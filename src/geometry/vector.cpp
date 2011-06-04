@@ -123,6 +123,25 @@ Vector& Vector::operator /= ( float f )
 	return *this;
 }
 
+// [] operator
+float Vector::operator [] ( unsigned id ) const
+{
+	if( id == 0 )
+		return x;
+	if( id == 1 )
+		return y;
+	if( id == 2 )
+		return z;
+
+	return 0;
+}
+
+// - operator
+Vector Vector::operator - () const 
+{
+	return Vector( -x , -y , -z );
+}
+
 // sqaured length
 float Vector::SquaredLength() const 
 {

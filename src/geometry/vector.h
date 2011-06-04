@@ -65,6 +65,15 @@ public:
 	// note   :	there will be runtime and log error if it's a zero vector ( 0 , 0 , 0 )
 	Vector&	Normalize();
 
+	// [] operator
+	// para 'id' :	an id from 0 to 2
+	// result :	a component with the specific id
+	float	operator[] ( unsigned id ) const;
+
+	// - operator , flip the vector
+	// result :	a flipped vector
+	Vector  operator- () const;
+
 // make all of the components public.
 public:
 	// the x y z data in three dimension
