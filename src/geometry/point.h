@@ -45,6 +45,18 @@ public:
 	// para 'v' :	a point to calculate the offset
 	// result   :	the offset between them
 	Vector operator - ( const Point& p ) const;
+	// para 'f' :	scaler
+	// result   :	a scaled point
+	Point operator * ( float f ) const;
+	// para 'f' : 	scaler
+	// result   :	current point after scaling
+	Point& operator *= ( float f );
+	// para 'f' :	divider
+	// result   :	a divided point
+	Point operator / ( float f ) const;
+	// para 'f' :	divider
+	// result   :	current vector after dividing
+	Point& operator /= ( float f );
 
 	// [] operator
 	// result   :	component with the specific id
@@ -73,6 +85,12 @@ public:
 inline Point operator + ( const Vector& v , const Point& p )
 {
 	return p + v;
+}
+// para 'f' :	scaler
+// result   :	a scaled point
+inline Point operator * ( float f , const Point& p )
+{
+	return p * f;
 }
 // para 'p0' :	a point
 // para 'p1' :	another point
