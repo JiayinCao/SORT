@@ -36,8 +36,8 @@ int main( int argc , char** argv )
 
 	output( "a+b" , a+b );
 
-	cout<<"a*b"<<" "<<dot( a , b )<<endl;
-	output( "axb" , cross( a , b ) );
+	cout<<"a*b"<<" "<<Dot( a , b )<<endl;
+	output( "axb" , Cross( a , b ) );
 
 	cout<<"length(a)="<<a.Length()<<endl;
 	

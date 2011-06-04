@@ -48,7 +48,19 @@ public:
 
 	// [] operator
 	// result   :	component with the specific id
-	float operator []( unsigned id );
+	float operator []( unsigned id ) const;
+	// [] operator
+	// result   :	component with the specific id
+	float& operator []( unsigned id );
+
+	// == operator
+	// para 'p' :	a point to compare
+	// result   :	'true' if the 'v' is the same with current vector , 'false' else
+	bool operator == ( const Point& p ) const ;
+	// != operator
+	// para 'p' :	a point to compare
+	// result   :	'true' if the 'v' is not the same with current vector , 'false' else
+	bool operator != ( const Point& p ) const ;
 
 //public field
 public:
@@ -58,8 +70,24 @@ public:
 // some global math operations
 // para 'v' :	vector to add
 // result   :	a point with the offset 'v' to the current point
-Point operator + ( const Vector& v , const Point& p );
-
+inline Point operator + ( const Vector& v , const Point& p )
+{
+	return p + v;
+}
+// para 'p0' :	a point
+// para 'p1' :	another point
+// result    :	the squared distance between the two points
+inline float SquaredDistance( const Point& p0 , const Point& p1 )
+{
+	return (p0-p1).SquaredLength();
+}
+// para 'p0' :	a point
+// para 'p1' :	another point
+// result    :	the distance between the two points
+inline float Distance( const Point& p0 , const Point& p1 )
+{
+	return (p0-p1).Length();
+}
 
 #endif
 

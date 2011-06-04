@@ -86,12 +86,6 @@ Vector&	Vector::operator *=( float f )
 	return *this;
 }
 
-// global * operator for Vector
-Vector operator * ( float f , const Vector& v )
-{
-	return Vector( v.x * f , v.y * f , v.z * f );
-}
-
 // / operator
 Vector Vector::operator / ( float f ) const
 {
@@ -136,10 +130,37 @@ float Vector::operator [] ( unsigned id ) const
 	return 0;
 }
 
+// [] operator
+float& Vector::operator [] ( unsigned id )
+{
+	if( id == 0 )
+		return x;
+	if( id == 1 )
+		return y;
+
+	return z;
+}
+
 // - operator
 Vector Vector::operator - () const 
 {
 	return Vector( -x , -y , -z );
+}
+
+// == operator
+bool Vector::operator == ( const Vector& v ) const
+{
+	if( v.x == x && v.y == y && v.z == z )
+		return true;
+	return false;
+}
+
+// != operator
+bool Vector::operator != ( const Vector& v ) const
+{
+	if( v.x != x && v.y != y && v.z != z )
+		return false;
+	return true;
 }
 
 // sqaured length
@@ -164,21 +185,4 @@ Vector& Vector::Normalize()
 	*this /= len;
 
 	return *this;
-}
-
-// the dot product
-float	dot( const Vector& v0 , const Vector& v1 )
-{
-	return v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
-}
-
-// the cross product , we use left handed coordinate here
-Vector	cross( const Vector& v0 , const Vector& v1 )
-{
-	Vector v;
-	v.x = v0.y * v1.z - v0.z * v1.y ;
-	v.y = v0.z * v1.x - v0.x * v1.z ;
-	v.z = v0.x * v1.y - v0.y * v1.x ;
-
-	return v;
 }
