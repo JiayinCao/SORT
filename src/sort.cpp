@@ -8,6 +8,7 @@
 #include <iostream>
 #include "geometry/vector.h"
 #include "geometry/point.h"
+#include "geometry/normal.h"
 
 // use standard namespace
 using namespace std;
@@ -42,6 +43,13 @@ int main( int argc , char** argv )
 	cout<<"length(a)="<<a.Length()<<endl;
 	
 	output("unit a=",a.Normalize());
+
+	Normal v( 1 , 2 , 4 );
+
+	if( FaceForward( v , c ) )
+		cout<<"win"<<endl;
+	else
+		cout<<"lose"<<endl;
 
   	return 0;
 } 

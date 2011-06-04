@@ -68,6 +68,42 @@ Point& Point::operator -= ( const Vector& v )
 	return *this;
 }
 
+// * operator
+Point Point::operator * ( float f ) const
+{
+	return Point( f * x , f * y , f * z );
+}
+
+// *= operator
+Point& Point::operator *= ( float f )
+{
+	x *= f;
+	y *= f;
+	z *= f;
+
+	return *this;
+}
+
+// / operator
+Point Point::operator / ( float f ) const
+{
+	float t = 1.0f / f;
+
+	return (*this) * t;
+}
+
+// /= operator
+Point& Point::operator /= ( float f )
+{
+	float t = 1.0f / f;
+
+	x *= t;
+	y *= t;
+	z *= t;
+
+	return *this;
+}
+
 // - operator
 Vector Point::operator - ( const Point& p ) const
 {

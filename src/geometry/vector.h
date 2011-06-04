@@ -24,7 +24,7 @@ public:
 	// para 'vector':	vector to copy
 	Vector( const Vector& vector );
 	// destructor does nothing here
-	virtual ~Vector();
+	~Vector();
 
 	// math operations
 	// para 'v' : 	vector to add
@@ -112,6 +112,14 @@ inline float Dot( const Vector& v0 , const Vector& v1 )
 }
 // para 'v0' :	a vector
 // para 'v1' :	another vector
+// result    :	the absolute value of the dot product
+inline float AbsDot( const Vector& v0 , const Vector& v1 )
+{
+	float r = Dot( v0 , v1 );
+	return ( r < 0.0f )? -r : r;
+}
+// para 'v0' :	a vector
+// para 'v1' :	another vector
 // result    :	the cross product of the two vectors
 inline Vector Cross( const Vector& v0 , const Vector& v1 )
 {
@@ -120,6 +128,13 @@ inline Vector Cross( const Vector& v0 , const Vector& v1 )
 	v.y = v0.z * v1.x - v0.x * v1.z;
 	v.z = v0.x * v1.y - v0.y * v1.x;
 	return v;
+}
+// para 'v0' :	a vector
+// para 'v1' :	another vector
+// result    :	'true' if the two vector is facing towards the same direction, 'false' else
+inline bool FaceForward( const Vector& v0 , const Vector& v1 )
+{
+	return Dot( v0 , v1 ) >= 0.0f;
 }
 
 #endif
