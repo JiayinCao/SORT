@@ -7,6 +7,7 @@
 // include the header file
 #include <iostream>
 #include "geometry/vector.h"
+#include "geometry/point.h"
 
 // use standard namespace
 using namespace std;
@@ -14,6 +15,10 @@ using namespace std;
 void output( const string& str , const Vector& v )
 {
 	cout<<"vector "<<str<<":"<<v.x<<" "<<v.y<<" "<<v.z<<endl;
+}
+void output( const string& str , const Point& p )
+{
+	cout<<"point "<<str<<":"<<p.x<<" "<<p.y<<" "<<p.z<<endl;
 }
 // the enter point for the program
 int main( int argc , char** argv )
@@ -23,7 +28,9 @@ int main( int argc , char** argv )
 	Vector c(b);
 	a = 4.0f * c + 0 * b;
 
-	output( "a" , a );
+	Point p( 1 , 0 , 3 );
+
+	output( "a" , a + p );
 	output( "b" , b );
 	output( "c" , c );
 
