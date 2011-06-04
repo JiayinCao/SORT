@@ -75,7 +75,7 @@ Vector Point::operator - ( const Point& p ) const
 }
 
 // [] operator
-float Point::operator [] ( unsigned id )
+float Point::operator [] ( unsigned id ) const
 {
 	if( id == 2 )
 		return z;
@@ -87,10 +87,33 @@ float Point::operator [] ( unsigned id )
 	return 0;
 }
 
-// + operator
-Point operator + ( const Vector& v , const Point& p )
+// [] operator
+float& Point::operator[]( unsigned id )
 {
-	return p + v;
+	if( id == 2 )
+		return z;
+	if( id == 1 )
+		return y;
+	
+	return x;
+}
+
+// == operator
+bool Point::operator == ( const Point& p ) const
+{
+	if( p.x == x && p.y == y && p.z == z )
+		return false;
+
+	return true;
+}
+
+// != operator
+bool Point::operator != ( const Point& p ) const
+{
+	if( p.x == x && p.y == y && p.z == z )
+		return true;
+
+	return false;
 }
 
 
