@@ -3,6 +3,8 @@ OBJ_PATH = obj
 
 sort : $(OBJ_PATH) sort.o vector.o
 	g++ -o sort $(OBJ_PATH)/sort.o $(OBJ_PATH)/vector.o
+	#delete the obj path
+	rm -rf $(OBJ_PATH)
 
 $(OBJ_PATH):
 	mkdir -p $(OBJ_PATH)
