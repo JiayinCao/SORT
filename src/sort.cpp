@@ -9,6 +9,8 @@
 #include "geometry/vector.h"
 #include "geometry/point.h"
 #include "geometry/normal.h"
+#include "texture/texture.h"
+#include "texture/texshower/bmpsaver.h"
 
 // use standard namespace
 using namespace std;
@@ -24,7 +26,7 @@ void output( const string& str , const Point& p )
 // the enter point for the program
 int main( int argc , char** argv )
 {
-	Vector a;
+/*	Vector a;
 	Vector b( 1 , 2 , 3 );
 	Vector c(b);
 	a = 4.0f * c + 0 * b;
@@ -50,6 +52,13 @@ int main( int argc , char** argv )
 		cout<<"win"<<endl;
 	else
 		cout<<"lose"<<endl;
+*/
+	Texture tex;
+	TexShower* t = new BmpSaver();
+	tex.SetTexShower( t );
+	tex.Output( "hello.txt" );
+
+	Texture::SetTexShower( 0 );
 
   	return 0;
 } 
