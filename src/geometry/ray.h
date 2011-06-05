@@ -8,6 +8,7 @@
 #define SORT_RAY
 
 // include the header
+#include "../sort.h"
 #include "vector.h"
 #include "point.h"
 #include "float.h"

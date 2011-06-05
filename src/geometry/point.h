@@ -8,6 +8,7 @@
 #define	SORT_POINT
 
 // include the header file
+#include "../sort.h"
 #include "vector.h"
 
 /////////////////////////////////////////////////////////////////////

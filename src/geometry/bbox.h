@@ -8,6 +8,7 @@
 #define SORT_BBOX
 
 // include the header file
+#include "../sort.h"
 #include "point.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -77,6 +78,8 @@ inline BBox Union( const BBox& bbox , const Point& p )
 			result.m_Max[i] = bbox.m_Max[i];
 		}
 	}
+
+	return result;
 }
 // para 'bbox0' :	first bounding box
 // para 'bbox1' :	second bounding box
@@ -87,15 +90,8 @@ inline BBox Union( const BBox& bbox0 , const BBox& bbox1 )
 
 	for( int i = 0 ; i < 3 ; i++ )
 	{
-		if( bbox0.m_Min[i] < bbox1.m_Min[i] )
-			result.m_Min[i] = bbox0.m_Min[i];
-		else
-			result.m_Min[i] = bbox1.m_Min[i];
-
-		if( bbox0.m_Max[i] > bbox1.m_Max[i] )
-			result.m_Max[i] = bbox0.m_Max[i];
-		else
-			result.m_Max[i] = bbox1.m_Max[i];
+		result.m_Min[i] = min( bbox0.m_Min[i] , bbox1.m_Min[i] );
+		result.m_Max[i] = max( bbox0.m_Max[i] , bbox1.m_Max[i] );
 	}
 
 	return result;
