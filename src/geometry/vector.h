@@ -7,6 +7,9 @@
 #ifndef SORT_VECTOR
 #define	SORT_VECTOR
 
+// include the header
+#include "../sort.h"
+
 /////////////////////////////////////////////////////////////////////////
 // defination of vector
 class	Vector

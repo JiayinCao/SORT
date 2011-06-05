@@ -11,7 +11,7 @@ sort : $(OBJ_PATH) $(LIBOBJS)
 $(OBJ_PATH) :
 	mkdir -p $(OBJ_PATH)
 
-$(OBJ_PATH)/_src_geometry_%.o : $(SRC_PATH)/geometry/%.cpp
+$(OBJ_PATH)/_src_geometry_%.o : $(SRC_PATH)/geometry/%.cpp $(SRC_PATH)/geometry/%.h
 	g++ -c $< -o $@
 
 $(OBJ_PATH)/sort.o : $(SRC_PATH)/sort.cpp
