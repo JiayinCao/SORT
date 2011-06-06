@@ -1,7 +1,7 @@
 /*
- * filename: sort.cpp
+ * filename  :	sort.cpp
  *
- * programmer: Cao Jiayin
+ * programmer:	Cao Jiayin
  */
 
 // include the header file
@@ -26,33 +26,6 @@ void output( const string& str , const Point& p )
 // the enter point for the program
 int main( int argc , char** argv )
 {
-/*	Vector a;
-	Vector b( 1 , 2 , 3 );
-	Vector c(b);
-	a = 4.0f * c + 0 * b;
-
-	Point p( 1 , 0 , 3 );
-
-	output( "a" , a + p );
-	output( "b" , b );
-	output( "c" , c );
-
-	output( "a+b" , a+b );
-
-	cout<<"a*b"<<" "<<Dot( a , b )<<endl;
-	output( "axb" , Cross( a , b ) );
-
-	cout<<"length(a)="<<a.Length()<<endl;
-	
-	output("unit a=",a.Normalize());
-
-	Normal v( 1 , 2 , 4 );
-
-	if( FaceForward( v , c ) )
-		cout<<"win"<<endl;
-	else
-		cout<<"lose"<<endl;
-*/
 	Texture tex;
 	TexShower* t = new BmpSaver();
 	tex.SetTexShower( t );
