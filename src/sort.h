@@ -9,6 +9,8 @@
 
 // include the header files
 #include <iostream>
+#include <cstring>
+#include <string>
 
 // use default name space
 using namespace std;
