@@ -38,8 +38,8 @@ typedef struct
 bool BmpSaver::Output( const Texture* tex , const string& str )
 {
 	// get the size of the image
-	int w = 800;
-	int h = 800;
+	int w = 123;
+	int h = 212;
 	
 	// the size for the image
 	int bytes = w * h * 4; // temp
