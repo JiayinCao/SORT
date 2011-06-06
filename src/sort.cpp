@@ -56,7 +56,7 @@ int main( int argc , char** argv )
 	Texture tex;
 	TexShower* t = new BmpSaver();
 	tex.SetTexShower( t );
-	tex.Output( "hello.txt" );
+	tex.Output( "hello.bmp" );
 
 	Texture::SetTexShower( 0 );
 
