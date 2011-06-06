@@ -1,5 +1,4 @@
 /*
- *
  * filename:	vector.cpp
  *
  * programmer:	Cao Jiayin
