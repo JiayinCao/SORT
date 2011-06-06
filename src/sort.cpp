@@ -1,7 +1,7 @@
 /*
  * filename: sort.cpp
  *
- * programmer: cao jiayin
+ * programmer: Cao Jiayin
  */
 
 // include the header file
