@@ -95,9 +95,9 @@ unsigned BBox::MaxAxisId() const
 {
 	Vector offset = m_Max - m_Min;
 
-	if( offset.x > offset.y & offset.x > offset.z )
+	if( offset.x > offset.y && offset.x > offset.z )
 		return 0;
-	if( offset.y > offset.x & offset.y > offset.z )
+	if( offset.y > offset.x && offset.y > offset.z )
 		return 1;
 
 	return 2;
