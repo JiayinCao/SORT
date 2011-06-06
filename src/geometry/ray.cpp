@@ -37,4 +37,5 @@ Ray::~Ray()
 // operator to get a point on the ray
 Point Ray::operator ()( float t ) const
 {
+	return m_Ori + t * m_Dir;
 }

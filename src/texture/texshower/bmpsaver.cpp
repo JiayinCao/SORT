@@ -13,27 +13,26 @@
 // bitmap info header
 typedef struct
 {
-	int 	bfType;
-	long	bfSize;
-	int	bfReserved1;
-	int	bfReserved2;
-	long	bfOffBits;
-} BITMAPFILEHEADER;
+	unsigned long   bfSize;
+	unsigned short  bfReserved1;
+	unsigned short  bfReserved2;
+	unsigned long   bfOffBits;
+} BitMapFileHeader;
 // bitmap info header
 typedef struct
 {
-	long	biSize;
-	long	biWidth;
-	long	biHeight;
-	int	biPlanes;
-	int	biBitCount;
-	long	biCompression;
-	long	biSizeImage;
-	long	biXPelsPerMeter;
-	long	biYPelsPerMeter;
-	long	biClrUsed;
-	long	biClrImportant;
-} BITMAPINFOHEADER;
+	unsigned long  biSize;
+	long           biWidth;
+	long           biHeight;
+	unsigned short biPlanes;
+	unsigned short biBitCount;
+	unsigned long  biCompression;
+	unsigned long  biSizeImage;
+	long           biXPelsPerMeter;
+	long           biYPelsPerMeter;
+	unsigned long  biClrUsed;
+	unsigned long  biClrImportant;
+} BitMapInfoHeader;
 
 // output the bmp file
 bool BmpSaver::Output( const Texture* tex , const string& str )
@@ -48,22 +47,25 @@ bool BmpSaver::Output( const Texture* tex , const string& str )
 	char* data = new char[bytes];
 	memset( data , 0 , bytes * sizeof( char ) );
 
+	// the type for the image
+	unsigned short type;
+	*((char*)&type) = 'B';
+	*(((char*)&type) + 1 ) = 'M';
+
 	// set the bitmap header
-	BITMAPINFOHEADER header;
+	BitMapInfoHeader header;
 	memset( &header , 0 , sizeof( header ) );
 	header.biWidth = w;
 	header.biHeight = h;
-	header.biSize = sizeof( BITMAPINFOHEADER );
+	header.biSize = sizeof( header );
 	header.biPlanes = 1;
 	header.biBitCount = 32;
 	header.biCompression = 0L;
 
-	BITMAPFILEHEADER bmfh;
+	// file header
+	BitMapFileHeader bmfh;
 	memset( &bmfh , 0 , sizeof( bmfh ) );
-	*((char*)&bmfh.bfType) = 'B';
-	*(((char*)&bmfh.bfType) + 1 ) = 'M';
-	*(((char*)&bmfh.bfType) + 2 ) = 'P';
-	bmfh.bfOffBits = sizeof( BITMAPFILEHEADER ) + sizeof( BITMAPINFOHEADER );
+	bmfh.bfOffBits = sizeof( bmfh ) + sizeof( header ) + sizeof( type ) ;
 	bmfh.bfSize = bmfh.bfOffBits + bytes;
 
 	// open the file
@@ -77,6 +79,8 @@ bool BmpSaver::Output( const Texture* tex , const string& str )
 		return false;
 	}
 
+	// output the information to file
+	file.write( (const char*)&type , sizeof( type ) );
 	file.write( (const char*)&bmfh , sizeof( bmfh ) );
 	file.write( (const char*)&header , sizeof( header ) );
 	file.write( data , bytes );
