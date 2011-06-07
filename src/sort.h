@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cstring>
 #include <string>
+#include <stdlib.h>
 
 // use default name space
 using namespace std;

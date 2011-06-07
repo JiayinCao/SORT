@@ -9,7 +9,7 @@
 #include "geometry/vector.h"
 #include "geometry/point.h"
 #include "geometry/normal.h"
-#include "texture/texture.h"
+#include "texture/gridtexture.h"
 #include "texture/texshower/bmpsaver.h"
 
 // use standard namespace
@@ -26,12 +26,13 @@ void output( const string& str , const Point& p )
 // the enter point for the program
 int main( int argc , char** argv )
 {
-	Texture tex;
+	GridTexture tex( 0.0f , 0.0f , 1.0f , 0.0f , 0.0f , 0.0f );
 	TexShower* t = new BmpSaver();
 	tex.SetTexShower( t );
+	tex.SetSize( 128 , 128 );
+	tex.SetTexCoordFilter( TCF_MIRROR );
 	tex.Output( "hello.bmp" );
-
 	Texture::SetTexShower( 0 );
 
-  	return 0;
+	return 0;
 } 

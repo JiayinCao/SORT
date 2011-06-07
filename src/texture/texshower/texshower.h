@@ -9,6 +9,7 @@
 
 // include the header file
 #include "../../sort.h"
+#include "../texture.h"
 
 // pre-declare Texture class
 class Texture;

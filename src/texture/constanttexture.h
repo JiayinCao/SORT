@@ -27,10 +27,32 @@ public:
 	// destructor
 	~ConstantTexture();
 
+	// get the texture value
+	// para 'x' :	x coordinate , if out of range , use filter
+	// para 'y' :	y coordinate , if out of range , use filter
+	// result	:	spectrum value in the position
+	virtual const Spectrum& GetColor( int x , int y ) const
+	{
+		return m_Color;
+	}
+
+	// get the texture value
+	// para 'u'	:	x coordinate , if out of range , use filter
+	// para 'v' :	y coordinate , if out of range , use filter
+	virtual const Spectrum& GetColor( float u , float v ) const
+	{
+		return m_Color;
+	}
+
 // private field
 private:
 	// the color for the texture
 	Spectrum	m_Color;
+
+// private method
+private:
+	// initialize the data
+	void _init();
 };
 
 #endif
