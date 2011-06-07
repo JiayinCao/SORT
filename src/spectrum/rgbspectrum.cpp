@@ -41,9 +41,9 @@ unsigned int RGBSpectrum::GetColor() const
 {
 	unsigned int color = 0;
 
-	color |= ((unsigned char)(255.0f*m_r))<<24;
-	color |= ((unsigned char)(255.0f*m_g))<<16;
-	color |= ((unsigned char)(255.0f*m_b))<<8;
+	color |= ((unsigned char)(255.0f*m_r))<<16;
+	color |= ((unsigned char)(255.0f*m_g))<<8;
+	color |= ((unsigned char)(255.0f*m_b))<<0;
 
 	return color;
 }

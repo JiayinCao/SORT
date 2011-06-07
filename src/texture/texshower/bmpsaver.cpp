@@ -6,6 +6,7 @@
 
 // include the header file
 #include "bmpsaver.h"
+#include "../../spectrum/spectrum.h"
 #include <fstream>
 
 //-------------------------------------------------
@@ -38,14 +39,25 @@ typedef struct
 bool BmpSaver::Output( const Texture* tex , const string& str )
 {
 	// get the size of the image
-	int w = 123;
-	int h = 212;
+	int w = tex->GetWidth();
+	int h = tex->GetHeight();
+
+	// if either of the length of the edge is zero , return
+	if( w == 0 || h == 0 )
+		return false;
 	
 	// the size for the image
-	int bytes = w * h * 4; // temp
+	int bytes = w * h; 
 
-	char* data = new char[bytes];
-	memset( data , 0 , bytes * sizeof( char ) );
+	// allocate the memory
+	unsigned* data = new unsigned[bytes];
+	memset( data , 0 , bytes * sizeof( unsigned ) );
+	for( int i = 0 ; i < h ; i++ )
+		for( int j = 0 ; j < w ; j++ )
+		{
+			unsigned offset = ( h - i - 1 ) * w + j;
+			data[offset] = tex->GetColor( (int)j , (int)i ).GetColor();
+		}
 
 	// the type for the image
 	unsigned short type;
@@ -83,7 +95,7 @@ bool BmpSaver::Output( const Texture* tex , const string& str )
 	file.write( (const char*)&type , sizeof( type ) );
 	file.write( (const char*)&bmfh , sizeof( bmfh ) );
 	file.write( (const char*)&header , sizeof( header ) );
-	file.write( data , bytes );
+	file.write( (const char*)data , bytes * sizeof( unsigned ) );
 
 	// close it
 	file.close();
