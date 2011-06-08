@@ -7,9 +7,7 @@
 // include the header file
 #include "texture.h"
 #include <math.h>
-
-// static value
-TexShower* Texture::m_pTexShower = 0;
+#include "../managers/texmanager/texmanager.h"
 
 // default constructor
 Texture::Texture()
@@ -26,31 +24,16 @@ Texture::~Texture()
 // initialize default value
 void Texture::_init()
 {
-	m_pTexShower = 0;
 	m_iTexWidth = 0;
 	m_iTexHeight = 0;
 	m_TexCoordFilter = TCF_WARP;
 }
 
-// set the texture shower
-void Texture::SetTexShower( TexShower* texShower )
-{
-	// delete previous texture shower
-	SAFE_DELETE( m_pTexShower );
-
-	// set new one
-	m_pTexShower = texShower;
-}
-
 // output the texture
-bool Texture::Output( const string& str )
-{
-	if( m_pTexShower )
-		return m_pTexShower->Output( this , str );
-	
-	cout<<"there is no texture shower"<<endl;
-
-	return false;
+bool Texture::Output( const string& str , TEX_OUTPUT_TYPE type )
+{	
+	// output the texture
+	return TexManager::GetSingleton().Write( str , this , type );
 }
 
 // get the color

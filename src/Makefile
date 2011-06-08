@@ -4,7 +4,9 @@ OBJ_PATH = $(BIN_PATH)/obj
 LIBSRCS = $(wildcard geometry/*.cpp)
 LIBSRCS += $(wildcard spectrum/*.cpp)
 LIBSRCS += $(wildcard texture/*.cpp)
-LIBSRCS += $(wildcard texture/texshower/*.cpp)
+LIBSRCS += $(wildcard managers/texmanager/*.cpp)
+LIBSRCS += $(wildcard managers/texmanager/texio/*.cpp)
+LIBSRCS += $(wildcard utility/*.cpp )
 
 LIBOBJS = $(OBJ_PATH)/sort.o
 LIBOBJS += $(addprefix $(OBJ_PATH)/, $(subst ._,, $(subst /,_,$(LIBSRCS:.cpp=.o)) ) )
@@ -30,7 +32,15 @@ $(OBJ_PATH)/texture_%.o : texture/%.cpp texture/%.h
 	@echo "building object $@"
 	@g++ -c $< -o $@
 
-$(OBJ_PATH)/texture_texshower_%.o : texture/texshower/%.cpp texture/texshower/%.h
+$(OBJ_PATH)/utility_%.o : utility/%.cpp utility/%.h
+	@echo "building object $@"
+	@g++ -c $< -o $@
+
+$(OBJ_PATH)/managers_texmanager_%.o : managers/texmanager/%.cpp managers/texmanager/%.h
+	@echo "buliding object $@"
+	@g++ -c $< -o $@
+
+$(OBJ_PATH)/managers_texmanager_texio_%.o : managers/texmanager/texio/%.cpp managers/texmanager/texio/%.h
 	@echo "building object $@"
 	@g++ -c $< -o $@
 

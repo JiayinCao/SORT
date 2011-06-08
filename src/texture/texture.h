@@ -7,12 +7,10 @@
 #ifndef SORT_TEXTURE
 #define SORT_TEXTURE
 
+// include header file
 #include "../sort.h"
-#include "texshower/texshower.h"
 #include "../spectrum/spectrum.h"
-
-// pre-decleration
-class TexShower;
+#include "../managers/texmanager/texio/texio.h"
 
 enum TEXCOORDFILTER
 {
@@ -32,12 +30,11 @@ public:
 	// destructor
 	~Texture();
 
-	// set tex shower
-	// para 'texShower' : the pointer to the texshower to set
-	static void SetTexShower( TexShower* texShower );
 	// output the texture
+	// para 'str' :	the name of the output entity
+	// para 'type':	the way outputing the texture , default way is saving the texture as a bitmap file
 	// result : return true , if outputing is successful
-	bool Output( const string& str );
+	bool Output( const string& str , TEX_OUTPUT_TYPE type = TOT_BMP );
 
 	// get the texture value
 	// para 'x' :	x coordinate , if out of range , use filter
@@ -80,9 +77,6 @@ public:
 
 // protected field
 protected:
-	// the texture shower
-	static TexShower*  m_pTexShower;
-
 	// the size of the texture
 	// default values are zero
 	unsigned	m_iTexWidth;
