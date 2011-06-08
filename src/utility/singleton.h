@@ -6,8 +6,9 @@
 
 #ifndef	SOTR_SINGLETON
 #define	SORT_SINGLETON
-#include <iostream>
-using namespace std;
+
+// include the header
+#include "../sort.h"
 
 //////////////////////////////////////////////////////////////////////
 //	defination of Singleton class
@@ -39,6 +40,12 @@ public:
 	static T* GetSingletonPtr()
 	{
 		return m_pSingleton;
+	}
+
+	// delete singleton
+	static void DeleteSingleton()
+	{
+		SAFE_DELETE(m_pSingleton);
 	}
 
 //protected field
