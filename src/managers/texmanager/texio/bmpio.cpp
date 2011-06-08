@@ -1,12 +1,12 @@
 /*
- * filename :	bmpsaver.cpp
+ * filename :	bmpio.cpp
  *
  * programmer : Cao Jiayin
  */
 
 // include the header file
-#include "bmpsaver.h"
-#include "../../spectrum/spectrum.h"
+#include "bmpio.h"
+#include "../../../spectrum/spectrum.h"
 #include <fstream>
 
 //-------------------------------------------------
@@ -36,8 +36,12 @@ typedef struct
 } BitMapInfoHeader;
 
 // output the bmp file
-bool BmpSaver::Output( const Texture* tex , const string& str )
+bool BmpIO::Write( const string& str , const Texture* tex )
 {
+	// check if 'str' and 'tex' are valid
+	if( str.empty() || tex == 0 )
+		return false;
+
 	// get the size of the image
 	int w = tex->GetWidth();
 	int h = tex->GetHeight();

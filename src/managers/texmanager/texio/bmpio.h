@@ -1,32 +1,33 @@
 /*
- * filename :	bmpsaver.h
+ * filename :	bmpio.h
  *
  * programmer :	Cao Jiayin
  */
 
-#ifndef SORT_BMPSAVER
-#define SORT_BMPSAVER
+#ifndef SORT_BMPIO
+#define SORT_BMPIO
 
 // include the header file
-#include "texshower.h"
+#include "texio.h"
 
 ////////////////////////////////////////////////////////////////////////////
-// defination of bmpsaver
+// defination of bmpio
 // save the image as an bmp file into the file system
-class BmpSaver : public TexShower
+// load the bmp file from file system into texture
+class BmpIO : public TexIO
 {
 // public method
 public:
 	// default constructor
-	BmpSaver(){}
+	BmpIO(){tot_type=TOT_BMP;}
 	// destructor
-	~BmpSaver(){}
+	~BmpIO(){}
 
 	// output the texture into bmp file
-	// para 'tex' :	the texture for outputing
 	// para 'str' : the name of the outputed bmp file
+	// para 'tex' :	the texture for outputing
 	// result     : 'true' if saving is successful
-	virtual bool Output( const Texture* tex , const string& str );
+	virtual bool Write( const string& str , const Texture* tex );
 };
 
 #endif
