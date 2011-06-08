@@ -54,8 +54,11 @@ const Spectrum& GridTexture::GetColor( int x , int y ) const
 	_texCoordFilter( x , y );
 
 	// return the color
-	if( (( x - (int)m_iTexWidth / 2 ) * ( y - (int)m_iTexHeight /2 )) > 0 )
-		return m_Color0;
-	else
+	int delta_x = ( x - (int)m_iTexWidth / 2 );
+	int delta_y = ( y - (int)m_iTexHeight / 2 );
+
+	if( ( delta_x >= 0 && delta_y < 0 ) || ( delta_x < 0 && delta_y >= 0 ) )
 		return m_Color1;
+	else
+		return m_Color0;
 }

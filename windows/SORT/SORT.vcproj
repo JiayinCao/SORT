@@ -18,8 +18,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)/../bin/"
-			IntermediateDirectory="$(SolutionDir)/../bin/$(ConfigurationName)_obj_d"
+			OutputDirectory="$(SolutionDir)\..\bin"
+			IntermediateDirectory="$(SolutionDir)\..\bin\$(ConfigurationName)_obj_d"
 			ConfigurationType="1"
 			CharacterSet="1"
 			>
@@ -90,8 +90,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)/../bin"
-			IntermediateDirectory="$(SolutionDir)/../bin/$(ConfigurationName)_obj"
+			OutputDirectory="$(SolutionDir)..\bin"
+			IntermediateDirectory="$(SolutionDir)..\bin\$(ConfigurationName)_obj"
 			ConfigurationType="1"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
@@ -193,22 +193,6 @@
 				RelativePath="..\..\src\texture\texture.h"
 				>
 			</File>
-			<Filter
-				Name="texshower"
-				>
-				<File
-					RelativePath="..\..\src\texture\texshower\bmpsaver.cpp"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\texture\texshower\bmpsaver.h"
-					>
-				</File>
-				<File
-					RelativePath="..\..\src\texture\texshower\texshower.h"
-					>
-				</File>
-			</Filter>
 		</Filter>
 		<Filter
 			Name="spectrum"
@@ -267,6 +251,46 @@
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\vector.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="managers"
+			>
+			<Filter
+				Name="manager"
+				>
+				<File
+					RelativePath="..\..\src\managers\texmanager\texmanager.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\managers\texmanager\texmanager.h"
+					>
+				</File>
+				<Filter
+					Name="texio"
+					>
+					<File
+						RelativePath="..\..\src\managers\texmanager\texio\bmpio.cpp"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\managers\texmanager\texio\bmpio.h"
+						>
+					</File>
+					<File
+						RelativePath="..\..\src\managers\texmanager\texio\texio.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="utility"
+			>
+			<File
+				RelativePath="..\..\src\utility\singleton.h"
 				>
 			</File>
 		</Filter>
