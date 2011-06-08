@@ -22,5 +22,7 @@ int main( int argc , char** argv )
 	tex.SetTexCoordFilter( TCF_MIRROR );
 	tex.Output( "hello.bmp" );
 
+	TexManager::DeleteSingleton();
+
 	return 0;
 } 

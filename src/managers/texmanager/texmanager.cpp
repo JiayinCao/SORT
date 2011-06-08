@@ -18,6 +18,12 @@ void TexManager::CreateTexManager()
 	new TexManager();
 }
 
+// destructor
+TexManager::~TexManager()
+{
+	_release();
+}
+
 // default constructor
 TexManager::TexManager()
 {
@@ -29,6 +35,19 @@ void TexManager::_init()
 {
 	// push the texture outputer
 	m_TexIOVec.push_back( new BmpIO() );
+}
+
+// release data
+void TexManager::_release()
+{
+	// release texture outputer
+	vector<TexIO*>::const_iterator it = m_TexIOVec.begin();
+	while( it != m_TexIOVec.end() )
+	{
+		delete *it;
+		it++;
+	}
+	m_TexIOVec.clear();
 }
 
 // output texture

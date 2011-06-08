@@ -11,7 +11,6 @@
 #include "../../sort.h"
 #include "../../utility/singleton.h"
 #include "texio/texio.h"
-#include "../../texture/texture.h"
 #include <vector>
 
 //////////////////////////////////////////////////////////////////
@@ -22,6 +21,9 @@ class TexManager : public Singleton<TexManager>
 public:
 	// create TexManager
 	static void CreateTexManager();
+
+	// destructor
+	~TexManager();
 
 	// output the img
 	// para 'str' :	name of the output entity
@@ -42,6 +44,9 @@ private:
 
 	// initialize texture manager data
 	void _init();
+
+	// release texture manager data
+	void _release();
 };
 
 #endif

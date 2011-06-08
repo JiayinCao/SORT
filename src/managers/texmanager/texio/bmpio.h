@@ -20,9 +20,7 @@ class BmpIO : public TexIO
 public:
 	// default constructor
 	BmpIO(){tot_type=TOT_BMP;}
-	// destructor
-	~BmpIO(){}
-
+	
 	// output the texture into bmp file
 	// para 'str' : the name of the outputed bmp file
 	// para 'tex' :	the texture for outputing
