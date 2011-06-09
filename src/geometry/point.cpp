@@ -6,6 +6,7 @@
 
 // include the header file
 #include "point.h"
+#include "../utility/error.h"
 
 // default constructor
 Point::Point()
@@ -87,6 +88,9 @@ Point& Point::operator *= ( float f )
 // / operator
 Point Point::operator / ( float f ) const
 {
+	if( f == 0.0f )
+		SCrash( "point divided by zero!!!" );
+
 	float t = 1.0f / f;
 
 	return (*this) * t;
@@ -95,6 +99,9 @@ Point Point::operator / ( float f ) const
 // /= operator
 Point& Point::operator /= ( float f )
 {
+	if( f == 0.0f )
+		SCrash( "point divided by zero!!!" );
+
 	float t = 1.0f / f;
 
 	x *= t;
@@ -120,6 +127,8 @@ float Point::operator [] ( unsigned id ) const
 	if( id == 0 )
 		return x;
 
+	SCrash( "index out of range!!!" );
+
 	return 0;
 }
 
@@ -130,7 +139,9 @@ float& Point::operator[]( unsigned id )
 		return z;
 	if( id == 1 )
 		return y;
-	
+	if( id != 0 )
+		SCrash( "index out of range!!!" );
+
 	return x;
 }
 

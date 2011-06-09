@@ -5,24 +5,25 @@
  */
 
 // include the header file
-#include <iostream>
-#include "texture/gridtexture.h"
+#include "sort.h"
 #include "managers/texmanager/texmanager.h"
+#include "managers/logmanager.h"
 
-// use standard namespace
-using namespace std;
-
-// the enter point for the program
-int main( int argc , char** argv )
+// initialize sort system
+bool	initSort()
 {
+	// initialize texture manager
 	TexManager::CreateTexManager();
+	// initialize log manager
+	LogManager::CreateLogManager();
 
-	GridTexture tex( 0.0f , 0.0f , 1.0f , 0.0f , 0.0f , 0.0f );
-	tex.SetSize( 128 , 128 );
-	tex.SetTexCoordFilter( TCF_MIRROR );
-	tex.Output( "hello.bmp" );
+	return true;
+}
 
+// release sort
+void	releaseSort()
+{
+	// release managers
 	TexManager::DeleteSingleton();
-
-	return 0;
-} 
+	LogManager::DeleteSingleton();
+}
