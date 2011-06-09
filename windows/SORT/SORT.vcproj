@@ -257,8 +257,16 @@
 		<Filter
 			Name="managers"
 			>
+			<File
+				RelativePath="..\..\src\managers\logmanager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\managers\logmanager.h"
+				>
+			</File>
 			<Filter
-				Name="manager"
+				Name="texmanager"
 				>
 				<File
 					RelativePath="..\..\src\managers\texmanager\texmanager.cpp"
@@ -290,10 +298,18 @@
 			Name="utility"
 			>
 			<File
+				RelativePath="..\..\src\utility\error.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\singleton.h"
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\src\main.cpp"
+			>
+		</File>
 		<File
 			RelativePath="..\..\src\sort.cpp"
 			>
