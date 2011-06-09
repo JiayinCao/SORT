@@ -8,9 +8,8 @@
 #include "texmanager.h"
 #include "texio/bmpio.h"
 
-// the singleton pointer
-template<>
-TexManager*	Singleton<TexManager>::m_pSingleton = 0;
+// instance the singleton with tex manager
+DEFINE_SINGLETON(TexManager);
 
 // create tex manager
 void TexManager::CreateTexManager()

@@ -4,7 +4,7 @@
  * programmer :	Cao Jiayin
  */
 
-#ifndef	SOTR_SINGLETON
+#ifndef	SORT_SINGLETON
 #define	SORT_SINGLETON
 
 // include the header
@@ -53,5 +53,8 @@ protected:
 	// the singleton pointer
 	static T* m_pSingleton;
 };
+
+// a useful macro for instance the templage
+#define	DEFINE_SINGLETON(T)	template<> T* Singleton<T>::m_pSingleton = 0
 
 #endif

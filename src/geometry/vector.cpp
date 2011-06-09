@@ -7,6 +7,7 @@
 // include the header files
 #include "vector.h"
 #include <math.h>
+#include "../utility/error.h"
 
 // default constructor, all of the components are set zero
 Vector::Vector()
@@ -88,10 +89,10 @@ Vector&	Vector::operator *=( float f )
 // / operator
 Vector Vector::operator / ( float f ) const
 {
-	if( f == 0 )
+	if( f == 0.0f )
 	{
-		// output the error here , to be modified
-		return Vector();
+		// output the error here
+		SCrash( "vector divided by 0!!!" );
 	}
 
 	float t = 1.0f / f;
@@ -104,7 +105,8 @@ Vector& Vector::operator /= ( float f )
 {
 	if( f == 0 )
 	{
-		// output the error here , to be modified
+		// output the error here
+		SCrash( "vector divided by 0!!!" );
 	}
 
 	float t = 1.0f / f;
@@ -126,6 +128,8 @@ float Vector::operator [] ( unsigned id ) const
 	if( id == 2 )
 		return z;
 
+	SCrash( "index out of range!!!" );
+
 	return 0;
 }
 
@@ -136,6 +140,8 @@ float& Vector::operator [] ( unsigned id )
 		return x;
 	if( id == 1 )
 		return y;
+	if( id != 2 )
+		SCrash( "index out of range!!!" );
 
 	return z;
 }
@@ -181,6 +187,9 @@ Vector& Vector::Normalize()
 	float len = Length();
 
 	// divide the vector
+	if( len == 0 )
+		SCrash( "Try to normalize a zero length vector!!" );
+	
 	*this /= len;
 
 	return *this;
