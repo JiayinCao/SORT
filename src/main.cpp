@@ -21,6 +21,9 @@ int main( int argc , char** argv )
 	ImageTexture tex;
 	tex.LoadImage( "tex.bmp" );
 	tex.Output( "tex1.bmp" );
+	ImageTexture t , t2 ;
+	t.LoadImage( "tex1.bmp" );
+	t2.LoadImage( "tex1.bmp" );
 
 	// release sort
 	releaseSort();

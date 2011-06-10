@@ -75,10 +75,6 @@ public:
 		m_iTexHeight = h;
 	}
 
-	// release the memory
-	// default method releases nothing
-	virtual void	Release() { m_iTexWidth = 0; m_iTexHeight = 0; }
-
 // protected field
 protected:
 	// the size of the texture

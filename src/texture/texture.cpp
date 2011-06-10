@@ -19,7 +19,8 @@ Texture::Texture()
 // destructor
 Texture::~Texture()
 {
-	Release();
+	m_iTexWidth = 0;
+	m_iTexHeight = 0;
 }
 
 // initialize default value

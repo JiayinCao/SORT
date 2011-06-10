@@ -45,6 +45,9 @@ private:
 	// a vector saving texture io
 	vector<TexIO*>	m_TexIOVec;
 
+	// map a string to the image memory
+	multimap< std::string , ImageTexture* > m_ImgContainer;
+
 // private method
 private:
 	// private default constructor
