@@ -17,11 +17,11 @@ enum TEX_TYPE
 
 // include the header file
 #include "../../../sort.h"
-#include "../../../texture/texture.h"
 
 // pre-declare texture class
 class Texture;
 class ImageTexture;
+struct ImgMemory;
 
 ////////////////////////////////////////////////////////////////////////////
 // defination of TexIO
@@ -52,7 +52,7 @@ public:
 	// para 'tex' : the texture for aside the memory
 	// result     :	return true if loading is successful
 	// note       : it's not a pure function because some shower doesn't need a reading func
-	virtual bool Read( const string& str , ImageTexture* tex )
+	virtual bool Read( const string& str , ImgMemory* tex )
 	{
 		return false;
 	}

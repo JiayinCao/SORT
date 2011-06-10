@@ -13,6 +13,14 @@
 #include "texio/texio.h"
 #include <vector>
 #include <map>
+#include "../../spectrum/spectrum.h"
+
+struct ImgMemory
+{
+	Spectrum*	m_ImgMem;
+	unsigned	m_iWidth;
+	unsigned	m_iHeight;
+};
 
 //////////////////////////////////////////////////////////////////
 //	defination of texture manager
@@ -46,7 +54,7 @@ private:
 	vector<TexIO*>	m_TexIOVec;
 
 	// map a string to the image memory
-	multimap< std::string , ImageTexture* > m_ImgContainer;
+	map< std::string , ImgMemory* > m_ImgContainer;
 
 // private method
 private:
