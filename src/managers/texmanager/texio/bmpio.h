@@ -29,10 +29,10 @@ public:
 
 	// read data from file
 	// para 'str' : the name of the input entity
-	// para 'tex' : the texture for aside the memory
+	// para 'mem' : the memory for the image
 	// result     :	'true' if the input file is parsed successfully
 	// note       : it's not a pure function because some shower doesn't need a reading func
-	virtual bool Read( const string& str , ImageTexture* tex );
+	virtual bool Read( const string& str , ImgMemory* mem );
 };
 
 #endif

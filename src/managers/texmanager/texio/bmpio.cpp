@@ -9,7 +9,8 @@
 #include "../../../spectrum/spectrum.h"
 #include <fstream>
 #include "../../../managers/logmanager.h"
-#include "../../../texture/imagetexture.h"
+#include "../../../managers/texmanager/texmanager.h"
+#include "../../../texture/texture.h"
 
 //-------------------------------------------------
 // define some useful structure
@@ -112,10 +113,10 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 }
 
 // read data from file
-bool BmpIO::Read( const string& str , ImageTexture* tex )
+bool BmpIO::Read( const string& str , ImgMemory* mem )
 {
 	// check if 'str' and 'tex' are valid
-	if( str.empty() || tex == 0 )
+	if( str.empty() || mem == 0 )
 		return false;
 
 	// open the file
@@ -139,12 +140,9 @@ bool BmpIO::Read( const string& str , ImageTexture* tex )
 	file.read( (char*)&bmfh , sizeof( bmfh ) );
 	file.read( (char*)&header , sizeof( header ) );
 
-	// get the size of the image
-	tex->SetSize( header.biWidth , header.biHeight );
-
 	// get the size
-	int w = tex->GetWidth();
-	int h = tex->GetHeight();
+	int w = header.biWidth;
+	int h = header.biHeight;
 
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 )
@@ -158,14 +156,14 @@ bool BmpIO::Read( const string& str , ImageTexture* tex )
 
 	// allocate the memory
 	unsigned* data = new unsigned[bytes];
-	Spectrum* target = tex->GetMemory();
+	mem->m_ImgMem = new Spectrum[bytes];
 	// read the data
 	file.read( (char*)data , bytes * sizeof( unsigned ) );
 	for( int i = 0 ; i < h ; i++ )
 		for( int j = 0 ; j < w ; j++ )
 		{
 			unsigned offset = ( h - i - 1 ) * w + j;
-			target[offset].SetColor( data[offset] );
+			mem->m_ImgMem[offset].SetColor( data[offset] );
 		}
 
 	// close file

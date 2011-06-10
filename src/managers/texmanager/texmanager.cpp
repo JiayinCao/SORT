@@ -41,23 +41,25 @@ void TexManager::_init()
 void TexManager::_release()
 {
 	// release texture outputer
-	vector<TexIO*>::const_iterator it = m_TexIOVec.begin();
-	while( it != m_TexIOVec.end() )
+	vector<TexIO*>::const_iterator tex_it = m_TexIOVec.begin();
+	while( tex_it != m_TexIOVec.end() )
 	{
-		delete *it;
-		it++;
+		delete *tex_it;
+		tex_it++;
 	}
 	m_TexIOVec.clear();
 
-	// release all of the texture memory
-	multimap< std::string , ImageTexture* >::iterator it2 = m_ImgContainer.begin();
-	while( it2 != m_ImgContainer.end() )
+	// try to find the image first , if it's already existed in the system , just set a pointer
+	map< std::string , ImgMemory* >::iterator img_it = m_ImgContainer.begin();
+	while( img_it != m_ImgContainer.end() )
 	{
-		// release the texture
-		it2->second->Release();
+		SAFE_DELETE_ARRAY( img_it->second->m_ImgMem );
+		img_it->second->m_iWidth = 0;
+		img_it->second->m_iHeight = 0;
 
-		it2++;
+		img_it++;
 	}
+	m_ImgContainer.clear();
 }
 
 // output texture
@@ -76,26 +78,36 @@ bool TexManager::Write( const string& str , const Texture* tex , TEX_TYPE type )
 bool TexManager::Read( const string& str , ImageTexture* tex , TEX_TYPE type )
 {
 	// try to find the image first , if it's already existed in the system , just set a pointer
-	multimap< std::string , ImageTexture* >::iterator it = m_ImgContainer.find( str );
+	map< std::string , ImgMemory* >::iterator it = m_ImgContainer.find( str );
 	if( it != m_ImgContainer.end() )
 	{
-		ImageTexture* t = it->second;
-
-		tex->m_iTexHeight = t->m_iTexHeight;
-		tex->m_iTexWidth = t->m_iTexWidth;
-		tex->m_pImage = t->m_pImage;
+		tex->m_pMemory = it->second;
+		tex->m_iTexWidth = it->second->m_iWidth;
+		tex->m_iTexHeight = it->second->m_iHeight;
 
 		return true;
 	}
-
-	// insert it into the container
-	m_ImgContainer.insert( make_pair( str , tex ) );
 
 	// find the specific texio first
 	TexIO* io = FindTexIO( type );
 
 	if( io != 0 )
-		io->Read( str , tex );
+	{
+		// create a new memory
+		ImgMemory* mem = new ImgMemory();
+
+		// read the data
+		if( io->Read( str , mem ) )
+		{
+			// set the texture
+			tex->m_pMemory = mem;
+			tex->m_iTexWidth = mem->m_iWidth;
+			tex->m_iTexHeight = mem->m_iHeight;
+
+			// insert it into the container
+			m_ImgContainer.insert( make_pair( str , mem ) );
+		}
+	}
 
 	return true;
 }
