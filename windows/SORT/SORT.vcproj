@@ -186,6 +186,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\texture\imagetexture.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\texture\imagetexture.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\texture\texture.cpp"
 				>
 			</File>

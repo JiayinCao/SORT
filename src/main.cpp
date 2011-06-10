@@ -6,7 +6,7 @@
 
 // include the header file
 #include "sort.h"
-#include "texture/gridtexture.h"
+#include "texture/imagetexture.h"
 #include "managers/logmanager.h"
 #include "utility/error.h"
 #include "geometry/vector.h"
@@ -18,9 +18,9 @@ int main( int argc , char** argv )
 	initSort();
 
 	// create a grid texture and save it
-	GridTexture tex( 1.0f , 0.0f , 0.0f , 0.0f , 1.0f , 0.0f );
-	tex.SetSize( 128 , 128 );
-	tex.Output( "tex.bmp" );
+	ImageTexture tex;
+	tex.LoadImage( "tex.bmp" );
+	tex.Output( "tex1.bmp" );
 
 	// release sort
 	releaseSort();

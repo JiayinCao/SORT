@@ -28,13 +28,13 @@ public:
 	// default constructor
 	Texture();
 	// destructor
-	~Texture();
+	virtual ~Texture();
 
 	// output the texture
 	// para 'str' :	the name of the output entity
 	// para 'type':	the way outputing the texture , default way is saving the texture as a bitmap file
 	// result : return true , if outputing is successful
-	bool Output( const string& str , TEX_OUTPUT_TYPE type = TOT_BMP );
+	bool Output( const string& str , TEX_TYPE type = TT_BMP );
 
 	// get the texture value
 	// para 'x' :	x coordinate , if out of range , use filter
@@ -75,6 +75,10 @@ public:
 		m_iTexHeight = h;
 	}
 
+	// release the memory
+	// default method releases nothing
+	virtual void	Release() { m_iTexWidth = 0; m_iTexHeight = 0; }
+
 // protected field
 protected:
 	// the size of the texture
@@ -96,5 +100,4 @@ protected:
 };
 
 #endif
-
 

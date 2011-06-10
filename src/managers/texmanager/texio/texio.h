@@ -8,11 +8,11 @@
 #define SORT_TEXIO
 
 // texture output type
-enum TEX_OUTPUT_TYPE
+enum TEX_TYPE
 {
-	TOT_BMP = 0,
-	TOT_WINDOW ,
-	TOT_END ,
+	TT_BMP = 0,
+	TT_WINDOW ,
+	TT_END ,
 };
 
 // include the header file
@@ -21,6 +21,7 @@ enum TEX_OUTPUT_TYPE
 
 // pre-declare texture class
 class Texture;
+class ImageTexture;
 
 ////////////////////////////////////////////////////////////////////////////
 // defination of TexIO
@@ -32,11 +33,11 @@ class	TexIO
 // public method
 public:
 	// default constructor
-	TexIO(){tot_type=TOT_END;}
+	TexIO(){m_TexType=TT_END;}
 	// constructor from a type
 	// para 'tot' : texture output type
 	// note	      :	actually set tot_type in TexIO gains nothing
-	TexIO( TEX_OUTPUT_TYPE tot ) { tot_type = tot; }
+	TexIO( TEX_TYPE tt ) { m_TexType = tt; }
 	// destructor
 	~TexIO() {}
 
@@ -49,23 +50,23 @@ public:
 	// read data from file
 	// para 'str' : the name of the input entity
 	// para 'tex' : the texture for aside the memory
-	// result     :	'true' if the input file is parsed successfully
+	// result     :	return true if loading is successful
 	// note       : it's not a pure function because some shower doesn't need a reading func
-	virtual bool Read( const string& str , const Texture* tex )
+	virtual bool Read( const string& str , ImageTexture* tex )
 	{
 		return false;
 	}
 
 	// get tot type
-	TEX_OUTPUT_TYPE GetTOT()
+	TEX_TYPE GetTT()
 	{
-		return tot_type;
+		return m_TexType;
 	}
 
 // protected data
 protected:
 	// the type of the outputer
-	TEX_OUTPUT_TYPE tot_type;
+	TEX_TYPE m_TexType;
 };
 
 #endif

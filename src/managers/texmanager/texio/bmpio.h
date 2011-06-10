@@ -19,13 +19,20 @@ class BmpIO : public TexIO
 // public method
 public:
 	// default constructor
-	BmpIO(){tot_type=TOT_BMP;}
+	BmpIO(){m_TexType=TT_BMP;}
 	
 	// output the texture into bmp file
 	// para 'str' : the name of the outputed bmp file
 	// para 'tex' :	the texture for outputing
 	// result     : 'true' if saving is successful
 	virtual bool Write( const string& str , const Texture* tex );
+
+	// read data from file
+	// para 'str' : the name of the input entity
+	// para 'tex' : the texture for aside the memory
+	// result     :	'true' if the input file is parsed successfully
+	// note       : it's not a pure function because some shower doesn't need a reading func
+	virtual bool Read( const string& str , ImageTexture* tex );
 };
 
 #endif
