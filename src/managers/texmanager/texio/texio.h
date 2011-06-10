@@ -7,16 +7,9 @@
 #ifndef SORT_TEXIO
 #define SORT_TEXIO
 
-// texture output type
-enum TEX_TYPE
-{
-	TT_BMP = 0,
-	TT_WINDOW ,
-	TT_END ,
-};
-
 // include the header file
 #include "../../../sort.h"
+#include "../../../utility/enum.h"
 
 // pre-declare texture class
 class Texture;

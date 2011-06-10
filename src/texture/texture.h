@@ -10,14 +10,7 @@
 // include header file
 #include "../sort.h"
 #include "../spectrum/spectrum.h"
-#include "../managers/texmanager/texio/texio.h"
-
-enum TEXCOORDFILTER
-{
-	TCF_WARP = 0 ,
-	TCF_CLAMP ,
-	TCF_MIRROR
-};
+#include "../utility/enum.h"
 
 //////////////////////////////////////////////////////////////
 // defination of class Texture
