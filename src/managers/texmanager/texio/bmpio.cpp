@@ -158,13 +158,14 @@ bool BmpIO::Read( const string& str , ImageTexture* tex )
 
 	// allocate the memory
 	unsigned* data = new unsigned[bytes];
+	Spectrum* target = tex->GetMemory();
 	// read the data
 	file.read( (char*)data , bytes * sizeof( unsigned ) );
 	for( int i = 0 ; i < h ; i++ )
 		for( int j = 0 ; j < w ; j++ )
 		{
 			unsigned offset = ( h - i - 1 ) * w + j;
-			tex->m_pImage[offset].SetColor( data[offset] );
+			target[offset].SetColor( data[offset] );
 		}
 
 	// close file
