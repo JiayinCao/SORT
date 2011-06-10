@@ -47,3 +47,11 @@ unsigned int RGBSpectrum::GetColor() const
 
 	return color;
 }
+
+// set the color
+void RGBSpectrum::SetColor( unsigned int color )
+{
+	m_r = ((float)( ( color >> 16 ) & 255 )) / 255.0f;
+	m_g = ((float)( ( color >> 8 ) & 255 )) / 255.0f;
+	m_b = ((float)( ( color >> 0 ) & 255 )) / 255.0f;
+}

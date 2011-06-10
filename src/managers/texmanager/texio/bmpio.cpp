@@ -8,6 +8,8 @@
 #include "bmpio.h"
 #include "../../../spectrum/spectrum.h"
 #include <fstream>
+#include "../../../managers/logmanager.h"
+#include "../../../texture/imagetexture.h"
 
 //-------------------------------------------------
 // define some useful structure
@@ -91,7 +93,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	// if the file could not be opened , just return an error
 	if( file.is_open() == false )
 	{
-		cout<<"Can't open file "<<str<<endl;
+		LOG( "Can't Open file" );
 		return false;
 	}
 
@@ -104,6 +106,71 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	// close it
 	file.close();
 
+	delete[] data;
+
+	return true;
+}
+
+// read data from file
+bool BmpIO::Read( const string& str , ImageTexture* tex )
+{
+	// check if 'str' and 'tex' are valid
+	if( str.empty() || tex == 0 )
+		return false;
+
+	// open the file
+	ifstream file;
+	file.open( str.c_str() , ios::binary );
+
+	// if the file could not be opened , just return an error
+	if( file.is_open() == false )
+	{
+		LOG( "Can't Open file" );
+		return false;
+	}
+
+	// the neccessary information
+	unsigned short type;
+	BitMapInfoHeader header;
+	BitMapFileHeader bmfh;
+
+	// output the information to file
+	file.read( (char*)&type , sizeof( type ) );
+	file.read( (char*)&bmfh , sizeof( bmfh ) );
+	file.read( (char*)&header , sizeof( header ) );
+
+	// get the size of the image
+	tex->SetSize( header.biWidth , header.biHeight );
+
+	// get the size
+	int w = tex->GetWidth();
+	int h = tex->GetHeight();
+
+	// if either of the length of the edge is zero , return
+	if( w == 0 || h == 0 )
+	{
+		file.close();
+		return false;
+	}
+	
+	// the size for the image
+	int bytes = w * h; 
+
+	// allocate the memory
+	unsigned* data = new unsigned[bytes];
+	// read the data
+	file.read( (char*)data , bytes * sizeof( unsigned ) );
+	for( int i = 0 ; i < h ; i++ )
+		for( int j = 0 ; j < w ; j++ )
+		{
+			unsigned offset = ( h - i - 1 ) * w + j;
+			tex->m_pImage[offset].SetColor( data[offset] );
+		}
+
+	// close file
+	file.close();
+
+	// delete the data
 	delete[] data;
 
 	return true;

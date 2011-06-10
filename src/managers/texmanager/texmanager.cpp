@@ -50,14 +50,38 @@ void TexManager::_release()
 }
 
 // output texture
-bool TexManager::Write( const string& str , const Texture* tex , TEX_OUTPUT_TYPE type )
+bool TexManager::Write( const string& str , const Texture* tex , TEX_TYPE type )
+{
+	// find the specific texio first
+	TexIO* io = FindTexIO( type );
+
+	if( io != 0 )
+		io->Write( str , tex );
+	
+	return true;
+}
+
+// load the image from file , if the specific image is already existed in the current system , just return the pointer
+bool TexManager::Read( const string& str , ImageTexture* tex , TEX_TYPE type )
+{
+	// find the specific texio first
+	TexIO* io = FindTexIO( type );
+
+	if( io != 0 )
+		io->Read( str , tex );
+
+	return true;
+}
+
+// find correct texio
+TexIO* TexManager::FindTexIO( TEX_TYPE tt )
 {
 	// find the specific texio first
 	TexIO* io = 0;
 	vector<TexIO*>::const_iterator it = m_TexIOVec.begin();
 	while( it != m_TexIOVec.end() )
 	{
-		if( (*it)->GetTOT() == type )
+		if( (*it)->GetTT() == tt )
 		{
 			io = *it;
 			break;
@@ -65,8 +89,5 @@ bool TexManager::Write( const string& str , const Texture* tex , TEX_OUTPUT_TYPE
 		it++;
 	}
 
-	if( io != 0 )
-		io->Write( str , tex );
-	
-	return true;
+	return io;
 }

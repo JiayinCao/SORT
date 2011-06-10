@@ -19,6 +19,7 @@ Texture::Texture()
 // destructor
 Texture::~Texture()
 {
+	Release();
 }
 
 // initialize default value
@@ -30,7 +31,7 @@ void Texture::_init()
 }
 
 // output the texture
-bool Texture::Output( const string& str , TEX_OUTPUT_TYPE type )
+bool Texture::Output( const string& str , TEX_TYPE type )
 {	
 	// output the texture
 	return TexManager::GetSingleton().Write( str , this , type );

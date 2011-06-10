@@ -24,6 +24,8 @@ public:
 
 	// get the color
 	unsigned int GetColor() const;
+	// set the color
+	void SetColor( unsigned int color );
 
 // private field
 private:
