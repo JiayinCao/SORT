@@ -106,10 +106,12 @@ bool TexManager::Read( const string& str , ImageTexture* tex , TEX_TYPE type )
 
 			// insert it into the container
 			m_ImgContainer.insert( make_pair( str , mem ) );
+
+			return true;
 		}
 	}
 
-	return true;
+	return false;
 }
 
 // find correct texio
