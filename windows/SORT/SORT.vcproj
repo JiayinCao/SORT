@@ -306,6 +306,10 @@
 			Name="utility"
 			>
 			<File
+				RelativePath="..\..\src\utility\enum.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\error.h"
 				>
 			</File>
