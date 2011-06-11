@@ -25,7 +25,7 @@ public:
 	// para 'str' : the name of the outputed bmp file
 	// para 'tex' :	the texture for outputing
 	// result     : 'true' if saving is successful
-	// note		  : all of the image we out put is 32-bits
+	// note		  : all of the image we out put is 24-bits
 	virtual bool Write( const string& str , const Texture* tex );
 
 	// read data from file
