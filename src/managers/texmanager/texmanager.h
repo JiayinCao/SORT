@@ -8,12 +8,15 @@
 #define	SORT_TEXMANAGER
 
 // include header file
-#include "../../sort.h"
 #include "../../utility/singleton.h"
-#include "texio/texio.h"
+#include "../../utility/enum.h"
 #include <vector>
 #include <map>
 #include "../../spectrum/spectrum.h"
+
+class Texture;
+class ImageTexture;
+class TexIO;
 
 struct ImgMemory
 {
