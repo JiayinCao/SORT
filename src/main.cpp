@@ -35,9 +35,9 @@ int main( int argc , char** argv )
 	unsigned w = tex1.GetWidth();
 	unsigned h = tex1.GetHeight();
 	target.SetSize( w , h );
-	for( int i = 0 ; i < w ; i++ )
+	for( unsigned i = 0 ; i < w ; i++ )
 	{
-		for( int j = 0 ; j < h ; j++ )
+		for( unsigned j = 0 ; j < h ; j++ )
 		{
 			const Spectrum& color = tex1.GetColor( i , j );
 			target.SetColor( i , j , color );
