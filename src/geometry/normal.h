@@ -8,7 +8,6 @@
 #define	SORT_NORMAL
 
 // include the header file
-#include "../sort.h"
 #include "vector.h"
 
 ////////////////////////////////////////////////////////////////////////

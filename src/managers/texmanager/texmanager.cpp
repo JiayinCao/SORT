@@ -6,6 +6,7 @@
 
 // include header file
 #include "texmanager.h"
+#include "texio/texio.h"
 #include "texio/bmpio.h"
 #include "../../texture/imagetexture.h"
 

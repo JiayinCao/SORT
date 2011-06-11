@@ -5,6 +5,7 @@
  */
 
 // include the header file
+#include "../../../sort.h"
 #include "bmpio.h"
 #include "../../../spectrum/spectrum.h"
 #include <fstream>
