@@ -194,6 +194,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\texture\rendertarget.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\texture\rendertarget.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\texture\texture.cpp"
 				>
 			</File>
