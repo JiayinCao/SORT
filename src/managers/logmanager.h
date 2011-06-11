@@ -11,6 +11,10 @@
 #include "../utility/singleton.h"
 #include <fstream>
 
+// a empty class for output a new line
+class _ENDL{};
+#define ENDL _ENDL()
+
 /////////////////////////////////////////////////////////////
 // defination of log manager
 class	LogManager : public Singleton<LogManager>
@@ -21,14 +25,10 @@ public:
 	static void CreateLogManager( bool enable = true );
 	// destructor
 	~LogManager();
-	// record new log
-	// para 'log' : log message
-	// para 'enter' : wheter there is an enter appended
-	void Log( const std::string& str  , bool enter = true );
 	// enable or disable log
 	// para 'enable' : enable or disable the log system
 	void SetLogEnabled( bool enable );
-	
+
 // private method
 private:
 	// the logger file
@@ -46,10 +46,25 @@ private:
 	void	_init();
 	// release the system
 	void	_release();
+
+	// set friend class
+	friend LogManager& operator<<( LogManager& , int );
+	friend LogManager& operator<<( LogManager& , float );
+	friend LogManager& operator<<( LogManager& , const char* );
+	friend LogManager& operator<<( LogManager& , const std::string& );
+	friend LogManager& operator<<( LogManager& , _ENDL );
 };
 
 // declare some useful macro for convinience
-#define LOG(s)	LogManager::GetSingleton().Log(s)
-#define	SLOG(s)	LogManager::GetSingleton().Log(s,false)
+//#define LOG(s)	LogManager::GetSingleton().Log(s)
+//#define	SLOG(s)	LogManager::GetSingleton().Log(s,false)
+#define LOG LogManager::GetSingleton()
+
+// the log manager stream operator
+LogManager& operator<<( LogManager& , int );
+LogManager& operator<<( LogManager& , const char* );
+LogManager& operator<<( LogManager& , float );
+LogManager& operator<<( LogManager& , const std::string& );
+LogManager& operator<<( LogManager& , _ENDL );
 
 #endif
