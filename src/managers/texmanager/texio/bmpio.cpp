@@ -54,16 +54,20 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 		return false;
 	
 	// the size for the image
-	int bytes = w * h; 
+	int bitcount = 3;
+	int pitch = ( w * bitcount + 3 ) / 4 * 4;
+	int bytes = pitch * h;
 
 	// allocate the memory
-	unsigned* data = new unsigned[bytes];
-	memset( data , 0 , bytes * sizeof( unsigned ) );
+	char* data = new char[bytes];
+	memset( data , 0 , bytes * sizeof( char ) );
 	for( int i = 0 ; i < h ; i++ )
 		for( int j = 0 ; j < w ; j++ )
 		{
-			unsigned offset = ( h - i - 1 ) * w + j;
-			data[offset] = tex->GetColor( (int)j , (int)i ).GetColor();
+			unsigned offset = ( h - i - 1 ) * pitch + j * bitcount;
+			data[offset+0] = (unsigned char)( tex->GetColor( (int)j , (int)i ).GetB() * 255 );
+			data[offset+1] = (unsigned char)( tex->GetColor( (int)j , (int)i ).GetG() * 255 );
+			data[offset+2] = (unsigned char)( tex->GetColor( (int)j , (int)i ).GetR() * 255 );
 		}
 
 	// the type for the image
@@ -78,7 +82,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	header.biHeight = h;
 	header.biSize = sizeof( header );
 	header.biPlanes = 1;
-	header.biBitCount = 32;
+	header.biBitCount = 24;
 	header.biCompression = 0L;
 
 	// file header
@@ -102,7 +106,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	file.write( (const char*)&type , sizeof( type ) );
 	file.write( (const char*)&bmfh , sizeof( bmfh ) );
 	file.write( (const char*)&header , sizeof( header ) );
-	file.write( (const char*)data , bytes * sizeof( unsigned ) );
+	file.write( (const char*)data , bytes * sizeof( char ) );
 
 	// close it
 	file.close();

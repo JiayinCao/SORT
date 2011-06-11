@@ -26,6 +26,10 @@ public:
 	unsigned int GetColor() const;
 	// set the color
 	void SetColor( unsigned int color );
+	// get each component
+	float	GetR() const { return m_r; }
+	float	GetG() const { return m_g; }
+	float	GetB() const { return m_b; }
 
 // private field
 private:
