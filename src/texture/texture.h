@@ -54,14 +54,6 @@ public:
 	}
 
 	// set the size of the texture
-	virtual void	SetWidth( unsigned w )
-	{
-		m_iTexWidth = w;
-	}
-	virtual void	SetHeight( unsigned h )
-	{
-		m_iTexHeight = h;
-	}
 	virtual void	SetSize( unsigned w , unsigned h )
 	{
 		m_iTexWidth = w;

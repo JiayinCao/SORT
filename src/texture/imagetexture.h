@@ -38,8 +38,6 @@ public:
 
 	// it means nothing to set the size of the image file
 	// set the size of the texture
-	virtual void	SetWidth( unsigned w ){}
-	virtual void	SetHeight( unsigned h ){}
 	virtual void	SetSize( unsigned w , unsigned h ){}
 
 	// release the texture memory
