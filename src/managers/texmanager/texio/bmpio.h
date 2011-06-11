@@ -25,13 +25,14 @@ public:
 	// para 'str' : the name of the outputed bmp file
 	// para 'tex' :	the texture for outputing
 	// result     : 'true' if saving is successful
+	// note		  : all of the image we out put is 32-bits
 	virtual bool Write( const string& str , const Texture* tex );
 
 	// read data from file
 	// para 'str' : the name of the input entity
 	// para 'mem' : the memory for the image
 	// result     :	'true' if the input file is parsed successfully
-	// note       : it's not a pure function because some shower doesn't need a reading func
+	// note       : only 24-bits or 32-bits image are supported!!
 	virtual bool Read( const string& str , ImgMemory* mem );
 };
 

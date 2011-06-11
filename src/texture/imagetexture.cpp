@@ -38,6 +38,8 @@ const Spectrum& ImageTexture::GetColor( int x , int y ) const
 void ImageTexture::Release()
 {
 	m_pMemory = 0;
+	m_iTexWidth = 0;
+	m_iTexHeight = 0;
 }
 
 // load image from file

@@ -143,6 +143,9 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	// get the size
 	int w = header.biWidth;
 	int h = header.biHeight;
+	
+	// the bit count for the image
+	int bitcount = header.biBitCount / 8;
 
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 )
@@ -152,19 +155,26 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	}
 	
 	// the size for the image
-	int bytes = w * h; 
+	int pitch = ( w * bitcount + 3 ) / 4 * 4;
+	int bytes = pitch * h;
 
 	// allocate the memory
-	unsigned* data = new unsigned[bytes];
-	mem->m_ImgMem = new Spectrum[bytes];
+	char* data = new char[bytes];
+	mem->m_ImgMem = new Spectrum[w*h];
 	// read the data
-	file.read( (char*)data , bytes * sizeof( unsigned ) );
+	file.read( (char*)data , bytes * sizeof( char ) );
 	for( int i = 0 ; i < h ; i++ )
 		for( int j = 0 ; j < w ; j++ )
 		{
-			unsigned offset = ( h - i - 1 ) * w + j;
-			mem->m_ImgMem[offset].SetColor( data[offset] );
+			unsigned offset = ( h - i - 1 ) * pitch + j * bitcount;
+			unsigned* color = (unsigned*)&data[offset];
+			unsigned c = (*color) & 0x00ffffff;
+			mem->m_ImgMem[i * w + j].SetColor( c );
 		}
+
+	// set the width and heigth
+	mem->m_iWidth = w;
+	mem->m_iHeight = h;
 
 	// close file
 	file.close();
