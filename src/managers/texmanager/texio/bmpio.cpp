@@ -43,7 +43,13 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 {
 	// check if 'str' and 'tex' are valid
 	if( str.empty() || tex == 0 )
+	{
+		if( str.empty() )
+			LOG<<"Image file name empty, writing image failed."<<ENDL;
+		if( tex == 0 )
+			LOG<<"No texture , writing image failed."<<ENDL;
 		return false;
+	}
 
 	// get the size of the image
 	int w = tex->GetWidth();
@@ -51,7 +57,10 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 )
+	{
+		LOG<<"There is no length in one dimension of the image, writing image failed"<<ENDL;
 		return false;
+	}
 	
 	// the size for the image
 	int bitcount = 3;
@@ -98,7 +107,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	// if the file could not be opened , just return an error
 	if( file.is_open() == false )
 	{
-		LOG( "Can't Open file" );
+		LOG<<"Can't Open file \""<<str<<"\", writing image failed."<<ENDL;
 		return false;
 	}
 
@@ -113,6 +122,9 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 
 	delete[] data;
 
+	// output log
+	LOG<<"Write image file : \""<<str<<"\""<<ENDL;
+
 	return true;
 }
 
@@ -121,7 +133,13 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 {
 	// check if 'str' and 'tex' are valid
 	if( str.empty() || mem == 0 )
+	{
+		if( str.empty() )
+			LOG<<"File name empty , reading image failed."<<ENDL;
+		if( mem == 0 )
+			LOG<<"No memory , reading image failed."<<ENDL;
 		return false;
+	}
 
 	// open the file
 	ifstream file;
@@ -130,7 +148,7 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	// if the file could not be opened , just return an error
 	if( file.is_open() == false )
 	{
-		LOG( "Can't Open file" );
+		LOG<<"Can't Open file \""<<str<<"\", reading image failed."<<ENDL;
 		return false;
 	}
 
@@ -154,6 +172,7 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 )
 	{
+		LOG<<"There is no length in one dimension of the image, reading image failed."<<ENDL;
 		file.close();
 		return false;
 	}
@@ -185,6 +204,9 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 
 	// delete the data
 	delete[] data;
+
+	// output log
+	LOG<<"Read image file : \""<<str<<"\""<<ENDL;
 
 	return true;
 }

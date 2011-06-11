@@ -13,7 +13,10 @@ DEFINE_SINGLETON(LogManager);
 // create a log manager
 void	LogManager::CreateLogManager( bool enable )
 {
-	new LogManager( enable );
+	LogManager* m = new LogManager( enable );
+
+	if( enable == false )
+		m->m_fileLog<<"Log disabled."<<endl;
 }
 
 // private constructor
@@ -49,20 +52,58 @@ void LogManager::_release()
 	m_fileLog.close();
 }
 
-// add new log
-void LogManager::Log( const std::string& str , bool enter )
-{
-	if( m_bLogEnable )
-	{
-		m_fileLog<<str;
-
-		if( enter )
-			m_fileLog<<endl;
-	}
-}
-
 // enable or disable the log
 void LogManager::SetLogEnabled( bool enable )
 {
 	m_bLogEnable = enable;
+
+	if( enable == false )
+		m_fileLog<<"Log disabled."<<endl;
+}
+
+// output message to the logger
+LogManager& operator<<( LogManager& manager , int data )
+{
+	if( manager.m_bLogEnable == false )
+		return manager;
+
+	manager.m_fileLog<<data;
+
+	return manager;
+}
+LogManager& operator<<( LogManager& manager , float data )
+{
+	if( manager.m_bLogEnable == false )
+		return manager;
+
+	manager.m_fileLog<<data;
+	
+	return manager;
+}
+LogManager& operator<<( LogManager& manager , const char* data )
+{
+	if( manager.m_bLogEnable == false )
+		return manager;
+
+	manager.m_fileLog<<data;
+
+	return manager;
+}
+LogManager& operator<<( LogManager& manager , _ENDL data )
+{
+	if( manager.m_bLogEnable == false )
+		return manager;
+
+	manager.m_fileLog<<endl;
+
+	return manager;
+}
+LogManager& operator<<( LogManager& manager , const std::string& str )
+{
+	if( manager.m_bLogEnable == false )
+		return manager;
+
+	manager.m_fileLog<<str.c_str();
+
+	return manager;
 }
