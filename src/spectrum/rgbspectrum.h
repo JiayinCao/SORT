@@ -35,6 +35,11 @@ public:
 	float	GetG() const { return m_g; }
 	float	GetB() const { return m_b; }
 
+	// operators
+	RGBSpectrum operator+( const RGBSpectrum& c ) const;
+	RGBSpectrum operator-( const RGBSpectrum& c ) const;
+	RGBSpectrum operator*( const RGBSpectrum& c ) const;
+
 // private field
 private:
 	// the rgb color

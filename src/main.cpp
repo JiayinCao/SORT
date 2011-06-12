@@ -21,7 +21,7 @@ int main( int argc , char** argv )
 	initSort();
 
 	// create a grid texture and save it
-	GridTexture tex0;
+	GridTexture tex0( 1 , 0 , 0 , 0 , 0 , 0 );
 	tex0.SetSize( 128 , 128 );
 	tex0.Output( "test1.bmp" );
 
@@ -44,6 +44,14 @@ int main( int argc , char** argv )
 		}
 	}
 	target.Output( "target.bmp" );
+
+	ComTexture com = target;
+	com.Output( "tt.bmp" );
+
+	GridTexture tex2( 0,1,0,1,0,1 );
+	tex2.SetSize( 128 , 128 );
+	com = tex2 * target + tex0;
+	com.Output( "tex2.bmp" );
 
 	// release sort
 	releaseSort();

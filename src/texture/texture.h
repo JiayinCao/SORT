@@ -12,6 +12,9 @@
 #include "../spectrum/spectrum.h"
 #include "../utility/enum.h"
 
+// pre-declare class
+class ComTexture;
+
 //////////////////////////////////////////////////////////////
 // defination of class Texture
 class Texture
@@ -59,6 +62,11 @@ public:
 		m_iTexWidth = w;
 		m_iTexHeight = h;
 	}
+
+	// texture supports + - * operator for blending
+	ComTexture operator + ( const Texture& tex );
+	ComTexture operator - ( const Texture& tex );
+	ComTexture operator * ( const Texture& tex );
 
 // protected field
 protected:
