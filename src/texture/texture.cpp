@@ -87,7 +87,7 @@ void Texture::_texCoordFilter( int& x , int& y ) const
 }
 
 // the operator
-ComTexture Texture::operator + ( const Texture& tex )
+ComTexture Texture::operator + ( const Texture& tex ) const
 {
 	if( tex.GetWidth() != m_iTexWidth || tex.GetHeight() != m_iTexHeight )
 		SCrash( "Size of the images are not the same , can't add together." );
@@ -109,7 +109,7 @@ ComTexture Texture::operator + ( const Texture& tex )
 }
 
 // the operator
-ComTexture Texture::operator - ( const Texture& tex )
+ComTexture Texture::operator - ( const Texture& tex ) const
 {
 	if( tex.GetWidth() != m_iTexWidth || tex.GetHeight() != m_iTexHeight )
 		SCrash( "Size of the images are not the same , can't substract." );
@@ -131,7 +131,7 @@ ComTexture Texture::operator - ( const Texture& tex )
 }
 
 // the operator
-ComTexture Texture::operator * ( const Texture& tex )
+ComTexture Texture::operator * ( const Texture& tex ) const
 {
 	if( tex.GetWidth() != m_iTexWidth || tex.GetHeight() != m_iTexHeight )
 		SCrash( "Size of the images are not the same , can't multiply." );
@@ -150,4 +150,89 @@ ComTexture Texture::operator * ( const Texture& tex )
 		}
 
 	return ComTexture( data , m_iTexWidth , m_iTexHeight );
+}
+
+// the operator
+ComTexture Texture::operator + ( float t ) const
+{
+	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
+		SCrash( "One dimension of the image is zero , can't add together." );
+
+	//allocate the data
+	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
+
+	for( unsigned i = 0 ; i < m_iTexHeight; i++ )
+		for( unsigned j = 0 ; j < m_iTexWidth ; j++ )
+		{
+			unsigned offset = i * m_iTexWidth + j;
+			data[offset] = GetColor( (int)j , (int)i ) + t;
+		}
+
+	return ComTexture( data , m_iTexWidth , m_iTexHeight );
+}
+
+// the operator
+ComTexture Texture::operator - ( float t ) const
+{
+	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
+		SCrash( "One dimension of the image is zero , can't substract." );
+
+	//allocate the data
+	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
+
+	for( unsigned i = 0 ; i < m_iTexHeight; i++ )
+		for( unsigned j = 0 ; j < m_iTexWidth ; j++ )
+		{
+			unsigned offset = i * m_iTexWidth + j;
+			data[offset] = GetColor( (int)j , (int)i ) - t;
+		}
+
+	return ComTexture( data , m_iTexWidth , m_iTexHeight );
+}
+
+// the operator
+ComTexture Texture::operator * ( float t ) const
+{
+	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
+		SCrash( "One dimension of the image is zero , can't multiply." );
+
+	//allocate the data
+	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
+
+	for( unsigned i = 0 ; i < m_iTexHeight; i++ )
+		for( unsigned j = 0 ; j < m_iTexWidth ; j++ )
+		{
+			unsigned offset = i * m_iTexWidth + j;
+			data[offset] = GetColor( (int)j , (int)i ) * t;
+		}
+
+	return ComTexture( data , m_iTexWidth , m_iTexHeight );
+}
+
+ComTexture operator+( float t , const Texture& tex )
+{
+	return tex + t;
+}
+
+ComTexture operator-( float t , const Texture& tex )
+{
+	if( tex.m_iTexWidth == 0 || tex.m_iTexHeight == 0 )
+		SCrash( "One dimension of the image is zero , can't multiply." );
+
+	//allocate the data
+	Spectrum* data = new Spectrum[ tex.m_iTexWidth * tex.m_iTexHeight ];
+
+	for( unsigned i = 0 ; i < tex.m_iTexHeight; i++ )
+		for( unsigned j = 0 ; j < tex.m_iTexWidth ; j++ )
+		{
+			unsigned offset = i * tex.m_iTexWidth + j;
+			data[offset] = t - tex.GetColor( (int)j , (int)i );
+		}
+
+	return ComTexture( data , tex.m_iTexWidth , tex.m_iTexHeight );
+}
+
+ComTexture operator*( float t , const Texture& tex )
+{
+	return tex * t;
 }

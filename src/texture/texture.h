@@ -64,9 +64,13 @@ public:
 	}
 
 	// texture supports + - * operator for blending
-	ComTexture operator + ( const Texture& tex );
-	ComTexture operator - ( const Texture& tex );
-	ComTexture operator * ( const Texture& tex );
+	ComTexture operator + ( const Texture& tex ) const ;
+	ComTexture operator - ( const Texture& tex ) const ;
+	ComTexture operator * ( const Texture& tex ) const ;
+
+	ComTexture operator + ( float ) const;
+	ComTexture operator - ( float ) const;
+	ComTexture operator * ( float ) const;
 
 // protected field
 protected:
@@ -86,7 +90,15 @@ protected:
 
 	// do texture filter
 	void _texCoordFilter( int& u , int&v ) const;
+
+// set friend class
+friend ComTexture operator-( float t , const Texture& tex );
+
 };
+
+ComTexture operator+( float t , const Texture& tex );
+ComTexture operator*( float t , const Texture& tex );
+ComTexture operator-( float t , const Texture& tex );
 
 #endif
 

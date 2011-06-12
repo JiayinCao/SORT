@@ -31,6 +31,22 @@ RGBSpectrum::RGBSpectrum( unsigned char r , unsigned char g , unsigned char b )
 	m_b = (float)b / 255.0f;
 }
 
+// constructor from one float
+RGBSpectrum::RGBSpectrum( float g )
+{
+	m_r = g;
+	m_g = g;
+	m_b = g;
+}
+
+// constructor from one unsigned
+RGBSpectrum::RGBSpectrum( unsigned char g )
+{
+	m_r = (( float ) g ) / 255.0f;
+	m_g = m_r;
+	m_b = m_r;
+}
+
 // destructor
 RGBSpectrum::~RGBSpectrum()
 {
@@ -82,7 +98,7 @@ RGBSpectrum RGBSpectrum::operator - ( const RGBSpectrum& c ) const
 	return RGBSpectrum( r , g , b );
 }
 
-// + operator
+// * operator
 RGBSpectrum RGBSpectrum::operator * ( const RGBSpectrum& c ) const
 {
 	float r = m_r * c.m_r;
@@ -91,3 +107,38 @@ RGBSpectrum RGBSpectrum::operator * ( const RGBSpectrum& c ) const
 
 	return RGBSpectrum( r , g , b );
 }
+
+// + operator
+RGBSpectrum RGBSpectrum::operator + ( float t ) const
+{
+	float r = min( 1.0f , t + m_r );
+	float g = min( 1.0f , t + m_g );
+	float b = min( 1.0f , t + m_b );
+
+	return RGBSpectrum( r , g , b );
+}
+
+// - operator
+RGBSpectrum RGBSpectrum::operator - ( float t ) const
+{
+	float r = max( 0.0f , m_r - t );
+	float g = max( 0.0f , m_g - t );
+	float b = max( 0.0f , m_b - t );
+
+	return RGBSpectrum( r , g , b );
+}
+
+// + operator
+RGBSpectrum RGBSpectrum::operator * ( float t ) const
+{
+	float r = min( 1.0f , t * m_r );
+	r = max( r , 0.0f );
+	float g = min( 1.0f , t * m_g );
+	g = max( g , 0.0f );
+	float b = min( 1.0f , t * m_b );
+	b = max( b , 0.0f );
+
+	return RGBSpectrum( r , g , b );
+}
+
+
