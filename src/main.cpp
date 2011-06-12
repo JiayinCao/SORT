@@ -32,25 +32,15 @@ int main( int argc , char** argv )
 	// a render target
 	RenderTarget target;
 
-	unsigned w = tex1.GetWidth();
-	unsigned h = tex1.GetHeight();
-	target.SetSize( w , h );
-	for( unsigned i = 0 ; i < w ; i++ )
-	{
-		for( unsigned j = 0 ; j < h ; j++ )
-		{
-			const Spectrum& color = tex1.GetColor( i , j );
-			target.SetColor( i , j , color );
-		}
-	}
+//	target = tex1;
 	target.Output( "target.bmp" );
 
 	ComTexture com = target;
 	com.Output( "tt.bmp" );
 
 	GridTexture tex2( 0,1,0,1,0,1 );
-	tex2.SetSize( 128 , 128 );
-	com = tex2 * target + tex0;
+	tex2.SetSize( 128 , 128	);
+	com = tex2 * tex0 + ( 1.0f - tex0 ) * tex1;
 	com.Output( "tex2.bmp" );
 
 	// release sort
