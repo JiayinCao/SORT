@@ -8,6 +8,8 @@
 #include "texture.h"
 #include <math.h>
 #include "../managers/texmanager/texmanager.h"
+#include "compositetexture.h"
+#include "../utility/error.h"
 
 // default constructor
 Texture::Texture()
@@ -82,4 +84,70 @@ void Texture::_texCoordFilter( int& x , int& y ) const
 		y = m_iTexHeight - 1 - y;
 		break;
 	}
+}
+
+// the operator
+ComTexture Texture::operator + ( const Texture& tex )
+{
+	if( tex.GetWidth() != m_iTexWidth || tex.GetHeight() != m_iTexHeight )
+		SCrash( "Size of the images are not the same , can't add together." );
+
+	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
+		SCrash( "One dimension of the image is zero , can't add together." );
+
+	//allocate the data
+	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
+
+	for( unsigned i = 0 ; i < m_iTexHeight; i++ )
+		for( unsigned j = 0 ; j < m_iTexWidth ; j++ )
+		{
+			unsigned offset = i * m_iTexWidth + j;
+			data[offset] = tex.GetColor( (int)j , (int)i ) + GetColor( (int)j , (int)i );
+		}
+
+	return ComTexture( data , m_iTexWidth , m_iTexHeight );
+}
+
+// the operator
+ComTexture Texture::operator - ( const Texture& tex )
+{
+	if( tex.GetWidth() != m_iTexWidth || tex.GetHeight() != m_iTexHeight )
+		SCrash( "Size of the images are not the same , can't substract." );
+
+	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
+		SCrash( "One dimension of the image is zero , can't substract." );
+
+	//allocate the data
+	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
+
+	for( unsigned i = 0 ; i < m_iTexHeight; i++ )
+		for( unsigned j = 0 ; j < m_iTexWidth ; j++ )
+		{
+			unsigned offset = i * m_iTexWidth + j;
+			data[offset] = GetColor( (int)j , (int)i ) - tex.GetColor( (int)j , (int)i );
+		}
+
+	return ComTexture( data , m_iTexWidth , m_iTexHeight );
+}
+
+// the operator
+ComTexture Texture::operator * ( const Texture& tex )
+{
+	if( tex.GetWidth() != m_iTexWidth || tex.GetHeight() != m_iTexHeight )
+		SCrash( "Size of the images are not the same , can't multiply." );
+
+	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
+		SCrash( "One dimension of the image is zero , can't multiply." );
+
+	//allocate the data
+	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
+
+	for( unsigned i = 0 ; i < m_iTexHeight; i++ )
+		for( unsigned j = 0 ; j < m_iTexWidth ; j++ )
+		{
+			unsigned offset = i * m_iTexWidth + j;
+			data[offset] = tex.GetColor( (int)j , (int)i ) * GetColor( (int)j , (int)i );
+		}
+
+	return ComTexture( data , m_iTexWidth , m_iTexHeight );
 }
