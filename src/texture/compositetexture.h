@@ -19,10 +19,15 @@ public:
 	// constructor 
 	ComTexture() { _init(); }
 	// constructor from a texture
+	// para 'tex' : texture to copy
 	ComTexture( const Texture& tex ) { _init(); _copy( tex ); }
 	// constructor from a comtexture
+	// para 'tex' : texture to copy
 	ComTexture( const ComTexture& tex ) { _init(); _copy( tex ); }
 	// constructor for texture to construct a comtexture
+	// para 'data' : the memory to the image data
+	// para 'w'    : the width for the texture
+	// para 'h'    : the height for the texture
 	ComTexture( Spectrum* data , unsigned w , unsigned h ) 
 	{
 		m_pData = data ;
