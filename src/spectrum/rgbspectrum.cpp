@@ -7,6 +7,8 @@
 // include the header
 #include "rgbspectrum.h"
 
+#define saturate(x) max(0.0f,min(1.0f,x))
+
 // default constructor
 RGBSpectrum::RGBSpectrum()
 {
@@ -18,9 +20,9 @@ RGBSpectrum::RGBSpectrum()
 // constructor from three float
 RGBSpectrum::RGBSpectrum( float r , float g , float b )
 {
-	m_r = r;
-	m_g = g;
-	m_b = b;
+	m_r = saturate(r);
+	m_g = saturate(g);
+	m_b = saturate(b);
 }
 
 // constructor from three unsigned char
@@ -76,11 +78,8 @@ void RGBSpectrum::SetColor( unsigned int color )
 RGBSpectrum RGBSpectrum::operator + ( const RGBSpectrum& c ) const
 {
 	float r = m_r + c.m_r;
-	if( r > 1.0f ) r = 1.0f;
 	float g = m_g + c.m_g;
-	if( g > 1.0f ) g = 1.0f;
 	float b = m_b + c.m_b;
-	if( b > 1.0f ) b = 1.0f;
 
 	return RGBSpectrum( r , g , b );
 }
@@ -89,11 +88,8 @@ RGBSpectrum RGBSpectrum::operator + ( const RGBSpectrum& c ) const
 RGBSpectrum RGBSpectrum::operator - ( const RGBSpectrum& c ) const
 {
 	float r = m_r - c.m_r;
-	if( r < 0.0f ) r = 0.0f;
 	float g = m_g - c.m_g;
-	if( g < 0.0f ) g = 0.0f;
 	float b = m_b - c.m_b;
-	if( b < 0.0f ) b = 0.0f;
 
 	return RGBSpectrum( r , g , b );
 }
@@ -111,9 +107,9 @@ RGBSpectrum RGBSpectrum::operator * ( const RGBSpectrum& c ) const
 // + operator
 RGBSpectrum RGBSpectrum::operator + ( float t ) const
 {
-	float r = min( 1.0f , t + m_r );
-	float g = min( 1.0f , t + m_g );
-	float b = min( 1.0f , t + m_b );
+	float r = t + m_r;
+	float g = t + m_g;
+	float b = t + m_b;
 
 	return RGBSpectrum( r , g , b );
 }
@@ -121,9 +117,9 @@ RGBSpectrum RGBSpectrum::operator + ( float t ) const
 // - operator
 RGBSpectrum RGBSpectrum::operator - ( float t ) const
 {
-	float r = max( 0.0f , m_r - t );
-	float g = max( 0.0f , m_g - t );
-	float b = max( 0.0f , m_b - t );
+	float r = m_r - t ;
+	float g = m_g - t ;
+	float b = m_b - t ;
 
 	return RGBSpectrum( r , g , b );
 }
@@ -131,12 +127,9 @@ RGBSpectrum RGBSpectrum::operator - ( float t ) const
 // + operator
 RGBSpectrum RGBSpectrum::operator * ( float t ) const
 {
-	float r = min( 1.0f , t * m_r );
-	r = max( r , 0.0f );
-	float g = min( 1.0f , t * m_g );
-	g = max( g , 0.0f );
-	float b = min( 1.0f , t * m_b );
-	b = max( b , 0.0f );
+	float r = t * m_r;
+	float g = t * m_g ;
+	float b = t * m_b ;
 
 	return RGBSpectrum( r , g , b );
 }
