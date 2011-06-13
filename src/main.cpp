@@ -6,42 +6,28 @@
 
 // include the header file
 #include "sort.h"
-#include "texture/imagetexture.h"
-#include "managers/logmanager.h"
-#include "utility/error.h"
-#include "geometry/vector.h"
 #include "texture/gridtexture.h"
-#include "geometry/vector.h"
-#include "texture/rendertarget.h"
+#include "utility/timer.h"
 
 // the main func
 int main( int argc , char** argv )
 {
 	// initialize sort first
 	initSort();
+	GridTexture tex1;
+	GridTexture com;
 
-	// create a grid texture and save it
-	GridTexture tex0( 1 , 0 , 0 , 0 , 0 , 0 );
-	tex0.SetSize( 128 , 128 );
-	tex0.Output( "test1.bmp" );
+	Timer::GetSingleton().StartTimer();
 
-	ImageTexture tex1;
-	tex1.LoadImage( "test1.bmp" );
-	tex1.Output( "t.bmp" );
+	for( int i = 0 ; i < 1000000; i++ )
+		for( int j = 0; j < 1; j++ )
+		{
+			Spectrum c = tex1.GetColor( 0 , 0 ) * com.GetColor( 0 , 0 );
+		}
 
-	// a render target
-	RenderTarget target;
+	Timer::GetSingleton().StopTimer();
 
-//	target = tex1;
-	target.Output( "target.bmp" );
-
-	ComTexture com = target;
-	com.Output( "tt.bmp" );
-
-	GridTexture tex2( 0,1,0,1,0,1 );
-	tex2.SetSize( 128 , 128	);
-	com = tex2 * tex0 + ( 1.0f - tex0 ) * tex1;
-	com.Output( "tex2.bmp" );
+	cout<<Timer::GetSingleton().GetElapsedTime()<<endl;
 
 	// release sort
 	releaseSort();

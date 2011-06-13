@@ -11,7 +11,7 @@
 static Spectrum color;
 
 // get the texture value
-const Spectrum& UVTexture::GetColor( int x , int y ) const
+Spectrum UVTexture::GetColor( int x , int y ) const
 {
 	// filter the x y coordinate
 	_texCoordFilter( x , y );

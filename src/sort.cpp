@@ -8,6 +8,7 @@
 #include "sort.h"
 #include "managers/texmanager/texmanager.h"
 #include "managers/logmanager.h"
+#include "utility/timer.h"
 
 // initialize sort system
 bool	initSort()
@@ -16,6 +17,8 @@ bool	initSort()
 	TexManager::CreateTexManager();
 	// initialize log manager
 	LogManager::CreateLogManager();
+	// initialize the timer
+	Timer::CreateTimer();
 
 	return true;
 }
@@ -26,4 +29,5 @@ void	releaseSort()
 	// release managers
 	TexManager::DeleteSingleton();
 	LogManager::DeleteSingleton();
+	Timer::DeleteSingleton();
 }

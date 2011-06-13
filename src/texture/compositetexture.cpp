@@ -56,7 +56,7 @@ void ComTexture::Release()
 }
 
 // get color from the texture
-const Spectrum& ComTexture::GetColor( int x , int y ) const
+Spectrum ComTexture::GetColor( int x , int y ) const
 {
 	if( m_pData == 0 )
 		SCrash( "No memory in the render target, can't get color." );
@@ -74,9 +74,9 @@ const Spectrum& ComTexture::GetColor( int x , int y ) const
 void ComTexture::SetSize( unsigned w , unsigned h )
 {
 	if( w == 0 )
-		LOG<<"Width of the texture is 0."<<ENDL;
+		WARNING<<"Width of the texture is 0."<<ENDL;
 	if( h == 0 )
-		LOG<<"Height of the texture is 0."<<ENDL;
+		WARNING<<"Height of the texture is 0."<<ENDL;
 
 	// set the size
 	m_iTexWidth = w;

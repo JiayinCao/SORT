@@ -56,9 +56,8 @@ private:
 };
 
 // declare some useful macro for convinience
-//#define LOG(s)	LogManager::GetSingleton().Log(s)
-//#define	SLOG(s)	LogManager::GetSingleton().Log(s,false)
 #define LOG LogManager::GetSingleton()
+#define WARNING LogManager::GetSingleton()<<"Warning: "
 
 // the log manager stream operator
 LogManager& operator<<( LogManager& , int );

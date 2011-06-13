@@ -18,7 +18,7 @@ void ImageTexture::_init()
 }
 
 // get color from image
-const Spectrum& ImageTexture::GetColor( int x , int y ) const
+Spectrum ImageTexture::GetColor( int x , int y ) const
 {
 	// if there is no image, just crash
 	if( 0 == m_pMemory || m_pMemory->m_ImgMem == 0 )

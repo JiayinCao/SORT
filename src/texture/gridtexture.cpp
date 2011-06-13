@@ -50,7 +50,7 @@ void GridTexture::_init()
 }
 
 // get the color
-const Spectrum& GridTexture::GetColor( int x , int y ) const 
+Spectrum GridTexture::GetColor( int x , int y ) const 
 {
 	// filter the coorindate first
 	_texCoordFilter( x , y );

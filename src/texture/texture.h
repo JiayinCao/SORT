@@ -36,12 +36,12 @@ public:
 	// para 'x' :	x coordinate , if out of range , use filter
 	// para 'y' :	y coordinate , if out of range , use filter
 	// result	:	spectrum value in the position
-	virtual const Spectrum& GetColor( int x , int y ) const = 0;
+	virtual Spectrum GetColor( int x , int y ) const = 0;
 
 	// get the texture value
 	// para 'u'	:	x coordinate , if out of range , use filter
 	// para 'v' :	y coordinate , if out of range , use filter
-	virtual const Spectrum& GetColor( float u , float v ) const;
+	virtual Spectrum GetColor( float u , float v ) const;
 
 	// set texture coordinate filter mode
 	void	SetTexCoordFilter( TEXCOORDFILTER mode );

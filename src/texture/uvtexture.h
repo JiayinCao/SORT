@@ -26,7 +26,7 @@ public:
 	// para 'x' :	x coordinate , if out of range , use filter
 	// para 'y' :	y coordinate , if out of range , use filter
 	// result	:	spectrum value in the position
-	virtual const Spectrum& GetColor( int x , int y ) const;
+	virtual Spectrum GetColor( int x , int y ) const;
 
 //private function
 private:

@@ -31,7 +31,7 @@ public:
 	// para 'x' :	x coordinate , if out of range , use filter
 	// para 'y' :	y coordinate , if out of range , use filter
 	// result	:	spectrum value in the position
-	virtual const Spectrum& GetColor( int x , int y ) const
+	virtual Spectrum GetColor( int x , int y ) const
 	{
 		return m_Color;
 	}
@@ -39,7 +39,7 @@ public:
 	// get the texture value
 	// para 'u'	:	x coordinate , if out of range , use filter
 	// para 'v' :	y coordinate , if out of range , use filter
-	virtual const Spectrum& GetColor( float u , float v ) const
+	virtual Spectrum GetColor( float u , float v ) const
 	{
 		return m_Color;
 	}

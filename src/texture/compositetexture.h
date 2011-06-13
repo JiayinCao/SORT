@@ -47,7 +47,7 @@ public:
 	// note     : the x or y is out of range , use filter to make them in the range.
 	//            if there is no data in the render target, there will be a run-time
 	//			  and log error.
-	virtual const Spectrum& GetColor( int x , int y ) const;
+	virtual Spectrum GetColor( int x , int y ) const;
 
 	// set the size for the render target
 	// para 'w' : width of the render target

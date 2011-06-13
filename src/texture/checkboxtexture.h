@@ -37,7 +37,7 @@ public:
 	// get the texture value
 	// para 'x'	:	x coordinate , if out of range , use filter
 	// para 'y' :	y coordinate , if out of range , use filter
-	virtual const Spectrum& GetColor( int x , int y ) const;
+	virtual Spectrum GetColor( int x , int y ) const;
 
 // private field
 private:
