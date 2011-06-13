@@ -20,7 +20,7 @@ void RenderTarget::SetColor( int x , int y , float r , float g , float b )
 	_texCoordFilter( x , y );
 
 	// get the offset
-	unsigned offset = y * m_iTexHeight + x;
+	unsigned offset = y * m_iTexWidth + x;
 
 	// set the color
 	m_pData[offset].SetColor( r , g , b );

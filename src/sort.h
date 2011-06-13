@@ -28,10 +28,4 @@ using namespace std;
 #define SAFE_DELETE(p) { if(p) { delete p; p = 0; } }
 #define SAFE_DELETE_ARRAY(p) { if(p) { delete[] p; p = 0 ; } }
 
-// initialize SORT system
-bool	initSort();
-
-// release SORT system
-void	releaseSort();
-
 #endif
