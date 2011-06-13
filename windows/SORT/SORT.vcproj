@@ -170,6 +170,14 @@
 			Name="texture"
 			>
 			<File
+				RelativePath="..\..\src\texture\checkboxtexture.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\texture\checkboxtexture.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\texture\compositetexture.cpp"
 				>
 			</File>
@@ -215,6 +223,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\texture\texture.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\texture\uvtexture.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\texture\uvtexture.h"
 				>
 			</File>
 		</Filter>
