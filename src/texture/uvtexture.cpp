@@ -7,9 +7,6 @@
 // include header file
 #include "uvtexture.h"
 
-// for outputing color
-static Spectrum color;
-
 // get the texture value
 Spectrum UVTexture::GetColor( int x , int y ) const
 {
@@ -19,10 +16,7 @@ Spectrum UVTexture::GetColor( int x , int y ) const
 	float u = ((float)x) / m_iTexWidth;
 	float v = ((float)y) / m_iTexHeight;
 
-	//set the color
-	color.SetColor( u , v , 0.0f );
-
-	return color;
+	return Spectrum( u , v , 0.0f );
 }
 
 // initialize default data
