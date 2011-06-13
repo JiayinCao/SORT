@@ -58,8 +58,8 @@ public:
 	virtual void SetSize( unsigned w , unsigned h );
 
 	// = operator
-	ComTexture& operator = ( const Texture& tex ) { _copy( tex ); }
-	ComTexture& operator = ( const ComTexture& tex ) { _copy( tex ); }
+	ComTexture& operator = ( const Texture& tex ) { _copy( tex ); return *this;}
+	ComTexture& operator = ( const ComTexture& tex ) { _copy( tex ); return *this; }
 
 // private field
 protected:
