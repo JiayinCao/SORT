@@ -19,7 +19,7 @@ System g_System;
 int main( int argc , char** argv )
 {
 	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( 1 , 0 , 0 ) );
+	camera->SetEye( Point( 1 , 1 , 0.5 ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , 0 , 0 ) );
 	camera->SetFov( 3.1415f / 4.0f );

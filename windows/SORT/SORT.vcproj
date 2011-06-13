@@ -358,16 +358,36 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="camera"
+			>
+			<File
+				RelativePath="..\..\src\camera\camera.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\camera\perspective.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\camera\perspective.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\sort.cpp"
+			RelativePath="..\..\src\sort.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\sort.h"
+			RelativePath="..\..\src\system.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\system.h"
 			>
 		</File>
 	</Files>
