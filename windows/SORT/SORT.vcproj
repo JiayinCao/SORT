@@ -349,6 +349,14 @@
 				RelativePath="..\..\src\utility\singleton.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\utility\timer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\utility\timer.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"
