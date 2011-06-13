@@ -46,9 +46,9 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	if( str.empty() || tex == 0 )
 	{
 		if( str.empty() )
-			LOG<<"Image file name empty, writing image failed."<<ENDL;
+			WARNING<<"Image file name empty, writing image failed."<<ENDL;
 		if( tex == 0 )
-			LOG<<"No texture , writing image failed."<<ENDL;
+			WARNING<<"No texture , writing image failed."<<ENDL;
 		return false;
 	}
 
@@ -59,7 +59,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 )
 	{
-		LOG<<"There is no length in one dimension of the image, writing image failed"<<ENDL;
+		WARNING<<"There is no length in one dimension of the image, writing image failed"<<ENDL;
 		return false;
 	}
 	
@@ -108,7 +108,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	// if the file could not be opened , just return an error
 	if( file.is_open() == false )
 	{
-		LOG<<"Can't Open file \""<<str<<"\", writing image failed."<<ENDL;
+		WARNING<<"Can't Open file \""<<str<<"\", writing image failed."<<ENDL;
 		return false;
 	}
 
@@ -136,9 +136,9 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	if( str.empty() || mem == 0 )
 	{
 		if( str.empty() )
-			LOG<<"File name empty , reading image failed."<<ENDL;
+			WARNING<<"File name empty , reading image failed."<<ENDL;
 		if( mem == 0 )
-			LOG<<"No memory , reading image failed."<<ENDL;
+			WARNING<<"No memory , reading image failed."<<ENDL;
 		return false;
 	}
 
@@ -149,7 +149,7 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	// if the file could not be opened , just return an error
 	if( file.is_open() == false )
 	{
-		LOG<<"Can't Open file \""<<str<<"\", reading image failed."<<ENDL;
+		WARNING<<"Can't Open file \""<<str<<"\", reading image failed."<<ENDL;
 		return false;
 	}
 
@@ -173,7 +173,7 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 )
 	{
-		LOG<<"There is no length in one dimension of the image, reading image failed."<<ENDL;
+		WARNING<<"There is no length in one dimension of the image, reading image failed."<<ENDL;
 		file.close();
 		return false;
 	}

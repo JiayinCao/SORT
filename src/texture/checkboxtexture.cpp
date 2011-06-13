@@ -48,7 +48,7 @@ void CheckBoxTexture::_init()
 }
 
 // get the color
-const Spectrum& CheckBoxTexture::GetColor( int x , int y ) const 
+Spectrum CheckBoxTexture::GetColor( int x , int y ) const 
 {
 	// filter the coorindate first
 	_texCoordFilter( x , y );

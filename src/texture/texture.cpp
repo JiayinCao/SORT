@@ -41,7 +41,7 @@ bool Texture::Output( const string& str , TEX_TYPE type )
 }
 
 // get the color
-const Spectrum& Texture::GetColor( float u , float v ) const
+Spectrum Texture::GetColor( float u , float v ) const
 {
 	return GetColor( (int) (u *  m_iTexWidth) , (int) (v * m_iTexHeight) );
 }
