@@ -71,14 +71,14 @@ void System::Render()
 
 	BBox box;
 	box.m_Min = Point( 0 , 0 , 0 );
-	box.m_Max = Point( 0.2 , 0.2 , 0.2 );
+	box.m_Max = Point( 0.2f , 0.1f , 0.3f );
 
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
 		{
 			// generate rays
-			Ray r = m_camera->GenerateRay( i , j );
+			Ray r = m_camera->GenerateRay( j , i );
 
 			// set the ray direction as color
 			if( Intersect( r , box ) == false )

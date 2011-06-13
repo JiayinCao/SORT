@@ -26,7 +26,7 @@ Ray	PerspectiveCamera::GenerateRay( unsigned x , unsigned y ) const
 
 	Vector v;
 	v.x = ( ( ( 2.0f * x ) / w ) - 1 ) / 2.0f / xScale ;
-	v.y = -1.0f * ( ( ( 2.0f * ( h - y - 1 ) / h ) - 1 ) ) / 2.0f / yScale;
+	v.y = -1.0f * ( ( ( 2.0f * y / h ) - 1 ) ) / 2.0f / yScale;
 	v.z = 1.0f;
 
 	Vector zaxis = ( m_target - m_eye ).Normalize();
