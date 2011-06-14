@@ -46,9 +46,9 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	if( str.empty() || tex == 0 )
 	{
 		if( str.empty() )
-			WARNING<<"Image file name empty, writing image failed."<<ENDL;
+			LOG_WARNING<<"Image file name empty, writing image failed."<<ENDL;
 		if( tex == 0 )
-			WARNING<<"No texture , writing image failed."<<ENDL;
+			LOG_WARNING<<"No texture , writing image failed."<<ENDL;
 		return false;
 	}
 
@@ -59,7 +59,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 )
 	{
-		WARNING<<"There is no length in one dimension of the image, writing image failed"<<ENDL;
+		LOG_WARNING<<"There is no length in one dimension of the image, writing image failed"<<ENDL;
 		return false;
 	}
 	
@@ -105,10 +105,10 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	ofstream file;
 	file.open( str.c_str() , ios::binary );
 
-	// if the file could not be opened , just return an error
+	// if the file could not be opened , just return an LOG_ERROR
 	if( file.is_open() == false )
 	{
-		WARNING<<"Can't Open file \""<<str<<"\", writing image failed."<<ENDL;
+		LOG_WARNING<<"Can't Open file \""<<str<<"\", writing image failed."<<ENDL;
 		return false;
 	}
 
@@ -136,9 +136,9 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	if( str.empty() || mem == 0 )
 	{
 		if( str.empty() )
-			WARNING<<"File name empty , reading image failed."<<ENDL;
+			LOG_WARNING<<"File name empty , reading image failed."<<ENDL;
 		if( mem == 0 )
-			WARNING<<"No memory , reading image failed."<<ENDL;
+			LOG_WARNING<<"No memory , reading image failed."<<ENDL;
 		return false;
 	}
 
@@ -146,10 +146,10 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	ifstream file;
 	file.open( str.c_str() , ios::binary );
 
-	// if the file could not be opened , just return an error
+	// if the file could not be opened , just return an LOG_ERROR
 	if( file.is_open() == false )
 	{
-		WARNING<<"Can't Open file \""<<str<<"\", reading image failed."<<ENDL;
+		LOG_WARNING<<"Can't Open file \""<<str<<"\", reading image failed."<<ENDL;
 		return false;
 	}
 
@@ -173,7 +173,7 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 )
 	{
-		WARNING<<"There is no length in one dimension of the image, reading image failed."<<ENDL;
+		LOG_WARNING<<"There is no length in one dimension of the image, reading image failed."<<ENDL;
 		file.close();
 		return false;
 	}

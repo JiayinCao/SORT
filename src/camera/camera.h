@@ -20,7 +20,7 @@ class	Camera
 // public method
 public:
 	// default constructor
-	Camera(){}
+	Camera(){ _init(); }
 	// destructor
 	virtual ~Camera(){}
 
@@ -40,6 +40,10 @@ protected:
 	Point	m_eye;
 	// the render target
 	RenderTarget* m_rt;
+
+// private method
+	// initialize default data
+	void _init() { m_rt = 0; }
 };
 
 #endif

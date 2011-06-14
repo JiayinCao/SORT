@@ -46,13 +46,13 @@ public:
 	// result   : the cooresponding color
 	// note     : the x or y is out of range , use filter to make them in the range.
 	//            if there is no data in the render target, there will be a run-time
-	//			  and log error.
+	//			  and log LOG_ERROR.
 	virtual Spectrum GetColor( int x , int y ) const;
 
 	// set the size for the render target
 	// para 'w' : width of the render target
 	// para 'y' : height of the render target
-	// note     : if any of the two edge is zero length , there will be a warning in
+	// note     : if any of the two edge is zero length , there will be a LOG_WARNING in
 	//			  log. any call to the method will cause allocating memory if parameters
 	//			  are both valid.
 	virtual void SetSize( unsigned w , unsigned h );

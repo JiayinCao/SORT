@@ -12,8 +12,13 @@
 #include <fstream>
 
 // a empty class for output a new line
-class _ENDL{};
-#define ENDL _ENDL()
+class _ENDL{
+public:
+	_ENDL( bool flag ){ m_bCrash = flag; }
+	
+	//whether crash after the message
+	bool m_bCrash;
+};
 
 /////////////////////////////////////////////////////////////
 // defination of log manager
@@ -56,8 +61,13 @@ private:
 };
 
 // declare some useful macro for convinience
-#define LOG LogManager::GetSingleton()
-#define WARNING LogManager::GetSingleton()<<"Warning: "
+#define	LOG_FILE_INFO	"(File:"<<__FILE__<<"  Line:"<<__LINE__<<") "
+#define LOG				LogManager::GetSingleton()
+#define LOG_WARNING		LOG<<LOG_FILE_INFO<<"WARNING: "
+#define	LOG_ERROR		LOG<<LOG_FILE_INFO<<"ERROR: "
+
+#define ENDL _ENDL(false)
+#define	CRASH _ENDL(true)
 
 // the log manager stream operator
 LogManager& operator<<( LogManager& , int );

@@ -8,7 +8,6 @@
 #include "compositetexture.h"
 #include "../spectrum/spectrum.h"
 #include "../managers/logmanager.h"
-#include "../utility/error.h"
 
 // constructor from a texture
 void ComTexture::_copy( const Texture& tex )
@@ -59,7 +58,7 @@ void ComTexture::Release()
 Spectrum ComTexture::GetColor( int x , int y ) const
 {
 	if( m_pData == 0 )
-		SCrash( "No memory in the render target, can't get color." );
+		LOG_ERROR<<"No memory in the render target, can't get color."<<CRASH;
 
 	// filter the x y coordinate
 	_texCoordFilter( x , y );
@@ -74,9 +73,9 @@ Spectrum ComTexture::GetColor( int x , int y ) const
 void ComTexture::SetSize( unsigned w , unsigned h )
 {
 	if( w == 0 )
-		WARNING<<"Width of the texture is 0."<<ENDL;
+		LOG_WARNING<<"Width of the texture is 0."<<ENDL;
 	if( h == 0 )
-		WARNING<<"Height of the texture is 0."<<ENDL;
+		LOG_WARNING<<"Height of the texture is 0."<<ENDL;
 
 	// set the size
 	m_iTexWidth = w;
