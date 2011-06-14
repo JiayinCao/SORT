@@ -6,16 +6,16 @@
 
 // include the header file
 #include "perspective.h"
-#include "../utility/error.h"
 #include "../texture/rendertarget.h"
 #include <math.h>
+#include "../managers/logmanager.h"
 
 // generate ray
 Ray	PerspectiveCamera::GenerateRay( unsigned x , unsigned y ) const
 {
 	// check if there is render target
 	if( m_rt == 0 )
-		SCrash( "There is no render target set in the camera, can't get width and height of the image." );
+		LOG_ERROR<<"There is no render target set in the camera, can't get width and height of the image."<<CRASH;
 
 	float w = (float)m_rt->GetWidth();
 	float h = (float)m_rt->GetHeight();
@@ -25,8 +25,8 @@ Ray	PerspectiveCamera::GenerateRay( unsigned x , unsigned y ) const
 	float xScale = yScale / aspect;
 
 	Vector v;
-	v.x = ( ( ( 2.0f * x ) / w ) - 1 ) / 2.0f / xScale ;
-	v.y = -1.0f * ( ( ( 2.0f * y / h ) - 1 ) ) / 2.0f / yScale;
+	v.x = ( ( ( (float)x ) / w ) - 0.5f ) / xScale ;
+	v.y = -1.0f * ( ( ((float)y) / h - 0.5f ) ) / yScale;
 	v.z = 1.0f;
 
 	Vector zaxis = ( m_target - m_eye ).Normalize();

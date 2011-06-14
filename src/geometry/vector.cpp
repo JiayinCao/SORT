@@ -7,7 +7,7 @@
 // include the header files
 #include "vector.h"
 #include <math.h>
-#include "../utility/error.h"
+#include "../managers/logmanager.h"
 
 // default constructor, all of the components are set zero
 Vector::Vector()
@@ -91,8 +91,8 @@ Vector Vector::operator / ( float f ) const
 {
 	if( f == 0.0f )
 	{
-		// output the error here
-		SCrash( "vector divided by 0!!!" );
+		// output the LOG_ERROR here
+		LOG_ERROR<<"vector divided by 0!!!"<<CRASH;
 	}
 
 	float t = 1.0f / f;
@@ -105,8 +105,8 @@ Vector& Vector::operator /= ( float f )
 {
 	if( f == 0 )
 	{
-		// output the error here
-		SCrash( "vector divided by 0!!!" );
+		// output the LOG_ERROR here
+		LOG_ERROR<<"vector divided by 0!!!"<<CRASH;
 	}
 
 	float t = 1.0f / f;
@@ -128,7 +128,7 @@ float Vector::operator [] ( unsigned id ) const
 	if( id == 2 )
 		return z;
 
-	SCrash( "index out of range!!!" );
+	LOG_ERROR<<"index out of range!!!"<<CRASH;
 
 	return 0;
 }
@@ -141,7 +141,7 @@ float& Vector::operator [] ( unsigned id )
 	if( id == 1 )
 		return y;
 	if( id != 2 )
-		SCrash( "index out of range!!!" );
+		LOG_ERROR<<"index out of range!!!"<<CRASH;
 
 	return z;
 }
@@ -188,7 +188,7 @@ Vector& Vector::Normalize()
 
 	// divide the vector
 	if( len == 0 )
-		SCrash( "Try to normalize a zero length vector!!" );
+		LOG_ERROR<<"Try to normalize a zero length vector!!"<<CRASH;
 	
 	*this /= len;
 

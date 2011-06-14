@@ -6,7 +6,6 @@
 
 // include the header file
 #include "imagetexture.h"
-#include "../utility/error.h"
 #include "../managers/texmanager/texmanager.h"
 #include "../managers/logmanager.h"
 
@@ -22,7 +21,7 @@ Spectrum ImageTexture::GetColor( int x , int y ) const
 {
 	// if there is no image, just crash
 	if( 0 == m_pMemory || m_pMemory->m_ImgMem == 0 )
-		SCrash( "There is no memory for the texture!!" );
+		LOG_ERROR<<"There is no memory for the texture!!"<<CRASH;
 
 	// filter the texture coordinate
 	_texCoordFilter( x , y );

@@ -47,11 +47,11 @@ public:
 	Vector& operator*=( float f );
 	// para 'f' :	the divider
 	// result   :	a vector divided by the divider
-	// note	    :	there will be run-time and log error if 'f' is zero
+	// note	    :	there will be run-time and log LOG_ERROR if 'f' is zero
 	Vector operator/( float f ) const;
 	// para 'f' :	the divider
 	// result   :	current vector after dividing by the divider
-	// note	    :	there will be run-time and log error if 'f' is zero
+	// note	    :	there will be run-time and log LOG_ERROR if 'f' is zero
 	Vector&	operator /= ( float f );
 
 	// get the length of the vector
@@ -62,7 +62,7 @@ public:
 	float	SquaredLength() const;
 	// normalize the vector
 	// result :	the normalized vector
-	// note   :	there will be runtime and log error if it's a zero vector ( 0 , 0 , 0 )
+	// note   :	there will be runtime and log LOG_ERROR if it's a zero vector ( 0 , 0 , 0 )
 	Vector&	Normalize();
 
 	// [] operator

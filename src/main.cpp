@@ -23,8 +23,8 @@ int main( int argc , char** argv )
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , 0 , 0 ) );
 	camera->SetFov( 3.1415f / 4.0f );
-	g_System.m_camera = camera;
-	g_System.m_camera->SetRenderTarget( g_System.m_rt );
+//	g_System.m_camera = camera;
+//	g_System.m_camera->SetRenderTarget( g_System.m_rt );
 
 	g_System.Render();
 

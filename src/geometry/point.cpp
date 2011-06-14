@@ -6,7 +6,7 @@
 
 // include the header file
 #include "point.h"
-#include "../utility/error.h"
+#include "../managers/logmanager.h"
 
 // default constructor
 Point::Point()
@@ -89,7 +89,7 @@ Point& Point::operator *= ( float f )
 Point Point::operator / ( float f ) const
 {
 	if( f == 0.0f )
-		SCrash( "point divided by zero!!!" );
+		LOG_ERROR<<"point divided by zero!!!"<<CRASH;
 
 	float t = 1.0f / f;
 
@@ -100,7 +100,7 @@ Point Point::operator / ( float f ) const
 Point& Point::operator /= ( float f )
 {
 	if( f == 0.0f )
-		SCrash( "point divided by zero!!!" );
+		LOG_ERROR<<"point divided by zero!!!"<<CRASH;
 
 	float t = 1.0f / f;
 
@@ -127,7 +127,7 @@ float Point::operator [] ( unsigned id ) const
 	if( id == 0 )
 		return x;
 
-	SCrash( "index out of range!!!" );
+	LOG_ERROR<<"index out of range!!!"<<CRASH;
 
 	return 0;
 }
@@ -140,7 +140,7 @@ float& Point::operator[]( unsigned id )
 	if( id == 1 )
 		return y;
 	if( id != 0 )
-		SCrash( "index out of range!!!" );
+		LOG_ERROR<<"index out of range!!!"<<CRASH;
 
 	return x;
 }

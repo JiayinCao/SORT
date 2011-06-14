@@ -96,6 +96,10 @@ LogManager& operator<<( LogManager& manager , _ENDL data )
 
 	manager.m_fileLog<<endl;
 
+	//crash
+	if( data.m_bCrash )
+		abort();
+
 	return manager;
 }
 LogManager& operator<<( LogManager& manager , const std::string& str )

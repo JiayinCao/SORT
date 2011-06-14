@@ -53,19 +53,18 @@ void System::_postUninit()
 	SAFE_DELETE( m_rt );
 	SAFE_DELETE( m_camera );
 }
-#include <math.h>
 
 // render the image
 void System::Render()
 {
 	if( m_rt == 0 )
 	{
-		WARNING<<"There is no render target in the system, can't render anything."<<ENDL;
+		LOG_WARNING<<"There is no render target in the system, can't render anything."<<ENDL;
 		return;
 	}
 	if( m_camera == 0 )
 	{
-		WARNING<<"There is no camera attached in the system , can't render anything."<<ENDL;
+		LOG_WARNING<<"There is no camera attached in the system , can't render anything."<<ENDL;
 		return;
 	}
 

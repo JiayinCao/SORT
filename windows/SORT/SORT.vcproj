@@ -342,10 +342,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\utility\error.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\utility\singleton.h"
 				>
 			</File>
