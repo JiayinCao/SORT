@@ -10,6 +10,9 @@
 // default constructor
 Ray::Ray()
 {
+	m_Depth = 0;
+	m_fMin = 0.0f;
+	m_fMax = FLT_MAX;
 }
 // constructor from a point and a direction
 Ray::Ray( const Point& p , const Vector& dir , unsigned depth , float fmin , float fmax)

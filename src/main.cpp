@@ -11,6 +11,7 @@
 #include "utility/timer.h"
 #include "camera/perspective.h"
 #include "geometry/vector.h"
+#include "utility/path.h"
 
 // the global system
 System g_System;
@@ -23,12 +24,14 @@ int main( int argc , char** argv )
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , 0 , 0 ) );
 	camera->SetFov( 3.1415f / 4.0f );
-//	g_System.m_camera = camera;
-//	g_System.m_camera->SetRenderTarget( g_System.m_rt );
+	g_System.m_camera = camera;
+	g_System.m_camera->SetRenderTarget( g_System.m_rt );
 
 	g_System.Render();
 
 	g_System.OutputRT( "test.bmp" );
+	
+	cout<<GetExecutableDir()<<endl;
 
 	return 0;
 }
