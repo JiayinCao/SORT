@@ -80,7 +80,7 @@ void System::Render()
 			Ray r = m_camera->GenerateRay( j , i );
 
 			// set the ray direction as color
-			if( Intersect( r , box ) == false )
+			if( Intersect( r , box ) < 0.0f )
 				m_rt->SetColor( j , i , 0 , 0 , 0 );
 			else
 				m_rt->SetColor( j , i , 1 , 1 , 1 );
