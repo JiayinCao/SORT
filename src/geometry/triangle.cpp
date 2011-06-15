@@ -7,8 +7,8 @@
 // include the header
 #include "triangle.h"
 #include "trimesh.h"
-#include "Point.h"
-#include "Vector.h"
+#include "point.h"
+#include "vector.h"
 #include "ray.h"
 
 // constructor

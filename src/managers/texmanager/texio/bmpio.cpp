@@ -52,6 +52,9 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 		return false;
 	}
 
+	if( tex->CanOutput() == false )
+		return false;
+
 	// get the size of the image
 	int w = tex->GetWidth();
 	int h = tex->GetHeight();
