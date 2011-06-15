@@ -12,9 +12,6 @@
 // get the texture value
 Spectrum NormalTexture::GetColor( int x , int y ) const
 {
-	// normal texture doesn't support outputing
-	LOG_ERROR<<"Normal texture doesn't support outputing."<<CRASH;
-
 	return Spectrum();
 }
 
@@ -25,4 +22,12 @@ Spectrum NormalTexture::Evaluate( const Intersection* intersect ) const
 		return Spectrum( intersect->normal.x , intersect->normal.y , intersect->normal.z );
 
 	return Spectrum();
+}
+
+// whether the image supports outputing
+bool NormalTexture::CanOutput() const
+{
+	LOG_WARNING<<"NormalTexture doesn't support outputing."<<ENDL;
+
+	return false;
 }

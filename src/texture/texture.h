@@ -39,6 +39,10 @@ public:
 	// result	:	spectrum value in the position
 	virtual Spectrum GetColor( int x , int y ) const = 0;
 
+	// whether the texture support outputing
+	// result : 'true' if the texture supports texture output
+	virtual	bool CanOutput() const { return true; }
+
 	// get the texture value
 	// para 'intersect' : the intersection
 	// result :	the spectrum value
