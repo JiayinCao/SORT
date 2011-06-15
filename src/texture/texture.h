@@ -14,6 +14,7 @@
 
 // pre-declare class
 class ComTexture;
+class Intersection;
 
 //////////////////////////////////////////////////////////////
 // defination of class Texture
@@ -39,9 +40,9 @@ public:
 	virtual Spectrum GetColor( int x , int y ) const = 0;
 
 	// get the texture value
-	// para 'u'	:	x coordinate , if out of range , use filter
-	// para 'v' :	y coordinate , if out of range , use filter
-	virtual Spectrum GetColor( float u , float v ) const;
+	// para 'intersect' : the intersection
+	// result :	the spectrum value
+	virtual Spectrum Evaluate( const Intersection* intersect ) const;
 
 	// set texture coordinate filter mode
 	void	SetTexCoordFilter( TEXCOORDFILTER mode );

@@ -12,6 +12,7 @@
 #include "camera/perspective.h"
 #include "geometry/vector.h"
 #include "utility/path.h"
+#include "texture/normaltexture.h"
 
 // the global system
 System g_System;
@@ -32,6 +33,10 @@ int main( int argc , char** argv )
 	g_System.OutputRT( "test.bmp" );
 	
 	cout<<GetExecutableDir()<<endl;
+
+	NormalTexture tex;
+	tex.SetSize( 128 , 128 );
+	tex.Output( "t.bmp" );
 
 	return 0;
 }
