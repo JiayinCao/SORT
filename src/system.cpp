@@ -11,7 +11,6 @@
 #include "utility/timer.h"
 #include "camera/camera.h"
 #include "texture/rendertarget.h"
-#include "geometry/bbox.h"
 
 // constructor
 System::System()
@@ -54,6 +53,8 @@ void System::_postUninit()
 	SAFE_DELETE( m_camera );
 }
 
+#include "geometry/trimesh.h"
+
 // render the image
 void System::Render()
 {
@@ -68,10 +69,8 @@ void System::Render()
 		return;
 	}
 
-	BBox box;
-	box.m_Min = Point( 0 , 0 , 0 );
-	box.m_Max = Point( 0.2f , 0.1f , 0.3f );
-
+	TriMesh trimesh;
+	const Triangle& tri = trimesh.m_TriList[0];
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
@@ -80,7 +79,7 @@ void System::Render()
 			Ray r = m_camera->GenerateRay( j , i );
 
 			// set the ray direction as color
-			if( Intersect( r , box ) < 0.0f )
+			if( tri.Intersect( r ) < 0.0f )
 				m_rt->SetColor( j , i , 0 , 0 , 0 );
 			else
 				m_rt->SetColor( j , i , 1 , 1 , 1 );
