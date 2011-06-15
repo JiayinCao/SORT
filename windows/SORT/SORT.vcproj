@@ -302,6 +302,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\geometry\triangle.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\triangle.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\trimesh.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\trimesh.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\geometry\vector.cpp"
 				>
 			</File>

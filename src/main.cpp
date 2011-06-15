@@ -21,7 +21,7 @@ System g_System;
 int main( int argc , char** argv )
 {
 	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( 1 , 1 , 0.5 ) );
+	camera->SetEye( Point( 5 , 5 , 5 ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , 0 , 0 ) );
 	camera->SetFov( 3.1415f / 4.0f );
@@ -31,12 +31,6 @@ int main( int argc , char** argv )
 	g_System.Render();
 
 	g_System.OutputRT( "test.bmp" );
-	
-	cout<<GetExecutableDir()<<endl;
-
-	NormalTexture tex;
-	tex.SetSize( 128 , 128 );
-	tex.Output( "t.bmp" );
 
 	return 0;
 }
