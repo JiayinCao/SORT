@@ -28,6 +28,11 @@ public:
 	// result	:	spectrum value in the position
 	virtual Spectrum GetColor( int x , int y ) const;
 
+	// get the texture value
+	// para 'intersect' : the intersection
+	// result :	the spectrum value
+	virtual Spectrum Evaluate( const Intersection* intersect ) const;
+
 //private function
 private:
 	// initialize default data

@@ -10,6 +10,7 @@
 #include "../managers/texmanager/texmanager.h"
 #include "compositetexture.h"
 #include "../managers/logmanager.h"
+#include "../geometry/intersection.h"
 
 // default constructor
 Texture::Texture()
@@ -41,9 +42,9 @@ bool Texture::Output( const string& str , TEX_TYPE type )
 }
 
 // get the color
-Spectrum Texture::GetColor( float u , float v ) const
+Spectrum Texture::Evaluate( const Intersection* intersect ) const
 {
-	return GetColor( (int) (u *  m_iTexWidth) , (int) (v * m_iTexHeight) );
+	return GetColor( (int) (intersect->u *  m_iTexWidth) , (int) (intersect->v * m_iTexHeight) );
 }
 
 // set texture coordinate filter mode

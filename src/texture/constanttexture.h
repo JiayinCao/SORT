@@ -37,9 +37,9 @@ public:
 	}
 
 	// get the texture value
-	// para 'u'	:	x coordinate , if out of range , use filter
-	// para 'v' :	y coordinate , if out of range , use filter
-	virtual Spectrum GetColor( float u , float v ) const
+	// para 'intersect' : the intersection
+	// para 'result'    : the result
+	virtual Spectrum Evaluate( const Intersection* intersect ) const
 	{
 		return m_Color;
 	}

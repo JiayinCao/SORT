@@ -210,6 +210,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\texture\normaltexture.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\texture\normaltexture.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\texture\rendertarget.cpp"
 				>
 			</File>
@@ -259,6 +267,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\bbox.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\intersection.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\intersection.h"
 				>
 			</File>
 			<File
