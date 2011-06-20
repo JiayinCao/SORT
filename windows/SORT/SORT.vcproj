@@ -270,11 +270,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\geometry\instancetri.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\instancetri.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\geometry\intersection.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\intersection.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\matrix.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\matrix.h"
 				>
 			</File>
 			<File
@@ -294,11 +310,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\geometry\primitive.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\geometry\ray.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\geometry\ray.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\transform.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\transform.h"
 				>
 			</File>
 			<File
