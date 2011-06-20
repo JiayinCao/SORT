@@ -33,24 +33,6 @@ void TriMesh::_init()
 	m_iNBCount = 0;
 	m_iIBCount = 0;
 	m_iTriNum = 0;
-
-	m_iVBCount = 3;
-	m_iIBCount = 3;
-	m_iTriNum = 1;
-
-	//temp , check the triangle intersectionn algorithm
-	m_pVertexBuffer = new Point[m_iVBCount];
-	m_pIndexBuffer = new unsigned[m_iIBCount];
-
-	m_pVertexBuffer[0] = Point( 0 , 0 , 0 );
-	m_pVertexBuffer[1] = Point( 1 , 0 , 0 );
-	m_pVertexBuffer[2] = Point( 1 , 0 , 1 );
-
-	m_pIndexBuffer[0] = 0;
-	m_pIndexBuffer[1] = 1;
-	m_pIndexBuffer[2] = 2;
-
-	m_TriList.push_back( Triangle( this , m_pVertexBuffer , m_pIndexBuffer ) );
 }
 
 // release the memory

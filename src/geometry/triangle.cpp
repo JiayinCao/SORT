@@ -18,7 +18,7 @@ m_trimesh( trimesh ) , m_ib( index ) , m_vb( vb )
 }
 
 // check if the triangle is intersected with the ray
-float Triangle::Intersect( const Ray& r ) const
+float Triangle::GetIntersect( const Ray& r ) const
 {
 	// get three vertexes
 	const Point& p0 = m_vb[ m_ib[0] ];

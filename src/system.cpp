@@ -53,8 +53,6 @@ void System::_postUninit()
 	SAFE_DELETE( m_camera );
 }
 
-#include "geometry/trimesh.h"
-
 // render the image
 void System::Render()
 {
@@ -69,20 +67,12 @@ void System::Render()
 		return;
 	}
 
-	TriMesh trimesh;
-	const Triangle& tri = trimesh.m_TriList[0];
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
 		{
 			// generate rays
 			Ray r = m_camera->GenerateRay( j , i );
-
-			// set the ray direction as color
-			if( tri.Intersect( r ) < 0.0f )
-				m_rt->SetColor( j , i , 0 , 0 , 0 );
-			else
-				m_rt->SetColor( j , i , 1 , 1 , 1 );
 		}
 	}
 }

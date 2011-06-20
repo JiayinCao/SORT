@@ -8,7 +8,7 @@
 #define	SORT_TRIMESH
 
 #include <vector>
-#include "triangle.h"
+//#include "triangle.h"
 
 class	Normal;
 class	Point;
@@ -41,7 +41,7 @@ public:
 	unsigned		m_iTriNum;
 
 	// the triangle list
-	std::vector<Triangle>	m_TriList;
+//	std::vector<Triangle>	m_TriList;
 
 // private method
 	// initialize default data
