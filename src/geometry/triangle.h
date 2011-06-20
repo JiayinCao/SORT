@@ -7,6 +7,8 @@
 #ifndef	SORT_TRIANGLE
 #define	SORT_TRIANGLE
 
+#include "primitive.h"
+
 // pre-decleration
 class	TriMesh;
 class	Point;
@@ -15,7 +17,7 @@ class	Ray;
 //////////////////////////////////////////////////////////////////////////////////
 //	defination of triangle
 //	note: triangle is the only primitive supported by the system.
-class	Triangle
+class	Triangle : public Primitive
 {
 // public method
 public:
@@ -30,7 +32,7 @@ public:
 	// check if the triangle is intersected with the ray
 	// para 'r' : the ray to check
 	// result   : positive value if intersect
-	float	Intersect( const Ray& r ) const;
+	float	GetIntersect( const Ray& r ) const;
 
 // private field
 private:
