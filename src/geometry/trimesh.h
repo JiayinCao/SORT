@@ -10,7 +10,7 @@
 #include <vector>
 //#include "triangle.h"
 
-class	Normal;
+class	Vector;
 class	Point;
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -32,7 +32,7 @@ public:
 	// the vertex buffer
 	Point*			m_pVertexBuffer;
 	// the normal buffer
-	Normal*			m_pNormalBuffer;
+	Vector*			m_pNormalBuffer;
 	// the index buffer
 	unsigned*		m_pIndexBuffer;
 	// the size for three buffers

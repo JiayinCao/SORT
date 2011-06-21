@@ -10,7 +10,6 @@
 // include the header
 #include "matrix.h"
 #include "vector.h"
-#include "normal.h"
 #include "point.h"
 #include <math.h>
 
@@ -131,8 +130,23 @@ inline Point operator* ( const Transform& t , const Point& p )
 // note : the vector could be a normal , which requires special care about the multiplication
 inline Vector operator* ( const Transform& t , const Vector& v )
 {
-	// transform the vector
-	return v._transform( t );
+	// if it's a normal , use the transpose of inverse matrix
+	if( v.m_bNormal )
+	{
+		float _x = v.x * t.invMatrix.m[0] + v.y * t.invMatrix.m[4] + v.z * t.invMatrix.m[8];
+		float _y = v.x * t.invMatrix.m[1] + v.y * t.invMatrix.m[5] + v.z * t.invMatrix.m[9];
+		float _z = v.x * t.invMatrix.m[2] + v.y * t.invMatrix.m[6] + v.z * t.invMatrix.m[10];
+
+		// return the result
+		return Vector( _x , _y , _z );
+	}
+
+	float _x = v.x * t.matrix.m[0] + v.y * t.matrix.m[1] + v.z * t.matrix.m[2];
+	float _y = v.x * t.matrix.m[4] + v.y * t.matrix.m[5] + v.z * t.matrix.m[6];
+	float _z = v.x * t.matrix.m[8] + v.y * t.matrix.m[9] + v.z * t.matrix.m[10];
+
+	// return the result
+	return Vector( _x , _y , _z );
 }
 
 #endif

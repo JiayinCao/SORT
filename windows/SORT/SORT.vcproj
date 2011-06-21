@@ -294,14 +294,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\geometry\normal.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\geometry\normal.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\geometry\point.cpp"
 				>
 			</File>

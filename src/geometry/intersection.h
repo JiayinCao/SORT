@@ -9,7 +9,6 @@
 
 // include the header
 #include "point.h"
-#include "normal.h"
 
 ///////////////////////////////////////////////////////////////////////
 //	defination of intersection
@@ -27,7 +26,7 @@ public:
 	// the interesection point
 	Point	intersect;
 	// the normal
-	Normal	normal;
+	Vector	normal;
 	// the uv coordinate
 	float	u , v;
 };
