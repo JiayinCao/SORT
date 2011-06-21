@@ -28,6 +28,14 @@ public:
 	Normal( const Normal& n );
 	// destructor
 	virtual ~Normal();
+
+// protected method
+protected:
+	// transform matrix
+	virtual Vector _transform( const Transform& t ) const;
+
+// set friend function
+friend Vector operator* ( const Transform& t , const Vector& v );
 };
 
 #endif
