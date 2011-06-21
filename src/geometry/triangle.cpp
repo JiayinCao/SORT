@@ -53,3 +53,24 @@ float Triangle::GetIntersect( const Ray& r ) const
 	// the ray doesn't cross the triangle
 	return -1.0f;
 }
+
+// get the bounding box of the triangle
+const BBox& Triangle::GetBBox()
+{
+	// if there is no bounding box , cache it
+	if( m_bbox.isValid() == false )
+	{
+		m_bbox = new BBox();
+
+		// get three vertexes
+		const Point& p0 = m_vb[ m_ib[0] ];
+		const Point& p1 = m_vb[ m_ib[1] ];
+		const Point& p2 = m_vb[ m_ib[2] ];
+
+		Union( *m_bbox , p0 );
+		Union( *m_bbox , p1 );
+		Union( *m_bbox , p2 );
+	}
+
+	return *m_bbox;
+}

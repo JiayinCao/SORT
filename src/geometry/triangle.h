@@ -34,6 +34,9 @@ public:
 	// result   : positive value if intersect
 	float	GetIntersect( const Ray& r ) const;
 
+	// get the bounding box of the triangle
+	const BBox&	GetBBox();
+
 // private field
 private:
 	// the triangle mesh

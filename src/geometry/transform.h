@@ -42,6 +42,15 @@ public:
 	Vector	operator()( const Vector& v ) const { return *this * v; }
 	Ray		operator()( const Ray& r ) const { return *this * r; }
 
+	// * operator for transform
+	Transform operator*( const Transform& t ) const
+	{
+		Matrix m = matrix * t.matrix;
+		Matrix invm = t.invMatrix * invMatrix;
+
+		return Transform( m , invm );
+	}
+
 // public field
 public:
 	// the matrix for tranformation
@@ -88,7 +97,7 @@ inline Transform RotateX( float angle )
 			  0.0f , sin_t , -cos_t , 0.0f ,
 			  0.0f , 0.0f , 0.0f , 1.0f );
 
-	return Transform( m , Transpose(m) );
+	return Transform( m , m.Transpose() );
 }
 
 // rotate around y axis
@@ -100,7 +109,7 @@ inline Transform RotateY( float angle )
 			  0.0f , 1.0f , 0.0f , 0.0f ,
 			  -sin_t , 0.0f , -cos_t , 0.0f ,
 			  0.0f , 0.0f , 0.0f , 1.0f );
-	return Transform( m , Transpose(m) );
+	return Transform( m , m.Transpose() );
 }
 
 // rotate around z axis
@@ -112,7 +121,7 @@ inline Transform RotateZ( float angle )
 			  sin_t , -cos_t , 0.0f , 0.0f ,
 			  0.0f , 0.0f , 1.0f , 0.0f ,
 			  0.0f , 0.0f , 0.0f , 1.0f );
-	return Transform( m , Transpose(m) );
+	return Transform( m , m.Transpose() );
 }
 
 // return the inverse of the transform

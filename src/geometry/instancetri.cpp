@@ -25,3 +25,16 @@ float	InstanceTriangle::GetIntersect( const Ray& r ) const
 
 	return 0.0f;
 }
+
+// get the bounding box of the triangle
+const BBox& InstanceTriangle::GetBBox()
+{
+	// if there is no bounding box , cache it
+	if( m_bbox.isValid() == false )
+	{
+		// to be modified
+		m_bbox = new BBox();
+	}
+
+	return *m_bbox;
+}
