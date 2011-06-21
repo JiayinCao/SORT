@@ -11,7 +11,13 @@
 #include "matrix.h"
 #include "vector.h"
 #include "point.h"
+#include "ray.h"
 #include <math.h>
+
+// pre-declera functions
+Point	operator* ( const Transform& t , const Point& p );
+Vector	operator* ( const Transform& t , const Vector& v );
+Ray		operator* ( const Transform& t , const Ray& r );
 
 ////////////////////////////////////////////////////////////////////////////
 //	defination of transform
@@ -30,6 +36,11 @@ public:
 	bool	IdIdentity() const;
 	// whether there is scale factor in the matrix
 	bool	HasScale() const;
+
+	// the operator for transformation
+	Point	operator()( const Point& p ) const { return *this * p; }
+	Vector	operator()( const Vector& v ) const { return *this * v; }
+	Ray		operator()( const Ray& r ) const { return *this * r; }
 
 // public field
 public:
@@ -147,6 +158,12 @@ inline Vector operator* ( const Transform& t , const Vector& v )
 
 	// return the result
 	return Vector( _x , _y , _z );
+}
+
+// transform a ray
+inline Ray	operator* ( const Transform& t , const Ray& r )
+{
+	return Ray( t(r.m_Ori) , t(r.m_Dir) );
 }
 
 #endif
