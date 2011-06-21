@@ -25,7 +25,7 @@ public:
 	// para 'trimesh' : the triangle mesh it belongs to
 	// para 'index'   : the index buffer
 	// para 'vb'      : the vertex buffer
-	Triangle( const TriMesh* trimesh , const Point* vb , const unsigned* index );
+	Triangle( const TriMesh* trimesh , const Point* vb , const unsigned* index , Transform* transform );
 	// destructor
 	~Triangle(){}
 

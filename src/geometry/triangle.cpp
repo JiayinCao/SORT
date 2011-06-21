@@ -10,10 +10,11 @@
 #include "point.h"
 #include "vector.h"
 #include "ray.h"
+#include "transform.h"
 
 // constructor
-Triangle::Triangle( const TriMesh* trimesh , const Point* vb , const unsigned* index ):
-m_trimesh( trimesh ) , m_ib( index ) , m_vb( vb )
+Triangle::Triangle( const TriMesh* trimesh , const Point* vb , const unsigned* index , Transform* transform):
+Primitive(transform), m_trimesh( trimesh ) , m_ib( index ) , m_vb( vb )
 {
 }
 

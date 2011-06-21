@@ -12,6 +12,8 @@
 
 // pre-decleration
 class Ray;
+// the transformation of the primitive
+class Transform;
 
 //////////////////////////////////////////////////////////////////
 //	defination of primitive
@@ -19,8 +21,8 @@ class	Primitive
 {
 // public method
 public:
-	// default constructor
-	Primitive(){}
+	// constructor from a transformation
+	Primitive( Transform* transform ): m_pTransform(transform) {}
 	// destructor
 	~Primitive(){}
 
@@ -40,6 +42,9 @@ public:
 protected:
 	// bounding box
 	SmartPtr<BBox> m_bbox;
+
+	// the transformation
+	Transform*	m_pTransform;
 };
 
 #endif

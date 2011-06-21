@@ -25,7 +25,7 @@ class	InstanceTriangle : public Primitive
 // public method
 public:
 	// constructor from a Triangle
-	InstanceTriangle( const Triangle* tri );
+	InstanceTriangle( const Triangle* tri , Transform* transform );
 	// destructor
 	~InstanceTriangle();
 
