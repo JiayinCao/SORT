@@ -58,7 +58,7 @@ float Triangle::GetIntersect( const Ray& r ) const
 const BBox& Triangle::GetBBox()
 {
 	// if there is no bounding box , cache it
-	if( m_bbox.isValid() == false )
+	if( !m_bbox )
 	{
 		m_bbox = new BBox();
 

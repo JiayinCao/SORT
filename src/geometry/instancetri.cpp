@@ -30,7 +30,7 @@ float	InstanceTriangle::GetIntersect( const Ray& r ) const
 const BBox& InstanceTriangle::GetBBox()
 {
 	// if there is no bounding box , cache it
-	if( m_bbox.isValid() == false )
+	if( !m_bbox )
 	{
 		// to be modified
 		m_bbox = new BBox();
