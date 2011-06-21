@@ -7,6 +7,9 @@
 #ifndef SORT_VECTOR
 #define	SORT_VECTOR
 
+// pre-deleration
+class Transform;
+
 /////////////////////////////////////////////////////////////////////////
 // defination of vector
 class	Vector
@@ -93,6 +96,14 @@ public:
 	float x;
 	float y;
 	float z;
+
+// protected method
+protected:
+	// transform matrix
+	virtual Vector _transform( const Transform& t ) const;
+
+// set friend function
+friend Vector operator* ( const Transform& t , const Vector& v );
 };
 
 // * operator
