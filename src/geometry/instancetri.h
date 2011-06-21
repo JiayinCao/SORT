@@ -31,6 +31,9 @@ public:
 
 	// get the instersection between a ray and a instance triangle
 	float	GetIntersect( const Ray& r ) const;	
+	
+	// get the bounding box of the triangle
+	const BBox&	GetBBox();
 
 // private field
 private:

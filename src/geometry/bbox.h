@@ -62,8 +62,11 @@ inline BBox Union( const BBox& bbox , const Point& p )
 {
 	BBox result;
 
+	cout<<"in"<<endl;
+
 	for( unsigned i = 0 ; i < 3 ; i++ )
 	{
+		cout<<i<<" "<<p[i]<<" "<<bbox.m_Min[i]<<endl;
 		if( p[i] < bbox.m_Min[i] )
 		{
 			result.m_Min[i] = p[i];

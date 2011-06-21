@@ -29,10 +29,13 @@ public:
 	// destructor
 	~Matrix(){}
 
-	// transform a point
-	Point	operator ()( const Point& p ) const;
-	// transform a vector
-	Vector	operator ()( const Vector& v ) const;
+	// matrix multiplication
+	// para 'm' : the matrix to mutiply
+	// result : the composition of the two matrix
+	Matrix operator * ( const Matrix& m ) const;
+
+	// transpose the matrix
+	Matrix Transpose() const;
 
 // public field
 public:
@@ -43,14 +46,5 @@ public:
 	// m[12] m[13] m[14] m[15]
 	float	m[16];
 };
-
-// create a transpose matrix
-inline Matrix Transpose( const Matrix& m )
-{
-	return Matrix( 	m.m[0] , m.m[4] , m.m[8] , m.m[12] , 
-					m.m[1] , m.m[5] , m.m[9] , m.m[13] ,
-					m.m[2] , m.m[6] , m.m[10] , m.m[14] ,
-					m.m[3] , m.m[7] , m.m[11] , m.m[15] );
-}
 
 #endif

@@ -9,7 +9,9 @@
 #include "vector.h"
 
 // default constructor
-BBox::BBox()
+BBox::BBox():
+m_Min( FLT_MAX , FLT_MAX , FLT_MAX ),
+m_Max( -FLT_MAX , -FLT_MAX , -FLT_MAX )
 {
 }
 

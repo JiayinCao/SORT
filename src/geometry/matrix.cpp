@@ -34,3 +34,31 @@ Matrix::Matrix( float _11 , float _12 , float _13 , float _14 ,
 	m[8] = _31;  m[9] = _32;  m[10] = _33; m[11] = _34;
 	m[12] = _41; m[13] = _42; m[14] = _43; m[15] = _44;
 }
+
+// matrix mutiplication
+Matrix Matrix::operator *( const Matrix& mat) const
+{
+	float data[16];
+	for( int i = 0 ; i < 4 ; i++ )
+	{
+		for( int j = 0 ; j < 4 ; j++ )
+		{
+			int offset = i * 4 + j;
+			data[offset] = 0.0f;
+
+			for( int k = 0 ; k < 4 ; k++ )
+				data[offset] += m[i*4+k]*mat.m[k*4+j];
+		}
+	}
+
+	return Matrix(data);
+}
+
+// create a transpose matrix
+Matrix Matrix::Transpose() const
+{
+	return Matrix( 	m[0] , m[4] , m[8] , m[12] , 
+					m[1] , m[5] , m[9] , m[13] ,
+					m[2] , m[6] , m[10] , m[14] ,
+					m[3] , m[7] , m[11] , m[15] );
+}

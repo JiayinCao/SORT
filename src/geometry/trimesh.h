@@ -8,7 +8,7 @@
 #define	SORT_TRIMESH
 
 #include <vector>
-//#include "triangle.h"
+#include "primitive.h"
 
 class	Vector;
 class	Point;
