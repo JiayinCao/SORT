@@ -198,14 +198,3 @@ Vector& Vector::Normalize()
 
 	return *this;
 }
-
-// transform matrix
-Vector Vector::_transform( const Transform& t ) const
-{
-	float _x = x * t.matrix.m[0] + y * t.matrix.m[1] + z * t.matrix.m[2];
-	float _y = x * t.matrix.m[4] + y * t.matrix.m[5] + z * t.matrix.m[6];
-	float _z = x * t.matrix.m[8] + y * t.matrix.m[9] + z * t.matrix.m[10];
-
-	// return the result
-	return Vector( _x , _y , _z );
-}

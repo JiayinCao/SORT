@@ -99,15 +99,7 @@ public:
 
 	// whether it's a normal or not
 	// by default , it's false
-	bool	m_bNormal;
-
-// protected method
-protected:
-	// transform matrix
-	virtual Vector _transform( const Transform& t ) const;
-
-// set friend function
-friend Vector operator* ( const Transform& t , const Vector& v );
+	bool m_bNormal;
 };
 
 // * operator

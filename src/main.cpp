@@ -19,7 +19,7 @@ int main( int argc , char** argv )
 	Vector* n = new Vector( true );
 	Vector* v = new Vector();
 
-	Vector n0 = t * (*n);
+	Vector n0 = t(*n);
 	Vector v0 = t * (*v);
 
 	Vector* n1 = n;
