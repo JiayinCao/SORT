@@ -17,15 +17,15 @@ class	Vector
 // public method
 public:
 	// default constructor, all of the components are set zero
-	Vector();
+	Vector( bool normal = false );
 	// constructor from three float data
 	// para 'x':	x component
 	// para 'y':	y component
 	// para 'z':	z component
-	Vector( float x , float y , float z );
+	Vector( float x , float y , float z , bool normal = false );
 	// copy constructor
 	// para 'vector':	vector to copy
-	Vector( const Vector& vector );
+	Vector( const Vector& vector , bool normal = false );
 	// destructor does nothing here
 	~Vector();
 
@@ -96,6 +96,10 @@ public:
 	float x;
 	float y;
 	float z;
+
+	// whether it's a normal or not
+	// by default , it's false
+	bool	m_bNormal;
 
 // protected method
 protected:

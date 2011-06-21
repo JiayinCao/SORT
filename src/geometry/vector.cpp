@@ -11,7 +11,8 @@
 #include "transform.h"
 
 // default constructor, all of the components are set zero
-Vector::Vector()
+Vector::Vector( bool normal ):
+m_bNormal( normal )
 {
 	x = 0;
 	y = 0;
@@ -19,7 +20,8 @@ Vector::Vector()
 }
 
 // copy constructor
-Vector::Vector( const Vector& vector )
+Vector::Vector( const Vector& vector , bool normal ):
+m_bNormal( normal )
 {
 	x = vector.x;
 	y = vector.y;
@@ -27,7 +29,8 @@ Vector::Vector( const Vector& vector )
 }
 
 // constructor from three float data
-Vector::Vector( float _x , float _y , float _z )
+Vector::Vector( float _x , float _y , float _z , bool normal ):
+m_bNormal( normal )
 {
 	x = _x;
 	y = _y;

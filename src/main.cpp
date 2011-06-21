@@ -16,7 +16,7 @@ System g_System;
 int main( int argc , char** argv )
 {
 	Transform t;
-	Normal* n = new Normal();
+	Vector* n = new Vector( true );
 	Vector* v = new Vector();
 
 	Vector n0 = t * (*n);

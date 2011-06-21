@@ -7,7 +7,6 @@
 // include the header file
 #include "trimesh.h"
 #include "../sort.h"
-#include "normal.h"
 #include "point.h"
 
 // default constructor
