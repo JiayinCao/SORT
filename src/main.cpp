@@ -23,17 +23,10 @@ int main( int argc , char** argv )
 	CheckBoxTexture cb;
 	cb.Output( "tex.bmp" );
 
-	ImageTexture* tex = new ImageTexture();
-	ImageTexture* t1 = new ImageTexture();
-	ImageTexture* t2 = new ImageTexture() ;
-	tex->LoadImage( "tex.bmp" );
-
-	t1->LoadImage( "tex.bmp" );
-	t2->LoadImage( "tex.bmp" );
-
-	delete t1;
-	delete t2;
-	delete tex;
+	ImageTexture tex , t1 , t2;
+	tex.LoadImage( "tex.bmp" );
+	t1.LoadImage( "tex.bmp" );
+	t2.LoadImage( "tex.bmp" );
 
 	return 0;
 }

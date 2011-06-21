@@ -398,7 +398,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\utility\referencecount.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\singleton.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\utility\smartptr.h"
 				>
 			</File>
 			<File

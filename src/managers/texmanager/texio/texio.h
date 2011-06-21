@@ -13,7 +13,7 @@
 // pre-declare texture class
 class Texture;
 class ImageTexture;
-struct ImgMemory;
+class ImgMemory;
 
 ////////////////////////////////////////////////////////////////////////////
 // defination of TexIO

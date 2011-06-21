@@ -9,7 +9,8 @@
 #include "triangle.h"
 
 // constructor from a triangle
-InstanceTriangle::InstanceTriangle( const Triangle* tri )
+InstanceTriangle::InstanceTriangle( const Triangle* tri , Transform* transform ):
+Primitive( transform )
 {
 }
 
