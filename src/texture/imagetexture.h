@@ -9,9 +9,8 @@
 
 // include the header file
 #include "texture.h"
-
-// pre-declare memory
-struct ImgMemory;
+#include "../utility/referencecount.h"
+#include "../managers/texmanager/texmanager.h"
 
 ///////////////////////////////////////////////////////////////
 // defination of image texture
@@ -46,7 +45,7 @@ public:
 // private field
 private:
 	// array saving the color of image
-	ImgMemory*	m_pMemory;
+	Reference<ImgMemory>	m_pMemory;
 
 // private method
 	// initialize default data

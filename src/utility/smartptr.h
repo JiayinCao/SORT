@@ -33,7 +33,13 @@ public:
 	}
 
 	// -> operator
-	T* operator->() const
+	T* operator->()
+	{
+		if( m_ptr == 0 )
+			LOG_ERROR<<"Prototype of smart pointer is destroyed."<<CRASH;
+		return m_ptr;
+	}
+	const T* operator->() const
 	{
 		if( m_ptr == 0 )
 			LOG_ERROR<<"Prototype of smart pointer is destroyed."<<CRASH;
@@ -41,7 +47,13 @@ public:
 	}
 
 	// * operator
-	T& operator*() const
+	T& operator*()
+	{
+		if( m_ptr == 0 )
+			LOG_ERROR<<"Prototype of smart pointer is destroyed."<<CRASH;
+		return *m_ptr;
+	}
+	const T& operator*() const
 	{
 		if( m_ptr == 0 )
 			LOG_ERROR<<"Prototype of smart pointer is destroyed."<<CRASH;
@@ -49,7 +61,7 @@ public:
 	}
 
 	// whether the smart pointer is valid
-	bool isValid() const
+	operator bool() const
 	{
 		return m_ptr != 0 ;
 	}

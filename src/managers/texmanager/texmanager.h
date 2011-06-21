@@ -13,13 +13,15 @@
 #include <vector>
 #include <map>
 #include "../../spectrum/spectrum.h"
+#include "../../utility/referencecount.h"
 
 class Texture;
 class ImageTexture;
 class TexIO;
 
-struct ImgMemory
+class ImgMemory : public ReferenceCount
 {
+public:
 	Spectrum*	m_ImgMem;
 	unsigned	m_iWidth;
 	unsigned	m_iHeight;
@@ -50,6 +52,11 @@ public:
 	// para 'type' : the type of the image file
 	// result      : 'true' if loading is successful
 	bool Read( const string& str , ImageTexture* tex , TEX_TYPE type );
+
+	// get the reference count
+	// para 'str' : the name of the image file
+	// result     : how many reference to the memory
+	unsigned GetReferenceCount( const string& str ) const;
 
 // private data
 private:

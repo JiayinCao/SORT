@@ -54,9 +54,18 @@ void TexManager::_release()
 	map< std::string , ImgMemory* >::iterator img_it = m_ImgContainer.begin();
 	while( img_it != m_ImgContainer.end() )
 	{
+		if( img_it->second->reference > 0 )
+		{
+			string isare = (img_it->second->reference>1)?"is":"are";
+			string refer = (img_it->second->reference>1)?" reference":" references";
+			LOG_ERROR<<"There "<<isare<<" still "<<(int)(img_it->second->reference)<<refer<<" pointing to "<<img_it->first<<"."<<CRASH;
+		}
 		SAFE_DELETE_ARRAY( img_it->second->m_ImgMem );
 		img_it->second->m_iWidth = 0;
 		img_it->second->m_iHeight = 0;
+
+		// delete the memory
+		delete img_it->second;
 
 		img_it++;
 	}
@@ -132,4 +141,17 @@ TexIO* TexManager::FindTexIO( TEX_TYPE tt )
 	}
 
 	return io;
+}
+
+// get the reference count
+unsigned TexManager::GetReferenceCount( const string& str ) const
+{
+	// try to find the image first , if it's already existed in the system , just set a pointer
+	map< std::string , ImgMemory* >::const_iterator it = m_ImgContainer.find( str );
+	if( it != m_ImgContainer.end() )
+	{
+		return it->second->reference;
+	}
+
+	return 0;
 }
