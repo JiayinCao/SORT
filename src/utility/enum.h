@@ -15,6 +15,12 @@ enum TEX_TYPE
 	TT_END ,
 };
 
+enum MESH_TYPE
+{
+	MT_OBJ = 0,
+	MT_END ,
+};
+
 enum TEXCOORDFILTER
 {
 	TCF_WARP = 0 ,

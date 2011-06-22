@@ -64,7 +64,7 @@ private:
 	vector<TexIO*>	m_TexIOVec;
 
 	// map a string to the image memory
-	map< std::string , ImgMemory* > m_ImgContainer;
+	map< string , ImgMemory* > m_ImgContainer;
 
 // private method
 private:
@@ -78,7 +78,7 @@ private:
 	void _release();
 
 	// find correct texio
-	TexIO*	FindTexIO( TEX_TYPE tt );
+	TexIO*	FindTexIO( TEX_TYPE tt ) const;
 };
 
 #endif

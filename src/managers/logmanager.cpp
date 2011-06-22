@@ -62,6 +62,16 @@ void LogManager::SetLogEnabled( bool enable )
 }
 
 // output message to the logger
+LogManager& operator<<( LogManager& manager , unsigned data )
+{
+	if( manager.m_bLogEnable == false )
+		return manager;
+
+	manager.m_fileLog<<data;
+
+	return manager;
+}
+
 LogManager& operator<<( LogManager& manager , int data )
 {
 	if( manager.m_bLogEnable == false )

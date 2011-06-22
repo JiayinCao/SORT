@@ -53,6 +53,7 @@ private:
 	void	_release();
 
 	// set friend class
+	friend LogManager& operator<<( LogManager& , unsigned );
 	friend LogManager& operator<<( LogManager& , int );
 	friend LogManager& operator<<( LogManager& , float );
 	friend LogManager& operator<<( LogManager& , const char* );
@@ -70,6 +71,7 @@ private:
 #define	CRASH _ENDL(true)
 
 // the log manager stream operator
+LogManager& operator<<( LogManager& , unsigned );
 LogManager& operator<<( LogManager& , int );
 LogManager& operator<<( LogManager& , const char* );
 LogManager& operator<<( LogManager& , float );
