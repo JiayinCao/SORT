@@ -6,7 +6,7 @@
 
 // include the header file
 #include "system.h"
-#include "managers/texmanager/texmanager.h"
+#include "managers/texmanager.h"
 #include "managers/logmanager.h"
 #include "utility/timer.h"
 #include "camera/camera.h"

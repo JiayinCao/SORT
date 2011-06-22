@@ -6,8 +6,8 @@
 
 // include header file
 #include "compositetexture.h"
-#include "../spectrum/spectrum.h"
-#include "../managers/logmanager.h"
+#include "spectrum/spectrum.h"
+#include "managers/logmanager.h"
 
 // constructor from a texture
 void ComTexture::_copy( const Texture& tex )

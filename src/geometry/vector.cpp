@@ -7,7 +7,7 @@
 // include the header files
 #include "vector.h"
 #include <math.h>
-#include "../managers/logmanager.h"
+#include "managers/logmanager.h"
 #include "transform.h"
 
 // default constructor, all of the components are set zero

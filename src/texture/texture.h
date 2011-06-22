@@ -8,9 +8,9 @@
 #define SORT_TEXTURE
 
 // include header file
-#include "../sort.h"
-#include "../spectrum/spectrum.h"
-#include "../utility/enum.h"
+#include "sort.h"
+#include "spectrum/spectrum.h"
+#include "utility/enum.h"
 
 // pre-declare class
 class ComTexture;

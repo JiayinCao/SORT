@@ -8,7 +8,7 @@
 #define SORT_BBOX
 
 // include the header file
-#include "../sort.h"
+#include "sort.h"
 #include "point.h"
 #include "ray.h"
 

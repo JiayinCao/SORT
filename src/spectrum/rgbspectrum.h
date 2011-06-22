@@ -7,7 +7,7 @@
 #ifndef	SORT_RGBSPECTRUM
 #define	SORT_RGBSPECTRUM
 
-#include "../sort.h"
+#include "sort.h"
 
 ///////////////////////////////////////////////////////////////////
 // definition of rgb spectrum

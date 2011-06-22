@@ -7,7 +7,7 @@
 #ifndef	SORT_REFERENCECOUNT
 #define	SORT_REFERENCECOUNT
 
-#include "../managers/logmanager.h"
+#include "managers/logmanager.h"
 
 //////////////////////////////////////////////////////////////////////////
 // definition of reference count
@@ -72,13 +72,13 @@ public:
 	T* operator->()
 	{
 		if( ptr == 0 )
-			LOG_ERROR<<"Prototype of reference count pointer is destroyed."<<CRASH;
+			LOG_ERROR<<"Invalid reference."<<CRASH;
 		return ptr;
 	}
 	const T* operator->() const
 	{
 		if( ptr == 0 )
-			LOG_ERROR<<"Prototype of reference count pointer is destroyed."<<CRASH;
+			LOG_ERROR<<"Invalid reference."<<CRASH;
 		return ptr;
 	}
 
@@ -86,13 +86,13 @@ public:
 	T& operator*()
 	{
 		if( ptr == 0 )
-			LOG_ERROR<<"Prototype of reference count is destroyed."<<CRASH;
+			LOG_ERROR<<"Invalid reference."<<CRASH;
 		return *ptr;
 	}
 	const T& operator*() const
 	{
 		if( ptr == 0 )
-			LOG_ERROR<<"Prototype of reference count is destroyed."<<CRASH;
+			LOG_ERROR<<"Invalid reference."<<CRASH;
 		return *ptr;
 	}
 

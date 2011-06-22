@@ -8,7 +8,7 @@
 #define	SORT_SINGLETON
 
 // include the header
-#include "../sort.h"
+#include "sort.h"
 
 //////////////////////////////////////////////////////////////////////
 //	definition of Singleton class

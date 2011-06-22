@@ -6,7 +6,7 @@
 
 // include header file
 #include "uvtexture.h"
-#include "../geometry/intersection.h"
+#include "geometry/intersection.h"
 
 // get the texture value
 Spectrum UVTexture::GetColor( int x , int y ) const

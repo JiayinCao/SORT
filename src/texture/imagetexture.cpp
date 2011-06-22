@@ -6,8 +6,8 @@
 
 // include the header file
 #include "imagetexture.h"
-#include "../managers/texmanager/texmanager.h"
-#include "../managers/logmanager.h"
+#include "managers/texmanager.h"
+#include "managers/logmanager.h"
 
 // initialize default data
 void ImageTexture::_init()

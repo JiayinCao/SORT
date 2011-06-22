@@ -6,8 +6,8 @@
 
 // include the header
 #include "normaltexture.h"
-#include "../managers/logmanager.h"
-#include "../geometry/intersection.h"
+#include "managers/logmanager.h"
+#include "geometry/intersection.h"
 
 // get the texture value
 Spectrum NormalTexture::GetColor( int x , int y ) const

@@ -6,7 +6,7 @@
 
 // include the header
 #include "timer.h"
-#include "../managers/logmanager.h"
+#include "managers/logmanager.h"
 
 #if defined(SORT_IN_LINUX) 
 #include <unistd.h>

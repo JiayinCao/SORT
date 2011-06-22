@@ -7,10 +7,10 @@
 // include the header file
 #include "texture.h"
 #include <math.h>
-#include "../managers/texmanager/texmanager.h"
+#include "managers/texmanager.h"
 #include "compositetexture.h"
-#include "../managers/logmanager.h"
-#include "../geometry/intersection.h"
+#include "managers/logmanager.h"
+#include "geometry/intersection.h"
 
 // default constructor
 Texture::Texture()
