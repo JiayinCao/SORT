@@ -8,8 +8,8 @@
 #define	SORT_SMARTPTR
 
 // include the header
-#include "../sort.h"
-#include "../managers/logmanager.h"
+#include "sort.h"
+#include "managers/logmanager.h"
 
 /////////////////////////////////////////////////////////////////////
 // definition of smart pointer
@@ -36,13 +36,13 @@ public:
 	T* operator->()
 	{
 		if( m_ptr == 0 )
-			LOG_ERROR<<"Prototype of smart pointer is destroyed."<<CRASH;
+			LOG_ERROR<<"Invalid smart pointer."<<CRASH;
 		return m_ptr;
 	}
 	const T* operator->() const
 	{
 		if( m_ptr == 0 )
-			LOG_ERROR<<"Prototype of smart pointer is destroyed."<<CRASH;
+			LOG_ERROR<<"Invalid smart pointer."<<CRASH;
 		return m_ptr;
 	}
 
@@ -50,13 +50,13 @@ public:
 	T& operator*()
 	{
 		if( m_ptr == 0 )
-			LOG_ERROR<<"Prototype of smart pointer is destroyed."<<CRASH;
+			LOG_ERROR<<"Invalid smart pointer."<<CRASH;
 		return *m_ptr;
 	}
 	const T& operator*() const
 	{
 		if( m_ptr == 0 )
-			LOG_ERROR<<"Prototype of smart pointer is destroyed."<<CRASH;
+			LOG_ERROR<<"Invalid smart pointer."<<CRASH;
 		return *m_ptr;
 	}
 

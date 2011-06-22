@@ -6,9 +6,9 @@
 
 // include the header file
 #include "perspective.h"
-#include "../texture/rendertarget.h"
+#include "texture/rendertarget.h"
 #include <math.h>
-#include "../managers/logmanager.h"
+#include "managers/logmanager.h"
 
 // generate ray
 Ray	PerspectiveCamera::GenerateRay( unsigned x , unsigned y ) const

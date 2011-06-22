@@ -12,7 +12,7 @@
 #include "geometry/instancetri.h"
 #include "texture/imagetexture.h"
 #include "texture/checkboxtexture.h"
-#include "managers/texmanager/texmanager.h"
+#include "managers/texmanager.h"
 
 // the global system
 System g_System;
@@ -27,6 +27,6 @@ int main( int argc , char** argv )
 	tex.LoadImage( "tex.bmp" );
 	t1.LoadImage( "tex.bmp" );
 	t2.LoadImage( "tex.bmp" );
-
+	
 	return 0;
 }

@@ -8,7 +8,7 @@
 #define	SORT_LOGMANAGER
 
 // include the header file
-#include "../utility/singleton.h"
+#include "utility/singleton.h"
 #include <fstream>
 
 // a empty class for output a new line

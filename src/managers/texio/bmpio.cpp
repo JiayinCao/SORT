@@ -5,13 +5,13 @@
  */
 
 // include the header file
-#include "../../../sort.h"
+#include "sort.h"
 #include "bmpio.h"
-#include "../../../spectrum/spectrum.h"
+#include "spectrum/spectrum.h"
 #include <fstream>
-#include "../../../managers/logmanager.h"
-#include "../../../managers/texmanager/texmanager.h"
-#include "../../../texture/texture.h"
+#include "managers/logmanager.h"
+#include "managers/texmanager.h"
+#include "texture/texture.h"
 
 //-------------------------------------------------
 // define some useful structure

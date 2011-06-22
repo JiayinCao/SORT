@@ -9,8 +9,8 @@
 
 // include the header file
 #include "texture.h"
-#include "../utility/referencecount.h"
-#include "../managers/texmanager/texmanager.h"
+#include "utility/referencecount.h"
+#include "managers/texmanager.h"
 
 ///////////////////////////////////////////////////////////////
 // definition of image texture

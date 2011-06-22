@@ -7,7 +7,7 @@
 #ifndef	SORT_PRIMITIVE
 #define	SORT_PRIMITIVE
 
-#include "../utility/smartptr.h"
+#include "utility/smartptr.h"
 #include "bbox.h"
 
 // pre-decleration

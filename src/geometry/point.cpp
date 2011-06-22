@@ -6,7 +6,7 @@
 
 // include the header file
 #include "point.h"
-#include "../managers/logmanager.h"
+#include "managers/logmanager.h"
 
 // default constructor
 Point::Point()

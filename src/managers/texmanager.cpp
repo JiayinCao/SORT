@@ -8,7 +8,7 @@
 #include "texmanager.h"
 #include "texio/texio.h"
 #include "texio/bmpio.h"
-#include "../../texture/imagetexture.h"
+#include "texture/imagetexture.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(TexManager);

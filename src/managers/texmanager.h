@@ -8,12 +8,12 @@
 #define	SORT_TEXMANAGER
 
 // include header file
-#include "../../utility/singleton.h"
-#include "../../utility/enum.h"
+#include "utility/singleton.h"
+#include "utility/enum.h"
 #include <vector>
 #include <map>
-#include "../../spectrum/spectrum.h"
-#include "../../utility/referencecount.h"
+#include "spectrum/spectrum.h"
+#include "utility/referencecount.h"
 
 class Texture;
 class ImageTexture;

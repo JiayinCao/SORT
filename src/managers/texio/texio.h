@@ -8,7 +8,7 @@
 #define SORT_TEXIO
 
 // include the header file
-#include "../../../utility/enum.h"
+#include "utility/enum.h"
 
 // pre-declare texture class
 class Texture;

@@ -6,7 +6,7 @@
 
 // include the header file
 #include "rendertarget.h"
-#include "../managers/logmanager.h"
+#include "managers/logmanager.h"
 
 // set the color
 void RenderTarget::SetColor( int x , int y , float r , float g , float b )

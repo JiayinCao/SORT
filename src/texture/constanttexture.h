@@ -9,7 +9,7 @@
 
 // include the header
 #include "texture.h"
-#include "../spectrum/spectrum.h"
+#include "spectrum/spectrum.h"
 
 ////////////////////////////////////////////////////////////
 // definition of constant texture

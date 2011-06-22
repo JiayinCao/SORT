@@ -7,8 +7,8 @@
 #ifndef	SORT_CAMERA
 #define	SORT_CAMERA
 
-#include "../geometry/point.h"
-#include "../geometry/ray.h"
+#include "geometry/point.h"
+#include "geometry/ray.h"
 
 // pre-decleration of render target
 class RenderTarget;
