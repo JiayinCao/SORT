@@ -8,6 +8,7 @@
 #include "trimesh.h"
 #include "sort.h"
 #include "point.h"
+#include "managers/meshmanager.h"
 
 // default constructor
 TriMesh::TriMesh()
@@ -25,19 +26,20 @@ TriMesh::~TriMesh()
 // initialize default data
 void TriMesh::_init()
 {
-	m_pVertexBuffer = 0;
-	m_pNormalBuffer = 0;
-	m_pIndexBuffer = 0;
-	m_iVBCount = 0;
-	m_iNBCount = 0;
-	m_iIBCount = 0;
-	m_iTriNum = 0;
+	m_pMemory = 0;
 }
 
 // release the memory
 void TriMesh::Release()
 {
-	SAFE_DELETE_ARRAY( m_pVertexBuffer );
-	SAFE_DELETE_ARRAY( m_pNormalBuffer );
-	SAFE_DELETE_ARRAY( m_pIndexBuffer );
+}
+
+// load the mesh
+bool TriMesh::LoadMesh( const string& str , MESH_TYPE type )
+{
+	// release the mesh first
+	Release();
+
+	// load the mesh
+	return MeshManager::GetSingleton().LoadMesh( str , this , type );
 }

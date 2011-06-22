@@ -8,6 +8,7 @@
 #include "system.h"
 #include "managers/texmanager.h"
 #include "managers/logmanager.h"
+#include "managers/meshmanager.h"
 #include "utility/timer.h"
 #include "camera/camera.h"
 #include "texture/rendertarget.h"
@@ -36,6 +37,8 @@ void System::_preInit()
 	TexManager::CreateTexManager();
 	// initialize log manager
 	LogManager::CreateLogManager();
+	// initialize the mesh manager
+	MeshManager::CreateMeshManager();
 	// initialize the timer
 	Timer::CreateTimer();
 }
@@ -45,8 +48,9 @@ void System::_postUninit()
 {
 	// release managers
 	TexManager::DeleteSingleton();
-	LogManager::DeleteSingleton();
+	MeshManager::DeleteSingleton();
 	Timer::DeleteSingleton();
+	LogManager::DeleteSingleton();
 
 	// delete the data
 	SAFE_DELETE( m_rt );

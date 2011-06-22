@@ -48,7 +48,5 @@ bool ImageTexture::LoadImage( const std::string& str , TEX_TYPE type )
 	Release();
 
 	// get the texture manager
-	TexManager::GetSingleton().Read( str , this , type );
-
-	return true;
+	return TexManager::GetSingleton().Read( str , this , type );
 }

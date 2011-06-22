@@ -56,7 +56,11 @@ $(OBJ_PATH)/managers_%.o : managers/%.cpp managers/%.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 
-$(OBJ_PATH)/managers_texio_%.o : managers/texio/%.cpp managers/texio/%.h
+$(OBJ_PATH)/managers_texio_%.o : managers/texio/%.cpp managers/texio/%.h managers/texio/texio.h
+	@echo "building object $@"
+	@g++ $(COMPILE_FLAG) -c $< -o $@
+
+$(OBJ_PATH)/managers_meshio_%.o : managers/meshio/%.cpp managers/meshio/%.h managers/meshio/meshloader.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 

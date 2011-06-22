@@ -8,7 +8,7 @@
 #include "sort.h"
 #include "system.h"
 #include "geometry/transform.h"
-#include "geometry/triangle.h"
+#include "geometry/trimesh.h"
 #include "geometry/instancetri.h"
 #include "texture/imagetexture.h"
 #include "texture/checkboxtexture.h"
@@ -25,8 +25,12 @@ int main( int argc , char** argv )
 
 	ImageTexture tex , t1 , t2;
 	tex.LoadImage( "tex.bmp" );
-	t1.LoadImage( "tex.bmp" );
+	t1.LoadImage( "tx.bmp" );
 	t2.LoadImage( "tex.bmp" );
-	
+
+	TriMesh me,a;
+	me.LoadMesh( "aa" );
+	a.LoadMesh( "aa" );
+
 	return 0;
 }

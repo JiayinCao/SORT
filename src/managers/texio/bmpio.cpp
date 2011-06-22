@@ -45,8 +45,6 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	// check if 'str' and 'tex' are valid
 	if( str.empty() || tex == 0 )
 	{
-		if( str.empty() )
-			LOG_WARNING<<"Image file name empty, writing image failed."<<ENDL;
 		if( tex == 0 )
 			LOG_WARNING<<"No texture , writing image failed."<<ENDL;
 		return false;
@@ -110,10 +108,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 
 	// if the file could not be opened , just return an LOG_ERROR
 	if( file.is_open() == false )
-	{
-		LOG_WARNING<<"Can't Open file \""<<str<<"\", writing image failed."<<ENDL;
 		return false;
-	}
 
 	// output the information to file
 	file.write( (const char*)&type , sizeof( type ) );
@@ -138,8 +133,6 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 	// check if 'str' and 'tex' are valid
 	if( str.empty() || mem == 0 )
 	{
-		if( str.empty() )
-			LOG_WARNING<<"File name empty , reading image failed."<<ENDL;
 		if( mem == 0 )
 			LOG_WARNING<<"No memory , reading image failed."<<ENDL;
 		return false;
@@ -151,10 +144,7 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 
 	// if the file could not be opened , just return an LOG_ERROR
 	if( file.is_open() == false )
-	{
-		LOG_WARNING<<"Can't Open file \""<<str<<"\", reading image failed."<<ENDL;
 		return false;
-	}
 
 	// the neccessary information
 	unsigned short type;

@@ -50,7 +50,6 @@ void TexManager::_release()
 	}
 	m_TexIOVec.clear();
 
-	// try to find the image first , if it's already existed in the system , just set a pointer
 	map< std::string , ImgMemory* >::iterator img_it = m_ImgContainer.begin();
 	while( img_it != m_ImgContainer.end() )
 	{
@@ -101,31 +100,36 @@ bool TexManager::Read( const string& str , ImageTexture* tex , TEX_TYPE type )
 	// find the specific texio first
 	TexIO* io = FindTexIO( type );
 
+	bool read = false;
 	if( io != 0 )
 	{
 		// create a new memory
 		ImgMemory* mem = new ImgMemory();
 
 		// read the data
-		if( io->Read( str , mem ) )
+		bool read = io->Read( str , mem );
+
+		if( read )
 		{
 			// set the texture
 			tex->m_pMemory = mem;
 			tex->m_iTexWidth = mem->m_iWidth;
 			tex->m_iTexHeight = mem->m_iHeight;
-
+			
 			// insert it into the container
 			m_ImgContainer.insert( make_pair( str , mem ) );
-
-			return true;
+		}else
+		{
+			LOG_WARNING<<"Can't load image file \""<<str<<"\"."<<ENDL;
+			delete mem;
 		}
 	}
 
-	return false;
+	return read;
 }
 
 // find correct texio
-TexIO* TexManager::FindTexIO( TEX_TYPE tt )
+TexIO* TexManager::FindTexIO( TEX_TYPE tt ) const
 {
 	// find the specific texio first
 	TexIO* io = 0;

@@ -7,9 +7,13 @@
 #ifndef	SORT_TRIMESH
 #define	SORT_TRIMESH
 
+// include the headers
 #include <vector>
 #include "primitive.h"
+#include "utility/referencecount.h"
+#include "managers/meshmanager.h"
 
+// pre-declera classes
 class	Vector;
 class	Point;
 
@@ -27,25 +31,23 @@ public:
 	// release the memory
 	void Release();
 
+	// load the mesh from file
+	// para 'str'  : the name of the input file
+	// para 'type' : the type of the mesh file , default value is obj
+	// result      : 'true' if loading is successful
+	bool LoadMesh( const string& str , MESH_TYPE type = MT_OBJ );
+
 // private field
 public:
-	// the vertex buffer
-	Point*			m_pVertexBuffer;
-	// the normal buffer
-	Vector*			m_pNormalBuffer;
-	// the index buffer
-	unsigned*		m_pIndexBuffer;
-	// the size for three buffers
-	unsigned		m_iVBCount , m_iNBCount , m_iIBCount;
-	// the number of triangles , usually it's equal to the third of 'm_iIBCount'
-	unsigned		m_iTriNum;
-
-	// the triangle list
-//	std::vector<Triangle>	m_TriList;
+	// the memory for the mesh
+	Reference<BufferMemory> m_pMemory;
 
 // private method
 	// initialize default data
 	void	_init();
+
+// set friend class
+friend	class	MeshManager;
 };
 
 #endif
