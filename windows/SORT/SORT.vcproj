@@ -394,6 +394,18 @@
 			<Filter
 				Name="meshio"
 				>
+				<File
+					RelativePath="..\..\src\managers\meshio\meshloader.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\managers\meshio\objloader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\managers\meshio\objloader.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
