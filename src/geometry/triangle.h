@@ -15,7 +15,7 @@ class	Point;
 class	Ray;
 
 //////////////////////////////////////////////////////////////////////////////////
-//	defination of triangle
+//	definition of triangle
 //	note: triangle is the only primitive supported by the system.
 class	Triangle : public Primitive
 {

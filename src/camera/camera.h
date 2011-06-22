@@ -14,7 +14,7 @@
 class RenderTarget;
 
 ////////////////////////////////////////////////////////////////////
-//	defination of camera
+//	definition of camera
 class	Camera
 {
 // public method

@@ -11,7 +11,7 @@
 #include "texture.h"
 
 /////////////////////////////////////////////////////////////////////////////////
-//	defination of composite texture
+//	definition of composite texture
 class	ComTexture : public Texture
 {
 // public function

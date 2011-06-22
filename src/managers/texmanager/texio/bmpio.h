@@ -11,7 +11,7 @@
 #include "texio.h"
 
 ////////////////////////////////////////////////////////////////////////////
-// defination of bmpio
+// definition of bmpio
 // save the image as an bmp file into the file system
 // load the bmp file from file system into texture
 class BmpIO : public TexIO

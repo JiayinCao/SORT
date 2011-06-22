@@ -11,7 +11,7 @@
 #include "texture.h"
 
 ////////////////////////////////////////////////////////////////////////////
-// defination of normal texture
+// definition of normal texture
 class	NormalTexture : public Texture
 {
 // public method

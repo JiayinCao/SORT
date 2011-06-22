@@ -14,7 +14,7 @@
 class Triangle;
 
 ////////////////////////////////////////////////////////////////////////////////
-// defination of instance triangle
+// definition of instance triangle
 // note :	an instance triangle is just a copy of a triangle, it doesn't 
 //			save the position data of the triangle. when performing intersection
 //			test , it first transform the ray from world space to object space

@@ -12,7 +12,7 @@ class Camera;
 class RenderTarget;
 
 /////////////////////////////////////////////////////////////////////
-//	defination of the system
+//	definition of the system
 class	System
 {
 // public method

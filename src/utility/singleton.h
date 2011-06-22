@@ -11,7 +11,7 @@
 #include "../sort.h"
 
 //////////////////////////////////////////////////////////////////////
-//	defination of Singleton class
+//	definition of Singleton class
 //	actually it's a template, any class wants to be singleton could 
 //	inherit from it.
 template<typename T>

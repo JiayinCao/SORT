@@ -13,7 +13,7 @@
 #include "ray.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// defination of axis aligned bounding box
+// definition of axis aligned bounding box
 class BBox
 {
 // public method

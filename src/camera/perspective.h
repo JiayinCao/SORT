@@ -11,7 +11,7 @@
 #include "camera.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
-//	defination of the perpective camera
+//	definition of the perpective camera
 class	PerspectiveCamera : public Camera
 {
 // public method

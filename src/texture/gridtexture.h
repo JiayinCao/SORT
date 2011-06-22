@@ -11,7 +11,7 @@
 #include "texture.h"
 
 ///////////////////////////////////////////////////////////////
-// defination of grid texture
+// definition of grid texture
 class	GridTexture : public Texture
 {
 // public method

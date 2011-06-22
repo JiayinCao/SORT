@@ -10,7 +10,7 @@
 #include "singleton.h"
 
 ////////////////////////////////////////////////////////////////////////////
-// defination of timer
+// definition of timer
 class	Timer : public Singleton<Timer>
 {
 // public method

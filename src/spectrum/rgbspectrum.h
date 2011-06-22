@@ -10,7 +10,7 @@
 #include "../sort.h"
 
 ///////////////////////////////////////////////////////////////////
-// defination of rgb spectrum
+// definition of rgb spectrum
 class	RGBSpectrum
 {
 // public method
