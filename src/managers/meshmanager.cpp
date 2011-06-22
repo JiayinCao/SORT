@@ -9,5 +9,3 @@
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MeshManager);
-
-
