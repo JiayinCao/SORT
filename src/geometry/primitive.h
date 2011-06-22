@@ -16,7 +16,7 @@ class Ray;
 class Transform;
 
 //////////////////////////////////////////////////////////////////
-//	defination of primitive
+//	definition of primitive
 class	Primitive
 {
 // public method

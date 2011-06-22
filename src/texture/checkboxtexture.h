@@ -11,7 +11,7 @@
 #include "texture.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
-//	defination of check box texture
+//	definition of check box texture
 class	CheckBoxTexture : public Texture
 {
 // public funcion

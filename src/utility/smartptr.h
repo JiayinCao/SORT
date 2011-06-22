@@ -12,7 +12,7 @@
 #include "../managers/logmanager.h"
 
 /////////////////////////////////////////////////////////////////////
-// defination of smart pointer
+// definition of smart pointer
 template<typename T>
 class	SmartPtr
 {

@@ -21,7 +21,7 @@ public:
 };
 
 /////////////////////////////////////////////////////////////
-// defination of log manager
+// definition of log manager
 class	LogManager : public Singleton<LogManager>
 {
 // public method

@@ -11,7 +11,7 @@
 class Transform;
 
 /////////////////////////////////////////////////////////////////////////
-// defination of vector
+// definition of vector
 class	Vector
 {
 // public method

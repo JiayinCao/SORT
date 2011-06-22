@@ -11,7 +11,7 @@
 #include "compositetexture.h"
 
 /////////////////////////////////////////////////////////////////////////
-//	defination of render target
+//	definition of render target
 //	all of the generated image will be rendered to render target.
 class	RenderTarget : public ComTexture
 {

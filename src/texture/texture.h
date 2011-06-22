@@ -17,7 +17,7 @@ class ComTexture;
 class Intersection;
 
 //////////////////////////////////////////////////////////////
-// defination of class Texture
+// definition of class Texture
 class Texture
 {
 // public method

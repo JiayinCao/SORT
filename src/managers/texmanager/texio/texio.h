@@ -12,11 +12,10 @@
 
 // pre-declare texture class
 class Texture;
-class ImageTexture;
 class ImgMemory;
 
 ////////////////////////////////////////////////////////////////////////////
-// defination of TexIO
+// definition of TexIO
 // TexIO is an abstract class that is responsible for outputing texture
 // in different ways , such as saving the texture as an image file or 
 // popping an window showing the texture.

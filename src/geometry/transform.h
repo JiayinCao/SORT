@@ -20,7 +20,7 @@ Vector	operator* ( const Transform& t , const Vector& v );
 Ray		operator* ( const Transform& t , const Ray& r );
 
 ////////////////////////////////////////////////////////////////////////////
-//	defination of transform
+//	definition of transform
 class	Transform
 {
 // public method

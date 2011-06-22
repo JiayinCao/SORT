@@ -12,7 +12,7 @@
 #include "../spectrum/spectrum.h"
 
 /////////////////////////////////////////////////////////////////////////////
-//	defination of uvtexture
+//	definition of uvtexture
 class	UVTexture : public Texture
 {
 // public function

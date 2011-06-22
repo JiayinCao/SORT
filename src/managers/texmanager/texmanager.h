@@ -28,7 +28,7 @@ public:
 };
 
 //////////////////////////////////////////////////////////////////
-//	defination of texture manager
+//	definition of texture manager
 class TexManager : public Singleton<TexManager>
 {
 // public method

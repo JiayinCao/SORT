@@ -11,7 +11,7 @@
 #include "point.h"
 
 ///////////////////////////////////////////////////////////////////////
-//	defination of intersection
+//	definition of intersection
 class	Intersection
 {
 // public method

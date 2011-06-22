@@ -14,7 +14,7 @@ class	Vector;
 class	Point;
 
 //////////////////////////////////////////////////////////////////////////////////
-//	defination of trimesh
+//	definition of trimesh
 class TriMesh
 {
 // public method

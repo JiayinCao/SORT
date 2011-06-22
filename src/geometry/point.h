@@ -11,7 +11,7 @@
 #include "vector.h"
 
 /////////////////////////////////////////////////////////////////////
-// defination of point
+// definition of point
 class Point
 {
 //public method

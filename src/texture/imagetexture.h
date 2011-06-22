@@ -13,7 +13,7 @@
 #include "../managers/texmanager/texmanager.h"
 
 ///////////////////////////////////////////////////////////////
-// defination of image texture
+// definition of image texture
 class ImageTexture : public Texture
 {
 // public method

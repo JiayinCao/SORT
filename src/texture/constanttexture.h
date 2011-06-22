@@ -12,7 +12,7 @@
 #include "../spectrum/spectrum.h"
 
 ////////////////////////////////////////////////////////////
-// defination of constant texture
+// definition of constant texture
 class ConstantTexture : public Texture
 {
 // public method

@@ -11,7 +11,7 @@ class Point;
 class Vector;
 
 ////////////////////////////////////////////////////////////////////
-//	defination of matrix
+//	definition of matrix
 class	Matrix
 {
 // public method

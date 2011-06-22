@@ -10,7 +10,7 @@
 #include "../managers/logmanager.h"
 
 //////////////////////////////////////////////////////////////////////////
-// defination of reference count
+// definition of reference count
 // note : there is a BIG difference between this reference count and the
 //		  others. When there is no reference point to the current one, 
 //		  the memory isn't destroyed, because we use memory managerment to
