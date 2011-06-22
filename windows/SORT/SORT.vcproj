@@ -359,33 +359,41 @@
 				RelativePath="..\..\src\managers\logmanager.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\managers\meshmanager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\managers\meshmanager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\managers\texmanager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\managers\texmanager.h"
+				>
+			</File>
 			<Filter
-				Name="texmanager"
+				Name="texio"
 				>
 				<File
-					RelativePath="..\..\src\managers\texmanager\texmanager.cpp"
+					RelativePath="..\..\src\managers\texio\bmpio.cpp"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\managers\texmanager\texmanager.h"
+					RelativePath="..\..\src\managers\texio\bmpio.h"
 					>
 				</File>
-				<Filter
-					Name="texio"
+				<File
+					RelativePath="..\..\src\managers\texio\texio.h"
 					>
-					<File
-						RelativePath="..\..\src\managers\texmanager\texio\bmpio.cpp"
-						>
-					</File>
-					<File
-						RelativePath="..\..\src\managers\texmanager\texio\bmpio.h"
-						>
-					</File>
-					<File
-						RelativePath="..\..\src\managers\texmanager\texio\texio.h"
-						>
-					</File>
-				</Filter>
+				</File>
+			</Filter>
+			<Filter
+				Name="meshio"
+				>
 			</Filter>
 		</Filter>
 		<Filter
