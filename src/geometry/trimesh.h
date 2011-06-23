@@ -42,12 +42,16 @@ public:
 	// the memory for the mesh
 	Reference<BufferMemory> m_pMemory;
 
+	// the triangle list
+	vector<Primitive*>		m_triBuffer;
+
 // private method
 	// initialize default data
 	void	_init();
 
 // set friend class
 friend	class	MeshManager;
+friend	class	Triangle;
 };
 
 #endif

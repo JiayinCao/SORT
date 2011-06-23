@@ -32,6 +32,14 @@ void TriMesh::_init()
 // release the memory
 void TriMesh::Release()
 {
+	vector<Primitive*>::iterator it = m_triBuffer.begin();
+	while( it != m_triBuffer.end() )
+	{
+		delete *it;
+		it++;
+	}
+	m_triBuffer.clear();
+	m_pMemory = 0;
 }
 
 // load the mesh

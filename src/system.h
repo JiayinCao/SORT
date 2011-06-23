@@ -11,6 +11,8 @@
 class Camera;
 class RenderTarget;
 
+class TriMesh;
+
 /////////////////////////////////////////////////////////////////////
 //	definition of the system
 class	System
@@ -23,7 +25,7 @@ public:
 	~System();
 
 	// render the image
-	void Render();
+	void Render( TriMesh* mesh);
 	// output the render target
 	void OutputRT( const char* str );
 

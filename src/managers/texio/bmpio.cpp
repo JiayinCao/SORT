@@ -108,7 +108,10 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 
 	// if the file could not be opened , just return an LOG_ERROR
 	if( file.is_open() == false )
+	{
+		delete[] data;
 		return false;
+	}
 
 	// output the information to file
 	file.write( (const char*)&type , sizeof( type ) );

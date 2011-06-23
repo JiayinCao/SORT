@@ -8,41 +8,58 @@
 #define	SORT_MESHMANAGER
 
 // include the headers
+#include "sort.h"
 #include "utility/singleton.h"
 #include "utility/referencecount.h"
 #include "utility/enum.h"
 #include <vector>
 #include <map>
+#include "geometry/point.h"
+#include "geometry/vector.h"
 
 // pre-declera class
-class Point;
-class Vector;
 class MeshLoader;
 class TriMesh;
 
+struct VertexIndex
+{
+	int	posIndex;
+	int	norIndex;
+	int	texIndex;
+
+	VertexIndex()
+	{
+		posIndex = -1;
+		norIndex = -1;
+		texIndex = -1;
+	}
+	~VertexIndex(){}
+};
+
+// the buffer memory for the mesh
 class BufferMemory : public ReferenceCount
 {
 // public data
 public:
 	// the vertex buffer
-	Point*			m_pVertexBuffer;
+	vector<Point>	m_PositionBuffer;
 	// the normal buffer
-	Vector*			m_pNormalBuffer;
+	vector<Vector>	m_NormalBuffer;
+	// the texture coordinate buffer
+	vector<float>	m_TexCoordBuffer;
 	// the index buffer
-	unsigned*		m_pIndexBuffer;
+	vector<VertexIndex>	m_IndexBuffer;
 	// the size for three buffers
-	unsigned		m_iVBCount , m_iNBCount , m_iIBCount;
-	// the number of triangles , usually it's equal to the third of 'm_iIBCount'
+	unsigned		m_iVBCount , m_iNBCount , m_iTBCount;
+	// the number of triangles 
 	unsigned		m_iTriNum;
 
 	// set default data for the buffer memory
 	BufferMemory()
 	{
-		m_pVertexBuffer = 0;
-		m_pNormalBuffer = 0;
-		m_pIndexBuffer = 0;
 		m_iVBCount = 0;
 		m_iNBCount = 0;
+		m_iTBCount = 0;
 		m_iTriNum = 0;
 	}
 };

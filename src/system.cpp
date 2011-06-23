@@ -29,7 +29,7 @@ void System::_preInit()
 {
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
-	m_rt->SetSize( 800 , 600 );
+	m_rt->SetSize( 128 , 128 );
 	// there is no default value for camera , it must be set in the script file
 	m_camera = 0;
 
@@ -57,8 +57,11 @@ void System::_postUninit()
 	SAFE_DELETE( m_camera );
 }
 
+#include "geometry/trimesh.h"
+#include "geometry/bbox.h"
+
 // render the image
-void System::Render()
+void System::Render( TriMesh* mesh )
 {
 	if( m_rt == 0 )
 	{
@@ -77,6 +80,23 @@ void System::Render()
 		{
 			// generate rays
 			Ray r = m_camera->GenerateRay( j , i );
+
+			bool intersect = false;
+
+			int n = mesh->m_pMemory->m_iTriNum;
+			for( int k = 0 ; k < n ; k++ )
+			{
+				if( mesh->m_triBuffer[k]->GetIntersect( r ) > 0 )
+				{
+					intersect = true;
+					break;
+				}
+			}
+
+			if( intersect )
+				m_rt->SetColor( j , i , 1 , 1 , 1 );
+			else
+				m_rt->SetColor( j , i , 0 , 0 , 0 );
 		}
 	}
 }

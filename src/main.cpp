@@ -7,12 +7,8 @@
 // include the header file
 #include "sort.h"
 #include "system.h"
-#include "geometry/transform.h"
 #include "geometry/trimesh.h"
-#include "geometry/instancetri.h"
-#include "texture/imagetexture.h"
-#include "texture/checkboxtexture.h"
-#include "managers/texmanager.h"
+#include "camera/perspective.h"
 
 // the global system
 System g_System;
@@ -20,17 +16,21 @@ System g_System;
 // the main func
 int main( int argc , char** argv )
 {
-	CheckBoxTexture cb;
-	cb.Output( "tex.bmp" );
+	TriMesh mesh;
+	mesh.LoadMesh( "../res/cube.obj" );
 
-	ImageTexture tex , t1 , t2;
-	tex.LoadImage( "tex.bmp" );
-	t1.LoadImage( "tx.bmp" );
-	t2.LoadImage( "tex.bmp" );
+	PerspectiveCamera* camera = new PerspectiveCamera();
+	camera->SetEye( Point( 3 , 3 , 3 ) );
+	camera->SetUp( Vector( 0 , 1 , 0 ) );
+	camera->SetTarget( Point( 0 , 0 , 0 ) );
+	camera->SetFov( 3.1415f / 4 );
 
-	TriMesh me,a;
-	me.LoadMesh( "aa" );
-	a.LoadMesh( "aa" );
+	camera->SetRenderTarget( g_System.m_rt );
+	g_System.m_camera = camera;
 
+	g_System.Render( &mesh );
+
+	g_System.OutputRT( "t.bmp" );
+	
 	return 0;
 }
