@@ -96,7 +96,7 @@ bool MeshManager::LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type )
 
 			// generate the triangles
 			unsigned triNum = mem->m_iTriNum;
-			for( int i = 0 ; i < triNum ; i++ )
+			for( int i = 0 ; i < (int)triNum ; i++ )
 				mesh->m_triBuffer.push_back( new Triangle( mesh , i , 0 ) );
 
 			// and insert it into the map
