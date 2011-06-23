@@ -8,6 +8,7 @@
 #include "meshmanager.h"
 #include "meshio/objloader.h"
 #include "geometry/trimesh.h"
+#include "geometry/triangle.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MeshManager);
@@ -92,6 +93,11 @@ bool MeshManager::LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type )
 		if( read )
 		{
 			mesh->m_pMemory = mem;
+
+			// generate the triangles
+			unsigned triNum = mem->m_iTriNum;
+			for( int i = 0 ; i < triNum ; i++ )
+				mesh->m_triBuffer.push_back( new Triangle( mesh , i , 0 ) );
 
 			// and insert it into the map
 			m_Buffers.insert( make_pair( str , mem ) );

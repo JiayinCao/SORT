@@ -13,18 +13,24 @@
 #include "transform.h"
 
 // constructor
-Triangle::Triangle( const TriMesh* trimesh , const Point* vb , const unsigned* index , Transform* transform):
-Primitive(transform), m_trimesh( trimesh ) , m_ib( index ) , m_vb( vb )
+Triangle::Triangle( const TriMesh* trimesh , const unsigned index , Transform* transform):
+Primitive(transform), m_trimesh( trimesh ) , m_id( index )
 {
 }
 
 // check if the triangle is intersected with the ray
 float Triangle::GetIntersect( const Ray& r ) const
 {
+	// get the memory
+	Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+	int id0 = mem->m_IndexBuffer[ 3 * m_id ].posIndex;
+	int id1 = mem->m_IndexBuffer[ 3 * m_id + 1 ].posIndex;
+	int id2 = mem->m_IndexBuffer[ 3 * m_id + 2 ].posIndex;
+
 	// get three vertexes
-	const Point& p0 = m_vb[ m_ib[0] ];
-	const Point& p1 = m_vb[ m_ib[1] ];
-	const Point& p2 = m_vb[ m_ib[2] ];
+	const Point& p0 = mem->m_PositionBuffer[id0] ;
+	const Point& p1 = mem->m_PositionBuffer[id1] ;
+	const Point& p2 = mem->m_PositionBuffer[id2] ;
 
 	// get the vector
 	Vector v0 = p1 - p0;
@@ -48,7 +54,7 @@ float Triangle::GetIntersect( const Ray& r ) const
 	Vector r1 = Cross( _v1 , v1 );
 	Vector r2 = Cross( _v2 , v2 );
 
-	if( Dot( r0 , r1 ) > 0.0f && Dot( r0 , r2 ) > 0.0f )
+	if( Dot( r0 , r1 ) > -0.0000000001f && Dot( r0 , r2 ) > -0.00000000001f )
 		return t;
 
 	// the ray doesn't cross the triangle
@@ -63,10 +69,16 @@ const BBox& Triangle::GetBBox()
 	{
 		m_bbox = new BBox();
 
+		// get the memory
+		Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+		int id0 = mem->m_IndexBuffer[ 3 * m_id ].posIndex;
+		int id1 = mem->m_IndexBuffer[ 3 * m_id + 1 ].posIndex;
+		int id2 = mem->m_IndexBuffer[ 3 * m_id + 2 ].posIndex;
+
 		// get three vertexes
-		const Point& p0 = m_vb[ m_ib[0] ];
-		const Point& p1 = m_vb[ m_ib[1] ];
-		const Point& p2 = m_vb[ m_ib[2] ];
+		const Point& p0 = mem->m_PositionBuffer[id0] ;
+		const Point& p1 = mem->m_PositionBuffer[id1] ;
+		const Point& p2 = mem->m_PositionBuffer[id2] ;
 
 		Union( *m_bbox , p0 );
 		Union( *m_bbox , p1 );
