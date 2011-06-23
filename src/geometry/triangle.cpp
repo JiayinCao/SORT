@@ -32,33 +32,47 @@ float Triangle::GetIntersect( const Ray& r ) const
 	const Point& p1 = mem->m_PositionBuffer[id1] ;
 	const Point& p2 = mem->m_PositionBuffer[id2] ;
 
-	// get the vector
-	Vector v0 = p1 - p0;
-	Vector v1 = p2 - p1;
-	Vector v2 = p0 - p2;
+	// Find vectors for two edges sharing vert0
+    Vector edge1 = p1 - p0;
+    Vector edge2 = p2 - p0;
 
-	// get the normal of the plane
-	Vector n = Cross( v1 , v2 );
+	// Begin calculating determinant - also used to calculate U parameter
+	Vector pvec = Cross( r.m_Dir , edge2 );
 
-	// get the intersected point
-	float t = Dot( n , p0 - r.m_Ori ) / Dot( n , r.m_Dir );
-	if( t < 0.0f )
-		return t;
-	Point p = r(t);
+    // If determinant is near zero, ray lies in plane of triangle
+    float det = Dot( edge1, pvec );
 
-	Vector _v0 = p - p0;
-	Vector _v1 = p - p1;
-	Vector _v2 = p - p2;
+    Vector tvec;
+    if( det > 0 )
+        tvec = r.m_Ori - p0;
+    else
+    {
+        tvec = p0 - r.m_Ori;
+        det = -det;
+    }
 
-	Vector r0 = Cross( _v0 , v0 );
-	Vector r1 = Cross( _v1 , v1 );
-	Vector r2 = Cross( _v2 , v2 );
+    if( det < 0.0001f )
+        return -1.0f;
 
-	if( Dot( r0 , r1 ) > -0.0000000001f && Dot( r0 , r2 ) > -0.00000000001f )
-		return t;
+    // Calculate U parameter and test bounds
+    float u = Dot( tvec, pvec );
+    if( u < 0.0f || u > det )
+        return -1.0f;
 
-	// the ray doesn't cross the triangle
-	return -1.0f;
+    // Prepare to test V parameter
+    Vector qvec = Cross( tvec, edge1 );
+
+    // Calculate V parameter and test bounds
+    float v = Dot( r.m_Dir, qvec );
+    if( v < 0.0f || u + v > det )
+        return -1.0f;
+
+    // Calculate t, scale parameters, ray intersects triangle
+    float t = Dot( edge2, qvec );
+    float fInvDet = 1.0f / det;
+    t *= fInvDet;
+
+    return t;
 }
 
 // get the bounding box of the triangle

@@ -9,6 +9,7 @@
 #include "system.h"
 #include "geometry/trimesh.h"
 #include "camera/perspective.h"
+#include "utility/timer.h"
 
 // the global system
 System g_System;
@@ -28,7 +29,13 @@ int main( int argc , char** argv )
 	camera->SetRenderTarget( g_System.m_rt );
 	g_System.m_camera = camera;
 
-	g_System.Render( &mesh );
+	Timer::GetSingleton().StartTimer();
+
+	for( int i = 0 ; i < 10 ; i++ )
+		g_System.Render( &mesh );
+
+	Timer::GetSingleton().StopTimer();
+	cout<<Timer::GetSingleton().GetElapsedTime()/10<<endl;
 
 	g_System.OutputRT( "t.bmp" );
 	

@@ -432,6 +432,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\utility\strhelper.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\utility\strhelper.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\timer.cpp"
 				>
 			</File>
