@@ -163,4 +163,8 @@ bool Point::operator != ( const Point& p ) const
 	return false;
 }
 
-
+// mix point
+Point Point::operator + ( const Point& v )
+{
+	return Point( x + v.x , y + v.y , z + v.z );
+}

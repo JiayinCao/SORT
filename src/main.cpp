@@ -17,9 +17,6 @@ System g_System;
 // the main func
 int main( int argc , char** argv )
 {
-	TriMesh mesh;
-	mesh.LoadMesh( "../res/cube.obj" );
-
 	PerspectiveCamera* camera = new PerspectiveCamera();
 	camera->SetEye( Point( 3 , 3 , 3 ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
@@ -29,13 +26,14 @@ int main( int argc , char** argv )
 	camera->SetRenderTarget( g_System.m_rt );
 	g_System.m_camera = camera;
 
+	g_System.LoadScene( "" );
+
 	Timer::GetSingleton().StartTimer();
 
-	for( int i = 0 ; i < 10 ; i++ )
-		g_System.Render( &mesh );
+	g_System.Render();
 
 	Timer::GetSingleton().StopTimer();
-	cout<<Timer::GetSingleton().GetElapsedTime()/10<<endl;
+	cout<<Timer::GetSingleton().GetElapsedTime()<<endl;
 
 	g_System.OutputRT( "t.bmp" );
 	

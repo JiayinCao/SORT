@@ -9,6 +9,7 @@
 #include "sort.h"
 #include "point.h"
 #include "managers/meshmanager.h"
+#include "geometry/triangle.h"
 
 // default constructor
 TriMesh::TriMesh()
@@ -19,8 +20,6 @@ TriMesh::TriMesh()
 // destructor
 TriMesh::~TriMesh()
 {
-	// release the memory
-	Release();
 }
 
 // initialize default data
@@ -29,25 +28,21 @@ void TriMesh::_init()
 	m_pMemory = 0;
 }
 
-// release the memory
-void TriMesh::Release()
-{
-	vector<Primitive*>::iterator it = m_triBuffer.begin();
-	while( it != m_triBuffer.end() )
-	{
-		delete *it;
-		it++;
-	}
-	m_triBuffer.clear();
-	m_pMemory = 0;
-}
-
 // load the mesh
-bool TriMesh::LoadMesh( const string& str , MESH_TYPE type )
+bool TriMesh::LoadMesh( const string& str , Transform& transform , MESH_TYPE type )
 {
-	// release the mesh first
-	Release();
+	// set the tranformation
+	m_Transform = transform;
 
 	// load the mesh
 	return MeshManager::GetSingleton().LoadMesh( str , this , type );
+}
+
+// fill buffer into vector
+void TriMesh::FillTriBuf( vector<Primitive*>& vec )
+{
+	// generate the triangles
+	unsigned triNum = m_pMemory->m_iTriNum;
+	for( int i = 0 ; i < (int)triNum ; i++ )
+		vec.push_back( new Triangle( this , i , &m_Transform ) );
 }

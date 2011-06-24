@@ -29,6 +29,8 @@ public:
 	Vector	normal;
 	// the uv coordinate
 	float	u , v;
+	// the delta distance from the orginal point
+	float	t;
 };
 
 #endif

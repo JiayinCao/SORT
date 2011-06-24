@@ -7,11 +7,12 @@
 #ifndef	SORT_SYSTEM
 #define	SORT_SYSTEM
 
+// include the header file
+#include "geometry/scene.h"
+
 // declare classes
 class Camera;
 class RenderTarget;
-
-class TriMesh;
 
 /////////////////////////////////////////////////////////////////////
 //	definition of the system
@@ -25,9 +26,12 @@ public:
 	~System();
 
 	// render the image
-	void Render( TriMesh* mesh);
+	void Render();
 	// output the render target
 	void OutputRT( const char* str );
+
+	// load the scene
+	bool LoadScene( const string& str );
 
 //private field:
 public:
@@ -35,6 +39,9 @@ public:
 	RenderTarget*	m_rt;
 	// the camera for the system
 	Camera*			m_camera;
+
+	// the scene for rendering
+	Scene			m_Scene;
 
 	// pre-Initialize
 	void	_preInit();

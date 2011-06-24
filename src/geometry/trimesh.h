@@ -12,10 +12,7 @@
 #include "primitive.h"
 #include "utility/referencecount.h"
 #include "managers/meshmanager.h"
-
-// pre-declera classes
-class	Vector;
-class	Point;
+#include "geometry/transform.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 //	definition of trimesh
@@ -28,22 +25,27 @@ public:
 	// destructor
 	~TriMesh();
 
-	// release the memory
-	void Release();
-
 	// load the mesh from file
 	// para 'str'  : the name of the input file
+	// para 'transform' : the transformation of the mesh
 	// para 'type' : the type of the mesh file , default value is obj
 	// result      : 'true' if loading is successful
-	bool LoadMesh( const string& str , MESH_TYPE type = MT_OBJ );
+	bool LoadMesh( const string& str , Transform& transform , MESH_TYPE type = MT_OBJ );
+
+	// fill buffer into vector
+	// para 'vec' : the buffer to filled
+	void FillTriBuf( vector<Primitive*>& vec );
 
 // private field
 public:
 	// the memory for the mesh
 	Reference<BufferMemory> m_pMemory;
 
-	// the triangle list
-	vector<Primitive*>		m_triBuffer;
+	// the tranformation of the mesh
+	Transform		m_Transform;
+
+	// whether the mesh is instanced
+	bool			m_bInstanced;
 
 // private method
 	// initialize default data

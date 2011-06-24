@@ -20,11 +20,11 @@ InstanceTriangle::~InstanceTriangle()
 }
 
 // get the intersection
-float	InstanceTriangle::GetIntersect( const Ray& r ) const
+bool	InstanceTriangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
 	// to be modified
 
-	return 0.0f;
+	return false;
 }
 
 // get the bounding box of the triangle
