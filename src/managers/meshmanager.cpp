@@ -73,8 +73,8 @@ bool MeshManager::LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type )
 	while( it != m_Buffers.end() )
 	{
 		// create another instance of the mesh
-
-		return true;	
+		mesh->m_bInstanced = true;
+		return true;
 	}
 	
 	// get the mesh loader first
@@ -92,12 +92,8 @@ bool MeshManager::LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type )
 		// set the pointer
 		if( read )
 		{
+			mesh->m_bInstanced = false;
 			mesh->m_pMemory = mem;
-
-			// generate the triangles
-			unsigned triNum = mem->m_iTriNum;
-			for( int i = 0 ; i < (int)triNum ; i++ )
-				mesh->m_triBuffer.push_back( new Triangle( mesh , i , 0 ) );
 
 			// and insert it into the map
 			m_Buffers.insert( make_pair( str , mem ) );

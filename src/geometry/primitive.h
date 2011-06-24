@@ -12,8 +12,8 @@
 
 // pre-decleration
 class Ray;
-// the transformation of the primitive
 class Transform;
+class Intersection;
 
 //////////////////////////////////////////////////////////////////
 //	definition of primitive
@@ -27,7 +27,7 @@ public:
 	~Primitive(){}
 
 	// get the intersection between a ray and a primitive
-	virtual float	GetIntersect( const Ray& r ) const = 0;
+	virtual bool	GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
 
 	// get the bounding box of the primitive
 	virtual const BBox&	GetBBox() = 0;

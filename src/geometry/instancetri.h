@@ -25,12 +25,12 @@ class	InstanceTriangle : public Primitive
 // public method
 public:
 	// constructor from a Triangle
-	InstanceTriangle( const Triangle* tri , Transform* transform );
+	InstanceTriangle( const Triangle* tri , Transform* transform);
 	// destructor
 	~InstanceTriangle();
 
 	// get the instersection between a ray and a instance triangle
-	float	GetIntersect( const Ray& r ) const;	
+	bool	GetIntersect( const Ray& r , Intersection* intersect ) const;	
 	
 	// get the bounding box of the triangle
 	const BBox&	GetBBox();

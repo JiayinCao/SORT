@@ -12,6 +12,7 @@
 #include "utility/timer.h"
 #include "camera/camera.h"
 #include "texture/rendertarget.h"
+#include "geometry/intersection.h"
 
 // constructor
 System::System()
@@ -27,41 +28,41 @@ System::~System()
 // pre-initialize
 void System::_preInit()
 {
-	// use 800 * 600 render target as default
-	m_rt = new RenderTarget();
-	m_rt->SetSize( 128 , 128 );
-	// there is no default value for camera , it must be set in the script file
-	m_camera = 0;
-
-	// initialize texture manager
-	TexManager::CreateTexManager();
 	// initialize log manager
 	LogManager::CreateLogManager();
+	// initialize texture manager
+	TexManager::CreateTexManager();
 	// initialize the mesh manager
 	MeshManager::CreateMeshManager();
 	// initialize the timer
 	Timer::CreateTimer();
+
+	// use 800 * 600 render target as default
+	m_rt = new RenderTarget();
+	m_rt->SetSize( 640 , 480 );
+	// there is no default value for camera , it must be set in the script file
+	m_camera = 0;
 }
 
 // post-uninit
 void System::_postUninit()
 {
+	// relase the memory
+	m_Scene.Release();
+
+	// delete the data
+	SAFE_DELETE( m_rt );
+	SAFE_DELETE( m_camera );
+
 	// release managers
 	TexManager::DeleteSingleton();
 	MeshManager::DeleteSingleton();
 	Timer::DeleteSingleton();
 	LogManager::DeleteSingleton();
-
-	// delete the data
-	SAFE_DELETE( m_rt );
-	SAFE_DELETE( m_camera );
 }
 
-#include "geometry/trimesh.h"
-#include "geometry/bbox.h"
-
 // render the image
-void System::Render( TriMesh* mesh )
+void System::Render()
 {
 	if( m_rt == 0 )
 	{
@@ -81,20 +82,9 @@ void System::Render( TriMesh* mesh )
 			// generate rays
 			Ray r = m_camera->GenerateRay( j , i );
 
-			bool intersect = false;
-
-			int n = mesh->m_pMemory->m_iTriNum;
-			for( int k = 0 ; k < n ; k++ )
-			{
-				if( mesh->m_triBuffer[k]->GetIntersect( r ) > 0 )
-				{
-					intersect = true;
-					break;
-				}
-			}
-
-			if( intersect )
-				m_rt->SetColor( j , i , 1 , 1 , 1 );
+			Intersection ip;
+			if( m_Scene.GetIntersect( r , &ip ) )
+				m_rt->SetColor( j , i , fabs(ip.normal.x) , fabs(ip.normal.y) , fabs(ip.normal.z) );
 			else
 				m_rt->SetColor( j , i , 0 , 0 , 0 );
 		}
@@ -105,4 +95,10 @@ void System::Render( TriMesh* mesh )
 void System::OutputRT( const char* str )
 {
 	m_rt->Output( str );
+}
+
+// load the scene
+bool System::LoadScene( const string& str )
+{
+	return m_Scene.LoadScene( str );
 }

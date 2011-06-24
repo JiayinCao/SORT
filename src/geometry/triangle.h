@@ -11,8 +11,6 @@
 
 // pre-decleration
 class	TriMesh;
-class	Point;
-class	Ray;
 
 //////////////////////////////////////////////////////////////////////////////////
 //	definition of triangle
@@ -31,8 +29,10 @@ public:
 
 	// check if the triangle is intersected with the ray
 	// para 'r' : the ray to check
+	// para 'intersect' : the result storing the intersection information
+	//					  the intersection is an optimized versiion
 	// result   : positive value if intersect
-	float	GetIntersect( const Ray& r ) const;
+	bool	GetIntersect( const Ray& r , Intersection* intersect ) const;
 
 	// get the bounding box of the triangle
 	const BBox&	GetBBox();

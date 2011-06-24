@@ -316,6 +316,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\geometry\scene.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\geometry\scene.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\geometry\transform.cpp"
 				>
 			</File>
