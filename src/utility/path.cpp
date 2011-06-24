@@ -44,7 +44,7 @@ string GetExecutableDir()
 string GetFullPath( const string& str )
 {
 #if defined( SORT_IN_WINDOWS )
-	return s = GetExecutableDir() + str;
+	return GetExecutableDir() + str;
 #elif defined( SORT_IN_LINUX )
 	return str;
 #endif
