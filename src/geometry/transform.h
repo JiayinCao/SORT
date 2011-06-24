@@ -94,7 +94,7 @@ inline Transform RotateX( float angle )
 	float cos_t = cos( angle );
 	Matrix m( 1.0f , 0.0f , 0.0f , 0.0f ,
 			  0.0f , cos_t , -sin_t , 0.0f ,
-			  0.0f , sin_t , -cos_t , 0.0f ,
+			  0.0f , sin_t , cos_t , 0.0f ,
 			  0.0f , 0.0f , 0.0f , 1.0f );
 
 	return Transform( m , m.Transpose() );
@@ -107,7 +107,7 @@ inline Transform RotateY( float angle )
 	float cos_t = cos( angle );
 	Matrix m( cos_t , 0.0f , sin_t , 0.0f ,
 			  0.0f , 1.0f , 0.0f , 0.0f ,
-			  -sin_t , 0.0f , -cos_t , 0.0f ,
+			  -sin_t , 0.0f , cos_t , 0.0f ,
 			  0.0f , 0.0f , 0.0f , 1.0f );
 	return Transform( m , m.Transpose() );
 }
@@ -118,7 +118,7 @@ inline Transform RotateZ( float angle )
 	float sin_t = sin( angle );
 	float cos_t = cos( angle );
 	Matrix m( cos_t , -sin_t , 0.0f , 0.0f ,
-			  sin_t , -cos_t , 0.0f , 0.0f ,
+			  sin_t , cos_t , 0.0f , 0.0f ,
 			  0.0f , 0.0f , 1.0f , 0.0f ,
 			  0.0f , 0.0f , 0.0f , 1.0f );
 	return Transform( m , m.Transpose() );

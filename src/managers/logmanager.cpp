@@ -6,6 +6,7 @@
 
 // include the header file
 #include "logmanager.h"
+#include "utility/path.h"
 
 // instance the singleton with logmanager class
 DEFINE_SINGLETON(LogManager);
@@ -21,7 +22,7 @@ void	LogManager::CreateLogManager( bool enable )
 
 // private constructor
 LogManager::LogManager( bool enable ):
-	m_sLogFileName( "log_sort.txt" )
+	m_sLogFileName( GetFullPath("log_sort.txt") )
 {
 	_init();
 
