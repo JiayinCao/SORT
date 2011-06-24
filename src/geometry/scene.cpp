@@ -29,7 +29,7 @@ bool Scene::LoadScene( const string& str )
 
 	for( int i = 0 ; i < 10 ; i ++ )
 	{
-		Transform t = Translate( Vector( 0 , 2 * i , 0 ) );
+		Transform t = Translate( Vector( 0 , (float)(2 * i) , 0 ) );
 		mesh = new TriMesh();
 		mesh->LoadMesh( "../res/cube.obj" , t );
 		m_meshBuf.push_back( mesh );

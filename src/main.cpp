@@ -10,7 +10,6 @@
 #include "geometry/trimesh.h"
 #include "camera/perspective.h"
 #include "utility/timer.h"
-#include "utility/path.h"
 
 // the global system
 System g_System;
