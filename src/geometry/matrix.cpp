@@ -6,6 +6,9 @@
 
 // include the header
 #include "matrix.h"
+#include "point.h"
+#include "vector.h"
+#include "managers/logmanager.h"
 
 // default constructor
 Matrix::Matrix()
@@ -52,6 +55,36 @@ Matrix Matrix::operator *( const Matrix& mat) const
 	}
 
 	return Matrix(data);
+}
+
+// transform point
+Point Matrix::operator *( const Point& p ) const
+{
+	float x = p.x * m[0] + p.y * m[1] + p.z * m[2] + m[3];
+	float y = p.x * m[4] + p.y * m[5] + p.z * m[6] + m[7];
+	float z = p.x * m[8] + p.y * m[9] + p.z * m[10] + m[11];
+	float w = p.x * m[12] + p.y * m[13] + p.z * m[14] + m[15];
+
+	// if w is one , just return the point
+	// note it is very common that w is one
+	if( w == 1.0f )
+		return Point( x , y , z );
+
+	return Point( x , y , z ) / w;
+}
+
+// transform vector
+Vector Matrix::operator *( const Vector& v ) const
+{
+	if( v.m_bNormal )
+		LOG_ERROR<<"Matrix applied to normal."<<CRASH;
+
+	float _x = v.x * m[0] + v.y * m[1] + v.z * m[2];
+	float _y = v.x * m[4] + v.y * m[5] + v.z * m[6];
+	float _z = v.x * m[8] + v.y * m[9] + v.z * m[10];
+
+	// return the result
+	return Vector( _x , _y , _z );
 }
 
 // create a transpose matrix

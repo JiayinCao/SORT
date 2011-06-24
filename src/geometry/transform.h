@@ -38,7 +38,7 @@ public:
 	bool	HasScale() const;
 
 	// the operator for transformation
-	Point	operator()( const Point& p ) const { return *this * p; }
+	Point	operator()( const Point& p ) const { return this->matrix * p; }
 	Vector	operator()( const Vector& v ) const { return *this * v; }
 	Ray		operator()( const Ray& r ) const { return *this * r; }
 
@@ -133,17 +133,7 @@ inline Transform Inverse( const Transform& t )
 // transform a point
 inline Point operator* ( const Transform& t , const Point& p )
 {
-	float x = p.x * t.matrix.m[0] + p.y * t.matrix.m[1] + p.z * t.matrix.m[2] + t.matrix.m[3];
-	float y = p.x * t.matrix.m[4] + p.y * t.matrix.m[5] + p.z * t.matrix.m[6] + t.matrix.m[7];
-	float z = p.x * t.matrix.m[8] + p.y * t.matrix.m[9] + p.z * t.matrix.m[10] + t.matrix.m[11];
-	float w = p.x * t.matrix.m[12] + p.y * t.matrix.m[13] + p.z * t.matrix.m[14] + t.matrix.m[15];
-
-	// if w is one , just return the point
-	// note it is very common that w is one
-	if( w == 1.0f )
-		return Point( x , y , z );
-
-	return Point( x , y , z ) / w;
+	return t.matrix * p;
 }
 
 // transform a vector
@@ -160,13 +150,8 @@ inline Vector operator* ( const Transform& t , const Vector& v )
 		// return the result
 		return Vector( _x , _y , _z );
 	}
-
-	float _x = v.x * t.matrix.m[0] + v.y * t.matrix.m[1] + v.z * t.matrix.m[2];
-	float _y = v.x * t.matrix.m[4] + v.y * t.matrix.m[5] + v.z * t.matrix.m[6];
-	float _z = v.x * t.matrix.m[8] + v.y * t.matrix.m[9] + v.z * t.matrix.m[10];
-
-	// return the result
-	return Vector( _x , _y , _z );
+	
+	return t.matrix * v;
 }
 
 // transform a ray

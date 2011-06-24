@@ -79,7 +79,7 @@ bool MeshManager::LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type )
 		mesh->m_pMemory = it->second;
 
 		// update the transform
-		mesh->m_Transform = Inverse(it->second->m_pPrototype->m_Transform) * mesh->m_Transform;
+		mesh->m_Transform = mesh->m_Transform * Inverse(it->second->m_pPrototype->m_Transform);
 		
 		return true;
 	}

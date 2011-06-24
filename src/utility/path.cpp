@@ -19,6 +19,8 @@ string GetExecutableDir()
 
 #if defined(SORT_IN_LINUX)
 	int c = readlink( "/proc/self/exe", buf, maxLen - 1 );
+	buf[c] = '/';
+	buf[c+1] = 0;
 #elif defined(SORT_IN_WINDOWS)
 	// get the current module filename
 	GetModuleFileNameA( NULL , buf , maxLen );
@@ -41,5 +43,9 @@ string GetExecutableDir()
 // get full path
 string GetFullPath( const string& str )
 {
-	return GetExecutableDir() + str;
+#if defined( SORT_IN_WINDOWS )
+	return s = GetExecutableDir() + str;
+#elif defined( SORT_IN_LINUX )
+	return str;
+#endif
 }
