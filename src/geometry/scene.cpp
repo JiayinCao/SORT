@@ -13,8 +13,10 @@ bool Scene::LoadScene( const string& str )
 {
 	// temporary
 	TriMesh* mesh = new TriMesh();
-	mesh->LoadMesh( "../res/cube.obj" , Transform() );
-	m_meshBuf.push_back( mesh );
+	if( mesh->LoadMesh( "../res/cube.obj" , Transform() ) )
+		m_meshBuf.push_back( mesh );
+	else
+		delete mesh;
 
 	// generate triangle buffer after parsing from file
 	_generateTriBuf();
