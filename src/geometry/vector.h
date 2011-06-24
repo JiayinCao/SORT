@@ -25,7 +25,7 @@ public:
 	Vector( float x , float y , float z , bool normal = false );
 	// copy constructor
 	// para 'vector':	vector to copy
-	Vector( const Vector& vector , bool normal = false );
+	Vector( const Vector& vector );
 	// destructor does nothing here
 	~Vector();
 

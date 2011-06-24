@@ -16,6 +16,7 @@
 #include <map>
 #include "geometry/point.h"
 #include "geometry/vector.h"
+#include "geometry/transform.h"
 
 // pre-declera class
 class MeshLoader;
@@ -53,6 +54,8 @@ public:
 	unsigned		m_iVBCount , m_iNBCount , m_iTBCount;
 	// the number of triangles 
 	unsigned		m_iTriNum;
+	// the tri mesh
+	TriMesh*		m_pPrototype;
 
 	// set default data for the buffer memory
 	BufferMemory()
@@ -61,7 +64,11 @@ public:
 		m_iNBCount = 0;
 		m_iTBCount = 0;
 		m_iTriNum = 0;
+		m_pPrototype = 0;
 	}
+
+	// apply transform
+	void ApplyTransform( TriMesh* mesh );
 };
 
 /////////////////////////////////////////////////////////////////////////

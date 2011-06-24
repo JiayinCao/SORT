@@ -13,7 +13,14 @@ bool Scene::LoadScene( const string& str )
 {
 	// temporary
 	TriMesh* mesh = new TriMesh();
-	if( mesh->LoadMesh( "../res/cube.obj" , Transform() ) )
+	if( mesh->LoadMesh( "../res/cube.obj" , Translate( Vector( 1 , 0 , 0 ) ) * RotateZ( 1.0f ) ) )
+		m_meshBuf.push_back( mesh );
+	else
+		delete mesh;
+
+	// create another instance
+	mesh = new TriMesh();
+	if( mesh->LoadMesh( "../res/cube.obj" , Translate( Vector( 0 , 1 , 0 ) ) * RotateX( 1.0f ) ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;

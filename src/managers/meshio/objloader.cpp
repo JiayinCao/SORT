@@ -41,7 +41,7 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			mem->m_PositionBuffer.push_back( p );	
 		}else if( strcmp( prefix.c_str() , "vn" ) == 0 )
 		{
-			Vector v;
+			Vector v(true);
 			file>>v.x;
 			file>>v.y;
 			file>>v.z;

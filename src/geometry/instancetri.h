@@ -12,6 +12,7 @@
 
 // pre-declera class
 class Triangle;
+class TriMesh;
 
 ////////////////////////////////////////////////////////////////////////////////
 // definition of instance triangle
@@ -25,7 +26,7 @@ class	InstanceTriangle : public Primitive
 // public method
 public:
 	// constructor from a Triangle
-	InstanceTriangle( const Triangle* tri , Transform* transform);
+	InstanceTriangle( const TriMesh* mesh , const unsigned index , Transform* transform );
 	// destructor
 	~InstanceTriangle();
 
@@ -37,7 +38,7 @@ public:
 
 // private field
 private:
-
+	TriMesh* mesh;
 };
 
 #endif

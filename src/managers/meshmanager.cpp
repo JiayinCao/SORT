@@ -74,6 +74,13 @@ bool MeshManager::LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type )
 	{
 		// create another instance of the mesh
 		mesh->m_bInstanced = true;
+
+		// copy the memory
+		mesh->m_pMemory = it->second;
+
+		// update the transform
+		mesh->m_Transform = Inverse(it->second->m_pPrototype->m_Transform) * mesh->m_Transform;
+		
 		return true;
 	}
 	
@@ -92,6 +99,9 @@ bool MeshManager::LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type )
 		// set the pointer
 		if( read )
 		{
+			// apply the transformation
+			mem->ApplyTransform( mesh );
+
 			mesh->m_bInstanced = false;
 			mesh->m_pMemory = mem;
 
@@ -105,4 +115,22 @@ bool MeshManager::LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type )
 	}
 
 	return read;
+}
+
+// apply transform
+void BufferMemory::ApplyTransform( TriMesh* mesh )
+{
+	vector<Point>::iterator p_it = m_PositionBuffer.begin();
+	while( p_it != m_PositionBuffer.end() )
+	{
+		*p_it = (mesh->m_Transform)(*p_it);
+		p_it++;
+	}
+	vector<Vector>::iterator n_it = m_NormalBuffer.begin();
+	while( n_it != m_NormalBuffer.end() )
+	{
+		*n_it = (mesh->m_Transform)(*n_it);
+		n_it++;
+	}
+	m_pPrototype = mesh;
 }

@@ -20,8 +20,8 @@ m_bNormal( normal )
 }
 
 // copy constructor
-Vector::Vector( const Vector& vector , bool normal ):
-m_bNormal( normal )
+Vector::Vector( const Vector& vector ):
+m_bNormal( vector.m_bNormal )
 {
 	x = vector.x;
 	y = vector.y;
