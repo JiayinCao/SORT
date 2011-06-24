@@ -11,6 +11,7 @@
 #include "geometry/vector.h"
 #include "managers/meshmanager.h"
 #include "utility/strhelper.h"
+#include "utility/path.h"
 
 // the maxmium length of a single line
 #define	LINE_MAXLENGTH		4096
@@ -18,7 +19,7 @@
 // load obj from file
 bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 {
-	ifstream file( str.c_str() );
+	ifstream file( GetFullPath(str).c_str() );
 
 	// if the specific file is not loaded return false
 	if( false == file.is_open() )

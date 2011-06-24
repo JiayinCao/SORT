@@ -36,6 +36,6 @@ int main( int argc , char** argv )
 	cout<<Timer::GetSingleton().GetElapsedTime()<<endl;
 
 	g_System.OutputRT( "t.bmp" );
-	
+
 	return 0;
 }
