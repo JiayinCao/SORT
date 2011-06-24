@@ -47,7 +47,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		// generate the triangles
 		unsigned triNum = m_pMemory->m_iTriNum;
 		for( int i = 0 ; i < (int)triNum ; i++ )
-			vec.push_back( new Triangle( this , i , &m_Transform ) );
+			vec.push_back( new Triangle( this , i ) );
 	}else
 	{
 		// create instance triangle

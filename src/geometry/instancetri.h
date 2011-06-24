@@ -11,8 +11,7 @@
 #include "primitive.h"
 
 // pre-declera class
-class Triangle;
-class TriMesh;
+class Transform;
 
 ////////////////////////////////////////////////////////////////////////////////
 // definition of instance triangle
@@ -38,7 +37,8 @@ public:
 
 // private field
 private:
-	TriMesh* mesh;
+	// the transformation of the triangle
+	Transform* transform;
 };
 
 #endif

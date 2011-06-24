@@ -7,13 +7,14 @@
 #ifndef	SORT_PRIMITIVE
 #define	SORT_PRIMITIVE
 
+// include header file
 #include "utility/smartptr.h"
 #include "bbox.h"
 
 // pre-decleration
 class Ray;
-class Transform;
 class Intersection;
+class TriMesh;
 
 //////////////////////////////////////////////////////////////////
 //	definition of primitive
@@ -22,7 +23,7 @@ class	Primitive
 // public method
 public:
 	// constructor from a transformation
-	Primitive( Transform* transform ): m_pTransform(transform) {}
+	Primitive( const TriMesh* mesh , unsigned id ): m_trimesh(mesh) , m_id(id) {}
 	// destructor
 	~Primitive(){}
 
@@ -43,8 +44,13 @@ protected:
 	// bounding box
 	SmartPtr<BBox> m_bbox;
 
-	// the transformation
-	Transform*	m_pTransform;
+	// the triangle mesh
+	const TriMesh*	m_trimesh;
+	// the index
+	const unsigned	m_id;
+
+	// get the intersection between a ray and a triangle
+	bool	_getIntersect( const Ray& r , Intersection* intersect ) const;
 };
 
 #endif

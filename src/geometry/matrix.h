@@ -7,8 +7,7 @@
 #ifndef	SORT_MATRIX
 #define	SORT_MATRIX
 
-class Point;
-class Vector;
+#include "ray.h"
 
 ////////////////////////////////////////////////////////////////////
 //	definition of matrix
@@ -33,6 +32,31 @@ public:
 	// para 'm' : the matrix to mutiply
 	// result : the composition of the two matrix
 	Matrix operator * ( const Matrix& m ) const;
+
+	// transform a point
+	// para 'p' : the point to transform
+	// result   : the transformed point
+	Point operator * ( const Point& p ) const;
+	Point operator () ( const Point& p ) const { return *this * p; }
+
+	// transform a vector
+	// para 'v' : the vector to transform
+	// result   : transformed vector
+	// note     : a matrix transformation applied to a normal is invalid
+	Vector operator * ( const Vector& v ) const;
+	Vector operator () ( const Vector& v ) const { return *this * v; }
+
+	// transform a ray
+	// para 'r' : the ray to transform
+	// result   : transformd ray
+	Ray operator * ( const Ray& r ) const
+	{
+		return Ray( *this * r.m_Ori , *this * r.m_Dir );
+	}
+	Ray operator () ( const Ray& r ) const
+	{
+		return *this * r;
+	}
 
 	// transpose the matrix
 	Matrix Transpose() const;

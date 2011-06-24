@@ -23,7 +23,7 @@ public:
 	// para 'trimesh' : the triangle mesh it belongs to
 	// para 'index'   : the index buffer
 	// para 'vb'      : the vertex buffer
-	Triangle( const TriMesh* trimesh , const unsigned index , Transform* transform );
+	Triangle( const TriMesh* trimesh , const unsigned index );
 	// destructor
 	~Triangle(){}
 
@@ -36,13 +36,6 @@ public:
 
 	// get the bounding box of the triangle
 	const BBox&	GetBBox();
-
-// private field
-private:
-	// the triangle mesh
-	const TriMesh*	m_trimesh;
-	// the index
-	const unsigned	m_id;
 };
 
 #endif

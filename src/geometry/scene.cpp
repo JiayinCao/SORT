@@ -13,18 +13,27 @@ bool Scene::LoadScene( const string& str )
 {
 	// temporary
 	TriMesh* mesh = new TriMesh();
-	if( mesh->LoadMesh( "../res/cube.obj" , Translate( Vector( 1 , 0 , 0 ) ) * RotateZ( 1.0f ) ) )
+	Transform t0 = Translate( Vector( 2 , 0 , 0 ) ) * RotateZ( 1.0f );
+	if( mesh->LoadMesh( "../res/cube.obj" , t0 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;
 
 	// create another instance
 	mesh = new TriMesh();
-	if( mesh->LoadMesh( "../res/cube.obj" , Translate( Vector( 0 , 1 , 0 ) ) * RotateX( 1.0f ) ) )
+	Transform t1 = Translate( Vector( 0 , 1 , 0 ) ) * RotateX( 1.0f ) ;
+	if( mesh->LoadMesh( "../res/cube.obj" , t1 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;
 
+	for( int i = 0 ; i < 10 ; i ++ )
+	{
+		Transform t = Translate( Vector( 0 , 2 * i , 0 ) );
+		mesh = new TriMesh();
+		mesh->LoadMesh( "../res/cube.obj" , t );
+		m_meshBuf.push_back( mesh );
+	}
 	// generate triangle buffer after parsing from file
 	_generateTriBuf();
 
