@@ -424,6 +424,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\utility\path.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\path.h"
 				>
 			</File>
