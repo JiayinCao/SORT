@@ -8,6 +8,7 @@
 #include "scene.h"
 #include "geometry/intersection.h"
 #include "accel/accelerator.h"
+#include "accel/kdtree.h"
 
 // initialize default data
 void Scene::_init()
