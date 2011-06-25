@@ -27,8 +27,6 @@ int main( int argc , char** argv )
 	camera->SetRenderTarget( g_System.m_rt );
 	g_System.m_camera = camera;
 
-	g_System.LoadScene( "" );
-
 	Timer::GetSingleton().StartTimer();
 
 	g_System.Render();

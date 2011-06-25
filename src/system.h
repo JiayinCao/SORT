@@ -25,6 +25,10 @@ public:
 	// destructor
 	~System();
 
+	// pre-process before rendering
+	void PreProcess();
+	// post-process after rendering
+	void PostProcess();
 	// render the image
 	void Render();
 	// output the render target

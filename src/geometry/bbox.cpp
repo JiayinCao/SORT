@@ -104,3 +104,25 @@ unsigned BBox::MaxAxisId() const
 
 	return 2;
 }
+
+// union the bounding box
+void BBox::Union( const Point& p )
+{
+	for( unsigned i = 0 ; i < 3 ; i++ )
+	{
+		if( p[i] < m_Min[i] )
+			m_Min[i] = p[i];
+		if( p[i] > m_Max[i] )
+			m_Max[i] = p[i];
+	}
+}
+
+// union the bounding box
+void BBox::Union( const BBox& box )
+{
+	for( int i = 0 ; i < 3 ; i++ )
+	{
+		m_Min[i] = min( m_Min[i] , box.m_Min[i] );
+		m_Max[i] = max( m_Max[i] , box.m_Max[i] );
+	}
+}

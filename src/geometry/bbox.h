@@ -47,6 +47,14 @@ public:
 	// result :	the id of axis with the longest extent
 	unsigned MaxAxisId() const;
 
+	// union bbox
+	// para 'p' : a point
+	void Union( const Point& p );
+
+	// union bbox
+	// para 'box' : another bounding box
+	void Union( const BBox& box );
+
 // public data
 public:
 	// the minium and maxium point of the bounding box
@@ -58,17 +66,18 @@ public:
 // para 'bbox' :	a bounding box to encapture
 // para 'p'    :	a point to encapture
 // result      :	a bounding box containg both 'bbox' and 'p'
-inline BBox Union( BBox& bbox , const Point& p )
+inline BBox Union( const BBox& bbox , const Point& p )
 {
+	BBox box;
 	for( unsigned i = 0 ; i < 3 ; i++ )
 	{
 		if( p[i] < bbox.m_Min[i] )
-			bbox.m_Min[i] = p[i];
+			box.m_Min[i] = p[i];
 		if( p[i] > bbox.m_Max[i] )
-			bbox.m_Max[i] = p[i];
+			box.m_Max[i] = p[i];
 	}
 
-	return bbox;
+	return box;
 }
 // para 'bbox0' :	first bounding box
 // para 'bbox1' :	second bounding box
