@@ -35,7 +35,23 @@ public:
 
 // private field
 private:
+	// the number of voxels
+	unsigned	m_voxelCount;
+	// the voxel count
+	unsigned	m_voxelNum[3];
+	// extent of grid in each dimension
+	float		m_voxelInvExtent[3];
+	// the voxel data
+	vector<Primitive*>*	m_pVoxels;
 
+	// initialize the data
+	void _init();
+	// release the data
+	void _release();
+	// from point to voxel
+	unsigned _point2VoxelId( const Point& p , unsigned axis ) const;
+	// get the id offset
+	unsigned _offset( unsigned x , unsigned y , unsigned z ) const;
 };
 
 #endif

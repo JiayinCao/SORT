@@ -26,12 +26,12 @@ class	Accelerator
 // public method
 public:
 	// default constructor
-	Accelerator(){}
+	Accelerator(){ m_primitives = 0; }
 	// constructor from primitive list
 	// para 'l' ; the primitive list
-	Accelerator( vector<Primitive*>* l ) : primitives(l){}
+	Accelerator( vector<Primitive*>* l ) : m_primitives(l){}
 	// destructor
-	~Accelerator(){ primitives = 0; }
+	~Accelerator(){ m_primitives = 0; }
 
 	// get the intersection between the ray and the primitive set
 	// para 'r' : the ray
@@ -48,13 +48,13 @@ public:
 	// set primitive list
 	void SetPrimitives( vector<Primitive*>* pri )
 	{
-		primitives = pri;
+		m_primitives = pri;
 	}
 
 // protected field
 protected:
 	// the vector storing primitive list
-	vector<Primitive*>* primitives;
+	vector<Primitive*>* m_primitives;
 
 	// the bounding box of the primitives
 	BBox	m_BBox;

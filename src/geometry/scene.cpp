@@ -8,7 +8,7 @@
 #include "scene.h"
 #include "geometry/intersection.h"
 #include "accel/accelerator.h"
-#include "accel/kdtree.h"
+#include "accel/unigrid.h"
 
 // initialize default data
 void Scene::_init()
@@ -32,7 +32,7 @@ bool Scene::LoadScene( const string& str )
 	// temporary
 	TriMesh* mesh = new TriMesh();
 	Transform t0 = Translate( Vector( 2 , 0 , 0 ) ) * RotateZ( 1.0f );
-	if( mesh->LoadMesh( "../res/cube.obj" , t0 ) )
+	if( mesh->LoadMesh( "../res/teapot.obj" , t0 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;
@@ -56,7 +56,7 @@ bool Scene::LoadScene( const string& str )
 	// generate triangle buffer after parsing from file
 	_generateTriBuf();
 
-	m_pAccelerator = new KDTree();
+	m_pAccelerator = new UniGrid();
 	if( m_pAccelerator )
 	{
 		m_pAccelerator->SetPrimitives( &m_triBuf );
