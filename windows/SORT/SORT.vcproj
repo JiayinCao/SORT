@@ -481,6 +481,10 @@
 			Name="accel"
 			>
 			<File
+				RelativePath="..\..\src\accel\accelerator.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\accel\accelerator.h"
 				>
 			</File>
