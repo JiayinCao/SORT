@@ -11,8 +11,8 @@
 // compute the bounding box
 void Accelerator::_computeBBox()
 {
-	vector<Primitive*>::const_iterator it = primitives->begin();
-	while( it != primitives->end() )
+	vector<Primitive*>::const_iterator it = m_primitives->begin();
+	while( it != m_primitives->end() )
 	{
 		m_BBox.Union( (*it)->GetBBox() );	
 		it++;
