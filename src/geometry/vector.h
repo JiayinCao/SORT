@@ -56,6 +56,9 @@ public:
 	// result   :	current vector after dividing by the divider
 	// note	    :	there will be run-time and log LOG_ERROR if 'f' is zero
 	Vector&	operator /= ( float f );
+	// para 'v' :	vector to copy
+	// result   :	copy the vector
+	Vector& operator = ( const Vector& v ) ;
 
 	// get the length of the vector
 	// result :	the length of the vector

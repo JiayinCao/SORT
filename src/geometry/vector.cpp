@@ -45,7 +45,7 @@ Vector::~Vector()
 // + operator
 Vector Vector::operator +( const Vector& v ) const
 {
-	return Vector( x + v.x , y + v.y , z + v.z );
+	return Vector( x + v.x , y + v.y , z + v.z , m_bNormal );
 }
 
 // += operator
@@ -61,7 +61,7 @@ Vector&	Vector::operator +=( const Vector& v )
 // - operator
 Vector	Vector::operator -( const Vector& v ) const
 {
-	return Vector( x - v.x , y - v.y , z - v.z );
+	return Vector( x - v.x , y - v.y , z - v.z , m_bNormal );
 }
 
 // -= operator
@@ -77,7 +77,7 @@ Vector&	Vector::operator -=( const Vector& v )
 // * operator with a float
 Vector Vector::operator *( float f ) const
 {
-	return Vector( x * f , y * f , z * f );
+	return Vector( x * f , y * f , z * f , m_bNormal );
 }
 
 // *= operator with a float
@@ -153,7 +153,7 @@ float& Vector::operator [] ( unsigned id )
 // - operator
 Vector Vector::operator - () const 
 {
-	return Vector( -x , -y , -z );
+	return Vector( -x , -y , -z , m_bNormal );
 }
 
 // == operator
@@ -195,6 +195,18 @@ Vector& Vector::Normalize()
 		LOG_ERROR<<"Try to normalize a zero length vector!!"<<CRASH;
 	
 	*this /= len;
+
+	return *this;
+}
+
+// para 'v' :	vector to copy
+Vector& Vector::operator = ( const Vector& v )
+{
+	x = v.x;
+	y = v.y;
+	z = v.z;
+
+	m_bNormal = v.m_bNormal;
 
 	return *this;
 }

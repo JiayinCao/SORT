@@ -8,7 +8,7 @@
 #define	SORT_INSTANCETRI
 
 // include the header
-#include "primitive.h"
+#include "triangle.h"
 
 // pre-declera class
 class Transform;
@@ -20,7 +20,7 @@ class Transform;
 //			test , it first transform the ray from world space to object space
 //			and then to the prototype-primitive space, it costs more than
 //			original triangle , but saves memory space.
-class	InstanceTriangle : public Primitive
+class	InstanceTriangle : public Triangle
 {
 // public method
 public:

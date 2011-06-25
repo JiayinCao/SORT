@@ -58,32 +58,17 @@ public:
 // para 'bbox' :	a bounding box to encapture
 // para 'p'    :	a point to encapture
 // result      :	a bounding box containg both 'bbox' and 'p'
-inline BBox Union( const BBox& bbox , const Point& p )
+inline BBox Union( BBox& bbox , const Point& p )
 {
-	BBox result;
-
-	cout<<"in"<<endl;
-
 	for( unsigned i = 0 ; i < 3 ; i++ )
 	{
-		cout<<i<<" "<<p[i]<<" "<<bbox.m_Min[i]<<endl;
 		if( p[i] < bbox.m_Min[i] )
-		{
-			result.m_Min[i] = p[i];
-			result.m_Max[i] = bbox.m_Max[i];
-		}
-		else if( p[i] > bbox.m_Max[i] )
-		{
-			result.m_Min[i] = bbox.m_Min[i];
-			result.m_Max[i] = p[i];
-		}else
-		{
-			result.m_Min[i] = bbox.m_Min[i];
-			result.m_Max[i] = bbox.m_Max[i];
-		}
+			bbox.m_Min[i] = p[i];
+		if( p[i] > bbox.m_Max[i] )
+			bbox.m_Max[i] = p[i];
 	}
 
-	return result;
+	return bbox;
 }
 // para 'bbox0' :	first bounding box
 // para 'bbox1' :	second bounding box

@@ -12,6 +12,9 @@
 #include <vector>
 #include "trimesh.h"
 
+// pre-decleration of classes
+class Accelerator;
+
 ////////////////////////////////////////////////////////////////////////////
 // definition of scene class
 class	Scene
@@ -19,9 +22,9 @@ class	Scene
 // public method
 public:
 	// default constructor
-	Scene(){}
+	Scene(){ _init(); }
 	// destructor
-	~Scene(){Release();}
+	~Scene(){ Release(); }
 
 	// load the scene from script file
 	// para 'str' : the name for the file
@@ -46,6 +49,9 @@ private:
 	// the triangle buffer for the scene
 	vector<Primitive*>	m_triBuf;
 
+	// the acceleration structure for the scene
+	Accelerator*		m_pAccelerator;
+
 // private method
 	
 	// brute force intersection test ( it will only invoked if there is no acceleration structor
@@ -55,6 +61,9 @@ private:
 
 	// generate triangle buffer
 	void	_generateTriBuf();
+
+	// initialize default data
+	void	_init();
 };
 
 #endif

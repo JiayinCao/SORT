@@ -12,9 +12,7 @@
 #include "bbox.h"
 
 // pre-decleration
-class Ray;
-class Intersection;
-class TriMesh;
+class	Intersection;
 
 //////////////////////////////////////////////////////////////////
 //	definition of primitive
@@ -23,7 +21,7 @@ class	Primitive
 // public method
 public:
 	// constructor from a transformation
-	Primitive( const TriMesh* mesh , unsigned id ): m_trimesh(mesh) , m_id(id) {}
+	Primitive(){}
 	// destructor
 	~Primitive(){}
 
@@ -43,14 +41,6 @@ public:
 protected:
 	// bounding box
 	SmartPtr<BBox> m_bbox;
-
-	// the triangle mesh
-	const TriMesh*	m_trimesh;
-	// the index
-	const unsigned	m_id;
-
-	// get the intersection between a ray and a triangle
-	bool	_getIntersect( const Ray& r , Intersection* intersect ) const;
 };
 
 #endif

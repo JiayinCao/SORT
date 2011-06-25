@@ -57,7 +57,7 @@ void TexManager::_release()
 		{
 			string isare = (img_it->second->reference>1)?"is":"are";
 			string refer = (img_it->second->reference>1)?" reference":" references";
-			LOG_ERROR<<"There "<<isare<<" still "<<(int)(img_it->second->reference)<<refer<<" pointing to "<<img_it->first<<"."<<CRASH;
+			LOG_ERROR<<"There "<<isare<<" still "<<(int)(img_it->second->reference)<<refer<<" pointing to \""<<img_it->first<<"\"."<<CRASH;
 		}
 		SAFE_DELETE_ARRAY( img_it->second->m_ImgMem );
 		img_it->second->m_iWidth = 0;

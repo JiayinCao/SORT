@@ -10,7 +10,7 @@
 #include "primitive.h"
 
 // pre-decleration
-class	TriMesh;
+class TriMesh;
 
 //////////////////////////////////////////////////////////////////////////////////
 //	definition of triangle
@@ -23,7 +23,7 @@ public:
 	// para 'trimesh' : the triangle mesh it belongs to
 	// para 'index'   : the index buffer
 	// para 'vb'      : the vertex buffer
-	Triangle( const TriMesh* trimesh , const unsigned index );
+	Triangle( const TriMesh* mesh , unsigned id ): m_trimesh(mesh) , m_id(id) {}
 	// destructor
 	~Triangle(){}
 
@@ -32,10 +32,17 @@ public:
 	// para 'intersect' : the result storing the intersection information
 	//					  the intersection is an optimized versiion
 	// result   : positive value if intersect
-	bool	GetIntersect( const Ray& r , Intersection* intersect ) const;
+	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const;
 
 	// get the bounding box of the triangle
-	const BBox&	GetBBox();
+	virtual const BBox&	GetBBox();
+
+// protected filed
+protected:
+	// the triangle mesh
+	const TriMesh*	m_trimesh;
+	// the index
+	const unsigned	m_id;
 };
 
 #endif

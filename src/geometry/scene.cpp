@@ -7,6 +7,13 @@
 // include the header
 #include "scene.h"
 #include "geometry/intersection.h"
+#include "accel/accelerator.h"
+
+// initialize default data
+void Scene::_init()
+{
+	m_pAccelerator = 0;
+}
 
 // load the scene from script file
 bool Scene::LoadScene( const string& str )
@@ -27,13 +34,14 @@ bool Scene::LoadScene( const string& str )
 	else
 		delete mesh;
 
-	for( int i = 0 ; i < 10 ; i ++ )
-	{
-		Transform t = Translate( Vector( 0 , (float)(2 * i) , 0 ) );
-		mesh = new TriMesh();
-		mesh->LoadMesh( "../res/cube.obj" , t );
+	// create another instance
+	mesh = new TriMesh();
+	Transform t2 = Translate( Vector( 0 , 1 , 0 ) ) * RotateX( -1.0f ) * Translate( Vector( 1 , 1 , 0 ) );
+	if( mesh->LoadMesh( "../res/cube.obj" , t2 ) )
 		m_meshBuf.push_back( mesh );
-	}
+	else
+		delete mesh;
+
 	// generate triangle buffer after parsing from file
 	_generateTriBuf();
 
@@ -43,8 +51,11 @@ bool Scene::LoadScene( const string& str )
 // get the intersection between a ray and the scene
 bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
-	// brute force intersection test
-	return _bfIntersect( r , intersect );
+	// brute force intersection test if there is no accelerator
+	if( m_pAccelerator == 0 )
+		return _bfIntersect( r , intersect );
+
+	return m_pAccelerator->GetIntersect( r , intersect );
 }
 
 // get the intersection between a ray and the scene 
@@ -56,6 +67,8 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 	for( int k = 0 ; k < n ; k++ )
 	{
 		Intersection in;
+		const BBox box = m_triBuf[k]->GetBBox();
+		
 		if( m_triBuf[k]->GetIntersect( r , &in ) && in.t < t )
 		{
 			bInter = true;
@@ -64,12 +77,14 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 		}
 	}
 
-	return true;
+	return bInter;
 }
 
 // release the memory of the scene
 void Scene::Release()
 {
+	SAFE_DELETE( m_pAccelerator );
+
 	vector<Primitive*>::iterator it = m_triBuf.begin();
 	while( it != m_triBuf.end() )
 	{

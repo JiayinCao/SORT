@@ -42,7 +42,7 @@ void ImageTexture::Release()
 }
 
 // load image from file
-bool ImageTexture::LoadImage( const std::string& str , TEX_TYPE type )
+bool ImageTexture::LoadImageFromFile( const std::string& str , TEX_TYPE type )
 {
 	// release an image first
 	Release();

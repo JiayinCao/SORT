@@ -27,7 +27,7 @@ public:
 	// para 'str'  : the name of the image file to be loaded
 	// para 'type' : the type of the image , default is bmp
 	// result      : whether loading is successful
-	bool LoadImage( const std::string& str , TEX_TYPE type = TT_BMP );
+	bool LoadImageFromFile( const std::string& str , TEX_TYPE type = TT_BMP );
 
 	// get the texture value
 	// para 'x' :	x coordinate , if out of range , use filter
