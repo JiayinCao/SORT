@@ -39,7 +39,7 @@ void MeshManager::_release()
 		{
 			string isare = (buf_it->second->reference>1)?"is":"are";
 			string refer = (buf_it->second->reference>1)?" reference":" references";
-			LOG_ERROR<<"There "<<isare<<" still "<<buf_it->second->reference<<refer<<" pointing to "<<buf_it->first<<"."<<CRASH;
+			LOG_ERROR<<"There "<<isare<<" still "<<buf_it->second->reference<<refer<<" pointing to \""<<buf_it->first<<"\"."<<CRASH;
 		}
 
 		// delete the memory

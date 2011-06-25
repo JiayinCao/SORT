@@ -10,6 +10,7 @@
 #include "geometry/trimesh.h"
 #include "camera/perspective.h"
 #include "utility/timer.h"
+#include "texture/imagetexture.h"
 
 // the global system
 System g_System;
@@ -18,9 +19,9 @@ System g_System;
 int main( int argc , char** argv )
 {
 	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( 50 , 50 , 50 ) );
+	camera->SetEye( Point( 10 , 10 , 10 ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
-	camera->SetTarget( Point( 0 , 10 , 0 ) );
+	camera->SetTarget( Point( 0 , 0 , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
 
 	camera->SetRenderTarget( g_System.m_rt );

@@ -60,6 +60,8 @@ public:
 	// para 'f' :	divider
 	// result   :	current vector after dividing
 	Point& operator /= ( float f );
+	// para 'p' :   point to copy
+	Point& operator = ( const Point& p );
 
 	// [] operator
 	// result   :	component with the specific id

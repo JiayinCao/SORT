@@ -6,15 +6,12 @@
 
 // include the header
 #include "instancetri.h"
-#include "transform.h"
 #include "intersection.h"
-#include "utility/referencecount.h"
-#include "managers/meshmanager.h"
 #include "trimesh.h"
 
 // constructor from a triangle
 InstanceTriangle::InstanceTriangle( const TriMesh* mesh , const unsigned index , Transform* t ):
-Primitive( mesh , index ) , transform( t )
+Triangle( mesh , index ) , transform( t )
 {
 }
 
@@ -30,7 +27,7 @@ bool	InstanceTriangle::GetIntersect( const Ray& r , Intersection* intersect ) co
 	Ray ray = transform->invMatrix( r ) ;
 
 	// get the intersection result 
-	bool result =  _getIntersect( ray , intersect );
+	bool result =  Triangle::GetIntersect( ray , intersect );
 
 	if( result == false )
 		return false;
@@ -58,12 +55,14 @@ const BBox& InstanceTriangle::GetBBox()
 		int id2 = index[2].posIndex;
 	
 		// get three vertexes
-		const Point& p0 = mem->m_PositionBuffer[id0] ;
-		const Point& p1 = mem->m_PositionBuffer[id1] ;
-		const Point& p2 = mem->m_PositionBuffer[id2] ;
+		const Point& p0 = (*transform)(mem->m_PositionBuffer[id0]);
+		const Point& p1 = (*transform)(mem->m_PositionBuffer[id1]);
+		const Point& p2 = (*transform)(mem->m_PositionBuffer[id2]);
 
 		// transform the point
-		
+		Union( *m_bbox , p0 );
+		Union( *m_bbox , p1 );
+		Union( *m_bbox , p2 );
 	}
 
 	return *m_bbox;

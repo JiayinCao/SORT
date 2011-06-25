@@ -148,7 +148,7 @@ inline Vector operator* ( const Transform& t , const Vector& v )
 		float _z = v.x * t.invMatrix.m[2] + v.y * t.invMatrix.m[6] + v.z * t.invMatrix.m[10];
 
 		// return the result
-		return Vector( _x , _y , _z );
+		return Vector( _x , _y , _z , true );
 	}
 	
 	return t.matrix * v;

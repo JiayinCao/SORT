@@ -168,3 +168,13 @@ Point Point::operator + ( const Point& v )
 {
 	return Point( x + v.x , y + v.y , z + v.z );
 }
+
+// para 'p' :   point to copy
+Point& Point::operator = ( const Point& p )
+{
+	x = p.x;
+	y = p.y;
+	z = p.z;
+
+	return *this;
+}
