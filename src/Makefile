@@ -12,6 +12,7 @@ LIBSRCS += $(wildcard texture/*.cpp)
 LIBSRCS += $(wildcard managers/*.cpp)
 LIBSRCS += $(wildcard managers/texio/*.cpp)
 LIBSRCS += $(wildcard managers/meshio/*.cpp)
+LIBSRCS += $(wildcard accel/*.cpp)
 LIBSRCS += $(wildcard utility/*.cpp )
 
 LIBOBJS = $(addprefix $(OBJ_PATH)/, $(subst ._,, $(subst /,_,$(LIBSRCS:.cpp=.o)) ) )
@@ -67,7 +68,11 @@ $(OBJ_PATH)/managers_meshio_%.o : managers/meshio/%.cpp managers/meshio/%.h mana
 $(OBJ_PATH)/sort.o : sort.cpp sort.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
-	
+
+$(OBJ_PATH)/accel_%.o : accel/%.cpp accel/%.h
+	@echo "building object $@"
+	@g++ $(COMPILE_FLAG) -c $< -o $@
+
 clean:
 	@echo "clear"
 	@rm -rf $(BIN_PATH)

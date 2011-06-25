@@ -12,7 +12,17 @@
 // initialize default data
 void Scene::_init()
 {
-	m_pAccelerator = 0;
+}
+
+// pre process
+void Scene::PreProcess()
+{
+}
+
+// post process
+void Scene::PostProcess()
+{
+
 }
 
 // load the scene from script file
@@ -45,6 +55,13 @@ bool Scene::LoadScene( const string& str )
 	// generate triangle buffer after parsing from file
 	_generateTriBuf();
 
+	m_pAccelerator = new KDTree();
+	if( m_pAccelerator )
+	{
+		m_pAccelerator->SetPrimitives( &m_triBuf );
+		m_pAccelerator->Build();
+	}
+
 	return true;
 }
 
@@ -58,21 +75,20 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
 	return m_pAccelerator->GetIntersect( r , intersect );
 }
 
-// get the intersection between a ray and the scene 
+// get the intersection between a ray and the scene in a brute force way
 bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 {
 	bool bInter = false;
-	float t = FLT_MAX;
+	intersect->t = FLT_MAX;
 	int n = (int)m_triBuf.size();
 	for( int k = 0 ; k < n ; k++ )
 	{
 		Intersection in;
-		const BBox box = m_triBuf[k]->GetBBox();
 		
-		if( m_triBuf[k]->GetIntersect( r , &in ) && in.t < t )
+		if( m_triBuf[k]->GetIntersect( r , &in ) && in.t < intersect->t )
 		{
 			bInter = true;
-			t = in.t;
+			intersect->t = in.t;
 			*intersect = in;
 		}
 	}

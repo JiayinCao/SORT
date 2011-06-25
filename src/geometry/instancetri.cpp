@@ -60,9 +60,9 @@ const BBox& InstanceTriangle::GetBBox()
 		const Point& p2 = (*transform)(mem->m_PositionBuffer[id2]);
 
 		// transform the point
-		Union( *m_bbox , p0 );
-		Union( *m_bbox , p1 );
-		Union( *m_bbox , p2 );
+		m_bbox->Union( p0 );
+		m_bbox->Union( p1 );
+		m_bbox->Union( p2 );
 	}
 
 	return *m_bbox;

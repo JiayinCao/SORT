@@ -24,10 +24,13 @@ KDTree::~KDTree()
 // get the intersection between the ray and the primitive set
 bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
-	return true;
+	//to be modified
+	return Intersect( r , m_BBox ) > 0.0f ;
 }
 
 // build the acceleration structure
 void KDTree::Build()
 {
+	// get the bounding box for the whole primitive list
+	_computeBBox();
 }

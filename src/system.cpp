@@ -64,16 +64,8 @@ void System::_postUninit()
 // render the image
 void System::Render()
 {
-	if( m_rt == 0 )
-	{
-		LOG_WARNING<<"There is no render target in the system, can't render anything."<<ENDL;
-		return;
-	}
-	if( m_camera == 0 )
-	{
-		LOG_WARNING<<"There is no camera attached in the system , can't render anything."<<ENDL;
-		return;
-	}
+	// preprocess before rendering
+	PreProcess();
 
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
@@ -84,11 +76,14 @@ void System::Render()
 
 			Intersection ip;
 			if( m_Scene.GetIntersect( r , &ip ) )
-				m_rt->SetColor( j , i , fabs( ip.normal.x ) , fabs( ip.normal.y ) , fabs( ip.normal.z ) );
+				m_rt->SetColor( j , i , fabs( ip.normal.x )+1.0f , fabs( ip.normal.y )+1.0f , fabs( ip.normal.z ) );
 			else
 				m_rt->SetColor( j , i , 0 , 0 , 0 );
 		}
 	}
+
+	// post process after rendering
+	PostProcess();
 }
 
 // output render target
@@ -101,4 +96,28 @@ void System::OutputRT( const char* str )
 bool System::LoadScene( const string& str )
 {
 	return m_Scene.LoadScene( str );
+}
+
+// pre-process before rendering
+void System::PreProcess()
+{
+	if( m_rt == 0 )
+	{
+		LOG_WARNING<<"There is no render target in the system, can't render anything."<<ENDL;
+		return;
+	}
+	if( m_camera == 0 )
+	{
+		LOG_WARNING<<"There is no camera attached in the system , can't render anything."<<ENDL;
+		return;
+	}
+
+	// load the scene
+	m_Scene.LoadScene("");
+	m_Scene.PreProcess();
+}
+
+// post-process after rendering
+void System::PostProcess()
+{
 }
