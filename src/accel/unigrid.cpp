@@ -81,7 +81,7 @@ void UniGrid::Build()
 	unsigned count = m_primitives->size();
 	
 	// grid per distance
-	float gridPerDistance = 3 * powf( count , 0.333f ) / extent;
+	float gridPerDistance = 3 * powf( (float)count , 0.333f ) / extent;
 
 	// the grid size
 	for( int i = 0 ; i < 3 ; i++ )
@@ -108,9 +108,9 @@ void UniGrid::Build()
 			maxGridId[i] = _point2VoxelId( (*it)->GetBBox().m_Max , i );
 		}
 
-		for( int i = minGridId[2] ; i < maxGridId[2] ; i++ )
-			for( int j = minGridId[1] ; j < maxGridId[1] ; j++ )
-				for( int k = minGridId[0] ; k < maxGridId[0] ; k++ )
+		for( unsigned i = minGridId[2] ; i < maxGridId[2] ; i++ )
+			for( unsigned j = minGridId[1] ; j < maxGridId[1] ; j++ )
+				for( unsigned k = minGridId[0] ; k < maxGridId[0] ; k++ )
 				{
 					unsigned offset = _offset( k , j , i );
 					m_pVoxels[offset].push_back( *it );
