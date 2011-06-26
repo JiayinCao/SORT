@@ -31,15 +31,15 @@ bool Scene::LoadScene( const string& str )
 {
 	// temporary
 	TriMesh* mesh = new TriMesh();
-	Transform t0 = Translate( Vector( 2 , 0 , 0 ) ) * RotateZ( 1.0f );
-	if( mesh->LoadMesh( "../res/cube.obj" , t0 ) )
+	Transform t0 = Translate( Vector( 2 , 0 , 0 ) ) * RotateZ( 1.0f ) * Scale( 0.8f , 0.8f , 0.8f );
+	if( mesh->LoadMesh( "../res/bunny.obj" , t0 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;
 
 	// create another instance
 	mesh = new TriMesh();
-	Transform t1 = Translate( Vector( 0 , 1 , 0 ) ) * RotateX( 1.0f ) ;
+	Transform t1 = Translate( Vector( 0 , 1 , 2 ) ) * RotateX( 1.0f ) * Scale( 0.5f , 0.5f , 0.5f );
 	if( mesh->LoadMesh( "../res/cube.obj" , t1 ) )
 		m_meshBuf.push_back( mesh );
 	else

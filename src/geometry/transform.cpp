@@ -25,11 +25,5 @@ bool Transform::IdIdentity() const
 // whether there is scale factor in the matrix
 bool Transform::HasScale() const
 {
-	float l0 = Vector( matrix.m[0] , matrix.m[4] , matrix.m[8] ).Length();
-	float l1 = Vector( matrix.m[1] , matrix.m[5] , matrix.m[9] ).Length();
-	float l2 = Vector( matrix.m[2] , matrix.m[6] , matrix.m[7] ).Length();
-
-#define	IS_ONE(x) ((x)>0.999f && (x)<1.001f )
-	return !( IS_ONE(l0) && IS_ONE(l1) && IS_ONE(l2) );
-#undef IS_ONE
+	return matrix.HasScale();
 }

@@ -61,6 +61,9 @@ public:
 	// transpose the matrix
 	Matrix Transpose() const;
 
+	// whether the matrix have scale factor
+	bool	HasScale() const;
+
 // public field
 public:
 	// the data of the 4x4 matrix

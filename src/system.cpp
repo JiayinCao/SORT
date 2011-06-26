@@ -76,7 +76,7 @@ void System::Render()
 
 			Intersection ip;
 			if( m_Scene.GetIntersect( r , &ip ) )
-				m_rt->SetColor( j , i , 0.5f + fabs( ip.normal.x ) , fabs( ip.normal.y ), fabs( ip.normal.z ) );
+				m_rt->SetColor( j , i , fabs( ip.normal.x ) , fabs( ip.normal.y ), fabs( ip.normal.z ) );
 			else
 				m_rt->SetColor( j , i , 0 , 0 , 0 );
 		}

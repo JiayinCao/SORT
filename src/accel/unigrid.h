@@ -44,6 +44,8 @@ private:
 	float		m_voxelInvExtent[3];
 	// the voxel data
 	vector<Primitive*>*	m_pVoxels;
+	// the delta
+	const float m_delta;
 
 	// initialize the data
 	void _init();
