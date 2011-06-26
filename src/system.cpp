@@ -64,9 +64,6 @@ void System::_postUninit()
 // render the image
 void System::Render()
 {
-	// preprocess before rendering
-	PreProcess();
-
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
@@ -81,9 +78,6 @@ void System::Render()
 				m_rt->SetColor( j , i , 0 , 0 , 0 );
 		}
 	}
-
-	// post process after rendering
-	PostProcess();
 }
 
 // output render target
