@@ -64,15 +64,15 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 		return false;
 
 	// get the intersect point
-	float t = Intersect( r , m_BBox , &(intersect->t) );
-	if( t < 0.0f )
+	float cur_t = Intersect( r , m_BBox , &(intersect->t) );
+	if( cur_t < 0.0f )
 		return false;
 
 	int 	curGrid[3] , dir[3];
 	float	delta[3] , next[3];
 	for( int i = 0 ; i < 3 ; i++ )
 	{
-		curGrid[i] = _point2VoxelId( r(t) , i );
+		curGrid[i] = _point2VoxelId( r(cur_t) , i );
 		dir[i] = ( r.m_Dir[i] > 0.0f ) ? 1 : -1;
 		if( r.m_Dir[i] != 0.0f )
 			delta[i] = fabs( m_voxelExtent[i] / r.m_Dir[i] );
@@ -88,18 +88,17 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	}
 
 	// traverse the uniform grid
-	float cur_t = t;
+	const unsigned array[] = { 0 , 0 , 1 , 0 , 2 , 2 , 1 , 0  };// [0] and [7] is impossible
 	while( cur_t < intersect->t )
 	{
 		// current voxel id
 		unsigned voxelId = _offset( curGrid[0] , curGrid[1] , curGrid[2] );
 
 		// get the next t
-		unsigned nextAxis = 2;
-		if( next[0] <= next[1] && next[0] <= next[2] )
-			nextAxis = 0;
-		else if( next[1] <= next[2] && next[1] <= next[0] )
-			nextAxis = 1;
+		unsigned nextAxis = (next[0] <= next[1])?1:0;
+		nextAxis |= (next[1] <= next[2])?2:0;
+		nextAxis |= (next[2] <= next[0])?4:0;
+		nextAxis = array[nextAxis];
 
 		// chech if there is intersection in the current grid
 		if( _getIntersect( r , intersect , voxelId , next[nextAxis] ) )
@@ -206,7 +205,7 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 		LOG_ERROR<<"Voxel id is out of range.("<<voxelId<<"/"<<m_voxelCount<<")"<<CRASH;
 
 	bool flag = false;
-	vector<Primitive*>::const_iterator it = m_pVoxels[voxelId].begin();
+	vector<Primitive*>::iterator it = m_pVoxels[voxelId].begin();
 	while( it != m_pVoxels[voxelId].end() )
 	{
 		flag |= (*it)->GetIntersect( r , intersect );
