@@ -26,7 +26,7 @@ public:
 	~Primitive(){}
 
 	// get the intersection between a ray and a primitive
-	virtual bool	GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
+	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
 
 	// get the bounding box of the primitive
 	virtual const BBox&	GetBBox() = 0;

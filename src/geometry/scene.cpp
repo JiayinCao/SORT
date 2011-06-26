@@ -32,7 +32,7 @@ bool Scene::LoadScene( const string& str )
 	// temporary
 	TriMesh* mesh = new TriMesh();
 	Transform t0 = Translate( Vector( 2 , 0 , 0 ) ) * RotateZ( 1.0f );
-	if( mesh->LoadMesh( "../res/teapot.obj" , t0 ) )
+	if( mesh->LoadMesh( "../res/cube.obj" , t0 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;
@@ -79,22 +79,12 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
 // get the intersection between a ray and the scene in a brute force way
 bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 {
-	bool bInter = false;
 	intersect->t = FLT_MAX;
 	int n = (int)m_triBuf.size();
 	for( int k = 0 ; k < n ; k++ )
-	{
-		Intersection in;
-		
-		if( m_triBuf[k]->GetIntersect( r , &in ) && in.t < intersect->t )
-		{
-			bInter = true;
-			intersect->t = in.t;
-			*intersect = in;
-		}
-	}
+		m_triBuf[k]->GetIntersect( r , intersect );
 
-	return bInter;
+	return intersect->t < r.m_fMax;
 }
 
 // release the memory of the scene
