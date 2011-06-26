@@ -12,13 +12,15 @@
 #include "geometry/intersection.h"
 
 // default constructor
-UniGrid::UniGrid()
+UniGrid::UniGrid():
+m_delta( 0.000001f )
 {
 	_init();
 }
 
 // constructor from a primitive list
-UniGrid::UniGrid( vector<Primitive*>* l ) : Accelerator(l)
+UniGrid::UniGrid( vector<Primitive*>* l ) :
+Accelerator(l) , m_delta( 0.00001f )
 {
 	_init();
 }
@@ -35,6 +37,7 @@ void UniGrid::_init()
 	for( int i = 0 ; i < 3 ; i++ )
 	{
 		m_voxelNum[i] = 0;
+		m_voxelExtent[i] = 0.0f;
 		m_voxelInvExtent[i] = 0.0f;
 	}
 	m_voxelCount = 0;
@@ -48,6 +51,7 @@ void UniGrid::_release()
 	for( int i = 0 ; i < 3 ; i++ )
 	{
 		m_voxelNum[i] = 0;
+		m_voxelExtent[i] = 0.0f;
 		m_voxelInvExtent[i] = 0.0f;
 	}
 	m_voxelCount = 0;
@@ -64,17 +68,14 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( t < 0.0f )
 		return false;
 
-	// the first intersect point
-	Point p = r(t);
-
 	int 	curGrid[3] , dir[3];
 	float	delta[3] , next[3];
 	for( int i = 0 ; i < 3 ; i++ )
 	{
-		curGrid[i] = _point2VoxelId( p , i );
+		curGrid[i] = _point2VoxelId( r(t) , i );
 		dir[i] = ( r.m_Dir[i] > 0.0f ) ? 1 : -1;
 		if( r.m_Dir[i] != 0.0f )
-			delta[i] = m_voxelExtent[i] / r.m_Dir[i];
+			delta[i] = fabs( m_voxelExtent[i] / r.m_Dir[i] );
 		else
 			delta[i] = FLT_MAX;
 	}
@@ -90,30 +91,24 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	float cur_t = t;
 	while( cur_t < intersect->t )
 	{
-	//	cout<<intersect->t<<" "<<cur_t<<" "<<curGrid[0]<<" "<<curGrid[1]<<" "<<curGrid[2]<<endl;
 		// current voxel id
 		unsigned voxelId = _offset( curGrid[0] , curGrid[1] , curGrid[2] );
 
-		cout<<curGrid[0]<<" "<<curGrid[1]<<" "<<curGrid[2]<<endl;
-
 		// get the next t
 		unsigned nextAxis = 2;
-		if( next[0] < next[1] && next[0] < next[2] )
+		if( next[0] <= next[1] && next[0] <= next[2] )
 			nextAxis = 0;
-		else if( next[1] < next[2] && next[1] < next[0] )
+		else if( next[1] <= next[2] && next[1] <= next[0] )
 			nextAxis = 1;
 
-		if( false == m_pVoxels[voxelId].empty() )
-			return true;
-
 		// chech if there is intersection in the current grid
-//		if( _getIntersect( r , intersect , voxelId , next[nextAxis] ) )
-//			return true;
+		if( _getIntersect( r , intersect , voxelId , next[nextAxis] ) )
+			return true;
 
 		// get to the next voxel
 		curGrid[nextAxis] += dir[nextAxis];
 
-		if( curGrid[nextAxis] < 0 || curGrid[nextAxis] >= m_voxelNum[nextAxis] )
+		if( curGrid[nextAxis] < 0 || (unsigned)curGrid[nextAxis] >= m_voxelNum[nextAxis] )
 			return false;
 
 		// update next
@@ -147,7 +142,7 @@ void UniGrid::Build()
 	// the grid size
 	for( int i = 0 ; i < 3 ; i++ )
 	{
-		m_voxelNum[i] = (unsigned)(min( 64.0f , gridPerDistance * delta[i] ));
+		m_voxelNum[i] = (unsigned)(min( 256.0f , gridPerDistance * delta[i] ));
 		m_voxelInvExtent[i] = m_voxelNum[i] / delta[i];
 		m_voxelExtent[i] = 1.0f / m_voxelInvExtent[i];
 	}
@@ -170,9 +165,9 @@ void UniGrid::Build()
 			maxGridId[i] = _point2VoxelId( (*it)->GetBBox().m_Max , i );
 		}
 
-		for( unsigned i = minGridId[2] ; i < maxGridId[2] ; i++ )
-			for( unsigned j = minGridId[1] ; j < maxGridId[1] ; j++ )
-				for( unsigned k = minGridId[0] ; k < maxGridId[0] ; k++ )
+		for( unsigned i = minGridId[2] ; i <= maxGridId[2] ; i++ )
+			for( unsigned j = minGridId[1] ; j <= maxGridId[1] ; j++ )
+				for( unsigned k = minGridId[0] ; k <= maxGridId[0] ; k++ )
 				{
 					unsigned offset = _offset( k , j , i );
 					m_pVoxels[offset].push_back( *it );
@@ -210,12 +205,13 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 	if( voxelId >= m_voxelCount )
 		LOG_ERROR<<"Voxel id is out of range.("<<voxelId<<"/"<<m_voxelCount<<")"<<CRASH;
 
+	bool flag = false;
 	vector<Primitive*>::const_iterator it = m_pVoxels[voxelId].begin();
 	while( it != m_pVoxels[voxelId].end() )
 	{
-		(*it)->GetIntersect( r , intersect );
+		flag |= (*it)->GetIntersect( r , intersect );
 		it++;
 	}
 
-	return intersect->t < nextT ;
+	return flag && ( intersect->t < nextT + m_delta );
 }

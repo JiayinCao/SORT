@@ -43,7 +43,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
         det = -det;
     }
 
-    if( det < 0.0001f )
+    if( det < 0.0000001f )
 		return false;
 
     // Calculate U parameter and test bounds
@@ -74,7 +74,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	intersect->intersect = u * p0 + v * p1 + ( 1 - u - v ) * p2;
 
 	// store normal if the info is available
-	if( mem->m_iNBCount >= 0 )
+	if( mem->m_iNBCount > 0 )
 	{
 		id0 = index[0].norIndex;
 		id1 = index[1].norIndex;

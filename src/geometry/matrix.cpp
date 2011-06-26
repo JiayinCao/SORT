@@ -95,3 +95,15 @@ Matrix Matrix::Transpose() const
 					m[2] , m[6] , m[10] , m[14] ,
 					m[3] , m[7] , m[11] , m[15] );
 }
+
+// whether the matrix have scale factor
+bool Matrix::HasScale() const
+{
+	float l0 = Vector( m[0] , m[4] , m[8] ).Length();
+	float l1 = Vector( m[1] , m[5] , m[9] ).Length();
+	float l2 = Vector( m[2] , m[6] , m[7] ).Length();
+
+#define	IS_ONE(x) ((x)>0.999f && (x)<1.001f )
+	return !( IS_ONE(l0) && IS_ONE(l1) && IS_ONE(l2) );
+#undef IS_ONE
+}
