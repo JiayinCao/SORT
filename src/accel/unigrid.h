@@ -40,6 +40,7 @@ private:
 	// the voxel count
 	unsigned	m_voxelNum[3];
 	// extent of grid in each dimension
+	float		m_voxelExtent[3];
 	float		m_voxelInvExtent[3];
 	// the voxel data
 	vector<Primitive*>*	m_pVoxels;
@@ -50,8 +51,13 @@ private:
 	void _release();
 	// from point to voxel
 	unsigned _point2VoxelId( const Point& p , unsigned axis ) const;
+	// give the bottom left corner of the voxel
+	Point	_voxelId2Point( int voxel[3] ) const;
 	// get the id offset
 	unsigned _offset( unsigned x , unsigned y , unsigned z ) const;
+	// get intersect in grid
+	// if the voxel id is out of range , there will be a runtime error
+	bool _getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const;
 };
 
 #endif

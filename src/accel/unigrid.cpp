@@ -9,6 +9,7 @@
 #include "managers/logmanager.h"
 #include <math.h>
 #include "geometry/primitive.h"
+#include "geometry/intersection.h"
 
 // default constructor
 UniGrid::UniGrid()
@@ -58,9 +59,69 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( m_pVoxels == 0 )
 		return false;
 
-	// traverse the uniform grid
+	// get the intersect point
+	float t = Intersect( r , m_BBox , &(intersect->t) );
+	if( t < 0.0f )
+		return false;
 
-	return true;
+	// the first intersect point
+	Point p = r(t);
+
+	int 	curGrid[3] , dir[3];
+	float	delta[3] , next[3];
+	for( int i = 0 ; i < 3 ; i++ )
+	{
+		curGrid[i] = _point2VoxelId( p , i );
+		dir[i] = ( r.m_Dir[i] > 0.0f ) ? 1 : -1;
+		if( r.m_Dir[i] != 0.0f )
+			delta[i] = m_voxelExtent[i] / r.m_Dir[i];
+		else
+			delta[i] = FLT_MAX;
+	}
+	Point gridCorner = _voxelId2Point( curGrid );
+	for( int i = 0 ; i < 3 ; i++ )
+	{
+		// get the next t
+		float target = gridCorner[i] + ((dir[i]+1)>>1) * m_voxelExtent[i];
+		next[i] = ( target - r.m_Ori[i] ) / r.m_Dir[i];
+	}
+
+	// traverse the uniform grid
+	float cur_t = t;
+	while( cur_t < intersect->t )
+	{
+	//	cout<<intersect->t<<" "<<cur_t<<" "<<curGrid[0]<<" "<<curGrid[1]<<" "<<curGrid[2]<<endl;
+		// current voxel id
+		unsigned voxelId = _offset( curGrid[0] , curGrid[1] , curGrid[2] );
+
+		cout<<curGrid[0]<<" "<<curGrid[1]<<" "<<curGrid[2]<<endl;
+
+		// get the next t
+		unsigned nextAxis = 2;
+		if( next[0] < next[1] && next[0] < next[2] )
+			nextAxis = 0;
+		else if( next[1] < next[2] && next[1] < next[0] )
+			nextAxis = 1;
+
+		if( false == m_pVoxels[voxelId].empty() )
+			return true;
+
+		// chech if there is intersection in the current grid
+//		if( _getIntersect( r , intersect , voxelId , next[nextAxis] ) )
+//			return true;
+
+		// get to the next voxel
+		curGrid[nextAxis] += dir[nextAxis];
+
+		if( curGrid[nextAxis] < 0 || curGrid[nextAxis] >= m_voxelNum[nextAxis] )
+			return false;
+
+		// update next
+		cur_t = next[nextAxis];
+		next[nextAxis] += delta[nextAxis];
+	}
+	
+	return false;
 }
 
 // build the acceleration structure
@@ -88,6 +149,7 @@ void UniGrid::Build()
 	{
 		m_voxelNum[i] = (unsigned)(min( 64.0f , gridPerDistance * delta[i] ));
 		m_voxelInvExtent[i] = m_voxelNum[i] / delta[i];
+		m_voxelExtent[i] = 1.0f / m_voxelInvExtent[i];
 	}
 
 	m_voxelCount = m_voxelNum[0] * m_voxelNum[1] * m_voxelNum[2];
@@ -122,11 +184,38 @@ void UniGrid::Build()
 // voxel id from point
 unsigned UniGrid::_point2VoxelId( const Point& p , unsigned axis ) const
 {
-	return (unsigned)( ( p[axis] - m_BBox.m_Min[axis] ) * m_voxelInvExtent[axis] );
+	return min( m_voxelNum[axis] - 1 , (unsigned)( ( p[axis] - m_BBox.m_Min[axis] ) * m_voxelInvExtent[axis] ) );
 }
 
 // get the id offset
 unsigned UniGrid::_offset( unsigned x , unsigned y , unsigned z ) const
 {
 	return z * m_voxelNum[1] * m_voxelNum[0] + y * m_voxelNum[0] + x;
+}
+
+// voxel id to point
+Point UniGrid::_voxelId2Point( int id[3] ) const
+{
+	Point p;
+	p.x = m_BBox.m_Min.x + id[0] * m_voxelExtent[0];
+	p.y = m_BBox.m_Min.y + id[1] * m_voxelExtent[1];
+	p.z = m_BBox.m_Min.z + id[2] * m_voxelExtent[2];
+
+	return p;
+}
+
+// get intersection between the ray and the triangles in the grid
+bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const
+{
+	if( voxelId >= m_voxelCount )
+		LOG_ERROR<<"Voxel id is out of range.("<<voxelId<<"/"<<m_voxelCount<<")"<<CRASH;
+
+	vector<Primitive*>::const_iterator it = m_pVoxels[voxelId].begin();
+	while( it != m_pVoxels[voxelId].end() )
+	{
+		(*it)->GetIntersect( r , intersect );
+		it++;
+	}
+
+	return intersect->t < nextT ;
 }
