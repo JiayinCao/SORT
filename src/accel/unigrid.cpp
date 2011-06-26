@@ -95,9 +95,7 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 		unsigned voxelId = _offset( curGrid[0] , curGrid[1] , curGrid[2] );
 
 		// get the next t
-		unsigned nextAxis = (next[0] <= next[1])?1:0;
-		nextAxis |= (next[1] <= next[2])?2:0;
-		nextAxis |= (next[2] <= next[0])?4:0;
+		unsigned nextAxis = (next[0] <= next[1])+((unsigned)(next[1] <= next[2]))*2+((unsigned)(next[2] <= next[0]))*4;
 		nextAxis = array[nextAxis];
 
 		// chech if there is intersection in the current grid
@@ -136,7 +134,7 @@ void UniGrid::Build()
 	unsigned count = m_primitives->size();
 	
 	// grid per distance
-	float gridPerDistance = 3 * powf( (float)count , 0.333f ) / extent;
+	float gridPerDistance = 3 * powf( (float)count , 0.333f ) / extent ;
 
 	// the grid size
 	for( int i = 0 ; i < 3 ; i++ )

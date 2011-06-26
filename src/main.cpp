@@ -26,10 +26,12 @@ int main( int argc , char** argv )
 	camera->SetRenderTarget( g_System.m_rt );
 	g_System.m_camera = camera;
 
+	g_System.PreProcess();
 	Timer::GetSingleton().StartTimer();
-	g_System.Render();
+	for( int i = 0 ; i < 10 ; i++ )
+		g_System.Render();
 	Timer::GetSingleton().StopTimer();
-	cout<<Timer::GetSingleton().GetElapsedTime()<<endl;
+	cout<<Timer::GetSingleton().GetElapsedTime()/10<<endl;
 
 	g_System.OutputRT( "t.bmp" );
 
