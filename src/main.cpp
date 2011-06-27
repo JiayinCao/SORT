@@ -28,10 +28,9 @@ int main( int argc , char** argv )
 
 	g_System.PreProcess();
 	Timer::GetSingleton().StartTimer();
-	for( int i = 0 ; i < 10 ; i++ )
-		g_System.Render();
+	g_System.Render();
 	Timer::GetSingleton().StopTimer();
-	cout<<Timer::GetSingleton().GetElapsedTime()/10<<endl;
+	cout<<Timer::GetSingleton().GetElapsedTime()<<endl;
 
 	g_System.OutputRT( "t.bmp" );
 

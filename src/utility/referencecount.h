@@ -44,7 +44,7 @@ public:
 		if( ptr ) ptr->reference++;
 	}
 	// destructor
-	~Reference(){ if( ptr ) ptr->reference--; ptr = 0; }
+	virtual ~Reference(){ if( ptr ) ptr->reference--; ptr = 0; }
 
 	// = operator
 	Reference& operator=( const Reference<T>& r )

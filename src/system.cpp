@@ -39,7 +39,7 @@ void System::_preInit()
 
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
-	m_rt->SetSize( 800 , 600 );
+	m_rt->SetSize( 1024 , 768 );
 	// there is no default value for camera , it must be set in the script file
 	m_camera = 0;
 }

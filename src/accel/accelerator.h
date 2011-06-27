@@ -31,7 +31,7 @@ public:
 	// para 'l' ; the primitive list
 	Accelerator( vector<Primitive*>* l ) : m_primitives(l){}
 	// destructor
-	~Accelerator(){ m_primitives = 0; }
+	virtual ~Accelerator(){ m_primitives = 0;}
 
 	// get the intersection between the ray and the primitive set
 	// para 'r' : the ray

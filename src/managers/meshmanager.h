@@ -56,6 +56,8 @@ public:
 	unsigned		m_iTriNum;
 	// the tri mesh
 	TriMesh*		m_pPrototype;
+	// the name for the file
+	std::string		m_filename;
 
 	// set default data for the buffer memory
 	BufferMemory()

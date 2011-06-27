@@ -13,7 +13,7 @@
 
 // default constructor
 UniGrid::UniGrid():
-m_delta( 0.000001f )
+m_delta( 0.001f )
 {
 	_init();
 }

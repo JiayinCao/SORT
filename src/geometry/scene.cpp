@@ -31,7 +31,7 @@ bool Scene::LoadScene( const string& str )
 {
 	// temporary
 	TriMesh* mesh = new TriMesh();
-	Transform t0 = Translate( Vector( 2 , 0 , 0 ) ) * RotateZ( 1.0f ) * Scale( 0.8f , 0.8f , 0.8f );
+	Transform t0 = Translate( Vector( 2 , 0 , 0 ) ) * RotateZ( 1.0f ) * Scale( 0.05f , 0.05f , 0.05f );
 	if( mesh->LoadMesh( "../res/bunny.obj" , t0 ) )
 		m_meshBuf.push_back( mesh );
 	else
@@ -90,7 +90,7 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 // release the memory of the scene
 void Scene::Release()
 {
-	SAFE_DELETE( m_pAccelerator );
+	SAFE_DELETE_ARRAY( m_pAccelerator );
 
 	vector<Primitive*>::iterator it = m_triBuf.begin();
 	while( it != m_triBuf.end() )
