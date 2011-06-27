@@ -49,8 +49,6 @@ private:
 	vector<Primitive*>*	m_pVoxels;
 	// the delta
 	const float m_delta;
-	// intersect id
-	mutable unsigned	m_intersectId;
 
 	// initialize the data
 	void _init();

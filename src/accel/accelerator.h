@@ -63,7 +63,7 @@ protected:
 	BBox	m_BBox;
 
 	// the mail box for avoiding intersection test with duplicate triangles
-	bool*	m_pMailBox;
+	unsigned char*	m_pMailBox;
 
 	// compute the bounding box of the primitives
 	void _computeBBox();
