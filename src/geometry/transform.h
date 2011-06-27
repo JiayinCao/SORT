@@ -86,6 +86,10 @@ inline Transform Scale( float x , float y , float z )
 				 0.0f , 0.0f , 0.0f , 1.0f );
 	return Transform( m , invm );
 }
+inline Transform Scale( float s )
+{
+	return Scale( s , s , s );
+}
 
 // rotate around x axis
 inline Transform RotateX( float angle )

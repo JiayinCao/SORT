@@ -26,9 +26,6 @@ m_bNormal( vector.m_bNormal )
 	x = vector.x;
 	y = vector.y;
 	z = vector.z;
-
-	if( m_bNormal && ( x != 0.0f || y != 0.0f || z != 0.0f ) )
-		Normalize();
 }
 
 // constructor from three float data
@@ -38,9 +35,6 @@ m_bNormal( normal )
 	x = _x;
 	y = _y;
 	z = _z;
-
-	if( m_bNormal && ( x != 0.0f || y != 0.0f || z != 0.0f ) )
-		Normalize();
 }
 
 // destructor does nothing here
