@@ -27,7 +27,7 @@ m_bNormal( vector.m_bNormal )
 	y = vector.y;
 	z = vector.z;
 
-	if( m_bNormal )
+	if( m_bNormal && ( x != 0.0f || y != 0.0f || z != 0.0f ) )
 		Normalize();
 }
 
@@ -39,7 +39,7 @@ m_bNormal( normal )
 	y = _y;
 	z = _z;
 
-	if( m_bNormal )
+	if( m_bNormal && ( x != 0.0f || y != 0.0f || z != 0.0f ) )
 		Normalize();
 }
 

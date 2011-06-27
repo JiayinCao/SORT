@@ -23,7 +23,7 @@ public:
 	// constructor from a transformation
 	Primitive(){}
 	// destructor
-	~Primitive(){}
+	virtual ~Primitive(){}
 
 	// get the intersection between a ray and a primitive
 	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;

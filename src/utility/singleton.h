@@ -25,7 +25,7 @@ public:
 		m_pSingleton = static_cast<T*>(this);	
 	}
 	// destructor
-	~Singleton()
+	virtual ~Singleton()
 	{
 		m_pSingleton = 0;
 	}

@@ -25,6 +25,7 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 	if( false == file.is_open() )
 		return false;
 
+	mem->m_filename = str;
 	mem->m_iTriNum = 0;
 
 	while( true )
