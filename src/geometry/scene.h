@@ -47,6 +47,9 @@ public:
 	// release the memory of the scene
 	void	Release();
 
+	// output log information
+	void	OutputLog() const;
+
 // private field
 private:
 	// the buffer for the triangle mesh
@@ -57,6 +60,9 @@ private:
 
 	// the acceleration structure for the scene
 	Accelerator*		m_pAccelerator;
+
+	// the file name for the scene
+	string		m_filename;
 
 // private method
 	

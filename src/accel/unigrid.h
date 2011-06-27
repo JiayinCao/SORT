@@ -33,6 +33,9 @@ public:
 	// build the acceleration structure
 	virtual void Build();
 
+	// output log information
+	void OutputLog() const;
+
 // private field
 private:
 	// the number of voxels
@@ -46,6 +49,8 @@ private:
 	vector<Primitive*>*	m_pVoxels;
 	// the delta
 	const float m_delta;
+	// intersect id
+	mutable unsigned	m_intersectId;
 
 	// initialize the data
 	void _init();

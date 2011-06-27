@@ -6,6 +6,7 @@
 
 // include the header file
 #include "kdtree.h"
+#include "managers/logmanager.h"
 
 // default constructor
 KDTree::KDTree()
@@ -33,4 +34,10 @@ void KDTree::Build()
 {
 	// get the bounding box for the whole primitive list
 	_computeBBox();
+}
+
+// output log
+void KDTree::OutputLog() const
+{
+	LOG<<"KD-Tree is not implemented yet."<<ENDL;
 }

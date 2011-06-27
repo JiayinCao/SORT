@@ -2,7 +2,7 @@ BIN_PATH = ../bin
 OBJ_PATH = $(BIN_PATH)/obj
 INC_PATH = -I.
 
-COMPILE_FLAG = $(INC_PATH)
+COMPILE_FLAG = $(INC_PATH) -g
 
 LIBSRCS = $(wildcard *.cpp)
 LIBSRCS += $(wildcard geometry/*.cpp)

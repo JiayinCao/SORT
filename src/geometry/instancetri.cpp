@@ -10,8 +10,8 @@
 #include "trimesh.h"
 
 // constructor from a triangle
-InstanceTriangle::InstanceTriangle( const TriMesh* mesh , const unsigned index , Transform* t ):
-Triangle( mesh , index ) , transform( t )
+InstanceTriangle::InstanceTriangle( unsigned pid , const TriMesh* mesh , unsigned index , Transform* t ):
+Triangle( pid , mesh , index ) , transform( t )
 {
 }
 
@@ -34,7 +34,7 @@ bool	InstanceTriangle::GetIntersect( const Ray& r , Intersection* intersect ) co
 
 	// transform the intersection
 	intersect->intersect = (*transform)(intersect->intersect);
-	intersect->normal = (*transform)(intersect->normal);
+	intersect->normal = ((*transform)(intersect->normal)).Normalize();
 
 	return true;
 }

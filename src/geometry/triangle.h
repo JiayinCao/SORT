@@ -20,10 +20,11 @@ class	Triangle : public Primitive
 // public method
 public:
 	// constructor
+	// para 'pid'     : primitive id
 	// para 'trimesh' : the triangle mesh it belongs to
 	// para 'index'   : the index buffer
-	// para 'vb'      : the vertex buffer
-	Triangle( const TriMesh* mesh , unsigned id ): m_trimesh(mesh) , m_id(id) {}
+	Triangle( unsigned pid , const TriMesh* mesh , unsigned id ):
+		Primitive(pid) , m_trimesh(mesh) , m_id(id) {}
 	// destructor
 	~Triangle(){}
 

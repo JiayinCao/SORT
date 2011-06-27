@@ -60,11 +60,19 @@ void UniGrid::_release()
 // get the intersection between the ray and the primitive set
 bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
-	if( m_pVoxels == 0 )
+	if( m_pVoxels == 0 || m_primitives == 0 )
+	{
+		LOG_WARNING<<"There is no primitive data in uniform grid."<<ENDL;
 		return false;
+	}
+
+	// clear the mail box first
+	memset( m_pMailBox , 0 , sizeof( bool ) * m_primitives->size() / 8 );
+	m_intersectId = 0xffffffff;
 
 	// get the intersect point
 	float cur_t = Intersect( r , m_BBox , &(intersect->t) );
+	float maxt = intersect->t;
 	if( cur_t < 0.0f )
 		return false;
 
@@ -106,21 +114,21 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 		curGrid[nextAxis] += dir[nextAxis];
 
 		if( curGrid[nextAxis] < 0 || (unsigned)curGrid[nextAxis] >= m_voxelNum[nextAxis] )
-			return false;
+			return intersect->t < maxt;
 
 		// update next
 		cur_t = next[nextAxis];
 		next[nextAxis] += delta[nextAxis];
 	}
 	
-	return false;
+	return intersect->t < maxt;
 }
 
 // build the acceleration structure
 void UniGrid::Build()
 {
 	if( m_primitives == 0 || m_primitives->empty() )
-		LOG_WARNING<<"There is no data in the uniform grid"<<ENDL;
+		LOG_WARNING<<"There is no primitive in the uniform grid"<<ENDL;
 
 	// find the bounding box first
 	_computeBBox();
@@ -171,6 +179,10 @@ void UniGrid::Build()
 				}
 		it++;
 	}
+
+	// create the mail box
+	SAFE_DELETE_ARRAY(m_pMailBox);
+	m_pMailBox = new bool[ count / 8 ];
 }
 
 // voxel id from point
@@ -202,13 +214,37 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 	if( voxelId >= m_voxelCount )
 		LOG_ERROR<<"Voxel id is out of range.("<<voxelId<<"/"<<m_voxelCount<<")"<<CRASH;
 
-	bool flag = false;
+	bool inter = false;
 	vector<Primitive*>::iterator it = m_pVoxels[voxelId].begin();
 	while( it != m_pVoxels[voxelId].end() )
 	{
-		flag |= (*it)->GetIntersect( r , intersect );
+		unsigned id = (*it)->GetID();
+		unsigned offset = id >> 3;
+		unsigned flag = 0x00000001 << ( id & 7 );
+
+		// get intersection
+		if( 0 == (flag & m_pMailBox[offset]) )
+			flag |= (*it)->GetIntersect( r , intersect );
+
+		// mark the triangle as checked
+		m_pMailBox[offset] |= flag;
+
 		it++;
 	}
 
-	return flag && ( intersect->t < nextT + m_delta );
+	return inter && ( intersect->t < nextT + m_delta );
 }
+
+// output log information
+void UniGrid::OutputLog() const
+{
+	LOG<<"Accelerator Type : Uniform Grid"<<ENDL;
+	LOG<<"Total Grid Count : "<<m_voxelCount<<ENDL;
+	LOG<<"Grid Dimenstion  : "<<m_voxelNum[0]<<"*"<<m_voxelNum[1]<<"*"<<m_voxelNum[2]<<ENDL;
+
+	unsigned count = 0;
+	for( unsigned i = 0 ; i < m_voxelCount ; i++ )
+		count += m_pVoxels[i].size();
+	LOG<<"Triangles per Grid: "<<(float)count/(float)m_voxelCount<<ENDL;
+}
+
