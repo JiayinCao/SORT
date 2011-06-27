@@ -109,6 +109,9 @@ void System::PreProcess()
 	// load the scene
 	m_Scene.LoadScene("");
 	m_Scene.PreProcess();
+
+	// output log
+	m_Scene.OutputLog();
 }
 
 // post-process after rendering

@@ -21,7 +21,9 @@ class	Primitive
 // public method
 public:
 	// constructor from a transformation
-	Primitive(){}
+	Primitive(){m_primitive_id=0;}
+	// constructor from a id
+	Primitive( unsigned id ) { m_primitive_id = id; }
 	// destructor
 	virtual ~Primitive(){}
 
@@ -37,10 +39,15 @@ public:
 		m_bbox.Delete();
 	}
 
+	// get primitive id
+	unsigned GetID() const { return m_primitive_id; }
+
 // protected field
 protected:
 	// bounding box
 	SmartPtr<BBox> m_bbox;
+	// id for the primitive
+	unsigned m_primitive_id;
 };
 
 #endif

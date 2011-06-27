@@ -90,7 +90,7 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 // release the memory of the scene
 void Scene::Release()
 {
-	SAFE_DELETE_ARRAY( m_pAccelerator );
+	SAFE_DELETE( m_pAccelerator );
 
 	vector<Primitive*>::iterator it = m_triBuf.begin();
 	while( it != m_triBuf.end() )
@@ -119,4 +119,14 @@ void Scene::_generateTriBuf()
 		(*it)->FillTriBuf( m_triBuf );
 		it++;
 	}
+}
+
+// output log information
+void Scene::OutputLog() const
+{
+	LOG<<"Scene File Name:\t"<<m_filename<<ENDL;
+	LOG<<"Triangle Count :\t"<<m_triBuf.size()<<ENDL;
+
+	if( m_pAccelerator )
+		m_pAccelerator->OutputLog();
 }

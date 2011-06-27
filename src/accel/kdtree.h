@@ -35,6 +35,8 @@ public:
 	// build the acceleration structure
 	virtual void Build();
 
+	// Output log information
+	virtual void OutputLog() const;
 // private field
 private:
 

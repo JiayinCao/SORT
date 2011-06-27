@@ -26,12 +26,12 @@ class	Accelerator
 // public method
 public:
 	// default constructor
-	Accelerator(){ m_primitives = 0; }
+	Accelerator(){ m_primitives = 0; m_pMailBox = 0; }
 	// constructor from primitive list
 	// para 'l' ; the primitive list
 	Accelerator( vector<Primitive*>* l ) : m_primitives(l){}
 	// destructor
-	virtual ~Accelerator(){ m_primitives = 0;}
+	virtual ~Accelerator(){ SAFE_DELETE_ARRAY(m_pMailBox); m_primitives = 0;}
 
 	// get the intersection between the ray and the primitive set
 	// para 'r' : the ray
@@ -41,6 +41,9 @@ public:
 
 	// build the acceleration structure
 	virtual void Build() = 0;
+
+	// output log information
+	virtual void OutputLog() const = 0;
 
 	// get bounding box
 	const BBox& GetBBox() const { return m_BBox; }
@@ -58,6 +61,9 @@ protected:
 
 	// the bounding box of the primitives
 	BBox	m_BBox;
+
+	// the mail box for avoiding intersection test with duplicate triangles
+	bool*	m_pMailBox;
 
 	// compute the bounding box of the primitives
 	void _computeBBox();
