@@ -31,7 +31,7 @@ bool Scene::LoadScene( const string& str )
 {
 	// temporary
 	TriMesh* mesh = new TriMesh();
-	Transform t0 = Translate( Vector( 2 , 0 , 0 ) ) * RotateZ( 1.0f ) * Scale( 0.05f , 0.05f , 0.05f );
+	Transform t0 = Scale( 0.01f , 0.01f , 0.01f );
 	if( mesh->LoadMesh( "../res/bunny.obj" , t0 ) )
 		m_meshBuf.push_back( mesh );
 	else

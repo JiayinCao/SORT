@@ -13,14 +13,14 @@
 
 // default constructor
 UniGrid::UniGrid():
-m_delta( 0.001f )
+m_delta( 0.00001f )
 {
 	_init();
 }
 
 // constructor from a primitive list
 UniGrid::UniGrid( vector<Primitive*>* l ) :
-Accelerator(l) , m_delta( 0.00001f )
+Accelerator(l) , m_delta( 0.01f )
 {
 	_init();
 }

@@ -43,7 +43,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
         det = -det;
     }
 
-    if( det < 0.0000001f )
+    if( det < 0.000000001f )
 		return false;
 
     // Calculate U parameter and test bounds
@@ -71,7 +71,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 		return false;
 
 	// store the intersection
-	intersect->intersect = u * p0 + v * p1 + ( 1 - u - v ) * p2;
+	intersect->intersect = r(t);
 
 	// store normal if the info is available
 	if( mem->m_iNBCount > 0 )
@@ -80,7 +80,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 		id1 = index[1].norIndex;
 		id2 = index[2].norIndex;
 
-		intersect->normal = ( 1 - v - u ) * mem->m_NormalBuffer[id0] + u * mem->m_NormalBuffer[id1] + v * mem->m_NormalBuffer[id2];
+		intersect->normal = (( 1 - v - u ) * mem->m_NormalBuffer[id0] + u * mem->m_NormalBuffer[id1] + v * mem->m_NormalBuffer[id2]).Normalize();
 	}
 
 	// store texture coordinate
@@ -91,10 +91,12 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 		id2 = index[2].texIndex;
 
 		intersect->u = ( 1 - v - u ) * mem->m_TexCoordBuffer[2*id0] + u * mem->m_TexCoordBuffer[2*id1] + v * mem->m_TexCoordBuffer[2*id2];
-		intersect->v = ( 1 - v - u ) * mem->m_TexCoordBuffer[2*id0] + u * mem->m_TexCoordBuffer[2*id1+1] + v * mem->m_TexCoordBuffer[2*id2+1];
+		intersect->v = ( 1 - v - u ) * mem->m_TexCoordBuffer[2*id0+1] + u * mem->m_TexCoordBuffer[2*id1+1] + v * mem->m_TexCoordBuffer[2*id2+1];
 	}
 
 	intersect->t = t;
+	intersect->u = u;
+	intersect->v = v;
 
     return t > 0.0f ;
 }
