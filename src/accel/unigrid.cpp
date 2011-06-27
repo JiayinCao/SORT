@@ -67,8 +67,7 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	}
 
 	// clear the mail box first
-	memset( m_pMailBox , 0 , sizeof( bool ) * m_primitives->size() / 8 );
-	m_intersectId = 0xffffffff;
+	memset( m_pMailBox , 0 , sizeof( unsigned char ) * ( m_primitives->size() + 7 ) / 8 );
 
 	// get the intersect point
 	float cur_t = Intersect( r , m_BBox , &(intersect->t) );
@@ -182,7 +181,7 @@ void UniGrid::Build()
 
 	// create the mail box
 	SAFE_DELETE_ARRAY(m_pMailBox);
-	m_pMailBox = new bool[ count / 8 ];
+	m_pMailBox = new unsigned char[ ( count + 7 ) / 8  ];
 }
 
 // voxel id from point
@@ -219,12 +218,12 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 	while( it != m_pVoxels[voxelId].end() )
 	{
 		unsigned id = (*it)->GetID();
-		unsigned offset = id >> 3;
-		unsigned flag = 0x00000001 << ( id & 7 );
+		unsigned offset = id / 8;
+		unsigned flag = 0x00000001 << ( id % 8 );
 
 		// get intersection
 		if( 0 == (flag & m_pMailBox[offset]) )
-			flag |= (*it)->GetIntersect( r , intersect );
+			inter |= (*it)->GetIntersect( r , intersect );
 
 		// mark the triangle as checked
 		m_pMailBox[offset] |= flag;

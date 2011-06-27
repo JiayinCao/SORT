@@ -20,8 +20,6 @@ class	Primitive
 {
 // public method
 public:
-	// constructor from a transformation
-	Primitive(){m_primitive_id=0;}
 	// constructor from a id
 	Primitive( unsigned id ) { m_primitive_id = id; }
 	// destructor
