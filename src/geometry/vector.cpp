@@ -192,9 +192,10 @@ Vector& Vector::Normalize()
 
 	// divide the vector
 	if( len == 0 )
-		LOG_ERROR<<"Try to normalize a zero length vector!!"<<CRASH;
+		LOG_WARNING<<"Try to normalize a zero length vector!!"<<ENDL;
 	
-	*this /= len;
+	if( len != 0 )
+		*this /= len;
 
 	return *this;
 }

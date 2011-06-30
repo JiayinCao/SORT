@@ -44,14 +44,13 @@ public:
 	// para 'tex' : texture of the output
 	// para 'type': the way we output the texture
 	// result     : 'true' if the texture is output successfully
-	bool Write( const string& str , const Texture* tex , TEX_TYPE type );
+	bool Write( const string& str , const Texture* tex );
 
 	// load the image from file , if the specific image is already existed in the current system , just return the pointer
 	// para 'str'  : name of the image file
 	// para 'tex'  : output to the texture
-	// para 'type' : the type of the image file
 	// result      : 'true' if loading is successful
-	bool Read( const string& str , ImageTexture* tex , TEX_TYPE type );
+	bool Read( const string& str , ImageTexture* tex );
 
 	// get the reference count
 	// para 'str' : the name of the image file

@@ -31,8 +31,8 @@ bool Scene::LoadScene( const string& str )
 {
 	// temporary
 	TriMesh* mesh = new TriMesh();
-	Transform t0 = Scale( 0.01f , 0.01f , 0.01f );
-	if( mesh->LoadMesh( "../res/bunny.obj" , t0 ) )
+	Transform t0 ;//= Scale( 0.01f , 0.01f , 0.01f );
+	if( mesh->LoadMesh( "../res/cube.ply" , t0 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;

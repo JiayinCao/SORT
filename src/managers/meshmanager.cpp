@@ -6,7 +6,9 @@
 
 // include the header file
 #include "meshmanager.h"
+#include "utility/strhelper.h"
 #include "meshio/objloader.h"
+#include "meshio/plyloader.h"
 #include "geometry/trimesh.h"
 #include "geometry/triangle.h"
 
@@ -18,6 +20,7 @@ void MeshManager::_init()
 {
 	// register the mesh loaders
 	m_MeshLoader.push_back( new ObjLoader() );
+	m_MeshLoader.push_back( new PlyLoader() );
 }
 
 // release the memory
@@ -66,8 +69,11 @@ MeshLoader*	MeshManager::_getMeshLoader( MESH_TYPE type ) const
 }
 
 // load the mesh from file
-bool MeshManager::LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type )
+bool MeshManager::LoadMesh( const string& str , TriMesh* mesh )
 {
+	// get the mesh type
+	MESH_TYPE type = MeshTypeFromStr( str );
+
 	// find the mesh memory first
 	map< string , BufferMemory* >::const_iterator it = m_Buffers.find( str );
 	while( it != m_Buffers.end() )

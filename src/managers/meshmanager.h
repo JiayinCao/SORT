@@ -88,9 +88,8 @@ public:
 	// load the mesh from file
 	// para 'str'  : name of the file
 	// para 'mesh' : triangle mesh
-	// para 'type' : the type of the mesh
 	// result      : 'true' if loading is successful
-	bool LoadMesh( const string& str , TriMesh* mesh , MESH_TYPE type );
+	bool LoadMesh( const string& str , TriMesh* mesh );
 
 // private field
 private:

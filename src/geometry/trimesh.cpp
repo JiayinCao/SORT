@@ -31,13 +31,13 @@ void TriMesh::_init()
 }
 
 // load the mesh
-bool TriMesh::LoadMesh( const string& str , Transform& transform , MESH_TYPE type )
+bool TriMesh::LoadMesh( const string& str , Transform& transform )
 {
 	// set the tranformation
 	m_Transform = transform;
 
 	// load the mesh
-	bool flag = MeshManager::GetSingleton().LoadMesh( str , this , type );
+	bool flag = MeshManager::GetSingleton().LoadMesh( str , this );
 	if( false == flag )
 		return false;
 
