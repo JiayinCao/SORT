@@ -35,7 +35,6 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 	float version;
 	int nprops;
 	int num_elems;
-	PlyProperty **plist;
 	char *elem_name;
 
 	// open file for reading
@@ -51,7 +50,7 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 	{
 		/* get the description of the first element */
 		elem_name = elist[i];
-		plist = ply_get_element_description (ply, elem_name, &num_elems, &nprops);
+		ply_get_element_description (ply, elem_name, &num_elems, &nprops);
 
 		if (equal_strings ("vertex", elem_name))
 		{
@@ -79,31 +78,18 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 				PlyIndex index;
 				ply_get_element (ply, (void *)&index);
 
-				// we only support triangle and quad here
-				if( index.count == 3 )
+				int curId = 1;
+				for( unsigned i = 0 ; i < index.count - 2 ; i++ )
 				{
 					VertexIndex vid;
 					vid.posIndex = index.index[0];
 					mem->m_IndexBuffer.push_back( vid );
-					vid.posIndex = index.index[1];
+					vid.posIndex = index.index[curId];
 					mem->m_IndexBuffer.push_back( vid );
-					vid.posIndex = index.index[2];
+					vid.posIndex = index.index[curId+1];
 					mem->m_IndexBuffer.push_back( vid );
-				}else if( index.count == 4 )
-				{
-					VertexIndex vid;
-					vid.posIndex = index.index[0];
-					mem->m_IndexBuffer.push_back( vid );
-					vid.posIndex = index.index[1];
-					mem->m_IndexBuffer.push_back( vid );
-					vid.posIndex = index.index[2];
-					mem->m_IndexBuffer.push_back( vid );
-					vid.posIndex = index.index[0];
-					mem->m_IndexBuffer.push_back( vid );
-					vid.posIndex = index.index[2];
-					mem->m_IndexBuffer.push_back( vid );
-					vid.posIndex = index.index[3];
-					mem->m_IndexBuffer.push_back( vid );
+
+					curId++;
 				}
 			}
 		}
