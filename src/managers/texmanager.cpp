@@ -9,6 +9,7 @@
 #include "texio/texio.h"
 #include "texio/bmpio.h"
 #include "texture/imagetexture.h"
+#include "utility/strhelper.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(TexManager);
@@ -72,8 +73,11 @@ void TexManager::_release()
 }
 
 // output texture
-bool TexManager::Write( const string& str , const Texture* tex , TEX_TYPE type )
+bool TexManager::Write( const string& str , const Texture* tex )
 {
+	// get the type
+	TEX_TYPE type = TexTypeFromStr( str );
+
 	// find the specific texio first
 	TexIO* io = FindTexIO( type );
 
@@ -84,8 +88,11 @@ bool TexManager::Write( const string& str , const Texture* tex , TEX_TYPE type )
 }
 
 // load the image from file , if the specific image is already existed in the current system , just return the pointer
-bool TexManager::Read( const string& str , ImageTexture* tex , TEX_TYPE type )
+bool TexManager::Read( const string& str , ImageTexture* tex )
 {
+	// get the type
+	TEX_TYPE type = TexTypeFromStr( str );
+
 	// try to find the image first , if it's already existed in the system , just set a pointer
 	map< std::string , ImgMemory* >::iterator it = m_ImgContainer.find( str );
 	if( it != m_ImgContainer.end() )

@@ -61,10 +61,7 @@ void UniGrid::_release()
 bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
 	if( m_pVoxels == 0 || m_primitives == 0 )
-	{
-		LOG_WARNING<<"There is no primitive data in uniform grid."<<ENDL;
 		return false;
-	}
 
 	// clear the mail box first
 	memset( m_pMailBox , 0 , sizeof( unsigned char ) * ( m_primitives->size() + 7 ) / 8 );
@@ -127,7 +124,10 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 void UniGrid::Build()
 {
 	if( m_primitives == 0 || m_primitives->empty() )
+	{
 		LOG_WARNING<<"There is no primitive in the uniform grid"<<ENDL;
+		return;
+	}
 
 	// find the bounding box first
 	_computeBBox();
@@ -218,8 +218,8 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 	while( it != m_pVoxels[voxelId].end() )
 	{
 		unsigned id = (*it)->GetID();
-		unsigned offset = id / 8;
-		unsigned flag = 0x00000001 << ( id % 8 );
+		unsigned offset = id >> 3;
+		unsigned flag = 0x00000001 << ( id & 7 );
 
 		// get intersection
 		if( 0 == (flag & m_pMailBox[offset]) )
@@ -237,13 +237,13 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 // output log information
 void UniGrid::OutputLog() const
 {
-	LOG<<"Accelerator Type : Uniform Grid"<<ENDL;
-	LOG<<"Total Grid Count : "<<m_voxelCount<<ENDL;
-	LOG<<"Grid Dimenstion  : "<<m_voxelNum[0]<<"*"<<m_voxelNum[1]<<"*"<<m_voxelNum[2]<<ENDL;
+	LOG<<"Accelerator Type :\tUniform Grid"<<ENDL;
+	LOG<<"Total Grid Count :\t"<<m_voxelCount<<ENDL;
+	LOG<<"Grid Dimenstion  :\t"<<m_voxelNum[0]<<"*"<<m_voxelNum[1]<<"*"<<m_voxelNum[2]<<ENDL;
 
 	unsigned count = 0;
 	for( unsigned i = 0 ; i < m_voxelCount ; i++ )
 		count += m_pVoxels[i].size();
-	LOG<<"Triangles per Grid: "<<(float)count/(float)m_voxelCount<<ENDL;
+	LOG<<"Triangles per Grid:\t"<<((m_voxelCount==0)?0:(float)count/(float)m_voxelCount)<<ENDL;
 }
 

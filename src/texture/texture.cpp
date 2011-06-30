@@ -35,10 +35,10 @@ void Texture::_init()
 }
 
 // output the texture
-bool Texture::Output( const string& str , TEX_TYPE type )
+bool Texture::Output( const string& str )
 {	
 	// output the texture
-	return TexManager::GetSingleton().Write( str , this , type );
+	return TexManager::GetSingleton().Write( str , this );
 }
 
 // get the color

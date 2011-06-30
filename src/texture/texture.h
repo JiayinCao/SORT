@@ -29,9 +29,8 @@ public:
 
 	// output the texture
 	// para 'str' :	the name of the output entity
-	// para 'type':	the way outputing the texture , default way is saving the texture as a bitmap file
 	// result : return true , if outputing is successful
-	bool Output( const string& str , TEX_TYPE type = TT_BMP );
+	bool Output( const string& str );
 
 	// get the texture value
 	// para 'x' :	x coordinate , if out of range , use filter

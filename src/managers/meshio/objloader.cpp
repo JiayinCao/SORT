@@ -14,7 +14,7 @@
 #include "utility/path.h"
 
 // the maxmium length of a single line
-#define	LINE_MAXLENGTH		4096
+static const unsigned LINE_MAXLENGTH = 4096;
 
 // load obj from file
 bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
@@ -63,8 +63,6 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 
 				mem->m_IndexBuffer.push_back( Str2VertexIndex( strIndex ) );
 			}
-
-			mem->m_iTriNum++;
 		}
 
 		// skip the rest of the line
@@ -79,6 +77,7 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 	mem->m_iVBCount = mem->m_PositionBuffer.size();
 	mem->m_iTBCount = mem->m_TexCoordBuffer.size();
 	mem->m_iNBCount = mem->m_NormalBuffer.size();
+	mem->m_iTriNum = mem->m_IndexBuffer.size() / 3;
 
 	return true;
 }

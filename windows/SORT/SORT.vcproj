@@ -415,6 +415,14 @@
 					RelativePath="..\..\src\managers\meshio\objloader.h"
 					>
 				</File>
+				<File
+					RelativePath="..\..\src\managers\meshio\plyloader.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\managers\meshio\plyloader.h"
+					>
+				</File>
 			</Filter>
 		</Filter>
 		<Filter
@@ -504,6 +512,22 @@
 				RelativePath="..\..\src\accel\unigrid.h"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="thirdparty"
+			>
+			<Filter
+				Name="ply"
+				>
+				<File
+					RelativePath="..\..\src\thirdparty\ply\ply.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\thirdparty\ply\plyfile.c"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"

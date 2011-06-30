@@ -8,7 +8,9 @@
 #define	SORT_STRHELPER
 
 #include "sort.h"
+#include "enum.h"
 
+// pre-decleration
 struct VertexIndex;
 
 ////////////////////////////////////////////////////////////////////////
@@ -18,5 +20,11 @@ struct VertexIndex;
 // para 'str' : the string to parse
 // result     : a vertex index
 VertexIndex	Str2VertexIndex( const string& str );
+
+// get the type of file according to the file extension
+MESH_TYPE	MeshTypeFromStr( const string& str );
+
+// get the type of image file from file extension
+TEX_TYPE	TexTypeFromStr( const string& str );
 
 #endif

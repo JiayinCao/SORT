@@ -30,7 +30,7 @@ public:
 	// para 'transform' : the transformation of the mesh
 	// para 'type' : the type of the mesh file , default value is obj
 	// result      : 'true' if loading is successful
-	bool LoadMesh( const string& str , Transform& transform , MESH_TYPE type = MT_OBJ );
+	bool LoadMesh( const string& str , Transform& transform );
 
 	// fill buffer into vector
 	// para 'vec' : the buffer to filled

@@ -42,11 +42,11 @@ void ImageTexture::Release()
 }
 
 // load image from file
-bool ImageTexture::LoadImageFromFile( const std::string& str , TEX_TYPE type )
+bool ImageTexture::LoadImageFromFile( const std::string& str )
 {
 	// release an image first
 	Release();
 
 	// get the texture manager
-	return TexManager::GetSingleton().Read( str , this , type );
+	return TexManager::GetSingleton().Read( str , this );
 }
