@@ -520,11 +520,11 @@
 				Name="ply"
 				>
 				<File
-					RelativePath="..\..\src\thirdparty\ply\ply.h"
+					RelativePath="..\..\src\thirdparty\ply\ply.c"
 					>
 				</File>
 				<File
-					RelativePath="..\..\src\thirdparty\ply\plyfile.c"
+					RelativePath="..\..\src\thirdparty\ply\ply.h"
 					>
 				</File>
 			</Filter>

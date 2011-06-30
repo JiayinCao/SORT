@@ -38,6 +38,10 @@ WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 #include <string.h>
 #include "ply.h"
 
+#if defined(_WIN32) || defined(_WIN64)
+#pragma warning(disable:4996)
+#endif
+
 char *type_names[] = {
 "invalid",
 "char", "short", "int",
@@ -732,7 +736,7 @@ PlyFile *ply_read(FILE *fp, int *nelems, char ***elem_names)
         plyfile->file_type = PLY_BINARY_LE;
       else
         return (NULL);
-      plyfile->version = atof (words[2]);
+      plyfile->version = (float)atof (words[2]);
       found_format = 1;
     }
     else if (equal_strings (words[0], "element"))
@@ -1911,7 +1915,7 @@ void write_binary_item(
       fwrite (&uint_val, 4, 1, fp);
       break;
     case PLY_FLOAT:
-      float_val = double_val;
+      float_val = (float)double_val;
       fwrite (&float_val, 4, 1, fp);
       break;
     case PLY_DOUBLE:
@@ -2094,13 +2098,13 @@ void get_stored_item(
       break;
     case PLY_FLOAT:
       *double_val = *((float *) ptr);
-      *int_val = *double_val;
-      *uint_val = *double_val;
+      *int_val = (int)*double_val;
+      *uint_val = (unsigned)*double_val;
       break;
     case PLY_DOUBLE:
       *double_val = *((double *) ptr);
-      *int_val = *double_val;
-      *uint_val = *double_val;
+      *int_val = (int)*double_val;
+      *uint_val = (unsigned)*double_val;
       break;
     default:
       fprintf (stderr, "get_stored_item: bad type = %d\n", type);
@@ -2176,14 +2180,14 @@ void get_binary_item(
     case PLY_FLOAT:
       fread (ptr, 4, 1, fp);
       *double_val = *((float *) ptr);
-      *int_val = *double_val;
-      *uint_val = *double_val;
+      *int_val = (int)*double_val;
+      *uint_val = (unsigned)*double_val;
       break;
     case PLY_DOUBLE:
       fread (ptr, 8, 1, fp);
       *double_val = *((double *) ptr);
-      *int_val = *double_val;
-      *uint_val = *double_val;
+      *int_val = (int)*double_val;
+      *uint_val = (unsigned)*double_val;
       break;
     default:
       fprintf (stderr, "get_binary_item: bad type = %d\n", type);
@@ -2301,7 +2305,7 @@ void store_item (
       break;
     case PLY_FLOAT:
       pfloat = (float *) item;
-      *pfloat = double_val;
+      *pfloat = (float)double_val;
       break;
     case PLY_DOUBLE:
       pdouble = (double *) item;
