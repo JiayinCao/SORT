@@ -46,11 +46,14 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 	mem->m_filename = str;
 	mem->m_iTriNum = 0;
 
+	char strVertex[] = "vertex";
+	char strFace[] = "face";
 	for ( int i = 0; i < nelems; i++) 
 	{
 		/* get the description of the first element */
 		elem_name = elist[i];
 		ply_get_element_description (ply, elem_name, &num_elems, &nprops);
+
 
 		if (equal_strings ("vertex", elem_name))
 		{

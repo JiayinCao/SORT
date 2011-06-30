@@ -59,13 +59,13 @@ int ply_type_size[] = {
 
 
 /* returns 1 if strings are equal, 0 if not */
-int equal_strings(char *, char *);
+int equal_strings(const char *,const char *);
 
 /* find an element in a plyfile's list */
 PlyElement *find_element(PlyFile *, char *);
 
 /* find a property in an element's list */
-PlyProperty *find_property(PlyElement *, char *, int *);
+PlyProperty *find_property(PlyElement *, const char *, int *);
 
 /* write to a file the word describing a PLY file data type */
 void write_scalar_type (FILE *, int);
@@ -805,7 +805,6 @@ PlyFile *ply_open_for_reading(
   char *name;
 
   /* tack on the extension .ply, if necessary */
-
   name = (char *) myalloc (sizeof (char) * (strlen (filename) + 5));
   strcpy (name, filename);
   if (strlen (name) < 4 ||
@@ -813,17 +812,14 @@ PlyFile *ply_open_for_reading(
       strcat (name, ".ply");
 
   /* open the file for reading */
-
   fp = fopen (name, "r");
   if (fp == NULL)
     return (NULL);
 
   /* create the PlyFile data structure */
-
   plyfile = ply_read (fp, nelems, elem_names);
-
+  
   /* determine the file type and version */
-
   *file_type = plyfile->file_type;
   *version = plyfile->version;
 
@@ -1389,7 +1385,7 @@ void ply_get_info(PlyFile *ply, float *version, int *file_type)
 Compare two strings.  Returns 1 if they are the same, 0 if not.
 ******************************************************************************/
 
-int equal_strings(char *s1, char *s2)
+int equal_strings(const char *s1,const char *s2)
 {
   while (*s1 && *s2)
     if (*s1++ != *s2++)
@@ -1437,7 +1433,7 @@ Exit:
   returns a pointer to the property, or NULL if not found
 ******************************************************************************/
 
-PlyProperty *find_property(PlyElement *elem, char *prop_name, int *index)
+PlyProperty *find_property(PlyElement *elem, const char *prop_name, int *index)
 {
   int i;
 
@@ -2487,11 +2483,12 @@ Entry:
   fname - file name from which memory was requested
 ******************************************************************************/
 
-static char *my_alloc(int size, int lnum, char *fname)
+char *my_alloc(int size, int lnum, char *fname)
 {
   char *ptr;
 
   ptr = (char *) malloc (size);
+  memset( ptr , 0 , size * sizeof( char ) );
 
   if (ptr == 0) {
     fprintf(stderr, "Memory allocation bombed on line %d in %s\n", lnum, fname);

@@ -66,7 +66,7 @@ extern "C" {
 
 typedef struct PlyProperty {    /* description of a property */
 
-  char *name;                           /* property name */
+  const char *name;                     /* property name */
   int external_type;                    /* file's data type */
   int internal_type;                    /* program's data type */
   int offset;                           /* offset bytes of prop in a struct */
@@ -159,7 +159,7 @@ extern void ply_describe_other_elements ( PlyFile *, PlyOtherElems *);
 extern void ply_put_other_elements (PlyFile *);
 extern void ply_free_other_elements (PlyOtherElems *);
 
-extern int equal_strings(char *, char *);
+extern int equal_strings(const char *,const char *);
 
 
 #ifdef __cplusplus
