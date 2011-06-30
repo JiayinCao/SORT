@@ -45,7 +45,7 @@ MESH_TYPE	MeshTypeFromStr( const string& str )
 	string substr = str.substr( index + 1 , str.length() - index );
 
 	// transform the extension to lower case
-	transform(substr.begin(),substr.end(),substr.begin(),tolower);
+	std::transform(substr.begin(),substr.end(),substr.begin(),ToLower());
 
 	if( strcmp( substr.c_str() , "obj" ) == 0 )
 		return MT_OBJ;
@@ -66,7 +66,7 @@ TEX_TYPE	TexTypeFromStr( const string& str )
 	string substr = str.substr( index + 1 , str.length() - index );
 
 	// transform the extension to lower case
-	transform(substr.begin(),substr.end(),substr.begin(),tolower);
+	transform(substr.begin(),substr.end(),substr.begin(),ToLower());
 
 	if( strcmp( substr.c_str() , "bmp" ) == 0 )
 		return TT_BMP;

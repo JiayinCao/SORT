@@ -27,4 +27,12 @@ MESH_TYPE	MeshTypeFromStr( const string& str );
 // get the type of image file from file extension
 TEX_TYPE	TexTypeFromStr( const string& str );
 
+
+class ToLower{
+public:
+     char operator()(char val){   
+        return tolower( val );
+    }
+}; 
+
 #endif

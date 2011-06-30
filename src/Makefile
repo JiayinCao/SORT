@@ -14,8 +14,10 @@ LIBSRCS += $(wildcard managers/texio/*.cpp)
 LIBSRCS += $(wildcard managers/meshio/*.cpp)
 LIBSRCS += $(wildcard accel/*.cpp)
 LIBSRCS += $(wildcard utility/*.cpp )
+LIBSCCS += $(wildcard thirdparty/ply/*.c)
 
 LIBOBJS = $(addprefix $(OBJ_PATH)/, $(subst ._,, $(subst /,_,$(LIBSRCS:.cpp=.o)) ) )
+LIBOBJS +=$(addprefix $(OBJ_PATH)/, thirdparty_ply_ply.o )
 
 sort : $(OBJ_PATH) $(LIBOBJS)
 	@g++ $(COMPILE_FLAG) -o $(BIN_PATH)/sort $(LIBOBJS)
@@ -72,6 +74,11 @@ $(OBJ_PATH)/sort.o : sort.cpp sort.h
 $(OBJ_PATH)/accel_%.o : accel/%.cpp accel/%.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
+
+$(OBJ_PATH)/thirdparty_ply_ply.o : thirdparty/ply/ply.c thirdparty/ply/ply.h
+	@echo "building object $@"
+	@gcc $(COMPILE_FLAG) -c $< -o $@
+	
 
 clean:
 	@echo "clear"
