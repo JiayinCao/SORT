@@ -755,6 +755,7 @@ PlyFile *ply_read(FILE *fp, int *nelems, char ***elem_names)
 
     words = get_words (plyfile->fp, &nwords, &orig_line);
   }
+  free(words);
 
   /* create tags for each property of each element, to be used */
   /* later to say whether or not to store each property for the user */
@@ -818,7 +819,10 @@ PlyFile *ply_open_for_reading(
   /* open the file for reading */
   fp = fopen (name, "r");
   if (fp == NULL)
+  {
+	free(name);
     return (NULL);
+  }
 
   /* create the PlyFile data structure */
   plyfile = ply_read (fp, nelems, elem_names);
@@ -827,8 +831,9 @@ PlyFile *ply_open_for_reading(
   *file_type = plyfile->file_type;
   *version = plyfile->version;
 
-  /* return a pointer to the file's information */
+  free(name);
 
+  /* return a pointer to the file's information */
   return (plyfile);
 }
 
@@ -1500,7 +1505,6 @@ void ascii_get_element(PlyFile *plyfile, char *elem_ptr)
     other_flag = 0;
 
   /* read in the element */
-
   words = get_words (plyfile->fp, &nwords, &orig_line);
   if (words == NULL) {
     fprintf (stderr, "ply_get_element: unexpected end of file\n");
@@ -1517,7 +1521,9 @@ void ascii_get_element(PlyFile *plyfile, char *elem_ptr)
     /* store either in the user's structure or in other_props */
     if (elem->store_prop[j])
       elem_data = elem_ptr;
-    else
+    else if( other_flag == 0 )
+		continue;
+	else
       elem_data = other_data;
 
     if (prop->is_list) {       /* a list */
@@ -1627,8 +1633,10 @@ void binary_get_element(PlyFile *plyfile, char *elem_ptr)
     /* store either in the user's structure or in other_props */
     if (elem->store_prop[j])
       elem_data = elem_ptr;
-    else
-      elem_data = other_data;
+    else if( other_flag == 0 )
+		continue;
+	else
+		elem_data = other_data;
 
     if (prop->is_list) {       /* a list */
 

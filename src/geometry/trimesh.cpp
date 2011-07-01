@@ -90,7 +90,7 @@ void TriMesh::_genFlatNormal()
 		Vector v1 = m_pMemory->m_PositionBuffer[id2] - m_pMemory->m_PositionBuffer[id1];
 
 		// set the normal
-		Vector n = Cross( v0 , v1 );
+		Vector n = Cross( v1 , v0 );
 		n.m_bNormal = true;
 		n.Normalize();
 		m_pMemory->m_NormalBuffer.push_back( n );

@@ -10,6 +10,10 @@
 // include the header file
 #include "meshloader.h"
 
+// pre-decleration
+struct PlyFile;
+struct PlyElement;
+
 struct PlyIndex
 {
 	unsigned	count;
@@ -42,7 +46,14 @@ public:
 	// para 'str' : name of the file
 	// para 'mem' : the memory to store
 	// result     : true if loading is successful
-	bool	LoadMesh( const string& str , BufferMemory* mem ); 
+	bool	LoadMesh( const string& str , BufferMemory* mem );
+
+// private method
+	// close ply file
+	void _closePly( PlyFile* plyfile );
+
+	// release element
+	void _releaseElement( PlyElement* element );
 };
 
 #endif
