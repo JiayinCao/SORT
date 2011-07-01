@@ -2509,3 +2509,34 @@ char *my_alloc(int size, int lnum, char *fname)
   return (ptr);
 }
 
+/******************************************************************************
+Free all of the allocated memory and close the file
+
+Entry:
+  Plyfile: the file object to free
+******************************************************************************/
+void ply_free_file( PlyFile* ply )
+{
+	int i , k;
+	for( i = 0 ; i < ply->num_comments ; i++ )
+		free( ply->comments[i] );
+	free( ply->comments );
+
+	for( i = 0 ; i < ply->num_obj_info; i++ )
+		free( ply->obj_info[i] );
+	free( ply->obj_info );
+
+	for( i = 0 ; i < ply->nelems ; i++ )
+	{
+		PlyElement* element = ply->elems[i];
+		if( element->store_prop )
+			free( element->store_prop );
+		for( k = 0 ; k < element->nprops; k++ )
+			free( element->props[k] );
+		free( element->props );
+		free( element );
+	}
+	free( ply->elems );
+
+	ply_close (ply);
+}
