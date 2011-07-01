@@ -16,10 +16,11 @@ System g_System;
 // the main func
 int main( int argc , char** argv )
 {
+	float distance = 6.0f;
 	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( 4.0f , 4.0f , 4.0f ) );
+	camera->SetEye( Point( distance , distance , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
-	camera->SetTarget( Point( 0 , 0 , 0 ) );
+	camera->SetTarget( Point( 0 , 1 , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
 	camera->SetRenderTarget( g_System.m_rt );
 	g_System.m_camera = camera;

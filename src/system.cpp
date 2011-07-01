@@ -39,7 +39,7 @@ void System::_preInit()
 
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
-	m_rt->SetSize( 1024 , 768 );
+	m_rt->SetSize( 800 , 600 );
 	// there is no default value for camera , it must be set in the script file
 	m_camera = 0;
 }
@@ -64,6 +64,9 @@ void System::_postUninit()
 // render the image
 void System::Render()
 {
+	unsigned progressCount = 64;
+	unsigned totalPixel = m_rt->GetHeight() * m_rt->GetWidth();
+	unsigned currentPixel = 0;
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
@@ -73,11 +76,25 @@ void System::Render()
 
 			Intersection ip;
 			if( m_Scene.GetIntersect( r , &ip ) )
-				m_rt->SetColor( j , i , fabs( ip.normal.x ) , fabs( ip.normal.y ), fabs( ip.normal.z ) );
+				m_rt->SetColor( j , i , fabs( max( ip.normal.y , 0.0f ) ) , fabs( max( ip.normal.y , 0.0f ) ), fabs( max( ip.normal.y , 0.0f ) ) );
 			else
 				m_rt->SetColor( j , i , 0 , 0 , 0 );
+
+			// update current pixel
+			currentPixel++;
 		}
+
+		// output progress
+		unsigned progress = (unsigned)( (float)(currentPixel * progressCount) / (float)totalPixel );
+		cout<<"Tracing <<";
+		unsigned k = 0;
+		for( ; k < progress ; k++ )
+			cout<<"-";
+		for( ; k < progressCount ; k++ )
+			cout<<" ";
+		cout<<">>\r";
 	}
+	cout<<endl;
 }
 
 // output render target

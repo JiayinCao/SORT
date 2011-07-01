@@ -31,15 +31,15 @@ bool Scene::LoadScene( const string& str )
 {
 	// temporary
 	TriMesh* mesh = new TriMesh();
-	Transform t0 ;//= Scale( 0.01f , 0.01f , 0.01f );
-	if( mesh->LoadMesh( "../res/cube.ply" , t0 ) )
+	Transform t0 = Scale( 10.0f );
+	if( mesh->LoadMesh( "../res/bunny.ply" , t0 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;
 
 	// create another instance
 	mesh = new TriMesh();
-	Transform t1 = Translate( Vector( 0 , 1 , 2 ) ) * RotateX( 1.0f ) * Scale( 0.5f , 0.5f , 0.5f );
+	Transform t1 = Translate( Vector( 0 , 1 , 2 ) ) * RotateX( 1.0f );
 	if( mesh->LoadMesh( "../res/cube.obj" , t1 ) )
 		m_meshBuf.push_back( mesh );
 	else
@@ -47,8 +47,8 @@ bool Scene::LoadScene( const string& str )
 
 	// create another instance
 	mesh = new TriMesh();
-	Transform t2 = Translate( Vector( 0 , 1 , 0 ) ) * RotateX( -1.0f ) * Translate( Vector( 1 , 1 , 0 ) );
-	if( mesh->LoadMesh( "../res/cube.obj" , t2 ) )
+	Transform t2 = Translate( Vector( 0 , 1 , 0 ) ) * RotateX( -1.0f ) * Translate( Vector( 1 , 1 , 0 ) ) * Scale( 10.0f );
+	if( mesh->LoadMesh( "../res/bunny.ply" , t2 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;
