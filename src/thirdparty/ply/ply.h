@@ -158,7 +158,7 @@ extern PlyOtherElems *ply_get_other_element (PlyFile *, char *, int);
 extern void ply_describe_other_elements ( PlyFile *, PlyOtherElems *);
 extern void ply_put_other_elements (PlyFile *);
 extern void ply_free_other_elements (PlyOtherElems *);
-
+extern void ply_free_file( PlyFile* ply );
 extern int equal_strings(const char *,const char *);
 
 

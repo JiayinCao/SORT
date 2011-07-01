@@ -46,8 +46,6 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 	mem->m_filename = str;
 	mem->m_iTriNum = 0;
 
-	char strVertex[] = "vertex";
-	char strFace[] = "face";
 	for ( int i = 0; i < nelems; i++) 
 	{
 		/* get the description of the first element */
@@ -114,41 +112,7 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 	delete[] elist;
 
 	// close ply file
-	_closePly( ply );
+	ply_free_file( ply );
 
 	return true;
-}
-
-// close ply file
-void PlyLoader::_closePly( PlyFile* ply )
-{
-	for( int i = 0 ; i < ply->num_comments ; i++ )
-		delete ply->comments[i];
-	delete[] ply->comments;
-
-	for( int i = 0 ; i < ply->num_obj_info; i++ )
-		delete[] ply->obj_info[i];
-	delete[] ply->obj_info;
-
-	for( int i = 0 ; i < ply->nelems ; i++ )
-		_releaseElement( ply->elems[i] );
-	delete ply->elems;
-
-	// delte the ply file
-	ply_close (ply);
-}
-
-// release element
-void PlyLoader::_releaseElement( PlyElement* element )
-{
-	delete element->name;
-	if( element->store_prop )
-		delete element->store_prop;
-	for( int k = 0 ; k < element->nprops; k++ )
-	{
-		delete element->props[k]->name;
-		delete element->props[k];
-	}
-	delete[] element->props;
-	delete element;
 }

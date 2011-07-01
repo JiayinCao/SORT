@@ -9,6 +9,7 @@
 #include "system.h"
 #include "camera/perspective.h"
 #include "utility/timer.h"
+#include "vld.h"
 
 // the global system
 System g_System;
