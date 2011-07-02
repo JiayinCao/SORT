@@ -8,7 +8,7 @@
 #define	SORT_ACCELERATOR
 
 // include the header file
-#include "sort.h"
+#include "utility/define.h"
 #include <vector>
 #include "geometry/bbox.h"
 

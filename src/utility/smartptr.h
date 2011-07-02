@@ -8,7 +8,7 @@
 #define	SORT_SMARTPTR
 
 // include the header
-#include "sort.h"
+#include "utility/define.h"
 #include "managers/logmanager.h"
 
 /////////////////////////////////////////////////////////////////////

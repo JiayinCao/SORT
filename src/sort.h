@@ -24,8 +24,4 @@ using namespace std;
 	#define SORT_IN_LINUX
 #endif
 
-// some useful macro
-#define SAFE_DELETE(p) { if(p) { delete p; p = 0; } }
-#define SAFE_DELETE_ARRAY(p) { if(p) { delete[] p; p = 0 ; } }
-
 #endif

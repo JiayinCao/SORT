@@ -8,6 +8,7 @@
 #define	SORT_RGBSPECTRUM
 
 #include "sort.h"
+#include "utility/define.h"
 
 ///////////////////////////////////////////////////////////////////
 // definition of rgb spectrum
@@ -37,9 +38,9 @@ public:
 		m_r = r; m_g = g ; m_b = b;
 	}
 	// get each component
-	float	GetR() const { return m_r; }
-	float	GetG() const { return m_g; }
-	float	GetB() const { return m_b; }
+	float	GetR() const; 
+	float	GetG() const; 
+	float	GetB() const; 
 
 	// operators
 	RGBSpectrum operator+( const RGBSpectrum& c ) const;
@@ -69,14 +70,8 @@ inline RGBSpectrum operator+( float t , const RGBSpectrum& s )
 inline RGBSpectrum operator-( float t , const RGBSpectrum& s )
 {
 	float r = t - s.m_r;
-	r = max( 0.0f , r );
-	r = min( 1.0f , r );
 	float g = t - s.m_g;
-	g = max( 0.0f , g );
-	g = min( 1.0f , g );
 	float b = t - s.m_b;
-	b = max( 0.0f , b );
-	b = min( 1.0f , b );
 
 	return RGBSpectrum( r , g , b );
 }

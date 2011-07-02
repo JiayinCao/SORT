@@ -433,6 +433,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\utility\define.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\path.cpp"
 				>
 			</File>
@@ -562,6 +566,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\bsdf\bxdf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\lambert.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\lambert.cpp"
 				>
 			</File>
 		</Filter>
