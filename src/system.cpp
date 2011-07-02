@@ -13,6 +13,8 @@
 #include "camera/camera.h"
 #include "texture/rendertarget.h"
 #include "geometry/intersection.h"
+#include "integrator/whittedrt.h"
+#include "camera/perspective.h"
 
 // constructor
 System::System()
@@ -40,8 +42,17 @@ void System::_preInit()
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
 	m_rt->SetSize( 800 , 600 );
-	// there is no default value for camera , it must be set in the script file
-	m_camera = 0;
+	// there is default value for camera
+	float distance = 6.0f;
+	PerspectiveCamera* camera = new PerspectiveCamera();
+	camera->SetEye( Point( distance , distance , distance ) );
+	camera->SetUp( Vector( 0 , 1 , 0 ) );
+	camera->SetTarget( Point( 0 , 1 , 0 ) );
+	camera->SetFov( 3.1415f / 4 );
+	camera->SetRenderTarget( m_rt );m_camera = 0;
+	m_camera = camera;
+	// the integrator
+	m_pIntegrator = new WhittedRT();
 }
 
 // post-uninit
@@ -53,6 +64,7 @@ void System::_postUninit()
 	// delete the data
 	SAFE_DELETE( m_rt );
 	SAFE_DELETE( m_camera );
+	SAFE_DELETE( m_pIntegrator );
 
 	// release managers
 	TexManager::DeleteSingleton();
@@ -74,11 +86,8 @@ void System::Render()
 			// generate rays
 			Ray r = m_camera->GenerateRay( j , i );
 
-			Intersection ip;
-			if( m_Scene.GetIntersect( r , &ip ) )
-				m_rt->SetColor( j , i , fabs( max( ip.normal.y , 0.0f ) ) , fabs( max( ip.normal.y , 0.0f ) ), fabs( max( ip.normal.y , 0.0f ) ) );
-			else
-				m_rt->SetColor( j , i , 0 , 0 , 0 );
+			Spectrum color = m_pIntegrator->Li( &m_Scene , r );
+			m_rt->SetColor( j , i , color );
 
 			// update current pixel
 			currentPixel++;

@@ -9,7 +9,6 @@
 #include "system.h"
 #include "camera/perspective.h"
 #include "utility/timer.h"
-#include "vld.h"
 
 // the global system
 System g_System;
@@ -17,21 +16,16 @@ System g_System;
 // the main func
 int main( int argc , char** argv )
 {
-	float distance = 6.0f;
-	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( distance , distance , distance ) );
-	camera->SetUp( Vector( 0 , 1 , 0 ) );
-	camera->SetTarget( Point( 0 , 1 , 0 ) );
-	camera->SetFov( 3.1415f / 4 );
-	camera->SetRenderTarget( g_System.m_rt );
-	g_System.m_camera = camera;
-
+	// pre process before rendering
 	g_System.PreProcess();
+
 	Timer::GetSingleton().StartTimer();
+	// do ray tracing
 	g_System.Render();
 	Timer::GetSingleton().StopTimer();
 	cout<<Timer::GetSingleton().GetElapsedTime()<<endl;
 
+	// output image
 	g_System.OutputRT( "t.bmp" );
 
 	return 0;

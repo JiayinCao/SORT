@@ -9,6 +9,7 @@
 
 // include the header file
 #include "geometry/scene.h"
+#include "integrator/integrator.h"
 
 // declare classes
 class Camera;
@@ -38,7 +39,7 @@ public:
 	bool LoadScene( const string& str );
 
 //private field:
-public:
+private:
 	// the render target for the system
 	RenderTarget*	m_rt;
 	// the camera for the system
@@ -46,6 +47,9 @@ public:
 
 	// the scene for rendering
 	Scene			m_Scene;
+
+	// the integrator for the renderer
+	Integrator*		m_pIntegrator;
 
 	// pre-Initialize
 	void	_preInit();
