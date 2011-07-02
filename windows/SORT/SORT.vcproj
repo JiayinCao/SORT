@@ -553,6 +553,26 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="bsdf"
+			>
+			<File
+				RelativePath="..\..\src\bsdf\bsdf.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\bxdf.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="light"
+			>
+			<File
+				RelativePath="..\..\src\light\light.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"
 			>
