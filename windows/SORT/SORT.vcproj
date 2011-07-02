@@ -529,6 +529,30 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="integrator"
+			>
+			<File
+				RelativePath="..\..\src\integrator\integrator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\integratormethod.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\integratormethod.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\whittedrt.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\whittedrt.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"
 			>
