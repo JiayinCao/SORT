@@ -38,6 +38,12 @@ public:
 	// load the scene
 	bool LoadScene( const string& str );
 
+	// get elapsed time
+	unsigned GetRenderingTime() const;
+
+	// output log information
+	void OutputLog() const;
+
 //private field:
 private:
 	// the render target for the system
@@ -51,10 +57,25 @@ private:
 	// the integrator for the renderer
 	Integrator*		m_pIntegrator;
 
+	// rendering time
+	unsigned		m_uRenderingTime;
+	// pre-processing time
+	unsigned		m_uPreProcessingTime;
+	// post-processing time
+	unsigned		m_uPostProcessingTime;
+	// current rendering pixel id
+	unsigned		m_uCurrentPixelId;
+	// progress count
+	unsigned		m_uProgressCount;
+	// total pixel number
+	unsigned		m_uTotalPixelCount;
+
 	// pre-Initialize
 	void	_preInit();
 	// post-Uninitialize
 	void	_postUninit();
+	// output progress
+	void	_outputProgress();
 };
 
 #endif

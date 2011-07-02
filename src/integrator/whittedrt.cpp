@@ -13,9 +13,19 @@
 // radiance along a specific ray direction
 Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 {
+	// get the intersection between the ray and the scene
 	Intersection ip;
-	if( scene.GetIntersect( r , &ip ) )
-		return Spectrum( (float)fabs( ip.normal.x ) , (float)fabs( ip.normal.y ) , (float)fabs( ip.normal.z ) );
+	if( false == scene.GetIntersect( r , &ip ) )
+		return Spectrum();
 
-	return Spectrum();
+	return Spectrum( ip.normal.x , ip.normal.y , ip.normal.z );
+}
+
+// output log information
+void WhittedRT::OutputLog() const
+{
+	LOG_HEADER( "Integrator" );
+	LOG<<"Integrator algorithm : Whitted Ray Tracing."<<ENDL;
+	LOG<<"It supports direct lighting , specular reflection and specular refraction."<<ENDL;
+	LOG<<"Indirect lighting , like color bleeding , caustics , is not supported."<<ENDL<<ENDL;
 }

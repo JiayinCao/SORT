@@ -16,14 +16,17 @@ System g_System;
 // the main func
 int main( int argc , char** argv )
 {
-	// pre process before rendering
-	g_System.PreProcess();
+	// load the scene from file
+	g_System.LoadScene("");
 
-	Timer::GetSingleton().StartTimer();
 	// do ray tracing
 	g_System.Render();
-	Timer::GetSingleton().StopTimer();
-	cout<<Timer::GetSingleton().GetElapsedTime()<<endl;
+
+	// output rendering time
+	cout<<g_System.GetRenderingTime()<<endl;
+
+	// output log information
+	g_System.OutputLog();
 
 	// output image
 	g_System.OutputRT( "t.bmp" );

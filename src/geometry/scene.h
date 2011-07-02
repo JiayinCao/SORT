@@ -26,12 +26,6 @@ public:
 	// destructor
 	~Scene(){ Release(); }
 
-	// pre process
-	void	PreProcess();
-
-	// post process
-	void	PostProcess();
-
 	// load the scene from script file
 	// para 'str' : the name for the file
 	// result     : 'true' if parsing is successful

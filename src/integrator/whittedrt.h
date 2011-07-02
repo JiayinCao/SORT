@@ -29,6 +29,9 @@ public:
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
 	virtual Spectrum	Li( const Scene& scene , const Ray& ray ) const;
+
+	// output log information
+	virtual void OutputLog() const;
 };
 
 #endif
