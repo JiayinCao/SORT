@@ -79,6 +79,7 @@ void System::Render()
 	unsigned progressCount = 64;
 	unsigned totalPixel = m_rt->GetHeight() * m_rt->GetWidth();
 	unsigned currentPixel = 0;
+	unsigned preProgress = 0;
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
@@ -86,7 +87,7 @@ void System::Render()
 			// generate rays
 			Ray r = m_camera->GenerateRay( j , i );
 
-			Spectrum color = m_pIntegrator->Li( &m_Scene , r );
+			Spectrum color = m_pIntegrator->Li( m_Scene , r );
 			m_rt->SetColor( j , i , color );
 
 			// update current pixel
@@ -95,13 +96,17 @@ void System::Render()
 
 		// output progress
 		unsigned progress = (unsigned)( (float)(currentPixel * progressCount) / (float)totalPixel );
-		cout<<"Tracing <<";
-		unsigned k = 0;
-		for( ; k < progress ; k++ )
-			cout<<"-";
-		for( ; k < progressCount ; k++ )
-			cout<<" ";
-		cout<<">>\r";
+		if( preProgress != progress )
+		{
+			cout<<"Tracing <<";
+			unsigned k = 0;
+			for( ; k < progress ; k++ )
+				cout<<"-";
+			for( ; k < progressCount ; k++ )
+				cout<<" ";
+			cout<<">>\r";
+			preProgress = progress;
+		}
 	}
 	cout<<endl;
 }
