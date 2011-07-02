@@ -8,6 +8,7 @@
 #include "compositetexture.h"
 #include "spectrum/spectrum.h"
 #include "managers/logmanager.h"
+#include "utility/define.h"
 
 // constructor from a texture
 void ComTexture::_copy( const Texture& tex )

@@ -1,44 +1,42 @@
 /*
- * filename :	bxdf.h
+ * filename :	lambert.h
  *
  * programmer :	Cao Jiayin
  */
 
-#ifndef	SORT_BXDF
-#define	SORT_BXDF
+#ifndef	SORT_LAMBERT
+#define	SORT_LAMBERT
 
-// include the header
-#include "spectrum/spectrum.h"
+// include header file
+#include "bxdf.h"
 
-// pre-declera class
-class Vector;
-
-/////////////////////////////////////////////////////////////////////////
-// definition of bxdf
-class	Bxdf
+////////////////////////////////////////////////////////////
+// definition of lambert brdf
+class Lambert : public Bxdf
 {
 // public method
 public:
 	// default constructor
-	Bxdf(){}
+	Lambert( const Spectrum& s ):R(s){}
 	// destructor
-	virtual ~Bxdf(){}
+	~Lambert(){}
 
 	// evaluate bxdf
 	// para 'wo' : out going direction
 	// para 'wi' : in direction
 	// result    : the portion that comes along 'wo' from 'wi'
-	virtual Spectrum f( const Vector& wo , const Vector& wi ) const = 0;
+	virtual Spectrum f( const Vector& wo , const Vector& wi ) const;
 
 	// sample a direction randomly
 	// para 'wo'  : out going direction
 	// para 'wi'  : in direction generated randomly
 	// para 'pdf' : property density function value of the specific 'wi'
-	virtual void Sample_f( const Vector& wo , Vector& wi , float* pdf ) const = 0;
+	virtual void Sample_f( const Vector& wo , Vector& wi , float* pdf ) const;
 
 // private field
 private:
-
+	// the total reflectance
+	Spectrum R;
 };
 
 #endif

@@ -10,6 +10,10 @@
 #include "geometry/intersection.h"
 #include "geometry/scene.h"
 
+
+// to be deleted
+#include "bsdf/lambert.h"
+
 // radiance along a specific ray direction
 Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 {
@@ -18,7 +22,15 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	if( false == scene.GetIntersect( r , &ip ) )
 		return Spectrum();
 
-	return Spectrum( ip.normal.x , ip.normal.y , ip.normal.z );
+	// get light direction ( not implemented )
+	Vector lightDir = Vector( -1.0f , -5.0f , 7.0f );
+	lightDir.Normalize();
+
+	// get primitive bsdf
+	Lambert lambert( Spectrum( PI ) );
+	Spectrum bsdf = lambert.f( -r.m_Dir , lightDir );
+
+	return bsdf * Dot( -r.m_Dir , ip.normal );
 }
 
 // output log information

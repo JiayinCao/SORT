@@ -16,6 +16,7 @@ LIBSRCS += $(wildcard accel/*.cpp)
 LIBSRCS += $(wildcard utility/*.cpp )
 LIBSRCS += $(wildcard integrator/*.cpp)
 LIBSRCS += $(wildcard light/*.cpp)
+LIBSRCS += $(wildcard bsdf/*.cpp)
 LIBSCCS += $(wildcard thirdparty/ply/*.c)
 
 LIBOBJS = $(addprefix $(OBJ_PATH)/, $(subst ._,, $(subst /,_,$(LIBSRCS:.cpp=.o)) ) )
@@ -82,6 +83,10 @@ $(OBJ_PATH)/integrator_%.o : integrator/%.cpp integrator/%.h
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 
 $(OBJ_PATH)/light_%.o : light/%.cpp light/%.h
+	@echo "building object $@"
+	@g++ $(COMPILE_FLAG) -c $< -o $@
+
+$(OBJ_PATH)/bsdf_%.o : bsdf/%.cpp bsdf/%.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 

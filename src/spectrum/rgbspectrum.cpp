@@ -6,8 +6,7 @@
 
 // include the header
 #include "rgbspectrum.h"
-
-#define saturate(x) max(0.0f,min(1.0f,x))
+#include "utility/define.h"
 
 // default constructor
 RGBSpectrum::RGBSpectrum()
@@ -20,9 +19,9 @@ RGBSpectrum::RGBSpectrum()
 // constructor from three float
 RGBSpectrum::RGBSpectrum( float r , float g , float b )
 {
-	m_r = saturate(r);
-	m_g = saturate(g);
-	m_b = saturate(b);
+	m_r = r;
+	m_g = g;
+	m_b = b;
 }
 
 // constructor from three unsigned char
@@ -59,9 +58,9 @@ unsigned int RGBSpectrum::GetColor() const
 {
 	unsigned int color = 0;
 
-	color |= ((unsigned char)(255.0f*m_r))<<16;
-	color |= ((unsigned char)(255.0f*m_g))<<8;
-	color |= ((unsigned char)(255.0f*m_b))<<0;
+	color |= ((unsigned char)(255.0f*saturate(m_r)))<<16;
+	color |= ((unsigned char)(255.0f*saturate(m_g)))<<8;
+	color |= ((unsigned char)(255.0f*saturate(m_b)))<<0;
 
 	return color;
 }
@@ -134,4 +133,16 @@ RGBSpectrum RGBSpectrum::operator * ( float t ) const
 	return RGBSpectrum( r , g , b );
 }
 
-
+// get each component
+float RGBSpectrum::GetR() const { 
+	float t =  saturate(m_r);
+	return t;
+}
+float RGBSpectrum::GetG() const { 
+	float t =  saturate(m_g);
+	return t; 
+}
+float RGBSpectrum::GetB() const { 
+	float t =  saturate(m_b);
+	return t;
+}

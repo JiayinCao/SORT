@@ -10,6 +10,7 @@
 #include "texio/bmpio.h"
 #include "texture/imagetexture.h"
 #include "utility/strhelper.h"
+#include "utility/define.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(TexManager);
