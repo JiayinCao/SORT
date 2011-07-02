@@ -237,6 +237,7 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 // output log information
 void UniGrid::OutputLog() const
 {
+	LOG_HEADER( "Accelerator" );
 	LOG<<"Accelerator Type :\tUniform Grid"<<ENDL;
 	LOG<<"Total Grid Count :\t"<<m_voxelCount<<ENDL;
 	LOG<<"Grid Dimenstion  :\t"<<m_voxelNum[0]<<"*"<<m_voxelNum[1]<<"*"<<m_voxelNum[2]<<ENDL;
@@ -244,6 +245,6 @@ void UniGrid::OutputLog() const
 	unsigned count = 0;
 	for( unsigned i = 0 ; i < m_voxelCount ; i++ )
 		count += m_pVoxels[i].size();
-	LOG<<"Triangles per Grid:\t"<<((m_voxelCount==0)?0:(float)count/(float)m_voxelCount)<<ENDL;
+	LOG<<"Triangles per Grid:\t"<<((m_voxelCount==0)?0:(float)count/(float)m_voxelCount)<<ENDL<<ENDL;
 }
 

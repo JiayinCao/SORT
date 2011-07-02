@@ -15,17 +15,6 @@ void Scene::_init()
 {
 }
 
-// pre process
-void Scene::PreProcess()
-{
-}
-
-// post process
-void Scene::PostProcess()
-{
-
-}
-
 // load the scene from script file
 bool Scene::LoadScene( const string& str )
 {
@@ -124,8 +113,9 @@ void Scene::_generateTriBuf()
 // output log information
 void Scene::OutputLog() const
 {
+	LOG_HEADER("Geometry Information");
 	LOG<<"Scene File Name:\t"<<m_filename<<ENDL;
-	LOG<<"Triangle Count :\t"<<m_triBuf.size()<<ENDL;
+	LOG<<"Triangle Count :\t"<<m_triBuf.size()<<ENDL<<ENDL;
 
 	if( m_pAccelerator )
 		m_pAccelerator->OutputLog();

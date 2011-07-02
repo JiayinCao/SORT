@@ -13,6 +13,7 @@
 
 // pre-decleration
 class	Intersection;
+class	Bsdf;
 
 //////////////////////////////////////////////////////////////////
 //	definition of primitive
@@ -21,7 +22,7 @@ class	Primitive
 // public method
 public:
 	// constructor from a id
-	Primitive( unsigned id ) { m_primitive_id = id; }
+	Primitive( unsigned id ) { m_primitive_id = id; m_bsdf = 0; }
 	// destructor
 	virtual ~Primitive(){}
 
@@ -40,12 +41,18 @@ public:
 	// get primitive id
 	unsigned GetID() const { return m_primitive_id; }
 
+	// get bsdf
+	Bsdf*	GetBsdf() const { return m_bsdf; }
+
 // protected field
 protected:
 	// bounding box
 	SmartPtr<BBox> m_bbox;
 	// id for the primitive
 	unsigned m_primitive_id;
+
+	// the material for the primitive
+	Bsdf*	m_bsdf;
 };
 
 #endif

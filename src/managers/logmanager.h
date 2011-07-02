@@ -30,9 +30,13 @@ public:
 	static void CreateLogManager( bool enable = true );
 	// destructor
 	~LogManager();
+	
 	// enable or disable log
 	// para 'enable' : enable or disable the log system
 	void SetLogEnabled( bool enable );
+	
+	// set the header of log
+	void SetHeader( const string& str );
 
 // private method
 private:
@@ -66,6 +70,7 @@ private:
 #define LOG				LogManager::GetSingleton()
 #define LOG_WARNING		LOG<<LOG_FILE_INFO<<"WARNING: "
 #define	LOG_ERROR		LOG<<LOG_FILE_INFO<<"ERROR: "
+#define	LOG_HEADER(str)	LogManager::GetSingleton().SetHeader( str )
 
 #define ENDL _ENDL(false)
 #define	CRASH _ENDL(true)

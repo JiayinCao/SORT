@@ -53,6 +53,14 @@ void System::_preInit()
 	m_camera = camera;
 	// the integrator
 	m_pIntegrator = new WhittedRT();
+
+	// set default value
+	m_uRenderingTime = 0;
+	m_uPreProcessingTime = 0;
+	m_uPostProcessingTime = 0;
+	m_uProgressCount = 64;
+	m_uCurrentPixelId = 0;
+	m_uTotalPixelCount = m_rt->GetWidth() * m_rt->GetHeight();
 }
 
 // post-uninit
@@ -76,10 +84,14 @@ void System::_postUninit()
 // render the image
 void System::Render()
 {
-	unsigned progressCount = 64;
-	unsigned totalPixel = m_rt->GetHeight() * m_rt->GetWidth();
-	unsigned currentPixel = 0;
-	unsigned preProgress = 0;
+	// pre-process before rendering
+	PreProcess();
+
+	// set timer before rendering
+	Timer::GetSingleton().StartTimer();
+
+	// reset pixel id
+	m_uCurrentPixelId = 0;
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
@@ -91,24 +103,19 @@ void System::Render()
 			m_rt->SetColor( j , i , color );
 
 			// update current pixel
-			currentPixel++;
+			m_uCurrentPixelId++;
 		}
-
 		// output progress
-		unsigned progress = (unsigned)( (float)(currentPixel * progressCount) / (float)totalPixel );
-		if( preProgress != progress )
-		{
-			cout<<"Tracing <<";
-			unsigned k = 0;
-			for( ; k < progress ; k++ )
-				cout<<"-";
-			for( ; k < progressCount ; k++ )
-				cout<<" ";
-			cout<<">>\r";
-			preProgress = progress;
-		}
+		_outputProgress();
 	}
 	cout<<endl;
+
+	// stop timer
+	Timer::GetSingleton().StopTimer();
+	m_uRenderingTime = Timer::GetSingleton().GetElapsedTime();
+
+	// post process after rendering
+	PostProcess();
 }
 
 // output render target
@@ -126,26 +133,71 @@ bool System::LoadScene( const string& str )
 // pre-process before rendering
 void System::PreProcess()
 {
+	// set timer before pre-processing
+	Timer::GetSingleton().StartTimer();
+
 	if( m_rt == 0 )
-	{
 		LOG_WARNING<<"There is no render target in the system, can't render anything."<<ENDL;
-		return;
-	}
 	if( m_camera == 0 )
-	{
 		LOG_WARNING<<"There is no camera attached in the system , can't render anything."<<ENDL;
-		return;
-	}
+	if( m_pIntegrator == 0 )
+		LOG_WARNING<<"There is no integrator attached in the system, can't rendering anything."<<ENDL;
 
-	// load the scene
-	m_Scene.LoadScene("");
-	m_Scene.PreProcess();
+	if( m_pIntegrator )
+		m_pIntegrator->PreProcess();
 
-	// output log
-	m_Scene.OutputLog();
+	// stop timer
+	Timer::GetSingleton().StopTimer();
+	m_uPreProcessingTime = Timer::GetSingleton().GetElapsedTime();
 }
 
 // post-process after rendering
 void System::PostProcess()
 {
+	// set timer before post-processing
+	Timer::GetSingleton().StartTimer();
+
+	if( m_pIntegrator )
+		m_pIntegrator->PostProcess();
+
+	// stop timer
+	Timer::GetSingleton().StopTimer();
+	m_uPostProcessingTime = Timer::GetSingleton().GetElapsedTime();
+}
+
+// get elapsed time
+unsigned System::GetRenderingTime() const
+{
+	return m_uRenderingTime;
+}
+
+// output progress
+void System::_outputProgress()
+{
+	// output progress
+	unsigned progress = (unsigned)( (float)(m_uCurrentPixelId * m_uProgressCount) / (float)m_uTotalPixelCount );
+	cout<<"Tracing <<";
+	unsigned k = 0;
+	for( ; k < progress ; k++ )
+		cout<<"-";
+	for( ; k < m_uProgressCount ; k++ )
+		cout<<" ";
+	cout<<">>\r";
+}
+
+// output log information
+void System::OutputLog() const
+{
+	// output scene information first
+	m_Scene.OutputLog();
+
+	// output integrator information
+	if( m_pIntegrator )
+		m_pIntegrator->OutputLog();
+
+	// output time information
+	LOG_HEADER( "Rendering Information" );
+	LOG<<"Time spent on pre-processing  : "<<m_uPreProcessingTime<<ENDL;
+	LOG<<"Time spent on rendering       : "<<m_uRenderingTime<<ENDL;
+	LOG<<"Time spent on post-processing : "<<m_uPostProcessingTime<<ENDL<<ENDL;
 }

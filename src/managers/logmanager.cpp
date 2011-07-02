@@ -62,6 +62,17 @@ void LogManager::SetLogEnabled( bool enable )
 		m_fileLog<<"Log disabled."<<endl;
 }
 
+// set log header
+void LogManager::SetHeader( const string& str )
+{
+	if( m_bLogEnable == false )
+		return ;
+
+	m_fileLog<<"-----------------------------------------------------"<<endl;
+	m_fileLog<<"--  "<<str<<endl;
+	m_fileLog<<"-----------------------------------------------------"<<endl;
+}
+
 // output message to the logger
 LogManager& operator<<( LogManager& manager , unsigned data )
 {
