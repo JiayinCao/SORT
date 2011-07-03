@@ -135,14 +135,17 @@ RGBSpectrum RGBSpectrum::operator * ( float t ) const
 
 // get each component
 float RGBSpectrum::GetR() const { 
-	float t =  saturate(m_r);
-	return t;
+	return m_r;
 }
 float RGBSpectrum::GetG() const { 
-	float t =  saturate(m_g);
-	return t; 
+	return m_g;
 }
 float RGBSpectrum::GetB() const { 
-	float t =  saturate(m_b);
-	return t;
+	return m_b;
+}
+
+// clamp the spectrum
+RGBSpectrum RGBSpectrum::Clamp() const
+{
+	return RGBSpectrum( saturate(m_r) , saturate(m_g) , saturate(m_b) );
 }

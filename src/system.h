@@ -67,6 +67,8 @@ private:
 	unsigned		m_uCurrentPixelId;
 	// progress count
 	unsigned		m_uProgressCount;
+	// previous progress
+	unsigned		m_uPreProgress;
 	// total pixel number
 	unsigned		m_uTotalPixelCount;
 
