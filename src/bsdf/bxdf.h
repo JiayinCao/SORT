@@ -34,10 +34,8 @@ public:
 	// para 'wo'  : out going direction
 	// para 'wi'  : in direction generated randomly
 	// para 'pdf' : property density function value of the specific 'wi'
-	virtual void Sample_f( const Vector& wo , Vector& wi , float* pdf ) const = 0;
-
-// private field
-private:
+	// result     : brdf value for the 'wo' and 'wi'
+	virtual Spectrum Sample_f( const Vector& wo , Vector& wi , float* pdf ) const = 0;
 
 };
 
