@@ -2529,10 +2529,15 @@ void ply_free_file( PlyFile* ply )
 	for( i = 0 ; i < ply->nelems ; i++ )
 	{
 		PlyElement* element = ply->elems[i];
+		free(element->name);
 		if( element->store_prop )
 			free( element->store_prop );
 		for( k = 0 ; k < element->nprops; k++ )
+		{
+			free( element->props[k]->name );
 			free( element->props[k] );
+		}
+		
 		free( element->props );
 		free( element );
 	}
