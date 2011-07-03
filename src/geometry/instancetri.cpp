@@ -49,7 +49,7 @@ const BBox& InstanceTriangle::GetBBox()
 		m_bbox = new BBox();
 
 		const Reference<BufferMemory> mem = m_trimesh->m_pMemory;
-		const VertexIndex* index = &(mem->m_IndexBuffer[ 3 * m_id ]);
+		const VertexIndex* index = &(mem->m_IndexBuffer[ 3 * m_offset ]);
 		int id0 = index[0].posIndex;
 		int id1 = index[1].posIndex;
 		int id2 = index[2].posIndex;

@@ -14,7 +14,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
 	// get the memory
 	Reference<BufferMemory> mem = m_trimesh->m_pMemory;
-	VertexIndex* index = &(mem->m_IndexBuffer[ 3 * m_id ]);
+	VertexIndex* index = &(mem->m_IndexBuffer[ 3 * m_offset ]);
 	int id0 = index[0].posIndex;
 	int id1 = index[1].posIndex;
 	int id2 = index[2].posIndex;
@@ -56,7 +56,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 
     // Calculate V parameter and test bounds
     float v = Dot( r.m_Dir, qvec );
-    if( v < 0.0f || u + v > det )
+    if( v < -0.00000001f || u + v > det )
 		return false;
 
     // Calculate t, scale parameters, ray intersects triangle
@@ -111,9 +111,9 @@ const BBox& Triangle::GetBBox()
 
 		// get the memory
 		Reference<BufferMemory> mem = m_trimesh->m_pMemory;
-		int id0 = mem->m_IndexBuffer[ 3 * m_id ].posIndex;
-		int id1 = mem->m_IndexBuffer[ 3 * m_id + 1 ].posIndex;
-		int id2 = mem->m_IndexBuffer[ 3 * m_id + 2 ].posIndex;
+		int id0 = mem->m_IndexBuffer[ 3 * m_offset ].posIndex;
+		int id1 = mem->m_IndexBuffer[ 3 * m_offset + 1 ].posIndex;
+		int id2 = mem->m_IndexBuffer[ 3 * m_offset + 2 ].posIndex;
 
 		// get three vertexes
 		const Point& p0 = mem->m_PositionBuffer[id0] ;

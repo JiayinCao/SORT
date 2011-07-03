@@ -184,7 +184,7 @@ void System::_outputProgress()
 		cout<<"Tracing <<";
 		for( unsigned i = 0 ; i < m_uProgressCount ; i++ )
 			cout<<" ";
-		cout<<">> \rTracing <<";
+		cout<<" >> \rTracing <<";
 	}
 	if( m_uPreProgress != progress )
 	{
