@@ -13,16 +13,21 @@
 // the maxmium length of a single line
 static const unsigned LINE_MAXLENGTH = 4096;
 
+static char x_prop[] = "x";
+static char y_prop[] = "y";
+static char z_prop[] = "z";
+static char vertex_index_prop[] = "vertex_indices";
+
 static PlyProperty vert_props[] = 
 {
-  {"x", PLY_FLOAT, PLY_FLOAT, 0, 0, 0, 0, 0},
-  {"y", PLY_FLOAT, PLY_FLOAT, 4, 0, 0, 0, 0},
-  {"z", PLY_FLOAT, PLY_FLOAT, 8, 0, 0, 0, 0},
+  {x_prop, PLY_FLOAT, PLY_FLOAT, 0, 0, 0, 0, 0},
+  {y_prop, PLY_FLOAT, PLY_FLOAT, 4, 0, 0, 0, 0},
+  {z_prop, PLY_FLOAT, PLY_FLOAT, 8, 0, 0, 0, 0},
 };
 
 static PlyProperty face_props[] = 
 {
-  {"vertex_indices", PLY_UINT, PLY_UINT, 4 , 1, 4, PLY_UINT, 0},
+  {vertex_index_prop, PLY_UINT, PLY_UINT, 4 , 1, 4, PLY_UINT, 0},
 };
 
 // load obj from file

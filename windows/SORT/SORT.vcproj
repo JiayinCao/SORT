@@ -477,6 +477,14 @@
 			Name="camera"
 			>
 			<File
+				RelativePath="..\..\src\camera\environment.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\camera\environment.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\camera\camera.h"
 				>
 			</File>

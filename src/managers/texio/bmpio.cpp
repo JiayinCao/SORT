@@ -77,9 +77,10 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 		for( int j = 0 ; j < w ; j++ )
 		{
 			unsigned offset = ( h - i - 1 ) * pitch + j * bitcount;
-			data[offset+0] = (unsigned char)( tex->GetColor( (int)j , (int)i ).GetB() * 255 );
-			data[offset+1] = (unsigned char)( tex->GetColor( (int)j , (int)i ).GetG() * 255 );
-			data[offset+2] = (unsigned char)( tex->GetColor( (int)j , (int)i ).GetR() * 255 );
+			Spectrum c = tex->GetColor( j , i ).Clamp();
+			data[offset+0] = (unsigned char)( c.GetB() * 255 );
+			data[offset+1] = (unsigned char)( c.GetG() * 255 );
+			data[offset+2] = (unsigned char)( c.GetR() * 255 );
 		}
 
 	// the type for the image

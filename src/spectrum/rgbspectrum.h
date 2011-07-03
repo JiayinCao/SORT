@@ -40,7 +40,10 @@ public:
 	// get each component
 	float	GetR() const; 
 	float	GetG() const; 
-	float	GetB() const; 
+	float	GetB() const;
+
+	// clamp the spectrum
+	RGBSpectrum Clamp() const;
 
 	// operators
 	RGBSpectrum operator+( const RGBSpectrum& c ) const;

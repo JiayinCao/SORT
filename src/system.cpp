@@ -49,7 +49,7 @@ void System::_preInit()
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , 1 , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
-	camera->SetRenderTarget( m_rt );m_camera = 0;
+	camera->SetRenderTarget( m_rt );
 	m_camera = camera;
 	// the integrator
 	m_pIntegrator = new WhittedRT();
@@ -60,6 +60,7 @@ void System::_preInit()
 	m_uPostProcessingTime = 0;
 	m_uProgressCount = 64;
 	m_uCurrentPixelId = 0;
+	m_uPreProgress = 0xffffffff;
 	m_uTotalPixelCount = m_rt->GetWidth() * m_rt->GetHeight();
 }
 
@@ -92,6 +93,7 @@ void System::Render()
 
 	// reset pixel id
 	m_uCurrentPixelId = 0;
+	m_uPreProgress = 0xffffffff;
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
@@ -176,13 +178,20 @@ void System::_outputProgress()
 {
 	// output progress
 	unsigned progress = (unsigned)( (float)(m_uCurrentPixelId * m_uProgressCount) / (float)m_uTotalPixelCount );
-	cout<<"Tracing <<";
-	unsigned k = 0;
-	for( ; k < progress ; k++ )
+
+	if( m_uPreProgress == 0xffffffff )
+	{
+		cout<<"Tracing <<";
+		for( unsigned i = 0 ; i < m_uProgressCount ; i++ )
+			cout<<" ";
+		cout<<">> \rTracing <<";
+	}
+	if( m_uPreProgress != progress )
+	{
 		cout<<"-";
-	for( ; k < m_uProgressCount ; k++ )
-		cout<<" ";
-	cout<<">>\r";
+		m_uPreProgress = progress;
+		cout.flush();
+	}
 }
 
 // output log information

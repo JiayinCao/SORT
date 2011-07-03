@@ -36,8 +36,8 @@ bool Scene::LoadScene( const string& str )
 
 	// create another instance
 	mesh = new TriMesh();
-	Transform t2 = Translate( Vector( 0 , 1 , 0 ) ) * RotateX( -1.0f ) * Translate( Vector( 1 , 1 , 0 ) ) * Scale( 10.0f );
-	if( mesh->LoadMesh( "../res/bunny.ply" , t2 ) )
+	Transform t2 = Translate( Vector( 0 , 1 , 0 ) ) * RotateX( 1.0f ) * Translate( Vector( 0 , -1 , -1 ) ) * Scale( 0.3f );
+	if( mesh->LoadMesh( "../res/teapot.obj" , t2 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;
