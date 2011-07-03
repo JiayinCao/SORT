@@ -1,26 +1,25 @@
 /*
- * filename :	lambert.h
+ * filename :	refraction.h
  *
  * programmer :	Cao Jiayin
  */
 
-#ifndef	SORT_LAMBERT
-#define	SORT_LAMBERT
+#ifndef	SORT_REFRACTION
+#define	SORT_REFRACTION
 
-// include header file
+// include the header
 #include "bxdf.h"
 
-////////////////////////////////////////////////////////////
-// definition of lambert brdf
-class Lambert : public Bxdf
+//////////////////////////////////////////////////////////////////////////////////
+// definition of refraction
+class	Refraction : public Bxdf
 {
 // public method
 public:
 	// default constructor
-	// para 's' : total reflectance
-	Lambert( const Spectrum& s ):R(s){}
+	Refraction(){}
 	// destructor
-	~Lambert(){}
+	~Refraction(){}
 
 	// evaluate bxdf
 	// para 'wo' : out going direction
@@ -34,11 +33,6 @@ public:
 	// para 'pdf' : property density function value of the specific 'wi'
 	// result     : brdf value for the 'wo' and 'wi'
 	virtual Spectrum Sample_f( const Vector& wo , Vector& wi , float* pdf ) const;
-
-// private field
-private:
-	// the total reflectance
-	Spectrum R;
 };
 
 #endif

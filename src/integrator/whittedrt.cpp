@@ -10,8 +10,8 @@
 #include "geometry/intersection.h"
 #include "geometry/scene.h"
 
-
 // to be deleted
+#include "bsdf/bxdf.h"
 #include "bsdf/lambert.h"
 
 // radiance along a specific ray direction
@@ -28,9 +28,9 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 
 	// get primitive bsdf
 	Lambert lambert( Spectrum( PI ) );
-	Spectrum bsdf = lambert.f( -r.m_Dir , lightDir );
+	Spectrum t = lambert.f( -r.m_Dir , lightDir );
 
-	return bsdf * Dot( -r.m_Dir , ip.normal );
+	return t * Dot( -r.m_Dir , ip.normal );
 }
 
 // output log information

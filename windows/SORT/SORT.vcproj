@@ -576,6 +576,22 @@
 				RelativePath="..\..\src\bsdf\lambert.cpp"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\bsdf\reflection.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\reflection.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\refraction.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\refraction.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="light"
