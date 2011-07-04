@@ -9,6 +9,7 @@
 
 // include the header
 #include "spectrum/spectrum.h"
+#include "utility/enum.h"
 
 // pre-declera class
 class Vector;
@@ -37,6 +38,10 @@ public:
 	// result     : brdf value for the 'wo' and 'wi'
 	virtual Spectrum Sample_f( const Vector& wo , Vector& wi , float* pdf ) const = 0;
 
+// protected field
+protected:
+	// the type for the bxdf
+	BXDF_TYPE m_type;
 };
 
 #endif

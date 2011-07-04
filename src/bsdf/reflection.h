@@ -17,7 +17,7 @@ class	Reflection : Bxdf
 // public method
 public:
 	// default constructor
-	Reflection(){}
+	Reflection(){m_type=BXDF_REFLECTION;}
 	// destructor
 	~Reflection(){}
 

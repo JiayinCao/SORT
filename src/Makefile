@@ -17,6 +17,7 @@ LIBSRCS += $(wildcard utility/*.cpp )
 LIBSRCS += $(wildcard integrator/*.cpp)
 LIBSRCS += $(wildcard light/*.cpp)
 LIBSRCS += $(wildcard bsdf/*.cpp)
+LIBSRCS += $(wildcard material/*.cpp)
 LIBSCCS += $(wildcard thirdparty/ply/*.c)
 
 LIBOBJS = $(addprefix $(OBJ_PATH)/, $(subst ._,, $(subst /,_,$(LIBSRCS:.cpp=.o)) ) )
@@ -90,6 +91,9 @@ $(OBJ_PATH)/bsdf_%.o : bsdf/%.cpp bsdf/%.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 
+$(OBJ_PATH)/material_%.o : material/%.cpp material/%.h
+	@echo "building object $@"
+	@g++ $(COMPILE_FLAG) -c $< -o $@
 $(OBJ_PATH)/thirdparty_ply_%.o : thirdparty/ply/%.c thirdparty/ply/%.h
 	@echo "building object $@"
 	@gcc $(COMPILE_FLAG) -c $< -o $@
