@@ -17,7 +17,7 @@ class	Refraction : public Bxdf
 // public method
 public:
 	// default constructor
-	Refraction(){}
+	Refraction(){m_type=BXDF_REFRACTION;}
 	// destructor
 	~Refraction(){}
 
