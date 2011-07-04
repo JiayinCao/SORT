@@ -20,8 +20,8 @@ bool Scene::LoadScene( const string& str )
 {
 	// temporary
 	TriMesh* mesh = new TriMesh();
-	Transform t0 = Scale( 10.0f );
-	if( mesh->LoadMesh( "../res/bunny.ply" , t0 ) )
+	Transform t0 = Scale( 0.1f ) * RotateY( PI ) * Translate( 0.0f , 5.0f , 0.0f );
+	if( mesh->LoadMesh( "../res/killeroo.obj" , t0 ) )
 		m_meshBuf.push_back( mesh );
 	else
 		delete mesh;
@@ -44,13 +44,6 @@ bool Scene::LoadScene( const string& str )
 
 	// generate triangle buffer after parsing from file
 	_generateTriBuf();
-
-	m_pAccelerator = new UniGrid();
-	if( m_pAccelerator )
-	{
-		m_pAccelerator->SetPrimitives( &m_triBuf );
-		m_pAccelerator->Build();
-	}
 
 	return true;
 }
@@ -119,4 +112,22 @@ void Scene::OutputLog() const
 
 	if( m_pAccelerator )
 		m_pAccelerator->OutputLog();
+}
+
+// preprocess
+void Scene::PreProcess()
+{
+	// set uniform grid as acceleration structure as default
+	m_pAccelerator = new UniGrid();
+	if( m_pAccelerator )
+	{
+		m_pAccelerator->SetPrimitives( &m_triBuf );
+		m_pAccelerator->Build();
+	}
+}
+
+// post process
+void Scene::PostProcess()
+{
+	SAFE_DELETE( m_pAccelerator );
 }

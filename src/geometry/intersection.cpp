@@ -14,6 +14,7 @@ Intersection::Intersection()
 	u = 0.0f;
 	v = 0.0f;
 	t = FLT_MAX;
+	primitive = 0;
 }
 
 // destructor

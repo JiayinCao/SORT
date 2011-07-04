@@ -56,12 +56,31 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			mem->m_TexCoordBuffer.push_back( v );
 		}else if( strcmp( prefix.c_str() , "f" ) == 0 )
 		{
-			for( int i = 0 ; i < 3 ; i++ )
-			{
-				string strIndex;
-				file>>strIndex;
+			string strIndex;
+			file>>strIndex;
+			VertexIndex vi0 = Str2VertexIndex( strIndex );
+			mem->m_IndexBuffer.push_back( vi0 );
+			file>>strIndex;
+			VertexIndex vi1 = Str2VertexIndex( strIndex );
+			mem->m_IndexBuffer.push_back( vi1 );
+			file>>strIndex;
+			VertexIndex vi2 = Str2VertexIndex( strIndex );
+			mem->m_IndexBuffer.push_back( vi2 );
 
-				mem->m_IndexBuffer.push_back( Str2VertexIndex( strIndex ) );
+			// check if there is another index
+			char t = file.peek();
+			while( t == ' ' || t == '\t' )
+			{
+				file.get();
+				t = file.peek();
+			}
+			if( t >= '0' && t <= '9' )
+			{
+				file>>strIndex;
+				VertexIndex vi3 = Str2VertexIndex( strIndex );
+				mem->m_IndexBuffer.push_back( vi0 );
+				mem->m_IndexBuffer.push_back( vi2 );
+				mem->m_IndexBuffer.push_back( vi3 );
 			}
 		}
 

@@ -27,7 +27,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	lightDir.Normalize();
 
 	// get primitive bsdf
-	Lambert lambert( Spectrum( PI ) );
+	Lambert lambert( Spectrum( PI * 2 , 0.0f , 0.0f ) );
 	Spectrum t = lambert.f( -r.m_Dir , lightDir );
 
 	return t * Dot( -r.m_Dir , ip.normal );

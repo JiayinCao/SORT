@@ -44,6 +44,11 @@ public:
 	// output log information
 	void	OutputLog() const;
 
+	// preprocess
+	void	PreProcess();
+	// post process
+	void	PostProcess();
+
 // private field
 private:
 	// the buffer for the triangle mesh
