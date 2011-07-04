@@ -569,6 +569,10 @@
 			Name="bsdf"
 			>
 			<File
+				RelativePath="..\..\src\bsdf\bsdf.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\bsdf\bsdf.h"
 				>
 			</File>
@@ -606,6 +610,14 @@
 			>
 			<File
 				RelativePath="..\..\src\light\light.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="material"
+			>
+			<File
+				RelativePath="..\..\src\material\material.h"
 				>
 			</File>
 		</Filter>
