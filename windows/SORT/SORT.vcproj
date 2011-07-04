@@ -429,11 +429,11 @@
 			Name="utility"
 			>
 			<File
-				RelativePath="..\..\src\utility\enum.h"
+				RelativePath="..\..\src\utility\define.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\utility\define.h"
+				RelativePath="..\..\src\utility\enum.h"
 				>
 			</File>
 			<File
@@ -477,7 +477,7 @@
 			Name="camera"
 			>
 			<File
-				RelativePath="..\..\src\camera\environment.h"
+				RelativePath="..\..\src\camera\camera.h"
 				>
 			</File>
 			<File
@@ -485,7 +485,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\camera\camera.h"
+				RelativePath="..\..\src\camera\environment.h"
 				>
 			</File>
 			<File
@@ -577,11 +577,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\bsdf\lambert.h"
+				RelativePath="..\..\src\bsdf\lambert.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\bsdf\lambert.cpp"
+				RelativePath="..\..\src\bsdf\lambert.h"
 				>
 			</File>
 			<File

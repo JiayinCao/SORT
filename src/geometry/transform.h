@@ -73,6 +73,19 @@ inline Transform Translate( const Vector& v )
 	return Transform( m , invm );
 }
 
+inline Transform Translate( float x , float y , float z )
+{
+	Matrix m( 	1.0f , 0.0f , 0.0f , x ,
+				0.0f , 1.0f , 0.0f , y ,
+				0.0f , 0.0f , 1.0f , z ,
+				0.0f , 0.0f , 0.0f , 1.0f );
+	Matrix invm( 1.0f , 0.0f , 0.0f , -x ,
+				 0.0f , 1.0f , 0.0f , -y ,
+				 0.0f , 0.0f , 1.0f , -z ,
+				 0.0f , 0.0f , 0.0f , 1.0f );
+	return Transform( m , invm );
+}
+
 // scale
 inline Transform Scale( float x , float y , float z )
 {

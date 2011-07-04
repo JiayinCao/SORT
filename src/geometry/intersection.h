@@ -10,6 +10,9 @@
 // include the header
 #include "point.h"
 
+// pre-decleration class
+class Primitive;
+
 ///////////////////////////////////////////////////////////////////////
 //	definition of intersection
 class	Intersection
@@ -31,6 +34,8 @@ public:
 	float	u , v;
 	// the delta distance from the orginal point
 	float	t;
+	// the intersected primitive
+	Primitive* primitive;
 };
 
 #endif

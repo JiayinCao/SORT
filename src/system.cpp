@@ -145,6 +145,8 @@ void System::PreProcess()
 	if( m_pIntegrator == 0 )
 		LOG_WARNING<<"There is no integrator attached in the system, can't rendering anything."<<ENDL;
 
+	m_Scene.PreProcess();
+
 	if( m_pIntegrator )
 		m_pIntegrator->PreProcess();
 
@@ -158,6 +160,8 @@ void System::PostProcess()
 {
 	// set timer before post-processing
 	Timer::GetSingleton().StartTimer();
+
+	m_Scene.PostProcess();
 
 	if( m_pIntegrator )
 		m_pIntegrator->PostProcess();

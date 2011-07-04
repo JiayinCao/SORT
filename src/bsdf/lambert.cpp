@@ -11,7 +11,7 @@
 
 // to be deleted
 #include "managers/logmanager.h"
-	
+
 // evaluate bxdf
 Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const
 {

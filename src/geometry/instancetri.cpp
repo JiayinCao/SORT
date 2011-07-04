@@ -28,7 +28,6 @@ bool	InstanceTriangle::GetIntersect( const Ray& r , Intersection* intersect ) co
 
 	// get the intersection result 
 	bool result =  Triangle::GetIntersect( ray , intersect );
-
 	if( result == false )
 		return false;
 

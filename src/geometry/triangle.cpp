@@ -43,12 +43,12 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
         det = -det;
     }
 
-    if( det < 0.000000001f )
+    if( det < -0.0000001f )
 		return false;
 
     // Calculate U parameter and test bounds
     float u = Dot( tvec, pvec );
-    if( u < 0.0f || u > det )
+    if( u < -0.0000001f || u > det + 0.0000001f )
 		return false;
 
     // Prepare to test V parameter
@@ -56,7 +56,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 
     // Calculate V parameter and test bounds
     float v = Dot( r.m_Dir, qvec );
-    if( v < -0.00000001f || u + v > det )
+    if( v < -0.0000001f || u + v > det + 0.0000001f )
 		return false;
 
     // Calculate t, scale parameters, ray intersects triangle
@@ -97,6 +97,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	intersect->t = t;
 	intersect->u = u;
 	intersect->v = v;
+	intersect->primitive = const_cast<Triangle*>(this);
 
     return t > 0.0f ;
 }
