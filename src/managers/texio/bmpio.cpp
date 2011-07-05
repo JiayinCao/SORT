@@ -12,7 +12,6 @@
 #include "managers/logmanager.h"
 #include "managers/texmanager.h"
 #include "texture/texture.h"
-#include "utility/path.h"
 
 //-------------------------------------------------
 // define some useful structure
@@ -106,7 +105,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 
 	// open the file
 	ofstream file;
-	file.open( GetFullPath(str).c_str() , ios::binary );
+	file.open( str.c_str() , ios::binary );
 
 	// if the file could not be opened , just return an LOG_ERROR
 	if( file.is_open() == false )
@@ -145,7 +144,7 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 
 	// open the file
 	ifstream file;
-	file.open( GetFullPath(str).c_str() , ios::binary );
+	file.open( str.c_str() , ios::binary );
 
 	// if the file could not be opened , just return an LOG_ERROR
 	if( file.is_open() == false )

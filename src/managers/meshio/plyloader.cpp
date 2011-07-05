@@ -6,7 +6,6 @@
 
 // include the header file
 #include "plyloader.h"
-#include "utility/path.h"
 #include "managers/meshmanager.h"
 #include "thirdparty/ply/ply.h"
 
@@ -43,7 +42,7 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 	char *elem_name;
 
 	// open file for reading
-	PlyFile *ply = ply_open_for_reading( GetFullPath(str).c_str() , &nelems, &elist, &file_type, &version);
+	PlyFile *ply = ply_open_for_reading( str.c_str() , &nelems, &elist, &file_type, &version);
 	if( ply == 0 )
 		return false;
 

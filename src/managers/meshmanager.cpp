@@ -11,6 +11,7 @@
 #include "meshio/plyloader.h"
 #include "geometry/trimesh.h"
 #include "geometry/triangle.h"
+#include "utility/path.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MeshManager);
@@ -69,8 +70,11 @@ MeshLoader*	MeshManager::_getMeshLoader( MESH_TYPE type ) const
 }
 
 // load the mesh from file
-bool MeshManager::LoadMesh( const string& str , TriMesh* mesh )
+bool MeshManager::LoadMesh( const string& filename , TriMesh* mesh )
 {
+	// get full resource filename
+	string str = GetFullPath( filename );
+
 	// get the mesh type
 	MESH_TYPE type = MeshTypeFromStr( str );
 

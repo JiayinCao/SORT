@@ -8,9 +8,10 @@
 #include "strhelper.h"
 #include "managers/meshmanager.h"
 #include <algorithm>
+#include "geometry/transform.h"
 
 // convert string to vertex index
-VertexIndex	Str2VertexIndex( const string& str )
+VertexIndex	VertexIndexFromStr( const string& str )
 {
 	VertexIndex vi;
 	string temp , rest;
@@ -75,4 +76,85 @@ TEX_TYPE	TexTypeFromStr( const string& str )
 	LOG_WARNING<<"Image type of \""<<substr<<"\" is not supported."<<ENDL;
 
 	return TT_END;
+}
+
+// transformation from string
+Transform TransformFromStr( const string& s )
+{
+	// if there is no such an value , just return identity matrix and log a warning
+	if( s.empty() )
+	{
+		LOG_WARNING<<"No value set in the transformation"<<ENDL;
+		return Transform();
+	}
+
+	string str = s;
+
+	// get the first character
+	string t = NextToken( str , ' ' );
+	if( t[0] == 't' )
+	{
+		t = NextToken( str , ' ' );
+		float x = atoi( t.c_str() );
+		t = NextToken( str , ' ' );
+		float y = atoi( t.c_str() );
+		t = NextToken( str , ' ' );
+		float z = atoi( t.c_str() );
+		return Translate( x , y , z );	
+	}else if( t[0] == 'r' )
+	{
+		t = NextToken( str , ' ' );
+		int axis = atoi( t.c_str() );
+		t = NextToken( str , ' ' );
+		float angle = atoi( t.c_str() );
+		switch( axis )
+		{
+			case 0:
+				return RotateX( angle );
+			case 1:
+				return RotateY( angle );
+			case 2:
+				return RotateZ( angle );
+		}
+	}else if( t[0] == 's' )
+	{
+		t = NextToken( str , ' ' );
+		float s0 = atoi( t.c_str() );
+		float s1 = s0;
+		float s2 = s0;
+		
+		t = NextToken( str , ' ' );
+		if( str.empty() == false )
+		{
+			s1 = atoi( t.c_str() );
+			t = NextToken( str , ' ' );
+			s2 = atoi( t.c_str() );
+		}
+
+		return Scale( s0 , s1 , s2 );
+	}
+
+	return Transform();
+}
+
+// get the next token
+string NextToken( string& str , char t )
+{
+	// get the next t index
+	unsigned id = str.find_first_of( t );
+	while( id == 0 )
+	{
+		// get to the next one
+		str = str.substr( 1 , string::npos );
+		id = str.find_first_of( t );
+	}
+	string res = str.substr( 0 , id );
+
+	// if there is no such a character , set it none
+	if( id == string::npos )
+		str = "";
+	else
+		str = str.substr( id + 1 , string::npos );
+
+	return res;
 }

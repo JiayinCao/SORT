@@ -1,0 +1,23 @@
+<Root>
+	<Resource path="../res/"/>
+	<Model filename="cube.obj">
+		<Transform>
+			<Matrix value="t 0 1 0"/>
+			<Matrix value="r 0 0.2"/>
+		</Transform>
+	</Model>
+	<Model filename="bunny.ply">
+		<Transform>
+			<Matrix value="s 5"/>
+			<Matrix value="t 2 1 0"/>
+			<Matrix value="r 0 0.2"/>
+		</Transform>
+	</Model>
+	<Model filename="bunny.ply">
+		<Transform>
+			<Matrix value="s 5"/>
+			<Matrix value="t -2 1 0"/>
+			<Matrix value="r 0 0.2"/>
+		</Transform>
+	</Model>
+</Root>

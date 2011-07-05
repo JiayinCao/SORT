@@ -11,7 +11,6 @@
 #include "geometry/vector.h"
 #include "managers/meshmanager.h"
 #include "utility/strhelper.h"
-#include "utility/path.h"
 
 // the maxmium length of a single line
 static const unsigned LINE_MAXLENGTH = 4096;
@@ -19,7 +18,7 @@ static const unsigned LINE_MAXLENGTH = 4096;
 // load obj from file
 bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 {
-	ifstream file( GetFullPath(str).c_str() );
+	ifstream file( str.c_str() );
 
 	// if the specific file is not loaded return false
 	if( false == file.is_open() )
@@ -58,13 +57,13 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 		{
 			string strIndex;
 			file>>strIndex;
-			VertexIndex vi0 = Str2VertexIndex( strIndex );
+			VertexIndex vi0 = VertexIndexFromStr( strIndex );
 			mem->m_IndexBuffer.push_back( vi0 );
 			file>>strIndex;
-			VertexIndex vi1 = Str2VertexIndex( strIndex );
+			VertexIndex vi1 = VertexIndexFromStr( strIndex );
 			mem->m_IndexBuffer.push_back( vi1 );
 			file>>strIndex;
-			VertexIndex vi2 = Str2VertexIndex( strIndex );
+			VertexIndex vi2 = VertexIndexFromStr( strIndex );
 			mem->m_IndexBuffer.push_back( vi2 );
 
 			// check if there is another index
@@ -77,7 +76,7 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			if( t >= '0' && t <= '9' )
 			{
 				file>>strIndex;
-				VertexIndex vi3 = Str2VertexIndex( strIndex );
+				VertexIndex vi3 = VertexIndexFromStr( strIndex );
 				mem->m_IndexBuffer.push_back( vi0 );
 				mem->m_IndexBuffer.push_back( vi2 );
 				mem->m_IndexBuffer.push_back( vi3 );

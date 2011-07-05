@@ -7,8 +7,7 @@
 // include the header file
 #include "sort.h"
 #include "system.h"
-#include "camera/perspective.h"
-#include "utility/timer.h"
+#include "utility/strhelper.h"
 
 // the global system
 System g_System;
@@ -17,7 +16,7 @@ System g_System;
 int main( int argc , char** argv )
 {
 	// load the scene from file
-	g_System.LoadScene("");
+	g_System.LoadScene("../res/first_scene.scene");
 
 	// do ray tracing
 	g_System.Render();
