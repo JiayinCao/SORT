@@ -25,7 +25,7 @@ public:
 	// default constructor
 	Bsdf(){}
 	// destructor
-	~Bsdf(){}
+	~Bsdf();
 
 	// get the number of bxdf
 	unsigned NumComponents() const;

@@ -9,6 +9,17 @@
 #include "bxdf.h"
 #include "geometry/vector.h"
 
+// destructor
+Bsdf::~Bsdf()
+{
+	vector<Bxdf*>::iterator it = m_bxdf.begin();
+	while( it != m_bxdf.end() )
+	{
+		delete *it;
+		it++;
+	}
+}
+
 // get the number of components in current bsdf
 unsigned Bsdf::NumComponents() const
 {

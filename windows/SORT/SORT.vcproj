@@ -540,6 +540,34 @@
 					>
 				</File>
 			</Filter>
+			<Filter
+				Name="tinyxml"
+				>
+				<File
+					RelativePath="..\..\src\thirdparty\tinyxml\tinystr.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\thirdparty\tinyxml\tinystr.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\thirdparty\tinyxml\tinyxml.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\thirdparty\tinyxml\tinyxml.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\thirdparty\tinyxml\tinyxmlerror.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\thirdparty\tinyxml\tinyxmlparser.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="integrator"
@@ -618,6 +646,14 @@
 			>
 			<File
 				RelativePath="..\..\src\material\material.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\material\matte.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\material\matte.h"
 				>
 			</File>
 		</Filter>

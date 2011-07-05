@@ -13,6 +13,7 @@
 
 // pre-decleration
 class	Intersection;
+class	Material;
 
 //////////////////////////////////////////////////////////////////
 //	definition of primitive
@@ -40,12 +41,20 @@ public:
 	// get primitive id
 	unsigned GetID() const { return m_primitive_id; }
 
+	// get material
+	Material* GetMaterial() const { return m_mat; }
+
+	// set material
+	void	SetMaterial( Material* mat ) { m_mat = mat; }
+
 // protected field
 protected:
 	// bounding box
 	SmartPtr<BBox> m_bbox;
 	// id for the primitive
-	unsigned m_primitive_id;
+	unsigned		m_primitive_id;
+	// the material
+	Material*		m_mat;
 };
 
 #endif
