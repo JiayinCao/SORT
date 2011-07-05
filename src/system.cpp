@@ -57,7 +57,6 @@ void System::_preInit()
 	// set default value
 	m_uRenderingTime = 0;
 	m_uPreProcessingTime = 0;
-	m_uPostProcessingTime = 0;
 	m_uProgressCount = 64;
 	m_uCurrentPixelId = 0;
 	m_uPreProgress = 0xffffffff;
@@ -115,9 +114,6 @@ void System::Render()
 	// stop timer
 	Timer::GetSingleton().StopTimer();
 	m_uRenderingTime = Timer::GetSingleton().GetElapsedTime();
-
-	// post process after rendering
-	PostProcess();
 }
 
 // output render target
@@ -153,22 +149,6 @@ void System::PreProcess()
 	// stop timer
 	Timer::GetSingleton().StopTimer();
 	m_uPreProcessingTime = Timer::GetSingleton().GetElapsedTime();
-}
-
-// post-process after rendering
-void System::PostProcess()
-{
-	// set timer before post-processing
-	Timer::GetSingleton().StartTimer();
-
-	m_Scene.PostProcess();
-
-	if( m_pIntegrator )
-		m_pIntegrator->PostProcess();
-
-	// stop timer
-	Timer::GetSingleton().StopTimer();
-	m_uPostProcessingTime = Timer::GetSingleton().GetElapsedTime();
 }
 
 // get elapsed time
@@ -212,5 +192,4 @@ void System::OutputLog() const
 	LOG_HEADER( "Rendering Information" );
 	LOG<<"Time spent on pre-processing  : "<<m_uPreProcessingTime<<ENDL;
 	LOG<<"Time spent on rendering       : "<<m_uRenderingTime<<ENDL;
-	LOG<<"Time spent on post-processing : "<<m_uPostProcessingTime<<ENDL<<ENDL;
 }

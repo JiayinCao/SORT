@@ -37,10 +37,6 @@ public:
 	// generate some neccessary infomation by latter stage.
 	virtual void PreProcess() {}
 
-	// post-process after rendering
-	// by default , nothing is done in post-process
-	virtual void PostProcess() {}
-
 	// output log information
 	virtual void OutputLog() const {}
 };

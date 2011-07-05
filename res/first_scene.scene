@@ -20,4 +20,5 @@
 			<Matrix value="r 0 0.2"/>
 		</Transform>
 	</Model>
+	<Accel type="uniform_grid"/>
 </Root>

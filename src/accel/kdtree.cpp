@@ -39,5 +39,6 @@ void KDTree::Build()
 // output log
 void KDTree::OutputLog() const
 {
-	LOG<<"KD-Tree is not implemented yet."<<ENDL;
+	LOG_HEADER( "Accelerator" );
+	LOG<<"KD-Tree is not implemented yet."<<ENDL<<ENDL;
 }

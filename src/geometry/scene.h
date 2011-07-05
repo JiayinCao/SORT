@@ -46,8 +46,6 @@ public:
 
 	// preprocess
 	void	PreProcess();
-	// post process
-	void	PostProcess();
 
 // private field
 private:

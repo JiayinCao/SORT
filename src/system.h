@@ -28,8 +28,6 @@ public:
 
 	// pre-process before rendering
 	void PreProcess();
-	// post-process after rendering
-	void PostProcess();
 	// render the image
 	void Render();
 	// output the render target
@@ -61,8 +59,6 @@ private:
 	unsigned		m_uRenderingTime;
 	// pre-processing time
 	unsigned		m_uPreProcessingTime;
-	// post-processing time
-	unsigned		m_uPostProcessingTime;
 	// current rendering pixel id
 	unsigned		m_uCurrentPixelId;
 	// progress count
