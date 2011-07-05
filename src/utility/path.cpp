@@ -11,6 +11,9 @@
 #include <windows.h>
 #endif
 
+// the resource path
+static string g_ResourcePath = "";
+
 // get current directory
 string GetExecutableDir()
 {
@@ -43,9 +46,29 @@ string GetExecutableDir()
 // get full path
 string GetFullPath( const string& str )
 {
+	return GetResourcePath() + str;
+}
+
+// set resource path
+void SetResourcePath( const string& str )
+{
+	g_ResourcePath = str;
+}
+
+// get resource path
+string GetResourcePath()
+{
 #if defined( SORT_IN_WINDOWS )
-	return GetExecutableDir() + str;
+	string abspath = GetExecutableDir();
 #elif defined( SORT_IN_LINUX )
-	return str;
+	string abspath = "";
 #endif
+	if( g_ResourcePath.empty() )
+		return abspath;
+
+	// it's a relative path
+	if( g_ResourcePath[0] == '.' )
+		return abspath + g_ResourcePath;
+
+	return g_ResourcePath;
 }

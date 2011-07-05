@@ -11,6 +11,7 @@
 #include "texture/imagetexture.h"
 #include "utility/strhelper.h"
 #include "utility/define.h"
+#include "utility/path.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(TexManager);
@@ -89,8 +90,11 @@ bool TexManager::Write( const string& str , const Texture* tex )
 }
 
 // load the image from file , if the specific image is already existed in the current system , just return the pointer
-bool TexManager::Read( const string& str , ImageTexture* tex )
+bool TexManager::Read( const string& filename , ImageTexture* tex )
 {
+	// get full path name
+	string str = GetFullPath( filename );
+
 	// get the type
 	TEX_TYPE type = TexTypeFromStr( str );
 

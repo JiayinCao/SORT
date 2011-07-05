@@ -9,6 +9,9 @@
 #include "geometry/intersection.h"
 #include "accel/accelerator.h"
 #include "accel/unigrid.h"
+#include "thirdparty/tinyxml/tinyxml.h"
+#include "utility/strhelper.h"
+#include "utility/path.h"
 
 // initialize default data
 void Scene::_init()
@@ -18,32 +21,62 @@ void Scene::_init()
 // load the scene from script file
 bool Scene::LoadScene( const string& str )
 {
-	// temporary
-	TriMesh* mesh = new TriMesh();
-	Transform t0 = Scale( 0.1f ) * RotateY( PI ) * Translate( 0.0f , 5.0f , 0.0f );
-	if( mesh->LoadMesh( "../res/killeroo.obj" , t0 ) )
-		m_meshBuf.push_back( mesh );
-	else
-		delete mesh;
+	// load the xml file
+	TiXmlDocument doc( str.c_str() );
+	doc.LoadFile();
 
-	// create another instance
-	mesh = new TriMesh();
-	Transform t1 = Translate( Vector( 0 , 1 , 2 ) ) * RotateX( 1.0f );
-	if( mesh->LoadMesh( "../res/cube.obj" , t1 ) )
-		m_meshBuf.push_back( mesh );
-	else
-		delete mesh;
+	// if there is error , return false
+	if( doc.Error() )
+	{
+		LOG_ERROR<<doc.ErrorDesc()<<CRASH;
+		return false;
+	}
 
-	// create another instance
-	mesh = new TriMesh();
-	Transform t2 = Translate( Vector( 0 , 1 , 0 ) ) * RotateX( 1.0f ) * Translate( Vector( 0 , -1 , -1 ) ) * Scale( 0.3f );
-	if( mesh->LoadMesh( "../res/teapot.obj" , t2 ) )
-		m_meshBuf.push_back( mesh );
-	else
-		delete mesh;
+	// get the root of xml
+	TiXmlNode*	root = doc.RootElement();
+
+	// get the resource path if there is
+	string oldpath = GetResourcePath();
+	TiXmlElement* element = root->FirstChildElement( "Resource" );
+	if( element )
+		SetResourcePath( element->Attribute( "path" ) );
+
+	// parse the triangle mesh
+	TiXmlElement* meshNode = root->FirstChildElement( "Model" );
+	while( meshNode )
+	{
+		// get the name of the file
+		const char* filename = meshNode->Attribute( "filename" );
+
+		// load the transform matrix
+		Transform transform;
+		TiXmlElement* matrixNode = meshNode->FirstChildElement( "Transform" );
+		if( matrixNode )
+		{
+			matrixNode = matrixNode->FirstChildElement( "Matrix" );
+			while( matrixNode )
+			{
+				transform = TransformFromStr(matrixNode->Attribute( "value" )) * transform;
+				matrixNode = matrixNode->NextSiblingElement( "Matrix" );
+			}
+		}
+
+		// load the first mesh
+		TriMesh* mesh = new TriMesh();
+		if( mesh->LoadMesh( filename , transform ) )
+			m_meshBuf.push_back( mesh );
+		else
+			delete mesh;
+
+		// get to the next model
+		meshNode = meshNode->NextSiblingElement( "Model" );
+	}
 
 	// generate triangle buffer after parsing from file
 	_generateTriBuf();
+
+	// restore resource path
+	SetResourcePath( oldpath );
 
 	return true;
 }
