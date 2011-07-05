@@ -95,18 +95,18 @@ Transform TransformFromStr( const string& s )
 	if( t[0] == 't' )
 	{
 		t = NextToken( str , ' ' );
-		float x = atoi( t.c_str() );
+		float x = (float)atof( t.c_str() );
 		t = NextToken( str , ' ' );
-		float y = atoi( t.c_str() );
+		float y = (float)atof( t.c_str() );
 		t = NextToken( str , ' ' );
-		float z = atoi( t.c_str() );
+		float z = (float)atof( t.c_str() );
 		return Translate( x , y , z );	
 	}else if( t[0] == 'r' )
 	{
 		t = NextToken( str , ' ' );
 		int axis = atoi( t.c_str() );
 		t = NextToken( str , ' ' );
-		float angle = atoi( t.c_str() );
+		float angle = (float)atof( t.c_str() );
 		switch( axis )
 		{
 			case 0:
@@ -119,16 +119,16 @@ Transform TransformFromStr( const string& s )
 	}else if( t[0] == 's' )
 	{
 		t = NextToken( str , ' ' );
-		float s0 = atoi( t.c_str() );
+		float s0 = (float)atof( t.c_str() );
 		float s1 = s0;
 		float s2 = s0;
 		
 		t = NextToken( str , ' ' );
 		if( str.empty() == false )
 		{
-			s1 = atoi( t.c_str() );
+			s1 = (float)atof( t.c_str() );
 			t = NextToken( str , ' ' );
-			s2 = atoi( t.c_str() );
+			s2 = (float)atof( t.c_str() );
 		}
 
 		return Scale( s0 , s1 , s2 );

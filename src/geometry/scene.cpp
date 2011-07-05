@@ -21,6 +21,9 @@ void Scene::_init()
 // load the scene from script file
 bool Scene::LoadScene( const string& str )
 {
+	// copy the filename
+	m_filename = str;
+
 	// load the xml file
 	TiXmlDocument doc( str.c_str() );
 	doc.LoadFile();
