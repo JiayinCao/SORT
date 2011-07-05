@@ -9,6 +9,7 @@
 #include "geometry/intersection.h"
 #include "accel/accelerator.h"
 #include "accel/unigrid.h"
+#include "accel/kdtree.h"
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "utility/strhelper.h"
 #include "utility/path.h"
@@ -16,6 +17,7 @@
 // initialize default data
 void Scene::_init()
 {
+	m_pAccelerator = 0;
 }
 
 // load the scene from script file
@@ -73,6 +75,18 @@ bool Scene::LoadScene( const string& str )
 
 		// get to the next model
 		meshNode = meshNode->NextSiblingElement( "Model" );
+	}
+
+	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.
+	TiXmlElement* accelNode = root->FirstChildElement( "Accel" );
+	if( accelNode )
+	{
+		// set cooresponding type of accelerator
+		string type = accelNode->Attribute( "type" );
+		if( type == "uniform_grid" )
+			m_pAccelerator = new UniGrid();
+		else if( type == "kd_tree" )
+			m_pAccelerator = new KDTree();
 	}
 
 	// generate triangle buffer after parsing from file
@@ -154,7 +168,6 @@ void Scene::OutputLog() const
 void Scene::PreProcess()
 {
 	// set uniform grid as acceleration structure as default
-	m_pAccelerator = new UniGrid();
 	if( m_pAccelerator )
 	{
 		m_pAccelerator->SetPrimitives( &m_triBuf );
@@ -162,8 +175,3 @@ void Scene::PreProcess()
 	}
 }
 
-// post process
-void Scene::PostProcess()
-{
-	SAFE_DELETE( m_pAccelerator );
-}
