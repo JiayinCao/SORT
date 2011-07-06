@@ -50,6 +50,10 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 	mem->m_filename = str;
 	mem->m_iTriNum = 0;
 
+	// temp
+	Trunk*	trunk = new Trunk("default");
+	mem->m_TrunkBuffer.push_back( trunk );
+
 	for ( int i = 0; i < nelems; i++) 
 	{
 		/* get the description of the first element */
@@ -87,11 +91,11 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 				{
 					VertexIndex vid;
 					vid.posIndex = index.index[0];
-					mem->m_IndexBuffer.push_back( vid );
+					trunk->m_IndexBuffer.push_back( vid );
 					vid.posIndex = index.index[curId];
-					mem->m_IndexBuffer.push_back( vid );
+					trunk->m_IndexBuffer.push_back( vid );
 					vid.posIndex = index.index[curId+1];
-					mem->m_IndexBuffer.push_back( vid );
+					trunk->m_IndexBuffer.push_back( vid );
 
 					curId++;
 				}
@@ -105,11 +109,6 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 		}
 		delete[] properties;
 	}
-
-	mem->m_iVBCount = mem->m_PositionBuffer.size();
-	mem->m_iTBCount = mem->m_TexCoordBuffer.size();
-	mem->m_iNBCount = mem->m_NormalBuffer.size();
-	mem->m_iTriNum = mem->m_IndexBuffer.size() / 3;
 
 	for( int i = 0 ; i < nelems ; i++ )
 		delete[] elist[i];

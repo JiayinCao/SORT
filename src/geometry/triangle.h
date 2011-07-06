@@ -11,6 +11,7 @@
 
 // pre-decleration
 class TriMesh;
+struct VertexIndex;
 
 //////////////////////////////////////////////////////////////////////////////////
 //	definition of triangle
@@ -23,8 +24,8 @@ public:
 	// para 'pid'     : primitive id
 	// para 'trimesh' : the triangle mesh it belongs to
 	// para 'index'   : the index buffer
-	Triangle( unsigned pid , const TriMesh* mesh , unsigned offset ):
-		Primitive(pid) , m_trimesh(mesh) , m_offset(offset) {}
+	Triangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index ):
+		Primitive(pid) , m_trimesh(mesh) , m_Index(index) {}
 	// destructor
 	~Triangle(){}
 
@@ -41,9 +42,9 @@ public:
 // protected filed
 protected:
 	// the triangle mesh
-	const TriMesh*	m_trimesh;
+	const TriMesh*		m_trimesh;
 	// the index
-	const unsigned	m_offset;
+	const VertexIndex*	m_Index;
 };
 
 #endif

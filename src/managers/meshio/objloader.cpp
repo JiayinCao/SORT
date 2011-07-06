@@ -27,12 +27,22 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 	mem->m_filename = str;
 	mem->m_iTriNum = 0;
 
+	// current trunk
+	Trunk*	trunk = 0;
+
 	while( true )
 	{
 		string prefix;
 		file>>prefix;
 
-		if( strcmp( prefix.c_str() , "v" ) == 0 )
+		if( strcmp( prefix.c_str() , "g" ) == 0 )
+		{
+			// create a new trunk
+			string trunkname;
+			file>>trunkname;
+			trunk = new Trunk(trunkname);
+			mem->m_TrunkBuffer.push_back( trunk );
+		}if( strcmp( prefix.c_str() , "v" ) == 0 )
 		{
 			Point p;
 			file>>p.x;
@@ -53,18 +63,18 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			file>>v;
 			mem->m_TexCoordBuffer.push_back( u );
 			mem->m_TexCoordBuffer.push_back( v );
-		}else if( strcmp( prefix.c_str() , "f" ) == 0 )
+		}else if( strcmp( prefix.c_str() , "f" ) == 0 && trunk != 0 )
 		{
 			string strIndex;
 			file>>strIndex;
 			VertexIndex vi0 = VertexIndexFromStr( strIndex );
-			mem->m_IndexBuffer.push_back( vi0 );
+			trunk->m_IndexBuffer.push_back( vi0 );
 			file>>strIndex;
 			VertexIndex vi1 = VertexIndexFromStr( strIndex );
-			mem->m_IndexBuffer.push_back( vi1 );
+			trunk->m_IndexBuffer.push_back( vi1 );
 			file>>strIndex;
 			VertexIndex vi2 = VertexIndexFromStr( strIndex );
-			mem->m_IndexBuffer.push_back( vi2 );
+			trunk->m_IndexBuffer.push_back( vi2 );
 
 			// check if there is another index
 			char t = file.peek();
@@ -77,9 +87,9 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			{
 				file>>strIndex;
 				VertexIndex vi3 = VertexIndexFromStr( strIndex );
-				mem->m_IndexBuffer.push_back( vi0 );
-				mem->m_IndexBuffer.push_back( vi2 );
-				mem->m_IndexBuffer.push_back( vi3 );
+				trunk->m_IndexBuffer.push_back( vi0 );
+				trunk->m_IndexBuffer.push_back( vi2 );
+				trunk->m_IndexBuffer.push_back( vi3 );
 			}
 		}
 
@@ -91,11 +101,6 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 	}
 
 	file.close();
-
-	mem->m_iVBCount = mem->m_PositionBuffer.size();
-	mem->m_iTBCount = mem->m_TexCoordBuffer.size();
-	mem->m_iNBCount = mem->m_NormalBuffer.size();
-	mem->m_iTriNum = mem->m_IndexBuffer.size() / 3;
 
 	return true;
 }

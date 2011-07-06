@@ -15,6 +15,7 @@
 #include "geometry/intersection.h"
 #include "integrator/whittedrt.h"
 #include "camera/perspective.h"
+#include "utility/path.h"
 
 // constructor
 System::System()
@@ -41,7 +42,7 @@ void System::_preInit()
 
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
-	m_rt->SetSize( 800 , 600 );
+	m_rt->SetSize( 1280 , 1024 );
 	// there is default value for camera
 	float distance = 6.0f;
 	PerspectiveCamera* camera = new PerspectiveCamera();
@@ -123,8 +124,9 @@ void System::OutputRT( const char* str )
 }
 
 // load the scene
-bool System::LoadScene( const string& str )
+bool System::LoadScene( const string& filename )
 {
+	string str = GetFullPath(filename);
 	return m_Scene.LoadScene( str );
 }
 
