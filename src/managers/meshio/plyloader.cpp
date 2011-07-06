@@ -48,9 +48,8 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 
 	// set the memory
 	mem->m_filename = str;
-	mem->m_iTriNum = 0;
 
-	// temp
+	// ply format doesn't support mutiple trunks , so there is only one trunk named 'default'
 	Trunk*	trunk = new Trunk("default");
 	mem->m_TrunkBuffer.push_back( trunk );
 

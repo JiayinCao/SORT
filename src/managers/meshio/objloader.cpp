@@ -25,7 +25,6 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 		return false;
 
 	mem->m_filename = str;
-	mem->m_iTriNum = 0;
 
 	// current trunk
 	Trunk*	trunk = 0;
