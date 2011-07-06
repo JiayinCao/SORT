@@ -8,6 +8,7 @@
 #include "sort.h"
 #include "system.h"
 #include "utility/strhelper.h"
+#include "utility/path.h"
 
 // the global system
 System g_System;
@@ -16,7 +17,7 @@ System g_System;
 int main( int argc , char** argv )
 {
 	// load the scene from file
-	g_System.LoadScene("../res/first_scene.scene");
+	g_System.LoadScene( "../res/first_scene.scene" );
 
 	// do ray tracing
 	g_System.Render();

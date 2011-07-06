@@ -14,10 +14,9 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
 	// get the memory
 	Reference<BufferMemory> mem = m_trimesh->m_pMemory;
-	VertexIndex* index = &(mem->m_IndexBuffer[ 3 * m_offset ]);
-	int id0 = index[0].posIndex;
-	int id1 = index[1].posIndex;
-	int id2 = index[2].posIndex;
+	int id0 = m_Index[0].posIndex;
+	int id1 = m_Index[1].posIndex;
+	int id2 = m_Index[2].posIndex;
 
 	// get three vertexes
 	const Point& p0 = mem->m_PositionBuffer[id0] ;
@@ -76,9 +75,9 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	// store normal if the info is available
 	if( mem->m_iNBCount > 0 )
 	{
-		id0 = index[0].norIndex;
-		id1 = index[1].norIndex;
-		id2 = index[2].norIndex;
+		id0 = m_Index[0].norIndex;
+		id1 = m_Index[1].norIndex;
+		id2 = m_Index[2].norIndex;
 
 		intersect->normal = (( 1 - v - u ) * mem->m_NormalBuffer[id0] + u * mem->m_NormalBuffer[id1] + v * mem->m_NormalBuffer[id2]).Normalize();
 	}
@@ -86,9 +85,9 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	// store texture coordinate
 	if( mem->m_iTBCount > 0 )
 	{
-		id0 = index[0].texIndex;
-		id1 = index[1].texIndex;
-		id2 = index[2].texIndex;
+		id0 = m_Index[0].texIndex;
+		id1 = m_Index[1].texIndex;
+		id2 = m_Index[2].texIndex;
 
 		intersect->u = ( 1 - v - u ) * mem->m_TexCoordBuffer[2*id0] + u * mem->m_TexCoordBuffer[2*id1] + v * mem->m_TexCoordBuffer[2*id2];
 		intersect->v = ( 1 - v - u ) * mem->m_TexCoordBuffer[2*id0+1] + u * mem->m_TexCoordBuffer[2*id1+1] + v * mem->m_TexCoordBuffer[2*id2+1];
@@ -112,9 +111,9 @@ const BBox& Triangle::GetBBox()
 
 		// get the memory
 		Reference<BufferMemory> mem = m_trimesh->m_pMemory;
-		int id0 = mem->m_IndexBuffer[ 3 * m_offset ].posIndex;
-		int id1 = mem->m_IndexBuffer[ 3 * m_offset + 1 ].posIndex;
-		int id2 = mem->m_IndexBuffer[ 3 * m_offset + 2 ].posIndex;
+		int id0 = m_Index[ 0 ].posIndex;
+		int id1 = m_Index[ 1 ].posIndex;
+		int id2 = m_Index[ 2 ].posIndex;
 
 		// get three vertexes
 		const Point& p0 = mem->m_PositionBuffer[id0] ;

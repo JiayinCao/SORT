@@ -106,6 +106,9 @@ bool MeshManager::LoadMesh( const string& filename , TriMesh* mesh )
 		// load the mesh from file
 		read = loader->LoadMesh( str , mem );
 
+		// reset count
+		mem->CalculateCount();
+
 		// set the pointer
 		if( read )
 		{

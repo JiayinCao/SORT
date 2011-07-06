@@ -10,7 +10,7 @@
 #include "trimesh.h"
 
 // constructor from a triangle
-InstanceTriangle::InstanceTriangle( unsigned pid , const TriMesh* mesh , unsigned index , Transform* t ):
+InstanceTriangle::InstanceTriangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index , Transform* t ):
 Triangle( pid , mesh , index ) , transform( t )
 {
 }
@@ -48,10 +48,9 @@ const BBox& InstanceTriangle::GetBBox()
 		m_bbox = new BBox();
 
 		const Reference<BufferMemory> mem = m_trimesh->m_pMemory;
-		const VertexIndex* index = &(mem->m_IndexBuffer[ 3 * m_offset ]);
-		int id0 = index[0].posIndex;
-		int id1 = index[1].posIndex;
-		int id2 = index[2].posIndex;
+		int id0 = m_Index[0].posIndex;
+		int id1 = m_Index[1].posIndex;
+		int id2 = m_Index[2].posIndex;
 	
 		// get three vertexes
 		const Point& p0 = (*transform)(mem->m_PositionBuffer[id0]);

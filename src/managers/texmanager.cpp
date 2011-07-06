@@ -75,8 +75,11 @@ void TexManager::_release()
 }
 
 // output texture
-bool TexManager::Write( const string& str , const Texture* tex )
+bool TexManager::Write( const string& filename , const Texture* tex )
 {
+	// get full path name
+	string str = GetFullPath( filename );
+
 	// get the type
 	TEX_TYPE type = TexTypeFromStr( str );
 

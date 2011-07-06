@@ -55,15 +55,25 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 	if( m_bInstanced == false )
 	{
 		// generate the triangles
-		unsigned triNum = m_pMemory->m_iTriNum;
-		for( int i = 0 ; i < (int)triNum ; i++ )
-			vec.push_back( new Triangle( base+i , this , i ) );
+		unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
+		for( unsigned i = 0 ; i < trunkNum ; i++ )
+		{
+			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
+				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) ) );
+			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+		}
 	}else
 	{
-		// create instance triangle
-		unsigned triNum = m_pMemory->m_iTriNum;
-		for( int i = 0 ; i < (int)triNum ; i++ )
-			vec.push_back( new InstanceTriangle( base+i , this , i , &m_Transform ) );
+		// generate the triangles
+		unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
+		for( unsigned i = 0 ; i < trunkNum ; i++ )
+		{
+			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
+				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform ) );
+			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+		}
 	}
 }
 
@@ -76,30 +86,38 @@ void TriMesh::_genFlatNormal()
 		return;
 	}
 
-	// generate normal for each face
-	unsigned triNum = m_pMemory->m_iTriNum;
-	for( unsigned i = 0 ; i < triNum ; i++ )
+	// generate the triangles
+	unsigned totalTriNum = 0;
+	unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
+	unsigned base = 0;
+	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
-		unsigned offset = 3 * i;
-		unsigned id0 = m_pMemory->m_IndexBuffer[offset].posIndex;
-		unsigned id1 = m_pMemory->m_IndexBuffer[offset+1].posIndex;
-		unsigned id2 = m_pMemory->m_IndexBuffer[offset+2].posIndex;
+		Trunk* trunk = m_pMemory->m_TrunkBuffer[i];
+		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
+		{
+			unsigned offset = 3*k;
+			unsigned id0 = trunk->m_IndexBuffer[offset].posIndex;
+			unsigned id1 = trunk->m_IndexBuffer[offset+1].posIndex;
+			unsigned id2 = trunk->m_IndexBuffer[offset+2].posIndex;
 
-		// get the vertexes
-		Vector v0 = m_pMemory->m_PositionBuffer[id0] - m_pMemory->m_PositionBuffer[id1];
-		Vector v1 = m_pMemory->m_PositionBuffer[id2] - m_pMemory->m_PositionBuffer[id1];
+			// get the vertexes
+			Vector v0 = m_pMemory->m_PositionBuffer[id0] - m_pMemory->m_PositionBuffer[id1];
+			Vector v1 = m_pMemory->m_PositionBuffer[id2] - m_pMemory->m_PositionBuffer[id1];
 
-		// set the normal
-		Vector n = Cross( v1 , v0 );
-		n.m_bNormal = true;
-		n.Normalize();
-		m_pMemory->m_NormalBuffer.push_back( n );
+			// set the normal
+			Vector n = Cross( v1 , v0 );
+			n.m_bNormal = true;
+			n.Normalize();
+			m_pMemory->m_NormalBuffer.push_back( n );
 
-		m_pMemory->m_IndexBuffer[offset].norIndex = i;
-		m_pMemory->m_IndexBuffer[offset+1].norIndex = i;
-		m_pMemory->m_IndexBuffer[offset+2].norIndex = i;
+			trunk->m_IndexBuffer[offset].norIndex = base+k;
+			trunk->m_IndexBuffer[offset+1].norIndex = base+k;
+			trunk->m_IndexBuffer[offset+2].norIndex = base+k;
+		}
+		totalTriNum += trunk->m_iTriNum;
+		base += trunk->m_iTriNum;
 	}
-	m_pMemory->m_iNBCount = triNum;
+	m_pMemory->m_iNBCount = totalTriNum;
 }
 
 void TriMesh::_genSmoothNormal()
@@ -115,21 +133,28 @@ void TriMesh::_genSmoothNormal()
 
 	// get the adjencency information
 	vector<unsigned>* adjacency = new vector<unsigned>[m_pMemory->m_iVBCount];
-	unsigned triNum = m_pMemory->m_iTriNum;
-	for( unsigned i = 0 ; i < triNum ; i++ )
+	// generate the triangles
+	unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
+	unsigned base = 0;
+	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
-		unsigned offset = 3 * i;
-		unsigned id0 = m_pMemory->m_IndexBuffer[offset].posIndex;
-		unsigned id1 = m_pMemory->m_IndexBuffer[offset+1].posIndex;
-		unsigned id2 = m_pMemory->m_IndexBuffer[offset+2].posIndex;
+		Trunk* trunk = m_pMemory->m_TrunkBuffer[i];
+		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
+		{
+			unsigned offset = 3 * k;
+			unsigned id0 = trunk->m_IndexBuffer[offset].posIndex;
+			unsigned id1 = trunk->m_IndexBuffer[offset+1].posIndex;
+			unsigned id2 = trunk->m_IndexBuffer[offset+2].posIndex;
 
-		adjacency[id0].push_back( i );
-		adjacency[id1].push_back( i );
-		adjacency[id2].push_back( i );
+			adjacency[id0].push_back( base + k );
+			adjacency[id1].push_back( base + k );
+			adjacency[id2].push_back( base + k );
 
-		m_pMemory->m_IndexBuffer[offset].norIndex = m_pMemory->m_IndexBuffer[offset].posIndex;
-		m_pMemory->m_IndexBuffer[offset+1].norIndex = m_pMemory->m_IndexBuffer[offset+1].posIndex;
-		m_pMemory->m_IndexBuffer[offset+2].norIndex = m_pMemory->m_IndexBuffer[offset+2].posIndex;
+			trunk->m_IndexBuffer[offset].norIndex = trunk->m_IndexBuffer[offset].posIndex;
+			trunk->m_IndexBuffer[offset+1].norIndex = trunk->m_IndexBuffer[offset+1].posIndex;
+			trunk->m_IndexBuffer[offset+2].norIndex = trunk->m_IndexBuffer[offset+2].posIndex;
+		}
+		base += trunk->m_iTriNum;
 	}
 
 	// generate smooth normal
@@ -154,6 +179,7 @@ void TriMesh::_genSmoothNormal()
 		smoothNormal.push_back(n);
 	}
 	m_pMemory->m_NormalBuffer = smoothNormal;
+	m_pMemory->m_iNBCount = m_pMemory->m_NormalBuffer.size() / 3;
 
 	delete[] adjacency;
 }

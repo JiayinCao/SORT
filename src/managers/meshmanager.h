@@ -22,6 +22,7 @@
 class MeshLoader;
 class TriMesh;
 
+// index for a vertex
 struct VertexIndex
 {
 	int	posIndex;
@@ -37,6 +38,24 @@ struct VertexIndex
 	~VertexIndex(){}
 };
 
+// trunk (submesh)
+// a trunk only contains index information
+class Trunk
+{
+// public method
+public:
+	// the name for the current trunk
+	string	name;
+	// index buffer
+	vector<VertexIndex>	m_IndexBuffer;
+	// the triangle number
+	unsigned	m_iTriNum;
+
+	// the name for the trunk
+	Trunk( const string& str ) : name(str)
+	{ m_iTriNum = 0; }
+};
+
 // the buffer memory for the mesh
 class BufferMemory : public ReferenceCount
 {
@@ -48,12 +67,14 @@ public:
 	vector<Vector>	m_NormalBuffer;
 	// the texture coordinate buffer
 	vector<float>	m_TexCoordBuffer;
-	// the index buffer
-	vector<VertexIndex>	m_IndexBuffer;
+	// the trunk buffer
+	vector<Trunk*>	m_TrunkBuffer;
 	// the size for three buffers
 	unsigned		m_iVBCount , m_iNBCount , m_iTBCount;
 	// the number of triangles 
 	unsigned		m_iTriNum;
+	// the trunk number
+	unsigned		m_iTrunkNum;
 	// the tri mesh
 	TriMesh*		m_pPrototype;
 	// the name for the file
@@ -67,10 +88,37 @@ public:
 		m_iTBCount = 0;
 		m_iTriNum = 0;
 		m_pPrototype = 0;
+		m_iTrunkNum = 0;
+	}
+	~BufferMemory()
+	{
+		vector<Trunk*>::iterator it = m_TrunkBuffer.begin();
+		while( it != m_TrunkBuffer.end() )
+		{
+			delete *it;
+			it++;
+		}
 	}
 
 	// apply transform
 	void ApplyTransform( TriMesh* mesh );
+
+	// calculate buffer number
+	void CalculateCount()
+	{
+		m_iVBCount = m_PositionBuffer.size();
+		m_iTBCount = m_TexCoordBuffer.size();
+		m_iNBCount = m_NormalBuffer.size();
+		m_iTrunkNum = m_TrunkBuffer.size();
+		m_iTriNum = 0;
+		vector<Trunk*>::iterator it = m_TrunkBuffer.begin();
+		while( it != m_TrunkBuffer.end() )
+		{
+			(*it)->m_iTriNum = (*it)->m_IndexBuffer.size() / 3;
+			m_iTriNum += (*it)->m_iTriNum;
+			it++;
+		}
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////
