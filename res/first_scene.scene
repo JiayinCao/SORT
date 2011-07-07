@@ -1,5 +1,6 @@
 <Root>
 	<Resource path="../res/"/>
+  <Material value="default.material"/>
 	<Model filename="cube.obj">
 		<Transform>
 			<Matrix value="t 0 1 0"/>

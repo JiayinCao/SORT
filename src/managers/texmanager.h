@@ -33,9 +33,6 @@ class TexManager : public Singleton<TexManager>
 {
 // public method
 public:
-	// create TexManager
-	static void CreateTexManager();
-
 	// destructor
 	~TexManager();
 
@@ -78,6 +75,8 @@ private:
 
 	// find correct texio
 	TexIO*	FindTexIO( TEX_TYPE tt ) const;
+
+	friend class Singleton<TexManager>;
 };
 
 #endif

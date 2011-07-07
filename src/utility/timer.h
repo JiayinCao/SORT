@@ -18,9 +18,6 @@ public:
 	// destructor
 	~Timer(){}
 
-	// create timer
-	static void CreateTimer();
-
 	// set the timer
 	void StartTimer();
 	// stop timer
@@ -45,6 +42,8 @@ private:
 
 	// constructor
 	Timer() { ResetTimer(); }
+
+	friend class Singleton<Timer>;
 };
 
 #endif

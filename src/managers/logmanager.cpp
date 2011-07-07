@@ -11,15 +11,6 @@
 // instance the singleton with logmanager class
 DEFINE_SINGLETON(LogManager);
 
-// create a log manager
-void	LogManager::CreateLogManager( bool enable )
-{
-	LogManager* m = new LogManager( enable );
-
-	if( enable == false )
-		m->m_fileLog<<"Log disabled."<<endl;
-}
-
 // private constructor
 LogManager::LogManager( bool enable ):
 	m_sLogFileName( GetFullPath("log_sort.txt") )
@@ -27,6 +18,9 @@ LogManager::LogManager( bool enable ):
 	_init();
 
 	m_bLogEnable = enable;
+
+	if( enable == false )
+		m_fileLog<<"Log disabled."<<endl;
 }
 
 // destructor
@@ -120,7 +114,10 @@ LogManager& operator<<( LogManager& manager , _ENDL data )
 
 	//crash
 	if( data.m_bCrash )
+	{
+		manager.m_fileLog.close();
 		abort();
+	}
 
 	return manager;
 }

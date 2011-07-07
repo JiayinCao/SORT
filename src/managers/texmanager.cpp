@@ -16,12 +16,6 @@
 // instance the singleton with tex manager
 DEFINE_SINGLETON(TexManager);
 
-// create tex manager
-void TexManager::CreateTexManager()
-{
-	new TexManager();
-}
-
 // destructor
 TexManager::~TexManager()
 {

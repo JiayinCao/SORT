@@ -34,12 +34,6 @@ unsigned long getTickCount()
 	return currentTime;
 }
 
-// create timer
-void Timer::CreateTimer()
-{
-	new Timer();
-}
-
 // start timer
 void Timer::StartTimer()
 {
