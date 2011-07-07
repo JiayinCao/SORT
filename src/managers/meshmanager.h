@@ -12,11 +12,13 @@
 #include "utility/singleton.h"
 #include "utility/referencecount.h"
 #include "utility/enum.h"
+#include "utility/define.h"
 #include <vector>
 #include <map>
 #include "geometry/point.h"
 #include "geometry/vector.h"
 #include "geometry/transform.h"
+#include "material/material.h"
 
 // pre-declera class
 class MeshLoader;
@@ -50,10 +52,16 @@ public:
 	vector<VertexIndex>	m_IndexBuffer;
 	// the triangle number
 	unsigned	m_iTriNum;
+	// the material
+	Material*	m_mat;
 
-	// the name for the trunk
+	// constructor
+	// para 'str' : name for the trunk
 	Trunk( const string& str ) : name(str)
-	{ m_iTriNum = 0; }
+	{ m_iTriNum = 0; m_mat = 0; }
+	// destructor
+	~Trunk()
+	{SAFE_DELETE(m_mat);}
 };
 
 // the buffer memory for the mesh
