@@ -85,6 +85,16 @@ unsigned MatManager::ParseMatFile( const string& str )
 
 		if( mat )
 		{
+			// set properties
+			TiXmlElement* prop = material->FirstChildElement( "Property" );
+			while( prop )
+			{
+				string attr_name = prop->Attribute( "name" );
+				string attr_value = prop->Attribute( "value" );
+				mat->SetProperty( attr_name , attr_value );
+				prop = prop->NextSiblingElement( "Property" );
+			}
+
 			// push the material
 			m_matPool.insert( make_pair( name , mat ) );
 		}

@@ -7,6 +7,9 @@
 #ifndef	SORT_MATERIAL
 #define	SORT_MATERIAL
 
+// include the cpp file
+#include "utility/propertyset.h"
+
 // pre-declera classes
 class Bsdf;
 class Intersection;
@@ -27,6 +30,11 @@ public:
 
 	// create instance of the brdf
 	virtual Material* CreateInstance() = 0;
+
+	// set property
+	// para 'nane'  : name for the property
+	// para 'value' : value for the property
+	virtual void SetProperty( const string& name , const string& value ) = 0;
 };
 
 #endif
