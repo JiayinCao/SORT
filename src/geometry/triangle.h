@@ -24,8 +24,8 @@ public:
 	// para 'pid'     : primitive id
 	// para 'trimesh' : the triangle mesh it belongs to
 	// para 'index'   : the index buffer
-	Triangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index ):
-		Primitive(pid) , m_trimesh(mesh) , m_Index(index) {}
+	Triangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index , Material* mat ):
+		Primitive(pid,mat) , m_trimesh(mesh) , m_Index(index) {}
 	// destructor
 	~Triangle(){}
 

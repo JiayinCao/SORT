@@ -12,6 +12,7 @@
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "logmanager.h"
 #include "material/matte.h"
+#include "texmanager.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MatManager);
@@ -92,6 +93,22 @@ unsigned MatManager::ParseMatFile( const string& str )
 				string attr_name = prop->Attribute( "name" );
 				string attr_value = prop->Attribute( "value" );
 				mat->SetProperty( attr_name , attr_value );
+				prop = prop->NextSiblingElement( "Property" );
+			}
+
+			// set texture properties
+			prop = material->FirstChildElement( "Texture" );
+			while( prop )
+			{
+				string name = prop->Attribute( "name" );
+				string type = prop->Attribute( "type" );
+				Texture* tex = TexManager::GetSingleton().CreateTexture(type);
+				TiXmlElement* tex_prop = prop->FirstChildElement( "Property" );
+				while( tex_prop )
+				{
+					tex_prop = tex_prop->NextSiblingElement( "Property" );
+				}
+				mat->SetProperty( name , tex );
 				prop = prop->NextSiblingElement( "Property" );
 			}
 

@@ -12,6 +12,12 @@
 #include "utility/strhelper.h"
 #include "utility/define.h"
 #include "utility/path.h"
+#include "texture/checkboxtexture.h"
+#include "texture/gridtexture.h"
+#include "texture/constanttexture.h"
+#include "texture/imagetexture.h"
+#include "texture/uvtexture.h"
+#include "texture/normaltexture.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(TexManager);
@@ -33,6 +39,9 @@ void TexManager::_init()
 {
 	// push the texture outputer
 	m_TexIOVec.push_back( new BmpIO() );
+
+	// register textures
+	_registerTexture();
 }
 
 // release data
@@ -66,6 +75,9 @@ void TexManager::_release()
 		img_it++;
 	}
 	m_ImgContainer.clear();
+
+	// unregister textures
+	_unregisterTexture();
 }
 
 // output texture
@@ -167,4 +179,39 @@ unsigned TexManager::GetReferenceCount( const string& str ) const
 	}
 
 	return 0;
+}
+
+// create the instance of texture
+Texture* TexManager::CreateTexture( const string& str ) const
+{
+	// try to find the texture with the specific type
+	map<string,Texture*>::const_iterator it = m_TextureMap.find( str );
+	if( it != m_TextureMap.end() )
+		return it->second->CreateInstance();
+
+	return 0;
+}
+
+// register textures
+void TexManager::_registerTexture()
+{
+	// register textures
+	m_TextureMap.insert( make_pair( "checkbox" , new CheckBoxTexture() ) );
+	m_TextureMap.insert( make_pair( "grid" , new GridTexture() ) );
+	m_TextureMap.insert( make_pair( "image" , new ImageTexture() ) );
+	m_TextureMap.insert( make_pair( "constant" , new ConstantTexture() ) );
+	m_TextureMap.insert( make_pair( "uv" , new UVTexture() ) );
+	m_TextureMap.insert( make_pair( "normal" , new NormalTexture() ) );
+}
+
+// unregister textures
+void TexManager::_unregisterTexture()
+{
+	map< string , Texture* >::iterator it = m_TextureMap.begin();
+	while( it != m_TextureMap.end() )
+	{
+		delete it->second;
+		it++;
+	}
+	m_TextureMap.clear();
 }

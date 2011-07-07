@@ -33,6 +33,9 @@ public:
 	// result :	the spectrum value
 	virtual Spectrum Evaluate( const Intersection* intersect ) const;
 
+	// create instance
+	Texture* CreateInstance() { return new UVTexture(); }
+
 //private function
 private:
 	// initialize default data

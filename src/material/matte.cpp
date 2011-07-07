@@ -10,14 +10,10 @@
 #include "bsdf/bsdf.h"
 #include "bsdf/lambert.h"
 
-// instance property set
-DEFINE_PROPERTY(Matte);
-
 // constructor
 Matte::Matte()
 {
-	m_d = 0;
-	_registerAllProperty();
+	_init();
 }
 
 // destructor
@@ -27,10 +23,21 @@ Matte::~Matte()
 	SAFE_DELETE( m_d );
 }
 
+// initiailize default value and register properties
+void Matte::_init()
+{
+	m_d = 0;
+
+	_registerAllProperty();
+}
+
 // get bsdf
 Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 {
-	return 0;
+	Spectrum color = m_d->Evaluate( intersect );
+	Bsdf* bsdf = new Bsdf();
+	bsdf->AddBxdf( new Lambert( color ) );
+	return bsdf;
 }
 
 // register property
@@ -38,6 +45,6 @@ void Matte::_registerAllProperty()
 {
 	if( m_propertySet.empty() )
 	{
-		_registerProperty( "Test" , new DiffuseProperty( this ) );
+		_registerProperty( "Test2" , new DiffuseProperty( this ) );
 	}
 }

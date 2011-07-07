@@ -41,6 +41,9 @@ public:
 	// release the texture memory
 	virtual void Release();
 
+	// create texture
+	Texture* CreateInstance() { return new ImageTexture(); }
+
 // private field
 private:
 	// array saving the color of image

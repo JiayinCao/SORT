@@ -13,6 +13,9 @@
 #include <map>
 #include "managers/logmanager.h"
 
+// pre-declera class
+class Texture;
+
 // property hendler
 template< typename T >
 class PropertyHandler
@@ -22,7 +25,9 @@ public:
 	// default constructor
 	PropertyHandler( T* t ):m_target(t){};
 	// set value
-	virtual void SetValue( const string& value ) = 0;
+	virtual void SetValue( const string& value ) {}
+	// set texture
+	virtual void SetValue( Texture* value ) {}
 
 	// the target
 	T*	m_target;
@@ -41,9 +46,9 @@ public:
 	virtual ~PropertySet() { _clearProperty(); }
 
 	// set property
-	void SetProp( const string& name , const string& value )
+	void SetProperty( const string& name , const string& value )
 	{
-		// get the property hander first
+		// get the property handler first
 		PropertyHandler<T>* ph = _getPropertyHandler( name );
 
 		if( 0 == ph )
@@ -55,14 +60,28 @@ public:
 		// set the value
 		ph->SetValue( value );
 	}
+	// set property
+	void SetProperty( const string& name , Texture* value )
+	{
+		// get the property handler first
+		PropertyHandler<T>* ph = _getPropertyHandler( name );
 
+		if( 0 == ph )
+		{
+			LOG_WARNING<<"There is no such a property named \'"<<name<<"\'."<<ENDL;
+			return;
+		}
+		
+		// set the texture
+		ph->SetValue( value );
+	}
 // protected field
 protected:
 	// the propery set
-	static map< string , PropertyHandler<T>* > m_propertySet;
+	map< string , PropertyHandler<T>* > m_propertySet;
 
 	// register property
-	virtual void _registerAllProperty() = 0;
+	void _registerAllProperty(){}
 
 	// clear registered properties
 	void _clearProperty()
@@ -91,7 +110,5 @@ protected:
 		return 0;
 	}
 };
-
-#define	DEFINE_PROPERTY(T) template<> map<string,PropertyHandler<T>*> PropertySet<T>::m_propertySet = map<string,PropertyHandler<T>*>()
 
 #endif

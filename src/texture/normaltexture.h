@@ -35,6 +35,9 @@ public:
 	// para 'intersect' : the intersection
 	// result :	the spectrum value
 	virtual Spectrum Evaluate( const Intersection* intersect ) const;
+
+	// create instance
+	Texture* CreateInstance() { return new NormalTexture(); }
 };
 
 #endif

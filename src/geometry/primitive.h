@@ -22,7 +22,7 @@ class	Primitive
 // public method
 public:
 	// constructor from a id
-	Primitive( unsigned id ) { m_primitive_id = id; }
+	Primitive( unsigned id , Material* mat ) { m_primitive_id = id; m_mat = mat; }
 	// destructor
 	virtual ~Primitive(){}
 

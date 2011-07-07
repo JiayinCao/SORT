@@ -11,6 +11,7 @@
 #include "sort.h"
 #include "spectrum/spectrum.h"
 #include "utility/enum.h"
+#include "utility/propertyset.h"
 
 // pre-declare class
 class ComTexture;
@@ -18,7 +19,7 @@ class Intersection;
 
 //////////////////////////////////////////////////////////////
 // definition of class Texture
-class Texture
+class Texture : public PropertySet<Texture>
 {
 // public method
 public:
@@ -75,6 +76,9 @@ public:
 	ComTexture operator + ( float ) const;
 	ComTexture operator - ( float ) const;
 	ComTexture operator * ( float ) const;
+
+	// create texture instance
+	virtual Texture* CreateInstance(){return 0;}
 
 // protected field
 protected:

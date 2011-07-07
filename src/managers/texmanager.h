@@ -54,6 +54,9 @@ public:
 	// result     : how many reference to the memory
 	unsigned GetReferenceCount( const string& str ) const;
 
+	// create a texture
+	Texture* CreateTexture( const string& type ) const;	
+
 // private data
 private:
 	// a vector saving texture io
@@ -61,6 +64,9 @@ private:
 
 	// map a string to the image memory
 	map< string , ImgMemory* > m_ImgContainer;
+	
+	// texture map
+	map< string , Texture* > m_TextureMap;
 
 // private method
 private:
@@ -72,6 +78,12 @@ private:
 
 	// release texture manager data
 	void _release();
+
+	// register all texture types
+	void _registerTexture();
+
+	// unregister texture
+	void _unregisterTexture();
 
 	// find correct texio
 	TexIO*	FindTexIO( TEX_TYPE tt ) const;

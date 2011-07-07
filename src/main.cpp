@@ -10,6 +10,7 @@
 #include "utility/strhelper.h"
 #include "utility/path.h"
 #include "managers/matmanager.h"
+#include "texture/checkboxtexture.h"
 
 // the global system
 System g_System;

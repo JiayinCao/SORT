@@ -91,7 +91,7 @@ $(OBJ_PATH)/bsdf_%.o : bsdf/%.cpp bsdf/%.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 
-$(OBJ_PATH)/material_%.o : material/%.cpp material/%.h
+$(OBJ_PATH)/material_%.o : material/%.cpp material/%.h utility/propertyset.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 	

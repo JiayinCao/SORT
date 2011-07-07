@@ -44,6 +44,9 @@ public:
 		return m_Color;
 	}
 
+	// create instance
+	Texture* CreateInstance() { return new ConstantTexture(); }
+
 // private field
 private:
 	// the color for the texture
