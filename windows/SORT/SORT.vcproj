@@ -453,6 +453,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\utility\propertyset.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\referencecount.h"
 				>
 			</File>

@@ -2,6 +2,9 @@
 	<Material name="default_matte0" type="Matte">
 	</Material>
 	<Material name="default_matte1" type="Matte">
+    <Property name="Test" value="teste!"/>
+    <Property name="Test2" value="teste2!"/>
+    <Property name="Test1" value="test2e!"/>
 	</Material>
 	<Material name="default_matte2" type="Matte">
 	</Material>

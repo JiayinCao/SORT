@@ -13,7 +13,7 @@
 
 //////////////////////////////////////////////////////////////////////
 // definition of matte material
-class Matte : public Material
+class Matte : public Material , public PropertySet<Matte>
 {
 // public method
 public:
@@ -31,10 +31,33 @@ public:
 	// create instance of the brdf
 	virtual Material* CreateInstance(){return new Matte();}
 
+	// set property
+	// para 'nane'  : name for the property
+	// para 'value' : value for the property
+	virtual void SetProperty( const string& name , const string& value ){SetProp( name , value );}
+
 // private field
 private:
 	// the scaled color for the material
 	Texture* m_d;
+
+	// register property
+	void _registerAllProperty();
+
+// property handler
+	class DiffuseProperty : public PropertyHandler<Matte>
+	{
+	public:
+		// constructor
+		DiffuseProperty(Matte* matte):PropertyHandler(matte){}
+
+		// set value
+		void SetValue( const string& value )
+		{
+			//temp
+			cout<<value<<endl;
+		}
+	};
 };
 
 #endif
