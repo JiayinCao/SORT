@@ -14,7 +14,7 @@
 #include "managers/logmanager.h"
 
 // property hendler
-template<class T>
+template< typename T >
 class PropertyHandler
 {
 // public metdod
@@ -30,7 +30,7 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////
 //	definition of property set
-template< class T >
+template< typename T >
 class PropertySet
 {
 // public method
@@ -67,7 +67,7 @@ protected:
 	// clear registered properties
 	void _clearProperty()
 	{
-		map< string , PropertyHandler<T>* >::iterator it = m_propertySet.begin();
+		typename map< string , PropertyHandler<T>* >::iterator it = m_propertySet.begin();
 		while( it != m_propertySet.end() )
 		{
 			delete it->second;
@@ -85,13 +85,13 @@ protected:
 	// get property handler
 	PropertyHandler<T>* _getPropertyHandler( const string& name )
 	{
-		map< string , PropertyHandler<T>* >::iterator it = m_propertySet.find( name );
+		typename map< string , PropertyHandler<T>* >::iterator it = m_propertySet.find( name );
 		if( it != m_propertySet.end() )
 			return it->second;
 		return 0;
 	}
 };
 
-#define	DEFINE_PROPERTY(T) template<> map< string , PropertyHandler<T>* > T::m_propertySet
+#define	DEFINE_PROPERTY(T) template<> map<string,PropertyHandler<T>*> PropertySet<T>::m_propertySet = map<string,PropertyHandler<T>*>()
 
 #endif
