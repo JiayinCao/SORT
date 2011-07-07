@@ -59,9 +59,6 @@ public:
 	// para 'str' : name for the trunk
 	Trunk( const string& str ) : name(str)
 	{ m_iTriNum = 0; m_mat = 0; }
-	// destructor
-	~Trunk()
-	{SAFE_DELETE(m_mat);}
 };
 
 // the buffer memory for the mesh
