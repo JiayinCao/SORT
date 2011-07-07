@@ -22,7 +22,7 @@ public:
 	// constructor from a template
 	Singleton()
 	{
-		m_pSingleton = static_cast<T*>(this);	
+		m_pSingleton = static_cast<T*>(this);
 	}
 	// destructor
 	virtual ~Singleton()
@@ -46,6 +46,12 @@ public:
 	static void DeleteSingleton()
 	{
 		SAFE_DELETE(m_pSingleton);
+	}
+
+	// create instance
+	static void CreateInstance()
+	{
+		new T();
 	}
 
 //protected field

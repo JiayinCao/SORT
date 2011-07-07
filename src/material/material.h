@@ -24,6 +24,9 @@ public:
 
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const = 0;
+
+	// create instance of the brdf
+	virtual Material* CreateInstance() = 0;
 };
 
 #endif

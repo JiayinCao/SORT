@@ -9,6 +9,7 @@
 #include "managers/texmanager.h"
 #include "managers/logmanager.h"
 #include "managers/meshmanager.h"
+#include "managers/matmanager.h"
 #include "utility/timer.h"
 #include "camera/camera.h"
 #include "texture/rendertarget.h"
@@ -32,13 +33,15 @@ System::~System()
 void System::_preInit()
 {
 	// initialize log manager
-	LogManager::CreateLogManager();
+	LogManager::CreateInstance();
 	// initialize texture manager
-	TexManager::CreateTexManager();
-	// initialize the mesh manager
-	MeshManager::CreateMeshManager();
+	TexManager::CreateInstance();
+	// initialize mesh manager
+	MeshManager::CreateInstance();
+	// initialize material manager
+	MatManager::CreateInstance();
 	// initialize the timer
-	Timer::CreateTimer();
+	Timer::CreateInstance();
 
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
@@ -78,6 +81,7 @@ void System::_postUninit()
 	// release managers
 	TexManager::DeleteSingleton();
 	MeshManager::DeleteSingleton();
+	MatManager::DeleteSingleton();
 	Timer::DeleteSingleton();
 	LogManager::DeleteSingleton();
 }

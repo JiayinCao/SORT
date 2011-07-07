@@ -369,6 +369,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\managers\matmanager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\managers\matmanager.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\managers\meshmanager.cpp"
 				>
 			</File>

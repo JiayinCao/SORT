@@ -28,6 +28,9 @@ public:
 	// set scaled color
 	void SetDiffuse( Texture* tex ) { m_d = tex; }
 
+	// create instance of the brdf
+	virtual Material* CreateInstance(){return new Matte();}
+
 // private field
 private:
 	// the scaled color for the material

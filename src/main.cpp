@@ -9,6 +9,7 @@
 #include "system.h"
 #include "utility/strhelper.h"
 #include "utility/path.h"
+#include "managers/matmanager.h"
 
 // the global system
 System g_System;
@@ -30,6 +31,4 @@ int main( int argc , char** argv )
 
 	// output image
 	g_System.OutputRT( "t.bmp" );
-
-	return 0;
 }

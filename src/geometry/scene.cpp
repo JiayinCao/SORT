@@ -13,6 +13,7 @@
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "utility/strhelper.h"
 #include "utility/path.h"
+#include "managers/matmanager.h"
 
 // initialize default data
 void Scene::_init()
@@ -45,6 +46,14 @@ bool Scene::LoadScene( const string& str )
 	TiXmlElement* element = root->FirstChildElement( "Resource" );
 	if( element )
 		SetResourcePath( element->Attribute( "path" ) );
+
+	// parse materials
+	TiXmlElement* material = root->FirstChildElement( "Material" );
+	while( material )
+	{
+		MatManager::GetSingleton().ParseMatFile( material->Attribute( "value" ) );
+		material = material->NextSiblingElement( "Material" );
+	}
 
 	// parse the triangle mesh
 	TiXmlElement* meshNode = root->FirstChildElement( "Model" );

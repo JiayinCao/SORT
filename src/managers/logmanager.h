@@ -26,8 +26,6 @@ class	LogManager : public Singleton<LogManager>
 {
 // public method
 public:
-	// create the logmanager
-	static void CreateLogManager( bool enable = true );
 	// destructor
 	~LogManager();
 	
@@ -49,8 +47,7 @@ private:
 
 // private method
 	// private constructor to avoid second instance in the app
-	LogManager() {}
-	LogManager( bool enable );
+	LogManager( bool enable = true );
 	// initialize the system
 	void	_init();
 	// release the system
@@ -63,6 +60,8 @@ private:
 	friend LogManager& operator<<( LogManager& , const char* );
 	friend LogManager& operator<<( LogManager& , const std::string& );
 	friend LogManager& operator<<( LogManager& , _ENDL );
+
+	friend class Singleton<LogManager>;
 };
 
 // declare some useful macro for convinience

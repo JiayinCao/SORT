@@ -127,9 +127,6 @@ class	MeshManager : public Singleton<MeshManager>
 {
 // public method
 public:
-	// create mesh manager
-	static void CreateMeshManager() { new MeshManager(); }
-
 	// destructor
 	~MeshManager(){ _release(); }
 
@@ -159,6 +156,8 @@ private:
 
 	// get the mesh loader
 	MeshLoader*	_getMeshLoader( MESH_TYPE type ) const;
+
+	friend class Singleton<MeshManager>;
 };
 
 #endif
