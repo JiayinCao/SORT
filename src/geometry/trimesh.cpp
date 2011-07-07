@@ -60,7 +60,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) ) );
+				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMemory->m_TrunkBuffer[i]->m_mat ) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}else
@@ -71,7 +71,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform ) );
+				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMemory->m_TrunkBuffer[i]->m_mat ) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}

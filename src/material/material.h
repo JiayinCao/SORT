@@ -16,7 +16,7 @@ class Intersection;
 
 ///////////////////////////////////////////////////////////
 // definition of material
-class Material
+class Material : public PropertySet<Material>
 {
 // public method
 public:
@@ -30,11 +30,6 @@ public:
 
 	// create instance of the brdf
 	virtual Material* CreateInstance() = 0;
-
-	// set property
-	// para 'nane'  : name for the property
-	// para 'value' : value for the property
-	virtual void SetProperty( const string& name , const string& value ) = 0;
 };
 
 #endif

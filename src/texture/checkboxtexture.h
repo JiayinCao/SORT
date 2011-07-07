@@ -39,6 +39,9 @@ public:
 	// para 'y' :	y coordinate , if out of range , use filter
 	virtual Spectrum GetColor( int x , int y ) const;
 
+	// create instance
+	Texture* CreateInstance() { return new CheckBoxTexture(); }
+
 // private field
 private:
 	// two colors

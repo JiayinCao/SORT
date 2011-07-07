@@ -11,6 +11,7 @@
 #include "geometry/vector.h"
 #include "managers/meshmanager.h"
 #include "utility/strhelper.h"
+#include "managers/matmanager.h"
 
 // the maxmium length of a single line
 static const unsigned LINE_MAXLENGTH = 4096;
@@ -40,6 +41,7 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			string trunkname;
 			file>>trunkname;
 			trunk = new Trunk(trunkname);
+			trunk->m_mat = MatManager::GetSingleton().FindMaterial( "default_matte1" );
 			mem->m_TrunkBuffer.push_back( trunk );
 		}if( strcmp( prefix.c_str() , "v" ) == 0 )
 		{
