@@ -91,6 +91,10 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 
 		intersect->u = ( 1 - v - u ) * mem->m_TexCoordBuffer[2*id0] + u * mem->m_TexCoordBuffer[2*id1] + v * mem->m_TexCoordBuffer[2*id2];
 		intersect->v = ( 1 - v - u ) * mem->m_TexCoordBuffer[2*id0+1] + u * mem->m_TexCoordBuffer[2*id1+1] + v * mem->m_TexCoordBuffer[2*id2+1];
+	}else
+	{
+		intersect->u = 0.0f;
+		intersect->v = 0.0f;
 	}
 
 	intersect->t = t;

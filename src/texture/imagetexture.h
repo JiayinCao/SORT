@@ -44,6 +44,8 @@ public:
 	// create texture
 	Texture* CreateInstance() { return new ImageTexture(); }
 
+	// whether the image is valid
+	bool IsValid() { return (bool)m_pMemory; }
 // private field
 private:
 	// array saving the color of image

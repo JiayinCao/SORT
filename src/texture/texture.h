@@ -80,6 +80,9 @@ public:
 	// create texture instance
 	virtual Texture* CreateInstance(){return 0;}
 
+	// whether the texture is valid
+	virtual bool IsValid() { return true; }
+
 // protected field
 protected:
 	// the size of the texture

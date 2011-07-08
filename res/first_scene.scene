@@ -5,6 +5,7 @@
 		<Transform>
 			<Matrix value="t 0 1 0"/>
 			<Matrix value="r 0 0.2"/>
+			<Matrix value="s 1.0"/>
 		</Transform>
 	</Model>
 	<Model filename="bunny.ply">
