@@ -1,15 +1,13 @@
 <Root>
-	<Material name="default_matte0" type="Matte">
+	<Material name="inside" type="Matte">
+		<Texture name="color" type="checkbox">
+			<Property name="color0" value="1 0 0"/>
+			<Property name="color1" value="0 1 0"/>
+		</Texture>
 	</Material>
-	<Material name="default_matte1" type="Matte">
-    <Property name="Test" value="teste!"/>
-    <Property name="Test" value="teste2!"/>
-    <Property name="Test1" value="test2e!"/>
+	<Material name="default" type="Matte">
 		<Texture name="color" type="image">
 			<Property name="filename" value= "test.bmp" />
-      <Property name="color0" value="1 1 0" />
-      <Property name="color1" value="0 0 1" />
-      <Property name="threshold" value="0.5" />
 		</Texture>
 	</Material>
 	<Material name="default_matte2" type="Matte">

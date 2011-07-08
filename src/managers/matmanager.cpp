@@ -78,7 +78,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 	if( doc.Error() )
 	{
 		LOG_WARNING<<doc.ErrorDesc()<<ENDL;
-		LOG_WARNING<<"Material file load failed."<<ENDL;
+		LOG_WARNING<<"Material \'"<<str<<"\'file load failed."<<ENDL;
 		return false;
 	}
 
@@ -124,11 +124,16 @@ unsigned MatManager::ParseMatFile( const string& str )
 					TiXmlElement* tex_prop = prop->FirstChildElement( "Property" );
 					while( tex_prop )
 					{
-						tex->SetProperty( tex_prop->Attribute( "name" ) , tex_prop->Attribute( "value" ) );
+						string pn = tex_prop->Attribute( "name" );
+						string pv = tex_prop->Attribute( "value" );
+						tex->SetProperty( pn , pv );
 						tex_prop = tex_prop->NextSiblingElement( "Property" );
 					}
 				}
-				mat->SetProperty( name , tex );
+				if( tex->IsValid() )
+					mat->SetProperty( name , tex );
+				else
+					delete tex;
 				prop = prop->NextSiblingElement( "Property" );
 			}
 

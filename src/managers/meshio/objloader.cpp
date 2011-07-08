@@ -41,9 +41,21 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			string trunkname;
 			file>>trunkname;
 			trunk = new Trunk(trunkname);
-			trunk->m_mat = MatManager::GetSingleton().FindMaterial( "default_matte1" );
 			mem->m_TrunkBuffer.push_back( trunk );
-		}if( strcmp( prefix.c_str() , "v" ) == 0 )
+		}else if( strcmp( prefix.c_str() , "mtllib" ) == 0 )
+		{
+			string name;
+			file>>name;
+			MatManager::GetSingleton().ParseMatFile( name );
+		}else if( strcmp( prefix.c_str() , "usemtl" ) == 0 )
+		{
+			string name;
+			file>>name;
+			if( trunk )
+				trunk->m_mat = MatManager::GetSingleton().FindMaterial( name );
+			if( 0 == trunk->m_mat )
+				LOG_WARNING<<"Material named \'"<<name<<"\' not found, use default material in subset \'"<<trunk->name<<"\' of \'"<<str<<"\'."<<ENDL;
+		}else if( strcmp( prefix.c_str() , "v" ) == 0 )
 		{
 			Point p;
 			file>>p.x;
