@@ -45,6 +45,9 @@ void CheckBoxTexture::_init()
 	// while makeing them zero forbids showing the texture
 	m_iTexWidth = 16;
 	m_iTexHeight = 16;
+
+	// register properties
+	_registerAllProperty();
 }
 
 // get the color
@@ -61,4 +64,11 @@ Spectrum CheckBoxTexture::GetColor( int x , int y ) const
 		return m_Color1;
 	else
 		return m_Color0;
+}
+
+// register properties
+void CheckBoxTexture::_registerAllProperty()
+{
+	_registerProperty( "color0" , new Color0Property( this ) );
+	_registerProperty( "color1" , new Color1Property( this ) );
 }

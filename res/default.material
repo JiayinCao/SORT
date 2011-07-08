@@ -5,8 +5,11 @@
     <Property name="Test" value="teste!"/>
     <Property name="Test" value="teste2!"/>
     <Property name="Test1" value="test2e!"/>
-		<Texture name="Test2" type="constant">
-			<Property name="tt" value= "taa" />	
+		<Texture name="color" type="image">
+			<Property name="filename" value= "test.bmp" />
+      <Property name="color0" value="1 1 0" />
+      <Property name="color1" value="0 0 1" />
+      <Property name="threshold" value="0.5" />
 		</Texture>
 	</Material>
 	<Material name="default_matte2" type="Matte">

@@ -1,7 +1,7 @@
 <Root>
 	<Resource path="../res/"/>
   <Material value="default.material"/>
-	<Model filename="cube.obj">
+	<Model filename="cup.obj">
 		<Transform>
 			<Matrix value="t 0 1 0"/>
 			<Matrix value="r 0 0.2"/>

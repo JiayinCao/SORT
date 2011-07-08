@@ -189,6 +189,7 @@ Texture* TexManager::CreateTexture( const string& str ) const
 	if( it != m_TextureMap.end() )
 		return it->second->CreateInstance();
 
+	LOG_WARNING<<"There is no texture with the type \'"<<str<<"\'."<<ENDL;
 	return 0;
 }
 

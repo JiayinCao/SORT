@@ -48,9 +48,9 @@ void System::_preInit()
 
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
-	m_rt->SetSize( 10 , 10 );
+	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
-	float distance = 6.0f;
+	float distance = 5.0f;
 	PerspectiveCamera* camera = new PerspectiveCamera();
 	camera->SetEye( Point( distance , distance , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
@@ -82,9 +82,9 @@ void System::_postUninit()
 	SAFE_DELETE( m_pIntegrator );
 
 	// release managers
+	MatManager::DeleteSingleton();
 	TexManager::DeleteSingleton();
 	MeshManager::DeleteSingleton();
-	MatManager::DeleteSingleton();
 	MemManager::DeleteSingleton();
 	Timer::DeleteSingleton();
 	LogManager::DeleteSingleton();

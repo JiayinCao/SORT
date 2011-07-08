@@ -47,6 +47,9 @@ void GridTexture::_init()
 	m_iTexHeight = 16;
 
 	m_Threshold = 0.9f;
+
+	// register all properties
+	_registerAllProperty();
 }
 
 // get the color
@@ -68,4 +71,12 @@ Spectrum GridTexture::GetColor( int x , int y ) const
 		return m_Color1;
 	else
 		return m_Color0;
+}
+
+// register properties
+void GridTexture::_registerAllProperty()
+{
+	_registerProperty( "color0" , new Color0Property( this ) );
+	_registerProperty( "color1" , new Color1Property( this ) );
+	_registerProperty( "threshold" , new ThresholdProperty( this ) );
 }

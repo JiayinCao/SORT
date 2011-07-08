@@ -137,6 +137,25 @@ Transform TransformFromStr( const string& s )
 	return Transform();
 }
 
+// spectrum from string
+Spectrum SpectrumFromStr( const string& s )
+{
+	// if the string is empty , return black color
+	if( s.empty() )
+		return Spectrum();
+
+	string str = s;
+	string r = NextToken( str , ' ' );
+	string g = NextToken( str , ' ' );
+	string b = NextToken( str , ' ' );
+
+	float fr = (float)atof( r.c_str() );
+	float fg = (float)atof( g.c_str() );
+	float fb = (float)atof( b.c_str() );
+
+	return Spectrum( fr , fg , fb );
+}
+
 // get the next token
 string NextToken( string& str , char t )
 {

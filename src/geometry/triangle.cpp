@@ -94,8 +94,6 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	}
 
 	intersect->t = t;
-	intersect->u = u;
-	intersect->v = v;
 	intersect->primitive = const_cast<Triangle*>(this);
 
     return t > 0.0f ;

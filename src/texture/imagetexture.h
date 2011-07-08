@@ -14,7 +14,7 @@
 
 ///////////////////////////////////////////////////////////////
 // definition of image texture
-class ImageTexture : public Texture
+class ImageTexture : public Texture 
 {
 // public method
 public:
@@ -55,6 +55,26 @@ private:
 
 	// set texture manager as a friend
 	friend class TexManager;
+
+	// register properties
+	void _registerAllProperty();
+
+// property handler
+	class FileNameProperty : public PropertyHandler<Texture>
+	{
+	public:
+		// constructor
+		FileNameProperty(Texture* tex):PropertyHandler(tex){}
+
+		// set value
+		void SetValue( const string& value )
+		{
+			ImageTexture* ct = dynamic_cast<ImageTexture*>( m_target );
+			
+			// load image file
+			ct->LoadImageFromFile( value );
+		}
+	};
 };
 
 #endif

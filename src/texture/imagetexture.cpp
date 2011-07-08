@@ -14,6 +14,9 @@ void ImageTexture::_init()
 {
 	// set default value
 	m_pMemory = 0;
+
+	// register properties
+	_registerAllProperty();
 }
 
 // get color from image
@@ -49,4 +52,10 @@ bool ImageTexture::LoadImageFromFile( const std::string& str )
 
 	// get the texture manager
 	return TexManager::GetSingleton().Read( str , this );
+}
+
+// register properties
+void ImageTexture::_registerAllProperty()
+{
+	_registerProperty( "filename" , new FileNameProperty( this ) );
 }

@@ -10,6 +10,7 @@
 #include "sort.h"
 #include "enum.h"
 #include "geometry/transform.h"
+#include "spectrum/spectrum.h"
 
 // pre-decleration
 struct VertexIndex;
@@ -41,6 +42,9 @@ public:
 
 // transform from string
 Transform TransformFromStr( const string& str );
+
+// spectrum from string
+Spectrum SpectrumFromStr( const string& str );
 
 // get the next token
 string NextToken( string& str , char t );

@@ -40,11 +40,11 @@ private:
 	void _init();
 
 // property handler
-	class DiffuseProperty : public PropertyHandler<Material>
+	class ColorProperty : public PropertyHandler<Material>
 	{
 	public:
 		// constructor
-		DiffuseProperty(Material* matte):PropertyHandler(matte){}
+		ColorProperty(Material* matte):PropertyHandler(matte){}
 
 		// set value
 		void SetValue( Texture* tex )
