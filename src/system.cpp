@@ -10,6 +10,7 @@
 #include "managers/logmanager.h"
 #include "managers/meshmanager.h"
 #include "managers/matmanager.h"
+#include "managers/memmanager.h"
 #include "utility/timer.h"
 #include "camera/camera.h"
 #include "texture/rendertarget.h"
@@ -40,12 +41,14 @@ void System::_preInit()
 	MeshManager::CreateInstance();
 	// initialize material manager
 	MatManager::CreateInstance();
+	// initialize memory manager
+	MemManager::CreateInstance();
 	// initialize the timer
 	Timer::CreateInstance();
 
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
-	m_rt->SetSize( 1280 , 1024 );
+	m_rt->SetSize( 10 , 10 );
 	// there is default value for camera
 	float distance = 6.0f;
 	PerspectiveCamera* camera = new PerspectiveCamera();
@@ -82,6 +85,7 @@ void System::_postUninit()
 	TexManager::DeleteSingleton();
 	MeshManager::DeleteSingleton();
 	MatManager::DeleteSingleton();
+	MemManager::DeleteSingleton();
 	Timer::DeleteSingleton();
 	LogManager::DeleteSingleton();
 }
@@ -110,6 +114,9 @@ void System::Render()
 
 			// update current pixel
 			m_uCurrentPixelId++;
+
+			// clear managed memory after each pixel
+			MemManager::GetSingleton().ClearMem();
 		}
 		// output progress
 		_outputProgress();

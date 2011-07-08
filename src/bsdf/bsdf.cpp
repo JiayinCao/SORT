@@ -12,24 +12,21 @@
 // destructor
 Bsdf::~Bsdf()
 {
-	vector<Bxdf*>::iterator it = m_bxdf.begin();
-	while( it != m_bxdf.end() )
-	{
-		delete *it;
-		it++;
-	}
 }
 
 // get the number of components in current bsdf
 unsigned Bsdf::NumComponents() const
 {
-	return m_bxdf.size();
+	return m_bsdfCount;
 }
 
 // add a new bxdf
 void Bsdf::AddBxdf( Bxdf* bxdf )
 {
-	m_bxdf.push_back( bxdf );
+	if( m_bsdfCount == MAX_BXDF_COUNT )
+		return;
+	m_bxdf[m_bsdfCount] = bxdf ;
+	m_bsdfCount++;
 }
 
 // evaluate bxdf
@@ -37,12 +34,9 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi ) const
 {
 	// the result
 	Spectrum r;
-	vector<Bxdf*>::const_iterator it = m_bxdf.begin();
-	while( it != m_bxdf.end() )
-	{
-		r += (*it)->f( wo , wi );
-		it++;
-	}
+
+	for( unsigned i = 0 ; i < m_bsdfCount ; i++ )
+		r += m_bxdf[i]->f( wo , wi );
 
 	return r;
 }

@@ -2,9 +2,9 @@
 	<Material name="default_matte0" type="Matte">
 	</Material>
 	<Material name="default_matte1" type="Matte">
-	    <Property name="Test" value="teste!"/>
-   		<Property name="Test" value="teste2!"/>
-    	<Property name="Test1" value="test2e!"/>
+    <Property name="Test" value="teste!"/>
+    <Property name="Test" value="teste2!"/>
+    <Property name="Test1" value="test2e!"/>
 		<Texture name="Test2" type="constant">
 			<Property name="tt" value= "taa" />	
 		</Texture>

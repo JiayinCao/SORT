@@ -17,6 +17,8 @@ class Lambert : public Bxdf
 // public method
 public:
 	// default constructor
+	Lambert(){}
+	// constructor
 	// para 's' : total reflectance
 	Lambert( const Spectrum& s ):R(s){m_type=BXDF_DIFFUSE;}
 	// destructor

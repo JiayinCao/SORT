@@ -377,6 +377,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\managers\memmanager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\managers\memmanager.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\managers\meshmanager.cpp"
 				>
 			</File>
@@ -582,30 +590,6 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="integrator"
-			>
-			<File
-				RelativePath="..\..\src\integrator\integrator.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\integrator\integratormethod.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\integrator\integratormethod.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\integrator\whittedrt.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\integrator\whittedrt.h"
-				>
-			</File>
-		</Filter>
-		<Filter
 			Name="bsdf"
 			>
 			<File
@@ -666,6 +650,30 @@
 			</File>
 			<File
 				RelativePath="..\..\src\material\matte.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="integrator"
+			>
+			<File
+				RelativePath="..\..\src\integrator\integrator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\integratormethod.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\integratormethod.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\whittedrt.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\whittedrt.h"
 				>
 			</File>
 		</Filter>

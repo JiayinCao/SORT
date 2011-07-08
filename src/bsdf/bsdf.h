@@ -9,12 +9,13 @@
 
 // include the header
 #include "sort.h"
-#include <vector>
 #include "spectrum/spectrum.h"
 
 // pre-declera class
 class Bxdf;
 class Vector;
+
+#define	MAX_BXDF_COUNT 8
 
 ////////////////////////////////////////////////////////////////////////
 // definition of bsdf
@@ -23,7 +24,7 @@ class	Bsdf
 // public method
 public:
 	// default constructor
-	Bsdf(){}
+	Bsdf(){m_bsdfCount=0;}
 	// destructor
 	~Bsdf();
 
@@ -42,7 +43,10 @@ public:
 // private field
 private:
 	// the list for the bxdf
-	vector<Bxdf*>	m_bxdf;
+	Bxdf*	m_bxdf[MAX_BXDF_COUNT];
+
+	// current bsdf
+	unsigned m_bsdfCount;
 };
 
 #endif

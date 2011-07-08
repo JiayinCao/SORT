@@ -33,10 +33,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	{
 		Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
 		if( bsdf )
-		{
 			t = bsdf->f( -r.m_Dir , lightDir );
-			delete bsdf;
-		}
 	}
 
 	return t * Dot( -r.m_Dir , ip.normal );
