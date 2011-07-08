@@ -15,7 +15,7 @@
 // evaluate bxdf
 Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const
 {
-	return R * INV_PI;
+	return R;
 }
 
 // sample a direction randomly

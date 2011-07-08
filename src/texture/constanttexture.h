@@ -10,6 +10,7 @@
 // include the header
 #include "texture.h"
 #include "spectrum/spectrum.h"
+#include "utility/strhelper.h"
 
 ////////////////////////////////////////////////////////////
 // definition of constant texture
@@ -56,6 +57,24 @@ private:
 private:
 	// initialize the data
 	void _init();
+
+	// register properties
+	void _registerAllProperty();
+
+// property handler
+	class ColorProperty : public PropertyHandler<Texture>
+	{
+	public:
+		// constructor
+		ColorProperty(Texture* tex):PropertyHandler(tex){}
+
+		// set value
+		void SetValue( const string& value )
+		{
+			ConstantTexture* ct = dynamic_cast<ConstantTexture*>( m_target );
+			ct->m_Color = SpectrumFromStr( value );
+		}
+	};
 };
 
 #endif

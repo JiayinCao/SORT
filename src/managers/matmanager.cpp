@@ -13,6 +13,8 @@
 #include "logmanager.h"
 #include "material/matte.h"
 #include "texmanager.h"
+#include "texture/constanttexture.h"
+#include "material/matte.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MatManager);
@@ -22,7 +24,13 @@ MatManager::MatManager()
 {
 	// register materials
 	_registerMaterials();
+
+	// initialize default material
+	ConstantTexture* ct = new ConstantTexture( 0.5f , 0.5f , 0.5f );
+	m_Default = new Matte();
+	m_Default->SetProperty( "color" , ct );
 }
+
 // destructor
 MatManager::~MatManager()
 {
@@ -33,6 +41,8 @@ MatManager::~MatManager()
 // clear the material pool
 void MatManager::_clearMatPool()
 {
+	SAFE_DELETE(m_Default);
+
 	map< string , Material* >::iterator it = m_matPool.begin();
 	while( it != m_matPool.end() )
 	{
@@ -49,6 +59,12 @@ Material* MatManager::FindMaterial( const string& mat_name ) const
 	if( it != m_matPool.end() )
 		return it->second;
 	return 0;
+}
+
+// whether the material exists
+Material* MatManager::GetDefaultMat() const
+{
+	return m_Default;
 }
 
 // parse material file and add the materials into the manager
@@ -103,11 +119,14 @@ unsigned MatManager::ParseMatFile( const string& str )
 				string name = prop->Attribute( "name" );
 				string type = prop->Attribute( "type" );
 				Texture* tex = TexManager::GetSingleton().CreateTexture(type);
-				TiXmlElement* tex_prop = prop->FirstChildElement( "Property" );
-				while( tex_prop )
+				if( tex )
 				{
-					tex->SetProperty( tex_prop->Attribute( "name" ) , tex_prop->Attribute( "value" ) );
-					tex_prop = tex_prop->NextSiblingElement( "Property" );
+					TiXmlElement* tex_prop = prop->FirstChildElement( "Property" );
+					while( tex_prop )
+					{
+						tex->SetProperty( tex_prop->Attribute( "name" ) , tex_prop->Attribute( "value" ) );
+						tex_prop = tex_prop->NextSiblingElement( "Property" );
+					}
 				}
 				mat->SetProperty( name , tex );
 				prop = prop->NextSiblingElement( "Property" );

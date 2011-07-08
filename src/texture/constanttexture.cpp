@@ -33,5 +33,12 @@ void ConstantTexture::_init()
 	// while makeing them zero forbids showing the texture
 	m_iTexWidth = 16;
 	m_iTexHeight = 16;
+
+	_registerAllProperty();
 }
 
+// register properties
+void ConstantTexture::_registerAllProperty()
+{
+	_registerProperty( "color" , new ColorProperty( this ) );
+}

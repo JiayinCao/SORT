@@ -10,6 +10,7 @@
 // include header file
 #include "utility/smartptr.h"
 #include "bbox.h"
+#include "managers/matmanager.h"
 
 // pre-decleration
 class	Intersection;
@@ -42,7 +43,12 @@ public:
 	unsigned GetID() const { return m_primitive_id; }
 
 	// get material
-	Material* GetMaterial() const { return m_mat; }
+	Material* GetMaterial() const 
+	{ 
+		if( m_mat == 0 ) 
+			return MatManager::GetSingleton().GetDefaultMat();
+		return m_mat; 
+	}
 
 	// set material
 	void	SetMaterial( Material* mat ) { m_mat = mat; }

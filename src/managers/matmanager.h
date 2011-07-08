@@ -34,9 +34,12 @@ public:
 
 	// find specific material
 	// para 'mat_name' : the name for the material
-	// result          : the material with specific material , 0 if there is 
-	//					 no material with the name.
+	// result          : the material with specific material , default material
+	//					 if there is no material with the name.
 	Material*	FindMaterial( const string& mat_name ) const;
+
+	// get default material
+	Material*	GetDefaultMat() const;
 
 	// parse material file and add the materials into the manager
 	// para 'str' : name of the material file
@@ -53,6 +56,9 @@ private:
 
 	// the registered type
 	map< string , Material* >	m_matType;
+
+	// the default material
+	Material*	m_Default;
 
 	// register all of the materials
 	void _registerMaterials();

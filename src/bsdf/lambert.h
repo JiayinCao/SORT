@@ -19,7 +19,7 @@ public:
 	// default constructor
 	Lambert(){}
 	// constructor
-	// para 's' : total reflectance
+	// para 's' : reflect density
 	Lambert( const Spectrum& s ):R(s){m_type=BXDF_DIFFUSE;}
 	// destructor
 	~Lambert(){}
@@ -36,6 +36,9 @@ public:
 	// para 'pdf' : property density function value of the specific 'wi'
 	// result     : brdf value for the 'wo' and 'wi'
 	virtual Spectrum Sample_f( const Vector& wo , Vector& wi , float* pdf ) const;
+
+	// set color
+	void SetColor( const Spectrum& color ) { R = color; }
 
 // private field
 private:

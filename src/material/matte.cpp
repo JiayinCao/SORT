@@ -35,18 +35,20 @@ void Matte::_init()
 // get bsdf
 Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 {
-	Spectrum color = m_d->Evaluate( intersect );
+	Spectrum color = Spectrum( 1.0f , 1.0f , 1.0f );
+	if( m_d )
+		color = m_d->Evaluate( intersect );
 
 	Bsdf* bsdf = SORT_MALLOC(Bsdf);
-	bsdf->AddBxdf( SORT_MALLOC( Lambert ) );
+	Lambert* lambert = SORT_MALLOC(Lambert);
+	lambert->SetColor( color );
+	bsdf->AddBxdf( lambert );
+
 	return bsdf;
 }
 
 // register property
 void Matte::_registerAllProperty()
 {
-	if( m_propertySet.empty() )
-	{
-		_registerProperty( "Test2" , new DiffuseProperty( this ) );
-	}
+	_registerProperty( "color" , new ColorProperty( this ) );
 }

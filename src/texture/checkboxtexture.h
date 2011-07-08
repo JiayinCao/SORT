@@ -9,6 +9,7 @@
 
 // include the header
 #include "texture.h"
+#include "utility/strhelper.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 //	definition of check box texture
@@ -52,6 +53,37 @@ private:
 private:
 	// init default values
 	void	_init();
+
+	// register properties
+	void _registerAllProperty();
+
+// property handler
+	class Color0Property : public PropertyHandler<Texture>
+	{
+	public:
+		// constructor
+		Color0Property(Texture* tex):PropertyHandler(tex){}
+
+		// set value
+		void SetValue( const string& value )
+		{
+			CheckBoxTexture* ct = dynamic_cast<CheckBoxTexture*>( m_target );
+			ct->m_Color0 = SpectrumFromStr( value );
+		}
+	};
+	class Color1Property : public PropertyHandler<Texture>
+	{
+	public:
+		// constructor
+		Color1Property(Texture* tex):PropertyHandler(tex){}
+
+		// set value
+		void SetValue( const string& value )
+		{
+			CheckBoxTexture* ct = dynamic_cast<CheckBoxTexture*>( m_target );
+			ct->m_Color1 = SpectrumFromStr( value );
+		}
+	};
 };
 
 #endif

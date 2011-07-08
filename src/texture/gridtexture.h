@@ -9,6 +9,7 @@
 
 // include the file
 #include "texture.h"
+#include "utility/strhelper.h"
 
 ///////////////////////////////////////////////////////////////
 // definition of grid texture
@@ -39,6 +40,9 @@ public:
 	// para 'y' :	y coordinate , if out of range , use filter
 	virtual Spectrum GetColor( int x , int y ) const;
 
+	// create instance
+	Texture* CreateInstance() { return new GridTexture(); }
+
 // protected field
 private:
 	// two colors
@@ -52,6 +56,49 @@ private:
 private:
 	// init default values
 	void	_init();
+
+	// register properties
+	void _registerAllProperty();
+
+	// property handler
+	class Color0Property : public PropertyHandler<Texture>
+	{
+	public:
+		// constructor
+		Color0Property(Texture* tex):PropertyHandler(tex){}
+
+		// set value
+		void SetValue( const string& value )
+		{
+			GridTexture* ct = dynamic_cast<GridTexture*>( m_target );
+			ct->m_Color0 = SpectrumFromStr( value );
+		}
+	};
+	class Color1Property : public PropertyHandler<Texture>
+	{
+	public:
+		// constructor
+		Color1Property(Texture* tex):PropertyHandler(tex){}
+
+		// set value
+		void SetValue( const string& value )
+		{
+			GridTexture* ct = dynamic_cast<GridTexture*>( m_target );
+			ct->m_Color1 = SpectrumFromStr( value );
+		}
+	};
+	class ThresholdProperty : public PropertyHandler<Texture>
+	{
+	public:
+		ThresholdProperty(Texture* tex):PropertyHandler(tex){}
+
+		// set value
+		void SetValue( const string& value )
+		{
+			GridTexture* ct = dynamic_cast<GridTexture*>( m_target );
+			ct->m_Threshold = (float)atof( value.c_str() );
+		}
+	};
 };
 
 #endif
