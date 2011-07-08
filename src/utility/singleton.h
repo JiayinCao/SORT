@@ -51,7 +51,8 @@ public:
 	// create instance
 	static void CreateInstance()
 	{
-		new T();
+		if( m_pSingleton == 0 )
+			new T();
 	}
 
 //protected field

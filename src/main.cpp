@@ -11,6 +11,7 @@
 #include "utility/path.h"
 #include "managers/matmanager.h"
 #include "texture/checkboxtexture.h"
+#include "vld.h"
 
 // the global system
 System g_System;

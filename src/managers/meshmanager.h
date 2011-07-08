@@ -127,7 +127,12 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////
-// definition of mesh manager
+//	definition of mesh manager
+//	desc :	A mesh manager manages all of the geometry data used in the 
+//			rendering system. The meshes are not located here. Two meshes
+//			will share the same geometry memory if they are loaded from
+//			from the same model file, which means intancing is supported
+//			in the current system.
 class	MeshManager : public Singleton<MeshManager>
 {
 // public method

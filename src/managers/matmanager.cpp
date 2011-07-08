@@ -106,6 +106,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 				TiXmlElement* tex_prop = prop->FirstChildElement( "Property" );
 				while( tex_prop )
 				{
+					tex->SetProperty( tex_prop->Attribute( "name" ) , tex_prop->Attribute( "value" ) );
 					tex_prop = tex_prop->NextSiblingElement( "Property" );
 				}
 				mat->SetProperty( name , tex );

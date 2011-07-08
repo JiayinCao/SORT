@@ -9,6 +9,7 @@
 #include "utility/define.h"
 #include "bsdf/bsdf.h"
 #include "bsdf/lambert.h"
+#include "managers/memmanager.h"
 
 // constructor
 Matte::Matte()
@@ -35,8 +36,9 @@ void Matte::_init()
 Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 {
 	Spectrum color = m_d->Evaluate( intersect );
-	Bsdf* bsdf = new Bsdf();
-	bsdf->AddBxdf( new Lambert( color ) );
+
+	Bsdf* bsdf = SORT_MALLOC(Bsdf);
+	bsdf->AddBxdf( SORT_MALLOC( Lambert ) );
 	return bsdf;
 }
 

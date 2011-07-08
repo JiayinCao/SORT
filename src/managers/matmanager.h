@@ -17,6 +17,12 @@ class Material;
 
 /////////////////////////////////////////////////////////////////////////////
 //	definition of material manager
+//	desc :	Material manager is a singleton. All of the materials in the system
+//			are parsed from file and located in a single pool. And it's 
+//			responsible for deallocate all of the material memory.
+//	note :	There will be textuers in most of materials. when materials are
+//			deleted the bind texture is also deleted. In another words ,
+//			material system is also responsible for deallocating textures.
 class	MatManager : public Singleton<MatManager>
 {
 // public method

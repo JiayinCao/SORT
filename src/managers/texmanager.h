@@ -29,6 +29,11 @@ public:
 
 //////////////////////////////////////////////////////////////////
 //	definition of texture manager
+//	desc :	A textuer manager only manages image texture memory.
+//			Other textures will not be managed here. And it's also
+//			responsible for deallocating image memory. Two image 
+//			texture will share the same image data if they are
+//			loaded from the same image file.
 class TexManager : public Singleton<TexManager>
 {
 // public method
