@@ -7,6 +7,8 @@
 #ifndef SORT_VECTOR
 #define	SORT_VECTOR
 
+#include "managers/logmanager.h"
+
 // pre-deleration
 class Transform;
 
@@ -68,7 +70,7 @@ public:
 	float	SquaredLength() const;
 	// normalize the vector
 	// result :	the normalized vector
-	// note   :	there will be runtime and log LOG_ERROR if it's a zero vector ( 0 , 0 , 0 )
+	// note   :	there will be warning if it's a zero vector ( 0 , 0 , 0 )
 	Vector&	Normalize();
 
 	// [] operator
@@ -150,6 +152,20 @@ inline Vector Cross( const Vector& v0 , const Vector& v1 )
 inline bool FaceForward( const Vector& v0 , const Vector& v1 )
 {
 	return Dot( v0 , v1 ) >= 0.0f;
+}
+
+// normalize a vector
+inline Vector Normalize( const Vector& v )
+{
+	float len = v.Length();
+
+	if( len == 0.0f )
+	{
+		LOG_WARNING<<"Try to normalize a zero length vector."<<ENDL;
+		return Vector();
+	}
+
+	return v / len;
 }
 
 #endif

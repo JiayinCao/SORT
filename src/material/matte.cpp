@@ -40,6 +40,7 @@ Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 		color = m_d->Evaluate( intersect );
 
 	Bsdf* bsdf = SORT_MALLOC(Bsdf);
+	bsdf->SetIntersection( intersect );
 	Lambert* lambert = SORT_MALLOC(Lambert);
 	lambert->SetColor( color );
 	bsdf->AddBxdf( lambert );
