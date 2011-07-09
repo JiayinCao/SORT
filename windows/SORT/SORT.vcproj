@@ -613,6 +613,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\bsdf\merl.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\merl.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\bsdf\reflection.cpp"
 				>
 			</File>
@@ -650,6 +658,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\material\matte.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\material\merlmat.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\material\merlmat.h"
 				>
 			</File>
 		</Filter>
