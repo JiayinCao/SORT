@@ -93,6 +93,11 @@ public:
 	// result   :	'false' if the 'v' is not the same with current vector, 'false' else
 	bool	operator != ( const Vector& v ) const;
 
+	// rotate a vector along the current vector
+	// para 'vec'   : the vector to rotate
+	// para 'angle' : the angle of rotation
+	void	Rotate( Vector& vec , float angle ) const;
+
 // make all of the components public.
 public:
 	// the x y z data in three dimension
