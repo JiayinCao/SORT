@@ -10,10 +10,11 @@
 // include the header
 #include "sort.h"
 #include "spectrum/spectrum.h"
+#include "geometry/vector.h"
 
 // pre-declera class
 class Bxdf;
-class Vector;
+class Intersection;
 
 #define	MAX_BXDF_COUNT 8
 
@@ -24,9 +25,12 @@ class	Bsdf
 // public method
 public:
 	// default constructor
-	Bsdf(){m_bsdfCount=0;}
+	Bsdf();
 	// destructor
 	~Bsdf();
+
+	// set intersection
+	void SetIntersection( const Intersection* );
 
 	// get the number of bxdf
 	unsigned NumComponents() const;
@@ -47,6 +51,14 @@ private:
 
 	// current bsdf
 	unsigned m_bsdfCount;
+
+	// the vectors
+	Vector nn , sn , tn;
+
+	// transform the vector from world to shading coordinate
+	// para 'v' : a vector in world space
+	// result   : a transformed vector in shading coordinate
+	Vector _worldToLocal( const Vector& v ) const;
 };
 
 #endif

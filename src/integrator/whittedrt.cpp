@@ -24,8 +24,12 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 		return Spectrum();
 
 	// get light direction ( not implemented )
-	Vector lightDir = Vector( -1.0f , -5.0f , 7.0f );
+	Vector lightDir = Vector( -1.0f , 5.0f , 7.0f );
 	lightDir.Normalize();
+
+	float density = max( 0.0f , Dot( lightDir , ip.normal ) );
+	if( density == 0.0f )
+		return Spectrum();
 
 	// get primitive bsdf
 	Spectrum t = Spectrum ( 1.0f , 1.0f , 1.0f );
@@ -36,7 +40,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 			t = bsdf->f( -r.m_Dir , lightDir );
 	}
 
-	return t * max( 0.0f , Dot( -r.m_Dir , ip.normal ) );
+	return t * density; 
 }
 
 // output log information

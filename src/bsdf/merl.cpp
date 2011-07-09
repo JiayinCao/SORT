@@ -120,18 +120,18 @@ void Merl::_std_coords_to_half_diff_coords( const Vector& wi , const Vector& wo 
 	Vector half = ( wi + wo ) * 0.5f;
 	half.Normalize();
 
-	theta_half = acos( half[2] );
-	phi_half = atan2( half[1] , half[0] );
+	theta_half = acos( half[1] );
+	phi_half = atan2( half[2] , half[0] );
 
-	Vector bi_normal( 0.0f , 0.0f , 1.0f );
-	Vector normal( 0.0f , 1.0f , 0.0f );
+	Vector bi_normal( 0.0f , 1.0f , 0.0f );
+	Vector normal( 0.0f , 0.0f , 1.0f );
 	Vector diff = wi;
 
 	normal.Rotate( diff , -phi_half );
 	bi_normal.Rotate( diff , -theta_half );
 
-	theta_diff = acos( diff[2] );
-	phi_diff = atan2( diff[1] , diff[0] );
+	theta_diff = acos( diff[1] );
+	phi_diff = atan2( diff[2] , diff[0] );
 }
 
 // lookup theta_half index
@@ -156,7 +156,7 @@ int Merl::theta_half_index( float theta_half ) const
 // lookup theta_diff index
 int	Merl::theta_diff_index( float theta_diff ) const
 {
-	int temp = int( ( theta_diff * 2.0f / PI ) * MERL_SAMPLING_RES_THETA_D );
+	int temp = int( ( theta_diff * 0.5f / PI ) * MERL_SAMPLING_RES_THETA_D );
 
 	if( temp < 0 )
 		return 0;

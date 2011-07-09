@@ -54,7 +54,7 @@ void System::_preInit()
 	PerspectiveCamera* camera = new PerspectiveCamera();
 	camera->SetEye( Point( distance , distance , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
-	camera->SetTarget( Point( 0 , 1 , 0 ) );
+	camera->SetTarget( Point( 0 , 0 , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
 	camera->SetRenderTarget( m_rt );
 	m_camera = camera;
