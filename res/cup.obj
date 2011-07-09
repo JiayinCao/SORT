@@ -4,7 +4,7 @@
 # Right Hemisphere, LTD
 # http://www.righthemisphere.com/
 # 
-mtllib cup.mtl
+#mtllib default.material
 # object insideShape
 g insideShape
 v -0.395825 0.436485 9.94025e-009
@@ -2473,7 +2473,7 @@ vn -0.246121 -0.966585 -0.071682
 vn 0.117454 -0.992691 0.0277192
 vn -0.253479 -0.966585 -0.0382435
 # 800 normals
-usemtl inside
+usemtl merl_mat
 f  1/3/3 800/2/2 799/1/1
 f  2/6/6 407/5/5 406/4/4
 f  3/9/9 204/8/8 203/7/7

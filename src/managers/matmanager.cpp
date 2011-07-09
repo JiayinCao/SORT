@@ -15,6 +15,7 @@
 #include "texmanager.h"
 #include "texture/constanttexture.h"
 #include "material/matte.h"
+#include "material/merlmat.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MatManager);
@@ -78,7 +79,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 	if( doc.Error() )
 	{
 		LOG_WARNING<<doc.ErrorDesc()<<ENDL;
-		LOG_WARNING<<"Material \'"<<str<<"\'file load failed."<<ENDL;
+		LOG_WARNING<<"Material \'"<<str<<"\' file load failed."<<ENDL;
 		return false;
 	}
 
@@ -95,7 +96,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 
 		// check if there is a material with the specific name, crash if there is
 		if( FindMaterial( name ) != 0 )
-			LOG_ERROR<<"A material named "<<name<<" already exists in material system."<<CRASH;
+			LOG_ERROR<<"A material named \'"<<name<<"\' already exists in material system."<<CRASH;
 
 		// create specific material
 		Material* mat = _createMaterial( type );
@@ -159,14 +160,18 @@ void MatManager::_registerMaterials()
 {
 	// register all of the materials
 	m_matType.insert( make_pair( "Matte" , new Matte() ) );
+	m_matType.insert( make_pair( "Merl" , new MerlMat() ) );
 }
 
 // clear registered types
 void MatManager::_unregisterMaterials()
 {
 	map< string , Material* >::iterator it = m_matType.begin();
-	if( it != m_matType.end() )
+	while( it != m_matType.end() )
+	{
 		delete it->second;
+		it++;
+	}
 	m_matType.clear();
 }
 
@@ -178,7 +183,7 @@ Material* MatManager::_createMaterial( const string& str )
 		return it->second->CreateInstance();
 
 	// crash
-	LOG_WARNING<<"There is no material named "<<str<<"."<<ENDL;
+	LOG_WARNING<<"There is no material with the type of "<<str<<"."<<ENDL;
 
 	return 0;
 }
