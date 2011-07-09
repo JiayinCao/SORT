@@ -211,3 +211,21 @@ Vector& Vector::operator = ( const Vector& v )
 
 	return *this;
 }
+
+// rotate a vector along the current vector
+void Vector::Rotate( Vector& vec , float angle ) const
+{
+	float temp;
+	float cos_ang = cos( angle );
+	float sin_ang = sin( angle );
+
+	Vector o = vec * cos_ang;
+
+	temp = Dot( vec , *this );
+	temp *= ( 1 - cos_ang );
+
+	o += *this * temp;
+	Vector cross = Cross( *this , vec );
+
+	vec = o + cross * sin_ang;
+}

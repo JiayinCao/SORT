@@ -36,7 +36,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 			t = bsdf->f( -r.m_Dir , lightDir );
 	}
 
-	return t * Dot( -r.m_Dir , ip.normal );
+	return t * max( 0.0f , Dot( -r.m_Dir , ip.normal ) );
 }
 
 // output log information
