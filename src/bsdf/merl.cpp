@@ -11,12 +11,12 @@
 #include "utility/path.h"
 #include "geometry/vector.h"
 #include <fstream>
-#include <math.h>
+#include "bsdf.h"
 
 // constant to be used in merl
 const unsigned Merl::MERL_SAMPLING_RES_THETA_H = 90;
 const unsigned Merl::MERL_SAMPLING_RES_THETA_D = 90;
-const unsigned Merl::MERL_SAMPLING_RES_PHI_D = 360;
+const unsigned Merl::MERL_SAMPLING_RES_PHI_D = 180;
 const double Merl::MERL_RED_SCALE = 0.0006666666666667;
 const double Merl::MERL_GREEN_SCALE = 0.000766666666666667;
 const double Merl::MERL_BLUE_SCALE = 0.0011066666666666667;
@@ -66,34 +66,72 @@ void Merl::_loadBrdf( const string& filename )
 	// check dimension
 	if( dims[0] != MERL_SAMPLING_RES_THETA_H ||
 		dims[1] != MERL_SAMPLING_RES_THETA_D ||
-		dims[2] != MERL_SAMPLING_RES_PHI_D / 2 )
+		dims[2] != MERL_SAMPLING_RES_PHI_D )
 	{
 		file.close();
 		return;
 	}
 
 	// allocate data
-	unsigned size = 3 * dims[0] * dims[1] * dims[2];
+	unsigned trunksize = dims[0] * dims[1] * dims[2];
+	unsigned size = 3 * trunksize;
 	m_data = new double[size];
 	file.read( (char*)m_data , sizeof( double ) * size );
+
+	unsigned offset = 0;
+	for( unsigned i = 0 ; i < trunksize ; i++ )
+		m_data[offset++] *= MERL_RED_SCALE;
+	for( unsigned i = 0 ; i < trunksize ; i++ )
+		m_data[offset++] *= MERL_GREEN_SCALE;
+	for( unsigned i = 0 ; i < trunksize ; i++ )
+		m_data[offset++] *= MERL_BLUE_SCALE;
 
 	file.close();
 }
 
 // evaluate bxdf
-Spectrum Merl::f( const Vector& wo , const Vector& wi ) const
+Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
 {
-	float theta_half , phi_half , phi_diff , theta_diff;
-	_std_coords_to_half_diff_coords( wi , wo , theta_half , phi_half , theta_diff , phi_diff );
+	Vector wo = Wo;
+	Vector wi = Wi;
 
-	// find index
-	const int index =	phi_diff_index( phi_diff ) +
-						theta_diff_index( theta_diff ) * MERL_SAMPLING_RES_PHI_D / 2 +
-						theta_half_index( theta_half ) * MERL_SAMPLING_RES_PHI_D / 2 * MERL_SAMPLING_RES_THETA_D;
+	// Compute wh and transform wi to halfangle coordinate system
+    Vector wh = wo + wi;
+    if (wh.y < 0.f) {
+        wo = -wo;
+        wi = -wi;
+        wh = -wh;
+    }
+    if (wh.x == 0.f && wh.y == 0.f && wh.z == 0.f)
+		return Spectrum (0.f);
+    wh = Normalize(wh);
 
-	const float r = (float)( m_data[ index ] * MERL_RED_SCALE );
-	const float g = (float)( m_data[ index + MERL_SAMPLING_RES_THETA_H * MERL_SAMPLING_RES_THETA_D * MERL_SAMPLING_RES_PHI_D / 2 ] * MERL_GREEN_SCALE );
-	const float b = (float)( m_data[ index + MERL_SAMPLING_RES_THETA_H * MERL_SAMPLING_RES_THETA_D * MERL_SAMPLING_RES_PHI_D ] * MERL_BLUE_SCALE );
+	float whTheta = SphericalTheta(wh);
+    float whCosPhi = CosPhi(wh), whSinPhi = SinPhi(wh);
+    float whCosTheta = CosTheta(wh), whSinTheta = SinTheta(wh);
+
+    Vector whx(whCosPhi * whCosTheta, -whSinTheta, whSinPhi * whCosTheta);
+    Vector why(-whSinPhi,0.0f , whCosPhi);
+    Vector wd(Dot(wi, whx), Dot(wi, wh), Dot(wi, why));
+
+    // Compute _index_ into measured BRDF tables
+    float wdTheta = SphericalTheta(wd), wdPhi = SphericalPhi(wd);
+    if (wdPhi > PI) 
+		wdPhi -= PI;
+
+    // Compute indices _whThetaIndex_, _wdThetaIndex_, _wdPhiIndex_
+#define REMAP(V, MAX, COUNT) (int)(clamp(((V) / (MAX) * (COUNT)), 0.0f, (float)((COUNT)-1)))
+    int whThetaIndex = REMAP(sqrtf(max(0.f, whTheta * 2.0f / PI)),  1.f, MERL_SAMPLING_RES_THETA_H);
+    int wdThetaIndex = REMAP(wdTheta, PI / 2.f, MERL_SAMPLING_RES_THETA_D);
+    int wdPhiIndex = REMAP(wdPhi, PI, MERL_SAMPLING_RES_PHI_D);
+#undef REMAP
+
+	// calculate the index
+    int index = wdPhiIndex + MERL_SAMPLING_RES_PHI_D * (wdThetaIndex + whThetaIndex * MERL_SAMPLING_RES_THETA_D);
+
+	const float r = (float)( m_data[ index ] );
+	const float g = (float)( m_data[ index + MERL_SAMPLING_RES_THETA_H * MERL_SAMPLING_RES_THETA_D * MERL_SAMPLING_RES_PHI_D ] );
+	const float b = (float)( m_data[ index + MERL_SAMPLING_RES_THETA_H * MERL_SAMPLING_RES_THETA_D * MERL_SAMPLING_RES_PHI_D * 2 ] );
 
 	return Spectrum( r , g , b );
 }
@@ -111,73 +149,4 @@ Merl* Merl::Clone() const
 	Merl* m = SORT_MALLOC(Merl);
 	m->m_data = m_data;
 	return m;
-}
-
-// transform coordinate
-void Merl::_std_coords_to_half_diff_coords( const Vector& wi , const Vector& wo , 
-										   float& theta_half , float& phi_half , float& theta_diff , float& phi_diff ) const
-{
-	Vector half = ( wi + wo ) * 0.5f;
-	half.Normalize();
-
-	theta_half = acos( half[1] );
-	phi_half = atan2( half[2] , half[0] );
-
-	Vector bi_normal( 0.0f , 1.0f , 0.0f );
-	Vector normal( 0.0f , 0.0f , 1.0f );
-	Vector diff = wi;
-
-	normal.Rotate( diff , -phi_half );
-	bi_normal.Rotate( diff , -theta_half );
-
-	theta_diff = acos( diff[1] );
-	phi_diff = atan2( diff[2] , diff[0] );
-}
-
-// lookup theta_half index
-int Merl::theta_half_index( float theta_half ) const
-{
-	if( theta_half <= 0.0 )
-		return 0;
-
-	float theta_half_deg = ( ( theta_half * 2.0f / PI ) * MERL_SAMPLING_RES_THETA_H );
-	theta_half_deg *= MERL_SAMPLING_RES_THETA_H;
-	theta_half_deg = sqrt( theta_half_deg );
-	int ret_val = (int)theta_half_deg;
-
-	if( ret_val < 0 )
-		return 0;
-	if( ret_val >= MERL_SAMPLING_RES_THETA_H )
-		return MERL_SAMPLING_RES_THETA_H - 1;
-
-	return ret_val;
-}
-
-// lookup theta_diff index
-int	Merl::theta_diff_index( float theta_diff ) const
-{
-	int temp = int( ( theta_diff * 0.5f / PI ) * MERL_SAMPLING_RES_THETA_D );
-
-	if( temp < 0 )
-		return 0;
-	if( temp >= MERL_SAMPLING_RES_THETA_D )
-		return MERL_SAMPLING_RES_THETA_D - 1;
-
-	return temp;
-}
-
-// lookup phi_diff index
-int Merl::phi_diff_index( float phi_diff ) const
-{
-	if( phi_diff < 0.0f )
-		phi_diff += PI;
-
-	int temp = int( phi_diff / PI * MERL_SAMPLING_RES_PHI_D * 0.5f );
-
-	if( temp < 0 )
-		return 0;
-	if( temp >= MERL_SAMPLING_RES_PHI_D * 0.5f )
-		return (int)(MERL_SAMPLING_RES_PHI_D * 0.5f - 1);
-
-	return temp;
 }

@@ -64,14 +64,6 @@ private:
 	void _release();
 	// load brdf data from file
 	void _loadBrdf( const string& filename );
-	// transform coordinate
-	void _std_coords_to_half_diff_coords( const Vector& wi , const Vector& wo , float& theta_half , float& phi_half , float& theta_diff , float& phi_dff ) const;
-	// lookup theta_half index
-	int theta_half_index( float theta_half ) const ;
-	// lookup theta_diff index
-	int	theta_diff_index( float theta_diff ) const ;
-	// lookup phi_diff index
-	int phi_diff_index( float phi_diff ) const ;
 };
 
 #endif
