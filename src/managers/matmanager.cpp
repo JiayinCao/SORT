@@ -27,7 +27,7 @@ MatManager::MatManager()
 	_registerMaterials();
 
 	// initialize default material
-	ConstantTexture* ct = new ConstantTexture( 0.5f , 0.5f , 0.5f );
+	ConstantTexture* ct = new ConstantTexture( 0.005f , 0.005f , 0.005f );
 	m_Default = new Matte();
 	m_Default->SetProperty( "color" , ct );
 }

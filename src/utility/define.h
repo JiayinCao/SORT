@@ -16,5 +16,11 @@
 
 // math macros
 #define saturate(x) max(0.0f,min(1.0f,x))
+inline float clamp( float x , float mi , float ma )
+{
+	if( x > ma ) x = ma;
+	if( x < mi ) x = mi;
+	return x;
+}
 
 #endif
