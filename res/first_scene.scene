@@ -1,25 +1,9 @@
 <Root>
 	<Resource path="../res/"/>
   <Material value="default.material"/>
-	<Model filename="cup.obj">
+	<Model filename="teapot.obj">
 		<Transform>
-			<Matrix value="t 0 1 0"/>
-			<Matrix value="r 0 0.2"/>
-			<Matrix value="s 1.0"/>
-		</Transform>
-	</Model>
-	<Model filename="bunny.ply">
-		<Transform>
-			<Matrix value="s 5"/>
-			<Matrix value="t 2 1 0"/>
-			<Matrix value="r 0 0.2"/>
-		</Transform>
-	</Model>
-	<Model filename="bunny.ply">
-		<Transform>
-			<Matrix value="s 5"/>
-			<Matrix value="t -2 1 0"/>
-			<Matrix value="r 0 0.2"/>
+			<Matrix value="s 0.03"/>
 		</Transform>
 	</Model>
 	<Accel type="uniform_grid"/>
