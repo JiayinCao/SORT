@@ -62,11 +62,11 @@ void Texture::_texCoordFilter( int& x , int& y ) const
 		if( x >= 0 ) 
 			x = x % m_iTexWidth;
 		else
-			x = m_iTexWidth - ( -x ) % m_iTexWidth;
+			x = m_iTexWidth - ( -x ) % m_iTexWidth - 1;
 		if( y >= 0 )
 			y = y % m_iTexHeight;
 		else
-			y = m_iTexHeight - ( -y ) % m_iTexHeight;
+			y = m_iTexHeight - ( -y ) % m_iTexHeight - 1;
 		break;
 	case TCF_CLAMP:
 		x = min( (int)m_iTexWidth - 1 , max( x , 0 ) );
