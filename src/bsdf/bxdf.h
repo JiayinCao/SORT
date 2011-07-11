@@ -40,7 +40,7 @@ public:
 
 	// whether the flag is matched
 	bool	MatchFlag( BXDF_TYPE type ) const
-	{return type & m_type;}
+	{return (type & m_type)!=BXDF_NONE;}
 
 // protected field
 protected:
