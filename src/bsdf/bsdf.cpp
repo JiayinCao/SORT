@@ -7,26 +7,21 @@
 // include the header file
 #include "bsdf.h"
 #include "bxdf.h"
-#include "geometry/vector.h"
 #include "geometry/intersection.h"
 
 // constructor
-Bsdf::Bsdf()
+Bsdf::Bsdf( const Intersection* intersect )
 {
 	m_bsdfCount = 0;
+
+	nn = intersect->normal;
+	sn = intersect->tangent;
+	tn = Cross( nn , sn );
 }
 
 // destructor
 Bsdf::~Bsdf()
 {
-}
-
-// set intersection
-void Bsdf::SetIntersection( const Intersection* intersect )
-{
-	nn = intersect->normal;
-	sn = Normalize( intersect->dpdu );
-	tn = Cross( nn , sn );
 }
 
 // get the number of components in current bsdf

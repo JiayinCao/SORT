@@ -51,10 +51,6 @@ public:
 	// initialize default data
 	void	_init();
 
-	// generate normal for the triangle mesh
-	void	_genFlatNormal();
-	void	_genSmoothNormal();
-
 // set friend class
 friend	class	MeshManager;
 friend	class	Triangle;

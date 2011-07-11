@@ -70,12 +70,14 @@ public:
 	vector<Point>	m_PositionBuffer;
 	// the normal buffer
 	vector<Vector>	m_NormalBuffer;
+	// the tagent buffer
+	vector<Vector>	m_TangentBuffer;
 	// the texture coordinate buffer
 	vector<float>	m_TexCoordBuffer;
 	// the trunk buffer
 	vector<Trunk*>	m_TrunkBuffer;
 	// the size for three buffers
-	unsigned		m_iVBCount , m_iNBCount , m_iTBCount;
+	unsigned		m_iVBCount , m_iNBCount , m_iTeBcount , m_iTBCount;
 	// the number of triangles 
 	unsigned		m_iTriNum;
 	// the trunk number
@@ -90,6 +92,7 @@ public:
 	{
 		m_iVBCount = 0;
 		m_iNBCount = 0;
+		m_iTeBcount = 0;
 		m_iTBCount = 0;
 		m_iTriNum = 0;
 		m_pPrototype = 0;
@@ -114,6 +117,7 @@ public:
 		m_iVBCount = m_PositionBuffer.size();
 		m_iTBCount = m_TexCoordBuffer.size();
 		m_iNBCount = m_NormalBuffer.size();
+		m_iTeBcount = m_TangentBuffer.size();
 		m_iTrunkNum = m_TrunkBuffer.size();
 		m_iTriNum = 0;
 		vector<Trunk*>::iterator it = m_TrunkBuffer.begin();
@@ -124,6 +128,18 @@ public:
 			it++;
 		}
 	}
+
+	// generate normal for the triangle mesh
+	void	GenSmoothNormal();
+	// generate tagent for the triangle mesh
+	void	GenSmoothTagent();
+	// generate texture coordinate
+	void	GenTexCoord();
+
+// private method
+private:
+	void	_genFlatNormal();
+	Vector	_genTagentForTri( const Trunk* trunk , unsigned k  ) const;
 };
 
 /////////////////////////////////////////////////////////////////////////

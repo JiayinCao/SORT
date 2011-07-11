@@ -35,8 +35,7 @@ void MerlMat::_init()
 // get bsdf
 Bsdf* MerlMat::GetBsdf( const Intersection* intersect ) const
 {
-	Bsdf* bsdf = SORT_MALLOC( Bsdf );
-	bsdf->SetIntersection( intersect );
+	Bsdf* bsdf = SORT_MALLOC( Bsdf )( intersect );
 	vector<Merl*>::const_iterator it = m_bxdf.begin();
 	while( it != m_bxdf.end() )
 	{

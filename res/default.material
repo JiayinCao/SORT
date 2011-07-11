@@ -5,9 +5,8 @@
 			<Property name="color1" value="0 1 0"/>
 		</Texture>
 	</Material>
-	<Material name="default1" type="Matte">
-		<Texture name="color" type="image">
-			<Property name="filename" value= "test.bmp" />
+	<Material name="defau1lt" type="Matte">
+		<Texture name="color" type="normal">
 		</Texture>
 	</Material>
 	<Material name="default_matte2" type="Matte">
@@ -16,6 +15,6 @@
     <Property name="merl" value="two-layer-gold.binary"/>
   </Material>
   <Material name="default" type="Merl">
-    <Property name="merl" value="hematite.binary"/>
+    <Property name="merl" value="alum-bronze.binary"/>
   </Material>
 </Root>

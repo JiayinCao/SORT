@@ -75,14 +75,12 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	float w = 1 - u - v;
 
 	// store normal if the info is available
-	if( mem->m_iNBCount > 0 )
-	{
-		id0 = m_Index[0].norIndex;
-		id1 = m_Index[1].norIndex;
-		id2 = m_Index[2].norIndex;
+	id0 = m_Index[0].norIndex;
+	id1 = m_Index[1].norIndex;
+	id2 = m_Index[2].norIndex;
 
-		intersect->normal = ( w * mem->m_NormalBuffer[id0] + u * mem->m_NormalBuffer[id1] + v * mem->m_NormalBuffer[id2]).Normalize();
-	}
+	intersect->normal = ( w * mem->m_NormalBuffer[id0] + u * mem->m_NormalBuffer[id1] + v * mem->m_NormalBuffer[id2]).Normalize();
+	intersect->tangent = ( w * mem->m_TangentBuffer[id0] + u * mem->m_TangentBuffer[id2] + v * mem->m_TangentBuffer[id2]).Normalize();
 
 	// store texture coordinate
 	if( mem->m_iTBCount > 0 )
@@ -99,18 +97,6 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 		float v2 = mem->m_TexCoordBuffer[id2+1];
 		intersect->u = w * u0 + u * u1 + v * u2;
 		intersect->v = w * v0 + u * v1 + v * v2;
-
-		float du1 = u0 - u2;
-		float du2 = u1 - u2;
-		float dv1 = v0 - v2;
-		float dv2 = v1 - v2;
-		Vector dp1 = p0 - p2;
-		Vector dp2 = p1 - p2;
-
-		float determinant = du1 * dv2 - dv1 * du2 ;
-		float invdet = 1.0f / determinant;
-		intersect->dpdu = ( dv2 * dp1 - dv1 * dp2 ) * invdet;
-		intersect->dpdv = ( -du2 * dp1 + du1 * dp2 ) * invdet;
 	}else
 	{
 		intersect->u = 0.0f;
