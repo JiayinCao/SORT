@@ -39,7 +39,7 @@ Bsdf* MerlMat::GetBsdf( const Intersection* intersect ) const
 	vector<Merl*>::const_iterator it = m_bxdf.begin();
 	while( it != m_bxdf.end() )
 	{
-		bsdf->AddBxdf( (*it)->Clone() );
+		bsdf->AddBxdf( *it );
 		it++;
 	}
 	

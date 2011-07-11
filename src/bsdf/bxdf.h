@@ -38,6 +38,10 @@ public:
 	// result     : brdf value for the 'wo' and 'wi'
 	virtual Spectrum Sample_f( const Vector& wo , Vector& wi , float* pdf ) const = 0;
 
+	// whether the flag is matched
+	bool	MatchFlag( BXDF_TYPE type ) const
+	{return type & m_type;}
+
 // protected field
 protected:
 	// the type for the bxdf

@@ -33,6 +33,7 @@ enum TEXCOORDFILTER
 // bxdf type
 enum BXDF_TYPE
 {
+	BXDF_NONE = 0,
 	BXDF_DIFFUSE = 1,
 	BXDF_GLOSSY = 2,
 	BXDF_SPECULAR = 4,

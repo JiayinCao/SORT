@@ -40,7 +40,7 @@ void Bsdf::AddBxdf( Bxdf* bxdf )
 }
 
 // evaluate bxdf
-Spectrum Bsdf::f( const Vector& wo , const Vector& wi ) const
+Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 {
 	// the result
 	Spectrum r;
@@ -49,7 +49,10 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi ) const
 	Vector swi = Normalize(_worldToLocal( wi ));
 
 	for( unsigned i = 0 ; i < m_bsdfCount ; i++ )
-		r += m_bxdf[i]->f( swo , swi );
+	{
+		if( m_bxdf[i]->MatchFlag( type ) )
+			r += m_bxdf[i]->f( swo , swi );
+	}
 
 	return r;
 }
