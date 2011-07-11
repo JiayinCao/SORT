@@ -348,8 +348,8 @@ Vector BufferMemory::_genTagentForTri( const Trunk* trunk , unsigned k ) const
 
 	float determinant = du1 * dv2 - dv1 * du2 ;
 	float invdet = 1.0f / determinant;
-
-	return Normalize((( dv2 * dp1 - dv1 * dp2 ) * invdet));
+	
+	return (( dv2 * dp1 - dv1 * dp2 ) * invdet);
 }
 
 // generate texture coordinate

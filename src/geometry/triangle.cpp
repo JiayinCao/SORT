@@ -80,7 +80,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	id2 = m_Index[2].norIndex;
 
 	intersect->normal = ( w * mem->m_NormalBuffer[id0] + u * mem->m_NormalBuffer[id1] + v * mem->m_NormalBuffer[id2]).Normalize();
-	intersect->tangent = ( w * mem->m_TangentBuffer[id0] + u * mem->m_TangentBuffer[id2] + v * mem->m_TangentBuffer[id2]).Normalize();
+	intersect->tangent = ( w * mem->m_TangentBuffer[id0] + u * mem->m_TangentBuffer[id1] + v * mem->m_TangentBuffer[id2]).Normalize();
 
 	// store texture coordinate
 	if( mem->m_iTBCount > 0 )

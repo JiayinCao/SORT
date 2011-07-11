@@ -52,7 +52,7 @@ void System::_preInit()
 	// there is default value for camera
 	float distance = 5.0f;
 	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( distance , distance , distance ) );
+	camera->SetEye( Point( distance , distance * 0.6f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , 1 , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
