@@ -19,8 +19,6 @@ class Merl : public Bxdf
 {
 // public method
 public:
-	// default constructor for clone
-	Merl(){ m_data = 0; }
 	// constructor from a filename
 	// para 'filename' : the file name for the brdf
 	Merl( const string& filename );
@@ -42,9 +40,6 @@ public:
 	// para 'pdf' : property density function value of the specific 'wi'
 	// result     : brdf value for the 'wo' and 'wi'
 	virtual Spectrum Sample_f( const Vector& wo , Vector& wi , float* pdf ) const;
-
-	// clone merl bxdf
-	Merl*	Clone() const;
 
 // private field
 private:

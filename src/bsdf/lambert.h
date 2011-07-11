@@ -17,7 +17,7 @@ class Lambert : public Bxdf
 // public method
 public:
 	// default constructor
-	Lambert(){}
+	Lambert(){ m_type=BXDF_DIFFUSE; }
 	// constructor
 	// para 's' : reflect density
 	Lambert( const Spectrum& s ):R(s){m_type=BXDF_DIFFUSE;}

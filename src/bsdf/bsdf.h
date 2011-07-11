@@ -11,6 +11,7 @@
 #include "sort.h"
 #include "spectrum/spectrum.h"
 #include "geometry/vector.h"
+#include "utility/enum.h"
 #include <math.h>
 
 // pre-declera class
@@ -40,7 +41,7 @@ public:
 	// evaluate bxdf
 	// para 'wi' : input vector
 	// para 'wo' : output vector
-	Spectrum f( const Vector& wo , const Vector& wi ) const;
+	Spectrum f( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
 // private field
 private:

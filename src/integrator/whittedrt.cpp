@@ -27,7 +27,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	Vector lightDir = Vector( -1.0f , 5.0f , 7.0f );
 	lightDir.Normalize();
 
-	Spectrum lightdensity = Spectrum( 100.0f );
+	Spectrum lightdensity = Spectrum( 50.0f );
 
 	float density = max( 0.0f , Dot( lightDir , ip.normal ) );
 	if( density == 0.0f )
