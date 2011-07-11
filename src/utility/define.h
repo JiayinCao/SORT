@@ -8,7 +8,7 @@
 #define	SORT_DEFINE
 
 #define	PI		3.1415926f
-#define	INV_PI	0.1383099f
+#define	INV_PI	0.3183098f
 
 // some useful macro
 #define SAFE_DELETE(p) { if(p) { delete p; p = 0; } }

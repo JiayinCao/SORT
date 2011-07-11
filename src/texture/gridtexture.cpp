@@ -9,8 +9,8 @@
 
 // default constructor
 GridTexture::GridTexture():
-	m_Color0( 1.0f , 1.0f , 1.0f ),
-	m_Color1( 0.0f , 0.0f , 0.0f )
+	m_Color0( 0.0f , 0.0f , 0.0f ),
+	m_Color1( 1.0f , 1.0f , 1.0f )
 {
 	_init();
 }
