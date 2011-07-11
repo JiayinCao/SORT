@@ -34,6 +34,7 @@ bool	InstanceTriangle::GetIntersect( const Ray& r , Intersection* intersect ) co
 	// transform the intersection
 	intersect->intersect = (*transform)(intersect->intersect);
 	intersect->normal = ((*transform)(intersect->normal)).Normalize();
+	intersect->tangent = ((*transform)(intersect->tangent)).Normalize();
 
 	return true;
 }

@@ -26,12 +26,9 @@ class	Bsdf
 // public method
 public:
 	// default constructor
-	Bsdf();
+	Bsdf( const Intersection* );
 	// destructor
 	~Bsdf();
-
-	// set intersection
-	void SetIntersection( const Intersection* );
 
 	// get the number of bxdf
 	unsigned NumComponents() const;
@@ -63,22 +60,30 @@ private:
 };
 
 // BSDF Inline Functions
-inline float CosTheta(const Vector &w) { return w.y; }
-inline float AbsCosTheta(const Vector &w) { return fabsf(w.y); }
-inline float SinTheta2(const Vector &w) {
+inline float CosTheta(const Vector &w) 
+{ 
+	return w.y; 
+}
+inline float AbsCosTheta(const Vector &w) 
+{ 
+	return fabsf(w.y); 
+}
+inline float SinTheta2(const Vector &w) 
+{
     return max(0.f, 1.f - CosTheta(w)*CosTheta(w));
 }
 
-inline float SinTheta(const Vector &w) {
+inline float SinTheta(const Vector &w) 
+{
     return sqrtf(SinTheta2(w));
 }
 
-inline float CosPhi(const Vector &w) {
+inline float CosPhi(const Vector &w) 
+{
     float sintheta = SinTheta(w);
     if (sintheta == 0.f) return 1.f;
     return clamp(w.x / sintheta, -1.f, 1.f);
 }
-
 
 inline float SinPhi(const Vector &w) {
     float sintheta = SinTheta(w);

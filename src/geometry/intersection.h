@@ -30,8 +30,8 @@ public:
 	Point	intersect;
 	// the normal
 	Vector	normal;
-	// partial derivives
-	Vector	dpdu , dpdv;
+	// tangent vector
+	Vector	tangent;
 	// the uv coordinate
 	float	u , v;
 	// the delta distance from the orginal point

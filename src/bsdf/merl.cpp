@@ -146,7 +146,7 @@ Spectrum Merl::Sample_f( const Vector& wo , Vector& wi , float* pdf ) const
 Merl* Merl::Clone() const
 {
 	// NOTE , the destructor of 'm' should never be called!!!
-	Merl* m = SORT_MALLOC(Merl);
+	Merl* m = SORT_MALLOC(Merl)();
 	m->m_data = m_data;
 	return m;
 }

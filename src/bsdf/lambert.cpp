@@ -25,5 +25,3 @@ Spectrum Lambert::Sample_f( const Vector& wo , Vector& wi , float* pdf ) const
 
 	return Spectrum();
 }
-
-

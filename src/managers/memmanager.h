@@ -35,18 +35,18 @@ public:
 	// de-allocate memory
 	void DeAlloc();
 
-	// allocate a new memory
+	// get pointer and set the offset
 	template< typename T >
-	T* Allocate()
+	T* GetPtr()
 	{
 		// check if the memory is enough
 		if( sizeof( T ) + m_offset > m_size )
 			LOG_ERROR<<"There is not enough memory in memory manager."<<ENDL;
 
-		T* r = new ((T*)(m_memory + m_offset)) T() ;
+		unsigned addr = m_offset;
 		m_offset += sizeof(T);
 		m_offset = ( m_offset + 15 ) & (~15);
-		return r;
+		return (T*)(m_memory + addr);
 	}
 
 // private field
@@ -64,6 +64,6 @@ private:
 };
 
 // allocate memory
-#define	SORT_MALLOC(T) MemManager::GetSingleton().Allocate<T>()
+#define	SORT_MALLOC(T) new (MemManager::GetSingleton().GetPtr<T>()) T
 
 #endif
