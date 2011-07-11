@@ -293,7 +293,7 @@ void BufferMemory::GenSmoothTagent()
 	}
 
 	// generate smooth normal
-	for( unsigned i = 0 ; i < m_iVBCount ; i++ )
+	for( unsigned i = 0 ; i < m_iNBCount ; i++ )
 	{
 		Vector t;
 
@@ -348,8 +348,8 @@ Vector BufferMemory::_genTagentForTri( const Trunk* trunk , unsigned k ) const
 
 	float determinant = du1 * dv2 - dv1 * du2 ;
 	float invdet = 1.0f / determinant;
-	
-	return (( dv2 * dp1 - dv1 * dp2 ) * invdet);
+
+	return Normalize((( dv2 * dp1 - dv1 * dp2 ) * invdet));
 }
 
 // generate texture coordinate
@@ -374,8 +374,8 @@ void BufferMemory::GenTexCoord()
 		Vector diff = *it - center;
 		diff.Normalize();
 
-		float u = SphericalTheta( diff );
-		float v = SphericalPhi( diff );
+		float u = SphericalTheta( diff ) / PI ;
+		float v = SphericalPhi( diff ) / PI * 0.5f;
 
 		m_TexCoordBuffer.push_back( u );
 		m_TexCoordBuffer.push_back( v );
