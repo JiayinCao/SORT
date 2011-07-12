@@ -24,5 +24,3 @@ Spectrum Reflection::Sample_f( const Vector& wo , Vector& wi , float* pdf ) cons
 
 	return Spectrum();
 }
-
-

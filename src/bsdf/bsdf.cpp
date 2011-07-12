@@ -15,8 +15,8 @@ Bsdf::Bsdf( const Intersection* intersect )
 	m_bsdfCount = 0;
 
 	nn = intersect->normal;
-	sn = intersect->tangent;
-	tn = Cross( nn , sn );
+	tn = Normalize(Cross( nn , intersect->tangent ));
+	sn = Cross( tn , nn );
 }
 
 // destructor
