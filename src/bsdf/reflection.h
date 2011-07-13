@@ -32,7 +32,7 @@ public:
 	// para 'wi'  : in direction generated randomly
 	// para 'pdf' : property density function value of the specific 'wi'
 	// result     : brdf value for the 'wo' and 'wi'
-	virtual Spectrum Sample_f( const Vector& wo , Vector& wi , float* pdf ) const ;
+	virtual Spectrum sample_f( const Vector& wo , Vector& wi , float* pdf ) const ;
 };
 
 #endif

@@ -32,7 +32,7 @@ public:
 	~Bsdf();
 
 	// get the number of bxdf
-	unsigned NumComponents() const;
+	unsigned NumComponents( BXDF_TYPE type = BXDF_ALL ) const;
 
 	// add a new bxdf
 	// para 'bxdf' : a bxdf to add
@@ -43,21 +43,30 @@ public:
 	// para 'wo' : output vector
 	Spectrum f( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
+	// sample ray from bsdf
+	// para 'wi' : input vector
+	// para 'wo' : output vector
+	Spectrum sample_f( const Vector& wo , Vector& wi , float* pdf , BXDF_TYPE type = BXDF_ALL ) const;
+
 // private field
 private:
 	// the list for the bxdf
 	Bxdf*	m_bxdf[MAX_BXDF_COUNT];
 
 	// current bsdf
-	unsigned m_bsdfCount;
+	unsigned m_bxdfCount;
 
 	// the vectors
 	Vector nn , sn , tn;
 
-	// transform the vector from world to shading coordinate
+	// transform a vector from world to shading coordinate
 	// para 'v' : a vector in world space
 	// result   : a transformed vector in shading coordinate
 	Vector _worldToLocal( const Vector& v ) const;
+	// transform a vector from shading coordinate to world coordinate
+	// para 'v' : a vector in shading coordinate
+	// result   : a transformed vector in world coordinate
+	Vector _localToWorld( const Vector& v ) const;
 };
 
 // BSDF Inline Functions

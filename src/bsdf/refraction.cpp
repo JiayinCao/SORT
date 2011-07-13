@@ -18,7 +18,7 @@ Spectrum Refraction::f( const Vector& wo , const Vector& wi ) const
 }
 
 // sample a direction randomly
-Spectrum Refraction::Sample_f( const Vector& wo , Vector& wi , float* pdf ) const
+Spectrum Refraction::sample_f( const Vector& wo , Vector& wi , float* pdf ) const
 {
 
 	return Spectrum();

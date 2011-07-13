@@ -10,8 +10,7 @@
 // radiance along specular reflection
 Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Integrator* integrator )
 {
-	// to be implemented
-	return Spectrum();
+	return integrator->Li( scene , ray );
 }
 
 // radiance along specular refraction
