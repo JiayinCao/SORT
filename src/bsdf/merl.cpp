@@ -97,11 +97,6 @@ Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
 
 	// Compute wh and transform wi to halfangle coordinate system
     Vector wh = wo + wi;
-    if (wh.y < 0.f) {
-        wo = -wo;
-        wi = -wi;
-        wh = -wh;
-    }
     if (wh.x == 0.f && wh.y == 0.f && wh.z == 0.f)
 		return Spectrum (0.f);
     wh = Normalize(wh);
@@ -110,8 +105,8 @@ Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
     float whCosPhi = CosPhi(wh), whSinPhi = SinPhi(wh);
     float whCosTheta = CosTheta(wh), whSinTheta = SinTheta(wh);
 
-    Vector whx(whCosPhi * whCosTheta, -whSinTheta, whSinPhi * whCosTheta);
-    Vector why(-whSinPhi,0.0f , whCosPhi);
+	Vector whx( whSinPhi , 0 , -whCosPhi );
+	Vector why( whCosPhi * whCosTheta , -whSinTheta , whSinPhi * whCosTheta );
     Vector wd(Dot(wi, whx), Dot(wi, wh), Dot(wi, why));
 
     // Compute _index_ into measured BRDF tables
@@ -120,11 +115,9 @@ Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
 		wdPhi -= PI;
 
     // Compute indices _whThetaIndex_, _wdThetaIndex_, _wdPhiIndex_
-#define REMAP(V, MAX, COUNT) (int)(clamp(((V) / (MAX) * (COUNT)), 0.0f, (float)((COUNT)-1)))
-    int whThetaIndex = REMAP(sqrtf(max(0.f, whTheta * 2.0f / PI)),  1.f, MERL_SAMPLING_RES_THETA_H);
-    int wdThetaIndex = REMAP(wdTheta, PI / 2.f, MERL_SAMPLING_RES_THETA_D);
-    int wdPhiIndex = REMAP(wdPhi, PI, MERL_SAMPLING_RES_PHI_D);
-#undef REMAP
+    int whThetaIndex = (int)clamp(sqrtf(max(0.f, whTheta * 2.0f * INV_PI )) * MERL_SAMPLING_RES_THETA_H,  0.f, (float)(MERL_SAMPLING_RES_THETA_H-1));
+    int wdThetaIndex = (int)clamp(wdTheta * INV_PI * 2.0f * MERL_SAMPLING_RES_THETA_D, 0.f , (float)(MERL_SAMPLING_RES_THETA_D-1));
+    int wdPhiIndex = (int)clamp(wdPhi * INV_PI * MERL_SAMPLING_RES_PHI_D, 0.f , (float)(MERL_SAMPLING_RES_PHI_D - 1));
 
 	// calculate the index
     int index = wdPhiIndex + MERL_SAMPLING_RES_PHI_D * (wdThetaIndex + whThetaIndex * MERL_SAMPLING_RES_THETA_D);
