@@ -48,9 +48,9 @@ void System::_preInit()
 
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
-	m_rt->SetSize( 1960 , 1080 );
+	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
-	float distance = 5.0f;
+	float distance = 500.0f;
 	PerspectiveCamera* camera = new PerspectiveCamera();
 	camera->SetEye( Point( distance , distance * 0.6f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );

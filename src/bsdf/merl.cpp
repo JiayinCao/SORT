@@ -17,6 +17,7 @@
 const unsigned Merl::MERL_SAMPLING_RES_THETA_H = 90;
 const unsigned Merl::MERL_SAMPLING_RES_THETA_D = 90;
 const unsigned Merl::MERL_SAMPLING_RES_PHI_D = 180;
+const unsigned Merl::MERL_SAMPLING_COUNT = 1458000;
 const double Merl::MERL_RED_SCALE = 0.0006666666666667;
 const double Merl::MERL_GREEN_SCALE = 0.000766666666666667;
 const double Merl::MERL_BLUE_SCALE = 0.0011066666666666667;
@@ -97,6 +98,12 @@ Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
 
 	// Compute wh and transform wi to halfangle coordinate system
     Vector wh = wo + wi;
+	if( wh.y < 0.0f )
+	{
+		wh = -wh;
+		wi = -wi;
+		wo = -wo;
+	}
     if (wh.x == 0.f && wh.y == 0.f && wh.z == 0.f)
 		return Spectrum (0.f);
     wh = Normalize(wh);
@@ -123,14 +130,16 @@ Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
     int index = wdPhiIndex + MERL_SAMPLING_RES_PHI_D * (wdThetaIndex + whThetaIndex * MERL_SAMPLING_RES_THETA_D);
 
 	const float r = (float)( m_data[ index ] );
-	const float g = (float)( m_data[ index + MERL_SAMPLING_RES_THETA_H * MERL_SAMPLING_RES_THETA_D * MERL_SAMPLING_RES_PHI_D ] );
-	const float b = (float)( m_data[ index + MERL_SAMPLING_RES_THETA_H * MERL_SAMPLING_RES_THETA_D * MERL_SAMPLING_RES_PHI_D * 2 ] );
+	index += MERL_SAMPLING_COUNT;
+	const float g = (float)( m_data[ index ] );
+	index += MERL_SAMPLING_COUNT;
+	const float b = (float)( m_data[ index ] );
 
 	return Spectrum( r , g , b );
 }
 
 // sample a direction randomly
-Spectrum Merl::Sample_f( const Vector& wo , Vector& wi , float* pdf ) const
+Spectrum Merl::sample_f( const Vector& wo , Vector& wi , float* pdf ) const
 {
 	return Spectrum();
 }

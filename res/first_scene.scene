@@ -1,11 +1,18 @@
 <Root>
-	<Resource path="../res/"/>
+  <Resource path="../res/"/>
   <Material value="default.material"/>
 	<Model filename="killeroo.obj">
 		<Transform>
 			<Matrix value="s 0.1"/>
       <Matrix value="r 1 5.0"/>
       <Matrix value="t 0 1 0"/>
+	  <Matrix value="s 100"/>
+		</Transform>
+	</Model>
+	<Model filename="cube.obj">
+		<Transform>
+			<Matrix value="t 0 0 -1.5"/>
+			<Matrix value="s 200"/>
 		</Transform>
 	</Model>
 	<Accel type="uniform_grid"/>

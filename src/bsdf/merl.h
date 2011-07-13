@@ -39,7 +39,7 @@ public:
 	// para 'wi'  : in direction generated randomly
 	// para 'pdf' : property density function value of the specific 'wi'
 	// result     : brdf value for the 'wo' and 'wi'
-	virtual Spectrum Sample_f( const Vector& wo , Vector& wi , float* pdf ) const;
+	virtual Spectrum sample_f( const Vector& wo , Vector& wi , float* pdf ) const;
 
 // private field
 private:
@@ -49,6 +49,7 @@ private:
 	static const unsigned	MERL_SAMPLING_RES_THETA_H;
 	static const unsigned	MERL_SAMPLING_RES_THETA_D;
 	static const unsigned	MERL_SAMPLING_RES_PHI_D;
+	static const unsigned	MERL_SAMPLING_COUNT;
 	static const double		MERL_RED_SCALE;
 	static const double		MERL_GREEN_SCALE;
 	static const double		MERL_BLUE_SCALE;

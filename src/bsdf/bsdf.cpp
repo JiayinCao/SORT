@@ -12,7 +12,7 @@
 // constructor
 Bsdf::Bsdf( const Intersection* intersect )
 {
-	m_bsdfCount = 0;
+	m_bxdfCount = 0;
 
 	nn = intersect->normal;
 	tn = Normalize(Cross( nn , intersect->tangent ));
@@ -25,18 +25,24 @@ Bsdf::~Bsdf()
 }
 
 // get the number of components in current bsdf
-unsigned Bsdf::NumComponents() const
+unsigned Bsdf::NumComponents( BXDF_TYPE type ) const
 {
-	return m_bsdfCount;
+	unsigned count = 0;
+	for( int i = 0 ; i < m_bxdfCount ; i++ )
+	{
+		if( m_bxdf[i]->MatchFlag( type ) )
+			count++;
+	}
+	return count;
 }
 
 // add a new bxdf
 void Bsdf::AddBxdf( Bxdf* bxdf )
 {
-	if( m_bsdfCount == MAX_BXDF_COUNT )
+	if( m_bxdfCount == MAX_BXDF_COUNT )
 		return;
-	m_bxdf[m_bsdfCount] = bxdf ;
-	m_bsdfCount++;
+	m_bxdf[m_bxdfCount] = bxdf ;
+	m_bxdfCount++;
 }
 
 // evaluate bxdf
@@ -45,10 +51,10 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 	// the result
 	Spectrum r;
 
-	Vector swo = Normalize(_worldToLocal( wo ));
-	Vector swi = Normalize(_worldToLocal( wi ));
+	Vector swo = _worldToLocal( wo );
+	Vector swi = _worldToLocal( wi );
 
-	for( unsigned i = 0 ; i < m_bsdfCount ; i++ )
+	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )
 	{
 		if( m_bxdf[i]->MatchFlag( type ) )
 			r += m_bxdf[i]->f( swo , swi );
@@ -57,8 +63,35 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 	return r;
 }
 
-// transform vector from worls coordinate to shading coordinate
+// sample a ray from bsdf
+Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , float* pdf , BXDF_TYPE type ) const
+{
+	Vector swo = _worldToLocal( wo );
+	Vector swi;
+
+	for( int i = 0 ; i < m_bxdfCount ; i++ )
+	{
+		if( m_bxdf[i]->MatchFlag( type ) )
+		{
+			Spectrum t = m_bxdf[i]->sample_f( swo , swi , pdf );
+			wi = _localToWorld( swi );
+			return t;
+		}
+	}
+
+	return Spectrum();
+}
+
+// transform vector from world coordinate to shading coordinate
 Vector Bsdf::_worldToLocal( const Vector& v ) const
 {
 	return Vector( Dot(v,sn) , Dot(v,nn) , Dot(v,tn) );
+}
+
+// transform vector from shading coordinate to world coordinate
+Vector Bsdf::_localToWorld( const Vector& v ) const
+{
+	return Vector( 	v.x * sn.x + v.y * nn.x + v.z * tn.z ,
+					v.x * sn.y + v.y * nn.y + v.z * tn.y ,
+					v.x * sn.z + v.y * nn.z + v.z * tn.z );
 }
