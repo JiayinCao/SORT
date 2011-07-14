@@ -12,7 +12,7 @@
 
 ////////////////////////////////////////////////////////////////////
 // definition of reflection
-class	Reflection : Bxdf
+class	Reflection : public Bxdf
 {
 // public method
 public:

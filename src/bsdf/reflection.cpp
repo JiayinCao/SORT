@@ -17,7 +17,7 @@ Spectrum Reflection::f( const Vector& wo , const Vector& wi ) const
 // sample a direction randomly
 Spectrum Reflection::sample_f( const Vector& wo , Vector& wi , float* pdf ) const
 {
-	wi = Vector( -wo.x , wo.y , -wi.z );
+	wi = Vector( -wo.x , wo.y , -wo.z );
 
 	return Spectrum( 1.0f );
 }
