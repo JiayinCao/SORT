@@ -32,4 +32,5 @@ public:
 	virtual Material* CreateInstance() = 0;
 };
 
+#define	CREATE_INSTANCE(T)	Material* CreateInstance() { return new T(); }
 #endif
