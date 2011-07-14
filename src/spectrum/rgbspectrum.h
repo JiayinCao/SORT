@@ -62,6 +62,18 @@ public:
 	RGBSpectrum& operator-=( float t ){ *this = *this - t ; return *this; }
 	RGBSpectrum& operator*=( float t ){ *this = *this * t ; return *this; }
 
+	//whether the spectrum is black
+	bool IsBlack() const
+	{
+		if( m_r > 0.0f )
+			return false;
+		if( m_g > 0.0f )
+			return false;
+		if( m_b > 0.0f )
+			return false;
+		return true;
+	}
+
 // private field
 private:
 	// the rgb color

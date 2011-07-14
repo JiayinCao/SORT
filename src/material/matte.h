@@ -26,7 +26,7 @@ public:
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
 
 	// create instance of the brdf
-	virtual Material* CreateInstance(){return new Matte();}
+	CREATE_INSTANCE( Matte );
 
 // private field
 private:
