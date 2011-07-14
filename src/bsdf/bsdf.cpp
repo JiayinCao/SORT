@@ -28,7 +28,7 @@ Bsdf::~Bsdf()
 unsigned Bsdf::NumComponents( BXDF_TYPE type ) const
 {
 	unsigned count = 0;
-	for( int i = 0 ; i < m_bxdfCount ; i++ )
+	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )
 	{
 		if( m_bxdf[i]->MatchFlag( type ) )
 			count++;
@@ -69,7 +69,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , float* pdf , BXDF_TYPE 
 	Vector swo = _worldToLocal( wo );
 	Vector swi;
 
-	for( int i = 0 ; i < m_bxdfCount ; i++ )
+	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )
 	{
 		if( m_bxdf[i]->MatchFlag( type ) )
 		{
@@ -91,7 +91,7 @@ Vector Bsdf::_worldToLocal( const Vector& v ) const
 // transform vector from shading coordinate to world coordinate
 Vector Bsdf::_localToWorld( const Vector& v ) const
 {
-	return Vector( 	v.x * sn.x + v.y * nn.x + v.z * tn.z ,
+	return Vector( 	v.x * sn.x + v.y * nn.x + v.z * tn.x ,
 					v.x * sn.y + v.y * nn.y + v.z * tn.y ,
 					v.x * sn.z + v.y * nn.z + v.z * tn.z );
 }
