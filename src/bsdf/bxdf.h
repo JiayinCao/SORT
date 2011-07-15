@@ -36,7 +36,7 @@ public:
 	// para 'wi'  : in direction generated randomly
 	// para 'pdf' : property density function value of the specific 'wi'
 	// result     : brdf value for the 'wo' and 'wi'
-	virtual Spectrum sample_f( const Vector& wo , Vector& wi , float* pdf ) const = 0;
+	virtual Spectrum sample_f( const Vector& wo , Vector& wi , float* pdf ) const;
 
 	// whether the flag is matched
 	bool	MatchFlag( BXDF_TYPE type ) const

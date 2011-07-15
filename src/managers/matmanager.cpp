@@ -136,7 +136,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 					mat->SetProperty( name , tex );
 				else
 					delete tex;
-				prop = prop->NextSiblingElement( "Property" );
+				prop = prop->NextSiblingElement( "Texture" );
 			}
 
 			// push the material

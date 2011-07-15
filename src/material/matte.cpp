@@ -28,6 +28,7 @@ Matte::~Matte()
 void Matte::_init()
 {
 	m_d = 0;
+	m_scale = Spectrum( 1.0f , 1.0f , 1.0f );
 
 	_registerAllProperty();
 }
@@ -35,9 +36,9 @@ void Matte::_init()
 // get bsdf
 Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 {
-	Spectrum color = Spectrum( 1.0f , 1.0f , 1.0f );
+	Spectrum color = m_scale;
 	if( m_d )
-		color = m_d->Evaluate( intersect );
+		color *= m_d->Evaluate( intersect );
 
 	Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
 	Lambert* lambert = SORT_MALLOC(Lambert)();
@@ -51,4 +52,5 @@ Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 void Matte::_registerAllProperty()
 {
 	_registerProperty( "color" , new ColorProperty( this ) );
+	_registerProperty( "scale" , new ScaleProperty( this ) );
 }

@@ -10,6 +10,7 @@
 // include header file
 #include "material.h"
 #include "texture/texture.h"
+#include "utility/strhelper.h"
 
 //////////////////////////////////////////////////////////////////////
 // definition of matte material
@@ -30,8 +31,11 @@ public:
 
 // private field
 private:
-	// the scaled color for the material
+	// the diffuse color for the material
 	Texture* m_d;
+
+	// a scaled color , default is ( 1 , 1 , 1 )
+	Spectrum m_scale;
 
 	// register property
 	void _registerAllProperty();
@@ -52,6 +56,20 @@ private:
 			Matte* matte = dynamic_cast<Matte*>(m_target);
 			SAFE_DELETE( matte->m_d );
 			matte->m_d = tex;
+		}
+	};
+	
+	class ScaleProperty : public PropertyHandler<Material>
+	{
+	public:
+		// constructor
+		ScaleProperty( Material* matte ) : PropertyHandler(matte){}
+
+		// set value
+		void SetValue( const string& str )
+		{
+			Matte* matte = dynamic_cast<Matte*>(m_target);
+			matte->m_scale = SpectrumFromStr( str );
 		}
 	};
 };

@@ -20,7 +20,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 		return Spectrum();
 
 	// get light direction ( not implemented )
-	Vector lightDir = Vector( 5.0f , 5.0f , 1.0f );
+	Vector lightDir = Vector( 2.0f , 5.0f , 3.0f );
 	lightDir.Normalize();
 	Spectrum lightdensity = Spectrum( 20.0f );
 
@@ -33,8 +33,13 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	t = c * density * lightdensity;
 
 	// add reflection
-	if( Dot( -r.m_Dir , ip.normal ) > 0.01f && bsdf->NumComponents( BXDF_REFLECTION ) > 0 )
-		t += SpecularReflection( scene , r , &ip , bsdf , this );
+	if( Dot( -r.m_Dir , ip.normal ) > 0.01f )
+	{
+		if( bsdf->NumComponents( BXDF_REFLECTION ) > 0 )
+			t += SpecularReflection( scene , r , &ip , bsdf , this );
+		if( bsdf->NumComponents( BXDF_TRANSMISSION ) > 0 )
+			t += SpecularRefraction( scene , r , &ip , bsdf , this );
+	}
 
 	return t;
 }

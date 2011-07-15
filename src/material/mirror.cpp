@@ -28,8 +28,3 @@ Bsdf* Mirror::GetBsdf( const Intersection* intersect ) const
 
 	return bsdf;
 }
-
-// register all properties
-void Mirror::_registerAllProperty()
-{
-}

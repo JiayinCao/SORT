@@ -14,9 +14,10 @@
   <Material name="killeroo_mat" type="Merl">
     <Property name="merl" value="alum-bronze.binary"/>
   </Material>
-  <Material name="default" type="Mirror">
+  <Material name="default" type="Matte">
     <Texture name="color" type="constant">
-      <Property name="color" value="0.1 0 0"/>
+      <Property name="color" value="0.1 10 0"/>
     </Texture>
+    <Property name="scale" value="0.5 0.005 0.1"/>
   </Material>
 </Root>

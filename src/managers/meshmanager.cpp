@@ -347,9 +347,12 @@ Vector BufferMemory::_genTagentForTri( const Trunk* trunk , unsigned k ) const
 	Vector dp2 = p1 - p2;
 
 	float determinant = du1 * dv2 - dv1 * du2 ;
+	if( determinant == 0.0f )
+		LOG_WARNING<<"There is a triangle containing three vertexes with same texture coodinate , can't generate shading coordinate correctly."<<ENDL;
+
 	float invdet = 1.0f / determinant;
 	
-	return (( dv2 * dp1 - dv1 * dp2 ) * invdet);
+	return ( dv2 * dp1 - dv1 * dp2 ) * invdet;
 }
 
 // generate texture coordinate
