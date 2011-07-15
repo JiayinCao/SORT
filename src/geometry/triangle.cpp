@@ -42,7 +42,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
         det = -det;
     }
 
-	const float threshold = 0.000000000001f;
+	const float threshold = 0.001f;
     if( det < -threshold )
 		return false;
 

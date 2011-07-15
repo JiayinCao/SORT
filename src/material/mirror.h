@@ -25,12 +25,6 @@ public:
 
 	// create instance of the brdf
 	CREATE_INSTANCE( Mirror );
-
-// private field
-private:
-
-	// register property
-	void _registerAllProperty();
 };
 
 #endif

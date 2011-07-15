@@ -601,6 +601,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\bsdf\bxdf.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\bsdf\bxdf.h"
 				>
 			</File>

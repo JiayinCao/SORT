@@ -137,10 +137,3 @@ Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
 
 	return Spectrum( r , g , b );
 }
-
-// sample a direction randomly
-Spectrum Merl::sample_f( const Vector& wo , Vector& wi , float* pdf ) const
-{
-	return Spectrum();
-}
-
