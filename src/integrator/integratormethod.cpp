@@ -15,7 +15,7 @@ Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Interse
 {
 	Ray r;
 	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , 0 , BXDF_REFLECTION );
-	if( f.IsBlack() )
+	if( f.IsBlack() || r.m_Dir.IsZero() )
 		return 0.0f;
 
 	r.m_Depth = ray.m_Depth + 1;
@@ -31,7 +31,7 @@ Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Interse
 {
 	Ray r;
 	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , 0 , BXDF_TRANSMISSION );
-	if( f.IsBlack() )
+	if( f.IsBlack() || r.m_Dir.IsZero() )
 		return 0.0f;
 
 	r.m_Depth = ray.m_Depth + 1;

@@ -20,5 +20,5 @@ Spectrum Reflection::sample_f( const Vector& wo , Vector& wi , float* pdf ) cons
 {
 	wi = Vector( -wo.x , wo.y , -wo.z );
 
-	return m_fresnel->Evaluate( CosTheta(wi) , CosTheta(wo) ) / AbsCosTheta( wi );
+	return m_fresnel->Evaluate( CosTheta(wo) ) / AbsCosTheta( wi );
 }
