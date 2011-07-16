@@ -100,6 +100,12 @@ public:
 	// para 'angle' : the angle of rotation
 	void	Rotate( Vector& vec , float angle ) const;
 
+	// whether it's a zero vector
+	bool	IsZero() const
+	{
+		return x == 0.0f && y == 0.0f && z == 0.0f;
+	}
+
 // make all of the components public.
 public:
 	// the x y z data in three dimension

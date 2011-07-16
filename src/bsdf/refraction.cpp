@@ -36,7 +36,7 @@ Spectrum Refraction::sample_f( const Vector& wo , Vector& wi , float* pdf ) cons
 	if( sini >= 1.0f )
 		return 0.0f;
 
-	float cosi = sqrtf( 1.0f - sini );
+	float cosi = sqrtf( 1.0f - sini * sini );
 	if( enter )
 		cosi = -cosi;
 

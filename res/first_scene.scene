@@ -1,12 +1,12 @@
 <Root>
   <Resource path="../res/"/>
   <Material value="default.material"/>
-	<Model filename="killeroo.obj">
+	<Model filename="teapot.obj">
 		<Transform>
 			<Matrix value="s 0.1"/>
-      <Matrix value="r 1 5.0"/>
+      <Matrix value="r 1 0.0"/>
       <Matrix value="t 0 1 0"/>
-	  <Matrix value="s 100"/>
+	  <Matrix value="s 30"/>
 		</Transform>
 	</Model>
 	<Accel type="uniform_grid"/>

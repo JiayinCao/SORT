@@ -14,7 +14,7 @@
 // radiance along a specific ray direction
 Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 {
-	if( r.m_Depth > 2 )
+	if( r.m_Depth > 6 )
 		return 0.0f;
 
 	// get the intersection between the ray and the scene
