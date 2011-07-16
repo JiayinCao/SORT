@@ -17,7 +17,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	// get the intersection between the ray and the scene
 	Intersection ip;
 	if( false == scene.GetIntersect( r , &ip ) )
-		return Spectrum();
+		return scene.EvaluateSky( r );
 
 	// get light direction ( not implemented )
 	Vector lightDir = Vector( 2.0f , 5.0f , 3.0f );

@@ -133,7 +133,10 @@ unsigned MatManager::ParseMatFile( const string& str )
 					}
 				}
 				if( tex->IsValid() )
-					mat->SetProperty( name , tex );
+				{
+					if( false == mat->SetProperty( name , tex ) )
+						delete tex;
+				}
 				else
 					delete tex;
 				prop = prop->NextSiblingElement( "Texture" );

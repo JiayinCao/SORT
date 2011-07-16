@@ -9,11 +9,16 @@
 	  <Matrix value="s 100"/>
 		</Transform>
 	</Model>
-	<Model filename="cube.obj">
-		<Transform>
-			<Matrix value="t 0 0 -1.5"/>
-			<Matrix value="s 200"/>
-		</Transform>
-	</Model>
 	<Accel type="uniform_grid"/>
+  <Sky type="sky_sphere">
+    <Property name="image" value="sky/mars.bmp"/>
+  </Sky>
+  <Sky type="sky_box">
+    <Property name="up" value="sky/lobbyypos.bmp"/>
+    <Property name="down" value="sky/lobbyyneg.bmp" />
+    <Property name="front" value="sky/lobbyxpos.bmp"/>
+    <Property name="back" value="sky/lobbyxneg.bmp"/>
+    <Property name="left" value="sky/lobbyzpos.bmp"/>
+    <Property name="right" value="sky/lobbyzneg.bmp"/>
+  </Sky>
 </Root>

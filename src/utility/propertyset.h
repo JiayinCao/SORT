@@ -46,7 +46,7 @@ public:
 	virtual ~PropertySet() { _clearProperty(); }
 
 	// set property
-	void SetProperty( const string& name , const string& value )
+	bool SetProperty( const string& name , const string& value )
 	{
 		// get the property handler first
 		PropertyHandler<T>* ph = _getPropertyHandler( name );
@@ -54,14 +54,16 @@ public:
 		if( 0 == ph )
 		{
 			LOG_WARNING<<"There is no such a property named \'"<<name<<"\'."<<ENDL;
-			return;
+			return false;
 		}
 
 		// set the value
 		ph->SetValue( value );
+
+		return true;
 	}
 	// set property
-	void SetProperty( const string& name , Texture* value )
+	bool SetProperty( const string& name , Texture* value )
 	{
 		// get the property handler first
 		PropertyHandler<T>* ph = _getPropertyHandler( name );
@@ -69,11 +71,13 @@ public:
 		if( 0 == ph )
 		{
 			LOG_WARNING<<"There is no such a property named \'"<<name<<"\'."<<ENDL;
-			return;
+			return false;
 		}
 		
 		// set the texture
 		ph->SetValue( value );
+
+		return true;
 	}
 // protected field
 protected:
