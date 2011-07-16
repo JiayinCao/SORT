@@ -19,11 +19,8 @@ void Accelerator::_computeBBox()
 	}
 
 	// enlarge the bounding box a little
-	const float threshold = 0.0001f;
-	m_BBox.m_Min.x -= threshold;
-	m_BBox.m_Min.y -= threshold;
-	m_BBox.m_Min.z -= threshold;
-	m_BBox.m_Max.x += threshold;
-	m_BBox.m_Max.y += threshold;
-	m_BBox.m_Max.z += threshold;
+	const float threshold = 0.001f;
+	Vector delta = (m_BBox.m_Max - m_BBox.m_Min ) * threshold;
+	m_BBox.m_Min -= delta;
+	m_BBox.m_Max += delta;
 }

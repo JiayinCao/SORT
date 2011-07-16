@@ -9,6 +9,7 @@
 
 // include the header
 #include "bxdf.h"
+#include "fresnel.h"
 
 ////////////////////////////////////////////////////////////////////
 // definition of reflection
@@ -17,7 +18,9 @@ class	Reflection : public Bxdf
 // public method
 public:
 	// default constructor
-	Reflection(){m_type=BXDF_REFLECTION;}
+	Reflection( const Fresnel* fre ):
+		m_fresnel(fre)
+	{m_type=BXDF_REFLECTION;}
 	// destructor
 	~Reflection(){}
 
@@ -33,6 +36,10 @@ public:
 	// para 'pdf' : property density function value of the specific 'wi'
 	// result     : brdf value for the 'wo' and 'wi'
 	virtual Spectrum sample_f( const Vector& wo , Vector& wi , float* pdf ) const ;
+
+// private field
+private:
+	const Fresnel* m_fresnel;
 };
 
 #endif

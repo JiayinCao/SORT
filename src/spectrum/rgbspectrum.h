@@ -49,18 +49,22 @@ public:
 	RGBSpectrum operator+( const RGBSpectrum& c ) const;
 	RGBSpectrum operator-( const RGBSpectrum& c ) const;
 	RGBSpectrum operator*( const RGBSpectrum& c ) const;
+	RGBSpectrum operator/( const RGBSpectrum& c ) const;
 
 	RGBSpectrum operator+( float t ) const;
 	RGBSpectrum operator-( float t ) const;
 	RGBSpectrum operator*( float t ) const;
+	RGBSpectrum operator/( float t ) const;
 
 	RGBSpectrum& operator+= ( const RGBSpectrum& c ) { *this = *this + c ; return *this; }
 	RGBSpectrum& operator-= ( const RGBSpectrum& c ) { *this = *this - c ; return *this; }
 	RGBSpectrum& operator*= ( const RGBSpectrum& c ) { *this = *this * c ; return *this; }
+	RGBSpectrum& operator/= ( const RGBSpectrum& c ) { *this = *this / c ; return *this; }
 
 	RGBSpectrum& operator+=( float t ){ *this = *this + t ; return *this; }
 	RGBSpectrum& operator-=( float t ){ *this = *this - t ; return *this; }
 	RGBSpectrum& operator*=( float t ){ *this = *this * t ; return *this; }
+	RGBSpectrum& operator/=( float t ){ *this = *this / t ; return *this; }
 
 	//whether the spectrum is black
 	bool IsBlack() const

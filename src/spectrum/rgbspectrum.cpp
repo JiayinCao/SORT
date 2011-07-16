@@ -103,6 +103,16 @@ RGBSpectrum RGBSpectrum::operator * ( const RGBSpectrum& c ) const
 	return RGBSpectrum( r , g , b );
 }
 
+// / operator
+RGBSpectrum RGBSpectrum::operator / ( const RGBSpectrum& c ) const
+{
+	float r = m_r / c.m_r;
+	float g = m_g / c.m_g;
+	float b = m_b / c.m_b;
+
+	return RGBSpectrum( r , g , b );
+}
+
 // + operator
 RGBSpectrum RGBSpectrum::operator + ( float t ) const
 {
@@ -129,6 +139,16 @@ RGBSpectrum RGBSpectrum::operator * ( float t ) const
 	float r = t * m_r;
 	float g = t * m_g ;
 	float b = t * m_b ;
+
+	return RGBSpectrum( r , g , b );
+}
+
+// / operator
+RGBSpectrum RGBSpectrum::operator / ( float t ) const
+{
+	float r = m_r / t;
+	float g = m_g / t;
+	float b = m_b / t;
 
 	return RGBSpectrum( r , g , b );
 }

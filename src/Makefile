@@ -92,7 +92,7 @@ $(OBJ_PATH)/light_%.o : light/%.cpp light/%.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 
-$(OBJ_PATH)/bsdf_%.o : bsdf/%.cpp bsdf/%.h
+$(OBJ_PATH)/bsdf_%.o : bsdf/%.cpp bsdf/%.h bsdf/fresnel.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 

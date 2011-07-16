@@ -41,6 +41,7 @@ Merl::~Merl()
 // initialize default data
 void Merl::_init()
 {
+	m_type = BXDF_GLOSSY;
 	m_data = 0;
 }
 

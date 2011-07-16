@@ -10,9 +10,6 @@
 		</Transform>
 	</Model>
 	<Accel type="uniform_grid"/>
-  <Sky type="sky_sphere">
-    <Property name="image" value="sky/mars.bmp"/>
-  </Sky>
   <Sky type="sky_box">
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />
