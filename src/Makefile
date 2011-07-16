@@ -6,6 +6,7 @@ COMPILE_FLAG = $(INC_PATH) -g
 
 LIBSRCS = $(wildcard *.cpp)
 LIBSRCS += $(wildcard geometry/*.cpp)
+LIBSRCS += $(wildcard geometry/sky/*.cpp)
 LIBSRCS += $(wildcard camera/*.cpp)
 LIBSRCS += $(wildcard spectrum/*.cpp)
 LIBSRCS += $(wildcard texture/*.cpp)
@@ -42,8 +43,12 @@ $(OBJ_PATH)/%.o : %.cpp %.h
 $(OBJ_PATH)/geometry_%.o : geometry/%.cpp geometry/%.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
+	
+$(OBJ_PATH)/geometry_sky_%.o : geometry/sky/%.cpp geometry/sky/%.h geometry/sky/sky.h
+	@echo "building object $@"
+	@g++ $(COMPILE_FLAG) -c $< -o $@
 
-$(OBJ_PATH)/camera_%.o : camera/%.cpp camera/%.h
+$(OBJ_PATH)/camera_%.o : camera/%.cpp camera/%.h camera/camera.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 

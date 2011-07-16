@@ -14,11 +14,14 @@
 #include "utility/strhelper.h"
 #include "utility/path.h"
 #include "managers/matmanager.h"
+#include "sky/skysphere.h"
+#include "sky/skybox.h"
 
 // initialize default data
 void Scene::_init()
 {
 	m_pAccelerator = 0;
+	m_pSky = 0;
 }
 
 // load the scene from script file
@@ -98,6 +101,28 @@ bool Scene::LoadScene( const string& str )
 			m_pAccelerator = new KDTree();
 	}
 
+	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.
+	TiXmlElement* skyNode = root->FirstChildElement( "Sky" );
+	if( skyNode )
+	{
+		// set cooresponding type of accelerator
+		string type = skyNode->Attribute( "type" );
+		if( type == "sky_sphere" )
+			m_pSky = new SkySphere();
+		else if( type == "sky_box" )
+			m_pSky = new SkyBox();
+
+		// set the properties
+		TiXmlElement* prop = skyNode->FirstChildElement( "Property" );
+		while( prop )
+		{
+			string prop_name = prop->Attribute( "name" );
+			string prop_value = prop->Attribute( "value" );
+			m_pSky->SetProperty( prop_name , prop_value );
+			prop = prop->NextSiblingElement( "Property" );
+		}
+	}
+
 	// generate triangle buffer after parsing from file
 	_generateTriBuf();
 
@@ -132,6 +157,7 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 void Scene::Release()
 {
 	SAFE_DELETE( m_pAccelerator );
+	SAFE_DELETE( m_pSky );
 
 	vector<Primitive*>::iterator it = m_triBuf.begin();
 	while( it != m_triBuf.end() )
@@ -184,3 +210,12 @@ void Scene::PreProcess()
 	}
 }
 
+
+// evaluate sky
+Spectrum Scene::EvaluateSky( const Ray& r ) const
+{
+	if( m_pSky )
+		return m_pSky->Evaluate( r );
+
+	return 0.0f;
+}

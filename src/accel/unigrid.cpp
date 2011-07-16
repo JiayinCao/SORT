@@ -214,7 +214,7 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 		LOG_ERROR<<"Voxel id is out of range.("<<voxelId<<"/"<<m_voxelCount<<")"<<CRASH;
 
 	bool inter = false;
-	vector<Primitive*>::iterator it = m_pVoxels[voxelId].begin();
+	vector<Primitive*>::const_iterator it = m_pVoxels[voxelId].begin();
 	while( it != m_pVoxels[voxelId].end() )
 	{
 		unsigned id = (*it)->GetID();

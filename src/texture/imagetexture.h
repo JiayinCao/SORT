@@ -34,6 +34,17 @@ public:
 	// result	:	spectrum value in the position
 	virtual Spectrum GetColor( int x , int y ) const;
 
+	// get texture value
+	// para 'u' : u coordinate
+	// para 'v' : v coordinate
+	// result   : spectrum value
+	virtual Spectrum GetColor( float u , float v ) const
+	{
+		int w = (int) (u * (int)m_iTexWidth);
+		int h = (int) (v * (int)m_iTexHeight);
+		return GetColor( w , h );
+	}
+
 	// it means nothing to set the size of the image file
 	// set the size of the texture
 	virtual void	SetSize( unsigned w , unsigned h ){}

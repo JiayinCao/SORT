@@ -11,9 +11,11 @@
 #include "sort.h"
 #include <vector>
 #include "trimesh.h"
+#include "spectrum/spectrum.h"
 
 // pre-decleration of classes
 class Accelerator;
+class Sky;
 
 ////////////////////////////////////////////////////////////////////////////
 // definition of scene class
@@ -38,6 +40,11 @@ public:
 	//			  of the triangles which will cost much!
 	bool	GetIntersect( const Ray& r , Intersection* intersect ) const;
 
+	// evaluate sky
+	// para 'r' : the ray
+	// result   : the sky spectrum
+	Spectrum EvaluateSky( const Ray& r ) const;
+
 	// release the memory of the scene
 	void	Release();
 
@@ -60,6 +67,9 @@ private:
 
 	// the file name for the scene
 	string		m_filename;
+
+	// the sky for the scene
+	Sky*		m_pSky;
 
 // private method
 	

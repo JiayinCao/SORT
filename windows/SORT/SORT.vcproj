@@ -356,6 +356,30 @@
 				RelativePath="..\..\src\geometry\vector.h"
 				>
 			</File>
+			<Filter
+				Name="sky"
+				>
+				<File
+					RelativePath="..\..\src\geometry\sky\sky.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\geometry\sky\skybox.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\geometry\sky\skybox.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\geometry\sky\skysphere.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\geometry\sky\skysphere.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="managers"
