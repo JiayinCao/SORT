@@ -21,8 +21,8 @@ Spectrum SkySphere::Evaluate( const Ray& r ) const
 	float theta = SphericalTheta( r.m_Dir );
 	float phi = SphericalPhi( r.m_Dir );
 
-	float u = theta * 2 * INV_PI;
-	float v = -phi * INV_PI;
+	float v = theta * 2 * INV_PI;
+	float u = phi * INV_PI;
 
 	return m_sky.GetColor( u , v );
 }

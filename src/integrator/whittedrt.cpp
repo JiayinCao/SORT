@@ -14,6 +14,9 @@
 // radiance along a specific ray direction
 Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 {
+	if( r.m_Depth > 2 )
+		return 0.0f;
+
 	// get the intersection between the ray and the scene
 	Intersection ip;
 	if( false == scene.GetIntersect( r , &ip ) )
@@ -33,13 +36,10 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	t = c * density * lightdensity;
 
 	// add reflection
-	if( Dot( -r.m_Dir , ip.normal ) > 0.01f )
-	{
-		if( bsdf->NumComponents( BXDF_REFLECTION ) > 0 )
-			t += SpecularReflection( scene , r , &ip , bsdf , this );
-		if( bsdf->NumComponents( BXDF_TRANSMISSION ) > 0 )
-			t += SpecularRefraction( scene , r , &ip , bsdf , this );
-	}
+	if( bsdf->NumComponents( BXDF_REFLECTION ) > 0 )
+		t += SpecularReflection( scene , r , &ip , bsdf , this );
+	if( bsdf->NumComponents( BXDF_TRANSMISSION ) > 0 )
+		t += SpecularRefraction( scene , r , &ip , bsdf , this );
 
 	return t;
 }

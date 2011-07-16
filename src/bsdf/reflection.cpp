@@ -7,7 +7,8 @@
 // include the header file
 #include "reflection.h"
 #include "geometry/vector.h"
-		
+#include "bsdf/bsdf.h"
+
 // evaluate bxdf
 Spectrum Reflection::f( const Vector& wo , const Vector& wi ) const
 {
@@ -19,5 +20,5 @@ Spectrum Reflection::sample_f( const Vector& wo , Vector& wi , float* pdf ) cons
 {
 	wi = Vector( -wo.x , wo.y , -wo.z );
 
-	return Spectrum( 1.0f );
+	return m_fresnel->Evaluate( CosTheta(wi) , CosTheta(wo) ) / AbsCosTheta( wi );
 }

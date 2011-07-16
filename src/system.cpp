@@ -50,11 +50,11 @@ void System::_preInit()
 	m_rt = new RenderTarget();
 	m_rt->SetSize( 1920 , 1080 );
 	// there is default value for camera
-	float distance = 800.0f;
+	float distance = 500.0f;
 	PerspectiveCamera* camera = new PerspectiveCamera();
 	camera->SetEye( Point( distance , distance * 0.6f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
-	camera->SetTarget( Point( 0 , 0.5 , 0 ) );
+	camera->SetTarget( Point( 0 , 30 , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
 	camera->SetRenderTarget( m_rt );
 	m_camera = camera;

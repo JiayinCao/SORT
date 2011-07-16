@@ -24,7 +24,7 @@ Mirror::~Mirror()
 Bsdf* Mirror::GetBsdf( const Intersection* intersect ) const
 {
 	Bsdf* bsdf = SORT_MALLOC(Bsdf)(intersect);
-	bsdf->AddBxdf( SORT_MALLOC(Reflection)() );
+	bsdf->AddBxdf( SORT_MALLOC(Reflection)(SORT_MALLOC(FresnelNo)()) );
 
 	return bsdf;
 }

@@ -17,6 +17,7 @@
 #include "material/matte.h"
 #include "material/merlmat.h"
 #include "material/mirror.h"
+#include "material/glass.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MatManager);
@@ -166,6 +167,7 @@ void MatManager::_registerMaterials()
 	m_matType.insert( make_pair( "Matte" , new Matte() ) );
 	m_matType.insert( make_pair( "Merl" , new MerlMat() ) );
 	m_matType.insert( make_pair( "Mirror" , new Mirror() ) );
+	m_matType.insert( make_pair( "Glass" , new Glass() ) );
 }
 
 // clear registered types
