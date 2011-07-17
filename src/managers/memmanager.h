@@ -48,50 +48,34 @@ public:
 	~MemManager();
 
 	// pre-allocate memory
-	void PreMalloc( unsigned size ) { PreMalloc( size , m_uDefault); }
-	void PreMalloc( unsigned size , unsigned id );
+	void PreMalloc( unsigned size , unsigned id = 0 );
 
 	// clear the allocated memory
-	void ClearMem( unsigned id );
-	void ClearMem() { ClearMem(m_uDefault); }
+	void ClearMem( unsigned id=0 );
 
 	// de-allocate memory
-	void DeAlloc( unsigned id );
-	void DeAlloc() { ClearMem(m_uDefault); }
+	void DeAlloc( unsigned id=0 );
 
 	// get pointer and set the offset
 	template< typename T >
-	T* GetPtr(unsigned id)
+	T* GetPtr(unsigned count , unsigned id=0)
 	{
 		// get the memory pointer first
 		Memory* mem = _getMemory(id);
 
 		// check if the memory is enough
-		if( sizeof( T ) + mem->m_offset > mem->m_size )
+		if( sizeof( T ) * count + mem->m_offset > mem->m_size )
 			LOG_ERROR<<"There is not enough memory in memory manager.(mem id:"<<id<<")"<<CRASH;
 
 		unsigned addr = mem->m_offset;
-		mem->m_offset += sizeof(T);
+		mem->m_offset += sizeof(T) * count;
 		mem->m_offset = ( mem->m_offset + 15 ) & (~15);
 		return (T*)(mem->m_memory + addr);
 	}
-	template< typename T >
-	T* GetPtr()
-	{return GetPtr<T>(m_uDefault);}
-
-	// set default memory id
-	void SetDefaultId( unsigned id )
-	{m_uDefault = id;}
-	unsigned GetDefaultId() const
-	{return m_uDefault;}
-
 // private field
 private:
 	// the memories
 	map<unsigned,Memory*> m_MemPool;
-
-	// default memory id
-	unsigned	m_uDefault;
 
 	// get memory
 	Memory*	_getMemory( unsigned id ) const
@@ -118,44 +102,25 @@ private:
 };
 
 // allocate memory
-#define	SORT_MALLOC(T) new (MemManager::GetSingleton().GetPtr<T>()) T
-
-// set default memory id
-inline void SORT_MEMID(unsigned id)
-{
-	MemManager::GetSingleton().SetDefaultId(id);
-}
-inline unsigned SORT_MEMID()
-{
-	MemManager::GetSingleton().GetDefaultId();
-}
+#define	SORT_MALLOC(T) new (MemManager::GetSingleton().GetPtr<T>(1)) T
+#define SORT_MALLOC_ID(T,id) new (MemManager::GetSingleton().GetPtr<T>(1,id)) T
+#define SORT_MALLOC_ARRAY(T,c) new (MemManager::GetSingleton().GetPtr<T>(c)) T
+#define	SORT_MALLOC_ARRAY_ID(T,c,id) new (MemManager::GetSingleton().GetPtr<T>(c,id)) T
 
 // premalloc memory
-inline void SORT_PREMALLOC(unsigned size)
-{
-	MemManager::GetSingleton().PreMalloc(size);
-}
-inline void SORT_PREMALLOC(unsigned size , unsigned id )
+inline void SORT_PREMALLOC(unsigned size , unsigned id=0)
 {
 	MemManager::GetSingleton().PreMalloc(size,id);
 }
 
 //clear memory
-inline void SORT_CLEARMEM()
-{
-	MemManager::GetSingleton().ClearMem();
-}
-inline void SORT_CLEARMEM(unsigned id)
+inline void SORT_CLEARMEM(unsigned id=0)
 {
 	MemManager::GetSingleton().ClearMem(id);
 }
 
 // dealloc
-inline void SORT_DEALLOC()
-{
-	MemManager::GetSingleton().DeAlloc();
-}
-inline void SORT_DEALLOC(unsigned id)
+inline void SORT_DEALLOC(unsigned id=0)
 {
 	MemManager::GetSingleton().DeAlloc(id);
 }
