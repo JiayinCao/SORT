@@ -58,22 +58,14 @@ void KDTree::Build()
 {
 	// get the bounding box for the whole primitive list
 	_computeBBox();
-
-	// get previous default memory id
-	unsigned default_mem_id = SORT_MEMID();
-
+	
 	// allocate some memory to be used in kdtree construction
 	SORT_PREMALLOC( 4 * 1024 * 1024 , KDTREE_MEM0 );
 	SORT_PREMALLOC( 4 * 1024 * 1024 , KDTREE_MEM1 );
 
-	
-
 	// release the memory
 	SORT_DEALLOC( KDTREE_MEM0 );
 	SORT_DEALLOC( KDTREE_MEM1 );
-
-	// restore default memory id
-	SORT_MEMID(default_mem_id);
 }
 
 // output log
