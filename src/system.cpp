@@ -106,6 +106,9 @@ void System::Render()
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
 		{
+			// clear managed memory after each pixel
+			SORT_CLEARMEM();
+			
 			// generate rays
 			Ray r = m_camera->GenerateRay( j , i );
 
@@ -114,9 +117,6 @@ void System::Render()
 
 			// update current pixel
 			m_uCurrentPixelId++;
-
-			// clear managed memory after each pixel
-			MemManager::GetSingleton().ClearMem();
 		}
 		// output progress
 		_outputProgress();
