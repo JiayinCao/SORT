@@ -116,6 +116,7 @@ LogManager& operator<<( LogManager& manager , _ENDL data )
 	if( data.m_bCrash )
 	{
 		manager.m_fileLog.close();
+		cout<<"check log"<<endl;
 		abort();
 	}
 

@@ -40,8 +40,8 @@ public:
 	// result   : spectrum value
 	virtual Spectrum GetColor( float u , float v ) const
 	{
-		int w = (int) (u * (int)m_iTexWidth + 0.5f );
-		int h = (int) (v * (int)m_iTexHeight + 0.5f );
+		int w = (int) (u * ( m_iTexWidth - 1 ) + 0.5f );
+		int h = (int) (v * ( m_iTexHeight - 1 ) + 0.5f );
 		return GetColor( w , h );
 	}
 

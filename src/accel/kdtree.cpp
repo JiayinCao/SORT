@@ -6,7 +6,31 @@
 
 // include the header file
 #include "kdtree.h"
-#include "managers/logmanager.h"
+#include "managers/memmanager.h"
+
+// the memory id used in kdtree
+static unsigned	KDTREE_MEM0 = 1;
+static unsigned KDTREE_MEM1 = 2;
+
+// split type
+enum Split_Type
+{
+	Split_Start = 1 ,
+	Split_End = 2 ,
+	Split_Left = 4 , 
+	Split_Right = 8 ,
+	Split_Mask = Split_Start | Split_End
+};
+
+// split candidates
+struct Split
+{
+public:
+	// the position of the split
+	float		pos;
+	// the type of the split , start or end
+	Split_Type	type;
+};
 
 // default constructor
 KDTree::KDTree()
@@ -34,6 +58,22 @@ void KDTree::Build()
 {
 	// get the bounding box for the whole primitive list
 	_computeBBox();
+
+	// get previous default memory id
+	unsigned default_mem_id = SORT_MEMID();
+
+	// allocate some memory to be used in kdtree construction
+	SORT_PREMALLOC( 4 * 1024 * 1024 , KDTREE_MEM0 );
+	SORT_PREMALLOC( 4 * 1024 * 1024 , KDTREE_MEM1 );
+
+	
+
+	// release the memory
+	SORT_DEALLOC( KDTREE_MEM0 );
+	SORT_DEALLOC( KDTREE_MEM1 );
+
+	// restore default memory id
+	SORT_MEMID(default_mem_id);
 }
 
 // output log

@@ -15,11 +15,10 @@
     <Property name="merl" value="alum-bronze.binary"/>
 	<Property name="eta_t" value="1.4" />
   </Material>
-  <Material name="default" type="Glass">
+  <Material name="default" type="Matte">
     <Property name="eta_t" value="1.4" />
     <Texture name="color" type="constant">
-      <Property name="color" value="0.1 10 0"/>
+      <Property name="color" value="0.1 0.1 0.1"/>
     </Texture>
-    <Property name="scale" value="0.5 0.005 0.1"/>
   </Material>
 </Root>

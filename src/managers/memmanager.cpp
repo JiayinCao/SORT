@@ -14,48 +14,58 @@ DEFINE_SINGLETON(MemManager);
 // default constructor
 MemManager::MemManager()
 {
-	m_memory = 0;
-	m_offset = 0;
-	m_size = 0;
+	m_uDefault = 0;
 
-	// 1mb memory for default
-	PreMalloc( 1024 * 1024 );
+	// 4mb memory for default
+	PreMalloc( 1024 * 1024 * 4 );
 }
 
 // destructor
 MemManager::~MemManager()
 {
-	DeAlloc();
+	_deallocAllMemory();
 }
 
 // pre-allocate memory
-void MemManager::PreMalloc( unsigned size )
+void MemManager::PreMalloc( unsigned size , unsigned id )
 {
-	// if there is old memory , delete them first
-	DeAlloc();
+	Memory* mem = _getMemory( id );
+
+	if( mem != 0 )
+		LOG_ERROR<<"Memory with id "<<id<<" already exist."<<CRASH;
 
 	// create new memory
-	m_memory = new char[size];
+	mem = new Memory();
+	mem->m_memory = new char[size];
 	// reset offset
-	m_offset = 0;
+	mem->m_offset = 0;
 	// set size
-	m_size = size;
+	mem->m_size = size;
+
+	// push it into the map
+	m_MemPool.insert( make_pair( id , mem ) );
 }
 
 // clear the allocated memory
-void MemManager::ClearMem()
+void MemManager::ClearMem( unsigned id )
 {
+	Memory* mem = _getMemory( id );
+	if( mem == 0 )
+		LOG_ERROR<<"Can't clear memory, because there is no memory with id "<<id<<"."<<CRASH;
+
 	//reset the offset
-	m_offset = 0;
+	mem->m_offset = 0;
 }
 
 // de-allocate memory
-void MemManager::DeAlloc()
+void MemManager::DeAlloc( unsigned id )
 {
-	// delete memory
-	SAFE_DELETE(m_memory);
+	Memory* mem = _getMemory( id );
+	if( mem == 0 )
+		LOG_ERROR<<"Can't delete memory, because there is no memory with id "<<id<<"."<<CRASH;
 
 	// reset offset and size
-	m_offset = 0;
-	m_size = 0;
+	delete mem;
+
+	m_MemPool.erase( id );
 }
