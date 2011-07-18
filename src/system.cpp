@@ -95,7 +95,7 @@ void System::Render()
 {
 	// pre-process before rendering
 	PreProcess();
-
+/*
 	// set timer before rendering
 	Timer::GetSingleton().StartTimer();
 
@@ -125,7 +125,7 @@ void System::Render()
 
 	// stop timer
 	Timer::GetSingleton().StopTimer();
-	m_uRenderingTime = Timer::GetSingleton().GetElapsedTime();
+	m_uRenderingTime = Timer::GetSingleton().GetElapsedTime();*/
 }
 
 // output render target
@@ -162,6 +162,7 @@ void System::PreProcess()
 	// stop timer
 	Timer::GetSingleton().StopTimer();
 	m_uPreProcessingTime = Timer::GetSingleton().GetElapsedTime();
+	cout<<m_uPreProcessingTime<<endl;
 }
 
 // get elapsed time
