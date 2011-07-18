@@ -10,6 +10,8 @@
 // include the header file
 #include "accelerator.h"
 
+class Primitive;
+
 // kd-tree node
 struct Kd_Node
 {
@@ -46,12 +48,18 @@ public:
 	float		pos;
 	// the type of the split , start or end
 	Split_Type	type;
-	// the primitive id
+	// the id in the triangle list
 	unsigned	id;
+	// the primitive pointer
+	Primitive*	primitive;
 
-	Split(){pos = 0;type = Split_None;id=0;}
-	Split( float p , Split_Type t , unsigned pid ){pos = p;type = t;id=pid;}
-	bool operator < ( Split& split )
+	Split(){pos = 0;type = Split_None;id=0;primitive=0;}
+	Split( float pos , Split_Type t , unsigned pid , Primitive* p = 0)
+	{
+		pos = pos;type = t;id=pid;
+		primitive = p;
+	}
+	bool operator < ( const Split& split ) const
 	{
 		if( pos != split.pos )
 			return pos<split.pos;
@@ -62,6 +70,12 @@ struct Splits
 {
 	Split*		split[3];
 	unsigned	split_c[3];
+	Splits()
+	{
+		split_c[0] = 0;
+		split_c[1] = 0;
+		split_c[2] = 0;
+	}
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +123,18 @@ private:
 	// free temporary memory
 	void _deallocTmpMemory();
 	// evaluate sah value for the kdtree node
-	float _sah( unsigned l , unsigned r , unsigned axis , float split , const BBox& box );
+	// para 'l' : the number of primitives on the left of the splitting plane
+	// para 'r' : the number of primitives on the right of the splitting plane
+	// para 'f' : the number of flat primitives lying on the splitting plane
+	// para 'axis' : the axis id of splitting
+	// para 'split' : splitting position
+	// para 'box'  : the bounding box of the kd-tree node
+	// para 'left' : whether the flat primitives lying on the left of the splitting plane
+	// result  : the sah value for the splitting
+	float _sah( unsigned l , unsigned r , unsigned f , unsigned axis , float split , const BBox& box , bool& left );
+	// pick best splitting
+	void _pickSplitting( const Splits& splits , unsigned tri_num , const BBox& box , 
+						 unsigned& splitAxis , float& split_pos , bool& left );
 };
 
 #endif
