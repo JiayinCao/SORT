@@ -28,13 +28,6 @@ KDTree::~KDTree()
 {
 }
 
-// get the intersection between the ray and the primitive set
-bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
-{
-	//to be modified
-	return Intersect( r , m_BBox ) > 0.0f ;
-}
-
 // build the acceleration structure
 void KDTree::Build()
 {
@@ -71,10 +64,10 @@ void KDTree::Build()
 		sort( splits.split[i] , splits.split[i] + splits.split_c[i] );
 
 	// create root node
-	m_root = SORT_MALLOC(Kd_Node)();
+	Kd_Node* root = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
 
 	// build kd-tree
-	_splitNode( m_root , splits , count , m_BBox );
+	_splitNode( root , splits , count , m_BBox );
 
 	// dealloc temporary memory
 	_deallocTmpMemory();
@@ -90,7 +83,8 @@ void KDTree::OutputLog() const
 // initialize
 void KDTree::_init()
 {
-	m_root = 0;
+	m_nodes = 0;
+	m_prilist = 0;
 	m_temp = 0;
 }
 
@@ -100,6 +94,9 @@ void KDTree::_mallocMemory()
 	SORT_PREMALLOC( 4 * 1024 * 1024 , KD_NODE_MEMID );
 	SORT_PREMALLOC( 4 * 1024 * 1024 , KD_LEAF_TRILIST_MEMID );
 	m_temp = new unsigned char[m_primitives->size()];
+
+	m_nodes = SORT_MEMORY_ID( Kd_Node , KD_NODE_MEMID );
+	m_prilist = SORT_MEMORY_ID( Primitive* , KD_LEAF_TRILIST_MEMID );
 }
 
 // free temporary memory
@@ -112,6 +109,12 @@ void KDTree::_deallocTmpMemory()
 // split node
 void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , const BBox& box )
 {
+	if( tri_num < 16 )
+	{
+		_makeLeaf( node , splits , tri_num );
+		return;
+	}
+
 	// ----------------------------------------------------------------------------------------
 	// step 1
 	// pick best split
@@ -119,14 +122,16 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 	unsigned 	split_Axis;
 	bool 		left = false;
 	_pickSplitting( splits , tri_num , box , split_Axis , split_pos , left );
+	node->flag = split_Axis;
+	node->split = split_pos;
 
 	// ----------------------------------------------------------------------------------------
 	// step 2
 	// distribute triangles
 	Split* _splits = splits.split[split_Axis];
 	unsigned l_num = 0 , r_num = 0 , b_num = tri_num;
-	for( unsigned i = 0 ; i < tri_num ; i++ )
-		m_temp[i] = 2;
+	for( unsigned i = 0 ; i < splits.split_c[split_Axis] ; i++ )
+		m_temp[splits.split[0][i].id] = 2;
 	for( unsigned i = 0 ; i < splits.split_c[split_Axis] ; i++ )
 	{
 		if( _splits[i].type == Split_End && _splits[i].pos <= split_pos )
@@ -155,8 +160,6 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 		}
 	}
 
-	cout<<l_num<<" "<<b_num<<" "<<r_num<<endl;
-
 	// ----------------------------------------------------------------------------------------
 	// step 3
 	// generate new events
@@ -176,17 +179,29 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 			unsigned id = old.id;
 			if( m_temp[id] == 0 || m_temp[id] == 2 )
 			{
-		//		l_splits.split[k][l_splits.split_c[k]] = old; 
+				l_splits.split[k][l_splits.split_c[k]] = old; 
 				l_splits.split_c[k]++;
 			}
 			if( m_temp[id] == 1 || m_temp[id] == 2 )
 			{
-			//	r_splits.split[k][r_splits.split_c[k]] = old;
+				r_splits.split[k][r_splits.split_c[k]] = old;
 				r_splits.split_c[k]++;
 			}
 		}
-		cout<<split_count<<" "<<l_splits.split_c[k]<<" "<<r_splits.split_c[k]<<endl;
 	}
+	splits.Release();
+
+	BBox left_box = box;
+	left_box.m_Max[split_Axis] = split_pos;
+	Kd_Node* left_node = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
+	_splitNode( left_node , l_splits , l_num+b_num , left_box );
+
+	unsigned node_offset = (SORT_OFFSET(KD_NODE_MEMID)/sizeof(Kd_Node));
+	node->right |= node_offset << 2;
+	BBox right_box = box;
+	right_box.m_Min[split_Axis] = split_pos;
+	Kd_Node* right_node = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
+	_splitNode( right_node , r_splits , r_num+b_num , right_box );
 }
 
 // evaluate sah value for the kdtree node
@@ -254,4 +269,78 @@ void KDTree::_pickSplitting( const Splits& splits , unsigned tri_num , const BBo
 			n_l += pf;
 		}
 	}
+}
+
+// make leaf
+void KDTree::_makeLeaf( Kd_Node* node , Splits& splits , unsigned tri_num )
+{
+	node->flag = 3;
+	node->trinum |= tri_num<<2;
+	node->offset = SORT_OFFSET(KD_LEAF_TRILIST_MEMID)/sizeof(Primitive*);
+
+	Primitive** primitives = SORT_MALLOC_ARRAY_ID(Primitive*,tri_num,KD_LEAF_TRILIST_MEMID)();
+	unsigned offset = 0;
+	for( unsigned i = 0 ; i < splits.split_c[0] ; i++ )
+	{
+		if( splits.split[0][i].type == Split_Start )
+		{
+			primitives[offset] = splits.split[0][i].primitive;
+			offset++;
+		}
+	}
+
+	splits.Release();
+}
+
+// get the intersection between the ray and the primitive set
+bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
+{
+	float fmax;
+	float fmin = Intersect( r , m_BBox , &fmax );
+	if( fmin < 0.0f )
+		return false;
+
+	return _traverse( m_nodes , r , intersect , fmin , fmax );
+}
+
+// tranverse kd-tree node
+bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const
+{
+	const unsigned mask = 0x00000003;
+
+	// it's a leaf node
+	if( (node->flag & mask) == 3 )
+	{
+		unsigned tri_num = node->flag>>2;
+		bool inter = false;
+		for( unsigned i = 0 ; i < tri_num ; i++ )
+			inter |= m_prilist[i+node->offset]->GetIntersect( ray , intersect );
+		return inter;
+	}
+
+	// get the intersection point between the ray and the splitting plane
+	unsigned split_axis = node->flag & mask;
+	float dir = ray.m_Dir[split_axis];
+	float t = ( node->split - ray.m_Ori[split_axis] ) / dir;
+	
+	Kd_Node* left = (Kd_Node*)( (unsigned)( (char*)node + sizeof(Kd_Node) + 15 ) & (~15));
+	if( dir >= 0.0f )
+	{
+		bool inter = false;
+		if( t > 0.0f )
+			inter = _traverse( left , ray , intersect , fmin , t );
+		if( inter == false && fmax > t )
+			return _traverse( m_nodes + (node->right>>2) , ray , intersect , t , fmax );
+		return inter;
+	}else
+	{
+		bool inter = false;
+		if( t > 0.0f )
+			inter = _traverse( m_nodes + (node->right>>2) , ray , intersect , fmin , t );
+		if( inter == false && fmax > t )
+			return _traverse( left , ray , intersect , t , fmax );
+		return inter;
+	}
+
+	return false;
 }
