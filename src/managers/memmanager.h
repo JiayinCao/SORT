@@ -63,6 +63,9 @@ public:
 		// get the memory pointer first
 		Memory* mem = _getMemory(id);
 
+		if( mem == 0 )
+			LOG_ERROR<<"No memory with id "<<id<<"."<<CRASH;
+
 		// check if the memory is enough
 		if( sizeof( T ) * count + mem->m_offset > mem->m_size )
 			LOG_ERROR<<"There is not enough memory in memory manager.(mem id:"<<id<<")"<<CRASH;
@@ -72,6 +75,16 @@ public:
 		mem->m_offset = ( mem->m_offset + 15 ) & (~15);
 		return (T*)(mem->m_memory + addr);
 	}
+
+	// get the offset of the memory
+	unsigned GetOffset( unsigned id=0 ) const
+	{
+		Memory* mem = _getMemory(id);
+		if( mem == 0 )
+			LOG_ERROR<<"No memory with id "<<id<<"."<<CRASH;
+		return mem->m_offset;
+	}
+
 // private field
 private:
 	// the memories
@@ -107,6 +120,9 @@ private:
 #define SORT_MALLOC_ARRAY(T,c) new (MemManager::GetSingleton().GetPtr<T>(c)) T
 #define	SORT_MALLOC_ARRAY_ID(T,c,id) new (MemManager::GetSingleton().GetPtr<T>(c,id)) T
 
+// get sort memory
+#define	SORT_MEMORY_ID(T,id) MemManager::GetSingleton().GetPtr<T>(0,id)
+
 // premalloc memory
 inline void SORT_PREMALLOC(unsigned size , unsigned id=0)
 {
@@ -123,6 +139,12 @@ inline void SORT_CLEARMEM(unsigned id=0)
 inline void SORT_DEALLOC(unsigned id=0)
 {
 	MemManager::GetSingleton().DeAlloc(id);
+}
+
+// get the offset
+inline unsigned SORT_OFFSET(unsigned id=0)
+{
+	return MemManager::GetSingleton().GetOffset(id);
 }
 
 #endif
