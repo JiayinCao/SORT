@@ -79,9 +79,15 @@ bool BBox::IsInBBox( const Point& p , float delta ) const
 // get the surface area of the bounding box
 float BBox::SurfaceArea() const
 {
+	return 2.0f * HalfSurfaceArea();
+}
+
+// half surface area
+float BBox::HalfSurfaceArea() const
+{
 	Vector offset = m_Max - m_Min;
 
-	return 2 * ( offset.x * offset.y + offset.y * offset.z + offset.z * offset.x );
+	return offset.x * offset.y + offset.y * offset.z + offset.z * offset.x;
 }
 
 // get the volumn of the bounding box

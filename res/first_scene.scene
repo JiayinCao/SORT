@@ -9,7 +9,7 @@
 	  <Matrix value="s 30"/>
 		</Transform>
 	</Model>
-	<Accel type="uniform_grid"/>
+	<Accel type="kd_tree"/>
   <Sky type="sky_box">
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />

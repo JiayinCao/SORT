@@ -38,6 +38,8 @@ public:
 	// get the surface area of the bounding box
 	// result :	the surface area of the bounding box
 	float SurfaceArea() const;
+	// half surface area
+	float HalfSurfaceArea() const;
 
 	// get the volumn of the bounding box
 	// result :	the volumn of the bounding box
