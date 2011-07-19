@@ -67,7 +67,7 @@ void KDTree::Build()
 	Kd_Node* root = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
 
 	// build kd-tree
-	_splitNode( root , splits , count , m_BBox );
+	_splitNode( root , splits , count , m_BBox , 0 );
 
 	// dealloc temporary memory
 	_deallocTmpMemory();
@@ -107,9 +107,9 @@ void KDTree::_deallocTmpMemory()
 }
 
 // split node
-void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , const BBox& box )
+void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , const BBox& box , unsigned depth )
 {
-	if( tri_num < 16 )
+	if( tri_num < 16 || depth > 28 )
 	{
 		_makeLeaf( node , splits , tri_num );
 		return;
@@ -121,9 +121,14 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 	float		split_pos;
 	unsigned 	split_Axis;
 	bool 		left = false;
-	_pickSplitting( splits , tri_num , box , split_Axis , split_pos , left );
+	float sah = _pickSplitting( splits , tri_num , box , split_Axis , split_pos , left );
 	node->flag = split_Axis;
 	node->split = split_pos;
+	if( sah >= tri_num )
+	{
+		_makeLeaf( node , splits , tri_num );
+		return;
+	}
 
 	// ----------------------------------------------------------------------------------------
 	// step 2
@@ -144,7 +149,7 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 			m_temp[_splits[i].id] = 1;
 			b_num--;
 			r_num++;
-		}else if( false && _splits[i].type == Split_Flat )
+		}else if( _splits[i].type == Split_Flat )
 		{
 			if( _splits[i].pos < split_pos || ( _splits[i].pos == split_pos && left ) )
 			{
@@ -194,14 +199,14 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 	BBox left_box = box;
 	left_box.m_Max[split_Axis] = split_pos;
 	Kd_Node* left_node = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
-	_splitNode( left_node , l_splits , l_num+b_num , left_box );
+	_splitNode( left_node , l_splits , l_num+b_num , left_box , depth + 1 );
 
 	unsigned node_offset = (SORT_OFFSET(KD_NODE_MEMID)/sizeof(Kd_Node));
 	node->right |= node_offset << 2;
 	BBox right_box = box;
 	right_box.m_Min[split_Axis] = split_pos;
 	Kd_Node* right_node = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
-	_splitNode( right_node , r_splits , r_num+b_num , right_box );
+	_splitNode( right_node , r_splits , r_num+b_num , right_box , depth + 1 );
 }
 
 // evaluate sah value for the kdtree node
@@ -229,7 +234,7 @@ float KDTree::_sah( unsigned l , unsigned r , unsigned f , unsigned axis , float
 }
 
 // pick best splitting
-void KDTree::_pickSplitting( const Splits& splits , unsigned tri_num , const BBox& box , 
+float KDTree::_pickSplitting( const Splits& splits , unsigned tri_num , const BBox& box , 
 							 unsigned& splitAxis , float& split_pos , bool& left )
 {
 	float min_sah = FLT_MAX;
@@ -269,6 +274,8 @@ void KDTree::_pickSplitting( const Splits& splits , unsigned tri_num , const BBo
 			n_l += pf;
 		}
 	}
+
+	return min_sah;
 }
 
 // make leaf
@@ -323,24 +330,19 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	float dir = ray.m_Dir[split_axis];
 	float t = ( node->split - ray.m_Ori[split_axis] ) / dir;
 	
-	Kd_Node* left = (Kd_Node*)( (unsigned)( (char*)node + sizeof(Kd_Node) + 15 ) & (~15));
-	if( dir >= 0.0f )
+	Kd_Node* first = (Kd_Node*)( ((unsigned)( (char*)node + sizeof(Kd_Node) + 15 )) & (~15));
+	Kd_Node* second = m_nodes + (node->right>>2);
+	if( dir < 0.0f )
 	{
-		bool inter = false;
-		if( t > 0.0f )
-			inter = _traverse( left , ray , intersect , fmin , t );
-		if( inter == false && fmax > t )
-			return _traverse( m_nodes + (node->right>>2) , ray , intersect , t , fmax );
-		return inter;
-	}else
-	{
-		bool inter = false;
-		if( t > 0.0f )
-			inter = _traverse( m_nodes + (node->right>>2) , ray , intersect , fmin , t );
-		if( inter == false && fmax > t )
-			return _traverse( left , ray , intersect , t , fmax );
-		return inter;
+		Kd_Node* temp = first;
+		first = second;
+		second = temp;
 	}
 
-	return false;
+	bool inter = false;
+	if( t > fmin )
+		inter = _traverse( first , ray , intersect , fmin , min( fmax , t ) );
+	if( inter == false && fmax > t )
+		return _traverse( second , ray , intersect , max( t , fmin ) , fmax );
+	return inter;
 }

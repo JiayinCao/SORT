@@ -136,7 +136,7 @@ private:
 	// para 'node'   : node to be split
 	// para 'splits' : splitting candidates
 	// para 'box'    : bouding box of the node
-	void _splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , const BBox& box );
+	void _splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , const BBox& box , unsigned depth );
 	
 	// malloc the memory
 	void _mallocMemory();
@@ -162,7 +162,8 @@ private:
 	// para 'splitaxis': axis of splitting
 	// para 'split_pos': splitting position
 	// para 'left'     : whether flat primitives are lying on the left child node
-	void _pickSplitting( const Splits& splits , unsigned tri_num , const BBox& box , 
+	// result          : sah value with the specific splitting
+	float _pickSplitting( const Splits& splits , unsigned tri_num , const BBox& box , 
 						 unsigned& splitAxis , float& split_pos , bool& left );
 	
 	// make leaf
