@@ -129,6 +129,17 @@ private:
 	// temporary buffer for marking triangles
 	unsigned char*	m_temp;
 
+	// total node number
+	unsigned	m_total;
+	// leaf node number
+	unsigned	m_leaf;
+	// average triangle number in leaf
+	float		m_fAvgLeafTri;
+	// depth of kd-tree
+	unsigned	m_depth;
+	// maxium number of triangle in a leaf
+	unsigned	m_MaxLeafTri;
+
 	// initialize
 	void _init();
 	

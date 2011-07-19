@@ -8,6 +8,7 @@
 #include "kdtree.h"
 #include "managers/memmanager.h"
 #include "geometry/primitive.h"
+#include "geometry/intersection.h"
 #include <algorithm>
 
 static const unsigned KD_NODE_MEMID = 1;
@@ -69,6 +70,9 @@ void KDTree::Build()
 	// build kd-tree
 	_splitNode( root , splits , count , m_BBox , 0 );
 
+	if( m_leaf != 0 )
+		m_fAvgLeafTri /= m_leaf;
+
 	// dealloc temporary memory
 	_deallocTmpMemory();
 }
@@ -77,7 +81,13 @@ void KDTree::Build()
 void KDTree::OutputLog() const
 {
 	LOG_HEADER( "Accelerator" );
-	LOG<<"KD-Tree is not finished yet."<<ENDL<<ENDL;
+	LOG<<"Accelerator Type :\tK-Dimensional Tree"<<ENDL;
+	LOG<<"KD-Tree Depth    :\t"<<m_depth<<ENDL;
+	LOG<<"Total Node Count :\t"<<m_total<<ENDL;
+	LOG<<"Inner Node Count :\t"<<m_total - m_leaf<<ENDL;
+	LOG<<"Leaf Node Count  :\t"<<m_leaf<<ENDL;
+	LOG<<"Triangles per leaf:\t"<<m_fAvgLeafTri<<ENDL;
+	LOG<<"Max triangles in leaf:\t"<<m_MaxLeafTri<<ENDL;
 }
 
 // initialize
@@ -86,6 +96,11 @@ void KDTree::_init()
 	m_nodes = 0;
 	m_prilist = 0;
 	m_temp = 0;
+	m_total = 0;
+	m_leaf = 0;
+	m_fAvgLeafTri = 0.0f;
+	m_depth = 0;
+	m_MaxLeafTri = 0;
 }
 
 // malloc the memory
@@ -200,6 +215,7 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 	left_box.m_Max[split_Axis] = split_pos;
 	Kd_Node* left_node = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
 	_splitNode( left_node , l_splits , l_num+b_num , left_box , depth + 1 );
+	m_total ++;
 
 	unsigned node_offset = (SORT_OFFSET(KD_NODE_MEMID)/sizeof(Kd_Node));
 	node->right |= node_offset << 2;
@@ -207,6 +223,9 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 	right_box.m_Min[split_Axis] = split_pos;
 	Kd_Node* right_node = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
 	_splitNode( right_node , r_splits , r_num+b_num , right_box , depth + 1 );
+	m_total ++;
+
+	m_depth = max( m_depth , depth );
 }
 
 // evaluate sah value for the kdtree node
@@ -296,6 +315,10 @@ void KDTree::_makeLeaf( Kd_Node* node , Splits& splits , unsigned tri_num )
 		}
 	}
 	splits.Release();
+
+	m_leaf++;
+	m_fAvgLeafTri += tri_num;
+	m_MaxLeafTri = max( m_MaxLeafTri , tri_num );
 }
 
 // get the intersection between the ray and the primitive set
@@ -321,7 +344,7 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 		bool inter = false;
 		for( unsigned i = 0 ; i < tri_num ; i++ )
 			inter |= m_prilist[i+node->offset]->GetIntersect( ray , intersect );
-		return inter;
+		return inter && ( intersect->t < fmax && intersect->t > fmin );
 	}
 
 	// get the intersection point between the ray and the splitting plane
