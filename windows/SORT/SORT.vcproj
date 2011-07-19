@@ -553,6 +553,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\accel\bvh.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\accel\bvh.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\accel\kdtree.cpp"
 				>
 			</File>

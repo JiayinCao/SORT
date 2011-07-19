@@ -7,9 +7,9 @@
 // include the header
 #include "scene.h"
 #include "geometry/intersection.h"
-#include "accel/accelerator.h"
 #include "accel/unigrid.h"
 #include "accel/kdtree.h"
+#include "accel/bvh.h"
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "utility/strhelper.h"
 #include "utility/path.h"
@@ -99,6 +99,8 @@ bool Scene::LoadScene( const string& str )
 			m_pAccelerator = new UniGrid();
 		else if( type == "kd_tree" )
 			m_pAccelerator = new KDTree();
+		else if( type == "bvh" )
+			m_pAccelerator = new Bvh();
 	}
 
 	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.

@@ -96,6 +96,8 @@ struct Splits
 //  a k-d tree (short for k-dimensional tree) is a space-partitioning data 
 //	structure for organizing points in a k-dimensional space. 
 //	the algorithm of kd-tree construction works in O(N*logN).
+//	To see the detail description of the algorithm, check the paper :
+//	"On building fast kd-Trees for Ray Tracing, and on doing that in O(N log N)"
 class KDTree : public Accelerator
 {
 // public method
@@ -128,6 +130,11 @@ private:
 	Primitive**		m_prilist;
 	// temporary buffer for marking triangles
 	unsigned char*	m_temp;
+
+	// maxmium depth of kd-tree
+	unsigned	m_maxDepth;
+	// maxmium number of triangles in a leaf node
+	unsigned	m_maxTriInLeaf;
 
 	// total node number
 	unsigned	m_total;
@@ -184,7 +191,7 @@ private:
 	void _makeLeaf( Kd_Node* node , Splits& splits , unsigned tri_num );
 	
 	// tranverse kd-tree node
-	bool _traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
+	bool _traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const;
 };
 
 #endif

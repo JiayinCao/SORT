@@ -87,7 +87,7 @@ void KDTree::OutputLog() const
 	LOG<<"Inner Node Count :\t"<<m_total - m_leaf<<ENDL;
 	LOG<<"Leaf Node Count  :\t"<<m_leaf<<ENDL;
 	LOG<<"Triangles per leaf:\t"<<m_fAvgLeafTri<<ENDL;
-	LOG<<"Max triangles in leaf:\t"<<m_MaxLeafTri<<ENDL;
+	LOG<<"Max triangles in leaf:\t"<<m_MaxLeafTri<<ENDL<<ENDL;
 }
 
 // initialize
@@ -101,6 +101,8 @@ void KDTree::_init()
 	m_fAvgLeafTri = 0.0f;
 	m_depth = 0;
 	m_MaxLeafTri = 0;
+	m_maxDepth = 28;
+	m_maxTriInLeaf = 16;
 }
 
 // malloc the memory
@@ -124,7 +126,7 @@ void KDTree::_deallocTmpMemory()
 // split node
 void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , const BBox& box , unsigned depth )
 {
-	if( tri_num < 16 || depth > 28 )
+	if( tri_num < m_maxTriInLeaf || depth > m_maxDepth )
 	{
 		_makeLeaf( node , splits , tri_num );
 		return;
@@ -329,12 +331,15 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( fmin < 0.0f )
 		return false;
 
-	return _traverse( m_nodes , r , intersect , fmin , fmax );
+	return _traverse( m_nodes , r , intersect , fmin , fmax , fmax );
 }
 
 // tranverse kd-tree node
-bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const
+bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const
 {
+	if( ray.m_fMax < fmin )
+		return ray.m_fMax < ray_max;
+
 	const unsigned mask = 0x00000003;
 
 	// it's a leaf node
@@ -363,8 +368,8 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 
 	bool inter = false;
 	if( t > fmin )
-		inter = _traverse( first , ray , intersect , fmin , min( fmax , t ) );
+		inter = _traverse( first , ray , intersect , fmin , min( fmax , t ) , ray_max );
 	if( inter == false && fmax > t )
-		return _traverse( second , ray , intersect , max( t , fmin ) , fmax );
+		return _traverse( second , ray , intersect , max( t , fmin ) , fmax , ray_max );
 	return inter;
 }
