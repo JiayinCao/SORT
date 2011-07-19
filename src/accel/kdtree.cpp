@@ -91,8 +91,8 @@ void KDTree::_init()
 // malloc the memory
 void KDTree::_mallocMemory()
 {
-	SORT_PREMALLOC( 4 * 1024 * 1024 , KD_NODE_MEMID );
-	SORT_PREMALLOC( 4 * 1024 * 1024 , KD_LEAF_TRILIST_MEMID );
+	SORT_PREMALLOC( 16 * 1024 * 1024 , KD_NODE_MEMID );
+	SORT_PREMALLOC( 16 * 1024 * 1024 , KD_LEAF_TRILIST_MEMID );
 	m_temp = new unsigned char[m_primitives->size()];
 
 	m_nodes = SORT_MEMORY_ID( Kd_Node , KD_NODE_MEMID );
@@ -136,7 +136,7 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 	Split* _splits = splits.split[split_Axis];
 	unsigned l_num = 0 , r_num = 0 , b_num = tri_num;
 	for( unsigned i = 0 ; i < splits.split_c[split_Axis] ; i++ )
-		m_temp[splits.split[0][i].id] = 2;
+		m_temp[splits.split[split_Axis][i].id] = 2;
 	for( unsigned i = 0 ; i < splits.split_c[split_Axis] ; i++ )
 	{
 		if( _splits[i].type == Split_End && _splits[i].pos <= split_pos )
@@ -289,13 +289,12 @@ void KDTree::_makeLeaf( Kd_Node* node , Splits& splits , unsigned tri_num )
 	unsigned offset = 0;
 	for( unsigned i = 0 ; i < splits.split_c[0] ; i++ )
 	{
-		if( splits.split[0][i].type == Split_Start )
+		if( splits.split[0][i].type == Split_Start || splits.split[0][i].type == Split_Flat )
 		{
 			primitives[offset] = splits.split[0][i].primitive;
 			offset++;
 		}
 	}
-
 	splits.Release();
 }
 
@@ -330,7 +329,7 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	float dir = ray.m_Dir[split_axis];
 	float t = ( node->split - ray.m_Ori[split_axis] ) / dir;
 	
-	Kd_Node* first = (Kd_Node*)( ((unsigned)( (char*)node + sizeof(Kd_Node) + 15 )) & (~15));
+	Kd_Node* first = node + 1 ;
 	Kd_Node* second = m_nodes + (node->right>>2);
 	if( dir < 0.0f )
 	{

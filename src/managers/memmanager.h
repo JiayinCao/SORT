@@ -72,7 +72,7 @@ public:
 
 		unsigned addr = mem->m_offset;
 		mem->m_offset += sizeof(T) * count;
-		mem->m_offset = ( mem->m_offset + 15 ) & (~15);
+	//	mem->m_offset = ( mem->m_offset + 15 ) & (~15);
 		return (T*)(mem->m_memory + addr);
 	}
 
