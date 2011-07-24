@@ -35,7 +35,7 @@ public:
 	Point operator + ( const Vector& v ) const;
 	// para 'p' :	point to merge
 	// result   :   a mixed point
-	Point operator + ( const Point& v );
+	Point operator + ( const Point& v ) const;
 	// para 'v' :	vector to add
 	// result   :   current point after the offset 'v' is applied
 	Point& operator += ( const Vector& v );

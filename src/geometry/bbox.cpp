@@ -132,3 +132,11 @@ void BBox::Union( const BBox& box )
 		m_Max[i] = max( m_Max[i] , box.m_Max[i] );
 	}
 }
+
+// delta in a specific axis
+float BBox::Delta( unsigned k ) const
+{
+	if( k < 0 || k > 3 )
+		LOG_ERROR<<"Index is out of range."<<CRASH;
+	return m_Max[k]-m_Min[k];
+}

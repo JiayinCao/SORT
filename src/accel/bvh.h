@@ -9,9 +9,45 @@
 
 // include header
 #include "accelerator.h"
+#include "geometry/primitive.h"
+
+// node for bvh
+struct Bvh_Node
+{
+	// bounding box for the node
+	BBox		bbox;
+	// primitive number
+	unsigned 	pri_num;
+	union
+	{
+		// offset in primitive list
+		unsigned	pri_offset;
+		// index of right child
+		Bvh_Node*	right_child;
+	};
+	// default constructor
+	Bvh_Node()
+	{pri_num=0;}
+};
+
+// bvh primitives
+struct Bvh_Primitive
+{
+	Primitive*	primitive;
+	Point		m_centroid;
+
+	Bvh_Primitive( Primitive* p ):
+	primitive(p)
+	{m_centroid = ( p->GetBBox().m_Max + p->GetBBox().m_Min ) * 0.5f;}
+
+	const BBox& GetBBox()
+	{return primitive->GetBBox();}
+};
 
 /////////////////////////////////////////////////////////////////////////////////////
-//	definition of bounding volumn hierarchy
+//	definition of bounding volume hierarchy
+//	This is a simple version for "On face Construction of SAH-based Bounding Volume
+//	Hierarchies"
 class Bvh : public Accelerator
 {
 // public method
@@ -35,7 +71,46 @@ public:
 
 // private field
 private:
+	// the nodes for bvh
+	Bvh_Node*		m_nodes;
+	// primitives in bvh
+	Bvh_Primitive*	m_bvhpri;
 
+	// maxmium primtive number in each leaf node
+	unsigned	m_maxPriInLeaf;
+
+	// bvh information
+	unsigned	m_totalNode;
+	// leaf node
+	unsigned	m_leafNode;
+	// depth
+	unsigned	m_bvhDepth;
+	// maxmium triangle number in leaf
+	unsigned	m_maxLeafTriNum;
+
+	// initialize
+	void _init();
+
+	// malloc the memory
+	void _mallocMemory();
+
+	// dealloc memory
+	void _deallocMemory();
+
+	// recursive split node
+	void _splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned depth );
+
+	// make the node as a leaf
+	void _makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end );
+
+	// evaluate sah value
+	float _sah( unsigned left , unsigned right , const BBox& lbox , const BBox& rbox , const BBox& box );
+
+	// pick best split plane
+	float _pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , unsigned _start , unsigned _end );
+
+	// traverse node
+	bool _traverseNode( Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const;
 };
 
 #endif

@@ -27,6 +27,10 @@ MemManager::~MemManager()
 // pre-allocate memory
 void MemManager::PreMalloc( unsigned size , unsigned id )
 {
+	// if size is equal to zero , just return
+	if( size == 0 )
+		return;
+
 	Memory* mem = _getMemory( id );
 
 	if( mem != 0 )
@@ -60,7 +64,7 @@ void MemManager::DeAlloc( unsigned id )
 {
 	Memory* mem = _getMemory( id );
 	if( mem == 0 )
-		LOG_ERROR<<"Can't delete memory, because there is no memory with id "<<id<<"."<<CRASH;
+		LOG_WARNING<<"Can't delete memory, because there is no memory with id "<<id<<"."<<ENDL;
 
 	// reset offset and size
 	delete mem;
