@@ -57,6 +57,9 @@ public:
 	// para 'box' : another bounding box
 	void Union( const BBox& box );
 
+	// delta in a specific axis
+	float Delta( unsigned k ) const;
+
 // public data
 public:
 	// the minium and maxium point of the bounding box

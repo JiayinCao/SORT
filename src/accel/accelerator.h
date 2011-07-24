@@ -26,12 +26,12 @@ class	Accelerator
 // public method
 public:
 	// default constructor
-	Accelerator(){ m_primitives = 0; m_pMailBox = 0; }
+	Accelerator(){ m_primitives = 0; }
 	// constructor from primitive list
 	// para 'l' ; the primitive list
 	Accelerator( vector<Primitive*>* l ) : m_primitives(l){}
 	// destructor
-	virtual ~Accelerator(){ SAFE_DELETE_ARRAY(m_pMailBox); m_primitives = 0;}
+	virtual ~Accelerator(){ m_primitives = 0;}
 
 	// get the intersection between the ray and the primitive set
 	// para 'r' : the ray
@@ -61,9 +61,6 @@ protected:
 
 	// the bounding box of the primitives
 	BBox	m_BBox;
-
-	// the mail box for avoiding intersection test with duplicate triangles
-	unsigned char*	m_pMailBox;
 
 	// compute the bounding box of the primitives
 	void _computeBBox();

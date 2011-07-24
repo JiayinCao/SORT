@@ -27,6 +27,7 @@ KDTree::KDTree( vector<Primitive*>* l ) : Accelerator(l)
 // destructor
 KDTree::~KDTree()
 {
+	_deallocMemory();
 }
 
 // build the acceleration structure
@@ -337,8 +338,8 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 // tranverse kd-tree node
 bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const
 {
-	if( ray.m_fMax < fmin )
-		return ray.m_fMax < ray_max;
+	if( intersect->t < fmin )
+		return intersect->t < ray_max;
 
 	const unsigned mask = 0x00000003;
 
@@ -372,4 +373,11 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	if( inter == false && fmax > t )
 		return _traverse( second , ray , intersect , max( t , fmin ) , fmax , ray_max );
 	return inter;
+}
+
+// dealloc memory
+void KDTree::_deallocMemory()
+{
+	SORT_DEALLOC(KD_NODE_MEMID);
+	SORT_DEALLOC(KD_LEAF_TRILIST_MEMID);
 }

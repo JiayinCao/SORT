@@ -158,6 +158,9 @@ private:
 	
 	// malloc the memory
 	void _mallocMemory();
+
+	// dealloc memory
+	void _deallocMemory();
 	
 	// free temporary memory
 	void _deallocTmpMemory();

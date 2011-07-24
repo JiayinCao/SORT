@@ -42,11 +42,13 @@ void UniGrid::_init()
 	}
 	m_voxelCount = 0;
 	m_pVoxels = 0;
+	m_pMailBox = 0;
 }
 
 // release the data
 void UniGrid::_release()
 {
+	SAFE_DELETE_ARRAY(m_pMailBox);
 	SAFE_DELETE_ARRAY( m_pVoxels );
 	for( int i = 0 ; i < 3 ; i++ )
 	{
