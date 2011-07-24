@@ -338,10 +338,11 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 // tranverse kd-tree node
 bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const
 {
-	if( intersect->t < fmin )
-		return intersect->t < ray_max;
+	const unsigned	mask = 0x00000003;
+	const float		delta = 0.001f;
 
-	const unsigned mask = 0x00000003;
+	if( intersect->t < fmin - delta )
+		return intersect->t < ray_max + delta;
 
 	// it's a leaf node
 	if( (node->flag & mask) == 3 )
@@ -350,7 +351,7 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 		bool inter = false;
 		for( unsigned i = 0 ; i < tri_num ; i++ )
 			inter |= m_prilist[i+node->offset]->GetIntersect( ray , intersect );
-		return inter && ( intersect->t < fmax && intersect->t > fmin );
+		return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
 	}
 
 	// get the intersection point between the ray and the splitting plane
@@ -368,9 +369,9 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	}
 
 	bool inter = false;
-	if( t > fmin )
+	if( t > fmin - delta )
 		inter = _traverse( first , ray , intersect , fmin , min( fmax , t ) , ray_max );
-	if( inter == false && fmax > t )
+	if( inter == false && ( fmax + delta ) > t )
 		return _traverse( second , ray , intersect , max( t , fmin ) , fmax , ray_max );
 	return inter;
 }
