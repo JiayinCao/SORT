@@ -54,22 +54,11 @@ private:
 	// material pool
 	map< string , Material* >	m_matPool;
 
-	// the registered type
-	map< string , Material* >	m_matType;
-
 	// the default material
 	Material*	m_Default;
 
-	// register all of the materials
-	void _registerMaterials();
-	// clear registered types
-	void _unregisterMaterials();
 	// clear the material pool
 	void _clearMatPool();
-	// create material
-	// para 'str' : material type
-	// result     : the material with specific type
-	Material* _createMaterial( const string& str );
 
 	friend class Singleton<MatManager>;
 };

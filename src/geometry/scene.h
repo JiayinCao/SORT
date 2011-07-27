@@ -12,10 +12,12 @@
 #include <vector>
 #include "trimesh.h"
 #include "spectrum/spectrum.h"
+#include "thirdparty/tinyxml/tinyxml.h"
 
 // pre-decleration of classes
 class Accelerator;
 class Sky;
+class Light;
 
 ////////////////////////////////////////////////////////////////////////////
 // definition of scene class
@@ -54,6 +56,10 @@ public:
 	// preprocess
 	void	PreProcess();
 
+	// get lights
+	const vector<Light*>& GetLights() const
+	{return m_lights;}
+
 // private field
 private:
 	// the buffer for the triangle mesh
@@ -61,6 +67,9 @@ private:
 
 	// the triangle buffer for the scene
 	vector<Primitive*>	m_triBuf;
+
+	// the light
+	vector<Light*>		m_lights;
 
 	// the acceleration structure for the scene
 	Accelerator*		m_pAccelerator;
@@ -83,6 +92,9 @@ private:
 
 	// initialize default data
 	void	_init();
+
+	// parse transformation
+	Transform	_parseTransform( const TiXmlElement* node );
 };
 
 #endif

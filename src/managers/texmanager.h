@@ -59,9 +59,6 @@ public:
 	// result     : how many reference to the memory
 	unsigned GetReferenceCount( const string& str ) const;
 
-	// create a texture
-	Texture* CreateTexture( const string& type ) const;	
-
 // private data
 private:
 	// a vector saving texture io
@@ -69,9 +66,6 @@ private:
 
 	// map a string to the image memory
 	map< string , ImgMemory* > m_ImgContainer;
-	
-	// texture map
-	map< string , Texture* > m_TextureMap;
 
 // private method
 private:

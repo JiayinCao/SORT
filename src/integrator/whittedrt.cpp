@@ -10,6 +10,7 @@
 #include "geometry/intersection.h"
 #include "geometry/scene.h"
 #include "bsdf/bsdf.h"
+#include "light/light.h"
 
 // radiance along a specific ray direction
 Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
@@ -22,18 +23,23 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	if( false == scene.GetIntersect( r , &ip ) )
 		return scene.EvaluateSky( r );
 
-	// get light direction ( not implemented )
-	Vector lightDir = Vector( 2.0f , 5.0f , 3.0f );
-	lightDir.Normalize();
-	Spectrum lightdensity = Spectrum( 20.0f );
-
-	float density = max( 0.0f , Dot( lightDir , ip.normal ) );
-
-	// get primitive bsdf
 	Spectrum t;
+
+	// get bsdf
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
-	Spectrum c = bsdf->f( -r.m_Dir , lightDir );
-	t = c * density * lightdensity;
+
+	// lights
+	const vector<Light*>& lights = scene.GetLights();
+	vector<Light*>::const_iterator it = lights.begin();
+	while( it != lights.end() )
+	{
+		Vector	lightDir;
+		float	pdf;
+		Spectrum ld = (*it)->sample_f( ip , lightDir , &pdf );
+		Spectrum f = bsdf->f( -r.m_Dir , lightDir );
+		t += (ld * f * max( 0.0f , Dot( lightDir , ip.normal ) ) / pdf);
+		it++;
+	}
 
 	// add reflection
 	if( bsdf->NumComponents( BXDF_REFLECTION ) > 0 )

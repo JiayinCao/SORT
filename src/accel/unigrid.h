@@ -16,6 +16,8 @@ class UniGrid : public Accelerator
 {
 // public method
 public:
+	DEFINE_CREATOR( UniGrid );
+
 	// default constructor
 	UniGrid();
 	// constructor from a primitive list

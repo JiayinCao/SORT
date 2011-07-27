@@ -469,6 +469,14 @@
 			Name="utility"
 			>
 			<File
+				RelativePath="..\..\src\utility\creator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\utility\creator.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\define.h"
 				>
 			</File>
@@ -682,6 +690,14 @@
 			>
 			<File
 				RelativePath="..\..\src\light\light.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\light\pointlight.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\light\pointlight.h"
 				>
 			</File>
 		</Filter>

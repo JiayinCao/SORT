@@ -17,6 +17,8 @@ class	CheckBoxTexture : public Texture
 {
 // public funcion
 public:
+	DEFINE_CREATOR( CheckBoxTexture );
+
 	// default constructor
 	CheckBoxTexture();
 	// constructor from two colors
@@ -39,9 +41,6 @@ public:
 	// para 'x'	:	x coordinate , if out of range , use filter
 	// para 'y' :	y coordinate , if out of range , use filter
 	virtual Spectrum GetColor( int x , int y ) const;
-
-	// create instance
-	Texture* CreateInstance() { return new CheckBoxTexture(); }
 
 // private field
 private:
@@ -67,7 +66,7 @@ private:
 		// set value
 		void SetValue( const string& value )
 		{
-			CheckBoxTexture* ct = dynamic_cast<CheckBoxTexture*>( m_target );
+			CheckBoxTexture* ct = CAST_TARGET(CheckBoxTexture);
 			ct->m_Color0 = SpectrumFromStr( value );
 		}
 	};
@@ -80,7 +79,7 @@ private:
 		// set value
 		void SetValue( const string& value )
 		{
-			CheckBoxTexture* ct = dynamic_cast<CheckBoxTexture*>( m_target );
+			CheckBoxTexture* ct = CAST_TARGET(CheckBoxTexture);
 			ct->m_Color1 = SpectrumFromStr( value );
 		}
 	};

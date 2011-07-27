@@ -18,6 +18,8 @@ class ConstantTexture : public Texture
 {
 // public method
 public:
+	DEFINE_CREATOR( ConstantTexture );
+
 	// default constructor
 	ConstantTexture();
 	// constructor from three float
@@ -45,9 +47,6 @@ public:
 		return m_Color;
 	}
 
-	// create instance
-	Texture* CreateInstance() { return new ConstantTexture(); }
-
 // private field
 private:
 	// the color for the texture
@@ -71,7 +70,7 @@ private:
 		// set value
 		void SetValue( const string& value )
 		{
-			ConstantTexture* ct = dynamic_cast<ConstantTexture*>( m_target );
+			ConstantTexture* ct = CAST_TARGET(ConstantTexture);
 			ct->m_Color = SpectrumFromStr( value );
 		}
 	};

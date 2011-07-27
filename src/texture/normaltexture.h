@@ -16,6 +16,8 @@ class	NormalTexture : public Texture
 {
 // public method
 public:
+	DEFINE_CREATOR( NormalTexture );
+
 	// default constructor
 	NormalTexture() {}
 	// destructor
@@ -35,9 +37,6 @@ public:
 	// para 'intersect' : the intersection
 	// result :	the spectrum value
 	virtual Spectrum Evaluate( const Intersection* intersect ) const;
-
-	// create instance
-	Texture* CreateInstance() { return new NormalTexture(); }
 };
 
 #endif

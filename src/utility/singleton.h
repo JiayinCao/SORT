@@ -33,6 +33,8 @@ public:
 	// get singleton
 	static T& GetSingleton()
 	{
+		if( m_pSingleton == 0 )
+			new T();
 		return *m_pSingleton;
 	}
 
