@@ -18,6 +18,8 @@ class Matte : public Material
 {
 // public method
 public:
+	DEFINE_CREATOR( Matte );
+
 	// default constructor
 	Matte();
 	// destructor
@@ -25,9 +27,6 @@ public:
 
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
-
-	// create instance of the brdf
-	CREATE_INSTANCE( Matte );
 
 // private field
 private:
@@ -53,7 +52,7 @@ private:
 		// set value
 		void SetValue( Texture* tex )
 		{
-			Matte* matte = dynamic_cast<Matte*>(m_target);
+			Matte* matte = CAST_TARGET(Matte);
 			SAFE_DELETE( matte->m_d );
 			matte->m_d = tex;
 		}
@@ -68,7 +67,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			Matte* matte = dynamic_cast<Matte*>(m_target);
+			Matte* matte = CAST_TARGET(Matte);
 			matte->m_scale = SpectrumFromStr( str );
 		}
 	};

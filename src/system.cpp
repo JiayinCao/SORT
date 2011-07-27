@@ -18,6 +18,7 @@
 #include "integrator/whittedrt.h"
 #include "camera/perspective.h"
 #include "utility/path.h"
+#include "utility/creator.h"
 
 // constructor
 System::System()
@@ -48,9 +49,9 @@ void System::_preInit()
 
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
-	m_rt->SetSize( 1920 , 1080 );
+	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
-	float distance = 500.0f;
+	float distance = 10000.0f;
 	PerspectiveCamera* camera = new PerspectiveCamera();
 	camera->SetEye( Point( distance , distance * 0.6f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
@@ -82,6 +83,7 @@ void System::_postUninit()
 	SAFE_DELETE( m_pIntegrator );
 
 	// release managers
+	Creator::DeleteSingleton();
 	MatManager::DeleteSingleton();
 	TexManager::DeleteSingleton();
 	MeshManager::DeleteSingleton();

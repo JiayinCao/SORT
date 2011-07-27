@@ -11,6 +11,7 @@
 #include "utility/define.h"
 #include <vector>
 #include "geometry/bbox.h"
+#include "utility/creator.h"
 
 // pre-declera classes
 class Primitive;

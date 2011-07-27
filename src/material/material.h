@@ -9,6 +9,7 @@
 
 // include the cpp file
 #include "utility/propertyset.h"
+#include "utility/creator.h"
 
 // pre-declera classes
 class Bsdf;
@@ -27,10 +28,6 @@ public:
 
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const = 0;
-
-	// create instance of the brdf
-	virtual Material* CreateInstance() = 0;
 };
 
-#define	CREATE_INSTANCE(T)	Material* CreateInstance() { return new T(); }
 #endif

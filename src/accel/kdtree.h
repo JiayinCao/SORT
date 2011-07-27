@@ -102,6 +102,8 @@ class KDTree : public Accelerator
 {
 // public method
 public:
+	DEFINE_CREATOR( KDTree );
+
 	// default constructor
 	KDTree();
 	// constructor from a primitive list

@@ -15,6 +15,8 @@ class	Glass : public Material
 {
 // public method
 public:
+	DEFINE_CREATOR( Glass );
+	
 	// constructor
 	Glass();
 	// destructor
@@ -22,8 +24,6 @@ public:
 
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
-
-	CREATE_INSTANCE(Glass);
 
 // private field
 private:
@@ -43,7 +43,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			Glass* glass = dynamic_cast<Glass*>(m_target);
+			Glass* glass = CAST_TARGET(Glass);
 			glass->eta_i = (float)atof( str.c_str() );
 		}
 	};
@@ -55,7 +55,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			Glass* glass = dynamic_cast<Glass*>(m_target);
+			Glass* glass = CAST_TARGET(Glass);
 			glass->eta_t = (float)atof( str.c_str() );
 		}
 	};

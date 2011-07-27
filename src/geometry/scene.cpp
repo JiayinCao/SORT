@@ -7,15 +7,13 @@
 // include the header
 #include "scene.h"
 #include "geometry/intersection.h"
-#include "accel/unigrid.h"
-#include "accel/kdtree.h"
-#include "accel/bvh.h"
-#include "thirdparty/tinyxml/tinyxml.h"
+#include "accel/accelerator.h"
 #include "utility/strhelper.h"
 #include "utility/path.h"
 #include "managers/matmanager.h"
 #include "sky/skysphere.h"
 #include "sky/skybox.h"
+#include "light/light.h"
 
 // initialize default data
 void Scene::_init()
@@ -66,17 +64,7 @@ bool Scene::LoadScene( const string& str )
 		const char* filename = meshNode->Attribute( "filename" );
 
 		// load the transform matrix
-		Transform transform;
-		TiXmlElement* matrixNode = meshNode->FirstChildElement( "Transform" );
-		if( matrixNode )
-		{
-			matrixNode = matrixNode->FirstChildElement( "Matrix" );
-			while( matrixNode )
-			{
-				transform = TransformFromStr(matrixNode->Attribute( "value" )) * transform;
-				matrixNode = matrixNode->NextSiblingElement( "Matrix" );
-			}
-		}
+		Transform transform = _parseTransform( meshNode->FirstChildElement( "Transform" ) );
 
 		// load the first mesh
 		TriMesh* mesh = new TriMesh();
@@ -89,18 +77,41 @@ bool Scene::LoadScene( const string& str )
 		meshNode = meshNode->NextSiblingElement( "Model" );
 	}
 
+
+	// parse the triangle mesh
+	TiXmlElement* lightNode = root->FirstChildElement( "Light" );
+	while( lightNode )
+	{
+		string type = lightNode->Attribute( "type" );
+		Light* light = CREATE_TYPE( type , Light );
+
+		// load the transform matrix
+		light->SetTransform( _parseTransform( lightNode->FirstChildElement( "Transform" ) ) );
+
+		// set the properties
+		TiXmlElement* prop = lightNode->FirstChildElement( "Property" );
+		while( prop )
+		{
+			string prop_name = prop->Attribute( "name" );
+			string prop_value = prop->Attribute( "value" );
+			light->SetProperty( prop_name , prop_value );
+			prop = prop->NextSiblingElement( "Property" );
+		}
+
+		// push the light
+		m_lights.push_back( light );
+
+		// get to the next light
+		lightNode = lightNode->NextSiblingElement( "Light" );
+	}
+
 	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.
 	TiXmlElement* accelNode = root->FirstChildElement( "Accel" );
 	if( accelNode )
 	{
 		// set cooresponding type of accelerator
 		string type = accelNode->Attribute( "type" );
-		if( type == "uniform_grid" )
-			m_pAccelerator = new UniGrid();
-		else if( type == "kd_tree" )
-			m_pAccelerator = new KDTree();
-		else if( type == "bvh" )
-			m_pAccelerator = new Bvh();
+		m_pAccelerator = CREATE_TYPE( type , Accelerator );
 	}
 
 	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.
@@ -176,6 +187,14 @@ void Scene::Release()
 		tri_it++;
 	}
 	m_meshBuf.clear();
+
+	vector<Light*>::iterator light_it = m_lights.begin();
+	while( light_it != m_lights.end() )
+	{
+		delete *light_it;
+		light_it++;
+	}
+	m_lights.clear();
 }
 
 // generate triangle buffer
@@ -220,4 +239,20 @@ Spectrum Scene::EvaluateSky( const Ray& r ) const
 		return m_pSky->Evaluate( r );
 
 	return 0.0f;
+}
+
+// parse transformation
+Transform Scene::_parseTransform( const TiXmlElement* node )
+{
+	Transform transform;
+	if( node )
+	{
+		node = node->FirstChildElement( "Matrix" );
+		while( node )
+		{
+			transform = TransformFromStr(node->Attribute( "value" )) * transform;
+			node = node->NextSiblingElement( "Matrix" );
+		}
+	}
+	return transform;
 }

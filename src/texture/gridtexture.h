@@ -17,6 +17,8 @@ class	GridTexture : public Texture
 {
 // public method
 public:
+	DEFINE_CREATOR( GridTexture );
+
 	// default constructor
 	GridTexture();
 	// constructor from two colors
@@ -39,9 +41,6 @@ public:
 	// para 'x'	:	x coordinate , if out of range , use filter
 	// para 'y' :	y coordinate , if out of range , use filter
 	virtual Spectrum GetColor( int x , int y ) const;
-
-	// create instance
-	Texture* CreateInstance() { return new GridTexture(); }
 
 // protected field
 private:
@@ -70,7 +69,7 @@ private:
 		// set value
 		void SetValue( const string& value )
 		{
-			GridTexture* ct = dynamic_cast<GridTexture*>( m_target );
+			GridTexture* ct = CAST_TARGET(GridTexture);
 			ct->m_Color0 = SpectrumFromStr( value );
 		}
 	};
@@ -83,7 +82,7 @@ private:
 		// set value
 		void SetValue( const string& value )
 		{
-			GridTexture* ct = dynamic_cast<GridTexture*>( m_target );
+			GridTexture* ct = CAST_TARGET(GridTexture);
 			ct->m_Color1 = SpectrumFromStr( value );
 		}
 	};
@@ -95,7 +94,7 @@ private:
 		// set value
 		void SetValue( const string& value )
 		{
-			GridTexture* ct = dynamic_cast<GridTexture*>( m_target );
+			GridTexture* ct = CAST_TARGET(GridTexture);
 			ct->m_Threshold = (float)atof( value.c_str() );
 		}
 	};

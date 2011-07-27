@@ -12,6 +12,7 @@
 #include "spectrum/spectrum.h"
 #include "utility/enum.h"
 #include "utility/propertyset.h"
+#include "utility/creator.h"
 
 // pre-declare class
 class ComTexture;
@@ -76,9 +77,6 @@ public:
 	ComTexture operator + ( float ) const;
 	ComTexture operator - ( float ) const;
 	ComTexture operator * ( float ) const;
-
-	// create texture instance
-	virtual Texture* CreateInstance(){return 0;}
 
 	// whether the texture is valid
 	virtual bool IsValid() { return true; }

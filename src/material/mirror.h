@@ -15,6 +15,8 @@ class	Mirror : public Material
 {
 // public method
 public:
+	DEFINE_CREATOR( Mirror );
+
 	// default constructor
 	Mirror();
 	// destructor
@@ -22,9 +24,6 @@ public:
 
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
-
-	// create instance of the brdf
-	CREATE_INSTANCE( Mirror );
 };
 
 #endif

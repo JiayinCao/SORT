@@ -18,6 +18,8 @@ class ImageTexture : public Texture
 {
 // public method
 public:
+	DEFINE_CREATOR( ImageTexture );
+
 	// default constructor
 	ImageTexture() { _init(); }
 	// destructor
@@ -52,9 +54,6 @@ public:
 	// release the texture memory
 	virtual void Release();
 
-	// create texture
-	Texture* CreateInstance() { return new ImageTexture(); }
-
 	// whether the image is valid
 	bool IsValid() { return (bool)m_pMemory; }
 // private field
@@ -82,7 +81,7 @@ private:
 		// set value
 		void SetValue( const string& value )
 		{
-			ImageTexture* ct = dynamic_cast<ImageTexture*>( m_target );
+			ImageTexture* ct = CAST_TARGET(ImageTexture);
 			
 			// load image file
 			ct->LoadImageFromFile( value );

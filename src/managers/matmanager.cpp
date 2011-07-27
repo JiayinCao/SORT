@@ -14,10 +14,7 @@
 #include "material/matte.h"
 #include "texmanager.h"
 #include "texture/constanttexture.h"
-#include "material/matte.h"
-#include "material/merlmat.h"
-#include "material/mirror.h"
-#include "material/glass.h"
+#include "utility/creator.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MatManager);
@@ -25,9 +22,6 @@ DEFINE_SINGLETON(MatManager);
 // default constructor
 MatManager::MatManager()
 {
-	// register materials
-	_registerMaterials();
-
 	// initialize default material
 	ConstantTexture* ct = new ConstantTexture( 0.1f , 0.1f , 0.1f );
 	m_Default = new Matte();
@@ -38,7 +32,6 @@ MatManager::MatManager()
 MatManager::~MatManager()
 {
 	_clearMatPool();
-	_unregisterMaterials();
 }
 
 // clear the material pool
@@ -101,7 +94,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 			LOG_ERROR<<"A material named \'"<<name<<"\' already exists in material system."<<CRASH;
 
 		// create specific material
-		Material* mat = _createMaterial( type );
+		Material* mat = CREATE_TYPE( type , Material );
 
 		if( mat )
 		{
@@ -121,7 +114,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 			{
 				string name = prop->Attribute( "name" );
 				string type = prop->Attribute( "type" );
-				Texture* tex = TexManager::GetSingleton().CreateTexture(type);
+				Texture* tex = CREATE_TYPE(type,Texture);
 				if( tex )
 				{
 					TiXmlElement* tex_prop = prop->FirstChildElement( "Property" );
@@ -158,39 +151,4 @@ unsigned MatManager::ParseMatFile( const string& str )
 unsigned MatManager::GetMatCount() const
 {
 	return m_matPool.size();
-}
-
-// register all of the materials
-void MatManager::_registerMaterials()
-{
-	// register all of the materials
-	m_matType.insert( make_pair( "Matte" , new Matte() ) );
-	m_matType.insert( make_pair( "Merl" , new MerlMat() ) );
-	m_matType.insert( make_pair( "Mirror" , new Mirror() ) );
-	m_matType.insert( make_pair( "Glass" , new Glass() ) );
-}
-
-// clear registered types
-void MatManager::_unregisterMaterials()
-{
-	map< string , Material* >::iterator it = m_matType.begin();
-	while( it != m_matType.end() )
-	{
-		delete it->second;
-		it++;
-	}
-	m_matType.clear();
-}
-
-// create material
-Material* MatManager::_createMaterial( const string& str )
-{
-	map< string , Material* >::const_iterator it = m_matType.find( str );
-	if( it != m_matType.end() )
-		return it->second->CreateInstance();
-
-	// crash
-	LOG_WARNING<<"There is no material with the type of "<<str<<"."<<ENDL;
-
-	return 0;
 }

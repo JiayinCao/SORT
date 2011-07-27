@@ -3,13 +3,25 @@
   <Material value="default.material"/>
 	<Model filename="teapot.obj">
 		<Transform>
-			<Matrix value="s 0.1"/>
-      <Matrix value="r 1 0.0"/>
-      <Matrix value="t 0 1 0"/>
 	  <Matrix value="s 30"/>
 		</Transform>
 	</Model>
-	<Accel type="kd_tree"/>
+  <Light type="point">
+    <Transform>
+      <Matrix value="t 100 1500 100"/>
+    </Transform>
+    <Property name="intensity" value="9000000 0 1"/>
+  </Light>
+  <Light type="point">
+    <Transform>
+      <Matrix value="t 1500 100 100"/>
+    </Transform>
+    <Property name="intensity" value="0 9000000 1"/>
+  </Light>
+	<Accel type="bvh"/>
+  <Sky type="sky_sphere">
+    <Property name="image" value="sky/mars.bmp"/>
+  </Sky>
   <Sky type="sky_box">
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />

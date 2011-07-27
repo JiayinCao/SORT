@@ -18,14 +18,13 @@ class MerlMat : public Material
 {
 // public method
 public:
+	DEFINE_CREATOR( MerlMat );
+
 	// default constructor
 	MerlMat();
 	
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
-
-	// create instance of the brdf
-	CREATE_INSTANCE( MerlMat );
 
 // private field
 private:
@@ -55,7 +54,7 @@ private:
 		void SetValue( const string& str )
 		{
 			// cast target
-			MerlMat* merlmat = dynamic_cast<MerlMat*>(m_target);
+			MerlMat* merlmat = CAST_TARGET(MerlMat);
 
 			// create a merl bxdf
 			Merl* merl = new Merl( str );

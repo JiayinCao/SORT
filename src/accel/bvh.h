@@ -52,6 +52,8 @@ class Bvh : public Accelerator
 {
 // public method
 public:
+	DEFINE_CREATOR( Bvh );
+
 	// default construction
 	Bvh();
 	// destructor
