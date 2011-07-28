@@ -111,7 +111,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 }
 
 // get the bounding box of the triangle
-const BBox& Triangle::GetBBox()
+const BBox& Triangle::GetBBox() const
 {
 	// if there is no bounding box , cache it
 	if( !m_bbox )

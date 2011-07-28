@@ -7,26 +7,19 @@
 		</Transform>
 	</Model>
   <Light type="point">
-    <Transform>
-      <Matrix value="t 100 100 1500"/>
-    </Transform>
-    <Property name="intensity" value="9000000 0 1"/>
-  </Light>
-  <Light type="point">
-    <Transform>
-      <Matrix value="t 1500 100 100"/>
-    </Transform>
     <Property name="intensity" value="0 9000000 1"/>
+	<Property name="pos" value="1500 100 100" />
   </Light>
   <Light type="spot">
-    <Transform>
-      <Matrix value="r 0 -3"/>
-      <Matrix value="r 1 -1.14"/>
-      <Matrix value="t 0 1500 0"/>
-    </Transform>
     <Property name="intensity" value="0 0 9000000"/>
     <Property name="falloff_start" value="0.1" />
     <Property name="range" value="0.4"/>
+	<Property name="pos" value="100 1500 100"/>
+	<Property name="dir" value="0 -1 0"/>
+  </Light>
+  <Light type="distant">
+  	<Property name="intensity" value="0 20 20" />
+	<Property name="dir" value="-1 -1 1"/>
   </Light>
 	<Accel type="bvh"/>
   <Sky type="sky_sphere">

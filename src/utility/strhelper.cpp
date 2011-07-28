@@ -156,7 +156,7 @@ Spectrum SpectrumFromStr( const string& s )
 	return Spectrum( fr , fg , fb );
 }
 
-// spectrum from string
+// point from string
 Point PointFromStr( const string& s )
 {
 	// if the string is empty , return black color
@@ -173,6 +173,23 @@ Point PointFromStr( const string& s )
 	float fz = (float)atof( z.c_str() );
 
 	return Point( fx , fy , fz );
+}
+
+// vector from string
+Vector VectorFromStr( const string& s )
+{
+	if( s.empty() )
+		return Vector();
+	string str = s;
+	string x = NextToken( str , ' ' );
+	string y = NextToken( str , ' ' );
+	string z = NextToken( str , ' ' );
+
+	float fx = (float)atof( x.c_str() );
+	float fy = (float)atof( y.c_str() );
+	float fz = (float)atof( z.c_str() );
+
+	return Vector( fx , fy , fz ); 
 }
 
 // get the next token

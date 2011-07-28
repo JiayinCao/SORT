@@ -37,7 +37,7 @@ public:
 	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const;
 
 	// get the bounding box of the triangle
-	virtual const BBox&	GetBBox();
+	virtual const BBox&	GetBBox() const;
 
 // protected filed
 protected:

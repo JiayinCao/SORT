@@ -60,6 +60,9 @@ public:
 	const vector<Light*>& GetLights() const
 	{return m_lights;}
 
+	// get bounding box of the scene
+	const BBox& GetBBox() const;
+
 // private field
 private:
 	// the buffer for the triangle mesh
@@ -79,6 +82,9 @@ private:
 
 	// the sky for the scene
 	Sky*		m_pSky;
+
+	// bounding box for the scene
+	mutable BBox	m_BBox;
 
 // private method
 	

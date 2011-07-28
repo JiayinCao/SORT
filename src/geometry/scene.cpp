@@ -85,21 +85,26 @@ bool Scene::LoadScene( const string& str )
 		string type = lightNode->Attribute( "type" );
 		Light* light = CREATE_TYPE( type , Light );
 
-		// load the transform matrix
-		light->SetTransform( _parseTransform( lightNode->FirstChildElement( "Transform" ) ) );
-
-		// set the properties
-		TiXmlElement* prop = lightNode->FirstChildElement( "Property" );
-		while( prop )
+		if( light )
 		{
-			string prop_name = prop->Attribute( "name" );
-			string prop_value = prop->Attribute( "value" );
-			light->SetProperty( prop_name , prop_value );
-			prop = prop->NextSiblingElement( "Property" );
-		}
+			// load the transform matrix
+			light->SetTransform( _parseTransform( lightNode->FirstChildElement( "Transform" ) ) );
 
-		// push the light
-		m_lights.push_back( light );
+			// set the properties
+			TiXmlElement* prop = lightNode->FirstChildElement( "Property" );
+			while( prop )
+			{
+				string prop_name = prop->Attribute( "name" );
+				string prop_value = prop->Attribute( "value" );
+				light->SetProperty( prop_name , prop_value );
+				prop = prop->NextSiblingElement( "Property" );
+			}
+
+			m_lights.push_back( light );
+		}else
+		{
+			LOG_WARNING<<"There is no light with the type of \'"<<type<<"\'."<<ENDL;
+		}
 
 		// get to the next light
 		lightNode = lightNode->NextSiblingElement( "Light" );
@@ -255,4 +260,20 @@ Transform Scene::_parseTransform( const TiXmlElement* node )
 		}
 	}
 	return transform;
+}
+
+// get the bounding box for the scene
+const BBox& Scene::GetBBox() const
+{
+	if( m_pAccelerator != 0 )
+		return m_pAccelerator->GetBBox();
+
+	// if there is no bounding box for the scene, generate one
+	vector<Primitive*>::const_iterator it = m_triBuf.begin();
+	while( it != m_triBuf.end() )
+	{
+		m_BBox.Union( (*it)->GetBBox() );
+		it++;
+	}
+	return m_BBox;
 }

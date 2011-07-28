@@ -29,42 +29,15 @@ public:
 	// para 'wo'		: output vector
 	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float* pdf ) const;
 
-	// set transformation
-	virtual void	SetTransform( const Transform& transform )
-	{
-		light2world = transform;
-		pos = transform(Point(0.0f,0.0f,0.0f));
-	}
-
 	// total power of the light
-	virtual Spectrum Power() const
+	virtual Spectrum Power( const Scene& ) const
 	{return 4 * PI * intensity;}
 
 // private field
 private:
-	// the light intensity
-	Spectrum intensity;
-
-	// position for light
-	Point	pos;
-
 	// register property
 	void _registerAllProperty();
 
-	// property handler
-	class IntensityProperty : public PropertyHandler<Light>
-	{
-	public:
-		// constructor
-		IntensityProperty(Light* light):PropertyHandler(light){}
-
-		// set value
-		void SetValue( const string& str )
-		{
-			PointLight* light = CAST_TARGET(PointLight);
-			light->intensity = SpectrumFromStr(str);
-		}
-	};
 	class PosProperty : public PropertyHandler<Light>
 	{
 	public:
@@ -74,7 +47,13 @@ private:
 		void SetValue( const string& str )
 		{
 			PointLight* light = CAST_TARGET(PointLight);
-			light->pos = PointFromStr( str );
+			Point p = PointFromStr( str );
+			light->light2world.matrix.m[3] = p.x;
+			light->light2world.matrix.m[7] = p.y;
+			light->light2world.matrix.m[11] = p.z;
+			light->light2world.invMatrix.m[3] = -p.x;
+			light->light2world.invMatrix.m[7] = -p.y;
+			light->light2world.invMatrix.m[11] = -p.z;
 		}
 	};
 };

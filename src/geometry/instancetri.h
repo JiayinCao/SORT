@@ -33,7 +33,7 @@ public:
 	bool	GetIntersect( const Ray& r , Intersection* intersect ) const;	
 	
 	// get the bounding box of the triangle
-	const BBox&	GetBBox();
+	const BBox&	GetBBox() const;
 
 // private field
 private:
