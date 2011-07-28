@@ -21,6 +21,6 @@ Spectrum PointLight::sample_f( const Intersection& intersect , Vector& wi , floa
 // register property
 void PointLight::_registerAllProperty()
 {
-	_registerProperty( "intensity" , new IntensityProperty(this) );
+	Light::_registerAllProperty();
 	_registerProperty( "pos" , new PosProperty(this) );
 }

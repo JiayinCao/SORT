@@ -10,6 +10,7 @@
 #include "sort.h"
 #include "managers/logmanager.h"
 #include "utility/define.h"
+#include <math.h>
 
 // pre-deleration
 class Transform;
@@ -181,6 +182,21 @@ inline Vector Normalize( const Vector& v )
 	}
 
 	return v / len;
+}
+
+// generate a coorindate system
+inline void CoordinateSystem( const Vector& v0 , Vector& v1 , Vector& v2 )
+{
+	if( fabs( v0.x ) > fabs( v0.y ) )
+	{
+		float invLen = 1.0f / sqrtf( v0.x * v0.x + v0.z * v0.z );
+		v1 = Vector( -v0.z * invLen , 0.0f , v0.x * invLen );
+	}else
+	{
+		float invLen = 1.0f / sqrtf( v0.y * v0.y + v0.z * v0.z );
+		v1 = Vector( 0.0f , v0.z * invLen , -v0.y * invLen );
+	}
+	v2 = Cross( v0 , v1 );
 }
 
 #endif

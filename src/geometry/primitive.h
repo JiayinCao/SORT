@@ -31,7 +31,7 @@ public:
 	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
 
 	// get the bounding box of the primitive
-	virtual const BBox&	GetBBox() = 0;
+	virtual const BBox&	GetBBox() const = 0;
 
 	// delete the cache
 	virtual void ClearBBoxCache()
@@ -56,7 +56,7 @@ public:
 // protected field
 protected:
 	// bounding box
-	SmartPtr<BBox> m_bbox;
+	mutable SmartPtr<BBox> m_bbox;
 	// id for the primitive
 	unsigned		m_primitive_id;
 	// the material

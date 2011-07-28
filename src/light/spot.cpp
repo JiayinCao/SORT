@@ -29,9 +29,11 @@ Spectrum SpotLight::sample_f( const Intersection& intersect , Vector& wi , float
 // register property
 void SpotLight::_registerAllProperty()
 {
-	_registerProperty( "intensity" , new IntensityProperty(this) );
+	Light::_registerAllProperty();
+	_registerProperty( "pos" , new PosProperty(this) );
 	_registerProperty( "falloff_start" , new FalloffStartProperty(this) );
 	_registerProperty( "range" , new RangeProperty(this) );
+	_registerProperty( "dir" , new DirProperty(this) );
 }
 
 // initialize default value

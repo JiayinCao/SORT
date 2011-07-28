@@ -40,7 +40,7 @@ bool	InstanceTriangle::GetIntersect( const Ray& r , Intersection* intersect ) co
 }
 
 // get the bounding box of the triangle
-const BBox& InstanceTriangle::GetBBox()
+const BBox& InstanceTriangle::GetBBox() const
 {
 	// if there is no bounding box , cache it
 	if( !m_bbox )
