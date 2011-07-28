@@ -46,6 +46,9 @@ Transform TransformFromStr( const string& str );
 // spectrum from string
 Spectrum SpectrumFromStr( const string& str );
 
+// spectrum from string
+Point PointFromStr( const string& str );
+
 // get the next token
 string NextToken( string& str , char t );
 

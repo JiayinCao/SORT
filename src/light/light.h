@@ -35,12 +35,15 @@ public:
 
 	// set transformation
 	virtual void	SetTransform( const Transform& transform )
-	{m_transform = transform;}
+	{light2world = transform;}
+
+	// total power of the light
+	virtual Spectrum Power() const = 0;
 
 // protected field
 protected:
 	// transformation of the light
-	Transform	m_transform;
+	Transform	light2world;
 };
 
 #endif

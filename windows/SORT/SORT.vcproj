@@ -700,6 +700,14 @@
 				RelativePath="..\..\src\light\pointlight.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\light\spot.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\light\spot.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="material"
