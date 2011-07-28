@@ -6,9 +6,15 @@
 	  <Matrix value="s 30"/>
 		</Transform>
 	</Model>
+  <Model filename="cube.obj">
+    <Transform>
+      <Matrix value="t -0.5 0 -0.5" />
+      <Matrix value="s 5000 10 5000"/>
+    </Transform>
+  </Model>
   <Light type="point">
-    <Property name="intensity" value="0 9000000 1"/>
-	<Property name="pos" value="1500 100 100" />
+    <Property name="intensity" value="0 5000000 1"/>
+	<Property name="pos" value="1500 500 100" />
   </Light>
   <Light type="spot">
     <Property name="intensity" value="0 0 9000000"/>
@@ -22,9 +28,6 @@
 	<Property name="dir" value="-1 -1 1"/>
   </Light>
 	<Accel type="bvh"/>
-  <Sky type="sky_sphere">
-    <Property name="image" value="sky/mars.bmp"/>
-  </Sky>
   <Sky type="sky_box">
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />
