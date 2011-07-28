@@ -7,7 +7,9 @@
 #ifndef SORT_VECTOR
 #define	SORT_VECTOR
 
+#include "sort.h"
 #include "managers/logmanager.h"
+#include "utility/define.h"
 
 // pre-deleration
 class Transform;
@@ -140,6 +142,13 @@ inline float AbsDot( const Vector& v0 , const Vector& v1 )
 {
 	float r = Dot( v0 , v1 );
 	return ( r < 0.0f )? -r : r;
+}
+// para 'v0' :	a vector
+// para 'v1' :	another vector
+// reulst    :	saturated dot product
+inline float SatDot( const Vector& v0 , const Vector& v1 )
+{
+	return clamp( Dot( v0 , v1 ) , 0.0f , 1.0f );
 }
 // para 'v0' :	a vector
 // para 'v1' :	another vector

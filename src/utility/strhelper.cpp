@@ -156,6 +156,25 @@ Spectrum SpectrumFromStr( const string& s )
 	return Spectrum( fr , fg , fb );
 }
 
+// spectrum from string
+Point PointFromStr( const string& s )
+{
+	// if the string is empty , return black color
+	if( s.empty() )
+		return Point();
+
+	string str = s;
+	string x = NextToken( str , ' ' );
+	string y = NextToken( str , ' ' );
+	string z = NextToken( str , ' ' );
+
+	float fx = (float)atof( x.c_str() );
+	float fy = (float)atof( y.c_str() );
+	float fz = (float)atof( z.c_str() );
+
+	return Point( fx , fy , fz );
+}
+
 // get the next token
 string NextToken( string& str , char t )
 {

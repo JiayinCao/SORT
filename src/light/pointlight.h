@@ -32,9 +32,13 @@ public:
 	// set transformation
 	virtual void	SetTransform( const Transform& transform )
 	{
-		m_transform = transform;
+		light2world = transform;
 		pos = transform(Point(0.0f,0.0f,0.0f));
 	}
+
+	// total power of the light
+	virtual Spectrum Power() const
+	{return 4 * PI * intensity;}
 
 // private field
 private:
@@ -59,6 +63,18 @@ private:
 		{
 			PointLight* light = CAST_TARGET(PointLight);
 			light->intensity = SpectrumFromStr(str);
+		}
+	};
+	class PosProperty : public PropertyHandler<Light>
+	{
+	public:
+		PosProperty(Light* light):PropertyHandler(light){}
+
+		// set value
+		void SetValue( const string& str )
+		{
+			PointLight* light = CAST_TARGET(PointLight);
+			light->pos = PointFromStr( str );
 		}
 	};
 };
