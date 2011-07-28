@@ -689,6 +689,14 @@
 			Name="light"
 			>
 			<File
+				RelativePath="..\..\src\light\distant.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\light\distant.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\light\light.h"
 				>
 			</File>
