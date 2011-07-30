@@ -341,7 +341,7 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	const unsigned	mask = 0x00000003;
 	const float		delta = 0.001f;
 
-	if( intersect->t < fmin - delta )
+	if( intersect && intersect->t < fmin - delta )
 		return intersect->t < ray_max + delta;
 
 	// it's a leaf node
@@ -350,7 +350,11 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 		unsigned tri_num = node->flag>>2;
 		bool inter = false;
 		for( unsigned i = 0 ; i < tri_num ; i++ )
+		{
 			inter |= m_prilist[i+node->offset]->GetIntersect( ray , intersect );
+			if( intersect == 0 && inter )
+				return true;
+		}
 		return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
 	}
 
@@ -370,7 +374,11 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 
 	bool inter = false;
 	if( t > fmin - delta )
+	{
 		inter = _traverse( first , ray , intersect , fmin , min( fmax , t ) , ray_max );
+		if( intersect == 0 && inter )
+			return true;
+	}
 	if( inter == false && ( fmax + delta ) > t )
 		return _traverse( second , ray , intersect , max( t , fmin ) , fmax , ray_max );
 	return inter;

@@ -226,7 +226,7 @@ bool Bvh::_traverseNode( Bvh_Node* node , const Ray& ray , Intersection* interse
 	if( fmin < 0.0f )
 		return false;
 
-	if( intersect->t < fmin )
+	if( intersect && intersect->t < fmin )
 		return intersect->t < ray_max;
 	
 	if( node->pri_num != 0 )
@@ -237,7 +237,11 @@ bool Bvh::_traverseNode( Bvh_Node* node , const Ray& ray , Intersection* interse
 
 		bool inter = false;
 		for( unsigned i = _start ; i < _end ; i++ )
+		{
 			inter |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
+			if( intersect == 0 && inter )
+				return true;
+		}
 
 		return inter;
 	}
@@ -250,14 +254,17 @@ bool Bvh::_traverseNode( Bvh_Node* node , const Ray& ray , Intersection* interse
 	float	_fmin1 , _fmax1;
 	_fmin1 = Intersect( ray , right->bbox , &_fmax1 );
 
+	bool inter = false;
 	if( _fmin1 > _fmin0 )
 	{
-		_traverseNode( left , ray , intersect , _fmin0 , _fmax0 , ray_max );
-		_traverseNode( right , ray , intersect , _fmin1 , _fmax1 , ray_max );
+		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 , ray_max );
+		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 , ray_max );
 	}else
 	{
-		_traverseNode( right , ray , intersect , _fmin1 , _fmax1 , ray_max );
-		_traverseNode( left , ray , intersect , _fmin0 , _fmax0 , ray_max );
+		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 , ray_max );
+		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 , ray_max );
 	}
+	if( intersect == 0 )
+		return inter;
 	return intersect->t < ray_max;
 }

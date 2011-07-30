@@ -166,8 +166,14 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 	intersect->t = FLT_MAX;
 	int n = (int)m_triBuf.size();
 	for( int k = 0 ; k < n ; k++ )
-		m_triBuf[k]->GetIntersect( r , intersect );
+	{
+		bool flag = m_triBuf[k]->GetIntersect( r , intersect );
+		if( flag && intersect == 0 )
+			return true;
+	}
 
+	if( intersect == 0 )
+		return false;
 	return intersect->t < r.m_fMax;
 }
 

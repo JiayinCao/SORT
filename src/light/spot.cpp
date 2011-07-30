@@ -7,9 +7,10 @@
 // include the header
 #include "spot.h"
 #include "geometry/intersection.h"
+#include "geometry/scene.h"
 
 // sample ray from light
-Spectrum SpotLight::sample_f( const Intersection& intersect , Vector& wi , float* pdf ) const
+Spectrum SpotLight::sample_f( const Intersection& intersect , Vector& wi , float* pdf , const Scene& scene ) const
 {
 	Point pos( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
 	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
@@ -23,6 +24,15 @@ Spectrum SpotLight::sample_f( const Intersection& intersect , Vector& wi , float
 	if( falloff > cos_falloff_start )
 		return intensity / delta.SquaredLength();
 	float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
+	if( d == 0.0f )
+		return 0.0f;
+
+	float len = delta.Length();
+	Ray r( intersect.intersect , wi , 0 , 1.0f , len );
+	bool occluded = scene.GetIntersect( r , 0 );
+	if( occluded )
+		return 0.0f;
+
 	return intensity / delta.SquaredLength() * d * d;
 }
 

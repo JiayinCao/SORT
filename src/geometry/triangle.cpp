@@ -23,51 +23,31 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	const Point& p1 = mem->m_PositionBuffer[id1] ;
 	const Point& p2 = mem->m_PositionBuffer[id2] ;
 
-	// Find vectors for two edges sharing vert0
-    Vector edge1 = p1 - p0;
-    Vector edge2 = p2 - p0;
+	Vector e1 = p1 - p0;
+	Vector e2 = p2 - p0;
+	Vector s1 = Cross( r.m_Dir , e2 );
+	float divisor = Dot( s1 , e1 );
+	if( divisor == 0.0f )
+		return false;
+	float invDivisor = 1.0f / divisor;
 
-	// Begin calculating determinant - also used to calculate U parameter
-	Vector pvec = Cross( r.m_Dir , edge2 );
-
-    // If determinant is near zero, ray lies in plane of triangle
-    float det = Dot( edge1, pvec );
-
-    Vector tvec;
-    if( det > 0 )
-        tvec = r.m_Ori - p0;
-    else
-    {
-        tvec = p0 - r.m_Ori;
-        det = -det;
-    }
-
-	const float threshold = 0.0000001f;
-    if( det < -threshold )
+	Vector d = r.m_Ori - p0;
+	float u = Dot( d , s1 ) * invDivisor;
+	if( u < 0.0f || u > 1.0f )
+		return false;
+	Vector s2 = Cross( d , e1 );
+	float v = Dot( r.m_Dir , s2 ) * invDivisor;
+	if( v < 0.0f || u + v > 1.0f )
+		return false;
+	float t = Dot( e2 , s2 ) * invDivisor;
+	if( t < r.m_fMin || t > r.m_fMax )
 		return false;
 
-    // Calculate U parameter and test bounds
-    float u = Dot( tvec, pvec );
-    if( u < -threshold || u > det + threshold )
-		return false;
-
-    // Prepare to test V parameter
-    Vector qvec = Cross( tvec, edge1 );
-
-    // Calculate V parameter and test bounds
-    float v = Dot( r.m_Dir, qvec );
-    if( v < -threshold || u + v > det + threshold )
-		return false;
-
-    // Calculate t, scale parameters, ray intersects triangle
-    float t = Dot( edge2, qvec );
-    float fInvDet = 1.0f / det;
-    t *= fInvDet;
-	u *= fInvDet;
-	v *= fInvDet;
+	if( intersect == 0 )
+		return t > r.m_fMin && t < r.m_fMax;
 
 	// if t is out of range , return false
-	if( t > intersect->t || t < 0.0f || t > r.m_fMax )
+	if( t > intersect->t )
 		return false;
 
 	// store the intersection
