@@ -33,7 +33,7 @@ public:
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'wo'		: output vector
-	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float* pdf ) const = 0;
+	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float* pdf , const Scene& scene ) const = 0;
 
 	// set transformation
 	virtual void	SetTransform( const Transform& transform )

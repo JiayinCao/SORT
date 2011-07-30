@@ -35,7 +35,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	{
 		Vector	lightDir;
 		float	pdf;
-		Spectrum ld = (*it)->sample_f( ip , lightDir , &pdf );
+		Spectrum ld = (*it)->sample_f( ip , lightDir , &pdf , scene );
 		Spectrum f = bsdf->f( -r.m_Dir , lightDir );
 		t += (ld * f * SatDot( lightDir , ip.normal ) / pdf);
 		it++;

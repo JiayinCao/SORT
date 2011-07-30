@@ -69,8 +69,9 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	memset( m_pMailBox , 0 , sizeof( unsigned char ) * ( m_primitives->size() + 7 ) / 8 );
 
 	// get the intersect point
-	float cur_t = Intersect( r , m_BBox , &(intersect->t) );
-	float maxt = intersect->t;
+	float maxt;
+	float cur_t = Intersect( r , m_BBox , &maxt );
+	if( intersect ) intersect->t = maxt;
 	if( cur_t < 0.0f )
 		return false;
 
@@ -95,7 +96,7 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 
 	// traverse the uniform grid
 	const unsigned array[] = { 0 , 0 , 1 , 0 , 2 , 2 , 1 , 0  };// [0] and [7] is impossible
-	while( cur_t < intersect->t )
+	while( ( intersect && cur_t < intersect->t ) || ( intersect == 0 ) )
 	{
 		// current voxel id
 		unsigned voxelId = _offset( curGrid[0] , curGrid[1] , curGrid[2] );
@@ -112,14 +113,14 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 		curGrid[nextAxis] += dir[nextAxis];
 
 		if( curGrid[nextAxis] < 0 || (unsigned)curGrid[nextAxis] >= m_voxelNum[nextAxis] )
-			return intersect->t < maxt;
+			return ( intersect && intersect->t < maxt );
 
 		// update next
 		cur_t = next[nextAxis];
 		next[nextAxis] += delta[nextAxis];
 	}
 	
-	return intersect->t < maxt;
+	return ( intersect && intersect->t < maxt );
 }
 
 // build the acceleration structure
@@ -225,7 +226,11 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 
 		// get intersection
 		if( 0 == (flag & m_pMailBox[offset]) )
+		{
 			inter |= (*it)->GetIntersect( r , intersect );
+			if( intersect == 0 && inter )
+				return true;
+		}
 
 		// mark the triangle as checked
 		m_pMailBox[offset] |= flag;
