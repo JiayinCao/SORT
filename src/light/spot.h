@@ -27,7 +27,7 @@ public:
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'wo'		: output vector
-	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float* pdf , const Scene& scene ) const;
+	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float* pdf , Visibility& visibility ) const;
 
 	// total power of the light
 	virtual Spectrum Power( const Scene& ) const

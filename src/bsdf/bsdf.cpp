@@ -66,7 +66,7 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 // sample a ray from bsdf
 Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , float* pdf , BXDF_TYPE type ) const
 {
-	Vector swo = _worldToLocal( wo );
+	Vector swo = Normalize(_worldToLocal( wo ));
 	Vector swi;
 
 	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )

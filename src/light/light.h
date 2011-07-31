@@ -13,11 +13,33 @@
 #include "geometry/transform.h"
 #include "utility/creator.h"
 #include "utility/strhelper.h"
+#include "geometry/scene.h"
 
 // pre-decleration
 class Intersection;
 class Vector;
-class Scene;
+
+class Visibility
+{
+// public method
+public:
+	// default constructor
+	Visibility( const Scene& s ):scene(s){}
+	// destructor
+	~Visibility(){}
+
+	// whether it's visible from the light source
+	bool	IsVisible() const
+	{
+		return !scene.GetIntersect( ray , 0 );
+	}
+
+// public field
+	// the shadow ray
+	Ray	ray;
+	// the scene
+	const Scene& scene;
+};
 
 ////////////////////////////////////////////////////////////////////////
 // definition of ligth
@@ -33,7 +55,7 @@ public:
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'wo'		: output vector
-	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float* pdf , const Scene& scene ) const = 0;
+	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float* pdf , Visibility& visibility ) const = 0;
 
 	// set transformation
 	virtual void	SetTransform( const Transform& transform )

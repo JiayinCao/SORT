@@ -29,15 +29,28 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r ) const
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
 
 	// lights
+	Visibility visibility(scene);
 	const vector<Light*>& lights = scene.GetLights();
 	vector<Light*>::const_iterator it = lights.begin();
 	while( it != lights.end() )
 	{
 		Vector	lightDir;
 		float	pdf;
-		Spectrum ld = (*it)->sample_f( ip , lightDir , &pdf , scene );
+		Spectrum ld = (*it)->sample_f( ip , lightDir , &pdf , visibility );
+		if( ld.IsBlack() )
+		{
+			it++;
+			continue;
+		}
 		Spectrum f = bsdf->f( -r.m_Dir , lightDir );
-		t += (ld * f * SatDot( lightDir , ip.normal ) / pdf);
+		if( f.IsBlack() )
+		{
+			it++;
+			continue;
+		}
+		bool visible = visibility.IsVisible();
+		if( visible )
+			t += (ld * f * SatDot( lightDir , ip.normal ) / pdf);
 		it++;
 	}
 
