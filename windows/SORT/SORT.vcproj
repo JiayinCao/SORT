@@ -501,6 +501,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\utility\samplemethod.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\singleton.h"
 				>
 			</File>
