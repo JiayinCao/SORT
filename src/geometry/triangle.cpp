@@ -23,21 +23,22 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	const Point& p1 = mem->m_PositionBuffer[id1] ;
 	const Point& p2 = mem->m_PositionBuffer[id2] ;
 
+	float delta = 0.0001f;
 	Vector e1 = p1 - p0;
 	Vector e2 = p2 - p0;
 	Vector s1 = Cross( r.m_Dir , e2 );
 	float divisor = Dot( s1 , e1 );
-	if( divisor == 0.0f )
+	if( fabs(divisor) < delta )
 		return false;
 	float invDivisor = 1.0f / divisor;
 
 	Vector d = r.m_Ori - p0;
 	float u = Dot( d , s1 ) * invDivisor;
-	if( u < 0.0f || u > 1.0f )
+	if( u < -delta || u > 1.0f + delta )
 		return false;
 	Vector s2 = Cross( d , e1 );
 	float v = Dot( r.m_Dir , s2 ) * invDivisor;
-	if( v < 0.0f || u + v > 1.0f )
+	if( v < -delta || u + v > 1.0f + delta )
 		return false;
 	float t = Dot( e2 , s2 ) * invDivisor;
 	if( t < r.m_fMin || t > r.m_fMax )

@@ -3,7 +3,8 @@
   <Material value="default.material"/>
 	<Model filename="teapot.obj">
 		<Transform>
-	  <Matrix value="s 30"/>
+	  <Matrix value="s 20"/>
+      <Matrix value="t 0 100 0"/>
 		</Transform>
 	</Model>
   <Model filename="cube.obj">
@@ -12,11 +13,11 @@
       <Matrix value="s 5000 10 5000"/>
     </Transform>
   </Model>
-  <Light type="point">
+  <Light type="po1int">
     <Property name="intensity" value="0 5000000 1"/>
 	<Property name="pos" value="1500 500 100" />
   </Light>
-  <Light type="spot">
+  <Light type="s1pot">
     <Property name="intensity" value="0 0 9000000"/>
     <Property name="falloff_start" value="0.1" />
     <Property name="range" value="0.4"/>
