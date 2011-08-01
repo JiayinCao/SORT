@@ -51,7 +51,7 @@ public:
 	// result   : transformd ray
 	Ray operator * ( const Ray& r ) const
 	{
-		return Ray( *this * r.m_Ori , *this * r.m_Dir );
+		return Ray( *this * r.m_Ori , *this * r.m_Dir , r.m_Depth , r.m_fMin , r.m_fMax );
 	}
 	Ray operator () ( const Ray& r ) const
 	{
