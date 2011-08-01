@@ -213,7 +213,9 @@ public:
 	{
 		float pdf0 , pdf1;
 		uv[1] = marginal->SampleContinuous( v , &pdf1 );
-		int vi = clamp( (int)(uv[1]*m_nv) , 0 , m_nv - 1 );
+		int vi = (int)(uv[1] * m_nv);
+		if( vi > (int)(m_nv - 1) )
+			vi = (int)(m_nv - 1);
 		uv[0] = pConditions[vi]->SampleContinuous( u , &pdf0 );
 
 		if( pdf )
