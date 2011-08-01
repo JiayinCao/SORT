@@ -14,7 +14,7 @@ description :
 	There are some basic sampling methods used for Monte Carlo ray tracing.
 */
 
-// sampling a point on unit disk uniformly
+// sampling a point on unit disk uniformly using Shirley's Mapping
 // para 'u' : a canonical random variable
 // para 'v' : a canonical random variable
 // para 'x' : x position on the unit disk
@@ -61,6 +61,39 @@ inline Vector CosSampleHemisphere( float u , float v )
 inline float CosHemispherePdf( const Vector& v )
 {
 	return CosTheta(v) * INV_PI;
+}
+
+// sampling a vector in a hemisphere uniformly
+// para 'u'	: a canonical random variable
+// para 'v' : a canonical random variable
+inline Vector UniformSampleHemisphere( float u , float v )
+{
+	float theta = acos( u );
+	float phi = TWO_PI * v;
+
+	return SphericalVec( theta , phi );
+}
+
+// uniformly sample hemisphere pdf
+inline float UniformHemispherePdf( const Vector& v )
+{
+	return INV_TWOPI;
+}
+
+// sampling a vector in sphere uniformly
+// para 'u'	: a canonical random variable
+// para 'v'	: a canonical random variable
+inline Vector UniformSampleSphere( float u , float v )
+{
+	float theta = acos( 1 - 2.0f * u );
+	float phi = TWO_PI * v;
+	return SphericalVec( theta , phi );
+}
+
+// pdf of uniformly sampling a vector on sphere
+inline float UniformSpherePdf( const Vector& v )
+{
+	return INV_TWOPI * 0.5f;
 }
 
 #endif

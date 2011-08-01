@@ -114,4 +114,13 @@ inline float SphericalPhi(const Vector &v) {
     return (p < 0.f) ? p + 2.f*PI : p;
 }
 
+inline Vector SphericalVec( float theta , float phi )
+{
+	float x = sin( theta ) * cos( phi );
+	float y = cos( theta );
+	float z = sin( theta ) * sin( phi );
+
+	return Vector( x , y , z );
+}
+
 #endif

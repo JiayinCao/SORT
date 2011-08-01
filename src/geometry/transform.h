@@ -174,7 +174,7 @@ inline Vector operator* ( const Transform& t , const Vector& v )
 // transform a ray
 inline Ray	operator* ( const Transform& t , const Ray& r )
 {
-	return Ray( t(r.m_Ori) , t(r.m_Dir) );
+	return Ray( t(r.m_Ori) , t(r.m_Dir) , r.m_Depth , r.m_fMin , r.m_fMax );
 }
 
 #endif
