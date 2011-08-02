@@ -11,7 +11,6 @@
 description :
 	Random number generation method, the default 'rand' function provided by c++ standard library is not so good,
 	another random number generation method is adapted here.
-	Check "Efficient Jump Ahead for F2-Linear Random Number Generators" for detail.
 */
 
 // set the seed
