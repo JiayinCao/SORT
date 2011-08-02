@@ -242,6 +242,7 @@ private:
 		marginal = new Distribution1D( m , nv );
 		m_nu = nu;
 		m_nv = nv;
+		delete[] m;
 	}
 };
 #endif
