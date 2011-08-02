@@ -497,6 +497,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\utility\rand.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\utility\rand.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\referencecount.h"
 				>
 			</File>

@@ -10,6 +10,7 @@
 #include "utility/samplemethod.h"
 #include "texture/imagetexture.h"
 #include "texture/rendertarget.h"
+#include "utility/rand.h"
 
 // the global system
 System g_System;
@@ -29,12 +30,8 @@ int main( int argc , char** argv )
 
 	for( int i = 0 ; i < 1000000; i++ )
 	{
-		float u = ((float) ( rand() % 1024 ) / 1024.0f);
-		float v = ((float) ( rand() % 1024 ) / 1024.0f);
-
-		int t = rand() % 4;
-		while( t-- > 0 )
-			v = (float) (rand() % 1024 ) / 1024.0f;
+		float u = sort_canonical();
+		float v = sort_canonical();
 
 		float uv[2];
 		dis.SampleContinuous( u , v , uv , 0 );
