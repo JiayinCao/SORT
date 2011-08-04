@@ -18,6 +18,7 @@
 // include the header file
 #include "bbox.h"
 #include "vector.h"
+#include "utility/assert.h"
 
 // default constructor
 BBox::BBox():
@@ -147,7 +148,6 @@ void BBox::Union( const BBox& box )
 // delta in a specific axis
 float BBox::Delta( unsigned k ) const
 {
-	if( k < 0 || k > 3 )
-		LOG_ERROR<<"Index is out of range."<<CRASH;
+	Sort_Assert( k < 3 );
 	return m_Max[k]-m_Min[k];
 }

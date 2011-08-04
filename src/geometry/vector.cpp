@@ -20,6 +20,7 @@
 #include <math.h>
 #include "managers/logmanager.h"
 #include "transform.h"
+#include "utility/assert.h"
 
 // default constructor, all of the components are set zero
 Vector::Vector( bool normal ):
@@ -104,11 +105,7 @@ Vector&	Vector::operator *=( float f )
 // / operator
 Vector Vector::operator / ( float f ) const
 {
-	if( f == 0.0f )
-	{
-		// output the LOG_ERROR here
-		LOG_ERROR<<"vector divided by 0!!!"<<CRASH;
-	}
+	Sort_Assert( f != 0.0f );
 
 	float t = 1.0f / f;
 	
@@ -118,11 +115,7 @@ Vector Vector::operator / ( float f ) const
 // /= operator
 Vector& Vector::operator /= ( float f )
 {
-	if( f == 0 )
-	{
-		// output the LOG_ERROR here
-		LOG_ERROR<<"vector divided by 0!!!"<<CRASH;
-	}
+	Sort_Assert( f != 0.0f );
 
 	float t = 1.0f / f;
 
@@ -143,7 +136,7 @@ float Vector::operator [] ( unsigned id ) const
 	if( id == 2 )
 		return z;
 
-	LOG_ERROR<<"index out of range!!!"<<CRASH;
+	Sort_Assert( id < 3 );
 
 	return 0;
 }
@@ -155,8 +148,7 @@ float& Vector::operator [] ( unsigned id )
 		return x;
 	if( id == 1 )
 		return y;
-	if( id != 2 )
-		LOG_ERROR<<"index out of range!!!"<<CRASH;
+	Sort_Assert( id < 3 );
 
 	return z;
 }

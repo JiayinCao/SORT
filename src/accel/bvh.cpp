@@ -269,10 +269,12 @@ bool Bvh::_traverseNode( Bvh_Node* node , const Ray& ray , Intersection* interse
 	if( _fmin1 > _fmin0 )
 	{
 		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 , ray_max );
+		if( inter && intersect == 0 ) return true;
 		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 , ray_max );
 	}else
 	{
 		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 , ray_max );
+		if( inter && intersect == 0 ) return true;
 		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 , ray_max );
 	}
 	if( intersect == 0 )

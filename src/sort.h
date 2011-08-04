@@ -35,4 +35,7 @@ using namespace std;
 	#define SORT_IN_LINUX
 #endif
 
+// enable debug by default
+#define	SORT_DEBUG
+
 #endif
