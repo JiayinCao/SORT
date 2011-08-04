@@ -17,7 +17,7 @@
 
 // include the header file
 #include "point.h"
-#include "managers/logmanager.h"
+#include "utility/assert.h"
 
 // default constructor
 Point::Point()
@@ -99,8 +99,7 @@ Point& Point::operator *= ( float f )
 // / operator
 Point Point::operator / ( float f ) const
 {
-	if( f == 0.0f )
-		LOG_ERROR<<"point divided by zero!!!"<<CRASH;
+	Sort_Assert( f != 0.0f );
 
 	float t = 1.0f / f;
 
@@ -110,8 +109,7 @@ Point Point::operator / ( float f ) const
 // /= operator
 Point& Point::operator /= ( float f )
 {
-	if( f == 0.0f )
-		LOG_ERROR<<"point divided by zero!!!"<<CRASH;
+	Sort_Assert( f != 0.0f );
 
 	float t = 1.0f / f;
 
@@ -131,14 +129,14 @@ Vector Point::operator - ( const Point& p ) const
 // [] operator
 float Point::operator [] ( unsigned id ) const
 {
+	Sort_Assert( id < 3 );
+
 	if( id == 2 )
 		return z;
 	if( id == 1 )
 		return y;
 	if( id == 0 )
 		return x;
-
-	LOG_ERROR<<"index out of range!!!"<<CRASH;
 
 	return 0;
 }

@@ -469,6 +469,10 @@
 			Name="utility"
 			>
 			<File
+				RelativePath="..\..\src\utility\assert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\utility\creator.cpp"
 				>
 			</File>
