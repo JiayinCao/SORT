@@ -25,7 +25,7 @@
 #include <math.h>
 
 // generate a ray given a pixel
-Ray	EnvironmentCamera::GenerateRay( unsigned x , unsigned y ) const
+Ray	EnvironmentCamera::GenerateRay( float x , float y ) const
 {
 	if( m_rt == 0 )
 		LOG_ERROR<<"There is no render target bind to environment camera."<<CRASH;

@@ -797,6 +797,26 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="sampler"
+			>
+			<File
+				RelativePath="..\..\src\sampler\random.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sampler\random.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sampler\sampler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sampler\sampler.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"
 			>

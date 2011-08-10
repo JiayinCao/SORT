@@ -18,7 +18,7 @@
 #ifndef	SORT_REFERENCECOUNT
 #define	SORT_REFERENCECOUNT
 
-#include "managers/logmanager.h"
+#include "utility/assert.h"
 
 //////////////////////////////////////////////////////////////////////////
 // definition of reference count
@@ -82,28 +82,24 @@ public:
 	// -> operator
 	T* operator->()
 	{
-		if( ptr == 0 )
-			LOG_ERROR<<"Invalid reference."<<CRASH;
+		Sort_Assert( ptr != 0 );
 		return ptr;
 	}
 	const T* operator->() const
 	{
-		if( ptr == 0 )
-			LOG_ERROR<<"Invalid reference."<<CRASH;
+		Sort_Assert( ptr != 0 );
 		return ptr;
 	}
 
 	// * operator
 	T& operator*()
 	{
-		if( ptr == 0 )
-			LOG_ERROR<<"Invalid reference."<<CRASH;
+		Sort_Assert( ptr != 0 );
 		return *ptr;
 	}
 	const T& operator*() const
 	{
-		if( ptr == 0 )
-			LOG_ERROR<<"Invalid reference."<<CRASH;
+		Sort_Assert( ptr != 0 );
 		return *ptr;
 	}
 

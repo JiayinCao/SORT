@@ -25,6 +25,8 @@
 // declare classes
 class Camera;
 class RenderTarget;
+class Sampler;
+class Sample;
 
 /////////////////////////////////////////////////////////////////////
 //	definition of the system
@@ -62,9 +64,14 @@ private:
 
 	// the scene for rendering
 	Scene			m_Scene;
-
 	// the integrator for the renderer
 	Integrator*		m_pIntegrator;
+	// the sampler
+	Sampler*		m_pSampler;
+	// sample number per pixel
+	unsigned		m_iSamplePerPixel;
+	// the samples
+	Sample*			m_pSamples;
 
 	// rendering time
 	unsigned		m_uRenderingTime;
