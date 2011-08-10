@@ -29,6 +29,7 @@
 class Accelerator;
 class Sky;
 class Light;
+class Distribution1D;
 
 ////////////////////////////////////////////////////////////////////////////
 // definition of scene class
@@ -70,6 +71,8 @@ public:
 	// get lights
 	const vector<Light*>& GetLights() const
 	{return m_lights;}
+	// get sampled light
+	const Light* SampleLight( float u ) const;
 
 	// get bounding box of the scene
 	const BBox& GetBBox() const;
@@ -84,6 +87,8 @@ private:
 
 	// the light
 	vector<Light*>		m_lights;
+	// distribution of light power
+	Distribution1D*		m_pLightsDis;
 
 	// the acceleration structure for the scene
 	Accelerator*		m_pAccelerator;
@@ -112,6 +117,9 @@ private:
 
 	// parse transformation
 	Transform	_parseTransform( const TiXmlElement* node );
+
+	// compute light cdf
+	void	_genLightDistribution();
 };
 
 #endif
