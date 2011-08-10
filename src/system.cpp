@@ -27,7 +27,7 @@
 #include "texture/rendertarget.h"
 #include "geometry/intersection.h"
 #include "integrator/whittedrt.h"
-#include "camera/perspective.h"
+#include "camera/dofperspective.h"
 #include "utility/path.h"
 #include "utility/creator.h"
 #include "sampler/sampler.h"
@@ -68,18 +68,21 @@ void System::_preInit()
 	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
 	float distance = 5000.0f;
-	PerspectiveCamera* camera = new PerspectiveCamera();
+	DofPerspective* camera = new DofPerspective();
 	camera->SetEye( Point( distance , distance * 0.6f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , distance * 0.1f , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
 	camera->SetRenderTarget( m_rt );
+	Vector vec( distance , distance * 0.5f , distance );
+	camera->SetFocalDistance( vec.Length() );
+	camera->SetLen( 50.0f );
 	m_camera = camera;
 	// the integrator
 	m_pIntegrator = new WhittedRT();
 	// the sampler
 	m_pSampler = new RandomSampler();
-	m_iSamplePerPixel = 32;
+	m_iSamplePerPixel = 16;
 	m_pSamples = new Sample[m_iSamplePerPixel];
 
 	// set default value
