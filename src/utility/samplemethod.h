@@ -22,6 +22,7 @@
 #include "bsdf/bsdf.h"
 #include "managers/logmanager.h"
 #include "texture/texture.h"
+#include <vector>
 
 /*
 description :
@@ -236,7 +237,7 @@ public:
 // private field
 private:
 	// the distribution in each row
-	vector<Distribution1D*>	pConditions;
+	std::vector<Distribution1D*>	pConditions;
 	// the marginal sampleing distribution
 	Distribution1D*			marginal;
 	// the size for the two dimensions

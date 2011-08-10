@@ -47,8 +47,8 @@ public:
 	float GetFov() const { return m_fov; }
 	void SetFov( float fov ) { m_fov = fov; }
 
-// private field
-private:
+// protected field
+protected:
 	// the target of the camera
 	Point m_target;
 	// the up vector of the camera

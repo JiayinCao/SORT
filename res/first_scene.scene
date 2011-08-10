@@ -1,13 +1,25 @@
 <Root>
   <Resource path="../res/"/>
   <Material value="default.material"/>
-	<Model filename="killeroo.obj">
+	<Model filename="teapot.obj">
 		<Transform>
-	  <Matrix value="s 100"/>
-      <Matrix value="t 0 1000 0"/>
+	  <Matrix value="s 20"/>
+      <Matrix value="t 0 100 0"/>
 		</Transform>
 	</Model>
-  <Model filename="cube.obj">
+   <Model filename="teapot.obj">
+		<Transform>
+	  <Matrix value="s 20"/>
+      <Matrix value="t -5000 100 -5000"/>
+		</Transform>
+	</Model>
+	 <Model filename="teapot.obj">
+		<Transform>
+	  <Matrix value="s 20"/>
+      <Matrix value="t -3000 100 -3000"/>
+		</Transform>
+	</Model>
+	<Model filename="cube.obj">
     <Transform>
       <Matrix value="t -0.5 0 -0.5" />
       <Matrix value="s 5000 10 5000"/>
@@ -28,7 +40,7 @@
   	<Property name="intensity" value="0 20 20" />
 	<Property name="dir" value="-1 -1 1"/>
   </Light>
-	<Accel type="bvh"/>
+	<Accel type="kd_tree"/>
   <Sky type="sky_box">
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />
