@@ -13,7 +13,7 @@
                 'sourceforge', https://soraytrace.svn.sourceforge.net/svnroot/soraytrace. And anyone is free to
                 modify or publish the source code. It's cross platform. You could compile the source code in 
                 linux and windows , g++ or visual studio 2008 is required.
- */
+*/
 
 // include header file
 #include "dofperspective.h"
@@ -54,8 +54,8 @@ Ray	DofPerspective::GenerateRay( float x , float y ) const
 	
 	Point target = r(dis);
 
-	float s = x - floor(x) - 0.5f;
-	float t = y - floor(y) - 0.5f;
+	float s = x - floor(x);
+	float t = y - floor(y);
 	UniformSampleDisk( s , t , s , t );
 	s *= lensRadius;
 	t *= lensRadius;

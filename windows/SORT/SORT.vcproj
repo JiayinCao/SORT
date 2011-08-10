@@ -549,6 +549,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\camera\dofperspective.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\camera\dofperspective.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\camera\environment.cpp"
 				>
 			</File>

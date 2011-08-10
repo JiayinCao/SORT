@@ -21,6 +21,8 @@
 #include "accel/accelerator.h"
 #include "utility/strhelper.h"
 #include "utility/path.h"
+#include "utility/samplemethod.h"
+#include "utility/assert.h"
 #include "managers/matmanager.h"
 #include "sky/skysphere.h"
 #include "sky/skybox.h"
@@ -30,6 +32,7 @@
 void Scene::_init()
 {
 	m_pAccelerator = 0;
+	m_pLightsDis = 0;
 	m_pSky = 0;
 }
 
@@ -89,7 +92,7 @@ bool Scene::LoadScene( const string& str )
 	}
 
 
-	// parse the triangle mesh
+	// parse the lights
 	TiXmlElement* lightNode = root->FirstChildElement( "Light" );
 	while( lightNode )
 	{
@@ -120,7 +123,8 @@ bool Scene::LoadScene( const string& str )
 		// get to the next light
 		lightNode = lightNode->NextSiblingElement( "Light" );
 	}
-
+	_genLightDistribution();
+	
 	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.
 	TiXmlElement* accelNode = root->FirstChildElement( "Accel" );
 	if( accelNode )
@@ -193,6 +197,7 @@ void Scene::Release()
 {
 	SAFE_DELETE( m_pAccelerator );
 	SAFE_DELETE( m_pSky );
+	SAFE_DELETE( m_pLightsDis );
 
 	vector<Primitive*>::iterator it = m_triBuf.begin();
 	while( it != m_triBuf.end() )
@@ -293,4 +298,36 @@ const BBox& Scene::GetBBox() const
 		it++;
 	}
 	return m_BBox;
+}
+
+// compute light cdf
+void Scene::_genLightDistribution()
+{
+	unsigned count = m_lights.size();
+	if( count == 0 )
+		return ;
+
+	float* pdf = new float[count];
+	vector<Light*>::const_iterator it = m_lights.begin();
+	for( unsigned i = 0 ; i < count ; i++ )
+	{
+		pdf[i] = m_lights[i]->Power(*this).GetIntensity();
+		it++;
+	}
+
+	SAFE_DELETE(m_pLightsDis);
+	m_pLightsDis = new Distribution1D( pdf , count );
+	delete[] pdf;
+}
+
+// get sampled light
+const Light* Scene::SampleLight( float u ) const
+{
+	Sort_Assert( u >= 0.0f && u < 1.0f );
+	Sort_Assert( m_pLightsDis != 0 );
+
+	int id = m_pLightsDis->SampleDiscrete( u , 0 );
+	if( id >= 0 && id < (int)m_lights.size() )
+		return m_lights[id];
+	return 0;
 }
