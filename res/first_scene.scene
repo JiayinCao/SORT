@@ -1,10 +1,10 @@
 <Root>
   <Resource path="../res/"/>
   <Material value="default.material"/>
-	<Model filename="teapot.obj">
+	<Model filename="killeroo.obj">
 		<Transform>
-	  <Matrix value="s 20"/>
-      <Matrix value="t 0 100 0"/>
+	  <Matrix value="s 100"/>
+      <Matrix value="t 0 1000 0"/>
 		</Transform>
 	</Model>
   <Model filename="cube.obj">

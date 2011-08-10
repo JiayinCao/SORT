@@ -18,11 +18,6 @@
 // include the header file
 #include "sort.h"
 #include "system.h"
-#include "utility/samplemethod.h"
-#include "texture/imagetexture.h"
-#include "texture/rendertarget.h"
-#include "utility/rand.h"
-#include "utility/define.h"
 
 // the global system
 System g_System;

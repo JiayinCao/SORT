@@ -36,7 +36,7 @@ public:
 	virtual ~Camera(){}
 
 	// generate a ray given a pixel
-	virtual Ray	GenerateRay( unsigned x , unsigned y ) const = 0;
+	virtual Ray	GenerateRay( float x , float y ) const = 0;
 
 	// set a render target
 	void SetRenderTarget( RenderTarget* rt ) { m_rt = rt; }

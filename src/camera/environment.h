@@ -34,7 +34,7 @@ public:
 	~EnvironmentCamera(){}
 
 	// generate a ray given a pixel
-	virtual Ray	GenerateRay( unsigned x , unsigned y ) const;
+	virtual Ray	GenerateRay( float x , float y ) const;
 
 	// set transformation matrix
 	void SetTransform( const Matrix& m ) { m_transform = m; }

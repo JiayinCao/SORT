@@ -22,7 +22,7 @@
 #include "managers/logmanager.h"
 
 // generate ray
-Ray	PerspectiveCamera::GenerateRay( unsigned x , unsigned y ) const
+Ray	PerspectiveCamera::GenerateRay( float x , float y ) const
 {
 	// check if there is render target
 	if( m_rt == 0 )
@@ -36,8 +36,8 @@ Ray	PerspectiveCamera::GenerateRay( unsigned x , unsigned y ) const
 	float xScale = yScale / aspect;
 
 	Vector v;
-	v.x = ( ( ( (float)x ) / w ) - 0.5f ) / xScale ;
-	v.y = -1.0f * ( ( ((float)y) / h - 0.5f ) ) / yScale;
+	v.x = ( ( x / w ) - 0.5f ) / xScale ;
+	v.y = -1.0f * ( ( y / h - 0.5f ) ) / yScale;
 	v.z = 1.0f;
 
 	Vector zaxis = ( m_target - m_eye ).Normalize();

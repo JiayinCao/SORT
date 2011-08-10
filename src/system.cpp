@@ -30,6 +30,9 @@
 #include "camera/perspective.h"
 #include "utility/path.h"
 #include "utility/creator.h"
+#include "sampler/sampler.h"
+
+#include "sampler/random.h"
 
 // constructor
 System::System()
@@ -58,20 +61,26 @@ void System::_preInit()
 	// initialize the timer
 	Timer::CreateInstance();
 
+	/////////////////////////////////////////////////////////////////////////////////
+	// temp
 	// use 800 * 600 render target as default
 	m_rt = new RenderTarget();
 	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
 	float distance = 5000.0f;
 	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( 0 , distance * 0.3f , distance ) );
+	camera->SetEye( Point( distance , distance * 0.6f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
-	camera->SetTarget( Point( 0 , 30 , 0 ) );
+	camera->SetTarget( Point( 0 , distance * 0.1f , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
 	camera->SetRenderTarget( m_rt );
 	m_camera = camera;
 	// the integrator
 	m_pIntegrator = new WhittedRT();
+	// the sampler
+	m_pSampler = new RandomSampler();
+	m_iSamplePerPixel = 32;
+	m_pSamples = new Sample[m_iSamplePerPixel];
 
 	// set default value
 	m_uRenderingTime = 0;
@@ -92,6 +101,8 @@ void System::_postUninit()
 	SAFE_DELETE( m_rt );
 	SAFE_DELETE( m_camera );
 	SAFE_DELETE( m_pIntegrator );
+	SAFE_DELETE( m_pSampler );
+	SAFE_DELETE_ARRAY( m_pSamples );
 
 	// release managers
 	Creator::DeleteSingleton();
@@ -122,11 +133,18 @@ void System::Render()
 			// clear managed memory after each pixel
 			SORT_CLEARMEM();
 			
-			// generate rays
-			Ray r = m_camera->GenerateRay( j , i );
+			// generate the samples
+			m_pSampler->GenerateSamples( m_pSamples , m_iSamplePerPixel );
 
-			Spectrum color = m_pIntegrator->Li( m_Scene , r );
-			m_rt->SetColor( j , i , color );
+			// the radiance
+			Spectrum radiance;
+			for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
+			{
+				// generate rays
+				Ray r = m_camera->GenerateRay( (float)j + m_pSamples[k].img_u , (float)i + m_pSamples[k].img_v );
+				radiance += m_pIntegrator->Li( m_Scene , r );
+			}
+			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
 
 			// update current pixel
 			m_uCurrentPixelId++;
