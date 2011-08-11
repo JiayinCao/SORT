@@ -20,17 +20,8 @@
 #include "utility/assert.h"
 #include "utility/rand.h"
 
-// default constructor
-RandomSampler::RandomSampler()
-{
-}
-// destructor
-RandomSampler::~RandomSampler()
-{
-}
-
 // generate sample in one dimension
-void RandomSampler::Generate1D( float* sample , int num )
+void RandomSampler::Generate1D( float* sample , unsigned num )
 {
 	Sort_Assert( sample != 0 );
 
@@ -39,7 +30,7 @@ void RandomSampler::Generate1D( float* sample , int num )
 }
 
 // generate sample in two dimension
-void RandomSampler::Generate2D( float* sample , int num )
+void RandomSampler::Generate2D( float* sample , unsigned num )
 {
 	Sort_Assert( sample != 0 );
 
