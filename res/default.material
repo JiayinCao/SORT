@@ -11,7 +11,7 @@
 	</Material>
 	<Material name="default_matte2" type="Matte">
 	</Material>
-  <Material name="killeroo_mat" type="Matte">
+  <Material name="killeroo_mat" type="Glass">
     <Property name="merl" value="alum-bronze.binary"/>
 	<Property name="eta_t" value="1.4" />
     <Texture name="color" type="constant">

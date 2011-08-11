@@ -824,6 +824,14 @@
 				RelativePath="..\..\src\sampler\sampler.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\sampler\stratified.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sampler\stratified.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"

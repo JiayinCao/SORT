@@ -1,7 +1,7 @@
 /*
-   FileName:      sampler.h
+   FileName:      stratified.h
 
-   Created Time:  2011-08-10 12:59:18
+   Created Time:  2011-08-11 13:25:56
 
    Auther:        Cao Jiayin
 
@@ -15,66 +15,39 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifndef	SORT_SAMPLER
-#define	SORT_SAMPLER
+#ifndef	SORT_STRATIFIED
+#define	SORT_STRATIFIED
 
-#include "sort.h"
-#include <vector>
-
-// sample defination
-class Sample
-{
-// public field
-public:
-	float				img_u , img_v;
-	vector<unsigned>	dim0;
-	vector<unsigned>	dim1;
-	float**				sample_1d;
-	float**				sample_2d;
-
-	// default constructor
-	Sample()
-	{
-		img_u = 0.0f;
-		img_v = 0.0f;
-		sample_1d = 0;
-		sample_2d = 0;
-	}
-};
+#include "sampler.h"
 
 /////////////////////////////////////////////////////////////////////////////////
 // definitation of the sampler
-class	Sampler
+class StratifiedSampler : public Sampler
 {
 // public method
 public:
 	// default constructor
-	Sampler();
+	StratifiedSampler(){}
 	// destructor
-	virtual ~Sampler();
-
-	// generate samples
-	// para 'sample' : the sample array
-	// para 'num'    : the number of samples to be generated
-	virtual void GenerateSamples( Sample* sample , unsigned num );
+	~StratifiedSampler(){}
 
 	// round the size for sampler
 	// para 'size' : number of samples to be generated
 	// result      : the modified number
 	// note : samples like jittered sampling needs to overwrite the method
-	virtual unsigned RoundSize( unsigned size ) const { return size; }
+	virtual unsigned RoundSize( unsigned size ) const;
 
 // protected medthod
 protected:
 	// generate sample in one dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate1D( float* sample , unsigned num ) = 0;
+	virtual void Generate1D( float* sample , unsigned num );
 
 	// generate sample in two dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate2D( float* sample , unsigned num ) = 0;
+	virtual void Generate2D( float* sample , unsigned num );
 };
 
 #endif

@@ -27,21 +27,21 @@ class RandomSampler : public Sampler
 // public method
 public:
 	// default constructor
-	RandomSampler();
+	RandomSampler(){}
 	// destructor
-	~RandomSampler();
+	~RandomSampler(){}
 
 // protected medthod
 protected:
 	// generate sample in one dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate1D( float* sample , int num );
+	virtual void Generate1D( float* sample , unsigned num );
 
 	// generate sample in two dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate2D( float* sample , int num );
+	virtual void Generate2D( float* sample , unsigned num );
 };
 
 #endif
