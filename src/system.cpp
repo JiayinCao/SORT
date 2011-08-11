@@ -34,6 +34,7 @@
 
 #include "sampler/stratified.h"
 #include "sampler/random.h"
+#include "sampler/regular.h"
 
 // constructor
 System::System()
@@ -69,20 +70,21 @@ void System::_preInit()
 	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
 	float distance = 5000.0f;
-	DofPerspective* camera = new DofPerspective();
+//	DofPerspective* camera = new DofPerspective();
+	PerspectiveCamera* camera = new PerspectiveCamera();
 	camera->SetEye( Point( distance , distance * 0.3f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , distance * 0.05f , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
 	camera->SetRenderTarget( m_rt );
 	Vector vec( distance , distance * 0.25f , distance );
-	camera->SetFocalDistance( vec.Length() );
-	camera->SetLen( 40.0f );
+//	camera->SetFocalDistance( vec.Length() );
+//	camera->SetLen( 40.0f );
 	m_camera = camera;
 	// the integrator
 	m_pIntegrator = new WhittedRT();
 	// the sampler
-	m_pSampler = new StratifiedSampler();
+	m_pSampler = new RegularSampler();
 	m_iSamplePerPixel = m_pSampler->RoundSize(8);
 	m_pSamples = new Sample[m_iSamplePerPixel];
 
