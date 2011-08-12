@@ -58,6 +58,7 @@ inline void UniformSampleDisk( float u , float v , float& x , float& y )
 	{
 		x = 0.0f;
 		y = 0.0f;
+		return;
 	}
 
 	theta *= PI / 4.0f;

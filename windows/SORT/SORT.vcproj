@@ -785,6 +785,14 @@
 			Name="integrator"
 			>
 			<File
+				RelativePath="..\..\src\integrator\direct.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\direct.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\integrator\integrator.h"
 				>
 			</File>

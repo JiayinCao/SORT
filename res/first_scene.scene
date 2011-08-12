@@ -8,7 +8,7 @@
 		</Transform>
 	</Model>
   <Light type="point">
-    <Property name="intensity" value="10000000 10000000 10000000"/>
+    <Property name="intensity" value="10000000 9000000 6000000"/>
 	<Property name="pos" value="0 600 500" />
   </Light>
   <Light type="s1pot">
