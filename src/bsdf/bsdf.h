@@ -134,4 +134,9 @@ inline Vector SphericalVec( float theta , float phi )
 	return Vector( x , y , z );
 }
 
+inline bool SameHemiSphere( const Vector& wi , const Vector& wo )
+{
+	return ( wi.y * wo.y ) > 0.0f;
+}
+
 #endif
