@@ -25,7 +25,7 @@ void RandomSampler::Generate1D( float* sample , unsigned num )
 {
 	Sort_Assert( sample != 0 );
 
-	for( int i = 0 ; i < num ; ++i )
+	for( unsigned i = 0 ; i < num ; ++i )
 		sample[i] = sort_canonical();
 }
 

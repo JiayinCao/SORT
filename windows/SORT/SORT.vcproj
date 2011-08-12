@@ -817,6 +817,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\sampler\regular.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\sampler\regular.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\sampler\sampler.cpp"
 				>
 			</File>

@@ -1,56 +1,26 @@
 <Root>
   <Resource path="../res/"/>
   <Material value="default.material"/>
-	<Model filename="killeroo.obj">
+	<Model filename="cornell.obj">
 		<Transform>
-	  <Matrix value="s 60"/>
-      <Matrix value="t 0 1000 0"/>
+	  <Matrix value="s 40"/>
+      <Matrix value="t 0 -500 0"/>
 		</Transform>
 	</Model>
-   <Model filename="teapot.obj">
-		<Transform>
-	  <Matrix value="s 20"/>
-      <Matrix value="t -1000 100 -3000"/>
-		</Transform>
-	</Model>
-  <Model filename="teapot.obj">
-    <Transform>
-      <Matrix value="s 20"/>
-      <Matrix value="t -7000 100 -9000"/>
-    </Transform>
-  </Model>
-  <Model filename="teapot.obj">
-    <Transform>
-      <Matrix value="s 20"/>
-      <Matrix value="t 1000 100 2000"/>
-    </Transform>
-  </Model>
-	 <Model filename="teapot.obj">
-		<Transform>
-	  <Matrix value="s 20"/>
-      <Matrix value="t -5000 100 -3000"/>
-		</Transform>
-	</Model>
-	<Model filename="cube.obj">
-    <Transform>
-      <Matrix value="t -0.5 0 -0.5" />
-      <Matrix value="s 5000 10 5000"/>
-    </Transform>
-  </Model>
-  <Light type="po1int">
-    <Property name="intensity" value="0 5000000 1"/>
-	<Property name="pos" value="1500 500 100" />
+  <Light type="point">
+    <Property name="intensity" value="10000000 10000000 10000000"/>
+	<Property name="pos" value="0 600 500" />
   </Light>
   <Light type="s1pot">
     <Property name="intensity" value="0 0 9000000"/>
     <Property name="falloff_start" value="0.1" />
     <Property name="range" value="0.4"/>
-	<Property name="pos" value="100 1500 100"/>
+	<Property name="pos" value="1500 1500 1500"/>
 	<Property name="dir" value="0 -1 0"/>
   </Light>
-  <Light type="distant">
+  <Light type="dis1tant">
   	<Property name="intensity" value="20 20 20" />
-	<Property name="dir" value="-1 -1 1"/>
+	<Property name="dir" value="-1 -0 -5"/>
   </Light>
 	<Accel type="kd_tree"/>
   <Sky type="sky_box">

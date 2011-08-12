@@ -18,7 +18,7 @@
       <Property name="color" value="0.1 0.1 0.1"/>
     </Texture>
   </Material>
-  <Material name="default" type="Matte">
+  <Material name="default" type="Mirror">
     <Property name="merl" value="alum-bronze.binary"/>
 	<Property name="eta_t" value="1.4" />
     <Texture name="color" type="constant">

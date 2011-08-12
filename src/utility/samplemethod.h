@@ -47,14 +47,19 @@ inline void UniformSampleDisk( float u , float v , float& x , float& y )
 		r = asv;
 		float factor = ( sv > 0.0f ) ? -1.0f : 1.0f;
 		theta = factor * su / r + 4.0f + 2.0f * factor ;
-	}else
+	}else if( asv > asu )
 	{
 		r = asu;
 		float factor = ( su > 0.0f ) ? 1.0f : -1.0f;
 		theta = factor * sv / r - 2.0f * factor + 2.0f  ;
 		if( theta < 0.0f )
 			theta += 8.0f;
+	}else
+	{
+		x = 0.0f;
+		y = 0.0f;
 	}
+
 	theta *= PI / 4.0f;
 
 	x = cos( theta ) * r;
