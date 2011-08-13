@@ -98,7 +98,7 @@ bool Scene::LoadScene( const string& str )
 					meshMat = meshMat->FirstChildElement( "MatSet" );
 					do
 					{
-						const char* set_name = meshMat->Attribute( "name1" );
+						const char* set_name = meshMat->Attribute( "name" );
 						const char* mat_name = meshMat->Attribute( "mat" );
 
 						if( set_name != 0 && mat_name != 0 )
