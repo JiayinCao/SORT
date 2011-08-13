@@ -27,7 +27,7 @@
   </Material>
   <Material name="cube_mat" type="Matte">
     <Texture name="color" type="constant">
-      <Property name="color" value="0.1 0.1 0.1"/>
+      <Property name="color" value="0.0 0.0 0.1"/>
     </Texture>
   </Material>
 </Root>

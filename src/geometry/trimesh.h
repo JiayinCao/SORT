@@ -47,6 +47,11 @@ public:
 	// para 'vec' : the buffer to filled
 	void FillTriBuf( vector<Primitive*>& vec );
 
+	// reset material
+	// para 'setname' : the subset to set material
+	// para 'matname' : the material name
+	void ResetMaterial( const string& setname , const string& matname );
+
 // private field
 public:
 	// the memory for the mesh
@@ -61,6 +66,8 @@ public:
 // private method
 	// initialize default data
 	void	_init();
+	// get the subset of the mesh
+	Trunk*	_getSubset( const string& setname );
 
 // set friend class
 friend	class	MeshManager;

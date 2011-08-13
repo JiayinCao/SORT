@@ -3,9 +3,12 @@
   <Material value="default.material"/>
 	<Model filename="cornell.obj">
 		<Transform>
-	  <Matrix value="s 40"/>
+	    <Matrix value="s 40"/>
       <Matrix value="t 0 -500 0"/>
 		</Transform>
+    <Material>
+      <MatSet name="Box01" mat="cube_mat"/>
+    </Material>
 	</Model>
   <Light type="point">
     <Property name="intensity" value="10000000 9000000 6000000"/>

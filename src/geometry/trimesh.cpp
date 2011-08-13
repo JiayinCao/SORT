@@ -83,3 +83,46 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		}
 	}
 }
+
+// reset material
+void TriMesh::ResetMaterial( const string& setname , const string& matname )
+{
+	// get the material first
+	Material* mat = MatManager::GetSingleton().FindMaterial( matname );
+	if( mat == 0 )
+		LOG_WARNING<<"There is no such a material named \'"<<matname<<"\'."<<ENDL;
+
+	// if there is no set name , all of the sets are set the material with the name of 'matname'
+	if( setname.empty() )
+	{
+		vector<Trunk*>::iterator it = m_pMemory->m_TrunkBuffer.begin();
+		while( it != m_pMemory->m_TrunkBuffer.end() )
+		{
+			(*it)->m_mat = mat;
+			it++;
+		}
+		return;
+	}
+
+	Trunk* trunk = _getSubset( setname );
+	if( trunk == 0 )
+	{
+		LOG_WARNING<<"There is no such subset named "<<setname<<ENDL;
+		return;
+	}
+	trunk->m_mat = mat;
+}
+
+// get the subset of the mesh
+Trunk* TriMesh::_getSubset( const string& setname )
+{
+	vector<Trunk*>::iterator it = m_pMemory->m_TrunkBuffer.begin();
+	while( it != m_pMemory->m_TrunkBuffer.end() )
+	{
+		if( (*it)->name == setname )
+			return *it;
+		it++;
+	}
+
+	return 0;
+}
