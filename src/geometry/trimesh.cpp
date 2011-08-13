@@ -33,12 +33,20 @@ TriMesh::TriMesh()
 // destructor
 TriMesh::~TriMesh()
 {
+	_release();
 }
 
 // initialize default data
 void TriMesh::_init()
 {
 	m_pMemory = 0;
+	m_pMaterials = 0;
+}
+
+// release the default data
+void TriMesh::_release()
+{
+	SAFE_DELETE_ARRAY(m_pMaterials);
 }
 
 // load the mesh
@@ -52,7 +60,20 @@ bool TriMesh::LoadMesh( const string& str , Transform& transform )
 	if( false == flag )
 		return false;
 
+	_copyMaterial();
 	return true;
+}
+
+// copy materials
+void TriMesh::_copyMaterial()
+{
+	SAFE_DELETE_ARRAY(m_pMaterials);
+
+	unsigned trunk_size = m_pMemory->m_TrunkBuffer.size();
+	m_pMaterials = new Material*[trunk_size];
+	
+	for( unsigned i = 0 ; i < trunk_size ; ++i )
+		m_pMaterials[i] = m_pMemory->m_TrunkBuffer[i]->m_mat;
 }
 
 // fill buffer into vector
@@ -67,7 +88,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMemory->m_TrunkBuffer[i]->m_mat ) );
+				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i] ) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}else
@@ -78,7 +99,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMemory->m_TrunkBuffer[i]->m_mat ) );
+				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] ) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}
@@ -95,34 +116,29 @@ void TriMesh::ResetMaterial( const string& setname , const string& matname )
 	// if there is no set name , all of the sets are set the material with the name of 'matname'
 	if( setname.empty() )
 	{
-		vector<Trunk*>::iterator it = m_pMemory->m_TrunkBuffer.begin();
-		while( it != m_pMemory->m_TrunkBuffer.end() )
-		{
-			(*it)->m_mat = mat;
-			it++;
-		}
+		unsigned size = m_pMemory->m_TrunkBuffer.size();
+		for( unsigned i = 0 ; i < size ; ++i )
+			m_pMaterials[i] = mat;
 		return;
 	}
 
-	Trunk* trunk = _getSubset( setname );
-	if( trunk == 0 )
+	int id = _getSubsetID( setname );
+	if( id < 0 )
 	{
 		LOG_WARNING<<"There is no such subset named "<<setname<<ENDL;
 		return;
 	}
-	trunk->m_mat = mat;
+	m_pMaterials[id] = mat;
 }
 
 // get the subset of the mesh
-Trunk* TriMesh::_getSubset( const string& setname )
+int TriMesh::_getSubsetID( const string& setname )
 {
-	vector<Trunk*>::iterator it = m_pMemory->m_TrunkBuffer.begin();
-	while( it != m_pMemory->m_TrunkBuffer.end() )
+	int size = (int)m_pMemory->m_TrunkBuffer.size();
+	for( int i = 0 ; i < size ; ++i )
 	{
-		if( (*it)->name == setname )
-			return *it;
-		it++;
+		if( m_pMemory->m_TrunkBuffer[i]->name == setname )
+			return i;
 	}
-
-	return 0;
+	return -1;
 }

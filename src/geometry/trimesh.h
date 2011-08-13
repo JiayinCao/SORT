@@ -25,6 +25,8 @@
 #include "managers/meshmanager.h"
 #include "geometry/transform.h"
 
+class	Material;
+
 //////////////////////////////////////////////////////////////////////////////////
 //	definition of trimesh
 class TriMesh
@@ -63,11 +65,18 @@ public:
 	// whether the mesh is instanced
 	bool			m_bInstanced;
 
+	// the materials for instanced mesh
+	Material**		m_pMaterials;
+
 // private method
 	// initialize default data
 	void	_init();
+	// release the default data
+	void	_release();
 	// get the subset of the mesh
-	Trunk*	_getSubset( const string& setname );
+	int		_getSubsetID( const string& setname );
+	// copy materials
+	void	_copyMaterial();
 
 // set friend class
 friend	class	MeshManager;
