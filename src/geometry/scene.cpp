@@ -83,7 +83,24 @@ bool Scene::LoadScene( const string& str )
 		// load the first mesh
 		TriMesh* mesh = new TriMesh();
 		if( mesh->LoadMesh( filename , transform ) )
+		{
+			// reset the material if neccessary
+			TiXmlElement* meshMat = meshNode->FirstChildElement( "Material" );
+			if( meshMat )
+			{
+				meshMat = meshMat->FirstChildElement( "MatSet" );
+				do
+				{
+					const char* set_name = meshMat->Attribute( "name" );
+					const char* mat_name = meshMat->Attribute( "mat" );
+
+					mesh->ResetMaterial( set_name , mat_name );
+
+					meshMat = meshMat->NextSiblingElement( "MatSet" );
+				}while( meshMat );
+			}
 			m_meshBuf.push_back( mesh );
+		}
 		else
 			delete mesh;
 
