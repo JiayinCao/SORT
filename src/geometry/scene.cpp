@@ -60,13 +60,18 @@ bool Scene::LoadScene( const string& str )
 	string oldpath = GetResourcePath();
 	TiXmlElement* element = root->FirstChildElement( "Resource" );
 	if( element )
-		SetResourcePath( element->Attribute( "path" ) );
+	{
+		const char* path = element->Attribute( "path" );
+		if( path )	SetResourcePath( path );
+	}
 
 	// parse materials
 	TiXmlElement* material = root->FirstChildElement( "Material" );
 	while( material )
 	{
-		MatManager::GetSingleton().ParseMatFile( material->Attribute( "value" ) );
+		const char* mat_name = material->Attribute( "value" );
+		if( mat_name != 0 )
+			MatManager::GetSingleton().ParseMatFile( mat_name );
 		material = material->NextSiblingElement( "Material" );
 	}
 
@@ -77,32 +82,36 @@ bool Scene::LoadScene( const string& str )
 		// get the name of the file
 		const char* filename = meshNode->Attribute( "filename" );
 
-		// load the transform matrix
-		Transform transform = _parseTransform( meshNode->FirstChildElement( "Transform" ) );
-
-		// load the first mesh
-		TriMesh* mesh = new TriMesh();
-		if( mesh->LoadMesh( filename , transform ) )
+		if( filename != 0 )
 		{
-			// reset the material if neccessary
-			TiXmlElement* meshMat = meshNode->FirstChildElement( "Material" );
-			if( meshMat )
+			// load the transform matrix
+			Transform transform = _parseTransform( meshNode->FirstChildElement( "Transform" ) );
+
+			// load the first mesh
+			TriMesh* mesh = new TriMesh();
+			if( mesh->LoadMesh( filename , transform ) )
 			{
-				meshMat = meshMat->FirstChildElement( "MatSet" );
-				do
+				// reset the material if neccessary
+				TiXmlElement* meshMat = meshNode->FirstChildElement( "Material" );
+				if( meshMat )
 				{
-					const char* set_name = meshMat->Attribute( "name" );
-					const char* mat_name = meshMat->Attribute( "mat" );
+					meshMat = meshMat->FirstChildElement( "MatSet" );
+					do
+					{
+						const char* set_name = meshMat->Attribute( "name1" );
+						const char* mat_name = meshMat->Attribute( "mat" );
 
-					mesh->ResetMaterial( set_name , mat_name );
+						if( set_name != 0 && mat_name != 0 )
+							mesh->ResetMaterial( set_name , mat_name );
 
-					meshMat = meshMat->NextSiblingElement( "MatSet" );
-				}while( meshMat );
+						meshMat = meshMat->NextSiblingElement( "MatSet" );
+					}while( meshMat );
+				}
+				m_meshBuf.push_back( mesh );
 			}
-			m_meshBuf.push_back( mesh );
+			else
+				delete mesh;
 		}
-		else
-			delete mesh;
 
 		// get to the next model
 		meshNode = meshNode->NextSiblingElement( "Model" );
@@ -113,29 +122,31 @@ bool Scene::LoadScene( const string& str )
 	TiXmlElement* lightNode = root->FirstChildElement( "Light" );
 	while( lightNode )
 	{
-		string type = lightNode->Attribute( "type" );
-		Light* light = CREATE_TYPE( type , Light );
-
-		if( light )
+		const char* type = lightNode->Attribute( "type" );
+		if( type != 0 )
 		{
-			// load the transform matrix
-			light->SetTransform( _parseTransform( lightNode->FirstChildElement( "Transform" ) ) );
+			Light* light = CREATE_TYPE( type , Light );
 
-			// set the properties
-			TiXmlElement* prop = lightNode->FirstChildElement( "Property" );
-			while( prop )
+			if( light )
 			{
-				string prop_name = prop->Attribute( "name" );
-				string prop_value = prop->Attribute( "value" );
-				light->SetProperty( prop_name , prop_value );
-				prop = prop->NextSiblingElement( "Property" );
-			}
+				// load the transform matrix
+				light->SetTransform( _parseTransform( lightNode->FirstChildElement( "Transform" ) ) );
 
-			m_lights.push_back( light );
+				// set the properties
+				TiXmlElement* prop = lightNode->FirstChildElement( "Property" );
+				while( prop )
+				{
+					const char* prop_name = prop->Attribute( "name" );
+					const char* prop_value = prop->Attribute( "value" );
+					if( prop_name != 0 && prop_value != 0 )
+						light->SetProperty( prop_name , prop_value );
+					prop = prop->NextSiblingElement( "Property" );
+				}
+
+				m_lights.push_back( light );
+			}
 		}else
-		{
 			LOG_WARNING<<"There is no light with the type of \'"<<type<<"\'."<<ENDL;
-		}
 
 		// get to the next light
 		lightNode = lightNode->NextSiblingElement( "Light" );
@@ -147,8 +158,8 @@ bool Scene::LoadScene( const string& str )
 	if( accelNode )
 	{
 		// set cooresponding type of accelerator
-		string type = accelNode->Attribute( "type" );
-		m_pAccelerator = CREATE_TYPE( type , Accelerator );
+		const char* type = accelNode->Attribute( "type" );
+		if( type != 0 )	m_pAccelerator = CREATE_TYPE( type , Accelerator );
 	}
 
 	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.
@@ -156,20 +167,24 @@ bool Scene::LoadScene( const string& str )
 	if( skyNode )
 	{
 		// set cooresponding type of accelerator
-		string type = skyNode->Attribute( "type" );
-		if( type == "sky_sphere" )
-			m_pSky = new SkySphere();
-		else if( type == "sky_box" )
-			m_pSky = new SkyBox();
-
-		// set the properties
-		TiXmlElement* prop = skyNode->FirstChildElement( "Property" );
-		while( prop )
+		const char* c_type = skyNode->Attribute( "type" );
+		if( c_type != 0 )
 		{
-			string prop_name = prop->Attribute( "name" );
-			string prop_value = prop->Attribute( "value" );
-			m_pSky->SetProperty( prop_name , prop_value );
-			prop = prop->NextSiblingElement( "Property" );
+			string type( c_type );
+			if( type == "sky_sphere" )
+				m_pSky = new SkySphere();
+			else if( type == "sky_box" )
+				m_pSky = new SkyBox();
+
+			// set the properties
+			TiXmlElement* prop = skyNode->FirstChildElement( "Property" );
+			while( prop )
+			{
+				const char* prop_name = prop->Attribute( "name" );
+				const char* prop_value = prop->Attribute( "value" );
+				if( prop_name && prop_value ) m_pSky->SetProperty( prop_name , prop_value );
+				prop = prop->NextSiblingElement( "Property" );
+			}
 		}
 	}
 
@@ -195,7 +210,7 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
 // get the intersection between a ray and the scene in a brute force way
 bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 {
-	intersect->t = FLT_MAX;
+	if( intersect ) intersect->t = FLT_MAX;
 	int n = (int)m_triBuf.size();
 	for( int k = 0 ; k < n ; k++ )
 	{
@@ -294,7 +309,8 @@ Transform Scene::_parseTransform( const TiXmlElement* node )
 		node = node->FirstChildElement( "Matrix" );
 		while( node )
 		{
-			transform = TransformFromStr(node->Attribute( "value" )) * transform;
+			const char* trans = node->Attribute( "value" );
+			if( trans )	transform = TransformFromStr( trans ) * transform;
 			node = node->NextSiblingElement( "Matrix" );
 		}
 	}
