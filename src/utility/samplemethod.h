@@ -186,6 +186,13 @@ public:
 	unsigned GetCount() const
 	{ return count; }
 
+	// get property of the unit
+	float GetProperty( unsigned i ) const
+	{
+		Sort_Assert( i < count );
+		return cdf[i+1]-cdf[i];
+	}
+
 // private field
 private:
 	const unsigned	count;
