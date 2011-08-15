@@ -33,7 +33,7 @@ public:
 	~DofPerspective(){}
 
 	// generate ray
-	virtual Ray GenerateRay( float x , float y ) const;
+	virtual Ray GenerateRay( float x , float y , const PixelSample& ps ) const;
 
 	// set len
 	void SetLen( float len )

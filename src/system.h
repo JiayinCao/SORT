@@ -26,7 +26,7 @@
 class Camera;
 class RenderTarget;
 class Sampler;
-class Sample;
+class PixelSample;
 
 /////////////////////////////////////////////////////////////////////
 //	definition of the system
@@ -71,7 +71,7 @@ private:
 	// sample number per pixel
 	unsigned		m_iSamplePerPixel;
 	// the samples
-	Sample*			m_pSamples;
+	PixelSample*			m_pSamples;
 
 	// rendering time
 	unsigned		m_uRenderingTime;

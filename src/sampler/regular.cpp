@@ -20,7 +20,7 @@
 #include <math.h>
 
 // generate sample in one dimension
-void RegularSampler::Generate1D( float* sample , unsigned num )
+void RegularSampler::Generate1D( float* sample , unsigned num ) const
 {
 	Sort_Assert( sample != 0 );
 
@@ -29,7 +29,7 @@ void RegularSampler::Generate1D( float* sample , unsigned num )
 }
 
 // generate sample in two dimension
-void RegularSampler::Generate2D( float* sample , unsigned num )
+void RegularSampler::Generate2D( float* sample , unsigned num ) const
 {
 	Sort_Assert( sample != 0 );
 	

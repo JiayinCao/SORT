@@ -833,6 +833,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\sampler\sample.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\sampler\sampler.cpp"
 				>
 			</File>

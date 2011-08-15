@@ -22,6 +22,8 @@
 #include "geometry/scene.h"
 #include "bsdf/bsdf.h"
 #include "light/light.h"
+#include "managers/memmanager.h"
+#include "sampler/sampler.h"
 
 // radiance along a specific ray direction
 Spectrum DirectLight::Li( const Scene& scene , const Ray& r ) const
@@ -84,3 +86,8 @@ void DirectLight::OutputLog() const
 	LOG<<"Indirect lighting , like color bleeding , caustics , is not supported."<<ENDL<<ENDL;
 }
 
+// generate samples
+void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
+{
+	Integrator::GenerateSample( sampler , samples , ps , scene );
+}

@@ -33,7 +33,7 @@ public:
 	~PerspectiveCamera(){}
 
 	// generate ray
-	virtual Ray GenerateRay( float x , float y ) const;
+	virtual Ray GenerateRay( float x , float y , const PixelSample& ps ) const;
 
 	// get and set target
 	const Point& GetTarget() const { return m_target; }

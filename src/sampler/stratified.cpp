@@ -22,7 +22,7 @@
 #include <math.h>
 
 // generate sample in one dimension
-void StratifiedSampler::Generate1D( float* sample , unsigned num )
+void StratifiedSampler::Generate1D( float* sample , unsigned num ) const
 {
 	Sort_Assert( sample != 0 );
 
@@ -31,7 +31,7 @@ void StratifiedSampler::Generate1D( float* sample , unsigned num )
 }
 
 // generate sample in two dimension
-void StratifiedSampler::Generate2D( float* sample , unsigned num )
+void StratifiedSampler::Generate2D( float* sample , unsigned num ) const
 {
 	Sort_Assert( sample != 0 );
 	

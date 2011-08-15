@@ -31,17 +31,15 @@ public:
 	// destructor
 	~RandomSampler(){}
 
-// protected medthod
-protected:
 	// generate sample in one dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate1D( float* sample , unsigned num );
+	virtual void Generate1D( float* sample , unsigned num ) const;
 
 	// generate sample in two dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate2D( float* sample , unsigned num );
+	virtual void Generate2D( float* sample , unsigned num ) const;
 };
 
 #endif
