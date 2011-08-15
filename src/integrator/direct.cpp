@@ -90,4 +90,64 @@ void DirectLight::OutputLog() const
 void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
 {
 	Integrator::GenerateSample( sampler , samples , ps , scene );
+
+	// total light sample
+	unsigned total = ps * ls_per_ps;
+	unsigned light_num = scene.LightNum();
+
+	unsigned* ls_num = SORT_MALLOC_ARRAY( unsigned , light_num )();
+	for( unsigned i = 0 ; i < light_num ; ++i )
+		ls_num[i] = sampler->RoundSize((unsigned)(scene.LightProperbility(i) * total ));
+	unsigned total_ls = 0 ;
+	for( unsigned i = 0 ; i < light_num ; ++i )
+		total_ls += ls_num[i];
+	float* ld_1d = SORT_MALLOC_ARRAY( float , total_ls );
+	float* ld_2d = SORT_MALLOC_ARRAY( float , 2 * total_ls );
+	unsigned* light_id = SORT_MALLOC_ARRAY( unsigned , total_ls );
+	float* p1d = ld_1d;
+	float* p2d = ld_2d;
+	unsigned offset = 0;
+	for( unsigned i = 0 ; i < light_num ; ++i )
+	{
+		sampler->Generate1D( p1d , ls_num[i] );
+		sampler->Generate2D( p2d , ls_num[i] );
+		p1d += ls_num[i];
+		p2d += ls_num[i] * 2;
+
+		for( unsigned k = 0 ; k < ls_num[i] ; k++ )
+		{
+			light_id[offset] = i;
+			++offset;
+		}
+	}
+	// actual number of light sample per pixel sample
+	unsigned lpp = (unsigned)ceil( (float)total_ls / (float)ps );
+	offset = 0;
+	for( unsigned i = 0 ; i < ps ; ++i )
+	{
+		for( unsigned k = 0 ; k < lpp ; k++ )
+		{
+			LightSample* ls = SORT_MALLOC( LightSample )();
+			ls->light_id = light_id[offset];
+			ls->t = p1d[offset];
+			ls->u = p2d[2*offset];
+			ls->v = p2d[2*offset+1];
+			samples[i].light_sample.push_back( ls );
+			++offset;
+		}
+	}
+
+	unsigned bsdf_sample = sampler->RoundSize( ps );
+	float* bd_1d = SORT_MALLOC_ARRAY( float , bsdf_sample );
+	float* bd_2d = SORT_MALLOC_ARRAY( float , bsdf_sample * 2 );
+	sampler->Generate1D( bd_1d , bsdf_sample );
+	sampler->Generate2D( bd_2d , bsdf_sample );
+	for( unsigned i = 0 ; i < bsdf_sample ; ++i )
+	{
+		BsdfSample* bs = SORT_MALLOC(BsdfSample)();
+		bs->t = bd_1d[i];
+		bs->u = bd_2d[2*i];
+		bs->v = bd_2d[2*i+1];
+		samples[i].bsdf_sample.push_back( bs );
+	}
 }

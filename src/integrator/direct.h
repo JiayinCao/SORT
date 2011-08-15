@@ -29,7 +29,7 @@ class	DirectLight : public Integrator
 // public method
 public:
 	// default constructor
-	DirectLight(){}
+	DirectLight( unsigned lp ):ls_per_ps(lp){}
 	// destructor
 	~DirectLight(){}
 
@@ -48,6 +48,10 @@ public:
 
 	// output log information
 	virtual void OutputLog() const;
+
+// private field
+private:
+	unsigned ls_per_ps; // light sample per pixel sample
 };
 
 #endif
