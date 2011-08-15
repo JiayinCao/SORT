@@ -21,7 +21,7 @@
 #include "utility/rand.h"
 
 // generate sample in one dimension
-void RandomSampler::Generate1D( float* sample , unsigned num )
+void RandomSampler::Generate1D( float* sample , unsigned num ) const
 {
 	Sort_Assert( sample != 0 );
 
@@ -30,7 +30,7 @@ void RandomSampler::Generate1D( float* sample , unsigned num )
 }
 
 // generate sample in two dimension
-void RandomSampler::Generate2D( float* sample , unsigned num )
+void RandomSampler::Generate2D( float* sample , unsigned num ) const
 {
 	Sort_Assert( sample != 0 );
 

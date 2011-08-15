@@ -23,11 +23,15 @@
 #include "utility/define.h"
 #include "texture/rendertarget.h"
 #include <math.h>
+#include "sampler/sample.h"
 
 // generate a ray given a pixel
-Ray	EnvironmentCamera::GenerateRay( float x , float y ) const
+Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
 {
 	Sort_Assert( m_rt != 0 );
+
+	x += ps.img_u;
+	y += ps.img_v;
 
 	// generate ray
 	float theta = PI * y / m_rt->GetHeight();

@@ -20,13 +20,17 @@
 #include "texture/rendertarget.h"
 #include <math.h>
 #include "utility/assert.h"
+#include "sampler/sample.h"
 
 // generate ray
-Ray	PerspectiveCamera::GenerateRay( float x , float y ) const
+Ray	PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
 {
 	// check if there is render target
 	Sort_Assert( m_rt != 0 );
 	
+	x += ps.img_u;
+	y += ps.img_v;
+
 	float w = (float)m_rt->GetWidth();
 	float h = (float)m_rt->GetHeight();
 	float aspect = w / h;

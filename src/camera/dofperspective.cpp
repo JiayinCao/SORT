@@ -20,13 +20,17 @@
 #include "texture/rendertarget.h"
 #include "utility/assert.h"
 #include "utility/samplemethod.h"
+#include "sampler/sample.h"
 
 // generate ray
-Ray	DofPerspective::GenerateRay( float x , float y ) const
+Ray	DofPerspective::GenerateRay( float x , float y , const PixelSample& ps ) const
 {
 	// check if there is render target
 	Sort_Assert( m_rt != 0 );
 	
+	x += ps.img_u;
+	y += ps.img_v;
+
 	float w = (float)m_rt->GetWidth();
 	float h = (float)m_rt->GetHeight();
 	float aspect = w / h;
@@ -54,9 +58,8 @@ Ray	DofPerspective::GenerateRay( float x , float y ) const
 	
 	Point target = r(dis);
 
-	float s = x - floor(x);
-	float t = y - floor(y);
-	UniformSampleDisk( s , t , s , t );
+	float s , t;
+	UniformSampleDisk( ps.dof_u , ps.dof_v , s , t );
 	s *= lensRadius;
 	t *= lensRadius;
 

@@ -20,6 +20,8 @@
 
 // include the header
 #include "spectrum/spectrum.h"
+#include "managers/memmanager.h"
+#include "sampler/sampler.h"
 
 // pre-declera classes
 class	Ray;
@@ -41,6 +43,29 @@ public:
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
 	virtual Spectrum	Li( const Scene& scene , const Ray& ray ) const = 0;
+
+	// generate samples
+	// para 'sampler' : the sampling method
+	// para 'samples' : the samples to be generated
+	// para 'ps'      : number of pixel sample to be generated
+	// para 'scene'   : the scene to be rendered
+	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
+	{
+		float* data = SORT_MALLOC_ARRAY( float , ps )();
+		sampler->Generate2D( data , ps );
+		for( unsigned i = 0 ; i < ps ; ++i )
+		{
+			samples[i].img_u = data[2*i];
+			samples[i].img_v = data[2*i+1];
+		}
+
+		sampler->Generate2D( data , ps );
+		for( unsigned i = 0 ; i < ps ; ++i )
+		{
+			samples[i].dof_u = 2 * data[2*i] - 1.0f ;
+			samples[i].dof_v = 2 * data[2*i+1] - 1.0f;
+		}
+	}
 
 	// pre-process before rendering
 	// by default , nothing is done in pre-process

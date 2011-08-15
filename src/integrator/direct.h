@@ -39,6 +39,13 @@ public:
 	// result       : radiance along the ray from the scene<F3>
 	virtual Spectrum	Li( const Scene& scene , const Ray& ray ) const;
 
+	// generate samples
+	// para 'sampler' : the sampling method
+	// para 'samples' : the samples to be generated
+	// para 'ps'      : number of pixel sample to be generated
+	// para 'scene'   : the scene to be rendered
+	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const;
+
 	// output log information
 	virtual void OutputLog() const;
 };

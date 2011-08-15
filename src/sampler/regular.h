@@ -37,17 +37,15 @@ public:
 	// note : samples like jittered sampling needs to overwrite the method
 	virtual unsigned RoundSize( unsigned size ) const;
 
-// protected medthod
-protected:
 	// generate sample in one dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate1D( float* sample , unsigned num );
+	virtual void Generate1D( float* sample , unsigned num ) const;
 
 	// generate sample in two dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate2D( float* sample , unsigned num );
+	virtual void Generate2D( float* sample , unsigned num ) const;
 };
 
 #endif

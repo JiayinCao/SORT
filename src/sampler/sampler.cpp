@@ -29,31 +29,3 @@ Sampler::Sampler()
 Sampler::~Sampler()
 {
 }
-
-// generate samples
-void Sampler::GenerateSamples( Sample* sample , unsigned num )
-{
-	float* data = SORT_MALLOC_ARRAY( float , num * 2 )();
-	Generate2D( data , num );
-
-	for( unsigned k = 0 ; k < num ; k++ )
-	{
-		sample[k].img_u = data[2*k];
-		sample[k].img_v = data[2*k+1];
-	}
-
-	Sort_Assert( sample );
-	for( unsigned k = 0 ; k < num ; ++k )
-	{
-		for( unsigned i = 0 ; i < sample[k].dim0.size() ; ++i )
-		{
-			Sort_Assert( sample[k].sample_1d != 0 );
-			Generate1D( sample[k].sample_1d[i] , sample[k].dim0[i] );
-		}
-		for( unsigned i = 0 ; i < sample[k].dim1.size() ; ++i )
-		{
-			Sort_Assert( sample[k].sample_2d != 0 );
-			Generate2D( sample[k].sample_2d[i] , sample[k].dim1[i] );
-		}
-	}
-}
