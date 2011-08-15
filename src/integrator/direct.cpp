@@ -49,7 +49,7 @@ Spectrum DirectLight::Li( const Scene& scene , const Ray& r ) const
 	{
 		Vector	lightDir;
 		float	pdf;
-		Spectrum ld = (*it)->sample_f( ip , lightDir , &pdf , visibility );
+		Spectrum ld = (*it)->sample_f( ip , lightDir , 1.0f , &pdf , visibility );
 		if( ld.IsBlack() )
 		{
 			it++;
@@ -127,7 +127,7 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 	{
 		for( unsigned k = 0 ; k < lpp ; k++ )
 		{
-			LightSample* ls = SORT_MALLOC( LightSample )();
+			LightSample* ls = SORT_MALLOC(LightSample)();
 			ls->light_id = light_id[offset];
 			ls->t = p1d[offset];
 			ls->u = p2d[2*offset];

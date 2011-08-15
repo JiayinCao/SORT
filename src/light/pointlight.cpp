@@ -20,15 +20,15 @@
 #include "geometry/intersection.h"
 
 // sample ray from light
-Spectrum PointLight::sample_f( const Intersection& intersect , Vector& wi , float* pdf , Visibility& visibility ) const
+Spectrum PointLight::sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
 {
 	Point pos( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
-	Vector delta = pos - intersect.intersect;
-	wi = Normalize( delta );
+	Vector vec = pos - intersect.intersect;
+	wi = Normalize( vec );
 	*pdf = 1.0f;
 
-	float len = delta.Length();
-	visibility.ray = Ray( intersect.intersect , wi , 0 , 1.0f , len );
+	float len = vec.Length();
+	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , len );
 
 	return intensity / ( len * len );
 }

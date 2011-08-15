@@ -20,27 +20,27 @@
 #include "geometry/intersection.h"
 
 // sample ray from light
-Spectrum SpotLight::sample_f( const Intersection& intersect , Vector& wi , float* pdf , Visibility& visibility ) const
+Spectrum SpotLight::sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
 {
 	Point pos( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
 	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
-	Vector delta = pos - intersect.intersect;
-	wi = Normalize( delta );
+	Vector vec = pos - intersect.intersect;
+	wi = Normalize( vec );
 	*pdf = 1.0f;
 
 	float falloff = SatDot( wi , -dir );
 	if( falloff < cos_total_range )
 		return 0.0f;
 	if( falloff > cos_falloff_start )
-		return intensity / delta.SquaredLength();
+		return intensity / vec.SquaredLength();
 	float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
 	if( d == 0.0f )
 		return 0.0f;
 
-	float len = delta.Length();
-	visibility.ray = Ray( intersect.intersect , wi , 0 , 1.0f , len );
+	float len = vec.Length();
+	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , len );
 
-	return intensity / delta.SquaredLength() * d * d;
+	return intensity / vec.SquaredLength() * d * d;
 }
 
 // register property
