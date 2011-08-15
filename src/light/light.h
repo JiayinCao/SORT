@@ -65,8 +65,11 @@ public:
 
 	// sample ray from light
 	// para 'intersect' : intersection information
-	// para 'wo'		: output vector
-	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float* pdf , Visibility& visibility ) const = 0;
+	// para 'wi'		: input vector in world space
+	// para 'delta'		: a delta to offset the original point
+	// para 'pdf'		: property density function value of the input vector
+	// para 'visibility': visibility tester
+	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const = 0;
 
 	// set transformation
 	virtual void	SetTransform( const Transform& transform )

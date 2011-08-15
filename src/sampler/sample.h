@@ -31,6 +31,9 @@ public:
 	// the sample parameters
 	float		t;		// a canonical number to select face from light
 	float		u , v;	// 2d sample data
+
+	// default constructor
+	LightSample(){}
 };
 
 // Bsdf Sample
@@ -42,6 +45,9 @@ public:
 	float	u , v;	// 2d sample data
 
 	float	preserved;	// a preserved data for memory alignment
+
+	// default constructor
+	BsdfSample(){}
 };
 
 // sample defination
