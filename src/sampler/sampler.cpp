@@ -17,8 +17,6 @@
 
 // include the header file
 #include "sampler.h"
-#include "utility/assert.h"
-#include "managers/memmanager.h"
 
 // default constructor
 Sampler::Sampler()

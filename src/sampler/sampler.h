@@ -21,6 +21,8 @@
 #include "sort.h"
 #include <vector>
 #include "sample.h"
+#include "managers/memmanager.h"
+#include <algorithm>
 
 /////////////////////////////////////////////////////////////////////////////////
 // definitation of the sampler
@@ -49,5 +51,16 @@ public:
 	// para 'num'    : the number of samples to be generated
 	virtual void Generate2D( float* sample , unsigned num ) const = 0;
 };
+
+// generate shuffle index
+inline const unsigned* ShuffleIndex( unsigned size )
+{
+	unsigned* shuffle = SORT_MALLOC_ARRAY( unsigned , size );
+	for( unsigned i = 0 ; i < size ; i++ )
+		shuffle[i] = i;
+	std::random_shuffle( shuffle , shuffle + size );
+	
+	return shuffle;
+}
 
 #endif
