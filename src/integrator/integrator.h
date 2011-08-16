@@ -51,7 +51,7 @@ public:
 	// para 'scene'   : the scene to be rendered
 	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
 	{
-		float* data = SORT_MALLOC_ARRAY( float , ps )();
+		float* data = SORT_MALLOC_ARRAY( float , 2 * ps )();
 		sampler->Generate2D( data , ps );
 		for( unsigned i = 0 ; i < ps ; ++i )
 		{
@@ -59,11 +59,14 @@ public:
 			samples[i].img_v = data[2*i+1];
 		}
 
+		// shuffle the index
+		const unsigned* shuffled_id = ShuffleIndex( ps );
 		sampler->Generate2D( data , ps );
 		for( unsigned i = 0 ; i < ps ; ++i )
 		{
-			samples[i].dof_u = 2 * data[2*i] - 1.0f ;
-			samples[i].dof_v = 2 * data[2*i+1] - 1.0f;
+			unsigned sid = 2*shuffled_id[i];
+			samples[i].dof_u = 2 * data[sid] - 1.0f ;
+			samples[i].dof_v = 2 * data[sid+1] - 1.0f;
 		}
 	}
 

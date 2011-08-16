@@ -120,6 +120,8 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 			++offset;
 		}
 	}
+	// shuffle the index
+	const unsigned* shuffled_id = ShuffleIndex( total_ls );
 	// actual number of light sample per pixel sample
 	unsigned lpp = (unsigned)ceil( (float)total_ls / (float)ps );
 	offset = 0;
@@ -127,27 +129,33 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 	{
 		for( unsigned k = 0 ; k < lpp ; k++ )
 		{
+			unsigned shuffled = shuffled_id[offset];
 			LightSample* ls = SORT_MALLOC(LightSample)();
-			ls->light_id = light_id[offset];
-			ls->t = p1d[offset];
-			ls->u = p2d[2*offset];
-			ls->v = p2d[2*offset+1];
+			ls->light_id = light_id[shuffled];
+			ls->t = ld_1d[shuffled];
+			ls->u = ld_2d[2*shuffled];
+			ls->v = ld_2d[2*shuffled+1];
 			samples[i].light_sample.push_back( ls );
 			++offset;
+			if( offset >= total_ls ) break;
 		}
+		if( offset >= total_ls ) break;
 	}
 
 	unsigned bsdf_sample = sampler->RoundSize( ps );
 	float* bd_1d = SORT_MALLOC_ARRAY( float , bsdf_sample );
 	float* bd_2d = SORT_MALLOC_ARRAY( float , bsdf_sample * 2 );
-	sampler->Generate1D( bd_1d , bsdf_sample );
-	sampler->Generate2D( bd_2d , bsdf_sample );
-	for( unsigned i = 0 ; i < bsdf_sample ; ++i )
+	for( unsigned i = 0 ; i < ps ; ++i )
 	{
-		BsdfSample* bs = SORT_MALLOC(BsdfSample)();
-		bs->t = bd_1d[i];
-		bs->u = bd_2d[2*i];
-		bs->v = bd_2d[2*i+1];
-		samples[i].bsdf_sample.push_back( bs );
+		sampler->Generate1D( bd_1d , bsdf_sample );
+		sampler->Generate2D( bd_2d , bsdf_sample );
+		for( unsigned k = 0 ; k < bsdf_sample ; ++k )
+		{
+			BsdfSample* bs = SORT_MALLOC(BsdfSample)();
+			bs->t = bd_1d[k];
+			bs->u = bd_2d[2*k];
+			bs->v = bd_2d[2*k+1];
+			samples[i].bsdf_sample.push_back( bs );
+		}
 	}
 }
