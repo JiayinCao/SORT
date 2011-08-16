@@ -101,8 +101,8 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 	unsigned total_ls = 0 ;
 	for( unsigned i = 0 ; i < light_num ; ++i )
 		total_ls += ls_num[i];
-	float* ld_1d = SORT_MALLOC_ARRAY( float , total_ls );
-	float* ld_2d = SORT_MALLOC_ARRAY( float , 2 * total_ls );
+	float* ld_1d = SORT_MALLOC_ARRAY( float , total_ls * 3 );
+	float* ld_2d = ld_1d + total_ls;
 	unsigned* light_id = SORT_MALLOC_ARRAY( unsigned , total_ls );
 	float* p1d = ld_1d;
 	float* p2d = ld_2d;
@@ -125,37 +125,45 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 	// actual number of light sample per pixel sample
 	unsigned lpp = (unsigned)ceil( (float)total_ls / (float)ps );
 	offset = 0;
+	LightSample* ls = SORT_MALLOC_ARRAY(LightSample,total_ls)();
 	for( unsigned i = 0 ; i < ps ; ++i )
 	{
+		samples[i].light_sample.clear();
+		if( lpp != samples[i].light_sample.size() )
+			samples[i].light_sample.resize(lpp);
 		for( unsigned k = 0 ; k < lpp ; k++ )
 		{
 			unsigned shuffled = shuffled_id[offset];
-			LightSample* ls = SORT_MALLOC(LightSample)();
-			ls->light_id = light_id[shuffled];
-			ls->t = ld_1d[shuffled];
-			ls->u = ld_2d[2*shuffled];
-			ls->v = ld_2d[2*shuffled+1];
-			samples[i].light_sample.push_back( ls );
+			ls[offset].light_id = light_id[shuffled];
+			ls[offset].t = ld_1d[shuffled];
+			ls[offset].u = ld_2d[2*shuffled];
+			ls[offset].v = ld_2d[2*shuffled+1];
+			samples[i].light_sample.push_back( &ls[offset] );
 			++offset;
 			if( offset >= total_ls ) break;
 		}
 		if( offset >= total_ls ) break;
 	}
 
-	unsigned bsdf_sample = sampler->RoundSize( ps );
-	float* bd_1d = SORT_MALLOC_ARRAY( float , bsdf_sample );
-	float* bd_2d = SORT_MALLOC_ARRAY( float , bsdf_sample * 2 );
+	unsigned bsdf_sample = sampler->RoundSize( samples[0].light_sample.size() );
+	float* bd_1d = SORT_MALLOC_ARRAY( float , bsdf_sample * 3 );
+	float* bd_2d = bd_1d + bsdf_sample;
+	BsdfSample* bsdf_samples = SORT_MALLOC_ARRAY( BsdfSample , bsdf_sample * ps )();
+	offset = 0;
 	for( unsigned i = 0 ; i < ps ; ++i )
 	{
+		samples[i].bsdf_sample.clear();
+		if( bsdf_sample != samples[i].bsdf_sample.size() )
+			samples[i].bsdf_sample.resize(bsdf_sample);
 		sampler->Generate1D( bd_1d , bsdf_sample );
 		sampler->Generate2D( bd_2d , bsdf_sample );
 		for( unsigned k = 0 ; k < bsdf_sample ; ++k )
 		{
-			BsdfSample* bs = SORT_MALLOC(BsdfSample)();
-			bs->t = bd_1d[k];
-			bs->u = bd_2d[2*k];
-			bs->v = bd_2d[2*k+1];
-			samples[i].bsdf_sample.push_back( bs );
+			bsdf_samples[offset].t = bd_1d[k];
+			bsdf_samples[offset].u = bd_2d[2*k];
+			bsdf_samples[offset].v = bd_2d[2*k+1];
+			samples[i].bsdf_sample.push_back( &bsdf_samples[offset] );
+			++offset;
 		}
 	}
 }
