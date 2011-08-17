@@ -78,6 +78,9 @@ public:
 	// total power of the light
 	virtual Spectrum Power( const Scene& ) const = 0;
 
+	// whether the light is a delta light
+	bool	IsDelta() const { return true; }
+
 // protected field
 protected:
 	// intensity for the light

@@ -14,6 +14,10 @@
     <Property name="intensity" value="10000000 9000000 6000000"/>
 	<Property name="pos" value="0 600 500" />
   </Light>
+  <Light type="point">
+    <Property name="intensity" value="10000000 9000000 6000000"/>
+    <Property name="pos" value="300 600 500" />
+  </Light>
   <Light type="s1pot">
     <Property name="intensity" value="0 0 9000000"/>
     <Property name="falloff_start" value="0.1" />

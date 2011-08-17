@@ -26,7 +26,7 @@
 #include "sampler/sampler.h"
 
 // radiance along a specific ray direction
-Spectrum DirectLight::Li( const Scene& scene , const Ray& r ) const
+Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample& ps ) const
 {
 	if( r.m_Depth > 6 )
 		return 0.0f;
@@ -36,42 +36,15 @@ Spectrum DirectLight::Li( const Scene& scene , const Ray& r ) const
 	if( false == scene.GetIntersect( r , &ip ) )
 		return scene.EvaluateSky( r );
 
-	Spectrum t;
+	// evaluate direct light
+	Spectrum t = EvaluateDirect( r , scene , ip , ps );
 
-	// get bsdf
+	// evaluate specular reflection or refraction
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
-
-	// lights
-	Visibility visibility(scene);
-	const vector<Light*>& lights = scene.GetLights();
-	vector<Light*>::const_iterator it = lights.begin();
-	while( it != lights.end() )
-	{
-		Vector	lightDir;
-		float	pdf;
-		Spectrum ld = (*it)->sample_f( ip , lightDir , 1.0f , &pdf , visibility );
-		if( ld.IsBlack() )
-		{
-			it++;
-			continue;
-		}
-		Spectrum f = bsdf->f( -r.m_Dir , lightDir );
-		if( f.IsBlack() )
-		{
-			it++;
-			continue;
-		}
-		bool visible = visibility.IsVisible();
-		if( visible )
-			t += (ld * f * SatDot( lightDir , ip.normal ) / pdf);
-		it++;
-	}
-
-	// add reflection
 	if( bsdf->NumComponents( BXDF_REFLECTION ) > 0 )
-		t += SpecularReflection( scene , r , &ip , bsdf , this );
+		t += SpecularReflection( scene , r , &ip , bsdf , this , ps );
 	if( bsdf->NumComponents( BXDF_TRANSMISSION ) > 0 )
-		t += SpecularRefraction( scene , r , &ip , bsdf , this );
+		t += SpecularRefraction( scene , r , &ip , bsdf , this , ps );
 
 	return t;
 }
@@ -127,11 +100,10 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 	offset = 0;
 	LightSample* ls = SORT_MALLOC_ARRAY(LightSample,total_ls)();
 	for( unsigned i = 0 ; i < ps ; ++i )
-	{
 		samples[i].light_sample.clear();
-		if( lpp != samples[i].light_sample.size() )
-			samples[i].light_sample.resize(lpp);
-		for( unsigned k = 0 ; k < lpp ; k++ )
+	for( unsigned k = 0 ; k < lpp ; k++ )
+	{
+		for( unsigned i = 0 ; i < ps ; i++ )
 		{
 			unsigned shuffled = shuffled_id[offset];
 			ls[offset].light_id = light_id[shuffled];
@@ -162,7 +134,7 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 			bsdf_samples[offset].t = bd_1d[k];
 			bsdf_samples[offset].u = bd_2d[2*k];
 			bsdf_samples[offset].v = bd_2d[2*k+1];
-			samples[i].bsdf_sample.push_back( &bsdf_samples[offset] );
+			samples[i].bsdf_sample[k] = &bsdf_samples[offset];
 			++offset;
 		}
 	}
