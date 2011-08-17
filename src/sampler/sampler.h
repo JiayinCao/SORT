@@ -39,7 +39,7 @@ public:
 	// para 'size' : number of samples to be generated
 	// result      : the modified number
 	// note : samples like jittered sampling needs to overwrite the method
-	virtual unsigned RoundSize( unsigned size ) const { return size; }
+	virtual unsigned RoundSize( unsigned size ) const { return (size==0)?1:size; }
 
 	// generate sample in one dimension
 	// para 'sample' : the memory to save the sampled data
