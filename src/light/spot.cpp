@@ -26,7 +26,7 @@ Spectrum SpotLight::sample_f( const Intersection& intersect , Vector& wi , float
 	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
 	Vector vec = pos - intersect.intersect;
 	wi = Normalize( vec );
-	*pdf = 1.0f;
+	if( pdf ) *pdf = 1.0f;
 
 	float falloff = SatDot( wi , -dir );
 	if( falloff < cos_total_range )

@@ -25,7 +25,7 @@ Spectrum PointLight::sample_f( const Intersection& intersect , Vector& wi , floa
 	Point pos( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
 	Vector vec = pos - intersect.intersect;
 	wi = Normalize( vec );
-	*pdf = 1.0f;
+	if( pdf ) *pdf = 1.0f;
 
 	float len = vec.Length();
 	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , len );

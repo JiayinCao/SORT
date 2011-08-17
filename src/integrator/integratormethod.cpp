@@ -20,9 +20,12 @@
 #include "geometry/ray.h"
 #include "geometry/intersection.h"
 #include "bsdf/bsdf.h"
+#include "geometry/primitive.h"
+#include "material/material.h"
+#include "light/light.h"
 
 // radiance along specular reflection
-Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator )
+Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps )
 {
 	Ray r;
 	float pdf;
@@ -35,11 +38,11 @@ Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Interse
 
 	float density = AbsDot( r.m_Dir , intersect->normal );
 
-	return f * integrator->Li( scene , r ) * density / pdf ;
+	return f * integrator->Li( scene , r , ps ) * density / pdf ;
 }
 
 // radiance along specular refraction
-Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator )
+Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps )
 {
 	Ray r;
 	float pdf;
@@ -52,5 +55,40 @@ Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Interse
 
 	float density = AbsDot( r.m_Dir , intersect->normal ) ;
 
-	return f * integrator->Li( scene , r ) * density / pdf ;
+	return f * integrator->Li( scene , r , ps ) * density / pdf ;
+}
+
+// evaluate direct lighting
+Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection& ip , const PixelSample& ps )
+{
+	Spectrum t;
+
+	// get the lights
+	const vector<Light*> lights = scene.GetLights();
+
+	// get bsdf
+	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
+
+	// evaluate light
+	Visibility visibility(scene);
+	vector<LightSample*>::const_iterator it = ps.light_sample.begin();
+	while( it != ps.light_sample.end() )
+	{
+		const Light* light = lights[(*it)->light_id];
+		if( light->IsDelta() )
+		{
+			Vector lightDir;
+			Spectrum c = light->sample_f( ip , lightDir , 0.1f , 0 , visibility );
+			if( visibility.IsVisible() )
+				t += c * bsdf->f( -r.m_Dir , lightDir ) * SatDot( lightDir , ip.normal );
+		}else
+		{
+			// to be added in the next couple of days
+		}
+
+		it++;
+	}
+	t /= (float)ps.light_sample.size();
+
+	return t;
 }
