@@ -22,10 +22,10 @@
 #include "utility/smartptr.h"
 #include "bbox.h"
 #include "managers/matmanager.h"
+#include "material/material.h"
 
 // pre-decleration
 class	Intersection;
-class	Material;
 
 //////////////////////////////////////////////////////////////////
 //	definition of primitive
@@ -63,6 +63,10 @@ public:
 
 	// set material
 	void	SetMaterial( Material* mat ) { m_mat = mat; }
+
+	// get emissive
+	const Spectrum& GetEmissive() const
+	{ return m_mat->GetEmissive(); }
 
 // protected field
 protected:

@@ -44,7 +44,7 @@ public:
 	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const ;
 
 	// total power of the light
-	virtual Spectrum Power( const Scene& ) const
+	virtual Spectrum Power() const
 	{return 4 * PI * intensity * ( 1.0f - 0.5f * ( cos_falloff_start + cos_total_range ) ) ;}
 
 // private field

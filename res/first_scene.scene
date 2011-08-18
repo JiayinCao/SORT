@@ -1,7 +1,7 @@
 <Root>
   <Resource path="../res/"/>
   <Material value="default.material"/>
-	<Model filename="cornell.obj">
+	<Model filename="cornell.obj" name="cornell">
 		<Transform>
 	    <Matrix value="s 40"/>
       <Matrix value="t 0 -500 0"/>
@@ -10,6 +10,15 @@
       <MatSet name="Box01" mat="cube_mat"/>
     </Material>
 	</Model>
+  <Model filename="cube.obj" name="light">
+    <Transform>
+      <Matrix value="s 400 50 400"/>
+      <Matrix value="t 0 1000 0"/>
+    </Transform>
+    <Material>
+      <MatSet name="Box01" mat="cube_mat"/>
+    </Material>
+  </Model>
   <Light type="point">
     <Property name="intensity" value="10000000 9000000 6000000"/>
 	<Property name="pos" value="0 600 500" />
@@ -28,6 +37,10 @@
   <Light type="dis1tant">
   	<Property name="intensity" value="20 20 20" />
 	<Property name="dir" value="-1 -0 -5"/>
+  </Light>
+  <Light type="area">
+    <Property name="intensity" value="9000000 9000000 9000000"/>
+    <Property name="mesh" value="light" />
   </Light>
 	<Accel type="kd_tree"/>
   <Sky type="sky_box">

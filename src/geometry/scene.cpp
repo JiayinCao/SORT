@@ -84,11 +84,24 @@ bool Scene::LoadScene( const string& str )
 
 		if( filename != 0 )
 		{
+			// the name of the model
+			const char* model_name = meshNode->Attribute( "name" );
+			if( model_name == 0 )
+			{
+				LOG_WARNING<<"There is a mesh \""<<filename<<"\" without a model name, it will be skipped."<<ENDL;
+				break;
+			}
+			if( 0 != GetTriMesh( model_name ) )
+			{
+				LOG_WARNING<<"A model with name \""<<model_name<<"\" already exists, it will be skipped."<<ENDL;
+				break;
+			}
+
 			// load the transform matrix
 			Transform transform = _parseTransform( meshNode->FirstChildElement( "Transform" ) );
 
 			// load the first mesh
-			TriMesh* mesh = new TriMesh();
+			TriMesh* mesh = new TriMesh(model_name);
 			if( mesh->LoadMesh( filename , transform ) )
 			{
 				// reset the material if neccessary
@@ -117,7 +130,6 @@ bool Scene::LoadScene( const string& str )
 		meshNode = meshNode->NextSiblingElement( "Model" );
 	}
 
-
 	// parse the lights
 	TiXmlElement* lightNode = root->FirstChildElement( "Light" );
 	while( lightNode )
@@ -126,9 +138,11 @@ bool Scene::LoadScene( const string& str )
 		if( type != 0 )
 		{
 			Light* light = CREATE_TYPE( type , Light );
-
 			if( light )
 			{
+				// setup 
+				light->SetupScene( this );
+
 				// load the transform matrix
 				light->SetTransform( _parseTransform( lightNode->FirstChildElement( "Transform" ) ) );
 
@@ -344,7 +358,7 @@ void Scene::_genLightDistribution()
 	vector<Light*>::const_iterator it = m_lights.begin();
 	for( unsigned i = 0 ; i < count ; i++ )
 	{
-		pdf[i] = m_lights[i]->Power(*this).GetIntensity();
+		pdf[i] = m_lights[i]->Power().GetIntensity();
 		it++;
 	}
 
@@ -382,4 +396,17 @@ float Scene::LightProperbility( unsigned i ) const
 {
 	Sort_Assert( m_pLightsDis != 0 );
 	return m_pLightsDis->GetProperty( i );
+}
+
+// get trimesh
+TriMesh* Scene::GetTriMesh( const string& name ) const
+{
+	vector<TriMesh*>::const_iterator it = m_meshBuf.begin();
+	while( it != m_meshBuf.end() )
+	{
+		if( (*it)->m_Name == name )
+			return *it;
+		it++;
+	}
+	return 0;
 }

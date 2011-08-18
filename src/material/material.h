@@ -21,6 +21,7 @@
 // include the cpp file
 #include "utility/propertyset.h"
 #include "utility/creator.h"
+#include "spectrum/spectrum.h"
 
 // pre-declera classes
 class Bsdf;
@@ -39,6 +40,18 @@ public:
 
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const = 0;
+
+	// get emissive power
+	const Spectrum& GetEmissive() const
+	{ return emissive; }
+	// set emissive power
+	const void SetEmissvie( const Spectrum& e )
+	{ emissive = e; }
+
+// private field
+private:
+	// emissive
+	Spectrum	emissive;
 };
 
 #endif

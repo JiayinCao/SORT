@@ -1,7 +1,7 @@
 /*
-   FileName:      pointlight.h
+   FileName:      area.h
 
-   Created Time:  2011-08-04 12:48:35
+   Created Time:  2011-08-18 09:51:50
 
    Auther:        Cao Jiayin
 
@@ -15,25 +15,25 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifndef	SORT_POINTLIGHT
-#define	SORT_POINTLIGHT
+#ifndef	SORT_AREA
+#define	SORT_AREA
 
-// include the header
 #include "light.h"
-#include "utility/strhelper.h"
+#include "geometry/trimesh.h"
+#include "utility/assert.h"
 
-//////////////////////////////////////////////////////////////////////
-// definition of point light
-class PointLight : public Light
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//	definition of area light
+class	AreaLight : public Light
 {
 // public method
 public:
-	DEFINE_CREATOR( PointLight );
+	DEFINE_CREATOR(AreaLight);
 
 	// default constructor
-	PointLight(){_registerAllProperty();}
+	AreaLight(){_registerAllProperty();}
 	// destructor
-	~PointLight(){}
+	~AreaLight(){}
 
 	// sample ray from light
 	// para 'intersect' : intersection information
@@ -44,30 +44,37 @@ public:
 	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const;
 
 	// total power of the light
-	virtual Spectrum Power() const
-	{return 4 * PI * intensity;}
+	virtual Spectrum Power() const;
+
+	// it's not a delta light
+	bool	IsDelta() const { return false; }
 
 // private field
 private:
+	// the mesh binded to the area light
+	TriMesh*	mesh;
+
 	// register property
 	void _registerAllProperty();
 
-	class PosProperty : public PropertyHandler<Light>
+	class MeshProperty : public PropertyHandler<Light>
 	{
 	public:
-		PosProperty(Light* light):PropertyHandler(light){}
+		MeshProperty(Light* light):PropertyHandler(light){}
 
 		// set value
 		void SetValue( const string& str )
 		{
-			PointLight* light = CAST_TARGET(PointLight);
-			Point p = PointFromStr( str );
-			light->light2world.matrix.m[3] = p.x;
-			light->light2world.matrix.m[7] = p.y;
-			light->light2world.matrix.m[11] = p.z;
-			light->light2world.invMatrix.m[3] = -p.x;
-			light->light2world.invMatrix.m[7] = -p.y;
-			light->light2world.invMatrix.m[11] = -p.z;
+			AreaLight* light = CAST_TARGET(AreaLight);
+
+			Sort_Assert( light->scene != 0 );
+
+			light->mesh = light->scene->GetTriMesh( str );
+
+			if( light->mesh == 0 )
+				LOG_WARNING<<"There is no model named \""<<str<<"\" attached to area light."<<ENDL;
+			else
+				light->mesh->SetEmission( light->intensity );
 		}
 	};
 };

@@ -84,6 +84,9 @@ public:
 	// get bounding box of the scene
 	const BBox& GetBBox() const;
 
+	// get trimesh
+	TriMesh* GetTriMesh( const string& name ) const;
+
 // private field
 private:
 	// the buffer for the triangle mesh
