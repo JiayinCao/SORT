@@ -31,7 +31,7 @@ public:
 	DEFINE_CREATOR(AreaLight);
 
 	// default constructor
-	AreaLight(){_registerAllProperty();}
+	AreaLight(){_registerAllProperty();mesh=0;}
 	// destructor
 	~AreaLight(){}
 
@@ -41,13 +41,16 @@ public:
 	// para 'delta'		: a delta to offset the original point
 	// para 'pdf'		: property density function value of the input vector
 	// para 'visibility': visibility tester
-	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const;
+	virtual Spectrum sample_l( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const;
 
 	// total power of the light
 	virtual Spectrum Power() const;
 
 	// it's not a delta light
 	bool	IsDelta() const { return false; }
+
+	// sample light density
+	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const;
 
 // private field
 private:
@@ -74,9 +77,17 @@ private:
 			if( light->mesh == 0 )
 				LOG_WARNING<<"There is no model named \""<<str<<"\" attached to area light."<<ENDL;
 			else
-				light->mesh->SetEmission( light->intensity );
+				light->mesh->SetEmission( light );
 		}
 	};
+
+	// set light intensity
+	virtual void _setIntensity( const Spectrum& e )
+	{
+		intensity = e;
+		if( mesh )
+			mesh->SetEmission( this );
+	}
 };
 
 #endif

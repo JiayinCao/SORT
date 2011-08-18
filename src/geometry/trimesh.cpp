@@ -151,11 +151,10 @@ int TriMesh::_getSubsetID( const string& setname )
 }
 
 // set emissive
-void TriMesh::SetEmission( const Spectrum& e )
+void TriMesh::SetEmission( Light* l )
 {
 	unsigned size = m_pMemory->m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < size ; ++i )
-		m_pMaterials[i]->SetEmissvie( e );
-	if( false == e.IsBlack() )
-		m_bEmissive = true;
+		m_pMaterials[i]->BindLight( l );
+	m_bEmissive = true;
 }
