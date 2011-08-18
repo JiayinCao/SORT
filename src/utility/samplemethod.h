@@ -117,6 +117,14 @@ inline float UniformSpherePdf( const Vector& v )
 	return INV_TWOPI * 0.5f;
 }
 
+// uniformly sample triangle
+inline void UniformSampleTriangle( float u1 , float u2 , float& u , float& v )
+{
+	float su1 = sqrt( u1 );
+	u = 1 - su1;
+	v = u2 * su1;
+}
+
 // one dimensional distribution
 class Distribution1D
 {
@@ -149,7 +157,7 @@ public:
 	int SampleDiscrete( float u , float* pdf ) const
 	{
 		Sort_Assert( count != 0 && cdf != 0 );
-		Sort_Assert( u < 1.0f && u > 0.0f );
+		Sort_Assert( u < 1.0f && u >= 0.0f );
 
 		float* target = lower_bound( cdf , cdf + count + 1 , u );
 		int offset = (u<=0.0f)? 0:(int)(target-cdf-1);
@@ -164,7 +172,7 @@ public:
 	float SampleContinuous( float u , float* pdf ) const
 	{
 		Sort_Assert( count != 0 && cdf != 0 );
-		Sort_Assert( u < 1.0f && u > 0.0f );
+		Sort_Assert( u < 1.0f && u >= 0.0f );
 
 		float* target = lower_bound( cdf , cdf+count+1 , u );
 		int offset = (u<=0.0f)?0:(int)(target-cdf-1);

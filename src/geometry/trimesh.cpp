@@ -232,3 +232,16 @@ Primitive* TriMesh::GetPrimitive( unsigned i ) const
 
 	return m_triBuffer[i];
 }
+
+// get total surface area
+float TriMesh::GetSurfaceArea() const
+{
+	float sa = 0.0f;
+	vector<Primitive*>::const_iterator it = m_triBuffer.begin();
+	while( it != m_triBuffer.end() )
+	{
+		sa += (*it)->SurfaceArea();
+		it++;
+	}
+	return sa;
+}

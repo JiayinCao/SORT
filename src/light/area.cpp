@@ -49,7 +49,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 	Vector vec = p - intersect.intersect;
 	wi = Normalize( vec );
 
-	if( pdf ) *pdf = _pdf * INV_PI * 0.25;
+	if( pdf ) *pdf = _pdf * INV_PI * 0.25f / pri->SurfaceArea();
 
 	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , vec.Length() );
 	return intensity;
@@ -58,7 +58,8 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 // total power of the light
 Spectrum AreaLight::Power() const
 {
-	return 0.0f;
+	Sort_Assert( mesh != 0 );
+	return mesh->GetSurfaceArea() * intensity.GetIntensity() * 4 * PI;
 }
 
 // register property

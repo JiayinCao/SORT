@@ -19,6 +19,7 @@
 #include "triangle.h"
 #include "trimesh.h"
 #include "intersection.h"
+#include "utility/samplemethod.h"
 
 // check if the triangle is intersected with the ray
 bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
@@ -164,6 +165,8 @@ Point Triangle::Sample( float u , float v ) const
 	const Point& p1 = mem->m_PositionBuffer[id1] ;
 	const Point& p2 = mem->m_PositionBuffer[id2] ;
 	
-	//temp
-	return p0;
+	// uniformly sample a triangle
+	UniformSampleTriangle( u , v , u , v );
+
+	return p0 * u + p1 * v + p2 * ( 1 - u - v );
 }
