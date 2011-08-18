@@ -148,10 +148,8 @@ public:
 	// result   : corresponding bucket straddle the u, -1 if there is no data in the distribution
 	int SampleDiscrete( float u , float* pdf ) const
 	{
-		if( count == 0 || cdf == 0 )
-			return -1;
-		if( u >= 1.0f || u < 0.0f )
-			LOG_ERROR<<"Invalid canonical random variable in Distribution1D sample method"<<CRASH;
+		Sort_Assert( count != 0 && cdf != 0 );
+		Sort_Assert( u < 1.0f && u > 0.0f );
 
 		float* target = lower_bound( cdf , cdf + count + 1 , u );
 		int offset = (u<=0.0f)? 0:(int)(target-cdf-1);
@@ -165,10 +163,8 @@ public:
 	// para 'pdf' : property density function value for the sample
 	float SampleContinuous( float u , float* pdf ) const
 	{
-		if( count == 0 || cdf == 0 )
-			return -1.0f;
-		if( u >= 1.0f || u < 0.0f )
-			LOG_ERROR<<"Invalid canonical random variable in Distribution1D sample method"<<CRASH;
+		Sort_Assert( count != 0 && cdf != 0 );
+		Sort_Assert( u < 1.0f && u > 0.0f );
 
 		float* target = lower_bound( cdf , cdf+count+1 , u );
 		int offset = (u<=0.0f)?0:(int)(target-cdf-1);
@@ -212,8 +208,7 @@ public:
 	{
 		unsigned nu = tex->GetWidth();
 		unsigned nv = tex->GetHeight();
-		if( nu == 0 || nv == 0 )
-			LOG_ERROR<<"One of the dimensions for the texture is zero!"<<CRASH;
+		Sort_Assert( nu != 0 && nv != 0 );
 		float* data = new float[nu*nv];
 		for( unsigned i = 0 ; i < nv ; i++ )
 		{

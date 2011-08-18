@@ -86,7 +86,7 @@ void System::_preInit()
 	// the integrator
 	m_pIntegrator = new DirectLight(1);
 	// the sampler
-	m_pSampler = new RegularSampler();
+	m_pSampler = new StratifiedSampler();
 	m_iSamplePerPixel = m_pSampler->RoundSize(1);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 

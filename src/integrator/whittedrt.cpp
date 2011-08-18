@@ -45,23 +45,27 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r , const PixelSample& p
 	vector<Light*>::const_iterator it = lights.begin();
 	while( it != lights.end() )
 	{
-		Vector	lightDir;
-		float	pdf;
-		Spectrum ld = (*it)->sample_l( ip , lightDir , 0.1f , &pdf , visibility );
-		if( ld.IsBlack() )
+		// only delta light is evaluated
+		if( (*it)->IsDelta() )
 		{
-			it++;
-			continue;
+			Vector	lightDir;
+			float	pdf;
+			Spectrum ld = (*it)->sample_l( ip , 0 , lightDir , 0.1f , &pdf , visibility );
+			if( ld.IsBlack() )
+			{
+				it++;
+				continue;
+			}
+			Spectrum f = bsdf->f( -r.m_Dir , lightDir );
+			if( f.IsBlack() )
+			{
+				it++;
+				continue;
+			}
+			bool visible = visibility.IsVisible();
+			if( visible )
+				t += (ld * f * SatDot( lightDir , ip.normal ) / pdf);
 		}
-		Spectrum f = bsdf->f( -r.m_Dir , lightDir );
-		if( f.IsBlack() )
-		{
-			it++;
-			continue;
-		}
-		bool visible = visibility.IsVisible();
-		if( visible )
-			t += (ld * f * SatDot( lightDir , ip.normal ) / pdf);
 		it++;
 	}
 

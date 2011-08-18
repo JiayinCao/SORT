@@ -75,17 +75,22 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 	while( it != ps.light_sample.end() )
 	{
 		const Light* light = lights[(*it)->light_id];
-		if( light->IsDelta() )
+/*		if( light->IsDelta() )
 		{
 			Vector lightDir;
-			Spectrum c = light->sample_l( ip , lightDir , 0.1f , 0 , visibility );
+			Spectrum c = light->sample_l( ip , *it , lightDir , 0.1f , 0 , visibility );
 			if( visibility.IsVisible() )
 				t += c * bsdf->f( -r.m_Dir , lightDir ) * SatDot( lightDir , ip.normal );
 		}else
 		{
 			// to be added in the next couple of days
 		}
-
+*/
+		Vector lightDir;
+		float pdf;
+		Spectrum c = light->sample_l( ip , *it , lightDir , 0.1f , &pdf , visibility );
+		if( visibility.IsVisible() )
+			t += c * bsdf->f( -r.m_Dir , lightDir ) * SatDot( lightDir , ip.normal );
 		it++;
 	}
 	t /= (float)ps.light_sample.size();

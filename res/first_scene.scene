@@ -16,14 +16,14 @@
       <Matrix value="t 0 1000 0"/>
     </Transform>
     <Material>
-      <MatSet name="aa" mat="cube_mat"/>
+      <MatSet name="" mat="cube_mat"/>
     </Material>
   </Model>
-  <Light type="point">
+  <Light type="po1int">
     <Property name="intensity" value="10000000 9000000 6000000"/>
 	<Property name="pos" value="0 600 500" />
   </Light>
-  <Light type="point">
+  <Light type="poi1nt">
     <Property name="intensity" value="10000000 9000000 6000000"/>
     <Property name="pos" value="300 600 500" />
   </Light>
@@ -39,7 +39,7 @@
 	<Property name="dir" value="-1 -0 -5"/>
   </Light>
   <Light type="area">
-    <Property name="intensity" value="9000000 9000000 9000000"/>
+    <Property name="intensity" value="90 90 90"/>
     <Property name="mesh" value="light" />
   </Light>
 	<Accel type="kd_tree"/>

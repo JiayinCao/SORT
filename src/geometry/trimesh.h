@@ -26,6 +26,7 @@
 #include "geometry/transform.h"
 
 class	Material;
+class	Distribution1D;
 
 //////////////////////////////////////////////////////////////////////////////////
 //	definition of trimesh
@@ -57,6 +58,14 @@ public:
 	// set emissive
 	void SetEmission( Light* l );
 
+	// get triangle distribution 1d
+	// note that : 	it's not the 'trimesh''s duty to release the generated memory
+	//				the caller is responsible for release the generated distribution1d
+	Distribution1D*	GetTriDistribution() const;
+
+	// get primitive
+	Primitive* GetPrimitive( unsigned i ) const;
+
 // private field
 public:
 	// the name of the model
@@ -73,6 +82,8 @@ public:
 	// bool emissive
 	bool			m_bEmissive;
 
+	// the triangles for the mesh
+	vector<Primitive*> m_triBuffer;
 	// the materials for instanced mesh
 	Reference<Material>*	m_pMaterials;
 
@@ -85,6 +96,8 @@ public:
 	int		_getSubsetID( const string& setname );
 	// copy materials
 	void	_copyMaterial();
+	// generate tri buffer
+	void	_genTriBuffer();
 
 // set friend class
 friend	class	MeshManager;

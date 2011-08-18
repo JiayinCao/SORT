@@ -49,22 +49,26 @@ public:
 	// delete the cache
 	virtual void ClearBBoxCache();
 
+	// set primitive id
+	void	SetID( unsigned id ) { m_primitive_id = id; }
 	// get primitive id
 	unsigned GetID() const { return m_primitive_id; }
 
 	// get material
-	Material* GetMaterial() const 
-	{ 
-		if( m_mat == 0 ) 
-			return MatManager::GetSingleton().GetDefaultMat();
-		return m_mat; 
-	}
-
+	Material* GetMaterial() const;
 	// set material
 	void	SetMaterial( Material* mat ) { m_mat = mat; }
 
+	// enable or disable emissive
+	void	SetEnabledEmissive( bool flag ) { m_bEmissive = flag; }
 	// get emissive
 	Spectrum GetEmissive( const Vector& wo , const Intersection& intersect ) const;
+
+	// get surface area of the primitive
+	virtual float	SurfaceArea() const = 0;
+
+	// sample a point in the triangle
+	virtual Point	Sample( float u , float v ) const = 0;
 
 // protected field
 protected:

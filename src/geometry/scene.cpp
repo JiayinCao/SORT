@@ -129,7 +129,7 @@ bool Scene::LoadScene( const string& str )
 		// get to the next model
 		meshNode = meshNode->NextSiblingElement( "Model" );
 	}
-
+	
 	// parse the lights
 	TiXmlElement* lightNode = root->FirstChildElement( "Light" );
 	while( lightNode )
@@ -201,12 +201,11 @@ bool Scene::LoadScene( const string& str )
 			}
 		}
 	}
+	// restore resource path
+	SetResourcePath( oldpath );
 
 	// generate triangle buffer after parsing from file
 	_generateTriBuf();
-
-	// restore resource path
-	SetResourcePath( oldpath );
 
 	return true;
 }

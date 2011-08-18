@@ -17,11 +17,42 @@
 
 // include the header
 #include "area.h"
+#include "sampler/sample.h"
+
+// initialize default value
+void AreaLight::_init()
+{
+	_registerAllProperty();
+
+	mesh = 0;
+	distribution = 0;
+}
+
+// release data
+void AreaLight::_release()
+{
+	SAFE_DELETE(distribution);
+}
 
 // sample ray from light
-Spectrum AreaLight::sample_l( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const
+Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const
 {
-	return 0.0f;
+	Sort_Assert( ls != 0 );
+
+	// get the sampled primitive
+	float _pdf;
+	unsigned pri_id = distribution->SampleDiscrete( ls->t , &_pdf );
+	Primitive* pri = mesh->GetPrimitive( pri_id );
+	
+	Point p = pri->Sample( ls->u , ls->v );
+
+	Vector vec = p - intersect.intersect;
+	wi = Normalize( vec );
+
+	if( pdf ) *pdf = _pdf * INV_PI * 0.25;
+
+	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , vec.Length() );
+	return intensity;
 }
 
 // total power of the light

@@ -35,3 +35,11 @@ void Primitive::ClearBBoxCache()
 {
 	m_bbox.Delete();
 }
+
+// get material
+Material* Primitive::GetMaterial() const 
+{ 
+	if( m_mat == 0 ) 
+		return MatManager::GetSingleton().GetDefaultMat();
+	return m_mat; 
+}
