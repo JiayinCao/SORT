@@ -23,6 +23,8 @@
 #include "geometry/triangle.h"
 #include "geometry/instancetri.h"
 #include "managers/logmanager.h"
+#include "managers/memmanager.h"
+#include "utility/samplemethod.h"
 
 // default constructor
 TriMesh::TriMesh( const string& name ):m_Name(name)
@@ -48,6 +50,8 @@ void TriMesh::_init()
 void TriMesh::_release()
 {
 	SAFE_DELETE_ARRAY(m_pMaterials);
+
+	m_triBuffer.clear();
 }
 
 // load the mesh
@@ -62,7 +66,40 @@ bool TriMesh::LoadMesh( const string& str , Transform& transform )
 		return false;
 
 	_copyMaterial();
+	_genTriBuffer();
+
 	return true;
+}
+
+// generate triangle buffer
+void TriMesh::_genTriBuffer()
+{
+	m_triBuffer.clear();
+
+	unsigned base = 0;
+	if( m_bInstanced == false )
+	{
+		// generate the triangles
+		unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
+		for( unsigned i = 0 ; i < trunkNum ; i++ )
+		{
+			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
+				m_triBuffer.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i] , m_bEmissive) );
+			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+		}
+	}else
+	{
+		// generate the triangles
+		unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
+		for( unsigned i = 0 ; i < trunkNum ; i++ )
+		{
+			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
+				m_triBuffer.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] , m_bEmissive) );
+			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+		}
+	}
 }
 
 // copy materials
@@ -87,6 +124,15 @@ void TriMesh::_copyMaterial()
 void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 {
 	unsigned base = vec.size();
+	vector<Primitive*>::iterator it = m_triBuffer.begin();
+	while( it != m_triBuffer.end() )
+	{
+		(*it)->SetID( (*it)->GetID() + base );
+		vec.push_back( *it );
+		it++;
+	}
+
+	return ;
 	if( m_bInstanced == false )
 	{
 		// generate the triangles
@@ -156,5 +202,33 @@ void TriMesh::SetEmission( Light* l )
 	unsigned size = m_pMemory->m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < size ; ++i )
 		m_pMaterials[i]->BindLight( l );
+	vector<Primitive*>::iterator it = m_triBuffer.begin();
+	while( it != m_triBuffer.end() )
+	{
+		(*it)->SetEnabledEmissive( true );
+		it++;
+	}
 	m_bEmissive = true;
+}
+
+// get triangle distribution1d
+Distribution1D*	TriMesh::GetTriDistribution() const
+{
+	unsigned count = m_triBuffer.size();
+
+	Sort_Assert( count != 0 );
+	
+	float* dis = SORT_MALLOC_ARRAY( float , count );
+	for( unsigned i = 0 ; i < count ; ++i )
+		dis[i] = m_triBuffer[i]->SurfaceArea();
+
+	return new Distribution1D( dis , count );
+}
+
+// get primitive
+Primitive* TriMesh::GetPrimitive( unsigned i ) const
+{
+	Sort_Assert( i < m_triBuffer.size() );
+
+	return m_triBuffer[i];
 }

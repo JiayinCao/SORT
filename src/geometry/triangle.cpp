@@ -128,3 +128,42 @@ const BBox& Triangle::GetBBox() const
 
 	return *m_bbox;
 }
+
+// get the surface area of the triangle
+float Triangle::SurfaceArea() const
+{
+	// get the memory
+	Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+	int id0 = m_Index[ 0 ].posIndex;
+	int id1 = m_Index[ 1 ].posIndex;
+	int id2 = m_Index[ 2 ].posIndex;
+
+	// get three vertexes
+	const Point& p0 = mem->m_PositionBuffer[id0] ;
+	const Point& p1 = mem->m_PositionBuffer[id1] ;
+	const Point& p2 = mem->m_PositionBuffer[id2] ;
+	
+	Vector e0 = p1 - p0 ;
+	Vector e1 = p2 - p0 ;
+	Vector t = Cross( e0 , e1 );
+
+	return t.Length() * 0.5f;
+}
+
+// sample a point on triangle
+Point Triangle::Sample( float u , float v ) const
+{
+	// get the memory
+	Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+	int id0 = m_Index[ 0 ].posIndex;
+	int id1 = m_Index[ 1 ].posIndex;
+	int id2 = m_Index[ 2 ].posIndex;
+
+	// get three vertexes
+	const Point& p0 = mem->m_PositionBuffer[id0] ;
+	const Point& p1 = mem->m_PositionBuffer[id1] ;
+	const Point& p2 = mem->m_PositionBuffer[id2] ;
+	
+	//temp
+	return p0;
+}

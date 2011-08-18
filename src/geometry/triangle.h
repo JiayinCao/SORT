@@ -50,6 +50,12 @@ public:
 	// get the bounding box of the triangle
 	virtual const BBox&	GetBBox() const;
 
+	// get the surface area
+	virtual float SurfaceArea() const;
+
+	// sample a point on the triangle
+	virtual Point Sample( float u , float v ) const;
+
 // protected filed
 protected:
 	// the triangle mesh

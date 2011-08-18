@@ -29,6 +29,7 @@
 // pre-decleration
 class Intersection;
 class Vector;
+class LightSample;
 
 class Visibility
 {
@@ -72,7 +73,7 @@ public:
 	// para 'delta'		: a delta to offset the original point
 	// para 'pdf'		: property density function value of the input vector
 	// para 'visibility': visibility tester
-	virtual Spectrum sample_l( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const = 0;
+	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const = 0;
 
 	// sample light density
 	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const
