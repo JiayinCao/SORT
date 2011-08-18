@@ -25,7 +25,7 @@
 #include "managers/logmanager.h"
 
 // default constructor
-TriMesh::TriMesh()
+TriMesh::TriMesh( const string& name ):m_Name(name)
 {
 	// initialize default data
 	_init();
@@ -141,4 +141,12 @@ int TriMesh::_getSubsetID( const string& setname )
 			return i;
 	}
 	return -1;
+}
+
+// set emissive
+void TriMesh::SetEmission( const Spectrum& e )
+{
+	unsigned size = m_pMemory->m_TrunkBuffer.size();
+	for( unsigned i = 0 ; i < size ; ++i )
+		m_pMaterials[i]->SetEmissvie( e );
 }

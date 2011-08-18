@@ -40,6 +40,7 @@
 #include "light/pointlight.h"
 #include "light/spot.h"
 #include "light/distant.h"
+#include "light/area.h"
 
 // instance the singleton with logmanager class
 DEFINE_SINGLETON(Creator);
@@ -76,6 +77,7 @@ void Creator::_init()
 	REGISTER( "point" , PointLight );
 	REGISTER( "spot" , SpotLight );
 	REGISTER( "distant" , DistantLight );
+	REGISTER( "area", AreaLight );
 
 #undef	REGISTER
 }

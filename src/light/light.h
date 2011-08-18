@@ -59,9 +59,12 @@ class	Light : public PropertySet<Light>
 // public method
 public:
 	// default constructor
-	Light(){}
+	Light(){scene=0;}
 	// destructor
-	virtual ~Light(){}
+	virtual ~Light(){scene=0;}
+
+	// setup scene
+	void	SetupScene( const Scene* s ) {scene=s;}
 
 	// sample ray from light
 	// para 'intersect' : intersection information
@@ -76,13 +79,15 @@ public:
 	{light2world = transform;}
 
 	// total power of the light
-	virtual Spectrum Power( const Scene& ) const = 0;
+	virtual Spectrum Power() const = 0;
 
 	// whether the light is a delta light
 	bool	IsDelta() const { return true; }
 
 // protected field
 protected:
+	// scene containing the light
+	const Scene* scene;
 	// intensity for the light
 	Spectrum	intensity;
 	// transformation of the light

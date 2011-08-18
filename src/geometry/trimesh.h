@@ -34,7 +34,7 @@ class TriMesh
 // public method
 public:
 	// default constructor
-	TriMesh();
+	TriMesh(const string& name);
 	// destructor
 	~TriMesh();
 
@@ -54,8 +54,14 @@ public:
 	// para 'matname' : the material name
 	void ResetMaterial( const string& setname , const string& matname );
 
+	// set emissive
+	void SetEmission( const Spectrum& e );
+
 // private field
 public:
+	// the name of the model
+	const string	m_Name;
+
 	// the memory for the mesh
 	Reference<BufferMemory> m_pMemory;
 

@@ -43,9 +43,10 @@ public:
 	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const;
 
 	// total power of the light
-	virtual Spectrum Power( const Scene& scene ) const
+	virtual Spectrum Power() const
 	{
-		const BBox& box = scene.GetBBox();
+		Sort_Assert( scene != 0 );
+		const BBox& box = scene->GetBBox();
 		float delta = (box.m_Max - box.m_Min).SquaredLength();
 		return delta * PI * intensity;
 	}

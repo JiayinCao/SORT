@@ -36,8 +36,11 @@ Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample&
 	if( false == scene.GetIntersect( r , &ip ) )
 		return scene.EvaluateSky( r );
 
-	// evaluate direct light
-	Spectrum t = EvaluateDirect( r , scene , ip , ps );
+	// evaluate light directly
+	Spectrum t = ip.primitive->GetEmissive();
+
+	// eavluate direct light
+	t += EvaluateDirect( r , scene , ip , ps );
 
 	// evaluate specular reflection or refraction
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
