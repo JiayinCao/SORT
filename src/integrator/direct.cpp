@@ -37,7 +37,7 @@ Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample&
 		return scene.EvaluateSky( r );
 
 	// evaluate light directly
-	Spectrum t = ip.primitive->GetEmissive();
+	Spectrum t = ip.primitive->GetEmissive( -r.m_Dir , ip );
 
 	// eavluate direct light
 	t += EvaluateDirect( r , scene , ip , ps );

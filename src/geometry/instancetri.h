@@ -36,7 +36,7 @@ class	InstanceTriangle : public Triangle
 // public method
 public:
 	// constructor from a Triangle
-	InstanceTriangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index , Transform* transform , Material* mat );
+	InstanceTriangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index , Transform* transform , Material* mat , bool emissive );
 	// destructor
 	~InstanceTriangle();
 

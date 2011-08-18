@@ -53,6 +53,13 @@ void MatManager::_clearMatPool()
 	map< string , Material* >::iterator it = m_matPool.begin();
 	while( it != m_matPool.end() )
 	{
+		if( it->second->reference != 0 )
+		{
+			string isare = (it->second->reference>1)?"is":"are";
+			string refer = (it->second->reference>1)?" reference":" references";
+			LOG_ERROR<<"There "<<isare<<" still "<<it->second->reference<<refer<<" pointing to material \""<<it->first<<"\"."<<CRASH;
+		}
+
 		delete it->second;
 		it++;
 	}
@@ -106,6 +113,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 
 		// create specific material
 		Material* mat = CREATE_TYPE( type , Material );
+		mat->SetName( name );
 
 		if( mat )
 		{

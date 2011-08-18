@@ -41,6 +41,7 @@ void TriMesh::_init()
 {
 	m_pMemory = 0;
 	m_pMaterials = 0;
+	m_bEmissive = false;
 }
 
 // release the default data
@@ -70,10 +71,16 @@ void TriMesh::_copyMaterial()
 	SAFE_DELETE_ARRAY(m_pMaterials);
 
 	unsigned trunk_size = m_pMemory->m_TrunkBuffer.size();
-	m_pMaterials = new Material*[trunk_size];
+	m_pMaterials = new Reference<Material>[trunk_size];
 	
 	for( unsigned i = 0 ; i < trunk_size ; ++i )
-		m_pMaterials[i] = m_pMemory->m_TrunkBuffer[i]->m_mat;
+	{
+		if( m_pMemory->m_TrunkBuffer[i]->m_mat )
+			m_pMaterials[i] = m_pMemory->m_TrunkBuffer[i]->m_mat;
+		else
+			m_pMaterials[i] = MatManager::GetSingleton().GetDefaultMat();
+		m_pMemory->m_TrunkBuffer[i]->m_mat = 0;
+	}
 }
 
 // fill buffer into vector
@@ -88,7 +95,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i] ) );
+				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i] , m_bEmissive) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}else
@@ -99,7 +106,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] ) );
+				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] , m_bEmissive) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}
@@ -149,4 +156,6 @@ void TriMesh::SetEmission( const Spectrum& e )
 	unsigned size = m_pMemory->m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < size ; ++i )
 		m_pMaterials[i]->SetEmissvie( e );
+	if( false == e.IsBlack() )
+		m_bEmissive = true;
 }

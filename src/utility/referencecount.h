@@ -109,6 +109,10 @@ public:
 		return ptr != 0 ;
 	}
 
+	operator T*() const
+	{
+		return ptr;
+	}
 
 // private field
 private:
