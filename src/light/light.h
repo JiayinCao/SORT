@@ -72,7 +72,11 @@ public:
 	// para 'delta'		: a delta to offset the original point
 	// para 'pdf'		: property density function value of the input vector
 	// para 'visibility': visibility tester
-	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const = 0;
+	virtual Spectrum sample_l( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const = 0;
+
+	// sample light density
+	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const
+	{ return 0.0f; }
 
 	// set transformation
 	virtual void	SetTransform( const Transform& transform )
@@ -110,9 +114,13 @@ protected:
 		void SetValue( const string& str )
 		{
 			Light* light = CAST_TARGET(Light);
-			light->intensity = SpectrumFromStr(str);
+			light->_setIntensity( SpectrumFromStr(str) );
 		}
 	};
+
+	// set light intensity
+	virtual void _setIntensity( const Spectrum& e )
+	{ intensity = e; }
 };
 
 #endif

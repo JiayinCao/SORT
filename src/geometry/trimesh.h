@@ -55,7 +55,7 @@ public:
 	void ResetMaterial( const string& setname , const string& matname );
 
 	// set emissive
-	void SetEmission( const Spectrum& e );
+	void SetEmission( Light* l );
 
 // private field
 public:

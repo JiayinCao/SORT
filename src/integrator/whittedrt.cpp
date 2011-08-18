@@ -47,7 +47,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r , const PixelSample& p
 	{
 		Vector	lightDir;
 		float	pdf;
-		Spectrum ld = (*it)->sample_f( ip , lightDir , 0.1f , &pdf , visibility );
+		Spectrum ld = (*it)->sample_l( ip , lightDir , 0.1f , &pdf , visibility );
 		if( ld.IsBlack() )
 		{
 			it++;

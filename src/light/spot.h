@@ -41,7 +41,7 @@ public:
 	// para 'delta'		: a delta to offset the original point
 	// para 'pdf'		: property density function value of the input vector
 	// para 'visibility': visibility tester
-	virtual Spectrum sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const ;
+	virtual Spectrum sample_l( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const ;
 
 	// total power of the light
 	virtual Spectrum Power() const

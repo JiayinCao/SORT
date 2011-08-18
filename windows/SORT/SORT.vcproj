@@ -305,6 +305,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\geometry\primitive.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\geometry\primitive.h"
 				>
 			</File>

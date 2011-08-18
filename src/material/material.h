@@ -27,6 +27,8 @@
 // pre-declera classes
 class Bsdf;
 class Intersection;
+class Light;
+class Vector;
 
 ///////////////////////////////////////////////////////////
 // definition of material
@@ -43,11 +45,9 @@ public:
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const = 0;
 
 	// get emissive power
-	const Spectrum& GetEmissive() const
-	{ return emissive; }
+	const Light* GetLight() const { return light; }
 	// set emissive power
-	const void SetEmissvie( const Spectrum& e )
-	{ emissive = e; }
+	void BindLight( Light* l ) { light = l; }
 
 	// set name
 	void SetName( const string& n ) { name = n; }
@@ -59,7 +59,7 @@ private:
 	// the name for the material
 	string		name;
 	// emissive
-	Spectrum	emissive;
+	Light*		light;
 };
 
 #endif

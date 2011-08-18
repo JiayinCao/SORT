@@ -20,7 +20,7 @@
 #include "geometry/intersection.h"
 
 // sample a ray
-Spectrum DistantLight::sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
+Spectrum DistantLight::sample_l( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
 {
 	// distant light direction
 	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );

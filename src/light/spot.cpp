@@ -20,7 +20,7 @@
 #include "geometry/intersection.h"
 
 // sample ray from light
-Spectrum SpotLight::sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
+Spectrum SpotLight::sample_l( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
 {
 	Point pos( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
 	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );

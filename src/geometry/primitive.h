@@ -47,10 +47,7 @@ public:
 	virtual const BBox&	GetBBox() const = 0;
 
 	// delete the cache
-	virtual void ClearBBoxCache()
-	{
-		m_bbox.Delete();
-	}
+	virtual void ClearBBoxCache();
 
 	// get primitive id
 	unsigned GetID() const { return m_primitive_id; }
@@ -67,14 +64,7 @@ public:
 	void	SetMaterial( Material* mat ) { m_mat = mat; }
 
 	// get emissive
-	Spectrum GetEmissive( const Vector& wo , const Intersection& intersect ) const
-	{
-		if( m_bEmissive == false )
-			return 0.0f;
-		if( Dot( wo , intersect.normal ) > 0.0f )
-			return m_mat->GetEmissive(); 
-		return 0.0f;
-	}
+	Spectrum GetEmissive( const Vector& wo , const Intersection& intersect ) const;
 
 // protected field
 protected:

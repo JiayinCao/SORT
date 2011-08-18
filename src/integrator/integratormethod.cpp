@@ -78,7 +78,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 		if( light->IsDelta() )
 		{
 			Vector lightDir;
-			Spectrum c = light->sample_f( ip , lightDir , 0.1f , 0 , visibility );
+			Spectrum c = light->sample_l( ip , lightDir , 0.1f , 0 , visibility );
 			if( visibility.IsVisible() )
 				t += c * bsdf->f( -r.m_Dir , lightDir ) * SatDot( lightDir , ip.normal );
 		}else

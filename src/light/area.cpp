@@ -19,7 +19,7 @@
 #include "area.h"
 
 // sample ray from light
-Spectrum AreaLight::sample_f( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const
+Spectrum AreaLight::sample_l( const Intersection& intersect , Vector& wi , float delta , float* pdf , Visibility& visibility ) const
 {
 	return 0.0f;
 }
@@ -35,4 +35,12 @@ void AreaLight::_registerAllProperty()
 {
 	Light::_registerAllProperty();
 	_registerProperty( "mesh" , new MeshProperty( this ) );
+}
+
+// sample light density
+Spectrum AreaLight::sample_l( const Intersection& intersect , const Vector& wo ) const
+{
+	if( Dot( wo , intersect.normal ) > 0.0f )
+		return intensity;
+	return 0.0f;
 }
