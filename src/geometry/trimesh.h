@@ -66,6 +66,9 @@ public:
 	// get primitive
 	Primitive* GetPrimitive( unsigned i ) const;
 
+	// get total surface area
+	float	GetSurfaceArea() const;
+
 // private field
 public:
 	// the name of the model
