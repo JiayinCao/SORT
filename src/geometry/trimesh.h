@@ -70,9 +70,11 @@ public:
 
 	// whether the mesh is instanced
 	bool			m_bInstanced;
+	// bool emissive
+	bool			m_bEmissive;
 
 	// the materials for instanced mesh
-	Material**		m_pMaterials;
+	Reference<Material>*	m_pMaterials;
 
 // private method
 	// initialize default data

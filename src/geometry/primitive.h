@@ -23,6 +23,8 @@
 #include "bbox.h"
 #include "managers/matmanager.h"
 #include "material/material.h"
+#include "utility/referencecount.h"
+#include "intersection.h"
 
 // pre-decleration
 class	Intersection;
@@ -34,7 +36,7 @@ class	Primitive
 // public method
 public:
 	// constructor from a id
-	Primitive( unsigned id , Material* mat ) { m_primitive_id = id; m_mat = mat; }
+	Primitive( unsigned id , Material* mat , bool emissive ) { m_primitive_id = id; m_mat = mat; m_bEmissive = emissive;}
 	// destructor
 	virtual ~Primitive(){}
 
@@ -65,8 +67,14 @@ public:
 	void	SetMaterial( Material* mat ) { m_mat = mat; }
 
 	// get emissive
-	const Spectrum& GetEmissive() const
-	{ return m_mat->GetEmissive(); }
+	Spectrum GetEmissive( const Vector& wo , const Intersection& intersect ) const
+	{
+		if( m_bEmissive == false )
+			return 0.0f;
+		if( Dot( wo , intersect.normal ) > 0.0f )
+			return m_mat->GetEmissive(); 
+		return 0.0f;
+	}
 
 // protected field
 protected:
@@ -75,7 +83,9 @@ protected:
 	// id for the primitive
 	unsigned		m_primitive_id;
 	// the material
-	Material*		m_mat;
+	Reference<Material>	m_mat;
+	// bool emissive
+	bool	m_bEmissive;
 };
 
 #endif

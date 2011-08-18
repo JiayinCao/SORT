@@ -64,7 +64,7 @@ public:
 	// the triangle number
 	unsigned	m_iTriNum;
 	// the material
-	Material*	m_mat;
+	Reference<Material>	m_mat;
 
 	// constructor
 	// para 'str' : name for the trunk

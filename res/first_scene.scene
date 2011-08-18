@@ -16,7 +16,7 @@
       <Matrix value="t 0 1000 0"/>
     </Transform>
     <Material>
-      <MatSet name="Box01" mat="cube_mat"/>
+      <MatSet name="aa" mat="cube_mat"/>
     </Material>
   </Model>
   <Light type="point">

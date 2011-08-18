@@ -22,6 +22,7 @@
 #include "utility/propertyset.h"
 #include "utility/creator.h"
 #include "spectrum/spectrum.h"
+#include "utility/referencecount.h"
 
 // pre-declera classes
 class Bsdf;
@@ -29,7 +30,7 @@ class Intersection;
 
 ///////////////////////////////////////////////////////////
 // definition of material
-class Material : public PropertySet<Material>
+class Material : public PropertySet<Material> , public ReferenceCount
 {
 // public method
 public:
@@ -48,8 +49,15 @@ public:
 	const void SetEmissvie( const Spectrum& e )
 	{ emissive = e; }
 
+	// set name
+	void SetName( const string& n ) { name = n; }
+	// get name of the material
+	const string& GetName() const { return name; }
+
 // private field
 private:
+	// the name for the material
+	string		name;
 	// emissive
 	Spectrum	emissive;
 };
