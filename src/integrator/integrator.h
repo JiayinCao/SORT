@@ -74,7 +74,7 @@ public:
 	// by default , nothing is done in pre-process
 	// some integrator, such as Photon Mapping use pre-process step to
 	// generate some neccessary infomation by latter stage.
-	virtual void PreProcess() {}
+	virtual void PreProcess( Scene& scene ) {}
 
 	// output log information
 	virtual void OutputLog() const {}

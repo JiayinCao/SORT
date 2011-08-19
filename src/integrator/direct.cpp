@@ -142,3 +142,10 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 		}
 	}
 }
+
+// pre-process before rendering
+void DirectLight::PreProcess( Scene& scene )
+{
+	// generate triangle distributuion for sampling
+	scene.PreProcessLight();
+}

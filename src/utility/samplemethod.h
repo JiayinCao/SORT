@@ -157,7 +157,7 @@ public:
 	int SampleDiscrete( float u , float* pdf ) const
 	{
 		Sort_Assert( count != 0 && cdf != 0 );
-		Sort_Assert( u < 1.0f && u >= 0.0f );
+		Sort_Assert( u <= 1.0f && u >= 0.0f );
 
 		float* target = lower_bound( cdf , cdf + count + 1 , u );
 		int offset = (u<=0.0f)? 0:(int)(target-cdf-1);

@@ -409,3 +409,14 @@ TriMesh* Scene::GetTriMesh( const string& name ) const
 	}
 	return 0;
 }
+
+// preprocess light
+void Scene::PreProcessLight()
+{
+	vector<Light*>::iterator it = m_lights.begin();
+	while( it != m_lights.end() )
+	{
+		(*it)->PreProcess();
+		it++;
+	}
+}

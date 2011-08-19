@@ -84,7 +84,7 @@ void System::_preInit()
 //	camera->SetLen( 40.0f );
 	m_camera = camera;
 	// the integrator
-	m_pIntegrator = new DirectLight(1);
+	m_pIntegrator = new DirectLight(16);
 	// the sampler
 	m_pSampler = new StratifiedSampler();
 	m_iSamplePerPixel = m_pSampler->RoundSize(1);
@@ -197,7 +197,7 @@ void System::PreProcess()
 	m_Scene.PreProcess();
 
 	if( m_pIntegrator )
-		m_pIntegrator->PreProcess();
+		m_pIntegrator->PreProcess(m_Scene);
 
 	// stop timer
 	Timer::GetSingleton().StopTimer();

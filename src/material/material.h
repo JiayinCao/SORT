@@ -37,7 +37,7 @@ class Material : public PropertySet<Material> , public ReferenceCount
 // public method
 public:
 	// default constructor
-	Material(){}
+	Material(){light=0;}
 	// destructor
 	virtual ~Material() {}
 
