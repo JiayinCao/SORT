@@ -87,6 +87,9 @@ public:
 	// get trimesh
 	TriMesh* GetTriMesh( const string& name ) const;
 
+	// preprocess light
+	void PreProcessLight();
+
 // private field
 private:
 	// the buffer for the triangle mesh

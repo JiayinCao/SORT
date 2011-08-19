@@ -25,6 +25,8 @@
 #include "managers/logmanager.h"
 #include "managers/memmanager.h"
 #include "utility/samplemethod.h"
+#include "accel/accelerator.h"
+#include "accel/kdtree.h"
 
 // default constructor
 TriMesh::TriMesh( const string& name ):m_Name(name)
@@ -43,6 +45,8 @@ void TriMesh::_init()
 {
 	m_pMemory = 0;
 	m_pMaterials = 0;
+	distribution = 0;
+	accel = 0;
 	m_bEmissive = false;
 }
 
@@ -50,6 +54,8 @@ void TriMesh::_init()
 void TriMesh::_release()
 {
 	SAFE_DELETE_ARRAY(m_pMaterials);
+	SAFE_DELETE(distribution);
+	SAFE_DELETE(accel);
 
 	m_triBuffer.clear();
 }
@@ -211,28 +217,6 @@ void TriMesh::SetEmission( Light* l )
 	m_bEmissive = true;
 }
 
-// get triangle distribution1d
-Distribution1D*	TriMesh::GetTriDistribution() const
-{
-	unsigned count = m_triBuffer.size();
-
-	Sort_Assert( count != 0 );
-	
-	float* dis = SORT_MALLOC_ARRAY( float , count );
-	for( unsigned i = 0 ; i < count ; ++i )
-		dis[i] = m_triBuffer[i]->SurfaceArea();
-
-	return new Distribution1D( dis , count );
-}
-
-// get primitive
-Primitive* TriMesh::GetPrimitive( unsigned i ) const
-{
-	Sort_Assert( i < m_triBuffer.size() );
-
-	return m_triBuffer[i];
-}
-
 // get total surface area
 float TriMesh::GetSurfaceArea() const
 {
@@ -244,4 +228,53 @@ float TriMesh::GetSurfaceArea() const
 		it++;
 	}
 	return sa;
+}
+
+// generate triangle distribution
+void TriMesh::GenTriDistribution()
+{
+	unsigned count = m_triBuffer.size();
+
+	Sort_Assert( count != 0 );
+	
+	float* dis = SORT_MALLOC_ARRAY( float , count );
+	for( unsigned i = 0 ; i < count ; ++i )
+		dis[i] = m_triBuffer[i]->SurfaceArea();
+
+	SAFE_DELETE( distribution );
+	distribution = new Distribution1D( dis , count );
+}
+
+// sample a primitive
+Primitive* TriMesh::SamplePrimitive( float u , float* pdf ) const
+{
+	Sort_Assert( distribution != 0 );
+
+	unsigned pri_id = distribution->SampleDiscrete( u , pdf );
+
+	return m_triBuffer[pri_id];
+}
+
+// build acceleration structure for the mesh
+void TriMesh::BuildAccel( const string& type )
+{
+	SAFE_DELETE( accel );
+	accel = CREATE_TYPE( type , Accelerator );
+
+	if( 0 == accel )
+	{
+		LOG_WARNING<<"There is no accelerator named \""<<type<<"\", kd-tree is used instead."<<ENDL;
+		accel = new KDTree();
+	}
+	
+	accel->SetPrimitives( &m_triBuffer );
+	accel->Build();
+}
+
+// get the intersection between a ray and the scene
+bool TriMesh::GetIntersect( const Ray& r , Intersection* intersect ) const
+{
+	Sort_Assert( accel != 0 );
+
+	return accel->GetIntersect( r , intersect );
 }

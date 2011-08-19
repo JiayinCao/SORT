@@ -13,7 +13,7 @@
   <Model filename="cube.obj" name="light">
     <Transform>
       <Matrix value="s 400 50 400"/>
-      <Matrix value="t 0 1000 0"/>
+      <Matrix value="t 100 800 100"/>
     </Transform>
     <Material>
       <MatSet name="" mat="cube_mat"/>
@@ -39,7 +39,7 @@
 	<Property name="dir" value="-1 -0 -5"/>
   </Light>
   <Light type="area">
-    <Property name="intensity" value="90 90 20"/>
+    <Property name="intensity" value="20 20 20"/>
     <Property name="mesh" value="light" />
   </Light>
 	<Accel type="kd_tree"/>

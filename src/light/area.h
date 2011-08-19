@@ -21,7 +21,6 @@
 #include "light.h"
 #include "geometry/trimesh.h"
 #include "utility/assert.h"
-#include "utility/samplemethod.h"
 
 class	Accelerator;
 
@@ -55,12 +54,13 @@ public:
 	// sample light density
 	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const;
 
+	// preprocess
+	void PreProcess();
+
 // private field
 private:
 	// the mesh binded to the area light
 	TriMesh*	mesh;
-	// the primitive distribution according to their surface areas
-	Distribution1D*	distribution;
 
 	// initialize default value
 	void _init();
@@ -87,12 +87,7 @@ private:
 			if( light->mesh == 0 )
 				LOG_WARNING<<"There is no model named \""<<str<<"\" attached to area light."<<ENDL;
 			else
-			{
 				light->mesh->SetEmission( light );
-				
-				SAFE_DELETE(light->distribution);
-				light->distribution = light->mesh->GetTriDistribution();	
-			}
 		}
 	};
 

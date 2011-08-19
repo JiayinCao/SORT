@@ -25,13 +25,11 @@ void AreaLight::_init()
 	_registerAllProperty();
 
 	mesh = 0;
-	distribution = 0;
 }
 
 // release data
 void AreaLight::_release()
 {
-	SAFE_DELETE(distribution);
 }
 
 // sample ray from light
@@ -39,19 +37,29 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 {
 	Sort_Assert( ls != 0 );
 
-	// get the sampled primitive
-	float _pdf;
-	unsigned pri_id = distribution->SampleDiscrete( ls->t , &_pdf );
-	Primitive* pri = mesh->GetPrimitive( pri_id );
-	
+	// sample the primitive
+	Primitive* pri = mesh->SamplePrimitive( ls->t , pdf );
+	// sample a point on the primitive
 	Point p = pri->Sample( ls->u , ls->v );
 
+	// get light direction
 	Vector vec = p - intersect.intersect;
 	wi = Normalize( vec );
+	float length = 0.0f;
 
-	if( pdf ) *pdf = _pdf * INV_PI * 0.25f / pri->SurfaceArea();
+	Ray inv_r( intersect.intersect , wi );
+	Intersection ip;
+	if( mesh->GetIntersect( inv_r , &ip ) )
+		length = ( intersect.intersect - ip.intersect ).Length();
+	else
+		length = vec.Length();
 
-	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , vec.Length() );
+	// setup visibility tester
+	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , length - delta );
+
+	// update pdf
+	if( pdf ) *pdf *= INV_PI * 0.25f / pri->SurfaceArea();
+
 	return intensity;
 }
 
@@ -75,4 +83,11 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const Vector& wo )
 	if( Dot( wo , intersect.normal ) > 0.0f )
 		return intensity;
 	return 0.0f;
+}
+
+// preprocess
+void AreaLight::PreProcess()
+{
+	mesh->GenTriDistribution();
+	mesh->BuildAccel("bvh");
 }
