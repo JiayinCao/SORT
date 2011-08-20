@@ -85,6 +85,26 @@ inline float CosHemispherePdf( const Vector& v )
 	return CosTheta(v) * INV_PI;
 }
 
+// sampling a cone uniformly
+// para 'u' : a canonical random variable
+// para 'v' : a canonical random variable
+inline Vector UniformSampleCone( float u , float v , float cos_max )
+{
+	Sort_Assert( cos_max <= 1.0f && cos_max >= -1.0f );
+
+	float cos_theta = ( 1.0f - u ) + u * cos_max;
+	float sin_theta = sqrt( 1.0f - cos_theta * cos_theta );
+	float phi = TWO_PI * v;
+
+	return Vector( cosf(phi)*sin_theta , cos_theta , sinf(phi)*sin_theta );
+}
+
+// sampling a cone uniformly
+inline float UniformConePdf( float cos_max )
+{
+	return 1.0f / ( TWO_PI * ( 1.0f - cos_max ) );
+}
+
 // sampling a vector in a hemisphere uniformly
 // para 'u'	: a canonical random variable
 // para 'v' : a canonical random variable
