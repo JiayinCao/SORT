@@ -19,6 +19,15 @@
       <MatSet name="" mat="cube_mat"/>
     </Material>
   </Model>
+  <Model filename="cube.obj" name="notlight">
+    <Transform>
+      <Matrix value="s 400 50 400"/>
+      <Matrix value="t 100 700 120"/>
+    </Transform>
+    <Material>
+      <MatSet name="" mat="cube_mat"/>
+    </Material>
+  </Model>
   <Light type="po1int">
     <Property name="intensity" value="10000000 9000000 6000000"/>
 	<Property name="pos" value="0 600 500" />
@@ -39,11 +48,14 @@
 	<Property name="dir" value="-1 -0 -5"/>
   </Light>
   <Light type="area">
-    <Property name="intensity" value="5000 5000 5000"/>
-	<Property name="dir" value="0 -1 0"/>
-	<Property name="pos" value="0 1000 0"/>
+    <Property name="shape" value="disk" />
+    <Property name="radius" value="100" />
+    <Property name="intensity" value="4000 4000 4000"/>
+	  <Property name="dir" value="0 -1 0"/>
+	  <Property name="pos" value="0 1000 0"/>
+    <Property name="dir" value="0 -1 0"/>
   </Light>
-	<Accel type="kd_tree"/>
+	<Accel type="uniform_grid"/>
   <Sky type="sky_box">
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />

@@ -89,6 +89,9 @@ public:
 	// whether the light is a delta light
 	bool	IsDelta() const { return true; }
 
+	// get intersection between the light and the ray
+	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }
+
 // protected field
 protected:
 	// scene containing the light

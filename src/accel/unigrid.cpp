@@ -82,9 +82,10 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	// get the intersect point
 	float maxt;
 	float cur_t = Intersect( r , m_BBox , &maxt );
-	if( intersect ) intersect->t = maxt;
 	if( cur_t < 0.0f )
 		return false;
+	if( intersect )
+		intersect->t = min( intersect->t , maxt );
 
 	int 	curGrid[3] , dir[3];
 	float	delta[3] , next[3];
@@ -124,14 +125,14 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 		curGrid[nextAxis] += dir[nextAxis];
 
 		if( curGrid[nextAxis] < 0 || (unsigned)curGrid[nextAxis] >= m_voxelNum[nextAxis] )
-			return ( intersect && intersect->t < maxt );
+			return ( intersect && intersect->t < maxt && ( intersect->primitive != 0 ));
 
 		// update next
 		cur_t = next[nextAxis];
 		next[nextAxis] += delta[nextAxis];
 	}
 	
-	return ( intersect && intersect->t < maxt );
+	return ( intersect && intersect->t < maxt && ( intersect->primitive != 0 ));
 }
 
 // build the acceleration structure

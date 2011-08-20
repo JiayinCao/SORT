@@ -20,9 +20,10 @@
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
 #include "geometry/vector.h"
+#include "geometry/intersection.h"
 
 // sample a point on shape
-Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf , Vector& normal ) const
+Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
 {
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
@@ -31,7 +32,7 @@ Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , floa
 	Point axis1 ( 0 , 0 , 1 );
 
 	Point lp = transform( ( axis0 * u + axis1 * v ) * radius );
-	normal = transform( Vector( 0 , 1 , 0 ) );
+	Vector normal = transform( Vector( 0 , 1 , 0 ) );
 	Vector delta = lp - p;
 	wi = Normalize( delta );
 
@@ -51,4 +52,26 @@ Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , floa
 float Disk::SurfaceArea() const
 {
 	return PI * radius * radius;
+}
+
+// get intersection between the light surface and the ray
+bool Disk::GetIntersect( const Ray& ray , Intersection* intersect ) const
+{
+	if( ray.m_Dir.z == 0.0f )
+		return false;
+
+	float t = -ray.m_Ori.y / ray.m_Dir.y;
+	if( t > intersect->t || t <= 0.0f )
+		return false;
+	Point p = ray(t);
+	float sqLength = p.x * p.x + p.z * p.z;
+	if( sqLength > radius * radius )
+		return false;
+
+	intersect->t = t;
+	intersect->intersect = ( ray(intersect->t) );
+	intersect->normal = Vector( 0.0f , 1.0f , 0.0f , true );
+	intersect->tangent = Vector( 1.0f , 0.0f , 0.0f );
+
+	return true;
 }

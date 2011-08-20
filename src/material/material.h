@@ -27,8 +27,6 @@
 // pre-declera classes
 class Bsdf;
 class Intersection;
-class Light;
-class Vector;
 
 ///////////////////////////////////////////////////////////
 // definition of material
@@ -37,17 +35,12 @@ class Material : public PropertySet<Material> , public ReferenceCount
 // public method
 public:
 	// default constructor
-	Material(){light=0;}
+	Material(){}
 	// destructor
 	virtual ~Material() {}
 
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const = 0;
-
-	// get emissive power
-	const Light* GetLight() const { return light; }
-	// set emissive power
-	void BindLight( Light* l ) { light = l; }
 
 	// set name
 	void SetName( const string& n ) { name = n; }
@@ -58,8 +51,6 @@ public:
 private:
 	// the name for the material
 	string		name;
-	// emissive
-	Light*		light;
 };
 
 #endif

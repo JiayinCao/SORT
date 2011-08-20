@@ -129,6 +129,8 @@ bool Scene::LoadScene( const string& str )
 		// get to the next model
 		meshNode = meshNode->NextSiblingElement( "Model" );
 	}
+	// generate triangle buffer after parsing from file
+	_generateTriBuf();
 	
 	// parse the lights
 	TiXmlElement* lightNode = root->FirstChildElement( "Light" );
@@ -184,11 +186,7 @@ bool Scene::LoadScene( const string& str )
 		const char* c_type = skyNode->Attribute( "type" );
 		if( c_type != 0 )
 		{
-			string type( c_type );
-			if( type == "sky_sphere" )
-				m_pSky = new SkySphere();
-			else if( type == "sky_box" )
-				m_pSky = new SkyBox();
+			m_pSky = CREATE_TYPE( c_type , Sky );
 
 			// set the properties
 			TiXmlElement* prop = skyNode->FirstChildElement( "Property" );
@@ -203,9 +201,6 @@ bool Scene::LoadScene( const string& str )
 	}
 	// restore resource path
 	SetResourcePath( oldpath );
-
-	// generate triangle buffer after parsing from file
-	_generateTriBuf();
 
 	return true;
 }
@@ -234,7 +229,7 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 
 	if( intersect == 0 )
 		return false;
-	return intersect->t < r.m_fMax;
+	return intersect->t < r.m_fMax && ( intersect->primitive != 0 );
 }
 
 // release the memory of the scene
@@ -407,4 +402,18 @@ TriMesh* Scene::GetTriMesh( const string& name ) const
 			return *it;
 		it++;
 	}
+	return 0;
+}
+
+// evaluate light
+Spectrum Scene::EvaluateLight( const Ray& ray , Intersection* intersect ) const
+{
+	Spectrum radiance;
+	vector<Light*>::const_iterator it = m_lights.begin();
+	while( it != m_lights.end() )
+	{
+		(*it)->Evaluate( ray , intersect , radiance );
+		it++;
+	}
+	return radiance;
 }

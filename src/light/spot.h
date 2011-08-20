@@ -69,9 +69,12 @@ private:
 			light->light2world.matrix.m[3] = p.x;
 			light->light2world.matrix.m[7] = p.y;
 			light->light2world.matrix.m[11] = p.z;
-			light->light2world.invMatrix.m[3] = -p.x;
-			light->light2world.invMatrix.m[7] = -p.y;
-			light->light2world.invMatrix.m[11] = -p.z;
+			light->light2world.invMatrix.m[3] = -( light->light2world.invMatrix.m[0] * p.x + 
+				light->light2world.invMatrix.m[1] * p.y + light->light2world.invMatrix.m[2] * p.z );
+			light->light2world.invMatrix.m[7] = -( light->light2world.invMatrix.m[4] * p.x + 
+				light->light2world.invMatrix.m[5] * p.y + light->light2world.invMatrix.m[6] * p.z );
+			light->light2world.invMatrix.m[11] = -( light->light2world.invMatrix.m[8] * p.x + 
+				light->light2world.invMatrix.m[9] * p.y + light->light2world.invMatrix.m[10] * p.z );
 		}
 	};
 	class DirProperty : public PropertyHandler<Light>
@@ -92,6 +95,12 @@ private:
 			inv.m[0] = t0.x; inv.m[1] = t0.y; inv.m[2] = t0.z;
 			inv.m[4] = dir.x; inv.m[5] = dir.y; inv.m[6] = dir.z;
 			inv.m[8] = t1.x; inv.m[9] = t1.y; inv.m[10] = t1.z;
+			inv.m[3] = -( light->light2world.invMatrix.m[0] * m.m[3] + 
+				light->light2world.invMatrix.m[1] * m.m[7] + light->light2world.invMatrix.m[2] * m.m[11] );
+			inv.m[7] = -( light->light2world.invMatrix.m[4] * m.m[3] + 
+				light->light2world.invMatrix.m[5] * m.m[7] + light->light2world.invMatrix.m[6] * m.m[11] );
+			inv.m[11] = -( light->light2world.invMatrix.m[8] * m.m[3] + 
+				light->light2world.invMatrix.m[9] * m.m[7] + light->light2world.invMatrix.m[10] * m.m[11] );
 		}
 	};
 	class FalloffStartProperty : public PropertyHandler<Light>

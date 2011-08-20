@@ -23,6 +23,8 @@
 
 class LightSample;
 class Vector;
+class Ray;
+class Intersection;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	definition of shape class
@@ -39,7 +41,7 @@ class	Shape
 // public method
 public:
 	// default constructor
-	Shape(){}
+	Shape(){ radius = 1.0f; }
 	// destructor
 	virtual ~Shape(){}
 
@@ -48,10 +50,8 @@ public:
 	// para 'p'	: the target point for the light to lit.
 	// para 'wi': the sampled vector ( output )
 	// para 'pdf': the pdf of the light sample ( output )
-	// para 'normal' : the normal of the light surface
 	// result   : a sampled point from the light source
-	virtual Point sample_l( const LightSample& ls , const Point& p , 
-							Vector& wi , float* pdf , Vector& normal ) const = 0;
+	virtual Point sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const = 0;
 
 	// the surface area of the shape
 	virtual float SurfaceArea() const = 0;
@@ -59,9 +59,18 @@ public:
 	// setup transformation for the shape
 	virtual void SetTransform( const Transform& s ) { transform = s; }
 
+	// get intersection between the light surface and the ray
+	virtual bool GetIntersect( const Ray& ray , Intersection* intersect ) const = 0;
+
+	// set the radius of the shape
+	virtual void SetRadius( float r ) { radius = r; }
+
 // protected field
 protected:
+	// the transformation for the shape
 	Transform	transform;
+	// the radius of the shape
+	float		radius;
 };
 
 #endif

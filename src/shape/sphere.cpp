@@ -19,7 +19,7 @@
 #include "sphere.h"
 
 // sample a point on shape
-Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf , Vector& normal ) const
+Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
 {
 	return Point();
 }
@@ -27,5 +27,11 @@ Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , fl
 // the surface area of the shape
 float Sphere::SurfaceArea() const
 {
-	return 0.0f;
+	return 4 * PI * radius * radius ;
+}
+
+// get intersection between the light surface and the ray
+bool Sphere::GetIntersect( const Ray& ray , Intersection* intersect ) const
+{
+	return false;
 }

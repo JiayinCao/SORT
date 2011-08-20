@@ -865,6 +865,30 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="shape"
+			>
+			<File
+				RelativePath="..\..\src\shape\disk.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shape\disk.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shape\shape.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shape\sphere.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shape\sphere.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"
 			>
