@@ -19,46 +19,36 @@
 #include "area.h"
 #include "sampler/sample.h"
 
+// temp
+#include "shape/disk.h"
+
 // initialize default value
 void AreaLight::_init()
 {
 	_registerAllProperty();
 
-	mesh = 0;
+	shape = new Disk();
 }
 
 // release data
 void AreaLight::_release()
 {
+	SAFE_DELETE( shape );
 }
 
 // sample ray from light
 Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const
 {
 	Sort_Assert( ls != 0 );
+	Sort_Assert( shape != 0 );
 
-	// sample the primitive
-	Primitive* pri = mesh->SamplePrimitive( ls->t , pdf );
-	// sample a point on the primitive
-	Point p = pri->Sample( ls->u , ls->v );
+	Vector n;
+	Point ps = shape->sample_l( *ls , intersect.intersect , wi , pdf , n );
 
-	// get light direction
-	Vector vec = p - intersect.intersect;
-	wi = Normalize( vec );
-	float length = 0.0f;
-
-	Ray inv_r( intersect.intersect , wi );
-	Intersection ip;
-	if( mesh->GetIntersect( inv_r , &ip ) )
-		length = ( intersect.intersect - ip.intersect ).Length();
-	else
-		length = vec.Length();
-
+	Vector dlt = ps - intersect.intersect;
+	
 	// setup visibility tester
-	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , length - delta );
-
-	// update pdf
-	if( pdf ) *pdf *= INV_PI * 0.25f / pri->SurfaceArea();
+	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , dlt.Length() - delta );
 
 	return intensity;
 }
@@ -66,15 +56,16 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 // total power of the light
 Spectrum AreaLight::Power() const
 {
-	Sort_Assert( mesh != 0 );
-	return mesh->GetSurfaceArea() * intensity.GetIntensity() * 4 * PI;
+	Sort_Assert( shape != 0 );
+	return shape->SurfaceArea() * intensity.GetIntensity() * TWO_PI;
 }
 
 // register property
 void AreaLight::_registerAllProperty()
 {
 	Light::_registerAllProperty();
-	_registerProperty( "mesh" , new MeshProperty( this ) );
+	_registerProperty( "pos" , new PosProperty(this) );
+	_registerProperty( "dir" , new DirProperty(this) );
 }
 
 // sample light density
@@ -83,11 +74,4 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const Vector& wo )
 	if( Dot( wo , intersect.normal ) > 0.0f )
 		return intensity;
 	return 0.0f;
-}
-
-// preprocess
-void AreaLight::PreProcess()
-{
-	mesh->GenTriDistribution();
-	mesh->BuildAccel("bvh");
 }

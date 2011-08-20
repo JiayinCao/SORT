@@ -19,6 +19,7 @@ LIBSRCS += $(wildcard integrator/*.cpp)
 LIBSRCS += $(wildcard light/*.cpp)
 LIBSRCS += $(wildcard bsdf/*.cpp)
 LIBSRCS += $(wildcard sampler/*.cpp)
+LIBSRCS += $(wildcard shape/*.cpp)
 LIBSRCS += $(wildcard material/*.cpp)
 LIBSRCS += $(wildcard thirdparty/tinyxml/*.cpp)
 
@@ -98,6 +99,10 @@ $(OBJ_PATH)/bsdf_%.o : bsdf/%.cpp bsdf/%.h bsdf/fresnel.h
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 	
 $(OBJ_PATH)/sampler_%.o : sampler/%.cpp sampler/%.h
+	@echo "building object $@"
+	@g++ $(COMPILE_FLAG) -c $< -o $@
+
+$(OBJ_PATH)/shape_%.o : shape/%.cpp shape/%.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 

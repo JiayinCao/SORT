@@ -34,7 +34,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r , const PixelSample& p
 	if( false == scene.GetIntersect( r , &ip ) )
 		return scene.EvaluateSky( r );
 
-	Spectrum t = ip.primitive->GetEmissive( -r.m_Dir , ip );
+	Spectrum t;
 
 	// get bsdf
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );

@@ -19,10 +19,8 @@
 #define	SORT_AREA
 
 #include "light.h"
-#include "geometry/trimesh.h"
 #include "utility/assert.h"
-
-class	Accelerator;
+#include "shape/shape.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	definition of area light
@@ -54,13 +52,10 @@ public:
 	// sample light density
 	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const;
 
-	// preprocess
-	void PreProcess();
-
 // private field
 private:
-	// the mesh binded to the area light
-	TriMesh*	mesh;
+	// the shape binded to the area light
+	Shape*	shape;
 
 	// initialize default value
 	void _init();
@@ -70,34 +65,46 @@ private:
 	// register property
 	void _registerAllProperty();
 
-	class MeshProperty : public PropertyHandler<Light>
+	class PosProperty : public PropertyHandler<Light>
 	{
 	public:
-		MeshProperty(Light* light):PropertyHandler(light){}
-
-		// set value
+		PosProperty(Light* light):PropertyHandler(light){}
 		void SetValue( const string& str )
 		{
 			AreaLight* light = CAST_TARGET(AreaLight);
+			Point p = PointFromStr( str );
+			light->light2world.matrix.m[3] = p.x;
+			light->light2world.matrix.m[7] = p.y;
+			light->light2world.matrix.m[11] = p.z;
+			light->light2world.invMatrix.m[3] = -p.x;
+			light->light2world.invMatrix.m[7] = -p.y;
+			light->light2world.invMatrix.m[11] = -p.z;
 
-			Sort_Assert( light->scene != 0 );
-
-			light->mesh = light->scene->GetTriMesh( str );
-
-			if( light->mesh == 0 )
-				LOG_WARNING<<"There is no model named \""<<str<<"\" attached to area light."<<ENDL;
-			else
-				light->mesh->SetEmission( light );
+			if( light->shape ) light->shape->SetTransform( light->light2world );
 		}
 	};
-
-	// set light intensity
-	virtual void _setIntensity( const Spectrum& e )
+	class DirProperty : public PropertyHandler<Light>
 	{
-		intensity = e;
-		if( mesh )
-			mesh->SetEmission( this );
-	}
+	public:
+		DirProperty(Light* light):PropertyHandler(light){}
+		void SetValue( const string& str )
+		{
+			AreaLight* light = CAST_TARGET(AreaLight);
+			Vector dir = Normalize(VectorFromStr( str ));
+			Vector t0 , t1;
+			CoordinateSystem( dir, t0 , t1 );
+			Matrix& m = light->light2world.matrix;
+			Matrix& inv = light->light2world.invMatrix;
+			m.m[0] = t0.x; m.m[1] = dir.x; m.m[2] = t1.x;
+			m.m[4] = t0.y; m.m[5] = dir.y; m.m[6] = t1.y;
+			m.m[8] = t0.z; m.m[9] = dir.z; m.m[10] = t1.z;
+			inv.m[0] = t0.x; inv.m[1] = t0.y; inv.m[2] = t0.z;
+			inv.m[4] = dir.x; inv.m[5] = dir.y; inv.m[6] = dir.z;
+			inv.m[8] = t1.x; inv.m[9] = t1.y; inv.m[10] = t1.z;
+
+			if( light->shape ) light->shape->SetTransform( light->light2world );
+		}
+	};
 };
 
 #endif

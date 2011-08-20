@@ -39,8 +39,9 @@
 	<Property name="dir" value="-1 -0 -5"/>
   </Light>
   <Light type="area">
-    <Property name="intensity" value="20 20 20"/>
-    <Property name="mesh" value="light" />
+    <Property name="intensity" value="5000 5000 5000"/>
+	<Property name="dir" value="0 -1 0"/>
+	<Property name="pos" value="0 1000 0"/>
   </Light>
 	<Accel type="kd_tree"/>
   <Sky type="sky_box">

@@ -21,8 +21,8 @@
 #include "trimesh.h"
 
 // constructor from a triangle
-InstanceTriangle::InstanceTriangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index , Transform* t , Material* mat  , bool emissive ):
-Triangle( pid , mesh , index , mat , emissive ) , transform( t )
+InstanceTriangle::InstanceTriangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index , Transform* t , Material* mat ):
+Triangle( pid , mesh , index , mat) , transform( t )
 {
 }
 

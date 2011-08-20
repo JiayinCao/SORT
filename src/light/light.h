@@ -89,9 +89,6 @@ public:
 	// whether the light is a delta light
 	bool	IsDelta() const { return true; }
 
-	// preprocess
-	virtual void PreProcess() {}
-
 // protected field
 protected:
 	// scene containing the light

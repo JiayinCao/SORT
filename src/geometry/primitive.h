@@ -36,7 +36,7 @@ class	Primitive
 // public method
 public:
 	// constructor from a id
-	Primitive( unsigned id , Material* mat , bool emissive ) { m_primitive_id = id; m_mat = mat; m_bEmissive = emissive;}
+	Primitive( unsigned id , Material* mat ) { m_primitive_id = id; m_mat = mat; }
 	// destructor
 	virtual ~Primitive(){}
 
@@ -59,16 +59,8 @@ public:
 	// set material
 	void	SetMaterial( Material* mat ) { m_mat = mat; }
 
-	// enable or disable emissive
-	void	SetEnabledEmissive( bool flag ) { m_bEmissive = flag; }
-	// get emissive
-	Spectrum GetEmissive( const Vector& wo , const Intersection& intersect ) const;
-
 	// get surface area of the primitive
 	virtual float	SurfaceArea() const = 0;
-
-	// sample a point in the triangle
-	virtual Point	Sample( float u , float v ) const = 0;
 
 // protected field
 protected:
@@ -78,8 +70,6 @@ protected:
 	unsigned		m_primitive_id;
 	// the material
 	Reference<Material>	m_mat;
-	// bool emissive
-	bool	m_bEmissive;
 };
 
 #endif
