@@ -48,9 +48,9 @@
 	<Property name="dir" value="-1 -0 -5"/>
   </Light>
   <Light type="area">
-    <Property name="shape" value="disk" />
+    <Property name="shape" value="sphere" />
     <Property name="radius" value="100" />
-    <Property name="intensity" value="4000 4000 4000"/>
+    <Property name="intensity" value="1000 1000 1000"/>
 	  <Property name="dir" value="0 -1 0"/>
 	  <Property name="pos" value="0 1000 0"/>
     <Property name="dir" value="0 -1 0"/>

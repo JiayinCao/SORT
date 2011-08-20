@@ -47,6 +47,11 @@ public:
 
 	// get intersection between the light surface and the ray
 	virtual bool GetIntersect( const Ray& ray , Intersection* intersect ) const;
+
+// private method
+private:
+	// get intersection between a ray and the sphere
+	float _getIntersect( const Ray& ray , float limit , Point& p ) const;
 };
 
 #endif
