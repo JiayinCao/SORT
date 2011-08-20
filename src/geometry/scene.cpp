@@ -397,7 +397,7 @@ float Scene::LightProperbility( unsigned i ) const
 	return m_pLightsDis->GetProperty( i );
 }
 
-// get trimesh
+// get triangle mesh set with a specific name
 TriMesh* Scene::GetTriMesh( const string& name ) const
 {
 	vector<TriMesh*>::const_iterator it = m_meshBuf.begin();
@@ -405,18 +405,6 @@ TriMesh* Scene::GetTriMesh( const string& name ) const
 	{
 		if( (*it)->m_Name == name )
 			return *it;
-		it++;
-	}
-	return 0;
-}
-
-// preprocess light
-void Scene::PreProcessLight()
-{
-	vector<Light*>::iterator it = m_lights.begin();
-	while( it != m_lights.end() )
-	{
-		(*it)->PreProcess();
 		it++;
 	}
 }

@@ -24,9 +24,6 @@
 #include "geometry/instancetri.h"
 #include "managers/logmanager.h"
 #include "managers/memmanager.h"
-#include "utility/samplemethod.h"
-#include "accel/accelerator.h"
-#include "accel/kdtree.h"
 
 // default constructor
 TriMesh::TriMesh( const string& name ):m_Name(name)
@@ -45,17 +42,12 @@ void TriMesh::_init()
 {
 	m_pMemory = 0;
 	m_pMaterials = 0;
-	distribution = 0;
-	accel = 0;
-	m_bEmissive = false;
 }
 
 // release the default data
 void TriMesh::_release()
 {
 	SAFE_DELETE_ARRAY(m_pMaterials);
-	SAFE_DELETE(distribution);
-	SAFE_DELETE(accel);
 
 	m_triBuffer.clear();
 }
@@ -91,7 +83,7 @@ void TriMesh::_genTriBuffer()
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				m_triBuffer.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i] , m_bEmissive) );
+				m_triBuffer.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i] ) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}else
@@ -102,7 +94,7 @@ void TriMesh::_genTriBuffer()
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				m_triBuffer.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] , m_bEmissive) );
+				m_triBuffer.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] ) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}
@@ -147,7 +139,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i] , m_bEmissive) );
+				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i]) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}else
@@ -158,7 +150,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] , m_bEmissive) );
+				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] ) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}
@@ -202,21 +194,6 @@ int TriMesh::_getSubsetID( const string& setname )
 	return -1;
 }
 
-// set emissive
-void TriMesh::SetEmission( Light* l )
-{
-	unsigned size = m_pMemory->m_TrunkBuffer.size();
-	for( unsigned i = 0 ; i < size ; ++i )
-		m_pMaterials[i]->BindLight( l );
-	vector<Primitive*>::iterator it = m_triBuffer.begin();
-	while( it != m_triBuffer.end() )
-	{
-		(*it)->SetEnabledEmissive( true );
-		it++;
-	}
-	m_bEmissive = true;
-}
-
 // get total surface area
 float TriMesh::GetSurfaceArea() const
 {
@@ -230,51 +207,3 @@ float TriMesh::GetSurfaceArea() const
 	return sa;
 }
 
-// generate triangle distribution
-void TriMesh::GenTriDistribution()
-{
-	unsigned count = m_triBuffer.size();
-
-	Sort_Assert( count != 0 );
-	
-	float* dis = SORT_MALLOC_ARRAY( float , count );
-	for( unsigned i = 0 ; i < count ; ++i )
-		dis[i] = m_triBuffer[i]->SurfaceArea();
-
-	SAFE_DELETE( distribution );
-	distribution = new Distribution1D( dis , count );
-}
-
-// sample a primitive
-Primitive* TriMesh::SamplePrimitive( float u , float* pdf ) const
-{
-	Sort_Assert( distribution != 0 );
-
-	unsigned pri_id = distribution->SampleDiscrete( u , pdf );
-
-	return m_triBuffer[pri_id];
-}
-
-// build acceleration structure for the mesh
-void TriMesh::BuildAccel( const string& type )
-{
-	SAFE_DELETE( accel );
-	accel = CREATE_TYPE( type , Accelerator );
-
-	if( 0 == accel )
-	{
-		LOG_WARNING<<"There is no accelerator named \""<<type<<"\", kd-tree is used instead."<<ENDL;
-		accel = new KDTree();
-	}
-	
-	accel->SetPrimitives( &m_triBuffer );
-	accel->Build();
-}
-
-// get the intersection between a ray and the scene
-bool TriMesh::GetIntersect( const Ray& r , Intersection* intersect ) const
-{
-	Sort_Assert( accel != 0 );
-
-	return accel->GetIntersect( r , intersect );
-}

@@ -43,6 +43,14 @@ Point::Point( float _x , float _y , float _z )
 	z = _z;
 }
 
+// constructor from a vector
+Point::Point( const Vector& v )
+{
+	x = v.x;
+	y = v.y;
+	z = v.z;
+}
+
 // destructor
 Point::~Point()
 {

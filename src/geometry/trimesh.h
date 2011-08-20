@@ -26,8 +26,6 @@
 #include "geometry/transform.h"
 
 class	Material;
-class	Distribution1D;
-class	Accelerator;
 
 //////////////////////////////////////////////////////////////////////////////////
 //	definition of trimesh
@@ -56,29 +54,8 @@ public:
 	// para 'matname' : the material name
 	void ResetMaterial( const string& setname , const string& matname );
 
-	// set emissive
-	void SetEmission( Light* l );
-	// whethe the triangle mesh is emissive
-	bool	IsEmissive() { return m_bEmissive; }
-
 	// get total surface area
 	float	GetSurfaceArea() const;
-
-	// generate triangle distribution
-	void	GenTriDistribution();
-
-	// sample a primitive
-	Primitive* SamplePrimitive( float u , float* pdf ) const;
-	
-	// build acceleration structure for the mesh
-	void	BuildAccel( const string& type );
-
-	// get the intersection between a ray and the triangle mesh
-	// para 'r' : the ray
-	// result   : the intersection information between the ray and the scene
-	// note     : if there is no acceleration structure , it will iterator all
-	//			  of the triangles which will cost much!
-	bool	GetIntersect( const Ray& r , Intersection* intersect ) const;
 
 // private field
 public:
@@ -93,18 +70,11 @@ public:
 
 	// whether the mesh is instanced
 	bool			m_bInstanced;
-	// bool emissive
-	bool			m_bEmissive;
 
 	// the triangles for the mesh
 	vector<Primitive*> m_triBuffer;
 	// the materials for instanced mesh
 	Reference<Material>*	m_pMaterials;
-
-	// the primitive distribution according to their surface areas
-	Distribution1D*	distribution;
-	// acceleration structure
-	Accelerator*	accel;
 
 // private method
 	// initialize default data

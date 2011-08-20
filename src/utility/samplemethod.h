@@ -23,6 +23,7 @@
 #include "managers/logmanager.h"
 #include "texture/texture.h"
 #include <vector>
+#include "assert.h"
 
 /*
 description :

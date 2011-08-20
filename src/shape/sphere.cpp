@@ -1,7 +1,7 @@
 /*
-   FileName:      primitive.cpp
+   FileName:      sphere.cpp
 
-   Created Time:  2011-08-18 16:59:53
+   Created Time:  2011-08-19 22:02:39
 
    Auther:        Cao Jiayin
 
@@ -15,20 +15,17 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#include "primitive.h"
-#include "light/light.h"
-#include "bbox.h"
+// include header
+#include "sphere.h"
 
-// delete the cache
-void Primitive::ClearBBoxCache()
+// sample a point on shape
+Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf , Vector& normal ) const
 {
-	m_bbox.Delete();
+	return Point();
 }
 
-// get material
-Material* Primitive::GetMaterial() const 
-{ 
-	if( m_mat == 0 ) 
-		return MatManager::GetSingleton().GetDefaultMat();
-	return m_mat; 
+// the surface area of the shape
+float Sphere::SurfaceArea() const
+{
+	return 0.0f;
 }

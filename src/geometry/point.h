@@ -37,6 +37,8 @@ public:
 	// copy constructor
 	// para 'p' :	a point to copy
 	Point( const Point& p );
+	// constructor from a vector
+	Point( const Vector& v );
 	// destructor
 	~Point();
 

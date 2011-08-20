@@ -37,7 +37,7 @@ Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample&
 		return scene.EvaluateSky( r );
 
 	// evaluate light directly
-	Spectrum t = ip.primitive->GetEmissive( -r.m_Dir , ip );
+	Spectrum t;
 
 	// eavluate direct light
 	t += EvaluateDirect( r , scene , ip , ps );
@@ -141,11 +141,4 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 			++offset;
 		}
 	}
-}
-
-// pre-process before rendering
-void DirectLight::PreProcess( Scene& scene )
-{
-	// generate triangle distributuion for sampling
-	scene.PreProcessLight();
 }
