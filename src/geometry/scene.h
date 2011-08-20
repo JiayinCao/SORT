@@ -80,6 +80,8 @@ public:
 	// get the number of lights
 	unsigned LightNum() const
 	{ return m_lights.size(); }
+	// evaluate light
+	Spectrum EvaluateLight( const Ray& ray , Intersection* intersect ) const;
 
 	// get bounding box of the scene
 	const BBox& GetBBox() const;

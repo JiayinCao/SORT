@@ -28,6 +28,8 @@ class	SkyBox : public Sky
 {
 // public method
 public:
+	DEFINE_CREATOR( SkyBox );
+
 	// default constructor
 	SkyBox();
 	// destructor

@@ -27,6 +27,8 @@ class	SkySphere : public Sky
 {
 // public method
 public:
+	DEFINE_CREATOR( SkySphere );
+
 	// default constructor
 	SkySphere();
 	// destructor

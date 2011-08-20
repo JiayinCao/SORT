@@ -52,10 +52,15 @@ public:
 	// sample light density
 	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const;
 
+	// get intersection between the light and the ray
+	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const;
+
 // private field
 private:
 	// the shape binded to the area light
 	Shape*	shape;
+	// the radius for the shape
+	float	radius;
 
 	// initialize default value
 	void _init();
@@ -76,9 +81,12 @@ private:
 			light->light2world.matrix.m[3] = p.x;
 			light->light2world.matrix.m[7] = p.y;
 			light->light2world.matrix.m[11] = p.z;
-			light->light2world.invMatrix.m[3] = -p.x;
-			light->light2world.invMatrix.m[7] = -p.y;
-			light->light2world.invMatrix.m[11] = -p.z;
+			light->light2world.invMatrix.m[3] = -( light->light2world.invMatrix.m[0] * p.x + 
+				light->light2world.invMatrix.m[1] * p.y + light->light2world.invMatrix.m[2] * p.z );
+			light->light2world.invMatrix.m[7] = -( light->light2world.invMatrix.m[4] * p.x + 
+				light->light2world.invMatrix.m[5] * p.y + light->light2world.invMatrix.m[6] * p.z );
+			light->light2world.invMatrix.m[11] = -( light->light2world.invMatrix.m[8] * p.x + 
+				light->light2world.invMatrix.m[9] * p.y + light->light2world.invMatrix.m[10] * p.z );
 
 			if( light->shape ) light->shape->SetTransform( light->light2world );
 		}
@@ -101,8 +109,41 @@ private:
 			inv.m[0] = t0.x; inv.m[1] = t0.y; inv.m[2] = t0.z;
 			inv.m[4] = dir.x; inv.m[5] = dir.y; inv.m[6] = dir.z;
 			inv.m[8] = t1.x; inv.m[9] = t1.y; inv.m[10] = t1.z;
+			inv.m[3] = -( light->light2world.invMatrix.m[0] * m.m[3] + 
+				light->light2world.invMatrix.m[1] * m.m[7] + light->light2world.invMatrix.m[2] * m.m[11] );
+			inv.m[7] = -( light->light2world.invMatrix.m[4] * m.m[3] + 
+				light->light2world.invMatrix.m[5] * m.m[7] + light->light2world.invMatrix.m[6] * m.m[11] );
+			inv.m[11] = -( light->light2world.invMatrix.m[8] * m.m[3] + 
+				light->light2world.invMatrix.m[9] * m.m[7] + light->light2world.invMatrix.m[10] * m.m[11] );
 
 			if( light->shape ) light->shape->SetTransform( light->light2world );
+		}
+	};
+	class ShapeProperty : public PropertyHandler<Light>
+	{
+	public:
+		ShapeProperty(Light* light):PropertyHandler(light){}
+		void SetValue( const string& str )
+		{
+			AreaLight* light = CAST_TARGET(AreaLight);
+			
+			SAFE_DELETE( light->shape );
+			light->shape = CREATE_TYPE( str , Shape );
+			if( light->shape )
+				light->shape->SetRadius( light->radius );
+		}
+	};
+	class RadiusProperty : public PropertyHandler<Light>
+	{
+	public:
+		RadiusProperty(Light* light):PropertyHandler(light){}
+		void SetValue( const string& str )
+		{
+			AreaLight* light = CAST_TARGET(AreaLight);
+			
+			light->radius = (float)atof( str.c_str() );
+			if( light->shape )
+				light->shape->SetRadius( light->radius );
 		}
 	};
 };

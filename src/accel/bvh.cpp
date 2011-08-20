@@ -228,7 +228,13 @@ bool Bvh::GetIntersect( const Ray& ray , Intersection* intersect ) const
 	if( fmin < 0.0f )
 		return false;
 
-	return _traverseNode( m_nodes , ray , intersect , fmin , fmax , ray.m_fMax );
+	if( _traverseNode( m_nodes , ray , intersect , fmin , fmax , ray.m_fMax ) )
+	{
+		if( intersect == 0 )
+			return true;
+		return intersect->primitive != 0 ;
+	}
+	return false;
 }
 
 // traverse node

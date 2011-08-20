@@ -33,14 +33,20 @@ Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample&
 
 	// get the intersection between the ray and the scene
 	Intersection ip;
-	if( false == scene.GetIntersect( r , &ip ) )
-		return scene.EvaluateSky( r );
-
 	// evaluate light directly
-	Spectrum t;
+	Spectrum t = scene.EvaluateLight( r , &ip );
+
+	if( false == scene.GetIntersect( r , &ip ) )
+	{
+		// to be deleted when sky light is added
+		if( ip.t == FLT_MAX )
+			return scene.EvaluateSky( r );
+		else
+			return t;
+	}
 
 	// eavluate direct light
-	t += EvaluateDirect( r , scene , ip , ps );
+	t = EvaluateDirect( r , scene , ip , ps );
 
 	// evaluate specular reflection or refraction
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );

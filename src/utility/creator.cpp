@@ -42,6 +42,14 @@
 #include "light/distant.h"
 #include "light/area.h"
 
+// sky
+#include "geometry/sky/skybox.h"
+#include "geometry/sky/skysphere.h"
+
+// the shapes
+#include "shape/disk.h"
+#include "shape/sphere.h"
+
 // instance the singleton with logmanager class
 DEFINE_SINGLETON(Creator);
 
@@ -78,6 +86,16 @@ void Creator::_init()
 	REGISTER( "spot" , SpotLight );
 	REGISTER( "distant" , DistantLight );
 	REGISTER( "area", AreaLight );
+
+	//----------------------------------------------------------
+	// sky
+	REGISTER( "sky_box" , SkyBox );
+	REGISTER( "sky_sphere" , SkySphere );
+
+	//----------------------------------------------------------
+	// shape
+	REGISTER( "sphere" , Sphere );
+	REGISTER( "disk" , Disk );
 
 #undef	REGISTER
 }

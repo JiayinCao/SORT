@@ -343,7 +343,13 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( fmin < 0.0f )
 		return false;
 
-	return _traverse( m_nodes , r , intersect , fmin , fmax , fmax );
+	if( _traverse( m_nodes , r , intersect , fmin , fmax , fmax ) )
+	{
+		if( intersect == 0 )
+			return true;
+		return intersect->primitive != 0;
+	}
+	return false;
 }
 
 // tranverse kd-tree node

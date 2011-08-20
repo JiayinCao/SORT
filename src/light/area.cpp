@@ -27,7 +27,8 @@ void AreaLight::_init()
 {
 	_registerAllProperty();
 
-	shape = new Disk();
+	shape = 0;
+	radius = 1.0f;
 }
 
 // release data
@@ -42,11 +43,12 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 	Sort_Assert( ls != 0 );
 	Sort_Assert( shape != 0 );
 
-	Vector n;
-	Point ps = shape->sample_l( *ls , intersect.intersect , wi , pdf , n );
+	Point ps = shape->sample_l( *ls , intersect.intersect , wi , pdf );
+	if( pdf && *pdf == 0.0f )
+		return 0.0f;
 
+	// get the delta
 	Vector dlt = ps - intersect.intersect;
-	
 	// setup visibility tester
 	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , dlt.Length() - delta );
 
@@ -66,6 +68,8 @@ void AreaLight::_registerAllProperty()
 	Light::_registerAllProperty();
 	_registerProperty( "pos" , new PosProperty(this) );
 	_registerProperty( "dir" , new DirProperty(this) );
+	_registerProperty( "shape" , new ShapeProperty(this) );
+	_registerProperty( "radius" , new RadiusProperty(this) );
 }
 
 // sample light density
@@ -74,4 +78,29 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const Vector& wo )
 	if( Dot( wo , intersect.normal ) > 0.0f )
 		return intensity;
 	return 0.0f;
+}
+
+// get intersection between the light and the ray
+bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
+{
+	Sort_Assert( shape != 0 );
+	Sort_Assert( intersect != 0 );
+
+	// transform the ray to local coordinate
+	Ray r = light2world.invMatrix( ray );
+
+	// get intersect
+	bool result = shape->GetIntersect( r , intersect );
+
+	// transform the intersection result back to world coordinate
+	if( result )
+	{
+		intersect->intersect = light2world(intersect->intersect);
+		intersect->normal = light2world(intersect->normal);
+		intersect->tangent = light2world(intersect->tangent);
+
+		radiance = sample_l( *intersect , -ray.m_Dir );
+	}
+
+	return result;
 }

@@ -19,6 +19,7 @@
 #define	SORT_SPHERE
 
 #include "shape.h"
+#include "utility/creator.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 //	definition of sphere
@@ -26,6 +27,8 @@ class	Sphere : public Shape
 {
 // public method
 public:
+	DEFINE_CREATOR(Sphere);
+
 	// default constructor
 	Sphere(){}
 	// destructor
@@ -36,13 +39,14 @@ public:
 	// para 'p'	: the target point for the light to lit.
 	// para 'wi': the sampled vector ( output )
 	// para 'pdf': the pdf of the light sample ( output )
-	// para 'normal' : the normal of the light surface
 	// result   : a sampled point from the light source
-	virtual Point sample_l( const LightSample& ls , const Point& p , 
-							Vector& wi , float* pdf , Vector& normal ) const;
+	virtual Point sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const;
 
 	// the surface area of the shape
 	virtual float SurfaceArea() const;
+
+	// get intersection between the light surface and the ray
+	virtual bool GetIntersect( const Ray& ray , Intersection* intersect ) const;
 };
 
 #endif
