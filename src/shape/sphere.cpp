@@ -47,7 +47,7 @@ Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , fl
 
 	Point _p;
 	Ray r = transform.invMatrix( Ray( p , wi ) );
-	if( false == _getIntersect( r , FLT_MAX , _p ) )
+	if( _getIntersect( r , FLT_MAX , _p ) < 0.0f )
 		_p = r( Dot( delta , wi ) );
 	
 	return transform(_p);
