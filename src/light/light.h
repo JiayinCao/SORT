@@ -87,7 +87,7 @@ public:
 	virtual Spectrum Power() const = 0;
 
 	// whether the light is a delta light
-	bool	IsDelta() const { return true; }
+	virtual bool IsDelta() const { return true; }
 
 	// get intersection between the light and the ray
 	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }

@@ -40,8 +40,10 @@ public:
 	// set texture
 	virtual void SetValue( Texture* value ) {}
 
+	// property name
+	string	m_name;
 	// the target
-	T*	m_target;
+	T*		m_target;
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -113,6 +115,7 @@ protected:
 	// set property
 	void _registerProperty( const string& name , PropertyHandler<T>* ph )
 	{
+		ph->m_name = name;
 		m_propertySet.insert( make_pair( name , ph ) );
 	}
 

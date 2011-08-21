@@ -21,6 +21,8 @@
 #include "sky.h"
 #include "texture/imagetexture.h"
 
+class Distribution2D;
+
 ////////////////////////////////////////////////////////////////////////
 // definition of sky sphere
 class	SkySphere : public Sky
@@ -30,21 +32,34 @@ public:
 	DEFINE_CREATOR( SkySphere );
 
 	// default constructor
-	SkySphere();
+	SkySphere(){_init();}
 	// destructor
-	~SkySphere(){}
+	~SkySphere(){_release();}
 
 	// evaluate value from sky
 	// para 'r' : the ray which misses all of the triangle in the scene
 	// result   : the spectrum in the sky
-	virtual Spectrum Evaluate( const Ray& r ) const;
+	virtual Spectrum Evaluate( const Vector& r ) const;
+
+	// get the average radiance
+	virtual Spectrum GetAverage() const;
+
+	// sample direction
+	virtual Vector sample_v( float u , float v , float* pdf ) const;
 
 // private field
 private:
-	ImageTexture m_sky;
+	ImageTexture	m_sky;
+	Distribution2D*	distribution;
 
+	// initialize default value
+	void _init();
+	// release
+	void _release();
 	// register property
 	void _registerAllProperty();
+	// generate 2d distribution
+	void _generateDistribution2D();
 
 // property handler
 	class ImageProperty : public PropertyHandler<Sky>
@@ -58,6 +73,7 @@ private:
 		{
 			SkySphere* sky = dynamic_cast<SkySphere*>(m_target);
 			sky->m_sky.LoadImageFromFile( str );
+			sky->_generateDistribution2D();
 		}
 	};
 };

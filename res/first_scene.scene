@@ -1,53 +1,53 @@
 <Root>
   <Resource path="../res/"/>
   <Material value="default.material"/>
-	<Model filename="cornell.obj" name="cornell">
-		<Transform>
-	    <Matrix value="s 40"/>
-      <Matrix value="t 0 -500 0"/>
-		</Transform>
-    <Material>
-      <MatSet name="Box01" mat="cube_mat"/>
-    </Material>
-	</Model>
-  <Model filename="cube.obj" name="light">
+  <Model filename="cube.obj" name="object">
+
+
+
+
+
+
+
+
+
     <Transform>
-      <Matrix value="s 400 50 400"/>
-      <Matrix value="t 100 800 100"/>
+      <Matrix value="t -0.5 20 -0.5" />
+      <Matrix value="s 1000 10 1000"/>
     </Transform>
     <Material>
       <MatSet name="" mat="cube_mat"/>
     </Material>
   </Model>
-  <Model filename="cube.obj" name="notlight">
+  <Model filename="cube.obj" name="plane">
     <Transform>
-      <Matrix value="s 400 50 400"/>
-      <Matrix value="t 100 700 120"/>
+      <Matrix value="t -0.5 0 -0.5" />
+      <Matrix value="s 5000 10 5000"/>
     </Transform>
-    <Material>
-      <MatSet name="" mat="cube_mat"/>
-    </Material>
   </Model>
-  <Light type="po1int">
-    <Property name="intensity" value="10000000 9000000 6000000"/>
-	<Property name="pos" value="0 600 500" />
-  </Light>
-  <Light type="poi1nt">
-    <Property name="intensity" value="10000000 9000000 6000000"/>
-    <Property name="pos" value="300 600 500" />
-  </Light>
-  <Light type="s1pot">
-    <Property name="intensity" value="0 0 9000000"/>
-    <Property name="falloff_start" value="0.1" />
-    <Property name="range" value="0.4"/>
-	<Property name="pos" value="1500 1500 1500"/>
-	<Property name="dir" value="0 -1 0"/>
-  </Light>
-  <Light type="dis1tant">
+
+
+
+  <Light type="dist1ant">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   	<Property name="intensity" value="20 20 20" />
-	<Property name="dir" value="-1 -0 -5"/>
+	<Property name="dir" value="-1 -1 1"/>
   </Light>
-  <Light type="area">
+  <Light type="ar1ea">
     <Property name="shape" value="square" />
     <Property name="radius" value="100" />
     <Property name="intensity" value="1000 1000 1000"/>
@@ -55,13 +55,15 @@
 	  <Property name="pos" value="0 1000 0"/>
     <Property name="dir" value="0 -1 0"/>
   </Light>
-	<Accel type="uniform_grid"/>
-  <Sky type="sky_box">
+  <Light type="skylight">
+    <Property name="type" value="sky_sphere"/>
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />
     <Property name="front" value="sky/lobbyxpos.bmp"/>
     <Property name="back" value="sky/lobbyxneg.bmp"/>
     <Property name="left" value="sky/lobbyzpos.bmp"/>
     <Property name="right" value="sky/lobbyzneg.bmp"/>
-  </Sky>
+    <Property name="image" value="sky/mars.bmp"/>
+  </Light>
+	<Accel type="kd_tree"/>
 </Root>

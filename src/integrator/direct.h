@@ -46,12 +46,6 @@ public:
 	// para 'scene'   : the scene to be rendered
 	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const;
 
-	// pre-process before rendering
-	// by default , nothing is done in pre-process
-	// some integrator, such as Photon Mapping use pre-process step to
-	// generate some neccessary infomation by latter stage.
-	virtual void PreProcess( Scene& scene ){}
-
 	// output log information
 	virtual void OutputLog() const;
 

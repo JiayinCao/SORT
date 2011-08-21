@@ -19,21 +19,28 @@
 #include "skysphere.h"
 #include "bsdf/bsdf.h"
 #include "geometry/ray.h"
+#include "utility/samplemethod.h"
 
-// default constructor
-SkySphere::SkySphere()
+// initialize default value
+void SkySphere::_init()
 {
 	_registerAllProperty();
+	distribution = 0;
+}
+// release
+void SkySphere::_release()
+{
+	SAFE_DELETE(distribution);
 }
 
 // evaluate value from sky
-Spectrum SkySphere::Evaluate( const Ray& r ) const
+Spectrum SkySphere::Evaluate( const Vector& vec ) const
 {
-	float theta = SphericalTheta( r.m_Dir );
-	float phi = SphericalPhi( r.m_Dir );
+	float theta = SphericalTheta( vec );
+	float phi = SphericalPhi( vec );
 
-	float v = theta * 2 * INV_PI;
-	float u = phi * INV_PI;
+	float v = theta * INV_PI;
+	float u = phi * INV_PI * 0.5f;
 
 	return m_sky.GetColor( u , v );
 }
@@ -42,4 +49,45 @@ Spectrum SkySphere::Evaluate( const Ray& r ) const
 void SkySphere::_registerAllProperty()
 {
 	_registerProperty( "image" , new ImageProperty( this ) );
+}
+
+// get the average radiance
+Spectrum SkySphere::GetAverage() const
+{
+	return m_sky.GetAverage();
+}
+
+// generate 2d distribution
+void SkySphere::_generateDistribution2D()
+{
+	SAFE_DELETE(distribution);
+
+	unsigned nu = m_sky.GetWidth();
+	unsigned nv = m_sky.GetHeight();
+	Sort_Assert( nu != 0 && nv != 0 );
+	float* data = new float[nu*nv];
+	for( unsigned i = 0 ; i < nv ; i++ )
+	{
+		unsigned offset = i * nu;
+		float sin_theta = sin( (float)i / (float)nv * PI );
+		for( unsigned j = 0 ; j < nu ; j++ )
+			data[offset+j] = m_sky.GetColor( (int)j , (int)i ).GetIntensity() * sin_theta;
+	}
+
+	distribution = new Distribution2D( data , nu , nv );
+	SAFE_DELETE_ARRAY(data);
+}
+
+// sample direction
+Vector SkySphere::sample_v( float u , float v , float* pdf ) const
+{
+	Sort_Assert( distribution != 0 );
+
+	float uv[2] ;
+	distribution->SampleContinuous( u , v , uv , pdf );
+
+	float theta = PI * uv[1];
+	float phi = TWO_PI * uv[0];
+
+	return SphericalVec( theta , phi );
 }

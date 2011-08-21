@@ -22,7 +22,7 @@
 #include "spectrum/spectrum.h"
 #include "utility/propertyset.h"
 
-class Ray;
+class Vector;
 
 //////////////////////////////////////////////////////////////////
 //	definition of sky
@@ -42,7 +42,13 @@ public:
 	// evaluate value from sky
 	// para 'r' : the ray which misses all of the triangle in the scene
 	// result   : the spectrum in the sky
-	virtual Spectrum Evaluate( const Ray& r ) const = 0;
+	virtual Spectrum Evaluate( const Vector& r ) const = 0;
+
+	// get the average radiance
+	virtual Spectrum GetAverage() const = 0;
+
+	// sample direction
+	virtual Vector sample_v( float u , float v , float* pdf ) const = 0;
 };
 
 #endif

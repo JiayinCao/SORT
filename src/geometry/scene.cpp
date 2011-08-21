@@ -24,8 +24,6 @@
 #include "utility/samplemethod.h"
 #include "utility/assert.h"
 #include "managers/matmanager.h"
-#include "sky/skysphere.h"
-#include "sky/skybox.h"
 #include "light/light.h"
 
 // initialize default data
@@ -33,7 +31,6 @@ void Scene::_init()
 {
 	m_pAccelerator = 0;
 	m_pLightsDis = 0;
-	m_pSky = 0;
 }
 
 // load the scene from script file
@@ -178,27 +175,6 @@ bool Scene::LoadScene( const string& str )
 		if( type != 0 )	m_pAccelerator = CREATE_TYPE( type , Accelerator );
 	}
 
-	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.
-	TiXmlElement* skyNode = root->FirstChildElement( "Sky" );
-	if( skyNode )
-	{
-		// set cooresponding type of accelerator
-		const char* c_type = skyNode->Attribute( "type" );
-		if( c_type != 0 )
-		{
-			m_pSky = CREATE_TYPE( c_type , Sky );
-
-			// set the properties
-			TiXmlElement* prop = skyNode->FirstChildElement( "Property" );
-			while( prop )
-			{
-				const char* prop_name = prop->Attribute( "name" );
-				const char* prop_value = prop->Attribute( "value" );
-				if( prop_name && prop_value ) m_pSky->SetProperty( prop_name , prop_value );
-				prop = prop->NextSiblingElement( "Property" );
-			}
-		}
-	}
 	// restore resource path
 	SetResourcePath( oldpath );
 
@@ -236,7 +212,6 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 void Scene::Release()
 {
 	SAFE_DELETE( m_pAccelerator );
-	SAFE_DELETE( m_pSky );
 	SAFE_DELETE( m_pLightsDis );
 
 	vector<Primitive*>::iterator it = m_triBuf.begin();
@@ -296,16 +271,6 @@ void Scene::PreProcess()
 		m_pAccelerator->SetPrimitives( &m_triBuf );
 		m_pAccelerator->Build();
 	}
-}
-
-
-// evaluate sky
-Spectrum Scene::EvaluateSky( const Ray& r ) const
-{
-	if( m_pSky )
-		return m_pSky->Evaluate( r );
-
-	return 0.0f;
 }
 
 // parse transformation

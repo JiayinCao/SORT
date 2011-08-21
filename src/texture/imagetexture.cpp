@@ -34,8 +34,7 @@ void ImageTexture::_init()
 Spectrum ImageTexture::GetColor( int x , int y ) const
 {
 	// if there is no image, just crash
-	if( 0 == m_pMemory || m_pMemory->m_ImgMem == 0 )
-		LOG_ERROR<<"There is no memory for the texture!!"<<CRASH;
+	Sort_Assert( m_pMemory != 0 && m_pMemory->m_ImgMem != 0 );
 
 	// filter the texture coordinate
 	_texCoordFilter( x , y );
@@ -62,11 +61,42 @@ bool ImageTexture::LoadImageFromFile( const std::string& str )
 	Release();
 
 	// get the texture manager
-	return TexManager::GetSingleton().Read( str , this );
+	if( TexManager::GetSingleton().Read( str , this ) )
+	{
+		_average();
+		return true;
+	}
+	return false;
 }
 
 // register properties
 void ImageTexture::_registerAllProperty()
 {
 	_registerProperty( "filename" , new FileNameProperty( this ) );
+}
+
+// get average color
+Spectrum ImageTexture::GetAverage() const
+{
+	return m_Average;
+}
+
+// compute average radiance
+void ImageTexture::_average()
+{
+	// if there is no image, just crash
+	if( m_pMemory == 0 || m_pMemory->m_ImgMem == 0 )
+		return;
+
+	Spectrum average;
+	for( unsigned i = 0 ; i < m_iTexHeight ; ++i )
+		for( unsigned j = 0 ; j < m_iTexWidth ; ++j )
+		{
+			// get the offset
+			int offset = i * m_iTexWidth + j;
+			// get the color
+			average += m_pMemory->m_ImgMem[ offset ];
+		}
+
+	m_Average = average / (float)( m_iTexWidth * m_iTexHeight );
 }

@@ -745,6 +745,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\light\skylight.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\light\skylight.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\light\spot.cpp"
 				>
 			</File>

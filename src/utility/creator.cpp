@@ -41,6 +41,7 @@
 #include "light/spot.h"
 #include "light/distant.h"
 #include "light/area.h"
+#include "light/skylight.h"
 
 // sky
 #include "geometry/sky/skybox.h"
@@ -87,6 +88,7 @@ void Creator::_init()
 	REGISTER( "spot" , SpotLight );
 	REGISTER( "distant" , DistantLight );
 	REGISTER( "area", AreaLight );
+	REGISTER( "skylight" , SkyLight );
 
 	//----------------------------------------------------------
 	// sky

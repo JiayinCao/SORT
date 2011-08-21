@@ -48,8 +48,6 @@ void TriMesh::_init()
 void TriMesh::_release()
 {
 	SAFE_DELETE_ARRAY(m_pMaterials);
-
-	m_triBuffer.clear();
 }
 
 // load the mesh
@@ -64,40 +62,8 @@ bool TriMesh::LoadMesh( const string& str , Transform& transform )
 		return false;
 
 	_copyMaterial();
-	_genTriBuffer();
 
 	return true;
-}
-
-// generate triangle buffer
-void TriMesh::_genTriBuffer()
-{
-	m_triBuffer.clear();
-
-	unsigned base = 0;
-	if( m_bInstanced == false )
-	{
-		// generate the triangles
-		unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
-		for( unsigned i = 0 ; i < trunkNum ; i++ )
-		{
-			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
-			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				m_triBuffer.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i] ) );
-			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
-		}
-	}else
-	{
-		// generate the triangles
-		unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
-		for( unsigned i = 0 ; i < trunkNum ; i++ )
-		{
-			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
-			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				m_triBuffer.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] ) );
-			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
-		}
-	}
 }
 
 // copy materials
@@ -122,15 +88,6 @@ void TriMesh::_copyMaterial()
 void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 {
 	unsigned base = vec.size();
-	vector<Primitive*>::iterator it = m_triBuffer.begin();
-	while( it != m_triBuffer.end() )
-	{
-		(*it)->SetID( (*it)->GetID() + base );
-		vec.push_back( *it );
-		it++;
-	}
-
-	return ;
 	if( m_bInstanced == false )
 	{
 		// generate the triangles
@@ -193,17 +150,3 @@ int TriMesh::_getSubsetID( const string& setname )
 	}
 	return -1;
 }
-
-// get total surface area
-float TriMesh::GetSurfaceArea() const
-{
-	float sa = 0.0f;
-	vector<Primitive*>::const_iterator it = m_triBuffer.begin();
-	while( it != m_triBuffer.end() )
-	{
-		sa += (*it)->SurfaceArea();
-		it++;
-	}
-	return sa;
-}
-

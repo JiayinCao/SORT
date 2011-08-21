@@ -54,9 +54,6 @@ public:
 	// para 'matname' : the material name
 	void ResetMaterial( const string& setname , const string& matname );
 
-	// get total surface area
-	float	GetSurfaceArea() const;
-
 // private field
 public:
 	// the name of the model
@@ -71,8 +68,6 @@ public:
 	// whether the mesh is instanced
 	bool			m_bInstanced;
 
-	// the triangles for the mesh
-	vector<Primitive*> m_triBuffer;
 	// the materials for instanced mesh
 	Reference<Material>*	m_pMaterials;
 
@@ -85,8 +80,6 @@ public:
 	int		_getSubsetID( const string& setname );
 	// copy materials
 	void	_copyMaterial();
-	// generate tri buffer
-	void	_genTriBuffer();
 
 // set friend class
 friend	class	MeshManager;
