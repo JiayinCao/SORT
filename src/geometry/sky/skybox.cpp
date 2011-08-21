@@ -17,7 +17,7 @@
 
 // include the header
 #include "skybox.h"
-#include "geometry/ray.h"
+#include "geometry/vector.h"
 #include <math.h>
 
 // default constructor
@@ -34,52 +34,52 @@ SkyBox::SkyBox()
 }
 
 // evaluate value from sky
-Spectrum SkyBox::Evaluate( const Ray& r ) const
+Spectrum SkyBox::Evaluate( const Vector& vec ) const
 {
-	float abs_x = fabs( r.m_Dir.x );
-	float abs_y = fabs( r.m_Dir.y );
-	float abs_z = fabs( r.m_Dir.z );
+	float abs_x = fabs( vec.x );
+	float abs_y = fabs( vec.y );
+	float abs_z = fabs( vec.z );
 
 	if( abs_x > abs_y && abs_x > abs_z )
 	{
-		if( r.m_Dir.x > 0.0f )
+		if( vec.x > 0.0f )
 		{
-			float u = ( -r.m_Dir.z / r.m_Dir.x + 1.0f ) * 0.5f;
-			float v = ( -r.m_Dir.y / r.m_Dir.x + 1.0f ) * 0.5f;
+			float u = ( -vec.z / vec.x + 1.0f ) * 0.5f;
+			float v = ( -vec.y / vec.x + 1.0f ) * 0.5f;
 			return m_front.GetColor( u , v );
 		}
 		else
 		{
-			float u = ( -r.m_Dir.z / r.m_Dir.x + 1.0f ) * 0.5f;
-			float v = ( r.m_Dir.y / r.m_Dir.x + 1.0f ) * 0.5f;
+			float u = ( -vec.z / vec.x + 1.0f ) * 0.5f;
+			float v = ( vec.y / vec.x + 1.0f ) * 0.5f;
 			return m_back.GetColor( u , v );
 		}
 	}else if( abs_y > abs_x && abs_y > abs_z )
 	{
-		if( r.m_Dir.y > 0.0f )
+		if( vec.y > 0.0f )
 		{
-			float u = ( r.m_Dir.x / r.m_Dir.y + 1.0f ) * 0.5f;
-			float v = ( r.m_Dir.z / r.m_Dir.y + 1.0f ) * 0.5f;
+			float u = ( vec.x / vec.y + 1.0f ) * 0.5f;
+			float v = ( vec.z / vec.y + 1.0f ) * 0.5f;
 			return m_up.GetColor( u , v );
 		}
 		else
 		{
-			float u = ( -r.m_Dir.x / r.m_Dir.y + 1.0f ) * 0.5f;
-			float v = ( r.m_Dir.z / r.m_Dir.y + 1.0f ) * 0.5f;
+			float u = ( -vec.x / vec.y + 1.0f ) * 0.5f;
+			float v = ( vec.z / vec.y + 1.0f ) * 0.5f;
 			return m_down.GetColor( u , v );
 		}
 	}else
 	{
-		if( r.m_Dir.z > 0.0f )
+		if( vec.z > 0.0f )
 		{
-			float u = ( r.m_Dir.x / r.m_Dir.z + 1.0f ) * 0.5f;
-			float v = ( -r.m_Dir.y / r.m_Dir.z + 1.0f ) * 0.5f;
+			float u = ( vec.x / vec.z + 1.0f ) * 0.5f;
+			float v = ( -vec.y / vec.z + 1.0f ) * 0.5f;
 			return m_left.GetColor( u , v );
 		}
 		else
 		{
-			float u = ( r.m_Dir.x / r.m_Dir.z + 1.0f ) * 0.5f;
-			float v = ( r.m_Dir.y / r.m_Dir.z + 1.0f ) * 0.5f;
+			float u = ( vec.x / vec.z + 1.0f ) * 0.5f;
+			float v = ( vec.y / vec.z + 1.0f ) * 0.5f;
 			return m_right.GetColor( u , v );
 		}
 	}
@@ -96,4 +96,17 @@ void SkyBox::_registerAllProperty()
 	_registerProperty( "right" , new RightProperty(this) );
 	_registerProperty( "front" , new FrontProperty(this) );
 	_registerProperty( "back" , new BackProperty(this) );
+}
+
+// get the average radiance
+Spectrum SkyBox::GetAverage() const
+{
+	// to be modified
+	return 0.0f;
+}
+
+// sample direction
+Vector SkyBox::sample_v( float u , float v , float* pdf ) const
+{
+	return Vector();
 }

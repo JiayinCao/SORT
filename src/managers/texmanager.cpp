@@ -133,7 +133,7 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 		ImgMemory* mem = new ImgMemory();
 
 		// read the data
-		bool read = io->Read( str , mem );
+		read = io->Read( str , mem );
 
 		if( read )
 		{

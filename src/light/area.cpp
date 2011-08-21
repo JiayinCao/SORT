@@ -50,7 +50,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 	// get the delta
 	Vector dlt = ps - intersect.intersect;
 	// setup visibility tester
-	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , dlt.Length() - delta );
+	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , dlt.Length() );
 
 	return intensity;
 }

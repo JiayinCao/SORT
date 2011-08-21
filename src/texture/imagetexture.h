@@ -67,14 +67,23 @@ public:
 
 	// whether the image is valid
 	bool IsValid() { return (bool)m_pMemory; }
+
+	// get average color
+	Spectrum GetAverage() const;
+
 // private field
 private:
 	// array saving the color of image
 	Reference<ImgMemory>	m_pMemory;
 
+	// the average radiance of the texture
+	Spectrum	m_Average;
+
 // private method
 	// initialize default data
 	void	_init();
+	// compute average radiance
+	void	_average();
 
 	// set texture manager as a friend
 	friend class TexManager;

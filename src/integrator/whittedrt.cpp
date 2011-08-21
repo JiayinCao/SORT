@@ -32,7 +32,7 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r , const PixelSample& p
 	// get the intersection between the ray and the scene
 	Intersection ip;
 	if( false == scene.GetIntersect( r , &ip ) )
-		return scene.EvaluateSky( r );
+		return 0.0f;
 
 	Spectrum t;
 

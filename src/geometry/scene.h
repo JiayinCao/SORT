@@ -27,7 +27,6 @@
 
 // pre-decleration of classes
 class Accelerator;
-class Sky;
 class Light;
 class Distribution1D;
 
@@ -53,11 +52,6 @@ public:
 	// note     : if there is no acceleration structure , it will iterator all
 	//			  of the triangles which will cost much!
 	bool	GetIntersect( const Ray& r , Intersection* intersect ) const;
-
-	// evaluate sky
-	// para 'r' : the ray
-	// result   : the sky spectrum
-	Spectrum EvaluateSky( const Ray& r ) const;
 
 	// release the memory of the scene
 	void	Release();
@@ -106,9 +100,6 @@ private:
 
 	// the file name for the scene
 	string		m_filename;
-
-	// the sky for the scene
-	Sky*		m_pSky;
 
 	// bounding box for the scene
 	mutable BBox	m_BBox;
