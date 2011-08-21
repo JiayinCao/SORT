@@ -49,6 +49,7 @@
 // the shapes
 #include "shape/disk.h"
 #include "shape/sphere.h"
+#include "shape/square.h"
 
 // instance the singleton with logmanager class
 DEFINE_SINGLETON(Creator);
@@ -96,6 +97,7 @@ void Creator::_init()
 	// shape
 	REGISTER( "sphere" , Sphere );
 	REGISTER( "disk" , Disk );
+	REGISTER( "square" , Square );
 
 #undef	REGISTER
 }
