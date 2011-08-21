@@ -888,6 +888,14 @@
 				RelativePath="..\..\src\shape\sphere.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\shape\square.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shape\square.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\..\src\main.cpp"
