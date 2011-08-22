@@ -32,7 +32,7 @@ class Intersection;
 //		1. Shape is only binded to area light , while primitive is the basic unit of 
 //		the scene geometry. The only primitive supported in SORT is triangle, supporting
 //		the other geometry doesn't contribute much. There is no material attached to 
-//		shape, because it's only emissive , not reflect light in SORT.
+//		shape, because it's only emissive , doesn't reflect light in SORT.
 //		2. Shape is simple to sample. The pdf of sampling shape is much more accurate
 //		than sampling a triangle , let alone the triangle set , which is very hard to 
 //		sample correctly.

@@ -20,6 +20,7 @@
 #include "bsdf/bsdf.h"
 #include "geometry/ray.h"
 #include "utility/samplemethod.h"
+#include "managers/memmanager.h"
 
 // initialize default value
 void SkySphere::_init()
@@ -65,7 +66,7 @@ void SkySphere::_generateDistribution2D()
 	unsigned nu = m_sky.GetWidth();
 	unsigned nv = m_sky.GetHeight();
 	Sort_Assert( nu != 0 && nv != 0 );
-	float* data = new float[nu*nv];
+	float* data = SORT_MALLOC_ARRAY( float , nu*nv )();
 	for( unsigned i = 0 ; i < nv ; i++ )
 	{
 		unsigned offset = i * nu;
@@ -75,7 +76,6 @@ void SkySphere::_generateDistribution2D()
 	}
 
 	distribution = new Distribution2D( data , nu , nv );
-	SAFE_DELETE_ARRAY(data);
 }
 
 // sample direction
@@ -89,5 +89,14 @@ Vector SkySphere::sample_v( float u , float v , float* pdf ) const
 	float theta = PI * uv[1];
 	float phi = TWO_PI * uv[0];
 
-	return SphericalVec( theta , phi );
+	Vector wi = SphericalVec( theta , phi );
+	if( pdf )
+	{
+		float sin_theta = SinTheta( wi );
+		if( sin_theta != 0.0f )
+			*pdf /= TWO_PI * PI * SinTheta( wi );
+		else
+			*pdf = 0.0f;
+	}
+	return wi;
 }

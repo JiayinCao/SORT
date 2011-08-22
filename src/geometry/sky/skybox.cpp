@@ -20,17 +20,21 @@
 #include "geometry/vector.h"
 #include <math.h>
 
-// default constructor
-SkyBox::SkyBox()
+// initialize default value
+void SkyBox::_init()
 {
 	_registerAllProperty();
-
 	m_up.SetTexCoordFilter( TCF_CLAMP );
 	m_down.SetTexCoordFilter( TCF_CLAMP );
 	m_left.SetTexCoordFilter( TCF_CLAMP );
 	m_right.SetTexCoordFilter( TCF_CLAMP );
 	m_front.SetTexCoordFilter( TCF_CLAMP );
 	m_back.SetTexCoordFilter( TCF_CLAMP );
+}
+
+// release
+void SkyBox::_release()
+{
 }
 
 // evaluate value from sky
@@ -101,8 +105,18 @@ void SkyBox::_registerAllProperty()
 // get the average radiance
 Spectrum SkyBox::GetAverage() const
 {
-	// to be modified
-	return 0.0f;
+	// note : 	there is only a rough simulation of the average radiance.
+	//			because a skylight use a rough simulation for power, a more
+	//			elegent way of computing the average doesn't make much sense.
+	return 0.16666666f * ( 	m_up.GetAverage() + m_down.GetAverage() +
+							m_front.GetAverage() + m_back.GetAverage() +
+							m_left.GetAverage() + m_right.GetAverage() );
+}
+
+// generate distribution2d
+void SkyBox::_generateDistribution2D()
+{
+
 }
 
 // sample direction

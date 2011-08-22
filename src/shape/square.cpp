@@ -22,12 +22,9 @@
 // sample a point on shape
 Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
 {
-	Point axis0 ( 1 , 0 , 0 );
-	Point axis1 ( 0 , 0 , 1 );
-
 	float u = 2 * ls.u - 1.0f;
 	float v = 2 * ls.v - 1.0f;
-	Point lp = transform( ( axis0 * u + axis1 * v ) * radius );
+	Point lp = transform( Point( radius * u , 0.0f , radius * v ) );
 	Vector normal = transform( Vector( 0 , 1 , 0 ) );
 	Vector delta = lp - p;
 	wi = Normalize( delta );
@@ -69,7 +66,6 @@ bool Square::GetIntersect( const Ray& ray , Intersection* intersect ) const
 	intersect->t = t;
 	intersect->intersect = ( ray(intersect->t) );
 	intersect->normal = Vector( 0.0f , 1.0f , 0.0f , true );
-	intersect->tangent = Vector( 1.0f , 0.0f , 0.0f );
 
 	return true;
 }

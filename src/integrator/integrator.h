@@ -34,7 +34,7 @@ class	Integrator
 // public method
 public:
 	// default constructor
-	Integrator(){}
+	Integrator(){max_recursive_depth=6;}
 	// destructor
 	virtual ~Integrator(){}
 
@@ -78,6 +78,10 @@ public:
 
 	// output log information
 	virtual void OutputLog() const {}
+
+// protected method
+protected:
+	unsigned	max_recursive_depth;
 };
 
 #endif

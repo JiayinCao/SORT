@@ -19,9 +19,6 @@
 #include "area.h"
 #include "sampler/sample.h"
 
-// temp
-#include "shape/disk.h"
-
 // initialize default value
 void AreaLight::_init()
 {
@@ -97,8 +94,6 @@ bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& r
 	{
 		intersect->intersect = light2world(intersect->intersect);
 		intersect->normal = light2world(intersect->normal);
-		intersect->tangent = light2world(intersect->tangent);
-
 		radiance = sample_l( *intersect , -ray.m_Dir );
 	}
 
