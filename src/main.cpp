@@ -18,7 +18,6 @@
 // include the header file
 #include "sort.h"
 #include "system.h"
-#include "vld.h"
 
 // the global system
 System g_System;

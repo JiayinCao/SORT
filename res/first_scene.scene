@@ -1,22 +1,26 @@
 <Root>
   <Resource path="../res/"/>
   <Material value="default.material"/>
-  <Model filename="cube.obj" name="object">
-
-
-
-
-
-
-
-
-
+  <Model filename="killeroo.obj" name="object">
     <Transform>
-      <Matrix value="t -0.5 20 -0.5" />
-      <Matrix value="s 1000 10 1000"/>
+      <Matrix value="t -0.5 15 -0.5" />
+      <Matrix value="s 20"/>
+      <Matrix value="r 1 4.6"/>
+      <Matrix value="t 0 0 200"/>
     </Transform>
     <Material>
-      <MatSet name="" mat="cube_mat"/>
+      <MatSet name="" mat="default"/>
+    </Material>
+  </Model>
+  <Model filename="killeroo.obj" name="object1">
+    <Transform>
+      <Matrix value="t -0.5 15 -0.5" />
+      <Matrix value="s 20"/>
+      <Matrix value="r 1 4.6"/>
+      <Matrix value="t 0 0 -200"/>
+    </Transform>
+    <Material>
+      <MatSet name="" mat="killeroo_mat"/>
     </Material>
   </Model>
   <Model filename="cube.obj" name="plane">
@@ -25,45 +29,29 @@
       <Matrix value="s 5000 10 5000"/>
     </Transform>
   </Model>
-
-
-
   <Light type="dist1ant">
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   	<Property name="intensity" value="20 20 20" />
 	<Property name="dir" value="-1 -1 1"/>
   </Light>
-  <Light type="ar1ea">
+  <Light type="area">
     <Property name="shape" value="square" />
     <Property name="radius" value="100" />
-    <Property name="intensity" value="1000 1000 1000"/>
+    <Property name="intensity" value="0 500 500"/>
 	  <Property name="dir" value="0 -1 0"/>
 	  <Property name="pos" value="0 1000 0"/>
     <Property name="dir" value="0 -1 0"/>
   </Light>
-  <Light type="skylight">
+  <Light type="ar1ea">
+    <Property name="shape" value="square" />
+    <Property name="radius" value="100" />
+    <Property name="intensity" value="500 1000 0"/>
+    <Property name="dir" value="0 -1 0"/>
+    <Property name="pos" value="1000 1000 1000"/>
+    <Property name="dir" value="-1 -1 0"/>
+  </Light>
+  <Light type="sky1light">
     <Property name="type" value="sky_sphere"/>
-    <Property name="up" value="sky/lobbyypos.bmp"/>
-    <Property name="down" value="sky/lobbyyneg.bmp" />
-    <Property name="front" value="sky/lobbyxpos.bmp"/>
-    <Property name="back" value="sky/lobbyxneg.bmp"/>
-    <Property name="left" value="sky/lobbyzpos.bmp"/>
-    <Property name="right" value="sky/lobbyzneg.bmp"/>
-    <Property name="image" value="sky/mars.bmp"/>
+    <Property name="image" value="sky/uffizi_latlong.bmp"/>
   </Light>
 	<Accel type="kd_tree"/>
 </Root>
