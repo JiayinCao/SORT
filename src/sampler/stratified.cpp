@@ -54,6 +54,5 @@ void StratifiedSampler::Generate2D( float* sample , unsigned num ) const
 unsigned StratifiedSampler::RoundSize( unsigned size ) const
 {
 	unsigned r = (unsigned)ceil( sqrt((float)size) );
-	if( r == 0 ) r = 1;
 	return r * r;
 }

@@ -89,6 +89,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 		Vector lightDir;
 		float pdf;
 		Spectrum c = light->sample_l( ip , *it , lightDir , 0.1f , &pdf , visibility );
+		pdf *= scene.LightProperbility( (*it)->light_id );
 		if( pdf != 0.0f && visibility.IsVisible() )
 			t += c * bsdf->f( -r.m_Dir , lightDir ) * SatDot( lightDir , ip.normal ) / pdf;
 		it++;

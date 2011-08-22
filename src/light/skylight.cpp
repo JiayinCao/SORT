@@ -32,6 +32,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 	// setup visibility tester
 	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , FLT_MAX );
 
+	// the 10.0f factor will be removed later
 	return 10.0f * sky->Evaluate( wi );
 }
 
@@ -49,7 +50,8 @@ Spectrum SkyLight::Power() const
 	BBox box = scene->GetBBox();
 	float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
 
-	return radius * radius * PI * sky->GetAverage();
+	// the 10.0f factor will be removed later
+	return radius * radius * PI * sky->GetAverage() * 10.0f;
 }
 
 // get intersection between the light and the ray

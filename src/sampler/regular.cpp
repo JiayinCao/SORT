@@ -52,6 +52,5 @@ void RegularSampler::Generate2D( float* sample , unsigned num ) const
 unsigned RegularSampler::RoundSize( unsigned size ) const
 {
 	unsigned r = (unsigned)ceil( sqrt((float)size) );
-	if( r == 0 ) r = 1;
 	return r * r;
 }

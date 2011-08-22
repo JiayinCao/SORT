@@ -73,7 +73,7 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 
 	unsigned* ls_num = SORT_MALLOC_ARRAY( unsigned , light_num )();
 	for( unsigned i = 0 ; i < light_num ; ++i )
-		ls_num[i] = sampler->RoundSize((unsigned)(scene.LightProperbility(i) * total ));
+		ls_num[i] = sampler->RoundSize((unsigned)(scene.LightProperbility(i) * total+0.5f));
 	unsigned total_ls = 0 ;
 	for( unsigned i = 0 ; i < light_num ; ++i )
 		total_ls += ls_num[i];
