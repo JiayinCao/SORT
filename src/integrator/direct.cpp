@@ -28,7 +28,7 @@
 // radiance along a specific ray direction
 Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample& ps ) const
 {
-	if( r.m_Depth > 6 )
+	if( r.m_Depth > max_recursive_depth )
 		return 0.0f;
 
 	// get the intersection between the ray and the scene

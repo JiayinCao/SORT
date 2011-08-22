@@ -31,9 +31,9 @@ public:
 	DEFINE_CREATOR( SkyBox );
 
 	// default constructor
-	SkyBox();
+	SkyBox(){_init();}
 	// destructor
-	~SkyBox(){}
+	~SkyBox(){_release();}
 
 	// evaluate value from sky
 	// para 'r' : the ray which misses all of the triangle in the scene
@@ -56,8 +56,14 @@ private:
 	ImageTexture	m_left;
 	ImageTexture	m_right;
 
+	// initialize
+	void _init();
+	// release
+	void _release();
 	// register property
 	void _registerAllProperty();
+	// generate 2d distribution
+	void _generateDistribution2D();
 
 // property handler
 	class UpProperty : public PropertyHandler<Sky>

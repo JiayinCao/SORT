@@ -28,10 +28,7 @@ Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , floa
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 
-	Point axis0 ( 1 , 0 , 0 );
-	Point axis1 ( 0 , 0 , 1 );
-
-	Point lp = transform( ( axis0 * u + axis1 * v ) * radius );
+	Point lp = transform( Point( u * radius , 0.0f , v * radius ) );
 	Vector normal = transform( Vector( 0 , 1 , 0 ) );
 	Vector delta = lp - p;
 	wi = Normalize( delta );
@@ -71,7 +68,6 @@ bool Disk::GetIntersect( const Ray& ray , Intersection* intersect ) const
 	intersect->t = t;
 	intersect->intersect = ( ray(intersect->t) );
 	intersect->normal = Vector( 0.0f , 1.0f , 0.0f , true );
-	intersect->tangent = Vector( 1.0f , 0.0f , 0.0f );
 
 	return true;
 }
