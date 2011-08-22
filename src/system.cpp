@@ -23,13 +23,15 @@
 #include "managers/matmanager.h"
 #include "managers/memmanager.h"
 #include "utility/timer.h"
-#include "camera/camera.h"
 #include "texture/rendertarget.h"
 #include "geometry/intersection.h"
 #include "camera/dofperspective.h"
 #include "utility/path.h"
 #include "utility/creator.h"
 #include "sampler/sampler.h"
+
+#include "camera/camera.h"
+#include "camera/environment.h"
 
 #include "integrator/whittedrt.h"
 #include "integrator/direct.h"
@@ -74,6 +76,7 @@ void System::_preInit()
 	float distance = 1500.0f;
 //	DofPerspective* camera = new DofPerspective();
 	PerspectiveCamera* camera = new PerspectiveCamera();
+//	EnvironmentCamera* camera = new EnvironmentCamera();
 	camera->SetEye( Point( distance , distance * 0.5f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , distance * 0.05f , 0 ) );

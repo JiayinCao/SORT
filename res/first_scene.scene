@@ -33,7 +33,7 @@
   	<Property name="intensity" value="20 20 20" />
 	<Property name="dir" value="-1 -1 1"/>
   </Light>
-  <Light type="area">
+  <Light type="are1a">
     <Property name="shape" value="square" />
     <Property name="radius" value="100" />
     <Property name="intensity" value="0 500 500"/>
@@ -49,9 +49,15 @@
     <Property name="pos" value="1000 1000 1000"/>
     <Property name="dir" value="-1 -1 0"/>
   </Light>
-  <Light type="sky1light">
+  <Light type="skylight">
     <Property name="type" value="sky_sphere"/>
-    <Property name="image" value="sky/uffizi_latlong.bmp"/>
+    <Property name="image" value="sky/lobby_sphere.bmp"/>
+    <Property name="up" value="sky/lobbyypos.bmp"/>
+    <Property name="down" value="sky/lobbyyneg.bmp" />
+    <Property name="front" value="sky/lobbyxpos.bmp"/>
+    <Property name="back" value="sky/lobbyxneg.bmp"/>
+    <Property name="left" value="sky/lobbyzpos.bmp"/>
+    <Property name="right" value="sky/lobbyzneg.bmp"/>
   </Light>
 	<Accel type="kd_tree"/>
 </Root>
