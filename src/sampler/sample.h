@@ -20,6 +20,7 @@
 
 #include "sort.h"
 #include <vector>
+#include "utility/rand.h"
 
 // Light Sample
 class	LightSample
@@ -47,7 +48,15 @@ public:
 	float	preserved;	// a preserved data for memory alignment
 
 	// default constructor
-	BsdfSample(){}
+	BsdfSample(bool auto_generate=false)
+	{
+		if( auto_generate )
+		{
+			t = sort_canonical();
+			u = sort_canonical();
+			v = sort_canonical();
+		}
+	}
 };
 
 // sample defination

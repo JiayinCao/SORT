@@ -20,14 +20,8 @@
 #include "geometry/vector.h"
 #include "bsdf/bsdf.h"
 
-// evaluate bxdf
-Spectrum Refraction::f( const Vector& wo , const Vector& wi ) const
-{
-	return Spectrum();
-}
-
 // sample a direction randomly
-Spectrum Refraction::sample_f( const Vector& wo , Vector& wi , float* pdf ) const
+Spectrum Refraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
 	float coso = CosTheta( wo );
 	

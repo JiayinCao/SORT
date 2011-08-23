@@ -29,7 +29,7 @@ Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Interse
 {
 	Ray r;
 	float pdf;
-	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , &pdf , BXDF_REFLECTION );
+	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , BsdfSample(true) , &pdf , BXDF_REFLECTION );
 	if( f.IsBlack() || r.m_Dir.IsZero() )
 		return 0.0f;
 
@@ -46,7 +46,7 @@ Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Interse
 {
 	Ray r;
 	float pdf;
-	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , &pdf , BXDF_TRANSMISSION );
+	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , BsdfSample(true) , &pdf , BXDF_TRANSMISSION );
 	if( f.IsBlack() || r.m_Dir.IsZero() )
 		return 0.0f;
 

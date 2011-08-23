@@ -20,14 +20,8 @@
 #include "geometry/vector.h"
 #include "bsdf/bsdf.h"
 
-// evaluate bxdf
-Spectrum Reflection::f( const Vector& wo , const Vector& wi ) const
-{
-	return Spectrum();
-}
-
 // sample a direction randomly
-Spectrum Reflection::sample_f( const Vector& wo , Vector& wi , float* pdf ) const
+Spectrum Reflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
 	wi = Vector( -wo.x , wo.y , -wo.z );
 	if( pdf ) *pdf = 1.0f;

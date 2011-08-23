@@ -17,10 +17,24 @@
 
 // include the header
 #include "bxdf.h"
+#include "bsdf.h"
+#include "utility/samplemethod.h"
+#include "sampler/sample.h"
 
 // sample a direction randomly
-Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , float* pdf ) const
+Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
-	// not implemented
-	return Spectrum();
+	wi = CosSampleHemisphere( bs.u , bs.v );
+	if( wo.y < 0.0f )
+		wi.y = -wi.y;
+	if( pdf ) *pdf = Pdf( wo , wi );
+	return f( wo , wi );
+}
+
+// the pdf for the sampled direction
+float Bxdf::Pdf( const Vector& wo , const Vector& wi ) const
+{
+	if( !SameHemisphere( wo , wi ) )
+		return 0.0f;
+	return CosHemispherePdf( wi );
 }

@@ -19,6 +19,8 @@
 #include "bsdf.h"
 #include "bxdf.h"
 #include "geometry/intersection.h"
+#include "sampler/sample.h"
+#include "utility/assert.h"
 
 // constructor
 Bsdf::Bsdf( const Intersection* intersect )
@@ -74,25 +76,6 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 	return r;
 }
 
-// sample a ray from bsdf
-Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , float* pdf , BXDF_TYPE type ) const
-{
-	Vector swo = Normalize(_worldToLocal( wo ));
-	Vector swi;
-
-	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )
-	{
-		if( m_bxdf[i]->MatchFlag( type ) )
-		{
-			Spectrum t = m_bxdf[i]->sample_f( swo , swi , pdf );
-			wi = _localToWorld( swi );
-			return t;
-		}
-	}
-
-	return Spectrum();
-}
-
 // transform vector from world coordinate to shading coordinate
 Vector Bsdf::_worldToLocal( const Vector& v ) const
 {
@@ -105,4 +88,72 @@ Vector Bsdf::_localToWorld( const Vector& v ) const
 	return Vector( 	v.x * sn.x + v.y * nn.x + v.z * tn.x ,
 					v.x * sn.y + v.y * nn.y + v.z * tn.y ,
 					v.x * sn.z + v.y * nn.z + v.z * tn.z );
+}
+
+// sample a ray from bsdf
+Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type ) const
+{
+	unsigned com_num = NumComponents(type);
+	if( com_num == 0 )
+	{
+		if( pdf ) *pdf = 0.0f;
+		return 0.0f;
+	}
+	int bsdf_id = min( (int)(bs.t*(float)com_num+0.5f) , (int)(com_num-1) );
+	Bxdf* bxdf = 0;
+	int count = com_num;
+	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
+		if( m_bxdf[i]->MatchFlag(type) ){
+			count--;
+			if( count == 0 )
+			{
+				bxdf = m_bxdf[i];
+				break;
+			}
+		}
+
+	Sort_Assert( bxdf != 0 );
+
+	// transform the 'wo' from world space to shading coordinate
+	Vector swo = Normalize(_worldToLocal( wo ));
+
+	// sample the direction
+	Spectrum t = bxdf->sample_f( swo , wi , bs , pdf );
+
+	// if there is no properbility of sampling that direction , just return 0.0f
+	if( pdf && *pdf == 0.0f ) return 0.0f;
+
+	// transform the direction back
+	wi = _localToWorld( wi );
+
+	// setup pdf
+	if( pdf && !( bxdf->GetType() & BXDF_SPECULAR ) && ( com_num > 1 ) )
+	{
+		for( unsigned i = 0; i < m_bxdfCount ; ++i )
+			if( m_bxdf[i] != bxdf && m_bxdf[i]->MatchFlag( type ) )
+				*pdf += m_bxdf[i]->Pdf( wo , wi );
+		*pdf /= com_num;
+	}
+	
+	if( !(bxdf->GetType() & BXDF_SPECULAR ) )
+	{
+		for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
+			if( bxdf != m_bxdf[i] && m_bxdf[i]->MatchFlag(type) )
+				t += m_bxdf[i]->f(wo,wi);
+	}
+	
+	return t;
+}
+
+// get the pdf according to sampled direction
+float Bsdf::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
+{
+	Vector lwo = _worldToLocal( wo );
+	Vector lwi = _worldToLocal( wi );
+
+	float pdf = 0.0f;
+	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
+		if( m_bxdf[i]->MatchFlag( type ) )
+			pdf += m_bxdf[i]->Pdf( wo , wi );
+	return pdf;
 }
