@@ -27,6 +27,8 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 
 	// sample a ray
 	wi = sky->sample_v( ls->u , ls->v , pdf );
+	if( pdf && *pdf == 0.0f )
+		return 0.0f;
 
 	// setup visibility tester
 	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , FLT_MAX );

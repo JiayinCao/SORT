@@ -19,6 +19,7 @@
 #include "skybox.h"
 #include "geometry/vector.h"
 #include <math.h>
+#include "utility/samplemethod.h"
 
 // initialize default value
 void SkyBox::_init()
@@ -113,14 +114,13 @@ Spectrum SkyBox::GetAverage() const
 							m_left.GetAverage() + m_right.GetAverage() );
 }
 
-// generate distribution2d
-void SkyBox::_generateDistribution2D()
-{
-
-}
-
 // sample direction
 Vector SkyBox::sample_v( float u , float v , float* pdf ) const
 {
-	return Vector();
+	// note :	Actually , it's very ugly to sample a ray on the sphere uniformly
+	//			Noises could be reduced by sampling according to the radiance from image.
+	Vector wi = UniformSampleSphere( u , v );
+	if( pdf ) *pdf = UniformSpherePdf( wi );
+
+	return wi;
 }

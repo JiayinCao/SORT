@@ -67,8 +67,6 @@ public:
 	{return m_lights;}
 	// get sampled light
 	const Light* SampleLight( float u ) const;
-	// get sampled light id
-	unsigned SampleLightId( float u ) const;
 	// get the properbility of the sample
 	float LightProperbility( unsigned i ) const;
 	// get the number of lights

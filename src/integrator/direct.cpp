@@ -77,19 +77,14 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 	unsigned total_ls = 0 ;
 	for( unsigned i = 0 ; i < light_num ; ++i )
 		total_ls += ls_num[i];
-	float* ld_1d = SORT_MALLOC_ARRAY( float , total_ls * 3 );
-	float* ld_2d = ld_1d + total_ls;
+	float* ld_2d = SORT_MALLOC_ARRAY( float , total_ls * 2 );
 	unsigned* light_id = SORT_MALLOC_ARRAY( unsigned , total_ls );
-	float* p1d = ld_1d;
 	float* p2d = ld_2d;
 	unsigned offset = 0;
 	for( unsigned i = 0 ; i < light_num ; ++i )
 	{
-		sampler->Generate1D( p1d , ls_num[i] );
 		sampler->Generate2D( p2d , ls_num[i] );
-		p1d += ls_num[i];
 		p2d += ls_num[i] * 2;
-
 		for( unsigned k = 0 ; k < ls_num[i] ; k++ )
 		{
 			light_id[offset] = i;
@@ -110,7 +105,6 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 		{
 			unsigned shuffled = shuffled_id[offset];
 			ls[offset].light_id = light_id[shuffled];
-			ls[offset].t = ld_1d[shuffled];
 			ls[offset].u = ld_2d[2*shuffled];
 			ls[offset].v = ld_2d[2*shuffled+1];
 			samples[i].light_sample.push_back( &ls[offset] );

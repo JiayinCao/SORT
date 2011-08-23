@@ -22,8 +22,10 @@
 #include "sky.h"
 #include "texture/imagetexture.h"
 
-///////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 //	definition of skybox
+//	note :	the sampling method in sky box is very ugly, it's better
+//			switching to skysphere for better quality and high performance
 class	SkyBox : public Sky
 {
 // public method
@@ -62,8 +64,6 @@ private:
 	void _release();
 	// register property
 	void _registerAllProperty();
-	// generate 2d distribution
-	void _generateDistribution2D();
 
 // property handler
 	class UpProperty : public PropertyHandler<Sky>

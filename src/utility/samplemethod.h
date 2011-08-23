@@ -181,7 +181,18 @@ public:
 		Sort_Assert( u <= 1.0f && u >= 0.0f );
 
 		float* target = lower_bound( cdf , cdf + count + 1 , u );
-		int offset = (u<=0.0f)? 0:(int)(target-cdf-1);
+		unsigned offset = (u<=0.0f)? 0:(int)(target-cdf-1);
+		// special care needs to be payed to situation when u == 0.0f
+		if( offset == 0 )
+		{
+			while( offset < count && cdf[offset+1] == 0.0f )
+				offset++;
+		}
+		if( offset == count )
+		{
+			if( pdf ) *pdf = 0.0f;
+			return 0;
+		}
 		if( pdf ) 
 			*pdf = cdf[offset+1] - cdf[offset];
 		return offset;
@@ -196,7 +207,18 @@ public:
 		Sort_Assert( u <= 1.0f && u >= 0.0f );
 
 		float* target = lower_bound( cdf , cdf+count+1 , u );
-		int offset = (u<=0.0f)?0:(int)(target-cdf-1);
+		unsigned offset = (u<=0.0f)?0:(int)(target-cdf-1);
+		// special care needs to be payed to situation when u == 0.0f
+		if( offset == 0 )
+		{
+			while( offset < count && cdf[offset+1] == 0.0f )
+				offset++;
+		}
+		if( offset == count )
+		{
+			if( pdf ) *pdf = 0.0f;
+			return 0.0f;
+		}
 		if( pdf )
 			*pdf = (cdf[offset+1]-cdf[offset])*count;
 		float du = ( u - cdf[offset] ) / ( cdf[offset+1] - cdf[offset] );

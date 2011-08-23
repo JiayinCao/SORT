@@ -569,6 +569,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\camera\ortho.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\camera\ortho.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\camera\perspective.cpp"
 				>
 			</File>

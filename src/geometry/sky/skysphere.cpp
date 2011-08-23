@@ -85,6 +85,8 @@ Vector SkySphere::sample_v( float u , float v , float* pdf ) const
 
 	float uv[2] ;
 	distribution->SampleContinuous( u , v , uv , pdf );
+	if( pdf && *pdf == 0.0f )
+		return Vector();
 
 	float theta = PI * uv[1];
 	float phi = TWO_PI * uv[0];

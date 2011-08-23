@@ -29,8 +29,8 @@ public:
 	// id of the light to sample
 	unsigned	light_id;
 	// the sample parameters
-	float		t;		// a canonical number to select face from light
 	float		u , v;	// 2d sample data
+	float		reserved;	// for memory alignment
 
 	// default constructor
 	LightSample(){}
