@@ -44,7 +44,7 @@ public:
 
 	// get and set eye point
 	const Point& GetEye() const { return m_eye; }
-	void SetEye( const Point& eye ) { m_eye = eye; }
+	virtual void SetEye( const Point& eye ) { m_eye = eye; }
 
 // protected field
 protected:

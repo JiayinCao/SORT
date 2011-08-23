@@ -30,4 +30,12 @@
       <Property name="color" value="0.0 0.1 0.1"/>
     </Texture>
   </Material>
+  <Material name="mirror" type="Mirror">
+    <Texture name="color" type="constant">
+      <Property name="color" value="0.0 0.1 0.1"/>
+    </Texture>
+  </Material>
+  <Material name="merl" type="Merl">
+    <Property name="merl" value="alum-bronze.binary"/>
+  </Material>
 </Root>

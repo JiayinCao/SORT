@@ -332,22 +332,11 @@ const Light* Scene::SampleLight( float u ) const
 	Sort_Assert( u >= 0.0f && u < 1.0f );
 	Sort_Assert( m_pLightsDis != 0 );
 
-	int id = m_pLightsDis->SampleDiscrete( u , 0 );
-	if( id >= 0 && id < (int)m_lights.size() )
+	float pdf;
+	int id = m_pLightsDis->SampleDiscrete( u , &pdf );
+	if( id >= 0 && id < (int)m_lights.size() && pdf != 0.0f )
 		return m_lights[id];
 	return 0;
-}
-
-// get sampled light id
-unsigned Scene::SampleLightId( float u ) const
-{
-	Sort_Assert( u >= 0.0f && u < 1.0f );
-	Sort_Assert( m_pLightsDis != 0 );
-
-	int id = m_pLightsDis->SampleDiscrete( u , 0 );
-	if( id >= 0 && id < (int)m_lights.size() )
-		return id;
-	return 0xffffffff;
 }
 
 // get light sample property

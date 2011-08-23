@@ -32,6 +32,7 @@
 
 #include "camera/camera.h"
 #include "camera/environment.h"
+#include "camera/ortho.h"
 
 #include "integrator/whittedrt.h"
 #include "integrator/direct.h"
@@ -75,19 +76,22 @@ void System::_preInit()
 	// there is default value for camera
 	float distance = 1500.0f;
 //	DofPerspective* camera = new DofPerspective();
-	PerspectiveCamera* camera = new PerspectiveCamera();
+//	OrthoCamera* camera = new OrthoCamera();
 //	EnvironmentCamera* camera = new EnvironmentCamera();
+	PerspectiveCamera* camera = new PerspectiveCamera();
 	camera->SetEye( Point( distance , distance * 0.5f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , distance * 0.05f , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
 	camera->SetRenderTarget( m_rt );
+//	camera->SetCameraWidth( 1000.0f );
+//	camera->SetCameraHeight( 1000.0f );
 //	Vector vec( distance , distance * 0.25f , distance );
 //	camera->SetFocalDistance( vec.Length() );
 //	camera->SetLen( 40.0f );
 	m_camera = camera;
 	// the integrator
-	m_pIntegrator = new DirectLight(9);
+	m_pIntegrator = new DirectLight(16);
 	// the sampler
 	m_pSampler = new StratifiedSampler();
 	m_iSamplePerPixel = m_pSampler->RoundSize(1);
