@@ -31,7 +31,7 @@ public:
 	// default constructor
 	Refraction( float ei , float et , const Fresnel* fre ):
 	eta_t(et),eta_i(ei),m_fresnel(fre)
-	{m_type=BXDF_TRANSMISSION;}
+	{m_type=(BXDF_TYPE)(BXDF_TRANSMISSION|BXDF_SPECULAR);}
 	// destructor
 	~Refraction(){}
 
@@ -39,14 +39,24 @@ public:
 	// para 'wo' : out going direction
 	// para 'wi' : in direction
 	// result    : the portion that comes along 'wo' from 'wi'
-	virtual Spectrum f( const Vector& wo , const Vector& wi ) const;
+	virtual Spectrum f( const Vector& wo , const Vector& wi ) const
+	{return 0.0f;}
 
 	// sample a direction randomly
 	// para 'wo'  : out going direction
 	// para 'wi'  : in direction generated randomly
+	// para 'bs'  : bsdf sample variable
 	// para 'pdf' : property density function value of the specific 'wi'
 	// result     : brdf value for the 'wo' and 'wi'
-	virtual Spectrum sample_f( const Vector& wo , Vector& wi , float* pdf ) const;
+	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+
+
+	// get the pdf of the sampled direction
+	// para 'wo' : out going direction
+	// para 'wi' : coming in direction from light
+	// result    : the pdf for the sample
+	virtual float Pdf( const Vector& wi , const Vector& wo ) const
+	{return 0.0f;}
 
 // private field
 private:

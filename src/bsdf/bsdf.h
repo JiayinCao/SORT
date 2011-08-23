@@ -28,6 +28,7 @@
 // pre-declera class
 class Bxdf;
 class Intersection;
+class BsdfSample;
 
 #define	MAX_BXDF_COUNT 8
 
@@ -57,7 +58,12 @@ public:
 	// sample ray from bsdf
 	// para 'wi' : input vector
 	// para 'wo' : output vector
-	Spectrum sample_f( const Vector& wo , Vector& wi , float* pdf , BXDF_TYPE type = BXDF_ALL ) const;
+	Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL ) const;
+
+	// get pdf according to the sampled method
+	// para 'wo' : out going direction
+	// para 'wi' : incoming direction
+	float Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
 // private field
 private:

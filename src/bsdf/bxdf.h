@@ -24,6 +24,7 @@
 
 // pre-declera class
 class Vector;
+class BsdfSample;
 
 /////////////////////////////////////////////////////////////////////////
 // definition of bxdf
@@ -45,13 +46,23 @@ public:
 	// sample a direction randomly
 	// para 'wo'  : out going direction
 	// para 'wi'  : in direction generated randomly
+	// para 'bs'  : bsdf sample variable
 	// para 'pdf' : property density function value of the specific 'wi'
 	// result     : brdf value for the 'wo' and 'wi'
-	virtual Spectrum sample_f( const Vector& wo , Vector& wi , float* pdf ) const;
+	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+
+	// get the pdf of the sampled direction
+	// para 'wo' : out going direction
+	// para 'wi' : coming in direction from light
+	// result    : the pdf for the sample
+	virtual float Pdf( const Vector& wi , const Vector& wo ) const;
 
 	// whether the flag is matched
 	bool	MatchFlag( BXDF_TYPE type ) const
 	{return (type & m_type)!=BXDF_NONE;}
+
+	// get bxdf type
+	BXDF_TYPE GetType() const { return m_type; }
 
 // protected field
 protected:
