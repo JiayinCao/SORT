@@ -9,7 +9,7 @@
       <Matrix value="t 0 0 200"/>
     </Transform>
     <Material>
-      <MatSet name="" mat="mirror"/>
+      <MatSet name="" mat="merl"/>
     </Material>
   </Model>
   <Model filename="killeroo.obj" name="object1">

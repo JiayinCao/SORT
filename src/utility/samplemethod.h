@@ -73,9 +73,9 @@ inline void UniformSampleDisk( float u , float v , float& x , float& y )
 // para 'v' : a canonical random variable
 inline Vector CosSampleHemisphere( float u , float v )
 {
-	float x , y ;
-	UniformSampleDisk( u , v , x , y );
-	float z = sqrt( 1.0f - x * x - y * y );
+	float x , z ;
+	UniformSampleDisk( u , v , x , z );
+	float y = sqrt( 1.0f - x * x - z * z );
 	return Vector( x , y , z );
 }
 

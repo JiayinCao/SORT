@@ -40,13 +40,13 @@ Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample&
 		return t;
 
 	// eavluate direct light
-	t = EvaluateDirect( r , scene , ip , ps );
+	t = EvaluateDirect( r , scene , ip , ps , BXDF_TYPE( BXDF_ALL & ~BXDF_SPECULAR ) );
 
 	// evaluate specular reflection or refraction
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
-	if( bsdf->NumComponents( BXDF_REFLECTION ) > 0 )
+	if( bsdf->NumComponents( BXDF_SPECULAR_REFLECTION ) > 0 )
 		t += SpecularReflection( scene , r , &ip , bsdf , this , ps );
-	if( bsdf->NumComponents( BXDF_TRANSMISSION ) > 0 )
+	if( bsdf->NumComponents( BXDF_SPECULAR_TRANSMISSION ) > 0 )
 		t += SpecularRefraction( scene , r , &ip , bsdf , this , ps );
 
 	return t;

@@ -64,7 +64,7 @@ bool SkyLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& ra
 	if( intersect->t != FLT_MAX )
 		return false;
 
-	radiance = sky->Evaluate( ray.m_Dir );
+	radiance = 10.0f * sky->Evaluate( ray.m_Dir );
 	return true;
 }
 
