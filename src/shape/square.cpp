@@ -41,6 +41,19 @@ Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , fl
 	return lp;
 }
 
+// get pdf of specific direction
+float Square::Pdf( const Point& p , const Point& lp ,  const Vector& wi ) const
+{
+	Vector normal = transform( Vector( 0.0f , 1.0f , 0.0f ) );
+	float dot = Dot( normal , wi );
+	if( dot <= 0.0f )
+		return 0.0f;
+
+	Vector delta = ( p - lp );
+
+	return delta.SquaredLength() / ( PI * radius * radius * dot );
+}
+
 // the surface area of the shape
 float Square::SurfaceArea() const
 {

@@ -62,6 +62,12 @@ public:
 	// preprocess
 	void	PreProcess();
 
+	// get light
+	const Light* GetLight( unsigned i ) const
+	{
+		Sort_Assert( i < m_lights.size() );
+		return m_lights[i];
+	}
 	// get lights
 	const vector<Light*>& GetLights() const
 	{return m_lights;}

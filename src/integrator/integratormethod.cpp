@@ -71,56 +71,74 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 
 	// evaluate light
 	Visibility visibility(scene);
-/*	vector<LightSample*>::const_iterator it = ps.light_sample.begin();
-	while( it != ps.light_sample.end() )
+	vector<LightSample*>::const_iterator lit = ps.light_sample.begin();
+	while( lit != ps.light_sample.end() )
 	{
-		const Light* light = lights[(*it)->light_id];
-/*		if( light->IsDelta() )
+		const Light* light = lights[(*lit)->light_id];
+		if( light->IsDelta() )
 		{
 			Vector lightDir;
-			Spectrum c = light->sample_l( ip , *it , lightDir , 0.1f , 0 , visibility );
-			if( visibility.IsVisible() )
-				t += c * bsdf->f( -r.m_Dir , lightDir ) * SatDot( lightDir , ip.normal );
+			float light_pdf;
+			Spectrum c = light->sample_l( ip , *lit , lightDir , 0.1f , &light_pdf , visibility );
+			light_pdf *= scene.LightProperbility((*lit)->light_id);
+			if( light_pdf != 0.0f && !c.IsBlack() && visibility.IsVisible() )
+				t += c * bsdf->f( -r.m_Dir , lightDir ) * AbsDot( lightDir , ip.normal ) / light_pdf;
 		}else
 		{
-			// to be added in the next couple of days
-		}
-
-		Vector lightDir;
-		float pdf;
-		Spectrum c = light->sample_l( ip , *it , lightDir , 0.1f , &pdf , visibility );
-		pdf *= scene.LightProperbility( (*it)->light_id );
-		if( pdf != 0.0f && visibility.IsVisible() )
-			t += c * bsdf->f( -r.m_Dir , lightDir ) * SatDot( lightDir , ip.normal ) / pdf;
-		it++;
-	}
-	t /= (float)ps.light_sample.size();
-*/
-	vector<BsdfSample*>::const_iterator it = ps.bsdf_sample.begin();
-	while( it != ps.bsdf_sample.end() )
-	{
-		Vector wi;
-		float pdf;
-		Spectrum c = bsdf->sample_f( -r.m_Dir , wi , *(*it) , &pdf , type );
-		Intersection _ip;
-		if( pdf != 0.0f )
-		{
-			Spectrum s = scene.EvaluateLight( Ray( ip.intersect , wi , 0 , 1.0f ) , &_ip );
-			if( s.IsBlack() == false )
+			Vector lightDir;
+			float light_pdf;
+			Spectrum lr = light->sample_l( ip , *lit , lightDir , 0.1f , &light_pdf , visibility );
+			if( light_pdf != 0.0f && !lr.IsBlack() && visibility.IsVisible() )
 			{
-				visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
-				if( visibility.IsVisible() )
-					t += c * s * SatDot( wi , ip.normal ) / pdf;
+				light_pdf *= scene.LightProperbility((*lit)->light_id);
+				Spectrum br = bsdf->f( -r.m_Dir , lightDir );
+				float bsdf_pdf = bsdf->Pdf( -r.m_Dir , lightDir );
+				float mis = MisFactor( 1 , light_pdf , 1 , bsdf_pdf );
+				t += lr * br * AbsDot( lightDir , ip.normal ) * mis / light_pdf;
 			}
 		}
-		it++;
+		lit++;
 	}
-	t /= (float)ps.bsdf_sample.size();
+	unsigned total_samples = ps.light_sample.size();
 
+	vector<BsdfSample*>::const_iterator bit = ps.bsdf_sample.begin();
+	while( bit != ps.bsdf_sample.end() )
+	{
+		Vector wi;
+		float bsdf_pdf;
+		BXDF_TYPE bxdf_type;
+		Spectrum br = bsdf->sample_f( -r.m_Dir , wi , *(*bit) , &bsdf_pdf , type , &bxdf_type );
+		Intersection _ip;
+		if( bsdf_pdf != 0.0f )
+		{
+			if( ~( bxdf_type & BXDF_SPECULAR ) )
+			{
+				Spectrum lr = scene.EvaluateLight( Ray( ip.intersect , wi , 0 , 0.1f ) , &_ip );
+				visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
+				if( !lr.IsBlack() && visibility.IsVisible() )
+					t += lr * br * AbsDot( wi , ip.normal ) / bsdf_pdf;
+			}else
+			{
+				Spectrum lr = scene.EvaluateLight( Ray( ip.intersect , wi , 0 , 1.0f ) , &_ip );
+				if( !lr.IsBlack() && _ip.light_id > 0 )
+				{
+					const Light* light = scene.GetLight(_ip.light_id);
+					float light_pdf = light->Pdf( ip.intersect , _ip.intersect , wi ) * scene.LightProperbility(_ip.light_id);
+					float mis = MisFactor( 1 , bsdf_pdf , 1 , light_pdf );
+					visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
+					if( visibility.IsVisible() )
+						t += br * lr * AbsDot( wi , ip.normal ) * mis / bsdf_pdf;
+				}
+			}
+		}
+		bit++;
+	}
+	total_samples += ps.bsdf_sample.size();
+	t /= (float) total_samples;
 	return t;
 }
 
-// mutilpe importance sampling factors
+// mutilpe importance sampling factors , power heuristic is adapted
 float	MisFactor( int nf, float fPdf, int ng, float gPdf )
 {
 	float f = nf * fPdf, g = ng * gPdf;
