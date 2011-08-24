@@ -23,6 +23,7 @@
 
 // pre-decleration class
 class Primitive;
+class Light;
 
 ///////////////////////////////////////////////////////////////////////
 //	definition of intersection
@@ -48,7 +49,9 @@ public:
 	// the delta distance from the orginal point
 	float	t;
 	// the intersected primitive
-	Primitive* primitive;
+	Primitive* 	primitive;
+	// the crossed light
+	int 	light_id;
 };
 
 #endif

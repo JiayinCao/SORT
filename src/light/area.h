@@ -52,6 +52,10 @@ public:
 	// sample light density
 	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const;
 
+	// the pdf for specific sampled directioin
+	// note : none-delta light must overwrite this method
+	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const;
+
 	// get intersection between the light and the ray
 	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const;
 

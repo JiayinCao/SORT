@@ -65,6 +65,9 @@ public:
 	// set the radius of the shape
 	virtual void SetRadius( float r ) { radius = r; }
 
+	// get the pdf of specific direction
+	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const = 0;
+
 // protected field
 protected:
 	// the transformation for the shape

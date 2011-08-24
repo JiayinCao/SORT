@@ -91,7 +91,7 @@ Vector Bsdf::_localToWorld( const Vector& v ) const
 }
 
 // sample a ray from bsdf
-Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type ) const
+Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type , BXDF_TYPE* bxdf_type ) const
 {
 	unsigned com_num = NumComponents(type);
 	if( com_num == 0 )
@@ -122,6 +122,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 
 	// if there is no properbility of sampling that direction , just return 0.0f
 	if( pdf && *pdf == 0.0f ) return 0.0f;
+	if( bxdf_type ) *bxdf_type = bxdf->GetType();
 
 	// transform the direction back
 	wi = _localToWorld( wi );

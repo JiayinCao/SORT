@@ -61,8 +61,11 @@ bool SkyLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& ra
 	Sort_Assert( sky != 0 );
 	Sort_Assert( intersect != 0 );
 
-	if( intersect->t != FLT_MAX )
+	if( intersect && intersect->t != FLT_MAX )
 		return false;
+
+	if( intersect )
+		intersect->light_id = (int)GetID();
 
 	radiance = 10.0f * sky->Evaluate( ray.m_Dir );
 	return true;

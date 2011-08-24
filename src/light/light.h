@@ -79,6 +79,10 @@ public:
 	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const
 	{ return 0.0f; }
 
+	// the pdf for specific sampled directioin
+	// note : none-delta light must overwrite this method
+	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const { return 1.0f; }
+
 	// set transformation
 	virtual void	SetTransform( const Transform& transform )
 	{light2world = transform;}
@@ -92,6 +96,11 @@ public:
 	// get intersection between the light and the ray
 	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }
 
+	// set light id
+	void SetID( unsigned i ) { id = i; }
+	// get light id
+	unsigned GetID() const { return id; }
+
 // protected field
 protected:
 	// scene containing the light
@@ -100,6 +109,8 @@ protected:
 	Spectrum	intensity;
 	// transformation of the light
 	Transform	light2world;
+	// set the id for the light
+	unsigned id;
 
 	// register property
 	void _registerAllProperty()

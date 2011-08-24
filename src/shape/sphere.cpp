@@ -53,6 +53,15 @@ Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , fl
 	return transform(_p);
 }
 
+// get pdf of specific direction
+float Sphere::Pdf( const Point& p , const Point& lp ,  const Vector& wi ) const
+{
+	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
+	float sin_theta_sq = radius * radius / ( p - center ).SquaredLength();
+	float cos_theta = sqrt( max( 0.0f , 1.0f - sin_theta_sq ) );
+	return UniformConePdf( cos_theta );
+}
+
 // the surface area of the shape
 float Sphere::SurfaceArea() const
 {

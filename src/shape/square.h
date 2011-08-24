@@ -48,6 +48,8 @@ public:
 	// get intersection between the light surface and the ray
 	virtual bool GetIntersect( const Ray& ray , Intersection* intersect ) const;
 
+	// get the pdf of specific direction
+	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const ;
 };
 
 #endif

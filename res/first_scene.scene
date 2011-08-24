@@ -8,9 +8,6 @@
       <Matrix value="r 1 4.6"/>
       <Matrix value="t 0 0 200"/>
     </Transform>
-    <Material>
-      <MatSet name="" mat="merl"/>
-    </Material>
   </Model>
   <Model filename="killeroo.obj" name="object1">
     <Transform>
@@ -34,22 +31,21 @@
 	<Property name="dir" value="-1 -1 1"/>
   </Light>
   <Light type="are1a">
-    <Property name="shape" value="square" />
+    <Property name="shape" value="disk" />
     <Property name="radius" value="100" />
     <Property name="intensity" value="0 500 500"/>
 	  <Property name="dir" value="0 -1 0"/>
-	  <Property name="pos" value="0 1000 0"/>
+	  <Property name="pos" value="1000 1000 0"/>
     <Property name="dir" value="0 -1 0"/>
   </Light>
-  <Light type="ar1ea">
-    <Property name="shape" value="square" />
+  <Light type="area">
+    <Property name="shape" value="disk" />
     <Property name="radius" value="100" />
     <Property name="intensity" value="500 1000 0"/>
+    <Property name="pos" value="0 1000 0"/>
     <Property name="dir" value="0 -1 0"/>
-    <Property name="pos" value="1000 1000 1000"/>
-    <Property name="dir" value="-1 -1 0"/>
   </Light>
-  <Light type="skylight">
+  <Light type="skylig1ht">
     <Property name="type" value="sky_sphere"/>
     <Property name="image" value="sky/lobby_sphere.bmp"/>
     <Property name="up" value="sky/lobbyypos.bmp"/>

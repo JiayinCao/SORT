@@ -52,6 +52,12 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 	return intensity;
 }
 
+// the pdf of the direction
+float AreaLight::Pdf( const Point& p , const Point& lp , const Vector& wi ) const
+{
+	Sort_Assert(shape!=0);
+	return shape->Pdf( p , lp , wi );
+}
 // total power of the light
 Spectrum AreaLight::Power() const
 {
@@ -92,6 +98,7 @@ bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& r
 	// transform the intersection result back to world coordinate
 	if( result )
 	{
+		intersect->light_id = (int)GetID();
 		intersect->intersect = light2world(intersect->intersect);
 		intersect->normal = light2world(intersect->normal);
 		radiance = sample_l( *intersect , -ray.m_Dir );

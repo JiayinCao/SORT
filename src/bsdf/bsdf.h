@@ -58,7 +58,7 @@ public:
 	// sample ray from bsdf
 	// para 'wi' : input vector
 	// para 'wo' : output vector
-	Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL ) const;
+	Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL , BXDF_TYPE* bxdf_type = 0 ) const;
 
 	// get pdf according to the sampled method
 	// para 'wo' : out going direction
