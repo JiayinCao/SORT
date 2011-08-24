@@ -29,7 +29,7 @@ Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Interse
 {
 	Ray r;
 	float pdf;
-	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , BsdfSample(true) , &pdf , BXDF_REFLECTION );
+	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , BsdfSample(true) , &pdf , BXDF_SPECULAR_REFLECTION );
 	if( f.IsBlack() || r.m_Dir.IsZero() )
 		return 0.0f;
 
@@ -46,7 +46,7 @@ Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Interse
 {
 	Ray r;
 	float pdf;
-	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , BsdfSample(true) , &pdf , BXDF_TRANSMISSION );
+	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , BsdfSample(true) , &pdf , BXDF_SPECULAR_TRANSMISSION );
 	if( f.IsBlack() || r.m_Dir.IsZero() )
 		return 0.0f;
 
@@ -59,7 +59,7 @@ Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Interse
 }
 
 // evaluate direct lighting
-Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection& ip , const PixelSample& ps )
+Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection& ip , const PixelSample& ps , BXDF_TYPE type )
 {
 	Spectrum t;
 
@@ -71,7 +71,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 
 	// evaluate light
 	Visibility visibility(scene);
-	vector<LightSample*>::const_iterator it = ps.light_sample.begin();
+/*	vector<LightSample*>::const_iterator it = ps.light_sample.begin();
 	while( it != ps.light_sample.end() )
 	{
 		const Light* light = lights[(*it)->light_id];
@@ -85,7 +85,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 		{
 			// to be added in the next couple of days
 		}
-*/
+
 		Vector lightDir;
 		float pdf;
 		Spectrum c = light->sample_l( ip , *it , lightDir , 0.1f , &pdf , visibility );
@@ -95,6 +95,34 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 		it++;
 	}
 	t /= (float)ps.light_sample.size();
+*/
+	vector<BsdfSample*>::const_iterator it = ps.bsdf_sample.begin();
+	while( it != ps.bsdf_sample.end() )
+	{
+		Vector wi;
+		float pdf;
+		Spectrum c = bsdf->sample_f( -r.m_Dir , wi , *(*it) , &pdf , type );
+		Intersection _ip;
+		if( pdf != 0.0f )
+		{
+			Spectrum s = scene.EvaluateLight( Ray( ip.intersect , wi , 0 , 1.0f ) , &_ip );
+			if( s.IsBlack() == false )
+			{
+				visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
+				if( visibility.IsVisible() )
+					t += c * s * SatDot( wi , ip.normal ) / pdf;
+			}
+		}
+		it++;
+	}
+	t /= (float)ps.bsdf_sample.size();
 
 	return t;
+}
+
+// mutilpe importance sampling factors
+float	MisFactor( int nf, float fPdf, int ng, float gPdf )
+{
+	float f = nf * fPdf, g = ng * gPdf;
+    return (f*f) / (f*f + g*g);
 }

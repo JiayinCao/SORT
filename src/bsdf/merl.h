@@ -26,6 +26,10 @@
 //	desc :	Merl is short for Mitsubishi Electric Research Laboratories. They provide
 //			some measured brdf on the websize http://www.merl.com/brdf/. Merl class is
 //			responsible for loading the brdf file they provided.
+//	note :	It's very difficult to sample merl brdf according to the distribution. So
+//			default method is adapted for sampling directions , which is very bad for
+//			large area light such as sky light, it'll produce a lot of noise with 
+//			a certain number of samples.
 class Merl : public Bxdf
 {
 // public method
