@@ -106,6 +106,13 @@ Vector SkySphere::sample_v( float u , float v , float* pdf ) const
 // get the pdf
 float SkySphere::Pdf( const Point& p , const Point& lp , const Vector& wi ) const
 {
-	// to be modified
-	return 0.0f;
+	float sin_theta = SinTheta(wi);
+	if( sin_theta == 0.0f ) return 0.0f;
+	float u , v;
+	float theta = SphericalTheta( wi );
+	float phi = SphericalPhi( wi );
+	u = theta * INV_PI;
+	v = phi * INV_TWOPI;
+	
+	return distribution->Pdf( u , v ) / ( TWO_PI * PI * sin_theta );
 }

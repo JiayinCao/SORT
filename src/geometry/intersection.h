@@ -50,8 +50,6 @@ public:
 	float	t;
 	// the intersected primitive
 	Primitive* 	primitive;
-	// the crossed light
-	int 	light_id;
 };
 
 #endif

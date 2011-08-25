@@ -49,8 +49,11 @@ float Square::Pdf( const Point& p , const Point& lp ,  const Vector& wi ) const
 	if( dot <= 0.0f )
 		return 0.0f;
 
+	Point local = transform.invMatrix( lp );
+	if( fabs( local.x ) > radius || fabs( local.z ) > radius )
+		return 0.0f;
+	
 	Vector delta = ( p - lp );
-
 	return delta.SquaredLength() / ( PI * radius * radius * dot );
 }
 

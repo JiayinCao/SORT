@@ -26,7 +26,6 @@ Intersection::Intersection()
 	v = 0.0f;
 	t = FLT_MAX;
 	primitive = 0;
-	light_id = -1;
 }
 
 // destructor
