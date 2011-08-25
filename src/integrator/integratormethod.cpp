@@ -111,7 +111,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 		Intersection _ip;
 		if( bsdf_pdf != 0.0f )
 		{
-			if( ~( bxdf_type & BXDF_SPECULAR ) )
+			if( bxdf_type & BXDF_SPECULAR )
 			{
 				Spectrum lr = scene.EvaluateLight( Ray( ip.intersect , wi , 0 , 0.1f ) , &_ip );
 				visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
@@ -123,7 +123,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 				if( !lr.IsBlack() && _ip.light_id > 0 )
 				{
 					const Light* light = scene.GetLight(_ip.light_id);
-					float light_pdf = light->Pdf( ip.intersect , _ip.intersect , wi ) * scene.LightProperbility(_ip.light_id);
+					float light_pdf = light->Pdf( ip.intersect , _ip.intersect , -wi ) * scene.LightProperbility(_ip.light_id);
 					float mis = MisFactor( 1 , bsdf_pdf , 1 , light_pdf );
 					visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
 					if( visibility.IsVisible() )

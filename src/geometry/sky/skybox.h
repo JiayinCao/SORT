@@ -48,6 +48,9 @@ public:
 	// sample direction
 	virtual Vector sample_v( float u , float v , float* pdf ) const;
 
+	// get the pdf
+	float Pdf( const Point& p , const Point& lp , const Vector& wi ) const;
+
 // private field
 private:
 	// the image textures

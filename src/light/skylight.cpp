@@ -96,3 +96,10 @@ void SkyLight::_registerAllProperty()
 	_registerProperty( "back" , new PropertyPasser( this ) );
 	_registerProperty( "image" , new PropertyPasser( this ) );
 }
+
+// the pdf for specific sampled directioin
+float SkyLight::Pdf( const Point& p , const Point& lp , const Vector& wi ) const
+{
+	Sort_Assert( sky );
+	return sky->Pdf( p , lp , wi );
+}
