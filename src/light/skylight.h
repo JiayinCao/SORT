@@ -55,6 +55,10 @@ public:
 	// get intersection between the light and the ray
 	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const;
 
+	// the pdf for specific sampled directioin
+	// note : none-delta light must overwrite this method
+	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const;
+
 // private field
 private:
 	// the sky
