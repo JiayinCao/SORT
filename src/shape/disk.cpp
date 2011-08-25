@@ -53,8 +53,11 @@ float Disk::Pdf( const Point& p , const Point& lp ,  const Vector& wi ) const
 	if( dot <= 0.0f )
 		return 0.0f;
 
-	Vector delta = ( p - lp );
+	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
+	if( ( lp - center ).SquaredLength() > radius * radius )
+		return 0.0f;
 
+	Vector delta = ( p - lp );
 	return delta.SquaredLength() / ( PI * radius * radius * dot );
 }
 

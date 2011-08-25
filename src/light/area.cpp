@@ -98,7 +98,6 @@ bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& r
 	// transform the intersection result back to world coordinate
 	if( result )
 	{
-		intersect->light_id = (int)GetID();
 		intersect->intersect = light2world(intersect->intersect);
 		intersect->normal = light2world(intersect->normal);
 		radiance = sample_l( *intersect , -ray.m_Dir );

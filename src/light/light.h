@@ -75,14 +75,6 @@ public:
 	// para 'visibility': visibility tester
 	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const = 0;
 
-	// sample light density
-	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const
-	{ return 0.0f; }
-
-	// the pdf for specific sampled directioin
-	// note : none-delta light must overwrite this method
-	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const { return 1.0f; }
-
 	// set transformation
 	virtual void	SetTransform( const Transform& transform )
 	{light2world = transform;}
@@ -90,16 +82,19 @@ public:
 	// total power of the light
 	virtual Spectrum Power() const = 0;
 
+	// note : the following methods must be overwritten in non-delta light
 	// whether the light is a delta light
 	virtual bool IsDelta() const { return true; }
 
+	// sample light density
+	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const
+	{ return 0.0f; }
+
+	// the pdf for specific sampled directioin
+	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const { return 1.0f; }
+
 	// get intersection between the light and the ray
 	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }
-
-	// set light id
-	void SetID( unsigned i ) { id = i; }
-	// get light id
-	unsigned GetID() const { return id; }
 
 // protected field
 protected:
@@ -109,8 +104,6 @@ protected:
 	Spectrum	intensity;
 	// transformation of the light
 	Transform	light2world;
-	// set the id for the light
-	unsigned id;
 
 	// register property
 	void _registerAllProperty()

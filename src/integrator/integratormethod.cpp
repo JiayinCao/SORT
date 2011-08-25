@@ -61,6 +61,9 @@ Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Interse
 // evaluate direct lighting
 Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection& ip , const PixelSample& ps , BXDF_TYPE type )
 {
+//NOTE:
+//	This evaluation of direct lighting is wrong.....
+//	I'll fix it in the next couple of days.
 	Spectrum t;
 
 	// get the lights
@@ -101,7 +104,8 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 	}
 	unsigned total_samples = ps.light_sample.size();
 
-	vector<BsdfSample*>::const_iterator bit = ps.bsdf_sample.begin();
+	return t / total_samples;
+/*	vector<BsdfSample*>::const_iterator bit = ps.bsdf_sample.begin();
 	while( bit != ps.bsdf_sample.end() )
 	{
 		Vector wi;
@@ -135,7 +139,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 	}
 	total_samples += ps.bsdf_sample.size();
 	t /= (float) total_samples;
-	return t;
+	return t;*/
 }
 
 // mutilpe importance sampling factors , power heuristic is adapted

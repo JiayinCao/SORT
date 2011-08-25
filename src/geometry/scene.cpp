@@ -156,7 +156,6 @@ bool Scene::LoadScene( const string& str )
 					prop = prop->NextSiblingElement( "Property" );
 				}
 
-				light->SetID( m_lights.size() );
 				m_lights.push_back( light );
 			}
 		}else

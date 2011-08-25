@@ -292,6 +292,17 @@ public:
 		if( pdf )
 			*pdf = pdf0 * pdf1;
 	}
+	// get pdf
+	float Pdf( float u , float v ) const
+	{
+		float pdf0 , pdf1 , uv[2];
+		uv[1] = marginal->SampleContinuous( v , &pdf1 );
+		int vi = (int)(uv[1] * m_nv);
+		if( vi > (int)(m_nv - 1) )
+			vi = (int)(m_nv - 1);
+		uv[0] = pConditions[vi]->SampleContinuous( u , &pdf0 );
+		return pdf0 * pdf1;
+	}
 
 // private field
 private:

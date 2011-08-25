@@ -41,7 +41,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 Spectrum SkyLight::sample_l( const Intersection& intersect , const Vector& wo ) const
 { 
 	Sort_Assert( sky != 0 );
-	return sky->Evaluate( -wo ); 
+	return 10.0f * sky->Evaluate( -wo ); 
 }
 
 // total power of the light
@@ -63,9 +63,6 @@ bool SkyLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& ra
 
 	if( intersect && intersect->t != FLT_MAX )
 		return false;
-
-	if( intersect )
-		intersect->light_id = (int)GetID();
 
 	radiance = 10.0f * sky->Evaluate( ray.m_Dir );
 	return true;

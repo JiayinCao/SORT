@@ -124,9 +124,6 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	if( pdf && *pdf == 0.0f ) return 0.0f;
 	if( bxdf_type ) *bxdf_type = bxdf->GetType();
 
-	// transform the direction back
-	wi = _localToWorld( wi );
-
 	// setup pdf
 	if( pdf && !( bxdf->GetType() & BXDF_SPECULAR ) && ( com_num > 1 ) )
 	{
@@ -143,6 +140,9 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 				t += m_bxdf[i]->f(wo,wi);
 	}
 	
+	// transform the direction back
+	wi = _localToWorld( wi );
+
 	return t;
 }
 
