@@ -71,7 +71,7 @@ private:
 	// sample number per pixel
 	unsigned		m_iSamplePerPixel;
 	// the samples
-	PixelSample*			m_pSamples;
+	PixelSample*	m_pSamples;
 
 	// rendering time
 	unsigned		m_uRenderingTime;

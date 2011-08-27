@@ -29,15 +29,18 @@ class	DirectLight : public Integrator
 // public method
 public:
 	// default constructor
-	DirectLight( unsigned lp ):ls_per_ps(lp){}
+	DirectLight( const Scene& s , unsigned lp ):ls_per_light(lp),Integrator(s){_init();}
 	// destructor
-	~DirectLight(){}
+	~DirectLight(){_release();}
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
 	virtual Spectrum	Li( const Scene& scene , const Ray& ray , const PixelSample& ps ) const;
+
+	// request samples
+	virtual void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num );
 
 	// generate samples
 	// para 'sampler' : the sampling method
@@ -51,7 +54,17 @@ public:
 
 // private field
 private:
-	unsigned ls_per_ps; // light sample per pixel sample
+	unsigned ls_per_light; // light sample per pixel sample per light
+
+	SampleOffset*	light_sample_offsets;	// light sample offset
+	SampleOffset*	bsdf_sample_offsets;	// bsdf sample offset
+	
+	unsigned total_samples;	// total sample number
+
+	// initialize default value
+	void _init();
+	// release data
+	void _release();
 };
 
 #endif
