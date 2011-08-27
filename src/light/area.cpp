@@ -53,11 +53,16 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 }
 
 // the pdf of the direction
-float AreaLight::Pdf( const Point& p , const Point& lp , const Vector& wi ) const
+float AreaLight::Pdf( const Point& p , const Vector& wi ) const
 {
 	Sort_Assert(shape!=0);
-	return shape->Pdf( p , lp , wi );
+
+	Point	local_p = light2world.invMatrix( p );
+	Vector	local_v = light2world.invMatrix( wi );
+
+	return shape->Pdf( local_p , local_v );
 }
+
 // total power of the light
 Spectrum AreaLight::Power() const
 {

@@ -893,6 +893,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shape\shape.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shape\shape.h"
 				>
 			</File>

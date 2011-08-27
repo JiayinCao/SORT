@@ -57,7 +57,7 @@ public:
 
 	// the pdf for specific sampled directioin
 	// note : none-delta light must overwrite this method
-	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const;
+	virtual float Pdf( const Point& p , const Vector& wi ) const;
 
 // private field
 private:

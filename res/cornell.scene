@@ -27,14 +27,14 @@
 	<Property name="dir" value="-1 -0 -5"/>
   </Light>
   <Light type="area">
-    <Property name="shape" value="square" />
+    <Property name="shape" value="sphere" />
     <Property name="radius" value="100" />
     <Property name="intensity" value="1000 1000 1000"/>
 	  <Property name="dir" value="0 -1 0"/>
 	  <Property name="pos" value="0 1000 0"/>
     <Property name="dir" value="0 -1 0"/>
   </Light>
-  <Light type="skylight">
+  <Light type="skyl12ight">
     <Property name="type" value="sky_box"/>
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />

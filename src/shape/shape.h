@@ -60,13 +60,13 @@ public:
 	virtual void SetTransform( const Transform& s ) { transform = s; }
 
 	// get intersection between the light surface and the ray
-	virtual bool GetIntersect( const Ray& ray , Intersection* intersect ) const = 0;
+	virtual bool GetIntersect( const Ray& ray , Intersection* intersect ) const;
 
 	// set the radius of the shape
 	virtual void SetRadius( float r ) { radius = r; }
 
 	// get the pdf of specific direction
-	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const = 0;
+	virtual float Pdf( const Point& p , const Vector& wi ) const;
 
 // protected field
 protected:
@@ -74,6 +74,9 @@ protected:
 	Transform	transform;
 	// the radius of the shape
 	float		radius;
+
+	// get intersected point between the ray and the shape
+	virtual float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX ) const = 0;
 };
 
 #endif

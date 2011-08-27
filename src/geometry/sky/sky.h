@@ -52,7 +52,7 @@ public:
 	virtual Vector sample_v( float u , float v , float* pdf ) const = 0;
 
 	// get the pdf
-	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const = 0;
+	virtual float Pdf( const Point& p , const Vector& wi ) const = 0;
 };
 
 #endif

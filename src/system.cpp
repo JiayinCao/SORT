@@ -74,12 +74,12 @@ void System::_preInit()
 	m_rt = new RenderTarget();
 	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
-	float distance = 1500.0f;
+	float distance = 5000.0f;
 //	DofPerspective* camera = new DofPerspective();
 //	OrthoCamera* camera = new OrthoCamera();
 //	EnvironmentCamera* camera = new EnvironmentCamera();
 	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( distance , distance * 0.5f , distance ) );
+	camera->SetEye( Point( 0 , distance * 0.1f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , distance * 0.05f , 0 ) );
 	camera->SetFov( 3.1415f / 4 );

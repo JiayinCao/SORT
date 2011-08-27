@@ -126,7 +126,7 @@ Vector SkyBox::sample_v( float u , float v , float* pdf ) const
 }
 
 // get the pdf
-float SkyBox::Pdf( const Point& p , const Point& lp , const Vector& wi ) const
+float SkyBox::Pdf( const Point& p , const Vector& wi ) const
 {
 	return UniformSpherePdf( wi );
 }
