@@ -34,7 +34,7 @@ class	Integrator
 // public method
 public:
 	// default constructor
-	Integrator(){max_recursive_depth=6;}
+	Integrator( const Scene& s ):scene(s){max_recursive_depth=6;}
 	// destructor
 	virtual ~Integrator(){}
 
@@ -70,18 +70,28 @@ public:
 		}
 	}
 
+	// request samples
+	virtual void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ) {}
+
 	// pre-process before rendering
 	// by default , nothing is done in pre-process
 	// some integrator, such as Photon Mapping use pre-process step to
 	// generate some neccessary infomation by latter stage.
-	virtual void PreProcess( Scene& scene ) {}
+	virtual void PreProcess() {}
 
 	// output log information
 	virtual void OutputLog() const {}
 
 // protected method
 protected:
-	unsigned	max_recursive_depth;
+	// maxium recursive depth
+	unsigned		max_recursive_depth;
+
+	// the scene description
+	const Scene&	scene;
+
+	// the pixel sample
+	PixelSample		pixel_sample;
 };
 
 #endif

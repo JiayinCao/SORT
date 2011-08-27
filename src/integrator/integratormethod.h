@@ -25,6 +25,9 @@
 // pre-decleration
 class Bsdf;
 class Intersection;
+class SampleOffset;
+class PixelSample;
+class Light;
 
 // radiance along specular reflective direction
 Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Intersection* intersect , 
@@ -35,8 +38,8 @@ Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Interse
 								const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps );
 
 // evaluate direct lighting
-Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection& ip , const PixelSample& ps ,
-							BXDF_TYPE type = BXDF_ALL );
+Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip , 
+							const LightSample& ls ,	const BsdfSample& bs , BXDF_TYPE type = BXDF_ALL );
 
 // mutilpe importance sampling factors
 float		MisFactor( int nf, float fPdf, int ng, float gPdf );

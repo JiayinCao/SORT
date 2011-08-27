@@ -59,14 +59,33 @@ Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Interse
 }
 
 // evaluate direct lighting
+Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip , 
+							const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type )
+{
+	// get bsdf
+	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
+
+	Spectrum radiance;
+	Visibility visibility(scene);
+	Vector lightDir;
+	float light_pdf;
+	Spectrum c = light->sample_l( ip , &ls , lightDir , 0.1f , &light_pdf , visibility );
+	//light_pdf *= scene.LightProperbility(ls->light_id);
+	if( light_pdf != 0.0f && !c.IsBlack() && visibility.IsVisible() )
+		radiance = c * bsdf->f( -r.m_Dir , lightDir ) * AbsDot( lightDir , ip.normal );
+
+	return radiance;
+}
+/*
+// evaluate direct lighting
 Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection& ip , const PixelSample& ps , BXDF_TYPE type )
 {
 //NOTE:
 //	This evaluation of direct lighting is wrong.....
 //	I'll fix it in the next couple of days.
 	Spectrum t;
-
-	// get the lights
+	return t;
+/*	// get the lights
 	const vector<Light*> lights = scene.GetLights();
 
 	// get bsdf
@@ -105,7 +124,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 	unsigned total_samples = ps.light_sample.size();
 
 	return t / (float)total_samples;
-/*	vector<BsdfSample*>::const_iterator bit = ps.bsdf_sample.begin();
+	vector<BsdfSample*>::const_iterator bit = ps.bsdf_sample.begin();
 	while( bit != ps.bsdf_sample.end() )
 	{
 		Vector wi;
@@ -140,7 +159,6 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 	total_samples += ps.bsdf_sample.size();
 	t /= (float) total_samples;
 	return t;*/
-}
 
 // mutilpe importance sampling factors , power heuristic is adapted
 float	MisFactor( int nf, float fPdf, int ng, float gPdf )

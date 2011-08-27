@@ -31,7 +31,7 @@ class	WhittedRT : public Integrator
 // public method
 public:
 	// default constructor
-	WhittedRT() {}
+	WhittedRT( const Scene& s ):Integrator(s) {}
 	// destructor
 	~WhittedRT() {}
 

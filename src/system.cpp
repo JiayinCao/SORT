@@ -91,7 +91,8 @@ void System::_preInit()
 //	camera->SetLen( 40.0f );
 	m_camera = camera;
 	// the integrator
-	m_pIntegrator = new DirectLight(1);
+	m_pIntegrator = new DirectLight( m_Scene , 1 );
+	//m_pIntegrator = new WhittedRT(m_Scene);
 	// the sampler
 	m_pSampler = new StratifiedSampler();
 	m_iSamplePerPixel = m_pSampler->RoundSize(1);
@@ -195,16 +196,27 @@ void System::PreProcess()
 	Timer::GetSingleton().StartTimer();
 
 	if( m_rt == 0 )
+	{
 		LOG_WARNING<<"There is no render target in the system, can't render anything."<<ENDL;
+		return;
+	}
 	if( m_camera == 0 )
+	{
 		LOG_WARNING<<"There is no camera attached in the system , can't render anything."<<ENDL;
+		return;
+	}
 	if( m_pIntegrator == 0 )
+	{
 		LOG_WARNING<<"There is no integrator attached in the system, can't rendering anything."<<ENDL;
+		return;
+	}
 
+	// preprocess scene
 	m_Scene.PreProcess();
 
-	if( m_pIntegrator )
-		m_pIntegrator->PreProcess(m_Scene);
+	// preprocess integrator
+	m_pIntegrator->RequestSample( m_pSampler , m_pSamples , m_iSamplePerPixel );
+	m_pIntegrator->PreProcess();
 
 	// stop timer
 	Timer::GetSingleton().StopTimer();
