@@ -45,11 +45,9 @@ public:
 	// the surface area of the shape
 	virtual float SurfaceArea() const;
 
-	// get intersection between the light surface and the ray
-	virtual bool GetIntersect( const Ray& ray , Intersection* intersect ) const;
-
-	// get the pdf of specific direction
-	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const ;
+protected:
+	// get intersected point between the ray and the shape
+	float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX ) const;
 };
 
 #endif

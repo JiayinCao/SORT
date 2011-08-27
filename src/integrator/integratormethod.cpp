@@ -104,7 +104,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection&
 	}
 	unsigned total_samples = ps.light_sample.size();
 
-	return t / total_samples;
+	return t / (float)total_samples;
 /*	vector<BsdfSample*>::const_iterator bit = ps.bsdf_sample.begin();
 	while( bit != ps.bsdf_sample.end() )
 	{

@@ -33,32 +33,16 @@ Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , floa
 	Vector delta = lp - p;
 	wi = Normalize( delta );
 
-	float dot = SatDot( -wi , normal );
-	if( pdf ) 
+	float dot = Dot( -wi , normal );
+	if( pdf )
 	{
-		if( dot == 0 )
+		if( dot <= 0.0f )
 			*pdf = 0.0f;
 		else
-			*pdf = delta.SquaredLength() / ( PI * radius * radius * dot );
+			*pdf = delta.SquaredLength() / ( SurfaceArea() * dot );
 	}
 
 	return lp;
-}
-
-// get pdf of specific direction
-float Disk::Pdf( const Point& p , const Point& lp ,  const Vector& wi ) const
-{
-	Vector normal = transform( Vector( 0.0f , 1.0f , 0.0f ) );
-	float dot = Dot( normal , wi );
-	if( dot <= 0.0f )
-		return 0.0f;
-
-	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
-	if( ( lp - center ).SquaredLength() > radius * radius )
-		return 0.0f;
-
-	Vector delta = ( p - lp );
-	return delta.SquaredLength() / ( PI * radius * radius * dot );
 }
 
 // the surface area of the shape
@@ -67,23 +51,19 @@ float Disk::SurfaceArea() const
 	return PI * radius * radius;
 }
 
-// get intersection between the light surface and the ray
-bool Disk::GetIntersect( const Ray& ray , Intersection* intersect ) const
+// get intersected point between the ray and the shape
+float Disk::_getIntersect( const Ray& ray , Point& p , float limit ) const
 {
-	if( ray.m_Dir.z == 0.0f )
-		return false;
+	if( ray.m_Dir.y == 0.0f )
+		return -1.0f;
 
 	float t = -ray.m_Ori.y / ray.m_Dir.y;
-	if( t > intersect->t || t <= 0.0f )
-		return false;
-	Point p = ray(t);
+	if( t > limit || t <= 0.0f )
+		return -1.0f;
+	p = ray(t);
 	float sqLength = p.x * p.x + p.z * p.z;
 	if( sqLength > radius * radius )
-		return false;
+		return -1.0f;
 
-	intersect->t = t;
-	intersect->intersect = ( ray(intersect->t) );
-	intersect->normal = Vector( 0.0f , 1.0f , 0.0f , true );
-
-	return true;
+	return t;
 }

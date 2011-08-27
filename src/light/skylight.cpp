@@ -95,8 +95,8 @@ void SkyLight::_registerAllProperty()
 }
 
 // the pdf for specific sampled directioin
-float SkyLight::Pdf( const Point& p , const Point& lp , const Vector& wi ) const
+float SkyLight::Pdf( const Point& p , const Vector& wi ) const
 {
 	Sort_Assert( sky );
-	return sky->Pdf( p , lp , wi );
+	return sky->Pdf( p , wi );
 }

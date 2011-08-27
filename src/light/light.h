@@ -91,7 +91,7 @@ public:
 	{ return 0.0f; }
 
 	// the pdf for specific sampled directioin
-	virtual float Pdf( const Point& p , const Point& lp , const Vector& wi ) const { return 1.0f; }
+	virtual float Pdf( const Point& p , const Vector& wi ) const { return 1.0f; }
 
 	// get intersection between the light and the ray
 	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }
