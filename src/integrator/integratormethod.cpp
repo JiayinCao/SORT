@@ -67,98 +67,59 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 
 	Spectrum radiance;
 	Visibility visibility(scene);
-	Vector lightDir;
 	float light_pdf;
-	Spectrum c = light->sample_l( ip , &ls , lightDir , 0.1f , &light_pdf , visibility );
-	//light_pdf *= scene.LightProperbility(ls->light_id);
-	if( light_pdf != 0.0f && !c.IsBlack() && visibility.IsVisible() )
-		radiance = c * bsdf->f( -r.m_Dir , lightDir ) * AbsDot( lightDir , ip.normal );
+	float bsdf_pdf;
+	Vector wo = -r.m_Dir;
+	Vector wi;
+	Spectrum li = light->sample_l( ip , &ls , wi , 0.1f , &light_pdf , visibility );
+	if( light_pdf > 0.0f && !li.IsBlack() )
+	{
+		Spectrum f = bsdf->f( wo , wi , type );
+		float dot = SatDot( wi , ip.normal );
+		if( f.IsBlack() == false && visibility.IsVisible() && dot > 0.0f )
+		{
+			if( light->IsDelta() )
+				radiance = li * f * dot / light_pdf;
+			else
+			{
+				bsdf_pdf = bsdf->Pdf( wo , wi , type );
+				float power_hueristic = MisFactor( 1 , light_pdf , 1 , bsdf_pdf );
+				radiance = li * f * dot * power_hueristic / light_pdf;
+			}
+		}
+	}
+
+	if( !light->IsDelta() )
+	{
+		BXDF_TYPE bxdf_type;
+		Spectrum f = bsdf->sample_f( wo , wi , bs , &bsdf_pdf , type , &bxdf_type );
+		float mis = 1.0f;
+		if( !f.IsBlack() && bsdf_pdf )
+		{
+			float weight = 1.0f;
+			if( !( bxdf_type & BXDF_SPECULAR ) )
+			{
+				float light_pdf;
+				light_pdf = light->Pdf( ip.intersect , wi );
+				if( light_pdf <= 0.0f )
+					return radiance;
+				weight = MisFactor( 1 , bsdf_pdf , 1 , light_pdf );
+			}
+			
+			Spectrum li;
+			Intersection _ip;
+			if( false == light->Evaluate( Ray( ip.intersect , wi ) , &_ip , li ) )
+				return 0.0f;
+
+			float dot = SatDot( wi , ip.normal );
+			visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
+			if( dot > 0.0f && !li.IsBlack() && visibility.IsVisible() )
+				radiance += li * f * dot * weight / bsdf_pdf;
+		}
+	}
 
 	return radiance;
 }
-/*
-// evaluate direct lighting
-Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Intersection& ip , const PixelSample& ps , BXDF_TYPE type )
-{
-//NOTE:
-//	This evaluation of direct lighting is wrong.....
-//	I'll fix it in the next couple of days.
-	Spectrum t;
-	return t;
-/*	// get the lights
-	const vector<Light*> lights = scene.GetLights();
-
-	// get bsdf
-	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
-
-	// evaluate light
-	Visibility visibility(scene);
-	vector<LightSample*>::const_iterator lit = ps.light_sample.begin();
-	while( lit != ps.light_sample.end() )
-	{
-		const Light* light = lights[(*lit)->light_id];
-		if( light->IsDelta() )
-		{
-			Vector lightDir;
-			float light_pdf;
-			Spectrum c = light->sample_l( ip , *lit , lightDir , 0.1f , &light_pdf , visibility );
-			light_pdf *= scene.LightProperbility((*lit)->light_id);
-			if( light_pdf != 0.0f && !c.IsBlack() && visibility.IsVisible() )
-				t += c * bsdf->f( -r.m_Dir , lightDir ) * AbsDot( lightDir , ip.normal ) / light_pdf;
-		}else
-		{
-			Vector lightDir;
-			float light_pdf;
-			Spectrum lr = light->sample_l( ip , *lit , lightDir , 0.1f , &light_pdf , visibility );
-			if( light_pdf != 0.0f && !lr.IsBlack() && visibility.IsVisible() )
-			{
-				light_pdf *= scene.LightProperbility((*lit)->light_id);
-				Spectrum br = bsdf->f( -r.m_Dir , lightDir );
-				float bsdf_pdf = bsdf->Pdf( -r.m_Dir , lightDir );
-				float mis = MisFactor( 1 , light_pdf , 1 , bsdf_pdf );
-				t += lr * br * AbsDot( lightDir , ip.normal ) * mis / light_pdf;
-			}
-		}
-		lit++;
-	}
-	unsigned total_samples = ps.light_sample.size();
-
-	return t / (float)total_samples;
-	vector<BsdfSample*>::const_iterator bit = ps.bsdf_sample.begin();
-	while( bit != ps.bsdf_sample.end() )
-	{
-		Vector wi;
-		float bsdf_pdf;
-		BXDF_TYPE bxdf_type;
-		Spectrum br = bsdf->sample_f( -r.m_Dir , wi , *(*bit) , &bsdf_pdf , type , &bxdf_type );
-		Intersection _ip;
-		if( bsdf_pdf != 0.0f )
-		{
-			if( bxdf_type & BXDF_SPECULAR )
-			{
-				Spectrum lr = scene.EvaluateLight( Ray( ip.intersect , wi , 0 , 0.1f ) , &_ip );
-				visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
-				if( !lr.IsBlack() && visibility.IsVisible() )
-					t += lr * br * AbsDot( wi , ip.normal ) / bsdf_pdf;
-			}else
-			{
-				Spectrum lr = scene.EvaluateLight( Ray( ip.intersect , wi , 0 , 1.0f ) , &_ip );
-				if( !lr.IsBlack() && _ip.light_id > 0 )
-				{
-					const Light* light = scene.GetLight(_ip.light_id);
-					float light_pdf = light->Pdf( ip.intersect , _ip.intersect , -wi ) * scene.LightProperbility(_ip.light_id);
-					float mis = MisFactor( 1 , bsdf_pdf , 1 , light_pdf );
-					visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
-					if( visibility.IsVisible() )
-						t += br * lr * AbsDot( wi , ip.normal ) * mis / bsdf_pdf;
-				}
-			}
-		}
-		bit++;
-	}
-	total_samples += ps.bsdf_sample.size();
-	t /= (float) total_samples;
-	return t;*/
 
 // mutilpe importance sampling factors , power heuristic is adapted
 float	MisFactor( int nf, float fPdf, int ng, float gPdf )

@@ -54,6 +54,8 @@ Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample&
 	if( false == scene.GetIntersect( r , &ip ) )
 		return t;
 
+	t = 0.0f;
+
 	// eavluate direct light
 	unsigned light_num = scene.LightNum();
 	for( unsigned i = 0 ; i < light_num ; ++i )
@@ -107,6 +109,9 @@ void DirectLight::RequestSample( Sampler* sampler , PixelSample* ps , unsigned p
 			float properbility = scene.LightProperbility(k);
 			unsigned lsn = (unsigned)( properbility * total_light_num + 0.5f );
 
+			const Light* light = scene.GetLight(k);
+			if( light->IsDelta() ) lsn = 1;
+
 			if( i == 0 )
 			{
 				light_sample_offsets[k].num = sampler->RoundSize( lsn );
@@ -135,22 +140,19 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 	{
 		unsigned offset = 0;
 
-		float* light_1d = SORT_MALLOC_ARRAY( float , total_samples );
 		float* light_2d = SORT_MALLOC_ARRAY( float , total_samples * 2 );
 		float* bsdf_1d = SORT_MALLOC_ARRAY( float , total_samples );
 		float* bsdf_2d = SORT_MALLOC_ARRAY( float , total_samples * 2 );
 		for( unsigned k = 0 ; k < light_num ; ++k )
 		{
-			sampler->Generate1D( light_1d + offset , light_sample_offsets[k].num );
-			sampler->Generate2D( light_2d + offset , light_sample_offsets[k].num );
+			sampler->Generate2D( light_2d + 2 * offset , light_sample_offsets[k].num );
 			sampler->Generate1D( bsdf_1d + offset , light_sample_offsets[k].num );
-			sampler->Generate2D( bsdf_2d + offset , bsdf_sample_offsets[k].num );
+			sampler->Generate2D( bsdf_2d + 2 * offset , bsdf_sample_offsets[k].num );
 			offset += bsdf_sample_offsets[k].num;
 		}
 
 		for( unsigned k = 0 ; k < total_samples ; k++ )
 		{
-			samples[i].light_sample[k].t = light_1d[k];
 			samples[i].light_sample[k].u = light_2d[2*k];
 			samples[i].light_sample[k].v = light_2d[2*k+1];
 			samples[i].bsdf_sample[k].t = bsdf_1d[k];

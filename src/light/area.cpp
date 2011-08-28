@@ -92,7 +92,6 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const Vector& wo )
 bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
 {
 	Sort_Assert( shape != 0 );
-	Sort_Assert( intersect != 0 );
 
 	// transform the ray to local coordinate
 	Ray r = light2world.invMatrix( ray );
@@ -101,7 +100,7 @@ bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& r
 	bool result = shape->GetIntersect( r , intersect );
 
 	// transform the intersection result back to world coordinate
-	if( result )
+	if( result && intersect != 0 )
 	{
 		intersect->intersect = light2world(intersect->intersect);
 		intersect->normal = light2world(intersect->normal);
