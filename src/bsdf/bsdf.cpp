@@ -155,6 +155,6 @@ float Bsdf::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 	float pdf = 0.0f;
 	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
 		if( m_bxdf[i]->MatchFlag( type ) )
-			pdf += m_bxdf[i]->Pdf( wo , wi );
+			pdf += m_bxdf[i]->Pdf( lwo , lwi );
 	return pdf;
 }

@@ -91,7 +91,7 @@ void System::_preInit()
 //	camera->SetLen( 40.0f );
 	m_camera = camera;
 	// the integrator
-	m_pIntegrator = new DirectLight( m_Scene , 1 );
+	m_pIntegrator = new DirectLight( m_Scene , 16 );
 	//m_pIntegrator = new WhittedRT(m_Scene);
 	// the sampler
 	m_pSampler = new StratifiedSampler();
