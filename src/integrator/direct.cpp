@@ -116,7 +116,7 @@ void DirectLight::RequestSample( Sampler* sampler , PixelSample* ps , unsigned p
 			{
 				light_sample_offsets[k].num = sampler->RoundSize( lsn );
 				light_sample_offsets[k].offset = ps[i].RequestMoreLightSample( light_sample_offsets[i].num );
-				bsdf_sample_offsets[k].num = light_sample_offsets[i].num;
+				bsdf_sample_offsets[k].num = light_sample_offsets[k].num;
 				bsdf_sample_offsets[k].offset = ps[i].RequestMoreBsdfSample( bsdf_sample_offsets[i].num );
 				total_samples += bsdf_sample_offsets[k].num;
 			}else
