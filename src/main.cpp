@@ -23,7 +23,7 @@
 System g_System;
 
 // the main func
-int main( int argc , char** argv )
+int __cdecl main( int argc , char** argv )
 {
 	// load the scene from file
 	g_System.LoadScene( "../res/cornell.scene" );
