@@ -1,6 +1,6 @@
 BIN_PATH = ../bin
 OBJ_PATH = $(BIN_PATH)/obj
-INC_PATH = -I.
+INC_PATH = -I. -I./thirdparty/ilmbase-1.0.2/ -I./thirdparty/openexr-1.7.0/ -I./thirdparty/zlib-1.2.5/
 
 COMPILE_FLAG = $(INC_PATH) -g
 
@@ -22,9 +22,13 @@ LIBSRCS += $(wildcard sampler/*.cpp)
 LIBSRCS += $(wildcard shape/*.cpp)
 LIBSRCS += $(wildcard material/*.cpp)
 LIBSRCS += $(wildcard thirdparty/tinyxml/*.cpp)
+LIBSRCS += $(wildcard thirdparty/ilmbase-1.0.2/*.cpp)
+LIBSRCS += $(wildcard thirdparty/openexr-1.7.0/*.cpp)
+LIBSRCS += $(wildcard thirdparty/zlib-1.2.5/*.c)
+LIBSRCS += $(wildcard thirdparty/ply/*.c)
 
-LIBOBJS = $(addprefix $(OBJ_PATH)/, $(subst ._,, $(subst /,_,$(LIBSRCS:.cpp=.o)) ) )
-LIBOBJS +=$(addprefix $(OBJ_PATH)/, thirdparty_ply_ply.o )
+LIBOBJS_ = $(addprefix $(OBJ_PATH)/, $(subst ._,, $(subst /,_,$(LIBSRCS:.cpp=.o)) ) )
+LIBOBJS = $(LIBOBJS_:.c=.o)
 
 sort : $(OBJ_PATH) $(LIBOBJS)
 	@g++ $(COMPILE_FLAG) -o $(BIN_PATH)/sort $(LIBOBJS)
@@ -117,7 +121,18 @@ $(OBJ_PATH)/thirdparty_tinyxml_%.o : thirdparty/tinyxml/%.cpp
 $(OBJ_PATH)/thirdparty_ply_%.o : thirdparty/ply/%.c thirdparty/ply/%.h
 	@echo "building object $@"
 	@gcc $(COMPILE_FLAG) -c $< -o $@
-	
+
+$(OBJ_PATH)/thirdparty_ilmbase-1.0.2_%.o : thirdparty/ilmbase-1.0.2/%.cpp
+	@echo "building object $@"
+	@gcc $(COMPILE_FLAG) -c $< -o $@
+
+$(OBJ_PATH)/thirdparty_openexr-1.7.0_%.o : thirdparty/openexr-1.7.0/%.cpp
+	@echo "building object $@"
+	@gcc $(COMPILE_FLAG) -c $< -o $@
+
+$(OBJ_PATH)/thirdparty_zlib-1.2.5_%.o : thirdparty/zlib-1.2.5/%.c
+	@echo "building object $@"
+	@gcc $(COMPILE_FLAT) -c $< -o $@
 
 clean:
 	@echo "clear"
