@@ -112,7 +112,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 				return 0.0f;
 
 			float dot = SatDot( wi , ip.normal );
-			visibility.ray = Ray( ip.intersect , wi , 0 , 1.0f , _ip.t );
+			visibility.ray = Ray( ip.intersect , wi , 0 , 0.1f , _ip.t );
 			if( dot > 0.0f && !li.IsBlack() && visibility.IsVisible() )
 				radiance += li * f * dot * weight / bsdf_pdf;
 		}
@@ -121,7 +121,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 	return radiance;
 }
 
-// mutilpe importance sampling factors , power heuristic is adapted
+// mutilpe importance sampling factors , power heuristic is used 
 float	MisFactor( int nf, float fPdf, int ng, float gPdf )
 {
 	float f = nf * fPdf, g = ng * gPdf;
