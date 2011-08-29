@@ -44,7 +44,7 @@
 #include <iostream>
 #include <assert.h>
 
-#ifdef SORT_IN_WINDOWS
+#if defined(_WIN32) || defined(_WIN64)
 
 namespace IlmThread {
 
