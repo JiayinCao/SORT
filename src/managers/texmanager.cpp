@@ -19,6 +19,7 @@
 #include "texmanager.h"
 #include "texio/texio.h"
 #include "texio/bmpio.h"
+#include "texio/exrio.h"
 #include "texture/imagetexture.h"
 #include "utility/strhelper.h"
 #include "utility/define.h"
@@ -50,6 +51,7 @@ void TexManager::_init()
 {
 	// push the texture outputer
 	m_TexIOVec.push_back( new BmpIO() );
+	m_TexIOVec.push_back( new ExrIO() );
 }
 
 // release data

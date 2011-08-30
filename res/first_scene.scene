@@ -17,7 +17,7 @@
       <Matrix value="t 0 0 -200"/>
     </Transform>
     <Material>
-      <MatSet name="" mat="killeroo_mat"/>
+      <MatSet name="" mat="mirror"/>
     </Material>
   </Model>
   <Model filename="cube.obj" name="plane">
@@ -30,7 +30,7 @@
   	<Property name="intensity" value="20 20 20" />
 	<Property name="dir" value="-1 -1 1"/>
   </Light>
-  <Light type="area">
+  <Light type="a1rea">
     <Property name="shape" value="disk" />
     <Property name="radius" value="100" />
     <Property name="intensity" value="0 500 500"/>
@@ -38,16 +38,16 @@
 	  <Property name="pos" value="0 1000 1000"/>
     <Property name="dir" value="0 -1 0"/>
   </Light>
-  <Light type="area">
+  <Light type="are1a">
     <Property name="shape" value="disk" />
     <Property name="radius" value="100" />
     <Property name="intensity" value="100 1000 0"/>
     <Property name="pos" value="0 1000 0"/>
     <Property name="dir" value="0 -1 0"/>
   </Light>
-  <Light type="skylig1ht">
+  <Light type="skylight">
     <Property name="type" value="sky_sphere"/>
-    <Property name="image" value="sky/lobby_sphere.bmp"/>
+    <Property name="image" value="uffizi_latlong.exr"/>
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />
     <Property name="front" value="sky/lobbyxpos.bmp"/>

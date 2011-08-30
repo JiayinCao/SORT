@@ -153,4 +153,10 @@ Attribute::newAttribute (const char typeName[])
 }
 
 
+void Attribute::deleteMap()
+{
+	LockedTypeMap* tMap = &typeMap();
+	delete tMap;
+}
+
 } // namespace Imf

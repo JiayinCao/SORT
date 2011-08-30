@@ -50,7 +50,7 @@
 				WarningLevel="3"
 				DebugInformationFormat="4"
 				CallingConvention="2"
-				DisableSpecificWarnings="4996;4819;4101;4800;4018;4244;4099;4099;4305"
+				DisableSpecificWarnings="4003;4996;4819;4101;4800;4018;4244;4099;4099;4305"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -127,7 +127,7 @@
 				WarningLevel="3"
 				DebugInformationFormat="3"
 				CallingConvention="2"
-				DisableSpecificWarnings="4996;4819;4101;4800;4018;4244;4099;4099;4305"
+				DisableSpecificWarnings="4996;4003;4819;4101;4800;4018;4244;4099;4099;4305"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -441,6 +441,14 @@
 				</File>
 				<File
 					RelativePath="..\..\src\managers\texio\bmpio.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\managers\texio\exrio.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\managers\texio\exrio.h"
 					>
 				</File>
 				<File

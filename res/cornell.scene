@@ -35,7 +35,8 @@
     <Property name="dir" value="0 -1 0"/>
   </Light>
   <Light type="skylight">
-    <Property name="type" value="sky_box"/>
+    <Property name="type" value="sky_sphere"/>
+    <Property name="image" value="uffizi_latlong.exr"/>
     <Property name="up" value="sky/lobbyypos.bmp"/>
     <Property name="down" value="sky/lobbyyneg.bmp" />
     <Property name="front" value="sky/lobbyxpos.bmp"/>

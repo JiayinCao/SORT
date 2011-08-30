@@ -104,6 +104,13 @@ class Attribute
 
     static bool			knownType (const char typeName[]);
 
+	//------------------------------------------------------
+    // Un-register all attribute types so 
+    // note : this is not part of the imf lib, it's added by
+	//		me due to memory leak.
+    //------------------------------------------------------
+
+	static void			deleteMap();
 
   protected:
 

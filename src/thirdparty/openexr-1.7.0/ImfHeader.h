@@ -423,6 +423,7 @@ class Header::ConstIterator
 
 void staticInitialize ();
 
+void staticUninitialize ();
 
 //-----------------
 // Inline Functions
@@ -620,7 +621,6 @@ Header::findTypedAttribute (const std::string &name) const
 {
     return findTypedAttribute<T> (name.c_str());
 }
-
 
 } // namespace Imf
 

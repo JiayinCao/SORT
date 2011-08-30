@@ -55,6 +55,9 @@ public:
 	// output log information
 	void OutputLog() const;
 
+	// uninitialize
+	void Uninit();
+
 //private field:
 private:
 	// the render target for the system
@@ -92,6 +95,8 @@ private:
 	void	_postUninit();
 	// output progress
 	void	_outputProgress();
+	// uninitialize 3rd party library
+	void	_uninit3rdParty();
 };
 
 #endif
