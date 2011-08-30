@@ -34,14 +34,14 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , FLT_MAX );
 
 	// the 10.0f factor will be removed later
-	return 10.0f * sky->Evaluate( wi );
+	return sky->Evaluate( wi );
 }
 
 // sample light density
 Spectrum SkyLight::sample_l( const Intersection& intersect , const Vector& wo ) const
 { 
 	Sort_Assert( sky != 0 );
-	return 10.0f * sky->Evaluate( -wo ); 
+	return sky->Evaluate( -wo ); 
 }
 
 // total power of the light
@@ -52,7 +52,7 @@ Spectrum SkyLight::Power() const
 	float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
 
 	// the 10.0f factor will be removed later
-	return radius * radius * PI * sky->GetAverage() * 10.0f;
+	return radius * radius * PI * sky->GetAverage();
 }
 
 // get intersection between the light and the ray
@@ -64,7 +64,7 @@ bool SkyLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& ra
 	if( intersect && intersect->t != FLT_MAX )
 		return false;
 
-	radiance = 10.0f * sky->Evaluate( ray.m_Dir );
+	radiance = sky->Evaluate( ray.m_Dir );
 	return true;
 }
 

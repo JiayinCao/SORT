@@ -29,6 +29,7 @@
 #include "utility/path.h"
 #include "utility/creator.h"
 #include "sampler/sampler.h"
+#include <ImfHeader.h>
 
 #include "camera/camera.h"
 #include "camera/environment.h"
@@ -74,12 +75,12 @@ void System::_preInit()
 	m_rt = new RenderTarget();
 	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
-	float distance = 5000.0f;
+	float distance = 1500.0f;
 //	DofPerspective* camera = new DofPerspective();
 //	OrthoCamera* camera = new OrthoCamera();
 //	EnvironmentCamera* camera = new EnvironmentCamera();
 	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( 0 , distance * 0.1f , distance ) );
+	camera->SetEye( Point( distance , distance * 0.5f , distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , distance * 0.05f , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
@@ -91,11 +92,11 @@ void System::_preInit()
 //	camera->SetLen( 40.0f );
 	m_camera = camera;
 	// the integrator
-	m_pIntegrator = new DirectLight( m_Scene , 16 );
+	m_pIntegrator = new DirectLight( m_Scene , 1 );
 	//m_pIntegrator = new WhittedRT(m_Scene);
 	// the sampler
 	m_pSampler = new StratifiedSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(1);
+	m_iSamplePerPixel = m_pSampler->RoundSize(16);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value
@@ -265,4 +266,16 @@ void System::OutputLog() const
 	LOG_HEADER( "Rendering Information" );
 	LOG<<"Time spent on pre-processing  : "<<m_uPreProcessingTime<<ENDL;
 	LOG<<"Time spent on rendering       : "<<m_uRenderingTime<<ENDL;
+}
+
+// uninitialize 3rd party library
+void System::_uninit3rdParty()
+{
+	Imf::staticUninitialize();
+}
+
+// uninitialize
+void System::Uninit()
+{
+	_uninit3rdParty();
 }

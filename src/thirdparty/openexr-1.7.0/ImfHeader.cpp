@@ -69,7 +69,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include <time.h>
-
+#include <ImfAttribute.h>
 
 namespace Imf {
 
@@ -1102,5 +1102,38 @@ staticInitialize ()
     }
 }
 
+void
+staticUninitialize ()
+{
+	Box2fAttribute::unRegisterAttributeType();
+	Box2iAttribute::unRegisterAttributeType();
+	ChannelListAttribute::unRegisterAttributeType();
+	CompressionAttribute::unRegisterAttributeType();
+	ChromaticitiesAttribute::unRegisterAttributeType();
+	DoubleAttribute::unRegisterAttributeType();
+	EnvmapAttribute::unRegisterAttributeType();
+	FloatAttribute::unRegisterAttributeType();
+	IntAttribute::unRegisterAttributeType();
+	KeyCodeAttribute::unRegisterAttributeType();
+	LineOrderAttribute::unRegisterAttributeType();
+	M33dAttribute::unRegisterAttributeType();
+	M33fAttribute::unRegisterAttributeType();
+	M44dAttribute::unRegisterAttributeType();
+	M44fAttribute::unRegisterAttributeType();
+	PreviewImageAttribute::unRegisterAttributeType();
+	RationalAttribute::unRegisterAttributeType();
+	StringAttribute::unRegisterAttributeType();
+        StringVectorAttribute::unRegisterAttributeType();
+	TileDescriptionAttribute::unRegisterAttributeType();
+	TimeCodeAttribute::unRegisterAttributeType();
+	V2dAttribute::unRegisterAttributeType();
+	V2fAttribute::unRegisterAttributeType();
+	V2iAttribute::unRegisterAttributeType();
+	V3dAttribute::unRegisterAttributeType();
+	V3fAttribute::unRegisterAttributeType();
+	V3iAttribute::unRegisterAttributeType();
+
+	Attribute::deleteMap();
+}
 
 } // namespace Imf

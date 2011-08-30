@@ -26,7 +26,7 @@ System g_System;
 int __cdecl main( int argc , char** argv )
 {
 	// load the scene from file
-	g_System.LoadScene( "../res/cornell.scene" );
+	g_System.LoadScene( "../res/first_scene.scene" );
 
 	// do ray tracing
 	g_System.Render();
@@ -39,6 +39,9 @@ int __cdecl main( int argc , char** argv )
 
 	// output image
 	g_System.OutputRT( "t.bmp" );
+
+	// unitialize the system
+	g_System.Uninit();
 
 	return 0;
 }

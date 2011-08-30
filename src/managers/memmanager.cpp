@@ -25,8 +25,8 @@ DEFINE_SINGLETON(MemManager);
 // default constructor
 MemManager::MemManager()
 {
-	// 4mb memory for default
-	PreMalloc( 1024 * 1024 * 4 );
+	// 16mb memory for default
+	PreMalloc( 1024 * 1024 * 16 );
 }
 
 // destructor
