@@ -6,6 +6,9 @@
 	    <Matrix value="s 40"/>
       <Matrix value="t 0 -500 0"/>
 		</Transform>
+    <Material>
+      <MatSet name="Box012" mat="mirror"/>
+    </Material>
 	</Model>
   <Light type="po1int">
     <Property name="intensity" value="10000000 9000000 6000000"/>
@@ -29,12 +32,12 @@
   <Light type="area">
     <Property name="shape" value="disk" />
     <Property name="radius" value="100" />
-    <Property name="intensity" value="200 100 100"/>
+    <Property name="intensity" value="150 150 150"/>
     <Property name="dir" value="0 -1 0"/>
     <Property name="pos" value="0 1000 -500"/>
     <Property name="dir" value="0 -1 0"/>
   </Light>
-  <Light type="skylight">
+  <Light type="skyl1ight">
     <Property name="type" value="sky_sphere"/>
     <Property name="image" value="uffizi_latlong.exr"/>
     <Property name="up" value="sky/lobbyypos.bmp"/>

@@ -8,6 +8,9 @@
       <Matrix value="r 1 4.6"/>
       <Matrix value="t 0 0 200"/>
     </Transform>
+    <Material>
+      <MatSet name="" mat="killeroo_mat"/>
+    </Material>
   </Model>
   <Model filename="killeroo.obj" name="object1">
     <Transform>

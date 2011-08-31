@@ -327,15 +327,20 @@ void Scene::_genLightDistribution()
 }
 
 // get sampled light
-const Light* Scene::SampleLight( float u ) const
+const Light* Scene::SampleLight( float u , float* pdf ) const
 {
-	Sort_Assert( u >= 0.0f && u < 1.0f );
+	if( u < 0.0f || u > 1.0f )
+		int a = 0;
+	Sort_Assert( u >= 0.0f && u <= 1.0f );
 	Sort_Assert( m_pLightsDis != 0 );
 
-	float pdf;
-	int id = m_pLightsDis->SampleDiscrete( u , &pdf );
-	if( id >= 0 && id < (int)m_lights.size() && pdf != 0.0f )
+	float _pdf;
+	int id = m_pLightsDis->SampleDiscrete( u , &_pdf );
+	if( id >= 0 && id < (int)m_lights.size() && _pdf != 0.0f )
+	{
+		if( pdf ) *pdf = _pdf;
 		return m_lights[id];
+	}
 	return 0;
 }
 

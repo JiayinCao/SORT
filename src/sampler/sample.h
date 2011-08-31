@@ -35,7 +35,20 @@ public:
 	float		reserved;	// for memory alignment
 
 	// default constructor
-	LightSample(){}
+	LightSample(bool auto_generate=false)
+	{
+		if( auto_generate )
+		{
+			t = sort_canonical();
+			u = sort_canonical();
+			v = sort_canonical();
+		}else
+		{
+			t = 0.0f;
+			v = 0.0f;
+			u = 0.0f;
+		}
+	}
 };
 
 // Bsdf Sample
@@ -56,6 +69,11 @@ public:
 			t = sort_canonical();
 			u = sort_canonical();
 			v = sort_canonical();
+		}else
+		{
+			t = 0.0f;
+			v = 0.0f;
+			u = 0.0f;
 		}
 	}
 };
