@@ -23,7 +23,11 @@
 System g_System;
 
 // the main func
+#ifdef SORT_IN_WINDOWS
 int __cdecl main( int argc , char** argv )
+#elif defined(SORT_IN_LINUX)
+int main( int argc , char** argv )
+#endif
 {
 	// load the scene from file
 	g_System.LoadScene( "../res/cornell.scene" );
