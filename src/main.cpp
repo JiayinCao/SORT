@@ -26,7 +26,7 @@ System g_System;
 int __cdecl main( int argc , char** argv )
 {
 	// load the scene from file
-	g_System.LoadScene( "../res/first_scene.scene" );
+	g_System.LoadScene( "../res/cornell.scene" );
 
 	// do ray tracing
 	g_System.Render();

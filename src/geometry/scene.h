@@ -72,7 +72,7 @@ public:
 	const vector<Light*>& GetLights() const
 	{return m_lights;}
 	// get sampled light
-	const Light* SampleLight( float u ) const;
+	const Light* SampleLight( float u , float* pdf ) const;
 	// get the properbility of the sample
 	float LightProperbility( unsigned i ) const;
 	// get the number of lights

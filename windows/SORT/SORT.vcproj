@@ -1757,6 +1757,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\integrator\pathtracing.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\pathtracing.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\integrator\whittedrt.cpp"
 				>
 			</File>
