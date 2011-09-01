@@ -97,6 +97,7 @@ public:
 	BsdfSample*			bsdf_sample;
 	vector<unsigned>	light_dimension;
 	vector<unsigned>	bsdf_dimension;
+	float*				data;		// the data to used
 
 	// default constructor
 	PixelSample()
@@ -105,11 +106,13 @@ public:
 		img_v = 0.0f;
 		light_sample = 0;
 		bsdf_sample = 0;
+		data = 0;
 	}
 	~PixelSample()
 	{
 		SAFE_DELETE_ARRAY( light_sample );
 		SAFE_DELETE_ARRAY( bsdf_sample );
+		SAFE_DELETE_ARRAY( data );
 	}
 	// request more samples
 	unsigned RequestMoreLightSample( unsigned num )

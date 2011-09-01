@@ -22,10 +22,14 @@
 #include "integratormethod.h"
 
 // return the radiance of a specific direction
+// note : there are two factors make the method biased.
+//			1. there is a limitation on the number of vertexes in the path
+//			2. caustics are not supported.
 Spectrum PathTracing::Li( const Scene& scene , const Ray& ray , const PixelSample& ps ) const
 {
 	Spectrum L = 0.0f;
 
+	bool		intersect_diffuse = false;
 	Spectrum	path_weight = 1.0f;
 	unsigned	bounces = 0;
 	Ray	r = ray;
@@ -49,17 +53,27 @@ Spectrum PathTracing::Li( const Scene& scene , const Ray& ray , const PixelSampl
 		// evaluate the light
 		Bsdf*			bsdf = inter.primitive->GetMaterial()->GetBsdf(&inter);
 		float			light_pdf = 0.0f;
-		const Light*	light = scene.SampleLight( ps.light_sample[bounces].t , &light_pdf );
+		LightSample		light_sample = (bounces==0)?ps.light_sample[0]:LightSample(true);
+		BsdfSample		bsdf_sample = (bounces==0)?ps.bsdf_sample[0]:BsdfSample(true);
+		const Light*	light = scene.SampleLight( light_sample.t , &light_pdf );
 		if( light_pdf > 0.0f )
-			L += path_weight * EvaluateDirect(	r  , scene , light , inter , ps.light_sample[bounces] , 
-												ps.bsdf_sample[bounces] ) / light_pdf;
+		{
+			BXDF_TYPE _type = (intersect_diffuse)?(BXDF_TYPE)(BXDF_ALL&~BXDF_SPECULAR):BXDF_ALL;
+			L += path_weight * EvaluateDirect(	r  , scene , light , inter , light_sample , 
+												bsdf_sample , _type ) / light_pdf;
+		}
 
 		// sample the next direct using bsdf
 		float		path_pdf;
 		Vector		wi;
-		Spectrum f = bsdf->sample_f( -r.m_Dir , wi , ps.bsdf_sample[path_per_pixel+bounces] , &path_pdf );
+		BXDF_TYPE	bxdf_type;
+		Spectrum f;
+		BsdfSample	_bsdf_sample = (bounces==0)?ps.bsdf_sample[1]:BsdfSample(true);
+		f = bsdf->sample_f( -r.m_Dir , wi , _bsdf_sample , &path_pdf , BXDF_ALL , &bxdf_type );
 		if( f.IsBlack() || path_pdf == 0.0f )
 			break;
+		if( !(bxdf_type & BXDF_SPECULAR) )
+			intersect_diffuse = true;
 
 		// update path weight
 		path_weight *= f * AbsDot( wi , inter.normal ) / path_pdf;
@@ -95,9 +109,11 @@ void PathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsigned p
 	{
 		// the first half samples are used to sample bsdf for shading
 		// the second half samples are used to sample bsdf for direction
-		ps[i].bsdf_sample = new BsdfSample[ path_per_pixel * 2 ];
-		ps[i].light_sample = new LightSample[ path_per_pixel ];
+		ps[i].bsdf_sample = new BsdfSample[ 2 ];
+		ps[i].light_sample = new LightSample[ 1 ];
 	}
+
+	ps[0].data = new float[ ps_num * 3 ];
 }
 
 // generate samples
@@ -105,12 +121,47 @@ void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples 
 {
 	Integrator::GenerateSample( sampler , samples , ps , scene );
 
-	// the sampler is not used here , to be improved
-	for (int k = 0; k < ps; ++k) {
-		for (int i = 0; i < path_per_pixel; ++i) {
-			samples[k].bsdf_sample[i] = BsdfSample(true);
-			samples[k].bsdf_sample[path_per_pixel+i] = BsdfSample(true);
-			samples[k].light_sample[i] = LightSample(true);
+	if( sampler->RoundSize( ps ) == ps )
+	{
+		float* data_1d = samples[0].data;
+		float* data_2d = samples[0].data + ps;
+
+		sampler->Generate1D( data_1d , ps );
+		sampler->Generate2D( data_2d , ps );
+		for( int k = 0 ; k < ps ; ++k )
+		{
+			int two_k = 2*k;
+			samples[k].bsdf_sample[0].t = data_1d[k];
+			samples[k].bsdf_sample[0].u = data_2d[two_k];
+			samples[k].bsdf_sample[0].v = data_2d[two_k+1];
+		}
+
+		sampler->Generate1D( data_1d , ps );
+		sampler->Generate2D( data_2d , ps );
+		for( int k = 0 ; k < ps ; ++k )
+		{
+			int two_k = 2*k;
+			samples[k].bsdf_sample[1].t = data_1d[k];
+			samples[k].bsdf_sample[1].u = data_2d[two_k];
+			samples[k].bsdf_sample[1].v = data_2d[two_k+1];
+		}
+
+		sampler->Generate1D( data_1d , ps );
+		sampler->Generate2D( data_2d , ps );
+		for( int k = 0 ; k < ps ; ++k )
+		{
+			int two_k = 2*k;
+			samples[k].light_sample[0].t = data_1d[k];
+			samples[k].light_sample[0].u = data_2d[two_k];
+			samples[k].light_sample[0].v = data_2d[two_k+1];
+		}
+	}else
+	{
+		for (int k = 0; k < ps; ++k) 
+		{
+			samples[k].bsdf_sample[0] = BsdfSample(true);
+			samples[k].bsdf_sample[1] = BsdfSample(true);
+			samples[k].light_sample[0] = LightSample(true);
 		}
 	}
 }

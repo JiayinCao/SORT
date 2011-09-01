@@ -128,6 +128,9 @@ void DirectLight::RequestSample( Sampler* sampler , PixelSample* ps , unsigned p
 		ps[i].bsdf_sample = new BsdfSample[ total_samples ];
 		ps[i].light_sample = new LightSample[ total_samples ];
 	}
+
+	// allocate the data to be used
+	ps[0].data = new float[ total_samples * 5 ];
 }
 
 // generate samples
@@ -140,9 +143,9 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 	{
 		unsigned offset = 0;
 
-		float* light_2d = SORT_MALLOC_ARRAY( float , total_samples * 2 );
-		float* bsdf_1d = SORT_MALLOC_ARRAY( float , total_samples );
-		float* bsdf_2d = SORT_MALLOC_ARRAY( float , total_samples * 2 );
+		float* light_2d = samples[0].data;
+		float* bsdf_1d = samples[0].data + total_samples * 2;
+		float* bsdf_2d = samples[0].data + total_samples ;
 		for( unsigned k = 0 ; k < light_num ; ++k )
 		{
 			sampler->Generate2D( light_2d + 2 * offset , light_sample_offsets[k].num );

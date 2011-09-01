@@ -7,7 +7,7 @@
       <Matrix value="t 0 -500 0"/>
 		</Transform>
     <Material>
-      <MatSet name="Box012" mat="mirror"/>
+      <MatSet name="B2ox02" mat=""/>
     </Material>
 	</Model>
   <Light type="po1int">
@@ -32,9 +32,9 @@
   <Light type="area">
     <Property name="shape" value="disk" />
     <Property name="radius" value="100" />
-    <Property name="intensity" value="150 150 150"/>
+    <Property name="intensity" value="450 450 450"/>
     <Property name="dir" value="0 -1 0"/>
-    <Property name="pos" value="0 1000 -500"/>
+    <Property name="pos" value="0 1000 0"/>
     <Property name="dir" value="0 -1 0"/>
   </Light>
   <Light type="skyl1ight">
@@ -47,5 +47,5 @@
     <Property name="left" value="sky/lobbyzpos.bmp"/>
     <Property name="right" value="sky/lobbyzneg.bmp"/>
   </Light>
-	<Accel type="uniform_grid"/>
+	<Accel type="kd_tree"/>
 </Root>
