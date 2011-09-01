@@ -94,11 +94,11 @@ void System::_preInit()
 	m_camera = camera;
 	// the integrator
 	//m_pIntegrator = new DirectLight( m_Scene , 1 );
-	m_pIntegrator = new PathTracing( m_Scene , 6 );
+	m_pIntegrator = new PathTracing( m_Scene , 1024 );
 	//m_pIntegrator = new WhittedRT(m_Scene);
 	// the sampler
 	m_pSampler = new StratifiedSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(16);
+	m_iSamplePerPixel = m_pSampler->RoundSize(1);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value

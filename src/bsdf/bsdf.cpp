@@ -97,6 +97,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	if( com_num == 0 )
 	{
 		if( pdf ) *pdf = 0.0f;
+		if( bxdf_type ) *bxdf_type = BXDF_NONE;
 		return 0.0f;
 	}
 	int bsdf_id = min( (int)(bs.t*(float)com_num+0.5f) , (int)(com_num-1) );

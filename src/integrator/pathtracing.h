@@ -27,7 +27,8 @@ class	PathTracing : public Integrator
 // public method
 public:
 	// default constructor
-	PathTracing( const Scene& s , unsigned ppp ):path_per_pixel(ppp),Integrator(s){}
+	PathTracing( const Scene& s , unsigned ppp ):path_per_pixel(ppp),Integrator(s)
+	{if( path_per_pixel < 3 ) path_per_pixel = 3;}
 	// destructor
 	~PathTracing(){}
 
