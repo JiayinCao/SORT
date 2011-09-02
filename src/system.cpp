@@ -218,7 +218,7 @@ void System::_outputPreprocess()
 		cout<<"   Multi-thread is enabled"<<"("<<core_num<<" core"<<((core_num>1)?"s are":" is")<<" detected.)"<<endl;
 	else
 		cout<<"   Multi-thread is disabled."<<endl;
-	cout<<"   "<<m_iSamplePerPixel<<" sample"<<((m_iSamplePerPixel>1)?"s are":" is")<<" per pixel."<<endl;
+	cout<<"   "<<m_iSamplePerPixel<<" sample"<<((m_iSamplePerPixel>1)?"s are":" is")<<" used per pixel."<<endl;
 	cout<<"   Scene file : "<<m_Scene.GetFileName()<<endl;
 	cout<<"   Time spent on preprocessing :"<<m_uPreProcessingTime<<" ms."<<endl;
 }

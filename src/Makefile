@@ -2,7 +2,7 @@ BIN_PATH = ../bin
 OBJ_PATH = $(BIN_PATH)/obj
 INC_PATH = -I. -I./thirdparty/ilmbase-1.0.2/ -I./thirdparty/openexr-1.7.0/ -I./thirdparty/zlib-1.2.5/
 
-COMPILE_FLAG = $(INC_PATH) -g
+COMPILE_FLAG = $(INC_PATH) -g -fopenmp
 
 LIBSRCS = $(wildcard *.cpp)
 LIBSRCS += $(wildcard geometry/*.cpp)
