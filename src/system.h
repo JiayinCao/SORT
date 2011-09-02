@@ -97,6 +97,16 @@ private:
 	void	_outputProgress();
 	// uninitialize 3rd party library
 	void	_uninit3rdParty();
+	// preprocess in mutiple threads environment
+	void	_prepareMemoryForThread();
+	// setup multiple threads environment
+	void	_setupMultiThreads();
+	// do ray tracing
+	void	_raytracing();
+	// do ray tracing in a multithread enviroment
+	void	_raytracing_multithread();
+	// output preprocessing information
+	void	_outputPreprocess();
 };
 
 #endif

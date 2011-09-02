@@ -20,6 +20,7 @@
 
 // include the header
 #include "utility/singleton.h"
+#include "utility/parallel.h"
 #include "logmanager.h"
 #include <map>
 
@@ -83,7 +84,6 @@ public:
 
 		unsigned addr = mem->m_offset;
 		mem->m_offset += sizeof(T) * count;
-	//	mem->m_offset = ( mem->m_offset + 15 ) & (~15);
 		return (T*)(mem->m_memory + addr);
 	}
 
@@ -126,9 +126,9 @@ private:
 };
 
 // allocate memory
-#define	SORT_MALLOC(T) new (MemManager::GetSingleton().GetPtr<T>(1)) T
+#define	SORT_MALLOC(T) SORT_MALLOC_ID(T,ThreadId())
 #define SORT_MALLOC_ID(T,id) new (MemManager::GetSingleton().GetPtr<T>(1,id)) T
-#define SORT_MALLOC_ARRAY(T,c) new (MemManager::GetSingleton().GetPtr<T>(c)) T
+#define SORT_MALLOC_ARRAY(T,c) SORT_MALLOC_ARRAY_ID( T , c , ThreadId() )
 #define	SORT_MALLOC_ARRAY_ID(T,c,id) new (MemManager::GetSingleton().GetPtr<T>(c,id)) T
 
 // get sort memory

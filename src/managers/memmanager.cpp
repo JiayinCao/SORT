@@ -45,7 +45,15 @@ void MemManager::PreMalloc( unsigned size , unsigned id )
 	Memory* mem = _getMemory( id );
 
 	if( mem != 0 )
-		LOG_ERROR<<"Memory with id "<<id<<" already exist."<<CRASH;
+	{
+		if( size != mem->m_size )
+			DeAlloc( id );
+		else
+		{
+			ClearMem( id );
+			return;
+		}
+	}
 
 	// create new memory
 	mem = new Memory();

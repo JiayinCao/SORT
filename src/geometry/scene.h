@@ -86,6 +86,10 @@ public:
 	// get triangle mesh with a specific name
 	TriMesh*	GetTriMesh( const string& name ) const;
 
+	// get file name
+	const string& GetFileName() const
+	{ return m_filename; }
+
 // private field
 private:
 	// the buffer for the triangle mesh

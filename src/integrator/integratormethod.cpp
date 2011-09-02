@@ -109,7 +109,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 			Spectrum li;
 			Intersection _ip;
 			if( false == light->Evaluate( Ray( ip.intersect , wi ) , &_ip , li ) )
-				return 0.0f;
+				return radiance;
 
 			float dot = SatDot( wi , ip.normal );
 			visibility.ray = Ray( ip.intersect , wi , 0 , 0.1f , _ip.t );

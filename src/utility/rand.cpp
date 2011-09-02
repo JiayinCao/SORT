@@ -58,6 +58,8 @@ void sort_seed()
 unsigned sort_rand()
 {
 	unsigned long y;
+#pragma omp critical
+{
     static unsigned long mag01[2]={0x0UL, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
@@ -91,7 +93,7 @@ unsigned sort_rand()
     y ^= (y << 7) & 0x9d2c5680UL;
     y ^= (y << 15) & 0xefc60000UL;
     y ^= (y >> 18);
-
+}
     return y;
 }
 

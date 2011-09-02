@@ -118,8 +118,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				Optimization="2"
+				Optimization="3"
+				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="&quot;$(SolutionDir)..\src&quot;;&quot;$(SolutionDir)..\src\thirdparty\ilmbase-1.0.2\&quot;;&quot;$(SolutionDir)..\src\thirdparty\zlib-1.2.5&quot;;&quot;$(SolutionDir)..\src\thirdparty\openexr-1.7.0&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="2"
@@ -127,7 +129,7 @@
 				OpenMP="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
 				CallingConvention="2"
 				DisableSpecificWarnings="4996;4003;4819;4101;4800;4018;4244;4099;4099;4305"
 			/>
@@ -504,6 +506,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\utility\enum.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\utility\parallel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\utility\parallel.h"
 				>
 			</File>
 			<File
