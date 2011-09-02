@@ -29,6 +29,7 @@
 #include "utility/path.h"
 #include "utility/creator.h"
 #include "sampler/sampler.h"
+#include "utility/parallel.h"
 #include <ImfHeader.h>
 
 #include "camera/camera.h"
@@ -98,7 +99,7 @@ void System::_preInit()
 	//m_pIntegrator = new WhittedRT(m_Scene);
 	// the sampler
 	m_pSampler = new StratifiedSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(1);
+	m_iSamplePerPixel = m_pSampler->RoundSize(16);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value
@@ -108,6 +109,9 @@ void System::_preInit()
 	m_uCurrentPixelId = 0;
 	m_uPreProgress = 0xffffffff;
 	m_uTotalPixelCount = m_rt->GetWidth() * m_rt->GetHeight();
+
+	if( MultiThreadEnabled() )
+		_setupMultiThreads();
 }
 
 // post-uninit
@@ -143,37 +147,11 @@ void System::Render()
 	Timer::GetSingleton().StartTimer();
 
 	// reset pixel id
-	m_uCurrentPixelId = 0;
-	m_uPreProgress = 0xffffffff;
-	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i++ )
-	{
-		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
-		{
-			// clear managed memory after each pixel
-			SORT_CLEARMEM();
-
-			// generate samples to be used later
-			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples , m_iSamplePerPixel , m_Scene );
-
-			// the radiance
-			Spectrum radiance;
-			for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
-			{
-				// generate rays
-				Ray r = m_camera->GenerateRay( (float)j , (float)i , m_pSamples[k] );
-				// accumulate the radiance
-				radiance += m_pIntegrator->Li( m_Scene , r , m_pSamples[k] );
-			}
-			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
-
-			// update current pixel
-			m_uCurrentPixelId++;
-		}
-		// output progress
-		_outputProgress();
-	}
-	cout<<endl;
-
+	if( MultiThreadEnabled() )
+		_raytracing_multithread();
+	else
+		_raytracing();
+	
 	// stop timer
 	Timer::GetSingleton().StopTimer();
 	m_uRenderingTime = Timer::GetSingleton().GetElapsedTime();
@@ -224,7 +202,25 @@ void System::PreProcess()
 	// stop timer
 	Timer::GetSingleton().StopTimer();
 	m_uPreProcessingTime = Timer::GetSingleton().GetElapsedTime();
-	cout<<m_uPreProcessingTime<<endl;
+
+	// output some information
+	_outputPreprocess();
+}
+
+// output preprocessing information
+void System::_outputPreprocess()
+{
+	unsigned	core_num = NumSystemCores();
+	bool		multi_thread = MultiThreadEnabled();
+	cout<<"------------------------------------------------------------------------------"<<endl;
+	cout<<" SORT is short for Simple Open-source Ray Tracing."<<endl;
+	if( multi_thread )
+		cout<<"   Multi-thread is enabled"<<"("<<core_num<<" core"<<((core_num>1)?"s are":" is")<<" detected.)"<<endl;
+	else
+		cout<<"   Multi-thread is disabled."<<endl;
+	cout<<"   "<<m_iSamplePerPixel<<" sample"<<((m_iSamplePerPixel>1)?"s are":" is")<<" per pixel."<<endl;
+	cout<<"   Scene file : "<<m_Scene.GetFileName()<<endl;
+	cout<<"   Time spent on preprocessing :"<<m_uPreProcessingTime<<" ms."<<endl;
 }
 
 // get elapsed time
@@ -280,4 +276,96 @@ void System::_uninit3rdParty()
 void System::Uninit()
 {
 	_uninit3rdParty();
+}
+
+// preprocess mutiple thread
+void System::_prepareMemoryForThread()
+{
+	int core_num = NumSystemCores();
+	for( int i = 0 ; i < core_num ; ++i )
+		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 16 , i );
+}
+
+// setup multiple threads environment
+void System::_setupMultiThreads()
+{
+	Sort_Assert( MultiThreadEnabled() == true );
+
+	// set thread number
+	SetThreadNum();
+
+	// prepare memory
+	_prepareMemoryForThread();
+}
+
+// do ray tracing
+void System::_raytracing()
+{
+	m_uCurrentPixelId = 0;
+	m_uPreProgress = 0xffffffff;
+	for( int i = 0 ; i < m_rt->GetHeight() ; i++ )
+	{
+		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
+		{
+			// clear managed memory after each pixel
+			MemManager::GetSingleton().ClearMem(ThreadId());
+
+			// generate samples to be used later
+			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples , m_iSamplePerPixel , m_Scene );
+
+			// the radiance
+			Spectrum radiance;
+			for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
+			{
+				// generate rays
+				Ray r = m_camera->GenerateRay( (float)j , (float)i , m_pSamples[k] );
+				// accumulate the radiance
+				radiance += m_pIntegrator->Li( m_Scene , r , m_pSamples[k] );
+			}
+			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
+
+			// update current pixel
+			m_uCurrentPixelId++;
+		}
+		// output progress
+		_outputProgress();
+	}
+	cout<<endl;
+}
+// do ray tracing in a multithread enviroment
+void System::_raytracing_multithread()
+{
+	m_uCurrentPixelId = 0;
+	m_uPreProgress = 0xffffffff;
+	#pragma omp parallel for
+	for( int i = 0 ; i < m_rt->GetHeight() ; i++ )
+	{
+		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
+		{
+			// clear managed memory after each pixel
+			MemManager::GetSingleton().ClearMem(ThreadId());
+
+			// generate samples to be used later
+			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples , m_iSamplePerPixel , m_Scene );
+
+			// the radiance
+			Spectrum radiance;
+			for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
+			{
+				// generate rays
+				Ray r = m_camera->GenerateRay( (float)j , (float)i , m_pSamples[k] );
+				// accumulate the radiance
+				radiance += m_pIntegrator->Li( m_Scene , r , m_pSamples[k] );
+			}
+			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
+			
+			#pragma omp critical
+			{	// update current pixel
+				m_uCurrentPixelId++;
+			}
+		}
+		// output progress
+		_outputProgress();
+	}
+	cout<<endl;
 }

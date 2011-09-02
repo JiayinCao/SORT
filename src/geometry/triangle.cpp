@@ -25,7 +25,8 @@
 bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
 	// get the memory
-	Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+	// note : reference is not used here because it's not thread-safe
+	BufferMemory* mem = m_trimesh->m_pMemory;
 	int id0 = m_Index[0].posIndex;
 	int id1 = m_Index[1].posIndex;
 	int id2 = m_Index[2].posIndex;

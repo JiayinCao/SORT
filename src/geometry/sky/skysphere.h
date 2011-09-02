@@ -74,7 +74,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			SkySphere* sky = dynamic_cast<SkySphere*>(m_target);
+			SkySphere* sky = CAST_TARGET(SkySphere);
 			sky->m_sky.LoadImageFromFile( str );
 			sky->_generateDistribution2D();
 		}

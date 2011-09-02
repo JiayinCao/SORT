@@ -22,8 +22,8 @@
 #include "geometry/intersection.h"
 #include <algorithm>
 
-static const unsigned KD_NODE_MEMID = 1;
-static const unsigned KD_LEAF_TRILIST_MEMID = 2;
+static const unsigned KD_NODE_MEMID = 1024;
+static const unsigned KD_LEAF_TRILIST_MEMID = 1025;
 
 // default constructor
 KDTree::KDTree()

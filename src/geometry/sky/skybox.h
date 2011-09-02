@@ -78,7 +78,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			SkyBox* sky = dynamic_cast<SkyBox*>(m_target);
+			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_up.LoadImageFromFile( str );
 		}
 	};
@@ -91,7 +91,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			SkyBox* sky = dynamic_cast<SkyBox*>(m_target);
+			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_down.LoadImageFromFile( str );
 		}
 	};
@@ -104,7 +104,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			SkyBox* sky = dynamic_cast<SkyBox*>(m_target);
+			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_front.LoadImageFromFile( str );
 		}
 	};
@@ -117,7 +117,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			SkyBox* sky = dynamic_cast<SkyBox*>(m_target);
+			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_back.LoadImageFromFile( str );
 		}
 	};
@@ -130,7 +130,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			SkyBox* sky = dynamic_cast<SkyBox*>(m_target);
+			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_left.LoadImageFromFile( str );
 		}
 	};
@@ -143,7 +143,7 @@ private:
 		// set value
 		void SetValue( const string& str )
 		{
-			SkyBox* sky = dynamic_cast<SkyBox*>(m_target);
+			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_right.LoadImageFromFile( str );
 		}
 	};

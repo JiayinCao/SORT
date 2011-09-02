@@ -23,8 +23,8 @@
 #include "managers/memmanager.h"
 #include "geometry/intersection.h"
 
-static const unsigned BVH_NODE_MEMID = 3;
-static const unsigned BVH_LEAF_PRILIST_MEMID = 4;
+static const unsigned BVH_NODE_MEMID = 1026;
+static const unsigned BVH_LEAF_PRILIST_MEMID = 1027;
 
 static const unsigned BVH_SPLIT_COUNT = 16;
 static const float BVH_INV_SPLIT_COUNT = 0.0625f;

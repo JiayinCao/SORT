@@ -329,8 +329,6 @@ void Scene::_genLightDistribution()
 // get sampled light
 const Light* Scene::SampleLight( float u , float* pdf ) const
 {
-	if( u < 0.0f || u > 1.0f )
-		int a = 0;
 	Sort_Assert( u >= 0.0f && u <= 1.0f );
 	Sort_Assert( m_pLightsDis != 0 );
 

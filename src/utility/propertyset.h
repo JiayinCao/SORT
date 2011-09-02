@@ -129,6 +129,6 @@ protected:
 	}
 };
 
-#define	CAST_TARGET(T)	dynamic_cast<T*>(m_target)
+#define	CAST_TARGET(T)	static_cast<T*>(m_target)
 
 #endif

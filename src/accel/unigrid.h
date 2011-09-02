@@ -63,9 +63,6 @@ private:
 	// the delta
 	const float m_delta;
 
-	// the mail box for avoiding intersection test with duplicate triangles
-	unsigned char*	m_pMailBox;
-
 	// initialize the data
 	void _init();
 	// release the data
