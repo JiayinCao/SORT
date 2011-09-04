@@ -71,9 +71,15 @@ public:
 	// para 'intersect' : intersection information
 	// para 'wi'		: input vector in world space
 	// para 'delta'		: a delta to offset the original point
-	// para 'pdf'		: property density function value of the input vector
+	// para 'pdf'		: properbility density function value of the input vector
 	// para 'visibility': visibility tester
 	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const = 0;
+
+	// sample a ray from light
+	// para 'ls'       : light sample
+	// para 'r'       : the light vector
+	// para 'pdf'      : the properbility density function
+	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const = 0;
 
 	// set transformation
 	virtual void	SetTransform( const Transform& transform )

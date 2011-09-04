@@ -48,6 +48,12 @@ public:
 	// get the pdf of specific direction
 	virtual float Pdf( const Point& p , const Vector& wi ) const ;
 
+	// sample a ray from light
+	// para 'ls'       : light sample
+	// para 'r'       : the light vector
+	// para 'pdf'      : the properbility density function
+	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
+
 // private method
 private:
 	// get intersection between a ray and the sphere

@@ -10,6 +10,13 @@
       <MatSet name="B2ox02" mat=""/>
     </Material>
 	</Model>
+	<Model filename="cube.obj" name="box">
+		<Transform>
+			<Matrix value="t -0.5 0 -0.5"/>
+			<Matrix value="s 300 500 300"/>
+			<Matrix value="t 0 500 0"/>
+		</Transform>
+	</Model>
   <Light type="po1int">
     <Property name="intensity" value="10000000 9000000 6000000"/>
 	<Property name="pos" value="0 600 500" />
@@ -34,8 +41,8 @@
     <Property name="radius" value="100" />
     <Property name="intensity" value="450 450 450"/>
     <Property name="dir" value="0 -1 0"/>
-    <Property name="pos" value="0 1000 0"/>
-    <Property name="dir" value="0 -1 0"/>
+    <Property name="pos" value="0 800 0"/>
+    <Property name="dir" value="0 1 0"/>
   </Light>
   <Light type="skyl1ight">
     <Property name="type" value="sky_sphere"/>

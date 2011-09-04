@@ -173,5 +173,5 @@ void PathTracing::OutputLog() const
 	LOG<<"Integrator algorithm : Path Tracing."<<ENDL;
 	LOG<<"It supports all of the features in direct lighting algorithm."<<ENDL;
 	LOG<<"Some global illumination effect is also supported in path tracing."<<ENDL;
-	LOG<<"While it requires much more samples to reduce the noise to an acceptable level."<<ENDL;
+	LOG<<"While it requires much more samples to reduce the noise to an acceptable level."<<ENDL<<ENDL;
 }

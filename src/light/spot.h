@@ -47,6 +47,12 @@ public:
 	virtual Spectrum Power() const
 	{return 4 * PI * intensity * ( 1.0f - 0.5f * ( cos_falloff_start + cos_total_range ) ) ;}
 
+	// sample a ray from light
+	// para 'ls'       : light sample
+	// para 'r'       : the light vector
+	// para 'pdf'      : the properbility density function
+	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
+
 // private field
 private:
 	float	cos_falloff_start;

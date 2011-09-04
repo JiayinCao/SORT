@@ -21,6 +21,7 @@
 #include "sampler/sample.h"
 #include "geometry/vector.h"
 #include "geometry/intersection.h"
+#include "utility/rand.h"
 
 // sample a point on shape
 Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
@@ -43,6 +44,19 @@ Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , floa
 	}
 
 	return lp;
+}
+
+// sample a ray from light
+void Disk::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+{
+	float u , v;
+	UniformSampleDisk( ls.u , ls.v , u , v );
+	r.m_fMin = 0.0f;
+	r.m_fMax = FLT_MAX;
+	r.m_Ori = transform(Point( u * radius , 0.0f , v * radius ));
+	r.m_Dir = transform(UniformSampleHemisphere(sort_canonical() , sort_canonical()));
+
+	if( pdf ) *pdf = 1.0f / ( radius * radius * PI * PI );
 }
 
 // the surface area of the shape

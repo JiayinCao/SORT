@@ -51,6 +51,12 @@ public:
 		return delta * PI * intensity;
 	}
 
+	// sample a ray from light
+	// para 'ls'       : light sample
+	// para 'r'       : the light vector
+	// para 'pdf'      : the properbility density function
+	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
+
 // private field
 private:
 
