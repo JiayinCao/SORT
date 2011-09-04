@@ -1749,6 +1749,14 @@
 			Name="integrator"
 			>
 			<File
+				RelativePath="..\..\src\integrator\bidirpath.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\integrator\bidirpath.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\integrator\direct.cpp"
 				>
 			</File>
