@@ -22,6 +22,7 @@
 #include "geometry/vector.h"
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
+#include "utility/rand.h"
 
 // sample a point on shape
 Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
@@ -97,3 +98,17 @@ float Sphere::_getIntersect( const Ray& r , Point& p , float limit ) const
 
 	return t;
 }
+
+// sample a ray from light
+void Sphere::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+{
+	r.m_fMin = 0.0f;
+	r.m_fMax = FLT_MAX;
+	r.m_Ori = radius * UniformSampleSphere( ls.u , ls.v );
+	r.m_Dir = UniformSampleSphere( sort_canonical() , sort_canonical() );
+	if( Dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
+		r.m_Dir = -r.m_Dir;
+
+	if( pdf ) *pdf = 1.0f / ( 8.0f * PI * PI );
+}
+

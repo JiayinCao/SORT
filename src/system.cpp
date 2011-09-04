@@ -39,6 +39,7 @@
 #include "integrator/whittedrt.h"
 #include "integrator/direct.h"
 #include "integrator/pathtracing.h"
+#include "integrator/bidirpath.h"
 
 #include "sampler/stratified.h"
 #include "sampler/random.h"
@@ -97,9 +98,10 @@ void System::_preInit()
 	//m_pIntegrator = new DirectLight( m_Scene , 1 );
 	m_pIntegrator = new PathTracing( m_Scene , 1024 );
 	//m_pIntegrator = new WhittedRT(m_Scene);
+	//m_pIntegrator = new BidirPathTracing( m_Scene , 1024 );
 	// the sampler
 	m_pSampler = new StratifiedSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(16);
+	m_iSamplePerPixel = m_pSampler->RoundSize(1);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value

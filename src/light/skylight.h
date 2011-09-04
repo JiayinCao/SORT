@@ -59,6 +59,12 @@ public:
 	// note : none-delta light must overwrite this method
 	virtual float Pdf( const Point& p , const Vector& wi ) const;
 
+	// sample a ray from light
+	// para 'ls'       : light sample
+	// para 'r'       : the light vector
+	// para 'pdf'      : the properbility density function
+	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
+
 // private field
 private:
 	// the sky

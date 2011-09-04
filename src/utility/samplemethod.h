@@ -138,14 +138,6 @@ inline float UniformSpherePdf( const Vector& v )
 	return INV_TWOPI * 0.5f;
 }
 
-// uniformly sample triangle
-inline void UniformSampleTriangle( float u1 , float u2 , float& u , float& v )
-{
-	float su1 = sqrt( u1 );
-	u = 1 - su1;
-	v = u2 * su1;
-}
-
 // one dimensional distribution
 class Distribution1D
 {

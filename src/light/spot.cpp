@@ -18,6 +18,8 @@
 // include the header
 #include "spot.h"
 #include "geometry/intersection.h"
+#include "sampler/sample.h"
+#include "utility/samplemethod.h"
 
 // sample ray from light
 Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
@@ -41,6 +43,18 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
 	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , len );
 
 	return intensity / vec.SquaredLength() * d * d;
+}
+
+// sample a ray from light
+void SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+{
+	r.m_fMin = 0.0f;
+	r.m_fMax = FLT_MAX;
+	r.m_Ori = Point( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
+	r.m_Dir = UniformSampleCone( ls.u , ls.v , cos_total_range );
+	r.m_Dir = light2world.matrix( r.m_Dir );
+
+	if( pdf ) *pdf = UniformConePdf( cos_total_range );
 }
 
 // register property

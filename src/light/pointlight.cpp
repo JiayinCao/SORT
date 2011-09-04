@@ -18,6 +18,8 @@
 // include header
 #include "pointlight.h"
 #include "geometry/intersection.h"
+#include "utility/samplemethod.h"
+#include "sampler/sample.h"
 
 // sample ray from light
 Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
@@ -31,6 +33,17 @@ Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample
 	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , len );
 
 	return intensity / ( len * len );
+}
+
+// sample a ray from light
+void PointLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+{
+	r.m_fMin = 0.0f;
+	r.m_fMax = FLT_MAX;
+	r.m_Ori = Point( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
+	r.m_Dir = UniformSampleSphere( ls.u , ls.v ); 
+
+	if( pdf ) *pdf = UniformSpherePdf(r.m_Dir);
 }
 
 // register property

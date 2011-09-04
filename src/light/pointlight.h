@@ -43,6 +43,12 @@ public:
 	// para 'visibility': visibility tester
 	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const;
 
+	// sample a ray from light
+	// para 'ls'       : light sample
+	// para 'r'       : the light vector
+	// para 'pdf'      : the properbility density function
+	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
+
 	// total power of the light
 	virtual Spectrum Power() const
 	{return 4 * PI * intensity;}

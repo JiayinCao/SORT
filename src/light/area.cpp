@@ -109,3 +109,10 @@ bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& r
 
 	return result;
 }
+
+// sample a ray from light
+void AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+{
+	Sort_Assert( shape != 0 );
+	shape->sample_l( ls , r , pdf );
+}

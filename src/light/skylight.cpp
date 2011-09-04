@@ -19,6 +19,7 @@
 #include "skylight.h"
 #include "sampler/sample.h"
 #include "bsdf/bsdf.h"
+#include "utility/samplemethod.h"
 
 // sample ray from light
 Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const
@@ -33,7 +34,6 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 	// setup visibility tester
 	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , FLT_MAX );
 
-	// the 10.0f factor will be removed later
 	return sky->Evaluate( wi );
 }
 
@@ -44,6 +44,22 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const Vector& wo ) 
 	return sky->Evaluate( -wo ); 
 }
 
+// sample a ray from light
+void SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+{
+	Sort_Assert( sky != 0 );
+
+	r.m_fMin = 0.0f;
+	r.m_fMax = FLT_MAX;
+	r.m_Dir = -sky->sample_v( ls.u , ls.v , pdf );
+
+	const BBox& box = scene->GetBBox();
+	Point center = ( box.m_Max + box.m_Min ) * 0.5f;
+	Vector delta = box.m_Max - box.m_Min;
+	float world_radius = delta.Length() * 0.5f;
+	r.m_Ori = center - r.m_Dir * world_radius * 2.0f;
+}
+
 // total power of the light
 Spectrum SkyLight::Power() const
 {
@@ -51,7 +67,6 @@ Spectrum SkyLight::Power() const
 	BBox box = scene->GetBBox();
 	float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
 
-	// the 10.0f factor will be removed later
 	return radius * radius * PI * sky->GetAverage();
 }
 

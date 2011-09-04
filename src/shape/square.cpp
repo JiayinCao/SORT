@@ -18,6 +18,8 @@
 #include "square.h"
 #include "geometry/intersection.h"
 #include "sampler/sample.h"
+#include "utility/samplemethod.h"
+#include "utility/rand.h"
 
 // sample a point on shape
 Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
@@ -39,6 +41,19 @@ Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , fl
 	}
 
 	return lp;
+}
+
+// sample a ray from light
+void Square::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+{
+	float u = 2 * ls.u - 1.0f;
+	float v = 2 * ls.v - 1.0f;
+	r.m_fMin = 0.0f;
+	r.m_fMax = FLT_MAX;
+	r.m_Ori = transform( Point( radius * u , 0.0f , radius * v ) );
+	r.m_Dir = transform( UniformSampleHemisphere( sort_canonical() , sort_canonical() ) );
+
+	if( pdf ) *pdf = 1.0f / ( radius * radius * 8.0f * PI );
 }
 
 // the surface area of the shape
