@@ -52,5 +52,5 @@ Spectrum Refraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
 	if( pdf ) 
 		*pdf = 1.0f;
 
-	return inv_eta * inv_eta * ( 1.0f - t ) / AbsCosTheta( wi ) ;
+	return color * inv_eta * inv_eta * ( 1.0f - t ) / AbsCosTheta( wi ) ;
 }

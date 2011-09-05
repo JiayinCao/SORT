@@ -25,5 +25,5 @@ Spectrum Reflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
 {
 	wi = Vector( -wo.x , wo.y , -wo.z );
 	if( pdf ) *pdf = 1.0f;
-	return m_fresnel->Evaluate( CosTheta(wo) ) / AbsCosTheta( wi );
+	return color * m_fresnel->Evaluate( CosTheta(wo) ) / AbsCosTheta( wi );
 }

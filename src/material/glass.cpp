@@ -36,6 +36,7 @@ void Glass::_registerAllProperty()
 {
 	_registerProperty( "eta_i" , new EtaIProperty( this ) );
 	_registerProperty( "eta_t" , new EtaTProperty( this ) );
+	_registerProperty( "color" , new ColorProperty( this ) );
 }
 
 // get bsdf
@@ -45,8 +46,8 @@ Bsdf* Glass::GetBsdf( const Intersection* intersect ) const
 
 	Fresnel* fresnel = SORT_MALLOC(FresnelDielectric)( eta_i , eta_t );
 
-	bsdf->AddBxdf( SORT_MALLOC(Reflection)(fresnel) );
-	bsdf->AddBxdf( SORT_MALLOC(Refraction)(eta_i,eta_t,fresnel) );
+	bsdf->AddBxdf( SORT_MALLOC(Reflection)(fresnel , color ) );
+	bsdf->AddBxdf( SORT_MALLOC(Refraction)(eta_i,eta_t,fresnel , color ) );
 
 	return bsdf;	
 }

@@ -21,6 +21,7 @@
 // include the header
 #include "bxdf.h"
 #include "fresnel.h"
+#include "spectrum/spectrum.h"
 
 //////////////////////////////////////////////////////////////////////////////////
 // definition of refraction
@@ -29,8 +30,8 @@ class	Refraction : public Bxdf
 // public method
 public:
 	// default constructor
-	Refraction( float ei , float et , const Fresnel* fre ):
-	eta_t(et),eta_i(ei),m_fresnel(fre)
+	Refraction( float ei , float et , const Fresnel* fre , const Spectrum& c = 1.0f ):
+	eta_t(et),eta_i(ei),m_fresnel(fre),color(c)
 	{m_type=(BXDF_TYPE)(BXDF_TRANSMISSION|BXDF_SPECULAR);}
 	// destructor
 	~Refraction(){}
@@ -61,8 +62,9 @@ public:
 // private field
 private:
 	float eta_t , eta_i;
-
 	const Fresnel* m_fresnel;
+
+	Spectrum color;
 };
 
 #endif

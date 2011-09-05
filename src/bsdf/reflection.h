@@ -21,6 +21,7 @@
 // include the header
 #include "bxdf.h"
 #include "fresnel.h"
+#include "spectrum/spectrum.h"
 
 ////////////////////////////////////////////////////////////////////
 // definition of reflection
@@ -29,8 +30,8 @@ class	Reflection : public Bxdf
 // public method
 public:
 	// default constructor
-	Reflection( const Fresnel* fre ):
-		m_fresnel(fre)
+	Reflection( const Fresnel* fre , const Spectrum& c = 1.0f ):
+		m_fresnel(fre) , color( c )
 	{m_type=(BXDF_TYPE)(BXDF_REFLECTION|BXDF_SPECULAR);}
 	// destructor
 	~Reflection(){}
@@ -60,6 +61,7 @@ public:
 // private field
 private:
 	const Fresnel* m_fresnel;
+	Spectrum color;
 };
 
 #endif
