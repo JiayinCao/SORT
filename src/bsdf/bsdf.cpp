@@ -102,15 +102,15 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	}
 	int bsdf_id = min( (int)(bs.t*(float)com_num+0.5f) , (int)(com_num-1) );
 	Bxdf* bxdf = 0;
-	int count = com_num;
+	int count = bsdf_id;
 	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
 		if( m_bxdf[i]->MatchFlag(type) ){
-			count--;
 			if( count == 0 )
 			{
 				bxdf = m_bxdf[i];
 				break;
 			}
+			count--;
 		}
 
 	Sort_Assert( bxdf != 0 );
@@ -131,8 +131,8 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 		for( unsigned i = 0; i < m_bxdfCount ; ++i )
 			if( m_bxdf[i] != bxdf && m_bxdf[i]->MatchFlag( type ) )
 				*pdf += m_bxdf[i]->Pdf( wo , wi );
-		*pdf /= com_num;
 	}
+	if( pdf ) *pdf /= com_num;
 	
 	if( !(bxdf->GetType() & BXDF_SPECULAR ) )
 	{
