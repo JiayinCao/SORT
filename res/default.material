@@ -1,5 +1,9 @@
 <Root>
-	<Material name="inside" type="Matte">
+ 	 <Material name="glass" type="Glass">
+   	 <Property name="eta_t" value="1.4" />
+		<Property name="color" value="0.0 0.0 1.0" />
+  	</Material>
+	 <Material name="inside" type="Matte">
 		<Texture name="color" type="checkbox">
 			<Property name="color0" value="1 0 0"/>
 			<Property name="color1" value="0 1 0"/>
@@ -34,9 +38,6 @@
     <Texture name="color" type="constant">
       <Property name="color" value="0.0 0.1 0.1"/>
     </Texture>
-  </Material>
-  <Material name="glass" type="Glass">
-    <Property name="eta_t" value="1.4" />
   </Material>
   <Material name="merl" type="Merl">
     <Property name="merl" value="alum-bronze.binary"/>

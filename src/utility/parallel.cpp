@@ -23,11 +23,7 @@
 
 // whether multi thread is enabled
 // by default it's enabled
-#if defined(SORT_DEBUG)
-static bool g_bMultiThreadEnabled = false;
-#else
 static bool g_bMultiThreadEnabled = true;
-#endif
 
 // enable or disable multi-thread
 bool	MultiThreadEnabled()

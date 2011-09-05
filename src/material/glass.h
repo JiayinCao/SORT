@@ -19,6 +19,8 @@
 #define	SORT_GLASS
 
 #include "material.h"
+#include "spectrum/spectrum.h"
+#include "utility/strhelper.h"
 
 ///////////////////////////////////////////////////////////////////
 // definition of glass
@@ -40,6 +42,7 @@ public:
 private:
 	float eta_i;
 	float eta_t;
+	Spectrum color;
 
 	// register property
 	void _registerAllProperty();
@@ -68,6 +71,18 @@ private:
 		{
 			Glass* glass = CAST_TARGET(Glass);
 			glass->eta_t = (float)atof( str.c_str() );
+		}
+	};
+	class ColorProperty : public PropertyHandler<Material>
+	{
+	public:
+		ColorProperty(Material* mat):PropertyHandler(mat){}
+
+		// set value
+		void SetValue( const string& str )
+		{
+			Glass* glass = CAST_TARGET(Glass);
+			glass->color = SpectrumFromStr( str );
 		}
 	};
 };
