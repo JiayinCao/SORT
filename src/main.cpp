@@ -30,7 +30,7 @@ int main( int argc , char** argv )
 #endif
 {
 	// load the scene from file
-	g_System.LoadScene( "../res/cornell.scene" );
+	g_System.LoadScene( "../res/first_scene.scene" );
 
 	// do ray tracing
 	g_System.Render();

@@ -1,26 +1,13 @@
 <Root>
   <Resource path="../res/"/>
   <Material value="default.material"/>
-  <Model filename="killeroo.obj" name="object">
+  <Model filename="sphere.obj" name="object">
     <Transform>
-      <Matrix value="t -0.5 15 -0.5" />
-      <Matrix value="s 20"/>
-      <Matrix value="r 1 4.6"/>
-      <Matrix value="t 0 0 200"/>
+      <Matrix value="t -0.5 60 -0.5" />
+      <Matrix value="s 2"/>
     </Transform>
     <Material>
-      <MatSet name="" mat="killeroo_mat"/>
-    </Material>
-  </Model>
-  <Model filename="killeroo.obj" name="object1">
-    <Transform>
-      <Matrix value="t -0.5 15 -0.5" />
-      <Matrix value="s 20"/>
-      <Matrix value="r 1 4.6"/>
-      <Matrix value="t 0 0 -200"/>
-    </Transform>
-    <Material>
-      <MatSet name="" mat="mirror"/>
+      <MatSet name="" mat="glass"/>
     </Material>
   </Model>
   <Model filename="cube.obj" name="plane">

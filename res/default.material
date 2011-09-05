@@ -35,6 +35,9 @@
       <Property name="color" value="0.0 0.1 0.1"/>
     </Texture>
   </Material>
+  <Material name="glass" type="Glass">
+    <Property name="eta_t" value="1.4" />
+  </Material>
   <Material name="merl" type="Merl">
     <Property name="merl" value="alum-bronze.binary"/>
   </Material>
