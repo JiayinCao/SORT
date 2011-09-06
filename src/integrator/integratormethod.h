@@ -30,11 +30,11 @@ class PixelSample;
 class Light;
 
 // radiance along specular reflective direction
-Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Intersection* intersect , 
+Spectrum	SpecularReflection( const Ray& ray , const Intersection* intersect , 
 								const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps );
 
 // radiance along specular refractive direction
-Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Intersection* intersect , 
+Spectrum	SpecularRefraction( const Ray& ray , const Intersection* intersect , 
 								const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps );
 
 // evaluate direct lighting

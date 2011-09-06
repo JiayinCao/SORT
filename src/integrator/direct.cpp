@@ -41,7 +41,7 @@ void DirectLight::_release()
 }
 
 // radiance along a specific ray direction
-Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample& ps ) const
+Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 {
 	if( r.m_Depth > max_recursive_depth )
 		return 0.0f;
@@ -73,9 +73,9 @@ Spectrum DirectLight::Li( const Scene& scene , const Ray& r , const PixelSample&
 	// evaluate specular reflection or refraction
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
 	if( bsdf->NumComponents( BXDF_SPECULAR_REFLECTION ) > 0 )
-		t += SpecularReflection( scene , r , &ip , bsdf , this , ps );
+		t += SpecularReflection( r , &ip , bsdf , this , ps );
 	if( bsdf->NumComponents( BXDF_SPECULAR_TRANSMISSION ) > 0 )
-		t += SpecularRefraction( scene , r , &ip , bsdf , this , ps );
+		t += SpecularRefraction( r , &ip , bsdf , this , ps );
 
 	return t;
 }

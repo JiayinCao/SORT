@@ -22,10 +22,9 @@
 #include "integratormethod.h"
 
 // return the radiance of a specific direction
-// note : there are two factors make the method biased.
-//			1. there is a limitation on the number of vertexes in the path
-//			2. caustics are not supported.
-Spectrum PathTracing::Li( const Scene& scene , const Ray& ray , const PixelSample& ps ) const
+// note : there are one factor makes the method biased.
+//		there is a limitation on the number of vertexes in the path
+Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
 	Spectrum L = 0.0f;
 
@@ -62,7 +61,7 @@ Spectrum PathTracing::Li( const Scene& scene , const Ray& ray , const PixelSampl
 			L += path_weight * EvaluateDirect(	r  , scene , light , inter , light_sample , 
 												bsdf_sample , BXDF_TYPE(BXDF_ALL&~BXDF_SPECULAR) ) / light_pdf;
 
-		// sample the next direct using bsdf
+		// sample the next direction using bsdf
 		float		path_pdf;
 		Vector		wi;
 		BXDF_TYPE	bxdf_type;

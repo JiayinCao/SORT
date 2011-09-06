@@ -25,7 +25,7 @@
 #include "light/light.h"
 
 // radiance along specular reflection
-Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps )
+Spectrum	SpecularReflection( const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps )
 {
 	Ray r;
 	float pdf;
@@ -38,11 +38,11 @@ Spectrum	SpecularReflection( const Scene& scene , const Ray& ray , const Interse
 
 	float density = AbsDot( r.m_Dir , intersect->normal );
 
-	return f * integrator->Li( scene , r , ps ) * density / pdf ;
+	return f * integrator->Li( r , ps ) * density / pdf ;
 }
 
 // radiance along specular refraction
-Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps )
+Spectrum	SpecularRefraction( const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps )
 {
 	Ray r;
 	float pdf;
@@ -55,7 +55,7 @@ Spectrum	SpecularRefraction( const Scene& scene , const Ray& ray , const Interse
 
 	float density = AbsDot( r.m_Dir , intersect->normal ) ;
 
-	return f * integrator->Li( scene , r , ps ) * density / pdf ;
+	return f * integrator->Li( r , ps ) * density / pdf ;
 }
 
 // evaluate direct lighting
