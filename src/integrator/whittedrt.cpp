@@ -24,7 +24,7 @@
 #include "light/light.h"
 
 // radiance along a specific ray direction
-Spectrum WhittedRT::Li( const Scene& scene , const Ray& r , const PixelSample& ps ) const
+Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 {
 	if( r.m_Depth > max_recursive_depth )
 		return 0.0f;
@@ -71,9 +71,9 @@ Spectrum WhittedRT::Li( const Scene& scene , const Ray& r , const PixelSample& p
 
 	// add reflection
 	if( bsdf->NumComponents( BXDF_REFLECTION ) > 0 )
-		t += SpecularReflection( scene , r , &ip , bsdf , this , ps );
+		t += SpecularReflection( r , &ip , bsdf , this , ps );
 	if( bsdf->NumComponents( BXDF_TRANSMISSION ) > 0 )
-		t += SpecularRefraction( scene , r , &ip , bsdf , this , ps );
+		t += SpecularRefraction( r , &ip , bsdf , this , ps );
 
 	return t;
 }

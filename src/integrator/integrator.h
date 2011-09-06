@@ -42,7 +42,7 @@ public:
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene
-	virtual Spectrum	Li( const Scene& scene , const Ray& ray , const PixelSample& ps ) const = 0;
+	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const = 0;
 
 	// generate samples
 	// para 'sampler' : the sampling method
