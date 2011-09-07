@@ -21,19 +21,29 @@
 #include "integrator.h"
 #include "geometry/point.h"
 #include "geometry/vector.h"
+#include "geometry/intersection.h"
 
 class	Primitive;
 class	Bsdf;
 
 struct BDPT_Vertex
 {
-	Point		p;	// the position of the vertex
-	Vector		n;	// the normal of the vertex
-	Primitive*	pri;// the primitive
-	Vector		wi;	// in direction
-	Vector		wo;	// out direction
-	Bsdf*		bsdf;// bsdf from material
-	float		pdf;// the pdf for the vertex
+	Point		p;		// the position of the vertex
+	Vector		n;		// the normal of the vertex
+	Primitive*	pri;	// the primitive
+	Vector		wi;		// in direction
+	Vector		wo;		// out direction
+	Bsdf*		bsdf;	// bsdf from material
+	float		pdf;	// the pdf for the vertex
+
+	Intersection	inter;	//temp
+
+	BDPT_Vertex()
+	{
+		pri = 0;
+		pdf = 1.0f;
+		bsdf = 0;
+	}
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -43,8 +53,7 @@ class BidirPathTracing : public Integrator
 // public method
 public:
 	// default constructor
-	BidirPathTracing( const Scene& s , unsigned ppp ):path_per_pixel(ppp),Integrator(s)
-	{if( path_per_pixel < 3 ) path_per_pixel = 3;}
+	BidirPathTracing( const Scene& s , unsigned ppp ):path_per_pixel(ppp),Integrator(s){}
 	// destructor
 	~BidirPathTracing(){}
 

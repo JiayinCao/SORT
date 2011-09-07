@@ -20,6 +20,7 @@
 #include "geometry/scene.h"
 #include "light/light.h"
 #include "bsdf/bsdf.h"
+#include "integratormethod.h"
 
 // return the radiance of a specific direction
 Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
@@ -38,9 +39,23 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	vector<BDPT_Vertex> light_path , eye_path;
 
 	unsigned eps = _generatePath( ray , eye_path , path_per_pixel );
+	if( eps == 0 )	return 0.0f;
+
 	unsigned lps = _generatePath( light_ray , light_path , path_per_pixel );
 
-	return _evaluatePath( eye_path , eps , light_path , lps ) / ( light_pdf * pdf );
+	Spectrum directWt = 1.0f;
+	Spectrum li;
+	for( unsigned i = 1 ; i <= eps ; ++i )
+	{
+		const BDPT_Vertex& vert = eye_path[i-1];
+		li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , light , vert.inter , LightSample(true) , BsdfSample(true) ) / i ;
+		directWt *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n ) / vert.pdf;
+
+		for( unsigned j = 1 ; j <= lps ; ++j )
+			li += 450.0f * _evaluatePath( eye_path , min( eps , i ) , light_path , min( lps , j ) ) / ( ( i + j ) * light_pdf );
+	}
+
+	return li / pdf;
 }
 
 // request samples
@@ -122,10 +137,11 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , vector<BDPT_Vertex>& 
 		vert.n = inter.normal;
 		vert.pri = inter.primitive;
 		vert.wi = -wi.m_Dir;
+		vert.inter = inter;
 		
-		if (path.size() > 2)
+		if (path.size() > 1)
 			if (sort_canonical() > 0.5f)
-			   break;
+				break;
 
 		vert.bsdf = inter.primitive->GetMaterial()->GetBsdf(&inter);
 		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &vert.pdf );
@@ -151,23 +167,27 @@ Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int 
 	for( int i = 0 ; i < esize - 1 ; ++i )
 	{
 		const BDPT_Vertex& vert = epath[i];
-		li *= vert.bsdf->f( vert.wi , vert.wo ) * AbsDot( vert.wo , vert.n ) / vert.pdf;
+		li *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n ) / vert.pdf;
 	}
 
 	for( int i = 0 ; i < lsize - 1 ; ++i )
 	{
 		const BDPT_Vertex& vert = lpath[i];
-		li *= vert.bsdf->f( vert.wo , vert.wi ) * AbsDot( vert.wi , vert.n ) / vert.pdf;
+		li *= vert.bsdf->f( vert.wo , vert.wi ) * SatDot( vert.wi , vert.n ) / vert.pdf;
 	}
 
-	if( epath.empty() == false || lpath.empty() == false )
+	if( lpath.empty() )
 		return li;
 
 	const BDPT_Vertex& evert = epath[esize-1];
-	const BDPT_Vertex& lvert = epath[lsize-1];
+	const BDPT_Vertex& lvert = lpath[lsize-1];
 	Vector delta = evert.p - lvert.p;
 	Vector n_delta = Normalize(delta);
-	li *= evert.bsdf->f( evert.wi , -n_delta ) * _Gterm( evert , lvert ) * lvert.bsdf->f( n_delta , lvert.wi ) / ( evert.pdf * lvert.pdf );
+	Spectrum l0 = evert.bsdf->f( evert.wi , -n_delta );
+	Spectrum l1 = _Gterm( evert , lvert );
+	Spectrum l2 = lvert.bsdf->f( n_delta , lvert.wi ) / ( evert.pdf * lvert.pdf );
+
+	li *= l0 * l1 * l2;
 
 	return li;
 }
@@ -177,5 +197,11 @@ Spectrum BidirPathTracing::_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1
 {
 	Vector delta = p0.p - p1.p;
 	Vector n_delta = Normalize(delta);
-	return AbsDot( p0.n , n_delta ) * AbsDot( p1.n , n_delta ) / delta.SquaredLength();
+
+	Visibility visible( scene );
+	visible.ray = Ray( p1.p , n_delta  , 0 , 0.1f , delta.Length() - 0.1f );
+	if( visible.IsVisible() == false )
+		return 0.0f;
+	
+	return SatDot( p0.n , -n_delta ) * SatDot( p1.n , n_delta ) / delta.SquaredLength();
 }
