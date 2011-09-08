@@ -380,7 +380,7 @@ Spectrum Scene::Le( const Ray& ray ) const
 	if( m_skyLight )
 	{
 		Spectrum r;
-		m_skyLight->Evaluate( ray , 0 , r );
+		m_skyLight->Le( ray , 0 , r );
 		return r;
 	}
 	return 0.0f;

@@ -38,7 +38,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 }
 
 // sample light density
-Spectrum SkyLight::sample_l( const Intersection& intersect , const Vector& wo ) const
+Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo ) const
 { 
 	Sort_Assert( sky != 0 );
 	return sky->Evaluate( -wo ); 
@@ -71,7 +71,7 @@ Spectrum SkyLight::Power() const
 }
 
 // get intersection between the light and the ray
-bool SkyLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
+bool SkyLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
 {
 	Sort_Assert( sky != 0 );
 

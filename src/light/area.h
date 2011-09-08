@@ -43,27 +43,27 @@ public:
 	// para 'visibility': visibility tester
 	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const;
 
+	// sample a ray from light
+	// para 'ls'       : light sample
+	// para 'r'       : the light vector
+	// para 'pdf'      : the properbility density function
+	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
+
+	// sample light density
+	virtual Spectrum Le( const Intersection& intersect , const Vector& wo ) const;
+
+	// get intersection between the light and the ray
+	virtual bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const;
+
 	// total power of the light
 	virtual Spectrum Power() const;
 
 	// it's not a delta light
 	bool	IsDelta() const { return false; }
 
-	// sample light density
-	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const;
-
 	// the pdf for specific sampled directioin
 	// note : none-delta light must overwrite this method
 	virtual float Pdf( const Point& p , const Vector& wi ) const;
-
-	// get intersection between the light and the ray
-	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const;
-
-	// sample a ray from light
-	// para 'ls'       : light sample
-	// para 'r'       : the light vector
-	// para 'pdf'      : the properbility density function
-	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
 
 	// get the shape of light
 	virtual Shape* GetShape() const { return shape; }

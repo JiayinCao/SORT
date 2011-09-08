@@ -67,6 +67,22 @@ public:
 
 	// setup scene
 	void	SetupScene( const Scene* s ) {scene=s;}
+	
+	// set transformation
+	virtual void	SetTransform( const Transform& transform ) {light2world = transform;}
+
+	// total power of the light
+	virtual Spectrum Power() const = 0;
+
+	// note : the following methods must be overwritten in non-delta light
+	// whether the light is a delta light
+	virtual bool IsDelta() const { return true; }
+
+	// get the shape of light
+	virtual Shape* GetShape() const { return 0; }
+
+	// the pdf for specific sampled directioin
+	virtual float Pdf( const Point& p , const Vector& wi ) const { return 1.0f; }
 
 	// sample ray from light
 	// para 'intersect' : intersection information
@@ -82,29 +98,11 @@ public:
 	// para 'pdf'      : the properbility density function
 	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const = 0;
 
-	// set transformation
-	virtual void	SetTransform( const Transform& transform )
-	{light2world = transform;}
-
-	// total power of the light
-	virtual Spectrum Power() const = 0;
-
-	// note : the following methods must be overwritten in non-delta light
-	// whether the light is a delta light
-	virtual bool IsDelta() const { return true; }
-
 	// sample light density
-	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const
-	{ return 0.0f; }
-
-	// get the shape of light
-	virtual Shape* GetShape() const { return 0; }
-
-	// the pdf for specific sampled directioin
-	virtual float Pdf( const Point& p , const Vector& wi ) const { return 1.0f; }
+	virtual Spectrum Le( const Intersection& intersect , const Vector& wo ) const { return 0.0f; }
 
 	// get intersection between the light and the ray
-	virtual bool Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }
+	virtual bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }
 
 // protected field
 protected:
