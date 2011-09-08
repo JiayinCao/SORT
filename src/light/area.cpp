@@ -77,7 +77,7 @@ void AreaLight::_registerAllProperty()
 }
 
 // sample light density
-Spectrum AreaLight::sample_l( const Intersection& intersect , const Vector& wo ) const
+Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo ) const
 {
 	if( Dot( wo , intersect.normal ) > 0.0f )
 		return intensity;
@@ -85,7 +85,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const Vector& wo )
 }
 
 // get intersection between the light and the ray
-bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
+bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
 {
 	Sort_Assert( shape != 0 );
 
@@ -94,7 +94,7 @@ bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& r
 
 	// transform the intersection result back to world coordinate
 	if( result && intersect != 0 )
-		radiance = sample_l( *intersect , -ray.m_Dir );
+		radiance = Le( *intersect , -ray.m_Dir );
 
 	return result;
 }

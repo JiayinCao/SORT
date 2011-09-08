@@ -40,6 +40,6 @@ Spectrum Intersection::Le( const Vector& wo ) const
 	if( primitive == 0 ) return 0.0f;
 	Light* light = primitive->GetLight();
 	if( light ) 
-		return light->sample_l( *this , wo );
+		return light->Le( *this , wo );
 	return 0.0f;
 }
