@@ -31,7 +31,6 @@ void AreaLight::_init()
 // release data
 void AreaLight::_release()
 {
-	SAFE_DELETE( shape );
 }
 
 // sample ray from light
@@ -47,7 +46,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 	// get the delta
 	Vector dlt = ps - intersect.intersect;
 	// setup visibility tester
-	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , dlt.Length() );
+	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , dlt.Length() - delta );
 
 	return intensity;
 }
@@ -57,10 +56,7 @@ float AreaLight::Pdf( const Point& p , const Vector& wi ) const
 {
 	Sort_Assert(shape!=0);
 
-	Point	local_p = light2world.invMatrix( p );
-	Vector	local_v = light2world.invMatrix( wi );
-
-	return shape->Pdf( local_p , local_v );
+	return shape->Pdf( p , wi );
 }
 
 // total power of the light
@@ -93,19 +89,12 @@ bool AreaLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& r
 {
 	Sort_Assert( shape != 0 );
 
-	// transform the ray to local coordinate
-	Ray r = light2world.invMatrix( ray );
-
 	// get intersect
-	bool result = shape->GetIntersect( r , intersect );
+	bool result = shape->GetIntersect( ray , intersect );
 
 	// transform the intersection result back to world coordinate
 	if( result && intersect != 0 )
-	{
-		intersect->intersect = light2world(intersect->intersect);
-		intersect->normal = light2world(intersect->normal);
 		radiance = sample_l( *intersect , -ray.m_Dir );
-	}
 
 	return result;
 }

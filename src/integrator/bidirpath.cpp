@@ -137,22 +137,23 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , vector<BDPT_Vertex>& 
 		vert.n = inter.normal;
 		vert.pri = inter.primitive;
 		vert.wi = -wi.m_Dir;
+		vert.bsdf = inter.primitive->GetMaterial()->GetBsdf(&inter);
 		vert.inter = inter;
-		
+		path.push_back( vert );
+
 		if (path.size() > 1)
+		{
 			if (sort_canonical() > 0.5f)
 				break;
+			vert.pdf *= 2.0f;
+		}
 
-		vert.bsdf = inter.primitive->GetMaterial()->GetBsdf(&inter);
 		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &vert.pdf );
-		vert.pdf *= 2.0f;
 
 		if( vert.pdf == 0.0f )
 			break;
 
 		wi = Ray( inter.intersect , vert.wo , 0 , 0.1f );
-
-		path.push_back( vert );
 	}
 
 	return path.size();

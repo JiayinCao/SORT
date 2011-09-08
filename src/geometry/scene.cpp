@@ -25,6 +25,7 @@
 #include "utility/assert.h"
 #include "managers/matmanager.h"
 #include "light/light.h"
+#include "shape/shape.h"
 
 // initialize default data
 void Scene::_init()
@@ -154,6 +155,13 @@ bool Scene::LoadScene( const string& str )
 					if( prop_name != 0 && prop_value != 0 )
 						light->SetProperty( prop_name , prop_value );
 					prop = prop->NextSiblingElement( "Property" );
+				}
+
+				Shape* shape = light->GetShape();
+				if( shape )
+				{
+					shape->SetID( m_triBuf.size() );
+					m_triBuf.push_back( shape );
 				}
 
 				m_lights.push_back( light );

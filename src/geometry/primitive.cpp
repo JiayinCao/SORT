@@ -18,6 +18,7 @@
 #include "primitive.h"
 #include "light/light.h"
 #include "bbox.h"
+#include "managers/matmanager.h"
 
 // delete the cache
 void Primitive::ClearBBoxCache()

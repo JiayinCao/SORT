@@ -65,6 +65,9 @@ public:
 	// para 'pdf'      : the properbility density function
 	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
 
+	// get the shape of light
+	virtual Shape* GetShape() const { return shape; }
+
 // private field
 private:
 	// the shape binded to the area light
@@ -98,7 +101,11 @@ private:
 			light->light2world.invMatrix.m[11] = -( light->light2world.invMatrix.m[8] * p.x + 
 				light->light2world.invMatrix.m[9] * p.y + light->light2world.invMatrix.m[10] * p.z );
 
-			if( light->shape ) light->shape->SetTransform( light->light2world );
+			if( light->shape )
+			{
+				light->shape->SetTransform( light->light2world );
+				light->shape->BindLight( light );
+			}
 		}
 	};
 	class DirProperty : public PropertyHandler<Light>
@@ -126,7 +133,11 @@ private:
 			inv.m[11] = -( light->light2world.invMatrix.m[8] * m.m[3] + 
 				light->light2world.invMatrix.m[9] * m.m[7] + light->light2world.invMatrix.m[10] * m.m[11] );
 
-			if( light->shape ) light->shape->SetTransform( light->light2world );
+			if( light->shape ) 
+			{
+				light->shape->SetTransform( light->light2world );
+				light->shape->BindLight(light);
+			}
 		}
 	};
 	class ShapeProperty : public PropertyHandler<Light>

@@ -18,6 +18,7 @@
 // include the header
 #include "intersection.h"
 #include <float.h>
+#include "light/light.h"
 
 // default constructor
 Intersection::Intersection()
@@ -31,4 +32,14 @@ Intersection::Intersection()
 // destructor
 Intersection::~Intersection()
 {
+}
+
+// get the emissive
+Spectrum Intersection::Le( const Vector& wo ) const
+{
+	if( primitive == 0 ) return 0.0f;
+	Light* light = primitive->GetLight();
+	if( light ) 
+		return light->sample_l( *this , wo );
+	return 0.0f;
 }

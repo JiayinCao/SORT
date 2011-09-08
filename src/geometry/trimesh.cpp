@@ -24,6 +24,7 @@
 #include "geometry/instancetri.h"
 #include "managers/logmanager.h"
 #include "managers/memmanager.h"
+#include "managers/matmanager.h"
 
 // default constructor
 TriMesh::TriMesh( const string& name ):m_Name(name)

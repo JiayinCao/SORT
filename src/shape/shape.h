@@ -20,30 +20,27 @@
 
 #include "geometry/point.h"
 #include "geometry/transform.h"
+#include "geometry/primitive.h"
 
 class LightSample;
 class Vector;
 class Ray;
 class Intersection;
+class Light;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	definition of shape class
-//	Note : SORT doesn't make shape and primitive the same because of two reasons.
-//		1. Shape is only binded to area light , while primitive is the basic unit of 
-//		the scene geometry. The only primitive supported in SORT is triangle, supporting
-//		the other geometry doesn't contribute much. There is no material attached to 
-//		shape, because it's only emissive , doesn't reflect light in SORT.
-//		2. Shape is simple to sample. The pdf of sampling shape is much more accurate
-//		than sampling a triangle , let alone the triangle set , which is very hard to 
-//		sample correctly.
-class	Shape
+class	Shape : public Primitive
 {
 // public method
 public:
 	// default constructor
-	Shape(){ radius = 1.0f; }
+	Shape():Primitive(0,0){ radius = 1.0f;}
 	// destructor
 	virtual ~Shape(){}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	// methods for Shape ( for light )
 
 	// sample a point on shape
 	// para 'ls': the light sample
@@ -52,15 +49,15 @@ public:
 	// para 'pdf': the pdf of the light sample ( output )
 	// result   : a sampled point from the light source
 	virtual Point sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const = 0;
-
-	// the surface area of the shape
-	virtual float SurfaceArea() const = 0;
 	
+	// sample a ray from light
+	// para 'ls'       : light sample
+	// para 'r'       : the light vector
+	// para 'pdf'      : the properbility density function
+	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const = 0;
+
 	// setup transformation for the shape
 	virtual void SetTransform( const Transform& s ) { transform = s; }
-
-	// get intersection between the light surface and the ray
-	virtual bool GetIntersect( const Ray& ray , Intersection* intersect ) const;
 
 	// set the radius of the shape
 	virtual void SetRadius( float r ) { radius = r; }
@@ -68,21 +65,31 @@ public:
 	// get the pdf of specific direction
 	virtual float Pdf( const Point& p , const Vector& wi ) const;
 
-	// sample a ray from light
-	// para 'ls'       : light sample
-	// para 'r'       : the light vector
-	// para 'pdf'      : the properbility density function
-	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const = 0;
+	// bind light
+	void	BindLight( Light* l ) { light = l; }
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	// methods inheriting from Primitive ( for geometry )
+	//
+	// get intersection between the light surface and the ray
+	virtual bool GetIntersect( const Ray& ray , Intersection* intersect ) const;
+	//
+	// get the bounding box of the primitive
+	virtual const BBox&	GetBBox() const = 0;
+	//
+	// get surface area of the primitive
+	virtual float	SurfaceArea() const = 0;
 
 // protected field
 protected:
+	
 	// the transformation for the shape
 	Transform	transform;
 	// the radius of the shape
 	float		radius;
 
 	// get intersected point between the ray and the shape
-	virtual float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX ) const = 0;
+	virtual float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* inter = 0 ) const = 0;
 };
 
 #endif
