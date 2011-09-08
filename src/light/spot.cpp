@@ -40,7 +40,7 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
 		return 0.0f;
 
 	float len = vec.Length();
-	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , len );
+	visibility.ray = Ray( pos , -wi , 0 , delta , len - delta );
 
 	return intensity / vec.SquaredLength() * d * d;
 }

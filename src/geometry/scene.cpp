@@ -32,6 +32,7 @@ void Scene::_init()
 {
 	m_pAccelerator = 0;
 	m_pLightsDis = 0;
+	m_skyLight = 0;
 }
 
 // load the scene from script file
@@ -163,6 +164,9 @@ bool Scene::LoadScene( const string& str )
 					shape->SetID( m_triBuf.size() );
 					m_triBuf.push_back( shape );
 				}
+
+				if( strcmp( type , "skylight" ) == 0 )
+					m_skyLight = light;
 
 				m_lights.push_back( light );
 			}
@@ -370,15 +374,14 @@ TriMesh* Scene::GetTriMesh( const string& name ) const
 	return 0;
 }
 
-// evaluate light
-Spectrum Scene::EvaluateLight( const Ray& ray , Intersection* intersect ) const
+// evalute sky
+Spectrum Scene::Le( const Ray& ray ) const
 {
-	Spectrum radiance;
-	vector<Light*>::const_iterator it = m_lights.begin();
-	while( it != m_lights.end() )
+	if( m_skyLight )
 	{
-		(*it)->Evaluate( ray , intersect , radiance );
-		it++;
+		Spectrum r;
+		m_skyLight->Evaluate( ray , 0 , r );
+		return r;
 	}
-	return radiance;
+	return 0.0f;
 }

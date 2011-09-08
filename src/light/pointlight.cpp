@@ -30,7 +30,7 @@ Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample
 	if( pdf ) *pdf = 1.0f;
 
 	float len = vec.Length();
-	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , len );
+	visibility.ray = Ray( pos , -wi , 0 , delta , len - delta );
 
 	return intensity / ( len * len );
 }

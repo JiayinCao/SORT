@@ -81,7 +81,7 @@ float Square::_getIntersect( const Ray& ray , Point& p , float limit , Intersect
 	if( intersect )
 	{
 		intersect->t = t;
-		intersect->intersect = transform( intersect->intersect );
+		intersect->intersect = transform( p );
 		intersect->normal = transform(Vector( 0.0f , 1.0f , 0.0f , true ));
 		intersect->tangent = transform(Vector( 0.0f , 0.0f , 1.0f ));
 		intersect->primitive = const_cast<Square*>(this);
