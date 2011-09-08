@@ -96,12 +96,12 @@ void System::_preInit()
 	m_camera = camera;
 	// the integrator
 	//m_pIntegrator = new DirectLight( m_Scene , 1 );
-	//m_pIntegrator = new PathTracing( m_Scene , 1024 );
+	m_pIntegrator = new PathTracing( m_Scene , 1024 );
 	//m_pIntegrator = new WhittedRT(m_Scene);
-	m_pIntegrator = new BidirPathTracing( m_Scene , 256 );
+	//m_pIntegrator = new BidirPathTracing( m_Scene , 1 );
 	// the sampler
 	m_pSampler = new StratifiedSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(16);
+	m_iSamplePerPixel = m_pSampler->RoundSize(1);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value
@@ -310,7 +310,7 @@ void System::_raytracing()
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
 		{
 			// clear managed memory after each pixel
-			MemManager::GetSingleton().ClearMem(ThreadId());
+			MemManager::GetSingleton().ClearMem();
 
 			// generate samples to be used later
 			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples , m_iSamplePerPixel , m_Scene );
@@ -350,6 +350,8 @@ void System::_raytracing_multithread()
 			// generate samples to be used later
 			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples , m_iSamplePerPixel , m_Scene );
 
+			if( i == 84 && j == 150 )
+				int a =0;
 			// the radiance
 			Spectrum radiance;
 			for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )

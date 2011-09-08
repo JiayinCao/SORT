@@ -49,12 +49,10 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 	// get the intersection between the ray and the scene
 	Intersection ip;
 	// evaluate light directly
-	Spectrum t = scene.EvaluateLight( r , &ip );
-
 	if( false == scene.GetIntersect( r , &ip ) )
-		return t;
+		return 0.0f;
 
-	t = 0.0f;
+	Spectrum t = ip.Le( -r.m_Dir );
 
 	// eavluate direct light
 	unsigned light_num = scene.LightNum();

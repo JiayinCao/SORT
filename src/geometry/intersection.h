@@ -20,6 +20,7 @@
 
 // include the header
 #include "point.h"
+#include "spectrum/spectrum.h"
 
 // pre-decleration class
 class Primitive;
@@ -35,6 +36,9 @@ public :
 	Intersection();
 	// destructor
 	~Intersection();
+
+	// get the emissive
+	Spectrum Le( const Vector& wo ) const;
 
 // public field
 public:

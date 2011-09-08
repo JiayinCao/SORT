@@ -21,13 +21,17 @@
 // get the pdf of specific direction
 float Shape::Pdf( const Point& p , const Vector& wi ) const
 {
+	Point lp = transform.invMatrix( p );
+	Vector lwi = transform.invMatrix( wi );
+
 	Point intersect;
-	if( _getIntersect( Ray( p , wi ) , intersect ) < 0.0f )
+	Intersection inter;
+	if( _getIntersect( Ray( lp , lwi ) , intersect , FLT_MAX , &inter ) < 0.0f )
 		return 0.0f;
 
-	Vector delta = Normalize(intersect - p);
+	Vector delta = Normalize(inter.intersect - p);
 	
-	float dot = Dot( delta , Vector( 0.0f , 1.0f , 0.0f ) );
+	float dot = Dot( delta , inter.normal );
 	if( dot <= 0.0f )
 		return 0.0f;
 
@@ -37,24 +41,13 @@ float Shape::Pdf( const Point& p , const Vector& wi ) const
 // get intersection between the light surface and the ray
 bool Shape::GetIntersect( const Ray& ray , Intersection* intersect ) const
 {
+	Ray local = transform.invMatrix( ray );
 	float t;
+	Point p;
 	if( intersect )
-	{
-		t = _getIntersect( ray , intersect->intersect , intersect->t );
-		
-		if( t > 0.0f )
-		{
-			intersect->t = t;
-			intersect->intersect = ( ray(intersect->t) );
-			intersect->normal = Vector( 0.0f , 1.0f , 0.0f , true );
-			return true;
-		}else
-			return false;
-	}else
-	{
-		Point p;
-		return _getIntersect( ray , p , FLT_MAX ) > 0.0f;
-	}
+		return _getIntersect( local , p , intersect->t , intersect ) > 0.0f;
+	else
+		return _getIntersect( local , p , FLT_MAX ) > 0.0f;
 
 	return true;
 }

@@ -21,13 +21,13 @@
 // include header file
 #include "utility/smartptr.h"
 #include "bbox.h"
-#include "managers/matmanager.h"
 #include "material/material.h"
 #include "utility/referencecount.h"
 #include "intersection.h"
 
 // pre-decleration
 class	Intersection;
+class	Light;
 
 //////////////////////////////////////////////////////////////////
 //	definition of primitive
@@ -36,7 +36,7 @@ class	Primitive
 // public method
 public:
 	// constructor from a id
-	Primitive( unsigned id , Material* mat ) { m_primitive_id = id; m_mat = mat; }
+	Primitive( unsigned id , Material* mat ) { m_primitive_id = id; m_mat = mat; light = 0; }
 	// destructor
 	virtual ~Primitive(){}
 
@@ -45,6 +45,9 @@ public:
 
 	// get the bounding box of the primitive
 	virtual const BBox&	GetBBox() const = 0;
+
+	// get surface area of the primitive
+	virtual float	SurfaceArea() const = 0;
 
 	// delete the cache
 	virtual void ClearBBoxCache();
@@ -59,8 +62,8 @@ public:
 	// set material
 	void	SetMaterial( Material* mat ) { m_mat = mat; }
 
-	// get surface area of the primitive
-	virtual float	SurfaceArea() const = 0;
+	// get light
+	Light* GetLight() const { return light; }
 
 // protected field
 protected:
@@ -70,6 +73,9 @@ protected:
 	unsigned		m_primitive_id;
 	// the material
 	Reference<Material>	m_mat;
+
+	// the binded light
+	Light*		light;
 };
 
 #endif

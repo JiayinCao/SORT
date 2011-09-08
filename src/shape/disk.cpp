@@ -66,18 +66,42 @@ float Disk::SurfaceArea() const
 }
 
 // get intersected point between the ray and the shape
-float Disk::_getIntersect( const Ray& ray , Point& p , float limit ) const
+float Disk::_getIntersect( const Ray& ray , Point& p , float limit , Intersection* intersect ) const
 {
 	if( ray.m_Dir.y == 0.0f )
 		return -1.0f;
 
 	float t = -ray.m_Ori.y / ray.m_Dir.y;
-	if( t > limit || t <= 0.0f )
+	if( t > limit || t <= 0.0f || t > ray.m_fMax )
 		return -1.0f;
 	p = ray(t);
 	float sqLength = p.x * p.x + p.z * p.z;
 	if( sqLength > radius * radius )
 		return -1.0f;
 
+	if( intersect )
+	{
+		intersect->t = t;
+		intersect->intersect = transform( intersect->intersect );
+		intersect->normal = transform(Vector( 0.0f , 1.0f , 0.0f , true ));
+		intersect->tangent = transform(Vector( 0.0f , 0.0f , 1.0f ));
+		intersect->primitive = const_cast<Disk*>(this);
+	}
+
 	return t;
+}
+
+// get the bounding box of the primitive
+const BBox&	Disk::GetBBox() const
+{
+	if( !m_bbox )
+	{
+		m_bbox = new BBox();
+		m_bbox->Union( transform( Point( radius , 0.0f , radius ) ) );
+		m_bbox->Union( transform( Point( radius , 0.0f , -radius ) ) );
+		m_bbox->Union( transform( Point( -radius , 0.0f , radius ) ) );
+		m_bbox->Union( transform( Point( -radius , 0.0f , -radius ) ) );
+	}
+
+	return *m_bbox;
 }

@@ -47,7 +47,7 @@ Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , fl
 	if( pdf ) *pdf = UniformConePdf( cos_theta );
 
 	Point _p;
-	Ray r = transform.invMatrix( Ray( p , wi ) );
+	Ray r = transform.invMatrix(Ray( p , wi ));
 	if( _getIntersect( r , _p , FLT_MAX ) < 0.0f )
 		_p = r( Dot( delta , wi ) );
 	
@@ -70,7 +70,7 @@ float Sphere::SurfaceArea() const
 }
 
 // get intersection between a ray and the sphere
-float Sphere::_getIntersect( const Ray& r , Point& p , float limit ) const
+float Sphere::_getIntersect( const Ray& r , Point& p , float limit , Intersection* intersect ) const
 {
 	float _b = 2.0f * ( r.m_Dir.x * r.m_Ori.x + r.m_Dir.y * r.m_Ori.y + r.m_Dir.z * r.m_Ori.z );
 	float _c = r.m_Ori.x * r.m_Ori.x + r.m_Ori.y * r.m_Ori.y + r.m_Ori.z * r.m_Ori.z - radius * radius;
@@ -94,7 +94,22 @@ float Sphere::_getIntersect( const Ray& r , Point& p , float limit ) const
 	else
 		t = max_t;
 
+	if( t > r.m_fMax )
+		return -1.0f;
+
 	p = r(t);
+
+	if( intersect )
+	{
+		intersect->t = t;
+		Vector n = Normalize(Vector( p.x , p.y , p.z , true ));
+		Vector v0 , v1;
+		CoordinateSystem( n , v0 , v1 );
+		intersect->intersect = transform(p);
+		intersect->normal = transform(n);
+		intersect->tangent = transform(v0);
+		intersect->primitive = const_cast<Sphere*>(this);
+	}
 
 	return t;
 }
@@ -112,3 +127,17 @@ void Sphere::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
 	if( pdf ) *pdf = 1.0f / ( 8.0f * PI * PI );
 }
 
+// get the bounding box of the primitive
+const BBox&	Sphere::GetBBox() const
+{
+	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
+
+	if( !m_bbox )
+	{
+		m_bbox = new BBox();
+		m_bbox->m_Min = center - radius ;
+		m_bbox->m_Max = center + radius ;
+	}
+
+	return *m_bbox;
+}

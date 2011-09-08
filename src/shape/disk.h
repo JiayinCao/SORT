@@ -34,6 +34,9 @@ public:
 	// destructor
 	~Disk(){}
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	// methods inheriting from Shape ( for light )
+
 	// sample a point on shape
 	// para 'ls': the light sample
 	// para 'p'	: the target point for the light to lit.
@@ -42,18 +45,24 @@ public:
 	// result   : a sampled point from the light source
 	virtual Point sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const;
 
-	// the surface area of the shape
-	virtual float SurfaceArea() const;
-
 	// sample a ray from light
 	// para 'ls'       : light sample
 	// para 'r'       : the light vector
 	// para 'pdf'      : the properbility density function
 	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////
+	// methods inheriting from Primitive ( for geometry )
+
+	// get the bounding box of the primitive
+	virtual const BBox&	GetBBox() const;
+
+	// the surface area of the shape
+	virtual float SurfaceArea() const;
+
 protected:
 	// get intersected point between the ray and the shape
-	float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX ) const;
+	float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* inter = 0 ) const;
 };
 
 #endif

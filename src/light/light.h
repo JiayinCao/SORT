@@ -30,6 +30,7 @@
 class Intersection;
 class Vector;
 class LightSample;
+class Shape;
 
 class Visibility
 {
@@ -95,6 +96,9 @@ public:
 	// sample light density
 	virtual Spectrum sample_l( const Intersection& intersect , const Vector& wo ) const
 	{ return 0.0f; }
+
+	// get the shape of light
+	virtual Shape* GetShape() const { return 0; }
 
 	// the pdf for specific sampled directioin
 	virtual float Pdf( const Point& p , const Vector& wi ) const { return 1.0f; }
