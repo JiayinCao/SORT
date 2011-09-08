@@ -96,9 +96,9 @@ void System::_preInit()
 	m_camera = camera;
 	// the integrator
 	//m_pIntegrator = new DirectLight( m_Scene , 1 );
-	m_pIntegrator = new PathTracing( m_Scene , 1024 );
+	//m_pIntegrator = new PathTracing( m_Scene , 1024 );
 	//m_pIntegrator = new WhittedRT(m_Scene);
-	//m_pIntegrator = new BidirPathTracing( m_Scene , 1 );
+	m_pIntegrator = new BidirPathTracing( m_Scene , 1 );
 	// the sampler
 	m_pSampler = new StratifiedSampler();
 	m_iSamplePerPixel = m_pSampler->RoundSize(1);
@@ -350,8 +350,6 @@ void System::_raytracing_multithread()
 			// generate samples to be used later
 			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples , m_iSamplePerPixel , m_Scene );
 
-			if( i == 84 && j == 150 )
-				int a =0;
 			// the radiance
 			Spectrum radiance;
 			for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
@@ -368,8 +366,11 @@ void System::_raytracing_multithread()
 				m_uCurrentPixelId++;
 			}
 		}
-		// output progress
-		_outputProgress();
+		#pragma omp critical
+		{
+			// output progress
+			_outputProgress();
+		}
 	}
 	cout<<endl;
 }

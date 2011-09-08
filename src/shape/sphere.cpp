@@ -94,7 +94,7 @@ float Sphere::_getIntersect( const Ray& r , Point& p , float limit , Intersectio
 	else
 		t = max_t;
 
-	if( t > r.m_fMax )
+	if( t > r.m_fMax || t < r.m_fMin )
 		return -1.0f;
 
 	p = r(t);
@@ -135,8 +135,9 @@ const BBox&	Sphere::GetBBox() const
 	if( !m_bbox )
 	{
 		m_bbox = new BBox();
-		m_bbox->m_Min = center - radius ;
-		m_bbox->m_Max = center + radius ;
+		Vector vec_r = Vector( radius , radius , radius );
+		m_bbox->m_Min = center - vec_r ;
+		m_bbox->m_Max = center + vec_r ;
 	}
 
 	return *m_bbox;

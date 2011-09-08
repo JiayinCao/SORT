@@ -74,7 +74,6 @@ Spectrum SkyLight::Power() const
 bool SkyLight::Evaluate( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
 {
 	Sort_Assert( sky != 0 );
-	Sort_Assert( intersect != 0 );
 
 	if( intersect && intersect->t != FLT_MAX )
 		return false;

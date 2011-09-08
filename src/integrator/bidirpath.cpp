@@ -127,7 +127,6 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , vector<BDPT_Vertex>& 
 	while( path.size() < max_vert )
 	{
 		Intersection inter;
-		Spectrum li = scene.EvaluateLight( wi , &inter );
 		if( false == scene.GetIntersect( wi , &inter ) )
 			break;
 

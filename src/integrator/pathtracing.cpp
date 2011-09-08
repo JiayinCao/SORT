@@ -41,7 +41,13 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		// if it's a light , accumulate the radiance and break
 		// note that light don't reflect radiance themselves
 		if( false == scene.GetIntersect( r , &inter ) )
+		{
+			if( bounces == 0 )
+				return scene.Le( r );
+			else if( specular ) 
+				L+=scene.Le(r)*path_weight;
 			break;
+		}
 
 		if( bounces == 0 ) L+=inter.Le(-r.m_Dir);
 		else if( specular ) L+=inter.Le(-r.m_Dir)*path_weight;

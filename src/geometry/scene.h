@@ -78,9 +78,6 @@ public:
 	// get the number of lights
 	unsigned LightNum() const
 	{ return m_lights.size(); }
-	// evaluate light
-	Spectrum EvaluateLight( const Ray& ray , Intersection* intersect ) const;
-
 	// get bounding box of the scene
 	const BBox& GetBBox() const;
 	// get triangle mesh with a specific name
@@ -89,6 +86,9 @@ public:
 	// get file name
 	const string& GetFileName() const
 	{ return m_filename; }
+
+	// evalute sky
+	Spectrum	Le( const Ray& ray ) const;
 
 // private field
 private:
@@ -102,6 +102,8 @@ private:
 	vector<Light*>		m_lights;
 	// distribution of light power
 	Distribution1D*		m_pLightsDis;
+	// the sky light
+	Light*				m_skyLight;
 
 	// the acceleration structure for the scene
 	Accelerator*		m_pAccelerator;
