@@ -29,11 +29,15 @@
 // bitmap info header
 typedef struct
 {
-	unsigned int   bfSize;
+	unsigned int	bfSize;
 	unsigned short  bfReserved1;
 	unsigned short  bfReserved2;
-	unsigned int   bfOffBits;
-} __attribute__((aligned(1))) BitMapFileHeader;
+	unsigned int	bfOffBits;
+}
+#if defined(SORT_IN_LINUX) || defined(SORT_IN_MAC )
+__attribute__((aligned(1))) 
+#endif
+BitMapFileHeader;
 // bitmap info header
 typedef struct
 {
@@ -48,7 +52,11 @@ typedef struct
 	int            biYPelsPerMeter;
 	unsigned int   biClrUsed;
 	unsigned int   biClrImportant;
-} __attribute__((aligned(1))) BitMapInfoHeader;
+} 
+#if defined(SORT_IN_LINUX) || defined(SORT_IN_MAC )
+__attribute__((aligned(1))) 
+#endif
+BitMapInfoHeader;
 
 // output the bmp file
 bool BmpIO::Write( const string& str , const Texture* tex )
