@@ -74,8 +74,7 @@ private:
 	class Color0Property : public PropertyHandler<Texture>
 	{
 	public:
-		// constructor
-		Color0Property(Texture* tex):PropertyHandler(tex){}
+		PH_CONSTRUCTOR(Color0Property,Texture);
 
 		// set value
 		void SetValue( const string& value )
@@ -87,8 +86,7 @@ private:
 	class Color1Property : public PropertyHandler<Texture>
 	{
 	public:
-		// constructor
-		Color1Property(Texture* tex):PropertyHandler(tex){}
+		PH_CONSTRUCTOR(Color1Property,Texture);
 
 		// set value
 		void SetValue( const string& value )
@@ -100,7 +98,7 @@ private:
 	class ThresholdProperty : public PropertyHandler<Texture>
 	{
 	public:
-		ThresholdProperty(Texture* tex):PropertyHandler(tex){}
+		PH_CONSTRUCTOR(ThresholdProperty,Texture);
 
 		// set value
 		void SetValue( const string& value )

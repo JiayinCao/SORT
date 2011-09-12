@@ -75,8 +75,7 @@ private:
 	class ColorProperty : public PropertyHandler<Texture>
 	{
 	public:
-		// constructor
-		ColorProperty(Texture* tex):PropertyHandler(tex){}
+		PH_CONSTRUCTOR(ColorProperty,Texture);
 
 		// set value
 		void SetValue( const string& value )

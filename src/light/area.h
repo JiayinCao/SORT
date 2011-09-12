@@ -86,7 +86,7 @@ private:
 	class PosProperty : public PropertyHandler<Light>
 	{
 	public:
-		PosProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(PosProperty,Light);
 		void SetValue( const string& str )
 		{
 			AreaLight* light = CAST_TARGET(AreaLight);
@@ -111,7 +111,7 @@ private:
 	class DirProperty : public PropertyHandler<Light>
 	{
 	public:
-		DirProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(DirProperty,Light);
 		void SetValue( const string& str )
 		{
 			AreaLight* light = CAST_TARGET(AreaLight);
@@ -143,7 +143,7 @@ private:
 	class ShapeProperty : public PropertyHandler<Light>
 	{
 	public:
-		ShapeProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(ShapeProperty,Light);
 		void SetValue( const string& str )
 		{
 			AreaLight* light = CAST_TARGET(AreaLight);
@@ -157,7 +157,7 @@ private:
 	class RadiusProperty : public PropertyHandler<Light>
 	{
 	public:
-		RadiusProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(RadiusProperty,Light);
 		void SetValue( const string& str )
 		{
 			AreaLight* light = CAST_TARGET(AreaLight);

@@ -72,7 +72,7 @@ void Bvh::OutputLog() const
 	LOG<<"Total Node Count :\t"<<m_totalNode<<ENDL;
 	LOG<<"Inner Node Count :\t"<<m_totalNode - m_leafNode<<ENDL;
 	LOG<<"Leaf Node Count  :\t"<<m_leafNode<<ENDL;
-	LOG<<"Triangles per leaf:\t"<<m_primitives->size()/m_leafNode<<ENDL;
+	LOG<<"Triangles per leaf:\t"<<(((float)m_primitives->size())/m_leafNode)<<ENDL;
 	LOG<<"Max triangles in leaf:\t"<<m_maxLeafTriNum<<ENDL<<ENDL;
 }
 

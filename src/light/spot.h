@@ -67,7 +67,8 @@ private:
 	class PosProperty : public PropertyHandler<Light>
 	{
 	public:
-		PosProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(PosProperty,Light);
+
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
@@ -86,7 +87,7 @@ private:
 	class DirProperty : public PropertyHandler<Light>
 	{
 	public:
-		DirProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(DirProperty,Light);
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
@@ -112,7 +113,7 @@ private:
 	class FalloffStartProperty : public PropertyHandler<Light>
 	{
 	public:
-		FalloffStartProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(FalloffStartProperty,Light);
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
@@ -122,7 +123,7 @@ private:
 	class RangeProperty : public PropertyHandler<Light>
 	{
 	public:
-		RangeProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(RangeProperty,Light);
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);

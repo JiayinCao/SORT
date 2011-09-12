@@ -33,6 +33,8 @@ using namespace std;
 	#define SORT_IN_WINDOWS
 #elif defined(__linux__)
 	#define SORT_IN_LINUX
+#elif defined(__APPLE__)
+	#define SORT_IN_MAC
 #endif
 
 // enable debug by default

@@ -268,7 +268,7 @@ void Scene::OutputLog() const
 {
 	LOG_HEADER("Geometry Information");
 	LOG<<"Scene File Name:\t"<<m_filename<<ENDL;
-	LOG<<"Triangle Count :\t"<<m_triBuf.size()<<ENDL<<ENDL;
+	LOG<<"Triangle Count :\t"<<(unsigned)m_triBuf.size()<<ENDL<<ENDL;
 
 	if( m_pAccelerator )
 		m_pAccelerator->OutputLog();

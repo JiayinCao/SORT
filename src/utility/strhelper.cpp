@@ -219,7 +219,7 @@ string NextToken( string& str , char t )
 	string res = str.substr( 0 , id );
 
 	// if there is no such a character , set it none
-	if( id == string::npos )
+	if( id == (unsigned)string::npos )
 		str = "";
 	else
 		str = str.substr( id + 1 , string::npos );

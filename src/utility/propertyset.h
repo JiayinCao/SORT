@@ -44,6 +44,10 @@ public:
 	string	m_name;
 	// the target
 	T*		m_target;
+
+// private copy constructor
+private:
+	explicit PropertyHandler( PropertyHandler<T>& ){}
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -130,5 +134,7 @@ protected:
 };
 
 #define	CAST_TARGET(T)	static_cast<T*>(m_target)
+
+#define PH_CONSTRUCTOR(T0,T1) T0(T1* t):PropertyHandler<T1>::PropertyHandler(t){}
 
 #endif

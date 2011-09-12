@@ -68,8 +68,7 @@ private:
 	class ImageProperty : public PropertyHandler<Sky>
 	{
 	public:
-		// constructor
-		ImageProperty(Sky* sky):PropertyHandler(sky){}
+		PH_CONSTRUCTOR(ImageProperty,Sky);
 
 		// set value
 		void SetValue( const string& str )

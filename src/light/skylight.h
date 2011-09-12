@@ -81,7 +81,7 @@ private:
 	class TypeProperty : public PropertyHandler<Light>
 	{
 	public:
-		TypeProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(TypeProperty,Light);
 		void SetValue( const string& str )
 		{
 			SkyLight* light = CAST_TARGET(SkyLight);
@@ -91,7 +91,7 @@ private:
 	class PropertyPasser : public PropertyHandler<Light>
 	{
 	public:
-		PropertyPasser(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(PropertyPasser,Light);
 		void SetValue( const string& str )
 		{
 			SkyLight* light = CAST_TARGET(SkyLight);

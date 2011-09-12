@@ -17,13 +17,13 @@
 
 // include header file
 #include "path.h"
+#include "system.h"
 
 #if defined(SORT_IN_WINDOWS)
 #include <windows.h>
 #endif
 
-// the resource path
-static string g_ResourcePath = "";
+extern System g_System;
 
 // get current directory
 string GetExecutableDir()
@@ -31,7 +31,7 @@ string GetExecutableDir()
 	const int maxLen = 2048;
 	char buf[ maxLen ];
 
-#if defined(SORT_IN_LINUX)
+#if defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
 	int c = readlink( "/proc/self/exe", buf, maxLen - 1 );
 	buf[c] = '/';
 	buf[c+1] = 0;
@@ -63,7 +63,7 @@ string GetFullPath( const string& str )
 // set resource path
 void SetResourcePath( const string& str )
 {
-	g_ResourcePath = str;
+	g_System.SetResourcePath( str );
 }
 
 // get resource path
@@ -71,15 +71,16 @@ string GetResourcePath()
 {
 #if defined( SORT_IN_WINDOWS )
 	string abspath = GetExecutableDir();
-#elif defined( SORT_IN_LINUX )
+#elif defined( SORT_IN_LINUX ) || defined( SORT_IN_MAC )
 	string abspath = "";
 #endif
-	if( g_ResourcePath.empty() )
+	string res_path = g_System.GetResourcePath();
+	if( res_path.empty() )
 		return abspath;
 
 	// it's a relative path
-	if( g_ResourcePath[0] == '.' )
-		return abspath + g_ResourcePath;
+	if( res_path[0] == '.' )
+		return abspath + res_path;
 
-	return g_ResourcePath;
+	return res_path;
 }
