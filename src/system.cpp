@@ -101,7 +101,7 @@ void System::_preInit()
 	//m_pIntegrator = new BidirPathTracing( m_Scene , 1 );
 	// the sampler
 	m_pSampler = new StratifiedSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(1);
+	m_iSamplePerPixel = m_pSampler->RoundSize(16);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value

@@ -44,7 +44,7 @@ unsigned NumSystemCores()
 			SYSTEM_INFO sysinfo;
 			GetSystemInfo(&sysinfo);
 			return sysinfo.dwNumberOfProcessors;
-		#elif defined(SORT_IN_LINUX)
+		#elif defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
 			return sysconf(_SC_NPROCESSORS_ONLN);
 		#endif
 	}

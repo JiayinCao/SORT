@@ -72,8 +72,7 @@ private:
 	class UpProperty : public PropertyHandler<Sky>
 	{
 	public:
-		// constructor
-		UpProperty(Sky* sky):PropertyHandler(sky){}
+		PH_CONSTRUCTOR(UpProperty,Sky);
 
 		// set value
 		void SetValue( const string& str )
@@ -85,8 +84,7 @@ private:
 	class DownProperty : public PropertyHandler<Sky>
 	{
 	public:
-		// constructor
-		DownProperty(Sky* sky):PropertyHandler(sky){}
+		PH_CONSTRUCTOR(DownProperty,Sky);
 
 		// set value
 		void SetValue( const string& str )
@@ -98,8 +96,7 @@ private:
 	class FrontProperty : public PropertyHandler<Sky>
 	{
 	public:
-		// constructor
-		FrontProperty(Sky* sky):PropertyHandler(sky){}
+		PH_CONSTRUCTOR(FrontProperty,Sky);
 
 		// set value
 		void SetValue( const string& str )
@@ -111,8 +108,7 @@ private:
 	class BackProperty : public PropertyHandler<Sky>
 	{
 	public:
-		// constructor
-		BackProperty(Sky* sky):PropertyHandler(sky){}
+		PH_CONSTRUCTOR(BackProperty,Sky);
 
 		// set value
 		void SetValue( const string& str )
@@ -124,8 +120,7 @@ private:
 	class LeftProperty : public PropertyHandler<Sky>
 	{
 	public:
-		// constructor
-		LeftProperty(Sky* sky):PropertyHandler(sky){}
+		PH_CONSTRUCTOR(LeftProperty,Sky);
 
 		// set value
 		void SetValue( const string& str )
@@ -137,8 +132,7 @@ private:
 	class RightProperty : public PropertyHandler<Sky>
 	{
 	public:
-		// constructor
-		RightProperty(Sky* sky):PropertyHandler(sky){}
+		PH_CONSTRUCTOR(RightProperty,Sky);
 
 		// set value
 		void SetValue( const string& str )

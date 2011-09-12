@@ -57,8 +57,7 @@ private:
 	class ColorProperty : public PropertyHandler<Material>
 	{
 	public:
-		// constructor
-		ColorProperty(Material* matte):PropertyHandler(matte){}
+		PH_CONSTRUCTOR(ColorProperty,Material);
 
 		// set value
 		void SetValue( Texture* tex )
@@ -72,8 +71,7 @@ private:
 	class ScaleProperty : public PropertyHandler<Material>
 	{
 	public:
-		// constructor
-		ScaleProperty( Material* matte ) : PropertyHandler(matte){}
+		PH_CONSTRUCTOR(ScaleProperty,Material);
 
 		// set value
 		void SetValue( const string& str )

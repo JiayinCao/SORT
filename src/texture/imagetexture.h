@@ -95,8 +95,7 @@ private:
 	class FileNameProperty : public PropertyHandler<Texture>
 	{
 	public:
-		// constructor
-		FileNameProperty(Texture* tex):PropertyHandler(tex){}
+		PH_CONSTRUCTOR(FileNameProperty,Texture);
 
 		// set value
 		void SetValue( const string& value )

@@ -58,6 +58,11 @@ public:
 	// uninitialize
 	void Uninit();
 
+	// get resource path
+	const string& GetResourcePath() const { return m_ResourcePath; }
+	// set resource path
+	void SetResourcePath( const string& str ) { m_ResourcePath = str; }
+
 //private field:
 private:
 	// the render target for the system
@@ -88,6 +93,9 @@ private:
 	unsigned		m_uPreProgress;
 	// total pixel number
 	unsigned		m_uTotalPixelCount;
+
+	// path for the resource
+	string			m_ResourcePath;
 
 	// pre-Initialize
 	void	_preInit();

@@ -65,7 +65,8 @@ private:
 	class DirProperty : public PropertyHandler<Light>
 	{
 	public:
-		DirProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(DirProperty,Light);
+
 		void SetValue( const string& str )
 		{
 			DistantLight* light = CAST_TARGET(DistantLight);

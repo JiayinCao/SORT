@@ -61,7 +61,7 @@ private:
 	class PosProperty : public PropertyHandler<Light>
 	{
 	public:
-		PosProperty(Light* light):PropertyHandler(light){}
+		PH_CONSTRUCTOR(PosProperty,Light);
 
 		// set value
 		void SetValue( const string& str )

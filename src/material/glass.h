@@ -51,8 +51,7 @@ private:
 	class EtaIProperty : public PropertyHandler<Material>
 	{
 	public:
-		// constructor
-		EtaIProperty(Material* mat):PropertyHandler(mat){}
+		PH_CONSTRUCTOR(EtaIProperty,Material);
 
 		// set value
 		void SetValue( const string& str )
@@ -64,7 +63,7 @@ private:
 	class EtaTProperty : public PropertyHandler<Material>
 	{
 	public:
-		EtaTProperty(Material* mat):PropertyHandler(mat){}
+		PH_CONSTRUCTOR(EtaTProperty,Material);
 
 		// set value
 		void SetValue( const string& str )
@@ -76,7 +75,7 @@ private:
 	class ColorProperty : public PropertyHandler<Material>
 	{
 	public:
-		ColorProperty(Material* mat):PropertyHandler(mat){}
+		PH_CONSTRUCTOR(ColorProperty,Material);
 
 		// set value
 		void SetValue( const string& str )

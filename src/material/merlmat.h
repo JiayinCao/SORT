@@ -58,8 +58,7 @@ private:
 	class MerlProperty : public PropertyHandler<Material>
 	{
 	public:
-		// constructor
-		MerlProperty(Material* matte):PropertyHandler(matte){}
+		PH_CONSTRUCTOR(MerlProperty,Material);
 
 		// set value
 		void SetValue( const string& str )

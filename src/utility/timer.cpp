@@ -19,7 +19,7 @@
 #include "timer.h"
 #include "managers/logmanager.h"
 
-#if defined(SORT_IN_LINUX) 
+#if defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
 #include <unistd.h>
 #include <sys/time.h>
 #include <netinet/in.h>
@@ -34,7 +34,7 @@ unsigned long getTickCount()
 {
 	unsigned long currentTime;
 
-#if defined(SORT_IN_LINUX)
+#if defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
 	struct timeval current;
 	gettimeofday( &current , 0 );
 	currentTime = current.tv_sec * 1000 + current.tv_usec/1000;
