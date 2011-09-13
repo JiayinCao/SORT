@@ -56,7 +56,7 @@ void Disk::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
 	r.m_Ori = transform(Point( u * radius , 0.0f , v * radius ));
 	r.m_Dir = transform(UniformSampleHemisphere(sort_canonical() , sort_canonical()));
 
-	if( pdf ) *pdf = 1.0f / ( radius * radius * PI * PI );
+	if( pdf ) *pdf = 1.0f / ( radius * radius * PI * TWO_PI );
 }
 
 // the surface area of the shape

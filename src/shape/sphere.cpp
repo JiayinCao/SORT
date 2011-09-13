@@ -124,7 +124,7 @@ void Sphere::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
 	if( Dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
 		r.m_Dir = -r.m_Dir;
 
-	if( pdf ) *pdf = 1.0f / ( 8.0f * PI * PI );
+	if( pdf ) *pdf = 1.0f / ( 8.0f * PI * PI * radius * radius );
 }
 
 // get the bounding box of the primitive
