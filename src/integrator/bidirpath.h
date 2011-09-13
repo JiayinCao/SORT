@@ -81,7 +81,7 @@ private:
 	unsigned path_per_pixel; // light sample per pixel sample per light
 
 	// generate path
-	unsigned	_generatePath( const Ray& ray , vector<BDPT_Vertex>& path , unsigned max_vert ) const;
+	unsigned	_generatePath( const Ray& ray , float base_pdf , vector<BDPT_Vertex>& path , unsigned max_vert ) const;
 	// evaluate path
 	// para 'epath' : path starting from eye point
 	// para 'esize' : sub-path size ( we're not evaluating full path )

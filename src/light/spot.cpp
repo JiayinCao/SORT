@@ -46,15 +46,27 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
 }
 
 // sample a ray from light
-void SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
 	r.m_Ori = Point( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
-	r.m_Dir = UniformSampleCone( ls.u , ls.v , cos_total_range );
-	r.m_Dir = light2world.matrix( r.m_Dir );
+	Vector local_dir = UniformSampleCone( ls.u , ls.v , cos_total_range );
+	r.m_Dir = light2world.matrix( local_dir );
 
 	if( pdf ) *pdf = UniformConePdf( cos_total_range );
+
+	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
+	float falloff = SatDot( local_dir , dir );
+	if( falloff < cos_total_range )
+		return 0.0f;
+	if( falloff > cos_falloff_start )
+		return intensity;
+	float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
+	if( d == 0.0f )
+		return 0.0f;
+
+	return intensity * d * d;
 }
 
 // register property

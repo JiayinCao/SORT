@@ -33,29 +33,29 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 	float	light_pdf = 0.0f;
 	Ray		light_ray;
-	light->sample_l( ps.light_sample[0] , light_ray , &light_pdf );
+	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , &light_pdf );
 
 	// the path from light and eye
 	vector<BDPT_Vertex> light_path , eye_path;
 
-	unsigned eps = _generatePath( ray , eye_path , path_per_pixel );
-	if( eps == 0 )	return 0.0f;
+	unsigned eps = _generatePath( ray , 1.0f , eye_path , path_per_pixel );
+	if( eps == 0 )	return scene.Le( ray );
 
-	unsigned lps = _generatePath( light_ray , light_path , path_per_pixel );
+	unsigned lps = _generatePath( light_ray , light_pdf , light_path , path_per_pixel );
 
 	Spectrum directWt = 1.0f;
 	Spectrum li;
 	for( unsigned i = 1 ; i <= eps ; ++i )
 	{
 		const BDPT_Vertex& vert = eye_path[i-1];
-		li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , light , vert.inter , LightSample(true) , BsdfSample(true) ) / i ;
+		li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , light , vert.inter , LightSample(true) , BsdfSample(true) ) / ( i + 1 );
 		directWt *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n ) / vert.pdf;
 
 		for( unsigned j = 1 ; j <= lps ; ++j )
-			li += 450.0f * _evaluatePath( eye_path , min( eps , i ) , light_path , min( lps , j ) ) / ( ( i + j ) * light_pdf );
+			li += le * _evaluatePath( eye_path , i , light_path , j ) / ( i + j + 2 );
 	}
 
-	return li / pdf;
+	return li / pdf + eye_path[0].inter.Le( -ray.m_Dir );
 }
 
 // request samples
@@ -120,39 +120,36 @@ void BidirPathTracing::OutputLog() const
 }
 
 // generate path
-unsigned BidirPathTracing::_generatePath( const Ray& ray , vector<BDPT_Vertex>& path , unsigned max_vert ) const
+unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , vector<BDPT_Vertex>& path , unsigned max_vert ) const
 {
 	Ray wi = ray;
 	Ray wo;
+	float pdf = base_pdf;
 	while( path.size() < max_vert )
 	{
-		Intersection inter;
-		if( false == scene.GetIntersect( wi , &inter ) )
+		BDPT_Vertex vert;
+		if( false == scene.GetIntersect( wi , &vert.inter ) )
 			break;
 
-		BDPT_Vertex vert;
-
-		vert.p = inter.intersect;
-		vert.n = inter.normal;
-		vert.pri = inter.primitive;
+		vert.p = vert.inter.intersect;
+		vert.n = vert.inter.normal;
+		vert.pri = vert.inter.primitive;
 		vert.wi = -wi.m_Dir;
-		vert.bsdf = inter.primitive->GetMaterial()->GetBsdf(&inter);
-		vert.inter = inter;
+		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
+		vert.pdf = pdf;
 		path.push_back( vert );
 
 		if (path.size() > 1)
-		{
 			if (sort_canonical() > 0.5f)
 				break;
-			vert.pdf *= 2.0f;
-		}
 
-		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &vert.pdf );
+		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &pdf );
+		if( path.size() > 1 ) pdf *= 2.0f;
 
-		if( vert.pdf == 0.0f )
+		if( pdf == 0.0f )
 			break;
 
-		wi = Ray( inter.intersect , vert.wo , 0 , 0.1f );
+		wi = Ray( vert.inter.intersect , vert.wo , 0 , 0.1f );
 	}
 
 	return path.size();
@@ -173,11 +170,11 @@ Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int 
 	for( int i = 0 ; i < lsize - 1 ; ++i )
 	{
 		const BDPT_Vertex& vert = lpath[i];
-		li *= vert.bsdf->f( vert.wo , vert.wi ) * SatDot( vert.wi , vert.n ) / vert.pdf;
+		li *= vert.bsdf->f( vert.wo , vert.wi ) * SatDot( vert.wo , vert.n ) / vert.pdf;
 	}
 
 	if( lpath.empty() )
-		return li;
+		return 0.0f;
 
 	const BDPT_Vertex& evert = epath[esize-1];
 	const BDPT_Vertex& lvert = lpath[lsize-1];

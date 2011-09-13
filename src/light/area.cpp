@@ -100,8 +100,10 @@ bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radianc
 }
 
 // sample a ray from light
-void AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
 {
 	Sort_Assert( shape != 0 );
 	shape->sample_l( ls , r , pdf );
+
+	return intensity;
 }
