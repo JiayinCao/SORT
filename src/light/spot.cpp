@@ -46,13 +46,14 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
 }
 
 // sample a ray from light
-Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
 	r.m_Ori = Point( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
 	Vector local_dir = UniformSampleCone( ls.u , ls.v , cos_total_range );
 	r.m_Dir = light2world.matrix( local_dir );
+	n = r.m_Dir;
 
 	if( pdf ) *pdf = UniformConePdf( cos_total_range );
 

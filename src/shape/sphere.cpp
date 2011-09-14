@@ -115,14 +115,16 @@ float Sphere::_getIntersect( const Ray& r , Point& p , float limit , Intersectio
 }
 
 // sample a ray from light
-void Sphere::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+void Sphere::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
-	r.m_Ori = radius * UniformSampleSphere( ls.u , ls.v );
+	Vector normalized_dir = UniformSampleSphere( ls.u , ls.v );
+	r.m_Ori = radius * normalized_dir;
 	r.m_Dir = UniformSampleSphere( sort_canonical() , sort_canonical() );
 	if( Dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
 		r.m_Dir = -r.m_Dir;
+	n = transform( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z , true ) );
 
 	if( pdf ) *pdf = 1.0f / ( 8.0f * PI * PI * radius * radius );
 }
