@@ -35,6 +35,7 @@ struct BDPT_Vertex
 	Vector		wo;		// out direction
 	Bsdf*		bsdf;	// bsdf from material
 	float		pdf;	// the pdf for the vertex
+	float		rr;		// the russion routtele
 
 	Intersection	inter;	//temp
 
@@ -43,6 +44,7 @@ struct BDPT_Vertex
 		pri = 0;
 		pdf = 1.0f;
 		bsdf = 0;
+		rr = 1.0f;
 	}
 };
 
