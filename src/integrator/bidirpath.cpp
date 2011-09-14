@@ -35,6 +35,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	Ray		light_ray;
 	Vector	n;
 	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , n , &light_pdf );
+	le *= SatDot( light_ray.m_Dir , n ) / ( light_pdf * pdf );
 
 	// the path from light and eye
 	vector<BDPT_Vertex> light_path , eye_path;
@@ -49,14 +50,15 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	for( unsigned i = 1 ; i <= eps ; ++i )
 	{
 		const BDPT_Vertex& vert = eye_path[i-1];
-		li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , light , vert.inter , LightSample(true) , BsdfSample(true) ) / ( pdf );
-		directWt *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n ) / vert.pdf;
+		li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , 
+						light , vert.inter , LightSample(true) , BsdfSample(true) ) / ( pdf * i );
+		directWt *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n ) / ( vert.pdf * vert.rr );
 
 		for( unsigned j = 1 ; j <= lps ; ++j )
-			li += le * _evaluatePath( eye_path , i , light_path , j ) / ( i + j ) / light_pdf;
+			li += le * _evaluatePath( eye_path , i , light_path , j ) / ( i + j );
 	}
 
-	return li / pdf + eye_path[0].inter.Le( -ray.m_Dir );
+	return li + eye_path[0].inter.Le( -ray.m_Dir );
 }
 
 // request samples
@@ -82,20 +84,23 @@ void BidirPathTracing::GenerateSample( const Sampler* sampler , PixelSample* sam
 
 		sampler->Generate1D( data_1d , ps );
 		sampler->Generate2D( data_2d , ps );
+		const unsigned* shuffled_id0 = ShuffleIndex( ps );
+
 		for( int k = 0 ; k < ps ; ++k )
 		{
-			int two_k = 2*k;
-			samples[k].bsdf_sample[0].t = data_1d[k];
+			int two_k = 2*shuffled_id0[k];
+			samples[k].bsdf_sample[0].t = data_1d[two_k];
 			samples[k].bsdf_sample[0].u = data_2d[two_k];
 			samples[k].bsdf_sample[0].v = data_2d[two_k+1];
 		}
 
+		const unsigned* shuffled_id1 = ShuffleIndex( ps );
 		sampler->Generate1D( data_1d , ps );
 		sampler->Generate2D( data_2d , ps );
 		for( int k = 0 ; k < ps ; ++k )
 		{
-			int two_k = 2*k;
-			samples[k].light_sample[0].t = data_1d[k];
+			int two_k = 2*shuffled_id1[k];
+			samples[k].light_sample[0].t = data_1d[two_k];
 			samples[k].light_sample[0].u = data_2d[two_k];
 			samples[k].light_sample[0].v = data_2d[two_k+1];
 		}
@@ -137,14 +142,16 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , vect
 		vert.pri = vert.inter.primitive;
 		vert.wi = -wi.m_Dir;
 		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
-		vert.pdf = pdf;
 		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &vert.pdf );
 		path.push_back( vert );
 
-		if (path.size() > 1)
+		if (path.size() > 4 )
+		{
 			if (sort_canonical() > 0.5f)
 				break;
-		if( path.size() > 1 ) path.front().pdf *= 2.0f;
+			else
+				path.front().rr = 0.5f;
+		}
 
 		if( pdf == 0.0f )
 			break;
@@ -164,13 +171,13 @@ Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int 
 	for( int i = 0 ; i < esize - 1 ; ++i )
 	{
 		const BDPT_Vertex& vert = epath[i];
-		li *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n ) / vert.pdf;
+		li *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n ) / ( vert.pdf * vert.rr );
 	}
 
 	for( int i = 0 ; i < lsize - 1 ; ++i )
 	{
 		const BDPT_Vertex& vert = lpath[i];
-		li *= vert.bsdf->f( vert.wo , vert.wi ) * SatDot( vert.wo , vert.n ) / vert.pdf;
+		li *= vert.bsdf->f( vert.wo , vert.wi ) * SatDot( vert.wo , vert.n ) / ( vert.pdf * vert.rr );
 	}
 
 	if( lpath.empty() )
@@ -184,7 +191,7 @@ Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int 
 	float l1 = _Gterm( evert , lvert );
 	Spectrum l2 = lvert.bsdf->f( n_delta , lvert.wi );
 
-	li *= l0 * l1 * l2;
+	li *= l0 * l1 * l2 / ( evert.rr * lvert.rr );
 
 	return li;
 }
@@ -195,10 +202,14 @@ float BidirPathTracing::_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) 
 	Vector delta = p0.p - p1.p;
 	Vector n_delta = Normalize(delta);
 
+	float g = SatDot( p0.n , -n_delta ) * SatDot( p1.n , n_delta ) / delta.SquaredLength();
+	if( g == 0.0f )
+		return 0.0f;
+
 	Visibility visible( scene );
 	visible.ray = Ray( p1.p , n_delta  , 0 , 0.1f , delta.Length() - 0.1f );
 	if( visible.IsVisible() == false )
 		return 0.0f;
 	
-	return SatDot( p0.n , -n_delta ) * SatDot( p1.n , n_delta ) / delta.SquaredLength();
+	return g;
 }

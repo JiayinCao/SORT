@@ -5,6 +5,7 @@
 		<Transform>
 	    <Matrix value="s 40"/>
       <Matrix value="t 0 -500 0"/>
+      <Matrix value="s 0.001"/>
 		</Transform>
     <Material>
       <MatSet name="B2ox02" mat=""/>
@@ -38,10 +39,10 @@
   </Light>
   <Light type="area">
     <Property name="shape" value="disk" />
-    <Property name="radius" value="100" />
+    <Property name="radius" value="0.1" />
     <Property name="intensity" value="450 450 450"/>
     <Property name="dir" value="0 -1 0"/>
-    <Property name="pos" value="0 1000 0"/>
+    <Property name="pos" value="0 1 0"/>
     <Property name="dir" value="0 -1 0"/>
   </Light>
   <Light type="skyl1ight">

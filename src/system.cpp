@@ -40,6 +40,7 @@
 #include "integrator/direct.h"
 #include "integrator/pathtracing.h"
 #include "integrator/bidirpath.h"
+//#include "integrator/test.h"
 
 #include "sampler/stratified.h"
 #include "sampler/random.h"
@@ -78,7 +79,7 @@ void System::_preInit()
 	m_rt = new RenderTarget();
 	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
-	float distance = 5000.0f;
+	float distance = 5.0f;
 //	DofPerspective* camera = new DofPerspective();
 //	OrthoCamera* camera = new OrthoCamera();
 //	EnvironmentCamera* camera = new EnvironmentCamera();
@@ -99,9 +100,10 @@ void System::_preInit()
 	//m_pIntegrator = new PathTracing( m_Scene , 1024 );
 	//m_pIntegrator = new WhittedRT(m_Scene);
 	m_pIntegrator = new BidirPathTracing( m_Scene , 16 );
+	//m_pIntegrator = new BidirPathTracing1( m_Scene , 16 );
 	// the sampler
-	m_pSampler = new StratifiedSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(16);
+	m_pSampler = new RandomSampler();
+	m_iSamplePerPixel = m_pSampler->RoundSize(36);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value
@@ -305,7 +307,7 @@ void System::_raytracing()
 {
 	m_uCurrentPixelId = 0;
 	m_uPreProgress = 0xffffffff;
-	for( int i = 0 ; i < m_rt->GetHeight() ; i++ )
+	for( int i = m_rt->GetHeight() -1; i >= 0 ; --i )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
 		{
@@ -315,6 +317,8 @@ void System::_raytracing()
 			// generate samples to be used later
 			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples , m_iSamplePerPixel , m_Scene );
 
+			if( j == 368 && i == 480 )
+				int a = 0;
 			// the radiance
 			Spectrum radiance;
 			for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
