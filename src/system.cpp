@@ -98,10 +98,10 @@ void System::_preInit()
 	//m_pIntegrator = new DirectLight( m_Scene , 1 );
 	//m_pIntegrator = new PathTracing( m_Scene , 1024 );
 	//m_pIntegrator = new WhittedRT(m_Scene);
-	m_pIntegrator = new BidirPathTracing( m_Scene , 1 );
+	m_pIntegrator = new BidirPathTracing( m_Scene , 16 );
 	// the sampler
 	m_pSampler = new StratifiedSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(4);
+	m_iSamplePerPixel = m_pSampler->RoundSize(16);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value
@@ -358,9 +358,6 @@ void System::_raytracing_multithread()
 				Ray r = m_camera->GenerateRay( (float)j , (float)i , m_pSamples[k] );
 				// accumulate the radiance
 				radiance += m_pIntegrator->Li( r , m_pSamples[k] );
-
-				if( !radiance.IsBlack() )
-					int  a= 0;
 			}
 			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
 			

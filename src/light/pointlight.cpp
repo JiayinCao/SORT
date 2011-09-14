@@ -36,12 +36,13 @@ Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample
 }
 
 // sample a ray from light
-Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
 	r.m_Ori = Point( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
 	r.m_Dir = UniformSampleSphere( ls.u , ls.v ); 
+	n = r.m_Dir;
 
 	if( pdf ) *pdf = UniformSpherePdf(r.m_Dir);
 

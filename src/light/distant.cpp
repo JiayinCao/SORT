@@ -36,7 +36,7 @@ Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSamp
 }
 
 // sample a ray from light
-Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
@@ -55,6 +55,8 @@ Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) c
 	r.m_Ori = p - r.m_Dir * world_radius * 2.0f;
 
 	if( pdf ) *pdf = 1.0f / ( PI * world_radius * world_radius );
+
+	n = r.m_Dir;
 
 	return intensity;
 }

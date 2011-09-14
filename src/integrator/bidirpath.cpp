@@ -33,7 +33,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 	float	light_pdf = 0.0f;
 	Ray		light_ray;
-	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , &light_pdf );
+	Vector	n;
+	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , n , &light_pdf );
 
 	// the path from light and eye
 	vector<BDPT_Vertex> light_path , eye_path;
@@ -48,11 +49,11 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	for( unsigned i = 1 ; i <= eps ; ++i )
 	{
 		const BDPT_Vertex& vert = eye_path[i-1];
-		li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , light , vert.inter , LightSample(true) , BsdfSample(true) ) / ( i + 1 );
+		li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , light , vert.inter , LightSample(true) , BsdfSample(true) ) / ( pdf );
 		directWt *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n ) / vert.pdf;
 
 		for( unsigned j = 1 ; j <= lps ; ++j )
-			li += le * _evaluatePath( eye_path , i , light_path , j ) / ( i + j + 2 );
+			li += le * _evaluatePath( eye_path , i , light_path , j ) / ( i + j ) / light_pdf;
 	}
 
 	return li / pdf + eye_path[0].inter.Le( -ray.m_Dir );
@@ -137,14 +138,13 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , vect
 		vert.wi = -wi.m_Dir;
 		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
 		vert.pdf = pdf;
+		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &vert.pdf );
 		path.push_back( vert );
 
 		if (path.size() > 1)
 			if (sort_canonical() > 0.5f)
 				break;
-
-		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &pdf );
-		if( path.size() > 1 ) pdf *= 2.0f;
+		if( path.size() > 1 ) path.front().pdf *= 2.0f;
 
 		if( pdf == 0.0f )
 			break;
@@ -181,8 +181,8 @@ Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int 
 	Vector delta = evert.p - lvert.p;
 	Vector n_delta = Normalize(delta);
 	Spectrum l0 = evert.bsdf->f( evert.wi , -n_delta );
-	Spectrum l1 = _Gterm( evert , lvert );
-	Spectrum l2 = lvert.bsdf->f( n_delta , lvert.wi ) / ( evert.pdf * lvert.pdf );
+	float l1 = _Gterm( evert , lvert );
+	Spectrum l2 = lvert.bsdf->f( n_delta , lvert.wi );
 
 	li *= l0 * l1 * l2;
 
@@ -190,7 +190,7 @@ Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int 
 }
 
 // compute G term
-Spectrum BidirPathTracing::_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const
+float BidirPathTracing::_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const
 {
 	Vector delta = p0.p - p1.p;
 	Vector n_delta = Normalize(delta);

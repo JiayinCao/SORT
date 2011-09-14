@@ -45,7 +45,7 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo ) const
 }
 
 // sample a ray from light
-Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
 	Sort_Assert( sky != 0 );
 
@@ -58,6 +58,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
 	Vector delta = box.m_Max - box.m_Min;
 	float world_radius = delta.Length() * 0.5f;
 	r.m_Ori = center - r.m_Dir * world_radius * 2.0f;
+	n = r.m_Dir;
 
 	return sky->Evaluate( -r.m_Dir );
 }

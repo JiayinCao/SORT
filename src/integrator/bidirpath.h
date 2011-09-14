@@ -90,7 +90,7 @@ private:
 	Spectrum	_evaluatePath(	const vector<BDPT_Vertex>& epath , int esize , 
 								const vector<BDPT_Vertex>& lpath , int lsize ) const;
 	// compute G term
-	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
+	float	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 };
 
 #endif

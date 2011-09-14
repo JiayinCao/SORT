@@ -44,7 +44,7 @@ Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , fl
 }
 
 // sample a ray from light
-void Square::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+void Square::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
 	float u = 2 * ls.u - 1.0f;
 	float v = 2 * ls.v - 1.0f;
@@ -52,6 +52,7 @@ void Square::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
 	r.m_fMax = FLT_MAX;
 	r.m_Ori = transform( Point( radius * u , 0.0f , radius * v ) );
 	r.m_Dir = transform( UniformSampleHemisphere( sort_canonical() , sort_canonical() ) );
+	n = transform( Vector( 0.0f , 1.0f , 0.0f , true ) );
 
 	if( pdf ) *pdf = 1.0f / ( radius * radius * 8.0f * PI );
 }

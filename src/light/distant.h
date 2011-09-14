@@ -55,7 +55,7 @@ public:
 	// para 'ls'       : light sample
 	// para 'r'       : the light vector
 	// para 'pdf'      : the properbility density function
-	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdf ) const;
+	virtual Spectrum sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const;
 
 // private field
 private:

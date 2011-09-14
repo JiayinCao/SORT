@@ -54,7 +54,7 @@ public:
 	// para 'ls'       : light sample
 	// para 'r'       : the light vector
 	// para 'pdf'      : the properbility density function
-	virtual void sample_l( const LightSample& ls , Ray& r , float* pdf ) const = 0;
+	virtual void sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const = 0;
 
 	// setup transformation for the shape
 	virtual void SetTransform( const Transform& s ) { transform = s; }

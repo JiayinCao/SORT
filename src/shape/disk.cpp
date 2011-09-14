@@ -47,14 +47,16 @@ Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , floa
 }
 
 // sample a ray from light
-void Disk::sample_l( const LightSample& ls , Ray& r , float* pdf ) const
+void Disk::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
 	r.m_Ori = transform(Point( u * radius , 0.0f , v * radius ));
-	r.m_Dir = transform(UniformSampleHemisphere(sort_canonical() , sort_canonical()));
+	Vector wi = UniformSampleHemisphere(sort_canonical() , sort_canonical());
+	r.m_Dir = transform(wi);
+	n = transform( Vector( 0.0f , 1.0f , 0.0f , true ) );
 
 	if( pdf ) *pdf = 1.0f / ( radius * radius * PI * TWO_PI );
 }
