@@ -35,7 +35,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	Ray		light_ray;
 	Vector	n;
 	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , n , &light_pdf );
-	le *= SatDot( light_ray.m_Dir , n ) / ( light_pdf * pdf );
+	le *= SatDot( light_ray.m_Dir , n ) / pdf ;
 
 	// the path from light and eye
 	vector<BDPT_Vertex> light_path , eye_path;
@@ -44,18 +44,30 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	if( eps == 0 )	return scene.Le( ray );
 
 	unsigned lps = _generatePath( light_ray , light_pdf , light_path , path_per_pixel );
+	BDPT_Vertex light_inter;
+	light_inter.p = light_ray.m_Ori;
+	light_inter.n = n;
+	light_inter.pdf = light_pdf;
 
 	Spectrum directWt = 1.0f;
 	Spectrum li;
 	for( unsigned i = 1 ; i <= eps ; ++i )
 	{
 		const BDPT_Vertex& vert = eye_path[i-1];
-		li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , 
-						light , vert.inter , LightSample(true) , BsdfSample(true) ) / ( pdf * i );
-		directWt *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n ) / ( vert.pdf * vert.rr );
+		directWt /= vert.pdf * vert.rr;
+		if( directWt.IsBlack() == false )
+		{
+			li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , light , vert.inter , 
+				LightSample(true) , BsdfSample(true) ) *
+				_Weight( eye_path , i , light_path , 0 , light_inter ) / pdf;
+		}
+		if( vert.pdf != 0 )
+			directWt *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n );
+		else
+			directWt = 0.0f;
 
 		for( unsigned j = 1 ; j <= lps ; ++j )
-			li += le * _evaluatePath( eye_path , i , light_path , j ) / ( i + j );
+			li += le * _evaluatePath( eye_path , i , light_path , j ) * _Weight( eye_path , i , light_path , j , light_inter );
 	}
 
 	return li + eye_path[0].inter.Le( -ray.m_Dir );
@@ -141,20 +153,20 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , vect
 		vert.n = vert.inter.normal;
 		vert.pri = vert.inter.primitive;
 		vert.wi = -wi.m_Dir;
+		vert.pdf = pdf;
 		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
-		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &vert.pdf );
-		path.push_back( vert );
 
 		if (path.size() > 4 )
 		{
 			if (sort_canonical() > 0.5f)
 				break;
 			else
-				path.front().rr = 0.5f;
+				vert.rr = 0.5f;
 		}
 
-		if( pdf == 0.0f )
-			break;
+		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &pdf );
+
+		path.push_back( vert );
 
 		wi = Ray( vert.inter.intersect , vert.wo , 0 , 0.1f );
 	}
@@ -191,7 +203,7 @@ Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int 
 	float l1 = _Gterm( evert , lvert );
 	Spectrum l2 = lvert.bsdf->f( n_delta , lvert.wi );
 
-	li *= l0 * l1 * l2 / ( evert.rr * lvert.rr );
+	li *= l0 * l1 * l2 / ( evert.pdf * evert.rr * lvert.rr * lvert.pdf );
 
 	return li;
 }
@@ -212,4 +224,83 @@ float BidirPathTracing::_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) 
 		return 0.0f;
 	
 	return g;
+}
+
+// weight the path
+float BidirPathTracing::_Weight(const vector<BDPT_Vertex>& epath , int esize , 
+								const vector<BDPT_Vertex>& lpath , int lsize ,
+								const BDPT_Vertex& light_pos ) const
+{
+	float total_pdf = 0.0f;
+	int total_size = esize + lsize;
+	for( int i = 1 ; i <= total_size ; ++i )
+		total_pdf += _PathPDF( epath , i , lpath , total_size - i , light_pos );
+
+	float pdf = _PathPDF( epath , esize , lpath , lsize , light_pos );
+	if( pdf == 0.0f )
+		return 0.0f;
+
+	return pdf / total_pdf;
+}
+
+// pdf of a specific path
+float BidirPathTracing::_PathPDF(const vector<BDPT_Vertex>& epath , int esize ,
+								const vector<BDPT_Vertex>& lpath , int lsize ,
+								const BDPT_Vertex& light_pos ) const
+{
+	if( esize == 0 )
+		return 0.0f;
+
+	int epath_size = (int)epath.size();
+	int lpath_size = (int)lpath.size();
+
+	int offset = 1;
+	const BDPT_Vertex* pre_vert = &epath[0];
+	float pdf = 1.0f;
+	const BDPT_Vertex* last = pre_vert;
+	for( int i = 1 ; i < esize ; i++ )
+	{
+		if( i < epath_size )
+		{
+			pre_vert = &epath[i];
+			pdf *= SatDot( pre_vert->wi , pre_vert->n ) * pre_vert->pdf / ( pre_vert->p - epath[i-1].p ).SquaredLength();
+			last = pre_vert;
+		}
+		else
+		{
+			const BDPT_Vertex& vert = lpath[ lpath_size - offset ];
+			Vector delta = pre_vert->p - vert.p ;
+			Vector wi = Normalize( delta );
+			pdf *= SatDot( wi , vert.n ) * pre_vert->bsdf->Pdf( pre_vert->wi , pre_vert->wo ) / delta.SquaredLength();
+			pre_vert = &lpath[ lpath_size - offset ];
+			++offset;
+
+			last = pre_vert;
+		}
+	}
+
+	for( int i = 1 ; i < lsize ; i++ )
+	{
+		if( i < lpath_size )
+		{
+			pre_vert = &lpath[i];
+			pdf *= SatDot( pre_vert->wi , pre_vert->n ) * pre_vert->pdf / ( pre_vert->p - lpath[i-1].p ).SquaredLength();
+		}else
+		{
+			const BDPT_Vertex& vert = epath[ epath_size - offset ];
+			Vector delta = pre_vert->p - vert.p;
+			Vector wi = Normalize( delta );
+			pdf *= SatDot( wi , vert.n ) * pre_vert->bsdf->Pdf( pre_vert->wi , pre_vert->wo ) / delta.SquaredLength();
+			pre_vert = &epath[ epath_size - offset ];
+			++offset;
+		}
+	}
+	
+	if( lpath_size != 0 )
+		last = &lpath[0];
+
+	Vector wi = Normalize( last->p - light_pos.p );
+	pdf *= AbsDot( wi , last->n ) * light_pos.pdf / ( last->p - light_pos.p ).SquaredLength();
+
+	return pdf;
 }
