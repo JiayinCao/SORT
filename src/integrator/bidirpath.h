@@ -84,6 +84,7 @@ private:
 
 	// generate path
 	unsigned	_generatePath( const Ray& ray , float base_pdf , vector<BDPT_Vertex>& path , unsigned max_vert ) const;
+
 	// evaluate path
 	// para 'epath' : path starting from eye point
 	// para 'esize' : sub-path size ( we're not evaluating full path )
@@ -93,6 +94,16 @@ private:
 								const vector<BDPT_Vertex>& lpath , int lsize ) const;
 	// compute G term
 	float	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
+
+	// weight the path
+	float	_Weight(	const vector<BDPT_Vertex>& epath , int esize , 
+						const vector<BDPT_Vertex>& lpath , int lsize ,
+						const BDPT_Vertex& light_pos ) const;
+
+	// pdf of a specific path
+	float	_PathPDF(	const vector<BDPT_Vertex>& epath , int esize ,
+						const vector<BDPT_Vertex>& lpath , int lsize ,
+						const BDPT_Vertex& light_pos ) const;
 };
 
 #endif

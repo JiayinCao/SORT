@@ -103,7 +103,7 @@ void System::_preInit()
 	//m_pIntegrator = new BidirPathTracing1( m_Scene , 16 );
 	// the sampler
 	m_pSampler = new RandomSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(36);
+	m_iSamplePerPixel = m_pSampler->RoundSize(4);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value
