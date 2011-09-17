@@ -253,8 +253,8 @@ float BidirPathTracing::_PathPDF(const vector<BDPT_Vertex>& epath , int esize ,
 
 	int epath_size = (int)epath.size();
 	int lpath_size = (int)lpath.size();
+	int total_size = esize + lsize ;
 
-	int offset = 1;
 	const BDPT_Vertex* pre_vert = &epath[0];
 	float pdf = 1.0f;
 	const BDPT_Vertex* last = pre_vert;
@@ -268,13 +268,13 @@ float BidirPathTracing::_PathPDF(const vector<BDPT_Vertex>& epath , int esize ,
 		}
 		else
 		{
-			const BDPT_Vertex& vert = lpath[ lpath_size - offset ];
+			if( lsize == 0 )
+				break;
+			const BDPT_Vertex& vert = lpath[ total_size - i - 1 ];
 			Vector delta = pre_vert->p - vert.p ;
 			Vector wi = Normalize( delta );
-			pdf *= SatDot( wi , vert.n ) * pre_vert->bsdf->Pdf( pre_vert->wi , pre_vert->wo ) / delta.SquaredLength();
-			pre_vert = &lpath[ lpath_size - offset ];
-			++offset;
-
+			pdf *= SatDot( wi , vert.n ) * pre_vert->bsdf->Pdf( pre_vert->wi , wi ) / delta.SquaredLength();
+			pre_vert = &lpath[ total_size - i - 1 ];
 			last = pre_vert;
 		}
 	}
@@ -287,12 +287,11 @@ float BidirPathTracing::_PathPDF(const vector<BDPT_Vertex>& epath , int esize ,
 			pdf *= SatDot( pre_vert->wi , pre_vert->n ) * pre_vert->pdf / ( pre_vert->p - lpath[i-1].p ).SquaredLength();
 		}else
 		{
-			const BDPT_Vertex& vert = epath[ epath_size - offset ];
+			const BDPT_Vertex& vert = epath[ total_size - i - 1 ];
 			Vector delta = pre_vert->p - vert.p;
 			Vector wi = Normalize( delta );
-			pdf *= SatDot( wi , vert.n ) * pre_vert->bsdf->Pdf( pre_vert->wi , pre_vert->wo ) / delta.SquaredLength();
-			pre_vert = &epath[ epath_size - offset ];
-			++offset;
+			pdf *= SatDot( wi , vert.n ) * pre_vert->bsdf->Pdf( pre_vert->wi , wi ) / delta.SquaredLength();
+			pre_vert = &epath[ total_size - i - 1 ];
 		}
 	}
 	
