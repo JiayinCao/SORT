@@ -40,7 +40,7 @@
   <Light type="area">
     <Property name="shape" value="disk" />
     <Property name="radius" value="0.1" />
-    <Property name="intensity" value="450 450 450"/>
+    <Property name="intensity" value="900 900 900"/>
     <Property name="dir" value="0 -1 0"/>
     <Property name="pos" value="0 1 0"/>
     <Property name="dir" value="0 -1 0"/>
