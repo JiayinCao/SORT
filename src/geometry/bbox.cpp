@@ -88,6 +88,13 @@ bool BBox::IsInBBox( const Point& p , float delta ) const
 	return true;
 }
 
+// set the bounding box as invalid
+void BBox::InvalidBBox()
+{
+	m_Min = Point( FLT_MAX , FLT_MAX , FLT_MAX );
+	m_Max = Point( -FLT_MAX , -FLT_MAX , -FLT_MAX );
+}
+
 // get the surface area of the bounding box
 float BBox::SurfaceArea() const
 {

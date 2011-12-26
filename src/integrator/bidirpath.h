@@ -50,6 +50,8 @@ struct BDPT_Vertex
 
 ///////////////////////////////////////////////////////////////////////////////////
 // definition of bidirectional path tracing
+// BDPT is not finished yet, there are bugs in the following code.
+// i'll try to finish it after i finish some more integrators.
 class BidirPathTracing : public Integrator
 {
 // public method
