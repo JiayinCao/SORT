@@ -22,6 +22,10 @@
 // compute the bounding box
 void Accelerator::_computeBBox()
 {
+	// reset bounding box
+	m_BBox.InvalidBBox();
+
+	// update bounding box again
 	vector<Primitive*>::const_iterator it = m_primitives->begin();
 	while( it != m_primitives->end() )
 	{

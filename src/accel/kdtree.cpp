@@ -59,8 +59,8 @@ void KDTree::Build()
 	{
 		for( unsigned i = 0 ; i < count ; i++ )
 		{
-			const BBox& box = (*m_primitives)[i]->GetBBox();
 			Primitive* pri = (*m_primitives)[i];
+			const BBox& box = pri->GetBBox();
 			if( box.m_Min[k] != box.m_Max[k] )
 			{
 				splits.split[k][splits.split_c[k]] = Split( box.m_Min[k] , Split_Start , i , pri );

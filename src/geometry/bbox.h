@@ -71,6 +71,9 @@ public:
 	// delta in a specific axis
 	float Delta( unsigned k ) const;
 
+	// set the bounding box as invalid
+	void InvalidBBox();
+
 // public data
 public:
 	// the minium and maxium point of the bounding box

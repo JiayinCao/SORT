@@ -65,7 +65,7 @@ public:
 	Primitive*	primitive;
 
 	Split(){pos = 0;type = Split_None;id=0;primitive=0;}
-	Split( float po , Split_Type t , unsigned pid , Primitive* p = 0)
+	Split( float po , Split_Type t , unsigned pid , Primitive* p )
 	{
 		pos = po;type = t;id=pid;
 		primitive = p;
