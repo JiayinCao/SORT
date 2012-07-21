@@ -17,7 +17,7 @@
 
 // include the header file
 #include "random.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 #include "utility/rand.h"
 
 // generate sample in one dimension

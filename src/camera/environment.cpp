@@ -19,7 +19,7 @@
 #include "environment.h"
 #include "geometry/vector.h"
 #include "geometry/ray.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 #include "utility/define.h"
 #include "texture/rendertarget.h"
 #include <math.h>

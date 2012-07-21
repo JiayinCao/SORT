@@ -17,7 +17,7 @@
 
 // include the header
 #include "stratified.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 #include "utility/rand.h"
 #include <math.h>
 

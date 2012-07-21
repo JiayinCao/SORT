@@ -18,7 +18,7 @@
 #ifndef	SORT_REFERENCECOUNT
 #define	SORT_REFERENCECOUNT
 
-#include "utility/assert.h"
+#include "utility/sassert.h"
 
 //////////////////////////////////////////////////////////////////////////
 // definition of reference count

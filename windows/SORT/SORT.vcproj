@@ -489,7 +489,7 @@
 			Name="utility"
 			>
 			<File
-				RelativePath="..\..\src\utility\assert.h"
+				RelativePath="..\..\src\utility\sassert.h"
 				>
 			</File>
 			<File

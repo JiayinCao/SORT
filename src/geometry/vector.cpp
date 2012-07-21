@@ -20,7 +20,7 @@
 #include <math.h>
 #include "managers/logmanager.h"
 #include "transform.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 
 // default constructor, all of the components are set zero
 Vector::Vector( bool normal ):

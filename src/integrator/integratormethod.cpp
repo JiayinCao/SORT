@@ -93,7 +93,6 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 	{
 		BXDF_TYPE bxdf_type;
 		Spectrum f = bsdf->sample_f( wo , wi , bs , &bsdf_pdf , type , &bxdf_type );
-		float mis = 1.0f;
 		if( !f.IsBlack() && bsdf_pdf != 0.0f )
 		{
 			float weight = 1.0f;

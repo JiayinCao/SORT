@@ -1,5 +1,5 @@
 /*
-   FileName:      assert.h
+   FileName:      sassert.h
 
    Created Time:  2011-08-04 20:03:11
 
@@ -15,8 +15,8 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifndef SORT_ASSERT
-#define	SORT_ASSERT
+#ifndef SORT_SASSERT
+#define	SORT_SASSERT
 
 #include "sort.h"
 #include "managers/logmanager.h"
