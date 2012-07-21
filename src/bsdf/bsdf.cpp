@@ -20,7 +20,7 @@
 #include "bxdf.h"
 #include "geometry/intersection.h"
 #include "sampler/sample.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 
 // constructor
 Bsdf::Bsdf( const Intersection* intersect )

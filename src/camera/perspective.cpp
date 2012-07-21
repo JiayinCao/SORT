@@ -19,7 +19,7 @@
 #include "perspective.h"
 #include "texture/rendertarget.h"
 #include <math.h>
-#include "utility/assert.h"
+#include "utility/sassert.h"
 #include "sampler/sample.h"
 
 // generate ray
@@ -33,6 +33,7 @@ Ray	PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) 
 
 	float w = (float)m_rt->GetWidth();
 	float h = (float)m_rt->GetHeight();
+	
 	float aspect = w / h;
 
 	float yScale = 1.0f / tan( m_fov / 2 );

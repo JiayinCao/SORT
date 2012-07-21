@@ -16,7 +16,7 @@
  */
 
 #include "regular.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 #include <math.h>
 
 // generate sample in one dimension

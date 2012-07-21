@@ -17,7 +17,7 @@
 
 // include header file
 #include "ortho.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 #include "sampler/sample.h"
 #include "texture/rendertarget.h"
 

@@ -22,7 +22,7 @@
 #include "utility/strhelper.h"
 #include "utility/path.h"
 #include "utility/samplemethod.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 #include "managers/matmanager.h"
 #include "light/light.h"
 #include "shape/shape.h"

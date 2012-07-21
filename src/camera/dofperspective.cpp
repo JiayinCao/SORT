@@ -18,7 +18,7 @@
 // include header file
 #include "dofperspective.h"
 #include "texture/rendertarget.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
 

@@ -18,7 +18,7 @@
 // include the header file
 #include "bbox.h"
 #include "vector.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 
 // default constructor
 BBox::BBox():

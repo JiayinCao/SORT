@@ -17,7 +17,7 @@
 
 // include the header file
 #include "point.h"
-#include "utility/assert.h"
+#include "utility/sassert.h"
 
 // default constructor
 Point::Point()

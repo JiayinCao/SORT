@@ -21,7 +21,10 @@
 
 #if defined(SORT_IN_WINDOWS)
 #include <windows.h>
+#elif defined(SORT_IN_MAC)
+#include <libproc.h>
 #endif
+
 
 extern System g_System;
 
@@ -31,7 +34,7 @@ string GetExecutableDir()
 	const int maxLen = 2048;
 	char buf[ maxLen ];
 
-#if defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
+#if defined(SORT_IN_LINUX)
 	int c = readlink( "/proc/self/exe", buf, maxLen - 1 );
 	buf[c] = '/';
 	buf[c+1] = 0;
@@ -49,6 +52,13 @@ string GetExecutableDir()
 			break;
 		}
 	}
+#elif defined(SORT_IN_MAC)
+	pid_t pid = getpid();
+    int ret = proc_pidpath (pid, buf, sizeof(buf));
+    if ( ret <= 0 ) {
+		LOG_ERROR<<"Can't get current directory."<<ENDL;
+        return "";
+    }
 #endif
 
 	return string(buf);
