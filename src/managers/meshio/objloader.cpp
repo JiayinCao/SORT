@@ -27,6 +27,24 @@
 // the maxmium length of a single line
 static const unsigned LINE_MAXLENGTH = 4096;
 
+#define CHECK_INDEX(index) {\
+	if( index.posIndex < 0 )\
+	{\
+		LOG_WARNING<<"Negative position index in file "<<str<<ENDL;\
+		index.posIndex = 0;\
+	}\
+	if( index.norIndex < 0 )\
+	{\
+		LOG_WARNING<<"Negative normal index in file "<<str<<ENDL;\
+		index.norIndex = 0;\
+	}\
+	if( index.texIndex < 0 )\
+	{\
+		LOG_WARNING<<"Negative texture index in file "<<str<<ENDL;\
+		index.texIndex = 0;\
+	}\
+}
+	
 // load obj from file
 bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 {
@@ -63,9 +81,11 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			string name;
 			file>>name;
 			if( trunk )
+			{
 				trunk->m_mat = MatManager::GetSingleton().FindMaterial( name );
-			if( 0 == trunk->m_mat )
-				LOG_WARNING<<"Material named \'"<<name<<"\' not found, use default material in subset \'"<<trunk->name<<"\' of \'"<<str<<"\'."<<ENDL;
+				if( 0 == trunk->m_mat )
+					LOG_WARNING<<"Material named \'"<<name<<"\' not found, use default material in subset \'"<<trunk->name<<"\' of \'"<<str<<"\'."<<ENDL;
+			}
 		}else if( strcmp( prefix.c_str() , "v" ) == 0 )
 		{
 			Point p;
@@ -92,12 +112,15 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			string strIndex;
 			file>>strIndex;
 			VertexIndex vi0 = VertexIndexFromStr( strIndex );
+			CHECK_INDEX(vi0);
 			trunk->m_IndexBuffer.push_back( vi0 );
 			file>>strIndex;
 			VertexIndex vi1 = VertexIndexFromStr( strIndex );
+			CHECK_INDEX(vi1);
 			trunk->m_IndexBuffer.push_back( vi1 );
 			file>>strIndex;
 			VertexIndex vi2 = VertexIndexFromStr( strIndex );
+			CHECK_INDEX(vi2);
 			trunk->m_IndexBuffer.push_back( vi2 );
 
 			// check if there is another index
@@ -111,6 +134,7 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			{
 				file>>strIndex;
 				VertexIndex vi3 = VertexIndexFromStr( strIndex );
+				CHECK_INDEX(vi3);
 				trunk->m_IndexBuffer.push_back( vi0 );
 				trunk->m_IndexBuffer.push_back( vi2 );
 				trunk->m_IndexBuffer.push_back( vi3 );
