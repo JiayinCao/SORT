@@ -40,7 +40,6 @@
 #include "integrator/direct.h"
 #include "integrator/pathtracing.h"
 #include "integrator/bidirpath.h"
-//#include "integrator/test.h"
 
 #include "sampler/stratified.h"
 #include "sampler/random.h"
@@ -79,12 +78,12 @@ void System::_preInit()
 	m_rt = new RenderTarget();
 	m_rt->SetSize( 800 , 600 );
 	// there is default value for camera
-	float distance = 5.0f;
+	float distance = 5000.0f;
 //	DofPerspective* camera = new DofPerspective();
 //	OrthoCamera* camera = new OrthoCamera();
 //	EnvironmentCamera* camera = new EnvironmentCamera();
 	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( 0 , distance * 0.1f , distance ) );
+	camera->SetEye( Point( 0 , distance * 0.2f, distance ) );
 	camera->SetUp( Vector( 0 , 1 , 0 ) );
 	camera->SetTarget( Point( 0 , distance * 0.05f , 0 ) );
 	camera->SetFov( 3.1415f / 4 );
@@ -98,11 +97,11 @@ void System::_preInit()
 	// the integrator
 	//m_pIntegrator = new DirectLight( m_Scene , 1 );
 	//m_pIntegrator = new PathTracing( m_Scene , 1024 );
-	//m_pIntegrator = new WhittedRT(m_Scene);
-	m_pIntegrator = new BidirPathTracing( m_Scene , 16 );
+	m_pIntegrator = new WhittedRT(m_Scene);
+	//m_pIntegrator = new BidirPathTracing( m_Scene , 16 );
 	//m_pIntegrator = new BidirPathTracing1( m_Scene , 16 );
 	// the sampler
-	m_pSampler = new RandomSampler();
+	m_pSampler = new StratifiedSampler();
 	m_iSamplePerPixel = m_pSampler->RoundSize(1);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 

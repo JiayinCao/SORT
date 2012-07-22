@@ -32,7 +32,7 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 	// get the intersection between the ray and the scene
 	Intersection ip;
 	if( false == scene.GetIntersect( r , &ip ) )
-		return 0.0f;
+		return scene.Le(r);
 
 	Spectrum t;
 
@@ -70,9 +70,9 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 	}
 
 	// add reflection
-	if( bsdf->NumComponents( BXDF_REFLECTION ) > 0 )
+	if( bsdf->NumComponents( BXDF_SPECULAR_REFLECTION ) > 0 )
 		t += SpecularReflection( r , &ip , bsdf , this , ps );
-	if( bsdf->NumComponents( BXDF_TRANSMISSION ) > 0 )
+	if( bsdf->NumComponents( BXDF_SPECULAR_TRANSMISSION ) > 0 )
 		t += SpecularRefraction( r , &ip , bsdf , this , ps );
 
 	return t;
