@@ -5,6 +5,10 @@
 
 #include "gzguts.h"
 
+#if defined(__APPLE__)
+#include <unistd.h>
+#endif
+
 #if defined(_LARGEFILE64_SOURCE) && _LFS64_LARGEFILE-0
 #  define LSEEK lseek64
 #else
