@@ -199,8 +199,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		DD27A1B516463A5800E17480 /* dofperspective.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dofperspective.cpp; sourceTree = "<group>"; };
-		DD27A1B616463A5800E17480 /* dofperspective.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dofperspective.h; sourceTree = "<group>"; };
 		DD337AF115BABF73006F3828 /* SORT */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SORT; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD8931E515BAF0C200831B31 /* accelerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = accelerator.cpp; sourceTree = "<group>"; };
 		DD8931E615BAF0C200831B31 /* accelerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = accelerator.h; sourceTree = "<group>"; };
@@ -691,8 +689,6 @@
 		DD8931FB15BAF0C200831B31 /* camera */ = {
 			isa = PBXGroup;
 			children = (
-				DD27A1B516463A5800E17480 /* dofperspective.cpp */,
-				DD27A1B616463A5800E17480 /* dofperspective.h */,
 				DD8931FC15BAF0C200831B31 /* camera.h */,
 				DD8931FF15BAF0C200831B31 /* environment.cpp */,
 				DD89320015BAF0C200831B31 /* environment.h */,
