@@ -24,13 +24,21 @@
 // default constructor
 OrthoCamera::OrthoCamera()
 {
+	_init();
+}
+
+// initialize data
+void OrthoCamera::_init()
+{
+	// set type for tha camera
+	m_type = CAMERA_ORTHO;
 	//set default value
 	m_camWidth = 1.0f;
 	m_camHeight = 1.0f;
 }
 
 // generate camera ray
-Ray OrthoCamera::GenerateRay(float x, float y, const PixelSample &ps) const
+Ray OrthoCamera::GenerateRay( unsigned pass_id , float x, float y, const PixelSample &ps) const
 {
 	x += ps.img_u;
 	y += ps.img_v;

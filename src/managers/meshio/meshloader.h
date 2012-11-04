@@ -34,7 +34,7 @@ public:
 	// default constructor
 	MeshLoader(){ m_MeshType = MT_END; }
 	// destructor
-	~MeshLoader(){}
+	virtual ~MeshLoader(){}
 
 	// load mesh from file
 	// para 'str' : name of the file

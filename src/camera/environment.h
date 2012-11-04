@@ -29,12 +29,12 @@ class	EnvironmentCamera : public Camera
 // public method
 public:
 	// default constructor
-	EnvironmentCamera(){}
+	EnvironmentCamera(){_init();}
 	// destructor
 	~EnvironmentCamera(){}
 
 	// generate a ray given a pixel
-	virtual Ray	GenerateRay( float x , float y , const PixelSample& ps ) const;
+	virtual Ray	GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const;
 
 	// set transformation matrix
 	void SetTransform( const Matrix& m ) { m_transform = m; }
@@ -43,6 +43,9 @@ public:
 private:
 	// a rotation transformation
 	Matrix	m_transform;
+	
+	// initialize data
+	void _init();
 };
 
 #endif

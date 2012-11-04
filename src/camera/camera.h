@@ -20,6 +20,8 @@
 
 #include "geometry/point.h"
 #include "geometry/ray.h"
+#include "utility/enum.h"
+#include "spectrum/spectrum.h"
 
 // pre-decleration of render target
 class RenderTarget;
@@ -37,7 +39,7 @@ public:
 	virtual ~Camera(){}
 
 	// generate a ray given a pixel
-	virtual Ray	GenerateRay( float x , float y , const PixelSample& ps ) const = 0;
+	virtual Ray	GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const = 0;
 
 	// set a render target
 	void SetRenderTarget( RenderTarget* rt ) { m_rt = rt; }
@@ -45,6 +47,11 @@ public:
 	// get and set eye point
 	const Point& GetEye() const { return m_eye; }
 	virtual void SetEye( const Point& eye ) { m_eye = eye; }
+	
+	// get pass number. By default , all of the cameras have only one pass except stereo vision is enabled in perspective camera.
+	virtual unsigned GetPassCount() const { return 1; }
+	// get pass filter
+	virtual Spectrum GetPassFilter( unsigned id ) const { return 1.0f; }
 
 // protected field
 protected:
@@ -52,10 +59,12 @@ protected:
 	Point	m_eye;
 	// the render target
 	RenderTarget* m_rt;
+	// the type for the camera
+	CAMERA_TYPE m_type;
 
 // private method
 	// initialize default data
-	void _init() { m_rt = 0; }
+	void _init() { m_rt = 0; m_type = CAMERA_NONE; }
 };
 
 #endif

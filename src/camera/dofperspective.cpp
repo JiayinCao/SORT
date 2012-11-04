@@ -23,7 +23,7 @@
 #include "sampler/sample.h"
 
 // generate ray
-Ray	DofPerspective::GenerateRay( float x , float y , const PixelSample& ps ) const
+Ray	DofPerspective::GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const
 {
 	// check if there is render target
 	Sort_Assert( m_rt != 0 );
@@ -44,8 +44,6 @@ Ray	DofPerspective::GenerateRay( float x , float y , const PixelSample& ps ) con
 	v.z = 1.0f;
 	v.Normalize();
 
-	float dis = focalDistance / v.z;
-
 	Vector zaxis = ( m_target - m_eye ).Normalize();
 	Vector xaxis = Cross( m_up , zaxis ).Normalize();
 	Vector yaxis = Cross( zaxis , xaxis );
@@ -56,7 +54,7 @@ Ray	DofPerspective::GenerateRay( float x , float y , const PixelSample& ps ) con
 	r.m_Dir.z = v.x * xaxis.z + v.y * yaxis.z + v.z * zaxis.z ;
 	r.m_Ori = m_eye;
 	
-	Point target = r(dis);
+	Point target = r(focalDistance / v.z);
 
 	float s , t;
 	UniformSampleDisk( ps.dof_u , ps.dof_v , s , t );
