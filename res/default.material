@@ -1,7 +1,7 @@
 <Root>
  	 <Material name="glass" type="Glass">
    	 <Property name="eta_t" value="1.4" />
-		<Property name="color" value="0.0 0.0 1.0" />
+		<Property name="color" value="1.0 1.0 1.0" />
   	</Material>
 	 <Material name="inside" type="Matte">
 		<Texture name="color" type="checkbox">
@@ -31,7 +31,7 @@
   </Material>
   <Material name="cube_mat" type="Matte">
     <Texture name="color" type="constant">
-      <Property name="color" value="0.0 0.1 0.1"/>
+      <Property name="color" value="0.1 0.1 0.1"/>
     </Texture>
   </Material>
   <Material name="mirror" type="Mirror">

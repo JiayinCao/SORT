@@ -1,6 +1,8 @@
 <Root>
   <Resource path="../res/"/>
-  <Material value="default.material"/>
+ 
+
+<Material value="default.material"/>
   <Model filename="sphere.obj" name="object2">
     <Transform>
       <Matrix value="t -0.5 60 -0.5" />

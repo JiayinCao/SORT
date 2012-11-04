@@ -48,9 +48,9 @@ Spectrum PerspectiveCamera::GetPassFilter( unsigned id ) const
 	{
 		if( ( m_redOnLeft && id == 0 ) ||
 		    ( m_redOnLeft == false && id == 1 ) )
-			return Spectrum( 1.0f , 0.5f , 0.0f );
+			return Spectrum( 1.0f , 0.0f , 0.0f );
 		else
-			return Spectrum( 0.0f , 0.5f , 1.0f );
+			return Spectrum( 0.0f , 1.0f , 1.0f );
 	}
 	
 	return 1.0f;
