@@ -90,9 +90,11 @@ void System::_preInit()
 	camera->SetRenderTarget( m_rt );
 //	camera->SetCameraWidth( 1000.0f );
 //	camera->SetCameraHeight( 1000.0f );
-//	Vector vec( distance , distance * 0.25f , distance );
+//	Vector vec( camera->GetTarget() - camera->GetEye() );
 //	camera->SetFocalDistance( vec.Length() );
-//	camera->SetLen( 40.0f );
+	camera->SetLen( 40.0f );
+	camera->SetInteraxial(100.0f);
+	
 	m_camera = camera;
 	// the integrator
 	//m_pIntegrator = new DirectLight( m_Scene , 1 );
@@ -102,7 +104,7 @@ void System::_preInit()
 	//m_pIntegrator = new BidirPathTracing1( m_Scene , 16 );
 	// the sampler
 	m_pSampler = new StratifiedSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(1);
+	m_iSamplePerPixel = m_pSampler->RoundSize(64);
 	m_pSamples = new PixelSample[m_iSamplePerPixel];
 
 	// set default value
@@ -318,12 +320,15 @@ void System::_raytracing()
 
 			// the radiance
 			Spectrum radiance;
-			for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
+			for( unsigned p = 0 ; p < m_camera->GetPassCount() ; ++p )
 			{
-				// generate rays
-				Ray r = m_camera->GenerateRay( (float)j , (float)i , m_pSamples[k] );
-				// accumulate the radiance
-				radiance += m_pIntegrator->Li( r , m_pSamples[k] );
+				for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
+				{
+					// generate rays
+					Ray r = m_camera->GenerateRay( p , (float)j , (float)i , m_pSamples[k] );
+					// accumulate the radiance
+					radiance += m_pIntegrator->Li( r , m_pSamples[k] ) * m_camera->GetPassFilter(p);
+				}
 			}
 			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
 
@@ -353,12 +358,15 @@ void System::_raytracing_multithread()
 
 			// the radiance
 			Spectrum radiance;
-			for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
+			for( unsigned p = 0 ; p < m_camera->GetPassCount() ; ++p )
 			{
-				// generate rays
-				Ray r = m_camera->GenerateRay( (float)j , (float)i , m_pSamples[k] );
-				// accumulate the radiance
-				radiance += m_pIntegrator->Li( r , m_pSamples[k] );
+				for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
+				{
+					// generate rays
+					Ray r = m_camera->GenerateRay( p , (float)j , (float)i , m_pSamples[k] );
+					// accumulate the radiance
+					radiance += m_pIntegrator->Li( r , m_pSamples[k] ) * m_camera->GetPassFilter(p);
+				}
 			}
 			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
 			

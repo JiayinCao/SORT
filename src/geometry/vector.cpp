@@ -49,6 +49,14 @@ m_bNormal( normal )
 	z = _z;
 }
 
+// constructor from point
+Vector::Vector( const Point& p )
+{
+	x = p.x;
+	y = p.y;
+	z = p.z;
+}
+
 // destructor does nothing here
 Vector::~Vector()
 {

@@ -34,7 +34,7 @@ public:
 	~OrthoCamera(){}
 
 	// generate ray
-	virtual Ray GenerateRay( float x , float y , const PixelSample& ps ) const;
+	virtual Ray GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const;
 
 	// get and set target
 	const Point& GetTarget() const { return m_target; }
@@ -68,6 +68,9 @@ protected:
 
 	// update transform matrix
 	void _updateTransform();
+	
+	// initialize data
+	void _init();
 };
 
 #endif

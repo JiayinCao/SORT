@@ -25,8 +25,14 @@
 #include <math.h>
 #include "sampler/sample.h"
 
+// initialize data
+void EnvironmentCamera::_init()
+{
+	m_type = CAMERA_ENVIRONMENT;
+}
+
 // generate a ray given a pixel
-Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
+Ray	EnvironmentCamera::GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const
 {
 	Sort_Assert( m_rt != 0 );
 

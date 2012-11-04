@@ -42,7 +42,7 @@ public:
 	// note	      :	actually set tot_type in TexIO gains nothing
 	TexIO( TEX_TYPE tt ) { m_TexType = tt; }
 	// destructor
-	~TexIO() {}
+	virtual ~TexIO() {}
 
 	// output the file in different ways
 	// para 'str' : the name of the output entity

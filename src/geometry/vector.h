@@ -25,6 +25,7 @@
 
 // pre-deleration
 class Transform;
+class Point;
 
 /////////////////////////////////////////////////////////////////////////
 // definition of vector
@@ -42,6 +43,8 @@ public:
 	// copy constructor
 	// para 'vector':	vector to copy
 	Vector( const Vector& vector );
+	// constructor from point
+	Vector( const Point& p );
 	// destructor does nothing here
 	~Vector();
 

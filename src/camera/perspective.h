@@ -28,12 +28,12 @@ class	PerspectiveCamera : public Camera
 // public method
 public:
 	// default constructor
-	PerspectiveCamera(){}
+	PerspectiveCamera(){_init();}
 	// destructor
 	~PerspectiveCamera(){}
 
 	// generate ray
-	virtual Ray GenerateRay( float x , float y , const PixelSample& ps ) const;
+	virtual Ray GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const;
 
 	// get and set target
 	const Point& GetTarget() const { return m_target; }
@@ -47,6 +47,25 @@ public:
 	float GetFov() const { return m_fov; }
 	void SetFov( float fov ) { m_fov = fov; }
 
+	// set len
+	void SetLen( float len )
+	{ m_lensRadius = len; }
+	// get len
+	float GetLen() const { return m_lensRadius; }
+	
+	// set interaxial for stereo vision
+	void SetInteraxial( float ir )
+	{ m_interaxial = ir; }
+	// get interaxial for stereo vision
+	float GetInteraxial() const { return m_interaxial; }
+	
+	// get pass number.
+	virtual unsigned GetPassCount() const;
+	// get pass filter
+	virtual Spectrum GetPassFilter( unsigned id ) const;
+	// by default, red glass is one the left.
+	void SwitchGlass( bool redOnLeft );
+	
 // protected field
 protected:
 	// the target of the camera
@@ -56,6 +75,18 @@ protected:
 
 	// the fov for the camera
 	float  m_fov;
+	
+	// radius for the lens , zero, by default, means no dof
+	float m_lensRadius;
+	
+	// interaxial , zero, by default, means no stereo vision
+	float m_interaxial;
+	
+	// whether red glass is one the left , default value is true
+	bool m_redOnLeft;
+	
+	// initialize data
+	void _init();
 };
 
 #endif
