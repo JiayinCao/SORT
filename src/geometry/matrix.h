@@ -71,6 +71,10 @@ public:
 
 	// transpose the matrix
 	Matrix Transpose() const;
+	// determinant of the matrix
+	float	Determinant() const;
+	// inverse of the matrix
+	bool Inverse(Matrix& out) const;
 
 	// whether the matrix have scale factor
 	bool	HasScale() const;
