@@ -1,0 +1,1276 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="texture">
+      <UniqueIdentifier>{143f62bd-c07b-4f54-861b-6579fe4ac5be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spectrum">
+      <UniqueIdentifier>{45581921-f474-43d6-8f0c-187873f43eed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="geometry">
+      <UniqueIdentifier>{f358eb48-7103-436d-9d70-592f3ce7d4f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="geometry\sky">
+      <UniqueIdentifier>{f2a93614-9e2c-4ce2-926f-a57e13f3e19f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="managers">
+      <UniqueIdentifier>{ff80cc79-3092-4bd2-9b3c-cefd907f8c63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="managers\texio">
+      <UniqueIdentifier>{a5460002-e012-4733-85f1-b7ca26cee6bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="managers\meshio">
+      <UniqueIdentifier>{9cf2c0b5-7b36-4f16-8e3f-5867f0db7a2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="utility">
+      <UniqueIdentifier>{6988db0d-537c-456e-a5cd-4ee9604a03cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="camera">
+      <UniqueIdentifier>{6f393cab-76f5-44b6-8f9d-28fac6f6def2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="accel">
+      <UniqueIdentifier>{55547d1e-853c-42e8-9e09-d6f457b93201}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{b34d4ac2-1bf7-4d33-8cb7-10e00146eb92}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\ply">
+      <UniqueIdentifier>{1fe02a7c-1f98-491f-9ec2-1f6932fe1ab9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\tinyxml">
+      <UniqueIdentifier>{82a3ea65-3131-4b31-b61c-d0d507d482bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\ilmbase-1.0.2">
+      <UniqueIdentifier>{c373d7d8-6573-464f-8082-a3c2d4cb4eaf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\openexr-1.7.0">
+      <UniqueIdentifier>{0d990a05-e93e-4e90-8cf6-46912a0f8e34}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\zlib-1.2.5">
+      <UniqueIdentifier>{3202738a-2609-48e7-8dc8-5d2f997ec092}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bsdf">
+      <UniqueIdentifier>{dd3d76b1-4329-4a9b-bc4f-7a54577c9fac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="light">
+      <UniqueIdentifier>{06f48e85-0e00-47ef-90e7-73780c574bf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="material">
+      <UniqueIdentifier>{2b8281cf-7ac3-4254-86a4-6ce7c27fea84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="integrator">
+      <UniqueIdentifier>{71bd458d-8a44-4119-81b5-b04669640b37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sampler">
+      <UniqueIdentifier>{fcb3a4dd-24f9-426c-9767-29c64e383b61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shape">
+      <UniqueIdentifier>{325c65ae-7989-40ff-80d7-d6285f7f4d3c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\texture\checkboxtexture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture\compositetexture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture\constanttexture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture\gridtexture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture\imagetexture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture\normaltexture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture\rendertarget.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture\texture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\texture\uvtexture.cpp">
+      <Filter>texture</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\spectrum\rgbspectrum.cpp">
+      <Filter>spectrum</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\bbox.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\instancetri.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\intersection.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\matrix.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\point.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\primitive.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\ray.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\scene.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\transform.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\triangle.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\trimesh.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\vector.cpp">
+      <Filter>geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\sky\skybox.cpp">
+      <Filter>geometry\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\geometry\sky\skysphere.cpp">
+      <Filter>geometry\sky</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\managers\logmanager.cpp">
+      <Filter>managers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\managers\matmanager.cpp">
+      <Filter>managers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\managers\memmanager.cpp">
+      <Filter>managers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\managers\meshmanager.cpp">
+      <Filter>managers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\managers\texmanager.cpp">
+      <Filter>managers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\managers\texio\bmpio.cpp">
+      <Filter>managers\texio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\managers\texio\exrio.cpp">
+      <Filter>managers\texio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\managers\meshio\objloader.cpp">
+      <Filter>managers\meshio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\managers\meshio\plyloader.cpp">
+      <Filter>managers\meshio</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utility\creator.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utility\parallel.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utility\path.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utility\rand.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utility\strhelper.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utility\timer.cpp">
+      <Filter>utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\camera\environment.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\camera\ortho.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\camera\perspective.cpp">
+      <Filter>camera</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\accel\accelerator.cpp">
+      <Filter>accel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\accel\bvh.cpp">
+      <Filter>accel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\accel\kdtree.cpp">
+      <Filter>accel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\accel\unigrid.cpp">
+      <Filter>accel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ply\ply.c">
+      <Filter>thirdparty\ply</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\tinyxml\tinystr.cpp">
+      <Filter>thirdparty\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\tinyxml\tinyxml.cpp">
+      <Filter>thirdparty\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\tinyxml\tinyxmlerror.cpp">
+      <Filter>thirdparty\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\tinyxml\tinyxmlparser.cpp">
+      <Filter>thirdparty\tinyxml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\half.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IexBaseExc.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IexThrowErrnoExc.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThread.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadMutex.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadMutexPosix.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadMutexWin32.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadPool.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadPosix.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadSemaphore.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadSemaphorePosix.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadSemaphorePosixCompat.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadSemaphoreWin32.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadWin32.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathBox.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathColorAlgo.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathFun.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathMatrixAlgo.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathRandom.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathShear.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathVec.cpp">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfAcesFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfB44Compressor.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfBoxAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfChannelList.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfChannelListAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfChromaticities.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfChromaticitiesAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfCompressionAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfCompressor.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfConvert.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfCRgbaFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfDoubleAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfEnvmap.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfEnvmapAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfFloatAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfFrameBuffer.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfFramesPerSecond.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfHeader.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfHuf.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfInputFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfIntAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfIO.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfKeyCode.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfKeyCodeAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfLineOrderAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfLut.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfMatrixAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfMisc.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfMultiView.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfOpaqueAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfOutputFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfPizCompressor.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfPreviewImage.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfPreviewImageAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfPxr24Compressor.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfRational.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfRationalAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfRgbaFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfRgbaYca.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfRleCompressor.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfScanLineInputFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfStandardAttributes.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfStdIO.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfStringAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfStringVectorAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfTestFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfThreading.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfTileDescriptionAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfTiledInputFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfTiledMisc.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfTiledOutputFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfTiledRgbaFile.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfTileOffsets.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfTimeCode.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfTimeCodeAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfVecAttribute.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfVersion.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfWav.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\openexr-1.7.0\ImfZipCompressor.cpp">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\adler32.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\compress.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\crc32.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\deflate.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\gzclose.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\gzlib.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\gzread.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\gzwrite.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\infback.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\inffast.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\inflate.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\inftrees.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\trees.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\uncompr.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\thirdparty\zlib-1.2.5\zutil.c">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\bsdf\bsdf.cpp">
+      <Filter>bsdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\bsdf\bxdf.cpp">
+      <Filter>bsdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\bsdf\lambert.cpp">
+      <Filter>bsdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\bsdf\merl.cpp">
+      <Filter>bsdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\bsdf\reflection.cpp">
+      <Filter>bsdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\bsdf\refraction.cpp">
+      <Filter>bsdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\light\area.cpp">
+      <Filter>light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\light\distant.cpp">
+      <Filter>light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\light\pointlight.cpp">
+      <Filter>light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\light\skylight.cpp">
+      <Filter>light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\light\spot.cpp">
+      <Filter>light</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\material\glass.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\material\matte.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\material\merlmat.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\material\mirror.cpp">
+      <Filter>material</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\integrator\bidirpath.cpp">
+      <Filter>integrator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\integrator\direct.cpp">
+      <Filter>integrator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\integrator\integratormethod.cpp">
+      <Filter>integrator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\integrator\pathtracing.cpp">
+      <Filter>integrator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\integrator\whittedrt.cpp">
+      <Filter>integrator</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sampler\random.cpp">
+      <Filter>sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sampler\regular.cpp">
+      <Filter>sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sampler\sampler.cpp">
+      <Filter>sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\sampler\stratified.cpp">
+      <Filter>sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shape\disk.cpp">
+      <Filter>shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shape\shape.cpp">
+      <Filter>shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shape\sphere.cpp">
+      <Filter>shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\shape\square.cpp">
+      <Filter>shape</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\system.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\texture\checkboxtexture.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\texture\compositetexture.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\texture\constanttexture.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\texture\gridtexture.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\texture\imagetexture.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\texture\normaltexture.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\texture\rendertarget.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\texture\texture.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\texture\uvtexture.h">
+      <Filter>texture</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\spectrum\rgbspectrum.h">
+      <Filter>spectrum</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\spectrum\spectrum.h">
+      <Filter>spectrum</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\bbox.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\instancetri.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\intersection.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\matrix.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\point.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\primitive.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\ray.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\scene.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\transform.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\triangle.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\trimesh.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\vector.h">
+      <Filter>geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\sky\sky.h">
+      <Filter>geometry\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\sky\skybox.h">
+      <Filter>geometry\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\geometry\sky\skysphere.h">
+      <Filter>geometry\sky</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\logmanager.h">
+      <Filter>managers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\matmanager.h">
+      <Filter>managers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\memmanager.h">
+      <Filter>managers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\meshmanager.h">
+      <Filter>managers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\texmanager.h">
+      <Filter>managers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\texio\bmpio.h">
+      <Filter>managers\texio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\texio\exrio.h">
+      <Filter>managers\texio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\texio\texio.h">
+      <Filter>managers\texio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\meshio\meshloader.h">
+      <Filter>managers\meshio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\meshio\objloader.h">
+      <Filter>managers\meshio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\managers\meshio\plyloader.h">
+      <Filter>managers\meshio</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\sassert.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\creator.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\define.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\enum.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\parallel.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\path.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\propertyset.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\rand.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\referencecount.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\samplemethod.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\singleton.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\smartptr.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\strhelper.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utility\timer.h">
+      <Filter>utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\camera\camera.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\camera\environment.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\camera\ortho.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\camera\perspective.h">
+      <Filter>camera</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\accel\accelerator.h">
+      <Filter>accel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\accel\bvh.h">
+      <Filter>accel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\accel\kdtree.h">
+      <Filter>accel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\accel\unigrid.h">
+      <Filter>accel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ply\ply.h">
+      <Filter>thirdparty\ply</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\tinyxml\tinystr.h">
+      <Filter>thirdparty\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\tinyxml\tinyxml.h">
+      <Filter>thirdparty\tinyxml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\eLut.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\half.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\halfFunction.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\halfLimits.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\Iex.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IexBaseExc.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IexErrnoExc.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IexMacros.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IexMathExc.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IexThrowErrnoExc.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmBaseConfig.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThread.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadMutex.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadPool.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\IlmThreadSemaphore.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathBox.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathBoxAlgo.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathColor.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathColorAlgo.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathEuler.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathExc.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathFrame.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathFrustum.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathFun.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathGL.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathGLU.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathHalfLimits.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathInt64.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathInterval.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathLimits.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathLine.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathLineAlgo.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathMath.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathMatrix.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathMatrixAlgo.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathPlane.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathPlatform.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathQuat.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathRandom.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathRoots.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathShear.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathSphere.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathVec.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\ImathVecAlgo.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\ilmbase-1.0.2\toFloat.h">
+      <Filter>thirdparty\ilmbase-1.0.2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\b44ExpLogTable.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfAcesFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfArray.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfAutoArray.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfB44Compressor.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfBoxAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfChannelList.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfChannelListAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfCheckedArithmetic.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfChromaticities.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfChromaticitiesAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfCompression.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfCompressionAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfCompressor.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfConvert.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfCRgbaFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfDoubleAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfEnvmap.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfEnvmapAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfFloatAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfFrameBuffer.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfFramesPerSecond.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfHeader.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfHuf.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfInputFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfInt64.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfIntAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfIO.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfKeyCode.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfKeyCodeAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfLineOrder.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfLineOrderAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfLut.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfMatrixAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfMisc.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfMultiView.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfName.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfOpaqueAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfOutputFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfPixelType.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfPizCompressor.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfPreviewImage.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfPreviewImageAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfPxr24Compressor.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfRational.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfRationalAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfRgba.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfRgbaFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfRgbaYca.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfRleCompressor.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfScanLineInputFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfStandardAttributes.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfStdIO.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfStringAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfStringVectorAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTestFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfThreading.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTileDescription.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTileDescriptionAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTiledInputFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTiledMisc.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTiledOutputFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTiledRgbaFile.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTileOffsets.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTimeCode.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfTimeCodeAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfVecAttribute.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfVersion.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfWav.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfXdr.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\ImfZipCompressor.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\openexr-1.7.0\OpenEXRConfig.h">
+      <Filter>thirdparty\openexr-1.7.0</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\crc32.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\deflate.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\gzguts.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\inffast.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\inffixed.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\inflate.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\inftrees.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\trees.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\zconf.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\zlib.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\thirdparty\zlib-1.2.5\zutil.h">
+      <Filter>thirdparty\zlib-1.2.5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bsdf\bsdf.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bsdf\bxdf.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bsdf\fresnel.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bsdf\lambert.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bsdf\merl.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bsdf\reflection.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bsdf\refraction.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\light\area.h">
+      <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\light\distant.h">
+      <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\light\light.h">
+      <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\light\pointlight.h">
+      <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\light\skylight.h">
+      <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\light\spot.h">
+      <Filter>light</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\material\glass.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\material\material.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\material\matte.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\material\merlmat.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\material\mirror.h">
+      <Filter>material</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\integrator\bidirpath.h">
+      <Filter>integrator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\integrator\direct.h">
+      <Filter>integrator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\integrator\integrator.h">
+      <Filter>integrator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\integrator\integratormethod.h">
+      <Filter>integrator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\integrator\pathtracing.h">
+      <Filter>integrator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\integrator\whittedrt.h">
+      <Filter>integrator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sampler\random.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sampler\regular.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sampler\sample.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sampler\sampler.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sampler\stratified.h">
+      <Filter>sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shape\disk.h">
+      <Filter>shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shape\shape.h">
+      <Filter>shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shape\sphere.h">
+      <Filter>shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\shape\square.h">
+      <Filter>shape</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\sort.h" />
+    <ClInclude Include="..\..\src\system.h" />
+  </ItemGroup>
+</Project>
