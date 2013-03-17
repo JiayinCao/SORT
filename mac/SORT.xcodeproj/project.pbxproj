@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DD2C72C016F4D5DA00322350 /* orennayar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD2C72BE16F4D5DA00322350 /* orennayar.cpp */; };
 		DD89339015BAF0C200831B31 /* accelerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD8931E515BAF0C200831B31 /* accelerator.cpp */; };
 		DD89339115BAF0C200831B31 /* bvh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD8931E715BAF0C200831B31 /* bvh.cpp */; };
 		DD89339215BAF0C200831B31 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD8931E915BAF0C200831B31 /* kdtree.cpp */; };
@@ -184,6 +185,8 @@
 		DD89344015BAF0C300831B31 /* rand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89338615BAF0C200831B31 /* rand.cpp */; };
 		DD89344115BAF0C300831B31 /* strhelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89338C15BAF0C200831B31 /* strhelper.cpp */; };
 		DD89344215BAF0C300831B31 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89338E15BAF0C200831B31 /* timer.cpp */; };
+		DDABCB3816F5E30F00A9A16D /* microfacetdistribution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDABCB3716F5E30F00A9A16D /* microfacetdistribution.cpp */; };
+		DDABCB3A16F5E82500A9A16D /* microfacet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDABCB3916F5E82500A9A16D /* microfacet.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -199,6 +202,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DD2C72BE16F4D5DA00322350 /* orennayar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = orennayar.cpp; sourceTree = "<group>"; };
+		DD2C72BF16F4D5DA00322350 /* orennayar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = orennayar.h; sourceTree = "<group>"; };
 		DD337AF115BABF73006F3828 /* SORT */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SORT; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD8931E515BAF0C200831B31 /* accelerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = accelerator.cpp; sourceTree = "<group>"; };
 		DD8931E615BAF0C200831B31 /* accelerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = accelerator.h; sourceTree = "<group>"; };
@@ -603,6 +608,10 @@
 		DD89338E15BAF0C200831B31 /* timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timer.cpp; sourceTree = "<group>"; };
 		DD89338F15BAF0C200831B31 /* timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = timer.h; sourceTree = "<group>"; };
 		DD89344315BAF2F100831B31 /* sassert.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sassert.h; sourceTree = "<group>"; };
+		DDABCB3416F5DC1D00A9A16D /* microfacet.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = microfacet.h; sourceTree = "<group>"; };
+		DDABCB3616F5DDFB00A9A16D /* microfacetdistribution.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = microfacetdistribution.h; sourceTree = "<group>"; };
+		DDABCB3716F5E30F00A9A16D /* microfacetdistribution.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = microfacetdistribution.cpp; sourceTree = "<group>"; };
+		DDABCB3916F5E82500A9A16D /* microfacet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = microfacet.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -668,6 +677,12 @@
 		DD8931ED15BAF0C200831B31 /* bsdf */ = {
 			isa = PBXGroup;
 			children = (
+				DDABCB3716F5E30F00A9A16D /* microfacetdistribution.cpp */,
+				DDABCB3616F5DDFB00A9A16D /* microfacetdistribution.h */,
+				DDABCB3916F5E82500A9A16D /* microfacet.cpp */,
+				DDABCB3416F5DC1D00A9A16D /* microfacet.h */,
+				DD2C72BE16F4D5DA00322350 /* orennayar.cpp */,
+				DD2C72BF16F4D5DA00322350 /* orennayar.h */,
 				DD8931EE15BAF0C200831B31 /* bsdf.cpp */,
 				DD8931EF15BAF0C200831B31 /* bsdf.h */,
 				DD8931F015BAF0C200831B31 /* bxdf.cpp */,
@@ -1452,6 +1467,9 @@
 				DD89344015BAF0C300831B31 /* rand.cpp in Sources */,
 				DD89344115BAF0C300831B31 /* strhelper.cpp in Sources */,
 				DD89344215BAF0C300831B31 /* timer.cpp in Sources */,
+				DD2C72C016F4D5DA00322350 /* orennayar.cpp in Sources */,
+				DDABCB3816F5E30F00A9A16D /* microfacetdistribution.cpp in Sources */,
+				DDABCB3A16F5E82500A9A16D /* microfacet.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
