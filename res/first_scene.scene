@@ -9,7 +9,7 @@
       <Matrix value="s 2"/>
     </Transform>
     <Material>
-      <MatSet name="" mat="glass"/>
+      <MatSet name="" mat="default"/>
     </Material>
   </Model>
  <Model filename="sphere.obj" name="object1">
@@ -19,27 +19,29 @@
       <Matrix value="t 0 0 1000" />
     </Transform>
     <Material>
-      <MatSet name="" mat="glass"/>
+      <MatSet name="" mat="default"/>
     </Material>
   </Model>
-<Model filename="sphere.obj" name="object3">
+<Model filename="killeroo.obj" name="object3">
     <Transform>
+		<Matrix value="s 10"/>
+		<Matrix value="r 1 1.57"/>
       <Matrix value="t -0.5 60 -0.5" />
       <Matrix value="s 2"/>
       <Matrix value="t 0 0 2000" />
     </Transform>
     <Material>
-      <MatSet name="" mat="glass"/>
+      <MatSet name="" mat="default"/>
     </Material>
   </Model>
 <Model filename="sphere.obj" name="object4">
     <Transform>
       <Matrix value="t -0.5 60 -0.5" />
       <Matrix value="s 2"/>
-      <Matrix value="t 0 0 -2000" />
+      <Matrix value="t 0 500 -3000" />
     </Transform>
     <Material>
-      <MatSet name="" mat="glass"/>
+      <MatSet name="" mat="default"/>
     </Material>
   </Model>
  <Model filename="sphere.obj" name="object">
@@ -49,7 +51,7 @@
 <Matrix value="t 0 0 -1000" />
     </Transform>
     <Material>
-      <MatSet name="" mat="glass"/>
+      <MatSet name="" mat="default"/>
     </Material>
   </Model>
   <Model filename="plane.obj" name="plane">
@@ -60,7 +62,7 @@
   </Model>
   <Light type="distant">
   	<Property name="intensity" value="20 20 20" />
-	<Property name="dir" value="-1 -1 1"/>
+	<Property name="dir" value="-1 -10000 -10000"/>
   </Light>
   <Light type="a1rea">
     <Property name="shape" value="disk" />

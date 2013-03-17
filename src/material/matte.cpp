@@ -19,8 +19,9 @@
 #include "matte.h"
 #include "utility/define.h"
 #include "bsdf/bsdf.h"
-#include "bsdf/lambert.h"
+//#include "bsdf/lambert.h"
 #include "managers/memmanager.h"
+#include "bsdf/orennayar.h"
 
 // constructor
 Matte::Matte()
@@ -52,10 +53,13 @@ Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 		color *= m_d->Evaluate( intersect );
 
 	Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-	Lambert* lambert = SORT_MALLOC(Lambert)();
+/*	Lambert* lambert = SORT_MALLOC(Lambert)();
 	lambert->SetColor( color );
 	bsdf->AddBxdf( lambert );
-
+*/
+	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( color , 20.0f/180.0f*3.14f );
+	bsdf->AddBxdf( orennayar );
+	
 	return bsdf;
 }
 

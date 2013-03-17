@@ -92,7 +92,7 @@ void System::_preInit()
 //	Vector vec( camera->GetTarget() - camera->GetEye() );
 //	camera->SetFocalDistance( vec.Length() );
 //	camera->SetLen( 40.0f );
-	camera->SetInteraxial(30.0f);
+//	camera->SetInteraxial(30.0f);
 	
 	m_camera = camera;
 	// the integrator
