@@ -32,7 +32,7 @@ class	MeshLoader
 // public method
 public:
 	// default constructor
-	MeshLoader(){ m_MeshType = MT_END; }
+	MeshLoader(){ m_MeshType = MT_NONE; }
 	// destructor
 	virtual ~MeshLoader(){}
 

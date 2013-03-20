@@ -30,6 +30,7 @@
 #include "sampler/sampler.h"
 #include "utility/parallel.h"
 #include <ImfHeader.h>
+#include "utility/strhelper.h"
 
 #include "camera/camera.h"
 #include "camera/environment.h"
@@ -72,47 +73,15 @@ void System::_preInit()
 	// initialize the timer
 	Timer::CreateInstance();
 
-	/////////////////////////////////////////////////////////////////////////////////
-	// temp
-	// use 800 * 600 render target as default
-	m_rt = new RenderTarget();
-	m_rt->SetSize( 800 , 600 );
-	// there is default value for camera
-	float distance = 4000.0f;
-//	OrthoCamera* camera = new OrthoCamera();
-//	EnvironmentCamera* camera = new EnvironmentCamera();
-	PerspectiveCamera* camera = new PerspectiveCamera();
-	camera->SetEye( Point( 0 , distance * 0.1f, distance ) );
-	camera->SetUp( Vector( 0 , 1 , 0 ) );
-	camera->SetTarget( Point( 0 , distance * 0.05f , 0 ) );
-	camera->SetFov( 3.1415f / 4 );
-	camera->SetRenderTarget( m_rt );
-//	camera->SetCameraWidth( 1000.0f );
-//	camera->SetCameraHeight( 1000.0f );
-//	Vector vec( camera->GetTarget() - camera->GetEye() );
-//	camera->SetFocalDistance( vec.Length() );
-//	camera->SetLen( 40.0f );
-//	camera->SetInteraxial(30.0f);
-	
-	m_camera = camera;
-	// the integrator
-	//m_pIntegrator = new DirectLight( m_Scene , 1 );
-	//m_pIntegrator = new PathTracing( m_Scene , 1024 );
-	m_pIntegrator = new WhittedRT(m_Scene);
-	//m_pIntegrator = new BidirPathTracing( m_Scene , 16 );
-	//m_pIntegrator = new BidirPathTracing1( m_Scene , 16 );
-	// the sampler
-	m_pSampler = new RegularSampler();
-	m_iSamplePerPixel = m_pSampler->RoundSize(1);
-	m_pSamples = new PixelSample[m_iSamplePerPixel];
-
-	// set default value
+	// setup default value
+	m_rt = 0;
+	m_pIntegrator = 0;
+	m_camera = 0;
 	m_uRenderingTime = 0;
 	m_uPreProcessingTime = 0;
 	m_uProgressCount = 64;
 	m_uCurrentPixelId = 0;
 	m_uPreProgress = 0xffffffff;
-	m_uTotalPixelCount = m_rt->GetWidth() * m_rt->GetHeight();
 
 	if( MultiThreadEnabled() )
 		_setupMultiThreads();
@@ -162,9 +131,9 @@ void System::Render()
 }
 
 // output render target
-void System::OutputRT( const char* str )
+void System::OutputRT()
 {
-	m_rt->Output( str );
+	m_rt->Output( m_strOutputFileName.c_str() );
 }
 
 // load the scene
@@ -381,4 +350,199 @@ void System::_raytracing_multithread()
 		}
 	}
 	cout<<endl;
+}
+
+// create integrator
+Integrator* System::_createIntegrator( const char* strtype , unsigned spp /* sample per pixel */ )
+{
+	if( strtype == 0 ) return 0;
+	
+	INTEGRATOR_TYPE type = IntegratorTypeFromStr( strtype );
+	switch(type)
+	{
+		case IT_WHITTED:
+			return new WhittedRT(m_Scene);
+		case IT_DIRECT:
+			return new DirectLight( m_Scene , spp );
+		case IT_PATHTRACING:
+			return new PathTracing( m_Scene , spp );
+		case IT_BDPT:
+			return new BidirPathTracing( m_Scene , spp );
+		case IT_NONE:
+			return 0;
+	}
+	return 0;
+}
+
+// create sampler
+Sampler* System::_createSampler( const char* strtype )
+{
+	if( strtype == 0 ) return 0;
+	
+	SAMPLER_TYPE type = SamplerTypeFromStr( strtype );
+	switch(type)
+	{
+		case ST_RANDOM:
+			return new RandomSampler();
+		case ST_REGULAR:
+			return new RegularSampler();
+		case ST_STRATIFIED:
+			return new StratifiedSampler();
+		case ST_NONE:
+			return 0;
+	}
+	return 0;
+}
+
+// create sampler
+Camera* System::_createCamera( const char* strtype )
+{
+	if( strtype == 0 ) return 0;
+	
+	CAMERA_TYPE type = CameraTypeFromStr( strtype );
+	switch(type)
+	{
+		case CT_PERSPECTIVE:
+			return new PerspectiveCamera();
+		case CT_ORTHO:
+			return new OrthoCamera();
+		case CT_ENVIRONMENT:
+			return new EnvironmentCamera();
+		case CT_NONE:
+			return 0;
+	}
+	return 0;
+}
+
+// setup system from file
+bool System::Setup( const char* str )
+{
+	// load the xml file
+	string full_name = GetFullPath(str);
+	TiXmlDocument doc( full_name.c_str() );
+	doc.LoadFile();
+	
+	// if there is error , return false
+	if( doc.Error() )
+	{
+		LOG_ERROR<<doc.ErrorDesc()<<CRASH;
+		return false;
+	}
+	
+	// get the root of xml
+	TiXmlNode*	root = doc.RootElement();
+	
+	// try to load the scene , note: only the first node matters
+	TiXmlElement* element = root->FirstChildElement( "Scene" );
+	if( element )
+	{
+		const char* str_scene = element->Attribute( "value" );
+		if( str_scene )
+			LoadScene(str_scene);
+		else
+			return false;
+	}else
+		return false;
+	
+	// get the integrater
+	element = root->FirstChildElement( "Integrator" );
+	if( element )
+	{
+		const char* str_type = element->Attribute( "type" );
+		const char* str_spp = element->Attribute( "spp" );
+		unsigned spp = atoi( str_spp );
+		m_pIntegrator = _createIntegrator( str_type , spp );
+		
+		if( m_pIntegrator == 0 )
+			return false;
+	}else
+		return false;
+	
+	// get the render target
+	m_rt = new RenderTarget();
+	element = root->FirstChildElement( "RenderTargetSize" );
+	if( element )
+	{
+		const char* str_width = element->Attribute("w");
+		const char* str_height = element->Attribute("h");
+		
+		if( str_width && str_height )
+		{
+			unsigned width = atoi( str_width );
+			unsigned height = atoi( str_height );
+		
+			if( width < 16 ) width = 16;
+			if( width > 4096 ) width = 4096;
+			if( height < 16 ) height = 16;
+			if( height > 3072 ) height = 3072;
+		
+			m_rt->SetSize( width , height );
+		}
+	}else
+	{
+		// use 1024x768 image as default
+		m_rt->SetSize(1024, 768);
+	}
+	
+	// get output file name
+	element = root->FirstChildElement( "OutputFile" );
+	if( element )
+	{
+		const char* str_name = element->Attribute("name");
+		if( str_name )
+			m_strOutputFileName = std::string( str_name );
+	}
+	
+	// get sampler
+	element = root->FirstChildElement( "Sampler" );
+	if( element )
+	{
+		const char* str_type = element->Attribute("type");
+		const char* str_round = element->Attribute("round");
+		
+		unsigned round = atoi( str_round );
+		if( round < 1 ) round = 1;
+		if( round > 1024 ) round = 1024;
+		
+		// create sampler
+		m_pSampler = _createSampler( str_type );
+		m_iSamplePerPixel = m_pSampler->RoundSize(round);
+		m_pSamples = new PixelSample[m_iSamplePerPixel];
+	}else{
+		// user stratified sampler as default sampler
+		m_pSampler = new StratifiedSampler();
+		m_iSamplePerPixel = m_pSampler->RoundSize(16);
+		m_pSamples = new PixelSample[m_iSamplePerPixel];
+	}
+	
+	element = root->FirstChildElement("Camera");
+	if( element )
+	{
+		const char* str_camera = element->Attribute("type");
+	
+		// create the camera
+		m_camera = _createCamera(str_camera);
+		
+		if( !m_camera )
+			return false;
+		
+		// set the properties
+		TiXmlElement* prop = element->FirstChildElement( "Property" );
+		while( prop )
+		{
+			const char* prop_name = prop->Attribute( "name" );
+			const char* prop_value = prop->Attribute( "value" );
+			if( prop_name != 0 && prop_value != 0 )
+				m_camera->SetProperty( prop_name , prop_value );
+			prop = prop->NextSiblingElement( "Property" );
+		}
+	}
+	
+	// setup render target
+	m_camera->SetRenderTarget(m_rt);
+	
+	// update total pixel count
+	m_uTotalPixelCount = m_rt->GetWidth() * m_rt->GetHeight();
+	
+	return true;
 }

@@ -22,7 +22,7 @@
     <Property name="intensity" value="10000000 9000000 6000000"/>
 	<Property name="pos" value="0 600 500" />
   </Light>
-  <Light type="poi1nt">
+  <Light type="pioint">
     <Property name="intensity" value="10000000 9000000 6000000"/>
     <Property name="pos" value="300 600 500" />
   </Light>

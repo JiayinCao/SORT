@@ -124,8 +124,6 @@ protected:
 	{
 	public:
 		// constructor
-//		IntensityProperty(Light* light):PropertyHandler<Light>::PropertyHandler((Light*)light){}
-
 		PH_CONSTRUCTOR(IntensityProperty,Light);
 
 		// set value

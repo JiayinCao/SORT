@@ -44,8 +44,11 @@ public:
 	// render the image
 	void Render();
 	// output the render target
-	void OutputRT( const char* str );
+	void OutputRT();
 
+	// setup system from file
+	bool Setup( const char* str );
+	
 	// load the scene
 	bool LoadScene( const string& str );
 
@@ -80,6 +83,8 @@ private:
 	unsigned		m_iSamplePerPixel;
 	// the samples
 	PixelSample*	m_pSamples;
+	// output file name
+	string			m_strOutputFileName;
 
 	// rendering time
 	unsigned		m_uRenderingTime;
@@ -115,6 +120,12 @@ private:
 	void	_raytracing_multithread();
 	// output preprocessing information
 	void	_outputPreprocess();
+	// create integrator
+	Integrator* _createIntegrator( const char* type , unsigned spp /*sample per pixel*/);
+	// create sampler
+	Sampler* _createSampler( const char* type );
+	// create sampler
+	Camera* _createCamera( const char* strtype );
 };
 
 #endif

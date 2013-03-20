@@ -23,7 +23,7 @@ enum TEX_TYPE
 {
 	TT_BMP = 0,
 	TT_EXR = 1,
-	TT_END ,
+	TT_NONE ,
 };
 
 // mesh file type
@@ -31,7 +31,7 @@ enum MESH_TYPE
 {
 	MT_OBJ = 0,
 	MT_PLY = 1,
-	MT_END ,
+	MT_NONE ,
 };
 
 // texture filter
@@ -62,10 +62,29 @@ enum BXDF_TYPE
 // camera type
 enum CAMERA_TYPE
 {
-	CAMERA_NONE = 0,
-	CAMERA_ORTHO = 1,
-	CAMERA_PERSPECTIVE = 2,
-	CAMERA_ENVIRONMENT = 3,
+	CT_NONE = 0,
+	CT_ORTHO = 1,
+	CT_PERSPECTIVE = 2,
+	CT_ENVIRONMENT = 3,
+};
+
+// integrator type
+enum INTEGRATOR_TYPE
+{
+	IT_WHITTED = 0,
+	IT_DIRECT = 1,
+	IT_PATHTRACING = 2,
+	IT_BDPT = 3,
+	IT_NONE
+};
+
+// sampler type
+enum SAMPLER_TYPE
+{
+	ST_RANDOM = 0,
+	ST_REGULAR = 1,
+	ST_STRATIFIED = 2,
+	ST_NONE
 };
 
 #endif

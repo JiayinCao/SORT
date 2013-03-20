@@ -22,6 +22,8 @@
 #include "geometry/ray.h"
 #include "utility/enum.h"
 #include "spectrum/spectrum.h"
+#include "utility/propertyset.h"
+#include "utility/strhelper.h"
 
 // pre-decleration of render target
 class RenderTarget;
@@ -29,7 +31,7 @@ class PixelSample;
 
 ////////////////////////////////////////////////////////////////////
 //	definition of camera
-class	Camera
+class	Camera : public PropertySet<Camera>
 {
 // public method
 public:
@@ -64,7 +66,22 @@ protected:
 
 // private method
 	// initialize default data
-	void _init() { m_rt = 0; m_type = CAMERA_NONE; }
+	void _init() { m_rt = 0; m_type = CT_NONE; }
+	
+	// property handler
+	class EyeProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(EyeProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			Camera* camera = CAST_TARGET(Camera);
+			camera->SetEye( PointFromStr(str) );
+		}
+	};
 };
 
 #endif

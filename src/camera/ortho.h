@@ -71,6 +71,66 @@ protected:
 	
 	// initialize data
 	void _init();
+	
+	// register all properties
+	void _registerAllProperty();
+	
+	// property handler
+	class UpProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(UpProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
+			camera->SetUp( PointFromStr(str) );
+		}
+	};
+	// property handler
+	class TargetProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(TargetProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
+			camera->SetTarget( PointFromStr(str) );
+		}
+	};
+	// property handler
+	class WidthProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(WidthProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
+			camera->SetCameraWidth( atof(str.c_str()) );
+		}
+	};
+	// property handler
+	class HeightProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(HeightProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
+			camera->SetCameraHeight( atof(str.c_str()) );
+		}
+	};
 };
 
 #endif
