@@ -31,10 +31,13 @@ OrthoCamera::OrthoCamera()
 void OrthoCamera::_init()
 {
 	// set type for tha camera
-	m_type = CAMERA_ORTHO;
+	m_type = CT_ORTHO;
 	//set default value
 	m_camWidth = 1.0f;
 	m_camHeight = 1.0f;
+	
+	// register properties
+	_registerAllProperty();
 }
 
 // generate camera ray
@@ -79,4 +82,14 @@ void OrthoCamera::_updateTransform()
 							xaxis.y , yaxis.y , zaxis.y , m_eye.y ,
 							xaxis.z , yaxis.z , zaxis.z , m_eye.z ,
 							0.0f , 0.0f , 0.0f , 1.0f );
+}
+
+// register all properties
+void OrthoCamera::_registerAllProperty()
+{
+	_registerProperty( "eye" , new EyeProperty( this ) );
+	_registerProperty( "up" , new UpProperty( this ) );
+	_registerProperty( "target" , new TargetProperty( this ) );
+	_registerProperty( "width" , new WidthProperty( this ) );
+	_registerProperty( "height" , new HeightProperty( this ) );
 }

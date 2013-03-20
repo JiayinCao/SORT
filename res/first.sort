@@ -1,0 +1,23 @@
+<Root>
+
+<Scene value="../res/first_scene.scene"/>
+
+<Integrator type="whitted" spp="1" />
+
+<RenderTargetSize w="1440" h="900"/>
+
+<OutputFile name="result.bmp"/>
+
+<Camera type="perspective">
+	<Property name="eye" value="0 400 4000"/>
+	<Property name="up" value="0 1 0"/>
+	<Property name="target" value="0 0 0"/>
+	<Property name="len" value="0.0f"/>
+	<Property name="interaxial" value="0.0f"/>
+	<Property name="width" value="18000.0f"/>
+	<Property name="height" value="16000.0f"/>
+</Camera>
+
+<Sampler type="stratified" round="1"/>
+
+</Root>

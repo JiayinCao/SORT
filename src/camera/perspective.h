@@ -87,6 +87,80 @@ protected:
 	
 	// initialize data
 	void _init();
+	
+	// register all properties
+	void _registerAllProperty();
+	
+	// property handler
+	class UpProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(UpProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
+			camera->SetUp( PointFromStr(str) );
+		}
+	};
+	// property handler
+	class TargetProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(TargetProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
+			camera->SetTarget( PointFromStr(str) );
+		}
+	};
+	// property handler
+	class FovProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(FovProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
+			camera->SetFov( atof(str.c_str()) );
+		}
+	};
+	// property handler
+	class LenProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(LenProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
+			camera->SetLen( atof(str.c_str()) );
+		}
+	};
+	// property handler
+	class InteraxialProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(InteraxialProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
+			camera->SetInteraxial( atof(str.c_str()) );
+		}
+	};
 };
 
 #endif

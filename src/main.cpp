@@ -29,23 +29,31 @@ int __cdecl main( int argc , char** argv )
 int main( int argc , char** argv )
 #endif
 {
-	// load the scene from file
-	g_System.LoadScene( "../res/first_scene.scene" );
+	// check if there is file argument
+	if( argc < 2 )
+	{
+		cout<<"Miss file argument."<<endl;
+		return 0;
+	}
+	
+	// setup the system
+	if( g_System.Setup( argv[1] ) )
+	{
+		// do ray tracing
+		g_System.Render();
 
-	// do ray tracing
-	g_System.Render();
+		// output rendering time
+		cout<<g_System.GetRenderingTime()<<endl;
 
-	// output rendering time
-	cout<<g_System.GetRenderingTime()<<endl;
+		// output log information
+		g_System.OutputLog();
 
-	// output log information
-	g_System.OutputLog();
-
-	// output image
-	g_System.OutputRT( "t.bmp" );
+		// output image
+		g_System.OutputRT();
+	}
 
 	// unitialize the system
 	g_System.Uninit();
-
+	
 	return 0;
 }

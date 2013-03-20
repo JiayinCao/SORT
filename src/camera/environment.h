@@ -46,6 +46,9 @@ private:
 	
 	// initialize data
 	void _init();
+	
+	// register all properties
+	void _registerAllProperty();
 };
 
 #endif

@@ -26,13 +26,15 @@
 void PerspectiveCamera::_init()
 {
 	// set camera type
-	m_type = CAMERA_PERSPECTIVE;
+	m_type = CT_PERSPECTIVE;
 	
 	// setup intial value for data
 	m_lensRadius = 0.0f;	// by default , depth of field is not enabled
 	m_interaxial = 0.0f;	// by default , stereo vision is not enabled
 	m_fov = PI * 0.25f;
 	m_redOnLeft = true; // by default , red glass is on the left
+	
+	_registerAllProperty();
 }
 
 // get pass number.
@@ -123,4 +125,15 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 	}
 
 	return r;
+}
+
+// register all properties
+void PerspectiveCamera::_registerAllProperty()
+{
+	_registerProperty( "eye" , new EyeProperty( this ) );
+	_registerProperty( "up" , new UpProperty( this ) );
+	_registerProperty( "target" , new TargetProperty( this ) );
+	_registerProperty( "fov" , new FovProperty( this ) );
+	_registerProperty( "len" , new LenProperty( this ) );
+	_registerProperty( "interaxial" , new InteraxialProperty( this ) );
 }

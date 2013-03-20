@@ -36,7 +36,7 @@ class	TexIO
 // public method
 public:
 	// default constructor
-	TexIO(){m_TexType=TT_END;}
+	TexIO(){m_TexType=TT_NONE;}
 	// constructor from a type
 	// para 'tot' : texture output type
 	// note	      :	actually set tot_type in TexIO gains nothing
