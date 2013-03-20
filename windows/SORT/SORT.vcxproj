@@ -43,6 +43,7 @@
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)..\bin\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)..\bin\$(Configuration)_obj\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectName)_d</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -96,6 +97,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\bsdf\microfacet.cpp" />
+    <ClCompile Include="..\..\src\bsdf\microfacetdistribution.cpp" />
+    <ClCompile Include="..\..\src\bsdf\orennayar.cpp" />
     <ClCompile Include="..\..\src\texture\checkboxtexture.cpp" />
     <ClCompile Include="..\..\src\texture\compositetexture.cpp" />
     <ClCompile Include="..\..\src\texture\constanttexture.cpp" />
@@ -275,6 +279,9 @@
     <ClCompile Include="..\..\src\system.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\bsdf\microfacet.h" />
+    <ClInclude Include="..\..\src\bsdf\microfacetdistribution.h" />
+    <ClInclude Include="..\..\src\bsdf\orennayar.h" />
     <ClInclude Include="..\..\src\texture\checkboxtexture.h" />
     <ClInclude Include="..\..\src\texture\compositetexture.h" />
     <ClInclude Include="..\..\src\texture\constanttexture.h" />

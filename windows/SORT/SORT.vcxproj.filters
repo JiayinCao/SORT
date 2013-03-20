@@ -596,6 +596,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\main.cpp" />
     <ClCompile Include="..\..\src\system.cpp" />
+    <ClCompile Include="..\..\src\bsdf\microfacetdistribution.cpp">
+      <Filter>bsdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\bsdf\orennayar.cpp">
+      <Filter>bsdf</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\bsdf\microfacet.cpp">
+      <Filter>bsdf</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\texture\checkboxtexture.h">
@@ -1272,5 +1281,14 @@
     </ClInclude>
     <ClInclude Include="..\..\src\sort.h" />
     <ClInclude Include="..\..\src\system.h" />
+    <ClInclude Include="..\..\src\bsdf\microfacet.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bsdf\microfacetdistribution.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\bsdf\orennayar.h">
+      <Filter>bsdf</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

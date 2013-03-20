@@ -489,10 +489,6 @@
 			Name="utility"
 			>
 			<File
-				RelativePath="..\..\src\utility\sassert.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\utility\creator.cpp"
 				>
 			</File>
@@ -542,6 +538,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\utility\samplemethod.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\utility\sassert.h"
 				>
 			</File>
 			<File
@@ -1630,6 +1630,30 @@
 			</File>
 			<File
 				RelativePath="..\..\src\bsdf\merl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\microfacet.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\microfacet.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\microfacetdistribution.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\microfacetdistribution.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\orennayar.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\bsdf\orennayar.h"
 				>
 			</File>
 			<File
