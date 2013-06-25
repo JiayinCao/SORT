@@ -21,6 +21,8 @@
 #include <math.h>
 #include "utility/samplemethod.h"
 
+IMPLEMENT_CREATOR( SkyBox );
+
 // initialize default value
 void SkyBox::_init()
 {

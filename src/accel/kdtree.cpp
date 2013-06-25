@@ -25,6 +25,8 @@
 static const unsigned KD_NODE_MEMID = 1024;
 static const unsigned KD_LEAF_TRILIST_MEMID = 1025;
 
+IMPLEMENT_CREATOR( KDTree );
+
 // default constructor
 KDTree::KDTree()
 {

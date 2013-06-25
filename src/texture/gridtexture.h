@@ -28,7 +28,7 @@ class	GridTexture : public Texture
 {
 // public method
 public:
-	DEFINE_CREATOR( GridTexture );
+	DEFINE_CREATOR( GridTexture , "grid" );
 
 	// default constructor
 	GridTexture();

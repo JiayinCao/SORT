@@ -22,6 +22,8 @@
 #include "bsdf/reflection.h"
 #include "bsdf/refraction.h"
 
+IMPLEMENT_CREATOR( Glass );
+
 // default constructor
 Glass::Glass()
 {

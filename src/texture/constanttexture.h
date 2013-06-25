@@ -29,7 +29,7 @@ class ConstantTexture : public Texture
 {
 // public method
 public:
-	DEFINE_CREATOR( ConstantTexture );
+	DEFINE_CREATOR( ConstantTexture , "constant" );
 
 	// default constructor
 	ConstantTexture();

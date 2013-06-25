@@ -19,6 +19,8 @@
 #include "uvtexture.h"
 #include "geometry/intersection.h"
 
+IMPLEMENT_CREATOR( UVTexture );
+
 // get the texture value
 Spectrum UVTexture::GetColor( int x , int y ) const
 {

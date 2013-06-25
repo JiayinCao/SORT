@@ -23,6 +23,8 @@
 #include "geometry/intersection.h"
 #include "utility/rand.h"
 
+IMPLEMENT_CREATOR( Disk );
+
 // sample a point on shape
 Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
 {

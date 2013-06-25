@@ -29,7 +29,7 @@ class MerlMat : public Material
 {
 // public method
 public:
-	DEFINE_CREATOR( MerlMat );
+	DEFINE_CREATOR( MerlMat , "Merl" );
 
 	// default constructor
 	MerlMat();

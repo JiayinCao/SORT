@@ -27,7 +27,7 @@ class UniGrid : public Accelerator
 {
 // public method
 public:
-	DEFINE_CREATOR( UniGrid );
+	DEFINE_CREATOR( UniGrid , "uniform_grid" );
 
 	// default constructor
 	UniGrid();

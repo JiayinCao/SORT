@@ -19,6 +19,8 @@
 #include "area.h"
 #include "sampler/sample.h"
 
+IMPLEMENT_CREATOR( AreaLight );
+
 // initialize default value
 void AreaLight::_init()
 {

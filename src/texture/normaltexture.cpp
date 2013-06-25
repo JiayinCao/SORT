@@ -20,6 +20,8 @@
 #include "managers/logmanager.h"
 #include "geometry/intersection.h"
 
+IMPLEMENT_CREATOR( NormalTexture );
+
 // get the texture value
 Spectrum NormalTexture::GetColor( int x , int y ) const
 {

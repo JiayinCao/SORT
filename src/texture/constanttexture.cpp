@@ -18,6 +18,8 @@
 // include the header file
 #include "constanttexture.h"
 
+IMPLEMENT_CREATOR( ConstantTexture );
+
 // default constructor
 ConstantTexture::ConstantTexture()
 {

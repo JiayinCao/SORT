@@ -24,6 +24,8 @@
 #include "utility/samplemethod.h"
 #include "utility/rand.h"
 
+IMPLEMENT_CREATOR( Sphere );
+
 // sample a point on shape
 Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
 {

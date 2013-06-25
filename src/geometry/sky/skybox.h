@@ -30,7 +30,7 @@ class	SkyBox : public Sky
 {
 // public method
 public:
-	DEFINE_CREATOR( SkyBox );
+	DEFINE_CREATOR( SkyBox , "sky_box" );
 
 	// default constructor
 	SkyBox(){_init();}

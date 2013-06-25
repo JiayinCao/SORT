@@ -27,7 +27,7 @@ class	NormalTexture : public Texture
 {
 // public method
 public:
-	DEFINE_CREATOR( NormalTexture );
+	DEFINE_CREATOR( NormalTexture , "normal" );
 
 	// default constructor
 	NormalTexture() {}

@@ -22,6 +22,8 @@
 #include "geometry/primitive.h"
 #include "geometry/intersection.h"
 
+IMPLEMENT_CREATOR( UniGrid );
+
 // default constructor
 UniGrid::UniGrid():
 m_delta( 0.00001f )

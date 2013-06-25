@@ -22,6 +22,8 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 
+IMPLEMENT_CREATOR( DistantLight );
+
 // sample a ray
 Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
 {

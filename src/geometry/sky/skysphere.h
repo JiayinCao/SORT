@@ -29,7 +29,7 @@ class	SkySphere : public Sky
 {
 // public method
 public:
-	DEFINE_CREATOR( SkySphere );
+	DEFINE_CREATOR( SkySphere , "sky_sphere" );
 
 	// default constructor
 	SkySphere(){_init();}

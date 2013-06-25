@@ -29,7 +29,7 @@ class Matte : public Material
 {
 // public method
 public:
-	DEFINE_CREATOR( Matte );
+	DEFINE_CREATOR( Matte , "Matte" );
 
 	// default constructor
 	Matte();
