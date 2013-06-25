@@ -20,6 +20,8 @@
 #include "managers/texmanager.h"
 #include "managers/logmanager.h"
 
+IMPLEMENT_CREATOR( ImageTexture );
+
 // initialize default data
 void ImageTexture::_init()
 {

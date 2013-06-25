@@ -28,7 +28,7 @@ class SpotLight : public Light
 {
 // public method
 public:
-	DEFINE_CREATOR( SpotLight );
+	DEFINE_CREATOR( SpotLight , "spot" );
 
 	// default constructor
 	SpotLight(){_registerAllProperty();}

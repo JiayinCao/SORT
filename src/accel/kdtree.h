@@ -113,7 +113,7 @@ class KDTree : public Accelerator
 {
 // public method
 public:
-	DEFINE_CREATOR( KDTree );
+	DEFINE_CREATOR( KDTree , "kd_tree" );
 
 	// default constructor
 	KDTree();

@@ -21,6 +21,8 @@
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
 
+IMPLEMENT_CREATOR( PointLight );
+
 // sample ray from light
 Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
 {

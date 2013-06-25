@@ -21,6 +21,8 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 
+IMPLEMENT_CREATOR( SpotLight );
+
 // sample ray from light
 Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
 {

@@ -63,7 +63,7 @@ class Bvh : public Accelerator
 {
 // public method
 public:
-	DEFINE_CREATOR( Bvh );
+	DEFINE_CREATOR( Bvh , "bvh" );
 
 	// default construction
 	Bvh();

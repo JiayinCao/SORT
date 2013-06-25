@@ -41,6 +41,8 @@ public:
 	}
 };
 
+IMPLEMENT_CREATOR( Bvh );
+
 // default construction
 Bvh::Bvh()
 {

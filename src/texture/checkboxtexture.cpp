@@ -18,6 +18,8 @@
 // include the header file
 #include "checkboxtexture.h"
 
+IMPLEMENT_CREATOR( CheckBoxTexture );
+
 // default constructor
 CheckBoxTexture::CheckBoxTexture():
 	m_Color0( 1.0f , 1.0f , 1.0f ),

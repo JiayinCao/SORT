@@ -28,7 +28,7 @@ class	CheckBoxTexture : public Texture
 {
 // public funcion
 public:
-	DEFINE_CREATOR( CheckBoxTexture );
+	DEFINE_CREATOR( CheckBoxTexture , "checkbox" );
 
 	// default constructor
 	CheckBoxTexture();

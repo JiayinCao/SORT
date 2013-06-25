@@ -20,6 +20,8 @@
 #include "managers/memmanager.h"
 #include "bsdf/bsdf.h"
 
+IMPLEMENT_CREATOR( MerlMat );
+
 // default constructor
 MerlMat::MerlMat()
 {

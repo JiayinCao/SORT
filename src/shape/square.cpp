@@ -21,6 +21,8 @@
 #include "utility/samplemethod.h"
 #include "utility/rand.h"
 
+IMPLEMENT_CREATOR( Square );
+
 // sample a point on shape
 Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
 {

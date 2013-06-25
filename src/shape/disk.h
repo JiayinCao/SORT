@@ -27,7 +27,7 @@ class	Disk : public Shape
 {
 // public method
 public:
-	DEFINE_CREATOR(Disk);
+	DEFINE_CREATOR(Disk,"disk");
 
 	// default constructor
 	Disk(){}

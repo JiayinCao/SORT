@@ -21,6 +21,8 @@
 #include "bsdf/bsdf.h"
 #include "utility/samplemethod.h"
 
+IMPLEMENT_CREATOR( SkyLight );
+
 // sample ray from light
 Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const
 {

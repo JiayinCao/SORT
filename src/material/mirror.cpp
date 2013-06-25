@@ -21,6 +21,8 @@
 #include "bsdf/bsdf.h"
 #include "bsdf/reflection.h"
 
+IMPLEMENT_CREATOR( Mirror );
+
 // default constructor
 Mirror::Mirror()
 {

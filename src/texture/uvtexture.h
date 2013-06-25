@@ -28,7 +28,7 @@ class	UVTexture : public Texture
 {
 // public function
 public:
-	DEFINE_CREATOR( UVTexture );
+	DEFINE_CREATOR( UVTexture , "uv" );
 
 	// constructor
 	UVTexture(){_init();}

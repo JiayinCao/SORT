@@ -22,6 +22,8 @@
 #include "utility/samplemethod.h"
 #include "managers/memmanager.h"
 
+IMPLEMENT_CREATOR( SkySphere );
+
 // initialize default value
 void SkySphere::_init()
 {

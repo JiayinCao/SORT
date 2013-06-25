@@ -27,7 +27,7 @@ class	Sphere : public Shape
 {
 // public method
 public:
-	DEFINE_CREATOR(Sphere);
+	DEFINE_CREATOR(Sphere,"sphere");
 
 	// default constructor
 	Sphere(){}

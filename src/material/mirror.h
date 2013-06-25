@@ -26,7 +26,7 @@ class	Mirror : public Material
 {
 // public method
 public:
-	DEFINE_CREATOR( Mirror );
+	DEFINE_CREATOR( Mirror , "Mirror" );
 
 	// default constructor
 	Mirror();

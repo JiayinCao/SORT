@@ -18,6 +18,8 @@
 // include the header file
 #include "gridtexture.h"
 
+IMPLEMENT_CREATOR( GridTexture );
+
 // default constructor
 GridTexture::GridTexture():
 	m_Color0( 0.0f , 0.0f , 0.0f ),

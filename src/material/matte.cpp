@@ -23,6 +23,8 @@
 #include "managers/memmanager.h"
 #include "bsdf/orennayar.h"
 
+IMPLEMENT_CREATOR( Matte );
+
 // constructor
 Matte::Matte()
 {

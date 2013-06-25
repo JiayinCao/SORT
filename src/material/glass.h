@@ -28,7 +28,7 @@ class	Glass : public Material
 {
 // public method
 public:
-	DEFINE_CREATOR( Glass );
+	DEFINE_CREATOR( Glass , "Glass" );
 	
 	// constructor
 	Glass();
