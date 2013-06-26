@@ -25,6 +25,8 @@
 #include <math.h>
 #include "sampler/sample.h"
 
+IMPLEMENT_CREATOR( EnvironmentCamera );
+
 // initialize data
 void EnvironmentCamera::_init()
 {

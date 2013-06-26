@@ -25,12 +25,17 @@
 #include "managers/memmanager.h"
 #include "sampler/sampler.h"
 
+IMPLEMENT_CREATOR( DirectLight );
+
 // initialize default value
 void DirectLight::_init()
 {
 	light_sample_offsets = 0;
 	bsdf_sample_offsets = 0;
 	total_samples = 0;
+	ls_per_light = 16;	// default sample per light is 16
+
+	_registerAllProperty();	// register all the properties
 }
 
 // release data
@@ -161,4 +166,9 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 			samples[i].bsdf_sample[k].v = bsdf_2d[2*k+1];
 		}
 	}
+}
+
+void DirectLight::_registerAllProperty()
+{
+	_registerProperty( "sample_per_light" , new SamplerPerLightProperty(this) );
 }

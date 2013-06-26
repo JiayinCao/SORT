@@ -1781,6 +1781,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\integrator\integrator.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\integrator\integrator.h"
 				>
 			</File>

@@ -28,6 +28,8 @@ class	OrthoCamera : public Camera
 {
 // public method
 public:
+	DEFINE_CREATOR( OrthoCamera , "ortho" );
+
 	// default constructor
 	OrthoCamera();
 	// destructor

@@ -112,15 +112,15 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			string strIndex;
 			file>>strIndex;
 			VertexIndex vi0 = VertexIndexFromStr( strIndex );
-			CHECK_INDEX(vi0);
+			//CHECK_INDEX(vi0);
 			trunk->m_IndexBuffer.push_back( vi0 );
 			file>>strIndex;
 			VertexIndex vi1 = VertexIndexFromStr( strIndex );
-			CHECK_INDEX(vi1);
+			//CHECK_INDEX(vi1);
 			trunk->m_IndexBuffer.push_back( vi1 );
 			file>>strIndex;
 			VertexIndex vi2 = VertexIndexFromStr( strIndex );
-			CHECK_INDEX(vi2);
+			//CHECK_INDEX(vi2);
 			trunk->m_IndexBuffer.push_back( vi2 );
 
 			// check if there is another index
@@ -134,7 +134,7 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			{
 				file>>strIndex;
 				VertexIndex vi3 = VertexIndexFromStr( strIndex );
-				CHECK_INDEX(vi3);
+				//CHECK_INDEX(vi3);
 				trunk->m_IndexBuffer.push_back( vi0 );
 				trunk->m_IndexBuffer.push_back( vi2 );
 				trunk->m_IndexBuffer.push_back( vi3 );

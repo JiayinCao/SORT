@@ -24,6 +24,7 @@
 #include "spectrum/spectrum.h"
 #include "utility/propertyset.h"
 #include "utility/strhelper.h"
+#include "utility/creator.h"
 
 // pre-decleration of render target
 class RenderTarget;

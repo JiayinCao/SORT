@@ -26,6 +26,8 @@ class RandomSampler : public Sampler
 {
 // public method
 public:
+	DEFINE_CREATOR( RandomSampler , "random" );
+
 	// default constructor
 	RandomSampler(){}
 	// destructor

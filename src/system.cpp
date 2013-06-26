@@ -31,20 +31,9 @@
 #include "utility/parallel.h"
 #include <ImfHeader.h>
 #include "utility/strhelper.h"
-
 #include "camera/camera.h"
-#include "camera/environment.h"
-#include "camera/ortho.h"
-#include "camera/perspective.h"
-
-#include "integrator/whittedrt.h"
-#include "integrator/direct.h"
-#include "integrator/pathtracing.h"
-#include "integrator/bidirpath.h"
-
+#include "integrator/integrator.h"
 #include "sampler/stratified.h"
-#include "sampler/random.h"
-#include "sampler/regular.h"
 
 // constructor
 System::System()
@@ -352,68 +341,6 @@ void System::_raytracing_multithread()
 	cout<<endl;
 }
 
-// create integrator
-Integrator* System::_createIntegrator( const char* strtype , unsigned spp /* sample per pixel */ )
-{
-	if( strtype == 0 ) return 0;
-	
-	INTEGRATOR_TYPE type = IntegratorTypeFromStr( strtype );
-	switch(type)
-	{
-		case IT_WHITTED:
-			return new WhittedRT(m_Scene);
-		case IT_DIRECT:
-			return new DirectLight( m_Scene , spp );
-		case IT_PATHTRACING:
-			return new PathTracing( m_Scene , spp );
-		case IT_BDPT:
-			return new BidirPathTracing( m_Scene , spp );
-		case IT_NONE:
-			return 0;
-	}
-	return 0;
-}
-
-// create sampler
-Sampler* System::_createSampler( const char* strtype )
-{
-	if( strtype == 0 ) return 0;
-	
-	SAMPLER_TYPE type = SamplerTypeFromStr( strtype );
-	switch(type)
-	{
-		case ST_RANDOM:
-			return new RandomSampler();
-		case ST_REGULAR:
-			return new RegularSampler();
-		case ST_STRATIFIED:
-			return new StratifiedSampler();
-		case ST_NONE:
-			return 0;
-	}
-	return 0;
-}
-
-// create sampler
-Camera* System::_createCamera( const char* strtype )
-{
-	if( strtype == 0 ) return 0;
-	
-	CAMERA_TYPE type = CameraTypeFromStr( strtype );
-	switch(type)
-	{
-		case CT_PERSPECTIVE:
-			return new PerspectiveCamera();
-		case CT_ORTHO:
-			return new OrthoCamera();
-		case CT_ENVIRONMENT:
-			return new EnvironmentCamera();
-		case CT_NONE:
-			return 0;
-	}
-	return 0;
-}
-
 // setup system from file
 bool System::Setup( const char* str )
 {
@@ -449,12 +376,24 @@ bool System::Setup( const char* str )
 	if( element )
 	{
 		const char* str_type = element->Attribute( "type" );
-		const char* str_spp = element->Attribute( "spp" );
-		unsigned spp = atoi( str_spp );
-		m_pIntegrator = _createIntegrator( str_type , spp );
+		m_pIntegrator = CREATE_TYPE( str_type , Integrator );
 		
 		if( m_pIntegrator == 0 )
+		{
+			LOG_WARNING<<"No integrator with name of "<<str_type<<"."<<ENDL;
 			return false;
+		}
+
+		// set the properties
+		TiXmlElement* prop = element->FirstChildElement( "Property" );
+		while( prop )
+		{
+			const char* prop_name = prop->Attribute( "name" );
+			const char* prop_value = prop->Attribute( "value" );
+			if( prop_name != 0 && prop_value != 0 )
+				m_pIntegrator->SetProperty( prop_name , prop_value );
+			prop = prop->NextSiblingElement( "Property" );
+		}
 	}else
 		return false;
 	
@@ -505,7 +444,7 @@ bool System::Setup( const char* str )
 		if( round > 1024 ) round = 1024;
 		
 		// create sampler
-		m_pSampler = _createSampler( str_type );
+		m_pSampler = CREATE_TYPE( str_type , Sampler );
 		m_iSamplePerPixel = m_pSampler->RoundSize(round);
 		m_pSamples = new PixelSample[m_iSamplePerPixel];
 	}else{
@@ -521,7 +460,7 @@ bool System::Setup( const char* str )
 		const char* str_camera = element->Attribute("type");
 	
 		// create the camera
-		m_camera = _createCamera(str_camera);
+		m_camera = CREATE_TYPE(str_camera,Camera);
 		
 		if( !m_camera )
 			return false;

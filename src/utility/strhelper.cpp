@@ -91,24 +91,6 @@ TEX_TYPE	TexTypeFromStr( const string& str )
 	return TT_NONE;
 }
 
-// get the type of integrator from file extension
-INTEGRATOR_TYPE	IntegratorTypeFromStr( const string& str )
-{
-	if( strcmp( str.c_str() , "whitted" ) == 0 )
-		return IT_WHITTED;
-	else if( strcmp( str.c_str() , "direct" ) == 0 )
-		return IT_DIRECT;
-	else if( strcmp( str.c_str() , "pathtracing" ) == 0 )
-		return IT_PATHTRACING;
-	else if( strcmp( str.c_str() , "bdpt" ) == 0 )
-		return IT_BDPT;
-	
-	// log a warning
-	LOG_WARNING<<"Integrator type of \""<<str<<"\" is not supported."<<ENDL;
-	
-	return IT_NONE;
-}
-
 // transformation from string
 Transform TransformFromStr( const string& s )
 {
@@ -243,36 +225,4 @@ string NextToken( string& str , char t )
 		str = str.substr( id + 1 , string::npos );
 
 	return res;
-}
-
-// get the sampler type from string
-SAMPLER_TYPE SamplerTypeFromStr( const std::string& str )
-{
-	if( strcmp( str.c_str() , "random" ) == 0 )
-		return ST_RANDOM;
-	else if( strcmp( str.c_str() , "regular" ) == 0 )
-		return ST_REGULAR;
-	else if( strcmp( str.c_str() , "stratified" ) == 0 )
-		return ST_STRATIFIED;
-	
-	// log a warning
-	LOG_WARNING<<"Sampler type of \""<<str<<"\" is not supported."<<ENDL;
-	
-	return ST_NONE;
-}
-
-// get camera type from string
-CAMERA_TYPE CameraTypeFromStr( const std::string& str )
-{
-	if( strcmp( str.c_str() , "perspective" ) == 0 )
-		return CT_PERSPECTIVE;
-	else if( strcmp( str.c_str() , "ortho" ) == 0 )
-		return CT_ORTHO;
-	else if( strcmp( str.c_str() , "environment" ) == 0 )
-		return CT_ENVIRONMENT;
-	
-	// log a warning
-	LOG_WARNING<<"Camera type of \""<<str<<"\" is not supported."<<ENDL;
-	
-	return CT_NONE;
 }

@@ -28,6 +28,8 @@ class	EnvironmentCamera : public Camera
 {
 // public method
 public:
+	DEFINE_CREATOR( EnvironmentCamera , "environment" );
+
 	// default constructor
 	EnvironmentCamera(){_init();}
 	// destructor

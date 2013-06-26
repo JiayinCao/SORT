@@ -2,8 +2,10 @@
 
 <Scene value="../res/cornell.scene"/>
 
-<Integrator type="pathtracing" spp="16" />
-
+<Integrator type="pathtracing">
+  <Property name="max_path" value="2"/>
+</Integrator>
+  
 <RenderTargetSize w="1440" h="900"/>
 
 <OutputFile name="result.bmp"/>
@@ -18,6 +20,6 @@
 	<Property name="height" value="16000.0f"/>
 </Camera>
 
-<Sampler type="stratified" round="64"/>
+<Sampler type="stratified" round="1"/>
 
 </Root>

@@ -21,6 +21,8 @@
 #include "sampler/sample.h"
 #include "texture/rendertarget.h"
 
+IMPLEMENT_CREATOR( OrthoCamera );
+
 // default constructor
 OrthoCamera::OrthoCamera()
 {

@@ -100,6 +100,7 @@
     <ClCompile Include="..\..\src\bsdf\microfacet.cpp" />
     <ClCompile Include="..\..\src\bsdf\microfacetdistribution.cpp" />
     <ClCompile Include="..\..\src\bsdf\orennayar.cpp" />
+    <ClCompile Include="..\..\src\integrator\integrator.cpp" />
     <ClCompile Include="..\..\src\texture\checkboxtexture.cpp" />
     <ClCompile Include="..\..\src\texture\compositetexture.cpp" />
     <ClCompile Include="..\..\src\texture\constanttexture.cpp" />
