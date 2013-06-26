@@ -605,6 +605,9 @@
     <ClCompile Include="..\..\src\bsdf\microfacet.cpp">
       <Filter>bsdf</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\integrator\integrator.cpp">
+      <Filter>integrator</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\texture\checkboxtexture.h">

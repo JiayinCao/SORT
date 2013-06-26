@@ -22,6 +22,8 @@
 #include "bsdf/bsdf.h"
 #include "integratormethod.h"
 
+IMPLEMENT_CREATOR( BidirPathTracing );
+
 // return the radiance of a specific direction
 Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {

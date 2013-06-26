@@ -56,8 +56,11 @@ class BidirPathTracing : public Integrator
 {
 // public method
 public:
+
+	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
+
 	// default constructor
-	BidirPathTracing( const Scene& s , unsigned ppp ):path_per_pixel(ppp),Integrator(s){}
+	BidirPathTracing(){}
 	// destructor
 	~BidirPathTracing(){}
 

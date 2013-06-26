@@ -21,6 +21,8 @@
 #include "geometry/scene.h"
 #include "integratormethod.h"
 
+IMPLEMENT_CREATOR( PathTracing );
+
 // return the radiance of a specific direction
 // note : there are one factor makes the method biased.
 //		there is a limitation on the number of vertexes in the path
@@ -175,4 +177,10 @@ void PathTracing::OutputLog() const
 	LOG<<"It supports all of the features in direct lighting algorithm."<<ENDL;
 	LOG<<"Some global illumination effect is also supported in path tracing."<<ENDL;
 	LOG<<"While it requires much more samples to reduce the noise to an acceptable level."<<ENDL<<ENDL;
+}
+
+// register property
+void PathTracing::_registerAllProperty()
+{
+	_registerProperty( "max_path" , new MaxPathProperty(this) );
 }

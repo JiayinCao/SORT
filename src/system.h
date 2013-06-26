@@ -51,6 +51,8 @@ public:
 	
 	// load the scene
 	bool LoadScene( const string& str );
+	// get scene
+	const Scene& GetScene() const { return m_Scene; }
 
 	// get elapsed time
 	unsigned GetRenderingTime() const;
@@ -120,12 +122,6 @@ private:
 	void	_raytracing_multithread();
 	// output preprocessing information
 	void	_outputPreprocess();
-	// create integrator
-	Integrator* _createIntegrator( const char* type , unsigned spp /*sample per pixel*/);
-	// create sampler
-	Sampler* _createSampler( const char* type );
-	// create sampler
-	Camera* _createCamera( const char* strtype );
 };
 
 #endif

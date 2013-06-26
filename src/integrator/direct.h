@@ -28,8 +28,11 @@ class	DirectLight : public Integrator
 {
 // public method
 public:
+
+	DEFINE_CREATOR( DirectLight , "direct" );
+
 	// default constructor
-	DirectLight( const Scene& s , unsigned lp ):ls_per_light(lp),Integrator(s){_init();}
+	DirectLight(){_init();}
 	// destructor
 	~DirectLight(){_release();}
 
@@ -54,7 +57,7 @@ public:
 
 // private field
 private:
-	unsigned ls_per_light; // light sample per pixel sample per light
+	unsigned		ls_per_light; // light sample per pixel sample per light
 
 	SampleOffset*	light_sample_offsets;	// light sample offset
 	SampleOffset*	bsdf_sample_offsets;	// bsdf sample offset
@@ -65,6 +68,22 @@ private:
 	void _init();
 	// release data
 	void _release();
+
+	// register property
+	void _registerAllProperty();
+
+	class SamplerPerLightProperty : public PropertyHandler<Integrator>
+	{
+	public:
+		PH_CONSTRUCTOR(SamplerPerLightProperty,Integrator);
+		void SetValue( const string& str )
+		{
+			DirectLight* direct = CAST_TARGET(DirectLight);
+
+			if( direct )
+				direct->ls_per_light = atoi( str.c_str() );
+		}
+	};
 };
 
 #endif

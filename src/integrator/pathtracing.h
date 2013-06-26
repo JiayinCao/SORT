@@ -26,9 +26,14 @@ class	PathTracing : public Integrator
 {
 // public method
 public:
+	DEFINE_CREATOR( PathTracing , "pathtracing" );
+
 	// default constructor
-	PathTracing( const Scene& s , unsigned ppp ):path_per_pixel(ppp),Integrator(s)
-	{if( path_per_pixel < 3 ) path_per_pixel = 3;}
+	PathTracing()
+	{
+		path_per_pixel = 3; // default maxium path is 3
+		_registerAllProperty();	// register properties
+	}
 	// destructor
 	~PathTracing(){}
 
@@ -54,6 +59,21 @@ public:
 // private field
 private:
 	unsigned path_per_pixel; // light sample per pixel sample per light
-};
 
+	// register property
+	void _registerAllProperty();
+
+	class MaxPathProperty : public PropertyHandler<Integrator>
+	{
+	public:
+		PH_CONSTRUCTOR(MaxPathProperty,Integrator);
+		void SetValue( const string& str )
+		{
+			PathTracing* pathtracing = CAST_TARGET(PathTracing);
+
+			if( pathtracing )
+				pathtracing->path_per_pixel = atoi( str.c_str() );
+		}
+	};
+};
 #endif

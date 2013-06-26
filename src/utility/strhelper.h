@@ -44,21 +44,6 @@ MESH_TYPE	MeshTypeFromStr( const string& str );
 // result     : a cooresponding mesh type
 TEX_TYPE	TexTypeFromStr( const string& str );
 
-// get the type of integrator from file extension
-// para 'str' : string to parse
-// result     : a cooresponding integrator type
-INTEGRATOR_TYPE	IntegratorTypeFromStr( const string& str );
-
-// get the sampler type from string
-// para 'str' : string to parse
-// result     : a cooresponding sampler type
-SAMPLER_TYPE SamplerTypeFromStr( const std::string& str );
-
-// get the camera type from string
-// para 'str' : string to parse
-// result     : a coorespoding sampler type
-CAMERA_TYPE CameraTypeFromStr( const std::string& str );
-
 class ToLower{
 public:
      char operator()(char val){   

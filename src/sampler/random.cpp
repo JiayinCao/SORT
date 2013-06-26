@@ -20,6 +20,8 @@
 #include "utility/sassert.h"
 #include "utility/rand.h"
 
+IMPLEMENT_CREATOR( RandomSampler );
+
 // generate sample in one dimension
 void RandomSampler::Generate1D( float* sample , unsigned num ) const
 {

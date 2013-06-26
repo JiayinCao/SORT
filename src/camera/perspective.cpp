@@ -23,6 +23,8 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 
+IMPLEMENT_CREATOR( PerspectiveCamera );
+
 void PerspectiveCamera::_init()
 {
 	// set camera type
@@ -74,7 +76,7 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 	float fd = ( m_target - m_eye ).Length();
 	
 	// check if focal distance is zero
-	Sort_Assert(fd);
+	Sort_Assert(fd!=0.0f);
 	
 	float hir = m_interaxial * 0.5f;
 	if( pass_id == 0 )

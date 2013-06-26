@@ -30,8 +30,11 @@ class	WhittedRT : public Integrator
 {
 // public method
 public:
+
+	DEFINE_CREATOR( WhittedRT , "whitted" );
+
 	// default constructor
-	WhittedRT( const Scene& s ):Integrator(s) {}
+	WhittedRT(){}
 	// destructor
 	~WhittedRT() {}
 

@@ -2,7 +2,7 @@
 
 <Scene value="../res/first_scene.scene"/>
 
-<Integrator type="whitted" spp="1" />
+<Integrator type="whitted"/>
 
 <RenderTargetSize w="1440" h="900"/>
 

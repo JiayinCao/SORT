@@ -23,6 +23,8 @@
 #include "bsdf/bsdf.h"
 #include "light/light.h"
 
+IMPLEMENT_CREATOR( WhittedRT );
+
 // radiance along a specific ray direction
 Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 {

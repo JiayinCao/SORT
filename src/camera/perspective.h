@@ -27,6 +27,9 @@ class	PerspectiveCamera : public Camera
 {
 // public method
 public:
+
+	DEFINE_CREATOR( PerspectiveCamera , "perspective" );
+
 	// default constructor
 	PerspectiveCamera(){_init();}
 	// destructor

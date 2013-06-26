@@ -22,6 +22,8 @@
 #include "spectrum/spectrum.h"
 #include "managers/memmanager.h"
 #include "sampler/sampler.h"
+#include "utility/creator.h"
+#include "utility/propertyset.h"
 
 // pre-declera classes
 class	Ray;
@@ -29,12 +31,12 @@ class	Scene;
 
 ////////////////////////////////////////////////////////////////////////////
 //	definition of integrator
-class	Integrator
+class	Integrator : public PropertySet<Integrator>
 {
 // public method
 public:
 	// default constructor
-	Integrator( const Scene& s ):scene(s){max_recursive_depth=6;}
+	Integrator();
 	// destructor
 	virtual ~Integrator(){}
 
@@ -43,6 +45,10 @@ public:
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene
 	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const = 0;
+
+	// set sample per pixel
+	// para 'spp' : sample per pixel
+	void SetSamplePerPixel( unsigned spp ){ sample_per_pixel = spp; }
 
 	// generate samples
 	// para 'sampler' : the sampling method
@@ -92,6 +98,9 @@ protected:
 
 	// the pixel sample
 	PixelSample		pixel_sample;
+
+	// light sample per pixel sample per light
+	unsigned sample_per_pixel; 
 };
 
 #endif

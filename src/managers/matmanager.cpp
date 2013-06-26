@@ -113,10 +113,11 @@ unsigned MatManager::ParseMatFile( const string& str )
 
 		// create specific material
 		Material* mat = CREATE_TYPE( type , Material );
-		mat->SetName( name );
 
 		if( mat )
 		{
+			mat->SetName( name );
+
 			// set properties
 			TiXmlElement* prop = material->FirstChildElement( "Property" );
 			while( prop )

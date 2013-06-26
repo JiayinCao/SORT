@@ -26,6 +26,8 @@ class RegularSampler : public Sampler
 {
 // public method
 public:
+	DEFINE_CREATOR( RegularSampler , "regular" );
+
 	// default constructor
 	RegularSampler(){}
 	// destructor
