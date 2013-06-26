@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DD2C72C016F4D5DA00322350 /* orennayar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD2C72BE16F4D5DA00322350 /* orennayar.cpp */; };
+		DD86210C177B0B910063CE14 /* integrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD86210B177B0B910063CE14 /* integrator.cpp */; };
 		DD89339015BAF0C200831B31 /* accelerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD8931E515BAF0C200831B31 /* accelerator.cpp */; };
 		DD89339115BAF0C200831B31 /* bvh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD8931E715BAF0C200831B31 /* bvh.cpp */; };
 		DD89339215BAF0C200831B31 /* kdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD8931E915BAF0C200831B31 /* kdtree.cpp */; };
@@ -205,6 +206,7 @@
 		DD2C72BE16F4D5DA00322350 /* orennayar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = orennayar.cpp; sourceTree = "<group>"; };
 		DD2C72BF16F4D5DA00322350 /* orennayar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = orennayar.h; sourceTree = "<group>"; };
 		DD337AF115BABF73006F3828 /* SORT */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = SORT; sourceTree = BUILT_PRODUCTS_DIR; };
+		DD86210B177B0B910063CE14 /* integrator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = integrator.cpp; sourceTree = "<group>"; };
 		DD8931E515BAF0C200831B31 /* accelerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = accelerator.cpp; sourceTree = "<group>"; };
 		DD8931E615BAF0C200831B31 /* accelerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = accelerator.h; sourceTree = "<group>"; };
 		DD8931E715BAF0C200831B31 /* bvh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bvh.cpp; sourceTree = "<group>"; };
@@ -764,6 +766,7 @@
 		DD89322415BAF0C200831B31 /* integrator */ = {
 			isa = PBXGroup;
 			children = (
+				DD86210B177B0B910063CE14 /* integrator.cpp */,
 				DD89322515BAF0C200831B31 /* bidirpath.cpp */,
 				DD89322615BAF0C200831B31 /* bidirpath.h */,
 				DD89322715BAF0C200831B31 /* direct.cpp */,
@@ -1470,6 +1473,7 @@
 				DD2C72C016F4D5DA00322350 /* orennayar.cpp in Sources */,
 				DDABCB3816F5E30F00A9A16D /* microfacetdistribution.cpp in Sources */,
 				DDABCB3A16F5E82500A9A16D /* microfacet.cpp in Sources */,
+				DD86210C177B0B910063CE14 /* integrator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
