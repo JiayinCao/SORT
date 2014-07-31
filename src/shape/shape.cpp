@@ -42,7 +42,6 @@ float Shape::Pdf( const Point& p , const Vector& wi ) const
 bool Shape::GetIntersect( const Ray& ray , Intersection* intersect ) const
 {
 	Ray local = transform.invMatrix( ray );
-	float t;
 	Point p;
 	if( intersect )
 		return _getIntersect( local , p , intersect->t , intersect ) > 0.0f;

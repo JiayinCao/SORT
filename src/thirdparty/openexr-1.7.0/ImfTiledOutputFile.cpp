@@ -63,7 +63,7 @@
 #include <fstream>
 #include <assert.h>
 #include <map>
-
+#include <ImathFun.h>
 
 namespace Imf {
 
