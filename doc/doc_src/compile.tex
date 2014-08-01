@@ -22,12 +22,14 @@ There are varies way to compile the project.
 \section{ To compile on different platforms }
 \subsection{ Compile on Windows }
 SORT is mainly developed on Windows so that to compile it on the platform is quite easy.
-Visual studio 2008 is required to compile the source code.
-Other version of visual studio could work too, but you will have to create your own .sln file.
-
-There is a directory named "windows" on the root directory of SORT.
-The sln file is in the directory.
-Open it , build , it's done.
+CMake is used to generate solution file. Please follow the following steps to generate the build:
+\begin{enumerate}
+\item Start a command line in the root folder of SORT.
+\item `mkdir vs', generate a folder for placing the solution file
+\item `cd vs', get into the folder
+\item `cmake -G ``VS\_VERSION" ..'  , generate sln file.
+\item open the solution file with your visual studio, build all.
+\end{enumerate}
 
 \subsection{ Compile on Mac OS }
 Mac Os comiling is the last supported one.
@@ -57,8 +59,8 @@ There is nothing much to say about it.
 It is the same way with compiling using "makefile" on Mac OS.
 
 \section{ To run on different platforms }
-Whichever way of compiling you choose, the executable file is generated in a new directory "bin".
-To run the program is nothing but execute it.
+To run the build, please add a .sort file as the first parameter, such as
+sort.exe cornell.sort
 A log file will be generated for debug purpose.
 
 \section{ About 3rd-party library }
