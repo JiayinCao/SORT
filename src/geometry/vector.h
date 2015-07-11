@@ -1,18 +1,18 @@
 /*
-   FileName:      vector.h
+FileName:      vector.h
 
-   Created Time:  2011-08-04 12:51:24
+Created Time:  2011-08-04 12:51:24
 
-   Auther:        Cao Jiayin
+Auther:        Cao Jiayin
 
-   Email:         soraytrace@hotmail.com
+Email:         soraytrace@hotmail.com
 
-   Location:      China, Shanghai
+Location:      China, Shanghai
 
-   Description:   SORT is short for Simple Open-source Ray Tracing. Anyone could checkout the source code from
-                'sourceforge', https://soraytrace.svn.sourceforge.net/svnroot/soraytrace. And anyone is free to
-                modify or publish the source code. It's cross platform. You could compile the source code in 
-                linux and windows , g++ or visual studio 2008 is required.
+Description:   SORT is short for Simple Open-source Ray Tracing. Anyone could checkout the source code from
+'sourceforge', https://soraytrace.svn.sourceforge.net/svnroot/soraytrace. And anyone is free to
+modify or publish the source code. It's cross platform. You could compile the source code in 
+linux and windows , g++ or visual studio 2008 is required.
 */
 
 #ifndef SORT_VECTOR
@@ -22,95 +22,209 @@
 #include "managers/logmanager.h"
 #include "utility/define.h"
 #include <math.h>
+#include "utility/sassert.h"
 
 // pre-deleration
-class Transform;
 class Point;
 
 /////////////////////////////////////////////////////////////////////////
 // definition of vector
 class	Vector
 {
-// public method
+	// public method
 public:
 	// default constructor, all of the components are set zero
-	Vector( bool normal = false );
+	Vector( bool normal = false )
+	{
+		x = 0;
+		y = 0;
+		z = 0;
+		m_bNormal = normal;
+	}
 	// constructor from three float data
 	// para 'x':	x component
 	// para 'y':	y component
 	// para 'z':	z component
-	Vector( float x , float y , float z , bool normal = false );
+	Vector( float _x , float _y , float _z , bool normal = false )
+	{
+		x = _x;
+		y = _y;
+		z = _z;
+		m_bNormal = normal;
+	}
 	// copy constructor
 	// para 'vector':	vector to copy
-	Vector( const Vector& vector );
+	Vector( const Vector& vector )
+		:m_bNormal( vector.m_bNormal )
+	{
+		x = vector.x;
+		y = vector.y;
+		z = vector.z;
+	}
 	// constructor from point
 	Vector( const Point& p );
-	// destructor does nothing here
-	~Vector();
 
 	// math operations
 	// para 'v' : 	vector to add
 	// result :	a vector containing the sum of two vectors in each component
-	Vector operator+( const Vector& v ) const;
+	Vector operator+( const Vector& v ) const		
+	{
+		return Vector( x + v.x , y + v.y , z + v.z , m_bNormal );
+	}
 	// para 'v' :	vector to add
 	// result :	current vector after adding 'v' in each component
-	Vector& operator+=( const Vector& v );
+	Vector& operator+=( const Vector& v )
+	{
+		x += v.x;
+		y += v.y;
+		z += v.z;
+
+		return *this;
+	}
 	// para 'v' :	vector to minus
 	// result :	a vector containing the difference of two vectors in each component
-	Vector operator-( const Vector& v ) const;
+	Vector operator-( const Vector& v ) const
+	{
+		return Vector( x - v.x , y - v.y , z - v.z , m_bNormal );
+	}
 	// para 'v' :	vector to minus
 	// result :	current vector after minusing 'v' in each component
-	Vector& operator-=( const Vector& v );
+	Vector& operator-=( const Vector& v ){
+		x -= v.x;
+		y -= v.y;
+		z -= v.z;
+
+		return *this;
+	}
 	// para 'f' :	scaler to the vector
 	// result :	a vector scaled by the scaler
-	Vector operator*( float f ) const;
+	Vector operator*( float f ) const
+	{
+		return Vector( x * f , y * f , z * f , m_bNormal );
+	}
 	// para 'f' :	scaler to the vector
 	// result   :   current vector scaled by the scaler
-	Vector& operator*=( float f );
+	Vector& operator*=( float f )
+	{
+		x *= f;
+		y *= f;
+		z *= f;
+
+		return *this;
+	}
+
 	// para 'f' :	the divider
 	// result   :	a vector divided by the divider
 	// note	    :	there will be run-time and log LOG_ERROR if 'f' is zero
-	Vector operator/( float f ) const;
+	Vector operator/( float f ) const
+	{
+		Sort_Assert( f != 0.0f );
+
+		float t = 1.0f / f;
+
+		return (*this) * t;
+	}
+
 	// para 'f' :	the divider
 	// result   :	current vector after dividing by the divider
 	// note	    :	there will be run-time and log LOG_ERROR if 'f' is zero
-	Vector&	operator /= ( float f );
+	Vector&	operator /= ( float f )
+	{
+		Sort_Assert( f != 0.0f );
+
+		float t = 1.0f / f;
+
+		x *= t;
+		y *= t;
+		z *= t;
+
+		return *this;
+	}
 	// para 'v' :	vector to copy
 	// result   :	copy the vector
-	Vector& operator = ( const Vector& v ) ;
+	Vector& operator = ( const Vector& v )
+	{
+		x = v.x;
+		y = v.y;
+		z = v.z;
+
+		m_bNormal = v.m_bNormal;
+
+		return *this;
+	}
+
 
 	// get the length of the vector
 	// result :	the length of the vector
-	float	Length() const;
+	float	Length() const
+	{
+		return sqrt( SquaredLength() );
+	}
 	// get the squared length of the vector
 	// result :	the squared length of the vector
-	float	SquaredLength() const;
+	float	SquaredLength() const
+	{
+		return x * x + y * y + z * z;
+	}
+
 	// normalize the vector
 	// result :	the normalized vector
 	// note   :	there will be warning if it's a zero vector ( 0 , 0 , 0 )
-	Vector&	Normalize();
+	Vector&	Normalize()
+	{
+		// get the length of the vector
+		float len = Length();
+
+		// divide the vector
+		if( len == 0 )
+			LOG_WARNING<<"Try to normalize a zero length vector!!"<<ENDL;
+
+		if( len != 0 )
+			*this /= len;
+
+		return *this;
+	}
 
 	// [] operator
 	// para 'id' :	an id from 0 to 2
 	// result :	a component with the specific id
-	float	operator[] ( unsigned id ) const;
+	float	operator[] ( unsigned id ) const
+	{
+		return data[id];
+	}
 	// [] operator
 	// para 'id' :	an from 0 to 2
 	// result :	a component with the specific id
-	float&	operator[] ( unsigned id );
+	float&	operator[] ( unsigned id )
+	{
+		return data[id];
+	}
 
 	// - operator , flip the vector
 	// result :	a flipped vector
-	Vector  operator- () const;
+	Vector  operator- () const
+	{
+		return Vector( -x , -y , -z , m_bNormal );
+	}
 
 	// == operator
 	// para 'v' :	an vector to compare
 	// result   :	'true' if the 'v' is the same with current vector, 'false' else
-	bool	operator == ( const Vector& v ) const;
+	bool	operator == ( const Vector& v ) const
+	{
+		if( v.x == x && v.y == y && v.z == z )
+			return true;
+		return false;
+	}
 	// != operator
 	// para 'v' :	an vector to compare
 	// result   :	'false' if the 'v' is not the same with current vector, 'false' else
-	bool	operator != ( const Vector& v ) const;
+	bool	operator != ( const Vector& v ) const
+	{
+		if( v.x != x && v.y != y && v.z != z )
+			return false;
+		return true;
+	}
 
 	// whether it's a zero vector
 	bool	IsZero() const
@@ -118,16 +232,23 @@ public:
 		return x == 0.0f && y == 0.0f && z == 0.0f;
 	}
 
-// make all of the components public.
+	// make all of the components public.
 public:
-	// the x y z data in three dimension
-	float x;
-	float y;
-	float z;
+	union
+	{
+		struct
+		{
+			// the x y z data in three dimension
+			float x;
+			float y;
+			float z;
 
-	// whether it's a normal or not
-	// by default , it's false
-	bool m_bNormal;
+			// whether it's a normal or not
+			// by default , it's false
+			bool m_bNormal;
+		};
+		float data[4];
+	};
 };
 
 // * operator
@@ -165,11 +286,9 @@ inline float SatDot( const Vector& v0 , const Vector& v1 )
 // result    :	the cross product of the two vectors
 inline Vector Cross( const Vector& v0 , const Vector& v1 )
 {
-	Vector v;
-	v.x = v0.y * v1.z - v0.z * v1.y;
-	v.y = v0.z * v1.x - v0.x * v1.z;
-	v.z = v0.x * v1.y - v0.y * v1.x;
-	return v;
+	return Vector (	v0.y * v1.z - v0.z * v1.y,
+		v0.z * v1.x - v0.x * v1.z,
+		v0.x * v1.y - v0.y * v1.x );
 }
 // para 'v0' :	a vector
 // para 'v1' :	another vector

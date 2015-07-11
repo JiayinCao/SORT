@@ -25,6 +25,8 @@
 #include "ray.h"
 #include <math.h>
 
+class Transform;
+
 // pre-declera functions
 Point	operator* ( const Transform& t , const Point& p );
 Vector	operator* ( const Transform& t , const Vector& v );
