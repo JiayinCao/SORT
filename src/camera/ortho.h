@@ -116,7 +116,7 @@ protected:
 		void SetValue( const string& str )
 		{
 			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
-			camera->SetCameraWidth( atof(str.c_str()) );
+			camera->SetCameraWidth( (float)atof(str.c_str()) );
 		}
 	};
 	// property handler
@@ -130,7 +130,7 @@ protected:
 		void SetValue( const string& str )
 		{
 			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
-			camera->SetCameraHeight( atof(str.c_str()) );
+			camera->SetCameraHeight( (float)atof(str.c_str()) );
 		}
 	};
 };

@@ -28,7 +28,7 @@ linux and windows , g++ or visual studio 2008 is required.
 // definition of vector
 class	Vector
 {
-	// public method
+// public method
 public:
 	// default constructor, all of the components are set zero
 	Vector()
@@ -316,5 +316,3 @@ inline void CoordinateSystem( const Vector& v0 , Vector& v1 , Vector& v2 )
 }
 
 #endif
-
-
