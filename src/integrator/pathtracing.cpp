@@ -131,7 +131,7 @@ void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples 
 
 		sampler->Generate1D( data_1d , ps );
 		sampler->Generate2D( data_2d , ps );
-		for( int k = 0 ; k < ps ; ++k )
+		for( unsigned k = 0 ; k < ps ; ++k )
 		{
 			int two_k = 2*k;
 			samples[k].bsdf_sample[0].t = data_1d[k];
@@ -141,7 +141,7 @@ void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples 
 
 		sampler->Generate1D( data_1d , ps );
 		sampler->Generate2D( data_2d , ps );
-		for( int k = 0 ; k < ps ; ++k )
+		for( unsigned k = 0 ; k < ps ; ++k )
 		{
 			int two_k = 2*k;
 			samples[k].bsdf_sample[1].t = data_1d[k];
@@ -151,7 +151,7 @@ void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples 
 
 		sampler->Generate1D( data_1d , ps );
 		sampler->Generate2D( data_2d , ps );
-		for( int k = 0 ; k < ps ; ++k )
+		for( unsigned k = 0 ; k < ps ; ++k )
 		{
 			int two_k = 2*k;
 			samples[k].light_sample[0].t = data_1d[k];
@@ -160,7 +160,7 @@ void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples 
 		}
 	}else
 	{
-		for (int k = 0; k < ps; ++k) 
+		for (unsigned k = 0; k < ps; ++k) 
 		{
 			samples[k].bsdf_sample[0] = BsdfSample(true);
 			samples[k].bsdf_sample[1] = BsdfSample(true);

@@ -133,7 +133,7 @@ protected:
 		void SetValue( const string& str )
 		{
 			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
-			camera->SetFov( atof(str.c_str()) );
+			camera->SetFov( (float)atof(str.c_str()) );
 		}
 	};
 	// property handler
@@ -147,7 +147,7 @@ protected:
 		void SetValue( const string& str )
 		{
 			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
-			camera->SetLen( atof(str.c_str()) );
+			camera->SetLen( (float)atof(str.c_str()) );
 		}
 	};
 	// property handler
@@ -161,7 +161,7 @@ protected:
 		void SetValue( const string& str )
 		{
 			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
-			camera->SetInteraxial( atof(str.c_str()) );
+			camera->SetInteraxial( (float)atof(str.c_str()) );
 		}
 	};
 };

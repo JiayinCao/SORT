@@ -100,7 +100,7 @@ void BidirPathTracing::GenerateSample( const Sampler* sampler , PixelSample* sam
 		sampler->Generate2D( data_2d , ps );
 		const unsigned* shuffled_id0 = ShuffleIndex( ps );
 
-		for( int k = 0 ; k < ps ; ++k )
+		for( unsigned k = 0 ; k < ps ; ++k )
 		{
 			int two_k = 2*shuffled_id0[k];
 			samples[k].bsdf_sample[0].t = data_1d[two_k];
@@ -111,7 +111,7 @@ void BidirPathTracing::GenerateSample( const Sampler* sampler , PixelSample* sam
 		const unsigned* shuffled_id1 = ShuffleIndex( ps );
 		sampler->Generate1D( data_1d , ps );
 		sampler->Generate2D( data_2d , ps );
-		for( int k = 0 ; k < ps ; ++k )
+		for( unsigned k = 0 ; k < ps ; ++k )
 		{
 			int two_k = 2*shuffled_id1[k];
 			samples[k].light_sample[0].t = data_1d[two_k];
@@ -120,7 +120,7 @@ void BidirPathTracing::GenerateSample( const Sampler* sampler , PixelSample* sam
 		}
 	}else
 	{
-		for (int k = 0; k < ps; ++k) 
+		for (unsigned k = 0; k < ps; ++k) 
 		{
 			samples[k].bsdf_sample[0] = BsdfSample(true);
 			samples[k].light_sample[0] = LightSample(true);
