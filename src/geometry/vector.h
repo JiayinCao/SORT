@@ -24,9 +24,6 @@ linux and windows , g++ or visual studio 2008 is required.
 #include <math.h>
 #include "utility/sassert.h"
 
-// pre-deleration
-class Point;
-
 /////////////////////////////////////////////////////////////////////////
 // definition of vector
 class	Vector
@@ -34,42 +31,39 @@ class	Vector
 	// public method
 public:
 	// default constructor, all of the components are set zero
-	Vector( bool normal = false )
+	Vector()
 	{
 		x = 0;
 		y = 0;
 		z = 0;
-		m_bNormal = normal;
 	}
 	// constructor from three float data
 	// para 'x':	x component
 	// para 'y':	y component
 	// para 'z':	z component
-	Vector( float _x , float _y , float _z , bool normal = false )
+	Vector( float _x , float _y , float _z )
 	{
 		x = _x;
 		y = _y;
 		z = _z;
-		m_bNormal = normal;
 	}
 	// copy constructor
 	// para 'vector':	vector to copy
 	Vector( const Vector& vector )
-		:m_bNormal( vector.m_bNormal )
 	{
 		x = vector.x;
 		y = vector.y;
 		z = vector.z;
 	}
 	// constructor from point
-	Vector( const Point& p );
+	//Vector( const Point& p );
 
 	// math operations
 	// para 'v' : 	vector to add
 	// result :	a vector containing the sum of two vectors in each component
 	Vector operator+( const Vector& v ) const		
 	{
-		return Vector( x + v.x , y + v.y , z + v.z , m_bNormal );
+		return Vector( x + v.x , y + v.y , z + v.z );
 	}
 	// para 'v' :	vector to add
 	// result :	current vector after adding 'v' in each component
@@ -85,7 +79,7 @@ public:
 	// result :	a vector containing the difference of two vectors in each component
 	Vector operator-( const Vector& v ) const
 	{
-		return Vector( x - v.x , y - v.y , z - v.z , m_bNormal );
+		return Vector( x - v.x , y - v.y , z - v.z );
 	}
 	// para 'v' :	vector to minus
 	// result :	current vector after minusing 'v' in each component
@@ -100,7 +94,7 @@ public:
 	// result :	a vector scaled by the scaler
 	Vector operator*( float f ) const
 	{
-		return Vector( x * f , y * f , z * f , m_bNormal );
+		return Vector( x * f , y * f , z * f );
 	}
 	// para 'f' :	scaler to the vector
 	// result   :   current vector scaled by the scaler
@@ -147,8 +141,6 @@ public:
 		x = v.x;
 		y = v.y;
 		z = v.z;
-
-		m_bNormal = v.m_bNormal;
 
 		return *this;
 	}
@@ -204,7 +196,7 @@ public:
 	// result :	a flipped vector
 	Vector  operator- () const
 	{
-		return Vector( -x , -y , -z , m_bNormal );
+		return Vector( -x , -y , -z );
 	}
 
 	// == operator
@@ -242,12 +234,8 @@ public:
 			float x;
 			float y;
 			float z;
-
-			// whether it's a normal or not
-			// by default , it's false
-			bool m_bNormal;
 		};
-		float data[4];
+		float data[3];
 	};
 };
 

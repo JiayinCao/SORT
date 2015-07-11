@@ -23,7 +23,7 @@
 
 // whether multi thread is enabled
 // by default it's enabled
-static bool g_bMultiThreadEnabled = true;
+static bool g_bMultiThreadEnabled = false;
 
 // enable or disable multi-thread
 bool	MultiThreadEnabled()

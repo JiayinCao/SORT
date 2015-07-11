@@ -88,7 +88,7 @@ protected:
 		void SetValue( const string& str )
 		{
 			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
-			camera->SetUp( PointFromStr(str) );
+			camera->SetUp( VectorFromStr(str) );
 		}
 	};
 	// property handler
