@@ -62,7 +62,7 @@ public:
 	// the memory for the mesh
 	Reference<BufferMemory> m_pMemory;
 
-	// the tranformation of the mesh
+	// the transformation of the mesh
 	Transform		m_Transform;
 
 	// whether the mesh is instanced

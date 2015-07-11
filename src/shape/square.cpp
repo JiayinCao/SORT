@@ -54,7 +54,7 @@ void Square::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
 	r.m_fMax = FLT_MAX;
 	r.m_Ori = transform( Point( radius * u , 0.0f , radius * v ) );
 	r.m_Dir = transform( UniformSampleHemisphere( sort_canonical() , sort_canonical() ) );
-	n = transform( Vector( 0.0f , 1.0f , 0.0f , true ) );
+	n = transform.invMatrix.Transpose()( Vector( 0.0f , 1.0f , 0.0f ) );
 
 	if( pdf ) *pdf = 1.0f / ( radius * radius * 8.0f * PI );
 }
@@ -85,7 +85,7 @@ float Square::_getIntersect( const Ray& ray , Point& p , float limit , Intersect
 	{
 		intersect->t = t;
 		intersect->intersect = transform( p );
-		intersect->normal = transform(Vector( 0.0f , 1.0f , 0.0f , true ));
+		intersect->normal = transform.invMatrix.Transpose()(Vector( 0.0f , 1.0f , 0.0f ));
 		intersect->tangent = transform(Vector( 0.0f , 0.0f , 1.0f ));
 		intersect->primitive = const_cast<Square*>(this);
 	}

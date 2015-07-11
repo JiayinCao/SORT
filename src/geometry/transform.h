@@ -160,6 +160,12 @@ inline Transform Inverse( const Transform& t )
 	return Transform( t.invMatrix , t.matrix );
 }
 
+// return the transpose of the transform
+inline Transform Transpose( const Transform& t )
+{
+	return Transform( t.matrix.Transpose() , t.invMatrix.Transpose() );
+}
+
 // transform a point
 inline Point operator* ( const Transform& t , const Point& p )
 {
@@ -170,17 +176,6 @@ inline Point operator* ( const Transform& t , const Point& p )
 // note : the vector could be a normal , which requires special care about the multiplication
 inline Vector operator* ( const Transform& t , const Vector& v )
 {
-	// if it's a normal , use the transpose of inverse matrix
-	if( v.m_bNormal )
-	{
-		float _x = v.x * t.invMatrix.m[0] + v.y * t.invMatrix.m[4] + v.z * t.invMatrix.m[8];
-		float _y = v.x * t.invMatrix.m[1] + v.y * t.invMatrix.m[5] + v.z * t.invMatrix.m[9];
-		float _z = v.x * t.invMatrix.m[2] + v.y * t.invMatrix.m[6] + v.z * t.invMatrix.m[10];
-
-		// return the result
-		return Vector( _x , _y , _z , true );
-	}
-	
 	return t.matrix * v;
 }
 

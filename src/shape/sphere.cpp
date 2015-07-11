@@ -104,11 +104,11 @@ float Sphere::_getIntersect( const Ray& r , Point& p , float limit , Intersectio
 	if( intersect )
 	{
 		intersect->t = t;
-		Vector n = Normalize(Vector( p.x , p.y , p.z , true ));
+		Vector n = Normalize(Vector( p.x , p.y , p.z ));
 		Vector v0 , v1;
 		CoordinateSystem( n , v0 , v1 );
 		intersect->intersect = transform(p);
-		intersect->normal = transform(n);
+		intersect->normal = transform.invMatrix.Transpose()(n);
 		intersect->tangent = transform(v0);
 		intersect->primitive = const_cast<Sphere*>(this);
 	}
@@ -126,7 +126,7 @@ void Sphere::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
 	r.m_Dir = UniformSampleSphere( sort_canonical() , sort_canonical() );
 	if( Dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
 		r.m_Dir = -r.m_Dir;
-	n = transform( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z , true ) );
+	n = transform.invMatrix.Transpose()( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z ) );
 
 	if( pdf ) *pdf = 1.0f / ( 8.0f * PI * PI * radius * radius );
 }

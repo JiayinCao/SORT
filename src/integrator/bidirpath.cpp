@@ -59,7 +59,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		directWt /= vert.pdf * vert.rr;
 		if( directWt.IsBlack() == false )
 		{
-			li += directWt * EvaluateDirect( Ray( Point( 0.0f ) , -vert.wi ) , scene , light , vert.inter , 
+			li += directWt * EvaluateDirect( Ray( Point() , -vert.wi ) , scene , light , vert.inter , 
 				LightSample(true) , BsdfSample(true) ) *
 				_Weight( eye_path , i , light_path , 0 , light_inter ) / pdf;
 		}

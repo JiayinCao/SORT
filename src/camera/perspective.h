@@ -105,7 +105,7 @@ protected:
 		void SetValue( const string& str )
 		{
 			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
-			camera->SetUp( PointFromStr(str) );
+			camera->SetUp( VectorFromStr(str) );
 		}
 	};
 	// property handler

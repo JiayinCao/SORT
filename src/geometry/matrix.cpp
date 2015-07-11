@@ -87,9 +87,6 @@ Point Matrix::operator *( const Point& p ) const
 // transform vector
 Vector Matrix::operator *( const Vector& v ) const
 {
-	if( v.m_bNormal )
-		LOG_ERROR<<"Matrix applied to normal."<<CRASH;
-
 	float _x = v.x * m[0] + v.y * m[1] + v.z * m[2];
 	float _y = v.x * m[4] + v.y * m[5] + v.z * m[6];
 	float _z = v.x * m[8] + v.y * m[9] + v.z * m[10];

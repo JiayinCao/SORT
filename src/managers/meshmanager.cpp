@@ -102,7 +102,7 @@ bool MeshManager::LoadMesh( const string& filename , TriMesh* mesh )
 
 		// update the transform
 		mesh->m_Transform = mesh->m_Transform * Inverse(it->second->m_pPrototype->m_Transform);
-		
+
 		return true;
 	}
 	
@@ -160,7 +160,7 @@ void BufferMemory::ApplyTransform( TriMesh* mesh )
 	vector<Vector>::iterator n_it = m_NormalBuffer.begin();
 	while( n_it != m_NormalBuffer.end() )
 	{
-		*n_it = (mesh->m_Transform)(*n_it);
+		*n_it = (mesh->m_Transform.invMatrix.Transpose())(*n_it);	// use inverse transpose matrix here
 		n_it++;
 	}
 	m_pPrototype = mesh;
@@ -192,7 +192,6 @@ void BufferMemory::_genFlatNormal()
 
 			// set the normal
 			Vector n = Cross( v1 , v0 );
-			n.m_bNormal = true;
 			n.Normalize();
 			m_NormalBuffer.push_back( n );
 
@@ -256,7 +255,6 @@ void BufferMemory::GenSmoothNormal()
 		if( 0 != adjacency[i].size() )
 		{
 			n.Normalize();
-			n.m_bNormal = true;
 		}
 
 		smoothNormal.push_back(n);
