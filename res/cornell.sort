@@ -20,6 +20,6 @@
 	<Property name="height" value="16000.0f"/>
 </Camera>
 
-<Sampler type="stratified" round="1"/>
+<Sampler type="stratified" round="64"/>
 
 </Root>

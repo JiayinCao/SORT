@@ -28,6 +28,8 @@ class RenderTarget;
 class Sampler;
 class PixelSample;
 
+#define	THREAD_NUM	8
+
 /////////////////////////////////////////////////////////////////////
 //	definition of the system
 class	System
@@ -68,6 +70,9 @@ public:
 	// set resource path
 	void SetResourcePath( const string& str ) { m_ResourcePath = str; }
 
+	// Render a tile
+	void RenderTile( unsigned left , unsigned right , unsigned top , unsigned bottom , unsigned tid);
+
 //private field:
 private:
 	// the render target for the system
@@ -84,7 +89,7 @@ private:
 	// sample number per pixel
 	unsigned		m_iSamplePerPixel;
 	// the samples
-	PixelSample*	m_pSamples;
+	PixelSample*	m_pSamples[THREAD_NUM];
 	// output file name
 	string			m_strOutputFileName;
 
