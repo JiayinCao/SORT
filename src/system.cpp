@@ -302,7 +302,6 @@ void System::_raytracing_multithread()
 {
 	m_uCurrentPixelId = 0;
 	m_uPreProgress = 0xffffffff;
-	#pragma omp parallel for
 	for( int i = 0 ; i < m_rt->GetHeight() ; i++ )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
@@ -327,12 +326,10 @@ void System::_raytracing_multithread()
 			}
 			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
 			
-			#pragma omp critical
 			{	// update current pixel
 				m_uCurrentPixelId++;
 			}
 		}
-		#pragma omp critical
 		{
 			// output progress
 			_outputProgress();

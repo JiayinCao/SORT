@@ -16,14 +16,13 @@
 */
 
 #include "parallel.h"
-#include <omp.h>
 #if defined(SORT_IN_WINDOWS)
 #include <windows.h>
 #endif
 
 // whether multi thread is enabled
 // by default it's enabled
-static bool g_bMultiThreadEnabled = false;
+static bool g_bMultiThreadEnabled = true;
 
 // enable or disable multi-thread
 bool	MultiThreadEnabled()
@@ -58,7 +57,7 @@ unsigned SetThreadNum()
 	if( g_bMultiThreadEnabled )
 	{
 		unsigned cores = NumSystemCores();
-		omp_set_num_threads( cores );
+		//omp_set_num_threads( cores );
 		return cores;
 	}
 	return 1;
@@ -67,7 +66,7 @@ unsigned SetThreadNum()
 // get the thread id
 unsigned ThreadId()
 {
-	if( g_bMultiThreadEnabled )
-		return omp_get_thread_num();
+//	if( g_bMultiThreadEnabled )
+//		return omp_get_thread_num();
 	return 0;
 }
