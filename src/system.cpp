@@ -28,7 +28,7 @@
 #include "utility/path.h"
 #include "utility/creator.h"
 #include "sampler/sampler.h"
-#include "utility/parallel.h"
+#include "multithread/parallel.h"
 #include <ImfHeader.h>
 #include "utility/strhelper.h"
 #include "camera/camera.h"
@@ -87,7 +87,8 @@ void System::_postUninit()
 	SAFE_DELETE( m_camera );
 	SAFE_DELETE( m_pIntegrator );
 	SAFE_DELETE( m_pSampler );
-	SAFE_DELETE_ARRAY( m_pSamples );
+	for( int i = 0 ; i <THREAD_NUM ; ++i )
+	SAFE_DELETE_ARRAY( m_pSamples[i] );
 
 	// release managers
 	Creator::DeleteSingleton();
@@ -158,7 +159,8 @@ void System::PreProcess()
 	m_Scene.PreProcess();
 
 	// preprocess integrator
-	m_pIntegrator->RequestSample( m_pSampler , m_pSamples , m_iSamplePerPixel );
+	for( int i = 0; i < THREAD_NUM ; ++i )
+		m_pIntegrator->RequestSample( m_pSampler , m_pSamples[i] , m_iSamplePerPixel );
 	m_pIntegrator->PreProcess();
 
 	// stop timer
@@ -273,7 +275,7 @@ void System::_raytracing()
 			MemManager::GetSingleton().ClearMem();
 
 			// generate samples to be used later
-			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples , m_iSamplePerPixel , m_Scene );
+			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples[0] , m_iSamplePerPixel , m_Scene );
 
 			// the radiance
 			Spectrum radiance;
@@ -282,9 +284,9 @@ void System::_raytracing()
 				for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
 				{
 					// generate rays
-					Ray r = m_camera->GenerateRay( p , (float)j , (float)i , m_pSamples[k] );
+					Ray r = m_camera->GenerateRay( p , (float)j , (float)i , m_pSamples[0][k] );
 					// accumulate the radiance
-					radiance += m_pIntegrator->Li( r , m_pSamples[k] ) * m_camera->GetPassFilter(p);
+					radiance += m_pIntegrator->Li( r , m_pSamples[0][k] ) * m_camera->GetPassFilter(p);
 				}
 			}
 			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
@@ -297,20 +299,19 @@ void System::_raytracing()
 	}
 	cout<<endl;
 }
-// do ray tracing in a multithread enviroment
-void System::_raytracing_multithread()
+
+// Render a tile
+void System::RenderTile( unsigned left , unsigned right , unsigned top , unsigned bottom , unsigned tid )
 {
-	m_uCurrentPixelId = 0;
-	m_uPreProgress = 0xffffffff;
-	for( int i = 0 ; i < m_rt->GetHeight() ; i++ )
+	for( int i = top ; i < bottom ; i++ )
 	{
-		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
+		for( unsigned j = left ; j < right ; j++ )
 		{
 			// clear managed memory after each pixel
-			MemManager::GetSingleton().ClearMem(ThreadId());
+			MemManager::GetSingleton().ClearMem(tid);
 
 			// generate samples to be used later
-			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples , m_iSamplePerPixel , m_Scene );
+			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples[tid] , m_iSamplePerPixel , m_Scene );
 
 			// the radiance
 			Spectrum radiance;
@@ -319,22 +320,63 @@ void System::_raytracing_multithread()
 				for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
 				{
 					// generate rays
-					Ray r = m_camera->GenerateRay( p , (float)j , (float)i , m_pSamples[k] );
+					Ray r = m_camera->GenerateRay( p , (float)j , (float)i , m_pSamples[tid][k] );
 					// accumulate the radiance
-					radiance += m_pIntegrator->Li( r , m_pSamples[k] ) * m_camera->GetPassFilter(p);
+					radiance += m_pIntegrator->Li( r , m_pSamples[tid][k] ) * m_camera->GetPassFilter(p);
 				}
 			}
 			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
 			
-			{	// update current pixel
+			{	
+				EnterCriticalSection();
+				// update current pixel
 				m_uCurrentPixelId++;
+
+				LeaveCriticalSection();
 			}
 		}
 		{
+			EnterCriticalSection();
 			// output progress
 			_outputProgress();
+			
+			LeaveCriticalSection();
 		}
 	}
+}
+
+// do ray tracing in a multithread enviroment
+void System::_raytracing_multithread()
+{
+	InitCriticalSections();
+
+	int tilesize = 16;
+	RenderTask rt;
+	for( int i = 0 ; i < m_rt->GetHeight() ; i += tilesize )
+	{
+		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j += tilesize )
+		{
+			rt.ori_x = j;
+			rt.ori_y = i;
+			rt.width = ( tilesize < ( m_rt->GetWidth() - j ))? tilesize : ( m_rt->GetWidth() - j );
+			rt.height = ( tilesize < ( m_rt->GetHeight() - i ))? tilesize : ( m_rt->GetHeight() - i );
+
+			PushRenderTask(rt);
+		}
+	}
+
+	ThreadUnit* threadUnits[THREAD_NUM];
+	for( int i = 0 ; i < THREAD_NUM ; ++i )
+		threadUnits[i] = SpawnNewRenderThread(i);
+	for( int i = 0 ; i < THREAD_NUM ; ++i )
+		threadUnits[i]->BeginThread();
+	for( int i = 0 ; i < THREAD_NUM ; ++i )
+		threadUnits[i]->WaitForFinish();
+	for( int i = 0 ; i < THREAD_NUM ; ++i )
+		delete threadUnits[i];
+
+	DestroyCriticalSections();
+
 	cout<<endl;
 }
 
@@ -443,12 +485,14 @@ bool System::Setup( const char* str )
 		// create sampler
 		m_pSampler = CREATE_TYPE( str_type , Sampler );
 		m_iSamplePerPixel = m_pSampler->RoundSize(round);
-		m_pSamples = new PixelSample[m_iSamplePerPixel];
+		for( int i = 0;i < THREAD_NUM ; ++i )
+			m_pSamples[i] = new PixelSample[m_iSamplePerPixel];
 	}else{
 		// user stratified sampler as default sampler
 		m_pSampler = new StratifiedSampler();
 		m_iSamplePerPixel = m_pSampler->RoundSize(16);
-		m_pSamples = new PixelSample[m_iSamplePerPixel];
+		for( int i = 0;i < THREAD_NUM ; ++i )
+			m_pSamples[i] = new PixelSample[m_iSamplePerPixel];
 	}
 	
 	element = root->FirstChildElement("Camera");
