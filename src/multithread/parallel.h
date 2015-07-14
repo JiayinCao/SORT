@@ -23,21 +23,11 @@
 #include "taskqueue.h"
 #include "parallel.h"
 
-// enable or disable multi-thread
-bool	MultiThreadEnabled();
-
-// enable or disable multi-thread
-void	SetMultiThreadEnabled( bool enabled );
-
 // get the number of cpu cores in the system
 unsigned NumSystemCores();
 
 // get the thread id
 unsigned ThreadId();
-
-// set the number of threads
-// thread number is the same as the number of cpu cores
-unsigned SetThreadNum();
 
 // spawn new thread
 ThreadUnit*	SpawnNewRenderThread( unsigned tid );
@@ -49,11 +39,5 @@ void PushRenderTask( const RenderTask& renderTask );
 void InitCriticalSections();
 // Destroy Critical Sections
 void DestroyCriticalSections();
-
-// enter critical section
-void EnterCriticalSection();
-
-// leave critical section
-void LeaveCriticalSection();
 
 #endif

@@ -16,6 +16,52 @@
 */
 
 #include "taskqueue.h"
+#include "parallel.h"
+#include "managers\memmanager.h"
+#include "integrator\integrator.h"
+#include "sampler\sampler.h"
+#include "camera\camera.h"
+#include "texture\rendertarget.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(RenderTaskQueue);
+
+// execute the task
+void RenderTask::Execute()
+{
+	// request samples
+	integrator->RequestSample( sampler , pixelSamples , samplePerPixel );
+
+	unsigned right = ori_x + width;
+	unsigned bottom = ori_y + height;
+
+	unsigned tid = ThreadId();
+
+	for( unsigned i = ori_y ; i < bottom ; i++ )
+	{
+		for( unsigned j = ori_x ; j < right ; j++ )
+		{
+			// clear managed memory after each pixel
+			MemManager::GetSingleton().ClearMem(tid);
+
+			// generate samples to be used later
+			integrator->GenerateSample( sampler , pixelSamples, samplePerPixel , scene );
+
+			// the radiance
+			Spectrum radiance;
+			for( unsigned p = 0 ; p < camera->GetPassCount() ; ++p )
+			{
+				for( unsigned k = 0 ; k < samplePerPixel ; ++k )
+				{
+					// generate rays
+					Ray r = camera->GenerateRay( p , (float)j , (float)i , pixelSamples[k] );
+					// accumulate the radiance
+					radiance += integrator->Li( r , pixelSamples[k] ) * camera->GetPassFilter(p);
+				}
+			}
+			rendertarget->SetColor( j , i , radiance / (float)samplePerPixel );		
+		}
+	}
+
+	taskDone[taskId] = true;
+}

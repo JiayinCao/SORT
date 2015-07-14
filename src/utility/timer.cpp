@@ -60,18 +60,20 @@ void Timer::StartTimer()
 }
 
 // stop timer
-void Timer::StopTimer()
+unsigned Timer::StopTimer()
 {
 	if( m_bTimerSet == false )
 	{
 		LOG_WARNING<<"Timer is not set."<<ENDL;
-		return;
+		return 0;
 	}
 	m_elapsed = getTickCount() - m_elapsed;
 
 	m_totalElapsed += m_elapsed;
 
 	m_bTimerSet = false;
+
+	return m_elapsed;
 }
 
 // get elapsed time

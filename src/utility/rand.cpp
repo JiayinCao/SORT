@@ -31,9 +31,9 @@
 
 // variables used for random number generation
 static const int N = 624;
-static unsigned long mt[N]; /* the array for the state vector  */
-static int mti;
-static bool seed_setup = false;
+__declspec(thread) static unsigned long mt[N]; /* the array for the state vector  */
+__declspec(thread) static int mti;
+__declspec(thread) static bool seed_setup = false;
 
 // set the seed
 void sort_seed()

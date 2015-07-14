@@ -41,17 +41,19 @@ public:
 	// Run the thread
 	virtual void RunThread();
 
-	// Wait for the end
-	virtual void WaitForFinish();
+	// Whether the thread is finished
+	virtual bool IsFinished(){
+		return m_finished;
+	}
 
 // private field
 private:
 	// the thread handle
 	HANDLE	m_threadHandle;
-	// the end event
-	HANDLE	m_endEvent;
 	// the thread id
 	unsigned m_tid;
+	// whether the thread is finished
+	bool	m_finished;
 
 public:
 	static __declspec(thread) int m_WinThreadId;

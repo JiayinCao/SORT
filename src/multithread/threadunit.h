@@ -37,8 +37,8 @@ public:
 	// run thread
 	virtual void RunThread() = 0;
 
-	// wait thread for finish
-	virtual void WaitForFinish() = 0;
+	// whether the thread is finished
+	virtual bool IsFinished() = 0;
 };
 
 #endif

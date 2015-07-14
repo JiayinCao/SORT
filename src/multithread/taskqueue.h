@@ -20,6 +20,14 @@
 
 #include <list>
 #include "utility\singleton.h"
+#include "utility\define.h"
+#include "sampler\sample.h"
+
+class Integrator;
+class Scene;
+class Sampler;
+class Camera;
+class RenderTarget;
 
 class RenderTask
 {
@@ -30,12 +38,43 @@ public:
 	unsigned width;
 	unsigned height;
 
-	RenderTask()
+	// the task id
+	unsigned		taskId;
+	bool*			taskDone;	// used to show the progress
+
+	// the pixel sample
+	PixelSample*	pixelSamples;
+	unsigned		samplePerPixel;
+
+	// the integrators
+	Integrator*		integrator;
+	// the sampler
+	Sampler*		sampler;
+	// the camera
+	Camera*			camera;
+	// the scene description
+	const Scene&	scene;
+	// the render target
+	RenderTarget*	rendertarget;
+
+	// constructor
+	RenderTask( Scene& sc , Integrator* integ , Sampler* samp , Camera* cam , RenderTarget* rt , bool* td, unsigned spp )
+		:scene(sc),integrator(integ),sampler(samp),camera(cam),samplePerPixel(spp),rendertarget(rt),taskDone(td)
 	{
 		ori_x = 0;
 		ori_y = 0;
 		width = 0;
 		height = 0;
+		pixelSamples = 0;
+		taskId = 0;
+	}
+
+	// execute the task
+	void Execute();
+	
+	static void DestoryRenderTask( RenderTask& rt )
+	{
+		SAFE_DELETE_ARRAY(rt.pixelSamples);
 	}
 };
 
