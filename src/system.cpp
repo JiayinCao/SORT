@@ -68,12 +68,7 @@ void System::_preInit()
 	m_camera = 0;
 	m_uRenderingTime = 0;
 	m_uPreProcessingTime = 0;
-	m_uProgressCount = 64;
-	m_uCurrentPixelId = 0;
 	m_uPreProgress = 0xffffffff;
-
-	if( MultiThreadEnabled() )
-		_setupMultiThreads();
 }
 
 // post-uninit
@@ -87,8 +82,7 @@ void System::_postUninit()
 	SAFE_DELETE( m_camera );
 	SAFE_DELETE( m_pIntegrator );
 	SAFE_DELETE( m_pSampler );
-	for( int i = 0 ; i <THREAD_NUM ; ++i )
-	SAFE_DELETE_ARRAY( m_pSamples[i] );
+	SAFE_DELETE_ARRAY( m_taskDone );
 
 	// release managers
 	Creator::DeleteSingleton();
@@ -109,15 +103,13 @@ void System::Render()
 	// set timer before rendering
 	Timer::GetSingleton().StartTimer();
 
-	// reset pixel id
-	if( MultiThreadEnabled() )
-		_raytracing_multithread();
-	else
-		_raytracing();
+	// push rendering task
+	_pushRenderTask();
+	// execute rendering tasks
+	_executeRenderingTasks();
 	
 	// stop timer
-	Timer::GetSingleton().StopTimer();
-	m_uRenderingTime = Timer::GetSingleton().GetElapsedTime();
+	m_uRenderingTime = Timer::GetSingleton().StopTimer();
 }
 
 // output render target
@@ -159,8 +151,6 @@ void System::PreProcess()
 	m_Scene.PreProcess();
 
 	// preprocess integrator
-	for( int i = 0; i < THREAD_NUM ; ++i )
-		m_pIntegrator->RequestSample( m_pSampler , m_pSamples[i] , m_iSamplePerPixel );
 	m_pIntegrator->PreProcess();
 
 	// stop timer
@@ -175,16 +165,13 @@ void System::PreProcess()
 void System::_outputPreprocess()
 {
 	unsigned	core_num = NumSystemCores();
-	bool		multi_thread = MultiThreadEnabled();
 	cout<<"------------------------------------------------------------------------------"<<endl;
 	cout<<" SORT is short for Simple Open-source Ray Tracing."<<endl;
-	if( multi_thread )
-		cout<<"   Multi-thread is enabled"<<"("<<core_num<<" core"<<((core_num>1)?"s are":" is")<<" detected.)"<<endl;
-	else
-		cout<<"   Multi-thread is disabled."<<endl;
+	cout<<"   Multi-thread is enabled"<<"("<<core_num<<" core"<<((core_num>1)?"s are":" is")<<" detected.)"<<endl;
 	cout<<"   "<<m_iSamplePerPixel<<" sample"<<((m_iSamplePerPixel>1)?"s are":" is")<<" used per pixel."<<endl;
 	cout<<"   Scene file : "<<m_Scene.GetFileName()<<endl;
 	cout<<"   Time spent on preprocessing :"<<m_uPreProcessingTime<<" ms."<<endl;
+	cout<<"------------------------------------------------------------------------------"<<endl;
 }
 
 // get elapsed time
@@ -196,22 +183,14 @@ unsigned System::GetRenderingTime() const
 // output progress
 void System::_outputProgress()
 {
-	// output progress
-	unsigned progress = (unsigned)( (float)(m_uCurrentPixelId * m_uProgressCount) / (float)m_uTotalPixelCount );
+	// get the number of tasks done
+	unsigned taskDone = 0;
+	for( unsigned i = 0; i < m_totalTask; ++i )
+		taskDone += m_taskDone[i];
 
-	if( m_uPreProgress == 0xffffffff )
-	{
-		cout<<"Tracing <<";
-		for( unsigned i = 0 ; i < m_uProgressCount ; i++ )
-			cout<<" ";
-		cout<<" >> \rTracing <<";
-	}
-	if( m_uPreProgress != progress )
-	{
-		cout<<"-";
-		m_uPreProgress = progress;
-		cout.flush();
-	}
+	// output progress
+	unsigned progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
+	cout<< progress<<"%\r";
 }
 
 // output log information
@@ -242,136 +221,78 @@ void System::Uninit()
 	_uninit3rdParty();
 }
 
-// preprocess mutiple thread
-void System::_prepareMemoryForThread()
+// push rendering task
+void System::_pushRenderTask()
 {
-	int core_num = NumSystemCores();
-	for( int i = 0 ; i < core_num ; ++i )
-		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 16 , i );
-}
+	// Push render task into the queue
+	unsigned tilesize = 64;
+	unsigned taskid = 0;
+	
+	// get the number of total task
+	m_totalTask = 0;
+	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i += tilesize )
+		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j += tilesize )
+			++m_totalTask;
+	m_taskDone = new bool[m_totalTask];
+	memset( m_taskDone , 0 , m_totalTask * sizeof(bool) );
 
-// setup multiple threads environment
-void System::_setupMultiThreads()
-{
-	Sort_Assert( MultiThreadEnabled() == true );
-
-	// set thread number
-	SetThreadNum();
-
-	// prepare memory
-	_prepareMemoryForThread();
-}
-
-// do ray tracing
-void System::_raytracing()
-{
-	m_uCurrentPixelId = 0;
-	m_uPreProgress = 0xffffffff;
-	for( int i = m_rt->GetHeight() -1; i >= 0 ; --i )
-	{
-		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j++ )
-		{
-			// clear managed memory after each pixel
-			MemManager::GetSingleton().ClearMem();
-
-			// generate samples to be used later
-			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples[0] , m_iSamplePerPixel , m_Scene );
-
-			// the radiance
-			Spectrum radiance;
-			for( unsigned p = 0 ; p < m_camera->GetPassCount() ; ++p )
-			{
-				for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
-				{
-					// generate rays
-					Ray r = m_camera->GenerateRay( p , (float)j , (float)i , m_pSamples[0][k] );
-					// accumulate the radiance
-					radiance += m_pIntegrator->Li( r , m_pSamples[0][k] ) * m_camera->GetPassFilter(p);
-				}
-			}
-			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
-
-			// update current pixel
-			m_uCurrentPixelId++;
-		}
-		// output progress
-		_outputProgress();
-	}
-	cout<<endl;
-}
-
-// Render a tile
-void System::RenderTile( unsigned left , unsigned right , unsigned top , unsigned bottom , unsigned tid )
-{
-	for( int i = top ; i < bottom ; i++ )
-	{
-		for( unsigned j = left ; j < right ; j++ )
-		{
-			// clear managed memory after each pixel
-			MemManager::GetSingleton().ClearMem(tid);
-
-			// generate samples to be used later
-			m_pIntegrator->GenerateSample( m_pSampler , m_pSamples[tid] , m_iSamplePerPixel , m_Scene );
-
-			// the radiance
-			Spectrum radiance;
-			for( unsigned p = 0 ; p < m_camera->GetPassCount() ; ++p )
-			{
-				for( unsigned k = 0 ; k < m_iSamplePerPixel ; ++k )
-				{
-					// generate rays
-					Ray r = m_camera->GenerateRay( p , (float)j , (float)i , m_pSamples[tid][k] );
-					// accumulate the radiance
-					radiance += m_pIntegrator->Li( r , m_pSamples[tid][k] ) * m_camera->GetPassFilter(p);
-				}
-			}
-			m_rt->SetColor( j , i , radiance / (float)m_iSamplePerPixel );
-			
-			{	
-				EnterCriticalSection();
-				// update current pixel
-				m_uCurrentPixelId++;
-
-				LeaveCriticalSection();
-			}
-		}
-		{
-			EnterCriticalSection();
-			// output progress
-			_outputProgress();
-			
-			LeaveCriticalSection();
-		}
-	}
-}
-
-// do ray tracing in a multithread enviroment
-void System::_raytracing_multithread()
-{
-	InitCriticalSections();
-
-	int tilesize = 16;
-	RenderTask rt;
-	for( int i = 0 ; i < m_rt->GetHeight() ; i += tilesize )
+	RenderTask rt(m_Scene,m_pIntegrator,m_pSampler,m_camera,m_rt,m_taskDone,m_iSamplePerPixel);
+	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i += tilesize )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j += tilesize )
 		{
+			rt.taskId = taskid++;
 			rt.ori_x = j;
 			rt.ori_y = i;
 			rt.width = ( tilesize < ( m_rt->GetWidth() - j ))? tilesize : ( m_rt->GetWidth() - j );
 			rt.height = ( tilesize < ( m_rt->GetHeight() - i ))? tilesize : ( m_rt->GetHeight() - i );
 
+			// create new pixel samples
+			rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
+
+			// push the render task
 			PushRenderTask(rt);
 		}
 	}
+}
 
+// do ray tracing in a multithread enviroment
+void System::_executeRenderingTasks()
+{
+	InitCriticalSections();
+
+	// will be parameterized later
+	const int THREAD_NUM = 8;
+
+	// pre allocate memory for the specific thread
+	for( int i = 0 ; i < THREAD_NUM ; ++i )
+		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 16 , i );
 	ThreadUnit* threadUnits[THREAD_NUM];
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
+	{
+		// spawn new threads
 		threadUnits[i] = SpawnNewRenderThread(i);
-	for( int i = 0 ; i < THREAD_NUM ; ++i )
+		// start new thread
 		threadUnits[i]->BeginThread();
-	for( int i = 0 ; i < THREAD_NUM ; ++i )
-		threadUnits[i]->WaitForFinish();
+	}
+
+	// wait for all the threads to be finished
+	while( true )
+	{
+		bool allfinished = true;
+		for( int i = 0 ; i < THREAD_NUM ; ++i )
+		{
+			//threadUnits[i]->WaitForFinish();
+			if( !threadUnits[i]->IsFinished() )
+				allfinished = false;
+		}
+
+		// Output progress
+		_outputProgress();
+
+		if( allfinished )
+			break;
+	}
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 		delete threadUnits[i];
 
@@ -485,14 +406,10 @@ bool System::Setup( const char* str )
 		// create sampler
 		m_pSampler = CREATE_TYPE( str_type , Sampler );
 		m_iSamplePerPixel = m_pSampler->RoundSize(round);
-		for( int i = 0;i < THREAD_NUM ; ++i )
-			m_pSamples[i] = new PixelSample[m_iSamplePerPixel];
 	}else{
 		// user stratified sampler as default sampler
 		m_pSampler = new StratifiedSampler();
 		m_iSamplePerPixel = m_pSampler->RoundSize(16);
-		for( int i = 0;i < THREAD_NUM ; ++i )
-			m_pSamples[i] = new PixelSample[m_iSamplePerPixel];
 	}
 	
 	element = root->FirstChildElement("Camera");
@@ -520,9 +437,6 @@ bool System::Setup( const char* str )
 	
 	// setup render target
 	m_camera->SetRenderTarget(m_rt);
-	
-	// update total pixel count
-	m_uTotalPixelCount = m_rt->GetWidth() * m_rt->GetHeight();
-	
+
 	return true;
 }

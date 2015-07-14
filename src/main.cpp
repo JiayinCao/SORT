@@ -43,7 +43,7 @@ int main( int argc , char** argv )
 		g_System.Render();
 
 		// output rendering time
-		cout<<g_System.GetRenderingTime()<<endl;
+		cout<<g_System.GetRenderingTime()/1000.0f<<" second"<<endl;
 
 		// output log information
 		g_System.OutputLog();

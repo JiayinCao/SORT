@@ -100,7 +100,7 @@ bool operator < (const Name &x, const Name &y);
 inline Name &
 Name::operator = (const char text[])
 {
-    strncpy (_text, text, MAX_LENGTH);
+    strncpy_s (_text, text, MAX_LENGTH);
     return *this;
 }
 

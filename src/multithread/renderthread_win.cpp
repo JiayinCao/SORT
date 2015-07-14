@@ -43,6 +43,7 @@ CRITICAL_SECTION gCS;
 RenderThreadWin::RenderThreadWin(unsigned tid):m_tid(tid)
 {
 	m_WinThreadId = tid;
+	m_finished = false;
 }
 
 RenderThreadWin::~RenderThreadWin()
@@ -51,9 +52,6 @@ RenderThreadWin::~RenderThreadWin()
 
 void RenderThreadWin::BeginThread()
 {
-	// Create end event
-	m_endEvent = CreateEvent(NULL,FALSE,FALSE,NULL);
-
 	// Create the thread
 	m_threadHandle = (HANDLE)_beginthreadex(
 			nullptr,
@@ -78,31 +76,24 @@ void RenderThreadWin::RunThread()
 	while( true )
 	{
 		EnterCriticalSection(&gCS);
-
 		if( RenderTaskQueue::GetSingleton().IsEmpty() )
 		{
 			LeaveCriticalSection(&gCS);
 			break;
 		}
-
-		const RenderTask& task = RenderTaskQueue::GetSingleton().PopTask();
-		
+		// Get a new task from the task queue
+		RenderTask& task = RenderTaskQueue::GetSingleton().PopTask();
 		LeaveCriticalSection(&gCS);
 
-		unsigned right = task.ori_x + task.width;
-		unsigned bottom = task.ori_y + task.height;
+		// execute the task
+		task.Execute();
 
-		g_System.RenderTile( task.ori_x , right , task.ori_y , bottom , m_tid );
+		// Destroy the task
+		RenderTask::DestoryRenderTask( task );
 	}
 	
-	// signal end event
-	SetEvent(m_endEvent);
-}
-
-// wait thread for finish
-void RenderThreadWin::WaitForFinish()
-{
-	WaitForSingleObject(m_endEvent,INFINITE);
+	// the thread is finished
+	m_finished = true;
 }
 
 #endif

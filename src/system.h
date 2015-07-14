@@ -28,8 +28,6 @@ class RenderTarget;
 class Sampler;
 class PixelSample;
 
-#define	THREAD_NUM	8
-
 /////////////////////////////////////////////////////////////////////
 //	definition of the system
 class	System
@@ -70,9 +68,6 @@ public:
 	// set resource path
 	void SetResourcePath( const string& str ) { m_ResourcePath = str; }
 
-	// Render a tile
-	void RenderTile( unsigned left , unsigned right , unsigned top , unsigned bottom , unsigned tid);
-
 //private field:
 private:
 	// the render target for the system
@@ -80,6 +75,8 @@ private:
 	// the camera for the system
 	Camera*			m_camera;
 
+	unsigned		m_totalTask;
+	bool*			m_taskDone;
 	// the scene for rendering
 	Scene			m_Scene;
 	// the integrator for the renderer
@@ -88,8 +85,6 @@ private:
 	Sampler*		m_pSampler;
 	// sample number per pixel
 	unsigned		m_iSamplePerPixel;
-	// the samples
-	PixelSample*	m_pSamples[THREAD_NUM];
 	// output file name
 	string			m_strOutputFileName;
 
@@ -97,14 +92,8 @@ private:
 	unsigned		m_uRenderingTime;
 	// pre-processing time
 	unsigned		m_uPreProcessingTime;
-	// current rendering pixel id
-	unsigned		m_uCurrentPixelId;
-	// progress count
-	unsigned		m_uProgressCount;
 	// previous progress
 	unsigned		m_uPreProgress;
-	// total pixel number
-	unsigned		m_uTotalPixelCount;
 
 	// path for the resource
 	string			m_ResourcePath;
@@ -117,16 +106,12 @@ private:
 	void	_outputProgress();
 	// uninitialize 3rd party library
 	void	_uninit3rdParty();
-	// preprocess in mutiple threads environment
-	void	_prepareMemoryForThread();
-	// setup multiple threads environment
-	void	_setupMultiThreads();
-	// do ray tracing
-	void	_raytracing();
 	// do ray tracing in a multithread enviroment
-	void	_raytracing_multithread();
+	void	_executeRenderingTasks();
 	// output preprocessing information
 	void	_outputPreprocess();
+	// push rendering task
+	void	_pushRenderTask();
 };
 
 #endif

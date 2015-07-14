@@ -20,60 +20,27 @@
 #include "renderthread_win.h"
 #endif
 
-// whether multi thread is enabled
-// by default it's enabled
-static bool g_bMultiThreadEnabled = false;
-
 // critical section
 #if defined(SORT_IN_WINDOWS)
 CRITICAL_SECTION g_CS_for_counters;
 extern CRITICAL_SECTION gCS;
 #endif
 
-// enable or disable multi-thread
-bool	MultiThreadEnabled()
-{
-	return g_bMultiThreadEnabled;
-}
-void	SetMultiThreadEnabled( bool enabled )
-{
-	g_bMultiThreadEnabled = enabled;
-}
-
 // get the number of cpu cores in the system
 unsigned NumSystemCores()
 {
-	if( g_bMultiThreadEnabled )
-	{
-		#if defined(SORT_IN_WINDOWS)
-			SYSTEM_INFO sysinfo;
-			GetSystemInfo(&sysinfo);
-			return sysinfo.dwNumberOfProcessors;
-		#elif defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
-			return sysconf(_SC_NPROCESSORS_ONLN);
-		#endif
-	}
-	return 1;
-}
-
-// set the number of threads
-// thread number is the same as the number of cpu cores
-unsigned SetThreadNum()
-{
-	if( g_bMultiThreadEnabled )
-	{
-		unsigned cores = NumSystemCores();
-		//omp_set_num_threads( cores );
-		return cores;
-	}
-	return 1;
+	#if defined(SORT_IN_WINDOWS)
+		SYSTEM_INFO sysinfo;
+		GetSystemInfo(&sysinfo);
+		return sysinfo.dwNumberOfProcessors;
+	#elif defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
+		return sysconf(_SC_NPROCESSORS_ONLN);
+	#endif
 }
 
 // get the thread id
 unsigned ThreadId()
 {
-//	if( g_bMultiThreadEnabled )
-//		return omp_get_thread_num();
 #if defined(SORT_IN_WINDOWS)
 #include "renderthread_win.h"
 	return RenderThreadWin::m_WinThreadId;
@@ -98,27 +65,13 @@ void PushRenderTask( const RenderTask& renderTask )
 	RenderTaskQueue::GetSingleton().PushTask( renderTask );
 }
 
-// enter critical section
-void EnterCriticalSection()
-{
-	EnterCriticalSection(&g_CS_for_counters);
-}
-
-// leave critical section
-void LeaveCriticalSection()
-{
-	LeaveCriticalSection(&g_CS_for_counters);
-}
-
 // Init Critical Sections
 void InitCriticalSections()
 {
 	InitializeCriticalSection(&gCS);
-	InitializeCriticalSection(&g_CS_for_counters);
 }
 // Destroy Critical Sections
 void DestroyCriticalSections()
 {
 	DeleteCriticalSection(&gCS);
-	DeleteCriticalSection(&g_CS_for_counters);
 }

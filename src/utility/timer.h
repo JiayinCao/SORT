@@ -32,7 +32,7 @@ public:
 	// set the timer
 	void StartTimer();
 	// stop timer
-	void StopTimer();
+	unsigned StopTimer();
 
 	// get elapsed time
 	unsigned long GetElapsedTime() const;
