@@ -34,6 +34,9 @@ static unsigned int WINAPI RenderThread_Win_Run(LPVOID lpParameter)
 	// run the thread
 	renderThreadWin->RunThread();
 
+	// end the thread
+	renderThreadWin->EndThread();
+
 	return 0;
 }
 
@@ -64,7 +67,11 @@ void RenderThreadWin::BeginThread()
 
 void RenderThreadWin::EndThread()
 {
+	// delete the integrator
+	SAFE_DELETE(m_pIntegrator);
 
+	// the thread is finished
+	m_finished = true;
 }
 
 // Run the thread
@@ -86,14 +93,11 @@ void RenderThreadWin::RunThread()
 		LeaveCriticalSection(&gCS);
 
 		// execute the task
-		task.Execute();
+		task.Execute(m_pIntegrator);
 
 		// Destroy the task
 		RenderTask::DestoryRenderTask( task );
 	}
-	
-	// the thread is finished
-	m_finished = true;
 }
 
 #endif

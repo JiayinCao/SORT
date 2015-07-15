@@ -20,6 +20,8 @@
 
 #include "sort.h"
 
+class Integrator;
+
 class ThreadUnit
 {
 // public method
@@ -39,6 +41,10 @@ public:
 
 	// whether the thread is finished
 	virtual bool IsFinished() = 0;
+
+// the rendering data
+public:
+	Integrator*	m_pIntegrator;
 };
 
 #endif

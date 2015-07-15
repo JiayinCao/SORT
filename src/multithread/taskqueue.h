@@ -46,8 +46,6 @@ public:
 	PixelSample*	pixelSamples;
 	unsigned		samplePerPixel;
 
-	// the integrators
-	Integrator*		integrator;
 	// the sampler
 	Sampler*		sampler;
 	// the camera
@@ -58,8 +56,8 @@ public:
 	RenderTarget*	rendertarget;
 
 	// constructor
-	RenderTask( Scene& sc , Integrator* integ , Sampler* samp , Camera* cam , RenderTarget* rt , bool* td, unsigned spp )
-		:scene(sc),integrator(integ),sampler(samp),camera(cam),samplePerPixel(spp),rendertarget(rt),taskDone(td)
+	RenderTask( Scene& sc , Sampler* samp , Camera* cam , RenderTarget* rt , bool* td, unsigned spp )
+		:scene(sc),sampler(samp),camera(cam),samplePerPixel(spp),rendertarget(rt),taskDone(td)
 	{
 		ori_x = 0;
 		ori_y = 0;
@@ -70,7 +68,7 @@ public:
 	}
 
 	// execute the task
-	void Execute();
+	void Execute( Integrator* integrator );
 	
 	static void DestoryRenderTask( RenderTask& rt )
 	{

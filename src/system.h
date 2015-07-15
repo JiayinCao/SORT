@@ -77,10 +77,18 @@ private:
 
 	unsigned		m_totalTask;
 	bool*			m_taskDone;
+
+	// the integrator type
+	string			m_integratorType;
+	// integrator properties
+	struct Property
+	{
+		string _name;
+		string _property;
+	};
+	vector<Property>	m_integratorProperty;
 	// the scene for rendering
 	Scene			m_Scene;
-	// the integrator for the renderer
-	Integrator*		m_pIntegrator;
 	// the sampler
 	Sampler*		m_pSampler;
 	// sample number per pixel
@@ -112,6 +120,8 @@ private:
 	void	_outputPreprocess();
 	// push rendering task
 	void	_pushRenderTask();
+	// allocate integrator
+	Integrator*	_allocateIntegrator();
 };
 
 #endif
