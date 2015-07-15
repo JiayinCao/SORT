@@ -64,7 +64,6 @@ void System::_preInit()
 
 	// setup default value
 	m_rt = 0;
-	m_pIntegrator = 0;
 	m_camera = 0;
 	m_uRenderingTime = 0;
 	m_uPreProcessingTime = 0;
@@ -80,7 +79,6 @@ void System::_postUninit()
 	// delete the data
 	SAFE_DELETE( m_rt );
 	SAFE_DELETE( m_camera );
-	SAFE_DELETE( m_pIntegrator );
 	SAFE_DELETE( m_pSampler );
 	SAFE_DELETE_ARRAY( m_taskDone );
 
@@ -141,17 +139,9 @@ void System::PreProcess()
 		LOG_WARNING<<"There is no camera attached in the system , can't render anything."<<ENDL;
 		return;
 	}
-	if( m_pIntegrator == 0 )
-	{
-		LOG_WARNING<<"There is no integrator attached in the system, can't rendering anything."<<ENDL;
-		return;
-	}
 
 	// preprocess scene
 	m_Scene.PreProcess();
-
-	// preprocess integrator
-	m_pIntegrator->PreProcess();
 
 	// stop timer
 	Timer::GetSingleton().StopTimer();
@@ -199,10 +189,6 @@ void System::OutputLog() const
 	// output scene information first
 	m_Scene.OutputLog();
 
-	// output integrator information
-	if( m_pIntegrator )
-		m_pIntegrator->OutputLog();
-
 	// output time information
 	LOG_HEADER( "Rendering Information" );
 	LOG<<"Time spent on pre-processing  : "<<m_uPreProcessingTime<<ENDL;
@@ -236,7 +222,7 @@ void System::_pushRenderTask()
 	m_taskDone = new bool[m_totalTask];
 	memset( m_taskDone , 0 , m_totalTask * sizeof(bool) );
 
-	RenderTask rt(m_Scene,m_pIntegrator,m_pSampler,m_camera,m_rt,m_taskDone,m_iSamplePerPixel);
+	RenderTask rt(m_Scene,m_pSampler,m_camera,m_rt,m_taskDone,m_iSamplePerPixel);
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i += tilesize )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j += tilesize )
@@ -262,7 +248,7 @@ void System::_executeRenderingTasks()
 	InitCriticalSections();
 
 	// will be parameterized later
-	const int THREAD_NUM = 8;
+	const int THREAD_NUM = 1;
 
 	// pre allocate memory for the specific thread
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
@@ -272,6 +258,11 @@ void System::_executeRenderingTasks()
 	{
 		// spawn new threads
 		threadUnits[i] = SpawnNewRenderThread(i);
+		
+		// setup basic data
+		threadUnits[i]->m_pIntegrator = _allocateIntegrator();
+		threadUnits[i]->m_pIntegrator->PreProcess();
+
 		// start new thread
 		threadUnits[i]->BeginThread();
 	}
@@ -299,6 +290,27 @@ void System::_executeRenderingTasks()
 	DestroyCriticalSections();
 
 	cout<<endl;
+}
+
+// allocate integrator
+Integrator*	System::_allocateIntegrator()
+{
+	Integrator* integrator = CREATE_TYPE( m_integratorType , Integrator );
+		
+	if( integrator == 0 )
+	{
+		LOG_WARNING<<"No integrator with name of "<<m_integratorType<<"."<<ENDL;
+		return false;
+	}
+
+	vector<Property>::iterator it = m_integratorProperty.begin();
+	while( it != m_integratorProperty.end() )
+	{
+		integrator->SetProperty(it->_name,it->_property);
+		++it;
+	}
+
+	return integrator;
 }
 
 // setup system from file
@@ -335,14 +347,7 @@ bool System::Setup( const char* str )
 	element = root->FirstChildElement( "Integrator" );
 	if( element )
 	{
-		const char* str_type = element->Attribute( "type" );
-		m_pIntegrator = CREATE_TYPE( str_type , Integrator );
-		
-		if( m_pIntegrator == 0 )
-		{
-			LOG_WARNING<<"No integrator with name of "<<str_type<<"."<<ENDL;
-			return false;
-		}
+		m_integratorType = element->Attribute( "type" );
 
 		// set the properties
 		TiXmlElement* prop = element->FirstChildElement( "Property" );
@@ -350,8 +355,12 @@ bool System::Setup( const char* str )
 		{
 			const char* prop_name = prop->Attribute( "name" );
 			const char* prop_value = prop->Attribute( "value" );
-			if( prop_name != 0 && prop_value != 0 )
-				m_pIntegrator->SetProperty( prop_name , prop_value );
+
+			Property property;
+			property._name = prop_name;
+			property._property = prop_value;
+			m_integratorProperty.push_back( property );
+
 			prop = prop->NextSiblingElement( "Property" );
 		}
 	}else

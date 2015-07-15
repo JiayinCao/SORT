@@ -27,7 +27,7 @@
 DEFINE_SINGLETON(RenderTaskQueue);
 
 // execute the task
-void RenderTask::Execute()
+void RenderTask::Execute( Integrator* integrator )
 {
 	// request samples
 	integrator->RequestSample( sampler , pixelSamples , samplePerPixel );
@@ -49,6 +49,7 @@ void RenderTask::Execute()
 
 			// the radiance
 			Spectrum radiance;
+
 			for( unsigned p = 0 ; p < camera->GetPassCount() ; ++p )
 			{
 				for( unsigned k = 0 ; k < samplePerPixel ; ++k )
