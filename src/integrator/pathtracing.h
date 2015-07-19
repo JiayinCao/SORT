@@ -31,7 +31,7 @@ public:
 	// default constructor
 	PathTracing()
 	{
-		path_per_pixel = 3; // default maxium path is 3
+		path_per_pixel = 16; // default maxium path is 16
 		_registerAllProperty();	// register properties
 	}
 	// destructor

@@ -93,8 +93,6 @@ private:
 	Sampler*		m_pSampler;
 	// sample number per pixel
 	unsigned		m_iSamplePerPixel;
-	// output file name
-	string			m_strOutputFileName;
 
 	// rendering time
 	unsigned		m_uRenderingTime;

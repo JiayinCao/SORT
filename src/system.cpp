@@ -34,6 +34,7 @@
 #include "camera/camera.h"
 #include "integrator/integrator.h"
 #include "sampler/stratified.h"
+#include <time.h>
 
 // constructor
 System::System()
@@ -113,7 +114,7 @@ void System::Render()
 // output render target
 void System::OutputRT()
 {
-	m_rt->Output( m_strOutputFileName.c_str() );
+	m_rt->Output( Timer::GetDate() );
 }
 
 // load the scene
@@ -180,7 +181,7 @@ void System::_outputProgress()
 
 	// output progress
 	unsigned progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
-	cout<< progress<<"%\r";
+	cout<< progress<<"\r";
 }
 
 // output log information
@@ -248,7 +249,7 @@ void System::_executeRenderingTasks()
 	InitCriticalSections();
 
 	// will be parameterized later
-	const int THREAD_NUM = 1;
+	const int THREAD_NUM = 8;
 
 	// pre allocate memory for the specific thread
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
@@ -262,7 +263,9 @@ void System::_executeRenderingTasks()
 		// setup basic data
 		threadUnits[i]->m_pIntegrator = _allocateIntegrator();
 		threadUnits[i]->m_pIntegrator->PreProcess();
+	}
 
+	for( int i = 0 ; i < THREAD_NUM ; ++i ){
 		// start new thread
 		threadUnits[i]->BeginThread();
 	}
@@ -390,15 +393,6 @@ bool System::Setup( const char* str )
 	{
 		// use 1024x768 image as default
 		m_rt->SetSize(1024, 768);
-	}
-	
-	// get output file name
-	element = root->FirstChildElement( "OutputFile" );
-	if( element )
-	{
-		const char* str_name = element->Attribute("name");
-		if( str_name )
-			m_strOutputFileName = std::string( str_name );
 	}
 	
 	// get sampler

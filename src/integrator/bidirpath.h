@@ -36,6 +36,7 @@ struct BDPT_Vertex
 	Bsdf*		bsdf;	// bsdf from material
 	float		pdf;	// the pdf for the vertex
 	float		rr;		// the russion routtele
+	float		accu_pdf;	// accumulated pdf, russion routtele is also acounted here
 
 	Intersection	inter;	//temp
 
@@ -60,7 +61,7 @@ public:
 	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
 
 	// default constructor
-	BidirPathTracing(){}
+	BidirPathTracing(){ path_per_pixel = 8; }
 	// destructor
 	~BidirPathTracing(){}
 
@@ -98,17 +99,18 @@ private:
 	Spectrum	_evaluatePath(	const vector<BDPT_Vertex>& epath , int esize , 
 								const vector<BDPT_Vertex>& lpath , int lsize ) const;
 	// compute G term
-	float	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
+	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
 	// weight the path
 	float	_Weight(	const vector<BDPT_Vertex>& epath , int esize , 
 						const vector<BDPT_Vertex>& lpath , int lsize ,
-						const BDPT_Vertex& light_pos ) const;
+						const BDPT_Vertex& light_pos ,
+						const float* const total_pdf ,
+						const float* const total_pdf_uniform ) const;
 
-	// pdf of a specific path
-	float	_PathPDF(	const vector<BDPT_Vertex>& epath , int esize ,
-						const vector<BDPT_Vertex>& lpath , int lsize ,
-						const BDPT_Vertex& light_pos ) const;
+	// generate summeration of pdf
+	void	_GeneratePDFSummuration( const vector<BDPT_Vertex>& epath , const vector<BDPT_Vertex>& lpath , float* result ) const;
+	void	_GeneratePDFSummurationUniform( const vector<BDPT_Vertex>& epath , const vector<BDPT_Vertex>& lpath , float* result ) const;
 };
 
 #endif

@@ -218,3 +218,6 @@ pip-log.txt
 Release/
 Debug/
 _out/
+res/
+*.sort
+*.sort
