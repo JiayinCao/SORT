@@ -27,6 +27,8 @@
 #include <windows.h>
 #endif
 
+#include <time.h>
+
 DEFINE_SINGLETON(Timer);
 
 // get tick count
@@ -99,4 +101,21 @@ void Timer::ResetTimer()
 	m_bTimerSet = false;
 	m_elapsed = 0;
 	m_totalElapsed = 0;
+}
+
+// Get Current Date
+string Timer::GetDate()
+{
+	// Get Current date
+	time_t tt = time(NULL);
+	tm* t= localtime(&tt);
+	char time_str[1024];
+	sprintf(time_str, "%d_%02d_%02d-%02d_%02d_%02d.bmp", 
+		t->tm_year + 1900,
+		t->tm_mon + 1,
+		t->tm_mday,
+		t->tm_hour,
+		t->tm_min,
+		t->tm_sec);
+	return string(time_str);
 }

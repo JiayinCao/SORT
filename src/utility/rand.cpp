@@ -59,7 +59,7 @@ unsigned sort_rand()
 {
 	unsigned long y;
 	{
-		static unsigned long mag01[2]={0x0UL, MATRIX_A};
+		__declspec(thread) static unsigned long mag01[2]={0x0UL, MATRIX_A};
 		/* mag01[x] = x * MATRIX_A  for x=0,1 */
 
 		if( seed_setup == false )
