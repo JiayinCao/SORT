@@ -247,7 +247,7 @@ float BidirPathTracing::_Weight(const vector<BDPT_Vertex>& epath , int esize ,
 	float pdf = epath[esize-1].accu_pdf;
 	if( lsize > 0 )
 		pdf *= lpath[lsize-1].accu_pdf;
-	 1.0f / total_pdf_uniform[esize+lsize];
+	// 1.0f / total_pdf_uniform[esize+lsize];
 	//return _pdf;
 	return pdf / total_pdf[esize+lsize];
 }

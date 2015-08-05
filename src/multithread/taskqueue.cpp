@@ -17,11 +17,11 @@
 
 #include "taskqueue.h"
 #include "parallel.h"
-#include "managers\memmanager.h"
-#include "integrator\integrator.h"
-#include "sampler\sampler.h"
-#include "camera\camera.h"
-#include "texture\rendertarget.h"
+#include "managers/memmanager.h"
+#include "integrator/integrator.h"
+#include "sampler/sampler.h"
+#include "camera/camera.h"
+#include "texture/rendertarget.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(RenderTaskQueue);

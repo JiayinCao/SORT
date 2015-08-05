@@ -26,7 +26,6 @@
 		DD89339F15BAF0C200831B31 /* instancetri.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89320815BAF0C200831B31 /* instancetri.cpp */; };
 		DD8933A015BAF0C200831B31 /* intersection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89320A15BAF0C200831B31 /* intersection.cpp */; };
 		DD8933A115BAF0C200831B31 /* matrix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89320C15BAF0C200831B31 /* matrix.cpp */; };
-		DD8933A215BAF0C200831B31 /* point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89320E15BAF0C200831B31 /* point.cpp */; };
 		DD8933A315BAF0C200831B31 /* primitive.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89321015BAF0C200831B31 /* primitive.cpp */; };
 		DD8933A415BAF0C200831B31 /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89321215BAF0C200831B31 /* ray.cpp */; };
 		DD8933A515BAF0C200831B31 /* scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89321415BAF0C200831B31 /* scene.cpp */; };
@@ -35,7 +34,6 @@
 		DD8933A815BAF0C200831B31 /* transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89321C15BAF0C200831B31 /* transform.cpp */; };
 		DD8933A915BAF0C200831B31 /* triangle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89321E15BAF0C200831B31 /* triangle.cpp */; };
 		DD8933AA15BAF0C200831B31 /* trimesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89322015BAF0C200831B31 /* trimesh.cpp */; };
-		DD8933AB15BAF0C200831B31 /* vector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89322215BAF0C200831B31 /* vector.cpp */; };
 		DD8933AC15BAF0C200831B31 /* bidirpath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89322515BAF0C200831B31 /* bidirpath.cpp */; };
 		DD8933AD15BAF0C200831B31 /* direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89322715BAF0C200831B31 /* direct.cpp */; };
 		DD8933AE15BAF0C200831B31 /* integratormethod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89322A15BAF0C200831B31 /* integratormethod.cpp */; };
@@ -181,13 +179,16 @@
 		DD89343B15BAF0C300831B31 /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = DD89337615BAF0C200831B31 /* uncompr.c */; };
 		DD89343C15BAF0C300831B31 /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = DD89337915BAF0C200831B31 /* zutil.c */; };
 		DD89343D15BAF0C300831B31 /* creator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89337D15BAF0C200831B31 /* creator.cpp */; };
-		DD89343E15BAF0C300831B31 /* parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89338115BAF0C200831B31 /* parallel.cpp */; };
 		DD89343F15BAF0C300831B31 /* path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89338315BAF0C200831B31 /* path.cpp */; };
 		DD89344015BAF0C300831B31 /* rand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89338615BAF0C200831B31 /* rand.cpp */; };
 		DD89344115BAF0C300831B31 /* strhelper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89338C15BAF0C200831B31 /* strhelper.cpp */; };
 		DD89344215BAF0C300831B31 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89338E15BAF0C200831B31 /* timer.cpp */; };
 		DDABCB3816F5E30F00A9A16D /* microfacetdistribution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDABCB3716F5E30F00A9A16D /* microfacetdistribution.cpp */; };
 		DDABCB3A16F5E82500A9A16D /* microfacet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDABCB3916F5E82500A9A16D /* microfacet.cpp */; };
+		FBF339471B72298700020975 /* parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF339401B72298700020975 /* parallel.cpp */; };
+		FBF339481B72298700020975 /* renderthread_win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF339421B72298700020975 /* renderthread_win.cpp */; };
+		FBF339491B72298700020975 /* taskqueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF339441B72298700020975 /* taskqueue.cpp */; };
+		FBF3394C1B722ACB00020975 /* renderthread_mac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF3394A1B722ACB00020975 /* renderthread_mac.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -243,7 +244,6 @@
 		DD89320B15BAF0C200831B31 /* intersection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = intersection.h; sourceTree = "<group>"; };
 		DD89320C15BAF0C200831B31 /* matrix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = matrix.cpp; sourceTree = "<group>"; };
 		DD89320D15BAF0C200831B31 /* matrix.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = matrix.h; sourceTree = "<group>"; };
-		DD89320E15BAF0C200831B31 /* point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = point.cpp; sourceTree = "<group>"; };
 		DD89320F15BAF0C200831B31 /* point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = point.h; sourceTree = "<group>"; };
 		DD89321015BAF0C200831B31 /* primitive.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = primitive.cpp; sourceTree = "<group>"; };
 		DD89321115BAF0C200831B31 /* primitive.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = primitive.h; sourceTree = "<group>"; };
@@ -262,7 +262,6 @@
 		DD89321F15BAF0C200831B31 /* triangle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = triangle.h; sourceTree = "<group>"; };
 		DD89322015BAF0C200831B31 /* trimesh.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = trimesh.cpp; sourceTree = "<group>"; };
 		DD89322115BAF0C200831B31 /* trimesh.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = trimesh.h; sourceTree = "<group>"; };
-		DD89322215BAF0C200831B31 /* vector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vector.cpp; sourceTree = "<group>"; };
 		DD89322315BAF0C200831B31 /* vector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vector.h; sourceTree = "<group>"; };
 		DD89322515BAF0C200831B31 /* bidirpath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = bidirpath.cpp; sourceTree = "<group>"; };
 		DD89322615BAF0C200831B31 /* bidirpath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bidirpath.h; sourceTree = "<group>"; };
@@ -594,8 +593,6 @@
 		DD89337E15BAF0C200831B31 /* creator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = creator.h; sourceTree = "<group>"; };
 		DD89337F15BAF0C200831B31 /* define.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = define.h; sourceTree = "<group>"; };
 		DD89338015BAF0C200831B31 /* enum.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = enum.h; sourceTree = "<group>"; };
-		DD89338115BAF0C200831B31 /* parallel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = parallel.cpp; sourceTree = "<group>"; };
-		DD89338215BAF0C200831B31 /* parallel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = parallel.h; sourceTree = "<group>"; };
 		DD89338315BAF0C200831B31 /* path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = path.cpp; sourceTree = "<group>"; };
 		DD89338415BAF0C200831B31 /* path.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = path.h; sourceTree = "<group>"; };
 		DD89338515BAF0C200831B31 /* propertyset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = propertyset.h; sourceTree = "<group>"; };
@@ -614,6 +611,15 @@
 		DDABCB3616F5DDFB00A9A16D /* microfacetdistribution.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = microfacetdistribution.h; sourceTree = "<group>"; };
 		DDABCB3716F5E30F00A9A16D /* microfacetdistribution.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = microfacetdistribution.cpp; sourceTree = "<group>"; };
 		DDABCB3916F5E82500A9A16D /* microfacet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = microfacet.cpp; sourceTree = "<group>"; };
+		FBF339401B72298700020975 /* parallel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parallel.cpp; path = ../src/multithread/parallel.cpp; sourceTree = "<group>"; };
+		FBF339411B72298700020975 /* parallel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parallel.h; path = ../src/multithread/parallel.h; sourceTree = "<group>"; };
+		FBF339421B72298700020975 /* renderthread_win.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renderthread_win.cpp; path = ../src/multithread/renderthread_win.cpp; sourceTree = "<group>"; };
+		FBF339431B72298700020975 /* renderthread_win.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renderthread_win.h; path = ../src/multithread/renderthread_win.h; sourceTree = "<group>"; };
+		FBF339441B72298700020975 /* taskqueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = taskqueue.cpp; path = ../src/multithread/taskqueue.cpp; sourceTree = "<group>"; };
+		FBF339451B72298700020975 /* taskqueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = taskqueue.h; path = ../src/multithread/taskqueue.h; sourceTree = "<group>"; };
+		FBF339461B72298700020975 /* threadunit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = threadunit.h; path = ../src/multithread/threadunit.h; sourceTree = "<group>"; };
+		FBF3394A1B722ACB00020975 /* renderthread_mac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renderthread_mac.cpp; path = ../src/multithread/renderthread_mac.cpp; sourceTree = "<group>"; };
+		FBF3394B1B722ACB00020975 /* renderthread_mac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renderthread_mac.h; path = ../src/multithread/renderthread_mac.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -630,6 +636,7 @@
 		DD337AE615BABF73006F3828 = {
 			isa = PBXGroup;
 			children = (
+				FBF3393E1B72295A00020975 /* multithread */,
 				DD8931E415BAF0C200831B31 /* accel */,
 				DD8931ED15BAF0C200831B31 /* bsdf */,
 				DD8931FB15BAF0C200831B31 /* camera */,
@@ -729,7 +736,6 @@
 				DD89320B15BAF0C200831B31 /* intersection.h */,
 				DD89320C15BAF0C200831B31 /* matrix.cpp */,
 				DD89320D15BAF0C200831B31 /* matrix.h */,
-				DD89320E15BAF0C200831B31 /* point.cpp */,
 				DD89320F15BAF0C200831B31 /* point.h */,
 				DD89321015BAF0C200831B31 /* primitive.cpp */,
 				DD89321115BAF0C200831B31 /* primitive.h */,
@@ -744,7 +750,6 @@
 				DD89321F15BAF0C200831B31 /* triangle.h */,
 				DD89322015BAF0C200831B31 /* trimesh.cpp */,
 				DD89322115BAF0C200831B31 /* trimesh.h */,
-				DD89322215BAF0C200831B31 /* vector.cpp */,
 				DD89322315BAF0C200831B31 /* vector.h */,
 			);
 			name = geometry;
@@ -1222,8 +1227,6 @@
 				DD89337E15BAF0C200831B31 /* creator.h */,
 				DD89337F15BAF0C200831B31 /* define.h */,
 				DD89338015BAF0C200831B31 /* enum.h */,
-				DD89338115BAF0C200831B31 /* parallel.cpp */,
-				DD89338215BAF0C200831B31 /* parallel.h */,
 				DD89338315BAF0C200831B31 /* path.cpp */,
 				DD89338415BAF0C200831B31 /* path.h */,
 				DD89338515BAF0C200831B31 /* propertyset.h */,
@@ -1240,6 +1243,22 @@
 			);
 			name = utility;
 			path = ../src/utility;
+			sourceTree = "<group>";
+		};
+		FBF3393E1B72295A00020975 /* multithread */ = {
+			isa = PBXGroup;
+			children = (
+				FBF3394A1B722ACB00020975 /* renderthread_mac.cpp */,
+				FBF3394B1B722ACB00020975 /* renderthread_mac.h */,
+				FBF339401B72298700020975 /* parallel.cpp */,
+				FBF339411B72298700020975 /* parallel.h */,
+				FBF339421B72298700020975 /* renderthread_win.cpp */,
+				FBF339431B72298700020975 /* renderthread_win.h */,
+				FBF339441B72298700020975 /* taskqueue.cpp */,
+				FBF339451B72298700020975 /* taskqueue.h */,
+				FBF339461B72298700020975 /* threadunit.h */,
+			);
+			name = multithread;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1310,7 +1329,6 @@
 				DD89339F15BAF0C200831B31 /* instancetri.cpp in Sources */,
 				DD8933A015BAF0C200831B31 /* intersection.cpp in Sources */,
 				DD8933A115BAF0C200831B31 /* matrix.cpp in Sources */,
-				DD8933A215BAF0C200831B31 /* point.cpp in Sources */,
 				DD8933A315BAF0C200831B31 /* primitive.cpp in Sources */,
 				DD8933A415BAF0C200831B31 /* ray.cpp in Sources */,
 				DD8933A515BAF0C200831B31 /* scene.cpp in Sources */,
@@ -1319,7 +1337,6 @@
 				DD8933A815BAF0C200831B31 /* transform.cpp in Sources */,
 				DD8933A915BAF0C200831B31 /* triangle.cpp in Sources */,
 				DD8933AA15BAF0C200831B31 /* trimesh.cpp in Sources */,
-				DD8933AB15BAF0C200831B31 /* vector.cpp in Sources */,
 				DD8933AC15BAF0C200831B31 /* bidirpath.cpp in Sources */,
 				DD8933AD15BAF0C200831B31 /* direct.cpp in Sources */,
 				DD8933AE15BAF0C200831B31 /* integratormethod.cpp in Sources */,
@@ -1345,6 +1362,7 @@
 				DD8933C315BAF0C200831B31 /* merlmat.cpp in Sources */,
 				DD8933C415BAF0C200831B31 /* mirror.cpp in Sources */,
 				DD8933C515BAF0C200831B31 /* random.cpp in Sources */,
+				FBF339471B72298700020975 /* parallel.cpp in Sources */,
 				DD8933C615BAF0C200831B31 /* regular.cpp in Sources */,
 				DD8933C715BAF0C200831B31 /* sampler.cpp in Sources */,
 				DD8933C815BAF0C200831B31 /* stratified.cpp in Sources */,
@@ -1424,6 +1442,7 @@
 				DD89341215BAF0C200831B31 /* ImfRationalAttribute.cpp in Sources */,
 				DD89341315BAF0C200831B31 /* ImfRgbaFile.cpp in Sources */,
 				DD89341415BAF0C200831B31 /* ImfRgbaYca.cpp in Sources */,
+				FBF339491B72298700020975 /* taskqueue.cpp in Sources */,
 				DD89341515BAF0C200831B31 /* ImfRleCompressor.cpp in Sources */,
 				DD89341615BAF0C200831B31 /* ImfScanLineInputFile.cpp in Sources */,
 				DD89341715BAF0C200831B31 /* ImfStandardAttributes.cpp in Sources */,
@@ -1435,6 +1454,7 @@
 				DD89341D15BAF0C200831B31 /* ImfTileDescriptionAttribute.cpp in Sources */,
 				DD89341E15BAF0C300831B31 /* ImfTiledInputFile.cpp in Sources */,
 				DD89341F15BAF0C300831B31 /* ImfTiledMisc.cpp in Sources */,
+				FBF339481B72298700020975 /* renderthread_win.cpp in Sources */,
 				DD89342015BAF0C300831B31 /* ImfTiledOutputFile.cpp in Sources */,
 				DD89342115BAF0C300831B31 /* ImfTiledRgbaFile.cpp in Sources */,
 				DD89342215BAF0C300831B31 /* ImfTileOffsets.cpp in Sources */,
@@ -1459,13 +1479,13 @@
 				DD89343515BAF0C300831B31 /* gzwrite.c in Sources */,
 				DD89343615BAF0C300831B31 /* infback.c in Sources */,
 				DD89343715BAF0C300831B31 /* inffast.c in Sources */,
+				FBF3394C1B722ACB00020975 /* renderthread_mac.cpp in Sources */,
 				DD89343815BAF0C300831B31 /* inflate.c in Sources */,
 				DD89343915BAF0C300831B31 /* inftrees.c in Sources */,
 				DD89343A15BAF0C300831B31 /* trees.c in Sources */,
 				DD89343B15BAF0C300831B31 /* uncompr.c in Sources */,
 				DD89343C15BAF0C300831B31 /* zutil.c in Sources */,
 				DD89343D15BAF0C300831B31 /* creator.cpp in Sources */,
-				DD89343E15BAF0C300831B31 /* parallel.cpp in Sources */,
 				DD89343F15BAF0C300831B31 /* path.cpp in Sources */,
 				DD89344015BAF0C300831B31 /* rand.cpp in Sources */,
 				DD89344115BAF0C300831B31 /* strhelper.cpp in Sources */,
@@ -1539,6 +1559,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = "../src/**";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1549,6 +1570,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_VERSION = "";
 				HEADER_SEARCH_PATHS = "../src/**";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

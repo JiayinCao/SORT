@@ -181,7 +181,7 @@ void System::_outputProgress()
 
 	// output progress
 	unsigned progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
-	cout<< progress<<"\r";
+	cout<< progress<<"\rProgress: ";
 }
 
 // output log information
@@ -249,7 +249,7 @@ void System::_executeRenderingTasks()
 	InitCriticalSections();
 
 	// will be parameterized later
-	const int THREAD_NUM = 8;
+	const int THREAD_NUM = 1;
 
 	// pre allocate memory for the specific thread
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
@@ -303,7 +303,7 @@ Integrator*	System::_allocateIntegrator()
 	if( integrator == 0 )
 	{
 		LOG_WARNING<<"No integrator with name of "<<m_integratorType<<"."<<ENDL;
-		return false;
+		return 0;
 	}
 
 	vector<Property>::iterator it = m_integratorProperty.begin();
