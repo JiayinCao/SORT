@@ -18,6 +18,8 @@
 #ifndef	SORT_DEFINE
 #define	SORT_DEFINE
 
+#include "sort.h"
+
 #define	PI		3.1415926f
 #define	TWO_PI	6.2831852f
 #define	INV_PI	0.3183098f
@@ -26,6 +28,12 @@
 // some useful macro
 #define SAFE_DELETE(p) { if(p) { delete p; p = 0; } }
 #define SAFE_DELETE_ARRAY(p) { if(p) { delete[] p; p = 0 ; } }
+
+#if defined(SORT_IN_WINDOWS)
+#define Thread_Local __declspec(thread)
+#elif defined(SORT_IN_MAC)
+#define Thread_Local __thread
+#endif
 
 // math macros
 #define saturate(x) max(0.0f,min(1.0f,x))

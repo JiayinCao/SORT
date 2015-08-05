@@ -19,9 +19,9 @@
 #define SORT_TASKQUEUE
 
 #include <list>
-#include "utility\singleton.h"
-#include "utility\define.h"
-#include "sampler\sample.h"
+#include "utility/singleton.h"
+#include "utility/define.h"
+#include "sampler/sample.h"
 
 class Integrator;
 class Scene;

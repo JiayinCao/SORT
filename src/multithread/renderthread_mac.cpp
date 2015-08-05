@@ -15,57 +15,50 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifdef SORT_IN_WINDOWS
+#include "renderthread_mac.h"
 
-#include "renderthread_win.h"
-#include <process.h>
+#if defined(SORT_IN_MAC)
+
 #include "taskqueue.h"
 #include "managers/memmanager.h"
 #include "system.h"
 
 extern System g_System;
 
-__declspec(thread) int RenderThreadWin::m_WinThreadId = 0;
+Thread_Local int g_MacThreadId = 0;
 
-static unsigned int WINAPI RenderThread_Win_Run(LPVOID lpParameter)
+pthread_key_t RenderThreadMac::m_threadKey;
+pthread_once_t RenderThreadMac::m_threadKeyInit;
+
+static void* RenderThread_Mac_Run(void* lpParameter)
 {
-	RenderThreadWin* renderThreadWin = (RenderThreadWin*) lpParameter;
+	RenderThreadMac* renderThreadMac = (RenderThreadMac*) lpParameter;
 
 	// run the thread
-	renderThreadWin->RunThread();
+	renderThreadMac->RunThread();
 
 	// end the thread
-	renderThreadWin->EndThread();
+	renderThreadMac->EndThread();
 
 	return 0;
 }
 
-// critical section
-CRITICAL_SECTION gCS;
-
-RenderThreadWin::RenderThreadWin(unsigned tid):m_tid(tid)
+RenderThreadMac::RenderThreadMac(unsigned tid)
 {
-	m_WinThreadId = tid;
+	g_MacThreadId = tid;
 	m_finished = false;
 }
 
-RenderThreadWin::~RenderThreadWin()
+RenderThreadMac::RenderThreadMac()
 {
 }
 
-void RenderThreadWin::BeginThread()
+void RenderThreadMac::BeginThread()
 {
-	// Create the thread
-	m_threadHandle = (HANDLE)_beginthreadex(
-			nullptr,
-			0,
-			RenderThread_Win_Run,
-			(void*)this,
-			0,
-			nullptr);
+    pthread_create( &m_thread, 0 , RenderThread_Mac_Run, this );
 }
 
-void RenderThreadWin::EndThread()
+void RenderThreadMac::EndThread()
 {
 	// delete the integrator
 	SAFE_DELETE(m_pIntegrator);
@@ -75,22 +68,19 @@ void RenderThreadWin::EndThread()
 }
 
 // Run the thread
-void RenderThreadWin::RunThread()
+void RenderThreadMac::RunThread()
 {
-	// setup thread id first
-	m_WinThreadId = m_tid;
-
 	while( true )
 	{
-		EnterCriticalSection(&gCS);
+		//EnterCriticalSection(&gCS);
 		if( RenderTaskQueue::GetSingleton().IsEmpty() )
 		{
-			LeaveCriticalSection(&gCS);
+		//	LeaveCriticalSection(&gCS);
 			break;
 		}
 		// Get a new task from the task queue
-		RenderTask& task = RenderTaskQueue::GetSingleton().PopTask();
-		LeaveCriticalSection(&gCS);
+		RenderTask task = RenderTaskQueue::GetSingleton().PopTask();
+		//LeaveCriticalSection(&gCS);
 
 		// execute the task
 		task.Execute(m_pIntegrator);

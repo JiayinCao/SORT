@@ -2,7 +2,7 @@ BIN_PATH = ../bin
 OBJ_PATH = $(BIN_PATH)/obj
 INC_PATH = -I. -I./thirdparty/ilmbase-1.0.2/ -I./thirdparty/openexr-1.7.0/ -I./thirdparty/zlib-1.2.5/
 
-COMPILE_FLAG = $(INC_PATH) -g -fopenmp
+COMPILE_FLAG = $(INC_PATH) -g
 
 LIBSRCS = $(wildcard *.cpp)
 LIBSRCS += $(wildcard geometry/*.cpp)
@@ -21,6 +21,7 @@ LIBSRCS += $(wildcard bsdf/*.cpp)
 LIBSRCS += $(wildcard sampler/*.cpp)
 LIBSRCS += $(wildcard shape/*.cpp)
 LIBSRCS += $(wildcard material/*.cpp)
+LIBSRCS += $(wildcard multithread/*.cpp)
 LIBSRCS += $(wildcard thirdparty/tinyxml/*.cpp)
 LIBSRCS += $(wildcard thirdparty/ilmbase-1.0.2/*.cpp)
 LIBSRCS += $(wildcard thirdparty/openexr-1.7.0/*.cpp)
@@ -114,6 +115,10 @@ $(OBJ_PATH)/material_%.o : material/%.cpp material/%.h utility/propertyset.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 	
+$(OBJ_PATH)/multithread_%.o : multithread/%.cpp multithread/%.h multithread/threadunit.h
+	@echo "building object $@"
+	@g++ $(COMPILE_FLAG) -c $< -o $@
+
 $(OBJ_PATH)/thirdparty_tinyxml_%.o : thirdparty/tinyxml/%.cpp
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@

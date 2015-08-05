@@ -17,6 +17,7 @@
 
 #include "rand.h"
 #include "sort.h"
+#include "utility/define.h"
 
 #if defined(SORT_IN_LINUX) 
 #elif defined(SORT_IN_WINDOWS)
@@ -31,9 +32,9 @@
 
 // variables used for random number generation
 static const int N = 624;
-__declspec(thread) static unsigned long mt[N]; /* the array for the state vector  */
-__declspec(thread) static int mti;
-__declspec(thread) static bool seed_setup = false;
+static Thread_Local unsigned long mt[N]; /* the array for the state vector  */
+static Thread_Local int mti;
+static Thread_Local bool seed_setup = false;
 
 // set the seed
 void sort_seed()
@@ -59,7 +60,7 @@ unsigned sort_rand()
 {
 	unsigned long y;
 	{
-		__declspec(thread) static unsigned long mag01[2]={0x0UL, MATRIX_A};
+		static Thread_Local unsigned long mag01[2]={0x0UL, MATRIX_A};
 		/* mag01[x] = x * MATRIX_A  for x=0,1 */
 
 		if( seed_setup == false )

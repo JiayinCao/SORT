@@ -162,13 +162,13 @@ public:
 
 
 	// [] operator
-	float Point::operator [] ( unsigned id ) const
+	float operator [] ( unsigned id ) const
 	{
 		return data[id];
 	}
 
 	// [] operator
-	float& Point::operator[]( unsigned id )
+	float& operator[]( unsigned id )
 	{
 		return data[id];
 	}
