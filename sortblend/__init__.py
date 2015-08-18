@@ -1,14 +1,35 @@
 import bpy
+from bpy.types import AddonPreferences
+from bpy.props import StringProperty, IntProperty, BoolProperty
+
+import platform
+import os
+import subprocess
+from subprocess import Popen, PIPE
 
 bl_info = {
     "name": "SORT",
     "description": "An open-source ray tracer project",
     "author": "Jiayin Cao(Jerry)",
-    "version": (1, 0),
+    "version": (0, 0, 1),
     "blender": (2, 75, 0),
     "location": "Info > RenderEngine",
     "warning": "Still under development", # used for warning icon and text in addons panel
     "category": "Render"}
+
+class SORTAddonPreferences(AddonPreferences):
+    # this must match the addon name
+    bl_idname = __name__
+    install_path = StringProperty(
+            name="Path to SORT binary",
+            description='Path to SORT binary',
+            subtype='DIR_PATH',
+            default="",
+            )
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "install_path")
 
 class SORT_RENDERER(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
@@ -36,7 +57,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
         # The framebuffer is defined as a list of pixels, each pixel
         # itself being a list of R,G,B,A values
-        green_rect = [[0.0, 1.0, 0.0, 1.0]] * pixel_count
+        green_rect = [[1.0, 1.0, 1.0, 1.0]] * pixel_count
 
         # Here we write the pixel values to the RenderResult
         result = self.begin_result(0, 0, self.size_x, self.size_y)
@@ -50,25 +71,48 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
         # The framebuffer is defined as a list of pixels, each pixel
         # itself being a list of R,G,B,A values
-        blue_rect = [[0.0, 0.0, 1.0, 1.0]] * pixel_count
+        blue_rect = [[1.0, 1.0, 1.0, 1.0]] * pixel_count
 
         # Here we write the pixel values to the RenderResult
         result = self.begin_result(0, 0, self.size_x, self.size_y)
+
+        #print(platform.system())
+        #environ = os.environ.copy()
+        #exepath = 'E:\\apitest\\apitest\\bin\\apitest_d.exe'
+        #print(exepath)
+        #subprocess.Popen([exepath], env=environ, shell=True)
+
         layer = result.layers[0]
-        layer.rect = blue_rect
+        #layer.rect = blue_rect somehow, it crashes at this line of code
+
+        print("render is done")
+        print(__name__)
         self.end_result(result)
 
 def register():
-	# Register the RenderEngine
-	bpy.utils.register_class(SORT_RENDERER)
+    # register path setting
+    #from . import next
+    #next.register()
+    bpy.utils.register_class(SORTAddonPreferences)
+    #preference.register()
+    print("SORT is enabled in Blender.")
 
-	from bl_ui import properties_render
-	properties_render.RENDER_PT_render.COMPAT_ENGINES.add('sort_renderer')
-	del properties_render
+    # Register the RenderEngine
+    bpy.utils.register_class(SORT_RENDERER)
+    
+    from bl_ui import properties_render
+    properties_render.RENDER_PT_render.COMPAT_ENGINES.add('sort_renderer')
+    del properties_render
 
-	from bl_ui import properties_material
-	properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add('sort_renderer')
-	del properties_material
+    from bl_ui import properties_material
+    properties_material.MATERIAL_PT_preview.COMPAT_ENGINES.add('sort_renderer')
+    del properties_material
 
 def unregister():
-	print("sort_destroy")
+    #unregister path setting
+    #from . import preferences
+    #preference.unregister()
+    bpy.utils.unregister_class(SORTAddonPreferences)
+    #unregister RenderEngine
+    bpy.utils.unregister_class(SORT_RENDERER)
+    print("SORT is disabled in Blender.")
