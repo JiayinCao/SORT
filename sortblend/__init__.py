@@ -1,5 +1,6 @@
 import bpy
 import os
+import platform
 from . import preference
 
 bl_info = {
@@ -37,7 +38,11 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # check if the path for SORT is set correctly
         self.sort_available = True
         sort_bin_dir = preference.get_sort_path()
-        sort_bin_path = sort_bin_dir + "sort.exe"
+        if platform.system() == 'Darwin':
+            sort_bin_path = sort_bin_dir + "sort"
+        elif platform.system() == 'Windows':
+            sort_bin_path = sort_bin_dir + "sort.exe"
+        print(sort_bin_path)
         try:
             if sort_bin_dir is None:
                 raise Exception("Set the path where binary for SORT is located before rendering anything.")
