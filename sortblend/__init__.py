@@ -1,4 +1,6 @@
 import bpy
+import os
+from . import preference
 
 bl_info = {
     "name": "SORT",
@@ -17,6 +19,9 @@ class SORT_RENDERER(bpy.types.RenderEngine):
     bl_label = 'SORT'
     bl_use_preview = True
 
+    # whether SORT path is set correctly
+    sort_available = True
+
     def __init__(self):
         self.render_pass = None
 
@@ -27,13 +32,34 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
     # update frame
     def update(self, data, scene):
-        print("update")
+        print("starting update")
+
+        # check if the path for SORT is set correctly
+        self.sort_available = True
+        sort_bin_dir = preference.get_sort_path()
+        sort_bin_path = sort_bin_dir + "sort.exe"
+        try:
+            if sort_bin_dir is None:
+                raise Exception("Set the path where binary for SORT is located before rendering anything.")
+            elif not os.path.exists(sort_bin_path):
+                raise Exception("SORT not found here: %s"%sort_bin_dir)
+        except Exception as exc:
+            self.sort_available = False
+            self.report({'ERROR'},'%s' % exc)
+
+        if not self.sort_available:
+            return
 
         from . import exporter
         exporter.export_scene(scene);
 
     # render
     def render(self, scene):
+        if not self.sort_available:
+            return
+
+        print("starting render")
+
         if scene.name == 'preview':
             self.render_preview(scene)
         else:
@@ -54,12 +80,10 @@ def register():
     bpy.utils.register_class(SORT_RENDERER)
 
     # Register preference
-    from . import preference
     preference.register()
 
 def unregister():
     # Unregister preference
-    from . import preference
     preference.unregister()
 
     # Unregister RenderEngine
