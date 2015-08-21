@@ -36,14 +36,16 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         print("starting update")
 
         # check if the path for SORT is set correctly
-        self.sort_available = True
-        sort_bin_dir = preference.get_sort_path()
-        if platform.system() == 'Darwin':
-            sort_bin_path = sort_bin_dir + "sort"
-        elif platform.system() == 'Windows':
-            sort_bin_path = sort_bin_dir + "sort.exe"
-        print(sort_bin_path)
         try:
+            self.sort_available = True
+            sort_bin_dir = preference.get_sort_path()
+            if platform.system() == 'Darwin':   # for Mac OS
+                sort_bin_path = sort_bin_dir + "sort"
+            elif platform.system() == 'Windows':    # for Windows
+                sort_bin_path = sort_bin_dir + "sort.exe"
+            else:
+                raise Exception("SORT is only supported on Windows, Ubuntu and Mac OS")
+
             if sort_bin_dir is None:
                 raise Exception("Set the path where binary for SORT is located before rendering anything.")
             elif not os.path.exists(sort_bin_path):
@@ -56,7 +58,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
             return
 
         from . import exporter
-        exporter.export_scene(scene);
+        exporter.export_blender(scene);
 
     # render
     def render(self, scene):

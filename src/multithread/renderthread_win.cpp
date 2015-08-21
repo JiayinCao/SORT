@@ -15,9 +15,9 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifdef SORT_IN_WINDOWS
-
 #include "renderthread_win.h"
+
+#ifdef SORT_IN_WINDOWS
 #include <process.h>
 #include "taskqueue.h"
 #include "managers/memmanager.h"
