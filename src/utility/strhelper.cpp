@@ -145,6 +145,15 @@ Transform TransformFromStr( const string& s )
 		}
 
 		return Scale( s0 , s1 , s2 );
+	}else if( t[0] == 'm' )
+	{
+		Matrix m;
+		for( int i = 0 ; i < 16; ++i )
+		{
+			t = NextToken( str , ' ' );
+			m.m[i] = (float)atof( t.c_str() );
+		}
+		return FromMatrix(m);
 	}
 
 	return Transform();

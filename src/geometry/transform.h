@@ -72,6 +72,15 @@ public:
 	Matrix	invMatrix;
 };
 
+// from matrix
+inline Transform FromMatrix( const Matrix& m )
+{
+	// get inverse matrix
+	Matrix invm;
+	m.Inverse(invm);
+	return Transform( m , invm );
+}
+
 // translate
 inline Transform Translate( const Vector& v )
 {
