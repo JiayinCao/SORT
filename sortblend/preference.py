@@ -32,6 +32,14 @@ def get_sort_bin_path():
         raise Exception("SORT is only supported on Windows, Ubuntu and Mac OS")
     return sort_bin_path
 
+def get_immediate_dir():
+    sort_bin_dir = get_sort_dir()
+    immediate_dir = sort_bin_dir + 'blender_intermediate/'
+    return immediate_dir
+
+def get_immediate_res_dir():
+    return get_immediate_dir() + 'res/'
+
 def register():
     bpy.utils.register_class(SORTAddonPreferences)
 

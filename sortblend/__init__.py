@@ -67,7 +67,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         if not self.sort_available:
             return
 
-        from . import exporter
+        # export the scene
         exporter.export_blender(scene);
 
     # render
@@ -102,16 +102,14 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         subprocess.Popen.wait(process)
 
         # load the result from file
-        xres = bpy.data.scenes["Scene"].render.resolution_x
-        yres = bpy.data.scenes["Scene"].render.resolution_y
+        xres = bpy.data.scenes["Scene"].render.resolution_x * bpy.data.scenes["Scene"].render.resolution_percentage / 100
+        yres = bpy.data.scenes["Scene"].render.resolution_y * bpy.data.scenes["Scene"].render.resolution_percentage / 100
         result = self.begin_result(0, 0, xres, yres)
         lay = result.layers[0]
-        lay.load_from_file(exporter.get_immediate_dir() + 'blender_generated.bmp')
+        lay.load_from_file(preference.get_immediate_dir() + 'blender_generated.bmp')
         self.end_result(result)
 
 def register():
-    print("SORT is enabled in Blender.")
-
     # Register the RenderEngine
     bpy.utils.register_class(SORT_RENDERER)
 
@@ -121,8 +119,5 @@ def register():
 def unregister():
     # Unregister preference
     preference.unregister()
-
     # Unregister RenderEngine
     bpy.utils.unregister_class(SORT_RENDERER)
-
-    print("SORT is disabled in Blender.")
