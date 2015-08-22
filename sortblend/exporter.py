@@ -99,31 +99,70 @@ def export_scene(scene):
             matrix = ob.matrix_world;
             ET.SubElement( transform_node , 'Matrix' , value = 'm %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f '%matrix_to_array(matrix) )
             # output the mesh to file
-            export_mesh(ob)
+            export_mesh(ob,scene)
         elif ob.type == 'LAMP':
             light_node = ET.SubElement( root , 'Light' , type='distant')    # to be exposed through GUI
             ET.SubElement( light_node , 'Property' , name='intensity' , value="10 10 10")
-            ET.SubElement( light_node , 'Property' , name='dir' , value="-1 -1 -1")
+            ET.SubElement( light_node , 'Property' , name='dir' , value="-1 -2 -3")
 
     # output the xml
     output_scene_file = preference.get_immediate_dir() + 'blender.xml'
     tree = ET.ElementTree(root)
     tree.write(output_scene_file)
 
+def veckey3d(v):
+    return round(v.x, 4), round(v.y, 4), round(v.z, 4)
+
 # export mesh file
-def export_mesh(obj):
+def export_mesh(obj,scene):
     output_path = preference.get_immediate_res_dir() + obj.name + '.obj'
+
+    # the mesh object
     mesh = obj.data
-    with open(output_path, 'w') as f:
-        f.write("# OBJ file\n")
-        f.write("g cube\n")
+
+    # face index pairs
+    face_index_pairs = [(face, index) for index, face in enumerate(mesh.polygons)]
+
+    # generate normal data
+    mesh.calc_normals_split()
+    with open(output_path, 'w') as file:
+        file.write("# OBJ file\n")
+        file.write("g cube\n")
+        # output vertices
         for v in mesh.vertices:
-            f.write("v %.4f %.4f %.4f\n" % v.co[:])
-        for p in mesh.polygons:
-            f.write("f")
-            for i in p.vertices:
-                f.write(" %d" % (i + 1))
-            f.write("\n")
+            file.write("v %.4f %.4f %.4f\n" % v.co[:])
+
+        # output normal
+        no_key = no_val = None
+        normals_to_idx = {}
+        no_get = normals_to_idx.get
+        no_unique_count = 0
+        loops_to_normals = [0] * len(mesh.loops)
+        for f, f_index in face_index_pairs:
+            print( f,f_index )
+            for l_idx in f.loop_indices:
+                #print( l_idx )
+                no_key = veckey3d(mesh.loops[l_idx].normal)
+                #print(no_key)
+                no_val = no_get(no_key)
+                if no_val is None:
+                    no_val = normals_to_idx[no_key] = no_unique_count
+                    file.write('vn %.6f %.6f %.6f\n' % no_key)
+                    no_unique_count += 1
+                loops_to_normals[l_idx] = no_val
+        del normals_to_idx, no_get, no_key, no_val
+
+       # print(loops_to_normals)
+
+        me_verts = mesh.vertices
+
+        for f, f_index in face_index_pairs:
+            f_v = [(vi, me_verts[v_idx], l_idx)
+                       for vi, (v_idx, l_idx) in enumerate(zip(f.vertices, f.loop_indices))]
+            file.write("f")
+            for vi, v, li in f_v:
+                file.write(" %d//%d" % (v.index+1, loops_to_normals[li]+1))
+            file.write("\n")
 
 # whether the object is hidden
 def is_visible_layer(scene, ob):
