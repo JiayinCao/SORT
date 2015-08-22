@@ -4,7 +4,6 @@ import platform
 import subprocess
 import bl_ui
 from . import preference
-from . import display
 from . import exporter
 
 bl_info = {
@@ -92,12 +91,13 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         print("render_scene")
 
         # start rendering process first
+        binary_dir = preference.get_sort_dir()
         binary_path = preference.get_sort_bin_path()
 
         # execute binary
         self.cmd_argument = [binary_path];
         self.cmd_argument.append('./blender_intermediate/blender_exported.xml')
-        process = subprocess.Popen(self.cmd_argument)
+        process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
         # wait for the process to finish
         subprocess.Popen.wait(process)
 
