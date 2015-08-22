@@ -3,6 +3,7 @@ import os
 import shutil
 from . import preference
 import xml.etree.cElementTree as ET
+from io_scene_obj import export_obj
 
 # export blender information
 def export_blender(scene):
@@ -16,8 +17,8 @@ def export_blender(scene):
 # clear old data and create new path
 def create_path(scene):
     # get immediate directory
-    output_dir = get_immediate_dir()
-    output_res_dir = get_immediate_res_dir();
+    output_dir = preference.get_immediate_dir()
+    output_res_dir = preference.get_immediate_res_dir();
     # clear the old directory
     shutil.rmtree(output_dir, ignore_errors=True)
     # create one if there is no such directory
@@ -47,8 +48,8 @@ def export_sort_file(scene):
     # the integrator node
     ET.SubElement(root, 'Integrator', type='whitted')
     # image size
-    xres = bpy.data.scenes["Scene"].render.resolution_x
-    yres = bpy.data.scenes["Scene"].render.resolution_y
+    xres = bpy.data.scenes["Scene"].render.resolution_x * bpy.data.scenes["Scene"].render.resolution_percentage / 100
+    yres = bpy.data.scenes["Scene"].render.resolution_y * bpy.data.scenes["Scene"].render.resolution_percentage / 100
     ET.SubElement(root, 'RenderTargetSize', w='%d'%xres, h='%d'%yres )
     # output file name
     ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.bmp')
@@ -69,7 +70,7 @@ def export_sort_file(scene):
     ET.SubElement( camera_node , "Property" , name="width" , value="0")
     ET.SubElement( camera_node , "Property" , name="height" , value="0")
     # output the xml
-    output_sort_file = get_immediate_dir() + 'blender_exported.xml'
+    output_sort_file = preference.get_immediate_dir() + 'blender_exported.xml'
     tree = ET.ElementTree(root)
     tree.write(output_sort_file)
 
@@ -105,13 +106,13 @@ def export_scene(scene):
             ET.SubElement( light_node , 'Property' , name='dir' , value="-1 -1 -1")
 
     # output the xml
-    output_scene_file = get_immediate_dir() + 'blender.xml'
+    output_scene_file = preference.get_immediate_dir() + 'blender.xml'
     tree = ET.ElementTree(root)
     tree.write(output_scene_file)
 
 # export mesh file
 def export_mesh(obj):
-    output_path = get_immediate_res_dir() + obj.name + '.obj'
+    output_path = preference.get_immediate_res_dir() + obj.name + '.obj'
     mesh = obj.data
     with open(output_path, 'w') as f:
         f.write("# OBJ file\n")
@@ -138,11 +139,3 @@ def is_renderable(scene, ob):
 # list all objects in the scene
 def renderable_objects(scene):
     return [ob for ob in scene.objects if is_renderable(scene, ob)]
-
-def get_immediate_dir():
-    sort_bin_dir = preference.get_sort_dir()
-    immediate_dir = sort_bin_dir + 'blender_intermediate/'
-    return immediate_dir
-
-def get_immediate_res_dir():
-    return get_immediate_dir() + 'res/'
