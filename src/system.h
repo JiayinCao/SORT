@@ -103,6 +103,7 @@ private:
 
 	// path for the resource
 	string			m_ResourcePath;
+	string			m_OutputFileName;
 
 	// pre-Initialize
 	void	_preInit();

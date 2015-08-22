@@ -1,7 +1,11 @@
 import bpy
 import os
 import platform
+import subprocess
+import bl_ui
 from . import preference
+from . import display
+from . import exporter
 
 bl_info = {
     "name": "SORT",
@@ -13,6 +17,15 @@ bl_info = {
     "warning": "Still under development", # used for warning icon and text in addons panel
     "category": "Render"}
 
+def _register_elm(elm, required=False):
+    try:
+        elm.COMPAT_ENGINES.add(__name__)
+    except:
+        if required:
+            MtsLog('Failed to add SORT to ' + elm.__name__)
+
+_register_elm(bl_ui.properties_render.RENDER_PT_dimensions, required=True)
+
 class SORT_RENDERER(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
     # RenderEngine; define its internal name, visible name and capabilities.
@@ -22,6 +35,10 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
     # whether SORT path is set correctly
     sort_available = True
+    # command argument
+    cmd_argument = []
+    # thread
+    fb_thread = None
 
     def __init__(self):
         self.render_pass = None
@@ -38,18 +55,12 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # check if the path for SORT is set correctly
         try:
             self.sort_available = True
-            sort_bin_dir = preference.get_sort_path()
-            if platform.system() == 'Darwin':   # for Mac OS
-                sort_bin_path = sort_bin_dir + "sort"
-            elif platform.system() == 'Windows':    # for Windows
-                sort_bin_path = sort_bin_dir + "sort.exe"
-            else:
-                raise Exception("SORT is only supported on Windows, Ubuntu and Mac OS")
-
-            if sort_bin_dir is None:
+            sort_bin_path = preference.get_sort_bin_path()
+            print(sort_bin_path)
+            if sort_bin_path is None:
                 raise Exception("Set the path where binary for SORT is located before rendering anything.")
             elif not os.path.exists(sort_bin_path):
-                raise Exception("SORT not found here: %s"%sort_bin_dir)
+                raise Exception("SORT not found here: %s"%sort_bin_path)
         except Exception as exc:
             self.sort_available = False
             self.report({'ERROR'},'%s' % exc)
@@ -79,6 +90,24 @@ class SORT_RENDERER(bpy.types.RenderEngine):
     # scene render
     def render_scene(self, scene):
         print("render_scene")
+
+        # start rendering process first
+        binary_path = preference.get_sort_bin_path()
+
+        # execute binary
+        self.cmd_argument = [binary_path];
+        self.cmd_argument.append('./blender_intermediate/blender_exported.xml')
+        process = subprocess.Popen(self.cmd_argument)
+        # wait for the process to finish
+        subprocess.Popen.wait(process)
+
+        # load the result from file
+        xres = bpy.data.scenes["Scene"].render.resolution_x
+        yres = bpy.data.scenes["Scene"].render.resolution_y
+        result = self.begin_result(0, 0, xres, yres)
+        lay = result.layers[0]
+        lay.load_from_file(exporter.get_immediate_dir() + 'blender_generated.bmp')
+        self.end_result(result)
 
 def register():
     print("SORT is enabled in Blender.")

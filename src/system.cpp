@@ -114,7 +114,7 @@ void System::Render()
 // output render target
 void System::OutputRT()
 {
-	m_rt->Output( Timer::GetDate() );
+	m_rt->Output( m_OutputFileName );
 }
 
 // load the scene
@@ -249,7 +249,7 @@ void System::_executeRenderingTasks()
 	InitCriticalSections();
 
 	// will be parameterized later
-	const int THREAD_NUM = 1;
+	const int THREAD_NUM = 8;
 
 	// pre allocate memory for the specific thread
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
@@ -437,7 +437,13 @@ bool System::Setup( const char* str )
 			prop = prop->NextSiblingElement( "Property" );
 		}
 	}
-	
+
+	element = root->FirstChildElement("OutputFile");
+	if( element )
+		m_OutputFileName = element->Attribute("name");
+	else
+		m_OutputFileName = "default.bmp";	// make a default filename
+
 	// setup render target
 	m_camera->SetRenderTarget(m_rt);
 
