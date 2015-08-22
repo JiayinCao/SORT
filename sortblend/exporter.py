@@ -47,9 +47,11 @@ def export_sort_file(scene):
     # the integrator node
     ET.SubElement(root, 'Integrator', type='whitted')
     # image size
-    ET.SubElement(root, 'RenderTargetSize', w='1440', h='900' )
+    xres = bpy.data.scenes["Scene"].render.resolution_x
+    yres = bpy.data.scenes["Scene"].render.resolution_y
+    ET.SubElement(root, 'RenderTargetSize', w='%d'%xres, h='%d'%yres )
     # output file name
-    ET.SubElement(root, 'OutputFile', name='result.bmp')
+    ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.bmp')
     # sampler type
     ET.SubElement(root, 'Sampler', type='stratified', round='1')
     # camera node
@@ -99,8 +101,8 @@ def export_scene(scene):
             export_mesh(ob)
         elif ob.type == 'LAMP':
             light_node = ET.SubElement( root , 'Light' , type='distant')    # to be exposed through GUI
-            ET.SubElement( light_node , 'Property' , name='intensity' , value="100")
-            ET.SubElement( light_node , 'Property' , name='dir' , value="0 -1 0")
+            ET.SubElement( light_node , 'Property' , name='intensity' , value="10 10 10")
+            ET.SubElement( light_node , 'Property' , name='dir' , value="-1 -1 -1")
 
     # output the xml
     output_scene_file = get_immediate_dir() + 'blender.xml'
@@ -138,7 +140,7 @@ def renderable_objects(scene):
     return [ob for ob in scene.objects if is_renderable(scene, ob)]
 
 def get_immediate_dir():
-    sort_bin_dir = preference.get_sort_path()
+    sort_bin_dir = preference.get_sort_dir()
     immediate_dir = sort_bin_dir + 'blender_intermediate/'
     return immediate_dir
 
