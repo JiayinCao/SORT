@@ -69,6 +69,7 @@ void System::_preInit()
 	m_uRenderingTime = 0;
 	m_uPreProcessingTime = 0;
 	m_uPreProgress = 0xffffffff;
+	m_thread_num = 1;
 }
 
 // post-uninit
@@ -249,12 +250,12 @@ void System::_executeRenderingTasks()
 	InitCriticalSections();
 
 	// will be parameterized later
-	const int THREAD_NUM = 8;
+	const int THREAD_NUM = m_thread_num;
 
 	// pre allocate memory for the specific thread
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 16 , i );
-	ThreadUnit* threadUnits[THREAD_NUM];
+	ThreadUnit** threadUnits = new ThreadUnit*[THREAD_NUM];
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 	{
 		// spawn new threads
@@ -289,6 +290,7 @@ void System::_executeRenderingTasks()
 	}
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 		delete threadUnits[i];
+	delete[] threadUnits;
 
 	DestroyCriticalSections();
 
@@ -443,6 +445,10 @@ bool System::Setup( const char* str )
 		m_OutputFileName = element->Attribute("name");
 	else
 		m_OutputFileName = "default.bmp";	// make a default filename
+
+	element = root->FirstChildElement("ThreadNum");
+	if( element )
+		m_thread_num = atoi(element->Attribute("name"));
 
 	// setup render target
 	m_camera->SetRenderTarget(m_rt);

@@ -87,13 +87,17 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 	
 	float w = (float)m_rt->GetWidth();
 	float h = (float)m_rt->GetHeight();
-	float aspect = w / h;
+	float aspect = w/h;
+	if( m_SensorW && m_SensorH )
+		aspect = m_SensorW / m_SensorH;
 	
-	float yScale = 1.0f / tan( m_fov / 2 );
+	float yScale = 0.5f / tan( m_fov * 0.5f );
 	float xScale = yScale / aspect;
 	
 	Vector v;
-	v.x = ( ( x / w ) - 0.5f ) / xScale - hir / fd;
+	// a workaround here for blender plugin, need further investigation
+	// the issue may be caused by different handness of blender and SORT
+	v.x = ( ( -x / w ) + 0.5f ) / xScale - hir / fd;	
 	v.y = -1.0f * ( ( y / h - 0.5f ) ) / yScale;
 	v.z = 1.0f;
 	v.Normalize();
@@ -132,6 +136,7 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 // register all properties
 void PerspectiveCamera::_registerAllProperty()
 {
+	_registerProperty( "sensorsize" , new SensorSizeProperty( this ) );
 	_registerProperty( "eye" , new EyeProperty( this ) );
 	_registerProperty( "up" , new UpProperty( this ) );
 	_registerProperty( "target" , new TargetProperty( this ) );

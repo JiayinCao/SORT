@@ -23,7 +23,7 @@
 IMPLEMENT_CREATOR( RandomSampler );
 
 // generate sample in one dimension
-void RandomSampler::Generate1D( float* sample , unsigned num ) const
+void RandomSampler::Generate1D( float* sample , unsigned num , bool accept_uniform ) const
 {
 	Sort_Assert( sample != 0 );
 
@@ -32,7 +32,7 @@ void RandomSampler::Generate1D( float* sample , unsigned num ) const
 }
 
 // generate sample in two dimension
-void RandomSampler::Generate2D( float* sample , unsigned num ) const
+void RandomSampler::Generate2D( float* sample , unsigned num , bool accept_uniform ) const
 {
 	Sort_Assert( sample != 0 );
 

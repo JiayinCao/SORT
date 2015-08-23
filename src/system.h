@@ -105,6 +105,9 @@ private:
 	string			m_ResourcePath;
 	string			m_OutputFileName;
 
+	// number of thread to allocate
+	unsigned		m_thread_num;
+
 	// pre-Initialize
 	void	_preInit();
 	// post-Uninitialize

@@ -64,10 +64,12 @@ protected:
 	RenderTarget* m_rt;
 	// the type for the camera
 	CAMERA_TYPE m_type;
+	// the size of the sensor
+	float	m_SensorW, m_SensorH;
 
 // private method
 	// initialize default data
-	void _init() { m_rt = 0; m_type = CT_NONE; }
+	void _init() { m_rt = 0; m_type = CT_NONE; m_SensorW = 0; m_SensorH = 0; }
 	
 	// property handler
 	class EyeProperty : public PropertyHandler<Camera>
@@ -81,6 +83,27 @@ protected:
 		{
 			Camera* camera = CAST_TARGET(Camera);
 			camera->SetEye( PointFromStr(str) );
+		}
+	};
+
+	// property handler
+	class SensorSizeProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(SensorSizeProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			Camera* camera = CAST_TARGET(Camera);
+
+			string _str = str;
+			string x = NextToken( _str , ' ' );
+			string y = NextToken( _str , ' ' );
+
+			camera->m_SensorW = (float)atof( x.c_str() );
+			camera->m_SensorH = (float)atof( y.c_str() );
 		}
 	};
 };
