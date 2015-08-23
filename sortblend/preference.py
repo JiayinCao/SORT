@@ -3,9 +3,10 @@ import platform
 from extensions_framework import util as efutil
 from bpy.types import AddonPreferences
 from bpy.props import StringProperty
+from . import common
 
 class SORTAddonPreferences(AddonPreferences):
-    bl_idname = __package__
+    bl_idname = common.preference_bl_name
     # this must match the addon name
     install_path = StringProperty(
             name="Path to SORT binary",
@@ -19,7 +20,7 @@ class SORTAddonPreferences(AddonPreferences):
         layout.prop(self, "install_path")
 
 def get_sort_dir():
-    addon_prefs = bpy.context.user_preferences.addons[__package__].preferences
+    addon_prefs = bpy.context.user_preferences.addons[common.preference_bl_name].preferences
     return efutil.filesystem_path(addon_prefs.install_path) + "/"
 
 def get_sort_bin_path():

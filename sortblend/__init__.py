@@ -1,6 +1,7 @@
 import bpy
 from . import renderer
 from . import preference
+from .ui import ui_init
 
 bl_info = {
     "name": "SORT",
@@ -16,8 +17,10 @@ def register():
     # Register other components
     preference.register()
     renderer.register()
+    ui_init.register()
 
 def unregister():
     # Unregister preference
+    ui_init.unregister()
     renderer.unregister()
     preference.unregister()

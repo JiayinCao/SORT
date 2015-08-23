@@ -48,8 +48,8 @@ def export_sort_file(scene):
     # the integrator node
     ET.SubElement(root, 'Integrator', type='whitted')
     # image size
-    xres = bpy.data.scenes["Scene"].render.resolution_x * bpy.data.scenes["Scene"].render.resolution_percentage / 100
-    yres = bpy.data.scenes["Scene"].render.resolution_y * bpy.data.scenes["Scene"].render.resolution_percentage / 100
+    xres = bpy.data.scenes[0].render.resolution_x * bpy.data.scenes[0].render.resolution_percentage / 100
+    yres = bpy.data.scenes[0].render.resolution_y * bpy.data.scenes[0].render.resolution_percentage / 100
     ET.SubElement(root, 'RenderTargetSize', w='%d'%xres, h='%d'%yres )
     # output file name
     ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.bmp')
@@ -139,11 +139,8 @@ def export_mesh(obj,scene):
         no_unique_count = 0
         loops_to_normals = [0] * len(mesh.loops)
         for f, f_index in face_index_pairs:
-            print( f,f_index )
             for l_idx in f.loop_indices:
-                #print( l_idx )
                 no_key = veckey3d(mesh.loops[l_idx].normal)
-                #print(no_key)
                 no_val = no_get(no_key)
                 if no_val is None:
                     no_val = normals_to_idx[no_key] = no_unique_count
@@ -151,8 +148,6 @@ def export_mesh(obj,scene):
                     no_unique_count += 1
                 loops_to_normals[l_idx] = no_val
         del normals_to_idx, no_get, no_key, no_val
-
-       # print(loops_to_normals)
 
         me_verts = mesh.vertices
 
