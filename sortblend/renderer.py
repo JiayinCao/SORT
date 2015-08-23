@@ -1,14 +1,15 @@
 import bpy
 import os
-import bl_ui
 import subprocess
 from . import preference
 from . import exporter
+from . import preference
+from . import common
 
 class SORT_RENDERER(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
     # RenderEngine; define its internal name, visible name and capabilities.
-    bl_idname = __name__
+    bl_idname = common.renderer_bl_name
     bl_label = 'SORT'
     bl_use_preview = True
 
@@ -30,7 +31,6 @@ class SORT_RENDERER(bpy.types.RenderEngine):
     # update frame
     def update(self, data, scene):
         print("starting update")
-
         # check if the path for SORT is set correctly
         try:
             self.sort_available = True
@@ -82,23 +82,16 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         subprocess.Popen.wait(process)
 
         # load the result from file
-        xres = bpy.data.scenes["Scene"].render.resolution_x * bpy.data.scenes["Scene"].render.resolution_percentage / 100
-        yres = bpy.data.scenes["Scene"].render.resolution_y * bpy.data.scenes["Scene"].render.resolution_percentage / 100
+        xres = bpy.data.scenes[0].render.resolution_x * bpy.data.scenes[0].render.resolution_percentage / 100
+        yres = bpy.data.scenes[0].render.resolution_y * bpy.data.scenes[0].render.resolution_percentage / 100
         result = self.begin_result(0, 0, xres, yres)
         lay = result.layers[0]
         lay.load_from_file(preference.get_immediate_dir() + 'blender_generated.bmp')
         self.end_result(result)
 
-# register ui element
-def _register_elm(elm):
-    elm.COMPAT_ENGINES.add(__name__)
-
 def register():
     # Register the RenderEngine
     bpy.utils.register_class(SORT_RENDERER)
-
-    # register UI component
-    _register_elm(bl_ui.properties_render.RENDER_PT_dimensions)
 
 def unregister():
     # Unregister RenderEngine
