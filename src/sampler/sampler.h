@@ -45,12 +45,12 @@ public:
 	// generate sample in one dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate1D( float* sample , unsigned num ) const = 0;
+	virtual void Generate1D( float* sample , unsigned num , bool accept_uniform = false ) const = 0;
 
 	// generate sample in two dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated
-	virtual void Generate2D( float* sample , unsigned num ) const = 0;
+	virtual void Generate2D( float* sample , unsigned num , bool accept_uniform = false ) const = 0;
 };
 
 // generate shuffle index

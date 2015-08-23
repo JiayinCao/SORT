@@ -46,15 +46,18 @@ def export_sort_file(scene):
     # the scene node
     ET.SubElement(root, 'Scene', value='blender_intermediate/blender.xml')
     # the integrator node
-    ET.SubElement(root, 'Integrator', type='whitted')
+    integrator_type = bpy.data.scenes[0].integrator_type_prop
+    ET.SubElement(root, 'Integrator', type=integrator_type)
     # image size
     xres = bpy.data.scenes[0].render.resolution_x * bpy.data.scenes[0].render.resolution_percentage / 100
     yres = bpy.data.scenes[0].render.resolution_y * bpy.data.scenes[0].render.resolution_percentage / 100
     ET.SubElement(root, 'RenderTargetSize', w='%d'%xres, h='%d'%yres )
     # output file name
-    ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.bmp')
+    ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.exr')
     # sampler type
-    ET.SubElement(root, 'Sampler', type='stratified', round='1')
+    sampler_type = bpy.data.scenes[0].sampler_type_prop
+    sampler_count = bpy.data.scenes[0].sampler_count_prop
+    ET.SubElement(root, 'Sampler', type=sampler_type, round='%s'%sampler_count)
     # camera node
     camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
     if camera is None:
@@ -69,6 +72,15 @@ def export_sort_file(scene):
     ET.SubElement( camera_node , "Property" , name="interaxial" , value="0")
     ET.SubElement( camera_node , "Property" , name="width" , value="0")
     ET.SubElement( camera_node , "Property" , name="height" , value="0")
+    sensor_w = bpy.data.cameras[0].sensor_width
+    sensor_h = bpy.data.cameras[0].sensor_height
+    ET.SubElement( camera_node , "Property" , name="sensorsize" , value= "%s %s"%(sensor_w,sensor_h))
+    fov_angle = bpy.data.cameras[0].angle
+    ET.SubElement( camera_node , "Property" , name="fov" , value= "%s"%fov_angle)
+
+    # output thread num
+    thread_num = bpy.data.scenes[0].thread_num_prop
+    ET.SubElement( root , 'ThreadNum', name='%s'%thread_num)
     # output the xml
     output_sort_file = preference.get_immediate_dir() + 'blender_exported.xml'
     tree = ET.ElementTree(root)

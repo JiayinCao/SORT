@@ -24,7 +24,7 @@
 IMPLEMENT_CREATOR( StratifiedSampler );
 
 // generate sample in one dimension
-void StratifiedSampler::Generate1D( float* sample , unsigned num ) const
+void StratifiedSampler::Generate1D( float* sample , unsigned num , bool accept_uniform ) const
 {
 	Sort_Assert( sample != 0 );
 
@@ -33,7 +33,7 @@ void StratifiedSampler::Generate1D( float* sample , unsigned num ) const
 }
 
 // generate sample in two dimension
-void StratifiedSampler::Generate2D( float* sample , unsigned num ) const
+void StratifiedSampler::Generate2D( float* sample , unsigned num , bool accept_uniform ) const
 {
 	Sort_Assert( sample != 0 );
 	

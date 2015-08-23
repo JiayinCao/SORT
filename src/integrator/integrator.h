@@ -58,7 +58,7 @@ public:
 	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
 	{
 		float* data = SORT_MALLOC_ARRAY( float , 2 * ps )();
-		sampler->Generate2D( data , ps );
+		sampler->Generate2D( data , ps , true );
 		for( unsigned i = 0 ; i < ps ; ++i )
 		{
 			samples[i].img_u = data[2*i];
