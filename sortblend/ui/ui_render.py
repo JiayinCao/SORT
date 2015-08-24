@@ -31,6 +31,17 @@ class MultiThreadPanel(bpy.types.Panel):
     def draw(self, context):
         self.layout.prop(context.scene,"thread_num_prop")
 
+class DebugPanel(bpy.types.Panel):
+    bl_label = common.debug_panel_bl_name
+    bl_space_type = "PROPERTIES"
+    bl_region_type = "WINDOW"
+    bl_context = "render"
+
+    bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
+
+    def draw(self, context):
+        self.layout.prop(context.scene,"debug_prop")
+
 class SamplerPanel(bpy.types.Panel):
     bl_label = common.sampler_panel_bl_name
     bl_space_type = "PROPERTIES"
@@ -60,9 +71,11 @@ def register():
     bpy.utils.register_class(IntegratorPanel)
     bpy.utils.register_class(SamplerPanel)
     bpy.utils.register_class(MultiThreadPanel)
+    bpy.utils.register_class(DebugPanel)
 
 def unregister():
     # unregister integrator panel
     bpy.utils.unregister_class(IntegratorPanel)
     bpy.utils.unregister_class(SamplerPanel)
     bpy.utils.unregister_class(MultiThreadPanel)
+    bpy.utils.unregister_class(DebugPanel)

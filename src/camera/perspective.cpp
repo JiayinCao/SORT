@@ -87,18 +87,41 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 	
 	float w = (float)m_rt->GetWidth();
 	float h = (float)m_rt->GetHeight();
-	float aspect = w/h;
-	if( m_SensorW && m_SensorH )
-		aspect = m_SensorW / m_SensorH;
-	
+	float aspect = w/h * m_aspectRatioW/m_aspectRatioH;
+
 	float yScale = 0.5f / tan( m_fov * 0.5f );
 	float xScale = yScale / aspect;
-	
+
+	// handle different sensor size
+	if( m_sensorW && m_sensorH )
+	{
+		if( m_aspectFit == 1 )	// horizontal fit
+		{
+			xScale = 0.5f / tan( m_fov * 0.5f );
+			yScale = xScale * aspect;
+		}else if( m_aspectFit == 2 )	// vertical fit
+		{
+			yScale = 0.5f / tan( m_fov * 0.5f );
+			xScale = yScale / aspect;
+		}else	// auto fit
+		{
+			if( aspect < 1 )
+			{
+				yScale = 0.5f / tan( m_fov * 0.5f );
+				xScale = yScale / aspect;
+			}else if( aspect > 1 )
+			{
+				xScale = 0.5f / tan( m_fov * 0.5f );
+				yScale = xScale * aspect;
+			}
+		}
+	}
+
 	Vector v;
 	// a workaround here for blender plugin, need further investigation
 	// the issue may be caused by different handness of blender and SORT
 	v.x = ( ( -x / w ) + 0.5f ) / xScale - hir / fd;	
-	v.y = -1.0f * ( ( y / h - 0.5f ) ) / yScale;
+	v.y = -1.0f * ( ( y / h - 0.5f ) ) / yScale ;
 	v.z = 1.0f;
 	v.Normalize();
 	
@@ -136,6 +159,7 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 // register all properties
 void PerspectiveCamera::_registerAllProperty()
 {
+	_registerProperty( "aspect" , new AspectProperty( this ) );
 	_registerProperty( "sensorsize" , new SensorSizeProperty( this ) );
 	_registerProperty( "eye" , new EyeProperty( this ) );
 	_registerProperty( "up" , new UpProperty( this ) );

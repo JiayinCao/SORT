@@ -15,13 +15,25 @@ class SORTAddonPreferences(AddonPreferences):
             default='',
             )
 
+    install_path_debug = StringProperty(
+            name='Path to SORT binary(debug)',
+            description='Path to SORT binary(debug)',
+            subtype='DIR_PATH',
+            default='',
+            )
+
     def draw(self, context):
         layout = self.layout
         layout.prop(self, "install_path")
+        layout.prop(self, "install_path_debug")
 
 def get_sort_dir():
     addon_prefs = bpy.context.user_preferences.addons[common.preference_bl_name].preferences
-    return efutil.filesystem_path(addon_prefs.install_path) + "/"
+    debug = bpy.context.scene.debug_prop
+    return_path = addon_prefs.install_path
+    if debug is True:
+        return_path = addon_prefs.install_path_debug
+    return efutil.filesystem_path(return_path) + "/"
 
 def get_sort_bin_path():
     sort_bin_dir = get_sort_dir()
