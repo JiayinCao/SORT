@@ -74,10 +74,18 @@ def export_sort_file(scene):
     ET.SubElement( camera_node , "Property" , name="height" , value="0")
     sensor_w = bpy.data.cameras[0].sensor_width
     sensor_h = bpy.data.cameras[0].sensor_height
-    ET.SubElement( camera_node , "Property" , name="sensorsize" , value= "%s %s"%(sensor_w,sensor_h))
+    sensor_fit = 0.0 # auto
+    sfit = bpy.data.cameras[0].sensor_fit
+    if sfit == 'VERTICAL':
+        sensor_fit = 2.0
+    elif sfit == 'HORIZONTAL':
+        sensor_fit = 1.0
+    ET.SubElement( camera_node , "Property" , name="sensorsize" , value= "%s %s %f"%(sensor_w,sensor_h, sensor_fit))
+    aspect_ratio_x = bpy.data.scenes["Scene"].render.pixel_aspect_x
+    aspect_ratio_y = bpy.data.scenes["Scene"].render.pixel_aspect_y
+    ET.SubElement( camera_node , "Property" , name="aspect" , value="%s %s"%(aspect_ratio_x,aspect_ratio_y))
     fov_angle = bpy.data.cameras[0].angle
     ET.SubElement( camera_node , "Property" , name="fov" , value= "%s"%fov_angle)
-
     # output thread num
     thread_num = bpy.data.scenes[0].thread_num_prop
     ET.SubElement( root , 'ThreadNum', name='%s'%thread_num)
