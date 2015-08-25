@@ -106,7 +106,8 @@ def export_scene(scene):
     # resource path node
     ET.SubElement( root , 'Resource', path="./blender_intermediate/res/")
     # acceleration structure
-    ET.SubElement( root , 'Accel', type="kd_tree")  # to be exposed through GUI
+    accelerator_type = bpy.data.scenes[0].accelerator_type_prop
+    ET.SubElement( root , 'Accel', type=accelerator_type)  # to be exposed through GUI
     for ob in renderable_objects(scene):
         if ob.type == 'MESH':
             model_node = ET.SubElement( root , 'Model' , filename=ob.name + '.obj', name = ob.name )

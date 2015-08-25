@@ -15,10 +15,20 @@ class IntegratorPanel(bpy.types.Panel):
         ("direct", "Direct Lighting", "", 3),
         ("whitted", "Whitted", "", 4),
         ]
-    bpy.types.Scene.integrator_type_prop = bpy.props.EnumProperty(items=integrator_types, name='Type')
+    bpy.types.Scene.integrator_type_prop = bpy.props.EnumProperty(items=integrator_types, name='Integrator')
+
+    # Accelerator type
+    accelerator_types = [
+        ("kd_tree", "SAH KDTree", "", 1),
+        ("bvh", "Bounding Volume Hierarchy", "", 2),
+        ("uniform_grid", "Uniform Grid", "", 3),
+        ("bruteforce", "No Accelerator", "", 4),
+        ]
+    bpy.types.Scene.accelerator_type_prop = bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
 
     def draw(self, context):
         self.layout.prop(context.scene,"integrator_type_prop")
+        self.layout.prop(context.scene,"accelerator_type_prop")
 
 class MultiThreadPanel(bpy.types.Panel):
     bl_label = common.thread_panel_bl_name
