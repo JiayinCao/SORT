@@ -35,14 +35,15 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
 	float falloff = SatDot( wi , -dir );
 	if( falloff < cos_total_range )
 		return 0.0f;
+
+	float len = vec.Length();
+	visibility.ray = Ray( pos , -wi , 0 , delta , len - delta );
+
 	if( falloff > cos_falloff_start )
 		return intensity / vec.SquaredLength();
 	float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
 	if( d == 0.0f )
 		return 0.0f;
-
-	float len = vec.Length();
-	visibility.ray = Ray( pos , -wi , 0 , delta , len - delta );
 
 	return intensity / vec.SquaredLength() * d * d;
 }
