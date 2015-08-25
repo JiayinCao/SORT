@@ -1,7 +1,9 @@
 import bpy
 import os
 import shutil
+import numpy as np
 from . import preference
+from . import utility
 import xml.etree.cElementTree as ET
 from io_scene_obj import export_obj
 
@@ -65,9 +67,9 @@ def export_sort_file(scene):
         return
     pos, target, up = lookAt(camera)
     camera_node = ET.SubElement(root, 'Camera', type='perspective')
-    ET.SubElement( camera_node , "Property" , name="eye" , value="%f %f %f"%vector_to_array3f(pos))
-    ET.SubElement( camera_node , "Property" , name="up" , value="%f %f %f"%vector_to_array3f(up))
-    ET.SubElement( camera_node , "Property" , name="target" , value="%f %f %f"%vector_to_array3f(target))
+    ET.SubElement( camera_node , "Property" , name="eye" , value=utility.vec3tostr(pos))
+    ET.SubElement( camera_node , "Property" , name="up" , value=utility.vec3tostr(up))
+    ET.SubElement( camera_node , "Property" , name="target" , value=utility.vec3tostr(target))
     ET.SubElement( camera_node , "Property" , name="len" , value="0")
     ET.SubElement( camera_node , "Property" , name="interaxial" , value="0")
     ET.SubElement( camera_node , "Property" , name="width" , value="0")
@@ -80,12 +82,15 @@ def export_sort_file(scene):
         sensor_fit = 2.0
     elif sfit == 'HORIZONTAL':
         sensor_fit = 1.0
-    ET.SubElement( camera_node , "Property" , name="sensorsize" , value= "%s %s %f"%(sensor_w,sensor_h, sensor_fit))
+    ET.SubElement( camera_node , "Property" , name="sensorsize" , value= "%s %s %f"%(sensor_w,sensor_h,sensor_fit))
     aspect_ratio_x = bpy.data.scenes["Scene"].render.pixel_aspect_x
     aspect_ratio_y = bpy.data.scenes["Scene"].render.pixel_aspect_y
     ET.SubElement( camera_node , "Property" , name="aspect" , value="%s %s"%(aspect_ratio_x,aspect_ratio_y))
     fov_angle = bpy.data.cameras[0].angle
     ET.SubElement( camera_node , "Property" , name="fov" , value= "%s"%fov_angle)
+    camera_shift_x = bpy.data.cameras[0].shift_x
+    camera_shift_y = bpy.data.cameras[0].shift_y
+    ET.SubElement( camera_node , "Property" , name="shift" , value="%s %s"%(camera_shift_x,camera_shift_y))
     # output thread num
     thread_num = bpy.data.scenes[0].thread_num_prop
     ET.SubElement( root , 'ThreadNum', name='%s'%thread_num)
@@ -93,16 +98,6 @@ def export_sort_file(scene):
     output_sort_file = preference.get_immediate_dir() + 'blender_exported.xml'
     tree = ET.ElementTree(root)
     tree.write(output_sort_file)
-
-# vector to string
-def vector_to_array4f(vector):
-    return vector[0],vector[1],vector[2],vector[3]
-def vector_to_array3f(vector):
-    return vector[0],vector[1],vector[2]
-
-# matrix to string
-def matrix_to_array(matrix):
-    return matrix[0][0],matrix[0][1],matrix[0][2],matrix[0][3],matrix[1][0],matrix[1][1],matrix[1][2],matrix[1][3],matrix[2][0],matrix[2][1],matrix[2][2],matrix[2][3],matrix[3][0],matrix[3][1],matrix[3][2],matrix[3][3]
 
 # export scene
 def export_scene(scene):
@@ -116,14 +111,46 @@ def export_scene(scene):
         if ob.type == 'MESH':
             model_node = ET.SubElement( root , 'Model' , filename=ob.name + '.obj', name = ob.name )
             transform_node = ET.SubElement( model_node , 'Transform' )
-            matrix = ob.matrix_world;
-            ET.SubElement( transform_node , 'Matrix' , value = 'm %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f '%matrix_to_array(matrix) )
+            ET.SubElement( transform_node , 'Matrix' , value = 'm '+ utility.matrixtostr(ob.matrix_world) )
             # output the mesh to file
             export_mesh(ob,scene)
         elif ob.type == 'LAMP':
-            light_node = ET.SubElement( root , 'Light' , type='distant')    # to be exposed through GUI
-            ET.SubElement( light_node , 'Property' , name='intensity' , value="10 10 10")
-            ET.SubElement( light_node , 'Property' , name='dir' , value="-1 -2 -3")
+            if bpy.data.lamps[ob.name].type == 'SUN':
+                light_node = ET.SubElement( root , 'Light' , type='distant')
+                light_spectrum = np.array(bpy.data.lamps[ob.name].color[:])
+                light_spectrum *= bpy.data.lamps[ob.name].energy
+                light_dir = ob.matrix_world.col[2] * -1.0
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
+                ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
+            elif bpy.data.lamps[ob.name].type == 'POINT':
+                light_node = ET.SubElement( root , 'Light' , type='point')
+                light_spectrum = np.array(bpy.data.lamps[ob.name].color[:])
+                light_spectrum *= bpy.data.lamps[ob.name].energy
+                light_position = ob.matrix_world.col[3]
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
+                ET.SubElement( light_node , 'Property' , name='pos' ,value=utility.vec3tostr(light_position))
+            elif bpy.data.lamps[ob.name].type == 'SPOT':
+                light_node = ET.SubElement( root , 'Light' , type='spot')
+                light_spectrum = np.array(bpy.data.lamps[ob.name].color[:])
+                light_spectrum *= bpy.data.lamps[ob.name].energy
+                light_dir = ob.matrix_world.col[2] * -1.0
+                light_position = ob.matrix_world.col[3]
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
+                ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
+                ET.SubElement( light_node , 'Property' , name='falloff_start' ,value='1.0')
+                ET.SubElement( light_node , 'Property' , name='range' ,value='1.0')
+                ET.SubElement( light_node , 'Property' , name='pos' ,value=utility.vec3tostr(light_position))
+            elif bpy.data.lamps[ob.name].type == 'AREA':
+                light_node = ET.SubElement( root , 'Light' , type='area')
+                light_spectrum = np.array(bpy.data.lamps[ob.name].color[:])
+                light_spectrum *= bpy.data.lamps[ob.name].energy
+                light_dir = ob.matrix_world.col[2] * -1.0
+                light_position = ob.matrix_world.col[3]
+                ET.SubElement( light_node , 'Property' , name='shape' ,value='square')
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
+                ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
+                ET.SubElement( light_node , 'Property' , name='pos' ,value=utility.vec3tostr(light_position))
+                ET.SubElement( light_node , 'Property' , name='radius' ,value='10')
 
     # output the xml
     output_scene_file = preference.get_immediate_dir() + 'blender.xml'

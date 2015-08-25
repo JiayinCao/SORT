@@ -70,6 +70,8 @@ protected:
 	float	m_aspectRatioW, m_aspectRatioH;
 	// aspect fit
 	int		m_aspectFit;
+	// camera shift
+	float	m_shiftX, m_shiftY;
 
 // private method
 	// initialize default data
@@ -128,6 +130,27 @@ protected:
 
 			camera->m_aspectRatioW = (float)atof( x.c_str() );
 			camera->m_aspectRatioH = (float)atof( y.c_str() );
+		}
+	};
+
+	// property handler
+	class ShiftProperty : public PropertyHandler<Camera>
+	{
+	public:
+		// constructor
+		PH_CONSTRUCTOR(ShiftProperty,Camera);
+		
+		// set value
+		void SetValue( const string& str )
+		{
+			Camera* camera = CAST_TARGET(Camera);
+
+			string _str = str;
+			string x = NextToken( _str , ' ' );
+			string y = NextToken( _str , ' ' );
+
+			camera->m_shiftX = (float)atof( x.c_str() );
+			camera->m_shiftY = (float)atof( y.c_str() );
 		}
 	};
 };

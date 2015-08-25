@@ -35,7 +35,6 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         try:
             self.sort_available = True
             sort_bin_path = preference.get_sort_bin_path()
-            print(sort_bin_path)
             if sort_bin_path is None:
                 raise Exception("Set the path where binary for SORT is located before rendering anything.")
             elif not os.path.exists(sort_bin_path):
