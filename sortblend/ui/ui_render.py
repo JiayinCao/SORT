@@ -2,11 +2,19 @@ import bpy
 import bl_ui
 from .. import common
 
-class IntegratorPanel(bpy.types.Panel):
-    bl_label = common.integrator_panel_bl_name
+class SORTRenderPanel:
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
+    COMPAT_ENGINES = {'sortblend'}
+
+    @classmethod
+    def poll(cls, context):
+        rd = context.scene.render
+        return rd.engine in cls.COMPAT_ENGINES
+
+class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
+    bl_label = common.integrator_panel_bl_name
 
     # Integrator type
     integrator_types = [
@@ -30,33 +38,24 @@ class IntegratorPanel(bpy.types.Panel):
         self.layout.prop(context.scene,"integrator_type_prop")
         self.layout.prop(context.scene,"accelerator_type_prop")
 
-class MultiThreadPanel(bpy.types.Panel):
+class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = common.thread_panel_bl_name
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "render"
 
     bpy.types.Scene.thread_num_prop = bpy.props.IntProperty(name='Thread Num', default=8, min=1, max=16)
 
     def draw(self, context):
         self.layout.prop(context.scene,"thread_num_prop")
 
-class DebugPanel(bpy.types.Panel):
+class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = common.debug_panel_bl_name
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "render"
 
     bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
 
     def draw(self, context):
         self.layout.prop(context.scene,"debug_prop")
 
-class SamplerPanel(bpy.types.Panel):
+class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = common.sampler_panel_bl_name
-    bl_space_type = "PROPERTIES"
-    bl_region_type = "WINDOW"
-    bl_context = "render"
 
     # sampler type
     sampler_types = [
@@ -74,18 +73,7 @@ class SamplerPanel(bpy.types.Panel):
         self.layout.prop(context.scene,"sampler_count_prop")
 
 def register():
-    # register UI component
     bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add(common.renderer_bl_name)
 
-    # register integrator panel
-    bpy.utils.register_class(IntegratorPanel)
-    bpy.utils.register_class(SamplerPanel)
-    bpy.utils.register_class(MultiThreadPanel)
-    bpy.utils.register_class(DebugPanel)
-
 def unregister():
-    # unregister integrator panel
-    bpy.utils.unregister_class(IntegratorPanel)
-    bpy.utils.unregister_class(SamplerPanel)
-    bpy.utils.unregister_class(MultiThreadPanel)
-    bpy.utils.unregister_class(DebugPanel)
+    bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.remove(common.renderer_bl_name)

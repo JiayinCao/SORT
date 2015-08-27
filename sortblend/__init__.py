@@ -14,13 +14,11 @@ bl_info = {
     "category": "Render"}
 
 def register():
-    # Register other components
-    preference.register()
-    renderer.register()
     ui_init.register()
 
+    bpy.utils.register_module(__name__)
+
 def unregister():
-    # Unregister preference
     ui_init.unregister()
-    renderer.unregister()
-    preference.unregister()
+
+    bpy.utils.unregister_module(__name__)
