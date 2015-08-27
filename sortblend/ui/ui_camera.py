@@ -8,4 +8,7 @@ def register():
     bl_ui.properties_data_camera.DATA_PT_camera_dof.COMPAT_ENGINES.add(common.renderer_bl_name)
     bl_ui.properties_data_camera.DATA_PT_camera.COMPAT_ENGINES.add(common.renderer_bl_name)
 
-#def unregister():
+def unregister():
+    bl_ui.properties_data_camera.DATA_PT_lens.COMPAT_ENGINES.remove(common.renderer_bl_name)
+    bl_ui.properties_data_camera.DATA_PT_camera_dof.COMPAT_ENGINES.remove(common.renderer_bl_name)
+    bl_ui.properties_data_camera.DATA_PT_camera.COMPAT_ENGINES.remove(common.renderer_bl_name)
