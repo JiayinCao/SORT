@@ -6,7 +6,7 @@ class SORTRenderPanel:
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
-    COMPAT_ENGINES = {'sortblend'}
+    COMPAT_ENGINES = {common.default_bl_name}
 
     @classmethod
     def poll(cls, context):
@@ -71,9 +71,3 @@ class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
     def draw(self, context):
         self.layout.prop(context.scene,"sampler_type_prop")
         self.layout.prop(context.scene,"sampler_count_prop")
-
-def register():
-    bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add(common.renderer_bl_name)
-
-def unregister():
-    bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.remove(common.renderer_bl_name)

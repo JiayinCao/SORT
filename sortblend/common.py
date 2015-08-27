@@ -1,4 +1,4 @@
-renderer_bl_name = 'sortblend'
+default_bl_name = 'sortblend'
 preference_bl_name = __package__
 
 integrator_panel_bl_name = 'Renderer'

@@ -1,16 +1,25 @@
+import bpy
 from . import ui_render
 from . import ui_camera
 from . import ui_lamp
 from . import ui_material
 
+def get_panels():
+    types = bpy.types
+    panels = [
+        "DATA_PT_lamp",
+        "DATA_PT_lens",
+        "DATA_PT_camera_dof",
+        "DATA_PT_camera",
+        "RENDER_PT_dimensions",
+        ]
+
+    return [getattr(types, p) for p in panels if hasattr(types, p)]
+
 def register():
-    ui_render.register()
-    ui_camera.register()
-    ui_lamp.register()
-    ui_material.register()
+    for panel in get_panels():
+        panel.COMPAT_ENGINES.add('sortblend')
 
 def unregister():
-    ui_render.unregister()
-    ui_lamp.unregister()
-    ui_camera.unregister()
-    ui_material.unregister()
+    for panel in get_panels():
+        panel.COMPAT_ENGINES.add('sortblend')
