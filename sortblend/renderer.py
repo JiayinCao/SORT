@@ -9,7 +9,7 @@ from . import common
 class SORT_RENDERER(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
     # RenderEngine; define its internal name, visible name and capabilities.
-    bl_idname = common.renderer_bl_name
+    bl_idname = common.default_bl_name
     bl_label = 'SORT'
     bl_use_preview = True
 

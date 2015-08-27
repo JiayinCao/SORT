@@ -6,7 +6,7 @@ class SORTMaterialPanel:
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "material"
-    COMPAT_ENGINES = {'sortblend'}
+    COMPAT_ENGINES = {common.default_bl_name}
 
     @classmethod
     def poll(cls, context):
