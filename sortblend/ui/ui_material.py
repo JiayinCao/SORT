@@ -69,8 +69,6 @@ class SORT_use_shading_nodes(bpy.types.Operator):
     def execute(self, context):
         if context.material:
             context.material.sort_material.use_sort_nodes = True
-        else:
-            return
 
         mat = context.material
         idtype = self.properties.idtype
@@ -109,21 +107,70 @@ def find_node(material, nodetype):
                 return node
     return None
 
-def panel_node_draw(layout, id_data, output_type, input_name):
+def draw_node_properties_recursive(layout, context, nt, node, level=0):
+
+    label_percentage = 0.3
+    prop_percentage = 0.9
+
+    def indented_label(layout):
+        for i in range(level):
+            layout.label('',icon='BLANK1')
+
+    layout.context_pointer_set("nodetree", nt)
+    layout.context_pointer_set("node", node)
+
+    def draw_props(inputs, layout):
+        for socket in inputs:
+
+            layout.context_pointer_set("socket", socket)
+
+            if socket.is_linked:
+                input_node = nodes.socket_node_input(nt, socket)
+                ui_open = socket.ui_open
+                icon = 'DISCLOSURE_TRI_DOWN' if ui_open else 'DISCLOSURE_TRI_RIGHT'
+                split = layout.split(label_percentage)
+                row = split.row()
+                indented_label(row)
+                row.prop(socket, "ui_open", icon=icon, text='', icon_only=True, emboss=False)
+                row.label(socket.name+":")
+                split.operator_menu_enum("node.add_surface" , "node_type", text=input_node.bl_idname)
+                if socket.ui_open:
+                    draw_node_properties_recursive(layout, context, nt, input_node, level=level+1)
+            else:
+                row = layout.row()
+                split = row.split(label_percentage)
+                left_row = split.row()
+                indented_label(left_row)
+                left_row.label(socket.name)
+                split = split.split(prop_percentage)
+                middle_row = split.row()
+                middle_row.prop(socket, 'default_value')
+                split.operator_menu_enum("node.add_surface" , "node_type",text='')
+
+    draw_props(node.inputs, layout)
+    layout.separator()
+
+def panel_node_draw(layout, context, id_data, output_type, input_name):
     if not id_data.sort_material.use_sort_nodes:
         layout.operator("sort.use_shading_nodes", icon='NODETREE')
         return False
 
-    node = find_node(id_data, output_type)
-    if not node:
+    ntree = bpy.data.node_groups[id_data.sort_material.sortnodetree]
+
+    output_node = find_node(id_data, output_type)
+
+    if output_node is None:
         layout.operator("sort.use_shading_nodes", icon='NODETREE')
         return False
-    else:
-        ntree = bpy.data.node_groups[id_data.sort_material.sortnodetree]
-        input = find_node_input(node, input_name)
-        layout.template_node_view(ntree, node, input)
 
-    return True
+    socket = output_node.inputs[input_name]
+
+    layout.context_pointer_set("nodetree", ntree)
+    layout.context_pointer_set("node", output_node)
+    layout.context_pointer_set("socket", socket)
+
+    if output_node is not None:
+        draw_node_properties_recursive(layout, context, ntree, output_node)
 
 from .. import material
 
@@ -135,7 +182,4 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
         return context.material and SORTMaterialPanel.poll(context)
 
     def draw(self, context):
-        layout = self.layout
-        mat = context.material
-
-        panel_node_draw(layout, mat, 'SORTOutputNode', 'Surface')
+        panel_node_draw(self.layout, context, context.material, 'SORTOutputNode', 'Surface')
