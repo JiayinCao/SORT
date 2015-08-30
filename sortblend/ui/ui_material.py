@@ -54,29 +54,6 @@ class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
             split.template_ID(space, "pin_id")
             split.separator()
 
-class SORTPatternGraph(bpy.types.NodeTree):
-    '''A node tree comprised of renderman nodes'''
-    bl_idname = 'SORTPatternGraph'
-    bl_label = 'SORT Pattern Graph'
-    bl_icon = 'TEXTURE_SHADED'
-    nodetypes = {}
-
-    @classmethod
-    def poll(cls, context):
-        return context.scene.render.engine == common.default_bl_name
-
-    # Return a node tree from the context to be used in the editor
-    @classmethod
-    def get_from_context(cls, context):
-        ob = context.active_object
-        if ob and ob.type not in {'LAMP', 'CAMERA'}:
-            ma = ob.active_material
-            if ma != None:
-                nt_name = ma.sort_material.sortnodetree
-                if nt_name != '':
-                    return bpy.data.node_groups[nt_name], ma, ma
-        return (None, None, None)
-
 class SORT_use_shading_nodes(bpy.types.Operator):
     """Enable nodes on a material, world or lamp"""
     bl_idname = "sort.use_shading_nodes"
@@ -100,11 +77,16 @@ class SORT_use_shading_nodes(bpy.types.Operator):
         context_data = {'material':context.material, 'lamp':context.lamp }
         idblock = context_data[idtype]
 
-        nt = bpy.data.node_groups.new(idblock.name, type='SORTPatternGraph')
-        nt.use_fake_user = True
+        group_name = 'SORTGroup_' + idblock.name
+
+        nt = None
+        for group in bpy.data.node_groups:
+            if group.name == group_name:
+                nt = group
+        if nt is None:
+            nt = bpy.data.node_groups.new(group_name, type='SORTPatternGraph')
 
         mat.sort_material.sortnodetree = nt.name
-        #idblock.renderman.nodetree = nt.name
         output = nt.nodes.new('SORTOutputNode')
         default = nt.nodes.new('SORTLambertNode')
         default.location = output.location
@@ -118,19 +100,13 @@ def find_node_input(node, name):
             return input
     return None
 
+# find the output node
 def find_node(material, nodetype):
     if material and material.sort_material and material.sort_material.sortnodetree:
         ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-
-        active_output_node = None
         for node in ntree.nodes:
-            if getattr(node, "type", None) == nodetype:
-                if getattr(node, "is_active_output", True):
-                    return node
-                if not active_output_node:
-                    active_output_node = node
-        return active_output_node
-
+            if getattr(node, "bl_idname", None) == nodetype:
+                return node
     return None
 
 def panel_node_draw(layout, id_data, output_type, input_name):
@@ -138,12 +114,12 @@ def panel_node_draw(layout, id_data, output_type, input_name):
         layout.operator("sort.use_shading_nodes", icon='NODETREE')
         return False
 
-    ntree = bpy.data.node_groups[id_data.sort_material.sortnodetree]
-
     node = find_node(id_data, output_type)
     if not node:
-        layout.label(text="Empty Node")
+        layout.operator("sort.use_shading_nodes", icon='NODETREE')
+        return False
     else:
+        ntree = bpy.data.node_groups[id_data.sort_material.sortnodetree]
         input = find_node_input(node, input_name)
         layout.template_node_view(ntree, node, input)
 
@@ -162,5 +138,4 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
         layout = self.layout
         mat = context.material
 
-        if not panel_node_draw(layout, mat, 'CUSTOM', 'Surface'):
-            layout.prop(mat, "diffuse_color")
+        panel_node_draw(layout, mat, 'SORTOutputNode', 'Surface')
