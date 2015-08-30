@@ -2,6 +2,7 @@ import bpy
 from . import renderer
 from . import preference
 from .ui import ui_init
+from . import material
 
 bl_info = {
     "name": "SORT",
@@ -14,11 +15,13 @@ bl_info = {
     "category": "Render"}
 
 def register():
-    ui_init.register()
-
     bpy.utils.register_module(__name__)
 
-def unregister():
-    ui_init.unregister()
+    ui_init.register()
+    material.register()
 
+def unregister():
     bpy.utils.unregister_module(__name__)
+
+    ui_init.unregister()
+    material.unregister()
