@@ -1,6 +1,7 @@
 import bpy
 from . import renderer
 from . import preference
+from . import nodes
 from .ui import ui_init
 from . import material
 
@@ -19,9 +20,11 @@ def register():
 
     ui_init.register()
     material.register()
+    nodes.register()
 
 def unregister():
     bpy.utils.unregister_module(__name__)
 
     ui_init.unregister()
     material.unregister()
+    nodes.unregister()
