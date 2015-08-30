@@ -1,5 +1,4 @@
 import bpy
-import bl_ui
 from .. import common
 
 class SORTRenderPanel:

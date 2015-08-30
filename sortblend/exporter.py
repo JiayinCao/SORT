@@ -116,24 +116,25 @@ def export_scene(scene):
             # output the mesh to file
             export_mesh(ob,scene)
         elif ob.type == 'LAMP':
-            if bpy.data.lamps[ob.name].type == 'SUN':
+            lamp = bpy.data.lamps['Lamp']
+            if lamp.type == 'SUN':
                 light_node = ET.SubElement( root , 'Light' , type='distant')
-                light_spectrum = np.array(bpy.data.lamps[ob.name].color[:])
-                light_spectrum *= bpy.data.lamps[ob.name].energy
+                light_spectrum = np.array(lamp.color[:])
+                light_spectrum *= lamp.energy
                 light_dir = ob.matrix_world.col[2] * -1.0
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
-            elif bpy.data.lamps[ob.name].type == 'POINT':
+            elif lamp.type == 'POINT':
                 light_node = ET.SubElement( root , 'Light' , type='point')
-                light_spectrum = np.array(bpy.data.lamps[ob.name].color[:])
-                light_spectrum *= bpy.data.lamps[ob.name].energy
+                light_spectrum = np.array(lamp.color[:])
+                light_spectrum *= lamp.energy
                 light_position = ob.matrix_world.col[3]
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='pos' ,value=utility.vec3tostr(light_position))
-            elif bpy.data.lamps[ob.name].type == 'SPOT':
+            elif lamp.type == 'SPOT':
                 light_node = ET.SubElement( root , 'Light' , type='spot')
-                light_spectrum = np.array(bpy.data.lamps[ob.name].color[:])
-                light_spectrum *= bpy.data.lamps[ob.name].energy
+                light_spectrum = np.array(lamp.color[:])
+                light_spectrum *= lamp.energy
                 light_dir = ob.matrix_world.col[2] * -1.0
                 light_position = ob.matrix_world.col[3]
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
@@ -141,10 +142,10 @@ def export_scene(scene):
                 ET.SubElement( light_node , 'Property' , name='falloff_start' ,value='1.0')
                 ET.SubElement( light_node , 'Property' , name='range' ,value='1.0')
                 ET.SubElement( light_node , 'Property' , name='pos' ,value=utility.vec3tostr(light_position))
-            elif bpy.data.lamps[ob.name].type == 'AREA':
+            elif lamp.type == 'AREA':
                 light_node = ET.SubElement( root , 'Light' , type='area')
-                light_spectrum = np.array(bpy.data.lamps[ob.name].color[:])
-                light_spectrum *= bpy.data.lamps[ob.name].energy
+                light_spectrum = np.array(lamp.color[:])
+                light_spectrum *= lamp.energy
                 light_dir = ob.matrix_world.col[2] * -1.0
                 light_position = ob.matrix_world.col[3]
                 ET.SubElement( light_node , 'Property' , name='shape' ,value='square')
