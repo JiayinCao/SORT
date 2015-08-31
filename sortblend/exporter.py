@@ -3,6 +3,7 @@ import os
 import shutil
 import numpy as np
 from . import preference
+from . import nodes
 from . import utility
 import xml.etree.cElementTree as ET
 from io_scene_obj import export_obj
@@ -15,6 +16,8 @@ def export_blender(scene):
     export_sort_file(scene)
     # export scene
     export_scene(scene)
+    # export material
+    export_material()
 
 # clear old data and create new path
 def create_path(scene):
@@ -159,9 +162,6 @@ def export_scene(scene):
     tree = ET.ElementTree(root)
     tree.write(output_scene_file)
 
-def veckey3d(v):
-    return round(v.x, 4), round(v.y, 4), round(v.z, 4)
-
 # export mesh file
 def export_mesh(obj,scene):
     output_path = preference.get_immediate_res_dir() + obj.name + '.obj'
@@ -189,7 +189,7 @@ def export_mesh(obj,scene):
         loops_to_normals = [0] * len(mesh.loops)
         for f, f_index in face_index_pairs:
             for l_idx in f.loop_indices:
-                no_key = veckey3d(mesh.loops[l_idx].normal)
+                no_key = utility.veckey3d(mesh.loops[l_idx].normal)
                 no_val = no_get(no_key)
                 if no_val is None:
                     no_val = normals_to_idx[no_key] = no_unique_count
@@ -207,6 +207,38 @@ def export_mesh(obj,scene):
             for vi, v, li in f_v:
                 file.write(" %d//%d" % (v.index+1, loops_to_normals[li]+1))
             file.write("\n")
+
+def export_material():
+    # create root node
+    root = ET.Element("Root")
+
+    for material in bpy.data.materials:
+        if material and material.sort_material and material.sort_material.sortnodetree:
+            ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+            output_node = nodes.find_node(material, 'SORTOutputNode')
+            if output_node is None:
+                continue
+
+            # material node
+            mat_node = ET.SubElement( root , 'Material', name=material.name )
+
+            def draw_props(mat_node , xml_node):
+                inputs = mat_node.inputs
+                for socket in inputs:
+                    if socket.is_linked:
+                        input_node = nodes.socket_node_input(ntree, socket)
+                        sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , node=input_node.bl_idname)
+                        draw_props(input_node,sub_xml_node)
+                    else:
+                        ET.SubElement( xml_node , 'Property' , name=socket.name , value=socket.output_default_value_to_str() )
+
+            draw_props(output_node, mat_node)
+
+    # output the xml
+    output_material_file = preference.get_immediate_dir() + 'material.xml'
+    print(output_material_file)
+    tree = ET.ElementTree(root)
+    tree.write(output_material_file)
 
 # whether the object is hidden
 def is_visible_layer(scene, ob):
