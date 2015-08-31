@@ -8,3 +8,6 @@ def matrix_to_array(matrix):
 
 def matrixtostr(matrix):
     return '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f '%matrix_to_array(matrix)
+
+def veckey3d(v):
+    return round(v.x, 4), round(v.y, 4), round(v.z, 4)

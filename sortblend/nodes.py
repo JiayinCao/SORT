@@ -51,24 +51,23 @@ class SORTShaderSocket(bpy.types.NodeSocketShader, SORTSocket):
     bl_label = 'SORT Shader Socket'
     default_value = None
 
-    def draw_value(self, context, layout, node):
-        layout.label(self.name)
-
-    def draw_color(self, context, node):
-        return (0.1, 1.0, 0.2, 0.75)
-
-    def draw(self, context, layout, node, text):
-        layout.label(text)
-        pass
-
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
     bl_idname = 'SORTNodeSocketColor'
     bl_label = 'SORT Color Socket'
 
     default_value = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
 
-    def draw_color(self, context, node):
-        return (1.0, 1.0, .5, 0.75)
+    def output_default_value_to_str(self):
+        return '%f %f %f'%(self.default_value[0],self.default_value[1],self.default_value[2])
+
+class SORTNodeSocketString(bpy.types.NodeSocketString, SORTSocket):
+    bl_idname = 'SORTNodeSocketString'
+    bl_label = 'SORT String Socket'
+
+    default_value = bpy.props.StringProperty( name='' , default='' ,subtype='FILE_PATH' )
+
+    def output_default_value_to_str(self):
+        return self.default_value
 
 # sort material node root
 class SORTShadingNode(bpy.types.Node):
@@ -91,7 +90,24 @@ class SORTLambertNode(SORTShadingNode):
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
-        self.inputs.new('SORTNodeSocketColor', 'Other')
+        self.outputs.new('SORTShaderSocket', 'Result')
+
+# microfacte node
+class SORTMicrofacetNode(SORTShadingNode):
+    bl_label = 'SORT_microfacet'
+    bl_idname = 'SORTMicrofacetNode'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
+        self.outputs.new('SORTShaderSocket', 'Result')
+
+# merl node
+class SORTMerlNode(SORTShadingNode):
+    bl_label = 'SORT_merl'
+    bl_idname = 'SORTMerlNode'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketString', 'Filename')
         self.outputs.new('SORTShaderSocket', 'Result')
 
 # our own base class with an appropriate poll function,
@@ -103,6 +119,21 @@ class SORTPatternNodeCategory(NodeCategory):
 
 def socket_node_input(nt, socket):
     return next((l.from_node for l in nt.links if l.to_socket == socket), None)
+
+def find_node_input(node, name):
+    for input in node.inputs:
+        if input.name == name:
+            return input
+    return None
+
+# find the output node
+def find_node(material, nodetype):
+    if material and material.sort_material and material.sort_material.sortnodetree:
+        ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+        for node in ntree.nodes:
+            if getattr(node, "bl_idname", None) == nodetype:
+                return node
+    return None
 
 #bass class for operator to add a node
 class SORT_Add_Node:
@@ -180,7 +211,7 @@ def register():
     node_categories = [
         # identifier, label, items list
         SORTPatternNodeCategory("SORT_output_nodes", "SORT outputs",items = []),
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTLambertNode")] ),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTLambertNode"),NodeItem("SORTMerlNode"),NodeItem("SORTMicrofacetNode")] ),
     ]
     nodeitems_utils.register_node_categories("SORTSHADERNODES",node_categories)
 

@@ -92,21 +92,6 @@ class SORT_use_shading_nodes(bpy.types.Operator):
         nt.links.new(default.outputs[0], output.inputs[0])
         return {'FINISHED'}
 
-def find_node_input(node, name):
-    for input in node.inputs:
-        if input.name == name:
-            return input
-    return None
-
-# find the output node
-def find_node(material, nodetype):
-    if material and material.sort_material and material.sort_material.sortnodetree:
-        ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-        for node in ntree.nodes:
-            if getattr(node, "bl_idname", None) == nodetype:
-                return node
-    return None
-
 def draw_node_properties_recursive(layout, context, nt, node, level=0):
 
     label_percentage = 0.3
@@ -157,7 +142,7 @@ def panel_node_draw(layout, context, id_data, output_type, input_name):
 
     ntree = bpy.data.node_groups[id_data.sort_material.sortnodetree]
 
-    output_node = find_node(id_data, output_type)
+    output_node = nodes.find_node(id_data, output_type)
 
     if output_node is None:
         layout.operator("sort.use_shading_nodes", icon='NODETREE')
@@ -171,6 +156,8 @@ def panel_node_draw(layout, context, id_data, output_type, input_name):
 
     if output_node is not None:
         draw_node_properties_recursive(layout, context, ntree, output_node)
+        input = nodes.find_node_input(output_node, input_name)
+        layout.template_node_view(ntree, output_node, input)
 
 from .. import material
 
