@@ -23,10 +23,71 @@
 #include "utility/creator.h"
 #include "spectrum/spectrum.h"
 #include "utility/referencecount.h"
+#include <vector>
 
 // pre-declera classes
 class Bsdf;
+class Bxdf;
 class Intersection;
+class Merl;
+
+enum Socket_Type
+{
+	Socket_Value,
+	Socket_Node,
+};
+
+enum Material_Node_Type
+{
+	Material_Node_Bxdf,
+	Material_Node_Others,
+};
+
+class MaterialNode;
+
+class MaterialSocket
+{
+public:
+	// default constructor
+	MaterialSocket(){
+		type = Socket_Value;
+		node = 0;
+	}
+
+	// type of the socket input
+	Socket_Type type;
+
+	// temp solution
+	Spectrum		value;
+	string			str_value;
+	MaterialNode*	node;
+};
+
+class MaterialNode : public PropertySet<MaterialNode>
+{
+public:
+	// the material inputs
+	std::vector<MaterialSocket>	inputs;
+
+	// update bsdf
+	virtual void UpdateBSDF( Bsdf* bsdf );
+};
+
+class LambertNode : public MaterialNode
+{
+public:
+	// update bsdf
+	virtual void UpdateBSDF( Bsdf* bsdf );
+};
+
+class MerlNode : public MaterialNode
+{
+public:
+	// update bsdf
+	virtual void UpdateBSDF( Bsdf* bsdf );
+
+	Merl* merl;
+};
 
 ///////////////////////////////////////////////////////////
 // definition of material
@@ -34,23 +95,26 @@ class Material : public PropertySet<Material> , public ReferenceCount
 {
 // public method
 public:
-	// default constructor
-	Material(){}
-	// destructor
-	virtual ~Material() {}
+	Material();
 
 	// get bsdf
-	virtual Bsdf* GetBsdf( const Intersection* intersect ) const = 0;
+	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
 
 	// set name
 	void SetName( const string& n ) { name = n; }
 	// get name of the material
 	const string& GetName() const { return name; }
 
+	// set root
+	MaterialNode* GetRootNode() { return root; }
+
 // private field
 private:
 	// the name for the material
-	string		name;
+	string			name;
+
+	// the root node of the material
+	MaterialNode*	root;
 };
 
 #endif

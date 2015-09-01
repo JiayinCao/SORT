@@ -94,9 +94,6 @@ class SORT_use_shading_nodes(bpy.types.Operator):
 
 def draw_node_properties_recursive(layout, context, nt, node, level=0):
 
-    label_percentage = 0.3
-    prop_percentage = 0.9
-
     def indented_label(layout):
         for i in range(level):
             layout.label('',icon='BLANK1')
@@ -104,16 +101,19 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
     layout.context_pointer_set("nodetree", nt)
     layout.context_pointer_set("node", node)
 
-    def draw_props(inputs, layout):
-        for socket in inputs:
+    def draw_props(node, layout):
+        # node properties
+        node.draw_props(context,layout,indented_label)
 
+        # inputs
+        for socket in node.inputs:
             layout.context_pointer_set("socket", socket)
 
             if socket.is_linked:
                 input_node = nodes.socket_node_input(nt, socket)
                 ui_open = socket.ui_open
                 icon = 'DISCLOSURE_TRI_DOWN' if ui_open else 'DISCLOSURE_TRI_RIGHT'
-                split = layout.split(label_percentage)
+                split = layout.split(common.label_percentage)
                 row = split.row()
                 indented_label(row)
                 row.prop(socket, "ui_open", icon=icon, text='', icon_only=True, emboss=False)
@@ -123,16 +123,16 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
                     draw_node_properties_recursive(layout, context, nt, input_node, level=level+1)
             else:
                 row = layout.row()
-                split = row.split(label_percentage)
+                split = row.split(common.label_percentage)
                 left_row = split.row()
                 indented_label(left_row)
                 left_row.label(socket.name)
-                split = split.split(prop_percentage)
+                split = split.split(common.socket_percentage)
                 middle_row = split.row()
                 middle_row.prop(socket, 'default_value')
                 split.operator_menu_enum("node.add_surface" , "node_type",text='')
 
-    draw_props(node.inputs, layout)
+    draw_props(node, layout)
     layout.separator()
 
 def panel_node_draw(layout, context, id_data, output_type, input_name):

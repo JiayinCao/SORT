@@ -6,7 +6,6 @@ from . import preference
 from . import nodes
 from . import utility
 import xml.etree.cElementTree as ET
-from io_scene_obj import export_obj
 
 # export blender information
 def export_blender(scene):
@@ -162,6 +161,15 @@ def export_scene(scene):
     tree = ET.ElementTree(root)
     tree.write(output_scene_file)
 
+def name_compat(name):
+    if name is None:
+        return 'None'
+    else:
+        return name.replace(' ', '_')
+
+mtl_dict = {}
+mtl_rev_dict = {}
+
 # export mesh file
 def export_mesh(obj,scene):
     output_path = preference.get_immediate_res_dir() + obj.name + '.obj'
@@ -176,7 +184,28 @@ def export_mesh(obj,scene):
     mesh.calc_normals_split()
     with open(output_path, 'w') as file:
         file.write("# OBJ file\n")
-        file.write("g cube\n")
+
+        # all materials are exported in blender_material.xml
+        file.write("mtllib ../blender_material.xml\n")
+
+        contextMat = None
+        materials = mesh.materials[:]
+        material_names = [m.name if m else None for m in materials]
+
+        # avoid bad index errors
+        if not materials:
+            materials = [None]
+            material_names = [name_compat(None)]
+
+        name1 = obj.name
+        name2 = obj.data.name
+        if name1 == name2:
+            obnamestring = name_compat(name1)
+        else:
+            obnamestring = '%s_%s' % (name_compat(name1), name_compat(name2))
+
+        file.write('g %s\n' % obnamestring)
+
         # output vertices
         for v in mesh.vertices:
             file.write("v %.4f %.4f %.4f\n" % v.co[:])
@@ -201,6 +230,64 @@ def export_mesh(obj,scene):
         me_verts = mesh.vertices
 
         for f, f_index in face_index_pairs:
+            f_smooth = f.use_smooth
+            #if f_smooth and smooth_groups:
+            #    f_smooth = smooth_groups[f_index]
+            f_mat = min(f.material_index, len(materials) - 1)
+
+            #if faceuv:
+            #    tface = uv_texture[f_index]
+            #    f_image = tface.image
+
+            # MAKE KEY
+            #if faceuv and f_image:  # Object is always true.
+            #    key = material_names[f_mat], f_image.name
+            #else:
+            key = material_names[f_mat], None  # No image, use None instead.
+
+            # CHECK FOR CONTEXT SWITCH
+            if key == contextMat:
+                pass  # Context already switched, dont do anything
+            else:
+                if key[0] is None and key[1] is None:
+                    # Write a null material, since we know the context has changed.
+                    #if EXPORT_GROUP_BY_MAT:
+                    # can be mat_image or (null)
+                    file.write("g %s_%s\n" % (name_compat(ob.name), name_compat(ob.data.name)))
+                    file.write("usemtl (null)\n")
+                else:
+                    mat_data = mtl_dict.get(key)
+                    if not mat_data:
+                        # First add to global dict so we can export to mtl
+                        # Then write mtl
+
+                        # Make a new names from the mat and image name,
+                        # converting any spaces to underscores with name_compat.
+
+                        # If none image dont bother adding it to the name
+                        # Try to avoid as much as possible adding texname (or other things)
+                        # to the mtl name (see [#32102])...
+                        mtl_name = "%s" % name_compat(key[0])
+                        if mtl_rev_dict.get(mtl_name, None) not in {key, None}:
+                            if key[1] is None:
+                                tmp_ext = "_NONE"
+                            else:
+                                tmp_ext = "_%s" % name_compat(key[1])
+                            i = 0
+                            while mtl_rev_dict.get(mtl_name + tmp_ext, None) not in {key, None}:
+                                i += 1
+                                tmp_ext = "_%3d" % i
+                            mtl_name += tmp_ext
+                        mat_data = mtl_dict[key] = mtl_name, materials[f_mat], None
+                        mtl_rev_dict[mtl_name] = key
+
+                    file.write("g %s_%s_%s\n" % (name_compat(obj.name), name_compat(obj.data.name), mat_data[0]))
+                    file.write("usemtl %s\n" % mat_data[0])
+
+            # update current context material
+            contextMat = key
+
+            # output face information
             f_v = [(vi, me_verts[v_idx], l_idx)
                        for vi, (v_idx, l_idx) in enumerate(zip(f.vertices, f.loop_indices))]
             file.write("f")
@@ -223,20 +310,24 @@ def export_material():
             mat_node = ET.SubElement( root , 'Material', name=material.name )
 
             def draw_props(mat_node , xml_node):
+                #for prop in mat_node.prop_inputs:
+                #    print('Property:'+prop.output_default_value_to_str())
+                #    ET.SubElement( xml_node , 'Property' , name=prop.name , type='value', value=prop.output_default_value_to_str() )
+                mat_node.export_prop(xml_node)
+
                 inputs = mat_node.inputs
                 for socket in inputs:
                     if socket.is_linked:
                         input_node = nodes.socket_node_input(ntree, socket)
-                        sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , node=input_node.bl_idname)
+                        sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
                         draw_props(input_node,sub_xml_node)
                     else:
-                        ET.SubElement( xml_node , 'Property' , name=socket.name , value=socket.output_default_value_to_str() )
+                        ET.SubElement( xml_node , 'Property' , name=socket.name , type='value', value=socket.output_default_value_to_str() )
 
             draw_props(output_node, mat_node)
 
     # output the xml
-    output_material_file = preference.get_immediate_dir() + 'material.xml'
-    print(output_material_file)
+    output_material_file = preference.get_immediate_dir() + 'blender_material.xml'
     tree = ET.ElementTree(root)
     tree.write(output_material_file)
 

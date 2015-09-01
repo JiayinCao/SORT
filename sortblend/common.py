@@ -7,3 +7,6 @@ thread_panel_bl_name = 'MultiThread'
 debug_panel_bl_name = 'DebugPanel'
 
 material_slot_panel_bl_name = 'MaterialSlot'
+
+label_percentage = 0.3
+socket_percentage = 0.9

@@ -1,4 +1,5 @@
 import bpy
+import xml.etree.cElementTree as ET
 from . import common
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
@@ -41,10 +42,13 @@ class SORTSocket:
         if self.is_linked or self.is_output:
             layout.label(text)
         else:
-            layout.label(text)
-            layout.prop(node.inputs[text], 'default_value')
+            row = layout.row()
+            split = row.split(common.label_percentage)
+            left_row = split.row()
+            left_row.label(text)
+            split.prop(node.inputs[text], 'default_value')
 
-# Custom socket type for connecting shaders
+# socket for SORT node
 class SORTShaderSocket(bpy.types.NodeSocketShader, SORTSocket):
     '''Renderman shader input/output'''
     bl_idname = 'SORTShaderSocket'
@@ -75,6 +79,25 @@ class SORTShadingNode(bpy.types.Node):
     bl_idname = 'SORTShadingNode'
     bl_icon = 'MATERIAL'
 
+    def export_prop(self, xml_node):
+        pass
+
+    def draw_props(self, context, layout, indented_label):
+        pass
+
+    def draw_button(self, layout, label, prop):
+        row = layout.row()
+        row.label(label)
+        row.prop(self,prop)
+
+    def draw_prop(self, layout, label, prop, indented_label):
+        row = layout.row()
+        split = row.split(common.label_percentage)
+        left_row = split.row()
+        indented_label(left_row)
+        left_row.label(label)
+        split.prop(self, prop)
+
 # output node
 class SORTOutputNode(SORTShadingNode):
     bl_label = 'SORT_output'
@@ -97,18 +120,53 @@ class SORTMicrofacetNode(SORTShadingNode):
     bl_label = 'SORT_microfacet'
     bl_idname = 'SORTMicrofacetNode'
 
+    fresnel_item = [ ("FresnelNo", "No Fresnel", "", 1),
+                     ("FresnelConductor" , "FresnelConductor" , "", 2),
+                     ("FresnelDielectric" , "FresnelDielectric" , "", 3)
+                   ]
+    fresnel_prop = bpy.props.EnumProperty(name='',items=fresnel_item)
+
+    mfdist_item = [ ("MicroFacetDistribution", "Blinn", "", 1),
+                     ("MicroFacetDistribution" , "Anisotropic" , "", 2)
+                   ]
+    mfdist_prop = bpy.props.EnumProperty(name='',items=mfdist_item)
+
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
         self.outputs.new('SORTShaderSocket', 'Result')
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Fresnel" , "fresnel_prop")
+        self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Fresnel' , 'fresnel_prop' , indented_label)
+        self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='value', value= self.fresnel_prop )
+        ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='value', value= self.mfdist_prop )
 
 # merl node
 class SORTMerlNode(SORTShadingNode):
     bl_label = 'SORT_merl'
     bl_idname = 'SORTMerlNode'
 
+    file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
+
     def init(self, context):
-        self.inputs.new('SORTNodeSocketString', 'Filename')
         self.outputs.new('SORTShaderSocket', 'Result')
+
+    def draw_buttons(self, context, layout):
+        row = layout.row()
+        row.label("Filename")
+        row.prop(self,'file_name_prop')
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='value', value= self.file_name_prop )
 
 # our own base class with an appropriate poll function,
 # so the categories only show up in our own tree type
