@@ -85,7 +85,9 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         yres = bpy.data.scenes[0].render.resolution_y * bpy.data.scenes[0].render.resolution_percentage / 100
         result = self.begin_result(0, 0, xres, yres)
         lay = result.layers[0]
-        lay.load_from_file(preference.get_immediate_dir() + 'blender_generated.exr')
+        result_filename = preference.get_immediate_dir() + 'blender_generated.exr'
+        if os.path.isfile(result_filename):
+            lay.load_from_file(result_filename)
         self.end_result(result)
 
 def register():
