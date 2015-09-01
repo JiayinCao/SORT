@@ -66,7 +66,7 @@ void Merl::_release()
 void Merl::_loadBrdf( const string& filename )
 {
 	// get full path
-	string str = GetFullPath( filename );
+	string str = ( filename );
 
 	// try to open the file
 	ifstream file( str.c_str() , ios::binary );
