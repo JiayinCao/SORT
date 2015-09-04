@@ -154,11 +154,10 @@ unsigned MatManager::ParseMatFile( const string& str )
 	{
 		// parse the material
 		string name = material->Attribute( "name" );
-		//string type = material->Attribute( "type" );
 
-		// check if there is a material with the specific name, crash if there is
-		//if( FindMaterial( name ) != 0 )
-		//	LOG_ERROR<<"A material named \'"<<name<<"\' already exists in material system."<<CRASH;
+		// check if there is a material with the specific name
+		if( FindMaterial( name ) != 0 )
+			continue;
 
 		Material* mat = new Material();
 		mat->SetName(name);

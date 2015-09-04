@@ -3,6 +3,7 @@ import os
 import shutil
 import numpy as np
 from . import preference
+from . import common
 from . import nodes
 from . import utility
 import xml.etree.cElementTree as ET
@@ -253,7 +254,7 @@ def export_mesh(obj,scene):
                     # Write a null material, since we know the context has changed.
                     #if EXPORT_GROUP_BY_MAT:
                     # can be mat_image or (null)
-                    file.write("g %s_%s\n" % (name_compat(ob.name), name_compat(ob.data.name)))
+                    file.write("g %s_%s\n" % (name_compat(obj.name), name_compat(obj.data.name)))
                     file.write("usemtl (null)\n")
                 else:
                     mat_data = mtl_dict.get(key)
@@ -302,7 +303,7 @@ def export_material():
     for material in bpy.data.materials:
         if material and material.sort_material and material.sort_material.sortnodetree:
             ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-            output_node = nodes.find_node(material, 'SORTOutputNode')
+            output_node = nodes.find_node(material, common.sort_node_output_bl_name)
             if output_node is None:
                 continue
 
