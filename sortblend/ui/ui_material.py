@@ -85,8 +85,8 @@ class SORT_use_shading_nodes(bpy.types.Operator):
             nt = bpy.data.node_groups.new(group_name, type='SORTPatternGraph')
 
         mat.sort_material.sortnodetree = nt.name
-        output = nt.nodes.new('SORTOutputNode')
-        default = nt.nodes.new('SORTLambertNode')
+        output = nt.nodes.new(common.sort_node_output_bl_name)
+        default = nt.nodes.new('SORTNodeLambert')
         default.location = output.location
         default.location[0] -= 300
         nt.links.new(default.outputs[0], output.inputs[0])
@@ -135,14 +135,14 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
     draw_props(node, layout)
     layout.separator()
 
-def panel_node_draw(layout, context, id_data, output_type, input_name):
+def panel_node_draw(layout, context, id_data, input_name):
     if not id_data.sort_material.use_sort_nodes:
         layout.operator("sort.use_shading_nodes", icon='NODETREE')
         return False
 
     ntree = bpy.data.node_groups[id_data.sort_material.sortnodetree]
 
-    output_node = nodes.find_node(id_data, output_type)
+    output_node = nodes.find_node(id_data, common.sort_node_output_bl_name)
 
     if output_node is None:
         layout.operator("sort.use_shading_nodes", icon='NODETREE')
@@ -156,8 +156,8 @@ def panel_node_draw(layout, context, id_data, output_type, input_name):
 
     if output_node is not None:
         draw_node_properties_recursive(layout, context, ntree, output_node)
-        input = nodes.find_node_input(output_node, input_name)
-        layout.template_node_view(ntree, output_node, input)
+#        input = nodes.find_node_input(output_node, input_name)
+#        layout.template_node_view(ntree, output_node, input)
 
 from .. import material
 
@@ -169,4 +169,4 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
         return context.material and SORTMaterialPanel.poll(context)
 
     def draw(self, context):
-        panel_node_draw(self.layout, context, context.material, 'SORTOutputNode', 'Surface')
+        panel_node_draw(self.layout, context, context.material, 'Surface')

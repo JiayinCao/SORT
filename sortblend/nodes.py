@@ -35,8 +35,9 @@ class SORTSocket:
     def draw_value(self, context, layout, node):
         layout.prop(node, self.name)
 
+    # green node for color
     def draw_color(self, context, node):
-        return (0.1, 1.0, 0.2, 0.75)
+        return (0.1, 0.1, 0.1, 0.75)
 
     def draw(self, context, layout, node, text):
         if self.is_linked or self.is_output:
@@ -55,23 +56,48 @@ class SORTShaderSocket(bpy.types.NodeSocketShader, SORTSocket):
     bl_label = 'SORT Shader Socket'
     default_value = None
 
+    # green node for color
+    def draw_color(self, context, node):
+        return (1.0, 1.0, 0.2, 1.0)
+
+class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTSocket):
+    bl_idname = 'SORTNodeSocketFloat'
+    bl_label = 'SORT Float Socket'
+
+    default_value = bpy.props.FloatProperty( name='' , default=0.0 )
+
+    # green node for color
+    def draw_color(self, context, node):
+        return (0.1, 0.1, 0.3, 1.0)
+
+    def output_default_value_to_str(self):
+        return '%f'%(self.default_value)
+
+class SORTNodeSocketFloat2(bpy.types.NodeSocketFloat, SORTSocket):
+    bl_idname = 'SORTNodeSocketFloat2'
+    bl_label = 'SORT Float2 Socket'
+
+    default_value = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0) ,subtype='NONE' ,size=2 )
+
+    # green node for color
+    def draw_color(self, context, node):
+        return (0.1, 0.65 , 0.3, 1.0)
+
+    def output_default_value_to_str(self):
+        return '%f'%(self.default_value)
+
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
     bl_idname = 'SORTNodeSocketColor'
     bl_label = 'SORT Color Socket'
 
     default_value = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
 
+    # green node for color
+    def draw_color(self, context, node):
+        return (0.1, 1.0, 0.2, 1.0)
+
     def output_default_value_to_str(self):
         return '%f %f %f'%(self.default_value[0],self.default_value[1],self.default_value[2])
-
-class SORTNodeSocketString(bpy.types.NodeSocketString, SORTSocket):
-    bl_idname = 'SORTNodeSocketString'
-    bl_label = 'SORT String Socket'
-
-    default_value = bpy.props.StringProperty( name='' , default='' ,subtype='FILE_PATH' )
-
-    def output_default_value_to_str(self):
-        return self.default_value
 
 # sort material node root
 class SORTShadingNode(bpy.types.Node):
@@ -99,26 +125,26 @@ class SORTShadingNode(bpy.types.Node):
         split.prop(self, prop)
 
 # output node
-class SORTOutputNode(SORTShadingNode):
+class SORTNodeOutput(SORTShadingNode):
     bl_label = 'SORT_output'
-    bl_idname = 'SORTOutputNode'
+    bl_idname = common.sort_node_output_bl_name
 
     def init(self, context):
-        input = self.inputs.new('SORTShaderSocket', 'Surface')
+        input = self.inputs.new('SORTNodeSocketColor', 'Surface')
 
 # lambert node
-class SORTLambertNode(SORTShadingNode):
+class SORTNodeLambert(SORTShadingNode):
     bl_label = 'SORT_lambert'
-    bl_idname = 'SORTLambertNode'
+    bl_idname = 'SORTNodeLambert'
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
-        self.outputs.new('SORTShaderSocket', 'Result')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
 
 # microfacte node
-class SORTMicrofacetNode(SORTShadingNode):
+class SORTNodeMicrofacet(SORTShadingNode):
     bl_label = 'SORT_microfacet'
-    bl_idname = 'SORTMicrofacetNode'
+    bl_idname = 'SORTNodeMicrofacet'
 
     fresnel_item = [ ("FresnelNo", "No Fresnel", "", 1),
                      ("FresnelConductor" , "FresnelConductor" , "", 2),
@@ -133,7 +159,7 @@ class SORTMicrofacetNode(SORTShadingNode):
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
-        self.outputs.new('SORTShaderSocket', 'Result')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
         self.draw_button(layout, "Fresnel" , "fresnel_prop")
@@ -148,14 +174,185 @@ class SORTMicrofacetNode(SORTShadingNode):
         ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='value', value= self.mfdist_prop )
 
 # merl node
-class SORTMerlNode(SORTShadingNode):
+class SORTNodeMerl(SORTShadingNode):
     bl_label = 'SORT_merl'
-    bl_idname = 'SORTMerlNode'
+    bl_idname = 'SORTNodeMerl'
 
     file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
 
     def init(self, context):
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+    def draw_buttons(self, context, layout):
+        row = layout.row()
+        row.label("Filename")
+        row.prop(self,'file_name_prop')
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='value', value= self.file_name_prop )
+
+# oren nayar node
+class SORTNodeOrenNayar(SORTShadingNode):
+    bl_label = 'SORT_orennayar'
+    bl_idname = 'SORTNodeOrenNayar'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
+        self.inputs.new('SORTNodeSocketFloat', 'Sigma')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+# reflection node
+class SORTNodeReflection(SORTShadingNode):
+    bl_label = 'SORT_reflection'
+    bl_idname = 'SORTNodeReflection'
+
+    fresnel_item = [ ("FresnelNo", "No Fresnel", "", 1),
+                     ("FresnelConductor" , "FresnelConductor" , "", 2),
+                     ("FresnelDielectric" , "FresnelDielectric" , "", 3)
+                   ]
+    fresnel_prop = bpy.props.EnumProperty(name='',items=fresnel_item)
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Fresnel" , "fresnel_prop")
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Fresnel' , 'fresnel_prop' , indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='value', value= self.fresnel_prop )
+
+# reflection node
+class SORTNodeRefraction(SORTShadingNode):
+    bl_label = 'SORT_refraction'
+    bl_idname = 'SORTNodeReraction'
+
+    fresnel_item = [ ("FresnelNo", "No Fresnel", "", 1),
+                     ("FresnelConductor" , "FresnelConductor" , "", 2),
+                     ("FresnelDielectric" , "FresnelDielectric" , "", 3)
+                   ]
+    fresnel_prop = bpy.props.EnumProperty(name='',items=fresnel_item)
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
+        self.inputs.new('SORTNodeSocketFloat', 'RefractionIndexOut')
+        self.inputs.new('SORTNodeSocketFloat', 'RefractionIndexIn')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Fresnel" , "fresnel_prop")
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Fresnel' , 'fresnel_prop' , indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='value', value= self.fresnel_prop )
+
+# operator nodes
+class SORTNodeAdd(SORTShadingNode):
+    bl_label = 'SORT_add'
+    bl_idname = 'SORTNodeAdd'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'Color1')
+        self.inputs.new('SORTNodeSocketColor', 'Color2')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+class SORTNodeMultiply(SORTShadingNode):
+    bl_label = 'SORT_multiply'
+    bl_idname = 'SORTNodeMultiply'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'Color1')
+        self.inputs.new('SORTNodeSocketColor', 'Color2')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+class SORTNodeBlend(SORTShadingNode):
+    bl_label = 'SORT_blend'
+    bl_idname = 'SORTNodeBlend'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'Color1')
+        self.inputs.new('SORTNodeSocketFloat', 'Factor1')
+        self.inputs.new('SORTNodeSocketColor', 'Color2')
+        self.inputs.new('SORTNodeSocketFloat', 'Factor2')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+class SORTNodeLerp(SORTShadingNode):
+    bl_label = 'SORT_lerp'
+    bl_idname = 'SORTNodeLerp'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'Color1')
+        self.inputs.new('SORTNodeSocketColor', 'Color2')
+        self.inputs.new('SORTNodeSocketFloat', 'Factor')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+# input nodoes
+class SORTNodePosition(SORTShadingNode):
+    bl_label = 'SORT_position'
+    bl_idname = 'SORTNodePosition'
+
+    def init(self, context):
         self.outputs.new('SORTShaderSocket', 'Result')
+
+class SORTNodeNormal(SORTShadingNode):
+    bl_label = 'SORT_normal'
+    bl_idname = 'SORTNodeNormal'
+
+    def init(self, context):
+        self.outputs.new('SORTShaderSocket', 'Result')
+
+class SORTNodeUV(SORTShadingNode):
+    bl_label = 'SORT_uv'
+    bl_idname = 'SORTNodeUV'
+
+    def init(self, context):
+        self.outputs.new('SORTNodeSocketFloat2', 'Result')
+
+# texture nodes
+class SORTNodeConstant(SORTShadingNode):
+    bl_label = 'SORT_constant'
+    bl_idname = 'SORTNodeConstant'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'Color')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+class SORTNodeGrid(SORTShadingNode):
+    bl_label = 'SORT_grid'
+    bl_idname = 'SORTNodeGrid'
+
+    def init(self, context):
+        socket = self.inputs.new('SORTNodeSocketFloat2','UV')
+        socket.editable = False
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+class SORTNodeCheckbox(SORTShadingNode):
+    bl_label = 'SORT_checkbox'
+    bl_idname = 'SORTNodeCheckbox'
+
+    def init(self, context):
+        socket = self.inputs.new('SORTNodeSocketFloat2','UV')
+        socket.editable = False
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+class SORTNodeImage(SORTShadingNode):
+    bl_label = 'SORT_image'
+    bl_idname = 'SORTNodeImage'
+
+    file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
+
+    def init(self, context):
+        socket = self.inputs.new('SORTNodeSocketFloat2','UV')
+        socket.editable = False
+        self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
         row = layout.row()
@@ -268,10 +465,17 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_output_nodes", "SORT outputs",items = []),
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTLambertNode"),NodeItem("SORTMerlNode"),NodeItem("SORTMicrofacetNode")] ),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacet"),NodeItem("SORTNodeOrenNayar"),NodeItem("SORTNodeReflection"),NodeItem("SORTNodeReraction")] ),
+        SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
+        SORTPatternNodeCategory("SORT_input", "SORT Input",items= [NodeItem("SORTNodePosition"),NodeItem("SORTNodeNormal"),NodeItem("SORTNodeUV")] ),
+        SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeConstant"),NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
     ]
     nodeitems_utils.register_node_categories("SORTSHADERNODES",node_categories)
 
     # register node types
-    SORTPatternGraph.nodetypes[SORTLambertNode] = 'SORTLambertNode'
+    SORTPatternGraph.nodetypes[SORTNodeLambert] = 'SORTNodeLambert'
+    SORTPatternGraph.nodetypes[SORTNodeMerl] = 'SORTNodeMerl'
+    SORTPatternGraph.nodetypes[SORTNodeMicrofacet] = 'SORTNodeMicrofacet'
+    SORTPatternGraph.nodetypes[SORTNodeOrenNayar] = 'SORTNodeOrenNayar'
+    SORTPatternGraph.nodetypes[SORTNodeReflection] = 'SORTNodeReflection'
+    SORTPatternGraph.nodetypes[SORTNodeRefraction] = 'SORTNodeRefraction'
