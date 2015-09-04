@@ -6,7 +6,6 @@ from . import preference
 from . import nodes
 from . import utility
 import xml.etree.cElementTree as ET
-from io_scene_obj import export_obj
 
 # export blender information
 def export_blender(scene):
@@ -311,6 +310,11 @@ def export_material():
             mat_node = ET.SubElement( root , 'Material', name=material.name )
 
             def draw_props(mat_node , xml_node):
+                #for prop in mat_node.prop_inputs:
+                #    print('Property:'+prop.output_default_value_to_str())
+                #    ET.SubElement( xml_node , 'Property' , name=prop.name , type='value', value=prop.output_default_value_to_str() )
+                mat_node.export_prop(xml_node)
+
                 inputs = mat_node.inputs
                 for socket in inputs:
                     if socket.is_linked:
