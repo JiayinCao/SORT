@@ -231,7 +231,7 @@ class SORTNodeReflection(SORTShadingNode):
 # reflection node
 class SORTNodeRefraction(SORTShadingNode):
     bl_label = 'SORT_refraction'
-    bl_idname = 'SORTNodeReraction'
+    bl_idname = 'SORTNodeRefraction'
 
     fresnel_item = [ ("FresnelNo", "No Fresnel", "", 1),
                      ("FresnelConductor" , "FresnelConductor" , "", 2),
@@ -465,7 +465,7 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacet"),NodeItem("SORTNodeOrenNayar"),NodeItem("SORTNodeReflection"),NodeItem("SORTNodeReraction")] ),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacet"),NodeItem("SORTNodeOrenNayar"),NodeItem("SORTNodeReflection"),NodeItem("SORTNodeRefraction")] ),
         SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
         SORTPatternNodeCategory("SORT_input", "SORT Input",items= [NodeItem("SORTNodePosition"),NodeItem("SORTNodeNormal"),NodeItem("SORTNodeUV")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeConstant"),NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
