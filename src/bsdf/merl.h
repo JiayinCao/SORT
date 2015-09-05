@@ -36,9 +36,12 @@ class Merl : public Bxdf
 public:
 	// constructor from a filename
 	// para 'filename' : the file name for the brdf
-	Merl( const string& filename );
+	Merl();
 	// destructor
 	~Merl();
+
+	// Load data from file
+	void	LoadData( const string& filename );
 
 	// whether the data is valid
 	bool	IsValid() { return m_data != 0 ; }

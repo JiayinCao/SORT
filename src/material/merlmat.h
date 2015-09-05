@@ -55,7 +55,7 @@ private:
 	~MerlMat();
 
 // property handler
-	class MerlProperty : public PropertyHandler<Material>
+	/*class MerlProperty : public PropertyHandler<Material>
 	{
 	public:
 		PH_CONSTRUCTOR(MerlProperty,Material);
@@ -74,7 +74,7 @@ private:
 			else
 				delete merl;
 		}
-	};
+	};*/
 };
 
 #endif

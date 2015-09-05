@@ -79,9 +79,9 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		if( !specular ) intersect_diffuse = true;
 
 		// update path weight
-		path_weight *= f * SatDot( wi , inter.normal ) / path_pdf;
+		path_weight *= f * AbsDot( wi , inter.normal ) / path_pdf;
 
-		if( path_weight.GetIntensity() == 0.0f )
+		if( path_weight.GetIntensity() == 0.0f && specular == false )
 			break;
 		if( bounces > 4 && intersect_diffuse )
 		{
