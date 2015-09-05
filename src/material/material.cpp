@@ -19,47 +19,26 @@
 #include "material.h"
 #include "bsdf/bsdf.h"
 #include "managers/memmanager.h"
-#include "bsdf/lambert.h"
-#include "bsdf/merl.h"
 
 // default constructor
 Material::Material()
 {
-	root = new MaterialNode();
+	root = new OutputNode();
 }
 
 Bsdf* Material::GetBsdf( const Intersection* intersect ) const
 {
 	Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-	vector<MaterialSocket>::iterator it = root->inputs.begin();
-	while( it != root->inputs.end() )
-	{
-		it->node->UpdateBSDF(bsdf);
-		++it;
-	}
+	root->UpdateBSDF(bsdf);
 	return bsdf;
 }
 
-// update bsdf
-void MaterialNode::UpdateBSDF( Bsdf* bsdf )
+// parse material
+void Material::ParseMaterial( TiXmlElement* element )
 {
-	vector<MaterialSocket>::iterator it = inputs.begin();
-	while( it != inputs.end() )
-	{
-		if( it->type == Socket_Node )
-			it->node->UpdateBSDF(bsdf);
-		++it;
-	}
-}
+	// parse node property
+	root->ParseProperty( element , root );
 
-void LambertNode::UpdateBSDF( Bsdf* bsdf )
-{
-	Spectrum color = inputs[0].value;
-	Lambert* lambert = SORT_MALLOC(Lambert)( color );
-	bsdf->AddBxdf( lambert );
-}
-
-void MerlNode::UpdateBSDF( Bsdf* bsdf )
-{
-	bsdf->AddBxdf( merl );
+	// post process material
+	root->PostProcess();
 }

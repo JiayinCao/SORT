@@ -34,11 +34,15 @@ const double Merl::MERL_GREEN_SCALE = 0.000766666666666667;
 const double Merl::MERL_BLUE_SCALE = 0.0011066666666666667;
 
 // default constructor
-Merl::Merl( const string& filename )
+Merl::Merl()
 {
 	// initialize default data
 	_init();
+}
 
+// Load data from file
+void Merl::LoadData( const string& filename )
+{
 	// load the brdf data
 	_loadBrdf( filename );
 }

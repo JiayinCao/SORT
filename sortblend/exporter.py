@@ -323,7 +323,7 @@ def export_material():
                         sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
                         draw_props(input_node,sub_xml_node)
                     else:
-                        ET.SubElement( xml_node , 'Property' , name=socket.name , type='value', value=socket.output_default_value_to_str() )
+                        ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.output_type_str(), value=socket.output_default_value_to_str() )
 
             draw_props(output_node, mat_node)
 
