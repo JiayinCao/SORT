@@ -73,6 +73,9 @@ class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTSocket):
     def output_default_value_to_str(self):
         return '%f'%(self.default_value)
 
+    def output_type_str(self):
+        return 'float'
+
 class SORTNodeSocketFloat2(bpy.types.NodeSocketFloat, SORTSocket):
     bl_idname = 'SORTNodeSocketFloat2'
     bl_label = 'SORT Float2 Socket'
@@ -86,6 +89,9 @@ class SORTNodeSocketFloat2(bpy.types.NodeSocketFloat, SORTSocket):
     def output_default_value_to_str(self):
         return '%f'%(self.default_value)
 
+    def output_type_str(self):
+        return 'float2'
+
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
     bl_idname = 'SORTNodeSocketColor'
     bl_label = 'SORT Color Socket'
@@ -98,6 +104,9 @@ class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
 
     def output_default_value_to_str(self):
         return '%f %f %f'%(self.default_value[0],self.default_value[1],self.default_value[2])
+
+    def output_type_str(self):
+        return 'color'
 
 # sort material node root
 class SORTShadingNode(bpy.types.Node):
@@ -152,8 +161,8 @@ class SORTNodeMicrofacet(SORTShadingNode):
                    ]
     fresnel_prop = bpy.props.EnumProperty(name='',items=fresnel_item)
 
-    mfdist_item = [ ("MicroFacetDistribution", "Blinn", "", 1),
-                     ("MicroFacetDistribution" , "Anisotropic" , "", 2)
+    mfdist_item = [ ("Blinn", "Blinn", "", 1),
+                     ("Anisotropic" , "Anisotropic" , "", 2)
                    ]
     mfdist_prop = bpy.props.EnumProperty(name='',items=mfdist_item)
 
@@ -170,8 +179,8 @@ class SORTNodeMicrofacet(SORTShadingNode):
         self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
 
     def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='value', value= self.fresnel_prop )
-        ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='value', value= self.mfdist_prop )
+        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='string', value= self.fresnel_prop )
+        ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='string', value= self.mfdist_prop )
 
 # merl node
 class SORTNodeMerl(SORTShadingNode):
@@ -192,7 +201,7 @@ class SORTNodeMerl(SORTShadingNode):
         self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
 
     def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Filename' , type='value', value= self.file_name_prop )
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
 
 # oren nayar node
 class SORTNodeOrenNayar(SORTShadingNode):
@@ -226,7 +235,7 @@ class SORTNodeReflection(SORTShadingNode):
         self.draw_prop(layout, 'Fresnel' , 'fresnel_prop' , indented_label)
 
     def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='value', value= self.fresnel_prop )
+        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='string', value= self.fresnel_prop )
 
 # reflection node
 class SORTNodeRefraction(SORTShadingNode):
@@ -252,7 +261,7 @@ class SORTNodeRefraction(SORTShadingNode):
         self.draw_prop(layout, 'Fresnel' , 'fresnel_prop' , indented_label)
 
     def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='value', value= self.fresnel_prop )
+        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='string', value= self.fresnel_prop )
 
 # operator nodes
 class SORTNodeAdd(SORTShadingNode):
@@ -363,7 +372,7 @@ class SORTNodeImage(SORTShadingNode):
         self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
 
     def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Filename' , type='value', value= self.file_name_prop )
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
 
 # our own base class with an appropriate poll function,
 # so the categories only show up in our own tree type

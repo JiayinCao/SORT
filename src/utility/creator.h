@@ -87,6 +87,6 @@ private:
 	void* CreateInstance() { return new T(); }\
 };
 
-#define IMPLEMENT_CREATOR( T ) static T::T##Creator g_creator;
+#define IMPLEMENT_CREATOR( T ) static T::T##Creator g_creator##T;
 
 #endif

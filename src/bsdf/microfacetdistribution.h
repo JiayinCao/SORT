@@ -50,7 +50,7 @@ class Anisotropic : public MicroFacetDistribution
 public:
 	// constructor
 	Anisotropic( float ei , float et ){
-		m_ex = ei; m_ex = et;
+		m_ex = ei; m_ey = et;
 		if( m_ex > 10000.0f ) m_ex = 10000.0f;
 		if( m_ey > 10000.0f ) m_ey = 10000.0f;
 	}

@@ -36,7 +36,7 @@ MerlMat::~MerlMat()
 // register property
 void MerlMat::_registerAllProperty()
 {
-	_registerProperty( "merl" , new MerlProperty( this ) );
+//	_registerProperty( "merl" , new MerlProperty( this ) );
 }
 
 // initialize default value and register property

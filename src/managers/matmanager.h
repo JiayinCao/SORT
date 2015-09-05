@@ -26,7 +26,6 @@
 // pre-decleration
 class Material;
 class TiXmlElement;
-class MaterialNode;
 
 /////////////////////////////////////////////////////////////////////////////
 //	definition of material manager
@@ -72,9 +71,6 @@ private:
 
 	// clear the material pool
 	void _clearMatPool();
-
-	// parse material nodes
-	MaterialNode*	_parseMaterialNode( TiXmlElement* prop , const string& name );
 
 	friend class Singleton<MatManager>;
 };

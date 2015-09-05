@@ -27,6 +27,7 @@
 #include "texture/constanttexture.h"
 #include "utility/creator.h"
 #include "bsdf/merl.h"
+#include "utility/creator.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MatManager);
@@ -82,53 +83,6 @@ Material* MatManager::GetDefaultMat() const
 	return m_Default;
 }
 
-// parse material nodes
-MaterialNode* MatManager::_parseMaterialNode( TiXmlElement* element , const string& name )
-{
-	string node_type = element->Attribute( "node" );
-
-	// create new material node
-	MaterialNode* node = 0;
-	if( node_type == "SORTLambertNode" )
-		node = new LambertNode();
-	else if( node_type == "SORTMerlNode" )
-		node = new MerlNode();
-	else
-		node = new MaterialNode();
-
-	TiXmlElement* prop = element->FirstChildElement( "Property" );
-	while(prop)
-	{
-		string prop_name = prop->Attribute( "name" );
-		string prop_type = prop->Attribute( "type" );
-
-		// add socket input
-		MaterialSocket socket;
-		if( prop_type == "node" )
-		{
-			socket.type = Socket_Node;
-			socket.node = _parseMaterialNode( prop , prop_name );
-		}else
-		{
-			socket.type = Socket_Value;
-			string prop_value = prop->Attribute( "value" );
-			if( node_type == "SORTLambertNode" )
-				socket.value = SpectrumFromStr( prop_value );
-			else if( node_type == "SORTMerlNode" ){
-				socket.str_value = prop_value;
-				MerlNode* merlNode = (MerlNode*)node;
-				merlNode->merl = new Merl(socket.str_value);
-			}
-		}
-		node->inputs.push_back( socket );
-			
-		// get next property
-		prop = element->NextSiblingElement( "Property" );
-	}
-
-	return node;
-}
-
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( const string& str )
 {
@@ -157,32 +111,17 @@ unsigned MatManager::ParseMatFile( const string& str )
 
 		// check if there is a material with the specific name
 		if( FindMaterial( name ) != 0 )
+		{
+			// parse the next material
+			material = material->NextSiblingElement( "Material" );
+
+			// skip this material
 			continue;
+		}
 
 		Material* mat = new Material();
 		mat->SetName(name);
-		TiXmlElement* prop = material->FirstChildElement( "Property" );
-		while(prop)
-		{
-			MaterialNode* root = mat->GetRootNode();
-			string prop_name = prop->Attribute( "name" );
-			string prop_type = prop->Attribute( "type" );
-
-			// add socket input
-			MaterialSocket socket;
-			if( prop_type == "node" )
-			{
-				socket.node = _parseMaterialNode( prop , prop_name );
-			}else
-			{
-				string prop_value = prop->Attribute( "value" );
-				socket.value = SpectrumFromStr( prop_value );
-			}
-			root->inputs.push_back( socket );
-			
-			// get next property
-			prop = material->NextSiblingElement( "Property" );
-		}
+		mat->ParseMaterial( material );
 
 		// push the material
 		m_matPool.insert( make_pair( name , mat ) );
