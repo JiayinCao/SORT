@@ -90,7 +90,7 @@ class MaterialNode : public PropertySet<MaterialNode>
 {
 public:
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf ) = 0;
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 	// parse property or socket
 	virtual void ParseProperty( TiXmlElement* element , MaterialNode* node );
@@ -115,7 +115,7 @@ public:
 	OutputNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf );
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 private:
 	MaterialNodePropertyColor	output;
@@ -131,7 +131,7 @@ public:
 	LambertNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf );
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 private:
 	MaterialNodePropertyColor	baseColor;
@@ -147,7 +147,7 @@ public:
 	MerlNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf );
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 	// post process
 	virtual void PostProcess();
@@ -169,7 +169,7 @@ public:
 	OrenNayarNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf );
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 private:
 	MaterialNodePropertyColor	baseColor;
@@ -187,7 +187,7 @@ public:
 	MicrofacetNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf );
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 	// post process
 	virtual void PostProcess();
@@ -211,7 +211,7 @@ public:
 	ReflectionNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf );
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 	// post process
 	virtual void PostProcess();
@@ -233,7 +233,7 @@ public:
 	RefractionNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf );
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 	// post process
 	virtual void PostProcess();
@@ -245,6 +245,57 @@ private:
 	MaterialNodePropertyFloat	theta1;
 
 	Fresnel*					pFresnel;
+};
+
+// Adding node
+class AddNode : public MaterialNode
+{
+public:
+	DEFINE_CREATOR( AddNode , "SORTNodeAdd" );
+
+	// constructor
+	AddNode();
+
+private:
+	MaterialNodePropertyColor	src0;
+	MaterialNodePropertyColor	src1;
+};
+
+// Lerp node
+class LerpNode : public MaterialNode
+{
+public:
+	DEFINE_CREATOR( LerpNode , "SORTNodeLerp" );
+
+	// constructor
+	LerpNode();
+	
+	// update bsdf
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+
+private:
+	MaterialNodePropertyColor	src0;
+	MaterialNodePropertyColor	src1;
+	MaterialNodePropertyFloat	factor;
+};
+
+// Lerp node
+class BlendNode : public MaterialNode
+{
+public:
+	DEFINE_CREATOR( BlendNode , "SORTNodeBlend" );
+
+	// constructor
+	BlendNode();
+	
+	// update bsdf
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+
+private:
+	MaterialNodePropertyColor	src0;
+	MaterialNodePropertyColor	src1;
+	MaterialNodePropertyFloat	factor0;
+	MaterialNodePropertyFloat	factor1;
 };
 
 #endif

@@ -70,7 +70,7 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )
 	{
 		if( m_bxdf[i]->MatchFlag( type ) )
-			r += m_bxdf[i]->f( swo , swi );
+			r += m_bxdf[i]->f( swo , swi ) * m_bxdf[i]->m_weight;
 	}
 
 	return r;
@@ -119,7 +119,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	Vector swo = Normalize(_worldToLocal( wo ));
 
 	// sample the direction
-	Spectrum t = bxdf->sample_f( swo , wi , bs , pdf );
+	Spectrum t = bxdf->sample_f( swo , wi , bs , pdf ) * bxdf->m_weight;
 
 	// if there is no properbility of sampling that direction , just return 0.0f
 	if( pdf && *pdf == 0.0f ) return 0.0f;
@@ -138,7 +138,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	{
 		for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
 			if( bxdf != m_bxdf[i] && m_bxdf[i]->MatchFlag(type) )
-				t += m_bxdf[i]->f(wo,wi);
+				t += m_bxdf[i]->f(wo,wi) * m_bxdf[i]->m_weight;
 	}
 	
 	// transform the direction back
