@@ -64,6 +64,9 @@ public:
 	// get bxdf type
 	BXDF_TYPE GetType() const { return m_type; }
 
+	// weight for the bxdf
+	Spectrum	m_weight;
+
 // protected field
 protected:
 	// the type for the bxdf
