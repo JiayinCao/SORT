@@ -34,6 +34,9 @@ IMPLEMENT_CREATOR( OrenNayarNode );
 IMPLEMENT_CREATOR( MicrofacetNode );
 IMPLEMENT_CREATOR( ReflectionNode );
 IMPLEMENT_CREATOR( RefractionNode );
+IMPLEMENT_CREATOR( AddNode );
+IMPLEMENT_CREATOR( LerpNode );
+IMPLEMENT_CREATOR( BlendNode );
 
 // get node property
 MaterialNodeProperty* MaterialNode::getProperty( const string& name )
@@ -140,6 +143,21 @@ void MaterialNode::PostProcess()
 	}
 }
 
+// update bsdf
+void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+	if( weight.IsBlack() )
+		return;
+
+	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
+	while( it != m_props.end() )
+	{
+		if( it->second->node )
+			it->second->node->UpdateBSDF(bsdf , weight);
+		++it;
+	}
+}
+
 OutputNode::OutputNode()
 {
 	// register node property
@@ -147,7 +165,7 @@ OutputNode::OutputNode()
 }
 
 // update bsdf
-void OutputNode::UpdateBSDF( Bsdf* bsdf )
+void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
 	if( output.node )
 		output.node->UpdateBSDF( bsdf );
@@ -158,9 +176,13 @@ LambertNode::LambertNode()
 	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
 }
 
-void LambertNode::UpdateBSDF( Bsdf* bsdf )
+void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+	if( weight.IsBlack() )
+		return;
+
 	Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.value );
+	lambert->m_weight = weight;
 	bsdf->AddBxdf( lambert );
 }
 
@@ -169,8 +191,12 @@ MerlNode::MerlNode()
 	m_props.insert( make_pair( "Filename" , &merlfile ) );
 }
 
-void MerlNode::UpdateBSDF( Bsdf* bsdf )
+void MerlNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+	if( weight.IsBlack() )
+		return;
+
+	merl.m_weight = weight;
 	bsdf->AddBxdf( &merl );
 }
 
@@ -187,9 +213,13 @@ OrenNayarNode::OrenNayarNode()
 	m_props.insert( make_pair( "Sigma" , &sigma ) );
 }
 
-void OrenNayarNode::UpdateBSDF( Bsdf* bsdf )
+void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+	if( weight.IsBlack() )
+		return;
+
 	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.value , sigma.value );
+	orennayar->m_weight = weight;
 	bsdf->AddBxdf( orennayar );
 }
 
@@ -200,9 +230,13 @@ MicrofacetNode::MicrofacetNode()
 	m_props.insert( make_pair( "Fresnel" , &fresnel ) );
 }
 
-void MicrofacetNode::UpdateBSDF( Bsdf* bsdf )
+void MicrofacetNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+	if( weight.IsBlack() )
+		return;
+
 	MicroFacet* mf = SORT_MALLOC(MicroFacet)( baseColor.value , pFresnel , pMFDist );
+	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
 }
 
@@ -229,9 +263,13 @@ ReflectionNode::ReflectionNode()
 	m_props.insert( make_pair( "Fresnel" , &fresnel ) );
 }
 
-void ReflectionNode::UpdateBSDF( Bsdf* bsdf )
+void ReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+	if( weight.IsBlack() )
+		return;
+
 	Reflection* reflection = SORT_MALLOC(Reflection)( pFresnel , baseColor.value);
+	reflection->m_weight = weight;
 	bsdf->AddBxdf( reflection );
 }
 
@@ -255,9 +293,13 @@ RefractionNode::RefractionNode()
 	m_props.insert( make_pair( "RefractionIndexIn" , &theta1 ) );
 }
 
-void RefractionNode::UpdateBSDF( Bsdf* bsdf )
+void RefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+	if( weight.IsBlack() )
+		return;
+
 	Refraction* refraction = SORT_MALLOC(Refraction)( theta0.value , theta1.value , pFresnel , baseColor.value);
+	refraction->m_weight = weight;
 	bsdf->AddBxdf( refraction );
 }
 
@@ -271,4 +313,49 @@ void RefractionNode::PostProcess()
 		pFresnel = new FresnelDielectric( theta0.value , theta1.value );
 	else
 		pFresnel = new FresnelNo();
+}
+
+AddNode::AddNode()
+{
+	m_props.insert( make_pair( "Color1" , &src0 ) );
+	m_props.insert( make_pair( "Color2" , &src1 ) );
+}
+
+LerpNode::LerpNode()
+{
+	m_props.insert( make_pair( "Color1" , &src0 ) );
+	m_props.insert( make_pair( "Color2" , &src1 ) );
+	m_props.insert( make_pair( "Factor" , &factor ) );
+}
+
+// update bsdf
+void LerpNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+	if( weight.IsBlack() )
+		return;
+
+	if( src0.node )
+		src0.node->UpdateBSDF( bsdf, weight * ( 1.0f - factor.value ) );
+	if( src1.node )
+		src1.node->UpdateBSDF( bsdf, weight * factor.value );
+}
+
+BlendNode::BlendNode()
+{
+	m_props.insert( make_pair( "Color1" , &src0 ) );
+	m_props.insert( make_pair( "Color2" , &src1 ) );
+	m_props.insert( make_pair( "Factor1" , &factor0 ) );
+	m_props.insert( make_pair( "Factor2" , &factor1 ) );
+}
+
+// update bsdf
+void BlendNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+	if( weight.IsBlack() )
+		return;
+
+	if( src0.node )
+		src0.node->UpdateBSDF( bsdf, weight * factor0.value );
+	if( src1.node )
+		src1.node->UpdateBSDF( bsdf, weight * factor1.value );
 }
