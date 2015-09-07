@@ -11,3 +11,6 @@ def matrixtostr(matrix):
 
 def veckey3d(v):
     return round(v.x, 4), round(v.y, 4), round(v.z, 4)
+
+def veckey2d(v):
+    return round(v[0], 4), round(v[1], 4)

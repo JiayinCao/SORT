@@ -1,6 +1,7 @@
 import bpy
 import xml.etree.cElementTree as ET
 from . import common
+from . import utility
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
 
@@ -87,7 +88,7 @@ class SORTNodeSocketFloat2(bpy.types.NodeSocketFloat, SORTSocket):
         return (0.1, 0.65 , 0.3, 1.0)
 
     def output_default_value_to_str(self):
-        return '%f'%(self.default_value)
+        return '%f %f'%(self.default_value[0], self.default_value[1])
 
     def output_type_str(self):
         return 'float2'
@@ -343,14 +344,44 @@ class SORTNodeGrid(SORTShadingNode):
         socket.editable = False
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
+    color1 = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
+    color2 = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Color1" , "color1")
+        self.draw_button(layout, "Color2" , "color2")
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Color1' , 'color1' , indented_label)
+        self.draw_prop(layout, 'Color2' , 'color2' , indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='Color1' , type='color', value= utility.vec3tostr(self.color1) )
+        ET.SubElement( xml_node , 'Property' , name='Color2' , type='color', value= utility.vec3tostr(self.color2) )
+
 class SORTNodeCheckbox(SORTShadingNode):
     bl_label = 'SORT_checkbox'
     bl_idname = 'SORTNodeCheckbox'
+
+    color1 = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
+    color2 = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
 
     def init(self, context):
         socket = self.inputs.new('SORTNodeSocketFloat2','UV')
         socket.editable = False
         self.outputs.new('SORTNodeSocketColor', 'Result')
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Color1" , "color1")
+        self.draw_button(layout, "Color2" , "color2")
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Color1' , 'color1' , indented_label)
+        self.draw_prop(layout, 'Color2' , 'color2' , indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='Color1' , type='color', value= utility.vec3tostr(self.color1) )
+        ET.SubElement( xml_node , 'Property' , name='Color2' , type='color', value= utility.vec3tostr(self.color2) )
 
 class SORTNodeImage(SORTShadingNode):
     bl_label = 'SORT_image'
