@@ -23,7 +23,7 @@
 #include "utility/sassert.h"
 
 // constructor
-Bsdf::Bsdf( const Intersection* intersect )
+Bsdf::Bsdf( const Intersection* _intersect ) : intersect( _intersect )
 {
 	m_bxdfCount = 0;
 

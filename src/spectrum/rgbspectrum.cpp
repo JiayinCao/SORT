@@ -18,6 +18,7 @@
 // include the header
 #include "rgbspectrum.h"
 #include "utility/define.h"
+#include "material/material_node.h"
 
 // default constructor
 RGBSpectrum::RGBSpectrum()
@@ -25,6 +26,14 @@ RGBSpectrum::RGBSpectrum()
 	m_r = 0.0f;
 	m_g = 0.0f;
 	m_b = 0.0f;
+}
+
+// constructor from node property
+RGBSpectrum::RGBSpectrum( const MaterialPropertyValue& prop )
+{
+	m_r = prop.x;
+	m_g = prop.y;
+	m_b = prop.z;
 }
 
 // constructor from three float

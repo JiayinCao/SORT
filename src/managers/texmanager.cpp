@@ -109,7 +109,7 @@ bool TexManager::Write( const string& filename , const Texture* tex )
 bool TexManager::Read( const string& filename , ImageTexture* tex )
 {
 	// get full path name
-	string str = GetFullPath( filename );
+	string str = filename;
 
 	// get the type
 	TEX_TYPE type = TexTypeFromStr( str );

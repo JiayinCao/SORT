@@ -21,6 +21,8 @@
 #include "sort.h"
 #include "utility/define.h"
 
+struct MaterialPropertyValue;
+
 ///////////////////////////////////////////////////////////////////
 // definition of rgb spectrum
 class	RGBSpectrum
@@ -29,6 +31,8 @@ class	RGBSpectrum
 public:
 	// default constructor
 	RGBSpectrum();
+	// constructor from node property
+	RGBSpectrum( const MaterialPropertyValue& prop );
 	// constructor from three float
 	RGBSpectrum( float r , float g , float b );
 	// constructor from three unsigned char

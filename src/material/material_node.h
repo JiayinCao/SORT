@@ -23,12 +23,38 @@
 #include <vector>
 #include "utility/creator.h"
 #include "bsdf/merl.h"
+#include "texture/gridtexture.h"
+#include "texture/checkboxtexture.h"
+#include "texture/imagetexture.h"
+#include "spectrum/rgbspectrum.h"
 
 class Bsdf;
 class MaterialNode;
 class TiXmlElement;
 class Fresnel;
 class MicroFacetDistribution;
+
+struct MaterialPropertyValue
+{
+	float x , y , z;
+
+	MaterialPropertyValue():x(0.0f),y(0.0f),z(0.0f)
+	{
+	}
+	MaterialPropertyValue( float value )
+	{
+		x = y = z = value;
+	}
+	MaterialPropertyValue( float _x , float _y , float _z )
+	{
+		x = _x;
+		y = _y;
+		z = _z;
+	}
+	MaterialPropertyValue( Spectrum& spectrum ): x(spectrum.GetR()) , y(spectrum.GetG()) , z(spectrum.GetB())
+	{
+	}
+};
 
 class MaterialNodeProperty
 {
@@ -41,6 +67,9 @@ public:
 	// set node property
 	virtual void SetNodeProperty( const string& prop ) = 0;
 
+	// get node property
+	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf ) = 0;
+
 	// sub node if it has value
 	MaterialNode*	node;
 };
@@ -50,6 +79,9 @@ class MaterialNodePropertyColor : public MaterialNodeProperty
 public:
 	// set node property
 	virtual void SetNodeProperty( const string& prop );
+
+	// get node property
+	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf );
 
 	// color value
 	Spectrum		value;
@@ -61,6 +93,9 @@ public:
 	// set node property
 	virtual void SetNodeProperty( const string& prop );
 
+	// get node property
+	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf );
+
 	// color value
 	float		value;
 };
@@ -71,6 +106,9 @@ public:
 	// set node property
 	virtual void SetNodeProperty( const string& prop );
 
+	// get node property
+	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf );
+
 	// color value
 	float	x , y;
 };
@@ -80,6 +118,9 @@ class MaterialNodePropertyString : public MaterialNodeProperty
 public:
 	// set node property
 	virtual void SetNodeProperty( const string& prop );
+
+	// get node property
+	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf ) { return 0.0f; }
 
 	// color value
 	string	str;
@@ -100,6 +141,9 @@ public:
 
 	// post process
 	virtual void PostProcess();
+
+	// get property value, this should never be called
+	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) { return 0.0f; }
 
 protected:
 	std::map< string , MaterialNodeProperty * > m_props;
@@ -297,5 +341,71 @@ private:
 	MaterialNodePropertyFloat	factor0;
 	MaterialNodePropertyFloat	factor1;
 };
+
+// Grid texture Node
+class GridTexNode : public MaterialNode
+{
+public:
+	DEFINE_CREATOR( GridTexNode , "SORTNodeGrid" );
+
+	// constructor
+	GridTexNode();
+
+	// get property value
+	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+
+	// post process
+	virtual void PostProcess();
+
+private:
+	MaterialNodePropertyColor	src0;
+	MaterialNodePropertyColor	src1;
+
+	GridTexture grid_tex;
+};
+
+// Grid texture Node
+class CheckBoxTexNode : public MaterialNode
+{
+public:
+	DEFINE_CREATOR( CheckBoxTexNode , "SORTNodeCheckbox" );
+
+	// constructor
+	CheckBoxTexNode();
+
+	// get property value
+	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+
+	// post process
+	virtual void PostProcess();
+
+private:
+	MaterialNodePropertyColor	src0;
+	MaterialNodePropertyColor	src1;
+
+	CheckBoxTexture checkbox_tex;
+};
+
+// Grid texture Node
+class ImageTexNode : public MaterialNode
+{
+public:
+	DEFINE_CREATOR( ImageTexNode , "SORTNodeImage" );
+
+	// constructor
+	ImageTexNode();
+
+	// get property value
+	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+
+	// post process
+	virtual void PostProcess();
+
+private:
+	MaterialNodePropertyString	filename;
+
+	ImageTexture image_tex;
+};
+
 
 #endif
