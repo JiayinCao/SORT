@@ -67,9 +67,6 @@ class SORT_use_shading_nodes(bpy.types.Operator):
                 getattr(context, "lamp", False))
 
     def execute(self, context):
-        if context.material:
-            context.material.sort_material.use_sort_nodes = True
-
         mat = context.material
         idtype = self.properties.idtype
         context_data = {'material':context.material, 'lamp':context.lamp }
@@ -136,7 +133,13 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
     layout.separator()
 
 def panel_node_draw(layout, context, id_data, input_name):
-    if not id_data.sort_material.use_sort_nodes:
+    # find current material
+    target = None
+    for group in bpy.data.node_groups:
+        if group.name == id_data.sort_material.sortnodetree:
+            target = group
+
+    if target is None:
         layout.operator("sort.use_shading_nodes", icon='NODETREE')
         return False
 

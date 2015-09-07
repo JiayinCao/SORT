@@ -119,7 +119,7 @@ def export_scene(scene):
             # output the mesh to file
             export_mesh(ob,scene)
         elif ob.type == 'LAMP':
-            lamp = bpy.data.lamps['Lamp']
+            lamp = bpy.data.lamps[ob.name]
             if lamp.type == 'SUN':
                 light_node = ET.SubElement( root , 'Light' , type='distant')
                 light_spectrum = np.array(lamp.color[:])
@@ -178,6 +178,11 @@ def export_mesh(obj,scene):
     # the mesh object
     mesh = obj.data
 
+    faceuv = len(mesh.uv_textures) > 0
+    if faceuv:
+        uv_texture = mesh.uv_textures.active.data[:]
+        uv_layer = mesh.uv_layers.active.data[:]
+
     # face index pairs
     face_index_pairs = [(face, index) for index, face in enumerate(mesh.polygons)]
 
@@ -210,6 +215,30 @@ def export_mesh(obj,scene):
         # output vertices
         for v in mesh.vertices:
             file.write("v %.4f %.4f %.4f\n" % v.co[:])
+
+        # UV
+        uv_unique_count = no_unique_count = 0
+        if faceuv:
+            # in case removing some of these dont get defined.
+            uv = f_index = uv_index = uv_key = uv_val = uv_ls = None
+
+            uv_face_mapping = [None] * len(face_index_pairs)
+
+            uv_dict = {}
+            uv_get = uv_dict.get
+            for f, f_index in face_index_pairs:
+                uv_ls = uv_face_mapping[f_index] = []
+                for uv_index, l_index in enumerate(f.loop_indices):
+                    uv = uv_layer[l_index].uv
+                    uv_key = utility.veckey2d(uv)
+                    uv_val = uv_get(uv_key)
+                    if uv_val is None:
+                        uv_val = uv_dict[uv_key] = uv_unique_count
+                        file.write('vt %.6f %.6f\n' % uv[:])
+                        uv_unique_count += 1
+                    uv_ls.append(uv_val)
+
+            del uv_dict, uv, f_index, uv_index, uv_ls, uv_get, uv_key, uv_val
 
         # output normal
         no_key = no_val = None
@@ -292,8 +321,23 @@ def export_mesh(obj,scene):
             f_v = [(vi, me_verts[v_idx], l_idx)
                        for vi, (v_idx, l_idx) in enumerate(zip(f.vertices, f.loop_indices))]
             file.write("f")
-            for vi, v, li in f_v:
-                file.write(" %d//%d" % (v.index+1, loops_to_normals[li]+1))
+            #for vi, v, li in f_v:
+            #    file.write(" %d//%d" % (v.index+1, loops_to_normals[li]+1))
+
+            totverts = 1
+            totuvco = 1
+            totno = 1
+            if faceuv:
+                for vi, v, li in f_v:
+                    file.write(" %d/%d/%d" % (totverts + v.index,
+                                      totuvco + uv_face_mapping[f_index][vi],
+                                      totno + loops_to_normals[li],
+                                      ))  # vert, uv, normal
+                #face_vert_index += len(f_v)
+            else:  # No UV's
+                for vi, v, li in f_v:
+                    file.write(" %d//%d" % (totverts + v.index, totno + loops_to_normals[li]))
+
             file.write("\n")
 
 def export_material():

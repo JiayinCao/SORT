@@ -45,14 +45,6 @@ class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
     def draw(self, context):
         self.layout.prop(context.scene,"thread_num_prop")
 
-class DebugPanel(SORTRenderPanel, bpy.types.Panel):
-    bl_label = common.debug_panel_bl_name
-
-    bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
-
-    def draw(self, context):
-        self.layout.prop(context.scene,"debug_prop")
-
 class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = common.sampler_panel_bl_name
 
@@ -70,3 +62,11 @@ class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
     def draw(self, context):
         self.layout.prop(context.scene,"sampler_type_prop")
         self.layout.prop(context.scene,"sampler_count_prop")
+
+class DebugPanel(SORTRenderPanel, bpy.types.Panel):
+    bl_label = common.debug_panel_bl_name
+
+    bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
+
+    def draw(self, context):
+        self.layout.prop(context.scene,"debug_prop")
