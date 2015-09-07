@@ -85,3 +85,10 @@ void CheckBoxTexture::_registerAllProperty()
 	_registerProperty( "color0" , new Color0Property( this ) );
 	_registerProperty( "color1" , new Color1Property( this ) );
 }
+
+// set check box color
+void CheckBoxTexture::SetCheckBoxColor( const Spectrum& c0 , const Spectrum& c1 )
+{
+	m_Color0 = c0;
+	m_Color1 = c1;
+}
