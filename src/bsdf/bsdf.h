@@ -65,6 +65,9 @@ public:
 	// para 'wi' : incoming direction
 	float Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
+	// Get current intersection
+	const Intersection* GetIntersection() const { return intersect; }
+
 // private field
 private:
 	// the list for the bxdf
@@ -75,6 +78,9 @@ private:
 
 	// the vectors
 	Vector nn , sn , tn;
+
+	// intersection for the bsdf
+	const Intersection* intersect;
 
 	// transform a vector from world to shading coordinate
 	// para 'v' : a vector in world space

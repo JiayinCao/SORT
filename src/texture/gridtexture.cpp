@@ -93,3 +93,10 @@ void GridTexture::_registerAllProperty()
 	_registerProperty( "color1" , new Color1Property( this ) );
 	_registerProperty( "threshold" , new ThresholdProperty( this ) );
 }
+
+// set color of the spectrum
+void GridTexture::SetGridColor( const Spectrum& c0 , const Spectrum& c1 )
+{
+	m_Color0 = c0;
+	m_Color1 = c1;
+}

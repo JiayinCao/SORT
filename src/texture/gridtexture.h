@@ -53,6 +53,9 @@ public:
 	// para 'y' :	y coordinate , if out of range , use filter
 	virtual Spectrum GetColor( int x , int y ) const;
 
+	// set color of the spectrum
+	void	SetGridColor( const Spectrum& c0 , const Spectrum& c1 );
+
 // protected field
 private:
 	// two colors

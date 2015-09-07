@@ -53,6 +53,9 @@ public:
 	// para 'y' :	y coordinate , if out of range , use filter
 	virtual Spectrum GetColor( int x , int y ) const;
 
+	// set check box color
+	void SetCheckBoxColor( const Spectrum& c0 , const Spectrum& c1 );
+
 // private field
 private:
 	// two colors
