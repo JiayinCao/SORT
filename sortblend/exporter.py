@@ -51,17 +51,17 @@ def export_sort_file(scene):
     # the scene node
     ET.SubElement(root, 'Scene', value='blender_intermediate/blender.xml')
     # the integrator node
-    integrator_type = bpy.data.scenes[0].integrator_type_prop
+    integrator_type = scene.integrator_type_prop
     ET.SubElement(root, 'Integrator', type=integrator_type)
     # image size
-    xres = bpy.data.scenes[0].render.resolution_x * bpy.data.scenes[0].render.resolution_percentage / 100
-    yres = bpy.data.scenes[0].render.resolution_y * bpy.data.scenes[0].render.resolution_percentage / 100
+    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
+    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
     ET.SubElement(root, 'RenderTargetSize', w='%d'%xres, h='%d'%yres )
     # output file name
     ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.exr')
     # sampler type
-    sampler_type = bpy.data.scenes[0].sampler_type_prop
-    sampler_count = bpy.data.scenes[0].sampler_count_prop
+    sampler_type = scene.sampler_type_prop
+    sampler_count = scene.sampler_count_prop
     ET.SubElement(root, 'Sampler', type=sampler_type, round='%s'%sampler_count)
     # camera node
     camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
@@ -86,8 +86,8 @@ def export_sort_file(scene):
     elif sfit == 'HORIZONTAL':
         sensor_fit = 1.0
     ET.SubElement( camera_node , "Property" , name="sensorsize" , value= "%s %s %f"%(sensor_w,sensor_h,sensor_fit))
-    aspect_ratio_x = bpy.data.scenes["Scene"].render.pixel_aspect_x
-    aspect_ratio_y = bpy.data.scenes["Scene"].render.pixel_aspect_y
+    aspect_ratio_x = scene.render.pixel_aspect_x
+    aspect_ratio_y = scene.render.pixel_aspect_y
     ET.SubElement( camera_node , "Property" , name="aspect" , value="%s %s"%(aspect_ratio_x,aspect_ratio_y))
     fov_angle = bpy.data.cameras[0].angle
     ET.SubElement( camera_node , "Property" , name="fov" , value= "%s"%fov_angle)
@@ -95,7 +95,7 @@ def export_sort_file(scene):
     camera_shift_y = bpy.data.cameras[0].shift_y
     ET.SubElement( camera_node , "Property" , name="shift" , value="%s %s"%(camera_shift_x,camera_shift_y))
     # output thread num
-    thread_num = bpy.data.scenes[0].thread_num_prop
+    thread_num = scene.thread_num_prop
     ET.SubElement( root , 'ThreadNum', name='%s'%thread_num)
     # output the xml
     output_sort_file = preference.get_immediate_dir() + 'blender_exported.xml'
@@ -109,7 +109,7 @@ def export_scene(scene):
     # resource path node
     ET.SubElement( root , 'Resource', path="./blender_intermediate/res/")
     # acceleration structure
-    accelerator_type = bpy.data.scenes[0].accelerator_type_prop
+    accelerator_type = scene.accelerator_type_prop
     ET.SubElement( root , 'Accel', type=accelerator_type)  # to be exposed through GUI
     for ob in renderable_objects(scene):
         if ob.type == 'MESH':
@@ -119,7 +119,7 @@ def export_scene(scene):
             # output the mesh to file
             export_mesh(ob,scene)
         elif ob.type == 'LAMP':
-            lamp = bpy.data.lamps[ob.name]
+            lamp = ob.data
             if lamp.type == 'SUN':
                 light_node = ET.SubElement( root , 'Light' , type='distant')
                 light_spectrum = np.array(lamp.color[:])
