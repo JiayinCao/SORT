@@ -34,6 +34,14 @@ class TiXmlElement;
 class Fresnel;
 class MicroFacetDistribution;
 
+#define MAT_NODE_TYPE unsigned int
+#define MAT_NODE_CONSTANT 0x1
+#define MAT_NODE_VARIABLE 0x2
+#define MAT_NODE_BXDF 0x4
+#define MAT_NODE_OPERATOR 0x8
+#define MAT_NODE_OUTPUT 0x10
+#define MAT_NODE_NONE 0x0
+
 struct MaterialPropertyValue
 {
 	float x , y , z;
@@ -53,6 +61,16 @@ struct MaterialPropertyValue
 	}
 	MaterialPropertyValue( Spectrum& spectrum ): x(spectrum.GetR()) , y(spectrum.GetG()) , z(spectrum.GetB())
 	{
+	}
+
+	const MaterialPropertyValue operator + ( const MaterialPropertyValue& v )
+	{
+		return MaterialPropertyValue( x + v.x , y + v.y , z + v.z );
+	}
+
+	MaterialPropertyValue operator * ( float f ) const
+	{
+		return MaterialPropertyValue( f * x , f * y , f * z );
 	}
 };
 
@@ -127,9 +145,13 @@ public:
 };
 
 // base material node
-class MaterialNode : public PropertySet<MaterialNode>
+class MaterialNode
 {
 public:
+	MaterialNode(){
+		subtree_node_type = MAT_NODE_NONE;
+		m_node_valid = true;
+	}
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
@@ -139,17 +161,30 @@ public:
 	// parse a new node
 	virtual MaterialNode* ParseNode( TiXmlElement* element , MaterialNode* node );
 
-	// post process
-	virtual void PostProcess();
-
 	// get property value, this should never be called
 	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) { return 0.0f; }
 
+	// post process
+	virtual void PostProcess();
+
+	// check validation
+	virtual bool CheckValidation();
+
+	// get node type
+	virtual MAT_NODE_TYPE getNodeType();
+
 protected:
+	// node properties
 	std::map< string , MaterialNodeProperty * > m_props;
 
 	// get node property
 	MaterialNodeProperty*	getProperty( const string& name );
+
+	// node type of this sub-tree
+	MAT_NODE_TYPE subtree_node_type;
+
+	// valid node
+	bool m_node_valid;
 };
 
 // Mateiral output node
@@ -161,12 +196,29 @@ public:
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
+	// get node type
+	virtual MAT_NODE_TYPE getNodeType() { return MAT_NODE_OUTPUT | MaterialNode::getNodeType(); }
+
+	// check validation
+	virtual bool CheckValidation();
+
 private:
 	MaterialNodePropertyColor	output;
 };
 
+// Bxdf node
+class BxdfNode : public MaterialNode
+{
+protected:
+	// get node type
+	virtual MAT_NODE_TYPE getNodeType() { return MAT_NODE_BXDF | MaterialNode::getNodeType(); }
+
+	// check validation
+	virtual bool CheckValidation();
+};
+
 // Lambert node
-class LambertNode : public MaterialNode
+class LambertNode : public BxdfNode
 {
 public:
 	DEFINE_CREATOR( LambertNode , "SORTNodeLambert" );
@@ -182,7 +234,7 @@ private:
 };
 
 // Merl node
-class MerlNode : public MaterialNode
+class MerlNode : public BxdfNode
 {
 public:
 	DEFINE_CREATOR( MerlNode , "SORTNodeMerl" );
@@ -204,7 +256,7 @@ private:
 };
 
 // Oren nayar node
-class OrenNayarNode : public MaterialNode
+class OrenNayarNode : public BxdfNode
 {
 public:
 	DEFINE_CREATOR( OrenNayarNode , "SORTNodeOrenNayar" );
@@ -222,7 +274,7 @@ private:
 };
 
 // Microfacet node
-class MicrofacetNode : public MaterialNode
+class MicrofacetNode : public BxdfNode
 {
 public:
 	DEFINE_CREATOR( MicrofacetNode , "SORTNodeMicrofacet" );
@@ -246,7 +298,7 @@ private:
 };
 
 // Microfacet node
-class ReflectionNode : public MaterialNode
+class ReflectionNode : public BxdfNode
 {
 public:
 	DEFINE_CREATOR( ReflectionNode , "SORTNodeReflection" );
@@ -268,7 +320,7 @@ private:
 };
 
 // Microfacet node
-class RefractionNode : public MaterialNode
+class RefractionNode : public BxdfNode
 {
 public:
 	DEFINE_CREATOR( RefractionNode , "SORTNodeRefraction" );
@@ -291,8 +343,15 @@ private:
 	Fresnel*					pFresnel;
 };
 
+class OperatorNode : public MaterialNode
+{
+public:
+	// get node type
+	virtual MAT_NODE_TYPE getNodeType() { return MAT_NODE_OPERATOR | MaterialNode::getNodeType(); }
+};
+
 // Adding node
-class AddNode : public MaterialNode
+class AddNode : public OperatorNode
 {
 public:
 	DEFINE_CREATOR( AddNode , "SORTNodeAdd" );
@@ -300,13 +359,19 @@ public:
 	// constructor
 	AddNode();
 
+	// get property value
+	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+
+	// check validation
+	virtual bool CheckValidation();
+
 private:
 	MaterialNodePropertyColor	src0;
 	MaterialNodePropertyColor	src1;
 };
 
 // Lerp node
-class LerpNode : public MaterialNode
+class LerpNode : public OperatorNode
 {
 public:
 	DEFINE_CREATOR( LerpNode , "SORTNodeLerp" );
@@ -317,14 +382,20 @@ public:
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
+	// get property value
+	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+
+	// check validation
+	virtual bool CheckValidation();
+
 private:
 	MaterialNodePropertyColor	src0;
 	MaterialNodePropertyColor	src1;
 	MaterialNodePropertyFloat	factor;
 };
 
-// Lerp node
-class BlendNode : public MaterialNode
+// Blend node
+class BlendNode : public OperatorNode
 {
 public:
 	DEFINE_CREATOR( BlendNode , "SORTNodeBlend" );
@@ -335,6 +406,12 @@ public:
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
+	// get property value
+	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+
+	// check validation
+	virtual bool CheckValidation();
+
 private:
 	MaterialNodePropertyColor	src0;
 	MaterialNodePropertyColor	src1;
@@ -342,8 +419,15 @@ private:
 	MaterialNodePropertyFloat	factor1;
 };
 
+class VariableNode : public MaterialNode
+{
+protected:
+	// get node type
+	virtual MAT_NODE_TYPE getNodeType() { return MAT_NODE_VARIABLE | MaterialNode::getNodeType(); }
+};
+
 // Grid texture Node
-class GridTexNode : public MaterialNode
+class GridTexNode : public VariableNode
 {
 public:
 	DEFINE_CREATOR( GridTexNode , "SORTNodeGrid" );
@@ -365,7 +449,7 @@ private:
 };
 
 // Grid texture Node
-class CheckBoxTexNode : public MaterialNode
+class CheckBoxTexNode : public VariableNode
 {
 public:
 	DEFINE_CREATOR( CheckBoxTexNode , "SORTNodeCheckbox" );
@@ -387,7 +471,7 @@ private:
 };
 
 // Grid texture Node
-class ImageTexNode : public MaterialNode
+class ImageTexNode : public VariableNode
 {
 public:
 	DEFINE_CREATOR( ImageTexNode , "SORTNodeImage" );

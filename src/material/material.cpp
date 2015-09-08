@@ -39,6 +39,9 @@ void Material::ParseMaterial( TiXmlElement* element )
 	// parse node property
 	root->ParseProperty( element , root );
 
-	// post process material
-	root->PostProcess();
+	// check validation
+	if( !root->CheckValidation() )
+		LOG_WARNING<<"Material "<<name<<" is not valid, a default material will be used."<<ENDL;
+	else
+		root->PostProcess();
 }
