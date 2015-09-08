@@ -120,7 +120,7 @@ void MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 			LOG_WARNING<<"Node property "<<prop_name<<" is ignored."<<ENDL;
 
 			// get next property
-			prop = element->NextSiblingElement( "Property" );
+			prop = prop->NextSiblingElement( "Property" );
 
 			// proceed to the next property
 			continue;
@@ -159,6 +159,43 @@ MaterialNode* MaterialNode::ParseNode( TiXmlElement* element , MaterialNode* nod
 	return mat_node; 
 }
 
+// check validation
+bool MaterialNode::CheckValidation()
+{
+	// get subtree node type
+	getNodeType();
+
+	m_node_valid = true;
+	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
+	while( it != m_props.end() )
+	{
+		if( it->second->node )
+			m_node_valid &= it->second->node->CheckValidation();
+		++it;
+	}
+
+	return m_node_valid;
+}
+
+// get sub tree node type
+MAT_NODE_TYPE MaterialNode::getNodeType()
+{
+	MAT_NODE_TYPE type = MAT_NODE_NONE;
+
+	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
+	while( it != m_props.end() )
+	{
+		if( it->second->node )
+			type |= it->second->node->getNodeType();
+		++it;
+	}
+
+	// setup sub-tree type
+	subtree_node_type = type;
+
+	return type;
+}
+
 // post process
 void MaterialNode::PostProcess()
 {
@@ -195,8 +232,63 @@ OutputNode::OutputNode()
 // update bsdf
 void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+	// return a default one for invalid material
+	if( !m_node_valid )
+	{
+		Spectrum default_spectrum( 0.3f , 0.0f , 0.0f );
+		Lambert* lambert = SORT_MALLOC(Lambert)( default_spectrum );
+		lambert->m_weight = weight;
+		bsdf->AddBxdf( lambert );
+		return;
+	}
+
 	if( output.node )
 		output.node->UpdateBSDF( bsdf );
+}
+
+// check validation
+bool OutputNode::CheckValidation()
+{
+	// it is invalid if there is no node attached
+	if( output.node == 0 )
+		return false;
+
+	// get node type
+	MAT_NODE_TYPE type = output.node->getNodeType();
+
+	// make sure there is bxdf attached !!
+	if( ( output.node == 0 ) || !(type & MAT_NODE_BXDF) )
+	{
+		m_node_valid = false;
+		return false;
+	}
+
+	m_node_valid = MaterialNode::CheckValidation();
+
+	return m_node_valid;
+}
+
+// check validation
+bool BxdfNode::CheckValidation()
+{
+	bool valid = MaterialNode::CheckValidation();
+
+	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
+	while( it != m_props.end() )
+	{
+		MaterialNode* node = it->second->node;
+		if( node )
+		{
+			MAT_NODE_TYPE sub_type = node->getNodeType();
+
+			// attaching bxdf result as an input of another bxdf doesn't make any sense at all
+			if( sub_type & MAT_NODE_BXDF )
+				return false;
+		}
+		++it;
+	}
+
+	return valid;
 }
 
 LambertNode::LambertNode()
@@ -349,6 +441,27 @@ AddNode::AddNode()
 	m_props.insert( make_pair( "Color2" , &src1 ) );
 }
 
+// check validation
+bool AddNode::CheckValidation()
+{
+	bool valid = MaterialNode::CheckValidation();
+
+	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
+	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
+
+	// if one of the parameters is a bxdf, the other should be exactly the same
+	if( ( type0 & MAT_NODE_BXDF ) != ( type1 & MAT_NODE_BXDF ) )
+		return false;
+
+	return valid;
+}
+
+// get property value
+MaterialPropertyValue AddNode::GetNodeValue( Bsdf* bsdf )
+{
+	return src0.GetPropertyValue(bsdf) + src1.GetPropertyValue(bsdf);
+}
+
 LerpNode::LerpNode()
 {
 	m_props.insert( make_pair( "Color1" , &src0 ) );
@@ -368,6 +481,28 @@ void LerpNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 		src0.node->UpdateBSDF( bsdf, weight * ( 1.0f - f ) );
 	if( src1.node )
 		src1.node->UpdateBSDF( bsdf, weight * f );
+}
+
+// get property value
+MaterialPropertyValue LerpNode::GetNodeValue( Bsdf* bsdf )
+{
+	float f = factor.GetPropertyValue( bsdf ).x;
+	return src0.GetPropertyValue(bsdf) * ( 1.0f - f ) + src1.GetPropertyValue(bsdf) * f;
+}
+
+// check validation
+bool LerpNode::CheckValidation()
+{
+	bool valid = MaterialNode::CheckValidation();
+
+	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
+	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
+
+	// if one of the parameters is a bxdf, the other should be exactly the same
+	if( ( type0 & MAT_NODE_BXDF ) != ( type1 & MAT_NODE_BXDF ) )
+		return false;
+
+	return valid;
 }
 
 BlendNode::BlendNode()
@@ -390,6 +525,29 @@ void BlendNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 		src0.node->UpdateBSDF( bsdf, weight * f0 );
 	if( src1.node )
 		src1.node->UpdateBSDF( bsdf, weight * f1 );
+}
+
+// get property value
+MaterialPropertyValue BlendNode::GetNodeValue( Bsdf* bsdf )
+{
+	float f0 = factor0.GetPropertyValue( bsdf ).x;
+	float f1 = factor1.GetPropertyValue( bsdf ).x;
+	return src0.GetPropertyValue(bsdf) * f0 + src1.GetPropertyValue(bsdf) * f1;
+}
+
+// check validation
+bool BlendNode::CheckValidation()
+{
+	bool valid = MaterialNode::CheckValidation();
+
+	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
+	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
+
+	// if one of the parameters is a bxdf, the other should be exactly the same
+	if( ( type0 & MAT_NODE_BXDF ) != ( type1 & MAT_NODE_BXDF ) )
+		return false;
+
+	return valid;
 }
 
 GridTexNode::GridTexNode()
