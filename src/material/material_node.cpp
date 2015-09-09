@@ -38,9 +38,11 @@ IMPLEMENT_CREATOR( RefractionNode );
 IMPLEMENT_CREATOR( AddNode );
 IMPLEMENT_CREATOR( LerpNode );
 IMPLEMENT_CREATOR( BlendNode );
+IMPLEMENT_CREATOR( MutiplyNode );
 IMPLEMENT_CREATOR( GridTexNode );
 IMPLEMENT_CREATOR( CheckBoxTexNode );
 IMPLEMENT_CREATOR( ImageTexNode );
+IMPLEMENT_CREATOR( ConstantColorNode );
 
 // get node property
 MaterialNodeProperty* MaterialNode::getProperty( const string& name )
@@ -223,6 +225,16 @@ void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	}
 }
 
+MaterialNode::~MaterialNode()
+{
+	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
+	while( it != m_props.end() )
+	{
+		delete it->second->node;
+		++it;
+	}
+}
+
 OutputNode::OutputNode()
 {
 	// register node property
@@ -350,6 +362,15 @@ MicrofacetNode::MicrofacetNode()
 	m_props.insert( make_pair( "Fresnel" , &fresnel ) );
 }
 
+// destructor
+MicrofacetNode::~MicrofacetNode()
+{
+	delete pFresnel;
+	delete pMFDist;
+
+	MaterialNode::~MaterialNode();
+}
+
 void MicrofacetNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
 	if( weight.IsBlack() )
@@ -383,6 +404,14 @@ ReflectionNode::ReflectionNode()
 	m_props.insert( make_pair( "Fresnel" , &fresnel ) );
 }
 
+// destructor
+ReflectionNode::~ReflectionNode()
+{
+	delete pFresnel;
+
+	MaterialNode::~MaterialNode();
+}
+
 void ReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
 	if( weight.IsBlack() )
@@ -411,6 +440,14 @@ RefractionNode::RefractionNode()
 	m_props.insert( make_pair( "Fresnel" , &fresnel ) );
 	m_props.insert( make_pair( "RefractionIndexOut" , &theta0 ) );
 	m_props.insert( make_pair( "RefractionIndexIn" , &theta1 ) );
+}
+
+// destructor
+RefractionNode::~RefractionNode()
+{
+	delete pFresnel;
+
+	MaterialNode::~MaterialNode();
 }
 
 void RefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -444,16 +481,16 @@ AddNode::AddNode()
 // check validation
 bool AddNode::CheckValidation()
 {
-	bool valid = MaterialNode::CheckValidation();
+	m_node_valid = MaterialNode::CheckValidation();
 
 	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
 	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
 
 	// if one of the parameters is a bxdf, the other should be exactly the same
 	if( ( type0 & MAT_NODE_BXDF ) != ( type1 & MAT_NODE_BXDF ) )
-		return false;
+		m_node_valid = false;
 
-	return valid;
+	return m_node_valid;
 }
 
 // get property value
@@ -493,16 +530,16 @@ MaterialPropertyValue LerpNode::GetNodeValue( Bsdf* bsdf )
 // check validation
 bool LerpNode::CheckValidation()
 {
-	bool valid = MaterialNode::CheckValidation();
+	m_node_valid = MaterialNode::CheckValidation();
 
 	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
 	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
 
 	// if one of the parameters is a bxdf, the other should be exactly the same
 	if( ( type0 & MAT_NODE_BXDF ) != ( type1 & MAT_NODE_BXDF ) )
-		return false;
+		m_node_valid = false;
 
-	return valid;
+	return m_node_valid;
 }
 
 BlendNode::BlendNode()
@@ -538,16 +575,58 @@ MaterialPropertyValue BlendNode::GetNodeValue( Bsdf* bsdf )
 // check validation
 bool BlendNode::CheckValidation()
 {
-	bool valid = MaterialNode::CheckValidation();
+	m_node_valid = MaterialNode::CheckValidation();
 
 	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
 	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
 
 	// if one of the parameters is a bxdf, the other should be exactly the same
 	if( ( type0 & MAT_NODE_BXDF ) != ( type1 & MAT_NODE_BXDF ) )
-		return false;
+		m_node_valid = false;
 
-	return valid;
+	return m_node_valid;
+}
+
+MutiplyNode::MutiplyNode()
+{
+	m_props.insert( make_pair( "Color1" , &src0 ) );
+	m_props.insert( make_pair( "Color2" , &src1 ) );
+}
+
+// update bsdf
+void MutiplyNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+	if( weight.IsBlack() )
+		return;
+
+	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
+	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
+
+	if( type0 & MAT_NODE_BXDF )
+		src0.node->UpdateBSDF( bsdf , weight * src1.GetPropertyValue(bsdf) );
+	else if( type1 & MAT_NODE_BXDF )
+		src1.node->UpdateBSDF( bsdf , weight * src0.GetPropertyValue(bsdf) );
+}
+
+// get property value
+MaterialPropertyValue MutiplyNode::GetNodeValue( Bsdf* bsdf )
+{
+	return src0.GetPropertyValue(bsdf) * src1.GetPropertyValue(bsdf);
+}
+
+// check validation
+bool MutiplyNode::CheckValidation()
+{
+	m_node_valid = MaterialNode::CheckValidation();
+
+	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
+	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
+
+	// Can't multiply two bxdfs
+	if( ( type0 & MAT_NODE_BXDF ) && ( type1 & MAT_NODE_BXDF ) )
+		m_node_valid = false;
+
+	return m_node_valid;
 }
 
 GridTexNode::GridTexNode()
@@ -561,14 +640,27 @@ MaterialPropertyValue GridTexNode::GetNodeValue( Bsdf* bsdf )
 {
 	// get intersection
 	const Intersection* intesection = bsdf->GetIntersection();
-	return grid_tex.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
+	return grid_tex.GetColorFromUV( intesection->u , intesection->v );
 }
 
 // post process
 void GridTexNode::PostProcess()
 {
 	// set grid texture
-	grid_tex.SetGridColor( src0.value , src1.value );
+	grid_tex.SetGridColor( src0.GetPropertyValue(0) , src1.GetPropertyValue(0) );
+}
+
+// check validation
+bool GridTexNode::CheckValidation()
+{
+	m_node_valid = MaterialNode::CheckValidation();
+	
+	MAT_NODE_TYPE type = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
+	if( type & MAT_NODE_BXDF ||
+		type & MAT_NODE_VARIABLE )
+		m_node_valid = false;
+
+	return m_node_valid;
 }
 
 CheckBoxTexNode::CheckBoxTexNode()
@@ -582,14 +674,27 @@ MaterialPropertyValue CheckBoxTexNode::GetNodeValue( Bsdf* bsdf )
 {
 	// get intersection
 	const Intersection* intesection = bsdf->GetIntersection();
-	return checkbox_tex.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
+	return checkbox_tex.GetColorFromUV( intesection->u , intesection->v );
 }
 
 // post process
 void CheckBoxTexNode::PostProcess()
 {
 	// set grid texture
-	checkbox_tex.SetCheckBoxColor( src0.value , src1.value );
+	checkbox_tex.SetCheckBoxColor( src0.GetPropertyValue(0) , src1.GetPropertyValue(0) );
+}
+
+// check validation
+bool CheckBoxTexNode::CheckValidation()
+{
+	m_node_valid = MaterialNode::CheckValidation();
+	
+	MAT_NODE_TYPE type = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
+	if( type & MAT_NODE_BXDF ||
+		type & MAT_NODE_VARIABLE )
+		m_node_valid = false;
+
+	return m_node_valid;
 }
 
 ImageTexNode::ImageTexNode()
@@ -610,4 +715,29 @@ void ImageTexNode::PostProcess()
 {
 	// set grid texture
 	image_tex.LoadImageFromFile( filename.str );
+}
+
+ConstantColorNode::ConstantColorNode()
+{
+	m_props.insert( make_pair( "Color" , &src ) );
+}
+
+// get property value
+MaterialPropertyValue ConstantColorNode::GetNodeValue( Bsdf* bsdf )
+{
+	// get intersection
+	return src.GetPropertyValue(bsdf);
+}
+
+// check validation
+bool ConstantColorNode::CheckValidation()
+{
+	m_node_valid = MaterialNode::CheckValidation();
+
+	MAT_NODE_TYPE type = (src.node)?src.node->getNodeType():MAT_NODE_CONSTANT;
+	if( type & MAT_NODE_BXDF ||
+		type & MAT_NODE_VARIABLE )
+		m_node_valid = false;
+
+	return m_node_valid;
 }
