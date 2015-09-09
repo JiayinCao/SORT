@@ -9,21 +9,21 @@ from . import utility
 import xml.etree.cElementTree as ET
 
 # export blender information
-def export_blender(scene):
+def export_blender(scene, force_debug=False):
     # create immediate file path
-    create_path(scene)
+    create_path(scene, force_debug)
     # export sort file
-    export_sort_file(scene)
+    export_sort_file(scene, force_debug)
     # export scene
-    export_scene(scene)
+    export_scene(scene, force_debug)
     # export material
-    export_material()
+    export_material( force_debug )
 
 # clear old data and create new path
-def create_path(scene):
+def create_path(scene, force_debug):
     # get immediate directory
-    output_dir = preference.get_immediate_dir()
-    output_res_dir = preference.get_immediate_res_dir();
+    output_dir = preference.get_immediate_dir(force_debug)
+    output_res_dir = preference.get_immediate_res_dir(force_debug)
     # clear the old directory
     shutil.rmtree(output_dir, ignore_errors=True)
     # create one if there is no such directory
@@ -45,7 +45,7 @@ def lookAt(camera):
     return (pos, target, up)
 
 # open sort file
-def export_sort_file(scene):
+def export_sort_file(scene, force_debug):
     # create root node
     root = ET.Element("Root")
     # the scene node
@@ -98,12 +98,12 @@ def export_sort_file(scene):
     thread_num = scene.thread_num_prop
     ET.SubElement( root , 'ThreadNum', name='%s'%thread_num)
     # output the xml
-    output_sort_file = preference.get_immediate_dir() + 'blender_exported.xml'
+    output_sort_file = preference.get_immediate_dir(force_debug) + 'blender_exported.xml'
     tree = ET.ElementTree(root)
     tree.write(output_sort_file)
 
 # export scene
-def export_scene(scene):
+def export_scene(scene, force_debug):
     # create root node
     root = ET.Element("Root")
     # resource path node
@@ -117,7 +117,7 @@ def export_scene(scene):
             transform_node = ET.SubElement( model_node , 'Transform' )
             ET.SubElement( transform_node , 'Matrix' , value = 'm '+ utility.matrixtostr(ob.matrix_world) )
             # output the mesh to file
-            export_mesh(ob,scene)
+            export_mesh(ob,scene, force_debug)
         elif ob.type == 'LAMP':
             lamp = ob.data
             if lamp.type == 'SUN':
@@ -158,7 +158,7 @@ def export_scene(scene):
                 ET.SubElement( light_node , 'Property' , name='radius' ,value='10')
 
     # output the xml
-    output_scene_file = preference.get_immediate_dir() + 'blender.xml'
+    output_scene_file = preference.get_immediate_dir(force_debug) + 'blender.xml'
     tree = ET.ElementTree(root)
     tree.write(output_scene_file)
 
@@ -172,8 +172,8 @@ mtl_dict = {}
 mtl_rev_dict = {}
 
 # export mesh file
-def export_mesh(obj,scene):
-    output_path = preference.get_immediate_res_dir() + obj.name + '.obj'
+def export_mesh(obj,scene,force_debug):
+    output_path = preference.get_immediate_res_dir(force_debug) + obj.name + '.obj'
 
     # the mesh object
     mesh = obj.data
@@ -340,7 +340,7 @@ def export_mesh(obj,scene):
 
             file.write("\n")
 
-def export_material():
+def export_material(force_debug):
     # create root node
     root = ET.Element("Root")
 
@@ -372,7 +372,7 @@ def export_material():
             draw_props(output_node, mat_node)
 
     # output the xml
-    output_material_file = preference.get_immediate_dir() + 'blender_material.xml'
+    output_material_file = preference.get_immediate_dir(force_debug) + 'blender_material.xml'
     tree = ET.ElementTree(root)
     tree.write(output_material_file)
 

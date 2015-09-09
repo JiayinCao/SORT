@@ -26,6 +26,12 @@ Material::Material()
 	root = new OutputNode();
 }
 
+Material::~Material()
+{
+	// delete the whole tree
+	delete root;
+}
+
 Bsdf* Material::GetBsdf( const Intersection* intersect ) const
 {
 	Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
