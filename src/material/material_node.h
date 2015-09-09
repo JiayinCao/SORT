@@ -59,7 +59,7 @@ struct MaterialPropertyValue
 		y = _y;
 		z = _z;
 	}
-	MaterialPropertyValue( Spectrum& spectrum ): x(spectrum.GetR()) , y(spectrum.GetG()) , z(spectrum.GetB())
+	MaterialPropertyValue( const Spectrum& spectrum ): x(spectrum.GetR()) , y(spectrum.GetG()) , z(spectrum.GetB())
 	{
 	}
 
