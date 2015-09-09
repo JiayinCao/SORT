@@ -72,6 +72,11 @@ struct MaterialPropertyValue
 	{
 		return MaterialPropertyValue( f * x , f * y , f * z );
 	}
+
+	MaterialPropertyValue operator * ( const MaterialPropertyValue& mat ) const
+	{
+		return MaterialPropertyValue( x * mat.x , y * mat.y , z * mat.z );
+	}
 };
 
 class MaterialNodeProperty
@@ -152,6 +157,8 @@ public:
 		subtree_node_type = MAT_NODE_NONE;
 		m_node_valid = true;
 	}
+	virtual ~MaterialNode();
+
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
@@ -281,7 +288,8 @@ public:
 
 	// constructor
 	MicrofacetNode();
-
+	// destructor
+	~MicrofacetNode();
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
@@ -305,6 +313,8 @@ public:
 
 	// constructor
 	ReflectionNode();
+	// destructor
+	~ReflectionNode();
 
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
@@ -327,6 +337,8 @@ public:
 
 	// constructor
 	RefractionNode();
+	// destructor
+	~RefractionNode();
 
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
@@ -419,6 +431,29 @@ private:
 	MaterialNodePropertyFloat	factor1;
 };
 
+// Mutiply node
+class MutiplyNode : public OperatorNode
+{
+public:
+	DEFINE_CREATOR( MutiplyNode , "SORTNodeMultiply" );
+
+	// constructor
+	MutiplyNode();
+	
+	// update bsdf
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+
+	// get property value
+	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+
+	// check validation
+	virtual bool CheckValidation();
+
+private:
+	MaterialNodePropertyColor	src0;
+	MaterialNodePropertyColor	src1;
+};
+
 class VariableNode : public MaterialNode
 {
 protected:
@@ -441,6 +476,9 @@ public:
 	// post process
 	virtual void PostProcess();
 
+	// check validation
+	virtual bool CheckValidation();
+
 private:
 	MaterialNodePropertyColor	src0;
 	MaterialNodePropertyColor	src1;
@@ -462,6 +500,9 @@ public:
 
 	// post process
 	virtual void PostProcess();
+
+	// check validation
+	virtual bool CheckValidation();
 
 private:
 	MaterialNodePropertyColor	src0;
@@ -491,5 +532,31 @@ private:
 	ImageTexture image_tex;
 };
 
+// constant node
+class ConstantNode : public MaterialNode
+{
+public:
+	// get node type
+	virtual MAT_NODE_TYPE getNodeType() { return MAT_NODE_CONSTANT | MaterialNode::getNodeType(); }
+};
+
+// constant color node
+class ConstantColorNode : public ConstantNode
+{
+public:
+	DEFINE_CREATOR( ConstantColorNode , "SORTNodeConstant" );
+
+	// constructor
+	ConstantColorNode();
+
+	// get property value
+	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+
+	// check validation
+	virtual bool CheckValidation();
+
+private:
+	MaterialNodePropertyColor	src;
+};
 
 #endif

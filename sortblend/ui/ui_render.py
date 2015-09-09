@@ -1,5 +1,6 @@
 import bpy
 from .. import common
+from .. import exporter
 
 class SORTRenderPanel:
     bl_space_type = "PROPERTIES"
@@ -63,6 +64,16 @@ class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
         self.layout.prop(context.scene,"sampler_type_prop")
         self.layout.prop(context.scene,"sampler_count_prop")
 
+# export debug scene
+class SORT_export_debug_scene(bpy.types.Operator):
+    bl_idname = "sort.export_debug_scene"
+    bl_label = "Export Debug Scene"
+
+    def execute(self, context):
+        # export the scene to debug folder
+        exporter.export_blender(context.scene,True)
+        return {'FINISHED'}
+
 class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = common.debug_panel_bl_name
 
@@ -70,3 +81,4 @@ class DebugPanel(SORTRenderPanel, bpy.types.Panel):
 
     def draw(self, context):
         self.layout.prop(context.scene,"debug_prop")
+        self.layout.operator("sort.export_debug_scene")

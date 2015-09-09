@@ -340,48 +340,20 @@ class SORTNodeGrid(SORTShadingNode):
     bl_idname = 'SORTNodeGrid'
 
     def init(self, context):
-        socket = self.inputs.new('SORTNodeSocketFloat2','UV')
-        socket.editable = False
+        #socket = self.inputs.new('SORTNodeSocketFloat2','UV')
+        self.inputs.new('SORTNodeSocketColor', 'Color1')
+        self.inputs.new('SORTNodeSocketColor', 'Color2')
         self.outputs.new('SORTNodeSocketColor', 'Result')
-
-    color1 = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
-    color2 = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
-
-    def draw_buttons(self, context, layout):
-        self.draw_button(layout, "Color1" , "color1")
-        self.draw_button(layout, "Color2" , "color2")
-
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, 'Color1' , 'color1' , indented_label)
-        self.draw_prop(layout, 'Color2' , 'color2' , indented_label)
-
-    def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Color1' , type='color', value= utility.vec3tostr(self.color1) )
-        ET.SubElement( xml_node , 'Property' , name='Color2' , type='color', value= utility.vec3tostr(self.color2) )
 
 class SORTNodeCheckbox(SORTShadingNode):
     bl_label = 'SORT_checkbox'
     bl_idname = 'SORTNodeCheckbox'
 
-    color1 = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
-    color2 = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
-
     def init(self, context):
-        socket = self.inputs.new('SORTNodeSocketFloat2','UV')
-        socket.editable = False
+        #socket = self.inputs.new('SORTNodeSocketFloat2','UV')
+        self.inputs.new('SORTNodeSocketColor', 'Color1')
+        self.inputs.new('SORTNodeSocketColor', 'Color2')
         self.outputs.new('SORTNodeSocketColor', 'Result')
-
-    def draw_buttons(self, context, layout):
-        self.draw_button(layout, "Color1" , "color1")
-        self.draw_button(layout, "Color2" , "color2")
-
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, 'Color1' , 'color1' , indented_label)
-        self.draw_prop(layout, 'Color2' , 'color2' , indented_label)
-
-    def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Color1' , type='color', value= utility.vec3tostr(self.color1) )
-        ET.SubElement( xml_node , 'Property' , name='Color2' , type='color', value= utility.vec3tostr(self.color2) )
 
 class SORTNodeImage(SORTShadingNode):
     bl_label = 'SORT_image'
@@ -390,8 +362,7 @@ class SORTNodeImage(SORTShadingNode):
     file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
 
     def init(self, context):
-        socket = self.inputs.new('SORTNodeSocketFloat2','UV')
-        socket.editable = False
+        #socket = self.inputs.new('SORTNodeSocketFloat2','UV')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
@@ -507,8 +478,9 @@ def register():
         # identifier, label, items list
         SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacet"),NodeItem("SORTNodeOrenNayar"),NodeItem("SORTNodeReflection"),NodeItem("SORTNodeRefraction")] ),
         SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
-        SORTPatternNodeCategory("SORT_input", "SORT Input",items= [NodeItem("SORTNodePosition"),NodeItem("SORTNodeNormal"),NodeItem("SORTNodeUV")] ),
-        SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeConstant"),NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
+        #SORTPatternNodeCategory("SORT_input", "SORT Input",items= [NodeItem("SORTNodePosition"),NodeItem("SORTNodeNormal"),NodeItem("SORTNodeUV")] ),
+        SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
+        SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
     ]
     nodeitems_utils.register_node_categories("SORTSHADERNODES",node_categories)
 
