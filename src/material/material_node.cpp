@@ -350,7 +350,7 @@ void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.value , sigma.value );
+	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.GetPropertyValue(bsdf) , sigma.GetPropertyValue(bsdf).x );
 	orennayar->m_weight = weight;
 	bsdf->AddBxdf( orennayar );
 }
@@ -376,7 +376,7 @@ void MicrofacetNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	MicroFacet* mf = SORT_MALLOC(MicroFacet)( baseColor.value , pFresnel , pMFDist );
+	MicroFacet* mf = SORT_MALLOC(MicroFacet)( baseColor.GetPropertyValue(bsdf) , pFresnel , pMFDist );
 	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
 }
@@ -417,7 +417,7 @@ void ReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	Reflection* reflection = SORT_MALLOC(Reflection)( pFresnel , baseColor.value);
+	Reflection* reflection = SORT_MALLOC(Reflection)( pFresnel , baseColor.GetPropertyValue(bsdf));
 	reflection->m_weight = weight;
 	bsdf->AddBxdf( reflection );
 }
@@ -455,7 +455,7 @@ void RefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	Refraction* refraction = SORT_MALLOC(Refraction)( theta0.value , theta1.value , pFresnel , baseColor.value);
+	Refraction* refraction = SORT_MALLOC(Refraction)( theta0.GetPropertyValue(bsdf).x , theta1.GetPropertyValue(bsdf).x , pFresnel , baseColor.GetPropertyValue(bsdf) );
 	refraction->m_weight = weight;
 	bsdf->AddBxdf( refraction );
 }
