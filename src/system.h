@@ -21,12 +21,15 @@
 // include the header file
 #include "geometry/scene.h"
 #include "integrator/integrator.h"
+#include "output/imageoutput.h"
+#include "output/blenderoutput.h"
 
 // declare classes
 class Camera;
 class RenderTarget;
 class Sampler;
 class PixelSample;
+class SORTOutput;
 
 /////////////////////////////////////////////////////////////////////
 //	definition of the system
@@ -72,6 +75,13 @@ public:
 private:
 	// the render target for the system
 	RenderTarget*	m_rt;
+	// the output methods
+	vector<SORTOutput*>	m_outputs;
+	// image output
+	ImageOutput		image_output;
+	// blender output
+	BlenderOutput	blender_output;
+
 	// the camera for the system
 	Camera*			m_camera;
 

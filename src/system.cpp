@@ -35,6 +35,7 @@
 #include "integrator/integrator.h"
 #include "sampler/stratified.h"
 #include <time.h>
+#include "output/sortoutput.h"
 
 // constructor
 System::System()
@@ -115,7 +116,8 @@ void System::Render()
 // output render target
 void System::OutputRT()
 {
-	m_rt->Output( m_OutputFileName );
+	//m_rt->Output( m_OutputFileName );
+	//image_output.PostProcess();
 }
 
 // load the scene
@@ -224,7 +226,12 @@ void System::_pushRenderTask()
 	m_taskDone = new bool[m_totalTask];
 	memset( m_taskDone , 0 , m_totalTask * sizeof(bool) );
 
-	RenderTask rt(m_Scene,m_pSampler,m_camera,m_rt,m_taskDone,m_iSamplePerPixel);
+	image_output.SetImageSize( m_rt->GetWidth() , m_rt->GetHeight() );
+	blender_output.SetImageSize( m_rt->GetWidth() , m_rt->GetHeight() );
+	m_outputs.push_back( &image_output );
+	m_outputs.push_back( &blender_output );
+
+	RenderTask rt(m_Scene,m_pSampler,m_camera,m_outputs,m_taskDone,m_iSamplePerPixel);
 	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i += tilesize )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j += tilesize )
@@ -247,6 +254,13 @@ void System::_pushRenderTask()
 // do ray tracing in a multithread enviroment
 void System::_executeRenderingTasks()
 {
+	vector<SORTOutput*>::const_iterator it = m_outputs.begin();
+	while( it != m_outputs.end() )
+	{
+		(*it)->PreProcess();
+		++it;
+	}
+
 	InitCriticalSections();
 
 	// will be parameterized later
@@ -281,7 +295,7 @@ void System::_executeRenderingTasks()
 			if( !threadUnits[i]->IsFinished() )
 				allfinished = false;
 		}
-
+		
 		// Output progress
 		_outputProgress();
 
@@ -295,6 +309,13 @@ void System::_executeRenderingTasks()
 	DestroyCriticalSections();
 
 	cout<<endl;
+
+	it = m_outputs.begin();
+	while( it != m_outputs.end() )
+	{
+		(*it)->PostProcess();
+		++it;
+	}
 }
 
 // allocate integrator
