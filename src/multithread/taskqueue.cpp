@@ -22,6 +22,7 @@
 #include "sampler/sampler.h"
 #include "camera/camera.h"
 #include "texture/rendertarget.h"
+#include "output/sortoutput.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(RenderTaskQueue);
@@ -36,7 +37,6 @@ void RenderTask::Execute( Integrator* integrator )
 	unsigned bottom = ori_y + height;
 
 	unsigned tid = ThreadId();
-
 	for( unsigned i = ori_y ; i < bottom ; i++ )
 	{
 		for( unsigned j = ori_x ; j < right ; j++ )
@@ -60,8 +60,25 @@ void RenderTask::Execute( Integrator* integrator )
 					radiance += integrator->Li( r , pixelSamples[k] ) * camera->GetPassFilter(p);
 				}
 			}
-			rendertarget->SetColor( j , i , radiance / (float)samplePerPixel );		
+			radiance /= (float)samplePerPixel;
+
+			vector<SORTOutput*>::const_iterator it = outputs.begin();
+			while( it != outputs.end() )
+			{
+				(*it)->StorePixel( j , i , radiance , *this );
+				++it;
+			}
 		}
+	}
+
+	int h = outputs[0]->m_height;
+	int x_off = ori_x / 64;
+	int y_off = (h - 1 - ori_y ) / 64 ;
+	vector<SORTOutput*>::const_iterator it = outputs.begin();
+	while( it != outputs.end() )
+	{
+		(*it)->FinishTile( x_off , y_off , *this );
+		++it;
 	}
 
 	taskDone[taskId] = true;

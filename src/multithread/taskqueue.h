@@ -28,6 +28,7 @@ class Scene;
 class Sampler;
 class Camera;
 class RenderTarget;
+class SORTOutput;
 
 class RenderTask
 {
@@ -52,12 +53,12 @@ public:
 	Camera*			camera;
 	// the scene description
 	const Scene&	scene;
-	// the render target
-	RenderTarget*	rendertarget;
+	// the output methods
+	const vector<SORTOutput*>	outputs;
 
 	// constructor
-	RenderTask( Scene& sc , Sampler* samp , Camera* cam , RenderTarget* rt , bool* td, unsigned spp )
-		:scene(sc),sampler(samp),camera(cam),samplePerPixel(spp),rendertarget(rt),taskDone(td)
+	RenderTask( Scene& sc , Sampler* samp , Camera* cam , const vector<SORTOutput*>& outputs , bool* td, unsigned spp )
+		:scene(sc),sampler(samp),camera(cam),samplePerPixel(spp),outputs(outputs),taskDone(td)
 	{
 		ori_x = 0;
 		ori_y = 0;
