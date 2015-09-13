@@ -58,7 +58,7 @@ def export_sort_file(scene, force_debug):
     yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
     ET.SubElement(root, 'RenderTargetSize', w='%d'%xres, h='%d'%yres )
     # output file name
-    ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.exr')
+    ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.bmp')
     # sampler type
     sampler_type = scene.sampler_type_prop
     sampler_count = scene.sampler_count_prop
