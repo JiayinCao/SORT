@@ -170,7 +170,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         subprocess.Popen.wait(process)
 
         # wait for the thread to finish
-        while self.sort_thread.isAlive():
+        if self.sort_thread.isAlive():
             self.sort_thread.stop()
             self.sort_thread.update(True)
 
