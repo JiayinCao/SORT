@@ -232,7 +232,7 @@ void System::_pushRenderTask()
 	m_outputs.push_back( &blender_output );
 
 	RenderTask rt(m_Scene,m_pSampler,m_camera,m_outputs,m_taskDone,m_iSamplePerPixel);
-	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i += tilesize )
+	/*	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i += tilesize )
 	{
 		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j += tilesize )
 		{
@@ -247,6 +247,136 @@ void System::_pushRenderTask()
 
 			// push the render task
 			PushRenderTask(rt);
+		}
+	}
+	*/
+	int tile_num_x = ceil(m_rt->GetWidth() / (float)tilesize);
+	int tile_num_y = ceil(m_rt->GetHeight() / (float)tilesize);
+
+	// start tile from center instead of top-left corner
+	int current_x = tile_num_x / 2;
+	int current_y = tile_num_y / 2;
+	int cur_dir = 0;
+	int cur_len = 0;
+	int cur_dir_len = 1;
+	int dir_x[4] = { 0, -1, 0, 1 };	// right , down , left , up
+	int dir_y[4] = { -1, 0, 1, 0 };	// right , down , left , up
+	int bb[4] = { INT_MAX, INT_MAX, -1, -1 };
+	while (true)
+	{
+		rt.taskId = taskid++;
+		rt.ori_x = current_x * tilesize;
+		rt.ori_y = current_y * tilesize;
+		rt.width = (tilesize < (m_rt->GetWidth() - rt.ori_x)) ? tilesize : (m_rt->GetWidth() - rt.ori_x);
+		rt.height = (tilesize < (m_rt->GetHeight() - rt.ori_y)) ? tilesize : (m_rt->GetHeight() - rt.ori_y);
+
+		// create new pixel samples
+		rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
+
+		// push the render task
+		PushRenderTask(rt);
+
+		// turn to the next direction
+		if (cur_len >= cur_dir_len)
+		{
+			cur_dir = (cur_dir + 1) % 4;
+			cur_len = 0;
+			if (cur_dir % 2 == 0)
+				++cur_dir_len;
+		}
+
+		// get to the next tile
+		current_x += dir_x[cur_dir];
+		current_y += dir_y[cur_dir];
+		++cur_len;
+
+		if (current_x < 0 || current_x >= tile_num_x ||
+			current_y < 0 || current_y >= tile_num_y)
+			break;
+
+		// update bb
+		bb[0] = min(bb[0], current_x);
+		bb[1] = min(bb[1], current_y);
+		bb[2] = max(bb[2], current_x);
+		bb[3] = max(bb[3], current_y);
+	}
+
+	return;
+	// fill the rest
+	cout << cur_dir << endl;
+	cout << bb[0] << "\t" << bb[1] << "\t" << bb[2] << "\t" << bb[3] << endl;
+	if (cur_dir % 2)
+	{
+		for (int i = bb[0] - 1; i >= 0; --i)
+		{
+			for (int j = 0; j < m_rt->GetHeight(); ++j)
+			{
+				rt.taskId = taskid++;
+				rt.ori_x = i * tilesize;
+				rt.ori_y = j * tilesize;
+				rt.width = (tilesize < (m_rt->GetWidth() - rt.ori_x)) ? tilesize : (m_rt->GetWidth() - rt.ori_x);
+				rt.height = (tilesize < (m_rt->GetHeight() - rt.ori_y)) ? tilesize : (m_rt->GetHeight() - rt.ori_y);
+
+				// create new pixel samples
+				rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
+
+				// push the render task
+				PushRenderTask(rt);
+			}
+		}
+		for (int i = bb[2] + 1; i < m_rt->GetWidth(); ++i)
+		{
+			for (int j = 0; j < m_rt->GetHeight(); ++j)
+			{
+				rt.taskId = taskid++;
+				rt.ori_x = i * tilesize;
+				rt.ori_y = j * tilesize;
+				rt.width = (tilesize < (m_rt->GetWidth() - rt.ori_x)) ? tilesize : (m_rt->GetWidth() - rt.ori_x);
+				rt.height = (tilesize < (m_rt->GetHeight() - rt.ori_y)) ? tilesize : (m_rt->GetHeight() - rt.ori_y);
+
+				// create new pixel samples
+				rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
+
+				// push the render task
+				PushRenderTask(rt);
+			}
+		}
+	}
+	else
+	{
+		for (int i = bb[0] - 1; i >= 0; --i)
+		{
+			for (int j = 0; j < m_rt->GetHeight(); ++j)
+			{
+				rt.taskId = taskid++;
+				rt.ori_x = i * tilesize;
+				rt.ori_y = j * tilesize;
+				rt.width = (tilesize < (m_rt->GetWidth() - rt.ori_x)) ? tilesize : (m_rt->GetWidth() - rt.ori_x);
+				rt.height = (tilesize < (m_rt->GetHeight() - rt.ori_y)) ? tilesize : (m_rt->GetHeight() - rt.ori_y);
+
+				// create new pixel samples
+				rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
+
+				// push the render task
+				PushRenderTask(rt);
+			}
+		}
+		for (int i = bb[1] + 1; i < m_rt->GetWidth(); ++i)
+		{
+			for (int j = 0; j < m_rt->GetHeight(); ++j)
+			{
+				rt.taskId = taskid++;
+				rt.ori_x = i * tilesize;
+				rt.ori_y = j * tilesize;
+				rt.width = (tilesize < (m_rt->GetWidth() - rt.ori_x)) ? tilesize : (m_rt->GetWidth() - rt.ori_x);
+				rt.height = (tilesize < (m_rt->GetHeight() - rt.ori_y)) ? tilesize : (m_rt->GetHeight() - rt.ori_y);
+
+				// create new pixel samples
+				rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
+
+				// push the render task
+				PushRenderTask(rt);
+			}
 		}
 	}
 }

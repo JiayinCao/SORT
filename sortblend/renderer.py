@@ -3,12 +3,11 @@ import os
 import subprocess
 import math
 import struct
-from . import preference
+import numpy
 from . import exporter
 from . import preference
 from . import common
 from extensions_framework.util import TimerThread
-import array
 
 class SORT_Thread(TimerThread):
     render_engine = None
@@ -28,13 +27,11 @@ class SORT_Thread(TimerThread):
     def kick(self, render_end=False):
         self.update()
 
-    def update(self):
-        # helper function
-        def chunks(l, n):
-            return [l[i:i+n] for i in range(0, len(l), n)]
-
+    def update(self, final_update=False):
         # total pixel count
         mod = self.render_engine.image_tile_size - ( self.render_engine.image_size_h % self.render_engine.image_tile_size )
+        if mod is self.render_engine.image_tile_size:
+            mod = 0
 
         # pick active tiles to update
         active_tiles = self.picknewtiles()
@@ -56,23 +53,25 @@ class SORT_Thread(TimerThread):
             self.shared_memory.seek( self.render_engine.image_header_size + i * self.render_engine.image_tile_size_in_bytes + offset_y * tile_size_x * 16)
             byptes = self.shared_memory.read(self.render_engine.image_tile_size_in_bytes - offset_y * tile_size_x * 16)
 
-            # pack the data
-            image_rect = struct.unpack('%sf'%(self.render_engine.image_tile_pixel_count * 4 - offset_y * tile_size_x * 4), byptes )
+            # convert binary to two dimensional array
+            tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
+            tile_rect = tile_data.reshape( ( ( self.render_engine.image_tile_pixel_count - offset_y * tile_size_x ) , 4 ) )
 
-            # convert it into two dimensional array
-            image_rect_final = chunks(image_rect,4)
-
-            # begin update
+            # begin result
             result = self.render_engine.begin_result(tile_x_offset, max(tile_y_offset - mod,0), tile_size_x, tile_size_y - offset_y)
 
             # update image memmory
-            result.layers[0].passes[0].rect = image_rect_final
+            result.layers[0].passes[0].rect = tile_rect
 
             # refresh the update
             self.render_engine.end_result(result)
 
             # update header info to make sure it is not processed again
             self.shared_memory[i] = self.shared_memory[i] + 1
+
+        # close the shared memory if it is the last update
+        if final_update:
+            self.shared_memory.close()
 
     def picknewtiles(self):
         active_tiles = []
@@ -173,7 +172,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # wait for the thread to finish
         while self.sort_thread.isAlive():
             self.sort_thread.stop()
-            self.sort_thread.update()
+            self.sort_thread.update(True)
 
 def register():
     # Register the RenderEngine
