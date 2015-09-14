@@ -167,11 +167,18 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 
         # wait for the process to finish
-        subprocess.Popen.wait(process)
+        while subprocess.Popen.poll(process) is None:
+            if self.test_break():
+                break
+
+        # terminate the process by force
+        if subprocess.Popen.poll(process) is None:
+            subprocess.Popen.terminate(process)
 
         # wait for the thread to finish
         if self.sort_thread.isAlive():
             self.sort_thread.stop()
+            self.sort_thread.join()
             self.sort_thread.update(True)
 
 def register():
