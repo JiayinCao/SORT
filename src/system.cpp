@@ -435,10 +435,8 @@ bool System::Setup( const char* str )
 			unsigned width = atoi( str_width );
 			unsigned height = atoi( str_height );
 		
-			if( width < 16 ) width = 16;
-			if( width > 4096 ) width = 4096;
-			if( height < 16 ) height = 16;
-			if( height > 3072 ) height = 3072;
+			if( width < 1 ) width = 1;
+			if( height < 1) height = 1;
 		
 			m_rt->SetSize( width , height );
 		}
