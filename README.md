@@ -13,5 +13,5 @@ Here are the features implemented so far:
   - Multi-thread rendering.
   - Blender plugin. (Working on it these days.)
 
-Here is an screen shot of SORT working in Blender
+Here is a screen shot of SORT working in Blender
 ![Image](https://agraphicsguy.files.wordpress.com/2015/09/ss.png)
