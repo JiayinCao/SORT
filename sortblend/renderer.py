@@ -22,7 +22,7 @@ class SORT_Thread(TimerThread):
         self.shared_memory = sm
 
         # pack image content as float
-        self.float_shared_memory = struct.pack('%sf'%(self.render_engine.image_size_in_bytes), *sm[self.render_engine.image_header_size:] )
+        self.float_shared_memory = struct.pack('%sf'%(self.render_engine.image_size_in_bytes), *sm[self.render_engine.image_header_size:self.render_engine.image_size_in_bytes + self.render_engine.image_header_size] )
 
     def kick(self, render_end=False):
         self.update()
@@ -92,8 +92,8 @@ class SORT_RENDERER(bpy.types.RenderEngine):
     def spawnnewthread(self):
         # allocate shared memory first
         import mmap
-        sharedMemory = mmap.mmap(0, self.image_size_in_bytes + self.image_header_size , "SORTBLEND_SHAREMEM")
-        self.sort_thread.setsharedmemory(sharedMemory)
+        self.sharedmemory = mmap.mmap(0, self.image_size_in_bytes + self.image_header_size + 1 , "SORTBLEND_SHAREMEM")
+        self.sort_thread.setsharedmemory(self.sharedmemory)
         self.sort_thread.set_kick_period(1)
         self.sort_thread.start()
 
@@ -103,6 +103,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         self.render_pass = None
         self.sort_thread = SORT_Thread()
         self.sort_thread.setrenderengine(self)
+        self.sharedmemory = None
 
         self.image_tile_size = 64
         self.image_size_w = int(bpy.data.scenes[0].render.resolution_x * bpy.data.scenes[0].render.resolution_percentage / 100)
@@ -164,12 +165,16 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # execute binary
         self.cmd_argument = [binary_path];
         self.cmd_argument.append('./blender_intermediate/blender_exported.xml')
+        self.cmd_argument.append('blendermode')
+        print(self.cmd_argument)
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 
         # wait for the process to finish
         while subprocess.Popen.poll(process) is None:
             if self.test_break():
                 break
+            progress = self.sharedmemory[self.image_size_in_bytes + self.image_header_size]
+            self.update_progress(progress/100)
 
         # terminate the process by force
         if subprocess.Popen.poll(process) is None:

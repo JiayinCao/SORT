@@ -20,6 +20,7 @@
 
 #include "sortoutput.h"
 #include "texture/rendertarget.h"
+#include "managers/smmanager.h"
 
 // generate output
 class BlenderOutput : public SORTOutput
@@ -40,7 +41,13 @@ public:
 	virtual void PostProcess();
 
 private:
-	RenderTarget m_rendertarget;
+	RenderTarget	m_rendertarget;
+
+	int				m_header_offset;
+	int				m_tilenum_x;
+	int				m_tilenum_y;
+
+	SharedMemory	m_sharedMemory;
 };
 
 #endif
