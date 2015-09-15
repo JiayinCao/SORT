@@ -17,12 +17,11 @@
 
 #include "blenderoutput.h"
 #include "multithread/taskqueue.h"
-
+#include "managers/smmanager.h"
 #include <Windows.h>
 
-float*	result_buffer = 0;
-int		result_offset = 0;
-HANDLE hMapFile;
+// tile size
+extern int g_iTileSize;
 
 // allocate memory in sort
 void BlenderOutput::SetImageSize( int w , int h )
@@ -33,22 +32,23 @@ void BlenderOutput::SetImageSize( int w , int h )
 // store pixel information
 void BlenderOutput::StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt )
 {
-	int w = m_width;
-	int h = m_height;
-	int mod = h % 64;
-	int w_tile = ceil( w / 64.0f );
-	int h_tile = ceil( h / 64.0f );
+	if (!m_sharedMemory.bytes)
+		return;
 
 	int tile_w = rt.width;
-	int tile_size = 64 * 64;
-	int x_off = rt.ori_x / 64;
-	int y_off = floor( (h - 1 - rt.ori_y ) / 64.0f ) ;
-	int tile_offset = y_off * w_tile + x_off;
+	int tile_size = g_iTileSize * g_iTileSize;
+	int x_off = rt.ori_x / g_iTileSize;
+	int y_off = floor((m_height - 1 - rt.ori_y) / (float)g_iTileSize);
+	int tile_offset = y_off * m_tilenum_x + x_off;
 	int offset = 4 * tile_offset * tile_size;
-	float* data = (float*)((char*)result_buffer+result_offset);
 
-	int inner_offset = offset + 4 * ( x - rt.ori_x + ( 63 - ( y - rt.ori_y ) ) * tile_w );
+	// get the data pointer
+	float* data = (float*)(m_sharedMemory.bytes + m_header_offset);
 
+	// get offset
+	int inner_offset = offset + 4 * (x - rt.ori_x + (g_iTileSize - 1 - (y - rt.ori_y)) * tile_w);
+
+	// copy data
 	data[ inner_offset ] = color.GetR();
 	data[ inner_offset + 1 ] = color.GetG();
 	data[ inner_offset + 2 ] = color.GetB();
@@ -58,54 +58,23 @@ void BlenderOutput::StorePixel( int x , int y , const Spectrum& color , const Re
 // finish image tile
 void BlenderOutput::FinishTile( int tile_x , int tile_y , const RenderTask& rt )
 {
-	int w_tile = ceil( m_width / 64.0f );
-	int h_tile = ceil( m_height / 64.0f );
-	int tile_offset = tile_y * w_tile + tile_x;
+	if (!m_sharedMemory.bytes)
+		return;
 
-	((char*)result_buffer)[ tile_offset ] = 1;
+	m_sharedMemory.bytes[tile_y * m_tilenum_x + tile_x] = 1;
 }
 
 // pre process
 void BlenderOutput::PreProcess()
 {
-	hMapFile = OpenFileMapping(
-		FILE_MAP_ALL_ACCESS,   // read/write access
-		FALSE,                 // do not inherit the name
-		"SORTBLEND_SHAREMEM");               // name of mapping object
+	m_tilenum_x = ceil(m_width / (float)g_iTileSize);
+	m_tilenum_y = ceil(m_height / (float)g_iTileSize);
+	m_header_offset = m_tilenum_x * m_tilenum_y;
 
-	if (hMapFile == NULL)
-	{
-		cout<<GetLastError()<<endl;
-		cout<<"Create."<<endl;
-		return;
-	}
-	int x_tile = ceil( m_width / 64.0f );
-	int y_tile = ceil( m_height / 64.0f );
-	result_offset = x_tile * y_tile;
-	int size = result_offset * 64 * 64 * 4 * sizeof(float) + result_offset;
-	result_buffer = (float*) MapViewOfFile(hMapFile,   // handle to map object
-		FILE_MAP_WRITE, // read/write permission
-		0,
-		0,
-		size );
-
-	if (result_buffer == NULL)
-	{
-		cout<<GetLastError()<<endl;
-		cout<<"Map."<<endl;
-		CloseHandle(hMapFile);
-
-		return;
-	}
-
-	// clear header first
-	memset( result_buffer , 0 , result_offset );
+	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("SORTBLEND_SHAREMEM");
 }
 
 // post process
 void BlenderOutput::PostProcess()
 {
-	UnmapViewOfFile(result_buffer);
-
-	CloseHandle(hMapFile);
 }

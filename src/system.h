@@ -87,6 +87,7 @@ private:
 
 	unsigned		m_totalTask;
 	bool*			m_taskDone;
+	char*			m_pProgress;
 
 	// the integrator type
 	string			m_integratorType;
@@ -108,8 +109,6 @@ private:
 	unsigned		m_uRenderingTime;
 	// pre-processing time
 	unsigned		m_uPreProcessingTime;
-	// previous progress
-	unsigned		m_uPreProgress;
 
 	// path for the resource
 	string			m_ResourcePath;
