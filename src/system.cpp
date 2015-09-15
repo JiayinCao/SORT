@@ -36,6 +36,9 @@
 #include "sampler/stratified.h"
 #include <time.h>
 #include "output/sortoutput.h"
+#include "managers/smmanager.h"
+
+extern bool g_bBlenderMode;
 
 // constructor
 System::System()
@@ -63,14 +66,16 @@ void System::_preInit()
 	MemManager::CreateInstance();
 	// initialize the timer
 	Timer::CreateInstance();
+	// initialize shared memory
+	SMManager::CreateInstance();
 
 	// setup default value
 	m_rt = 0;
 	m_camera = 0;
 	m_uRenderingTime = 0;
 	m_uPreProcessingTime = 0;
-	m_uPreProgress = 0xffffffff;
 	m_thread_num = 1;
+	m_pProgress = 0;
 }
 
 // post-uninit
@@ -93,6 +98,7 @@ void System::_postUninit()
 	MemManager::DeleteSingleton();
 	Timer::DeleteSingleton();
 	LogManager::DeleteSingleton();
+	SMManager::DeleteSingleton();
 }
 
 // render the image
@@ -184,7 +190,11 @@ void System::_outputProgress()
 
 	// output progress
 	unsigned progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
-	cout<< progress<<"\rProgress: ";
+
+	if (!g_bBlenderMode)
+		cout<< progress<<"\rProgress: ";
+	else if (m_pProgress)
+		*m_pProgress = progress;
 }
 
 // output log information
@@ -501,6 +511,26 @@ bool System::Setup( const char* str )
 
 	// setup render target
 	m_camera->SetRenderTarget(m_rt);
+
+	// create shared memory
+	int x_tile = ceil(m_rt->GetWidth() / 64.0f);
+	int y_tile = ceil(m_rt->GetHeight() / 64.0f);
+	int header_size = x_tile * y_tile;
+	int size =	header_size * 64 * 64 * 4 * sizeof(float)	// image size
+				+ header_size								// header size
+				+ 1;										// progress data
+
+	// create shared memory
+	const SharedMemory& sm = SMManager::GetSingleton().CreateSharedMemory("SORTBLEND_SHAREMEM", size, SharedMmeory_All);
+	// clear the memory first
+	if (sm.bytes)
+	{
+		// clear the memory
+		memset(sm.bytes, 0, sm.size);
+
+		// setup progess pointer
+		m_pProgress = sm.bytes + sm.size - 1;
+	}
 
 	return true;
 }

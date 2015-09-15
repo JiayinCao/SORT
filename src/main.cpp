@@ -22,6 +22,8 @@
 // the global system
 System g_System;
 
+extern bool g_bBlenderMode;
+
 // the main func
 #ifdef SORT_IN_WINDOWS
 int __cdecl main( int argc , char** argv )
@@ -35,7 +37,14 @@ int main( int argc , char** argv )
 		cout<<"Miss file argument."<<endl;
 		return 0;
 	}
-	
+
+	// enable blender mode if possible
+	if (argc > 2)
+	{
+		if (strcmp(argv[2], "blendermode") == 0)
+			g_bBlenderMode = true;
+	}
+
 	// setup the system
 	if( g_System.Setup( argv[1] ) )
 	{
