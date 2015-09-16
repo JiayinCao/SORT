@@ -32,7 +32,9 @@ SMManager::~SMManager()
 	while (it != m_SharedMemory.end())
 	{
 		ReleaseSharedMemory(it->first);
-		++it;
+		
+		// restart from the first one
+		it = m_SharedMemory.begin();
 	}
 }
 
