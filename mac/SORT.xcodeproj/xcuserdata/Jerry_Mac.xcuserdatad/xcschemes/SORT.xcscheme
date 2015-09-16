@@ -60,7 +60,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "../res/cornell.sort"
+            argument = "blender_intermediate/blender_exported.xml"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

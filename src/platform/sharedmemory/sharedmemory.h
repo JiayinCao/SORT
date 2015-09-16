@@ -39,7 +39,7 @@ struct SharedMemory
 #if defined(SORT_IN_WINDOWS)
 	#include "winsharedmemory.h"
 #elif defined(SORT_IN_MAC)
-// to be implemented
+    #include "mmapsharedmemory.h"
 #elif defined(SORT_IN_LINUX)
 // to be implemented
 #endif

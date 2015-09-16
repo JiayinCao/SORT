@@ -18,14 +18,19 @@
 #ifndef SORT_SORTOUTPUT
 #define SORT_SORTOUTPUT
 
+// somehow, pre-decleration will crash the program on Mac.
+#include "spectrum/spectrum.h"
+
 // pre-decleration
-class Spectrum;
 class RenderTask;
 
 // generate output
 class SORTOutput
 {
 public:
+    SORTOutput(){}
+    virtual ~SORTOutput(){}
+    
 	// pre process
 	virtual void PreProcess() = 0;
 
@@ -35,9 +40,9 @@ public:
 	// finish image tile
 	virtual void FinishTile( int tile_x , int tile_y , const RenderTask& rt ){}
 
-	// store pixel information
-	virtual void StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt ) = 0;
-
+    // store pixel information
+    virtual void StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt ) = 0;
+    
 	// post process
 	virtual void PostProcess() = 0;
 
