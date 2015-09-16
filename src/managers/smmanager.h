@@ -20,22 +20,7 @@
 
 #include "utility/singleton.h"
 #include <map>
-
-#define SharedMemory_Read 0x01
-#define	SharedMemory_Write 0x02
-#define SharedMmeory_All ( SharedMemory_Read | SharedMemory_Write )
-
-struct SharedMemory
-{
-	char*	bytes;
-	int		size;
-
-	SharedMemory()
-	{
-		bytes = 0;
-		size = 0;
-	}
-};
+#include "platform/sharedmemory/sharedmemory.h"
 
 /////////////////////////////////////////////////////////////
 // definition of shared memory manager
@@ -56,7 +41,7 @@ public:
 
 private:
 	// the map for shared memory
-	std::map< string, SharedMemory > m_SharedMemory;
+	std::map< string, PlatformSharedMemory > m_SharedMemory;
 
 	// private constructor
 	SMManager();

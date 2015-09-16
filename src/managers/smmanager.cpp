@@ -20,12 +20,6 @@
 // instance the singleton with tex manager
 DEFINE_SINGLETON(SMManager);
 
-// temporary solution, will isolate those windows interfaces later
-#include <Windows.h>
-static float*	result_buffer = 0;
-static int		result_offset = 0;
-static HANDLE	hMapFile;
-
 SMManager::SMManager()
 {
 
@@ -34,7 +28,7 @@ SMManager::SMManager()
 SMManager::~SMManager()
 {
 	// Release all shared memory
-	std::map< string, SharedMemory >::iterator it = m_SharedMemory.begin();
+	std::map< string, PlatformSharedMemory >::iterator it = m_SharedMemory.begin();
 	while (it != m_SharedMemory.end())
 	{
 		ReleaseSharedMemory(it->first);
@@ -45,46 +39,34 @@ SMManager::~SMManager()
 // Initialize shared memory
 SharedMemory SMManager::CreateSharedMemory(const string& sm_name, int size, unsigned type)
 {
-	hMapFile = OpenFileMapping(
-		FILE_MAP_ALL_ACCESS,	// read/write access
-		FALSE,					// do not inherit the name
-		sm_name.c_str());		// name of mapping object
+	// platform dependent shared memory
+	PlatformSharedMemory sm;
 
-	if (hMapFile == NULL)
-	{
-		cout << GetLastError() << endl;
-		cout << "Create." << endl;
-		return SharedMemory();
-	}
-	result_buffer = (float*)MapViewOfFile(hMapFile,   // handle to map object
-		FILE_MAP_WRITE, // read/write permission
-		0,
-		0,
-		size);
+	// create shared memory
+	sm.CreateSharedMemory(sm_name, size, type);
 
-	if (result_buffer == NULL)
-	{
-		cout << GetLastError() << endl;
-		cout << "Map." << endl;
-		CloseHandle(hMapFile);
-		return SharedMemory();
-	}
+	// push it into the map
+	m_SharedMemory.insert(make_pair(sm_name, sm));
 
-	SharedMemory sm;
-	sm.bytes = (char*)result_buffer;
-	sm.size = size;
-	m_SharedMemory.insert(make_pair( sm_name, sm ));
-	return sm;
+	// return shared memory result
+	return sm.sharedmemory;
 }
 
 // Release shared memory
 void SMManager::ReleaseSharedMemory(const string& sm_name)
 {
-	// unmap the view
-	UnmapViewOfFile(result_buffer);
+	// Release all shared memory
+	std::map< string, PlatformSharedMemory >::iterator it = m_SharedMemory.begin();
+	while (it != m_SharedMemory.end())
+	{
+		if (it->first == sm_name)
+		{
+			it->second.ReleaseSharedMemory();
+			break;
+		}
 
-	// close file handle
-	CloseHandle(hMapFile);
+		++it;
+	}
 
 	// erase it from the map
 	m_SharedMemory.erase(sm_name);
@@ -94,11 +76,11 @@ void SMManager::ReleaseSharedMemory(const string& sm_name)
 SharedMemory SMManager::GetSharedMemory(const string& sm_name)
 {
 	// Release all shared memory
-	std::map< string, SharedMemory >::iterator it = m_SharedMemory.begin();
+	std::map< string, PlatformSharedMemory >::iterator it = m_SharedMemory.begin();
 	while (it != m_SharedMemory.end())
 	{
 		if (it->first == sm_name)
-			return it->second;
+			return it->second.sharedmemory;
 		++it;
 	}
 
