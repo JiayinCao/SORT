@@ -22,6 +22,8 @@ LIBSRCS += $(wildcard sampler/*.cpp)
 LIBSRCS += $(wildcard shape/*.cpp)
 LIBSRCS += $(wildcard material/*.cpp)
 LIBSRCS += $(wildcard multithread/*.cpp)
+LIBSRCS += $(wildcard output/*.cpp)
+LIBSRCS += $(wildcard platform/sharedmemory/*.cpp)
 LIBSRCS += $(wildcard thirdparty/tinyxml/*.cpp)
 LIBSRCS += $(wildcard thirdparty/ilmbase-1.0.2/*.cpp)
 LIBSRCS += $(wildcard thirdparty/openexr-1.7.0/*.cpp)
@@ -39,7 +41,7 @@ $(OBJ_PATH) :
 	@echo "creating directory $@"
 	@mkdir -p $(OBJ_PATH)
 
-$(OBJ_PATH)/main.o : main.cpp
+$(OBJ_PATH)/%.o : %.cpp
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 
@@ -116,6 +118,14 @@ $(OBJ_PATH)/material_%.o : material/%.cpp material/%.h utility/propertyset.h
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 	
 $(OBJ_PATH)/multithread_%.o : multithread/%.cpp multithread/%.h multithread/threadunit.h
+	@echo "building object $@"
+	@g++ $(COMPILE_FLAG) -c $< -o $@
+
+$(OBJ_PATH)/output_%.o : output/%.cpp output/%.h output/sortoutput.h
+	@echo "building object $@"
+	@g++ $(COMPILE_FLAG) -c $< -o $@
+
+$(OBJ_PATH)/platform_sharedmemory_%.o : platform/sharedmemory/%.cpp platform/sharedmemory/%.h platform/sharedmemory/sharedmemory.h
 	@echo "building object $@"
 	@g++ $(COMPILE_FLAG) -c $< -o $@
 
