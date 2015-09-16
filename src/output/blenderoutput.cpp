@@ -18,7 +18,6 @@
 #include "blenderoutput.h"
 #include "multithread/taskqueue.h"
 #include "managers/smmanager.h"
-#include <Windows.h>
 
 // tile size
 extern int g_iTileSize;

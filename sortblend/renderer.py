@@ -4,6 +4,7 @@ import subprocess
 import math
 import struct
 import numpy
+import platform
 from . import exporter
 from . import preference
 from . import common
@@ -90,13 +91,30 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
     # spawn new rendering thread
     def spawnnewthread(self):
-        # allocate shared memory first
         import mmap
-        self.sharedmemory = mmap.mmap(0, self.image_size_in_bytes + self.image_header_size + 1 , "SORTBLEND_SHAREMEM")
+        
+        # setup shared memory size
+        self.sm_size = self.image_size_in_bytes + self.image_header_size + 1
+        
+        # on mac os
+        if platform.system() == "Darwin":
+            # open a new file
+            self.file = open( preference.get_immediate_dir() + "sharedmem.bin" , "wb" , self.sm_size)
+            self.file.write( bytes( "\0" * self.sm_size , "utf-8" ) )
+            self.file.close()
+        
+            # open it in append mode
+            self.file = open( preference.get_immediate_dir() + "sharedmem.bin" , "a+b" , self.sm_size)
+
+            # allocate shared memory first
+            self.sharedmemory = mmap.mmap(self.file.fileno(), self.sm_size)
+        elif platform.system() == "win32":
+            self.sharedmemory = mmap.mmap(0, self.image_size_in_bytes + self.image_header_size + 1 , "SORTBLEND_SHAREMEM")
+
         self.sort_thread.setsharedmemory(self.sharedmemory)
         self.sort_thread.set_kick_period(1)
         self.sort_thread.start()
-
+    
     def __init__(self):
         self.sort_available = True
         self.cmd_argument = []
@@ -166,7 +184,6 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         self.cmd_argument = [binary_path];
         self.cmd_argument.append('./blender_intermediate/blender_exported.xml')
         self.cmd_argument.append('blendermode')
-        print(self.cmd_argument)
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 
         # wait for the process to finish

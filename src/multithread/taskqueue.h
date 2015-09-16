@@ -54,7 +54,7 @@ public:
 	// the scene description
 	const Scene&	scene;
 	// the output methods
-	const vector<SORTOutput*>	outputs;
+	const vector<SORTOutput*>&	outputs;
 
 	// constructor
 	RenderTask( Scene& sc , Sampler* samp , Camera* cam , const vector<SORTOutput*>& outputs , bool* td, unsigned spp )
