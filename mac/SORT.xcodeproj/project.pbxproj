@@ -195,7 +195,6 @@
 		FBB4F2EA1BA987380042317D /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2E91BA987370042317D /* global.cpp */; };
 		FBB4F2ED1BA987610042317D /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2EB1BA987610042317D /* material.cpp */; };
 		FBB4F2F01BA987CE0042317D /* material_node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2EE1BA987CE0042317D /* material_node.cpp */; };
-		FBF339471B72298700020975 /* parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF339401B72298700020975 /* parallel.cpp */; };
 		FBF339491B72298700020975 /* taskqueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF339441B72298700020975 /* taskqueue.cpp */; };
 /* End PBXBuildFile section */
 
@@ -641,8 +640,6 @@
 		FBB4F2EC1BA987610042317D /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
 		FBB4F2EE1BA987CE0042317D /* material_node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material_node.cpp; sourceTree = "<group>"; };
 		FBB4F2EF1BA987CE0042317D /* material_node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material_node.h; sourceTree = "<group>"; };
-		FBF339401B72298700020975 /* parallel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parallel.cpp; path = ../src/multithread/parallel.cpp; sourceTree = "<group>"; };
-		FBF339411B72298700020975 /* parallel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parallel.h; path = ../src/multithread/parallel.h; sourceTree = "<group>"; };
 		FBF339441B72298700020975 /* taskqueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = taskqueue.cpp; path = ../src/multithread/taskqueue.cpp; sourceTree = "<group>"; };
 		FBF339451B72298700020975 /* taskqueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = taskqueue.h; path = ../src/multithread/taskqueue.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -1327,8 +1324,6 @@
 		FBF3393E1B72295A00020975 /* multithread */ = {
 			isa = PBXGroup;
 			children = (
-				FBF339401B72298700020975 /* parallel.cpp */,
-				FBF339411B72298700020975 /* parallel.h */,
 				FBF339441B72298700020975 /* taskqueue.cpp */,
 				FBF339451B72298700020975 /* taskqueue.h */,
 			);
@@ -1438,7 +1433,6 @@
 				DD8933C315BAF0C200831B31 /* merlmat.cpp in Sources */,
 				DD8933C415BAF0C200831B31 /* mirror.cpp in Sources */,
 				DD8933C515BAF0C200831B31 /* random.cpp in Sources */,
-				FBF339471B72298700020975 /* parallel.cpp in Sources */,
 				DD8933C615BAF0C200831B31 /* regular.cpp in Sources */,
 				DD8933C715BAF0C200831B31 /* sampler.cpp in Sources */,
 				DD8933C815BAF0C200831B31 /* stratified.cpp in Sources */,

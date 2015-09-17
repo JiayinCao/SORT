@@ -20,7 +20,7 @@
 
 // include the header
 #include "utility/singleton.h"
-#include "multithread/parallel.h"
+#include "platform/multithread/multithread.h"
 #include "logmanager.h"
 #include <map>
 
