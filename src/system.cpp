@@ -40,6 +40,7 @@
 #include "multithread/taskqueue.h"
 
 extern bool g_bBlenderMode;
+extern int  g_iTileSize;
 
 // constructor
 System::System()
@@ -226,7 +227,7 @@ void System::Uninit()
 void System::_pushRenderTask()
 {
 	// Push render task into the queue
-	unsigned tilesize = 64;
+	unsigned tilesize = g_iTileSize;
 	unsigned taskid = 0;
 	
 	// get the number of total task
@@ -510,10 +511,10 @@ bool System::Setup( const char* str )
 	m_camera->SetRenderTarget(m_rt);
 
 	// create shared memory
-	int x_tile = ceil(m_rt->GetWidth() / 64.0f);
-	int y_tile = ceil(m_rt->GetHeight() / 64.0f);
+	int x_tile = ceil(m_rt->GetWidth() / (float)g_iTileSize);
+	int y_tile = ceil(m_rt->GetHeight() / (float)g_iTileSize);
 	int header_size = x_tile * y_tile;
-	int size =	header_size * 64 * 64 * 4 * sizeof(float)	// image size
+	int size =	header_size * g_iTileSize * g_iTileSize * 4 * sizeof(float)	// image size
 				+ header_size								// header size
 				+ 1;										// progress data
 
