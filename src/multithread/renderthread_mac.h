@@ -46,13 +46,20 @@ public:
 		return m_finished;
 	}
 
+    // get thread id
+    int GetThreadID() const{
+        return m_thread_id;
+    }
+    
 // private field
 private:
 	// whether the thread is finished
 	bool	m_finished;
     // thread handle
     pthread_t m_thread;
-
+    // thread id
+    int     m_thread_id;
+    
 public:
     static pthread_once_t m_threadKeyInit;
     static pthread_key_t m_threadKey;
