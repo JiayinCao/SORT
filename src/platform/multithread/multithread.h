@@ -26,6 +26,99 @@ unsigned NumSystemCores();
 // get the thread id
 int ThreadId();
 
+#include <list>
+#include "utility/singleton.h"
+#include "utility/define.h"
+#include "sampler/sample.h"
+
+class Integrator;
+class Scene;
+class Sampler;
+class Camera;
+class RenderTarget;
+class SORTOutput;
+
+class RenderTask
+{
+public:
+    // the following parameters define where to calculate the image
+    unsigned ori_x;
+    unsigned ori_y;
+    unsigned width;
+    unsigned height;
+    
+    // the task id
+    unsigned		taskId;
+    bool*			taskDone;	// used to show the progress
+    
+    // the pixel sample
+    PixelSample*	pixelSamples;
+    unsigned		samplePerPixel;
+    
+    // the sampler
+    Sampler*		sampler;
+    // the camera
+    Camera*			camera;
+    // the scene description
+    const Scene&	scene;
+    // the output methods
+    const vector<SORTOutput*>&	outputs;
+    
+    // constructor
+    RenderTask( Scene& sc , Sampler* samp , Camera* cam , const vector<SORTOutput*>& outputs , bool* td, unsigned spp )
+    :scene(sc),sampler(samp),camera(cam),samplePerPixel(spp),outputs(outputs),taskDone(td)
+    {
+        ori_x = 0;
+        ori_y = 0;
+        width = 0;
+        height = 0;
+        pixelSamples = 0;
+        taskId = 0;
+    }
+    
+    // execute the task
+    void Execute( Integrator* integrator );
+    
+    static void DestoryRenderTask( RenderTask& rt )
+    {
+        SAFE_DELETE_ARRAY(rt.pixelSamples);
+    }
+};
+
+class RenderTaskQueue : public Singleton<RenderTaskQueue>
+{
+    // public method
+public:
+    ~RenderTaskQueue(){}
+    
+    // Add Task
+    void PushTask( RenderTask task ){
+        m_taskList.push_back(task);
+    }
+    
+    // Pop task
+    RenderTask PopTask(){
+        RenderTask t = m_taskList.front();
+        m_taskList.pop_front();
+        return t;
+    }
+    
+    // Is the queue empty
+    bool IsEmpty() const{
+        return m_taskList.empty();
+    }
+    
+    // private field
+private:
+    std::list<RenderTask> m_taskList;
+    
+    // private constructor
+    RenderTaskQueue(){}
+    
+    friend class Singleton<RenderTaskQueue>;
+};
+
+
 #if defined(SORT_IN_WINDOWS)
 	#include "winmultithread.h"
 #elif defined(SORT_IN_MAC)

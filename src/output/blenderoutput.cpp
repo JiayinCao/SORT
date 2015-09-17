@@ -16,7 +16,7 @@
 */
 
 #include "blenderoutput.h"
-#include "multithread/taskqueue.h"
+#include "platform/multithread/multithread.h"
 #include "managers/smmanager.h"
 
 // tile size
