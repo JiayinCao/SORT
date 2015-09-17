@@ -185,6 +185,8 @@
 		DD89344215BAF0C300831B31 /* timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DD89338E15BAF0C200831B31 /* timer.cpp */; };
 		DDABCB3816F5E30F00A9A16D /* microfacetdistribution.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDABCB3716F5E30F00A9A16D /* microfacetdistribution.cpp */; };
 		DDABCB3A16F5E82500A9A16D /* microfacet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDABCB3916F5E82500A9A16D /* microfacet.cpp */; };
+		FB39C9C51BAA7A5600273968 /* ptmultithread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB39C9C11BAA7A5600273968 /* ptmultithread.cpp */; };
+		FB39C9C61BAA7A5600273968 /* winmultithread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB39C9C31BAA7A5600273968 /* winmultithread.cpp */; };
 		FBB4F2D71BA9839E0042317D /* smmanager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2D51BA9839E0042317D /* smmanager.cpp */; };
 		FBB4F2DD1BA983B10042317D /* blenderoutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2D81BA983B10042317D /* blenderoutput.cpp */; };
 		FBB4F2DE1BA983B10042317D /* imageoutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2DA1BA983B10042317D /* imageoutput.cpp */; };
@@ -194,9 +196,7 @@
 		FBB4F2ED1BA987610042317D /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2EB1BA987610042317D /* material.cpp */; };
 		FBB4F2F01BA987CE0042317D /* material_node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2EE1BA987CE0042317D /* material_node.cpp */; };
 		FBF339471B72298700020975 /* parallel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF339401B72298700020975 /* parallel.cpp */; };
-		FBF339481B72298700020975 /* renderthread_win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF339421B72298700020975 /* renderthread_win.cpp */; };
 		FBF339491B72298700020975 /* taskqueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF339441B72298700020975 /* taskqueue.cpp */; };
-		FBF3394C1B722ACB00020975 /* renderthread_mac.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF3394A1B722ACB00020975 /* renderthread_mac.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -619,6 +619,11 @@
 		DDABCB3616F5DDFB00A9A16D /* microfacetdistribution.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = microfacetdistribution.h; sourceTree = "<group>"; };
 		DDABCB3716F5E30F00A9A16D /* microfacetdistribution.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = microfacetdistribution.cpp; sourceTree = "<group>"; };
 		DDABCB3916F5E82500A9A16D /* microfacet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = microfacet.cpp; sourceTree = "<group>"; };
+		FB39C9C01BAA7A5600273968 /* multithread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = multithread.h; path = ../src/platform/multithread/multithread.h; sourceTree = "<group>"; };
+		FB39C9C11BAA7A5600273968 /* ptmultithread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ptmultithread.cpp; path = ../src/platform/multithread/ptmultithread.cpp; sourceTree = "<group>"; };
+		FB39C9C21BAA7A5600273968 /* ptmultithread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ptmultithread.h; path = ../src/platform/multithread/ptmultithread.h; sourceTree = "<group>"; };
+		FB39C9C31BAA7A5600273968 /* winmultithread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = winmultithread.cpp; path = ../src/platform/multithread/winmultithread.cpp; sourceTree = "<group>"; };
+		FB39C9C41BAA7A5600273968 /* winmultithread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = winmultithread.h; path = ../src/platform/multithread/winmultithread.h; sourceTree = "<group>"; };
 		FBB4F2D51BA9839E0042317D /* smmanager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = smmanager.cpp; sourceTree = "<group>"; };
 		FBB4F2D61BA9839E0042317D /* smmanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = smmanager.h; sourceTree = "<group>"; };
 		FBB4F2D81BA983B10042317D /* blenderoutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blenderoutput.cpp; path = ../src/output/blenderoutput.cpp; sourceTree = "<group>"; };
@@ -638,13 +643,8 @@
 		FBB4F2EF1BA987CE0042317D /* material_node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material_node.h; sourceTree = "<group>"; };
 		FBF339401B72298700020975 /* parallel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = parallel.cpp; path = ../src/multithread/parallel.cpp; sourceTree = "<group>"; };
 		FBF339411B72298700020975 /* parallel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = parallel.h; path = ../src/multithread/parallel.h; sourceTree = "<group>"; };
-		FBF339421B72298700020975 /* renderthread_win.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renderthread_win.cpp; path = ../src/multithread/renderthread_win.cpp; sourceTree = "<group>"; };
-		FBF339431B72298700020975 /* renderthread_win.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renderthread_win.h; path = ../src/multithread/renderthread_win.h; sourceTree = "<group>"; };
 		FBF339441B72298700020975 /* taskqueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = taskqueue.cpp; path = ../src/multithread/taskqueue.cpp; sourceTree = "<group>"; };
 		FBF339451B72298700020975 /* taskqueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = taskqueue.h; path = ../src/multithread/taskqueue.h; sourceTree = "<group>"; };
-		FBF339461B72298700020975 /* threadunit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = threadunit.h; path = ../src/multithread/threadunit.h; sourceTree = "<group>"; };
-		FBF3394A1B722ACB00020975 /* renderthread_mac.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = renderthread_mac.cpp; path = ../src/multithread/renderthread_mac.cpp; sourceTree = "<group>"; };
-		FBF3394B1B722ACB00020975 /* renderthread_mac.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = renderthread_mac.h; path = ../src/multithread/renderthread_mac.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1279,6 +1279,18 @@
 			path = ../src/utility;
 			sourceTree = "<group>";
 		};
+		FB39C9BF1BAA7A4300273968 /* multithread */ = {
+			isa = PBXGroup;
+			children = (
+				FB39C9C01BAA7A5600273968 /* multithread.h */,
+				FB39C9C11BAA7A5600273968 /* ptmultithread.cpp */,
+				FB39C9C21BAA7A5600273968 /* ptmultithread.h */,
+				FB39C9C31BAA7A5600273968 /* winmultithread.cpp */,
+				FB39C9C41BAA7A5600273968 /* winmultithread.h */,
+			);
+			name = multithread;
+			sourceTree = "<group>";
+		};
 		FBB4F2DF1BA983C40042317D /* output */ = {
 			isa = PBXGroup;
 			children = (
@@ -1294,6 +1306,7 @@
 		FBB4F2E01BA985570042317D /* platform */ = {
 			isa = PBXGroup;
 			children = (
+				FB39C9BF1BAA7A4300273968 /* multithread */,
 				FBB4F2E11BA9855F0042317D /* sharedmemory */,
 			);
 			name = platform;
@@ -1314,15 +1327,10 @@
 		FBF3393E1B72295A00020975 /* multithread */ = {
 			isa = PBXGroup;
 			children = (
-				FBF3394A1B722ACB00020975 /* renderthread_mac.cpp */,
-				FBF3394B1B722ACB00020975 /* renderthread_mac.h */,
 				FBF339401B72298700020975 /* parallel.cpp */,
 				FBF339411B72298700020975 /* parallel.h */,
-				FBF339421B72298700020975 /* renderthread_win.cpp */,
-				FBF339431B72298700020975 /* renderthread_win.h */,
 				FBF339441B72298700020975 /* taskqueue.cpp */,
 				FBF339451B72298700020975 /* taskqueue.h */,
-				FBF339461B72298700020975 /* threadunit.h */,
 			);
 			name = multithread;
 			sourceTree = "<group>";
@@ -1400,6 +1408,7 @@
 				DD8933A515BAF0C200831B31 /* scene.cpp in Sources */,
 				DD8933A615BAF0C200831B31 /* skybox.cpp in Sources */,
 				DD8933A715BAF0C200831B31 /* skysphere.cpp in Sources */,
+				FB39C9C61BAA7A5600273968 /* winmultithread.cpp in Sources */,
 				DD8933A815BAF0C200831B31 /* transform.cpp in Sources */,
 				DD8933A915BAF0C200831B31 /* triangle.cpp in Sources */,
 				DD8933AA15BAF0C200831B31 /* trimesh.cpp in Sources */,
@@ -1467,6 +1476,7 @@
 				DD8933E615BAF0C200831B31 /* ImathBox.cpp in Sources */,
 				DD8933E715BAF0C200831B31 /* ImathColorAlgo.cpp in Sources */,
 				DD8933E815BAF0C200831B31 /* ImathFun.cpp in Sources */,
+				FB39C9C51BAA7A5600273968 /* ptmultithread.cpp in Sources */,
 				DD8933E915BAF0C200831B31 /* ImathMatrixAlgo.cpp in Sources */,
 				DD8933EA15BAF0C200831B31 /* ImathRandom.cpp in Sources */,
 				DD8933EB15BAF0C200831B31 /* ImathShear.cpp in Sources */,
@@ -1526,7 +1536,6 @@
 				DD89341D15BAF0C200831B31 /* ImfTileDescriptionAttribute.cpp in Sources */,
 				DD89341E15BAF0C300831B31 /* ImfTiledInputFile.cpp in Sources */,
 				DD89341F15BAF0C300831B31 /* ImfTiledMisc.cpp in Sources */,
-				FBF339481B72298700020975 /* renderthread_win.cpp in Sources */,
 				DD89342015BAF0C300831B31 /* ImfTiledOutputFile.cpp in Sources */,
 				DD89342115BAF0C300831B31 /* ImfTiledRgbaFile.cpp in Sources */,
 				DD89342215BAF0C300831B31 /* ImfTileOffsets.cpp in Sources */,
@@ -1553,7 +1562,6 @@
 				DD89343515BAF0C300831B31 /* gzwrite.c in Sources */,
 				DD89343615BAF0C300831B31 /* infback.c in Sources */,
 				DD89343715BAF0C300831B31 /* inffast.c in Sources */,
-				FBF3394C1B722ACB00020975 /* renderthread_mac.cpp in Sources */,
 				DD89343815BAF0C300831B31 /* inflate.c in Sources */,
 				DD89343915BAF0C300831B31 /* inftrees.c in Sources */,
 				DD89343A15BAF0C300831B31 /* trees.c in Sources */,
