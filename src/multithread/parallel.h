@@ -19,25 +19,17 @@
 #define	SORT_PARALLEL
 
 #include "sort.h"
-#include "threadunit.h"
 #include "taskqueue.h"
 #include "parallel.h"
+#include "platform/multithread/multithread.h"
 
 // get the number of cpu cores in the system
 unsigned NumSystemCores();
 
-// get the thread id
-unsigned ThreadId();
-
 // spawn new thread
-ThreadUnit*	SpawnNewRenderThread( unsigned tid );
+PlatformThreadUnit*	SpawnNewRenderThread(unsigned tid);
 
 // push render task
 void PushRenderTask( const RenderTask& renderTask );
-
-// Init Critical Sections
-void InitCriticalSections();
-// Destroy Critical Sections
-void DestroyCriticalSections();
 
 #endif

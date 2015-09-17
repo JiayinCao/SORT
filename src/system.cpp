@@ -301,15 +301,13 @@ void System::_executeRenderingTasks()
 		++it;
 	}
 
-	InitCriticalSections();
-
 	// will be parameterized later
 	const int THREAD_NUM = m_thread_num;
 
 	// pre allocate memory for the specific thread
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 16 , i );
-	ThreadUnit** threadUnits = new ThreadUnit*[THREAD_NUM];
+	PlatformThreadUnit** threadUnits = new PlatformThreadUnit*[THREAD_NUM];
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 	{
 		// spawn new threads
@@ -345,8 +343,6 @@ void System::_executeRenderingTasks()
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 		delete threadUnits[i];
 	delete[] threadUnits;
-
-	DestroyCriticalSections();
 
 	cout<<endl;
 
