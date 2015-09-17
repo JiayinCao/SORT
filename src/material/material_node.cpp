@@ -367,8 +367,6 @@ MicrofacetNode::~MicrofacetNode()
 {
 	delete pFresnel;
 	delete pMFDist;
-
-	MaterialNode::~MaterialNode();
 }
 
 void MicrofacetNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -408,8 +406,6 @@ ReflectionNode::ReflectionNode()
 ReflectionNode::~ReflectionNode()
 {
 	delete pFresnel;
-
-	MaterialNode::~MaterialNode();
 }
 
 void ReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -446,8 +442,6 @@ RefractionNode::RefractionNode()
 RefractionNode::~RefractionNode()
 {
 	delete pFresnel;
-
-	MaterialNode::~MaterialNode();
 }
 
 void RefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
