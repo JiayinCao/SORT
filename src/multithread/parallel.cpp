@@ -47,15 +47,8 @@ unsigned ThreadId()
 #if defined(SORT_IN_WINDOWS)
 	return RenderThreadWin::m_WinThreadId;
 #else
- //   int tid = RenderThreadMac::m_MacThreadId;
-  //  pthread_t self = pthread_self();
-   // pthread_getugid_np(&self, &tid);
-  //  __uint64_t _tid;
-   // pthread_getugid_np(&self, &_tid);
-    //pthread_threadid_np(0, &_tid);
     extern Thread_Local int g_MacThreadId;
-    int tid = g_MacThreadId;
-    return tid;
+    return g_MacThreadId;
 #endif
 }
 
@@ -65,7 +58,7 @@ ThreadUnit*	SpawnNewRenderThread( unsigned int tid )
 #if defined(SORT_IN_WINDOWS)
 	return new RenderThreadWin(tid);
 #elif defined(SORT_IN_MAC)
-	return new RenderThreadMac(tid);	// to be implemented
+	return new RenderThreadMac(tid);
 #endif
 }
 
