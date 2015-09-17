@@ -187,6 +187,7 @@
 		DDABCB3A16F5E82500A9A16D /* microfacet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DDABCB3916F5E82500A9A16D /* microfacet.cpp */; };
 		FB39C9C51BAA7A5600273968 /* ptmultithread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB39C9C11BAA7A5600273968 /* ptmultithread.cpp */; };
 		FB39C9C61BAA7A5600273968 /* winmultithread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB39C9C31BAA7A5600273968 /* winmultithread.cpp */; };
+		FB39C9C81BAAE0A300273968 /* multithread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FB39C9C71BAAE0A300273968 /* multithread.cpp */; };
 		FBB4F2D71BA9839E0042317D /* smmanager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2D51BA9839E0042317D /* smmanager.cpp */; };
 		FBB4F2DD1BA983B10042317D /* blenderoutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2D81BA983B10042317D /* blenderoutput.cpp */; };
 		FBB4F2DE1BA983B10042317D /* imageoutput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2DA1BA983B10042317D /* imageoutput.cpp */; };
@@ -195,7 +196,6 @@
 		FBB4F2EA1BA987380042317D /* global.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2E91BA987370042317D /* global.cpp */; };
 		FBB4F2ED1BA987610042317D /* material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2EB1BA987610042317D /* material.cpp */; };
 		FBB4F2F01BA987CE0042317D /* material_node.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBB4F2EE1BA987CE0042317D /* material_node.cpp */; };
-		FBF339491B72298700020975 /* taskqueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = FBF339441B72298700020975 /* taskqueue.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -623,6 +623,7 @@
 		FB39C9C21BAA7A5600273968 /* ptmultithread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ptmultithread.h; path = ../src/platform/multithread/ptmultithread.h; sourceTree = "<group>"; };
 		FB39C9C31BAA7A5600273968 /* winmultithread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = winmultithread.cpp; path = ../src/platform/multithread/winmultithread.cpp; sourceTree = "<group>"; };
 		FB39C9C41BAA7A5600273968 /* winmultithread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = winmultithread.h; path = ../src/platform/multithread/winmultithread.h; sourceTree = "<group>"; };
+		FB39C9C71BAAE0A300273968 /* multithread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = multithread.cpp; path = ../src/platform/multithread/multithread.cpp; sourceTree = "<group>"; };
 		FBB4F2D51BA9839E0042317D /* smmanager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = smmanager.cpp; sourceTree = "<group>"; };
 		FBB4F2D61BA9839E0042317D /* smmanager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = smmanager.h; sourceTree = "<group>"; };
 		FBB4F2D81BA983B10042317D /* blenderoutput.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = blenderoutput.cpp; path = ../src/output/blenderoutput.cpp; sourceTree = "<group>"; };
@@ -640,8 +641,6 @@
 		FBB4F2EC1BA987610042317D /* material.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material.h; sourceTree = "<group>"; };
 		FBB4F2EE1BA987CE0042317D /* material_node.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = material_node.cpp; sourceTree = "<group>"; };
 		FBB4F2EF1BA987CE0042317D /* material_node.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = material_node.h; sourceTree = "<group>"; };
-		FBF339441B72298700020975 /* taskqueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = taskqueue.cpp; path = ../src/multithread/taskqueue.cpp; sourceTree = "<group>"; };
-		FBF339451B72298700020975 /* taskqueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = taskqueue.h; path = ../src/multithread/taskqueue.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -660,7 +659,6 @@
 			children = (
 				FBB4F2E01BA985570042317D /* platform */,
 				FBB4F2DF1BA983C40042317D /* output */,
-				FBF3393E1B72295A00020975 /* multithread */,
 				DD8931E415BAF0C200831B31 /* accel */,
 				DD8931ED15BAF0C200831B31 /* bsdf */,
 				DD8931FB15BAF0C200831B31 /* camera */,
@@ -1279,6 +1277,7 @@
 		FB39C9BF1BAA7A4300273968 /* multithread */ = {
 			isa = PBXGroup;
 			children = (
+				FB39C9C71BAAE0A300273968 /* multithread.cpp */,
 				FB39C9C01BAA7A5600273968 /* multithread.h */,
 				FB39C9C11BAA7A5600273968 /* ptmultithread.cpp */,
 				FB39C9C21BAA7A5600273968 /* ptmultithread.h */,
@@ -1319,15 +1318,6 @@
 				FBB4F2E71BA986870042317D /* mmapsharedmemory.h */,
 			);
 			name = sharedmemory;
-			sourceTree = "<group>";
-		};
-		FBF3393E1B72295A00020975 /* multithread */ = {
-			isa = PBXGroup;
-			children = (
-				FBF339441B72298700020975 /* taskqueue.cpp */,
-				FBF339451B72298700020975 /* taskqueue.h */,
-			);
-			name = multithread;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -1458,6 +1448,7 @@
 				DD8933DA15BAF0C200831B31 /* IexThrowErrnoExc.cpp in Sources */,
 				DD8933DB15BAF0C200831B31 /* IlmThread.cpp in Sources */,
 				DD8933DC15BAF0C200831B31 /* IlmThreadMutex.cpp in Sources */,
+				FB39C9C81BAAE0A300273968 /* multithread.cpp in Sources */,
 				DD8933DD15BAF0C200831B31 /* IlmThreadMutexPosix.cpp in Sources */,
 				DD8933DE15BAF0C200831B31 /* IlmThreadMutexWin32.cpp in Sources */,
 				DD8933DF15BAF0C200831B31 /* IlmThreadPool.cpp in Sources */,
@@ -1518,7 +1509,6 @@
 				DD89341215BAF0C200831B31 /* ImfRationalAttribute.cpp in Sources */,
 				DD89341315BAF0C200831B31 /* ImfRgbaFile.cpp in Sources */,
 				DD89341415BAF0C200831B31 /* ImfRgbaYca.cpp in Sources */,
-				FBF339491B72298700020975 /* taskqueue.cpp in Sources */,
 				DD89341515BAF0C200831B31 /* ImfRleCompressor.cpp in Sources */,
 				DD89341615BAF0C200831B31 /* ImfScanLineInputFile.cpp in Sources */,
 				DD89341715BAF0C200831B31 /* ImfStandardAttributes.cpp in Sources */,
