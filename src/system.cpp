@@ -37,7 +37,7 @@
 #include <time.h>
 #include "output/sortoutput.h"
 #include "managers/smmanager.h"
-#include "multithread/taskqueue.h"
+#include "platform/multithread/multithread.h"
 
 extern bool g_bBlenderMode;
 extern int  g_iTileSize;

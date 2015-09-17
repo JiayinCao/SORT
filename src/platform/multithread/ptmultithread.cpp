@@ -19,7 +19,6 @@
 
 #if defined(SORT_IN_MAC)
 
-#include "taskqueue.h"
 #include "integrator/integrator.h"
 
 // LTS data
