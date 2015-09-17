@@ -24,6 +24,8 @@
 // instance the singleton with tex manager
 DEFINE_SINGLETON(RenderTaskQueue);
 
+extern int g_iTileSize;
+
 // execute the task
 void RenderTask::Execute( Integrator* integrator )
 {
@@ -69,8 +71,8 @@ void RenderTask::Execute( Integrator* integrator )
 	}
 
 	int h = outputs[0]->m_height;
-	int x_off = ori_x / 64;
-	int y_off = (h - 1 - ori_y ) / 64 ;
+	int x_off = ori_x / g_iTileSize;
+	int y_off = (h - 1 - ori_y ) / g_iTileSize ;
 	vector<SORTOutput*>::const_iterator it = outputs.begin();
 	while( it != outputs.end() )
 	{
