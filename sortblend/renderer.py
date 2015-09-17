@@ -92,7 +92,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
     # spawn new rendering thread
     def spawnnewthread(self):
         import mmap
-        
+
         # setup shared memory size
         self.sm_size = self.image_size_in_bytes + self.image_header_size + 1
         
@@ -108,7 +108,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
             # allocate shared memory first
             self.sharedmemory = mmap.mmap(self.file.fileno(), self.sm_size)
-        elif platform.system() == "win32":
+        elif platform.system() == "Windows":
             self.sharedmemory = mmap.mmap(0, self.image_size_in_bytes + self.image_header_size + 1 , "SORTBLEND_SHAREMEM")
 
         self.sort_thread.setsharedmemory(self.sharedmemory)
