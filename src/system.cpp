@@ -28,7 +28,7 @@
 #include "utility/path.h"
 #include "utility/creator.h"
 #include "sampler/sampler.h"
-#include "multithread/parallel.h"
+#include "platform/multithread/multithread.h"
 #include <ImfHeader.h>
 #include "utility/strhelper.h"
 #include "camera/camera.h"
@@ -37,6 +37,7 @@
 #include <time.h>
 #include "output/sortoutput.h"
 #include "managers/smmanager.h"
+#include "multithread/taskqueue.h"
 
 extern bool g_bBlenderMode;
 
@@ -269,7 +270,7 @@ void System::_pushRenderTask()
 			rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
 
 			// push the render task
-			PushRenderTask(rt);
+            RenderTaskQueue::GetSingleton().PushTask( rt );
 		}
 
 		// turn to the next direction
@@ -311,7 +312,7 @@ void System::_executeRenderingTasks()
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 	{
 		// spawn new threads
-		threadUnits[i] = SpawnNewRenderThread(i);
+		threadUnits[i] = new PlatformThreadUnit(i);
 		
 		// setup basic data
 		threadUnits[i]->m_pIntegrator = _allocateIntegrator();

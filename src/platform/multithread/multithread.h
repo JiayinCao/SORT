@@ -20,6 +20,12 @@
 
 #include "sort.h"
 
+// get the number of cpu cores in the system
+unsigned NumSystemCores();
+
+// get the thread id
+int ThreadId();
+
 #if defined(SORT_IN_WINDOWS)
 	#include "winmultithread.h"
 #elif defined(SORT_IN_MAC)

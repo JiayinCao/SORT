@@ -30,6 +30,14 @@ int ThreadId()
 	return g_ThreadId;
 }
 
+// get the number of cpu cores in the system
+unsigned NumSystemCores()
+{
+    SYSTEM_INFO sysinfo;
+    GetSystemInfo(&sysinfo);
+    return sysinfo.dwNumberOfProcessors;
+}
+
 // critical section
 struct CSection{
 	CRITICAL_SECTION cs;

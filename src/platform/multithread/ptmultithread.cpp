@@ -31,6 +31,12 @@ int ThreadId()
 	return g_ThreadId;
 }
 
+// get the number of cpu cores in the system
+unsigned NumSystemCores()
+{
+    return sysconf(_SC_NPROCESSORS_ONLN);
+}
+
 // thread mutex
 static pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
 
