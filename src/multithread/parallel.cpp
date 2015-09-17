@@ -16,18 +16,7 @@
 */
 
 #include "parallel.h"
-#if defined(SORT_IN_WINDOWS)
-#include "renderthread_win.h"
-#elif defined(SORT_IN_MAC)
-#include <unistd.h>
-#include "renderthread_mac.h"
-#endif
-
-// critical section
-#if defined(SORT_IN_WINDOWS)
-CRITICAL_SECTION g_CS_for_counters;
-extern CRITICAL_SECTION gCS;
-#endif
+#include "platform/multithread/multithread.h"
 
 // get the number of cpu cores in the system
 unsigned NumSystemCores()
@@ -41,44 +30,14 @@ unsigned NumSystemCores()
 	#endif
 }
 
-// get the thread id
-unsigned ThreadId()
-{
-#if defined(SORT_IN_WINDOWS)
-	return RenderThreadWin::m_WinThreadId;
-#else
-    extern Thread_Local int g_MacThreadId;
-    return g_MacThreadId;
-#endif
-}
-
 // spawn new thread
-ThreadUnit*	SpawnNewRenderThread( unsigned int tid )
+PlatformThreadUnit*	SpawnNewRenderThread(unsigned int tid)
 {
-#if defined(SORT_IN_WINDOWS)
-	return new RenderThreadWin(tid);
-#elif defined(SORT_IN_MAC)
-	return new RenderThreadMac(tid);
-#endif
+	return new PlatformThreadUnit(tid);
 }
 
 // push render task
 void PushRenderTask( const RenderTask& renderTask )
 {
 	RenderTaskQueue::GetSingleton().PushTask( renderTask );
-}
-
-// Init Critical Sections
-void InitCriticalSections()
-{
-#if defined(SORT_IN_WINDOWS)
-	InitializeCriticalSection(&gCS);
-#endif
-}
-// Destroy Critical Sections
-void DestroyCriticalSections()
-{
-#if defined(SORT_IN_WINDOWS)
-	DeleteCriticalSection(&gCS);
-#endif
 }
