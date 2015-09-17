@@ -23,6 +23,11 @@
 #ifdef SORT_IN_MAC
 #include <pthread.h>
 
+// get the thread id
+int ThreadId();
+
+class Integrator;
+
 class RenderThreadMac
 {
 	// public method
@@ -45,6 +50,11 @@ public:
 		return m_finished;
 	}
 
+    // get thread id
+    int GetThreadID() const{
+        return m_tid;
+    }
+    
 	// private field
 private:
 	// thread handle
@@ -57,10 +67,6 @@ private:
 // the rendering data
 public:
 	Integrator*	m_pIntegrator;
-
-public:
-	static pthread_once_t m_threadKeyInit;
-	static pthread_key_t m_threadKey;
 };
 
 #define PlatformThreadUnit	RenderThreadMac
