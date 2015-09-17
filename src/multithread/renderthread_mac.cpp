@@ -25,7 +25,11 @@
 
 extern System g_System;
 
+// LTS data
 Thread_Local int g_MacThreadId = 0;
+
+// thread mutex
+static pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 pthread_key_t RenderThreadMac::m_threadKey;
 pthread_once_t RenderThreadMac::m_threadKeyInit;
@@ -34,6 +38,9 @@ static void* RenderThread_Mac_Run(void* lpParameter)
 {
 	RenderThreadMac* renderThreadMac = (RenderThreadMac*) lpParameter;
 
+    // setup lts
+    g_MacThreadId = renderThreadMac->GetThreadID();
+    
 	// run the thread
 	renderThreadMac->RunThread();
 
@@ -45,7 +52,7 @@ static void* RenderThread_Mac_Run(void* lpParameter)
 
 RenderThreadMac::RenderThreadMac(unsigned tid)
 {
-	g_MacThreadId = tid;
+    m_thread_id = tid;
 	m_finished = false;
 }
 
@@ -72,15 +79,19 @@ void RenderThreadMac::RunThread()
 {
 	while( true )
 	{
-		//EnterCriticalSection(&gCS);
+        // lock mutex
+        pthread_mutex_lock( &g_mutex );
+        
 		if( RenderTaskQueue::GetSingleton().IsEmpty() )
 		{
-		//	LeaveCriticalSection(&gCS);
+            pthread_mutex_unlock( &g_mutex );
 			break;
 		}
 		// Get a new task from the task queue
 		RenderTask task = RenderTaskQueue::GetSingleton().PopTask();
-		//LeaveCriticalSection(&gCS);
+		
+        // release the mutex
+        pthread_mutex_unlock( &g_mutex );
 
 		// execute the task
 		task.Execute(m_pIntegrator);
