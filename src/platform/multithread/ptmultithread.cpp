@@ -20,10 +20,10 @@
 #if defined(SORT_IN_MAC)
 
 #include "taskqueue.h"
-#include "managers/memmanager.h"
+#include "integrator/integrator.h"
 
 // LTS data
-Thread_Local int g_ThreadId = 0;
+static Thread_Local int g_ThreadId = 0;
 
 // get the thread id
 int ThreadId()
@@ -33,9 +33,6 @@ int ThreadId()
 
 // thread mutex
 static pthread_mutex_t g_mutex = PTHREAD_MUTEX_INITIALIZER;
-
-pthread_key_t RenderThreadMac::m_threadKey;
-pthread_once_t RenderThreadMac::m_threadKeyInit;
 
 static void* RenderThread_Mac_Run(void* lpParameter)
 {
@@ -53,9 +50,8 @@ static void* RenderThread_Mac_Run(void* lpParameter)
 	return 0;
 }
 
-RenderThreadMac::RenderThreadMac(unsigned tid)
+RenderThreadMac::RenderThreadMac(unsigned tid):m_tid(tid)
 {
-	m_thread_id = tid;
 	m_finished = false;
 }
 
