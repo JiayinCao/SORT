@@ -90,10 +90,8 @@ public:
 
 	// Pop task
 	RenderTask PopTask(){
-
 		RenderTask t = m_taskList.front();
 		m_taskList.pop_front();
-
 		return t;
 	}
 
