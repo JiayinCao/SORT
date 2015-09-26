@@ -28,7 +28,6 @@ int ThreadId();
 
 #include <list>
 #include "utility/singleton.h"
-#include "utility/define.h"
 #include "sampler/sample.h"
 
 class Integrator;
