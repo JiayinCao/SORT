@@ -7,7 +7,6 @@ include_directories( "${SORT_SOURCE_DIR}/src/thirdparty/zlib-1.2.5" )
 include_directories( "${SORT_SOURCE_DIR}/src/thirdparty/openexr-1.7.0" )
 
 macro(source_group_by_dir source_files)
-    if(MSVC)
         set(sgbd_cur_dir ${CMAKE_CURRENT_SOURCE_DIR}/src)
         foreach(sgbd_file ${${source_files}})
             string(REGEX REPLACE ${sgbd_cur_dir}/\(.*\) \\1 sgbd_fpath ${sgbd_file})
@@ -19,7 +18,6 @@ macro(source_group_by_dir source_files)
             endif(sgbd_nogroup)
             source_group(${sgbd_group_name} FILES ${sgbd_file})
         endforeach(sgbd_file)
-    endif(MSVC)
 endmacro(source_group_by_dir)
 
 file(GLOB_RECURSE project_headers src/*.h)
@@ -29,7 +27,9 @@ file(GLOB_RECURSE project_cs src/*.c)
 set(all_files ${project_headers} ${project_cpps} ${project_cs})
 source_group_by_dir(all_files)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "../")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SORT_SOURCE_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/Debug")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${SORT_SOURCE_DIR}/Release")
 
 add_executable(SORT ${all_files})
 

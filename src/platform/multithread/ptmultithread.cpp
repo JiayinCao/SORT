@@ -20,6 +20,7 @@
 #if defined(SORT_IN_MAC)
 
 #include "integrator/integrator.h"
+#include <unistd.h>
 
 // LTS data
 static Thread_Local int g_ThreadId = 0;
