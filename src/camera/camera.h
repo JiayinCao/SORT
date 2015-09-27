@@ -27,8 +27,8 @@
 #include "utility/creator.h"
 
 // pre-decleration of render target
-class RenderTarget;
 class PixelSample;
+class ImageSensor;
 
 ////////////////////////////////////////////////////////////////////
 //	definition of camera
@@ -45,7 +45,7 @@ public:
 	virtual Ray	GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const = 0;
 
 	// set a render target
-	void SetRenderTarget( RenderTarget* rt ) { m_rt = rt; }
+	void SetImageSensor( ImageSensor* is ) { m_imagesensor = is; }
 
 	// get and set eye point
 	const Point& GetEye() const { return m_eye; }
@@ -55,13 +55,18 @@ public:
 	virtual unsigned GetPassCount() const { return 1; }
 	// get pass filter
 	virtual Spectrum GetPassFilter( unsigned id ) const { return 1.0f; }
+    
+    // get image sensor
+    ImageSensor* GetImageSensor(){
+        return m_imagesensor;
+    }
 
 // protected field
 protected:
 	// the eye point
 	Point	m_eye;
-	// the render target
-	RenderTarget* m_rt;
+    // the image sensor
+    ImageSensor*    m_imagesensor;
 	// the type for the camera
 	CAMERA_TYPE m_type;
 	// the size of the sensor
@@ -75,7 +80,7 @@ protected:
 
 // private method
 	// initialize default data
-	void _init() { m_rt = 0; m_type = CT_NONE; m_sensorW = 0; m_sensorH = 0; }
+	void _init() { m_imagesensor = 0; m_type = CT_NONE; m_sensorW = 0; m_sensorH = 0; }
 	
 	// property handler
 	class EyeProperty : public PropertyHandler<Camera>

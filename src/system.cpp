@@ -23,7 +23,6 @@
 #include "managers/matmanager.h"
 #include "managers/memmanager.h"
 #include "utility/timer.h"
-#include "texture/rendertarget.h"
 #include "geometry/intersection.h"
 #include "utility/path.h"
 #include "utility/creator.h"
@@ -35,7 +34,6 @@
 #include "integrator/integrator.h"
 #include "sampler/stratified.h"
 #include <time.h>
-#include "output/sortoutput.h"
 #include "managers/smmanager.h"
 #include "platform/multithread/multithread.h"
 
@@ -72,12 +70,12 @@ void System::_preInit()
 	SMManager::CreateInstance();
 
 	// setup default value
-	m_rt = 0;
 	m_camera = 0;
 	m_uRenderingTime = 0;
 	m_uPreProcessingTime = 0;
 	m_thread_num = 1;
 	m_pProgress = 0;
+    m_imagesensor = 0;
 }
 
 // post-uninit
@@ -87,7 +85,7 @@ void System::_postUninit()
 	m_Scene.Release();
 
 	// delete the data
-	SAFE_DELETE( m_rt );
+    SAFE_DELETE( m_imagesensor );
 	SAFE_DELETE( m_camera );
 	SAFE_DELETE( m_pSampler );
 	SAFE_DELETE_ARRAY( m_taskDone );
@@ -141,7 +139,7 @@ void System::PreProcess()
 	// set timer before pre-processing
 	Timer::GetSingleton().StartTimer();
 
-	if( m_rt == 0 )
+	if( m_imagesensor == 0 )
 	{
 		LOG_WARNING<<"There is no render target in the system, can't render anything."<<ENDL;
 		return;
@@ -232,21 +230,16 @@ void System::_pushRenderTask()
 	
 	// get the number of total task
 	m_totalTask = 0;
-	for( unsigned i = 0 ; i < m_rt->GetHeight() ; i += tilesize )
-		for( unsigned j = 0 ; j < m_rt->GetWidth() ; j += tilesize )
+	for( unsigned i = 0 ; i < m_imagesensor->GetHeight() ; i += tilesize )
+		for( unsigned j = 0 ; j < m_imagesensor->GetWidth() ; j += tilesize )
 			++m_totalTask;
 	m_taskDone = new bool[m_totalTask];
 	memset( m_taskDone , 0 , m_totalTask * sizeof(bool) );
 
-	image_output.SetImageSize( m_rt->GetWidth() , m_rt->GetHeight() );
-	blender_output.SetImageSize( m_rt->GetWidth() , m_rt->GetHeight() );
-	m_outputs.push_back( &image_output );
-	m_outputs.push_back( &blender_output );
+	RenderTask rt(m_Scene,m_pSampler,m_camera,m_taskDone,m_iSamplePerPixel);
 
-	RenderTask rt(m_Scene,m_pSampler,m_camera,m_outputs,m_taskDone,m_iSamplePerPixel);
-
-	int tile_num_x = ceil(m_rt->GetWidth() / (float)tilesize);
-	int tile_num_y = ceil(m_rt->GetHeight() / (float)tilesize);
+	int tile_num_x = ceil(m_imagesensor->GetWidth() / (float)tilesize);
+	int tile_num_y = ceil(m_imagesensor->GetHeight() / (float)tilesize);
 
 	// start tile from center instead of top-left corner
 	int current_x = tile_num_x / 2;
@@ -264,8 +257,8 @@ void System::_pushRenderTask()
 			rt.taskId = taskid++;
 			rt.ori_x = current_x * tilesize;
 			rt.ori_y = current_y * tilesize;
-			rt.width = (tilesize < (m_rt->GetWidth() - rt.ori_x)) ? tilesize : (m_rt->GetWidth() - rt.ori_x);
-			rt.height = (tilesize < (m_rt->GetHeight() - rt.ori_y)) ? tilesize : (m_rt->GetHeight() - rt.ori_y);
+			rt.width = (tilesize < (m_imagesensor->GetWidth() - rt.ori_x)) ? tilesize : (m_imagesensor->GetWidth() - rt.ori_x);
+			rt.height = (tilesize < (m_imagesensor->GetHeight() - rt.ori_y)) ? tilesize : (m_imagesensor->GetHeight() - rt.ori_y);
 
 			// create new pixel samples
 			rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
@@ -296,13 +289,8 @@ void System::_pushRenderTask()
 // do ray tracing in a multithread enviroment
 void System::_executeRenderingTasks()
 {
-	vector<SORTOutput*>::const_iterator it = m_outputs.begin();
-	while( it != m_outputs.end() )
-	{
-		(*it)->PreProcess();
-		++it;
-	}
-
+    m_imagesensor->PreProcess();
+    
 	// will be parameterized later
 	const int THREAD_NUM = m_thread_num;
 
@@ -348,12 +336,7 @@ void System::_executeRenderingTasks()
 
 	cout<<endl;
 
-	it = m_outputs.begin();
-	while( it != m_outputs.end() )
-	{
-		(*it)->PostProcess();
-		++it;
-	}
+    m_imagesensor->PostProcess();
 }
 
 // allocate integrator
@@ -380,6 +363,12 @@ Integrator*	System::_allocateIntegrator()
 // setup system from file
 bool System::Setup( const char* str )
 {
+    // setup image sensor first of all
+    if( g_bBlenderMode )
+        m_imagesensor = new BlenderImage();
+    else
+        m_imagesensor = new RenderTargetImage();
+    
 	// load the xml file
 	string full_name = GetFullPath(str);
 	TiXmlDocument doc( full_name.c_str() );
@@ -431,7 +420,6 @@ bool System::Setup( const char* str )
 		return false;
 	
 	// get the render target
-	m_rt = new RenderTarget();
 	element = root->FirstChildElement( "RenderTargetSize" );
 	if( element )
 	{
@@ -440,18 +428,13 @@ bool System::Setup( const char* str )
 		
 		if( str_width && str_height )
 		{
-			unsigned width = atoi( str_width );
-			unsigned height = atoi( str_height );
-		
-			if( width < 1 ) width = 1;
-			if( height < 1) height = 1;
-		
-			m_rt->SetSize( width , height );
+            m_imagesensor->SetProperty("width", str_width);
+            m_imagesensor->SetProperty("height", str_height);
 		}
 	}else
 	{
-		// use 1024x768 image as default
-		m_rt->SetSize(1024, 768);
+		// use 1080p image as default
+		m_imagesensor->SetImageSize( 1920 , 1080 );
 	}
 	
 	// get sampler
@@ -499,20 +482,18 @@ bool System::Setup( const char* str )
 
 	element = root->FirstChildElement("OutputFile");
 	if( element )
-		m_OutputFileName = element->Attribute("name");
-	else
-		m_OutputFileName = "default.bmp";	// make a default filename
+        m_imagesensor->SetProperty("filename", element->Attribute("name"));
 
 	element = root->FirstChildElement("ThreadNum");
 	if( element )
 		m_thread_num = atoi(element->Attribute("name"));
 
-	// setup render target
-	m_camera->SetRenderTarget(m_rt);
+	// setup image sensor
+    m_camera->SetImageSensor(m_imagesensor);
 
 	// create shared memory
-	int x_tile = ceil(m_rt->GetWidth() / (float)g_iTileSize);
-	int y_tile = ceil(m_rt->GetHeight() / (float)g_iTileSize);
+	int x_tile = ceil(m_imagesensor->GetWidth() / (float)g_iTileSize);
+	int y_tile = ceil(m_imagesensor->GetHeight() / (float)g_iTileSize);
 	int header_size = x_tile * y_tile;
 	int size =	header_size * g_iTileSize * g_iTileSize * 4 * sizeof(float)	// image size
 				+ header_size								// header size

@@ -18,12 +18,12 @@
 #ifndef SORT_BLENDEROUTPUT
 #define SORT_BLENDEROUTPUT
 
-#include "sortoutput.h"
+#include "imagesensor.h"
 #include "texture/rendertarget.h"
 #include "managers/smmanager.h"
 
 // generate output
-class BlenderOutput : public SORTOutput
+class BlenderImage : public ImageSensor
 {
 public:
 	// allocate memory in sort
@@ -37,8 +37,6 @@ public:
 
 	// pre process
 	virtual void PreProcess();
-	// post process
-	virtual void PostProcess();
 
 private:
 	RenderTarget	m_rendertarget;
