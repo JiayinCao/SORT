@@ -37,16 +37,16 @@ public:
 	RenderThreadMac();
 
 	// Begin thread
-	virtual void BeginThread();
+    void BeginThread();
 
 	// End thread
-	virtual void EndThread();
+	void EndThread();
 
 	// Run the thread
-	virtual void RunThread();
+    void RunThread();
 
 	// Whether the thread is finished
-	virtual bool IsFinished(){
+	bool IsFinished(){
 		return m_finished;
 	}
 

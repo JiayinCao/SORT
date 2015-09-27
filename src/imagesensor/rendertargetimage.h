@@ -18,27 +18,51 @@
 #ifndef SORT_IMAGEOUTPUT
 #define SORT_IMAGEOUTPUT
 
-#include "sortoutput.h"
+#include "imagesensor.h"
 #include "texture/rendertarget.h"
 
 // generate output
-class ImageOutput : public SORTOutput
+class RenderTargetImage : public ImageSensor
 {
 public:
-	// allocate memory in sort
-	virtual void SetImageSize( int w , int h );
-
+    // constructor
+    RenderTargetImage()
+    {
+        _registerAllProperty();
+    }
 	// store pixel information
 	virtual void StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt );
 
-	// pre process
-	virtual void PreProcess();
-
+    // Pre process
+    virtual void PreProcess();
 	// post process
 	virtual void PostProcess();
 
 private:
+    // render target
 	RenderTarget m_rendertarget;
+    
+    // filename
+    string      m_filename;
+    
+    // register property
+    void _registerAllProperty()
+    {
+        _registerProperty( "filename" , new FilenameProperty( this ) );
+    }
+    
+    class FilenameProperty : public PropertyHandler<ImageSensor>
+    {
+    public:
+        PH_CONSTRUCTOR(FilenameProperty,ImageSensor);
+        
+        // set value
+        void SetValue( const string& str )
+        {
+            RenderTargetImage* rti = CAST_TARGET(RenderTargetImage);
+            rti->m_filename = str;
+        }
+    };
 };
 
 #endif

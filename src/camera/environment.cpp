@@ -21,7 +21,7 @@
 #include "geometry/ray.h"
 #include "utility/sassert.h"
 #include "utility/define.h"
-#include "texture/rendertarget.h"
+#include "imagesensor/imagesensor.h"
 #include <math.h>
 #include "sampler/sample.h"
 
@@ -38,14 +38,14 @@ void EnvironmentCamera::_init()
 // generate a ray given a pixel
 Ray	EnvironmentCamera::GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const
 {
-	Sort_Assert( m_rt != 0 );
+	Sort_Assert( m_imagesensor != 0 );
 
 	x += ps.img_u;
 	y += ps.img_v;
 
 	// generate ray
-	float theta = PI * y / m_rt->GetHeight();
-	float phi = 2 * PI * x / m_rt->GetWidth();
+	float theta = PI * y / m_imagesensor->GetHeight();
+	float phi = 2 * PI * x / m_imagesensor->GetWidth();
 	Vector dir( sinf( theta ) * cosf( phi ) , cosf( theta ) , sinf( theta ) * sinf( phi ) );
 	Ray r( m_eye , dir );
 

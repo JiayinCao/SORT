@@ -15,29 +15,25 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#include "imageoutput.h"
+#include "rendertargetimage.h"
 
-// allocate memory in sort
-void ImageOutput::SetImageSize( int w , int h )
+// Pre process
+void RenderTargetImage::PreProcess()
 {
-	SORTOutput::SetImageSize( w , h );
-
-	m_rendertarget.SetSize( w , h );
+    m_rendertarget.SetSize( m_width , m_height );
 }
 
 // store pixel information
-void ImageOutput::StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt )
+void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt )
 {
 	m_rendertarget.SetColor( x , y , color );
 }
 
-// pre process
-void ImageOutput::PreProcess()
-{
-}
-
 // post process
-void ImageOutput::PostProcess()
+void RenderTargetImage::PostProcess()
 {
-	m_rendertarget.Output("result.bmp");
+    if( !m_filename.empty() )
+        m_rendertarget.Output(m_filename);
+    else
+        m_rendertarget.Output("default.bmp");
 }
