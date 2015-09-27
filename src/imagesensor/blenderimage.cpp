@@ -15,7 +15,7 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#include "blenderoutput.h"
+#include "blenderimage.h"
 #include "platform/multithread/multithread.h"
 #include "managers/smmanager.h"
 
@@ -23,13 +23,13 @@
 extern int g_iTileSize;
 
 // allocate memory in sort
-void BlenderOutput::SetImageSize( int w , int h )
+void BlenderImage::SetImageSize( int w , int h )
 {
-	SORTOutput::SetImageSize( w , h );
+	ImageSensor::SetImageSize( w , h );
 }
 
 // store pixel information
-void BlenderOutput::StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt )
+void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt )
 {
 	if (!m_sharedMemory.bytes)
 		return;
@@ -55,7 +55,7 @@ void BlenderOutput::StorePixel( int x , int y , const Spectrum& color , const Re
 }
 
 // finish image tile
-void BlenderOutput::FinishTile( int tile_x , int tile_y , const RenderTask& rt )
+void BlenderImage::FinishTile( int tile_x , int tile_y , const RenderTask& rt )
 {
 	if (!m_sharedMemory.bytes)
 		return;
@@ -64,16 +64,11 @@ void BlenderOutput::FinishTile( int tile_x , int tile_y , const RenderTask& rt )
 }
 
 // pre process
-void BlenderOutput::PreProcess()
+void BlenderImage::PreProcess()
 {
 	m_tilenum_x = ceil(m_width / (float)g_iTileSize);
 	m_tilenum_y = ceil(m_height / (float)g_iTileSize);
 	m_header_offset = m_tilenum_x * m_tilenum_y;
 
 	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("SORTBLEND_SHAREMEM");
-}
-
-// post process
-void BlenderOutput::PostProcess()
-{
 }

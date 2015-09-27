@@ -19,7 +19,7 @@
 #include "ortho.h"
 #include "utility/sassert.h"
 #include "sampler/sample.h"
-#include "texture/rendertarget.h"
+#include "imagesensor/imagesensor.h"
 
 IMPLEMENT_CREATOR( OrthoCamera );
 
@@ -48,8 +48,8 @@ Ray OrthoCamera::GenerateRay( unsigned pass_id , float x, float y, const PixelSa
 	x += ps.img_u;
 	y += ps.img_v;
 
-	float w = (float)m_rt->GetWidth();
-	float h = (float)m_rt->GetHeight();
+	float w = (float)m_imagesensor->GetWidth();
+	float h = (float)m_imagesensor->GetHeight();
 
 	x = ( ( x / w ) - 0.5f ) * m_camWidth;
 	y = -1.0f * ( ( y / h - 0.5f ) ) * m_camHeight;

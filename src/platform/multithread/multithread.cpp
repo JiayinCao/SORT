@@ -19,7 +19,7 @@
 #include "integrator/integrator.h"
 #include "sampler/sampler.h"
 #include "camera/camera.h"
-#include "output/sortoutput.h"
+#include "imagesensor/imagesensor.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(RenderTaskQueue);
@@ -29,6 +29,10 @@ extern int g_iTileSize;
 // execute the task
 void RenderTask::Execute( Integrator* integrator )
 {
+    ImageSensor* is = camera->GetImageSensor();
+    if( !is )
+        return;
+    
     // request samples
     integrator->RequestSample( sampler , pixelSamples , samplePerPixel );
     
@@ -61,24 +65,14 @@ void RenderTask::Execute( Integrator* integrator )
             }
             radiance /= (float)samplePerPixel;
             
-            vector<SORTOutput*>::const_iterator it = outputs.begin();
-            while( it != outputs.end() )
-            {
-                (*it)->StorePixel( j , i , radiance , *this );
-                ++it;
-            }
+            // store the pixel
+            is->StorePixel( j , i , radiance , *this );
         }
     }
     
-    int h = outputs[0]->m_height;
     int x_off = ori_x / g_iTileSize;
-    int y_off = (h - 1 - ori_y ) / g_iTileSize ;
-    vector<SORTOutput*>::const_iterator it = outputs.begin();
-    while( it != outputs.end() )
-    {
-        (*it)->FinishTile( x_off , y_off , *this );
-        ++it;
-    }
+    int y_off = (is->m_height - 1 - ori_y ) / g_iTileSize ;
+    is->FinishTile( x_off, y_off, *this );
     
     taskDone[taskId] = true;
 }

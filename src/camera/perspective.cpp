@@ -22,6 +22,7 @@
 #include "utility/sassert.h"
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
+#include "imagesensor/imagesensor.h"
 
 IMPLEMENT_CREATOR( PerspectiveCamera );
 
@@ -70,7 +71,7 @@ void PerspectiveCamera::SwitchGlass( bool redOnLeft )
 Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const
 {
 	// check if there is render target
-	Sort_Assert( m_rt != 0 );
+	Sort_Assert( m_imagesensor != 0 );
 	
 	// update focal distance every time
 	float fd = ( m_target - m_eye ).Length();
@@ -85,8 +86,8 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 	x += ps.img_u;
 	y += ps.img_v;
 	
-	float w = (float)m_rt->GetWidth();
-	float h = (float)m_rt->GetHeight();
+	float w = (float)m_imagesensor->GetWidth();
+	float h = (float)m_imagesensor->GetHeight();
 	float aspect = w/h * m_aspectRatioW/m_aspectRatioH;
 
 	float yScale = 0.5f / tan( m_fov * 0.5f );
