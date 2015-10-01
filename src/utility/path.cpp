@@ -24,6 +24,8 @@
 #elif defined(SORT_IN_MAC)
 #include <libproc.h>
 #include <unistd.h>
+#elif defined(SORT_IN_LINUX)
+#include <unistd.h>
 #endif
 
 
