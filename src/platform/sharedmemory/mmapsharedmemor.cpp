@@ -17,7 +17,7 @@
 
 #include "sort.h"
 
-#if defined(SORT_IN_MAC)
+#if defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
 
 #include "sharedmemory.h"
 #include "managers/logmanager.h"
