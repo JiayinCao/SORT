@@ -31,7 +31,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SORT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/Debug")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${SORT_SOURCE_DIR}/Release")
 
+find_package(Threads)
+
 add_executable(SORT ${all_files})
+
+if(UNIX)
+	target_link_libraries(SORT ${CMAKE_THREAD_LIBS_INIT})
+endif(UNIX)
 
 if(MSVC)
 	set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/Gz" )
