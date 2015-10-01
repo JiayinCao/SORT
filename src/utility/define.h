@@ -31,7 +31,7 @@
 
 #if defined(SORT_IN_WINDOWS)
 #define Thread_Local __declspec(thread)
-#elif defined(SORT_IN_MAC)
+#elif defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
 #define Thread_Local __thread
 #endif
 
