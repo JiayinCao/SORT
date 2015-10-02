@@ -119,13 +119,6 @@ void System::Render()
 	m_uRenderingTime = Timer::GetSingleton().StopTimer();
 }
 
-// output render target
-void System::OutputRT()
-{
-	//m_rt->Output( m_OutputFileName );
-	//image_output.PostProcess();
-}
-
 // load the scene
 bool System::LoadScene( const string& filename )
 {

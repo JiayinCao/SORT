@@ -56,9 +56,6 @@ int main( int argc , char** argv )
 
 		// output log information
 		g_System.OutputLog();
-
-		// output image
-		g_System.OutputRT();
 	}
 
 	// unitialize the system
