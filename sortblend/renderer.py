@@ -95,9 +95,9 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
         # setup shared memory size
         self.sm_size = self.image_size_in_bytes + self.image_header_size + 1
-        
+ 
         # on mac os
-        if platform.system() == "Darwin":
+        if platform.system() == "Darwin" or platform.system() == "Linux":
             # open a new file
             self.file = open( preference.get_immediate_dir() + "sharedmem.bin" , "wb" , self.sm_size)
             self.file.write( bytes( "\0" * self.sm_size , "utf-8" ) )
