@@ -344,15 +344,6 @@ def export_material(force_debug):
     # create root node
     root = ET.Element("Root")
 
-    print('start')
-    for group in bpy.data.node_groups:
-        print(group.name)
-    print('------')
-    for material in bpy.data.materials:
-        print(material.name)
-        print(material.sort_material)
-        print(material.sort_material.sortnodetree)
-    print('end')
     for material in bpy.data.materials:
         if material and material.sort_material and material.sort_material.sortnodetree:
             ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
