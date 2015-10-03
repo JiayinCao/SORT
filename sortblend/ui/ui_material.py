@@ -80,6 +80,7 @@ class SORT_use_shading_nodes(bpy.types.Operator):
                 nt = group
         if nt is None:
             nt = bpy.data.node_groups.new(group_name, type='SORTPatternGraph')
+            nt.use_fake_user = True
 
         mat.sort_material.sortnodetree = nt.name
         output = nt.nodes.new(common.sort_node_output_bl_name)

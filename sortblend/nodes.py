@@ -7,7 +7,7 @@ from nodeitems_utils import NodeCategory, NodeItem
 
 # node tree for sort
 class SORTPatternGraph(bpy.types.NodeTree):
-    '''A node tree comprised of renderman nodes'''
+    '''A node tree comprised of sort nodes'''
     bl_idname = 'SORTPatternGraph'
     bl_label = 'SORT Pattern Graph'
     bl_icon = 'TEXTURE_SHADED'
@@ -20,6 +20,7 @@ class SORTPatternGraph(bpy.types.NodeTree):
     # Return a node tree from the context to be used in the editor
     @classmethod
     def get_from_context(cls, context):
+        print('get_from_context')
         ob = context.active_object
         if ob and ob.type not in {'LAMP', 'CAMERA'}:
             ma = ob.active_material
