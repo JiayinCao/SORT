@@ -18,11 +18,9 @@
 // include the header
 #include "sort.h"
 #include "matmanager.h"
-#include "material/material.h"
 #include "utility/path.h"
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "logmanager.h"
-#include "material/matte.h"
 #include "texmanager.h"
 #include "texture/constanttexture.h"
 #include "utility/creator.h"
@@ -35,10 +33,6 @@ DEFINE_SINGLETON(MatManager);
 // default constructor
 MatManager::MatManager()
 {
-	// initialize default material
-	ConstantTexture* ct = new ConstantTexture( 0.1f , 0.1f , 0.1f );
-	m_Default = new Matte();
-	m_Default->SetProperty( "color" , ct );
 }
 
 // destructor
@@ -50,8 +44,6 @@ MatManager::~MatManager()
 // clear the material pool
 void MatManager::_clearMatPool()
 {
-	SAFE_DELETE(m_Default);
-
 	map< string , Material* >::iterator it = m_matPool.begin();
 	while( it != m_matPool.end() )
 	{
@@ -78,9 +70,9 @@ Material* MatManager::FindMaterial( const string& mat_name ) const
 }
 
 // whether the material exists
-Material* MatManager::GetDefaultMat() const
+Material* MatManager::GetDefaultMat()
 {
-	return m_Default;
+	return &m_Default;
 }
 
 // parse material file and add the materials into the manager

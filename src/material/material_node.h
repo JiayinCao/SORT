@@ -33,6 +33,7 @@ class MaterialNode;
 class TiXmlElement;
 class Fresnel;
 class MicroFacetDistribution;
+class VisTerm;
 
 #define MAT_NODE_TYPE unsigned int
 #define MAT_NODE_CONSTANT 0x1
@@ -277,7 +278,7 @@ public:
 private:
 	MaterialNodePropertyColor	baseColor;
 
-	MaterialNodePropertyFloat	sigma;
+	MaterialNodePropertyFloat	roughness;
 };
 
 // Microfacet node
@@ -298,11 +299,14 @@ public:
 
 private:
 	MaterialNodePropertyColor	baseColor;
+	MaterialNodePropertyFloat	roughness;
 	MaterialNodePropertyString	fresnel;
 	MaterialNodePropertyString	mf_dist;
+	MaterialNodePropertyString	mf_vis;
 
 	Fresnel*				pFresnel;
 	MicroFacetDistribution*	pMFDist;
+	VisTerm*				pVisTerm;
 };
 
 // Microfacet node
