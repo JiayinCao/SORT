@@ -22,9 +22,9 @@
 #include "utility/singleton.h"
 #include <string>
 #include <map>
+#include "material/matte.h"
 
 // pre-decleration
-class Material;
 class TiXmlElement;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ public:
 	Material*	FindMaterial( const string& mat_name ) const;
 
 	// get default material
-	Material*	GetDefaultMat() const;
+	Material*	GetDefaultMat();
 
 	// parse material file and add the materials into the manager
 	// para 'str' : name of the material file
@@ -67,7 +67,7 @@ private:
 	map< string , Material* >	m_matPool;
 
 	// the default material
-	Material*	m_Default;
+	Matte	m_Default;
 
 	// clear the material pool
 	void _clearMatPool();
