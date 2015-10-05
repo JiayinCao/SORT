@@ -16,55 +16,27 @@
 */
 
 // include the header
+
 #include "matte.h"
 #include "utility/define.h"
 #include "bsdf/bsdf.h"
-//#include "bsdf/lambert.h"
+#include "bsdf/lambert.h"
 #include "managers/memmanager.h"
-#include "bsdf/orennayar.h"
 
 IMPLEMENT_CREATOR( Matte );
 
 // constructor
 Matte::Matte()
 {
-	_init();
-}
-
-// destructor
-Matte::~Matte()
-{
-	// delete the texture
-	SAFE_DELETE( m_d );
-}
-
-// initiailize default value and register properties
-void Matte::_init()
-{
-	m_d = 0;
-	m_scale = Spectrum( 1.0f , 1.0f , 1.0f );
-
-	_registerAllProperty();
+	m_color = Spectrum( 0.1f , 0.1f , 0.1f );
 }
 
 // get bsdf
 Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 {
-	Spectrum color = m_scale;
-	if( m_d )
-		color *= m_d->Evaluate( intersect );
-
 	Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( color , 20.0f/180.0f*3.14f );
-	orennayar->m_weight = 1.0f;
-	bsdf->AddBxdf( orennayar );
-	
+	Lambert* lambert = SORT_MALLOC(Lambert)( m_color );
+	bsdf->AddBxdf( lambert );
+	lambert->m_weight = 1.0f;
 	return bsdf;
-}
-
-// register property
-void Matte::_registerAllProperty()
-{
-	_registerProperty( "color" , new ColorProperty( this ) );
-	_registerProperty( "scale" , new ScaleProperty( this ) );
 }

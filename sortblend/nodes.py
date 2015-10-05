@@ -20,7 +20,6 @@ class SORTPatternGraph(bpy.types.NodeTree):
     # Return a node tree from the context to be used in the editor
     @classmethod
     def get_from_context(cls, context):
-        print('get_from_context')
         ob = context.active_object
         if ob and ob.type not in {'LAMP', 'CAMERA'}:
             ma = ob.active_material
@@ -164,25 +163,39 @@ class SORTNodeMicrofacet(SORTShadingNode):
     fresnel_prop = bpy.props.EnumProperty(name='',items=fresnel_item)
 
     mfdist_item = [ ("Blinn", "Blinn", "", 1),
-                     ("Anisotropic" , "Anisotropic" , "", 2)
+                    ("Beckmann" , "Beckmann" , "", 2),
+                    ("GGX" , "GGX" , "" , 3)
                    ]
     mfdist_prop = bpy.props.EnumProperty(name='',items=mfdist_item)
 
+    mfvis_item = [ ("Implicit", "Implicit", "", 1),
+                   ("Neumann" , "Neumann" , "", 2),
+                   ("Kelemen" , "Kelemen" , "" , 3),
+                   ("Schlick" , "Schlick" , "" , 4),
+                   ("Smith" , "Smith" , "" , 5),
+                   ("SmithJointApprox" , "SmithJointApprox" , "" , 6 )
+                   ]
+    mfvis_prop = bpy.props.EnumProperty(name='',items=mfvis_item)
+
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
+        self.inputs.new('SORTNodeSocketFloat', 'Roughness')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
-        self.draw_button(layout, "Fresnel" , "fresnel_prop")
+        #self.draw_button(layout, "Fresnel" , "fresnel_prop")
         self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
+        self.draw_button(layout, "VisibilityTerm" , "mfvis_prop")
 
     def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, 'Fresnel' , 'fresnel_prop' , indented_label)
+        #self.draw_prop(layout, 'Fresnel' , 'fresnel_prop' , indented_label)
         self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
+        self.draw_prop(layout, 'VisibilityTerm' , 'mfvis_prop' , indented_label)
 
     def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='string', value= self.fresnel_prop )
+        #ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='string', value= self.fresnel_prop )
         ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='string', value= self.mfdist_prop )
+        ET.SubElement( xml_node , 'Property' , name='Visibility' , type='string', value= self.mfvis_prop )
 
 # merl node
 class SORTNodeMerl(SORTShadingNode):
@@ -212,7 +225,10 @@ class SORTNodeOrenNayar(SORTShadingNode):
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
-        self.inputs.new('SORTNodeSocketFloat', 'Sigma')
+        roughness = self.inputs.new('SORTNodeSocketFloat', 'Roughness')
+        #roughness.default_value.min = 0.0
+        print(dir(roughness))
+        print(roughness.default_value)
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
 # reflection node
@@ -479,7 +495,6 @@ def register():
         # identifier, label, items list
         SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacet"),NodeItem("SORTNodeOrenNayar"),NodeItem("SORTNodeReflection"),NodeItem("SORTNodeRefraction")] ),
         SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
-        #SORTPatternNodeCategory("SORT_input", "SORT Input",items= [NodeItem("SORTNodePosition"),NodeItem("SORTNodeNormal"),NodeItem("SORTNodeUV")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
     ]

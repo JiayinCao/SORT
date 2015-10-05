@@ -31,7 +31,7 @@ class Intersection;
 
 ///////////////////////////////////////////////////////////
 // definition of material
-class Material : public PropertySet<Material> , public ReferenceCount
+class Material : public ReferenceCount
 {
 // public method
 public:

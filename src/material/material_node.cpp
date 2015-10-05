@@ -22,7 +22,6 @@
 #include "bsdf/microfacet.h"
 #include "bsdf/reflection.h"
 #include "bsdf/refraction.h"
-#include "bsdf/microfacetdistribution.h"
 #include "bsdf/fresnel.h"
 #include "managers/memmanager.h"
 #include "bsdf/bsdf.h"
@@ -342,7 +341,7 @@ void MerlNode::PostProcess()
 OrenNayarNode::OrenNayarNode()
 {
 	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-	m_props.insert( make_pair( "Sigma" , &sigma ) );
+	m_props.insert( make_pair( "Roughness" , &roughness ) );
 }
 
 void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -350,7 +349,7 @@ void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.GetPropertyValue(bsdf) , sigma.GetPropertyValue(bsdf).x );
+	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.GetPropertyValue(bsdf) , roughness.GetPropertyValue(bsdf).x );
 	orennayar->m_weight = weight;
 	bsdf->AddBxdf( orennayar );
 }
@@ -359,7 +358,9 @@ MicrofacetNode::MicrofacetNode()
 {
 	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
 	m_props.insert( make_pair( "MicroFacetDistribution" , &mf_dist ) );
+	m_props.insert( make_pair( "Visibility" , &mf_vis ) );
 	m_props.insert( make_pair( "Fresnel" , &fresnel ) );
+	m_props.insert( make_pair( "Roughness" , &roughness ) );
 }
 
 // destructor
@@ -374,7 +375,7 @@ void MicrofacetNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	MicroFacet* mf = SORT_MALLOC(MicroFacet)( baseColor.GetPropertyValue(bsdf) , pFresnel , pMFDist );
+	MicroFacet* mf = SORT_MALLOC(MicroFacet)( baseColor.GetPropertyValue(bsdf) , pFresnel , pMFDist , pVisTerm);
 	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
 }
@@ -390,10 +391,26 @@ void MicrofacetNode::PostProcess()
 	else
 		pFresnel = new FresnelNo();
 
+	float rn = clamp( roughness.GetPropertyValue(0).x , 0.04f , 1.0f );
 	if( mf_dist.str == "Blinn" )
-		pMFDist = new Blinn( 1.0f );
+		pMFDist = new Blinn( rn );
+	else if( mf_dist.str == "Beckmann" )
+		pMFDist = new Beckmann( rn );
 	else
-		pMFDist = new Anisotropic( 1.0f , 1.0f );
+		pMFDist = new GGX( rn );	// GGX is default
+
+	if( mf_vis.str == "Neumann" )
+		pVisTerm = new VisNeumann();
+	else if( mf_vis.str == "Kelemen" )
+		pVisTerm = new VisKelemen();
+	else if( mf_vis.str == "Schlick" )
+		pVisTerm = new VisSchlick( rn );
+	else if( mf_vis.str == "Smith" )
+		pVisTerm = new VisSmith( rn );
+	else if( mf_vis.str == "SmithJointApprox" )
+		pVisTerm = new VisSmithJointApprox( rn );
+	else
+		pVisTerm = new VisImplicit();	// implicit visibility term is default
 }
 
 ReflectionNode::ReflectionNode()

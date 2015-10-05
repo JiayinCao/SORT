@@ -29,7 +29,7 @@ class OrenNayar : public Bxdf
 // public method
 public:
 	// constructor
-	OrenNayar( const Spectrum& reflectence , float sig);
+	OrenNayar( const Spectrum& reflectence , float roughness);
 	
 	// evaluate bxdf
 	// para 'wo' : out going direction
