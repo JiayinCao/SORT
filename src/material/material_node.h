@@ -27,6 +27,7 @@
 #include "texture/checkboxtexture.h"
 #include "texture/imagetexture.h"
 #include "spectrum/rgbspectrum.h"
+#include "math/vector4.h"
 
 class Bsdf;
 class MaterialNode;
@@ -43,98 +44,25 @@ class VisTerm;
 #define MAT_NODE_OUTPUT 0x10
 #define MAT_NODE_NONE 0x0
 
-struct MaterialPropertyValue
-{
-	float x , y , z;
-
-	MaterialPropertyValue():x(0.0f),y(0.0f),z(0.0f)
-	{
-	}
-	MaterialPropertyValue( float value )
-	{
-		x = y = z = value;
-	}
-	MaterialPropertyValue( float _x , float _y , float _z )
-	{
-		x = _x;
-		y = _y;
-		z = _z;
-	}
-	MaterialPropertyValue( const Spectrum& spectrum ): x(spectrum.GetR()) , y(spectrum.GetG()) , z(spectrum.GetB())
-	{
-	}
-
-	const MaterialPropertyValue operator + ( const MaterialPropertyValue& v )
-	{
-		return MaterialPropertyValue( x + v.x , y + v.y , z + v.z );
-	}
-
-	MaterialPropertyValue operator * ( float f ) const
-	{
-		return MaterialPropertyValue( f * x , f * y , f * z );
-	}
-
-	MaterialPropertyValue operator * ( const MaterialPropertyValue& mat ) const
-	{
-		return MaterialPropertyValue( x * mat.x , y * mat.y , z * mat.z );
-	}
-};
+typedef Vector4<float> MaterialPropertyValue;
 
 class MaterialNodeProperty
 {
 public:
-	MaterialNodeProperty()
-	{
-		node = 0;
+	MaterialNodeProperty():node(0){
 	}
 
 	// set node property
-	virtual void SetNodeProperty( const string& prop ) = 0;
+	virtual void SetNodeProperty( const string& prop );
 
 	// get node property
-	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf ) = 0;
+	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf );
 
 	// sub node if it has value
 	MaterialNode*	node;
-};
 
-class MaterialNodePropertyColor : public MaterialNodeProperty
-{
-public:
-	// set node property
-	virtual void SetNodeProperty( const string& prop );
-
-	// get node property
-	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf );
-
-	// color value
-	Spectrum		value;
-};
-
-class MaterialNodePropertyFloat : public MaterialNodeProperty
-{
-public:
-	// set node property
-	virtual void SetNodeProperty( const string& prop );
-
-	// get node property
-	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf );
-
-	// color value
-	float		value;
-};
-
-class MaterialNodePropertyFloat2 : public MaterialNodeProperty
-{
-public:
-	// set node property
-	virtual void SetNodeProperty( const string& prop );
-
-	// get node property
-	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf );
-
-	// color value
-	float	x , y;
+	// value
+	MaterialPropertyValue value;
 };
 
 class MaterialNodePropertyString : public MaterialNodeProperty
@@ -144,7 +72,7 @@ public:
 	virtual void SetNodeProperty( const string& prop );
 
 	// get node property
-	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf ) { return 0.0f; }
+	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf ) { return MaterialPropertyValue(); }
 
 	// color value
 	string	str;
@@ -211,7 +139,7 @@ public:
 	virtual bool CheckValidation();
 
 private:
-	MaterialNodePropertyColor	output;
+	MaterialNodeProperty	output;
 };
 
 // Bxdf node
@@ -238,7 +166,7 @@ public:
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 private:
-	MaterialNodePropertyColor	baseColor;
+	MaterialNodeProperty	baseColor;
 };
 
 // Merl node
@@ -276,9 +204,8 @@ public:
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 private:
-	MaterialNodePropertyColor	baseColor;
-
-	MaterialNodePropertyFloat	roughness;
+	MaterialNodeProperty	baseColor;
+	MaterialNodeProperty	roughness;
 };
 
 // Microfacet node
@@ -298,8 +225,8 @@ public:
 	virtual void PostProcess();
 
 private:
-	MaterialNodePropertyColor	baseColor;
-	MaterialNodePropertyFloat	roughness;
+	MaterialNodeProperty	baseColor;
+	MaterialNodeProperty	roughness;
 	MaterialNodePropertyString	fresnel;
 	MaterialNodePropertyString	mf_dist;
 	MaterialNodePropertyString	mf_vis;
@@ -327,7 +254,7 @@ public:
 	virtual void PostProcess();
 
 private:
-	MaterialNodePropertyColor	baseColor;
+	MaterialNodeProperty	baseColor;
 	MaterialNodePropertyString	fresnel;
 
 	Fresnel*				pFresnel;
@@ -351,10 +278,10 @@ public:
 	virtual void PostProcess();
 
 private:
-	MaterialNodePropertyColor	baseColor;
+	MaterialNodeProperty	baseColor;
 	MaterialNodePropertyString	fresnel;
-	MaterialNodePropertyFloat	theta0;
-	MaterialNodePropertyFloat	theta1;
+	MaterialNodeProperty	theta0;
+	MaterialNodeProperty	theta1;
 
 	Fresnel*					pFresnel;
 };
@@ -382,8 +309,8 @@ public:
 	virtual bool CheckValidation();
 
 private:
-	MaterialNodePropertyColor	src0;
-	MaterialNodePropertyColor	src1;
+	MaterialNodeProperty	src0;
+	MaterialNodeProperty	src1;
 };
 
 // Lerp node
@@ -405,9 +332,9 @@ public:
 	virtual bool CheckValidation();
 
 private:
-	MaterialNodePropertyColor	src0;
-	MaterialNodePropertyColor	src1;
-	MaterialNodePropertyFloat	factor;
+	MaterialNodeProperty	src0;
+	MaterialNodeProperty	src1;
+	MaterialNodeProperty	factor;
 };
 
 // Blend node
@@ -429,10 +356,10 @@ public:
 	virtual bool CheckValidation();
 
 private:
-	MaterialNodePropertyColor	src0;
-	MaterialNodePropertyColor	src1;
-	MaterialNodePropertyFloat	factor0;
-	MaterialNodePropertyFloat	factor1;
+	MaterialNodeProperty	src0;
+	MaterialNodeProperty	src1;
+	MaterialNodeProperty	factor0;
+	MaterialNodeProperty	factor1;
 };
 
 // Mutiply node
@@ -454,8 +381,8 @@ public:
 	virtual bool CheckValidation();
 
 private:
-	MaterialNodePropertyColor	src0;
-	MaterialNodePropertyColor	src1;
+	MaterialNodeProperty	src0;
+	MaterialNodeProperty	src1;
 };
 
 class VariableNode : public MaterialNode
@@ -484,8 +411,8 @@ public:
 	virtual bool CheckValidation();
 
 private:
-	MaterialNodePropertyColor	src0;
-	MaterialNodePropertyColor	src1;
+	MaterialNodeProperty	src0;
+	MaterialNodeProperty	src1;
 
 	GridTexture grid_tex;
 };
@@ -509,8 +436,8 @@ public:
 	virtual bool CheckValidation();
 
 private:
-	MaterialNodePropertyColor	src0;
-	MaterialNodePropertyColor	src1;
+	MaterialNodeProperty	src0;
+	MaterialNodeProperty	src1;
 
 	CheckBoxTexture checkbox_tex;
 };
@@ -560,7 +487,7 @@ public:
 	virtual bool CheckValidation();
 
 private:
-	MaterialNodePropertyColor	src;
+	MaterialNodeProperty	src;
 };
 
 #endif

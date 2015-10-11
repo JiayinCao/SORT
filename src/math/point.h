@@ -19,7 +19,7 @@ linux and windows , g++ or visual studio 2008 is required.
 #define	SORT_POINT
 
 // include the header file
-#include "vector.h"
+#include "vector3.h"
 #include "utility/sassert.h"
 
 /////////////////////////////////////////////////////////////////////

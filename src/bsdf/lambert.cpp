@@ -18,7 +18,7 @@
 // include the header file
 #include "lambert.h"
 #include "utility/define.h"
-#include "geometry/vector.h"
+#include "math/vector3.h"
 #include "bsdf.h"
 
 // evaluate bxdf

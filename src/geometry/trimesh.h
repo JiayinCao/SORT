@@ -23,7 +23,7 @@
 #include "primitive.h"
 #include "utility/referencecount.h"
 #include "managers/meshmanager.h"
-#include "geometry/transform.h"
+#include "math/transform.h"
 
 class	Material;
 

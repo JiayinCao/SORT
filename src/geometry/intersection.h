@@ -19,7 +19,7 @@
 #define	SORT_INTERSECTION
 
 // include the header
-#include "point.h"
+#include "math/point.h"
 #include "spectrum/spectrum.h"
 
 // pre-decleration class

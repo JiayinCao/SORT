@@ -28,14 +28,6 @@ RGBSpectrum::RGBSpectrum()
 	m_b = 0.0f;
 }
 
-// constructor from node property
-RGBSpectrum::RGBSpectrum( const MaterialPropertyValue& prop )
-{
-	m_r = prop.x;
-	m_g = prop.y;
-	m_b = prop.z;
-}
-
 // constructor from three float
 RGBSpectrum::RGBSpectrum( float r , float g , float b )
 {

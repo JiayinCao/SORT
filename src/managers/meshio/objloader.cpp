@@ -18,8 +18,8 @@
 // include the header
 #include "objloader.h"
 #include <fstream>
-#include "geometry/point.h"
-#include "geometry/vector.h"
+#include "math/point.h"
+#include "math/vector3.h"
 #include "managers/meshmanager.h"
 #include "utility/strhelper.h"
 #include "managers/matmanager.h"

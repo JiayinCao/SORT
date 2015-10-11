@@ -20,7 +20,7 @@
 #include "utility/define.h"
 #include "managers/memmanager.h"
 #include "utility/path.h"
-#include "geometry/vector.h"
+#include "math/vector3.h"
 #include <fstream>
 #include "bsdf.h"
 

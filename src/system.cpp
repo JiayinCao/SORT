@@ -36,6 +36,7 @@
 #include <time.h>
 #include "managers/smmanager.h"
 #include "platform/multithread/multithread.h"
+#include "math/vector2.h"
 
 extern bool g_bBlenderMode;
 extern int  g_iTileSize;
@@ -231,27 +232,27 @@ void System::_pushRenderTask()
 
 	RenderTask rt(m_Scene,m_pSampler,m_camera,m_taskDone,m_iSamplePerPixel);
 
-	int tile_num_x = ceil(m_imagesensor->GetWidth() / (float)tilesize);
-	int tile_num_y = ceil(m_imagesensor->GetHeight() / (float)tilesize);
+	//int tile_num_x = ceil(m_imagesensor->GetWidth() / (float)tilesize);
+	//int tile_num_y = ceil(m_imagesensor->GetHeight() / (float)tilesize);
+	Vector2i tile_num = Vector2i( (int)ceil(m_imagesensor->GetWidth() / (float)tilesize) , (int)ceil(m_imagesensor->GetHeight() / (float)tilesize) );
 
 	// start tile from center instead of top-left corner
-	int current_x = tile_num_x / 2;
-	int current_y = tile_num_y / 2;
+	Vector2i cur_pos( tile_num / 2 );
 	int cur_dir = 0;
 	int cur_len = 0;
 	int cur_dir_len = 1;
-	int dir_x[4] = { 0, -1, 0, 1 };	// down , left , up , right
-	int dir_y[4] = { -1, 0, 1, 0 };	// down , left , up , right
+	const Vector2i dir[4] = { Vector2i( 0 , -1 ) , Vector2i( -1 , 0 ) , Vector2i( 0 , 1 ) , Vector2i( 1 , 0 ) };
+
 	while (true)
 	{
 		// only process node inside the image region
-		if (current_x >= 0 && current_x < tile_num_x && current_y >= 0 && current_y < tile_num_y)
+		if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y )
 		{
 			rt.taskId = taskid++;
-			rt.ori_x = current_x * tilesize;
-			rt.ori_y = current_y * tilesize;
-			rt.width = (tilesize < (m_imagesensor->GetWidth() - rt.ori_x)) ? tilesize : (m_imagesensor->GetWidth() - rt.ori_x);
-			rt.height = (tilesize < (m_imagesensor->GetHeight() - rt.ori_y)) ? tilesize : (m_imagesensor->GetHeight() - rt.ori_y);
+			rt.ori.x = cur_pos.x * tilesize;
+			rt.ori.y = cur_pos.y * tilesize;
+			rt.size.x = (tilesize < (m_imagesensor->GetWidth() - rt.ori.x)) ? tilesize : (m_imagesensor->GetWidth() - rt.ori.x);
+			rt.size.y = (tilesize < (m_imagesensor->GetHeight() - rt.ori.y)) ? tilesize : (m_imagesensor->GetHeight() - rt.ori.y);
 
 			// create new pixel samples
 			rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
@@ -268,14 +269,12 @@ void System::_pushRenderTask()
 			cur_dir_len += 1 - cur_dir % 2;
 		}
 
-		// get to the next tile
-		current_x += dir_x[cur_dir];
-		current_y += dir_y[cur_dir];
+		cur_pos += dir[cur_dir];
+
 		++cur_len;
 
-		// stop further processing if there is no need
-		if( (current_x < 0 || current_x >= tile_num_x) && (current_y < 0 || current_y >= tile_num_y) )
-			break;
+		if( (cur_pos.x < 0 || cur_pos.x >= tile_num.x ) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y ) )
+			return;
 	}
 }
 
@@ -485,8 +484,8 @@ bool System::Setup( const char* str )
     m_camera->SetImageSensor(m_imagesensor);
 
 	// create shared memory
-	int x_tile = ceil(m_imagesensor->GetWidth() / (float)g_iTileSize);
-	int y_tile = ceil(m_imagesensor->GetHeight() / (float)g_iTileSize);
+	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_iTileSize));
+	int y_tile = (int)(ceil(m_imagesensor->GetHeight() / (float)g_iTileSize));
 	int header_size = x_tile * y_tile;
 	int size =	header_size * g_iTileSize * g_iTileSize * 4 * sizeof(float)	// image size
 				+ header_size								// header size

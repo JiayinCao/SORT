@@ -21,14 +21,14 @@
 // include header
 #include "spectrum/spectrum.h"
 #include "utility/propertyset.h"
-#include "geometry/transform.h"
+#include "math/transform.h"
 #include "utility/creator.h"
 #include "utility/strhelper.h"
 #include "geometry/scene.h"
+#include "math/vector3.h"
 
 // pre-decleration
 class Intersection;
-class Vector;
 class LightSample;
 class Shape;
 

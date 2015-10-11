@@ -19,7 +19,7 @@
 #include "strhelper.h"
 #include "managers/meshmanager.h"
 #include <algorithm>
-#include "geometry/transform.h"
+#include "math/transform.h"
 
 // convert string to vertex index
 VertexIndex	VertexIndexFromStr( const string& str )
