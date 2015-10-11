@@ -32,7 +32,7 @@ public:
 	}
 	Vector2( const Vector2<T>& c ) : x(c.x), y(c.y){
 	}
-	Vector2( const T* const d ) : data[0](d[0]),data[1](d[1]){
+	Vector2( const T* const d ) : x(d[0]),y(d[1]){
 	}
 
 	Vector2<T>	operator+ ( const Vector2<T>& v) const {
