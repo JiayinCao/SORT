@@ -21,7 +21,7 @@
 // include the header
 #include "sort.h"
 #include "spectrum/spectrum.h"
-#include "geometry/vector.h"
+#include "math/vector3.h"
 #include "utility/enum.h"
 #include <math.h>
 

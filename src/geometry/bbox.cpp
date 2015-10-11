@@ -17,7 +17,7 @@
 
 // include the header file
 #include "bbox.h"
-#include "vector.h"
+#include "math/vector3.h"
 #include "utility/sassert.h"
 
 // default constructor

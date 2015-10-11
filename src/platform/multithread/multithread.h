@@ -29,6 +29,7 @@ int ThreadId();
 #include <list>
 #include "utility/singleton.h"
 #include "sampler/sample.h"
+#include "math/vector2.h"
 
 class Integrator;
 class Scene;
@@ -41,10 +42,11 @@ class RenderTask
 {
 public:
     // the following parameters define where to calculate the image
-    unsigned ori_x;
-    unsigned ori_y;
-    unsigned width;
-    unsigned height;
+    Vector2i ori;
+	Vector2i size;
+    //unsigned ori_y;
+    //unsigned width;
+    //unsigned height;
     
     // the task id
     unsigned		taskId;
@@ -65,10 +67,6 @@ public:
     RenderTask( Scene& sc , Sampler* samp , Camera* cam , bool* td, unsigned spp )
     :scene(sc),sampler(samp),camera(cam),samplePerPixel(spp),taskDone(td)
     {
-        ori_x = 0;
-        ori_y = 0;
-        width = 0;
-        height = 0;
         pixelSamples = 0;
         taskId = 0;
     }

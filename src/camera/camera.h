@@ -18,7 +18,7 @@
 #ifndef	SORT_CAMERA
 #define	SORT_CAMERA
 
-#include "geometry/point.h"
+#include "math/point.h"
 #include "geometry/ray.h"
 #include "utility/enum.h"
 #include "spectrum/spectrum.h"

@@ -18,12 +18,12 @@
 #ifndef	SORT_SHAPE
 #define	SORT_SHAPE
 
-#include "geometry/point.h"
-#include "geometry/transform.h"
+#include "math/point.h"
+#include "math/transform.h"
 #include "geometry/primitive.h"
+#include "math/vector3.h"
 
 class LightSample;
-class Vector;
 class Ray;
 class Intersection;
 class Light;

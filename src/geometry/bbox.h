@@ -20,7 +20,7 @@
 
 // include the header file
 #include "sort.h"
-#include "point.h"
+#include "math/point.h"
 #include "ray.h"
 
 /////////////////////////////////////////////////////////////////////////////

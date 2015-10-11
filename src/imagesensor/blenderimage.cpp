@@ -34,10 +34,10 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 	if (!m_sharedMemory.bytes)
 		return;
 
-	int tile_w = rt.width;
+	int tile_w = rt.size.x;
 	int tile_size = g_iTileSize * g_iTileSize;
-	int x_off = rt.ori_x / g_iTileSize;
-	int y_off = floor((m_height - 1 - rt.ori_y) / (float)g_iTileSize);
+	int x_off = (int)(rt.ori.x / g_iTileSize);
+	int y_off = (int)(floor((m_height - 1 - rt.ori.y) / (float)g_iTileSize));
 	int tile_offset = y_off * m_tilenum_x + x_off;
 	int offset = 4 * tile_offset * tile_size;
 
@@ -45,7 +45,7 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 	float* data = (float*)(m_sharedMemory.bytes + m_header_offset);
 
 	// get offset
-	int inner_offset = offset + 4 * (x - rt.ori_x + (g_iTileSize - 1 - (y - rt.ori_y)) * tile_w);
+	int inner_offset = offset + 4 * (x - rt.ori.x + (g_iTileSize - 1 - (y - rt.ori.y)) * tile_w);
 
 	// copy data
 	data[ inner_offset ] = color.GetR();
@@ -66,8 +66,8 @@ void BlenderImage::FinishTile( int tile_x , int tile_y , const RenderTask& rt )
 // pre process
 void BlenderImage::PreProcess()
 {
-	m_tilenum_x = ceil(m_width / (float)g_iTileSize);
-	m_tilenum_y = ceil(m_height / (float)g_iTileSize);
+	m_tilenum_x = (int)(ceil(m_width / (float)g_iTileSize));
+	m_tilenum_y = (int)(ceil(m_height / (float)g_iTileSize));
 	m_header_offset = m_tilenum_x * m_tilenum_y;
 
 	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("SORTBLEND_SHAREMEM");

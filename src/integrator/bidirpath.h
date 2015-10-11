@@ -19,8 +19,8 @@
 #define	SORT_BIDIRPATH
 
 #include "integrator.h"
-#include "geometry/point.h"
-#include "geometry/vector.h"
+#include "math/point.h"
+#include "math/vector3.h"
 #include "geometry/intersection.h"
 
 class	Primitive;

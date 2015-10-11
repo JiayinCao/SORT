@@ -258,7 +258,7 @@ void BidirPathTracing::_GeneratePDFSummuration( const vector<BDPT_Vertex>& epath
 	unsigned eps = epath.size();
 	unsigned lps = lpath.size();
 
-	for(int i = 0; i < eps + lps + 1 ; ++i )
+	for(unsigned i = 0; i < eps + lps + 1 ; ++i )
 		result[i] = 0.0f;
 	for( unsigned i = 1 ; i <= eps ; ++i )
 	{
@@ -274,7 +274,7 @@ void BidirPathTracing::_GeneratePDFSummurationUniform( const vector<BDPT_Vertex>
 	unsigned eps = epath.size();
 	unsigned lps = lpath.size();
 
-	for(int i = 0; i < eps + lps + 1 ; ++i )
+	for(unsigned i = 0; i < eps + lps + 1 ; ++i )
 		result[i] = 0.0f;
 	for( unsigned i = 1 ; i <= eps ; ++i )
 	{

@@ -20,9 +20,9 @@
 
 // include the header
 #include "matrix.h"
-#include "vector.h"
+#include "math/vector3.h"
 #include "point.h"
-#include "ray.h"
+#include "geometry/ray.h"
 #include <math.h>
 
 class Transform;

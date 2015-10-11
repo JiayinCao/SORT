@@ -21,8 +21,8 @@
 // include the header
 #include "spectrum/spectrum.h"
 #include "utility/propertyset.h"
+#include "math/vector3.h"
 
-class Vector;
 class Point;
 
 //////////////////////////////////////////////////////////////////

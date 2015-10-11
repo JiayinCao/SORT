@@ -20,7 +20,7 @@
 
 // include the header file
 #include "camera.h"
-#include "geometry/transform.h"
+#include "math/transform.h"
 
 ////////////////////////////////////////////////////////////////////////////////////
 //	definition of the ortho camera
