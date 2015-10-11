@@ -35,7 +35,7 @@ public:
 	}
 	Vector4( const Vector4<T>& c ):x(c.x),y(c.y),z(c.z),w(c.w) {
 	}
-	Vector4( const T* const d ) : data[0](d[0]),data[1](d[1]),data[2](d[2]),data[3](d[3]){
+	Vector4( const T* const d ) : x(d[0]),y(d[1]),z(d[2]),w(d[3]){
 	}
 
 	Vector4<T>	operator+ ( const Vector4<T>& v) const {
