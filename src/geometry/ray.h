@@ -19,8 +19,8 @@
 #define SORT_RAY
 
 // include the header
-#include "vector.h"
-#include "point.h"
+#include "math/vector3.h"
+#include "math/point.h"
 #include "float.h"
 
 ////////////////////////////////////////////////////////////////////////////

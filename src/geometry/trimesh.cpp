@@ -18,7 +18,7 @@
 // include the header file
 #include "trimesh.h"
 #include "sort.h"
-#include "point.h"
+#include "math/point.h"
 #include "managers/meshmanager.h"
 #include "geometry/triangle.h"
 #include "geometry/instancetri.h"

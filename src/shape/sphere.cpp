@@ -19,7 +19,7 @@
 #include "sphere.h"
 #include "geometry/ray.h"
 #include "geometry/intersection.h"
-#include "geometry/vector.h"
+#include "math/vector3.h"
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 #include "utility/rand.h"

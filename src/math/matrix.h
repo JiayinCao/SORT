@@ -18,7 +18,7 @@
 #ifndef	SORT_MATRIX
 #define	SORT_MATRIX
 
-#include "ray.h"
+#include "geometry/ray.h"
 
 ////////////////////////////////////////////////////////////////////
 //	definition of matrix

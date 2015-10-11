@@ -26,9 +26,9 @@
 #include "utility/define.h"
 #include <vector>
 #include <map>
-#include "geometry/point.h"
-#include "geometry/vector.h"
-#include "geometry/transform.h"
+#include "math/point.h"
+#include "math/vector3.h"
+#include "math/transform.h"
 #include "material/material.h"
 
 // pre-declera class

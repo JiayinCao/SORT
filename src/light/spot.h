@@ -20,7 +20,7 @@
 
 #include "light.h"
 #include "utility/strhelper.h"
-#include "geometry/vector.h"
+#include "math/vector3.h"
 
 ///////////////////////////////////////////////////////////////////////
 // definition of spot light

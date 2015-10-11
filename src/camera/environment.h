@@ -20,7 +20,7 @@
 
 // include header file
 #include "camera.h"
-#include "geometry/matrix.h"
+#include "math/matrix.h"
 
 //////////////////////////////////////////////////////////////
 // definition of environment camera

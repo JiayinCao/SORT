@@ -73,10 +73,10 @@ float VisKelemen::Vis_Term( float NoL , float NoV , float VoH )
 
 float VisSchlick::Vis_Term( float NoL , float NoV , float VoH )
 {
-	float k = roughness * roughness * 0.5;
+	float k = roughness * roughness * 0.5f;
 	float Vis_SchlickV = NoV * (1 - k) + k;
 	float Vis_SchlickL = NoL * (1 - k) + k;
-	return 0.25 / ( Vis_SchlickV * Vis_SchlickL );
+	return 0.25f / ( Vis_SchlickV * Vis_SchlickL );
 }
 
 float VisSmith::Vis_Term( float NoL , float NoV , float VoH )
@@ -94,7 +94,7 @@ float VisSmithJointApprox::Vis_Term( float Roughness, float NoV, float NoL )
 	float a = roughness * roughness;
 	float Vis_SmithV = NoL * ( NoV * ( 1 - a ) + a );
 	float Vis_SmithL = NoV * ( NoL * ( 1 - a ) + a );
-	return 0.5 / ( Vis_SmithV + Vis_SmithL );
+	return 0.5f / ( Vis_SmithV + Vis_SmithL );
 }
 
 // constructor

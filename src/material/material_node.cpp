@@ -52,51 +52,27 @@ MaterialNodeProperty* MaterialNode::getProperty( const string& name )
 	return 0;
 }
 
-// get node property value
-MaterialPropertyValue MaterialNodePropertyColor::GetPropertyValue( Bsdf* bsdf )
+// set node property
+void MaterialNodeProperty::SetNodeProperty( const string& prop )
 {
-	if( node )
-		return node->GetNodeValue( bsdf );
-	return MaterialPropertyValue(value);
+	string str = prop;
+	string x = NextToken( str , ' ' );
+	string y = NextToken( str , ' ' );
+	string z = NextToken( str , ' ' );
+	string w = NextToken( str , ' ' );
+
+	value.x = (float)atof( x.c_str() );
+	value.y = (float)atof( y.c_str() );
+	value.z = (float)atof( z.c_str() );
+	value.w = (float)atof( w.c_str() );
 }
 
-// get node property value
-MaterialPropertyValue MaterialNodePropertyFloat2::GetPropertyValue( Bsdf* bsdf )
-{
-	if( node )
-		return node->GetNodeValue( bsdf );
-	return Spectrum( x , y , 0.0f );
-}
-
-// get node property value
-MaterialPropertyValue MaterialNodePropertyFloat::GetPropertyValue( Bsdf* bsdf )
+// get node property
+MaterialPropertyValue MaterialNodeProperty::GetPropertyValue( Bsdf* bsdf )
 {
 	if( node )
 		return node->GetNodeValue( bsdf );
 	return value;
-}
-
-// set node property
-void MaterialNodePropertyColor::SetNodeProperty( const string& prop )
-{
-	value = SpectrumFromStr( prop );
-}
-
-// set node property
-void MaterialNodePropertyFloat::SetNodeProperty( const string& prop )
-{
-	value = (float)atof( prop.c_str() );
-}
-
-// set node property
-void MaterialNodePropertyFloat2::SetNodeProperty( const string& prop )
-{
-	string str = prop;
-	string r = NextToken( str , ' ' );
-	string g = NextToken( str , ' ' );
-
-	x = (float)atof( r.c_str() );
-	y = (float)atof( g.c_str() );
 }
 
 // set node property
@@ -312,7 +288,7 @@ void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf) );
+	Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() );
 	lambert->m_weight = weight;
 	bsdf->AddBxdf( lambert );
 }
@@ -349,7 +325,7 @@ void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.GetPropertyValue(bsdf) , roughness.GetPropertyValue(bsdf).x );
+	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , roughness.GetPropertyValue(bsdf).x );
 	orennayar->m_weight = weight;
 	bsdf->AddBxdf( orennayar );
 }
@@ -375,7 +351,7 @@ void MicrofacetNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	MicroFacet* mf = SORT_MALLOC(MicroFacet)( baseColor.GetPropertyValue(bsdf) , pFresnel , pMFDist , pVisTerm);
+	MicroFacet* mf = SORT_MALLOC(MicroFacet)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , pFresnel , pMFDist , pVisTerm);
 	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
 }
@@ -430,7 +406,7 @@ void ReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	Reflection* reflection = SORT_MALLOC(Reflection)( pFresnel , baseColor.GetPropertyValue(bsdf));
+	Reflection* reflection = SORT_MALLOC(Reflection)( pFresnel , baseColor.GetPropertyValue(bsdf).ToSpectrum() );
 	reflection->m_weight = weight;
 	bsdf->AddBxdf( reflection );
 }
@@ -466,7 +442,7 @@ void RefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	Refraction* refraction = SORT_MALLOC(Refraction)( theta0.GetPropertyValue(bsdf).x , theta1.GetPropertyValue(bsdf).x , pFresnel , baseColor.GetPropertyValue(bsdf) );
+	Refraction* refraction = SORT_MALLOC(Refraction)( theta0.GetPropertyValue(bsdf).x , theta1.GetPropertyValue(bsdf).x , pFresnel , baseColor.GetPropertyValue(bsdf).ToSpectrum() );
 	refraction->m_weight = weight;
 	bsdf->AddBxdf( refraction );
 }
@@ -476,9 +452,9 @@ void RefractionNode::PostProcess()
 {
 	// parameters are to be exposed through GUI
 	if( fresnel.str == "FresnelConductor" )
-		pFresnel = new FresnelConductor( theta0.value , theta1.value );
+		pFresnel = new FresnelConductor( theta0.value.x , theta1.value.x );
 	else if( fresnel.str == "FresnelDielectric" )
-		pFresnel = new FresnelDielectric( theta0.value , theta1.value );
+		pFresnel = new FresnelDielectric( theta0.value.x , theta1.value.x );
 	else
 		pFresnel = new FresnelNo();
 }
@@ -614,9 +590,9 @@ void MutiplyNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
 
 	if( type0 & MAT_NODE_BXDF )
-		src0.node->UpdateBSDF( bsdf , weight * src1.GetPropertyValue(bsdf) );
+		src0.node->UpdateBSDF( bsdf , weight * src1.GetPropertyValue(bsdf).x );
 	else if( type1 & MAT_NODE_BXDF )
-		src1.node->UpdateBSDF( bsdf , weight * src0.GetPropertyValue(bsdf) );
+		src1.node->UpdateBSDF( bsdf , weight * src0.GetPropertyValue(bsdf).x );
 }
 
 // get property value
@@ -651,14 +627,14 @@ MaterialPropertyValue GridTexNode::GetNodeValue( Bsdf* bsdf )
 {
 	// get intersection
 	const Intersection* intesection = bsdf->GetIntersection();
-	return grid_tex.GetColorFromUV( intesection->u , intesection->v );
+	return FromSpectrum( grid_tex.GetColorFromUV( intesection->u , intesection->v ) );
 }
 
 // post process
 void GridTexNode::PostProcess()
 {
 	// set grid texture
-	grid_tex.SetGridColor( src0.GetPropertyValue(0) , src1.GetPropertyValue(0) );
+	grid_tex.SetGridColor( src0.GetPropertyValue(0).x , src1.GetPropertyValue(0).x );
 }
 
 // check validation
@@ -685,14 +661,14 @@ MaterialPropertyValue CheckBoxTexNode::GetNodeValue( Bsdf* bsdf )
 {
 	// get intersection
 	const Intersection* intesection = bsdf->GetIntersection();
-	return checkbox_tex.GetColorFromUV( intesection->u , intesection->v );
+	return FromSpectrum( checkbox_tex.GetColorFromUV( intesection->u , intesection->v ) );
 }
 
 // post process
 void CheckBoxTexNode::PostProcess()
 {
 	// set grid texture
-	checkbox_tex.SetCheckBoxColor( src0.GetPropertyValue(0) , src1.GetPropertyValue(0) );
+	checkbox_tex.SetCheckBoxColor( src0.GetPropertyValue(0).x , src1.GetPropertyValue(0).x );
 }
 
 // check validation
@@ -718,7 +694,7 @@ MaterialPropertyValue ImageTexNode::GetNodeValue( Bsdf* bsdf )
 {
 	// get intersection
 	const Intersection* intesection = bsdf->GetIntersection();
-	return image_tex.GetColorFromUV( intesection->u , intesection->v );
+	return FromSpectrum( image_tex.GetColorFromUV( intesection->u , intesection->v ) );
 }
 
 // post process

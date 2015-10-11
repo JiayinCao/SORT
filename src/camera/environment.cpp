@@ -17,7 +17,7 @@
 
 // include the header
 #include "environment.h"
-#include "geometry/vector.h"
+#include "math/vector3.h"
 #include "geometry/ray.h"
 #include "utility/sassert.h"
 #include "utility/define.h"

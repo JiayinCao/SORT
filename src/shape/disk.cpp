@@ -19,7 +19,7 @@
 #include "disk.h"
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
-#include "geometry/vector.h"
+#include "math/vector3.h"
 #include "geometry/intersection.h"
 #include "utility/rand.h"
 

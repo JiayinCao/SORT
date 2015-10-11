@@ -18,7 +18,7 @@
 // include the header
 #include "matrix.h"
 #include "point.h"
-#include "vector.h"
+#include "math/vector3.h"
 #include "managers/logmanager.h"
 
 // default constructor

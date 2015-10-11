@@ -17,7 +17,7 @@
 
 // include header file
 #include "refraction.h"
-#include "geometry/vector.h"
+#include "math/vector3.h"
 #include "bsdf/bsdf.h"
 
 // sample a direction randomly

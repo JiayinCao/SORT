@@ -36,13 +36,12 @@ void RenderTask::Execute( Integrator* integrator )
     // request samples
     integrator->RequestSample( sampler , pixelSamples , samplePerPixel );
     
-    unsigned right = ori_x + width;
-    unsigned bottom = ori_y + height;
+	Vector2i rb = ori + size;
     
     unsigned tid = ThreadId();
-    for( unsigned i = ori_y ; i < bottom ; i++ )
+    for( unsigned i = ori.y ; i < rb.y ; i++ )
     {
-        for( unsigned j = ori_x ; j < right ; j++ )
+        for( unsigned j = ori.x ; j < rb.x ; j++ )
         {
             // clear managed memory after each pixel
             MemManager::GetSingleton().ClearMem(tid);
@@ -70,8 +69,8 @@ void RenderTask::Execute( Integrator* integrator )
         }
     }
     
-    int x_off = ori_x / g_iTileSize;
-    int y_off = (is->m_height - 1 - ori_y ) / g_iTileSize ;
+    int x_off = ori.x / g_iTileSize;
+    int y_off = (is->m_height - 1 - ori.y ) / g_iTileSize ;
     is->FinishTile( x_off, y_off, *this );
     
     taskDone[taskId] = true;

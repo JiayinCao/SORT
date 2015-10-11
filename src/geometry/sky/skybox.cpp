@@ -17,7 +17,7 @@
 
 // include the header
 #include "skybox.h"
-#include "geometry/vector.h"
+#include "math/vector3.h"
 #include <math.h>
 #include "utility/samplemethod.h"
 

@@ -21,9 +21,8 @@
 // include the header
 #include "spectrum/spectrum.h"
 #include "utility/enum.h"
+#include "math/vector3.h"
 
-// pre-declera class
-class Vector;
 class BsdfSample;
 
 /////////////////////////////////////////////////////////////////////////
