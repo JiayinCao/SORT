@@ -176,6 +176,9 @@ MAT_NODE_TYPE MaterialNode::getNodeType()
 // post process
 void MaterialNode::PostProcess()
 {
+	if( m_post_processed )
+		return;
+
 	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
 	while( it != m_props.end() )
 	{
@@ -183,6 +186,8 @@ void MaterialNode::PostProcess()
 			it->second->node->PostProcess();
 		++it;
 	}
+
+	m_post_processed = true;
 }
 
 // update bsdf
@@ -310,6 +315,9 @@ void MerlNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 // post process
 void MerlNode::PostProcess()
 {
+	if( m_post_processed )
+		return;
+
 	if( merlfile.str.empty() == false )
 		merl.LoadData( merlfile.str );
 }
@@ -337,6 +345,10 @@ MicrofacetNode::MicrofacetNode()
 	m_props.insert( make_pair( "Visibility" , &mf_vis ) );
 	m_props.insert( make_pair( "Fresnel" , &fresnel ) );
 	m_props.insert( make_pair( "Roughness" , &roughness ) );
+	m_props.insert( make_pair( "in_ior" , &in_ior ) );
+	m_props.insert( make_pair( "ext_ior" , &ext_ior ) );
+	m_props.insert( make_pair( "eta" , &eta ) );
+	m_props.insert( make_pair( "k" , &k ) );
 }
 
 // destructor
@@ -344,6 +356,7 @@ MicrofacetNode::~MicrofacetNode()
 {
 	delete pFresnel;
 	delete pMFDist;
+	delete pVisTerm;
 }
 
 void MicrofacetNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -359,11 +372,14 @@ void MicrofacetNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 // post process
 void MicrofacetNode::PostProcess()
 {
+	if( m_post_processed )
+		return;
+
 	// parameters are to be exposed through GUI
 	if( fresnel.str == "FresnelConductor" )
-		pFresnel = new FresnelConductor( 1.0f , 1.0f );
+		pFresnel = new FresnelConductor( eta.GetPropertyValue(0).ToSpectrum() , k.GetPropertyValue(0).ToSpectrum() );
 	else if( fresnel.str == "FresnelDielectric" )
-		pFresnel = new FresnelDielectric( 1.0f , 1.0f );
+		pFresnel = new FresnelDielectric( in_ior.GetPropertyValue(0).x , ext_ior.GetPropertyValue(0).x );
 	else
 		pFresnel = new FresnelNo();
 
@@ -387,6 +403,8 @@ void MicrofacetNode::PostProcess()
 		pVisTerm = new VisSmithJointApprox( rn );
 	else
 		pVisTerm = new VisImplicit();	// implicit visibility term is default
+
+	MaterialNode::PostProcess();
 }
 
 ReflectionNode::ReflectionNode()
@@ -414,6 +432,9 @@ void ReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 // post process
 void ReflectionNode::PostProcess()
 {
+	if( m_post_processed )
+		return;
+
 	// parameters are to be exposed through GUI
 	if( fresnel.str == "FresnelConductor" )
 		pFresnel = new FresnelConductor( 1.0f , 1.0f );
@@ -421,6 +442,8 @@ void ReflectionNode::PostProcess()
 		pFresnel = new FresnelDielectric( 1.0f , 1.0f );
 	else
 		pFresnel = new FresnelNo();
+
+	MaterialNode::PostProcess();
 }
 
 RefractionNode::RefractionNode()
@@ -450,6 +473,9 @@ void RefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 // post process
 void RefractionNode::PostProcess()
 {
+	if( m_post_processed )
+		return;
+
 	// parameters are to be exposed through GUI
 	if( fresnel.str == "FresnelConductor" )
 		pFresnel = new FresnelConductor( theta0.value.x , theta1.value.x );
@@ -457,6 +483,8 @@ void RefractionNode::PostProcess()
 		pFresnel = new FresnelDielectric( theta0.value.x , theta1.value.x );
 	else
 		pFresnel = new FresnelNo();
+
+	MaterialNode::PostProcess();
 }
 
 AddNode::AddNode()
@@ -633,8 +661,13 @@ MaterialPropertyValue GridTexNode::GetNodeValue( Bsdf* bsdf )
 // post process
 void GridTexNode::PostProcess()
 {
+	if( m_post_processed )
+		return;
+
 	// set grid texture
 	grid_tex.SetGridColor( src0.GetPropertyValue(0).x , src1.GetPropertyValue(0).x );
+
+	MaterialNode::PostProcess();
 }
 
 // check validation
@@ -667,8 +700,13 @@ MaterialPropertyValue CheckBoxTexNode::GetNodeValue( Bsdf* bsdf )
 // post process
 void CheckBoxTexNode::PostProcess()
 {
+	if( m_post_processed )
+		return;
+
 	// set grid texture
 	checkbox_tex.SetCheckBoxColor( src0.GetPropertyValue(0).x , src1.GetPropertyValue(0).x );
+
+	MaterialNode::PostProcess();
 }
 
 // check validation
@@ -700,6 +738,9 @@ MaterialPropertyValue ImageTexNode::GetNodeValue( Bsdf* bsdf )
 // post process
 void ImageTexNode::PostProcess()
 {
+	if( m_post_processed )
+		return;
+
 	// set grid texture
 	image_tex.LoadImageFromFile( filename.str );
 }

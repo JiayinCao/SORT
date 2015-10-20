@@ -48,7 +48,11 @@ class SORTSocket:
             split = row.split(common.label_percentage)
             left_row = split.row()
             left_row.label(text)
-            split.prop(node.inputs[text], 'default_value')
+            if node.inputs[text].IsEmptySocket() is False:
+                split.prop(node.inputs[text], 'default_value')
+
+    def IsEmptySocket(self):
+        return False
 
 # socket for SORT node
 class SORTShaderSocket(bpy.types.NodeSocketShader, SORTSocket):
@@ -60,6 +64,9 @@ class SORTShaderSocket(bpy.types.NodeSocketShader, SORTSocket):
     # green node for color
     def draw_color(self, context, node):
         return (1.0, 1.0, 0.2, 1.0)
+
+    def IsEmptySocket(self):
+        return True
 
 class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTSocket):
     bl_idname = 'SORTNodeSocketFloat'
@@ -177,25 +184,53 @@ class SORTNodeMicrofacet(SORTShadingNode):
                    ]
     mfvis_prop = bpy.props.EnumProperty(name='',items=mfvis_item)
 
+    # fresnel parameters
+    # dielectric-conductor parameters
+    eta = bpy.props.FloatVectorProperty(name='', default=(0.37, 0.37, 0.37), min=0.10, max=10.0)
+    k = bpy.props.FloatVectorProperty(name='', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
+    # dielectric-dielectric parameters
+    int_ior = bpy.props.FloatProperty(name='', default=1.5, min=1.0, max=10.0)
+    ext_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
+
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
         self.inputs.new('SORTNodeSocketFloat', 'Roughness')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
-        #self.draw_button(layout, "Fresnel" , "fresnel_prop")
         self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
         self.draw_button(layout, "VisibilityTerm" , "mfvis_prop")
+        self.draw_button(layout, "Fresnel" , "fresnel_prop")
+
+        if self.fresnel_prop == 'FresnelConductor':
+            self.draw_button(layout, "In IOR" , "int_ior")
+            self.draw_button(layout, "Ext IOR" , "ext_ior")
+        elif self.fresnel_prop == 'FresnelDielectric':
+            self.draw_button(layout, "In IOR" , "eta" )
+            self.draw_button(layout, "Absorption Coefficient" , "k")
 
     def draw_props(self, context, layout, indented_label):
-        #self.draw_prop(layout, 'Fresnel' , 'fresnel_prop' , indented_label)
         self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
         self.draw_prop(layout, 'VisibilityTerm' , 'mfvis_prop' , indented_label)
 
+        if self.fresnel_prop == 'FresnelConductor':
+            self.draw_prop(layout, "In IOR" , "int_ior", indented_label)
+            self.draw_prop(layout, "Ext IOR" , "ext_ior", indented_label)
+        elif self.fresnel_prop == 'FresnelDielectric':
+            self.draw_prop(layout, "In IOR" , "eta" , indented_label)
+            self.draw_prop(layout, "Absorption Coefficient" , "k", indented_label)
+
     def export_prop(self, xml_node):
-        #ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='string', value= self.fresnel_prop )
         ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='string', value= self.mfdist_prop )
         ET.SubElement( xml_node , 'Property' , name='Visibility' , type='string', value= self.mfvis_prop )
+
+        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='string' , value= self.fresnel_prop )
+        if self.fresnel_prop == 'FresnelConductor':
+            ET.SubElement( xml_node , 'Property' , name='eta' , type='color', value= '%f %f %f'%(self.eta[0],self.eta[1],self.eta[2])  )
+            ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
+        elif self.fresnel_prop == 'FresnelDielectric':
+            ET.SubElement( xml_node , 'Property' , name='in_ior' , type='color', value= '%f'%(self.int_ior)  )
+            ET.SubElement( xml_node , 'Property' , name='ext_ior' , type='color', value= '%f'%(self.ext_ior) )
 
 # merl node
 class SORTNodeMerl(SORTShadingNode):
@@ -225,10 +260,7 @@ class SORTNodeOrenNayar(SORTShadingNode):
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
-        roughness = self.inputs.new('SORTNodeSocketFloat', 'Roughness')
-        #roughness.default_value.min = 0.0
-        print(dir(roughness))
-        print(roughness.default_value)
+        self.inputs.new('SORTNodeSocketFloat', 'Roughness')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
 # reflection node
