@@ -85,6 +85,7 @@ public:
 	MaterialNode(){
 		subtree_node_type = MAT_NODE_NONE;
 		m_node_valid = true;
+		m_post_processed = false;
 	}
 	virtual ~MaterialNode();
 
@@ -121,6 +122,9 @@ protected:
 
 	// valid node
 	bool m_node_valid;
+
+	// already post processed
+	bool m_post_processed;
 };
 
 // Mateiral output node
@@ -227,6 +231,10 @@ public:
 private:
 	MaterialNodeProperty	baseColor;
 	MaterialNodeProperty	roughness;
+	MaterialNodeProperty	eta;
+	MaterialNodeProperty	k;
+	MaterialNodeProperty	in_ior;
+	MaterialNodeProperty	ext_ior;
 	MaterialNodePropertyString	fresnel;
 	MaterialNodePropertyString	mf_dist;
 	MaterialNodePropertyString	mf_vis;
@@ -236,7 +244,7 @@ private:
 	VisTerm*				pVisTerm;
 };
 
-// Microfacet node
+// Reflection node
 class ReflectionNode : public BxdfNode
 {
 public:
@@ -260,7 +268,7 @@ private:
 	Fresnel*				pFresnel;
 };
 
-// Microfacet node
+// Refraction node
 class RefractionNode : public BxdfNode
 {
 public:
