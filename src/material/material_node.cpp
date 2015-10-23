@@ -410,13 +410,8 @@ void MicrofacetNode::PostProcess()
 ReflectionNode::ReflectionNode()
 {
 	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-	m_props.insert( make_pair( "Fresnel" , &fresnel ) );
-}
-
-// destructor
-ReflectionNode::~ReflectionNode()
-{
-	delete pFresnel;
+	m_props.insert( make_pair( "eta" , &eta ) );
+	m_props.insert( make_pair( "k" , &k ) );
 }
 
 void ReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -424,40 +419,18 @@ void ReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	Reflection* reflection = SORT_MALLOC(Reflection)( pFresnel , baseColor.GetPropertyValue(bsdf).ToSpectrum() );
+	Fresnel* fresnel = SORT_MALLOC(FresnelConductor)( eta.GetPropertyValue(0).ToSpectrum() , k.GetPropertyValue(0).ToSpectrum() );
+	Reflection* reflection = SORT_MALLOC(Reflection)( fresnel , baseColor.GetPropertyValue(bsdf).ToSpectrum() );
 	reflection->m_weight = weight;
+
 	bsdf->AddBxdf( reflection );
-}
-
-// post process
-void ReflectionNode::PostProcess()
-{
-	if( m_post_processed )
-		return;
-
-	// parameters are to be exposed through GUI
-	if( fresnel.str == "FresnelConductor" )
-		pFresnel = new FresnelConductor( 1.0f , 1.0f );
-	else if( fresnel.str == "FresnelDielectric" )
-		pFresnel = new FresnelDielectric( 1.0f , 1.0f );
-	else
-		pFresnel = new FresnelNo();
-
-	MaterialNode::PostProcess();
 }
 
 RefractionNode::RefractionNode()
 {
 	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-	m_props.insert( make_pair( "Fresnel" , &fresnel ) );
-	m_props.insert( make_pair( "RefractionIndexOut" , &theta0 ) );
-	m_props.insert( make_pair( "RefractionIndexIn" , &theta1 ) );
-}
-
-// destructor
-RefractionNode::~RefractionNode()
-{
-	delete pFresnel;
+	m_props.insert( make_pair( "in_ior" , &in_ior ) );
+	m_props.insert( make_pair( "ext_ior" , &ext_ior ) );
 }
 
 void RefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -465,26 +438,13 @@ void RefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	Refraction* refraction = SORT_MALLOC(Refraction)( theta0.GetPropertyValue(bsdf).x , theta1.GetPropertyValue(bsdf).x , pFresnel , baseColor.GetPropertyValue(bsdf).ToSpectrum() );
+	float _in_ior = in_ior.GetPropertyValue(0).x;
+	float _ext_ior = ext_ior.GetPropertyValue(0).x;
+
+	Fresnel* fresnel = SORT_MALLOC(FresnelDielectric)( _in_ior , _ext_ior );
+	Refraction* refraction = SORT_MALLOC(Refraction)( _in_ior , _ext_ior , fresnel , baseColor.GetPropertyValue(bsdf).ToSpectrum() );
 	refraction->m_weight = weight;
 	bsdf->AddBxdf( refraction );
-}
-
-// post process
-void RefractionNode::PostProcess()
-{
-	if( m_post_processed )
-		return;
-
-	// parameters are to be exposed through GUI
-	if( fresnel.str == "FresnelConductor" )
-		pFresnel = new FresnelConductor( theta0.value.x , theta1.value.x );
-	else if( fresnel.str == "FresnelDielectric" )
-		pFresnel = new FresnelDielectric( theta0.value.x , theta1.value.x );
-	else
-		pFresnel = new FresnelNo();
-
-	MaterialNode::PostProcess();
 }
 
 AddNode::AddNode()

@@ -252,20 +252,15 @@ public:
 
 	// constructor
 	ReflectionNode();
-	// destructor
-	~ReflectionNode();
 
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
-	// post process
-	virtual void PostProcess();
-
 private:
 	MaterialNodeProperty	baseColor;
-	MaterialNodePropertyString	fresnel;
 
-	Fresnel*				pFresnel;
+	MaterialNodeProperty	eta;
+	MaterialNodeProperty	k;
 };
 
 // Refraction node
@@ -276,22 +271,14 @@ public:
 
 	// constructor
 	RefractionNode();
-	// destructor
-	~RefractionNode();
 
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
-	// post process
-	virtual void PostProcess();
-
 private:
 	MaterialNodeProperty	baseColor;
-	MaterialNodePropertyString	fresnel;
-	MaterialNodeProperty	theta0;
-	MaterialNodeProperty	theta1;
-
-	Fresnel*					pFresnel;
+	MaterialNodeProperty	in_ior;
+	MaterialNodeProperty	ext_ior;
 };
 
 class OperatorNode : public MaterialNode
