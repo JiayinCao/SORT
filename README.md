@@ -1,6 +1,6 @@
 # SORT
 
-SORT is short for Simple Open-source Ray Tracing. It is a project that I initiated a couple of years ago, which is a project quite simlilar to PBRT, because I wrote the whole renderer after reading pbrt several times.
+SORT is short for Simple Open-source Ray Tracing. It is a project that I initiated a couple of years ago, which is quite simlilar to PBRT, because I wrote the whole renderer after reading pbrt several times and I'd like to enhance my understanding on offline rendering with this small project.
 SORT is cross-platform, it works well on Windows, Mac and Ubuntu.
 
 Here are the features implemented so far:
