@@ -383,7 +383,7 @@ void MicrofacetNode::PostProcess()
 	else
 		pFresnel = new FresnelNo();
 
-	float rn = clamp( roughness.GetPropertyValue(0).x , 0.04f , 1.0f );
+	float rn = clamp( roughness.GetPropertyValue(0).x , 0.05f , 1.0f );
 	if( mf_dist.str == "Blinn" )
 		pMFDist = new Blinn( rn );
 	else if( mf_dist.str == "Beckmann" )

@@ -31,10 +31,7 @@ float Shape::Pdf( const Point& p , const Vector& wi ) const
 
 	Vector delta = Normalize(inter.intersect - p);
 	
-	float dot = Dot( delta , inter.normal );
-	if( dot <= 0.0f )
-		return 0.0f;
-
+	float dot = AbsDot( delta , inter.normal );
 	return delta.SquaredLength() / ( SurfaceArea() * dot );
 }
 
