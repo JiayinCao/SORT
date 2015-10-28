@@ -146,6 +146,15 @@ inline Vector SphericalVec( float theta , float phi )
 	return Vector( x , y , z );
 }
 
+inline Vector SphericalVec( float sintheta , float costheta , float phi )
+{
+	float x = sintheta * cos( phi );
+	float y = costheta;
+	float z = sintheta * sin( phi );
+
+	return Vector( x , y , z );
+}
+
 inline bool SameHemiSphere( const Vector& wi , const Vector& wo )
 {
 	return ( wi.y * wo.y ) > 0.0f;
