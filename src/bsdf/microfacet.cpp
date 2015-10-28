@@ -18,6 +18,7 @@
 // include header file
 #include "microfacet.h"
 #include "bsdf.h"
+#include "sampler/sample.h"
 
 // constructor
 Blinn::Blinn( float roughness )
@@ -32,9 +33,40 @@ float Blinn::D(float NoH) const
 	return (exp+2.0f) * INV_TWOPI * powf( NoH , exp );
 }
 
+// sampling according to GGX
+void Blinn::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+{
+	float costheta = powf( bs.u , 1.0f / (exp+1.0f) );
+	float sintheta = sqrtf( max( 0.0f , 1.0f - costheta * costheta ) );
+	float phi = TWO_PI * bs.v;
+
+	Vector wh = SphericalVec( sintheta , costheta , phi );
+
+	wi = 2.0f * wh * Dot( wo , wh ) - wo;
+
+	if(pdf)
+		*pdf = Pdf( wo , wi );
+}
+
+// pdf respective to the sampling method in GGX
+float Blinn::Pdf( const Vector& wo , const Vector& wi ) const
+{
+	Vector h = Normalize( wo + wi );
+	float HoN = AbsCosTheta( h );
+	float EoH = Dot( wo , h );
+
+	float blinn_pdf = 0.0f;
+	if( EoH < 0.0f )
+		blinn_pdf = 0.0f;
+	else
+		blinn_pdf = ((exp + 1.0f ) * powf( HoN , exp)) / ( TWO_PI * 4.0f * EoH );
+	return blinn_pdf;
+}
+
 Beckmann::Beckmann( float roughness )
 {
-	m = pow( roughness , 4.0f );
+	alpha = roughness * roughness;
+	m = alpha * alpha;
 }
 
 // probabilty of facet with specific normal (v)
@@ -44,16 +76,78 @@ float Beckmann::D(float NoH) const
 	return exp( (NoH2 - 1) / (m * NoH2) ) / ( PI * m * NoH2 * NoH2 );
 }
 
+// sampling according to GGX
+void Beckmann::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+{
+	float theta = atan( -1.0f * alpha * alpha * log( 1.0f - bs.u ) );
+	float phi = TWO_PI * bs.v;
+
+	Vector wh = SphericalVec( theta , phi );
+
+	wi = 2.0f * wh * Dot( wo , wh ) - wo;
+
+	if(pdf)
+		*pdf = Pdf( wo , wi );
+}
+
+// pdf respective to the sampling method in GGX
+float Beckmann::Pdf( const Vector& wo , const Vector& wi ) const
+{
+	Vector h = Normalize( wo + wi );
+	float EoH = AbsDot( wo , h );
+
+	if( EoH < 0.0f )
+		return 0.0f;
+	return D(AbsCosTheta(h)) / ( 4.0f * EoH );
+}
+
 GGX::GGX( float roughness )
 {
-	m = pow( roughness , 4.0f );
+	alpha = roughness * roughness;
+	m = alpha * alpha;
 }
 
 // probabilty of facet with specific normal (v)
 float GGX::D(float NoH) const
 {
-	float d = ( NoH * m - NoH ) * NoH + 1;
+	float d = ( m - 1.0f ) * NoH * NoH + 1.0f;
 	return m / ( PI*d*d );
+}
+
+// sample a direction randomly
+// para 'wo'  : out going direction
+// para 'wi'  : in direction generated randomly
+// para 'bs'  : bsdf sample variable
+// para 'pdf' : property density function value of the specific 'wi'
+// result     : brdf value for the 'wo' and 'wi'
+void GGX::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+{
+	float phi = TWO_PI * bs.u;
+	float theta = acos( sqrt( ( 1.0f - bs.v ) / ( ( m - 1.0f ) * bs.v + 1.0f ) ) );
+
+	float tanThetaMSqr = m * bs.v / ( 1.0f - bs.v );
+	theta = acos( 1.0f / sqrt( 1.0f + tanThetaMSqr ) );
+
+	Vector n = SphericalVec( theta , phi );
+
+	wi = 2.0f * Dot( n , wo ) * n - wo;
+
+	if( pdf )
+		*pdf = Pdf( wo , wi );
+}
+
+// get the pdf of the sampled direction
+// para 'wo' : out going direction
+// para 'wi' : coming in direction from light
+// result    : the pdf for the sample
+float GGX::Pdf( const Vector& wo , const Vector& wi ) const
+{
+	Vector h = Normalize( wo + wi );
+	float EoH = AbsDot( wo , h );
+
+	if( EoH < 0.0f )
+		return 0.0f;
+	return D(AbsCosTheta(h)) / ( 4.0f * EoH );
 }
 
 float VisImplicit::Vis_Term( float NoL , float NoV , float VoH )
@@ -130,6 +224,33 @@ Spectrum MicroFacet::f( const Vector& wo , const Vector& wi ) const
 	float NoV = AbsCosTheta( wo );
 	float VoH = Dot( wh , wo );
 
+	// g-term
+	float gterm = min( 1.0f , 2.0f * min( NoH * NoV / VoH , NoH * NoL / VoH ) );
+
 	// return Torrance–Sparrow BRDF
-	return R * distribution->D(NoH) * F * visterm->Vis_Term( NoL , NoV , VoH );
+	//return R * distribution->D(NoH) * F * visterm->Vis_Term( NoL , NoV , VoH );
+	return R * distribution->D(NoH) * F * gterm / ( 4.0f * NoL * NoV );
+}
+
+// sample a direction randomly
+// para 'wo'  : out going direction
+// para 'wi'  : in direction generated randomly
+// para 'bs'  : bsdf sample variable
+// para 'pdf' : property density function value of the specific 'wi'
+// result     : brdf value for the 'wo' and 'wi'
+Spectrum MicroFacet::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+{
+	distribution->sample_f( wo , wi , bs , pdf );
+	return f( wo , wi );
+}
+
+// get the pdf of the sampled direction
+// para 'wo' : out going direction
+// para 'wi' : coming in direction from light
+// result    : the pdf for the sample
+float MicroFacet::Pdf( const Vector& wo , const Vector& wi ) const
+{
+	if( !SameHemisphere( wo , wi ) )
+		return 0.0f;
+	return distribution->Pdf( wo , wi );
 }

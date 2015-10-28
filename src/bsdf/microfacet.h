@@ -31,6 +31,21 @@ class MicroFacetDistribution
 public:
 	// probabilty of facet with specific normal (v)
 	virtual float D(float NoH) const = 0;
+
+	// sample a direction randomly
+	// para 'wo'  : out going direction
+	// para 'wi'  : in direction generated randomly
+	// para 'bs'  : bsdf sample variable
+	// para 'pdf' : property density function value of the specific 'wi'
+	// result     : brdf value for the 'wo' and 'wi'
+	virtual void sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+	{}
+
+	// get the pdf of the sampled direction
+	// para 'wo' : out going direction
+	// para 'wi' : coming in direction from light
+	// result    : the pdf for the sample
+	virtual float Pdf( const Vector& wo , const Vector& wi ) const { return 0.0f; }
 };
 
 class Blinn : public MicroFacetDistribution
@@ -43,6 +58,12 @@ public:
 	// probabilty of facet with specific normal (v)
 	float D(float NoH) const;
 	
+	// sampling according to GGX
+	virtual void sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+
+	// pdf respective to the sampling method in GGX
+	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+
 // private field
 private:
 	// the exponent
@@ -58,9 +79,16 @@ public:
 	// probabilty of facet with specific normal (v)
 	float D(float NoH) const;
 
+	// sampling according to GGX
+	virtual void sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+
+	// pdf respective to the sampling method in GGX
+	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+
 // private field
 private:
 	float m;
+	float alpha;
 };
 
 class GGX : public MicroFacetDistribution
@@ -72,9 +100,16 @@ public:
 	// probabilty of facet with specific normal (v)
 	float D(float NoH) const;
 
+	// sampling according to GGX
+	virtual void sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+
+	// pdf respective to the sampling method in GGX
+	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+
 // private field
 private:
 	float m;
+	float alpha;
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -118,7 +153,7 @@ class VisSmith : public VisTerm
 {
 public:
 	VisSmith( float rough ): roughness(rough) {}
-	virtual float Vis_Term( float NoL , float NoV , float NoH );
+	virtual float Vis_Term( float NoL , float NoV , float VoH );
 
 private:
 	float roughness;
@@ -128,7 +163,17 @@ class VisSmithJointApprox : public VisTerm
 {
 public:
 	VisSmithJointApprox( float rough ): roughness(rough) {}
-	virtual float Vis_Term( float NoL , float NoV , float NoH );
+	virtual float Vis_Term( float NoL , float NoV , float VoH );
+
+private:
+	float roughness;
+};
+
+class VisCookTorrance : public VisTerm
+{
+public:
+	VisCookTorrance( float rough ): roughness(rough) {}
+	virtual float Vis_Term( float NoL , float NoV , float VoH );
 
 private:
 	float roughness;
@@ -149,6 +194,20 @@ public:
 	// result    : the portion that comes along 'wo' from 'wi'
 	Spectrum f( const Vector& wo , const Vector& wi ) const;
 	
+	// sample a direction randomly
+	// para 'wo'  : out going direction
+	// para 'wi'  : in direction generated randomly
+	// para 'bs'  : bsdf sample variable
+	// para 'pdf' : property density function value of the specific 'wi'
+	// result     : brdf value for the 'wo' and 'wi'
+	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+
+	// get the pdf of the sampled direction
+	// para 'wo' : out going direction
+	// para 'wi' : coming in direction from light
+	// result    : the pdf for the sample
+	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+
 // private field
 private:
 	// reflectance

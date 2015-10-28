@@ -54,7 +54,7 @@ public:
 	// para 'wo' : out going direction
 	// para 'wi' : coming in direction from light
 	// result    : the pdf for the sample
-	virtual float Pdf( const Vector& wi , const Vector& wo ) const;
+	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
 
 	// whether the flag is matched
 	bool	MatchFlag( BXDF_TYPE type ) const
