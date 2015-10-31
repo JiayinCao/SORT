@@ -25,6 +25,9 @@
 class	Fresnel
 {
 public:
+    // virtual destructor
+    virtual ~Fresnel(){}
+    
 	// evaluate spectrum
 	virtual Spectrum Evaluate( float cosi , float coso) const = 0;
 	// evaluate spectrum
