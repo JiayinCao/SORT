@@ -36,5 +36,5 @@ float Bxdf::Pdf( const Vector& wo , const Vector& wi ) const
 {
 	if( !SameHemisphere( wo , wi ) )
 		return 0.0f;
-	return fabs(CosHemispherePdf( wi )) * INV_PI;
+	return fabs(CosHemispherePdf( wi ));
 }

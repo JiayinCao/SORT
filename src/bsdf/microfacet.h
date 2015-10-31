@@ -32,20 +32,8 @@ public:
 	// probabilty of facet with specific normal (v)
 	virtual float D(float NoH) const = 0;
 
-	// sample a direction randomly
-	// para 'wo'  : out going direction
-	// para 'wi'  : in direction generated randomly
-	// para 'bs'  : bsdf sample variable
-	// para 'pdf' : property density function value of the specific 'wi'
-	// result     : brdf value for the 'wo' and 'wi'
-	virtual void sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
-	{}
-
-	// get the pdf of the sampled direction
-	// para 'wo' : out going direction
-	// para 'wi' : coming in direction from light
-	// result    : the pdf for the sample
-	virtual float Pdf( const Vector& wo , const Vector& wi ) const { return 0.0f; }
+	// sampling a normal respect to the NDF
+	virtual Vector sample_f( const BsdfSample& bs ) const = 0;
 };
 
 class Blinn : public MicroFacetDistribution
@@ -58,11 +46,10 @@ public:
 	// probabilty of facet with specific normal (v)
 	float D(float NoH) const;
 	
-	// sampling according to GGX
-	virtual void sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
-
-	// pdf respective to the sampling method in GGX
-	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+	// sampling according to Blinn
+	// PBRT's method is not used here.
+	// Check "Microfacet Models for Refraction through Rough Surfaces" for detail.
+	virtual Vector sample_f( const BsdfSample& bs ) const;
 
 // private field
 private:
@@ -79,11 +66,8 @@ public:
 	// probabilty of facet with specific normal (v)
 	float D(float NoH) const;
 
-	// sampling according to GGX
-	virtual void sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
-
-	// pdf respective to the sampling method in GGX
-	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+	// sampling according to Beckmann
+	virtual Vector sample_f( const BsdfSample& bs ) const;
 
 // private field
 private:
@@ -101,10 +85,7 @@ public:
 	float D(float NoH) const;
 
 	// sampling according to GGX
-	virtual void sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
-
-	// pdf respective to the sampling method in GGX
-	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+	virtual Vector sample_f( const BsdfSample& bs ) const;
 
 // private field
 private:
