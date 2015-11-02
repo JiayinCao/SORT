@@ -153,11 +153,7 @@ private:
 class VisCookTorrance : public VisTerm
 {
 public:
-	VisCookTorrance( float rough ): roughness(rough) {}
 	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
-
-private:
-	float roughness;
 };
 
 /////////////////////////////////////////////////////////////////////
