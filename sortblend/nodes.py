@@ -180,7 +180,8 @@ class SORTNodeMicrofacet(SORTShadingNode):
                    ("Kelemen" , "Kelemen" , "" , 3),
                    ("Schlick" , "Schlick" , "" , 4),
                    ("Smith" , "Smith" , "" , 5),
-                   ("SmithJointApprox" , "SmithJointApprox" , "" , 6 )
+                   ("SmithJointApprox" , "SmithJointApprox" , "" , 6 ),
+                   ("CookTorrance" , "CookTorrance" , "" , 7)
                    ]
     mfvis_prop = bpy.props.EnumProperty(name='',items=mfvis_item)
 
