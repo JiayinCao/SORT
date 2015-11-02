@@ -402,7 +402,7 @@ void MicrofacetNode::PostProcess()
 	else if( mf_vis.str == "SmithJointApprox" )
 		pVisTerm = new VisSmithJointApprox( rn );
 	else if( mf_vis.str == "CookTorrance" )
-		pVisTerm = new VisCookTorrance( rn );
+		pVisTerm = new VisCookTorrance();
 	else
 		pVisTerm = new VisImplicit();	// implicit visibility term is default
 
