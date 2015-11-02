@@ -99,32 +99,32 @@ private:
 class VisTerm
 {
 public:
-	virtual float Vis_Term( float NoL , float NoV , float VoH ) = 0;
+	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH ) = 0;
 };
 
 class VisImplicit : public VisTerm
 {
 public:
-	virtual float Vis_Term( float NoL , float NoV , float VoH );
+	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
 };
 
 class VisNeumann : public VisTerm
 {
 public:
-	virtual float Vis_Term( float NoL , float NoV , float VoH );
+	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
 };
 
 class VisKelemen : public VisTerm
 {
 public:
-	virtual float Vis_Term( float NoL , float NoV , float VoH );
+	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
 };
 
 class VisSchlick : public VisTerm
 {
 public:
 	VisSchlick( float rough ): roughness(rough) {}
-	virtual float Vis_Term( float NoL , float NoV , float VoH );
+	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
 
 private:
 	float roughness;
@@ -134,7 +134,7 @@ class VisSmith : public VisTerm
 {
 public:
 	VisSmith( float rough ): roughness(rough) {}
-	virtual float Vis_Term( float NoL , float NoV , float VoH );
+	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
 
 private:
 	float roughness;
@@ -144,7 +144,7 @@ class VisSmithJointApprox : public VisTerm
 {
 public:
 	VisSmithJointApprox( float rough ): roughness(rough) {}
-	virtual float Vis_Term( float NoL , float NoV , float VoH );
+	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
 
 private:
 	float roughness;
@@ -154,7 +154,7 @@ class VisCookTorrance : public VisTerm
 {
 public:
 	VisCookTorrance( float rough ): roughness(rough) {}
-	virtual float Vis_Term( float NoL , float NoV , float VoH );
+	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
 
 private:
 	float roughness;
