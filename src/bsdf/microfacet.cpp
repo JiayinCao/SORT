@@ -80,28 +80,27 @@ float GGX::D(float NoH) const
 
 Vector GGX::sample_f( const BsdfSample& bs ) const
 {
+	float theta = atan( alpha * sqrt(bs.v) / ( 1.0f - bs.v ) );
 	float phi = TWO_PI * bs.u;
-	float theta = acos( sqrt( ( 1.0f - bs.v ) / ( ( m - 1.0f ) * bs.v + 1.0f ) ) );
-
 	return SphericalVec( theta , phi );
 }
 
-float VisImplicit::Vis_Term( float NoL , float NoV , float VoH )
+float VisImplicit::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 {
 	return 0.25f;
 }
 
-float VisNeumann::Vis_Term( float NoL , float NoV , float VoH )
+float VisNeumann::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 {
 	return 1 / ( 4 * max( NoL, NoV ) );
 }
 
-float VisKelemen::Vis_Term( float NoL , float NoV , float VoH )
+float VisKelemen::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 {
 	return 1.0f / ( 4.0f * VoH * VoH );
 }
 
-float VisSchlick::Vis_Term( float NoL , float NoV , float VoH )
+float VisSchlick::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 {
 	float k = roughness * roughness * 0.5f;
 	float Vis_SchlickV = NoV * (1 - k) + k;
@@ -109,7 +108,7 @@ float VisSchlick::Vis_Term( float NoL , float NoV , float VoH )
 	return 0.25f / ( Vis_SchlickV * Vis_SchlickL );
 }
 
-float VisSmith::Vis_Term( float NoL , float NoV , float VoH )
+float VisSmith::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 {
 	float a = roughness * roughness;
 	float a2 = a*a;
@@ -119,12 +118,17 @@ float VisSmith::Vis_Term( float NoL , float NoV , float VoH )
 	return 1.0f / ( Vis_SmithV * Vis_SmithL );
 }
 
-float VisSmithJointApprox::Vis_Term( float Roughness, float NoV, float NoL )
+float VisSmithJointApprox::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 {
 	float a = roughness * roughness;
 	float Vis_SmithV = NoL * ( NoV * ( 1 - a ) + a );
 	float Vis_SmithL = NoV * ( NoL * ( 1 - a ) + a );
 	return 0.5f / ( Vis_SmithV + Vis_SmithL );
+}
+
+float VisCookTorrance::Vis_Term( float NoL , float NoV , float VoH , float NoH)
+{
+	return min( 1.0f , 2.0f * min( NoH * NoV / VoH , NoH * NoL / VoH ) ) / ( 4.0f * NoL * NoV );
 }
 
 // constructor
@@ -144,28 +148,21 @@ MicroFacet::MicroFacet(const Spectrum &reflectance, Fresnel* f , MicroFacetDistr
 // result    : the portion that comes along 'wo' from 'wi'
 Spectrum MicroFacet::f( const Vector& wo , const Vector& wi ) const
 {
-	float cosThetaO = AbsCosTheta(wo);
-	float cosThetaI = AbsCosTheta(wi);
-	
-	if (cosThetaI == 0.f || cosThetaO == 0.f)
+	float NoL = AbsCosTheta( wi );
+	float NoV = AbsCosTheta( wo );
+
+	if (NoL == 0.f || NoV == 0.f)
 		return Spectrum(0.f);
 	
 	// evaluate fresnel term
 	Vector wh = Normalize(wi + wo);
-	float cosThetaH = Dot(wi, wh);
-	Spectrum F = fresnel->Evaluate(cosThetaH);
-	
+	float VoH = Dot(wi, wh);
 	float NoH = AbsCosTheta( wh );
-	float NoL = AbsCosTheta( wi );
-	float NoV = AbsCosTheta( wo );
-	float VoH = Dot( wh , wo );
 
-	// g-term
-	float gterm = min( 1.0f , 2.0f * min( NoH * NoV / VoH , NoH * NoL / VoH ) );
-
+	Spectrum F = fresnel->Evaluate(VoH);
+	
 	// return Torrance–Sparrow BRDF
-	//return R * distribution->D(NoH) * F * visterm->Vis_Term( NoL , NoV , VoH );
-	return R * distribution->D(NoH) * F * gterm / ( 4.0f * NoL * NoV );
+	return R * distribution->D(NoH) * F * visterm->Vis_Term( NoL , NoV , VoH , NoH );
 }
 
 // sample a direction randomly
