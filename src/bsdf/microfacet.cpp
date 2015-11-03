@@ -80,7 +80,7 @@ float GGX::D(float NoH) const
 
 Vector GGX::sample_f( const BsdfSample& bs ) const
 {
-	float theta = atan( alpha * sqrt(bs.v) / ( 1.0f - bs.v ) );
+	float theta = atan( alpha * sqrt(bs.v / ( 1.0f - bs.v )) );
 	float phi = TWO_PI * bs.u;
 	return SphericalVec( theta , phi );
 }
@@ -181,11 +181,7 @@ Spectrum MicroFacet::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
 
 	// Make sure the generate wi is in the same hemisphere with wo
 	if( !SameHemiSphere( wo , wi ) )
-	{
-		if( pdf )
-			*pdf = 0.0f;
 		return 0.0f;
-	}
 
 	if(pdf)
 		*pdf = Pdf( wo , wi );
