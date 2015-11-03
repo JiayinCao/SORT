@@ -204,7 +204,8 @@ float MicroFacet::Pdf( const Vector& wo , const Vector& wi ) const
 
 	Vector h = Normalize( wo + wi );
 	float EoH = AbsDot( wo , h );
+	float HoN = CosTheta(h);
 	if( EoH <= 0.0f )
 		return 0.0f;
-	return distribution->D(AbsCosTheta(h)) / ( 4.0f * EoH );
+	return distribution->D(HoN) * HoN / (4.0f * EoH);
 }
