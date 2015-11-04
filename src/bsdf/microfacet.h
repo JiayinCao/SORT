@@ -29,6 +29,8 @@ class MicroFacetDistribution
 {
 // public method
 public:
+    virtual ~MicroFacetDistribution(){}
+    
 	// probabilty of facet with specific normal (v)
 	virtual float D(float NoH) const = 0;
 
@@ -99,6 +101,8 @@ private:
 class VisTerm
 {
 public:
+    virtual ~VisTerm(){}
+    
 	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH ) = 0;
 };
 
