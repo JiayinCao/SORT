@@ -29,9 +29,8 @@ float Shape::Pdf( const Point& p , const Vector& wi ) const
 	if( _getIntersect( Ray( lp , lwi ) , intersect , FLT_MAX , &inter ) < 0.0f )
 		return 0.0f;
 
-	Vector delta = Normalize(inter.intersect - p);
-	
-	float dot = AbsDot( delta , inter.normal );
+	Vector delta = inter.intersect - p;
+	float dot = AbsDot( Normalize(delta) , inter.normal );
 	return delta.SquaredLength() / ( SurfaceArea() * dot );
 }
 
