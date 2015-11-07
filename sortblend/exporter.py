@@ -25,7 +25,8 @@ def create_path(scene, force_debug):
     output_dir = preference.get_immediate_dir(force_debug)
     output_res_dir = preference.get_immediate_res_dir(force_debug)
     # clear the old directory
-    shutil.rmtree(output_dir, ignore_errors=True)
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
     # create one if there is no such directory
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)

@@ -213,35 +213,43 @@ private:
 };
 
 // Microfacet node
-class MicrofacetNode : public BxdfNode
+class MicrofacetReflectionNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( MicrofacetNode , "SORTNodeMicrofacet" );
+	DEFINE_CREATOR( MicrofacetReflectionNode , "SORTNodeMicrofacetReflection" );
 
 	// constructor
-	MicrofacetNode();
-	// destructor
-	~MicrofacetNode();
+	MicrofacetReflectionNode();
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
-
-	// post process
-	virtual void PostProcess();
 
 private:
 	MaterialNodeProperty	baseColor;
 	MaterialNodeProperty	roughness;
 	MaterialNodeProperty	eta;
 	MaterialNodeProperty	k;
-	MaterialNodeProperty	in_ior;
-	MaterialNodeProperty	ext_ior;
-	MaterialNodePropertyString	fresnel;
 	MaterialNodePropertyString	mf_dist;
 	MaterialNodePropertyString	mf_vis;
+};
 
-	Fresnel*				pFresnel;
-	MicroFacetDistribution*	pMFDist;
-	VisTerm*				pVisTerm;
+// Microfacet node
+class MicrofacetRefractionNode : public BxdfNode
+{
+public:
+	DEFINE_CREATOR( MicrofacetRefractionNode , "SORTNodeMicrofacetRefraction" );
+
+	// constructor
+	MicrofacetRefractionNode();
+	// update bsdf
+	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+
+private:
+	MaterialNodeProperty	baseColor;
+	MaterialNodeProperty	roughness;
+	MaterialNodeProperty	in_ior;
+	MaterialNodeProperty	ext_ior;
+	MaterialNodePropertyString	mf_dist;
+	MaterialNodePropertyString	mf_vis;
 };
 
 // Reflection node

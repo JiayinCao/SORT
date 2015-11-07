@@ -159,15 +159,9 @@ class SORTNodeLambert(SORTShadingNode):
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
 # microfacte node
-class SORTNodeMicrofacet(SORTShadingNode):
-    bl_label = 'SORT_microfacet'
-    bl_idname = 'SORTNodeMicrofacet'
-
-    fresnel_item = [ ("FresnelNo", "No Fresnel", "", 1),
-                     ("FresnelConductor" , "FresnelConductor" , "", 2),
-                     ("FresnelDielectric" , "FresnelDielectric" , "", 3)
-                   ]
-    fresnel_prop = bpy.props.EnumProperty(name='',items=fresnel_item)
+class SORTNodeMicrofacetReflection(SORTShadingNode):
+    bl_label = 'SORT_microfacet_reflection'
+    bl_idname = 'SORTNodeMicrofacetReflection'
 
     mfdist_item = [ ("Blinn", "Blinn", "", 1),
                     ("Beckmann" , "Beckmann" , "", 2),
@@ -183,15 +177,12 @@ class SORTNodeMicrofacet(SORTShadingNode):
                    ("SmithJointApprox" , "SmithJointApprox" , "" , 6 ),
                    ("CookTorrance" , "CookTorrance" , "" , 7)
                    ]
-    mfvis_prop = bpy.props.EnumProperty(name='',items=mfvis_item)
+    mfvis_prop = bpy.props.EnumProperty(name='',items=mfvis_item, default="CookTorrance")
 
     # fresnel parameters
     # dielectric-conductor parameters
     eta = bpy.props.FloatVectorProperty(name='', default=(0.37, 0.37, 0.37), min=0.10, max=10.0)
     k = bpy.props.FloatVectorProperty(name='', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
-    # dielectric-dielectric parameters
-    int_ior = bpy.props.FloatProperty(name='', default=1.5, min=1.0, max=10.0)
-    ext_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
@@ -201,37 +192,67 @@ class SORTNodeMicrofacet(SORTShadingNode):
     def draw_buttons(self, context, layout):
         self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
         self.draw_button(layout, "VisibilityTerm" , "mfvis_prop")
-        self.draw_button(layout, "Fresnel" , "fresnel_prop")
-
-        if self.fresnel_prop == 'FresnelConductor':
-            self.draw_button(layout, "In IOR" , "eta" )
-            self.draw_button(layout, "Absorption Coefficient" , "k")
-        elif self.fresnel_prop == 'FresnelDielectric':
-            self.draw_button(layout, "In IOR" , "int_ior")
-            self.draw_button(layout, "Ext IOR" , "ext_ior")
+        self.draw_button(layout, "In IOR" , "eta" )
+        self.draw_button(layout, "Absorption Coefficient" , "k")
 
     def draw_props(self, context, layout, indented_label):
         self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
         self.draw_prop(layout, 'VisibilityTerm' , 'mfvis_prop' , indented_label)
-
-        if self.fresnel_prop == 'FresnelConductor':
-            self.draw_prop(layout, "In IOR" , "eta" , indented_label)
-            self.draw_prop(layout, "Absorption Coefficient" , "k", indented_label)
-        elif self.fresnel_prop == 'FresnelDielectric':
-            self.draw_prop(layout, "In IOR" , "int_ior", indented_label)
-            self.draw_prop(layout, "Ext IOR" , "ext_ior", indented_label)
+        self.draw_prop(layout, "In IOR" , "eta" , indented_label)
+        self.draw_prop(layout, "Absorption Coefficient" , "k", indented_label)
 
     def export_prop(self, xml_node):
         ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='string', value= self.mfdist_prop )
         ET.SubElement( xml_node , 'Property' , name='Visibility' , type='string', value= self.mfvis_prop )
+        ET.SubElement( xml_node , 'Property' , name='eta' , type='color', value= '%f %f %f'%(self.eta[0],self.eta[1],self.eta[2])  )
+        ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
 
-        ET.SubElement( xml_node , 'Property' , name='Fresnel' , type='string' , value= self.fresnel_prop )
-        if self.fresnel_prop == 'FresnelConductor':
-            ET.SubElement( xml_node , 'Property' , name='eta' , type='color', value= '%f %f %f'%(self.eta[0],self.eta[1],self.eta[2])  )
-            ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
-        elif self.fresnel_prop == 'FresnelDielectric':
-            ET.SubElement( xml_node , 'Property' , name='in_ior' , type='color', value= '%f'%(self.int_ior)  )
-            ET.SubElement( xml_node , 'Property' , name='ext_ior' , type='color', value= '%f'%(self.ext_ior) )
+class SORTNodeMicrofacetRefraction(SORTShadingNode):
+    bl_label = 'SORT_microfacet_refraction'
+    bl_idname = 'SORTNodeMicrofacetRefraction'
+
+    mfdist_item = [ ("Blinn", "Blinn", "", 1),
+                    ("Beckmann" , "Beckmann" , "", 2),
+                    ("GGX" , "GGX" , "" , 3)
+                   ]
+    mfdist_prop = bpy.props.EnumProperty(name='',items=mfdist_item)
+
+    mfvis_item = [ ("Implicit", "Implicit", "", 1),
+                   ("Neumann" , "Neumann" , "", 2),
+                   ("Kelemen" , "Kelemen" , "" , 3),
+                   ("Schlick" , "Schlick" , "" , 4),
+                   ("Smith" , "Smith" , "" , 5),
+                   ("SmithJointApprox" , "SmithJointApprox" , "" , 6 ),
+                   ("CookTorrance" , "CookTorrance" , "" , 7)
+                   ]
+    mfvis_prop = bpy.props.EnumProperty(name='',items=mfvis_item,default="CookTorrance")
+
+    # dielectric-dielectric parameters
+    int_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
+    ext_ior = bpy.props.FloatProperty(name='', default=1.1, min=1.0, max=10.0)
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
+        self.inputs.new('SORTNodeSocketFloat', 'Roughness')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
+        self.draw_button(layout, "VisibilityTerm" , "mfvis_prop")
+        self.draw_button(layout, "In IOR" , "int_ior")
+        self.draw_button(layout, "Ext IOR" , "ext_ior")
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
+        self.draw_prop(layout, 'VisibilityTerm' , 'mfvis_prop' , indented_label)
+        self.draw_prop(layout, "In IOR" , "int_ior", indented_label)
+        self.draw_prop(layout, "Ext IOR" , "ext_ior", indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='string', value= self.mfdist_prop )
+        ET.SubElement( xml_node , 'Property' , name='Visibility' , type='string', value= self.mfvis_prop )
+        ET.SubElement( xml_node , 'Property' , name='in_ior' , type='color', value= '%f'%(self.int_ior)  )
+        ET.SubElement( xml_node , 'Property' , name='ext_ior' , type='color', value= '%f'%(self.ext_ior) )
 
 # merl node
 class SORTNodeMerl(SORTShadingNode):
@@ -293,8 +314,8 @@ class SORTNodeRefraction(SORTShadingNode):
     bl_label = 'SORT_refraction'
     bl_idname = 'SORTNodeRefraction'
 
-    int_ior = bpy.props.FloatProperty(name='', default=1.5, min=1.0, max=10.0)
-    ext_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
+    int_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
+    ext_ior = bpy.props.FloatProperty(name='', default=1.1, min=1.0, max=10.0)
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
@@ -524,17 +545,19 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacet"),NodeItem("SORTNodeOrenNayar"),NodeItem("SORTNodeReflection"),NodeItem("SORTNodeRefraction")] ),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar"),NodeItem("SORTNodeReflection"),NodeItem("SORTNodeRefraction")] ),
         SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
+        SORTPatternNodeCategory("SORT_input", "SORT Input",items=[],),
     ]
     nodeitems_utils.register_node_categories("SORTSHADERNODES",node_categories)
 
     # register node types
     SORTPatternGraph.nodetypes[SORTNodeLambert] = 'SORTNodeLambert'
     SORTPatternGraph.nodetypes[SORTNodeMerl] = 'SORTNodeMerl'
-    SORTPatternGraph.nodetypes[SORTNodeMicrofacet] = 'SORTNodeMicrofacet'
+    SORTPatternGraph.nodetypes[SORTNodeMicrofacetReflection] = 'SORTNodeMicrofacetReflection'
+    SORTPatternGraph.nodetypes[SORTNodeMicrofacetRefraction] = 'SORTNodeMicrofacetRefraction'
     SORTPatternGraph.nodetypes[SORTNodeOrenNayar] = 'SORTNodeOrenNayar'
     SORTPatternGraph.nodetypes[SORTNodeReflection] = 'SORTNodeReflection'
     SORTPatternGraph.nodetypes[SORTNodeRefraction] = 'SORTNodeRefraction'

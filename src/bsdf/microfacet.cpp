@@ -132,7 +132,7 @@ float VisCookTorrance::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 }
 
 // constructor
-MicroFacet::MicroFacet(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v )
+MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v )
 {
 	R = reflectance;
 	distribution = d;
@@ -146,7 +146,7 @@ MicroFacet::MicroFacet(const Spectrum &reflectance, Fresnel* f , MicroFacetDistr
 // para 'wo' : out going direction
 // para 'wi' : in direction
 // result    : the portion that comes along 'wo' from 'wi'
-Spectrum MicroFacet::f( const Vector& wo , const Vector& wi ) const
+Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 {
 	float NoL = AbsCosTheta( wi );
 	float NoV = AbsCosTheta( wo );
@@ -171,7 +171,7 @@ Spectrum MicroFacet::f( const Vector& wo , const Vector& wi ) const
 // para 'bs'  : bsdf sample variable
 // para 'pdf' : property density function value of the specific 'wi'
 // result     : brdf value for the 'wo' and 'wi'
-Spectrum MicroFacet::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
 	// sampling the normal
 	Vector wh = distribution->sample_f( bs );
@@ -193,7 +193,7 @@ Spectrum MicroFacet::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
 // para 'wo' : out going direction
 // para 'wi' : coming in direction from light
 // result    : the pdf for the sample
-float MicroFacet::Pdf( const Vector& wo , const Vector& wi ) const
+float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 {
 	if( !SameHemisphere( wo , wi ) )
 		return 0.0f;
@@ -202,4 +202,93 @@ float MicroFacet::Pdf( const Vector& wo , const Vector& wi ) const
 	float EoH = AbsDot( wo , h );
 	float HoN = AbsCosTheta(h);
 	return distribution->D(HoN) * HoN / (4.0f * EoH);
+}
+
+// constructor
+MicroFacetRefraction::MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v , float ieta , float eeta )
+{
+	T = reflectance;
+	distribution = d;
+	fresnel = f;
+	visterm = v;
+	eta_in = ieta;
+	eta_ext = eeta;
+	
+	m_type = (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION);
+}
+
+// evaluate bxdf
+// para 'wo' : out going direction
+// para 'wi' : in direction
+// result    : the portion that comes along 'wo' from 'wi'
+Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
+{
+	if (SameHemisphere(wo, wi)) return 0.0f;
+
+	float NoL = AbsCosTheta( wi );
+	float NoV = AbsCosTheta( wo );
+	if (NoL == 0.f || NoV == 0.f)
+		return Spectrum(0.f);
+	
+	float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
+    Vector3f wh = Normalize(wo + wi * eta);
+    if (wh.y < 0) wh = -wh;
+
+	float NoH = AbsCosTheta( wh );
+	float VoH = AbsDot( wo , wh );
+
+	// Fresnel term
+    Spectrum F = fresnel->Evaluate(AbsDot(wo, wh));
+
+    float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
+	float distri = distribution->D(NoH);
+
+	return (Spectrum(1.f) - F) * T * distri * visterm->Vis_Term( NoL , NoV , VoH , NoH ) * eta * eta * AbsDot(wi, wh) * AbsDot(wo, wh) * 4.0f / (sqrtDenom * sqrtDenom) ;
+}
+
+// sample a direction randomly
+// para 'wo'  : out going direction
+// para 'wi'  : in direction generated randomly
+// para 'bs'  : bsdf sample variable
+// para 'pdf' : property density function value of the specific 'wi'
+// result     : brdf value for the 'wo' and 'wi'
+Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+{
+	// sampling the normal
+	Vector wh = distribution->sample_f( bs );
+
+	float coso = Dot( wo , wh );
+	float eta = coso > 0 ? (eta_ext / eta_in) : (eta_in / eta_ext);
+	float t = 1.0f - eta * eta * ( 1.0f - coso * coso );
+
+	// total inner relection
+	if( t < 0.0f )
+		return 0.0f;
+	
+	float factor = (coso<0.0f)? 1.0f : -1.0f;
+	wi = -1.0f * wo * eta + ( eta * coso + factor * sqrt(t)) * wh;
+
+	if(pdf)
+		*pdf = Pdf( wo , wi );
+
+	return f( wo , wi );
+}
+
+// get the pdf of the sampled direction
+// para 'wo' : out going direction
+// para 'wi' : coming in direction from light
+// result    : the pdf for the sample
+float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi ) const
+{
+	if( SameHemisphere( wo , wi ) )
+		return 0.0f;
+
+	float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
+    Vector3f wh = Normalize(wo + wi * eta);
+
+    // Compute change of variables _dwh\_dwi_ for microfacet transmission
+    float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
+    float dwh_dwi = eta * eta * AbsDot(wi, wh) / (sqrtDenom * sqrtDenom);
+	float HoN = AbsCosTheta(wh);
+    return distribution->D(HoN) * HoN * dwh_dwi;
 }

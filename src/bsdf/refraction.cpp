@@ -26,15 +26,7 @@ Spectrum Refraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
 	float coso = CosTheta( wo );
 	
 	bool enter = coso > 0.0f;
-	float ei = eta_i;
-	float et = eta_t;
-	if( !enter )
-	{
-		ei = eta_t;
-		et = eta_i;
-	}
-
-	float eta = ei / et;
+	float eta = coso > 0 ? (eta_t / eta_i) : (eta_i / eta_t);
 	float inv_eta = 1.0f / eta;
 	float sini = eta * sqrtf( 1.0f - coso * coso );
 	// note , fully reflection is handled in class Reflection
