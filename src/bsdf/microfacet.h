@@ -161,13 +161,13 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////
-// microfacet bxdf
-class MicroFacet : public Bxdf
+// microfacet reflection bxdf
+class MicroFacetReflection : public Bxdf
 {
 // public method
 public:
 	// constructor
-	MicroFacet(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v );
+	MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v );
 	
 	// evaluate bxdf
 	// para 'wo' : out going direction
@@ -199,6 +199,51 @@ private:
 	Fresnel* fresnel;
 	// visiblity term
 	VisTerm* visterm;
+};
+
+/////////////////////////////////////////////////////////////////////
+// microfacet refraction bxdf
+// Refer to "Microfacet Models for Refraction through Rough Surfaces" for further detail
+class MicroFacetRefraction : public Bxdf
+{
+// public method
+public:
+	// constructor
+	MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v , float ieta , float eeta );
+	
+	// evaluate bxdf
+	// para 'wo' : out going direction
+	// para 'wi' : in direction
+	// result    : the portion that comes along 'wo' from 'wi'
+	Spectrum f( const Vector& wo , const Vector& wi ) const;
+	
+	// sample a direction randomly
+	// para 'wo'  : out going direction
+	// para 'wi'  : in direction generated randomly
+	// para 'bs'  : bsdf sample variable
+	// para 'pdf' : property density function value of the specific 'wi'
+	// result     : brdf value for the 'wo' and 'wi'
+	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+
+	// get the pdf of the sampled direction
+	// para 'wo' : out going direction
+	// para 'wi' : coming in direction from light
+	// result    : the pdf for the sample
+	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+
+// private field
+private:
+	// transmittance
+	Spectrum T;
+	// distribution of facets
+	MicroFacetDistribution* distribution;
+	// fresnel for the surface
+	Fresnel* fresnel;
+	// visiblity term
+	VisTerm* visterm;
+	// index of refraction
+	float	eta_in;
+	float	eta_ext;
 };
 
 #endif
