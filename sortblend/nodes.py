@@ -192,13 +192,13 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
     def draw_buttons(self, context, layout):
         self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
         self.draw_button(layout, "VisibilityTerm" , "mfvis_prop")
-        self.draw_button(layout, "In IOR" , "eta" )
+        self.draw_button(layout, "Interior IOR" , "eta" )
         self.draw_button(layout, "Absorption Coefficient" , "k")
 
     def draw_props(self, context, layout, indented_label):
         self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
         self.draw_prop(layout, 'VisibilityTerm' , 'mfvis_prop' , indented_label)
-        self.draw_prop(layout, "In IOR" , "eta" , indented_label)
+        self.draw_prop(layout, "Interior IOR" , "eta" , indented_label)
         self.draw_prop(layout, "Absorption Coefficient" , "k", indented_label)
 
     def export_prop(self, xml_node):
@@ -228,8 +228,8 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
     mfvis_prop = bpy.props.EnumProperty(name='',items=mfvis_item,default="CookTorrance")
 
     # dielectric-dielectric parameters
-    int_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
-    ext_ior = bpy.props.FloatProperty(name='', default=1.1, min=1.0, max=10.0)
+    int_ior = bpy.props.FloatProperty(name='', default=1.1, min=1.0, max=10.0)
+    ext_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
@@ -239,14 +239,14 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
     def draw_buttons(self, context, layout):
         self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
         self.draw_button(layout, "VisibilityTerm" , "mfvis_prop")
-        self.draw_button(layout, "In IOR" , "int_ior")
-        self.draw_button(layout, "Ext IOR" , "ext_ior")
+        self.draw_button(layout, "Interior IOR" , "int_ior")
+        self.draw_button(layout, "Exterior IOR" , "ext_ior")
 
     def draw_props(self, context, layout, indented_label):
         self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
         self.draw_prop(layout, 'VisibilityTerm' , 'mfvis_prop' , indented_label)
-        self.draw_prop(layout, "In IOR" , "int_ior", indented_label)
-        self.draw_prop(layout, "Ext IOR" , "ext_ior", indented_label)
+        self.draw_prop(layout, "Interior IOR" , "int_ior", indented_label)
+        self.draw_prop(layout, "Exterior IOR" , "ext_ior", indented_label)
 
     def export_prop(self, xml_node):
         ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='string', value= self.mfdist_prop )
@@ -298,11 +298,11 @@ class SORTNodeReflection(SORTShadingNode):
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
-        self.draw_button(layout, "In IOR" , "eta" )
+        self.draw_button(layout, "Interior IOR" , "eta" )
         self.draw_button(layout, "Absorption Coefficient" , "k")
 
     def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, "In IOR" , "eta" , indented_label)
+        self.draw_prop(layout, "Interior IOR" , "eta" , indented_label)
         self.draw_prop(layout, "Absorption Coefficient" , "k", indented_label)
 
     def export_prop(self, xml_node):
@@ -314,20 +314,20 @@ class SORTNodeRefraction(SORTShadingNode):
     bl_label = 'SORT_refraction'
     bl_idname = 'SORTNodeRefraction'
 
-    int_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
-    ext_ior = bpy.props.FloatProperty(name='', default=1.1, min=1.0, max=10.0)
+    int_ior = bpy.props.FloatProperty(name='', default=1.1, min=1.0, max=10.0)
+    ext_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'BaseColor')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
-        self.draw_button(layout, "In IOR" , "int_ior")
-        self.draw_button(layout, "Ext IOR" , "ext_ior")
+        self.draw_button(layout, "Interior IOR" , "int_ior")
+        self.draw_button(layout, "Exterior IOR" , "ext_ior")
 
     def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, "In IOR" , "int_ior", indented_label)
-        self.draw_prop(layout, "Ext IOR" , "ext_ior", indented_label)
+        self.draw_prop(layout, "Interior IOR" , "int_ior", indented_label)
+        self.draw_prop(layout, "Exterior IOR" , "ext_ior", indented_label)
 
     def export_prop(self, xml_node):
         ET.SubElement( xml_node , 'Property' , name='in_ior' , type='color', value= '%f'%(self.int_ior)  )
