@@ -31,10 +31,10 @@ public:
 	// evaluate spectrum
 	virtual Spectrum Evaluate( float cosi , float coso) const = 0;
 	// evaluate spectrum
-	virtual Spectrum Evaluate( float coso ) const
+/*	virtual Spectrum Evaluate( float coso ) const
 	{
 		return Evaluate( coso , coso );
-	}
+	}*/
 };
 
 class	FresnelNo : public Fresnel
@@ -103,7 +103,7 @@ public:
 	}
 
 	// evaluate spectrum
-	virtual Spectrum Evaluate( float coso ) const
+/*	virtual Spectrum Evaluate( float coso ) const
 	{
 		bool enter = coso > 0.0f;
 		float ei = eta_i;
@@ -123,7 +123,7 @@ public:
 		float cosi = sqrtf( 1.0f - sini * sini );
 		
 		return Evaluate( cosi , coso );
-	}
+	}*/
 
 // private field
 private:
