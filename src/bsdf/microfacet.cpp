@@ -159,7 +159,7 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 	float VoH = Dot(wi, wh);
 	float NoH = AbsCosTheta( wh );
 
-	Spectrum F = fresnel->Evaluate(VoH);
+	Spectrum F = fresnel->Evaluate(Dot(wi,wh), VoH);
 	
 	// return Torrance–Sparrow BRDF
 	return R * distribution->D(NoH) * F * visterm->Vis_Term( NoL , NoV , VoH , NoH );
@@ -223,26 +223,57 @@ MicroFacetRefraction::MicroFacetRefraction(const Spectrum &reflectance, Fresnel*
 // result    : the portion that comes along 'wo' from 'wi'
 Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 {
-	if (SameHemisphere(wo, wi)) return 0.0f;
-
 	float NoL = AbsCosTheta( wi );
 	float NoV = AbsCosTheta( wo );
 	if (NoL == 0.f || NoV == 0.f)
 		return Spectrum(0.f);
 	
+	bool eval_reflection = SameHemisphere(wo, wi);
+
 	float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
-    Vector3f wh = Normalize(wo + wi * eta);
-    if (wh.y < 0) wh = -wh;
+
+	Vector3f wh;
+	if (eval_reflection)
+	{
+		// handle total reflection
+		wh = Normalize(wi + wo);
+	}else
+	{
+		// handle refraction
+		wh = Normalize(wo + wi * eta);
+		if (wh.y < 0) wh = -wh;
+	}
 
 	float NoH = AbsCosTheta( wh );
 	float VoH = AbsDot( wo , wh );
 
-	// Fresnel term
-    Spectrum F = fresnel->Evaluate(AbsDot(wo, wh));
-
-    float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
 	float distri = distribution->D(NoH);
 
+	// Fresnel term
+	Spectrum F = fresnel->Evaluate(Dot(wi, wh),Dot(wo, wh));
+
+	if( eval_reflection )
+	{
+		float coso = Dot( wo , wh );
+		float eta = coso > 0 ? (eta_ext / eta_in) : (eta_in / eta_ext);
+		float t = 1.0f - eta * eta * ( 1.0f - coso * coso );
+
+		float fresnel_term = 1.0f;
+
+		// not inner reflection
+		if( t > 0.0f )
+		{
+			// get the tranmistance/refracted ray
+			float factor = (coso<0.0f)? 1.0f : -1.0f;
+			Vector _wi = -1.0f * wo * eta + ( eta * coso + factor * sqrt(t)) * wh;
+
+			fresnel_term = fresnel->Evaluate( Dot( _wi , wh ) , Dot( wo , wh ) ).GetR();
+		}
+
+		return fresnel_term * T * distri * visterm->Vis_Term( NoL , NoV , VoH , NoH );
+	}
+
+	float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
 	return (Spectrum(1.f) - F) * T * distri * visterm->Vis_Term( NoL , NoV , VoH , NoH ) * eta * eta * AbsDot(wi, wh) * AbsDot(wo, wh) * 4.0f / (sqrtDenom * sqrtDenom) ;
 }
 
@@ -254,6 +285,9 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 // result     : brdf value for the 'wo' and 'wi'
 Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
+	// whether sample reflection
+	bool sampleReflection = false;
+
 	// sampling the normal
 	Vector wh = distribution->sample_f( bs );
 
@@ -261,15 +295,34 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 	float eta = coso > 0 ? (eta_ext / eta_in) : (eta_in / eta_ext);
 	float t = 1.0f - eta * eta * ( 1.0f - coso * coso );
 
-	// total inner relection
-	if( t < 0.0f )
-		return 0.0f;
-	
-	float factor = (coso<0.0f)? 1.0f : -1.0f;
-	wi = -1.0f * wo * eta + ( eta * coso + factor * sqrt(t)) * wh;
+	float fresnel_term = 1.0f;
 
-	if(pdf)
-		*pdf = Pdf( wo , wi );
+	// not inner reflection
+	if( t > 0.0f )
+	{
+		// get the tranmistance/refracted ray
+		float factor = (coso<0.0f)? 1.0f : -1.0f;
+		wi = -1.0f * wo * eta + ( eta * coso + factor * sqrt(t)) * wh;
+
+		fresnel_term = fresnel->Evaluate( Dot( wi , wh ) , Dot( wo , wh ) ).GetR();
+	}
+
+	if( sort_canonical() <= fresnel_term )
+		sampleReflection = true;
+
+	// sample reflection or refraction
+	if( sampleReflection )
+	{
+		// get reflected ray
+		wi = 2.0f * wh * Dot( wo , wh ) - wo;
+
+		if(pdf)
+			*pdf = Pdf( wo , wi ) * fresnel_term;
+	}else
+	{
+		if(pdf)
+			*pdf = Pdf( wo , wi ) * ( 1.0f - fresnel_term );
+	}
 
 	return f( wo , wi );
 }
@@ -281,7 +334,12 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi ) const
 {
 	if( SameHemisphere( wo , wi ) )
-		return 0.0f;
+	{
+		Vector h = Normalize( wo + wi );
+		float EoH = AbsDot( wo , h );
+		float HoN = AbsCosTheta(h);
+		return distribution->D(HoN) * HoN / (4.0f * EoH);
+	}
 
 	float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
     Vector3f wh = Normalize(wo + wi * eta);
