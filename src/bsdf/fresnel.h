@@ -30,11 +30,6 @@ public:
     
 	// evaluate spectrum
 	virtual Spectrum Evaluate( float cosi , float coso) const = 0;
-	// evaluate spectrum
-/*	virtual Spectrum Evaluate( float coso ) const
-	{
-		return Evaluate( coso , coso );
-	}*/
 };
 
 class	FresnelNo : public Fresnel
@@ -101,29 +96,6 @@ public:
 
 		return ( Rparl * Rparl + Rparp * Rparp ) * 0.5f;
 	}
-
-	// evaluate spectrum
-/*	virtual Spectrum Evaluate( float coso ) const
-	{
-		bool enter = coso > 0.0f;
-		float ei = eta_i;
-		float et = eta_t;
-		if( !enter )
-		{
-			ei = eta_t;
-			et = eta_i;
-		}
-
-		float eta = ei / et;
-		float sini = eta * sqrtf( 1.0f - coso * coso );
-		// note , fully reflection is handled in class Reflection
-		if( sini >= 1.0f )
-			return 1.0f;
-
-		float cosi = sqrtf( 1.0f - sini * sini );
-		
-		return Evaluate( cosi , coso );
-	}*/
 
 // private field
 private:

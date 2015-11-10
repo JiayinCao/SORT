@@ -160,9 +160,29 @@ public:
 	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
 };
 
+class Microfacet : public Bxdf
+{
+// private field
+protected:
+	// reflectance
+	Spectrum R;
+	// distribution of facets
+	MicroFacetDistribution* distribution;
+	// fresnel for the surface
+	Fresnel* fresnel;
+	// visiblity term
+	VisTerm* visterm;
+
+	// get reflected ray
+	inline Vector	_getReflected( Vector v , Vector n ) const;
+
+	// get refracted ray
+	inline Vector	_getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const;
+};
+
 /////////////////////////////////////////////////////////////////////
 // microfacet reflection bxdf
-class MicroFacetReflection : public Bxdf
+class MicroFacetReflection : public Microfacet
 {
 // public method
 public:
@@ -188,23 +208,12 @@ public:
 	// para 'wi' : coming in direction from light
 	// result    : the pdf for the sample
 	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
-
-// private field
-private:
-	// reflectance
-	Spectrum R;
-	// distribution of facets
-	MicroFacetDistribution* distribution;
-	// fresnel for the surface
-	Fresnel* fresnel;
-	// visiblity term
-	VisTerm* visterm;
 };
 
 /////////////////////////////////////////////////////////////////////
 // microfacet refraction bxdf
 // Refer to "Microfacet Models for Refraction through Rough Surfaces" for further detail
-class MicroFacetRefraction : public Bxdf
+class MicroFacetRefraction : public Microfacet
 {
 // public method
 public:
@@ -233,14 +242,6 @@ public:
 
 // private field
 private:
-	// transmittance
-	Spectrum T;
-	// distribution of facets
-	MicroFacetDistribution* distribution;
-	// fresnel for the surface
-	Fresnel* fresnel;
-	// visiblity term
-	VisTerm* visterm;
 	// index of refraction
 	float	eta_in;
 	float	eta_ext;
