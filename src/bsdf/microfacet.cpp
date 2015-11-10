@@ -240,6 +240,10 @@ MicroFacetRefraction::MicroFacetRefraction(const Spectrum &reflectance, Fresnel*
 	visterm = v;
 	eta_in = ieta;
 	eta_ext = eeta;
+
+	// make sure IORs are not the same inside and outside
+	if(eta_in == eta_ext)
+		eta_in = eta_ext + 0.01f;
 	
 	m_type = (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION);
 }
