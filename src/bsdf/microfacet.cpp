@@ -131,6 +131,33 @@ float VisCookTorrance::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 	return min( 1.0f , 2.0f * min( NoH * NoV / VoH , NoH * NoL / VoH ) ) / ( 4.0f * NoL * NoV );
 }
 
+// get reflected ray
+Vector	Microfacet::_getReflected( Vector v , Vector n ) const
+{
+	return 2.0f * n * Dot( v , n ) - v;
+}
+
+// get refracted ray
+Vector Microfacet::_getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const
+{
+	float coso = Dot( v , n );
+	float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
+	float t = 1.0f - eta * eta * ( 1.0f - coso * coso );
+
+	// total inner reflection
+	if( t < 0.0f ){
+		inner_reflection = true;
+		return Vector(0.0f,0.0f,0.0f);
+	}
+
+	// not total reflection
+	inner_reflection = false;
+
+	// get the tranmistance/refracted ray
+	float factor = (coso<0.0f)? 1.0f : -1.0f;
+	return -1.0f * v * eta + ( eta * coso + factor * sqrt(t)) * n;
+}
+
 // constructor
 MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v )
 {
@@ -177,7 +204,7 @@ Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const B
 	Vector wh = distribution->sample_f( bs );
 
 	// reflect the incident direction
-	wi = 2.0f * wh * Dot( wo , wh ) - wo;
+	wi = _getReflected( wo , wh );
 
 	// Make sure the generate wi is in the same hemisphere with wo
 	if( !SameHemiSphere( wo , wi ) )
@@ -207,7 +234,7 @@ float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 // constructor
 MicroFacetRefraction::MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v , float ieta , float eeta )
 {
-	T = reflectance;
+	R = reflectance;
 	distribution = d;
 	fresnel = f;
 	visterm = v;
@@ -228,53 +255,38 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 	if (NoL == 0.f || NoV == 0.f)
 		return Spectrum(0.f);
 	
-	bool eval_reflection = SameHemisphere(wo, wi);
-
 	float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
 
 	Vector3f wh;
+	bool eval_reflection = SameHemisphere(wo, wi);
 	if (eval_reflection)
-	{
-		// handle total reflection
 		wh = Normalize(wi + wo);
-	}else
-	{
-		// handle refraction
+	else
 		wh = Normalize(wo + wi * eta);
-		if (wh.y < 0) wh = -wh;
-	}
 
 	float NoH = AbsCosTheta( wh );
-	float VoH = AbsDot( wo , wh );
-
-	float distri = distribution->D(NoH);
-
+	float sVoH = Dot(wo , wh);
+	float VoH = fabs(sVoH);
+	
 	// Fresnel term
-	Spectrum F = fresnel->Evaluate(Dot(wi, wh),Dot(wo, wh));
+	Spectrum F = fresnel->Evaluate(Dot(wi, wh),sVoH);
 
+	// eveluate reflection
 	if( eval_reflection )
 	{
-		float coso = Dot( wo , wh );
-		float eta = coso > 0 ? (eta_ext / eta_in) : (eta_in / eta_ext);
-		float t = 1.0f - eta * eta * ( 1.0f - coso * coso );
+		bool total_reflection = false;
+		Vector _wi = _getRefracted( wo , wh , eta_in , eta_ext , total_reflection );
+		
+		// get fresnel term
+		float fresnel_term = (total_reflection)?1.0f:fresnel->Evaluate( Dot( _wi , wh ) , Dot( wo , wh ) ).GetR();
 
-		float fresnel_term = 1.0f;
-
-		// not inner reflection
-		if( t > 0.0f )
-		{
-			// get the tranmistance/refracted ray
-			float factor = (coso<0.0f)? 1.0f : -1.0f;
-			Vector _wi = -1.0f * wo * eta + ( eta * coso + factor * sqrt(t)) * wh;
-
-			fresnel_term = fresnel->Evaluate( Dot( _wi , wh ) , Dot( wo , wh ) ).GetR();
-		}
-
-		return fresnel_term * T * distri * visterm->Vis_Term( NoL , NoV , VoH , NoH );
+		return fresnel_term * R * distribution->D(NoH) * visterm->Vis_Term( NoL , NoV , VoH , NoH );
 	}
 
 	float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
-	return (Spectrum(1.f) - F) * T * distri * visterm->Vis_Term( NoL , NoV , VoH , NoH ) * eta * eta * AbsDot(wi, wh) * AbsDot(wo, wh) * 4.0f / (sqrtDenom * sqrtDenom) ;
+	float t = eta / sqrtDenom;
+	return (Spectrum(1.f) - F) * R * distribution->D(NoH) * visterm->Vis_Term( NoL , NoV , VoH , NoH ) * 
+				t * t * AbsDot(wi, wh) * AbsDot(wo, wh) * 4.0f ;
 }
 
 // sample a direction randomly
@@ -291,22 +303,14 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 	// sampling the normal
 	Vector wh = distribution->sample_f( bs );
 
-	float coso = Dot( wo , wh );
-	float eta = coso > 0 ? (eta_ext / eta_in) : (eta_in / eta_ext);
-	float t = 1.0f - eta * eta * ( 1.0f - coso * coso );
+	// try to get refracted ray
+	bool total_reflection = false;
+	wi = _getRefracted( wo , wh , eta_in , eta_ext , total_reflection );
 
-	float fresnel_term = 1.0f;
+	// get fresnel term
+	float fresnel_term = (total_reflection)?1.0f:fresnel->Evaluate( Dot( wi , wh ) , Dot( wo , wh ) ).GetR();
 
-	// not inner reflection
-	if( t > 0.0f )
-	{
-		// get the tranmistance/refracted ray
-		float factor = (coso<0.0f)? 1.0f : -1.0f;
-		wi = -1.0f * wo * eta + ( eta * coso + factor * sqrt(t)) * wh;
-
-		fresnel_term = fresnel->Evaluate( Dot( wi , wh ) , Dot( wo , wh ) ).GetR();
-	}
-
+	// sample reflection or refraction by fresnel term
 	if( sort_canonical() <= fresnel_term )
 		sampleReflection = true;
 
@@ -314,12 +318,20 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 	if( sampleReflection )
 	{
 		// get reflected ray
-		wi = 2.0f * wh * Dot( wo , wh ) - wo;
+		wi = _getReflected( wo , wh );
+
+		// Make sure the generate wi is in the same hemisphere with wo
+		if( !SameHemiSphere( wo , wi ) )
+			return 0.0f;
 
 		if(pdf)
 			*pdf = Pdf( wo , wi ) * fresnel_term;
 	}else
 	{
+		// Make sure the generate wi is not in the same hemisphere with wo
+		if( SameHemiSphere( wo , wi ) )
+			return 0.0f;
+
 		if(pdf)
 			*pdf = Pdf( wo , wi ) * ( 1.0f - fresnel_term );
 	}
