@@ -44,12 +44,12 @@ class SORTSocket:
         if self.is_linked or self.is_output:
             layout.label(text)
         else:
-            row = layout.row()
-            split = row.split(common.label_percentage)
-            left_row = split.row()
-            left_row.label(text)
-            if node.inputs[text].IsEmptySocket() is False:
-                split.prop(node.inputs[text], 'default_value')
+            #row = layout.row()
+            #split = row.split(common.label_percentage)
+            #left_row = split.row()
+            #left_row.label(text)
+            #if node.inputs[text].IsEmptySocket() is False:
+            layout.prop(node.inputs[text], 'default_value')
 
     def IsEmptySocket(self):
         return False
@@ -68,43 +68,11 @@ class SORTShaderSocket(bpy.types.NodeSocketShader, SORTSocket):
     def IsEmptySocket(self):
         return True
 
-class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTSocket):
-    bl_idname = 'SORTNodeSocketFloat'
-    bl_label = 'SORT Float Socket'
-
-    default_value = bpy.props.FloatProperty( name='' , default=0.0 )
-
-    # green node for color
-    def draw_color(self, context, node):
-        return (0.1, 0.1, 0.3, 1.0)
-
-    def output_default_value_to_str(self):
-        return '%f'%(self.default_value)
-
-    def output_type_str(self):
-        return 'float'
-
-class SORTNodeSocketFloat2(bpy.types.NodeSocketFloat, SORTSocket):
-    bl_idname = 'SORTNodeSocketFloat2'
-    bl_label = 'SORT Float2 Socket'
-
-    default_value = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0) ,subtype='NONE' ,size=2 )
-
-    # green node for color
-    def draw_color(self, context, node):
-        return (0.1, 0.65 , 0.3, 1.0)
-
-    def output_default_value_to_str(self):
-        return '%f %f'%(self.default_value[0], self.default_value[1])
-
-    def output_type_str(self):
-        return 'float2'
-
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
     bl_idname = 'SORTNodeSocketColor'
     bl_label = 'SORT Color Socket'
 
-    default_value = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
+    default_value = bpy.props.FloatVectorProperty( name='' , default=(1.0, 1.0, 1.0) ,subtype='COLOR',soft_min = 0.0, soft_max = 1.0)
 
     # green node for color
     def draw_color(self, context, node):
@@ -129,17 +97,19 @@ class SORTShadingNode(bpy.types.Node):
         pass
 
     def draw_button(self, layout, label, prop):
-        row = layout.row()
-        row.label(label)
-        row.prop(self,prop)
+        #row = layout.row()
+        #row.label(label)
+        #row.prop(self,prop)
+        layout.prop(self,prop)
 
     def draw_prop(self, layout, label, prop, indented_label):
         row = layout.row()
-        split = row.split(common.label_percentage)
-        left_row = split.row()
-        indented_label(left_row)
-        left_row.label(label)
-        split.prop(self, prop)
+        #split = row.split(common.label_percentage)
+        #left_row = split.row()
+        indented_label(row)
+        #left_row.label(label)
+        #split.prop(self, prop)
+        row.prop(self,prop)
 
 # output node
 class SORTNodeOutput(SORTShadingNode):
@@ -149,14 +119,46 @@ class SORTNodeOutput(SORTShadingNode):
     def init(self, context):
         input = self.inputs.new('SORTNodeSocketColor', 'Surface')
 
+class SORTNodeBaseColorSocket(bpy.types.NodeSocketColor, SORTSocket):
+    bl_idname = 'SORTNodeBaseColorSocket'
+    bl_label = 'SORT Base Color Socket'
+
+    default_value = bpy.props.FloatVectorProperty( name='BaseColor' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
+
+    # green node for color
+    def draw_color(self, context, node):
+        return (0.1, 1.0, 0.2, 1.0)
+
+    def output_default_value_to_str(self):
+        return '%f %f %f'%(self.default_value[0],self.default_value[1],self.default_value[2])
+
+    def output_type_str(self):
+        return 'color'
+
 # lambert node
 class SORTNodeLambert(SORTShadingNode):
     bl_label = 'SORT_lambert'
     bl_idname = 'SORTNodeLambert'
 
     def init(self, context):
-        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketColor', 'Result')
+
+class SORTNodeRoughnessSocket(bpy.types.NodeSocketFloat, SORTSocket):
+    bl_idname = 'SORTNodeRoughnessSocket'
+    bl_label = 'SORT Roughness Socket'
+
+    default_value = bpy.props.FloatProperty( name='Roughness' , default=0.0 , min=0.0, max=1.0 )
+
+    # green node for color
+    def draw_color(self, context, node):
+        return (0.1, 0.1, 0.3, 1.0)
+
+    def output_default_value_to_str(self):
+        return '%f'%(self.default_value)
+
+    def output_type_str(self):
+        return 'float'
 
 # microfacte node
 class SORTNodeMicrofacetReflection(SORTShadingNode):
@@ -167,7 +169,7 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
                     ("Beckmann" , "Beckmann" , "", 2),
                     ("GGX" , "GGX" , "" , 3)
                    ]
-    mfdist_prop = bpy.props.EnumProperty(name='',items=mfdist_item)
+    mfdist_prop = bpy.props.EnumProperty(name='NDF',items=mfdist_item)
 
     mfvis_item = [ ("Implicit", "Implicit", "", 1),
                    ("Neumann" , "Neumann" , "", 2),
@@ -177,16 +179,16 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
                    ("SmithJointApprox" , "SmithJointApprox" , "" , 6 ),
                    ("CookTorrance" , "CookTorrance" , "" , 7)
                    ]
-    mfvis_prop = bpy.props.EnumProperty(name='',items=mfvis_item, default="CookTorrance")
+    mfvis_prop = bpy.props.EnumProperty(name='Visibility',items=mfvis_item, default="CookTorrance")
 
     # fresnel parameters
     # dielectric-conductor parameters
-    eta = bpy.props.FloatVectorProperty(name='', default=(0.37, 0.37, 0.37), min=0.10, max=10.0)
-    k = bpy.props.FloatVectorProperty(name='', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
+    eta = bpy.props.FloatVectorProperty(name='Interior IOR', default=(0.37, 0.37, 0.37), min=0.10, max=10.0)
+    k = bpy.props.FloatVectorProperty(name='Absorption', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
-        self.inputs.new('SORTNodeSocketFloat', 'Roughness')
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
+        self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
@@ -215,7 +217,7 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
                     ("Beckmann" , "Beckmann" , "", 2),
                     ("GGX" , "GGX" , "" , 3)
                    ]
-    mfdist_prop = bpy.props.EnumProperty(name='',items=mfdist_item)
+    mfdist_prop = bpy.props.EnumProperty(name='NDF',items=mfdist_item)
 
     mfvis_item = [ ("Implicit", "Implicit", "", 1),
                    ("Neumann" , "Neumann" , "", 2),
@@ -225,15 +227,15 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
                    ("SmithJointApprox" , "SmithJointApprox" , "" , 6 ),
                    ("CookTorrance" , "CookTorrance" , "" , 7)
                    ]
-    mfvis_prop = bpy.props.EnumProperty(name='',items=mfvis_item,default="CookTorrance")
+    mfvis_prop = bpy.props.EnumProperty(name='Visibility',items=mfvis_item,default="CookTorrance")
 
     # dielectric-dielectric parameters
-    int_ior = bpy.props.FloatProperty(name='', default=1.1, min=1.0, max=10.0)
-    ext_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
+    int_ior = bpy.props.FloatProperty(name='Interior IOR', default=1.1, min=1.0, max=10.0)
+    ext_ior = bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
-        self.inputs.new('SORTNodeSocketFloat', 'Roughness')
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
+        self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
@@ -281,8 +283,8 @@ class SORTNodeOrenNayar(SORTShadingNode):
     bl_idname = 'SORTNodeOrenNayar'
 
     def init(self, context):
-        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
-        self.inputs.new('SORTNodeSocketFloat', 'Roughness')
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
+        self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
 # reflection node
@@ -290,11 +292,11 @@ class SORTNodeReflection(SORTShadingNode):
     bl_label = 'SORT_reflection'
     bl_idname = 'SORTNodeReflection'
 
-    eta = bpy.props.FloatVectorProperty(name='', default=(0.37, 0.37, 0.37), min=0.10, max=10.0)
-    k = bpy.props.FloatVectorProperty(name='', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
+    eta = bpy.props.FloatVectorProperty(name='Interior IOR', default=(0.37, 0.37, 0.37), min=0.10, max=10.0)
+    k = bpy.props.FloatVectorProperty(name='Absorption', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
@@ -314,11 +316,11 @@ class SORTNodeRefraction(SORTShadingNode):
     bl_label = 'SORT_refraction'
     bl_idname = 'SORTNodeRefraction'
 
-    int_ior = bpy.props.FloatProperty(name='', default=1.1, min=1.0, max=10.0)
-    ext_ior = bpy.props.FloatProperty(name='', default=1.0, min=1.0, max=10.0)
+    int_ior = bpy.props.FloatProperty(name='Interior IOR', default=1.1, min=1.0, max=10.0)
+    ext_ior = bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeSocketColor', 'BaseColor')
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
@@ -419,7 +421,6 @@ class SORTNodeCheckbox(SORTShadingNode):
     bl_idname = 'SORTNodeCheckbox'
 
     def init(self, context):
-        #socket = self.inputs.new('SORTNodeSocketFloat2','UV')
         self.inputs.new('SORTNodeSocketColor', 'Color1')
         self.inputs.new('SORTNodeSocketColor', 'Color2')
         self.outputs.new('SORTNodeSocketColor', 'Result')
