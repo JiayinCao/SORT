@@ -54,7 +54,8 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 		return 1.0f;
 
 	float distance = Distance( aoip.intersect , ray.m_Ori );
-	return pow( distance / maxDistance , 4.0f );
+	float ao = distance / maxDistance;
+	return ao * ao;
 }
 
 // output log information
