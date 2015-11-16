@@ -62,8 +62,6 @@ public:
 
 	// default constructor
 	BidirPathTracing(){ path_per_pixel = 8; }
-	// destructor
-	~BidirPathTracing(){}
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data

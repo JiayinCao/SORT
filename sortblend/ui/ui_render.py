@@ -20,8 +20,9 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
     integrator_types = [
         ("bdpt", "Bidirectional Path Tracing", "", 1),
         ("pathtracing", "Path Tracing", "", 2),
-        ("direct", "Direct Lighting", "", 3),
-        ("whitted", "Whitted", "", 4),
+        ("ao", "Ambient Occlusion", "", 3),
+        ("direct", "Direct Lighting", "", 4),
+        ("whitted", "Whitted", "", 5),
         ]
     bpy.types.Scene.integrator_type_prop = bpy.props.EnumProperty(items=integrator_types, name='Integrator')
 
@@ -37,6 +38,9 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
     def draw(self, context):
         self.layout.prop(context.scene,"integrator_type_prop")
         self.layout.prop(context.scene,"accelerator_type_prop")
+
+        if bpy.types.Scene.integrator_type_prop is 3:
+            elf.layout.prop(context.scene,"accelerator_type_prop")
 
 class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = common.thread_panel_bl_name

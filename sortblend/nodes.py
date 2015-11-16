@@ -44,11 +44,6 @@ class SORTSocket:
         if self.is_linked or self.is_output:
             layout.label(text)
         else:
-            #row = layout.row()
-            #split = row.split(common.label_percentage)
-            #left_row = split.row()
-            #left_row.label(text)
-            #if node.inputs[text].IsEmptySocket() is False:
             layout.prop(node.inputs[text], 'default_value')
 
     def IsEmptySocket(self):
@@ -97,18 +92,11 @@ class SORTShadingNode(bpy.types.Node):
         pass
 
     def draw_button(self, layout, label, prop):
-        #row = layout.row()
-        #row.label(label)
-        #row.prop(self,prop)
         layout.prop(self,prop)
 
     def draw_prop(self, layout, label, prop, indented_label):
         row = layout.row()
-        #split = row.split(common.label_percentage)
-        #left_row = split.row()
         indented_label(row)
-        #left_row.label(label)
-        #split.prop(self, prop)
         row.prop(self,prop)
 
 # output node
@@ -187,8 +175,8 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
     k = bpy.props.FloatVectorProperty(name='Absorption', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
@@ -234,8 +222,8 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
     ext_ior = bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
@@ -283,57 +271,9 @@ class SORTNodeOrenNayar(SORTShadingNode):
     bl_idname = 'SORTNodeOrenNayar'
 
     def init(self, context):
-        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
-        self.outputs.new('SORTNodeSocketColor', 'Result')
-
-# reflection node
-class SORTNodeReflection(SORTShadingNode):
-    bl_label = 'SORT_reflection'
-    bl_idname = 'SORTNodeReflection'
-
-    eta = bpy.props.FloatVectorProperty(name='Interior IOR', default=(0.37, 0.37, 0.37), min=0.10, max=10.0)
-    k = bpy.props.FloatVectorProperty(name='Absorption', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
-
-    def init(self, context):
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketColor', 'Result')
-
-    def draw_buttons(self, context, layout):
-        self.draw_button(layout, "Interior IOR" , "eta" )
-        self.draw_button(layout, "Absorption Coefficient" , "k")
-
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, "Interior IOR" , "eta" , indented_label)
-        self.draw_prop(layout, "Absorption Coefficient" , "k", indented_label)
-
-    def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='eta' , type='color', value= '%f %f %f'%(self.eta[0],self.eta[1],self.eta[2])  )
-        ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
-
-# reflection node
-class SORTNodeRefraction(SORTShadingNode):
-    bl_label = 'SORT_refraction'
-    bl_idname = 'SORTNodeRefraction'
-
-    int_ior = bpy.props.FloatProperty(name='Interior IOR', default=1.1, min=1.0, max=10.0)
-    ext_ior = bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0)
-
-    def init(self, context):
-        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
-        self.outputs.new('SORTNodeSocketColor', 'Result')
-
-    def draw_buttons(self, context, layout):
-        self.draw_button(layout, "Interior IOR" , "int_ior")
-        self.draw_button(layout, "Exterior IOR" , "ext_ior")
-
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, "Interior IOR" , "int_ior", indented_label)
-        self.draw_prop(layout, "Exterior IOR" , "ext_ior", indented_label)
-
-    def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='in_ior' , type='color', value= '%f'%(self.int_ior)  )
-        ET.SubElement( xml_node , 'Property' , name='ext_ior' , type='color', value= '%f'%(self.ext_ior) )
 
 # operator nodes
 class SORTNodeAdd(SORTShadingNode):
@@ -546,7 +486,7 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar"),NodeItem("SORTNodeReflection"),NodeItem("SORTNodeRefraction")] ),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
         SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
@@ -560,5 +500,3 @@ def register():
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetReflection] = 'SORTNodeMicrofacetReflection'
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetRefraction] = 'SORTNodeMicrofacetRefraction'
     SORTPatternGraph.nodetypes[SORTNodeOrenNayar] = 'SORTNodeOrenNayar'
-    SORTPatternGraph.nodetypes[SORTNodeReflection] = 'SORTNodeReflection'
-    SORTPatternGraph.nodetypes[SORTNodeRefraction] = 'SORTNodeRefraction'

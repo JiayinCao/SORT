@@ -68,17 +68,10 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 		unsigned sample_num = light_sample_offsets[i].num;
 		for( unsigned k = 0 ; k < sample_num ; ++k )
 			ld += EvaluateDirect(	r  , scene , light , ip , ps.light_sample[light_sample_offsets[i].offset+k] , 
-									ps.bsdf_sample[bsdf_sample_offsets[i].offset+k] , BXDF_TYPE( BXDF_ALL & ~BXDF_SPECULAR ) );
+									ps.bsdf_sample[bsdf_sample_offsets[i].offset+k] , BXDF_TYPE( BXDF_ALL ) );
 		if( sample_num != 0 )
 			t += ld / (float)sample_num;
 	}
-
-	// evaluate specular reflection or refraction
-	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
-	if( bsdf->NumComponents( BXDF_SPECULAR_REFLECTION ) > 0 )
-		t += SpecularReflection( r , &ip , bsdf , this , ps );
-	if( bsdf->NumComponents( BXDF_SPECULAR_TRANSMISSION ) > 0 )
-		t += SpecularRefraction( r , &ip , bsdf , this , ps );
 
 	return t;
 }

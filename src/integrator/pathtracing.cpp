@@ -30,7 +30,6 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
 	Spectrum L = 0.0f;
 
-	bool		intersect_diffuse = false;
 	bool		specular = true;
 	Spectrum	path_weight = 1.0f;
 	unsigned	bounces = 0;
@@ -64,7 +63,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		const Light*	light = scene.SampleLight( light_sample.t , &light_pdf );
 		if( light_pdf > 0.0f )
 			L += path_weight * EvaluateDirect(	r  , scene , light , inter , light_sample , 
-												bsdf_sample , BXDF_TYPE(BXDF_ALL&~BXDF_SPECULAR) ) / light_pdf;
+												bsdf_sample , BXDF_TYPE(BXDF_ALL) ) / light_pdf;
 
 		// sample the next direction using bsdf
 		float		path_pdf;
@@ -75,15 +74,13 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		f = bsdf->sample_f( -r.m_Dir , wi , _bsdf_sample , &path_pdf , BXDF_ALL , &bxdf_type );
 		if( f.IsBlack() || path_pdf == 0.0f )
 			break;
-		specular = (bxdf_type & BXDF_SPECULAR)!=0;
-		if( !specular ) intersect_diffuse = true;
 
 		// update path weight
 		path_weight *= f * AbsDot( wi , inter.normal ) / path_pdf;
 
 		if( path_weight.GetIntensity() == 0.0f && specular == false )
 			break;
-		if( bounces > 4 && intersect_diffuse )
+		if( bounces > 4 )
 		{
 			float continueProperbility = min( 0.5f , path_weight.GetIntensity() );
 			if( sort_canonical() > continueProperbility )
