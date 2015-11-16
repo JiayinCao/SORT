@@ -126,7 +126,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	if( bxdf_type ) *bxdf_type = bxdf->GetType();
 
 	// setup pdf
-	if( pdf && !( bxdf->GetType() & BXDF_SPECULAR ) && ( com_num > 1 ) )
+	if( pdf  && ( com_num > 1 ) )
 	{
 		for( unsigned i = 0; i < m_bxdfCount ; ++i )
 			if( m_bxdf[i] != bxdf && m_bxdf[i]->MatchFlag( type ) )
@@ -134,12 +134,9 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	}
 	if( pdf ) *pdf /= com_num;
 	
-	if( !(bxdf->GetType() & BXDF_SPECULAR ) )
-	{
-		for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
-			if( bxdf != m_bxdf[i] && m_bxdf[i]->MatchFlag(type) )
-				t += m_bxdf[i]->f(wo,wi) * m_bxdf[i]->m_weight;
-	}
+	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
+		if( bxdf != m_bxdf[i] && m_bxdf[i]->MatchFlag(type) )
+			t += m_bxdf[i]->f(wo,wi) * m_bxdf[i]->m_weight;
 	
 	// transform the direction back
 	wi = _localToWorld( wi );
