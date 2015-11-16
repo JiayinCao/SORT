@@ -1,7 +1,7 @@
 /*
-   FileName:      whittedrt.h
+   FileName:      ao.h
 
-   Created Time:  2011-08-04 12:49:06
+   Created Time:  2015-11-16
 
    Auther:        Cao Jiayin
 
@@ -15,8 +15,8 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifndef	SORT_WHITTEDRT
-#define	SORT_WHITTEDRT
+#ifndef	SORT_AO
+#define	SORT_AO
 
 // include the header file
 #include "integrator.h"
@@ -26,12 +26,14 @@
 // note : Whitted ray tracer only takes direct light into consideration,
 //		  there are also specular reflection and refraction. While indirect 
 //		  light, like color bleeding , is not supported.
-class	WhittedRT : public Integrator
+class	AmbientOcclusion : public Integrator
 {
 // public method
 public:
 
-	DEFINE_CREATOR( WhittedRT , "whitted" );
+	DEFINE_CREATOR( AmbientOcclusion , "ao" );
+
+	AmbientOcclusion() { maxDistance = 10.0f; }
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -41,6 +43,25 @@ public:
 
 	// output log information
 	virtual void OutputLog() const;
+
+// private field
+private:
+	float	maxDistance;
+
+	void _registerAllProperty();
+
+	// Max Distance Property
+	class MaxDistanceProperty : public PropertyHandler<Integrator>
+	{
+	public:
+		PH_CONSTRUCTOR(MaxDistanceProperty,Integrator);
+		void SetValue( const string& str )
+		{
+			AmbientOcclusion* ao = CAST_TARGET(AmbientOcclusion);
+			if( ao )
+				ao->maxDistance = atof( str.c_str() );
+		}
+	};
 };
 
 #endif

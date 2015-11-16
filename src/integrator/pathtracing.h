@@ -34,8 +34,6 @@ public:
 		path_per_pixel = 16; // default maxium path is 16
 		_registerAllProperty();	// register properties
 	}
-	// destructor
-	~PathTracing(){}
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data

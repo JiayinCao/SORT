@@ -20,8 +20,6 @@
 #include "bsdf/merl.h"
 #include "bsdf/orennayar.h"
 #include "bsdf/microfacet.h"
-#include "bsdf/reflection.h"
-#include "bsdf/refraction.h"
 #include "bsdf/fresnel.h"
 #include "managers/memmanager.h"
 #include "bsdf/bsdf.h"
@@ -33,8 +31,6 @@ IMPLEMENT_CREATOR( MerlNode );
 IMPLEMENT_CREATOR( OrenNayarNode );
 IMPLEMENT_CREATOR( MicrofacetReflectionNode );
 IMPLEMENT_CREATOR( MicrofacetRefractionNode );
-IMPLEMENT_CREATOR( ReflectionNode );
-IMPLEMENT_CREATOR( RefractionNode );
 IMPLEMENT_CREATOR( AddNode );
 IMPLEMENT_CREATOR( LerpNode );
 IMPLEMENT_CREATOR( BlendNode );
@@ -433,46 +429,6 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist , vis , in_eta , ext_eta );
 	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
-}
-
-ReflectionNode::ReflectionNode()
-{
-	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-	m_props.insert( make_pair( "eta" , &eta ) );
-	m_props.insert( make_pair( "k" , &k ) );
-}
-
-void ReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
-	if( weight.IsBlack() )
-		return;
-
-	Fresnel* fresnel = SORT_MALLOC(FresnelConductor)( eta.GetPropertyValue(0).ToSpectrum() , k.GetPropertyValue(0).ToSpectrum() );
-	Reflection* reflection = SORT_MALLOC(Reflection)( fresnel , baseColor.GetPropertyValue(bsdf).ToSpectrum() );
-	reflection->m_weight = weight;
-
-	bsdf->AddBxdf( reflection );
-}
-
-RefractionNode::RefractionNode()
-{
-	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-	m_props.insert( make_pair( "in_ior" , &in_ior ) );
-	m_props.insert( make_pair( "ext_ior" , &ext_ior ) );
-}
-
-void RefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
-	if( weight.IsBlack() )
-		return;
-
-	float _in_ior = in_ior.GetPropertyValue(0).x;
-	float _ext_ior = ext_ior.GetPropertyValue(0).x;
-
-	Fresnel* fresnel = SORT_MALLOC(FresnelDielectric)( _in_ior , _ext_ior );
-	Refraction* refraction = SORT_MALLOC(Refraction)( _in_ior , _ext_ior , fresnel , baseColor.GetPropertyValue(bsdf).ToSpectrum() );
-	refraction->m_weight = weight;
-	bsdf->AddBxdf( refraction );
 }
 
 AddNode::AddNode()

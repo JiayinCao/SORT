@@ -71,12 +71,6 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 		it++;
 	}
 
-	// add reflection
-	if( bsdf->NumComponents( BXDF_SPECULAR_REFLECTION ) > 0 )
-		t += SpecularReflection( r , &ip , bsdf , this , ps );
-	if( bsdf->NumComponents( BXDF_SPECULAR_TRANSMISSION ) > 0 )
-		t += SpecularRefraction( r , &ip , bsdf , this , ps );
-
 	return t;
 }
 

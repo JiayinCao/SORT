@@ -252,43 +252,6 @@ private:
 	MaterialNodePropertyString	mf_vis;
 };
 
-// Reflection node
-class ReflectionNode : public BxdfNode
-{
-public:
-	DEFINE_CREATOR( ReflectionNode , "SORTNodeReflection" );
-
-	// constructor
-	ReflectionNode();
-
-	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
-
-private:
-	MaterialNodeProperty	baseColor;
-
-	MaterialNodeProperty	eta;
-	MaterialNodeProperty	k;
-};
-
-// Refraction node
-class RefractionNode : public BxdfNode
-{
-public:
-	DEFINE_CREATOR( RefractionNode , "SORTNodeRefraction" );
-
-	// constructor
-	RefractionNode();
-
-	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
-
-private:
-	MaterialNodeProperty	baseColor;
-	MaterialNodeProperty	in_ior;
-	MaterialNodeProperty	ext_ior;
-};
-
 class OperatorNode : public MaterialNode
 {
 public:

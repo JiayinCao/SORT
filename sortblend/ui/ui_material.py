@@ -116,15 +116,10 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
                     draw_node_properties_recursive(layout, context, nt, input_node, level=level+1)
             else:
                 row = layout.row()
-                #split = row.split(common.label_percentage)
-                #left_row = split.row()
-                #indented_label(left_row)
-                #left_row.label(socket.name)
-                #split = row.split(common.socket_percentage)
-                #middle_row = split.row()
                 indented_label(row)
-                row.prop(socket, 'default_value',slider = True)
-                row.operator_menu_enum("node.add_surface" , "node_type",text='',icon='DOT')
+                other = row.row(align = True)
+                other.prop(socket, 'default_value',slider = True)
+                other.operator_menu_enum("node.add_surface" , "node_type", text='',icon='DOT')
 
     draw_props(node, layout)
     layout.separator()
@@ -158,10 +153,6 @@ def panel_node_draw(layout, context, id_data, input_name):
         draw_node_properties_recursive(layout, context, ntree, output_node)
         #input = nodes.find_node_input(output_node, input_name)
         #layout.template_node_view(ntree, output_node, input)
-
-        #node = ntree.nodes.active # selected node
-        #for socket in node.inputs:
-        #    layout.node_draw_input(layout, ntree, node, socket)
 
 from .. import material
 

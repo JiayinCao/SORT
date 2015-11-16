@@ -25,8 +25,6 @@
 Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
 	wi = CosSampleHemisphere( bs.u , bs.v );
-	if( wo.y < 0.0f )
-		wi.y = -wi.y;
 	if( pdf ) *pdf = Pdf( wo , wi );
 	return f( wo , wi );
 }

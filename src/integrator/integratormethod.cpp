@@ -24,40 +24,6 @@
 #include "material/material.h"
 #include "light/light.h"
 
-// radiance along specular reflection
-Spectrum	SpecularReflection( const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps )
-{
-	Ray r;
-	float pdf;
-	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , BsdfSample(true) , &pdf , BXDF_SPECULAR_REFLECTION );
-	if( f.IsBlack() || r.m_Dir.IsZero() )
-		return 0.0f;
-
-	r.m_Depth = ray.m_Depth + 1;
-	r.m_Ori = intersect->intersect + r.m_Dir ;
-
-	float density = AbsDot( r.m_Dir , intersect->normal );
-
-	return f * integrator->Li( r , ps ) * density / pdf ;
-}
-
-// radiance along specular refraction
-Spectrum	SpecularRefraction( const Ray& ray , const Intersection* intersect , const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps )
-{
-	Ray r;
-	float pdf;
-	Spectrum f = bsdf->sample_f( -ray.m_Dir , r.m_Dir , BsdfSample(true) , &pdf , BXDF_SPECULAR_TRANSMISSION );
-	if( f.IsBlack() || r.m_Dir.IsZero() )
-		return 0.0f;
-
-	r.m_Depth = ray.m_Depth + 1;
-	r.m_Ori = intersect->intersect + r.m_Dir;
-
-	float density = AbsDot( r.m_Dir , intersect->normal ) ;
-
-	return f * integrator->Li( r , ps ) * density / pdf ;
-}
-
 // evaluate direct lighting
 Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip , 
 							const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type )
@@ -96,7 +62,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 		if( !f.IsBlack() && bsdf_pdf != 0.0f )
 		{
 			float weight = 1.0f;
-			if( !( bxdf_type & BXDF_SPECULAR ) )
+			if( bxdf_type )
 			{
 				float light_pdf;
 				light_pdf = light->Pdf( ip.intersect , wi );
