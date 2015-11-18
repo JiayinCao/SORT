@@ -34,8 +34,9 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 	// get the intersection between the ray and the scene
 	Intersection ip;
 	if( false == scene.GetIntersect( r , &ip ) )
-		return scene.Le(r).IsBlack()?0.0f:1.0f;
+		return 0.0f;
 
+	//return Spectrum((ip.normal.x + 1.0f)*0.5f, (ip.normal.y+1.0f)*0.5f, (ip.normal.z + 1.0f) * 0.5f);
 	Vector nn = ip.normal;
 	Vector tn = Normalize(Cross( nn , ip.tangent ));
 	Vector sn = Cross( tn , nn );
@@ -44,6 +45,10 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 	Vector wi = Vector( _wi.x * sn.x + _wi.y * nn.x + _wi.z * tn.x ,
 						_wi.x * sn.y + _wi.y * nn.y + _wi.z * tn.y ,
 						_wi.x * sn.z + _wi.y * nn.z + _wi.z * tn.z );
+
+	// flip the incident direction if necessary
+	if (Dot(r.m_Dir, nn)>0.0f)
+		wi *= -1.0f;
 
 	// the ray to be tested
 	Ray ray( ip.intersect , wi , 0 , 0.001f , maxDistance );
