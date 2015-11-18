@@ -76,7 +76,7 @@ float Disk::_getIntersect( const Ray& ray , Point& p , float limit , Intersectio
 		return -1.0f;
 
 	float t = -ray.m_Ori.y / ray.m_Dir.y;
-	if( t > limit || t <= 0.0f || t > ray.m_fMax )
+	if( t > limit || t <= ray.m_fMin || t > ray.m_fMax )
 		return -1.0f;
 	p = ray(t);
 	float sqLength = p.x * p.x + p.z * p.z;
