@@ -183,6 +183,9 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , vect
 
 		vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &pdf );
 
+		if (pdf == 0)
+			return path.size();
+
 		path.push_back( vert );
 
 		wi = Ray( vert.inter.intersect , vert.wo , 0 , 0.001f );

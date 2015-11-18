@@ -107,5 +107,8 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float
 	Sort_Assert( shape != 0 );
 	shape->sample_l( ls , r , n , pdf );
 
+	// to avoid self intersection
+	r.m_fMin = 0.01f;
+
 	return intensity;
 }
