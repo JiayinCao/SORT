@@ -599,7 +599,7 @@ MaterialPropertyValue GridTexNode::GetNodeValue( Bsdf* bsdf )
 {
 	// get intersection
 	const Intersection* intesection = bsdf->GetIntersection();
-	return FromSpectrum( grid_tex.GetColorFromUV( intesection->u , intesection->v ) );
+	return FromSpectrum( grid_tex.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f ) );
 }
 
 // post process
@@ -609,7 +609,7 @@ void GridTexNode::PostProcess()
 		return;
 
 	// set grid texture
-	grid_tex.SetGridColor( src0.GetPropertyValue(0).x , src1.GetPropertyValue(0).x );
+	grid_tex.SetGridColor( src0.GetPropertyValue(0).ToSpectrum(), src1.GetPropertyValue(0).ToSpectrum());
 
 	MaterialNode::PostProcess();
 }
@@ -648,7 +648,7 @@ void CheckBoxTexNode::PostProcess()
 		return;
 
 	// set grid texture
-	checkbox_tex.SetCheckBoxColor( src0.GetPropertyValue(0).x , src1.GetPropertyValue(0).x );
+	checkbox_tex.SetCheckBoxColor( src0.GetPropertyValue(0).ToSpectrum() , src1.GetPropertyValue(0).ToSpectrum() );
 
 	MaterialNode::PostProcess();
 }

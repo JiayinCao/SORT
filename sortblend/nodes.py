@@ -40,11 +40,15 @@ class SORTSocket:
     def draw_color(self, context, node):
         return (0.1, 0.1, 0.1, 0.75)
 
+    #draw socket property in node
     def draw(self, context, layout, node, text):
         if self.is_linked or self.is_output:
             layout.label(text)
         else:
-            layout.prop(node.inputs[text], 'default_value')
+            row = layout.row()
+            split = row.split(common.label_percentage)
+            split.label(text)
+            split.prop(node.inputs[text],'default_value',text="")
 
     def IsEmptySocket(self):
         return False
@@ -79,39 +83,11 @@ class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
     def output_type_str(self):
         return 'color'
 
-# sort material node root
-class SORTShadingNode(bpy.types.Node):
-    bl_label = 'ShadingNode'
-    bl_idname = 'SORTShadingNode'
-    bl_icon = 'MATERIAL'
-
-    def export_prop(self, xml_node):
-        pass
-
-    def draw_props(self, context, layout, indented_label):
-        pass
-
-    def draw_button(self, layout, label, prop):
-        layout.prop(self,prop)
-
-    def draw_prop(self, layout, label, prop, indented_label):
-        row = layout.row()
-        indented_label(row)
-        row.prop(self,prop)
-
-# output node
-class SORTNodeOutput(SORTShadingNode):
-    bl_label = 'SORT_output'
-    bl_idname = common.sort_node_output_bl_name
-
-    def init(self, context):
-        input = self.inputs.new('SORTNodeSocketColor', 'Surface')
-
 class SORTNodeBaseColorSocket(bpy.types.NodeSocketColor, SORTSocket):
     bl_idname = 'SORTNodeBaseColorSocket'
     bl_label = 'SORT Base Color Socket'
 
-    default_value = bpy.props.FloatVectorProperty( name='BaseColor' , default=(1.0, 1.0, 1.0) ,subtype='COLOR' )
+    default_value = bpy.props.FloatVectorProperty( name='BaseColor' , default=(1.0, 1.0, 1.0) ,subtype='COLOR',soft_min = 0.0, soft_max = 1.0)
 
     # green node for color
     def draw_color(self, context, node):
@@ -122,15 +98,6 @@ class SORTNodeBaseColorSocket(bpy.types.NodeSocketColor, SORTSocket):
 
     def output_type_str(self):
         return 'color'
-
-# lambert node
-class SORTNodeLambert(SORTShadingNode):
-    bl_label = 'SORT_lambert'
-    bl_idname = 'SORTNodeLambert'
-
-    def init(self, context):
-        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
-        self.outputs.new('SORTNodeSocketColor', 'Result')
 
 class SORTNodeRoughnessSocket(bpy.types.NodeSocketFloat, SORTSocket):
     bl_idname = 'SORTNodeRoughnessSocket'
@@ -147,6 +114,53 @@ class SORTNodeRoughnessSocket(bpy.types.NodeSocketFloat, SORTSocket):
 
     def output_type_str(self):
         return 'float'
+
+# sort material node root
+class SORTShadingNode(bpy.types.Node):
+    bl_label = 'ShadingNode'
+    bl_idname = 'SORTShadingNode'
+    bl_icon = 'MATERIAL'
+
+    def export_prop(self, xml_node):
+        pass
+
+    def draw_props(self, context, layout, indented_label):
+        pass
+
+    #draw property in node
+    def draw_button(self, layout, label, prop):
+        row = layout.row()
+        split = row.split(common.label_percentage)
+        split.label(label)
+        prop_row = split.row()
+        prop_row.prop(self,prop,text="")
+
+    # draw non-socket property in panel
+    def draw_prop(self, layout, label, prop, indented_label):
+        split = layout.split(common.label_percentage)
+        row = split.row()
+        indented_label(row)
+        row.label(label)
+        prop_row = split.row()
+        prop_row.prop(self,prop,text="")
+
+# output node
+class SORTNodeOutput(SORTShadingNode):
+    bl_label = 'SORT_output'
+    bl_idname = common.sort_node_output_bl_name
+
+    def init(self, context):
+        input = self.inputs.new('SORTNodeSocketColor', 'Surface')
+
+# lambert node
+class SORTNodeLambert(SORTShadingNode):
+    bl_label = 'SORT_lambert'
+    bl_idname = 'SORTNodeLambert'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
 
 # microfacte node
 class SORTNodeMicrofacetReflection(SORTShadingNode):
@@ -351,7 +365,6 @@ class SORTNodeGrid(SORTShadingNode):
     bl_idname = 'SORTNodeGrid'
 
     def init(self, context):
-        #socket = self.inputs.new('SORTNodeSocketFloat2','UV')
         self.inputs.new('SORTNodeSocketColor', 'Color1')
         self.inputs.new('SORTNodeSocketColor', 'Color2')
         self.outputs.new('SORTNodeSocketColor', 'Result')
@@ -372,7 +385,6 @@ class SORTNodeImage(SORTShadingNode):
     file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
 
     def init(self, context):
-        #socket = self.inputs.new('SORTNodeSocketFloat2','UV')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
     def draw_buttons(self, context, layout):
@@ -386,8 +398,6 @@ class SORTNodeImage(SORTShadingNode):
     def export_prop(self, xml_node):
         ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
 
-# our own base class with an appropriate poll function,
-# so the categories only show up in our own tree type
 class SORTPatternNodeCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
