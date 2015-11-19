@@ -94,6 +94,7 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
     layout.context_pointer_set("nodetree", nt)
     layout.context_pointer_set("node", node)
 
+    # draw socket property in panel
     def draw_props(node, layout):
         # node properties
         node.draw_props(context,layout,indented_label)
@@ -115,11 +116,13 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
                 if socket.ui_open:
                     draw_node_properties_recursive(layout, context, nt, input_node, level=level+1)
             else:
-                row = layout.row()
+                split = layout.split(common.label_percentage)
+                row = split.row()
                 indented_label(row)
-                other = row.row(align = True)
-                other.prop(socket, 'default_value',slider = True)
-                other.operator_menu_enum("node.add_surface" , "node_type", text='',icon='DOT')
+                row.label(socket.name)
+                prop_panel = split.row( align=True )
+                prop_panel.prop(socket,'default_value',text="")
+                prop_panel.operator_menu_enum("node.add_surface" , "node_type", text='',icon='DOT')
 
     draw_props(node, layout)
     layout.separator()
