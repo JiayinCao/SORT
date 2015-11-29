@@ -7,7 +7,6 @@ from . import ui_material
 def get_panels():
     types = bpy.types
     panels = [
-        "DATA_PT_lamp",
         "DATA_PT_lens",
         "DATA_PT_camera_dof",
         "DATA_PT_camera",
@@ -19,7 +18,7 @@ def get_panels():
 def register():
     for panel in get_panels():
         panel.COMPAT_ENGINES.add('sortblend')
-
+        
 def unregister():
     for panel in get_panels():
         panel.COMPAT_ENGINES.add('sortblend')

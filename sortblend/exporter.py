@@ -157,6 +157,10 @@ def export_scene(scene, force_debug):
                 ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
                 ET.SubElement( light_node , 'Property' , name='pos' ,value=utility.vec3tostr(light_position))
                 ET.SubElement( light_node , 'Property' , name='radius' ,value='10')
+            elif lamp.type == 'HEMI':
+                light_node = ET.SubElement( root , 'Light' , type='skylight')
+                ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
+                ET.SubElement( light_node , 'Property' , name='image' ,value=lamp.sort_lamp.sort_lamp_hemi.envmap_file)
 
     # output the xml
     output_scene_file = preference.get_immediate_dir(force_debug) + 'blender.xml'
@@ -356,9 +360,6 @@ def export_material(force_debug):
             mat_node = ET.SubElement( root , 'Material', name=material.name )
 
             def draw_props(mat_node , xml_node):
-                #for prop in mat_node.prop_inputs:
-                #    print('Property:'+prop.output_default_value_to_str())
-                #    ET.SubElement( xml_node , 'Property' , name=prop.name , type='value', value=prop.output_default_value_to_str() )
                 mat_node.export_prop(xml_node)
 
                 inputs = mat_node.inputs
