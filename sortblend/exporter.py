@@ -1,6 +1,8 @@
 import bpy
 import os
 import shutil
+import mathutils
+import math
 import numpy as np
 from . import preference
 from . import common
@@ -36,13 +38,21 @@ def create_path(scene, force_debug):
 # get camera data
 def lookAt(camera):
     # it seems that the matrix return here is the inverse of view matrix.
-    matrix = camera.matrix_world.copy()
+    ori_matrix = utility.getGlobalMatrix() * camera.matrix_world.copy()
     # get the transpose matrix
-    matrix = matrix.transposed()
+    matrix = ori_matrix.transposed()
     pos = matrix[3]             # get eye position
     forwards = -matrix[2]       # get forward direction
+    forwards[3] = 0.0
     target = (pos + forwards)   # get target
     up = matrix[1]              # get up direction
+
+    #matrix = ori_matrix.transposed()
+    #pos = matrix[3]             # get eye position
+    #forwards = -ori_matrix[2]       # get forward direction
+    #forwards[3] = 0.0
+    #target = (pos + forwards)   # get target
+    #up = ori_matrix[1]              # get up direction
     return (pos, target, up)
 
 # open sort file
@@ -116,31 +126,32 @@ def export_scene(scene, force_debug):
         if ob.type == 'MESH':
             model_node = ET.SubElement( root , 'Model' , filename=ob.name + '.obj', name = ob.name )
             transform_node = ET.SubElement( model_node , 'Transform' )
-            ET.SubElement( transform_node , 'Matrix' , value = 'm '+ utility.matrixtostr(ob.matrix_world) )
+            ET.SubElement( transform_node , 'Matrix' , value = 'm '+ utility.matrixtostr( utility.getGlobalMatrix() * ob.matrix_world) )
             # output the mesh to file
             export_mesh(ob,scene, force_debug)
         elif ob.type == 'LAMP':
             lamp = ob.data
+            world_matrix = utility.getGlobalMatrix() * ob.matrix_world
             if lamp.type == 'SUN':
                 light_node = ET.SubElement( root , 'Light' , type='distant')
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
-                light_dir = ob.matrix_world.col[2] * -1.0
+                light_dir = world_matrix.col[2] * -1.0
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
             elif lamp.type == 'POINT':
                 light_node = ET.SubElement( root , 'Light' , type='point')
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
-                light_position = ob.matrix_world.col[3]
+                light_position = world_matrix.col[3]
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='pos' ,value=utility.vec3tostr(light_position))
             elif lamp.type == 'SPOT':
                 light_node = ET.SubElement( root , 'Light' , type='spot')
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
-                light_dir = ob.matrix_world.col[2] * -1.0
-                light_position = ob.matrix_world.col[3]
+                light_dir = world_matrix.col[2] * -1.0
+                light_position = world_matrix.col[3]
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
                 ET.SubElement( light_node , 'Property' , name='falloff_start' ,value='1.0')
@@ -150,8 +161,8 @@ def export_scene(scene, force_debug):
                 light_node = ET.SubElement( root , 'Light' , type='area')
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
-                light_dir = ob.matrix_world.col[2] * -1.0
-                light_position = ob.matrix_world.col[3]
+                light_dir = world_matrix.col[2] * -1.0
+                light_position = world_matrix.col[3]
                 ET.SubElement( light_node , 'Property' , name='shape' ,value='square')
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
@@ -161,6 +172,8 @@ def export_scene(scene, force_debug):
                 light_node = ET.SubElement( root , 'Light' , type='skylight')
                 ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
                 ET.SubElement( light_node , 'Property' , name='image' ,value=lamp.sort_lamp.sort_lamp_hemi.envmap_file)
+                eul = mathutils.Euler((-ob.rotation_euler[0], -ob.rotation_euler[2], -ob.rotation_euler[1]), ob.rotation_mode).to_matrix().to_4x4()
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr(eul) )
 
     # output the xml
     output_scene_file = preference.get_immediate_dir(force_debug) + 'blender.xml'
@@ -219,7 +232,7 @@ def export_mesh(obj,scene,force_debug):
 
         # output vertices
         for v in mesh.vertices:
-            file.write("v %.4f %.4f %.4f\n" % v.co[:])
+            file.write("v %.4f %.4f %.4f\n" % (v.co[:]))
 
         # UV
         uv_unique_count = no_unique_count = 0
