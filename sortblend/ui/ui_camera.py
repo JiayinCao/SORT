@@ -25,9 +25,9 @@ class sort_camera_lens(declarative_property_group):
             'attr': 'lens_size',
             'name': 'Size of Camera Lens',
             'description': 'The size of lens in camera',
-            'default': 1.0,
-            'min': 1e-3,
-            'soft_min': 1e-3,
+            'default': 0.0,
+            'min': 0.0,
+            'soft_min': 0.0,
             'max': 1e3,
             'soft_max': 1e3,
             'save_in_preset': True
