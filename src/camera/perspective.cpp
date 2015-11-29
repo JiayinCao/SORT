@@ -119,9 +119,7 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 	}
 
 	Vector v;
-	// a workaround here for blender plugin, need further investigation
-	// the issue may be caused by different handness of blender and SORT
-	v.x = ( ( -x / w ) + 0.5f ) / xScale - hir / fd;	
+	v.x = ( x / w - 0.5f ) / xScale - hir / fd;
 	v.y = -1.0f * ( ( y / h - 0.5f ) ) / yScale ;
 	v.z = 1.0f;
 	v.Normalize();
