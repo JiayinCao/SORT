@@ -22,6 +22,7 @@
 #include "spectrum/spectrum.h"
 #include "utility/propertyset.h"
 #include "math/vector3.h"
+#include "math/transform.h"
 
 class Point;
 
@@ -53,6 +54,14 @@ public:
 
 	// get the pdf
 	virtual float Pdf( const Point& p , const Vector& wi ) const = 0;
+
+	// setup transformation
+	void SetTransform( const Transform& tf ){
+		m_transform = tf;
+	}
+
+protected:
+	Transform m_transform;
 };
 
 #endif

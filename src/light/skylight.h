@@ -70,6 +70,9 @@ private:
 	// the sky
 	Sky*	sky;
 
+	// The transformation
+	Transform	transform;
+
 	// initialize default value
 	void _init();
 	// release
@@ -86,6 +89,8 @@ private:
 		{
 			SkyLight* light = CAST_TARGET(SkyLight);
 			light->sky = CREATE_TYPE( str , Sky );
+
+			light->sky->SetTransform( light->transform );
 		}
 	};
 	class PropertyPasser : public PropertyHandler<Light>
@@ -99,6 +104,19 @@ private:
 				light->sky->SetProperty( m_name , str );
 			else
 				LOG_WARNING<<"There is no sky attached to the light"<<ENDL;
+		}
+	};
+	class TransformProperty : public PropertyHandler<Light>
+	{
+	public:
+		PH_CONSTRUCTOR(TransformProperty,Light);
+		void SetValue( const string& str )
+		{
+			SkyLight* light = CAST_TARGET(SkyLight);
+			light->transform = TransformFromStr(str);
+
+			if( light->sky )
+				light->sky->SetTransform( light->transform );
 		}
 	};
 };

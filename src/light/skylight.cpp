@@ -111,6 +111,7 @@ void SkyLight::_registerAllProperty()
 	_registerProperty( "front" , new PropertyPasser( this ) );
 	_registerProperty( "back" , new PropertyPasser( this ) );
 	_registerProperty( "image" , new PropertyPasser( this ) );
+	_registerProperty( "transform" , new TransformProperty( this ) );
 }
 
 // the pdf for specific sampled directioin
