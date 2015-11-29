@@ -40,7 +40,7 @@ class SORTLampPanel(bl_ui.properties_data_lamp.DataButtonsPanel):
     @classmethod
     def poll(cls, context):
         rd = context.scene.render
-        return rd.engine in cls.COMPAT_ENGINES
+        return super().poll(context) and rd.engine in cls.COMPAT_ENGINES
 
 class LampPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Property'

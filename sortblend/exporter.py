@@ -43,16 +43,18 @@ def lookAt(camera):
     matrix = ori_matrix.transposed()
     pos = matrix[3]             # get eye position
     forwards = -matrix[2]       # get forward direction
-    forwards[3] = 0.0
-    target = (pos + forwards)   # get target
-    up = matrix[1]              # get up direction
 
-    #matrix = ori_matrix.transposed()
-    #pos = matrix[3]             # get eye position
-    #forwards = -ori_matrix[2]       # get forward direction
-    #forwards[3] = 0.0
-    #target = (pos + forwards)   # get target
-    #up = ori_matrix[1]              # get up direction
+    # get focal distance for DOF effect
+    if camera.data.dof_object is not None:
+        focal_object = camera.data.dof_object
+        fo_mat = utility.getGlobalMatrix() * focal_object.matrix_world
+        delta = fo_mat.to_translation() - pos.to_3d()
+        focal_distance = delta.dot(forwards)
+    else:
+        focal_distance = max( camera.data.dof_distance , 0.01 )
+    scaled_forward = mathutils.Vector((focal_distance * forwards[0], focal_distance * forwards[1], focal_distance * forwards[2] , 0.0))
+    target = (pos + scaled_forward)   # get target
+    up = matrix[1]              # get up direction
     return (pos, target, up)
 
 # open sort file
@@ -84,7 +86,7 @@ def export_sort_file(scene, force_debug):
     ET.SubElement( camera_node , "Property" , name="eye" , value=utility.vec3tostr(pos))
     ET.SubElement( camera_node , "Property" , name="up" , value=utility.vec3tostr(up))
     ET.SubElement( camera_node , "Property" , name="target" , value=utility.vec3tostr(target))
-    ET.SubElement( camera_node , "Property" , name="len" , value="0")
+    ET.SubElement( camera_node , "Property" , name="len" , value='%f'%camera.data.sort_camera.sort_camera_lens.lens_size)
     ET.SubElement( camera_node , "Property" , name="interaxial" , value="0")
     ET.SubElement( camera_node , "Property" , name="width" , value="0")
     ET.SubElement( camera_node , "Property" , name="height" , value="0")

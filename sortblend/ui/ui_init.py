@@ -8,7 +8,6 @@ def get_panels():
     types = bpy.types
     panels = [
         "DATA_PT_lens",
-        "DATA_PT_camera_dof",
         "DATA_PT_camera",
         "RENDER_PT_dimensions",
         ]
