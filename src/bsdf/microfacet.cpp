@@ -311,6 +311,22 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 	bool total_reflection = false;
 	wi = _getRefracted( wo , wh , eta_in , eta_ext , total_reflection );
 
+	// handle total inner relection seperately
+	if( total_reflection )
+	{
+		// get reflected ray
+		wi = _getReflected( wo , wh );
+
+		// Make sure the generate wi is in the same hemisphere with wo
+		if( !SameHemiSphere( wo , wi ) )
+			return 0.0f;
+
+		if(pdf)
+			*pdf = Pdf( wo , wi );
+
+		return f( wo , wi );
+	 }
+
 	// get fresnel term
 	float fresnel_term = (total_reflection)?1.0f:fresnel->Evaluate( Dot( wi , wh ) , Dot( wo , wh ) ).GetR();
 
