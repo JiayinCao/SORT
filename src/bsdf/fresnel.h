@@ -54,7 +54,7 @@ public:
 	/// evaluate spectrum
 	virtual Spectrum Evaluate( float cosi , float coso ) const
 	{
-		float abs_cos = (cosi>0.0f)?cosi:(-cosi);
+		float abs_cos = (coso>0.0f)?coso:(-coso);
 		float sq_cos = abs_cos * abs_cos;
 
 		Spectrum t = 2 * eta * abs_cos;
