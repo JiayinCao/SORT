@@ -23,6 +23,7 @@ enum TEX_TYPE
 {
 	TT_BMP = 0,
 	TT_EXR = 1,
+	TT_TGA = 2,
 	TT_NONE ,
 };
 
