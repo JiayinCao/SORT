@@ -84,6 +84,8 @@ TEX_TYPE	TexTypeFromStr( const string& str )
 		return TT_BMP;
 	else if( strcmp( substr.c_str() , "exr" ) == 0 )
 		return TT_EXR;
+	else if( strcmp( substr.c_str() , "tga" ) == 0 )
+		return TT_TGA;
 
 	// log a warning
 	LOG_WARNING<<"Image type of \""<<substr<<"\" is not supported."<<ENDL;
