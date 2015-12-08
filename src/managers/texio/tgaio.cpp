@@ -67,7 +67,28 @@ bool TgaIO::Read( const string& name , ImgMemory* mem )
 // output the texture into bmp file
 bool TgaIO::Write( const string& name , const Texture* tex )
 {
-	
+    int width = tex->GetWidth();
+    int height = tex->GetHeight();
+    if( width == 0 || height == 0 )
+        return false;
+    
+    // Reformat to BGR layout.
+    uint8_t *outBuf = new uint8_t[3 * width * height];
+    uint8_t *dst = outBuf;
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            Spectrum c = tex->GetColor(x, y);
+            dst[0] = ( unsigned char ) (c.GetB() * 255);
+            dst[1] = ( unsigned char ) (c.GetG() * 255);
+            dst[2] = ( unsigned char ) (c.GetR() * 255);
+            dst += 3;
+        }
+    }
+    
+    tga_result result;
+    result = tga_write_bgr(name.c_str(), outBuf, width, height, 24);
+    
+    delete[] outBuf;
 
-	return true;
+	return result == TGA_NOERR;
 }
