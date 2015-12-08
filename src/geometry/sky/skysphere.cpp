@@ -70,7 +70,7 @@ void SkySphere::_generateDistribution2D()
 	unsigned nu = m_sky.GetWidth();
 	unsigned nv = m_sky.GetHeight();
 	Sort_Assert( nu != 0 && nv != 0 );
-	float* data = SORT_MALLOC_ARRAY( float , nu*nv )();
+	float* data = new float[nu*nv];
 	for( unsigned i = 0 ; i < nv ; i++ )
 	{
 		unsigned offset = i * nu;
@@ -81,6 +81,8 @@ void SkySphere::_generateDistribution2D()
 	}
 
 	distribution = new Distribution2D( data , nu , nv );
+
+	delete[] data;
 }
 
 // sample direction
