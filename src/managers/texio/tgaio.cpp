@@ -40,23 +40,8 @@ bool TgaIO::Read( const string& name , ImgMemory* mem )
 	mem->m_iWidth  = img.width;
 	mem->m_iHeight = img.height;
 
-    // "Unpack" the pixels (origin in the lower left corner).
     // TGA pixels are in BGRA format.
     mem->m_ImgMem = new Spectrum[ img.width * img.height ];
-  /*  for (int y = img.height - 1; y >= 0; y--)
-        for (int x = 0; x < img.width; x++) {
-            uint8_t *src = tga_find_pixel(&img, x, y);
-            if (tga_is_mono(&img)){
-				mem->m_ImgMem[i] = Spectrum( *src / 255.f );
-			}
-            else {
-                float c[3];
-                c[2] = src[0] / 255.f;
-                c[1] = src[1] / 255.f;
-                c[0] = src[2] / 255.f;
-                mem->m_ImgMem[i] = Spectrum( c );
-            }
-    }*/
 
 	for( int i = 0 ; i < img.height ; i++ )
 		for( int j = 0 ; j < img.width ; j++ )
