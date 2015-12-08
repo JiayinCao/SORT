@@ -20,6 +20,7 @@
 #include "texio/bmpio.h"
 #include "texio/exrio.h"
 #include "texio/tgaio.h"
+#include "texio/pngio.h"
 #include "texture/imagetexture.h"
 #include "utility/strhelper.h"
 #include "utility/define.h"
@@ -53,6 +54,7 @@ void TexManager::_init()
 	m_TexIOVec.push_back( new BmpIO() );
 	m_TexIOVec.push_back( new ExrIO() );
 	m_TexIOVec.push_back( new TgaIO() );
+    m_TexIOVec.push_back( new PngIO() );
 }
 
 // release data
