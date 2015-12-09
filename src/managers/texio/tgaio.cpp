@@ -78,6 +78,7 @@ bool TgaIO::Write( const string& name , const Texture* tex )
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             Spectrum c = tex->GetColor(x, y);
+            c = c.Clamp(); // no tone mapping yet
             dst[0] = ( unsigned char ) (c.GetB() * 255);
             dst[1] = ( unsigned char ) (c.GetG() * 255);
             dst[2] = ( unsigned char ) (c.GetR() * 255);
