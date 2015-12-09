@@ -67,6 +67,7 @@ bool PngIO::Write( const string& name , const Texture* tex )
         for( int j = 0 ; j < tex->GetWidth() ; j++ )
         {
             Spectrum c = tex->GetColor( j , i );
+            c = c.Clamp(); // no tone mapping yet
             image[4 * width * i + 4 * j + 0] = ( unsigned char ) (c.GetR() * 255.0f);
             image[4 * width * i + 4 * j + 1] = ( unsigned char ) (c.GetG() * 255.0f);
             image[4 * width * i + 4 * j + 2] = ( unsigned char ) (c.GetB() * 255.0f);
