@@ -32,7 +32,7 @@ bool HDRLoader::load(const char *fileName, HDRLoaderResult &res)
 	char str[200];
 	FILE *file;
 
-	fopen_s( &file, fileName, "rb");
+	file = fopen( fileName, "rb");
 	if (!file)
 		return false;
 
@@ -65,7 +65,7 @@ bool HDRLoader::load(const char *fileName, HDRLoaderResult &res)
 	}
 
 	int w, h;
-	if (!sscanf_s(reso, "-Y %ld +X %ld", &h, &w)) {
+	if (!sscanf(reso, "-Y %ld +X %ld", &h, &w)) {
 		fclose(file);
 		return false;
 	}
