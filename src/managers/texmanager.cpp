@@ -22,6 +22,7 @@
 #include "texio/tgaio.h"
 #include "texio/pngio.h"
 #include "texio/jpgio.h"
+#include "texio/hdrio.h"
 #include "texture/imagetexture.h"
 #include "utility/strhelper.h"
 #include "utility/define.h"
@@ -57,6 +58,7 @@ void TexManager::_init()
 	m_TexIOVec.push_back( new TgaIO() );
     m_TexIOVec.push_back( new PngIO() );
 	m_TexIOVec.push_back( new JpgIO() );
+	m_TexIOVec.push_back( new HdrIO() );
 }
 
 // release data
