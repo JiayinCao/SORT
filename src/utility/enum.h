@@ -25,6 +25,7 @@ enum TEX_TYPE
 	TT_EXR = 1,
 	TT_TGA = 2,
     TT_PNG = 3,
+	TT_JPG = 4,
 	TT_NONE ,
 };
 
