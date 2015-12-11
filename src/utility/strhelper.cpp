@@ -86,6 +86,8 @@ TEX_TYPE	TexTypeFromStr( const string& str )
 		return TT_EXR;
 	else if( strcmp( substr.c_str() , "tga" ) == 0 )
 		return TT_TGA;
+	else if (strcmp(substr.c_str(), "jpg") == 0)
+		return TT_JPG;
     else if( strcmp( substr.c_str() , "png" ) == 0 )
         return TT_PNG;
 
