@@ -100,6 +100,7 @@ void System::_postUninit()
 	Timer::DeleteSingleton();
 	LogManager::DeleteSingleton();
 	SMManager::DeleteSingleton();
+	RenderTaskQueue::DeleteSingleton();
 }
 
 // render the image
@@ -311,7 +312,6 @@ void System::_executeRenderingTasks()
 		bool allfinished = true;
 		for( int i = 0 ; i < THREAD_NUM ; ++i )
 		{
-			//threadUnits[i]->WaitForFinish();
 			if( !threadUnits[i]->IsFinished() )
 				allfinished = false;
 		}
@@ -323,7 +323,10 @@ void System::_executeRenderingTasks()
 			break;
 	}
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
+	{
+		delete threadUnits[i]->m_pIntegrator;
 		delete threadUnits[i];
+	}
 	delete[] threadUnits;
 
 	cout<<endl;
