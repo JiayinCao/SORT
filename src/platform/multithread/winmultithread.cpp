@@ -90,9 +90,6 @@ void RenderThreadWin::BeginThread()
 
 void RenderThreadWin::EndThread()
 {
-	// delete the integrator
-	SAFE_DELETE(m_pIntegrator);
-
 	// the thread is finished
 	m_finished = true;
 }
