@@ -26,6 +26,8 @@ bool HdrIO::Read( const string& name , ImgMemory* mem )
 {
 	HDRLoaderResult result;
 	bool ret = HDRLoader::load(name.c_str(), result);
+	if (!ret)
+		return false;
 
 	mem->m_iWidth = result.width;
 	mem->m_iHeight = result.height;
@@ -45,6 +47,41 @@ bool HdrIO::Read( const string& name , ImgMemory* mem )
 // output the texture into bmp file
 bool HdrIO::Write( const string& name , const Texture* tex )
 {
-	// to be implemented
-	return false;
+	std::ofstream hdr(name.c_str(), std::ios::binary);
+
+	int mResY = tex->GetHeight();
+	int mResX = tex->GetWidth();
+
+	hdr << "#?RADIANCE" << '\n';
+	hdr << "# SmallVCM" << '\n';
+	hdr << "FORMAT=32-bit_rle_rgbe" << '\n' << '\n';
+	hdr << "-Y " << mResY << " +X " << mResX << '\n';
+
+	for (int y = 0; y<mResY; y++)
+	{
+		for (int x = 0; x<mResX; x++)
+		{
+			typedef unsigned char byte;
+			byte rgbe[4] = { 0,0,0,0 };
+
+			const Spectrum &rgbF = tex->GetColor(x , y);
+			float v = std::max(rgbF.GetR(), std::max(rgbF.GetG(), rgbF.GetB()));
+
+			if (v >= 1e-32f)
+			{
+				int e;
+				v = float(frexp(v, &e) * 256.f / v);
+				rgbe[0] = byte(rgbF.GetR() * v);
+				rgbe[1] = byte(rgbF.GetG() * v);
+				rgbe[2] = byte(rgbF.GetB() * v);
+				rgbe[3] = byte(e + 128);
+			}
+
+			hdr.write((char*)&rgbe[0], 4);
+		}
+	}
+
+	hdr.close();
+
+	return true;
 }
