@@ -53,7 +53,7 @@ bool HdrIO::Write( const string& name , const Texture* tex )
 	int mResX = tex->GetWidth();
 
 	hdr << "#?RADIANCE" << '\n';
-	hdr << "# SmallVCM" << '\n';
+	hdr << "# SORT" << '\n';
 	hdr << "FORMAT=32-bit_rle_rgbe" << '\n' << '\n';
 	hdr << "-Y " << mResY << " +X " << mResX << '\n';
 
