@@ -38,7 +38,7 @@ Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample
 }
 
 // sample a ray from light
-Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
+Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
@@ -47,6 +47,7 @@ Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , Vector& n , floa
 	n = r.m_Dir;
 
 	if( pdf ) *pdf = UniformSpherePdf(r.m_Dir);
+	if( area_pdf ) *area_pdf = 1.0f;
 
 	return intensity;
 }

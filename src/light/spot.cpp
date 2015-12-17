@@ -49,7 +49,7 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
 }
 
 // sample a ray from light
-Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
+Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
@@ -59,9 +59,10 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float
 	n = r.m_Dir;
 
 	if( pdf ) *pdf = UniformConePdf( cos_total_range );
+	if( area_pdf ) *area_pdf = 1.0f;
 
 	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
-	float falloff = SatDot( local_dir , dir );
+	float falloff = SatDot( r.m_Dir , dir );
 	if( falloff < cos_total_range )
 		return 0.0f;
 	if( falloff > cos_falloff_start )
