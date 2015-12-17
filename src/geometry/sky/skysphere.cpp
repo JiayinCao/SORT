@@ -86,13 +86,15 @@ void SkySphere::_generateDistribution2D()
 }
 
 // sample direction
-Vector SkySphere::sample_v( float u , float v , float* pdf ) const
+Vector SkySphere::sample_v( float u , float v , float* pdf , float* area_pdf ) const
 {
 	Sort_Assert( distribution != 0 );
 
 	float uv[2] ;
-	distribution->SampleContinuous( u , v , uv , pdf );
-	if( pdf && *pdf == 0.0f )
+	float apdf = 0.0f;
+	distribution->SampleContinuous( u , v , uv , &apdf );
+	if( area_pdf ) *area_pdf = apdf;
+	if( apdf == 0.0f )
 		return Vector();
 
 	float theta = PI * uv[1];
@@ -101,6 +103,7 @@ Vector SkySphere::sample_v( float u , float v , float* pdf ) const
 	Vector wi = SphericalVec( theta , phi );
 	if( pdf )
 	{
+		*pdf = apdf;
 		float sin_theta = SinTheta( wi );
 		if( sin_theta != 0.0f )
 			*pdf /= TWO_PI * PI * SinTheta( wi );
