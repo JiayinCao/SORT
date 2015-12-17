@@ -29,7 +29,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 	Sort_Assert( sky );
 
 	// sample a ray
-	wi = sky->sample_v( ls->u , ls->v , pdf );
+	wi = sky->sample_v( ls->u , ls->v , pdf , 0 );
 	if( pdf && *pdf == 0.0f )
 		return 0.0f;
 
@@ -47,13 +47,13 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo ) const
 }
 
 // sample a ray from light
-Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
+Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const
 {
 	Sort_Assert( sky != 0 );
 
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
-	r.m_Dir = -sky->sample_v( ls.u , ls.v , pdf );
+	r.m_Dir = -sky->sample_v( ls.u , ls.v , pdf , area_pdf );
 
 	const BBox& box = scene->GetBBox();
 	Point center = ( box.m_Max + box.m_Min ) * 0.5f;

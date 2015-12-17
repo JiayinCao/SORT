@@ -46,7 +46,7 @@ public:
 	virtual Spectrum GetAverage() const;
 
 	// sample direction
-	virtual Vector sample_v( float u , float v , float* pdf ) const;
+	virtual Vector sample_v( float u , float v , float* pdf , float* area_pdf ) const;
 
 	// get the pdf
 	float Pdf( const Point& p , const Vector& wi ) const;

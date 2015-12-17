@@ -102,10 +102,13 @@ bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radianc
 }
 
 // sample a ray from light
-Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
+Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const
 {
 	Sort_Assert( shape != 0 );
 	shape->sample_l( ls , r , n , pdf );
+
+	if( area_pdf )
+		*area_pdf = 1.0f / shape->SurfaceArea();
 
 	// to avoid self intersection
 	r.m_fMin = 0.01f;
