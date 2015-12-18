@@ -34,9 +34,6 @@ struct BDPT_Vertex
 	Vector		wi;		// in direction
 	Vector		wo;		// out direction
 	Bsdf*		bsdf;	// bsdf from material
-	float		pdf;	// the pdf for the vertex
-	float		rr;		// the russion routtele
-	float		accu_pdf;	// accumulated pdf, russion routtele is also acounted here
 	Spectrum		accu_radiance;	// accumulated radiance
 
 	Intersection	inter;	//temp
@@ -44,9 +41,7 @@ struct BDPT_Vertex
 	BDPT_Vertex()
 	{
 		pri = 0;
-		pdf = 1.0f;
 		bsdf = 0;
-		rr = 1.0f;
 	}
 };
 
@@ -88,7 +83,7 @@ private:
 	unsigned path_per_pixel; // light sample per pixel sample per light
 
 	// generate path
-	unsigned	_generatePath( const Ray& ray , float base_pdf , vector<BDPT_Vertex>& path , unsigned max_vert , bool eye_path ) const;
+	unsigned	_generatePath( const Ray& ray , float base_pdf , const Spectrum& base_radiance , vector<BDPT_Vertex>& path , unsigned max_vert  ) const;
 
 	// evaluate path
 	// para 'epath' : path starting from eye point
@@ -105,7 +100,7 @@ private:
 						const vector<BDPT_Vertex>& lpath , int lsize ) const;
 
 	// connect light sample
-	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const BDPT_Vertex& light_vertex, const Light* light ) const;
+	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light ) const;
 };
 
 #endif
