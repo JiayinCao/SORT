@@ -287,13 +287,14 @@ public:
 	// get pdf
 	float Pdf( float u , float v ) const
 	{
-		float pdf0 , pdf1 , uv[2];
-		uv[1] = marginal->SampleContinuous( v , &pdf1 );
-		int vi = (int)(uv[1] * m_nv);
-		if( vi > (int)(m_nv - 1) )
-			vi = (int)(m_nv - 1);
-		uv[0] = pConditions[vi]->SampleContinuous( u , &pdf0 );
-		return pdf0 * pdf1;
+		u = clamp( u , 0.0f , 1.0f );
+		v = clamp( v , 0.0f , 1.0f );
+
+		int iu = (int)( u * m_nu );
+		int iv = (int)( v * m_nv );
+		if( pConditions[iv]->GetSum() * marginal->GetSum() == 0.0f )
+			return 0.0f;
+		return pConditions[iv]->GetProperty( iu ) * m_nu * marginal->GetProperty( iv ) * m_nv ;// ( pConditions[iv]->GetSum() * marginal->GetSum() );
 	}
 
 // private field
