@@ -45,7 +45,7 @@ Spectrum SkySphere::Evaluate( const Vector& vec ) const
 	float phi = SphericalPhi( wi );
 
 	float v = theta * INV_PI;
-	float u = phi * INV_PI * 0.5f;
+	float u = phi * INV_TWOPI;
 
 	return m_sky.GetColor( u , v );
 }
@@ -124,8 +124,8 @@ float SkySphere::Pdf( const Point& p , const Vector& wi ) const
 	float u , v;
 	float theta = SphericalTheta( lwi );
 	float phi = SphericalPhi( lwi );
-	u = theta * INV_PI;
-	v = phi * INV_TWOPI;
+	v = theta * INV_PI;
+	u = phi * INV_TWOPI;
 	
 	return distribution->Pdf( u , v ) / ( TWO_PI * PI * sin_theta );
 }
