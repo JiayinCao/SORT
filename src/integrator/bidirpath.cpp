@@ -36,8 +36,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	float	light_pdf = 0.0f;
 	Ray		light_ray;
 	Vector	n;
-	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , n , &light_pdf );
-	le *= 1.0f / pdf ;
+	Spectrum ori_le = light->sample_l( ps.light_sample[0] , light_ray , n , &light_pdf );
+	Spectrum le = ori_le / pdf ;
 
 	// the path from light and eye
 	vector<BDPT_Vertex> light_path , eye_path;
@@ -47,9 +47,6 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	if( eps == 0 )	return scene.Le( ray );
 	// generate path from light
 	unsigned lps = _generatePath( light_ray , light_pdf , light_path , path_per_pixel , false );
-
-	//float* total_pdf = SORT_MALLOC_ARRAY( float , eye_path.size() + light_path.size() + 1 );
-	//_GeneratePDFSummuration( eye_path, light_path, total_pdf );
 
 	//float* total_pdf2 = SORT_MALLOC_ARRAY( float , eye_path.size() + light_path.size() + 1 );
 	//_GeneratePDFSummurationUniform( eye_path, light_path, total_pdf2 );
@@ -65,6 +62,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	for( unsigned i = 1 ; i <= eps ; ++i )
 	{
 		const BDPT_Vertex& vert = eye_path[i-1];
+		
+		// the following code should be skipped in the near future
 		directWt /= vert.pdf * vert.rr;
 		if( directWt.IsBlack() == false )
 		{
@@ -72,9 +71,9 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 				* _Weight( eye_path , i , light_path , 0  );
 		}
 		directWt *= vert.bsdf->f( vert.wi , vert.wo ) * SatDot( vert.wo , vert.n );
-
+		
 		// connect light sample first
-		li += _ConnectLight(vert, light_inter);
+		li += ori_le * _ConnectLight(vert, light_inter) * _Weight(eye_path, i, light_path, 0);
 		
 		for( unsigned j = 1 ; j <= lps ; ++j )
 		{
@@ -185,8 +184,8 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , vect
 		vert.accu_pdf = accu_pdf;
 
 		Spectrum bsdf_value = vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &pdf );
-		accu_radiance *= bsdf_value * AbsDot(vert.wo, vert.n);
-		vert.accu_radiance = accu_radiance;
+		vert.accu_radiance = accu_radiance / vert.accu_pdf;
+		accu_radiance *= bsdf_value * AbsDot(vert.wo, vert.n) ;
 
 		if (pdf == 0 || bsdf_value.IsBlack())
 			return path.size();
@@ -206,12 +205,9 @@ Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int 
 	if( lpath.empty() )
 		return 0.0f;
 
-	Spectrum radiance = (esize > 1) ? epath[esize - 2].accu_radiance : 1.0f;
-	Spectrum weight = (lsize > 1) ? lpath[lsize - 2].accu_radiance : 1.0f;
 	const BDPT_Vertex& evert = epath[esize-1];
 	const BDPT_Vertex& lvert = lpath[lsize-1];
-	Spectrum li = radiance * weight * _Gterm(evert, lvert) / (evert.accu_pdf * lvert.accu_pdf);
-	return li;
+	return evert.accu_radiance * lvert.accu_radiance * _Gterm(evert, lvert);
 }
 
 // compute G term
@@ -237,30 +233,9 @@ float BidirPathTracing::_Weight(const vector<BDPT_Vertex>& epath , int esize ,
 								const vector<BDPT_Vertex>& lpath , int lsize ) const
 {
 	return 1.0f / (esize + lsize);
-	/*float pdf = epath[esize-1].accu_pdf;
-	if( lsize > 0 )
-		pdf *= lpath[lsize-1].accu_pdf;
-	return 1.0f / total_pdf_uniform[esize+lsize];
-	//return _pdf;
-	return pdf / total_pdf[esize+lsize];*/
+	//return 1.0f / total_pdf_uniform[esize+lsize];
 }
 /*
-// generate summeration of pdf
-void BidirPathTracing::_GeneratePDFSummuration( const vector<BDPT_Vertex>& epath , const vector<BDPT_Vertex>& lpath , float* result ) const
-{
-	unsigned eps = epath.size();
-	unsigned lps = lpath.size();
-
-	for(unsigned i = 0; i < eps + lps + 1 ; ++i )
-		result[i] = 0.0f;
-	for( unsigned i = 1 ; i <= eps ; ++i )
-	{
-		result[i] += epath[i-1].accu_pdf;
-		for( unsigned j = 1 ; j <= lps ; ++j )
-			result[i+j] += epath[i-1].accu_pdf * lpath[j-1].accu_pdf;
-	}
-}
-
 // generate summeration of pdf
 void BidirPathTracing::_GeneratePDFSummurationUniform( const vector<BDPT_Vertex>& epath , const vector<BDPT_Vertex>& lpath , float* result ) const
 {
@@ -280,26 +255,16 @@ void BidirPathTracing::_GeneratePDFSummurationUniform( const vector<BDPT_Vertex>
 // connect light sample
 Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex, const BDPT_Vertex& light_vertex) const
 {
-/*	if (lpath.empty())
+	return 0.0f;	// to be fixed
+
+	Vector delta = light_vertex.p - eye_vertex.p;
+	Vector n_delta = Normalize(delta);
+	Spectrum result = eye_vertex.accu_radiance * AbsDot(eye_vertex.n, n_delta) * eye_vertex.bsdf->f(eye_vertex.wi, n_delta) * AbsDot(light_vertex.n, n_delta) / delta.SquaredLength();
+
+	Visibility visible(scene);
+	visible.ray = Ray(eye_vertex.p, n_delta, 0, 0.1f, delta.Length() - 0.1f);
+	if (visible.IsVisible() == false)
 		return 0.0f;
 
-	Spectrum li(1.0f);
-
-	for (int i = 0; i < esize - 1; ++i)
-	{
-		const BDPT_Vertex& vert = epath[i];
-		li *= vert.bsdf->f(vert.wi, vert.wo) * SatDot(vert.wo, vert.n);// / ( vert.pdf * vert.rr );
-	}
-
-	for (int i = 0; i < lsize - 1; ++i)
-	{
-		const BDPT_Vertex& vert = lpath[i];
-		li *= vert.bsdf->f(vert.wo, vert.wi) * SatDot(vert.wi, vert.n);// / ( vert.pdf * vert.rr );
-	}
-
-	const BDPT_Vertex& evert = epath[esize - 1];
-	const BDPT_Vertex& lvert = lpath[lsize - 1];
-	li *= _Gterm(evert, lvert) / (evert.accu_pdf * lvert.accu_pdf);//( evert.pdf * lvert.pdf * evert.rr * lvert.rr);
-	*/
-	return 0.0f;
+	return result;
 }
