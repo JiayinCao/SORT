@@ -34,35 +34,27 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		return 0.0f;
 
 	float	light_pdf = 0.0f;
-	float	light_area_pdf = 0.0f;
 	Ray		light_ray;
 	Vector	n;
-	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , n , &light_pdf , &light_area_pdf );
+	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , n , &light_pdf , 0 );
 
 	// the path from light and eye
 	vector<BDPT_Vertex> light_path , eye_path;
 
 	// generate path from eye
-	unsigned eps = _generatePath( ray , 1.0f , eye_path , path_per_pixel , true );
+	unsigned eps = _generatePath( ray , 1.0f , 1.0f , eye_path , path_per_pixel );
 	if( eps == 0 )	return scene.Le( ray );
 	// generate path from light
-	unsigned lps = _generatePath( light_ray , light_pdf , light_path , path_per_pixel , false );
+	unsigned lps = _generatePath( light_ray , light_pdf * pdf , le , light_path , path_per_pixel );
 
-	// the light intersection
-	BDPT_Vertex light_inter;
-	light_inter.p = light_ray.m_Ori;
-	light_inter.n = n;
-	light_inter.pdf = light_area_pdf;
-
-	Spectrum directWt = 1.0f / pdf;
 	Spectrum li;
 	for( unsigned i = 1 ; i <= eps ; ++i )
 	{
 		// connect light sample first
-		li += le * _ConnectLight(eye_path[i-1], light_inter, light) * _Weight(eye_path, i, light_path, 0);
+		li += _ConnectLight(eye_path[i-1], light) * _Weight(eye_path, i, light_path, 0);
 		
 		for( unsigned j = 1 ; j <= lps ; ++j )
-			li += le * _evaluatePath( eye_path , i , light_path , j ) * _Weight( eye_path , i , light_path , j );
+			li += _evaluatePath( eye_path , i , light_path , j ) * _Weight( eye_path , i , light_path , j );
 	}
 
 	return li + eye_path[0].inter.Le( -ray.m_Dir );
@@ -133,13 +125,10 @@ void BidirPathTracing::OutputLog() const
 }
 
 // generate path
-unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , vector<BDPT_Vertex>& path , unsigned max_vert, bool eye_path ) const
+unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , const Spectrum& base_radiance, vector<BDPT_Vertex>& path , unsigned max_vert ) const
 {
 	Ray wi = ray;
-	Ray wo;
-	float pdf = base_pdf;
-	float accu_pdf = 1.0f;
-	Spectrum accu_radiance = 1.0f;
+	Spectrum accu_radiance = base_radiance / base_pdf;
 	while( path.size() < max_vert )
 	{
 		BDPT_Vertex vert;
@@ -150,29 +139,24 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , vect
 		vert.n = vert.inter.normal;
 		vert.pri = vert.inter.primitive;
 		vert.wi = -wi.m_Dir;
-		vert.pdf = pdf;
 		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
 		
-		if (path.size() > 4 )
+		vert.accu_radiance = accu_radiance;
+		
+		float bsdf_pdf;
+		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf);
+		accu_radiance *= bsdf_value * AbsDot(vert.wo, vert.n) / bsdf_pdf;
+
+		if (bsdf_pdf == 0 || bsdf_value.IsBlack())
+			return path.size();
+
+		if (path.size() > 4)
 		{
-			if ( sort_canonical() > 0.5f)
+			if (sort_canonical() > 0.5f)
 				break;
 			else
-			{
-				accu_pdf *= 0.5f;
-				vert.rr = 0.5f;
-			}
+				vert.accu_radiance *= 2.0f;
 		}
-
-		accu_pdf *= pdf;
-		vert.accu_pdf = accu_pdf;
-
-		Spectrum bsdf_value = vert.bsdf->sample_f( vert.wi , vert.wo , BsdfSample(true) , &pdf );
-		vert.accu_radiance = accu_radiance / vert.accu_pdf;
-		accu_radiance *= bsdf_value * AbsDot(vert.wo, vert.n) ;
-
-		if (pdf == 0 || bsdf_value.IsBlack())
-			return path.size();
 
 		path.push_back( vert );
 
@@ -221,16 +205,21 @@ float BidirPathTracing::_Weight(const vector<BDPT_Vertex>& epath , int esize ,
 }
 
 // connect light sample
-Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex, const BDPT_Vertex& light_vertex , const Light* light ) const
+Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const Light* light ) const
 {
-	Vector delta = light_vertex.p - eye_vertex.p;
-	Vector n_delta = Normalize(delta);
-	Spectrum result = eye_vertex.accu_radiance * eye_vertex.bsdf->f(eye_vertex.wi, n_delta) * AbsDot(eye_vertex.n, n_delta) / delta.SquaredLength() / light_vertex.pdf;
+	// drop the light vertex, take a new sample here
+	LightSample sample(true);
+	Vector wi;
+	Visibility visibility(scene);
+	float light_pdf;
+	Spectrum li = light->sample_l(eye_vertex.inter, &sample, wi, 0.1f, &light_pdf, visibility);
+	li *= eye_vertex.accu_radiance * eye_vertex.bsdf->f(eye_vertex.wi, wi) * AbsDot(eye_vertex.n, wi) / light_pdf;
 
-	Visibility visible(scene);
-	visible.ray = Ray(eye_vertex.p, n_delta, 0, 0.1f, delta.Length() - 0.1f);
-	if (visible.IsVisible() == false)
+	if (li.IsBlack())
 		return 0.0f;
 
-	return result;
+	if (visibility.IsVisible() == false)
+		return 0.0f;
+
+	return li;
 }

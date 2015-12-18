@@ -30,10 +30,10 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
 	Spectrum L = 0.0f;
 
-	bool		specular = true;
 	Spectrum	path_weight = 1.0f;
 	unsigned	bounces = 0;
 	Ray	r = ray;
+
 	while(true)
 	{
 		Intersection inter;
@@ -44,13 +44,10 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		{
 			if( bounces == 0 )
 				return scene.Le( r );
-			else if( specular ) 
-				L+=scene.Le(r)*path_weight;
 			break;
 		}
 
 		if( bounces == 0 ) L+=inter.Le(-r.m_Dir);
-		else if( specular ) L+=inter.Le(-r.m_Dir)*path_weight;
 
 		// make sure there is intersected primitive
 		Sort_Assert( inter.primitive != 0 );
@@ -78,7 +75,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		// update path weight
 		path_weight *= f * AbsDot( wi , inter.normal ) / path_pdf;
 
-		if( path_weight.GetIntensity() == 0.0f && specular == false )
+		if( path_weight.GetIntensity() == 0.0f )
 			break;
 		if( bounces > 4 )
 		{

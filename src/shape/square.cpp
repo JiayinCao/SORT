@@ -56,7 +56,7 @@ void Square::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
 	r.m_Dir = transform( UniformSampleHemisphere( sort_canonical() , sort_canonical() ) );
 	n = transform.invMatrix.Transpose()( Vector( 0.0f , 1.0f , 0.0f ) );
 
-	if( pdf ) *pdf = 1.0f / ( radius * radius * 8.0f * PI );
+	if( pdf ) *pdf = 1.0f / ( SurfaceArea() * TWO_PI );
 }
 
 // the surface area of the shape
