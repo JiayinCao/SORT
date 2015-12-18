@@ -42,7 +42,7 @@ Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , Vector& n , fl
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
-	r.m_Dir = Vector( -light2world.matrix.m[1] , -light2world.matrix.m[5] , -light2world.matrix.m[9] );
+	r.m_Dir = Vector( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
 	
 	const BBox& box = scene->GetBBox();
 	Point center = ( box.m_Max + box.m_Min ) * 0.5f;
