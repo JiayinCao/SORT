@@ -105,8 +105,7 @@ private:
 						const vector<BDPT_Vertex>& lpath , int lsize ) const;
 
 	// generate summeration of pdf
-	void	_GeneratePDFSummuration( const vector<BDPT_Vertex>& epath , const vector<BDPT_Vertex>& lpath , float* result ) const;
-	void	_GeneratePDFSummurationUniform( const vector<BDPT_Vertex>& epath , const vector<BDPT_Vertex>& lpath , float* result ) const;
+//	void	_GeneratePDFSummurationUniform( const vector<BDPT_Vertex>& epath , const vector<BDPT_Vertex>& lpath , float* result ) const;
 
 	// connect light sample
 	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const BDPT_Vertex& light_vertex) const;
