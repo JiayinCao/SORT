@@ -37,6 +37,7 @@ struct BDPT_Vertex
 	float		pdf;	// the pdf for the vertex
 	float		rr;		// the russion routtele
 	float		accu_pdf;	// accumulated pdf, russion routtele is also acounted here
+	Spectrum		accu_radiance;	// accumulated radiance
 
 	Intersection	inter;	//temp
 
@@ -87,7 +88,7 @@ private:
 	unsigned path_per_pixel; // light sample per pixel sample per light
 
 	// generate path
-	unsigned	_generatePath( const Ray& ray , float base_pdf , vector<BDPT_Vertex>& path , unsigned max_vert ) const;
+	unsigned	_generatePath( const Ray& ray , float base_pdf , vector<BDPT_Vertex>& path , unsigned max_vert , bool eye_path ) const;
 
 	// evaluate path
 	// para 'epath' : path starting from eye point
@@ -101,14 +102,14 @@ private:
 
 	// weight the path
 	float	_Weight(	const vector<BDPT_Vertex>& epath , int esize , 
-						const vector<BDPT_Vertex>& lpath , int lsize ,
-						const BDPT_Vertex& light_pos ,
-						const float* const total_pdf ,
-						const float* const total_pdf_uniform ) const;
+						const vector<BDPT_Vertex>& lpath , int lsize ) const;
 
 	// generate summeration of pdf
 	void	_GeneratePDFSummuration( const vector<BDPT_Vertex>& epath , const vector<BDPT_Vertex>& lpath , float* result ) const;
 	void	_GeneratePDFSummurationUniform( const vector<BDPT_Vertex>& epath , const vector<BDPT_Vertex>& lpath , float* result ) const;
+
+	// connect light sample
+	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const BDPT_Vertex& light_vertex) const;
 };
 
 #endif
