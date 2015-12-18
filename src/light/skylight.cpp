@@ -59,7 +59,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float*
 	Point center = ( box.m_Max + box.m_Min ) * 0.5f;
 	Vector delta = box.m_Max - box.m_Min;
 	float world_radius = delta.Length() * 0.5f;
-	r.m_Ori = center - r.m_Dir * world_radius * 2.0f;
+	r.m_Ori = center - r.m_Dir * world_radius * 3.0f;
 	n = r.m_Dir;
 
 	return sky->Evaluate( -r.m_Dir );

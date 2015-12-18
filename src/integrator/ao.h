@@ -59,7 +59,7 @@ private:
 		{
 			AmbientOcclusion* ao = CAST_TARGET(AmbientOcclusion);
 			if( ao )
-				ao->maxDistance = atof( str.c_str() );
+				ao->maxDistance = (float)atof( str.c_str() );
 		}
 	};
 };
