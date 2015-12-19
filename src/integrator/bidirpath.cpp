@@ -45,16 +45,16 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	unsigned eps = _generatePath( ray , 1.0f , 1.0f , eye_path , path_per_pixel );
 	if( eps == 0 )	return scene.Le( ray );
 	// generate path from light
-	unsigned lps = _generatePath( light_ray , light_pdf * pdf , le , light_path , path_per_pixel );
+	unsigned lps = _generatePath( light_ray , light_pdf * pdf , le * SatDot( light_ray.m_Dir , n ), light_path , path_per_pixel );
 
 	Spectrum li;
 	for( unsigned i = 1 ; i <= eps ; ++i )
 	{
 		// connect light sample first
-		li += _ConnectLight(eye_path[i-1], light) * _Weight(eye_path, i, light_path, 0);
+		li += _ConnectLight(eye_path[i-1], light) * _Weight(eye_path, i, light_path, 0) / pdf;
 		
-		for( unsigned j = 1 ; j <= lps ; ++j )
-			li += _evaluatePath( eye_path , i , light_path , j ) * _Weight( eye_path , i , light_path , j );
+		for (unsigned j = 1; j <= lps; ++j)
+			li += _evaluatePath(eye_path, i, light_path, j) * _Weight(eye_path, i, light_path, j);
 	}
 
 	return li + eye_path[0].inter.Le( -ray.m_Dir );
@@ -143,6 +143,8 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , cons
 		
 		vert.accu_radiance = accu_radiance;
 		
+		path.push_back(vert);
+
 		float bsdf_pdf;
 		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf);
 		accu_radiance *= bsdf_value * AbsDot(vert.wo, vert.n) / bsdf_pdf;
@@ -157,8 +159,6 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , cons
 			else
 				vert.accu_radiance *= 2.0f;
 		}
-
-		path.push_back( vert );
 
 		wi = Ray( vert.inter.intersect , vert.wo , 0 , 0.001f );
 	}
@@ -189,7 +189,7 @@ Spectrum BidirPathTracing::_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1
 		return 0.0f;
 
 	Visibility visible( scene );
-	visible.ray = Ray( p1.p , n_delta  , 0 , 0.1f , delta.Length() - 0.1f );
+	visible.ray = Ray( p1.p , n_delta  , 0 , 0.01f , delta.Length() - 0.01f );
 	if( visible.IsVisible() == false )
 		return 0.0f;
 	
