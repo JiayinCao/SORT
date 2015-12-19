@@ -54,7 +54,7 @@ Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , Vector& n , fl
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 	Point p = ( u * v0 + v * v1 ) * world_radius + center;
-	r.m_Ori = p - r.m_Dir * world_radius * 2.0f;
+	r.m_Ori = p - r.m_Dir * world_radius * 3.0f;
 
 	if( pdf ) *pdf = 1.0f / ( PI * world_radius * world_radius );
 	if( area_pdf ) *area_pdf = *pdf;

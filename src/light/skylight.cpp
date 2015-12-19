@@ -59,8 +59,18 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float*
 	Point center = ( box.m_Max + box.m_Min ) * 0.5f;
 	Vector delta = box.m_Max - box.m_Min;
 	float world_radius = delta.Length() * 0.5f;
-	r.m_Ori = center - r.m_Dir * world_radius * 3.0f;
+
+	Vector v1 , v2;
+	CoordinateSystem( -r.m_Dir , v1 , v2 );
+	float d1 , d2;
+	float t0 = sort_canonical();
+	float t1 = sort_canonical();
+	UniformSampleDisk( t0 , t1 , d1 , d2 );
+	r.m_Ori = center + world_radius * ( v1 * d1 + v2 * d2 ) - r.m_Dir * 2.0f * world_radius;
 	n = r.m_Dir;
+
+	if( pdf )
+		*pdf *= 1.0f / ( PI * world_radius * world_radius );
 
 	return sky->Evaluate( -r.m_Dir );
 }
