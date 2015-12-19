@@ -157,8 +157,13 @@ public:
 		for( unsigned i = 0 ; i < n ; i++ )
 			cdf[i+1] = cdf[i] + f[i];
 		sum = cdf[n];
-		for( unsigned i = 0 ; i < n+1 ; i++ )
-			cdf[i] /= sum;
+
+		if( sum != 0.0f )
+			for( unsigned i = 0 ; i < n+1 ; ++i )
+				cdf[i] /= sum;
+		else
+			for( unsigned i = 0 ; i < n+1 ; ++i )
+				cdf[i] = (float)i / (float)(n);
 	}
 	// destructor
 	~Distribution1D(){ SAFE_DELETE_ARRAY(cdf); }
@@ -212,7 +217,7 @@ public:
 			return 0.0f;
 		}
 		if( pdf )
-			*pdf = (cdf[offset+1]-cdf[offset])*count;
+			*pdf = (cdf[offset+1]-cdf[offset]) * count;
 		float du = ( u - cdf[offset] ) / ( cdf[offset+1] - cdf[offset] );
 		return ( du + (float)offset ) / (float)count;
 	}
