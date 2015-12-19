@@ -48,12 +48,12 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	unsigned lps = _generatePath( light_ray , light_pdf * pdf , le * SatDot( light_ray.m_Dir , n ), light_path , path_per_pixel );
 
 	Spectrum li;
-	for( unsigned i = 1 ; i <= eps ; ++i )
+	for( unsigned i = 0 ; i < eps ; ++i )
 	{
 		// connect light sample first
-		li += _ConnectLight(eye_path[i-1], light) * _Weight(eye_path, i, light_path, 0) / pdf;
+		li += _ConnectLight(eye_path[i], light) * _Weight(eye_path, i, light_path, -1) / pdf;
 		
-		for (unsigned j = 1; j <= lps; ++j)
+		for (unsigned j = 0; j < lps; ++j)
 			li += _evaluatePath(eye_path, i, light_path, j) * _Weight(eye_path, i, light_path, j);
 	}
 
@@ -173,8 +173,8 @@ Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int 
 	if( lpath.empty() )
 		return 0.0f;
 
-	const BDPT_Vertex& evert = epath[esize-1];
-	const BDPT_Vertex& lvert = lpath[lsize-1];
+	const BDPT_Vertex& evert = epath[esize];
+	const BDPT_Vertex& lvert = lpath[lsize];
 	return evert.accu_radiance * lvert.accu_radiance * _Gterm(evert, lvert);
 }
 
@@ -201,7 +201,7 @@ float BidirPathTracing::_Weight(const vector<BDPT_Vertex>& epath , int esize ,
 								const vector<BDPT_Vertex>& lpath , int lsize ) const
 {
 	// MIS to be implemented
-	return 1.0f / (esize + lsize);
+	return 1.0f / (esize + lsize+2);
 }
 
 // connect light sample
