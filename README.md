@@ -1,10 +1,10 @@
 # SORT
 
-SORT is short for Simple Open-source Ray Tracing. It is a project that I initiated a couple of years ago, which is quite simlilar to PBRT, because I wrote the whole renderer after reading pbrt several times and I'd like to enhance my understanding on offline rendering with this small project.
+SORT is short for Simple Open-source Ray Tracing. It is a physically based renderer that I initiated a couple of years ago, which is quite simlilar to PBRT, because I wrote the whole renderer after reading pbrt several times and I'd like to enhance my understanding on offline rendering with this small project.
 SORT is cross-platform, it works well on Windows, Mac and Ubuntu.
 
 Here are the features implemented so far:
-  - Integrator. (Whitted ray tracing, direct lighting, path tracing, ambient occlusion)
+  - Integrator. (Whitted ray tracing, direct lighting, path tracing, bidirectional path tracing, ambient occlusion)
   - Spatial acceleration structure. (KD-Tree, BVH, Uniform grid)
   - Sampler. (Regular, random, stratified)
   - BXDF. (Lambert, Oran Nayar, MicroFacet, MERL)
