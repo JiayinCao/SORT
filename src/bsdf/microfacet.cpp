@@ -175,6 +175,13 @@ MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, Fresnel*
 // result    : the portion that comes along 'wo' from 'wi'
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 {
+	if( SameHemiSphere( wo , wi ) == false )
+		return 0.0f;
+    
+    // ignore reflection at the back face
+    if( wo.y <= 0.0f )
+        return 0.0f;
+
 	float NoL = AbsCosTheta( wi );
 	float NoV = AbsCosTheta( wo );
 

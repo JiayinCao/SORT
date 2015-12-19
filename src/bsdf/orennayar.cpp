@@ -40,6 +40,11 @@ OrenNayar::OrenNayar( const Spectrum& reflectence , float roughness)
 // result    : the portion that comes along 'wo' from 'wi'
 Spectrum OrenNayar::f( const Vector& wo , const Vector& wi ) const
 {
+	if( SameHemiSphere( wo , wi ) == false )
+		return 0.0f;
+	if( wo.y < 0.0f )
+		return 0.0f;
+
 	float sintheta_i = SinTheta(wi);
 	float sintheta_o = SinTheta(wo);
 	

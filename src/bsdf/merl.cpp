@@ -112,6 +112,13 @@ Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
 	Vector wo = Wo;
 	Vector wi = Wi;
 
+	if( SameHemiSphere( wo , wi ) == false )
+		return 0.0f;
+    
+    // ignore reflection at the back face
+    if( wo.y <= 0.0f )
+        return 0.0f;
+	
 	// Compute wh and transform wi to halfangle coordinate system
     Vector wh = wo + wi;
 	if( wh.y < 0.0f )
