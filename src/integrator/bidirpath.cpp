@@ -41,23 +41,26 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	// the path from light and eye
 	vector<BDPT_Vertex> light_path , eye_path;
 
-	// generate path from eye
-	unsigned eps = _generatePath( ray , 1.0f , 1.0f , eye_path , path_per_pixel );
-	if( eps == 0 )	return scene.Le( ray );
-	// generate path from light
-	unsigned lps = _generatePath( light_ray , light_pdf * pdf , le * SatDot( light_ray.m_Dir , n ), light_path , path_per_pixel );
-
 	Spectrum li;
+
+	// generate path from eye
+	unsigned eps = _generatePath( ray , 1.0f , 1.0f , eye_path , path_per_pixel , &li , light );
+	li /= pdf;
+	if( eps == 0 )	return li;
+
+	// generate path from light
+	unsigned lps = _generatePath( light_ray , light_pdf * pdf , le * SatDot( light_ray.m_Dir , n ), light_path , path_per_pixel , 0 , 0 );
+
 	for( unsigned i = 0 ; i < eps ; ++i )
 	{
 		// connect light sample first
-		li += _ConnectLight(eye_path[i], light) * _Weight(eye_path, i, light_path, -1) / pdf;
+		li += _ConnectLight(eye_path[i], light) * _Weight(i, -1, light) / pdf;
 		
 		for (unsigned j = 0; j < lps; ++j)
-			li += _evaluatePath(eye_path, i, light_path, j) * _Weight(eye_path, i, light_path, j);
+			li += _evaluatePath(eye_path, i, light_path, j) * _Weight(i, j, light);
 	}
 
-	return li + eye_path[0].inter.Le( -ray.m_Dir );
+	return li;
 }
 
 // request samples
@@ -125,7 +128,7 @@ void BidirPathTracing::OutputLog() const
 }
 
 // generate path
-unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , const Spectrum& base_radiance, vector<BDPT_Vertex>& path , unsigned max_vert ) const
+unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , const Spectrum& base_radiance, vector<BDPT_Vertex>& path , unsigned max_vert , Spectrum* pli , const Light* light ) const
 {
 	Ray wi = ray;
 	Spectrum accu_radiance = base_radiance / base_pdf;
@@ -133,20 +136,26 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , cons
 	{
 		BDPT_Vertex vert;
 		if( false == scene.GetIntersect( wi , &vert.inter ) )
+		{
+			if( pli && scene.GetSkyLight() == light) 
+				*pli = scene.Le( wi ) * accu_radiance * _Weight( path.size() , -2 , light);
 			break;
+		}
 		
+		// it hits a light source
+		if( pli && vert.inter.primitive->GetLight() == light )
+			*pli += vert.inter.Le( -wi.m_Dir ) * accu_radiance * _Weight( path.size() , -2 , light);
+
 		vert.p = vert.inter.intersect;
 		vert.n = vert.inter.normal;
-		vert.pri = vert.inter.primitive;
 		vert.wi = -wi.m_Dir;
 		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
-		
 		vert.accu_radiance = accu_radiance;
 		
 		path.push_back(vert);
 
 		float bsdf_pdf;
-		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf);
+		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf , BXDF_ALL);
 		accu_radiance *= bsdf_value * AbsDot(vert.wo, vert.n) / bsdf_pdf;
 
 		if (bsdf_pdf == 0 || bsdf_value.IsBlack())
@@ -157,7 +166,7 @@ unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , cons
 			if (sort_canonical() > 0.5f)
 				break;
 			else
-				vert.accu_radiance *= 2.0f;
+				accu_radiance *= 2.0f;
 		}
 
 		wi = Ray( vert.inter.intersect , vert.wo , 0 , 0.001f );
@@ -197,11 +206,13 @@ Spectrum BidirPathTracing::_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1
 }
 
 // weight the path
-float BidirPathTracing::_Weight(const vector<BDPT_Vertex>& epath , int esize , 
-								const vector<BDPT_Vertex>& lpath , int lsize ) const
+float BidirPathTracing::_Weight( int esize , int lsize , const Light* light ) const
 {
+	if( light->IsDelta() )
+		return 1.0f / (esize+lsize+2);
+
 	// MIS to be implemented
-	return 1.0f / (esize + lsize+2);
+	return 1.0f / (esize + lsize+3);
 }
 
 // connect light sample

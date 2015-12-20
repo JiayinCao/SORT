@@ -30,7 +30,6 @@ struct BDPT_Vertex
 {
 	Point		p;		// the position of the vertex
 	Vector		n;		// the normal of the vertex
-	Primitive*	pri;	// the primitive
 	Vector		wi;		// in direction
 	Vector		wo;		// out direction
 	Bsdf*		bsdf;	// bsdf from material
@@ -40,7 +39,6 @@ struct BDPT_Vertex
 
 	BDPT_Vertex()
 	{
-		pri = 0;
 		bsdf = 0;
 	}
 };
@@ -83,7 +81,7 @@ private:
 	unsigned path_per_pixel; // light sample per pixel sample per light
 
 	// generate path
-	unsigned	_generatePath( const Ray& ray , float base_pdf , const Spectrum& base_radiance , vector<BDPT_Vertex>& path , unsigned max_vert  ) const;
+	unsigned	_generatePath( const Ray& ray , float base_pdf , const Spectrum& base_radiance , vector<BDPT_Vertex>& path , unsigned max_vert , Spectrum* pli , const Light* light ) const;
 
 	// evaluate path
 	// para 'epath' : path starting from eye point
@@ -96,8 +94,7 @@ private:
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
 	// weight the path
-	float	_Weight(	const vector<BDPT_Vertex>& epath , int esize , 
-						const vector<BDPT_Vertex>& lpath , int lsize ) const;
+	float	_Weight( int esize , int lsize , const Light* light ) const;
 
 	// connect light sample
 	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light ) const;
