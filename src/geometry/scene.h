@@ -71,6 +71,9 @@ public:
 	// get lights
 	const vector<Light*>& GetLights() const
 	{return m_lights;}
+	// get sky light
+	const Light* GetSkyLight() const
+	{return m_skyLight;}
 	// get sampled light
 	const Light* SampleLight( float u , float* pdf ) const;
 	// get the properbility of the sample
