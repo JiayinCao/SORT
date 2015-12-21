@@ -56,9 +56,15 @@ public:
 	void SetCameraHeight( float h );
 
 	// get camera coordinate according to a view direction in world space
-	virtual Vector2i GetScreenCoord(Vector dir) {
+	virtual Vector2i GetScreenCoord(Vector dir, float* pdf) {
 		Sort_Assert(false);
 		return Vector2i();
+	}
+
+	// get eye direction
+	virtual Vector GetForward() {
+		Sort_Assert(false);
+		return Vector();
 	}
 
 // protected field

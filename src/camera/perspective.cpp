@@ -94,26 +94,31 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 	float xScale = yScale / aspect;
 
 	// handle different sensor size
+	float imagePlaneDist = 0.0f;
 	if( m_sensorW && m_sensorH )
 	{
 		if( m_aspectFit == 1 )	// horizontal fit
 		{
 			xScale = 0.5f / tan( m_fov * 0.5f );
 			yScale = xScale * aspect;
+			imagePlaneDist = xScale * w;
 		}else if( m_aspectFit == 2 )	// vertical fit
 		{
 			yScale = 0.5f / tan( m_fov * 0.5f );
 			xScale = yScale / aspect;
+			imagePlaneDist = yScale * h;
 		}else	// auto fit
 		{
 			if( aspect < 1 )
 			{
 				yScale = 0.5f / tan( m_fov * 0.5f );
 				xScale = yScale / aspect;
+				imagePlaneDist = yScale * h;
 			}else if( aspect > 1 )
 			{
 				xScale = 0.5f / tan( m_fov * 0.5f );
 				yScale = xScale * aspect;
+				imagePlaneDist = xScale * w;
 			}
 		}
 	}
@@ -152,7 +157,21 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 		r.m_Dir = Normalize( target - r.m_Ori );
 	}
 
+	// calculate the pdf for camera ray
+	const float cosAtCamera = Dot( zaxis , r.m_Dir );
+	const float imagePointToCameraDist = imagePlaneDist / cosAtCamera;
+	const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
+
+	// the pdf of the ray
+	r.m_fPDF = w * h / imageToSolidAngleFactor;
+
 	return r;
+}
+
+// get eye direction
+Vector PerspectiveCamera::GetForward()
+{
+	return (m_target-m_eye).Normalize();
 }
 
 // register all properties
@@ -169,7 +188,7 @@ void PerspectiveCamera::_registerAllProperty()
 }
 
 // get camera coordinate according to a view direction in world space
-Vector2i PerspectiveCamera::GetScreenCoord(Vector dir)
+Vector2i PerspectiveCamera::GetScreenCoord(Vector dir , float* pdf)
 {
 	// get view axis
 	Vector zaxis = Normalize(m_target - m_eye);
@@ -191,29 +210,31 @@ Vector2i PerspectiveCamera::GetScreenCoord(Vector dir)
 	float xScale = yScale / aspect;
 
 	// handle different sensor size
-	if (m_sensorW && m_sensorH)
+	float imagePlaneDist = 0.0f;
+	if( m_sensorW && m_sensorH )
 	{
-		if (m_aspectFit == 1)	// horizontal fit
+		if( m_aspectFit == 1 )	// horizontal fit
 		{
-			xScale = 0.5f / tan(m_fov * 0.5f);
+			xScale = 0.5f / tan( m_fov * 0.5f );
 			yScale = xScale * aspect;
-		}
-		else if (m_aspectFit == 2)	// vertical fit
+			imagePlaneDist = xScale * w;
+		}else if( m_aspectFit == 2 )	// vertical fit
 		{
-			yScale = 0.5f / tan(m_fov * 0.5f);
+			yScale = 0.5f / tan( m_fov * 0.5f );
 			xScale = yScale / aspect;
-		}
-		else	// auto fit
+			imagePlaneDist = yScale * h;
+		}else	// auto fit
 		{
-			if (aspect < 1)
+			if( aspect < 1 )
 			{
-				yScale = 0.5f / tan(m_fov * 0.5f);
+				yScale = 0.5f / tan( m_fov * 0.5f );
 				xScale = yScale / aspect;
-			}
-			else if (aspect > 1)
+				imagePlaneDist = yScale * h;
+			}else if( aspect > 1 )
 			{
-				xScale = 0.5f / tan(m_fov * 0.5f);
+				xScale = 0.5f / tan( m_fov * 0.5f );
 				yScale = xScale * aspect;
+				imagePlaneDist = xScale * w;
 			}
 		}
 	}
@@ -221,6 +242,17 @@ Vector2i PerspectiveCamera::GetScreenCoord(Vector dir)
 	Vector2i coord;
 	coord.x = ( vs_dir.x * xScale + 0.5f ) * w;
 	coord.y = (-vs_dir.y * yScale + 0.5f ) * h;
+
+	if( pdf )
+	{
+		// calculate the pdf for camera ray
+		const float cosAtCamera = Dot( zaxis , dir );
+		const float imagePointToCameraDist = imagePlaneDist / cosAtCamera;
+		const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
+
+		// the pdf of the ray
+		*pdf = ( w * h ) / imageToSolidAngleFactor ;
+	}
 
 	return coord;
 }

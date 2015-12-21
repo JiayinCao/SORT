@@ -60,6 +60,8 @@ public:
 	// the maxium and minium value in the ray
 	float	m_fMin;
 	float	m_fMax;
+
+	float	m_fPDF;
 };
 #endif
 
