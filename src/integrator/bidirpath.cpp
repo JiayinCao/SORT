@@ -38,8 +38,18 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	float	light_pdf = 0.0f;
 	Ray		light_ray;
 	Vector	light_normal;
-	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , light_normal, &light_pdf , 0 );
+	float	light_area_pdf = 0.0f;
+	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , light_normal, &light_pdf , &light_area_pdf );
 	Spectrum li;
+	
+	//-----------------------------------------------------------------------------------------------------
+	// Path evaluation: light tracing
+	BDPT_Vertex light_vert;
+	light_vert.p = light_ray.m_Ori;
+	light_vert.accu_radiance = le / pdf / light_area_pdf;
+	light_vert.n = light_normal;
+	light_vert.bsdf = 0;
+	_ConnectCamera( light_vert , 0 , light );
 
 	vector<BDPT_Vertex> light_path;
 	Ray wi = light_ray;
@@ -57,6 +67,10 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		vert.accu_radiance = accu_radiance;
 
 		light_path.push_back(vert);
+
+		//-----------------------------------------------------------------------------------------------------
+		// Path evaluation: light tracing
+		_ConnectCamera( vert , light_path.size() , light );
 
 		float bsdf_pdf;
 		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf, BXDF_ALL);
@@ -76,10 +90,14 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 		wi = Ray(vert.inter.intersect, vert.wo, 0, 0.001f);
 	}
+
+	if( light_tracing_only )
+		return 0.0f;
+
 	unsigned lps = light_path.size();
 
 	wi = ray;
-	accu_radiance = 1.0f;
+	accu_radiance = 1.0f;;
 	int light_path_len = 0;
 	while (light_path_len < path_per_pixel)
 	{
@@ -144,6 +162,8 @@ void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsig
 		ps[i].light_sample = new LightSample[ 1 ];
 	}
 	ps[0].data = new float[ ps_num * 3 ];
+
+	sample_per_pixel = ps_num;
 }
 
 // generate samples
@@ -221,10 +241,10 @@ Spectrum BidirPathTracing::_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1
 float BidirPathTracing::_Weight( int esize , int lsize , const Light* light ) const
 {
 	if( light->IsDelta() )
-		return 1.0f / (esize+lsize+2);
+		return 1.0f / (esize+lsize+3);
 
 	// MIS to be implemented
-	return 1.0f / (esize + lsize+3);
+	return 1.0f / (esize + lsize + 4);
 }
 
 // connect light sample
@@ -254,7 +274,7 @@ void BidirPathTracing::PostProcess()
 	if (!is)
 		return;
 
-	std::vector<Pending_Sample>::const_iterator it = pending_samples.begin();
+	std::list<Pending_Sample>::const_iterator it = pending_samples.begin();
 	while (it != pending_samples.end())
 	{
 		is->UpdatePixel((*it).coord.x, (*it).coord.y, (*it).radiance);
@@ -263,20 +283,39 @@ void BidirPathTracing::PostProcess()
 }
 
 // connect camera point
-void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex) const
+void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const Light* light ) const
 {
-	Vector delta = light_vertex.p - camera->GetEye();
-	delta.Normalize();
+	float weight = 1.0f;
+	if( light_tracing_only == false )
+		weight = _Weight( len , -2 , light );
 
-	Vector2i coord = camera->GetScreenCoord(delta);
+	Vector delta = light_vertex.p - camera->GetEye();
+	Vector n_delta = Normalize(delta);
+
+	float camera_pdf;
+	Vector2i coord = camera->GetScreenCoord(n_delta, &camera_pdf);
+
+	camera_pdf /= AbsDot( light_vertex.n, n_delta ) / delta.SquaredLength();
 
 	if (coord.x < 0.0f || coord.y < 0.0f ||
 		coord.x >= camera->GetImageSensor()->GetWidth() ||
-		coord.y >= camera->GetImageSensor()->GetHeight())
+		coord.y >= camera->GetImageSensor()->GetHeight() ||
+		camera_pdf == 0.0f )
 		return;
 
+	Spectrum g = 1.0f;
+	if( light_vertex.bsdf )
+		g *= light_vertex.bsdf->f( light_vertex.wi , -n_delta );
+	if( g.IsBlack() )
+		return;
+
+	Visibility visible( scene );
+	visible.ray = Ray( light_vertex.p , -n_delta , 0 , 0.01f , delta.Length() );
+	if( visible.IsVisible() == false )
+		return;
+	
 	Pending_Sample light_sample;
 	light_sample.coord = coord;
-	light_sample.radiance = light_vertex.accu_radiance;
+	light_sample.radiance = light_vertex.accu_radiance * g / camera_pdf / sample_per_pixel * weight ;
 	pending_samples.push_back(light_sample);
 }

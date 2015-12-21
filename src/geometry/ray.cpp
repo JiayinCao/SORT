@@ -24,6 +24,7 @@ Ray::Ray()
 	m_Depth = 0;
 	m_fMin = 0.0f;
 	m_fMax = FLT_MAX;
+	m_fPDF = 1.0f;
 }
 // constructor from a point and a direction
 Ray::Ray( const Point& p , const Vector& dir , unsigned depth , float fmin , float fmax)
@@ -33,6 +34,7 @@ Ray::Ray( const Point& p , const Vector& dir , unsigned depth , float fmin , flo
 	m_Depth = depth;
 	m_fMin = fmin;
 	m_fMax = fmax;
+	m_fPDF = 1.0f;
 }
 // copy constructor
 Ray::Ray( const Ray& r )
@@ -42,6 +44,7 @@ Ray::Ray( const Ray& r )
 	m_Depth = r.m_Depth;
 	m_fMin = r.m_fMin;
 	m_fMax = r.m_fMax;
+	m_fPDF = 1.0f;
 }
 // destructor
 Ray::~Ray()
