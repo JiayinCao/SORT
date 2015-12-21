@@ -20,6 +20,7 @@
 #include "bsdf/bsdf.h"
 #include "geometry/scene.h"
 #include "integratormethod.h"
+#include "camera/camera.h"
 
 IMPLEMENT_CREATOR( PathTracing );
 

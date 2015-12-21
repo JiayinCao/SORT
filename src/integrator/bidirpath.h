@@ -61,7 +61,7 @@ public:
 	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
 
 	// default constructor
-	BidirPathTracing() { path_per_pixel = 8; light_tracing_only = false; }
+	BidirPathTracing() { path_per_pixel = 8; light_tracing_only = false; sample_per_pixel = 1;}
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -93,7 +93,9 @@ protected:
 	int path_per_pixel;			// light sample per pixel sample per light
 
 	bool light_tracing_only;	// only do light tracing
-	mutable std::vector<Pending_Sample>	pending_samples;	// pending samples for light tracing
+	mutable std::list<Pending_Sample>	pending_samples;	// pending samples for light tracing
+
+	int sample_per_pixel;		// light sample per pixel
 
 	// compute G term
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
@@ -105,7 +107,7 @@ protected:
 	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light ) const;
 	
 	// connect camera point
-	void _ConnectCamera(const BDPT_Vertex& light_vertex) const;
+	void _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light ) const;
 };
 
 #endif

@@ -52,6 +52,8 @@ public:
 	const Point& GetEye() const { return m_eye; }
 	virtual void SetEye(const Point& eye) { m_eye = eye; }
 
+	// get eye direction
+	virtual Vector GetForward() = 0;
 	// get pass number. By default , all of the cameras have only one pass except stereo vision is enabled in perspective camera.
 	virtual unsigned GetPassCount() const { return 1; }
 	// get pass filter
@@ -63,7 +65,7 @@ public:
 	}
 
 	// get camera coordinate according to a view direction in world space
-	virtual Vector2i GetScreenCoord(Vector dir) = 0;
+	virtual Vector2i GetScreenCoord(Vector dir, float* pdf) = 0;
 
 // protected field
 protected:

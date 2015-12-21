@@ -70,7 +70,10 @@ public:
 	void SwitchGlass( bool redOnLeft );
 	
 	// get camera coordinate according to a view direction in world space
-	virtual Vector2i GetScreenCoord(Vector dir);
+	virtual Vector2i GetScreenCoord(Vector dir, float* pdf);
+	
+	// get eye direction
+	virtual Vector GetForward();
 
 // protected field
 protected:
@@ -90,6 +93,11 @@ protected:
 	
 	// whether red glass is one the left , default value is true
 	bool m_redOnLeft;
+
+	// image distance with each pixel area equals to exactly one
+	float m_imagePlaneDist;
+
+	float m_scalex , m_scaley;
 	
 	// initialize data
 	void _init();
