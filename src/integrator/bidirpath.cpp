@@ -35,29 +35,99 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 	float	light_pdf = 0.0f;
 	Ray		light_ray;
-	Vector	n;
-	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , n , &light_pdf , 0 );
-
-	// the path from light and eye
-	vector<BDPT_Vertex> light_path , eye_path;
-
+	Vector	light_normal;
+	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , light_normal, &light_pdf , 0 );
 	Spectrum li;
 
-	// generate path from eye
-	unsigned eps = _generatePath( ray , 1.0f , 1.0f , eye_path , path_per_pixel , &li , light );
-	li /= pdf;
-	if( eps == 0 )	return li;
-
-	// generate path from light
-	unsigned lps = _generatePath( light_ray , light_pdf * pdf , le * SatDot( light_ray.m_Dir , n ), light_path , path_per_pixel , 0 , 0 );
-
-	for( unsigned i = 0 ; i < eps ; ++i )
+	vector<BDPT_Vertex> light_path;
+	Ray wi = light_ray;
+	Spectrum accu_radiance = le * SatDot(light_ray.m_Dir, light_normal) / (light_pdf * pdf);
+	while ((int)light_path.size() < path_per_pixel)
 	{
-		// connect light sample first
-		li += _ConnectLight(eye_path[i], light) * _Weight(i, -1, light) / pdf;
-		
+		BDPT_Vertex vert;
+		if (false == scene.GetIntersect(wi, &vert.inter))
+			break;
+
+		vert.p = vert.inter.intersect;
+		vert.n = vert.inter.normal;
+		vert.wi = -wi.m_Dir;
+		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
+		vert.accu_radiance = accu_radiance;
+
+		light_path.push_back(vert);
+
+		float bsdf_pdf;
+		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf, BXDF_ALL);
+		accu_radiance *= bsdf_value * AbsDot(vert.wo, vert.n) / bsdf_pdf;
+
+		if (bsdf_pdf == 0 || bsdf_value.IsBlack())
+			break;
+
+		// russian roulette
+		if (light_path.size() > 4 || accu_radiance.GetIntensity() < 0.01f)
+		{
+			if (sort_canonical() > 0.5f)
+				break;
+			else
+				accu_radiance *= 2.0f;
+		}
+
+		wi = Ray(vert.inter.intersect, vert.wo, 0, 0.001f);
+	}
+	unsigned lps = light_path.size();
+
+	wi = ray;
+	accu_radiance = 1.0f;
+	int light_path_len = 0;
+	while (light_path_len < path_per_pixel)
+	{
+		BDPT_Vertex vert;
+		if (false == scene.GetIntersect(wi, &vert.inter))
+		{
+			if (scene.GetSkyLight() == light)
+				li += scene.Le(wi) * accu_radiance * _Weight(light_path_len, -2, light) / pdf;
+			break;
+		}
+
+		//-----------------------------------------------------------------------------------------------------
+		// Path evaluation: it hits a light source
+		if (vert.inter.primitive->GetLight() == light)
+			li += vert.inter.Le(-wi.m_Dir) * accu_radiance * _Weight(light_path_len, -2, light) / pdf;
+
+		vert.p = vert.inter.intersect;
+		vert.n = vert.inter.normal;
+		vert.wi = -wi.m_Dir;
+		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
+		vert.accu_radiance = accu_radiance;
+
+		//-----------------------------------------------------------------------------------------------------
+		// Path evaluation: connect light sample first
+		li += _ConnectLight(vert, light) * _Weight(light_path_len, -1, light) / pdf;
+
+		//-----------------------------------------------------------------------------------------------------
+		// Path evaluation: connect vertices
 		for (unsigned j = 0; j < lps; ++j)
-			li += _evaluatePath(eye_path, i, light_path, j) * _Weight(i, j, light);
+			li += vert.accu_radiance * light_path[j].accu_radiance * _Gterm( vert , light_path[j] ) * _Weight(light_path_len, j, light);
+
+		++light_path_len;
+
+		float bsdf_pdf;
+		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf, BXDF_ALL);
+		accu_radiance *= bsdf_value * AbsDot(vert.wo, vert.n) / bsdf_pdf;
+
+		if (bsdf_pdf == 0 || bsdf_value.IsBlack())
+			break;
+
+		// russian roulette
+		if (light_path_len > 4 || accu_radiance.GetIntensity() < 0.01f )
+		{
+			if (sort_canonical() > 0.5f)
+				break;
+			else
+				accu_radiance *= 2.0f;
+		}
+
+		wi = Ray(vert.inter.intersect, vert.wo, 0, 0.001f);
 	}
 
 	return li;
@@ -125,66 +195,6 @@ void BidirPathTracing::OutputLog() const
 	LOG<<"Some global illumination effect is also supported in path tracing."<<ENDL;
 	LOG<<"While it requires much more samples to reduce the noise to an acceptable level."<<ENDL;
 	LOG<<"Bidirectional Path Tracing trace rays from eye and light source at the same time."<<ENDL;
-}
-
-// generate path
-unsigned BidirPathTracing::_generatePath( const Ray& ray , float base_pdf , const Spectrum& base_radiance, vector<BDPT_Vertex>& path , unsigned max_vert , Spectrum* pli , const Light* light ) const
-{
-	Ray wi = ray;
-	Spectrum accu_radiance = base_radiance / base_pdf;
-	while( path.size() < max_vert )
-	{
-		BDPT_Vertex vert;
-		if( false == scene.GetIntersect( wi , &vert.inter ) )
-		{
-			if( pli && scene.GetSkyLight() == light) 
-				*pli = scene.Le( wi ) * accu_radiance * _Weight( path.size() , -2 , light);
-			break;
-		}
-		
-		// it hits a light source
-		if( pli && vert.inter.primitive->GetLight() == light )
-			*pli += vert.inter.Le( -wi.m_Dir ) * accu_radiance * _Weight( path.size() , -2 , light);
-
-		vert.p = vert.inter.intersect;
-		vert.n = vert.inter.normal;
-		vert.wi = -wi.m_Dir;
-		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
-		vert.accu_radiance = accu_radiance;
-		
-		path.push_back(vert);
-
-		float bsdf_pdf;
-		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf , BXDF_ALL);
-		accu_radiance *= bsdf_value * AbsDot(vert.wo, vert.n) / bsdf_pdf;
-
-		if (bsdf_pdf == 0 || bsdf_value.IsBlack())
-			return path.size();
-
-		if (path.size() > 4)
-		{
-			if (sort_canonical() > 0.5f)
-				break;
-			else
-				accu_radiance *= 2.0f;
-		}
-
-		wi = Ray( vert.inter.intersect , vert.wo , 0 , 0.001f );
-	}
-
-	return path.size();
-}
-
-// evaluate path
-Spectrum BidirPathTracing::_evaluatePath(const vector<BDPT_Vertex>& epath , int esize , 
-										const vector<BDPT_Vertex>& lpath , int lsize ) const
-{
-	if( lpath.empty() )
-		return 0.0f;
-
-	const BDPT_Vertex& evert = epath[esize];
-	const BDPT_Vertex& lvert = lpath[lsize];
-	return evert.accu_radiance * lvert.accu_radiance * _Gterm(evert, lvert);
 }
 
 // compute G term

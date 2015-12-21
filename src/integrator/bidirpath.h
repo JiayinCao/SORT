@@ -78,18 +78,8 @@ public:
 
 // private field
 private:
-	unsigned path_per_pixel; // light sample per pixel sample per light
+	int path_per_pixel; // light sample per pixel sample per light
 
-	// generate path
-	unsigned	_generatePath( const Ray& ray , float base_pdf , const Spectrum& base_radiance , vector<BDPT_Vertex>& path , unsigned max_vert , Spectrum* pli , const Light* light ) const;
-
-	// evaluate path
-	// para 'epath' : path starting from eye point
-	// para 'esize' : sub-path size ( we're not evaluating full path )
-	// para 'lpath' : path starting from light
-	// para 'lsize' : sub-path size ( we're not evaluating full path )
-	Spectrum	_evaluatePath(	const vector<BDPT_Vertex>& epath , int esize , 
-								const vector<BDPT_Vertex>& lpath , int lsize ) const;
 	// compute G term
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
