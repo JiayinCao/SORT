@@ -69,6 +69,9 @@ public:
 	// by default, red glass is one the left.
 	void SwitchGlass( bool redOnLeft );
 	
+	// get camera coordinate according to a view direction in world space
+	virtual Vector2i GetScreenCoord(Vector dir);
+
 // protected field
 protected:
 	// the target of the camera
