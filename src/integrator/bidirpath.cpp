@@ -21,6 +21,8 @@
 #include "light/light.h"
 #include "bsdf/bsdf.h"
 #include "integratormethod.h"
+#include "camera/camera.h"
+#include "imagesensor/imagesensor.h"
 
 IMPLEMENT_CREATOR( BidirPathTracing );
 
@@ -243,4 +245,19 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 		return 0.0f;
 
 	return li;
+}
+
+// post process , finish pending writes
+void BidirPathTracing::PostProcess()
+{
+	ImageSensor* is = camera->GetImageSensor();
+	if (!is)
+		return;
+
+	std::vector<Pending_Sample>::const_iterator it = pending_samples.begin();
+	while (it != pending_samples.end())
+	{
+		is->UpdatePixel((*it).coord.x, (*it).coord.y, (*it).radiance);
+		++it;
+	}
 }

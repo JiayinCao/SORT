@@ -71,8 +71,8 @@ class SORT_Thread(TimerThread):
             self.shared_memory[i] = self.shared_memory[i] + 1
 
         # close the shared memory if it is the last update
-        if final_update:
-            self.shared_memory.close()
+        #if final_update:
+        #    self.shared_memory.close()
 
     def picknewtiles(self):
         active_tiles = []
@@ -94,7 +94,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         import mmap
 
         # setup shared memory size
-        self.sm_size = self.image_size_in_bytes + self.image_header_size + 1
+        self.sm_size = self.image_size_in_bytes * 2 + self.image_header_size + 2
  
         # on mac os
         if platform.system() == "Darwin" or platform.system() == "Linux":
@@ -109,7 +109,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
             # allocate shared memory first
             self.sharedmemory = mmap.mmap(self.file.fileno(), self.sm_size)
         elif platform.system() == "Windows":
-            self.sharedmemory = mmap.mmap(0, self.image_size_in_bytes + self.image_header_size + 1 , "SORTBLEND_SHAREMEM")
+            self.sharedmemory = mmap.mmap(0, self.sm_size , "SORTBLEND_SHAREMEM")
 
         self.sort_thread.setsharedmemory(self.sharedmemory)
         self.sort_thread.set_kick_period(1)
@@ -190,7 +190,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         while subprocess.Popen.poll(process) is None:
             if self.test_break():
                 break
-            progress = self.sharedmemory[self.image_size_in_bytes + self.image_header_size]
+            progress = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size]
             self.update_progress(progress/100)
 
         # terminate the process by force
@@ -202,6 +202,27 @@ class SORT_RENDERER(bpy.types.RenderEngine):
             self.sort_thread.stop()
             self.sort_thread.join()
             self.sort_thread.update(True)
+
+            # if final update is necessary
+            final_update = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size + 1]
+            if final_update:
+                # begin result
+                result = self.begin_result(0, 0, bpy.data.scenes[0].render.resolution_x, bpy.data.scenes[0].render.resolution_y)
+
+                self.sharedmemory.seek( self.image_header_size + self.image_size_in_bytes)
+                byptes = self.sharedmemory.read(self.image_pixel_count * 16)
+
+                tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
+                tile_rect = tile_data.reshape( self.image_pixel_count , 4 )
+
+                # update image memory
+                result.layers[0].passes[0].rect = tile_rect
+
+                # refresh the update
+                self.end_result(result)
+
+            # close shared memory connection
+            self.sharedmemory.close()
 
 def register():
     # Register the RenderEngine

@@ -19,7 +19,6 @@
 #define SORT_IMAGEOUTPUT
 
 #include "imagesensor.h"
-#include "texture/rendertarget.h"
 
 // generate output
 class RenderTargetImage : public ImageSensor
@@ -39,9 +38,6 @@ public:
 	virtual void PostProcess();
 
 private:
-    // render target
-	RenderTarget m_rendertarget;
-    
     // filename
     string      m_filename;
     

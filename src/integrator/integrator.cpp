@@ -24,4 +24,5 @@ Integrator::Integrator()
 	:scene( g_System.GetScene() )
 {
 	max_recursive_depth=6;
+	camera = 0;
 }

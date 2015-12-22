@@ -22,12 +22,6 @@
 // tile size
 extern int g_iTileSize;
 
-// allocate memory in sort
-void BlenderImage::SetImageSize( int w , int h )
-{
-	ImageSensor::SetImageSize( w , h );
-}
-
 // store pixel information
 void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt )
 {
@@ -52,6 +46,9 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 	data[ inner_offset + 1 ] = color.GetG();
 	data[ inner_offset + 2 ] = color.GetB();
 	data[ inner_offset + 3 ] = 1.0f;
+
+	// for final update
+	m_rendertarget.SetColor(x, y, color);
 }
 
 // finish image tile
@@ -69,6 +66,30 @@ void BlenderImage::PreProcess()
 	m_tilenum_x = (int)(ceil(m_width / (float)g_iTileSize));
 	m_tilenum_y = (int)(ceil(m_height / (float)g_iTileSize));
 	m_header_offset = m_tilenum_x * m_tilenum_y;
+	m_final_update_flag_offset = m_header_offset * g_iTileSize * g_iTileSize * 4 * sizeof(float) * 2 + m_header_offset + 1;
 
 	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("SORTBLEND_SHAREMEM");
+
+	m_rendertarget.SetSize(m_width, m_height);
+}
+
+// post process
+void BlenderImage::PostProcess()
+{
+	// perform a copy from render target to shared memory
+	float* data = (float*)(m_sharedMemory.bytes + m_header_offset + m_header_offset * g_iTileSize * g_iTileSize * 4 * sizeof(float));
+
+	int offset = 0;
+	for (int i = 0; i < m_rendertarget.GetHeight(); ++i)
+		for (int j = 0; j < m_rendertarget.GetWidth(); ++j)
+		{
+			const Spectrum& c = m_rendertarget.GetColor(j, m_rendertarget.GetHeight() - i - 1);
+			data[offset++] = c.GetR();
+			data[offset++] = c.GetG();
+			data[offset++] = c.GetB();
+			data[offset++] = 1.0f;
+		}
+
+	// signal a final update
+	m_sharedMemory.bytes[m_final_update_flag_offset] = 1;
 }

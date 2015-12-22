@@ -20,9 +20,10 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
     integrator_types = [
         ("bdpt", "Bidirectional Path Tracing", "", 1),
         ("pathtracing", "Path Tracing", "", 2),
-        ("ao", "Ambient Occlusion", "", 3),
-        ("direct", "Direct Lighting", "", 4),
-        ("whitted", "Whitted", "", 5),
+        ("lighttracing", "Light Tracing", "", 3),
+        ("ao", "Ambient Occlusion", "", 4),
+        ("direct", "Direct Lighting", "", 5),
+        ("whitted", "Whitted", "", 6),
         ]
     bpy.types.Scene.integrator_type_prop = bpy.props.EnumProperty(items=integrator_types, name='Integrator')
 

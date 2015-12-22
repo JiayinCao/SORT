@@ -26,9 +26,6 @@
 class BlenderImage : public ImageSensor
 {
 public:
-	// allocate memory in sort
-	virtual void SetImageSize( int w , int h );
-
 	// store pixel information
 	virtual void StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt );
 
@@ -38,10 +35,12 @@ public:
 	// pre process
 	virtual void PreProcess();
 
-private:
-	RenderTarget	m_rendertarget;
+	// post process
+	virtual void PostProcess();
 
+private:
 	int				m_header_offset;
+	int				m_final_update_flag_offset;
 	int				m_tilenum_x;
 	int				m_tilenum_y;
 
