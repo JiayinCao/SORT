@@ -43,6 +43,12 @@ struct BDPT_Vertex
 	}
 };
 
+struct Pending_Sample
+{
+	Vector2i	coord;
+	Spectrum	radiance;
+};
+
 ///////////////////////////////////////////////////////////////////////////////////
 // definition of bidirectional path tracing
 // BDPT is not finished yet, there are bugs in the following code.
@@ -55,7 +61,7 @@ public:
 	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
 
 	// default constructor
-	BidirPathTracing(){ path_per_pixel = 8; }
+	BidirPathTracing() { path_per_pixel = 8; light_tracing_only = false; }
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -76,9 +82,18 @@ public:
 	// output log information
 	virtual void OutputLog() const;
 
+	// post process
+	virtual void PostProcess();
+
+	// support pending write
+	virtual bool SupportPendingWrite() { return true; }
+
 // private field
-private:
-	int path_per_pixel; // light sample per pixel sample per light
+protected:
+	int path_per_pixel;			// light sample per pixel sample per light
+
+	bool light_tracing_only;	// only do light tracing
+	std::vector<Pending_Sample>	pending_samples;	// pending samples for light tracing
 
 	// compute G term
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;

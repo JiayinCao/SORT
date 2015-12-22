@@ -50,6 +50,11 @@ public:
 	// para 'spp' : sample per pixel
 	void SetSamplePerPixel( unsigned spp ){ sample_per_pixel = spp; }
 
+	// setup camera
+	void SetupCamera(Camera* cam){
+		camera = cam;
+	}
+
 	// generate samples
 	// para 'sampler' : the sampling method
 	// para 'samples' : the samples to be generated
@@ -85,11 +90,20 @@ public:
 	// generate some neccessary infomation by latter stage.
 	virtual void PreProcess() {}
 
+	// post process
+	virtual void PostProcess() {}
+
+	// support pending write
+	virtual bool SupportPendingWrite() { return false; }
+
 	// output log information
 	virtual void OutputLog() const {}
 
 // protected method
 protected:
+	// Camera
+	Camera*			camera;
+
 	// maxium recursive depth
 	unsigned		max_recursive_depth;
 
