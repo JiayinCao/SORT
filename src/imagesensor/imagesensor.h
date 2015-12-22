@@ -21,6 +21,7 @@
 // somehow, pre-decleration will crash the program on Mac.
 #include "spectrum/spectrum.h"
 #include "utility/propertyset.h"
+#include "texture/rendertarget.h"
 
 // pre-decleration
 class RenderTask;
@@ -37,9 +38,6 @@ public:
 	// pre process
     virtual void PreProcess(){}
 
-	// allocate memory in sort
-	virtual void SetImageSize( int w , int h ){ m_width = w; m_height = h; }
-
 	// finish image tile
 	virtual void FinishTile( int tile_x , int tile_y , const RenderTask& rt ){}
 
@@ -49,6 +47,13 @@ public:
 	// post process
     virtual void PostProcess(){}
     
+	// add radiance
+	virtual void UpdatePixel(int x, int y, const Spectrum& color)
+	{
+		Spectrum _color = m_rendertarget.GetColor(x, y);
+		m_rendertarget.SetColor(x, y, _color + color);
+	}
+
     // get width
     unsigned GetWidth() const {
         return m_width;
@@ -63,6 +68,9 @@ public:
 	int m_width;
 	int m_height;
     
+protected:
+	RenderTarget m_rendertarget;
+
     // register property
     void _registerAllProperty()
     {

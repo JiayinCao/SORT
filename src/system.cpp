@@ -299,6 +299,7 @@ void System::_executeRenderingTasks()
 		// setup basic data
 		threadUnits[i]->m_pIntegrator = _allocateIntegrator();
 		threadUnits[i]->m_pIntegrator->PreProcess();
+		threadUnits[i]->m_pIntegrator->SetupCamera(m_camera);
 	}
 
 	for( int i = 0 ; i < THREAD_NUM ; ++i ){
@@ -319,8 +320,13 @@ void System::_executeRenderingTasks()
 		// Output progress
 		_outputProgress();
 
-		if( allfinished )
+		if (allfinished)
+		{
+			// post process of integrator
+			for (int i = 0; i < THREAD_NUM; ++i)
+				threadUnits[i]->m_pIntegrator->PostProcess();
 			break;
+		}
 	}
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 	{
@@ -429,7 +435,8 @@ bool System::Setup( const char* str )
 	}else
 	{
 		// use 1080p image as default
-		m_imagesensor->SetImageSize( 1920 , 1080 );
+		m_imagesensor->SetProperty("width", "1920");
+		m_imagesensor->SetProperty("height", "1080");
 	}
 	
 	// get sampler
@@ -490,9 +497,9 @@ bool System::Setup( const char* str )
 	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_iTileSize));
 	int y_tile = (int)(ceil(m_imagesensor->GetHeight() / (float)g_iTileSize));
 	int header_size = x_tile * y_tile;
-	int size =	header_size * g_iTileSize * g_iTileSize * 4 * sizeof(float)	// image size
-				+ header_size								// header size
-				+ 1;										// progress data
+	int size = header_size * g_iTileSize * g_iTileSize * 4 * sizeof(float) * 2	// image size
+			+ header_size								// header size
+			+ 2;										// progress data and final update flag
 
 	// create shared memory
 	const SharedMemory& sm = SMManager::GetSingleton().CreateSharedMemory("SORTBLEND_SHAREMEM", size, SharedMmeory_All);
@@ -503,7 +510,7 @@ bool System::Setup( const char* str )
 		memset(sm.bytes, 0, sm.size);
 
 		// setup progess pointer
-		m_pProgress = sm.bytes + sm.size - 1;
+		m_pProgress = sm.bytes + sm.size - 2;
 	}
 
 	return true;
