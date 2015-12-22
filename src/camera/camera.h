@@ -25,6 +25,7 @@
 #include "utility/propertyset.h"
 #include "utility/strhelper.h"
 #include "utility/creator.h"
+#include "math/vector2.h"
 
 // pre-decleration of render target
 class PixelSample;
@@ -34,32 +35,35 @@ class ImageSensor;
 //	definition of camera
 class	Camera : public PropertySet<Camera>
 {
-// public method
+	// public method
 public:
 	// default constructor
-	Camera(){ _init(); }
+	Camera() { _init(); }
 	// destructor
-	virtual ~Camera(){}
+	virtual ~Camera() {}
 
 	// generate a ray given a pixel
-	virtual Ray	GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const = 0;
+	virtual Ray	GenerateRay(unsigned pass_id, float x, float y, const PixelSample& ps) const = 0;
 
 	// set a render target
-	void SetImageSensor( ImageSensor* is ) { m_imagesensor = is; }
+	void SetImageSensor(ImageSensor* is) { m_imagesensor = is; }
 
 	// get and set eye point
 	const Point& GetEye() const { return m_eye; }
-	virtual void SetEye( const Point& eye ) { m_eye = eye; }
-	
+	virtual void SetEye(const Point& eye) { m_eye = eye; }
+
 	// get pass number. By default , all of the cameras have only one pass except stereo vision is enabled in perspective camera.
 	virtual unsigned GetPassCount() const { return 1; }
 	// get pass filter
-	virtual Spectrum GetPassFilter( unsigned id ) const { return 1.0f; }
-    
-    // get image sensor
-    ImageSensor* GetImageSensor(){
-        return m_imagesensor;
-    }
+	virtual Spectrum GetPassFilter(unsigned id) const { return 1.0f; }
+
+	// get image sensor
+	ImageSensor* GetImageSensor() {
+		return m_imagesensor;
+	}
+
+	// get camera coordinate according to a view direction in world space
+	virtual Vector2i GetScreenCoord(Vector dir) = 0;
 
 // protected field
 protected:

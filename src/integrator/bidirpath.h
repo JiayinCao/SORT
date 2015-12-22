@@ -93,7 +93,7 @@ protected:
 	int path_per_pixel;			// light sample per pixel sample per light
 
 	bool light_tracing_only;	// only do light tracing
-	std::vector<Pending_Sample>	pending_samples;	// pending samples for light tracing
+	mutable std::vector<Pending_Sample>	pending_samples;	// pending samples for light tracing
 
 	// compute G term
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
@@ -103,6 +103,9 @@ protected:
 
 	// connect light sample
 	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light ) const;
+	
+	// connect camera point
+	void _ConnectCamera(const BDPT_Vertex& light_vertex) const;
 };
 
 #endif
