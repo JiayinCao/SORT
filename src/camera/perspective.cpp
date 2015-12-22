@@ -167,3 +167,60 @@ void PerspectiveCamera::_registerAllProperty()
 	_registerProperty( "len" , new LenProperty( this ) );
 	_registerProperty( "interaxial" , new InteraxialProperty( this ) );
 }
+
+// get camera coordinate according to a view direction in world space
+Vector2i PerspectiveCamera::GetScreenCoord(Vector dir)
+{
+	// get view axis
+	Vector zaxis = Normalize(m_target - m_eye);
+	Vector xaxis = Cross(m_up, zaxis).Normalize();
+	Vector yaxis = Cross(zaxis, xaxis);
+
+	// get view space dir
+	Vector vs_dir;
+	vs_dir.x = dir.x * xaxis.x + dir.y * xaxis.y + dir.z * xaxis.z;
+	vs_dir.y = dir.x * yaxis.x + dir.y * yaxis.y + dir.z * yaxis.z;
+	vs_dir.z = dir.x * zaxis.x + dir.y * zaxis.y + dir.z * zaxis.z;
+	vs_dir /= vs_dir.z;
+
+	float w = (float)m_imagesensor->GetWidth();
+	float h = (float)m_imagesensor->GetHeight();
+	float aspect = w / h * m_aspectRatioW / m_aspectRatioH;
+
+	float yScale = 0.5f / tan(m_fov * 0.5f);
+	float xScale = yScale / aspect;
+
+	// handle different sensor size
+	if (m_sensorW && m_sensorH)
+	{
+		if (m_aspectFit == 1)	// horizontal fit
+		{
+			xScale = 0.5f / tan(m_fov * 0.5f);
+			yScale = xScale * aspect;
+		}
+		else if (m_aspectFit == 2)	// vertical fit
+		{
+			yScale = 0.5f / tan(m_fov * 0.5f);
+			xScale = yScale / aspect;
+		}
+		else	// auto fit
+		{
+			if (aspect < 1)
+			{
+				yScale = 0.5f / tan(m_fov * 0.5f);
+				xScale = yScale / aspect;
+			}
+			else if (aspect > 1)
+			{
+				xScale = 0.5f / tan(m_fov * 0.5f);
+				yScale = xScale * aspect;
+			}
+		}
+	}
+
+	Vector2i coord;
+	coord.x = ( vs_dir.x * xScale + 0.5f ) * w;
+	coord.y = (-vs_dir.y * yScale + 0.5f ) * h;
+
+	return coord;
+}

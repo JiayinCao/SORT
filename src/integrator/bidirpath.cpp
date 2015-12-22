@@ -261,3 +261,22 @@ void BidirPathTracing::PostProcess()
 		++it;
 	}
 }
+
+// connect camera point
+void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex) const
+{
+	Vector delta = light_vertex.p - camera->GetEye();
+	delta.Normalize();
+
+	Vector2i coord = camera->GetScreenCoord(delta);
+
+	if (coord.x < 0.0f || coord.y < 0.0f ||
+		coord.x >= camera->GetImageSensor()->GetWidth() ||
+		coord.y >= camera->GetImageSensor()->GetHeight())
+		return;
+
+	Pending_Sample light_sample;
+	light_sample.coord = coord;
+	light_sample.radiance = light_vertex.accu_radiance;
+	pending_samples.push_back(light_sample);
+}
