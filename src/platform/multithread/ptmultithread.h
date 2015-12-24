@@ -70,7 +70,21 @@ public:
 	Integrator*	m_pIntegrator;
 };
 
+class MutexMac
+{
+public:
+    MutexMac();
+    ~MutexMac();
+    
+    void Lock();
+    void Unlock();
+    
+private:
+    pthread_mutex_t m_mutex;
+};
+
 #define PlatformThreadUnit	RenderThreadMac
+#define PlatformMutex       MutexMac
 
 #endif
 
