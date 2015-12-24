@@ -426,18 +426,9 @@ bool System::Setup( const char* str )
 	{
 		const char* str_width = element->Attribute("w");
 		const char* str_height = element->Attribute("h");
-		
-		if( str_width && str_height )
-		{
-            m_imagesensor->SetProperty("width", str_width);
-            m_imagesensor->SetProperty("height", str_height);
-		}
+		m_imagesensor->SetSensorSize( atoi( str_width ) , atoi( str_height ) );
 	}else
-	{
-		// use 1080p image as default
-		m_imagesensor->SetProperty("width", "1920");
-		m_imagesensor->SetProperty("height", "1080");
-	}
+		m_imagesensor->SetSensorSize( 1920 , 1080 );
 	
 	// get sampler
 	element = root->FirstChildElement( "Sampler" );

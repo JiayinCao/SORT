@@ -70,7 +70,24 @@ public:
 	Integrator*	m_pIntegrator;
 };
 
+class MutexWin
+{
+public:
+	// constructor and destructor
+	MutexWin();
+	~MutexWin();
+
+	// lock/unlock
+	void Lock();
+	void Unlock();
+
+private:
+	// critical section
+	CRITICAL_SECTION m_cs;
+};
+
 #define PlatformThreadUnit	RenderThreadWin
+#define PlatformMutex		MutexWin
 
 #endif
 
