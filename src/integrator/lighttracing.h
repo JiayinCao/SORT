@@ -33,6 +33,10 @@ public:
 	LightTracing() {
 		light_tracing_only = true;
 	}
+
+	// refresh tile in blender
+	// no need to refresh tiles
+	virtual bool NeedRefreshTile() const { return false; }
 };
 
 #endif
