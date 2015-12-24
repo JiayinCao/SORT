@@ -38,6 +38,13 @@ public:
 	// pre process
     virtual void PreProcess(){}
 
+	// set image size
+	virtual void SetSensorSize( int w , int h )
+	{
+		m_width = w;
+		m_height = h;
+	}
+
 	// finish image tile
 	virtual void FinishTile( int tile_x , int tile_y , const RenderTask& rt ){}
 
@@ -47,13 +54,6 @@ public:
 	// post process
     virtual void PostProcess(){}
     
-	// add radiance
-	virtual void UpdatePixel(int x, int y, const Spectrum& color)
-	{
-		Spectrum _color = m_rendertarget.GetColor(x, y);
-		m_rendertarget.SetColor(x, y, _color + color);
-	}
-
     // get width
     unsigned GetWidth() const {
         return m_width;
@@ -64,45 +64,15 @@ public:
         return m_height;
     }
 
-public:
+	// add radiance
+	virtual void UpdatePixel(int x, int y, const Spectrum& color){}
+
+protected:
 	int m_width;
 	int m_height;
     
-protected:
+	// the render target
 	RenderTarget m_rendertarget;
-
-    // register property
-    void _registerAllProperty()
-    {
-        _registerProperty( "width" , new WidthProperty( this ) );
-        _registerProperty( "height" , new HeightProperty( this ) );
-    }
-    
-    class WidthProperty : public PropertyHandler<ImageSensor>
-    {
-    public:
-        PH_CONSTRUCTOR(WidthProperty,ImageSensor);
-        
-        // set value
-        void SetValue( const string& str )
-        {
-            ImageSensor* is = CAST_TARGET(ImageSensor);
-            is->m_width = atoi(str.c_str());
-        }
-    };
-    
-    class HeightProperty : public PropertyHandler<ImageSensor>
-    {
-    public:
-        PH_CONSTRUCTOR(HeightProperty,ImageSensor);
-        
-        // set value
-        void SetValue( const string& str )
-        {
-            ImageSensor* is = CAST_TARGET(ImageSensor);
-            is->m_height = atoi(str.c_str());
-        }
-    };
 };
 
 #endif

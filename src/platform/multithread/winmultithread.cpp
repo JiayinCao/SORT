@@ -117,4 +117,24 @@ void RenderThreadWin::RunThread()
 	}
 }
 
+MutexWin::MutexWin()
+{
+	InitializeCriticalSection(&m_cs);
+}
+
+MutexWin::~MutexWin()
+{
+	DeleteCriticalSection(&m_cs);
+}
+
+void MutexWin::Lock()
+{
+	EnterCriticalSection(&m_cs);
+}
+
+void MutexWin::Unlock()
+{
+	LeaveCriticalSection(&m_cs);
+}
+
 #endif

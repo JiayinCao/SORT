@@ -82,9 +82,6 @@ public:
 	// output log information
 	virtual void OutputLog() const;
 
-	// post process
-	virtual void PostProcess();
-
 	// support pending write
 	virtual bool SupportPendingWrite() { return true; }
 

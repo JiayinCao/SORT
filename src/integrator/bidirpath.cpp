@@ -267,21 +267,6 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 	return li;
 }
 
-// post process , finish pending writes
-void BidirPathTracing::PostProcess()
-{
-	ImageSensor* is = camera->GetImageSensor();
-	if (!is)
-		return;
-
-	std::list<Pending_Sample>::const_iterator it = pending_samples.begin();
-	while (it != pending_samples.end())
-	{
-		is->UpdatePixel((*it).coord.x, (*it).coord.y, (*it).radiance);
-		++it;
-	}
-}
-
 // connect camera point
 void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const Light* light ) const
 {
@@ -313,9 +298,12 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	visible.ray = Ray( light_vertex.p , -n_delta , 0 , 0.01f , delta.Length() );
 	if( visible.IsVisible() == false )
 		return;
-	
-	Pending_Sample light_sample;
-	light_sample.coord = coord;
-	light_sample.radiance = light_vertex.accu_radiance * g / camera_pdf / sample_per_pixel * weight ;
-	pending_samples.push_back(light_sample);
+
+	Spectrum radiance = light_vertex.accu_radiance * g / camera_pdf / sample_per_pixel * weight;
+
+	// update image sensor
+	ImageSensor* is = camera->GetImageSensor();
+	if (!is)
+		return;
+	is->UpdatePixel(coord.x , coord.y , radiance);
 }
