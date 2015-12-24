@@ -103,4 +103,22 @@ void RenderThreadMac::RunThread()
 	}
 }
 
+MutexMac::MutexMac()
+{
+}
+
+MutexMac::~MutexMac()
+{
+}
+
+void MutexMac::Lock()
+{
+    pthread_mutex_lock(&m_mutex);
+}
+
+void MutexMac::Unlock()
+{
+    pthread_mutex_unlock(&m_mutex);
+}
+
 #endif
