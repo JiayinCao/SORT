@@ -99,6 +99,9 @@ public:
 	// output log information
 	virtual void OutputLog() const {}
 
+	// refresh tile in blender
+	virtual bool NeedRefreshTile() const { return true; }
+
 // protected method
 protected:
 	// Camera
