@@ -48,7 +48,10 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 	data[ inner_offset + 3 ] = 1.0f;
 
 	// for final update
-	m_rendertarget.SetColor(x, y, color);
+	m_mutex[x][y].Lock();
+	Spectrum _color = m_rendertarget.GetColor(x,y);
+	m_rendertarget.SetColor(x, y, color+_color);
+	m_mutex[x][y].Unlock();
 }
 
 // finish image tile
@@ -71,6 +74,10 @@ void BlenderImage::PreProcess()
 	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("SORTBLEND_SHAREMEM");
 
 	m_rendertarget.SetSize(m_width, m_height);
+
+	m_mutex = new PlatformMutex*[m_width];
+	for( int i = 0 ; i < m_width ; ++i )
+		m_mutex[i] = new PlatformMutex[m_height];
 }
 
 // post process
@@ -92,4 +99,9 @@ void BlenderImage::PostProcess()
 
 	// signal a final update
 	m_sharedMemory.bytes[m_final_update_flag_offset] = 1;
+
+	// delete the mutex
+	for( int i = 0 ; i < m_width ; ++i )
+		delete[] m_mutex[i];
+	delete[] m_mutex;
 }

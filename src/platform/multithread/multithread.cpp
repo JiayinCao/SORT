@@ -70,7 +70,7 @@ void RenderTask::Execute( Integrator* integrator )
     }
     
     int x_off = ori.x / g_iTileSize;
-    int y_off = (is->m_height - 1 - ori.y ) / g_iTileSize ;
+	int y_off = (is->GetHeight() - 1 - ori.y ) / g_iTileSize ;
     is->FinishTile( x_off, y_off, *this );
     
     taskDone[taskId] = true;
