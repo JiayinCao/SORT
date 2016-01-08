@@ -20,20 +20,21 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 #include "utility/rand.h"
+#include "managers/logmanager.h"
 
 IMPLEMENT_CREATOR( Square );
 
 // sample a point on shape
-Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
+Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
 {
 	float u = 2 * ls.u - 1.0f;
 	float v = 2 * ls.v - 1.0f;
 	Point lp = transform( Point( radius * u , 0.0f , radius * v ) );
-	Vector normal = transform( Vector( 0 , 1 , 0 ) );
+	n = transform( Vector( 0 , 1 , 0 ) );
 	Vector delta = lp - p;
 	wi = Normalize( delta );
 
-	float dot = Dot( -wi , normal );
+	float dot = Dot( -wi , n );
 	if( pdf ) 
 	{
 		if( dot <= 0 )

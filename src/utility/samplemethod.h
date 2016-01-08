@@ -117,7 +117,7 @@ inline Vector UniformSampleHemisphere( float u , float v )
 }
 
 // uniformly sample hemisphere pdf
-inline float UniformHemispherePdf( const Vector& v )
+inline float UniformHemispherePdf()
 {
 	return INV_TWOPI;
 }
@@ -133,7 +133,7 @@ inline Vector UniformSampleSphere( float u , float v )
 }
 
 // pdf of uniformly sampling a vector on sphere
-inline float UniformSpherePdf( const Vector& v )
+inline float UniformSpherePdf()
 {
 	return INV_TWOPI * 0.5f;
 }

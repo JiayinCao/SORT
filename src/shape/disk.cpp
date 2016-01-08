@@ -26,17 +26,17 @@
 IMPLEMENT_CREATOR( Disk );
 
 // sample a point on shape
-Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
+Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
 {
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 
 	Point lp = transform( Point( u * radius , 0.0f , v * radius ) );
-	Vector normal = transform( Vector( 0 , 1 , 0 ) );
+    n = transform( Vector( 0 , 1.0f , 0 ) );
 	Vector delta = lp - p;
 	wi = Normalize( delta );
 
-	float dot = Dot( -wi , normal );
+	float dot = Dot( -wi , n );
 	if( pdf )
 	{
 		if( dot <= 0.0f )

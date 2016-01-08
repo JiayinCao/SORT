@@ -24,30 +24,56 @@
 IMPLEMENT_CREATOR( PointLight );
 
 // sample ray from light
-Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
+Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
-	Point pos( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
-	Vector vec = pos - intersect.intersect;
-	wi = Normalize( vec );
-	if( pdf ) *pdf = 1.0f;
+    // Get light position
+	Vector _dirToLight = light_pos - intersect.intersect;
+    
+    // Normalize vec
+    float sqrLen = _dirToLight.SquaredLength();
+    float len = sqrt(sqrLen);
+	dirToLight = _dirToLight / len;
+    
+    // setup visibility ray
+    const float delta = 0.01f;
+	visibility.ray = Ray( light_pos , -dirToLight , 0 , delta , len - delta );
 
-	float len = vec.Length();
-	visibility.ray = Ray( pos , -wi , 0 , delta , len - delta );
-
-	return intensity / ( len * len );
+    // direction pdf from 'intersect' to light source w.r.t solid angle
+    if( pdfw )
+        *pdfw = sqrLen;
+    
+    if( cosAtLight )
+        *cosAtLight = 1.0f;
+    
+    if( distance )
+        *distance = len;
+    
+    // product of pdf of sampling a point w.r.t surface area and a direction w.r.t direction
+    if( emissionPdf )
+        *emissionPdf = UniformSpherePdf();
+    
+	return intensity;
 }
 
 // sample a ray from light
-Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const
+Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
 {
+    // sample a new ray
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
-	r.m_Ori = Point( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
-	r.m_Dir = UniformSampleSphere( ls.u , ls.v ); 
-	n = r.m_Dir;
+	r.m_Ori = light_pos;
+	r.m_Dir = UniformSampleSphere( ls.u , ls.v );
 
-	if( pdf ) *pdf = UniformSpherePdf(r.m_Dir);
-	if( area_pdf ) *area_pdf = 1.0f;
+    // product of pdf of sampling a point w.r.t surface area and a direction w.r.t direction
+	if( pdfW )
+        *pdfW = UniformSpherePdf();
+    
+    // pdf w.r.t surface area
+	if( pdfA )
+        *pdfA = 1.0f;
+    
+    if( cosAtLight )
+        *cosAtLight = 1.0f;
 
 	return intensity;
 }

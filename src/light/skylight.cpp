@@ -24,19 +24,37 @@
 IMPLEMENT_CREATOR( SkyLight );
 
 // sample ray from light
-Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const
+Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
 	Sort_Assert( sky );
 
 	// sample a ray
-	wi = sky->sample_v( ls->u , ls->v , pdf , 0 );
-	if( pdf && *pdf == 0.0f )
+    float _pdfw = 0.0f;
+	dirToLight = sky->sample_v( ls->u , ls->v , &_pdfw , 0 );
+	if( _pdfw == 0.0f )
 		return 0.0f;
+    
+    if( pdfw )
+        *pdfw = _pdfw;
+    
+    if( distance )
+        *distance = 1e6f;
+    
+    if( cosAtLight )
+        *cosAtLight = 1.0f;
+    
+    if( emissionPdf )
+    {
+        const BBox& box = scene->GetBBox();
+        Vector delta = box.m_Max - box.m_Min;
+        *emissionPdf = _pdfw * 0.25f * INV_PI / delta.SquaredLength();
+    }
 
 	// setup visibility tester
-	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , FLT_MAX );
+    const float delta = 0.01f;
+	visibility.ray = Ray( intersect.intersect , dirToLight , 0 , delta , FLT_MAX );
 
-	return sky->Evaluate( wi );
+	return sky->Evaluate( dirToLight );
 }
 
 // sample light density
@@ -47,13 +65,14 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo ) const
 }
 
 // sample a ray from light
-Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const
+Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
 {
 	Sort_Assert( sky != 0 );
 
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
-	r.m_Dir = -sky->sample_v( ls.u , ls.v , pdf , area_pdf );
+    float _pdfw;
+	r.m_Dir = -sky->sample_v( ls.u , ls.v , &_pdfw , pdfA );
 
 	const BBox& box = scene->GetBBox();
 	Point center = ( box.m_Max + box.m_Min ) * 0.5f;
@@ -67,10 +86,14 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float*
 	float t1 = sort_canonical();
 	UniformSampleDisk( t0 , t1 , d1 , d2 );
 	r.m_Ori = center + world_radius * ( v1 * d1 + v2 * d2 ) - r.m_Dir * 2.0f * world_radius;
-	n = r.m_Dir;
 
-	if( pdf )
-		*pdf *= 1.0f / ( PI * world_radius * world_radius );
+    _pdfw /= ( PI * world_radius * world_radius );
+	if( pdfW )
+		*pdfW = _pdfw;
+    if( cosAtLight )
+        *cosAtLight = 1.0f;
+    if( pdfA )
+        *pdfA = _pdfw;
 
 	return sky->Evaluate( -r.m_Dir );
 }

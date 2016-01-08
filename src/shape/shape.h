@@ -48,7 +48,7 @@ public:
 	// para 'wi': the sampled vector ( output )
 	// para 'pdf': the pdf of the light sample ( output )
 	// result   : a sampled point from the light source
-	virtual Point sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const = 0;
+	virtual Point sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const = 0;
 	
 	// sample a ray from light
 	// para 'ls'       : light sample

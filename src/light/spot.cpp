@@ -24,45 +24,68 @@
 IMPLEMENT_CREATOR( SpotLight );
 
 // sample ray from light
-Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
+Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
-	Point pos( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
-	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
-	Vector vec = pos - intersect.intersect;
-	wi = Normalize( vec );
-	if( pdf ) *pdf = 1.0f;
-
-	float falloff = SatDot( wi , -dir );
+    // direction to light
+	Vector _dirToLight = light_pos - intersect.intersect;
+    
+    // Normalize vec
+    float sqrLen = _dirToLight.SquaredLength();
+    float len = sqrt(sqrLen);
+    dirToLight = _dirToLight / len;
+    
+    // direction pdf from 'intersect' to light source w.r.t solid angle
+	if( pdfw )
+        *pdfw = sqrLen;
+    
+    // emission pdf from light source w.r.t solid angle
+    if( emissionPdf )
+        *emissionPdf = UniformConePdf( cos_total_range );
+    
+    if( cosAtLight )
+        *cosAtLight = 1.0f;
+    
+    if( distance )
+        *distance = len;
+    
+    // update visility
+    const float delta = 0.01f;
+    visibility.ray = Ray( light_pos , -dirToLight , 0 , delta , len - delta );
+    
+	float falloff = SatDot( dirToLight , -light_dir );
 	if( falloff < cos_total_range )
 		return 0.0f;
-
-	float len = vec.Length();
-	visibility.ray = Ray( pos , -wi , 0 , delta , len - delta );
-
 	if( falloff > cos_falloff_start )
-		return intensity / vec.SquaredLength();
+		return intensity ;
 	float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
 	if( d == 0.0f )
 		return 0.0f;
 
-	return intensity / vec.SquaredLength() * d * d;
+	return intensity * d * d;
 }
 
 // sample a ray from light
-Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const
+Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
 {
+    // udpate ray
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
-	r.m_Ori = Point( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
+	r.m_Ori = light_pos;
+    
+    // sample a light direction
 	Vector local_dir = UniformSampleCone( ls.u , ls.v , cos_total_range );
 	r.m_Dir = light2world.matrix( local_dir );
-	n = r.m_Dir;
 
-	if( pdf ) *pdf = UniformConePdf( cos_total_range );
-	if( area_pdf ) *area_pdf = 1.0f;
+    // product of pdf of sampling a point w.r.t surface area and a direction w.r.t direction
+	if( pdfW )
+        *pdfW = UniformConePdf( cos_total_range );
+    // pdf w.r.t surface area
+	if( pdfA )
+        *pdfA = 1.0f;
+    if( cosAtLight )
+        *cosAtLight = 1.0f;
 
-	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
-	float falloff = SatDot( r.m_Dir , dir );
+	float falloff = SatDot( r.m_Dir , light_dir );
 	if( falloff < cos_total_range )
 		return 0.0f;
 	if( falloff > cos_falloff_start )
