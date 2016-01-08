@@ -32,22 +32,20 @@ public:
 
 	// default constructor
 	AreaLight(){_init();}
-	// destructor
-	~AreaLight(){_release();}
 
 	// sample ray from light
 	// para 'intersect' : intersection information
-	// para 'wi'		: input vector in world space
+	// para 'dirToLight': input vector in world space
 	// para 'delta'		: a delta to offset the original point
 	// para 'pdf'		: property density function value of the input vector
 	// para 'visibility': visibility tester
-	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const;
+	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const;
 
 	// sample a ray from light
 	// para 'ls'       : light sample
 	// para 'r'       : the light vector
 	// para 'pdf'      : the properbility density function
-	virtual Spectrum sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const;
+	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const;
 
 	// sample light density
 	virtual Spectrum Le( const Intersection& intersect , const Vector& wo ) const;
@@ -77,8 +75,6 @@ private:
 
 	// initialize default value
 	void _init();
-	// release
-	void _release();
 
 	// register property
 	void _registerAllProperty();

@@ -37,9 +37,10 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 	float	light_pdf = 0.0f;
 	Ray		light_ray;
-	Vector	light_normal;
+	Vector	light_normal;   // it is never initialized!!!!
 	float	light_area_pdf = 0.0f;
-	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , light_normal, &light_pdf , &light_area_pdf );
+    float   cosAtLight = 1.0f;
+	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , &light_pdf , &light_area_pdf , &cosAtLight );
 	Spectrum li;
 	
 	//-----------------------------------------------------------------------------------------------------
@@ -47,13 +48,13 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	BDPT_Vertex light_vert;
 	light_vert.p = light_ray.m_Ori;
 	light_vert.accu_radiance = le / pdf / light_area_pdf;
-	light_vert.n = light_normal;
+	light_vert.n = light_normal;    // there is a bug here!!!!!!!
 	light_vert.bsdf = 0;
 	_ConnectCamera( light_vert , 0 , light );
 
 	vector<BDPT_Vertex> light_path;
 	Ray wi = light_ray;
-	Spectrum accu_radiance = le * SatDot(light_ray.m_Dir, light_normal) / (light_pdf * pdf);
+	Spectrum accu_radiance = le * cosAtLight / (light_pdf * pdf);
 	while ((int)light_path.size() < path_per_pixel)
 	{
 		BDPT_Vertex vert;
@@ -254,9 +255,9 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 	LightSample sample(true);
 	Vector wi;
 	Visibility visibility(scene);
-	float light_pdf;
-	Spectrum li = light->sample_l(eye_vertex.inter, &sample, wi, 0.1f, &light_pdf, visibility);
-	li *= eye_vertex.accu_radiance * eye_vertex.bsdf->f(eye_vertex.wi, wi) * AbsDot(eye_vertex.n, wi) / light_pdf;
+	float directPdfW;
+	Spectrum li = light->sample_l(eye_vertex.inter, &sample, wi, 0 , &directPdfW, 0 , 0 , visibility);
+	li *= eye_vertex.accu_radiance * eye_vertex.bsdf->f(eye_vertex.wi, wi) * AbsDot(eye_vertex.n, wi) / directPdfW;
 
 	if (li.IsBlack())
 		return 0.0f;

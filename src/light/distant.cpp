@@ -25,24 +25,39 @@
 IMPLEMENT_CREATOR( DistantLight );
 
 // sample a ray
-Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const 
+Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
 	// distant light direction
-	Vector dir( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
-	wi = -dir;
-	if( pdf ) *pdf = 1.0f;
+	dirToLight = -light_dir;
+    
+	if( pdfw )
+        *pdfw = 1.0f;
+    
+    if( distance )
+        *distance = 1e6f;
+    
+    if( emissionPdf )
+    {
+        const BBox& box = scene->GetBBox();
+        Vector delta = box.m_Max - box.m_Min;
+        *emissionPdf = 0.25f * INV_PI / delta.SquaredLength();
+    }
+    
+    if( cosAtLight )
+        *cosAtLight = 1.0f;
 
-	visibility.ray = Ray( intersect.intersect , wi , 0 , delta );
+    const float delta = 0.01f;
+	visibility.ray = Ray( intersect.intersect , dirToLight , 0 , delta );
 
 	return intensity;
 }
 
 // sample a ray from light
-Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const
+Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
-	r.m_Dir = Vector( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
+    r.m_Dir = light_dir;
 	
 	const BBox& box = scene->GetBBox();
 	Point center = ( box.m_Max + box.m_Min ) * 0.5f;
@@ -56,11 +71,11 @@ Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , Vector& n , fl
 	Point p = ( u * v0 + v * v1 ) * world_radius + center;
 	r.m_Ori = p - r.m_Dir * world_radius * 3.0f;
 
-	if( pdf ) *pdf = 1.0f / ( PI * world_radius * world_radius );
-	if( area_pdf ) *area_pdf = *pdf;
-
-	n = r.m_Dir;
-
+    float pdf = 1.0f / ( PI * world_radius * world_radius );
+	if( pdfW ) *pdfW = pdf;
+	if( pdfA ) *pdfA = pdf;
+    if( cosAtLight ) *cosAtLight = 1.0f;
+    
 	return intensity;
 }
 

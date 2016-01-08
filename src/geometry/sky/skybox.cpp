@@ -122,7 +122,7 @@ Vector SkyBox::sample_v( float u , float v , float* pdf , float* area_pdf ) cons
 	// note :	Actually , it's very ugly to sample a ray on the sphere uniformly
 	//			Noises could be reduced by sampling according to the radiance from image.
 	Vector wi = UniformSampleSphere( u , v );
-	if( pdf ) *pdf = UniformSpherePdf( wi );
+	if( pdf ) *pdf = UniformSpherePdf();
 	if( area_pdf ) *area_pdf = 0.25f * INV_PI;
 
 	return wi;
@@ -131,5 +131,5 @@ Vector SkyBox::sample_v( float u , float v , float* pdf , float* area_pdf ) cons
 // get the pdf
 float SkyBox::Pdf( const Point& p , const Vector& wi ) const
 {
-	return UniformSpherePdf( wi );
+	return UniformSpherePdf();
 }

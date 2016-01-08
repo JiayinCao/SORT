@@ -41,13 +41,13 @@ public:
 	// para 'delta'		: a delta to offset the original point
 	// para 'pdf'		: property density function value of the input vector
 	// para 'visibility': visibility tester
-	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const;
+    virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const;
 
 	// sample a ray from light
 	// para 'ls'       : light sample
 	// para 'r'       : the light vector
 	// para 'pdf'      : the properbility density function
-	virtual Spectrum sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const;
+	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const;
 
 	// total power of the light
 	virtual Spectrum Power() const
@@ -55,6 +55,9 @@ public:
 
 // private field
 private:
+    // light position
+    Point light_pos;
+    
 	// register property
 	void _registerAllProperty();
 
@@ -67,13 +70,13 @@ private:
 		void SetValue( const string& str )
 		{
 			PointLight* light = CAST_TARGET(PointLight);
-			Point p = PointFromStr( str );
-			light->light2world.matrix.m[3] = p.x;
-			light->light2world.matrix.m[7] = p.y;
-			light->light2world.matrix.m[11] = p.z;
-			light->light2world.invMatrix.m[3] = -p.x;
-			light->light2world.invMatrix.m[7] = -p.y;
-			light->light2world.invMatrix.m[11] = -p.z;
+			light->light_pos = PointFromStr( str );
+			light->light2world.matrix.m[3] = light->light_pos.x;
+			light->light2world.matrix.m[7] = light->light_pos.y;
+			light->light2world.matrix.m[11] = light->light_pos.z;
+			light->light2world.invMatrix.m[3] = -light->light_pos.x;
+			light->light2world.invMatrix.m[7] = -light->light_pos.y;
+			light->light2world.invMatrix.m[11] = -light->light_pos.z;
 		}
 	};
 };

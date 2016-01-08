@@ -41,7 +41,7 @@ public:
 	// para 'delta'		: a delta to offset the original point
 	// para 'pdf'		: property density function value of the input vector
 	// para 'visibility': visibility tester
-	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const ;
+	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const ;
 
 	// total power of the light
 	virtual Spectrum Power() const
@@ -51,10 +51,15 @@ public:
 	// para 'ls'       : light sample
 	// para 'r'       : the light vector
 	// para 'pdf'      : the properbility density function
-	virtual Spectrum sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const;
+	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const;
 
 // private field
 private:
+    // light position
+    Point  light_pos;
+    // light direction
+    Vector  light_dir;
+    
 	float	cos_falloff_start;
 	float	cos_total_range;
 
@@ -72,16 +77,16 @@ private:
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
-			Point p = PointFromStr( str );
-			light->light2world.matrix.m[3] = p.x;
-			light->light2world.matrix.m[7] = p.y;
-			light->light2world.matrix.m[11] = p.z;
-			light->light2world.invMatrix.m[3] = -( light->light2world.invMatrix.m[0] * p.x + 
-				light->light2world.invMatrix.m[1] * p.y + light->light2world.invMatrix.m[2] * p.z );
-			light->light2world.invMatrix.m[7] = -( light->light2world.invMatrix.m[4] * p.x + 
-				light->light2world.invMatrix.m[5] * p.y + light->light2world.invMatrix.m[6] * p.z );
-			light->light2world.invMatrix.m[11] = -( light->light2world.invMatrix.m[8] * p.x + 
-				light->light2world.invMatrix.m[9] * p.y + light->light2world.invMatrix.m[10] * p.z );
+			light->light_pos = PointFromStr( str );
+			light->light2world.matrix.m[3] = light->light_pos.x;
+			light->light2world.matrix.m[7] = light->light_pos.y;
+			light->light2world.matrix.m[11] = light->light_pos.z;
+			light->light2world.invMatrix.m[3] = -( light->light2world.invMatrix.m[0] * light->light_pos.x +
+				light->light2world.invMatrix.m[1] * light->light_pos.y + light->light2world.invMatrix.m[2] * light->light_pos.z );
+			light->light2world.invMatrix.m[7] = -( light->light2world.invMatrix.m[4] * light->light_pos.x +
+				light->light2world.invMatrix.m[5] * light->light_pos.y + light->light2world.invMatrix.m[6] * light->light_pos.z );
+			light->light2world.invMatrix.m[11] = -( light->light2world.invMatrix.m[8] * light->light_pos.x +
+				light->light2world.invMatrix.m[9] * light->light_pos.y + light->light2world.invMatrix.m[10] * light->light_pos.z );
 		}
 	};
 	class DirProperty : public PropertyHandler<Light>
@@ -91,16 +96,16 @@ private:
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
-			Vector dir = Normalize(VectorFromStr( str ));
+			light->light_dir = Normalize(VectorFromStr( str ));
 			Vector t0 , t1;
-			CoordinateSystem( dir, t0 , t1 );
+			CoordinateSystem( light->light_dir, t0 , t1 );
 			Matrix& m = light->light2world.matrix;
 			Matrix& inv = light->light2world.invMatrix;
-			m.m[0] = t0.x; m.m[1] = dir.x; m.m[2] = t1.x;
-			m.m[4] = t0.y; m.m[5] = dir.y; m.m[6] = t1.y;
-			m.m[8] = t0.z; m.m[9] = dir.z; m.m[10] = t1.z;
+			m.m[0] = t0.x; m.m[1] = light->light_dir.x; m.m[2] = t1.x;
+			m.m[4] = t0.y; m.m[5] = light->light_dir.y; m.m[6] = t1.y;
+			m.m[8] = t0.z; m.m[9] = light->light_dir.z; m.m[10] = t1.z;
 			inv.m[0] = t0.x; inv.m[1] = t0.y; inv.m[2] = t0.z;
-			inv.m[4] = dir.x; inv.m[5] = dir.y; inv.m[6] = dir.z;
+			inv.m[4] = light->light_dir.x; inv.m[5] = light->light_dir.y; inv.m[6] = light->light_dir.z;
 			inv.m[8] = t1.x; inv.m[9] = t1.y; inv.m[10] = t1.z;
 			inv.m[3] = -( light->light2world.invMatrix.m[0] * m.m[3] + 
 				light->light2world.invMatrix.m[1] * m.m[7] + light->light2world.invMatrix.m[2] * m.m[11] );
