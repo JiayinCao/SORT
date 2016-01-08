@@ -18,6 +18,7 @@
 // include the header
 #include "area.h"
 #include "sampler/sample.h"
+#include "utility/samplemethod.h"
 
 IMPLEMENT_CREATOR( AreaLight );
 
@@ -30,27 +31,61 @@ void AreaLight::_init()
 	radius = 1.0f;
 }
 
-// release data
-void AreaLight::_release()
-{
-}
-
 // sample ray from light
-Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& wi , float delta , float* pdf , Visibility& visibility ) const
+Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
 	Sort_Assert( ls != 0 );
 	Sort_Assert( shape != 0 );
 
-	Point ps = shape->sample_l( *ls , intersect.intersect , wi , pdf );
-	if( pdf && *pdf == 0.0f )
+    // sample a point from light
+    Vector normal;
+	Point ps = shape->sample_l( *ls , intersect.intersect , dirToLight , normal , pdfW );
+    
+    // get the delta
+    Vector dlt = ps - intersect.intersect;
+    float len = dlt.Length();
+    
+    // return if pdf is zero
+	if( pdfW && *pdfW == 0.0f )
 		return 0.0f;
+    
+    if(cosAtLight)
+        *cosAtLight = Dot( dirToLight , normal );
+    
+    if( distance )
+        *distance = len;
+    
+    // product of pdf of sampling a point w.r.t surface area and a direction w.r.t direction
+    if( emissionPdf )
+        *emissionPdf = UniformHemispherePdf() / shape->SurfaceArea();
 
-	// get the delta
-	Vector dlt = ps - intersect.intersect;
 	// setup visibility tester
-	visibility.ray = Ray( intersect.intersect , wi , 0 , delta , dlt.Length() - delta );
+    const float delta = 0.01f;
+	visibility.ray = Ray( intersect.intersect , dirToLight , 0 , delta , len - delta );
 
 	return intensity;
+}
+
+// sample a ray from light
+Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
+{
+    Sort_Assert( shape != 0 );
+    Vector n;
+    shape->sample_l( ls , r , n , pdfW );
+    
+    if( pdfA )
+        *pdfA = 1.0f / shape->SurfaceArea();
+    
+    if( cosAtLight )
+    {
+        *cosAtLight = Dot( r.m_Dir , n );
+        Sort_Assert(*cosAtLight);
+    }
+    
+    // to avoid self intersection
+    r.m_fMin = 0.01f;
+    
+    return intensity;
 }
 
 // the pdf of the direction
@@ -99,19 +134,4 @@ bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radianc
 		radiance = Le( *intersect , -ray.m_Dir );
 
 	return result;
-}
-
-// sample a ray from light
-Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf , float* area_pdf ) const
-{
-	Sort_Assert( shape != 0 );
-	shape->sample_l( ls , r , n , pdf );
-
-	if( area_pdf )
-		*area_pdf = 1.0f / shape->SurfaceArea();
-
-	// to avoid self intersection
-	r.m_fMin = 0.01f;
-
-	return intensity;
 }

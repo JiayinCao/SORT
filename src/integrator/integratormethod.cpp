@@ -37,7 +37,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 	float bsdf_pdf;
 	Vector wo = -r.m_Dir;
 	Vector wi;
-	Spectrum li = light->sample_l( ip , &ls , wi , 0.1f , &light_pdf , visibility );
+	Spectrum li = light->sample_l( ip , &ls , wi , 0 , &light_pdf , 0 , 0 , visibility );
 	if( light_pdf > 0.0f && !li.IsBlack() )
 	{
 		Spectrum f = bsdf->f( wo , wi , type );

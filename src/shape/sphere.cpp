@@ -27,8 +27,10 @@
 IMPLEMENT_CREATOR( Sphere );
 
 // sample a point on shape
-Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , float* pdf ) const
+Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
 {
+    LOG_ERROR<<"N is not filled in Sphere::sample_l"<<ENDL;
+    
 	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
 	Vector delta = center - p;
 	Vector dir = Normalize( delta );
