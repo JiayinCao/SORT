@@ -40,17 +40,12 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	Vector	light_normal;   // it is never initialized!!!!
 	float	light_area_pdf = 0.0f;
     float   cosAtLight = 1.0f;
-	Spectrum le = light->sample_l( sort_canonical() , light_ray , &light_pdf , &light_area_pdf , &cosAtLight );
+	LightSample light_sample(true);
+	Spectrum le = light->sample_l( light_sample , light_ray , &light_pdf , &light_area_pdf , &cosAtLight );
 	Spectrum li;
 	
 	//-----------------------------------------------------------------------------------------------------
 	// Path evaluation: light tracing
-	BDPT_Vertex light_vert;
-	light_vert.p = light_ray.m_Ori;
-	light_vert.accu_radiance = le / pdf / light_area_pdf;
-	light_vert.n = light_normal;    // there is a bug here!!!!!!!
-	light_vert.bsdf = 0;
-	_ConnectCamera( light_vert , 0 , light );
 
 	vector<BDPT_Vertex> light_path;
 	Ray wi = light_ray;
@@ -92,9 +87,6 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		wi = Ray(vert.inter.intersect, vert.wo, 0, 0.001f);
 	}
 
-	if( light_tracing_only )
-		return 0.0f;
-
 	unsigned lps = light_path.size();
 
 	wi = ray;
@@ -106,14 +98,27 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		if (false == scene.GetIntersect(wi, &vert.inter))
 		{
 			if (scene.GetSkyLight() == light)
-				li += scene.Le(wi) * accu_radiance * _Weight(light_path_len, -2, light) / pdf;
+			{
+				if( light_path_len )
+					li += scene.Le(wi) * accu_radiance * _Weight(light_path_len, -2, light) / pdf;
+				else
+					li += scene.Le(wi);
+			}
+
 			break;
 		}
 
 		//-----------------------------------------------------------------------------------------------------
 		// Path evaluation: it hits a light source
 		if (vert.inter.primitive->GetLight() == light)
-			li += vert.inter.Le(-wi.m_Dir) * accu_radiance * _Weight(light_path_len, -2, light) / pdf;
+		{
+			if( light_path_len )
+				li += vert.inter.Le(-wi.m_Dir) * accu_radiance * _Weight(light_path_len, -2, light) / pdf;
+			else
+				li += vert.inter.Le(-wi.m_Dir) / pdf;
+		}
+		if( light_tracing_only )
+			return li;
 
 		vert.p = vert.inter.intersect;
 		vert.n = vert.inter.normal;
@@ -223,8 +228,8 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	camera_pdf /= AbsDot( light_vertex.n, n_delta ) / delta.SquaredLength();
 
 	if (coord.x < 0.0f || coord.y < 0.0f ||
-		coord.x >= camera->GetImageSensor()->GetWidth() ||
-		coord.y >= camera->GetImageSensor()->GetHeight() ||
+		coord.x >= (int)camera->GetImageSensor()->GetWidth() ||
+		coord.y >= (int)camera->GetImageSensor()->GetHeight() ||
 		camera_pdf == 0.0f )
 		return;
 
@@ -239,7 +244,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	if( visible.IsVisible() == false )
 		return;
 
-	Spectrum radiance = light_vertex.accu_radiance * g / camera_pdf / sample_per_pixel * weight;
+	Spectrum radiance = light_vertex.accu_radiance * g / camera_pdf / (float)sample_per_pixel * weight;
 
 	// update image sensor
 	ImageSensor* is = camera->GetImageSensor();
