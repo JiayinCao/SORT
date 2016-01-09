@@ -35,11 +35,18 @@ struct BDPT_Vertex
 	Bsdf*		bsdf;	// bsdf from material
 	Spectrum		accu_radiance;	// accumulated radiance
 
+	// For further detail, please refer to the paper "Implementing Vertex Connection and Merging"
+	// MIS factors
+	float		vc;
+	float		vcm;
+
 	Intersection	inter;	//temp
 
 	BDPT_Vertex()
 	{
 		bsdf = 0;
+		vc = 0.0f;
+		vcm = 0.0f;
 	}
 };
 
@@ -61,7 +68,7 @@ public:
 	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
 
 	// default constructor
-	BidirPathTracing() { path_per_pixel = 8; light_tracing_only = false; sample_per_pixel = 1;}
+	BidirPathTracing() { path_per_pixel = 8; light_tracing_only = false; sample_per_pixel = 1; mis_enabled = true; }
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -84,6 +91,8 @@ protected:
 
 	int sample_per_pixel;		// light sample per pixel
 
+	bool mis_enabled;			// whether use multiple importance sampling
+
 	// compute G term
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
@@ -95,6 +104,9 @@ protected:
 	
 	// connect camera point
 	void _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light ) const;
+
+	// connnect vertices
+	Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex ) const;
 };
 
 #endif

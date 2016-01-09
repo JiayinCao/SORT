@@ -35,11 +35,11 @@ Intersection::~Intersection()
 }
 
 // get the emissive
-Spectrum Intersection::Le( const Vector& wo ) const
+Spectrum Intersection::Le( const Vector& wo , float* directPdfA , float* emissionPdf ) const
 {
 	if( primitive == 0 ) return 0.0f;
 	Light* light = primitive->GetLight();
 	if( light ) 
-		return light->Le( *this , wo );
+		return light->Le( *this , wo , directPdfA , emissionPdf );
 	return 0.0f;
 }

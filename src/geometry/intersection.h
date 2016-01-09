@@ -38,7 +38,7 @@ public :
 	~Intersection();
 
 	// get the emissive
-	Spectrum Le( const Vector& wo ) const;
+	Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;
 
 // public field
 public:

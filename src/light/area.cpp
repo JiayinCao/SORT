@@ -79,7 +79,7 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
     if( cosAtLight )
     {
         *cosAtLight = Dot( r.m_Dir , n );
-        Sort_Assert(*cosAtLight);
+        //Sort_Assert(*cosAtLight);
     }
     
     // to avoid self intersection
@@ -114,11 +114,19 @@ void AreaLight::_registerAllProperty()
 }
 
 // sample light density
-Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo ) const
+Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const
 {
-	if( Dot( wo , intersect.normal ) > 0.0f )
-		return intensity;
-	return 0.0f;
+	const float cos = SatDot( wo , intersect.normal );
+	if( cos == 0.0f )
+		return 0.0f;
+
+	if( directPdfA )
+		*directPdfA = 1.0f / shape->SurfaceArea();
+
+	if( emissionPdf )
+        *emissionPdf = UniformHemispherePdf() / shape->SurfaceArea();
+
+	return intensity;
 }
 
 // get intersection between the light and the ray
@@ -131,7 +139,7 @@ bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radianc
 
 	// transform the intersection result back to world coordinate
 	if( result && intersect != 0 )
-		radiance = Le( *intersect , -ray.m_Dir );
+		radiance = Le( *intersect , -ray.m_Dir , 0 , 0 );
 
 	return result;
 }

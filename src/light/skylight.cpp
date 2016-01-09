@@ -58,9 +58,21 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 }
 
 // sample light density
-Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo ) const
+Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const
 { 
 	Sort_Assert( sky != 0 );
+
+	const BBox& box = scene->GetBBox();
+	const Vector delta = box.m_Max - box.m_Min;
+
+	const float directPdf = sky->Pdf( intersect.intersect , -wo );
+	const float positionPdf = 0.25f * INV_PI / delta.SquaredLength();
+
+	if( directPdfA )
+		*directPdfA = directPdf;
+	if( emissionPdf )
+		*emissionPdf = directPdf * positionPdf;
+
 	return sky->Evaluate( -wo ); 
 }
 

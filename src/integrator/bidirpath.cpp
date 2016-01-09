@@ -35,32 +35,40 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	if( light == 0 || pdf == 0.0f )
 		return 0.0f;
 
-	float	light_pdf = 0.0f;
+	Spectrum li;
+
+	float	light_emission_pdf = 0.0f;
+	float	light_pdfa = 0.0f;
 	Ray		light_ray;
-	Vector	light_normal;   // it is never initialized!!!!
-	float	light_area_pdf = 0.0f;
     float   cosAtLight = 1.0f;
 	LightSample light_sample(true);
-	Spectrum le = light->sample_l( light_sample , light_ray , &light_pdf , &light_area_pdf , &cosAtLight );
-	Spectrum li;
+	Spectrum le = light->sample_l( light_sample , light_ray , &light_emission_pdf , &light_pdfa , &cosAtLight );
 	
 	//-----------------------------------------------------------------------------------------------------
-	// Path evaluation: light tracing
-
+	// Trace light path from light source
 	vector<BDPT_Vertex> light_path;
 	Ray wi = light_ray;
-	Spectrum accu_radiance = le * cosAtLight / (light_pdf * pdf);
+	float vc = cosAtLight / light_emission_pdf;
+	float vcm = light_pdfa / light_emission_pdf;
+	Spectrum accu_radiance = le * cosAtLight / (light_emission_pdf * pdf);
 	while ((int)light_path.size() < path_per_pixel)
 	{
 		BDPT_Vertex vert;
 		if (false == scene.GetIntersect(wi, &vert.inter))
 			break;
 
+		float distSqr = ( wi.m_Ori - vert.inter.intersect ).SquaredLength();
+		vcm *= distSqr;
+		vcm /= AbsDot( -wi.m_Dir , vert.inter.normal );
+		vc /= AbsDot( -wi.m_Dir , vert.inter.normal );
+
 		vert.p = vert.inter.intersect;
 		vert.n = vert.inter.normal;
 		vert.wi = -wi.m_Dir;
 		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
 		vert.accu_radiance = accu_radiance;
+		vert.vcm = vcm;
+		vert.vc = vc;
 
 		light_path.push_back(vert);
 
@@ -84,14 +92,22 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 				accu_radiance *= 2.0f;
 		}
 
+		float rev_bsdf_pdfw = vert.bsdf->Pdf( vert.wo , vert.wi );
+		vc = AbsDot( vert.wo , vert.n ) * ( rev_bsdf_pdfw * vc + vcm ) / bsdf_pdf;
+		vcm = 1.0f / bsdf_pdf;
+
 		wi = Ray(vert.inter.intersect, vert.wo, 0, 0.001f);
 	}
 
+	//-----------------------------------------------------------------------------------------------------
+	// Trace light path from eye point
 	unsigned lps = light_path.size();
-
+	const float total_sample_num = (float)(camera->GetImageSensor()->GetWidth() * camera->GetImageSensor()->GetHeight() * sample_per_pixel);
 	wi = ray;
 	accu_radiance = 1.0f;;
 	int light_path_len = 0;
+	vc = 0.0f;
+	vcm = total_sample_num / ray.m_fPDF;
 	while (light_path_len < path_per_pixel)
 	{
 		BDPT_Vertex vert;
@@ -113,27 +129,52 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		if (vert.inter.primitive->GetLight() == light)
 		{
 			if( light_path_len )
-				li += vert.inter.Le(-wi.m_Dir) * accu_radiance * _Weight(light_path_len, -2, light) / pdf;
+			{
+				if( !mis_enabled )
+					li += vert.inter.Le(-wi.m_Dir) * accu_radiance * _Weight(light_path_len, -2, light) / pdf;
+				else
+				{
+					float emissionPdf;
+					float directPdfA;
+					Spectrum _li = vert.inter.Le(-wi.m_Dir , &directPdfA , &emissionPdf ) * accu_radiance / pdf;
+					li += _li / ( 1.0f + directPdfA * vert.vcm + emissionPdf * vert.vc );
+				}
+			}
 			else
 				li += vert.inter.Le(-wi.m_Dir) / pdf;
 		}
 		if( light_tracing_only )
 			return li;
 
+		float distSqr = ( wi.m_Ori - vert.inter.intersect ).SquaredLength();
+		vcm *= distSqr;
+		vcm /= AbsDot( -wi.m_Dir , vert.inter.normal );
+		vc /= AbsDot( -wi.m_Dir , vert.inter.normal );
+
 		vert.p = vert.inter.intersect;
 		vert.n = vert.inter.normal;
 		vert.wi = -wi.m_Dir;
 		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
 		vert.accu_radiance = accu_radiance;
+		vert.vc = vc;
+		vert.vcm = vcm;
 
 		//-----------------------------------------------------------------------------------------------------
 		// Path evaluation: connect light sample first
-		li += _ConnectLight(vert, light) * _Weight(light_path_len, -1, light) / pdf;
+		if( !mis_enabled )
+			li += _ConnectLight(vert, light) * _Weight(light_path_len, -1, light) / pdf;
+		else
+			li += _ConnectLight(vert, light) / pdf;
 
 		//-----------------------------------------------------------------------------------------------------
 		// Path evaluation: connect vertices
 		for (unsigned j = 0; j < lps; ++j)
-			li += vert.accu_radiance * light_path[j].accu_radiance * _Gterm( vert , light_path[j] ) * _Weight(light_path_len, j, light);
+		{
+			if( !mis_enabled )
+				li += vert.accu_radiance * light_path[j].accu_radiance * _Gterm( vert , light_path[j] ) * _Weight(light_path_len, j, light);
+			else
+				li += _ConnectVertices( light_path[j] , vert );
+		}
 
 		++light_path_len;
 
@@ -153,6 +194,10 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 				accu_radiance *= 2.0f;
 		}
 
+		float rev_bsdf_pdfw = vert.bsdf->Pdf( vert.wo , vert.wi );
+		vc = AbsDot( vert.wo , vert.n ) * ( rev_bsdf_pdfw * vc + vcm ) / bsdf_pdf;
+		vcm = 1.0f / bsdf_pdf;
+
 		wi = Ray(vert.inter.intersect, vert.wo, 0, 0.001f);
 	}
 
@@ -162,6 +207,38 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num )
 {
     sample_per_pixel = ps_num;
+}
+
+// connnect vertices
+Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const
+{
+	Vector delta = p0.p - p1.p;
+	float distSqr = delta.SquaredLength();
+	Vector n_delta = Normalize(delta);
+
+	Spectrum g = AbsDot( p0.n , -n_delta ) * p1.bsdf->f( p1.wi , n_delta ) * p0.bsdf->f( -n_delta, p0.wi ) * AbsDot( p1.n , n_delta ) / delta.SquaredLength();
+	if( g.IsBlack() )
+		return 0.0f;
+
+	Visibility visible( scene );
+	visible.ray = Ray( p1.p , n_delta  , 0 , 0.01f , delta.Length() - 0.01f );
+	if( visible.IsVisible() == false )
+		return 0.0f;
+	
+	float p0_bsdf_pdfw = p0.bsdf->Pdf( p0.wi , -n_delta );
+	float p0_bsdf_rev_pdfw = p0.bsdf->Pdf( -n_delta , p0.wi );
+	float p1_bsdf_pdfw = p1.bsdf->Pdf( p1.wi , n_delta );
+	float p1_bsdf_rev_pdfw = p1.bsdf->Pdf( n_delta , p1.wi );
+
+	float p0_a = p1_bsdf_pdfw * AbsDot( n_delta , p0.n ) / distSqr;
+	float p1_a = p0_bsdf_pdfw * AbsDot( n_delta , p1.n ) / distSqr;
+
+	float mis_0 = p0_a * ( p0.vcm + p0.vc * p0_bsdf_rev_pdfw );
+	float mis_1 = p1_a * ( p1.vcm + p1.vc * p1_bsdf_rev_pdfw );
+
+	Spectrum li = p0.accu_radiance * p1.accu_radiance * g / ( mis_0 + 1.0f + mis_1 );
+
+	return li;
 }
 
 // compute G term
@@ -200,7 +277,9 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 	Vector wi;
 	Visibility visibility(scene);
 	float directPdfW;
-	Spectrum li = light->sample_l(eye_vertex.inter, &sample, wi, 0 , &directPdfW, 0 , 0 , visibility);
+	float emissionPdfW;
+	float cosAtLight;
+	Spectrum li = light->sample_l(eye_vertex.inter, &sample, wi, 0 , &directPdfW, &emissionPdfW , &cosAtLight , visibility);
 	li *= eye_vertex.accu_radiance * eye_vertex.bsdf->f(eye_vertex.wi, wi) * AbsDot(eye_vertex.n, wi) / directPdfW;
 
 	if (li.IsBlack())
@@ -208,6 +287,17 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 
 	if (visibility.IsVisible() == false)
 		return 0.0f;
+
+	if( mis_enabled )
+	{
+		float eye_bsdf_pdfw = eye_vertex.bsdf->Pdf( eye_vertex.wi , wi );
+		float eye_bsdf_rev_pdfw = eye_vertex.bsdf->Pdf( wi , eye_vertex.wi );
+
+		float mis0 = light->IsDelta()?0.0f:(eye_bsdf_pdfw / directPdfW);
+		float mis1 = AbsDot( eye_vertex.n , wi ) * emissionPdfW * ( eye_vertex.vcm + eye_vertex.vc * eye_bsdf_rev_pdfw ) / ( cosAtLight * directPdfW );
+
+		li /= mis0 + mis1 + 1.0f;
+	}
 
 	return li;
 }
@@ -244,7 +334,17 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	if( visible.IsVisible() == false )
 		return;
 
-	Spectrum radiance = light_vertex.accu_radiance * g / camera_pdf / (float)sample_per_pixel * weight;
+	Spectrum radiance = light_vertex.accu_radiance * g / camera_pdf / (float)sample_per_pixel;
+
+	if( mis_enabled )
+	{
+		float bsdf_rev_pdfw = light_vertex.bsdf->Pdf( n_delta , light_vertex.wi );
+		const float total_sample_num = (float)(camera->GetImageSensor()->GetWidth() * camera->GetImageSensor()->GetHeight() * sample_per_pixel);
+
+		float mis0 = ( light_vertex.vcm + light_vertex.vc * bsdf_rev_pdfw ) / ( total_sample_num * camera_pdf );
+		radiance /= ( 1.0f + mis0 );
+	}else
+		radiance *= weight;
 
 	// update image sensor
 	ImageSensor* is = camera->GetImageSensor();
