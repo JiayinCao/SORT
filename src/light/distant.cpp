@@ -60,18 +60,18 @@ Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , 
     r.m_Dir = light_dir;
 	
 	const BBox& box = scene->GetBBox();
-	Point center = ( box.m_Max + box.m_Min ) * 0.5f;
-	Vector delta = box.m_Max - box.m_Min;
-	float world_radius = delta.Length() * 0.5f;
+	const Point center = ( box.m_Max + box.m_Min ) * 0.5f;
+	const Vector delta = box.m_Max - center;
+	const float world_radius = delta.Length();
 
 	Vector v0 , v1;
 	CoordinateSystem( r.m_Dir , v0 , v1 );
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
-	Point p = ( u * v0 + v * v1 ) * world_radius + center;
+	const Point p = ( u * v0 + v * v1 ) * world_radius + center;
 	r.m_Ori = p - r.m_Dir * world_radius * 3.0f;
 
-    float pdf = 1.0f / ( PI * world_radius * world_radius );
+    const float pdf = 1.0f / ( PI * world_radius * world_radius );
 	if( pdfW ) *pdfW = pdf;
 	if( pdfA ) *pdfA = pdf;
     if( cosAtLight ) *cosAtLight = 1.0f;

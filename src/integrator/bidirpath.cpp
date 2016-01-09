@@ -31,7 +31,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
 	// pick a light randomly
 	float pdf;
-	const Light* light = scene.SampleLight( ps.light_sample[0].t , &pdf );
+	const Light* light = scene.SampleLight( sort_canonical() , &pdf );
 	if( light == 0 || pdf == 0.0f )
 		return 0.0f;
 
@@ -40,7 +40,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	Vector	light_normal;   // it is never initialized!!!!
 	float	light_area_pdf = 0.0f;
     float   cosAtLight = 1.0f;
-	Spectrum le = light->sample_l( ps.light_sample[0] , light_ray , &light_pdf , &light_area_pdf , &cosAtLight );
+	Spectrum le = light->sample_l( sort_canonical() , light_ray , &light_pdf , &light_area_pdf , &cosAtLight );
 	Spectrum li;
 	
 	//-----------------------------------------------------------------------------------------------------
@@ -154,70 +154,9 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	return li;
 }
 
-// request samples
 void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num )
 {
-	for( unsigned i = 0 ; i < ps_num ; i++ )
-	{
-		ps[i].bsdf_sample = new BsdfSample[ 1 ];
-		ps[i].light_sample = new LightSample[ 1 ];
-	}
-	ps[0].data = new float[ ps_num * 3 ];
-
-	sample_per_pixel = ps_num;
-}
-
-// generate samples
-void BidirPathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
-{
-	Integrator::GenerateSample( sampler , samples , ps , scene );
-
-	if( sampler->RoundSize( ps ) == ps && false )
-	{
-		float* data_1d = samples[0].data;
-		float* data_2d = samples[0].data + ps;
-
-		sampler->Generate1D( data_1d , ps );
-		sampler->Generate2D( data_2d , ps );
-		const unsigned* shuffled_id0 = ShuffleIndex( ps );
-
-		for( unsigned k = 0 ; k < ps ; ++k )
-		{
-			int two_k = 2*shuffled_id0[k];
-			samples[k].bsdf_sample[0].t = data_1d[two_k];
-			samples[k].bsdf_sample[0].u = data_2d[two_k];
-			samples[k].bsdf_sample[0].v = data_2d[two_k+1];
-		}
-
-		const unsigned* shuffled_id1 = ShuffleIndex( ps );
-		sampler->Generate1D( data_1d , ps );
-		sampler->Generate2D( data_2d , ps );
-		for( unsigned k = 0 ; k < ps ; ++k )
-		{
-			int two_k = 2*shuffled_id1[k];
-			samples[k].light_sample[0].t = data_1d[two_k];
-			samples[k].light_sample[0].u = data_2d[two_k];
-			samples[k].light_sample[0].v = data_2d[two_k+1];
-		}
-	}else
-	{
-		for (unsigned k = 0; k < ps; ++k) 
-		{
-			samples[k].bsdf_sample[0] = BsdfSample(true);
-			samples[k].light_sample[0] = LightSample(true);
-		}
-	}
-}
-
-// output log information
-void BidirPathTracing::OutputLog() const
-{
-	LOG_HEADER( "Integrator" );
-	LOG<<"Integrator algorithm : Bidirectional Path Tracing."<<ENDL;
-	LOG<<"It supports all of the features in direct lighting algorithm."<<ENDL;
-	LOG<<"Some global illumination effect is also supported in path tracing."<<ENDL;
-	LOG<<"While it requires much more samples to reduce the noise to an acceptable level."<<ENDL;
-	LOG<<"Bidirectional Path Tracing trace rays from eye and light source at the same time."<<ENDL;
+    sample_per_pixel = ps_num;
 }
 
 // compute G term

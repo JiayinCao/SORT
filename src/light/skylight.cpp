@@ -46,7 +46,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
     if( emissionPdf )
     {
         const BBox& box = scene->GetBBox();
-        Vector delta = box.m_Max - box.m_Min;
+        const Vector delta = box.m_Max - box.m_Min;
         *emissionPdf = _pdfw * 0.25f * INV_PI / delta.SquaredLength();
     }
 
@@ -75,15 +75,15 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 	r.m_Dir = -sky->sample_v( ls.u , ls.v , &_pdfw , pdfA );
 
 	const BBox& box = scene->GetBBox();
-	Point center = ( box.m_Max + box.m_Min ) * 0.5f;
-	Vector delta = box.m_Max - box.m_Min;
-	float world_radius = delta.Length() * 0.5f;
+	const Point center = ( box.m_Max + box.m_Min ) * 0.5f;
+	const Vector delta = box.m_Max - center;
+	float world_radius = delta.Length();
 
 	Vector v1 , v2;
 	CoordinateSystem( -r.m_Dir , v1 , v2 );
 	float d1 , d2;
-	float t0 = sort_canonical();
-	float t1 = sort_canonical();
+	const float t0 = sort_canonical();
+	const float t1 = sort_canonical();
 	UniformSampleDisk( t0 , t1 , d1 , d2 );
 	r.m_Ori = center + world_radius * ( v1 * d1 + v2 * d2 ) - r.m_Dir * 2.0f * world_radius;
 
@@ -102,8 +102,8 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 Spectrum SkyLight::Power() const
 {
 	Sort_Assert( scene!=0 );
-	BBox box = scene->GetBBox();
-	float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
+	const BBox box = scene->GetBBox();
+	const float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
 
 	return radius * radius * PI * sky->GetAverage();
 }
