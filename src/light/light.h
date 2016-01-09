@@ -99,7 +99,7 @@ public:
 	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const = 0;
 
 	// sample light density
-	virtual Spectrum Le( const Intersection& intersect , const Vector& wo ) const { return 0.0f; }
+	virtual Spectrum Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const { return 0.0f; }
 
 	// get intersection between the light and the ray
 	virtual bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }
