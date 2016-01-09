@@ -68,19 +68,9 @@ public:
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
 	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const;
-
-	// request samples
-	virtual void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num );
-
-	// generate samples
-	// para 'sampler' : the sampling method
-	// para 'samples' : the samples to be generated
-	// para 'ps'      : number of pixel sample to be generated
-	// para 'scene'   : the scene to be rendered
-	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const;
-
-	// output log information
-	virtual void OutputLog() const;
+    
+    // request sample
+    void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num );
 
 	// support pending write
 	virtual bool SupportPendingWrite() { return true; }

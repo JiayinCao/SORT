@@ -27,16 +27,16 @@ IMPLEMENT_CREATOR( PointLight );
 Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
     // Get light position
-	Vector _dirToLight = light_pos - intersect.intersect;
+	const Vector _dirToLight = light_pos - intersect.intersect;
     
     // Normalize vec
-    float sqrLen = _dirToLight.SquaredLength();
-    float len = sqrt(sqrLen);
+    const float sqrLen = _dirToLight.SquaredLength();
+    const float len = sqrt(sqrLen);
 	dirToLight = _dirToLight / len;
     
     // setup visibility ray
     const float delta = 0.01f;
-	visibility.ray = Ray( light_pos , -dirToLight , 0 , delta , len - delta );
+	visibility.ray = Ray( light_pos , -dirToLight , 0 , 0.0f , len - delta );
 
     // direction pdf from 'intersect' to light source w.r.t solid angle
     if( pdfw )
