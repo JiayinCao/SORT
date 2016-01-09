@@ -27,11 +27,11 @@ IMPLEMENT_CREATOR( SpotLight );
 Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
     // direction to light
-	Vector _dirToLight = light_pos - intersect.intersect;
+	const Vector _dirToLight = light_pos - intersect.intersect;
     
     // Normalize vec
-    float sqrLen = _dirToLight.SquaredLength();
-    float len = sqrt(sqrLen);
+    const float sqrLen = _dirToLight.SquaredLength();
+    const float len = sqrt(sqrLen);
     dirToLight = _dirToLight / len;
     
     // direction pdf from 'intersect' to light source w.r.t solid angle
@@ -52,12 +52,12 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
     const float delta = 0.01f;
     visibility.ray = Ray( light_pos , -dirToLight , 0 , delta , len - delta );
     
-	float falloff = SatDot( dirToLight , -light_dir );
+	const float falloff = SatDot( dirToLight , -light_dir );
 	if( falloff < cos_total_range )
 		return 0.0f;
 	if( falloff > cos_falloff_start )
 		return intensity ;
-	float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
+	const float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
 	if( d == 0.0f )
 		return 0.0f;
 
@@ -73,7 +73,7 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 	r.m_Ori = light_pos;
     
     // sample a light direction
-	Vector local_dir = UniformSampleCone( ls.u , ls.v , cos_total_range );
+	const Vector local_dir = UniformSampleCone( ls.u , ls.v , cos_total_range );
 	r.m_Dir = light2world.matrix( local_dir );
 
     // product of pdf of sampling a point w.r.t surface area and a direction w.r.t direction
@@ -85,12 +85,12 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
     if( cosAtLight )
         *cosAtLight = 1.0f;
 
-	float falloff = SatDot( r.m_Dir , light_dir );
+	const float falloff = SatDot( r.m_Dir , light_dir );
 	if( falloff < cos_total_range )
 		return 0.0f;
 	if( falloff > cos_falloff_start )
 		return intensity;
-	float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
+	const float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
 	if( d == 0.0f )
 		return 0.0f;
 
