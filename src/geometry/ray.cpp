@@ -44,7 +44,7 @@ Ray::Ray( const Ray& r )
 	m_Depth = r.m_Depth;
 	m_fMin = r.m_fMin;
 	m_fMax = r.m_fMax;
-	m_fPDF = 1.0f;
+	m_fPDF = r.m_fPDF;
 }
 // destructor
 Ray::~Ray()
