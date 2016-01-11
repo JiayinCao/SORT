@@ -50,7 +50,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 		return 0.0f;
     
     if(cosAtLight)
-        *cosAtLight = Dot( dirToLight , normal );
+        *cosAtLight = Dot( -dirToLight , normal );
     
     if( distance )
         *distance = len;
@@ -78,7 +78,7 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
     
     if( cosAtLight )
     {
-        *cosAtLight = Dot( r.m_Dir , n );
+        *cosAtLight = SatDot( r.m_Dir , n );
         //Sort_Assert(*cosAtLight);
     }
     
