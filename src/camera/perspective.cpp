@@ -163,7 +163,7 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 	const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
 
 	// the pdf of the ray
-	r.m_fPDF = w * h / imageToSolidAngleFactor;
+	r.m_fPDF = imageToSolidAngleFactor;
 
 	return r;
 }
@@ -251,7 +251,7 @@ Vector2i PerspectiveCamera::GetScreenCoord(Vector dir , float* pdf)
 		const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
 
 		// the pdf of the ray
-		*pdf = ( w * h ) / imageToSolidAngleFactor ;
+		*pdf = imageToSolidAngleFactor ;
 	}
 
 	return coord;

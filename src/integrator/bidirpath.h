@@ -33,7 +33,8 @@ struct BDPT_Vertex
 	Vector		wi;		// in direction
 	Vector		wo;		// out direction
 	Bsdf*		bsdf;	// bsdf from material
-	Spectrum		accu_radiance;	// accumulated radiance
+	float		rr;		// russian roulette
+	Spectrum	throughput;	// through put
 
 	// For further detail, please refer to the paper "Implementing Vertex Connection and Merging"
 	// MIS factors
