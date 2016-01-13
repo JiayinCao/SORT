@@ -26,7 +26,7 @@
 
 IMPLEMENT_CREATOR( BidirPathTracing );
 
-#define MIS(x) ((x)*(x))
+#define MIS(x) (x)
 
 // return the radiance of a specific direction
 Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
@@ -60,7 +60,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		if (false == scene.GetIntersect(wi, &vert.inter))
 			break;
 
-		const float distSqr = ( wi.m_Ori - vert.inter.intersect ).SquaredLength();
+		const float distSqr = vert.inter.t * vert.inter.t;
 		const float cosIn = AbsDot( wi.m_Dir , vert.inter.normal );
 		vcm *= MIS( distSqr );
 		vcm /= MIS( cosIn );
@@ -131,7 +131,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 			break;
 		}
 
-		const float distSqr = ( wi.m_Ori - vert.inter.intersect ).SquaredLength();
+		const float distSqr = vert.inter.t * vert.inter.t;
 		const float cosIn = AbsDot( wi.m_Dir , vert.inter.normal );
 		vcm *= MIS( distSqr );
 		vcm /= MIS( cosIn );
@@ -334,6 +334,9 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 		coord.x >= (int)camera->GetImageSensor()->GetWidth() ||
 		coord.y >= (int)camera->GetImageSensor()->GetHeight() ||
 		camera_pdfA == 0.0f )
+		return;
+
+	if( Dot( delta , camera->GetForward() ) <= 0.0f )
 		return;
 
 	Spectrum bsdf_value = light_vertex.bsdf->f( light_vertex.wi , -n_delta );
