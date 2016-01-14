@@ -26,7 +26,8 @@
 
 IMPLEMENT_CREATOR( BidirPathTracing );
 
-#define MIS(x) (x)
+// use power heuristic as default
+#define MIS(x) ((x)*(x))
 
 // return the radiance of a specific direction
 Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
@@ -50,8 +51,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	// Trace light path from light source
 	vector<BDPT_Vertex> light_path;
 	Ray wi = light_ray;
-	float vc = (light->IsDelta())?0.0f:cosAtLight / light_emission_pdf;
-	float vcm = light_pdfa / light_emission_pdf;
+	float vc = (light->IsDelta())?0.0f: MIS(cosAtLight / light_emission_pdf);
+	float vcm = MIS(light_pdfa / light_emission_pdf);
 	Spectrum throughput = le * cosAtLight / (light_emission_pdf * pdf);
 	float rr = 1.0f;
 	while ((int)light_path.size() < path_per_pixel)
@@ -113,7 +114,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	throughput = 1.0f;
 	int light_path_len = 0;
 	vc = 0.0f;
-	vcm = total_pixel / ray.m_fPDF;
+	vcm = MIS(total_pixel / ray.m_fPDF);
 	rr = 1.0f;
 	while (light_path_len < path_per_pixel)
 	{
