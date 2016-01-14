@@ -35,19 +35,20 @@ struct BDPT_Vertex
 	Bsdf*		bsdf;	// bsdf from material
 	float		rr;		// russian roulette
 	Spectrum	throughput;	// through put
+	Intersection	inter;	// intersection
+	int			depth;	// vertex depth
 
 	// For further detail, please refer to the paper "Implementing Vertex Connection and Merging"
 	// MIS factors
 	float		vc;
 	float		vcm;
 
-	Intersection	inter;	//temp
-
 	BDPT_Vertex()
 	{
 		bsdf = 0;
 		vc = 0.0f;
 		vcm = 0.0f;
+		depth = 0;
 	}
 };
 
@@ -97,9 +98,6 @@ protected:
 	// compute G term
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
-	// weight the path
-	float	_Weight( int esize , int lsize , const Light* light ) const;
-
 	// connect light sample
 	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light ) const;
 	
@@ -107,7 +105,7 @@ protected:
 	void _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light ) const;
 
 	// connnect vertices
-	Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex ) const;
+	Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light ) const;
 };
 
 #endif
