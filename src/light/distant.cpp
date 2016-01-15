@@ -40,7 +40,7 @@ Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSamp
     {
         const BBox& box = scene->GetBBox();
         Vector delta = box.m_Max - box.m_Min;
-        *emissionPdf = 0.25f * INV_PI / delta.SquaredLength();
+        *emissionPdf = 4.0f * INV_PI / delta.SquaredLength();
     }
     
     if( cosAtLight )
@@ -73,7 +73,7 @@ Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , 
 
     const float pdf = 1.0f / ( PI * world_radius * world_radius );
 	if( pdfW ) *pdfW = pdf;
-	if( pdfA ) *pdfA = pdf;
+	if( pdfA ) *pdfA = 1.0f;
     if( cosAtLight ) *cosAtLight = 1.0f;
     
 	return intensity;

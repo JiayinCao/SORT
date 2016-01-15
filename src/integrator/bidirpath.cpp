@@ -65,7 +65,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 		const float distSqr = vert.inter.t * vert.inter.t;
 		const float cosIn = AbsDot( wi.m_Dir , vert.inter.normal );
-		vcm *= MIS( distSqr );
+		if( light_path.size() > 0 || ( light_path.size() == 0 && !light->IsInfinite() ) )
+			vcm *= MIS( distSqr );
 		vcm /= MIS( cosIn );
 		vc /= MIS( cosIn );
 
@@ -127,10 +128,17 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 			if (scene.GetSkyLight() == light)
 			{
 				if( light_path_len )
-					li += scene.Le(wi) * throughput / (float) ( ( light_path_len + 1 + !light->IsDelta() ) * pdf ) ;
-				else
-					li += scene.Le(wi);
+				{
+					float emissionPdf;
+					float directPdfA;
+					Spectrum _li = light->Le( vert.inter, -wi.m_Dir , &directPdfA , &emissionPdf ) * throughput / light->PickPDF();
+					float weight = 1.0f / ( 1.0f + MIS( directPdfA ) * vcm + MIS( emissionPdf ) * vc );
+					li += _li * weight;
+				}
 			}
+
+			if( light_path_len == 0 )
+				li += scene.Le( wi );
 
 			break;
 		}
