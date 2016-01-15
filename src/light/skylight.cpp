@@ -47,7 +47,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
     {
         const BBox& box = scene->GetBBox();
         const Vector delta = box.m_Max - box.m_Min;
-        *emissionPdf = _pdfw * 0.25f * INV_PI / delta.SquaredLength();
+        *emissionPdf = _pdfw * 4.0f * INV_PI / delta.SquaredLength();
     }
 
 	// setup visibility tester
@@ -66,7 +66,7 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float*
 	const Vector delta = box.m_Max - box.m_Min;
 
 	const float directPdf = sky->Pdf( intersect.intersect , -wo );
-	const float positionPdf = 0.25f * INV_PI / delta.SquaredLength();
+	const float positionPdf = 4.0f * INV_PI / delta.SquaredLength();
 
 	if( directPdfA )
 		*directPdfA = directPdf;
@@ -84,7 +84,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
     float _pdfw;
-	r.m_Dir = -sky->sample_v( ls.u , ls.v , &_pdfw , pdfA );
+	r.m_Dir = -sky->sample_v( ls.u , ls.v , &_pdfw , 0 );
 
 	const BBox& box = scene->GetBBox();
 	const Point center = ( box.m_Max + box.m_Min ) * 0.5f;
@@ -99,9 +99,9 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 	UniformSampleDisk( t0 , t1 , d1 , d2 );
 	r.m_Ori = center + world_radius * ( v1 * d1 + v2 * d2 ) - r.m_Dir * 2.0f * world_radius;
 
-    _pdfw /= ( PI * world_radius * world_radius );
+    const float emissionPdf = _pdfw / ( PI * world_radius * world_radius );
 	if( pdfW )
-		*pdfW = _pdfw;
+		*pdfW = emissionPdf;
     if( cosAtLight )
         *cosAtLight = 1.0f;
     if( pdfA )

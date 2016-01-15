@@ -78,6 +78,9 @@ public:
 	// whether the light is a delta light
 	virtual bool IsDelta() const { return true; }
 
+	// whether the light is an infinite light
+	virtual bool IsInfinite() const { return false; }
+
 	// get the shape of light
 	virtual Shape* GetShape() const { return 0; }
 
@@ -104,6 +107,14 @@ public:
 	// get intersection between the light and the ray
 	virtual bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }
 
+	// set pdf of picking the light
+	void SetPickPDF( float pdf ) {
+		pickProp = pdf;
+	}
+	float PickPDF() const {
+		return pickProp;
+	}
+
 // protected field
 protected:
 	// scene containing the light
@@ -112,6 +123,9 @@ protected:
 	Spectrum	intensity;
 	// transformation of the light
 	Transform	light2world;
+
+	// pdf of picking the light
+	float		pickProp;
 
 	// register property
 	void _registerAllProperty()

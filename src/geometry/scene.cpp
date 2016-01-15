@@ -326,12 +326,15 @@ void Scene::_genLightDistribution()
 		return ;
 
 	float* pdf = new float[count];
-	vector<Light*>::const_iterator it = m_lights.begin();
 	for( unsigned i = 0 ; i < count ; i++ )
-	{
 		pdf[i] = m_lights[i]->Power().GetIntensity();
-		it++;
-	}
+
+	float total_pdf = 0.0f;
+	for( unsigned i = 0 ; i < count ; i++ )
+		total_pdf += pdf[i];
+
+	for( unsigned i = 0 ; i < count ; i++ )
+		m_lights[i]->SetPickPDF( pdf[i] / total_pdf );
 
 	SAFE_DELETE(m_pLightsDis);
 	m_pLightsDis = new Distribution1D( pdf , count );

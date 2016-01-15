@@ -55,6 +55,9 @@ public:
 	// get intersection between the light and the ray
 	virtual bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const;
 
+	// whether the light is an infinite light
+	virtual bool IsInfinite() const { return true; }
+
 	// total power of the light
 	virtual Spectrum Power() const;
 

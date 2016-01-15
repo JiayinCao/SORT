@@ -57,6 +57,9 @@ public:
 	// para 'pdf'      : the properbility density function
 	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const;
 
+	// whether the light is an infinite light
+	virtual bool IsInfinite() const { return true; }
+
 // private field
 private:
     Vector light_dir;
