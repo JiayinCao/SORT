@@ -28,15 +28,14 @@ class	Bsdf;
 
 struct BDPT_Vertex
 {
-	Point		p;		// the position of the vertex
-	Vector		n;		// the normal of the vertex
-	Vector		wi;		// in direction
-	Vector		wo;		// out direction
-	Bsdf*		bsdf;	// bsdf from material
-	float		rr;		// russian roulette
-	Spectrum	throughput;	// through put
-	Intersection	inter;	// intersection
-	int			depth;	// vertex depth
+	Point			p;			// the position of the vertex
+	Vector			n;			// the normal of the vertex
+	Vector			wi;			// in direction
+	Vector			wo;			// out direction
+	Bsdf*			bsdf;		// bsdf from material
+	float			rr;			// russian roulette
+	Spectrum		throughput;	// through put
+	Intersection	inter;		// intersection
 
 	// For further detail, please refer to the paper "Implementing Vertex Connection and Merging"
 	// MIS factors
@@ -48,7 +47,6 @@ struct BDPT_Vertex
 		bsdf = 0;
 		vc = 0.0f;
 		vcm = 0.0f;
-		depth = 0;
 	}
 };
 
@@ -70,7 +68,7 @@ public:
 	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
 
 	// default constructor
-	BidirPathTracing() { path_per_pixel = 8; light_tracing_only = false; sample_per_pixel = 1; mis_enabled = true; }
+	BidirPathTracing() { path_per_pixel = 8; light_tracing_only = false; sample_per_pixel = 1; }
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -92,9 +90,7 @@ protected:
 	mutable std::list<Pending_Sample>	pending_samples;	// pending samples for light tracing
 
 	int sample_per_pixel;		// light sample per pixel
-
-	bool mis_enabled;			// whether use multiple importance sampling
-
+	
 	// compute G term
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
