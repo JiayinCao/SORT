@@ -86,8 +86,9 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 			path_weight /= continueProperbility;
 		}
 
-		r.m_Ori = inter.intersect + wi * 0.001f;
+		r.m_Ori = inter.intersect;
 		r.m_Dir = wi;
+		r.m_fMin = 0.00001f;
 
 		++bounces;
 
