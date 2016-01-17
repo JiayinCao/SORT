@@ -77,7 +77,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 				return radiance;
 
 			float dot = SatDot( wi , ip.normal );
-			visibility.ray = Ray( ip.intersect , wi , 0 , 0.1f , _ip.t - 0.1f );
+			visibility.ray = Ray( ip.intersect , wi , 0 , 0.001f , _ip.t - 0.001f );
 			if( dot > 0.0f && !li.IsBlack() && visibility.IsVisible() )
 				radiance += li * f * dot * weight / bsdf_pdf;
 		}
