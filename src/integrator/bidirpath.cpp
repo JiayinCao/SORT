@@ -215,6 +215,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num )
 {
+	Integrator::RequestSample( sampler, ps , ps_num );
+
     sample_per_pixel = ps_num;
 }
 
@@ -299,8 +301,9 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	if( Dot( delta , camera->GetForward() ) <= 0.0f )
 		return;
 
+	Visibility visible( scene );
 	float camera_pdfA;
-	const Vector2i coord = camera->GetScreenCoord(n_delta, &camera_pdfA);
+	const Vector2i coord = camera->GetScreenCoord(light_vertex.inter.intersect, &camera_pdfA , &visible );
 	camera_pdfA *= AbsDot( light_vertex.n, n_delta ) * invSqrLen;
 
 	if (coord.x < 0.0f || coord.y < 0.0f ||
@@ -313,8 +316,6 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	if( bsdf_value.IsBlack() )
 		return;
 
-	Visibility visible( scene );
-	visible.ray = Ray( light_vertex.p , -n_delta , 0 , 0.01f , delta.Length() );
 	if( visible.IsVisible() == false )
 		return;
 

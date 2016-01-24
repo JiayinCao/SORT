@@ -23,6 +23,7 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 #include "imagesensor/imagesensor.h"
+#include "light/light.h"
 
 IMPLEMENT_CREATOR( PerspectiveCamera );
 
@@ -107,7 +108,7 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
         Point target = r(m_focalDistance / view_dir.z);
         
         float s , t;
-        UniformSampleDisk( ps.dof_u , ps.dof_v , s , t );
+		UniformSampleDisk( ps.dof_u , ps.dof_v , s , t );
         
         r.m_Ori.x = s * m_lensRadius;
         r.m_Ori.y = t * m_lensRadius;
@@ -129,11 +130,35 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 }
 
 // get camera coordinate according to a view direction in world space
-Vector2i PerspectiveCamera::GetScreenCoord(Vector dir , float* pdf)
+Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdf, Visibility* visibility)
 {
+	Vector dir = Normalize(p - m_eye);
+
 	// get view space dir
-    const Point rastP = m_worldToRaster( m_eye + dir );
+    Point rastP = m_worldToRaster( p );
     
+	// Handle DOF camera ray adaption
+	if( m_lensRadius != 0.0f )
+	{
+		Point view_target = m_worldToCamera( p );
+
+		float s , t;
+        UniformSampleDisk( sort_canonical() , sort_canonical() , s , t );
+
+		Ray adapted_ray;
+		adapted_ray.m_Ori = Point( s , t , 0.0f ) * m_lensRadius;
+		adapted_ray.m_Dir = view_target - adapted_ray.m_Ori;
+		adapted_ray.m_fMax = adapted_ray.m_Dir.Length();
+		adapted_ray.m_Dir /= adapted_ray.m_fMax;
+		adapted_ray.m_fMax -= 0.001f;
+		adapted_ray.m_fMin += 0.001f;
+
+		visibility->ray = m_worldToCamera.invMatrix( adapted_ray );
+
+		Point view_focal_target = adapted_ray( m_focalDistance / adapted_ray.m_Dir.z );
+		rastP = m_cameraToRaster( view_focal_target );
+	}
+
 	if( pdf )
 	{
 		// calculate the pdf for camera ray
