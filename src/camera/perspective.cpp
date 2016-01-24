@@ -132,11 +132,14 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 // get camera coordinate according to a view direction in world space
 Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdf, Visibility* visibility)
 {
-	Vector dir = Normalize(p - m_eye);
+	const float delta = 0.001f;
+	Vector dir = p - m_eye;
+	const float len = dir.Length();
+	dir = dir / len;
 
 	// get view space dir
     Point rastP = m_worldToRaster( p );
-    
+
 	// Handle DOF camera ray adaption
 	if( m_lensRadius != 0.0f )
 	{
@@ -145,19 +148,20 @@ Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdf, Visibility* visi
 		float s , t;
         UniformSampleDisk( sort_canonical() , sort_canonical() , s , t );
 
-		Ray adapted_ray;
-		adapted_ray.m_Ori = Point( s , t , 0.0f ) * m_lensRadius;
-		adapted_ray.m_Dir = view_target - adapted_ray.m_Ori;
-		adapted_ray.m_fMax = adapted_ray.m_Dir.Length();
-		adapted_ray.m_Dir /= adapted_ray.m_fMax;
-		adapted_ray.m_fMax -= 0.001f;
-		adapted_ray.m_fMin += 0.001f;
+		Ray shadow_ray;
+		shadow_ray.m_Ori = Point( s , t , 0.0f ) * m_lensRadius;
+		shadow_ray.m_Dir = view_target - shadow_ray.m_Ori;
+		shadow_ray.m_fMax = shadow_ray.m_Dir.Length();
+		shadow_ray.m_Dir /= shadow_ray.m_fMax;
+		shadow_ray.m_fMax -= delta;
+		shadow_ray.m_fMin += delta;
 
-		visibility->ray = m_worldToCamera.invMatrix( adapted_ray );
+		visibility->ray = m_worldToCamera.invMatrix( shadow_ray );
 
-		Point view_focal_target = adapted_ray( m_focalDistance / adapted_ray.m_Dir.z );
+		Point view_focal_target = shadow_ray( m_focalDistance / shadow_ray.m_Dir.z );
 		rastP = m_cameraToRaster( view_focal_target );
-	}
+	}else
+		visibility->ray = Ray( p , -dir , 0 , delta , len - delta );
 
 	if( pdf )
 	{
