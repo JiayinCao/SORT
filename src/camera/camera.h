@@ -30,6 +30,7 @@
 // pre-decleration of render target
 class PixelSample;
 class ImageSensor;
+class Visibility;
 
 ////////////////////////////////////////////////////////////////////
 //	definition of camera
@@ -68,7 +69,7 @@ public:
 	}
 
 	// get camera coordinate according to a view direction in world space
-	virtual Vector2i GetScreenCoord(Vector dir, float* pdf) = 0;
+	virtual Vector2i GetScreenCoord(Point p, float* pdf, Visibility* visibility ) = 0;
 
 // protected field
 protected:

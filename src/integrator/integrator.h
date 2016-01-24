@@ -76,8 +76,8 @@ public:
 		for( unsigned i = 0 ; i < ps ; ++i )
 		{
 			unsigned sid = 2*shuffled_id[i];
-			samples[i].dof_u = 2 * data[sid] - 1.0f ;
-			samples[i].dof_v = 2 * data[sid+1] - 1.0f;
+			samples[i].dof_u = data[sid];
+			samples[i].dof_v = data[sid+1];
 		}
 	}
 
