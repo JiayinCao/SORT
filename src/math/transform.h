@@ -163,6 +163,36 @@ inline Transform RotateZ( float angle )
 	return Transform( m , m.Transpose() );
 }
 
+inline Transform ViewLookat( const Point& eye , const Vector& dir , const Vector& up )
+{
+    const Vector right = Cross( up , dir );
+    const Vector adjusted_up = Cross( dir , right );
+
+    const float x = right.x * eye.x + right.y * eye.y + right.z * eye.z;
+    const float y = adjusted_up.x * eye.x + adjusted_up.y * eye.y + adjusted_up.z * eye.z;
+    const float z = dir.x * eye.x + dir.y * eye.y + dir.z * eye.z;
+    
+    const Matrix m( right.x , right.y , right.z , -x ,
+                    adjusted_up.x , adjusted_up.y , adjusted_up.z , -y ,
+                    dir.x , dir.y , dir.z , -z ,
+                    0.0f , 0.0f , 0.0f , 1.0f );
+    
+    return FromMatrix(m);
+}
+
+// perspective matrix
+inline Transform Perspective( float scaleX , float scaleY )
+{
+    // the following values don't matter much in a ray tracer because there is no Z-buffer at all.
+    const float n = 0.01f;
+    const float f = 1000.0f;
+    Matrix m( scaleX , 0.0f , 0.0f , 0.0f ,
+              0.0f , scaleY , 0.0f , 0.0f ,
+              0.0f , 0.0f , f/(f-n) , -f*n/(f-n),
+              0.0f , 0.0f , 1.0f , 0.0f );
+    return FromMatrix(m);
+}
+
 // return the inverse of the transform
 inline Transform Inverse( const Transform& t )
 {

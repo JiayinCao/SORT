@@ -48,7 +48,7 @@ public:
 	}
 
 	// get eye direction
-	virtual Vector GetForward() {
+	virtual Vector GetForward() const {
 		Sort_Assert(false);
 		return Vector();
 	}

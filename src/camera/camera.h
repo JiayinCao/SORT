@@ -42,6 +42,9 @@ public:
 	// destructor
 	virtual ~Camera() {}
 
+    // Preprocess
+    virtual void PreProcess(){}
+    
 	// generate a ray given a pixel
 	virtual Ray	GenerateRay(unsigned pass_id, float x, float y, const PixelSample& ps) const = 0;
 
@@ -53,7 +56,7 @@ public:
 	virtual void SetEye(const Point& eye) { m_eye = eye; }
 
 	// get eye direction
-	virtual Vector GetForward() = 0;
+	virtual Vector GetForward() const = 0;
 	// get pass number. By default , all of the cameras have only one pass except stereo vision is enabled in perspective camera.
 	virtual unsigned GetPassCount() const { return 1; }
 	// get pass filter

@@ -195,6 +195,10 @@ public:
 		return false;
 	}
 
+    operator Vector3f() const
+    {
+        return Vector3f( x , y , z );
+    }
 
 	//public field
 public:
