@@ -35,6 +35,9 @@ public:
 	// destructor
 	~PerspectiveCamera(){}
 
+    // Preprocess
+    virtual void PreProcess();
+    
 	// generate ray
 	virtual Ray GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const;
 
@@ -56,24 +59,13 @@ public:
 	// get len
 	float GetLen() const { return m_lensRadius; }
 	
-	// set interaxial for stereo vision
-	void SetInteraxial( float ir )
-	{ m_interaxial = ir; }
-	// get interaxial for stereo vision
-	float GetInteraxial() const { return m_interaxial; }
-	
-	// get pass number.
-	virtual unsigned GetPassCount() const;
-	// get pass filter
-	virtual Spectrum GetPassFilter( unsigned id ) const;
-	// by default, red glass is one the left.
-	void SwitchGlass( bool redOnLeft );
-	
 	// get camera coordinate according to a view direction in world space
 	virtual Vector2i GetScreenCoord(Vector dir, float* pdf);
 	
 	// get eye direction
-	virtual Vector GetForward();
+	virtual Vector GetForward() const {
+        return m_forward;
+    }
 
 // protected field
 protected:
@@ -81,23 +73,27 @@ protected:
 	Point m_target;
 	// the up vector of the camera
 	Vector m_up;
+    // forward direction
+    Vector m_forward;
 
 	// the fov for the camera
 	float  m_fov;
 	
 	// radius for the lens , zero, by default, means no dof
 	float m_lensRadius;
-	
-	// interaxial , zero, by default, means no stereo vision
-	float m_interaxial;
-	
-	// whether red glass is one the left , default value is true
-	bool m_redOnLeft;
 
 	// image distance with each pixel area equals to exactly one
 	float m_imagePlaneDist;
+    
+    // focal distance
+    float m_focalDistance;
 
-	float m_scalex , m_scaley;
+    // Transformation
+    Transform   m_cameraToClip;
+    Transform   m_clipToRaster;
+    Transform   m_cameraToRaster;
+    Transform   m_worldToCamera;
+    Transform   m_worldToRaster;
 	
 	// initialize data
 	void _init();
@@ -159,20 +155,6 @@ protected:
 		{
 			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
 			camera->SetLen( (float)atof(str.c_str()) );
-		}
-	};
-	// property handler
-	class InteraxialProperty : public PropertyHandler<Camera>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(InteraxialProperty,Camera);
-		
-		// set value
-		void SetValue( const string& str )
-		{
-			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
-			camera->SetInteraxial( (float)atof(str.c_str()) );
 		}
 	};
 };
