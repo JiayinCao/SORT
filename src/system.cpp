@@ -484,6 +484,9 @@ bool System::Setup( const char* str )
 	// setup image sensor
     m_camera->SetImageSensor(m_imagesensor);
 
+    // preprocess camera
+    m_camera->PreProcess();
+    
 	// create shared memory
 	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_iTileSize));
 	int y_tile = (int)(ceil(m_imagesensor->GetHeight() / (float)g_iTileSize));
