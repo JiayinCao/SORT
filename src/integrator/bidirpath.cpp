@@ -251,7 +251,7 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
 		return li;
 
 	Visibility visible( scene );
-	visible.ray = Ray( p1.p , n_delta  , 0 , 0.01f , delta.Length() - 0.01f );
+	visible.ray = Ray( p1.p , n_delta  , 0 , 0.001f , delta.Length() - 0.001f );
 	if( visible.IsVisible() == false )
 		return 0.0f;
 
