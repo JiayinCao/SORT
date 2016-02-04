@@ -165,11 +165,11 @@ Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdfw, float* pdfa, fl
 		shadow_ray.m_fMax -= delta;
 		shadow_ray.m_fMin += delta;
 
+        Point view_focal_target = shadow_ray( m_focalDistance / shadow_ray.m_Dir.z );
+        rastP = m_cameraToRaster( view_focal_target );
+        
 		shadow_ray = m_worldToCamera.invMatrix( shadow_ray );
 		visibility->ray = shadow_ray ;
-
-		Point view_focal_target = shadow_ray( m_focalDistance / shadow_ray.m_Dir.z );
-		rastP = m_cameraToRaster( view_focal_target );
 
 		if( eyeP )
 			*eyeP = shadow_ray.m_Ori;
