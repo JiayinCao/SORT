@@ -35,7 +35,7 @@ void PerspectiveCamera::_init()
 	// setup intial value for data
 	m_lensRadius = 0.0f;	// by default , depth of field is not enabled
 	m_fov = PI * 0.25f;
-	
+
 	_registerAllProperty();
 }
 
@@ -88,6 +88,7 @@ void PerspectiveCamera::PreProcess()
     m_cameraToRaster = m_clipToRaster * m_cameraToClip;
     m_worldToCamera = ViewLookat( m_eye , m_forward , m_up );
     m_worldToRaster = m_cameraToRaster * m_worldToCamera;
+	m_inverseApartureSize = (m_lensRadius==0)? 1.0f : (1.0f / ( m_lensRadius * m_lensRadius * PI));
 }
 
 // generate ray
@@ -124,13 +125,21 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 	const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
 
 	// the pdf of the ray
-	r.m_fPDF = imageToSolidAngleFactor;
+	// combination of two pdfs, sampling a point on the apature and a direction from the point
+	r.m_fPdfW = imageToSolidAngleFactor;
+	r.m_fPdfA = m_inverseApartureSize;
+
+	// importance of the ray
+	r.m_we = r.m_fPdfW * r.m_fPdfA / cosAtCamera;
+
+	// cos at camera
+	r.m_fCosAtCamera = cosAtCamera;
 
 	return r;
 }
 
 // get camera coordinate according to a view direction in world space
-Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdf, Visibility* visibility)
+Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosatcamera , Spectrum* we , Point* eyeP , Visibility* visibility)
 {
 	const float delta = 0.001f;
 	Vector dir = p - m_eye;
@@ -156,23 +165,35 @@ Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdf, Visibility* visi
 		shadow_ray.m_fMax -= delta;
 		shadow_ray.m_fMin += delta;
 
-		visibility->ray = m_worldToCamera.invMatrix( shadow_ray );
+		shadow_ray = m_worldToCamera.invMatrix( shadow_ray );
+		visibility->ray = shadow_ray ;
 
 		Point view_focal_target = shadow_ray( m_focalDistance / shadow_ray.m_Dir.z );
 		rastP = m_cameraToRaster( view_focal_target );
+
+		if( eyeP )
+			*eyeP = shadow_ray.m_Ori;
 	}else
+	{
 		visibility->ray = Ray( p , -dir , 0 , delta , len - delta );
 
-	if( pdf )
-	{
-		// calculate the pdf for camera ray
-		const float cosAtCamera = Dot( m_forward , dir );
-		const float imagePointToCameraDist = m_imagePlaneDist / cosAtCamera;
-		const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
-
-		// the pdf of the ray
-		*pdf = imageToSolidAngleFactor ;
+		if( eyeP )
+			*eyeP = m_eye;
 	}
 
-	return Vector2i( rastP.x , rastP.y );
+	// calculate the pdf for camera ray
+	const float cosAtCamera = Dot( m_forward , dir );
+	const float imagePointToCameraDist = m_imagePlaneDist / cosAtCamera;
+	const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
+
+	if( pdfw )
+		*pdfw = imageToSolidAngleFactor;
+	if( pdfa )
+		*pdfa = m_inverseApartureSize;
+	if( we )
+		*we = imageToSolidAngleFactor * m_inverseApartureSize / cosAtCamera;
+	if( cosatcamera )
+		*cosatcamera = cosAtCamera;
+
+	return Vector2i( (int)rastP.x , (int)rastP.y );
 }

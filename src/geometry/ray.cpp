@@ -24,7 +24,10 @@ Ray::Ray()
 	m_Depth = 0;
 	m_fMin = 0.0f;
 	m_fMax = FLT_MAX;
-	m_fPDF = 1.0f;
+	m_fPdfW = 0.0f;
+	m_fPdfA = 0.0f;
+	m_we = 0.0f;
+	m_fCosAtCamera = 0.0f;
 }
 // constructor from a point and a direction
 Ray::Ray( const Point& p , const Vector& dir , unsigned depth , float fmin , float fmax)
@@ -34,7 +37,10 @@ Ray::Ray( const Point& p , const Vector& dir , unsigned depth , float fmin , flo
 	m_Depth = depth;
 	m_fMin = fmin;
 	m_fMax = fmax;
-	m_fPDF = 1.0f;
+	m_fPdfW = 0.0f;
+	m_fPdfA = 0.0f;
+	m_we = 0.0f;
+	m_fCosAtCamera = 0.0f;
 }
 // copy constructor
 Ray::Ray( const Ray& r )
@@ -44,7 +50,10 @@ Ray::Ray( const Ray& r )
 	m_Depth = r.m_Depth;
 	m_fMin = r.m_fMin;
 	m_fMax = r.m_fMax;
-	m_fPDF = r.m_fPDF;
+	m_fPdfW = r.m_fPdfW;
+	m_fPdfA = r.m_fPdfA;
+	m_we = r.m_we;
+	m_fCosAtCamera = r.m_fCosAtCamera;
 }
 // destructor
 Ray::~Ray()

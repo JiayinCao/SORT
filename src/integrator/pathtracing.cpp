@@ -29,12 +29,14 @@ IMPLEMENT_CREATOR( PathTracing );
 //		there is a limitation on the number of vertexes in the path
 Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
-	Spectrum L = 0.0f;
+	Spectrum	L = 0.0f;
 
-	Spectrum	path_weight = 1.0f;
+	// throughput should be exactly one with the following equation.
+	// however it is still shown here since it is part of rendering equation.
+	Spectrum	throughput = 1.0f;// ray.m_we * ray.m_fCosAtCamera / ( ray.m_fPdfW * ray.m_fPdfA );
+
 	unsigned	bounces = 0;
 	Ray	r = ray;
-
 	while(true)
 	{
 		Intersection inter;
@@ -60,7 +62,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		BsdfSample		bsdf_sample = (bounces==0)?ps.bsdf_sample[0]:BsdfSample(true);
 		const Light*	light = scene.SampleLight( light_sample.t , &light_pdf );
 		if( light_pdf > 0.0f )
-			L += path_weight * EvaluateDirect(	r  , scene , light , inter , light_sample , 
+			L += throughput * EvaluateDirect(	r  , scene , light , inter , light_sample , 
 												bsdf_sample , BXDF_TYPE(BXDF_ALL) ) / light_pdf;
 
 		// sample the next direction using bsdf
@@ -74,16 +76,16 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 			break;
 
 		// update path weight
-		path_weight *= f * AbsDot( wi , inter.normal ) / path_pdf;
+		throughput *= f * AbsDot( wi , inter.normal ) / path_pdf;
 
-		if( path_weight.GetIntensity() == 0.0f )
+		if( throughput.GetIntensity() == 0.0f )
 			break;
 		if( bounces > 4 )
 		{
-			float continueProperbility = min( 0.5f , path_weight.GetIntensity() );
+			float continueProperbility = min( 0.5f , throughput.GetIntensity() );
 			if( sort_canonical() > continueProperbility )
 				break;
-			path_weight /= continueProperbility;
+			throughput /= continueProperbility;
 		}
 
 		r.m_Ori = inter.intersect;

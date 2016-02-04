@@ -22,6 +22,7 @@
 #include "math/vector3.h"
 #include "math/point.h"
 #include "float.h"
+#include "spectrum/spectrum.h"
 
 ////////////////////////////////////////////////////////////////////////////
 class Ray
@@ -61,7 +62,12 @@ public:
 	float	m_fMin;
 	float	m_fMax;
 
-	float	m_fPDF;
+	float	m_fPdfW;
+	float	m_fPdfA;
+	float	m_fCosAtCamera;
+
+	// importance value of the ray
+	Spectrum m_we;
 };
 #endif
 

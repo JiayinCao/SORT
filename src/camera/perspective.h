@@ -60,7 +60,7 @@ public:
 	float GetLen() const { return m_lensRadius; }
 	
 	// get camera coordinate according to a view direction in world space
-	virtual Vector2i GetScreenCoord(Point p, float* pdf, Visibility* visibility);
+	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility );
 	
 	// get eye direction
 	virtual Vector GetForward() const {
@@ -87,6 +87,9 @@ protected:
     
     // focal distance
     float m_focalDistance;
+
+	// inverse aparture size
+	float m_inverseApartureSize;
 
     // Transformation
     Transform   m_cameraToClip;
