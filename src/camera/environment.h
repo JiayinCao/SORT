@@ -42,7 +42,7 @@ public:
 	void SetTransform( const Matrix& m ) { m_transform = m; }
 
 	// get camera coordinate according to a view direction in world space
-	virtual Vector2i GetScreenCoord(Point p, float* pdf, Visibility* visibility) {
+	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) {
 		Sort_Assert(false);
 		return Vector2i();
 	}
