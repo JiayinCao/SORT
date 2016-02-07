@@ -114,7 +114,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	const unsigned lps = light_path.size();
 	const unsigned int total_pixel = camera->GetImageSensor()->GetWidth() * camera->GetImageSensor()->GetHeight();
 	wi = ray;
-	throughput = 1.0f; //ray.m_we * ray.m_fCosAtCamera / ( ray.m_fPdfA * ray.m_fPdfW );
+	throughput = 1.0f;
 	int light_path_len = 0;
 	vc = 0.0f;
 	vcm = MIS(total_pixel / ray.m_fPdfW);
