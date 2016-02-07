@@ -30,10 +30,7 @@ IMPLEMENT_CREATOR( PathTracing );
 Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
 	Spectrum	L = 0.0f;
-
-	// throughput should be exactly one with the following equation.
-	// however it is still shown here since it is part of rendering equation.
-	Spectrum	throughput = 1.0f;// ray.m_we * ray.m_fCosAtCamera / ( ray.m_fPdfW * ray.m_fPdfA );
+	Spectrum	throughput = 1.0f;
 
 	unsigned	bounces = 0;
 	Ray	r = ray;
