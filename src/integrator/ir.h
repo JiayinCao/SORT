@@ -1,7 +1,7 @@
 /*
-   FileName:      ao.h
+   FileName:      ir.h
 
-   Created Time:  2015-11-16
+   Created Time:  2016-2-6
 
    Auther:        Cao Jiayin
 
@@ -15,22 +15,28 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifndef	SORT_AO
-#define	SORT_AO
+#ifndef	SORT_IR
+#define	SORT_IR
 
 // include the header file
 #include "integrator.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// definition of Ambient Occulusion
-class	AmbientOcclusion : public Integrator
+// definition of Instant Radiosity
+// note : Instant Radiosity is a subset of directional path tracing
+//        It has two seperate passes. First pass generates virtual light
+//        sources along the path tracing from light sources. Second pass
+//        will use those virtual light source to evaluate indirect
+//        illumination. Direct illumination is handled the same way in
+//        directlight integrator.
+class	InstantRadiosity : public Integrator
 {
 // public method
 public:
 
-	DEFINE_CREATOR( AmbientOcclusion , "ao" );
+	DEFINE_CREATOR( InstantRadiosity , "ir" );
 
-	AmbientOcclusion() { maxDistance = 10.0f; }
+	InstantRadiosity() {}
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -38,27 +44,13 @@ public:
 	// result       : radiance along the ray from the scene<F3>
 	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const;
 
-	// output log information
-	virtual void OutputLog() const;
-
+    // Preprocess: In preprocessing stage, numbers of virtual light sources
+    // are generated along the path tracing from light sources.
+    virtual void Preprocess();
+    
 // private field
 private:
-	float	maxDistance;
-
-	void _registerAllProperty();
-
-	// Max Distance Property
-	class MaxDistanceProperty : public PropertyHandler<Integrator>
-	{
-	public:
-		PH_CONSTRUCTOR(MaxDistanceProperty,Integrator);
-		void SetValue( const string& str )
-		{
-			AmbientOcclusion* ao = CAST_TARGET(AmbientOcclusion);
-			if( ao )
-				ao->maxDistance = (float)atof( str.c_str() );
-		}
-	};
+    
 };
 
 #endif
