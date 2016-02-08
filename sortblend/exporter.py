@@ -69,7 +69,7 @@ def export_sort_file(scene, force_debug):
     if integrator_type == 'ir':
         ET.SubElement( integrator_node , "Property" , name="light_path_set_num" , value='%d'%scene.ir_light_path_set_num)
         ET.SubElement( integrator_node , "Property" , name="light_path_num" , value='%d'%scene.ir_light_path_num)
-        ET.SubElement( integrator_node , "Property" , name="gterm_threshold" , value='%f'%scene.ir_min_dist)
+        ET.SubElement( integrator_node , "Property" , name="min_distance" , value='%f'%scene.ir_min_dist)
     # image size
     xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
     yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
