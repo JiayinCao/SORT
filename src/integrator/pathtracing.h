@@ -28,13 +28,6 @@ class	PathTracing : public Integrator
 public:
 	DEFINE_CREATOR( PathTracing , "pathtracing" );
 
-	// default constructor
-	PathTracing()
-	{
-		path_per_pixel = 16; // default maxium path is 16
-		_registerAllProperty();	// register properties
-	}
-
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
@@ -53,25 +46,5 @@ public:
 
 	// output log information
 	virtual void OutputLog() const;
-
-// private field
-private:
-	unsigned path_per_pixel; // light sample per pixel sample per light
-
-	// register property
-	void _registerAllProperty();
-
-	class MaxPathProperty : public PropertyHandler<Integrator>
-	{
-	public:
-		PH_CONSTRUCTOR(MaxPathProperty,Integrator);
-		void SetValue( const string& str )
-		{
-			PathTracing* pathtracing = CAST_TARGET(PathTracing);
-
-			if( pathtracing )
-				pathtracing->path_per_pixel = atoi( str.c_str() );
-		}
-	};
 };
 #endif

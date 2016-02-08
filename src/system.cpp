@@ -287,6 +287,10 @@ void System::_executeRenderingTasks()
 	// will be parameterized later
 	const int THREAD_NUM = m_thread_num;
 
+	Integrator* integrator = _allocateIntegrator();
+	integrator->PreProcess();
+	integrator->SetupCamera(m_camera);
+
 	// pre allocate memory for the specific thread
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 16 , i );
@@ -297,9 +301,7 @@ void System::_executeRenderingTasks()
 		threadUnits[i] = new PlatformThreadUnit(i);
 		
 		// setup basic data
-		threadUnits[i]->m_pIntegrator = _allocateIntegrator();
-		threadUnits[i]->m_pIntegrator->PreProcess();
-		threadUnits[i]->m_pIntegrator->SetupCamera(m_camera);
+		threadUnits[i]->m_pIntegrator = integrator;
 	}
 
 	for( int i = 0 ; i < THREAD_NUM ; ++i ){
@@ -322,17 +324,14 @@ void System::_executeRenderingTasks()
 
 		if (allfinished)
 		{
-			// post process of integrator
-			for (int i = 0; i < THREAD_NUM; ++i)
-				threadUnits[i]->m_pIntegrator->PostProcess();
 			break;
 		}
 	}
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 	{
-		delete threadUnits[i]->m_pIntegrator;
 		delete threadUnits[i];
 	}
+	delete integrator;
 	delete[] threadUnits;
 
 	cout<<endl;

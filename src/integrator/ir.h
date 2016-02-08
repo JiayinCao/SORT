@@ -20,6 +20,17 @@
 
 // include the header file
 #include "integrator.h"
+#include "geometry/intersection.h"
+
+class Bsdf;
+
+struct VirtualLightSource
+{
+	Intersection	intersect;
+	Vector			wi;
+	Spectrum		power;
+	int				depth;
+};
 
 /////////////////////////////////////////////////////////////////////////////
 // definition of Instant Radiosity
@@ -36,21 +47,76 @@ public:
 
 	DEFINE_CREATOR( InstantRadiosity , "ir" );
 
-	InstantRadiosity() {}
+	InstantRadiosity() {
+		m_nLightPaths = 64;
+		m_fGTermThrshold = 1000.0f;
+		m_nLightPathSet = 1;
+
+		_registerAllProperty();
+	}
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
 	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const;
-
-    // Preprocess: In preprocessing stage, numbers of virtual light sources
-    // are generated along the path tracing from light sources.
-    virtual void Preprocess();
     
+	// Preprocess: In preprocessing stage, numbers of virtual light sources
+    // are generated along the path tracing from light sources.
+    virtual void PreProcess();
+	// post-process after rendering
+	virtual void PostProcess();
+
 // private field
 private:
-    
+	// light path set
+	int		m_nLightPathSet;
+
+    // number of paths to follow when creating virtual light sources
+	int		m_nLightPaths;
+
+	// distant threshold
+	float	m_fGTermThrshold;
+
+	// container for light sources
+	vector<VirtualLightSource>*	m_pVirtualLightSources;
+
+	// register property
+	void _registerAllProperty();
+
+	class LightPathNumProperty : public PropertyHandler<Integrator>
+	{
+	public:
+		PH_CONSTRUCTOR(LightPathNumProperty,Integrator);
+		void SetValue( const string& str )
+		{
+			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
+			if( ir )
+				ir->m_nLightPaths = atoi( str.c_str() );
+		}
+	};
+	class GTermThresholdProperty : public PropertyHandler<Integrator>
+	{
+	public:
+		PH_CONSTRUCTOR(GTermThresholdProperty,Integrator);
+		void SetValue( const string& str )
+		{
+			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
+			if( ir )
+				ir->m_fGTermThrshold = (float)atof( str.c_str() );
+		}
+	};
+	class LightPathSetProperty : public PropertyHandler<Integrator>
+	{
+	public:
+		PH_CONSTRUCTOR(LightPathSetProperty,Integrator);
+		void SetValue( const string& str )
+		{
+			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
+			if( ir )
+				ir->m_nLightPathSet = (int)atof( str.c_str() );
+		}
+	};
 };
 
 #endif
