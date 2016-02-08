@@ -93,7 +93,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 		// note :	the following code makes the method biased
 		//			'path_per_pixel' could be set very large to reduce the side-effect.
-		if( bounces >= path_per_pixel )
+		if( bounces >= max_recursive_depth )
 			break;
 	}
 
@@ -172,10 +172,4 @@ void PathTracing::OutputLog() const
 	LOG<<"It supports all of the features in direct lighting algorithm."<<ENDL;
 	LOG<<"Some global illumination effect is also supported in path tracing."<<ENDL;
 	LOG<<"While it requires much more samples to reduce the noise to an acceptable level."<<ENDL<<ENDL;
-}
-
-// register property
-void PathTracing::_registerAllProperty()
-{
-	_registerProperty( "max_path" , new MaxPathProperty(this) );
 }

@@ -23,12 +23,12 @@
 #include "utility/sassert.h"
 
 // constructor
-Bsdf::Bsdf( const Intersection* _intersect ) : intersect( _intersect )
+Bsdf::Bsdf( const Intersection* _intersect ) : intersect( *_intersect )
 {
 	m_bxdfCount = 0;
 
-	nn = intersect->normal;
-	tn = Normalize(Cross( nn , intersect->tangent ));
+	nn = intersect.normal;
+	tn = Normalize(Cross( nn , intersect.tangent ));
 	sn = Cross( tn , nn );
 }
 
