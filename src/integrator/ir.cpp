@@ -28,7 +28,7 @@ IMPLEMENT_CREATOR( InstantRadiosity );
 // Preprocess
 void InstantRadiosity::PreProcess()
 {
-	m_pVirtualLightSources = new vector<VirtualLightSource>[m_nLightPathSet];
+	m_pVirtualLightSources = new list<VirtualLightSource>[m_nLightPathSet];
 
 	for( int k = 0 ; k < m_nLightPathSet ; ++k )
 	{
@@ -94,6 +94,12 @@ void InstantRadiosity::PostProcess()
 // radiance along a specific ray direction
 Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps ) const
 {
+	return _li( r );
+}
+
+// private method of li
+Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_intersect_dist ) const
+{
 	// return if it is larger than the maximum depth
     if( r.m_Depth > max_recursive_depth )
 		return 0.0f;
@@ -101,10 +107,10 @@ Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps ) const
 	// get intersection from camera ray
 	Intersection ip;
 	if( false == scene.GetIntersect( r , &ip ) )
-		return scene.Le( r );
+		return ignoreLe?0.0f:scene.Le( r );
 
 	// eavluate light path less than two vertices
-	Spectrum radiance = ip.Le( -r.m_Dir );
+	Spectrum radiance = ignoreLe?0.0f:ip.Le( -r.m_Dir );
 	unsigned light_num = scene.LightNum();
 	for( unsigned i = 0 ; i < light_num ; ++i )
 	{
@@ -112,19 +118,25 @@ Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps ) const
 		radiance += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , BXDF_TYPE( BXDF_ALL ) );
 	}
 	
+	if( first_intersect_dist )
+		*first_intersect_dist = ip.t;
+
 	// pick a virtual light source randomly
 	const unsigned lps_id = min( m_nLightPathSet - 1 , (int)(sort_canonical() * m_nLightPathSet) );
-	const vector<VirtualLightSource>& vps = m_pVirtualLightSources[lps_id];
+	list<VirtualLightSource> vps = m_pVirtualLightSources[lps_id];
 
 	Bsdf*	bsdf = ip.primitive->GetMaterial()->GetBsdf(&ip);
 
 	// evaluate indirect illumination
 	Spectrum indirectIllum;
-	vector<VirtualLightSource>::const_iterator it = vps.begin();
+	list<VirtualLightSource>::const_iterator it = vps.begin();
 	while( it != vps.end() )
 	{
 		if( r.m_Depth + it->depth > max_recursive_depth )
+		{
+			++it;
 			continue;
+		}
 
 		Vector	delta = ip.intersect - it->intersect.intersect;
 		float	sqrLen = delta.SquaredLength();
@@ -133,7 +145,7 @@ Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps ) const
 
 		Bsdf* bsdf1 = it->intersect.primitive->GetMaterial()->GetBsdf(&(it->intersect));
 
-		float		gterm = min( m_fGTermThrshold , AbsDot( n_delta , ip.normal ) * AbsDot( n_delta , it->intersect.normal ) / sqrLen );
+		float		gterm = AbsDot( n_delta , ip.normal ) * AbsDot( n_delta , it->intersect.normal ) / max( m_fMinSqrDist , sqrLen );
 		Spectrum	f0 = bsdf->f( -r.m_Dir , -n_delta );
 		Spectrum	f1 = bsdf1->f( n_delta , it->wi );
 
@@ -151,6 +163,27 @@ Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps ) const
 	}
 	radiance += indirectIllum / (float)m_nLightPaths;
 
+	if( m_fMinDist > 0.0f )
+	{
+		Vector	wi;
+		float	bsdf_pdf;
+		Spectrum f = bsdf->sample_f( -r.m_Dir , wi , BsdfSample( true ) , &bsdf_pdf );
+
+		if( !f.IsBlack() && bsdf_pdf != 0.0f )
+		{
+			PixelSample ps;
+			float gather_dist;
+			Ray gather_ray( ip.intersect , wi , r.m_Depth + 1 , 0.001f , m_fMinDist - 0.001f );
+			Spectrum li = _li( gather_ray , true , &gather_dist );
+
+			if( !li.IsBlack() )
+			{
+				float dgterm = AbsDot( wi , ip.normal ) * max( 0.0f , 1.0f - gather_dist * gather_dist / m_fMinSqrDist );
+				radiance += f * li * dgterm / bsdf_pdf;
+			}
+		}
+	}
+
 	return radiance;
 }
 
@@ -159,5 +192,5 @@ void InstantRadiosity::_registerAllProperty()
 {
 	_registerProperty( "light_path_num" , new LightPathNumProperty(this) );
 	_registerProperty( "light_path_set_num" , new LightPathSetProperty(this) );
-	_registerProperty( "gterm_threshold" , new GTermThresholdProperty(this) );
+	_registerProperty( "min_distance" , new MinDistanceProperty(this) );
 }

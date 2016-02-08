@@ -39,7 +39,7 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
 
     bpy.types.Scene.ir_light_path_set_num = bpy.props.IntProperty(name='Light Path Set Num', default=1, min=1)
     bpy.types.Scene.ir_light_path_num = bpy.props.IntProperty(name='Light Path Num', default=64, min=1)
-    bpy.types.Scene.ir_min_dist = bpy.props.FloatProperty(name='GTerm Threshold', default=1000.0, min=0.0)
+    bpy.types.Scene.ir_min_dist = bpy.props.FloatProperty(name='Minimum Distance', default=1.0, min=0.0)
 
     def draw(self, context):
         self.layout.prop(context.scene,"integrator_type_prop")
