@@ -65,7 +65,11 @@ def export_sort_file(scene, force_debug):
     ET.SubElement(root, 'Scene', value='blender_intermediate/blender.xml')
     # the integrator node
     integrator_type = scene.integrator_type_prop
-    ET.SubElement(root, 'Integrator', type=integrator_type)
+    integrator_node = ET.SubElement(root, 'Integrator', type=integrator_type)
+    if integrator_type == 'ir':
+        ET.SubElement( integrator_node , "Property" , name="light_path_set_num" , value='%d'%scene.ir_light_path_set_num)
+        ET.SubElement( integrator_node , "Property" , name="light_path_num" , value='%d'%scene.ir_light_path_num)
+        ET.SubElement( integrator_node , "Property" , name="gterm_threshold" , value='%f'%scene.ir_min_dist)
     # image size
     xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
     yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
