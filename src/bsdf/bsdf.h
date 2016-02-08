@@ -24,6 +24,7 @@
 #include "math/vector3.h"
 #include "utility/enum.h"
 #include <math.h>
+#include "geometry/intersection.h"
 
 // pre-declera class
 class Bxdf;
@@ -66,7 +67,7 @@ public:
 	float Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
 	// Get current intersection
-	const Intersection* GetIntersection() const { return intersect; }
+	const Intersection* GetIntersection() const { return &intersect; }
 
 // private field
 private:
@@ -80,7 +81,7 @@ private:
 	Vector nn , sn , tn;
 
 	// intersection for the bsdf
-	const Intersection* intersect;
+	const Intersection intersect;
 
 	// transform a vector from world to shading coordinate
 	// para 'v' : a vector in world space

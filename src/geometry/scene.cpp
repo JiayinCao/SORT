@@ -196,6 +196,9 @@ bool Scene::LoadScene( const string& str )
 // get the intersection between a ray and the scene
 bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
+	if( intersect )
+		intersect->t = FLT_MAX;
+
 	// brute force intersection test if there is no accelerator
 	if( m_pAccelerator == 0 )
 		return _bfIntersect( r , intersect );

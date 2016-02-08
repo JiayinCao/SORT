@@ -84,13 +84,10 @@ public:
 
 // private field
 protected:
-	int path_per_pixel;			// light sample per pixel sample per light
+	int		path_per_pixel;			// light sample per pixel sample per light
+	bool	light_tracing_only;		// only do light tracing
+	int		sample_per_pixel;		// light sample per pixel
 
-	bool light_tracing_only;	// only do light tracing
-	mutable std::list<Pending_Sample>	pending_samples;	// pending samples for light tracing
-
-	int sample_per_pixel;		// light sample per pixel
-	
 	// compute G term
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
