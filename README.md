@@ -4,7 +4,7 @@ SORT is short for Simple Open-source Ray Tracing. It is a physically based rende
 SORT is cross-platform, it works well on Windows, Mac and Ubuntu.
 
 Here are the features implemented so far:
-  - Integrator. (Whitted ray tracing, direct lighting, path tracing, light tracing, bidirectional path tracing, ambient occlusion)
+  - Integrator. (Whitted ray tracing, direct lighting, path tracing, light tracing, bidirectional path tracing, instant radiosity, ambient occlusion)
   - Spatial acceleration structure. (KD-Tree, BVH, Uniform grid)
   - Sampler. (Regular, random, stratified)
   - BXDF. (Lambert, Oran Nayar, MicroFacet, MERL)
