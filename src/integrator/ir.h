@@ -49,7 +49,8 @@ public:
 
 	InstantRadiosity() {
 		m_nLightPaths = 64;
-		m_fGTermThrshold = 1000.0f;
+		m_fMinDist = 1.0f;
+		m_fMinSqrDist = 1.0f;
 		m_nLightPathSet = 1;
 
 		_registerAllProperty();
@@ -76,13 +77,17 @@ private:
 	int		m_nLightPaths;
 
 	// distant threshold
-	float	m_fGTermThrshold;
+	float	m_fMinDist;
+	float	m_fMinSqrDist;
 
 	// container for light sources
-	vector<VirtualLightSource>*	m_pVirtualLightSources;
+	list<VirtualLightSource>*	m_pVirtualLightSources;
 
 	// register property
 	void _registerAllProperty();
+
+	// private method of li
+	Spectrum _li( const Ray& ray , bool ignoreLe = false , float* first_intersect_dist = 0 ) const;
 
 	class LightPathNumProperty : public PropertyHandler<Integrator>
 	{
@@ -95,15 +100,18 @@ private:
 				ir->m_nLightPaths = atoi( str.c_str() );
 		}
 	};
-	class GTermThresholdProperty : public PropertyHandler<Integrator>
+	class MinDistanceProperty : public PropertyHandler<Integrator>
 	{
 	public:
-		PH_CONSTRUCTOR(GTermThresholdProperty,Integrator);
+		PH_CONSTRUCTOR(MinDistanceProperty,Integrator);
 		void SetValue( const string& str )
 		{
 			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
 			if( ir )
-				ir->m_fGTermThrshold = (float)atof( str.c_str() );
+			{
+				ir->m_fMinDist = (float)atof( str.c_str() );
+				ir->m_fMinSqrDist = ir->m_fMinDist * ir->m_fMinDist;
+			}
 		}
 	};
 	class LightPathSetProperty : public PropertyHandler<Integrator>
