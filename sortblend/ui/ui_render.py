@@ -37,12 +37,19 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
         ]
     bpy.types.Scene.accelerator_type_prop = bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
 
+    bpy.types.Scene.ir_light_path_set_num = bpy.props.IntProperty(name='Light Path Set Num', default=1, min=1)
+    bpy.types.Scene.ir_light_path_num = bpy.props.IntProperty(name='Light Path Num', default=64, min=1)
+    bpy.types.Scene.ir_min_dist = bpy.props.FloatProperty(name='GTerm Threshold', default=1000.0, min=0.0)
+
     def draw(self, context):
         self.layout.prop(context.scene,"integrator_type_prop")
-        self.layout.prop(context.scene,"accelerator_type_prop")
+        integrator_type = context.scene.integrator_type_prop
+        if integrator_type == "ir":
+            self.layout.prop(context.scene,"ir_light_path_set_num")
+            self.layout.prop(context.scene,"ir_light_path_num")
+            self.layout.prop(context.scene, "ir_min_dist")
 
-        if bpy.types.Scene.integrator_type_prop is 3:
-            elf.layout.prop(context.scene,"accelerator_type_prop")
+        self.layout.prop(context.scene,"accelerator_type_prop")
 
 class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = common.thread_panel_bl_name
