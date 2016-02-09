@@ -57,23 +57,17 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 	if( false == scene.GetIntersect( r , &ip ) )
 		return scene.Le( r );
 
-	Spectrum t = ip.Le( -r.m_Dir );
+	Spectrum li = ip.Le( -r.m_Dir );
 
 	// eavluate direct light
 	unsigned light_num = scene.LightNum();
 	for( unsigned i = 0 ; i < light_num ; ++i )
 	{
 		const Light* light = scene.GetLight(i);
-		Spectrum ld;
-		unsigned sample_num = light_sample_offsets[i].num;
-		for( unsigned k = 0 ; k < sample_num ; ++k )
-			ld += EvaluateDirect(	r  , scene , light , ip , ps.light_sample[light_sample_offsets[i].offset+k] , 
-									ps.bsdf_sample[bsdf_sample_offsets[i].offset+k] , BXDF_TYPE( BXDF_ALL ) );
-		if( sample_num != 0 )
-			t += ld / (float)sample_num;
+		li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true), BXDF_TYPE( BXDF_ALL ) );
 	}
 
-	return t;
+	return li;
 }
 
 // output log information
@@ -89,7 +83,7 @@ void DirectLight::OutputLog() const
 // request samples
 void DirectLight::RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num )
 {
-	SAFE_DELETE_ARRAY(light_sample_offsets);
+	/*SAFE_DELETE_ARRAY(light_sample_offsets);
 	SAFE_DELETE_ARRAY(bsdf_sample_offsets);
 
 	unsigned light_num = scene.LightNum();
@@ -126,14 +120,14 @@ void DirectLight::RequestSample( Sampler* sampler , PixelSample* ps , unsigned p
 	}
 
 	// allocate the data to be used
-	ps[0].data = new float[ total_samples * 5 ];
+	ps[0].data = new float[ total_samples * 5 ];*/
 }
 
 // generate samples
 void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
 {
 	Integrator::GenerateSample( sampler , samples , ps , scene );
-
+	/*
 	unsigned light_num = scene.LightNum();
 	for( unsigned i = 0 ; i < ps ; ++i )
 	{
@@ -158,7 +152,7 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 			samples[i].bsdf_sample[k].u = bsdf_2d[2*k];
 			samples[i].bsdf_sample[k].v = bsdf_2d[2*k+1];
 		}
-	}
+	}*/
 }
 
 void DirectLight::_registerAllProperty()
