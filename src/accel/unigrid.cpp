@@ -101,6 +101,8 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 		// get the next t
 		float target = gridCorner[i] + ((dir[i]+1)>>1) * m_voxelExtent[i];
 		next[i] = ( target - r.m_Ori[i] ) / r.m_Dir[i];
+		if( r.m_Dir[i] == 0.0f )
+			next[i] = FLT_MAX;
 	}
 
 	// traverse the uniform grid
