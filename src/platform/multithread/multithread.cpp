@@ -39,9 +39,9 @@ void RenderTask::Execute( Integrator* integrator )
 	Vector2i rb = ori + size;
     
     unsigned tid = ThreadId();
-    for( unsigned i = ori.y ; i < rb.y ; i++ )
+    for( int i = ori.y ; i < rb.y ; i++ )
     {
-        for( unsigned j = ori.x ; j < rb.x ; j++ )
+        for( int j = ori.x ; j < rb.x ; j++ )
         {
             // clear managed memory after each pixel
             MemManager::GetSingleton().ClearMem(tid);
@@ -51,16 +51,13 @@ void RenderTask::Execute( Integrator* integrator )
             
             // the radiance
             Spectrum radiance;
-            
-            for( unsigned p = 0 ; p < camera->GetPassCount() ; ++p )
+
+            for( unsigned k = 0 ; k < samplePerPixel ; ++k )
             {
-                for( unsigned k = 0 ; k < samplePerPixel ; ++k )
-                {
-                    // generate rays
-                    Ray r = camera->GenerateRay( p , (float)j , (float)i , pixelSamples[k] );
-                    // accumulate the radiance
-                    radiance += integrator->Li( r , pixelSamples[k] ) * camera->GetPassFilter(p);
-                }
+                // generate rays
+                Ray r = camera->GenerateRay( (float)j , (float)i , pixelSamples[k] );
+                // accumulate the radiance
+                radiance += integrator->Li( r , pixelSamples[k] );
             }
             radiance /= (float)samplePerPixel;
             

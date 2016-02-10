@@ -36,7 +36,7 @@ void EnvironmentCamera::_init()
 }
 
 // generate a ray given a pixel
-Ray	EnvironmentCamera::GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const
+Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
 {
 	Sort_Assert( m_imagesensor != 0 );
 

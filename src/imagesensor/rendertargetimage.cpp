@@ -17,12 +17,6 @@
 
 #include "rendertargetimage.h"
 
-// Pre process
-void RenderTargetImage::PreProcess()
-{
-    m_rendertarget.SetSize( m_width , m_height );
-}
-
 // store pixel information
 void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt )
 {
@@ -32,8 +26,10 @@ void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , cons
 // post process
 void RenderTargetImage::PostProcess()
 {
+	ImageSensor::PostProcess();
+
     if( !m_filename.empty() )
         m_rendertarget.Output(m_filename);
     else
-        m_rendertarget.Output("default.bmp");
+        m_rendertarget.Output("default.bmp");	
 }
