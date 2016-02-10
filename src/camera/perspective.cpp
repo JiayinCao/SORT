@@ -92,7 +92,7 @@ void PerspectiveCamera::PreProcess()
 }
 
 // generate ray
-Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const
+Ray	PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
 {
 	// check if there is render target
 	Sort_Assert( m_imagesensor != 0 );
@@ -139,7 +139,7 @@ Ray	PerspectiveCamera::GenerateRay( unsigned pass_id , float x , float y , const
 }
 
 // get camera coordinate according to a view direction in world space
-Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosatcamera , Spectrum* we , Point* eyeP , Visibility* visibility)
+Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosatcamera , Spectrum* we , Point* eyeP , Visibility* visibility) const
 {
 	const float delta = 0.001f;
 	Vector dir = p - m_eye;

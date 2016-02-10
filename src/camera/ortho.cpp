@@ -43,7 +43,7 @@ void OrthoCamera::_init()
 }
 
 // generate camera ray
-Ray OrthoCamera::GenerateRay( unsigned pass_id , float x, float y, const PixelSample &ps) const
+Ray OrthoCamera::GenerateRay( float x, float y, const PixelSample &ps) const
 {
 	x += ps.img_u;
 	y += ps.img_v;

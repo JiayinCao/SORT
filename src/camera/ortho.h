@@ -36,7 +36,7 @@ public:
 	~OrthoCamera(){}
 
 	// generate ray
-	virtual Ray GenerateRay( unsigned pass_id , float x , float y , const PixelSample& ps ) const;
+	virtual Ray GenerateRay( float x , float y , const PixelSample& ps ) const;
 
 	// get and set target
 	const Point& GetTarget() const { return m_target; }
@@ -56,7 +56,7 @@ public:
 	void SetCameraHeight( float h );
 
 	// get camera coordinate according to a view direction in world space
-	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) {
+	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) const {
 		Sort_Assert(false);
 		return Vector2i();
 	}
