@@ -357,6 +357,9 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 // tranverse kd-tree node
 bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const
 {
+	if( fmin > fmax )
+		return false;
+	
 	const unsigned	mask = 0x00000003;
 	const float		delta = 0.001f;
 
@@ -380,11 +383,11 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	// get the intersection point between the ray and the splitting plane
 	unsigned split_axis = node->flag & mask;
 	float dir = ray.m_Dir[split_axis];
-	float t = ( node->split - ray.m_Ori[split_axis] ) / dir;
+	float t = (dir==0.0f) ? FLT_MAX : ( node->split - ray.m_Ori[split_axis] ) / dir;
 	
 	Kd_Node* first = node + 1 ;
 	Kd_Node* second = m_nodes + (node->right>>2);
-	if( dir < 0.0f )
+	if( dir < 0.0f || (dir==0.0f&&ray.m_Ori[split_axis] > node->split) )
 	{
 		Kd_Node* temp = first;
 		first = second;
