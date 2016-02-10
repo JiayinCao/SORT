@@ -21,7 +21,6 @@
 #include "imagesensor.h"
 #include "texture/rendertarget.h"
 #include "managers/smmanager.h"
-#include "platform/multithread/multithread.h"
 
 // generate output
 class BlenderImage : public ImageSensor
@@ -39,15 +38,6 @@ public:
 	// post process
 	virtual void PostProcess();
 
-	// add radiance
-	virtual void UpdatePixel(int x, int y, const Spectrum& color)
-	{
-		m_mutex[x][y].Lock();
-		Spectrum _color = m_rendertarget.GetColor(x, y);
-		m_rendertarget.SetColor(x, y, _color + color);
-		m_mutex[x][y].Unlock();
-	}
-
 private:
 	int				m_header_offset;
 	int				m_final_update_flag_offset;
@@ -55,9 +45,6 @@ private:
 	int				m_tilenum_y;
 
 	SharedMemory	m_sharedMemory;
-
-	// the mutex
-	PlatformMutex**	m_mutex;
 };
 
 #endif

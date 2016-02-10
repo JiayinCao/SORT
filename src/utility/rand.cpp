@@ -36,10 +36,12 @@ static Thread_Local unsigned long mt[N]; /* the array for the state vector  */
 static Thread_Local int mti;
 static Thread_Local bool seed_setup = false;
 
+#include "platform/multithread/multithread.h"
+
 // set the seed
 void sort_seed()
 {
-	unsigned seed = (unsigned)time(0);
+	unsigned seed = ThreadId() * (unsigned)time(0);
 	mt[0]= seed & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {
         mt[mti] =

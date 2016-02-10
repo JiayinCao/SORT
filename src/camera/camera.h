@@ -47,7 +47,7 @@ public:
     virtual void PreProcess(){}
     
 	// generate a ray given a pixel
-	virtual Ray	GenerateRay(unsigned pass_id, float x, float y, const PixelSample& ps) const = 0;
+	virtual Ray	GenerateRay( float x, float y, const PixelSample& ps) const = 0;
 
 	// set a render target
 	void SetImageSensor(ImageSensor* is) { m_imagesensor = is; }
@@ -58,10 +58,6 @@ public:
 
 	// get eye direction
 	virtual Vector GetForward() const = 0;
-	// get pass number. By default , all of the cameras have only one pass except stereo vision is enabled in perspective camera.
-	virtual unsigned GetPassCount() const { return 1; }
-	// get pass filter
-	virtual Spectrum GetPassFilter(unsigned id) const { return 1.0f; }
 
 	// get image sensor
 	ImageSensor* GetImageSensor() {
@@ -69,7 +65,7 @@ public:
 	}
 
 	// get camera coordinate according to a view direction in world space
-	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) = 0;
+	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) const = 0;
 
 // protected field
 protected:

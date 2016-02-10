@@ -32,8 +32,6 @@ public:
 	// store pixel information
 	virtual void StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt );
 
-    // Pre process
-    virtual void PreProcess();
 	// post process
 	virtual void PostProcess();
 

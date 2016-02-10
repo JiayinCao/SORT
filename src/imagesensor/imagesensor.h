@@ -22,6 +22,7 @@
 #include "spectrum/spectrum.h"
 #include "utility/propertyset.h"
 #include "texture/rendertarget.h"
+#include "platform/multithread/multithread.h"
 
 // pre-decleration
 class RenderTask;
@@ -36,7 +37,14 @@ public:
     virtual ~ImageSensor(){}
     
 	// pre process
-    virtual void PreProcess(){}
+    virtual void PreProcess()
+	{
+		m_rendertarget.SetSize(m_width, m_height);
+
+		m_mutex = new PlatformMutex*[m_width];
+		for( int i = 0 ; i < m_width ; ++i )
+			m_mutex[i] = new PlatformMutex[m_height];
+	}
 
 	// set image size
 	virtual void SetSensorSize( int w , int h )
@@ -52,7 +60,12 @@ public:
     virtual void StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt ) = 0;
     
 	// post process
-    virtual void PostProcess(){}
+    virtual void PostProcess(){
+		// delete the mutex
+		for( int i = 0 ; i < m_width ; ++i )
+			delete[] m_mutex[i];
+		delete[] m_mutex;
+	}
     
     // get width
     unsigned GetWidth() const {
@@ -65,12 +78,21 @@ public:
     }
 
 	// add radiance
-	virtual void UpdatePixel(int x, int y, const Spectrum& color){}
+	virtual void UpdatePixel(int x, int y, const Spectrum& color)
+	{
+		m_mutex[x][y].Lock();
+		Spectrum _color = m_rendertarget.GetColor(x, y);
+		m_rendertarget.SetColor(x, y, _color + color);
+		m_mutex[x][y].Unlock();
+	}
 
 protected:
 	int m_width;
 	int m_height;
     
+	// the mutex
+	PlatformMutex**	m_mutex;
+
 	// the render target
 	RenderTarget m_rendertarget;
 };
