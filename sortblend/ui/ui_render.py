@@ -19,8 +19,8 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
     # Integrator type
     integrator_types = [
         ("bdpt", "Bidirectional Path Tracing", "", 1),
-        ("pathtracing", "Path Tracing", "", 2),
-        ("lighttracing", "Light Tracing", "", 3),
+        ("pt", "Path Tracing", "", 2),
+        ("lt", "Light Tracing", "", 3),
         ("ir", "Instant Radiosity", "", 4),
         ("ao", "Ambient Occlusion", "", 5),
         ("direct", "Direct Lighting", "", 6),
@@ -37,13 +37,29 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
         ]
     bpy.types.Scene.accelerator_type_prop = bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
 
+    # general integrator parameters
+    bpy.types.Scene.inte_max_recur_depth = bpy.props.IntProperty(name='Maximum Recursive Depth', default=16, min=1)
+
+    # ao integrator parameters
+    bpy.types.Scene.ao_max_dist = bpy.props.FloatProperty(name='Maximum Distance', default=3.0, min=0.01)
+
+    # instant radiosity parameters
     bpy.types.Scene.ir_light_path_set_num = bpy.props.IntProperty(name='Light Path Set Num', default=1, min=1)
     bpy.types.Scene.ir_light_path_num = bpy.props.IntProperty(name='Light Path Num', default=64, min=1)
     bpy.types.Scene.ir_min_dist = bpy.props.FloatProperty(name='Minimum Distance', default=1.0, min=0.0)
 
+    # bidirectional path tracing parameters
+    bpy.types.Scene.bdpt_mis = bpy.props.BoolProperty(name='Multiple Importance Sampling', default=True)
+
     def draw(self, context):
         self.layout.prop(context.scene,"integrator_type_prop")
         integrator_type = context.scene.integrator_type_prop
+        if integrator_type != "whitted" and integrator_type != "direct" and integrator_type != "ao":
+            self.layout.prop(context.scene,"inte_max_recur_depth")
+        if integrator_type == "ao":
+            self.layout.prop(context.scene,"ao_max_dist")
+        if integrator_type == "bdpt":
+            self.layout.prop(context.scene,"bdpt_mis")
         if integrator_type == "ir":
             self.layout.prop(context.scene,"ir_light_path_set_num")
             self.layout.prop(context.scene,"ir_light_path_num")

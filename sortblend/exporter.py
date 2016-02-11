@@ -66,6 +66,11 @@ def export_sort_file(scene, force_debug):
     # the integrator node
     integrator_type = scene.integrator_type_prop
     integrator_node = ET.SubElement(root, 'Integrator', type=integrator_type)
+    ET.SubElement( integrator_node , "Property" , name="inte_max_recur_depth" , value="%d"%scene.inte_max_recur_depth )
+    if integrator_type == "ao":
+        ET.SubElement( integrator_node , "Property" , name="max_distance" , value="%f"%scene.ao_max_dist)
+    if integrator_type == "bdpt":
+        ET.SubElement( integrator_node , "Property" , name="bdpt_mis" , value="%d"%scene.bdpt_mis)
     if integrator_type == 'ir':
         ET.SubElement( integrator_node , "Property" , name="light_path_set_num" , value='%d'%scene.ir_light_path_set_num)
         ET.SubElement( integrator_node , "Property" , name="light_path_num" , value='%d'%scene.ir_light_path_num)

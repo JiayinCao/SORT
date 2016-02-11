@@ -72,7 +72,10 @@ public:
 	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
 
 	// default constructor
-	BidirPathTracing() { light_tracing_only = false; sample_per_pixel = 1; }
+	BidirPathTracing() { 
+		light_tracing_only = false; sample_per_pixel = 1; m_bMIS = true; 
+		_registerProperty( "bdpt_mis" , new PTMISProperty(this) );
+	}
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -102,6 +105,27 @@ protected:
 
 	// connnect vertices
 	Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light ) const;
+
+// private field
+private:
+	// use multiple importance sampling to sample direct illumination
+	bool	m_bMIS;
+
+	// Max Distance Property
+	class PTMISProperty : public PropertyHandler<Integrator>
+	{
+	public:
+		PH_CONSTRUCTOR(PTMISProperty,Integrator);
+		void SetValue( const string& str )
+		{
+			BidirPathTracing* bdpt = CAST_TARGET(BidirPathTracing);
+			if( bdpt )
+				bdpt->m_bMIS = (atoi( str.c_str() )==1);
+		}
+	};
+
+	// mis factor
+	float MIS( float t ) const;
 };
 
 #endif

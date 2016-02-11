@@ -26,11 +26,6 @@
 
 IMPLEMENT_CREATOR( BidirPathTracing );
 
-// use power heuristic as default
-#define MIS(x) ((x)*(x))	// power heuristic
-//#define MIS(x) (x)		// balance heuristic
-//#define MIS(x) 1.0f		// naive bidirectional path tracing
-
 // return the radiance of a specific direction
 Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
@@ -120,7 +115,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	vc = 0.0f;
 	vcm = MIS(total_pixel / ray.m_fPdfW);
 	rr = 1.0f;
-	while (light_path_len < (int)max_recursive_depth)
+	while (light_path_len <= (int)max_recursive_depth)
 	{
 		BDPT_Vertex vert;
 		vert.depth = light_path_len;
@@ -351,4 +346,14 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	if (!is)
 		return;
 	is->UpdatePixel(coord.x , coord.y , radiance);
+}
+
+// mis factor
+float BidirPathTracing::MIS( float t ) const
+{
+	// power heuristic
+	if(m_bMIS)
+		return t * t;
+
+	return 1;
 }
