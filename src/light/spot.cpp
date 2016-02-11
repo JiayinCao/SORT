@@ -53,9 +53,9 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
     visibility.ray = Ray( light_pos , -dirToLight , 0 , delta , len - delta );
     
 	const float falloff = SatDot( dirToLight , -light_dir );
-	if( falloff < cos_total_range )
+	if( falloff <= cos_total_range )
 		return 0.0f;
-	if( falloff > cos_falloff_start )
+	if( falloff >= cos_falloff_start )
 		return intensity ;
 	const float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
 	if( d == 0.0f )
@@ -78,17 +78,20 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 
     // product of pdf of sampling a point w.r.t surface area and a direction w.r.t direction
 	if( pdfW )
-        *pdfW = UniformConePdf( cos_total_range );
+    {
+		*pdfW = UniformConePdf( cos_total_range );
+		Sort_Assert( *pdfW != 0.0f );
+	}
     // pdf w.r.t surface area
 	if( pdfA )
         *pdfA = 1.0f;
     if( cosAtLight )
         *cosAtLight = 1.0f;
-
+	
 	const float falloff = SatDot( r.m_Dir , light_dir );
-	if( falloff < cos_total_range )
+	if( falloff <= cos_total_range )
 		return 0.0f;
-	if( falloff > cos_falloff_start )
+	if( falloff >= cos_falloff_start )
 		return intensity;
 	const float d = ( falloff - cos_total_range ) / ( cos_falloff_start - cos_total_range );
 	if( d == 0.0f )
