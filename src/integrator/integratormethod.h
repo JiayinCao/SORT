@@ -23,19 +23,8 @@
 #include "utility/enum.h"
 
 // pre-decleration
-class Bsdf;
 class Intersection;
-class SampleOffset;
-class PixelSample;
 class Light;
-
-// radiance along specular reflective direction
-Spectrum	SpecularReflection( const Ray& ray , const Intersection* intersect , 
-								const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps );
-
-// radiance along specular refractive direction
-Spectrum	SpecularRefraction( const Ray& ray , const Intersection* intersect , 
-								const Bsdf* bsdf , const Integrator* integrator , const PixelSample& ps );
 
 // evaluate direct lighting
 Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip , 

@@ -30,7 +30,7 @@ public:
 
 	DEFINE_CREATOR( AmbientOcclusion , "ao" );
 
-	AmbientOcclusion() { maxDistance = 10.0f; }
+	AmbientOcclusion() { maxDistance = 10.0f; _registerAllProperty(); }
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
