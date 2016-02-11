@@ -32,7 +32,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	Spectrum	L = 0.0f;
 	Spectrum	throughput = 1.0f;
 
-	unsigned	bounces = 0;
+	int			bounces = 0;
 	Ray	r = ray;
 	while(true)
 	{

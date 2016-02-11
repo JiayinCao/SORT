@@ -57,7 +57,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	float vcm = MIS(light_pdfa / light_emission_pdf);
 	Spectrum throughput = le * cosAtLight / (light_emission_pdf * pdf);
 	float rr = 1.0f;
-	while ((int)light_path.size() < path_per_pixel)
+	while ((int)light_path.size() < max_recursive_depth)
 	{
 		BDPT_Vertex vert;
 		if (false == scene.GetIntersect(wi, &vert.inter))
@@ -82,6 +82,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		vert.vcm = vcm;
 		vert.vc = vc;
 		vert.rr = rr;
+		vert.depth = light_path.size() + 1;
 
 		light_path.push_back(vert);
 
@@ -119,15 +120,16 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	vc = 0.0f;
 	vcm = MIS(total_pixel / ray.m_fPdfW);
 	rr = 1.0f;
-	while (light_path_len < path_per_pixel)
+	while (light_path_len < (int)max_recursive_depth)
 	{
 		BDPT_Vertex vert;
+		vert.depth = light_path_len;
 		if (false == scene.GetIntersect(wi, &vert.inter))
 		{
 			// the following code needs to be modified
 			if (scene.GetSkyLight() == light)
 			{
-				if( light_path_len )
+				if( vert.depth <= max_recursive_depth && vert.depth > 0 )
 				{
 					float emissionPdf;
 					float directPdfA;
@@ -137,7 +139,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 				}
 			}
 
-			if( light_path_len == 0 )
+			if( vert.depth == 0 )
 				li += scene.Le( wi );
 
 			break;
@@ -153,14 +155,14 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		// Path evaluation: it hits a light source
 		if (vert.inter.primitive->GetLight() == light)
 		{
-			if( light_path_len )
+			if( vert.depth > 0 && vert.depth <= max_recursive_depth )
 			{
 				float emissionPdf;
 				float directPdfA;
 				Spectrum _li = vert.inter.Le(-wi.m_Dir , &directPdfA , &emissionPdf ) * throughput / pdf;
 				li += _li / ( 1.0f + MIS( directPdfA ) * vcm + MIS( emissionPdf ) * vc );
 			}
-			else
+			else if( vert.depth == 0 )
 				li += vert.inter.Le(-wi.m_Dir) / pdf;
 		}
 		if( light_tracing_only )
@@ -223,6 +225,9 @@ void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsig
 // connnect vertices
 Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 , const Light* light ) const
 {
+	if( p0.depth + p1.depth >= max_recursive_depth )
+		return 0.0f;
+
 	const Vector delta = p0.p - p1.p;
 	const float invDistcSqr = 1.0f / delta.SquaredLength();
 	const Vector n_delta = delta * sqrt(invDistcSqr);
@@ -261,6 +266,9 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
 // connect light sample
 Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const Light* light ) const
 {
+	if( eye_vertex.depth >= max_recursive_depth )
+		return 0.0f;
+
 	// drop the light vertex, take a new sample here
 	const LightSample sample(true);
 	Vector wi;
@@ -292,6 +300,9 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 // connect camera point
 void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const Light* light ) const
 {
+	if( light_vertex.depth > max_recursive_depth )
+		return;
+
 	Visibility visible( scene );
 	float camera_pdfA;
 	float camera_pdfW;

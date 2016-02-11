@@ -42,11 +42,15 @@ struct BDPT_Vertex
 	float		vc;
 	float		vcm;
 
+	// depth of the vertex
+	int			depth;
+
 	BDPT_Vertex()
 	{
 		bsdf = 0;
 		vc = 0.0f;
 		vcm = 0.0f;
+		depth = 0;
 	}
 };
 
@@ -68,7 +72,7 @@ public:
 	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
 
 	// default constructor
-	BidirPathTracing() { path_per_pixel = 8; light_tracing_only = false; sample_per_pixel = 1; }
+	BidirPathTracing() { light_tracing_only = false; sample_per_pixel = 1; }
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -84,7 +88,6 @@ public:
 
 // private field
 protected:
-	int		path_per_pixel;			// light sample per pixel sample per light
 	bool	light_tracing_only;		// only do light tracing
 	int		sample_per_pixel;		// light sample per pixel
 
