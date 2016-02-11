@@ -56,7 +56,7 @@ public:
 	Vector	m_Dir;
 
 	// the depth for the ray
-	unsigned m_Depth;
+	int		m_Depth;
 
 	// the maxium and minium value in the ray
 	float	m_fMin;
