@@ -38,8 +38,8 @@ bool PngIO::Read( const string& name , ImgMemory* mem )
     mem->m_iHeight = height;
     mem->m_ImgMem = new Spectrum[ width * height ];
 
-    for( int i = 0 ; i < height ; i++ )
-		for( int j = 0 ; j < width ; j++ )
+    for( unsigned i = 0 ; i < height ; i++ )
+		for( unsigned j = 0 ; j < width ; j++ )
 		{
             unsigned char r = image[4 * width * i + 4 * j + 0];
             unsigned char g = image[4 * width * i + 4 * j + 1];
@@ -63,8 +63,8 @@ bool PngIO::Write( const string& name , const Texture* tex )
     image.resize( 4 * width * height );
     
     // load the pixels
-    for( int i = 0 ; i < tex->GetHeight() ; i++ )
-        for( int j = 0 ; j < tex->GetWidth() ; j++ )
+    for( unsigned i = 0 ; i < tex->GetHeight() ; i++ )
+        for( unsigned j = 0 ; j < tex->GetWidth() ; j++ )
         {
             Spectrum c = tex->GetColor( j , i );
             c = c.Clamp(); // no tone mapping yet
@@ -75,5 +75,5 @@ bool PngIO::Write( const string& name , const Texture* tex )
         }
 
     unsigned error = lodepng::encode(name, image, width, height);
-	return error = 0;
+	return (error == 0);
 }

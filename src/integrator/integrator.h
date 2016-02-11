@@ -108,7 +108,7 @@ protected:
 	Camera*			camera;
 
 	// maxium recursive depth
-	unsigned		max_recursive_depth;
+	int				max_recursive_depth;
 
 	// the scene description
 	const Scene&	scene;
@@ -117,7 +117,19 @@ protected:
 	PixelSample		pixel_sample;
 
 	// light sample per pixel sample per light
-	unsigned sample_per_pixel; 
+	unsigned sample_per_pixel;
+
+	class MaxDepthProperty : public PropertyHandler<Integrator>
+	{
+	public:
+		PH_CONSTRUCTOR(MaxDepthProperty,Integrator);
+		void SetValue( const string& str )
+		{
+			Integrator* ir = CAST_TARGET(Integrator);
+			if( ir )
+				ir->max_recursive_depth = max( 1 , atoi( str.c_str() ) );
+		}
+	};
 };
 
 #endif
