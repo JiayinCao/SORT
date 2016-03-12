@@ -33,7 +33,8 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
         ("kd_tree", "SAH KDTree", "", 1),
         ("bvh", "Bounding Volume Hierarchy", "", 2),
         ("uniform_grid", "Uniform Grid", "", 3),
-        ("bruteforce", "No Accelerator", "", 4),
+        ("octree" , "OcTree" , "" , 4),
+        ("bruteforce", "No Accelerator", "", 5),
         ]
     bpy.types.Scene.accelerator_type_prop = bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
 

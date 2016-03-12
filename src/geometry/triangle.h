@@ -47,6 +47,12 @@ public:
 	// result   : positive value if intersect
 	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const;
 
+	// intersection test between a triangle and a bounding box
+	// Detail algorithm is descripted in this paper : "Fast 3D Triangle-Box Overlap Testing".
+	// http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox_tam.pdf.
+	// para 'box' : bounding box
+	bool GetIntersect( const BBox& box ) const;
+
 	// get the bounding box of the triangle
 	virtual const BBox&	GetBBox() const;
 

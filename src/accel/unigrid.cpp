@@ -187,8 +187,15 @@ void UniGrid::Build()
 			for( unsigned j = minGridId[1] ; j <= maxGridId[1] ; j++ )
 				for( unsigned k = minGridId[0] ; k <= maxGridId[0] ; k++ )
 				{
-					unsigned offset = _offset( k , j , i );
-					m_pVoxels[offset].push_back( *it );
+					BBox bb;
+					bb.m_Min = m_BBox.m_Min + Vector( (float)k , (float)j , (float)i ) * m_voxelExtent;
+					bb.m_Max = bb.m_Min + m_voxelExtent;
+
+					// only add the triangle if it is actually intersected
+					if( (*it)->GetIntersect( bb ) ){
+						unsigned offset = _offset( k , j , i );
+						m_pVoxels[offset].push_back( *it );
+					}
 				}
 		it++;
 	}

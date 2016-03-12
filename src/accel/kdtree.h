@@ -27,19 +27,15 @@ class Primitive;
 struct Kd_Node
 {
 public:
-	union
-	{
-		unsigned	flag;		// 11 leaf node , 00 x split , 01 y split , 02 z split
-		unsigned	right;		// the index of right child
-		unsigned	trinum;		// the number of triangles in the leaf node
-	};
-	union
-	{
-		float		split;		// splitting information
-		unsigned	offset;		// offset in triangle list
-	};
+	Kd_Node*					leftChild;	// pointer to the left child
+	Kd_Node*					rightChild;	// pointer to the right child
+	BBox						bbox;		// bounding box for kd-tree node
+	vector<const Primitive*>	trilist;	// triangle list in the leaf node
+	unsigned					flag;		// 11 leaf node , 00 x split , 01 y split , 02 z split
+	float						split;		// split position
+
 	// default constructor
-	Kd_Node():flag(0),offset(0){}
+	Kd_Node( const BBox& bb ):flag(0),split(0.0f),leftChild(0),rightChild(0),bbox(bb){}
 };
 
 // split type
@@ -138,7 +134,7 @@ public:
 // private field
 private:
 	// the root of kd-tree
-	Kd_Node*		m_nodes;
+	Kd_Node*		m_root;
 	// the primitive list
 	Primitive**		m_prilist;
 	// temporary buffer for marking triangles
@@ -166,17 +162,8 @@ private:
 	// split node
 	// para 'node'   : node to be split
 	// para 'splits' : splitting candidates
-	// para 'box'    : bouding box of the node
-	void _splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , const BBox& box , unsigned depth );
-	
-	// malloc the memory
-	void _mallocMemory();
-
-	// dealloc memory
-	void _deallocMemory();
-	
-	// free temporary memory
-	void _deallocTmpMemory();
+	// para 'depth'  : depth of the node
+	void _splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , unsigned depth );
 	
 	// evaluate sah value for the kdtree node
 	// para 'l' : the number of primitives on the left of the splitting plane
@@ -208,6 +195,9 @@ private:
 	
 	// tranverse kd-tree node
 	bool _traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const;
+
+	// delete kd-tree node
+	void deleteKdNode( Kd_Node* node );
 };
 
 #endif
