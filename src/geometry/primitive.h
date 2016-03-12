@@ -42,6 +42,8 @@ public:
 
 	// get the intersection between a ray and a primitive
 	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
+	// get the intersection between a bounding box and a ray
+	virtual bool GetIntersect( const BBox& box ) const = 0;
 
 	// get the bounding box of the primitive
 	virtual const BBox&	GetBBox() const = 0;

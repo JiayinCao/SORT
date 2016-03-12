@@ -152,3 +152,78 @@ float Triangle::SurfaceArea() const
 	return t.Length() * 0.5f;
 }
 
+// Project vertex along specific axis
+static void Project(const Point* points, int count , const Vector& axis, float& min, float& max)
+{
+	for( int i = 0; i < count; ++i ){
+		float val = Dot( axis , (Vector)points[i] );
+		if (val < min) min = val;
+		if (val > max) max = val;
+	}
+}
+
+// intersection test between a triangle and a bounding box
+// Detail algorithm is descripted in this paper : "Fast 3D Triangle-Box Overlap Testing".
+// http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox_tam.pdf.
+// para 'triangle' : the input triangle
+// para 'bb' : bounding box
+bool Triangle::GetIntersect( const BBox& box ) const
+{
+	// get the memory
+	Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+	int id0 = m_Index[ 0 ].posIndex;
+	int id1 = m_Index[ 1 ].posIndex;
+	int id2 = m_Index[ 2 ].posIndex;
+	Point tri[3] = { mem->m_PositionBuffer[id0] , mem->m_PositionBuffer[id1] , mem->m_PositionBuffer[id2] };
+
+	float triMin , triMax;	// will intialize later
+	float boxMin = FLT_MAX, boxMax = -FLT_MAX;
+
+	Vector	boxN[3] = { Point( 1.0f , 0.0f , 0.0f ) , 
+						Point( 0.0f , 1.0f , 0.0f ) ,
+						Point( 0.0f , 0.0f , 1.0f )};
+	
+	// Case 1 : try separating axis perpendicular to box surface normal , 3 tests
+	// along bounding box face normal directions first
+	for( int i = 0 ; i < 3 ; ++i ){
+		triMin = FLT_MAX;
+		triMax = -FLT_MAX;
+		Project( tri , 3 , boxN[i] , triMin , triMax );
+		if( triMin > box.m_Max[i] || triMax < box.m_Min[i] )
+			return false;
+	}
+
+	// Case 2 : try triangle plane , 1 test
+	// get triangle normal
+	Vector triN = Cross( tri[1] - tri[0] , tri[2] - tri[0] );
+	//triN = triN * ( 1.0f / triN.Length() );	// no need to normalize it at all
+	float triOffset = Dot( triN , (Vector)tri[0] );
+	Point bbp[8] = { box.m_Min , 
+		Point( box.m_Min.x , box.m_Min.y , box.m_Max.z ) ,
+		Point( box.m_Min.x , box.m_Max.y , box.m_Min.z ),
+		Point( box.m_Min.x , box.m_Max.y , box.m_Max.z ),
+		Point( box.m_Max.x , box.m_Min.y , box.m_Min.z ),
+		Point( box.m_Max.x , box.m_Min.y , box.m_Max.z ),
+		Point( box.m_Max.x , box.m_Max.y , box.m_Min.z ),
+		box.m_Max };
+	Project( bbp , 8 , triN , boxMin , boxMax );
+	if( boxMax < triOffset || boxMin > triOffset )
+		return false;
+
+	// Case 3 : try cross product planes , 9 tests
+	Vector triangleEdges[3] = { tri[0] - tri[1] , tri[1] - tri[2] , tri[2] - tri[3] };
+	for( int i = 0 ; i < 3 ; ++i ){
+		for( int j = 0 ; j < 3 ; ++j ){
+			triMin = boxMin = FLT_MAX;
+			triMax = boxMax = -FLT_MAX;
+			Vector new_axis = Cross( triangleEdges[i] , boxN[j] );
+			Project( bbp , 8 , new_axis , boxMin , boxMax );
+			Project( tri , 3 , new_axis , triMin , triMax );
+
+			if( boxMax < triMin || boxMin > triMax )
+				return false;
+		}
+	}
+
+	return true;
+}

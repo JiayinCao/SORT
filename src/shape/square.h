@@ -61,6 +61,10 @@ public:
 protected:
 	// get intersected point between the ray and the shape
 	float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* intersect = 0 ) const;
+	// get the intersection between a bounding box and a ray
+	virtual bool GetIntersect( const BBox& box ) const{
+		return true;
+	}
 };
 
 #endif
