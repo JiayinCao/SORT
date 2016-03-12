@@ -56,8 +56,8 @@ private:
 	// the voxel count
 	unsigned	m_voxelNum[3];
 	// extent of grid in each dimension
-	float		m_voxelExtent[3];
-	float		m_voxelInvExtent[3];
+	Vector		m_voxelExtent;
+	Vector		m_voxelInvExtent;
 	// the voxel data
 	vector<Primitive*>*	m_pVoxels;
 	// the delta

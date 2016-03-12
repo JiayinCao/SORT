@@ -17,13 +17,9 @@
 
 // include the header file
 #include "kdtree.h"
-#include "managers/memmanager.h"
 #include "geometry/primitive.h"
 #include "geometry/intersection.h"
 #include <algorithm>
-
-static const unsigned KD_NODE_MEMID = 1024;
-static const unsigned KD_LEAF_TRILIST_MEMID = 1025;
 
 IMPLEMENT_CREATOR( KDTree );
 
@@ -40,14 +36,18 @@ KDTree::KDTree( vector<Primitive*>* l ) : Accelerator(l)
 // destructor
 KDTree::~KDTree()
 {
-	_deallocMemory();
+	// delete kd-tree
+	deleteKdNode( m_root );
 }
 
 // build the acceleration structure
 void KDTree::Build()
 {
+	if( m_primitives->size() == 0 )
+		return;
+
 	// pre-malloc node and leaf triangle list memory
-	_mallocMemory();
+	m_temp = new unsigned char[m_primitives->size()];
 
 	// get the bounding box for the whole primitive list
 	_computeBBox();
@@ -79,16 +79,16 @@ void KDTree::Build()
 		sort( splits.split[i] , splits.split[i] + splits.split_c[i] );
 
 	// create root node
-	Kd_Node* root = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
+	m_root = new Kd_Node(m_BBox);
 
 	// build kd-tree
-	_splitNode( root , splits , count , m_BBox , 0 );
+	_splitNode( m_root , splits , count , 0 );
 
 	if( m_leaf != 0 )
 		m_fAvgLeafTri /= m_leaf;
 
-	// dealloc temporary memory
-	_deallocTmpMemory();
+	// delete temporary memory
+	SAFE_DELETE_ARRAY(m_temp);
 }
 
 // output log
@@ -107,7 +107,7 @@ void KDTree::OutputLog() const
 // initialize
 void KDTree::_init()
 {
-	m_nodes = 0;
+	m_root = 0;
 	m_prilist = 0;
 	m_temp = 0;
 	m_total = 0;
@@ -119,26 +119,8 @@ void KDTree::_init()
 	m_maxTriInLeaf = 16;
 }
 
-// malloc the memory
-void KDTree::_mallocMemory()
-{
-	SORT_PREMALLOC( 16 * 1024 * 1024 , KD_NODE_MEMID );
-	SORT_PREMALLOC( 16 * 1024 * 1024 , KD_LEAF_TRILIST_MEMID );
-	m_temp = new unsigned char[m_primitives->size()];
-
-	m_nodes = SORT_MEMORY_ID( Kd_Node , KD_NODE_MEMID );
-	m_prilist = SORT_MEMORY_ID( Primitive* , KD_LEAF_TRILIST_MEMID );
-}
-
-// free temporary memory
-void KDTree::_deallocTmpMemory()
-{
-	// delete temporary memory
-	SAFE_DELETE_ARRAY(m_temp);
-}
-
 // split node
-void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , const BBox& box , unsigned depth )
+void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , unsigned depth )
 {
 	if( tri_num < m_maxTriInLeaf || depth > m_maxDepth )
 	{
@@ -152,7 +134,7 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 	float		split_pos;
 	unsigned 	split_Axis;
 	bool 		left = false;
-	float sah = _pickSplitting( splits , tri_num , box , split_Axis , split_pos , left );
+	float sah = _pickSplitting( splits , tri_num , node->bbox , split_Axis , split_pos , left );
 	node->flag = split_Axis;
 	node->split = split_pos;
 	if( sah >= tri_num )
@@ -227,18 +209,16 @@ void KDTree::_splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , con
 	}
 	splits.Release();
 
-	BBox left_box = box;
+	BBox left_box = node->bbox;
 	left_box.m_Max[split_Axis] = split_pos;
-	Kd_Node* left_node = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
-	_splitNode( left_node , l_splits , l_num+b_num , left_box , depth + 1 );
+	node->leftChild = new Kd_Node(left_box);
+	_splitNode( node->leftChild , l_splits , l_num+b_num , depth + 1 );
 	m_total ++;
 
-	unsigned node_offset = (SORT_OFFSET(KD_NODE_MEMID)/sizeof(Kd_Node));
-	node->right |= node_offset << 2;
-	BBox right_box = box;
+	BBox right_box = node->bbox;
 	right_box.m_Min[split_Axis] = split_pos;
-	Kd_Node* right_node = SORT_MALLOC_ID(Kd_Node,KD_NODE_MEMID)();
-	_splitNode( right_node , r_splits , r_num+b_num , right_box , depth + 1 );
+	node->rightChild = new Kd_Node(right_box);
+	_splitNode( node->rightChild , r_splits , r_num+b_num , depth + 1 );
 	m_total ++;
 
 	m_depth = max( m_depth , depth );
@@ -317,17 +297,14 @@ float KDTree::_pickSplitting( const Splits& splits , unsigned tri_num , const BB
 void KDTree::_makeLeaf( Kd_Node* node , Splits& splits , unsigned tri_num )
 {
 	node->flag = 3;
-	node->trinum |= tri_num<<2;
-	node->offset = SORT_OFFSET(KD_LEAF_TRILIST_MEMID)/sizeof(Primitive*);
 
-	Primitive** primitives = SORT_MALLOC_ARRAY_ID(Primitive*,tri_num,KD_LEAF_TRILIST_MEMID)();
-	unsigned offset = 0;
 	for( unsigned i = 0 ; i < splits.split_c[0] ; i++ )
 	{
 		if( splits.split[0][i].type == Split_Start || splits.split[0][i].type == Split_Flat )
 		{
-			primitives[offset] = splits.split[0][i].primitive;
-			offset++;
+			const Primitive* primitive = splits.split[0][i].primitive;
+			if( primitive->GetIntersect( node->bbox ) )
+				node->trilist.push_back(primitive);
 		}
 	}
 	splits.Release();
@@ -345,7 +322,7 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( fmin < 0.0f )
 		return false;
 
-	if( _traverse( m_nodes , r , intersect , fmin , fmax , fmax ) )
+	if( _traverse( m_root , r , intersect , fmin , fmax , fmax ) )
 	{
 		if( intersect == 0 )
 			return true;
@@ -369,13 +346,13 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	// it's a leaf node
 	if( (node->flag & mask) == 3 )
 	{
-		unsigned tri_num = node->flag>>2;
 		bool inter = false;
-		for( unsigned i = 0 ; i < tri_num ; i++ )
-		{
-			inter |= m_prilist[i+node->offset]->GetIntersect( ray , intersect );
+		vector<const Primitive*>::const_iterator it = node->trilist.begin();
+		while( it != node->trilist.end() ){
+			inter |= (*it)->GetIntersect( ray , intersect );
 			if( intersect == 0 && inter )
 				return true;
+			++it;
 		}
 		return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
 	}
@@ -385,8 +362,8 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	float dir = ray.m_Dir[split_axis];
 	float t = (dir==0.0f) ? FLT_MAX : ( node->split - ray.m_Ori[split_axis] ) / dir;
 	
-	Kd_Node* first = node + 1 ;
-	Kd_Node* second = m_nodes + (node->right>>2);
+	Kd_Node* first = node->leftChild;
+	Kd_Node* second = node->rightChild;
 	if( dir < 0.0f || (dir==0.0f&&ray.m_Ori[split_axis] > node->split) )
 	{
 		Kd_Node* temp = first;
@@ -406,9 +383,14 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	return inter;
 }
 
-// dealloc memory
-void KDTree::_deallocMemory()
+// delete kd-tree node
+void KDTree::deleteKdNode( Kd_Node* node )
 {
-	SORT_DEALLOC(KD_NODE_MEMID);
-	SORT_DEALLOC(KD_LEAF_TRILIST_MEMID);
+	if( !node )
+		return;
+
+	deleteKdNode( node->leftChild );
+	deleteKdNode( node->rightChild );
+
+	delete node;
 }

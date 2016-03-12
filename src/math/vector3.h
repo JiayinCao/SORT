@@ -56,6 +56,9 @@ public:
 		x *= s; y *= s; z *= s;
 		return *this;
 	}
+	Vector3<T>	operator* ( const Vector3<T>& v) const {
+		return Vector3<T>( x * v.x , y * v.y , z * v.z );
+	}
 	Vector3<T>	operator/ ( float div ) const {
 		if( div == 0.0f )
 			return *this;
