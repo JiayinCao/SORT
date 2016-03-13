@@ -230,7 +230,7 @@ bool Bvh::GetIntersect( const Ray& ray , Intersection* intersect ) const
 	if( fmin < 0.0f )
 		return false;
 
-	if( _traverseNode( m_nodes , ray , intersect , fmin , fmax , ray.m_fMax ) )
+	if( _traverseNode( m_nodes , ray , intersect , fmin , fmax ) )
 	{
 		if( intersect == 0 )
 			return true;
@@ -240,13 +240,13 @@ bool Bvh::GetIntersect( const Ray& ray , Intersection* intersect ) const
 }
 
 // traverse node
-bool Bvh::_traverseNode( Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const
+bool Bvh::_traverseNode( Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const
 {
 	if( fmin < 0.0f )
 		return false;
 
 	if( intersect && intersect->t < fmin )
-		return intersect->t < ray_max;
+		return intersect->t < fmax;
 	
 	if( node->pri_num != 0 )
 	{
@@ -276,16 +276,16 @@ bool Bvh::_traverseNode( Bvh_Node* node , const Ray& ray , Intersection* interse
 	bool inter = false;
 	if( _fmin1 > _fmin0 )
 	{
-		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 , ray_max );
+		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 );
 		if( inter && intersect == 0 ) return true;
-		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 , ray_max );
+		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 );
 	}else
 	{
-		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 , ray_max );
+		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 );
 		if( inter && intersect == 0 ) return true;
-		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 , ray_max );
+		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 );
 	}
 	if( intersect == 0 )
 		return inter;
-	return intersect->t < ray_max;
+	return intersect->t < fmax;
 }

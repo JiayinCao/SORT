@@ -322,7 +322,7 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( fmin < 0.0f )
 		return false;
 
-	if( _traverse( m_root , r , intersect , fmin , fmax , fmax ) )
+	if( _traverse( m_root , r , intersect , fmin , fmax ) )
 	{
 		if( intersect == 0 )
 			return true;
@@ -332,7 +332,7 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 }
 
 // tranverse kd-tree node
-bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const
+bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const
 {
 	if( fmin > fmax )
 		return false;
@@ -341,7 +341,7 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	const float		delta = 0.001f;
 
 	if( intersect && intersect->t < fmin - delta )
-		return intersect->t < ray_max + delta;
+		return intersect->t < fmax + delta;
 
 	// it's a leaf node
 	if( (node->flag & mask) == 3 )
@@ -374,12 +374,12 @@ bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect
 	bool inter = false;
 	if( t > fmin - delta )
 	{
-		inter = _traverse( first , ray , intersect , fmin , min( fmax , t ) , ray_max );
+		inter = _traverse( first , ray , intersect , fmin , min( fmax , t ) );
 		if( intersect == 0 && inter )
 			return true;
 	}
 	if( inter == false && ( fmax + delta ) > t )
-		return _traverse( second , ray , intersect , max( t , fmin ) , fmax , ray_max );
+		return _traverse( second , ray , intersect , max( t , fmin ) , fmax );
 	return inter;
 }
 
