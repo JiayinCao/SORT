@@ -123,7 +123,7 @@ private:
 	float _pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , unsigned _start , unsigned _end );
 
 	// traverse node
-	bool _traverseNode( Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , float ray_max ) const;
+	bool _traverseNode( Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
 };
 
 #endif
