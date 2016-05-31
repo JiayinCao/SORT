@@ -14,11 +14,12 @@
 
 #include "stdthread.h"
 
-#include <process.h>
 #include "managers/memmanager.h"
 
+#ifdef SORT_IN_WINDOWS
+
 // thread id
-static __declspec(thread) int g_ThreadId = 0;
+static Thread_Local int g_ThreadId = 0;
 
 // get the thread id
 int ThreadId()
@@ -72,7 +73,7 @@ void RenderThreadStd::RunThread()
 			break;
 		}
 		// Get a new task from the task queue
-		RenderTask& task = RenderTaskQueue::GetSingleton().PopTask();
+		RenderTask task = RenderTaskQueue::GetSingleton().PopTask();
 		g_mutex.Unlock();
 
 		// execute the task
@@ -92,3 +93,5 @@ void MutexStd::Unlock()
 {
 	m_mutex.unlock();
 }
+
+#endif
