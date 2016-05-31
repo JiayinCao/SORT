@@ -17,7 +17,7 @@
 
 #include "ptmultithread.h"
 
-#if defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
+#if defined(SORT_IN_MAC_DISABLE) || defined(SORT_IN_LINUX_DISABLE)
 
 #include "integrator/integrator.h"
 #include <unistd.h>

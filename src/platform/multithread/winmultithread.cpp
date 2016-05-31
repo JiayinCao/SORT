@@ -17,7 +17,7 @@
 
 #include "winmultithread.h"
 
-#ifdef SORT_IN_WINDOWS
+#ifdef SORT_IN_WINDOWS_DISABLE
 #include <process.h>
 #include "managers/memmanager.h"
 

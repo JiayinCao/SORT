@@ -20,7 +20,7 @@
 #ifndef SORT_WINMULTITHREAD
 #define SORT_WINMULTITHREAD
 
-#ifdef SORT_IN_WINDOWS
+#ifdef SORT_IN_WINDOWS_DISABLE
 
 #include <Windows.h>
 

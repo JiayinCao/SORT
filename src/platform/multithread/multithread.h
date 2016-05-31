@@ -114,10 +114,12 @@ private:
 };
 
 
-#if defined(SORT_IN_WINDOWS)
-	#include "winmultithread.h"
-#elif defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
-	#include "ptmultithread.h"
-#endif
+//#if defined(SORT_IN_WINDOWS)
+//	#include "winmultithread.h"
+//#elif defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
+//	#include "ptmultithread.h"
+//#endif
+
+#include "stdthread.h"
 
 #endif // SORT_SHAREDMEMORY

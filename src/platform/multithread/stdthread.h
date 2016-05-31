@@ -1,7 +1,7 @@
 /*
-	FileName:      renderthread.h
+	FileName:      stdthread.h
 
-	Created Time:  2015-07-13
+	Created Time:  2016-05-31
 
 	Auther:        Cao Jiayin
 
@@ -15,77 +15,70 @@
 				linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifndef SORT_PTMULTITHREAD
-#define SORT_PTMULTITHREAD
+#include "sort.h"
 
-#include "utility/define.h"
+#ifndef SORT_STDTHREAD
+#define SORT_STDTHREAD
 
-#if defined(SORT_IN_WINDOWS_DISABLE) || defined(SORT_IN_WINDOWS_DISABLE)
+#include <thread>
+#include <mutex>
 
-#include <pthread.h>
+class Integrator;
 
 // get the thread id
 int ThreadId();
 
-class Integrator;
-
-class RenderThreadMac
+class RenderThreadStd
 {
 	// public method
 public:
 	// constructor
-	RenderThreadMac(unsigned tid);
-	RenderThreadMac();
+	RenderThreadStd(unsigned tid);
 
 	// Begin thread
-    void BeginThread();
+	void BeginThread();
 
 	// End thread
 	void EndThread();
 
 	// Run the thread
-    void RunThread();
+	void RunThread();
 
 	// Whether the thread is finished
-	bool IsFinished(){
+	bool IsFinished() {
 		return m_finished;
 	}
 
-    // get thread id
-    int GetThreadID() const{
-        return m_tid;
-    }
-    
-	// private field
+	// get thread id
+	int GetThreadID() const {
+		return m_tid;
+	}
+
+// private field
 private:
-	// thread handle
-	pthread_t m_thread;
 	// the thread id
 	unsigned m_tid;
 	// whether the thread is finished
 	bool	m_finished;
-	
+
 // the rendering data
 public:
 	Integrator*	m_pIntegrator;
 };
 
-class MutexMac
+class MutexStd
 {
 public:
-    MutexMac();
-    ~MutexMac();
-    
-    void Lock();
-    void Unlock();
-    
+	// lock/unlock
+	void Lock();
+	void Unlock();
+
 private:
-    pthread_mutex_t m_mutex;
+	// critical section
+	std::mutex	m_mutex;
 };
 
-#define PlatformThreadUnit	RenderThreadMac
-#define PlatformMutex       MutexMac
-
-#endif
+#define PlatformThreadUnit	RenderThreadStd
+#define PlatformMutex		MutexStd
 
 #endif
