@@ -1,0 +1,13 @@
+version: 1.0.{build}
+clone_folder: c:\SORT
+before_build:
+- cmd: >-
+    md _out
+
+    cd _out
+
+    cmake ..
+build:
+  project: c:\SORT\_out\SORT.sln
+  parallel: true
+  verbosity: minimal
