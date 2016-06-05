@@ -36,7 +36,7 @@ class Material : public ReferenceCount
 // public method
 public:
 	Material();
-	~Material();
+	virtual ~Material();
 
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;

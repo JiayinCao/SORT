@@ -77,7 +77,7 @@ class	FresnelDielectric : public Fresnel
 public:
 	// constructor
 	FresnelDielectric( float ei , float et ):
-		eta_i(ei) , eta_t(et)
+        eta_t(et),eta_i(ei)
 	{
 	}
 

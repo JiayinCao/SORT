@@ -21,7 +21,7 @@
 IMPLEMENT_CREATOR( OcTree );
 
 // default construction
-OcTree::OcTree():m_uMaxTriInLeaf(16),m_uMaxDepthInOcTree(16),m_pRoot(0)
+OcTree::OcTree():m_pRoot(0),m_uMaxTriInLeaf(16),m_uMaxDepthInOcTree(16)
 {
 }
 
