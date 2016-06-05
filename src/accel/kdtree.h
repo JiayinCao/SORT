@@ -35,7 +35,7 @@ public:
 	float						split;		// split position
 
 	// default constructor
-	Kd_Node( const BBox& bb ):flag(0),split(0.0f),leftChild(0),rightChild(0),bbox(bb){}
+	Kd_Node( const BBox& bb ):leftChild(0),rightChild(0),bbox(bb),flag(0),split(0.0f){}
 };
 
 // split type

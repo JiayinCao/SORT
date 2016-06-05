@@ -65,7 +65,7 @@ public:
     
     // constructor
     RenderTask( Scene& sc , Sampler* samp , Camera* cam , bool* td, unsigned spp )
-    :scene(sc),sampler(samp),camera(cam),samplePerPixel(spp),taskDone(td)
+    :taskDone(td),samplePerPixel(spp),sampler(samp),camera(cam),scene(sc)
     {
         pixelSamples = 0;
         taskId = 0;
