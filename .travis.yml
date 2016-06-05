@@ -7,3 +7,7 @@ compiler:
 os:
 - linux
 - osx
+script:
+-mkdir _out
+-cd _out
+-./cmake && make
