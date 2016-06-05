@@ -35,6 +35,8 @@ class PropertyHandler
 public:
 	// default constructor
 	PropertyHandler( T* t ):m_target(t){};
+    // destructor
+    virtual ~PropertyHandler(){}
 	// set value
 	virtual void SetValue( const string& value ) {}
 	// set texture

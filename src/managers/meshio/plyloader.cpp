@@ -20,9 +20,6 @@
 #include "managers/meshmanager.h"
 #include "thirdparty/ply/ply.h"
 
-// the maxmium length of a single line
-static const unsigned LINE_MAXLENGTH = 4096;
-
 static char x_prop[] = "x";
 static char y_prop[] = "y";
 static char z_prop[] = "z";
