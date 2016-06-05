@@ -1,8 +1,15 @@
 # SORT
 
-[![Build status](https://ci.appveyor.com/api/projects/status/6kiio0dak0wc3ics?svg=true)](https://ci.appveyor.com/project/JerryCao1985/sort)
-[![Build status](https://travis-ci.org/JerryCao1985/SORT.svg?branch=master)](https://travis-ci.org/JerryCao1985/SORT)
-
+<table>
+  <tr>
+    <th>Windows (Visual Studio)</th>
+    <th>Unbuntu & Mac</th>
+  </tr>
+  <tr>
+    <td>[![Build status](https://ci.appveyor.com/api/projects/status/6kiio0dak0wc3ics?svg=true)](https://ci.appveyor.com/project/JerryCao1985/sort)</td>
+    <td>[![Build status](https://travis-ci.org/JerryCao1985/SORT.svg?branch=master)](https://travis-ci.org/JerryCao1985/SORT)</td>
+  </tr>
+</table>
 
 SORT is short for Simple Open-source Ray Tracing. It is a physically based renderer that I initiated a couple of years ago, which is quite simlilar to PBRT, because I wrote the whole renderer after reading pbrt several times and I'd like to enhance my understanding on offline rendering with this small project.
 SORT is cross-platform, it works well on Windows, Mac and Ubuntu.
