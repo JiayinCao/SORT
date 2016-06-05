@@ -42,9 +42,6 @@ public:
 	// reset the timer
 	void ResetTimer();
 
-	// Get Current Date
-	static string GetDate();
-
 // private field
 private:
 	// the time
