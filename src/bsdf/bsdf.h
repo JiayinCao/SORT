@@ -41,8 +41,6 @@ class	Bsdf
 public:
 	// default constructor
 	Bsdf( const Intersection* );
-	// destructor
-	~Bsdf();
 
 	// get the number of bxdf
 	unsigned NumComponents( BXDF_TYPE type = BXDF_ALL ) const;
@@ -72,10 +70,10 @@ public:
 // private field
 private:
 	// the list for the bxdf
-	Bxdf*	m_bxdf[MAX_BXDF_COUNT];
+    Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};
 
 	// current bsdf
-	unsigned m_bxdfCount;
+	unsigned m_bxdfCount = 0;
 
 	// the vectors
 	Vector nn , sn , tn;

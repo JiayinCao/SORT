@@ -29,8 +29,6 @@ class MicroFacetDistribution
 {
 // public method
 public:
-    virtual ~MicroFacetDistribution(){}
-    
 	// probabilty of facet with specific normal (v)
 	virtual float D(float NoH) const = 0;
 
@@ -91,8 +89,8 @@ public:
 
 // private field
 private:
-	float m;
-	float alpha;
+	float m = 0.0f;
+    float alpha = 0.0f;
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -101,8 +99,6 @@ private:
 class VisTerm
 {
 public:
-    virtual ~VisTerm(){}
-    
 	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH ) = 0;
 };
 
@@ -167,11 +163,11 @@ protected:
 	// reflectance
 	Spectrum R;
 	// distribution of facets
-	MicroFacetDistribution* distribution;
+	MicroFacetDistribution* distribution = nullptr;
 	// fresnel for the surface
-	Fresnel* fresnel;
+	Fresnel* fresnel = nullptr;
 	// visiblity term
-	VisTerm* visterm;
+	VisTerm* visterm = nullptr;
 
 	// get reflected ray
 	inline Vector	_getReflected( Vector v , Vector n ) const;

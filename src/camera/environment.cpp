@@ -31,7 +31,7 @@ IMPLEMENT_CREATOR( EnvironmentCamera );
 void EnvironmentCamera::_init()
 {
 	m_type = CT_ENVIRONMENT;
-	
+
 	_registerAllProperty();
 }
 

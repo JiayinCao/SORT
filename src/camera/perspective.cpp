@@ -31,10 +31,6 @@ void PerspectiveCamera::_init()
 {
 	// set camera type
 	m_type = CT_PERSPECTIVE;
-	
-	// setup intial value for data
-	m_lensRadius = 0.0f;	// by default , depth of field is not enabled
-	m_fov = PI * 0.25f;
 
 	_registerAllProperty();
 }

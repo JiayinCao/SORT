@@ -38,8 +38,6 @@ class	Camera : public PropertySet<Camera>
 {
 	// public method
 public:
-	// default constructor
-	Camera() { _init(); }
 	// destructor
 	virtual ~Camera() {}
 
@@ -72,22 +70,19 @@ protected:
 	// the eye point
 	Point	m_eye;
     // the image sensor
-    ImageSensor*    m_imagesensor;
+    ImageSensor*    m_imagesensor = nullptr;
 	// the type for the camera
-	CAMERA_TYPE m_type;
+	CAMERA_TYPE m_type = CT_NONE;
 	// the size of the sensor
-	float	m_sensorW, m_sensorH;
+	float	m_sensorW = 0.0f, m_sensorH = 0.0f;
 	// aspect ratio
-	float	m_aspectRatioW, m_aspectRatioH;
+	float	m_aspectRatioW = 0.0f, m_aspectRatioH = 0.0f;
 	// aspect fit
-	int		m_aspectFit;
+	int		m_aspectFit = 0.0f;
 	// camera shift
-	float	m_shiftX, m_shiftY;
+	float	m_shiftX = 0.0f, m_shiftY = 0.0f;
 
 // private method
-	// initialize default data
-	void _init() { m_imagesensor = 0; m_type = CT_NONE; m_sensorW = 0; m_sensorH = 0; }
-	
 	// property handler
 	class EyeProperty : public PropertyHandler<Camera>
 	{

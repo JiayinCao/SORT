@@ -32,9 +32,7 @@ public:
 
 	// default constructor
 	PerspectiveCamera(){_init();}
-	// destructor
-	~PerspectiveCamera(){}
-
+    
     // Preprocess
     virtual void PreProcess();
     
@@ -77,19 +75,19 @@ protected:
     Vector m_forward;
 
 	// the fov for the camera
-	float  m_fov;
+	float  m_fov = 0.25f;
 	
 	// radius for the lens , zero, by default, means no dof
-	float m_lensRadius;
+	float m_lensRadius = 0.0f;
 
 	// image distance with each pixel area equals to exactly one
-	float m_imagePlaneDist;
+	float m_imagePlaneDist = 0.0f;
     
     // focal distance
-    float m_focalDistance;
+    float m_focalDistance = 0.0f;
 
 	// inverse aparture size
-	float m_inverseApartureSize;
+	float m_inverseApartureSize = 0.0f;
 
     // Transformation
     Transform   m_cameraToClip;
