@@ -43,26 +43,10 @@ public:
 
 IMPLEMENT_CREATOR( Bvh );
 
-// default construction
-Bvh::Bvh()
-{
-	_init();
-}
-
 // destructor
 Bvh::~Bvh()
 {
 	_deallocMemory();
-}
-
-// initialize
-void Bvh::_init()
-{
-	m_maxPriInLeaf = 8;
-	m_totalNode = 0;
-	m_leafNode = 0;
-	m_bvhDepth = 0;
-	m_maxLeafTriNum = 0;
 }
 
 // output log information

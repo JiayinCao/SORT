@@ -28,17 +28,14 @@ struct Bvh_Node
 	// bounding box for the node
 	BBox		bbox;
 	// primitive number
-	unsigned 	pri_num;
+	unsigned 	pri_num = 0;
 	union
 	{
 		// offset in primitive list
-		unsigned	pri_offset;
+		unsigned	pri_offset = 0;
 		// index of right child
 		Bvh_Node*	right_child;
 	};
-	// default constructor
-	Bvh_Node()
-	{pri_num=0;}
 };
 
 // bvh primitives
@@ -47,8 +44,7 @@ struct Bvh_Primitive
 	Primitive*	primitive;
 	Point		m_centroid;
 
-	Bvh_Primitive( Primitive* p ):
-	primitive(p)
+	Bvh_Primitive( Primitive* p ):primitive(p)
 	{m_centroid = ( p->GetBBox().m_Max + p->GetBBox().m_Min ) * 0.5f;}
 
 	const BBox& GetBBox()
@@ -65,8 +61,6 @@ class Bvh : public Accelerator
 public:
 	DEFINE_CREATOR( Bvh , "bvh" );
 
-	// default construction
-	Bvh();
 	// destructor
 	~Bvh();
 
@@ -85,24 +79,21 @@ public:
 // private field
 private:
 	// the nodes for bvh
-	Bvh_Node*		m_nodes;
+	Bvh_Node*		m_nodes = nullptr;
 	// primitives in bvh
-	Bvh_Primitive*	m_bvhpri;
+	Bvh_Primitive*	m_bvhpri = nullptr;
 
 	// maxmium primtive number in each leaf node
-	unsigned	m_maxPriInLeaf;
+	unsigned	m_maxPriInLeaf = 8;
 
 	// bvh information
-	unsigned	m_totalNode;
+	unsigned	m_totalNode = 0;
 	// leaf node
-	unsigned	m_leafNode;
+	unsigned	m_leafNode = 0;
 	// depth
-	unsigned	m_bvhDepth;
+	unsigned	m_bvhDepth = 0;
 	// maxmium triangle number in leaf
-	unsigned	m_maxLeafTriNum;
-
-	// initialize
-	void _init();
+	unsigned	m_maxLeafTriNum = 0;
 
 	// malloc the memory
 	void _mallocMemory();

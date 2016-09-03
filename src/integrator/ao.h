@@ -27,10 +27,9 @@ class	AmbientOcclusion : public Integrator
 {
 // public method
 public:
-
 	DEFINE_CREATOR( AmbientOcclusion , "ao" );
 
-	AmbientOcclusion() { maxDistance = 10.0f; _registerAllProperty(); }
+	AmbientOcclusion() { _registerAllProperty(); }
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -43,7 +42,7 @@ public:
 
 // private field
 private:
-	float	maxDistance;
+	float	maxDistance = 10.0f;
 
 	void _registerAllProperty();
 

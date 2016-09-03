@@ -23,24 +23,14 @@
 
 //! OcTree node structure
 struct OcTreeNode{
-	OcTreeNode*					child[8];	/**< Child node pointers, all will be NULL if current node is a leaf.*/
+    OcTreeNode*					child[8] = {};	/**< Child node pointers, all will be NULL if current node is a leaf.*/
 	vector<const Primitive*>	primitives;	/**< Primitives buffer.*/
 	BBox						bb;			/**< Bounding box for this octree node.*/
-
-	//! A container sets everything with 0.
-	OcTreeNode(){
-		memset( child , 0 , sizeof(child) );
-	}
 };
 
 //! @brief Triangle information in octree node.
 struct NodeTriangleContainer{
 	vector<const Primitive*>	primitives;		/**< Primitive buffer used during octree construction.*/
-
-	//! Release list memory in destructor.
-	~NodeTriangleContainer(){
-		primitives.clear();
-	}
 };
 
 /////////////////////////////////////////////////////////////////////////////////////
@@ -51,8 +41,6 @@ class OcTree : public Accelerator
 public:
 	DEFINE_CREATOR( OcTree , "octree" );
 
-	//! default construction
-	OcTree();
 	//! destructor
 	~OcTree();
 
@@ -70,9 +58,9 @@ public:
 
 // private field
 private:
-	OcTreeNode*	m_pRoot;				/**< Pointer to the root node of this octree.*/
-	unsigned	m_uMaxTriInLeaf;		/**< Maximum number of triangles allowed in a leaf node, 16 is the default value.*/
-	unsigned	m_uMaxDepthInOcTree;	/**< Maximum depth of the octree, 16 is the default value.*/
+	OcTreeNode*	m_pRoot = nullptr;				/**< Pointer to the root node of this octree.*/
+	const unsigned	m_uMaxTriInLeaf = 16;		/**< Maximum number of triangles allowed in a leaf node, 16 is the default value.*/
+	const unsigned	m_uMaxDepthInOcTree = 16;	/**< Maximum depth of the octree, 16 is the default value.*/
 
 	//! Split current node into eight if criteria is not met. Otherwise, it will make it a leaf.\n
 	//! This function invokes itself recursively, so the whole sub-tree will be built once it is called.

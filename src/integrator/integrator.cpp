@@ -23,8 +23,5 @@ extern System g_System;
 Integrator::Integrator()
 	:scene( g_System.GetScene() )
 {
-	max_recursive_depth=6;
-	camera = 0;
-
 	_registerProperty( "inte_max_recur_depth" , new MaxDepthProperty(this) );
 }
