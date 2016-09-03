@@ -25,16 +25,9 @@
 // constructor
 Bsdf::Bsdf( const Intersection* _intersect ) : intersect( *_intersect )
 {
-	m_bxdfCount = 0;
-
 	nn = intersect.normal;
 	tn = Normalize(Cross( nn , intersect.tangent ));
 	sn = Cross( tn , nn );
-}
-
-// destructor
-Bsdf::~Bsdf()
-{
 }
 
 // get the number of components in current bsdf

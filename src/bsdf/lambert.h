@@ -32,8 +32,6 @@ public:
 	// constructor
 	// para 's' : reflect density
 	Lambert( const Spectrum& s ):R(s){m_type=BXDF_DIFFUSE;}
-	// destructor
-	~Lambert(){}
 
 	// evaluate bxdf
 	// para 'wo' : out going direction

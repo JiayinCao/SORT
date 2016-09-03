@@ -25,19 +25,18 @@
 #include "bsdf.h"
 
 // constant to be used in merl
-const unsigned Merl::MERL_SAMPLING_RES_THETA_H = 90;
-const unsigned Merl::MERL_SAMPLING_RES_THETA_D = 90;
-const unsigned Merl::MERL_SAMPLING_RES_PHI_D = 180;
-const unsigned Merl::MERL_SAMPLING_COUNT = 1458000;
-const double Merl::MERL_RED_SCALE = 0.0006666666666667;
-const double Merl::MERL_GREEN_SCALE = 0.000766666666666667;
-const double Merl::MERL_BLUE_SCALE = 0.0011066666666666667;
+static const unsigned MERL_SAMPLING_RES_THETA_H = 90;
+static const unsigned MERL_SAMPLING_RES_THETA_D = 90;
+static const unsigned MERL_SAMPLING_RES_PHI_D = 180;
+static const unsigned MERL_SAMPLING_COUNT = 1458000;
+static const double MERL_RED_SCALE = 0.0006666666666667;
+static const double MERL_GREEN_SCALE = 0.000766666666666667;
+static const double MERL_BLUE_SCALE = 0.0011066666666666667;
 
 // default constructor
 Merl::Merl()
 {
-	// initialize default data
-	_init();
+    m_type = BXDF_GLOSSY;
 }
 
 // Load data from file
@@ -49,19 +48,6 @@ void Merl::LoadData( const string& filename )
 
 // destructor
 Merl::~Merl()
-{
-	_release();
-}
-
-// initialize default data
-void Merl::_init()
-{
-	m_type = BXDF_GLOSSY;
-	m_data = 0;
-}
-
-// release data
-void Merl::_release()
 {
 	SAFE_DELETE(m_data);
 }

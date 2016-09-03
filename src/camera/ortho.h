@@ -32,8 +32,6 @@ public:
 
 	// default constructor
 	OrthoCamera();
-	// destructor
-	~OrthoCamera(){}
 
 	// generate ray
 	virtual Ray GenerateRay( float x , float y , const PixelSample& ps ) const;
@@ -75,7 +73,7 @@ protected:
 	Vector m_up;
 
 	// set the width and height for the camera
-	float m_camWidth , m_camHeight;
+	float m_camWidth = 1.0f, m_camHeight = 1.0f;
 
 	// the transformation
 	Matrix world2camera;

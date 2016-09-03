@@ -34,9 +34,6 @@ void OrthoCamera::_init()
 {
 	// set type for tha camera
 	m_type = CT_ORTHO;
-	//set default value
-	m_camWidth = 1.0f;
-	m_camHeight = 1.0f;
 	
 	// register properties
 	_registerAllProperty();

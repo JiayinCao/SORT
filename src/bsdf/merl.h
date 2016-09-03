@@ -55,20 +55,8 @@ public:
 // private field
 private:
 	// the brdf data
-	double*	m_data;
-
-	static const unsigned	MERL_SAMPLING_RES_THETA_H;
-	static const unsigned	MERL_SAMPLING_RES_THETA_D;
-	static const unsigned	MERL_SAMPLING_RES_PHI_D;
-	static const unsigned	MERL_SAMPLING_COUNT;
-	static const double		MERL_RED_SCALE;
-	static const double		MERL_GREEN_SCALE;
-	static const double		MERL_BLUE_SCALE;
-
-	// initialize default data
-	void _init();
-	// release data
-	void _release();
+	double*	m_data = nullptr;
+    
 	// load brdf data from file
 	void _loadBrdf( const string& filename );
 };
