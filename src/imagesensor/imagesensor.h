@@ -22,7 +22,7 @@
 #include "spectrum/spectrum.h"
 #include "utility/propertyset.h"
 #include "texture/rendertarget.h"
-#include "platform/multithread/multithread.h"
+#include "utility/multithread/multithread.h"
 
 // pre-decleration
 class RenderTask;

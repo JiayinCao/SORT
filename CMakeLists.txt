@@ -36,13 +36,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SORT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/Debug")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${SORT_SOURCE_DIR}/Release")
 
-find_package(Threads)
-
 add_executable(SORT ${all_files})
 
 if(UNIX)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
 	target_link_libraries(SORT ${CMAKE_THREAD_LIBS_INIT})
+	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++0x -stdlib=libc++")
 endif(UNIX)
 
 if(MSVC)

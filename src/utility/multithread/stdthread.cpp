@@ -16,8 +16,6 @@
 
 #include "managers/memmanager.h"
 
-#ifdef SORT_IN_WINDOWS
-
 // thread id
 static Thread_Local int g_ThreadId = 0;
 
@@ -93,5 +91,3 @@ void MutexStd::Unlock()
 {
 	m_mutex.unlock();
 }
-
-#endif

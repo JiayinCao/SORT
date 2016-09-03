@@ -44,9 +44,6 @@ public:
     // the following parameters define where to calculate the image
     Vector2i ori;
 	Vector2i size;
-    //unsigned ori_y;
-    //unsigned width;
-    //unsigned height;
     
     // the task id
     unsigned		taskId;
@@ -113,12 +110,6 @@ private:
     friend class Singleton<RenderTaskQueue>;
 };
 
-
-#if defined(SORT_IN_WINDOWS)
-    #include "stdthread.h"
-#elif defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
-	#include "ptmultithread.h"
-#endif
-
+#include "stdthread.h"
 
 #endif // SORT_SHAREDMEMORY
