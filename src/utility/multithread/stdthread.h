@@ -63,7 +63,7 @@ private:
 
 // the rendering data
 public:
-	Integrator*	m_pIntegrator;
+	Integrator*	m_pIntegrator = nullptr;
 };
 
 class MutexStd

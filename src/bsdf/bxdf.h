@@ -31,11 +31,6 @@ class	Bxdf
 {
 // public method
 public:
-	// default constructor
-	Bxdf(){}
-	// destructor
-	virtual ~Bxdf(){}
-
 	// evaluate bxdf
 	// para 'wo' : out going direction
 	// para 'wi' : in direction
@@ -69,7 +64,7 @@ public:
 // protected field
 protected:
 	// the type for the bxdf
-	BXDF_TYPE m_type;
+	BXDF_TYPE m_type = BXDF_NONE;
 };
 
 #endif

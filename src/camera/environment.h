@@ -32,8 +32,6 @@ public:
 
 	// default constructor
 	EnvironmentCamera(){_init();}
-	// destructor
-	~EnvironmentCamera(){}
 
 	// generate a ray given a pixel
 	virtual Ray	GenerateRay( float x , float y , const PixelSample& ps ) const;

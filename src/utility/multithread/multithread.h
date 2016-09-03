@@ -46,17 +46,17 @@ public:
 	Vector2i size;
     
     // the task id
-    unsigned		taskId;
-    bool*			taskDone;	// used to show the progress
+    unsigned		taskId = 0;
+    bool*			taskDone = nullptr;	// used to show the progress
     
     // the pixel sample
-    PixelSample*	pixelSamples;
-    unsigned		samplePerPixel;
+    PixelSample*	pixelSamples = nullptr;
+    unsigned		samplePerPixel = 0;
     
     // the sampler
-    Sampler*		sampler;
+    Sampler*		sampler = nullptr;
     // the camera
-    Camera*			camera;
+    Camera*			camera = nullptr;
     // the scene description
     const Scene&	scene;
     
@@ -64,8 +64,6 @@ public:
     RenderTask( Scene& sc , Sampler* samp , Camera* cam , bool* td, unsigned spp )
     :taskDone(td),samplePerPixel(spp),sampler(samp),camera(cam),scene(sc)
     {
-        pixelSamples = 0;
-        taskId = 0;
     }
     
     // execute the task
@@ -79,10 +77,8 @@ public:
 
 class RenderTaskQueue : public Singleton<RenderTaskQueue>
 {
-    // public method
+// public method
 public:
-    ~RenderTaskQueue(){}
-    
     // Add Task
     void PushTask( RenderTask task ){
         m_taskList.push_back(task);
