@@ -41,7 +41,7 @@ add_executable(SORT ${all_files})
 if(UNIX)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
 	target_link_libraries(SORT ${CMAKE_THREAD_LIBS_INIT})
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++0x -stdlib=libc++")
+	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
 
 if(MSVC)
