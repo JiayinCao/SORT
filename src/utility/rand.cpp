@@ -36,7 +36,7 @@ static Thread_Local unsigned long mt[N]; /* the array for the state vector  */
 static Thread_Local int mti;
 static Thread_Local bool seed_setup = false;
 
-#include "platform/multithread/multithread.h"
+#include "utility/multithread/multithread.h"
 
 // set the seed
 void sort_seed()

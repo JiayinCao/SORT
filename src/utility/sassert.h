@@ -25,7 +25,7 @@
 #ifndef SORT_DEBUG
 	#define Sort_Assert(expr) (void(0))
 #else
-	#define Sort_Assert(expr) if((expr)==false) LOG_ERROR<<(#expr)<<CRASH
+	#define Sort_Assert(expr) if((expr)==0) LOG_ERROR<<(#expr)<<CRASH
 #endif
 
 #endif

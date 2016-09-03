@@ -20,8 +20,6 @@
 #ifndef SORT_STDTHREAD
 #define SORT_STDTHREAD
 
-#ifdef SORT_IN_WINDOWS
-
 #include <thread>
 #include <mutex>
 
@@ -82,7 +80,5 @@ private:
 
 #define PlatformThreadUnit	RenderThreadStd
 #define PlatformMutex		MutexStd
-
-#endif
 
 #endif
