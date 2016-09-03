@@ -28,13 +28,15 @@ class	DirectLight : public Integrator
 {
 // public method
 public:
-
 	DEFINE_CREATOR( DirectLight , "direct" );
 
 	// default constructor
-	DirectLight(){_init();}
+	DirectLight(){_registerAllProperty();}
 	// destructor
-	~DirectLight(){_release();}
+	~DirectLight(){
+        SAFE_DELETE_ARRAY(light_sample_offsets);
+        SAFE_DELETE_ARRAY(bsdf_sample_offsets);
+    }
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
@@ -57,17 +59,12 @@ public:
 
 // private field
 private:
-	unsigned		ls_per_light; // light sample per pixel sample per light
+	unsigned		ls_per_light = 16; // light sample per pixel sample per light
 
-	SampleOffset*	light_sample_offsets;	// light sample offset
-	SampleOffset*	bsdf_sample_offsets;	// bsdf sample offset
+	SampleOffset*	light_sample_offsets = nullptr;	// light sample offset
+	SampleOffset*	bsdf_sample_offsets = nullptr;	// bsdf sample offset
 	
-	unsigned total_samples;	// total sample number
-
-	// initialize default value
-	void _init();
-	// release data
-	void _release();
+	unsigned total_samples = 0;	// total sample number
 
 	// register property
 	void _registerAllProperty();

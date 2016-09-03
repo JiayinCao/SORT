@@ -105,10 +105,10 @@ public:
 // protected method
 protected:
 	// Camera
-	Camera*			camera;
+	Camera*			camera = nullptr;
 
 	// maxium recursive depth
-	int				max_recursive_depth;
+	int				max_recursive_depth = 6;
 
 	// the scene description
 	const Scene&	scene;

@@ -29,13 +29,8 @@ class UniGrid : public Accelerator
 public:
 	DEFINE_CREATOR( UniGrid , "uniform_grid" );
 
-	// default constructor
-	UniGrid();
-	// constructor from a primitive list
-	// para 'l' : the primitive list
-	UniGrid( vector<Primitive*>* l );
 	// destructor
-	~UniGrid();
+    ~UniGrid();
 
 	// get the intersection between the ray and the primitive set
 	// para 'r' : the ray
@@ -52,16 +47,16 @@ public:
 // private field
 private:
 	// the number of voxels
-	unsigned	m_voxelCount;
+	unsigned	m_voxelCount = 0;
 	// the voxel count
-	unsigned	m_voxelNum[3];
+    unsigned	m_voxelNum[3] = {};
 	// extent of grid in each dimension
 	Vector		m_voxelExtent;
 	Vector		m_voxelInvExtent;
 	// the voxel data
-	vector<Primitive*>*	m_pVoxels;
+	vector<Primitive*>*	m_pVoxels = nullptr;
 	// the delta
-	const float m_delta;
+	const float m_delta = 0.00001f;
 
 	// initialize the data
 	void _init();

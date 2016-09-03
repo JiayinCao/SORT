@@ -27,24 +27,6 @@
 
 IMPLEMENT_CREATOR( DirectLight );
 
-// initialize default value
-void DirectLight::_init()
-{
-	light_sample_offsets = 0;
-	bsdf_sample_offsets = 0;
-	total_samples = 0;
-	ls_per_light = 16;	// default sample per light is 16
-
-	_registerAllProperty();	// register all the properties
-}
-
-// release data
-void DirectLight::_release()
-{
-	SAFE_DELETE_ARRAY(light_sample_offsets);
-	SAFE_DELETE_ARRAY(bsdf_sample_offsets);
-}
-
 // radiance along a specific ray direction
 Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 {

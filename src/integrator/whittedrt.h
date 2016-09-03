@@ -30,7 +30,6 @@ class	WhittedRT : public Integrator
 {
 // public method
 public:
-
 	DEFINE_CREATOR( WhittedRT , "whitted" );
 
 	// return the radiance of a specific direction

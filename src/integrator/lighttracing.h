@@ -30,7 +30,7 @@ class LightTracing : public BidirPathTracing
 public:
 	DEFINE_CREATOR(LightTracing, "lt" );
 
-	LightTracing() {
+    LightTracing(){
 		light_tracing_only = true;
 	}
 
