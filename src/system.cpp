@@ -27,7 +27,7 @@
 #include "utility/path.h"
 #include "utility/creator.h"
 #include "sampler/sampler.h"
-#include "platform/multithread/multithread.h"
+#include "utility/multithread/multithread.h"
 #include <ImfHeader.h>
 #include "utility/strhelper.h"
 #include "camera/camera.h"
@@ -35,7 +35,6 @@
 #include "sampler/stratified.h"
 #include <time.h>
 #include "managers/smmanager.h"
-#include "platform/multithread/multithread.h"
 #include "math/vector2.h"
 
 extern bool g_bBlenderMode;

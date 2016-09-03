@@ -16,7 +16,7 @@
 */
 
 #include "blenderimage.h"
-#include "platform/multithread/multithread.h"
+#include "utility/multithread/multithread.h"
 #include "managers/smmanager.h"
 
 // tile size
