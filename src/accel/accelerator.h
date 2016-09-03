@@ -37,13 +37,8 @@ class	Accelerator
 {
 // public method
 public:
-	// default constructor
-	Accelerator(){ m_primitives = 0; }
-	// constructor from primitive list
-	// para 'l' ; the primitive list
-	Accelerator( vector<Primitive*>* l ) : m_primitives(l){}
 	// destructor
-	virtual ~Accelerator(){ m_primitives = 0;}
+    virtual ~Accelerator() {};
 
 	// get the intersection between the ray and the primitive set
 	// para 'r' : the ray

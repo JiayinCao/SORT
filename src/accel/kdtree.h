@@ -27,15 +27,14 @@ class Primitive;
 struct Kd_Node
 {
 public:
-	Kd_Node*					leftChild;	// pointer to the left child
-	Kd_Node*					rightChild;	// pointer to the right child
-	BBox						bbox;		// bounding box for kd-tree node
-	vector<const Primitive*>	trilist;	// triangle list in the leaf node
-	unsigned					flag;		// 11 leaf node , 00 x split , 01 y split , 02 z split
-	float						split;		// split position
+	Kd_Node*					leftChild = nullptr;	// pointer to the left child
+	Kd_Node*					rightChild = nullptr;	// pointer to the right child
+	BBox						bbox;                   // bounding box for kd-tree node
+	vector<const Primitive*>	trilist;                // triangle list in the leaf node
+	unsigned					flag = 0;               // 11 leaf node , 00 x split , 01 y split , 02 z split
+	float						split = 0.0f;           // split position
 
-	// default constructor
-	Kd_Node( const BBox& bb ):leftChild(0),rightChild(0),bbox(bb),flag(0),split(0.0f){}
+    Kd_Node( const BBox& bb ):bbox(bb){}
 };
 
 // split type
@@ -52,26 +51,15 @@ struct Split
 {
 public:
 	// the position of the split
-	float		pos;
+	float		pos = 0.0f;
 	// the type of the split , start or end
-	Split_Type	type;
+	Split_Type	type = Split_None;
 	// the id in the triangle list
-	unsigned	id;
+	unsigned	id = 0;
 	// the primitive pointer
-	Primitive*	primitive;
+	Primitive*	primitive = nullptr;
 
-	Split(){pos = 0;type = Split_None;id=0;primitive=0;}
-	Split( float po , Split_Type t , unsigned pid , Primitive* p )
-	{
-		pos = po;type = t;id=pid;
-		primitive = p;
-	}
-	Split( const Split& split )
-	{
-		pos = split.pos;
-		type = split.type;
-		id = split.id;
-		primitive = split.primitive;
+    Split( float po = 0.0f , Split_Type t = Split_None, unsigned pid = 0, Primitive* p = nullptr): pos(po) , type(t) , id(pid) , primitive(p){
 	}
 	bool operator < ( const Split& split ) const
 	{
@@ -82,14 +70,8 @@ public:
 };
 struct Splits
 {
-	Split*		split[3];
-	unsigned	split_c[3];
-	Splits()
-	{
-		split_c[0] = 0;
-		split_c[1] = 0;
-		split_c[2] = 0;
-	}
+    Split*		split[3] = { nullptr , nullptr , nullptr };
+    unsigned	split_c[3] = { 0 , 0 , 0 };
 	void Release()
 	{
 		SAFE_DELETE_ARRAY(split[0]);
@@ -111,11 +93,6 @@ class KDTree : public Accelerator
 public:
 	DEFINE_CREATOR( KDTree , "kd_tree" );
 
-	// default constructor
-	KDTree();
-	// constructor from a primitive list
-	// para 'l' : the primitive list
-	KDTree( vector<Primitive*>* l );
 	// destructor
 	~KDTree();
 
@@ -134,31 +111,26 @@ public:
 // private field
 private:
 	// the root of kd-tree
-	Kd_Node*		m_root;
-	// the primitive list
-	Primitive**		m_prilist;
+	Kd_Node*		m_root = nullptr;
 	// temporary buffer for marking triangles
-	unsigned char*	m_temp;
+	unsigned char*	m_temp = nullptr;
 
 	// maxmium depth of kd-tree
-	unsigned	m_maxDepth;
+	const unsigned	m_maxDepth = 28;
 	// maxmium number of triangles in a leaf node
-	unsigned	m_maxTriInLeaf;
+	const unsigned	m_maxTriInLeaf = 32;
 
 	// total node number
-	unsigned	m_total;
+	unsigned	m_total = 0;
 	// leaf node number
-	unsigned	m_leaf;
+	unsigned	m_leaf = 0;
 	// average triangle number in leaf
-	float		m_fAvgLeafTri;
+	float		m_fAvgLeafTri = 0;
 	// depth of kd-tree
-	unsigned	m_depth;
+	unsigned	m_depth = 0;
 	// maxium number of triangle in a leaf
-	unsigned	m_MaxLeafTri;
+	unsigned	m_MaxLeafTri = 0;
 
-	// initialize
-	void _init();
-	
 	// split node
 	// para 'node'   : node to be split
 	// para 'splits' : splitting candidates

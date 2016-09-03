@@ -23,16 +23,6 @@
 
 IMPLEMENT_CREATOR( KDTree );
 
-// default constructor
-KDTree::KDTree()
-{
-	_init();
-}
-
-// constructor from a primitive list
-KDTree::KDTree( vector<Primitive*>* l ) : Accelerator(l)
-{
-}
 // destructor
 KDTree::~KDTree()
 {
@@ -102,21 +92,6 @@ void KDTree::OutputLog() const
 	LOG<<"Leaf Node Count  :\t"<<m_leaf<<ENDL;
 	LOG<<"Triangles per leaf:\t"<<m_fAvgLeafTri<<ENDL;
 	LOG<<"Max triangles in leaf:\t"<<m_MaxLeafTri<<ENDL<<ENDL;
-}
-
-// initialize
-void KDTree::_init()
-{
-	m_root = 0;
-	m_prilist = 0;
-	m_temp = 0;
-	m_total = 0;
-	m_leaf = 0;
-	m_fAvgLeafTri = 0.0f;
-	m_depth = 0;
-	m_MaxLeafTri = 0;
-	m_maxDepth = 28;
-	m_maxTriInLeaf = 16;
 }
 
 // split node

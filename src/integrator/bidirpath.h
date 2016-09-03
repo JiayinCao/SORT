@@ -28,30 +28,22 @@ class	Bsdf;
 
 struct BDPT_Vertex
 {
-	Point			p;			// the position of the vertex
-	Vector			n;			// the normal of the vertex
-	Vector			wi;			// in direction
-	Vector			wo;			// out direction
-	Bsdf*			bsdf;		// bsdf from material
-	float			rr;			// russian roulette
-	Spectrum		throughput;	// through put
-	Intersection	inter;		// intersection
+	Point			p;                  // the position of the vertex
+	Vector			n;                  // the normal of the vertex
+	Vector			wi;                 // in direction
+	Vector			wo;                 // out direction
+	Bsdf*			bsdf = nullptr;		// bsdf from material
+	float			rr = 0.0f;          // russian roulette
+	Spectrum		throughput;         // through put
+	Intersection	inter;              // intersection
 
 	// For further detail, please refer to the paper "Implementing Vertex Connection and Merging"
 	// MIS factors
-	float		vc;
-	float		vcm;
+	float		vc = 0.0f;
+	float		vcm = 0.0f;
 
 	// depth of the vertex
-	int			depth;
-
-	BDPT_Vertex()
-	{
-		bsdf = 0;
-		vc = 0.0f;
-		vcm = 0.0f;
-		depth = 0;
-	}
+    int			depth = 0;
 };
 
 struct Pending_Sample
@@ -72,8 +64,7 @@ public:
 	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
 
 	// default constructor
-	BidirPathTracing() { 
-		light_tracing_only = false; sample_per_pixel = 1; m_bMIS = true; 
+	BidirPathTracing() {
 		_registerProperty( "bdpt_mis" , new PTMISProperty(this) );
 	}
 
@@ -91,8 +82,8 @@ public:
 
 // private field
 protected:
-	bool	light_tracing_only;		// only do light tracing
-	int		sample_per_pixel;		// light sample per pixel
+	bool	light_tracing_only = false;		// only do light tracing
+	int		sample_per_pixel = 1;           // light sample per pixel
 
 	// compute G term
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
@@ -109,7 +100,7 @@ protected:
 // private field
 private:
 	// use multiple importance sampling to sample direct illumination
-	bool	m_bMIS;
+	bool	m_bMIS = true;
 
 	// Max Distance Property
 	class PTMISProperty : public PropertyHandler<Integrator>
