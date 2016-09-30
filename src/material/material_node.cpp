@@ -287,10 +287,7 @@ LambertNode::LambertNode()
 
 void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	if( weight.IsBlack() )
-		return;
-
-	Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() );
+    Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() );
 	lambert->m_weight = weight;
 	bsdf->AddBxdf( lambert );
 }
@@ -302,9 +299,6 @@ MerlNode::MerlNode()
 
 void MerlNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	if( weight.IsBlack() )
-		return;
-
 	merl.m_weight = weight;
 	bsdf->AddBxdf( &merl );
 }
@@ -327,9 +321,6 @@ OrenNayarNode::OrenNayarNode()
 
 void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	if( weight.IsBlack() )
-		return;
-
 	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , roughness.GetPropertyValue(bsdf).x );
 	orennayar->m_weight = weight;
 	bsdf->AddBxdf( orennayar );
@@ -347,9 +338,6 @@ MicrofacetReflectionNode::MicrofacetReflectionNode()
 
 void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	if( weight.IsBlack() )
-		return;
-
 	float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.05f , 1.0f );
 	MicroFacetDistribution* dist = 0;
 	if( mf_dist.str == "Blinn" )
@@ -394,9 +382,6 @@ MicrofacetRefractionNode::MicrofacetRefractionNode()
 
 void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	if( weight.IsBlack() )
-		return;
-
 	float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.05f , 1.0f );
 	MicroFacetDistribution* dist = 0;
 	if( mf_dist.str == "Blinn" )

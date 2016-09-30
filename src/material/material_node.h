@@ -279,6 +279,7 @@ private:
 	MaterialNodeProperty	src1;
 };
 
+// To be changed
 // Lerp node
 class LerpNode : public OperatorNode
 {

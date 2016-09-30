@@ -307,53 +307,45 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 }
 
 // tranverse kd-tree node
-bool KDTree::_traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const
+bool KDTree::_traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const
 {
-	if( fmin > fmax )
-		return false;
-	
-	const unsigned	mask = 0x00000003;
-	const float		delta = 0.001f;
+	static const unsigned	mask = 0x00000003;
+	static const float		delta = 0.001f;
 
+    if( fmin > fmax )
+        return false;
+    
 	if( intersect && intersect->t < fmin - delta )
-		return intersect->t < fmax + delta;
+		return true;
 
 	// it's a leaf node
-	if( (node->flag & mask) == 3 )
-	{
+	if( (node->flag & mask) == 3 ){
 		bool inter = false;
-		vector<const Primitive*>::const_iterator it = node->trilist.begin();
-		while( it != node->trilist.end() ){
-			inter |= (*it)->GetIntersect( ray , intersect );
+        for( auto tri : node->trilist ){
+			inter |= tri->GetIntersect( ray , intersect );
 			if( intersect == 0 && inter )
 				return true;
-			++it;
 		}
 		return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
 	}
 
 	// get the intersection point between the ray and the splitting plane
-	unsigned split_axis = node->flag & mask;
-	float dir = ray.m_Dir[split_axis];
-	float t = (dir==0.0f) ? FLT_MAX : ( node->split - ray.m_Ori[split_axis] ) / dir;
+	const unsigned split_axis = node->flag & mask;
+	const float dir = ray.m_Dir[split_axis];
+	const float t = (dir==0.0f) ? FLT_MAX : ( node->split - ray.m_Ori[split_axis] ) / dir;
 	
-	Kd_Node* first = node->leftChild;
-	Kd_Node* second = node->rightChild;
+	const Kd_Node* first = node->leftChild;
+	const Kd_Node* second = node->rightChild;
 	if( dir < 0.0f || (dir==0.0f&&ray.m_Ori[split_axis] > node->split) )
-	{
-		Kd_Node* temp = first;
-		first = second;
-		second = temp;
-	}
+        swap(first, second);
 
 	bool inter = false;
-	if( t > fmin - delta )
-	{
+	if( t > fmin - delta ){
 		inter = _traverse( first , ray , intersect , fmin , min( fmax , t ) );
-		if( intersect == 0 && inter )
+		if( !intersect && inter )
 			return true;
 	}
-	if( inter == false && ( fmax + delta ) > t )
+	if( !inter && ( fmax + delta ) > t )
 		return _traverse( second , ray , intersect , max( t , fmin ) , fmax );
 	return inter;
 }
