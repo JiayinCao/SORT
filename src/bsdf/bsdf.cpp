@@ -45,7 +45,7 @@ unsigned Bsdf::NumComponents( BXDF_TYPE type ) const
 // add a new bxdf
 void Bsdf::AddBxdf( Bxdf* bxdf )
 {
-	if( m_bxdfCount == MAX_BXDF_COUNT )
+	if( m_bxdfCount == MAX_BXDF_COUNT || bxdf == 0 || bxdf->m_weight.IsBlack() )
 		return;
 	m_bxdf[m_bxdfCount] = bxdf ;
 	m_bxdfCount++;
