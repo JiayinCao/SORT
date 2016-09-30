@@ -166,7 +166,7 @@ private:
 	void _makeLeaf( Kd_Node* node , Splits& splits , unsigned tri_num );
 	
 	// tranverse kd-tree node
-	bool _traverse( Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
+	bool _traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
 
 	// delete kd-tree node
 	void deleteKdNode( Kd_Node* node );
