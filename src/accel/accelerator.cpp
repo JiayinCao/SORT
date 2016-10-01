@@ -26,15 +26,11 @@ void Accelerator::_computeBBox()
 	m_BBox.InvalidBBox();
 
 	// update bounding box again
-	vector<Primitive*>::const_iterator it = m_primitives->begin();
-	while( it != m_primitives->end() )
-	{
-		m_BBox.Union( (*it)->GetBBox() );	
-		it++;
-	}
+    for( auto tri : *m_primitives )
+		m_BBox.Union( tri->GetBBox() );
 
 	// enlarge the bounding box a little
-	const float threshold = 0.001f;
+	static const float threshold = 0.001f;
 	Vector delta = (m_BBox.m_Max - m_BBox.m_Min ) * threshold;
 	m_BBox.m_Min -= delta;
 	m_BBox.m_Max += delta;

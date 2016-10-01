@@ -37,11 +37,10 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( fmin < 0.0f )
 		return false;
 
-	if( traverseOcTree( m_pRoot , r , intersect , fmin , fmax ) )
-	{
-		if( intersect == 0 )
+	if( traverseOcTree( m_pRoot , r , intersect , fmin , fmax ) ){
+		if( !intersect )
 			return true;
-		return intersect->primitive != 0;
+		return intersect->primitive;
 	}
 	return false;
 }
@@ -58,11 +57,8 @@ void OcTree::Build()
 
 	// initialize a triangle container
 	NodeTriangleContainer* container = new NodeTriangleContainer();
-	vector<Primitive*>::const_iterator it = m_primitives->begin();
-	while( it != m_primitives->end() ){
-		container->primitives.push_back( *it );
-		++it;
-	}
+    for( auto primitive : *m_primitives )
+		container->primitives.push_back( primitive );
 	
 	// create root node
 	m_pRoot = new OcTreeNode();
@@ -83,7 +79,7 @@ void OcTree::OutputLog() const
 // @param node Sub-tree belongs to this node will be released recursively.
 void OcTree::releaseOcTree( OcTreeNode* node ){
 	// return for empty node
-	if( node == 0 )
+	if( !node )
 		return;
 
 	// release all child nodes
@@ -103,8 +99,7 @@ void OcTree::releaseOcTree( OcTreeNode* node ){
 void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , unsigned depth )
 {
 	// make a leaf if there are not enough points
-	if( container->primitives.size() < (int)m_uMaxTriInLeaf || depth > m_uMaxDepthInOcTree )
-	{
+	if( container->primitives.size() < (int)m_uMaxTriInLeaf || depth > m_uMaxDepthInOcTree ){
 		// make leaf
 		makeLeaf( node , container );
 		// no need to process any more
@@ -176,13 +171,8 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 // @param container Container holdes all triangle information in this node.
 void OcTree::makeLeaf( OcTreeNode* node , NodeTriangleContainer* container )
 {
-	std::vector<const Primitive*>::const_iterator it = container->primitives.begin();
-	while( it != container->primitives.end() ){
-		node->primitives.push_back( *it );
-		++it;
-	}
-	
-	// delete the container
+    for( auto primitive : container->primitives )
+		node->primitives.push_back( primitive );
 	delete container;
 }
 
@@ -202,45 +192,36 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 	if( fmin > fmax )
 		return false;
 	if( intersect && intersect->t < fmin - delta )
-		return intersect->t < fmax + delta;
+		return true;
 
 	// Iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
-	if( node->child[0] == 0 )
-	{
-		vector<const Primitive*>::const_iterator it = node->primitives.begin();
-		while( it != node->primitives.end() ){
-			inter |= (*it)->GetIntersect( ray , intersect );
-			if( intersect == 0 && inter )
+	if( node->child[0] == 0 ){
+        for( auto tri : node->primitives ){
+			inter |= tri->GetIntersect( ray , intersect );
+			if( !intersect && inter )
 				return true;
-			++it;
 		}
 		return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
 	}
 
-	Point contact = ray(fmin);
-	Point center = ( node->bb.m_Max + node->bb.m_Min ) * 0.5f;
-	int node_index = ( contact.x > center.x ) + ( contact.y > center.y ) * 2 + ( contact.z > center.z ) * 4;
+	const Point contact = ray(fmin);
+	const Point center = ( node->bb.m_Max + node->bb.m_Min ) * 0.5f;
+    int node_index = ( contact.x > center.x ) + ( contact.y > center.y ) * 2 + ( contact.z > center.z ) * 4;
 
 	float	_curt = fmin;
 	int 	_dir[3];
 	float	_delta[3],_next[3];
 	for( int i = 0 ; i < 3 ; i++ ){
 		_dir[i] = ( ray.m_Dir[i] > 0.0f ) ? 1 : -1;
-		if( ray.m_Dir[i] != 0.0f )
-			_delta[i] = fabs( node->bb.Delta(i) / ray.m_Dir[i] ) * 0.5f;
-		else
-			_delta[i] = FLT_MAX;
+        _delta[i] = ( ray.m_Dir[i] != 0.0f )?fabs( node->bb.Delta(i) / ray.m_Dir[i] ) * 0.5f : FLT_MAX;
 	}
 	for( int i = 0 ; i < 3 ; i++ ){
-		float target = node->child[node_index]->bb.m_Min[i] + ((_dir[i]+1)>>1) * node->bb.Delta(i) * 0.5f;
-		_next[i] = ( target - ray.m_Ori[i] ) / ray.m_Dir[i];
-		if( ray.m_Dir[i] == 0.0f )
-			_next[i] = FLT_MAX;
+		const float target = node->child[node_index]->bb.m_Min[i] + ((_dir[i]+1)>>1) * node->bb.Delta(i) * 0.5f;
+        _next[i] = ( ray.m_Dir[i] == 0.0f )?FLT_MAX:( target - ray.m_Ori[i] ) / ray.m_Dir[i];
 	}
 
 	// traverse the octree
-	while( ( intersect && _curt < intersect->t ) || ( intersect == 0 ) )
-	{
+	while( ( intersect && _curt < intersect->t ) || !intersect ){
 		// get the axis along which the ray leaves the node fastest.
 		unsigned nextAxis = (_next[0] <= _next[1])?0:1;
 		nextAxis = (_next[nextAxis] <= _next[2])?nextAxis:2;
