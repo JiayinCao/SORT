@@ -29,13 +29,11 @@ struct Bvh_Node
 	BBox		bbox;
 	// primitive number
 	unsigned 	pri_num = 0;
-	union
-	{
-		// offset in primitive list
-		unsigned	pri_offset = 0;
-		// index of right child
-		Bvh_Node*	right_child;
-	};
+    // offset in primitive list
+    unsigned	pri_offset = 0;
+    
+    Bvh_Node*   left = 0;
+    Bvh_Node*   right = 0;
 };
 
 // bvh primitives
@@ -78,10 +76,10 @@ public:
 
 // private field
 private:
-	// the nodes for bvh
-	Bvh_Node*		m_nodes = nullptr;
 	// primitives in bvh
 	Bvh_Primitive*	m_bvhpri = nullptr;
+    // root node
+    Bvh_Node*       m_root = nullptr;
 
 	// maxmium primtive number in each leaf node
 	unsigned	m_maxPriInLeaf = 8;
@@ -114,7 +112,10 @@ private:
 	float _pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , unsigned _start , unsigned _end );
 
 	// traverse node
-	bool _traverseNode( Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
+	bool _traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
+    
+    // delete node
+    void _delete( Bvh_Node* node );
 };
 
 #endif
