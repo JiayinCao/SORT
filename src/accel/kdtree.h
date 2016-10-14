@@ -51,7 +51,7 @@ public:
     //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
     //!                     long as it finds an intersection. It is faster than the one with intersection information
     //!                     data and suitable for shadow ray calculation.
-    //! @return             It will return true if there is intersection, otherwise it returns false.
+    //! @return             It will return true if there is an intersection, otherwise it returns false.
 	bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
 	//! Build KD-Tree structure in O(N*lg(N)).
@@ -149,17 +149,7 @@ private:
     //! @param prinum   The number of primitives in the node.
     //! @param depth    The current depth of the node.
 	void splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth );
-	
-	// evaluate sah value for the kdtree node
-	// para 'l' : the number of primitives on the left of the splitting plane
-	// para 'r' : the number of primitives on the right of the splitting plane
-	// para 'f' : the number of flat primitives lying on the splitting plane
-	// para 'axis' : the axis id of splitting
-	// para 'split' : splitting position
-	// para 'box'  : the bounding box of the kd-tree node
-	// para 'left' : whether the flat primitives lying on the left of the splitting plane
-	// result  : the sah value for the splitting
-    
+
     //! @brief Evalute SAH value for a specific split plane.
     //! @param l        Number of primitives on the left of the split plane.
     //! @param r        Number of primitives on the right of the split plane.
