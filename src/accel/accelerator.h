@@ -1,76 +1,80 @@
 /*
-   FileName:      accelerator.h
+    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
+    platform physically based renderer.
+ 
+    Copyright (c) 2011-2016 by Cao Jiayin - All rights reserved.
+ 
+    SORT is a free software written for educational purpose. Anyone can distribute
+    or modify it under the the terms of the GNU General Public License Version 3 as
+    published by the Free Software Foundation. However, there is NO warranty that
+    all components are functional in a perfect manner. Without even the implied
+    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+    General Public License for more details.
+ 
+    You should have received a copy of the GNU General Public License along with
+    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+ */
 
-   Created Time:  2011-08-04 12:52:59
+#pragma once
 
-   Auther:        Cao Jiayin
-
-   Email:         soraytrace@hotmail.com
-
-   Location:      China, Shanghai
-
-   Description:   SORT is short for Simple Open-source Ray Tracing. Anyone could checkout the source code from
-                'sourceforge', https://soraytrace.svn.sourceforge.net/svnroot/soraytrace. And anyone is free to
-                modify or publish the source code. It's cross platform. You could compile the source code in 
-                linux and windows , g++ or visual studio 2008 is required.
-*/
-
-#ifndef	SORT_ACCELERATOR
-#define	SORT_ACCELERATOR
-
-// include the header file
 #include "utility/define.h"
 #include <vector>
 #include "geometry/bbox.h"
 #include "utility/creator.h"
 
-// pre-declera classes
 class Primitive;
 class Intersection;
 class Ray;
 
-////////////////////////////////////////////////////////////////////////////////
-// definition of accelerator
-// Accelerator is a kind of space-partitioning data structure for improving 
-// the performance of ray and scene intersection test.
+//! @brief Spatial acceleration structure interface.
+/**
+ * Accelerator is an interface rather than a base class. There is no instance of it.
+ * It is responsible for acceleration of intersection tests between ray and primitives.
+ * A ray tracing algorithm without a spatial acceleration structure is O(m*n) where m is
+ * the number of rays and n is the number of primitives. Spatial acceleration structure
+ * can optimize the algorithm so that it is O(m*lg(n)), a significant improvement over
+ * the naive brute force ray tracing.
+ * Common spatial structures inlcudes, KD-Tree, BVH and Uniform Grid.
+ */
 class	Accelerator
 {
-// public method
 public:
-	// destructor
+	//! Destructor of Accelerator, nothing is done in it.
     virtual ~Accelerator() {};
 
-	// get the intersection between the ray and the primitive set
-	// para 'r' : the ray
-	// para 'intersect' : the intersection result
-	// result   : 'true' if the ray pirece one of the triangle in the list
+    //!
+    //! @brief Get intersection between the ray and the primitive set.
+    //!
+    //! Pretty much all spatial accelerators perform this operation
+    //! in O(lg(n)) where n is the number of primitives in the set.
+    //! It returns true if there is intersection between the ray and the primitive set.
+    //! If intersect is not nullptr, it will fill the structure and return the nearest intersection.
+    //! If intersect is nullptr, it will stop as long as one intersection is found.
+    //! False will be returned if there is no intersection at all.
+    //! @param r The input ray to be tested.
+    //! @param intersect The intersection result. If a nullptr pointer is provided, it stops as long as it finds a intersection. It is faster than the one with real intersection information and suitable for shadow ray calculation.
 	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
 
-	// build the acceleration structure
+    //! @brief Build the acceleration structure.
 	virtual void Build() = 0;
 
-	// output log information
+	//! @brief Output log information.
 	virtual void OutputLog() const = 0;
 
-	// get bounding box
+	//! @brief Get the bounding box of the primitive set.
 	const BBox& GetBBox() const { return m_BBox; }
 
-	// set primitive list
-	void SetPrimitives( vector<Primitive*>* pri )
-	{
+    //! @brief Set primitive set in the acceleration structure.
+    //!
+    //! @param pri The set of primitives in the scene.
+	void SetPrimitives( vector<Primitive*>* pri ){
 		m_primitives = pri;
 	}
 
-// protected field
 protected:
-	// the vector storing primitive list
-	vector<Primitive*>* m_primitives;
+	vector<Primitive*>* m_primitives;   /**< The vector holding all pritmitive pointers. */
+	BBox                m_BBox;         /**< The vector holding all pritmitive pointers. */
 
-	// the bounding box of the primitives
-	BBox	m_BBox;
-
-	// compute the bounding box of the primitives
+	//! Generate the bounding box for the primitive set.
 	void _computeBBox();
 };
-
-#endif
