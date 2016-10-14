@@ -19,18 +19,18 @@
 #include "geometry/primitive.h"
 
 //! Generate the bounding box for the primitive set.
-void Accelerator::_computeBBox()
+void Accelerator::computeBBox()
 {
 	// reset bounding box
-	m_BBox.InvalidBBox();
+	m_bbox.InvalidBBox();
 
 	// update bounding box again
     for( auto tri : *m_primitives )
-		m_BBox.Union( tri->GetBBox() );
+		m_bbox.Union( tri->GetBBox() );
 
 	// enlarge the bounding box a little
 	static const float threshold = 0.001f;
-	Vector delta = (m_BBox.m_Max - m_BBox.m_Min ) * threshold;
-	m_BBox.m_Min -= delta;
-	m_BBox.m_Max += delta;
+	Vector delta = (m_bbox.m_Max - m_bbox.m_Min ) * threshold;
+	m_bbox.m_Min -= delta;
+	m_bbox.m_Max += delta;
 }
