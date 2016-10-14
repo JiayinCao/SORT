@@ -17,124 +17,138 @@
 
 #pragma once
 
-// include the header file
 #include "accelerator.h"
 
-class Primitive;
-
-// kd-tree node
-struct Kd_Node
-{
-public:
-	Kd_Node*					leftChild = nullptr;	// pointer to the left child
-	Kd_Node*					rightChild = nullptr;	// pointer to the right child
-	BBox						bbox;                   // bounding box for kd-tree node
-	vector<const Primitive*>	trilist;                // triangle list in the leaf node
-	unsigned					flag = 0;               // 11 leaf node , 00 x split , 01 y split , 02 z split
-	float						split = 0.0f;           // split position
-
-    Kd_Node( const BBox& bb ):bbox(bb){}
-};
-
-// split type
-enum Split_Type
-{
-	Split_None = 0,
-	Split_End = 1 ,
-	Split_Flat = 2 ,
-	Split_Start = 4,
-};
-
-// split candidates
-struct Split
-{
-public:
-	// the position of the split
-	float		pos = 0.0f;
-	// the type of the split , start or end
-	Split_Type	type = Split_None;
-	// the id in the triangle list
-	unsigned	id = 0;
-	// the primitive pointer
-	Primitive*	primitive = nullptr;
-
-    Split( float po = 0.0f , Split_Type t = Split_None, unsigned pid = 0, Primitive* p = nullptr): pos(po) , type(t) , id(pid) , primitive(p){
-	}
-	bool operator < ( const Split& split ) const
-	{
-		if( pos != split.pos )
-			return pos<split.pos;
-		return type < split.type ;
-	}
-};
-struct Splits
-{
-    Split*		split[3] = { nullptr , nullptr , nullptr };
-    unsigned	split_c[3] = { 0 , 0 , 0 };
-	void Release()
-	{
-		SAFE_DELETE_ARRAY(split[0]);
-		SAFE_DELETE_ARRAY(split[1]);
-		SAFE_DELETE_ARRAY(split[2]);
-	}
-};
-
-////////////////////////////////////////////////////////////////////////////////
-// definition of kd-tree
-//  a k-d tree (short for k-dimensional tree) is a space-partitioning data 
-//	structure for organizing points in a k-dimensional space. 
-//	the algorithm of kd-tree construction works in O(N*logN).
-//	To see the detail description of the algorithm, check the paper :
-//	"On building fast kd-Trees for Ray Tracing, and on doing that in O(N log N)"
+//! @brief K-Dimensional Tree or KD-Tree.
+/**
+ * A KD-Tree is a spatial partitioning data structure for organizing primitives in
+ * a k-dimensional space. In the context of a ray tracer, k usually equals to 3.
+ * KD-Tree is a very popular spatial data structure for accelerating ray tracing
+ * algorithms and it is also one of the most efficient ones.
+ * The construction of this KD-Tree works in O(N*lg(N)), which is proved to be the
+ * optimal solution in one single thread.
+ * Please refer to this paper
+ * <a href="http://www.eng.utah.edu/~cs6965/papers/kdtree.pdf">
+ * On building fast kd-Trees for Ray Tracing, and on doing that in O(N log N)</a> for further details.
+ */
 class KDTree : public Accelerator
 {
-// public method
 public:
 	DEFINE_CREATOR( KDTree , "kd_tree" );
 
-	// destructor
-	~KDTree();
+	//! Destructor that delete all allocated KD-Tree memory.
+    ~KDTree() override;
 
-	// get the intersection between the ray and the primitive set
-	// para 'r' : the ray
-	// para 'intersect' : the intersection result
-	// result   : 'true' if the ray pirece one of the triangle in the list
-	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const;
+    //! @brief Get intersection between the ray and the primitive set using KD-Tree.
+    //!
+    //! It will return true if there is intersection between the ray and the primitive set.
+    //! In case of an existed intersection, if intersect is not empty, it will fill the
+    //! structure and return the nearest intersection.
+    //! If intersect is nullptr, it will stop as long as one intersection is found, it is not
+    //! necessary to be the nearest one.
+    //! False will be returned if there is no intersection at all.
+    //! @param r            The input ray to be tested.
+    //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
+    //!                     long as it finds an intersection. It is faster than the one with intersection information
+    //!                     data and suitable for shadow ray calculation.
+    //! @return             It will return true if there is intersection, otherwise it returns false.
+	bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
-	// build the acceleration structure
-	virtual void Build();
+	//! Build KD-Tree structure in O(N*lg(N)).
+	void Build() override;
 
-	// Output log information
-	virtual void OutputLog() const;
+	//! Output log information
+	void OutputLog() const override;
 
-// private field
+    //! KD-Tree split plane type
+    enum class Split_Type
+    {
+        Split_None = 0,     /**< An invalid type. */
+        Split_End = 1,      /**< Split plane at the end of one primitive along an axis. */
+        Split_Flat = 2,     /**< Split plane contains the primitive, it happens when primitve is axis-aligned. */
+        Split_Start = 4,    /**< Split plane at the start of one primitive along an axis. */
+    };
+    
+    //! KD-Tree node structure
+    struct Kd_Node
+    {
+    public:
+        Kd_Node*					leftChild = nullptr;	/**< Pointer to the left child of the KD-Tree node. */
+        Kd_Node*					rightChild = nullptr;	/**< Pointer to the right child of the KD-Tree node. */
+        BBox						bbox;                   /**< Bounding box of the KD-Tree node. */
+        vector<const Primitive*>	trilist;                /**< Vector holding all primitives in the node. It 
+                                                             should be empty for interior nodes. */
+        unsigned					flag = 0;               /**< Special mask used for nodes. The node is a leaf node if it is 3. 
+                                                             For interior nodes, it will be the cooreponding id of the split axis.*/
+        float						split = 0.0f;           /**< Split position */
+        
+        //! @brief Constructor taking a bounding box.
+        //! @param bb Bounding box of the node.
+        Kd_Node( const BBox& bb ):bbox(bb){}
+    };
+    
+    //! A split candidate.
+    struct Split
+    {
+        float		pos = 0.0f;                     /**< Position of the split plane along a specific axis. */
+        Split_Type	type = Split_Type::Split_None;  /**< The type of the split plane. */
+        unsigned	id = 0;                         /**< The index of the pritmitive that triggers the split plane in the primitive list.*/
+        Primitive*	primitive = nullptr;            /**< The pointer pointing to the primitive that triggers the split plane.*/
+        
+        //! Constructor of Split.
+        //! @param po   Position of the split plane.
+        //! @param t    Type of the split plane.
+        //! @param pid  Index of the primitive that triggers the split plane.
+        //! @param p    The pointer to the primitive that triggers the split plane.
+        Split( float po = 0.0f , Split_Type t = Split_Type::Split_None, unsigned pid = 0, Primitive* p = nullptr): pos(po) , type(t) , id(pid) , primitive(p){
+        }
+        
+        //! Comparator for the struct.
+        //! @param split    The split plane to compare with.
+        //! @return         A comparing result based on position and type of the split planes.
+        bool operator < ( const Split& split ) const
+        {
+            if( pos != split.pos )
+                return pos<split.pos;
+            return type < split.type ;
+        }
+    };
+    
+    //! The structure holds all possible split plane during KD-Tree construction.
+    struct Splits
+    {
+        Split*		split[3] = { nullptr , nullptr , nullptr }; /**< Split planes along three different axis. */
+        unsigned	split_c[3] = { 0 , 0 , 0 };                 /**< Number of split planes in each different axis. */
+        
+        //! Release the allcoated memory.
+        void Release()
+        {
+            SAFE_DELETE_ARRAY(split[0]);
+            SAFE_DELETE_ARRAY(split[1]);
+            SAFE_DELETE_ARRAY(split[2]);
+        }
+    };
+    
 private:
-	// the root of kd-tree
-	Kd_Node*		m_root = nullptr;
-	// temporary buffer for marking triangles
-	unsigned char*	m_temp = nullptr;
+	Kd_Node*		m_root = nullptr;           /**< Root node of the KD-Tree. */
+	unsigned char*	m_temp = nullptr;           /**< Temporary buffer for marking primitives. */
 
-	// maxmium depth of kd-tree
-	const unsigned	m_maxDepth = 28;
-	// maxmium number of triangles in a leaf node
-	const unsigned	m_maxTriInLeaf = 32;
+	const unsigned	m_maxDepth = 28;            /**< Maximum allowed depth of KD-Tree. */
+	const unsigned	m_maxTriInLeaf = 32;        /**< Maximum allowed number of primitives in a leaf node. */
 
-	// total node number
-	unsigned	m_total = 0;
-	// leaf node number
-	unsigned	m_leaf = 0;
-	// average triangle number in leaf
-	float		m_fAvgLeafTri = 0;
-	// depth of kd-tree
-	unsigned	m_depth = 0;
-	// maxium number of triangle in a leaf
-	unsigned	m_MaxLeafTri = 0;
+	// KD-Tree information
+	unsigned	m_total = 0;                    /**< Total number of nodes in KD-Tree. */
+	unsigned	m_leaf = 0;                     /**< Total number of leaf nodes in KD-Tree. */
+	float		m_fAvgLeafTri = 0;              /**< Average number of primitives in leaf nodes. */
+	unsigned	m_depth = 0;                    /**< Depth of KD-Tree. */
+	unsigned	m_MaxLeafTri = 0;               /**< Maximum number of primitives in KD-Tree leaf nodes. */
 
-	// split node
-	// para 'node'   : node to be split
-	// para 'splits' : splitting candidates
-	// para 'depth'  : depth of the node
-	void _splitNode( Kd_Node* node , Splits& splits , unsigned tri_num , unsigned depth );
+    //! @brief Split current KD-Tree node.
+    //! @param node     The KD-Tree node to be split.
+    //! @param splits   The split plane that holds all primitive pointers.
+    //! @param prinum   The number of primitives in the node.
+    //! @param depth    The current depth of the node.
+	void splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth );
 	
 	// evaluate sah value for the kdtree node
 	// para 'l' : the number of primitives on the left of the splitting plane
@@ -145,28 +159,47 @@ private:
 	// para 'box'  : the bounding box of the kd-tree node
 	// para 'left' : whether the flat primitives lying on the left of the splitting plane
 	// result  : the sah value for the splitting
-	float _sah( unsigned l , unsigned r , unsigned f , unsigned axis , float split , const BBox& box , bool& left );
+    
+    //! @brief Evalute SAH value for a specific split plane.
+    //! @param l        Number of primitives on the left of the split plane.
+    //! @param r        Number of primitives on the right of the split plane.
+    //! @param f        Number of primitives lying on the split plane.
+    //! @param axis     ID of splitting axis.
+    //! @param split    Position along the splitting axis of the split plane.
+    //! @param box      Bounding box of the KD-Tree node.
+    //! @param left     Whether those flat primitves belongs to the left child or not.
+    //! @return         The evaluted SAH value for the split.
+	float sah( unsigned l , unsigned r , unsigned f , unsigned axis , float split , const BBox& box , bool& left );
 	
-	// pick best splitting
-	// para 'splits' : the splitting candidates
-	// para 'tri_num': triangle number
-	// para 'box'    : bounding box of the node
-	// para 'splitaxis': axis of splitting
-	// para 'split_pos': splitting position
-	// para 'left'     : whether flat primitives are lying on the left child node
-	// result          : sah value with the specific splitting
-	float _pickSplitting( const Splits& splits , unsigned tri_num , const BBox& box , 
+    //! @brief Pick the split plane with minimal SAH value.
+    //! @param splits       Split information that holds all possible split plane information.
+    //! @param prinum       Number of all primitives in the current node.
+    //! @param box          Axis aligned bounding box of the node.
+    //! @param splitAxis    ID of the splitting axis.
+    //! @param split_pos    Position along the splitting axis of the split plane.
+    //! @param left     Whether those flat primitves belongs to the left child or not.
+    //! @return         The SAH value of the selected split that has the minimal SAH value.
+	float pickSplitting( const Splits& splits , unsigned prinum , const BBox& box ,
 						 unsigned& splitAxis , float& split_pos , bool& left );
 	
-	// make leaf
-	// para 'node'   : the node to be leaf
-	// para 'splits' : the splitting candidates
-	// para 'tri_num': triangle number
-	void _makeLeaf( Kd_Node* node , Splits& splits , unsigned tri_num );
+    //! @brief Mark the current node as leaf node.
+    //! @param node     The KD-Tree node to be marked as leaf node.
+    //! @param splits   Split plane information that holds all primitive pointers.
+    //! @param prinum   The number of primitives in the node.
+	void makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum );
 	
-	// tranverse kd-tree node
-	bool _traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
+    //! @brief A recursive function that traverses the KD-Tree node.
+    //! @param node         The node to be traversed.
+    //! @param ray          The ray to be tested.
+    //! @param intersect    The structure holding the intersection information. If empty pointer is passed,
+    //!                     it will return as long as one intersection is found and it won't be necessary to be
+    //!                     the nearest one.
+    //! @param fmin         The minimum range along the ray.
+    //! @param fmax         The maximum range along the ray.
+    //! @return             True if there is intersection, otherwise it will return false.
+	bool traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
 
-	// delete kd-tree node
+    //! @brief Delete all sub tree originating from node.
+    //! @param node The KD-Tree node to be deleted.
 	void deleteKdNode( Kd_Node* node );
 };
