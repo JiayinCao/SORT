@@ -15,10 +15,8 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header file
 #include "unigrid.h"
 #include "managers/logmanager.h"
-#include <math.h>
 #include "geometry/primitive.h"
 #include "geometry/intersection.h"
 
@@ -28,19 +26,6 @@ IMPLEMENT_CREATOR( UniGrid );
 UniGrid::~UniGrid()
 {
 	_release();
-}
-
-// initialize data
-void UniGrid::_init()
-{
-	for( int i = 0 ; i < 3 ; i++ )
-	{
-		m_voxelNum[i] = 0;
-		m_voxelExtent[i] = 0.0f;
-		m_voxelInvExtent[i] = 0.0f;
-	}
-	m_voxelCount = 0;
-	m_pVoxels = 0;
 }
 
 // release the data
@@ -74,14 +59,14 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	float	delta[3] , next[3];
 	for( int i = 0 ; i < 3 ; i++ )
 	{
-		curGrid[i] = _point2VoxelId( r(cur_t) , i );
+		curGrid[i] = point2VoxelId( r(cur_t) , i );
 		dir[i] = ( r.m_Dir[i] > 0.0f ) ? 1 : -1;
 		if( r.m_Dir[i] != 0.0f )
 			delta[i] = fabs( m_voxelExtent[i] / r.m_Dir[i] );
 		else
 			delta[i] = FLT_MAX;
 	}
-	Point gridCorner = _voxelId2Point( curGrid );
+	Point gridCorner = voxelId2Point( curGrid );
 	for( int i = 0 ; i < 3 ; i++ )
 	{
 		// get the next t
@@ -96,14 +81,14 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	while( ( intersect && cur_t < intersect->t ) || ( intersect == 0 ) )
 	{
 		// current voxel id
-		unsigned voxelId = _offset( curGrid[0] , curGrid[1] , curGrid[2] );
+		unsigned voxelId = offset( curGrid[0] , curGrid[1] , curGrid[2] );
 
 		// get the next t
 		unsigned nextAxis = (next[0] <= next[1])+((unsigned)(next[1] <= next[2]))*2+((unsigned)(next[2] <= next[0]))*4;
 		nextAxis = array[nextAxis];
 
 		// chech if there is intersection in the current grid
-		if( _getIntersect( r , intersect , voxelId , next[nextAxis] ) )
+		if( getIntersect( r , intersect , voxelId , next[nextAxis] ) )
 			return true;
 
 		// get to the next voxel
@@ -165,8 +150,8 @@ void UniGrid::Build()
 		unsigned minGridId[3];
 		for( int i = 0 ; i < 3 ; i++ )
 		{
-			minGridId[i] = _point2VoxelId( (*it)->GetBBox().m_Min , i );
-			maxGridId[i] = _point2VoxelId( (*it)->GetBBox().m_Max , i );
+			minGridId[i] = point2VoxelId( (*it)->GetBBox().m_Min , i );
+			maxGridId[i] = point2VoxelId( (*it)->GetBBox().m_Max , i );
 		}
 
 		for( unsigned i = minGridId[2] ; i <= maxGridId[2] ; i++ )
@@ -178,29 +163,27 @@ void UniGrid::Build()
 					bb.m_Max = bb.m_Min + m_voxelExtent;
 
 					// only add the triangle if it is actually intersected
-					if( (*it)->GetIntersect( bb ) ){
-						unsigned offset = _offset( k , j , i );
-						m_pVoxels[offset].push_back( *it );
-					}
+					if( (*it)->GetIntersect( bb ) )
+						m_pVoxels[offset( k , j , i )].push_back( *it );
 				}
 		it++;
 	}
 }
 
 // voxel id from point
-unsigned UniGrid::_point2VoxelId( const Point& p , unsigned axis ) const
+unsigned UniGrid::point2VoxelId( const Point& p , unsigned axis ) const
 {
 	return min( m_voxelNum[axis] - 1 , (unsigned)( ( p[axis] - m_bbox.m_Min[axis] ) * m_voxelInvExtent[axis] ) );
 }
 
 // get the id offset
-unsigned UniGrid::_offset( unsigned x , unsigned y , unsigned z ) const
+unsigned UniGrid::offset( unsigned x , unsigned y , unsigned z ) const
 {
 	return z * m_voxelNum[1] * m_voxelNum[0] + y * m_voxelNum[0] + x;
 }
 
 // voxel id to point
-Point UniGrid::_voxelId2Point( int id[3] ) const
+Point UniGrid::voxelId2Point( int id[3] ) const
 {
 	Point p;
 	p.x = m_bbox.m_Min.x + id[0] * m_voxelExtent[0];
@@ -211,7 +194,7 @@ Point UniGrid::_voxelId2Point( int id[3] ) const
 }
 
 // get intersection between the ray and the triangles in the grid
-bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const
+bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const
 {
 	if( voxelId >= m_voxelCount )
 		LOG_ERROR<<"Voxel id is out of range.("<<voxelId<<"/"<<m_voxelCount<<")"<<CRASH;
@@ -224,7 +207,7 @@ bool UniGrid::_getIntersect( const Ray& r , Intersection* intersect , unsigned v
 			return true;
 	}
 
-	return inter && ( intersect->t < nextT + m_delta );
+	return inter && ( intersect->t < nextT + 0.00001f );
 }
 
 // output log information
