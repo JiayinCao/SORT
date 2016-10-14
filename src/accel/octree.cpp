@@ -33,7 +33,7 @@ OcTree::~OcTree()
 bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
 	float fmax;
-	float fmin = Intersect( r , m_BBox , &fmax );
+	float fmin = Intersect( r , m_bbox , &fmax );
 	if( fmin < 0.0f )
 		return false;
 
@@ -53,7 +53,7 @@ void OcTree::Build()
 		return ;
 
 	// generate aabb
-	_computeBBox();
+	computeBBox();
 
 	// initialize a triangle container
 	NodeTriangleContainer* container = new NodeTriangleContainer();
@@ -62,7 +62,7 @@ void OcTree::Build()
 	
 	// create root node
 	m_pRoot = new OcTreeNode();
-	m_pRoot->bb = m_BBox;
+	m_pRoot->bb = m_bbox;
 
 	// split octree node
 	splitNode( m_pRoot , container , 0 );

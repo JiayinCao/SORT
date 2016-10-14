@@ -22,28 +22,16 @@
 #include "managers/memmanager.h"
 #include "geometry/intersection.h"
 
-static const unsigned BVH_LEAF_PRILIST_MEMID = 1027;
-
-static const unsigned BVH_SPLIT_COUNT = 16;
-static const float BVH_INV_SPLIT_COUNT = 0.0625f;
-
-struct Bvh_PriComparer
-{
-	float		pos;
-	unsigned	axis;
-public:
-	Bvh_PriComparer( float p , unsigned a ) : pos(p) , axis(a) {}
-	bool operator ()( const Bvh_Primitive& pri ){
-		return pri.m_centroid[axis] < pos ;
-	}
-};
+static const unsigned   BVH_LEAF_PRILIST_MEMID  = 1027;
+static const unsigned   BVH_SPLIT_COUNT         = 16;
+static const float      BVH_INV_SPLIT_COUNT     = 0.0625f;
 
 IMPLEMENT_CREATOR( Bvh );
 
 // destructor
 Bvh::~Bvh()
 {
-	_deallocMemory();
+	deallocMemory();
 }
 
 // output log information
@@ -60,27 +48,27 @@ void Bvh::OutputLog() const
 }
 
 // malloc the memory
-void Bvh::_mallocMemory()
+void Bvh::mallocMemory()
 {
 	SORT_PREMALLOC( sizeof( Bvh_Primitive ) * m_primitives->size() , BVH_LEAF_PRILIST_MEMID );
 	m_bvhpri = SORT_MEMORY_ID( Bvh_Primitive , BVH_LEAF_PRILIST_MEMID );
 }
 
 // dealloc memory
-void Bvh::_deallocMemory()
+void Bvh::deallocMemory()
 {
 	SORT_DEALLOC( BVH_LEAF_PRILIST_MEMID );
-    _delete( m_root );
+    deleteNode( m_root );
 }
 
 // build the acceleration structure
 void Bvh::Build()
 {
 	// malloc memory
-	_mallocMemory();
+	mallocMemory();
 
 	// build bounding box
-	_computeBBox();
+	computeBBox();
 
 	// generate bvh primitives
     for( auto primitive : *m_primitives )
@@ -88,11 +76,11 @@ void Bvh::Build()
     
 	// recursively split node
     m_root = new Bvh_Node();
-	_splitNode( m_root , 0 , m_primitives->size() , 0 );
+	splitNode( m_root , 0 , m_primitives->size() , 0 );
 }
 
-// recursive split node
-void Bvh::_splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned depth )
+// recursively split BVH node
+void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned depth )
 {
 	m_totalNode ++;
 	m_bvhDepth = max( depth , m_bvhDepth );
@@ -103,33 +91,33 @@ void Bvh::_splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigne
 
 	unsigned tri_num = _end - _start;
 	if( tri_num <= m_maxPriInLeaf ){
-		_makeLeaf( node , _start , _end );
+		makeLeaf( node , _start , _end );
 		return;
 	}
 
 	// pick best split plane
 	unsigned split_axis;
 	float split_pos;
-	float sah = _pickBestSplit( split_axis , split_pos , node , _start , _end );
+	float sah = pickBestSplit( split_axis , split_pos , node , _start , _end );
 	if( sah >= tri_num ){
-		_makeLeaf( node , _start , _end );
+		makeLeaf( node , _start , _end );
 		return;
 	}
 
 	// partition the data
-	Bvh_PriComparer com = Bvh_PriComparer(split_pos , split_axis);
-	const Bvh_Primitive* middle = partition( &m_bvhpri[_start] , &m_bvhpri[_end-1]+1 , com );
+    auto compare = [split_pos,split_axis](const Bvh::Bvh_Primitive& pri){return pri.m_centroid[split_axis] < split_pos;};
+	const Bvh_Primitive* middle = partition( &m_bvhpri[_start] , &m_bvhpri[_end-1]+1 , compare );
 	unsigned mid = middle - m_bvhpri;
 
     node->left = new Bvh_Node();
-	_splitNode( node->left , _start , mid , depth + 1 );
+	splitNode( node->left , _start , mid , depth + 1 );
 
     node->right = new Bvh_Node();
-	_splitNode( node->right , mid , _end , depth + 1 );
+	splitNode( node->right , mid , _end , depth + 1 );
 }
 
-// pick best split plane
-float Bvh::_pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , unsigned _start , unsigned _end )
+// pick best split plane among all possible splits
+float Bvh::pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , unsigned _start , unsigned _end )
 {
 	BBox inner;
 	for( unsigned i = _start ; i < _end ; i++ )
@@ -162,9 +150,9 @@ float Bvh::_pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , 
 	BBox		lbox = bbox[0];
 	float pos = split_delta + split_start ;
 	for( unsigned i = 0 ; i < BVH_SPLIT_COUNT - 1 ; i++ ){
-		float sah = _sah( left , tri_num - left , lbox , rbox[i] , node->bbox );
-		if( sah < min_sah ){
-			min_sah = sah;
+		float sah_value = sah( left , tri_num - left , lbox , rbox[i] , node->bbox );
+		if( sah_value < min_sah ){
+			min_sah = sah_value;
 			split_pos = pos;
 		}
 		left += bin[i+1];
@@ -176,13 +164,13 @@ float Bvh::_pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , 
 }
 
 // evaluate sah value
-float Bvh::_sah( unsigned left , unsigned right , const BBox& lbox , const BBox& rbox , const BBox& box )
+float Bvh::sah( unsigned left , unsigned right , const BBox& lbox , const BBox& rbox , const BBox& box )
 {
 	return (left * lbox.HalfSurfaceArea() + right * rbox.HalfSurfaceArea()) / box.HalfSurfaceArea();
 }
 
 // make the node as a leaf
-void Bvh::_makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end )
+void Bvh::makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end )
 {
 	node->pri_num = _end - _start;
 	node->pri_offset = _start;
@@ -195,11 +183,11 @@ void Bvh::_makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end )
 bool Bvh::GetIntersect( const Ray& ray , Intersection* intersect ) const
 {
 	float fmax;
-	float fmin = Intersect( ray , m_BBox , &fmax );
+	float fmin = Intersect( ray , m_bbox , &fmax );
 	if( fmin < 0.0f )
 		return false;
 
-	if( _traverseNode( m_root , ray , intersect , fmin , fmax ) ){
+	if( traverseNode( m_root , ray , intersect , fmin , fmax ) ){
 		if( intersect == 0 )
 			return true;
 		return intersect->primitive != 0 ;
@@ -209,7 +197,7 @@ bool Bvh::GetIntersect( const Ray& ray , Intersection* intersect ) const
 }
 
 // traverse node
-bool Bvh::_traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const
+bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const
 {
 	if( fmin < 0.0f )
 		return false;
@@ -241,24 +229,24 @@ bool Bvh::_traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* i
 
 	bool inter = false;
 	if( _fmin1 > _fmin0 ){
-		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 );
+		inter |= traverseNode( left , ray , intersect , _fmin0 , _fmax0 );
 		if( inter && intersect == 0 ) return true;
-		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 );
+		inter |= traverseNode( right , ray , intersect , _fmin1 , _fmax1 );
 	}else{
-		inter |= _traverseNode( right , ray , intersect , _fmin1 , _fmax1 );
+		inter |= traverseNode( right , ray , intersect , _fmin1 , _fmax1 );
 		if( inter && intersect == 0 ) return true;
-		inter |= _traverseNode( left , ray , intersect , _fmin0 , _fmax0 );
+		inter |= traverseNode( left , ray , intersect , _fmin0 , _fmax0 );
 	}
 	if( intersect == 0 )
 		return inter;
 	return true;
 }
 
-// delete node
-void Bvh::_delete( Bvh_Node* node ){
+// delete bvh node recursively
+void Bvh::deleteNode( Bvh_Node* node ){
     if( !node )
         return;
-    _delete( node->left );
-    _delete( node->right );
+    deleteNode( node->left );
+    deleteNode( node->right );
     delete node;
 }

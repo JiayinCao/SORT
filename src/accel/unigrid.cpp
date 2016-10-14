@@ -64,7 +64,7 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 
 	// get the intersect point
 	float maxt;
-	float cur_t = Intersect( r , m_BBox , &maxt );
+	float cur_t = Intersect( r , m_bbox , &maxt );
 	if( cur_t < 0.0f )
 		return false;
 	if( intersect )
@@ -130,11 +130,11 @@ void UniGrid::Build()
 	}
 
 	// find the bounding box first
-	_computeBBox();
+	computeBBox();
 
 	// get the maxium extent id and distance
-	unsigned id = m_BBox.MaxAxisId();
-	Vector delta = m_BBox.m_Max - m_BBox.m_Min;
+	unsigned id = m_bbox.MaxAxisId();
+	Vector delta = m_bbox.m_Max - m_bbox.m_Min;
 	float extent = delta[id];
 
 	// get the total number of primitives
@@ -174,7 +174,7 @@ void UniGrid::Build()
 				for( unsigned k = minGridId[0] ; k <= maxGridId[0] ; k++ )
 				{
 					BBox bb;
-					bb.m_Min = m_BBox.m_Min + Vector( (float)k , (float)j , (float)i ) * m_voxelExtent;
+					bb.m_Min = m_bbox.m_Min + Vector( (float)k , (float)j , (float)i ) * m_voxelExtent;
 					bb.m_Max = bb.m_Min + m_voxelExtent;
 
 					// only add the triangle if it is actually intersected
@@ -190,7 +190,7 @@ void UniGrid::Build()
 // voxel id from point
 unsigned UniGrid::_point2VoxelId( const Point& p , unsigned axis ) const
 {
-	return min( m_voxelNum[axis] - 1 , (unsigned)( ( p[axis] - m_BBox.m_Min[axis] ) * m_voxelInvExtent[axis] ) );
+	return min( m_voxelNum[axis] - 1 , (unsigned)( ( p[axis] - m_bbox.m_Min[axis] ) * m_voxelInvExtent[axis] ) );
 }
 
 // get the id offset
@@ -203,9 +203,9 @@ unsigned UniGrid::_offset( unsigned x , unsigned y , unsigned z ) const
 Point UniGrid::_voxelId2Point( int id[3] ) const
 {
 	Point p;
-	p.x = m_BBox.m_Min.x + id[0] * m_voxelExtent[0];
-	p.y = m_BBox.m_Min.y + id[1] * m_voxelExtent[1];
-	p.z = m_BBox.m_Min.z + id[2] * m_voxelExtent[2];
+	p.x = m_bbox.m_Min.x + id[0] * m_voxelExtent[0];
+	p.y = m_bbox.m_Min.y + id[1] * m_voxelExtent[1];
+	p.z = m_bbox.m_Min.z + id[2] * m_voxelExtent[2];
 
 	return p;
 }

@@ -30,9 +30,9 @@ class Ray;
 /**
  * Accelerator is an interface rather than a base class. There is no instance of it.
  * It is responsible for acceleration of intersection tests between ray and primitives.
- * A ray tracing algorithm without a spatial acceleration structure is O(m*n) where m is
- * the number of rays and n is the number of primitives. Spatial acceleration structure
- * can optimize the algorithm so that it is O(m*lg(n)), a significant improvement over
+ * A ray tracing algorithm without a spatial acceleration structure is O(M*N) where M is
+ * the number of rays and N is the number of primitives. Spatial acceleration structure
+ * can optimize the algorithm so that it is O(M*lg(N)), a significant improvement over
  * the naive brute force ray tracing.
  * Common spatial structures inlcudes, KD-Tree, BVH and Uniform Grid.
  */
@@ -42,17 +42,21 @@ public:
 	//! Destructor of Accelerator, nothing is done in it.
     virtual ~Accelerator() {};
 
-    //!
     //! @brief Get intersection between the ray and the primitive set.
     //!
     //! Pretty much all spatial accelerators perform this operation
-    //! in O(lg(n)) where n is the number of primitives in the set.
-    //! It returns true if there is intersection between the ray and the primitive set.
-    //! If intersect is not nullptr, it will fill the structure and return the nearest intersection.
-    //! If intersect is nullptr, it will stop as long as one intersection is found.
+    //! in O(lg(N)) where n is the number of primitives in the set.
+    //! It will return true if there is intersection between the ray and the primitive set.
+    //! In case of an existed intersection, if intersect is not empty, it will fill the
+    //! structure and return the nearest intersection.
+    //! If intersect is nullptr, it will stop as long as one intersection is found, it is not
+    //! necessary to be the nearest one.
     //! False will be returned if there is no intersection at all.
-    //! @param r The input ray to be tested.
-    //! @param intersect The intersection result. If a nullptr pointer is provided, it stops as long as it finds a intersection. It is faster than the one with real intersection information and suitable for shadow ray calculation.
+    //! @param r            The input ray to be tested.
+    //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
+    //!                     long as it finds an intersection. It is faster than the one with intersection information
+    //!                     data and suitable for shadow ray calculation.
+    //! @return             It will return true if there is intersection, otherwise it returns false.
 	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
 
     //! @brief Build the acceleration structure.
@@ -62,10 +66,10 @@ public:
 	virtual void OutputLog() const = 0;
 
 	//! @brief Get the bounding box of the primitive set.
-	const BBox& GetBBox() const { return m_BBox; }
+    //! @return Bounding box of the spatial acceleration structure.
+	const BBox& GetBBox() const { return m_bbox; }
 
     //! @brief Set primitive set in the acceleration structure.
-    //!
     //! @param pri The set of primitives in the scene.
 	void SetPrimitives( vector<Primitive*>* pri ){
 		m_primitives = pri;
@@ -73,8 +77,8 @@ public:
 
 protected:
 	vector<Primitive*>* m_primitives;   /**< The vector holding all pritmitive pointers. */
-	BBox                m_BBox;         /**< The vector holding all pritmitive pointers. */
+	BBox                m_bbox;         /**< The bounding box of all pritmives. */
 
 	//! Generate the bounding box for the primitive set.
-	void _computeBBox();
+	void computeBBox();
 };

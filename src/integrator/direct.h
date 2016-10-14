@@ -63,8 +63,6 @@ private:
 
 	SampleOffset*	light_sample_offsets = nullptr;	// light sample offset
 	SampleOffset*	bsdf_sample_offsets = nullptr;	// bsdf sample offset
-	
-	unsigned total_samples = 0;	// total sample number
 
 	// register property
 	void _registerAllProperty();
