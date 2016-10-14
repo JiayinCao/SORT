@@ -17,57 +17,77 @@
 
 #pragma once
 
-// include the header file
 #include "accelerator.h"
 
-////////////////////////////////////////////////////////////////////////////////
-// definition of uniform grid
+//! @brief Uniform Grid.
+/**
+ * Uniform grid is the simplest spatial acceleration structure in a ray tracer.
+ * Unlike other complex data structure, like KD-Tree, uniform grid takes linear
+ * time complexity to build. However the travesal efficiency may be lower than
+ * its peers.
+ */
 class UniGrid : public Accelerator
 {
-// public method
 public:
 	DEFINE_CREATOR( UniGrid , "uniform_grid" );
 
-	// destructor
-    ~UniGrid();
+	//! Destructor releasing all voxel data.
+    ~UniGrid() override;
 
-	// get the intersection between the ray and the primitive set
-	// para 'r' : the ray
-	// para 'intersect' : the intersection result
-	// result   : 'true' if the ray pirece one of the triangle in the list
-	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const;
+    //! @brief Get intersection between the ray and the primitive set using uniform grid.
+    //!
+    //! It will return true if there is intersection between the ray and the primitive set.
+    //! In case of an existed intersection, if intersect is not empty, it will fill the
+    //! structure and return the nearest intersection.
+    //! If intersect is nullptr, it will stop as long as one intersection is found, it is not
+    //! necessary to be the nearest one.
+    //! False will be returned if there is no intersection at all.
+    //! @param r            The input ray to be tested.
+    //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
+    //!                     long as it finds an intersection. It is faster than the one with intersection information
+    //!                     data and suitable for shadow ray calculation.
+    //! @return             It will return true if there is intersection, otherwise it returns false.
+    bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
-	// build the acceleration structure
-	virtual void Build();
+	//! Build KD-Tree structure in O(N).
+    void Build() override;
 
-	// output log information
-	void OutputLog() const;
+	//! Output log information
+	void OutputLog() const override;
 
-// private field
 private:
-	// the number of voxels
-	unsigned	m_voxelCount = 0;
-	// the voxel count
-    unsigned	m_voxelNum[3] = {};
-	// extent of grid in each dimension
-	Vector		m_voxelExtent;
-	Vector		m_voxelInvExtent;
-	// the voxel data
-	vector<Primitive*>*	m_pVoxels = nullptr;
-	// the delta
-	const float m_delta = 0.00001f;
+	unsigned	m_voxelCount = 0;               /**< Total number of voxels. */
+    unsigned	m_voxelNum[3] = {};             /**< Number of voxels along each axis. */
+	Vector		m_voxelExtent;                  /**< Extent of one voxel along each axis. */
+	Vector		m_voxelInvExtent;               /**< Inverse of extent of one voxel along each axis. */
+	vector<Primitive*>*	m_pVoxels = nullptr;    /**< Vector holding all voxels. */
 
-	// initialize the data
-	void _init();
-	// release the data
+	//! Release all allocated memory.
 	void _release();
-	// from point to voxel
-	unsigned _point2VoxelId( const Point& p , unsigned axis ) const;
-	// give the bottom left corner of the voxel
-	Point	_voxelId2Point( int voxel[3] ) const;
-	// get the id offset
-	unsigned _offset( unsigned x , unsigned y , unsigned z ) const;
-	// get intersect in grid
-	// if the voxel id is out of range , there will be a runtime error
-	bool _getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const;
+    
+	//! @brief Locate the voxel id along a specific axis that a point belongs to.
+    //! @param p    The point to be evaluated.
+    //! @param axis The id of axis to be tested along.
+    //! @return     The id of the voxel along the selected axis.
+	unsigned point2VoxelId( const Point& p , unsigned axis ) const;
+    
+	//! @brief Caculate the point with the minimal values along each axis in the voxel.
+    //! @param voxel    The id of the voxel to be evaluted along three dimensions.
+    //! @return         The point with minimal value along each axis in the voxel.
+	Point	voxelId2Point( int voxel[3] ) const;
+    
+	//! Translate voxel id from three-dimensional to one-dimentional.
+    //! param x ID of voxel along axis-x.
+    //! param y ID of voxel along axis-y.
+    //! param z ID of voxel along axis-z.
+    //! return  ID of the voxel in one single dimension.
+	unsigned offset( unsigned x , unsigned y , unsigned z ) const;
+	
+    //! @brief Get the nearest intersection between a ray and the primitive set.
+    //! @param r            The ray to be tested.
+    //! @param intersect    A pointer to the intersection information. If it is empty, it will return true as long as there is an intersection detected, which is not necessarily the nearest one.
+    //! @param voxelId      ID of the voxel to be tested.
+    //! @param nextT        The intersected position of the ray and the next to-be-traversed voxel along the ray.
+    //! @return             It will return true if there is an intersection, otherwise it returns false.
+	bool getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const;
 };
