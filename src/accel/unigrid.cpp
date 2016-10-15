@@ -25,11 +25,11 @@ IMPLEMENT_CREATOR( UniGrid );
 // destructor
 UniGrid::~UniGrid()
 {
-	_release();
+	release();
 }
 
 // release the data
-void UniGrid::_release()
+void UniGrid::release()
 {
 	SAFE_DELETE_ARRAY( m_pVoxels );
 	for( int i = 0 ; i < 3 ; i++ )
