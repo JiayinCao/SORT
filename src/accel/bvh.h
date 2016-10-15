@@ -49,7 +49,7 @@ public:
     //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
     //!                     long as it finds an intersection. It is faster than the one with intersection information
     //!                     data and suitable for shadow ray calculation.
-    //! @return             It will return true if there is intersection, otherwise it returns false.
+    //! @return             It will return true if there is an intersection, otherwise it returns false.
     bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
     //! Build BVH structure in O(N*lg(N)).

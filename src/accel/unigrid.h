@@ -46,10 +46,10 @@ public:
     //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
     //!                     long as it finds an intersection. It is faster than the one with intersection information
     //!                     data and suitable for shadow ray calculation.
-    //! @return             It will return true if there is intersection, otherwise it returns false.
+    //! @return             It will return true if there is an intersection, otherwise it returns false.
     bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
-	//! Build KD-Tree structure in O(N).
+	//! Build uniform grid structure in O(N).
     void Build() override;
 
 	//! Output log information
@@ -63,9 +63,9 @@ private:
 	vector<Primitive*>*	m_pVoxels = nullptr;    /**< Vector holding all voxels. */
 
 	//! Release all allocated memory.
-	void _release();
+	void release();
     
-	//! @brief Locate the voxel id along a specific axis that a point belongs to.
+	//! @brief Locate the id of the voxel that the point belongs to along a specific axis.
     //! @param p    The point to be evaluated.
     //! @param axis The id of axis to be tested along.
     //! @return     The id of the voxel along the selected axis.
@@ -76,11 +76,11 @@ private:
     //! @return         The point with minimal value along each axis in the voxel.
 	Point	voxelId2Point( int voxel[3] ) const;
     
-	//! Translate voxel id from three-dimensional to one-dimentional.
-    //! param x ID of voxel along axis-x.
-    //! param y ID of voxel along axis-y.
-    //! param z ID of voxel along axis-z.
-    //! return  ID of the voxel in one single dimension.
+	//! @brief Translate voxel id from three-dimensional to one-dimentional.
+    //! @param x ID of voxel along axis-x.
+    //! @param y ID of voxel along axis-y.
+    //! @param z ID of voxel along axis-z.
+    //! @return  ID of the voxel in one single dimension.
 	unsigned offset( unsigned x , unsigned y , unsigned z ) const;
 	
     //! @brief Get the nearest intersection between a ray and the primitive set.
