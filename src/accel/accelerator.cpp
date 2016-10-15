@@ -18,7 +18,7 @@
 #include "accelerator.h"
 #include "geometry/primitive.h"
 
-//! Generate the bounding box for the primitive set.
+// Generate the bounding box for the primitive set.
 void Accelerator::computeBBox()
 {
 	// reset bounding box

@@ -34,7 +34,7 @@ class Ray;
  * the number of rays and N is the number of primitives. Spatial acceleration structure
  * can optimize the algorithm so that it is O(M*lg(N)), a significant improvement over
  * the naive brute force ray tracing.
- * Common spatial structures inlcudes, KD-Tree, BVH and Uniform Grid.
+ * Common spatial structures inlcude KD-Tree, BVH and Uniform Grid.
  */
 class	Accelerator
 {
@@ -56,7 +56,7 @@ public:
     //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
     //!                     long as it finds an intersection. It is faster than the one with intersection information
     //!                     data and suitable for shadow ray calculation.
-    //! @return             It will return true if there is intersection, otherwise it returns false.
+    //! @return             It will return true if there is an intersection, otherwise it returns false.
 	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
 
     //! @brief Build the acceleration structure.

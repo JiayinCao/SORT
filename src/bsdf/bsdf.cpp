@@ -142,9 +142,15 @@ float Bsdf::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 	Vector lwo = worldToLocal( wo );
 	Vector lwi = worldToLocal( wi );
 
+    unsigned int count = 0;
 	float pdf = 0.0f;
 	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
 		if( m_bxdf[i]->MatchFlag( type ) )
-			pdf += m_bxdf[i]->Pdf( lwo , lwi );
+        {
+            ++count;
+            pdf += m_bxdf[i]->Pdf( lwo , lwi );
+        }
+    if( count )
+        pdf /= count;
 	return pdf;
 }
