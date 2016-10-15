@@ -15,7 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header file
 #include "bsdf.h"
 #include "bxdf.h"
 #include "geometry/intersection.h"
@@ -57,8 +56,8 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 	// the result
 	Spectrum r;
 
-	Vector swo = _worldToLocal( wo );
-	Vector swi = _worldToLocal( wi );
+	Vector swo = worldToLocal( wo );
+	Vector swi = worldToLocal( wi );
 
 	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )
 	{
@@ -70,13 +69,13 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 }
 
 // transform vector from world coordinate to shading coordinate
-Vector Bsdf::_worldToLocal( const Vector& v ) const
+Vector Bsdf::worldToLocal( const Vector& v ) const
 {
 	return Vector( Dot(v,sn) , Dot(v,nn) , Dot(v,tn) );
 }
 
 // transform vector from shading coordinate to world coordinate
-Vector Bsdf::_localToWorld( const Vector& v ) const
+Vector Bsdf::localToWorld( const Vector& v ) const
 {
 	return Vector( 	v.x * sn.x + v.y * nn.x + v.z * tn.x ,
 					v.x * sn.y + v.y * nn.y + v.z * tn.y ,
@@ -109,7 +108,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	Sort_Assert( bxdf != 0 );
 
 	// transform the 'wo' from world space to shading coordinate
-	Vector swo = Normalize(_worldToLocal( wo ));
+	Vector swo = Normalize(worldToLocal( wo ));
 
 	// sample the direction
 	Spectrum t = bxdf->sample_f( swo , wi , bs , pdf ) * bxdf->m_weight;
@@ -132,7 +131,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 			t += m_bxdf[i]->f(wo,wi) * m_bxdf[i]->m_weight;
 	
 	// transform the direction back
-	wi = _localToWorld( wi );
+	wi = localToWorld( wi );
 
 	return t;
 }
@@ -140,8 +139,8 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 // get the pdf according to sampled direction
 float Bsdf::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 {
-	Vector lwo = _worldToLocal( wo );
-	Vector lwi = _worldToLocal( wi );
+	Vector lwo = worldToLocal( wo );
+	Vector lwi = worldToLocal( wi );
 
 	float pdf = 0.0f;
 	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )

@@ -15,9 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header file
 #include "lambert.h"
-#include "utility/define.h"
 #include "math/vector3.h"
 #include "bsdf.h"
 

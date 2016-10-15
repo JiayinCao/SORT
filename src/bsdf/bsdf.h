@@ -15,80 +15,85 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_BSDF
-#define	SORT_BSDF
+#pragma once
 
-// include the header
 #include "sort.h"
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
 #include "utility/enum.h"
-#include <math.h>
 #include "geometry/intersection.h"
 
-// pre-declera class
 class Bxdf;
 class Intersection;
 class BsdfSample;
 
 #define	MAX_BXDF_COUNT 8
 
-////////////////////////////////////////////////////////////////////////
-// definition of bsdf
+//! @brief BSDF implementation.
 class	Bsdf
 {
-// public method
 public:
-	// default constructor
-	Bsdf( const Intersection* );
+	//! @brief Constructor taking intersection data.
+    //! @param intersection     Intersection data of the point to be evaluted.
+	Bsdf( const Intersection* intersection );
 
-	// get the number of bxdf
+	//! @brief Get the number of components based on the type.
+    //! @param type     The specific type to be checked.
+    //! @return         The number of components in the type.
 	unsigned NumComponents( BXDF_TYPE type = BXDF_ALL ) const;
 
-	// add a new bxdf
-	// para 'bxdf' : a bxdf to add
+	//! @brief Add a new bxdf in the BSDF, there will be at most 8 bxdf in it.
+	//! @param The bxdf to be added.
 	void AddBxdf( Bxdf* bxdf );
 
-	// evaluate bxdf
-	// para 'wi' : input vector
-	// para 'wo' : output vector
+	//! @brief Evalute the value of BSDF based on the incoming and outgoing directions.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param type The specific type to be considered.
+    //! @return     The evaluted value of the BSDF.
 	Spectrum f( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
-	// sample ray from bsdf
-	// para 'wi' : input vector
-	// para 'wo' : output vector
+    //! @brief Importance sampling for the bsdf.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param bs   Sample for bsdf that holds some random variables.
+    //! @param pdf  Probability density of the selected direction.
+    //! @param type The specific bxdf type it considers during evaluation.
+    //! @param bxdf_type The specific bxdf type which it selects among all bxdfs in the BSDF.
+    //! @return     The evaluted BRDF value.
 	Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL , BXDF_TYPE* bxdf_type = 0 ) const;
 
-	// get pdf according to the sampled method
-	// para 'wo' : out going direction
-	// para 'wi' : incoming direction
+    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param type The specific bxdf type it considers during evaluation.
+    //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
 	float Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
-	// Get current intersection
+	//! @brief Get intersection information of the point at which the bsdf is evaluated.
+    //! @return The intersection information of the point at which the bsdf is evaluated.
 	const Intersection* GetIntersection() const { return &intersect; }
 
-// private field
 private:
-	// the list for the bxdf
-    Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};
+    Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
+	unsigned m_bxdfCount = 0;               /**< Number of Bxdf in the BSDF. */
 
-	// current bsdf
-	unsigned m_bxdfCount = 0;
-
-	// the vectors
-	Vector nn , sn , tn;
+    Vector nn;  /**< Normal at the point to be evaluted. */
+    Vector sn;  /**< Bi-tangent at the point to be evaluated. */
+    Vector tn;  /**< Tangent at the point to be evaluted. */
 
 	// intersection for the bsdf
-	const Intersection intersect;
+	const Intersection intersect;   /**<    Intersection information of the point to be evaluted. */
 
-	// transform a vector from world to shading coordinate
-	// para 'v' : a vector in world space
-	// result   : a transformed vector in shading coordinate
-	Vector _worldToLocal( const Vector& v ) const;
-	// transform a vector from shading coordinate to world coordinate
-	// para 'v' : a vector in shading coordinate
-	// result   : a transformed vector in world coordinate
-	Vector _localToWorld( const Vector& v ) const;
+    //! @brief Transform a vector from world coordinate to shading coordinate.
+    //! @param v    A vector in world coordiante.
+    //! @return     Cooresponding vector in shading coordinate.
+	Vector worldToLocal( const Vector& v ) const;
+    
+    //! @brief Transform a vector from shading coordinate to world coordinate.
+    //! @param v    A vector in shading coordinate.
+    //! @return     Cooresponding vector in world coordinate.
+	Vector localToWorld( const Vector& v ) const;
 };
 
 // BSDF Inline Functions
@@ -159,4 +164,3 @@ inline bool SameHemiSphere( const Vector& wi , const Vector& wo )
 	return ( wi.y * wo.y ) > 0.0f;
 }
 
-#endif

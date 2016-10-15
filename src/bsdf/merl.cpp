@@ -33,63 +33,50 @@ static const double MERL_RED_SCALE = 0.0006666666666667;
 static const double MERL_GREEN_SCALE = 0.000766666666666667;
 static const double MERL_BLUE_SCALE = 0.0011066666666666667;
 
-// default constructor
-Merl::Merl()
-{
-    m_type = BXDF_GLOSSY;
-}
-
 // Load data from file
 void Merl::LoadData( const string& filename )
 {
-	// load the brdf data
-	_loadBrdf( filename );
+    // get full path
+    string str = ( filename );
+    
+    // try to open the file
+    ifstream file( str.c_str() , ios::binary );
+    if( false == file.is_open() )
+        return;
+    
+    int dims[3];
+    file.read( (char*)dims , sizeof( int ) * 3 );
+    
+    // check dimension
+    if( dims[0] != MERL_SAMPLING_RES_THETA_H ||
+       dims[1] != MERL_SAMPLING_RES_THETA_D ||
+       dims[2] != MERL_SAMPLING_RES_PHI_D )
+    {
+        file.close();
+        return;
+    }
+    
+    // allocate data
+    unsigned trunksize = dims[0] * dims[1] * dims[2];
+    unsigned size = 3 * trunksize;
+    m_data = new double[size];
+    file.read( (char*)m_data , sizeof( double ) * size );
+    
+    unsigned offset = 0;
+    for( unsigned i = 0 ; i < trunksize ; i++ )
+        m_data[offset++] *= MERL_RED_SCALE;
+    for( unsigned i = 0 ; i < trunksize ; i++ )
+        m_data[offset++] *= MERL_GREEN_SCALE;
+    for( unsigned i = 0 ; i < trunksize ; i++ )
+        m_data[offset++] *= MERL_BLUE_SCALE;
+    
+    file.close();
 }
 
 // destructor
 Merl::~Merl()
 {
 	SAFE_DELETE(m_data);
-}
-
-// load brdf data from file
-void Merl::_loadBrdf( const string& filename )
-{
-	// get full path
-	string str = ( filename );
-
-	// try to open the file
-	ifstream file( str.c_str() , ios::binary );
-	if( false == file.is_open() )
-		return;
-
-	int dims[3];
-	file.read( (char*)dims , sizeof( int ) * 3 );
-
-	// check dimension
-	if( dims[0] != MERL_SAMPLING_RES_THETA_H ||
-		dims[1] != MERL_SAMPLING_RES_THETA_D ||
-		dims[2] != MERL_SAMPLING_RES_PHI_D )
-	{
-		file.close();
-		return;
-	}
-
-	// allocate data
-	unsigned trunksize = dims[0] * dims[1] * dims[2];
-	unsigned size = 3 * trunksize;
-	m_data = new double[size];
-	file.read( (char*)m_data , sizeof( double ) * size );
-
-	unsigned offset = 0;
-	for( unsigned i = 0 ; i < trunksize ; i++ )
-		m_data[offset++] *= MERL_RED_SCALE;
-	for( unsigned i = 0 ; i < trunksize ; i++ )
-		m_data[offset++] *= MERL_GREEN_SCALE;
-	for( unsigned i = 0 ; i < trunksize ; i++ )
-		m_data[offset++] *= MERL_BLUE_SCALE;
-
-	file.close();
 }
 
 // evaluate bxdf

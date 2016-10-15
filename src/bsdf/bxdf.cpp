@@ -15,9 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header
 #include "bxdf.h"
-#include "bsdf.h"
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
 
