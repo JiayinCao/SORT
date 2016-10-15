@@ -15,7 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include header file
 #include "microfacet.h"
 #include "bsdf.h"
 #include "sampler/sample.h"
@@ -132,13 +131,13 @@ float VisCookTorrance::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 }
 
 // get reflected ray
-Vector	Microfacet::_getReflected( Vector v , Vector n ) const
+Vector	Microfacet::getReflected( Vector v , Vector n ) const
 {
 	return 2.0f * n * Dot( v , n ) - v;
 }
 
 // get refracted ray
-Vector Microfacet::_getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const
+Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const
 {
 	float coso = Dot( v , n );
 	float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
@@ -170,9 +169,6 @@ MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, Fresnel*
 }
 
 // evaluate bxdf
-// para 'wo' : out going direction
-// para 'wi' : in direction
-// result    : the portion that comes along 'wo' from 'wi'
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 {
 	if( SameHemiSphere( wo , wi ) == false )
@@ -200,18 +196,13 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 }
 
 // sample a direction randomly
-// para 'wo'  : out going direction
-// para 'wi'  : in direction generated randomly
-// para 'bs'  : bsdf sample variable
-// para 'pdf' : property density function value of the specific 'wi'
-// result     : brdf value for the 'wo' and 'wi'
 Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
 	// sampling the normal
 	Vector wh = distribution->sample_f( bs );
 
 	// reflect the incident direction
-	wi = _getReflected( wo , wh );
+	wi = getReflected( wo , wh );
 
 	// Make sure the generate wi is in the same hemisphere with wo
 	if( !SameHemiSphere( wo , wi ) )
@@ -224,9 +215,6 @@ Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const B
 }
 
 // get the pdf of the sampled direction
-// para 'wo' : out going direction
-// para 'wi' : coming in direction from light
-// result    : the pdf for the sample
 float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 {
 	if( !SameHemisphere( wo , wi ) )
@@ -256,9 +244,6 @@ MicroFacetRefraction::MicroFacetRefraction(const Spectrum &reflectance, Fresnel*
 }
 
 // evaluate bxdf
-// para 'wo' : out going direction
-// para 'wi' : in direction
-// result    : the portion that comes along 'wo' from 'wi'
 Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 {
 	float NoL = AbsCosTheta( wi );
@@ -286,7 +271,7 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 	if( eval_reflection )
 	{
 		bool total_reflection = false;
-		Vector _wi = _getRefracted( wo , wh , eta_in , eta_ext , total_reflection );
+		Vector _wi = getRefracted( wo , wh , eta_in , eta_ext , total_reflection );
 		
 		// get fresnel term
 		float fresnel_term = (total_reflection)?1.0f:fresnel->Evaluate( Dot( _wi , wh ) , Dot( wo , wh ) ).GetR();
@@ -300,12 +285,7 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 				t * t * AbsDot(wi, wh) * AbsDot(wo, wh) * 4.0f ;
 }
 
-// sample a direction randomly
-// para 'wo'  : out going direction
-// para 'wi'  : in direction generated randomly
-// para 'bs'  : bsdf sample variable
-// para 'pdf' : property density function value of the specific 'wi'
-// result     : brdf value for the 'wo' and 'wi'
+// sample a direction using importance sampling
 Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
 	// whether sample reflection
@@ -316,13 +296,13 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 
 	// try to get refracted ray
 	bool total_reflection = false;
-	wi = _getRefracted( wo , wh , eta_in , eta_ext , total_reflection );
+	wi = getRefracted( wo , wh , eta_in , eta_ext , total_reflection );
 
 	// handle total inner relection seperately
 	if( total_reflection )
 	{
 		// get reflected ray
-		wi = _getReflected( wo , wh );
+		wi = getReflected( wo , wh );
 
 		// Make sure the generate wi is in the same hemisphere with wo
 		if( !SameHemiSphere( wo , wi ) )
@@ -345,7 +325,7 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 	if( sampleReflection )
 	{
 		// get reflected ray
-		wi = _getReflected( wo , wh );
+		wi = getReflected( wo , wh );
 
 		// Make sure the generate wi is in the same hemisphere with wo
 		if( !SameHemiSphere( wo , wi ) )
@@ -367,9 +347,6 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 }
 
 // get the pdf of the sampled direction
-// para 'wo' : out going direction
-// para 'wi' : coming in direction from light
-// result    : the pdf for the sample
 float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi ) const
 {
 	if( SameHemisphere( wo , wi ) )

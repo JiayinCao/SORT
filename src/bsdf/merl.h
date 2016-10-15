@@ -15,50 +15,43 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_MERL
-#define	SORT_MERL
+#pragma once
 
-// include the header file
 #include "bxdf.h"
 
-/////////////////////////////////////////////////////////////////////////////////////
-//	definition of merl bxdf
-//	desc :	Merl is short for Mitsubishi Electric Research Laboratories. They provide
-//			some measured brdf on the websize http://www.merl.com/brdf/. Merl class is
-//			responsible for loading the brdf file they provided.
-//	note :	It's very difficult to sample merl brdf according to the distribution. So
-//			default method is adapted for sampling directions , which is very bad for
-//			large area light such as sky light, it'll produce a lot of noise with 
-//			a certain number of samples.
+//! @brief  MERL brdf.
+/**
+ * MERL is short for Mitsubishi Electric Research Laboratories. They provide some measured
+ * brdf on the website http://www.merl.com/brdf/. Merl class is responsible for loading 
+ * and displaying the brdf they provided in the renderer.\n
+ * There is no importance sampling for this brdf. With the default sampling method, the
+ * convergence rage is extremely low. 
+ * The paper <a href="http://csbio.unc.edu/mcmillan/pubs/sig03_matusik.pdf">
+ * "A Data-Driven Reflectance Model"</a> didn't propose an importance sampling method
+ * for it. Further research is needed before it can be practical to be used.
+ */
 class Merl : public Bxdf
 {
-// public method
 public:
-	// constructor from a filename
-	// para 'filename' : the file name for the brdf
-	Merl();
-	// destructor
-	~Merl();
+	//! Default constructor setting brdf type.
+    Merl(){m_type = BXDF_GLOSSY;}
+	//! Destructor deletes all allocated memory
+    ~Merl() override;
 
-	// Load data from file
+    //! Evaluate the BRDF
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The evaluted BRDF value.
+    Spectrum f( const Vector& wo , const Vector& wi ) const override;
+    
+	//! Load brdf data from MERL file.
+    //! @param filename Name of the MERL file.
 	void	LoadData( const string& filename );
 
-	// whether the data is valid
-	bool	IsValid() { return m_data != 0 ; }
+	//! Whether there is valid data loaded.
+    //! @return True if data is valid, otherwise it will return false.
+	bool	IsValid() { return m_data != 0; }
 
-	// evaluate bxdf
-	// para 'wo' : out going direction
-	// para 'wi' : in direction
-	// result    : the portion that comes along 'wo' from 'wi'
-	virtual Spectrum f( const Vector& wo , const Vector& wi ) const;
-
-// private field
 private:
-	// the brdf data
-	double*	m_data = nullptr;
-    
-	// load brdf data from file
-	void _loadBrdf( const string& filename );
+	double*	m_data = nullptr;   /**< The actual data of MERL brdf. */
 };
-
-#endif
