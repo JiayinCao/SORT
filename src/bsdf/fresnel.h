@@ -15,41 +15,51 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_FRESNEL
-#define	SORT_FRESNEL
+#pragma once
 
-// include the headers
 #include "spectrum/spectrum.h"
-#include <math.h>
 
+//! @brief Interface for fresnel.
 class	Fresnel
 {
 public:
-	// evaluate spectrum
+	//! @brief Evalute the Fresnel term.
+    //! @param cosi     Cosine value between the incoming ray and the normal.
+    //! @param coso     Cosine value between the outgoing ray and the normal.
+    //! @return         Evaluted fresnel value.
 	virtual Spectrum Evaluate( float cosi , float coso) const = 0;
 };
 
+//! @brief A hack that presents no fresnel.
 class	FresnelNo : public Fresnel
 {
 public:
-	virtual Spectrum Evaluate( float cosi , float coso ) const
-	{
+    //! @brief Evalute the Fresnel term.
+    //! @param cosi     Cosine value between the incoming ray and the normal.
+    //! @param coso     Cosine value between the outgoing ray and the normal.
+    //! @return         Evaluted fresnel value.
+    Spectrum Evaluate( float cosi , float coso ) const override{
 		return 1.0f;
 	}
 };
 
+//! @brief Fresnel for conductors.
 class	FresnelConductor : public Fresnel
 {
-// public method
 public:
-	// constructor
+	//! Constructor
+    //! @param  e   Index of refraction. TBD
+    //! @param  kk  Absorbtion coefficient.
 	FresnelConductor( const Spectrum& e , const Spectrum& kk ):
 		eta(e) , k(kk)
 	{
 	}
 
-	/// evaluate spectrum
-	virtual Spectrum Evaluate( float cosi , float coso ) const
+    //! @brief Evalute the Fresnel term.
+    //! @param cosi     Cosine value between the incoming ray and the normal.
+    //! @param coso     Cosine value between the outgoing ray and the normal.
+    //! @return         Evaluted fresnel value.
+	Spectrum Evaluate( float cosi , float coso ) const override
 	{
 		float abs_cos = (coso>0.0f)?coso:(-coso);
 		float sq_cos = abs_cos * abs_cos;
@@ -63,23 +73,28 @@ public:
 		return (Rparl2+Rperp2)*0.5f;
 	}
 
-// private field
 private:
-	Spectrum eta , k ;
+    Spectrum eta;   /**< Internal data used for fresnel calculation. */
+    Spectrum k;     /**< Internal data used for fresnel calculation. */
 };
 
+//! @brief Fresnel for dielectric.
 class	FresnelDielectric : public Fresnel
 {
-// public method
 public:
-	// constructor
+    //! Constructor
+    //! @param  ei      Index of refraction of the medium on the side normal points. TBD
+    //! @param  et      Index of refraction of the medium on the other side normal points. TBD
 	FresnelDielectric( float ei , float et ):
         eta_t(et),eta_i(ei)
 	{
 	}
 
-	// evalute spectrum
-	virtual Spectrum Evaluate( float cosi , float coso ) const
+    //! @brief Evalute the Fresnel term.
+    //! @param cosi     Cosine value between the incoming ray and the normal.
+    //! @param coso     Cosine value between the outgoing ray and the normal.
+    //! @return         Evaluted fresnel value.
+	Spectrum Evaluate( float cosi , float coso ) const override
 	{
 		float cos_i = ( cosi > 0.0f )?cosi:(-cosi);
 		float cos_o = ( coso > 0.0f )?coso:(-coso);
@@ -94,9 +109,7 @@ public:
 		return ( Rparl * Rparl + Rparp * Rparp ) * 0.5f;
 	}
 
-// private field
 private:
-	float eta_t , eta_i;
+    float eta_t;    /**< Internal data used for fresnel calculation. TBD */
+    float eta_i;    /**< Internal data used for fresnel calculation. TBD */
 };
-
-#endif

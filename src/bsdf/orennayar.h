@@ -15,35 +15,32 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_ORENNAYAR
-#define	SORT_ORENNAYAR
+#pragma once
 
 // include header file
 #include "bxdf.h"
 
-////////////////////////////////////////////////////////////////////////
-//	A geometric-optics microfacet-based brdf model that is proposed by
-//	Oren and Nayar (1994)
+//! @brief OrenNayar brdf.
+/**
+ * Like lambert brdf, OrenNayar delievers similar quality with subtle differences.
+ * It has slightly brighter color at the contour.
+ */
 class OrenNayar : public Bxdf
 {
-// public method
 public:
-	// constructor
-	OrenNayar( const Spectrum& reflectence , float roughness);
+	//! Contstructor
+    //! @param reflectance  Direction-hemisphere reflection.
+    //! @param roughness    It controls the roughness of the surface.
+	OrenNayar( const Spectrum& reflectance , float roughness);
 	
-	// evaluate bxdf
-	// para 'wo' : out going direction
-	// para 'wi' : in direction
-	// result    : the portion that comes along 'wo' from 'wi'
-	virtual Spectrum f( const Vector& wo , const Vector& wi ) const;
+    //! Evaluate the BRDF
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The evaluted BRDF value.
+    Spectrum f( const Vector& wo , const Vector& wi ) const override;
 	
-// private field
 private:
-	// spectrum for scaling the brdf
-	Spectrum R;
-	// the factors
-	float	A;
-	float	B;
+	Spectrum R;         /**< Direction-Hemisphere reflection or total reflection. */
+	float	A;          /**< Internal data for OrenNayar computation. */
+	float	B;          /**< Internal data for OrenNayar computation. */
 };
-
-#endif

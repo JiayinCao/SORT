@@ -15,56 +15,69 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_BXDF
-#define	SORT_BXDF
+#pragma once
 
-// include the header
 #include "spectrum/spectrum.h"
 #include "utility/enum.h"
 #include "math/vector3.h"
 
 class BsdfSample;
 
-/////////////////////////////////////////////////////////////////////////
-// definition of bxdf
+//! @brief Brdf or btdf.
+/**
+ * Bxdf is either brdf(bidirectional reflection density function) or btdf(
+ * bidirectional translation density function).\n
+ * This class serves as a basic interface for varies bxdf types, it will
+ * not have any instance of itself.
+ */
 class	Bxdf
 {
-// public method
 public:
-	// evaluate bxdf
-	// para 'wo' : out going direction
-	// para 'wi' : in direction
-	// result    : the portion that comes along 'wo' from 'wi'
+    //! Virtual destructor.
+    virtual ~Bxdf(){}
+    
+    //! @brief Evaluate the BRDF
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The evaluted BRDF value.
 	virtual Spectrum f( const Vector& wo , const Vector& wi ) const = 0;
-
-	// sample a direction randomly
-	// para 'wo'  : out going direction
-	// para 'wi'  : in direction generated randomly
-	// para 'bs'  : bsdf sample variable
-	// para 'pdf' : property density function value of the specific 'wi'
-	// result     : brdf value for the 'wo' and 'wi'
+    
+    //! @brief Importance sampling for the bxdf.
+    //!
+    //! This method is not pure virtual and it has a default
+    //! implementation, which sample out-going directions that have linear probability with the
+    //! consine value between the out-going ray and the normal.\n
+    //! However, it is suggested that each bxdf has its own importance sampling method for optimal
+    //! convergence rate.\n
+    //! One also needs to implement the function Pdf to make it consistance.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param bs   Sample for bsdf that holds some random variables.
+    //! @param pdf  Probability density of the selected direction.
+    //! @return     The evaluted BRDF value.
 	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
-
-	// get the pdf of the sampled direction
-	// para 'wo' : out going direction
-	// para 'wi' : coming in direction from light
-	// result    : the pdf for the sample
+    
+    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //!
+    //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
+    //! this function, otherwise it is not unbiased.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
 	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
 
-	// whether the flag is matched
-	bool	MatchFlag( BXDF_TYPE type ) const
+	//! @brief  Check the type of the bxdf, it shouldn't be overriden by derived classes.
+    //! @param type     The type to check.
+    //! @return         If the bxdf belongs to the input type.
+	virtual bool	MatchFlag( BXDF_TYPE type ) const final
 	{return (type & m_type)==m_type;}
 
-	// get bxdf type
-	BXDF_TYPE GetType() const { return m_type; }
+	//! @brief  Get the type of the bxdf
+    //! @return The specific type of the bxdf.
+	virtual BXDF_TYPE GetType() const final { return m_type; }
 
-	// weight for the bxdf
-	Spectrum	m_weight;
+	Spectrum	m_weight;           /**< The weight for the bxdf, usually between 0 and 1. */
 
-// protected field
 protected:
-	// the type for the bxdf
-	BXDF_TYPE m_type = BXDF_NONE;
+	BXDF_TYPE m_type = BXDF_NONE;   /**< The specific type of the bxdf. */
 };
-
-#endif

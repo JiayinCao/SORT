@@ -20,9 +20,9 @@
 #include "bsdf.h"
 
 // constructor
-OrenNayar::OrenNayar( const Spectrum& reflectence , float roughness)
+OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness)
 {
-	R = reflectence;
+	R = reflectance;
 	
 	// rough ness ranges from 0 to infinity
 	roughness = max( 0.0f , roughness );

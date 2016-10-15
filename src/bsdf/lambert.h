@@ -15,37 +15,35 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_LAMBERT
-#define	SORT_LAMBERT
+#pragma once
 
-// include header file
 #include "bxdf.h"
 
-////////////////////////////////////////////////////////////
-// definition of lambert brdf
+//! @brief Lambert brdf.
+/**
+ * Lambert is the simplest BRDF that exists in any renderers.
+ * It reflects equal radiance along all exitance directions.
+ * One can use Lambert to simulate Matte-like material.
+ */
 class Lambert : public Bxdf
 {
-// public method
 public:
-	// default constructor
-	Lambert(){ m_type=BXDF_DIFFUSE; }
-	// constructor
-	// para 's' : reflect density
-	Lambert( const Spectrum& s ):R(s){m_type=BXDF_DIFFUSE;}
+	//! Default constructor setting default type value
+    Lambert(){ m_type=BXDF_DIFFUSE; }
+	//! Constructor taking spectrum information.
+    //! @param s Direction-Hemisphere reflection.
+    Lambert( const Spectrum& s ):R(s){m_type=BXDF_DIFFUSE;}
 
-	// evaluate bxdf
-	// para 'wo' : out going direction
-	// para 'wi' : in direction
-	// result    : the portion that comes along 'wo' from 'wi'
-	virtual Spectrum f( const Vector& wo , const Vector& wi ) const;
+    //! Evaluate the BRDF
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The evaluted BRDF value.
+    Spectrum f( const Vector& wo , const Vector& wi ) const;
 
-	// set color
+	//! Reset the directional-hemisphere reflection.
+    //! @param color    Direction-Hemisphere reflection.
 	void SetColor( const Spectrum& color ) { R = color; }
 
-// private field
 private:
-	// the total reflectance
-	Spectrum R;
+	Spectrum R;         /**< Direction-Hemisphere reflection or total reflection. */
 };
-
-#endif

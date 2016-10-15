@@ -15,195 +15,236 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_MICROFACET
-#define	SORT_MICROFACET
+#pragma once
 
-// include header file
 #include "bxdf.h"
 #include "fresnel.h"
 
-/////////////////////////////////////////////////////////////////////
-// normal distribution
-
+//! @brief Normal distribution function.
 class MicroFacetDistribution
 {
-// public method
 public:
-	// probabilty of facet with specific normal (v)
+	//! @brief Probabilty of facet with specific normal (v)
 	virtual float D(float NoH) const = 0;
 
-	// sampling a normal respect to the NDF
+	//! @brief Sampling a normal respect to the NDF.
+    //! @param bs   Sample holind all necessary random variables.
+    //! @return     Sampled normal direction based on the NDF.
 	virtual Vector sample_f( const BsdfSample& bs ) const = 0;
 };
 
+//! @brief Blinn NDF.
 class Blinn : public MicroFacetDistribution
 {
-// public method
 public:
-	// constructor
+	//! @brief Constructor
+    //! @param roughness    Roughness of the surface formed by the micro facets.
 	Blinn( float roughness );
 	
-	// probabilty of facet with specific normal (v)
-	float D(float NoH) const;
+	//! @brief Probabilty of facet with specific normal (v)
+	float D(float NoH) const override;
 	
-	// sampling according to Blinn
-	// PBRT's method is not used here.
-	// Check "Microfacet Models for Refraction through Rough Surfaces" for detail.
-	virtual Vector sample_f( const BsdfSample& bs ) const;
+    //! @brief Sampling a normal respect to the NDF.
+    //!
+    //! Refer to this
+    //! <a href="https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/">blog</a>
+    //! for detail explanation of the implementation.
+    //! @param bs   Sample holind all necessary random variables.
+    //! @return     Sampled normal direction based on the NDF.
+    Vector sample_f( const BsdfSample& bs ) const override;
 
-// private field
 private:
-	// the exponent
-	float exp;
+	float exp;      /**< Internal data used for NDF calculationg. */
 };
 
+//! @brief Beckmann NDF.
 class Beckmann : public MicroFacetDistribution
 {
-// public method
 public:
+    //! @brief Constructor
+    //! @param roughness    Roughness of the surface formed by the micro facets.
 	Beckmann( float roughness );
 
-	// probabilty of facet with specific normal (v)
-	float D(float NoH) const;
+    //! @brief Probabilty of facet with specific normal (v)
+    float D(float NoH) const override;
+    
+    //! @brief Sampling a normal respect to the NDF.
+    //!
+    //! Refer to this
+    //! <a href="https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/">blog</a>
+    //! for detail explanation of the implementation.
+    //! @param bs   Sample holind all necessary random variables.
+    //! @return     Sampled normal direction based on the NDF.
+    Vector sample_f( const BsdfSample& bs ) const override;
 
-	// sampling according to Beckmann
-	virtual Vector sample_f( const BsdfSample& bs ) const;
-
-// private field
 private:
-	float m;
-	float alpha;
+	float m;        /**< Internal data used for NDF calculationg. */
+	float alpha;    /**< Internal data used for NDF calculationg. */
 };
 
+//! @brief GGX NDF.
 class GGX : public MicroFacetDistribution
 {
-// public method
 public:
+    //! @brief Constructor
+    //! @param roughness    Roughness of the surface formed by the micro facets.
 	GGX( float roughness );
 
-	// probabilty of facet with specific normal (v)
-	float D(float NoH) const;
+    //! @brief Probabilty of facet with specific normal (v)
+    float D(float NoH) const override;
+    
+    //! @brief Sampling a normal respect to the NDF.
+    //!
+    //! Refer to this
+    //! <a href="https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/">blog</a>
+    //! for detail explanation of the implementation.
+    //! @param bs   Sample holind all necessary random variables.
+    //! @return     Sampled normal direction based on the NDF.
+    Vector sample_f( const BsdfSample& bs ) const override;
 
-	// sampling according to GGX
-	virtual Vector sample_f( const BsdfSample& bs ) const;
-
-// private field
 private:
-	float m = 0.0f;
-    float alpha = 0.0f;
+	float m = 0.0f;         /**< Internal data used for NDF calculationg. */
+    float alpha = 0.0f;     /**< Internal data used for NDF calculationg. */
 };
 
-/////////////////////////////////////////////////////////////////////
-// visibility term
-
+//! @brief Visibility term.
 class VisTerm
 {
 public:
+    //! @brief Evalute visibility term.
+    //! @param NoL  Cosine value of the angle between light and normal.
+    //! @param NoV  Cosine value of the angle between view direction and normal
+    //! @param VoH  Cosine value of the angle between view and middle vector
+    //! @param NoH  Cosine value of the angle between normal and middle vector
+    //! @return     Visibility term
 	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH ) = 0;
 };
 
+//! @brief Implicit visibility term.
 class VisImplicit : public VisTerm
 {
 public:
-	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
+    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
 };
 
+//! @brief Neumann visibility term.
 class VisNeumann : public VisTerm
 {
 public:
-	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
+	float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
 };
 
+//! @brief Kelemen visibility term.
 class VisKelemen : public VisTerm
 {
 public:
-	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
+    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
 };
 
+//! @brief Schlick visibility term.
 class VisSchlick : public VisTerm
 {
 public:
+    //! @brief Constructor
+    //! @param rough    Roughness value.
 	VisSchlick( float rough ): roughness(rough) {}
-	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
+    
+    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
 
 private:
-	float roughness;
+	float roughness;    /**< Roughness value */
 };
 
+//! @brief Smith visibility term.
 class VisSmith : public VisTerm
 {
 public:
+    //! @brief Constructor
+    //! @param rough    Roughness value.
 	VisSmith( float rough ): roughness(rough) {}
-	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
+    
+    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
 
 private:
-	float roughness;
+	float roughness;    /**< Roughness value */
 };
 
+//! @brief Smith Joint Approximation visibility term.
 class VisSmithJointApprox : public VisTerm
 {
 public:
+    //! @brief Constructor
+    //! @param rough    Roughness value.
 	VisSmithJointApprox( float rough ): roughness(rough) {}
-	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
+    
+    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
 
 private:
-	float roughness;
+	float roughness;    /**< Roughness value */
 };
 
+//! @brief CookTorrance visibility term.
 class VisCookTorrance : public VisTerm
 {
 public:
-	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH);
+    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
 };
 
+//! @brief Interface for Microfacet bxdf.
 class Microfacet : public Bxdf
 {
-// private field
 protected:
-	// reflectance
-	Spectrum R;
-	// distribution of facets
-	MicroFacetDistribution* distribution = nullptr;
-	// fresnel for the surface
-	Fresnel* fresnel = nullptr;
-	// visiblity term
-	VisTerm* visterm = nullptr;
+	Spectrum R;                                     /**< Direction-hemisphere reflection. */
+	MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
+	Fresnel* fresnel = nullptr;                     /**< Fresnel term. */
+	VisTerm* visterm = nullptr;                     /**< Visibility term. */
 
-	// get reflected ray
-	inline Vector	_getReflected( Vector v , Vector n ) const;
+	//! @brief Get reflected direction based on incident direction and normal.
+    //! @param v    Incoming direction.
+    //! @param n    Normal of the surface.
+    //! @return     Reflected direction.
+	inline Vector	getReflected( Vector v , Vector n ) const;
 
-	// get refracted ray
-	inline Vector	_getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const;
+	//! @brief Get refracted direction based on incident direction, normal and index of refraction.
+    //! @param v        Incoming direction. It can come from either inside or outside of the surface.
+    //! @param n        Surface normal.
+    //! @param in_eta   Index of refraction. TBD
+    //! @param ext_eta  Index of refraction. TBD
+    //! @param inner_reflection     Whether it is a total innner relection.
+    //! @return         Refracted vector.
+	inline Vector	getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const;
 };
 
-/////////////////////////////////////////////////////////////////////
-// microfacet reflection bxdf
+//! @brief Microfacet for reflection surfaces.
 class MicroFacetReflection : public Microfacet
 {
-// public method
 public:
-	// constructor
+	//! @brief Constructor
+    //! @param reflectance      Direction hemisphere reflection.
+    //! @param f                Fresnel term.
+    //! @param d                NDF term.
+    //! @param v                Visibility term.
 	MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v );
 	
-	// evaluate bxdf
-	// para 'wo' : out going direction
-	// para 'wi' : in direction
-	// result    : the portion that comes along 'wo' from 'wi'
-	Spectrum f( const Vector& wo , const Vector& wi ) const;
+    //! @brief Evaluate the BRDF
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The evaluted BRDF value.
+	Spectrum f( const Vector& wo , const Vector& wi ) const override;
 	
-	// sample a direction randomly
-	// para 'wo'  : out going direction
-	// para 'wi'  : in direction generated randomly
-	// para 'bs'  : bsdf sample variable
-	// para 'pdf' : property density function value of the specific 'wi'
-	// result     : brdf value for the 'wo' and 'wi'
-	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+    //! @brief Importance sampling for the microfacet brdf.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param bs   Sample for bsdf that holds some random variables.
+    //! @param pdf  Probability density of the selected direction.
+    //! @return     The evaluted BRDF value.
+    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
 
-	// get the pdf of the sampled direction
-	// para 'wo' : out going direction
-	// para 'wi' : coming in direction from light
-	// result    : the pdf for the sample
-	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
+	float Pdf( const Vector& wo , const Vector& wi ) const override;
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -211,36 +252,37 @@ public:
 // Refer to "Microfacet Models for Refraction through Rough Surfaces" for further detail
 class MicroFacetRefraction : public Microfacet
 {
-// public method
 public:
-	// constructor
+    //! @brief Constructor
+    //! @param reflectance      Direction hemisphere reflection.
+    //! @param f                Fresnel term.
+    //! @param d                NDF term.
+    //! @param v                Visibility term.
+    //! @param ieta             Index of refraction. TBD
+    //! @param eeta             Index of refraction. TBD
 	MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v , float ieta , float eeta );
 	
-	// evaluate bxdf
-	// para 'wo' : out going direction
-	// para 'wi' : in direction
-	// result    : the portion that comes along 'wo' from 'wi'
-	Spectrum f( const Vector& wo , const Vector& wi ) const;
-	
-	// sample a direction randomly
-	// para 'wo'  : out going direction
-	// para 'wi'  : in direction generated randomly
-	// para 'bs'  : bsdf sample variable
-	// para 'pdf' : property density function value of the specific 'wi'
-	// result     : brdf value for the 'wo' and 'wi'
-	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+    //! @brief Evaluate the BRDF
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The evaluted BRDF value.
+    Spectrum f( const Vector& wo , const Vector& wi ) const override;
+    
+    //! @brief Importance sampling for the microfacet btdf.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param bs   Sample for bsdf that holds some random variables.
+    //! @param pdf  Probability density of the selected direction.
+    //! @return     The evaluted BRDF value.
+    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
+    
+    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
+    float Pdf( const Vector& wo , const Vector& wi ) const override;
 
-	// get the pdf of the sampled direction
-	// para 'wo' : out going direction
-	// para 'wi' : coming in direction from light
-	// result    : the pdf for the sample
-	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
-
-// private field
 private:
-	// index of refraction
-	float	eta_in;
-	float	eta_ext;
+	float	eta_in;     /**< Index of refraction. TBD */
+	float	eta_ext;    /**< Index of refraction. TBD */
 };
-
-#endif
