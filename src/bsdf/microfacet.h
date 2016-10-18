@@ -208,10 +208,10 @@ protected:
 	//! @brief Get refracted direction based on incident direction, normal and index of refraction.
     //! @param v        Incoming direction. It can come from either inside or outside of the surface.
     //! @param n        Surface normal.
-    //! @param in_eta   Index of refraction. TBD
-    //! @param ext_eta  Index of refraction. TBD
+    //! @param in_eta   Index of refraction inside the surface.
+    //! @param ext_eta  Index of refraction outside the surface.
     //! @param inner_reflection     Whether it is a total innner relection.
-    //! @return         Refracted vector.
+    //! @return         Refracted vector based on Snell's law.
 	inline Vector	getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const;
 };
 
@@ -258,8 +258,8 @@ public:
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param v                Visibility term.
-    //! @param ieta             Index of refraction. TBD
-    //! @param eeta             Index of refraction. TBD
+    //! @param ieta             Index of refraction inside the surface.
+    //! @param eeta             Index of refraction outside the surface.
 	MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v , float ieta , float eeta );
 	
     //! @brief Evaluate the BRDF
@@ -283,6 +283,6 @@ public:
     float Pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:
-	float	eta_in;     /**< Index of refraction. TBD */
-	float	eta_ext;    /**< Index of refraction. TBD */
+	float	eta_in;     /**< Index of refraction inside the surface. */
+	float	eta_ext;    /**< Index of refraction outside the surface. */
 };

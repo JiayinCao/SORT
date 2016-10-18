@@ -15,92 +15,105 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_PERSPECTIVE
-#define	SORT_PERSPECTIVE
+#pragma once
 
-// include the header file
 #include "camera.h"
 
-////////////////////////////////////////////////////////////////////////////////////
-//	definition of the perpective camera
+//! @brief Perspective camera.
+/**
+ * This is the most commonly used type of camera. It simulates the way
+ * human eye and cameras see things.
+ */
 class	PerspectiveCamera : public Camera
 {
-// public method
 public:
-
 	DEFINE_CREATOR( PerspectiveCamera , "perspective" );
 
-	// default constructor
-	PerspectiveCamera(){_init();}
+	//! @brief Default constructor.
+    PerspectiveCamera(){
+        m_type = CT_PERSPECTIVE;
+        registerAllProperty();
+    }
     
-    // Preprocess
-    virtual void PreProcess();
+    //! @brief Pre-process after initialization.
+    void PreProcess() override;
     
-	// generate ray
-	virtual Ray GenerateRay( float x , float y , const PixelSample& ps ) const;
+    //! @brief Generating a primary ray.
+    //! @param x    Coordinate along horizontal axis on the image sensor, it could be a float value.
+    //! @param y    Coordinate along vertical axis on the image sensor, it could be a float value.
+    //! @param ps   Pixel sample holding several useful random variables.
+    //! @return     The generated ray based on the input.
+    Ray GenerateRay( float x , float y , const PixelSample& ps ) const override;
 
-	// get and set target
+	//! @brief Get camera viewing target.
+    //! @return Camera viewing target.
 	const Point& GetTarget() const { return m_target; }
+    
+    //! @brief Set camera viewing target in world space.
+    //! @param t Target point to be set.
 	void SetTarget( const Point& t ) { m_target = t; }
 
-	// get and set up
+	//! @brief Get camera up direction in world space.
+    //! @return Camera up direction in world space.
 	const Vector& GetUp() const { return m_up; }
+    
+    //! @brief Set camera up direction in world space.
+    //! @param u Camera up direction to be set.
 	void SetUp( const Vector& u ) { m_up = u; }
 
-	// get and set fov
+	//! @brief Get the field of view for the camera.
+    //! @return The field of view for the camera.
 	float GetFov() const { return m_fov; }
+    
+    //! @brief Set the field of view for the camera.
+    //! @return The FOV to be set.
 	void SetFov( float fov ) { m_fov = fov; }
 
-	// set len
+	//! @brief Set lens radius. A non-zero lens radius means that there is DOF.
+    //! @param len The radius of the lens to be set.
 	void SetLen( float len )
 	{ m_lensRadius = len; }
-	// get len
+	
+    //! @brief Get lens radius.
+    //! return The radius of the lens for the camera.
 	float GetLen() const { return m_lensRadius; }
 	
-	// get camera coordinate according to a view direction in world space
-	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility ) const;
+    //! @brief Get camera coordinate according to a view direction in world space. It is used in light tracing or bi-directional path tracing algorithm.
+    //! @param p                A point in world space. The calculation will connect it to the viewing point of the cammere seeking the intersected point between the direction and the image sensor.
+    //! @param pdfw             PDF w.r.t the solid angle of choosing the direction.
+    //! @param pdfa             PDF w.r.t the area of choosing the viewing point.
+    //! @param cosAtCamera      The cosine factor of the angle between the viewing direction and forward direction.
+    //! @param we               The importance function.
+    //! @param eyeP             The selected random viewing point in world space.
+    //! @param visibility       The structure holding visibility information.
+    //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
+    Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility ) const override;
 	
-	// get eye direction
-	virtual Vector GetForward() const {
+    //! @brief Get viewing direction.
+    //! @return Camera forward direction.
+	Vector GetForward() const override {
         return m_forward;
     }
 
-// protected field
 protected:
-	// the target of the camera
-	Point m_target;
-	// the up vector of the camera
-	Vector m_up;
-    // forward direction
-    Vector m_forward;
-
-	// the fov for the camera
-	float  m_fov = 0.25f;
-	
-	// radius for the lens , zero, by default, means no dof
-	float m_lensRadius = 0.0f;
-
-	// image distance with each pixel area equals to exactly one
-	float m_imagePlaneDist = 0.0f;
+	Point   m_target;                       /**< Viewing target of the camera. */
+	Vector  m_up;                           /**< Up direction of the camera. */
+    Vector  m_forward;                      /**< Forward direction of the camera. */
     
-    // focal distance
-    float m_focalDistance = 0.0f;
+	float   m_fov = 0.25f;                  /**< Field of view for the camera. */
+	float   m_lensRadius = 0.0f;            /**< Radius of the camera lens. */
+	float   m_imagePlaneDist = 0.0f;        /**< Distance to the image plane with each pixel equals to exactly one. */
+    float   m_focalDistance = 0.0f;         /**< The focal distance for DOF effect. */
+	float   m_inverseApartureSize = 0.0f;   /**< Recipocal of the aparture size. */
 
-	// inverse aparture size
-	float m_inverseApartureSize = 0.0f;
-
-    // Transformation
-    Transform   m_cameraToClip;
-    Transform   m_clipToRaster;
-    Transform   m_cameraToRaster;
-    Transform   m_worldToCamera;
-    Transform   m_worldToRaster;
+    Transform   m_cameraToClip;         /**< Transformation from view space to clip space. */
+    Transform   m_clipToRaster;         /**< Transformation from clip space to screen space. */
+    Transform   m_cameraToRaster;       /**< Transformation from view space to screen space. */
+    Transform   m_worldToCamera;        /**< Transformation from world space to camera space. */
+    Transform   m_worldToRaster;        /**< Transformation from world space to screen space. */
 	
-	// initialize data
-	void _init();
-	
-	// register all properties
-	void _registerAllProperty();
+	//! @brief Register all properties for camera.
+	void registerAllProperty();
 	
 	// property handler
 	class UpProperty : public PropertyHandler<Camera>
@@ -159,5 +172,3 @@ protected:
 		}
 	};
 };
-
-#endif

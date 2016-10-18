@@ -27,16 +27,8 @@
 
 IMPLEMENT_CREATOR( PerspectiveCamera );
 
-void PerspectiveCamera::_init()
-{
-	// set camera type
-	m_type = CT_PERSPECTIVE;
-
-	_registerAllProperty();
-}
-
 // register all properties
-void PerspectiveCamera::_registerAllProperty()
+void PerspectiveCamera::registerAllProperty()
 {
     _registerProperty( "aspect" , new AspectProperty( this ) );
     _registerProperty( "sensorsize" , new SensorSizeProperty( this ) );

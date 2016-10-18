@@ -15,77 +15,99 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_ORTHO
-#define	SORT_ORTHO
+#pragma once
 
-// include the header file
 #include "camera.h"
-#include "math/transform.h"
 
-////////////////////////////////////////////////////////////////////////////////////
-//	definition of the ortho camera
+//! @brief Orthogonal camera.
+/**
+ * Orthogonal camera does not deliver the effect that faraway objects appear
+ * much smaller comparing with nearer objects. It is commonly used in applications
+ * like 3ds max, CAD.
+ */
 class	OrthoCamera : public Camera
 {
-// public method
 public:
 	DEFINE_CREATOR( OrthoCamera , "ortho" );
 
-	// default constructor
+	//! @brief Default constructor
 	OrthoCamera();
 
-	// generate ray
+    //! @brief Generating a primary ray.
+    //! @param x    Coordinate along horizontal axis on the image sensor, it could be a float value.
+    //! @param y    Coordinate along vertical axis on the image sensor, it could be a float value.
+    //! @param ps   Pixel sample holding several useful random variables.
+    //! @return     The generated ray based on the input.
 	virtual Ray GenerateRay( float x , float y , const PixelSample& ps ) const;
 
-	// get and set target
-	const Point& GetTarget() const { return m_target; }
-	void SetTarget( const Point& t ) { m_target = t; _updateTransform(); }
-
-	// get and set up
-	const Vector& GetUp() const { return m_up; }
-	void SetUp( const Vector& u ) { m_up = u; _updateTransform(); }
+    //! @brief Get camera viewing target.
+    //! @return Camera viewing target.
+    const Point& GetTarget() const { return m_target; }
+    
+    //! @brief Set camera viewing target in world space.
+    //! @param t Target point to be set.
+    void SetTarget( const Point& t ) { m_target = t; updateTransform(); }
+    
+    //! @brief Get camera up direction in world space.
+    //! @return Camera up direction in world space.
+    const Vector& GetUp() const { return m_up; }
+    
+    //! @brief Set camera up direction in world space.
+    //! @param u Camera up direction to be set.
+    void SetUp( const Vector& u ) { m_up = u; updateTransform(); }
 	
-	// set up eye point
-	virtual void SetEye( const Point& eye ) { m_eye = eye; _updateTransform(); }
+    //! @brief Setup viewing point for the camera.
+    //! @param eye  Viewing point to set up in the camera.
+    void SetEye( const Point& eye ) { m_eye = eye; updateTransform(); }
 
-	// set the width and height for the camera
+	//! @brief Get width of camera image plane in world space.
+    //! @return The width of camera image plane in world space.
 	float GetCameraWidth() const { return m_camWidth; }
+    
+    //! @brief Get height of camera image plane in world space.
+    //! @return The height of camera image plane in world space.
 	float GetCameraHeight() const { return m_camHeight; }
+    
+    //! @brief Set width of camera image plane in world space.
+    //! @param w Width to be set.
 	void SetCameraWidth( float w );
+    //! @brief Set height of camera image plane in world space.
+    //! @param h Height to be set.
 	void SetCameraHeight( float h );
 
-	// get camera coordinate according to a view direction in world space
+    //! @brief Get camera coordinate according to a view direction in world space. It is used in light tracing or bi-directional path tracing algorithm.
+    //! @param p                A point in world space. The calculation will connect it to the viewing point of the cammere seeking the intersected point between the direction and the image sensor.
+    //! @param pdfw             PDF w.r.t the solid angle of choosing the direction.
+    //! @param pdfa             PDF w.r.t the area of choosing the viewing point.
+    //! @param cosAtCamera      The cosine factor of the angle between the viewing direction and forward direction.
+    //! @param we               The importance function.
+    //! @param eyeP             The selected random viewing point in world space.
+    //! @param visibility       The structure holding visibility information.
+    //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
 	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) const {
 		Sort_Assert(false);
 		return Vector2i();
 	}
 
-	// get eye direction
+    //! @brief Get viewing direction.
+    //! @return Camera forward direction.
 	virtual Vector GetForward() const{
 		Sort_Assert(false);
 		return Vector();
 	}
 
-// protected field
 protected:
-	// the target of the camera
-	Point m_target;
-	// the up vector of the camera
-	Vector m_up;
+	Point   m_target;            /**< Viewing target of the camera in world space. */
+	Vector  m_up;                /**< Up direction of the camera in world space. */
+    float   m_camWidth = 1.0f;   /**< Camera image plane width in world space. */
+    float   m_camHeight = 1.0f;  /**< Camera image plane height in world space. */
+	Matrix  world2camera;        /**< Transformation from world space to view space. */
 
-	// set the width and height for the camera
-	float m_camWidth = 1.0f, m_camHeight = 1.0f;
-
-	// the transformation
-	Matrix world2camera;
-
-	// update transform matrix
-	void _updateTransform();
-	
-	// initialize data
-	void _init();
-	
-	// register all properties
-	void _registerAllProperty();
+    //! @brief Udpate transformation
+    void updateTransform();
+    
+	//! @brief Register all properties.
+	void registerAllProperty();
 	
 	// property handler
 	class UpProperty : public PropertyHandler<Camera>
@@ -144,5 +166,3 @@ protected:
 		}
 	};
 };
-
-#endif
