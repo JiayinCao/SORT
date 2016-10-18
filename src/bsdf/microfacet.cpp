@@ -133,7 +133,7 @@ float VisCookTorrance::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 // get reflected ray
 Vector	Microfacet::getReflected( Vector v , Vector n ) const
 {
-	return 2.0f * n * Dot( v , n ) - v;
+	return ( 2.0f * Dot( v , n ) ) * n - v;
 }
 
 // get refracted ray
@@ -144,17 +144,13 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 	float t = 1.0f - eta * eta * ( 1.0f - coso * coso );
 
 	// total inner reflection
-	if( t < 0.0f ){
-		inner_reflection = true;
+    inner_reflection = (t <= 0.0f);
+	if( inner_reflection )
 		return Vector(0.0f,0.0f,0.0f);
-	}
-
-	// not total reflection
-	inner_reflection = false;
 
 	// get the tranmistance/refracted ray
 	float factor = (coso<0.0f)? 1.0f : -1.0f;
-	return -1.0f * v * eta + ( eta * coso + factor * sqrt(t)) * n;
+	return -eta * v  + ( eta * coso + factor * sqrt(t)) * n;
 }
 
 // constructor

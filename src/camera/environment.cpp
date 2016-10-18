@@ -27,14 +27,6 @@
 
 IMPLEMENT_CREATOR( EnvironmentCamera );
 
-// initialize data
-void EnvironmentCamera::_init()
-{
-	m_type = CT_ENVIRONMENT;
-
-	_registerAllProperty();
-}
-
 // generate a ray given a pixel
 Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
 {
@@ -56,7 +48,7 @@ Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) 
 }
 
 // register all properties
-void EnvironmentCamera::_registerAllProperty()
+void EnvironmentCamera::registerAllProperty()
 {
 	_registerProperty( "eye" , new EyeProperty( this ) );
 }
