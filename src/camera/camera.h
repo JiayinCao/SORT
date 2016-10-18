@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_CAMERA
-#define	SORT_CAMERA
+#pragma once
 
 #include "math/point.h"
 #include "geometry/ray.h"
@@ -27,62 +26,77 @@
 #include "utility/creator.h"
 #include "math/vector2.h"
 
-// pre-decleration of render target
 class PixelSample;
 class ImageSensor;
 class Visibility;
 
-////////////////////////////////////////////////////////////////////
-//	definition of camera
+//! @brief Abstruct camera
+/**
+ * This class serves as an abstract interface for different camera model.
+ * There are several derived classes, such as perspective camera, othogonal 
+ * camera and environment camera.
+ */
 class	Camera : public PropertySet<Camera>
 {
-	// public method
 public:
-	// destructor
-	virtual ~Camera() {}
+	//! @brief Virtual destructor.
+    virtual ~Camera() {}
 
-    // Preprocess
-    virtual void PreProcess(){}
+    //! @brief Camera pre-proessing.
+    //!
+    //! Camera will do some pre-processing after camera intialization once all properties have been set.
+    virtual void PreProcess() {}
     
-	// generate a ray given a pixel
+	//! @brief Generating a primary ray.
+    //! @param x    Coordinate along horizontal axis on the image sensor, it could be a float value.
+    //! @param y    Coordinate along vertical axis on the image sensor, it could be a float value.
+    //! @param ps   Pixel sample holding several useful random variables.
+    //! @return     The generated ray based on the input.
 	virtual Ray	GenerateRay( float x, float y, const PixelSample& ps) const = 0;
 
-	// set a render target
+	//! @brief Setup image sensor for the camera.
+    //! @param is   The pointer to an existed image sensor.
 	void SetImageSensor(ImageSensor* is) { m_imagesensor = is; }
 
-	// get and set eye point
+    //! @brief Get attached image sensor.
+    //! @return The attached image sensor.
+    ImageSensor* GetImageSensor() {
+        return m_imagesensor;
+    }
+
+	//! @brief Get camera viewing point.
+    //! @return Viewing point of the camera.
 	const Point& GetEye() const { return m_eye; }
+    
+    //! @brief Setup viewing point for the camera.
+    //! @param eye  Viewing point to set up in the camera.
 	virtual void SetEye(const Point& eye) { m_eye = eye; }
 
-	// get eye direction
+	//! @brief Get viewing direction.
+    //! @return Camera forward direction.
 	virtual Vector GetForward() const = 0;
 
-	// get image sensor
-	ImageSensor* GetImageSensor() {
-		return m_imagesensor;
-	}
-
-	// get camera coordinate according to a view direction in world space
+    //! @brief Get camera coordinate according to a view direction in world space. It is used in light tracing or bi-directional path tracing algorithm.
+    //! @param p                A point in world space. The calculation will connect it to the viewing point of the cammere seeking the intersected point between the direction and the image sensor.
+    //! @param pdfw             PDF w.r.t the solid angle of choosing the direction.
+    //! @param pdfa             PDF w.r.t the area of choosing the viewing point.
+    //! @param cosAtCamera      The cosine factor of the angle between the viewing direction and forward direction.
+    //! @param we               The importance function.
+    //! @param eyeP             The selected random viewing point in world space.
+    //! @param visibility       The structure holding visibility information.
+    //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
 	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) const = 0;
 
-// protected field
 protected:
-	// the eye point
-	Point	m_eye;
-    // the image sensor
-    ImageSensor*    m_imagesensor = nullptr;
-	// the type for the camera
-	CAMERA_TYPE m_type = CT_NONE;
-	// the size of the sensor
-	float	m_sensorW = 0.0f, m_sensorH = 0.0f;
-	// aspect ratio
-	float	m_aspectRatioW = 0.0f, m_aspectRatioH = 0.0f;
-	// aspect fit
-	int		m_aspectFit = 0.0f;
-	// camera shift
-	float	m_shiftX = 0.0f, m_shiftY = 0.0f;
+	Point           m_eye;                      /**< Viewing point of the camera. */
+    ImageSensor*    m_imagesensor = nullptr;    /**< Image sensor. */
+	CAMERA_TYPE     m_type = CT_NONE;           /**< Camera type. */
+    float           m_sensorW = 0.0f;           /**< Image sensor width. */
+    float           m_sensorH = 0.0f;           /**< Image sensor height. */
+    float           m_aspectRatioW = 0.0f;      /**< Aspect ratio along x axis. */
+    float           m_aspectRatioH = 0.0f;      /**< Aspect ratio along y axis. */
+	int             m_aspectFit = 0.0f;         /**< Aspect fit. It equals to 1 if it fits horizontally, otherwise it is 2. */
 
-// private method
 	// property handler
 	class EyeProperty : public PropertyHandler<Camera>
 	{
@@ -138,27 +152,4 @@ protected:
 			camera->m_aspectRatioH = (float)atof( y.c_str() );
 		}
 	};
-
-	// property handler
-	class ShiftProperty : public PropertyHandler<Camera>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(ShiftProperty,Camera);
-		
-		// set value
-		void SetValue( const string& str )
-		{
-			Camera* camera = CAST_TARGET(Camera);
-
-			string _str = str;
-			string x = NextToken( _str , ' ' );
-			string y = NextToken( _str , ' ' );
-
-			camera->m_shiftX = (float)atof( x.c_str() );
-			camera->m_shiftY = (float)atof( y.c_str() );
-		}
-	};
 };
-
-#endif

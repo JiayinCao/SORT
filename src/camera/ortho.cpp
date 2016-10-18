@@ -15,7 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include header file
 #include "ortho.h"
 #include "utility/sassert.h"
 #include "sampler/sample.h"
@@ -26,17 +25,11 @@ IMPLEMENT_CREATOR( OrthoCamera );
 // default constructor
 OrthoCamera::OrthoCamera()
 {
-	_init();
-}
-
-// initialize data
-void OrthoCamera::_init()
-{
-	// set type for tha camera
-	m_type = CT_ORTHO;
-	
-	// register properties
-	_registerAllProperty();
+    // set type for tha camera
+    m_type = CT_ORTHO;
+    
+    // register properties
+    registerAllProperty();
 }
 
 // generate camera ray
@@ -71,7 +64,7 @@ void OrthoCamera::SetCameraHeight( float h )
 }
 
 // update transform matrix
-void OrthoCamera::_updateTransform()
+void OrthoCamera::updateTransform()
 {
 	Vector zaxis = ( m_target - m_eye ).Normalize();
 	Vector xaxis = Cross( m_up , zaxis ).Normalize();
@@ -84,7 +77,7 @@ void OrthoCamera::_updateTransform()
 }
 
 // register all properties
-void OrthoCamera::_registerAllProperty()
+void OrthoCamera::registerAllProperty()
 {
 	_registerProperty( "eye" , new EyeProperty( this ) );
 	_registerProperty( "up" , new UpProperty( this ) );
