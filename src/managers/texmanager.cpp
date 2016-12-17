@@ -31,8 +31,6 @@
 #include "texture/gridtexture.h"
 #include "texture/constanttexture.h"
 #include "texture/imagetexture.h"
-#include "texture/uvtexture.h"
-#include "texture/normaltexture.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(TexManager);
