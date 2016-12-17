@@ -25,10 +25,8 @@
 // get node property
 MaterialNodeProperty* MaterialNode::getProperty( const string& name )
 {
-	map< string , MaterialNodeProperty* >::const_iterator it = m_props.find( name );
-	if( it != m_props.end() )
-		return it->second;
-	return 0;
+	auto it = m_props.find( name );
+    return ( it != m_props.end() )? it->second : nullptr;
 }
 
 // set node property
@@ -52,6 +50,12 @@ MaterialPropertyValue MaterialNodeProperty::GetPropertyValue( Bsdf* bsdf )
 	if( node )
 		return node->GetNodeValue( bsdf );
 	return value;
+}
+
+// update bsdf, for layered brdf
+void MaterialNodeProperty::UpdateBsdf( Bsdf* bsdf , Spectrum weight ){
+    if( node )
+        node->UpdateBSDF( bsdf , weight );
 }
 
 // set node property
@@ -122,12 +126,9 @@ bool MaterialNode::CheckValidation()
 	getNodeType();
 
 	m_node_valid = true;
-	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
-	while( it != m_props.end() )
-	{
-		if( it->second->node )
-			m_node_valid &= it->second->node->CheckValidation();
-		++it;
+    for( auto it : m_props ){
+		if( it.second->node )
+			m_node_valid &= it.second->node->CheckValidation();
 	}
 
 	return m_node_valid;

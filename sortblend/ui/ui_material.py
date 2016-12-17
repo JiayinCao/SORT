@@ -121,7 +121,8 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
                 indented_label(row)
                 row.label(socket.name)
                 prop_panel = split.row( align=True )
-                prop_panel.prop(socket,'default_value',text="")
+                if socket.default_value is not None:
+                    prop_panel.prop(socket,'default_value',text="")
                 prop_panel.operator_menu_enum("node.add_surface" , "node_type", text='',icon='DOT')
 
     draw_props(node, layout)

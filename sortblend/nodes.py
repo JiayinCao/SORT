@@ -48,14 +48,14 @@ class SORTSocket:
             row = layout.row()
             split = row.split(common.label_percentage)
             split.label(text)
-            split.prop(node.inputs[text],'default_value',text="")
+            if node.inputs[text].default_value is not None:
+                split.prop(node.inputs[text],'default_value',text="")
 
     def IsEmptySocket(self):
         return False
 
 # socket for SORT node
 class SORTShaderSocket(bpy.types.NodeSocketShader, SORTSocket):
-    '''Renderman shader input/output'''
     bl_idname = 'SORTShaderSocket'
     bl_label = 'SORT Shader Socket'
     default_value = None
@@ -63,6 +63,18 @@ class SORTShaderSocket(bpy.types.NodeSocketShader, SORTSocket):
     # green node for color
     def draw_color(self, context, node):
         return (1.0, 1.0, 0.2, 1.0)
+
+    def IsEmptySocket(self):
+        return True
+
+class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTSocket):
+    bl_idname = 'SORTNodeSocketBxdf'
+    bl_label = 'SORT Shader Socket'
+    default_value = None
+
+    # green node for color
+    def draw_color(self, context, node):
+        return (0.2, 0.2, 1.0, 1.0)
 
     def IsEmptySocket(self):
         return True
@@ -150,7 +162,36 @@ class SORTNodeOutput(SORTShadingNode):
     bl_idname = common.sort_node_output_bl_name
 
     def init(self, context):
-        input = self.inputs.new('SORTNodeSocketColor', 'Surface')
+        input = self.inputs.new('SORTNodeSocketBxdf', 'Surface')
+
+# layered bxdf node
+class SORTNodeLayeredBXDF(SORTShadingNode):
+    bl_label = 'SORT_layered_bxdf'
+    bl_idname = 'SORTNodeLayeredBXDF'
+
+    bxdf_count = bpy.props.IntProperty( name = 'Bxdf Count' , default = 2 , min = 1 , max = 8 )
+
+    def init(self, context):
+        for x in range(0,8):
+            self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
+            self.inputs.new( 'SORTNodeBaseColorSocket' , 'Weight'+str(x) )
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Bxdf Count" , "bxdf_count")
+
+        for x in range( 0 , 8 ):
+            if x < self.bxdf_count:
+                if self.inputs.get('Bxdf'+str(x)) is None:
+                    self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
+                    self.inputs.new( 'SORTNodeBaseColorSocket' , 'Weight'+str(x) )
+            else:
+                if self.inputs.get('Bxdf'+str(x)) is not None:
+                    self.inputs.remove( self.inputs['Bxdf' + str(x)] )
+                    self.inputs.remove( self.inputs['Weight' + str(x)] )
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Bxdf Count' , 'bxdf_count' , indented_label)
 
 # lambert node
 class SORTNodeLambert(SORTShadingNode):
@@ -159,7 +200,7 @@ class SORTNodeLambert(SORTShadingNode):
 
     def init(self, context):
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
-        self.outputs.new('SORTNodeSocketColor', 'Result')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
 
 # microfacte node
@@ -191,7 +232,7 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
     def init(self, context):
         self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
-        self.outputs.new('SORTNodeSocketColor', 'Result')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
     def draw_buttons(self, context, layout):
         self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
@@ -238,7 +279,7 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
     def init(self, context):
         self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
-        self.outputs.new('SORTNodeSocketColor', 'Result')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
     def draw_buttons(self, context, layout):
         self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
@@ -266,7 +307,7 @@ class SORTNodeMerl(SORTShadingNode):
     file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
 
     def init(self, context):
-        self.outputs.new('SORTNodeSocketColor', 'Result')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
     def draw_buttons(self, context, layout):
         row = layout.row()
@@ -287,7 +328,7 @@ class SORTNodeOrenNayar(SORTShadingNode):
     def init(self, context):
         self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
-        self.outputs.new('SORTNodeSocketColor', 'Result')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
 # operator nodes
 class SORTNodeAdd(SORTShadingNode):
@@ -496,7 +537,7 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLayeredBXDF"),NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
         SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
@@ -505,6 +546,7 @@ def register():
     nodeitems_utils.register_node_categories("SORTSHADERNODES",node_categories)
 
     # register node types
+    SORTPatternGraph.nodetypes[SORTNodeLayeredBXDF] = 'SORTNodeLayeredBXDF'
     SORTPatternGraph.nodetypes[SORTNodeLambert] = 'SORTNodeLambert'
     SORTPatternGraph.nodetypes[SORTNodeMerl] = 'SORTNodeMerl'
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetReflection] = 'SORTNodeMicrofacetReflection'
