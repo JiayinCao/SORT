@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_CONSTANT_NODE
-#define	SORT_CONSTANT_NODE
+#pragma once
 
 #include "material_node.h"
 
@@ -25,7 +24,7 @@ class ConstantNode : public MaterialNode
 {
 public:
     // get node type
-    virtual MAT_NODE_TYPE getNodeType() { return MAT_NODE_CONSTANT | MaterialNode::getNodeType(); }
+    MAT_NODE_TYPE getNodeType() override { return MAT_NODE_CONSTANT | MaterialNode::getNodeType(); }
 };
 
 // Grid texture Node
@@ -38,13 +37,13 @@ public:
 	GridTexNode();
 
 	// get property value
-	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
 	// post process
-	virtual void PostProcess();
+	void PostProcess() override;
 
 	// check validation
-	virtual bool CheckValidation();
+	bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	src0;
@@ -117,5 +116,3 @@ public:
 private:
 	MaterialNodeProperty	src;
 };
-
-#endif

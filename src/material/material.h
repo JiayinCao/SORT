@@ -15,17 +15,14 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_MATERIAL
-#define	SORT_MATERIAL
+#pragma once
 
-// include the cpp file
 #include "utility/propertyset.h"
 #include "utility/creator.h"
 #include "spectrum/spectrum.h"
 #include "utility/referencecount.h"
 #include "material_node.h"
 
-// pre-declera classes
 class Bsdf;
 class Intersection;
 
@@ -33,11 +30,7 @@ class Intersection;
 // definition of material
 class Material : public ReferenceCount
 {
-// public method
 public:
-	Material();
-	virtual ~Material();
-
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
 
@@ -47,18 +40,15 @@ public:
 	const string& GetName() const { return name; }
 
 	// set root
-	MaterialNode* GetRootNode() { return root; }
+	MaterialNode* GetRootNode() { return &root; }
 
 	// parse material
 	void	ParseMaterial( TiXmlElement* element );
 
-// private field
 private:
 	// the name for the material
 	string			name;
 
 	// the root node of the material
-	MaterialNode*	root;
+	mutable OutputNode	root;
 };
-
-#endif

@@ -23,12 +23,6 @@
 
 IMPLEMENT_CREATOR( Matte );
 
-// constructor
-Matte::Matte()
-{
-	m_color = Spectrum( 0.1f , 0.1f , 0.1f );
-}
-
 // get bsdf
 Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 {

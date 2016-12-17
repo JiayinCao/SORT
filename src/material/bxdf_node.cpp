@@ -23,17 +23,52 @@
 #include "managers/memmanager.h"
 #include "bsdf/bsdf.h"
 
+IMPLEMENT_CREATOR( LayeredBxdfNode );
 IMPLEMENT_CREATOR( LambertNode );
 IMPLEMENT_CREATOR( MerlNode );
 IMPLEMENT_CREATOR( OrenNayarNode );
 IMPLEMENT_CREATOR( MicrofacetReflectionNode );
 IMPLEMENT_CREATOR( MicrofacetRefractionNode );
 
+LayeredBxdfNode::LayeredBxdfNode(){
+    for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i ){
+        m_props.insert( make_pair( "Bxdf" + to_string(i) , &bxdfs[i] ) );
+        m_props.insert( make_pair( "Weight" + to_string(i) , &weights[i] ));
+    }
+}
+
+bool LayeredBxdfNode::CheckValidation()
+{
+    for( auto bxdf_prop : bxdfs ){
+        if( bxdf_prop.node ){
+            // Only bxdf nodes are allowed to be connected to Layered Bxdf node
+            MAT_NODE_TYPE sub_type = bxdf_prop.node->getNodeType();
+            if( (sub_type & MAT_NODE_BXDF) == 0 )
+                return false;
+        }
+    }
+    
+    for( auto weight_prop : weights ){
+        if( weight_prop.node ){
+            // Only constant node is allowed to be connected with Layered Bxdf weight node
+            MAT_NODE_TYPE sub_type = weight_prop.node->getNodeType();
+            if( (sub_type & MAT_NODE_CONSTANT) == 0 )
+                return false;
+        }
+    }
+    
+    return MaterialNode::CheckValidation();
+}
+
+void LayeredBxdfNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+    for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i )
+        bxdfs[i].UpdateBsdf(bsdf, weights[i].GetPropertyValue(bsdf).ToSpectrum());
+}
+
 // check validation
 bool BxdfNode::CheckValidation()
 {
-    bool valid = MaterialNode::CheckValidation();
-    
     for( auto prop : m_props ){
         MaterialNode* node = prop.second->node;
         if( node ){
@@ -44,8 +79,7 @@ bool BxdfNode::CheckValidation()
                 return false;
         }
     }
-    
-    return valid;
+    return MaterialNode::CheckValidation();
 }
 
 LambertNode::LambertNode()

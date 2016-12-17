@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_OPERATION_NODE
-#define	SORT_OPERATION_NODE
+#pragma once
 
 #include "material_node.h"
 
@@ -24,7 +23,7 @@ class OperatorNode : public MaterialNode
 {
 public:
 	// get node type
-	virtual MAT_NODE_TYPE getNodeType() { return MAT_NODE_OPERATOR | MaterialNode::getNodeType(); }
+	virtual MAT_NODE_TYPE getNodeType() override { return MAT_NODE_OPERATOR | MaterialNode::getNodeType(); }
 };
 
 // Adding node
@@ -37,10 +36,10 @@ public:
 	AddNode();
 
 	// get property value
-	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
 	// check validation
-	virtual bool CheckValidation();
+	bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	src0;
@@ -58,13 +57,13 @@ public:
 	LerpNode();
 	
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 	// get property value
-	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
 	// check validation
-	virtual bool CheckValidation();
+    bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	src0;
@@ -82,13 +81,13 @@ public:
 	BlendNode();
 	
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 	// get property value
-	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
 	// check validation
-	virtual bool CheckValidation();
+    bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	src0;
@@ -107,17 +106,16 @@ public:
 	MutiplyNode();
 	
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 	// get property value
-	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
 	// check validation
-	virtual bool CheckValidation();
+	bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	src0;
 	MaterialNodeProperty	src1;
 };
 
-#endif
