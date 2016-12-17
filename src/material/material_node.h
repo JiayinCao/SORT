@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_MATERIAL_NODE
-#define	SORT_MATERIAL_NODE
+#pragma once
 
 #include "utility/propertyset.h"
 #include "spectrum/spectrum.h"
@@ -57,6 +56,9 @@ public:
 
 	// get node property
 	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf );
+    
+    // update bsdf, for layered brdf
+    void UpdateBsdf( Bsdf* bsdf , Spectrum weight );
 
 	// sub node if it has value
 	MaterialNode*	node;
@@ -134,16 +136,14 @@ public:
 	OutputNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 	// get node type
-	virtual MAT_NODE_TYPE getNodeType() { return MAT_NODE_OUTPUT | MaterialNode::getNodeType(); }
+    MAT_NODE_TYPE getNodeType() override { return MAT_NODE_OUTPUT | MaterialNode::getNodeType(); }
 
 	// check validation
-	virtual bool CheckValidation();
+    bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	output;
 };
-
-#endif

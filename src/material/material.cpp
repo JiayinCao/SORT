@@ -20,22 +20,10 @@
 #include "bsdf/bsdf.h"
 #include "managers/memmanager.h"
 
-// default constructor
-Material::Material()
-{
-	root = new OutputNode();
-}
-
-Material::~Material()
-{
-	// delete the whole tree
-	delete root;
-}
-
 Bsdf* Material::GetBsdf( const Intersection* intersect ) const
 {
 	Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-	root->UpdateBSDF(bsdf);
+	root.UpdateBSDF(bsdf);
 	return bsdf;
 }
 
@@ -43,11 +31,11 @@ Bsdf* Material::GetBsdf( const Intersection* intersect ) const
 void Material::ParseMaterial( TiXmlElement* element )
 {
 	// parse node property
-	root->ParseProperty( element , root );
+	root.ParseProperty( element , &root );
 
 	// check validation
-	if( !root->CheckValidation() )
+	if( !root.CheckValidation() )
 		LOG_WARNING<<"Material "<<name<<" is not valid, a default material will be used."<<ENDL;
 	else
-		root->PostProcess();
+		root.PostProcess();
 }

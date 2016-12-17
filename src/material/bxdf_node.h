@@ -15,20 +15,38 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_BXDF_NODE
-#define	SORT_BXDF_NODE
+#pragma once
 
 #include "material_node.h"
+#include "bsdf/bsdf.h"
 
 // Bxdf node
 class BxdfNode : public MaterialNode
 {
 protected:
 	// get node type
-	virtual MAT_NODE_TYPE getNodeType() { return MAT_NODE_BXDF | MaterialNode::getNodeType(); }
+    MAT_NODE_TYPE getNodeType() override { return MAT_NODE_BXDF | MaterialNode::getNodeType(); }
 
 	// check validation
-	virtual bool CheckValidation();
+    bool CheckValidation() override;
+};
+
+// Layered BXDF node
+class LayeredBxdfNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR( LayeredBxdfNode , "SORTNodeLayeredBxdf" );
+    
+    // constructor
+    LayeredBxdfNode();
+    // update bsdf
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    // check validation
+    bool CheckValidation() override;
+    
+private:
+    MaterialNodeProperty    bxdfs[MAX_BXDF_COUNT];
+    MaterialNodeProperty    weights[MAX_BXDF_COUNT];
 };
 
 // Lambert node
@@ -41,7 +59,7 @@ public:
 	LambertNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 private:
 	MaterialNodeProperty	baseColor;
@@ -57,10 +75,10 @@ public:
 	MerlNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 	// post process
-	virtual void PostProcess();
+    void PostProcess() override;
 
 private:
 	MaterialNodePropertyString	merlfile;
@@ -79,7 +97,7 @@ public:
 	OrenNayarNode();
 
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 private:
 	MaterialNodeProperty	baseColor;
@@ -95,7 +113,7 @@ public:
 	// constructor
 	MicrofacetReflectionNode();
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 private:
 	MaterialNodeProperty	baseColor;
@@ -115,7 +133,7 @@ public:
 	// constructor
 	MicrofacetRefractionNode();
 	// update bsdf
-	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 private:
 	MaterialNodeProperty	baseColor;
@@ -125,5 +143,3 @@ private:
 	MaterialNodePropertyString	mf_dist;
 	MaterialNodePropertyString	mf_vis;
 };
-
-#endif

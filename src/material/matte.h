@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_MATTE
-#define	SORT_MATTE
+#pragma once
 
 // include header file
 #include "material.h"
@@ -31,18 +30,13 @@ class Matte : public Material
 public:
 	DEFINE_CREATOR( Matte , "Matte" );
 
-	// default constructor
-	Matte();
-
 	// get bsdf
-	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
+    Bsdf* GetBsdf( const Intersection* intersect ) const override;
 	
 // private field
 private:
 	// a scaled color , default is ( 0.1f , 0.1f , 0.1f )
-	Spectrum m_color;
+    Spectrum m_color = Spectrum( 0.1f , 0.1f , 0.1f );
 };
-
-#endif
 
 
