@@ -78,6 +78,7 @@ private:
         int     *aOffset = nullptr;
         float   *a = nullptr;
         float   *cdf = nullptr;
+        float   *recip = nullptr;
         
         ~FourierBxdfTable(){
             SAFE_DELETE_ARRAY(mu);
@@ -85,6 +86,7 @@ private:
             SAFE_DELETE_ARRAY(aOffset);
             SAFE_DELETE_ARRAY(a);
             SAFE_DELETE_ARRAY(cdf);
+            SAFE_DELETE_ARRAY(recip);
         }
         
         float* GetAk( int offsetI , int offsetO , int* mptr ) const{
@@ -97,7 +99,12 @@ private:
     FourierBxdfTable    bsdfTable;
     
     // Get weight and offset.
-    void GetWeightAndOffset( float costheta , int& offset , float* weight) const;
+    void getWeightAndOffset( float costheta , int& offset , float* weight) const;
     // Fourier interpolation
-    float Fourier( const float* ak , int m , double cosPhi ) const;
+    float fourier( const float* ak , int m , double cosPhi ) const;
+    // Importance sampling for fourier interpolation
+    // Refer these two wiki pages for further detail:
+    // Bisection method :   https://en.wikipedia.org/wiki/Bisection_method
+    // Newton method :      https://en.wikipedia.org/wiki/Newton%27s_method
+    float sampleFourier( const float ak , const float* recip , int m , float u , float* pdf , float* phiptr );
 };
