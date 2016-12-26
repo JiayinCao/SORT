@@ -18,6 +18,9 @@
 #pragma once
 
 #include "material_node.h"
+#include "texture/gridtexture.h"
+#include "texture/checkboxtexture.h"
+#include "texture/imagetexture.h"
 
 // constant node
 class ConstantNode : public MaterialNode

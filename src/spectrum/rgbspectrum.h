@@ -54,7 +54,7 @@ public:
 	float	GetB() const;
 
 	// clamp the spectrum
-	RGBSpectrum Clamp() const;
+	RGBSpectrum Clamp( float low = 0.0f , float high = 0.0f ) const;
 
 	// operators
 	RGBSpectrum operator+( const RGBSpectrum& c ) const;

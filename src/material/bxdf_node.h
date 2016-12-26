@@ -19,6 +19,8 @@
 
 #include "material_node.h"
 #include "bsdf/bsdf.h"
+#include "bsdf/merl.h"
+#include "bsdf/fourierbxdf.h"
 
 // Bxdf node
 class BxdfNode : public MaterialNode
@@ -85,6 +87,28 @@ private:
 
 	// the merl data
 	Merl merl;
+};
+
+// Fourier bxdf node
+class FourierBxdfNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR( FourierBxdfNode , "SORTNodeFourierBxdf" );
+    
+    // constructor
+    FourierBxdfNode();
+    
+    // update bsdf
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    
+    // post process
+    void PostProcess() override;
+
+private:
+    MaterialNodePropertyString  fourierBxdfFile;
+    
+    // fourier bxdf node
+    FourierBxdf fourierBxdf;
 };
 
 // Oren nayar node

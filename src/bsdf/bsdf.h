@@ -97,26 +97,25 @@ private:
 };
 
 // BSDF Inline Functions
-inline float CosTheta(const Vector &w) 
-{ 
+inline float CosTheta(const Vector &w){
 	return w.y; 
 }
-inline float AbsCosTheta(const Vector &w) 
-{ 
+
+inline float AbsCosTheta(const Vector &w){
 	return fabsf(w.y); 
 }
-inline float SinTheta2(const Vector &w) 
-{
+
+inline float SinTheta2(const Vector &w){
     return max(0.f, 1.f - CosTheta(w)*CosTheta(w));
 }
 
-inline float SinTheta(const Vector &w) 
-{
+inline float CosDPhi( const Vector& w0 , const Vector& w1 ){
+    return clamp( ( w0.x * w1.x + w0.z * w1.z ) / sqrt( (w0.x * w0.x + w0.z * w0.z)*(w1.x * w1.x + w1.z*w1.z) ) , -1.0f , 1.0f );
+}
+inline float SinTheta(const Vector &w){
     return sqrtf(SinTheta2(w));
 }
-
-inline float CosPhi(const Vector &w) 
-{
+inline float CosPhi(const Vector &w){
     float sintheta = SinTheta(w);
     if (sintheta == 0.f) return 1.f;
     return clamp(w.x / sintheta, -1.f, 1.f);
@@ -141,8 +140,7 @@ inline float SphericalPhi(const Vector &v) {
     return (p < 0.f) ? p + 2.f*PI : p;
 }
 
-inline Vector SphericalVec( float theta , float phi )
-{
+inline Vector SphericalVec( float theta , float phi ){
 	float x = sin( theta ) * cos( phi );
 	float y = cos( theta );
 	float z = sin( theta ) * sin( phi );
@@ -150,17 +148,14 @@ inline Vector SphericalVec( float theta , float phi )
 	return Vector( x , y , z );
 }
 
-inline Vector SphericalVec( float sintheta , float costheta , float phi )
-{
+inline Vector SphericalVec( float sintheta , float costheta , float phi ){
 	float x = sintheta * cos( phi );
 	float y = costheta;
 	float z = sintheta * sin( phi );
-
 	return Vector( x , y , z );
 }
 
-inline bool SameHemiSphere( const Vector& wi , const Vector& wo )
-{
+inline bool SameHemiSphere( const Vector& wi , const Vector& wo ){
 	return ( wi.y * wo.y ) > 0.0f;
 }
 

@@ -177,7 +177,7 @@ float RGBSpectrum::GetB() const {
 }
 
 // clamp the spectrum
-RGBSpectrum RGBSpectrum::Clamp() const
+RGBSpectrum RGBSpectrum::Clamp( float low , float high ) const
 {
-	return RGBSpectrum( saturate(m_r) , saturate(m_g) , saturate(m_b) );
+	return RGBSpectrum( clamp(m_r, low, high) , clamp(m_g, low, high) , clamp(m_b, low, high) );
 }

@@ -127,6 +127,22 @@ class SORTNodeRoughnessSocket(bpy.types.NodeSocketFloat, SORTSocket):
     def output_type_str(self):
         return 'float'
 
+class SORTNodeFloatSocket(bpy.types.NodeSocketFloat, SORTSocket):
+    bl_idname = 'SORTNodeFloatSocket'
+    bl_label = 'SORT Float Socket'
+
+    default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0, max=1.0 )
+
+    # green node for color
+    def draw_color(self, context, node):
+        return (0.1, 0.1, 0.3, 1.0)
+
+    def output_default_value_to_str(self):
+        return '%f'%(self.default_value)
+
+    def output_type_str(self):
+        return 'float'
+
 # sort material node root
 class SORTShadingNode(bpy.types.Node):
     bl_label = 'ShadingNode'
@@ -320,6 +336,27 @@ class SORTNodeMerl(SORTShadingNode):
     def export_prop(self, xml_node):
         ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
 
+# fourier bxdf node
+class SORTNodeFourierBxdf(SORTShadingNode):
+    bl_label = 'SORT_fourierbxdf'
+    bl_idname = 'SORTNodeFourierBxdf'
+
+    file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
+
+    def init(self, context):
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def draw_buttons(self, context, layout):
+        row = layout.row()
+        row.label("Filename")
+        row.prop(self,'file_name_prop')
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
+
 # oren nayar node
 class SORTNodeOrenNayar(SORTShadingNode):
     bl_label = 'SORT_orennayar'
@@ -340,6 +377,14 @@ class SORTNodeAdd(SORTShadingNode):
         self.inputs.new('SORTNodeSocketColor', 'Color2')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
+class SORTNodeInverse(SORTShadingNode):
+    bl_label = 'SORT_inverse'
+    bl_idname = 'SORTNodeInverse'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'Color')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
 class SORTNodeMultiply(SORTShadingNode):
     bl_label = 'SORT_multiply'
     bl_idname = 'SORTNodeMultiply'
@@ -355,9 +400,9 @@ class SORTNodeBlend(SORTShadingNode):
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'Color1')
-        self.inputs.new('SORTNodeSocketFloat', 'Factor1')
+        self.inputs.new('SORTNodeFloatSocket', 'Factor1')
         self.inputs.new('SORTNodeSocketColor', 'Color2')
-        self.inputs.new('SORTNodeSocketFloat', 'Factor2')
+        self.inputs.new('SORTNodeFloatSocket', 'Factor2')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
 class SORTNodeLerp(SORTShadingNode):
@@ -367,7 +412,7 @@ class SORTNodeLerp(SORTShadingNode):
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'Color1')
         self.inputs.new('SORTNodeSocketColor', 'Color2')
-        self.inputs.new('SORTNodeSocketFloat', 'Factor')
+        self.inputs.new('SORTNodeFloatSocket', 'Factor')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
 # input nodoes
@@ -537,8 +582,8 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items= [NodeItem("SORTNodeLayeredBXDF"),NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
-        SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNodeLayeredBXDF"),NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeFourierBxdf"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
+        SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeInverse"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
         SORTPatternNodeCategory("SORT_input", "SORT Input",items=[],),
@@ -549,6 +594,7 @@ def register():
     SORTPatternGraph.nodetypes[SORTNodeLayeredBXDF] = 'SORTNodeLayeredBXDF'
     SORTPatternGraph.nodetypes[SORTNodeLambert] = 'SORTNodeLambert'
     SORTPatternGraph.nodetypes[SORTNodeMerl] = 'SORTNodeMerl'
+    SORTPatternGraph.nodetypes[SORTNodeFourierBxdf] = 'SORTNodeFourierBxdf'
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetReflection] = 'SORTNodeMicrofacetReflection'
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetRefraction] = 'SORTNodeMicrofacetRefraction'
     SORTPatternGraph.nodetypes[SORTNodeOrenNayar] = 'SORTNodeOrenNayar'

@@ -21,10 +21,7 @@
 #include "spectrum/spectrum.h"
 #include <vector>
 #include "utility/creator.h"
-#include "bsdf/merl.h"
-#include "texture/gridtexture.h"
-#include "texture/checkboxtexture.h"
-#include "texture/imagetexture.h"
+
 #include "spectrum/rgbspectrum.h"
 #include "math/vector4.h"
 
