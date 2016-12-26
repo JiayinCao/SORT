@@ -78,6 +78,10 @@ void FourierBxdf::LoadData( const string& filename )
         bsdfTable.m[i] = offsetAndLength[2*i+1];
     }
     
+    bsdfTable.recip[0] = 0.0f;
+    for( int i = 1 ; i < bsdfTable.nMu ; ++i )
+        bsdfTable.recip[i] = 1.0f / (float) i;
+    
     file.close();
 }
 
@@ -89,14 +93,14 @@ Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi ) const
     const float dPhi = CosDPhi( wo , -wi );
     
     int offsetI , offsetO;
-    float weightsI[1] , weights[1];
-    GetWeightAndOffset( muI , offsetI , weights );
-    GetWeightAndOffset( muO , offsetO , weights );
+    float weightsI[1] , weightsO[1];
+    getWeightAndOffset( muI , offsetI , weightsI );
+    getWeightAndOffset( muO , offsetO , weightsO );
     
     int m;
     float* ak = bsdfTable.GetAk(offsetI, offsetO, &m );
     
-    float Y = max( 0.0f , Fourier( ak , m , dPhi ) );
+    float Y = max( 0.0f , fourier( ak , m , dPhi ) );
     float scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
     if( muI * muO > 0.0f ){
         float eta = ( muI > 0.0f ) ? 1 / bsdfTable.eta : bsdfTable.eta;
@@ -107,8 +111,8 @@ Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi ) const
         return scale * Y;
     }
     
-    float R = Fourier( ak + 1 * m , m , dPhi );
-    float B = Fourier( ak + 2 * m , m , dPhi );
+    float R = fourier( ak + 1 * m , m , dPhi );
+    float B = fourier( ak + 2 * m , m , dPhi );
     float G = 1.39829f * Y - 0.100913f * B - 0.297375f * R;
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
@@ -126,7 +130,7 @@ float FourierBxdf::Pdf( const Vector& wo , const Vector& wi ) const
 }
 
 // Get weight and offset.
-void FourierBxdf::GetWeightAndOffset( float costheta , int& offset , float* weight ) const
+void FourierBxdf::getWeightAndOffset( float costheta , int& offset , float* weight ) const
 {
     if( costheta < bsdfTable.mu[0] || costheta > bsdfTable.mu[bsdfTable.nMu-1] ){
         *weight = 0;
@@ -154,7 +158,7 @@ void FourierBxdf::GetWeightAndOffset( float costheta , int& offset , float* weig
 }
 
 // Fourier interpolation
-float FourierBxdf::Fourier( const float* ak , int m , double cosPhi ) const
+float FourierBxdf::fourier( const float* ak , int m , double cosPhi ) const
 {
     // cos( K * phi ) = 2.0 * cos( (K-1) * phi ) cos( phi ) - cos( (K-2) * Phi );
     double value = 0.0;
@@ -167,4 +171,59 @@ float FourierBxdf::Fourier( const float* ak , int m , double cosPhi ) const
         cosKPhi = cosKPlusPhi;
     }
     return value;
+}
+
+// Importance sampling for fourier interpolation
+// Refer these two wiki pages for further detail:
+// Bisection method :   https://en.wikipedia.org/wiki/Bisection_method
+// Newton method :      https://en.wikipedia.org/wiki/Newton%27s_method
+float sampleFourier( const float* ak , const float* recip , int m , float u , float* pdf , float* phiptr )
+{
+    bool flip = u >= 0.5f;
+    if( flip ) u = 2.0f * ( 1.0f - u );
+    else u *= 2.0f;
+    
+    // Bisection method
+    double l = 0.0f , r = PI, phi = 0.5f * PI;
+    double F, f;
+    while( true ){
+        double cosPhi = cos(phi);
+        double sinPhi = sqrt( max( 0.0 , 1.0f - cosPhi * cosPhi ) );
+        double cosPrevPhi = cosPhi , cosCurPhi = 1.0;
+        double sinPrevPhi = -sinPhi , sinCurPhi = 0.0;
+        
+        F = ak[0] * phi;
+        f = ak[0];
+        for( int i = 1 ; i < m ; ++i ){
+            double cosNextPhi = 2.0 * cosCurPhi * cosPhi - cosPrevPhi;
+            double sinNextPhi = 2.0 * sinCurPhi * cosPhi - sinPrevPhi;
+            cosPrevPhi = cosCurPhi;
+            cosCurPhi = cosNextPhi;
+            sinPrevPhi = sinCurPhi;
+            sinCurPhi = sinNextPhi;
+            
+            F += ak[i] * sinCurPhi * recip[i];
+            f += ak[i] * cosCurPhi;
+        }
+        F -= u * ak[0] * PI;
+        
+        if( F > 0.0 ) r = phi;
+        else l = phi;
+        
+        if( fabs(F) < 1e-6f || r - l < 1e-6f )
+            break;
+        
+        // Newton method
+        if( f > 1e-6f )
+            phi -= F / f;
+        
+        if( phi >= r || phi <= l )
+            phi = ( l + r ) * 0.5f;
+    }
+    
+    if( flip ) phi = TWO_PI - phi;
+    if( pdf ) *pdf = (float) ( INV_TWOPI * f / ak[0] );
+    *phiptr = phi;
+    
+    return f;
 }
