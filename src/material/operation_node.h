@@ -46,6 +46,25 @@ private:
 	MaterialNodeProperty	src1;
 };
 
+// Inverse node
+class InverseNode : public OperatorNode
+{
+public:
+    DEFINE_CREATOR( InverseNode , "SORTNodeInverse" );
+    
+    // constructor
+    InverseNode();
+    
+    // get property value
+    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
+    
+    // check validation
+    bool CheckValidation() override;
+    
+private:
+    MaterialNodeProperty    src;
+};
+
 // To be changed
 // Lerp node
 class LerpNode : public OperatorNode

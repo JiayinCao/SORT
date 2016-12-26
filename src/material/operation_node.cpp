@@ -17,6 +17,7 @@
 
 #include "operation_node.h"
 
+IMPLEMENT_CREATOR( InverseNode );
 IMPLEMENT_CREATOR( AddNode );
 IMPLEMENT_CREATOR( LerpNode );
 IMPLEMENT_CREATOR( BlendNode );
@@ -48,6 +49,31 @@ bool AddNode::CheckValidation()
 MaterialPropertyValue AddNode::GetNodeValue( Bsdf* bsdf )
 {
 	return src0.GetPropertyValue(bsdf) + src1.GetPropertyValue(bsdf);
+}
+
+// inverse node
+InverseNode::InverseNode()
+{
+    m_props.insert( make_pair( "Color" , &src ) );
+}
+
+bool InverseNode::CheckValidation()
+{
+    m_node_valid = MaterialNode::CheckValidation();
+    
+    MAT_NODE_TYPE type = (src.node)?src.node->getNodeType():MAT_NODE_CONSTANT;
+    
+    // if one of the parameters is a bxdf, the other should be exactly the same
+    if( ( type & MAT_NODE_CONSTANT ) == 0 )
+        m_node_valid = false;
+    
+    return m_node_valid;
+}
+
+// get property value
+MaterialPropertyValue InverseNode::GetNodeValue( Bsdf* bsdf )
+{
+    return MaterialPropertyValue(1.0f) - src.GetPropertyValue(bsdf);
 }
 
 LerpNode::LerpNode()
