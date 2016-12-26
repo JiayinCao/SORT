@@ -26,6 +26,7 @@
 IMPLEMENT_CREATOR( LayeredBxdfNode );
 IMPLEMENT_CREATOR( LambertNode );
 IMPLEMENT_CREATOR( MerlNode );
+IMPLEMENT_CREATOR( FourierBxdfNode );
 IMPLEMENT_CREATOR( OrenNayarNode );
 IMPLEMENT_CREATOR( MicrofacetReflectionNode );
 IMPLEMENT_CREATOR( MicrofacetRefractionNode );
@@ -113,6 +114,27 @@ void MerlNode::PostProcess()
 
 	if( merlfile.str.empty() == false )
 		merl.LoadData( merlfile.str );
+}
+
+FourierBxdfNode::FourierBxdfNode()
+{
+    m_props.insert( make_pair( "Filename" , &fourierBxdfFile ) );
+}
+
+void FourierBxdfNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+    fourierBxdf.m_weight = weight;
+    bsdf->AddBxdf( &fourierBxdf );
+}
+
+// post process
+void FourierBxdfNode::PostProcess()
+{
+    if( m_post_processed )
+        return;
+    
+    if( fourierBxdfFile.str.empty() == false )
+        fourierBxdf.LoadData( fourierBxdfFile.str );
 }
 
 OrenNayarNode::OrenNayarNode()
