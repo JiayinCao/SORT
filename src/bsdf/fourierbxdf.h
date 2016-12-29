@@ -98,13 +98,14 @@ private:
     
     FourierBxdfTable    bsdfTable;
     
-    // Get weight and offset.
-    void getWeightAndOffset( float costheta , int& offset , float* weight) const;
     // Fourier interpolation
     float fourier( const float* ak , int m , double cosPhi ) const;
     // Importance sampling for fourier interpolation
     // Refer these two wiki pages for further detail:
     // Bisection method :   https://en.wikipedia.org/wiki/Bisection_method
     // Newton method :      https://en.wikipedia.org/wiki/Newton%27s_method
-    float sampleFourier( const float ak , const float* recip , int m , float u , float* pdf , float* phiptr );
+    float sampleFourier( const float* ak , const float* recip , int m , float u , float* pdf , float* phiptr ) const;
+
+    // Get CatmullRomWeights
+    bool getCatmullRomWeights( float x , int& offset , float* weights ) const;
 };
