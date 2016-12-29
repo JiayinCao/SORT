@@ -31,6 +31,9 @@ class Intersection;
 class Material : public ReferenceCount
 {
 public:
+    // virtual destructor
+    virtual ~Material() {}
+    
 	// get bsdf
 	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
 
