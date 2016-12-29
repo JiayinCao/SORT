@@ -66,6 +66,7 @@ void FourierBxdf::LoadData( const string& filename )
     bsdfTable.m = new int[sqMu];
     bsdfTable.aOffset = new int[sqMu];
     bsdfTable.a = new float[coeff];
+    bsdfTable.recip = new float[bsdfTable.nMu];
     
     if(!ReadFile( (char*)bsdfTable.mu , bsdfTable.nMu * sizeof(float) ) ||
        !ReadFile( (char*)bsdfTable.cdf , sqMu * sizeof(float) ) ||
@@ -93,68 +94,99 @@ Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi ) const
     const float dPhi = CosDPhi( wo , -wi );
     
     int offsetI , offsetO;
-    float weightsI[1] , weightsO[1];
-    getWeightAndOffset( muI , offsetI , weightsI );
-    getWeightAndOffset( muO , offsetO , weightsO );
+    float weightsI[4] , weightsO[4];
+    if( !getCatmullRomWeights( muI , offsetI , weightsI ) ||
+        !getCatmullRomWeights( muO , offsetO , weightsO ) )
+        return 0.0f;
     
-    int m;
-    float* ak = bsdfTable.GetAk(offsetI, offsetO, &m );
+    float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
+    memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
+    int nMax = 0;
+    for( int i = 0 ; i < 4 ; ++i ){
+        for( int j = 0 ; j < 4 ; ++j ){
+            float w = weightsI[j] * weightsO[i];
+            if( w > 0.0f ){
+                int m;
+                float* a = bsdfTable.GetAk(offsetI + j , offsetO + i, &m );
+                nMax = max( nMax , m );
+                for( int c = 0 ; c < bsdfTable.nChannels ; ++c ){
+                    for( int k = 0 ; k < m ; ++k ){
+                        ak[ c * bsdfTable.nMax + k ] += w * a[ c * m + k ];
+                    }
+                }
+            }
+        }
+    }
     
-    float Y = max( 0.0f , fourier( ak , m , dPhi ) );
+    float Y = max( 0.0f , fourier( ak , nMax , dPhi ) );
     float scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
     if( muI * muO > 0.0f ){
         float eta = ( muI > 0.0f ) ? 1 / bsdfTable.eta : bsdfTable.eta;
         scale *= eta * eta;
     }
     
-    if( bsdfTable.nChannels == 1 ){
+    if( bsdfTable.nChannels == 1 )
         return scale * Y;
-    }
     
-    float R = fourier( ak + 1 * m , m , dPhi );
-    float B = fourier( ak + 2 * m , m , dPhi );
+    float R = fourier( ak + 1 * bsdfTable.nMax , nMax , dPhi );
+    float B = fourier( ak + 2 * bsdfTable.nMax , nMax , dPhi );
     float G = 1.39829f * Y - 0.100913f * B - 0.297375f * R;
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
 Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
-    wi = UniformSampleSphere( bs.u , bs.v );
-    if( pdf ) *pdf = Pdf( wo , wi );
-    return f( wo , wi );
+    return Bxdf::sample_f( wo , wi , bs , pdf );
 }
 
 float FourierBxdf::Pdf( const Vector& wo , const Vector& wi ) const
 {
-    return UniformSpherePdf();
+    return Bxdf::Pdf( wo , wi );
 }
 
-// Get weight and offset.
-void FourierBxdf::getWeightAndOffset( float costheta , int& offset , float* weight ) const
+// Get CatmullRomWeights
+bool FourierBxdf::getCatmullRomWeights( float x , int& offset , float* weights ) const
 {
-    if( costheta < bsdfTable.mu[0] || costheta > bsdfTable.mu[bsdfTable.nMu-1] ){
-        *weight = 0;
-        offset =0;
-        return;
-    }else if( costheta == bsdfTable.mu[bsdfTable.nMu-1] ){
-        *weight = 1.0f;
-        offset = bsdfTable.nMu - 1;
-        return;
-    }
-    
-    // box filter is used temporarily
-    *weight = 1.0f;
+    if( x <= bsdfTable.mu[0] || x >= bsdfTable.mu[bsdfTable.nMu-1] )
+        return false;
     
     // use binary search to get the offset
     int l = 0 , r = bsdfTable.nMu - 1;
     while( l < r ){
         int m = l + (( r - l ) >> 1);
-        if( bsdfTable.mu[m] <= costheta )
+        if( bsdfTable.mu[m] <= x )
             l = m + 1;
         else
             r = m;
     }
-    offset = l - 1;
+    offset = l - 2;
+    
+    float x1 = bsdfTable.mu[offset+1] , x2 = bsdfTable.mu[offset+2];
+    float t = ( x - x1 ) / ( x2 - x1 ) , t2 = t * t, t3 = t2 * t;
+    
+    weights[0] = weights[3] = 0.0f;
+    weights[1] = 2 * t3 - 3 * t2 + 1;
+    weights[2] = -2 * t3 + 3 * t2;
+    if( offset >= 0 ){
+        float w0 = (t3 - 2 * t2 + t) * (x2 - x1) / (x2 - bsdfTable.mu[offset]);
+        weights[0] = -w0;
+        weights[2] += w0;
+    }else{
+        float w0 = t3 - 2 * t2 + t;
+        weights[1] -= w0;
+        weights[2] += w0;
+    }
+    if( offset < bsdfTable.nMu - 3 ){
+        float w3 = (t3 - t2) * (x2 - x1) / (bsdfTable.mu[offset+3] - x1);
+        weights[1] -= w3;
+        weights[3] = w3;
+    }else{
+        float w3 = t3 - t2;
+        weights[1] -= w3;
+        weights[2] += w3;
+    }
+    
+    return true;
 }
 
 // Fourier interpolation
@@ -177,7 +209,7 @@ float FourierBxdf::fourier( const float* ak , int m , double cosPhi ) const
 // Refer these two wiki pages for further detail:
 // Bisection method :   https://en.wikipedia.org/wiki/Bisection_method
 // Newton method :      https://en.wikipedia.org/wiki/Newton%27s_method
-float sampleFourier( const float* ak , const float* recip , int m , float u , float* pdf , float* phiptr )
+float FourierBxdf::sampleFourier( const float* ak , const float* recip , int m , float u , float* pdf , float* phiptr ) const
 {
     bool flip = u >= 0.5f;
     if( flip ) u = 2.0f * ( 1.0f - u );
