@@ -77,6 +77,7 @@ private:
         int     *m = nullptr;
         int     *aOffset = nullptr;
         float   *a = nullptr;
+        float   *a0 = nullptr;
         float   *cdf = nullptr;
         float   *recip = nullptr;
         
@@ -85,6 +86,7 @@ private:
             SAFE_DELETE_ARRAY(m);
             SAFE_DELETE_ARRAY(aOffset);
             SAFE_DELETE_ARRAY(a);
+            SAFE_DELETE_ARRAY(a0);
             SAFE_DELETE_ARRAY(cdf);
             SAFE_DELETE_ARRAY(recip);
         }
@@ -108,4 +110,12 @@ private:
 
     // Get CatmullRomWeights
     bool getCatmullRomWeights( float x , int& offset , float* weights ) const;
+    
+    // Importance sampling for catmull rom
+    float sampleCatmullRom2D( int size1 , int size2 , const float* nodes1 , const float* nodes2 , const float* values , const float* cdf ,
+                             float alpha , float u , float* fval , float* pdf ) const;
+    
+    // helper function find interval that wraps the target value
+    template<typename Predicate>
+    int findInterval( int cnt , const Predicate& pred ) const;
 };
