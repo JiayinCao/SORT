@@ -78,7 +78,7 @@ void FourierBxdf::LoadData( const string& filename )
     for( int i = 0 ; i < bsdfTable.nMu * bsdfTable.nMu ; ++i ){
         bsdfTable.aOffset[i] = offsetAndLength[2*i];
         bsdfTable.m[i] = offsetAndLength[2*i+1];
-        bsdfTable.a0[i] = ( bsdfTable.m[i] > 0 )?bsdfTable.a[i]:0.0f;
+        bsdfTable.a0[i] = ( bsdfTable.m[i] > 0 )?bsdfTable.a[offsetAndLength[2*i]]:0.0f;
     }
     
     bsdfTable.recip[0] = 0.0f;
@@ -138,8 +138,6 @@ Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi ) const
 
 Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
-    return Bxdf::sample_f( wo , wi , bs , pdf );
-    
     float muO = CosTheta(wo);
     float pdfMu;
     float muI = sampleCatmullRom2D(bsdfTable.nMu, bsdfTable.nMu, bsdfTable.mu, bsdfTable.mu, bsdfTable.a0, bsdfTable.cdf, muO, bs.u, nullptr, &pdfMu);
@@ -147,8 +145,10 @@ Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample
     int offsetI , offsetO;
     float weightsI[4] , weightsO[4];
     if( !getCatmullRomWeights( muI , offsetI , weightsI ) ||
-        !getCatmullRomWeights( muO , offsetO , weightsO ) )
+       !getCatmullRomWeights( muO , offsetO , weightsO ) ){
+        *pdf = 0.0f;
         return 0.0f;
+    }
     
     float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
@@ -174,12 +174,12 @@ Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample
     *pdf = max( 0.0f , pdfPhi * pdfMu );
     
     float sin2ThetaI = max( 0.0f , 1.0f - muI * muI );
-    float norm = sqrt( sin2ThetaI / SinTheta(wo));
+    float norm = sqrt( sin2ThetaI / SinTheta2(wo));
     if( isinf(norm) ) norm = 0.0f;
     float sinPhi = sin(phi) , cosPhi = cos(phi);
-    wi = -Vector3f( norm * ( cosPhi * wo.x - sinPhi * wo.y ),
-                    norm * ( sinPhi * wo.x + cosPhi * wo.y ),
-                    muI );
+    wi = -Vector3f( norm * ( cosPhi * wo.x - sinPhi * wo.z ),
+                    muI ,
+                    norm * ( sinPhi * wo.x + cosPhi * wo.z ));
     
     wi.Normalize();
     
@@ -200,8 +200,6 @@ Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample
 
 float FourierBxdf::Pdf( const Vector& wo , const Vector& wi ) const
 {
-    return Bxdf::Pdf( wo , wi );
-    
     float muI = CosTheta(-wi) , muO = CosTheta(wo);
     float cosPhi = CosDPhi( -wi , wo );
     
@@ -232,7 +230,7 @@ float FourierBxdf::Pdf( const Vector& wo , const Vector& wi ) const
         if( weightsO[o] == 0 ) continue;
         rho += weightsO[o] * bsdfTable.cdf[ (offsetO + o) * bsdfTable.nMu + bsdfTable.nMu - 1 ] * TWO_PI;
     }
-    
+
     float Y = fourier(ak, nMax, cosPhi);
     return (rho > 0.0f && Y > 0.0f) ? (Y/rho) : 0.0f;
 }
@@ -256,7 +254,7 @@ int FourierBxdf::findInterval( int cnt , const Predicate& pred ) const
 // Get CatmullRomWeights
 bool FourierBxdf::getCatmullRomWeights( float x , int& offset , float* weights ) const
 {
-    if( x <= bsdfTable.mu[0] || x >= bsdfTable.mu[bsdfTable.nMu-1] )
+    if( !(x >= bsdfTable.mu[0] && x <= bsdfTable.mu[bsdfTable.nMu-1] ) )
         return false;
     
     // use binary search to get the offset
@@ -287,9 +285,6 @@ bool FourierBxdf::getCatmullRomWeights( float x , int& offset , float* weights )
         weights[2] += w3;
     }
 
-    weights[0] = weights[2] = weights[3] = 0.0f;
-    weights[1] = 1.0f;
-    
     return true;
 }
 
