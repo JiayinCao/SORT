@@ -115,7 +115,10 @@ private:
     float sampleCatmullRom2D( int size1 , int size2 , const float* nodes1 , const float* nodes2 , const float* values , const float* cdf ,
                              float alpha , float u , float* fval , float* pdf ) const;
     
-    // helper function find interval that wraps the target value
+    // helper function to find interval that wraps the target value
     template<typename Predicate>
     int findInterval( int cnt , const Predicate& pred ) const;
+    
+    // helper functio to blend coefficients for fourier
+    int blendCoefficients( float* ak , int channel , int offsetI , int offsetO , float* weightsI , float* weightsO ) const;
 };

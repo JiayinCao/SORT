@@ -292,7 +292,7 @@ void System::_executeRenderingTasks()
 
 	// pre allocate memory for the specific thread
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
-		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 16 , i );
+		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 256 , i );
 	PlatformThreadUnit** threadUnits = new PlatformThreadUnit*[THREAD_NUM];
 	for( int i = 0 ; i < THREAD_NUM ; ++i )
 	{
