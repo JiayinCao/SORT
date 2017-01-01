@@ -103,22 +103,7 @@ Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi ) const
     
     float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
-    int nMax = 0;
-    for( int i = 0 ; i < 4 ; ++i ){
-        for( int j = 0 ; j < 4 ; ++j ){
-            float w = weightsI[j] * weightsO[i];
-            if( w != 0.0f ){
-                int m;
-                float* a = bsdfTable.GetAk(offsetI + j , offsetO + i, &m );
-                nMax = max( nMax , m );
-                for( int c = 0 ; c < bsdfTable.nChannels ; ++c ){
-                    for( int k = 0 ; k < m ; ++k ){
-                        ak[ c * bsdfTable.nMax + k ] += w * a[ c * m + k ];
-                    }
-                }
-            }
-        }
-    }
+    int nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
     
     float Y = max( 0.0f , fourier( ak , nMax , dPhi ) );
     float scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
@@ -145,29 +130,14 @@ Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample
     int offsetI , offsetO;
     float weightsI[4] , weightsO[4];
     if( !getCatmullRomWeights( muI , offsetI , weightsI ) ||
-       !getCatmullRomWeights( muO , offsetO , weightsO ) ){
+        !getCatmullRomWeights( muO , offsetO , weightsO ) ){
         *pdf = 0.0f;
         return 0.0f;
     }
     
     float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
-    int nMax = 0;
-    for( int i = 0 ; i < 4 ; ++i ){
-        for( int j = 0 ; j < 4 ; ++j ){
-            float w = weightsI[j] * weightsO[i];
-            if( w != 0.0f ){
-                int m;
-                float* a = bsdfTable.GetAk(offsetI + j , offsetO + i, &m );
-                nMax = max( nMax , m );
-                for( int c = 0 ; c < bsdfTable.nChannels ; ++c ){
-                    for( int k = 0 ; k < m ; ++k ){
-                        ak[ c * bsdfTable.nMax + k ] += w * a[ c * m + k ];
-                    }
-                }
-            }
-        }
-    }
+    int nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
     
     float phi, pdfPhi;
     float Y = sampleFourier(ak, bsdfTable.recip, nMax, bs.v, &pdfPhi, &phi);
@@ -211,19 +181,7 @@ float FourierBxdf::Pdf( const Vector& wo , const Vector& wi ) const
     
     float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax );
-    int nMax = 0;
-    for( int i = 0 ; i < 4 ; ++i ){
-        for( int j = 0 ; j < 4 ; ++j ){
-            float w = weightsI[j] * weightsO[i];
-            if( w != 0.0f ){
-                int m;
-                float* a = bsdfTable.GetAk(offsetI + j , offsetO + i, &m );
-                nMax = max( nMax , m );
-                for( int k = 0 ; k < m ; ++k )
-                    ak[k] += w * a[k];
-            }
-        }
-    }
+    int nMax = blendCoefficients( ak , 1 , offsetI, offsetO, weightsI, weightsO );
     
     float rho = 0.0f;
     for( int o = 0 ; o < 4 ; ++o ){
@@ -286,6 +244,74 @@ bool FourierBxdf::getCatmullRomWeights( float x , int& offset , float* weights )
     }
 
     return true;
+}
+
+// Importance sampling for catmull rom
+float FourierBxdf::sampleCatmullRom2D( int size1 , int size2 , const float* nodes1 , const float* nodes2 , const float* values , const float* cdf ,
+                                      float alpha , float u , float* fval , float* pdf ) const
+{
+    // Determine offset and coefficients for the alpha parameter
+    int offset;
+    float weights[4];
+    if( !getCatmullRomWeights( alpha , offset , weights ) )
+        return 0.0f;
+    
+    // Interpolate between the four table entries
+    auto interpolate = [&]( const float* array , int idx ){
+        float value = 0.0f;
+        for( int i = 0 ; i < 4 ; ++i ){
+            if( weights[i] != 0.0f )
+                value += array[ ( i + offset ) * size2 + idx ] * weights[i];
+        }
+        return value;
+    };
+    
+    float maximum = interpolate( cdf , size2 - 1 );
+    u *= maximum;
+    int idx = findInterval( size2, [&](int i){ return interpolate(cdf,i) <= u; } );
+    
+    float f0 = interpolate( values , idx );
+    float f1 = interpolate( values , idx + 1 );
+    float x0 = nodes2[idx] , x1 = nodes2[idx+1];
+    float w = x1 - x0;
+    float d0 , d1;
+    
+    u = ( u - interpolate( cdf , idx ) ) / w;
+    
+    if( idx > 0 )
+        d0 = w * ( f1 - interpolate( values , idx - 1 ) ) / ( x1 - nodes2[idx-1] );
+    else
+        d0 = ( f1 - f0 );
+    if( idx < size2 - 2 )
+        d1 = w * ( interpolate( values , idx + 1 ) - f0 ) / ( nodes2[idx+2] - x0 );
+    else
+        d1 = f1 - f0;
+    
+    // Approximate the intersection by assuming it is linear interpolant
+    float t = ( f0 != f1 ) ? ( f0 - sqrt(max( 0.0f , f0 * f0 + 2 * u * ( f1 - f0 ) ) ) ) / (f0 - f1 ) : u / f0;
+    float a = 0.0f , b = 1.0f, Fhat , fhat;
+    while(true){
+        if( !( t >= a && t <= b ) )
+            t = ( a + b ) * 0.5f;
+        
+        // Evaluate target function and its derivative in Horner form
+        Fhat = t * (f0 + t * (.5f * d0 + t * ((1.f / 3.f) * (-2 * d0 - d1) + f1 - f0 + t * (.25f * (d0 + d1) + .5f * (f0 - f1)))));
+        fhat = f0 + t * (d0 + t * (-2 * d0 - d1 + 3 * (f1 - f0) + t * (d0 + d1 + 2 * (f0 - f1))));
+        
+        if( fabs( Fhat - u ) < 1e-6f || b - a < 1e-6f )
+            break;
+        
+        if( Fhat - u < 0.0f )
+            a = t;
+        else
+            b = t;
+        
+        t -= (Fhat-u) / fhat;
+    }
+    
+    if( fval ) *fval = fhat;
+    if( pdf ) *pdf = fhat / maximum;
+    return x0 + w * t;
 }
 
 // Fourier interpolation
@@ -358,70 +384,23 @@ float FourierBxdf::sampleFourier( const float* ak , const float* recip , int m ,
     return f;
 }
 
-// Importance sampling for catmull rom
-float FourierBxdf::sampleCatmullRom2D( int size1 , int size2 , const float* nodes1 , const float* nodes2 , const float* values , const float* cdf ,
-                         float alpha , float u , float* fval , float* pdf ) const
+// helper functio to blend coefficients for fourier
+int FourierBxdf::blendCoefficients( float* ak , int channel , int offsetI , int offsetO , float* weightsI , float* weightsO ) const
 {
-    // Determine offset and coefficients for the alpha parameter
-    int offset;
-    float weights[4];
-    if( !getCatmullRomWeights( alpha , offset , weights ) )
-        return 0.0f;
-    
-    // Interpolate between the four table entries
-    auto interpolate = [&]( const float* array , int idx ){
-        float value = 0.0f;
-        for( int i = 0 ; i < 4 ; ++i ){
-            if( weights[i] != 0.0f )
-                value += array[ ( i + offset ) * size2 + idx ] * weights[i];
+    int nMax = 0;
+    for( int i = 0 ; i < 4 ; ++i ){
+        for( int j = 0 ; j < 4 ; ++j ){
+            float w = weightsI[j] * weightsO[i];
+            if( w != 0.0f ){
+                int m;
+                float* a = bsdfTable.GetAk(offsetI + j , offsetO + i, &m );
+                nMax = max( nMax , m );
+                for( int c = 0 ; c < channel ; ++c ){
+                    for( int k = 0 ; k < m ; ++k )
+                        ak[ c * bsdfTable.nMax + k ] += w * a[ c * m + k ];
+                }
+            }
         }
-        return value;
-    };
-    
-    float maximum = interpolate( cdf , size2 - 1 );
-    u *= maximum;
-    int idx = findInterval( size2, [&](int i){ return interpolate(cdf,i) <= u; } );
-    
-    float f0 = interpolate( values , idx );
-    float f1 = interpolate( values , idx + 1 );
-    float x0 = nodes2[idx] , x1 = nodes2[idx+1];
-    float w = x1 - x0;
-    float d0 , d1;
-    
-    u = ( u - interpolate( cdf , idx ) ) / w;
-    
-    if( idx > 0 )
-        d0 = w * ( f1 - interpolate( values , idx - 1 ) ) / ( x1 - nodes2[idx-1] );
-    else
-        d0 = ( f1 - f0 );
-    if( idx < size2 - 1 )
-        d1 = w * ( interpolate( values , idx + 1 ) - f0 ) / ( nodes2[idx+1] - x0 );
-    else
-        d1 = f1 - f0;
-    
-    // Approximate the intersection by assuming it is linear interpolant
-    float t = ( f0 != f1 ) ? ( f0 - sqrt(max( 0.0f , f0 * f0 + 2 * u * ( f1 - f0 ) ) ) ) / (f0 - f1 ) : u / f0;
-    float a = 0.0f , b = 1.0f, Fhat , fhat;
-    while(true){
-        if( !( t >= a && t <= b ) )
-            t = ( a + b ) * 0.5f;
-        
-        // Evaluate target function and its derivative in Horner form
-        Fhat = t * (f0 + t * (.5f * d0 + t * ((1.f / 3.f) * (-2 * d0 - d1) + f1 - f0 + t * (.25f * (d0 + d1) + .5f * (f0 - f1)))));
-        fhat = f0 + t * (d0 + t * (-2 * d0 - d1 + 3 * (f1 - f0) + t * (d0 + d1 + 2 * (f0 - f1))));
-        
-        if( fabs( Fhat - u ) < 1e-6f || b - a < 1e-6f )
-            break;
-        
-        if( Fhat - u < 0.0f )
-            a = t;
-        else
-            b = t;
-        
-        t -= (Fhat-u) / fhat;
     }
-    
-    if( fval ) *fval = fhat;
-    if( pdf ) *pdf = fhat / maximum;
-    return x0 + w * t;
+    return nMax;
 }
