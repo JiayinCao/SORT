@@ -34,18 +34,18 @@ void FourierBxdf::LoadData( const string& filename )
     if( !file.is_open() )
         return;
     
-    const char* header = "SCATFUN\x01";
-    char file_header[8];
-    memset( file_header , 0 , sizeof( file_header ) );
-    file.read( file_header , 8 );
-    if( memcmp( file_header , header , 8 ) != 0 )
-        return;
-    
     // We assume both of the system and the file are of the same endian, which should be little endian on Intel chip.
     auto ReadFile = [&]( char* data , int sizeInByte )-> bool {
         file.read( data , sizeInByte );
         return sizeInByte == file.gcount();
     };
+    
+    const char* header = "SCATFUN\x01";
+    char file_header[8];
+    memset( file_header , 0 , sizeof( file_header ) );
+    ReadFile( file_header , 8 );
+    if( memcmp( file_header , header , 8 ) != 0 )
+        return;
     
     int flags = 0, coeff = 0, unused[4];
     std::unique_ptr<int[]> offsetAndLength;
