@@ -30,7 +30,7 @@ FourierBxdf::FourierBxdf()
 
 void FourierBxdf::LoadData( const string& filename )
 {
-    ifstream file( filename.c_str() );
+    ifstream file( filename.c_str(), ios::binary);
     if( !file.is_open() )
         return;
     
@@ -67,7 +67,7 @@ void FourierBxdf::LoadData( const string& filename )
     bsdfTable.aOffset = new int[sqMu];
     bsdfTable.a = new float[coeff];
     bsdfTable.a0 = new float[sqMu];
-    bsdfTable.recip = new float[bsdfTable.nMax];
+    bsdfTable.recip = new float[bsdfTable.nMu];
     
     if(!ReadFile( (char*)bsdfTable.mu , bsdfTable.nMu * sizeof(float) ) ||
        !ReadFile( (char*)bsdfTable.cdf , sqMu * sizeof(float) ) ||
