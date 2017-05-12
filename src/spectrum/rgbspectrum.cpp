@@ -145,7 +145,7 @@ RGBSpectrum RGBSpectrum::operator - ( float t ) const
 	return RGBSpectrum( r , g , b );
 }
 
-// + operator
+// * operator
 RGBSpectrum RGBSpectrum::operator * ( float t ) const
 {
 	float r = t * m_r;
