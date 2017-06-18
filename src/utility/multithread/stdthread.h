@@ -17,11 +17,10 @@
 
 #include "sort.h"
 
-#ifndef SORT_STDTHREAD
-#define SORT_STDTHREAD
+#pragma once
 
 #include <thread>
-#include <mutex>
+#include <atomic>
 
 class Integrator;
 
@@ -73,5 +72,3 @@ private:
 #define PlatformThreadUnit      RenderThreadStd
 #define PlatformMutex           std::mutex
 #define PlatformSpinlockMutex   spinlock_mutex
-
-#endif
