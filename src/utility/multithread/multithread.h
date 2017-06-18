@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_MULTI_THREAD
-#define SORT_MULTI_THREAD
+#pragma once
 
 #include "sort.h"
 
@@ -27,6 +26,7 @@ unsigned NumSystemCores();
 int ThreadId();
 
 #include <list>
+#include <memory>
 #include "utility/singleton.h"
 #include "sampler/sample.h"
 #include "math/vector2.h"
@@ -107,5 +107,3 @@ private:
 };
 
 #include "stdthread.h"
-
-#endif // SORT_SHAREDMEMORY
