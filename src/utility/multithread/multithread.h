@@ -67,7 +67,7 @@ public:
     }
     
     // execute the task
-    void Execute( Integrator* integrator );
+    void Execute( std::shared_ptr<Integrator> integrator );
     
     static void DestoryRenderTask( RenderTask& rt )
     {

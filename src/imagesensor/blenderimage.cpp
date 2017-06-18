@@ -48,10 +48,11 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 	data[ inner_offset + 3 ] = 1.0f;
 
 	// for final update
-	m_mutex[x][y].Lock();
-	Spectrum _color = m_rendertarget.GetColor(x,y);
-	m_rendertarget.SetColor(x, y, color+_color);
-	m_mutex[x][y].Unlock();
+    {
+        lock_guard<PlatformSpinlockMutex> lock(m_mutex[x][y]);
+        Spectrum _color = m_rendertarget.GetColor(x,y);
+        m_rendertarget.SetColor(x, y, color+_color);
+    }
 }
 
 // finish image tile
