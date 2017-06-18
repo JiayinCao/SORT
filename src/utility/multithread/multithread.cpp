@@ -27,7 +27,7 @@ DEFINE_SINGLETON(RenderTaskQueue);
 extern int g_iTileSize;
 
 // execute the task
-void RenderTask::Execute( Integrator* integrator )
+void RenderTask::Execute( std::shared_ptr<Integrator> integrator )
 {
     ImageSensor* is = camera->GetImageSensor();
     if( !is )

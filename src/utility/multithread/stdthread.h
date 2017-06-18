@@ -30,55 +30,48 @@ int ThreadId();
 
 class RenderThreadStd
 {
-	// public method
+// public method
 public:
-	// constructor
-	RenderThreadStd(unsigned tid);
-
+    // Constructor
+    RenderThreadStd( unsigned tid , std::shared_ptr<Integrator> integrator ) : m_tid(tid) , m_pIntegrator( integrator ) {}
+    
 	// Begin thread
 	void BeginThread();
-
-	// End thread
-	void EndThread();
-
+    
 	// Run the thread
 	void RunThread();
 
 	// Whether the thread is finished
-	bool IsFinished() {
-		return m_finished;
+	void Join() {
+		return m_thread.join();
 	}
-
-	// get thread id
-	int GetThreadID() const {
-		return m_tid;
-	}
-
+    
 // private field
 private:
-	// the thread id
-	unsigned m_tid;
-	// whether the thread is finished
-	bool	m_finished;
-
+    std::thread m_thread;
+    unsigned    m_tid = 0;
+    
 // the rendering data
 public:
-	Integrator*	m_pIntegrator = nullptr;
+    std::shared_ptr<Integrator>	m_pIntegrator;
 };
 
-class MutexStd
+class spinlock_mutex
 {
 public:
-	// lock/unlock
-	void Lock();
-	void Unlock();
+    void lock() {
+        while (locked.test_and_set(std::memory_order_acquire)) { ; }
+    }
+    void unlock() {
+        locked.clear(std::memory_order_release);
+    }
 
 private:
-	// critical section
-	std::mutex	m_mutex;
+    std::atomic_flag locked = ATOMIC_FLAG_INIT ;
 };
 
-#define PlatformThreadUnit	RenderThreadStd
-#define PlatformMutex		MutexStd
+#define PlatformThreadUnit      RenderThreadStd
+#define PlatformMutex           std::mutex
+#define PlatformSpinlockMutex   spinlock_mutex
 
 #endif

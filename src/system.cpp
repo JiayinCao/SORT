@@ -189,6 +189,8 @@ void System::_outputProgress()
 		cout<< progress<<"\rProgress: ";
 	else if (m_pProgress)
 		*m_pProgress = progress;
+
+    cout<<endl;
 }
 
 // output log information
@@ -282,58 +284,27 @@ void System::_pushRenderTask()
 void System::_executeRenderingTasks()
 {
     m_imagesensor->PreProcess();
-    
-	// will be parameterized later
-	const int THREAD_NUM = m_thread_num;
 
-	Integrator* integrator = _allocateIntegrator();
+    std::shared_ptr<Integrator> integrator(_allocateIntegrator());
 	integrator->PreProcess();
 	integrator->SetupCamera(m_camera);
 
 	// pre allocate memory for the specific thread
-	for( int i = 0 ; i < THREAD_NUM ; ++i )
+	for( int i = 0 ; i < m_thread_num ; ++i )
 		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 256 , i );
-	PlatformThreadUnit** threadUnits = new PlatformThreadUnit*[THREAD_NUM];
-	for( int i = 0 ; i < THREAD_NUM ; ++i )
-	{
-		// spawn new threads
-		threadUnits[i] = new PlatformThreadUnit(i);
-		
-		// setup basic data
-		threadUnits[i]->m_pIntegrator = integrator;
-	}
+    
+    std::vector< std::unique_ptr<PlatformThreadUnit> > threads;
+    for( unsigned i = 0 ; i < m_thread_num ; ++i )
+        threads.push_back( std::unique_ptr<PlatformThreadUnit>( new PlatformThreadUnit( i , integrator ) ) );
 
-	for( int i = 0 ; i < THREAD_NUM ; ++i ){
-		// start new thread
-		threadUnits[i]->BeginThread();
-	}
+    // start all threads
+    for_each( threads.begin() , threads.end() , []( std::unique_ptr<PlatformThreadUnit>& thread ) { thread->BeginThread(); } );
 
 	// wait for all the threads to be finished
-	while( true )
-	{
-		bool allfinished = true;
-		for( int i = 0 ; i < THREAD_NUM ; ++i )
-		{
-			if( !threadUnits[i]->IsFinished() )
-				allfinished = false;
-		}
-		
-		// Output progress
-		_outputProgress();
+    for_each( threads.begin() , threads.end() , []( std::unique_ptr<PlatformThreadUnit>& thread ) { thread->Join(); } );
 
-		if (allfinished)
-		{
-			break;
-		}
-	}
-	for( int i = 0 ; i < THREAD_NUM ; ++i )
-	{
-		delete threadUnits[i];
-	}
-	delete integrator;
-	delete[] threadUnits;
-
-	cout<<endl;
+    // Output progress
+    _outputProgress();
 
     m_imagesensor->PostProcess();
 }

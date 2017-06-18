@@ -41,9 +41,9 @@ public:
 	{
 		m_rendertarget.SetSize(m_width, m_height);
 
-		m_mutex = new PlatformMutex*[m_width];
+		m_mutex = new PlatformSpinlockMutex*[m_width];
 		for( int i = 0 ; i < m_width ; ++i )
-			m_mutex[i] = new PlatformMutex[m_height];
+			m_mutex[i] = new PlatformSpinlockMutex[m_height];
 	}
 
 	// set image size
@@ -80,10 +80,9 @@ public:
 	// add radiance
 	virtual void UpdatePixel(int x, int y, const Spectrum& color)
 	{
-		m_mutex[x][y].Lock();
+        lock_guard<PlatformSpinlockMutex> lock(m_mutex[x][y]);
 		Spectrum _color = m_rendertarget.GetColor(x, y);
 		m_rendertarget.SetColor(x, y, _color + color);
-		m_mutex[x][y].Unlock();
 	}
 
 protected:
@@ -91,7 +90,7 @@ protected:
 	int m_height;
     
 	// the mutex
-	PlatformMutex**	m_mutex;
+	PlatformSpinlockMutex**	m_mutex;
 
 	// the render target
 	RenderTarget m_rendertarget;

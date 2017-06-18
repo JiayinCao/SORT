@@ -35,31 +35,17 @@ unsigned NumSystemCores()
 }
 
 // critical section
-MutexStd g_mutex;
-
-RenderThreadStd::RenderThreadStd(unsigned tid) :m_tid(tid)
-{
-	m_finished = false;
-}
+PlatformSpinlockMutex g_mutex;
 
 void RenderThreadStd::BeginThread()
 {
-	new std::thread([this]() {
+	m_thread = std::thread([&]() {
 		// setup lts
-		g_ThreadId = GetThreadID();
+        g_ThreadId = m_tid;
 
 		// run the thread
 		RunThread();
-
-		// end the thread
-		EndThread();
 	});
-}
-
-void RenderThreadStd::EndThread()
-{
-	// the thread is finished
-	m_finished = true;
 }
 
 // Run the thread
@@ -67,15 +53,15 @@ void RenderThreadStd::RunThread()
 {
 	while (true)
 	{
-		g_mutex.Lock();
+		g_mutex.lock();
 		if (RenderTaskQueue::GetSingleton().IsEmpty())
 		{
-			g_mutex.Unlock();
+			g_mutex.unlock();
 			break;
 		}
 		// Get a new task from the task queue
 		RenderTask task = RenderTaskQueue::GetSingleton().PopTask();
-		g_mutex.Unlock();
+		g_mutex.unlock();
 
 		// execute the task
 		task.Execute(m_pIntegrator);
@@ -83,14 +69,4 @@ void RenderThreadStd::RunThread()
 		// Destroy the task
 		RenderTask::DestoryRenderTask(task);
 	}
-}
-
-void MutexStd::Lock()
-{
-	m_mutex.lock();
-}
-
-void MutexStd::Unlock()
-{
-	m_mutex.unlock();
 }
