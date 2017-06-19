@@ -18,6 +18,7 @@
 #include "blenderimage.h"
 #include "utility/multithread/multithread.h"
 #include "managers/smmanager.h"
+#include <mutex>
 
 // tile size
 extern int g_iTileSize;

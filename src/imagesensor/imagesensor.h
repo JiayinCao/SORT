@@ -23,6 +23,7 @@
 #include "utility/propertyset.h"
 #include "texture/rendertarget.h"
 #include "utility/multithread/multithread.h"
+#include <mutex>
 
 // pre-decleration
 class RenderTask;
