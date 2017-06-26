@@ -19,7 +19,7 @@
 #define	SORT_CREATOR
 
 #include "singleton.h"
-#include <map>
+#include <unordered_map>
 #include <algorithm>
 #include "utility/strhelper.h"
 
@@ -30,7 +30,7 @@ public:
 	virtual void* CreateInstance() = 0;
 };
 
-typedef map<string,ItemCreator*> CREATOR_CONTAINER;
+typedef unordered_map<string,ItemCreator*> CREATOR_CONTAINER;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	creator is responsible for creating different kinds of object
@@ -49,12 +49,14 @@ public:
 		::transform(_str.begin(),_str.end(),_str.begin(),ToLower());
 		CREATOR_CONTAINER::const_iterator it = m_container.find( _str );
 		if( it == m_container.end() )
-			return 0;
+			return nullptr;
 		return (T*)(it->second->CreateInstance());
 	}
 	
 	// get container
-	CREATOR_CONTAINER& GetContainer() { return m_container; }
+	CREATOR_CONTAINER& GetContainer() {
+        return m_container;
+    }
 
 // private field
 private:
@@ -76,8 +78,7 @@ private:
 		std::string _str( N );\
 		::transform(_str.begin(),_str.end(),_str.begin(),ToLower());\
 		CREATOR_CONTAINER& container = Creator::GetSingleton().GetContainer();\
-		CREATOR_CONTAINER::const_iterator it = container.find( _str );\
-		if( it != container.end() )\
+		if( container.count( _str ) )\
 		{\
 			LOG_WARNING<<"The creator type with specific name of "<<N<<" already existed."<<ENDL;\
 			return;\

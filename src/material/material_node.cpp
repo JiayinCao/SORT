@@ -25,8 +25,7 @@
 // get node property
 MaterialNodeProperty* MaterialNode::getProperty( const string& name )
 {
-	auto it = m_props.find( name );
-    return ( it != m_props.end() )? it->second : nullptr;
+    return m_props.count(name) ? m_props[name] : nullptr;
 }
 
 // set node property
@@ -139,12 +138,9 @@ MAT_NODE_TYPE MaterialNode::getNodeType()
 {
 	MAT_NODE_TYPE type = MAT_NODE_NONE;
 
-	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
-	while( it != m_props.end() )
-	{
-		if( it->second->node )
-			type |= it->second->node->getNodeType();
-		++it;
+    for( auto it : m_props ){
+		if( it.second->node )
+			type |= it.second->node->getNodeType();
 	}
 
 	// setup sub-tree type
@@ -159,12 +155,9 @@ void MaterialNode::PostProcess()
 	if( m_post_processed )
 		return;
 
-	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
-	while( it != m_props.end() )
-	{
-		if( it->second->node )
-			it->second->node->PostProcess();
-		++it;
+    for( auto it : m_props ){
+		if( it.second->node )
+			it.second->node->PostProcess();
 	}
 
 	m_post_processed = true;
@@ -176,23 +169,16 @@ void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
-	while( it != m_props.end() )
-	{
-		if( it->second->node )
-			it->second->node->UpdateBSDF(bsdf , weight);
-		++it;
+    for( auto it : m_props ){
+		if( it.second->node )
+			it.second->node->UpdateBSDF(bsdf , weight);
 	}
 }
 
 MaterialNode::~MaterialNode()
 {
-	map< string , MaterialNodeProperty* >::const_iterator it = m_props.begin();
-	while( it != m_props.end() )
-	{
-		delete it->second->node;
-		++it;
-	}
+    for( auto it : m_props )
+		delete it.second->node;
 }
 
 OutputNode::OutputNode()

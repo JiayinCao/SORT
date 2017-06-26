@@ -61,7 +61,7 @@ bool MeshManager::LoadMesh( const string& filename , TriMesh* mesh )
 	MESH_TYPE type = MeshTypeFromStr( str );
 
 	// find the mesh memory first
-    map< string , std::shared_ptr<BufferMemory> >::const_iterator it = m_Buffers.find( str );
+    unordered_map< string , std::shared_ptr<BufferMemory> >::const_iterator it = m_Buffers.find( str );
 	while( it != m_Buffers.end() )
 	{
 		// create another instance of the mesh
