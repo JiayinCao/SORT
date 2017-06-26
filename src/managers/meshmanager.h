@@ -166,7 +166,7 @@ private:
     vector<std::shared_ptr<MeshLoader>>	m_MeshLoader;
 
 	// the memory for meshes
-    map< string , std::shared_ptr<BufferMemory> > m_Buffers;
+    unordered_map< string , std::shared_ptr<BufferMemory> > m_Buffers;
 
 // private method
 private:

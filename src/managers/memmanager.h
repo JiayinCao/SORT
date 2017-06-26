@@ -22,7 +22,7 @@
 #include "utility/singleton.h"
 #include "utility/multithread/multithread.h"
 #include "logmanager.h"
-#include <map>
+#include <unordered_map>
 
 struct Memory
 {
@@ -99,21 +99,21 @@ public:
 // private field
 private:
 	// the memories
-	map<unsigned,Memory*> m_MemPool;
+	unordered_map<unsigned,Memory*> m_MemPool;
 
 	// get memory
 	Memory*	_getMemory( unsigned id ) const
 	{
-		map<unsigned,Memory*>::const_iterator it = m_MemPool.find(id);
+		unordered_map<unsigned,Memory*>::const_iterator it = m_MemPool.find(id);
 		if( it != m_MemPool.end() )
 			return it->second;
-		return 0;
+		return nullptr;
 	}
 
 	// dealloc all memory
 	void _deallocAllMemory()
 	{
-		map<unsigned,Memory*>::const_iterator it = m_MemPool.begin();
+		unordered_map<unsigned,Memory*>::const_iterator it = m_MemPool.begin();
 		while( it != m_MemPool.end() )
 		{
 			delete it->second;

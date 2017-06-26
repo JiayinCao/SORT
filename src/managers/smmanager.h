@@ -19,7 +19,7 @@
 #define SORT_SMMANAGER
 
 #include "utility/singleton.h"
-#include <map>
+#include <unordered_map>
 #include "platform/sharedmemory/sharedmemory.h"
 
 /////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ public:
 
 private:
 	// the map for shared memory
-	std::map< string, PlatformSharedMemory > m_SharedMemory;
+	std::unordered_map< string, PlatformSharedMemory > m_SharedMemory;
 
 	// private constructor
 	SMManager();
