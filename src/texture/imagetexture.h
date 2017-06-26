@@ -20,7 +20,6 @@
 
 // include the header file
 #include "texture.h"
-#include "utility/referencecount.h"
 #include "managers/texmanager.h"
 
 ///////////////////////////////////////////////////////////////
@@ -74,7 +73,7 @@ public:
 // private field
 private:
 	// array saving the color of image
-	Reference<ImgMemory>	m_pMemory;
+    std::shared_ptr<ImgMemory>	m_pMemory;
 
 	// the average radiance of the texture
 	Spectrum	m_Average;

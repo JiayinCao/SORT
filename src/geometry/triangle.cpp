@@ -26,7 +26,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
 	// get the memory
 	// note : reference is not used here because it's not thread-safe
-	BufferMemory* mem = m_trimesh->m_pMemory;
+	auto& mem = m_trimesh->m_pMemory;
 	int id0 = m_Index[0].posIndex;
 	int id1 = m_Index[1].posIndex;
 	int id2 = m_Index[2].posIndex;
@@ -110,10 +110,10 @@ const BBox& Triangle::GetBBox() const
 	// if there is no bounding box , cache it
 	if( !m_bbox )
 	{
-		m_bbox = new BBox();
+        m_bbox = std::unique_ptr<BBox>( new BBox() );
 
 		// get the memory
-		Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+        auto& mem = m_trimesh->m_pMemory;
 		int id0 = m_Index[ 0 ].posIndex;
 		int id1 = m_Index[ 1 ].posIndex;
 		int id2 = m_Index[ 2 ].posIndex;
@@ -135,7 +135,7 @@ const BBox& Triangle::GetBBox() const
 float Triangle::SurfaceArea() const
 {
 	// get the memory
-	Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+	auto& mem = m_trimesh->m_pMemory;
 	int id0 = m_Index[ 0 ].posIndex;
 	int id1 = m_Index[ 1 ].posIndex;
 	int id2 = m_Index[ 2 ].posIndex;
@@ -170,7 +170,7 @@ static void Project(const Point* points, int count , const Vector& axis, float& 
 bool Triangle::GetIntersect( const BBox& box ) const
 {
 	// get the memory
-	Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+	auto& mem = m_trimesh->m_pMemory;
 	int id0 = m_Index[ 0 ].posIndex;
 	int id1 = m_Index[ 1 ].posIndex;
 	int id2 = m_Index[ 2 ].posIndex;

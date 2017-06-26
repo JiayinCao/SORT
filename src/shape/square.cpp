@@ -99,7 +99,7 @@ const BBox&	Square::GetBBox() const
 {
 	if( !m_bbox )
 	{
-		m_bbox = new BBox();
+        m_bbox = std::unique_ptr<BBox>( new BBox() );
 		m_bbox->Union( transform( Point( radius , 0.0f , radius ) ) );
 		m_bbox->Union( transform( Point( radius , 0.0f , -radius ) ) );
 		m_bbox->Union( transform( Point( -radius , 0.0f , radius ) ) );

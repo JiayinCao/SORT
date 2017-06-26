@@ -22,7 +22,7 @@
 #include "thirdparty/tga/targa.h"
 
 // read data from file
-bool TgaIO::Read( const string& name , ImgMemory* mem )
+bool TgaIO::Read( const string& name , std::shared_ptr<ImgMemory>& mem )
 {
 	tga_image img;
     tga_result result;
@@ -41,7 +41,7 @@ bool TgaIO::Read( const string& name , ImgMemory* mem )
 	mem->m_iHeight = img.height;
 
     // TGA pixels are in BGRA format.
-    mem->m_ImgMem = new Spectrum[ img.width * img.height ];
+    mem->m_ImgMem = std::unique_ptr<Spectrum[]>( new Spectrum[ img.width * img.height ] );
 
 	for( int i = 0 ; i < img.height ; i++ )
 		for( int j = 0 ; j < img.width ; j++ )

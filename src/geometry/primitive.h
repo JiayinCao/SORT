@@ -19,10 +19,8 @@
 #define	SORT_PRIMITIVE
 
 // include header file
-#include "utility/smartptr.h"
 #include "bbox.h"
 #include "material/material.h"
-#include "utility/referencecount.h"
 #include "intersection.h"
 
 // pre-decleration
@@ -36,7 +34,7 @@ class	Primitive
 // public method
 public:
 	// constructor from a id
-	Primitive( unsigned id , Material* mat ) { m_primitive_id = id; m_mat = mat; light = 0; }
+    Primitive( unsigned id , std::shared_ptr<Material> mat ) { m_primitive_id = id; m_mat = mat; light = 0; }
 	// destructor
 	virtual ~Primitive(){}
 
@@ -51,18 +49,15 @@ public:
 	// get surface area of the primitive
 	virtual float	SurfaceArea() const = 0;
 
-	// delete the cache
-	virtual void ClearBBoxCache();
-
 	// set primitive id
 	void	SetID( unsigned id ) { m_primitive_id = id; }
 	// get primitive id
 	unsigned GetID() const { return m_primitive_id; }
 
 	// get material
-	Material* GetMaterial() const;
+    const std::shared_ptr<Material>& GetMaterial() const;
 	// set material
-	void	SetMaterial( Material* mat ) { m_mat = mat; }
+    void	SetMaterial( std::shared_ptr<Material>& mat ) { m_mat = mat; }
 
 	// get light
 	Light* GetLight() const { return light; }
@@ -70,11 +65,11 @@ public:
 // protected field
 protected:
 	// bounding box
-	mutable SmartPtr<BBox> m_bbox;
+    mutable std::unique_ptr<BBox> m_bbox;
 	// id for the primitive
 	unsigned		m_primitive_id;
 	// the material
-	Reference<Material>	m_mat;
+    std::shared_ptr<Material>	m_mat;
 
 	// the binded light
 	Light*		light;

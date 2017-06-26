@@ -21,11 +21,10 @@
 // include the headers
 #include "sort.h"
 #include "utility/singleton.h"
-#include "utility/referencecount.h"
 #include "utility/enum.h"
 #include "utility/define.h"
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include "math/point.h"
 #include "math/vector3.h"
 #include "math/transform.h"
@@ -64,7 +63,7 @@ public:
 	// the triangle number
 	unsigned	m_iTriNum;
 	// the material
-	Reference<Material>	m_mat;
+    std::shared_ptr<Material>	m_mat;
 
 	// constructor
 	// para 'str' : name for the trunk
@@ -73,7 +72,7 @@ public:
 };
 
 // the buffer memory for the mesh
-class BufferMemory : public ReferenceCount
+class BufferMemory
 {
 // public data
 public:
@@ -86,7 +85,7 @@ public:
 	// the texture coordinate buffer
 	vector<float>	m_TexCoordBuffer;
 	// the trunk buffer
-	vector<Trunk*>	m_TrunkBuffer;
+    vector<std::shared_ptr<Trunk>>	m_TrunkBuffer;
 	// the size for three buffers
 	unsigned		m_iVBCount , m_iNBCount , m_iTeBcount , m_iTBCount;
 	// the number of triangles 
@@ -109,15 +108,6 @@ public:
 		m_pPrototype = 0;
 		m_iTrunkNum = 0;
 	}
-	~BufferMemory()
-	{
-		vector<Trunk*>::iterator it = m_TrunkBuffer.begin();
-		while( it != m_TrunkBuffer.end() )
-		{
-			delete *it;
-			it++;
-		}
-	}
 
 	// apply transform
 	void ApplyTransform( TriMesh* mesh );
@@ -131,7 +121,7 @@ public:
 		m_iTeBcount = m_TangentBuffer.size();
 		m_iTrunkNum = m_TrunkBuffer.size();
 		m_iTriNum = 0;
-		vector<Trunk*>::iterator it = m_TrunkBuffer.begin();
+		auto it = m_TrunkBuffer.begin();
 		while( it != m_TrunkBuffer.end() )
 		{
 			(*it)->m_iTriNum = (*it)->m_IndexBuffer.size() / 3;
@@ -150,7 +140,7 @@ public:
 // private method
 private:
 	void	_genFlatNormal();
-	Vector	_genTagentForTri( const Trunk* trunk , unsigned k  ) const;
+    Vector	_genTagentForTri( const std::shared_ptr<Trunk>& trunk , unsigned k  ) const;
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -164,9 +154,6 @@ class	MeshManager : public Singleton<MeshManager>
 {
 // public method
 public:
-	// destructor
-	~MeshManager(){ _release(); }
-
 	// load the mesh from file
 	// para 'str'  : name of the file
 	// para 'mesh' : triangle mesh
@@ -176,23 +163,18 @@ public:
 // private field
 private:
 	// the mesh loaders
-	vector<MeshLoader*>	m_MeshLoader;
+    vector<std::shared_ptr<MeshLoader>>	m_MeshLoader;
 
 	// the memory for meshes
-	map< string , BufferMemory* > m_Buffers;
+    map< string , std::shared_ptr<BufferMemory> > m_Buffers;
 
 // private method
 private:
 	// default constructor
-	MeshManager(){ _init(); }
-
-	// initialize the manager
-	void	_init();
-	// release the manager
-	void	_release();
-
+    MeshManager();
+    
 	// get the mesh loader
-	MeshLoader*	_getMeshLoader( MESH_TYPE type ) const;
+	std::shared_ptr<MeshLoader>	_getMeshLoader( MESH_TYPE type ) const;
 
 	friend class Singleton<MeshManager>;
 };

@@ -20,7 +20,6 @@
 #include "utility/propertyset.h"
 #include "utility/creator.h"
 #include "spectrum/spectrum.h"
-#include "utility/referencecount.h"
 #include "material_node.h"
 
 class Bsdf;
@@ -28,7 +27,7 @@ class Intersection;
 
 ///////////////////////////////////////////////////////////
 // definition of material
-class Material : public ReferenceCount
+class Material
 {
 public:
     // virtual destructor

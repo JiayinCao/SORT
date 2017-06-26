@@ -23,7 +23,7 @@
 #include "thirdparty/libjpg/jpge.h"
 
 // read data from file
-bool JpgIO::Read( const string& name , ImgMemory* mem )
+bool JpgIO::Read( const string& name , std::shared_ptr<ImgMemory>& mem )
 {
 	const int channel = 3;
 	int width = 0;
@@ -35,7 +35,7 @@ bool JpgIO::Read( const string& name , ImgMemory* mem )
 	mem->m_iHeight = height;
 
 	// TGA pixels are in BGRA format.
-	mem->m_ImgMem = new Spectrum[width * height];
+	mem->m_ImgMem = std::unique_ptr<Spectrum[]>( new Spectrum[width * height] );
 
 	for (int i = 0; i < height; i++)
 		for (int j = 0; j < width; j++)

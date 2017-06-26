@@ -92,9 +92,9 @@ void System::_postUninit()
 
 	// release managers
 	Creator::DeleteSingleton();
+    MeshManager::DeleteSingleton();
 	MatManager::DeleteSingleton();
 	TexManager::DeleteSingleton();
-	MeshManager::DeleteSingleton();
 	MemManager::DeleteSingleton();
 	Timer::DeleteSingleton();
 	LogManager::DeleteSingleton();

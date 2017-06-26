@@ -21,11 +21,10 @@
 // include header file
 #include "utility/singleton.h"
 #include <string>
-#include <map>
-#include "material/matte.h"
+#include <unordered_map>
 
 // pre-decleration
-class TiXmlElement;
+class Material;
 
 /////////////////////////////////////////////////////////////////////////////
 //	definition of material manager
@@ -41,17 +40,17 @@ class	MatManager : public Singleton<MatManager>
 public:
 	// default constructor
 	MatManager();
-	// destructor
-	~MatManager();
-
+    // default destructor
+    ~MatManager();
+    
 	// find specific material
 	// para 'mat_name' : the name for the material
 	// result          : the material with specific material , default material
 	//					 if there is no material with the name.
-	Material*	FindMaterial( const string& mat_name ) const;
+    std::shared_ptr<Material>	FindMaterial( const string& mat_name ) const;
 
 	// get default material
-	Material*	GetDefaultMat();
+    std::shared_ptr<Material>	GetDefaultMat();
 
 	// parse material file and add the materials into the manager
 	// para 'str' : name of the material file
@@ -64,13 +63,10 @@ public:
 // private field
 private:
 	// material pool
-	map< string , Material* >	m_matPool;
+    std::unordered_map< string , std::shared_ptr<Material> >	m_matPool;
 
 	// the default material
-	Matte	m_Default;
-
-	// clear the material pool
-	void _clearMatPool();
+    std::shared_ptr<Material>	m_pDefault;
 
 	friend class Singleton<MatManager>;
 };

@@ -26,6 +26,7 @@
 #include "utility/creator.h"
 #include "bsdf/merl.h"
 #include "utility/creator.h"
+#include "material/matte.h"
 
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MatManager);
@@ -33,46 +34,35 @@ DEFINE_SINGLETON(MatManager);
 // default constructor
 MatManager::MatManager()
 {
+    m_pDefault = std::make_shared<Matte>();
 }
 
-// destructor
+// default destructor
 MatManager::~MatManager()
 {
-	_clearMatPool();
-}
-
-// clear the material pool
-void MatManager::_clearMatPool()
-{
-	map< string , Material* >::iterator it = m_matPool.begin();
-	while( it != m_matPool.end() )
-	{
-		if( it->second->reference != 0 )
-		{
-			string isare = (it->second->reference>1)?"is":"are";
-			string refer = (it->second->reference>1)?" reference":" references";
-			LOG_ERROR<<"There "<<isare<<" still "<<it->second->reference<<refer<<" pointing to material \""<<it->first<<"\"."<<CRASH;
-		}
-
-		delete it->second;
-		it++;
-	}
-	m_matPool.clear();
+#if defined(SORT_DEBUG)
+    for_each( m_matPool.begin() , m_matPool.end() ,
+        []( const std::pair< string , std::shared_ptr<Material>>& it )
+        {
+            int references = it.second.use_count() - 1;
+            if( references > 1 )
+                LOG_ERROR<<"There are still "<<references<<" references pointing to material \""<<it.first<<"\"."<<CRASH;
+        }
+    );
+#endif
 }
 
 // find specific material
-Material* MatManager::FindMaterial( const string& mat_name ) const
+std::shared_ptr<Material> MatManager::FindMaterial( const string& mat_name ) const
 {
-	map< string , Material* >::const_iterator it = m_matPool.find( mat_name );
-	if( it != m_matPool.end() )
-		return it->second;
-	return 0;
+    std::unordered_map< string , std::shared_ptr<Material> >::const_iterator it = m_matPool.find( mat_name );
+    return it == m_matPool.end() ? nullptr : it->second;
 }
 
 // whether the material exists
-Material* MatManager::GetDefaultMat()
+std::shared_ptr<Material> MatManager::GetDefaultMat()
 {
-	return &m_Default;
+	return m_pDefault;
 }
 
 // parse material file and add the materials into the manager
@@ -111,7 +101,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 			continue;
 		}
 
-		Material* mat = new Material();
+        std::shared_ptr<Material> mat = std::make_shared<Material>();
 		mat->SetName(name);
 		mat->ParseMaterial( material );
 
