@@ -21,7 +21,7 @@
 #include "trimesh.h"
 
 // constructor from a triangle
-InstanceTriangle::InstanceTriangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index , Transform* t , Material* mat ):
+InstanceTriangle::InstanceTriangle( unsigned pid , const TriMesh* mesh , const VertexIndex* index , Transform* t , std::shared_ptr<Material>& mat ):
 Triangle( pid , mesh , index , mat) , transform( t )
 {
 }
@@ -60,9 +60,9 @@ const BBox& InstanceTriangle::GetBBox() const
 	if( !m_bbox )
 	{
 		// to be modified
-		m_bbox = new BBox();
+        m_bbox = std::unique_ptr<BBox>( new BBox() );
 
-		const Reference<BufferMemory> mem = m_trimesh->m_pMemory;
+        const auto& mem = m_trimesh->m_pMemory;
 		int id0 = m_Index[0].posIndex;
 		int id1 = m_Index[1].posIndex;
 		int id2 = m_Index[2].posIndex;

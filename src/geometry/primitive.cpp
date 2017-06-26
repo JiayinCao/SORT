@@ -20,14 +20,8 @@
 #include "bbox.h"
 #include "managers/matmanager.h"
 
-// delete the cache
-void Primitive::ClearBBoxCache()
-{
-	m_bbox.Delete();
-}
-
 // get material
-Material* Primitive::GetMaterial() const 
+const std::shared_ptr<Material>& Primitive::GetMaterial() const
 { 
 	if( m_mat == 0 ) 
 		return MatManager::GetSingleton().GetDefaultMat();

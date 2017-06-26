@@ -50,14 +50,12 @@ class	PlyLoader : public MeshLoader
 public:
 	// default constructor
 	PlyLoader(){m_MeshType = MT_PLY;}
-	// destructor
-	~PlyLoader(){}
 
 	// load mesh from file
 	// para 'str' : name of the file
 	// para 'mem' : the memory to store
 	// result     : true if loading is successful
-	bool	LoadMesh( const string& str , BufferMemory* mem );
+    bool	LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem ) override;
 };
 
 #endif

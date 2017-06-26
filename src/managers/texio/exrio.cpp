@@ -29,7 +29,7 @@ using namespace Imf;
 using namespace Imath;
 
 // read data from file
-bool ExrIO::Read( const string& name , ImgMemory* mem )
+bool ExrIO::Read( const string& name , std::shared_ptr<ImgMemory>& mem )
 {
 	try {
 		InputFile file(name.c_str());
@@ -51,7 +51,7 @@ bool ExrIO::Read( const string& name , ImgMemory* mem )
 		file.readPixels(dw.min.y, dw.max.y);
 
 		unsigned total = mem->m_iWidth * mem->m_iHeight;
-		mem->m_ImgMem = new Spectrum[ total ];
+        mem->m_ImgMem = std::unique_ptr<Spectrum[]>( new Spectrum[ total ] );
 
 		for( unsigned i = 0 ; i < total ; i++ )
 			mem->m_ImgMem[i] = Spectrum( rgb[3*i] , rgb[3*i+1] , rgb[3*i+2] );

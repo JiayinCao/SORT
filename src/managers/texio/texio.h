@@ -55,7 +55,7 @@ public:
 	// para 'tex' : the texture for aside the memory
 	// result     :	return true if loading is successful
 	// note       : it's not a pure function because some shower doesn't need a reading func
-	virtual bool Read( const string& str , ImgMemory* tex )
+    virtual bool Read( const string& str , std::shared_ptr<ImgMemory>& tex )
 	{
 		return false;
 	}

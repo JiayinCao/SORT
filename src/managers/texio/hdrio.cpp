@@ -22,7 +22,7 @@
 #include "thirdparty/hdrlib/hdrloader.h"
 
 // read data from file
-bool HdrIO::Read( const string& name , ImgMemory* mem )
+bool HdrIO::Read( const string& name , std::shared_ptr<ImgMemory>& mem )
 {
 	HDRLoaderResult result;
 	bool ret = HDRLoader::load(name.c_str(), result);
@@ -33,7 +33,7 @@ bool HdrIO::Read( const string& name , ImgMemory* mem )
 	mem->m_iHeight = result.height;
 
 	int totalsize = result.width * result.height;
-	mem->m_ImgMem = new Spectrum[ totalsize ];
+    mem->m_ImgMem = std::unique_ptr<Spectrum[]>( new Spectrum[ totalsize ] );
 
 	for( int i = 0 ; i < totalsize; ++i )
 		mem->m_ImgMem[i] = Spectrum( result.cols[3*i] , result.cols[3*i+1], result.cols[3*i+2] );

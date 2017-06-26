@@ -21,7 +21,6 @@
 // include the headers
 #include <vector>
 #include "primitive.h"
-#include "utility/referencecount.h"
 #include "managers/meshmanager.h"
 #include "math/transform.h"
 
@@ -35,9 +34,7 @@ class TriMesh
 public:
 	// default constructor
 	TriMesh(const string& name);
-	// destructor
-	~TriMesh();
-
+    
 	// load the mesh from file
 	// para 'str'  : the name of the input file
 	// para 'transform' : the transformation of the mesh
@@ -59,23 +56,19 @@ public:
 	// the name of the model
 	const string	m_Name;
 
-	// the memory for the mesh
-	Reference<BufferMemory> m_pMemory;
-
-	// the transformation of the mesh
+    // the transformation of the mesh
 	Transform		m_Transform;
 
 	// whether the mesh is instanced
 	bool			m_bInstanced;
 
+    // the memory for the mesh
+    std::shared_ptr<BufferMemory>  m_pMemory;
+    
 	// the materials for instanced mesh
-	Reference<Material>*	m_pMaterials;
+    std::vector<std::shared_ptr<Material>>      m_Materials;
 
 // private method
-	// initialize default data
-	void	_init();
-	// release the default data
-	void	_release();
 	// get the subset of the mesh
 	int		_getSubsetID( const string& setname );
 	// copy materials

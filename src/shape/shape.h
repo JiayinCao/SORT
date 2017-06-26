@@ -35,7 +35,7 @@ class	Shape : public Primitive
 // public method
 public:
 	// default constructor
-	Shape():Primitive(0,0){ radius = 1.0f;}
+	Shape():Primitive(0,nullptr){ radius = 1.0f;}
 	// destructor
 	virtual ~Shape(){}
 
