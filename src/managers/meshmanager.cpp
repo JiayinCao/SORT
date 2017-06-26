@@ -28,49 +28,19 @@
 // instance the singleton with tex manager
 DEFINE_SINGLETON(MeshManager);
 
-// initialize the manager
-void MeshManager::_init()
+// default constructor
+MeshManager::MeshManager()
 {
 	// register the mesh loaders
-	m_MeshLoader.push_back( new ObjLoader() );
-	m_MeshLoader.push_back( new PlyLoader() );
-}
-
-// release the memory
-void MeshManager::_release()
-{
-	// unregister the mesh loader
-	vector<MeshLoader*>::iterator it = m_MeshLoader.begin();
-	while( it != m_MeshLoader.end() )
-	{
-		delete *it;
-		it++;
-	}
-	m_MeshLoader.clear();
-
-	map< string , BufferMemory* >::iterator buf_it = m_Buffers.begin();
-	while( buf_it != m_Buffers.end() )
-	{
-		if( buf_it->second->reference > 0 )
-		{
-			string isare = (buf_it->second->reference>1)?"is":"are";
-			string refer = (buf_it->second->reference>1)?" reference":" references";
-			LOG_ERROR<<"There "<<isare<<" still "<<buf_it->second->reference<<refer<<" pointing to \""<<buf_it->first<<"\"."<<CRASH;
-		}
-
-		// delete the memory
-		delete buf_it->second;
-
-		buf_it++;
-	}
-	m_Buffers.clear();
+    m_MeshLoader.push_back( std::make_shared<ObjLoader>() );
+    m_MeshLoader.push_back( std::make_shared<PlyLoader>() );
 }
 
 // get the mesh loader
-MeshLoader*	MeshManager::_getMeshLoader( MESH_TYPE type ) const
+std::shared_ptr<MeshLoader>	MeshManager::_getMeshLoader( MESH_TYPE type ) const
 {
 	// unregister the mesh loader
-	vector<MeshLoader*>::const_iterator it = m_MeshLoader.begin();
+	auto it = m_MeshLoader.begin();
 	while( it != m_MeshLoader.end() )
 	{
 		if( (*it)->GetMT() == type )
@@ -78,7 +48,7 @@ MeshLoader*	MeshManager::_getMeshLoader( MESH_TYPE type ) const
 		it++;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 // load the mesh from file
@@ -91,7 +61,7 @@ bool MeshManager::LoadMesh( const string& filename , TriMesh* mesh )
 	MESH_TYPE type = MeshTypeFromStr( str );
 
 	// find the mesh memory first
-	map< string , BufferMemory* >::const_iterator it = m_Buffers.find( str );
+    map< string , std::shared_ptr<BufferMemory> >::const_iterator it = m_Buffers.find( str );
 	while( it != m_Buffers.end() )
 	{
 		// create another instance of the mesh
@@ -107,13 +77,13 @@ bool MeshManager::LoadMesh( const string& filename , TriMesh* mesh )
 	}
 	
 	// get the mesh loader first
-	MeshLoader* loader = _getMeshLoader( type );
+	auto loader = _getMeshLoader( type );
 
 	bool read = false;
 	if( loader )
 	{
 		// create the new memory
-		BufferMemory* mem = new BufferMemory();
+        shared_ptr<BufferMemory> mem = std::make_shared<BufferMemory>();
 
 		// load the mesh from file
 		read = loader->LoadMesh( str , mem );
@@ -138,10 +108,6 @@ bool MeshManager::LoadMesh( const string& filename , TriMesh* mesh )
 
 			// and insert it into the map
 			m_Buffers.insert( make_pair( str , mem ) );
-		}else
-		{
-			LOG_WARNING<<"Can't load file \""<<str<<"\"."<<ENDL;
-			delete mem;
 		}
 	}
 
@@ -178,7 +144,7 @@ void BufferMemory::_genFlatNormal()
 	unsigned base = 0;
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
-		Trunk* trunk = m_TrunkBuffer[i];
+        auto& trunk = m_TrunkBuffer[i];
 		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
 		{
 			unsigned offset = 3*k;
@@ -220,7 +186,7 @@ void BufferMemory::GenSmoothNormal()
 	unsigned base = 0;
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
-		Trunk* trunk = m_TrunkBuffer[i];
+		auto& trunk = m_TrunkBuffer[i];
 		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
 		{
 			unsigned offset = 3 * k;
@@ -276,7 +242,7 @@ void BufferMemory::GenSmoothTagent()
 	const unsigned trunkNum = m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
-		Trunk* trunk = m_TrunkBuffer[i];
+        auto& trunk = m_TrunkBuffer[i];
 		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
 			tagents.push_back( _genTagentForTri( trunk , k ) );
 	}
@@ -286,7 +252,7 @@ void BufferMemory::GenSmoothTagent()
 	unsigned base = 0;
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
-		Trunk* trunk = m_TrunkBuffer[i];
+		auto& trunk = m_TrunkBuffer[i];
 		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
 		{
 			unsigned offset = 3 * k;
@@ -325,7 +291,7 @@ void BufferMemory::GenSmoothTagent()
 }
 
 // generate tagent vector for a triangle
-Vector BufferMemory::_genTagentForTri( const Trunk* trunk , unsigned k ) const
+Vector BufferMemory::_genTagentForTri( const std::shared_ptr<Trunk>& trunk , unsigned k ) const
 {
 	unsigned offset = 3 * k;
 	unsigned pid0 = trunk->m_IndexBuffer[offset].posIndex;
@@ -406,7 +372,7 @@ void BufferMemory::GenTexCoord()
 	unsigned trunkNum = m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
-		Trunk* trunk = m_TrunkBuffer[i];
+		auto& trunk = m_TrunkBuffer[i];
 		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
 		{
 			unsigned offset = 3*k;

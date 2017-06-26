@@ -42,7 +42,7 @@ public:
 	// para 'str' : the name of the input entity
 	// para 'mem' : the memory for the image
 	// result     :	'true' if the input file is parsed successfully
-	virtual bool Read( const string& str , ImgMemory* mem );
+    bool Read( const string& str , std::shared_ptr<ImgMemory>& mem ) override;
 };
 
 #endif

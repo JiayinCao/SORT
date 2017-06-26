@@ -46,7 +46,7 @@ static const unsigned LINE_MAXLENGTH = 4096;
 }
 	
 // load obj from file
-bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
+bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem )
 {
 	ifstream file( str.c_str() );
 
@@ -57,7 +57,7 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 	mem->m_filename = str;
 
 	// current trunk
-	Trunk*	trunk = 0;
+    std::shared_ptr<Trunk>	trunk = nullptr;
 
 	while( true )
 	{
@@ -69,7 +69,7 @@ bool ObjLoader::LoadMesh( const string& str , BufferMemory* mem )
 			// create a new trunk
 			string trunkname;
 			file>>trunkname;
-			trunk = new Trunk(trunkname);
+            trunk = std::make_shared<Trunk>( trunkname );
 			mem->m_TrunkBuffer.push_back( trunk );
 		}else if( strcmp( prefix.c_str() , "mtllib" ) == 0 )
 		{

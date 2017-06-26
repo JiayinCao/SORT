@@ -151,7 +151,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 }
 
 // read data from file
-bool BmpIO::Read( const string& str , ImgMemory* mem )
+bool BmpIO::Read( const string& str , std::shared_ptr<ImgMemory>& mem )
 {
 	// check if 'str' and 'tex' are valid
 	if( str.empty() || mem == 0 )
@@ -200,7 +200,7 @@ bool BmpIO::Read( const string& str , ImgMemory* mem )
 
 	// allocate the memory
 	char* data = new char[bytes];
-	mem->m_ImgMem = new Spectrum[w*h];
+    mem->m_ImgMem = std::unique_ptr<Spectrum[]>(new Spectrum[w*h]);
 	// read the data
 	file.read( (char*)data , bytes * sizeof( char ) );
 	for( int i = 0 ; i < h ; i++ )

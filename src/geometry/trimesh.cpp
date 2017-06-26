@@ -29,26 +29,6 @@
 // default constructor
 TriMesh::TriMesh( const string& name ):m_Name(name)
 {
-	// initialize default data
-	_init();
-}
-// destructor
-TriMesh::~TriMesh()
-{
-	_release();
-}
-
-// initialize default data
-void TriMesh::_init()
-{
-	m_pMemory = 0;
-	m_pMaterials = 0;
-}
-
-// release the default data
-void TriMesh::_release()
-{
-	SAFE_DELETE_ARRAY(m_pMaterials);
 }
 
 // load the mesh
@@ -70,19 +50,11 @@ bool TriMesh::LoadMesh( const string& str , Transform& transform )
 // copy materials
 void TriMesh::_copyMaterial()
 {
-	SAFE_DELETE_ARRAY(m_pMaterials);
-
 	unsigned trunk_size = m_pMemory->m_TrunkBuffer.size();
-	m_pMaterials = new Reference<Material>[trunk_size];
+    m_Materials.resize( trunk_size );
 	
 	for( unsigned i = 0 ; i < trunk_size ; ++i )
-	{
-		if( m_pMemory->m_TrunkBuffer[i]->m_mat )
-			m_pMaterials[i] = m_pMemory->m_TrunkBuffer[i]->m_mat;
-		else
-			m_pMaterials[i] = MatManager::GetSingleton().GetDefaultMat();
-		m_pMemory->m_TrunkBuffer[i]->m_mat = 0;
-	}
+        m_Materials[i] = m_pMemory->m_TrunkBuffer[i]->m_mat ? m_pMemory->m_TrunkBuffer[i]->m_mat : MatManager::GetSingleton().GetDefaultMat();
 }
 
 // fill buffer into vector
@@ -97,7 +69,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_pMaterials[i]) );
+				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_Materials[i]) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}else
@@ -108,7 +80,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 		{
 			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_pMaterials[i] ) );
+				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_Materials[i] ) );
 			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 		}
 	}
@@ -118,7 +90,7 @@ void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 void TriMesh::ResetMaterial( const string& setname , const string& matname )
 {
 	// get the material first
-	Material* mat = MatManager::GetSingleton().FindMaterial( matname );
+    auto mat = MatManager::GetSingleton().FindMaterial( matname );
 	if( mat == 0 )
 		LOG_WARNING<<"There is no such a material named \'"<<matname<<"\'."<<ENDL;
 
@@ -127,7 +99,7 @@ void TriMesh::ResetMaterial( const string& setname , const string& matname )
 	{
 		unsigned size = m_pMemory->m_TrunkBuffer.size();
 		for( unsigned i = 0 ; i < size ; ++i )
-			m_pMaterials[i] = mat;
+			m_Materials[i] = mat;
 		return;
 	}
 
@@ -137,7 +109,7 @@ void TriMesh::ResetMaterial( const string& setname , const string& matname )
 		LOG_WARNING<<"There is no such subset named "<<setname<<ENDL;
 		return;
 	}
-	m_pMaterials[id] = mat;
+	m_Materials[id] = mat;
 }
 
 // get the subset of the mesh

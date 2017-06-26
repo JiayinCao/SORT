@@ -22,7 +22,7 @@
 #include "thirdparty/png/lodepng.h"
 
 // read data from file
-bool PngIO::Read( const string& name , ImgMemory* mem )
+bool PngIO::Read( const string& name , std::shared_ptr<ImgMemory>& mem )
 {
     std::vector<unsigned char> image; //the raw pixels
     unsigned width, height;
@@ -36,7 +36,7 @@ bool PngIO::Read( const string& name , ImgMemory* mem )
     // TGA pixels are in BGRA format.
     mem->m_iWidth = width;
     mem->m_iHeight = height;
-    mem->m_ImgMem = new Spectrum[ width * height ];
+    mem->m_ImgMem = std::unique_ptr<Spectrum[]>( new Spectrum[ width * height ] );
 
     for( unsigned i = 0 ; i < height ; i++ )
 		for( unsigned j = 0 ; j < width ; j++ )

@@ -44,7 +44,7 @@ public:
 	// para 'mem' : the memory for the image
 	// result     :	'true' if the input file is parsed successfully
 	// note       : only 24-bits or 32-bits image are supported!!
-	virtual bool Read( const string& str , ImgMemory* mem );
+    bool Read( const string& str , std::shared_ptr<ImgMemory>& mem ) override;
 };
 
 #endif

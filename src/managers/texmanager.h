@@ -22,20 +22,19 @@
 #include "utility/singleton.h"
 #include "utility/enum.h"
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include "spectrum/spectrum.h"
-#include "utility/referencecount.h"
 
 class Texture;
 class ImageTexture;
 class TexIO;
 
-class ImgMemory : public ReferenceCount
+class ImgMemory
 {
 public:
-	Spectrum*	m_ImgMem;
-	unsigned	m_iWidth;
-	unsigned	m_iHeight;
+    std::unique_ptr<Spectrum[]>	m_ImgMem;
+	unsigned                    m_iWidth;
+	unsigned                    m_iHeight;
 };
 
 //////////////////////////////////////////////////////////////////
@@ -64,30 +63,19 @@ public:
 	// para 'tex'  : output to the texture
 	// result      : 'true' if loading is successful
 	bool Read( const string& str , ImageTexture* tex );
-
-	// get the reference count
-	// para 'str' : the name of the image file
-	// result     : how many reference to the memory
-	unsigned GetReferenceCount( const string& str ) const;
-
+    
 // private data
 private:
 	// a vector saving texture io
-	vector<TexIO*>	m_TexIOVec;
+    vector<std::shared_ptr<TexIO>>	m_TexIOVec;
 
 	// map a string to the image memory
-	map< string , ImgMemory* > m_ImgContainer;
+    unordered_map< string , std::shared_ptr<ImgMemory> > m_ImgContainer;
 
 // private method
 private:
 	// private default constructor
 	TexManager();
-
-	// initialize texture manager data
-	void _init();
-
-	// release texture manager data
-	void _release();
 
 	// register all texture types
 	void _registerTexture();
@@ -96,7 +84,7 @@ private:
 	void _unregisterTexture();
 
 	// find correct texio
-	TexIO*	FindTexIO( TEX_TYPE tt ) const;
+    std::shared_ptr<TexIO>	FindTexIO( TEX_TYPE tt ) const;
 
 	friend class Singleton<TexManager>;
 };

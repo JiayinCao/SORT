@@ -38,7 +38,7 @@ static PlyProperty face_props[] =
 };
 
 // load obj from file
-bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
+bool PlyLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem )
 {
 	// some variable that will be used later
 	int nelems;
@@ -58,7 +58,7 @@ bool PlyLoader::LoadMesh( const string& str , BufferMemory* mem )
 	mem->m_filename = str;
 
 	// ply format doesn't support mutiple trunks , so there is only one trunk named 'default'
-	Trunk*	trunk = new Trunk("default");
+    std::shared_ptr<Trunk>	trunk = std::make_shared<Trunk>("default");
 	mem->m_TrunkBuffer.push_back( trunk );
 
 	for ( int i = 0; i < nelems; i++) 

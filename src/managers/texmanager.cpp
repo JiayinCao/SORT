@@ -38,58 +38,28 @@ DEFINE_SINGLETON(TexManager);
 // destructor
 TexManager::~TexManager()
 {
-	_release();
+#if defined(SORT_DEBUG)
+    for_each( m_ImgContainer.begin() , m_ImgContainer.end() ,
+        []( const std::pair< string , std::shared_ptr<ImgMemory>>& it )
+        {
+            int references = it.second.use_count() - 1;
+            if( references > 1 )
+                LOG_ERROR<<"There are still "<<references<<" references pointing to material \""<<it.first<<"\"."<<CRASH;
+        }
+    );
+#endif
 }
 
 // default constructor
 TexManager::TexManager()
 {
-	_init();
-}
-
-// initialize data
-void TexManager::_init()
-{
-	// push the texture outputer
-	m_TexIOVec.push_back( new BmpIO() );
-	m_TexIOVec.push_back( new ExrIO() );
-	m_TexIOVec.push_back( new TgaIO() );
-    m_TexIOVec.push_back( new PngIO() );
-	m_TexIOVec.push_back( new JpgIO() );
-	m_TexIOVec.push_back( new HdrIO() );
-}
-
-// release data
-void TexManager::_release()
-{
-	// release texture outputer
-	vector<TexIO*>::const_iterator tex_it = m_TexIOVec.begin();
-	while( tex_it != m_TexIOVec.end() )
-	{
-		delete *tex_it;
-		tex_it++;
-	}
-	m_TexIOVec.clear();
-
-	map< std::string , ImgMemory* >::iterator img_it = m_ImgContainer.begin();
-	while( img_it != m_ImgContainer.end() )
-	{
-		if( img_it->second->reference > 0 )
-		{
-			string isare = (img_it->second->reference>1)?"is":"are";
-			string refer = (img_it->second->reference>1)?" reference":" references";
-			LOG_ERROR<<"There "<<isare<<" still "<<(int)(img_it->second->reference)<<refer<<" pointing to \""<<img_it->first<<"\"."<<CRASH;
-		}
-		SAFE_DELETE_ARRAY( img_it->second->m_ImgMem );
-		img_it->second->m_iWidth = 0;
-		img_it->second->m_iHeight = 0;
-
-		// delete the memory
-		delete img_it->second;
-
-		img_it++;
-	}
-	m_ImgContainer.clear();
+    // push the texture outputer
+    m_TexIOVec.push_back( std::make_shared<BmpIO>() );
+    m_TexIOVec.push_back( std::make_shared<ExrIO>() );
+    m_TexIOVec.push_back( std::make_shared<TgaIO>() );
+    m_TexIOVec.push_back( std::make_shared<PngIO>() );
+    m_TexIOVec.push_back( std::make_shared<JpgIO>() );
+    m_TexIOVec.push_back( std::make_shared<HdrIO>() );
 }
 
 // output texture
@@ -102,9 +72,9 @@ bool TexManager::Write( const string& filename , const Texture* tex )
 	TEX_TYPE type = TexTypeFromStr( str );
 
 	// find the specific texio first
-	TexIO* io = FindTexIO( type );
+    std::shared_ptr<TexIO> io = FindTexIO( type );
 
-	if( io != 0 )
+	if( io != nullptr )
 		io->Write( str , tex );
 	
 	return true;
@@ -120,7 +90,7 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 	TEX_TYPE type = TexTypeFromStr( str );
 
 	// try to find the image first , if it's already existed in the system , just set a pointer
-	map< std::string , ImgMemory* >::iterator it = m_ImgContainer.find( str );
+    auto it = m_ImgContainer.find( str );
 	if( it != m_ImgContainer.end() )
 	{
 		tex->m_pMemory = it->second;
@@ -131,13 +101,13 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 	}
 
 	// find the specific texio first
-	TexIO* io = FindTexIO( type );
+    std::shared_ptr<TexIO> io = FindTexIO( type );
 
 	bool read = false;
-	if( io != 0 )
+	if( io != nullptr )
 	{
 		// create a new memory
-		ImgMemory* mem = new ImgMemory();
+        std::shared_ptr<ImgMemory> mem = std::make_shared<ImgMemory>();
 
 		// read the data
 		read = io->Read( str , mem );
@@ -152,21 +122,18 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 			// insert it into the container
 			m_ImgContainer.insert( make_pair( str , mem ) );
 		}else
-		{
 			LOG_WARNING<<"Can't load image file \""<<str<<"\"."<<ENDL;
-			delete mem;
-		}
 	}
 
 	return read;
 }
 
 // find correct texio
-TexIO* TexManager::FindTexIO( TEX_TYPE tt ) const
+std::shared_ptr<TexIO> TexManager::FindTexIO( TEX_TYPE tt ) const
 {
 	// find the specific texio first
-	TexIO* io = 0;
-	vector<TexIO*>::const_iterator it = m_TexIOVec.begin();
+    std::shared_ptr<TexIO> io;
+    auto it = m_TexIOVec.begin();
 	while( it != m_TexIOVec.end() )
 	{
 		if( (*it)->GetTT() == tt )
@@ -178,17 +145,4 @@ TexIO* TexManager::FindTexIO( TEX_TYPE tt ) const
 	}
 
 	return io;
-}
-
-// get the reference count
-unsigned TexManager::GetReferenceCount( const string& str ) const
-{
-	// try to find the image first , if it's already existed in the system , just set a pointer
-	map< std::string , ImgMemory* >::const_iterator it = m_ImgContainer.find( str );
-	if( it != m_ImgContainer.end() )
-	{
-		return it->second->reference;
-	}
-
-	return 0;
 }
