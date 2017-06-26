@@ -21,7 +21,7 @@
 // include the header
 #include "sort.h"
 #include <string>
-#include <map>
+#include <unordered_map>
 #include "managers/logmanager.h"
 
 // pre-declera class
@@ -101,7 +101,7 @@ public:
 // protected field
 protected:
 	// the propery set
-	map< string , PropertyHandler<T>* > m_propertySet;
+	unordered_map< string , PropertyHandler<T>* > m_propertySet;
 
 	// register property
 	void _registerAllProperty(){}
@@ -109,7 +109,7 @@ protected:
 	// clear registered properties
 	void _clearProperty()
 	{
-		typename map< string , PropertyHandler<T>* >::iterator it = m_propertySet.begin();
+		typename unordered_map< string , PropertyHandler<T>* >::iterator it = m_propertySet.begin();
 		while( it != m_propertySet.end() )
 		{
 			delete it->second;
@@ -126,12 +126,8 @@ protected:
 	}
 
 	// get property handler
-	PropertyHandler<T>* _getPropertyHandler( const string& name )
-	{
-		typename map< string , PropertyHandler<T>* >::iterator it = m_propertySet.find( name );
-		if( it != m_propertySet.end() )
-			return it->second;
-		return 0;
+	PropertyHandler<T>* _getPropertyHandler( const string& name ){
+        return m_propertySet.count( name ) ? m_propertySet[name] : nullptr;
 	}
 };
 

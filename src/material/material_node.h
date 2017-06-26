@@ -111,7 +111,7 @@ public:
 
 protected:
 	// node properties
-	std::map< string , MaterialNodeProperty * > m_props;
+	std::unordered_map< string , MaterialNodeProperty * > m_props;
 
 	// get node property
 	MaterialNodeProperty*	getProperty( const string& name );
