@@ -2,7 +2,7 @@
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
  
-    Copyright (c) 2011-2016 by Cao Jiayin - All rights reserved.
+    Copyright (c) 2011-2017 by Cao Jiayin - All rights reserved.
  
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
@@ -37,7 +37,7 @@ public:
 	// para 'tex' :	the texture for outputing
 	// result     : 'true' if saving is successful
 	// note		  : all of the image we out put is 24-bits
-	virtual bool Write( const string& str , const Texture* tex );
+	bool Write( const string& str , const Texture* tex ) override;
 
 	// read data from file
 	// para 'str' : the name of the input entity
