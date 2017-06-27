@@ -28,7 +28,7 @@ VertexIndex	VertexIndexFromStr( const string& str )
 	string temp , rest;
 
 	// get the position index
-	int t0 = str.find_first_of( '/' );
+	int t0 = (int)str.find_first_of( '/' );
 	temp = str.substr( 0 , t0 );
 	vi.posIndex = atoi( temp.c_str() ) - 1;
 	if( t0 == string::npos )
@@ -36,7 +36,7 @@ VertexIndex	VertexIndexFromStr( const string& str )
 	
 	// get the texture coordinate index
 	rest = str.substr( t0 + 1 , string::npos );
-	t0 = rest.find_first_of( '/' );
+	t0 = (int)rest.find_first_of( '/' );
 	temp = rest.substr( 0 , t0 );
 	vi.texIndex = temp.empty()?(-1):(atoi( temp.c_str() ) - 1);
 	if( t0 == string::npos )
@@ -53,7 +53,7 @@ VertexIndex	VertexIndexFromStr( const string& str )
 MESH_TYPE	MeshTypeFromStr( const string& str )
 {
 	// get the file extension
-	int index = str.find_last_of( "." );
+	int index = (int)str.find_last_of( "." );
 	string substr = str.substr( index + 1 , str.length() - index );
 
 	// transform the extension to lower case
@@ -74,7 +74,7 @@ MESH_TYPE	MeshTypeFromStr( const string& str )
 TEX_TYPE	TexTypeFromStr( const string& str )
 {
 	// get the file extension
-	int index = str.find_last_of( "." );
+	int index = (int)str.find_last_of( "." );
 	string substr = str.substr( index + 1 , str.length() - index );
 
 	// transform the extension to lower case
@@ -226,12 +226,12 @@ Vector VectorFromStr( const string& s )
 string NextToken( string& str , char t )
 {
 	// get the next t index
-	unsigned id = str.find_first_of( t );
+	unsigned id = (int)str.find_first_of( t );
 	while( id == 0 )
 	{
 		// get to the next one
 		str = str.substr( 1 , string::npos );
-		id = str.find_first_of( t );
+		id = (int)str.find_first_of( t );
 	}
 	string res = str.substr( 0 , id );
 

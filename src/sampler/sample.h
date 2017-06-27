@@ -117,13 +117,13 @@ public:
 	// request more samples
 	unsigned RequestMoreLightSample( unsigned num )
 	{
-		unsigned offset = light_dimension.size();
+		unsigned offset = (unsigned)light_dimension.size();
 		light_dimension.push_back( num );
 		return offset;
 	}
 	unsigned RequestMoreBsdfSample( unsigned num )
 	{
-		unsigned offset = bsdf_dimension.size();
+		unsigned offset = (unsigned)bsdf_dimension.size();
 		bsdf_dimension.push_back( num );
 		return offset;
 	}

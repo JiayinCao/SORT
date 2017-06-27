@@ -42,7 +42,7 @@ void KDTree::Build()
 	computeBBox();
 	
 	// create the split candidates
-	unsigned count = m_primitives->size();
+	unsigned count = (unsigned)m_primitives->size();
 	Splits splits;
 	for( int i = 0 ; i < 3 ; i++ )
 		splits.split[i] = new Split[2*count];

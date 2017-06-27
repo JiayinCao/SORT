@@ -123,7 +123,7 @@ void UniGrid::Build()
 	float extent = delta[id];
 
 	// get the total number of primitives
-	unsigned count = m_primitives->size();
+	unsigned count = (unsigned)m_primitives->size();
 	
 	// grid per distance
 	float gridPerDistance = 3 * powf( (float)count , 0.333f ) / extent ;
@@ -220,7 +220,7 @@ void UniGrid::OutputLog() const
 
 	unsigned count = 0;
 	for( unsigned i = 0 ; i < m_voxelCount ; i++ )
-		count += m_pVoxels[i].size();
+		count += (unsigned)m_pVoxels[i].size();
 	LOG<<"Triangles per Grid:\t"<<((m_voxelCount==0)?0:(float)count/(float)m_voxelCount)<<ENDL<<ENDL;
 }
 

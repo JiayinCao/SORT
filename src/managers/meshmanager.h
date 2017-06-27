@@ -116,16 +116,16 @@ public:
 	// calculate buffer number
 	void CalculateCount()
 	{
-		m_iVBCount = m_PositionBuffer.size();
-		m_iTBCount = m_TexCoordBuffer.size();
-		m_iNBCount = m_NormalBuffer.size();
-		m_iTeBcount = m_TangentBuffer.size();
-		m_iTrunkNum = m_TrunkBuffer.size();
+		m_iVBCount = (unsigned)m_PositionBuffer.size();
+		m_iTBCount = (unsigned)m_TexCoordBuffer.size();
+		m_iNBCount = (unsigned)m_NormalBuffer.size();
+		m_iTeBcount = (unsigned)m_TangentBuffer.size();
+		m_iTrunkNum = (unsigned)m_TrunkBuffer.size();
 		m_iTriNum = 0;
 		auto it = m_TrunkBuffer.begin();
 		while( it != m_TrunkBuffer.end() )
 		{
-			(*it)->m_iTriNum = (*it)->m_IndexBuffer.size() / 3;
+			(*it)->m_iTriNum = ((unsigned)(*it)->m_IndexBuffer.size()) / 3;
 			m_iTriNum += (*it)->m_iTriNum;
 			it++;
 		}

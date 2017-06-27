@@ -80,7 +80,7 @@ public:
 	float LightProperbility( unsigned i ) const;
 	// get the number of lights
 	unsigned LightNum() const
-	{ return m_lights.size(); }
+	{ return (unsigned)m_lights.size(); }
 	// get bounding box of the scene
 	const BBox& GetBBox() const;
 	// get triangle mesh with a specific name

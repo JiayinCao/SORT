@@ -327,7 +327,7 @@ float FourierBxdf::fourier( const float* ak , int m , double cosPhi ) const
         cosKMinusOnePhi = cosKPhi;
         cosKPhi = cosKPlusPhi;
     }
-    return value;
+    return (float)value;
 }
 
 // Importance sampling for fourier interpolation
@@ -379,9 +379,9 @@ float FourierBxdf::sampleFourier( const float* ak , const float* recip , int m ,
     
     if( flip ) phi = TWO_PI - phi;
     if( pdf ) *pdf = (float) ( INV_TWOPI * f / ak[0] );
-    *phiptr = phi;
+    *phiptr = (float)phi;
     
-    return f;
+    return (float)f;
 }
 
 // helper functio to blend coefficients for fourier
