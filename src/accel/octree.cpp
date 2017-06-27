@@ -40,7 +40,7 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( traverseOcTree( m_pRoot , r , intersect , fmin , fmax ) ){
 		if( !intersect )
 			return true;
-		return intersect->primitive;
+		return nullptr != intersect->primitive;
 	}
 	return false;
 }

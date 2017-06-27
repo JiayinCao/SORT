@@ -46,7 +46,7 @@ string GetExecutableDir()
 	GetModuleFileNameA( NULL , buf , maxLen );
 
 	// remove the file name
-	int len = strlen( buf );
+	int len = (int)strlen( buf );
 	for( int i = len - 1 ; i > 0 ; i-- )
 	{
 		if( buf[i] == '\\' )

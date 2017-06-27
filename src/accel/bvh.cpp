@@ -50,7 +50,7 @@ void Bvh::OutputLog() const
 // malloc the memory
 void Bvh::mallocMemory()
 {
-	SORT_PREMALLOC( sizeof( Bvh_Primitive ) * m_primitives->size() , BVH_LEAF_PRILIST_MEMID );
+	SORT_PREMALLOC( (unsigned)(sizeof( Bvh_Primitive ) * m_primitives->size()) , BVH_LEAF_PRILIST_MEMID );
 	m_bvhpri = SORT_MEMORY_ID( Bvh_Primitive , BVH_LEAF_PRILIST_MEMID );
 }
 
@@ -76,7 +76,7 @@ void Bvh::Build()
     
 	// recursively split node
     m_root = new Bvh_Node();
-	splitNode( m_root , 0 , m_primitives->size() , 0 );
+	splitNode( m_root , 0u , (unsigned)m_primitives->size() , 0u );
 }
 
 // recursively split BVH node
@@ -107,7 +107,7 @@ void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned
 	// partition the data
     auto compare = [split_pos,split_axis](const Bvh::Bvh_Primitive& pri){return pri.m_centroid[split_axis] < split_pos;};
 	const Bvh_Primitive* middle = partition( &m_bvhpri[_start] , &m_bvhpri[_end-1]+1 , compare );
-	unsigned mid = middle - m_bvhpri;
+	unsigned mid = (unsigned)(middle - m_bvhpri);
 
     node->left = new Bvh_Node();
 	splitNode( node->left , _start , mid , depth + 1 );

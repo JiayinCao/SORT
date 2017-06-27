@@ -77,13 +77,13 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		vert.vcm = vcm;
 		vert.vc = vc;
 		vert.rr = rr;
-		vert.depth = light_path.size() + 1;
+		vert.depth = (unsigned)(light_path.size() + 1);
 
 		light_path.push_back(vert);
 
 		//-----------------------------------------------------------------------------------------------------
 		// Path evaluation: light tracing
-		_ConnectCamera( vert , light_path.size() , light );
+		_ConnectCamera( vert , (unsigned)light_path.size() , light );
 
 		// russian roulette
 		if (sort_canonical() > rr)
@@ -107,7 +107,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 	//-----------------------------------------------------------------------------------------------------
 	// Trace light path from eye point
-	const unsigned lps = light_path.size();
+	const unsigned lps = (const unsigned)light_path.size();
 	const unsigned int total_pixel = camera->GetImageSensor()->GetWidth() * camera->GetImageSensor()->GetHeight();
 	wi = ray;
 	throughput = 1.0f;

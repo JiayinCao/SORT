@@ -290,7 +290,7 @@ void System::_executeRenderingTasks()
 	integrator->SetupCamera(m_camera);
 
 	// pre allocate memory for the specific thread
-	for( int i = 0 ; i < m_thread_num ; ++i )
+	for( unsigned i = 0 ; i < m_thread_num ; ++i )
 		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 256 , i );
     
     std::vector< std::unique_ptr<PlatformThreadUnit> > threads;

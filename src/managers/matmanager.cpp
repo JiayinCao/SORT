@@ -118,5 +118,5 @@ unsigned MatManager::ParseMatFile( const string& str )
 // get material number
 unsigned MatManager::GetMatCount() const
 {
-	return m_matPool.size();
+	return (unsigned)m_matPool.size();
 }

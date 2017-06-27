@@ -161,7 +161,7 @@ bool Scene::LoadScene( const string& str )
 				Shape* shape = light->GetShape();
 				if( shape )
 				{
-					shape->SetID( m_triBuf.size() );
+					shape->SetID((unsigned)m_triBuf.size() );
 					m_triBuf.push_back( shape );
 				}
 
@@ -324,7 +324,7 @@ const BBox& Scene::GetBBox() const
 // compute light cdf
 void Scene::_genLightDistribution()
 {
-	unsigned count = m_lights.size();
+	unsigned count = (unsigned)m_lights.size();
 	if( count == 0 )
 		return ;
 
