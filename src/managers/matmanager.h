@@ -22,6 +22,7 @@
 #include "utility/singleton.h"
 #include <string>
 #include <unordered_map>
+#include <memory>
 
 // pre-decleration
 class Material;
