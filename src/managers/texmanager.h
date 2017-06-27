@@ -23,6 +23,7 @@
 #include "utility/enum.h"
 #include <vector>
 #include <unordered_map>
+#include <memory>
 #include "spectrum/spectrum.h"
 
 class Texture;

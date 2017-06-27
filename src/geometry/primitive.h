@@ -22,6 +22,7 @@
 #include "bbox.h"
 #include "material/material.h"
 #include "intersection.h"
+#include <memory>
 
 // pre-decleration
 class	Intersection;
