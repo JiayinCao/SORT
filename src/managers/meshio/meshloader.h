@@ -21,6 +21,7 @@
 // include the header
 #include "sort.h"
 #include "utility/enum.h"
+#include <memory>
 
 // pre-decleration class
 class	BufferMemory;

@@ -21,6 +21,7 @@
 // include the header file
 #include "sort.h"
 #include "utility/enum.h"
+#include <memory>
 
 // pre-declare texture class
 class Texture;

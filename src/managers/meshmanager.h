@@ -29,6 +29,7 @@
 #include "math/vector3.h"
 #include "math/transform.h"
 #include "material/material.h"
+#include <memory>
 
 // pre-declera class
 class MeshLoader;
