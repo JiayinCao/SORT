@@ -50,7 +50,7 @@ bool TriMesh::LoadMesh( const string& str , Transform& transform )
 // copy materials
 void TriMesh::_copyMaterial()
 {
-	unsigned trunk_size = m_pMemory->m_TrunkBuffer.size();
+	unsigned trunk_size = (unsigned)m_pMemory->m_TrunkBuffer.size();
     m_Materials.resize( trunk_size );
 	
 	for( unsigned i = 0 ; i < trunk_size ; ++i )
@@ -60,28 +60,28 @@ void TriMesh::_copyMaterial()
 // fill buffer into vector
 void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 {
-	unsigned base = vec.size();
+	unsigned base = (unsigned)vec.size();
 	if( m_bInstanced == false )
 	{
 		// generate the triangles
-		unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
+		unsigned trunkNum = (unsigned)m_pMemory->m_TrunkBuffer.size();
 		for( unsigned i = 0 ; i < trunkNum ; i++ )
 		{
-			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+			unsigned trunkTriNum = (unsigned)m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
 				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_Materials[i]) );
-			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+			base += (unsigned)(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3);
 		}
 	}else
 	{
 		// generate the triangles
-		unsigned trunkNum = m_pMemory->m_TrunkBuffer.size();
+		unsigned trunkNum = (unsigned)m_pMemory->m_TrunkBuffer.size();
 		for( unsigned i = 0 ; i < trunkNum ; i++ )
 		{
-			unsigned trunkTriNum = m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+			unsigned trunkTriNum = (unsigned)(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3);
 			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
 				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_Materials[i] ) );
-			base += m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+			base += (unsigned)(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3);
 		}
 	}
 }
@@ -97,7 +97,7 @@ void TriMesh::ResetMaterial( const string& setname , const string& matname )
 	// if there is no set name , all of the sets are set the material with the name of 'matname'
 	if( setname.empty() )
 	{
-		unsigned size = m_pMemory->m_TrunkBuffer.size();
+		unsigned size = (unsigned)m_pMemory->m_TrunkBuffer.size();
 		for( unsigned i = 0 ; i < size ; ++i )
 			m_Materials[i] = mat;
 		return;

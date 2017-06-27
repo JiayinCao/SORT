@@ -140,7 +140,7 @@ void BufferMemory::_genFlatNormal()
 
 	// generate the triangles
 	unsigned totalTriNum = 0;
-	unsigned trunkNum = m_TrunkBuffer.size();
+	unsigned trunkNum = (unsigned)m_TrunkBuffer.size();
 	unsigned base = 0;
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
@@ -182,7 +182,7 @@ void BufferMemory::GenSmoothNormal()
 	// get the adjacency information
 	vector<unsigned>* adjacency = new vector<unsigned>[m_iVBCount];
 	// generate the triangles
-	unsigned trunkNum = m_TrunkBuffer.size();
+	unsigned trunkNum = (unsigned)m_TrunkBuffer.size();
 	unsigned base = 0;
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
@@ -226,7 +226,7 @@ void BufferMemory::GenSmoothNormal()
 		smoothNormal.push_back(n);
 	}
 	m_NormalBuffer = smoothNormal;
-	m_iNBCount = m_NormalBuffer.size();
+	m_iNBCount = (unsigned)m_NormalBuffer.size();
 
 	delete[] adjacency;
 }
@@ -239,7 +239,7 @@ void BufferMemory::GenSmoothTagent()
 
 	// generate tagent for each triangle
 	vector<Vector> tagents;
-	const unsigned trunkNum = m_TrunkBuffer.size();
+	const unsigned trunkNum = (unsigned)m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
         auto& trunk = m_TrunkBuffer[i];
@@ -284,7 +284,7 @@ void BufferMemory::GenSmoothTagent()
 
 		m_TangentBuffer.push_back(t);
 	}
-	m_iTeBcount = m_TangentBuffer.size();
+	m_iTeBcount = (unsigned)m_TangentBuffer.size();
 
 	// free the memory
 	delete[] adjacency;
@@ -366,10 +366,10 @@ void BufferMemory::GenTexCoord()
 
 		it++;
 	}
-	m_iTBCount = m_TexCoordBuffer.size();
+	m_iTBCount = (unsigned)m_TexCoordBuffer.size();
 
 	// set the texture coordinate index
-	unsigned trunkNum = m_TrunkBuffer.size();
+	unsigned trunkNum = (unsigned)m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
 		auto& trunk = m_TrunkBuffer[i];

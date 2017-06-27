@@ -21,7 +21,7 @@
 #include "managers/matmanager.h"
 
 // get material
-const std::shared_ptr<Material>& Primitive::GetMaterial() const
+std::shared_ptr<Material> Primitive::GetMaterial() const
 { 
 	if( m_mat == 0 ) 
 		return MatManager::GetSingleton().GetDefaultMat();

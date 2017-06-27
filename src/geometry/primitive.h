@@ -56,7 +56,7 @@ public:
 	unsigned GetID() const { return m_primitive_id; }
 
 	// get material
-    const std::shared_ptr<Material>& GetMaterial() const;
+    std::shared_ptr<Material> GetMaterial() const;
 	// set material
     void	SetMaterial( std::shared_ptr<Material>& mat ) { m_mat = mat; }
 
