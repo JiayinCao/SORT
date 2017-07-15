@@ -26,7 +26,7 @@
 class	EnvironmentCamera : public Camera
 {
 public:
-	DEFINE_CREATOR( EnvironmentCamera , "environment" );
+	DEFINE_CREATOR( EnvironmentCamera , Camera , "environment" );
 
 	//! @brief Default constructor.
 	EnvironmentCamera(){

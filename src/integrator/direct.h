@@ -28,7 +28,7 @@ class	DirectLight : public Integrator
 {
 // public method
 public:
-	DEFINE_CREATOR( DirectLight , "direct" );
+	DEFINE_CREATOR( DirectLight , Integrator , "direct" );
 
 	// default constructor
 	DirectLight(){_registerAllProperty();}

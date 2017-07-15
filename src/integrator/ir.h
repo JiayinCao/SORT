@@ -45,7 +45,7 @@ class	InstantRadiosity : public Integrator
 // public method
 public:
 
-	DEFINE_CREATOR( InstantRadiosity , "ir" );
+	DEFINE_CREATOR( InstantRadiosity , Integrator , "ir" );
 
 	InstantRadiosity() {
 		m_nLightPaths = 64;

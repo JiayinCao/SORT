@@ -28,7 +28,7 @@ class	AreaLight : public Light
 {
 // public method
 public:
-	DEFINE_CREATOR(AreaLight,"area");
+	DEFINE_CREATOR(AreaLight, Light, "area");
 
 	// default constructor
 	AreaLight(){_init();}

@@ -16,6 +16,9 @@
  */
 
 #include "creator.h"
+#include "integrator/integrator.h"
+#include "accel/accelerator.h"
+#include "geometry/sky/sky.h"
+#include "light/light.h"
 
-// instance the singleton with logmanager class
-DEFINE_SINGLETON(Creator);
+ITERATE_CREATOR(DEFINE_SINGLETON_CREATOR)

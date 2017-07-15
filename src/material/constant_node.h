@@ -34,7 +34,7 @@ public:
 class GridTexNode : public ConstantNode
 {
 public:
-	DEFINE_CREATOR( GridTexNode , "SORTNodeGrid" );
+	DEFINE_CREATOR( GridTexNode , MaterialNode , "SORTNodeGrid" );
 
 	// constructor
 	GridTexNode();
@@ -59,7 +59,7 @@ private:
 class CheckBoxTexNode : public ConstantNode
 {
 public:
-	DEFINE_CREATOR( CheckBoxTexNode , "SORTNodeCheckbox" );
+	DEFINE_CREATOR( CheckBoxTexNode , MaterialNode , "SORTNodeCheckbox" );
 
 	// constructor
 	CheckBoxTexNode();
@@ -84,7 +84,7 @@ private:
 class ImageTexNode : public ConstantNode
 {
 public:
-	DEFINE_CREATOR( ImageTexNode , "SORTNodeImage" );
+	DEFINE_CREATOR( ImageTexNode , MaterialNode , "SORTNodeImage" );
 
 	// constructor
 	ImageTexNode();
@@ -105,7 +105,7 @@ private:
 class ConstantColorNode : public ConstantNode
 {
 public:
-	DEFINE_CREATOR( ConstantColorNode , "SORTNodeConstant" );
+	DEFINE_CREATOR( ConstantColorNode , MaterialNode , "SORTNodeConstant" );
 
 	// constructor
 	ConstantColorNode();

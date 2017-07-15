@@ -28,7 +28,7 @@ class PointLight : public Light
 {
 // public method
 public:
-	DEFINE_CREATOR( PointLight , "point" );
+	DEFINE_CREATOR( PointLight , Light , "point" );
 
 	// default constructor
 	PointLight(){_registerAllProperty();}

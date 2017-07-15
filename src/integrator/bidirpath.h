@@ -61,7 +61,7 @@ class BidirPathTracing : public Integrator
 // public method
 public:
 
-	DEFINE_CREATOR( BidirPathTracing , "bdpt" );
+	DEFINE_CREATOR( BidirPathTracing , Integrator , "bdpt" );
 
 	// default constructor
 	BidirPathTracing() {
