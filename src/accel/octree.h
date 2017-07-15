@@ -30,7 +30,7 @@
 class OcTree : public Accelerator
 {
 public:
-	DEFINE_CREATOR( OcTree , "octree" );
+	DEFINE_CREATOR( OcTree , Accelerator , "octree" );
 
 	//! destructor
 	~OcTree();

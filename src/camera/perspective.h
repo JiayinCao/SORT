@@ -27,7 +27,7 @@
 class	PerspectiveCamera : public Camera
 {
 public:
-	DEFINE_CREATOR( PerspectiveCamera , "perspective" );
+	DEFINE_CREATOR( PerspectiveCamera , Camera , "perspective" );
 
 	//! @brief Default constructor.
     PerspectiveCamera(){

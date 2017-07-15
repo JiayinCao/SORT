@@ -28,7 +28,7 @@ class Matte : public Material
 {
 // public method
 public:
-	DEFINE_CREATOR( Matte , "Matte" );
+	DEFINE_CREATOR( Matte , Material, "Matte" );
 
 	// get bsdf
     Bsdf* GetBsdf( const Intersection* intersect ) const override;

@@ -26,7 +26,7 @@ class StratifiedSampler : public Sampler
 {
 // public method
 public:
-	DEFINE_CREATOR( StratifiedSampler , "stratified" );
+	DEFINE_CREATOR( StratifiedSampler , Sampler , "stratified" );
 
 	// default constructor
 	StratifiedSampler(){}

@@ -37,7 +37,7 @@ protected:
 class LayeredBxdfNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR( LayeredBxdfNode , "SORTNodeLayeredBxdf" );
+    DEFINE_CREATOR( LayeredBxdfNode , MaterialNode, "SORTNodeLayeredBxdf" );
     
     // constructor
     LayeredBxdfNode();
@@ -55,7 +55,7 @@ private:
 class LambertNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( LambertNode , "SORTNodeLambert" );
+	DEFINE_CREATOR( LambertNode , MaterialNode , "SORTNodeLambert" );
 
 	// constructor
 	LambertNode();
@@ -71,7 +71,7 @@ private:
 class MerlNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( MerlNode , "SORTNodeMerl" );
+	DEFINE_CREATOR( MerlNode , MaterialNode , "SORTNodeMerl" );
 
 	// constructor
 	MerlNode();
@@ -93,7 +93,7 @@ private:
 class FourierBxdfNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR( FourierBxdfNode , "SORTNodeFourierBxdf" );
+    DEFINE_CREATOR( FourierBxdfNode , MaterialNode , "SORTNodeFourierBxdf" );
     
     // constructor
     FourierBxdfNode();
@@ -115,7 +115,7 @@ private:
 class OrenNayarNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( OrenNayarNode , "SORTNodeOrenNayar" );
+	DEFINE_CREATOR( OrenNayarNode , MaterialNode , "SORTNodeOrenNayar" );
 
 	// constructor
 	OrenNayarNode();
@@ -132,7 +132,7 @@ private:
 class MicrofacetReflectionNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( MicrofacetReflectionNode , "SORTNodeMicrofacetReflection" );
+	DEFINE_CREATOR( MicrofacetReflectionNode , MaterialNode , "SORTNodeMicrofacetReflection" );
 
 	// constructor
 	MicrofacetReflectionNode();
@@ -152,7 +152,7 @@ private:
 class MicrofacetRefractionNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( MicrofacetRefractionNode , "SORTNodeMicrofacetRefraction" );
+	DEFINE_CREATOR( MicrofacetRefractionNode , MaterialNode , "SORTNodeMicrofacetRefraction" );
 
 	// constructor
 	MicrofacetRefractionNode();

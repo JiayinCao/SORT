@@ -28,7 +28,7 @@ class ImageTexture : public Texture
 {
 // public method
 public:
-	DEFINE_CREATOR( ImageTexture , "image" );
+	DEFINE_CREATOR( ImageTexture , Texture , "image" );
 
 	// default constructor
 	ImageTexture() { _init(); }

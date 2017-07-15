@@ -29,7 +29,7 @@
 class UniGrid : public Accelerator
 {
 public:
-	DEFINE_CREATOR( UniGrid , "uniform_grid" );
+	DEFINE_CREATOR( UniGrid , Accelerator , "uniform_grid" );
 
 	//! Destructor releasing all voxel data.
     ~UniGrid() override;

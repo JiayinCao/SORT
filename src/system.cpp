@@ -36,6 +36,8 @@
 #include <time.h>
 #include "managers/smmanager.h"
 #include "math/vector2.h"
+#include "geometry/sky/sky.h"
+#include "shape/shape.h"
 
 extern bool g_bBlenderMode;
 extern int  g_iTileSize;
@@ -54,21 +56,6 @@ System::~System()
 // pre-initialize
 void System::_preInit()
 {
-	// initialize log manager
-	LogManager::CreateInstance();
-	// initialize texture manager
-	TexManager::CreateInstance();
-	// initialize mesh manager
-	MeshManager::CreateInstance();
-	// initialize material manager
-	MatManager::CreateInstance();
-	// initialize memory manager
-	MemManager::CreateInstance();
-	// initialize the timer
-	Timer::CreateInstance();
-	// initialize shared memory
-	SMManager::CreateInstance();
-
 	// setup default value
 	m_camera = 0;
 	m_uRenderingTime = 0;
@@ -91,7 +78,7 @@ void System::_postUninit()
 	SAFE_DELETE_ARRAY( m_taskDone );
 
 	// release managers
-	Creator::DeleteSingleton();
+    ITERATE_CREATOR(DESTRUCT_CREATOR);
     MeshManager::DeleteSingleton();
 	MatManager::DeleteSingleton();
 	TexManager::DeleteSingleton();

@@ -30,7 +30,7 @@ class	WhittedRT : public Integrator
 {
 // public method
 public:
-	DEFINE_CREATOR( WhittedRT , "whitted" );
+	DEFINE_CREATOR( WhittedRT , Integrator , "whitted" );
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data

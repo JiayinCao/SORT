@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SINGLETON
-#define	SORT_SINGLETON
+#pragma once
 
 // include the header
 #include "sort.h"
@@ -76,5 +75,3 @@ protected:
 
 // a useful macro for instance the templage
 #define	DEFINE_SINGLETON(T)	template<> T* Singleton<T>::m_pSingleton = 0
-
-#endif

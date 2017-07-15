@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_TEXMANAGER
-#define	SORT_TEXMANAGER
+#pragma once
 
 // include header file
 #include "utility/singleton.h"
@@ -68,7 +67,8 @@ public:
 // private data
 private:
 	// a vector saving texture io
-    vector<std::shared_ptr<TexIO>>	m_TexIOVec;
+    vector<std::unique_ptr<TexIO>>	m_TexIOVec;
+    unique_ptr<TexIO>               m_TexNull;
 
 	// map a string to the image memory
     unordered_map< string , std::shared_ptr<ImgMemory> > m_ImgContainer;
@@ -77,17 +77,9 @@ private:
 private:
 	// private default constructor
 	TexManager();
-
-	// register all texture types
-	void _registerTexture();
-
-	// unregister texture
-	void _unregisterTexture();
-
+    
 	// find correct texio
-    std::shared_ptr<TexIO>	FindTexIO( TEX_TYPE tt ) const;
+    const std::unique_ptr<TexIO>&	FindTexIO( TEX_TYPE tt ) const;
 
 	friend class Singleton<TexManager>;
 };
-
-#endif

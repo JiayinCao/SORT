@@ -27,7 +27,7 @@ class	AmbientOcclusion : public Integrator
 {
 // public method
 public:
-	DEFINE_CREATOR( AmbientOcclusion , "ao" );
+	DEFINE_CREATOR( AmbientOcclusion , Integrator , "ao" );
 
 	AmbientOcclusion() { _registerAllProperty(); }
 

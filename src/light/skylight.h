@@ -28,7 +28,7 @@ class	SkyLight : public Light
 {
 // public method
 public:
-	DEFINE_CREATOR(SkyLight,"skylight");
+	DEFINE_CREATOR(SkyLight, Light, "skylight");
 
 	// default constructor
 	SkyLight(){_init();}
