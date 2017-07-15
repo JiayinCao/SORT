@@ -28,7 +28,7 @@
 class	OrthoCamera : public Camera
 {
 public:
-	DEFINE_CREATOR( OrthoCamera , "ortho" );
+	DEFINE_CREATOR( OrthoCamera , Camera , "ortho" );
 
 	//! @brief Default constructor
 	OrthoCamera();

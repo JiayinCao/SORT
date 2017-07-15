@@ -27,7 +27,7 @@ class	Square : public Shape
 {
 // public method
 public:
-	DEFINE_CREATOR(Square,"square");
+	DEFINE_CREATOR(Square, Shape, "square");
 
 	// default constructor
 	Square(){}

@@ -27,7 +27,7 @@ class DistantLight : public Light
 {
 // public method
 public:
-	DEFINE_CREATOR(DistantLight,"distant");
+	DEFINE_CREATOR(DistantLight, Light, "distant");
 	
 	// default constructor
 	DistantLight(){_registerAllProperty();}

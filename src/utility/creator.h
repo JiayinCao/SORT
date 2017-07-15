@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_CREATOR
-#define	SORT_CREATOR
+#pragma once
 
 #include "singleton.h"
 #include <unordered_map>
@@ -24,33 +23,32 @@
 #include "utility/strhelper.h"
 
 // item creator
+template<class T>
 class ItemCreator
 {
 public:
-	virtual void* CreateInstance() = 0;
+	virtual T* CreateInstance() const = 0;
 };
-
-typedef unordered_map<string,ItemCreator*> CREATOR_CONTAINER;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //	creator is responsible for creating different kinds of object
-class Creator : public Singleton<Creator>
+template<class T>
+class Creator : public Singleton<Creator<T>>
 {
+    typedef unordered_map<string,ItemCreator<T>*> CREATOR_CONTAINER;
+    
 // public method
 public:
-	// destructor
-	~Creator(){}
-
+    
 	// Create instance
-	template< typename T >
 	T* CreateType( const string& str ) const
 	{
 		string _str = str;
 		::transform(_str.begin(),_str.end(),_str.begin(),ToLower());
-		CREATOR_CONTAINER::const_iterator it = m_container.find( _str );
+		const auto& it = m_container.find( _str );
 		if( it == m_container.end() )
 			return nullptr;
-		return (T*)(it->second->CreateInstance());
+		return it->second->CreateInstance();
 	}
 	
 	// get container
@@ -63,31 +61,44 @@ private:
 	// the container
 	CREATOR_CONTAINER	m_container;
 
-	// default constructor
+	// default constructor & copy constructor
 	Creator(){}
+    Creator(const Creator<T>&){}
 
 	friend class Singleton<Creator>;
 };
 
-#define CREATE_TYPE(str,T) Creator::GetSingleton().CreateType<T>( str )
+#define CREATE_TYPE(str,B) Creator<B>::GetSingleton().CreateType( str )
 
-#define	DEFINE_CREATOR( T , N ) class T##Creator : public ItemCreator \
+#define	DEFINE_CREATOR( T , B , N ) class T##Creator : public ItemCreator<B> \
 { public: \
 	T##Creator()\
 	{\
 		std::string _str( N );\
 		::transform(_str.begin(),_str.end(),_str.begin(),ToLower());\
-		CREATOR_CONTAINER& container = Creator::GetSingleton().GetContainer();\
+        auto& container = Creator<B>::GetSingleton().GetContainer();\
 		if( container.count( _str ) )\
 		{\
 			LOG_WARNING<<"The creator type with specific name of "<<N<<" already existed."<<ENDL;\
 			return;\
 		}\
-		container.insert( make_pair( _str , this ) );\
+        container.insert( std::make_pair(_str , this) );\
 	}\
-	void* CreateInstance() { return new T(); }\
+	B* CreateInstance() const { return new T(); }\
 };
 
-#define IMPLEMENT_CREATOR( T ) static T::T##Creator g_creator##T;
-
-#endif
+#define IMPLEMENT_CREATOR( T )          static T::T##Creator g_creator##T;
+#define DEFINE_SINGLETON_CREATOR( T )   DEFINE_SINGLETON(Creator<T>);
+#define DESTRUCT_CREATOR( T )           Creator<T>::DeleteSingleton();
+            
+#define ITERATE_CREATOR( OP ) \
+OP(Integrator)\
+OP(Sampler)\
+OP(MaterialNode)\
+OP(Accelerator)\
+OP(Sky)\
+OP(Light)\
+OP(Shape)\
+OP(Camera)\
+OP(Texture)\
+OP(Material)

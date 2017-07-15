@@ -30,7 +30,7 @@ public:
 class AddNode : public OperatorNode
 {
 public:
-	DEFINE_CREATOR( AddNode , "SORTNodeAdd" );
+	DEFINE_CREATOR( AddNode , MaterialNode , "SORTNodeAdd" );
 
 	// constructor
 	AddNode();
@@ -50,7 +50,7 @@ private:
 class InverseNode : public OperatorNode
 {
 public:
-    DEFINE_CREATOR( InverseNode , "SORTNodeInverse" );
+    DEFINE_CREATOR( InverseNode , MaterialNode , "SORTNodeInverse" );
     
     // constructor
     InverseNode();
@@ -70,7 +70,7 @@ private:
 class LerpNode : public OperatorNode
 {
 public:
-	DEFINE_CREATOR( LerpNode , "SORTNodeLerp" );
+	DEFINE_CREATOR( LerpNode , MaterialNode , "SORTNodeLerp" );
 
 	// constructor
 	LerpNode();
@@ -94,7 +94,7 @@ private:
 class BlendNode : public OperatorNode
 {
 public:
-	DEFINE_CREATOR( BlendNode , "SORTNodeBlend" );
+	DEFINE_CREATOR( BlendNode , MaterialNode , "SORTNodeBlend" );
 
 	// constructor
 	BlendNode();
@@ -119,7 +119,7 @@ private:
 class MutiplyNode : public OperatorNode
 {
 public:
-	DEFINE_CREATOR( MutiplyNode , "SORTNodeMultiply" );
+	DEFINE_CREATOR( MutiplyNode , MaterialNode , "SORTNodeMultiply" );
 
 	// constructor
 	MutiplyNode();

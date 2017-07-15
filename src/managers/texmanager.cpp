@@ -54,12 +54,12 @@ TexManager::~TexManager()
 TexManager::TexManager()
 {
     // push the texture outputer
-    m_TexIOVec.push_back( std::make_shared<BmpIO>() );
-    m_TexIOVec.push_back( std::make_shared<ExrIO>() );
-    m_TexIOVec.push_back( std::make_shared<TgaIO>() );
-    m_TexIOVec.push_back( std::make_shared<PngIO>() );
-    m_TexIOVec.push_back( std::make_shared<JpgIO>() );
-    m_TexIOVec.push_back( std::make_shared<HdrIO>() );
+    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new BmpIO()) );
+    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new ExrIO()) );
+    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new TgaIO()) );
+    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new PngIO()) );
+    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new JpgIO()) );
+    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new HdrIO()) );
 }
 
 // output texture
@@ -72,7 +72,7 @@ bool TexManager::Write( const string& filename , const Texture* tex )
 	TEX_TYPE type = TexTypeFromStr( str );
 
 	// find the specific texio first
-    std::shared_ptr<TexIO> io = FindTexIO( type );
+    const std::unique_ptr<TexIO>& io = FindTexIO( type );
 
 	if( io != nullptr )
 		io->Write( str , tex );
@@ -101,7 +101,7 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 	}
 
 	// find the specific texio first
-    std::shared_ptr<TexIO> io = FindTexIO( type );
+    const std::unique_ptr<TexIO>& io = FindTexIO( type );
 
 	bool read = false;
 	if( io != nullptr )
@@ -129,20 +129,16 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 }
 
 // find correct texio
-std::shared_ptr<TexIO> TexManager::FindTexIO( TEX_TYPE tt ) const
+const std::unique_ptr<TexIO>& TexManager::FindTexIO( TEX_TYPE tt ) const
 {
 	// find the specific texio first
-    std::shared_ptr<TexIO> io;
     auto it = m_TexIOVec.begin();
 	while( it != m_TexIOVec.end() )
 	{
 		if( (*it)->GetTT() == tt )
-		{
-			io = *it;
-			break;
-		}
+            return *it;
 		it++;
 	}
 
-	return io;
+	return m_TexNull;
 }
