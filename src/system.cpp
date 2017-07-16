@@ -76,17 +76,6 @@ void System::_postUninit()
 	SAFE_DELETE( m_camera );
 	SAFE_DELETE( m_pSampler );
 	SAFE_DELETE_ARRAY( m_taskDone );
-
-	// release managers
-    ITERATE_CREATOR(DESTRUCT_CREATOR);
-    MeshManager::DeleteSingleton();
-	MatManager::DeleteSingleton();
-	TexManager::DeleteSingleton();
-	MemManager::DeleteSingleton();
-	Timer::DeleteSingleton();
-	LogManager::DeleteSingleton();
-	SMManager::DeleteSingleton();
-	RenderTaskQueue::DeleteSingleton();
 }
 
 // render the image

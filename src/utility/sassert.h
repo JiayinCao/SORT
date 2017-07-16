@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_SASSERT
-#define	SORT_SASSERT
+#pragma once
 
 #include "sort.h"
 #include "managers/logmanager.h"
@@ -26,6 +25,4 @@
 	#define Sort_Assert(expr) (void(0))
 #else
 	#define Sort_Assert(expr) if((expr)==0) LOG_ERROR<<(#expr)<<CRASH
-#endif
-
 #endif

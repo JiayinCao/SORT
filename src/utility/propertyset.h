@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_PROPERTYSET
-#define	SORT_PROPERTYSET
+#pragma once
 
 // include the header
 #include "sort.h"
@@ -134,5 +133,3 @@ protected:
 #define	CAST_TARGET(T)	static_cast<T*>(m_target)
 
 #define PH_CONSTRUCTOR(T0,T1) T0(T1* t):PropertyHandler<T1>::PropertyHandler(t){}
-
-#endif

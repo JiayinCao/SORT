@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_TIMER
-#define	SORT_TIMER
+#pragma once
 
 #include "singleton.h"
 
@@ -26,9 +25,6 @@ class	Timer : public Singleton<Timer>
 {
 // public method
 public:
-	// destructor
-	~Timer(){}
-
 	// set the timer
 	void StartTimer();
 	// stop timer
@@ -56,5 +52,3 @@ private:
 
 	friend class Singleton<Timer>;
 };
-
-#endif

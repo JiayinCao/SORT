@@ -29,8 +29,6 @@
 
 #include <time.h>
 
-DEFINE_SINGLETON(Timer);
-
 // get tick count
 unsigned long getTickCount()
 {
