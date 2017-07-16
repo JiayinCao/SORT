@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_PATH
-#define	SORT_PATH
+#pragma once
 
 // include header file
 #include "sort.h"
@@ -32,5 +31,3 @@ void SetResourcePath( const string& str );
 
 // get current resource path
 string GetResourcePath() ;
-
-#endif

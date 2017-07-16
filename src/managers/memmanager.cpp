@@ -19,9 +19,6 @@
 #include "memmanager.h"
 #include "utility/define.h"
 
-// instance the singleton with tex manager
-DEFINE_SINGLETON(MemManager);
-
 // default constructor
 MemManager::MemManager()
 {

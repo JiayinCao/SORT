@@ -29,49 +29,18 @@ class	Singleton
 {
 //public method
 public:
-	// constructor from a template
-	Singleton()
-	{
-		m_pSingleton = static_cast<T*>(this);
-	}
 	// destructor
-	virtual ~Singleton()
-	{
-		m_pSingleton = 0;
+	virtual ~Singleton(){
 	}
 
 	// get singleton
-	static T& GetSingleton()
-	{
-		if( m_pSingleton == 0 )
-			new T();
-		return *m_pSingleton;
+	static T& GetSingleton(){
+        static T m_Singleton;
+		return m_Singleton;
 	}
 
 	// get singleton pointer
-	static T* GetSingletonPtr()
-	{
-		return m_pSingleton;
+	static T* GetSingletonPtr(){
+		return &GetSingleton();
 	}
-
-	// delete singleton
-	static void DeleteSingleton()
-	{
-		SAFE_DELETE(m_pSingleton);
-	}
-
-	// create instance
-	static void CreateInstance()
-	{
-		if( m_pSingleton == 0 )
-			new T();
-	}
-
-//protected field
-protected:
-	// the singleton pointer
-	static T* m_pSingleton;
 };
-
-// a useful macro for instance the templage
-#define	DEFINE_SINGLETON(T)	template<> T* Singleton<T>::m_pSingleton = 0

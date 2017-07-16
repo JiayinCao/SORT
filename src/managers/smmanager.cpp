@@ -17,9 +17,6 @@
 
 #include "smmanager.h"
 
-// instance the singleton with tex manager
-DEFINE_SINGLETON(SMManager);
-
 SMManager::SMManager()
 {
 

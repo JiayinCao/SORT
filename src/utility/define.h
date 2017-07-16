@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_DEFINE
-#define	SORT_DEFINE
+#pragma once
 
 #include "sort.h"
 
@@ -43,5 +42,3 @@ inline float clamp( float x , float mi , float ma )
 	if( x < mi ) x = mi;
 	return x;
 }
-
-#endif

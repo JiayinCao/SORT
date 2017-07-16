@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_STRHELPER
-#define	SORT_STRHELPER
+#pragma once
 
 #include "sort.h"
 #include "enum.h"
@@ -65,5 +64,3 @@ Vector VectorFromStr( const string& str );
 
 // get the next token
 string NextToken( string& str , char t );
-
-#endif

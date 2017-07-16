@@ -28,9 +28,6 @@
 #include "utility/creator.h"
 #include "material/matte.h"
 
-// instance the singleton with tex manager
-DEFINE_SINGLETON(MatManager);
-
 // default constructor
 MatManager::MatManager()
 {

@@ -25,9 +25,6 @@
 #include "utility/path.h"
 #include "bsdf/bsdf.h"
 
-// instance the singleton with tex manager
-DEFINE_SINGLETON(MeshManager);
-
 // default constructor
 MeshManager::MeshManager()
 {

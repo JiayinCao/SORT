@@ -19,9 +19,6 @@
 #include "logmanager.h"
 #include "utility/path.h"
 
-// instance the singleton with logmanager class
-DEFINE_SINGLETON(LogManager);
-
 // private constructor
 LogManager::LogManager( bool enable ):
 	m_sLogFileName( GetFullPath("log_sort.txt") )
