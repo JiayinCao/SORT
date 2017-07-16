@@ -32,9 +32,6 @@
 #include "texture/constanttexture.h"
 #include "texture/imagetexture.h"
 
-// instance the singleton with tex manager
-DEFINE_SINGLETON(TexManager);
-
 // destructor
 TexManager::~TexManager()
 {

@@ -88,17 +88,3 @@ private:
 };
 
 #define IMPLEMENT_CREATOR( T )          static T::T##Creator g_creator##T;
-#define DEFINE_SINGLETON_CREATOR( T )   DEFINE_SINGLETON(Creator<T>);
-#define DESTRUCT_CREATOR( T )           Creator<T>::DeleteSingleton();
-            
-#define ITERATE_CREATOR( OP ) \
-OP(Integrator)\
-OP(Sampler)\
-OP(MaterialNode)\
-OP(Accelerator)\
-OP(Sky)\
-OP(Light)\
-OP(Shape)\
-OP(Camera)\
-OP(Texture)\
-OP(Material)

@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SAMPLEMETHOD
-#define	SORT_SAMPLEMETHOD
+#pragma once
 
 #include <algorithm>
 #include "bsdf/bsdf.h"
@@ -325,4 +324,3 @@ private:
 		delete[] m;
 	}
 };
-#endif

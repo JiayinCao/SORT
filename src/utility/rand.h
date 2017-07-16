@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_RAND
-#define	SORT_RAND
+#pragma once
 
 /*
 description :
@@ -32,5 +31,3 @@ unsigned	sort_rand();
 
 // generate a canonical random number
 float		sort_canonical();
-
-#endif

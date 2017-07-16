@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_ENUM
-#define	SORT_ENUM
+#pragma once
 
 // texture output type
 enum TEX_TYPE
@@ -87,5 +86,3 @@ enum SAMPLER_TYPE
 	ST_STRATIFIED = 2,
 	ST_NONE
 };
-
-#endif

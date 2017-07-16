@@ -21,9 +21,6 @@
 #include "camera/camera.h"
 #include "imagesensor/imagesensor.h"
 
-// instance the singleton with tex manager
-DEFINE_SINGLETON(RenderTaskQueue);
-
 extern int g_iTileSize;
 
 // execute the task
