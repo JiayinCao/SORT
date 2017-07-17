@@ -32,21 +32,6 @@
 #include "texture/constanttexture.h"
 #include "texture/imagetexture.h"
 
-// destructor
-TexManager::~TexManager()
-{
-#if defined(SORT_DEBUG)
-    for_each( m_ImgContainer.begin() , m_ImgContainer.end() ,
-        []( const std::pair< string , std::shared_ptr<ImgMemory>>& it )
-        {
-            int references = it.second.use_count() - 1;
-            if( references > 1 )
-                LOG_ERROR<<"There are still "<<references<<" references pointing to material \""<<it.first<<"\"."<<CRASH;
-        }
-    );
-#endif
-}
-
 // default constructor
 TexManager::TexManager()
 {

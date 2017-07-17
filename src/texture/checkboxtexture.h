@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_CHECKBOXTEXTURE
-#define	SORT_CHECKBOXTEXTURE
+#pragma once
 
 // include the header
 #include "texture.h"
@@ -96,5 +95,3 @@ private:
 		}
 	};
 };
-
-#endif

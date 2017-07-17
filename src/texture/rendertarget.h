@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_RENDERTARGET
-#define	SORT_RENDERTARGET
+#pragma once
 
 // include the header file
 #include "compositetexture.h"
@@ -47,5 +46,3 @@ public:
 		SetColor( x , y , c.GetR() , c.GetG() , c.GetB() );
 	}
 };
-
-#endif

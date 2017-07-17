@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_SHAREDMEMORY
-#define SORT_SHAREDMEMORY
+#pragma once
 
 #include "sort.h"
 
@@ -41,5 +40,3 @@ struct SharedMemory
 #elif defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
     #include "mmapsharedmemory.h"
 #endif
-
-#endif // SORT_SHAREDMEMORY

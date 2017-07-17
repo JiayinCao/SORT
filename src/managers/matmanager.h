@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_MATMANAGER
-#define	SORT_MATMANAGER
+#pragma once
 
 // include header file
 #include "utility/singleton.h"
@@ -39,11 +38,6 @@ class	MatManager : public Singleton<MatManager>
 {
 // public method
 public:
-	// default constructor
-	MatManager();
-    // default destructor
-    ~MatManager();
-    
 	// find specific material
 	// para 'mat_name' : the name for the material
 	// result          : the material with specific material , default material
@@ -66,10 +60,5 @@ private:
 	// material pool
     std::unordered_map< string , std::shared_ptr<Material> >	m_matPool;
 
-	// the default material
-    std::shared_ptr<Material>	m_pDefault;
-
 	friend class Singleton<MatManager>;
 };
-
-#endif

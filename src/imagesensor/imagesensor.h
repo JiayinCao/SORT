@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_SORTOUTPUT
-#define SORT_SORTOUTPUT
+#pragma once
 
 // somehow, pre-decleration will crash the program on Mac.
 #include "spectrum/spectrum.h"
@@ -96,5 +95,3 @@ protected:
 	// the render target
 	RenderTarget m_rendertarget;
 };
-
-#endif

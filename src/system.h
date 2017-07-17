@@ -38,8 +38,6 @@ class	System
 public:
 	// default constructor
 	System();
-	// destructor
-	~System();
 
 	// pre-process before rendering
 	void PreProcess();
@@ -112,8 +110,6 @@ private:
 
 	// pre-Initialize
 	void	_preInit();
-	// post-Uninitialize
-	void	_postUninit();
 	// output progress
 	void	_outputProgress();
 	// uninitialize 3rd party library

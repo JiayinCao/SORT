@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_VECTOR4
-#define SORT_VECTOR4
+#pragma once
 
 #include <math.h>
 #include "vector2.h"
@@ -179,5 +178,3 @@ inline Vector4f FromSpectrum( const Spectrum& rgb )
 {
 	return Vector4f( rgb.GetR() , rgb.GetG() , rgb.GetB() , 0.0f );
 }
-
-#endif

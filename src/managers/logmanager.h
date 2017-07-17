@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_LOGMANAGER
-#define	SORT_LOGMANAGER
+#pragma once
 
 // include the header file
 #include "utility/singleton.h"
@@ -92,5 +91,3 @@ LogManager& operator<<( LogManager& , const char* );
 LogManager& operator<<( LogManager& , float );
 LogManager& operator<<( LogManager& , const std::string& );
 LogManager& operator<<( LogManager& , _ENDL );
-
-#endif

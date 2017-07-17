@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_MMAPSHAREDMEMORY
-#define SORT_MMAPSHAREDMEMORY
+#pragma once
 
 #include "sort.h"
 
@@ -46,5 +45,3 @@ private:
 #endif
 
 #define PlatformSharedMemory	MmapSharedMemory
-
-#endif

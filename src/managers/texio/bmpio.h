@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_BMPIO
-#define SORT_BMPIO
+#pragma once
 
 // include the header file
 #include "texio.h"
@@ -46,5 +45,3 @@ public:
 	// note       : only 24-bits or 32-bits image are supported!!
     bool Read( const string& str , std::shared_ptr<ImgMemory>& mem ) override;
 };
-
-#endif

@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_SMMANAGER
-#define SORT_SMMANAGER
+#pragma once
 
 #include "utility/singleton.h"
 #include <unordered_map>
@@ -48,5 +47,3 @@ private:
 
 	friend class Singleton<SMManager>;
 };
-
-#endif

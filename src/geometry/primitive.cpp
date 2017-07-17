@@ -23,7 +23,7 @@
 // get material
 std::shared_ptr<Material> Primitive::GetMaterial() const
 { 
-	if( m_mat == 0 ) 
+	if( m_mat == nullptr ) 
 		return MatManager::GetSingleton().GetDefaultMat();
 	return m_mat; 
 }

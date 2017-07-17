@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT__
-#define SORT__
+#pragma once
 
 // include the header files
 #include <iostream>
@@ -28,7 +27,6 @@
 using namespace std;
 
 // find the correct platform
-// currently , windows and linux is support
 #if defined(_WIN32) || defined(_WIN64)
 	#define SORT_IN_WINDOWS
 #elif defined(__linux__)
@@ -44,6 +42,4 @@ using namespace std;
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1800) 
 #  include <algorithm> // for std::min and std::max 
-#endif
-
 #endif
