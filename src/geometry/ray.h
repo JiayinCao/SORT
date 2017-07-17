@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_RAY
-#define SORT_RAY
+#pragma once
 
 // include the header
 #include "math/vector3.h"
@@ -69,6 +68,3 @@ public:
 	// importance value of the ray
 	Spectrum m_we;
 };
-#endif
-
-

@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_VECTOR2
-#define SORT_VECTOR2
+#pragma once
 
 #include <math.h>
 #include "utility/define.h"
@@ -151,5 +150,3 @@ inline float SatDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
 {
 	return clamp( Dot( v0 , v1 ) , 0.0f , 1.0f );
 }
-
-#endif

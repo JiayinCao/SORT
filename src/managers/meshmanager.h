@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_MESHMANAGER
-#define	SORT_MESHMANAGER
+#pragma once
 
 // include the headers
 #include "sort.h"
@@ -179,5 +178,3 @@ private:
 
 	friend class Singleton<MeshManager>;
 };
-
-#endif

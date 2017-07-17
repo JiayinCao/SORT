@@ -47,11 +47,6 @@ System::System()
 {
 	_preInit();
 }
-// destructor
-System::~System()
-{
-	_postUninit();
-}
 
 // pre-initialize
 void System::_preInit()
@@ -63,19 +58,6 @@ void System::_preInit()
 	m_thread_num = 1;
 	m_pProgress = 0;
     m_imagesensor = 0;
-}
-
-// post-uninit
-void System::_postUninit()
-{
-	// relase the memory
-	m_Scene.Release();
-
-	// delete the data
-    SAFE_DELETE( m_imagesensor );
-	SAFE_DELETE( m_camera );
-	SAFE_DELETE( m_pSampler );
-	SAFE_DELETE_ARRAY( m_taskDone );
 }
 
 // render the image
@@ -190,6 +172,15 @@ void System::_uninit3rdParty()
 // uninitialize
 void System::Uninit()
 {
+    // relase the memory
+    m_Scene.Release();
+
+    // delete the data
+    SAFE_DELETE(m_imagesensor);
+    SAFE_DELETE(m_camera);
+    SAFE_DELETE(m_pSampler);
+    SAFE_DELETE_ARRAY(m_taskDone);
+
 	_uninit3rdParty();
 }
 

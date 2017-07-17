@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_TEXTURE
-#define SORT_TEXTURE
+#pragma once
 
 // include header file
 #include "sort.h"
@@ -122,6 +121,4 @@ friend ComTexture operator-( float t , const Texture& tex );
 ComTexture operator+( float t , const Texture& tex );
 ComTexture operator*( float t , const Texture& tex );
 ComTexture operator-( float t , const Texture& tex );
-
-#endif
 

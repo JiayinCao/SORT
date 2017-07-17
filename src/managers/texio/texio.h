@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_TEXIO
-#define SORT_TEXIO
+#pragma once
 
 // include the header file
 #include "sort.h"
@@ -72,5 +71,3 @@ protected:
 	// the type of the outputer
 	TEX_TYPE m_TexType;
 };
-
-#endif

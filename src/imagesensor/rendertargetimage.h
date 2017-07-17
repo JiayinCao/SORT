@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_IMAGEOUTPUT
-#define SORT_IMAGEOUTPUT
+#pragma once
 
 #include "imagesensor.h"
 
@@ -58,5 +57,3 @@ private:
         }
     };
 };
-
-#endif

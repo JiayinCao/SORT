@@ -24,10 +24,10 @@
 #include <unordered_map>
 #include <memory>
 #include "spectrum/spectrum.h"
+#include "managers/texio/texio.h"
 
 class Texture;
 class ImageTexture;
-class TexIO;
 
 class ImgMemory
 {
@@ -48,9 +48,6 @@ class TexManager : public Singleton<TexManager>
 {
 // public method
 public:
-	// destructor
-	~TexManager();
-
 	// output the img
 	// para 'str' :	name of the output entity
 	// para 'tex' : texture of the output

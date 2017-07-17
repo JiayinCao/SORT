@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_WINSHAREDMEMORY
-#define SORT_WINSHAREDMEMORY
+#pragma once
 
 #include "sort.h"
 
@@ -48,5 +47,3 @@ private:
 #endif
 
 #define PlatformSharedMemory	WinSharedMemory
-
-#endif
