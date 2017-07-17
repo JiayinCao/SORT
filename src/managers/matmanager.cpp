@@ -28,27 +28,6 @@
 #include "utility/creator.h"
 #include "material/matte.h"
 
-// default constructor
-MatManager::MatManager()
-{
-    m_pDefault = std::make_shared<Matte>();
-}
-
-// default destructor
-MatManager::~MatManager()
-{
-#if defined(SORT_DEBUG)
-    for_each( m_matPool.begin() , m_matPool.end() ,
-        []( const std::pair< string , std::shared_ptr<Material>>& it )
-        {
-            int references = it.second.use_count() - 1;
-            if( references > 1 )
-                LOG_ERROR<<"There are still "<<references<<" references pointing to material \""<<it.first<<"\"."<<CRASH;
-        }
-    );
-#endif
-}
-
 // find specific material
 std::shared_ptr<Material> MatManager::FindMaterial( const string& mat_name ) const
 {
@@ -59,7 +38,8 @@ std::shared_ptr<Material> MatManager::FindMaterial( const string& mat_name ) con
 // whether the material exists
 std::shared_ptr<Material> MatManager::GetDefaultMat()
 {
-	return m_pDefault;
+    static std::shared_ptr<Matte> defaultMat = std::make_shared<Matte>();
+	return defaultMat;
 }
 
 // parse material file and add the materials into the manager

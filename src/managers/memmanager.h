@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_MEMMANAGER
-#define	SORT_MEMMANAGER
+#pragma once
 
 // include the header
 #include "utility/singleton.h"
@@ -157,5 +156,3 @@ inline unsigned SORT_OFFSET(unsigned id=0)
 {
 	return MemManager::GetSingleton().GetOffset(id);
 }
-
-#endif

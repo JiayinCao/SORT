@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_VECTOR3
-#define SORT_VECTOR3
+#pragma once
 
 #include <math.h>
 #include "utility/define.h"
@@ -212,5 +211,3 @@ inline void CoordinateSystem( const Vector3<T>& v0 , Vector3<T>& v1 , Vector3<T>
 	}
 	v2 = Cross( v0 , v1 );
 }
-
-#endif

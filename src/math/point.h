@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_POINT
-#define	SORT_POINT
+#pragma once
 
 // include the header file
 #include "vector3.h"
@@ -239,5 +238,3 @@ inline float Distance( const Point& p0 , const Point& p1 )
 {
 	return (p0-p1).Length();
 }
-
-#endif

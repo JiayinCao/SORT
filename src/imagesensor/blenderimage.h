@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef SORT_BLENDEROUTPUT
-#define SORT_BLENDEROUTPUT
+#pragma once
 
 #include "imagesensor.h"
 #include "texture/rendertarget.h"
@@ -46,5 +45,3 @@ private:
 
 	SharedMemory	m_sharedMemory;
 };
-
-#endif
