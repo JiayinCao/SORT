@@ -96,8 +96,7 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	// pick best split
 	unsigned	split_offset;
 	unsigned 	split_Axis;
-	bool 		left = false;
-	float sah = pickSplitting( splits , prinum , node->bbox , split_Axis , split_offset, left );
+	float sah = pickSplitting( splits , prinum , node->bbox , split_Axis , split_offset);
 	node->flag = split_Axis;
 	node->split = splits.split[split_Axis][split_offset].pos;
 	if( sah >= prinum ){
@@ -184,7 +183,7 @@ float KDTree::sah( unsigned l , unsigned r , unsigned axis , float split , const
 
 // pick best splitting
 float KDTree::pickSplitting( const Splits& splits , unsigned prinum , const BBox& box ,
-							 unsigned& splitAxis , unsigned& split_offset , bool& left )
+							 unsigned& splitAxis , unsigned& split_offset )
 {
 	float min_sah = FLT_MAX;
 	for( int k = 0 ; k < 3 ; k++ )
@@ -194,17 +193,22 @@ float KDTree::pickSplitting( const Splits& splits , unsigned prinum , const BBox
 		unsigned split_count = prinum * 2;
 		unsigned i = 0;
 		while( i < split_count ){
+            if (splits.split[k][i].pos <= box.m_Min[k] ){
+                ++i;
+                continue;
+            }
+            if( splits.split[k][i].pos >= box.m_Max[k] )
+                break;
+            
             if (splits.split[k][i].type == Split_Type::Split_End)
                 --n_r;
 
 			// get the sah value
-			bool _left = false;
 			float sahv = sah( n_l , n_r , k , splits.split[k][i].pos , box );
 			if( sahv < min_sah ){
 				min_sah = sahv;
 				splitAxis = k;
                 split_offset = i;
-				left = _left;
 			}
 			
             if (splits.split[k][i].type == Split_Type::Split_Start)

@@ -64,8 +64,8 @@ public:
     enum class Split_Type
     {
         Split_None = 0,     /**< An invalid type. */
-        Split_End = 1,      /**< Split plane at the end of one primitive along an axis. */
-        Split_Start = 2,    /**< Split plane at the start of one primitive along an axis. */
+        Split_Start = 1,    /**< Split plane at the start of one primitive along an axis. */
+        Split_End = 2,      /**< Split plane at the end of one primitive along an axis. */
     };
     
     //! KD-Tree node structure
@@ -163,10 +163,9 @@ private:
     //! @param box          Axis aligned bounding box of the node.
     //! @param splitAxis    ID of the splitting axis.
     //! @param split_offset ID of the best split plane that is picked.
-    //! @param left     Whether those flat primitives belongs to the left child or not.
     //! @return         The SAH value of the selected split that has the minimal SAH value.
 	float pickSplitting( const Splits& splits , unsigned prinum , const BBox& box ,
-						 unsigned& splitAxis , unsigned& split_offset , bool& left );
+						 unsigned& splitAxis , unsigned& split_offset );
 	
     //! @brief Mark the current node as leaf node.
     //! @param node     The KD-Tree node to be marked as leaf node.
