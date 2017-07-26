@@ -258,7 +258,7 @@ void System::_executeRenderingTasks()
 
 	// pre allocate memory for the specific thread
 	for( unsigned i = 0 ; i < m_thread_num ; ++i )
-		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 256 , i );
+		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 64 , i );
     
     std::vector< std::unique_ptr<PlatformThreadUnit> > threads;
     for( unsigned i = 0 ; i < m_thread_num ; ++i )
