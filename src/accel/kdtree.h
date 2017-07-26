@@ -65,8 +65,7 @@ public:
     {
         Split_None = 0,     /**< An invalid type. */
         Split_End = 1,      /**< Split plane at the end of one primitive along an axis. */
-        Split_Flat = 2,     /**< Split plane contains the primitive, it happens when primitve is axis-aligned. */
-        Split_Start = 4,    /**< Split plane at the start of one primitive along an axis. */
+        Split_Start = 2,    /**< Split plane at the start of one primitive along an axis. */
     };
     
     //! KD-Tree node structure
@@ -118,7 +117,6 @@ public:
     struct Splits
     {
         Split*		split[3] = { nullptr , nullptr , nullptr }; /**< Split planes along three different axis. */
-        unsigned	split_c[3] = { 0 , 0 , 0 };                 /**< Number of split planes in each different axis. */
         
         //! Release the allcoated memory.
         void Release()
@@ -153,24 +151,22 @@ private:
     //! @brief Evalute SAH value for a specific split plane.
     //! @param l        Number of primitives on the left of the split plane.
     //! @param r        Number of primitives on the right of the split plane.
-    //! @param f        Number of primitives lying on the split plane.
     //! @param axis     ID of splitting axis.
     //! @param split    Position along the splitting axis of the split plane.
     //! @param box      Bounding box of the KD-Tree node.
-    //! @param left     Whether those flat primitves belongs to the left child or not.
     //! @return         The evaluted SAH value for the split.
-	float sah( unsigned l , unsigned r , unsigned f , unsigned axis , float split , const BBox& box , bool& left );
+	float sah( unsigned l , unsigned r , unsigned axis , float split , const BBox& box );
 	
     //! @brief Pick the split plane with minimal SAH value.
     //! @param splits       Split information that holds all possible split plane information.
     //! @param prinum       Number of all primitives in the current node.
     //! @param box          Axis aligned bounding box of the node.
     //! @param splitAxis    ID of the splitting axis.
-    //! @param split_pos    Position along the splitting axis of the split plane.
-    //! @param left     Whether those flat primitves belongs to the left child or not.
+    //! @param split_offset ID of the best split plane that is picked.
+    //! @param left     Whether those flat primitives belongs to the left child or not.
     //! @return         The SAH value of the selected split that has the minimal SAH value.
 	float pickSplitting( const Splits& splits , unsigned prinum , const BBox& box ,
-						 unsigned& splitAxis , float& split_pos , bool& left );
+						 unsigned& splitAxis , unsigned& split_offset , bool& left );
 	
     //! @brief Mark the current node as leaf node.
     //! @param node     The KD-Tree node to be marked as leaf node.
