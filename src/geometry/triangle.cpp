@@ -36,7 +36,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	const Point& p1 = mem->m_PositionBuffer[id1] ;
 	const Point& p2 = mem->m_PositionBuffer[id2] ;
 
-	float delta = 0.0001f;
+	float delta = 0.0000001f;
 	Vector e1 = p1 - p0;
 	Vector e2 = p2 - p0;
 	Vector s1 = Cross( r.m_Dir , e2 );
