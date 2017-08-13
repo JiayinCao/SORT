@@ -97,12 +97,12 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	unsigned	split_offset;
 	unsigned 	split_Axis;
 	float sah = pickSplitting( splits , prinum , node->bbox , split_Axis , split_offset);
-	node->flag = split_Axis;
-	node->split = splits.split[split_Axis][split_offset].pos;
 	if( sah >= prinum ){
 		makeLeaf( node , splits , prinum );
 		return;
 	}
+    node->flag = split_Axis;
+    node->split = splits.split[split_Axis][split_offset].pos;
 
 	// ----------------------------------------------------------------------------------------
 	// step 2
