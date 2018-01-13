@@ -24,6 +24,7 @@
 #include "light/light.h"
 #include "managers/memmanager.h"
 #include "sampler/sampler.h"
+#include "log/log.h"
 
 IMPLEMENT_CREATOR( DirectLight );
 
@@ -53,13 +54,8 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 }
 
 // output log information
-void DirectLight::OutputLog() const
-{
-	LOG_HEADER( "Integrator" );
-	LOG<<"Integrator algorithm : Direct Light Integrator."<<ENDL;
-	LOG<<"It supports direct lighting , specular reflection and specular refraction."<<ENDL;
-	LOG<<"Soft shadow and area light are also supported in the algorithm."<<ENDL;
-	LOG<<"Indirect lighting , like color bleeding , caustics , is not supported."<<ENDL<<ENDL;
+void DirectLight::OutputLog() const{
+    slog( LOG_LEVEL::INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : direct light integrator." );
 }
 
 // request samples

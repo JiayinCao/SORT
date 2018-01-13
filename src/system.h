@@ -116,8 +116,6 @@ private:
 	void	_uninit3rdParty();
 	// do ray tracing in a multithread enviroment
 	void	_executeRenderingTasks();
-	// output preprocessing information
-	void	_outputPreprocess();
 	// push rendering task
 	void	_pushRenderTask();
 	// allocate integrator

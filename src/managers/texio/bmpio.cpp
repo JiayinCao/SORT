@@ -20,9 +20,9 @@
 #include "bmpio.h"
 #include "spectrum/spectrum.h"
 #include <fstream>
-#include "managers/logmanager.h"
 #include "managers/texmanager.h"
 #include "texture/texture.h"
+#include "log/log.h"
 
 //-------------------------------------------------
 // define some useful structure
@@ -223,7 +223,7 @@ bool BmpIO::Read( const string& str , std::shared_ptr<ImgMemory>& mem )
 	delete[] data;
 
 	// output log
-	LOG<<"Read image file : \""<<str<<"\""<<ENDL;
+    slog( LOG_LEVEL::INFO , LOG_TYPE::GENERAL , stringFormat( "Read image file : \"%s\"" , str.c_str() ) );
 
 	return true;
 }

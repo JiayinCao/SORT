@@ -19,6 +19,7 @@
 #include "managers/logmanager.h"
 #include "geometry/primitive.h"
 #include "geometry/intersection.h"
+#include "log/log.h"
 
 IMPLEMENT_CREATOR( UniGrid );
 
@@ -213,14 +214,11 @@ bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned vo
 // output log information
 void UniGrid::OutputLog() const
 {
-	LOG_HEADER( "Accelerator" );
-	LOG<<"Accelerator Type :\tUniform Grid"<<ENDL;
-	LOG<<"Total Grid Count :\t"<<m_voxelCount<<ENDL;
-	LOG<<"Grid Dimenstion  :\t"<<m_voxelNum[0]<<"*"<<m_voxelNum[1]<<"*"<<m_voxelNum[2]<<ENDL;
-
 	unsigned count = 0;
 	for( unsigned i = 0 ; i < m_voxelCount ; i++ )
 		count += (unsigned)m_pVoxels[i].size();
-	LOG<<"Triangles per Grid:\t"<<((m_voxelCount==0)?0:(float)count/(float)m_voxelCount)<<ENDL<<ENDL;
+    
+    slog( LOG_LEVEL::INFO , LOG_TYPE::SPATIAL_ACCELERATOR , "Spatial accelerator is Uniform Grid." );
+    slog( LOG_LEVEL::DEBUG , LOG_TYPE::SPATIAL_ACCELERATOR , stringFormat( "Total grid count is %d. Grid dimension is %d x %d x %d. Average number of triangles per grid is %f" , m_voxelCount , m_voxelNum[0] , m_voxelNum[1] , m_voxelNum[2] , ((m_voxelCount==0)?0:(float)count/(float)m_voxelCount) ) );
 }
 

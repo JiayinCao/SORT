@@ -20,7 +20,7 @@
 #if defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
 
 #include "sharedmemory.h"
-#include "managers/logmanager.h"
+#include "log/log.h"
 #include <sys/mman.h>
 #include <sys/types.h>
 
@@ -43,7 +43,7 @@ void MmapSharedMemory::CreateSharedMemory( const string& name , int size , unsig
     fd = open( "blender_intermediate/sharedmem.bin" , O_RDWR , 0 );
     if( fd == -1 )
     {
-        cout<< "Failed to load shared memory file"<<endl;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "Failed to load shared memory file");
         return;
     }
     

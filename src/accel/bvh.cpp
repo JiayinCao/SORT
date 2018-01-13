@@ -18,7 +18,7 @@
 #include "bvh.h"
 #include <algorithm>
 #include "geometry/ray.h"
-#include "managers/logmanager.h"
+#include "log/log.h"
 #include "managers/memmanager.h"
 #include "geometry/intersection.h"
 
@@ -37,14 +37,8 @@ Bvh::~Bvh()
 // output log information
 void Bvh::OutputLog() const
 {
-	LOG_HEADER( "Accelerator" );
-	LOG<<"Accelerator Type :\tBounding Volumn Hierarchy"<<ENDL;
-	LOG<<"BVH Depth        :\t"<<m_bvhDepth<<ENDL;
-	LOG<<"Total Node Count :\t"<<m_totalNode<<ENDL;
-	LOG<<"Inner Node Count :\t"<<m_totalNode - m_leafNode<<ENDL;
-	LOG<<"Leaf Node Count  :\t"<<m_leafNode<<ENDL;
-	LOG<<"Triangles per leaf:\t"<<(((float)m_primitives->size())/m_leafNode)<<ENDL;
-	LOG<<"Max triangles in leaf:\t"<<m_maxLeafTriNum<<ENDL<<ENDL;
+    slog( LOG_LEVEL::INFO , LOG_TYPE::SPATIAL_ACCELERATOR , "Spatial accelerator type is BVH ( Bounding Volume Hierarchy )." );
+    slog( LOG_LEVEL::DEBUG , LOG_TYPE::SPATIAL_ACCELERATOR , stringFormat( "Maximum depth in BVH tree is %d. Total number of nodes in it is %d, number of inner nodes is %d, number of leaf nodes is %d. Average number of triangles per leaf nodes is %f, maximum number of triangles in leaf nodes is %d" , m_bvhDepth , m_totalNode , m_totalNode - m_leafNode , m_leafNode , (((float)m_primitives->size())/m_leafNode) , m_maxPriInLeaf ) );
 }
 
 // malloc the memory
