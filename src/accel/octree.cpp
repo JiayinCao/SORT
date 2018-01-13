@@ -17,6 +17,7 @@
 
 #include "octree.h"
 #include "geometry/primitive.h"
+#include "log/log.h"
 
 IMPLEMENT_CREATOR( OcTree );
 
@@ -71,8 +72,7 @@ void OcTree::Build()
 // output log information
 void OcTree::OutputLog() const
 {
-	LOG_HEADER( "Accelerator" );
-	LOG<<"Accelerator Type :\tOcTree"<<ENDL;
+    slog( LOG_LEVEL::INFO , LOG_TYPE::SPATIAL_ACCELERATOR , "Spatial accelerator is OcTree." );
 }
 
 // Release OcTree memory.

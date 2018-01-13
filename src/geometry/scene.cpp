@@ -26,6 +26,7 @@
 #include "managers/matmanager.h"
 #include "light/light.h"
 #include "shape/shape.h"
+#include "log/log.h"
 
 // initialize default data
 void Scene::_init()
@@ -269,10 +270,7 @@ void Scene::_generateTriBuf()
 // output log information
 void Scene::OutputLog() const
 {
-	LOG_HEADER("Geometry Information");
-	LOG<<"Scene File Name:\t"<<m_filename<<ENDL;
-	LOG<<"Triangle Count :\t"<<(unsigned)m_triBuf.size()<<ENDL<<ENDL;
-
+    slog( LOG_LEVEL::INFO , LOG_TYPE::GENERAL , stringFormat("Triangle number is %d." , m_triBuf.size() ) );
 	if( m_pAccelerator )
 		m_pAccelerator->OutputLog();
 }

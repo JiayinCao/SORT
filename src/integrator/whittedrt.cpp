@@ -22,6 +22,7 @@
 #include "geometry/scene.h"
 #include "bsdf/bsdf.h"
 #include "light/light.h"
+#include "log/log.h"
 
 IMPLEMENT_CREATOR( WhittedRT );
 
@@ -75,10 +76,6 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 }
 
 // output log information
-void WhittedRT::OutputLog() const
-{
-	LOG_HEADER( "Integrator" );
-	LOG<<"Integrator algorithm : Whitted Ray Tracing."<<ENDL;
-	LOG<<"It supports direct lighting , specular reflection and specular refraction."<<ENDL;
-	LOG<<"Indirect lighting , like color bleeding , caustics , is not supported."<<ENDL<<ENDL;
+void WhittedRT::OutputLog() const{
+    slog( LOG_LEVEL::INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : whitted ray tracing." );
 }

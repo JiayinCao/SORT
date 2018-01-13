@@ -22,6 +22,7 @@
 #include "light/light.h"
 #include "math/vector3.h"
 #include "utility/samplemethod.h"
+#include "log/log.h"
 
 IMPLEMENT_CREATOR( AmbientOcclusion );
 
@@ -64,10 +65,8 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 }
 
 // output log information
-void AmbientOcclusion::OutputLog() const
-{
-	LOG_HEADER( "Integrator" );
-	LOG<<"Integrator algorithm : Ambient Occlusion."<<ENDL;
+void AmbientOcclusion::OutputLog() const{
+    slog( LOG_LEVEL::INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : Ambient Occlusion." );
 }
 
 void AmbientOcclusion::_registerAllProperty()

@@ -21,6 +21,7 @@
 #include "geometry/scene.h"
 #include "integratormethod.h"
 #include "camera/camera.h"
+#include "log/log.h"
 
 IMPLEMENT_CREATOR( PathTracing );
 
@@ -165,11 +166,6 @@ void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples 
 }
 
 // output log information
-void PathTracing::OutputLog() const
-{
-	LOG_HEADER( "Integrator" );
-	LOG<<"Integrator algorithm : Path Tracing."<<ENDL;
-	LOG<<"It supports all of the features in direct lighting algorithm."<<ENDL;
-	LOG<<"Some global illumination effect is also supported in path tracing."<<ENDL;
-	LOG<<"While it requires much more samples to reduce the noise to an acceptable level."<<ENDL<<ENDL;
+void PathTracing::OutputLog() const{
+    slog( LOG_LEVEL::INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : path tracing." );
 }

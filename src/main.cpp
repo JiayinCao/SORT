@@ -24,6 +24,8 @@ System g_System;
 
 extern bool g_bBlenderMode;
 
+#include "log/log.h"
+
 // the main func
 #ifdef SORT_IN_WINDOWS
 int __cdecl main( int argc , char** argv )
@@ -31,6 +33,9 @@ int __cdecl main( int argc , char** argv )
 int main( int argc , char** argv )
 #endif
 {
+    addLogDispatcher(new StdOutLogDispatcher());
+    addLogDispatcher(new FileLogDispatcher("log.txt"));
+    
 	// check if there is file argument
 	if( argc < 2 )
 	{
@@ -38,6 +43,16 @@ int main( int argc , char** argv )
 		return 0;
 	}
 
+    string commandline = "Command line arguments: \t";
+    for( int i = 0 ; i < argc ; ++i ){
+        commandline += string(argv[i]);
+        commandline += " ";
+    }
+    
+    slog( LOG_LEVEL::INFO , LOG_TYPE::GENERAL , commandline );
+    slog( LOG_LEVEL::INFO , LOG_TYPE::GENERAL , "Number of CPU cores " + to_string(NumSystemCores()) );
+    slog( LOG_LEVEL::INFO , LOG_TYPE::GENERAL , "Scene file (" + std::string(argv[1]) + ")" );
+    
 	// enable blender mode if possible
 	if (argc > 2)
 	{

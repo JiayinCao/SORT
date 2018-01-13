@@ -19,6 +19,7 @@
 #include "geometry/primitive.h"
 #include "geometry/intersection.h"
 #include <algorithm>
+#include "log/log.h"
 
 IMPLEMENT_CREATOR( KDTree );
 
@@ -73,14 +74,8 @@ void KDTree::Build()
 // output log
 void KDTree::OutputLog() const
 {
-	LOG_HEADER( "Accelerator" );
-	LOG<<"Accelerator Type :\tK-Dimensional Tree"<<ENDL;
-	LOG<<"KD-Tree Depth    :\t"<<m_depth<<ENDL;
-	LOG<<"Total Node Count :\t"<<m_total<<ENDL;
-	LOG<<"Inner Node Count :\t"<<m_total - m_leaf<<ENDL;
-	LOG<<"Leaf Node Count  :\t"<<m_leaf<<ENDL;
-	LOG<<"Triangles per leaf:\t"<<m_fAvgLeafTri<<ENDL;
-	LOG<<"Max triangles in leaf:\t"<<m_MaxLeafTri<<ENDL<<ENDL;
+    slog( LOG_LEVEL::INFO , LOG_TYPE::SPATIAL_ACCELERATOR , "Spatial accelerator is SAH KD-Tree." );
+    slog( LOG_LEVEL::DEBUG , LOG_TYPE::SPATIAL_ACCELERATOR , stringFormat( "KD-Tree depth is %d. Total number of nodes in it is %d. Total number of inner nodes is %d. Leaf Node number is %d. Average number of triangles in leaf is %f. Maximum number of triangles in leaf nodes is %d." , m_depth , m_total , m_total - m_leaf , m_leaf , m_fAvgLeafTri , m_MaxLeafTri ) );
 }
 
 // split node
