@@ -17,6 +17,7 @@
 
 // include the header file
 #include "system.h"
+#include "log/log.h"
 #include "managers/texmanager.h"
 #include "managers/logmanager.h"
 #include "managers/meshmanager.h"
@@ -109,21 +110,7 @@ void System::PreProcess()
 	Timer::GetSingleton().StopTimer();
 	m_uPreProcessingTime = Timer::GetSingleton().GetElapsedTime();
 
-	// output some information
-	_outputPreprocess();
-}
-
-// output preprocessing information
-void System::_outputPreprocess()
-{
-	unsigned	core_num = NumSystemCores();
-	cout<<"------------------------------------------------------------------------------"<<endl;
-	cout<<" SORT is short for Simple Open-source Ray Tracing."<<endl;
-	cout<<"   Multi-thread is enabled"<<"("<<core_num<<" core"<<((core_num>1)?"s are":" is")<<" detected.)"<<endl;
-	cout<<"   "<<m_iSamplePerPixel<<" sample"<<((m_iSamplePerPixel>1)?"s are":" is")<<" used per pixel."<<endl;
-	cout<<"   Scene file : "<<m_Scene.GetFileName()<<endl;
-	cout<<"   Time spent on preprocessing :"<<m_uPreProcessingTime<<" ms."<<endl;
-	cout<<"------------------------------------------------------------------------------"<<endl;
+    slog( LOG_LEVEL::INFO , LOG_TYPE::GENERAL , "Time spent on preprocessing is " + to_string( m_uPreProcessingTime ) + " ms." );
 }
 
 // get elapsed time
@@ -157,10 +144,7 @@ void System::OutputLog() const
 	// output scene information first
 	m_Scene.OutputLog();
 
-	// output time information
-	LOG_HEADER( "Rendering Information" );
-	LOG<<"Time spent on pre-processing  : "<<m_uPreProcessingTime<<ENDL;
-	LOG<<"Time spent on rendering       : "<<m_uRenderingTime<<ENDL;
+    slog( LOG_LEVEL::INFO , LOG_TYPE::PERFORMANCE , stringFormat( "Time spent on pre-processing %d ms. Time spent on rendering %d ms" , m_uPreProcessingTime , m_uRenderingTime ) );
 }
 
 // uninitialize 3rd party library
