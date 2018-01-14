@@ -20,6 +20,8 @@
 #include "managers/meshmanager.h"
 #include <algorithm>
 #include "math/transform.h"
+#include <stdarg.h>
+#include "log/log.h"
 
 // convert string to vertex index
 VertexIndex	VertexIndexFromStr( const string& str )
@@ -64,9 +66,7 @@ MESH_TYPE	MeshTypeFromStr( const string& str )
 	else if( strcmp( substr.c_str() , "ply" ) == 0 )
 		return MT_PLY;
 		
-	// log a warning
-	LOG_WARNING<<"Mesh type of \""<<substr<<"\" is not supported."<<ENDL;
-
+    slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat( "Mesh type of \"%s\" is not supported" , substr.c_str() ) );
 	return MT_NONE;
 }
 
@@ -94,8 +94,8 @@ TEX_TYPE	TexTypeFromStr( const string& str )
 		return TT_HDR;
 
 	// log a warning
-	LOG_WARNING<<"Image type of \""<<substr<<"\" is not supported."<<ENDL;
-
+    slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat( "Image type of \"%s\" is not supported" , substr.c_str() ) );
+    
 	return TT_NONE;
 }
 
@@ -105,7 +105,7 @@ Transform TransformFromStr( const string& s )
 	// if there is no such an value , just return identity matrix and log a warning
 	if( s.empty() )
 	{
-		LOG_WARNING<<"No value set in the transformation"<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "No value set in the transformation" );
 		return Transform();
 	}
 

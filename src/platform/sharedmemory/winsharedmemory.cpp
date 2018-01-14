@@ -20,7 +20,7 @@
 #if defined(SORT_IN_WINDOWS)
 
 #include "sharedmemory.h"
-#include "managers/logmanager.h"
+#include "log/log.h"
 
 // default constructor
 WinSharedMemory::WinSharedMemory()
@@ -37,7 +37,7 @@ void WinSharedMemory::CreateSharedMemory( const string& name , int size , unsign
 
 	if (hMapFile == NULL)
 	{
-		LOG_WARNING<<"Creating Shared Memory Failed "<<name<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat( "Creating shared memory failed %s" , name.c_str() ) );
 		return;
 	}
 	sharedmemory.size = size;
@@ -51,7 +51,7 @@ void WinSharedMemory::CreateSharedMemory( const string& name , int size , unsign
 	{
 		sharedmemory.size = 0;
 		CloseHandle(hMapFile);
-		LOG_WARNING<<"Mapping Shared Memory Failed "<<name<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat( "Creating shared memory failed %s" , name.c_str() ) );
 	}
 }
 

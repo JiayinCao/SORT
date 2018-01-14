@@ -19,6 +19,7 @@
 #include "material.h"
 #include "bsdf/bsdf.h"
 #include "managers/memmanager.h"
+#include "log/log.h"
 
 Bsdf* Material::GetBsdf( const Intersection* intersect ) const
 {
@@ -35,7 +36,7 @@ void Material::ParseMaterial( TiXmlElement* element )
 
 	// check validation
 	if( !root.CheckValidation() )
-		LOG_WARNING<<"Material "<<name<<" is not valid, a default material will be used."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat( "Material %s is not valid , a default material will be used." , name.c_str() ) );
 	else
 		root.PostProcess();
 }

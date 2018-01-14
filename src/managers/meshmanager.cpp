@@ -24,6 +24,7 @@
 #include "geometry/triangle.h"
 #include "utility/path.h"
 #include "bsdf/bsdf.h"
+#include "log/log.h"
 
 // default constructor
 MeshManager::MeshManager()
@@ -321,7 +322,7 @@ Vector BufferMemory::_genTagentForTri( const std::shared_ptr<Trunk>& trunk , uns
 	float determinant = du1 * dv2 - dv1 * du2 ;
 	if( determinant == 0.0f )
 	{
-		LOG_WARNING<<"There is a triangle containing three vertexes with same texture coordinate , can't generate shading coordinate correctly."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "There is a triangle containing three vertexes with same texture coordinate , can't generate shading coordinate correctly." );
 		Vector n = Normalize( p0 - p1 );
 		Vector t0 , t1;
 		CoordinateSystem( n , t0 , t1 );

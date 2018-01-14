@@ -21,6 +21,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include "utility/strhelper.h"
+#include "log/log.h"
 
 // item creator
 template<class T>
@@ -79,7 +80,7 @@ private:
         auto& container = Creator<B>::GetSingleton().GetContainer();\
 		if( container.count( _str ) )\
 		{\
-			LOG_WARNING<<"The creator type with specific name of "<<N<<" already existed."<<ENDL;\
+            slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat( "The creator type with specific name of %s already exxisted." , N ) );\
 			return;\
 		}\
         container.insert( std::make_pair(_str , this) );\

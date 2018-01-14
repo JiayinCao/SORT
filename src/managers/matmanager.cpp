@@ -27,6 +27,7 @@
 #include "bsdf/merl.h"
 #include "utility/creator.h"
 #include "material/matte.h"
+#include "log/log.h"
 
 // find specific material
 std::shared_ptr<Material> MatManager::FindMaterial( const string& mat_name ) const
@@ -53,8 +54,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 	// if there is error , return false
 	if( doc.Error() )
 	{
-		LOG_WARNING<<doc.ErrorDesc()<<ENDL;
-		LOG_WARNING<<"Material \'"<<str<<"\' file load failed."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat( "%s. Material \"%s\" file load failed" , doc.ErrorDesc() , str.c_str() ) );
 		return false;
 	}
 

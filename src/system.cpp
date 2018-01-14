@@ -94,12 +94,12 @@ void System::PreProcess()
 
 	if( m_imagesensor == 0 )
 	{
-		LOG_WARNING<<"There is no render target in the system, can't render anything."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "There is no render target in the system, can't render anything." );
 		return;
 	}
 	if( m_camera == 0 )
 	{
-		LOG_WARNING<<"There is no camera attached in the system , can't render anything."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "There is no camera attached in the system , can't render anything." );
 		return;
 	}
 
@@ -267,7 +267,7 @@ Integrator*	System::_allocateIntegrator()
 		
 	if( integrator == 0 )
 	{
-		LOG_WARNING<<"No integrator with name of "<<m_integratorType<<"."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat( "No integrator with name of %s" , m_integratorType.c_str() ) );
 		return 0;
 	}
 

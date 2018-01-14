@@ -35,6 +35,9 @@ enum class LOG_TYPE{
     SPATIAL_ACCELERATOR = 0x02,
     PERFORMANCE = 0x04,
     INTEGRATOR = 0x08,
+    LIGHT = 0x10,
+    MATERIAL = 0x20,
+    IMAGE = 0x40,
 };
 
 class LogDispatcher{
