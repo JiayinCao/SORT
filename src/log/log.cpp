@@ -17,6 +17,7 @@
 
 #include "log.h"
 #include <vector>
+#include <memory>
 
 static vector<unique_ptr<LogDispatcher>> logDispatcher;
 static bool logLevel = true;
@@ -68,7 +69,10 @@ const string typeToString( LOG_TYPE type ){
     ( LOG_TYPE::GENERAL == type ) ? "[General]" :
     ( LOG_TYPE::SPATIAL_ACCELERATOR == type ) ? "[Spatial Accelerator]":
     ( LOG_TYPE::PERFORMANCE == type ) ? "[Performance]" :
-    ( LOG_TYPE::INTEGRATOR == type ) ? "[Integrator]" : "";
+    ( LOG_TYPE::INTEGRATOR == type ) ? "[Integrator]" :
+    ( LOG_TYPE::LIGHT == type ) ? "[Light]" :
+    ( LOG_TYPE::MATERIAL == type ) ? "[Material]" :
+    ( LOG_TYPE::IMAGE == type ) ? "[Image]" : "";
 }
 
 const string lineInfoString( const char* file , int line ){

@@ -18,7 +18,7 @@
 // include header file
 #include "compositetexture.h"
 #include "spectrum/spectrum.h"
-#include "managers/logmanager.h"
+#include "log/log.h"
 #include "utility/define.h"
 
 // constructor from a texture
@@ -85,9 +85,9 @@ Spectrum ComTexture::GetColor( int x , int y ) const
 void ComTexture::SetSize( unsigned w , unsigned h )
 {
 	if( w == 0 )
-		LOG_WARNING<<"Width of the texture is 0."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::IMAGE , "Width of the texture is 0." );
 	if( h == 0 )
-		LOG_WARNING<<"Height of the texture is 0."<<ENDL;
+		slog( LOG_LEVEL::WARNING , LOG_TYPE::IMAGE , "Height of the texture is 0." );
 
 	// set the size
 	m_iTexWidth = w;

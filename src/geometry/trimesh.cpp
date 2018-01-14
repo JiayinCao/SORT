@@ -22,7 +22,7 @@
 #include "managers/meshmanager.h"
 #include "geometry/triangle.h"
 #include "geometry/instancetri.h"
-#include "managers/logmanager.h"
+#include "log/log.h"
 #include "managers/memmanager.h"
 #include "managers/matmanager.h"
 
@@ -91,8 +91,8 @@ void TriMesh::ResetMaterial( const string& setname , const string& matname )
 {
 	// get the material first
     auto mat = MatManager::GetSingleton().FindMaterial( matname );
-	if( mat == 0 )
-		LOG_WARNING<<"There is no such a material named \'"<<matname<<"\'."<<ENDL;
+	if( mat == nullptr )
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat( "Material %s doesn't exist." , matname.c_str() ) );
 
 	// if there is no set name , all of the sets are set the material with the name of 'matname'
 	if( setname.empty() )
@@ -104,9 +104,8 @@ void TriMesh::ResetMaterial( const string& setname , const string& matname )
 	}
 
 	int id = _getSubsetID( setname );
-	if( id < 0 )
-	{
-		LOG_WARNING<<"There is no such subset named "<<setname<<ENDL;
+	if( id < 0 ){
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat( "Material subset %s in material %s doesn't exist." , matname.c_str() , matname.c_str() ) );
 		return;
 	}
 	m_Materials[id] = mat;

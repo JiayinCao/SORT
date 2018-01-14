@@ -23,6 +23,7 @@
 #include "managers/meshmanager.h"
 #include "utility/strhelper.h"
 #include "managers/matmanager.h"
+#include "log/log.h"
 
 // the maxmium length of a single line
 static const unsigned LINE_MAXLENGTH = 4096;
@@ -30,17 +31,17 @@ static const unsigned LINE_MAXLENGTH = 4096;
 #define CHECK_INDEX(index) {\
 	if( index.posIndex < 0 )\
 	{\
-		LOG_WARNING<<"Negative position index in file "<<str<<ENDL;\
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "Negative position index in file." );\
 		index.posIndex = 0;\
 	}\
 	if( index.norIndex < 0 )\
 	{\
-		LOG_WARNING<<"Negative normal index in file "<<str<<ENDL;\
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "Negative normal index in file." );\
 		index.norIndex = 0;\
 	}\
 	if( index.texIndex < 0 )\
 	{\
-		LOG_WARNING<<"Negative texture index in file "<<str<<ENDL;\
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "Negative texture index in file." );\
 		index.texIndex = 0;\
 	}\
 }
@@ -84,7 +85,7 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 			{
 				trunk->m_mat = MatManager::GetSingleton().FindMaterial( name );
 				if( 0 == trunk->m_mat )
-					LOG_WARNING<<"Material named \'"<<name<<"\' not found, use default material in subset \'"<<trunk->name<<"\' of \'"<<str<<"\'."<<ENDL;
+                    slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat("Material named %s not found, use default material in subset \"%s\"." , name.c_str() , str.c_str() ) );
 			}
 		}else if( strcmp( prefix.c_str() , "v" ) == 0 )
 		{

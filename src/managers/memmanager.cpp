@@ -18,6 +18,8 @@
 // include the headers
 #include "memmanager.h"
 #include "utility/define.h"
+#include "log/log.h"
+#include "utility/strhelper.h"
 
 // default constructor
 MemManager::MemManager()
@@ -69,7 +71,7 @@ void MemManager::ClearMem( unsigned id )
 {
 	Memory* mem = _getMemory( id );
 	if( mem == 0 )
-		LOG_ERROR<<"Can't clear memory, because there is no memory with id "<<id<<"."<<CRASH;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat( "Can't clear memory, because there is no memory with id %d." , id ) );
 
 	//reset the offset
 	mem->m_offset = 0;
@@ -80,7 +82,7 @@ void MemManager::DeAlloc( unsigned id )
 {
 	Memory* mem = _getMemory( id );
 	if( mem == 0 )
-		LOG_WARNING<<"Can't delete memory, because there is no memory with id "<<id<<"."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat( "Can't delete memory, because there is no memory with id %d." , id ) );
 
 	// reset offset and size
 	delete mem;

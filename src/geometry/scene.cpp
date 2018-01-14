@@ -86,14 +86,12 @@ bool Scene::LoadScene( const string& str )
 		{
 			// the name of the model
 			const char* model_name = meshNode->Attribute( "name" );
-			if( model_name == 0 )
-			{
-				LOG_WARNING<<"There is a mesh \""<<filename<<"\" without a model name, it will be skipped."<<ENDL;
+			if( model_name == nullptr ){
+                slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat("Mesh defined in file %s doesn't have a model name, it will be skipped." , filename ) );
 				break;
 			}
-			if( 0 != GetTriMesh( model_name ) )
-			{
-				LOG_WARNING<<"A model with name \""<<model_name<<"\" already exists, it will be skipped."<<ENDL;
+			if( nullptr != GetTriMesh( model_name ) ){
+                slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat("A mesh with name %s already existed." , model_name ) );
 				break;
 			}
 
@@ -172,7 +170,7 @@ bool Scene::LoadScene( const string& str )
 				m_lights.push_back( light );
 			}
 		}else
-			LOG_WARNING<<"There is no light with the type of \'"<<type<<"\'."<<ENDL;
+            slog( LOG_LEVEL::WARNING , LOG_TYPE::LIGHT , stringFormat( "Undefined light type %s" , type ) );
 
 		// get to the next light
 		lightNode = lightNode->NextSiblingElement( "Light" );
