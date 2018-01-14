@@ -21,6 +21,7 @@
 #include "light.h"
 #include "utility/creator.h"
 #include "geometry/sky/sky.h"
+#include "log/log.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 // definition of sky light
@@ -106,7 +107,7 @@ private:
 			if( light->sky )
 				light->sky->SetProperty( m_name , str );
 			else
-				LOG_WARNING<<"There is no sky attached to the light"<<ENDL;
+                slog( LOG_LEVEL::WARNING , LOG_TYPE::LIGHT , "There is no sky attached to light" );
 		}
 	};
 	class TransformProperty : public PropertyHandler<Light>

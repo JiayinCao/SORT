@@ -21,6 +21,7 @@
 #include "bsdf/lambert.h"
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "geometry/intersection.h"
+#include "log/log.h"
 
 // get node property
 MaterialNodeProperty* MaterialNode::getProperty( const string& name )
@@ -76,7 +77,7 @@ void MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 		if( node_prop == 0 )
 		{
 			// output error log
-			LOG_WARNING<<"Node property "<<prop_name<<" is ignored."<<ENDL;
+            slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat("Node property %s is ignored." , prop_name.c_str() ) );
 
 			// get next property
 			prop = prop->NextSiblingElement( "Property" );
@@ -108,7 +109,7 @@ MaterialNode* MaterialNode::ParseNode( TiXmlElement* element , MaterialNode* nod
 	MaterialNode* mat_node = CREATE_TYPE( node_type , MaterialNode );
 	if( mat_node == 0 )
 	{
-		LOG_WARNING<<"Node type "<<node_type<<" is unknown!!"<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat("Node type %s is undefined." , node_type.c_str() ) );
 		return mat_node;
 	}
 

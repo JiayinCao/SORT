@@ -31,6 +31,7 @@
 #include "texture/gridtexture.h"
 #include "texture/constanttexture.h"
 #include "texture/imagetexture.h"
+#include "log/log.h"
 
 // default constructor
 TexManager::TexManager()
@@ -104,7 +105,7 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 			// insert it into the container
 			m_ImgContainer.insert( make_pair( str , mem ) );
 		}else
-			LOG_WARNING<<"Can't load image file \""<<str<<"\"."<<ENDL;
+            slog( LOG_LEVEL::WARNING , LOG_TYPE::IMAGE , stringFormat("Can't load image file Ts." , str.c_str() ) );
 	}
 
 	return read;

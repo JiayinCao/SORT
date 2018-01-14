@@ -17,7 +17,7 @@
 
 // include the header
 #include "timer.h"
-#include "managers/logmanager.h"
+#include "log/log.h"
 
 #if defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
 #include <unistd.h>
@@ -50,7 +50,7 @@ void Timer::StartTimer()
 {
 	if( m_bTimerSet )
 	{
-		LOG_WARNING<<"Timer is already set."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "Timer is already set." );
 		return;
 	}
 	// get curren tick count
@@ -64,7 +64,7 @@ unsigned Timer::StopTimer()
 {
 	if( m_bTimerSet == false )
 	{
-		LOG_WARNING<<"Timer is not set."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "Timer is not set." );
 		return 0;
 	}
 	m_elapsed = getTickCount() - m_elapsed;
@@ -81,7 +81,7 @@ unsigned long Timer::GetElapsedTime() const
 {
 	if( m_bTimerSet )
 	{
-		LOG_WARNING<<"Trying to get elapsed time when timing, return 0."<<ENDL;
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "Trying to get elapsed time when timing, return 0." );
 		return 0L;
 	}
 	return m_elapsed;

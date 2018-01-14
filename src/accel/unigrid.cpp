@@ -109,9 +109,8 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 // build the acceleration structure
 void UniGrid::Build()
 {
-	if( m_primitives == 0 || m_primitives->empty() )
-	{
-		LOG_WARNING<<"There is no primitive in the uniform grid"<<ENDL;
+	if( nullptr == m_primitives || m_primitives->empty() ){
+        slog( LOG_LEVEL::WARNING , LOG_TYPE::SPATIAL_ACCELERATOR , "There is no primitive in uniform grid." );
 		return;
 	}
 

@@ -21,7 +21,8 @@
 #include "sort.h"
 #include <string>
 #include <unordered_map>
-#include "managers/logmanager.h"
+#include "log/log.h"
+#include "utility/strhelper.h"
 
 // pre-declera class
 class Texture;
@@ -71,7 +72,7 @@ public:
 
 		if( 0 == ph )
 		{
-			LOG_WARNING<<"There is no such a property named \'"<<name<<"\'."<<ENDL;
+            slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat( "There is no such a property named %s." , name.c_str() ) );
 			return false;
 		}
 
@@ -88,7 +89,7 @@ public:
 
 		if( 0 == ph )
 		{
-			LOG_WARNING<<"There is no such a property named \'"<<name<<"\'."<<ENDL;
+            slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat( "There is no such a property named %s." , name.c_str() ) );
 			return false;
 		}
 		
