@@ -21,6 +21,7 @@
 
 #include "sharedmemory.h"
 #include "log/log.h"
+#include "utility/strhelper.h"
 
 // default constructor
 WinSharedMemory::WinSharedMemory()

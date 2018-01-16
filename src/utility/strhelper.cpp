@@ -245,12 +245,12 @@ string NextToken( string& str , char t )
 }
 
 // format the input string like sprintf
-string stringFormat( const std::string& fmt, ... ){
+string stringFormat( const char* fmt, ... ){
     std::vector<char> str(100,'\0');
     va_list ap;
     while (1) {
         va_start(ap, fmt);
-        auto n = vsnprintf(str.data(), str.size(), fmt.c_str(), ap);
+        auto n = vsnprintf(str.data(), str.size(), fmt, ap);
         va_end(ap);
         if ((n > -1) && (size_t(n) < str.size())) {
             return str.data();
