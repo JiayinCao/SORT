@@ -55,7 +55,7 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 
 // output log information
 void DirectLight::OutputLog() const{
-    slog( LOG_LEVEL::INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : direct light integrator." );
+    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : direct light integrator." );
 }
 
 // request samples

@@ -54,7 +54,7 @@ unsigned MatManager::ParseMatFile( const string& str )
 	// if there is error , return false
 	if( doc.Error() )
 	{
-        slog( LOG_LEVEL::WARNING , LOG_TYPE::MATERIAL , stringFormat( "%s. Material \"%s\" file load failed" , doc.ErrorDesc() , str.c_str() ) );
+        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::MATERIAL , stringFormat( "%s. Material \"%s\" file load failed" , doc.ErrorDesc() , str.c_str() ) );
 		return false;
 	}
 

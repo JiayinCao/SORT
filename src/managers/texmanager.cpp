@@ -105,7 +105,7 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 			// insert it into the container
 			m_ImgContainer.insert( make_pair( str , mem ) );
 		}else
-            slog( LOG_LEVEL::WARNING , LOG_TYPE::IMAGE , stringFormat("Can't load image file Ts." , str.c_str() ) );
+            slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::IMAGE , stringFormat("Can't load image file Ts." , str.c_str() ) );
 	}
 
 	return read;

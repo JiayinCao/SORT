@@ -94,12 +94,12 @@ void System::PreProcess()
 
 	if( m_imagesensor == 0 )
 	{
-        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "There is no render target in the system, can't render anything." );
+        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "There is no render target in the system, can't render anything." );
 		return;
 	}
 	if( m_camera == 0 )
 	{
-        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , "There is no camera attached in the system , can't render anything." );
+        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "There is no camera attached in the system , can't render anything." );
 		return;
 	}
 
@@ -110,7 +110,7 @@ void System::PreProcess()
 	Timer::GetSingleton().StopTimer();
 	m_uPreProcessingTime = Timer::GetSingleton().GetElapsedTime();
 
-    slog( LOG_LEVEL::INFO , LOG_TYPE::GENERAL , "Time spent on preprocessing is " + to_string( m_uPreProcessingTime ) + " ms." );
+    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::GENERAL , "Time spent on preprocessing is " + to_string( m_uPreProcessingTime ) + " ms." );
 }
 
 // get elapsed time
@@ -144,7 +144,7 @@ void System::OutputLog() const
 	// output scene information first
 	m_Scene.OutputLog();
 
-    slog( LOG_LEVEL::INFO , LOG_TYPE::PERFORMANCE , stringFormat( "Time spent on pre-processing %d ms. Time spent on rendering %d ms" , m_uPreProcessingTime , m_uRenderingTime ) );
+    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::PERFORMANCE , stringFormat( "Time spent on pre-processing %d ms. Time spent on rendering %d ms" , m_uPreProcessingTime , m_uRenderingTime ) );
 }
 
 // uninitialize 3rd party library
@@ -267,7 +267,7 @@ Integrator*	System::_allocateIntegrator()
 		
 	if( integrator == 0 )
 	{
-        slog( LOG_LEVEL::WARNING , LOG_TYPE::GENERAL , stringFormat( "No integrator with name of %s" , m_integratorType.c_str() ) );
+        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat( "No integrator with name of %s" , m_integratorType.c_str() ) );
 		return 0;
 	}
 

@@ -25,7 +25,7 @@ static bool logLevel = true;
 static bool logType = true;
 static bool logTime = true;
 static bool logLineInfo = false;
-static LOG_LEVEL logDefaultLevel = LOG_LEVEL::DEBUG;     // By default, debug information is avoided.
+static LOG_LEVEL logDefaultLevel = LOG_LEVEL::LOG_DEBUG;     // By default, debug information is avoided.
 
 void addLogDispatcher( LogDispatcher* logdispatcher ){
     logDispatcher.push_back( unique_ptr<LogDispatcher>(logdispatcher) );
@@ -58,10 +58,11 @@ const string logTimeString(){
 
 const string levelToString( LOG_LEVEL level ){
     return !logLevel ? "" :
-    ( LOG_LEVEL::DEBUG == level ) ? "[Debug]" :
-    ( LOG_LEVEL::INFO == level ) ? "[Info]" :
-    ( LOG_LEVEL::WARNING == level ) ? "[Warning]" :
-    ( LOG_LEVEL::CRITICAL == level ) ? "[Critical]" : "";
+    ( LOG_LEVEL::LOG_DEBUG == level ) ? "[Debug]" :
+    ( LOG_LEVEL::LOG_INFO == level ) ? "[Info]" :
+    ( LOG_LEVEL::LOG_WARNING == level ) ? "[Warning]" :
+//    ( LOG_LEVEL::LOG_ERROR == level ) ? "[Error]" :
+    ( LOG_LEVEL::LOG_CRITICAL == level ) ? "[Critical]" : "";
 }
 
 const string typeToString( LOG_TYPE type ){
