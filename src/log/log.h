@@ -23,10 +23,11 @@
 #define slog( level , type , s ) sortLog( level , type , s , __FILE__ , __LINE__ )
 
 enum class LOG_LEVEL {
-    DEBUG = 0x01,
-    INFO,
-    WARNING,
-    CRITICAL,
+    LOG_DEBUG,
+    LOG_INFO,
+    LOG_WARNING,
+//    LOG_ERROR,  to be uncommented once logmanager is fully removed.
+    LOG_CRITICAL,
 };
 
 enum class LOG_TYPE{
