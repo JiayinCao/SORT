@@ -77,7 +77,7 @@ private:
 // declare some useful macro for convinience
 #define	LOG_FILE_INFO	"(File:"<<__FILE__<<"  Line:"<<__LINE__<<") "
 #define LOG				LogManager::GetSingleton()
-#define LOG_WARNING		LOG<<LOG_FILE_INFO<<"WARNING: "
+//#define LOG_WARNING		LOG<<LOG_FILE_INFO<<"WARNING: "
 #define	LOG_ERROR		LOG<<LOG_FILE_INFO<<"ERROR: "
 #define	LOG_HEADER(str)	LogManager::GetSingleton().SetHeader( str )
 

@@ -77,5 +77,5 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 
 // output log information
 void WhittedRT::OutputLog() const{
-    slog( LOG_LEVEL::INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : whitted ray tracing." );
+    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : whitted ray tracing." );
 }

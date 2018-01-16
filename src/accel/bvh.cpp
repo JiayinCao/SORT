@@ -37,8 +37,8 @@ Bvh::~Bvh()
 // output log information
 void Bvh::OutputLog() const
 {
-    slog( LOG_LEVEL::INFO , LOG_TYPE::SPATIAL_ACCELERATOR , "Spatial accelerator type is BVH ( Bounding Volume Hierarchy )." );
-    slog( LOG_LEVEL::DEBUG , LOG_TYPE::SPATIAL_ACCELERATOR , stringFormat( "Maximum depth in BVH tree is %d. Total number of nodes in it is %d, number of inner nodes is %d, number of leaf nodes is %d. Average number of triangles per leaf nodes is %f, maximum number of triangles in leaf nodes is %d" , m_bvhDepth , m_totalNode , m_totalNode - m_leafNode , m_leafNode , (((float)m_primitives->size())/m_leafNode) , m_maxPriInLeaf ) );
+    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::SPATIAL_ACCELERATOR , "Spatial accelerator type is BVH ( Bounding Volume Hierarchy )." );
+    slog( LOG_LEVEL::LOG_DEBUG , LOG_TYPE::SPATIAL_ACCELERATOR , stringFormat( "Maximum depth in BVH tree is %d. Total number of nodes in it is %d, number of inner nodes is %d, number of leaf nodes is %d. Average number of triangles per leaf nodes is %f, maximum number of triangles in leaf nodes is %d" , m_bvhDepth , m_totalNode , m_totalNode - m_leafNode , m_leafNode , (((float)m_primitives->size())/m_leafNode) , m_maxPriInLeaf ) );
 }
 
 // malloc the memory
