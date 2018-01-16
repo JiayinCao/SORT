@@ -66,4 +66,4 @@ Vector VectorFromStr( const string& str );
 string NextToken( string& str , char t );
 
 // format the input string like sprintf
-string stringFormat( const std::string& format, ... );
+string stringFormat( const char* format, ... );
