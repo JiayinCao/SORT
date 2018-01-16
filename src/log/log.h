@@ -22,12 +22,11 @@
 
 #define slog( level , type , s ) sortLog( level , type , s , __FILE__ , __LINE__ )
 
-enum class LOG_LEVEL{
+enum class LOG_LEVEL {
     DEBUG = 0x01,
-    INFO = 0x02,
-    WARNING = 0x04,
-    ERROR = 0x08,
-    CRITICAL = 0x10
+    INFO,
+    WARNING,
+    CRITICAL,
 };
 
 enum class LOG_TYPE{

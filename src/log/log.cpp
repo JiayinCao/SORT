@@ -18,6 +18,7 @@
 #include "log.h"
 #include <vector>
 #include <memory>
+#include <time.h>
 
 static vector<unique_ptr<LogDispatcher>> logDispatcher;
 static bool logLevel = true;
@@ -60,7 +61,6 @@ const string levelToString( LOG_LEVEL level ){
     ( LOG_LEVEL::DEBUG == level ) ? "[Debug]" :
     ( LOG_LEVEL::INFO == level ) ? "[Info]" :
     ( LOG_LEVEL::WARNING == level ) ? "[Warning]" :
-    ( LOG_LEVEL::ERROR == level ) ? "[Error]" :
     ( LOG_LEVEL::CRITICAL == level ) ? "[Critical]" : "";
 }
 
