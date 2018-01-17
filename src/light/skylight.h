@@ -107,7 +107,7 @@ private:
 			if( light->sky )
 				light->sky->SetProperty( m_name , str );
 			else
-                slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::LIGHT , "There is no sky attached to light" );
+                slog( WARNING , LIGHT , "There is no sky attached to light" );
 		}
 	};
 	class TransformProperty : public PropertyHandler<Light>

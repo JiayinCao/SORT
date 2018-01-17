@@ -72,7 +72,7 @@ void OcTree::Build()
 // output log information
 void OcTree::OutputLog() const
 {
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::SPATIAL_ACCELERATOR , "Spatial accelerator is OcTree." );
+    slog( INFO , SPATIAL_ACCELERATOR , "Spatial accelerator is OcTree." );
 }
 
 // Release OcTree memory.

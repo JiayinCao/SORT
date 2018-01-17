@@ -87,11 +87,11 @@ bool Scene::LoadScene( const string& str )
 			// the name of the model
 			const char* model_name = meshNode->Attribute( "name" );
 			if( model_name == nullptr ){
-                slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat("Mesh defined in file %s doesn't have a model name, it will be skipped." , filename ) );
+                slog( WARNING , GENERAL , stringFormat("Mesh defined in file %s doesn't have a model name, it will be skipped." , filename ) );
 				break;
 			}
 			if( nullptr != GetTriMesh( model_name ) ){
-                slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat("A mesh with name %s already existed." , model_name ) );
+                slog( WARNING , GENERAL , stringFormat("A mesh with name %s already existed." , model_name ) );
 				break;
 			}
 
@@ -170,7 +170,7 @@ bool Scene::LoadScene( const string& str )
 				m_lights.push_back( light );
 			}
 		}else
-            slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::LIGHT , stringFormat( "Undefined light type %s" , type ) );
+            slog( WARNING , LIGHT , stringFormat( "Undefined light type %s" , type ) );
 
 		// get to the next light
 		lightNode = lightNode->NextSiblingElement( "Light" );
@@ -268,7 +268,7 @@ void Scene::_generateTriBuf()
 // output log information
 void Scene::OutputLog() const
 {
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::GENERAL , stringFormat("Triangle number is %d." , m_triBuf.size() ) );
+    slog( INFO , GENERAL , stringFormat("Triangle number is %d." , m_triBuf.size() ) );
 	if( m_pAccelerator )
 		m_pAccelerator->OutputLog();
 }

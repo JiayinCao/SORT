@@ -71,7 +71,7 @@ void MemManager::ClearMem( unsigned id )
 {
 	Memory* mem = _getMemory( id );
 	if( mem == 0 )
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat( "Can't clear memory, because there is no memory with id %d." , id ) );
+        slog( WARNING , GENERAL , stringFormat( "Can't clear memory, because there is no memory with id %d." , id ) );
 
 	//reset the offset
 	mem->m_offset = 0;
@@ -82,7 +82,7 @@ void MemManager::DeAlloc( unsigned id )
 {
 	Memory* mem = _getMemory( id );
 	if( mem == 0 )
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat( "Can't delete memory, because there is no memory with id %d." , id ) );
+        slog( WARNING , GENERAL , stringFormat( "Can't delete memory, because there is no memory with id %d." , id ) );
 
 	// reset offset and size
 	delete mem;

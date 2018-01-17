@@ -31,17 +31,17 @@ static const unsigned LINE_MAXLENGTH = 4096;
 #define CHECK_INDEX(index) {\
 	if( index.posIndex < 0 )\
 	{\
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "Negative position index in file." );\
+        slog( WARNING , GENERAL , "Negative position index in file." );\
 		index.posIndex = 0;\
 	}\
 	if( index.norIndex < 0 )\
 	{\
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "Negative normal index in file." );\
+        slog( WARNING , GENERAL , "Negative normal index in file." );\
 		index.norIndex = 0;\
 	}\
 	if( index.texIndex < 0 )\
 	{\
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "Negative texture index in file." );\
+        slog( WARNING , GENERAL , "Negative texture index in file." );\
 		index.texIndex = 0;\
 	}\
 }
@@ -85,7 +85,7 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 			{
 				trunk->m_mat = MatManager::GetSingleton().FindMaterial( name );
 				if( 0 == trunk->m_mat )
-                    slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::MATERIAL , stringFormat("Material named %s not found, use default material in subset \"%s\"." , name.c_str() , str.c_str() ) );
+                    slog( WARNING , MATERIAL , stringFormat("Material named %s not found, use default material in subset \"%s\"." , name.c_str() , str.c_str() ) );
 			}
 		}else if( strcmp( prefix.c_str() , "v" ) == 0 )
 		{

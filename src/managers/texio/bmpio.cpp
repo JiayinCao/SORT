@@ -65,7 +65,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	if( str.empty() || tex == 0 )
 	{
 		if( tex == 0 )
-            slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::IMAGE , "No texture, writing image failed" );
+            slog( WARNING , IMAGE , "No texture, writing image failed" );
 		return false;
 	}
 
@@ -78,7 +78,7 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 ){
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::IMAGE , "There is no length in one dimension of the image, writing image failed" );
+        slog( WARNING , IMAGE , "There is no length in one dimension of the image, writing image failed" );
 		return false;
 	}
 	
@@ -156,7 +156,7 @@ bool BmpIO::Read( const string& str , std::shared_ptr<ImgMemory>& mem )
 	if( str.empty() || mem == 0 )
 	{
 		if( mem == 0 )
-            slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::IMAGE , "No memory , reading image failed." );
+            slog( WARNING , IMAGE , "No memory , reading image failed." );
 		return false;
 	}
 
@@ -188,7 +188,7 @@ bool BmpIO::Read( const string& str , std::shared_ptr<ImgMemory>& mem )
 	// if either of the length of the edge is zero , return
 	if( w == 0 || h == 0 )
 	{
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::IMAGE , "There is no length in one dimension of the image, reading image failed." );
+        slog( WARNING , IMAGE , "There is no length in one dimension of the image, reading image failed." );
 		file.close();
 		return false;
 	}
@@ -222,7 +222,7 @@ bool BmpIO::Read( const string& str , std::shared_ptr<ImgMemory>& mem )
 	delete[] data;
 
 	// output log
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::GENERAL , stringFormat( "Read image file : \"%s\"" , str.c_str() ) );
+    slog( INFO , GENERAL , stringFormat( "Read image file : \"%s\"" , str.c_str() ) );
 
 	return true;
 }

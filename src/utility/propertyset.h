@@ -72,7 +72,7 @@ public:
 
 		if( 0 == ph )
 		{
-            slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat( "There is no such a property named %s." , name.c_str() ) );
+            slog( WARNING , GENERAL , stringFormat( "There is no such a property named %s." , name.c_str() ) );
 			return false;
 		}
 
@@ -89,7 +89,7 @@ public:
 
 		if( 0 == ph )
 		{
-            slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat( "There is no such a property named %s." , name.c_str() ) );
+            slog( WARNING , GENERAL , stringFormat( "There is no such a property named %s." , name.c_str() ) );
 			return false;
 		}
 		

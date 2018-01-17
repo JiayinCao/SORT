@@ -49,9 +49,9 @@ int main( int argc , char** argv )
         commandline += " ";
     }
     
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::GENERAL , commandline );
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::GENERAL , "Number of CPU cores " + to_string(NumSystemCores()) );
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::GENERAL , "Scene file (" + std::string(argv[1]) + ")" );
+    slog( INFO , GENERAL , commandline );
+    slog( INFO , GENERAL , "Number of CPU cores " + to_string(NumSystemCores()) );
+    slog( INFO , GENERAL , "Scene file (" + std::string(argv[1]) + ")" );
     
 	// enable blender mode if possible
 	if (argc > 2)

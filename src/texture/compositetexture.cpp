@@ -85,9 +85,9 @@ Spectrum ComTexture::GetColor( int x , int y ) const
 void ComTexture::SetSize( unsigned w , unsigned h )
 {
 	if( w == 0 )
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::IMAGE , "Width of the texture is 0." );
+        slog( WARNING , IMAGE , "Width of the texture is 0." );
 	if( h == 0 )
-		slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::IMAGE , "Height of the texture is 0." );
+		slog( WARNING , IMAGE , "Height of the texture is 0." );
 
 	// set the size
 	m_iTexWidth = w;

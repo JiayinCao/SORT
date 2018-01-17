@@ -43,7 +43,7 @@ void MmapSharedMemory::CreateSharedMemory( const string& name , int size , unsig
     fd = open( "blender_intermediate/sharedmem.bin" , O_RDWR , 0 );
     if( fd == -1 )
     {
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "Failed to load shared memory file");
+        slog( WARNING , GENERAL , "Failed to load shared memory file");
         return;
     }
     
