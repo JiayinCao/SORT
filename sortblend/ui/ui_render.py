@@ -1,4 +1,7 @@
 import bpy
+import os
+import platform
+from .. import preference
 from .. import common
 from .. import exporter
 
@@ -34,8 +37,7 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
         ("bvh", "Bounding Volume Hierarchy", "", 2),
         ("uniform_grid", "Uniform Grid", "", 3),
         ("octree" , "OcTree" , "" , 4),
-        ("embree_bvh" , "Embree BVH" , "" , 5),
-        ("bruteforce", "No Accelerator", "", 6),
+        ("bruteforce", "No Accelerator", "", 5),
         ]
     bpy.types.Scene.accelerator_type_prop = bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
 
@@ -105,6 +107,21 @@ class SORT_export_debug_scene(bpy.types.Operator):
         exporter.export_blender(context.scene,True)
         return {'FINISHED'}
 
+# open log
+class SORT_open_log(bpy.types.Operator):
+    bl_idname = "sort.open_log"
+    bl_label = "Open Log"
+
+    def execute(self, context):
+        logfile = preference.get_sort_dir() + "log.txt"
+        if platform.system() == 'Darwin':   # for Mac OS
+            os.system( "open " + logfile)
+        elif platform.system() == 'Windows':    # for Windows
+            os.system(logfile)
+        elif platform.system() == "Linux":
+            os.system( "xdg-open " + logfile)
+        return {'FINISHED'}
+
 class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = common.debug_panel_bl_name
 
@@ -113,3 +130,4 @@ class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     def draw(self, context):
         self.layout.prop(context.scene,"debug_prop")
         self.layout.operator("sort.export_debug_scene")
+        self.layout.operator("sort.open_log")
