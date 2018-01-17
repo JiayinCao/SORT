@@ -67,13 +67,13 @@ const string levelToString( LOG_LEVEL level ){
 
 const string typeToString( LOG_TYPE type ){
     return !logType ? "" :
-    ( LOG_TYPE::GENERAL == type ) ? "[General]" :
-    ( LOG_TYPE::SPATIAL_ACCELERATOR == type ) ? "[Spatial Accelerator]":
-    ( LOG_TYPE::PERFORMANCE == type ) ? "[Performance]" :
-    ( LOG_TYPE::INTEGRATOR == type ) ? "[Integrator]" :
-    ( LOG_TYPE::LIGHT == type ) ? "[Light]" :
-    ( LOG_TYPE::MATERIAL == type ) ? "[Material]" :
-    ( LOG_TYPE::IMAGE == type ) ? "[Image]" : "";
+    ( LOG_TYPE::LOG_GENERAL == type ) ? "[General]" :
+    ( LOG_TYPE::LOG_SPATIAL_ACCELERATOR == type ) ? "[Spatial Accelerator]":
+    ( LOG_TYPE::LOG_PERFORMANCE == type ) ? "[Performance]" :
+    ( LOG_TYPE::LOG_INTEGRATOR == type ) ? "[Integrator]" :
+    ( LOG_TYPE::LOG_LIGHT == type ) ? "[Light]" :
+    ( LOG_TYPE::LOG_MATERIAL == type ) ? "[Material]" :
+    ( LOG_TYPE::LOG_IMAGE == type ) ? "[Image]" : "";
 }
 
 const string lineInfoString( const char* file , int line ){

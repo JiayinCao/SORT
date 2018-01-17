@@ -42,7 +42,7 @@ public:
 
 	// check whether a specific point is in the bounding box
 	// para 'p'     :	a point
-	// para 'delta' :	enlarge the bounding box a little to avoid float format LOG_ERROR
+	// para 'delta' :	enlarge the bounding box a little to avoid float format precision error
 	// result       :	return true if 'p' is in the bounding box
 	bool IsInBBox( const Point& p , float delta ) const;
 

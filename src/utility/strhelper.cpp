@@ -66,7 +66,7 @@ MESH_TYPE	MeshTypeFromStr( const string& str )
 	else if( strcmp( substr.c_str() , "ply" ) == 0 )
 		return MT_PLY;
 		
-    slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat( "Mesh type of \"%s\" is not supported" , substr.c_str() ) );
+    slog( WARNING , GENERAL , stringFormat( "Mesh type of \"%s\" is not supported" , substr.c_str() ) );
 	return MT_NONE;
 }
 
@@ -94,7 +94,7 @@ TEX_TYPE	TexTypeFromStr( const string& str )
 		return TT_HDR;
 
 	// log a warning
-    slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat( "Image type of \"%s\" is not supported" , substr.c_str() ) );
+    slog( WARNING , GENERAL , stringFormat( "Image type of \"%s\" is not supported" , substr.c_str() ) );
     
 	return TT_NONE;
 }
@@ -105,7 +105,7 @@ Transform TransformFromStr( const string& s )
 	// if there is no such an value , just return identity matrix and log a warning
 	if( s.empty() )
 	{
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "No value set in the transformation" );
+        slog( WARNING , GENERAL , "No value set in the transformation" );
 		return Transform();
 	}
 

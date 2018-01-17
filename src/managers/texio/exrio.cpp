@@ -61,7 +61,7 @@ bool ExrIO::Read( const string& name , std::shared_ptr<ImgMemory>& mem )
 
 		return true;
     }catch (const std::exception &e) {
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::IMAGE , stringFormat("Unable to read image file \"%s\": %s" , name.c_str() , e.what() ) );
+        slog( WARNING , IMAGE , stringFormat("Unable to read image file \"%s\": %s" , name.c_str() , e.what() ) );
         return false;
     }
 
@@ -93,7 +93,7 @@ bool ExrIO::Write( const string& name , const Texture* tex )
         file.writePixels(totalYRes);
     }
     catch (const std::exception &e) {
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::IMAGE , stringFormat("Unable to write image file \"%s\": %s" , name.c_str() , e.what() ) );
+        slog( WARNING , IMAGE , stringFormat("Unable to write image file \"%s\": %s" , name.c_str() , e.what() ) );
     }
 
     delete[] hrgba;

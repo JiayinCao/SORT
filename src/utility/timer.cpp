@@ -50,7 +50,7 @@ void Timer::StartTimer()
 {
 	if( m_bTimerSet )
 	{
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "Timer is already set." );
+        slog( WARNING , GENERAL , "Timer is already set." );
 		return;
 	}
 	// get curren tick count
@@ -64,7 +64,7 @@ unsigned Timer::StopTimer()
 {
 	if( m_bTimerSet == false )
 	{
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "Timer is not set." );
+        slog( WARNING , GENERAL , "Timer is not set." );
 		return 0;
 	}
 	m_elapsed = getTickCount() - m_elapsed;
@@ -81,7 +81,7 @@ unsigned long Timer::GetElapsedTime() const
 {
 	if( m_bTimerSet )
 	{
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , "Trying to get elapsed time when timing, return 0." );
+        slog( WARNING , GENERAL , "Trying to get elapsed time when timing, return 0." );
 		return 0L;
 	}
 	return m_elapsed;

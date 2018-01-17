@@ -66,7 +66,7 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 
 // output log information
 void AmbientOcclusion::OutputLog() const{
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : Ambient Occlusion." );
+    slog( INFO , INTEGRATOR , "Integrator algorithm : Ambient Occlusion." );
 }
 
 void AmbientOcclusion::_registerAllProperty()

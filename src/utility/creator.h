@@ -80,7 +80,7 @@ private:
         auto& container = Creator<B>::GetSingleton().GetContainer();\
 		if( container.count( _str ) )\
 		{\
-            slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::GENERAL , stringFormat( "The creator type with specific name of %s already exxisted." , N ) );\
+            slog( WARNING , GENERAL , stringFormat( "The creator type with specific name of %s already exxisted." , N ) );\
 			return;\
 		}\
         container.insert( std::make_pair(_str , this) );\
