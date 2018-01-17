@@ -167,5 +167,5 @@ void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples 
 
 // output log information
 void PathTracing::OutputLog() const{
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::INTEGRATOR , "Integrator algorithm : path tracing." );
+    slog( INFO , INTEGRATOR , "Integrator algorithm : path tracing." );
 }

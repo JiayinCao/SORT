@@ -77,7 +77,7 @@ void MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 		if( node_prop == 0 )
 		{
 			// output error log
-            slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::MATERIAL , stringFormat("Node property %s is ignored." , prop_name.c_str() ) );
+            slog( WARNING , MATERIAL , stringFormat("Node property %s is ignored." , prop_name.c_str() ) );
 
 			// get next property
 			prop = prop->NextSiblingElement( "Property" );
@@ -109,7 +109,7 @@ MaterialNode* MaterialNode::ParseNode( TiXmlElement* element , MaterialNode* nod
 	MaterialNode* mat_node = CREATE_TYPE( node_type , MaterialNode );
 	if( mat_node == 0 )
 	{
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::MATERIAL , stringFormat("Node type %s is undefined." , node_type.c_str() ) );
+        slog( WARNING , MATERIAL , stringFormat("Node type %s is undefined." , node_type.c_str() ) );
 		return mat_node;
 	}
 

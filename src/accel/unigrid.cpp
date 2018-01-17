@@ -110,7 +110,7 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 void UniGrid::Build()
 {
 	if( nullptr == m_primitives || m_primitives->empty() ){
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::SPATIAL_ACCELERATOR , "There is no primitive in uniform grid." );
+        slog( WARNING , SPATIAL_ACCELERATOR , "There is no primitive in uniform grid." );
 		return;
 	}
 
@@ -217,7 +217,7 @@ void UniGrid::OutputLog() const
 	for( unsigned i = 0 ; i < m_voxelCount ; i++ )
 		count += (unsigned)m_pVoxels[i].size();
     
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::SPATIAL_ACCELERATOR , "Spatial accelerator is Uniform Grid." );
-    slog( LOG_LEVEL::LOG_DEBUG , LOG_TYPE::SPATIAL_ACCELERATOR , stringFormat( "Total grid count is %d. Grid dimension is %d x %d x %d. Average number of triangles per grid is %f" , m_voxelCount , m_voxelNum[0] , m_voxelNum[1] , m_voxelNum[2] , ((m_voxelCount==0)?0:(float)count/(float)m_voxelCount) ) );
+    slog( INFO , SPATIAL_ACCELERATOR , "Spatial accelerator is Uniform Grid." );
+    slog( DEBUG , SPATIAL_ACCELERATOR , stringFormat( "Total grid count is %d. Grid dimension is %d x %d x %d. Average number of triangles per grid is %f" , m_voxelCount , m_voxelNum[0] , m_voxelNum[1] , m_voxelNum[2] , ((m_voxelCount==0)?0:(float)count/(float)m_voxelCount) ) );
 }
 

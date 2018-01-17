@@ -38,7 +38,7 @@ void WinSharedMemory::CreateSharedMemory( const string& name , int size , unsign
 
 	if (hMapFile == NULL)
 	{
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::MATERIAL , stringFormat( "Creating shared memory failed %s" , name.c_str() ) );
+        slog( WARNING , MATERIAL , stringFormat( "Creating shared memory failed %s" , name.c_str() ) );
 		return;
 	}
 	sharedmemory.size = size;
@@ -52,7 +52,7 @@ void WinSharedMemory::CreateSharedMemory( const string& name , int size , unsign
 	{
 		sharedmemory.size = 0;
 		CloseHandle(hMapFile);
-        slog( LOG_LEVEL::LOG_WARNING , LOG_TYPE::MATERIAL , stringFormat( "Creating shared memory failed %s" , name.c_str() ) );
+        slog( WARNING , MATERIAL , stringFormat( "Creating shared memory failed %s" , name.c_str() ) );
 	}
 }
 

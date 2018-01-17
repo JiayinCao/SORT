@@ -74,8 +74,8 @@ void KDTree::Build()
 // output log
 void KDTree::OutputLog() const
 {
-    slog( LOG_LEVEL::LOG_INFO , LOG_TYPE::SPATIAL_ACCELERATOR , "Spatial accelerator is SAH KD-Tree." );
-    slog( LOG_LEVEL::LOG_DEBUG , LOG_TYPE::SPATIAL_ACCELERATOR , stringFormat( "KD-Tree depth is %d. Total number of nodes in it is %d. Total number of inner nodes is %d. Leaf Node number is %d. Average number of triangles in leaf is %f. Maximum number of triangles in leaf nodes is %d." , m_depth , m_total , m_total - m_leaf , m_leaf , m_fAvgLeafTri , m_MaxLeafTri ) );
+    slog( INFO , SPATIAL_ACCELERATOR , "Spatial accelerator is SAH KD-Tree." );
+    slog( DEBUG , SPATIAL_ACCELERATOR , stringFormat( "KD-Tree depth is %d. Total number of nodes in it is %d. Total number of inner nodes is %d. Leaf Node number is %d. Average number of triangles in leaf is %f. Maximum number of triangles in leaf nodes is %d." , m_depth , m_total , m_total - m_leaf , m_leaf , m_fAvgLeafTri , m_MaxLeafTri ) );
 }
 
 // split node

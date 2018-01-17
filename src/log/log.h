@@ -20,7 +20,7 @@
 #include "utility/singleton.h"
 #include <fstream>
 
-#define slog( level , type , s ) sortLog( level , type , s , __FILE__ , __LINE__ )
+#define slog( level , type , s ) sortLog( LOG_LEVEL::LOG_##level , LOG_TYPE::LOG_##type , s , __FILE__ , __LINE__ )
 
 enum class LOG_LEVEL {
     LOG_DEBUG,
@@ -31,13 +31,13 @@ enum class LOG_LEVEL {
 };
 
 enum class LOG_TYPE{
-    GENERAL = 0x01,
-    SPATIAL_ACCELERATOR = 0x02,
-    PERFORMANCE = 0x04,
-    INTEGRATOR = 0x08,
-    LIGHT = 0x10,
-    MATERIAL = 0x20,
-    IMAGE = 0x40,
+    LOG_GENERAL = 0x01,
+    LOG_SPATIAL_ACCELERATOR = 0x02,
+    LOG_PERFORMANCE = 0x04,
+    LOG_INTEGRATOR = 0x08,
+    LOG_LIGHT = 0x10,
+    LOG_MATERIAL = 0x20,
+    LOG_IMAGE = 0x40,
 };
 
 class LogDispatcher{
