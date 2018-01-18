@@ -144,8 +144,8 @@ bool BmpIO::Write( const string& str , const Texture* tex )
 	delete[] data;
 
 	// output log
-	LOG<<"Write image file : \""<<str<<"\""<<ENDL;
-
+    slog( INFO , IMAGE , stringFormat( "Write image file : \"%s\"" , str.c_str() ) );
+    
 	return true;
 }
 

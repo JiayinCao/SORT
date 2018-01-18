@@ -26,7 +26,7 @@ IMPLEMENT_CREATOR( SkyLight );
 // sample ray from light
 Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
-	Sort_Assert( sky );
+	sAssert( sky , LIGHT );
 
 	// sample a ray
     float _pdfw = 0.0f;
@@ -60,7 +60,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 // sample light density
 Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const
 { 
-	Sort_Assert( sky != 0 );
+	sAssert( sky != 0 , LIGHT );
 
 	const BBox& box = scene->GetBBox();
 	const Vector delta = box.m_Max - box.m_Min;
@@ -79,7 +79,7 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float*
 // sample a ray from light
 Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
 {
-	Sort_Assert( sky != 0 );
+	sAssert( sky != 0 , LIGHT );
 
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
@@ -113,7 +113,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 // total power of the light
 Spectrum SkyLight::Power() const
 {
-	Sort_Assert( scene!=0 );
+	sAssert( scene!=0 , LIGHT );
 	const BBox box = scene->GetBBox();
 	const float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
 
@@ -123,7 +123,7 @@ Spectrum SkyLight::Power() const
 // get intersection between the light and the ray
 bool SkyLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
 {
-	Sort_Assert( sky != 0 );
+	sAssert( sky != 0 , LIGHT );
 
 	if( intersect && intersect->t != FLT_MAX )
 		return false;
@@ -162,6 +162,6 @@ void SkyLight::_registerAllProperty()
 // the pdf for specific sampled directioin
 float SkyLight::Pdf( const Point& p , const Vector& wi ) const
 {
-	Sort_Assert( sky );
+	sAssert( sky , LIGHT );
 	return sky->Pdf( p , wi );
 }

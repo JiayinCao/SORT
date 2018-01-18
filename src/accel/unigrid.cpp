@@ -16,10 +16,10 @@
  */
 
 #include "unigrid.h"
-#include "managers/logmanager.h"
 #include "geometry/primitive.h"
 #include "geometry/intersection.h"
 #include "log/log.h"
+#include "utility/sassert.h"
 
 IMPLEMENT_CREATOR( UniGrid );
 
@@ -196,9 +196,8 @@ Point UniGrid::voxelId2Point( int id[3] ) const
 // get intersection between the ray and the triangles in the grid
 bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const
 {
-	if( voxelId >= m_voxelCount )
-		LOG_ERROR<<"Voxel id is out of range.("<<voxelId<<"/"<<m_voxelCount<<")"<<CRASH;
-
+    sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "asfsa" );
+    
 	bool inter = false;
     for( auto voxel : m_pVoxels[voxelId] ){
 		// get intersection

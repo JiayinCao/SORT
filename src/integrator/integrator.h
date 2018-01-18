@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_INTEGRATOR
-#define	SORT_INTEGRATOR
+#pragma once
 
 // include the header
 #include "spectrum/spectrum.h"
@@ -131,5 +130,3 @@ protected:
 		}
 	};
 };
-
-#endif

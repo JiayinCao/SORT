@@ -58,10 +58,7 @@ string GetExecutableDir()
 #elif defined(SORT_IN_MAC)
 	pid_t pid = getpid();
     int ret = proc_pidpath (pid, buf, sizeof(buf));
-    if ( ret <= 0 ) {
-		LOG_ERROR<<"Can't get current directory."<<ENDL;
-        return "";
-    }
+    sAssertMsg( ret > 0 , GENERAL , "Can't get current directory." );
 #endif
 
 	return string(buf);

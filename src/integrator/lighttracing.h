@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_LIGHTRACING
-#define	SORT_LIGHTRACING
+#pragma once
 
 #include "bidirpath.h"
 
@@ -38,5 +37,3 @@ public:
 	// no need to refresh tiles
 	virtual bool NeedRefreshTile() const { return false; }
 };
-
-#endif

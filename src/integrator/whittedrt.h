@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_WHITTEDRT
-#define	SORT_WHITTEDRT
+#pragma once
 
 // include the header file
 #include "integrator.h"
@@ -41,5 +40,3 @@ public:
 	// output log information
 	virtual void OutputLog() const;
 };
-
-#endif

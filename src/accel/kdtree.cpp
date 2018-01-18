@@ -142,8 +142,8 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
             if (m_temp[id] & 0x02)
                 r_splits.split[k][r_offset++] = old;
 		}
-        Sort_Assert(l_offset == 2 * l_num);
-        Sort_Assert(r_offset == 2 * r_num);
+        sAssert(l_offset == 2 * l_num, SPATIAL_ACCELERATOR);
+        sAssert(r_offset == 2 * r_num, SPATIAL_ACCELERATOR);
 	}
 	splits.Release();
 

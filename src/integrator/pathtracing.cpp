@@ -51,7 +51,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		if( bounces == 0 ) L+=inter.Le(-r.m_Dir);
 
 		// make sure there is intersected primitive
-		Sort_Assert( inter.primitive != 0 );
+		sAssert( inter.primitive != 0 , INTEGRATOR );
 
 		// evaluate the light
 		Bsdf*			bsdf = inter.primitive->GetMaterial()->GetBsdf(&inter);

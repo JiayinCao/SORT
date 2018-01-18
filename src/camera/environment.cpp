@@ -30,7 +30,7 @@ IMPLEMENT_CREATOR( EnvironmentCamera );
 // generate a ray given a pixel
 Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
 {
-	Sort_Assert( m_imagesensor != 0 );
+	sAssert( m_imagesensor != 0 , CAMERA );
 
 	x += ps.img_u;
 	y += ps.img_v;

@@ -20,7 +20,6 @@
 #include "matmanager.h"
 #include "utility/path.h"
 #include "thirdparty/tinyxml/tinyxml.h"
-#include "logmanager.h"
 #include "texmanager.h"
 #include "texture/constanttexture.h"
 #include "utility/creator.h"

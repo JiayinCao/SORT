@@ -45,7 +45,7 @@ public:
 	// total power of the light
 	virtual Spectrum Power() const
 	{
-		Sort_Assert( scene != 0 );
+		sAssert( scene != 0 , LIGHT );
 		const BBox& box = scene->GetBBox();
 		float delta = (box.m_Max - box.m_Min).SquaredLength();
 		return delta * PI * intensity;

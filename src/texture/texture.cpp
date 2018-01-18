@@ -20,7 +20,6 @@
 #include <math.h>
 #include "managers/texmanager.h"
 #include "compositetexture.h"
-#include "managers/logmanager.h"
 #include "geometry/intersection.h"
 
 // default constructor
@@ -101,12 +100,9 @@ void Texture::_texCoordFilter( int& x , int& y ) const
 // the operator
 ComTexture Texture::operator + ( const Texture& tex ) const
 {
-	if( tex.GetWidth() != m_iTexWidth || tex.GetHeight() != m_iTexHeight )
-		LOG_ERROR<<"Size of the images are not the same , can't add together."<<CRASH;
-
-	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
-		LOG_ERROR<<"One dimension of the image is zero , can't add together."<<CRASH;
-
+    sAssertMsg( tex.GetWidth() == m_iTexWidth && tex.GetHeight() == m_iTexHeight , IMAGE , "Size of the images are not the same , can't add together." );
+    sAssertMsg( 0 != m_iTexWidth && 0 != m_iTexHeight , IMAGE , "One dimension of the image is zero , can't add together." );
+    
 	//allocate the data
 	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
 
@@ -123,11 +119,8 @@ ComTexture Texture::operator + ( const Texture& tex ) const
 // the operator
 ComTexture Texture::operator - ( const Texture& tex ) const
 {
-	if( tex.GetWidth() != m_iTexWidth || tex.GetHeight() != m_iTexHeight )
-		LOG_ERROR<<"Size of the images are not the same , can't substract."<<CRASH;
-
-	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
-		LOG_ERROR<<"One dimension of the image is zero , can't substract."<<CRASH;
+    sAssertMsg( tex.GetWidth() == m_iTexWidth && tex.GetHeight() == m_iTexHeight , IMAGE , "Size of the images are not the same , can't substract." );
+    sAssertMsg( 0 != m_iTexWidth && 0 != m_iTexHeight , IMAGE , "One dimension of the image is zero , can't substract." );
 
 	//allocate the data
 	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
@@ -145,11 +138,8 @@ ComTexture Texture::operator - ( const Texture& tex ) const
 // the operator
 ComTexture Texture::operator * ( const Texture& tex ) const
 {
-	if( tex.GetWidth() != m_iTexWidth || tex.GetHeight() != m_iTexHeight )
-		LOG_ERROR<<"Size of the images are not the same , can't multiply."<<CRASH;
-
-	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
-		LOG_ERROR<<"One dimension of the image is zero , can't multiply."<<CRASH;
+    sAssertMsg( tex.GetWidth() == m_iTexWidth && tex.GetHeight() == m_iTexHeight , IMAGE , "Size of the images are not the same , can't multiply." );
+    sAssertMsg( 0 != m_iTexWidth && 0 != m_iTexHeight , IMAGE , "One dimension of the image is zero , can't multiply." );
 
 	//allocate the data
 	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
@@ -167,8 +157,7 @@ ComTexture Texture::operator * ( const Texture& tex ) const
 // the operator
 ComTexture Texture::operator + ( float t ) const
 {
-	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
-		LOG_ERROR<<"One dimension of the image is zero , can't add together."<<CRASH;
+    sAssertMsg( 0 != m_iTexWidth && 0 != m_iTexHeight , IMAGE , "One dimension of the image is zero , can't add together." );
 
 	//allocate the data
 	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
@@ -186,9 +175,8 @@ ComTexture Texture::operator + ( float t ) const
 // the operator
 ComTexture Texture::operator - ( float t ) const
 {
-	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
-		LOG_ERROR<<"One dimension of the image is zero , can't substract."<<CRASH;
-
+    sAssertMsg( 0 != m_iTexWidth && 0 != m_iTexHeight , IMAGE , "One dimension of the image is zero , can't substract." );
+    
 	//allocate the data
 	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
 
@@ -205,9 +193,8 @@ ComTexture Texture::operator - ( float t ) const
 // the operator
 ComTexture Texture::operator * ( float t ) const
 {
-	if( m_iTexWidth == 0 || m_iTexHeight == 0 )
-		LOG_ERROR<<"One dimension of the image is zero , can't multiply."<<CRASH;
-
+    sAssertMsg( 0 != m_iTexWidth && 0 != m_iTexHeight , IMAGE , "One dimension of the image is zero , can't multiply." );
+    
 	//allocate the data
 	Spectrum* data = new Spectrum[ m_iTexWidth * m_iTexHeight ];
 
@@ -228,9 +215,8 @@ ComTexture operator+( float t , const Texture& tex )
 
 ComTexture operator-( float t , const Texture& tex )
 {
-	if( tex.m_iTexWidth == 0 || tex.m_iTexHeight == 0 )
-		LOG_ERROR<<"One dimension of the image is zero , can't multiply."<<CRASH;
-
+    sAssertMsg( 0 != tex.m_iTexWidth && 0 != tex.m_iTexHeight , IMAGE , "One dimension of the image is zero , can't substract." );
+    
 	//allocate the data
 	Spectrum* data = new Spectrum[ tex.m_iTexWidth * tex.m_iTexHeight ];
 
