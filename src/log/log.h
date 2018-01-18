@@ -26,18 +26,19 @@ enum class LOG_LEVEL {
     LOG_DEBUG,
     LOG_INFO,
     LOG_WARNING,
-//    LOG_ERROR,  to be uncommented once logmanager is fully removed.
+    LOG_ERROR,
     LOG_CRITICAL,
 };
 
 enum class LOG_TYPE{
-    LOG_GENERAL = 0x01,
-    LOG_SPATIAL_ACCELERATOR = 0x02,
-    LOG_PERFORMANCE = 0x04,
-    LOG_INTEGRATOR = 0x08,
-    LOG_LIGHT = 0x10,
-    LOG_MATERIAL = 0x20,
-    LOG_IMAGE = 0x40,
+    LOG_GENERAL,
+    LOG_SPATIAL_ACCELERATOR,
+    LOG_PERFORMANCE,
+    LOG_INTEGRATOR,
+    LOG_LIGHT,
+    LOG_MATERIAL,
+    LOG_IMAGE,
+    LOG_SAMPLING,
 };
 
 class LogDispatcher{

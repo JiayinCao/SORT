@@ -69,7 +69,7 @@ void SkySphere::_generateDistribution2D()
 
 	unsigned nu = m_sky.GetWidth();
 	unsigned nv = m_sky.GetHeight();
-	Sort_Assert( nu != 0 && nv != 0 );
+	sAssert( nu != 0 && nv != 0 , LIGHT );
 	float* data = new float[nu*nv];
 	for( unsigned i = 0 ; i < nv ; i++ )
 	{
@@ -88,7 +88,7 @@ void SkySphere::_generateDistribution2D()
 // sample direction
 Vector SkySphere::sample_v( float u , float v , float* pdf , float* area_pdf ) const
 {
-	Sort_Assert( distribution != 0 );
+	sAssert( distribution != 0 , LIGHT );
 
 	float uv[2] ;
 	float apdf = 0.0f;

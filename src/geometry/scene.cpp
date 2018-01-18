@@ -26,7 +26,7 @@
 #include "managers/matmanager.h"
 #include "light/light.h"
 #include "shape/shape.h"
-#include "log/log.h"
+#include "utility/sassert.h"
 
 // initialize default data
 void Scene::_init()
@@ -46,12 +46,7 @@ bool Scene::LoadScene( const string& str )
 	TiXmlDocument doc( str.c_str() );
 	doc.LoadFile();
 
-	// if there is error , return false
-	if( doc.Error() )
-	{
-		LOG_ERROR<<doc.ErrorDesc()<<CRASH;
-		return false;
-	}
+    sAssert( !doc.Error() , GENERAL );
 
 	// get the root of xml
 	TiXmlNode*	root = doc.RootElement();
@@ -343,8 +338,8 @@ void Scene::_genLightDistribution()
 // get sampled light
 const Light* Scene::SampleLight( float u , float* pdf ) const
 {
-	Sort_Assert( u >= 0.0f && u <= 1.0f );
-	Sort_Assert( m_pLightsDis != 0 );
+	sAssert( u >= 0.0f && u <= 1.0f , SAMPLING );
+	sAssert( m_pLightsDis != 0 , SAMPLING );
 
 	float _pdf;
 	int id = m_pLightsDis->SampleDiscrete( u , &_pdf );
@@ -359,7 +354,7 @@ const Light* Scene::SampleLight( float u , float* pdf ) const
 // get light sample property
 float Scene::LightProperbility( unsigned i ) const
 {
-	Sort_Assert( m_pLightsDis != 0 );
+	sAssert( m_pLightsDis != 0 , LIGHT );
 	return m_pLightsDis->GetProperty( i );
 }
 

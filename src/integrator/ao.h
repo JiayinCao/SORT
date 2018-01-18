@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_AO
-#define	SORT_AO
+#pragma once
 
 // include the header file
 #include "integrator.h"
@@ -59,5 +58,3 @@ private:
 		}
 	};
 };
-
-#endif

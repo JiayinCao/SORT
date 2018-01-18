@@ -20,7 +20,6 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 #include "utility/rand.h"
-#include "managers/logmanager.h"
 
 IMPLEMENT_CREATOR( Square );
 

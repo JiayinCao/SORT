@@ -24,7 +24,7 @@ IMPLEMENT_CREATOR( RegularSampler );
 // generate sample in one dimension
 void RegularSampler::Generate1D( float* sample , unsigned num , bool accept_uniform ) const
 {
-	Sort_Assert( sample != 0 );
+	sAssert( sample != 0 , SAMPLING );
 
 	for( unsigned i = 0 ; i < num ; ++i )
 	{
@@ -40,10 +40,10 @@ void RegularSampler::Generate1D( float* sample , unsigned num , bool accept_unif
 // generate sample in two dimension
 void RegularSampler::Generate2D( float* sample , unsigned num , bool accept_uniform ) const
 {
-	Sort_Assert( sample != 0 );
+	sAssert( sample != 0 , SAMPLING );
 
 	unsigned n = (unsigned)sqrt((float)num);
-	Sort_Assert( n * n == num );
+	sAssert( n * n == num , SAMPLING );
 	unsigned dn = 2 * n;
 
 	for( unsigned i = 0 ; i < n ; ++i )

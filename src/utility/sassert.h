@@ -18,11 +18,22 @@
 #pragma once
 
 #include "sort.h"
-#include "managers/logmanager.h"
+#include "log/log.h"
+#include <assert.h>
 
 // assert
 #ifndef SORT_DEBUG
-	#define Sort_Assert(expr) (void(0))
+    #define sAssert(expr,type) (void(0))
+    #define sAssertMsg(expr,type,str) (void(0))
 #else
-	#define Sort_Assert(expr) if((expr)==0) LOG_ERROR<<(#expr)<<CRASH
+    #define sAssert(expr,type) \
+            if( false == (bool)(expr) ) \
+                assert( false );
+
+    #define sAssertMsg(expr, type, str) \
+            if( false == (bool)(expr) )\
+            {\
+                slog( CRITICAL , type , str );\
+                assert( false );\
+            }
 #endif

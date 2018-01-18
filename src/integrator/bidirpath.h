@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_BIDIRPATH
-#define	SORT_BIDIRPATH
+#pragma once
 
 #include "integrator.h"
 #include "math/point.h"
@@ -118,5 +117,3 @@ private:
 	// mis factor
 	float MIS( float t ) const;
 };
-
-#endif

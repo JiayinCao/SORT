@@ -83,7 +83,7 @@ void PerspectiveCamera::PreProcess()
 Ray	PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
 {
 	// check if there is render target
-	Sort_Assert( m_imagesensor != 0 );
+	sAssert( m_imagesensor != 0 , CAMERA );
 	
     const Point rastP( x + ps.img_u , y + ps.img_v , 0.0f );
     Vector view_dir = m_cameraToRaster.invMatrix( rastP );

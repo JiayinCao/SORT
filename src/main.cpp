@@ -18,13 +18,12 @@
 // include the header file
 #include "sort.h"
 #include "system.h"
+#include "log/log.h"
 
 // the global system
 System g_System;
 
 extern bool g_bBlenderMode;
-
-#include "log/log.h"
 
 // the main func
 #ifdef SORT_IN_WINDOWS
@@ -65,9 +64,6 @@ int main( int argc , char** argv )
 	{
 		// do ray tracing
 		g_System.Render();
-
-		// output rendering time
-		cout<<g_System.GetRenderingTime()/1000.0f<<" second"<<endl;
 
 		// output log information
 		g_System.OutputLog();

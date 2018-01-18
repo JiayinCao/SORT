@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SYSTEM
-#define	SORT_SYSTEM
+#pragma once
 
 // include the header file
 #include "geometry/scene.h"
@@ -121,5 +120,3 @@ private:
 	// allocate integrator
 	Integrator*	_allocateIntegrator();
 };
-
-#endif

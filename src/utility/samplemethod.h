@@ -19,7 +19,6 @@
 
 #include <algorithm>
 #include "bsdf/bsdf.h"
-#include "managers/logmanager.h"
 #include "texture/texture.h"
 #include <vector>
 #include "sassert.h"
@@ -89,7 +88,7 @@ inline float CosHemispherePdf( const Vector& v )
 // para 'v' : a canonical random variable
 inline Vector UniformSampleCone( float u , float v , float cos_max )
 {
-	Sort_Assert( cos_max <= 1.0f && cos_max >= -1.0f );
+	sAssert( cos_max <= 1.0f && cos_max >= -1.0f , SAMPLING );
 
 	float cos_theta = ( 1.0f - u ) + u * cos_max;
 	float sin_theta = sqrt( 1.0f - cos_theta * cos_theta );
@@ -173,8 +172,8 @@ public:
 	// result   : corresponding bucket straddle the u, -1 if there is no data in the distribution
 	int SampleDiscrete( float u , float* pdf ) const
 	{
-		Sort_Assert( count != 0 && cdf != 0 );
-		Sort_Assert( u <= 1.0f && u >= 0.0f );
+		sAssert( count != 0 && cdf != 0 , SAMPLING );
+		sAssert( u <= 1.0f && u >= 0.0f , SAMPLING );
 
 		float* target = lower_bound( cdf , cdf + count + 1 , u );
 		unsigned offset = (u<=0.0f)? 0:(int)(target-cdf-1);
@@ -199,8 +198,8 @@ public:
 	// para 'pdf' : property density function value for the sample
 	float SampleContinuous( float u , float* pdf ) const
 	{
-		Sort_Assert( count != 0 && cdf != 0 );
-		Sort_Assert( u <= 1.0f && u >= 0.0f );
+		sAssert( count != 0 && cdf != 0 , SAMPLING );
+		sAssert( u <= 1.0f && u >= 0.0f , SAMPLING );
 
 		float* target = lower_bound( cdf , cdf+count+1 , u );
 		unsigned offset = (u<=0.0f)?0:(int)(target-cdf-1);
@@ -232,7 +231,7 @@ public:
 	// get property of the unit
 	float GetProperty( unsigned i ) const
 	{
-		Sort_Assert( i < count );
+		sAssert( i < count , GENERAL );
 		return cdf[i+1]-cdf[i];
 	}
 
@@ -255,7 +254,7 @@ public:
 	{
 		unsigned nu = tex->GetWidth();
 		unsigned nv = tex->GetHeight();
-		Sort_Assert( nu != 0 && nv != 0 );
+		sAssert( nu != 0 && nv != 0 , GENERAL );
 		float* data = new float[nu*nv];
 		for( unsigned i = 0 ; i < nv ; i++ )
 		{

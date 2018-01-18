@@ -80,7 +80,7 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 	if( pdfW )
     {
 		*pdfW = UniformConePdf( cos_total_range );
-		Sort_Assert( *pdfW != 0.0f );
+		sAssert( *pdfW != 0.0f , LIGHT );
 	}
     // pdf w.r.t surface area
 	if( pdfA )

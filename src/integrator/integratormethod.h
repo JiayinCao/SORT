@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_INTEGRATORMETHOD
-#define	SORT_INTEGRATORMETHOD
+#pragma once
 
 // include the header
 #include "integrator.h"
@@ -32,5 +31,3 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 
 // mutilpe importance sampling factors
 float		MisFactor( int nf, float fPdf, int ng, float gPdf );
-
-#endif

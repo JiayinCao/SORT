@@ -20,7 +20,8 @@
 // include the header
 #include "utility/singleton.h"
 #include "utility/multithread/multithread.h"
-#include "logmanager.h"
+#include "log/log.h"
+#include "utility/strhelper.h"
 #include <unordered_map>
 
 struct Memory
@@ -74,13 +75,9 @@ public:
 		// get the memory pointer first
 		Memory* mem = _getMemory(id);
 
-		if( mem == 0 )
-			LOG_ERROR<<"No memory with id "<<id<<"."<<CRASH;
-
-		// check if the memory is enough
-		if( sizeof( T ) * count + mem->m_offset > mem->m_size )
-			LOG_ERROR<<"There is not enough memory in memory manager.(mem id:"<<id<<")"<<CRASH;
-
+        sAssertMsg( nullptr != mem , GENERAL , stringFormat( "No memory with id %d." , id ) );
+        sAssertMsg( sizeof( T ) * count + mem->m_offset <= mem->m_size , GENERAL , stringFormat( "There is not enough memory in memory manager.(mem id:%d)" , id ) );
+        
 		unsigned addr = mem->m_offset;
 		mem->m_offset += sizeof(T) * count;
 		return (T*)(mem->m_memory + addr);
@@ -90,8 +87,7 @@ public:
 	unsigned GetOffset( unsigned id=0 ) const
 	{
 		Memory* mem = _getMemory(id);
-		if( mem == 0 )
-			LOG_ERROR<<"No memory with id "<<id<<"."<<CRASH;
+        sAssertMsg( nullptr != mem , GENERAL , stringFormat( "No memory with id %d. " , id ) );
 		return mem->m_offset;
 	}
 

@@ -65,7 +65,7 @@ public:
 	// get light
 	const Light* GetLight( unsigned i ) const
 	{
-		Sort_Assert( i < m_lights.size() );
+		sAssert( i < m_lights.size() , LIGHT );
 		return m_lights[i];
 	}
 	// get lights
