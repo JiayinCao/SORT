@@ -129,7 +129,7 @@ public:
 	// result   :	a divided point
 	Point operator / ( float f ) const
 	{
-		sAssert( abs(f) > 0.000001f , GENERAL );
+		sAssert( fabs(f) > 0.000001f , GENERAL );
 
 		float t = 1.0f / f;
 
@@ -139,7 +139,7 @@ public:
 	// result   :	current vector after dividing
 	Point& operator /= ( float f )
 	{
-		sAssert( abs(f) > 0.000001f , GENERAL );
+		sAssert( fabs(f) > 0.000001f , GENERAL );
 
 		float t = 1.0f / f;
 
