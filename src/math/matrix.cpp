@@ -19,7 +19,6 @@
 #include "matrix.h"
 #include "point.h"
 #include "math/vector3.h"
-#include "managers/logmanager.h"
 
 // default constructor
 Matrix::Matrix()

@@ -85,14 +85,14 @@ public:
     //! @param visibility       The structure holding visibility information.
     //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
 	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) const {
-		Sort_Assert(false);
+		sAssert(false, CAMERA);
 		return Vector2i();
 	}
 
     //! @brief Get viewing direction.
     //! @return Camera forward direction.
 	virtual Vector GetForward() const{
-		Sort_Assert(false);
+		sAssert(false, CAMERA);
 		return Vector();
 	}
 

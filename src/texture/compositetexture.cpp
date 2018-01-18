@@ -69,8 +69,7 @@ void ComTexture::Release()
 // get color from the texture
 Spectrum ComTexture::GetColor( int x , int y ) const
 {
-	if( m_pData == 0 )
-		LOG_ERROR<<"No memory in the render target, can't get color."<<CRASH;
+    sAssertMsg( nullptr != m_pData , IMAGE , "No memory in the render target, can't get color." );
 
 	// filter the x y coordinate
 	_texCoordFilter( x , y );

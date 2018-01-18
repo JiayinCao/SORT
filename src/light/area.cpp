@@ -34,8 +34,8 @@ void AreaLight::_init()
 // sample ray from light
 Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
-	Sort_Assert( ls != 0 );
-	Sort_Assert( shape != 0 );
+	sAssert( ls != 0 , LIGHT );
+	sAssert( shape != 0 , LIGHT );
 
     // sample a point from light
     Vector normal;
@@ -69,7 +69,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 // sample a ray from light
 Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
 {
-    Sort_Assert( shape != 0 );
+    sAssert( shape , LIGHT );
     Vector n;
     shape->sample_l( ls , r , n , pdfW );
     
@@ -77,10 +77,7 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
         *pdfA = 1.0f / shape->SurfaceArea();
     
     if( cosAtLight )
-    {
         *cosAtLight = SatDot( r.m_Dir , n );
-        //Sort_Assert(*cosAtLight);
-    }
     
     // to avoid self intersection
     r.m_fMin = 0.01f;
@@ -91,7 +88,7 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 // the pdf of the direction
 float AreaLight::Pdf( const Point& p , const Vector& wi ) const
 {
-	Sort_Assert(shape!=0);
+	sAssert(shape, LIGHT);
 
 	return shape->Pdf( p , wi );
 }
@@ -99,7 +96,7 @@ float AreaLight::Pdf( const Point& p , const Vector& wi ) const
 // total power of the light
 Spectrum AreaLight::Power() const
 {
-	Sort_Assert( shape != 0 );
+	sAssert( shape , LIGHT );
 	return shape->SurfaceArea() * intensity.GetIntensity() * TWO_PI;
 }
 
@@ -132,7 +129,7 @@ Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo , float
 // get intersection between the light and the ray
 bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
 {
-	Sort_Assert( shape != 0 );
+	sAssert( shape != 0 , LIGHT );
 
 	// get intersect
 	const bool result = shape->GetIntersect( ray , intersect );

@@ -23,13 +23,14 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 #include "utility/rand.h"
+#include "log/log.h"
 
 IMPLEMENT_CREATOR( Sphere );
 
 // sample a point on shape
 Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
 {
-    LOG_ERROR<<"N is not filled in Sphere::sample_l"<<ENDL;
+    sAssertMsg(false, SAMPLING, "N is not filled in Sphere::sample_l");
     
 	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
 	Vector delta = center - p;

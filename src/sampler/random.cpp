@@ -25,7 +25,7 @@ IMPLEMENT_CREATOR( RandomSampler );
 // generate sample in one dimension
 void RandomSampler::Generate1D( float* sample , unsigned num , bool accept_uniform ) const
 {
-	Sort_Assert( sample != 0 );
+	sAssert( sample != 0 , SAMPLING );
 
 	for( unsigned i = 0 ; i < num ; ++i )
 		sample[i] = sort_canonical();
@@ -34,7 +34,7 @@ void RandomSampler::Generate1D( float* sample , unsigned num , bool accept_unifo
 // generate sample in two dimension
 void RandomSampler::Generate2D( float* sample , unsigned num , bool accept_uniform ) const
 {
-	Sort_Assert( sample != 0 );
+	sAssert( sample != 0 , SAMPLING );
 
 	int count = 2 * num;
 	for( int i = 0 ; i < count ; i += 2 )

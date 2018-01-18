@@ -53,13 +53,13 @@ Ray OrthoCamera::GenerateRay( float x, float y, const PixelSample &ps) const
 // set the camera range
 void OrthoCamera::SetCameraWidth( float w )
 {
-	Sort_Assert( w > 0.0f );
+	sAssert( w > 0.0f , CAMERA );
 	m_camWidth = w;
 }
 
 void OrthoCamera::SetCameraHeight( float h )
 {
-	Sort_Assert( h > 0.0f );
+	sAssert( h > 0.0f , CAMERA );
 	m_camHeight = h;
 }
 

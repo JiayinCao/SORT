@@ -16,7 +16,6 @@
  */
 
 #include "embree_bvh.h"
-#include "managers/logmanager.h"
 #include "geometry/primitive.h"
 #include "geometry/intersection.h"
 

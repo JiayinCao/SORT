@@ -155,6 +155,6 @@ void BBox::Union( const BBox& box )
 // delta in a specific axis
 float BBox::Delta( unsigned k ) const
 {
-	Sort_Assert( k < 3 );
+	sAssert( k < 3 , GENERAL );
 	return m_Max[k]-m_Min[k];
 }

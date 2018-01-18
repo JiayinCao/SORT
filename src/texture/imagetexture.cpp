@@ -18,7 +18,6 @@
 // include the header file
 #include "imagetexture.h"
 #include "managers/texmanager.h"
-#include "managers/logmanager.h"
 
 IMPLEMENT_CREATOR( ImageTexture );
 
@@ -36,7 +35,7 @@ void ImageTexture::_init()
 Spectrum ImageTexture::GetColor( int x , int y ) const
 {
 	// if there is no image, just crash
-	Sort_Assert( m_pMemory != 0 && m_pMemory->m_ImgMem != 0 );
+	sAssert( m_pMemory != 0 && m_pMemory->m_ImgMem != 0 , IMAGE );
 
 	// filter the texture coordinate
 	_texCoordFilter( x , y );

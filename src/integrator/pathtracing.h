@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_PATHTRACING
-#define	SORT_PATHTRACING
+#pragma once
 
 #include "integrator.h"
 
@@ -47,4 +46,3 @@ public:
 	// output log information
 	virtual void OutputLog() const;
 };
-#endif

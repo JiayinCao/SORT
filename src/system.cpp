@@ -19,7 +19,6 @@
 #include "system.h"
 #include "log/log.h"
 #include "managers/texmanager.h"
-#include "managers/logmanager.h"
 #include "managers/meshmanager.h"
 #include "managers/matmanager.h"
 #include "managers/memmanager.h"
@@ -143,8 +142,9 @@ void System::OutputLog() const
 {
 	// output scene information first
 	m_Scene.OutputLog();
-
+    
     slog( INFO , PERFORMANCE , stringFormat( "Time spent on pre-processing %d ms. Time spent on rendering %d ms" , m_uPreProcessingTime , m_uRenderingTime ) );
+    slog( INFO , PERFORMANCE , stringFormat( "Rendering time : %fs." , GetRenderingTime()/1000.0f ) );
 }
 
 // uninitialize 3rd party library
@@ -295,12 +295,7 @@ bool System::Setup( const char* str )
 	TiXmlDocument doc( full_name.c_str() );
 	doc.LoadFile();
 	
-	// if there is error , return false
-	if( doc.Error() )
-	{
-		LOG_ERROR<<doc.ErrorDesc()<<CRASH;
-		return false;
-	}
+    sAssert( !doc.Error() , GENERAL );
 	
 	// get the root of xml
 	TiXmlNode*	root = doc.RootElement();
