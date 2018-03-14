@@ -4,6 +4,7 @@ import platform
 from .. import preference
 from .. import common
 from .. import exporter
+from .. import pbrt_exporter
 
 class SORTRenderPanel:
     bl_space_type = "PROPERTIES"
@@ -100,11 +101,19 @@ class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
 # export debug scene
 class SORT_export_debug_scene(bpy.types.Operator):
     bl_idname = "sort.export_debug_scene"
-    bl_label = "Export Debug Scene"
+    bl_label = "Export SORT Scene"
 
     def execute(self, context):
         # export the scene to debug folder
         exporter.export_blender(context.scene,True)
+        return {'FINISHED'}
+
+class SORT_export_pbrt_scene(bpy.types.Operator):
+    bl_idname = "sort.export_pbrt_scene"
+    bl_label = "Export PBRT scene"
+
+    def execute(self, context):
+        pbrt_exporter.export_blender(context.scene,True)
         return {'FINISHED'}
 
 # open log
@@ -130,4 +139,5 @@ class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     def draw(self, context):
         self.layout.prop(context.scene,"debug_prop")
         self.layout.operator("sort.export_debug_scene")
+        self.layout.operator("sort.export_pbrt_scene")
         self.layout.operator("sort.open_log")
