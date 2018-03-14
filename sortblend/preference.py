@@ -22,10 +22,18 @@ class SORTAddonPreferences(AddonPreferences):
             default='',
             )
 
+    pbrt_export_path = StringProperty(
+            name='Pbrt exporting path',
+            description='Path to exported pbrt scene',
+            subtype='DIR_PATH',
+            default='',
+            )
+
     def draw(self, context):
         layout = self.layout
         layout.prop(self, "install_path")
         layout.prop(self, "install_path_debug")
+        layout.prop(self, "pbrt_export_path")
 
 def get_sort_dir(force_debug=False):
     addon_prefs = bpy.context.user_preferences.addons[common.preference_bl_name].preferences
