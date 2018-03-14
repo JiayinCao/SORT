@@ -86,6 +86,15 @@ void FourierBxdf::LoadData( const string& filename )
         bsdfTable.recip[i] = 1.0f / (float) i;
     
     file.close();
+    
+    Vector wo = Vector( -.5f , .8f , -.5f );
+    Vector wi = Vector( .4 , .7 , .52f );
+    auto spec = f( wo , wi );
+    const float YWeight[3] = {0.212671f, 0.715160f, 0.072169f};
+    float t = spec.GetR() * YWeight[0] + spec.GetG() * YWeight[1] + spec.GetB() * YWeight[2];
+    
+    float delta = fabs( 2.679294 - t );
+    int a = 0;
 }
 
 // evaluate bxdf
@@ -283,7 +292,7 @@ float FourierBxdf::sampleCatmullRom2D( int size1 , int size2 , const float* node
     else
         d0 = ( f1 - f0 );
     if( idx < size2 - 2 )
-        d1 = w * ( interpolate( values , idx + 1 ) - f0 ) / ( nodes2[idx+2] - x0 );
+        d1 = w * ( interpolate( values , idx + 2 ) - f0 ) / ( nodes2[idx+2] - x0 );
     else
         d1 = f1 - f0;
     
