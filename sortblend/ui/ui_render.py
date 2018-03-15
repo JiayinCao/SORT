@@ -3,8 +3,8 @@ import os
 import platform
 from .. import preference
 from .. import common
-from .. import exporter
-from .. import pbrt_exporter
+from ..exporter import sort_exporter
+from ..exporter import pbrt_exporter
 
 class SORTRenderPanel:
     bl_space_type = "PROPERTIES"
@@ -104,8 +104,7 @@ class SORT_export_debug_scene(bpy.types.Operator):
     bl_label = "Export SORT Scene"
 
     def execute(self, context):
-        # export the scene to debug folder
-        exporter.export_blender(context.scene,True)
+        sort_exporter.export_blender(context.scene,True)
         return {'FINISHED'}
 
 class SORT_export_pbrt_scene(bpy.types.Operator):

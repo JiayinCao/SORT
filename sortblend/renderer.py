@@ -5,7 +5,7 @@ import math
 import struct
 import numpy
 import platform
-from . import exporter
+from .exporter import sort_exporter
 from . import preference
 from . import common
 from extensions_framework.util import TimerThread
@@ -155,7 +155,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
             return
 
         # export the scene
-        exporter.export_blender(scene);
+        sort_exporter.export_blender(scene)
 
     # render
     def render(self, scene):
