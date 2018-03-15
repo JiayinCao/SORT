@@ -1,13 +1,13 @@
 import bpy
 import os
-import shutil
 import mathutils
-import math
+import shutil
 import numpy as np
-from . import preference
-from . import common
-from . import nodes
-from . import utility
+from .. import preference
+from .. import common
+from .. import nodes
+from .. import utility
+from . import exporter_common
 import xml.etree.cElementTree as ET
 
 # export blender information
@@ -34,28 +34,6 @@ def create_path(scene, force_debug):
         os.mkdir(output_dir)
     if not os.path.exists(output_res_dir):
         os.mkdir(output_res_dir)
-
-# get camera data
-def lookAt(camera):
-    # it seems that the matrix return here is the inverse of view matrix.
-    ori_matrix = utility.getGlobalMatrix() * camera.matrix_world.copy()
-    # get the transpose matrix
-    matrix = ori_matrix.transposed()
-    pos = matrix[3]             # get eye position
-    forwards = -matrix[2]       # get forward direction
-
-    # get focal distance for DOF effect
-    if camera.data.dof_object is not None:
-        focal_object = camera.data.dof_object
-        fo_mat = utility.getGlobalMatrix() * focal_object.matrix_world
-        delta = fo_mat.to_translation() - pos.to_3d()
-        focal_distance = delta.dot(forwards)
-    else:
-        focal_distance = max( camera.data.dof_distance , 0.01 )
-    scaled_forward = mathutils.Vector((focal_distance * forwards[0], focal_distance * forwards[1], focal_distance * forwards[2] , 0.0))
-    target = (pos + scaled_forward)   # get target
-    up = matrix[1]              # get up direction
-    return (pos, target, up)
 
 # open sort file
 def export_sort_file(scene, force_debug):
@@ -86,11 +64,8 @@ def export_sort_file(scene, force_debug):
     sampler_count = scene.sampler_count_prop
     ET.SubElement(root, 'Sampler', type=sampler_type, round='%s'%sampler_count)
     # camera node
-    camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
-    if camera is None:
-        print("Camera not found.")
-        return
-    pos, target, up = lookAt(camera)
+    camera = exporter_common.getCamera(scene)
+    pos, target, up = exporter_common.lookAt(camera)
     camera_node = ET.SubElement(root, 'Camera', type='perspective')
     ET.SubElement( camera_node , "Property" , name="eye" , value=utility.vec3tostr(pos))
     ET.SubElement( camera_node , "Property" , name="up" , value=utility.vec3tostr(up))
