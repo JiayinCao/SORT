@@ -4,20 +4,15 @@ from . import exporter_common
 from .. import common
 from .. import utility
 
-# utility function to pbrt exporting
-def blender_to_pbrt( vec ):
-    return (vec[0],vec[2],vec[1])
-
 # export blender information
 def export_blender(scene, force_debug=False):
-    export_scene(scene)
-    export_pbrt_file(scene)
+    node = export_scene(scene)
+    export_pbrt_file(scene,node)
 
 # export pbrt file
-def export_pbrt_file(scene):
+def export_pbrt_file(scene, node):
     # Get the path to save pbrt scene
-    addon_prefs = bpy.context.user_preferences.addons[common.preference_bl_name].preferences
-    pbrt_file_path = addon_prefs.pbrt_export_path
+    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
     pbrt_file_name = exporter_common.getEditedFileName()
     pbrt_file_fullpath = pbrt_file_path + pbrt_file_name + ".pbrt"
 
@@ -34,10 +29,11 @@ def export_pbrt_file(scene):
     # generating camera information
     fov = math.degrees( bpy.data.cameras[0].angle )
     camera = exporter_common.getCamera(scene)
-    pos, target, up = exporter_common.lookAt(camera)
-    pbrt_camera = "LookAt \t" + utility.vec3tostr( blender_to_pbrt(pos) ) + "\n"
-    pbrt_camera += "       \t" + utility.vec3tostr( blender_to_pbrt(target) ) + "\n"
-    pbrt_camera += "       \t" + utility.vec3tostr( blender_to_pbrt(up) ) + "\n"
+    pos, target, up = exporter_common.lookAtPbrt(camera)
+    pbrt_camera = "Scale -1 1 1 \n"
+    pbrt_camera += "LookAt \t" + utility.vec3tostr( pos ) + "\n"
+    pbrt_camera += "       \t" + utility.vec3tostr( target ) + "\n"
+    pbrt_camera += "       \t" + utility.vec3tostr( up ) + "\n"
     pbrt_camera += "Camera \t\"perspective\"\n"
     pbrt_camera += "       \t\"float fov\" [" + '%f'%fov + "]\n\n"
 
@@ -55,12 +51,58 @@ def export_pbrt_file(scene):
     file.write( pbrt_integrator )
     file.write( "WorldBegin\n" )
     file.write( "Include \"tmp.pbrt\"\n")
+    for n in node:
+        file.write( "Include \"" + n + ".pbrt\"\n" )
     file.write( "WorldEnd\n" )
     file.close()
 
 # export scene
 def export_scene(scene):
+    ret = []
     all_nodes = exporter_common.renderable_objects(scene)
     for node in all_nodes:
         if node.type == 'MESH':
-            print( node.name )
+            export_mesh(node)
+            ret.append(node.name)
+    return ret;
+
+def export_mesh(node):
+    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    pbrt_geometry_file_name = pbrt_file_path + node.name + ".pbrt"
+
+    print( "Exporting pbrt file for geometry: " , pbrt_geometry_file_name )
+    file = open( pbrt_geometry_file_name , 'w' )
+
+    mesh = node.data
+
+    # begin attribute
+    file.write( "AttributeBegin\n" )
+
+    # transform
+    #file.write( "Scale -1 1 1\n" )
+    file.write( "Transform [" + utility.matrixtostr( node.matrix_world.transposed() ) + "]\n" )
+
+    # output triangle mesh
+    file.write( "Shape \"trianglemesh\"\n")
+
+    # output vertex buffer
+    file.write( '\"point P\" [' )
+    for v in mesh.vertices:
+        file.write( utility.vec3tostr( v.co ) + " " )
+    file.write( "]\n" )
+
+    # output index buffer
+    file.write( "\"integer indices\" [" )
+    for p in mesh.polygons:
+        if len(p.vertices) == 3:
+            file.write( "%d %d %d " %( p.vertices[0] , p.vertices[1] , p.vertices[2] ) )
+        elif len(p.vertices) == 4:
+            file.write( "%d %d %d %d %d %d " % (p.vertices[0],p.vertices[1],p.vertices[2],p.vertices[0],p.vertices[2],p.vertices[3]))
+        #for i in p.vertices:
+        #    file.write("%d " % i)
+    file.write( "]\n" )
+
+    # end attribute
+    file.write( "AttributeEnd\n" )
+
+    file.close()
