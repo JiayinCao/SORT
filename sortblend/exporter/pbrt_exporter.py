@@ -7,6 +7,7 @@ from .. import utility
 # export blender information
 def export_blender(scene, force_debug=False):
     node = export_scene(scene)
+    export_material()
     export_pbrt_file(scene,node)
 
 # export pbrt file
@@ -50,7 +51,8 @@ def export_pbrt_file(scene, node):
     file.write( pbrt_sampler )
     file.write( pbrt_integrator )
     file.write( "WorldBegin\n" )
-    file.write( "Include \"tmp.pbrt\"\n")
+    file.write( "Include \"tmp.pbrt\"\n" )
+    file.write( "Include \"materials.pbrt\"" )
     for n in node:
         file.write( "Include \"" + n + ".pbrt\"\n" )
     file.write( "WorldEnd\n" )
@@ -66,6 +68,20 @@ def export_scene(scene):
             ret.append(node.name)
     return ret;
 
+def export_material():
+    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    pbrt_material_file_name = pbrt_file_path + "materials.pbrt"
+
+    print( "Exporting pbrt file for material: " , pbrt_material_file_name )
+    file = open( pbrt_material_file_name , 'w' )
+
+    for material in bpy.data.materials:
+        if material and material.sort_material and material.sort_material.sortnodetree:
+            file.write( "MakeNamedMaterial \"" + material.name + "\"\n" )
+
+    file.close()
+
+
 def export_mesh(node):
     pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
     pbrt_geometry_file_name = pbrt_file_path + node.name + ".pbrt"
@@ -78,8 +94,17 @@ def export_mesh(node):
     # begin attribute
     file.write( "AttributeBegin\n" )
 
+    # setup material
+    materials = mesh.materials[:]
+    material_names = [m.name if m else None for m in materials]
+
+    # avoid bad index errors
+    if not materials:
+        materials = [None]
+        material_names = [name_compat(None)]
+    file.write( "NamedMaterial \"" + material_names[0] + "\"\n" )
+
     # transform
-    #file.write( "Scale -1 1 1\n" )
     file.write( "Transform [" + utility.matrixtostr( node.matrix_world.transposed() ) + "]\n" )
 
     # output triangle mesh
@@ -91,6 +116,16 @@ def export_mesh(node):
         file.write( utility.vec3tostr( v.co ) + " " )
     file.write( "]\n" )
 
+    file.write( "\"normal N\" [" )
+    mesh.calc_normals_split()
+    normals = [""] * len( mesh.vertices )
+    for poly in mesh.polygons:
+        for loop_index in poly.loop_indices:
+            id = mesh.loops[loop_index].vertex_index
+            normals[id] = utility.vec3tostr( mesh.loops[loop_index].normal )
+    file.write( " ".join( normals ) )
+    file.write( "]\n" )
+
     # output index buffer
     file.write( "\"integer indices\" [" )
     for p in mesh.polygons:
@@ -98,8 +133,6 @@ def export_mesh(node):
             file.write( "%d %d %d " %( p.vertices[0] , p.vertices[1] , p.vertices[2] ) )
         elif len(p.vertices) == 4:
             file.write( "%d %d %d %d %d %d " % (p.vertices[0],p.vertices[1],p.vertices[2],p.vertices[0],p.vertices[2],p.vertices[3]))
-        #for i in p.vertices:
-        #    file.write("%d " % i)
     file.write( "]\n" )
 
     # end attribute
