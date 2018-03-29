@@ -66,7 +66,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		vc /= MIS( cosIn );
 
 		rr = 1.0f;
-		if (light_path.size() > 4 || throughput.GetIntensity() < 0.01f)
+		if (throughput.GetIntensity() < 0.01f)
 			rr = 0.5f;
 
 		vert.p = vert.inter.intersect;
@@ -164,7 +164,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 			return li;
 
 		rr = 1.0f;
-		if (light_path_len > 4 || throughput.GetIntensity() < 0.01f )
+		if (throughput.GetIntensity() < 0.01f )
 			rr = 0.5f;
 
 		vert.p = vert.inter.intersect;

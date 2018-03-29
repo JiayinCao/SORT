@@ -60,7 +60,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		BsdfSample		bsdf_sample = (bounces==0)?ps.bsdf_sample[0]:BsdfSample(true);
 		const Light*	light = scene.SampleLight( light_sample.t , &light_pdf );
 		if( light_pdf > 0.0f )
-			L += throughput * EvaluateDirect(	r  , scene , light , inter , light_sample , 
+			L += throughput * EvaluateDirect(	r  , scene , light , inter , light_sample ,
 												bsdf_sample , BXDF_TYPE(BXDF_ALL) ) / light_pdf;
 
 		// sample the next direction using bsdf
@@ -78,17 +78,18 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 		if( throughput.GetIntensity() == 0.0f )
 			break;
-		if( bounces > 4 )
+        
+		if( bounces > 3 && throughput.GetMaxComponent() < 0.1f )
 		{
-			float continueProperbility = min( 0.5f , throughput.GetIntensity() );
-			if( sort_canonical() > continueProperbility )
+			float continueProperbility = max( 0.05f , 1.0f - throughput.GetMaxComponent() );
+			if( sort_canonical() < continueProperbility )
 				break;
-			throughput /= continueProperbility;
+			throughput /= 1 - continueProperbility;
 		}
-
+        
 		r.m_Ori = inter.intersect;
 		r.m_Dir = wi;
-		r.m_fMin = 0.001f;
+		r.m_fMin = 0.0001f;
 
 		++bounces;
 
