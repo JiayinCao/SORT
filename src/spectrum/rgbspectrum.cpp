@@ -175,6 +175,9 @@ float RGBSpectrum::GetG() const {
 float RGBSpectrum::GetB() const { 
 	return m_b;
 }
+float RGBSpectrum::GetMaxComponent() const{
+    return max( m_r , max( m_b , m_g ) );
+}
 
 // clamp the spectrum
 RGBSpectrum RGBSpectrum::Clamp( float low , float high ) const
