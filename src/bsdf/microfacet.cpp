@@ -141,7 +141,7 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 {
 	float coso = Dot( v , n );
 	float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
-	float t = 1.0f - eta * eta * ( 1.0f - coso * coso );
+	float t = 1.0f - eta * eta * max( 0.0f , 1.0f - coso * coso );
 
 	// total inner reflection
     inner_reflection = (t <= 0.0f);

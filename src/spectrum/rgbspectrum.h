@@ -52,6 +52,7 @@ public:
 	float	GetR() const; 
 	float	GetG() const; 
 	float	GetB() const;
+    float   GetMaxComponent() const;
 
 	// clamp the spectrum
 	RGBSpectrum Clamp( float low = 0.0f , float high = 0.0f ) const;
