@@ -162,7 +162,7 @@ MicrofacetReflectionNode::MicrofacetReflectionNode()
 
 void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.05f , 1.0f );
+	float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
 	MicroFacetDistribution* dist = 0;
 	if( mf_dist.str == "Blinn" )
 		dist = SORT_MALLOC(Blinn)( rn );
