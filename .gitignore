@@ -222,3 +222,4 @@ _out/
 res/
 *.sort
 *.sort
+src/integrator/pathtracing.cpp
