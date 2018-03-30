@@ -134,9 +134,6 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         self.image_tile_size_in_bytes = self.image_tile_pixel_count * 16
         self.image_size_in_bytes = self.image_tile_count_x * self.image_tile_count_y * self.image_tile_size_in_bytes
 
-    def __del__(self):
-        print('delete')
-
     # update frame
     def update(self, data, scene):
         # check if the path for SORT is set correctly

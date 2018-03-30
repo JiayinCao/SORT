@@ -3,6 +3,7 @@ import math
 from . import exporter_common
 from .. import common
 from .. import utility
+from .. import nodes
 
 # export blender information
 def export_blender(scene, force_debug=False):
@@ -77,7 +78,18 @@ def export_material():
 
     for material in bpy.data.materials:
         if material and material.sort_material and material.sort_material.sortnodetree:
+            ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+            output_node = nodes.find_node(material, common.sort_node_output_bl_name)
+            if output_node is None:
+                continue
+
+            if len(output_node.inputs) == 0:
+                return
+
             file.write( "MakeNamedMaterial \"" + material.name + "\"\n" )
+
+            nput_node = nodes.socket_node_input(ntree, output_node.inputs[0])
+            nput_node.export_pbrt(file)
 
     file.close()
 
