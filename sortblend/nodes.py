@@ -111,6 +111,9 @@ class SORTNodeBaseColorSocket(bpy.types.NodeSocketColor, SORTSocket):
     def output_type_str(self):
         return 'color'
 
+    def export_pbrt(self,file):
+        file.write( "  \"rgb basecolor\" [%f %f %f]\n"%(self.default_value[:]) )
+
 class SORTNodeRoughnessSocket(bpy.types.NodeSocketFloat, SORTSocket):
     bl_idname = 'SORTNodeRoughnessSocket'
     bl_label = 'SORT Roughness Socket'
@@ -126,6 +129,9 @@ class SORTNodeRoughnessSocket(bpy.types.NodeSocketFloat, SORTSocket):
 
     def output_type_str(self):
         return 'float'
+
+    def export_pbrt(self,file):
+        file.write( "  \"float roughness\" [%f]\n"%(self.default_value) )
 
 class SORTNodeFloatSocket(bpy.types.NodeSocketFloat, SORTSocket):
     bl_idname = 'SORTNodeFloatSocket'
@@ -218,6 +224,11 @@ class SORTNodeLambert(SORTShadingNode):
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
+    def export_pbrt(self, file):
+        file.write( "  \"string type\" \"Sort_Lambert\"\n" )
+        for input in self.inputs:
+            input.export_pbrt(file)
+        file.write( "\n" )
 
 # microfacte node
 class SORTNodeMicrofacetReflection(SORTShadingNode):
@@ -268,6 +279,16 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
         ET.SubElement( xml_node , 'Property' , name='eta' , type='color', value= '%f %f %f'%(self.eta[0],self.eta[1],self.eta[2])  )
         ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
 
+    def export_pbrt(self, file):
+        file.write( "  \"string type\" \"Sort_MicrofacetReflection\"\n" )
+        file.write( "  \"string nd\" \"%s\"\n" %self.mfdist_prop )
+        file.write( "  \"string vis\" \"%s\"\n" %self.mfvis_prop )
+        file.write( "  \"rgb eta\" [%f %f %f]\n" %self.eta[:] )
+        file.write( "  \"rgb k\" [%f %f %f]\n" %self.k[:] )
+        for input in self.inputs:
+            input.export_pbrt(file)
+        file.write( "\n" )
+
 class SORTNodeMicrofacetRefraction(SORTShadingNode):
     bl_label = 'SORT_microfacet_refraction'
     bl_idname = 'SORTNodeMicrofacetRefraction'
@@ -315,6 +336,15 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
         ET.SubElement( xml_node , 'Property' , name='in_ior' , type='color', value= '%f'%(self.int_ior)  )
         ET.SubElement( xml_node , 'Property' , name='ext_ior' , type='color', value= '%f'%(self.ext_ior) )
 
+    def export_pbrt(self, file):
+        file.write( "  \"string type\" \"Sort_MicrofacetRefraction\"\n" )
+        file.write( "  \"string nd\" \"%s\"\n" %self.mfdist_prop )
+        file.write( "  \"string vis\" \"%s\"\n" %self.mfvis_prop )
+        file.write( "  \"float int_ior\" [%f]\n" %self.int_ior )
+        file.write( "  \"float ext_ior\" [%f]\n" %self.ext_ior )
+        for input in self.inputs:
+            input.export_pbrt(file)
+
 # merl node
 class SORTNodeMerl(SORTShadingNode):
     bl_label = 'SORT_merl'
@@ -356,6 +386,11 @@ class SORTNodeFourierBxdf(SORTShadingNode):
 
     def export_prop(self, xml_node):
         ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
+
+    def export_pbrt(self, file):
+        file.write( "  \"string type\" \"fourier\"\n" )
+        file.write( "  \"string bsdffile\" \"%s\"\n" %self.file_name_prop )
+        file.write( "\n" )
 
 # oren nayar node
 class SORTNodeOrenNayar(SORTShadingNode):
