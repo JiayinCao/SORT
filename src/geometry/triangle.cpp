@@ -164,7 +164,7 @@ static void Project(const Point* points, int count , const Vector& axis, float& 
 
 // intersection test between a triangle and a bounding box
 // Detail algorithm is descripted in this paper : "Fast 3D Triangle-Box Overlap Testing".
-// http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox_tam.pdf.
+// http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox_tam.pdf
 // para 'triangle' : the input triangle
 // para 'bb' : bounding box
 bool Triangle::GetIntersect( const BBox& box ) const
@@ -211,7 +211,7 @@ bool Triangle::GetIntersect( const BBox& box ) const
 		return false;
 
 	// Case 3 : try cross product planes , 9 tests
-	Vector triangleEdges[3] = { tri[0] - tri[1] , tri[1] - tri[2] , tri[2] - tri[3] };
+	Vector triangleEdges[3] = { tri[0] - tri[1] , tri[1] - tri[2] , tri[2] - tri[0] };
 	for( int i = 0 ; i < 3 ; ++i ){
 		for( int j = 0 ; j < 3 ; ++j ){
 			triMin = boxMin = FLT_MAX;
