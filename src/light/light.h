@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_LIGHT
-#define	SORT_LIGHT
+#pragma once
 
 // include header
 #include "spectrum/spectrum.h"
@@ -60,8 +59,6 @@ class	Light : public PropertySet<Light>
 {
 // public method
 public:
-	// default constructor
-	Light(){scene=0;}
 	// destructor
 	virtual ~Light(){scene=0;}
 
@@ -118,7 +115,7 @@ public:
 // protected field
 protected:
 	// scene containing the light
-	const Scene* scene;
+    const Scene* scene = nullptr;
 	// intensity for the light
 	Spectrum	intensity;
 	// transformation of the light
@@ -152,5 +149,3 @@ protected:
 	virtual void _setIntensity( const Spectrum& e )
 	{ intensity = e; }
 };
-
-#endif

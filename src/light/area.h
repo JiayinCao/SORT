@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_AREA
-#define	SORT_AREA
+#pragma once
 
 #include "light.h"
 #include "utility/sassert.h"
@@ -158,11 +157,9 @@ private:
 		{
 			AreaLight* light = CAST_TARGET(AreaLight);
 			
-			light->radius = (float)atof( str.c_str() );
+			light->radius = 0.5f * (float)atof( str.c_str() );
 			if( light->shape )
 				light->shape->SetRadius( light->radius );
 		}
 	};
 };
-
-#endif

@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_DISTANT
-#define	SORT_DISTANT
+#pragma once
 
 #include "light.h"
 #include "geometry/scene.h"
@@ -88,5 +87,3 @@ private:
 		}
 	};
 };
-
-#endif

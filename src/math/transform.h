@@ -54,6 +54,9 @@ public:
 	Point	operator()( const Point& p ) const { return this->matrix * p; }
 	Vector	operator()( const Vector& v ) const { return *this * v; }
 	Ray		operator()( const Ray& r ) const { return *this * r; }
+    
+    // Get the inversed transform
+    Transform GetInversed() const { return Transform( invMatrix , matrix ); }
 
 	// * operator for transform
 	Transform operator*( const Transform& t ) const

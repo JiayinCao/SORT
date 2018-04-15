@@ -9,6 +9,7 @@ from .. import nodes
 def export_blender(scene, force_debug=False):
     node = export_scene(scene)
     export_material()
+    export_light(scene)
     export_pbrt_file(scene,node)
 
 # export pbrt file
@@ -52,7 +53,7 @@ def export_pbrt_file(scene, node):
     file.write( pbrt_sampler )
     file.write( pbrt_integrator )
     file.write( "WorldBegin\n" )
-    file.write( "Include \"tmp.pbrt\"\n" )
+    file.write( "Include \"lights.pbrt\"\n" )
     file.write( "Include \"materials.pbrt\"" )
     for n in node:
         file.write( "Include \"" + n + ".pbrt\"\n" )
@@ -68,6 +69,51 @@ def export_scene(scene):
             export_mesh(node)
             ret.append(node.name)
     return ret;
+
+def export_light(scene):
+    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    pbrt_light_file_name = pbrt_file_path + "lights.pbrt"
+
+    file = open(pbrt_light_file_name,'w')
+
+    pbrt_lights = ''
+    all_nodes = exporter_common.renderable_objects(scene)
+    for ob in all_nodes:
+        if ob.type == 'LAMP':
+            lamp = ob.data
+            world_matrix = ob.matrix_world
+
+            file.write( "AttributeBegin\r" )
+            file.write( "Transform [" + utility.matrixtostr( world_matrix.transposed() ) + "]\n" )
+            if lamp.type == 'SUN':
+                point_from = [0,1,0]
+                point_to = [0,0,0]
+                str = "LightSource \"distant\" "
+                str += "\"rgb L\" [%f,%f,%f] "%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "\"point from\" [%f,%f,%f] "%(point_from[0],point_from[2],point_from[1])
+                str += "\"point to\" [%f,%f,%f] "%(point_to[0],point_to[2],point_to[1])
+                str += "\"rgb scale\" [%f,%f,%f] "%(lamp.energy,lamp.energy,lamp.energy)
+                str += "\r"
+                file.write(str)
+            elif lamp.type == 'POINT':
+                point_from = [0,0,0]#world_matrix.col[3]
+                str = "LightSource \"point\" "
+                str += "\"rgb I\" [%f,%f,%f] "%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "\"point from\" [%f,%f,%f] "%(point_from[0],point_from[2],point_from[1])
+                str += "\"rgb scale\" [%f,%f,%f] "%(lamp.energy,lamp.energy,lamp.energy)
+                str += "\r"
+                file.write(str)
+#            elif lamp.type == 'SPOT':
+#            elif lamp.type == 'AREA':
+            elif lamp.type == 'HEMI':
+                str = "LightSource \"infinite\" "
+                str += "\"string mapname\" \"%s\" "%lamp.sort_lamp.sort_lamp_hemi.envmap_file
+                str += "\r"
+                file.write(str)
+            file.write( "AttributeEnd\r" )
+
+    file.close()
+
 
 def export_material():
     pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
