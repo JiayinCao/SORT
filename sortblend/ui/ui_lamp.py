@@ -68,3 +68,26 @@ class LampHemiPanel(SORTLampPanel, bpy.types.Panel):
         layout = self.layout
         lamp = context.lamp
         layout.prop(lamp.sort_lamp.sort_lamp_hemi, "envmap_file", text="HDRI file")
+
+
+class LampAreaPanel(SORTLampPanel, bpy.types.Panel):
+    bl_label = 'Lamp Area Property'
+
+    @classmethod
+    def poll(cls, context):
+        return super().poll(context) and context.lamp.type == 'AREA'
+
+    def draw(self, context):
+        layout = self.layout
+        lamp = context.lamp
+
+        split = layout.split()
+        col = split.column(align=True)
+        col.prop(lamp, "shape", text="")
+        sub = split.column(align=True)
+
+        if lamp.shape == 'SQUARE':
+            sub.prop(lamp, "size")
+        elif lamp.shape == 'RECTANGLE':
+            sub.prop(lamp, "size", text="Size X")
+            sub.prop(lamp, "size_y", text="Size Y")

@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SHAPE
-#define	SORT_SHAPE
+#pragma once
 
 #include "math/point.h"
 #include "math/transform.h"
@@ -91,5 +90,3 @@ protected:
 	// get intersected point between the ray and the shape
 	virtual float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* inter = 0 ) const = 0;
 };
-
-#endif

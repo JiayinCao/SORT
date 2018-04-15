@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_POINTLIGHT
-#define	SORT_POINTLIGHT
+#pragma once
 
 // include the header
 #include "light.h"
@@ -32,8 +31,6 @@ public:
 
 	// default constructor
 	PointLight(){_registerAllProperty();}
-	// destructor
-	~PointLight(){}
 
 	// sample ray from light
 	// para 'intersect' : intersection information
@@ -80,5 +77,3 @@ private:
 		}
 	};
 };
-
-#endif

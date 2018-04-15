@@ -15,52 +15,44 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SQUARE
-#define	SORT_SQUARE
+#pragma once
 
-#include "shape.h"
+#include "rectangle.h"
 #include "utility/creator.h"
 
 /////////////////////////////////////////////////////////////////////////////////
 //	definition of the square
-class	Square : public Shape
+class	Square : public Rectangle
 {
 // public method
 public:
 	DEFINE_CREATOR(Square, Shape, "square");
 
-	// default constructor
-	Square(){}
-	// destruction
-	~Square(){}
-	
 	// sample a point on shape
 	// para 'ls': the light sample
 	// para 'p'	: the target point for the light to lit.
 	// para 'wi': the sampled vector ( output )
 	// para 'pdf': the pdf of the light sample ( output )
 	// result   : a sampled point from the light source
-	virtual Point sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const;
+    Point sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const override;
 
 	// sample a ray from light
 	// para 'ls'       : light sample
 	// para 'r'       : the light vector
 	// para 'pdf'      : the properbility density function
-	virtual void sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const;
+    void sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const override;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// methods inheriting from Primitive ( for geometry )
 
 	// get the bounding box of the primitive
-	virtual const BBox&	GetBBox() const;
+    const BBox&	GetBBox() const override;
 
 	// the surface area of the shape
-	virtual float SurfaceArea() const;
+    float SurfaceArea() const override;
     
 // protected method
 protected:
 	// get intersected point between the ray and the shape
-	float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* intersect = 0 ) const;
+	float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* intersect = 0 ) const override;
 };
-
-#endif
