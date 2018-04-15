@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SKYLIGHT
-#define	SORT_SKYLIGHT
+#pragma once
 
 #include "light.h"
 #include "utility/creator.h"
@@ -117,12 +116,10 @@ private:
 		void SetValue( const string& str )
 		{
 			SkyLight* light = CAST_TARGET(SkyLight);
-			light->transform = TransformFromStr(str);
+			light->transform = TransformFromStr(str).GetInversed();
 
 			if( light->sky )
 				light->sky->SetTransform( light->transform );
 		}
 	};
 };
-
-#endif

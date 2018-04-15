@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SPOT
-#define	SORT_SPOT
+#pragma once
 
 #include "light.h"
 #include "utility/strhelper.h"
@@ -136,5 +135,3 @@ private:
 		}
 	};
 };
-
-#endif
