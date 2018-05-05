@@ -22,3 +22,15 @@ def veckey3d(v):
 
 def veckey2d(v):
     return round(v[0], 4), round(v[1], 4)
+
+def euler_rotation_convert( mode ):
+    # no internet access now, seeking better solution later
+    res = ""
+    for c in mode:
+        if c == "X":
+            res += "X";
+        elif c == "Y":
+            res += "Z";
+        else:
+            res += "Y";
+    return res;

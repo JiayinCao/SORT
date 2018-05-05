@@ -1,5 +1,6 @@
 import bpy
 import math
+import mathutils
 from . import exporter_common
 from .. import common
 from .. import utility
@@ -82,10 +83,9 @@ def export_light(scene):
         if ob.type == 'LAMP':
             lamp = ob.data
             world_matrix = ob.matrix_world
-
             file.write( "AttributeBegin\r" )
-            file.write( "Transform [" + utility.matrixtostr( world_matrix.transposed() ) + "]\n" )
             if lamp.type == 'SUN':
+                file.write( "Transform [" + utility.matrixtostr( world_matrix.transposed() ) + "]\n" )
                 point_from = [0,1,0]
                 point_to = [0,0,0]
                 str = "LightSource \"distant\" "
@@ -96,6 +96,7 @@ def export_light(scene):
                 str += "\r"
                 file.write(str)
             elif lamp.type == 'POINT':
+                file.write( "Transform [" + utility.matrixtostr( world_matrix.transposed() ) + "]\n" )
                 point_from = [0,0,0]#world_matrix.col[3]
                 str = "LightSource \"point\" "
                 str += "\"rgb I\" [%f,%f,%f] "%(lamp.color[0],lamp.color[1],lamp.color[2])
@@ -106,6 +107,8 @@ def export_light(scene):
 #            elif lamp.type == 'SPOT':
 #            elif lamp.type == 'AREA':
             elif lamp.type == 'HEMI':
+                eul = mathutils.Euler((-ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]), ob.rotation_mode).to_matrix().to_4x4()
+                file.write( "Transform [" + utility.matrixtostr( eul ) + "]\n" )
                 str = "LightSource \"infinite\" "
                 str += "\"string mapname\" \"%s\" "%lamp.sort_lamp.sort_lamp_hemi.envmap_file
                 str += "\r"
