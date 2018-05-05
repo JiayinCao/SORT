@@ -159,8 +159,8 @@ def export_scene(scene, force_debug):
                 light_node = ET.SubElement( root , 'Light' , type='skylight')
                 ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
                 ET.SubElement( light_node , 'Property' , name='image' ,value=lamp.sort_lamp.sort_lamp_hemi.envmap_file)
-                #eul = mathutils.Euler((-ob.rotation_euler[0], -ob.rotation_euler[2], -ob.rotation_euler[1]), ob.rotation_mode).to_matrix().to_4x4()
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr(utility.getGlobalMatrix() * ob.matrix_world) )
+                eul = mathutils.Euler((ob.rotation_euler[0], -ob.rotation_euler[2], -ob.rotation_euler[1]), utility.euler_rotation_convert(ob.rotation_mode)).to_matrix().to_4x4()
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr(eul) )
 
     # output the xml
     output_scene_file = preference.get_immediate_dir(force_debug) + 'blender.xml'
