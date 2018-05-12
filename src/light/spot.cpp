@@ -26,6 +26,9 @@ IMPLEMENT_CREATOR( SpotLight );
 // sample ray from light
 Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
+    const Vector light_dir = Vector3f( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
+    const Vector light_pos = Vector3f( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
+    
     // direction to light
 	const Vector _dirToLight = light_pos - intersect.intersect;
     
@@ -67,6 +70,9 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
 // sample a ray from light
 Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
 {
+    const Vector light_dir = Vector3f( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
+    const Vector light_pos = Vector3f( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
+    
     // udpate ray
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
@@ -104,10 +110,8 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 void SpotLight::_registerAllProperty()
 {
 	Light::_registerAllProperty();
-	_registerProperty( "pos" , new PosProperty(this) );
 	_registerProperty( "falloff_start" , new FalloffStartProperty(this) );
 	_registerProperty( "range" , new RangeProperty(this) );
-	_registerProperty( "dir" , new DirProperty(this) );
 }
 
 // initialize default value
