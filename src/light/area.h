@@ -70,7 +70,8 @@ private:
 	// the shape binded to the area light
 	Shape*	shape;
 	// the radius for the shape
-	float	radius;
+	float	sizeX;
+    float   sizeY;
 
 	// initialize default value
 	void _init();
@@ -145,21 +146,41 @@ private:
 			
 			SAFE_DELETE( light->shape );
 			light->shape = CREATE_TYPE( str , Shape );
-			if( light->shape )
-				light->shape->SetRadius( light->radius );
+            if( light->shape ){
+				light->shape->SetSizeX( light->sizeX );
+                light->shape->SetSizeY( light->sizeY );
+                light->shape->SetTransform(light->light2world);
+            }
 		}
 	};
-	class RadiusProperty : public PropertyHandler<Light>
+	class SizeXProperty : public PropertyHandler<Light>
 	{
 	public:
-		PH_CONSTRUCTOR(RadiusProperty,Light);
+		PH_CONSTRUCTOR(SizeXProperty,Light);
 		void SetValue( const string& str )
 		{
 			AreaLight* light = CAST_TARGET(AreaLight);
 			
-			light->radius = 0.5f * (float)atof( str.c_str() );
-			if( light->shape )
-				light->shape->SetRadius( light->radius );
+			light->sizeX = atof( str.c_str() );
+            if( light->shape ){
+                light->shape->SetSizeX( light->sizeX );
+                light->shape->SetSizeY( light->sizeY );
+            }
 		}
 	};
+    class SizeYProperty : public PropertyHandler<Light>
+    {
+    public:
+        PH_CONSTRUCTOR(SizeYProperty,Light);
+        void SetValue( const string& str )
+        {
+            AreaLight* light = CAST_TARGET(AreaLight);
+            
+            light->sizeY = atof( str.c_str() );
+            if( light->shape ){
+                light->shape->SetSizeX( light->sizeX );
+                light->shape->SetSizeY( light->sizeY );
+            }
+        }
+    };
 };

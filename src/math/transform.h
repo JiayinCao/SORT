@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_TRANSFORM
-#define	SORT_TRANSFORM
+#pragma once
 
 // include the header
 #include "matrix.h"
@@ -42,8 +41,6 @@ public:
 	Transform(){}
 	// constructor from two matrix
 	Transform( const Matrix& m , const Matrix& invm ): matrix(m) , invMatrix( invm ){}
-	// destructor
-	~Transform(){}
 
 	// check whether the transform is identity
 	bool	IdIdentity() const;
@@ -226,5 +223,3 @@ inline Ray	operator* ( const Transform& t , const Ray& r )
 {
 	return Ray( t(r.m_Ori) , t(r.m_Dir) , r.m_Depth , r.m_fMin , r.m_fMax );
 }
-
-#endif

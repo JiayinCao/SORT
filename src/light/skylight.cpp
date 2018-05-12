@@ -65,7 +65,7 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float*
 	const BBox& box = scene->GetBBox();
 	const Vector delta = box.m_Max - box.m_Min;
 
-	const float directPdf = sky->Pdf( intersect.intersect , -wo );
+	const float directPdf = sky->Pdf( intersect.intersect , light2world.GetInversed()(-wo) );
 	const float positionPdf = 4.0f * INV_PI / delta.SquaredLength();
 
 	if( directPdfA )
@@ -73,7 +73,7 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float*
 	if( emissionPdf )
 		*emissionPdf = directPdf * positionPdf;
 
-	return sky->Evaluate( -wo ); 
+	return sky->Evaluate( light2world.GetInversed()(-wo) );
 }
 
 // sample a ray from light
@@ -84,7 +84,8 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
     float _pdfw;
-	r.m_Dir = -sky->sample_v( ls.u , ls.v , &_pdfw , 0 );
+	auto localDir = -sky->sample_v( ls.u , ls.v , &_pdfw , 0 );
+    r.m_Dir = light2world(localDir);
 
 	const BBox& box = scene->GetBBox();
 	const Point center = ( box.m_Max + box.m_Min ) * 0.5f;
@@ -92,7 +93,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 	float world_radius = delta.Length();
 
 	Vector v1 , v2;
-	CoordinateSystem( -r.m_Dir , v1 , v2 );
+	CoordinateSystem( -localDir , v1 , v2 );
 	float d1 , d2;
 	const float t0 = sort_canonical();
 	const float t1 = sort_canonical();
@@ -107,7 +108,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
     if( pdfA )
         *pdfA = _pdfw;
 
-	return sky->Evaluate( -r.m_Dir );
+	return sky->Evaluate( -localDir );
 }
 
 // total power of the light
@@ -128,7 +129,7 @@ bool SkyLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance
 	if( intersect && intersect->t != FLT_MAX )
 		return false;
 
-	radiance = sky->Evaluate( ray.m_Dir );
+	radiance = sky->Evaluate( light2world.GetInversed()(ray.m_Dir) );
 	return true;
 }
 
@@ -156,12 +157,11 @@ void SkyLight::_registerAllProperty()
 	_registerProperty( "front" , new PropertyPasser( this ) );
 	_registerProperty( "back" , new PropertyPasser( this ) );
 	_registerProperty( "image" , new PropertyPasser( this ) );
-	_registerProperty( "transform" , new TransformProperty( this ) );
 }
 
 // the pdf for specific sampled directioin
 float SkyLight::Pdf( const Point& p , const Vector& wi ) const
 {
 	sAssert( sky , LIGHT );
-	return sky->Pdf( p , wi );
+	return sky->Pdf( p , light2world.GetInversed()(wi) );
 }

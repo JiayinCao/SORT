@@ -34,7 +34,7 @@ class	Shape : public Primitive
 // public method
 public:
 	// default constructor
-	Shape():Primitive(0,nullptr){ radius = 1.0f;}
+    Shape():Primitive(0,nullptr){ sizeX = 1.0f; sizeY = 1.0f; }
 	// destructor
 	virtual ~Shape(){}
 
@@ -59,7 +59,8 @@ public:
 	virtual void SetTransform( const Transform& s ) { transform = s; }
 
 	// set the radius of the shape
-	virtual void SetRadius( float r ) { radius = r; }
+    virtual void SetSizeX( float x ) { sizeX = x; }
+    virtual void SetSizeY( float y ) { sizeY = y; }
 
 	// get the pdf of specific direction
 	virtual float Pdf( const Point& p , const Vector& wi ) const;
@@ -81,11 +82,12 @@ public:
 
 // protected field
 protected:
-	
 	// the transformation for the shape
 	Transform	transform;
-	// the radius of the shape
-	float		radius;
+    
+	// the size
+	float		sizeX;
+    float       sizeY;
 
 	// get intersected point between the ray and the shape
 	virtual float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* inter = 0 ) const = 0;

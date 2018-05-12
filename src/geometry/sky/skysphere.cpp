@@ -37,10 +37,8 @@ void SkySphere::_release()
 }
 
 // evaluate value from sky
-Spectrum SkySphere::Evaluate( const Vector& vec ) const
+Spectrum SkySphere::Evaluate( const Vector& wi ) const
 {
-	Vector wi = m_transform.invMatrix(vec);
-
 	float theta = SphericalTheta( wi );
 	float phi = SphericalPhi( wi );
 
@@ -111,14 +109,12 @@ Vector SkySphere::sample_v( float u , float v , float* pdf , float* area_pdf ) c
 			*pdf = 0.0f;
 	}
 
-	return m_transform(wi);
+    return wi;
 }
 
 // get the pdf
-float SkySphere::Pdf( const Point& p , const Vector& wi ) const
+float SkySphere::Pdf( const Point& p , const Vector& lwi ) const
 {
-	Vector lwi = m_transform.invMatrix( wi );
-
 	float sin_theta = SinTheta(lwi);
 	if( sin_theta == 0.0f ) return 0.0f;
 	float u , v;
