@@ -22,16 +22,6 @@
 
 IMPLEMENT_CREATOR( AreaLight );
 
-// initialize default value
-void AreaLight::_init()
-{
-	_registerAllProperty();
-
-	shape = nullptr;
-	sizeX = 1.0f;
-    sizeY = 1.0f;
-}
-
 // sample ray from light
 Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
@@ -105,7 +95,6 @@ Spectrum AreaLight::Power() const
 void AreaLight::_registerAllProperty()
 {
 	Light::_registerAllProperty();
-	Light::_registerAllProperty();
     _registerProperty( "shape" , new ShapeProperty(this) );
 	_registerProperty( "sizex" , new SizeXProperty(this) );
     _registerProperty( "sizey" , new SizeYProperty(this) );
@@ -130,7 +119,7 @@ Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo , float
 // get intersection between the light and the ray
 bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
 {
-	sAssert( shape != 0 , LIGHT );
+	sAssert( shape != nullptr , LIGHT );
 
 	// get intersect
 	const bool result = shape->GetIntersect( ray , intersect );
