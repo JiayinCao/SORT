@@ -26,8 +26,8 @@ IMPLEMENT_CREATOR( Rectangle );
 // sample a point on shape
 Point Rectangle::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
 {
-    const float halfx = sizex * 0.5f;
-    const float halfy = sizey * 0.5f;
+    const float halfx = sizeX * 0.5f;
+    const float halfy = sizeY * 0.5f;
     
 	float u = 2 * ls.u - 1.0f;
 	float v = 2 * ls.v - 1.0f;
@@ -51,8 +51,8 @@ Point Rectangle::sample_l( const LightSample& ls , const Point& p , Vector& wi ,
 // sample a ray from light
 void Rectangle::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
-    const float halfx = sizex * 0.5f;
-    const float halfy = sizey * 0.5f;
+    const float halfx = sizeX * 0.5f;
+    const float halfy = sizeY * 0.5f;
     
 	float u = 2 * ls.u - 1.0f;
 	float v = 2 * ls.v - 1.0f;
@@ -68,7 +68,7 @@ void Rectangle::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pd
 // the surface area of the shape
 float Rectangle::SurfaceArea() const
 {
-    return sizex * sizey;
+    return sizeX * sizeY;
 }
 
 // get intersected point between the ray and the shape
@@ -82,8 +82,8 @@ float Rectangle::_getIntersect( const Ray& ray , Point& p , float limit , Inters
 		return -1.0f;
 	p = ray(t);
 
-    const float halfx = sizex * 0.5f;
-    const float halfy = sizey * 0.5f;
+    const float halfx = sizeX * 0.5f;
+    const float halfy = sizeY * 0.5f;
 	if( p.x > halfx || p.x < -halfx )
 		return -1.0f;
 	if( p.z > halfy || p.z < -halfy )
@@ -104,8 +104,8 @@ float Rectangle::_getIntersect( const Ray& ray , Point& p , float limit , Inters
 // get the bounding box of the primitive
 const BBox&	Rectangle::GetBBox() const
 {
-    const float halfx = sizex * 0.5f;
-    const float halfy = sizey * 0.5f;
+    const float halfx = sizeX * 0.5f;
+    const float halfy = sizeY * 0.5f;
 	if( !m_bbox )
 	{
         m_bbox = std::unique_ptr<BBox>( new BBox() );

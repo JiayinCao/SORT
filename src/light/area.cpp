@@ -27,15 +27,16 @@ void AreaLight::_init()
 {
 	_registerAllProperty();
 
-	shape = 0;
-	radius = 1.0f;
+	shape = nullptr;
+	sizeX = 1.0f;
+    sizeY = 1.0f;
 }
 
 // sample ray from light
 Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
-	sAssert( ls != 0 , LIGHT );
-	sAssert( shape != 0 , LIGHT );
+	sAssert( ls != nullptr , LIGHT );
+	sAssert( shape != nullptr , LIGHT );
 
     // sample a point from light
     Vector normal;
@@ -104,10 +105,10 @@ Spectrum AreaLight::Power() const
 void AreaLight::_registerAllProperty()
 {
 	Light::_registerAllProperty();
-	_registerProperty( "pos" , new PosProperty(this) );
-	_registerProperty( "dir" , new DirProperty(this) );
-	_registerProperty( "shape" , new ShapeProperty(this) );
-	_registerProperty( "radius" , new RadiusProperty(this) );
+	Light::_registerAllProperty();
+    _registerProperty( "shape" , new ShapeProperty(this) );
+	_registerProperty( "sizex" , new SizeXProperty(this) );
+    _registerProperty( "sizey" , new SizeYProperty(this) );
 }
 
 // sample light density
@@ -135,7 +136,7 @@ bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radianc
 	const bool result = shape->GetIntersect( ray , intersect );
 
 	// transform the intersection result back to world coordinate
-	if( result && intersect != 0 )
+	if( result && intersect != nullptr )
 		radiance = Le( *intersect , -ray.m_Dir , 0 , 0 );
 
 	return result;

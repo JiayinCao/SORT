@@ -26,6 +26,8 @@ IMPLEMENT_CREATOR( PointLight );
 // sample ray from light
 Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
+    auto light_pos = Vector3f( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
+    
     // Get light position
 	const Vector _dirToLight = light_pos - intersect.intersect;
     
@@ -58,6 +60,8 @@ Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample
 // sample a ray from light
 Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
 {
+    auto light_pos = Vector3f( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
+    
     // sample a new ray
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
@@ -76,11 +80,4 @@ Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , fl
         *cosAtLight = 1.0f;
 
 	return intensity;
-}
-
-// register property
-void PointLight::_registerAllProperty()
-{
-	Light::_registerAllProperty();
-	_registerProperty( "pos" , new PosProperty(this) );
 }

@@ -26,7 +26,7 @@ class	Rectangle : public Shape
 {
 // public method
 public:
-	DEFINE_CREATOR(Rectangle, Rectangle, "rectangle");
+	DEFINE_CREATOR(Rectangle, Shape, "rectangle");
 	
 	// sample a point on shape
 	// para 'ls': the light sample
@@ -55,8 +55,4 @@ public:
 protected:
 	// get intersected point between the ray and the shape
 	float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* intersect = 0 ) const override;
-    
-    // size
-    float sizex = 0.0f;
-    float sizey = 0.0f;
 };

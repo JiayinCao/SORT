@@ -26,6 +26,8 @@ IMPLEMENT_CREATOR( Square );
 // sample a point on shape
 Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
 {
+    const float radius = sizeX * 0.5f;
+    
 	float u = 2 * ls.u - 1.0f;
 	float v = 2 * ls.v - 1.0f;
 	Point lp = transform( Point( radius * u , 0.0f , radius * v ) );
@@ -48,6 +50,8 @@ Point Square::sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
 // sample a ray from light
 void Square::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
+    const float radius = sizeX * 0.5f;
+    
 	float u = 2 * ls.u - 1.0f;
 	float v = 2 * ls.v - 1.0f;
 	r.m_fMin = 0.0f;
@@ -62,12 +66,14 @@ void Square::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
 // the surface area of the shape
 float Square::SurfaceArea() const
 {
-	return radius * radius * 4.0f;
+    return sizeX * sizeX;
 }
 
 // get intersected point between the ray and the shape
 float Square::_getIntersect( const Ray& ray , Point& p , float limit , Intersection* intersect ) const
 {
+    const float radius = sizeX * 0.5f;
+    
 	if( ray.m_Dir.y == 0.0f )
 		return -1.0f;
 
@@ -96,6 +102,8 @@ float Square::_getIntersect( const Ray& ray , Point& p , float limit , Intersect
 // get the bounding box of the primitive
 const BBox&	Square::GetBBox() const
 {
+    const float radius = sizeX * 0.5f;
+    
 	if( !m_bbox )
 	{
         m_bbox = std::unique_ptr<BBox>( new BBox() );

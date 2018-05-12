@@ -29,9 +29,6 @@ class PointLight : public Light
 public:
 	DEFINE_CREATOR( PointLight , Light , "point" );
 
-	// default constructor
-	PointLight(){_registerAllProperty();}
-
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'wi'		: input vector in world space
@@ -49,31 +46,4 @@ public:
 	// total power of the light
 	virtual Spectrum Power() const
 	{return 4 * PI * intensity;}
-
-// private field
-private:
-    // light position
-    Point light_pos;
-    
-	// register property
-	void _registerAllProperty();
-
-	class PosProperty : public PropertyHandler<Light>
-	{
-	public:
-		PH_CONSTRUCTOR(PosProperty,Light);
-
-		// set value
-		void SetValue( const string& str )
-		{
-			PointLight* light = CAST_TARGET(PointLight);
-			light->light_pos = PointFromStr( str );
-			light->light2world.matrix.m[3] = light->light_pos.x;
-			light->light2world.matrix.m[7] = light->light_pos.y;
-			light->light2world.matrix.m[11] = light->light_pos.z;
-			light->light2world.invMatrix.m[3] = -light->light_pos.x;
-			light->light2world.invMatrix.m[7] = -light->light_pos.y;
-			light->light2world.invMatrix.m[11] = -light->light_pos.z;
-		}
-	};
 };
