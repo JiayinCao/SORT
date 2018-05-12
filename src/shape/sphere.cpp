@@ -32,6 +32,8 @@ Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
 {
     sAssertMsg(false, SAMPLING, "N is not filled in Sphere::sample_l");
     
+    const float radius = sizeX * 0.5f;
+    
 	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
 	Vector delta = center - p;
 	Vector dir = Normalize( delta );
@@ -62,6 +64,8 @@ Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
 // get pdf of specific direction
 float Sphere::Pdf( const Point& p ,  const Vector& wi ) const
 {
+    const float radius = sizeX * 0.5f;
+    
 	Point center;
 	float sin_theta_sq = radius * radius / ( p - center ).SquaredLength();
 	float cos_theta = sqrt( max( 0.0f , 1.0f - sin_theta_sq ) );
@@ -71,12 +75,15 @@ float Sphere::Pdf( const Point& p ,  const Vector& wi ) const
 // the surface area of the shape
 float Sphere::SurfaceArea() const
 {
+    const float radius = sizeX * 0.5f;
 	return 4 * PI * radius * radius ;
 }
 
 // get intersection between a ray and the sphere
 float Sphere::_getIntersect( const Ray& r , Point& p , float limit , Intersection* intersect ) const
 {
+    const float radius = sizeX * 0.5f;
+    
 	float _b = 2.0f * ( r.m_Dir.x * r.m_Ori.x + r.m_Dir.y * r.m_Ori.y + r.m_Dir.z * r.m_Ori.z );
 	float _c = r.m_Ori.x * r.m_Ori.x + r.m_Ori.y * r.m_Ori.y + r.m_Ori.z * r.m_Ori.z - radius * radius;
 
@@ -122,6 +129,8 @@ float Sphere::_getIntersect( const Ray& r , Point& p , float limit , Intersectio
 // sample a ray from light
 void Sphere::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
+    const float radius = sizeX * 0.5f;
+    
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
 	Vector normalized_dir = UniformSampleSphere( ls.u , ls.v );
@@ -137,6 +146,8 @@ void Sphere::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
 // get the bounding box of the primitive
 const BBox&	Sphere::GetBBox() const
 {
+    const float radius = sizeX * 0.5f;
+    
 	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
 
 	if( !m_bbox )

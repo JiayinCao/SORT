@@ -109,17 +109,4 @@ private:
                 slog( WARNING , LIGHT , "There is no sky attached to light" );
 		}
 	};
-	class TransformProperty : public PropertyHandler<Light>
-	{
-	public:
-		PH_CONSTRUCTOR(TransformProperty,Light);
-		void SetValue( const string& str )
-		{
-			SkyLight* light = CAST_TARGET(SkyLight);
-			light->transform = TransformFromStr(str).GetInversed();
-
-			if( light->sky )
-				light->sky->SetTransform( light->transform );
-		}
-	};
 };

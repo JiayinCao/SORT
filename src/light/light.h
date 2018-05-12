@@ -59,6 +59,8 @@ class	Light : public PropertySet<Light>
 {
 // public method
 public:
+    // constructor
+    Light() {_registerAllProperty();}
 	// destructor
 	virtual ~Light(){scene=0;}
 
@@ -128,6 +130,7 @@ protected:
 	void _registerAllProperty()
 	{
 		_registerProperty( "intensity" , new IntensityProperty(this) );
+        _registerProperty( "transform" , new TransformProperty(this) );
 	}
 
 	// property handler
@@ -144,7 +147,18 @@ protected:
 			light->_setIntensity( SpectrumFromStr(str) );
 		}
 	};
-
+    
+    class TransformProperty : public PropertyHandler<Light>
+    {
+    public:
+        PH_CONSTRUCTOR(TransformProperty,Light);
+        void SetValue( const string& str )
+        {
+            Light* light = CAST_TARGET(Light);
+            light->SetTransform( TransformFromStr(str) );
+        }
+    };
+    
 	// set light intensity
 	virtual void _setIntensity( const Spectrum& e )
 	{ intensity = e; }

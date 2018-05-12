@@ -10,6 +10,22 @@ from .. import utility
 from . import exporter_common
 import xml.etree.cElementTree as ET
 
+def MatrixSortToBlender():
+    from bpy_extras.io_utils import axis_conversion
+    global_matrix = axis_conversion(to_forward='-Z',to_up='Y').to_4x4()
+    global_matrix[2][0] *= -1.0
+    global_matrix[2][1] *= -1.0
+    global_matrix[2][2] *= -1.0
+    return global_matrix
+
+def MatrixBlenderToSort():
+    from bpy_extras.io_utils import axis_conversion
+    global_matrix = axis_conversion(to_forward='-Z',to_up='Y').to_4x4()
+    global_matrix[2][0] *= -1.0
+    global_matrix[2][1] *= -1.0
+    global_matrix[2][2] *= -1.0
+    return global_matrix
+
 # export blender information
 def export_blender(scene, force_debug=False):
     # create immediate file path
@@ -118,21 +134,22 @@ def export_scene(scene, force_debug):
             export_mesh(ob,scene, force_debug)
         elif ob.type == 'LAMP':
             lamp = ob.data
-            world_matrix = utility.getGlobalMatrix() * ob.matrix_world
+            # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
+            flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
+            world_matrix = MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() * flip_mat
             if lamp.type == 'SUN':
                 light_node = ET.SubElement( root , 'Light' , type='distant')
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
-                light_dir = world_matrix.col[2] * -1.0
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( world_matrix ) )                
             elif lamp.type == 'POINT':
                 light_node = ET.SubElement( root , 'Light' , type='point')
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
                 light_position = world_matrix.col[3]
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='pos' ,value=utility.vec3tostr(light_position))
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( world_matrix ) )                
             elif lamp.type == 'SPOT':
                 light_node = ET.SubElement( root , 'Light' , type='spot')
                 light_spectrum = np.array(lamp.color[:])
@@ -150,17 +167,28 @@ def export_scene(scene, force_debug):
                 light_spectrum *= lamp.energy
                 light_dir = world_matrix.col[2] * -1.0
                 light_position = world_matrix.col[3]
-                ET.SubElement( light_node , 'Property' , name='shape' ,value='square')
+
+                sizeX = lamp.size
+                sizeY = lamp.size_y
+
+                shape = 'square'
+                if lamp.shape == 'RECTANGLE':
+                    shape = 'rectangle'
+                
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr(world_matrix) )
+                ET.SubElement( light_node , 'Property' , name='shape' ,value=shape)
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='dir' ,value=utility.vec3tostr(light_dir))
                 ET.SubElement( light_node , 'Property' , name='pos' ,value=utility.vec3tostr(light_position))
-                ET.SubElement( light_node , 'Property' , name='radius' ,value='%d'%lamp.size )
+                ET.SubElement( light_node , 'Property' , name='sizex' ,value='%d'%sizeX )
+                ET.SubElement( light_node , 'Property' , name='sizey' ,value='%d'%sizeY )
             elif lamp.type == 'HEMI':
                 light_node = ET.SubElement( root , 'Light' , type='skylight')
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( world_matrix ) )
                 ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
                 ET.SubElement( light_node , 'Property' , name='image' ,value=lamp.sort_lamp.sort_lamp_hemi.envmap_file)
-                eul = mathutils.Euler((ob.rotation_euler[0], -ob.rotation_euler[2], -ob.rotation_euler[1]), utility.euler_rotation_convert(ob.rotation_mode)).to_matrix().to_4x4()
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr(eul) )
+                #eul = mathutils.Euler((ob.rotation_euler[0], -ob.rotation_euler[2], -ob.rotation_euler[1]), utility.euler_rotation_convert(ob.rotation_mode)).to_matrix().to_4x4()
+                #ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr(world_matrix) )
 
     # output the xml
     output_scene_file = preference.get_immediate_dir(force_debug) + 'blender.xml'
