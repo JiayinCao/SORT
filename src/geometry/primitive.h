@@ -35,7 +35,7 @@ class	Primitive
 // public method
 public:
 	// constructor from a id
-    Primitive( unsigned id , std::shared_ptr<Material> mat ) { m_primitive_id = id; m_mat = mat; light = 0; }
+    Primitive( unsigned id , std::shared_ptr<Material> mat ) { m_primitive_id = id; m_mat = mat; light = nullptr; }
 	// destructor
 	virtual ~Primitive(){}
 
@@ -62,6 +62,8 @@ public:
 
 	// get light
 	Light* GetLight() const { return light; }
+    // set light
+    void SetLight( Light* _light ) { light = _light; }
 
 // protected field
 protected:
