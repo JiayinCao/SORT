@@ -6,6 +6,31 @@ from .. import common
 from .. import utility
 from .. import nodes
 
+# get camera data, to be merged with the above function
+def lookAtPbrt(camera):
+    # it seems that the matrix return here is the inverse of view matrix.
+    ori_matrix = camera.matrix_world.copy()
+    # get the transpose matrix
+    matrix = ori_matrix.transposed()
+    pos = matrix[3]             # get eye position
+    forwards = -matrix[2]       # get forward direction
+
+    # get focal distance for DOF effect
+    if camera.data.dof_object is not None:
+        focal_object = camera.data.dof_object
+        fo_mat = focal_object.matrix_world
+        delta = fo_mat.to_translation() - pos.to_3d()
+        focal_distance = delta.dot(forwards)
+    else:
+        focal_distance = max( camera.data.dof_distance , 0.01 )
+    scaled_forward = mathutils.Vector((focal_distance * forwards[0], focal_distance * forwards[1], focal_distance * forwards[2] , 0.0))
+    # viewing target
+    target = (pos + scaled_forward)
+    # up direction
+    up = matrix[1]
+    return (pos, target, up)
+
+
 # export blender information
 def export_blender(scene, force_debug=False):
     node = export_scene(scene)
@@ -33,7 +58,7 @@ def export_pbrt_file(scene, node):
     # generating camera information
     fov = math.degrees( bpy.data.cameras[0].angle )
     camera = exporter_common.getCamera(scene)
-    pos, target, up = exporter_common.lookAtPbrt(camera)
+    pos, target, up = lookAtPbrt(camera)
     pbrt_camera = "Scale -1 1 1 \n"
     pbrt_camera += "LookAt \t" + utility.vec3tostr( pos ) + "\n"
     pbrt_camera += "       \t" + utility.vec3tostr( target ) + "\n"
@@ -84,8 +109,8 @@ def export_light(scene):
             lamp = ob.data
             world_matrix = ob.matrix_world
             file.write( "AttributeBegin\r" )
+            file.write( "Transform [" + utility.matrixtostr( world_matrix.transposed() ) + "]\n" )
             if lamp.type == 'SUN':
-                file.write( "Transform [" + utility.matrixtostr( world_matrix.transposed() ) + "]\n" )
                 point_from = [0,1,0]
                 point_to = [0,0,0]
                 str = "LightSource \"distant\" "
@@ -96,7 +121,6 @@ def export_light(scene):
                 str += "\r"
                 file.write(str)
             elif lamp.type == 'POINT':
-                file.write( "Transform [" + utility.matrixtostr( world_matrix.transposed() ) + "]\n" )
                 point_from = [0,0,0]#world_matrix.col[3]
                 str = "LightSource \"point\" "
                 str += "\"rgb I\" [%f,%f,%f] "%(lamp.color[0],lamp.color[1],lamp.color[2])
@@ -107,8 +131,6 @@ def export_light(scene):
 #            elif lamp.type == 'SPOT':
 #            elif lamp.type == 'AREA':
             elif lamp.type == 'HEMI':
-                eul = mathutils.Euler((-ob.rotation_euler[0], ob.rotation_euler[1], ob.rotation_euler[2]), ob.rotation_mode).to_matrix().to_4x4()
-                file.write( "Transform [" + utility.matrixtostr( eul ) + "]\n" )
                 str = "LightSource \"infinite\" "
                 str += "\"string mapname\" \"%s\" "%lamp.sort_lamp.sort_lamp_hemi.envmap_file
                 str += "\r"

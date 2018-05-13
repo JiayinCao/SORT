@@ -26,6 +26,30 @@ def MatrixBlenderToSort():
     global_matrix[2][2] *= -1.0
     return global_matrix
 
+# get camera data
+def lookAtSORT(camera):
+    # it seems that the matrix return here is the inverse of view matrix.
+    ori_matrix = MatrixBlenderToSort() * camera.matrix_world.copy()
+    # get the transpose matrix
+    matrix = ori_matrix.transposed()
+    pos = matrix[3]             # get eye position
+    forwards = -matrix[2]       # get forward direction
+
+    # get focal distance for DOF effect
+    if camera.data.dof_object is not None:
+        focal_object = camera.data.dof_object
+        fo_mat = MatrixBlenderToSort() * focal_object.matrix_world
+        delta = fo_mat.to_translation() - pos.to_3d()
+        focal_distance = delta.dot(forwards)
+    else:
+        focal_distance = max( camera.data.dof_distance , 0.01 )
+    scaled_forward = mathutils.Vector((focal_distance * forwards[0], focal_distance * forwards[1], focal_distance * forwards[2] , 0.0))
+    # viewing target
+    target = (pos + scaled_forward)
+    # up direction
+    up = matrix[1]
+    return (pos, target, up)
+
 # export blender information
 def export_blender(scene, force_debug=False):
     # create immediate file path
@@ -81,7 +105,7 @@ def export_sort_file(scene, force_debug):
     ET.SubElement(root, 'Sampler', type=sampler_type, round='%s'%sampler_count)
     # camera node
     camera = exporter_common.getCamera(scene)
-    pos, target, up = exporter_common.lookAt(camera)
+    pos, target, up = lookAtSORT(camera)
     camera_node = ET.SubElement(root, 'Camera', type='perspective')
     ET.SubElement( camera_node , "Property" , name="eye" , value=utility.vec3tostr(pos))
     ET.SubElement( camera_node , "Property" , name="up" , value=utility.vec3tostr(up))
@@ -129,7 +153,7 @@ def export_scene(scene, force_debug):
         if ob.type == 'MESH':
             model_node = ET.SubElement( root , 'Model' , filename=ob.name + '.obj', name = ob.name )
             transform_node = ET.SubElement( model_node , 'Transform' )
-            ET.SubElement( transform_node , 'Matrix' , value = 'm '+ utility.matrixtostr( utility.getGlobalMatrix() * ob.matrix_world) )
+            ET.SubElement( transform_node , 'Matrix' , value = 'm '+ utility.matrixtostr( MatrixBlenderToSort() * ob.matrix_world) )
             # output the mesh to file
             export_mesh(ob,scene, force_debug)
         elif ob.type == 'LAMP':
