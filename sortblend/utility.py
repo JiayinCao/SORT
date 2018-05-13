@@ -1,11 +1,3 @@
-def getGlobalMatrix():
-    from bpy_extras.io_utils import axis_conversion
-    global_matrix = axis_conversion(to_forward='-Z',to_up='Y').to_4x4()
-    global_matrix[2][0] *= -1.0
-    global_matrix[2][1] *= -1.0
-    global_matrix[2][2] *= -1.0
-    return global_matrix
-
 # utility function
 def vec3tostr(vec):
     return "%f %f %f"%(vec[0],vec[1],vec[2])
@@ -22,15 +14,3 @@ def veckey3d(v):
 
 def veckey2d(v):
     return round(v[0], 4), round(v[1], 4)
-
-def euler_rotation_convert( mode ):
-    # no internet access now, seeking better solution later
-    res = ""
-    for c in mode:
-        if c == "X":
-            res += "X";
-        elif c == "Y":
-            res += "Z";
-        else:
-            res += "Y";
-    return res;
