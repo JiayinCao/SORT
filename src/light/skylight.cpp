@@ -30,9 +30,10 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 
 	// sample a ray
     float _pdfw = 0.0f;
-	dirToLight = sky->sample_v( ls->u , ls->v , &_pdfw , 0 );
+	const Vector localDir = sky->sample_v( ls->u , ls->v , &_pdfw , 0 );
 	if( _pdfw == 0.0f )
 		return 0.0f;
+    dirToLight = light2world(localDir);
     
     if( pdfw )
         *pdfw = _pdfw;
@@ -54,7 +55,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
     const float delta = 0.01f;
 	visibility.ray = Ray( intersect.intersect , dirToLight , 0 , delta , FLT_MAX );
 
-	return sky->Evaluate( dirToLight );
+	return sky->Evaluate( localDir );
 }
 
 // sample light density
@@ -93,7 +94,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 	float world_radius = delta.Length();
 
 	Vector v1 , v2;
-	CoordinateSystem( -localDir , v1 , v2 );
+	CoordinateSystem( -r.m_Dir , v1 , v2 );
 	float d1 , d2;
 	const float t0 = sort_canonical();
 	const float t1 = sort_canonical();
