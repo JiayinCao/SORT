@@ -113,7 +113,7 @@ Vector SkySphere::sample_v( float u , float v , float* pdf , float* area_pdf ) c
 }
 
 // get the pdf
-float SkySphere::Pdf( const Point& p , const Vector& lwi ) const
+float SkySphere::Pdf( const Vector& lwi ) const
 {
 	float sin_theta = SinTheta(lwi);
 	if( sin_theta == 0.0f ) return 0.0f;
