@@ -66,7 +66,7 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float*
 	const BBox& box = scene->GetBBox();
 	const Vector delta = box.m_Max - box.m_Min;
 
-	const float directPdf = sky->Pdf( intersect.intersect , light2world.GetInversed()(-wo) );
+	const float directPdf = sky->Pdf( light2world.GetInversed()(-wo) );
 	const float positionPdf = 4.0f * INV_PI / delta.SquaredLength();
 
 	if( directPdfA )
@@ -164,5 +164,5 @@ void SkyLight::_registerAllProperty()
 float SkyLight::Pdf( const Point& p , const Vector& wi ) const
 {
 	sAssert( sky , LIGHT );
-	return sky->Pdf( p , light2world.GetInversed()(wi) );
+	return sky->Pdf( light2world.GetInversed()(wi) );
 }
