@@ -53,7 +53,7 @@ public:
 	virtual Vector sample_v( float u , float v , float* pdf , float* area_pdf ) const = 0;
 
 	// get the pdf
-	virtual float Pdf( const Point& p , const Vector& wi ) const = 0;
+	virtual float Pdf( const Vector& wi ) const = 0;
 
 	// setup transformation
 	void SetTransform( const Transform& tf ){
