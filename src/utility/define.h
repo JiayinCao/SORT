@@ -24,6 +24,9 @@
 #define	INV_PI	0.3183099f
 #define INV_TWOPI 0.15915494f
 
+inline float Radians( float deg ) { return PI / 180.0f * deg; }
+inline float Degrees( float rad ) { return 180.0f * INV_PI * rad ; }
+
 // some useful macro
 #define SAFE_DELETE(p) { if(p) { delete p; p = 0; } }
 #define SAFE_DELETE_ARRAY(p) { if(p) { delete[] p; p = 0 ; } }
