@@ -113,10 +113,3 @@ void SpotLight::_registerAllProperty()
 	_registerProperty( "falloff_start" , new FalloffStartProperty(this) );
 	_registerProperty( "range" , new RangeProperty(this) );
 }
-
-// initialize default value
-void SpotLight::_init()
-{
-	cos_total_range = 0.0f;
-	cos_falloff_start = 1.0f;
-}

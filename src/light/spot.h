@@ -52,11 +52,8 @@ public:
 
 // private field
 private:
-	float	cos_falloff_start;
-	float	cos_total_range;
-
-	// initialize default value
-	void _init();
+    float	cos_falloff_start = Radians( 25.0f );
+    float	cos_total_range = Radians( 30.0f );
 
 	// register property
 	void _registerAllProperty();
@@ -68,7 +65,7 @@ private:
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
-			light->cos_falloff_start = (float)cos(atof( str.c_str() ));
+			light->cos_falloff_start = (float)cos( Radians( atof( str.c_str() ) ) );
 		}
 	};
 	class RangeProperty : public PropertyHandler<Light>
@@ -78,7 +75,7 @@ private:
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
-			light->cos_total_range = (float)cos(atof( str.c_str() ));
+            light->cos_total_range = (float)cos( Radians( atof( str.c_str() ) ) );
 		}
 	};
 };

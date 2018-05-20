@@ -1,6 +1,7 @@
 import bpy
 import math
 import mathutils
+from math import degrees
 from . import exporter_common
 from .. import common
 from .. import utility
@@ -80,7 +81,7 @@ def export_pbrt_file(scene, node):
     file.write( pbrt_integrator )
     file.write( "WorldBegin\n" )
     file.write( "Include \"lights.pbrt\"\n" )
-    file.write( "Include \"materials.pbrt\"" )
+    file.write( "Include \"materials.pbrt\"\n" )
     for n in node:
         file.write( "Include \"" + n + ".pbrt\"\n" )
     file.write( "WorldEnd\n" )
@@ -113,27 +114,34 @@ def export_light(scene):
             if lamp.type == 'SUN':
                 point_from = [0,1,0]
                 point_to = [0,0,0]
-                str = "LightSource \"distant\" "
-                str += "\"rgb L\" [%f,%f,%f] "%(lamp.color[0],lamp.color[1],lamp.color[2])
-                str += "\"point from\" [%f,%f,%f] "%(point_from[0],point_from[2],point_from[1])
-                str += "\"point to\" [%f,%f,%f] "%(point_to[0],point_to[2],point_to[1])
-                str += "\"rgb scale\" [%f,%f,%f] "%(lamp.energy,lamp.energy,lamp.energy)
-                str += "\r"
+                str = "LightSource \"distant\" \n"
+                str += "\"rgb L\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "\"point from\" [%f,%f,%f] \n"%(point_from[0],point_from[2],point_from[1])
+                str += "\"point to\" [%f,%f,%f] \n"%(point_to[0],point_to[2],point_to[1])
+                str += "\"rgb scale\" [%f,%f,%f] \n"%(lamp.energy,lamp.energy,lamp.energy)
                 file.write(str)
             elif lamp.type == 'POINT':
-                point_from = [0,0,0]#world_matrix.col[3]
-                str = "LightSource \"point\" "
-                str += "\"rgb I\" [%f,%f,%f] "%(lamp.color[0],lamp.color[1],lamp.color[2])
-                str += "\"point from\" [%f,%f,%f] "%(point_from[0],point_from[2],point_from[1])
-                str += "\"rgb scale\" [%f,%f,%f] "%(lamp.energy,lamp.energy,lamp.energy)
-                str += "\r"
+                point_from = [0,0,0]
+                str = "LightSource \"point\" \n"
+                str += "\"rgb I\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "\"point from\" [%f,%f,%f] \n"%(point_from[0],point_from[2],point_from[1])
+                str += "\"rgb scale\" [%f,%f,%f] \n"%(lamp.energy,lamp.energy,lamp.energy)
                 file.write(str)
-#            elif lamp.type == 'SPOT':
+            elif lamp.type == 'SPOT':
+                point_from = [0,1,0]
+                point_to = [0,0,0]
+                str = "LightSource \"spot\" "
+                str += "\"rgb I\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "\"point from\" [%f,%f,%f] \n"%(point_from[0],point_from[2],point_from[1])
+                str += "\"point to\" [%f,%f,%f] \n"%(point_to[0],point_to[2],point_to[1])
+                str += "\"rgb scale\" [%f,%f,%f] \n"%(lamp.energy,lamp.energy,lamp.energy)
+                str += "\"float coneangle\" [%f] \n"%(degrees(lamp.spot_size*0.5))
+                str += "\"float conedeltaangle\" [%f] \n"%(degrees(lamp.spot_size * lamp.spot_blend * 0.5))
+                file.write(str)
 #            elif lamp.type == 'AREA':
             elif lamp.type == 'HEMI':
                 str = "LightSource \"infinite\" "
-                str += "\"string mapname\" \"%s\" "%lamp.sort_lamp.sort_lamp_hemi.envmap_file
-                str += "\r"
+                str += "\"string mapname\" \"%s\" \n"%lamp.sort_lamp.sort_lamp_hemi.envmap_file
                 file.write(str)
             file.write( "AttributeEnd\r" )
 

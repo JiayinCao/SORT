@@ -3,6 +3,7 @@ import os
 import mathutils
 import shutil
 import numpy as np
+from math import degrees
 from .. import preference
 from .. import common
 from .. import nodes
@@ -182,8 +183,8 @@ def export_scene(scene, force_debug):
                 light_position = world_matrix.col[3]
                 ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( world_matrix ) )
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='falloff_start' ,value='1.0')
-                ET.SubElement( light_node , 'Property' , name='range' ,value='1.0')
+                ET.SubElement( light_node , 'Property' , name='falloff_start' ,value="%d"%(degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)))
+                ET.SubElement( light_node , 'Property' , name='range' ,value="%d"%(degrees(lamp.spot_size*0.5)))
             elif lamp.type == 'AREA':
                 light_node = ET.SubElement( root , 'Light' , type='area')
                 light_spectrum = np.array(lamp.color[:])
