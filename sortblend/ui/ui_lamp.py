@@ -91,3 +91,17 @@ class LampAreaPanel(SORTLampPanel, bpy.types.Panel):
         elif lamp.shape == 'RECTANGLE':
             sub.prop(lamp, "size", text="Size X")
             sub.prop(lamp, "size_y", text="Size Y")
+
+class LampSpotPanel(SORTLampPanel, bpy.types.Panel):
+    bl_label = 'Lamp Spot Property'
+
+    @classmethod
+    def poll(cls, context):
+        return super().poll(context) and context.lamp.type == 'SPOT'
+
+    def draw(self, context):
+        layout = self.layout
+        lamp = context.lamp
+
+        layout.prop( lamp , "spot_size" , text="Spot Light Range" )
+        layout.prop( lamp , "spot_blend" , text="Spot Light Blend" )
