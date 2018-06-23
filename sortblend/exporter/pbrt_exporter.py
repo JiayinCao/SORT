@@ -138,7 +138,16 @@ def export_light(scene):
                 str += "\"float coneangle\" [%f] \n"%(degrees(lamp.spot_size*0.5))
                 str += "\"float conedeltaangle\" [%f] \n"%(degrees(lamp.spot_size * lamp.spot_blend * 0.5))
                 file.write(str)
-#            elif lamp.type == 'AREA':
+            elif lamp.type == 'AREA':
+                halfSizeX = lamp.size / 2
+                halfSizeY = lamp.size_y / 2
+
+                str = "AreaLightSource \"diffuse\" \"rgb L\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "Material \"matte\" \"rgb Kd\" [ 0.0 0.0 0.0 ]"
+                str += "Shape \"trianglemesh\"\n"
+                str += "\"integer indices\" [0 2 1 0 3 2]"
+                str += "\"point P\" [ %f %f 0   %f %f 0   %f %f 0   %f %f 0 ]"%(-halfSizeX,-halfSizeY,halfSizeX,-halfSizeY,halfSizeX,halfSizeY,-halfSizeX,halfSizeY)
+                file.write(str)
             elif lamp.type == 'HEMI':
                 str = "LightSource \"infinite\" "
                 str += "\"string mapname\" \"%s\" \n"%lamp.sort_lamp.sort_lamp_hemi.envmap_file
