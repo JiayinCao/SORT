@@ -121,20 +121,25 @@ unsigned System::GetRenderingTime() const
 // output progress
 void System::_outputProgress()
 {
-	// get the number of tasks done
-	unsigned taskDone = 0;
-	for( unsigned i = 0; i < m_totalTask; ++i )
-		taskDone += m_taskDone[i];
-
-	// output progress
-	unsigned progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
-
-	if (!g_bBlenderMode)
-		cout<< progress<<"\rProgress: ";
-	else if (m_pProgress)
-		*m_pProgress = progress;
-
-    cout<<endl;
+    unsigned progress = 0;
+    
+    while( progress < 100 ){
+        // get the number of tasks done
+        unsigned taskDone = 0;
+        for( unsigned i = 0; i < m_totalTask; ++i )
+            taskDone += m_taskDone[i];
+        
+        // output progress
+        progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
+        
+        if (!g_bBlenderMode)
+            cout<< "Progress: "<<progress<<"%\n";
+        else if (m_pProgress)
+            *m_pProgress = progress;
+        
+        if( taskDone == m_totalTask )
+            break;
+    }
 }
 
 // output log information
@@ -242,7 +247,7 @@ void System::_executeRenderingTasks()
 
 	// pre allocate memory for the specific thread
 	for( unsigned i = 0 ; i < m_thread_num ; ++i )
-		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 64 , i );
+		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 1024 , i );
     
     std::vector< std::unique_ptr<PlatformThreadUnit> > threads;
     for( unsigned i = 0 ; i < m_thread_num ; ++i )
@@ -251,11 +256,11 @@ void System::_executeRenderingTasks()
     // start all threads
     for_each( threads.begin() , threads.end() , []( std::unique_ptr<PlatformThreadUnit>& thread ) { thread->BeginThread(); } );
 
+    // output progress
+    _outputProgress();
+    
 	// wait for all the threads to be finished
     for_each( threads.begin() , threads.end() , []( std::unique_ptr<PlatformThreadUnit>& thread ) { thread->Join(); } );
-
-    // Output progress
-    _outputProgress();
 
     m_imagesensor->PostProcess();
 }
