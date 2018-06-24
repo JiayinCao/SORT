@@ -66,10 +66,12 @@ def shutdown_pbrt():
     subprocess.Popen.terminate(pbrt_process)
     pbrt_process = None
 
+def get_pbrt_dir():
+    return bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+
 # get pbrt output file name
 def get_pbrt_filename():
-    # Get the path to save pbrt scene
-    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    pbrt_file_path = get_pbrt_dir()
     pbrt_file_name = exporter_common.getEditedFileName()
     return pbrt_file_path + pbrt_file_name + ".exr"
 
