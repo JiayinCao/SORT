@@ -179,12 +179,14 @@ def export_light(scene):
             elif lamp.type == 'AREA':
                 halfSizeX = lamp.size / 2
                 halfSizeY = lamp.size_y / 2
+                if lamp.shape == 'SQUARE':
+                    halfSizeY = halfSizeX
 
                 str = "AreaLightSource \"diffuse\" \"rgb L\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
-                str += "Material \"matte\" \"rgb Kd\" [ 0.0 0.0 0.0 ]"
+                str += "Material \"matte\" \"rgb Kd\" [ 0.0 0.0 0.0 ]\n"
                 str += "Shape \"trianglemesh\"\n"
-                str += "\"integer indices\" [0 2 1 0 3 2]"
-                str += "\"point P\" [ %f %f 0   %f %f 0   %f %f 0   %f %f 0 ]"%(-halfSizeX,-halfSizeY,halfSizeX,-halfSizeY,halfSizeX,halfSizeY,-halfSizeX,halfSizeY)
+                str += "\"integer indices\" [0 2 1 0 3 2]\n"
+                str += "\"point P\" [ %f %f 0   %f %f 0   %f %f 0   %f %f 0 ]\n"%(-halfSizeX,-halfSizeY,halfSizeX,-halfSizeY,halfSizeX,halfSizeY,-halfSizeX,halfSizeY)
                 file.write(str)
             elif lamp.type == 'HEMI':
                 str = "LightSource \"infinite\" "
