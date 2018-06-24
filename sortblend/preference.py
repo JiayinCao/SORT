@@ -57,6 +57,23 @@ def get_sort_bin_path(force_debug=False):
         raise Exception("SORT is only supported on Windows, Ubuntu and Mac OS")
     return sort_bin_path
 
+def get_pbrt_dir():
+    addon_prefs = bpy.context.user_preferences.addons[common.preference_bl_name].preferences
+    return_path = addon_prefs.pbrt_export_path
+    return efutil.filesystem_path(return_path) + "/"
+
+def get_pbrt_bin_path():
+    pbrt_bin_dir = get_pbrt_dir()
+    if platform.system() == 'Darwin':   # for Mac OS
+        pbrt_bin_dir = pbrt_bin_dir + "pbrt"
+    elif platform.system() == 'Windows':    # for Windows
+        pbrt_bin_dir = pbrt_bin_dir + "pbrt.exe"
+    elif platform.system() == "Linux":
+        pbrt_bin_dir = pbrt_bin_dir + "pbrt"
+    else:
+        raise Exception("PBRT is only supported on Windows, Ubuntu and Mac OS")
+    return pbrt_bin_dir
+
 def get_immediate_dir(force_debug=False):
     sort_bin_dir = get_sort_dir(force_debug)
     immediate_dir = sort_bin_dir + 'blender_intermediate/'
