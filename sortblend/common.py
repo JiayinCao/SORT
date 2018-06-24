@@ -5,6 +5,7 @@ integrator_panel_bl_name = 'Renderer'
 sampler_panel_bl_name = 'Sampler'
 thread_panel_bl_name = 'MultiThread'
 debug_panel_bl_name = 'DebugPanel'
+pbrt_debug_panel_bl_name = 'PBRTDebugPanel'
 
 material_slot_panel_bl_name = 'MaterialSlot'
 

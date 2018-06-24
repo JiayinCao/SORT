@@ -1,10 +1,27 @@
 import bpy
 import os
 import platform
+import subprocess
 from .. import preference
 from .. import common
 from ..exporter import sort_exporter
 from ..exporter import pbrt_exporter
+
+def OpenFile( filename ):
+    if platform.system() == 'Darwin':     # for Mac OS
+        os.system( "open \"%s\""%filename)
+    elif platform.system() == 'Windows':  # for Windows
+        os.system(filename)
+    elif platform.system() == "Linux":    # for linux
+        os.system( "xdg-open \"%s\""%filename )
+
+def OpenFolder( path ):
+    if platform.system() == 'Darwin':     # for Mac OS
+        subprocess.call(["open", "-R", path])
+    elif platform.system() == 'Windows':  # for Windows
+        subprocess.call(["explorer \"%s\""%path]) # to be verified
+    elif platform.system() == "Linux":    # for linux
+        os.system( "xdg-open \"%s\""%filename ) # to be verified
 
 class SORTRenderPanel:
     bl_space_type = "PROPERTIES"
@@ -107,77 +124,12 @@ class SORT_export_debug_scene(bpy.types.Operator):
         sort_exporter.export_blender(context.scene,True)
         return {'FINISHED'}
 
-export_pbrt_lable = "Render in PBRT"
-class SORT_export_pbrt_scene(bpy.types.Operator):
-    bl_idname = "sort.export_pbrt_scene"
-    bl_label = "Export PBRT scene"
-
-    def modal(self, context, event):
-        if event.type == 'TIMER':
-            # this is a very hacky way to update the UI
-            color = context.user_preferences.themes[0].view_3d.space.gradients.high_gradient
-            color.s = color.s
-
-            if pbrt_exporter.is_pbrt_executing() is False:
-                global export_pbrt_lable
-                export_pbrt_lable = "Render in PBRT"
-
-                # remove timer
-                wm = context.window_manager
-                wm.event_timer_remove(self._timer)
-                return {'CANCELLED'}
-
-        return {'PASS_THROUGH'}
-
-    def execute(self, context):
-        if pbrt_exporter.is_pbrt_executing() is False:
-            wm = context.window_manager
-            self._timer = wm.event_timer_add(0.01, context.window)
-            wm.modal_handler_add(self)
-
-            global export_pbrt_lable
-            export_pbrt_lable = "Shutdown PBRT"
-            pbrt_exporter.export_blender(context.scene,True)
-        else:
-            global export_pbrt_lable
-            export_pbrt_lable = "Render in PBRT"
-            pbrt_exporter.shutdown_pbrt()
-
-            # remove timer
-            wm = context.window_manager
-            wm.event_timer_remove(self._timer)
-            return {'CANCELLED'}
-
-        return {'RUNNING_MODAL'}
-
-class SORT_checkresult_pbrt(bpy.types.Operator):
-    bl_idname = "sort.checkresult_pbrt"
-    bl_label = "Check PBRT Result"
-
-    def execute(self, context):
-        # Get the path to save pbrt scene
-        pbrt_file_name = pbrt_exporter.get_pbrt_filename()
-        if platform.system() == 'Darwin':   # for Mac OS
-            os.system( "open " + pbrt_file_name)
-        elif platform.system() == 'Windows':    # for Windows
-            os.system(pbrt_file_name)
-        elif platform.system() == "Linux":
-            os.system( "xdg-open " + pbrt_file_name)
-        return {'FINISHED'}
-
-# open log
 class SORT_open_log(bpy.types.Operator):
     bl_idname = "sort.open_log"
     bl_label = "Open Log"
-
     def execute(self, context):
-        logfile = preference.get_pbrt_dir() + "log.txt"
-        if platform.system() == 'Darwin':   # for Mac OS
-            os.system( "open " + logfile)
-        elif platform.system() == 'Windows':    # for Windows
-            os.system(logfile)
-        elif platform.system() == "Linux":
-            os.system( "xdg-open " + logfile)
+        logfile = preference.get_sort_dir() + "log.txt"
+        OpenFile( logfile )
         return {'FINISHED'}
 
 class DebugPanel(SORTRenderPanel, bpy.types.Panel):
@@ -189,8 +141,98 @@ class DebugPanel(SORTRenderPanel, bpy.types.Panel):
         self.layout.operator("sort.export_debug_scene")
         self.layout.operator("sort.open_log")
 
+export_pbrt_lable = "Render in PBRT"
+pbrt_running = False
+class PBRT_export_scene(bpy.types.Operator):
+    bl_idname = "sort.export_pbrt_scene"
+    bl_label = "Export PBRT scene"
+
+    @classmethod
+    def poll(cls,context):
+        if pbrt_exporter.get_pbrt_dir():
+            return True
+        return False
+
+    def modal(self, context, event):
+        if event.type == 'TIMER':
+            # this is a very hacky way to update the UI, somehow this line will invalidate the window forcing a redraw
+            color = context.user_preferences.themes[0].view_3d.space.gradients.high_gradient
+            color.s = color.s
+
+            if pbrt_exporter.is_pbrt_executing() is False:
+                global export_pbrt_lable
+                export_pbrt_lable = "Render in PBRT"
+
+                # chexk the result automatically
+                if pbrt_running is True:
+                    pbrt_file_name = pbrt_exporter.get_pbrt_filename()
+                    OpenFile( pbrt_file_name )
+
+                # remove timer
+                wm = context.window_manager
+                wm.event_timer_remove(self._timer)
+                return {'CANCELLED'}
+
+        return {'PASS_THROUGH'}
+
+    def execute(self, context):
+        global export_pbrt_lable
+        global pbrt_running
+        if pbrt_exporter.is_pbrt_executing() is False:
+            pbrt_running = True
+
+            wm = context.window_manager
+            self._timer = wm.event_timer_add(0.01, context.window)
+            wm.modal_handler_add(self)
+
+            export_pbrt_lable = "Shutdown PBRT"
+            pbrt_exporter.export_blender(context.scene,True)
+        else:
+            pbrt_running = False
+            export_pbrt_lable = "Render in PBRT"
+            pbrt_exporter.shutdown_pbrt()
+            return {'CANCELLED'}
+
+        return {'RUNNING_MODAL'}
+
+class PBRT_checkresult(bpy.types.Operator):
+    bl_idname = "sort.checkresult_pbrt"
+    bl_label = "Check PBRT Result"
+    
+    @classmethod
+    def poll(cls,context):
+        if pbrt_exporter.get_pbrt_dir():
+            return True
+        return False
+
+    def execute(self, context):
+        # Get the path to save pbrt scene
+        pbrt_file_name = pbrt_exporter.get_pbrt_filename()
+        OpenFile( pbrt_file_name )
+        return {'FINISHED'}
+
+class PBRT_openfolder(bpy.types.Operator):
+    bl_idname = "sort.openfolder_pbrt"
+    bl_label = "Open PBRT folder"
+    
+    @classmethod
+    def poll(cls,context):
+        if pbrt_exporter.get_pbrt_dir():
+            return True
+        return False
+
+    def execute(self, context):
+        OpenFolder( pbrt_exporter.get_pbrt_dir() )
+        return {'FINISHED'}
+
+class PBRTDebugPanel(SORTRenderPanel, bpy.types.Panel):
+    bl_label = common.pbrt_debug_panel_bl_name
+    bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
+
+    def draw(self, context):
+        self.layout.operator("sort.export_pbrt_scene",text=export_pbrt_lable)
         split = self.layout.split()
         left = split.column(align=True)
-        left.operator("sort.export_pbrt_scene",text=export_pbrt_lable)
+        left.operator("sort.checkresult_pbrt")
         right = split.column(align=True)
-        right.operator("sort.checkresult_pbrt")
+        right.operator("sort.openfolder_pbrt")
