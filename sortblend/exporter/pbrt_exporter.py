@@ -1,11 +1,16 @@
 import bpy
 import math
 import mathutils
+import subprocess
 from math import degrees
 from . import exporter_common
 from .. import common
 from .. import utility
 from .. import nodes
+from .. import preference
+from ..ui import ui_render
+
+pbrt_process = None
 
 # get camera data, to be merged with the above function
 def lookAtPbrt(camera):
@@ -31,13 +36,42 @@ def lookAtPbrt(camera):
     up = matrix[1]
     return (pos, target, up)
 
-
 # export blender information
 def export_blender(scene, force_debug=False):
     node = export_scene(scene)
     export_material()
     export_light(scene)
-    export_pbrt_file(scene,node)
+    pbrt_file_fullpath = export_pbrt_file(scene,node)
+
+    # start rendering process first
+    pbrt_bin_path = preference.get_pbrt_bin_path()
+    pbrt_bin_dir = preference.get_pbrt_dir()
+
+    # execute binary
+    cmd_argument = [pbrt_bin_path]
+    cmd_argument.append(pbrt_file_fullpath)
+    global pbrt_process
+    pbrt_process = subprocess.Popen(cmd_argument,cwd=pbrt_bin_dir)
+
+# check if the process is still executing
+def is_pbrt_executing():
+    global pbrt_process
+    if pbrt_process is None:
+        return False
+    return subprocess.Popen.poll(pbrt_process) is None
+
+# shutdown pbrt process
+def shutdown_pbrt():
+    global pbrt_process
+    subprocess.Popen.terminate(pbrt_process)
+    pbrt_process = None
+
+# get pbrt output file name
+def get_pbrt_filename():
+    # Get the path to save pbrt scene
+    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    pbrt_file_name = exporter_common.getEditedFileName()
+    return pbrt_file_path + pbrt_file_name + ".exr"
 
 # export pbrt file
 def export_pbrt_file(scene, node):
@@ -86,6 +120,8 @@ def export_pbrt_file(scene, node):
         file.write( "Include \"" + n + ".pbrt\"\n" )
     file.write( "WorldEnd\n" )
     file.close()
+
+    return pbrt_file_fullpath
 
 # export scene
 def export_scene(scene):
@@ -201,7 +237,7 @@ def export_mesh(node):
     # avoid bad index errors
     if not materials:
         materials = [None]
-        material_names = [name_compat(None)]
+        material_names = ["None"]
     file.write( "NamedMaterial \"" + material_names[0] + "\"\n" )
 
     # transform
