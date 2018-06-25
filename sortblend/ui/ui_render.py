@@ -11,7 +11,7 @@ def OpenFile( filename ):
     if platform.system() == 'Darwin':     # for Mac OS
         os.system( "open \"%s\""%filename)
     elif platform.system() == 'Windows':  # for Windows
-        os.system(filename)
+        os.system("\"%s\""%filename)
     elif platform.system() == "Linux":    # for linux
         os.system( "xdg-open \"%s\""%filename )
 
@@ -19,7 +19,7 @@ def OpenFolder( path ):
     if platform.system() == 'Darwin':     # for Mac OS
         subprocess.call(["open", "-R", path])
     elif platform.system() == 'Windows':  # for Windows
-        subprocess.call(["explorer \"%s\""%path]) # to be verified
+        subprocess.call("explorer \"%s\""%path) # to be verified
     elif platform.system() == "Linux":    # for linux
         os.system( "xdg-open \"%s\""%filename ) # to be verified
 
