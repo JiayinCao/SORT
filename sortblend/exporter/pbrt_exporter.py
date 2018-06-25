@@ -67,7 +67,7 @@ def shutdown_pbrt():
     pbrt_process = None
 
 def get_pbrt_dir():
-    return bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    return preference.get_pbrt_dir()
 
 # get pbrt output file name
 def get_pbrt_filename():
