@@ -60,6 +60,8 @@ def get_sort_bin_path(force_debug=False):
 def get_pbrt_dir():
     addon_prefs = bpy.context.user_preferences.addons[common.preference_bl_name].preferences
     return_path = addon_prefs.pbrt_export_path
+    if platform.system() == 'Windows':
+        return return_path
     return efutil.filesystem_path(return_path) + "/"
 
 def get_pbrt_bin_path():
