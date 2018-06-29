@@ -17,7 +17,7 @@
 
 #include "operation_node.h"
 
-IMPLEMENT_CREATOR( InverseNode );
+IMPLEMENT_CREATOR( SORTNodeOneMinus );
 IMPLEMENT_CREATOR( AddNode );
 IMPLEMENT_CREATOR( LerpNode );
 IMPLEMENT_CREATOR( BlendNode );
@@ -52,12 +52,12 @@ MaterialPropertyValue AddNode::GetNodeValue( Bsdf* bsdf )
 }
 
 // inverse node
-InverseNode::InverseNode()
+SORTNodeOneMinus::SORTNodeOneMinus()
 {
     m_props.insert( make_pair( "Color" , &src ) );
 }
 
-bool InverseNode::CheckValidation()
+bool SORTNodeOneMinus::CheckValidation()
 {
     m_node_valid = MaterialNode::CheckValidation();
     
@@ -71,7 +71,7 @@ bool InverseNode::CheckValidation()
 }
 
 // get property value
-MaterialPropertyValue InverseNode::GetNodeValue( Bsdf* bsdf )
+MaterialPropertyValue SORTNodeOneMinus::GetNodeValue( Bsdf* bsdf )
 {
     return MaterialPropertyValue(1.0f) - src.GetPropertyValue(bsdf);
 }

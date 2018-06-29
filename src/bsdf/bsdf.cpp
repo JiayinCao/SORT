@@ -22,7 +22,7 @@
 #include "utility/sassert.h"
 
 // constructor
-Bsdf::Bsdf( const Intersection* _intersect ) : intersect( *_intersect )
+Bsdf::Bsdf( const Intersection* _intersect , bool rootNode ) : intersect( *_intersect ) , m_rootNode( rootNode )
 {
 	nn = intersect.normal;
 	tn = Normalize(Cross( nn , intersect.tangent ));
@@ -71,12 +71,16 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 // transform vector from world coordinate to shading coordinate
 Vector Bsdf::worldToLocal( const Vector& v ) const
 {
+    if( !m_rootNode )
+        return v;
 	return Vector( Dot(v,sn) , Dot(v,nn) , Dot(v,tn) );
 }
 
 // transform vector from shading coordinate to world coordinate
 Vector Bsdf::localToWorld( const Vector& v ) const
 {
+    if( !m_rootNode )
+        return v;
 	return Vector( 	v.x * sn.x + v.y * nn.x + v.z * tn.x ,
 					v.x * sn.y + v.y * nn.y + v.z * tn.y ,
 					v.x * sn.z + v.y * nn.z + v.z * tn.z );

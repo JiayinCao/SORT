@@ -204,7 +204,10 @@ def export_scene(scene, force_debug):
                 ET.SubElement( light_node , 'Property' , name='sizex' ,value='%d'%sizeX )
                 ET.SubElement( light_node , 'Property' , name='sizey' ,value='%d'%sizeY )
             elif lamp.type == 'HEMI':
+                light_spectrum = np.array(lamp.color[:])
+                light_spectrum *= lamp.energy
                 light_node = ET.SubElement( root , 'Light' , type='skylight')
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() ) )
                 ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
                 ET.SubElement( light_node , 'Property' , name='image' ,value=lamp.sort_lamp.sort_lamp_hemi.envmap_file)
@@ -232,7 +235,6 @@ def export_mesh(obj,scene,force_debug):
 
     faceuv = len(mesh.uv_textures) > 0
     if faceuv:
-        uv_texture = mesh.uv_textures.active.data[:]
         uv_layer = mesh.uv_layers.active.data[:]
 
     # face index pairs
@@ -313,18 +315,8 @@ def export_mesh(obj,scene,force_debug):
 
         for f, f_index in face_index_pairs:
             f_smooth = f.use_smooth
-            #if f_smooth and smooth_groups:
-            #    f_smooth = smooth_groups[f_index]
             f_mat = min(f.material_index, len(materials) - 1)
 
-            #if faceuv:
-            #    tface = uv_texture[f_index]
-            #    f_image = tface.image
-
-            # MAKE KEY
-            #if faceuv and f_image:  # Object is always true.
-            #    key = material_names[f_mat], f_image.name
-            #else:
             key = material_names[f_mat], None  # No image, use None instead.
 
             # CHECK FOR CONTEXT SWITCH

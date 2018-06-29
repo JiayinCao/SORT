@@ -186,35 +186,6 @@ class SORTNodeOutput(SORTShadingNode):
     def init(self, context):
         input = self.inputs.new('SORTNodeSocketBxdf', 'Surface')
 
-# layered bxdf node
-class SORTNodeLayeredBXDF(SORTShadingNode):
-    bl_label = 'SORT_layered_bxdf'
-    bl_idname = 'SORTNodeLayeredBXDF'
-
-    bxdf_count = bpy.props.IntProperty( name = 'Bxdf Count' , default = 2 , min = 1 , max = 8 )
-
-    def init(self, context):
-        for x in range(0,8):
-            self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
-            self.inputs.new( 'SORTNodeBaseColorSocket' , 'Weight'+str(x) )
-        self.outputs.new('SORTNodeSocketBxdf', 'Result')
-
-    def draw_buttons(self, context, layout):
-        self.draw_button(layout, "Bxdf Count" , "bxdf_count")
-
-        for x in range( 0 , 8 ):
-            if x < self.bxdf_count:
-                if self.inputs.get('Bxdf'+str(x)) is None:
-                    self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
-                    self.inputs.new( 'SORTNodeBaseColorSocket' , 'Weight'+str(x) )
-            else:
-                if self.inputs.get('Bxdf'+str(x)) is not None:
-                    self.inputs.remove( self.inputs['Bxdf' + str(x)] )
-                    self.inputs.remove( self.inputs['Weight' + str(x)] )
-
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, 'Bxdf Count' , 'bxdf_count' , indented_label)
-
 # lambert node
 class SORTNodeLambert(SORTShadingNode):
     bl_label = 'SORT_lambert'
@@ -412,9 +383,9 @@ class SORTNodeAdd(SORTShadingNode):
         self.inputs.new('SORTNodeSocketColor', 'Color2')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
-class SORTNodeInverse(SORTShadingNode):
-    bl_label = 'SORT_inverse'
-    bl_idname = 'SORTNodeInverse'
+class SORTNodeOneMinus(SORTShadingNode):
+    bl_label = 'SORT_oneminus'
+    bl_idname = 'SORTNodeOneMinus'
 
     def init(self, context):
         self.inputs.new('SORTNodeSocketColor', 'Color')
@@ -613,12 +584,56 @@ class NODE_OT_add_surface(bpy.types.Operator, SORT_Add_Node):
     bl_description = 'Connect a Bxdf to this socket'
     input_type = bpy.props.StringProperty(default='Result')
 
+class SORTNodePrinciple(SORTShadingNode):
+    bl_label = 'SORT_principle_material'
+    bl_idname = 'SORTNodePrincipleBXDF'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeFloatSocket', 'Roughness')
+        self.inputs.new('SORTNodeFloatSocket', 'Metallic')
+        self.inputs.new('SORTNodeFloatSocket', 'Specular')
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def export_pbrt(self, file):
+        return
+
+# layered bxdf node
+class SORTNodeLayeredBXDF(SORTShadingNode):
+    bl_label = 'SORT_layered_material'
+    bl_idname = 'SORTNodeLayeredBXDF'
+
+    bxdf_count = bpy.props.IntProperty( name = 'Bxdf Count' , default = 2 , min = 1 , max = 8 )
+
+    def init(self, context):
+        for x in range(0,8):
+            self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
+            self.inputs.new( 'SORTNodeBaseColorSocket' , 'Weight'+str(x) )
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Bxdf Count" , "bxdf_count")
+
+        for x in range( 0 , 8 ):
+            if x < self.bxdf_count:
+                if self.inputs.get('Bxdf'+str(x)) is None:
+                    self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
+                    self.inputs.new( 'SORTNodeBaseColorSocket' , 'Weight'+str(x) )
+            else:
+                if self.inputs.get('Bxdf'+str(x)) is not None:
+                    self.inputs.remove( self.inputs['Bxdf' + str(x)] )
+                    self.inputs.remove( self.inputs['Weight' + str(x)] )
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Bxdf Count' , 'bxdf_count' , indented_label)
+
 def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNodeLayeredBXDF"),NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeFourierBxdf"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
-        SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeInverse"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeFourierBxdf"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
+        SORTPatternNodeCategory("SORT_material", "SORT Materials",items = [NodeItem("SORTNodePrincipleBXDF"),NodeItem("SORTNodeLayeredBXDF")] ),
+        SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeOneMinus"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
         SORTPatternNodeCategory("SORT_input", "SORT Input",items=[],),
@@ -633,3 +648,4 @@ def register():
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetReflection] = 'SORTNodeMicrofacetReflection'
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetRefraction] = 'SORTNodeMicrofacetRefraction'
     SORTPatternGraph.nodetypes[SORTNodeOrenNayar] = 'SORTNodeOrenNayar'
+    SORTPatternGraph.nodetypes[SORTNodePrinciple] = 'SORTNodePrincipleBXDF'

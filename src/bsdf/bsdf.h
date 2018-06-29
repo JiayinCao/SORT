@@ -22,6 +22,7 @@
 #include "math/vector3.h"
 #include "utility/enum.h"
 #include "geometry/intersection.h"
+#include "bxdf.h"
 
 class Bxdf;
 class Intersection;
@@ -30,12 +31,13 @@ class BsdfSample;
 #define	MAX_BXDF_COUNT 8
 
 //! @brief BSDF implementation.
-class	Bsdf
+class	Bsdf : public Bxdf
 {
 public:
 	//! @brief Constructor taking intersection data.
     //! @param intersection     Intersection data of the point to be evaluted.
-	Bsdf( const Intersection* intersection );
+    //! @param root_node        Since bsdf is a bxdf itself, it can be recursively setup. This is to support layered material.
+	Bsdf( const Intersection* intersection , bool root_node = true );
 
 	//! @brief Get the number of components based on the type.
     //! @param type     The specific type to be checked.
@@ -77,6 +79,8 @@ public:
 private:
     Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
 	unsigned m_bxdfCount = 0;               /**< Number of Bxdf in the BSDF. */
+    
+    bool    m_rootNode;                     /**< Root node bsdf. */
 
     Vector nn;  /**< Normal at the point to be evaluted. */
     Vector sn;  /**< Bi-tangent at the point to be evaluated. */
