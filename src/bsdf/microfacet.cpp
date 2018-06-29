@@ -165,7 +165,7 @@ MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, Fresnel*
 }
 
 // evaluate bxdf
-Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
+Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 {
 	if( SameHemiSphere( wo , wi ) == false )
 		return 0.0f;
@@ -192,7 +192,7 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 }
 
 // sample a direction randomly
-Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type , BXDF_TYPE* bxdf_type ) const
 {
 	// sampling the normal
 	Vector wh = distribution->sample_f( bs );
@@ -211,7 +211,7 @@ Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const B
 }
 
 // get the pdf of the sampled direction
-float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
+float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 {
 	if( !SameHemisphere( wo , wi ) )
 		return 0.0f;
@@ -240,7 +240,7 @@ MicroFacetRefraction::MicroFacetRefraction(const Spectrum &reflectance, Fresnel*
 }
 
 // evaluate bxdf
-Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
+Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 {
     if( SameHemiSphere(wi, wo) )
         return Spectrum(0.f);
@@ -268,7 +268,7 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 }
 
 // sample a direction using importance sampling
-Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type , BXDF_TYPE* bxdf_type ) const
 {
     if( CosTheta( wo ) == 0.0f )
         return 0.0f;
@@ -287,7 +287,7 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 }
 
 // get the pdf of the sampled direction
-float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi ) const
+float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 {
 	if( SameHemisphere( wo , wi ) )
         return 0.0f;

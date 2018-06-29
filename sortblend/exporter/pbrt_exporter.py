@@ -2,6 +2,7 @@ import bpy
 import math
 import mathutils
 import subprocess
+import os.path
 from math import degrees
 from . import exporter_common
 from .. import common
@@ -46,6 +47,10 @@ def export_blender(scene, force_debug=False):
     # start rendering process first
     pbrt_bin_path = preference.get_pbrt_bin_path()
     pbrt_bin_dir = preference.get_pbrt_dir()
+
+    if os.path.isfile(pbrt_bin_path) is False:
+        print("Can't find pbrt executable file.")
+        return
 
     # execute binary
     cmd_argument = [pbrt_bin_path]
@@ -147,7 +152,7 @@ def export_light(scene):
         if ob.type == 'LAMP':
             lamp = ob.data
             world_matrix = ob.matrix_world
-            file.write( "AttributeBegin\r" )
+            file.write( "AttributeBegin\n" )
             file.write( "Transform [" + utility.matrixtostr( world_matrix.transposed() ) + "]\n" )
             if lamp.type == 'SUN':
                 point_from = [0,1,0]
@@ -190,9 +195,10 @@ def export_light(scene):
                 file.write(str)
             elif lamp.type == 'HEMI':
                 str = "LightSource \"infinite\" "
+                str += "\"rgb L\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
                 str += "\"string mapname\" \"%s\" \n"%lamp.sort_lamp.sort_lamp_hemi.envmap_file
                 file.write(str)
-            file.write( "AttributeEnd\r" )
+            file.write( "AttributeEnd\n" )
 
     file.close()
 
@@ -265,6 +271,20 @@ def export_mesh(node):
             normals[id] = utility.vec3tostr( mesh.loops[loop_index].normal )
     file.write( " ".join( normals ) )
     file.write( "]\n" )
+
+    faceuv = len(mesh.uv_textures) > 0
+    if faceuv:
+        uv_layer = mesh.uv_layers.active.data[:]
+        uvs = [""] * len( mesh.vertices )
+
+        file.write( "\"float st\" [" )
+        for poly in mesh.polygons:
+            for loop_index in poly.loop_indices:
+                id = mesh.loops[loop_index].vertex_index
+                uv = uv_layer[loop_index].uv
+                uvs[id] = " %f%f"%(uv[0],uv[1])
+        file.write( " ".join( uvs ) )
+        file.write( "]\n" )
 
     # output index buffer
     file.write( "\"integer indices\" [" )

@@ -40,7 +40,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The evaluted BRDF value.
-	virtual Spectrum f( const Vector& wo , const Vector& wi ) const = 0;
+	virtual Spectrum f( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const = 0;
     
     //! @brief Importance sampling for the bxdf.
     //!
@@ -55,7 +55,7 @@ public:
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
-	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL , BXDF_TYPE* bxdf_type = 0 ) const;
     
     //! @brief Evalute the pdf of an existance direction given the incoming direction.
     //!
@@ -64,7 +64,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
-	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+	virtual float Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
 	//! @brief  Check the type of the bxdf, it shouldn't be overriden by derived classes.
     //! @param type     The type to check.
@@ -76,7 +76,7 @@ public:
     //! @return The specific type of the bxdf.
 	virtual BXDF_TYPE GetType() const final { return m_type; }
 
-	Spectrum	m_weight;           /**< The weight for the bxdf, usually between 0 and 1. */
+	Spectrum	m_weight = 1.0f;           /**< The weight for the bxdf, usually between 0 and 1. */
 
 protected:
 	BXDF_TYPE m_type = BXDF_NONE;   /**< The specific type of the bxdf. */

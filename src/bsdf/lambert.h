@@ -38,7 +38,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The evaluted BRDF value.
-    Spectrum f( const Vector& wo , const Vector& wi ) const;
+    Spectrum f( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
 	//! Reset the directional-hemisphere reflection.
     //! @param color    Direction-Hemisphere reflection.

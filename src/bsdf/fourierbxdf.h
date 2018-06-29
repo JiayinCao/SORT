@@ -36,7 +36,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The evaluted BRDF value.
-    Spectrum f( const Vector& wo , const Vector& wi ) const override;
+    Spectrum f( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const override;
 	
     //! @brief Importance sampling for the bxdf.
     //!
@@ -51,7 +51,7 @@ public:
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
-    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
+    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL , BXDF_TYPE* bxdf_type = 0 ) const override;
     
     //! @brief Evalute the pdf of an existance direction given the incoming direction.
     //!
@@ -60,7 +60,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
-    float Pdf( const Vector& wo , const Vector& wi ) const override;
+    float Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const override;
     
     //! Load brdf data from Fourier Bxdf file.
     //! @param filename Name of Fourier Bxdf file.

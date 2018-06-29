@@ -33,24 +33,6 @@ protected:
     bool CheckValidation() override;
 };
 
-// Layered BXDF node
-class LayeredBxdfNode : public BxdfNode
-{
-public:
-    DEFINE_CREATOR( LayeredBxdfNode , MaterialNode, "SORTNodeLayeredBxdf" );
-    
-    // constructor
-    LayeredBxdfNode();
-    // update bsdf
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-    // check validation
-    bool CheckValidation() override;
-    
-private:
-    MaterialNodeProperty    bxdfs[MAX_BXDF_COUNT];
-    MaterialNodeProperty    weights[MAX_BXDF_COUNT];
-};
-
 // Lambert node
 class LambertNode : public BxdfNode
 {
