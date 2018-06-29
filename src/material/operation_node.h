@@ -47,13 +47,13 @@ private:
 };
 
 // Inverse node
-class InverseNode : public OperatorNode
+class SORTNodeOneMinus : public OperatorNode
 {
 public:
-    DEFINE_CREATOR( InverseNode , MaterialNode , "SORTNodeInverse" );
+    DEFINE_CREATOR( SORTNodeOneMinus , MaterialNode , "SORTNodeOneMinus" );
     
     // constructor
-    InverseNode();
+    SORTNodeOneMinus();
     
     // get property value
     MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;

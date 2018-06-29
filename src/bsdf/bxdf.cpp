@@ -20,7 +20,7 @@
 #include "sampler/sample.h"
 
 // sample a direction randomly
-Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type , BXDF_TYPE* bxdf_type ) const
 {
 	wi = CosSampleHemisphere( bs.u , bs.v );
 	if( pdf ) *pdf = Pdf( wo , wi );
@@ -28,7 +28,7 @@ Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 }
 
 // the pdf for the sampled direction
-float Bxdf::Pdf( const Vector& wo , const Vector& wi ) const
+float Bxdf::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 {
 	if( !SameHemisphere( wo , wi ) )
 		return 0.0f;

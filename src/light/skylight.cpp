@@ -55,7 +55,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
     const float delta = 0.01f;
 	visibility.ray = Ray( intersect.intersect , dirToLight , 0 , delta , FLT_MAX );
 
-	return sky->Evaluate( localDir );
+	return sky->Evaluate( localDir ) * intensity;
 }
 
 // sample light density
@@ -74,7 +74,7 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float*
 	if( emissionPdf )
 		*emissionPdf = directPdf * positionPdf;
 
-	return sky->Evaluate( light2world.GetInversed()(-wo) );
+	return sky->Evaluate( light2world.GetInversed()(-wo) ) * intensity;
 }
 
 // sample a ray from light
@@ -109,7 +109,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
     if( pdfA )
         *pdfA = _pdfw;
 
-	return sky->Evaluate( -localDir );
+	return sky->Evaluate( -localDir ) * intensity;
 }
 
 // total power of the light
@@ -119,7 +119,7 @@ Spectrum SkyLight::Power() const
 	const BBox box = scene->GetBBox();
 	const float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
 
-	return radius * radius * PI * sky->GetAverage();
+	return radius * radius * PI * sky->GetAverage() * intensity;
 }
 
 // get intersection between the light and the ray
@@ -130,14 +130,14 @@ bool SkyLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance
 	if( intersect && intersect->t != FLT_MAX )
 		return false;
 
-	radiance = sky->Evaluate( light2world.GetInversed()(ray.m_Dir) );
+	radiance = sky->Evaluate( light2world.GetInversed()(ray.m_Dir) ) * intensity;
 	return true;
 }
 
 // initialize default value
 void SkyLight::_init()
 {
-	sky = 0;
+	sky = nullptr;
 	_registerAllProperty();
 }
 
