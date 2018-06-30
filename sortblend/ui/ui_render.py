@@ -132,6 +132,14 @@ class SORT_open_log(bpy.types.Operator):
         OpenFile( logfile )
         return {'FINISHED'}
 
+class SORT_openfolder(bpy.types.Operator):
+    bl_idname = "sort.openfolder_sort"
+    bl_label = "Open SORT folder"
+    
+    def execute(self, context):
+        OpenFolder( preference.get_sort_dir() )
+        return {'FINISHED'}
+
 class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = common.debug_panel_bl_name
     bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
@@ -139,7 +147,12 @@ class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     def draw(self, context):
         self.layout.prop(context.scene,"debug_prop")
         self.layout.operator("sort.export_debug_scene")
-        self.layout.operator("sort.open_log")
+
+        split = self.layout.split()
+        left = split.column(align=True)
+        left.operator("sort.open_log")
+        right = split.column(align=True)
+        right.operator("sort.openfolder_sort")
 
 export_pbrt_lable = "Render in PBRT"
 pbrt_running = False

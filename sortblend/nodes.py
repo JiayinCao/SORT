@@ -316,53 +316,6 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
         for input in self.inputs:
             input.export_pbrt(file)
 
-# merl node
-class SORTNodeMerl(SORTShadingNode):
-    bl_label = 'SORT_merl'
-    bl_idname = 'SORTNodeMerl'
-
-    file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
-
-    def init(self, context):
-        self.outputs.new('SORTNodeSocketBxdf', 'Result')
-
-    def draw_buttons(self, context, layout):
-        row = layout.row()
-        row.label("Filename")
-        row.prop(self,'file_name_prop')
-
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
-
-    def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
-
-# fourier bxdf node
-class SORTNodeFourierBxdf(SORTShadingNode):
-    bl_label = 'SORT_fourierbxdf'
-    bl_idname = 'SORTNodeFourierBxdf'
-
-    file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
-
-    def init(self, context):
-        self.outputs.new('SORTNodeSocketBxdf', 'Result')
-
-    def draw_buttons(self, context, layout):
-        row = layout.row()
-        row.label("Filename")
-        row.prop(self,'file_name_prop')
-
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
-
-    def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
-
-    def export_pbrt(self, file):
-        file.write( "  \"string type\" \"fourier\"\n" )
-        file.write( "  \"string bsdffile\" \"%s\"\n" %self.file_name_prop )
-        file.write( "\n" )
-
 # oren nayar node
 class SORTNodeOrenNayar(SORTShadingNode):
     bl_label = 'SORT_orennayar'
@@ -598,6 +551,98 @@ class SORTNodePrinciple(SORTShadingNode):
     def export_pbrt(self, file):
         return
 
+class SORTNodeGlass(SORTShadingNode):
+    bl_label = 'SORT_glass_material'
+    bl_idname = 'SORTNodeGlassBXDF'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeBaseColorSocket', 'Reflectance')
+        self.inputs.new('SORTNodeBaseColorSocket', 'Transmittance')
+        self.inputs.new('SORTNodeFloatSocket', 'Roughness')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def export_pbrt(self, file):
+        reflectance = self.inputs[0].default_value
+        transmittance = self.inputs[1].default_value
+        roughness = self.inputs[2].default_value
+        file.write( "  \"string type\" \"glass\"\n" )
+        file.write( "  \"rgb Kr\" [%f,%f,%f]\n"%(reflectance[:]))
+        file.write( "  \"rgb Kt\" [%f,%f,%f]\n"%(transmittance[:]))
+        file.write( "  \"float uroughness\" [%s]\n" %roughness )
+        file.write( "  \"float vroughness\" [%s]\n" %roughness )
+        return
+
+class SORTNodePlastic(SORTShadingNode):
+    bl_label = 'SORT_plastic_material'
+    bl_idname = 'SORTNodePlasticBXDF'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeBaseColorSocket', 'Diffuse')
+        self.inputs.new('SORTNodeBaseColorSocket', 'Specular')
+        self.inputs.new('SORTNodeFloatSocket', 'Roughness')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def export_pbrt(self, file):
+        basecolor = self.inputs[0].default_value
+        specular = self.inputs[1].default_value
+        roughness = self.inputs[2].default_value
+        file.write( "  \"string type\" \"plastic\"\n" )
+        file.write( "  \"rgb Kd\" [%f,%f,%f]\n"%(basecolor[:]))
+        file.write( "  \"rgb Ks\" [%f,%f,%f]\n"%(specular[:]))
+        file.write( "  \"float roughness\" [%s]\n" %roughness )
+        return
+
+class SORTNodeMatte(SORTShadingNode):
+    bl_label = 'SORT_matte_material'
+    bl_idname = 'SORTNodeMatteBXDF'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
+        self.inputs.new('SORTNodeFloatSocket', 'Roughness')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def export_pbrt(self, file):
+        basecolor = self.inputs[0].default_value
+        roughness = self.inputs[1].default_value
+        file.write( "  \"string type\" \"matte\"\n" )
+        file.write( "  \"rgb Kd\" [%f,%f,%f]\n"%(basecolor[:]))
+        file.write( "  \"float sigma\" [%s]\n" %roughness )
+        return
+
+class SORTNodeMeasured(SORTShadingNode):
+    bl_label = 'SORT_measured_material'
+    bl_idname = 'SORTNodeMeasuredBXDF'
+
+    type_item = [ ("Fourier", "Fourier", "", 1), ("MERL" , "MERL" , "", 2) ]
+    type_prop = bpy.props.EnumProperty(name='Type',items=type_item,default="Fourier")
+    file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
+
+    def init(self, context):
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Type" , "type_prop")
+        row = layout.row()
+        row.label("Filename")
+        row.prop(self,'file_name_prop')
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Type' , 'type_prop' , intended_label)
+        self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
+
+    def export_prop(self, xml_node):
+        ET.SubElement( xml_node , 'Property' , name='Type' , type='string', value = self.type_prop )
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
+
+    def export_pbrt(self, file):
+        if self.type_prop == 'Fourier':
+            file.write( "  \"string type\" \"fourier\"\n" )
+            file.write( "  \"string bsdffile\" \"%s\"\n" %self.file_name_prop )
+        else:
+            file.write( "  \"string type\" \"matte\"\n" ) # Merl is not supported in pbrt 3.x
+            file.write( "  \"rgb Kd\" [1.0,1.0,1.0]\n" )
+        file.write( "\n" )
+
 # layered bxdf node
 class SORTNodeLayeredBXDF(SORTShadingNode):
     bl_label = 'SORT_layered_material'
@@ -631,8 +676,8 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMerl"),NodeItem("SORTNodeFourierBxdf"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
-        SORTPatternNodeCategory("SORT_material", "SORT Materials",items = [NodeItem("SORTNodePrincipleBXDF"),NodeItem("SORTNodeLayeredBXDF")] ),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
+        SORTPatternNodeCategory("SORT_material", "SORT Materials",items = [NodeItem("SORTNodePrincipleBXDF"),NodeItem("SORTNodeGlassBXDF"),NodeItem("SORTNodePlasticBXDF"),NodeItem("SORTNodeMatteBXDF"),NodeItem("SORTNodeMeasuredBXDF"),NodeItem("SORTNodeLayeredBXDF")] ),
         SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeOneMinus"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
@@ -643,9 +688,11 @@ def register():
     # register node types
     SORTPatternGraph.nodetypes[SORTNodeLayeredBXDF] = 'SORTNodeLayeredBXDF'
     SORTPatternGraph.nodetypes[SORTNodeLambert] = 'SORTNodeLambert'
-    SORTPatternGraph.nodetypes[SORTNodeMerl] = 'SORTNodeMerl'
-    SORTPatternGraph.nodetypes[SORTNodeFourierBxdf] = 'SORTNodeFourierBxdf'
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetReflection] = 'SORTNodeMicrofacetReflection'
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetRefraction] = 'SORTNodeMicrofacetRefraction'
     SORTPatternGraph.nodetypes[SORTNodeOrenNayar] = 'SORTNodeOrenNayar'
     SORTPatternGraph.nodetypes[SORTNodePrinciple] = 'SORTNodePrincipleBXDF'
+    SORTPatternGraph.nodetypes[SORTNodeGlass] = 'SORTNodeGlassBXDF'
+    SORTPatternGraph.nodetypes[SORTNodePlastic] = 'SORTNodePlasticBXDF'
+    SORTPatternGraph.nodetypes[SORTNodeMatte] = 'SORTNodeMatteBXDF'
+    SORTPatternGraph.nodetypes[SORTNodeMeasured] = 'SORTNodeMeasuredBXDF'

@@ -80,7 +80,7 @@ Merl::~Merl()
 }
 
 // evaluate bxdf
-Spectrum Merl::f( const Vector& Wo , const Vector& Wi , BXDF_TYPE type ) const
+Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
 {
 	Vector wo = Wo;
 	Vector wi = Wi;

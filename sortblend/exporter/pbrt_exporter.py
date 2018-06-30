@@ -3,6 +3,7 @@ import math
 import mathutils
 import subprocess
 import os.path
+import numpy as np
 from math import degrees
 from . import exporter_common
 from .. import common
@@ -186,16 +187,20 @@ def export_light(scene):
                 halfSizeY = lamp.size_y / 2
                 if lamp.shape == 'SQUARE':
                     halfSizeY = halfSizeX
+                light_spectrum = np.array(lamp.color[:])
+                light_spectrum *= lamp.energy
 
-                str = "AreaLightSource \"diffuse\" \"rgb L\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str = "AreaLightSource \"diffuse\" \"rgb L\" [%f,%f,%f] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
                 str += "Material \"matte\" \"rgb Kd\" [ 0.0 0.0 0.0 ]\n"
                 str += "Shape \"trianglemesh\"\n"
                 str += "\"integer indices\" [0 2 1 0 3 2]\n"
                 str += "\"point P\" [ %f %f 0   %f %f 0   %f %f 0   %f %f 0 ]\n"%(-halfSizeX,-halfSizeY,halfSizeX,-halfSizeY,halfSizeX,halfSizeY,-halfSizeX,halfSizeY)
                 file.write(str)
             elif lamp.type == 'HEMI':
+                light_spectrum = np.array(lamp.color[:])
+                light_spectrum *= lamp.energy
                 str = "LightSource \"infinite\" "
-                str += "\"rgb L\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "\"rgb L\" [%f,%f,%f] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
                 str += "\"string mapname\" \"%s\" \n"%lamp.sort_lamp.sort_lamp_hemi.envmap_file
                 file.write(str)
             file.write( "AttributeEnd\n" )

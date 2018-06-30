@@ -20,7 +20,7 @@
 #include "bsdf.h"
 
 // evaluate bxdf
-Spectrum Lambert::f( const Vector& wo , const Vector& wi  , BXDF_TYPE type ) const
+Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const
 {
 	if( SameHemiSphere( wo , wi ) == false )
 		return 0.0f;

@@ -89,7 +89,7 @@ void FourierBxdf::LoadData( const string& filename )
 }
 
 // evaluate bxdf
-Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi  , BXDF_TYPE type ) const
+Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi ) const
 {
     const float muI = CosTheta( -wi );
     const float muO = CosTheta( wo );
@@ -121,7 +121,7 @@ Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi  , BXDF_TYPE type )
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
-Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type , BXDF_TYPE* bxdf_type ) const
+Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
     float muO = CosTheta(wo);
     float pdfMu;
@@ -168,7 +168,7 @@ Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
-float FourierBxdf::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
+float FourierBxdf::Pdf( const Vector& wo , const Vector& wi ) const
 {
     float muI = CosTheta(-wi) , muO = CosTheta(wo);
     float cosPhi = CosDPhi( -wi , wo );
