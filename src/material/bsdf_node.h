@@ -22,7 +22,7 @@
 #include "bsdf/merl.h"
 #include "bsdf/fourierbxdf.h"
 
-// Layered BXDF node
+// Layered Material node
 class LayeredMaterialNode : public BxdfNode
 {
 public:
@@ -40,7 +40,7 @@ private:
     MaterialNodeProperty    weights[MAX_BXDF_COUNT];
 };
 
-// Priciple BRDF
+// Priciple Material
 class PrincipleMaterialNode : public BxdfNode
 {
 public:
@@ -56,4 +56,77 @@ private:
     MaterialNodeProperty    roughness;
     MaterialNodeProperty    metallic;
     MaterialNodeProperty    specular;
+};
+
+// Matte BRDF
+class MatteMaterialNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR( MatteMaterialNode , MaterialNode, "SORTNodeMatteBXDF" );
+    
+    // constructor
+    MatteMaterialNode();
+    // update bsdf
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    
+private:
+    MaterialNodeProperty    baseColor;
+    MaterialNodeProperty    roughness;
+};
+
+// Plastic BRDF
+class PlasticMaterialNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR( PlasticMaterialNode , MaterialNode, "SORTNodePlasticBXDF" );
+    
+    // constructor
+    PlasticMaterialNode();
+    // update bsdf
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    
+private:
+    MaterialNodeProperty    diffuse;
+    MaterialNodeProperty    specular;
+    MaterialNodeProperty    roughness;
+};
+
+// Glass BRDF
+class GlassMaterialNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR( GlassMaterialNode , MaterialNode, "SORTNodeGlassBXDF" );
+    
+    // constructor
+    GlassMaterialNode();
+    // update bsdf
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    
+private:
+    MaterialNodeProperty    reflectance;
+    MaterialNodeProperty    transmittance;
+    MaterialNodeProperty    roughness;
+};
+
+// Fourier bxdf node
+class MeasuredMaterialNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR( MeasuredMaterialNode , MaterialNode , "SORTNodeMeasuredBxdf" );
+    
+    // constructor
+    MeasuredMaterialNode();
+    
+    // update bsdf
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    
+    // post process
+    void PostProcess() override;
+    
+private:
+    MaterialNodePropertyString  bxdfFilePath;
+    MaterialNodePropertyString  bxdfType;
+    
+    FourierBxdf fourierBxdf;
+    Merl        merlBxdf;
 };
