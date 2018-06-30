@@ -38,7 +38,7 @@ OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness)
 // para 'wo' : out going direction
 // para 'wi' : in direction
 // result    : the portion that comes along 'wo' from 'wi'
-Spectrum OrenNayar::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
+Spectrum OrenNayar::f( const Vector& wo , const Vector& wi ) const
 {
 	if( SameHemiSphere( wo , wi ) == false )
 		return 0.0f;

@@ -25,6 +25,10 @@
 
 IMPLEMENT_CREATOR( LayeredMaterialNode );
 IMPLEMENT_CREATOR( PrincipleMaterialNode );
+IMPLEMENT_CREATOR( MatteMaterialNode );
+IMPLEMENT_CREATOR( PlasticMaterialNode );
+IMPLEMENT_CREATOR( GlassMaterialNode );
+IMPLEMENT_CREATOR( MeasuredMaterialNode );
 
 LayeredMaterialNode::LayeredMaterialNode(){
     for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i ){
@@ -79,17 +83,124 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
     MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rn );      // GGX
     VisTerm* vis = SORT_MALLOC(VisSmith)( rn );                 // Smith
-    Fresnel* frenel = SORT_MALLOC( FresnelConductor )( eta , k );
-    MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist , vis);
+    Fresnel* fresnel = SORT_MALLOC( FresnelConductor )( eta , k );
+    MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , fresnel , dist , vis);
     
     const float m = metallic.GetPropertyValue(bsdf).x;
     mf->m_weight = weight * ( m * 0.92f + 0.08f );
     lambert->m_weight = weight * ( 1 - m ) * 0.92;
     
-    Bsdf* localbsdf = SORT_MALLOC(Bsdf)( bsdf->GetIntersection() , false );
-    localbsdf->AddBxdf( lambert );
-    localbsdf->AddBxdf( mf );
+    bsdf->AddBxdf(lambert);
+    bsdf->AddBxdf(mf);
+}
+
+MatteMaterialNode::MatteMaterialNode()
+{
+    m_props.insert( make_pair( "BaseColor" , &baseColor ) );
+    m_props.insert( make_pair( "Roughness" , &roughness ) );
+}
+
+void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+    Spectrum reflectance(baseColor.GetPropertyValue(bsdf).ToSpectrum());
+    if( !reflectance.IsBlack() ){
+        float rn = roughness.GetPropertyValue(bsdf).x;
+        if( rn == 0.0f ){
+            Lambert* lambert = SORT_MALLOC(Lambert)( reflectance );
+            lambert->m_weight = weight;
+            bsdf->AddBxdf(lambert);
+        }else{
+            OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( reflectance , rn );
+            orennayar->m_weight = weight;
+            bsdf->AddBxdf( orennayar );
+        }
+    }
+}
+
+PlasticMaterialNode::PlasticMaterialNode()
+{
+    m_props.insert( make_pair( "Diffuse" , &diffuse ) );
+    m_props.insert( make_pair( "Specular" , &specular ) );
+    m_props.insert( make_pair( "Roughness" , &roughness ) );
+}
+
+void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+    Spectrum diff(diffuse.GetPropertyValue(bsdf).ToSpectrum());
+    if( !diff.IsBlack() ){
+        Lambert* lambert = SORT_MALLOC(Lambert)( diff );
+        lambert->m_weight = weight;
+        bsdf->AddBxdf(lambert);
+    }
     
-    localbsdf->m_weight = weight;
-    bsdf->AddBxdf(localbsdf);
+    Spectrum spec(specular.GetPropertyValue(bsdf).ToSpectrum());
+    if( !spec.IsBlack() ){
+        Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.5f, 1.f);
+        float rough = roughness.GetPropertyValue(bsdf).x;
+        MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough );   // GGX
+        VisTerm* vis = SORT_MALLOC(VisSmith)( rough );              // Smith
+        MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist , vis);
+        mf->m_weight = weight;
+        bsdf->AddBxdf(mf);
+    }
+}
+
+MeasuredMaterialNode::MeasuredMaterialNode()
+{
+    m_props.insert( make_pair( "Type" , &bxdfType ) );
+    m_props.insert( make_pair( "Filename" , &bxdfFilePath ) );
+}
+
+void MeasuredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+    if( bxdfType.str == "Fourier" ){
+        fourierBxdf.m_weight = weight;
+        bsdf->AddBxdf( &fourierBxdf );
+    }else if( bxdfType.str == "MERL" ){
+        merlBxdf.m_weight = weight;
+        bsdf->AddBxdf( &merlBxdf );
+    }
+}
+
+// post process
+void MeasuredMaterialNode::PostProcess()
+{
+    if( m_post_processed || bxdfFilePath.str.empty() )
+        return;
+    
+    if( bxdfType.str == "Fourier" )
+        fourierBxdf.LoadData( bxdfFilePath.str );
+    else if( bxdfType.str == "MERL" )
+        merlBxdf.LoadData( bxdfFilePath.str );
+}
+
+GlassMaterialNode::GlassMaterialNode()
+{
+    m_props.insert( make_pair( "Reflectance" , &reflectance ) );
+    m_props.insert( make_pair( "Transmittance" , &transmittance ) );
+    m_props.insert( make_pair( "Roughness" , &roughness ) );
+}
+
+void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+    float rough = roughness.GetPropertyValue(bsdf).x;
+    Spectrum r = reflectance.GetPropertyValue(bsdf).ToSpectrum();
+    Spectrum t = transmittance.GetPropertyValue(bsdf).ToSpectrum();
+    if( r.IsBlack() && t.IsBlack() )
+        return;
+    
+    MicroFacetDistribution* dist = SORT_MALLOC(Blinn)( rough );    // Blinn
+    VisTerm* vis = SORT_MALLOC(VisSmith)( rough );                 // Smith
+    Fresnel* fresnel = SORT_MALLOC( FresnelDielectric )( 1.0f , 1.5f );
+    
+    if( !r.IsBlack() ){
+        MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( r , fresnel , dist , vis);
+        mf->m_weight = weight;
+        bsdf->AddBxdf(mf);
+    }
+    if( !t.IsBlack() ){
+        MicroFacetRefraction* mr = SORT_MALLOC(MicroFacetRefraction)( t , fresnel , dist , vis , 1.0f , 1.5f );
+        mr->m_weight = weight;
+        bsdf->AddBxdf(mr);
+    }
 }
