@@ -374,6 +374,23 @@ class SORTNodeLerp(SORTShadingNode):
         self.inputs.new('SORTNodeFloatSocket', 'Factor')
         self.outputs.new('SORTNodeSocketColor', 'Result')
 
+
+class SORTNodeLinearToGamma(SORTShadingNode):
+    bl_label = 'SORT_LinearToGamma'
+    bl_idname = 'SORTNodeLinearToGamma'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'Color')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
+class SORTNodeGammaToLinear(SORTShadingNode):
+    bl_label = 'SORT_GammaToLinear'
+    bl_idname = 'SORTNodeGammaToLinear'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeSocketColor', 'Color')
+        self.outputs.new('SORTNodeSocketColor', 'Result')
+
 # input nodoes
 class SORTNodePosition(SORTShadingNode):
     bl_label = 'SORT_position'
@@ -566,8 +583,8 @@ class SORTNodeGlass(SORTShadingNode):
         transmittance = self.inputs[1].default_value
         roughness = self.inputs[2].default_value
         file.write( "  \"string type\" \"glass\"\n" )
-        file.write( "  \"rgb Kr\" [%f,%f,%f]\n"%(reflectance[:]))
-        file.write( "  \"rgb Kt\" [%f,%f,%f]\n"%(transmittance[:]))
+        file.write( "  \"rgb Kr\" [%f %f %f]\n"%(reflectance[:]))
+        file.write( "  \"rgb Kt\" [%f %f %f]\n"%(transmittance[:]))
         file.write( "  \"float uroughness\" [%s]\n" %roughness )
         file.write( "  \"float vroughness\" [%s]\n" %roughness )
         return
@@ -587,8 +604,8 @@ class SORTNodePlastic(SORTShadingNode):
         specular = self.inputs[1].default_value
         roughness = self.inputs[2].default_value
         file.write( "  \"string type\" \"plastic\"\n" )
-        file.write( "  \"rgb Kd\" [%f,%f,%f]\n"%(basecolor[:]))
-        file.write( "  \"rgb Ks\" [%f,%f,%f]\n"%(specular[:]))
+        file.write( "  \"rgb Kd\" [%f %f %f]\n"%(basecolor[:]))
+        file.write( "  \"rgb Ks\" [%f %f %f]\n"%(specular[:]))
         file.write( "  \"float roughness\" [%s]\n" %roughness )
         return
 
@@ -605,7 +622,7 @@ class SORTNodeMatte(SORTShadingNode):
         basecolor = self.inputs[0].default_value
         roughness = self.inputs[1].default_value
         file.write( "  \"string type\" \"matte\"\n" )
-        file.write( "  \"rgb Kd\" [%f,%f,%f]\n"%(basecolor[:]))
+        file.write( "  \"rgb Kd\" [%f %f %f]\n"%(basecolor[:]))
         file.write( "  \"float sigma\" [%s]\n" %roughness )
         return
 
@@ -640,7 +657,7 @@ class SORTNodeMeasured(SORTShadingNode):
             file.write( "  \"string bsdffile\" \"%s\"\n" %self.file_name_prop )
         else:
             file.write( "  \"string type\" \"matte\"\n" ) # Merl is not supported in pbrt 3.x
-            file.write( "  \"rgb Kd\" [1.0,1.0,1.0]\n" )
+            file.write( "  \"rgb Kd\" [1.0 1.0 1.0]\n" )
         file.write( "\n" )
 
 # layered bxdf node
@@ -678,7 +695,7 @@ def register():
         # identifier, label, items list
         SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
         SORTPatternNodeCategory("SORT_material", "SORT Materials",items = [NodeItem("SORTNodePrincipleBXDF"),NodeItem("SORTNodeGlassBXDF"),NodeItem("SORTNodePlasticBXDF"),NodeItem("SORTNodeMatteBXDF"),NodeItem("SORTNodeMeasuredBXDF"),NodeItem("SORTNodeLayeredBXDF")] ),
-        SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeOneMinus"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp")] ),
+        SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeOneMinus"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp"),NodeItem("SORTNodeLinearToGamma"),NodeItem("SORTNodeGammaToLinear")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
         SORTPatternNodeCategory("SORT_input", "SORT Input",items=[],),

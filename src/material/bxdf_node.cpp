@@ -24,8 +24,6 @@
 #include "bsdf/bsdf.h"
 
 IMPLEMENT_CREATOR( LambertNode );
-IMPLEMENT_CREATOR( MerlNode );
-IMPLEMENT_CREATOR( FourierBxdfNode );
 IMPLEMENT_CREATOR( OrenNayarNode );
 IMPLEMENT_CREATOR( MicrofacetReflectionNode );
 IMPLEMENT_CREATOR( MicrofacetRefractionNode );
@@ -56,48 +54,6 @@ void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() );
 	lambert->m_weight = weight;
 	bsdf->AddBxdf( lambert );
-}
-
-MerlNode::MerlNode()
-{
-	m_props.insert( make_pair( "Filename" , &merlfile ) );
-}
-
-void MerlNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
-	merl.m_weight = weight;
-	bsdf->AddBxdf( &merl );
-}
-
-// post process
-void MerlNode::PostProcess()
-{
-	if( m_post_processed )
-		return;
-
-	if( merlfile.str.empty() == false )
-		merl.LoadData( merlfile.str );
-}
-
-FourierBxdfNode::FourierBxdfNode()
-{
-    m_props.insert( make_pair( "Filename" , &fourierBxdfFile ) );
-}
-
-void FourierBxdfNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
-    fourierBxdf.m_weight = weight;
-    bsdf->AddBxdf( &fourierBxdf );
-}
-
-// post process
-void FourierBxdfNode::PostProcess()
-{
-    if( m_post_processed )
-        return;
-    
-    if( fourierBxdfFile.str.empty() == false )
-        fourierBxdf.LoadData( fourierBxdfFile.str );
 }
 
 OrenNayarNode::OrenNayarNode()

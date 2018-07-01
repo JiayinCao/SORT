@@ -49,50 +49,6 @@ private:
 	MaterialNodeProperty	baseColor;
 };
 
-// Merl node
-class MerlNode : public BxdfNode
-{
-public:
-	DEFINE_CREATOR( MerlNode , MaterialNode , "SORTNodeMerl" );
-
-	// constructor
-	MerlNode();
-
-	// update bsdf
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-
-	// post process
-    void PostProcess() override;
-
-private:
-	MaterialNodePropertyString	merlfile;
-
-	// the merl data
-	Merl merl;
-};
-
-// Fourier bxdf node
-class FourierBxdfNode : public BxdfNode
-{
-public:
-    DEFINE_CREATOR( FourierBxdfNode , MaterialNode , "SORTNodeFourierBxdf" );
-    
-    // constructor
-    FourierBxdfNode();
-    
-    // update bsdf
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-    
-    // post process
-    void PostProcess() override;
-
-private:
-    MaterialNodePropertyString  fourierBxdfFile;
-    
-    // fourier bxdf node
-    FourierBxdf fourierBxdf;
-};
-
 // Oren nayar node
 class OrenNayarNode : public BxdfNode
 {
