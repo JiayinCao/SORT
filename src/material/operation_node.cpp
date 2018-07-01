@@ -22,27 +22,29 @@ IMPLEMENT_CREATOR( AddNode );
 IMPLEMENT_CREATOR( LerpNode );
 IMPLEMENT_CREATOR( BlendNode );
 IMPLEMENT_CREATOR( MutiplyNode );
+IMPLEMENT_CREATOR( GammaToLinearNode );
+IMPLEMENT_CREATOR( LinearToGammaNode );
+
+bool OperatorNode::CheckValidation()
+{
+    m_node_valid = MaterialNode::CheckValidation();
+    
+    for( auto input : m_props ){
+        auto type = input.second->node ? input.second->node->getNodeType() : MAT_NODE_CONSTANT;
+        if( type & MAT_NODE_BXDF ){
+            m_node_valid = false;
+            break;
+        }
+    }
+    
+    return m_node_valid;
+}
 
 // Adding node
 AddNode::AddNode()
 {
 	m_props.insert( make_pair( "Color1" , &src0 ) );
 	m_props.insert( make_pair( "Color2" , &src1 ) );
-}
-
-// check validation
-bool AddNode::CheckValidation()
-{
-	m_node_valid = MaterialNode::CheckValidation();
-
-	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
-	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
-
-	// if one of the parameters is a bxdf, the other should be exactly the same
-	if( ( type0 & MAT_NODE_BXDF ) != ( type1 & MAT_NODE_BXDF ) )
-		m_node_valid = false;
-
-	return m_node_valid;
 }
 
 // get property value
@@ -55,19 +57,6 @@ MaterialPropertyValue AddNode::GetNodeValue( Bsdf* bsdf )
 SORTNodeOneMinus::SORTNodeOneMinus()
 {
     m_props.insert( make_pair( "Color" , &src ) );
-}
-
-bool SORTNodeOneMinus::CheckValidation()
-{
-    m_node_valid = MaterialNode::CheckValidation();
-    
-    MAT_NODE_TYPE type = (src.node)?src.node->getNodeType():MAT_NODE_CONSTANT;
-    
-    // if one of the parameters is a bxdf, the other should be exactly the same
-    if( ( type & MAT_NODE_CONSTANT ) == 0 )
-        m_node_valid = false;
-    
-    return m_node_valid;
 }
 
 // get property value
@@ -104,21 +93,6 @@ MaterialPropertyValue LerpNode::GetNodeValue( Bsdf* bsdf )
 	return src0.GetPropertyValue(bsdf) * ( 1.0f - f ) + src1.GetPropertyValue(bsdf) * f;
 }
 
-// check validation
-bool LerpNode::CheckValidation()
-{
-	m_node_valid = MaterialNode::CheckValidation();
-
-	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
-	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
-
-	// if one of the parameters is a bxdf, the other should be exactly the same
-	if( ( type0 & MAT_NODE_BXDF ) != ( type1 & MAT_NODE_BXDF ) )
-		m_node_valid = false;
-
-	return m_node_valid;
-}
-
 BlendNode::BlendNode()
 {
 	m_props.insert( make_pair( "Color1" , &src0 ) );
@@ -149,21 +123,6 @@ MaterialPropertyValue BlendNode::GetNodeValue( Bsdf* bsdf )
 	return src0.GetPropertyValue(bsdf) * f0 + src1.GetPropertyValue(bsdf) * f1;
 }
 
-// check validation
-bool BlendNode::CheckValidation()
-{
-	m_node_valid = MaterialNode::CheckValidation();
-
-	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
-	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
-
-	// if one of the parameters is a bxdf, the other should be exactly the same
-	if( ( type0 & MAT_NODE_BXDF ) != ( type1 & MAT_NODE_BXDF ) )
-		m_node_valid = false;
-
-	return m_node_valid;
-}
-
 MutiplyNode::MutiplyNode()
 {
 	m_props.insert( make_pair( "Color1" , &src0 ) );
@@ -191,17 +150,32 @@ MaterialPropertyValue MutiplyNode::GetNodeValue( Bsdf* bsdf )
 	return src0.GetPropertyValue(bsdf) * src1.GetPropertyValue(bsdf);
 }
 
-// check validation
-bool MutiplyNode::CheckValidation()
+GammaToLinearNode::GammaToLinearNode()
 {
-	m_node_valid = MaterialNode::CheckValidation();
+    m_props.insert( make_pair( "Color" , &src ) );
+}
 
-	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
-	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
+// get property value
+MaterialPropertyValue GammaToLinearNode::GetNodeValue( Bsdf* bsdf )
+{
+    auto tmp = src.GetPropertyValue(bsdf);
+    tmp.x = GammaToLinear(tmp.x);
+    tmp.y = GammaToLinear(tmp.y);
+    tmp.z = GammaToLinear(tmp.z);
+    return tmp;
+}
 
-	// Can't multiply two bxdfs
-	if( ( type0 & MAT_NODE_BXDF ) && ( type1 & MAT_NODE_BXDF ) )
-		m_node_valid = false;
+LinearToGammaNode::LinearToGammaNode()
+{
+    m_props.insert( make_pair( "Color" , &src ) );
+}
 
-	return m_node_valid;
+// get property value
+MaterialPropertyValue LinearToGammaNode::GetNodeValue( Bsdf* bsdf )
+{
+    auto tmp = src.GetPropertyValue(bsdf);
+    tmp.x = LinearToGamma(tmp.x);
+    tmp.y = LinearToGamma(tmp.y);
+    tmp.z = LinearToGamma(tmp.z);
+    return tmp;
 }

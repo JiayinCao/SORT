@@ -96,6 +96,17 @@ public:
         const float YWeight[3] = { 0.212671f, 0.715160f, 0.072169f };
         return YWeight[0] * m_r + YWeight[1] * m_g + YWeight[2] * m_b;
 	}
+    
+    void ToLinear(){
+        m_r = GammaToLinear(m_r);
+        m_g = GammaToLinear(m_g);
+        m_b = GammaToLinear(m_b);
+    }
+    void ToGamma(){
+        m_r = LinearToGamma(m_r);
+        m_g = LinearToGamma(m_g);
+        m_b = LinearToGamma(m_b);
+    }
 
 // private field
 private:

@@ -24,6 +24,9 @@ class OperatorNode : public MaterialNode
 public:
 	// get node type
 	virtual MAT_NODE_TYPE getNodeType() override { return MAT_NODE_OPERATOR | MaterialNode::getNodeType(); }
+    
+    // check validation
+    bool CheckValidation() override;
 };
 
 // Adding node
@@ -37,9 +40,6 @@ public:
 
 	// get property value
     MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
-
-	// check validation
-	bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	src0;
@@ -57,9 +57,6 @@ public:
     
     // get property value
     MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
-    
-    // check validation
-    bool CheckValidation() override;
     
 private:
     MaterialNodeProperty    src;
@@ -81,9 +78,6 @@ public:
 	// get property value
     MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
-	// check validation
-    bool CheckValidation() override;
-
 private:
 	MaterialNodeProperty	src0;
 	MaterialNodeProperty	src1;
@@ -104,9 +98,6 @@ public:
 
 	// get property value
     MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
-
-	// check validation
-    bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	src0;
@@ -130,11 +121,39 @@ public:
 	// get property value
     MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
-	// check validation
-	bool CheckValidation() override;
-
 private:
 	MaterialNodeProperty	src0;
 	MaterialNodeProperty	src1;
 };
 
+// Gamma correction Node
+class GammaToLinearNode : public OperatorNode
+{
+public:
+    DEFINE_CREATOR( GammaToLinearNode , MaterialNode , "SORTNodeGammaToLinear" );
+    
+    // constructor
+    GammaToLinearNode();
+    
+    // get property value
+    MaterialPropertyValue    GetNodeValue( Bsdf* bsdf ) override;
+    
+private:
+    MaterialNodeProperty    src;
+};
+
+// Gamma correction Node
+class LinearToGammaNode : public OperatorNode
+{
+public:
+    DEFINE_CREATOR( LinearToGammaNode , MaterialNode , "SORTNodeLinearToGamma" );
+    
+    // constructor
+    LinearToGammaNode();
+    
+    // get property value
+    MaterialPropertyValue    GetNodeValue( Bsdf* bsdf ) override;
+    
+private:
+    MaterialNodeProperty    src;
+};
