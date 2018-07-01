@@ -41,7 +41,7 @@ Spectrum ImageTexture::GetColor( int x , int y ) const
 	_texCoordFilter( x , y );
 
 	// get the offset
-	int offset = y * m_iTexWidth + x;
+	int offset = ( m_iTexHeight - 1 - y ) * m_iTexWidth + x;
 
 	// get the color
 	return m_pMemory->m_ImgMem[ offset ];
