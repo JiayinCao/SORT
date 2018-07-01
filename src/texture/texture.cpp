@@ -237,7 +237,7 @@ ComTexture operator*( float t , const Texture& tex )
 
 // get color from uv coordinate
 Spectrum Texture::GetColorFromUV( float u , float v ) const{
-    int w = (int) (u * ( m_iTexWidth - 1 ));
-    int h = (int) (v * ( m_iTexHeight - 1 ));
+    int w = (int) (u * m_iTexWidth );
+    int h = (int) (v * m_iTexHeight );
     return GetColor( w , h );
 }
