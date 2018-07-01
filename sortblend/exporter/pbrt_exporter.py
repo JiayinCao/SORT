@@ -159,28 +159,28 @@ def export_light(scene):
                 point_from = [0,1,0]
                 point_to = [0,0,0]
                 str = "LightSource \"distant\" \n"
-                str += "\"rgb L\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
-                str += "\"point from\" [%f,%f,%f] \n"%(point_from[0],point_from[2],point_from[1])
-                str += "\"point to\" [%f,%f,%f] \n"%(point_to[0],point_to[2],point_to[1])
-                str += "\"rgb scale\" [%f,%f,%f] \n"%(lamp.energy,lamp.energy,lamp.energy)
+                str += "\"rgb L\" [ %f %f %f ] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "\"point from\" [ %f %f %f ] \n"%(point_from[0],point_from[2],point_from[1])
+                str += "\"point to\" [ %f %f %f ] \n"%(point_to[0],point_to[2],point_to[1])
+                str += "\"rgb scale\" [ %f %f %f ] \n"%(lamp.energy,lamp.energy,lamp.energy)
                 file.write(str)
             elif lamp.type == 'POINT':
                 point_from = [0,0,0]
                 str = "LightSource \"point\" \n"
-                str += "\"rgb I\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
-                str += "\"point from\" [%f,%f,%f] \n"%(point_from[0],point_from[2],point_from[1])
-                str += "\"rgb scale\" [%f,%f,%f] \n"%(lamp.energy,lamp.energy,lamp.energy)
+                str += "\"rgb I\" [ %f %f %f ] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "\"point from\" [ %f %f %f ] \n"%(point_from[0],point_from[2],point_from[1])
+                str += "\"rgb scale\" [ %f %f %f ] \n"%(lamp.energy,lamp.energy,lamp.energy)
                 file.write(str)
             elif lamp.type == 'SPOT':
                 point_from = [0,1,0]
                 point_to = [0,0,0]
                 str = "LightSource \"spot\" "
-                str += "\"rgb I\" [%f,%f,%f] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
-                str += "\"point from\" [%f,%f,%f] \n"%(point_from[0],point_from[2],point_from[1])
-                str += "\"point to\" [%f,%f,%f] \n"%(point_to[0],point_to[2],point_to[1])
-                str += "\"rgb scale\" [%f,%f,%f] \n"%(lamp.energy,lamp.energy,lamp.energy)
-                str += "\"float coneangle\" [%f] \n"%(degrees(lamp.spot_size*0.5))
-                str += "\"float conedeltaangle\" [%f] \n"%(degrees(lamp.spot_size * lamp.spot_blend * 0.5))
+                str += "\"rgb I\" [ %f %f %f ] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+                str += "\"point from\" [ %f %f %f ] \n"%(point_from[0],point_from[2],point_from[1])
+                str += "\"point to\" [ %f %f %f] \n"%(point_to[0],point_to[2],point_to[1])
+                str += "\"rgb scale\" [ %f %f %f ] \n"%(lamp.energy,lamp.energy,lamp.energy)
+                str += "\"float coneangle\" [ %f ] \n"%(degrees(lamp.spot_size*0.5))
+                str += "\"float conedeltaangle\" [ %f ] \n"%(degrees(lamp.spot_size * lamp.spot_blend * 0.5))
                 file.write(str)
             elif lamp.type == 'AREA':
                 halfSizeX = lamp.size / 2
@@ -190,7 +190,7 @@ def export_light(scene):
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
 
-                str = "AreaLightSource \"diffuse\" \"rgb L\" [%f,%f,%f] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
+                str = "AreaLightSource \"diffuse\" \"rgb L\" [%f %f %f] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
                 str += "Material \"matte\" \"rgb Kd\" [ 0.0 0.0 0.0 ]\n"
                 str += "Shape \"trianglemesh\"\n"
                 str += "\"integer indices\" [0 2 1 0 3 2]\n"
@@ -200,7 +200,7 @@ def export_light(scene):
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
                 str = "LightSource \"infinite\" "
-                str += "\"rgb L\" [%f,%f,%f] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
+                str += "\"rgb L\" [ %f,%f,%f ] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
                 str += "\"string mapname\" \"%s\" \n"%lamp.sort_lamp.sort_lamp_hemi.envmap_file
                 file.write(str)
             file.write( "AttributeEnd\n" )
@@ -287,7 +287,7 @@ def export_mesh(node):
             for loop_index in poly.loop_indices:
                 id = mesh.loops[loop_index].vertex_index
                 uv = uv_layer[loop_index].uv
-                uvs[id] = " %f%f"%(uv[0],uv[1])
+                uvs[id] = " %f %f"%(uv[0],uv[1])
         file.write( " ".join( uvs ) )
         file.write( "]\n" )
 

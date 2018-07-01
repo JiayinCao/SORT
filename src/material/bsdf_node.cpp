@@ -78,13 +78,16 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
     Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() );
     
+    Spectrum basecolor = baseColor.GetPropertyValue(bsdf).ToSpectrum();
+    basecolor.SetColor( pow( basecolor.GetR() , 2.2f ) , pow( basecolor.GetG() , 2.2f ) , pow( basecolor.GetB() , 2.2f ) );
+    
     Spectrum eta = Spectrum( 0.37f , 0.4f , 0.37f );
     Spectrum k( 2.82f );
     float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
-    MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rn );      // GGX
+    MicroFacetDistribution* dist = SORT_MALLOC(Blinn)( rn );      // GGX
     VisTerm* vis = SORT_MALLOC(VisSmith)( rn );                 // Smith
     Fresnel* fresnel = SORT_MALLOC( FresnelConductor )( eta , k );
-    MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , fresnel , dist , vis);
+    MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( basecolor , fresnel , dist , vis);
     
     const float m = metallic.GetPropertyValue(bsdf).x;
     mf->m_weight = weight * ( m * 0.92f + 0.08f );
@@ -199,7 +202,7 @@ void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
         bsdf->AddBxdf(mf);
     }
     if( !t.IsBlack() ){
-        MicroFacetRefraction* mr = SORT_MALLOC(MicroFacetRefraction)( t , fresnel , dist , vis , 1.0f , 1.5f );
+        MicroFacetRefraction* mr = SORT_MALLOC(MicroFacetRefraction)( t , fresnel , dist , vis , 1.5f , 1.0f );
         mr->m_weight = weight;
         bsdf->AddBxdf(mr);
     }
