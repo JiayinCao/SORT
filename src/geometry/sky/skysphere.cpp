@@ -45,7 +45,7 @@ Spectrum SkySphere::Evaluate( const Vector& wi ) const
 	float v = theta * INV_PI;
 	float u = phi * INV_TWOPI;
 
-	return m_sky.GetColor( u , v );
+	return m_sky.GetColorFromUV( u , 1.0f - v );
 }
 
 // register property
@@ -95,7 +95,7 @@ Vector SkySphere::sample_v( float u , float v , float* pdf , float* area_pdf ) c
 	if( apdf == 0.0f )
 		return Vector();
 
-	float theta = PI * uv[1];
+    float theta = PI * ( 1.0f - uv[1] );
 	float phi = TWO_PI * uv[0];
 
 	Vector wi = SphericalVec( theta , phi );
@@ -120,7 +120,7 @@ float SkySphere::Pdf( const Vector& lwi ) const
 	float u , v;
 	float theta = SphericalTheta( lwi );
 	float phi = SphericalPhi( lwi );
-	v = theta * INV_PI;
+	v = 1.0f - theta * INV_PI;
 	u = phi * INV_TWOPI;
 	
 	return distribution->Pdf( u , v ) / ( TWO_PI * PI * sin_theta );

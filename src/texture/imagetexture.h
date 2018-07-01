@@ -44,18 +44,7 @@ public:
 	// para 'x' :	x coordinate , if out of range , use filter
 	// para 'y' :	y coordinate , if out of range , use filter
 	// result	:	spectrum value in the position
-	virtual Spectrum GetColor( int x , int y ) const;
-
-	// get texture value
-	// para 'u' : u coordinate
-	// para 'v' : v coordinate
-	// result   : spectrum value
-	virtual Spectrum GetColor( float u , float v ) const
-	{
-		int w = (int) (u * ( m_iTexWidth - 1 ) + 0.5f );
-		int h = (int) (v * ( m_iTexHeight - 1 ) + 0.5f );
-		return GetColor( w , h );
-	}
+    Spectrum GetColor( int x , int y ) const override;
 
 	// it means nothing to set the size of the image file
 	// set the size of the texture
