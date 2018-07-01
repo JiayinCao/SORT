@@ -22,7 +22,7 @@
 // constructor
 Blinn::Blinn( float roughness )
 {
-	exp = roughness;
+    exp = max( 0.01f , roughness );
 	exp = 2.0f / pow( exp , 4.0f ) - 2.0f;
 }
 
@@ -66,6 +66,8 @@ Vector Beckmann::sample_f( const BsdfSample& bs ) const
 
 GGX::GGX( float roughness )
 {
+    // roughness value smaller than 0.02 will easily create 'nan' in GGX
+    roughness = max( 0.02f , roughness );
 	alpha = roughness * roughness;
 	m = alpha * alpha;
 }
