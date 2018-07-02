@@ -566,6 +566,13 @@ class SORTNodePrinciple(SORTShadingNode):
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
     def export_pbrt(self, file):
+        reflectance = self.inputs[3].default_value
+        metallic = self.inputs[1].default_value
+        roughness = self.inputs[0].default_value
+        file.write( "  \"string type\" \"disney\"\n" )
+        file.write( "  \"rgb color\" [%f %f %f]\n"%(reflectance[:]))
+        file.write( "  \"float metallic\" [%f]\n"%metallic)
+        file.write( "  \"float roughness\" [%s]\n" %roughness )
         return
 
 class SORTNodeGlass(SORTShadingNode):
