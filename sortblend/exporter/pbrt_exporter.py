@@ -200,7 +200,7 @@ def export_light(scene):
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
                 str = "LightSource \"infinite\" "
-                str += "\"rgb L\" [ %f,%f,%f ] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
+                str += "\"rgb L\" [ %f %f %f ] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
                 str += "\"string mapname\" \"%s\" \n"%lamp.sort_lamp.sort_lamp_hemi.envmap_file
                 file.write(str)
             file.write( "AttributeEnd\n" )
