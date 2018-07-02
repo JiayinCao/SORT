@@ -63,7 +63,7 @@ bool LayeredMaterialNode::CheckValidation()
 void LayeredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
     for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i )
-        bxdfs[i].UpdateBsdf(bsdf, weights[i].GetPropertyValue(bsdf).ToSpectrum());
+        bxdfs[i].UpdateBsdf(bsdf, weights[i].GetPropertyValue(bsdf).ToSpectrum() * weight );
 }
 
 PrincipleMaterialNode::PrincipleMaterialNode()
@@ -79,9 +79,8 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() );
     
     Spectrum basecolor = baseColor.GetPropertyValue(bsdf).ToSpectrum();
-    basecolor.SetColor( pow( basecolor.GetR() , 2.2f ) , pow( basecolor.GetG() , 2.2f ) , pow( basecolor.GetB() , 2.2f ) );
     
-    Spectrum eta = Spectrum( 0.37f , 0.4f , 0.37f );
+    Spectrum eta = Spectrum( 0.37f , 0.37f , 0.37f );
     Spectrum k( 2.82f );
     float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
     MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rn );      // GGX
@@ -91,7 +90,7 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     
     const float m = metallic.GetPropertyValue(bsdf).x;
     mf->m_weight = weight * ( m * 0.92f + 0.08f );
-    lambert->m_weight = weight * ( 1 - m ) * 0.92;
+    lambert->m_weight = weight * ( 1 - m ) * 0.92f;
     
     bsdf->AddBxdf(lambert);
     bsdf->AddBxdf(mf);
@@ -138,7 +137,7 @@ void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     
     Spectrum spec(specular.GetPropertyValue(bsdf).ToSpectrum());
     if( !spec.IsBlack() ){
-        Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.5f, 1.f);
+        Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.2f, 1.f);
         float rough = roughness.GetPropertyValue(bsdf).x;
         MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough );   // GGX
         VisTerm* vis = SORT_MALLOC(VisSmith)( rough );              // Smith
