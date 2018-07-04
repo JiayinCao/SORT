@@ -26,7 +26,7 @@ Blinn::Blinn( float roughness )
 	exp = 2.0f / pow( exp , 4.0f ) - 2.0f;
 }
 
-// probabilty of facet with specific normal (v)
+// probability of facet with specific normal (v)
 float Blinn::D(float NoH) const
 {
 	return (exp+2.0f) * INV_TWOPI * powf( NoH , exp );
@@ -35,9 +35,9 @@ float Blinn::D(float NoH) const
 // sampling according to GGX
 Vector Blinn::sample_f( const BsdfSample& bs ) const
 {
-	float costheta = powf( bs.u , 1.0f / (exp+2.0f) );
-	float sintheta = sqrtf( max( 0.0f , 1.0f - costheta * costheta ) );
-	float phi = TWO_PI * bs.v;
+	const float costheta = powf( bs.u , 1.0f / (exp+2.0f) );
+    const float sintheta = sqrtf( max( 0.0f , 1.0f - costheta * costheta ) );
+    const float phi = TWO_PI * bs.v;
 
 	return SphericalVec( sintheta , costheta , phi );
 }
@@ -51,15 +51,15 @@ Beckmann::Beckmann( float roughness )
 // probabilty of facet with specific normal (v)
 float Beckmann::D(float NoH) const
 {
-	float NoH2 = NoH * NoH;
+    const float NoH2 = NoH * NoH;
 	return exp( (NoH2 - 1) / (m * NoH2) ) / ( PI * m * NoH2 * NoH2 );
 }
 
 // sampling according to GGX
 Vector Beckmann::sample_f( const BsdfSample& bs ) const
 {
-	float theta = atan( sqrt( -1.0f * alpha * alpha * log( 1.0f - bs.u ) ) );
-	float phi = TWO_PI * bs.v;
+    const float theta = atan( sqrt( -1.0f * alpha * alpha * log( 1.0f - bs.u ) ) );
+    const float phi = TWO_PI * bs.v;
 
 	return SphericalVec( theta , phi );
 }
@@ -75,14 +75,14 @@ GGX::GGX( float roughness )
 // probabilty of facet with specific normal (v)
 float GGX::D(float NoH) const
 {
-	float d = ( m - 1.0f ) * NoH * NoH + 1.0f;
+    const float d = ( m - 1.0f ) * NoH * NoH + 1.0f;
 	return m / ( PI*d*d );
 }
 
 Vector GGX::sample_f( const BsdfSample& bs ) const
 {
-	float theta = atan( alpha * sqrt(bs.v / ( 1.0f - bs.v )) );
-	float phi = TWO_PI * bs.u;
+    const float theta = atan( alpha * sqrt(bs.v / ( 1.0f - bs.v )) );
+    const float phi = TWO_PI * bs.u;
 	return SphericalVec( theta , phi );
 }
 
@@ -103,27 +103,27 @@ float VisKelemen::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 
 float VisSchlick::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 {
-	float k = roughness * roughness * 0.5f;
-	float Vis_SchlickV = NoV * (1 - k) + k;
-	float Vis_SchlickL = NoL * (1 - k) + k;
+    const float k = roughness * roughness * 0.5f;
+    const float Vis_SchlickV = NoV * (1 - k) + k;
+    const float Vis_SchlickL = NoL * (1 - k) + k;
 	return 0.25f / ( Vis_SchlickV * Vis_SchlickL );
 }
 
 float VisSmith::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 {
-	float a = roughness * roughness;
-	float a2 = a*a;
+    const float a = roughness * roughness;
+    const float a2 = a*a;
 
-	float Vis_SmithV = NoV + sqrt( NoV * (NoV - NoV * a2) + a2 );
-	float Vis_SmithL = NoL + sqrt( NoL * (NoL - NoL * a2) + a2 );
+    const float Vis_SmithV = NoV + sqrt( NoV * (NoV - NoV * a2) + a2 );
+    const float Vis_SmithL = NoL + sqrt( NoL * (NoL - NoL * a2) + a2 );
 	return 1.0f / ( Vis_SmithV * Vis_SmithL );
 }
 
 float VisSmithJointApprox::Vis_Term( float NoL , float NoV , float VoH , float NoH)
 {
-	float a = roughness * roughness;
-	float Vis_SmithV = NoL * ( NoV * ( 1 - a ) + a );
-	float Vis_SmithL = NoV * ( NoL * ( 1 - a ) + a );
+    const float a = roughness * roughness;
+    const float Vis_SmithV = NoL * ( NoV * ( 1 - a ) + a );
+    const float Vis_SmithL = NoV * ( NoL * ( 1 - a ) + a );
 	return 0.5f / ( Vis_SmithV + Vis_SmithL );
 }
 
@@ -141,9 +141,9 @@ Vector	Microfacet::getReflected( Vector v , Vector n ) const
 // get refracted ray
 Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const
 {
-	float coso = Dot( v , n );
-	float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
-	float t = 1.0f - eta * eta * max( 0.0f , 1.0f - coso * coso );
+	const float coso = Dot( v , n );
+	const float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
+	const float t = 1.0f - eta * eta * max( 0.0f , 1.0f - coso * coso );
 
 	// total inner reflection
     inner_reflection = (t <= 0.0f);
@@ -151,7 +151,7 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 		return Vector(0.0f,0.0f,0.0f);
 
 	// get the tranmistance/refracted ray
-	float factor = (coso<0.0f)? 1.0f : -1.0f;
+	const float factor = (coso<0.0f)? 1.0f : -1.0f;
 	return -eta * v  + ( eta * coso + factor * sqrt(t)) * n;
 }
 
@@ -176,18 +176,18 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
     if( wo.y <= 0.0f )
         return 0.0f;
 
-	float NoL = AbsCosTheta( wi );
-	float NoV = AbsCosTheta( wo );
+	const float NoL = AbsCosTheta( wi );
+	const float NoV = AbsCosTheta( wo );
 
 	if (NoL == 0.f || NoV == 0.f)
 		return Spectrum(0.f);
 	
 	// evaluate fresnel term
-	Vector wh = Normalize(wi + wo);
-	float VoH = Dot(wi, wh);
-	float NoH = AbsCosTheta( wh );
+	const Vector wh = Normalize(wi + wo);
+	const float VoH = Dot(wi, wh);
+	const float NoH = AbsCosTheta( wh );
 
-	Spectrum F = fresnel->Evaluate(Dot(wi,wh), VoH);
+	const Spectrum F = fresnel->Evaluate( AbsDot(wo,wh) , fabs(VoH) );
 	
 	// return Torrance–Sparrow BRDF
 	return R * distribution->D(NoH) * F * visterm->Vis_Term( NoL , NoV , VoH , NoH );
@@ -197,7 +197,7 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
 	// sampling the normal
-	Vector wh = distribution->sample_f( bs );
+	const Vector wh = distribution->sample_f( bs );
 
 	// reflect the incident direction
 	wi = getReflected( wo , wh );
@@ -218,9 +218,9 @@ float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 	if( !SameHemisphere( wo , wi ) )
 		return 0.0f;
 
-	Vector h = Normalize( wo + wi );
-	float EoH = AbsDot( wo , h );
-	float HoN = AbsCosTheta(h);
+	const Vector h = Normalize( wo + wi );
+	const float EoH = AbsDot( wo , h );
+	const float HoN = AbsCosTheta(h);
 	return distribution->D(HoN) * HoN / (4.0f * EoH);
 }
 
@@ -247,26 +247,27 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
     if( SameHemiSphere(wi, wo) )
         return Spectrum(0.f);
     
-	float NoL = AbsCosTheta( wi );
-	float NoV = AbsCosTheta( wo );
+	const float NoL = AbsCosTheta( wi );
+	const float NoV = AbsCosTheta( wo );
 	if (NoL == 0.f || NoV == 0.f)
 		return Spectrum(0.f);
 	
-	float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
+	const float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
 
-	Vector3f wh = Normalize(wo + wi * eta);
+	const Vector3f wh = Normalize(wo + wi * eta);
 
-	float NoH = AbsCosTheta( wh );
-	float sVoH = Dot(wo , wh);
-	float VoH = fabs(sVoH);
+	const float NoH = AbsCosTheta( wh );
+	const float sVoH = Dot(wo , wh);
+	const float VoH = fabs(sVoH);
+    const float sIoH = Dot(wi, wh);
+    const float IoH = fabs(sIoH);
 	
 	// Fresnel term
-	Spectrum F = fresnel->Evaluate(Dot(wi, wh),sVoH);
+	const Spectrum F = fresnel->Evaluate( VoH , IoH );
 
-	float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
-	float t = eta / sqrtDenom;
-	return (Spectrum(1.f) - F) * R * distribution->D(NoH) * visterm->Vis_Term( NoL , NoV , VoH , NoH ) * 
-				t * t * AbsDot(wi, wh) * AbsDot(wo, wh) * 4.0f ;
+	const float sqrtDenom = sVoH + eta * sIoH;
+	const float t = eta / sqrtDenom;
+	return (Spectrum(1.f) - F) * R * distribution->D(NoH) * visterm->Vis_Term( NoL , NoV , VoH , NoH ) * t * t * IoH * VoH * 4.0f ;
 }
 
 // sample a direction using importance sampling
@@ -276,7 +277,7 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
         return 0.0f;
     
 	// sampling the normal
-	Vector wh = distribution->sample_f( bs );
+	const Vector wh = distribution->sample_f( bs );
 
 	// try to get refracted ray
 	bool total_reflection = false;
@@ -294,12 +295,12 @@ float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi ) const
 	if( SameHemisphere( wo , wi ) )
         return 0.0f;
 
-	float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
-    Vector3f wh = Normalize(wo + wi * eta);
+	const float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
+    const Vector3f wh = Normalize(wo + wi * eta);
 
     // Compute change of variables _dwh\_dwi_ for microfacet transmission
-    float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
-    float dwh_dwi = eta * eta * AbsDot(wi, wh) / (sqrtDenom * sqrtDenom);
-	float HoN = AbsCosTheta(wh);
+    const float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
+    const float dwh_dwi = eta * eta * AbsDot(wi, wh) / (sqrtDenom * sqrtDenom);
+	const float HoN = AbsCosTheta(wh);
     return distribution->D(HoN) * HoN * dwh_dwi;
 }
