@@ -18,6 +18,7 @@
 #include "stdthread.h"
 
 #include "managers/memmanager.h"
+#include "utility/stats.h"
 
 // thread id
 static Thread_Local int g_ThreadId = 0;
@@ -69,4 +70,6 @@ void RenderThreadStd::RunThread()
 		// Destroy the task
 		RenderTask::DestoryRenderTask(task);
 	}
+
+    FlushStatsData();
 }

@@ -38,9 +38,13 @@
 #include "math/vector2.h"
 #include "geometry/sky/sky.h"
 #include "shape/shape.h"
+#include "utility/stats.h"
 
 extern bool g_bBlenderMode;
 extern int  g_iTileSize;
+
+SORT_DEFINE_COUNTER_TYPE("Performance", "Pre-processing Time", sPreprocessTime, float);
+SORT_DEFINE_COUNTER_TYPE("Performance", "Rendering Time", sRenderingTime, float);
 
 // constructor
 System::System()
@@ -107,7 +111,7 @@ void System::PreProcess()
 
 	// stop timer
 	Timer::GetSingleton().StopTimer();
-	m_uPreProcessingTime = Timer::GetSingleton().GetElapsedTime();
+    sPreprocessTime = Timer::GetSingleton().GetElapsedTime();
 
     slog( INFO , GENERAL , "Time spent on preprocessing is " + to_string( m_uPreProcessingTime ) + " ms." );
 }
@@ -148,8 +152,15 @@ void System::OutputLog() const
 	// output scene information first
 	m_Scene.OutputLog();
     
-    slog( INFO , PERFORMANCE , stringFormat( "Time spent on pre-processing %d ms. Time spent on rendering %d ms" , m_uPreProcessingTime , m_uRenderingTime ) );
-    slog( INFO , PERFORMANCE , stringFormat( "Rendering time : %fs." , GetRenderingTime()/1000.0f ) );
+    //slog( INFO , PERFORMANCE , stringFormat( "Time spent on pre-processing %d ms. Time spent on rendering %d ms" , m_uPreProcessingTime , m_uRenderingTime ) );
+    //slog( INFO , PERFORMANCE , stringFormat( "Rendering time : %fs." , GetRenderingTime()/1000.0f ) );
+
+    sRenderingTime = GetRenderingTime();
+
+    // Flush main thread data
+    FlushStatsData();
+    // Output stats data
+    PrintStatsData();
 }
 
 // uninitialize 3rd party library
