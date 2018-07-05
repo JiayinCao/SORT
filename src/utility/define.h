@@ -31,11 +31,7 @@ inline float Degrees( float rad ) { return 180.0f * INV_PI * rad ; }
 #define SAFE_DELETE(p) { if(p) { delete p; p = 0; } }
 #define SAFE_DELETE_ARRAY(p) { if(p) { delete[] p; p = 0 ; } }
 
-#if defined(SORT_IN_WINDOWS)
-#define Thread_Local __declspec(thread)
-#elif defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
-#define Thread_Local __thread
-#endif
+#define Thread_Local thread_local
 
 // math macros
 #define saturate(x) max(0.0f,min(1.0f,x))
