@@ -63,7 +63,7 @@ public:
 	virtual void Build() = 0;
 
 	//! @brief Output log information.
-	virtual void OutputLog() const = 0;
+    virtual void OutputLog() const {};
 
 	//! @brief Get the bounding box of the primitive set.
     //! @return Bounding box of the spatial acceleration structure.

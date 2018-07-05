@@ -57,9 +57,6 @@ public:
 	//! Build KD-Tree structure in O(N*lg(N)).
 	void Build() override;
 
-	//! Output log information
-	void OutputLog() const override;
-
     //! KD-Tree split plane type
     enum class Split_Type
     {
@@ -133,13 +130,6 @@ private:
 
 	const unsigned	m_maxDepth = 28;            /**< Maximum allowed depth of KD-Tree. */
 	const unsigned	m_maxTriInLeaf = 32;        /**< Maximum allowed number of primitives in a leaf node. */
-
-	// KD-Tree information
-	unsigned	m_total = 0;                    /**< Total number of nodes in KD-Tree. */
-	unsigned	m_leaf = 0;                     /**< Total number of leaf nodes in KD-Tree. */
-	float		m_fAvgLeafTri = 0;              /**< Average number of primitives in leaf nodes. */
-	unsigned	m_depth = 0;                    /**< Depth of KD-Tree. */
-	unsigned	m_MaxLeafTri = 0;               /**< Maximum number of primitives in KD-Tree leaf nodes. */
 
     //! @brief Split current KD-Tree node.
     //! @param node     The KD-Tree node to be split.
