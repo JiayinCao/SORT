@@ -24,14 +24,14 @@
 
 IMPLEMENT_CREATOR( KDTree );
 
-SORT_DEFINE_COUNTER("Spatial-Structure(KDTree)", "Ray Count", sRayCount);
-SORT_DEFINE_COUNTER("Spatial-Structure(KDTree)", "Shadow Ray", sShadowRayCount);
-SORT_DEFINE_COUNTER("Spatial-Structure(KDTree)", "Intersection Test", sIntersectionTest );
-SORT_DEFINE_COUNTER("Spatial-Structure(KDTree)", "Node Count", sNodeCount);
-SORT_DEFINE_COUNTER("Spatial-Structure(KDTree)", "Leaf Node Count", sLeafNodeCount);
-SORT_DEFINE_COUNTER("Spatial-Structure(KDTree)", "KDTree Depth", sKDTreeDepth);
-SORT_DEFINE_COUNTER("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sMaxPriCountInLeaf);
-SORT_DEFINE_COUNTER_TYPE("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sAvgPriCountInLeaf , float);
+SORT_STATS_INT("Spatial-Structure(KDTree)", "Total Ray Count", sRayCount);
+SORT_STATS_INT("Spatial-Structure(KDTree)", "Shadow Ray Count", sShadowRayCount);
+SORT_STATS_INT("Spatial-Structure(KDTree)", "Intersection Test", sIntersectionTest );
+SORT_STATS_INT("Spatial-Structure(KDTree)", "Node Count", sNodeCount);
+SORT_STATS_INT("Spatial-Structure(KDTree)", "Leaf Node Count", sLeafNodeCount);
+SORT_STATS_INT("Spatial-Structure(KDTree)", "KDTree Depth", sKDTreeDepth);
+SORT_STATS_INT("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sMaxPriCountInLeaf);
+SORT_STATS_FLOAT("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sAvgPriCountInLeaf );
 
 // destructor
 KDTree::~KDTree()
@@ -161,10 +161,10 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	splitNode( node->rightChild , r_splits , r_num , depth + 1 );
 
     SORT_STATS(sNodeCount += 2);
-    SORT_STATS(sKDTreeDepth = max(sKDTreeDepth, (int)depth));
+    SORT_STATS(sKDTreeDepth = max((int)sKDTreeDepth, (int)depth));
 }
 
-// evaluate sah value for a specific split plane
+// evaluate sah for a specific split plane
 float KDTree::sah( unsigned l , unsigned r , unsigned axis , float split , const BBox& box )
 {
 	float inv_sarea = 1.0f / box.HalfSurfaceArea();
@@ -200,7 +200,7 @@ float KDTree::pickSplitting( const Splits& splits , unsigned prinum , const BBox
             if (splits.split[k][i].type == Split_Type::Split_End)
                 --n_r;
 
-			// get the sah value
+			// get the sah
 			float sahv = sah( n_l , n_r , k , splits.split[k][i].pos , box );
 			if( sahv < min_sah ){
 				min_sah = sahv;
@@ -234,14 +234,14 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum )
     SORT_STATS(++sLeafNodeCount);
     SORT_STATS(++sNodeCount);
     SORT_STATS(sAvgPriCountInLeaf += prinum);
-    SORT_STATS(sMaxPriCountInLeaf = max(sMaxPriCountInLeaf, (int)prinum));
+    SORT_STATS(sMaxPriCountInLeaf = max((int)sMaxPriCountInLeaf, (int)prinum));
 }
 
 // get the intersection between the ray and the primitive set
 bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
-    SORT_STATS(++sRayCount;);
-    SORT_STATS(sShadowRayCount += intersect == nullptr;);
+    SORT_STATS(++sRayCount);
+    SORT_STATS(sShadowRayCount += (intersect == nullptr));
 
 	float fmax;
 	float fmin = Intersect( r , m_bbox , &fmax );
@@ -272,7 +272,7 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 	if( (node->flag & mask) == 3 ){
 		bool inter = false;
         for( auto tri : node->trilist ){
-            SORT_STATS(++sIntersectionTest;)
+            SORT_STATS(++sIntersectionTest);
 			inter |= tri->GetIntersect( ray , intersect );
 			if( intersect == 0 && inter )
 				return true;
