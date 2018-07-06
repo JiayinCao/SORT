@@ -43,8 +43,8 @@
 extern bool g_bBlenderMode;
 extern int  g_iTileSize;
 
-SORT_DEFINE_COUNTER_TYPE("Performance", "Pre-processing Time", sPreprocessTime, float);
-SORT_DEFINE_COUNTER_TYPE("Performance", "Rendering Time", sRenderingTime, float);
+SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTime);
+SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTime);
 
 // constructor
 System::System()
@@ -152,8 +152,8 @@ void System::OutputLog() const
 	// output scene information first
 	m_Scene.OutputLog();
     
-    //slog( INFO , PERFORMANCE , stringFormat( "Time spent on pre-processing %d ms. Time spent on rendering %d ms" , m_uPreProcessingTime , m_uRenderingTime ) );
-    //slog( INFO , PERFORMANCE , stringFormat( "Rendering time : %fs." , GetRenderingTime()/1000.0f ) );
+    slog( INFO , PERFORMANCE , stringFormat( "Time spent on pre-processing %d ms. Time spent on rendering %d ms" , m_uPreProcessingTime , m_uRenderingTime ) );
+    slog( INFO , PERFORMANCE , stringFormat( "Rendering time : %fs." , GetRenderingTime()/1000.0f ) );
 
     sRenderingTime = GetRenderingTime();
 

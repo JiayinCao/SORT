@@ -16,8 +16,6 @@
  */
 
 #include "stats.h"
-#include "define.h"
-#include "log/log.h"
 #include "utility/sassert.h"
 #include "utility/strhelper.h"
 
@@ -25,19 +23,19 @@
 // This is a container holding all statsItem per thread
 class StatsItemContainer {
 public:
-    void Register(const StatsItem& item) {
+    void Register(const StatsItemRegister* item) {
         container.push_back(item);
     }
     void FlushData() {
         sAssert(!flushed, LOG_GENERAL);
-        for (const StatsItem& item : container)
-            item.FlushData();
+        for (const StatsItemRegister* item : container)
+            item->FlushData();
         flushed = true;
     }
 
 private:
     // Container for all stats per thread
-    std::vector<StatsItem> container;
+    std::vector<const StatsItemRegister*> container;
     // To make sure we don't flush data twice
     bool flushed = false;
 };
@@ -47,19 +45,14 @@ void StatsSummary::PrintStats() const {
     std::map<std::string, std::map<std::string, std::string>> outputs;
     for (const auto& counterCat : counters) {
         for (const auto& counterItem : counterCat.second) {
-            outputs[counterCat.first][counterItem.first] = to_string(counterItem.second);
-        }
-    }
-    for (const auto& counterCat : countersFloat) {
-        for (const auto& counterItem : counterCat.second) {
-            outputs[counterCat.first][counterItem.first] = to_string(counterItem.second);
+            outputs[counterCat.first][counterItem.first] = counterItem.second->ToString();
         }
     }
 
     for (const auto& counterCat : outputs) {
         slog(INFO, GENERAL, stringFormat("%s", counterCat.first.c_str()));
             for (const auto& counterItem : counterCat.second) {
-                slog(INFO, GENERAL, stringFormat("    %-42s %s", counterItem.first.c_str() , counterItem.second.c_str()));
+                slog(INFO, GENERAL, stringFormat("    %-38s %s", counterItem.first.c_str() , counterItem.second.c_str()));
             }
     }
     slog(INFO, GENERAL, "-------------------------Statistics-------------------------");
@@ -69,15 +62,15 @@ static StatsSummary                     g_StatsSummary;
 static Thread_Local StatsItemContainer  g_StatsItemContainer;
 
 // Recording all necessary data in constructor
-StatsItem::StatsItem( const stats_update f ): func(f) 
+StatsItemRegister::StatsItemRegister( const stats_update f ): func(f) 
 {
     static std::mutex statsMutex;
     std::lock_guard<std::mutex> lock(statsMutex);
-    g_StatsItemContainer.Register(*this);
+    g_StatsItemContainer.Register(this);
 }
 
 // Flush the data into StatsSummary
-void StatsItem::FlushData() const
+void StatsItemRegister::FlushData() const
 {
     sAssert(func, LOG_GENERAL);
     func(g_StatsSummary);
