@@ -24,40 +24,40 @@
 #include <map>
 #include <vector>
 #include <mutex>
+#include <memory>
 #include "utility/sassert.h"
 #include "utility/strhelper.h"
 #include "define.h"
+
+#define SORT_STATS(eva) eva
+
+#define SORT_STATS_BASE_TYPE( cat , name , var , formatter , type )\
+static Thread_Local type<formatter> g_StatsItem_##var; \
+static void update_counter_##var(StatsSummary& ss) { ss.FlushCounter( cat , name , &g_StatsItem_##var );}\
+static thread_local StatsItemRegister g_Counter_Int_##var( update_counter_##var );\
+
+#define SORT_STATS_INT_TYPE( cat , name , var , formatter) \
+SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt );\
+static Thread_Local long long& var = (g_StatsItem_##var).value;
+
+#define SORT_STATS_FLOAT_TYPE( cat , name , var , formatter ) \
+SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemFloat );\
+static Thread_Local float& var = (g_StatsItem_##var).value;
+
+#define SORT_STATS_COUNTER( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsInt)
+#define SORT_STATS_TIME( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsElaspedTime)
+#define SORT_STATS_FCOUNTER( cat , name , var ) SORT_STATS_FLOAT_TYPE( cat , name , var , StatsFloat)
+
+#define STATS_FORMATTER( name , type ) class name{ public: static std::string ToString( type v ); };
+STATS_FORMATTER( StatsElaspedTime , long long )
+STATS_FORMATTER( StatsInt , long long )
+STATS_FORMATTER( StatsFloat , float )
 
 class StatsItem{
 public:
     virtual std::string ToString() const = 0;
     virtual void Merge( const StatsItem* item ) = 0;
     virtual shared_ptr<StatsItem> MakeItem() const = 0;
-};
-
-class StatsElaspedTime{
-public:
-    static std::string ToString( float v ){
-        return "to be done";
-    }
-};
-
-class StatsInt{
-public:
-    static std::string ToString( long long v ){
-        auto s = to_string(v);
-        if( s.size() < 5 )
-            return s;
-        int len = (int)s.size() - 1;
-        std::string ret( len + 1 + len / 3 , ',' );
-        int i = 0 , j = (int)ret.size() - 1;
-        while( i < s.size() ){
-            ret[j--] = s[len - (i++)];
-            if( i % 3 == 0 )
-                --j;
-        }
-        return ret;
-    }
 };
 
 template<class T>
@@ -76,14 +76,6 @@ public:
     }
     long long value = 0;
 };
-
-class StatsFloat{
-public:
-    static std::string ToString( float v ){
-        return stringFormat("%.2f",v);
-    }
-};
-
 template<class T>
 class StatsItemFloat : public StatsItem{
 public:
@@ -100,24 +92,6 @@ public:
     }
     float value = 0.0f;
 };
-
-#define SORT_STATS(eva) eva;
-
-#define SORT_STATS_BASE_TYPE( cat , name , var , formatter , type )\
-    static Thread_Local type<formatter> g_StatsItem_##var; \
-    static void update_counter_##var(StatsSummary& ss) { ss.FlushCounter( cat , name , &g_StatsItem_##var );}\
-    static thread_local StatsItemRegister g_Counter_Int_##var( update_counter_##var );\
-
-#define SORT_STATS_INT( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsInt)
-#define SORT_STATS_TIME( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsElaspedTime)
-#define SORT_STATS_INT_TYPE( cat , name , var , formatter) \
-    SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt );\
-    static Thread_Local long long& var = (g_StatsItem_##var).value;
-
-#define SORT_STATS_FLOAT( cat , name , var ) SORT_STATS_FLOAT_TYPE( cat , name , var , StatsFloat )
-#define SORT_STATS_FLOAT_TYPE( cat , name , var , formatter ) \
-    SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemFloat );\
-    static Thread_Local float& var = (g_StatsItem_##var).value;
 
 // StatsSummary keeps all stats data after the rendering is done
 class StatsSummary {
@@ -150,7 +124,9 @@ private:
 
 #else
 #define SORT_STATS(eva)
-#define SORT_DEFINE_COUNTER( cat , name , var )
+#define SORT_STATS_COUNTER( cat , name , var )
+#define SORT_STATS_FCOUNTER( cat , name , var )
+#define SORT_STATS_TIME( cat , name , var )
 #endif
 
 // Flush per-thread stats to StatsSummary, this should be called at the end of per-thread

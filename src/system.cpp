@@ -57,8 +57,6 @@ void System::_preInit()
 {
 	// setup default value
 	m_camera = 0;
-	m_uRenderingTime = 0;
-	m_uPreProcessingTime = 0;
 	m_thread_num = 1;
 	m_pProgress = 0;
     m_imagesensor = 0;
@@ -79,7 +77,8 @@ void System::Render()
 	_executeRenderingTasks();
 	
 	// stop timer
-	m_uRenderingTime = Timer::GetSingleton().StopTimer();
+	auto renderingTime = Timer::GetSingleton().StopTimer();
+    SORT_STATS( sRenderingTime = renderingTime );
 }
 
 // load the scene
@@ -111,15 +110,7 @@ void System::PreProcess()
 
 	// stop timer
 	Timer::GetSingleton().StopTimer();
-    sPreprocessTime = Timer::GetSingleton().GetElapsedTime();
-
-    slog( INFO , GENERAL , "Time spent on preprocessing is " + to_string( m_uPreProcessingTime ) + " ms." );
-}
-
-// get elapsed time
-unsigned System::GetRenderingTime() const
-{
-	return m_uRenderingTime;
+    SORT_STATS(sPreprocessTime = Timer::GetSingleton().GetElapsedTime());
 }
 
 // output progress
@@ -151,11 +142,6 @@ void System::OutputLog() const
 {
 	// output scene information first
 	m_Scene.OutputLog();
-    
-    slog( INFO , PERFORMANCE , stringFormat( "Time spent on pre-processing %d ms. Time spent on rendering %d ms" , m_uPreProcessingTime , m_uRenderingTime ) );
-    slog( INFO , PERFORMANCE , stringFormat( "Rendering time : %fs." , GetRenderingTime()/1000.0f ) );
-
-    sRenderingTime = GetRenderingTime();
 
     // Flush main thread data
     FlushStatsData();
