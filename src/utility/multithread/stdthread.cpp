@@ -71,5 +71,5 @@ void RenderThreadStd::RunThread()
 		RenderTask::DestoryRenderTask(task);
 	}
 
-    FlushStatsData();
+    SortStatsFlushData();
 }

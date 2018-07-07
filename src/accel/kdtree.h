@@ -18,6 +18,7 @@
 #pragma once
 
 #include "accelerator.h"
+#include "utility/stats.h"
 
 //! @brief K-Dimensional Tree or KD-Tree.
 /**
@@ -177,4 +178,6 @@ private:
     //! @brief Delete all sub tree originating from node.
     //! @param node The KD-Tree node to be deleted.
 	void deleteKdNode( Kd_Node* node );
+    
+    SORT_STATS_ENABLE( "Spatial-Structure(KDTree)" )
 };

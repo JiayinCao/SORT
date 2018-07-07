@@ -44,6 +44,8 @@ void StatsSummary::PrintStats() const {
     slog(INFO, GENERAL, "-------------------------Statistics-------------------------");
     std::map<std::string, std::map<std::string, std::string>> outputs;
     for (const auto& counterCat : counters) {
+        if( categories.count( counterCat.first ) == 0 )
+            continue;
         for (const auto& counterItem : counterCat.second) {
             outputs[counterCat.first][counterItem.first] = counterItem.second->ToString();
         }
@@ -104,16 +106,23 @@ std::string StatsFloat::ToString( float v ){
 }
 
 std::string StatsRatio::ToString( StatsData_Ratio ratio ){
-    return stringFormat("%d/%d",ratio.nominator,ratio.denominator);
+    float r = (float)ratio.nominator / (float)ratio.denominator;
+    return stringFormat("%.2f%%",r * 100);
+}
+
+std::string StatsFloatRatio::ToString( StatsData_Ratio ratio ){
+    float r = (float)ratio.nominator / (float)ratio.denominator;
+    return stringFormat("%.2f",r);
 }
 
 #endif
 
-void FlushStatsData()
-{
+void SortStatsFlushData(){
     SORT_STATS(g_StatsItemContainer.FlushData());
 }
-void PrintStatsData()
-{
+void SortStatsPrintData(){
     SORT_STATS(g_StatsSummary.PrintStats());
+}
+void SortStatsEnableCategory( const std::string& s ){
+    SORT_STATS(g_StatsSummary.EnableCategory(s));
 }
