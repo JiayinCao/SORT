@@ -75,6 +75,34 @@ void StatsItemRegister::FlushData() const
     sAssert(func, LOG_GENERAL);
     func(g_StatsSummary);
 }
+
+std::string StatsInt::ToString(long long v){
+    auto s = to_string(v);
+    if( s.size() < 5 )
+        return s;
+    int len = (int)s.size() - 1;
+    std::string ret( len + 1 + len / 3 , ',' );
+    int i = 0 , j = (int)ret.size() - 1;
+    while( i < s.size() ){
+        ret[j--] = s[len - (i++)];
+        if( i % 3 == 0 )
+            --j;
+    }
+    return ret;
+}
+
+std::string StatsElaspedTime::ToString( long long v ){
+    if( v < 1000 ) return stringFormat("%d(ms)" , v);
+    if( v < 60000 ) return stringFormat("%.2f(s)" , (float)v/1000.0f); v /= 1000.0f;
+    if( v < 3600 ) return stringFormat( "%d(m)%d(s)" , v/60 , v%60 ); v /= 60.0f;
+    if( v < 1440 ) return stringFormat( "%d(h)%d(m)" , v/60 , v%60 );
+    return stringFormat( "%d(d)%d(h)%d(m)" , v / 1440 , ( v % 1440 ) / 60 , v % 60 );
+}
+
+std::string StatsFloat::ToString( float v ){
+    return stringFormat("%.2f",v);
+}
+
 #endif
 
 void FlushStatsData()

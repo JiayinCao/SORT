@@ -53,9 +53,6 @@ public:
 	// get scene
 	const Scene& GetScene() const { return m_Scene; }
 
-	// get elapsed time
-	unsigned GetRenderingTime() const;
-
 	// output log information
 	void OutputLog() const;
 
@@ -94,11 +91,6 @@ private:
 	Sampler*		m_pSampler;
 	// sample number per pixel
 	unsigned		m_iSamplePerPixel;
-
-	// rendering time
-	unsigned		m_uRenderingTime;
-	// pre-processing time
-	unsigned		m_uPreProcessingTime;
 
 	// path for the resource
 	string			m_ResourcePath;

@@ -24,14 +24,14 @@
 
 IMPLEMENT_CREATOR( KDTree );
 
-SORT_STATS_INT("Spatial-Structure(KDTree)", "Total Ray Count", sRayCount);
-SORT_STATS_INT("Spatial-Structure(KDTree)", "Shadow Ray Count", sShadowRayCount);
-SORT_STATS_INT("Spatial-Structure(KDTree)", "Intersection Test", sIntersectionTest );
-SORT_STATS_INT("Spatial-Structure(KDTree)", "Node Count", sNodeCount);
-SORT_STATS_INT("Spatial-Structure(KDTree)", "Leaf Node Count", sLeafNodeCount);
-SORT_STATS_INT("Spatial-Structure(KDTree)", "KDTree Depth", sKDTreeDepth);
-SORT_STATS_INT("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sMaxPriCountInLeaf);
-SORT_STATS_FLOAT("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sAvgPriCountInLeaf );
+SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Total Ray Count", sRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Shadow Ray Count", sShadowRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Intersection Test", sIntersectionTest );
+SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Node Count", sNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Leaf Node Count", sLeafNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "KDTree Depth", sKDTreeDepth);
+SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sMaxPriCountInLeaf);
+SORT_STATS_FCOUNTER("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sAvgPriCountInLeaf );
 
 // destructor
 KDTree::~KDTree()
