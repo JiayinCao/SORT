@@ -144,9 +144,9 @@ void System::OutputLog() const
 	m_Scene.OutputLog();
 
     // Flush main thread data
-    FlushStatsData();
+    SortStatsFlushData();
     // Output stats data
-    PrintStatsData();
+    SortStatsPrintData();
 }
 
 // uninitialize 3rd party library

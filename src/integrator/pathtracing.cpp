@@ -24,7 +24,7 @@
 #include "log/log.h"
 #include "utility/stats.h"
 
-SORT_STATS_RATIO("Spatial-Structure(KDTree)", "Average Length of Path", sTotalPathLength , sPrimaryCount);
+SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength , sPrimaryCount);
 
 IMPLEMENT_CREATOR( PathTracing );
 
