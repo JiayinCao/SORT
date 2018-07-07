@@ -22,6 +22,9 @@
 #include "integratormethod.h"
 #include "camera/camera.h"
 #include "log/log.h"
+#include "utility/stats.h"
+
+SORT_STATS_RATIO("Spatial-Structure(KDTree)", "Average Length of Path", sTotalPathLength , sPrimaryCount);
 
 IMPLEMENT_CREATOR( PathTracing );
 
@@ -32,11 +35,15 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
 	Spectrum	L = 0.0f;
 	Spectrum	throughput = 1.0f;
+    
+    SORT_STATS(++sPrimaryCount);
 
 	int			bounces = 0;
 	Ray	r = ray;
 	while(true)
 	{
+        SORT_STATS(++sTotalPathLength);
+        
 		Intersection inter;
 
 		// get the intersection between the ray and the scene

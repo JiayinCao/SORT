@@ -25,8 +25,6 @@ System g_System;
 
 extern bool g_bBlenderMode;
 
-#include "utility/stats.h"
-
 // the main func
 #ifdef SORT_IN_WINDOWS
 int __cdecl main( int argc , char** argv )
