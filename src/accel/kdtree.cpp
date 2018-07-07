@@ -20,7 +20,6 @@
 #include "geometry/intersection.h"
 #include <algorithm>
 #include "log/log.h"
-#include "utility/stats.h"
 
 IMPLEMENT_CREATOR( KDTree );
 
@@ -31,7 +30,7 @@ SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Node Count", sNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Leaf Node Count", sLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "KDTree Depth", sKDTreeDepth);
 SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sMaxPriCountInLeaf);
-SORT_STATS_FCOUNTER("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sAvgPriCountInLeaf );
+SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sPrimitiveCount , sLeafNodeCountCopy );
 
 // destructor
 KDTree::~KDTree()
@@ -75,7 +74,7 @@ void KDTree::Build()
 	splitNode( m_root , splits , count , 0 );
 
     SORT_STATS(++sNodeCount);
-    SORT_STATS(if (sLeafNodeCount != 0) sAvgPriCountInLeaf /= sLeafNodeCount);
+    SORT_STATS(sLeafNodeCountCopy = sLeafNodeCount);
 
 	// delete temporary memory
 	SAFE_DELETE_ARRAY(m_temp);
@@ -233,7 +232,7 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum )
 
     SORT_STATS(++sLeafNodeCount);
     SORT_STATS(++sNodeCount);
-    SORT_STATS(sAvgPriCountInLeaf += prinum);
+    SORT_STATS(sPrimitiveCount += prinum);
     SORT_STATS(sMaxPriCountInLeaf = max((int)sMaxPriCountInLeaf, (int)prinum));
 }
 

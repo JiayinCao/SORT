@@ -18,6 +18,7 @@
 #pragma once
 
 #include "integrator.h"
+#include "utility/stats.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 //	definition of direct light
@@ -26,7 +27,7 @@ class	PathTracing : public Integrator
 // public method
 public:
 	DEFINE_CREATOR( PathTracing , Integrator , "pt" );
-
+    
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
@@ -45,4 +46,6 @@ public:
 
 	// output log information
 	virtual void OutputLog() const;
+    
+    SORT_STATS_ENABLE( "Path Tracing" )
 };
