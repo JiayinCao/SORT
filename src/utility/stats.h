@@ -29,6 +29,23 @@
 #include "utility/strhelper.h"
 #include "define.h"
 
+struct StatsData_Ratio{
+    long long nominator = 0;
+    long long denominator = 0;
+    StatsData_Ratio& operator += ( const StatsData_Ratio& r ){
+        nominator += r.nominator;
+        denominator += r.denominator;
+        return *this;
+    }
+};
+
+class StatsItemBase{
+public:
+    virtual std::string ToString() const = 0;
+    virtual void Merge( const StatsItemBase* item ) = 0;
+    virtual shared_ptr<StatsItemBase> MakeItem() const = 0;
+};
+
 #define SORT_STATS(eva) eva
 
 #define SORT_STATS_BASE_TYPE( cat , name , var , formatter , type )\
@@ -38,65 +55,54 @@ static thread_local StatsItemRegister g_Counter_Int_##var( update_counter_##var 
 
 #define SORT_STATS_INT_TYPE( cat , name , var , formatter) \
 SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt );\
-static Thread_Local long long& var = (g_StatsItem_##var).value;
+static Thread_Local long long& var = (g_StatsItem_##var).data;
 
 #define SORT_STATS_FLOAT_TYPE( cat , name , var , formatter ) \
 SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemFloat );\
-static Thread_Local float& var = (g_StatsItem_##var).value;
+static Thread_Local float& var = (g_StatsItem_##var).data;
+
+#define SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , formatter ) \
+SORT_STATS_BASE_TYPE( cat , name , var0 , formatter , StatsItemRatio );\
+static Thread_Local long long& var0 = (g_StatsItem_##var0).data.nominator;\
+static Thread_Local long long& var1 = (g_StatsItem_##var0).data.denominator;
 
 #define SORT_STATS_COUNTER( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsInt)
 #define SORT_STATS_TIME( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsElaspedTime)
 #define SORT_STATS_FCOUNTER( cat , name , var ) SORT_STATS_FLOAT_TYPE( cat , name , var , StatsFloat)
+#define SORT_STATS_RATIO( cat , name , var0 , var1 ) SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , StatsRatio )
 
-#define STATS_FORMATTER( name , type ) class name{ public: static std::string ToString( type v ); };
-STATS_FORMATTER( StatsElaspedTime , long long )
-STATS_FORMATTER( StatsInt , long long )
-STATS_FORMATTER( StatsFloat , float )
+#define SORT_STATS_FORMATTER( name , type ) class name{ public: static std::string ToString( type v ); };
+SORT_STATS_FORMATTER( StatsElaspedTime , long long )
+SORT_STATS_FORMATTER( StatsInt , long long )
+SORT_STATS_FORMATTER( StatsFloat , float )
+SORT_STATS_FORMATTER( StatsRatio , StatsData_Ratio )
 
-class StatsItem{
-public:
-    virtual std::string ToString() const = 0;
-    virtual void Merge( const StatsItem* item ) = 0;
-    virtual shared_ptr<StatsItem> MakeItem() const = 0;
+#define SORT_STATS_ITEM( NAME , DATA ) \
+template<class T>\
+class NAME : public StatsItemBase{\
+public:\
+    std::string ToString() const override{\
+        return T::ToString(data);\
+    }\
+    void Merge( const StatsItemBase* item ) override{\
+        auto p = dynamic_cast<const NAME*>(item);\
+        sAssert( p , "Merging incorrect stats data." );\
+        data += p->data;\
+    }\
+    shared_ptr<StatsItemBase> MakeItem() const override{\
+        return make_shared<NAME>();\
+    }\
+    DATA data;\
 };
 
-template<class T>
-class StatsItemInt : public StatsItem{
-public:
-    std::string ToString() const override{
-        return T::ToString(value);
-    }
-    void Merge( const StatsItem* item ) override{
-        auto p = dynamic_cast<const StatsItemInt*>(item);
-        sAssert( p , "Merging incorrect stats data." );
-        value += p->value;
-    }
-    shared_ptr<StatsItem> MakeItem() const override{
-        return make_shared<StatsItemInt>();
-    }
-    long long value = 0;
-};
-template<class T>
-class StatsItemFloat : public StatsItem{
-public:
-    std::string ToString() const override{
-        return T::ToString(value);
-    }
-    void Merge( const StatsItem* item ) override{
-        auto p = dynamic_cast<const StatsItemFloat*>(item);
-        sAssert( p , "Merging incorrect stats data." );
-        value += p->value;
-    }
-    shared_ptr<StatsItem> MakeItem() const override{
-        return make_shared<StatsItemFloat>();
-    }
-    float value = 0.0f;
-};
+SORT_STATS_ITEM( StatsItemRatio , StatsData_Ratio )
+SORT_STATS_ITEM( StatsItemFloat , float )
+SORT_STATS_ITEM( StatsItemInt , long long )
 
 // StatsSummary keeps all stats data after the rendering is done
 class StatsSummary {
 public:
-    void FlushCounter(const std::string& category, const std::string& varname, const StatsItem* var) {
+    void FlushCounter(const std::string& category, const std::string& varname, const StatsItemBase* var) {
         std::lock_guard<std::mutex> lock(mutex);
         if( counters[category].count(varname) == 0 )
             counters[category][varname] = var->MakeItem();
@@ -105,7 +111,7 @@ public:
     void PrintStats() const;
 
 private:
-    std::map<string, std::map<string, std::shared_ptr<StatsItem>>> counters;
+    std::map<string, std::map<string, std::shared_ptr<StatsItemBase>>> counters;
     std::mutex mutex;
 };
 
