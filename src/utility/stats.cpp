@@ -103,6 +103,10 @@ std::string StatsFloat::ToString( float v ){
     return stringFormat("%.2f",v);
 }
 
+std::string StatsRatio::ToString( StatsData_Ratio ratio ){
+    return stringFormat("%d/%d",ratio.nominator,ratio.denominator);
+}
+
 #endif
 
 void FlushStatsData()
