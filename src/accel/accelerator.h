@@ -21,6 +21,7 @@
 #include <vector>
 #include "geometry/bbox.h"
 #include "utility/creator.h"
+#include "utility/stats.h"
 
 class Primitive;
 class Intersection;

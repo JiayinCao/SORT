@@ -18,7 +18,6 @@
 #pragma once
 
 #include "accelerator.h"
-#include "utility/stats.h"
 
 //! @brief K-Dimensional Tree or KD-Tree.
 /**

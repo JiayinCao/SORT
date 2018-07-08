@@ -19,7 +19,6 @@
 
 #include "accelerator.h"
 #include "geometry/bbox.h"
-#include "utility/stats.h"
 
 //! @brief OcTree
 /**

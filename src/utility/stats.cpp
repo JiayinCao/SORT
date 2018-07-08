@@ -28,17 +28,15 @@ public:
         container.push_back(item);
     }
     void FlushData() {
-        sAssert(!flushed, LOG_GENERAL);
+        static std::mutex statsMutex;
+        std::lock_guard<std::mutex> lock(statsMutex);
         for (const StatsItemRegister* item : container)
             item->FlushData();
-        flushed = true;
     }
 
 private:
     // Container for all stats per thread
     std::vector<const StatsItemRegister*> container;
-    // To make sure we don't flush data twice
-    bool flushed = false;
 };
 
 void StatsSummary::PrintStats() const {
@@ -61,15 +59,17 @@ void StatsSummary::PrintStats() const {
     slog(INFO, GENERAL, "-------------------------Statistics-------------------------");
 }
 
-static StatsSummary                     g_StatsSummary;
-static Thread_Local StatsItemContainer  g_StatsItemContainer;
+static StatsSummary             g_StatsSummary;
+static StatsItemContainer*      g_pStatsItemContainer = nullptr;
 
 // Recording all necessary data in constructor
-StatsItemRegister::StatsItemRegister( const stats_update f ): func(f) 
-{
+StatsItemRegister::StatsItemRegister( const stats_update f ): func(f){
     static std::mutex statsMutex;
     std::lock_guard<std::mutex> lock(statsMutex);
-    g_StatsItemContainer.Register(this);
+    
+    if( nullptr == g_pStatsItemContainer )
+        g_pStatsItemContainer = new StatsItemContainer();
+    g_pStatsItemContainer->Register(this);
 }
 
 // Flush the data into StatsSummary
@@ -123,8 +123,12 @@ std::string StatsRayPerSecond::ToString( StatsData_Ratio ratio ){
 
 #endif
 
-void SortStatsFlushData(){
-    SORT_STATS(g_StatsItemContainer.FlushData());
+void SortStatsFlushData( bool mainThread ){
+#ifdef SORT_ENABLE_STATS_COLLECTION
+    if( !g_pStatsItemContainer ) return;
+    g_pStatsItemContainer->FlushData();
+    if( mainThread ) SAFE_DELETE(g_pStatsItemContainer); // don't need it anymore
+#endif
 }
 void SortStatsPrintData(){
     SORT_STATS(g_StatsSummary.PrintStats());

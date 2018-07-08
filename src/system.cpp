@@ -43,9 +43,12 @@
 extern bool g_bBlenderMode;
 extern int  g_iTileSize;
 
+SORT_STATS_DEFINE_COUNTER(sPreprocessTime)
+SORT_STATS_DEFINE_COUNTER(sRenderingTime)
+
 SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTime);
 SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTime);
-SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRaysPerSecond_RC , sRaysPerSecond_Time);
+SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount , sRenderingTime);
 
 // render the image
 void System::Render()
@@ -64,7 +67,6 @@ void System::Render()
 	// stop timer
 	auto renderingTime = Timer::GetSingleton().StopTimer();
     SORT_STATS( sRenderingTime = renderingTime );
-    SORT_STATS( sRaysPerSecond_Time = renderingTime );
 }
 
 // load the scene

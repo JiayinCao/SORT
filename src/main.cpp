@@ -71,7 +71,7 @@ int main( int argc , char** argv )
 	g_System.Uninit();
 	
     // Flush main thread data
-    SortStatsFlushData();
+    SortStatsFlushData(true);
     // Output stats data
     SortStatsPrintData();
     
