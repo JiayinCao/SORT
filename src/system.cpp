@@ -45,23 +45,7 @@ extern int  g_iTileSize;
 
 SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTime);
 SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTime);
-//SORT_STATS_FCOUNTER("Performance", "Number of rays per second(MRays/s)", sRaysPerSecond);
-
-// constructor
-System::System()
-{
-	_preInit();
-}
-
-// pre-initialize
-void System::_preInit()
-{
-	// setup default value
-	m_camera = 0;
-	m_thread_num = 1;
-	m_pProgress = 0;
-    m_imagesensor = 0;
-}
+SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRaysPerSecond_RC , sRaysPerSecond_Time);
 
 // render the image
 void System::Render()
@@ -80,6 +64,7 @@ void System::Render()
 	// stop timer
 	auto renderingTime = Timer::GetSingleton().StopTimer();
     SORT_STATS( sRenderingTime = renderingTime );
+    SORT_STATS( sRaysPerSecond_Time = renderingTime );
 }
 
 // load the scene

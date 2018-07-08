@@ -22,14 +22,16 @@
 #include "managers/memmanager.h"
 #include "geometry/intersection.h"
 
-SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Total Ray Count", sRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Shadow Ray Count", sShadowRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Intersection Test", sIntersectionTest );
-SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Node Count", sNodeCount);
-SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Leaf Node Count", sLeafNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Total Ray Count", sBvhRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Shadow Ray Count", sBvhShadowRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Intersection Test", sBvhIntersectionTest );
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Node Count", sBvhNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Leaf Node Count", sBvhLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "BVH Depth", sBVHDepth);
-SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sMaxPriCountInLeaf);
-SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sPrimitiveCount , sLeafNodeCountCopy );
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sBvhMaxPriCountInLeaf);
+SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sBvhPrimitiveCount , sBvhLeafNodeCountCopy );
+
+SORT_STATS_DECLERE_COUNTER(sRaysPerSecond_RC);
 
 static const unsigned   BVH_LEAF_PRILIST_MEMID  = 1027;
 static const unsigned   BVH_SPLIT_COUNT         = 16;
@@ -74,8 +76,8 @@ void Bvh::Build()
     m_root = new Bvh_Node();
 	splitNode( m_root , 0u , (unsigned)m_primitives->size() , 0u );
     
-    SORT_STATS(++sNodeCount);
-    SORT_STATS(sLeafNodeCountCopy = sLeafNodeCount);
+    SORT_STATS(++sBvhNodeCount);
+    SORT_STATS(sBvhLeafNodeCountCopy = sBvhLeafNodeCount);
 }
 
 // recursively split BVH node
@@ -113,7 +115,7 @@ void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned
     node->right = new Bvh_Node();
 	splitNode( node->right , mid , _end , depth + 1 );
     
-    SORT_STATS(sNodeCount+=2);
+    SORT_STATS(sBvhNodeCount+=2);
 }
 
 // pick best split plane among all possible splits
@@ -175,16 +177,17 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end )
 	node->pri_num = _end - _start;
 	node->pri_offset = _start;
 
-    SORT_STATS(++sLeafNodeCount);
-    SORT_STATS(sMaxPriCountInLeaf = max( sMaxPriCountInLeaf , (long long)node->pri_num) );
-    SORT_STATS(sPrimitiveCount += (long long)(long long)node->pri_num);
+    SORT_STATS(++sBvhLeafNodeCount);
+    SORT_STATS(sBvhMaxPriCountInLeaf = max( sBvhMaxPriCountInLeaf , (long long)node->pri_num) );
+    SORT_STATS(sBvhPrimitiveCount += (long long)node->pri_num);
 }
 
 // get the intersection between the ray and the primitive set
 bool Bvh::GetIntersect( const Ray& ray , Intersection* intersect ) const
 {
-    SORT_STATS(++sRayCount);
-    SORT_STATS(sShadowRayCount += intersect != nullptr);
+    SORT_STATS(++sBvhRayCount);
+    SORT_STATS(++sRaysPerSecond_RC);
+    SORT_STATS(sBvhShadowRayCount += intersect != nullptr);
     
 	float fmax;
 	float fmin = Intersect( ray , m_bbox , &fmax );
@@ -216,7 +219,7 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         
         bool inter = false;
         for( unsigned i = _start ; i < _end ; i++ ){
-            SORT_STATS(++sIntersectionTest);
+            SORT_STATS(++sBvhIntersectionTest);
             inter |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
             if( intersect == 0 && inter )
                 return true;

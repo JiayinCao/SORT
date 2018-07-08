@@ -48,13 +48,13 @@ public:
 
 	// it means nothing to set the size of the image file
 	// set the size of the texture
-	virtual void	SetSize( unsigned w , unsigned h ){}
+	void	SetSize( unsigned w , unsigned h ) override{}
 
 	// release the texture memory
 	virtual void Release();
 
 	// whether the image is valid
-	bool IsValid() { return (bool)m_pMemory; }
+	bool IsValid() override { return (bool)m_pMemory; }
 
 	// get average color
 	Spectrum GetAverage() const;

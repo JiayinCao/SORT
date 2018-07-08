@@ -36,8 +36,6 @@ class	Scene
 {
 // public method
 public:
-	// default constructor
-	Scene(){ _init(); }
 	// destructor
 	~Scene(){ Release(); }
 
@@ -101,12 +99,12 @@ private:
 	// the light
 	vector<Light*>		m_lights;
 	// distribution of light power
-	Distribution1D*		m_pLightsDis;
+	Distribution1D*		m_pLightsDis = nullptr;
 	// the sky light
-	Light*				m_skyLight;
+	Light*				m_skyLight = nullptr;
 
 	// the acceleration structure for the scene
-	Accelerator*		m_pAccelerator;
+	Accelerator*		m_pAccelerator = nullptr;
 
 	// the file name for the scene
 	string		m_filename;

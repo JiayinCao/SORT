@@ -30,14 +30,7 @@
 #include "utility/stats.h"
 
 SORT_STATS_COUNTER("Scene", "Total Primitive Count", sScenePrimitiveCount);
-
-// initialize default data
-void Scene::_init()
-{
-	m_pAccelerator = 0;
-	m_pLightsDis = 0;
-	m_skyLight = 0;
-}
+SORT_STATS_COUNTER("Scene", "Total Light Count", sSceneLightCount);
 
 // load the scene from script file
 bool Scene::LoadScene( const string& str )
@@ -188,6 +181,7 @@ bool Scene::LoadScene( const string& str )
 	SetResourcePath( oldpath );
     
     SORT_STATS(sScenePrimitiveCount=(long long)m_triBuf.size());
+    SORT_STATS(sSceneLightCount=(long long)m_lights.size());
 
 	return true;
 }
