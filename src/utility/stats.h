@@ -109,11 +109,11 @@ public:\
 #define SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , formatter ) \
     extern Thread_Local long long var0;\
     extern Thread_Local long long var1;\
-    static Thread_Local StatsData_Ratio g##var0_##var1( var0 , var1 );\
-    static long long g_Global_Ratio0_##var0 = 0.0f;\
-    static long long g_Global_Ratio1_##var1 = 0.0f;\
-    static Thread_Local StatsData_Ratio g_Global_g##var0_##var1( g_Global_Ratio0_##var0 , g_Global_Ratio1_##var1 );\
-    SORT_STATS_BASE_TYPE( cat , name , g##var0_##var1 , formatter , StatsItemRatio , StatsData_Ratio);
+    static Thread_Local StatsData_Ratio g##var0##_##var1( var0 , var1 );\
+    static long long g_Global_Ratio0_##var0##_##var1##_##var0 = 0.0f;\
+    static long long g_Global_Ratio1_##var0##_##var1##_##var1 = 0.0f;\
+    static Thread_Local StatsData_Ratio g_Global_g##var0##_##var1( g_Global_Ratio0_##var0##_##var1##_##var0 , g_Global_Ratio1_##var0##_##var1##_##var1 );\
+    SORT_STATS_BASE_TYPE( cat , name , g##var0##_##var1 , formatter , StatsItemRatio , StatsData_Ratio);
 
 #define SORT_STATS_COUNTER( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsInt)
 #define SORT_STATS_TIME( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsElaspedTime)
