@@ -20,6 +20,7 @@
 #include "utility/strhelper.h"
 
 #ifdef SORT_ENABLE_STATS_COLLECTION
+
 // This is a container holding all statsItem per thread
 class StatsItemContainer {
 public:

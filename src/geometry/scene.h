@@ -56,9 +56,6 @@ public:
 	// release the memory of the scene
 	void	Release();
 
-	// output log information
-	void	OutputLog() const;
-
 	// preprocess
 	void	PreProcess();
 

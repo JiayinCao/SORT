@@ -45,6 +45,7 @@ extern int  g_iTileSize;
 
 SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTime);
 SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTime);
+//SORT_STATS_FCOUNTER("Performance", "Number of rays per second(MRays/s)", sRaysPerSecond);
 
 // constructor
 System::System()
@@ -135,18 +136,6 @@ void System::_outputProgress()
         if( taskDone == m_totalTask )
             break;
     }
-}
-
-// output log information
-void System::OutputLog() const
-{
-	// output scene information first
-	m_Scene.OutputLog();
-
-    // Flush main thread data
-    SortStatsFlushData();
-    // Output stats data
-    SortStatsPrintData();
 }
 
 // uninitialize 3rd party library
