@@ -116,6 +116,11 @@ std::string StatsFloatRatio::ToString( StatsData_Ratio ratio ){
     return stringFormat("%.2f",r);
 }
 
+std::string StatsRayPerSecond::ToString( StatsData_Ratio ratio ){
+    float r = (float)ratio.nominator / (float)ratio.denominator * 0.001f;
+    return stringFormat("%.2f(MRay/s)",r);
+}
+
 #endif
 
 void SortStatsFlushData(){

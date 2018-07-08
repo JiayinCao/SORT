@@ -19,14 +19,16 @@
 #include "geometry/primitive.h"
 #include "log/log.h"
 
-SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Total Ray Count", sRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Shadow Ray Count", sShadowRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Intersection Test", sIntersectionTest );
-SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Node Count", sNodeCount);
-SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Leaf Node Count", sLeafNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Total Ray Count", sOcTreeRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Shadow Ray Count", sOcTreeShadowRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Intersection Test", sOcTreeIntersectionTest );
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Node Count", sOcTreeNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Leaf Node Count", sOcTreeLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "OcTree Depth", sOcTreeDepth);
-SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sMaxPriCountInLeaf);
-SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sPrimitiveCount , sLeafNodeCountCopy );
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOcTreeMaxPriCountInLeaf);
+SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCountCopy );
+
+SORT_STATS_DECLERE_COUNTER(sRaysPerSecond_RC);
 
 IMPLEMENT_CREATOR( OcTree );
 
@@ -42,8 +44,9 @@ OcTree::~OcTree()
 // @return 'true' if the ray pirece one of the primitve in the list
 bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
-    SORT_STATS(++sRayCount);
-    SORT_STATS(sShadowRayCount += intersect == nullptr);
+    SORT_STATS(++sRaysPerSecond_RC);
+    SORT_STATS(++sOcTreeRayCount);
+    SORT_STATS(sOcTreeShadowRayCount += intersect == nullptr);
     
 	float fmax;
 	float fmin = Intersect( r , m_bbox , &fmax );
@@ -80,8 +83,8 @@ void OcTree::Build()
 	// split octree node
 	splitNode( m_pRoot , container , 0 );
     
-    SORT_STATS(++sNodeCount);
-    SORT_STATS(sLeafNodeCountCopy = sLeafNodeCount);
+    SORT_STATS(++sOcTreeNodeCount);
+    SORT_STATS(sOcTreeLeafNodeCountCopy = sOcTreeLeafNodeCount);
 }
 
 // Release OcTree memory.
@@ -124,7 +127,7 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 		childcontainer[i] = new NodeTriangleContainer();
 	}
 	
-    SORT_STATS(sNodeCount+=8);
+    SORT_STATS(sOcTreeNodeCount+=8);
     
 	// get the center point of this tree node
 	int offset = 0;
@@ -184,9 +187,9 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 // @param container Container holdes all triangle information in this node.
 void OcTree::makeLeaf( OcTreeNode* node , NodeTriangleContainer* container )
 {
-    SORT_STATS(++sLeafNodeCount);
-    SORT_STATS(sMaxPriCountInLeaf = max( sMaxPriCountInLeaf , (long long)container->primitives.size()) );
-    SORT_STATS(sPrimitiveCount += (long long)container->primitives.size());
+    SORT_STATS(++sOcTreeLeafNodeCount);
+    SORT_STATS(sOcTreeMaxPriCountInLeaf = max( sOcTreeMaxPriCountInLeaf , (long long)container->primitives.size()) );
+    SORT_STATS(sOcTreePrimitiveCount += (long long)container->primitives.size());
     
     for( auto primitive : container->primitives )
 		node->primitives.push_back( primitive );
@@ -214,7 +217,7 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 	// Iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
 	if( node->child[0] == 0 ){
         for( auto tri : node->primitives ){
-            SORT_STATS(++sIntersectionTest);
+            SORT_STATS(++sOcTreeIntersectionTest);
 			inter |= tri->GetIntersect( ray , intersect );
 			if( !intersect && inter )
 				return true;
