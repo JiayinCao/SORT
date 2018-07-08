@@ -19,7 +19,7 @@
 
 #include "accelerator.h"
 #include "geometry/bbox.h"
-
+#include "utility/stats.h"
 
 //! @brief OcTree
 /**
@@ -52,9 +52,6 @@ public:
 
 	//! Build the OcTree in O(Nlg(N)) time
 	virtual void Build();
-
-	//! output log information
-	void OutputLog() const;
 
     //! OcTree node structure
     struct OcTreeNode{
@@ -100,4 +97,6 @@ private:
 	//! @brief Release OcTree memory.
 	//! @param node Sub-tree belongs to this node will be released recursively.
 	void releaseOcTree( OcTreeNode* node );
+    
+    SORT_STATS_ENABLE( "Spatial-Structure(OcTree)" )
 };

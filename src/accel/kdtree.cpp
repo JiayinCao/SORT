@@ -83,6 +83,8 @@ void KDTree::Build()
 // split node
 void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth )
 {
+    SORT_STATS(sKDTreeDepth = max((int)sKDTreeDepth, (int)depth+1));
+    
 	if( prinum < m_maxTriInLeaf || depth > m_maxDepth ){
 		makeLeaf( node , splits , prinum );
 		return;
@@ -160,7 +162,6 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	splitNode( node->rightChild , r_splits , r_num , depth + 1 );
 
     SORT_STATS(sNodeCount += 2);
-    SORT_STATS(sKDTreeDepth = max((int)sKDTreeDepth, (int)depth));
 }
 
 // evaluate sah for a specific split plane

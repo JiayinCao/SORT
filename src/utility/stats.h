@@ -133,10 +133,8 @@ public:
 
 private:
     std::map<string, std::map<string, std::shared_ptr<StatsItemBase>>> counters;
-    std::unordered_set<std::string> categories;
+    std::unordered_set<std::string> categories = { "Performance" , "Scene" };
     std::mutex mutex;
-    
-    SORT_STATS_ENABLE( "Performance" );
 };
 
 using stats_update = std::function<void(StatsSummary&)>;

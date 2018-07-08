@@ -53,9 +53,6 @@ public:
 	// get scene
 	const Scene& GetScene() const { return m_Scene; }
 
-	// output log information
-	void OutputLog() const;
-
 	// uninitialize
 	void Uninit();
 
