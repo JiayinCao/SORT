@@ -18,6 +18,7 @@
 #pragma once
 
 #include "accelerator.h"
+#include "utility/stats.h"
 
 //! @brief Uniform Grid.
 /**
@@ -51,9 +52,6 @@ public:
 
 	//! Build uniform grid structure in O(N).
     void Build() override;
-
-	//! Output log information
-	void OutputLog() const override;
 
 private:
 	unsigned	m_voxelCount = 0;               /**< Total number of voxels. */
@@ -90,4 +88,6 @@ private:
     //! @param nextT        The intersected position of the ray and the next to-be-traversed voxel along the ray.
     //! @return             It will return true if there is an intersection, otherwise it returns false.
 	bool getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const;
+    
+    SORT_STATS_ENABLE( "Spatial-Structure(UniformGrid)" )
 };

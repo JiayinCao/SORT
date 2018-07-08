@@ -19,6 +19,7 @@
 
 #include "accelerator.h"
 #include "geometry/primitive.h"
+#include "utility/stats.h"
 
 //! @brief Bounding volume hierarchy.
 /**
@@ -55,9 +56,6 @@ public:
     //! Build BVH structure in O(N*lg(N)).
 	void Build() override;
 
-	//! Output log information
-	void OutputLog() const override;
-
     //! Bounding volume hierarchy node.
     struct Bvh_Node
     {
@@ -90,12 +88,6 @@ private:
     Bvh_Node*       m_root = nullptr;   /**< Root node of the BVH structure. */
 
 	const unsigned	m_maxPriInLeaf = 8; /**< Maximum primitives in a leaf node. During BVH construction, a node with less primitives will be marked as a leaf node. */
-
-    // BVH information
-	unsigned	m_totalNode = 0;        /**< Total number of nodes in the BVH. */
-	unsigned	m_leafNode = 0;         /**< Number of leaf nodes in the BVH. */
-	unsigned	m_bvhDepth = 0;         /**< Depth of the BVH. */
-	unsigned	m_maxLeafTriNum = 0;    /**< Real maximum number of primitives in the leaf node after construction. */
 
 	//! Malloc necessary memory.
 	void mallocMemory();
@@ -148,4 +140,6 @@ private:
     //! @brief Delete all nodes in the BVH.
     //! @param node The node to be deleted.
     void deleteNode( Bvh_Node* node );
+    
+    SORT_STATS_ENABLE( "Spatial-Structure(BVH)" )
 };

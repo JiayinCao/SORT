@@ -22,6 +22,15 @@
 #include "managers/memmanager.h"
 #include "geometry/intersection.h"
 
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Total Ray Count", sRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Shadow Ray Count", sShadowRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Intersection Test", sIntersectionTest );
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Node Count", sNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Leaf Node Count", sLeafNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "BVH Depth", sBVHDepth);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sMaxPriCountInLeaf);
+SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sPrimitiveCount , sLeafNodeCountCopy );
+
 static const unsigned   BVH_LEAF_PRILIST_MEMID  = 1027;
 static const unsigned   BVH_SPLIT_COUNT         = 16;
 static const float      BVH_INV_SPLIT_COUNT     = 0.0625f;
@@ -32,13 +41,6 @@ IMPLEMENT_CREATOR( Bvh );
 Bvh::~Bvh()
 {
 	deallocMemory();
-}
-
-// output log information
-void Bvh::OutputLog() const
-{
-    slog( INFO , SPATIAL_ACCELERATOR , "Spatial accelerator type is BVH ( Bounding Volume Hierarchy )." );
-    slog( DEBUG , SPATIAL_ACCELERATOR , stringFormat( "Maximum depth in BVH tree is %d. Total number of nodes in it is %d, number of inner nodes is %d, number of leaf nodes is %d. Average number of triangles per leaf nodes is %f, maximum number of triangles in leaf nodes is %d" , m_bvhDepth , m_totalNode , m_totalNode - m_leafNode , m_leafNode , (((float)m_primitives->size())/m_leafNode) , m_maxPriInLeaf ) );
 }
 
 // malloc the memory
@@ -71,14 +73,16 @@ void Bvh::Build()
 	// recursively split node
     m_root = new Bvh_Node();
 	splitNode( m_root , 0u , (unsigned)m_primitives->size() , 0u );
+    
+    SORT_STATS(++sNodeCount);
+    SORT_STATS(sLeafNodeCountCopy = sLeafNodeCount);
 }
 
 // recursively split BVH node
 void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned depth )
 {
-	m_totalNode ++;
-	m_bvhDepth = max( depth , m_bvhDepth );
-
+    SORT_STATS(sBVHDepth = max( sBVHDepth , (long long)depth + 1 ) );
+    
 	// generate the bounding box for the node
 	for( unsigned i = _start ; i < _end ; i++ )
 		node->bbox.Union( m_bvhpri[i].GetBBox() );
@@ -108,6 +112,8 @@ void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned
 
     node->right = new Bvh_Node();
 	splitNode( node->right , mid , _end , depth + 1 );
+    
+    SORT_STATS(sNodeCount+=2);
 }
 
 // pick best split plane among all possible splits
@@ -169,13 +175,17 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end )
 	node->pri_num = _end - _start;
 	node->pri_offset = _start;
 
-	m_leafNode++;
-	m_maxLeafTriNum = max( m_maxLeafTriNum , node->pri_num );
+    SORT_STATS(++sLeafNodeCount);
+    SORT_STATS(sMaxPriCountInLeaf = max( sMaxPriCountInLeaf , (long long)node->pri_num) );
+    SORT_STATS(sPrimitiveCount += (long long)(long long)node->pri_num);
 }
 
 // get the intersection between the ray and the primitive set
 bool Bvh::GetIntersect( const Ray& ray , Intersection* intersect ) const
 {
+    SORT_STATS(++sRayCount);
+    SORT_STATS(sShadowRayCount += intersect != nullptr);
+    
 	float fmax;
 	float fmin = Intersect( ray , m_bbox , &fmax );
 	if( fmin < 0.0f )
@@ -206,6 +216,7 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         
         bool inter = false;
         for( unsigned i = _start ; i < _end ; i++ ){
+            SORT_STATS(++sIntersectionTest);
             inter |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
             if( intersect == 0 && inter )
                 return true;

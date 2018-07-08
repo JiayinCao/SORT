@@ -19,6 +19,7 @@
 #include "sort.h"
 #include "system.h"
 #include "log/log.h"
+#include "utility/stats.h"
 
 // the global system
 System g_System;
@@ -64,13 +65,15 @@ int main( int argc , char** argv )
 	{
 		// do ray tracing
 		g_System.Render();
-
-		// output log information
-		g_System.OutputLog();
 	}
 
 	// unitialize the system
 	g_System.Uninit();
 	
+    // Flush main thread data
+    SortStatsFlushData();
+    // Output stats data
+    SortStatsPrintData();
+    
 	return 0;
 }

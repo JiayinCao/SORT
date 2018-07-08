@@ -27,6 +27,9 @@
 #include "light/light.h"
 #include "shape/shape.h"
 #include "utility/sassert.h"
+#include "utility/stats.h"
+
+SORT_STATS_COUNTER("Scene", "Total Primitive Count", sScenePrimitiveCount);
 
 // initialize default data
 void Scene::_init()
@@ -183,6 +186,8 @@ bool Scene::LoadScene( const string& str )
 
 	// restore resource path
 	SetResourcePath( oldpath );
+    
+    SORT_STATS(sScenePrimitiveCount=(long long)m_triBuf.size());
 
 	return true;
 }
@@ -258,14 +263,6 @@ void Scene::_generateTriBuf()
 		(*it)->FillTriBuf( m_triBuf );
 		it++;
 	}
-}
-
-// output log information
-void Scene::OutputLog() const
-{
-    slog( INFO , GENERAL , stringFormat("Triangle number is %d." , m_triBuf.size() ) );
-	if( m_pAccelerator )
-		m_pAccelerator->OutputLog();
 }
 
 // preprocess

@@ -21,6 +21,14 @@
 #include "log/log.h"
 #include "utility/sassert.h"
 
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Total Ray Count", sRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Shadow Ray Count", sShadowRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Intersection Test", sIntersectionTest );
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Grid Count", sGridCount);
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension X", sUniformGridX);
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGridY);
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
+
 IMPLEMENT_CREATOR( UniGrid );
 
 // destructor
@@ -45,6 +53,9 @@ void UniGrid::release()
 // get the intersection between the ray and the primitive set
 bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
+    SORT_STATS(++sRayCount);
+    SORT_STATS(sShadowRayCount += intersect == nullptr);
+    
 	if( m_pVoxels == 0 || m_primitives == 0 )
 		return false;
 
@@ -168,6 +179,11 @@ void UniGrid::Build()
 				}
 		it++;
 	}
+    
+    SORT_STATS(sUniformGridX = m_voxelNum[0]);
+    SORT_STATS(sUniformGridY = m_voxelNum[1]);
+    SORT_STATS(sUniformGridZ = m_voxelNum[2]);
+    SORT_STATS(sGridCount = m_voxelCount);
 }
 
 // voxel id from point
@@ -200,6 +216,7 @@ bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned vo
     
 	bool inter = false;
     for( auto voxel : m_pVoxels[voxelId] ){
+        SORT_STATS(++sIntersectionTest);
 		// get intersection
 		inter |= voxel->GetIntersect( r , intersect );
 		if( intersect == 0 && inter )
@@ -208,15 +225,3 @@ bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned vo
 
 	return inter && ( intersect->t < nextT + 0.00001f );
 }
-
-// output log information
-void UniGrid::OutputLog() const
-{
-	unsigned count = 0;
-	for( unsigned i = 0 ; i < m_voxelCount ; i++ )
-		count += (unsigned)m_pVoxels[i].size();
-    
-    slog( INFO , SPATIAL_ACCELERATOR , "Spatial accelerator is Uniform Grid." );
-    slog( DEBUG , SPATIAL_ACCELERATOR , stringFormat( "Total grid count is %d. Grid dimension is %d x %d x %d. Average number of triangles per grid is %f" , m_voxelCount , m_voxelNum[0] , m_voxelNum[1] , m_voxelNum[2] , ((m_voxelCount==0)?0:(float)count/(float)m_voxelCount) ) );
-}
-

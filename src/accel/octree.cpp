@@ -19,6 +19,15 @@
 #include "geometry/primitive.h"
 #include "log/log.h"
 
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Total Ray Count", sRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Shadow Ray Count", sShadowRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Intersection Test", sIntersectionTest );
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Node Count", sNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Leaf Node Count", sLeafNodeCount);
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "OcTree Depth", sOcTreeDepth);
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sMaxPriCountInLeaf);
+SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sPrimitiveCount , sLeafNodeCountCopy );
+
 IMPLEMENT_CREATOR( OcTree );
 
 // destructor
@@ -33,6 +42,9 @@ OcTree::~OcTree()
 // @return 'true' if the ray pirece one of the primitve in the list
 bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
+    SORT_STATS(++sRayCount);
+    SORT_STATS(sShadowRayCount += intersect == nullptr);
+    
 	float fmax;
 	float fmin = Intersect( r , m_bbox , &fmax );
 	if( fmin < 0.0f )
@@ -67,12 +79,9 @@ void OcTree::Build()
 
 	// split octree node
 	splitNode( m_pRoot , container , 0 );
-}
-
-// output log information
-void OcTree::OutputLog() const
-{
-    slog( INFO , SPATIAL_ACCELERATOR , "Spatial accelerator is OcTree." );
+    
+    SORT_STATS(++sNodeCount);
+    SORT_STATS(sLeafNodeCountCopy = sLeafNodeCount);
 }
 
 // Release OcTree memory.
@@ -98,6 +107,8 @@ void OcTree::releaseOcTree( OcTreeNode* node ){
 // @param depth Current depth of this node.
 void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , unsigned depth )
 {
+    SORT_STATS( sOcTreeDepth = max( sOcTreeDepth , (long long) depth + 1 ) );
+    
 	// make a leaf if there are not enough points
 	if( container->primitives.size() < (int)m_uMaxTriInLeaf || depth > m_uMaxDepthInOcTree ){
 		// make leaf
@@ -113,6 +124,8 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 		childcontainer[i] = new NodeTriangleContainer();
 	}
 	
+    SORT_STATS(sNodeCount+=8);
+    
 	// get the center point of this tree node
 	int offset = 0;
 	Vector length = ( node->bb.m_Max - node->bb.m_Min ) * 0.5f;
@@ -171,6 +184,10 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 // @param container Container holdes all triangle information in this node.
 void OcTree::makeLeaf( OcTreeNode* node , NodeTriangleContainer* container )
 {
+    SORT_STATS(++sLeafNodeCount);
+    SORT_STATS(sMaxPriCountInLeaf = max( sMaxPriCountInLeaf , (long long)container->primitives.size()) );
+    SORT_STATS(sPrimitiveCount += (long long)container->primitives.size());
+    
     for( auto primitive : container->primitives )
 		node->primitives.push_back( primitive );
 	delete container;
@@ -197,6 +214,7 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 	// Iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
 	if( node->child[0] == 0 ){
         for( auto tri : node->primitives ){
+            SORT_STATS(++sIntersectionTest);
 			inter |= tri->GetIntersect( ray , intersect );
 			if( !intersect && inter )
 				return true;
