@@ -22,16 +22,21 @@
 #include "managers/memmanager.h"
 #include "geometry/intersection.h"
 
-SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Total Ray Count", sBvhRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Shadow Ray Count", sBvhShadowRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Intersection Test", sBvhIntersectionTest );
+SORT_STATS_DEFINE_COUNTER(sBvhNodeCount)
+SORT_STATS_DEFINE_COUNTER(sBvhLeafNodeCount)
+SORT_STATS_DEFINE_COUNTER(sBVHDepth)
+SORT_STATS_DEFINE_COUNTER(sBvhMaxPriCountInLeaf)
+SORT_STATS_DEFINE_COUNTER(sBvhPrimitiveCount)
+SORT_STATS_DEFINE_COUNTER(sBvhLeafNodeCountCopy)
+
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Total Ray Count", sRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Shadow Ray Count", sShadowRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Intersection Test", sIntersectionTest );
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Node Count", sBvhNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Leaf Node Count", sBvhLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "BVH Depth", sBVHDepth);
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sBvhMaxPriCountInLeaf);
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sBvhPrimitiveCount , sBvhLeafNodeCountCopy );
-
-SORT_STATS_DECLERE_COUNTER(sRaysPerSecond_RC);
 
 static const unsigned   BVH_LEAF_PRILIST_MEMID  = 1027;
 static const unsigned   BVH_SPLIT_COUNT         = 16;
@@ -185,9 +190,8 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end )
 // get the intersection between the ray and the primitive set
 bool Bvh::GetIntersect( const Ray& ray , Intersection* intersect ) const
 {
-    SORT_STATS(++sBvhRayCount);
-    SORT_STATS(++sRaysPerSecond_RC);
-    SORT_STATS(sBvhShadowRayCount += intersect != nullptr);
+    SORT_STATS(++sRayCount);
+    SORT_STATS(sShadowRayCount += intersect != nullptr);
     
 	float fmax;
 	float fmin = Intersect( ray , m_bbox , &fmax );
@@ -219,7 +223,7 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         
         bool inter = false;
         for( unsigned i = _start ; i < _end ; i++ ){
-            SORT_STATS(++sBvhIntersectionTest);
+            SORT_STATS(++sIntersectionTest);
             inter |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
             if( intersect == 0 && inter )
                 return true;

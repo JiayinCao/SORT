@@ -19,8 +19,10 @@
 
 #include "sort.h"
 
+#include "multithread/stdthread.h"
+
 // Flush per-thread stats to StatsSummary, this should be called at the end of per-thread
-void SortStatsFlushData();
+void SortStatsFlushData( bool mainThread = false );
 // Print Stats Result, this should be called in main thread after all rendering thread is done
 void SortStatsPrintData();
 // Enable specific category
@@ -38,13 +40,14 @@ void SortStatsEnableCategory( const std::string& s );
 #include "define.h"
 
 struct StatsData_Ratio{
-    long long nominator = 0;
-    long long denominator = 0;
+    long long& nominator;
+    long long& denominator;
     StatsData_Ratio& operator += ( const StatsData_Ratio& r ){
         nominator += r.nominator;
         denominator += r.denominator;
         return *this;
     }
+    StatsData_Ratio( long long& v0 , long long& v1 ) : nominator( v0 ) , denominator( v1 ) {}
 };
 
 class StatsItemBase{
@@ -56,6 +59,12 @@ public:
 
 #define SORT_STATS(eva) eva
 
+#define SORT_STATS_DEFINE_COUNTER( var ) Thread_Local long long var = 0L;
+#define SORT_STATS_DEFINE_FCOUNTER( var ) Thread_Local float var = 0.0f;
+
+#define SORT_STATS_DECLARE_COUNTER( var ) extern Thread_Local long long var;
+#define SORT_STATS_DECLARE_FCOUNTER( var ) extern Thread_Local float var;
+
 #define SORT_STATS_ENABLE(category) \
     class StatsCategoryEnabler{ \
         public: \
@@ -63,23 +72,48 @@ public:
     };\
     StatsCategoryEnabler stats_category_enabler;
 
-#define SORT_STATS_BASE_TYPE( cat , name , var , formatter , type )\
-static Thread_Local type<formatter> g_StatsItem_##var; \
-static void update_counter_##var(StatsSummary& ss) { ss.FlushCounter( cat , name , &g_StatsItem_##var );}\
-static thread_local StatsItemRegister g_Counter_Int_##var( update_counter_##var );\
+#define SORT_STATS_ITEM( NAME , DATA , var ) \
+template<class T>\
+class NAME##var : public StatsItemBase{\
+public:\
+    NAME##var( DATA& d ) : data(d) {}\
+    std::string ToString() const override{\
+        return T::ToString(data);\
+    }\
+    void Merge( const StatsItemBase* item ) override{\
+        auto p = dynamic_cast<const NAME##var*>(item);\
+        sAssert( p , "Merging incorrect stats data." );\
+        data += p->data;\
+    }\
+    shared_ptr<StatsItemBase> MakeItem() const override{\
+        return make_shared<NAME##var>(g_Global_##var);\
+    }\
+    DATA& data;\
+};
+
+#define SORT_STATS_BASE_TYPE( cat , name , var , formatter , type , data_type )\
+    SORT_STATS_ITEM( type , data_type , var )\
+    static Thread_Local type##var<formatter> g_StatsItem_##var(var); \
+    static void update_counter_##var(StatsSummary& ss) { ss.FlushCounter( cat , name , &g_StatsItem_##var );}\
+    static StatsItemRegister g_Counter_##var( update_counter_##var );
 
 #define SORT_STATS_INT_TYPE( cat , name , var , formatter) \
-SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt );\
-Thread_Local long long& var = (g_StatsItem_##var).data;
+    extern Thread_Local long long var;\
+    static long long g_Global_##var = 0.0f;\
+    SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt , long long );
 
 #define SORT_STATS_FLOAT_TYPE( cat , name , var , formatter ) \
-SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemFloat );\
-Thread_Local float& var = (g_StatsItem_##var).data;
+    static float g_Global_##var = 0.0f;\
+    SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemFloat , float );
 
 #define SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , formatter ) \
-SORT_STATS_BASE_TYPE( cat , name , var0 , formatter , StatsItemRatio );\
-Thread_Local long long& var0 = (g_StatsItem_##var0).data.nominator;\
-Thread_Local long long& var1 = (g_StatsItem_##var0).data.denominator;
+    extern Thread_Local long long var0;\
+    extern Thread_Local long long var1;\
+    static Thread_Local StatsData_Ratio g##var0_##var1( var0 , var1 );\
+    static long long g_Global_Ratio0_##var0 = 0.0f;\
+    static long long g_Global_Ratio1_##var1 = 0.0f;\
+    static Thread_Local StatsData_Ratio g_Global_g##var0_##var1( g_Global_Ratio0_##var0 , g_Global_Ratio1_##var1 );\
+    SORT_STATS_BASE_TYPE( cat , name , g##var0_##var1 , formatter , StatsItemRatio , StatsData_Ratio);
 
 #define SORT_STATS_COUNTER( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsInt)
 #define SORT_STATS_TIME( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsElaspedTime)
@@ -96,40 +130,16 @@ SORT_STATS_FORMATTER( StatsFloatRatio , StatsData_Ratio  )
 SORT_STATS_FORMATTER( StatsRatio , StatsData_Ratio )
 SORT_STATS_FORMATTER( StatsRayPerSecond , StatsData_Ratio  )
 
-#define SORT_STATS_ITEM( NAME , DATA ) \
-template<class T>\
-class NAME : public StatsItemBase{\
-public:\
-    std::string ToString() const override{\
-        return T::ToString(data);\
-    }\
-    void Merge( const StatsItemBase* item ) override{\
-        auto p = dynamic_cast<const NAME*>(item);\
-        sAssert( p , "Merging incorrect stats data." );\
-        data += p->data;\
-    }\
-    shared_ptr<StatsItemBase> MakeItem() const override{\
-        return make_shared<NAME>();\
-    }\
-    DATA data;\
-};
-
-SORT_STATS_ITEM( StatsItemRatio , StatsData_Ratio )
-SORT_STATS_ITEM( StatsItemAvg , StatsData_Ratio )
-SORT_STATS_ITEM( StatsItemFloat , float )
-SORT_STATS_ITEM( StatsItemInt , long long )
-
-#define SORT_STATS_DECLERE_COUNTER( var ) extern Thread_Local long long& var;
-#define SORT_STATS_DECLERE_FCOUNTER( var ) extern Thread_Local float& var;
-
 // StatsSummary keeps all stats data after the rendering is done
 class StatsSummary {
 public:
     void FlushCounter(const std::string& category, const std::string& varname, const StatsItemBase* var) {
         std::lock_guard<std::mutex> lock(mutex);
+        
         if( counters[category].count(varname) == 0 )
             counters[category][varname] = var->MakeItem();
-        counters[category][varname]->Merge(var);
+        if( categories.count( category ) )
+            counters[category][varname]->Merge(var);
     }
     void PrintStats() const;
     void EnableCategory( const std::string& s ){
@@ -146,10 +156,10 @@ using stats_update = std::function<void(StatsSummary&)>;
 class StatsItemRegister {
 public:
     // Register all stats item before main function in constructors
-    StatsItemRegister(const stats_update f);
+    StatsItemRegister(const stats_update f );
     // Flush the data into StatsSummary
     void FlushData() const;
-
+    
 private:
     // This is used to flush the data to final StatsSummary at the end of the thread
     const stats_update func;
@@ -164,6 +174,8 @@ private:
 #define SORT_STATS_RATIO( cat , name , var0 , var1 )
 #define SORT_STATS_AVG_COUNT( cat , name , var0 , var1 )
 #define SORT_STATS_AVG_RAY_SECOND( cat , name , var0 , var1 )
-#define SORT_STATS_DECLERE_COUNTER( var )
-#define SORT_STATS_DECLERE_FCOUNTER( var )
+#define SORT_STATS_DEFINE_COUNTER( var )
+#define SORT_STATS_DEFINE_FCOUNTER( var )
+#define SORT_STATS_DECLARE_COUNTER( var )
+#define SORT_STATS_DECLARE_FCOUNTER( var )
 #endif
