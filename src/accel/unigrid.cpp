@@ -21,13 +21,15 @@
 #include "log/log.h"
 #include "utility/sassert.h"
 
-SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Total Ray Count", sRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Shadow Ray Count", sShadowRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Intersection Test", sIntersectionTest );
-SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Grid Count", sGridCount);
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Total Ray Count", sUGRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Shadow Ray Count", sUGShadowRayCount);
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Intersection Test", sUGIntersectionTest );
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Grid Count", sUGGridCount);
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension X", sUniformGridX);
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGridY);
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
+
+SORT_STATS_DECLERE_COUNTER(sRaysPerSecond_RC);
 
 IMPLEMENT_CREATOR( UniGrid );
 
@@ -53,8 +55,9 @@ void UniGrid::release()
 // get the intersection between the ray and the primitive set
 bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
-    SORT_STATS(++sRayCount);
-    SORT_STATS(sShadowRayCount += intersect == nullptr);
+    SORT_STATS(++sRaysPerSecond_RC);
+    SORT_STATS(++sUGRayCount);
+    SORT_STATS(sUGShadowRayCount += intersect == nullptr);
     
 	if( m_pVoxels == 0 || m_primitives == 0 )
 		return false;
@@ -183,7 +186,7 @@ void UniGrid::Build()
     SORT_STATS(sUniformGridX = m_voxelNum[0]);
     SORT_STATS(sUniformGridY = m_voxelNum[1]);
     SORT_STATS(sUniformGridZ = m_voxelNum[2]);
-    SORT_STATS(sGridCount = m_voxelCount);
+    SORT_STATS(sUGGridCount = m_voxelCount);
 }
 
 // voxel id from point
@@ -216,7 +219,7 @@ bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned vo
     
 	bool inter = false;
     for( auto voxel : m_pVoxels[voxelId] ){
-        SORT_STATS(++sIntersectionTest);
+        SORT_STATS(++sUGIntersectionTest);
 		// get intersection
 		inter |= voxel->GetIntersect( r , intersect );
 		if( intersect == 0 && inter )

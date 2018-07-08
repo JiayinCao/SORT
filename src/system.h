@@ -35,9 +35,6 @@ class	System
 {
 // public method
 public:
-	// default constructor
-	System();
-
 	// pre-process before rendering
 	void PreProcess();
 	// render the image
@@ -64,14 +61,14 @@ public:
 //private field:
 private:
     // image sensor
-    ImageSensor*    m_imagesensor;
+    ImageSensor*    m_imagesensor = nullptr;
 
 	// the camera for the system
-	Camera*			m_camera;
+    Camera*			m_camera = nullptr;
 
-	unsigned		m_totalTask;
-	bool*			m_taskDone;
-	char*			m_pProgress;
+    unsigned		m_totalTask = 0;
+    bool*			m_taskDone = nullptr;
+    char*			m_pProgress = nullptr;
 
 	// the integrator type
 	string			m_integratorType;
@@ -85,19 +82,17 @@ private:
 	// the scene for rendering
 	Scene			m_Scene;
 	// the sampler
-	Sampler*		m_pSampler;
+    Sampler*		m_pSampler = nullptr;
 	// sample number per pixel
-	unsigned		m_iSamplePerPixel;
+    unsigned		m_iSamplePerPixel = 0;
 
 	// path for the resource
 	string			m_ResourcePath;
 	string			m_OutputFileName;
 
 	// number of thread to allocate
-	unsigned		m_thread_num;
+    unsigned		m_thread_num = 1;
 
-	// pre-Initialize
-	void	_preInit();
 	// output progress
 	void	_outputProgress();
 	// uninitialize 3rd party library
