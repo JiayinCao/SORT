@@ -19,7 +19,6 @@
 
 #include "accelerator.h"
 #include "geometry/primitive.h"
-#include "utility/stats.h"
 
 //! @brief Bounding volume hierarchy.
 /**

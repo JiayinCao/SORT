@@ -18,6 +18,10 @@
 #include "accelerator.h"
 #include "geometry/primitive.h"
 
+SORT_STATS_DEFINE_COUNTER(sRayCount)
+SORT_STATS_DEFINE_COUNTER(sShadowRayCount)
+SORT_STATS_DEFINE_COUNTER(sIntersectionTest)
+
 // Generate the bounding box for the primitive set.
 void Accelerator::computeBBox()
 {
