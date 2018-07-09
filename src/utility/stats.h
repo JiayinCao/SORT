@@ -19,8 +19,6 @@
 
 #include "sort.h"
 
-#include "multithread/stdthread.h"
-
 // Flush per-thread stats to StatsSummary, this should be called at the end of per-thread
 void SortStatsFlushData( bool mainThread = false );
 // Print Stats Result, this should be called in main thread after all rendering thread is done
@@ -59,7 +57,7 @@ public:
 
 #define SORT_STATS(eva) eva
 
-#define SORT_STATS_DEFINE_COUNTER( var ) Thread_Local long long var = 0L;
+#define SORT_STATS_DEFINE_COUNTER( var ) Thread_Local long long var = 0l;
 #define SORT_STATS_DEFINE_FCOUNTER( var ) Thread_Local float var = 0.0f;
 
 #define SORT_STATS_DECLARE_COUNTER( var ) extern Thread_Local long long var;
@@ -82,7 +80,7 @@ public:\
     }\
     void Merge( const StatsItemBase* item ) override{\
         auto p = dynamic_cast<const NAME##var*>(item);\
-        sAssert( p , "Merging incorrect stats data." );\
+        sAssert( p != nullptr , "Merging incorrect stats data." );\
         data += p->data;\
     }\
     shared_ptr<StatsItemBase> MakeItem() const override{\
@@ -99,7 +97,7 @@ public:\
 
 #define SORT_STATS_INT_TYPE( cat , name , var , formatter) \
     extern Thread_Local long long var;\
-    static long long g_Global_##var = 0.0f;\
+    static long long g_Global_##var = 0l;\
     SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt , long long );
 
 #define SORT_STATS_FLOAT_TYPE( cat , name , var , formatter ) \
@@ -110,9 +108,9 @@ public:\
     extern Thread_Local long long var0;\
     extern Thread_Local long long var1;\
     static Thread_Local StatsData_Ratio g##var0##_##var1( var0 , var1 );\
-    static long long g_Global_Ratio0_##var0##_##var1##_##var0 = 0.0f;\
-    static long long g_Global_Ratio1_##var0##_##var1##_##var1 = 0.0f;\
-    static Thread_Local StatsData_Ratio g_Global_g##var0##_##var1( g_Global_Ratio0_##var0##_##var1##_##var0 , g_Global_Ratio1_##var0##_##var1##_##var1 );\
+    static long long g_Global_Ratio0_##var0##_##var1##_##var0 = 0l;\
+    static long long g_Global_Ratio1_##var0##_##var1##_##var1 = 0l;\
+    static StatsData_Ratio g_Global_g##var0##_##var1( g_Global_Ratio0_##var0##_##var1##_##var0 , g_Global_Ratio1_##var0##_##var1##_##var1 );\
     SORT_STATS_BASE_TYPE( cat , name , g##var0##_##var1 , formatter , StatsItemRatio , StatsData_Ratio);
 
 #define SORT_STATS_COUNTER( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsInt)

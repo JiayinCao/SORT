@@ -60,7 +60,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 // sample a ray from light
 Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
 {
-    sAssert( shape , LIGHT );
+    sAssert( shape != nullptr , LIGHT );
     Vector n;
     shape->sample_l( ls , r , n , pdfW );
     
@@ -79,7 +79,7 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 // the pdf of the direction
 float AreaLight::Pdf( const Point& p , const Vector& wi ) const
 {
-	sAssert(shape, LIGHT);
+	sAssert(shape != nullptr, LIGHT);
 
 	return shape->Pdf( p , wi );
 }
@@ -87,7 +87,7 @@ float AreaLight::Pdf( const Point& p , const Vector& wi ) const
 // total power of the light
 Spectrum AreaLight::Power() const
 {
-	sAssert( shape , LIGHT );
+	sAssert( shape != nullptr, LIGHT );
 	return shape->SurfaceArea() * intensity.GetIntensity() * TWO_PI;
 }
 

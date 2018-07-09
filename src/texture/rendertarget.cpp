@@ -23,7 +23,7 @@
 void RenderTarget::SetColor( int x , int y , float r , float g , float b )
 {
 	// check if there is memory
-    sAssertMsg( m_pData , IMAGE , "There is no data in render target , can't set color" );
+    sAssertMsg( m_pData != nullptr , IMAGE , "There is no data in render target , can't set color" );
     
 	// use filter first
 	_texCoordFilter( x , y );

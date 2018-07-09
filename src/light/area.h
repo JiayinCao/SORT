@@ -102,7 +102,7 @@ private:
 		{
 			AreaLight* light = CAST_TARGET(AreaLight);
 			
-			light->sizeX = atof( str.c_str() );
+			light->sizeX = (float)atof( str.c_str() );
             if( light->shape ){
                 light->shape->SetSizeX( light->sizeX );
                 light->shape->SetSizeY( light->sizeY );
@@ -117,7 +117,7 @@ private:
         {
             AreaLight* light = CAST_TARGET(AreaLight);
             
-            light->sizeY = atof( str.c_str() );
+            light->sizeY = (float)atof( str.c_str() );
             if( light->shape ){
                 light->shape->SetSizeX( light->sizeX );
                 light->shape->SetSizeY( light->sizeY );
