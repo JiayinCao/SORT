@@ -322,7 +322,7 @@ Vector BufferMemory::_genTagentForTri( const std::shared_ptr<Trunk>& trunk , uns
 	float determinant = du1 * dv2 - dv1 * du2 ;
 	if( determinant == 0.0f )
 	{
-        slog( WARNING , GENERAL , "There is a triangle containing three vertexes with same texture coordinate , can't generate shading coordinate correctly." );
+        //slog( WARNING , GENERAL , "There is a triangle containing three vertexes with same texture coordinate , can't generate shading coordinate correctly." );
 		Vector n = Normalize( p0 - p1 );
 		Vector t0 , t1;
 		CoordinateSystem( n , t0 , t1 );
