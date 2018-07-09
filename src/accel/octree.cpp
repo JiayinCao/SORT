@@ -26,11 +26,9 @@ SORT_STATS_DEFINE_COUNTER(sOcTreeMaxPriCountInLeaf)
 SORT_STATS_DEFINE_COUNTER(sOcTreePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sOcTreeLeafNodeCountCopy)
 
-SORT_STATS_DEFINE_COUNTER(sIntersectionTest1)
-
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Total Ray Count", sRayCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Shadow Ray Count", sShadowRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Intersection Test", sIntersectionTest1 );
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Intersection Test", sIntersectionTest );
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Node Count", sOcTreeNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Leaf Node Count", sOcTreeLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "OcTree Depth", sOcTreeDepth);
@@ -48,7 +46,7 @@ OcTree::~OcTree()
 // Get the intersection between the ray and the primitive set
 // @param r The ray
 // @param intersect The intersection result
-// @return 'true' if the ray pirece one of the primitve in the list
+// @return 'true' if the ray pierce one of the primitive in the list
 bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
     SORT_STATS(++sRayCount);
@@ -110,8 +108,8 @@ void OcTree::releaseOcTree( OcTreeNode* node ){
 
 // Split current node into eight if criteria is not met. Otherwise, it will make it a leaf.\n
 // This function invokes itself recursively, so the whole sub-tree will be built once it is called.
-// @param node Node to be splitted.
-// @param container Container holdes all triangle information in this node.
+// @param node Node to be splited.
+// @param container Container holding all triangle information in this node.
 // @param bb Bounding box of this node.
 // @param depth Current depth of this node.
 void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , unsigned depth )
@@ -120,9 +118,7 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
     
 	// make a leaf if there are not enough points
 	if( container->primitives.size() < (int)m_uMaxTriInLeaf || depth > m_uMaxDepthInOcTree ){
-		// make leaf
 		makeLeaf( node , container );
-		// no need to process any more
 		return;
 	}
 
@@ -154,9 +150,8 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 	while( it != container->primitives.end() ){
 		for( int i = 0 ; i < 8 ; ++i ){
 			// check for intersection
-			if( (*it)->GetIntersect( node->child[i]->bb ) ){
+			if( (*it)->GetIntersect( node->child[i]->bb ) )
 				childcontainer[i]->primitives.push_back( *it );
-			}
 		}
 		++it;
 	}
@@ -215,15 +210,16 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 	bool inter = false;
 
 	// Early rejections
-	if( fmin > fmax )
+	if( fmin >= fmax )
 		return false;
 	if( intersect && intersect->t < fmin - delta )
-		return true;
+    if (intersect && intersect->t < fmin - delta)
+        return true;
 
 	// Iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
-	if( node->child[0] == 0 ){
+	if( node->child[0] == nullptr ){
         for( auto tri : node->primitives ){
-            SORT_STATS(++sIntersectionTest1);
+            SORT_STATS(++sIntersectionTest);
 			inter |= tri->GetIntersect( ray , intersect );
 			if( !intersect && inter )
 				return true;
@@ -250,10 +246,10 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 	// traverse the octree
 	while( ( intersect && _curt < intersect->t ) || !intersect ){
 		// get the axis along which the ray leaves the node fastest.
-		unsigned nextAxis = (_next[0] <= _next[1])?0:1;
-		nextAxis = (_next[nextAxis] <= _next[2])?nextAxis:2;
+		unsigned nextAxis = (_next[0] <= _next[1]) ? 0 : 1;
+		nextAxis = (_next[nextAxis] <= _next[2]) ? nextAxis : 2;
 
-		// chech if there is intersection in the current grid
+		// check if there is intersection in the current grid
 		if( traverseOcTree( node->child[node_index] , ray , intersect , _curt , _next[nextAxis] ) )
 			return true;
 
