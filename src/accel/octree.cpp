@@ -212,8 +212,7 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 	// Early rejections
 	if( fmin >= fmax )
 		return false;
-	if( intersect && intersect->t < fmin - delta )
-    if (intersect && intersect->t < fmin - delta)
+    if( intersect && intersect->t < fmin - delta )
         return true;
 
 	// Iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
