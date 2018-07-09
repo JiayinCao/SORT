@@ -28,12 +28,12 @@ SORT_STATS_DEFINE_COUNTER(sOcTreeLeafNodeCountCopy)
 
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Total Ray Count", sRayCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Shadow Ray Count", sShadowRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Intersection Test", sIntersectionTest );
+SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Intersection Test", sIntersectionTest);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Node Count", sOcTreeNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Leaf Node Count", sOcTreeLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "OcTree Depth", sOcTreeDepth);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOcTreeMaxPriCountInLeaf);
-SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCountCopy );
+SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCountCopy);
 
 IMPLEMENT_CREATOR( OcTree );
 
@@ -128,8 +128,6 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 		node->child[i] = new OcTreeNode();
 		childcontainer[i] = new NodeTriangleContainer();
 	}
-	
-    SORT_STATS(sOcTreeNodeCount+=8);
     
 	// get the center point of this tree node
 	int offset = 0;
@@ -167,8 +165,10 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 		makeLeaf( node , container );
 
 		// splitting plane information is no useful anymore.
-		for( int i = 0 ; i < 8 ; ++i )
-			delete childcontainer[i];
+        for( int i = 0 ; i < 8 ; ++i ){
+            SAFE_DELETE( node->child[i] );
+            SAFE_DELETE( childcontainer[i] );
+        }
 
 		// no need to process any more
 		return;
@@ -176,10 +176,12 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 	
 	// container for this level is no useful any more
 	delete container;
-
+    
 	// split children node
 	for( int i = 0 ; i < 8 ; ++i )
 		splitNode( node->child[i] , childcontainer[i], depth + 1 );
+    
+    SORT_STATS(sOcTreeNodeCount+=8);
 }
 
 // Making the current node as a leaf node.
@@ -225,7 +227,7 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 		}
 		return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
 	}
-
+    
 	const Point contact = ray(fmin);
 	const Point center = ( node->bb.m_Max + node->bb.m_Min ) * 0.5f;
     int node_index = ( contact.x > center.x ) + ( contact.y > center.y ) * 2 + ( contact.z > center.z ) * 4;
