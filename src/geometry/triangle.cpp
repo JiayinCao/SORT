@@ -175,19 +175,8 @@ bool Triangle::GetIntersect(const BBox& box) const
     int id1 = m_Index[1].posIndex;
     int id2 = m_Index[2].posIndex;
     Point tri[3] = { mem->m_PositionBuffer[id0] , mem->m_PositionBuffer[id1] , mem->m_PositionBuffer[id2] };
-
-    BBox bbox;
-    bbox.Union(tri[0]);
-    bbox.Union(tri[1]);
-    bbox.Union(tri[2]);
-    for (int k = 0; k < 3; ++k) {
-        if (bbox.m_Min[k] > box.m_Max[k] || bbox.m_Max[k] < box.m_Min[k])
-            return false;
-    }
-    return true;
-
-
-	float triMin , triMax;	// will intialize later
+    
+	float triMin , triMax;	// will initialize later
 	float boxMin = FLT_MAX, boxMax = -FLT_MAX;
 
 	Vector	boxN[3] = { Point( 1.0f , 0.0f , 0.0f ) , 
