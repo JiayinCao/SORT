@@ -37,6 +37,10 @@ void SortStatsEnableCategory( const std::string& s );
 #include "utility/strhelper.h"
 #include "define.h"
 
+#define SORT_CAT_PROXY(v0, v1)              v0 ## v1
+#define SORT_CAT(v0, v1)                    SORT_CAT_PROXY(v0,v1)
+#define SORT_STATS_UNIQUE_NAMESPACE()       SORT_CAT(SORT_CAT(sort_stats_namespace, __LINE__), _namespace)
+
 struct StatsData_Ratio{
     long long& nominator;
     long long& denominator;
@@ -84,34 +88,41 @@ public:\
         data += p->data;\
     }\
     shared_ptr<StatsItemBase> MakeItem() const override{\
-        return make_shared<NAME##var>(g_Global_##var);\
+        return make_shared<NAME##var>(g_Global_Default);\
     }\
     DATA& data;\
 };
 
 #define SORT_STATS_BASE_TYPE( cat , name , var , formatter , type , data_type )\
     SORT_STATS_ITEM( type , data_type , var )\
-    static Thread_Local type##var<formatter> g_StatsItem_##var(var); \
-    static void update_counter_##var(StatsSummary& ss) { ss.FlushCounter( cat , name , &g_StatsItem_##var );}\
-    static StatsItemRegister g_Counter_##var( update_counter_##var );
+    static Thread_Local type##var<formatter> g_StatsItem(var); \
+    static void update_counter_##var(StatsSummary& ss) { ss.FlushCounter( cat , name , &g_StatsItem );}\
+    static StatsItemRegister g_StatsItemRegister( update_counter_##var );
 
 #define SORT_STATS_INT_TYPE( cat , name , var , formatter) \
     extern Thread_Local long long var;\
-    static long long g_Global_##var = 0l;\
-    SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt , long long );
+    namespace SORT_STATS_UNIQUE_NAMESPACE(){\
+        static long long g_Global_Default = 0l;\
+        SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt , long long );\
+    }
 
 #define SORT_STATS_FLOAT_TYPE( cat , name , var , formatter ) \
-    static float g_Global_##var = 0.0f;\
-    SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemFloat , float );
+    extern Thread_Local float var;\
+    namespace SORT_STATS_UNIQUE_NAMESPACE(){\
+        static float g_Global_Default = 0.0f;\
+        SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemFloat , float );\
+    }
 
 #define SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , formatter ) \
     extern Thread_Local long long var0;\
     extern Thread_Local long long var1;\
-    static Thread_Local StatsData_Ratio g##var0##_##var1( var0 , var1 );\
-    static long long g_Global_Ratio0_##var0##_##var1##_##var0 = 0l;\
-    static long long g_Global_Ratio1_##var0##_##var1##_##var1 = 0l;\
-    static StatsData_Ratio g_Global_g##var0##_##var1( g_Global_Ratio0_##var0##_##var1##_##var0 , g_Global_Ratio1_##var0##_##var1##_##var1 );\
-    SORT_STATS_BASE_TYPE( cat , name , g##var0##_##var1 , formatter , StatsItemRatio , StatsData_Ratio);
+    namespace SORT_STATS_UNIQUE_NAMESPACE(){\
+        static Thread_Local StatsData_Ratio g##var0##_##var1( var0 , var1 );\
+        static long long g_Global_Var0 = 0l;\
+        static long long g_Global_Var1 = 0l;\
+        static StatsData_Ratio g_Global_Default( g_Global_Var0 , g_Global_Var1 );\
+        SORT_STATS_BASE_TYPE( cat , name , g##var0##_##var1 , formatter , StatsItemRatio , StatsData_Ratio);\
+    }
 
 #define SORT_STATS_COUNTER( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsInt )
 #define SORT_STATS_TIME( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsElaspedTime )
