@@ -54,9 +54,9 @@ public:
 
     //! OcTree node structure
     struct OcTreeNode{
-        OcTreeNode*					child[8] = {};	/**< Child node pointers, all will be NULL if current node is a leaf.*/
-        vector<const Primitive*>	primitives;     /**< Primitives buffer.*/
-        BBox						bb;             /**< Bounding box for this octree node.*/
+        OcTreeNode*					child[8] = {nullptr};	/**< Child node pointers, all will be NULL if current node is a leaf.*/
+        vector<const Primitive*>	primitives;             /**< Primitives buffer.*/
+        BBox						bb;                     /**< Bounding box for this octree node.*/
     };
     
     //! @brief Triangle information in octree node.

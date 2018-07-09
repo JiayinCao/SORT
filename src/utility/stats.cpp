@@ -16,8 +16,6 @@
  */
 
 #include "stats.h"
-#include "utility/sassert.h"
-#include "utility/strhelper.h"
 
 #ifdef SORT_ENABLE_STATS_COLLECTION
 
@@ -28,8 +26,6 @@ public:
         container.push_back(item);
     }
     void FlushData() const {
-        static std::mutex statsMutex;
-        std::lock_guard<std::mutex> lock(statsMutex);
         for (const StatsItemRegister* item : container)
             item->FlushData();
     }
@@ -59,6 +55,20 @@ void StatsSummary::PrintStats() const {
     slog(INFO, GENERAL, "-------------------------Statistics-------------------------");
 }
 
+void StatsSummary::FlushCounter(const std::string& category, const std::string& varname, const StatsItemBase* var) {
+    static std::mutex mutex;
+    std::lock_guard<std::mutex> lock(mutex);
+
+    if (counters[category].count(varname) == 0)
+        counters[category][varname] = var->MakeItem();
+    if (categories.count(category))
+        counters[category][varname]->Merge(var);
+}
+
+void StatsSummary::EnableCategory(const std::string& s) {
+    categories.insert(s);
+}
+
 static StatsSummary             g_StatsSummary;
 static StatsItemContainer*      g_pStatsItemContainer = nullptr;
 
@@ -86,7 +96,7 @@ std::string StatsInt::ToString(long long v){
     int len = (int)s.size() - 1;
     std::string ret( len + 1 + len / 3 , ',' );
     int i = 0 , j = (int)ret.size() - 1;
-    while( i < s.size() ){
+    while( i < (int)s.size() ){
         ret[j--] = s[len - (i++)];
         if( i % 3 == 0 )
             --j;

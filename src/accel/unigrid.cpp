@@ -28,7 +28,7 @@ SORT_STATS_DEFINE_COUNTER(sUniformGridZ)
 
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Total Ray Count", sRayCount);
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Shadow Ray Count", sShadowRayCount);
-SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Intersection Test", sIntersectionTest1 );
+SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Intersection Test", sIntersectionTest );
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Grid Count", sUGGridCount);
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension X", sUniformGridX);
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGridY);
@@ -221,7 +221,7 @@ bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned vo
     
 	bool inter = false;
     for( auto voxel : m_pVoxels[voxelId] ){
-        SORT_STATS(++sIntersectionTest1);
+        SORT_STATS(++sIntersectionTest);
 		// get intersection
 		inter |= voxel->GetIntersect( r , intersect );
 		if( intersect == 0 && inter )

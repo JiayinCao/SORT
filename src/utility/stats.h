@@ -113,9 +113,9 @@ public:\
     static StatsData_Ratio g_Global_g##var0##_##var1( g_Global_Ratio0_##var0##_##var1##_##var0 , g_Global_Ratio1_##var0##_##var1##_##var1 );\
     SORT_STATS_BASE_TYPE( cat , name , g##var0##_##var1 , formatter , StatsItemRatio , StatsData_Ratio);
 
-#define SORT_STATS_COUNTER( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsInt)
-#define SORT_STATS_TIME( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsElaspedTime)
-#define SORT_STATS_FCOUNTER( cat , name , var ) SORT_STATS_FLOAT_TYPE( cat , name , var , StatsFloat)
+#define SORT_STATS_COUNTER( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsInt )
+#define SORT_STATS_TIME( cat , name , var ) SORT_STATS_INT_TYPE( cat , name , var , StatsElaspedTime )
+#define SORT_STATS_FCOUNTER( cat , name , var ) SORT_STATS_FLOAT_TYPE( cat , name , var , StatsFloat )
 #define SORT_STATS_RATIO( cat , name , var0 , var1 ) SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , StatsRatio )
 #define SORT_STATS_AVG_COUNT( cat , name , var0 , var1 ) SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , StatsFloatRatio )
 #define SORT_STATS_AVG_RAY_SECOND( cat , name , var0 , var1 ) SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , StatsRayPerSecond )
@@ -131,23 +131,13 @@ SORT_STATS_FORMATTER( StatsRayPerSecond , StatsData_Ratio  )
 // StatsSummary keeps all stats data after the rendering is done
 class StatsSummary {
 public:
-    void FlushCounter(const std::string& category, const std::string& varname, const StatsItemBase* var) {
-        std::lock_guard<std::mutex> lock(mutex);
-        
-        if( counters[category].count(varname) == 0 )
-            counters[category][varname] = var->MakeItem();
-        if( categories.count( category ) )
-            counters[category][varname]->Merge(var);
-    }
+    void FlushCounter(const std::string& category, const std::string& varname, const StatsItemBase* var);
     void PrintStats() const;
-    void EnableCategory( const std::string& s ){
-        categories.insert(s);
-    }
+    void EnableCategory(const std::string& s);
 
 private:
     std::map<string, std::map<string, std::shared_ptr<StatsItemBase>>> counters;
     std::unordered_set<std::string> categories = { "Performance" , "Scene" };
-    std::mutex mutex;
 };
 
 using stats_update = std::function<void(StatsSummary&)>;
