@@ -27,7 +27,7 @@ public:
     void Register(const StatsItemRegister* item) {
         container.push_back(item);
     }
-    void FlushData() {
+    void FlushData() const {
         static std::mutex statsMutex;
         std::lock_guard<std::mutex> lock(statsMutex);
         for (const StatsItemRegister* item : container)
@@ -96,8 +96,8 @@ std::string StatsInt::ToString(long long v){
 
 std::string StatsElaspedTime::ToString( long long v ){
     if( v < 1000 ) return stringFormat("%d(ms)" , v);
-    if( v < 60000 ) return stringFormat("%.2f(s)" , (float)v/1000.0f); v /= 1000.0f;
-    if( v < 3600 ) return stringFormat( "%d(m)%d(s)" , v/60 , v%60 ); v /= 60.0f;
+    if( v < 60000 ) return stringFormat("%.2f(s)" , (float)v/1000.0f); v /= 1000;
+    if( v < 3600 ) return stringFormat( "%d(m)%d(s)" , v/60 , v%60 ); v /= 60;
     if( v < 1440 ) return stringFormat( "%d(h)%d(m)" , v/60 , v%60 );
     return stringFormat( "%d(d)%d(h)%d(m)" , v / 1440 , ( v % 1440 ) / 60 , v % 60 );
 }

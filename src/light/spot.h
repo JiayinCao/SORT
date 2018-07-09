@@ -65,7 +65,7 @@ private:
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
-			light->cos_falloff_start = (float)cos( Radians( atof( str.c_str() ) ) );
+			light->cos_falloff_start = (float)cos( Radians( (float)atof( str.c_str() ) ) );
 		}
 	};
 	class RangeProperty : public PropertyHandler<Light>
@@ -75,7 +75,7 @@ private:
 		void SetValue( const string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
-            light->cos_total_range = (float)cos( Radians( atof( str.c_str() ) ) );
+            light->cos_total_range = (float)cos( Radians( (float)atof( str.c_str() ) ) );
 		}
 	};
 };

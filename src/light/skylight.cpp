@@ -26,7 +26,7 @@ IMPLEMENT_CREATOR( SkyLight );
 // sample ray from light
 Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
-	sAssert( sky , LIGHT );
+	sAssert( sky != nullptr , LIGHT );
 
 	// sample a ray
     float _pdfw = 0.0f;
@@ -163,6 +163,6 @@ void SkyLight::_registerAllProperty()
 // the pdf for specific sampled directioin
 float SkyLight::Pdf( const Point& p , const Vector& wi ) const
 {
-	sAssert( sky , LIGHT );
+	sAssert( sky != nullptr, LIGHT );
 	return sky->Pdf( light2world.GetInversed()(wi) );
 }

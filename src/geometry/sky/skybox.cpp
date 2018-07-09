@@ -53,13 +53,13 @@ Spectrum SkyBox::Evaluate( const Vector& vec ) const
 		{
 			float u = ( -vec.z / vec.x + 1.0f ) * 0.5f;
 			float v = ( -vec.y / vec.x + 1.0f ) * 0.5f;
-			return m_front.GetColor( u , v );
+			return m_front.GetColorFromUV( u , v );
 		}
 		else
 		{
 			float u = ( -vec.z / vec.x + 1.0f ) * 0.5f;
 			float v = ( vec.y / vec.x + 1.0f ) * 0.5f;
-			return m_back.GetColor( u , v );
+			return m_back.GetColorFromUV( u , v );
 		}
 	}else if( abs_y > abs_x && abs_y > abs_z )
 	{
@@ -67,13 +67,13 @@ Spectrum SkyBox::Evaluate( const Vector& vec ) const
 		{
 			float u = ( vec.x / vec.y + 1.0f ) * 0.5f;
 			float v = ( vec.z / vec.y + 1.0f ) * 0.5f;
-			return m_up.GetColor( u , v );
+			return m_up.GetColorFromUV( u , v );
 		}
 		else
 		{
 			float u = ( -vec.x / vec.y + 1.0f ) * 0.5f;
 			float v = ( vec.z / vec.y + 1.0f ) * 0.5f;
-			return m_down.GetColor( u , v );
+			return m_down.GetColorFromUV( u , v );
 		}
 	}else
 	{
@@ -81,13 +81,13 @@ Spectrum SkyBox::Evaluate( const Vector& vec ) const
 		{
 			float u = ( vec.x / vec.z + 1.0f ) * 0.5f;
 			float v = ( -vec.y / vec.z + 1.0f ) * 0.5f;
-			return m_left.GetColor( u , v );
+			return m_left.GetColorFromUV( u , v );
 		}
 		else
 		{
 			float u = ( vec.x / vec.z + 1.0f ) * 0.5f;
 			float v = ( vec.y / vec.z + 1.0f ) * 0.5f;
-			return m_right.GetColor( u , v );
+			return m_right.GetColorFromUV( u , v );
 		}
 	}
 
