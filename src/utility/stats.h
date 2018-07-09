@@ -33,13 +33,14 @@ void SortStatsEnableCategory( const std::string& s );
 #include <mutex>
 #include <memory>
 #include <unordered_set>
+#include <unordered_map>
 #include "utility/sassert.h"
 #include "utility/strhelper.h"
 #include "define.h"
 
 #define SORT_CAT_PROXY(v0, v1)              v0 ## v1
 #define SORT_CAT(v0, v1)                    SORT_CAT_PROXY(v0,v1)
-#define SORT_STATS_UNIQUE_NAMESPACE()       SORT_CAT(SORT_CAT(sort_stats_namespace, __LINE__), _namespace)
+#define SORT_STATS_UNIQUE_NAMESPACE(var)    SORT_CAT(SORT_CAT(sort_stats_namespace, __LINE__), var)
 
 struct StatsData_Ratio{
     long long& nominator;
@@ -74,41 +75,41 @@ public:
     };\
     StatsCategoryEnabler stats_category_enabler;
 
-#define SORT_STATS_ITEM( NAME , DATA , var ) \
+#define SORT_STATS_ITEM( NAME , DATA ) \
 template<class T>\
-class NAME##var : public StatsItemBase{\
+class NAME : public StatsItemBase{\
 public:\
-    NAME##var( DATA& d ) : data(d) {}\
+    NAME( DATA& d ) : data(d) {}\
     std::string ToString() const override{\
         return T::ToString(data);\
     }\
     void Merge( const StatsItemBase* item ) override{\
-        auto p = dynamic_cast<const NAME##var*>(item);\
+        auto p = dynamic_cast<const NAME*>(item);\
         sAssert( p != nullptr , "Merging incorrect stats data." );\
         data += p->data;\
     }\
     shared_ptr<StatsItemBase> MakeItem() const override{\
-        return make_shared<NAME##var>(g_Global_Default);\
+        return make_shared<NAME>(g_Global_Default);\
     }\
     DATA& data;\
 };
 
 #define SORT_STATS_BASE_TYPE( cat , name , var , formatter , type , data_type )\
-    SORT_STATS_ITEM( type , data_type , var )\
-    static Thread_Local type##var<formatter> g_StatsItem(var); \
-    static void update_counter_##var(StatsSummary& ss) { ss.FlushCounter( cat , name , &g_StatsItem );}\
-    static StatsItemRegister g_StatsItemRegister( update_counter_##var );
+    SORT_STATS_ITEM( type , data_type )\
+    static Thread_Local type<formatter> g_StatsItem(var); \
+    static void update_counter(StatsSummary& ss) { ss.FlushCounter( cat , name , &g_StatsItem );}\
+    static StatsItemRegister g_StatsItemRegister( update_counter , cat , name );
 
 #define SORT_STATS_INT_TYPE( cat , name , var , formatter) \
     extern Thread_Local long long var;\
-    namespace SORT_STATS_UNIQUE_NAMESPACE(){\
+    namespace SORT_STATS_UNIQUE_NAMESPACE(var){\
         static long long g_Global_Default = 0l;\
         SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt , long long );\
     }
 
 #define SORT_STATS_FLOAT_TYPE( cat , name , var , formatter ) \
     extern Thread_Local float var;\
-    namespace SORT_STATS_UNIQUE_NAMESPACE(){\
+    namespace SORT_STATS_UNIQUE_NAMESPACE(var){\
         static float g_Global_Default = 0.0f;\
         SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemFloat , float );\
     }
@@ -116,7 +117,7 @@ public:\
 #define SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , formatter ) \
     extern Thread_Local long long var0;\
     extern Thread_Local long long var1;\
-    namespace SORT_STATS_UNIQUE_NAMESPACE(){\
+    namespace SORT_STATS_UNIQUE_NAMESPACE(g##var0##_##var1){\
         static Thread_Local StatsData_Ratio g##var0##_##var1( var0 , var1 );\
         static long long g_Global_Var0 = 0l;\
         static long long g_Global_Var1 = 0l;\
@@ -155,7 +156,7 @@ using stats_update = std::function<void(StatsSummary&)>;
 class StatsItemRegister {
 public:
     // Register all stats item before main function in constructors
-    StatsItemRegister(const stats_update f );
+    StatsItemRegister(const stats_update f , const std::string& cat , const std::string& name);
     // Flush the data into StatsSummary
     void FlushData() const;
     

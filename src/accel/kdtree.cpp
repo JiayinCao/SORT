@@ -19,7 +19,6 @@
 #include "geometry/primitive.h"
 #include "geometry/intersection.h"
 #include <algorithm>
-#include "log/log.h"
 
 IMPLEMENT_CREATOR( KDTree );
 

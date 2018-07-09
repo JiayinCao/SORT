@@ -22,7 +22,10 @@
 // This is a container holding all statsItem per thread
 class StatsItemContainer {
 public:
-    void Register(const StatsItemRegister* item) {
+    void Register(const StatsItemRegister* item , const std::string& cat , const std::string& name ) {
+        if( registered[cat].count(name) )
+            return;
+        registered[cat].insert(name);
         container.push_back(item);
     }
     void FlushData() const {
@@ -33,6 +36,7 @@ public:
 private:
     // Container for all stats per thread
     std::vector<const StatsItemRegister*> container;
+    std::unordered_map<std::string,std::unordered_set<std::string>> registered;
 };
 
 void StatsSummary::PrintStats() const {
@@ -58,7 +62,6 @@ void StatsSummary::PrintStats() const {
 void StatsSummary::FlushCounter(const std::string& category, const std::string& varname, const StatsItemBase* var) {
     static std::mutex mutex;
     std::lock_guard<std::mutex> lock(mutex);
-
     if (counters[category].count(varname) == 0)
         counters[category][varname] = var->MakeItem();
     if (categories.count(category))
@@ -73,13 +76,13 @@ static StatsSummary             g_StatsSummary;
 static StatsItemContainer*      g_pStatsItemContainer = nullptr;
 
 // Recording all necessary data in constructor
-StatsItemRegister::StatsItemRegister( const stats_update f ): func(f){
+StatsItemRegister::StatsItemRegister( const stats_update f , const std::string& cat , const std::string& name ): func(f){
     static std::mutex statsMutex;
     std::lock_guard<std::mutex> lock(statsMutex);
     
     if( nullptr == g_pStatsItemContainer )
         g_pStatsItemContainer = new StatsItemContainer();
-    g_pStatsItemContainer->Register(this);
+    g_pStatsItemContainer->Register(this, cat, name);
 }
 
 // Flush the data into StatsSummary
