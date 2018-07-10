@@ -87,7 +87,7 @@ void KDTree::Build()
 // split node
 void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth )
 {
-    SORT_STATS(sKDTreeDepth = max((int)sKDTreeDepth, (int)depth+1));
+    SORT_STATS(sKDTreeDepth = max(sKDTreeDepth, (StatsInt)depth+1));
     
 	if( prinum < m_maxTriInLeaf || depth > m_maxDepth ){
 		makeLeaf( node , splits , prinum );
@@ -238,7 +238,7 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum )
     SORT_STATS(++sKDTreeLeafNodeCount);
     SORT_STATS(++sKDTreeNodeCount);
     SORT_STATS(sKDTreePrimitiveCount += prinum);
-    SORT_STATS(sKDTreeMaxPriCountInLeaf = max((int)sKDTreeMaxPriCountInLeaf, (int)prinum));
+    SORT_STATS(sKDTreeMaxPriCountInLeaf = max(sKDTreeMaxPriCountInLeaf, (StatsInt)prinum));
 }
 
 // get the intersection between the ray and the primitive set
