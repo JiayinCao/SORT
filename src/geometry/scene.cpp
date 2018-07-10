@@ -183,8 +183,8 @@ bool Scene::LoadScene( const string& str )
 	// restore resource path
 	SetResourcePath( oldpath );
     
-    SORT_STATS(sScenePrimitiveCount=(long long)m_triBuf.size());
-    SORT_STATS(sSceneLightCount=(long long)m_lights.size());
+    SORT_STATS(sScenePrimitiveCount=(StatsInt)m_triBuf.size());
+    SORT_STATS(sSceneLightCount=(StatsInt)m_lights.size());
 
 	return true;
 }
