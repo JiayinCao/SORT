@@ -88,7 +88,7 @@ void Bvh::Build()
 // recursively split BVH node
 void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned depth )
 {
-    SORT_STATS(sBVHDepth = max( sBVHDepth , (long long)depth + 1 ) );
+    SORT_STATS(sBVHDepth = max( sBVHDepth , (StatsInt)depth + 1 ) );
     
 	// generate the bounding box for the node
 	for( unsigned i = _start ; i < _end ; i++ )
@@ -183,8 +183,8 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end )
 	node->pri_offset = _start;
 
     SORT_STATS(++sBvhLeafNodeCount);
-    SORT_STATS(sBvhMaxPriCountInLeaf = max( sBvhMaxPriCountInLeaf , (long long)node->pri_num) );
-    SORT_STATS(sBvhPrimitiveCount += (long long)node->pri_num);
+    SORT_STATS(sBvhMaxPriCountInLeaf = max( sBvhMaxPriCountInLeaf , (StatsInt)node->pri_num) );
+    SORT_STATS(sBvhPrimitiveCount += (StatsInt)node->pri_num);
 }
 
 // get the intersection between the ray and the primitive set

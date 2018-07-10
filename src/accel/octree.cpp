@@ -114,7 +114,7 @@ void OcTree::releaseOcTree( OcTreeNode* node ){
 // @param depth Current depth of this node.
 void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , unsigned depth )
 {
-    SORT_STATS( sOcTreeDepth = max( sOcTreeDepth , (long long) depth + 1 ) );
+    SORT_STATS( sOcTreeDepth = max( sOcTreeDepth , (StatsInt) depth + 1 ) );
     
 	// make a leaf if there are not enough points
 	if( container->primitives.size() < (int)m_uMaxTriInLeaf || depth > m_uMaxDepthInOcTree ){
@@ -191,8 +191,8 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 void OcTree::makeLeaf( OcTreeNode* node , NodeTriangleContainer* container )
 {
     SORT_STATS(++sOcTreeLeafNodeCount);
-    SORT_STATS(sOcTreeMaxPriCountInLeaf = max( sOcTreeMaxPriCountInLeaf , (long long)container->primitives.size()) );
-    SORT_STATS(sOcTreePrimitiveCount += (long long)container->primitives.size());
+    SORT_STATS(sOcTreeMaxPriCountInLeaf = max( sOcTreeMaxPriCountInLeaf , (StatsInt)container->primitives.size()) );
+    SORT_STATS(sOcTreePrimitiveCount += (StatsInt)container->primitives.size());
     
     for( auto primitive : container->primitives )
 		node->primitives.push_back( primitive );

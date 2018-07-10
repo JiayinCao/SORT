@@ -92,7 +92,7 @@ void StatsItemRegister::FlushData() const
     func(g_StatsSummary);
 }
 
-std::string StatsInt::ToString(long long v){
+std::string StatsFormatter_Int::ToString(StatsInt v){
     auto s = to_string(v);
     if( s.size() < 5 )
         return s;
@@ -107,30 +107,30 @@ std::string StatsInt::ToString(long long v){
     return ret;
 }
 
-std::string StatsElaspedTime::ToString( long long v ){
+std::string StatsFormatter_ElaspedTime::ToString(StatsInt v ){
     if( v < 1000 ) return stringFormat("%d(ms)" , v);
-    if( v < 60000 ) return stringFormat("%.2f(s)" , (float)v/1000.0f); v /= 1000;
+    if( v < 60000 ) return stringFormat("%.2f(s)" , (StatsFloat)v/1000.0f); v /= 1000;
     if( v < 3600 ) return stringFormat( "%d(m)%d(s)" , v/60 , v%60 ); v /= 60;
     if( v < 1440 ) return stringFormat( "%d(h)%d(m)" , v/60 , v%60 );
     return stringFormat( "%d(d)%d(h)%d(m)" , v / 1440 , ( v % 1440 ) / 60 , v % 60 );
 }
 
-std::string StatsFloat::ToString( float v ){
+std::string StatsFormatter_Float::ToString(StatsFloat v ){
     return stringFormat("%.2f",v);
 }
 
-std::string StatsRatio::ToString( StatsData_Ratio ratio ){
-    float r = (float)ratio.nominator / (float)ratio.denominator;
+std::string StatsFormatter_Ratio::ToString( StatsData_Ratio ratio ){
+    StatsFloat r = (StatsFloat)ratio.nominator / (StatsFloat)ratio.denominator;
     return stringFormat("%.2f%%",r * 100);
 }
 
-std::string StatsFloatRatio::ToString( StatsData_Ratio ratio ){
-    float r = (float)ratio.nominator / (float)ratio.denominator;
+std::string StatsFormatter_FloatRatio::ToString( StatsData_Ratio ratio ){
+    StatsFloat r = (StatsFloat)ratio.nominator / (StatsFloat)ratio.denominator;
     return stringFormat("%.2f",r);
 }
 
-std::string StatsRayPerSecond::ToString( StatsData_Ratio ratio ){
-    float r = (float)ratio.nominator / (float)ratio.denominator * 0.001f;
+std::string StatsFormatter_RayPerSecond::ToString( StatsData_Ratio ratio ){
+    StatsFloat r = (StatsFloat)ratio.nominator / (StatsFloat)ratio.denominator * 0.001f;
     return stringFormat("%.2f(MRay/s)",r);
 }
 
