@@ -37,6 +37,7 @@ SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Leaf Node Count", sBvhLeafNodeCoun
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "BVH Depth", sBVHDepth);
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sBvhMaxPriCountInLeaf);
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sBvhPrimitiveCount , sBvhLeafNodeCountCopy );
+SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
 static const unsigned   BVH_LEAF_PRILIST_MEMID  = 1027;
 static const unsigned   BVH_SPLIT_COUNT         = 16;
@@ -60,6 +61,8 @@ void Bvh::mallocMemory()
 // dealloc memory
 void Bvh::deallocMemory()
 {
+    SORT_PROFILE("Destructe Bvh");
+
 	SORT_DEALLOC( BVH_LEAF_PRILIST_MEMID );
     deleteNode( m_root );
 }
@@ -67,6 +70,8 @@ void Bvh::deallocMemory()
 // build the acceleration structure
 void Bvh::Build()
 {
+    SORT_PROFILE("Build Bvh");
+
 	// malloc memory
 	mallocMemory();
 
@@ -190,6 +195,7 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end )
 // get the intersection between the ray and the primitive set
 bool Bvh::GetIntersect( const Ray& ray , Intersection* intersect ) const
 {
+    SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect != nullptr);
     

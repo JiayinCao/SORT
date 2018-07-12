@@ -19,6 +19,7 @@
 
 #include "managers/memmanager.h"
 #include "utility/stats.h"
+#include "utility/profile.h"
 
 // thread id
 static Thread_Local int g_ThreadId = 0;
@@ -40,6 +41,7 @@ PlatformSpinlockMutex g_mutex;
 
 void RenderThreadStd::BeginThread()
 {
+    SORT_PROFILE("Rendering Thread")
 	m_thread = std::thread([&]() {
 		// setup lts
         g_ThreadId = m_tid;
@@ -54,6 +56,7 @@ void RenderThreadStd::RunThread()
 {
 	while (true)
 	{
+        SORT_PROFILE( "Grabbing RT Task" )
 		g_mutex.lock();
 		if (RenderTaskQueue::GetSingleton().IsEmpty())
 		{
@@ -63,6 +66,7 @@ void RenderThreadStd::RunThread()
 		// Get a new task from the task queue
 		RenderTask task = RenderTaskQueue::GetSingleton().PopTask();
 		g_mutex.unlock();
+        SORT_PROFILE_END
 
 		// execute the task
 		task.Execute(m_pIntegrator);

@@ -39,6 +39,7 @@
 #include "geometry/sky/sky.h"
 #include "shape/shape.h"
 #include "utility/stats.h"
+#include "utility/profile.h"
 
 extern bool g_bBlenderMode;
 extern int  g_iTileSize;
@@ -134,6 +135,9 @@ void System::_uninit3rdParty()
 // uninitialize
 void System::Uninit()
 {
+    // Post process for image sensor
+    m_imagesensor->PostProcess();
+
     // relase the memory
     m_Scene.Release();
 
@@ -234,8 +238,6 @@ void System::_executeRenderingTasks()
     
 	// wait for all the threads to be finished
     for_each( threads.begin() , threads.end() , []( std::unique_ptr<PlatformThreadUnit>& thread ) { thread->Join(); } );
-
-    m_imagesensor->PostProcess();
 }
 
 // allocate integrator
@@ -283,9 +285,10 @@ bool System::Setup( const char* str )
 	if( element )
 	{
 		const char* str_scene = element->Attribute( "value" );
-		if( str_scene )
-			LoadScene(str_scene);
-		else
+        if (str_scene) {
+            SORT_PROFILE("Loading Scene");
+            LoadScene(str_scene);
+        }else
 			return false;
 	}else
 		return false;

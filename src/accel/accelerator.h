@@ -22,6 +22,7 @@
 #include "geometry/bbox.h"
 #include "utility/creator.h"
 #include "utility/stats.h"
+#include "utility/profile.h"
 
 class Primitive;
 class Intersection;
