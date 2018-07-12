@@ -36,6 +36,7 @@ SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Leaf Node Count", sKDTreeLeafNo
 SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "KDTree Depth", sKDTreeDepth);
 SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sKDTreeMaxPriCountInLeaf);
 SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sKDTreePrimitiveCount , sKDTreeLeafNodeCount );
+SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
 // destructor
 KDTree::~KDTree()
@@ -47,6 +48,8 @@ KDTree::~KDTree()
 // build the acceleration structure
 void KDTree::Build()
 {
+    SORT_PROFILE("Destructe KdTree");
+
 	if( m_primitives->size() == 0 )
 		return;
 
@@ -244,6 +247,7 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum )
 // get the intersection between the ray and the primitive set
 bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
+    SORT_PROFILE("Traverse KD-Tree");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += (intersect == nullptr));
 
@@ -308,6 +312,8 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 // delete all kd-tree nodes
 void KDTree::deleteKdNode( Kd_Node* node )
 {
+    SORT_PROFILE("Destructe KD-Tree");
+
 	if( !node )
 		return;
 	deleteKdNode( node->leftChild );

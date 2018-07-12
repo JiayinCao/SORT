@@ -22,18 +22,20 @@ this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 // Easy_Profiler is used in SORT to profile data. 
 // It is a open-source cross-platform project, which is available on git https://github.com/yse/easy_profiler
 
-// Comment this to disable profiling system
-#define SORT_ENABLE_PROFILER
-
 // There is no implementation until it is fully integrated on all platforms
 #ifdef SORT_ENABLE_PROFILER
-#define sProfileEnable
-#define sProfile(e)
-#define sProfileEnd
-#define sProfileDump(file)      0
+
+#include "easy/profiler.h"
+
+#define SORT_PROFILE_ENABLE         EASY_PROFILER_ENABLE
+#define SORT_PROFILE_ISENABLED      ::profiler::isEnabled()
+#define SORT_PROFILE(e)             EASY_BLOCK(e)
+#define SORT_PROFILE_END            EASY_END_BLOCK
+#define SORT_PROFILE_DUMP(file)     profiler::dumpBlocksToFile(file)
 #else
-#define sProfileEnable
-#define sProfile(e)
-#define sProfileEnd(e)
-#define sProfileDump(file)      0
+#define SORT_PROFILE_ENABLE
+#define SORT_PROFILE_ISENABLED      false
+#define SORT_PROFILE(e)
+#define SORT_PROFILE_END
+#define SORT_PROFILE_DUMP(file)     0
 #endif

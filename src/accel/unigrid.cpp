@@ -33,12 +33,14 @@ SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Grid Count", sUGGridCount)
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension X", sUniformGridX);
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGridY);
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
+SORT_STATS_AVG_COUNT("Spatial-Structure(UniformGrid)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
 IMPLEMENT_CREATOR( UniGrid );
 
 // destructor
 UniGrid::~UniGrid()
 {
+    SORT_PROFILE("Destructe Uniform Grid");
 	release();
 }
 
@@ -58,6 +60,7 @@ void UniGrid::release()
 // get the intersection between the ray and the primitive set
 bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
+    SORT_PROFILE("Traverse Uniform Grid");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect == nullptr);
     
@@ -125,6 +128,7 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 // build the acceleration structure
 void UniGrid::Build()
 {
+    SORT_PROFILE("Build Uniform Grid");
 	if( nullptr == m_primitives || m_primitives->empty() ){
         slog( WARNING , SPATIAL_ACCELERATOR , "There is no primitive in uniform grid." );
 		return;

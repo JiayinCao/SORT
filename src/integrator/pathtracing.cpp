@@ -22,7 +22,6 @@
 #include "integratormethod.h"
 #include "camera/camera.h"
 #include "log/log.h"
-#include "utility/stats.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalPathLength)
 SORT_STATS_DEFINE_COUNTER(sPrimaryCount)
@@ -36,11 +35,12 @@ IMPLEMENT_CREATOR( PathTracing );
 //		there is a limitation on the number of vertexes in the path
 Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
+    SORT_PROFILE("Path tracing");
+    SORT_STATS(++sPrimaryCount);
+
 	Spectrum	L = 0.0f;
 	Spectrum	throughput = 1.0f;
     
-    SORT_STATS(++sPrimaryCount);
-
 	int			bounces = 0;
 	Ray	r = ray;
 	while(true)

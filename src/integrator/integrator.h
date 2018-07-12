@@ -23,6 +23,8 @@
 #include "sampler/sampler.h"
 #include "utility/creator.h"
 #include "utility/propertyset.h"
+#include "utility/stats.h"
+#include "utility/profile.h"
 
 // pre-declera classes
 class	Ray;
