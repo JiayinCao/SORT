@@ -34,12 +34,14 @@ SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Leaf Node Count", sOcTreeLeafNo
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "OcTree Depth", sOcTreeDepth);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOcTreeMaxPriCountInLeaf);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCountCopy);
+SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
 IMPLEMENT_CREATOR( OcTree );
 
 // destructor
 OcTree::~OcTree()
 {
+    SORT_PROFILE("Destructe OcTree");
 	releaseOcTree( m_pRoot );
 }
 
@@ -49,6 +51,7 @@ OcTree::~OcTree()
 // @return 'true' if the ray pierce one of the primitive in the list
 bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
+    SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect == nullptr);
     
@@ -68,6 +71,8 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 // build the acceleration structure
 void OcTree::Build()
 {
+    SORT_PROFILE("Build OcTree");
+
 	// handling empty mesh case
 	if( m_primitives->size() == 0 )
 		return ;
