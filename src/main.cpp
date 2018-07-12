@@ -20,6 +20,7 @@
 #include "system.h"
 #include "log/log.h"
 #include "utility/stats.h"
+#include "utility/profile.h"
 
 // the global system
 System g_System;
@@ -32,7 +33,11 @@ int __cdecl main( int argc , char** argv )
 #elif defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
 int main( int argc , char** argv )
 #endif
-{
+{   
+    // enable profiler
+    sProfileEnable;
+    sProfile("Main Thread");
+
     addLogDispatcher(new StdOutLogDispatcher());
     addLogDispatcher(new FileLogDispatcher("log.txt"));
     
@@ -40,6 +45,11 @@ int main( int argc , char** argv )
 	if( argc < 2 )
 	{
 		cout<<"Miss file argument."<<endl;
+
+        sProfileEnd; // Main Thread
+
+        uint32_t blocks = sProfileDump("test_profile.prof");
+        slog(INFO, GENERAL, stringFormat("Easy profile filed dumped with %d blocks.", blocks));
 		return 0;
 	}
 
@@ -75,5 +85,9 @@ int main( int argc , char** argv )
     // Output stats data
     SortStatsPrintData();
     
+    sProfileEnd; // Main Thread
+    uint32_t blocks = sProfileDump("sort.prof");
+    slog(INFO, GENERAL, stringFormat("Easy profile filed dumped with %d blocks." , blocks ));
+
 	return 0;
 }

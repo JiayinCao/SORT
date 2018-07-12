@@ -19,6 +19,9 @@
 
 #include "sort.h"
 
+ // Comment this to disable stats collection system
+#define SORT_ENABLE_STATS_COLLECTION
+
 // Flush per-thread stats to StatsSummary, this should be called at the end of per-thread
 void SortStatsFlushData( bool mainThread = false );
 // Print Stats Result, this should be called in main thread after all rendering thread is done

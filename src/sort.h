@@ -38,8 +38,6 @@ using namespace std;
 
 // enable debug by default
 #define	SORT_DEBUG
-// Comment this to disable stats collection system
-#define SORT_ENABLE_STATS_COLLECTION
 
 #include <math.h>
 
