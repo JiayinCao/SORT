@@ -41,6 +41,8 @@ SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Tested per 
 // destructor
 KDTree::~KDTree()
 {
+    SORT_PROFILE("Destructe KD-Tree");
+
 	// delete kd-tree
 	deleteKdNode( m_root );
 }
@@ -48,7 +50,7 @@ KDTree::~KDTree()
 // build the acceleration structure
 void KDTree::Build()
 {
-    SORT_PROFILE("Destructe KdTree");
+    SORT_PROFILE("Build KdTree");
 
 	if( m_primitives->size() == 0 )
 		return;
@@ -312,8 +314,6 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 // delete all kd-tree nodes
 void KDTree::deleteKdNode( Kd_Node* node )
 {
-    SORT_PROFILE("Destructe KD-Tree");
-
 	if( !node )
 		return;
 	deleteKdNode( node->leftChild );
