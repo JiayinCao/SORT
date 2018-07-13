@@ -41,7 +41,6 @@ PlatformSpinlockMutex g_mutex;
 
 void RenderThreadStd::BeginThread()
 {
-    SORT_PROFILE("Rendering Thread")
 	m_thread = std::thread([&]() {
 		// setup lts
         g_ThreadId = m_tid;
@@ -54,6 +53,8 @@ void RenderThreadStd::BeginThread()
 // Run the thread
 void RenderThreadStd::RunThread()
 {
+    SORT_PROFILE("Rendering Thread")
+
 	while (true)
 	{
         SORT_PROFILE( "Grabbing RT Task" )
