@@ -1,12 +1,17 @@
 cmake_minimum_required (VERSION 2.6)
 
-#SET( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )
+if (WIN32)
+	SET( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )
+endif( WIN32 )
+
 SET( SORT_ENABLE_STATS "YES" CACHE BOOL "Enable SORT stats system. It is true by default." )
 SET( SORT_ENABLE_PROFILER "NO" CACHE BOOL "Enable SORT profiling system. It is false by default." )
 
 project (SORT)
 
-#find_package(easy_profiler REQUIRED)
+if (WIN32)
+	find_package(easy_profiler REQUIRED)
+endif(WIN32)
 
 include_directories( "${SORT_SOURCE_DIR}/src" )
 
@@ -16,7 +21,9 @@ include_directories( "${SORT_SOURCE_DIR}/src/thirdparty/zlib-1.2.5" )
 include_directories( "${SORT_SOURCE_DIR}/src/thirdparty/openexr-1.7.0" )
 
 # dependencies include
-#include_directories( "${SORT_SOURCE_DIR}/dependencies/thirdparty/easy_profiler/include" )
+if (WIN32)
+	include_directories( "${SORT_SOURCE_DIR}/dependencies/thirdparty/easy_profiler/include" )
+endif(WIN32)
 
 macro(source_group_by_dir source_files)
     set(sgbd_cur_dir ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -50,7 +57,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${SORT_SOURCE_DIR}/Release")
 
 add_executable(SORT ${all_files})
 
-#target_link_libraries(SORT easy_profiler)
+if (WIN32)
+	target_link_libraries(SORT easy_profiler)
+endif (WIN32)
 
 if (WIN32)
 file(GLOB easy_profiler_bin "${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.dll" 
