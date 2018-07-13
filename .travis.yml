@@ -7,6 +7,7 @@ os:
 - linux
 - osx
 script:
+- sudo /bin/sh ./getdep_linux.sh
 - mkdir _out
 - cd _out
 - cmake .. && make
