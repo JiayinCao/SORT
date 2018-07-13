@@ -1,11 +1,17 @@
 cmake_minimum_required (VERSION 2.6)
 
 if (WIN32)
-	SET( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )
+	SET( easy_profiler_DIR "e:/Github/SORT/dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )
 endif( WIN32 )
 
 SET( SORT_ENABLE_STATS "YES" CACHE BOOL "Enable SORT stats system. It is true by default." )
-SET( SORT_ENABLE_PROFILER "NO" CACHE BOOL "Enable SORT profiling system. It is false by default." )
+
+# to be modified once I have set everything up
+if (WIN32)
+	SET( SORT_ENABLE_PROFILER "YES" CACHE BOOL "Enable SORT profiling system. It is false by default." )
+else(WIN32)
+	SET( SORT_ENABLE_PROFILER "NO" CACHE BOOL "Enable SORT profiling system. It is false by default." )
+endif(WIN32)
 
 project (SORT)
 
