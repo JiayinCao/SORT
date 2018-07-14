@@ -18,7 +18,7 @@
 // include the header file
 #include "sort.h"
 #include "system.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include "utility/stats.h"
 #include "utility/profile.h"
 #include "utility/path.h"
@@ -53,18 +53,16 @@ int main(int argc, char** argv)
         slog(INFO, GENERAL, "Easy profiler is enabled.");
     else
         slog(INFO, GENERAL, "Easy profiler is disabled.");
+#if SORT_ENABLE_STATS_COLLECTION
+    slog( INFO, GENERAL, "Stats collection is enabled.");
+#else
+    slog( INFO, GENERAL, "Stats collection is disabled." );
+#endif
 
     // check if there is file argument
     if (argc < 2)
     {
         slog(WARNING, GENERAL, "Miss file argument.");
-
-        SORT_PROFILE_END; // Main Thread
-        if (SORT_PROFILE_ISENABLED) {
-            const std::string filename("sort.prof");
-            SORT_PROFILE_DUMP(filename.c_str());
-            slog(INFO, GENERAL, stringFormat("Easy profiler file dumpped \"%s\".", GetFullPath(filename).c_str()));
-        }
         slog(INFO, GENERAL, stringFormat("Log file: \"%s\"", GetFullPath("log.txt").c_str()));
         return 0;
     }

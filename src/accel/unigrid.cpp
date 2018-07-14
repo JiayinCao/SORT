@@ -18,7 +18,7 @@
 #include "unigrid.h"
 #include "geometry/primitive.h"
 #include "geometry/intersection.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include "utility/sassert.h"
 
 SORT_STATS_DEFINE_COUNTER(sUGGridCount)

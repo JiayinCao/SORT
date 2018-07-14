@@ -21,12 +21,13 @@
 #include "geometry/scene.h"
 #include "integratormethod.h"
 #include "camera/camera.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalPathLength)
-SORT_STATS_DEFINE_COUNTER(sPrimaryCount)
+SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 
-SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength , sPrimaryCount);
+SORT_STATS_COUNTER("Path Tracing", "Primary Ray Count" , sPrimaryRayCount);
+SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength , sPrimaryRayCount);    // This also counts the case where ray hits sky
 
 IMPLEMENT_CREATOR( PathTracing );
 
@@ -36,7 +37,7 @@ IMPLEMENT_CREATOR( PathTracing );
 Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
     SORT_PROFILE("Path tracing");
-    SORT_STATS(++sPrimaryCount);
+    SORT_STATS(++sPrimaryRayCount);
 
 	Spectrum	L = 0.0f;
 	Spectrum	throughput = 1.0f;
@@ -174,9 +175,4 @@ void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples 
 			samples[k].light_sample[0] = LightSample(true);
 		}
 	}
-}
-
-// output log information
-void PathTracing::OutputLog() const{
-    slog( INFO , INTEGRATOR , "Integrator algorithm : path tracing." );
 }

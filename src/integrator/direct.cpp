@@ -24,13 +24,19 @@
 #include "light/light.h"
 #include "managers/memmanager.h"
 #include "sampler/sampler.h"
-#include "log/log.h"
+#include "utility/log.h"
+
+SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
+
+SORT_STATS_COUNTER("Direct Illumination", "Primary Ray Count" , sPrimaryRayCount);
 
 IMPLEMENT_CREATOR( DirectLight );
 
 // radiance along a specific ray direction
 Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 {
+    SORT_STATS(++sPrimaryRayCount);
+    
 	if( r.m_Depth > max_recursive_depth )
 		return 0.0f;
 
@@ -51,11 +57,6 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 	}
 
 	return li;
-}
-
-// output log information
-void DirectLight::OutputLog() const{
-    slog( INFO , INTEGRATOR , "Integrator algorithm : direct light integrator." );
 }
 
 // request samples

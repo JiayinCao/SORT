@@ -17,7 +17,7 @@
 
 // include the header file
 #include "system.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include "managers/texmanager.h"
 #include "managers/meshmanager.h"
 #include "managers/matmanager.h"

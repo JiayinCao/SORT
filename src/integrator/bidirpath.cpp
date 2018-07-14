@@ -24,11 +24,21 @@
 #include "camera/camera.h"
 #include "imagesensor/imagesensor.h"
 
+SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromEye)
+SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromLight)
+SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
+
+SORT_STATS_COUNTER("Bi-directional Path Tracing", "Primary Ray Count" , sPrimaryRayCount);
+SORT_STATS_AVG_COUNT("Bi-directional Path Tracing", "Average Path Length Starting from Eye", sTotalLengthPathFromEye , sPrimaryRayCount);            // This also counts the case where ray hits sky
+SORT_STATS_AVG_COUNT("Bi-directional Path Tracing", "Average Path Length Starting from Lights", sTotalLengthPathFromLight , sPrimaryRayCount);       // This also counts the case where ray hits sky
+
 IMPLEMENT_CREATOR( BidirPathTracing );
 
 // return the radiance of a specific direction
 Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 {
+    SORT_STATS(++sPrimaryRayCount);
+    
 	// pick a light randomly
 	float pdf;
 	const Light* light = scene.SampleLight( sort_canonical() , &pdf );
@@ -54,10 +64,12 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	float rr = 1.0f;
 	while ((int)light_path.size() < max_recursive_depth)
 	{
+        SORT_STATS(++sTotalLengthPathFromLight);
+        
 		BDPT_Vertex vert;
 		if (false == scene.GetIntersect(wi, &vert.inter))
 			break;
-
+        
 		const float distSqr = vert.inter.t * vert.inter.t;
 		const float cosIn = AbsDot( wi.m_Dir , vert.inter.normal );
 		if( light_path.size() > 0 || ( light_path.size() == 0 && !light->IsInfinite() ) )
@@ -117,6 +129,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	rr = 1.0f;
 	while (light_path_len <= (int)max_recursive_depth)
 	{
+        SORT_STATS(++sTotalLengthPathFromEye);
+        
 		BDPT_Vertex vert;
 		vert.depth = light_path_len;
 		if (false == scene.GetIntersect(wi, &vert.inter))
@@ -139,7 +153,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 			break;
 		}
-
+        
 		const float distSqr = vert.inter.t * vert.inter.t;
 		const float cosIn = AbsDot( wi.m_Dir , vert.inter.normal );
 		vcm *= MIS( distSqr );

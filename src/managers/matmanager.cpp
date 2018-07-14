@@ -26,7 +26,7 @@
 #include "bsdf/merl.h"
 #include "utility/creator.h"
 #include "material/matte.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 // find specific material
 std::shared_ptr<Material> MatManager::FindMaterial( const string& mat_name ) const

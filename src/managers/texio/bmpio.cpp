@@ -22,7 +22,7 @@
 #include <fstream>
 #include "managers/texmanager.h"
 #include "texture/texture.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 //-------------------------------------------------
 // define some useful structure

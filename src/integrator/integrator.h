@@ -97,9 +97,6 @@ public:
 	// support pending write
 	virtual bool SupportPendingWrite() { return false; }
 
-	// output log information
-	virtual void OutputLog() const {}
-
 	// refresh tile in blender
 	virtual bool NeedRefreshTile() const { return true; }
 

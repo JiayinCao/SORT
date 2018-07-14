@@ -19,7 +19,7 @@
 #include "material.h"
 #include "bsdf/bsdf.h"
 #include "managers/memmanager.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 Bsdf* Material::GetBsdf( const Intersection* intersect ) const
 {
