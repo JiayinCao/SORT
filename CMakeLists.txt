@@ -61,6 +61,7 @@ file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBU
 endif (WIN32)
 
 add_definitions(-DSORT_ENABLE_STATS_COLLECTION)
+add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 
 if(SORT_ENABLE_PROFILER)
 	add_definitions(-DSORT_ENABLE_PROFILER)
