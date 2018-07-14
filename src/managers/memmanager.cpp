@@ -18,7 +18,7 @@
 // include the headers
 #include "memmanager.h"
 #include "utility/define.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include "utility/strhelper.h"
 
 // default constructor

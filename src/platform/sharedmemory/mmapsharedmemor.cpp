@@ -20,7 +20,7 @@
 #if defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
 
 #include "sharedmemory.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include <sys/mman.h>
 #include <sys/types.h>
 

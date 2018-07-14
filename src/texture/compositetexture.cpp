@@ -18,7 +18,7 @@
 // include header file
 #include "compositetexture.h"
 #include "spectrum/spectrum.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include "utility/define.h"
 
 // constructor from a texture

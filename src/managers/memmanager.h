@@ -20,7 +20,7 @@
 // include the header
 #include "utility/singleton.h"
 #include "utility/multithread/multithread.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include "utility/strhelper.h"
 #include <unordered_map>
 

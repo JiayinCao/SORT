@@ -124,4 +124,6 @@ private:
 				ir->m_nLightPathSet = (int)atof( str.c_str() );
 		}
 	};
+    
+    SORT_STATS_ENABLE( "Instant Radiosity" )
 };

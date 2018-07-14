@@ -37,6 +37,6 @@ public:
 	// result       : radiance along the ray from the scene<F3>
 	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const;
 
-	// output log information
-	virtual void OutputLog() const;
+private:
+    SORT_STATS_ENABLE( "Whitted Ray Tracing" )
 };

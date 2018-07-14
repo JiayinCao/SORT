@@ -20,7 +20,7 @@
 #if defined(SORT_IN_WINDOWS)
 
 #include "sharedmemory.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include "utility/strhelper.h"
 
 // default constructor

@@ -21,7 +21,7 @@
 #include "bsdf/lambert.h"
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "geometry/intersection.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 // get node property
 MaterialNodeProperty* MaterialNode::getProperty( const string& name )

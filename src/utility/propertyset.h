@@ -21,7 +21,7 @@
 #include "sort.h"
 #include <string>
 #include <unordered_map>
-#include "log/log.h"
+#include "utility/log.h"
 #include "utility/strhelper.h"
 
 // pre-declera class

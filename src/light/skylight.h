@@ -20,7 +20,7 @@
 #include "light.h"
 #include "utility/creator.h"
 #include "geometry/sky/sky.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 // definition of sky light

@@ -22,7 +22,7 @@
 #include "managers/meshmanager.h"
 #include "geometry/triangle.h"
 #include "geometry/instancetri.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include "managers/memmanager.h"
 #include "managers/matmanager.h"
 

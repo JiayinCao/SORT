@@ -44,8 +44,5 @@ public:
 	// para 'scene'   : the scene to be rendered
 	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const;
 
-	// output log information
-	virtual void OutputLog() const;
-    
     SORT_STATS_ENABLE( "Path Tracing" )
 };

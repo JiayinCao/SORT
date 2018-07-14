@@ -18,6 +18,8 @@
 #include "integrator.h"
 #include "system.h"
 
+SORT_STATS_DEFINE_COUNTER(sPrimaryRayCount)
+
 extern System g_System;
 
 Integrator::Integrator()

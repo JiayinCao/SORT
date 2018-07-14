@@ -31,7 +31,7 @@
 #include "texture/gridtexture.h"
 #include "texture/constanttexture.h"
 #include "texture/imagetexture.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 // default constructor
 TexManager::TexManager()

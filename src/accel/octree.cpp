@@ -17,7 +17,7 @@
 
 #include "octree.h"
 #include "geometry/primitive.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 SORT_STATS_DEFINE_COUNTER(sOcTreeNodeCount)
 SORT_STATS_DEFINE_COUNTER(sOcTreeLeafNodeCount)
