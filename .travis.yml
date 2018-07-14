@@ -7,7 +7,7 @@ matrix:
       compiler: clang
     - os: linux
       compiler: gcc
-      evn:
+      env:
         -CXX_COMPILER=g++-5
         -C_COMPILER=gcc-5
 script:
