@@ -24,7 +24,7 @@
 #include <half.h>
 #include <ImfRgba.h>
 #include <ImfRgbaFile.h>
-#include "log/log.h"
+#include "utility/log.h"
 
 using namespace Imf;
 using namespace Imath;

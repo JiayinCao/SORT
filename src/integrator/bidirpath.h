@@ -59,7 +59,6 @@ class BidirPathTracing : public Integrator
 {
 // public method
 public:
-
 	DEFINE_CREATOR( BidirPathTracing , Integrator , "bdpt" );
 
 	// default constructor
@@ -116,4 +115,6 @@ private:
 
 	// mis factor
 	float MIS( float t ) const;
+    
+    SORT_STATS_ENABLE( "Bi-directional Path Tracing" )
 };

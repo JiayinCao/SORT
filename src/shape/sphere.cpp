@@ -23,7 +23,7 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 #include "utility/rand.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 IMPLEMENT_CREATOR( Sphere );
 

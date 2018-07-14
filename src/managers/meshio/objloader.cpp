@@ -23,7 +23,7 @@
 #include "managers/meshmanager.h"
 #include "utility/strhelper.h"
 #include "managers/matmanager.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 // the maxmium length of a single line
 static const unsigned LINE_MAXLENGTH = 4096;

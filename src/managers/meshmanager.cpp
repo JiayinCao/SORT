@@ -24,7 +24,7 @@
 #include "geometry/triangle.h"
 #include "utility/path.h"
 #include "bsdf/bsdf.h"
-#include "log/log.h"
+#include "utility/log.h"
 
 // default constructor
 MeshManager::MeshManager()

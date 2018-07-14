@@ -22,13 +22,19 @@
 #include "geometry/scene.h"
 #include "bsdf/bsdf.h"
 #include "light/light.h"
-#include "log/log.h"
+#include "utility/log.h"
+
+SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
+
+SORT_STATS_COUNTER("Whitted Ray Tracing", "Primary Ray Count" , sPrimaryRayCount);
 
 IMPLEMENT_CREATOR( WhittedRT );
 
 // radiance along a specific ray direction
 Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 {
+    SORT_STATS(++sPrimaryRayCount);
+    
 	if( r.m_Depth > max_recursive_depth )
 		return 0.0f;
 
@@ -73,9 +79,4 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 	}
 
 	return t;
-}
-
-// output log information
-void WhittedRT::OutputLog() const{
-    slog( INFO , INTEGRATOR , "Integrator algorithm : whitted ray tracing." );
 }

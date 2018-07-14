@@ -23,11 +23,19 @@
 #include "light/light.h"
 #include "bsdf/bsdf.h"
 
+SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
+SORT_STATS_DEFINE_COUNTER(sVPLCount)
+
+SORT_STATS_COUNTER("Instant Radiosity", "Primary Ray Count" , sPrimaryRayCount);
+SORT_STATS_COUNTER("Instant Radiosity", "Virtual Point Lights Count" , sVPLCount);
+
 IMPLEMENT_CREATOR( InstantRadiosity );
 
 // Preprocess
 void InstantRadiosity::PreProcess()
 {
+    SORT_PROFILE("Instant Radiosity (LPV distribution stage)");
+    
 	m_pVirtualLightSources = new list<VirtualLightSource>[m_nLightPathSet];
 
 	for( int k = 0 ; k < m_nLightPathSet ; ++k )
@@ -82,6 +90,8 @@ void InstantRadiosity::PreProcess()
 				ray = Ray(intersect.intersect, wo, 0, 0.001f);
 			}
 		}
+        
+        SORT_STATS(sVPLCount+=m_pVirtualLightSources[k].size());
 	}
 }
 
@@ -94,6 +104,8 @@ void InstantRadiosity::PostProcess()
 // radiance along a specific ray direction
 Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps ) const
 {
+    SORT_STATS( ++sPrimaryRayCount );
+    
 	return _li( r );
 }
 

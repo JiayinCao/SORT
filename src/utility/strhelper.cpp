@@ -21,7 +21,7 @@
 #include <algorithm>
 #include "math/transform.h"
 #include <stdarg.h>
-#include "log/log.h"
+#include "utility/log.h"
 
 // convert string to vertex index
 VertexIndex	VertexIndexFromStr( const string& str )

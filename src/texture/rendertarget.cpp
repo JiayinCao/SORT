@@ -17,7 +17,6 @@
 
 // include the header file
 #include "rendertarget.h"
-#include "log/log.h"
 
 // set the color
 void RenderTarget::SetColor( int x , int y , float r , float g , float b )

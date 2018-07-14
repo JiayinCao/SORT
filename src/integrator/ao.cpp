@@ -22,13 +22,19 @@
 #include "light/light.h"
 #include "math/vector3.h"
 #include "utility/samplemethod.h"
-#include "log/log.h"
+#include "utility/log.h"
+
+SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
+
+SORT_STATS_COUNTER("Ambient Occlusion", "Primary Ray Count" , sPrimaryRayCount);
 
 IMPLEMENT_CREATOR( AmbientOcclusion );
 
 // radiance along a specific ray direction
 Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 {
+    SORT_STATS(++sPrimaryRayCount);
+    
 	if( r.m_Depth > max_recursive_depth )
 		return 0.0f;
 
@@ -62,11 +68,6 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 	float distance = Distance( aoip.intersect , ray.m_Ori );
 	float ao = distance / maxDistance;
 	return ao * ao;
-}
-
-// output log information
-void AmbientOcclusion::OutputLog() const{
-    slog( INFO , INTEGRATOR , "Integrator algorithm : Ambient Occlusion." );
 }
 
 void AmbientOcclusion::_registerAllProperty()

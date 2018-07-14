@@ -18,7 +18,7 @@
 #pragma once
 
 #include "sort.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include <assert.h>
 
 // assert

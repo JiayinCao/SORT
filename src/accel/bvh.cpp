@@ -18,7 +18,7 @@
 #include "bvh.h"
 #include <algorithm>
 #include "geometry/ray.h"
-#include "log/log.h"
+#include "utility/log.h"
 #include "managers/memmanager.h"
 #include "geometry/intersection.h"
 
@@ -48,6 +48,7 @@ IMPLEMENT_CREATOR( Bvh );
 // destructor
 Bvh::~Bvh()
 {
+    SORT_PROFILE("Destructe Bvh");
 	deallocMemory();
 }
 
@@ -61,8 +62,6 @@ void Bvh::mallocMemory()
 // dealloc memory
 void Bvh::deallocMemory()
 {
-    SORT_PROFILE("Destructe Bvh");
-
 	SORT_DEALLOC( BVH_LEAF_PRILIST_MEMID );
     deleteNode( m_root );
 }
