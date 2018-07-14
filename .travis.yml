@@ -7,11 +7,17 @@ matrix:
       compiler: clang
     - os: linux
       compiler: gcc
-      evn:
+      env:
         -CXX_COMPILER=g++-5
         -C_COMPILER=gcc-5
+      addons:
+         apt:
+           sources:
+            - ubuntu-toolchain-r-test
+           packages:
+            - g++-5
 script:
 - sudo /bin/sh ./getdep_linux.sh
 - mkdir _out
 - cd _out
-- cmake .. && make
+- cmake -DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make
