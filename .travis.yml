@@ -1,11 +1,15 @@
 language: cpp
 sudo: required
 dist: trusty
-compiler:
-- clang
-os:
-- linux
-- osx
+matrix:
+  include:
+    - os: osx
+      compiler: clang
+    - os: linux
+      compiler: gcc
+      evn:
+        -CXX_COMPILER=g++-5
+        -C_COMPILER=gcc-5
 script:
 - sudo /bin/sh ./getdep_linux.sh
 - mkdir _out
