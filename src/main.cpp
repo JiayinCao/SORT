@@ -62,7 +62,7 @@ int main(int argc, char** argv)
         SORT_PROFILE_END; // Main Thread
         if (SORT_PROFILE_ISENABLED) {
             const std::string filename("sort.prof");
-            uint32_t blocks = SORT_PROFILE_DUMP(filename.c_str());
+            SORT_PROFILE_DUMP(filename.c_str());
             slog(INFO, GENERAL, stringFormat("Easy profiler file dumpped \"%s\".", GetFullPath(filename).c_str()));
         }
         slog(INFO, GENERAL, stringFormat("Log file: \"%s\"", GetFullPath("log.txt").c_str()));
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     // dump profile data
     if (SORT_PROFILE_ISENABLED){
         const std::string filename("sort.prof");
-        uint32_t blocks = SORT_PROFILE_DUMP(filename.c_str());
+        SORT_PROFILE_DUMP(filename.c_str());
         slog(INFO, GENERAL, stringFormat("Profiling file: \"%s\"", GetFullPath(filename).c_str()));
     }
     slog(INFO, GENERAL, stringFormat("Log file: \"%s\"", GetFullPath("log.txt").c_str()));
