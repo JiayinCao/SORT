@@ -719,7 +719,7 @@ static BPMNode* bpmnode_create(BPMLists* lists, int weight, unsigned index, BPMN
   return result;
 }
 
-static int __cdecl bpmnode_compare(const void* a, const void* b)
+static int bpmnode_compare(const void* a, const void* b)
 {
   int wa = ((const BPMNode*)a)->weight;
   int wb = ((const BPMNode*)b)->weight;
