@@ -10,7 +10,6 @@ from .. import common
 from .. import utility
 from .. import nodes
 from .. import preference
-from ..ui import ui_render
 
 pbrt_process = None
 
