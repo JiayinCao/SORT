@@ -186,21 +186,6 @@ class SORTNodeOutput(SORTShadingNode):
     def init(self, context):
         input = self.inputs.new('SORTNodeSocketBxdf', 'Surface')
 
-# lambert node
-class SORTNodeLambert(SORTShadingNode):
-    bl_label = 'SORT_lambert'
-    bl_idname = 'SORTNodeLambert'
-
-    def init(self, context):
-        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
-        self.outputs.new('SORTNodeSocketBxdf', 'Result')
-
-    def export_pbrt(self, file):
-        file.write( "  \"string type\" \"Sort_Lambert\"\n" )
-        for input in self.inputs:
-            input.export_pbrt(file)
-        file.write( "\n" )
-
 # microfacte node
 class SORTNodeMicrofacetReflection(SORTShadingNode):
     bl_label = 'SORT_microfacet_reflection'
@@ -315,16 +300,6 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
         file.write( "  \"float ext_ior\" [%f]\n" %self.ext_ior )
         for input in self.inputs:
             input.export_pbrt(file)
-
-# oren nayar node
-class SORTNodeOrenNayar(SORTShadingNode):
-    bl_label = 'SORT_orennayar'
-    bl_idname = 'SORTNodeOrenNayar'
-
-    def init(self, context):
-        self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
-        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
-        self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
 # operator nodes
 class SORTNodeAdd(SORTShadingNode):
@@ -559,7 +534,8 @@ class SORTNodePrinciple(SORTShadingNode):
     bl_idname = 'SORTNodePrincipleBXDF'
 
     def init(self, context):
-        self.inputs.new('SORTNodeFloatSocket', 'Roughness')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessU')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessV')
         self.inputs.new('SORTNodeFloatSocket', 'Metallic')
         self.inputs.new('SORTNodeFloatSocket', 'Specular')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
@@ -572,7 +548,7 @@ class SORTNodePrinciple(SORTShadingNode):
         file.write( "  \"string type\" \"disney\"\n" )
         file.write( "  \"rgb color\" [%f %f %f]\n"%(reflectance[:]))
         file.write( "  \"float metallic\" [%f]\n"%metallic)
-        file.write( "  \"float roughness\" [%s]\n" %roughness )
+        file.write( "  \"float roughnessu\" [%s]\n" %roughness )    # no anisotropic in pbrt disney model yet
         return
 
 class SORTNodeGlass(SORTShadingNode):
@@ -700,21 +676,19 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNodeLambert"),NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction"),NodeItem("SORTNodeOrenNayar")] ),
         SORTPatternNodeCategory("SORT_material", "SORT Materials",items = [NodeItem("SORTNodePrincipleBXDF"),NodeItem("SORTNodeGlassBXDF"),NodeItem("SORTNodePlasticBXDF"),NodeItem("SORTNodeMatteBXDF"),NodeItem("SORTNodeMeasuredBXDF"),NodeItem("SORTNodeLayeredBXDF")] ),
         SORTPatternNodeCategory("SORT_operator", "SORT Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeOneMinus"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp"),NodeItem("SORTNodeLinearToGamma"),NodeItem("SORTNodeGammaToLinear")] ),
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
         SORTPatternNodeCategory("SORT_input", "SORT Input",items=[],),
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction")]), # For debugging purpose, to be deprecated
     ]
     nodeitems_utils.register_node_categories("SORTSHADERNODES",node_categories)
 
     # register node types
     SORTPatternGraph.nodetypes[SORTNodeLayeredBXDF] = 'SORTNodeLayeredBXDF'
-    SORTPatternGraph.nodetypes[SORTNodeLambert] = 'SORTNodeLambert'
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetReflection] = 'SORTNodeMicrofacetReflection'
     SORTPatternGraph.nodetypes[SORTNodeMicrofacetRefraction] = 'SORTNodeMicrofacetRefraction'
-    SORTPatternGraph.nodetypes[SORTNodeOrenNayar] = 'SORTNodeOrenNayar'
     SORTPatternGraph.nodetypes[SORTNodePrinciple] = 'SORTNodePrincipleBXDF'
     SORTPatternGraph.nodetypes[SORTNodeGlass] = 'SORTNodeGlassBXDF'
     SORTPatternGraph.nodetypes[SORTNodePlastic] = 'SORTNodePlasticBXDF'
