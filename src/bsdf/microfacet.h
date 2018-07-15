@@ -24,13 +24,14 @@
 class MicroFacetDistribution
 {
 public:
-	//! @brief Probabilty of facet with specific normal (v)
-	virtual float D(float NoH) const = 0;
+	//! @brief Probabilty of facet with specific normal (h)
+	virtual float D(const Vector& h) const = 0;
 
 	//! @brief Sampling a normal respect to the NDF.
     //! @param bs   Sample holind all necessary random variables.
+    //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
-	virtual Vector sample_f( const BsdfSample& bs ) const = 0;
+	virtual Vector sample_f( const BsdfSample& bs , const Vector& wo ) const = 0;
 };
 
 //! @brief Blinn NDF.
@@ -41,8 +42,8 @@ public:
     //! @param roughness    Roughness of the surface formed by the micro facets.
 	Blinn( float roughness );
 	
-	//! @brief Probabilty of facet with specific normal (v)
-	float D(float NoH) const override;
+	//! @brief Probabilty of facet with specific normal (h)
+	float D(const Vector& h) const override;
 	
     //! @brief Sampling a normal respect to the NDF.
     //!
@@ -50,8 +51,9 @@ public:
     //! <a href="https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/">blog</a>
     //! for detail explanation of the implementation.
     //! @param bs   Sample holind all necessary random variables.
+    //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
-    Vector sample_f( const BsdfSample& bs ) const override;
+    Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
 private:
 	float exp;      /**< Internal data used for NDF calculationg. */
@@ -62,24 +64,26 @@ class Beckmann : public MicroFacetDistribution
 {
 public:
     //! @brief Constructor
-    //! @param roughness    Roughness of the surface formed by the micro facets.
-	Beckmann( float roughness );
+    //! @param roughnessU    Roughness of the surface formed by the micro facets.
+    //! @param roughnessV    Roughness of the surface formed by the micro facets.
+	Beckmann( float roughnessU , float roughnessV );
 
     //! @brief Probabilty of facet with specific normal (v)
-    float D(float NoH) const override;
+    float D(const Vector& h) const override;
     
     //! @brief Sampling a normal respect to the NDF.
     //!
-    //! Refer to this
+    //! Refer to this for asotropic importance sampling
     //! <a href="https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/">blog</a>
     //! for detail explanation of the implementation.
     //! @param bs   Sample holind all necessary random variables.
+    //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
-    Vector sample_f( const BsdfSample& bs ) const override;
+    Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
 private:
-	float m;        /**< Internal data used for NDF calculationg. */
-	float alpha;    /**< Internal data used for NDF calculationg. */
+	float alphaU , alphaV;        /**< Internal data used for NDF calculationg. */
+    float alphaU2 , alphaV2 , alphaUV;
 };
 
 //! @brief GGX NDF.
@@ -90,8 +94,8 @@ public:
     //! @param roughness    Roughness of the surface formed by the micro facets.
 	GGX( float roughness );
 
-    //! @brief Probabilty of facet with specific normal (v)
-    float D(float NoH) const override;
+    //! @brief Probabilty of facet with specific normal (h)
+    float D(const Vector& h) const override;
     
     //! @brief Sampling a normal respect to the NDF.
     //!
@@ -99,8 +103,9 @@ public:
     //! <a href="https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/">blog</a>
     //! for detail explanation of the implementation.
     //! @param bs   Sample holind all necessary random variables.
+    //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
-    Vector sample_f( const BsdfSample& bs ) const override;
+    Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
 private:
 	float m = 0.0f;         /**< Internal data used for NDF calculationg. */

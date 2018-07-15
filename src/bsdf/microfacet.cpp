@@ -18,6 +18,7 @@
 #include "microfacet.h"
 #include "bsdf.h"
 #include "sampler/sample.h"
+#include <cmath>
 
 // constructor
 Blinn::Blinn( float roughness )
@@ -27,13 +28,14 @@ Blinn::Blinn( float roughness )
 }
 
 // probability of facet with specific normal (v)
-float Blinn::D(float NoH) const
+float Blinn::D(const Vector& h) const
 {
+    float NoH = AbsCosTheta(h);
 	return (exp+2.0f) * INV_TWOPI * powf( NoH , exp );
 }
 
 // sampling according to GGX
-Vector Blinn::sample_f( const BsdfSample& bs ) const
+Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
 	const float costheta = powf( bs.u , 1.0f / (exp+2.0f) );
     const float sintheta = sqrtf( max( 0.0f , 1.0f - costheta * costheta ) );
@@ -42,26 +44,55 @@ Vector Blinn::sample_f( const BsdfSample& bs ) const
 	return SphericalVec( sintheta , costheta , phi );
 }
 
-Beckmann::Beckmann( float roughness )
+Beckmann::Beckmann( float roughnessU , float roughnessV )
 {
-	alpha = roughness * roughness;
-	m = alpha * alpha;
+    const static auto convert = []( float roughness ) {
+        roughness = std::max(roughness, (float)1e-3);
+        const float x = std::log(roughness);
+        return 1.62142f + 0.819955f * x + 0.1734f * x * x + 0.0171201f * x * x * x + 0.000640711f * x * x * x * x;
+    };
+    alphaU = convert( roughnessU );
+    alphaV = convert( roughnessV );
+    alphaU2 = alphaU * alphaU;
+    alphaV2 = alphaV * alphaV;
+    alphaUV = alphaU * alphaV;
 }
 
 // probabilty of facet with specific normal (v)
-float Beckmann::D(float NoH) const
+float Beckmann::D(const Vector& h) const
 {
-    const float NoH2 = NoH * NoH;
-	return exp( (NoH2 - 1) / (m * NoH2) ) / ( PI * m * NoH2 * NoH2 );
+    // Anisotropic Beckmann distribution formular, pbrt-v3 ( page 539 )
+    // D(w_h) = pow( e , -tan(\theta_h)^2 * ( (cos(\phi_h) / alpha_x)^2 + (sin(\phi_h) / alpha_y)^2 ) ) / ( PI * alpha_x * alpha_y * cos(\theta_h) ^ 4
+    // When alpha_x equals to alpha_y , it is isotropic, the formular is simpler
+    // D(w_h) = pow( e , -(tan(\theta_h)/alpha)^2 ) / ( PI * alpha^2 * cos(\theta_h)^4 )
+    const float tan_theta_sq = TanTheta2(h);
+    const float cos_theta_sq = CosTheta2(h);
+    if( std::isinf(tan_theta_sq) ) return 0.f;
+    
+    const float sin_phi_h_sq = SinPhi2(h);
+    const float cos_phi_h_sq = 1.0f - sin_phi_h_sq;
+    return exp( -tan_theta_sq * ( cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2 ) ) / ( PI * alphaUV * cos_theta_sq * cos_theta_sq );
 }
 
 // sampling according to GGX
-Vector Beckmann::sample_f( const BsdfSample& bs ) const
+Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
-    const float theta = atan( sqrt( -1.0f * alpha * alpha * log( 1.0f - bs.u ) ) );
-    const float phi = TWO_PI * bs.v;
-
-	return SphericalVec( theta , phi );
+    const float logSample = std::log( 1.0f - bs.u );
+    sAssert(!std::isinf(logSample), "Bad sample in Beckman sampling.");
+    
+    // Special case about isotropic beckmann importance sampling
+    if( alphaU == alphaV ){
+        const float theta = atan( sqrt( -1.0f * alphaUV * logSample ) );
+        const float phi = TWO_PI * bs.v;
+        return SphericalVec( theta , phi );
+    }
+    
+    float phi = std::atan( alphaV / alphaU * std::tan( TWO_PI * bs.v + HALF_PI ) );
+    if( bs.v > 0.5f ) phi += PI;
+    const float sin_phi = std::sin(phi);
+    const float sin_phi_sq = sin_phi * sin_phi;
+    const float theta = atan( sqrt( -logSample / ( ( 1.0f - sin_phi_sq ) / alphaU2 + sin_phi_sq / alphaV2 ) ) );
+    return SphericalVec(theta, phi);
 }
 
 GGX::GGX( float roughness )
@@ -73,13 +104,14 @@ GGX::GGX( float roughness )
 }
 
 // probabilty of facet with specific normal (v)
-float GGX::D(float NoH) const
+float GGX::D(const Vector& h) const
 {
+    float NoH = AbsCosTheta(h);
     const float d = ( m - 1.0f ) * NoH * NoH + 1.0f;
 	return m / ( PI*d*d );
 }
 
-Vector GGX::sample_f( const BsdfSample& bs ) const
+Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
     const float theta = atan( alpha * sqrt(bs.v / ( 1.0f - bs.v )) );
     const float phi = TWO_PI * bs.u;
@@ -190,14 +222,14 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 	const Spectrum F = fresnel->Evaluate( AbsDot(wo,wh) , fabs(VoH) );
 	
 	// return Torrance–Sparrow BRDF
-	return R * distribution->D(NoH) * F * visterm->Vis_Term( NoL , NoV , VoH , NoH );
+	return R * distribution->D(wh) * F * visterm->Vis_Term( NoL , NoV , VoH , NoH );
 }
 
 // sample a direction randomly
 Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
 	// sampling the normal
-	const Vector wh = distribution->sample_f( bs );
+	const Vector wh = distribution->sample_f( bs , wo );
 
 	// reflect the incident direction
 	wi = getReflected( wo , wh );
@@ -221,7 +253,7 @@ float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 	const Vector h = Normalize( wo + wi );
 	const float EoH = AbsDot( wo , h );
 	const float HoN = AbsCosTheta(h);
-	return distribution->D(HoN) * HoN / (4.0f * EoH);
+	return distribution->D(h) * HoN / (4.0f * EoH);
 }
 
 // constructor
@@ -267,7 +299,7 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 
 	const float sqrtDenom = sVoH + eta * sIoH;
 	const float t = eta / sqrtDenom;
-	return (Spectrum(1.f) - F) * R * distribution->D(NoH) * visterm->Vis_Term( NoL , NoV , VoH , NoH ) * t * t * IoH * VoH * 4.0f ;
+	return (Spectrum(1.f) - F) * R * distribution->D(wh) * visterm->Vis_Term( NoL , NoV , VoH , NoH ) * t * t * IoH * VoH * 4.0f ;
 }
 
 // sample a direction using importance sampling
@@ -277,7 +309,7 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
         return 0.0f;
     
 	// sampling the normal
-	const Vector wh = distribution->sample_f( bs );
+	const Vector wh = distribution->sample_f( bs , wo );
 
 	// try to get refracted ray
 	bool total_reflection = false;
@@ -302,5 +334,5 @@ float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi ) const
     const float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
     const float dwh_dwi = eta * eta * AbsDot(wi, wh) / (sqrtDenom * sqrtDenom);
 	const float HoN = AbsCosTheta(wh);
-    return distribution->D(HoN) * HoN * dwh_dwi;
+    return distribution->D(wh) * HoN * dwh_dwi;
 }
