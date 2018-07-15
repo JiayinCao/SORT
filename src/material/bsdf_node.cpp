@@ -69,7 +69,8 @@ void LayeredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 PrincipleMaterialNode::PrincipleMaterialNode()
 {
     m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-    m_props.insert( make_pair( "Roughness" , &roughness ) );
+    m_props.insert( make_pair( "RoughnessU" , &roughnessU ) );
+    m_props.insert( make_pair( "RoughnessV" , &roughnessV ) );
     m_props.insert( make_pair( "Metallic" , &metallic ) );
     m_props.insert( make_pair( "Specular" , &specular ) );
 }
@@ -82,9 +83,12 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     
     Spectrum eta = Spectrum( 0.37f , 0.37f , 0.37f );
     Spectrum k( 2.82f );
-    float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
-    MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rn );      // GGX
+    MicroFacetDistribution* dist = SORT_MALLOC(Beckmann)( roughnessU.GetPropertyValue(bsdf).x , roughnessV.GetPropertyValue(bsdf).x );
+    
+    // visibility function to be removed.
+    float rn = clamp( roughnessU.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
     VisTerm* vis = SORT_MALLOC(VisSmith)( rn );                 // Smith
+    
     Fresnel* fresnel = SORT_MALLOC( FresnelConductor )( eta , k );
     MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( basecolor , fresnel , dist , vis);
     

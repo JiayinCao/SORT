@@ -53,7 +53,8 @@ public:
     
 private:
     MaterialNodeProperty    baseColor;
-    MaterialNodeProperty    roughness;
+    MaterialNodeProperty    roughnessU;
+    MaterialNodeProperty    roughnessV;
     MaterialNodeProperty    metallic;
     MaterialNodeProperty    specular;
 };

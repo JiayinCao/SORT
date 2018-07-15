@@ -109,6 +109,14 @@ inline float SinTheta2(const Vector &w){
     return max(0.f, 1.f - CosTheta(w)*CosTheta(w));
 }
 
+inline float CosTheta2(const Vector &w){
+    return CosTheta(w) * CosTheta(w);
+}
+
+inline float TanTheta2(const Vector &w){
+    return 1.0f / CosTheta2(w) - 1.0f;
+}
+
 inline float CosDPhi( const Vector& w0 , const Vector& w1 ){
     return clamp( ( w0.x * w1.x + w0.z * w1.z ) / sqrt( (w0.x * w0.x + w0.z * w0.z)*(w1.x * w1.x + w1.z*w1.z) ) , -1.0f , 1.0f );
 }
@@ -125,6 +133,16 @@ inline float SinPhi(const Vector &w) {
     float sintheta = SinTheta(w);
     if (sintheta == 0.f) return 0.f;
     return clamp(w.z / sintheta, -1.f, 1.f);
+}
+
+inline float SinPhi2(const Vector &w) {
+    const float sinPhi = SinPhi(w);
+    return sinPhi * sinPhi;
+}
+
+inline float CosPhi2(const Vector &w) {
+    const float cosPhi = CosPhi(w);
+    return cosPhi * cosPhi;
 }
 
 inline bool SameHemisphere(const Vector &w, const Vector &wp) {
