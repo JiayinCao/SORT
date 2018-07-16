@@ -27,7 +27,7 @@ Blinn::Blinn( float roughness )
 	exp = 2.0f / pow( exp , 4.0f ) - 2.0f;
 }
 
-// probability of facet with specific normal (v)
+// probability of facet with specific normal (h)
 float Blinn::D(const Vector& h) const
 {
     float NoH = AbsCosTheta(h);
@@ -58,7 +58,7 @@ Beckmann::Beckmann( float roughnessU , float roughnessV )
     alphaUV = alphaU * alphaV;
 }
 
-// probabilty of facet with specific normal (v)
+// probability of facet with specific normal (h)
 float Beckmann::D(const Vector& h) const
 {
     // Anisotropic Beckmann distribution formular, pbrt-v3 ( page 539 )
@@ -77,22 +77,26 @@ float Beckmann::D(const Vector& h) const
 // sampling according to GGX
 Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
-    const float logSample = std::log( 1.0f - bs.u );
+    const float logSample = std::log( bs.u );
     sAssert(!std::isinf(logSample), "Bad sample in Beckman sampling.");
     
-    // Special case about isotropic beckmann importance sampling
+    float theta, phi;
     if( alphaU == alphaV ){
-        const float theta = atan( sqrt( -1.0f * alphaUV * logSample ) );
-        const float phi = TWO_PI * bs.v;
-        return SphericalVec( theta , phi );
+        // Refer the following link ( my blog ) for a full derivation
+        // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+        theta = atan( sqrt( -1.0f * alphaUV * logSample ) );
+        phi = TWO_PI * bs.v;
+    }else {
+        phi = std::atan(alphaV / alphaU * std::tan(TWO_PI * bs.v));
+        if (bs.v > 0.5f) phi += PI;
+        const float sin_phi = std::sin(phi);
+        const float sin_phi_sq = sin_phi * sin_phi;
+        theta = atan(sqrt(-logSample / ((1.0f - sin_phi_sq) / alphaU2 + sin_phi_sq / alphaV2)));
     }
     
-    float phi = std::atan( alphaV / alphaU * std::tan( TWO_PI * bs.v + HALF_PI ) );
-    if( bs.v > 0.5f ) phi += PI;
-    const float sin_phi = std::sin(phi);
-    const float sin_phi_sq = sin_phi * sin_phi;
-    const float theta = atan( sqrt( -logSample / ( ( 1.0f - sin_phi_sq ) / alphaU2 + sin_phi_sq / alphaV2 ) ) );
-    return SphericalVec(theta, phi);
+    auto wh = SphericalVec(theta, phi);
+    if (!SameHemiSphere(wh, wo)) wh = -wh;
+    return wh;
 }
 
 GGX::GGX( float roughness )
@@ -103,7 +107,7 @@ GGX::GGX( float roughness )
 	m = alpha * alpha;
 }
 
-// probabilty of facet with specific normal (v)
+// probability of facet with specific normal (h)
 float GGX::D(const Vector& h) const
 {
     float NoH = AbsCosTheta(h);
