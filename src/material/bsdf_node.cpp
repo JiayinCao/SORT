@@ -83,7 +83,7 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     
     Spectrum eta = Spectrum( 0.37f , 0.37f , 0.37f );
     Spectrum k( 2.82f );
-    MicroFacetDistribution* dist = SORT_MALLOC(Beckmann)( roughnessU.GetPropertyValue(bsdf).x , roughnessV.GetPropertyValue(bsdf).x );
+    MicroFacetDistribution* dist = SORT_MALLOC(GGX)( roughnessU.GetPropertyValue(bsdf).x , roughnessV.GetPropertyValue(bsdf).x );
     
     // visibility function to be removed.
     float rn = clamp( roughnessU.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
@@ -143,8 +143,8 @@ void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     if( !spec.IsBlack() ){
         Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.2f, 1.f);
         float rough = roughness.GetPropertyValue(bsdf).x;
-        MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough );   // GGX
-        VisTerm* vis = SORT_MALLOC(VisSmith)( rough );              // Smith
+        MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
+        VisTerm* vis = SORT_MALLOC(VisSmith)( rough );                      // Smith
         MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist , vis);
         mf->m_weight = weight;
         bsdf->AddBxdf(mf);
@@ -195,8 +195,8 @@ void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     if( r.IsBlack() && t.IsBlack() )
         return;
     
-    MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough );    // GGX
-    VisTerm* vis = SORT_MALLOC(VisSmith)( rough );               // Smith
+    MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
+    VisTerm* vis = SORT_MALLOC(VisSmith)( rough );                      // Smith
     Fresnel* fresnel = SORT_MALLOC( FresnelDielectric )( 1.0f , 1.5f );
     
     if( !r.IsBlack() ){

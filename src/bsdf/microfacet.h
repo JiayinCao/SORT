@@ -89,7 +89,7 @@ class GGX : public MicroFacetDistribution
 public:
     //! @brief Constructor
     //! @param roughness    Roughness of the surface formed by the micro facets.
-	GGX( float roughness );
+	GGX( float roughnessU , float roughnessV );
 
     //! @brief Probabilty of facet with specific normal (h)
     float D(const Vector& h) const override;
@@ -105,8 +105,8 @@ public:
     Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
 private:
-	float m = 0.0f;         /**< Internal data used for NDF calculationg. */
-    float alpha = 0.0f;     /**< Internal data used for NDF calculationg. */
+	float alphaU , alphaV;        /**< Internal data used for NDF calculationg. */
+    float alphaU2 , alphaV2 , alphaUV;
 };
 
 //! @brief Visibility term.

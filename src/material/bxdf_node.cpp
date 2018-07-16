@@ -88,7 +88,7 @@ void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	else if( mf_dist.str == "Beckmann" )
 		dist = SORT_MALLOC(Beckmann)( rn , rn );    // this model is to be removed , no anisotropic model here.
 	else
-		dist = SORT_MALLOC(GGX)( rn );	// GGX is default
+		dist = SORT_MALLOC(GGX)( rn , rn );	// GGX is default
 
 	VisTerm* vis = 0;
 	if( mf_vis.str == "Neumann" )
@@ -132,7 +132,7 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	else if( mf_dist.str == "Beckmann" )
 		dist = SORT_MALLOC(Beckmann)( rn , rn );    /// this model is to be removed , no anisotropic model here.
 	else
-		dist = SORT_MALLOC(GGX)( rn );	// GGX is default
+		dist = SORT_MALLOC(GGX)( rn , rn );	// GGX is default
 
 	VisTerm* vis = 0;
 	if( mf_vis.str == "Neumann" )
