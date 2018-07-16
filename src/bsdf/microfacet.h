@@ -73,9 +73,6 @@ public:
     
     //! @brief Sampling a normal respect to the NDF.
     //!
-    //! Refer to this for asotropic importance sampling
-    //! <a href="https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/">blog</a>
-    //! for detail explanation of the implementation.
     //! @param bs   Sample holind all necessary random variables.
     //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.

@@ -67,6 +67,9 @@ private:
 	// the average radiance of the texture
 	Spectrum	m_Average;
 
+    // texture name
+    std::string m_Name;
+
 // private method
 	// initialize default data
 	void	_init();
