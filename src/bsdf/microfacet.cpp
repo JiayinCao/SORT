@@ -62,16 +62,16 @@ Beckmann::Beckmann( float roughnessU , float roughnessV )
 float Beckmann::D(const Vector& h) const
 {
     // Anisotropic Beckmann distribution formular, pbrt-v3 ( page 539 )
-    // D(w_h) = pow( e , -tan(\theta_h)^2 * ( (cos(\phi_h) / alpha_x)^2 + (sin(\phi_h) / alpha_y)^2 ) ) / ( PI * alpha_x * alpha_y * cos(\theta_h) ^ 4
-    // When alpha_x equals to alpha_y , it is isotropic, the formular is simpler
+    // D(w_h) = pow( e , -tan(\theta_h)^2 * ( (cos(\phi_h) / alphaU)^2 + (sin(\phi_h) / alphaV)^2 ) ) / ( PI * alphaU * alphaV * cos(\theta_h) ^ 4
+    // When alphaU equals to alphaV , it is isotropic, the formular is simpler
     // D(w_h) = pow( e , -(tan(\theta_h)/alpha)^2 ) / ( PI * alpha^2 * cos(\theta_h)^4 )
-    const float tan_theta_sq = TanTheta2(h);
-    const float cos_theta_sq = CosTheta2(h);
-    if( std::isinf(tan_theta_sq) ) return 0.f;
+    const float cos_theta_h_sq = CosTheta2(h);
+    if( cos_theta_h_sq <= 0.0f ) return 0.f;
+    const float tan_theta_h_sq = TanTheta2(h);
     
     const float sin_phi_h_sq = SinPhi2(h);
     const float cos_phi_h_sq = 1.0f - sin_phi_h_sq;
-    return exp( -tan_theta_sq * ( cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2 ) ) / ( PI * alphaUV * cos_theta_sq * cos_theta_sq );
+    return exp( -tan_theta_h_sq * ( cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2 ) ) / ( PI * alphaUV * cos_theta_h_sq * cos_theta_h_sq );
 }
 
 // sampling according to GGX
@@ -99,27 +99,56 @@ Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
     return wh;
 }
 
-GGX::GGX( float roughness )
+GGX::GGX( float roughnessU , float roughnessV )
 {
-    // roughness value smaller than 0.02 will easily create 'nan' in GGX
-    roughness = max( 0.02f , roughness );
-	alpha = roughness * roughness;
-	m = alpha * alpha;
+    const static auto convert = []( float roughness ) {
+        roughness = std::max(roughness, (float)1e-3);
+        float x = std::log(roughness);
+        return 1.62142f + 0.819955f * x + 0.1734f * x * x + 0.0171201f * x * x * x + 0.000640711f * x * x * x * x;
+    };
+    alphaU = convert( roughnessU );
+    alphaV = convert( roughnessV );
+    alphaU2 = alphaU * alphaU;
+    alphaV2 = alphaV * alphaV;
+    alphaUV = alphaU * alphaV;
 }
 
 // probability of facet with specific normal (h)
 float GGX::D(const Vector& h) const
 {
-    float NoH = AbsCosTheta(h);
-    const float d = ( m - 1.0f ) * NoH * NoH + 1.0f;
-	return m / ( PI*d*d );
+    // Anisotropic GGX (Trowbridge-Reitz) distribution formular, pbrt-v3 ( page 539 )
+    // D(w_h) = 1.0f / ( PI * alphaU * alphaV * cos(\theta)^4 * ( 1 + tan(\thete)^2 * ( ( cos(\theta) / alphaU ) ^ 2 + ( sin(\theta) / alphaV ) ^ 2 ) ) ^ 2 )
+    // When alphaU equals to alphaV, it is isotropic, the formula is simpler
+    // D(w_h) = alpha ^ 2 / ( PI * ( 1 + ( alpha ^ 2 - 1 ) * cos(\theta) ^ 2 ) ^ 2
+    const float cos_theta_h_sq = CosTheta2(h);
+    if( cos_theta_h_sq <= 0.0f ) return 0.f;
+    const float tan_theta_h_sq = TanTheta2(h);
+    
+    const float sin_phi_h_sq = SinPhi2(h);
+    const float cos_phi_h_sq = 1.0f - sin_phi_h_sq;
+    return 1.0f / ( PI * alphaUV * cos_theta_h_sq * cos_theta_h_sq * ( 1 + tan_theta_h_sq * ( cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2 ) ) );
 }
 
 Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
-    const float theta = atan( alpha * sqrt(bs.v / ( 1.0f - bs.v )) );
-    const float phi = TWO_PI * bs.u;
-	return SphericalVec( theta , phi );
+    float theta, phi;
+    if( alphaU == alphaV ){
+        // Refer the following link ( my blog ) for a full derivation
+        // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+        theta = atan( alphaU * sqrt( bs.v / ( 1.0f - bs.v )) );
+        phi = TWO_PI * bs.u;
+    }else{
+        phi = std::atan( alphaV / alphaU * std::tan( TWO_PI * bs.v ) );
+        if( bs.u > 0.5f ) phi += PI;
+        const float sin_phi = std::sin(phi);
+        const float sin_phi_sq = sin_phi * sin_phi;
+        const float cos_phi_sq = 1 - sin_phi_sq;
+        float beta = 1.0f / ( cos_phi_sq / alphaU2 + sin_phi_sq / alphaV2 );
+        theta = atan( sqrt( beta * bs.u / ( 1.0f - bs.u ) ) );
+    }
+    auto wh = SphericalVec( theta , phi );
+    if( !SameHemiSphere(wh , wo) ) wh = -wh;
+    return wh;
 }
 
 float VisImplicit::Vis_Term( float NoL , float NoV , float VoH , float NoH)
