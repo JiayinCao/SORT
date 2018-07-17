@@ -61,20 +61,16 @@ Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
         // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
         phi = TWO_PI * bs.v;
     }else{
-        // This piece of code should be buggy, need to investigate!!
-
-        static const auto blinn_sample_phi = [this](float v) -> float {
-            return std::atan(std::sqrt((alphaU + 2.0f) / (alphaV + 2.0f)) * std::tan(HALF_PI * v));
-        };
-
+        #define SAMPLE_BLINN(x) (std::atan(std::sqrt((alphaU + 2.0f) / (alphaV + 2.0f)) * std::tan(HALF_PI * x)))
+        
         if (bs.v < 0.25f)
-            phi = blinn_sample_phi(4.0f * bs.v);
+            phi = SAMPLE_BLINN(4.0f * bs.v);
         else if (bs.v < 0.5f)
-            phi = PI - blinn_sample_phi(4.0f * (0.5f - bs.v));
+            phi = PI - SAMPLE_BLINN(4.0f * (0.5f - bs.v));
         else if (bs.v < 0.75f)
-            phi = PI + blinn_sample_phi(4.0f * (bs.v - 0.5f));
+            phi = PI + SAMPLE_BLINN(4.0f * (bs.v - 0.5f));
         else
-            phi = TWO_PI - blinn_sample_phi(4.0f* (1.0f - bs.v));
+            phi = TWO_PI - SAMPLE_BLINN(4.0f* (1.0f - bs.v));
     }
 
     const float sin_phi_h = std::sin(phi);
