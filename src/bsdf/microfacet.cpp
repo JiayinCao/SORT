@@ -21,35 +21,82 @@
 #include <cmath>
 
 // constructor
-Blinn::Blinn( float roughness )
+Blinn::Blinn( float roughnessU , float roughnessV )
 {
-    exp = max( 0.01f , roughness );
-	exp = 2.0f / pow( exp , 4.0f ) - 2.0f;
+    // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
+    // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
+    // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
+    // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT.
+    const static auto convert = [](float roughness) {
+        roughness = max(0.01f, roughness);
+        return 2.0f / pow(roughness, 4.0f) - 2.0f;
+    };
+    alphaU = convert(roughnessU);
+    alphaV = convert(roughnessV);
 }
 
 // probability of facet with specific normal (h)
 float Blinn::D(const Vector& h) const
 {
+    // An Anisotropic Phong BRDF Model (Micheal Ashikhmin, Peter Shirley)
+    // http://www.irisa.fr/prive/kadi/Lopez/ashikhmin00anisotropic.pdf ( The original phong model was not energy conservative, see the following link for a fix. )
+    // http://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html ( Modified Phong model )
+    // http://www.farbrausch.de/~fg/stuff/phong.pdf ( Derivation of phong model's scaling factor )
+    // Anisotropic model:   D(w_h) = sqrt( ( alphaU + 2 ) * ( alphaV * 2 ) ) * cos(\theta) ^ ( cos(\phi)^2 * alphaU + sin(\phi)^2 * alphaV ) / ( 2 * PI )
+    // Isotropic model:     D(w_h) = ( alpha + 2 ) * cos(\theta) ^ alpha / ( 2 * PI )
+
     float NoH = AbsCosTheta(h);
-	return (exp+2.0f) * INV_TWOPI * powf( NoH , exp );
+    if (NoH <= 0.0f) return 0.0f;
+    const float sin_phi_h_sq = SinPhi2(h);
+    const float cos_phi_h_sq = 1.0f - sin_phi_h_sq;
+    return sqrt((alphaU + 2) * (alphaV + 2)) * pow(NoH, cos_phi_h_sq * alphaU + sin_phi_h_sq * alphaV) * INV_TWOPI;
 }
 
 // sampling according to GGX
 Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
-	const float costheta = powf( bs.u , 1.0f / (exp+2.0f) );
-    const float sintheta = sqrtf( max( 0.0f , 1.0f - costheta * costheta ) );
-    const float phi = TWO_PI * bs.v;
+    float phi = 0.0f;
+    if (alphaU == alphaV) {
+        // Refer the following link ( my blog ) for a full derivation of isotropic importance sampling for Blinn
+        // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+        phi = TWO_PI * bs.v;
+    }else{
+        // This piece of code should be buggy, need to investigate!!
 
-	return SphericalVec( sintheta , costheta , phi );
+        static const auto blinn_sample_phi = [this](float v) -> float {
+            return std::atan(std::sqrt((alphaU + 2.0f) / (alphaV + 2.0f)) * std::tan(HALF_PI * v));
+        };
+
+        if (bs.v < 0.25f)
+            phi = blinn_sample_phi(4.0f * bs.v);
+        else if (bs.v < 0.5f)
+            phi = PI - blinn_sample_phi(4.0f * (0.5f - bs.v));
+        else if (bs.v < 0.75f)
+            phi = PI + blinn_sample_phi(4.0f * (bs.v - 0.5f));
+        else
+            phi = TWO_PI - blinn_sample_phi(4.0f* (1.0f - bs.v));
+    }
+
+    const float sin_phi_h = std::sin(phi);
+    const float sin_phi_h_sq = sin_phi_h * sin_phi_h;
+    const float alpha = alphaU * (1.0f - sin_phi_h_sq) + alphaV * sin_phi_h_sq;
+    const float cos_theta = std::pow(bs.u, 1.0f / (alpha + 2.0f));
+    const float sin_theta = sqrtf(max(0.0f, 1.0f - cos_theta * cos_theta));
+
+    auto wh = SphericalVec(sin_theta, cos_theta, phi);
+    if (!SameHemiSphere(wh, wo)) wh = -wh;
+    return wh;
 }
 
 Beckmann::Beckmann( float roughnessU , float roughnessV )
 {
+    // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
+    // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
+    // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
+    // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT. 
     const static auto convert = []( float roughness ) {
         roughness = std::max(roughness, (float)1e-3);
-        const float x = std::log(roughness);
-        return 1.62142f + 0.819955f * x + 0.1734f * x * x + 0.0171201f * x * x * x + 0.000640711f * x * x * x * x;
+        return roughness * roughness;
     };
     alphaU = convert( roughnessU );
     alphaV = convert( roughnessV );
@@ -61,10 +108,9 @@ Beckmann::Beckmann( float roughnessU , float roughnessV )
 // probability of facet with specific normal (h)
 float Beckmann::D(const Vector& h) const
 {
-    // Anisotropic Beckmann distribution formular, pbrt-v3 ( page 539 )
-    // D(w_h) = pow( e , -tan(\theta_h)^2 * ( (cos(\phi_h) / alphaU)^2 + (sin(\phi_h) / alphaV)^2 ) ) / ( PI * alphaU * alphaV * cos(\theta_h) ^ 4
-    // When alphaU equals to alphaV , it is isotropic, the formular is simpler
-    // D(w_h) = pow( e , -(tan(\theta_h)/alpha)^2 ) / ( PI * alpha^2 * cos(\theta_h)^4 )
+    // Anisotropic Beckmann distribution formula, pbrt-v3 ( page 539 )
+    // Anisotropic model:   D(w_h) = pow( e , -tan(\theta_h)^2 * ( (cos(\phi_h) / alphaU)^2 + (sin(\phi_h) / alphaV)^2 ) ) / ( PI * alphaU * alphaV * cos(\theta_h) ^ 4
+    // Isotropic model:     D(w_h) = pow( e , -(tan(\theta_h)/alpha)^2 ) / ( PI * alpha^2 * cos(\theta_h)^4 )
     const float cos_theta_h_sq = CosTheta2(h);
     if( cos_theta_h_sq <= 0.0f ) return 0.f;
     const float tan_theta_h_sq = TanTheta2(h);
@@ -82,11 +128,11 @@ Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
     
     float theta, phi;
     if( alphaU == alphaV ){
-        // Refer the following link ( my blog ) for a full derivation
+        // Refer the following link ( my blog ) for a full derivation of isotropic importance sampling for Beckmann
         // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
         theta = atan( sqrt( -1.0f * alphaUV * logSample ) );
         phi = TWO_PI * bs.v;
-    }else {
+    }else{
         phi = std::atan(alphaV / alphaU * std::tan(TWO_PI * bs.v));
         if (bs.v > 0.5f) phi += PI;
         const float sin_phi = std::sin(phi);
@@ -101,10 +147,13 @@ Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
 
 GGX::GGX( float roughnessU , float roughnessV )
 {
+    // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
+    // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
+    // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
+    // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT. 
     const static auto convert = []( float roughness ) {
         roughness = std::max(roughness, (float)1e-3);
-        float x = std::log(roughness);
-        return 1.62142f + 0.819955f * x + 0.1734f * x * x + 0.0171201f * x * x * x + 0.000640711f * x * x * x * x;
+        return roughness * roughness;
     };
     alphaU = convert( roughnessU );
     alphaV = convert( roughnessV );
@@ -116,24 +165,23 @@ GGX::GGX( float roughnessU , float roughnessV )
 // probability of facet with specific normal (h)
 float GGX::D(const Vector& h) const
 {
-    // Anisotropic GGX (Trowbridge-Reitz) distribution formular, pbrt-v3 ( page 539 )
-    // D(w_h) = 1.0f / ( PI * alphaU * alphaV * cos(\theta)^4 * ( 1 + tan(\thete)^2 * ( ( cos(\theta) / alphaU ) ^ 2 + ( sin(\theta) / alphaV ) ^ 2 ) ) ^ 2 )
-    // When alphaU equals to alphaV, it is isotropic, the formula is simpler
-    // D(w_h) = alpha ^ 2 / ( PI * ( 1 + ( alpha ^ 2 - 1 ) * cos(\theta) ^ 2 ) ^ 2
+    // Anisotropic GGX (Trowbridge-Reitz) distribution formula, pbrt-v3 ( page 539 )
+    // Anisotropic model:   D(w_h) = 1.0f / ( PI * alphaU * alphaV * cos(\theta)^4 * ( 1 + tan(\thete)^2 * ( ( cos(\theta) / alphaU ) ^ 2 + ( sin(\theta) / alphaV ) ^ 2 ) ) ^ 2 )
+    // Isotrocpic model:    D(w_h) = alpha ^ 2 / ( PI * ( 1 + ( alpha ^ 2 - 1 ) * cos(\theta) ^ 2 ) ^ 2
     const float cos_theta_h_sq = CosTheta2(h);
     if( cos_theta_h_sq <= 0.0f ) return 0.f;
-    const float tan_theta_h_sq = TanTheta2(h);
     
     const float sin_phi_h_sq = SinPhi2(h);
     const float cos_phi_h_sq = 1.0f - sin_phi_h_sq;
-    return 1.0f / ( PI * alphaUV * cos_theta_h_sq * cos_theta_h_sq * ( 1 + tan_theta_h_sq * ( cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2 ) ) );
+    const float beta = ( cos_theta_h_sq + sin_phi_h_sq * (cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2));
+    return 1.0f / ( PI * alphaUV * std::pow( beta , 2.0f ) );
 }
 
 Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
     float theta, phi;
     if( alphaU == alphaV ){
-        // Refer the following link ( my blog ) for a full derivation
+        // Refer the following link ( my blog ) for a full derivation of isotropic importance sampling for GGX
         // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
         theta = atan( alphaU * sqrt( bs.v / ( 1.0f - bs.v )) );
         phi = TWO_PI * bs.u;
@@ -142,7 +190,7 @@ Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
         if( bs.u > 0.5f ) phi += PI;
         const float sin_phi = std::sin(phi);
         const float sin_phi_sq = sin_phi * sin_phi;
-        const float cos_phi_sq = 1 - sin_phi_sq;
+        const float cos_phi_sq = 1.0f - sin_phi_sq;
         float beta = 1.0f / ( cos_phi_sq / alphaU2 + sin_phi_sq / alphaV2 );
         theta = atan( sqrt( beta * bs.u / ( 1.0f - bs.u ) ) );
     }

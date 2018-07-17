@@ -39,24 +39,22 @@ class Blinn : public MicroFacetDistribution
 {
 public:
 	//! @brief Constructor
-    //! @param roughness    Roughness of the surface formed by the micro facets.
-	Blinn( float roughness );
+    //! @param roughnessU    Roughness of the surface formed by the micro facets.
+    //! @param roughnessV    Roughness of the surface formed by the micro facets.
+	Blinn(float roughnessU, float roughnessV);
 	
 	//! @brief Probabilty of facet with specific normal (h)
 	float D(const Vector& h) const override;
 	
     //! @brief Sampling a normal respect to the NDF.
     //!
-    //! Refer to this
-    //! <a href="https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/">blog</a>
-    //! for detail explanation of the implementation.
     //! @param bs   Sample holind all necessary random variables.
     //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
     Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
 private:
-	float exp;      /**< Internal data used for NDF calculationg. */
+	float alphaU , alphaV;      /**< Internal data used for NDF calculation. */
 };
 
 //! @brief Beckmann NDF.
@@ -79,7 +77,7 @@ public:
     Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
 private:
-	float alphaU , alphaV;        /**< Internal data used for NDF calculationg. */
+	float alphaU , alphaV;        /**< Internal data used for NDF calculation. */
     float alphaU2 , alphaV2 , alphaUV;
 };
 
@@ -96,16 +94,13 @@ public:
     
     //! @brief Sampling a normal respect to the NDF.
     //!
-    //! Refer to this
-    //! <a href="https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/">blog</a>
-    //! for detail explanation of the implementation.
     //! @param bs   Sample holind all necessary random variables.
     //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
     Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
 private:
-	float alphaU , alphaV;        /**< Internal data used for NDF calculationg. */
+	float alphaU , alphaV;        /**< Internal data used for NDF calculation. */
     float alphaU2 , alphaV2 , alphaUV;
 };
 
