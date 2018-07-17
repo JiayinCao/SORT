@@ -173,8 +173,8 @@ float GGX::D(const Vector& h) const
     
     const float sin_phi_h_sq = SinPhi2(h);
     const float cos_phi_h_sq = 1.0f - sin_phi_h_sq;
-    const float beta = ( cos_theta_h_sq + sin_phi_h_sq * (cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2));
-    return 1.0f / ( PI * alphaUV * std::pow( beta , 2.0f ) );
+    const float beta = ( cos_theta_h_sq + ( 1.0f - cos_theta_h_sq ) * (cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2));
+    return 1.0f / ( PI * alphaUV * beta * beta );
 }
 
 Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
