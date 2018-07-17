@@ -84,7 +84,7 @@ void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
 	MicroFacetDistribution* dist = 0;
 	if( mf_dist.str == "Blinn" )
-		dist = SORT_MALLOC(Blinn)( rn );
+		dist = SORT_MALLOC(Blinn)( rn , rn );
 	else if( mf_dist.str == "Beckmann" )
 		dist = SORT_MALLOC(Beckmann)( rn , rn );    // this model is to be removed , no anisotropic model here.
 	else
@@ -128,9 +128,9 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.05f , 1.0f );
 	MicroFacetDistribution* dist = 0;
 	if( mf_dist.str == "Blinn" )
-		dist = SORT_MALLOC(Blinn)( rn );
+		dist = SORT_MALLOC(Blinn)( rn , rn );
 	else if( mf_dist.str == "Beckmann" )
-		dist = SORT_MALLOC(Beckmann)( rn , rn );    /// this model is to be removed , no anisotropic model here.
+		dist = SORT_MALLOC(Beckmann)( rn , rn );
 	else
 		dist = SORT_MALLOC(GGX)( rn , rn );	// GGX is default
 
