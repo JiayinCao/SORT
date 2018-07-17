@@ -34,6 +34,6 @@
             if( false == (bool)(expr) )\
             {\
                 slog( CRITICAL , type , str );\
-                assert( false );\
+                abort();\
             }
 #endif
