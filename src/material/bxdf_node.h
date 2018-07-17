@@ -79,7 +79,8 @@ public:
 
 private:
 	MaterialNodeProperty	baseColor;
-	MaterialNodeProperty	roughness;
+	MaterialNodeProperty	roughnessU;
+    MaterialNodeProperty    roughnessV;
 	MaterialNodeProperty	eta;
 	MaterialNodeProperty	k;
 	MaterialNodePropertyString	mf_dist;
@@ -99,7 +100,7 @@ public:
 
 private:
 	MaterialNodeProperty	baseColor;
-	MaterialNodeProperty	roughness;
+    MaterialNodeProperty	roughness;
 	MaterialNodeProperty	in_ior;
 	MaterialNodeProperty	ext_ior;
 	MaterialNodePropertyString	mf_dist;

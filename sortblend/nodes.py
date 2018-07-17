@@ -213,7 +213,8 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
     k = bpy.props.FloatVectorProperty(name='Absorption', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessU')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessV')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
@@ -236,14 +237,14 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
         ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
 
     def export_pbrt(self, file):
-        file.write( "  \"string type\" \"Sort_MicrofacetReflection\"\n" )
-        file.write( "  \"string nd\" \"%s\"\n" %self.mfdist_prop )
-        file.write( "  \"string vis\" \"%s\"\n" %self.mfvis_prop )
+        file.write( "  \"string type\" \"metal\"\n" )
         file.write( "  \"rgb eta\" [%f %f %f]\n" %self.eta[:] )
         file.write( "  \"rgb k\" [%f %f %f]\n" %self.k[:] )
-        for input in self.inputs:
-            input.export_pbrt(file)
-        file.write( "\n" )
+        file.write( "  \"bool remaproughness\" \"false\"\n" )
+        uroughness = self.inputs[0].default_value
+        file.write( "  \"float uroughness\" [%s]\n" %uroughness)
+        vroughness = self.inputs[1].default_value
+        file.write( "  \"float vroughness\" [%s]\n" %vroughness)
 
 class SORTNodeMicrofacetRefraction(SORTShadingNode):
     bl_label = 'SORT_microfacet_refraction'
@@ -542,8 +543,8 @@ class SORTNodePrinciple(SORTShadingNode):
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
     def export_pbrt(self, file):
-        reflectance = self.inputs[3].default_value
-        metallic = self.inputs[1].default_value
+        reflectance = self.inputs[4].default_value
+        metallic = self.inputs[2].default_value
         roughness = self.inputs[0].default_value
         file.write( "  \"string type\" \"disney\"\n" )
         file.write( "  \"rgb color\" [%f %f %f]\n"%(reflectance[:]))
