@@ -86,8 +86,7 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     MicroFacetDistribution* dist = SORT_MALLOC(GGX)( roughnessU.GetPropertyValue(bsdf).x , roughnessV.GetPropertyValue(bsdf).x );
     
     // visibility function to be removed.
-    float rn = clamp( roughnessU.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
-    VisTerm* vis = SORT_MALLOC(VisSmith)( rn );                 // Smith
+    VisTerm* vis = SORT_MALLOC(VisCookTorrance)();
     
     Fresnel* fresnel = SORT_MALLOC( FresnelConductor )( eta , k );
     MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( basecolor , fresnel , dist , vis);

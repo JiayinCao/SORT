@@ -74,21 +74,23 @@ MicrofacetReflectionNode::MicrofacetReflectionNode()
 	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
 	m_props.insert( make_pair( "MicroFacetDistribution" , &mf_dist ) );
 	m_props.insert( make_pair( "Visibility" , &mf_vis ) );
-	m_props.insert( make_pair( "Roughness" , &roughness ) );
+	m_props.insert( make_pair( "RoughnessU" , &roughnessU ) );
+    m_props.insert( make_pair( "RoughnessV" , &roughnessV ) );
 	m_props.insert( make_pair( "eta" , &eta ) );
 	m_props.insert( make_pair( "k" , &k ) );
 }
 
 void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
+	float ru = clamp( roughnessU.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
+    float rv = clamp( roughnessV.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
 	MicroFacetDistribution* dist = 0;
 	if( mf_dist.str == "Blinn" )
-		dist = SORT_MALLOC(Blinn)( rn , rn );
+		dist = SORT_MALLOC(Blinn)( ru , rv );
 	else if( mf_dist.str == "Beckmann" )
-		dist = SORT_MALLOC(Beckmann)( rn , rn );    // this model is to be removed , no anisotropic model here.
+		dist = SORT_MALLOC(Beckmann)( ru , rv );
 	else
-		dist = SORT_MALLOC(GGX)( rn , rn );	// GGX is default
+		dist = SORT_MALLOC(GGX)( ru , rv );	// GGX is default
 
 	VisTerm* vis = 0;
 	if( mf_vis.str == "Neumann" )
@@ -96,11 +98,11 @@ void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	else if( mf_vis.str == "Kelemen" )
 		vis = SORT_MALLOC(VisKelemen)();
 	else if( mf_vis.str == "Schlick" )
-		vis = SORT_MALLOC(VisSchlick)( rn );
+		vis = SORT_MALLOC(VisSchlick)( ru );
 	else if( mf_vis.str == "Smith" )
-		vis = SORT_MALLOC(VisSmith)( rn );
+		vis = SORT_MALLOC(VisSmith)( ru );
 	else if( mf_vis.str == "SmithJointApprox" )
-		vis = SORT_MALLOC(VisSmithJointApprox)( rn );
+		vis = SORT_MALLOC(VisSmithJointApprox)( ru );
 	else if( mf_vis.str == "CookTorrance" )
 		vis = SORT_MALLOC(VisCookTorrance)();
 	else
