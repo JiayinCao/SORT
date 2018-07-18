@@ -55,6 +55,7 @@ public:
 
 private:
 	float alphaU , alphaV;      /**< Internal data used for NDF calculation. */
+    float alpha;
 };
 
 //! @brief Beckmann NDF.
@@ -78,7 +79,7 @@ public:
 
 private:
 	float alphaU , alphaV;        /**< Internal data used for NDF calculation. */
-    float alphaU2 , alphaV2 , alphaUV;
+    float alphaU2 , alphaV2 , alphaUV, alpha;
 };
 
 //! @brief GGX NDF.
@@ -101,7 +102,7 @@ public:
 
 private:
 	float alphaU , alphaV;        /**< Internal data used for NDF calculation. */
-    float alphaU2 , alphaV2 , alphaUV;
+    float alphaU2 , alphaV2 , alphaUV , alpha;
 };
 
 //! @brief Visibility term.

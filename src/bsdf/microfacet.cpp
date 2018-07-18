@@ -33,6 +33,7 @@ Blinn::Blinn( float roughnessU , float roughnessV )
     };
     alphaU = convert(roughnessU);
     alphaV = convert(roughnessV);
+    alpha = sqrt( ( alphaU + 2.0f ) * ( alphaV + 2.0f ) );
 }
 
 // probability of facet with specific normal (h)
@@ -49,7 +50,7 @@ float Blinn::D(const Vector& h) const
     if (NoH <= 0.0f) return 0.0f;
     const float sin_phi_h_sq = SinPhi2(h);
     const float cos_phi_h_sq = 1.0f - sin_phi_h_sq;
-    return sqrt((alphaU + 2) * (alphaV + 2)) * pow(NoH, cos_phi_h_sq * alphaU + sin_phi_h_sq * alphaV) * INV_TWOPI;
+    return alpha * pow(NoH, cos_phi_h_sq * alphaU + sin_phi_h_sq * alphaV) * INV_TWOPI;
 }
 
 // sampling according to GGX
@@ -65,7 +66,7 @@ Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
         // https://agraphicsguy.wordpress.com/2018/07/18/sampling-anisotropic-microfacet-brdf/
         const static int offset[5] = { 0 , 1 , 1 , 2 , 2 };
         const int i = bs.v == 0.25f ? 0 : (int)(bs.v * 4.0f);
-        phi = std::atan(std::sqrt((alphaU + 2.0f) / (alphaV + 2.0f)) * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
+        phi = std::atan(alpha * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
     }
 
     const float sin_phi_h = std::sin(phi);
@@ -94,6 +95,7 @@ Beckmann::Beckmann( float roughnessU , float roughnessV )
     alphaU2 = alphaU * alphaU;
     alphaV2 = alphaV * alphaV;
     alphaUV = alphaU * alphaV;
+    alpha = alphaV / alphaU;
 }
 
 // probability of facet with specific normal (h)
@@ -128,8 +130,7 @@ Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
         // https://agraphicsguy.wordpress.com/2018/07/18/sampling-anisotropic-microfacet-brdf/
         const static int offset[5] = { 0 , 1 , 1 , 2 , 2 };
         const int i = bs.v == 0.25f ? 0 : (int)(bs.v * 4.0f);
-        phi = std::atan(alphaV / alphaU * std::tan(TWO_PI * bs.v));// +offset[i] * PI;
-        if (bs.v > 0.5f) phi += PI;
+        phi = std::atan( alpha * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
         const float sin_phi = std::sin(phi);
         const float sin_phi_sq = sin_phi * sin_phi;
         theta = atan(sqrt(-logSample / ((1.0f - sin_phi_sq) / alphaU2 + sin_phi_sq / alphaV2)));
@@ -155,6 +156,7 @@ GGX::GGX( float roughnessU , float roughnessV )
     alphaU2 = alphaU * alphaU;
     alphaV2 = alphaV * alphaV;
     alphaUV = alphaU * alphaV;
+    alpha = alphaV / alphaU;
 }
 
 // probability of facet with specific normal (h)
@@ -185,7 +187,7 @@ Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
         // https://agraphicsguy.wordpress.com/2018/07/18/sampling-anisotropic-microfacet-brdf/
         const static int offset[5] = { 0 , 1 , 1 , 2 , 2 };
         const int i = bs.v == 0.25f ? 0 : (int)(bs.v * 4.0f);
-        phi = std::atan(alphaV / alphaU * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
+        phi = std::atan( alpha * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
         const float sin_phi = std::sin(phi);
         const float sin_phi_sq = sin_phi * sin_phi;
         const float cos_phi_sq = 1.0f - sin_phi_sq;
@@ -262,7 +264,6 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 		return Vector(0.0f,0.0f,0.0f);
 
 	// get the refracted ray
-	const float factor = (coso<0.0f)? 1.0f : -1.0f;
 	return -eta * v  + ( eta * coso - sqrt(t)) * n;
 }
 
