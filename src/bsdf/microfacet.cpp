@@ -52,6 +52,11 @@ float Blinn::D(const Vector& h) const
     return sqrt((alphaU + 2) * (alphaV + 2)) * pow(NoH, cos_phi_h_sq * alphaU + sin_phi_h_sq * alphaV) * INV_TWOPI;
 }
 
+#include "utility/sassert.h"
+#include "utility/strhelper.h"
+
+#pragma optimize( "" , off )
+
 // sampling according to GGX
 Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
@@ -61,16 +66,9 @@ Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
         // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
         phi = TWO_PI * bs.v;
     }else{
-        #define SAMPLE_BLINN(x) (std::atan(std::sqrt((alphaU + 2.0f) / (alphaV + 2.0f)) * std::tan(HALF_PI * x)))
-        
-        if (bs.v < 0.25f)
-            phi = SAMPLE_BLINN(4.0f * bs.v);
-        else if (bs.v < 0.5f)
-            phi = PI - SAMPLE_BLINN(4.0f * (0.5f - bs.v));
-        else if (bs.v < 0.75f)
-            phi = PI + SAMPLE_BLINN(4.0f * (bs.v - 0.5f));
-        else
-            phi = TWO_PI - SAMPLE_BLINN(4.0f* (1.0f - bs.v));
+        const static int offset[5] = { 0 , 1 , 1 , 2 , 2 };
+        const int i = bs.v == 0.25f ? 0 : (int)(bs.v / 0.25f);
+        phi = std::atan(std::sqrt((alphaU + 2.0f) / (alphaV + 2.0f)) * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
     }
 
     const float sin_phi_h = std::sin(phi);
@@ -251,7 +249,7 @@ Vector	Microfacet::getReflected( Vector v , Vector n ) const
 Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const
 {
 	const float coso = Dot( v , n );
-	const float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
+	const float eta = CosTheta(v) > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
 	const float t = 1.0f - eta * eta * max( 0.0f , 1.0f - coso * coso );
 
 	// total inner reflection
@@ -259,9 +257,9 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 	if( inner_reflection )
 		return Vector(0.0f,0.0f,0.0f);
 
-	// get the tranmistance/refracted ray
+	// get the refracted ray
 	const float factor = (coso<0.0f)? 1.0f : -1.0f;
-	return -eta * v  + ( eta * coso + factor * sqrt(t)) * n;
+	return -eta * v  + ( eta * coso - sqrt(t)) * n;
 }
 
 // constructor
