@@ -52,11 +52,6 @@ float Blinn::D(const Vector& h) const
     return sqrt((alphaU + 2) * (alphaV + 2)) * pow(NoH, cos_phi_h_sq * alphaU + sin_phi_h_sq * alphaV) * INV_TWOPI;
 }
 
-#include "utility/sassert.h"
-#include "utility/strhelper.h"
-
-#pragma optimize( "" , off )
-
 // sampling according to GGX
 Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
@@ -66,8 +61,10 @@ Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
         // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
         phi = TWO_PI * bs.v;
     }else{
+        // Refer the following link ( my blog ) for a full derivation of anisotropic importance sampling for Blinn
+        // https://agraphicsguy.wordpress.com/2018/07/18/sampling-anisotropic-microfacet-brdf/
         const static int offset[5] = { 0 , 1 , 1 , 2 , 2 };
-        const int i = bs.v == 0.25f ? 0 : (int)(bs.v / 0.25f);
+        const int i = bs.v == 0.25f ? 0 : (int)(bs.v * 4.0f);
         phi = std::atan(std::sqrt((alphaU + 2.0f) / (alphaV + 2.0f)) * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
     }
 
@@ -127,7 +124,11 @@ Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
         theta = atan( sqrt( -1.0f * alphaUV * logSample ) );
         phi = TWO_PI * bs.v;
     }else{
-        phi = std::atan(alphaV / alphaU * std::tan(TWO_PI * bs.v));
+        // Refer the following link ( my blog ) for a full derivation of anisotropic importance sampling for Beckmann
+        // https://agraphicsguy.wordpress.com/2018/07/18/sampling-anisotropic-microfacet-brdf/
+        const static int offset[5] = { 0 , 1 , 1 , 2 , 2 };
+        const int i = bs.v == 0.25f ? 0 : (int)(bs.v * 4.0f);
+        phi = std::atan(alphaV / alphaU * std::tan(TWO_PI * bs.v));// +offset[i] * PI;
         if (bs.v > 0.5f) phi += PI;
         const float sin_phi = std::sin(phi);
         const float sin_phi_sq = sin_phi * sin_phi;
@@ -180,8 +181,11 @@ Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
         theta = atan( alphaU * sqrt( bs.v / ( 1.0f - bs.v )) );
         phi = TWO_PI * bs.u;
     }else{
-        phi = std::atan( alphaV / alphaU * std::tan( TWO_PI * bs.v ) );
-        if( bs.u > 0.5f ) phi += PI;
+        // Refer the following link ( my blog ) for a full derivation of anisotropic importance sampling for GGX
+        // https://agraphicsguy.wordpress.com/2018/07/18/sampling-anisotropic-microfacet-brdf/
+        const static int offset[5] = { 0 , 1 , 1 , 2 , 2 };
+        const int i = bs.v == 0.25f ? 0 : (int)(bs.v * 4.0f);
+        phi = std::atan(alphaV / alphaU * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
         const float sin_phi = std::sin(phi);
         const float sin_phi_sq = sin_phi * sin_phi;
         const float cos_phi_sq = 1.0f - sin_phi_sq;
