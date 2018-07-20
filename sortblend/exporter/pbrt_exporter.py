@@ -13,6 +13,11 @@ from .. import preference
 
 pbrt_process = None
 
+# fix pbrt path , / will be recognized as escape letter, which will easily crash the system in PBRT
+def fixPbrtPath(path):
+    print( path.replace( '\\' , '/' ) )
+    return path.replace( '\\' , '/' )
+
 # get camera data, to be merged with the above function
 def lookAtPbrt(camera):
     # it seems that the matrix return here is the inverse of view matrix.
@@ -200,7 +205,7 @@ def export_light(scene):
                 light_spectrum *= lamp.energy
                 str = "LightSource \"infinite\" "
                 str += "\"rgb L\" [ %f %f %f ] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
-                str += "\"string mapname\" \"%s\" \n"%lamp.sort_lamp.sort_lamp_hemi.envmap_file
+                str += "\"string mapname\" \"%s\" \n"%fixPbrtPath(lamp.sort_lamp.sort_lamp_hemi.envmap_file)
                 file.write(str)
             file.write( "AttributeEnd\n" )
 
