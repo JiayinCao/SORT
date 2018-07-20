@@ -2,6 +2,7 @@ import bpy
 import xml.etree.cElementTree as ET
 from . import common
 from . import utility
+from .exporter import pbrt_exporter
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
 
@@ -213,8 +214,7 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
     k = bpy.props.FloatVectorProperty(name='Absorption', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeFloatSocket', 'RoughnessU')
-        self.inputs.new('SORTNodeFloatSocket', 'RoughnessV')
+        self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
@@ -237,14 +237,14 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
         ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
 
     def export_pbrt(self, file):
-        file.write( "  \"string type\" \"metal\"\n" )
+        file.write( "  \"string type\" \"Sort_MicrofacetReflection\"\n" )
+        file.write( "  \"string nd\" \"%s\"\n" %self.mfdist_prop )
+        file.write( "  \"string vis\" \"%s\"\n" %self.mfvis_prop )
         file.write( "  \"rgb eta\" [%f %f %f]\n" %self.eta[:] )
         file.write( "  \"rgb k\" [%f %f %f]\n" %self.k[:] )
-        file.write( "  \"bool remaproughness\" \"false\"\n" )
-        uroughness = self.inputs[0].default_value
-        file.write( "  \"float uroughness\" [%s]\n" %uroughness)
-        vroughness = self.inputs[1].default_value
-        file.write( "  \"float vroughness\" [%s]\n" %vroughness)
+        for input in self.inputs:
+            input.export_pbrt(file)
+        file.write( "\n" )
 
 class SORTNodeMicrofacetRefraction(SORTShadingNode):
     bl_label = 'SORT_microfacet_refraction'
@@ -549,7 +549,7 @@ class SORTNodePrinciple(SORTShadingNode):
         file.write( "  \"string type\" \"disney\"\n" )
         file.write( "  \"rgb color\" [%f %f %f]\n"%(reflectance[:]))
         file.write( "  \"float metallic\" [%f]\n"%metallic)
-        file.write( "  \"float roughnessu\" [%s]\n" %roughness )    # no anisotropic in pbrt disney model yet
+        file.write( "  \"float roughness\" [%s]\n" %roughness )    # no anisotropic in pbrt disney model yet
         return
 
 class SORTNodeGlass(SORTShadingNode):
@@ -638,7 +638,7 @@ class SORTNodeMeasured(SORTShadingNode):
     def export_pbrt(self, file):
         if self.type_prop == 'Fourier':
             file.write( "  \"string type\" \"fourier\"\n" )
-            file.write( "  \"string bsdffile\" \"%s\"\n" %self.file_name_prop )
+            file.write( "  \"string bsdffile\" \"%s\"\n" % pbrt_exporter.fixPbrtPath(self.file_name_prop) )
         else:
             file.write( "  \"string type\" \"matte\"\n" ) # Merl is not supported in pbrt 3.x
             file.write( "  \"rgb Kd\" [1.0 1.0 1.0]\n" )
