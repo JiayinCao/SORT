@@ -43,6 +43,8 @@ def get_sort_dir(force_debug=False):
         return_path = addon_prefs.install_path_debug
     if force_debug:
         return_path = addon_prefs.install_path_debug
+    if platform.system() == 'Windows':
+        return return_path
     return efutil.filesystem_path(return_path) + "/"
 
 def get_sort_bin_path(force_debug=False):
