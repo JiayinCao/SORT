@@ -26,12 +26,21 @@ class MicroFacetDistribution
 public:
 	//! @brief Probabilty of facet with specific normal (h)
 	virtual float D(const Vector& h) const = 0;
+    
+    //! @brief Visibility term of microfacet model, Smith shadow-masking function
+    float G( const Vector& wo , const Vector& wi ){
+        return G1( wo ) * G1( wi );
+    }
 
 	//! @brief Sampling a normal respect to the NDF.
     //! @param bs   Sample holind all necessary random variables.
     //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
 	virtual Vector sample_f( const BsdfSample& bs , const Vector& wo ) const = 0;
+    
+protected:
+    //! @brief Smith shadow-masking function G1
+    virtual float G1( const Vector& v ) = 0;
 };
 
 //! @brief Blinn NDF.
@@ -54,8 +63,11 @@ public:
     Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
 private:
-	float alphaU , alphaV;      /**< Internal data used for NDF calculation. */
-    float alpha;
+	float expU , expV , exp;      /**< Internal data used for NDF calculation. */
+    float alphaU2 , alphaV2;
+    
+    //! @brief Smith shadow-masking function G1
+    float G1( const Vector& v ) override;
 };
 
 //! @brief Beckmann NDF.
@@ -80,6 +92,9 @@ public:
 private:
 	float alphaU , alphaV;        /**< Internal data used for NDF calculation. */
     float alphaU2 , alphaV2 , alphaUV, alpha;
+    
+    //! @brief Smith shadow-masking function G1
+    float G1( const Vector& v ) override;
 };
 
 //! @brief GGX NDF.
@@ -103,89 +118,9 @@ public:
 private:
 	float alphaU , alphaV;        /**< Internal data used for NDF calculation. */
     float alphaU2 , alphaV2 , alphaUV , alpha;
-};
-
-//! @brief Visibility term.
-class VisTerm
-{
-public:
-    //! @brief Evalute visibility term.
-    //! @param NoL  Cosine value of the angle between light and normal.
-    //! @param NoV  Cosine value of the angle between view direction and normal
-    //! @param VoH  Cosine value of the angle between view and middle vector
-    //! @param NoH  Cosine value of the angle between normal and middle vector
-    //! @return     Visibility term
-	virtual float Vis_Term( float NoL , float NoV , float VoH , float NoH ) = 0;
-};
-
-//! @brief Implicit visibility term.
-class VisImplicit : public VisTerm
-{
-public:
-    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
-};
-
-//! @brief Neumann visibility term.
-class VisNeumann : public VisTerm
-{
-public:
-	float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
-};
-
-//! @brief Kelemen visibility term.
-class VisKelemen : public VisTerm
-{
-public:
-    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
-};
-
-//! @brief Schlick visibility term.
-class VisSchlick : public VisTerm
-{
-public:
-    //! @brief Constructor
-    //! @param rough    Roughness value.
-	VisSchlick( float rough ): roughness(rough) {}
     
-    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
-
-private:
-	float roughness;    /**< Roughness value */
-};
-
-//! @brief Smith visibility term.
-class VisSmith : public VisTerm
-{
-public:
-    //! @brief Constructor
-    //! @param rough    Roughness value.
-	VisSmith( float rough ): roughness(rough) {}
-    
-    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
-
-private:
-	float roughness;    /**< Roughness value */
-};
-
-//! @brief Smith Joint Approximation visibility term.
-class VisSmithJointApprox : public VisTerm
-{
-public:
-    //! @brief Constructor
-    //! @param rough    Roughness value.
-	VisSmithJointApprox( float rough ): roughness(rough) {}
-    
-    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
-
-private:
-	float roughness;    /**< Roughness value */
-};
-
-//! @brief CookTorrance visibility term.
-class VisCookTorrance : public VisTerm
-{
-public:
-    float Vis_Term( float NoL , float NoV , float VoH , float NoH) override;
+    //! @brief Smith shadow-masking function G1
+    float G1( const Vector& v ) override;
 };
 
 //! @brief Interface for Microfacet bxdf.
@@ -195,7 +130,6 @@ protected:
 	Spectrum R;                                     /**< Direction-hemisphere reflection. */
 	MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
 	Fresnel* fresnel = nullptr;                     /**< Fresnel term. */
-	VisTerm* visterm = nullptr;                     /**< Visibility term. */
 
 	//! @brief Get reflected direction based on incident direction and normal.
     //! @param v    Incoming direction.
@@ -222,7 +156,7 @@ public:
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param v                Visibility term.
-	MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v );
+	MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d );
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -258,7 +192,7 @@ public:
     //! @param v                Visibility term.
     //! @param ieta             Index of refraction inside the surface.
     //! @param eeta             Index of refraction outside the surface.
-	MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v , float ieta , float eeta );
+	MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , float ieta , float eeta );
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.

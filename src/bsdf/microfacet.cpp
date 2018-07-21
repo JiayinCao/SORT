@@ -27,13 +27,19 @@ Blinn::Blinn( float roughnessU , float roughnessV )
     // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
     // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
     // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT.
-    const static auto convert = [](float roughness) {
+    const static auto convert_alpha = [](float roughness) {
         roughness = max(0.01f, roughness);
-        return 2.0f / pow(roughness, 4.0f) - 2.0f;
+        return pow( roughness , 4.0f );
     };
-    alphaU = convert(roughnessU);
-    alphaV = convert(roughnessV);
-    alpha = sqrt( ( alphaU + 2.0f ) * ( alphaV + 2.0f ) );
+    const static auto convert_exp = [](float roughness) {
+        return 2.0f / convert_alpha(roughness) - 2.0f;
+    };
+    
+    expU = convert_exp(roughnessU);
+    expV = convert_exp(roughnessV);
+    exp = sqrt( ( expU + 2.0f ) * ( expV + 2.0f ) );
+    alphaU2 = convert_alpha(roughnessU);
+    alphaV2 = convert_alpha(roughnessV);
 }
 
 // probability of facet with specific normal (h)
@@ -50,14 +56,14 @@ float Blinn::D(const Vector& h) const
     if (NoH <= 0.0f) return 0.0f;
     const float sin_phi_h_sq = SinPhi2(h);
     const float cos_phi_h_sq = 1.0f - sin_phi_h_sq;
-    return alpha * pow(NoH, cos_phi_h_sq * alphaU + sin_phi_h_sq * alphaV) * INV_TWOPI;
+    return exp * pow(NoH, cos_phi_h_sq * expU + sin_phi_h_sq * expV) * INV_TWOPI;
 }
 
 // sampling according to GGX
 Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
     float phi = 0.0f;
-    if (alphaU == alphaV) {
+    if (expU == expV) {
         // Refer the following link ( my blog ) for a full derivation of isotropic importance sampling for Blinn
         // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
         phi = TWO_PI * bs.v;
@@ -66,18 +72,29 @@ Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
         // https://agraphicsguy.wordpress.com/2018/07/18/sampling-anisotropic-microfacet-brdf/
         const static int offset[5] = { 0 , 1 , 1 , 2 , 2 };
         const int i = bs.v == 0.25f ? 0 : (int)(bs.v * 4.0f);
-        phi = std::atan(alpha * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
+        phi = std::atan(exp * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
     }
 
     const float sin_phi_h = std::sin(phi);
     const float sin_phi_h_sq = sin_phi_h * sin_phi_h;
-    const float alpha = alphaU * (1.0f - sin_phi_h_sq) + alphaV * sin_phi_h_sq;
+    const float alpha = expU * (1.0f - sin_phi_h_sq) + expV * sin_phi_h_sq;
     const float cos_theta = std::pow(bs.u, 1.0f / (alpha + 2.0f));
     const float sin_theta = sqrtf(max(0.0f, 1.0f - cos_theta * cos_theta));
 
     auto wh = SphericalVec(sin_theta, cos_theta, phi);
     if (!SameHemiSphere(wh, wo)) wh = -wh;
     return wh;
+}
+
+//! @brief Smith shadow-masking function G1
+float Blinn::G1( const Vector& v )
+{
+    const float absTan = fabs( TanTheta(v) );
+    if( isinf( absTan ) ) return 0.0f;
+    const float cos_phi_sq = CosPhi2(v);
+    const float a = 1.0f / ( sqrt( cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2 ) * absTan );
+    if( a > 1.6f || isinf( a ) ) return 1.0f;
+    return ( 3.535f * a + 2.181f * a * a ) / ( 1.0f + 2.276f * a + 2.577f * a * a );
 }
 
 Beckmann::Beckmann( float roughnessU , float roughnessV )
@@ -141,6 +158,17 @@ Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
     return wh;
 }
 
+//! @brief Smith shadow-masking function G1
+float Beckmann::G1( const Vector& v )
+{
+    const float absTan = fabs( TanTheta(v) );
+    if( isinf( absTan ) ) return 0.0f;
+    const float cos_phi_sq = CosPhi2(v);
+    const float a = 1.0f / ( sqrt( cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2 ) * absTan );
+    if( a > 1.6f || isinf( a ) ) return 1.0f;
+    return ( 3.535f * a + 2.181f * a * a ) / ( 1.0f + 2.276f * a + 2.577f * a * a );
+}
+
 GGX::GGX( float roughnessU , float roughnessV )
 {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
@@ -199,50 +227,14 @@ Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
     return wh;
 }
 
-float VisImplicit::Vis_Term( float NoL , float NoV , float VoH , float NoH)
+//! @brief Smith shadow-masking function G1
+float GGX::G1( const Vector& v )
 {
-	return 0.25f;
-}
-
-float VisNeumann::Vis_Term( float NoL , float NoV , float VoH , float NoH)
-{
-	return 1 / ( 4 * max( NoL, NoV ) );
-}
-
-float VisKelemen::Vis_Term( float NoL , float NoV , float VoH , float NoH)
-{
-	return 1.0f / ( 4.0f * VoH * VoH );
-}
-
-float VisSchlick::Vis_Term( float NoL , float NoV , float VoH , float NoH)
-{
-    const float k = roughness * roughness * 0.5f;
-    const float Vis_SchlickV = NoV * (1 - k) + k;
-    const float Vis_SchlickL = NoL * (1 - k) + k;
-	return 0.25f / ( Vis_SchlickV * Vis_SchlickL );
-}
-
-float VisSmith::Vis_Term( float NoL , float NoV , float VoH , float NoH)
-{
-    const float a = roughness * roughness;
-    const float a2 = a*a;
-
-    const float Vis_SmithV = NoV + sqrt( NoV * (NoV - NoV * a2) + a2 );
-    const float Vis_SmithL = NoL + sqrt( NoL * (NoL - NoL * a2) + a2 );
-	return 1.0f / ( Vis_SmithV * Vis_SmithL );
-}
-
-float VisSmithJointApprox::Vis_Term( float NoL , float NoV , float VoH , float NoH)
-{
-    const float a = roughness * roughness;
-    const float Vis_SmithV = NoL * ( NoV * ( 1 - a ) + a );
-    const float Vis_SmithL = NoV * ( NoL * ( 1 - a ) + a );
-	return 0.5f / ( Vis_SmithV + Vis_SmithL );
-}
-
-float VisCookTorrance::Vis_Term( float NoL , float NoV , float VoH , float NoH)
-{
-	return min( 1.0f , 2.0f * min( NoH * NoV / VoH , NoH * NoL / VoH ) ) / ( 4.0f * NoL * NoV );
+    const float tan_theta_sq = TanTheta2(v);
+    if( isinf( tan_theta_sq ) ) return 0.0f;
+    const float cos_phi_sq = CosPhi2(v);
+    const float alpha2 = cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2;
+    return 2.0f / ( 1.0f + sqrt( 1.0f + alpha2 * tan_theta_sq ) );
 }
 
 // get reflected ray
@@ -268,12 +260,11 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 }
 
 // constructor
-MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v )
+MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d )
 {
 	R = reflectance;
 	distribution = d;
 	fresnel = f;
-	visterm = v;
 	
 	m_type = (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION);
 }
@@ -297,12 +288,11 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 	// evaluate fresnel term
 	const Vector wh = Normalize(wi + wo);
 	const float VoH = Dot(wi, wh);
-	const float NoH = AbsCosTheta( wh );
 
 	const Spectrum F = fresnel->Evaluate( AbsDot(wo,wh) , fabs(VoH) );
 	
 	// return Torrance–Sparrow BRDF
-	return R * distribution->D(wh) * F * visterm->Vis_Term( NoL , NoV , VoH , NoH );
+    return R * distribution->D(wh) * F * distribution->G(wo,wi);
 }
 
 // sample a direction randomly
@@ -337,12 +327,11 @@ float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 }
 
 // constructor
-MicroFacetRefraction::MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , VisTerm* v , float ieta , float eeta )
+MicroFacetRefraction::MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , float ieta , float eeta )
 {
 	R = reflectance;
 	distribution = d;
 	fresnel = f;
-	visterm = v;
 	eta_in = ieta;
 	eta_ext = eeta;
 
@@ -368,7 +357,6 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 
 	const Vector3f wh = Normalize(wo + wi * eta);
 
-	const float NoH = AbsCosTheta( wh );
 	const float sVoH = Dot(wo , wh);
 	const float VoH = fabs(sVoH);
     const float sIoH = Dot(wi, wh);
@@ -379,7 +367,7 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 
 	const float sqrtDenom = sVoH + eta * sIoH;
 	const float t = eta / sqrtDenom;
-	return (Spectrum(1.f) - F) * R * distribution->D(wh) * visterm->Vis_Term( NoL , NoV , VoH , NoH ) * t * t * IoH * VoH * 4.0f ;
+    return (Spectrum(1.f) - F) * R * distribution->D(wh) * distribution->G(wo,wi) * t * t * IoH * VoH * 4.0f ;
 }
 
 // sample a direction using importance sampling

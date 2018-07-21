@@ -198,16 +198,6 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
                    ]
     mfdist_prop = bpy.props.EnumProperty(name='NDF',items=mfdist_item)
 
-    mfvis_item = [ ("Implicit", "Implicit", "", 1),
-                   ("Neumann" , "Neumann" , "", 2),
-                   ("Kelemen" , "Kelemen" , "" , 3),
-                   ("Schlick" , "Schlick" , "" , 4),
-                   ("Smith" , "Smith" , "" , 5),
-                   ("SmithJointApprox" , "SmithJointApprox" , "" , 6 ),
-                   ("CookTorrance" , "CookTorrance" , "" , 7)
-                   ]
-    mfvis_prop = bpy.props.EnumProperty(name='Visibility',items=mfvis_item, default="CookTorrance")
-
     # fresnel parameters
     # dielectric-conductor parameters
     eta = bpy.props.FloatVectorProperty(name='Interior IOR', default=(0.37, 0.37, 0.37), min=0.10, max=10.0)
@@ -220,26 +210,22 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
 
     def draw_buttons(self, context, layout):
         self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
-        self.draw_button(layout, "VisibilityTerm" , "mfvis_prop")
         self.draw_button(layout, "Interior IOR" , "eta" )
         self.draw_button(layout, "Absorption Coefficient" , "k")
 
     def draw_props(self, context, layout, indented_label):
         self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
-        self.draw_prop(layout, 'VisibilityTerm' , 'mfvis_prop' , indented_label)
         self.draw_prop(layout, "Interior IOR" , "eta" , indented_label)
         self.draw_prop(layout, "Absorption Coefficient" , "k", indented_label)
 
     def export_prop(self, xml_node):
         ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='string', value= self.mfdist_prop )
-        ET.SubElement( xml_node , 'Property' , name='Visibility' , type='string', value= self.mfvis_prop )
         ET.SubElement( xml_node , 'Property' , name='eta' , type='color', value= '%f %f %f'%(self.eta[0],self.eta[1],self.eta[2])  )
         ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
 
     def export_pbrt(self, file):
         file.write( "  \"string type\" \"Sort_MicrofacetReflection\"\n" )
         file.write( "  \"string nd\" \"%s\"\n" %self.mfdist_prop )
-        file.write( "  \"string vis\" \"%s\"\n" %self.mfvis_prop )
         file.write( "  \"rgb eta\" [%f %f %f]\n" %self.eta[:] )
         file.write( "  \"rgb k\" [%f %f %f]\n" %self.k[:] )
         for input in self.inputs:
@@ -256,16 +242,6 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
                    ]
     mfdist_prop = bpy.props.EnumProperty(name='NDF',items=mfdist_item)
 
-    mfvis_item = [ ("Implicit", "Implicit", "", 1),
-                   ("Neumann" , "Neumann" , "", 2),
-                   ("Kelemen" , "Kelemen" , "" , 3),
-                   ("Schlick" , "Schlick" , "" , 4),
-                   ("Smith" , "Smith" , "" , 5),
-                   ("SmithJointApprox" , "SmithJointApprox" , "" , 6 ),
-                   ("CookTorrance" , "CookTorrance" , "" , 7)
-                   ]
-    mfvis_prop = bpy.props.EnumProperty(name='Visibility',items=mfvis_item,default="CookTorrance")
-
     # dielectric-dielectric parameters
     int_ior = bpy.props.FloatProperty(name='Interior IOR', default=1.1, min=1.0, max=10.0)
     ext_ior = bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0)
@@ -277,26 +253,22 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
 
     def draw_buttons(self, context, layout):
         self.draw_button(layout, "MicroFacetDistribution" , "mfdist_prop")
-        self.draw_button(layout, "VisibilityTerm" , "mfvis_prop")
         self.draw_button(layout, "Interior IOR" , "int_ior")
         self.draw_button(layout, "Exterior IOR" , "ext_ior")
 
     def draw_props(self, context, layout, indented_label):
         self.draw_prop(layout, 'MicroFacetDistribution' , 'mfdist_prop' , indented_label)
-        self.draw_prop(layout, 'VisibilityTerm' , 'mfvis_prop' , indented_label)
         self.draw_prop(layout, "Interior IOR" , "int_ior", indented_label)
         self.draw_prop(layout, "Exterior IOR" , "ext_ior", indented_label)
 
     def export_prop(self, xml_node):
         ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='string', value= self.mfdist_prop )
-        ET.SubElement( xml_node , 'Property' , name='Visibility' , type='string', value= self.mfvis_prop )
         ET.SubElement( xml_node , 'Property' , name='in_ior' , type='color', value= '%f'%(self.int_ior)  )
         ET.SubElement( xml_node , 'Property' , name='ext_ior' , type='color', value= '%f'%(self.ext_ior) )
 
     def export_pbrt(self, file):
         file.write( "  \"string type\" \"Sort_MicrofacetRefraction\"\n" )
         file.write( "  \"string nd\" \"%s\"\n" %self.mfdist_prop )
-        file.write( "  \"string vis\" \"%s\"\n" %self.mfvis_prop )
         file.write( "  \"float int_ior\" [%f]\n" %self.int_ior )
         file.write( "  \"float ext_ior\" [%f]\n" %self.ext_ior )
         for input in self.inputs:
@@ -566,11 +538,13 @@ class SORTNodeGlass(SORTShadingNode):
         reflectance = self.inputs[0].default_value
         transmittance = self.inputs[1].default_value
         roughness = self.inputs[2].default_value
+        roughnessv = roughness * 2
         file.write( "  \"string type\" \"glass\"\n" )
         file.write( "  \"rgb Kr\" [%f %f %f]\n"%(reflectance[:]))
         file.write( "  \"rgb Kt\" [%f %f %f]\n"%(transmittance[:]))
         file.write( "  \"float uroughness\" [%s]\n" %roughness )
-        file.write( "  \"float vroughness\" [%s]\n" %roughness )
+        file.write( "  \"float vroughness\" [%s]\n" %roughnessv )
+        file.write( "  \"bool remaproughness\" \"true\" \n" )
         return
 
 class SORTNodePlastic(SORTShadingNode):
