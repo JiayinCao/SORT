@@ -84,7 +84,6 @@ private:
 	MaterialNodeProperty	eta;
 	MaterialNodeProperty	k;
 	MaterialNodePropertyString	mf_dist;
-	MaterialNodePropertyString	mf_vis;
 };
 
 // Microfacet node
@@ -104,5 +103,4 @@ private:
 	MaterialNodeProperty	in_ior;
 	MaterialNodeProperty	ext_ior;
 	MaterialNodePropertyString	mf_dist;
-	MaterialNodePropertyString	mf_vis;
 };
