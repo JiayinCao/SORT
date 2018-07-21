@@ -145,6 +145,10 @@ inline float CosPhi2(const Vector &w) {
     return cosPhi * cosPhi;
 }
 
+inline float TanTheta( const Vector& w){
+    return SinTheta(w) / CosTheta(w);
+}
+
 inline bool SameHemisphere(const Vector &w, const Vector &wp) {
     return w.y * wp.y > 0.f;
 }

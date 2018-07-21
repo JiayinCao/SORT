@@ -85,11 +85,8 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     Spectrum k( 2.82f );
     MicroFacetDistribution* dist = SORT_MALLOC(GGX)( roughnessU.GetPropertyValue(bsdf).x , roughnessV.GetPropertyValue(bsdf).x );
     
-    // visibility function to be removed.
-    VisTerm* vis = SORT_MALLOC(VisCookTorrance)();
-    
     Fresnel* fresnel = SORT_MALLOC( FresnelConductor )( eta , k );
-    MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( basecolor , fresnel , dist , vis);
+    MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( basecolor , fresnel , dist );
     
     const float m = metallic.GetPropertyValue(bsdf).x;
     mf->m_weight = weight * ( m * 0.92f + 0.08f );
@@ -143,8 +140,7 @@ void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
         Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.2f, 1.f);
         float rough = roughness.GetPropertyValue(bsdf).x;
         MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
-        VisTerm* vis = SORT_MALLOC(VisSmith)( rough );                      // Smith
-        MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist , vis);
+        MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist );
         mf->m_weight = weight;
         bsdf->AddBxdf(mf);
     }
@@ -195,16 +191,15 @@ void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
         return;
     
     MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
-    VisTerm* vis = SORT_MALLOC(VisSmith)( rough );                      // Smith
     Fresnel* fresnel = SORT_MALLOC( FresnelDielectric )( 1.0f , 1.5f );
     
     if( !r.IsBlack() ){
-        MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( r , fresnel , dist , vis);
+        MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( r , fresnel , dist );
         mf->m_weight = weight;
         bsdf->AddBxdf(mf);
     }
     if( !t.IsBlack() ){
-        MicroFacetRefraction* mr = SORT_MALLOC(MicroFacetRefraction)( t , fresnel , dist , vis , 1.5f , 1.0f );
+        MicroFacetRefraction* mr = SORT_MALLOC(MicroFacetRefraction)( t , fresnel , dist , 1.5f , 1.0f );
         mr->m_weight = weight;
         bsdf->AddBxdf(mr);
     }

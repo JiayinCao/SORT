@@ -73,7 +73,6 @@ MicrofacetReflectionNode::MicrofacetReflectionNode()
 {
 	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
 	m_props.insert( make_pair( "MicroFacetDistribution" , &mf_dist ) );
-	m_props.insert( make_pair( "Visibility" , &mf_vis ) );
 	m_props.insert( make_pair( "RoughnessU" , &roughnessU ) );
     m_props.insert( make_pair( "RoughnessV" , &roughnessV ) );
 	m_props.insert( make_pair( "eta" , &eta ) );
@@ -92,25 +91,9 @@ void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	else
 		dist = SORT_MALLOC(GGX)( ru , rv );	// GGX is default
 
-	VisTerm* vis = 0;
-	if( mf_vis.str == "Neumann" )
-		vis = SORT_MALLOC(VisNeumann)();
-	else if( mf_vis.str == "Kelemen" )
-		vis = SORT_MALLOC(VisKelemen)();
-	else if( mf_vis.str == "Schlick" )
-		vis = SORT_MALLOC(VisSchlick)( ru );
-	else if( mf_vis.str == "Smith" )
-		vis = SORT_MALLOC(VisSmith)( ru );
-	else if( mf_vis.str == "SmithJointApprox" )
-		vis = SORT_MALLOC(VisSmithJointApprox)( ru );
-	else if( mf_vis.str == "CookTorrance" )
-		vis = SORT_MALLOC(VisCookTorrance)();
-	else
-		vis = new VisImplicit();	// implicit visibility term is default
-
 	Fresnel* frenel = SORT_MALLOC( FresnelConductor )( eta.GetPropertyValue(bsdf).ToSpectrum() , k.GetPropertyValue(bsdf).ToSpectrum() );
 
-	MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist , vis);
+	MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist );
 	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
 }
@@ -119,7 +102,6 @@ MicrofacetRefractionNode::MicrofacetRefractionNode()
 {
 	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
 	m_props.insert( make_pair( "MicroFacetDistribution" , &mf_dist ) );
-	m_props.insert( make_pair( "Visibility" , &mf_vis ) );
 	m_props.insert( make_pair( "Roughness" , &roughness ) );
 	m_props.insert( make_pair( "in_ior" , &in_ior ) );
 	m_props.insert( make_pair( "ext_ior" , &ext_ior ) );
@@ -136,27 +118,11 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	else
 		dist = SORT_MALLOC(GGX)( rn , rn );	// GGX is default
 
-	VisTerm* vis = 0;
-	if( mf_vis.str == "Neumann" )
-		vis = SORT_MALLOC(VisNeumann)();
-	else if( mf_vis.str == "Kelemen" )
-		vis = SORT_MALLOC(VisKelemen)();
-	else if( mf_vis.str == "Schlick" )
-		vis = SORT_MALLOC(VisSchlick)( rn );
-	else if( mf_vis.str == "Smith" )
-		vis = SORT_MALLOC(VisSmith)( rn );
-	else if( mf_vis.str == "SmithJointApprox" )
-		vis = SORT_MALLOC(VisSmithJointApprox)( rn );
-	else if( mf_vis.str == "CookTorrance" )
-		vis = SORT_MALLOC(VisCookTorrance)();
-	else
-		vis = new VisImplicit();	// implicit visibility term is default
-
 	float in_eta = in_ior.GetPropertyValue(bsdf).x;
 	float ext_eta = ext_ior.GetPropertyValue(bsdf).x;
 	Fresnel* frenel = SORT_MALLOC( FresnelDielectric )( in_eta , ext_eta );
 
-	MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist , vis , in_eta , ext_eta );
+	MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist , in_eta , ext_eta );
 	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
 }
