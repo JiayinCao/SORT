@@ -85,26 +85,25 @@ public:
 	{
         // Memo on Fresnel equations
         // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
-        
-        const bool entering = cosI < 0.0f ? false : true;
+        const bool entering = cosI > 0.0f;
         const float _etaI = entering ? eta_i : eta_t;
         const float _etaT = entering ? eta_t : eta_i;
-        
+
         const float sinI = sqrt( 1.0f - cosI * cosI );
         const float sinT = _etaI * sinI / _etaT;
         if( sinT >= 1.0f ) return 1.0f;
         if( !entering ) cosI = -cosI;
-        
-        const float cosT = sqrt( 1.0f - sinT * sinT );
-        
-		const float t0 = eta_t * cosI;
-		const float t1 = eta_i * cosT;
-		const float t2 = eta_i * cosI;
-		const float t3 = eta_t * cosT;
 
-		const float Rparl = ( t0 - t1 ) / ( t0 + t1 );
-		const float Rparp = ( t2 - t3 ) / ( t2 + t3 );
-		return ( Rparl * Rparl + Rparp * Rparp ) * 0.5f;
+        const float cosT = sqrt( 1.0f - sinT * sinT );
+
+        const float t0 = _etaT * cosI;
+        const float t1 = _etaI * cosT;
+        const float t2 = _etaI * cosI;
+        const float t3 = _etaT * cosT;
+
+        const float Rparl = ( t0 - t1 ) / ( t0 + t1 );
+        const float Rparp = ( t2 - t3 ) / ( t2 + t3 );
+        return ( Rparl * Rparl + Rparp * Rparp ) * 0.5f;
 	}
 
 private:
