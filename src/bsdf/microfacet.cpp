@@ -275,22 +275,14 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 	if( SameHemiSphere( wo , wi ) == false )
 		return 0.0f;
     
-    // ignore reflection at the back face
-    if( wo.y <= 0.0f )
-        return 0.0f;
-
 	const float NoL = AbsCosTheta( wi );
 	const float NoV = AbsCosTheta( wo );
-
 	if (NoL == 0.f || NoV == 0.f)
 		return Spectrum(0.f);
 	
 	// evaluate fresnel term
 	const Vector wh = Normalize(wi + wo);
-	const float VoH = Dot(wi, wh);
-
-	const Spectrum F = fresnel->Evaluate( AbsDot(wo,wh) , fabs(VoH) );
-	
+	const Spectrum F = fresnel->Evaluate( Dot(wo,wh) );
     return R * distribution->D(wh) * F * distribution->G(wo,wi) / ( 4.0f * NoL * NoV );
 }
 
@@ -343,6 +335,9 @@ MicroFacetRefraction::MicroFacetRefraction(const Spectrum &transmittance, MicroF
 // evaluate bxdf
 Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 {
+    // Microfacet Models for Refraction through Rough Surfaces
+    // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
+    
     if( SameHemiSphere(wi, wo) )
         return Spectrum(0.f);
     
@@ -355,17 +350,14 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 
 	const Vector3f wh = Normalize(wo + wi * eta);
 
-	const float sVoH = Dot(wo , wh);
-	const float VoH = fabs(sVoH);
+	const float sVoH = Dot(wo, wh);
     const float sIoH = Dot(wi, wh);
-    const float IoH = fabs(sIoH);
 	
 	// Fresnel term
-	const Spectrum F = fresnel.Evaluate( VoH , IoH );
-
+	const Spectrum F = fresnel.Evaluate( sVoH );
 	const float sqrtDenom = sVoH + eta * sIoH;
 	const float t = eta / sqrtDenom;
-    return (Spectrum(1.f) - F) * T * fabs(distribution->D(wh) * distribution->G(wo,wi) * t * t * IoH * VoH / ( NoV * NoL ));
+    return (Spectrum(1.f) - F) * T * fabs(distribution->D(wh) * distribution->G(wo,wi) * t * t * sIoH * sVoH / ( NoV * NoL ));
 }
 
 // sample a direction using importance sampling
