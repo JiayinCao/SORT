@@ -291,8 +291,7 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 
 	const Spectrum F = fresnel->Evaluate( AbsDot(wo,wh) , fabs(VoH) );
 	
-	// return Torrance–Sparrow BRDF
-    return R * distribution->D(wh) * F * distribution->G(wo,wi);
+    return R * distribution->D(wh) * F * distribution->G(wo,wi) / ( 4.0f * NoL * NoV );
 }
 
 // sample a direction randomly
@@ -327,11 +326,10 @@ float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 }
 
 // constructor
-MicroFacetRefraction::MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , float ieta , float eeta )
+MicroFacetRefraction::MicroFacetRefraction(const Spectrum &transmittance, MicroFacetDistribution* d , float ieta , float eeta ): fresnel( ieta , eeta )
 {
-	R = reflectance;
+	T = transmittance;
 	distribution = d;
-	fresnel = f;
 	eta_in = ieta;
 	eta_ext = eeta;
 
@@ -348,8 +346,8 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
     if( SameHemiSphere(wi, wo) )
         return Spectrum(0.f);
     
-	const float NoL = AbsCosTheta( wi );
-	const float NoV = AbsCosTheta( wo );
+	const float NoL = CosTheta( wi );
+	const float NoV = CosTheta( wo );
 	if (NoL == 0.f || NoV == 0.f)
 		return Spectrum(0.f);
 	
@@ -363,11 +361,11 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
     const float IoH = fabs(sIoH);
 	
 	// Fresnel term
-	const Spectrum F = fresnel->Evaluate( VoH , IoH );
+	const Spectrum F = fresnel.Evaluate( VoH , IoH );
 
 	const float sqrtDenom = sVoH + eta * sIoH;
 	const float t = eta / sqrtDenom;
-    return (Spectrum(1.f) - F) * R * distribution->D(wh) * distribution->G(wo,wi) * t * t * IoH * VoH * 4.0f ;
+    return (Spectrum(1.f) - F) * T * fabs(distribution->D(wh) * distribution->G(wo,wi) * t * t * IoH * VoH / ( NoV * NoL ));
 }
 
 // sample a direction using importance sampling

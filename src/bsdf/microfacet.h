@@ -127,7 +127,7 @@ private:
 class Microfacet : public Bxdf
 {
 protected:
-	Spectrum R;                                     /**< Direction-hemisphere reflection. */
+	
 	MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
 	Fresnel* fresnel = nullptr;                     /**< Fresnel term. */
 
@@ -177,6 +177,9 @@ public:
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
 	float Pdf( const Vector& wo , const Vector& wi ) const override;
+    
+private:
+    Spectrum R;                   /**< Direction-hemisphere reflection. */
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -186,13 +189,13 @@ class MicroFacetRefraction : public Microfacet
 {
 public:
     //! @brief Constructor
-    //! @param reflectance      Direction hemisphere reflection.
+    //! @param transmittance    Direction hemisphere transmittance.
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param v                Visibility term.
     //! @param ieta             Index of refraction inside the surface.
     //! @param eeta             Index of refraction outside the surface.
-	MicroFacetRefraction(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d , float ieta , float eeta );
+	MicroFacetRefraction(const Spectrum &transmittance, MicroFacetDistribution* d , float ieta , float eeta );
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -215,6 +218,8 @@ public:
     float Pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:
-	float	eta_in;     /**< Index of refraction inside the surface. */
-	float	eta_ext;    /**< Index of refraction outside the surface. */
+	float	eta_in;                 /**< Index of refraction inside the surface. */
+	float	eta_ext;                /**< Index of refraction outside the surface. */
+    Spectrum T;                     /**< Direction-hemisphere transmittance. */
+    FresnelDielectric   fresnel;    /**< Dielectric fresnel in microfacet tranmittance model. */
 };
