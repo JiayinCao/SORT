@@ -118,9 +118,9 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	else
 		dist = SORT_MALLOC(GGX)( rn , rn );	// GGX is default
 
-	float in_eta = in_ior.GetPropertyValue(bsdf).x;
-	float ext_eta = ext_ior.GetPropertyValue(bsdf).x;
-	MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , dist , in_eta , ext_eta );
+	float in_eta = in_ior.GetPropertyValue(bsdf).x;     // index of refraction inside the material
+	float ext_eta = ext_ior.GetPropertyValue(bsdf).x;   // index of refraction outside the material
+	MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , dist , ext_eta , in_eta );
 	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
 }

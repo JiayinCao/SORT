@@ -318,16 +318,13 @@ float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 }
 
 // constructor
-MicroFacetRefraction::MicroFacetRefraction(const Spectrum &transmittance, MicroFacetDistribution* d , float ieta , float eeta ): fresnel( ieta , eeta )
+MicroFacetRefraction::MicroFacetRefraction(const Spectrum &transmittance, MicroFacetDistribution* d , float etai , float etat ):  etaI(etai) , etaT(etat) , T( transmittance ) , fresnel( etai , etat )
 {
-	T = transmittance;
-	distribution = d;
-	eta_in = ieta;
-	eta_ext = eeta;
-
+    distribution = d;
+    
 	// make sure IORs are not the same inside and outside
-	if(eta_in == eta_ext)
-		eta_in = eta_ext + 0.01f;
+	if(etaT == etaI)
+		etaT = etaI + 0.01f;
 	
 	m_type = (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION);
 }
@@ -346,15 +343,16 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 	if (NoL == 0.f || NoV == 0.f)
 		return Spectrum(0.f);
 	
-	const float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
+	const float eta = CosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
 
-	const Vector3f wh = Normalize(wo + wi * eta);
+    Vector3f wh = Normalize(wo + wi * eta);
+    if( wh.y < 0.0f ) wh = -wh;
 
 	const float sVoH = Dot(wo, wh);
     const float sIoH = Dot(wi, wh);
 	
 	// Fresnel term
-	const Spectrum F = fresnel.Evaluate( sVoH );
+	const Spectrum F = fresnel.Evaluate( Dot( wh , wo ) );
 	const float sqrtDenom = sVoH + eta * sIoH;
 	const float t = eta / sqrtDenom;
     return (Spectrum(1.f) - F) * T * fabs(distribution->D(wh) * distribution->G(wo,wi) * t * t * sIoH * sVoH / ( NoV * NoL ));
@@ -371,7 +369,7 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 
 	// try to get refracted ray
 	bool total_reflection = false;
-	wi = getRefracted( wo , wh , eta_in , eta_ext , total_reflection );
+	wi = getRefracted( wo , wh , etaT , etaI , total_reflection );
 	if( total_reflection ) return 0.0f;
 
     if( pdf )
@@ -385,7 +383,7 @@ float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi ) const
 	if( SameHemisphere( wo , wi ) )
         return 0.0f;
 
-	const float eta = CosTheta(wo) > 0 ? (eta_in / eta_ext) : (eta_ext / eta_in);
+	const float eta = CosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
     const Vector3f wh = Normalize(wo + wi * eta);
 
     // Compute change of variables _dwh\_dwi_ for microfacet transmission
