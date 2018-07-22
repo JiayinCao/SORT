@@ -24,10 +24,9 @@ class	Fresnel
 {
 public:
 	//! @brief Evaluate the Fresnel term.
-    //! @param cosO     Absolute cosine value of the angle between the exit ray and the normal. Caller of this function has to make sure cosO >= 0.0f.
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
     //! @return         Evaluated fresnel value.
-	virtual Spectrum Evaluate( float cosO, float cosI ) const = 0;
+	virtual Spectrum Evaluate( float cosI ) const = 0;
 };
 
 //! @brief A hack that presents no fresnel.
@@ -35,10 +34,9 @@ class	FresnelNo : public Fresnel
 {
 public:
     //! @brief Evaluate the Fresnel term.
-    //! @param cosO     Absolute cosine value of the angle between the exit ray and the normal. Caller of this function has to make sure cosO >= 0.0f.
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
     //! @return         Evaluated fresnel value.
-    Spectrum Evaluate( float cosO, float cosI ) const override{ return 1.0f; }
+    Spectrum Evaluate( float cosI ) const override{ return 1.0f; }
 };
 
 //! @brief Fresnel for conductors.
@@ -51,10 +49,9 @@ public:
 	FresnelConductor( const Spectrum& e , const Spectrum& kk ): eta(e) , k(kk) {}
 
     //! @brief Evaluate the Fresnel term.
-    //! @param cosO     Absolute cosine value of the angle between the exit ray and the normal. Caller of this function has to make sure cosO >= 0.0f.
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
     //! @return         Evaluated fresnel value.
-	Spectrum Evaluate( float cosO, float cosI ) const override
+	Spectrum Evaluate( float cosI ) const override
 	{
 		float sq_cos = cosI * cosI;
 
@@ -82,19 +79,31 @@ public:
 	FresnelDielectric( float ei , float et ): eta_t(et),eta_i(ei) {}
 
     //! @brief Evaluate the Fresnel term.
-    //! @param cosO     Absolute cosine value of the angle between the exit ray and the normal. Caller of this function has to make sure cosO >= 0.0f.
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
     //! @return         Evaluated fresnel value.
-	Spectrum Evaluate( float cosO, float cosI ) const override
+	Spectrum Evaluate( float cosI ) const override
 	{
+        // Memo on Fresnel equations
+        // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
+        
+        const bool entering = cosI < 0.0f ? false : true;
+        const float _etaI = entering ? eta_i : eta_t;
+        const float _etaT = entering ? eta_t : eta_i;
+        
+        const float sinI = sqrt( 1.0f - cosI * cosI );
+        const float sinT = _etaI * sinI / _etaT;
+        if( sinT >= 1.0f ) return 1.0f;
+        if( !entering ) cosI = -cosI;
+        
+        const float cosT = sqrt( 1.0f - sinT * sinT );
+        
 		const float t0 = eta_t * cosI;
-		const float t1 = eta_i * cosO;
+		const float t1 = eta_i * cosT;
 		const float t2 = eta_i * cosI;
-		const float t3 = eta_t * cosO;
+		const float t3 = eta_t * cosT;
 
-		float Rparl = ( t0 - t1 ) / ( t0 + t1 );
-		float Rparp = ( t2 - t3 ) / ( t2 + t3 );
-
+		const float Rparl = ( t0 - t1 ) / ( t0 + t1 );
+		const float Rparp = ( t2 - t3 ) / ( t2 + t3 );
 		return ( Rparl * Rparl + Rparp * Rparp ) * 0.5f;
 	}
 
