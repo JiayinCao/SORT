@@ -191,15 +191,15 @@ void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
         return;
     
     MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
-    Fresnel* fresnel = SORT_MALLOC( FresnelDielectric )( 1.0f , 1.5f );
     
     if( !r.IsBlack() ){
+        Fresnel* fresnel = SORT_MALLOC( FresnelDielectric )( 1.0f , 1.5f );
         MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( r , fresnel , dist );
         mf->m_weight = weight;
         bsdf->AddBxdf(mf);
     }
     if( !t.IsBlack() ){
-        MicroFacetRefraction* mr = SORT_MALLOC(MicroFacetRefraction)( t , fresnel , dist , 1.5f , 1.0f );
+        MicroFacetRefraction* mr = SORT_MALLOC(MicroFacetRefraction)( t , dist , 1.5f , 1.0f );
         mr->m_weight = weight;
         bsdf->AddBxdf(mr);
     }

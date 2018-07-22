@@ -120,9 +120,7 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 	float in_eta = in_ior.GetPropertyValue(bsdf).x;
 	float ext_eta = ext_ior.GetPropertyValue(bsdf).x;
-	Fresnel* frenel = SORT_MALLOC( FresnelDielectric )( in_eta , ext_eta );
-
-	MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist , in_eta , ext_eta );
+	MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , dist , in_eta , ext_eta );
 	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
 }
