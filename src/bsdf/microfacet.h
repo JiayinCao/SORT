@@ -193,9 +193,9 @@ public:
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param v                Visibility term.
-    //! @param ieta             Index of refraction inside the surface.
-    //! @param eeta             Index of refraction outside the surface.
-	MicroFacetRefraction(const Spectrum &transmittance, MicroFacetDistribution* d , float ieta , float eeta );
+    //! @param etaI             Index of refraction of the side that normal points
+    //! @param etaT             Index of refraction of the other side that normal points
+	MicroFacetRefraction(const Spectrum &transmittance, MicroFacetDistribution* d , float etaI , float etaT );
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -218,8 +218,8 @@ public:
     float Pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:
-	float	eta_in;                 /**< Index of refraction inside the surface. */
-	float	eta_ext;                /**< Index of refraction outside the surface. */
-    Spectrum T;                     /**< Direction-hemisphere transmittance. */
-    FresnelDielectric   fresnel;    /**< Dielectric fresnel in microfacet tranmittance model. */
+	float	            etaI;               /**< Index of refraction of the side that normal points. */
+	float	            etaT;               /**< Index of refraction of the other side that normal points. */
+    Spectrum            T;                  /**< Direction-hemisphere transmittance. */
+    FresnelDielectric   fresnel;            /**< Dielectric fresnel in microfacet tranmittance model. */
 };
