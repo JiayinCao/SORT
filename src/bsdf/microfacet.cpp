@@ -87,7 +87,7 @@ Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
 }
 
 //! @brief Smith shadow-masking function G1
-float Blinn::G1( const Vector& v )
+float Blinn::G1( const Vector& v ) const
 {
     const float absTan = fabs( TanTheta(v) );
     if( isinf( absTan ) ) return 0.0f;
@@ -159,7 +159,7 @@ Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
 }
 
 //! @brief Smith shadow-masking function G1
-float Beckmann::G1( const Vector& v )
+float Beckmann::G1( const Vector& v ) const
 {
     const float absTan = fabs( TanTheta(v) );
     if( isinf( absTan ) ) return 0.0f;
@@ -228,7 +228,7 @@ Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
 }
 
 //! @brief Smith shadow-masking function G1
-float GGX::G1( const Vector& v )
+float GGX::G1( const Vector& v ) const
 {
     const float tan_theta_sq = TanTheta2(v);
     if( isinf( tan_theta_sq ) ) return 0.0f;
@@ -260,7 +260,7 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 }
 
 // constructor
-MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d )
+MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f , const MicroFacetDistribution* d )
 {
 	R = reflectance;
 	distribution = d;
@@ -313,12 +313,11 @@ float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 
 	const Vector h = Normalize( wo + wi );
 	const float EoH = AbsDot( wo , h );
-	const float HoN = AbsCosTheta(h);
-	return distribution->D(h) * HoN / (4.0f * EoH);
+	return distribution->Pdf(h) / (4.0f * EoH);
 }
 
 // constructor
-MicroFacetRefraction::MicroFacetRefraction(const Spectrum &transmittance, MicroFacetDistribution* d , float etai , float etat ):  etaI(etai) , etaT(etat) , T( transmittance ) , fresnel( etai , etat )
+MicroFacetRefraction::MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d , float etai , float etat ):  etaI(etai) , etaT(etat) , T( transmittance ) , fresnel( etai , etat )
 {
     distribution = d;
     
@@ -389,6 +388,5 @@ float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi ) const
     // Compute change of variables _dwh\_dwi_ for microfacet transmission
     const float sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
     const float dwh_dwi = eta * eta * AbsDot(wi, wh) / (sqrtDenom * sqrtDenom);
-	const float HoN = AbsCosTheta(wh);
-    return distribution->D(wh) * HoN * dwh_dwi;
+    return distribution->Pdf(wh) * dwh_dwi;
 }

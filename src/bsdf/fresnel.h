@@ -110,3 +110,8 @@ private:
     float eta_t;    /**< Index of refraction of the medium on the side normal points. */
     float eta_i;    /**< Index of refraction of the medium on the other side normal points. */
 };
+
+// Schlick Fresnel Approximation
+inline Spectrum SchlickFresnel( const Spectrum& R0 , float cos ){
+    return R0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - R0 );
+}
