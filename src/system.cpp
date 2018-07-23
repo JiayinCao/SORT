@@ -46,10 +46,12 @@ extern int  g_iTileSize;
 
 SORT_STATS_DEFINE_COUNTER(sPreprocessTime)
 SORT_STATS_DEFINE_COUNTER(sRenderingTime)
+SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
 
 SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTime);
 SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTime);
 SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount , sRenderingTime);
+SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
 
 // render the image
 void System::Render()
@@ -345,6 +347,7 @@ bool System::Setup( const char* str )
 		m_pSampler = new StratifiedSampler();
 		m_iSamplePerPixel = m_pSampler->RoundSize(16);
 	}
+    SORT_STATS(sSamplePerPixel = m_iSamplePerPixel);
 	
 	element = root->FirstChildElement("Camera");
 	if( element )

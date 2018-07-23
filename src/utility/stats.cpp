@@ -40,7 +40,7 @@ private:
 };
 
 void StatsSummary::PrintStats() const {
-    slog(INFO, GENERAL, "---------------------------Statistics---------------------------");
+    slog(INFO, GENERAL, "----------------------------------------------------------------");
     std::map<std::string, std::map<std::string, std::string>> outputs;
     for (const auto& counterCat : counters) {
         if( categories.count( counterCat.first ) == 0 )
@@ -56,7 +56,7 @@ void StatsSummary::PrintStats() const {
                 slog(INFO, GENERAL, stringFormat("    %-44s %s", counterItem.first.c_str() , counterItem.second.c_str()));
             }
     }
-    slog(INFO, GENERAL, "---------------------------Statistics---------------------------");
+    slog(INFO, GENERAL, "----------------------------------------------------------------");
 }
 
 void StatsSummary::FlushCounter(const std::string& category, const std::string& varname, const StatsItemBase* var) {

@@ -152,7 +152,7 @@ public:
 
 private:
     std::map<string, std::map<string, std::shared_ptr<StatsItemBase>>> counters;
-    std::unordered_set<std::string> categories = { "Performance" , "Scene" };
+    std::unordered_set<std::string> categories = { "Performance" , "Statistics" };
 };
 
 using stats_update = std::function<void(StatsSummary&)>;
