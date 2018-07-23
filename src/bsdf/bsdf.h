@@ -181,3 +181,6 @@ inline bool SameHemiSphere( const Vector& wi , const Vector& wo ){
 	return ( wi.y * wo.y ) > 0.0f;
 }
 
+inline bool PointingUp( const Vector& w ){
+    return w.y > 0.0f;
+}

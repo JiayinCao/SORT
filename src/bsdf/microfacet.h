@@ -18,6 +18,7 @@
 #pragma once
 
 #include "bxdf.h"
+#include "bsdf.h"
 #include "fresnel.h"
 
 //! @brief Normal distribution function.
@@ -28,7 +29,7 @@ public:
 	virtual float D(const Vector& h) const = 0;
     
     //! @brief Visibility term of microfacet model, Smith shadow-masking function
-    float G( const Vector& wo , const Vector& wi ){
+    float G( const Vector& wo , const Vector& wi ) const {
         return G1( wo ) * G1( wi );
     }
 
@@ -38,9 +39,15 @@ public:
     //! @return     Sampled normal direction based on the NDF.
 	virtual Vector sample_f( const BsdfSample& bs , const Vector& wo ) const = 0;
     
+    //! @brief PDF of sampling a specific normal direction
+    //! @param wh   Normal direction to be sampled
+    float Pdf( const Vector& wh ) const {
+        return D( wh ) * AbsCosTheta(wh);
+    }
+    
 protected:
     //! @brief Smith shadow-masking function G1
-    virtual float G1( const Vector& v ) = 0;
+    virtual float G1( const Vector& v ) const  = 0;
 };
 
 //! @brief Blinn NDF.
@@ -67,7 +74,7 @@ private:
     float alphaU2 , alphaV2;
     
     //! @brief Smith shadow-masking function G1
-    float G1( const Vector& v ) override;
+    float G1( const Vector& v ) const override;
 };
 
 //! @brief Beckmann NDF.
@@ -94,7 +101,7 @@ private:
     float alphaU2 , alphaV2 , alphaUV, alpha;
     
     //! @brief Smith shadow-masking function G1
-    float G1( const Vector& v ) override;
+    float G1( const Vector& v ) const override;
 };
 
 //! @brief GGX NDF.
@@ -120,16 +127,15 @@ private:
     float alphaU2 , alphaV2 , alphaUV , alpha;
     
     //! @brief Smith shadow-masking function G1
-    float G1( const Vector& v ) override;
+    float G1( const Vector& v ) const override;
 };
 
 //! @brief Interface for Microfacet bxdf.
 class Microfacet : public Bxdf
 {
 protected:
-	
-	MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
-	Fresnel* fresnel = nullptr;                     /**< Fresnel term. */
+	const MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
+	const Fresnel* fresnel = nullptr;                     /**< Fresnel term. */
 
 	//! @brief Get reflected direction based on incident direction and normal.
     //! @param v    Incoming direction.
@@ -156,7 +162,7 @@ public:
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param v                Visibility term.
-	MicroFacetReflection(const Spectrum &reflectance, Fresnel* f , MicroFacetDistribution* d );
+	MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f , const MicroFacetDistribution* d );
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -195,7 +201,7 @@ public:
     //! @param v                Visibility term.
     //! @param etaI             Index of refraction of the side that normal points
     //! @param etaT             Index of refraction of the other side that normal points
-	MicroFacetRefraction(const Spectrum &transmittance, MicroFacetDistribution* d , float etaI , float etaT );
+	MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d , float etaI , float etaT );
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
