@@ -32,8 +32,8 @@
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
 
-SORT_STATS_COUNTER("Scene", "Total Primitive Count", sScenePrimitiveCount);
-SORT_STATS_COUNTER("Scene", "Total Light Count", sSceneLightCount);
+SORT_STATS_COUNTER("Statistics", "Total Primitive Count", sScenePrimitiveCount);
+SORT_STATS_COUNTER("Statistics", "Total Light Count", sSceneLightCount);
 
 // load the scene from script file
 bool Scene::LoadScene( const string& str )
