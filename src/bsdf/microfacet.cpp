@@ -49,8 +49,8 @@ float Blinn::D(const Vector& h) const
     // http://www.irisa.fr/prive/kadi/Lopez/ashikhmin00anisotropic.pdf ( The original phong model was not energy conservative, see the following link for a fix. )
     // http://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html ( Modified Phong model )
     // http://www.farbrausch.de/~fg/stuff/phong.pdf ( Derivation of phong model's scaling factor )
-    // Anisotropic model:   D(w_h) = sqrt( ( alphaU + 2 ) * ( alphaV * 2 ) ) * cos(\theta) ^ ( cos(\phi)^2 * alphaU + sin(\phi)^2 * alphaV ) / ( 2 * PI )
-    // Isotropic model:     D(w_h) = ( alpha + 2 ) * cos(\theta) ^ alpha / ( 2 * PI )
+    // Anisotropic model:   D(w_h) = sqrt( ( exponentU + 2 ) * ( exponentV + 2 ) ) * cos(\theta) ^ ( cos(\phi)^2 * alphaU + sin(\phi)^2 * alphaV ) / ( 2 * PI )
+    // Isotropic model:     D(w_h) = ( exponent + 2 ) * cos(\theta) ^ alpha / ( 2 * PI )
 
     float NoH = AbsCosTheta(h);
     if (NoH <= 0.0f) return 0.0f;
