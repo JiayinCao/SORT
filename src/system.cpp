@@ -337,7 +337,6 @@ bool System::Setup( const char* str )
 		
 		unsigned round = atoi( str_round );
 		if( round < 1 ) round = 1;
-		if( round > 1024 ) round = 1024;
 		
 		// create sampler
 		m_pSampler = CREATE_TYPE( str_type , Sampler );
