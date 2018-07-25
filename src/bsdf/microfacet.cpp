@@ -37,7 +37,8 @@ Blinn::Blinn( float roughnessU , float roughnessV )
     
     expU = convert_exp(roughnessU);
     expV = convert_exp(roughnessV);
-    exp = sqrt( ( expU + 2.0f ) * ( expV + 2.0f ) );
+    expUV = sqrt( ( expU + 2.0f ) * ( expV + 2.0f ) );
+    exp = sqrt( ( expU + 2.0f ) / ( expV + 2.0f ) );
     alphaU2 = convert_alpha(roughnessU);
     alphaV2 = convert_alpha(roughnessV);
 }
@@ -56,7 +57,7 @@ float Blinn::D(const Vector& h) const
     if (NoH <= 0.0f) return 0.0f;
     const float sin_phi_h_sq = SinPhi2(h);
     const float cos_phi_h_sq = 1.0f - sin_phi_h_sq;
-    return exp * pow(NoH, cos_phi_h_sq * expU + sin_phi_h_sq * expV) * INV_TWOPI;
+    return expUV * pow(NoH, cos_phi_h_sq * expU + sin_phi_h_sq * expV) * INV_TWOPI;
 }
 
 // sampling according to GGX
@@ -72,7 +73,7 @@ Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
         // https://agraphicsguy.wordpress.com/2018/07/18/sampling-anisotropic-microfacet-brdf/
         const static int offset[5] = { 0 , 1 , 1 , 2 , 2 };
         const int i = bs.v == 0.25f ? 0 : (int)(bs.v * 4.0f);
-        phi = std::atan(exp * std::tan(TWO_PI * bs.v)) + offset[i] * PI;
+        phi = std::atan( exp * std::tan(TWO_PI * bs.v) ) + offset[i] * PI;
     }
 
     const float sin_phi_h = std::sin(phi);

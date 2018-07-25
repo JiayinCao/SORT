@@ -70,7 +70,7 @@ public:
     Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
 private:
-	float expU , expV , exp;      /**< Internal data used for NDF calculation. */
+	float expU , expV , exp , expUV;      /**< Internal data used for NDF calculation. */
     float alphaU2 , alphaV2;
     
     //! @brief Smith shadow-masking function G1
