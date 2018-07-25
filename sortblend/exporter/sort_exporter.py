@@ -60,7 +60,7 @@ def export_blender(scene, force_debug=False):
     # export scene
     export_scene(scene, force_debug)
     # export material
-    export_material( force_debug )
+    export_material(scene, force_debug )
 
 # clear old data and create new path
 def create_path(scene, force_debug):
@@ -384,36 +384,52 @@ def export_mesh(obj,scene,force_debug):
 
             file.write("\n")
 
-def export_material(force_debug):
+def export_material(scene,force_debug):
     # create root node
     root = ET.Element("Root")
 
-    for material in bpy.data.materials:
-        if material and material.sort_material and material.sort_material.sortnodetree:
-            ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-            output_node = nodes.find_node(material, common.sort_node_output_bl_name)
-            if output_node is None:
-                continue
+    # avoid exporting a material twice
+    exported_materials = []
 
-            # material node
-            mat_node = ET.SubElement( root , 'Material', name=material.name )
+    all_nodes = exporter_common.renderable_objects(scene)
+    for ob in all_nodes:
+        if ob.type == 'MESH':
+            for material in ob.data.materials[:]:
+                # make sure it is a SORT material
+                if material and material.sort_material and material.sort_material.sortnodetree:
+                    # skip if the material is already exported
+                    if exported_materials.count( material.name ) != 0:
+                        continue
+                    exported_materials.append( material.name )
 
-            print( 'Exporting material: ' + material.name )
-            def draw_props(mat_node , xml_node):
-                mat_node.export_prop(xml_node)
+                    # get the sort tree nodes
+                    ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
 
-                inputs = mat_node.inputs
-                for socket in inputs:
-                    if socket.is_linked:
-                        input_node = nodes.socket_node_input(ntree, socket)
-                        sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
-                        draw_props(input_node,sub_xml_node)
-                    else:
-                        if socket.IsEmptySocket() is False:
-                            ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.output_type_str(), value=socket.output_default_value_to_str() )
+                    # get output nodes
+                    output_node = nodes.find_node(material, common.sort_node_output_bl_name)
+                    if output_node is None:
+                        continue
 
-            draw_props(output_node, mat_node)
+                    print( 'Exporting material: ' + material.name )
 
+                    # material node
+                    mat_node = ET.SubElement( root , 'Material', name=material.name )
+                    
+                    def draw_props(mat_node , xml_node):
+                        mat_node.export_prop(xml_node)
+
+                        inputs = mat_node.inputs
+                        for socket in inputs:
+                            if socket.is_linked:
+                                input_node = nodes.socket_node_input(ntree, socket)
+                                sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
+                                draw_props(input_node,sub_xml_node)
+                            else:
+                                if socket.IsEmptySocket() is False:
+                                    ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.output_type_str(), value=socket.output_default_value_to_str() )
+
+                    draw_props(output_node, mat_node)
+    
     # output the xml
     output_material_file = preference.get_immediate_dir(force_debug) + 'blender_material.xml'
     tree = ET.ElementTree(root)

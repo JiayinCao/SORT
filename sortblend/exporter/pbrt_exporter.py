@@ -45,7 +45,7 @@ def lookAtPbrt(camera):
 # export blender information
 def export_blender(scene, force_debug=False):
     node = export_scene(scene)
-    export_material()
+    export_material(scene)
     export_light(scene)
     pbrt_file_fullpath = export_pbrt_file(scene,node)
 
@@ -212,27 +212,39 @@ def export_light(scene):
     file.close()
 
 
-def export_material():
+def export_material(scene):
     pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
     pbrt_material_file_name = pbrt_file_path + "materials.pbrt"
 
     print( "Exporting pbrt file for material: " , pbrt_material_file_name )
     file = open( pbrt_material_file_name , 'w' )
 
-    for material in bpy.data.materials:
-        if material and material.sort_material and material.sort_material.sortnodetree:
-            ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-            output_node = nodes.find_node(material, common.sort_node_output_bl_name)
-            if output_node is None:
-                continue
+    # avoid exporting a material twice
+    exported_materials = []
 
-            if len(output_node.inputs) == 0:
-                return
+    all_nodes = exporter_common.renderable_objects(scene)
+    for ob in all_nodes:
+        if ob.type == 'MESH':
+            for material in ob.data.materials[:]:
+                # make sure it is a SORT material
+                if material and material.sort_material and material.sort_material.sortnodetree:
+                    # skip if the material is already exported
+                    if exported_materials.count( material.name ) != 0:
+                        continue
+                    exported_materials.append( material.name )
+                    
+                    ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+                    output_node = nodes.find_node(material, common.sort_node_output_bl_name)
+                    if output_node is None:
+                        continue
 
-            file.write( "MakeNamedMaterial \"" + material.name + "\"\n" )
+                    if len(output_node.inputs) == 0:
+                        return
 
-            nput_node = nodes.socket_node_input(ntree, output_node.inputs[0])
-            nput_node.export_pbrt(file)
+                    file.write( "MakeNamedMaterial \"" + material.name + "\"\n" )
+
+                    nput_node = nodes.socket_node_input(ntree, output_node.inputs[0])
+                    nput_node.export_pbrt(file)
 
     file.close()
 
