@@ -16,16 +16,18 @@
  */
 
 // include the header file
-#include "fresnelblend.h"
+#include "ashikhmanshirley.h"
 #include "bsdf.h"
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 
-FresnelBlend::FresnelBlend( const Spectrum& diffuse , const Spectrum& specular , const MicroFacetDistribution* d ) : D(diffuse) , S(specular) , distribution(d){
+AshikhmanShirley::AshikhmanShirley( const Spectrum& diffuse , const Spectrum& specular , const float roughnessU , const float roughnessV ) 
+    : D(diffuse) , S(specular) , distribution(roughnessU,roughnessV)
+{
 	m_type = (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION);
 }
 
-Spectrum FresnelBlend::f( const Vector& wo , const Vector& wi ) const
+Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
 {
     if( !SameHemiSphere(wo, wi) ) return 0.0f;
     
@@ -36,28 +38,28 @@ Spectrum FresnelBlend::f( const Vector& wo , const Vector& wi ) const
     // Diffuse  : f_diffuse( wo , wi ) = 28.0f / ( 23.0f * PI ) * ( 1.0 - R ) * ( 1.0 - ( 1.0 - 0.5 * CosTheta(wo) ) ^ 5 ) * ( 1.0 - ( 1.0 - 0.5f * CosTheta(wi) ) ^ 5
     // Specular : f_specular( wo , wi ) = D(h) * SchlickFresnel(S,Dot(wi,h)) / ( 4.0f * AbsDot( wi , h ) * max( AbsDot(wi,n) , AbsDot(wo,n) )
     const Spectrum diffuse = 0.3875f * D * ( Spectrum( 1.0f ) - S )
-                             * ( 1.0f - pow5( 1.0f - 0.5f * ( 1.0f - cos_theta_o ) ) )
-                             * ( 1.0f - pow5( 1.0f - 0.5f * ( 1.0f - cos_theta_i ) ) );
+                             * ( 1.0f - pow5( 1.0f - 0.5f * cos_theta_o ) )
+                             * ( 1.0f - pow5( 1.0f - 0.5f * cos_theta_i ) );
     
     Vector h = wo + wi;
     if( h.IsZero() ) return 0.0f;
     h = Normalize(h);
     
     const float IoH = AbsDot( wi , h );
-    const Spectrum specular = ( distribution->D(h) * SchlickFresnel(S, IoH) ) / ( 4.0f * IoH * max( cos_theta_i , cos_theta_o ) ) ;
+    const Spectrum specular = ( distribution.D(h) * SchlickFresnel(S, IoH) ) / ( 4.0f * IoH * max( cos_theta_i , cos_theta_o ) ) ;
 #undef pow5
     
     return diffuse + specular;
 }
 
-Spectrum FresnelBlend::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
+Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
     if( bs.u < 0.5f ){
         // Cosine-weighted sample
         wi = CosSampleHemisphere( 2.0f * bs.u , bs.v );
         if( PointingUp( wo ) ) wi.z = -wi.z;
     }else{
         BsdfSample sample(true);
-        Vector wh = distribution->sample_f(sample,wo);
+        Vector wh = distribution.sample_f(sample,wo);
         wi = 2 * Dot( wo , wh ) * wh - wo;
         if( !SameHemiSphere(wo, wi) ) return 0.0f;
     }
@@ -66,10 +68,10 @@ Spectrum FresnelBlend::sample_f( const Vector& wo , Vector& wi , const BsdfSampl
     return f( wo , wi );
 }
 
-float FresnelBlend::Pdf( const Vector& wo , const Vector& wi ) const{
+float AshikhmanShirley::Pdf( const Vector& wo , const Vector& wi ) const{
     if( !SameHemiSphere(wo, wi) ) return 0.0f;
     
     const Vector wh = Normalize( wi + wo );
-    float pdf_wh = distribution->D( wh ) * AbsCosTheta( wh );
+    float pdf_wh = distribution.Pdf(wh);
     return 0.5f * ( AbsCosTheta(wi) * INV_PI + pdf_wh / ( 4.0f * Dot( wo , wh ) ) );
 }
