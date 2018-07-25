@@ -20,6 +20,7 @@
 #include "bsdf/merl.h"
 #include "bsdf/orennayar.h"
 #include "bsdf/microfacet.h"
+#include "bsdf/ashikhmanshirley.h"
 #include "managers/memmanager.h"
 #include "bsdf/bsdf.h"
 
@@ -27,6 +28,7 @@ IMPLEMENT_CREATOR( LambertNode );
 IMPLEMENT_CREATOR( OrenNayarNode );
 IMPLEMENT_CREATOR( MicrofacetReflectionNode );
 IMPLEMENT_CREATOR( MicrofacetRefractionNode );
+IMPLEMENT_CREATOR( AshikhmanShirleyNode );
 
 // check validation
 bool BxdfNode::CheckValidation()
@@ -81,8 +83,8 @@ MicrofacetReflectionNode::MicrofacetReflectionNode()
 
 void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	float ru = clamp( roughnessU.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
-    float rv = clamp( roughnessV.GetPropertyValue(bsdf).x , 0.001f , 1.0f );
+	float ru = saturate( roughnessU.GetPropertyValue(bsdf).x );
+    float rv = saturate( roughnessV.GetPropertyValue(bsdf).x );
 	MicroFacetDistribution* dist = 0;
 	if( mf_dist.str == "Blinn" )
 		dist = SORT_MALLOC(Blinn)( ru , rv );
@@ -102,25 +104,47 @@ MicrofacetRefractionNode::MicrofacetRefractionNode()
 {
 	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
 	m_props.insert( make_pair( "MicroFacetDistribution" , &mf_dist ) );
-	m_props.insert( make_pair( "Roughness" , &roughness ) );
+    m_props.insert( make_pair( "RoughnessU" , &roughnessU ) );
+    m_props.insert( make_pair( "RoughnessV" , &roughnessV ) );
 	m_props.insert( make_pair( "in_ior" , &in_ior ) );
 	m_props.insert( make_pair( "ext_ior" , &ext_ior ) );
 }
 
 void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	float rn = clamp( roughness.GetPropertyValue(bsdf).x , 0.05f , 1.0f );
+	float ru = saturate( roughnessU.GetPropertyValue(bsdf).x );
+    float rv = saturate( roughnessV.GetPropertyValue(bsdf).x );
 	MicroFacetDistribution* dist = 0;
 	if( mf_dist.str == "Blinn" )
-		dist = SORT_MALLOC(Blinn)( rn , rn );
+		dist = SORT_MALLOC(Blinn)( ru , rv );
 	else if( mf_dist.str == "Beckmann" )
-		dist = SORT_MALLOC(Beckmann)( rn , rn );
+		dist = SORT_MALLOC(Beckmann)(ru, rv);
 	else
-		dist = SORT_MALLOC(GGX)( rn , rn );	// GGX is default
+		dist = SORT_MALLOC(GGX)(ru, rv);	// GGX is default
 
 	float in_eta = in_ior.GetPropertyValue(bsdf).x;     // index of refraction inside the material
 	float ext_eta = ext_ior.GetPropertyValue(bsdf).x;   // index of refraction outside the material
 	MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , dist , ext_eta , in_eta );
 	mf->m_weight = weight;
 	bsdf->AddBxdf( mf );
+}
+
+AshikhmanShirleyNode::AshikhmanShirleyNode()
+{
+    m_props.insert(make_pair("Diffuse", &diffuse));
+    m_props.insert(make_pair("Specular", &specular));
+    m_props.insert(make_pair("RoughnessU", &roughnessU));
+    m_props.insert(make_pair("RoughnessV", &roughnessV));
+}
+
+void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
+{
+    const float ru = saturate(roughnessU.GetPropertyValue(bsdf).x);
+    const float rv = saturate(roughnessV.GetPropertyValue(bsdf).x);
+    const auto specDiffuse = diffuse.GetPropertyValue(bsdf).ToSpectrum();
+    const auto specSpecular = specular.GetPropertyValue(bsdf).ToSpectrum();
+
+    AshikhmanShirley* mf = SORT_MALLOC(AshikhmanShirley)(specDiffuse, specSpecular, ru, rv);
+    mf->m_weight = weight;
+    bsdf->AddBxdf(mf);
 }

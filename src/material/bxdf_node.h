@@ -37,7 +37,7 @@ protected:
 class LambertNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( LambertNode , MaterialNode , "SORTNodeLambert" );
+	DEFINE_CREATOR( LambertNode , MaterialNode , "SORTNode_BXDF_Lambert" );
 
 	// constructor
 	LambertNode();
@@ -53,7 +53,7 @@ private:
 class OrenNayarNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( OrenNayarNode , MaterialNode , "SORTNodeOrenNayar" );
+	DEFINE_CREATOR( OrenNayarNode , MaterialNode , "SORTNode_BXDF_OrenNayar" );
 
 	// constructor
 	OrenNayarNode();
@@ -70,7 +70,7 @@ private:
 class MicrofacetReflectionNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( MicrofacetReflectionNode , MaterialNode , "SORTNodeMicrofacetReflection" );
+	DEFINE_CREATOR( MicrofacetReflectionNode , MaterialNode , "SORTNode_BXDF_MicrofacetReflection" );
 
 	// constructor
 	MicrofacetReflectionNode();
@@ -90,7 +90,7 @@ private:
 class MicrofacetRefractionNode : public BxdfNode
 {
 public:
-	DEFINE_CREATOR( MicrofacetRefractionNode , MaterialNode , "SORTNodeMicrofacetRefraction" );
+	DEFINE_CREATOR( MicrofacetRefractionNode , MaterialNode , "SORTNode_BXDF_MicrofacetRefraction" );
 
 	// constructor
 	MicrofacetRefractionNode();
@@ -99,8 +99,29 @@ public:
 
 private:
 	MaterialNodeProperty	baseColor;
-    MaterialNodeProperty	roughness;
+    MaterialNodeProperty	roughnessU;
+    MaterialNodeProperty	roughnessV;
 	MaterialNodeProperty	in_ior;
 	MaterialNodeProperty	ext_ior;
 	MaterialNodePropertyString	mf_dist;
 };
+
+
+// AshikhmanShirley node
+class AshikhmanShirleyNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR(AshikhmanShirleyNode, MaterialNode, "SORTNode_BXDF_AshikhmanShirley");
+
+    // constructor
+    AshikhmanShirleyNode();
+    // update bsdf
+    void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
+
+private:
+    MaterialNodeProperty	diffuse;
+    MaterialNodeProperty	specular;
+    MaterialNodeProperty	roughnessU;
+    MaterialNodeProperty	roughnessV;
+};
+

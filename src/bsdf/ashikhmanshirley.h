@@ -20,21 +20,22 @@
 #include "bxdf.h"
 #include "microfacet.h"
 
-//! @brief FresnelBlend brdf.
+//! @brief AshikhmanShirley brdf.
 /**
  * An Anisotropic Phong BRDF Model
  * http://www.irisa.fr/prive/kadi/Lopez/ashikhmin00anisotropic.pdf
  * This BRDF model has two layer, specular and diffuse.
  * Unlike the modern PBR model ( microfacet + diffuse ), this model also counts fresnel effect when blending the two layer
  */
-class FresnelBlend : public Bxdf
+class AshikhmanShirley : public Bxdf
 {
 public:
-	//! Contstructor
+	//! Constructor
     //! @param diffuse          Direction-hemisphere reflection for diffuse.
     //! @param specular         Direction-hemisphere reflection for specular.
-    //! @param d                Normal distribution function.
-	FresnelBlend( const Spectrum& diffuse , const Spectrum& specular , const MicroFacetDistribution* d );
+    //! @param roughnessU       Roughness along one axis.
+    //! @param roughnessV       Roughness along the other axis
+    AshikhmanShirley(const Spectrum& diffuse, const Spectrum& specular, const float roughnessU, const float roughnessV);
 	
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -57,6 +58,6 @@ public:
     float Pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
-	const Spectrum D , S;                           /**< Direction-Hemisphere reflectance and transmittance. */
-    const MicroFacetDistribution* distribution;     /**< Normal Distribution Function. >**/
+	const Spectrum  D , S;            /**< Direction-Hemisphere reflectance and transmittance. */
+    const Blinn     distribution;     /**< Normal Distribution Function. >**/
 };

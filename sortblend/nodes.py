@@ -115,25 +115,6 @@ class SORTNodeBaseColorSocket(bpy.types.NodeSocketColor, SORTSocket):
     def export_pbrt(self,file):
         file.write( "  \"rgb basecolor\" [%f %f %f]\n"%(self.default_value[:]) )
 
-class SORTNodeRoughnessSocket(bpy.types.NodeSocketFloat, SORTSocket):
-    bl_idname = 'SORTNodeRoughnessSocket'
-    bl_label = 'SORT Roughness Socket'
-
-    default_value = bpy.props.FloatProperty( name='Roughness' , default=0.0 , min=0.0, max=1.0 )
-
-    # green node for color
-    def draw_color(self, context, node):
-        return (0.1, 0.1, 0.3, 1.0)
-
-    def output_default_value_to_str(self):
-        return '%f'%(self.default_value)
-
-    def output_type_str(self):
-        return 'float'
-
-    def export_pbrt(self,file):
-        file.write( "  \"float roughness\" [%f]\n"%(self.default_value) )
-
 class SORTNodeFloatSocket(bpy.types.NodeSocketFloat, SORTSocket):
     bl_idname = 'SORTNodeFloatSocket'
     bl_label = 'SORT Float Socket'
@@ -188,9 +169,9 @@ class SORTNodeOutput(SORTShadingNode):
         input = self.inputs.new('SORTNodeSocketBxdf', 'Surface')
 
 # microfacte node
-class SORTNodeMicrofacetReflection(SORTShadingNode):
+class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
     bl_label = 'SORT_microfacet_reflection'
-    bl_idname = 'SORTNodeMicrofacetReflection'
+    bl_idname = 'SORTNode_BXDF_MicrofacetReflection'
 
     mfdist_item = [ ("Blinn", "Blinn", "", 1),
                     ("Beckmann" , "Beckmann" , "", 2),
@@ -204,7 +185,8 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
     k = bpy.props.FloatVectorProperty(name='Absorption', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessU')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessV')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
@@ -224,17 +206,12 @@ class SORTNodeMicrofacetReflection(SORTShadingNode):
         ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
 
     def export_pbrt(self, file):
-        file.write( "  \"string type\" \"Sort_MicrofacetReflection\"\n" )
-        file.write( "  \"string nd\" \"%s\"\n" %self.mfdist_prop )
-        file.write( "  \"rgb eta\" [%f %f %f]\n" %self.eta[:] )
-        file.write( "  \"rgb k\" [%f %f %f]\n" %self.k[:] )
-        for input in self.inputs:
-            input.export_pbrt(file)
-        file.write( "\n" )
+        # not supported
+        return
 
-class SORTNodeMicrofacetRefraction(SORTShadingNode):
+class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode):
     bl_label = 'SORT_microfacet_refraction'
-    bl_idname = 'SORTNodeMicrofacetRefraction'
+    bl_idname = 'SORTNode_BXDF_MicrofacetRefraction'
 
     mfdist_item = [ ("Blinn", "Blinn", "", 1),
                     ("Beckmann" , "Beckmann" , "", 2),
@@ -247,7 +224,8 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
     ext_ior = bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0)
 
     def init(self, context):
-        self.inputs.new('SORTNodeRoughnessSocket', 'Roughness')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessU')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessV')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
@@ -267,12 +245,25 @@ class SORTNodeMicrofacetRefraction(SORTShadingNode):
         ET.SubElement( xml_node , 'Property' , name='ext_ior' , type='color', value= '%f'%(self.ext_ior) )
 
     def export_pbrt(self, file):
-        file.write( "  \"string type\" \"Sort_MicrofacetRefraction\"\n" )
-        file.write( "  \"string nd\" \"%s\"\n" %self.mfdist_prop )
-        file.write( "  \"float int_ior\" [%f]\n" %self.int_ior )
-        file.write( "  \"float ext_ior\" [%f]\n" %self.ext_ior )
-        for input in self.inputs:
-            input.export_pbrt(file)
+        # not supported
+        return
+
+class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode):
+    bl_label = 'SORT_AshikhmanShirley_material'
+    bl_idname = 'SORTNode_BXDF_AshikhmanShirley'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeBaseColorSocket', 'Diffuse')
+        self.inputs.new('SORTNodeBaseColorSocket', 'Specular')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessU')
+        self.inputs.new('SORTNodeFloatSocket', 'RoughnessV')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def export_prop(self, xml_node):
+        return
+
+    def export_pbrt(self, file):
+        return
 
 # operator nodes
 class SORTNodeAdd(SORTShadingNode):
@@ -538,13 +529,11 @@ class SORTNodeGlass(SORTShadingNode):
         reflectance = self.inputs[0].default_value
         transmittance = self.inputs[1].default_value
         roughness = self.inputs[2].default_value
-        roughnessv = roughness * 2
         file.write( "  \"string type\" \"glass\"\n" )
         file.write( "  \"rgb Kr\" [%f %f %f]\n"%(reflectance[:]))
         file.write( "  \"rgb Kt\" [%f %f %f]\n"%(transmittance[:]))
         file.write( "  \"float uroughness\" [%s]\n" %roughness )
-        file.write( "  \"float vroughness\" [%s]\n" %roughnessv )
-        file.write( "  \"bool remaproughness\" \"true\" \n" )
+        file.write( "  \"float vroughness\" [%s]\n" %roughness )
         return
 
 class SORTNodePlastic(SORTShadingNode):
@@ -656,14 +645,15 @@ def register():
         SORTPatternNodeCategory("SORT_texture", "SORT Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("SORT_constant", "SORT Constant",items= [NodeItem("SORTNodeConstant")] ),
         SORTPatternNodeCategory("SORT_input", "SORT Input",items=[],),
-        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNodeMicrofacetReflection"),NodeItem("SORTNodeMicrofacetRefraction")]), # For debugging purpose, to be deprecated
+        SORTPatternNodeCategory("SORT_bxdf", "SORT Bxdfs",items = [NodeItem("SORTNode_BXDF_MicrofacetReflection"),NodeItem("SORTNode_BXDF_MicrofacetRefraction"),NodeItem("SORTNode_BXDF_AshikhmanShirley")]), # For debugging purpose, to be deprecated
     ]
     nodeitems_utils.register_node_categories("SORTSHADERNODES",node_categories)
 
     # register node types
     SORTPatternGraph.nodetypes[SORTNodeLayeredBXDF] = 'SORTNodeLayeredBXDF'
-    SORTPatternGraph.nodetypes[SORTNodeMicrofacetReflection] = 'SORTNodeMicrofacetReflection'
-    SORTPatternGraph.nodetypes[SORTNodeMicrofacetRefraction] = 'SORTNodeMicrofacetRefraction'
+    SORTPatternGraph.nodetypes[SORTNode_BXDF_MicrofacetReflection] = 'SORTNode_BXDF_MicrofacetReflection'
+    SORTPatternGraph.nodetypes[SORTNode_BXDF_MicrofacetRefraction] = 'SORTNode_BXDF_MicrofacetRefraction'
+    SORTPatternGraph.nodetypes[SORTNode_BXDF_AshikhmanShirley] = 'SORTNode_BXDF_AshikhmanShirley'
     SORTPatternGraph.nodetypes[SORTNodePrinciple] = 'SORTNodePrincipleBXDF'
     SORTPatternGraph.nodetypes[SORTNodeGlass] = 'SORTNodeGlassBXDF'
     SORTPatternGraph.nodetypes[SORTNodePlastic] = 'SORTNodePlasticBXDF'

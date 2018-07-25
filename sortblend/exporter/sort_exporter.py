@@ -398,6 +398,7 @@ def export_material(force_debug):
             # material node
             mat_node = ET.SubElement( root , 'Material', name=material.name )
 
+            print( 'Exporting material: ' + material.name )
             def draw_props(mat_node , xml_node):
                 mat_node.export_prop(xml_node)
 
