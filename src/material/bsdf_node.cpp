@@ -20,15 +20,50 @@
 #include "bsdf/merl.h"
 #include "bsdf/orennayar.h"
 #include "bsdf/microfacet.h"
+#include "bsdf/disney.h"
 #include "managers/memmanager.h"
 #include "bsdf/bsdf.h"
 
+IMPLEMENT_CREATOR( DisneyPrincipleNode );
 IMPLEMENT_CREATOR( LayeredMaterialNode );
 IMPLEMENT_CREATOR( PrincipleMaterialNode );
 IMPLEMENT_CREATOR( MatteMaterialNode );
 IMPLEMENT_CREATOR( PlasticMaterialNode );
 IMPLEMENT_CREATOR( GlassMaterialNode );
 IMPLEMENT_CREATOR( MeasuredMaterialNode );
+
+DisneyPrincipleNode::DisneyPrincipleNode()
+{
+    m_props.insert( make_pair( "BaseColor" , &basecolor ) );
+    m_props.insert( make_pair( "SubSurface" , &subsurface ) );
+    m_props.insert( make_pair( "Metallic" , &metallic ) );
+    m_props.insert( make_pair( "Specular" , &specular ) );
+    m_props.insert( make_pair( "SpecularTint" , &specularTint ) );
+    m_props.insert( make_pair( "Roughness" , &roughness ) );
+    m_props.insert( make_pair( "Anisotropic" , &anisotropic ) );
+    m_props.insert( make_pair( "Sheen" , &sheen ) );
+    m_props.insert( make_pair( "SheenTint" , &sheenTint ) );
+    m_props.insert( make_pair( "ClearCoaat" , &clearcoat ) );
+    m_props.insert( make_pair( "ClearCoaatGloss" , &clearcoatGloss ) );
+}
+
+void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+    const Spectrum  bc = basecolor.GetPropertyValue(bsdf).ToSpectrum();
+    const float     ss = subsurface.GetPropertyValue(bsdf).x;
+    const float     m = metallic.GetPropertyValue(bsdf).x;
+    const float     s = specular.GetPropertyValue(bsdf).x;
+    const float     st = specularTint.GetPropertyValue(bsdf).x;
+    const float     r = roughness.GetPropertyValue(bsdf).x;
+    const float     a = anisotropic.GetPropertyValue(bsdf).x;
+    const float     sh = sheen.GetPropertyValue(bsdf).x;
+    const float     sht = sheenTint.GetPropertyValue(bsdf).x;
+    const float     cc = clearcoat.GetPropertyValue(bsdf).x;
+    const float     ccg = clearcoatGloss.GetPropertyValue(bsdf).x;
+    
+    const DisneyBRDF* disney = SORT_MALLOC(DisneyBRDF)( bc , ss , m , s , st , r , a , sh , sht , cc , ccg , weight );
+    bsdf->AddBxdf(disney);
+}
 
 LayeredMaterialNode::LayeredMaterialNode(){
     for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i ){

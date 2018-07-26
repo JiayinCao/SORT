@@ -37,7 +37,7 @@ public:
     //! @param roughnessV       Roughness along the other axis
     //! @param weight           Weight of the BXDF
     AshikhmanShirley(const Spectrum& diffuse, const float specular, const float roughnessU, const float roughnessV, const Spectrum& weight)
-        :D(diffuse), S(specular), distribution(roughnessU, roughnessV), Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION)) {}
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION)) , D(diffuse), S(specular), distribution(roughnessU, roughnessV) {}
 	
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
