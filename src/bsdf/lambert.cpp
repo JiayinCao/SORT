@@ -25,9 +25,5 @@ Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const
 	if( SameHemiSphere( wo , wi ) == false )
 		return 0.0f;
     
-    // ignore reflection at the back face
-    if( wo.y <= 0.0f )
-        return 0.0f;
-
 	return R * INV_PI;
 }

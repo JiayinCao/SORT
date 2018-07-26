@@ -22,6 +22,32 @@
 #include "bsdf/merl.h"
 #include "bsdf/fourierbxdf.h"
 
+// Disney Principle BRDF node
+class DisneyPrincipleNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR( DisneyPrincipleNode , MaterialNode , "SORTNode_Material_DisneyBRDF" );
+    
+    // constructor
+    DisneyPrincipleNode();
+    
+    // update bsdf
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    
+private:
+    MaterialNodeProperty        basecolor;
+    MaterialNodeProperty        subsurface;
+    MaterialNodeProperty        metallic;
+    MaterialNodeProperty        specular;
+    MaterialNodeProperty        specularTint;
+    MaterialNodeProperty        roughness;
+    MaterialNodeProperty        anisotropic;
+    MaterialNodeProperty        sheen;
+    MaterialNodeProperty        sheenTint;
+    MaterialNodeProperty        clearcoat;
+    MaterialNodeProperty        clearcoatGloss;
+};
+
 // Layered Material node
 class LayeredMaterialNode : public BxdfNode
 {
