@@ -20,12 +20,12 @@
 #include "bsdf.h"
 
 // constructor
-OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spectrum& weight) : R(reflectance) , Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) )
+OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spectrum& weight) : Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) ) , R(reflectance) 
 {
 	// rough ness ranges from 0 to infinity
 	roughness = max( 0.0f , roughness );
 
-	float roughness2 = roughness * roughness;
+	const float roughness2 = roughness * roughness;
 	A = 1.0f - (roughness2 / ( 2.0f * (roughness2+0.33f)));
 	B = 0.45f * roughness2 / ( roughness2 + 0.09f );
 }
@@ -37,8 +37,6 @@ OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spect
 Spectrum OrenNayar::f( const Vector& wo , const Vector& wi ) const
 {
 	if( SameHemiSphere( wo , wi ) == false )
-		return 0.0f;
-	if( wo.y < 0.0f )
 		return 0.0f;
 
 	float sintheta_i = SinTheta(wi);

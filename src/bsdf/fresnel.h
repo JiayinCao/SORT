@@ -115,3 +115,8 @@ private:
 inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
     return F0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - F0);
 }
+
+inline float SchlickWeight( float cos ){
+    cos = saturate( 1.0f - cos );
+    return pow( cos , 5.0f );
+}

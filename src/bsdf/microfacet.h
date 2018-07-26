@@ -138,7 +138,7 @@ public:
     //! @param d        Normal distribution term
     //! @param w        Weight of the bxdf
     //! @param t        Type of the bxdf
-    Microfacet(const MicroFacetDistribution* d, const Spectrum& w, const BXDF_TYPE t) : distribution(d), Bxdf(w, t) {}
+    Microfacet(const MicroFacetDistribution* d, const Spectrum& w, const BXDF_TYPE t) : Bxdf(w, t) , distribution(d) {}
 
 protected:
 	const MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
@@ -168,7 +168,7 @@ public:
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param w                Weight of this BRDF
-    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight) : R(reflectance), fresnel(f), Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION)){}
+    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight) : Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION)) , R(reflectance), fresnel(f) {}
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -209,7 +209,7 @@ public:
     //! @param etai             Index of refraction of the side that normal points
     //! @param etat             Index of refraction of the other side that normal points
     MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d, float etai, float etat, const Spectrum& weight) 
-        : T(transmittance), etaT(etat) , etaI(etai) , fresnel( etai , etat ) , Microfacet(d, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_TRANSMISSION))
+        : Microfacet(d, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_TRANSMISSION)) , T(transmittance), etaI(etai) , etaT(etat) , fresnel( etai , etat )
     {
         // make sure IORs are not the same inside and outside
         if (etaT == etaI)
@@ -237,8 +237,8 @@ public:
     float Pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:
+    const Spectrum            T;          /**< Direction-hemisphere transmittance. */
 	float	                  etaI;       /**< Index of refraction of the side that normal points. */
 	float	                  etaT;       /**< Index of refraction of the other side that normal points. */
-    const Spectrum            T;          /**< Direction-hemisphere transmittance. */
     const FresnelDielectric   fresnel;    /**< Dielectric fresnel in microfacet tranmittance model. */
 };
