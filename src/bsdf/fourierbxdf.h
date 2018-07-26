@@ -29,8 +29,8 @@
 class FourierBxdf : public Bxdf
 {
 public:
-	//! Contstructor
-	FourierBxdf();
+	//! Constructor
+    FourierBxdf( const Spectrum& weight = Spectrum(1.0f) ) : Bxdf(weight, BXDF_ALL) {}
 	
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.

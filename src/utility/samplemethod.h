@@ -80,7 +80,7 @@ inline Vector CosSampleHemisphere( float u , float v )
 // cosine hemisphere pdf
 inline float CosHemispherePdf( const Vector& v )
 {
-	return CosTheta(v) * INV_PI;
+	return AbsCosTheta(v) * INV_PI;
 }
 
 // sampling a cone uniformly

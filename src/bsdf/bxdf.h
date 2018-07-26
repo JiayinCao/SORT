@@ -33,6 +33,11 @@ class BsdfSample;
 class	Bxdf
 {
 public:
+    //! Constructor
+    //! @param w    Weight of the bxdf
+    //! @param type Type of the bxdf
+    Bxdf(const Spectrum& w, BXDF_TYPE type) : m_weight(w), m_type(type) {}
+
     //! Virtual destructor.
     virtual ~Bxdf(){}
     

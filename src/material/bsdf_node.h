@@ -26,7 +26,7 @@
 class LayeredMaterialNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR( LayeredMaterialNode , MaterialNode, "SORTNodeLayeredBxdf" );
+    DEFINE_CREATOR( LayeredMaterialNode , MaterialNode, "SORTNode_Material_Layered" );
     
     // constructor
     LayeredMaterialNode();
@@ -44,7 +44,7 @@ private:
 class PrincipleMaterialNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR( PrincipleMaterialNode , MaterialNode, "SORTNodePrincipleBXDF" );
+    DEFINE_CREATOR( PrincipleMaterialNode , MaterialNode, "SORTNode_Material_Principle" );
     
     // constructor
     PrincipleMaterialNode();
@@ -63,7 +63,7 @@ private:
 class MatteMaterialNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR( MatteMaterialNode , MaterialNode, "SORTNodeMatteBXDF" );
+    DEFINE_CREATOR( MatteMaterialNode , MaterialNode, "SORTNode_Material_Matte" );
     
     // constructor
     MatteMaterialNode();
@@ -79,7 +79,7 @@ private:
 class PlasticMaterialNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR( PlasticMaterialNode , MaterialNode, "SORTNodePlasticBXDF" );
+    DEFINE_CREATOR( PlasticMaterialNode , MaterialNode, "SORTNode_Material_Plastic" );
     
     // constructor
     PlasticMaterialNode();
@@ -96,7 +96,7 @@ private:
 class GlassMaterialNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR( GlassMaterialNode , MaterialNode, "SORTNodeGlassBXDF" );
+    DEFINE_CREATOR( GlassMaterialNode , MaterialNode, "SORTNode_Material_Glass" );
     
     // constructor
     GlassMaterialNode();
@@ -113,7 +113,7 @@ private:
 class MeasuredMaterialNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR( MeasuredMaterialNode , MaterialNode , "SORTNodeMeasuredBxdf" );
+    DEFINE_CREATOR( MeasuredMaterialNode , MaterialNode , "SORTNode_Material_Measured" );
     
     // constructor
     MeasuredMaterialNode();

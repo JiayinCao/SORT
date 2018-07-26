@@ -56,8 +56,7 @@ LambertNode::LambertNode()
 
 void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() );
-	lambert->m_weight = weight;
+    const Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , weight );
 	bsdf->AddBxdf( lambert );
 }
 
@@ -69,8 +68,7 @@ OrenNayarNode::OrenNayarNode()
 
 void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-	OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , roughness.GetPropertyValue(bsdf).x );
-	orennayar->m_weight = weight;
+	const OrenNayar* orennayar = SORT_MALLOC(OrenNayar)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , roughness.GetPropertyValue(bsdf).x , weight );
 	bsdf->AddBxdf( orennayar );
 }
 
@@ -98,8 +96,7 @@ void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 	Fresnel* frenel = SORT_MALLOC( FresnelConductor )( eta.GetPropertyValue(bsdf).ToSpectrum() , k.GetPropertyValue(bsdf).ToSpectrum() );
 
-	MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist );
-	mf->m_weight = weight;
+	const MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist , weight );
 	bsdf->AddBxdf( mf );
 }
 
@@ -127,8 +124,7 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 	float in_eta = in_ior.GetPropertyValue(bsdf).x;     // index of refraction inside the material
 	float ext_eta = ext_ior.GetPropertyValue(bsdf).x;   // index of refraction outside the material
-	MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , dist , ext_eta , in_eta );
-	mf->m_weight = weight;
+	const MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , dist , ext_eta , in_eta , weight );
 	bsdf->AddBxdf( mf );
 }
 
@@ -145,10 +141,9 @@ void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
     const float ru = saturate(roughnessU.GetPropertyValue(bsdf).x);
     const float rv = saturate(roughnessV.GetPropertyValue(bsdf).x);
     const auto specDiffuse = diffuse.GetPropertyValue(bsdf).ToSpectrum();
-    const auto specSpecular = specular.GetPropertyValue(bsdf).ToSpectrum();
+    const auto specSpecular = specular.GetPropertyValue(bsdf).x;
 
-    AshikhmanShirley* mf = SORT_MALLOC(AshikhmanShirley)(specDiffuse, specSpecular, ru, rv);
-    mf->m_weight = weight;
+    const AshikhmanShirley* mf = SORT_MALLOC(AshikhmanShirley)(specDiffuse, specSpecular, ru, rv , weight );
     bsdf->AddBxdf(mf);
 }
 
