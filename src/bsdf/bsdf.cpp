@@ -42,7 +42,7 @@ unsigned Bsdf::NumComponents( BXDF_TYPE type ) const
 }
 
 // add a new bxdf
-void Bsdf::AddBxdf( Bxdf* bxdf )
+void Bsdf::AddBxdf( const Bxdf* bxdf )
 {
 	if( m_bxdfCount == MAX_BXDF_COUNT || bxdf == 0 || bxdf->m_weight.IsBlack() )
 		return;
@@ -93,7 +93,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 		return 0.0f;
 	}
 	int bsdf_id = min( (int)(bs.t*(float)com_num) , (int)(com_num-1) );
-	Bxdf* bxdf = 0;
+	const Bxdf* bxdf = nullptr;
 	int count = bsdf_id;
 	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
 		if( m_bxdf[i]->MatchFlag(type) ){

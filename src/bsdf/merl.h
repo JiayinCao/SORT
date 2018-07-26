@@ -34,7 +34,8 @@ class Merl : public Bxdf
 {
 public:
 	//! Default constructor setting brdf type.
-    Merl(){m_type = BXDF_GLOSSY;}
+    Merl(const Spectrum& weight = Spectrum(1.0f)) : Bxdf(weight, BXDF_ALL) {}
+
 	//! Destructor deletes all allocated memory
     ~Merl() override;
 

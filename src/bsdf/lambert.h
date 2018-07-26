@@ -28,11 +28,11 @@
 class Lambert : public Bxdf
 {
 public:
-	//! Default constructor setting default type value
-    Lambert(){ m_type=BXDF_DIFFUSE; }
 	//! Constructor taking spectrum information.
-    //! @param s Direction-Hemisphere reflection.
-    Lambert( const Spectrum& s ):R(s){m_type=BXDF_DIFFUSE;}
+    //! @param s            Direction-Hemisphere reflection.
+    //! @param weight       Weight of this BRDF
+    //! @param t            Type of this BRDF
+    Lambert( const Spectrum& s , const Spectrum& weight ):R(s),Bxdf(weight, BXDF_DIFFUSE){}
 
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -40,10 +40,6 @@ public:
     //! @return     The evaluted BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const;
 
-	//! Reset the directional-hemisphere reflection.
-    //! @param color    Direction-Hemisphere reflection.
-	void SetColor( const Spectrum& color ) { R = color; }
-
 private:
-	Spectrum R;         /**< Direction-Hemisphere reflection or total reflection. */
+	const Spectrum R;         /**< Direction-Hemisphere reflection or total reflection. */
 };

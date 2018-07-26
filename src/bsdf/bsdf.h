@@ -44,7 +44,7 @@ public:
 
 	//! @brief Add a new bxdf in the BSDF, there will be at most 8 bxdf in it.
 	//! @param The bxdf to be added.
-	void AddBxdf( Bxdf* bxdf );
+	void AddBxdf( const Bxdf* bxdf );
 
 	//! @brief Evalute the value of BSDF based on the incoming and outgoing directions.
     //! @param wo   Exitance direction in shading coordinate.
@@ -75,8 +75,8 @@ public:
 	const Intersection* GetIntersection() const { return &intersect; }
 
 private:
-    Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
-	unsigned m_bxdfCount = 0;               /**< Number of Bxdf in the BSDF. */
+    const Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
+	unsigned m_bxdfCount = 0;                   /**< Number of Bxdf in the BSDF. */
 
     Vector nn;  /**< Normal at the point to be evaluted. */
     Vector sn;  /**< Bi-tangent at the point to be evaluated. */

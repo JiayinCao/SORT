@@ -260,16 +260,6 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 	return -eta * v  + ( eta * coso - sqrt(t)) * n;
 }
 
-// constructor
-MicroFacetReflection::MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f , const MicroFacetDistribution* d )
-{
-	R = reflectance;
-	distribution = d;
-	fresnel = f;
-	
-	m_type = (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION);
-}
-
 // evaluate bxdf
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 {
@@ -315,18 +305,6 @@ float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
 	const Vector h = Normalize( wo + wi );
 	const float EoH = AbsDot( wo , h );
 	return distribution->Pdf(h) / (4.0f * EoH);
-}
-
-// constructor
-MicroFacetRefraction::MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d , float etai , float etat ):  etaI(etai) , etaT(etat) , T( transmittance ) , fresnel( etai , etat )
-{
-    distribution = d;
-    
-	// make sure IORs are not the same inside and outside
-	if(etaT == etaI)
-		etaT = etaI + 0.01f;
-	
-	m_type = (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION);
 }
 
 // evaluate bxdf

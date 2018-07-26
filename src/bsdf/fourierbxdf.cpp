@@ -22,12 +22,6 @@
 #include "utility/samplemethod.h"
 #include <fstream>
 
-// constructor
-FourierBxdf::FourierBxdf()
-{
-	m_type = BXDF_GLOSSY;
-}
-
 void FourierBxdf::LoadData( const string& filename )
 {
     ifstream file( filename.c_str(), ios::binary);

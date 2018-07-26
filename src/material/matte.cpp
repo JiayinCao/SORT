@@ -27,8 +27,7 @@ IMPLEMENT_CREATOR( Matte );
 Bsdf* Matte::GetBsdf( const Intersection* intersect ) const
 {
 	Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-	Lambert* lambert = SORT_MALLOC(Lambert)( m_color );
-    lambert->m_weight = 1.0f;
+	const Lambert* lambert = SORT_MALLOC(Lambert)( m_color , 1.0f );
 	bsdf->AddBxdf( lambert );
 	return bsdf;
 }

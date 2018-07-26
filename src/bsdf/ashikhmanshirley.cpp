@@ -21,12 +21,6 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 
-AshikhmanShirley::AshikhmanShirley( const Spectrum& diffuse , const Spectrum& specular , const float roughnessU , const float roughnessV ) 
-    : D(diffuse) , S(specular) , distribution(roughnessU,roughnessV)
-{
-	m_type = (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION);
-}
-
 Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
 {
     if( !SameHemiSphere(wo, wi) ) return 0.0f;
@@ -73,5 +67,5 @@ float AshikhmanShirley::Pdf( const Vector& wo , const Vector& wi ) const{
     
     const Vector wh = Normalize( wi + wo );
     float pdf_wh = distribution.Pdf(wh);
-    return 0.5f * ( AbsCosTheta(wi) * INV_PI + pdf_wh / ( 4.0f * Dot( wo , wh ) ) );
+    return 0.5f * ( CosHemispherePdf(wi) + pdf_wh / ( 4.0f * Dot( wo , wh ) ) );
 }
