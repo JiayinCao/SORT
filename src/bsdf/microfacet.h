@@ -133,9 +133,15 @@ private:
 //! @brief Interface for Microfacet bxdf.
 class Microfacet : public Bxdf
 {
+public:
+    //! @brief Constructor
+    //! @param d        Normal distribution term
+    //! @param w        Weight of the bxdf
+    //! @param t        Type of the bxdf
+    Microfacet(const MicroFacetDistribution* d, const Spectrum& w, const BXDF_TYPE t) : distribution(d), Bxdf(w, t) {}
+
 protected:
 	const MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
-	const Fresnel* fresnel = nullptr;                     /**< Fresnel term. */
 
 	//! @brief Get reflected direction based on incident direction and normal.
     //! @param v    Incoming direction.
@@ -161,8 +167,8 @@ public:
     //! @param reflectance      Direction hemisphere reflection.
     //! @param f                Fresnel term.
     //! @param d                NDF term.
-    //! @param v                Visibility term.
-	MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f , const MicroFacetDistribution* d );
+    //! @param w                Weight of this BRDF
+    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight) : R(reflectance), fresnel(f), Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION)){}
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -185,7 +191,8 @@ public:
 	float Pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
-    Spectrum R;                   /**< Direction-hemisphere reflection. */
+    const Spectrum R;                   /**< Direction-hemisphere reflection. */
+    const Fresnel* fresnel = nullptr;   /**< Fresnel term. */
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -199,9 +206,15 @@ public:
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param v                Visibility term.
-    //! @param etaI             Index of refraction of the side that normal points
-    //! @param etaT             Index of refraction of the other side that normal points
-	MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d , float etaI , float etaT );
+    //! @param etai             Index of refraction of the side that normal points
+    //! @param etat             Index of refraction of the other side that normal points
+    MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d, float etai, float etat, const Spectrum& weight) 
+        : T(transmittance), etaT(etat) , etaI(etai) , fresnel( etai , etat ) , Microfacet(d, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_TRANSMISSION))
+    {
+        // make sure IORs are not the same inside and outside
+        if (etaT == etaI)
+            etaT = etaI + 0.01f;
+    }
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -224,8 +237,8 @@ public:
     float Pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:
-	float	            etaI;               /**< Index of refraction of the side that normal points. */
-	float	            etaT;               /**< Index of refraction of the other side that normal points. */
-    Spectrum            T;                  /**< Direction-hemisphere transmittance. */
-    FresnelDielectric   fresnel;            /**< Dielectric fresnel in microfacet tranmittance model. */
+	float	                  etaI;       /**< Index of refraction of the side that normal points. */
+	float	                  etaT;       /**< Index of refraction of the other side that normal points. */
+    const Spectrum            T;          /**< Direction-hemisphere transmittance. */
+    const FresnelDielectric   fresnel;    /**< Dielectric fresnel in microfacet tranmittance model. */
 };

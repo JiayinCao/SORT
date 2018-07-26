@@ -22,7 +22,7 @@
 
 //! @brief OrenNayar brdf.
 /**
- * Like lambert brdf, OrenNayar delievers similar quality with subtle differences.
+ * Like lambert brdf, OrenNayar presents similar quality with subtle differences.
  * It has slightly brighter color at the contour.
  */
 class OrenNayar : public Bxdf
@@ -31,7 +31,8 @@ public:
 	//! Contstructor
     //! @param reflectance  Direction-hemisphere reflection.
     //! @param roughness    It controls the roughness of the surface.
-	OrenNayar( const Spectrum& reflectance , float roughness);
+    //! @param weight       Weight of the BRDF
+	OrenNayar( const Spectrum& reflectance , float roughness , const Spectrum& weight );
 	
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -40,7 +41,7 @@ public:
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
 	
 private:
-	Spectrum R;         /**< Direction-Hemisphere reflection or total reflection. */
+	const Spectrum R;   /**< Direction-Hemisphere reflection or total reflection. */
 	float	A;          /**< Internal data for OrenNayar computation. */
 	float	B;          /**< Internal data for OrenNayar computation. */
 };

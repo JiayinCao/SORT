@@ -35,7 +35,9 @@ public:
     //! @param specular         Direction-hemisphere reflection for specular.
     //! @param roughnessU       Roughness along one axis.
     //! @param roughnessV       Roughness along the other axis
-    AshikhmanShirley(const Spectrum& diffuse, const Spectrum& specular, const float roughnessU, const float roughnessV);
+    //! @param weight           Weight of the BXDF
+    AshikhmanShirley(const Spectrum& diffuse, const float specular, const float roughnessU, const float roughnessV, const Spectrum& weight)
+        :D(diffuse), S(specular), distribution(roughnessU, roughnessV), Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION)) {}
 	
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.

@@ -112,6 +112,6 @@ private:
 };
 
 // Schlick Fresnel Approximation
-inline Spectrum SchlickFresnel( const Spectrum& R0 , float cos ){
-    return R0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - R0 );
+inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
+    return F0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - F0);
 }

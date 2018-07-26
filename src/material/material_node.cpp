@@ -195,8 +195,7 @@ void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( !m_node_valid )
 	{
 		Spectrum default_spectrum( 0.3f , 0.0f , 0.0f );
-		Lambert* lambert = SORT_MALLOC(Lambert)( default_spectrum );
-		lambert->m_weight = weight;
+		const Lambert* lambert = SORT_MALLOC(Lambert)( default_spectrum , weight );
 		bsdf->AddBxdf( lambert );
 		return;
 	}
