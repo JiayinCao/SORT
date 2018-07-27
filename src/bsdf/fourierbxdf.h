@@ -59,7 +59,7 @@ public:
     //! this function, otherwise it is not unbiased.
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
+    //! @return     The probability of choosing the out-going direction based on the incoming direction.
     float Pdf( const Vector& wo , const Vector& wi ) const override;
     
     //! Load brdf data from Fourier Bxdf file.
