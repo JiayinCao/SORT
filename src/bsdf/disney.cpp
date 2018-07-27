@@ -113,7 +113,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     // Clear coat term (ior = 1.5 -> F0 = 0.04)
     const ClearcoatGGX cggx(lerp(0.1f, 0.001f, clearcoatGloss));
     const FresnelSchlick<float> fresnel1(0.04f);
-    const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f ) , &fresnel1, &cggx, white);
+    const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f * clearcoat ) , &fresnel1, &cggx, white);
     
     // Final specular term
     const Spectrum spec = mf.f(wo, wi) + mf_clearcoat.f(wo, wi);

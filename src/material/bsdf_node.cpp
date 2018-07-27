@@ -43,8 +43,8 @@ DisneyPrincipleNode::DisneyPrincipleNode()
     m_props.insert( make_pair( "Anisotropic" , &anisotropic ) );
     m_props.insert( make_pair( "Sheen" , &sheen ) );
     m_props.insert( make_pair( "SheenTint" , &sheenTint ) );
-    m_props.insert( make_pair( "ClearCoaat" , &clearcoat ) );
-    m_props.insert( make_pair( "ClearCoaatGloss" , &clearcoatGloss ) );
+    m_props.insert( make_pair( "Clearcoat" , &clearcoat ) );
+    m_props.insert( make_pair( "ClearcoatGloss" , &clearcoatGloss ) );
 }
 
 void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )

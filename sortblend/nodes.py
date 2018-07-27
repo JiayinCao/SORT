@@ -581,8 +581,8 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs.new('SORTNodeFloatSocket', 'Anisotropic')
         self.inputs.new('SORTNodeFloatSocket', 'Sheen')
         self.inputs.new('SORTNodeFloatSocket', 'SheenTint')
-        self.inputs.new('SORTNodeFloatSocket', 'ClearCoat')
-        self.inputs.new('SORTNodeFloatSocket', 'ClearCoaatGloss')
+        self.inputs.new('SORTNodeFloatSocket', 'Clearcoat')
+        self.inputs.new('SORTNodeFloatSocket', 'ClearcoatGloss')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
