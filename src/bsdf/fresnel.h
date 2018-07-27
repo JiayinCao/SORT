@@ -111,6 +111,20 @@ private:
     float eta_i;    /**< Index of refraction of the medium on the other side normal points. */
 };
 
+
+// Schlick Fresnel Approximation
+inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
+    return F0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - F0);
+}
+inline float SchlickFresnel(const float F0, float cos) {
+    return F0 + pow(1.0f - cos, 5.0f) * ( 1.0f - F0 );
+}
+
+inline float SchlickWeight( float cos ){
+    cos = saturate( 1.0f - cos );
+    return pow( cos , 5.0f );
+}
+
 //! @brief Schlick Fresnel Approximation
 template<class T>
 class	FresnelSchlick : public Fresnel
@@ -131,16 +145,3 @@ public:
 private:
     const T F0;
 };
-
-// Schlick Fresnel Approximation
-inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
-    return F0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - F0);
-}
-inline float SchlickFresnel(const float F0, float cos) {
-    return F0 + pow(1.0f - cos, 5.0f) * ( 1.0f - F0 );
-}
-
-inline float SchlickWeight( float cos ){
-    cos = saturate( 1.0f - cos );
-    return pow( cos , 5.0f );
-}
