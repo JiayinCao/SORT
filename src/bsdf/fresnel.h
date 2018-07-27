@@ -111,9 +111,33 @@ private:
     float eta_i;    /**< Index of refraction of the medium on the other side normal points. */
 };
 
+//! @brief Schlick Fresnel Approximation
+template<class T>
+class	FresnelSchlick : public Fresnel
+{
+public:
+    //! Constructor
+    //! @param  ei      Index of refraction of the medium on the side normal points.
+    //! @param  et      Index of refraction of the medium on the other side normal points.
+    FresnelSchlick( const T& F0 ) : F0(F0) {}
+
+    //! @brief Evaluate the Fresnel term.
+    //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
+    //! @return         Evaluated fresnel value.
+    Spectrum Evaluate(float cosI) const override{
+        return SchlickFresnel(F0, cosI);
+    }
+
+private:
+    const T F0;
+};
+
 // Schlick Fresnel Approximation
 inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
     return F0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - F0);
+}
+inline float SchlickFresnel(const float F0, float cos) {
+    return F0 + pow(1.0f - cos, 5.0f) * ( 1.0f - F0 );
 }
 
 inline float SchlickWeight( float cos ){

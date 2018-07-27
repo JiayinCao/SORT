@@ -714,11 +714,11 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("SORT_material", "Materials",items = [NodeItem("SORTNode_Material_DisneyBRDF"),NodeItem("SORTNode_Material_Principle"),NodeItem("SORTNode_Material_Glass"),NodeItem("SORTNode_Material_Plastic"),NodeItem("SORTNode_Material_Matte"),NodeItem("SORTNode_Material_Measured"),NodeItem("SORTNode_Material_Layered")] ),
-        SORTPatternNodeCategory("SORT_operator", "Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeOneMinus"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp"),NodeItem("SORTNodeLinearToGamma"),NodeItem("SORTNodeGammaToLinear")] ),
-        SORTPatternNodeCategory("SORT_texture", "Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
-        SORTPatternNodeCategory("SORT_constant", "Constant",items= [NodeItem("SORTNodeConstant")] ),
-        SORTPatternNodeCategory("SORT_input", "Input",items=[],),
+        SORTPatternNodeCategory("Material", "Materials",items = [NodeItem("SORTNode_Material_DisneyBRDF"),NodeItem("SORTNode_Material_Principle"),NodeItem("SORTNode_Material_Glass"),NodeItem("SORTNode_Material_Plastic"),NodeItem("SORTNode_Material_Matte"),NodeItem("SORTNode_Material_Measured"),NodeItem("SORTNode_Material_Layered")] ),
+        SORTPatternNodeCategory("Operator", "Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeOneMinus"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp"),NodeItem("SORTNodeLinearToGamma"),NodeItem("SORTNodeGammaToLinear")] ),
+        SORTPatternNodeCategory("Texture", "Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
+        SORTPatternNodeCategory("Constant", "Constant",items= [NodeItem("SORTNodeConstant")] ),
+        SORTPatternNodeCategory("Input", "Input",items=[],),
         SORTPatternNodeCategory("BXDF", "BXDF",items = [NodeItem("SORTNode_BXDF_AshikhmanShirley"),NodeItem("SORTNode_BXDF_Lambert"),NodeItem("SORTNode_BXDF_OrenNayar"),NodeItem("SORTNode_BXDF_MicrofacetReflection"),NodeItem("SORTNode_BXDF_MicrofacetRefraction"),NodeItem("SORTNode_BXDF_Fourier"),NodeItem("SORTNode_BXDF_MERL")]),
     ]
     nodeitems_utils.register_node_categories("SORTSHADERNODES",node_categories)
