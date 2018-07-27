@@ -17,11 +17,54 @@
 
 // include the header file
 #include "disney.h"
+#include "microfacet.h"
+#include "sampler/sample.h"
 
+//! @brief Clearcoat GGX NDF.
+class ClearcoatGGX : public GGX
+{
+public:
+    //! @brief Constructor
+    //! @param roughness    Roughness of the surface formed by the micro facets.
+    ClearcoatGGX(float roughness) : GGX(roughness, roughness) {}
+
+    //! @brief probability of facet with specific normal (h)
+    float D(const Vector& h) const override {
+        // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) )
+        return (alphaU2 - 1) / (TWO_PI * log(alphaU) * (1 + (alphaU2 - 1) * CosTheta(h)));
+    }
+
+    //! @brief Sampling a normal respect to the NDF.
+    //!
+    //! @param bs   Sample holding all necessary random variables.
+    //! @param wo   Outgoing direction
+    //! @return     Sampled normal direction based on the NDF.
+    Vector sample_f(const BsdfSample& bs, const Vector& wo) const override {
+        // phi = 2 * PI * u
+        // theta = acos( sqrt( ( exp( 2 * ln(alpha) * v ) - 1 ) / ( alpha^2 - 1.0f ) ) )
+        const float phi = TWO_PI * bs.u;
+        const float theta = acos(sqrt((exp(log(alphaU2) * bs.v) - 1.0f) / (alphaU2 - 1.0f)));
+        auto wh = SphericalVec(theta, phi);
+        if (!SameHemiSphere(wh, wo)) wh = -wh;
+        return wh;
+    }
+
+protected:
+    //! @brief Smith shadow-masking function G1
+    float G1(const Vector& v) const override{
+        const float tan_theta_sq = TanTheta2(v);
+        if (isinf(tan_theta_sq)) return 0.0f;
+        static const float roughness = 0.25f;
+        const float alpha2 = roughness * roughness;
+        return 2.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
+    }
+};
 
 Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 {
     if( !SameHemiSphere(wo, wi) ) return 0.0f;
+
+    const static Spectrum white(1.0f);
     
     const auto lerp = []( const float a , const float b , const float t ){ return a * ( 1.0f - t ) + b * t; };
     const auto lerp_spectrum = []( const Spectrum& a , const Spectrum& b , const float t ){ return a * ( 1.0f - t ) + b * t; };
@@ -32,16 +75,16 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     const float HoO = Dot( wo , h );
     const float HoO2 = HoO * HoO;
     
-    const float luminance = 0.3 * basecolor.GetR() + 0.6 * basecolor.GetG() + 0.1 * basecolor.GetB();
+    const float luminance = 0.3f * basecolor.GetR() + 0.6f * basecolor.GetG() + 0.1f * basecolor.GetB();
     
     // Fresnel term
     const float FH = SchlickWeight(HoO);
     
     // Sheen term in Disney BRDF model
     const Spectrum Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
-    const Spectrum Cspec0 = lerp_spectrum( specular * 0.08 * lerp_spectrum( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
+    const Spectrum Cspec0 = lerp_spectrum( specular * 0.08f * lerp_spectrum( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
     const Spectrum Csheen = lerp_spectrum( Spectrum(1.0f) , Ctint , sheenTint );
-    const Spectrum Fsheen = FH * sheen * Csheen;
+    const Spectrum Fsheen = FH * sheen * Csheen ;
     
     // Diffuse term in Disney BRDF model
     const float FO = SchlickWeight( NoO );
@@ -49,28 +92,31 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     const float Fd90 = 0.5f + 2.0f * HoO2 * roughness;
     const float Fd = lerp( 1.0f , Fd90 , FO )  * lerp( 1.0f , Fd90 , FI );
     
-    // Based on Hanrahan-Krueger brdf approximation of isotropic bssrdf
+    // Reflection from Layered Surfaces due to Subsurface Scattering
+    // https://cseweb.ucsd.edu/~ravir/6998/papers/p165-hanrahan.pdf
+    // Based on Hanrahan-Krueger BRDF approximation of isotropic BSSRDF
     // 1.25 scale is used to (roughly) preserve albedo
-    // Fss90 used to "flatten" retroreflection based on roughness
+    // Fss90 used to "flatten" retro-reflection based on roughness
     const float Fss90 = HoO2*roughness;
     const float Fss = lerp(1.0, Fss90, FO) * lerp(1.0, Fss90, FI);
-    const float ss = 1.25 * (Fss * (1 / (NoO + NoI) - .5) + .5);
+    const float ss = 1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f);
     
-    // Final diffuse term for disney BRDF
-    const Spectrum diff = INV_PI * ( lerp( Fd , ss , subsurface ) * basecolor + Fsheen ) * ( 1.0f - metallic );
+    // Final diffuse term for Disney BRDF
+    const Spectrum diff = ( INV_PI * lerp( Fd , ss , subsurface ) * basecolor + Fsheen ) * ( 1.0f - metallic );
     
     // Specular term in Disney BRDF
     const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
     const GGX ggx( roughness / aspect , roughness * aspect );
-    const Spectrum Fs = lerp_spectrum( Cspec0 , Spectrum( 1.0f ) , FH );
+    const FresnelSchlick<Spectrum> fresnel0(Cspec0);
+    const MicroFacetReflection mf(white, &fresnel0, &ggx, white);
     
     // Clear coat term (ior = 1.5 -> F0 = 0.04)
-    const float Fr = lerp( 0.04f , 1.0f , FH );
-    const float r = lerp( 0.1f , 0.001f , clearcoatGloss );
-    const GGX ggx2( r , r );
+    const ClearcoatGGX cggx(lerp(0.1f, 0.001f, clearcoatGloss));
+    const FresnelSchlick<float> fresnel1(0.04f);
+    const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f ) , &fresnel1, &cggx, white);
     
     // Final specular term
-    const Spectrum spec = ggx.D(h) * Fs * ggx.G(wo,wi) / ( 4.0f * NoO * NoI ) + 0.25f * clearcoat * Fr * ggx2.G(wo,wi) * ggx2.G(wo,wi);
+    const Spectrum spec = mf.f(wo, wi) + mf_clearcoat.f(wo, wi);
     
     return diff + spec;
 }

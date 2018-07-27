@@ -67,7 +67,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @param type The specific bxdf type it considers during evaluation.
-    //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
+    //! @return     The probability of choosing the out-going direction based on the incoming direction.
 	float Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
 	//! @brief Get intersection information of the point at which the bsdf is evaluated.

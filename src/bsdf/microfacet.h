@@ -25,7 +25,7 @@
 class MicroFacetDistribution
 {
 public:
-	//! @brief Probabilty of facet with specific normal (h)
+	//! @brief probability of facet with specific normal (h)
 	virtual float D(const Vector& h) const = 0;
     
     //! @brief Visibility term of microfacet model, Smith shadow-masking function
@@ -34,7 +34,7 @@ public:
     }
 
 	//! @brief Sampling a normal respect to the NDF.
-    //! @param bs   Sample holind all necessary random variables.
+    //! @param bs   Sample holding all necessary random variables.
     //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
 	virtual Vector sample_f( const BsdfSample& bs , const Vector& wo ) const = 0;
@@ -59,12 +59,12 @@ public:
     //! @param roughnessV    Roughness of the surface formed by the micro facets.
 	Blinn(float roughnessU, float roughnessV);
 	
-	//! @brief Probabilty of facet with specific normal (h)
+	//! @brief probability of facet with specific normal (h)
 	float D(const Vector& h) const override;
 	
     //! @brief Sampling a normal respect to the NDF.
     //!
-    //! @param bs   Sample holind all necessary random variables.
+    //! @param bs   Sample holding all necessary random variables.
     //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
     Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
@@ -86,12 +86,12 @@ public:
     //! @param roughnessV    Roughness of the surface formed by the micro facets.
 	Beckmann( float roughnessU , float roughnessV );
 
-    //! @brief Probabilty of facet with specific normal (v)
+    //! @brief probability of facet with specific normal (v)
     float D(const Vector& h) const override;
     
     //! @brief Sampling a normal respect to the NDF.
     //!
-    //! @param bs   Sample holind all necessary random variables.
+    //! @param bs   Sample holding all necessary random variables.
     //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
     Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
@@ -109,20 +109,21 @@ class GGX : public MicroFacetDistribution
 {
 public:
     //! @brief Constructor
-    //! @param roughness    Roughness of the surface formed by the micro facets.
+    //! @param roughnessU    Roughness of the surface formed by the micro facets.
+    //! @param roughnessV    Roughness of the surface formed by the micro facets.
 	GGX( float roughnessU , float roughnessV );
 
-    //! @brief Probabilty of facet with specific normal (h)
+    //! @brief probability of facet with specific normal (h)
     float D(const Vector& h) const override;
     
     //! @brief Sampling a normal respect to the NDF.
     //!
-    //! @param bs   Sample holind all necessary random variables.
+    //! @param bs   Sample holding all necessary random variables.
     //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
     Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
 
-private:
+protected:
 	float alphaU , alphaV;        /**< Internal data used for NDF calculation. */
     float alphaU2 , alphaV2 , alphaUV , alpha;
     
@@ -187,7 +188,7 @@ public:
     //! @brief Evalute the pdf of an existance direction given the incoming direction.
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
+    //! @return     The probability of choosing the out-going direction based on the incoming direction.
 	float Pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
@@ -230,10 +231,10 @@ public:
     //! @return     The evaluted BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
     
-    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The probabilty of choosing the out-going direction based on the incoming direction.
+    //! @return     The probability of choosing the out-going direction based on the incoming direction.
     float Pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:
