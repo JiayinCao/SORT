@@ -28,9 +28,6 @@ Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 }
 
 // the pdf for the sampled direction
-float Bxdf::Pdf( const Vector& wo , const Vector& wi ) const
-{
-	if( !SameHemisphere( wo , wi ) )
-		return 0.0f;
-	return fabs(CosHemispherePdf( wi ));
+float Bxdf::Pdf( const Vector& wo , const Vector& wi ) const{
+    return SameHemisphere( wo , wi ) ? CosHemispherePdf( wi ) : 0.0f;
 }

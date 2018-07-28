@@ -49,6 +49,22 @@ private:
 	MaterialNodeProperty	baseColor;
 };
 
+// Lambert node
+class LambertTransmissionNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR( LambertTransmissionNode , MaterialNode , "SORTNode_BXDF_LambertTransmission" );
+    
+    // constructor
+    LambertTransmissionNode();
+    
+    // update bsdf
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    
+private:
+    MaterialNodeProperty    baseColor;
+};
+
 // Oren nayar node
 class OrenNayarNode : public BxdfNode
 {

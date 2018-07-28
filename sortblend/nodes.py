@@ -259,6 +259,14 @@ class SORTNode_BXDF_Lambert(SORTShadingNode):
         self.inputs.new('SORTNodeBaseColorSocket', 'Diffuse')
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
+class SORTNode_BXDF_LambertTransmission(SORTShadingNode):
+    bl_label = 'Lambert Transmission'
+    bl_idname = 'SORTNode_BXDF_LambertTransmission'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeBaseColorSocket', 'Diffuse')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
 class SORTNode_BXDF_OrenNayar(SORTShadingNode):
     bl_label = 'OrenNayar'
     bl_idname = 'SORTNode_BXDF_OrenNayar'
@@ -740,13 +748,14 @@ def register():
         SORTPatternNodeCategory("Texture", "Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("Constant", "Constant",items= [NodeItem("SORTNodeConstant")] ),
         SORTPatternNodeCategory("Input", "Input",items=[],),
-        SORTPatternNodeCategory("BXDF", "BXDF",items = [NodeItem("SORTNode_BXDF_AshikhmanShirley"),NodeItem("SORTNode_BXDF_Lambert"),NodeItem("SORTNode_BXDF_OrenNayar"),NodeItem("SORTNode_BXDF_MicrofacetReflection"),NodeItem("SORTNode_BXDF_MicrofacetRefraction"),NodeItem("SORTNode_BXDF_Fourier"),NodeItem("SORTNode_BXDF_MERL")]),
+        SORTPatternNodeCategory("BXDF", "BXDF",items = [NodeItem("SORTNode_BXDF_AshikhmanShirley"),NodeItem("SORTNode_BXDF_Lambert"),NodeItem("SORTNode_BXDF_LambertTransmission"),NodeItem("SORTNode_BXDF_OrenNayar"),NodeItem("SORTNode_BXDF_MicrofacetReflection"),NodeItem("SORTNode_BXDF_MicrofacetRefraction"),NodeItem("SORTNode_BXDF_Fourier"),NodeItem("SORTNode_BXDF_MERL")]),
     ]
     nodeitems_utils.register_node_categories("SORTSHADERNODES",node_categories)
 
     # bxdf nodes
     SORTPatternGraph.nodetypes[SORTNode_BXDF_AshikhmanShirley] = 'SORTNode_BXDF_AshikhmanShirley'
     SORTPatternGraph.nodetypes[SORTNode_BXDF_Lambert] = 'SORTNode_BXDF_Lambert'
+    SORTPatternGraph.nodetypes[SORTNode_BXDF_LambertTransmission] = 'SORTNode_BXDF_LambertTransmission'
     SORTPatternGraph.nodetypes[SORTNode_BXDF_OrenNayar] = 'SORTNode_BXDF_OrenNayar'
     SORTPatternGraph.nodetypes[SORTNode_BXDF_Fourier] = 'SORTNode_BXDF_Fourier'
     SORTPatternGraph.nodetypes[SORTNode_BXDF_MERL] = 'SORTNode_BXDF_MERL'
