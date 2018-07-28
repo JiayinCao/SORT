@@ -50,7 +50,7 @@ Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfS
     if( bs.u < 0.5f ){
         // Cosine-weighted sample
         wi = CosSampleHemisphere( 2.0f * bs.u , bs.v );
-        if( PointingUp( wo ) ) wi.z = -wi.z;
+        if( !SameHemiSphere(wo, wi) ) wi.z = -wi.z;
     }else{
         BsdfSample sample(true);
         Vector wh = distribution.sample_f(sample,wo);
