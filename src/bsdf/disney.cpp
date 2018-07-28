@@ -109,7 +109,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     const MicroFacetReflection mf(Cspec0, &fresnel0, &ggx, white);
     
     // Clear coat term (ior = 1.5 -> F0 = 0.04)
-    const ClearcoatGGX cggx(lerp(0.1f, 0.001f, clearcoatGloss));
+    const ClearcoatGGX cggx(sqrt(lerp(0.1f, 0.001f, clearcoatGloss)));
     const FresnelSchlick<float> fresnel1(0.04f);
     const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f * clearcoat ) , &fresnel1, &cggx, white);
     
@@ -120,7 +120,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 }
 
 Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
-    if( bs.u < ( 1.0f - metallic ) * 0.92f ){
+    if( bs.u < ( 1.0f - metallic ) * ( 1.0f - specular * 0.92f ) ){
         // Cosine-weighted sample
         wi = CosSampleHemisphere( bs.u / ( ( 1.0f - metallic ) * 0.92f ) , bs.v );
         if( !SameHemiSphere(wo, wi) ) wi.z = -wi.z;
@@ -140,7 +140,7 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
         }else{
             const float clearcoat_ratio = clearcoat_intensity / total_intensity;
             if( r < clearcoat_ratio || clearcoat_ratio == 1.0f ){
-                const ClearcoatGGX cggx(lerp(0.1f, 0.001f, clearcoatGloss));
+                const ClearcoatGGX cggx(sqrt(lerp(0.1f, 0.001f, clearcoatGloss)));
                 wh = cggx.sample_f(sample,wo);
             }else{
                 const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
@@ -162,7 +162,7 @@ float DisneyBRDF::Pdf( const Vector& wo , const Vector& wi ) const{
     const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
     const GGX ggx( roughness / aspect , roughness * aspect );
     
-    const ClearcoatGGX cggx(lerp(0.1f, 0.001f, clearcoatGloss));
+    const ClearcoatGGX cggx(sqrt(lerp(0.1f, 0.001f, clearcoatGloss)));
     
     const float luminance = basecolor.GetIntensity();
     const Spectrum Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
@@ -176,5 +176,5 @@ float DisneyBRDF::Pdf( const Vector& wo , const Vector& wi ) const{
         return CosHemispherePdf(wi);
     const Vector wh = Normalize( wi + wo );
     const float pdf_wh = lerp( ggx.Pdf(wh) , cggx.Pdf(wh) , clearcoat_ratio );
-    return lerp( pdf_wh / ( 4.0f * Dot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * 0.92f );
+    return lerp( pdf_wh / ( 4.0f * Dot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.92f ) );
 }
