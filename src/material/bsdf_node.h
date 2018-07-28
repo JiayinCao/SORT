@@ -48,7 +48,7 @@ private:
     MaterialNodeProperty        clearcoatGloss;
 };
 
-// Layered Material node
+// Layered Material
 class LayeredMaterialNode : public BxdfNode
 {
 public:
@@ -85,7 +85,7 @@ private:
     MaterialNodeProperty    specular;
 };
 
-// Matte BRDF
+// Matte Material
 class MatteMaterialNode : public BxdfNode
 {
 public:
@@ -101,7 +101,7 @@ private:
     MaterialNodeProperty    roughness;
 };
 
-// Plastic BRDF
+// Plastic Material
 class PlasticMaterialNode : public BxdfNode
 {
 public:
@@ -118,7 +118,7 @@ private:
     MaterialNodeProperty    roughness;
 };
 
-// Glass BRDF
+// Glass Material
 class GlassMaterialNode : public BxdfNode
 {
 public:
@@ -135,7 +135,22 @@ private:
     MaterialNodeProperty    roughness;
 };
 
-// Fourier bxdf node
+// Mirror Material
+class MirrorMaterialNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR( MirrorMaterialNode , MaterialNode, "SORTNode_Material_Mirror" );
+    
+    // constructor
+    MirrorMaterialNode();
+    // update bsdf
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    
+private:
+    MaterialNodeProperty    basecolor;
+};
+
+// Measured Material
 class MeasuredMaterialNode : public BxdfNode
 {
 public:

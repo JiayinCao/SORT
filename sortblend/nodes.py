@@ -676,6 +676,20 @@ class SORTNode_Material_Matte(SORTShadingNode):
         file.write( "  \"float sigma\" [%s]\n" %roughness )
         return
 
+class SORTNode_Material_Mirror(SORTShadingNode):
+    bl_label = 'Mirror'
+    bl_idname = 'SORTNode_Material_Mirror'
+
+    def init(self, context):
+        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
+        self.outputs.new('SORTNodeSocketBxdf', 'Result')
+
+    def export_pbrt(self, file):
+        basecolor = self.inputs[0].default_value
+        file.write( "  \"string type\" \"mirror\"\n" )
+        file.write( "  \"rgb Kd\" [%f %f %f]\n"%(basecolor[:]))
+        return
+
 class SORTNode_Material_Measured(SORTShadingNode):
     bl_label = 'Measured'
     bl_idname = 'SORTNode_Material_Measured'
@@ -743,7 +757,7 @@ def register():
     # all categories in a list
     node_categories = [
         # identifier, label, items list
-        SORTPatternNodeCategory("Material", "Materials",items = [NodeItem("SORTNode_Material_DisneyBRDF"),NodeItem("SORTNode_Material_Principle"),NodeItem("SORTNode_Material_Glass"),NodeItem("SORTNode_Material_Plastic"),NodeItem("SORTNode_Material_Matte"),NodeItem("SORTNode_Material_Measured"),NodeItem("SORTNode_Material_Layered")] ),
+        SORTPatternNodeCategory("Material", "Materials",items = [NodeItem("SORTNode_Material_DisneyBRDF"),NodeItem("SORTNode_Material_Principle"),NodeItem("SORTNode_Material_Glass"),NodeItem("SORTNode_Material_Mirror"),NodeItem("SORTNode_Material_Plastic"),NodeItem("SORTNode_Material_Matte"),NodeItem("SORTNode_Material_Measured"),NodeItem("SORTNode_Material_Layered")] ),
         SORTPatternNodeCategory("Operator", "Operator",items= [NodeItem("SORTNodeAdd"),NodeItem("SORTNodeOneMinus"),NodeItem("SORTNodeMultiply"),NodeItem("SORTNodeBlend"),NodeItem("SORTNodeLerp"),NodeItem("SORTNodeLinearToGamma"),NodeItem("SORTNodeGammaToLinear")] ),
         SORTPatternNodeCategory("Texture", "Texture",items= [NodeItem("SORTNodeGrid"),NodeItem("SORTNodeCheckbox"),NodeItem("SORTNodeImage")] ),
         SORTPatternNodeCategory("Constant", "Constant",items= [NodeItem("SORTNodeConstant")] ),
@@ -770,3 +784,4 @@ def register():
     SORTPatternGraph.nodetypes[SORTNode_Material_Measured] = 'SORTNode_Material_Measured'
     SORTPatternGraph.nodetypes[SORTNode_Material_Layered] = 'SORTNode_Material_Layered'
     SORTPatternGraph.nodetypes[SORTNode_Material_DisneyBRDF] = 'SORTNode_Material_DisneyBRDF'
+    SORTPatternGraph.nodetypes[SORTNode_Material_Mirror] = 'SORTNode_Material_Mirror'
