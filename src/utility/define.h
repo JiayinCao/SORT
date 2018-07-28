@@ -42,3 +42,5 @@ inline float clamp( float x , float mi , float ma )
 	if( x < mi ) x = mi;
 	return x;
 }
+
+#define lerp( a , b , t  )      ( a * ( 1.0f - t ) + b * t )
