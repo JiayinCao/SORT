@@ -32,14 +32,51 @@ public:
     //! @param s            Direction-Hemisphere reflection.
     //! @param weight       Weight of this BRDF
     //! @param t            Type of this BRDF
-    Lambert( const Spectrum& s , const Spectrum& weight ):Bxdf(weight, BXDF_DIFFUSE),R(s){}
+    Lambert( const Spectrum& s , const Spectrum& weight ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION)),R(s){}
 
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The evaluted BRDF value.
-    Spectrum f( const Vector& wo , const Vector& wi ) const;
+    Spectrum f( const Vector& wo , const Vector& wi ) const override;
 
 private:
 	const Spectrum R;         /**< Direction-Hemisphere reflection or total reflection. */
+};
+
+//! @brief Lambert transmittance brdf.
+/**
+ * LambertTransmittance is the transmittance version of lambert model
+ */
+class LambertTransmission : public Bxdf
+{
+public:
+    //! Constructor taking spectrum information.
+    //! @param s            Direction-Hemisphere refraction.
+    //! @param weight       Weight of this BRDF
+    //! @param t            Type of this BRDF
+    LambertTransmission( const Spectrum& t , const Spectrum& weight ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_TRANSMISSION)),T(t){}
+    
+    //! Evaluate the BRDF
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The evaluted BRDF value.
+    Spectrum f( const Vector& wo , const Vector& wi ) const override;
+    
+    //! @brief Importance sampling for the microfacet btdf.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param bs   Sample for bsdf that holds some random variables.
+    //! @param pdf  Probability density of the selected direction.
+    //! @return     The evaluted BRDF value.
+    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
+    
+    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The probability of choosing the out-going direction based on the incoming direction.
+    float Pdf( const Vector& wo , const Vector& wi ) const override;
+    
+private:
+    const Spectrum T;         /**< Direction-Hemisphere reflection or total reflection. */
 };

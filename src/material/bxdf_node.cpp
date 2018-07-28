@@ -27,6 +27,7 @@
 
 IMPLEMENT_CREATOR( AshikhmanShirleyNode );
 IMPLEMENT_CREATOR( LambertNode );
+IMPLEMENT_CREATOR( LambertTransmissionNode );
 IMPLEMENT_CREATOR( OrenNayarNode );
 IMPLEMENT_CREATOR( MicrofacetReflectionNode );
 IMPLEMENT_CREATOR( MicrofacetRefractionNode );
@@ -54,10 +55,17 @@ LambertNode::LambertNode()
 	m_props.insert( make_pair( "Diffuse" , &baseColor ) );
 }
 
-void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+	bsdf->AddBxdf( SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , weight ) );
+}
+
+LambertTransmissionNode::LambertTransmissionNode()
 {
-    const Lambert* lambert = SORT_MALLOC(Lambert)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , weight );
-	bsdf->AddBxdf( lambert );
+    m_props.insert( make_pair( "Diffuse" , &baseColor ) );
+}
+
+void LambertTransmissionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+    bsdf->AddBxdf( SORT_MALLOC(LambertTransmission)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , weight ) );
 }
 
 OrenNayarNode::OrenNayarNode()
@@ -95,9 +103,7 @@ void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 		dist = SORT_MALLOC(GGX)( ru , rv );	// GGX is default
 
 	Fresnel* frenel = SORT_MALLOC( FresnelConductor )( eta.GetPropertyValue(bsdf).ToSpectrum() , k.GetPropertyValue(bsdf).ToSpectrum() );
-
-	const MicroFacetReflection* mf = SORT_MALLOC(MicroFacetReflection)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist , weight );
-	bsdf->AddBxdf( mf );
+	bsdf->AddBxdf( SORT_MALLOC(MicroFacetReflection)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , frenel , dist , weight ) );
 }
 
 MicrofacetRefractionNode::MicrofacetRefractionNode()
@@ -124,8 +130,7 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 	float in_eta = in_ior.GetPropertyValue(bsdf).x;     // index of refraction inside the material
 	float ext_eta = ext_ior.GetPropertyValue(bsdf).x;   // index of refraction outside the material
-	const MicroFacetRefraction* mf = SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , dist , ext_eta , in_eta , weight );
-	bsdf->AddBxdf( mf );
+	bsdf->AddBxdf( SORT_MALLOC(MicroFacetRefraction)( baseColor.GetPropertyValue(bsdf).ToSpectrum() , dist , ext_eta , in_eta , weight ) );
 }
 
 AshikhmanShirleyNode::AshikhmanShirleyNode()
@@ -143,8 +148,7 @@ void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
     const auto specDiffuse = diffuse.GetPropertyValue(bsdf).ToSpectrum();
     const auto specSpecular = specular.GetPropertyValue(bsdf).x;
 
-    const AshikhmanShirley* mf = SORT_MALLOC(AshikhmanShirley)(specDiffuse, specSpecular, ru, rv , weight );
-    bsdf->AddBxdf(mf);
+    bsdf->AddBxdf(SORT_MALLOC(AshikhmanShirley)(specDiffuse, specSpecular, ru, rv , weight ));
 }
 
 MerlNode::MerlNode()

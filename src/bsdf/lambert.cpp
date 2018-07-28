@@ -18,12 +18,27 @@
 #include "lambert.h"
 #include "math/vector3.h"
 #include "bsdf.h"
+#include "utility/samplemethod.h"
+#include "sampler/sample.h"
 
 // evaluate bxdf
-Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const
-{
-	if( SameHemiSphere( wo , wi ) == false )
-		return 0.0f;
-    
-	return R * INV_PI;
+Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const{
+    return SameHemiSphere( wo , wi )? R * INV_PI : 0.0f;
+}
+
+// evaluate bxdf
+Spectrum LambertTransmission::f( const Vector& wo , const Vector& wi ) const{
+    return SameHemiSphere( wo , wi ) ? 0.0f : T * INV_PI;
+}
+
+// sample a direction randomly
+Spectrum LambertTransmission::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
+    wi = -CosSampleHemisphere( bs.u , bs.v );
+    if( pdf ) *pdf = Pdf( wo , wi );
+    return f( wo , wi );
+}
+
+// get the pdf of the sampled direction
+float LambertTransmission::Pdf( const Vector& wo , const Vector& wi ) const{
+    return SameHemisphere( wo , wi ) ? 0.0f : CosHemispherePdf( wi );
 }
