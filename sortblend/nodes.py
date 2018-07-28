@@ -587,6 +587,27 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
     def export_pbrt(self, file):
+        subsurface = self.inputs[0].default_value
+        metallic = self.inputs[1].default_value
+        #specular = self.input[2].default_value
+        speculartint = self.inputs[3].default_value
+        roughness = self.inputs[4].default_value
+        anisotropic = self.inputs[5].default_value
+        sheen = self.inputs[6].default_value
+        sheentint = self.inputs[7].default_value
+        clearcoat = self.inputs[8].default_value
+        clearcoatgloss = self.inputs[9].default_value
+        basecolor = self.inputs[10].default_value
+        file.write( "  \"string type\" \"disney\"\n" )
+        file.write( "  \"rgb color\" [%f %f %f]\n"%(basecolor[:]))
+        file.write( "  \"float metallic\" [%f]\n"%metallic)
+        file.write( "  \"float roughness\" [%s]\n" %roughness )
+        file.write( "  \"float anisotropic\" [%s]\n" %anisotropic )
+        file.write( "  \"float speculartint\" [%s]\n" %speculartint )
+        file.write( "  \"float sheen\" [%s]\n" %sheen )
+        file.write( "  \"float sheentint\" [%s]\n" %sheentint )
+        file.write( "  \"float clearcoat\" [%s]\n" %clearcoat )
+        file.write( "  \"float clearcoatgloss\" [%s]\n" %clearcoatgloss )
         return
 
 class SORTNode_Material_Glass(SORTShadingNode):
