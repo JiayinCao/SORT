@@ -19,6 +19,41 @@
 
 #include "spectrum/spectrum.h"
 
+// Memo on Fresnel equations
+// https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
+
+// Schlick Fresnel Approximation
+inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
+    return F0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - F0);
+}
+inline float SchlickFresnel(const float F0, float cos) {
+    return F0 + pow(1.0f - cos, 5.0f) * ( 1.0f - F0 );
+}
+inline float SchlickWeight( float cos ){
+    return pow( saturate( 1.0f - cos ) , 5.0f );
+}
+inline float DielectricFresnel( float cosI , float eta_i , float eta_t ){
+    const bool entering = cosI > 0.0f;
+    const float _etaI = entering ? eta_i : eta_t;
+    const float _etaT = entering ? eta_t : eta_i;
+    
+    const float sinI = sqrt( 1.0f - cosI * cosI );
+    const float sinT = _etaI * sinI / _etaT;
+    if( sinT >= 1.0f ) return 1.0f;
+    if( !entering ) cosI = -cosI;
+    
+    const float cosT = sqrt( 1.0f - sinT * sinT );
+    
+    const float t0 = _etaT * cosI;
+    const float t1 = _etaI * cosT;
+    const float t2 = _etaI * cosI;
+    const float t3 = _etaT * cosT;
+    
+    const float Rparl = ( t0 - t1 ) / ( t0 + t1 );
+    const float Rparp = ( t2 - t3 ) / ( t2 + t3 );
+    return ( Rparl * Rparl + Rparp * Rparp ) * 0.5f;
+}
+
 //! @brief Interface for fresnel.
 class	Fresnel
 {
@@ -81,49 +116,14 @@ public:
     //! @brief Evaluate the Fresnel term.
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
     //! @return         Evaluated fresnel value.
-	Spectrum Evaluate( float cosI ) const override
-	{
-        // Memo on Fresnel equations
-        // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
-        const bool entering = cosI > 0.0f;
-        const float _etaI = entering ? eta_i : eta_t;
-        const float _etaT = entering ? eta_t : eta_i;
-
-        const float sinI = sqrt( 1.0f - cosI * cosI );
-        const float sinT = _etaI * sinI / _etaT;
-        if( sinT >= 1.0f ) return 1.0f;
-        if( !entering ) cosI = -cosI;
-
-        const float cosT = sqrt( 1.0f - sinT * sinT );
-
-        const float t0 = _etaT * cosI;
-        const float t1 = _etaI * cosT;
-        const float t2 = _etaI * cosI;
-        const float t3 = _etaT * cosT;
-
-        const float Rparl = ( t0 - t1 ) / ( t0 + t1 );
-        const float Rparp = ( t2 - t3 ) / ( t2 + t3 );
-        return ( Rparl * Rparl + Rparp * Rparp ) * 0.5f;
+	Spectrum Evaluate( float cosI ) const override{
+        return DielectricFresnel( cosI , eta_i , eta_t );
 	}
 
 private:
     float eta_t;    /**< Index of refraction of the medium on the side normal points. */
     float eta_i;    /**< Index of refraction of the medium on the other side normal points. */
 };
-
-
-// Schlick Fresnel Approximation
-inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
-    return F0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - F0);
-}
-inline float SchlickFresnel(const float F0, float cos) {
-    return F0 + pow(1.0f - cos, 5.0f) * ( 1.0f - F0 );
-}
-
-inline float SchlickWeight( float cos ){
-    cos = saturate( 1.0f - cos );
-    return pow( cos , 5.0f );
-}
 
 //! @brief Schlick Fresnel Approximation
 template<class T>
@@ -144,4 +144,25 @@ public:
 
 private:
     const T F0;
+};
+
+//! @brief Disney Fresnel Approximation
+class    FresnelDisney : public Fresnel
+{
+public:
+    //! Constructor
+    //! @param  ei      Index of refraction of the medium on the side normal points.
+    //! @param  et      Index of refraction of the medium on the other side normal points.
+    FresnelDisney( const Spectrum& F0 , const float etai , const float etat , const float metallic ) : F0(F0), etai(etai), etat(etat), metallic(metallic){}
+    
+    //! @brief Evaluate the Fresnel term.
+    //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
+    //! @return         Evaluated fresnel value.
+    Spectrum Evaluate(float cosI) const override{
+        return lerp( DielectricFresnel(cosI, etai, etat) , SchlickFresnel(F0, cosI) , metallic );
+    }
+    
+private:
+    const Spectrum F0;
+    const float etai , etat, metallic;
 };

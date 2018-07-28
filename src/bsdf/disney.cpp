@@ -19,6 +19,7 @@
 #include "disney.h"
 #include "microfacet.h"
 #include "sampler/sample.h"
+#include "utility/samplemethod.h"
 
 //! @brief Clearcoat GGX NDF.
 class ClearcoatGGX : public GGX
@@ -66,8 +67,6 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 
     const static Spectrum white(1.0f);
     
-    const auto lerp = []( const float a , const float b , const float t ){ return a * ( 1.0f - t ) + b * t; };
-    const auto lerp_spectrum = []( const Spectrum& a , const Spectrum& b , const float t ){ return a * ( 1.0f - t ) + b * t; };
     const float NoO = CosTheta( wo );
     const float NoI = CosTheta( wi );
     
@@ -75,15 +74,14 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     const float HoO = Dot( wo , h );
     const float HoO2 = HoO * HoO;
     
-    const float luminance = 0.3f * basecolor.GetR() + 0.6f * basecolor.GetG() + 0.1f * basecolor.GetB();
-    
     // Fresnel term
     const float FH = SchlickWeight(HoO);
     
     // Sheen term in Disney BRDF model
+    const float luminance = basecolor.GetIntensity();
     const Spectrum Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
-    const Spectrum Cspec0 = lerp_spectrum( specular * 0.08f * lerp_spectrum( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
-    const Spectrum Csheen = lerp_spectrum( Spectrum(1.0f) , Ctint , sheenTint );
+    const Spectrum Cspec0 = lerp( specular * 0.08f * lerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
+    const Spectrum Csheen = lerp( Spectrum(1.0f) , Ctint , sheenTint );
     const Spectrum Fsheen = FH * sheen * Csheen ;
     
     // Diffuse term in Disney BRDF model
@@ -107,8 +105,8 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     // Specular term in Disney BRDF
     const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
     const GGX ggx( roughness / aspect , roughness * aspect );
-    const FresnelSchlick<Spectrum> fresnel0(Cspec0);
-    const MicroFacetReflection mf(white, &fresnel0, &ggx, white);
+    const FresnelDisney fresnel0(Cspec0, 1.0f, 1.5f, metallic);
+    const MicroFacetReflection mf(Cspec0, &fresnel0, &ggx, white);
     
     // Clear coat term (ior = 1.5 -> F0 = 0.04)
     const ClearcoatGGX cggx(lerp(0.1f, 0.001f, clearcoatGloss));
@@ -116,17 +114,67 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f * clearcoat ) , &fresnel1, &cggx, white);
     
     // Final specular term
-    const Spectrum spec = mf.f(wo, wi) + mf_clearcoat.f(wo, wi);
+    const Spectrum spec = mf.f(wo,wi) + mf_clearcoat.f(wo, wi);
     
     return diff + spec;
 }
 
 Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
-    // to be implemented
-    return Bxdf::sample_f( wo , wi , bs , pdf );
+    if( bs.u < ( 1.0f - metallic ) * 0.92f ){
+        // Cosine-weighted sample
+        wi = CosSampleHemisphere( bs.u / ( ( 1.0f - metallic ) * 0.92f ) , bs.v );
+        if( !SameHemiSphere(wo, wi) ) wi.z = -wi.z;
+    }else{
+        const float r = sort_canonical();
+        BsdfSample sample(true);
+        Vector wh;
+        
+        const float luminance = basecolor.GetIntensity();
+        const Spectrum Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
+        const Spectrum Cspec0 = lerp( specular * 0.08f * lerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
+        const float clearcoat_intensity = 0.25f * clearcoat;
+        const float specular_intensity = Cspec0.GetIntensity();
+        const float total_intensity = clearcoat_intensity + specular_intensity;
+        if( total_intensity == 0.0f ){
+            wi = CosSampleHemisphere( bs.u / ( ( 1.0f - metallic ) * 0.92f ) , bs.v );
+        }else{
+            const float clearcoat_ratio = clearcoat_intensity / total_intensity;
+            if( r < clearcoat_ratio || clearcoat_ratio == 1.0f ){
+                const ClearcoatGGX cggx(lerp(0.1f, 0.001f, clearcoatGloss));
+                wh = cggx.sample_f(sample,wo);
+            }else{
+                const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
+                const GGX ggx( roughness / aspect , roughness * aspect );
+                wh = ggx.sample_f(sample,wo);
+            }
+            wi = 2 * Dot( wo , wh ) * wh - wo;
+        }
+        if( !SameHemiSphere(wo, wi) ) wi.z = -wi.z;
+    }
+    
+    if( pdf ) *pdf = Pdf( wo , wi );
+    return f( wo , wi );
 }
 
 float DisneyBRDF::Pdf( const Vector& wo , const Vector& wi ) const{
-    // to be implemented
-    return Bxdf::Pdf( wo , wi );
+    if( !SameHemiSphere(wo, wi) ) return 0.0f;
+    
+    const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
+    const GGX ggx( roughness / aspect , roughness * aspect );
+    
+    const ClearcoatGGX cggx(lerp(0.1f, 0.001f, clearcoatGloss));
+    
+    const float luminance = basecolor.GetIntensity();
+    const Spectrum Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
+    const Spectrum Cspec0 = lerp( specular * 0.08f * lerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
+    const float clearcoat_intensity = 0.25f * clearcoat;
+    const float specular_intensity = Cspec0.GetIntensity();
+    const float total_intensity = clearcoat_intensity + specular_intensity;
+    const float clearcoat_ratio = clearcoat_intensity / total_intensity;
+    
+    if( total_intensity == 0.0f )
+        return CosHemispherePdf(wi);
+    const Vector wh = Normalize( wi + wo );
+    const float pdf_wh = lerp( ggx.Pdf(wh) , cggx.Pdf(wh) , clearcoat_ratio );
+    return lerp( pdf_wh / ( 4.0f * Dot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * 0.92f );
 }
