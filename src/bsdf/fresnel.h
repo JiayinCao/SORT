@@ -54,6 +54,18 @@ inline float DielectricFresnel( float cosI , float eta_i , float eta_t ){
     return ( Rparl * Rparl + Rparp * Rparp ) * 0.5f;
 }
 
+inline Spectrum ConductorFresnel( float cosI , const Spectrum& eta , const Spectrum& k ){
+    float sq_cos = cosI * cosI;
+    
+    Spectrum t = 2 * eta * cosI;
+    Spectrum tmp_f = eta*eta+k*k;
+    Spectrum tmp = tmp_f * sq_cos;
+    Spectrum Rparl2 = (tmp - t + 1 ) / ( tmp + t + 1 );
+    Spectrum Rperp2 = (tmp_f - t + sq_cos)/(tmp_f + t + sq_cos );
+    
+    return (Rparl2+Rperp2)*0.5f;
+}
+
 //! @brief Interface for fresnel.
 class	Fresnel
 {
@@ -86,17 +98,8 @@ public:
     //! @brief Evaluate the Fresnel term.
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
     //! @return         Evaluated fresnel value.
-	Spectrum Evaluate( float cosI ) const override
-	{
-		float sq_cos = cosI * cosI;
-
-		Spectrum t = 2 * eta * cosI;
-		Spectrum tmp_f = eta*eta+k*k;
-		Spectrum tmp = tmp_f * sq_cos;
-		Spectrum Rparl2 = (tmp - t + 1 ) / ( tmp + t + 1 );
-		Spectrum Rperp2 = (tmp_f - t + sq_cos)/(tmp_f + t + sq_cos );
-
-		return (Rparl2+Rperp2)*0.5f;
+	Spectrum Evaluate( float cosI ) const override{
+        return ConductorFresnel( cosI , eta , k );
 	}
 
 private:
