@@ -2,9 +2,12 @@ import bpy
 import xml.etree.cElementTree as ET
 from . import common
 from . import utility
-from .exporter import pbrt_exporter
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
+
+# fix pbrt path , / will be recognized as escape letter, which will easily crash the system in PBRT
+def fixPbrtPath(path):
+    return path.replace( '\\' , '/' )
 
 # node tree for sort
 class SORTPatternGraph(bpy.types.NodeTree):
@@ -140,6 +143,9 @@ class SORTShadingNode(bpy.types.Node):
     def export_prop(self, xml_node):
         pass
 
+    def export_pbrt(self, file):
+        pass
+        
     def draw_props(self, context, layout, indented_label):
         pass
 
@@ -326,7 +332,7 @@ class SORTNode_BXDF_Fourier(SORTShadingNode):
     def export_pbrt(self, file):
         abs_file_path = bpy.path.abspath( self.file_name_prop )
         file.write( "  \"string type\" \"fourier\"\n" )
-        file.write( "  \"string bsdffile\" \"%s\"\n" % pbrt_exporter.fixPbrtPath(abs_file_path) )
+        file.write( "  \"string bsdffile\" \"%s\"\n" % fixPbrtPath(abs_file_path) )
         file.write( "\n" )
 
 # operator nodes
@@ -724,7 +730,7 @@ class SORTNode_Material_Measured(SORTShadingNode):
         abs_file_path = bpy.path.abspath( self.file_name_prop )
         if self.type_prop == 'Fourier':
             file.write( "  \"string type\" \"fourier\"\n" )
-            file.write( "  \"string bsdffile\" \"%s\"\n" % pbrt_exporter.fixPbrtPath(abs_file_path) )
+            file.write( "  \"string bsdffile\" \"%s\"\n" % fixPbrtPath(abs_file_path) )
         else:
             file.write( "  \"string type\" \"matte\"\n" ) # Merl is not supported in pbrt 3.x
             file.write( "  \"rgb Kd\" [1.0 1.0 1.0]\n" )
