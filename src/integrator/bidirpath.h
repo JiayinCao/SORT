@@ -24,6 +24,7 @@
 
 class	Primitive;
 class	Bsdf;
+class   Light;
 
 struct BDPT_Vertex
 {
