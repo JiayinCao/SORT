@@ -74,7 +74,8 @@ const string typeToString( LOG_TYPE type ){
     ( LOG_TYPE::LOG_LIGHT == type ) ? "[Light]" :
     ( LOG_TYPE::LOG_MATERIAL == type ) ? "[Material]" :
     ( LOG_TYPE::LOG_IMAGE == type ) ? "[Image]" :
-    ( LOG_TYPE::LOG_SAMPLING == type ) ? "[Sampling]" : "";
+    ( LOG_TYPE::LOG_SAMPLING == type ) ? "[Sampling]" :
+    ( LOG_TYPE::LOG_CAMERA == type ) ? "[Camera]" : "[Unknown]";
 }
 
 const string lineInfoString( const char* file , int line ){

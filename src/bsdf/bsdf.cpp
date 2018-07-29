@@ -105,7 +105,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 			count--;
 		}
 
-	sAssert( bxdf != 0 , BSDF );
+	sAssert( bxdf != 0 , GENERAL );
 
 	// transform the 'wo' from world space to shading coordinate
 	Vector swo = Normalize(worldToLocal( wo ));
