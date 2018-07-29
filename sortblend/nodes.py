@@ -294,7 +294,8 @@ class SORTNode_BXDF_MERL(SORTShadingNode):
         self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
 
     def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
+        abs_file_path = bpy.path.abspath( self.file_name_prop )
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= abs_file_path )
 
     def export_pbrt(self, file):
         file.write( "  \"string type\" \"matte\"\n" ) # Merl is not supported in pbrt 3.x
@@ -319,11 +320,13 @@ class SORTNode_BXDF_Fourier(SORTShadingNode):
         self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
 
     def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
+        abs_file_path = bpy.path.abspath( self.file_name_prop )
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= abs_file_path )
 
     def export_pbrt(self, file):
+        abs_file_path = bpy.path.abspath( self.file_name_prop )
         file.write( "  \"string type\" \"fourier\"\n" )
-        file.write( "  \"string bsdffile\" \"%s\"\n" % pbrt_exporter.fixPbrtPath(self.file_name_prop) )
+        file.write( "  \"string bsdffile\" \"%s\"\n" % pbrt_exporter.fixPbrtPath(abs_file_path) )
         file.write( "\n" )
 
 # operator nodes
@@ -458,7 +461,8 @@ class SORTNodeImage(SORTShadingNode):
         self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
 
     def export_prop(self, xml_node):
-        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
+        abs_file_path = bpy.path.abspath( self.file_name_prop )
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= abs_file_path )
 
 class SORTPatternNodeCategory(NodeCategory):
     @classmethod
@@ -712,13 +716,15 @@ class SORTNode_Material_Measured(SORTShadingNode):
         self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
 
     def export_prop(self, xml_node):
+        abs_file_path = bpy.path.abspath( self.file_name_prop )
         ET.SubElement( xml_node , 'Property' , name='Type' , type='string', value = self.type_prop )
-        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= self.file_name_prop )
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= abs_file_path )
 
     def export_pbrt(self, file):
+        abs_file_path = bpy.path.abspath( self.file_name_prop )
         if self.type_prop == 'Fourier':
             file.write( "  \"string type\" \"fourier\"\n" )
-            file.write( "  \"string bsdffile\" \"%s\"\n" % pbrt_exporter.fixPbrtPath(self.file_name_prop) )
+            file.write( "  \"string bsdffile\" \"%s\"\n" % pbrt_exporter.fixPbrtPath(abs_file_path) )
         else:
             file.write( "  \"string type\" \"matte\"\n" ) # Merl is not supported in pbrt 3.x
             file.write( "  \"rgb Kd\" [1.0 1.0 1.0]\n" )
