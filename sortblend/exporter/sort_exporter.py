@@ -210,7 +210,7 @@ def export_scene(scene, force_debug):
                 ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() ) )
                 ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
-                ET.SubElement( light_node , 'Property' , name='image' ,value=lamp.sort_lamp.sort_lamp_hemi.envmap_file)
+                ET.SubElement( light_node , 'Property' , name='image' ,value= bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ) )
 
     # output the xml
     output_scene_file = preference.get_immediate_dir(force_debug) + 'blender.xml'
