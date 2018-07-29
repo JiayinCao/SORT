@@ -21,10 +21,10 @@
 // include the header
 #include "math/point.h"
 #include "spectrum/spectrum.h"
+#include <float.h>
 
 // pre-decleration class
 class Primitive;
-class Light;
 
 ///////////////////////////////////////////////////////////////////////
 //	definition of intersection
@@ -32,11 +32,6 @@ class	Intersection
 {
 // public method
 public :
-	// default constructor
-	Intersection();
-	// destructor
-	~Intersection();
-
 	// get the emissive
 	Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;
 
@@ -49,11 +44,11 @@ public:
 	// tangent vector
 	Vector	tangent;
 	// the uv coordinate
-	float	u , v;
+    float	u = 0.0f , v = 0.0f;
 	// the delta distance from the orginal point
-	float	t;
+	float	t = FLT_MAX;
 	// the intersected primitive
-	Primitive* 	primitive;
+	Primitive* 	primitive = nullptr;
 };
 
 #endif
