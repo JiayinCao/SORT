@@ -39,6 +39,7 @@ enum class LOG_TYPE{
     LOG_MATERIAL,
     LOG_IMAGE,
     LOG_SAMPLING,
+    LOG_CAMERA,
 };
 
 class LogDispatcher{

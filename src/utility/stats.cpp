@@ -88,7 +88,7 @@ StatsItemRegister::StatsItemRegister( const stats_update f , const std::string& 
 // Flush the data into StatsSummary
 void StatsItemRegister::FlushData() const
 {
-    sAssert(func, LOG_GENERAL);
+    sAssert(func, GENERAL);
     func(g_StatsSummary);
 }
 

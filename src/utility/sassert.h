@@ -27,8 +27,10 @@
     #define sAssertMsg(expr,type,str) (void(0))
 #else
     #define sAssert(expr,type) \
-            if( false == (bool)(expr) ) \
-                assert( false );
+            if( false == (bool)(expr) ) {\
+                slog( CRITICAL , type , "Crashed!" );\
+                assert( false );\
+            }
 
     #define sAssertMsg(expr, type, str) \
             if( false == (bool)(expr) )\
