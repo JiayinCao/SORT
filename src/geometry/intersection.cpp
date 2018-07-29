@@ -17,22 +17,7 @@
 
 // include the header
 #include "intersection.h"
-#include <float.h>
 #include "light/light.h"
-
-// default constructor
-Intersection::Intersection()
-{
-	u = 0.0f;
-	v = 0.0f;
-	t = FLT_MAX;
-	primitive = 0;
-}
-
-// destructor
-Intersection::~Intersection()
-{
-}
 
 // get the emissive
 Spectrum Intersection::Le( const Vector& wo , float* directPdfA , float* emissionPdf ) const

@@ -88,7 +88,7 @@ public:\
     }\
     void Merge( const StatsItemBase* item ) override{\
         auto p = dynamic_cast<const NAME*>(item);\
-        sAssert( p != nullptr , "Merging incorrect stats data." );\
+        sAssertMsg( p != nullptr , GENERAL , "Merging incorrect stats data." );\
         data += p->data;\
     }\
     shared_ptr<StatsItemBase> MakeItem() const override{\

@@ -333,7 +333,7 @@ void Scene::_genLightDistribution()
 const Light* Scene::SampleLight( float u , float* pdf ) const
 {
 	sAssert( u >= 0.0f && u <= 1.0f , SAMPLING );
-	sAssert( m_pLightsDis != 0 , SAMPLING );
+	sAssertMsg( m_pLightsDis != 0 , SAMPLING , "No light in the scene." );
 
 	float _pdf;
 	int id = m_pLightsDis->SampleDiscrete( u , &_pdf );

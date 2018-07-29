@@ -135,7 +135,7 @@ float Beckmann::D(const Vector& h) const
 Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
     const float logSample = std::log( bs.u );
-    sAssert(!std::isinf(logSample), "Bad sample in Beckman sampling.");
+    sAssertMsg(!std::isinf(logSample), GENERAL , "Bad sample in Beckman sampling.");
     
     float theta, phi;
     if( alphaU == alphaV ){
