@@ -24,6 +24,7 @@ IMPLEMENT_CREATOR( BlendNode );
 IMPLEMENT_CREATOR( MutiplyNode );
 IMPLEMENT_CREATOR( GammaToLinearNode );
 IMPLEMENT_CREATOR( LinearToGammaNode );
+IMPLEMENT_CREATOR( NormalDecoderNode );
 
 bool OperatorNode::CheckValidation()
 {
@@ -178,4 +179,16 @@ MaterialPropertyValue LinearToGammaNode::GetNodeValue( Bsdf* bsdf )
     tmp.y = LinearToGamma(tmp.y);
     tmp.z = LinearToGamma(tmp.z);
     return tmp;
+}
+
+NormalDecoderNode::NormalDecoderNode()
+{
+    m_props.insert( make_pair( "Color" , &src ) );
+}
+
+// get property value
+MaterialPropertyValue NormalDecoderNode::GetNodeValue( Bsdf* bsdf )
+{
+    auto tmp = src.GetPropertyValue(bsdf);
+    return MaterialPropertyValue( 2.0f * tmp.x - 1.0f , tmp.z , 2.0f * tmp.y - 1.0f , 0.0f );
 }

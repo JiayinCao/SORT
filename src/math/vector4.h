@@ -116,6 +116,10 @@ public:
 	Spectrum ToSpectrum() const{
 		return Spectrum( x , y , z );
 	}
+    // to vector
+    Vector   ToVector() const{
+        return Vector( x , y , z );
+    }
 
 // private field
 public:
