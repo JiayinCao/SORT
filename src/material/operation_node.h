@@ -157,3 +157,19 @@ public:
 private:
     MaterialNodeProperty    src;
 };
+
+// Gamma correction Node
+class NormalDecoderNode : public OperatorNode
+{
+public:
+    DEFINE_CREATOR( NormalDecoderNode , MaterialNode , "SORTNodeDecodeNormal" );
+    
+    // constructor
+    NormalDecoderNode();
+    
+    // get property value
+    MaterialPropertyValue    GetNodeValue( Bsdf* bsdf ) override;
+    
+private:
+    MaterialNodeProperty    src;
+};
