@@ -63,6 +63,8 @@ protected:
 
 Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 {
+    static const Vector up( 0.0f , 1.0f , 0.0f );
+    
     if( !SameHemiSphere(wo, wi) ) return 0.0f;
 
     const static Spectrum white(1.0f);
@@ -106,12 +108,15 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
     const GGX ggx( roughness / aspect , roughness * aspect );
     const FresnelDisney fresnel0(Cspec0, 1.0f, 1.5f, metallic);
-    const MicroFacetReflection mf(Cspec0, &fresnel0, &ggx, white);
+    const MicroFacetReflection mf(Cspec0, &fresnel0, &ggx, white, up);
     
     // Clear coat term (ior = 1.5 -> F0 = 0.04)
     const ClearcoatGGX cggx(sqrt(lerp(0.1f, 0.001f, clearcoatGloss)));
     const FresnelSchlick<float> fresnel1(0.04f);
-    const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f * clearcoat ) , &fresnel1, &cggx, white);
+    const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f * clearcoat ) , &fresnel1, &cggx, white, up);
+    
+    mf.UpdateGNormal(gnormal);
+    mf_clearcoat.UpdateGNormal(gnormal);
     
     // Final specular term
     const Spectrum spec = mf.f(wo,wi) + mf_clearcoat.f(wo, wi);
@@ -119,7 +124,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     return diff + spec;
 }
 
-Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
+Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
     if( bs.u < ( 1.0f - metallic ) * ( 1.0f - specular * 0.92f ) ){
         // Cosine-weighted sample
         wi = CosSampleHemisphere( bs.u / ( ( 1.0f - metallic ) * 0.92f ) , bs.v );
@@ -152,11 +157,11 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
         if( !SameHemiSphere(wo, wi) ) wi.z = -wi.z;
     }
     
-    if( pdf ) *pdf = Pdf( wo , wi );
+    if( pPdf ) *pPdf = pdf( wo , wi );
     return f( wo , wi );
 }
 
-float DisneyBRDF::Pdf( const Vector& wo , const Vector& wi ) const{
+float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
     if( !SameHemiSphere(wo, wi) ) return 0.0f;
     
     const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));

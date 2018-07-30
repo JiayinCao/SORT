@@ -83,7 +83,7 @@ private:
     Vector tn;  /**< Tangent at the point to be evaluted. */
 
 	// intersection for the bsdf
-	const Intersection intersect;   /**<    Intersection information of the point to be evaluted. */
+    const Intersection intersect;   /**<    Intersection information of the point to be evaluted. */
 
     //! @brief Transform a vector from world coordinate to shading coordinate.
     //! @param v    A vector in world coordiante.
@@ -179,8 +179,4 @@ inline Vector SphericalVec( float sintheta , float costheta , float phi ){
 
 inline bool SameHemiSphere( const Vector& wi , const Vector& wo ){
 	return ( wi.y * wo.y ) > 0.0f;
-}
-
-inline bool PointingUp( const Vector& w ){
-    return w.y > 0.0f;
 }

@@ -26,11 +26,17 @@
 class BxdfNode : public MaterialNode
 {
 protected:
+    // constructor
+    BxdfNode() { m_props.insert( make_pair( "Normal" , &normal ) ); }
+    
 	// get node type
     MAT_NODE_TYPE getNodeType() override { return MAT_NODE_BXDF | MaterialNode::getNodeType(); }
 
 	// check validation
     bool CheckValidation() override;
+    
+    // normal map if provided
+    MaterialNodeProperty    normal;
 };
 
 // Lambert node

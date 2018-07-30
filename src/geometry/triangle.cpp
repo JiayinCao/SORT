@@ -74,6 +74,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	id1 = m_Index[1].norIndex;
 	id2 = m_Index[2].norIndex;
 
+    intersect->gnormal = Normalize(Cross( e2 , e1 ));
 	intersect->normal = ( w * mem->m_NormalBuffer[id0] + u * mem->m_NormalBuffer[id1] + v * mem->m_NormalBuffer[id2]).Normalize();
 	intersect->tangent = ( w * mem->m_TangentBuffer[id0] + u * mem->m_TangentBuffer[id1] + v * mem->m_TangentBuffer[id2]).Normalize();
 
