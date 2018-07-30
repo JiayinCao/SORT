@@ -45,7 +45,7 @@ public:
     const Spectrum& GetWeight() const { return m_weight; }
     
     inline Spectrum F( const Vector& wo , const Vector& wi ) const{
-        return f( bxdfToBsdf(wo) , bxdfToBsdf(wi) );
+        return f( bsdfToBxdf(wo) , bsdfToBxdf(wi) );
     }
     inline Spectrum Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
         const Spectrum res = sample_f( bsdfToBxdf(wo) , wi , bs , pdf );
@@ -53,7 +53,7 @@ public:
         return res;
     }
     inline float Pdf( const Vector& wo , const Vector& wi ) const{
-        return pdf( bxdfToBsdf(wo) , bxdfToBsdf(wi) );
+        return pdf( bsdfToBxdf(wo) , bsdfToBxdf(wi) );
     }
     
     //! @brief  Check the type of the bxdf, it shouldn't be overriden by derived classes.
