@@ -50,6 +50,7 @@ DisneyPrincipleNode::DisneyPrincipleNode()
 
 void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+    const Vector    n = normal.GetPropertyValue(bsdf).ToVector();
     const Spectrum  bc = basecolor.GetPropertyValue(bsdf).ToSpectrum();
     const float     ss = subsurface.GetPropertyValue(bsdf).x;
     const float     m = metallic.GetPropertyValue(bsdf).x;
@@ -61,7 +62,7 @@ void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     const float     sht = sheenTint.GetPropertyValue(bsdf).x;
     const float     cc = clearcoat.GetPropertyValue(bsdf).x;
     const float     ccg = clearcoatGloss.GetPropertyValue(bsdf).x;
-    bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)( bc , ss , m , s , st , r , a , sh , sht , cc , ccg , weight ));
+    bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)( bc , ss , m , s , st , r , a , sh , sht , cc , ccg , weight , n ));
 }
 
 LayeredMaterialNode::LayeredMaterialNode(){
@@ -111,6 +112,7 @@ PrincipleMaterialNode::PrincipleMaterialNode()
 
 void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
     const Spectrum  basecolor = baseColor.GetPropertyValue(bsdf).ToSpectrum();
     const float     spec = specular.GetPropertyValue(bsdf).x;
     
@@ -121,8 +123,8 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     const Fresnel* fresnel = SORT_MALLOC( FresnelConductor )( eta , k );
     
     const float m = metallic.GetPropertyValue(bsdf).x;
-    bsdf->AddBxdf(SORT_MALLOC(Lambert)(baseColor.GetPropertyValue(bsdf).ToSpectrum() , weight * (1 - m) * 0.92f ));
-    bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(basecolor, fresnel, dist , weight * (m * 0.92f + 0.08f * spec) ));
+    bsdf->AddBxdf(SORT_MALLOC(Lambert)(baseColor.GetPropertyValue(bsdf).ToSpectrum() , weight * (1 - m) * 0.92f , n));
+    bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(basecolor, fresnel, dist , weight * (m * 0.92f + 0.08f * spec) , n));
 }
 
 MatteMaterialNode::MatteMaterialNode()
@@ -133,13 +135,14 @@ MatteMaterialNode::MatteMaterialNode()
 
 void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
     const Spectrum reflectance(baseColor.GetPropertyValue(bsdf).ToSpectrum());
     if( !reflectance.IsBlack() ){
         const float rn = roughness.GetPropertyValue(bsdf).x;
         if( rn == 0.0f )
-            bsdf->AddBxdf(SORT_MALLOC(Lambert)( reflectance , weight ));
+            bsdf->AddBxdf(SORT_MALLOC(Lambert)( reflectance , weight , n ));
         else
-            bsdf->AddBxdf( SORT_MALLOC(OrenNayar)( reflectance , rn , weight ) );
+            bsdf->AddBxdf( SORT_MALLOC(OrenNayar)( reflectance , rn , weight , n ) );
     }
 }
 
@@ -152,16 +155,17 @@ PlasticMaterialNode::PlasticMaterialNode()
 
 void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
     const Spectrum diff(diffuse.GetPropertyValue(bsdf).ToSpectrum());
     if( !diff.IsBlack() )
-        bsdf->AddBxdf(SORT_MALLOC(Lambert)( diff , weight ));
+        bsdf->AddBxdf(SORT_MALLOC(Lambert)( diff , weight , n ));
     
     const Spectrum spec(specular.GetPropertyValue(bsdf).ToSpectrum());
     if( !spec.IsBlack() ){
         const Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.0f, 1.2f);
         const float rough = roughness.GetPropertyValue(bsdf).x;
         const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
-        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist , weight ));
+        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist , weight , n ));
     }
 }
 
@@ -174,10 +178,12 @@ MeasuredMaterialNode::MeasuredMaterialNode()
 void MeasuredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
     if( bxdfType.str == "Fourier" ){
-        fourierBxdf.m_weight = weight;
+        // This may not even be correct if I have multiple of this BXDF with different weight
+        fourierBxdf.UpdateWeight( weight );
         bsdf->AddBxdf( &fourierBxdf );
     }else if( bxdfType.str == "MERL" ){
-        merlBxdf.m_weight = weight;
+        // This may not even be correct if I have multiple of this BXDF with different weight
+        merlBxdf.UpdateWeight( weight );
         bsdf->AddBxdf( &merlBxdf );
     }
 }
@@ -203,6 +209,7 @@ GlassMaterialNode::GlassMaterialNode()
 
 void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
     const float rough = roughness.GetPropertyValue(bsdf).x;
     const Spectrum r = reflectance.GetPropertyValue(bsdf).ToSpectrum();
     const Spectrum t = transmittance.GetPropertyValue(bsdf).ToSpectrum();
@@ -212,10 +219,10 @@ void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
     if( !r.IsBlack() ){
         const Fresnel* fresnel = SORT_MALLOC( FresnelDielectric )( 1.0f , 1.5f );
-        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( r , fresnel , dist , weight ));
+        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( r , fresnel , dist , weight , n ));
     }
     if( !t.IsBlack() )
-        bsdf->AddBxdf(SORT_MALLOC(MicroFacetRefraction)( t , dist , 1.0f , 1.5f , weight ));
+        bsdf->AddBxdf(SORT_MALLOC(MicroFacetRefraction)( t , dist , 1.0f , 1.5f , weight , n ));
 }
 
 MirrorMaterialNode::MirrorMaterialNode(){
@@ -224,6 +231,7 @@ MirrorMaterialNode::MirrorMaterialNode(){
 
 void MirrorMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
+    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
     const Spectrum color = basecolor.GetPropertyValue(bsdf).ToSpectrum();
     if( color.IsBlack() ) return;
     
@@ -231,6 +239,6 @@ void MirrorMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( 0.0f , 0.0f );   // GGX
     if( !color.IsBlack() ){
         const Fresnel* fresnel = SORT_MALLOC( FresnelNo )();
-        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( color , fresnel , dist , weight ));
+        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( color , fresnel , dist , weight , n ));
     }
 }

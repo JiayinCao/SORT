@@ -20,7 +20,7 @@
 #include "bsdf.h"
 
 // constructor
-OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spectrum& weight) : Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) ) , R(reflectance) 
+OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spectrum& weight , const Vector& n) : Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , n) , R(reflectance) 
 {
 	// rough ness ranges from 0 to infinity
 	roughness = max( 0.0f , roughness );

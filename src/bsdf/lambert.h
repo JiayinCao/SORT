@@ -32,7 +32,7 @@ public:
     //! @param s            Direction-Hemisphere reflection.
     //! @param weight       Weight of this BRDF
     //! @param t            Type of this BRDF
-    Lambert( const Spectrum& s , const Spectrum& weight ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION)),R(s){}
+    Lambert( const Spectrum& s , const Spectrum& weight , const Vector& n ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), n),R(s){}
 
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -55,7 +55,7 @@ public:
     //! @param s            Direction-Hemisphere refraction.
     //! @param weight       Weight of this BRDF
     //! @param t            Type of this BRDF
-    LambertTransmission( const Spectrum& t , const Spectrum& weight ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_TRANSMISSION)),T(t){}
+    LambertTransmission( const Spectrum& t , const Spectrum& weight , const Vector& n ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_TRANSMISSION), n),T(t){}
     
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -75,7 +75,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the incoming direction.
-    float Pdf( const Vector& wo , const Vector& wi ) const override;
+    float pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
     const Spectrum T;         /**< Direction-Hemisphere reflection or total reflection. */

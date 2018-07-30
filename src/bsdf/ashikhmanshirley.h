@@ -36,8 +36,8 @@ public:
     //! @param roughnessU       Roughness along one axis.
     //! @param roughnessV       Roughness along the other axis
     //! @param weight           Weight of the BXDF
-    AshikhmanShirley(const Spectrum& diffuse, const float specular, const float roughnessU, const float roughnessV, const Spectrum& weight)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION)) , D(diffuse), S(specular), distribution(roughnessU, roughnessV) {}
+    AshikhmanShirley(const Spectrum& diffuse, const float specular, const float roughnessU, const float roughnessV, const Spectrum& weight, const Vector& n )
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n) , D(diffuse), S(specular), distribution(roughnessU, roughnessV) {}
 	
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -57,7 +57,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the incoming direction.
-    float Pdf( const Vector& wo , const Vector& wi ) const override;
+    float pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
 	const Spectrum  D , S;            /**< Direction-Hemisphere reflectance and transmittance. */

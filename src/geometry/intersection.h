@@ -39,8 +39,10 @@ public :
 public:
 	// the interesection point
 	Point	intersect;
-	// the normal
+	// the shading normal
 	Vector	normal;
+    // the geometry normal
+    Vector  gnormal;
 	// tangent vector
 	Vector	tangent;
 	// the uv coordinate

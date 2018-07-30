@@ -44,9 +44,9 @@ unsigned Bsdf::NumComponents( BXDF_TYPE type ) const
 // add a new bxdf
 void Bsdf::AddBxdf( const Bxdf* bxdf )
 {
-	if( m_bxdfCount == MAX_BXDF_COUNT || bxdf == 0 || bxdf->m_weight.IsBlack() )
-		return;
+	if( m_bxdfCount == MAX_BXDF_COUNT || bxdf == 0 || bxdf->GetWeight().IsBlack() ) return;
 	m_bxdf[m_bxdfCount] = bxdf ;
+    m_bxdf[m_bxdfCount]->UpdateGNormal( worldToLocal(intersect.gnormal) );
 	m_bxdfCount++;
 }
 
@@ -62,7 +62,7 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )
 	{
 		if( m_bxdf[i]->MatchFlag( type ) )
-			r += m_bxdf[i]->f( swo , swi ) * m_bxdf[i]->m_weight;
+			r += m_bxdf[i]->F( swo , swi ) * m_bxdf[i]->GetWeight();
 	}
 
 	return r;
@@ -111,7 +111,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	Vector swo = Normalize(worldToLocal( wo ));
 
 	// sample the direction
-	Spectrum t = bxdf->sample_f( swo , wi , bs , pdf ) * bxdf->m_weight;
+	Spectrum t = bxdf->Sample_F( swo , wi , bs , pdf ) * bxdf->GetWeight();
 
 	// if there is no properbility of sampling that direction , just return 0.0f
 	if( pdf && *pdf == 0.0f ) return 0.0f;
@@ -128,7 +128,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	
 	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
 		if( bxdf != m_bxdf[i] && m_bxdf[i]->MatchFlag(type) )
-			t += m_bxdf[i]->f(wo,wi) * m_bxdf[i]->m_weight;
+			t += m_bxdf[i]->F(wo,wi) * m_bxdf[i]->GetWeight();
 	
 	// transform the direction back
 	wi = localToWorld( wi );

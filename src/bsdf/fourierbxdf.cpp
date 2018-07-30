@@ -162,7 +162,7 @@ Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
-float FourierBxdf::Pdf( const Vector& wo , const Vector& wi ) const
+float FourierBxdf::pdf( const Vector& wo , const Vector& wi ) const
 {
     float muI = CosTheta(-wi) , muO = CosTheta(wo);
     float cosPhi = CosDPhi( -wi , wo );

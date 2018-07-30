@@ -32,13 +32,13 @@ Spectrum LambertTransmission::f( const Vector& wo , const Vector& wi ) const{
 }
 
 // sample a direction randomly
-Spectrum LambertTransmission::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
+Spectrum LambertTransmission::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
     wi = -CosSampleHemisphere( bs.u , bs.v );
-    if( pdf ) *pdf = Pdf( wo , wi );
+    if( pPdf ) *pPdf = pdf( wo , wi );
     return f( wo , wi );
 }
 
 // get the pdf of the sampled direction
-float LambertTransmission::Pdf( const Vector& wo , const Vector& wi ) const{
+float LambertTransmission::pdf( const Vector& wo , const Vector& wi ) const{
     return SameHemisphere( wo , wi ) ? 0.0f : CosHemispherePdf( wi );
 }

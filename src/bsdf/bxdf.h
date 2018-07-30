@@ -36,11 +36,45 @@ public:
     //! Constructor
     //! @param w    Weight of the bxdf
     //! @param type Type of the bxdf
-    Bxdf(const Spectrum& w, BXDF_TYPE type) : m_weight(w), m_type(type) {}
+    Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n = Vector( 0.0f , 1.0f , 0.0f ) );
 
     //! Virtual destructor.
     virtual ~Bxdf(){}
+
+    //! Update weight of the BXDF. I probably need a wrapper BXDF class for measured BXDF so that I can kill this function.
+    // https://github.com/JerryCao1985/SORT/issues/62
+    void UpdateWeight( const Spectrum& weight ) { m_weight = weight; }
     
+    //! Get weight of this BXDF
+    const Spectrum& GetWeight() const { return m_weight; }
+    
+    inline Spectrum F( const Vector& wo , const Vector& wi ) const{
+        return f( bxdfToBsdf(wo) , bxdfToBsdf(wi) );
+    }
+    inline Spectrum Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
+        const Spectrum res = sample_f( bsdfToBxdf(wo) , wi , bs , pdf );
+        wi = bxdfToBsdf(wi);
+        return res;
+    }
+    inline float Pdf( const Vector& wo , const Vector& wi ) const{
+        return pdf( bxdfToBsdf(wo) , bxdfToBsdf(wi) );
+    }
+    
+    //! @brief  Check the type of the bxdf, it shouldn't be overriden by derived classes.
+    //! @param type     The type to check.
+    //! @return         If the bxdf belongs to the input type.
+    virtual bool    MatchFlag( BXDF_TYPE type ) const final
+    {return (type & m_type)==m_type;}
+    
+    //! @brief  Get the type of the bxdf
+    //! @return The specific type of the bxdf.
+    virtual BXDF_TYPE GetType() const final { return m_type; }
+    
+    //! @brief Update Geometry Normal
+    //! @param n    Geometry normal in bsdf space.
+    inline void UpdateGNormal( const Vector& n ) const { gnormal = bsdfToBxdf(n); }
+    
+protected:
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
@@ -69,20 +103,35 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the incoming direction.
-	virtual float Pdf( const Vector& wo , const Vector& wi ) const;
+	virtual float pdf( const Vector& wo , const Vector& wi ) const;
 
-	//! @brief  Check the type of the bxdf, it shouldn't be overriden by derived classes.
-    //! @param type     The type to check.
-    //! @return         If the bxdf belongs to the input type.
-	virtual bool	MatchFlag( BXDF_TYPE type ) const final
-	{return (type & m_type)==m_type;}
-
-	//! @brief  Get the type of the bxdf
-    //! @return The specific type of the bxdf.
-	virtual BXDF_TYPE GetType() const final { return m_type; }
-
-	Spectrum	m_weight = 1.0f;           /**< The weight for the bxdf, usually between 0 and 1. */
-
-protected:
-	BXDF_TYPE m_type = BXDF_NONE;   /**< The specific type of the bxdf. */
+    //! @brief  Helper function to decide if a vector is pointing on the other side of the primitive
+    //! @param  Vector to be evaluated
+    bool    PointingUp( const Vector& v ) const;
+    
+    //! @brief Transform a vector from world coordinate to shading coordinate.
+    //! @param v    A vector in world coordiante.
+    //! @return     Cooresponding vector in shading coordinate.
+    inline Vector bsdfToBxdf( const Vector& v ) const{
+        if( !normal_map_applied ) return v;
+        return Vector( Dot(v,sn) , Dot(v,nn) , Dot(v,tn) );
+    }
+    
+    //! @brief Transform a vector from shading coordinate to world coordinate.
+    //! @param v    A vector in shading coordinate.
+    //! @return     Cooresponding vector in world coordinate.
+    inline Vector bxdfToBsdf( const Vector& v ) const{
+        if( !normal_map_applied ) return v;
+        return Vector(  v.x * sn.x + v.y * nn.x + v.z * tn.x ,
+                        v.x * sn.y + v.y * nn.y + v.z * tn.y ,
+                        v.x * sn.z + v.y * nn.z + v.z * tn.z );
+    }
+    
+    Spectrum    m_weight = 1.0f;            /**< The weight for the bxdf, usually between 0 and 1. */
+    BXDF_TYPE   m_type = BXDF_NONE;         /**< The specific type of the bxdf. */
+    bool        normal_map_applied = false; /**< Whether normal map is applied on the BXDF. */
+    Vector      nn;                         /**< Normal at the point to be evaluted. */
+    Vector      sn;                         /**< Bi-tangent at the point to be evaluated. */
+    Vector      tn;                         /**< Tangent at the point to be evaluted. */
+    mutable Vector      gnormal;            /**< Geometry normal. */
 };
