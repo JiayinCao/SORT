@@ -166,7 +166,7 @@ private:
     MaterialNodePropertyString    merlfile;
 
     // the merl data
-    Merl merl;
+    MerlData data;
 };
 
 // Fourier bxdf node
@@ -188,5 +188,5 @@ private:
     MaterialNodePropertyString  fourierBxdfFile;
 
     // fourier bxdf node
-    FourierBxdf fourierBxdf;
+    FourierBxdfData fourierBxdfData;
 };
