@@ -23,7 +23,7 @@
 
 Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
 {
-    if( !SameHemiSphere(wo, wi) ) return 0.0f;
+    if( !SameHemiSphere(wo, wi) || !PointingUp(wi) ) return 0.0f;
     
     const float cos_theta_o = AbsCosTheta(wo);
     const float cos_theta_i = AbsCosTheta(wi);
@@ -46,7 +46,7 @@ Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
     return diffuse + specular;
 }
 
-Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
+Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
     if( bs.u < 0.5f ){
         // Cosine-weighted sample
         wi = CosSampleHemisphere( 2.0f * bs.u , bs.v );
@@ -57,13 +57,16 @@ Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfS
         wi = 2 * Dot( wo , wh ) * wh - wo;
         if( !SameHemiSphere(wo, wi) ) return 0.0f;
     }
+    if( pPdf ) *pPdf = pdf( wo , wi );
     
-    if( pdf ) *pdf = Pdf( wo , wi );
+    if( !SameHemiSphere(wo, wi) || !PointingUp(wi) )
+        return 0.0f;
+    
     return f( wo , wi );
 }
 
-float AshikhmanShirley::Pdf( const Vector& wo , const Vector& wi ) const{
-    if( !SameHemiSphere(wo, wi) ) return 0.0f;
+float AshikhmanShirley::pdf( const Vector& wo , const Vector& wi ) const{
+    if( !SameHemiSphere(wo, wi) || !PointingUp(wi) ) return 0.0f;
     
     const Vector wh = Normalize( wi + wo );
     float pdf_wh = distribution.Pdf(wh);

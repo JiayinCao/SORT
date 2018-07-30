@@ -60,7 +60,7 @@ float Blinn::D(const Vector& h) const
     return expUV * pow(NoH, cos_phi_h_sq * expU + sin_phi_h_sq * expV) * INV_TWOPI;
 }
 
-// sampling according to GGX
+// sampling according to Blinn
 Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
     float phi = 0.0f;
@@ -131,11 +131,10 @@ float Beckmann::D(const Vector& h) const
     return exp( -tan_theta_h_sq * ( cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2 ) ) / ( PI * alphaUV * cos_theta_h_sq * cos_theta_h_sq );
 }
 
-// sampling according to GGX
+// sampling according to Beckmann
 Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
 {
     const float logSample = std::log( bs.u );
-    sAssertMsg(!std::isinf(logSample), GENERAL , "Bad sample in Beckman sampling.");
     
     float theta, phi;
     if( alphaU == alphaV ){
@@ -263,7 +262,7 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 // evaluate bxdf
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 {
-	if( SameHemiSphere( wo , wi ) == false )
+	if( SameHemiSphere( wo , wi ) == false || !PointingUp(wo) )
 		return 0.0f;
     
 	const float NoL = AbsCosTheta( wi );
@@ -278,7 +277,7 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 }
 
 // sample a direction randomly
-Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const
 {
 	// sampling the normal
 	const Vector wh = distribution->sample_f( bs , wo );
@@ -287,19 +286,19 @@ Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const B
 	wi = getReflected( wo , wh );
 
 	// Make sure the generate wi is in the same hemisphere with wo
-	if( !SameHemiSphere( wo , wi ) )
+    if( !SameHemiSphere( wo , wi ) || !PointingUp( wi ) ){
+        if( pPdf ) *pPdf = 0.0f;
 		return 0.0f;
+    }
 
-	if(pdf)
-		*pdf = Pdf( wo , wi );
-
+	if(pPdf) *pPdf = pdf( wo , wi );
 	return f( wo , wi );
 }
 
 // get the pdf of the sampled direction
-float MicroFacetReflection::Pdf( const Vector& wo , const Vector& wi ) const
+float MicroFacetReflection::pdf( const Vector& wo , const Vector& wi ) const
 {
-	if( !SameHemisphere( wo , wi ) )
+	if( !SameHemisphere( wo , wi ) || !PointingUp(wo) )
 		return 0.0f;
 
 	const Vector h = Normalize( wo + wi );
@@ -337,7 +336,7 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 }
 
 // sample a direction using importance sampling
-Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const
 {
     if( CosTheta( wo ) == 0.0f )
         return 0.0f;
@@ -350,13 +349,12 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 	wi = getRefracted( wo , wh , etaT , etaI , total_reflection );
 	if( total_reflection ) return 0.0f;
 
-    if( pdf )
-        *pdf = Pdf( wo , wi );
+    if( pPdf ) *pPdf = pdf( wo , wi );
 	return f( wo , wi );
 }
 
 // get the pdf of the sampled direction
-float MicroFacetRefraction::Pdf( const Vector& wo , const Vector& wi ) const
+float MicroFacetRefraction::pdf( const Vector& wo , const Vector& wi ) const
 {
 	if( SameHemisphere( wo , wi ) )
         return 0.0f;

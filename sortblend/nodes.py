@@ -138,7 +138,7 @@ class SORTNodeNormalSocket(bpy.types.NodeSocketVector, SORTSocket):
     bl_idname = 'SORTNodeNormalSocket'
     bl_label = 'SORT Normal Socket'
 
-    default_value = bpy.props.FloatVectorProperty( name='Normal' , default=(0.5,0.5,1.0) , min=-1.0, max=1.0 )
+    default_value = bpy.props.FloatVectorProperty( name='Normal' , default=(0.0,1.0,0.0) , min=-1.0, max=1.0 )
 
     # green node for color
     def draw_color(self, context, node):

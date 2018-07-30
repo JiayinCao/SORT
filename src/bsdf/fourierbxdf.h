@@ -30,7 +30,7 @@ class FourierBxdf : public Bxdf
 {
 public:
 	//! Constructor
-    FourierBxdf( const Spectrum& weight = Spectrum(1.0f) ) : Bxdf(weight, BXDF_ALL) {}
+    FourierBxdf() : Bxdf(Spectrum(1.0f), BXDF_ALL) {}
 	
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -60,7 +60,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the incoming direction.
-    float Pdf( const Vector& wo , const Vector& wi ) const override;
+    float pdf( const Vector& wo , const Vector& wi ) const override;
     
     //! Load brdf data from Fourier Bxdf file.
     //! @param filename Name of Fourier Bxdf file.

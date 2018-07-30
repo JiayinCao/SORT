@@ -19,15 +19,29 @@
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
 
+Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n ) : m_weight(w), m_type(type){
+    static const Vector up( 0.0f , 1.0f , 0.0f );
+    if( n == up ) return;
+    
+    normal_map_applied = true;
+    nn = n;
+    tn = Normalize(Cross( nn , Vector( 1.0f , 0.0f , 0.0f ) ));
+    sn = Cross( tn , nn );
+}
+
 // sample a direction randomly
-Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const
 {
 	wi = CosSampleHemisphere( bs.u , bs.v );
-	if( pdf ) *pdf = Pdf( wo , wi );
+	if( pPdf ) *pPdf = pdf( wo , wi );
 	return f( wo , wi );
 }
 
 // the pdf for the sampled direction
-float Bxdf::Pdf( const Vector& wo , const Vector& wi ) const{
+float Bxdf::pdf( const Vector& wo , const Vector& wi ) const{
     return SameHemisphere( wo , wi ) ? CosHemispherePdf( wi ) : 0.0f;
+}
+
+bool Bxdf::PointingUp( const Vector& v ) const {
+    return Dot( v , gnormal ) > 0.0f;
 }

@@ -139,7 +139,7 @@ public:
     //! @param d        Normal distribution term
     //! @param w        Weight of the bxdf
     //! @param t        Type of the bxdf
-    Microfacet(const MicroFacetDistribution* d, const Spectrum& w, const BXDF_TYPE t) : Bxdf(w, t) , distribution(d) {}
+    Microfacet(const MicroFacetDistribution* d, const Spectrum& w, const BXDF_TYPE t , const Vector& n ) : Bxdf(w, t, n) , distribution(d) {}
 
 protected:
 	const MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
@@ -169,7 +169,7 @@ public:
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param w                Weight of this BRDF
-    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight) : Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION)) , R(reflectance), fresnel(f) {}
+    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight , const Vector& n ) : Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , n) , R(reflectance), fresnel(f) {}
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -189,7 +189,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the incoming direction.
-	float Pdf( const Vector& wo , const Vector& wi ) const override;
+	float pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
     const Spectrum R;                   /**< Direction-hemisphere reflection. */
@@ -209,8 +209,8 @@ public:
     //! @param v                Visibility term.
     //! @param etai             Index of refraction of the side that normal points
     //! @param etat             Index of refraction of the other side that normal points
-    MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d, float etai, float etat, const Spectrum& weight) 
-        : Microfacet(d, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_TRANSMISSION)) , T(transmittance), etaI(etai) , etaT(etat) , fresnel( etai , etat )
+    MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d, float etai, float etat, const Spectrum& weight , const Vector& n)
+        : Microfacet(d, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_TRANSMISSION), n) , T(transmittance), etaI(etai) , etaT(etat) , fresnel( etai , etat )
     {
         // make sure IORs are not the same inside and outside
         if (etaT == etaI)
@@ -235,7 +235,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the incoming direction.
-    float Pdf( const Vector& wo , const Vector& wi ) const override;
+    float pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:
     const Spectrum            T;          /**< Direction-hemisphere transmittance. */
