@@ -34,7 +34,7 @@ static const double MERL_GREEN_SCALE = 0.000766666666666667;
 static const double MERL_BLUE_SCALE = 0.0011066666666666667;
 
 // Load data from file
-void Merl::LoadData( const string& filename )
+void MerlData::LoadData( const string& filename )
 {
     // get full path
     string str = ( filename );
@@ -73,14 +73,8 @@ void Merl::LoadData( const string& filename )
     file.close();
 }
 
-// destructor
-Merl::~Merl()
-{
-	SAFE_DELETE(m_data);
-}
-
 // evaluate bxdf
-Spectrum Merl::f( const Vector& Wo , const Vector& Wi ) const
+Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
 {
 	Vector wo = Wo;
 	Vector wi = Wi;

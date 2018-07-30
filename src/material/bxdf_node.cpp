@@ -163,9 +163,8 @@ MerlNode::MerlNode()
 
 void MerlNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    // This may not even be correct if I have multiple of this BXDF with different weight
-    merl.UpdateWeight(weight);
-    bsdf->AddBxdf( &merl );
+    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
+    bsdf->AddBxdf( SORT_MALLOC(Merl)( data , weight , n ) );
 }
 
 void MerlNode::PostProcess()
@@ -174,7 +173,8 @@ void MerlNode::PostProcess()
         return;
     
     if( merlfile.str.empty() == false )
-        merl.LoadData( merlfile.str );
+        data.LoadData( merlfile.str );
+    BxdfNode::PostProcess();
 }
 
 FourierBxdfNode::FourierBxdfNode()
@@ -184,9 +184,8 @@ FourierBxdfNode::FourierBxdfNode()
 
 void FourierBxdfNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    // This may not even be correct if I have multiple of this BXDF with different weight
-    fourierBxdf.UpdateWeight( weight );
-    bsdf->AddBxdf( &fourierBxdf );
+    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
+    bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( fourierBxdfData , weight , n ) );
 }
 
 // post process
@@ -196,5 +195,6 @@ void FourierBxdfNode::PostProcess()
         return;
 
     if( fourierBxdfFile.str.empty() == false )
-        fourierBxdf.LoadData( fourierBxdfFile.str );
+        fourierBxdfData.LoadData( fourierBxdfFile.str );
+    BxdfNode::PostProcess();
 }

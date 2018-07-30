@@ -36,15 +36,11 @@ public:
     //! Constructor
     //! @param w    Weight of the bxdf
     //! @param type Type of the bxdf
-    Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n = Vector( 0.0f , 1.0f , 0.0f ) );
+    Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n );
 
     //! Virtual destructor.
     virtual ~Bxdf(){}
 
-    //! Update weight of the BXDF. I probably need a wrapper BXDF class for measured BXDF so that I can kill this function.
-    // https://github.com/JerryCao1985/SORT/issues/62
-    void UpdateWeight( const Spectrum& weight ) { m_weight = weight; }
-    
     //! Get weight of this BXDF
     const Spectrum& GetWeight() const { return m_weight; }
     

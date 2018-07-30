@@ -22,7 +22,7 @@
 #include "utility/samplemethod.h"
 #include <fstream>
 
-void FourierBxdf::LoadData( const string& filename )
+void FourierBxdfData::LoadData( const string& filename )
 {
     ifstream file( filename.c_str(), ios::binary);
     if( !file.is_open() )
@@ -83,7 +83,7 @@ void FourierBxdf::LoadData( const string& filename )
 }
 
 // evaluate bxdf
-Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi ) const
+Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
 {
     const float muI = CosTheta( -wi );
     const float muO = CosTheta( wo );
@@ -115,7 +115,7 @@ Spectrum FourierBxdf::f( const Vector& wo , const Vector& wi ) const
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
-Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
+Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
     float muO = CosTheta(wo);
     float pdfMu;
@@ -162,7 +162,7 @@ Spectrum FourierBxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
-float FourierBxdf::pdf( const Vector& wo , const Vector& wi ) const
+float FourierBxdfData::pdf( const Vector& wo , const Vector& wi ) const
 {
     float muI = CosTheta(-wi) , muO = CosTheta(wo);
     float cosPhi = CosDPhi( -wi , wo );
@@ -189,7 +189,7 @@ float FourierBxdf::pdf( const Vector& wo , const Vector& wi ) const
 
 // helper function find interval that wraps the target value
 template<typename Predicate>
-int FourierBxdf::findInterval( int cnt , const Predicate& pred ) const
+int FourierBxdfData::findInterval( int cnt , const Predicate& pred ) const
 {
     // use binary search to get the offset
     int l = 0 , r = cnt - 1;
@@ -204,7 +204,7 @@ int FourierBxdf::findInterval( int cnt , const Predicate& pred ) const
 }
 
 // Get CatmullRomWeights
-bool FourierBxdf::getCatmullRomWeights( float x , int& offset , float* weights ) const
+bool FourierBxdfData::getCatmullRomWeights( float x , int& offset , float* weights ) const
 {
     if( !(x >= bsdfTable.mu[0] && x <= bsdfTable.mu[bsdfTable.nMu-1] ) )
         return false;
@@ -241,7 +241,7 @@ bool FourierBxdf::getCatmullRomWeights( float x , int& offset , float* weights )
 }
 
 // Importance sampling for catmull rom
-float FourierBxdf::sampleCatmullRom2D( int size1 , int size2 , const float* nodes1 , const float* nodes2 , const float* values , const float* cdf ,
+float FourierBxdfData::sampleCatmullRom2D( int size1 , int size2 , const float* nodes1 , const float* nodes2 , const float* values , const float* cdf ,
                                       float alpha , float u , float* fval , float* pdf ) const
 {
     // Determine offset and coefficients for the alpha parameter
@@ -309,7 +309,7 @@ float FourierBxdf::sampleCatmullRom2D( int size1 , int size2 , const float* node
 }
 
 // Fourier interpolation
-float FourierBxdf::fourier( const float* ak , int m , double cosPhi ) const
+float FourierBxdfData::fourier( const float* ak , int m , double cosPhi ) const
 {
     // cos( K * phi ) = 2.0 * cos( (K-1) * phi ) cos( phi ) - cos( (K-2) * Phi );
     double value = 0.0;
@@ -328,7 +328,7 @@ float FourierBxdf::fourier( const float* ak , int m , double cosPhi ) const
 // Refer these two wiki pages for further detail:
 // Bisection method :   https://en.wikipedia.org/wiki/Bisection_method
 // Newton method :      https://en.wikipedia.org/wiki/Newton%27s_method
-float FourierBxdf::sampleFourier( const float* ak , const float* recip , int m , float u , float* pdf , float* phiptr ) const
+float FourierBxdfData::sampleFourier( const float* ak , const float* recip , int m , float u , float* pdf , float* phiptr ) const
 {
     bool flip = u >= 0.5f;
     if( flip ) u = 2.0f * ( 1.0f - u );
@@ -379,7 +379,7 @@ float FourierBxdf::sampleFourier( const float* ak , const float* recip , int m ,
 }
 
 // helper functio to blend coefficients for fourier
-int FourierBxdf::blendCoefficients( float* ak , int channel , int offsetI , int offsetO , float* weightsI , float* weightsO ) const
+int FourierBxdfData::blendCoefficients( float* ak , int channel , int offsetI , int offsetO , float* weightsI , float* weightsO ) const
 {
     int nMax = 0;
     for( int i = 0 ; i < 4 ; ++i ){
