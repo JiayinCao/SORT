@@ -19,6 +19,29 @@
 
 #include "bxdf.h"
 
+class MerlData
+{
+public:
+    ~MerlData() { SAFE_DELETE(m_data); }
+    
+    //! Evaluate the BRDF
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The evaluted BRDF value.
+    Spectrum f( const Vector& wo , const Vector& wi ) const;
+    
+    //! Load brdf data from MERL file.
+    //! @param filename Name of the MERL file.
+    void    LoadData( const string& filename );
+    
+    //! Whether there is valid data loaded.
+    //! @return True if data is valid, otherwise it will return false.
+    bool    IsValid() { return m_data != 0; }
+    
+private:
+    double*    m_data = nullptr;   /**< The actual data of MERL brdf. */
+};
+
 //! @brief  MERL brdf.
 /**
  * MERL is short for Mitsubishi Electric Research Laboratories. They provide some measured
@@ -34,25 +57,16 @@ class Merl : public Bxdf
 {
 public:
 	//! Default constructor setting brdf type.
-    Merl() : Bxdf(Spectrum(1.0f), BXDF_ALL) {}
-
-	//! Destructor deletes all allocated memory
-    ~Merl() override;
+    Merl( const MerlData& md , const Spectrum& weight , const Vector& n ) : Bxdf( weight, BXDF_ALL, n ) , m_data(md) {}
 
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The evaluted BRDF value.
-    Spectrum f( const Vector& wo , const Vector& wi ) const override;
-    
-	//! Load brdf data from MERL file.
-    //! @param filename Name of the MERL file.
-	void	LoadData( const string& filename );
-
-	//! Whether there is valid data loaded.
-    //! @return True if data is valid, otherwise it will return false.
-	bool	IsValid() { return m_data != 0; }
+    Spectrum f( const Vector& wo , const Vector& wi ) const override{
+        return m_data.f(wo,wi);
+    }
 
 private:
-	double*	m_data = nullptr;   /**< The actual data of MERL brdf. */
+	const MerlData&	m_data;   /**< The actual data of MERL brdf. */
 };

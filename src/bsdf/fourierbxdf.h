@@ -20,23 +20,20 @@
 // include header file
 #include "bxdf.h"
 
-//! @brief FourierBxdf.
+//! @brief FourierBxdfData.
 /**
  * Same with MERL brdf, FourierBxdf is also a measured bxdf.
  * However, it is much compact comparing with MERL in term of memory usage.
  * There is also an importance sampling method provided in the bxdf type.
  */
-class FourierBxdf : public Bxdf
+class FourierBxdfData
 {
 public:
-	//! Constructor
-    FourierBxdf() : Bxdf(Spectrum(1.0f), BXDF_ALL) {}
-	
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The evaluted BRDF value.
-    Spectrum f( const Vector& wo , const Vector& wi ) const override;
+    Spectrum f( const Vector& wo , const Vector& wi ) const;
 	
     //! @brief Importance sampling for the bxdf.
     //!
@@ -51,7 +48,7 @@ public:
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
-    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
+    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
     
     //! @brief Evalute the pdf of an existance direction given the incoming direction.
     //!
@@ -60,7 +57,7 @@ public:
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the incoming direction.
-    float pdf( const Vector& wo , const Vector& wi ) const override;
+    float pdf( const Vector& wo , const Vector& wi ) const;
     
     //! Load brdf data from Fourier Bxdf file.
     //! @param filename Name of Fourier Bxdf file.
@@ -121,4 +118,56 @@ private:
     
     // helper functio to blend coefficients for fourier
     int blendCoefficients( float* ak , int channel , int offsetI , int offsetO , float* weightsI , float* weightsO ) const;
+};
+
+//! @brief FourierBxdf.
+/**
+ * Same with MERL brdf, FourierBxdf is also a measured bxdf.
+ * However, it is much compact comparing with MERL in term of memory usage.
+ * There is also an importance sampling method provided in the bxdf type.
+ */
+class FourierBxdf : public Bxdf
+{
+public:
+    //! Default constructor setting brdf type.
+    FourierBxdf( const FourierBxdfData& fd , const Spectrum& weight , const Vector& n ) : Bxdf( weight, BXDF_ALL, n ) , m_data(fd) {}
+    
+    //! Evaluate the BRDF
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The evaluted BRDF value.
+    Spectrum f( const Vector& wo , const Vector& wi ) const override{
+        return m_data.f(wo,wi);
+    }
+    
+    //! @brief Importance sampling for the bxdf.
+    //!
+    //! This method is not pure virtual and it has a default
+    //! implementation, which sample out-going directions that have linear probability with the
+    //! consine value between the out-going ray and the normal.\n
+    //! However, it is suggested that each bxdf has its own importance sampling method for optimal
+    //! convergence rate.\n
+    //! One also needs to implement the function Pdf to make it consistance.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param bs   Sample for bsdf that holds some random variables.
+    //! @param pdf  Probability density of the selected direction.
+    //! @return     The evaluted BRDF value.
+    Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override{
+        return m_data.sample_f( wo , wi , bs , pdf );
+    }
+    
+    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //!
+    //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
+    //! this function, otherwise it is not unbiased.
+    //! @param wo   Exitance direction in shading coordinate.
+    //! @param wi   Incomiing direction in shading coordinate.
+    //! @return     The probability of choosing the out-going direction based on the incoming direction.
+    float pdf( const Vector& wo , const Vector& wi ) const override{
+        return m_data.pdf( wo , wi );
+    }
+    
+private:
+    const FourierBxdfData&    m_data;   /**< The actual data of MERL brdf. */
 };

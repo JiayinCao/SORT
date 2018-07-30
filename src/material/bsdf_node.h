@@ -169,6 +169,6 @@ private:
     MaterialNodePropertyString  bxdfFilePath;
     MaterialNodePropertyString  bxdfType;
     
-    FourierBxdf fourierBxdf;
-    Merl        merlBxdf;
+    FourierBxdfData fourierBxdfData;
+    MerlData        merlData;
 };

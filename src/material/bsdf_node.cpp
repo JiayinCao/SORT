@@ -177,15 +177,11 @@ MeasuredMaterialNode::MeasuredMaterialNode()
 
 void MeasuredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    if( bxdfType.str == "Fourier" ){
-        // This may not even be correct if I have multiple of this BXDF with different weight
-        fourierBxdf.UpdateWeight( weight );
-        bsdf->AddBxdf( &fourierBxdf );
-    }else if( bxdfType.str == "MERL" ){
-        // This may not even be correct if I have multiple of this BXDF with different weight
-        merlBxdf.UpdateWeight( weight );
-        bsdf->AddBxdf( &merlBxdf );
-    }
+    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
+    if( bxdfType.str == "Fourier" )
+        bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( fourierBxdfData , weight , n ) );
+    else if( bxdfType.str == "MERL" )
+        bsdf->AddBxdf( SORT_MALLOC(Merl)(merlData, weight , n) );
 }
 
 // post process
@@ -195,9 +191,10 @@ void MeasuredMaterialNode::PostProcess()
         return;
     
     if( bxdfType.str == "Fourier" )
-        fourierBxdf.LoadData( bxdfFilePath.str );
+        fourierBxdfData.LoadData( bxdfFilePath.str );
     else if( bxdfType.str == "MERL" )
-        merlBxdf.LoadData( bxdfFilePath.str );
+        merlData.LoadData( bxdfFilePath.str );
+    BxdfNode::PostProcess();
 }
 
 GlassMaterialNode::GlassMaterialNode()
