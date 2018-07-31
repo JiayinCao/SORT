@@ -107,7 +107,7 @@ MaterialNode* MaterialNode::ParseNode( TiXmlElement* element , MaterialNode* nod
 	string node_type = element->Attribute( "node" );
 	// create new material node
 	MaterialNode* mat_node = CREATE_TYPE( node_type , MaterialNode );
-	if( mat_node == 0 )
+	if( mat_node == nullptr )
 	{
         slog( WARNING , MATERIAL , stringFormat("Node type %s is undefined." , node_type.c_str() ) );
 		return mat_node;

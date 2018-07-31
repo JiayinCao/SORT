@@ -123,16 +123,13 @@ void ImageTexNode::PostProcess()
 	image_tex.LoadImageFromFile( filename.str );
 }
 
-ConstantColorNode::ConstantColorNode()
-{
+ConstantColorNode::ConstantColorNode(){
 	REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
 }
 
 // get property value
-MaterialPropertyValue ConstantColorNode::GetNodeValue( Bsdf* bsdf )
-{
-	// get intersection
-	return src.GetPropertyValue(bsdf);
+MaterialPropertyValue ConstantColorNode::GetNodeValue( Bsdf* bsdf ){
+	return GET_MATERIALNODE_PROPERTY(src);
 }
 
 // check validation
