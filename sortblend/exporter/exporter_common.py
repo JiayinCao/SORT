@@ -1,7 +1,22 @@
+#    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
+#    platform physically based renderer.
+# 
+#    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+# 
+#    SORT is a free software written for educational purpose. Anyone can distribute
+#    or modify it under the the terms of the GNU General Public License Version 3 as
+#    published by the Free Software Foundation. However, there is NO warranty that
+#    all components are functional in a perfect manner. Without even the implied
+#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+# 
+#    You should have received a copy of the GNU General Public License along with
+#    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+
 import os
 import mathutils
 import bpy
-from .. import utility
+from .. import common
 
 def getCamera(scene):
     camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
@@ -31,3 +46,13 @@ def is_renderable(scene, ob):
 # list all objects in the scene
 def renderable_objects(scene):
     return [ob for ob in scene.objects if is_renderable(scene, ob)]
+
+# matrix to string
+def matrixtostr(matrix):
+    return '%f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f '%(matrix[0][0],matrix[0][1],matrix[0][2],matrix[0][3],matrix[1][0],matrix[1][1],matrix[1][2],matrix[1][3],matrix[2][0],matrix[2][1],matrix[2][2],matrix[2][3],matrix[3][0],matrix[3][1],matrix[3][2],matrix[3][3])
+
+def vec3tostr(vec):
+    return "%f %f %f"%(vec[0],vec[1],vec[2])
+
+def getPreference():
+    return bpy.context.user_preferences.addons[common.preference_bl_name].preferences

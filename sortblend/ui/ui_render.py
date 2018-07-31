@@ -1,8 +1,22 @@
+#    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
+#    platform physically based renderer.
+# 
+#    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+# 
+#    SORT is a free software written for educational purpose. Anyone can distribute
+#    or modify it under the the terms of the GNU General Public License Version 3 as
+#    published by the Free Software Foundation. However, there is NO warranty that
+#    all components are functional in a perfect manner. Without even the implied
+#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+# 
+#    You should have received a copy of the GNU General Public License along with
+#    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+
 import bpy
 import os
 import platform
 import subprocess
-from .. import preference
 from .. import common
 from ..exporter import sort_exporter
 from ..exporter import pbrt_exporter
@@ -35,7 +49,7 @@ class SORTRenderPanel:
         return rd.engine in cls.COMPAT_ENGINES
 
 class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
-    bl_label = common.integrator_panel_bl_name
+    bl_label = 'Renderer'
 
     # Integrator type
     integrator_types = [
@@ -90,7 +104,7 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
         self.layout.prop(context.scene,"accelerator_type_prop")
 
 class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
-    bl_label = common.thread_panel_bl_name
+    bl_label = 'MultiThread'
 
     bpy.types.Scene.thread_num_prop = bpy.props.IntProperty(name='Thread Num', default=8, min=1, max=16)
 
@@ -98,7 +112,7 @@ class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
         self.layout.prop(context.scene,"thread_num_prop")
 
 class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
-    bl_label = common.sampler_panel_bl_name
+    bl_label = 'Sample'
 
     # sampler type
     sampler_types = [
@@ -128,7 +142,7 @@ class SORT_open_log(bpy.types.Operator):
     bl_idname = "sort.open_log"
     bl_label = "Open Log"
     def execute(self, context):
-        logfile = preference.get_sort_dir() + "log.txt"
+        logfile = sort_exporter.get_sort_dir() + "log.txt"
         OpenFile( logfile )
         return {'FINISHED'}
 
@@ -137,11 +151,11 @@ class SORT_openfolder(bpy.types.Operator):
     bl_label = "Open SORT folder"
     
     def execute(self, context):
-        OpenFolder( preference.get_sort_dir() )
+        OpenFolder( sort_exporter.get_sort_dir() )
         return {'FINISHED'}
 
 class DebugPanel(SORTRenderPanel, bpy.types.Panel):
-    bl_label = common.debug_panel_bl_name
+    bl_label = 'DebugPanel'
     bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
 
     def draw(self, context):
@@ -239,7 +253,7 @@ class PBRT_openfolder(bpy.types.Operator):
         return {'FINISHED'}
 
 class PBRTDebugPanel(SORTRenderPanel, bpy.types.Panel):
-    bl_label = common.pbrt_debug_panel_bl_name
+    bl_label = 'PBRT Debug Panel'
     bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
 
     def draw(self, context):

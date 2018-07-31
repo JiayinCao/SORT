@@ -1,15 +1,62 @@
+#    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
+#    platform physically based renderer.
+# 
+#    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+# 
+#    SORT is a free software written for educational purpose. Anyone can distribute
+#    or modify it under the the terms of the GNU General Public License Version 3 as
+#    published by the Free Software Foundation. However, there is NO warranty that
+#    all components are functional in a perfect manner. Without even the implied
+#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+# 
+#    You should have received a copy of the GNU General Public License along with
+#    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+
 import bpy
 import os
 import mathutils
 import shutil
 import numpy as np
+import platform
 from math import degrees
-from .. import preference
 from .. import common
 from .. import nodes
-from .. import utility
 from . import exporter_common
 import xml.etree.cElementTree as ET
+from extensions_framework import util as efutil
+
+def get_sort_dir(force_debug=False):
+    addon_prefs = bpy.context.user_preferences.addons[common.preference_bl_name].preferences
+    debug = bpy.context.scene.debug_prop
+    return_path = addon_prefs.install_path
+    if debug is True:
+        return_path = addon_prefs.install_path_debug
+    if force_debug:
+        return_path = addon_prefs.install_path_debug
+    if platform.system() == 'Windows':
+        return return_path
+    return efutil.filesystem_path(return_path) + "/"
+
+def get_sort_bin_path(force_debug=False):
+    sort_bin_dir = get_sort_dir(force_debug)
+    if platform.system() == 'Darwin':   # for Mac OS
+        sort_bin_path = sort_bin_dir + "sort"
+    elif platform.system() == 'Windows':    # for Windows
+        sort_bin_path = sort_bin_dir + "sort.exe"
+    elif platform.system() == "Linux":
+        sort_bin_path = sort_bin_dir + "SORT"
+    else:
+        raise Exception("SORT is only supported on Windows, Ubuntu and Mac OS")
+    return sort_bin_path
+
+def get_immediate_dir(force_debug=False):
+    sort_bin_dir = get_sort_dir(force_debug)
+    immediate_dir = sort_bin_dir + 'blender_intermediate/'
+    return immediate_dir
+
+def get_immediate_res_dir(force_debug=False):
+    return get_immediate_dir(force_debug) + 'res/'
 
 def MatrixSortToBlender():
     from bpy_extras.io_utils import axis_conversion
@@ -65,8 +112,8 @@ def export_blender(scene, force_debug=False):
 # clear old data and create new path
 def create_path(scene, force_debug):
     # get immediate directory
-    output_dir = preference.get_immediate_dir(force_debug)
-    output_res_dir = preference.get_immediate_res_dir(force_debug)
+    output_dir = get_immediate_dir(force_debug)
+    output_res_dir = get_immediate_res_dir(force_debug)
     # clear the old directory
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
@@ -108,9 +155,9 @@ def export_sort_file(scene, force_debug):
     camera = exporter_common.getCamera(scene)
     pos, target, up = lookAtSORT(camera)
     camera_node = ET.SubElement(root, 'Camera', type='perspective')
-    ET.SubElement( camera_node , "Property" , name="eye" , value=utility.vec3tostr(pos))
-    ET.SubElement( camera_node , "Property" , name="up" , value=utility.vec3tostr(up))
-    ET.SubElement( camera_node , "Property" , name="target" , value=utility.vec3tostr(target))
+    ET.SubElement( camera_node , "Property" , name="eye" , value=exporter_common.vec3tostr(pos))
+    ET.SubElement( camera_node , "Property" , name="up" , value=exporter_common.vec3tostr(up))
+    ET.SubElement( camera_node , "Property" , name="target" , value=exporter_common.vec3tostr(target))
     ET.SubElement( camera_node , "Property" , name="len" , value='%f'%camera.data.sort_camera.sort_camera_lens.lens_size)
     ET.SubElement( camera_node , "Property" , name="interaxial" , value="0")
     ET.SubElement( camera_node , "Property" , name="width" , value="0")
@@ -136,7 +183,7 @@ def export_sort_file(scene, force_debug):
     thread_num = scene.thread_num_prop
     ET.SubElement( root , 'ThreadNum', name='%s'%thread_num)
     # output the xml
-    output_sort_file = preference.get_immediate_dir(force_debug) + 'blender_exported.xml'
+    output_sort_file = get_immediate_dir(force_debug) + 'blender_exported.xml'
     tree = ET.ElementTree(root)
     tree.write(output_sort_file)
 
@@ -154,7 +201,7 @@ def export_scene(scene, force_debug):
         if ob.type == 'MESH':
             model_node = ET.SubElement( root , 'Model' , filename=ob.name + '.obj', name = ob.name )
             transform_node = ET.SubElement( model_node , 'Transform' )
-            ET.SubElement( transform_node , 'Matrix' , value = 'm '+ utility.matrixtostr( MatrixBlenderToSort() * ob.matrix_world) )
+            ET.SubElement( transform_node , 'Matrix' , value = 'm '+ exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world) )
             # output the mesh to file
             export_mesh(ob,scene, force_debug)
         elif ob.type == 'LAMP':
@@ -166,23 +213,23 @@ def export_scene(scene, force_debug):
                 light_node = ET.SubElement( root , 'Light' , type='distant')
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( world_matrix ) )                
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
             elif lamp.type == 'POINT':
                 light_node = ET.SubElement( root , 'Light' , type='point')
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
                 light_position = world_matrix.col[3]
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( world_matrix ) )                
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
             elif lamp.type == 'SPOT':
                 light_node = ET.SubElement( root , 'Light' , type='spot')
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
                 light_dir = world_matrix.col[2] * -1.0
                 light_position = world_matrix.col[3]
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( world_matrix ) )
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='falloff_start' ,value="%d"%(degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)))
                 ET.SubElement( light_node , 'Property' , name='range' ,value="%d"%(degrees(lamp.spot_size*0.5)))
             elif lamp.type == 'AREA':
@@ -198,22 +245,22 @@ def export_scene(scene, force_debug):
                 if lamp.shape == 'RECTANGLE':
                     shape = 'rectangle'
                 
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr(world_matrix) )
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr(world_matrix) )
                 ET.SubElement( light_node , 'Property' , name='shape' ,value=shape)
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
                 ET.SubElement( light_node , 'Property' , name='sizex' ,value='%d'%sizeX )
                 ET.SubElement( light_node , 'Property' , name='sizey' ,value='%d'%sizeY )
             elif lamp.type == 'HEMI':
                 light_spectrum = np.array(lamp.color[:])
                 light_spectrum *= lamp.energy
                 light_node = ET.SubElement( root , 'Light' , type='skylight')
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=utility.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + utility.matrixtostr( MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() ) )
+                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
+                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() ) )
                 ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
                 ET.SubElement( light_node , 'Property' , name='image' ,value= bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ) )
 
     # output the xml
-    output_scene_file = preference.get_immediate_dir(force_debug) + 'blender.xml'
+    output_scene_file = get_immediate_dir(force_debug) + 'blender.xml'
     tree = ET.ElementTree(root)
     tree.write(output_scene_file)
 
@@ -228,7 +275,7 @@ mtl_rev_dict = {}
 
 # export mesh file
 def export_mesh(obj,scene,force_debug):
-    output_path = preference.get_immediate_res_dir(force_debug) + obj.name + '.obj'
+    output_path = get_immediate_res_dir(force_debug) + obj.name + '.obj'
 
     # the mesh object
     mesh = obj.data
@@ -284,7 +331,7 @@ def export_mesh(obj,scene,force_debug):
                 uv_ls = uv_face_mapping[f_index] = []
                 for uv_index, l_index in enumerate(f.loop_indices):
                     uv = uv_layer[l_index].uv
-                    uv_key = utility.veckey2d(uv)
+                    uv_key = round(uv[0], 4), round(uv[1], 4)
                     uv_val = uv_get(uv_key)
                     if uv_val is None:
                         uv_val = uv_dict[uv_key] = uv_unique_count
@@ -302,7 +349,9 @@ def export_mesh(obj,scene,force_debug):
         loops_to_normals = [0] * len(mesh.loops)
         for f, f_index in face_index_pairs:
             for l_idx in f.loop_indices:
-                no_key = utility.veckey3d(mesh.loops[l_idx].normal)
+                def veckey3d(v):
+                    return round(v.x, 4), round(v.y, 4), round(v.z, 4)
+                no_key = veckey3d(mesh.loops[l_idx].normal)
                 no_val = no_get(no_key)
                 if no_val is None:
                     no_val = normals_to_idx[no_key] = no_unique_count
@@ -431,7 +480,7 @@ def export_material(scene,force_debug):
                     draw_props(output_node, mat_node)
     
     # output the xml
-    output_material_file = preference.get_immediate_dir(force_debug) + 'blender_material.xml'
+    output_material_file = get_immediate_dir(force_debug) + 'blender_material.xml'
     tree = ET.ElementTree(root)
     tree.write(output_material_file)
 

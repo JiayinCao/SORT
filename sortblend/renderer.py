@@ -1,3 +1,18 @@
+#    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
+#    platform physically based renderer.
+# 
+#    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+# 
+#    SORT is a free software written for educational purpose. Anyone can distribute
+#    or modify it under the the terms of the GNU General Public License Version 3 as
+#    published by the Free Software Foundation. However, there is NO warranty that
+#    all components are functional in a perfect manner. Without even the implied
+#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+# 
+#    You should have received a copy of the GNU General Public License along with
+#    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+
 import bpy
 import os
 import subprocess
@@ -6,7 +21,6 @@ import struct
 import numpy
 import platform
 from .exporter import sort_exporter
-from . import preference
 from . import common
 from extensions_framework.util import TimerThread
 
@@ -99,12 +113,12 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # on mac os
         if platform.system() == "Darwin" or platform.system() == "Linux":
             # open a new file
-            self.file = open( preference.get_immediate_dir() + "sharedmem.bin" , "wb" , self.sm_size)
+            self.file = open( sort_exporter.get_immediate_dir() + "sharedmem.bin" , "wb" , self.sm_size)
             self.file.write( bytes( "\0" * self.sm_size , "utf-8" ) )
             self.file.close()
         
             # open it in append mode
-            self.file = open( preference.get_immediate_dir() + "sharedmem.bin" , "a+b" , self.sm_size)
+            self.file = open( sort_exporter.get_immediate_dir() + "sharedmem.bin" , "a+b" , self.sm_size)
 
             # allocate shared memory first
             self.sharedmemory = mmap.mmap(self.file.fileno(), self.sm_size)
@@ -139,7 +153,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # check if the path for SORT is set correctly
         try:
             self.sort_available = True
-            sort_bin_path = preference.get_sort_bin_path()
+            sort_bin_path = sort_exporter.get_sort_bin_path()
             if sort_bin_path is None:
                 raise Exception("Set the path where binary for SORT is located before rendering anything.")
             elif not os.path.exists(sort_bin_path):
@@ -166,7 +180,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
     # preview render
     def render_preview(self, scene):
-        print("render_preview")
+        pass
 
     # scene render
     def render_scene(self, scene):
@@ -174,8 +188,8 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         self.spawnnewthread()
 
         # start rendering process first
-        binary_dir = preference.get_sort_dir()
-        binary_path = preference.get_sort_bin_path()
+        binary_dir = sort_exporter.get_sort_dir()
+        binary_path = sort_exporter.get_sort_bin_path()
 
         # execute binary
         self.cmd_argument = [binary_path];

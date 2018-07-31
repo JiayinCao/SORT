@@ -1,17 +1,52 @@
+#    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
+#    platform physically based renderer.
+# 
+#    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+# 
+#    SORT is a free software written for educational purpose. Anyone can distribute
+#    or modify it under the the terms of the GNU General Public License Version 3 as
+#    published by the Free Software Foundation. However, there is NO warranty that
+#    all components are functional in a perfect manner. Without even the implied
+#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+# 
+#    You should have received a copy of the GNU General Public License along with
+#    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+
 import bpy
 import math
 import mathutils
 import subprocess
 import os.path
+import platform
 import numpy as np
 from math import degrees
 from . import exporter_common
 from .. import common
-from .. import utility
 from .. import nodes
-from .. import preference
+from extensions_framework import util as efutil
 
 pbrt_process = None
+
+# get the path of pbrt binary folder
+def get_pbrt_dir():
+    return_path = exporter_common.getPreference().pbrt_export_path
+    if platform.system() == 'Windows':
+        return return_path
+    return efutil.filesystem_path(return_path) + "/"
+
+# get the path of pbrt executable file
+def get_pbrt_bin_path():
+    pbrt_bin_dir = get_pbrt_dir()
+    if platform.system() == 'Darwin':   # for Mac OS
+        pbrt_bin_dir = pbrt_bin_dir + "pbrt"
+    elif platform.system() == 'Windows':    # for Windows
+        pbrt_bin_dir = pbrt_bin_dir + "pbrt.exe"
+    elif platform.system() == "Linux":
+        pbrt_bin_dir = pbrt_bin_dir + "pbrt"
+    else:
+        raise Exception("PBRT is only supported on Windows, Ubuntu and Mac OS")
+    return pbrt_bin_dir
 
 # get camera data, to be merged with the above function
 def lookAtPbrt(camera):
@@ -45,8 +80,8 @@ def export_blender(scene, force_debug=False):
     pbrt_file_fullpath = export_pbrt_file(scene,node)
 
     # start rendering process first
-    pbrt_bin_path = preference.get_pbrt_bin_path()
-    pbrt_bin_dir = preference.get_pbrt_dir()
+    pbrt_bin_path = get_pbrt_bin_path()
+    pbrt_bin_dir = get_pbrt_dir()
 
     if os.path.isfile(pbrt_bin_path) is False:
         print("Can't find pbrt executable file.")
@@ -71,9 +106,6 @@ def shutdown_pbrt():
     subprocess.Popen.terminate(pbrt_process)
     pbrt_process = None
 
-def get_pbrt_dir():
-    return preference.get_pbrt_dir()
-
 # get pbrt output file name
 def get_pbrt_filename():
     pbrt_file_path = get_pbrt_dir()
@@ -83,7 +115,7 @@ def get_pbrt_filename():
 # export pbrt file
 def export_pbrt_file(scene, node):
     # Get the path to save pbrt scene
-    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    pbrt_file_path = exporter_common.getPreference().pbrt_export_path
     pbrt_file_name = exporter_common.getEditedFileName()
     pbrt_file_fullpath = pbrt_file_path + pbrt_file_name + ".pbrt"
 
@@ -102,9 +134,9 @@ def export_pbrt_file(scene, node):
     camera = exporter_common.getCamera(scene)
     pos, target, up = lookAtPbrt(camera)
     pbrt_camera = "Scale -1 1 1 \n"
-    pbrt_camera += "LookAt \t" + utility.vec3tostr( pos ) + "\n"
-    pbrt_camera += "       \t" + utility.vec3tostr( target ) + "\n"
-    pbrt_camera += "       \t" + utility.vec3tostr( up ) + "\n"
+    pbrt_camera += "LookAt \t" + exporter_common.vec3tostr( pos ) + "\n"
+    pbrt_camera += "       \t" + exporter_common.vec3tostr( target ) + "\n"
+    pbrt_camera += "       \t" + exporter_common.vec3tostr( up ) + "\n"
     pbrt_camera += "Camera \t\"perspective\"\n"
     pbrt_camera += "       \t\"float fov\" [" + '%f'%fov + "]\n\n"
 
@@ -141,7 +173,7 @@ def export_scene(scene):
     return ret;
 
 def export_light(scene):
-    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    pbrt_file_path = exporter_common.getPreference().pbrt_export_path
     pbrt_light_file_name = pbrt_file_path + "lights.pbrt"
 
     file = open(pbrt_light_file_name,'w')
@@ -153,7 +185,7 @@ def export_light(scene):
             lamp = ob.data
             world_matrix = ob.matrix_world
             file.write( "AttributeBegin\n" )
-            file.write( "Transform [" + utility.matrixtostr( world_matrix.transposed() ) + "]\n" )
+            file.write( "Transform [" + exporter_common.matrixtostr( world_matrix.transposed() ) + "]\n" )
             if lamp.type == 'SUN':
                 point_from = [0,1,0]
                 point_to = [0,0,0]
@@ -208,7 +240,7 @@ def export_light(scene):
 
 
 def export_material(scene):
-    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    pbrt_file_path = exporter_common.getPreference().pbrt_export_path
     pbrt_material_file_name = pbrt_file_path + "materials.pbrt"
 
     print( "Exporting pbrt file for material: " , pbrt_material_file_name )
@@ -245,7 +277,7 @@ def export_material(scene):
 
 
 def export_mesh(node):
-    pbrt_file_path = bpy.context.user_preferences.addons[common.preference_bl_name].preferences.pbrt_export_path
+    pbrt_file_path = exporter_common.getPreference().pbrt_export_path
     pbrt_geometry_file_name = pbrt_file_path + node.name + ".pbrt"
 
     print( "Exporting pbrt file for geometry: " , pbrt_geometry_file_name )
@@ -267,7 +299,7 @@ def export_mesh(node):
     file.write( "NamedMaterial \"" + material_names[0] + "\"\n" )
 
     # transform
-    file.write( "Transform [" + utility.matrixtostr( node.matrix_world.transposed() ) + "]\n" )
+    file.write( "Transform [" + exporter_common.matrixtostr( node.matrix_world.transposed() ) + "]\n" )
 
     # output triangle mesh
     file.write( "Shape \"trianglemesh\"\n")
@@ -275,7 +307,7 @@ def export_mesh(node):
     # output vertex buffer
     file.write( '\"point P\" [' )
     for v in mesh.vertices:
-        file.write( utility.vec3tostr( v.co ) + " " )
+        file.write( exporter_common.vec3tostr( v.co ) + " " )
     file.write( "]\n" )
 
     file.write( "\"normal N\" [" )
@@ -284,7 +316,7 @@ def export_mesh(node):
     for poly in mesh.polygons:
         for loop_index in poly.loop_indices:
             id = mesh.loops[loop_index].vertex_index
-            normals[id] = utility.vec3tostr( mesh.loops[loop_index].normal )
+            normals[id] = exporter_common.vec3tostr( mesh.loops[loop_index].normal )
     file.write( " ".join( normals ) )
     file.write( "]\n" )
 
