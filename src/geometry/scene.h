@@ -85,7 +85,7 @@ public:
 	const string& GetFileName() const
 	{ return m_filename; }
 
-	// evalute sky
+	// Evaluate sky
 	Spectrum	Le( const Ray& ray ) const;
 
 // private field

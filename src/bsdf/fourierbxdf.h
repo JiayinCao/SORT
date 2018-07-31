@@ -32,7 +32,7 @@ public:
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const;
 	
     //! @brief Importance sampling for the bxdf.
@@ -47,10 +47,10 @@ public:
     //! @param wi   Incomiing direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
     
-    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
     //!
     //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
     //! this function, otherwise it is not unbiased.
@@ -135,7 +135,7 @@ public:
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         return m_data.f(wo,wi);
     }
@@ -152,12 +152,12 @@ public:
     //! @param wi   Incomiing direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override{
         return m_data.sample_f( wo , wi , bs , pdf );
     }
     
-    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
     //!
     //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
     //! this function, otherwise it is not unbiased.

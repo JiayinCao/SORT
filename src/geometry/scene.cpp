@@ -365,7 +365,7 @@ TriMesh* Scene::GetTriMesh( const string& name ) const
 	return 0;
 }
 
-// evalute sky
+// Evaluate sky
 Spectrum Scene::Le( const Ray& ray ) const
 {
 	if( m_skyLight )

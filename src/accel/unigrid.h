@@ -69,7 +69,7 @@ private:
 	unsigned point2VoxelId( const Point& p , unsigned axis ) const;
     
 	//! @brief Caculate the point with the minimal values along each axis in the voxel.
-    //! @param voxel    The id of the voxel to be evaluted along three dimensions.
+    //! @param voxel    The id of the voxel to be Evaluated along three dimensions.
     //! @return         The point with minimal value along each axis in the voxel.
 	Point	voxelId2Point( int voxel[3] ) const;
     
