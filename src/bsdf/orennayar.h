@@ -37,7 +37,7 @@ public:
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
 	
 private:

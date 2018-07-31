@@ -27,7 +27,7 @@ public:
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const;
     
     //! Load brdf data from MERL file.
@@ -62,7 +62,7 @@ public:
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         return m_data.f(wo,wi);
     }

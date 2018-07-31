@@ -74,7 +74,7 @@ protected:
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
 	virtual Spectrum f( const Vector& wo , const Vector& wi ) const = 0;
     
     //! @brief Importance sampling for the bxdf.
@@ -89,10 +89,10 @@ protected:
     //! @param wi   Incomiing direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
 	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
     
-    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
     //!
     //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
     //! this function, otherwise it is not unbiased.
@@ -126,8 +126,8 @@ protected:
     Spectrum    m_weight = 1.0f;            /**< The weight for the bxdf, usually between 0 and 1. */
     BXDF_TYPE   m_type = BXDF_NONE;         /**< The specific type of the bxdf. */
     bool        normal_map_applied = false; /**< Whether normal map is applied on the BXDF. */
-    Vector      nn;                         /**< Normal at the point to be evaluted. */
+    Vector      nn;                         /**< Normal at the point to be Evaluated. */
     Vector      sn;                         /**< Bi-tangent at the point to be evaluated. */
-    Vector      tn;                         /**< Tangent at the point to be evaluted. */
+    Vector      tn;                         /**< Tangent at the point to be Evaluated. */
     mutable Vector      gnormal;            /**< Geometry normal. */
 };
