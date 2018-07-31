@@ -165,11 +165,9 @@ def export_pbrt_file(scene, node):
 # export scene
 def export_scene(scene):
     ret = []
-    all_nodes = exporter_common.renderable_objects(scene)
-    for node in all_nodes:
-        if node.type == 'MESH':
-            export_mesh(node)
-            ret.append(node.name)
+    for node in exporter_common.getMeshList(scene):
+        export_mesh(node)
+        ret.append(node.name)
     return ret;
 
 def export_light(scene):
@@ -179,62 +177,60 @@ def export_light(scene):
     file = open(pbrt_light_file_name,'w')
 
     pbrt_lights = ''
-    all_nodes = exporter_common.renderable_objects(scene)
-    for ob in all_nodes:
-        if ob.type == 'LAMP':
-            lamp = ob.data
-            world_matrix = ob.matrix_world
-            file.write( "AttributeBegin\n" )
-            file.write( "Transform [" + exporter_common.matrixtostr( world_matrix.transposed() ) + "]\n" )
-            if lamp.type == 'SUN':
-                point_from = [0,1,0]
-                point_to = [0,0,0]
-                str = "LightSource \"distant\" \n"
-                str += "\"rgb L\" [ %f %f %f ] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
-                str += "\"point from\" [ %f %f %f ] \n"%(point_from[0],point_from[2],point_from[1])
-                str += "\"point to\" [ %f %f %f ] \n"%(point_to[0],point_to[2],point_to[1])
-                str += "\"rgb scale\" [ %f %f %f ] \n"%(lamp.energy,lamp.energy,lamp.energy)
-                file.write(str)
-            elif lamp.type == 'POINT':
-                point_from = [0,0,0]
-                str = "LightSource \"point\" \n"
-                str += "\"rgb I\" [ %f %f %f ] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
-                str += "\"point from\" [ %f %f %f ] \n"%(point_from[0],point_from[2],point_from[1])
-                str += "\"rgb scale\" [ %f %f %f ] \n"%(lamp.energy,lamp.energy,lamp.energy)
-                file.write(str)
-            elif lamp.type == 'SPOT':
-                point_from = [0,1,0]
-                point_to = [0,0,0]
-                str = "LightSource \"spot\" "
-                str += "\"rgb I\" [ %f %f %f ] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
-                str += "\"point from\" [ %f %f %f ] \n"%(point_from[0],point_from[2],point_from[1])
-                str += "\"point to\" [ %f %f %f] \n"%(point_to[0],point_to[2],point_to[1])
-                str += "\"rgb scale\" [ %f %f %f ] \n"%(lamp.energy,lamp.energy,lamp.energy)
-                str += "\"float coneangle\" [ %f ] \n"%(degrees(lamp.spot_size*0.5))
-                str += "\"float conedeltaangle\" [ %f ] \n"%(degrees(lamp.spot_size * lamp.spot_blend * 0.5))
-                file.write(str)
-            elif lamp.type == 'AREA':
-                halfSizeX = lamp.size / 2
-                halfSizeY = lamp.size_y / 2
-                if lamp.shape == 'SQUARE':
-                    halfSizeY = halfSizeX
-                light_spectrum = np.array(lamp.color[:])
-                light_spectrum *= lamp.energy
+    for ob in exporter_common.getLightList(scene):
+        lamp = ob.data
+        world_matrix = ob.matrix_world
+        file.write( "AttributeBegin\n" )
+        file.write( "Transform [" + exporter_common.matrixtostr( world_matrix.transposed() ) + "]\n" )
+        if lamp.type == 'SUN':
+            point_from = [0,1,0]
+            point_to = [0,0,0]
+            str = "LightSource \"distant\" \n"
+            str += "\"rgb L\" [ %f %f %f ] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+            str += "\"point from\" [ %f %f %f ] \n"%(point_from[0],point_from[2],point_from[1])
+            str += "\"point to\" [ %f %f %f ] \n"%(point_to[0],point_to[2],point_to[1])
+            str += "\"rgb scale\" [ %f %f %f ] \n"%(lamp.energy,lamp.energy,lamp.energy)
+            file.write(str)
+        elif lamp.type == 'POINT':
+            point_from = [0,0,0]
+            str = "LightSource \"point\" \n"
+            str += "\"rgb I\" [ %f %f %f ] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+            str += "\"point from\" [ %f %f %f ] \n"%(point_from[0],point_from[2],point_from[1])
+            str += "\"rgb scale\" [ %f %f %f ] \n"%(lamp.energy,lamp.energy,lamp.energy)
+            file.write(str)
+        elif lamp.type == 'SPOT':
+            point_from = [0,1,0]
+            point_to = [0,0,0]
+            str = "LightSource \"spot\" "
+            str += "\"rgb I\" [ %f %f %f ] \n"%(lamp.color[0],lamp.color[1],lamp.color[2])
+            str += "\"point from\" [ %f %f %f ] \n"%(point_from[0],point_from[2],point_from[1])
+            str += "\"point to\" [ %f %f %f] \n"%(point_to[0],point_to[2],point_to[1])
+            str += "\"rgb scale\" [ %f %f %f ] \n"%(lamp.energy,lamp.energy,lamp.energy)
+            str += "\"float coneangle\" [ %f ] \n"%(degrees(lamp.spot_size*0.5))
+            str += "\"float conedeltaangle\" [ %f ] \n"%(degrees(lamp.spot_size * lamp.spot_blend * 0.5))
+            file.write(str)
+        elif lamp.type == 'AREA':
+            halfSizeX = lamp.size / 2
+            halfSizeY = lamp.size_y / 2
+            if lamp.shape == 'SQUARE':
+                halfSizeY = halfSizeX
+            light_spectrum = np.array(lamp.color[:])
+            light_spectrum *= lamp.energy
 
-                str = "AreaLightSource \"diffuse\" \"rgb L\" [%f %f %f] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
-                str += "Material \"matte\" \"rgb Kd\" [ 0.0 0.0 0.0 ]\n"
-                str += "Shape \"trianglemesh\"\n"
-                str += "\"integer indices\" [0 2 1 0 3 2]\n"
-                str += "\"point P\" [ %f %f 0   %f %f 0   %f %f 0   %f %f 0 ]\n"%(-halfSizeX,-halfSizeY,halfSizeX,-halfSizeY,halfSizeX,halfSizeY,-halfSizeX,halfSizeY)
-                file.write(str)
-            elif lamp.type == 'HEMI':
-                light_spectrum = np.array(lamp.color[:])
-                light_spectrum *= lamp.energy
-                str = "LightSource \"infinite\" "
-                str += "\"rgb L\" [ %f %f %f ] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
-                str += "\"string mapname\" \"%s\" \n"%nodes.fixPbrtPath(bpy.path.abspath(lamp.sort_lamp.sort_lamp_hemi.envmap_file))
-                file.write(str)
-            file.write( "AttributeEnd\n" )
+            str = "AreaLightSource \"diffuse\" \"rgb L\" [%f %f %f] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
+            str += "Material \"matte\" \"rgb Kd\" [ 0.0 0.0 0.0 ]\n"
+            str += "Shape \"trianglemesh\"\n"
+            str += "\"integer indices\" [0 2 1 0 3 2]\n"
+            str += "\"point P\" [ %f %f 0   %f %f 0   %f %f 0   %f %f 0 ]\n"%(-halfSizeX,-halfSizeY,halfSizeX,-halfSizeY,halfSizeX,halfSizeY,-halfSizeX,halfSizeY)
+            file.write(str)
+        elif lamp.type == 'HEMI':
+            light_spectrum = np.array(lamp.color[:])
+            light_spectrum *= lamp.energy
+            str = "LightSource \"infinite\" "
+            str += "\"rgb L\" [ %f %f %f ] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
+            str += "\"string mapname\" \"%s\" \n"%nodes.fixPbrtPath(bpy.path.abspath(lamp.sort_lamp.sort_lamp_hemi.envmap_file))
+            file.write(str)
+        file.write( "AttributeEnd\n" )
 
     file.close()
 
@@ -246,32 +242,20 @@ def export_material(scene):
     print( "Exporting pbrt file for material: " , pbrt_material_file_name )
     file = open( pbrt_material_file_name , 'w' )
 
-    # avoid exporting a material twice
-    exported_materials = []
+    for material in exporter_common.getMaterialList(scene):
+        ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+        output_node = nodes.find_node(material, common.sort_node_output_bl_name)
+        if output_node is None:
+            continue
 
-    all_nodes = exporter_common.renderable_objects(scene)
-    for ob in all_nodes:
-        if ob.type == 'MESH':
-            for material in ob.data.materials[:]:
-                # make sure it is a SORT material
-                if material and material.sort_material and material.sort_material.sortnodetree:
-                    # skip if the material is already exported
-                    if exported_materials.count( material.name ) != 0:
-                        continue
-                    exported_materials.append( material.name )
-                    
-                    ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-                    output_node = nodes.find_node(material, common.sort_node_output_bl_name)
-                    if output_node is None:
-                        continue
+        if len(output_node.inputs) == 0:
+            return
 
-                    if len(output_node.inputs) == 0:
-                        return
+        print( 'Exporting material: ' + material.name )
 
-                    file.write( "MakeNamedMaterial \"" + material.name + "\"\n" )
-
-                    nput_node = nodes.socket_node_input(ntree, output_node.inputs[0])
-                    nput_node.export_pbrt(file)
+        file.write( "MakeNamedMaterial \"" + material.name + "\"\n" )
+        nput_node = nodes.socket_node_input(ntree, output_node.inputs[0])
+        nput_node.export_pbrt(file)
 
     file.close()
 
