@@ -1,7 +1,21 @@
+#    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
+#    platform physically based renderer.
+# 
+#    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+# 
+#    SORT is a free software written for educational purpose. Anyone can distribute
+#    or modify it under the the terms of the GNU General Public License Version 3 as
+#    published by the Free Software Foundation. However, there is NO warranty that
+#    all components are functional in a perfect manner. Without even the implied
+#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+# 
+#    You should have received a copy of the GNU General Public License along with
+#    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+
 import bpy
 import xml.etree.cElementTree as ET
 from . import common
-from . import utility
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
 
@@ -845,3 +859,7 @@ def register():
     SORTPatternGraph.nodetypes[SORTNode_Material_Layered] = 'SORTNode_Material_Layered'
     SORTPatternGraph.nodetypes[SORTNode_Material_DisneyBRDF] = 'SORTNode_Material_DisneyBRDF'
     SORTPatternGraph.nodetypes[SORTNode_Material_Mirror] = 'SORTNode_Material_Mirror'
+
+def unregister():
+    nodeitems_utils.unregister_node_categories("SORTSHADERNODES")
+
