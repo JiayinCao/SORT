@@ -196,85 +196,85 @@ def export_scene(scene, force_debug):
     # acceleration structure
     accelerator_type = scene.accelerator_type_prop
     ET.SubElement( root , 'Accel', type=accelerator_type)
-    all_nodes = exporter_common.renderable_objects(scene)
-    for ob in all_nodes:
-        if ob.type == 'MESH':
-            model_node = ET.SubElement( root , 'Model' , filename=ob.name + '.obj', name = ob.name )
-            transform_node = ET.SubElement( model_node , 'Transform' )
-            ET.SubElement( transform_node , 'Matrix' , value = 'm '+ exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world) )
-            # output the mesh to file
-            export_mesh(ob,scene, force_debug)
-        elif ob.type == 'LAMP':
-            lamp = ob.data
-            # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
-            flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
-            world_matrix = MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() * flip_mat
-            if lamp.type == 'SUN':
-                light_node = ET.SubElement( root , 'Light' , type='distant')
-                light_spectrum = np.array(lamp.color[:])
-                light_spectrum *= lamp.energy
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
-            elif lamp.type == 'POINT':
-                light_node = ET.SubElement( root , 'Light' , type='point')
-                light_spectrum = np.array(lamp.color[:])
-                light_spectrum *= lamp.energy
-                light_position = world_matrix.col[3]
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
-            elif lamp.type == 'SPOT':
-                light_node = ET.SubElement( root , 'Light' , type='spot')
-                light_spectrum = np.array(lamp.color[:])
-                light_spectrum *= lamp.energy
-                light_dir = world_matrix.col[2] * -1.0
-                light_position = world_matrix.col[3]
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='falloff_start' ,value="%d"%(degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)))
-                ET.SubElement( light_node , 'Property' , name='range' ,value="%d"%(degrees(lamp.spot_size*0.5)))
-            elif lamp.type == 'AREA':
-                light_node = ET.SubElement( root , 'Light' , type='area')
-                light_spectrum = np.array(lamp.color[:])
-                light_spectrum *= lamp.energy
-                light_dir = world_matrix.col[2] * -1.0
-                light_position = world_matrix.col[3]
 
-                sizeX = lamp.size
-                sizeY = lamp.size_y
-                shape = 'square'
-                if lamp.shape == 'RECTANGLE':
-                    shape = 'rectangle'
-                
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr(world_matrix) )
-                ET.SubElement( light_node , 'Property' , name='shape' ,value=shape)
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='sizex' ,value='%d'%sizeX )
-                ET.SubElement( light_node , 'Property' , name='sizey' ,value='%d'%sizeY )
-            elif lamp.type == 'HEMI':
-                light_spectrum = np.array(lamp.color[:])
-                light_spectrum *= lamp.energy
-                light_node = ET.SubElement( root , 'Light' , type='skylight')
-                ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-                ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() ) )
-                ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
-                ET.SubElement( light_node , 'Property' , name='image' ,value= bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ) )
+    for ob in exporter_common.getMeshList(scene):
+        model_node = ET.SubElement( root , 'Model' , filename=ob.name + '.obj', name = ob.name )
+        transform_node = ET.SubElement( model_node , 'Transform' )
+        ET.SubElement( transform_node , 'Matrix' , value = 'm '+ exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world) )
+        # output the mesh to file
+        export_mesh(ob,scene, force_debug)
+
+    for ob in exporter_common.getLightList(scene):
+        lamp = ob.data
+        # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
+        flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
+        world_matrix = MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() * flip_mat
+        if lamp.type == 'SUN':
+            light_node = ET.SubElement( root , 'Light' , type='distant')
+            light_spectrum = np.array(lamp.color[:])
+            light_spectrum *= lamp.energy
+            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
+            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
+        elif lamp.type == 'POINT':
+            light_node = ET.SubElement( root , 'Light' , type='point')
+            light_spectrum = np.array(lamp.color[:])
+            light_spectrum *= lamp.energy
+            light_position = world_matrix.col[3]
+            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
+            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
+        elif lamp.type == 'SPOT':
+            light_node = ET.SubElement( root , 'Light' , type='spot')
+            light_spectrum = np.array(lamp.color[:])
+            light_spectrum *= lamp.energy
+            light_dir = world_matrix.col[2] * -1.0
+            light_position = world_matrix.col[3]
+            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )
+            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
+            ET.SubElement( light_node , 'Property' , name='falloff_start' ,value="%d"%(degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)))
+            ET.SubElement( light_node , 'Property' , name='range' ,value="%d"%(degrees(lamp.spot_size*0.5)))
+        elif lamp.type == 'AREA':
+            light_node = ET.SubElement( root , 'Light' , type='area')
+            light_spectrum = np.array(lamp.color[:])
+            light_spectrum *= lamp.energy
+            light_dir = world_matrix.col[2] * -1.0
+            light_position = world_matrix.col[3]
+
+            sizeX = lamp.size
+            sizeY = lamp.size_y
+            shape = 'square'
+            if lamp.shape == 'RECTANGLE':
+                shape = 'rectangle'
+            
+            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr(world_matrix) )
+            ET.SubElement( light_node , 'Property' , name='shape' ,value=shape)
+            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
+            ET.SubElement( light_node , 'Property' , name='sizex' ,value='%d'%sizeX )
+            ET.SubElement( light_node , 'Property' , name='sizey' ,value='%d'%sizeY )
+        elif lamp.type == 'HEMI':
+            light_spectrum = np.array(lamp.color[:])
+            light_spectrum *= lamp.energy
+            light_node = ET.SubElement( root , 'Light' , type='skylight')
+            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
+            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() ) )
+            ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
+            ET.SubElement( light_node , 'Property' , name='image' ,value= bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ) )
 
     # output the xml
     output_scene_file = get_immediate_dir(force_debug) + 'blender.xml'
     tree = ET.ElementTree(root)
     tree.write(output_scene_file)
 
-def name_compat(name):
-    if name is None:
-        return 'None'
-    else:
-        return name.replace(' ', '_')
-
 mtl_dict = {}
 mtl_rev_dict = {}
 
 # export mesh file
 def export_mesh(obj,scene,force_debug):
+    def name_compat(name):
+        if name is None:
+            return 'None'
+        else:
+            return name.replace(' ', '_')
+
     output_path = get_immediate_res_dir(force_debug) + obj.name + '.obj'
 
     # the mesh object
@@ -437,47 +437,34 @@ def export_material(scene,force_debug):
     # create root node
     root = ET.Element("Root")
 
-    # avoid exporting a material twice
-    exported_materials = []
+    for material in exporter_common.getMaterialList(scene):
+        # get the sort tree nodes
+        ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
 
-    all_nodes = exporter_common.renderable_objects(scene)
-    for ob in all_nodes:
-        if ob.type == 'MESH':
-            for material in ob.data.materials[:]:
-                # make sure it is a SORT material
-                if material and material.sort_material and material.sort_material.sortnodetree:
-                    # skip if the material is already exported
-                    if exported_materials.count( material.name ) != 0:
-                        continue
-                    exported_materials.append( material.name )
+        # get output nodes
+        output_node = nodes.find_node(material, common.sort_node_output_bl_name)
+        if output_node is None:
+            continue
 
-                    # get the sort tree nodes
-                    ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+        print( 'Exporting material: ' + material.name )
 
-                    # get output nodes
-                    output_node = nodes.find_node(material, common.sort_node_output_bl_name)
-                    if output_node is None:
-                        continue
+        # material node
+        mat_node = ET.SubElement( root , 'Material', name=material.name )
+        
+        def draw_props(mat_node , xml_node):
+            mat_node.export_prop(xml_node)
 
-                    print( 'Exporting material: ' + material.name )
+            inputs = mat_node.inputs
+            for socket in inputs:
+                if socket.is_linked:
+                    input_node = nodes.socket_node_input(ntree, socket)
+                    sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
+                    draw_props(input_node,sub_xml_node)
+                else:
+                    if socket.IsEmptySocket() is False:
+                        ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.output_type_str(), value=socket.output_default_value_to_str() )
 
-                    # material node
-                    mat_node = ET.SubElement( root , 'Material', name=material.name )
-                    
-                    def draw_props(mat_node , xml_node):
-                        mat_node.export_prop(xml_node)
-
-                        inputs = mat_node.inputs
-                        for socket in inputs:
-                            if socket.is_linked:
-                                input_node = nodes.socket_node_input(ntree, socket)
-                                sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
-                                draw_props(input_node,sub_xml_node)
-                            else:
-                                if socket.IsEmptySocket() is False:
-                                    ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.output_type_str(), value=socket.output_default_value_to_str() )
-
-                    draw_props(output_node, mat_node)
+        draw_props(output_node, mat_node)
     
     # output the xml
     output_material_file = get_immediate_dir(force_debug) + 'blender_material.xml'
