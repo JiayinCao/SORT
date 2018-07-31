@@ -32,19 +32,16 @@ def getEditedFileName():
         pbrt_file_name = 'default_scene'
     return pbrt_file_name
 
-# whether the object is hidden
-def is_visible_layer(scene, ob):
-    for i in range(len(scene.layers)):
-        if scene.layers[i] == True and ob.layers[i] == True:
-            return True
-    return False
-
-# whether the object is renderable
-def is_renderable(scene, ob):
-    return (is_visible_layer(scene, ob) and not ob.hide_render)
-
 # list all objects in the scene
 def renderable_objects(scene):
+    def is_renderable(scene, ob):
+        # whether the object is hidden
+        def is_visible_layer(scene, ob):
+            for i in range(len(scene.layers)):
+                if scene.layers[i] == True and ob.layers[i] == True:
+                    return True
+            return False
+        return (is_visible_layer(scene, ob) and not ob.hide_render)
     return [ob for ob in scene.objects if is_renderable(scene, ob)]
 
 # matrix to string
@@ -56,3 +53,36 @@ def vec3tostr(vec):
 
 def getPreference():
     return bpy.context.user_preferences.addons[common.preference_bl_name].preferences
+
+# get the list of material for the whole scene
+def getMaterialList( scene ):
+    exported_materials = []
+    all_nodes = renderable_objects(scene)
+    for ob in all_nodes:
+        if ob.type == 'MESH':
+            for material in ob.data.materials[:]:
+                # make sure it is a SORT material
+                if material and material.sort_material and material.sort_material.sortnodetree:
+                    # skip if the material is already exported
+                    if exported_materials.count( material ) != 0:
+                        continue
+                    exported_materials.append( material )
+    return exported_materials
+
+# get the list of lights in the scene
+def getLightList( scene ):
+    exported_lights = []
+    all_nodes = renderable_objects(scene)
+    for ob in all_nodes:
+        if ob.type == 'LAMP':
+            exported_lights.append( ob )
+    return exported_lights
+
+# get the list of lights in the scene
+def getMeshList( scene ):
+    exported_meshes = []
+    all_nodes = renderable_objects(scene)
+    for ob in all_nodes:
+        if ob.type == 'MESH':
+            exported_meshes.append( ob )
+    return exported_meshes
