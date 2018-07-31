@@ -19,7 +19,7 @@
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
 
-Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n ) : m_weight(w), m_type(type){
+Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_weight(w), m_type(type), doubleSided(doubleSided){
     static const Vector up( 0.0f , 1.0f , 0.0f );
     if( n == up ) return;
     
@@ -39,7 +39,9 @@ Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 
 // the pdf for the sampled direction
 float Bxdf::pdf( const Vector& wo , const Vector& wi ) const{
-    return SameHemisphere( wo , wi ) ? CosHemispherePdf( wi ) : 0.0f;
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
+    return CosHemispherePdf( wi );
 }
 
 bool Bxdf::PointingUp( const Vector& v ) const {

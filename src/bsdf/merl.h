@@ -57,13 +57,15 @@ class Merl : public Bxdf
 {
 public:
 	//! Default constructor setting brdf type.
-    Merl( const MerlData& md , const Spectrum& weight , const Vector& n ) : Bxdf( weight, BXDF_ALL, n ) , m_data(md) {}
+    Merl( const MerlData& md , const Spectrum& weight , const Vector& n , bool doubleSided = false) : Bxdf( weight, BXDF_ALL, n , doubleSided) , m_data(md) {}
 
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
+        if (!SameHemiSphere(wo, wi)) return 0.0f;
+        if (!doubleSided && !PointingUp(wo)) return 0.0f;
         return m_data.f(wo,wi);
     }
 

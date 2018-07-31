@@ -32,7 +32,7 @@ public:
     //! @param reflectance  Direction-hemisphere reflection.
     //! @param roughness    It controls the roughness of the surface.
     //! @param weight       Weight of the BRDF
-	OrenNayar( const Spectrum& reflectance , float roughness , const Spectrum& weight , const Vector& n);
+	OrenNayar( const Spectrum& reflectance , float roughness , const Spectrum& weight , const Vector& n, bool doubleSided = false);
 	
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.

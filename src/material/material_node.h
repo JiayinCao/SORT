@@ -42,6 +42,8 @@ class VisTerm;
 
 typedef Vector4<float> MaterialPropertyValue;
 
+#define REGISTER_MATERIALNODE_PROPERTY( name , prop )    m_props.insert( make_pair( (name) , &(prop) ) )
+
 class MaterialNodeProperty
 {
 public:

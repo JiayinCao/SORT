@@ -35,17 +35,17 @@ IMPLEMENT_CREATOR( MeasuredMaterialNode );
 
 DisneyPrincipleNode::DisneyPrincipleNode()
 {
-    m_props.insert( make_pair( "BaseColor" , &basecolor ) );
-    m_props.insert( make_pair( "SubSurface" , &subsurface ) );
-    m_props.insert( make_pair( "Metallic" , &metallic ) );
-    m_props.insert( make_pair( "Specular" , &specular ) );
-    m_props.insert( make_pair( "SpecularTint" , &specularTint ) );
-    m_props.insert( make_pair( "Roughness" , &roughness ) );
-    m_props.insert( make_pair( "Anisotropic" , &anisotropic ) );
-    m_props.insert( make_pair( "Sheen" , &sheen ) );
-    m_props.insert( make_pair( "SheenTint" , &sheenTint ) );
-    m_props.insert( make_pair( "Clearcoat" , &clearcoat ) );
-    m_props.insert( make_pair( "ClearcoatGloss" , &clearcoatGloss ) );
+    REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , basecolor );
+    REGISTER_MATERIALNODE_PROPERTY( "SubSurface" , subsurface );
+    REGISTER_MATERIALNODE_PROPERTY( "Metallic" , metallic );
+    REGISTER_MATERIALNODE_PROPERTY( "Specular" , specular );
+    REGISTER_MATERIALNODE_PROPERTY( "SpecularTint" , specularTint );
+    REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
+    REGISTER_MATERIALNODE_PROPERTY( "Anisotropic" , anisotropic );
+    REGISTER_MATERIALNODE_PROPERTY( "Sheen" , sheen );
+    REGISTER_MATERIALNODE_PROPERTY( "SheenTint" , sheenTint );
+    REGISTER_MATERIALNODE_PROPERTY( "Clearcoat" , clearcoat );
+    REGISTER_MATERIALNODE_PROPERTY( "ClearcoatGloss" , clearcoatGloss );
 }
 
 void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -67,8 +67,8 @@ void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 LayeredMaterialNode::LayeredMaterialNode(){
     for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i ){
-        m_props.insert( make_pair( "Bxdf" + to_string(i) , &bxdfs[i] ) );
-        m_props.insert( make_pair( "Weight" + to_string(i) , &weights[i] ));
+        REGISTER_MATERIALNODE_PROPERTY( "Bxdf" + to_string(i) , bxdfs[i] );
+        REGISTER_MATERIALNODE_PROPERTY( "Weight" + to_string(i) , weights[i] );
     }
 }
 
@@ -103,11 +103,11 @@ void LayeredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 PrincipleMaterialNode::PrincipleMaterialNode()
 {
-    m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-    m_props.insert( make_pair( "RoughnessU" , &roughnessU ) );
-    m_props.insert( make_pair( "RoughnessV" , &roughnessV ) );
-    m_props.insert( make_pair( "Metallic" , &metallic ) );
-    m_props.insert( make_pair( "Specular" , &specular ) );
+    REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , baseColor );
+    REGISTER_MATERIALNODE_PROPERTY( "RoughnessU" , roughnessU );
+    REGISTER_MATERIALNODE_PROPERTY( "RoughnessV" , roughnessV );
+    REGISTER_MATERIALNODE_PROPERTY( "Metallic" , metallic );
+    REGISTER_MATERIALNODE_PROPERTY( "Specular" , specular );
 }
 
 void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -129,8 +129,8 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 MatteMaterialNode::MatteMaterialNode()
 {
-    m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-    m_props.insert( make_pair( "Roughness" , &roughness ) );
+    REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , baseColor );
+    REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
 }
 
 void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -148,9 +148,9 @@ void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 PlasticMaterialNode::PlasticMaterialNode()
 {
-    m_props.insert( make_pair( "Diffuse" , &diffuse ) );
-    m_props.insert( make_pair( "Specular" , &specular ) );
-    m_props.insert( make_pair( "Roughness" , &roughness ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Diffuse" , diffuse );
+    REGISTER_MATERIALNODE_PROPERTY( "Specular" , specular );
+    REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
 }
 
 void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -171,8 +171,8 @@ void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 MeasuredMaterialNode::MeasuredMaterialNode()
 {
-    m_props.insert( make_pair( "Type" , &bxdfType ) );
-    m_props.insert( make_pair( "Filename" , &bxdfFilePath ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Type" , bxdfType );
+    REGISTER_MATERIALNODE_PROPERTY( "Filename" , bxdfFilePath );
 }
 
 void MeasuredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -199,9 +199,9 @@ void MeasuredMaterialNode::PostProcess()
 
 GlassMaterialNode::GlassMaterialNode()
 {
-    m_props.insert( make_pair( "Reflectance" , &reflectance ) );
-    m_props.insert( make_pair( "Transmittance" , &transmittance ) );
-    m_props.insert( make_pair( "Roughness" , &roughness ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Reflectance" , reflectance );
+    REGISTER_MATERIALNODE_PROPERTY( "Transmittance" , transmittance );
+    REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
 }
 
 void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -216,14 +216,15 @@ void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
     if( !r.IsBlack() ){
         const Fresnel* fresnel = SORT_MALLOC( FresnelDielectric )( 1.0f , 1.5f );
-        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( r , fresnel , dist , weight , n ));
+        // This is one of the rare cases where there is double faces for perfect inner reflection.
+        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( r , fresnel , dist , weight , n , true ));
     }
     if( !t.IsBlack() )
         bsdf->AddBxdf(SORT_MALLOC(MicroFacetRefraction)( t , dist , 1.0f , 1.5f , weight , n ));
 }
 
 MirrorMaterialNode::MirrorMaterialNode(){
-    m_props.insert( make_pair( "BaseColor" , &basecolor ) );
+    REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , basecolor );
 }
 
 void MirrorMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )

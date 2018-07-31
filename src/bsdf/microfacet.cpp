@@ -262,9 +262,9 @@ Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_
 // evaluate bxdf
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 {
-	if( SameHemiSphere( wo , wi ) == false || !PointingUp(wo) )
-		return 0.0f;
-    
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
+
 	const float NoL = AbsCosTheta( wi );
 	const float NoV = AbsCosTheta( wo );
 	if (NoL == 0.f || NoV == 0.f)
@@ -285,21 +285,19 @@ Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const B
 	// reflect the incident direction
 	wi = getReflected( wo , wh );
 
-	// Make sure the generate wi is in the same hemisphere with wo
-    if( !SameHemiSphere( wo , wi ) || !PointingUp( wi ) ){
-        if( pPdf ) *pPdf = 0.0f;
-		return 0.0f;
-    }
+    if (pPdf) *pPdf = pdf(wo, wi);
 
-	if(pPdf) *pPdf = pdf( wo , wi );
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
+
 	return f( wo , wi );
 }
 
 // get the pdf of the sampled direction
 float MicroFacetReflection::pdf( const Vector& wo , const Vector& wi ) const
 {
-	if( !SameHemisphere( wo , wi ) || !PointingUp(wo) )
-		return 0.0f;
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
 	const Vector h = Normalize( wo + wi );
 	const float EoH = AbsDot( wo , h );

@@ -185,7 +185,7 @@ MaterialNode::~MaterialNode()
 OutputNode::OutputNode()
 {
 	// register node property
-	m_props.insert( make_pair( "Surface" , &output ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Surface" , output );
 }
 
 // update bsdf

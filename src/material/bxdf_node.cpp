@@ -52,7 +52,7 @@ bool BxdfNode::CheckValidation()
 
 LambertNode::LambertNode()
 {
-	m_props.insert( make_pair( "Diffuse" , &baseColor ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Diffuse" , baseColor );
 }
 
 void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
@@ -62,7 +62,7 @@ void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
 
 LambertTransmissionNode::LambertTransmissionNode()
 {
-    m_props.insert( make_pair( "Diffuse" , &baseColor ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Diffuse" , baseColor );
 }
 
 void LambertTransmissionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
@@ -72,8 +72,8 @@ void LambertTransmissionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
 
 OrenNayarNode::OrenNayarNode()
 {
-	m_props.insert( make_pair( "Diffuse" , &baseColor ) );
-	m_props.insert( make_pair( "Roughness" , &roughness ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Diffuse" , baseColor );
+	REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
 }
 
 void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -84,12 +84,12 @@ void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 MicrofacetReflectionNode::MicrofacetReflectionNode()
 {
-	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-	m_props.insert( make_pair( "MicroFacetDistribution" , &mf_dist ) );
-	m_props.insert( make_pair( "RoughnessU" , &roughnessU ) );
-    m_props.insert( make_pair( "RoughnessV" , &roughnessV ) );
-	m_props.insert( make_pair( "eta" , &eta ) );
-	m_props.insert( make_pair( "k" , &k ) );
+	REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , baseColor );
+	REGISTER_MATERIALNODE_PROPERTY( "MicroFacetDistribution" , mf_dist );
+	REGISTER_MATERIALNODE_PROPERTY( "RoughnessU" , roughnessU );
+    REGISTER_MATERIALNODE_PROPERTY( "RoughnessV" , roughnessV );
+	REGISTER_MATERIALNODE_PROPERTY( "eta" , eta );
+	REGISTER_MATERIALNODE_PROPERTY( "k" , k );
 }
 
 void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -111,12 +111,12 @@ void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 MicrofacetRefractionNode::MicrofacetRefractionNode()
 {
-	m_props.insert( make_pair( "BaseColor" , &baseColor ) );
-	m_props.insert( make_pair( "MicroFacetDistribution" , &mf_dist ) );
-    m_props.insert( make_pair( "RoughnessU" , &roughnessU ) );
-    m_props.insert( make_pair( "RoughnessV" , &roughnessV ) );
-	m_props.insert( make_pair( "in_ior" , &in_ior ) );
-	m_props.insert( make_pair( "ext_ior" , &ext_ior ) );
+	REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , baseColor );
+	REGISTER_MATERIALNODE_PROPERTY( "MicroFacetDistribution" , mf_dist );
+    REGISTER_MATERIALNODE_PROPERTY( "RoughnessU" , roughnessU );
+    REGISTER_MATERIALNODE_PROPERTY( "RoughnessV" , roughnessV );
+	REGISTER_MATERIALNODE_PROPERTY( "in_ior" , in_ior );
+	REGISTER_MATERIALNODE_PROPERTY( "ext_ior" , ext_ior );
 }
 
 void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -139,10 +139,10 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 AshikhmanShirleyNode::AshikhmanShirleyNode()
 {
-    m_props.insert(make_pair("Diffuse", &diffuse));
-    m_props.insert(make_pair("Specular", &specular));
-    m_props.insert(make_pair("RoughnessU", &roughnessU));
-    m_props.insert(make_pair("RoughnessV", &roughnessV));
+    REGISTER_MATERIALNODE_PROPERTY("Diffuse", diffuse);
+    REGISTER_MATERIALNODE_PROPERTY("Specular", specular);
+    REGISTER_MATERIALNODE_PROPERTY("RoughnessU", roughnessU);
+    REGISTER_MATERIALNODE_PROPERTY("RoughnessV", roughnessV);
 }
 
 void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
@@ -158,7 +158,7 @@ void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
 
 MerlNode::MerlNode()
 {
-    m_props.insert( make_pair( "Filename" , &merlfile ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Filename" , merlfile );
 }
 
 void MerlNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
@@ -179,7 +179,7 @@ void MerlNode::PostProcess()
 
 FourierBxdfNode::FourierBxdfNode()
 {
-    m_props.insert( make_pair( "Filename" , &fourierBxdfFile ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Filename" , fourierBxdfFile );
 }
 
 void FourierBxdfNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
