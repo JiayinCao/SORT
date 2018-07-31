@@ -50,18 +50,18 @@ DisneyPrincipleNode::DisneyPrincipleNode()
 
 void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector    n = normal.GetPropertyValue(bsdf).ToVector();
-    const Spectrum  bc = basecolor.GetPropertyValue(bsdf).ToSpectrum();
-    const float     ss = subsurface.GetPropertyValue(bsdf).x;
-    const float     m = metallic.GetPropertyValue(bsdf).x;
-    const float     s = specular.GetPropertyValue(bsdf).x;
-    const float     st = specularTint.GetPropertyValue(bsdf).x;
-    const float     r = roughness.GetPropertyValue(bsdf).x;
-    const float     a = anisotropic.GetPropertyValue(bsdf).x;
-    const float     sh = sheen.GetPropertyValue(bsdf).x;
-    const float     sht = sheenTint.GetPropertyValue(bsdf).x;
-    const float     cc = clearcoat.GetPropertyValue(bsdf).x;
-    const float     ccg = clearcoatGloss.GetPropertyValue(bsdf).x;
+    const Vector    n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    const Spectrum  bc = GET_MATERIALNODE_PROPERTY_SPECTRUM(basecolor);
+    const float     ss = GET_MATERIALNODE_PROPERTY_FLOAT(subsurface);
+    const float     m = GET_MATERIALNODE_PROPERTY_FLOAT(metallic);
+    const float     s = GET_MATERIALNODE_PROPERTY_FLOAT(specular);
+    const float     st = GET_MATERIALNODE_PROPERTY_FLOAT(specularTint);
+    const float     r = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
+    const float     a = GET_MATERIALNODE_PROPERTY_FLOAT(anisotropic);
+    const float     sh = GET_MATERIALNODE_PROPERTY_FLOAT(sheen);
+    const float     sht = GET_MATERIALNODE_PROPERTY_FLOAT(sheenTint);
+    const float     cc = GET_MATERIALNODE_PROPERTY_FLOAT(clearcoat);
+    const float     ccg = GET_MATERIALNODE_PROPERTY_FLOAT(clearcoatGloss);
     bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)( bc , ss , m , s , st , r , a , sh , sht , cc , ccg , weight , n ));
 }
 
@@ -98,7 +98,7 @@ bool LayeredMaterialNode::CheckValidation()
 void LayeredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
     for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i )
-        bxdfs[i].UpdateBsdf(bsdf, weights[i].GetPropertyValue(bsdf).ToSpectrum() * weight );
+        bxdfs[i].UpdateBsdf(bsdf, GET_MATERIALNODE_PROPERTY_SPECTRUM(weights[i]) * weight );
 }
 
 PrincipleMaterialNode::PrincipleMaterialNode()
@@ -112,18 +112,18 @@ PrincipleMaterialNode::PrincipleMaterialNode()
 
 void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
-    const Spectrum  basecolor = baseColor.GetPropertyValue(bsdf).ToSpectrum();
-    const float     spec = specular.GetPropertyValue(bsdf).x;
+    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    const Spectrum  basecolor(GET_MATERIALNODE_PROPERTY_SPECTRUM(baseColor));
+    const float     spec = GET_MATERIALNODE_PROPERTY_FLOAT(specular);
     
     const Spectrum eta = Spectrum( 0.37f , 0.37f , 0.37f );
     const Spectrum k( 2.82f );
-    const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( roughnessU.GetPropertyValue(bsdf).x , roughnessV.GetPropertyValue(bsdf).x );
+    const MicroFacetDistribution* dist = SORT_MALLOC(GGX)(GET_MATERIALNODE_PROPERTY_FLOAT(roughnessU) , GET_MATERIALNODE_PROPERTY_FLOAT(roughnessV));
     
     const Fresnel* fresnel = SORT_MALLOC( FresnelConductor )( eta , k );
     
-    const float m = metallic.GetPropertyValue(bsdf).x;
-    bsdf->AddBxdf(SORT_MALLOC(Lambert)(baseColor.GetPropertyValue(bsdf).ToSpectrum() , weight * (1 - m) * 0.92f , n));
+    const float m = GET_MATERIALNODE_PROPERTY_FLOAT(metallic);
+    bsdf->AddBxdf(SORT_MALLOC(Lambert)(GET_MATERIALNODE_PROPERTY_SPECTRUM(baseColor) , weight * (1 - m) * 0.92f , n));
     bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(basecolor, fresnel, dist , weight * (m * 0.92f + 0.08f * spec) , n));
 }
 
@@ -135,10 +135,10 @@ MatteMaterialNode::MatteMaterialNode()
 
 void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
-    const Spectrum reflectance(baseColor.GetPropertyValue(bsdf).ToSpectrum());
+    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    const Spectrum reflectance(GET_MATERIALNODE_PROPERTY_SPECTRUM(baseColor));
     if( !reflectance.IsBlack() ){
-        const float rn = roughness.GetPropertyValue(bsdf).x;
+        const float rn = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
         if( rn == 0.0f )
             bsdf->AddBxdf(SORT_MALLOC(Lambert)( reflectance , weight , n ));
         else
@@ -155,15 +155,15 @@ PlasticMaterialNode::PlasticMaterialNode()
 
 void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
-    const Spectrum diff(diffuse.GetPropertyValue(bsdf).ToSpectrum());
+    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    const Spectrum diff(GET_MATERIALNODE_PROPERTY_SPECTRUM(diffuse));
     if( !diff.IsBlack() )
         bsdf->AddBxdf(SORT_MALLOC(Lambert)( diff , weight , n ));
     
-    const Spectrum spec(specular.GetPropertyValue(bsdf).ToSpectrum());
+    const Spectrum spec(GET_MATERIALNODE_PROPERTY_SPECTRUM(specular));
     if( !spec.IsBlack() ){
         const Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.0f, 1.2f);
-        const float rough = roughness.GetPropertyValue(bsdf).x;
+        const float rough = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
         const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
         bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist , weight , n ));
     }
@@ -177,7 +177,7 @@ MeasuredMaterialNode::MeasuredMaterialNode()
 
 void MeasuredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
+    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
     if( bxdfType.str == "Fourier" )
         bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( fourierBxdfData , weight , n ) );
     else if( bxdfType.str == "MERL" )
@@ -206,12 +206,11 @@ GlassMaterialNode::GlassMaterialNode()
 
 void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
-    const float rough = roughness.GetPropertyValue(bsdf).x;
-    const Spectrum r = reflectance.GetPropertyValue(bsdf).ToSpectrum();
-    const Spectrum t = transmittance.GetPropertyValue(bsdf).ToSpectrum();
-    if( r.IsBlack() && t.IsBlack() )
-        return;
+    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    const float rough = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
+    const Spectrum r = GET_MATERIALNODE_PROPERTY_SPECTRUM(reflectance);
+    const Spectrum t = GET_MATERIALNODE_PROPERTY_SPECTRUM(transmittance);
+    if( r.IsBlack() && t.IsBlack() ) return;
     
     const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
     if( !r.IsBlack() ){
@@ -229,8 +228,8 @@ MirrorMaterialNode::MirrorMaterialNode(){
 
 void MirrorMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = normal.GetPropertyValue(bsdf).ToVector();
-    const Spectrum color = basecolor.GetPropertyValue(bsdf).ToSpectrum();
+    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    const Spectrum color = GET_MATERIALNODE_PROPERTY_SPECTRUM(basecolor);
     if( color.IsBlack() ) return;
     
     // This is not perfect mirror reflection in term of physically based rendering, but it looks good enough so far.

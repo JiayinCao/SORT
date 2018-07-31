@@ -43,6 +43,10 @@ class VisTerm;
 typedef Vector4<float> MaterialPropertyValue;
 
 #define REGISTER_MATERIALNODE_PROPERTY( name , prop )    m_props.insert( make_pair( (name) , &(prop) ) )
+#define GET_MATERIALNODE_PROPERTY( prop )                prop.GetPropertyValue(bsdf)
+#define GET_MATERIALNODE_PROPERTY_FLOAT( prop )          prop.GetPropertyValue(bsdf).x
+#define GET_MATERIALNODE_PROPERTY_SPECTRUM( prop )       prop.GetPropertyValue(bsdf).ToSpectrum()
+#define GET_MATERIALNODE_PROPERTY_VECTOR( prop )         prop.GetPropertyValue(bsdf).ToVector()
 
 class MaterialNodeProperty
 {

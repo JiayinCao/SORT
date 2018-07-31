@@ -51,7 +51,7 @@ AddNode::AddNode()
 // get property value
 MaterialPropertyValue AddNode::GetNodeValue( Bsdf* bsdf )
 {
-	return src0.GetPropertyValue(bsdf) + src1.GetPropertyValue(bsdf);
+	return GET_MATERIALNODE_PROPERTY(src0) + GET_MATERIALNODE_PROPERTY(src1);
 }
 
 // inverse node
@@ -63,7 +63,7 @@ SORTNodeOneMinus::SORTNodeOneMinus()
 // get property value
 MaterialPropertyValue SORTNodeOneMinus::GetNodeValue( Bsdf* bsdf )
 {
-    return MaterialPropertyValue(1.0f) - src.GetPropertyValue(bsdf);
+    return MaterialPropertyValue(1.0f) - GET_MATERIALNODE_PROPERTY(src);
 }
 
 LerpNode::LerpNode()
@@ -79,8 +79,7 @@ void LerpNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	float f = factor.GetPropertyValue(bsdf).x;
-
+    const float f = GET_MATERIALNODE_PROPERTY_FLOAT(factor);
 	if( src0.node )
 		src0.node->UpdateBSDF( bsdf, weight * ( 1.0f - f ) );
 	if( src1.node )
@@ -90,8 +89,8 @@ void LerpNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 // get property value
 MaterialPropertyValue LerpNode::GetNodeValue( Bsdf* bsdf )
 {
-	float f = factor.GetPropertyValue( bsdf ).x;
-	return src0.GetPropertyValue(bsdf) * ( 1.0f - f ) + src1.GetPropertyValue(bsdf) * f;
+	const float f = GET_MATERIALNODE_PROPERTY_FLOAT(factor);
+    return lerp(GET_MATERIALNODE_PROPERTY(src0) , GET_MATERIALNODE_PROPERTY(src1), f);
 }
 
 BlendNode::BlendNode()
@@ -108,8 +107,8 @@ void BlendNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-	float f0 = factor0.GetPropertyValue(bsdf).x;
-	float f1 = factor1.GetPropertyValue(bsdf).y;
+    const float f0 = GET_MATERIALNODE_PROPERTY_FLOAT(factor0);
+    const float f1 = GET_MATERIALNODE_PROPERTY_FLOAT(factor1);
 	if( src0.node )
 		src0.node->UpdateBSDF( bsdf, weight * f0 );
 	if( src1.node )
@@ -119,9 +118,9 @@ void BlendNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 // get property value
 MaterialPropertyValue BlendNode::GetNodeValue( Bsdf* bsdf )
 {
-	float f0 = factor0.GetPropertyValue( bsdf ).x;
-	float f1 = factor1.GetPropertyValue( bsdf ).x;
-	return src0.GetPropertyValue(bsdf) * f0 + src1.GetPropertyValue(bsdf) * f1;
+	const float f0 = GET_MATERIALNODE_PROPERTY_FLOAT(factor0);
+	const float f1 = GET_MATERIALNODE_PROPERTY_FLOAT(factor1);
+	return GET_MATERIALNODE_PROPERTY(src0) * f0 + GET_MATERIALNODE_PROPERTY(src1) * f1;
 }
 
 MutiplyNode::MutiplyNode()
@@ -140,15 +139,15 @@ void MutiplyNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
 
 	if( type0 & MAT_NODE_BXDF )
-		src0.node->UpdateBSDF( bsdf , weight * src1.GetPropertyValue(bsdf).x );
+		src0.node->UpdateBSDF( bsdf , weight * GET_MATERIALNODE_PROPERTY_FLOAT(src1) );
 	else if( type1 & MAT_NODE_BXDF )
-		src1.node->UpdateBSDF( bsdf , weight * src0.GetPropertyValue(bsdf).x );
+		src1.node->UpdateBSDF( bsdf , weight * GET_MATERIALNODE_PROPERTY_FLOAT(src0) );
 }
 
 // get property value
 MaterialPropertyValue MutiplyNode::GetNodeValue( Bsdf* bsdf )
 {
-	return src0.GetPropertyValue(bsdf) * src1.GetPropertyValue(bsdf);
+	return GET_MATERIALNODE_PROPERTY(src0) * GET_MATERIALNODE_PROPERTY(src1);
 }
 
 GammaToLinearNode::GammaToLinearNode()
@@ -159,7 +158,7 @@ GammaToLinearNode::GammaToLinearNode()
 // get property value
 MaterialPropertyValue GammaToLinearNode::GetNodeValue( Bsdf* bsdf )
 {
-    auto tmp = src.GetPropertyValue(bsdf);
+    auto tmp = GET_MATERIALNODE_PROPERTY(src);
     tmp.x = GammaToLinear(tmp.x);
     tmp.y = GammaToLinear(tmp.y);
     tmp.z = GammaToLinear(tmp.z);
@@ -174,7 +173,7 @@ LinearToGammaNode::LinearToGammaNode()
 // get property value
 MaterialPropertyValue LinearToGammaNode::GetNodeValue( Bsdf* bsdf )
 {
-    auto tmp = src.GetPropertyValue(bsdf);
+    auto tmp = GET_MATERIALNODE_PROPERTY(src);
     tmp.x = LinearToGamma(tmp.x);
     tmp.y = LinearToGamma(tmp.y);
     tmp.z = LinearToGamma(tmp.z);
@@ -189,6 +188,6 @@ NormalDecoderNode::NormalDecoderNode()
 // get property value
 MaterialPropertyValue NormalDecoderNode::GetNodeValue( Bsdf* bsdf )
 {
-    auto tmp = src.GetPropertyValue(bsdf);
+    const auto tmp = GET_MATERIALNODE_PROPERTY(src);
     return MaterialPropertyValue( 2.0f * tmp.x - 1.0f , tmp.z , 2.0f * tmp.y - 1.0f , 0.0f );
 }
