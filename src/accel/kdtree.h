@@ -138,13 +138,13 @@ private:
     //! @param depth    The current depth of the node.
 	void splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth );
 
-    //! @brief Evalute SAH value for a specific split plane.
+    //! @brief Evaluate SAH value for a specific split plane.
     //! @param l        Number of primitives on the left of the split plane.
     //! @param r        Number of primitives on the right of the split plane.
     //! @param axis     ID of splitting axis.
     //! @param split    Position along the splitting axis of the split plane.
     //! @param box      Bounding box of the KD-Tree node.
-    //! @return         The evaluted SAH value for the split.
+    //! @return         The Evaluated SAH value for the split.
 	float sah( unsigned l , unsigned r , unsigned axis , float split , const BBox& box );
 	
     //! @brief Pick the split plane with minimal SAH value.

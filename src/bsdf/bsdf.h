@@ -24,7 +24,6 @@
 #include "geometry/intersection.h"
 
 class Bxdf;
-class Intersection;
 class BsdfSample;
 
 #define	MAX_BXDF_COUNT 8
@@ -34,7 +33,7 @@ class	Bsdf
 {
 public:
 	//! @brief Constructor taking intersection data.
-    //! @param intersection     Intersection data of the point to be evaluted.
+    //! @param intersection     Intersection data of the point to be Evaluated.
 	Bsdf( const Intersection* intersection );
 
 	//! @brief Get the number of components based on the type.
@@ -46,11 +45,11 @@ public:
 	//! @param The bxdf to be added.
 	void AddBxdf( const Bxdf* bxdf );
 
-	//! @brief Evalute the value of BSDF based on the incoming and outgoing directions.
+	//! @brief Evaluate the value of BSDF based on the incoming and outgoing directions.
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @param type The specific type to be considered.
-    //! @return     The evaluted value of the BSDF.
+    //! @return     The Evaluated value of the BSDF.
 	Spectrum f( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
     //! @brief Importance sampling for the bsdf.
@@ -60,10 +59,10 @@ public:
     //! @param pdf  Probability density of the selected direction.
     //! @param type The specific bxdf type it considers during evaluation.
     //! @param bxdf_type The specific bxdf type which it selects among all bxdfs in the BSDF.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
 	Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL , BXDF_TYPE* bxdf_type = 0 ) const;
 
-    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
     //! @param type The specific bxdf type it considers during evaluation.
@@ -78,12 +77,12 @@ private:
     const Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
 	unsigned m_bxdfCount = 0;                   /**< Number of Bxdf in the BSDF. */
 
-    Vector nn;  /**< Normal at the point to be evaluted. */
+    Vector nn;  /**< Normal at the point to be Evaluated. */
     Vector sn;  /**< Bi-tangent at the point to be evaluated. */
-    Vector tn;  /**< Tangent at the point to be evaluted. */
+    Vector tn;  /**< Tangent at the point to be Evaluated. */
 
 	// intersection for the bsdf
-    const Intersection intersect;   /**<    Intersection information of the point to be evaluted. */
+    const Intersection intersect;   /**<    Intersection information of the point to be Evaluated. */
 
     //! @brief Transform a vector from world coordinate to shading coordinate.
     //! @param v    A vector in world coordiante.

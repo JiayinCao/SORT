@@ -37,7 +37,7 @@ public:
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
 
 private:
@@ -60,7 +60,7 @@ public:
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
     
     //! @brief Importance sampling for the microfacet btdf.
@@ -68,7 +68,7 @@ public:
     //! @param wi   Incomiing direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
-    //! @return     The evaluted BRDF value.
+    //! @return     The Evaluated BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
     
     //! @brief Evaluate the pdf of an existance direction given the incoming direction.

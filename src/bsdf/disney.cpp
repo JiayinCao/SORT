@@ -98,7 +98,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     // 1.25 scale is used to (roughly) preserve albedo
     // Fss90 used to "flatten" retro-reflection based on roughness
     const float Fss90 = HoO2*roughness;
-    const float Fss = lerp(1.0, Fss90, FO) * lerp(1.0, Fss90, FI);
+    const float Fss = lerp(1.0f, Fss90, FO) * lerp(1.0f, Fss90, FI);
     const float ss = 1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f);
     
     // Final diffuse term for Disney BRDF
