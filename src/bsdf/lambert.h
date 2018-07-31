@@ -32,7 +32,7 @@ public:
     //! @param s            Direction-Hemisphere reflection.
     //! @param weight       Weight of this BRDF
     //! @param t            Type of this BRDF
-    Lambert( const Spectrum& s , const Spectrum& weight , const Vector& n ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), n),R(s){}
+    Lambert( const Spectrum& s , const Spectrum& weight , const Vector& n , bool doubleSided = false):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), n, doubleSided),R(s){}
 
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -55,7 +55,7 @@ public:
     //! @param s            Direction-Hemisphere refraction.
     //! @param weight       Weight of this BRDF
     //! @param t            Type of this BRDF
-    LambertTransmission( const Spectrum& t , const Spectrum& weight , const Vector& n ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_TRANSMISSION), n),T(t){}
+    LambertTransmission( const Spectrum& t , const Spectrum& weight , const Vector& n ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_TRANSMISSION), n, true),T(t){}
     
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.

@@ -32,7 +32,7 @@ public:
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The Evaluated BRDF value.
+    //! @return     The evaluted BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const;
 	
     //! @brief Importance sampling for the bxdf.
@@ -47,10 +47,10 @@ public:
     //! @param wi   Incomiing direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
-    //! @return     The Evaluated BRDF value.
+    //! @return     The evaluted BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
     
-    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
+    //! @brief Evalute the pdf of an existance direction given the incoming direction.
     //!
     //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
     //! this function, otherwise it is not unbiased.
@@ -130,12 +130,12 @@ class FourierBxdf : public Bxdf
 {
 public:
     //! Default constructor setting brdf type.
-    FourierBxdf( const FourierBxdfData& fd , const Spectrum& weight , const Vector& n ) : Bxdf( weight, BXDF_ALL, n ) , m_data(fd) {}
+    FourierBxdf( const FourierBxdfData& fd , const Spectrum& weight , const Vector& n ) : Bxdf( weight, BXDF_ALL, n , true ) , m_data(fd) {}
     
     //! Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
     //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The Evaluated BRDF value.
+    //! @return     The evaluted BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         return m_data.f(wo,wi);
     }
@@ -152,12 +152,12 @@ public:
     //! @param wi   Incomiing direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
-    //! @return     The Evaluated BRDF value.
+    //! @return     The evaluted BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override{
         return m_data.sample_f( wo , wi , bs , pdf );
     }
     
-    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
+    //! @brief Evalute the pdf of an existance direction given the incoming direction.
     //!
     //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
     //! this function, otherwise it is not unbiased.

@@ -36,7 +36,7 @@ public:
     //! Constructor
     //! @param w    Weight of the bxdf
     //! @param type Type of the bxdf
-    Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n );
+    Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n, bool doubleSided = false);
 
     //! Virtual destructor.
     virtual ~Bxdf(){}
@@ -56,7 +56,7 @@ public:
         return pdf( bsdfToBxdf(wo) , bsdfToBxdf(wi) );
     }
     
-    //! @brief  Check the type of the bxdf, it shouldn't be overriden by derived classes.
+    //! @brief  Check the type of the bxdf, it shouldn't be overridden by derived classes.
     //! @param type     The type to check.
     //! @return         If the bxdf belongs to the input type.
     virtual bool    MatchFlag( BXDF_TYPE type ) const final
@@ -122,7 +122,11 @@ protected:
                         v.x * sn.y + v.y * nn.y + v.z * tn.y ,
                         v.x * sn.z + v.y * nn.z + v.z * tn.z );
     }
-    
+
+    inline bool SameHemiSphere(const Vector& wi, const Vector& wo) const {
+        return !(PointingUp(wi) ^ PointingUp(wo));
+    }
+
     Spectrum    m_weight = 1.0f;            /**< The weight for the bxdf, usually between 0 and 1. */
     BXDF_TYPE   m_type = BXDF_NONE;         /**< The specific type of the bxdf. */
     bool        normal_map_applied = false; /**< Whether normal map is applied on the BXDF. */
@@ -130,4 +134,5 @@ protected:
     Vector      sn;                         /**< Bi-tangent at the point to be evaluated. */
     Vector      tn;                         /**< Tangent at the point to be Evaluated. */
     mutable Vector      gnormal;            /**< Geometry normal. */
+    const bool  doubleSided = false;        /**< Whether the bxdf is double sided. */
 };

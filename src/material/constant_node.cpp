@@ -26,8 +26,8 @@ IMPLEMENT_CREATOR( ConstantColorNode );
 
 GridTexNode::GridTexNode()
 {
-	m_props.insert( make_pair( "Color1" , &src0 ) );
-	m_props.insert( make_pair( "Color2" , &src1 ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
+	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
 }
 
 // get property value
@@ -64,8 +64,8 @@ bool GridTexNode::CheckValidation()
 
 CheckBoxTexNode::CheckBoxTexNode()
 {
-	m_props.insert( make_pair( "Color1" , &src0 ) );
-	m_props.insert( make_pair( "Color2" , &src1 ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
+	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
 }
 
 // get property value
@@ -102,7 +102,7 @@ bool CheckBoxTexNode::CheckValidation()
 
 ImageTexNode::ImageTexNode()
 {
-	m_props.insert( make_pair( "Filename" , &filename ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Filename" , filename );
 }
 
 // get property value
@@ -125,7 +125,7 @@ void ImageTexNode::PostProcess()
 
 ConstantColorNode::ConstantColorNode()
 {
-	m_props.insert( make_pair( "Color" , &src ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
 }
 
 // get property value

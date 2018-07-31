@@ -23,7 +23,9 @@
 
 // evaluate bxdf
 Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const{
-    return SameHemiSphere( wo , wi )? R * INV_PI : 0.0f;
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
+    return R * INV_PI;
 }
 
 // evaluate bxdf
