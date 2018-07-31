@@ -20,9 +20,9 @@
 #include "bsdf.h"
 
 // constructor
-OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spectrum& weight , const Vector& n) : Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , n) , R(reflectance) 
+OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spectrum& weight , const Vector& n, bool doubleSided) : Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , n, doubleSided) , R(reflectance)
 {
-	// rough ness ranges from 0 to infinity
+	// roughness ranges from 0 to infinity
 	roughness = max( 0.0f , roughness );
 
 	const float roughness2 = roughness * roughness;
@@ -36,8 +36,8 @@ OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spect
 // result    : the portion that comes along 'wo' from 'wi'
 Spectrum OrenNayar::f( const Vector& wo , const Vector& wi ) const
 {
-	if( SameHemiSphere( wo , wi ) == false )
-		return 0.0f;
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
 	float sintheta_i = SinTheta(wi);
 	float sintheta_o = SinTheta(wo);

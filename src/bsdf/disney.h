@@ -37,8 +37,8 @@ public:
     //! @param roughnessV       Roughness along the other axis
     //! @param weight           Weight of the BXDF
     DisneyBRDF( const Spectrum& basecolor , float subsurface , float metallic , float specular , float specularTint , float roughness ,
-               float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , const Spectrum& weight, const Vector& n)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n) , basecolor(basecolor), subsurface(subsurface), metallic(metallic),
+               float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , const Spectrum& weight, const Vector& n , bool doubleSided = false)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , basecolor(basecolor), subsurface(subsurface), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
           clearcoat(clearcoat), clearcoatGloss(clearcoatGloss) {}
 	

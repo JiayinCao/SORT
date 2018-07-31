@@ -27,7 +27,7 @@ class BxdfNode : public MaterialNode
 {
 protected:
     // constructor
-    BxdfNode() { m_props.insert( make_pair( "Normal" , &normal ) ); }
+    BxdfNode() { REGISTER_MATERIALNODE_PROPERTY( "Normal" , normal ); }
     
 	// get node type
     MAT_NODE_TYPE getNodeType() override { return MAT_NODE_BXDF | MaterialNode::getNodeType(); }

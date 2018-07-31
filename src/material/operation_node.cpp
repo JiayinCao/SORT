@@ -44,8 +44,8 @@ bool OperatorNode::CheckValidation()
 // Adding node
 AddNode::AddNode()
 {
-	m_props.insert( make_pair( "Color1" , &src0 ) );
-	m_props.insert( make_pair( "Color2" , &src1 ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
+	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
 }
 
 // get property value
@@ -57,7 +57,7 @@ MaterialPropertyValue AddNode::GetNodeValue( Bsdf* bsdf )
 // inverse node
 SORTNodeOneMinus::SORTNodeOneMinus()
 {
-    m_props.insert( make_pair( "Color" , &src ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
 }
 
 // get property value
@@ -68,9 +68,9 @@ MaterialPropertyValue SORTNodeOneMinus::GetNodeValue( Bsdf* bsdf )
 
 LerpNode::LerpNode()
 {
-	m_props.insert( make_pair( "Color1" , &src0 ) );
-	m_props.insert( make_pair( "Color2" , &src1 ) );
-	m_props.insert( make_pair( "Factor" , &factor ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
+	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
+	REGISTER_MATERIALNODE_PROPERTY( "Factor" , factor );
 }
 
 // update bsdf
@@ -96,10 +96,10 @@ MaterialPropertyValue LerpNode::GetNodeValue( Bsdf* bsdf )
 
 BlendNode::BlendNode()
 {
-	m_props.insert( make_pair( "Color1" , &src0 ) );
-	m_props.insert( make_pair( "Color2" , &src1 ) );
-	m_props.insert( make_pair( "Factor1" , &factor0 ) );
-	m_props.insert( make_pair( "Factor2" , &factor1 ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
+	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
+	REGISTER_MATERIALNODE_PROPERTY( "Factor1" , factor0 );
+	REGISTER_MATERIALNODE_PROPERTY( "Factor2" , factor1 );
 }
 
 // update bsdf
@@ -126,8 +126,8 @@ MaterialPropertyValue BlendNode::GetNodeValue( Bsdf* bsdf )
 
 MutiplyNode::MutiplyNode()
 {
-	m_props.insert( make_pair( "Color1" , &src0 ) );
-	m_props.insert( make_pair( "Color2" , &src1 ) );
+	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
+	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
 }
 
 // update bsdf
@@ -153,7 +153,7 @@ MaterialPropertyValue MutiplyNode::GetNodeValue( Bsdf* bsdf )
 
 GammaToLinearNode::GammaToLinearNode()
 {
-    m_props.insert( make_pair( "Color" , &src ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
 }
 
 // get property value
@@ -168,7 +168,7 @@ MaterialPropertyValue GammaToLinearNode::GetNodeValue( Bsdf* bsdf )
 
 LinearToGammaNode::LinearToGammaNode()
 {
-    m_props.insert( make_pair( "Color" , &src ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
 }
 
 // get property value
@@ -183,7 +183,7 @@ MaterialPropertyValue LinearToGammaNode::GetNodeValue( Bsdf* bsdf )
 
 NormalDecoderNode::NormalDecoderNode()
 {
-    m_props.insert( make_pair( "Color" , &src ) );
+    REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
 }
 
 // get property value

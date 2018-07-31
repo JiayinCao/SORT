@@ -48,6 +48,9 @@ public:
 protected:
     //! @brief Smith shadow-masking function G1
     virtual float G1( const Vector& v ) const  = 0;
+
+    //! @brief Check if the two vectors are in the same hemisphere in shading coordinate
+    bool SameHemiSphere(const Vector& wo, const Vector& wi) const { return wo.y * wi.y > 0.0f; }
 };
 
 //! @brief Blinn NDF.
@@ -139,7 +142,7 @@ public:
     //! @param d        Normal distribution term
     //! @param w        Weight of the bxdf
     //! @param t        Type of the bxdf
-    Microfacet(const MicroFacetDistribution* d, const Spectrum& w, const BXDF_TYPE t , const Vector& n ) : Bxdf(w, t, n) , distribution(d) {}
+    Microfacet(const MicroFacetDistribution* d, const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided) : Bxdf(w, t, n, doubleSided) , distribution(d) {}
 
 protected:
 	const MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
@@ -169,7 +172,7 @@ public:
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param w                Weight of this BRDF
-    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight , const Vector& n ) : Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , n) , R(reflectance), fresnel(f) {}
+    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight , const Vector& n , bool doubleSided = false ) : Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , R(reflectance), fresnel(f) {}
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitance direction in shading coordinate.
@@ -210,7 +213,7 @@ public:
     //! @param etai             Index of refraction of the side that normal points
     //! @param etat             Index of refraction of the other side that normal points
     MicroFacetRefraction(const Spectrum &transmittance, const MicroFacetDistribution* d, float etai, float etat, const Spectrum& weight , const Vector& n)
-        : Microfacet(d, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_TRANSMISSION), n) , T(transmittance), etaI(etai) , etaT(etat) , fresnel( etai , etat )
+        : Microfacet(d, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_TRANSMISSION), n, true) , T(transmittance), etaI(etai) , etaT(etat) , fresnel( etai , etat )
     {
         // make sure IORs are not the same inside and outside
         if (etaT == etaI)

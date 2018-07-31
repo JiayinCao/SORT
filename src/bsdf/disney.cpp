@@ -65,7 +65,8 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 {
     static const Vector up( 0.0f , 1.0f , 0.0f );
     
-    if( !SameHemiSphere(wo, wi) ) return 0.0f;
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
     const static Spectrum white(1.0f);
     
@@ -162,8 +163,9 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
 }
 
 float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
-    if( !SameHemiSphere(wo, wi) ) return 0.0f;
-    
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
+
     const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
     const GGX ggx( roughness / aspect , roughness * aspect );
     
