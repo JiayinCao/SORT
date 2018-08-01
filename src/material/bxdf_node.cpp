@@ -92,8 +92,8 @@ MicrofacetReflectionNode::MicrofacetReflectionNode()
 	REGISTER_MATERIALNODE_PROPERTY( "MicroFacetDistribution" , mf_dist );
 	REGISTER_MATERIALNODE_PROPERTY( "RoughnessU" , roughnessU );
     REGISTER_MATERIALNODE_PROPERTY( "RoughnessV" , roughnessV );
-	REGISTER_MATERIALNODE_PROPERTY( "eta" , eta );
-	REGISTER_MATERIALNODE_PROPERTY( "k" , k );
+	REGISTER_MATERIALNODE_PROPERTY( "Interior IOR" , eta );
+	REGISTER_MATERIALNODE_PROPERTY( "Absorption Coefficient" , k );
 }
 
 void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
