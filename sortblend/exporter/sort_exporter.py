@@ -21,7 +21,6 @@ import numpy as np
 import platform
 from math import degrees
 from .. import common
-from .. import nodes
 from . import exporter_common
 import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
@@ -441,8 +440,17 @@ def export_material(scene,force_debug):
         # get the sort tree nodes
         ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
 
+        # find the output node, duplicated code, to be cleaned
+        def find_node(material, nodetype):
+            if material and material.sort_material and material.sort_material.sortnodetree:
+                ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+                for node in ntree.nodes:
+                    if getattr(node, "bl_idname", None) == nodetype:
+                        return node
+            return None
+
         # get output nodes
-        output_node = nodes.find_node(material, common.sort_node_output_bl_name)
+        output_node = find_node(material, common.sort_node_output_bl_name)
         if output_node is None:
             continue
 
@@ -457,7 +465,9 @@ def export_material(scene,force_debug):
             inputs = mat_node.inputs
             for socket in inputs:
                 if socket.is_linked:
-                    input_node = nodes.socket_node_input(ntree, socket)
+                    def socket_node_input(nt, socket):
+                        return next((l.from_node for l in nt.links if l.to_socket == socket), None)
+                    input_node = socket_node_input(ntree, socket)
                     sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
                     draw_props(input_node,sub_xml_node)
                 else:

@@ -15,8 +15,8 @@
 
 import bpy
 import xml.etree.cElementTree as ET
-from . import common
 import nodeitems_utils
+from . import sockets
 from nodeitems_utils import NodeCategory, NodeItem
 
 # fix pbrt path , / will be recognized as escape letter, which will easily crash the system in PBRT
@@ -33,7 +33,7 @@ class SORTPatternGraph(bpy.types.NodeTree):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.render.engine == common.default_bl_name
+        return context.scene.render.engine == 'sortblend'
 
     # Return a node tree from the context to be used in the editor
     @classmethod
@@ -46,101 +46,6 @@ class SORTPatternGraph(bpy.types.NodeTree):
                 if nt_name != '':
                     return bpy.data.node_groups[nt_name], ma, ma
         return (None, None, None)
-
-class SORTSocket:
-    ui_open = bpy.props.BoolProperty(name='UI Open', default=True)
-    socket_color = (0.1, 0.1, 0.1, 0.75)
-
-    # Optional function for drawing the socket input value
-    def draw_value(self, context, layout, node):
-        layout.prop(node, self.name)
-
-    # green node for color
-    def draw_color(self, context, node):
-        return self.socket_color
-
-    #draw socket property in node
-    def draw(self, context, layout, node, text):
-        if self.is_linked or self.is_output:
-            layout.label(text)
-        else:
-            row = layout.row()
-            split = row.split(common.label_percentage)
-            split.label(text)
-            if node.inputs[text].default_value is not None:
-                split.prop(node.inputs[text],'default_value',text="")
-
-    def IsEmptySocket(self):
-        return False
-
-# socket for SORT node
-class SORTShaderSocket(bpy.types.NodeSocketShader, SORTSocket):
-    bl_idname = 'SORTShaderSocket'
-    bl_label = 'SORT Shader Socket'
-    socket_color = (1.0, 1.0, 0.2, 1.0)
-    default_value = None
-
-    def IsEmptySocket(self):
-        return True
-
-class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTSocket):
-    bl_idname = 'SORTNodeSocketBxdf'
-    bl_label = 'SORT Shader Socket'
-    socket_color = (0.2, 0.2, 1.0, 1.0)
-    default_value = None
-
-    # green node for color
-    def IsEmptySocket(self):
-        return True
-
-class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
-    bl_idname = 'SORTNodeSocketColor'
-    bl_label = 'SORT Base Color Socket'
-    socket_color = (0.1, 1.0, 0.2, 1.0)
-    default_value = bpy.props.FloatVectorProperty( name='BaseColor' , default=(1.0, 1.0, 1.0) ,subtype='COLOR',soft_min = 0.0, soft_max = 1.0)
-
-    # green node for color
-    def export_sort_socket_value(self):
-        return '%f %f %f'%(self.default_value[0],self.default_value[1],self.default_value[2])
-    def export_sort_socket_type(self):
-        return 'color'
-    def to_string():
-        return 'SORTNodeSocketColor'
-
-class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTSocket):
-    bl_idname = 'SORTNodeSocketFloat'
-    bl_label = 'SORT Float Socket'
-    socket_color = (0.1, 0.1, 0.3, 1.0)
-    default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0, max=1.0 )
-
-    def export_sort_socket_value(self):
-        return '%f'%(self.default_value)
-    def export_sort_socket_type(self):
-        return 'float'
-    def to_string():
-        return 'SORTNodeSocketFloat'
-
-class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTSocket):
-    bl_idname = 'SORTNodeSocketNormal'
-    bl_label = 'SORT Normal Socket'
-    socket_color = (0.1, 0.6, 0.3, 1.0)
-    default_value = bpy.props.FloatVectorProperty( name='Normal' , default=(0.0,1.0,0.0) , min=-1.0, max=1.0 )
-
-    #draw socket property in node
-    def draw(self, context, layout, node, text):
-        if self.is_linked or self.is_output:
-            layout.label(text)
-        else:
-            row = layout.row()
-            split = row.split(common.label_percentage)
-            split.label(text)
-
-    def export_sort_socket_value(self):
-        return '%f %f %f'%(self.default_value[:])
-    def export_sort_socket_type(self):
-        return 'vector'
-    def to_string():
-        return 'SORTNodeSocketNormal'
 
 # sort material node root
 class SORTShadingNode(bpy.types.Node):
@@ -183,14 +88,14 @@ class SORTShadingNode(bpy.types.Node):
     #draw property in node
     def draw_button(self, layout, label, prop):
         row = layout.row()
-        split = row.split(common.label_percentage)
+        split = row.split(0.3)
         split.label(label)
         prop_row = split.row()
         prop_row.prop(self,prop,text="")
 
     # draw non-socket property in panel
     def draw_prop(self, layout, label, prop, indented_label):
-        split = layout.split(common.label_percentage)
+        split = layout.split(0.3)
         row = split.row()
         indented_label(row)
         row.label(label)
@@ -208,10 +113,10 @@ class SORTShadingNode_BXDF(SORTShadingNode):
 # output node
 class SORTNodeOutput(SORTShadingNode):
     bl_label = 'SORT_output'
-    bl_idname = common.sort_node_output_bl_name
+    bl_idname = 'SORTNodeOutput'
 
     def init(self, context):
-        input = self.inputs.new('SORTNodeSocketBxdf', 'Surface')
+        input = self.inputs.new('sockets.SORTNodeSocketBxdf', 'Surface')
 
 # microfacte node
 class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
@@ -230,10 +135,10 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
     k = bpy.props.FloatVectorProperty(name='Absorption Coefficient', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketFloat , "RoughnessU" , 0.1 ) , 
-                    ( SORTNodeSocketFloat , "RoughnessV" , 0.1 ) , 
-                    ( SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketFloat , "RoughnessU" , 0.1 ) , 
+                    ( sockets.SORTNodeSocketFloat , "RoughnessV" , 0.1 ) , 
+                    ( sockets.SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -268,10 +173,10 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
     ext_ior = bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0)
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketFloat , "RoughnessU" , 0.1 ) , 
-                    ( SORTNodeSocketFloat , "RoughnessV" , 0.1 ) , 
-                    ( SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketFloat , "RoughnessU" , 0.1 ) , 
+                    ( sockets.SORTNodeSocketFloat , "RoughnessV" , 0.1 ) , 
+                    ( sockets.SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -296,11 +201,11 @@ class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_BXDF_AshikhmanShirley'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketFloat , "Specular" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "RoughnessU" , 0.1 ) , 
-                    ( SORTNodeSocketFloat , "RoughnessV" , 0.1 ) , 
-                    ( SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketFloat , "Specular" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "RoughnessU" , 0.1 ) , 
+                    ( sockets.SORTNodeSocketFloat , "RoughnessV" , 0.1 ) , 
+                    ( sockets.SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -310,8 +215,8 @@ class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_BXDF_Lambert'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -321,8 +226,8 @@ class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_BXDF_LambertTransmission'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -332,9 +237,9 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_BXDF_OrenNayar'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketFloat , "Roughness" , 0.0 ) , 
-                    ( SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketFloat , "Roughness" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -346,7 +251,7 @@ class SORTNode_BXDF_MERL(SORTShadingNode_BXDF):
     file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super.register_prop()
@@ -375,7 +280,7 @@ class SORTNode_BXDF_Fourier(SORTShadingNode_BXDF):
     file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super.register_prop()
@@ -404,8 +309,8 @@ class SORTNodeAdd(SORTShadingNode):
     bl_idname = 'SORTNodeAdd'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color1" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color1" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -415,7 +320,7 @@ class SORTNodeOneMinus(SORTShadingNode):
     bl_idname = 'SORTNodeOneMinus'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -425,8 +330,8 @@ class SORTNodeMultiply(SORTShadingNode):
     bl_idname = 'SORTNodeMultiply'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color1" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color1" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -436,10 +341,10 @@ class SORTNodeBlend(SORTShadingNode):
     bl_idname = 'SORTNodeBlend'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color1" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketFloat , "Factor1" , 0.0 ) , 
-                    ( SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketFloat , "Factor2" , 0.0 ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color1" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketFloat , "Factor1" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketFloat , "Factor2" , 0.0 ) ]
 
     def init(self, context):
         super().register_prop()
@@ -449,9 +354,9 @@ class SORTNodeLerp(SORTShadingNode):
     bl_idname = 'SORTNodeLerp'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color1" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketFloat , "Factor" , 0.0 ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color1" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketFloat , "Factor" , 0.0 ) ]
 
     def init(self, context):
         super().register_prop()
@@ -461,7 +366,7 @@ class SORTNodeLinearToGamma(SORTShadingNode):
     bl_idname = 'SORTNodeLinearToGamma'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -471,7 +376,7 @@ class SORTNodeGammaToLinear(SORTShadingNode):
     bl_idname = 'SORTNodeGammaToLinear'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -481,7 +386,7 @@ class SORTNodeDecodeNormal(SORTShadingNode):
     bl_idname = 'SORTNodeDecodeNormal'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -492,7 +397,7 @@ class SORTNodeConstant(SORTShadingNode):
     bl_idname = 'SORTNodeConstant'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color" , (1.0,1.0,1.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -502,8 +407,8 @@ class SORTNodeGrid(SORTShadingNode):
     bl_idname = 'SORTNodeGrid'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color1" , (0.2,0.2,0.2) ) , 
-                    ( SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color1" , (0.2,0.2,0.2) ) , 
+                    ( sockets.SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -513,8 +418,8 @@ class SORTNodeCheckbox(SORTShadingNode):
     bl_idname = 'SORTNodeCheckbox'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Color1" , (0.2,0.2,0.2) ) , 
-                    ( SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Color1" , (0.2,0.2,0.2) ) , 
+                    ( sockets.SORTNodeSocketColor , "Color2" , (1.0,1.0,1.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -639,12 +544,12 @@ class SORTNode_Material_Principle(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_Material_Principle'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketFloat , "RoughnessU" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "RoughnessV" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "Metallic" , 1.0 ) , 
-                    ( SORTNodeSocketFloat , "Specular" , 1.0 ) ,  
-                    ( SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketFloat , "RoughnessU" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "RoughnessV" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "Metallic" , 1.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "Specular" , 1.0 ) ,  
+                    ( sockets.SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -664,18 +569,18 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_Material_DisneyBRDF'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketFloat , "SubSurface" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "Metallic" , 1.0 ) , 
-                    ( SORTNodeSocketFloat , "Specular" , 1.0 ) , 
-                    ( SORTNodeSocketFloat , "SpecularTint" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "Roughness" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "Anisotropic" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "Sheen" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "SheenTint" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "Clearcoat" , 0.0 ) , 
-                    ( SORTNodeSocketFloat , "ClearcoatGloss" , 0.0 ) , 
-                    ( SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) ,
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketFloat , "SubSurface" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "Metallic" , 1.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "Specular" , 1.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "SpecularTint" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "Roughness" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "Anisotropic" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "Sheen" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "SheenTint" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "Clearcoat" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketFloat , "ClearcoatGloss" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) ,
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -709,10 +614,10 @@ class SORTNode_Material_Glass(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_Material_Glass'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Reflectance" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketColor , "Transmittance" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketFloat , "Roughness" , 0.0 ) , 
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Reflectance" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketColor , "Transmittance" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketFloat , "Roughness" , 0.0 ) , 
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -733,10 +638,10 @@ class SORTNode_Material_Plastic(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_Material_Plastic'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketColor , "Specular" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketFloat , "Roughness" , 1.0 ) , 
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "Diffuse" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketColor , "Specular" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketFloat , "Roughness" , 1.0 ) , 
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -756,9 +661,9 @@ class SORTNode_Material_Matte(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_Material_Matte'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketFloat , "Roughness" , 1.0 ) , 
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketFloat , "Roughness" , 1.0 ) , 
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -776,9 +681,9 @@ class SORTNode_Material_Mirror(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_Material_Mirror'
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) , 
-                    ( SORTNodeSocketFloat , "Roughness" , 1.0 ) , 
-                    ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketColor , "BaseColor" , (1.0,1.0,1.0) ) , 
+                    ( sockets.SORTNodeSocketFloat , "Roughness" , 1.0 ) , 
+                    ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         self.register_prop()
@@ -798,7 +703,7 @@ class SORTNode_Material_Measured(SORTShadingNode_BXDF):
     file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
 
     # node sockets
-    socket_list = [ ( SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
+    socket_list = [ ( sockets.SORTNodeSocketNormal , "Normal" , (0.0,1.0,0.0) ) ]
 
     def init(self, context):
         super().register_prop()
@@ -837,8 +742,8 @@ class SORTNode_Material_Layered(SORTShadingNode_BXDF):
 
     def init(self, context):
         for x in range(0,8):
-            self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
-            self.inputs.new( 'SORTNodeSocketColor' , 'Weight'+str(x) )
+            self.inputs.new( 'sockets.SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
+            self.inputs.new( 'sockets.SORTNodeSocketColor' , 'Weight'+str(x) )
         super().register_prop()
 
     def draw_buttons(self, context, layout):
@@ -847,8 +752,8 @@ class SORTNode_Material_Layered(SORTShadingNode_BXDF):
         for x in range( 0 , 8 ):
             if x < self.bxdf_count:
                 if self.inputs.get('Bxdf'+str(x)) is None:
-                    self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
-                    self.inputs.new( 'SORTNodeSocketColor' , 'Weight'+str(x) )
+                    self.inputs.new( 'sockets.SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
+                    self.inputs.new( 'sockets.SORTNodeSocketColor' , 'Weight'+str(x) )
             else:
                 if self.inputs.get('Bxdf'+str(x)) is not None:
                     self.inputs.remove( self.inputs['Bxdf' + str(x)] )

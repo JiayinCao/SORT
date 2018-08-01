@@ -25,7 +25,7 @@ bl_info = {
 
 import bpy
 from . import renderer
-from . import nodes
+from .mat_node import nodes
 from . import material
 from . import common
 from extensions_framework import Addon
