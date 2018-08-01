@@ -26,7 +26,7 @@ import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
 
 def get_sort_dir(force_debug=False):
-    addon_prefs = bpy.context.user_preferences.addons[common.preference_bl_name].preferences
+    addon_prefs = exporter_common.getPreference()
     debug = bpy.context.scene.debug_prop
     return_path = addon_prefs.install_path
     if debug is True:
@@ -459,7 +459,7 @@ def export_material(scene,force_debug):
         # material node
         mat_node = ET.SubElement( root , 'Material', name=material.name )
         
-        def draw_props(mat_node , xml_node):
+        def export_props(mat_node , xml_node):
             mat_node.export_prop(xml_node)
 
             inputs = mat_node.inputs
@@ -469,12 +469,11 @@ def export_material(scene,force_debug):
                         return next((l.from_node for l in nt.links if l.to_socket == socket), None)
                     input_node = socket_node_input(ntree, socket)
                     sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
-                    draw_props(input_node,sub_xml_node)
+                    export_props(input_node,sub_xml_node)
                 else:
-                    if socket.IsEmptySocket() is False:
-                        ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.export_sort_socket_type(), value=socket.export_sort_socket_value() )
+                    ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.export_sort_socket_type(), value=socket.export_sort_socket_value() )
 
-        draw_props(output_node, mat_node)
+        export_props(output_node, mat_node)
     
     # output the xml
     output_material_file = get_immediate_dir(force_debug) + 'blender_material.xml'
