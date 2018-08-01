@@ -19,4 +19,3 @@ preference_bl_name = __package__
 sort_node_output_bl_name = 'SORTNodeOutput'
 
 label_percentage = 0.3
-socket_percentage = 0.9
