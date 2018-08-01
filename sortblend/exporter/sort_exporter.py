@@ -462,7 +462,7 @@ def export_material(scene,force_debug):
                     draw_props(input_node,sub_xml_node)
                 else:
                     if socket.IsEmptySocket() is False:
-                        ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.output_type_str(), value=socket.output_default_value_to_str() )
+                        ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.export_sort_socket_type(), value=socket.export_sort_socket_value() )
 
         draw_props(output_node, mat_node)
     

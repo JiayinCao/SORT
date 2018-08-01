@@ -107,11 +107,12 @@ class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
     def draw_color(self, context, node):
         return (0.1, 1.0, 0.2, 1.0)
 
-    def output_default_value_to_str(self):
+    def export_sort_socket_value(self):
         return '%f %f %f'%(self.default_value[0],self.default_value[1],self.default_value[2])
-
-    def output_type_str(self):
+    def export_sort_socket_type(self):
         return 'color'
+    def to_string():
+        return 'SORTNodeSocketColor'
 
 class SORTNodeBaseColorSocket(bpy.types.NodeSocketColor, SORTSocket):
     bl_idname = 'SORTNodeBaseColorSocket'
@@ -123,14 +124,15 @@ class SORTNodeBaseColorSocket(bpy.types.NodeSocketColor, SORTSocket):
     def draw_color(self, context, node):
         return (0.1, 1.0, 0.2, 1.0)
 
-    def output_default_value_to_str(self):
-        return '%f %f %f'%(self.default_value[0],self.default_value[1],self.default_value[2])
-
-    def output_type_str(self):
-        return 'color'
-
     def export_pbrt(self,file):
         file.write( "  \"rgb basecolor\" [%f %f %f]\n"%(self.default_value[:]) )
+
+    def export_sort_socket_value(self):
+        return '%f %f %f'%(self.default_value[0],self.default_value[1],self.default_value[2])
+    def export_sort_socket_type(self):
+        return 'color'
+    def to_string():
+        return 'SORTNodeBaseColorSocket'
 
 class SORTNodeFloatSocket(bpy.types.NodeSocketFloat, SORTSocket):
     bl_idname = 'SORTNodeFloatSocket'
@@ -142,11 +144,12 @@ class SORTNodeFloatSocket(bpy.types.NodeSocketFloat, SORTSocket):
     def draw_color(self, context, node):
         return (0.1, 0.1, 0.3, 1.0)
 
-    def output_default_value_to_str(self):
+    def export_sort_socket_value(self):
         return '%f'%(self.default_value)
-
-    def output_type_str(self):
+    def export_sort_socket_type(self):
         return 'float'
+    def to_string():
+        return 'SORTNodeFloatSocket'
 
 class SORTNodeNormalSocket(bpy.types.NodeSocketVector, SORTSocket):
     bl_idname = 'SORTNodeNormalSocket'
@@ -158,12 +161,6 @@ class SORTNodeNormalSocket(bpy.types.NodeSocketVector, SORTSocket):
     def draw_color(self, context, node):
         return (0.1, 0.6, 0.3, 1.0)
 
-    def output_default_value_to_str(self):
-        return '%f %f %f'%(self.default_value[:])
-
-    def output_type_str(self):
-        return 'vector'
-
     #draw socket property in node
     def draw(self, context, layout, node, text):
         if self.is_linked or self.is_output:
@@ -173,11 +170,26 @@ class SORTNodeNormalSocket(bpy.types.NodeSocketVector, SORTSocket):
             split = row.split(common.label_percentage)
             split.label(text)
 
+    def export_sort_socket_value(self):
+        return '%f %f %f'%(self.default_value[:])
+    def export_sort_socket_type(self):
+        return 'vector'
+    def to_string():
+        return 'SORTNodeNormalSocket'
+
 # sort material node root
 class SORTShadingNode(bpy.types.Node):
     bl_label = 'ShadingNode'
     bl_idname = 'SORTShadingNode'
     bl_icon = 'MATERIAL'
+
+    # registered properties
+    sockets = []
+
+    def register_sockets(self):
+        for socket in self.sockets:
+            self.inputs.new( socket[0].to_string() , socket[1] )
+            self.inputs[socket[1]].default_value = socket[2]
 
     def export_prop(self, xml_node):
         pass
@@ -229,11 +241,14 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
     eta = bpy.props.FloatVectorProperty(name='Interior IOR', default=(0.37, 0.37, 0.37), min=0.10, max=10.0)
     k = bpy.props.FloatVectorProperty(name='Absorption', default=(2.82, 2.82, 2.82), min=1.0, max=10.0)
 
+    # node sockets
+    sockets = [ ( SORTNodeFloatSocket , "RoughnessU" , 0.1 ) , 
+                ( SORTNodeFloatSocket , "RoughnessV" , 0.1 ) , 
+                ( SORTNodeBaseColorSocket , "BaseColor" , (1.0,1.0,1.0) ) ,
+                ( SORTNodeNormalSocket , "Normal" , (0.0,1.0,0.0) ) ]
+
     def init(self, context):
-        self.inputs.new('SORTNodeFloatSocket', 'RoughnessU')
-        self.inputs.new('SORTNodeFloatSocket', 'RoughnessV')
-        self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
-        self.inputs.new('SORTNodeNormalSocket', 'Normal' )
+        super().register_sockets()
         self.outputs.new('SORTNodeSocketBxdf', 'Result')
 
     def draw_buttons(self, context, layout):
@@ -248,8 +263,8 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
 
     def export_prop(self, xml_node):
         ET.SubElement( xml_node , 'Property' , name='MicroFacetDistribution' , type='string', value= self.mfdist_prop )
-        ET.SubElement( xml_node , 'Property' , name='eta' , type='color', value= '%f %f %f'%(self.eta[0],self.eta[1],self.eta[2])  )
-        ET.SubElement( xml_node , 'Property' , name='k' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
+        ET.SubElement( xml_node , 'Property' , name='Interior IOR' , type='color', value= '%f %f %f'%(self.eta[0],self.eta[1],self.eta[2])  )
+        ET.SubElement( xml_node , 'Property' , name='Absorption Coefficient' , type='color', value= '%f %f %f'%(self.k[0],self.k[1],self.k[2]) )
 
 class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode):
     bl_label = 'MicrofacetRefraction'
@@ -265,7 +280,10 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode):
     int_ior = bpy.props.FloatProperty(name='Interior IOR', default=1.1, min=1.0, max=10.0)
     ext_ior = bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0)
 
+    test = "inherited"
+
     def init(self, context):
+        super().register_prop()
         self.inputs.new('SORTNodeFloatSocket', 'RoughnessU')
         self.inputs.new('SORTNodeFloatSocket', 'RoughnessV')
         self.inputs.new('SORTNodeBaseColorSocket', 'BaseColor')
