@@ -15,7 +15,6 @@
 
 import bpy
 from .. import common
-from .. import nodes
 
 class SORTMaterialPanel:
     bl_space_type = "PROPERTIES"
@@ -119,7 +118,9 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
             layout.context_pointer_set("socket", socket)
 
             if socket.is_linked:
-                input_node = nodes.socket_node_input(nt, socket)
+                def socket_node_input(nt, socket):
+                    return next((l.from_node for l in nt.links if l.to_socket == socket), None)
+                input_node = socket_node_input(nt, socket)
                 ui_open = socket.ui_open
                 icon = 'DISCLOSURE_TRI_DOWN' if ui_open else 'DISCLOSURE_TRI_RIGHT'
                 split = layout.split(common.label_percentage)
@@ -156,7 +157,16 @@ def panel_node_draw(layout, context, id_data, input_name):
 
     ntree = bpy.data.node_groups[id_data.sort_material.sortnodetree]
 
-    output_node = nodes.find_node(id_data, common.sort_node_output_bl_name)
+    # find the output node
+    def find_node(material, nodetype):
+        if material and material.sort_material and material.sort_material.sortnodetree:
+            ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+            for node in ntree.nodes:
+                if getattr(node, "bl_idname", None) == nodetype:
+                    return node
+        return None
+
+    output_node = find_node(id_data, common.sort_node_output_bl_name)
 
     if output_node is None:
         layout.operator("sort.use_shading_nodes", icon='NODETREE')
@@ -170,8 +180,6 @@ def panel_node_draw(layout, context, id_data, input_name):
 
     if output_node is not None:
         draw_node_properties_recursive(layout, context, ntree, output_node)
-        #input = nodes.find_node_input(output_node, input_name)
-        #layout.template_node_view(ntree, output_node, input)
 
 from .. import material
 

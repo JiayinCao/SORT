@@ -23,7 +23,6 @@ import numpy as np
 from math import degrees
 from . import exporter_common
 from .. import common
-from .. import nodes
 from extensions_framework import util as efutil
 
 pbrt_process = None
@@ -228,7 +227,10 @@ def export_light(scene):
             light_spectrum *= lamp.energy
             str = "LightSource \"infinite\" "
             str += "\"rgb L\" [ %f %f %f ] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
-            str += "\"string mapname\" \"%s\" \n"%nodes.fixPbrtPath(bpy.path.abspath(lamp.sort_lamp.sort_lamp_hemi.envmap_file))
+            # fix pbrt path , / will be recognized as escape letter, which will easily crash the system in PBRT
+            def fixPbrtPath(path):
+                return path.replace( '\\' , '/' )
+            str += "\"string mapname\" \"%s\" \n"%fixPbrtPath(bpy.path.abspath(lamp.sort_lamp.sort_lamp_hemi.envmap_file))
             file.write(str)
         file.write( "AttributeEnd\n" )
 
@@ -244,7 +246,17 @@ def export_material(scene):
 
     for material in exporter_common.getMaterialList(scene):
         ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-        output_node = nodes.find_node(material, common.sort_node_output_bl_name)
+
+        # find the output node, duplicated code, to be cleaned
+        def find_node(material, nodetype):
+            if material and material.sort_material and material.sort_material.sortnodetree:
+                ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+                for node in ntree.nodes:
+                    if getattr(node, "bl_idname", None) == nodetype:
+                        return node
+            return None
+
+        output_node = find_node(material, common.sort_node_output_bl_name)
         if output_node is None:
             continue
 
@@ -254,7 +266,9 @@ def export_material(scene):
         print( 'Exporting material: ' + material.name )
 
         file.write( "MakeNamedMaterial \"" + material.name + "\"\n" )
-        nput_node = nodes.socket_node_input(ntree, output_node.inputs[0])
+        def socket_node_input(nt, socket):
+            return next((l.from_node for l in nt.links if l.to_socket == socket), None)
+        nput_node = socket_node_input(ntree, output_node.inputs[0])
         nput_node.export_pbrt(file)
 
     file.close()
