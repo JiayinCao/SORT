@@ -21,7 +21,6 @@ import struct
 import numpy
 import platform
 from .exporter import sort_exporter
-from . import common
 from extensions_framework.util import TimerThread
 
 class SORT_Thread(TimerThread):
@@ -99,7 +98,7 @@ class SORT_Thread(TimerThread):
 class SORT_RENDERER(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
     # RenderEngine; define its internal name, visible name and capabilities.
-    bl_idname = common.default_bl_name
+    bl_idname = 'sortblend'
     bl_label = 'SORT'
     bl_use_preview = True
 

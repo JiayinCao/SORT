@@ -20,7 +20,6 @@ import shutil
 import numpy as np
 import platform
 from math import degrees
-from .. import common
 from . import exporter_common
 import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
@@ -145,7 +144,7 @@ def export_sort_file(scene, force_debug):
     yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
     ET.SubElement(root, 'RenderTargetSize', w='%d'%xres, h='%d'%yres )
     # output file name
-    ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.bmp')
+    ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.exr')
     # sampler type
     sampler_type = scene.sampler_type_prop
     sampler_count = scene.sampler_count_prop
@@ -441,16 +440,16 @@ def export_material(scene,force_debug):
         ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
 
         # find the output node, duplicated code, to be cleaned
-        def find_node(material, nodetype):
+        def find_output_node(material):
             if material and material.sort_material and material.sort_material.sortnodetree:
                 ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
                 for node in ntree.nodes:
-                    if getattr(node, "bl_idname", None) == nodetype:
+                    if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
                         return node
             return None
 
         # get output nodes
-        output_node = find_node(material, common.sort_node_output_bl_name)
+        output_node = find_output_node(material)
         if output_node is None:
             continue
 
@@ -471,7 +470,7 @@ def export_material(scene,force_debug):
                     sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
                     export_props(input_node,sub_xml_node)
                 else:
-                    ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.export_sort_socket_type(), value=socket.export_sort_socket_value() )
+                    ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.export_sort_socket_type(), value=socket.export_socket_value() )
 
         export_props(output_node, mat_node)
     

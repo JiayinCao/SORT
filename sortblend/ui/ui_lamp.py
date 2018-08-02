@@ -15,7 +15,6 @@
 
 import bpy
 import bl_ui
-from .. import common
 from .. import SORTAddon
 from extensions_framework import declarative_property_group
 
@@ -50,7 +49,7 @@ class SORTLampPanel(bl_ui.properties_data_lamp.DataButtonsPanel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "data"
-    COMPAT_ENGINES = {common.default_bl_name}
+    COMPAT_ENGINES = {'sortblend'}
 
     @classmethod
     def poll(cls, context):
