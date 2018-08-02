@@ -17,7 +17,6 @@ import bpy
 import os
 import platform
 import subprocess
-from .. import common
 from ..exporter import sort_exporter
 from ..exporter import pbrt_exporter
 
@@ -41,7 +40,7 @@ class SORTRenderPanel:
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
-    COMPAT_ENGINES = {common.default_bl_name}
+    COMPAT_ENGINES = {'sortblend'}
 
     @classmethod
     def poll(cls, context):

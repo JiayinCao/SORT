@@ -16,12 +16,8 @@
 import bpy
 import xml.etree.cElementTree as ET
 import nodeitems_utils
-from . import sockets
 from nodeitems_utils import NodeItem
-
-# fix pbrt path , / will be recognized as escape letter, which will easily crash the system in PBRT
-def fixPbrtPath(path):
-    return path.replace( '\\' , '/' )
+from . import sockets
 
 # node tree for sort
 class SORTPatternGraph(bpy.types.NodeTree):
@@ -53,10 +49,7 @@ class SORTShadingNode(bpy.types.Node):
     bl_label = 'ShadingNode'
     bl_idname = 'SORTShadingNode'
     bl_icon = 'MATERIAL'
-
     output_type = 'SORTNodeSocketColor'
-
-    # registered socket list
     socket_list = []
 
     def register_prop(self):
@@ -78,9 +71,6 @@ class SORTShadingNode(bpy.types.Node):
         
     def draw_buttons(self, context, layout):
         pass
-    
-    def draw_props(self, context, layout, indented_label):
-        pass
 
     #draw property in node
     def draw_button(self, layout, label, prop):
@@ -99,23 +89,17 @@ class SORTShadingNode(bpy.types.Node):
         prop_row = split.row()
         prop_row.prop(self,prop,text="")
 
-
-# sort material node root
 class SORTShadingNode_BXDF(SORTShadingNode):
     bl_label = 'ShadingNode'
     bl_idname = 'SORTShadingNode'
     bl_icon = 'MATERIAL'
-
     output_type = 'SORTNodeSocketBxdf'
-
     bxdf_socket_list = [ { 'class' : sockets.SORTNodeSocketNormal , 'name' : 'Normal' } ]
-
     pbrt_bxdf_type = ''
 
     def register_prop(self):
         super().register_prop()
-
-        # register all sockets
+        # register all sockets in BXDF
         for socket in SORTShadingNode_BXDF.bxdf_socket_list:
             self.inputs.new( socket['class'].__name__ , socket['name'] )
             if 'default' in socket:
@@ -123,25 +107,222 @@ class SORTShadingNode_BXDF(SORTShadingNode):
 
     def export_pbrt(self, file):
         # disable pbrt export by default, not all materials are supported in pbrt
-        if self.pbrt_bxdf_type is None:
+        if self.pbrt_bxdf_type is '':
+            # fall back to a default grey matte material
+            file.write( "  \"string type\" \"matte\"\n\n" )
             return
-
         # register all sockets
         file.write( "  \"string type\" \"" + self.pbrt_bxdf_type + "\"\n" )
         for socket in self.socket_list:
             if 'pbrt_name' in socket:
-                file.write( "  \"" + self.inputs[socket['name']].export_pbrt_socket_type() + " " + socket['pbrt_name'] + "\" [%s]\n"%self.inputs[socket['name']].export_sort_socket_value())
+                file.write( "  \"" + self.inputs[socket['name']].export_pbrt_socket_type() + " " + socket['pbrt_name'] + "\" [%s]\n"%self.inputs[socket['name']].export_socket_value())
         file.write( "\n" )
 
-# output node
-class SORTNodeOutput(SORTShadingNode):
-    bl_label = 'SORT_output'
-    bl_idname = 'SORTNodeOutput'
+class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == 'SORTPatternGraph'
+
+class SORT_Add_Node:
+    def get_type_items(self, context):
+        items = []
+        for nodetype in SORTPatternGraph.nodetypes.values():
+            items.append((nodetype, nodetype,nodetype))
+        items.append(('REMOVE', 'Remove',
+                        'Remove the node connected to this socket'))
+        items.append(('DISCONNECT', 'Disconnect',
+                        'Disconnect the node connected to this socket'))
+        return items
+
+    node_type = bpy.props.EnumProperty(name="Node Type",
+        description='Node type to add to this socket',
+        items=get_type_items)
+
+    def execute(self, context):
+        new_type = self.properties.node_type
+        if new_type == 'DEFAULT':
+            return {'CANCELLED'}
+
+        nt = context.nodetree
+        node = context.node
+        socket = context.socket
+        def socket_node_input(nt, socket):
+            return next((l.from_node for l in nt.links if l.to_socket == socket), None)
+        input_node = socket_node_input(nt, socket)
+
+        if new_type == 'REMOVE':
+            nt.nodes.remove(input_node)
+            return {'FINISHED'}
+
+        if new_type == 'DISCONNECT':
+            link = next((l for l in nt.links if l.to_socket == socket), None)
+            nt.links.remove(link)
+            return {'FINISHED'}
+
+        # add a new node to existing socket
+        if input_node is None:
+            newnode = nt.nodes.new(new_type)
+            newnode.location = node.location
+            newnode.location[0] -= 300
+            newnode.selected = False
+            if self.input_type == 'Pattern':
+                link_node(nt, newnode, socket)
+            else:
+                nt.links.new(newnode.outputs[self.input_type], socket)
+
+        # replace input node with a new one
+        else:
+            newnode = nt.nodes.new(new_type)
+            input = socket
+            old_node = input.links[0].from_node
+            nt.links.new(newnode.outputs[self.input_type], socket)
+            newnode.location = old_node.location
+
+            nt.nodes.remove(old_node)
+        return {'FINISHED'}
+
+class NODE_OT_add_surface(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface'
+    bl_label = 'Add Bxdf Node'
+    bl_description = 'Connect a Bxdf to this socket'
+    input_type = bpy.props.StringProperty(default='Result')
+
+#------------------------------------------------------------------------------------------------------------------------------------
+#                                               Material Nodes for SORT
+#------------------------------------------------------------------------------------------------------------------------------------
+class SORTNode_Material_Principle(SORTShadingNode_BXDF):
+    bl_label = 'Principle'
+    bl_idname = 'SORTNode_Material_Principle'
+    socket_list = [ { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'RoughnessU' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'RoughnessV' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Metallic' , 'default' : 1.0 } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Specular' } , 
+                    { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
+    def init(self, context):
+        super().register_prop()
+
+
+class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
+    bl_label = 'Disney BRDF'
+    bl_idname = 'SORTNode_Material_DisneyBRDF'
+    pbrt_bxdf_type = 'disney'
+    socket_list = [ { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'SubSurface' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Metallic' , 'default' : 1.0 , 'pbrt_name' : 'metallic' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Speulcar' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'SpecularTint' , 'pbrt_name' : 'speculartint' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Roughness' , 'pbrt_name' : 'roughness' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Anisotropic' , 'pbrt_name' : 'anisotropic' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Sheen' , 'pbrt_name' : 'sheen' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'SheenTint' , 'pbrt_name' : 'sheentint' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Clearcoat' , 'pbrt_name' : 'clearcoat' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'ClearcoatGloss' , 'pbrt_name' : 'clearcoatgloass' } , 
+                    { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'color' } ]
+    def init(self, context):
+        super().register_prop()
+
+class SORTNode_Material_Glass(SORTShadingNode_BXDF):
+    bl_label = 'Glass'
+    bl_idname = 'SORTNode_Material_Glass'
+    pbrt_bxdf_type = 'glass'
+    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Reflectance' , 'pbrt_name' : 'Kr' } , 
+                    { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Transmittance' , 'pbrt_name' : 'Kt' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'RoughnessU' , 'pbrt_name' : 'uroughness' } ,
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'pbrt_name' : 'vroughness' } ] 
+    def init(self, context):
+        super().register_prop()
+
+class SORTNode_Material_Plastic(SORTShadingNode_BXDF):
+    bl_label = 'Plastic'
+    bl_idname = 'SORTNode_Material_Plastic'
+    pbrt_bxdf_type = 'plastic'
+    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Diffuse' , 'pbrt_name' : 'Kd' } , 
+                    { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Specular' , 'pbrt_name' : 'Ks' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Roughness' , 'default' : 0.2 , 'pbrt_name' : 'roughness' } ] 
+    def init(self, context):
+        super().register_prop()
+
+class SORTNode_Material_Matte(SORTShadingNode_BXDF):
+    bl_label = 'Matte'
+    bl_idname = 'SORTNode_Material_Matte'
+    pbrt_bxdf_type = 'matte'
+    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } , 
+                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Roughness' , 'pbrt_name' : 'sigma' } ] 
+    def init(self, context):
+        super().register_prop()
+
+class SORTNode_Material_Mirror(SORTShadingNode_BXDF):
+    bl_label = 'Mirror'
+    bl_idname = 'SORTNode_Material_Mirror'
+    pbrt_bxdf_type = 'mirror'
+    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } ] 
+    def init(self, context):
+        self.register_prop()
+
+class SORTNode_Material_Measured(SORTShadingNode_BXDF):
+    bl_label = 'Measured'
+    bl_idname = 'SORTNode_Material_Measured'
+
+    type_item = [ ("Fourier", "Fourier", "", 1), ("MERL" , "MERL" , "", 2) ]
+    type_prop = bpy.props.EnumProperty(name='Type',items=type_item,default="Fourier")
+    file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
 
     def init(self, context):
-        input = self.inputs.new('sockets.SORTNodeSocketBxdf', 'Surface')
+        super().register_prop()
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Type" , "type_prop")
+        row = layout.row()
+        row.label("Filename")
+        row.prop(self,'file_name_prop')
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Type' , 'type_prop' , intended_label)
+        self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
+
+    def export_prop(self, xml_node):
+        abs_file_path = bpy.path.abspath( self.file_name_prop )
+        ET.SubElement( xml_node , 'Property' , name='Type' , type='string', value = self.type_prop )
+        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= abs_file_path )
+
+    def export_pbrt(self, file):
+        abs_file_path = bpy.path.abspath( self.file_name_prop )
+        if self.type_prop == 'Fourier':
+            file.write( "  \"string type\" \"fourier\"\n" )
+            file.write( "  \"string bsdffile\" \"%s\"\n" % abs_file_path.replace( '\\' , '/' ) )
+        file.write( "\n" )
 
 
+class SORTNode_Material_Layered(SORTShadingNode_BXDF):
+    bl_label = 'Layered Material'
+    bl_idname = 'SORTNode_Material_Layered'
+    bxdf_count = bpy.props.IntProperty( name = 'Bxdf Count' , default = 2 , min = 1 , max = 8 )
+
+    def init(self, context):
+        super().register_prop()
+        for x in range(0,8):
+            self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
+            self.inputs.new( 'SORTNodeSocketColor' , 'Weight'+str(x) )
+
+    def draw_buttons(self, context, layout):
+        self.draw_button(layout, "Bxdf Count" , "bxdf_count")
+
+        for x in range( 0 , 8 ):
+            if x < self.bxdf_count:
+                if self.inputs.get('Bxdf'+str(x)) is None:
+                    self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
+                    self.inputs.new( 'SORTNodeSocketColor' , 'Weight'+str(x) )
+            else:
+                if self.inputs.get('Bxdf'+str(x)) is not None:
+                    self.inputs.remove( self.inputs['Bxdf' + str(x)] )
+                    self.inputs.remove( self.inputs['Weight' + str(x)] )
+
+    def draw_props(self, context, layout, indented_label):
+        self.draw_prop(layout, 'Bxdf Count' , 'bxdf_count' , indented_label)
+#------------------------------------------------------------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------------------------------------------------------------
+#                                               BXDF Nodes for SORT
+#------------------------------------------------------------------------------------------------------------------------------------
 # microfacte node
 class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
     bl_label = 'MicrofacetRelection'
@@ -221,13 +402,10 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
 class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
     bl_label = 'AshikhmanShirley'
     bl_idname = 'SORTNode_BXDF_AshikhmanShirley'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketFloat , 'name'  : 'Specular' } , 
                     { 'class' : sockets.SORTNodeSocketFloat , 'name'  : 'RoughnessU' , 'default' : 0.1 } , 
                     { 'class' : sockets.SORTNodeSocketFloat , 'name'  : 'RoughnessV' , 'default' : 0.1 } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
-
     def init(self, context):
         super().register_prop()
 
@@ -235,10 +413,7 @@ class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
 class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
     bl_label = 'Lambert'
     bl_idname = 'SORTNode_BXDF_Lambert'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
-
     def init(self, context):
         super().register_prop()
 
@@ -246,10 +421,7 @@ class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
 class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
     bl_label = 'Lambert Transmission'
     bl_idname = 'SORTNode_BXDF_LambertTransmission'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
-
     def init(self, context):
         super().register_prop()
 
@@ -257,11 +429,8 @@ class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
 class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
     bl_label = 'OrenNayar'
     bl_idname = 'SORTNode_BXDF_OrenNayar'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketFloat , 'name'  : 'Roughness' } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
-
     def init(self, context):
         super().register_prop()
 
@@ -287,12 +456,6 @@ class SORTNode_BXDF_MERL(SORTShadingNode_BXDF):
         abs_file_path = bpy.path.abspath( self.file_name_prop )
         ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= abs_file_path )
 
-    def export_pbrt(self, file):
-        file.write( "  \"string type\" \"matte\"\n" ) # Merl is not supported in pbrt 3.x
-        file.write( "  \"rgb Kd\" [1.0 1.0 1.0]\n" )
-        file.write( "\n" )
-
-
 class SORTNode_BXDF_Fourier(SORTShadingNode_BXDF):
     bl_label = 'Fourier BXDF'
     bl_idname = 'SORTNode_BXDF_Fourier'
@@ -317,135 +480,99 @@ class SORTNode_BXDF_Fourier(SORTShadingNode_BXDF):
     def export_pbrt(self, file):
         abs_file_path = bpy.path.abspath( self.file_name_prop )
         file.write( "  \"string type\" \"fourier\"\n" )
-        file.write( "  \"string bsdffile\" \"%s\"\n" % fixPbrtPath(abs_file_path) )
+        file.write( "  \"string bsdffile\" \"%s\"\n" % abs_file_path.replace( '\\' , '/' ) )
         file.write( "\n" )
+#------------------------------------------------------------------------------------------------------------------------------------
 
-
-# operator nodes
+#------------------------------------------------------------------------------------------------------------------------------------
+#                                               Operator Nodes for SORT
+#------------------------------------------------------------------------------------------------------------------------------------
 class SORTNodeAdd(SORTShadingNode):
     bl_label = 'Add'
     bl_idname = 'SORTNodeAdd'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color1' } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color2' } ]
-
     def init(self, context):
         super().register_prop()
 
 class SORTNodeOneMinus(SORTShadingNode):
     bl_label = 'One Minus'
     bl_idname = 'SORTNodeOneMinus'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color' } ]
-
     def init(self, context):
         super().register_prop()
 
 class SORTNodeMultiply(SORTShadingNode):
     bl_label = 'Multiply'
     bl_idname = 'SORTNodeMultiply'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color1' } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color2' } ]
-
     def init(self, context):
         super().register_prop()
 
 class SORTNodeBlend(SORTShadingNode):
     bl_label = 'Blend'
     bl_idname = 'SORTNodeBlend'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color1' } , 
                     { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Factor1' } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color2' } ,
                     { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Factor2' } ]
-
     def init(self, context):
         super().register_prop()
 
 class SORTNodeLerp(SORTShadingNode):
     bl_label = 'Lerp'
     bl_idname = 'SORTNodeLerp'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color1' } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color2' } ,
                     { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Factor' } ]
-
     def init(self, context):
         super().register_prop()
 
 class SORTNodeLinearToGamma(SORTShadingNode):
     bl_label = 'LinearToGamma'
     bl_idname = 'SORTNodeLinearToGamma'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color' } ]
-
     def init(self, context):
         super().register_prop()
 
 class SORTNodeGammaToLinear(SORTShadingNode):
     bl_label = 'GammaToLinear'
     bl_idname = 'SORTNodeGammaToLinear'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color' } ]
-
     def init(self, context):
         super().register_prop()
 
 class SORTNodeDecodeNormal(SORTShadingNode):
     bl_label = 'DecodeNormal'
     bl_idname = 'SORTNodeDecodeNormal'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color' } ]
-
     def init(self, context):
         super().register_prop()
+#------------------------------------------------------------------------------------------------------------------------------------
 
-# texture nodes
-class SORTNodeConstant(SORTShadingNode):
-    bl_label = 'Constant'
-    bl_idname = 'SORTNodeConstant'
-
-    # node sockets
-    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color' } ]
-
-    def init(self, context):
-        super().register_prop()
-
+#------------------------------------------------------------------------------------------------------------------------------------
+#                                               Texture Nodes for SORT
+#------------------------------------------------------------------------------------------------------------------------------------
 class SORTNodeGrid(SORTShadingNode):
     bl_label = 'Grid'
     bl_idname = 'SORTNodeGrid'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color2' } ]
-
     def init(self, context):
         super().register_prop()
 
 class SORTNodeCheckbox(SORTShadingNode):
     bl_label = 'CheckBox'
     bl_idname = 'SORTNodeCheckbox'
-
-    # node sockets
     socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color2' } ]
-
     def init(self, context):
         super().register_prop()
 
 class SORTNodeImage(SORTShadingNode):
     bl_label = 'Image'
     bl_idname = 'SORTNodeImage'
-
     file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
 
     def init(self, context):
@@ -462,293 +589,36 @@ class SORTNodeImage(SORTShadingNode):
     def export_prop(self, xml_node):
         abs_file_path = bpy.path.abspath( self.file_name_prop )
         ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= abs_file_path )
+#------------------------------------------------------------------------------------------------------------------------------------
 
-class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
-    @classmethod
-    def poll(cls, context):
-        return context.space_data.tree_type == 'SORTPatternGraph'
-
-def socket_node_input(nt, socket):
-    return next((l.from_node for l in nt.links if l.to_socket == socket), None)
-
-def find_node_input(node, name):
-    for input in node.inputs:
-        if input.name == name:
-            return input
-    return None
-
-# find the output node
-def find_node(material, nodetype):
-    if material and material.sort_material and material.sort_material.sortnodetree:
-        ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-        for node in ntree.nodes:
-            if getattr(node, "bl_idname", None) == nodetype:
-                return node
-    return None
-
-#bass class for operator to add a node
-class SORT_Add_Node:
-    '''
-    For generating cycles-style ui menus to add new nodes,
-    connected to a given input socket.
-    '''
-    def get_type_items(self, context):
-        items = []
-        for nodetype in SORTPatternGraph.nodetypes.values():
-            items.append((nodetype, nodetype,nodetype))
-        items.append(('REMOVE', 'Remove',
-                        'Remove the node connected to this socket'))
-        items.append(('DISCONNECT', 'Disconnect',
-                        'Disconnect the node connected to this socket'))
-        return items
-
-    node_type = bpy.props.EnumProperty(name="Node Type",
-        description='Node type to add to this socket',
-        items=get_type_items)
-
-    def execute(self, context):
-        new_type = self.properties.node_type
-        if new_type == 'DEFAULT':
-            return {'CANCELLED'}
-
-        nt = context.nodetree
-        node = context.node
-        socket = context.socket
-        input_node = socket_node_input(nt, socket)
-
-        if new_type == 'REMOVE':
-            nt.nodes.remove(input_node)
-            return {'FINISHED'}
-
-        if new_type == 'DISCONNECT':
-            link = next((l for l in nt.links if l.to_socket == socket), None)
-            nt.links.remove(link)
-            return {'FINISHED'}
-
-        # add a new node to existing socket
-        if input_node is None:
-            newnode = nt.nodes.new(new_type)
-            newnode.location = node.location
-            newnode.location[0] -= 300
-            newnode.selected = False
-            if self.input_type == 'Pattern':
-                link_node(nt, newnode, socket)
-            else:
-                nt.links.new(newnode.outputs[self.input_type], socket)
-
-        # replace input node with a new one
-        else:
-            newnode = nt.nodes.new(new_type)
-            input = socket
-            old_node = input.links[0].from_node
-            nt.links.new(newnode.outputs[self.input_type], socket)
-            newnode.location = old_node.location
-
-            nt.nodes.remove(old_node)
-        return {'FINISHED'}
-
-class NODE_OT_add_surface(bpy.types.Operator, SORT_Add_Node):
-    '''
-    For generating cycles-style ui menus to add new bxdfs,
-    connected to a given input socket.
-    '''
-    bl_idname = 'node.add_surface'
-    bl_label = 'Add Bxdf Node'
-    bl_description = 'Connect a Bxdf to this socket'
-    input_type = bpy.props.StringProperty(default='Result')
-
-class SORTNode_Material_Principle(SORTShadingNode_BXDF):
-    bl_label = 'Principle'
-    bl_idname = 'SORTNode_Material_Principle'
-
-    # node sockets
-    socket_list = [ { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'RoughnessU' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'RoughnessV' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Metallic' , 'default' : 1.0 } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Specular' } , 
-                    { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
-
+#------------------------------------------------------------------------------------------------------------------------------------
+#                                               Constant Nodes for SORT
+#------------------------------------------------------------------------------------------------------------------------------------
+class SORTNodeConstant(SORTShadingNode):
+    bl_label = 'Constant'
+    bl_idname = 'SORTNodeConstant'
+    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Color' } ]
     def init(self, context):
         super().register_prop()
+#------------------------------------------------------------------------------------------------------------------------------------
 
-    def export_pbrt(self, file):
-        reflectance = self.inputs[4].default_value
-        metallic = self.inputs[2].default_value
-        roughness = self.inputs[0].default_value
-        file.write( "  \"string type\" \"disney\"\n" )
-        file.write( "  \"rgb color\" [%f %f %f]\n"%(reflectance[:]))
-        file.write( "  \"float metallic\" [%f]\n"%metallic)
-        file.write( "  \"float roughness\" [%s]\n" %roughness )    # no anisotropic in pbrt disney model yet
-        return
-
-class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
-    bl_label = 'Disney BRDF'
-    bl_idname = 'SORTNode_Material_DisneyBRDF'
-
-    pbrt_bxdf_type = 'disney'
-
-    # node sockets
-    socket_list = [ { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'SubSurface' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Metallic' , 'default' : 1.0 , 'pbrt_name' : 'metallic' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Speulcar' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'SpecularTint' , 'pbrt_name' : 'speculartint' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Roughness' , 'pbrt_name' : 'roughness' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Anisotropic' , 'pbrt_name' : 'anisotropic' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Sheen' , 'pbrt_name' : 'sheen' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'SheenTint' , 'pbrt_name' : 'sheentint' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Clearcoat' , 'pbrt_name' : 'clearcoat' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'ClearcoatGloss' , 'pbrt_name' : 'clearcoatgloass' } , 
-                    { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'color' } ]
-
+#------------------------------------------------------------------------------------------------------------------------------------
+#                                               Output Nodes for SORT
+#------------------------------------------------------------------------------------------------------------------------------------
+class SORTNodeOutput(SORTShadingNode):
+    bl_label = 'SORT_output'
+    bl_idname = 'SORTNodeOutput'
     def init(self, context):
-        super().register_prop()
+        input = self.inputs.new('sockets.SORTNodeSocketBxdf', 'Surface')
+#------------------------------------------------------------------------------------------------------------------------------------
 
-class SORTNode_Material_Glass(SORTShadingNode_BXDF):
-    bl_label = 'Glass'
-    bl_idname = 'SORTNode_Material_Glass'
-
-    # node sockets
-    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Reflectance' } , 
-                    { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Transmittance' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Roughness' } ] 
-
-    def init(self, context):
-        super().register_prop()
-
-    def export_pbrt(self, file):
-        reflectance = self.inputs[0].default_value
-        transmittance = self.inputs[1].default_value
-        roughness = self.inputs[2].default_value
-        file.write( "  \"string type\" \"glass\"\n" )
-        file.write( "  \"rgb Kr\" [%f %f %f]\n"%(reflectance[:]))
-        file.write( "  \"rgb Kt\" [%f %f %f]\n"%(transmittance[:]))
-        file.write( "  \"float uroughness\" [%s]\n" %roughness )
-        file.write( "  \"float vroughness\" [%s]\n" %roughness )
-        return
-
-class SORTNode_Material_Plastic(SORTShadingNode_BXDF):
-    bl_label = 'Plastic'
-    bl_idname = 'SORTNode_Material_Plastic'
-
-    # node sockets
-    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Diffuse' } , 
-                    { 'class' : sockets.SORTNodeSocketColor , 'name' : 'Specular' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Roughness' , 'default' : 0.2 } ] 
-
-    def init(self, context):
-        super().register_prop()
-
-    def export_pbrt(self, file):
-        basecolor = self.inputs[0].default_value
-        specular = self.inputs[1].default_value
-        roughness = self.inputs[2].default_value
-        file.write( "  \"string type\" \"plastic\"\n" )
-        file.write( "  \"rgb Kd\" [%f %f %f]\n"%(basecolor[:]))
-        file.write( "  \"rgb Ks\" [%f %f %f]\n"%(specular[:]))
-        file.write( "  \"float roughness\" [%s]\n" %roughness )
-        return
-
-class SORTNode_Material_Matte(SORTShadingNode_BXDF):
-    bl_label = 'Matte'
-    bl_idname = 'SORTNode_Material_Matte'
-
-    # node sockets
-    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' } , 
-                    { 'class' : sockets.SORTNodeSocketFloat , 'name' : 'Roughness' } ] 
-
-    def init(self, context):
-        super().register_prop()
-
-    def export_pbrt(self, file):
-        basecolor = self.inputs[0].default_value
-        roughness = self.inputs[1].default_value
-        file.write( "  \"string type\" \"matte\"\n" )
-        file.write( "  \"rgb Kd\" [%f %f %f]\n"%(basecolor[:]))
-        file.write( "  \"float sigma\" [%s]\n" %roughness )
-        return
-
-class SORTNode_Material_Mirror(SORTShadingNode_BXDF):
-    bl_label = 'Mirror'
-    bl_idname = 'SORTNode_Material_Mirror'
-
-    # node sockets
-    socket_list = [ { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' } ] 
-
-    def init(self, context):
-        self.register_prop()
-
-    def export_pbrt(self, file):
-        basecolor = self.inputs[0].default_value
-        file.write( "  \"string type\" \"mirror\"\n" )
-        file.write( "  \"rgb Kd\" [%f %f %f]\n"%(basecolor[:]))
-        return
-
-class SORTNode_Material_Measured(SORTShadingNode_BXDF):
-    bl_label = 'Measured'
-    bl_idname = 'SORTNode_Material_Measured'
-
-    type_item = [ ("Fourier", "Fourier", "", 1), ("MERL" , "MERL" , "", 2) ]
-    type_prop = bpy.props.EnumProperty(name='Type',items=type_item,default="Fourier")
-    file_name_prop = bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' )
-
-    def init(self, context):
-        super().register_prop()
-
-    def draw_buttons(self, context, layout):
-        self.draw_button(layout, "Type" , "type_prop")
-        row = layout.row()
-        row.label("Filename")
-        row.prop(self,'file_name_prop')
-
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, 'Type' , 'type_prop' , intended_label)
-        self.draw_prop(layout, 'Filename' , 'file_name_prop' , indented_label)
-
-    def export_prop(self, xml_node):
-        abs_file_path = bpy.path.abspath( self.file_name_prop )
-        ET.SubElement( xml_node , 'Property' , name='Type' , type='string', value = self.type_prop )
-        ET.SubElement( xml_node , 'Property' , name='Filename' , type='string', value= abs_file_path )
-
-    def export_pbrt(self, file):
-        abs_file_path = bpy.path.abspath( self.file_name_prop )
-        if self.type_prop == 'Fourier':
-            file.write( "  \"string type\" \"fourier\"\n" )
-            file.write( "  \"string bsdffile\" \"%s\"\n" % fixPbrtPath(abs_file_path) )
-        else:
-            file.write( "  \"string type\" \"matte\"\n" ) # Merl is not supported in pbrt 3.x
-            file.write( "  \"rgb Kd\" [1.0 1.0 1.0]\n" )
-        file.write( "\n" )
-
-# layered bxdf node
-class SORTNode_Material_Layered(SORTShadingNode_BXDF):
-    bl_label = 'Layered Material'
-    bl_idname = 'SORTNode_Material_Layered'
-
-    bxdf_count = bpy.props.IntProperty( name = 'Bxdf Count' , default = 2 , min = 1 , max = 8 )
-
-    def init(self, context):
-        super().register_prop()
-        for x in range(0,8):
-            self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
-            self.inputs.new( 'SORTNodeSocketColor' , 'Weight'+str(x) )
-
-    def draw_buttons(self, context, layout):
-        self.draw_button(layout, "Bxdf Count" , "bxdf_count")
-
-        for x in range( 0 , 8 ):
-            if x < self.bxdf_count:
-                if self.inputs.get('Bxdf'+str(x)) is None:
-                    self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
-                    self.inputs.new( 'SORTNodeSocketColor' , 'Weight'+str(x) )
-            else:
-                if self.inputs.get('Bxdf'+str(x)) is not None:
-                    self.inputs.remove( self.inputs['Bxdf' + str(x)] )
-                    self.inputs.remove( self.inputs['Weight' + str(x)] )
-
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, 'Bxdf Count' , 'bxdf_count' , indented_label)
+class SORTMaterial(bpy.types.PropertyGroup):
+    sortnodetree = bpy.props.StringProperty(name="Nodetree",default='')
+    use_sort_nodes = bpy.props.BoolProperty(name="Nodetree",default=False)
 
 def register():
+    bpy.types.Material.sort_material = bpy.props.PointerProperty(type=SORTMaterial, name="SORT Material Settings")
+
     # all categories in a list
     node_categories = [
         # identifier, label, items list
@@ -782,5 +652,6 @@ def register():
     SORTPatternGraph.nodetypes[SORTNode_Material_Mirror] = 'SORTNode_Material_Mirror'
 
 def unregister():
+    del bpy.types.Material.sort_material
     nodeitems_utils.unregister_node_categories("SORTSHADERNODES")
 

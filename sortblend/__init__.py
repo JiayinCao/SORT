@@ -25,9 +25,7 @@ bl_info = {
 
 import bpy
 from . import renderer
-from .mat_node import nodes
-from . import material
-from . import common
+from .material import nodes
 from extensions_framework import Addon
 
 SORTAddon = Addon(bl_info)
@@ -36,7 +34,7 @@ addon_register, addon_unregister = SORTAddon.init_functions()
 from .ui import ui_init
 
 class SORTAddonPreferences(bpy.types.AddonPreferences):
-    bl_idname = common.preference_bl_name
+    bl_idname = 'sortblend'
 
     # this must match the addon name
     install_path = bpy.props.StringProperty(
@@ -71,7 +69,6 @@ def register():
     bpy.utils.register_module(__name__)
 
     ui_init.register()
-    material.register()
     nodes.register()
 
 def unregister():
@@ -80,5 +77,4 @@ def unregister():
     bpy.utils.unregister_module(__name__)
 
     ui_init.unregister()
-    material.unregister()
     nodes.unregister()

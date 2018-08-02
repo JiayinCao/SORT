@@ -201,18 +201,20 @@ GlassMaterialNode::GlassMaterialNode()
 {
     REGISTER_MATERIALNODE_PROPERTY( "Reflectance" , reflectance );
     REGISTER_MATERIALNODE_PROPERTY( "Transmittance" , transmittance );
-    REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
+    REGISTER_MATERIALNODE_PROPERTY( "RoughnessU" , roughnessU );
+    REGISTER_MATERIALNODE_PROPERTY( "RoughnessV" , roughnessV );
 }
 
 void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
     const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const float rough = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
+    const float roughU = GET_MATERIALNODE_PROPERTY_FLOAT(roughnessU);
+    const float roughV = GET_MATERIALNODE_PROPERTY_FLOAT(roughnessV);
     const Spectrum r = GET_MATERIALNODE_PROPERTY_SPECTRUM(reflectance);
     const Spectrum t = GET_MATERIALNODE_PROPERTY_SPECTRUM(transmittance);
     if( r.IsBlack() && t.IsBlack() ) return;
     
-    const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
+    const MicroFacetDistribution* dist = SORT_MALLOC(GGX)(roughU, roughV);   // GGX
     if( !r.IsBlack() ){
         const Fresnel* fresnel = SORT_MALLOC( FresnelDielectric )( 1.0f , 1.5f );
         // This is one of the rare cases where there is double faces for perfect inner reflection.
