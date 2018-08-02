@@ -57,7 +57,7 @@ class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
     pbrt_type = 'rgb'
     default_value = bpy.props.FloatVectorProperty( name='Color' , default=(1.0, 1.0, 1.0) ,subtype='COLOR',soft_min = 0.0, soft_max = 1.0)
     def export_socket_value(self):
-        return '%f %f %f'%(self.default_value[0],self.default_value[1],self.default_value[2])
+        return '%f %f %f'%(self.default_value[:])
 
 # Socket for Float
 class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTSocket):
