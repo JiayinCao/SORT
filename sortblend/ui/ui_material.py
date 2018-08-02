@@ -14,13 +14,12 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
-from .. import common
 
 class SORTMaterialPanel:
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "material"
-    COMPAT_ENGINES = {common.default_bl_name}
+    COMPAT_ENGINES = {'sortblend'}
 
     @classmethod
     def poll(cls, context):
@@ -92,7 +91,7 @@ class SORT_use_shading_nodes(bpy.types.Operator):
         nt.use_fake_user = True
 
         mat.sort_material.sortnodetree = nt.name
-        output = nt.nodes.new(common.sort_node_output_bl_name)
+        output = nt.nodes.new('SORTNodeOutput')
         default = nt.nodes.new('SORTNode_Material_Principle')
         default.location = output.location
         default.location[0] -= 300
@@ -123,7 +122,7 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
                 input_node = socket_node_input(nt, socket)
                 ui_open = socket.ui_open
                 icon = 'DISCLOSURE_TRI_DOWN' if ui_open else 'DISCLOSURE_TRI_RIGHT'
-                split = layout.split(common.label_percentage)
+                split = layout.split(0.3)
                 row = split.row()
                 indented_label(row)
                 row.prop(socket, "ui_open", icon=icon, text='', icon_only=True, emboss=False)
@@ -132,7 +131,7 @@ def draw_node_properties_recursive(layout, context, nt, node, level=0):
                 if socket.ui_open:
                     draw_node_properties_recursive(layout, context, nt, input_node, level=level+1)
             else:
-                split = layout.split(common.label_percentage)
+                split = layout.split(0.3)
                 row = split.row()
                 indented_label(row)
                 row.label(socket.name)
@@ -157,16 +156,16 @@ def panel_node_draw(layout, context, id_data, input_name):
 
     ntree = bpy.data.node_groups[id_data.sort_material.sortnodetree]
 
-    # find the output node
-    def find_node(material, nodetype):
+    # find the output node, duplicated code, to be cleaned
+    def find_output_node(material):
         if material and material.sort_material and material.sort_material.sortnodetree:
             ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
             for node in ntree.nodes:
-                if getattr(node, "bl_idname", None) == nodetype:
+                if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
                     return node
         return None
 
-    output_node = find_node(id_data, common.sort_node_output_bl_name)
+    output_node = find_output_node(id_data)
 
     if output_node is None:
         layout.operator("sort.use_shading_nodes", icon='NODETREE')

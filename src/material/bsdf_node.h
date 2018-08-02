@@ -132,7 +132,8 @@ public:
 private:
     MaterialNodeProperty    reflectance;
     MaterialNodeProperty    transmittance;
-    MaterialNodeProperty    roughness;
+    MaterialNodeProperty    roughnessU;
+    MaterialNodeProperty    roughnessV;
 };
 
 // Mirror Material

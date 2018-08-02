@@ -119,7 +119,7 @@ void System::_outputProgress()
         progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
         
         if (!g_bBlenderMode)
-            cout<< "Progress: "<<progress<<"%\n";
+            cout<< "Progress: "<<progress<<"%\r";
         else if (m_pProgress)
             *m_pProgress = progress;
         

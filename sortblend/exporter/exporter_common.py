@@ -16,7 +16,6 @@
 import os
 import mathutils
 import bpy
-from .. import common
 
 def getCamera(scene):
     camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
@@ -52,7 +51,7 @@ def vec3tostr(vec):
     return "%f %f %f"%(vec[0],vec[1],vec[2])
 
 def getPreference():
-    return bpy.context.user_preferences.addons[common.preference_bl_name].preferences
+    return bpy.context.user_preferences.addons['sortblend'].preferences
 
 # get the list of material for the whole scene
 def getMaterialList( scene ):

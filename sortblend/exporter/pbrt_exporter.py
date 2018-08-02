@@ -22,7 +22,6 @@ import platform
 import numpy as np
 from math import degrees
 from . import exporter_common
-from .. import common
 from extensions_framework import util as efutil
 
 pbrt_process = None
@@ -227,10 +226,7 @@ def export_light(scene):
             light_spectrum *= lamp.energy
             str = "LightSource \"infinite\" "
             str += "\"rgb L\" [ %f %f %f ] \n"%(light_spectrum[0],light_spectrum[1],light_spectrum[2])
-            # fix pbrt path , / will be recognized as escape letter, which will easily crash the system in PBRT
-            def fixPbrtPath(path):
-                return path.replace( '\\' , '/' )
-            str += "\"string mapname\" \"%s\" \n"%fixPbrtPath(bpy.path.abspath(lamp.sort_lamp.sort_lamp_hemi.envmap_file))
+            str += "\"string mapname\" \"%s\" \n"%bpy.path.abspath(lamp.sort_lamp.sort_lamp_hemi.envmap_file).replace( '\\' , '/' )
             file.write(str)
         file.write( "AttributeEnd\n" )
 
@@ -248,15 +244,15 @@ def export_material(scene):
         ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
 
         # find the output node, duplicated code, to be cleaned
-        def find_node(material, nodetype):
+        def find_output_node(material):
             if material and material.sort_material and material.sort_material.sortnodetree:
                 ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
                 for node in ntree.nodes:
-                    if getattr(node, "bl_idname", None) == nodetype:
+                    if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
                         return node
             return None
 
-        output_node = find_node(material, common.sort_node_output_bl_name)
+        output_node = find_output_node(material)
         if output_node is None:
             continue
 
