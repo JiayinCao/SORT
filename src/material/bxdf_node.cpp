@@ -120,8 +120,8 @@ MicrofacetRefractionNode::MicrofacetRefractionNode()
 	REGISTER_MATERIALNODE_PROPERTY( "MicroFacetDistribution" , mf_dist );
     REGISTER_MATERIALNODE_PROPERTY( "RoughnessU" , roughnessU );
     REGISTER_MATERIALNODE_PROPERTY( "RoughnessV" , roughnessV );
-	REGISTER_MATERIALNODE_PROPERTY( "in_ior" , in_ior );
-	REGISTER_MATERIALNODE_PROPERTY( "ext_ior" , ext_ior );
+	REGISTER_MATERIALNODE_PROPERTY( "Interior_IOR" , in_ior );
+	REGISTER_MATERIALNODE_PROPERTY( "Exterior_IOR" , ext_ior );
 }
 
 void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )

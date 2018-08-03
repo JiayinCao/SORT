@@ -30,6 +30,9 @@ class SORTSocket:
     # export type in PBRT
     def export_pbrt_socket_type(self):
         return self.pbrt_type
+    # export value
+    def export_socket_value(self):
+        pass
     #draw socket property in node
     def draw(self, context, layout, node, text):
         if self.is_linked or self.is_output:
@@ -47,6 +50,7 @@ class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTSocket):
     bl_label = 'SORT Shader Socket'
     socket_color = (0.2, 0.2, 1.0, 1.0)
     default_value = None
+
 
 # Socket for Color
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTSocket):
