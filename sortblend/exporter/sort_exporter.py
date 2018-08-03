@@ -459,7 +459,8 @@ def export_material(scene,force_debug):
         mat_node = ET.SubElement( root , 'Material', name=material.name )
         
         def export_props(mat_node , xml_node):
-            mat_node.export_prop(xml_node)
+            export_prop_in_sort = lambda n , t , v : ET.SubElement( xml_node , 'Property' , name=n , type=t, value=v )
+            mat_node.export_sort(export_prop_in_sort)
 
             inputs = mat_node.inputs
             for socket in inputs:
@@ -468,6 +469,7 @@ def export_material(scene,force_debug):
                         return next((l.from_node for l in nt.links if l.to_socket == socket), None)
                     input_node = socket_node_input(ntree, socket)
                     sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , type='node', node=input_node.bl_idname)
+
                     export_props(input_node,sub_xml_node)
                 else:
                     ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.export_sort_socket_type(), value=socket.export_socket_value() )
