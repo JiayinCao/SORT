@@ -61,38 +61,39 @@ class SORTShadingNode(bpy.types.Node):
                 self.inputs[socket['name']].default_value = socket['default']
         self.outputs.new( self.output_type , 'Result' )
 
-    def export_prop(self, xml_node):
-        pass
-
     def draw_props(self, context, layout, indented_label):
         for prop in self.property_list:
-            self.draw_prop(layout,prop,prop,indented_label)
+            split = layout.split(0.3)
+            row = split.row()
+            indented_label(row)
+            row.label(prop['name'])
+            prop_row = split.row()
+            prop_row.prop(self,prop['name'],text="")
         pass
 
     def export_pbrt(self, file):
         pass
     
     def export_prop(self, xml_node):
-        for prop in self.get_sort_prop():
-            ET.SubElement( xml_node , 'Property' , name=prop[0] , type=prop[1], value=prop[2] )
-
-    def get_sort_prop(self):
-        return []
+        for prop in self.property_list:
+            attr = getattr(self, prop['name'])
+            t = prop['sort_type']
+            v = ''
+            if t is 'string':
+                v = attr
+            elif t is 'path':
+                v = bpy.path.abspath( attr )
+            elif t is 'float':
+                v = '%f'%attr
+            elif t is 'color':
+                v = '%f %f %f'%attr[:]
+            ET.SubElement( xml_node , 'Property' , name=prop['name'] , type=prop['sort_type'], value=v )
 
     #draw property in node
     def draw_button(self, layout, label, prop):
         row = layout.row()
         split = row.split(0.3)
         split.label(label)
-        prop_row = split.row()
-        prop_row.prop(self,prop,text="")
-
-    # draw non-socket property in panel
-    def draw_prop(self, layout, label, prop, indented_label):
-        split = layout.split(0.3)
-        row = split.row()
-        indented_label(row)
-        row.label(label)
         prop_row = split.row()
         prop_row.prop(self,prop,text="")
 
@@ -112,7 +113,9 @@ class SORTShadingNode(bpy.types.Node):
         for props in cls.get_mro('property_list'):
             if not props:
                 continue
-            for k, v in props.items():
+            for prop in props:
+                k = prop['name']
+                v = prop['class']
                 if 'register_properties' in dir(v):
                     for kp, vp in v.get_properties(k):
                         setattr(cls, kp, vp)
@@ -124,7 +127,9 @@ class SORTShadingNode(bpy.types.Node):
         for props in cls.get_mro('property_list'):
             if not props:
                 continue
-            for k, v in props.items():
+            for prop in props:
+                k = prop['name']
+                v = prop['class']
                 if 'register_properties' in dir(v):
                     for kp, vp in v.get_properties(k):
                         delattr(cls, kp)
@@ -140,7 +145,7 @@ class SORTShadingNode(bpy.types.Node):
 
     def draw_buttons(self, context, layout):
         for prop in self.property_list:
-            layout.prop(self,prop)
+            layout.prop(self,prop['name'])
 
 class SORTShadingNode_BXDF(SORTShadingNode):
     bl_label = 'ShadingNode'
@@ -301,12 +306,10 @@ class SORTNode_Material_Mirror(SORTShadingNode_BXDF):
 class SORTNode_Material_Measured(SORTShadingNode_BXDF):
     bl_label = 'Measured'
     bl_idname = 'SORTNode_Material_Measured'
-    property_list = { 'BRDF_Type' : bpy.props.EnumProperty(name='Type',items=[ ("Fourier", "Fourier", "", 1), ("MERL" , "MERL" , "", 2) ] ,default="Fourier") ,
-                      'FileName' : bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' ) }
-    def get_sort_prop(self):
-        return [ ( 'Type' , 'string' , self.BRDF_Type ) , ( 'Filename' , 'string' , bpy.path.abspath(self.FileName) )]
+    property_list = [ { 'class' : bpy.props.EnumProperty(name='Type',items=[ ("Fourier", "Fourier", "", 1), ("MERL" , "MERL" , "", 2) ] ,default="Fourier") , 'name' : 'Type' , 'sort_type' : 'string' } ,
+                      { 'class' : bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' ) , 'name' : 'Filename' , 'sort_type' : 'path' } ]
     def export_pbrt(self, file):
-        abs_file_path = bpy.path.abspath( self.FileName )
+        abs_file_path = bpy.path.abspath( self.Filename )
         if self.BRDF_Type == 'Fourier':
             file.write( "  \"string type\" \"fourier\"\n" )
             file.write( "  \"string bsdffile\" \"%s\"\n" % abs_file_path.replace( '\\' , '/' ) )
@@ -339,9 +342,6 @@ class SORTNode_Material_Layered(SORTShadingNode_BXDF):
                     self.inputs.remove( self.inputs['Bxdf' + str(x)] )
                     self.inputs.remove( self.inputs['Weight' + str(x)] )
 
-    def draw_props(self, context, layout, indented_label):
-        self.draw_prop(layout, 'Bxdf Count' , 'bxdf_count' , indented_label)
-
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               BXDF Nodes for SORT
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -352,13 +352,9 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
     socket_list = [ { 'class' : sockets.SORTNodeSocketFloat , 'name'  : 'RoughnessU' , 'default' : 0.1 } , 
                     { 'class' : sockets.SORTNodeSocketFloat , 'name'  : 'RoughnessV' , 'default' : 0.1 } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
-    property_list = { 'MicroFacetDistribution' : bpy.props.EnumProperty(name='NDF',items=[ ("Blinn", "Blinn", "", 1), ("Beckmann" , "Beckmann" , "", 2), ("GGX" , "GGX" , "" , 3) ]),
-                      'Interior_IOR' : bpy.props.FloatVectorProperty(name='Interior IOR', default=(0.37, 0.37, 0.37), min=0.10, max=10.0),
-                      'Absorption_Coefficient' : bpy.props.FloatVectorProperty(name='Absorption Coefficient', default=(2.82, 2.82, 2.82), min=1.0, max=10.0) }
-    def get_sort_prop(self):
-        return [ ( 'MicroFacetDistribution' , 'string' , self.MicroFacetDistribution ) ,
-                 ( 'Interior IOR' , 'color' , '%f %f %f'%self.Interior_IOR[:] ) ,
-                 ( 'Absorption Coefficient' , 'color' , '%f %f %f'%self.Absorption_Coefficient[:] ) ]
+    property_list = [ {'class' : bpy.props.EnumProperty(name='NDF',items=[ ("Blinn", "Blinn", "", 1), ("Beckmann" , "Beckmann" , "", 2), ("GGX" , "GGX" , "" , 3) ]), 'name' : 'MicroFacetDistribution' , 'sort_type' : 'string' },
+                      {'class' : bpy.props.FloatVectorProperty(name='Interior IOR', default=(0.37, 0.37, 0.37), min=0.10, max=10.0), 'name' : 'Interior_IOR' , 'sort_type' : 'color'},
+                      {'class' : bpy.props.FloatVectorProperty(name='Absorption Coefficient', default=(2.82, 2.82, 2.82), min=1.0, max=10.0) , 'name' : 'Absorption_Coefficient' , 'sort_type' : 'color' } ]
 
 class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
     bl_label = 'MicrofacetRefraction'
@@ -366,13 +362,9 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
     socket_list = [ { 'class' : sockets.SORTNodeSocketFloat , 'name'  : 'RoughnessU' , 'default' : 0.1 } , 
                     { 'class' : sockets.SORTNodeSocketFloat , 'name'  : 'RoughnessV' , 'default' : 0.1 } , 
                     { 'class' : sockets.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
-    property_list = { 'MicroFacetDistribution' : bpy.props.EnumProperty(name='NDF',items=[ ("Blinn", "Blinn", "", 1), ("Beckmann" , "Beckmann" , "", 2), ("GGX" , "GGX" , "" , 3) ]),
-                      'Interior_IOR' : bpy.props.FloatProperty(name='Interior IOR', default=1.1, min=1.0, max=10.0),
-                      'Exterior_IOR' : bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0) }
-    def get_sort_prop(self):
-        return [ ( 'MicroFacetDistribution' , 'string' , self.MicroFacetDistribution ) ,
-                 ( 'in_ior' , 'float' , '%f'%self.Interior_IOR ) ,
-                 ( 'ext_ior' , 'float' , '%f'%self.Exterior_IOR ) ]
+    property_list = [ {'class' : bpy.props.EnumProperty(name='NDF',items=[ ("Blinn", "Blinn", "", 1), ("Beckmann" , "Beckmann" , "", 2), ("GGX" , "GGX" , "" , 3) ]), 'name' : 'MicroFacetDistribution' , 'sort_type' : 'string' },
+                      {'class' : bpy.props.FloatProperty(name='Interior IOR', default=1.1, min=1.0, max=10.0), 'name' : 'Interior_IOR' , 'sort_type' : 'float' },
+                      {'class' : bpy.props.FloatProperty(name='Exterior IOR', default=1.0, min=1.0, max=10.0), 'name' : 'Exterior_IOR' , 'sort_type' : 'float' } ]
 
 class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
     bl_label = 'AshikhmanShirley'
@@ -401,16 +393,12 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
 class SORTNode_BXDF_MERL(SORTShadingNode_BXDF):
     bl_label = 'MERL'
     bl_idname = 'SORTNode_BXDF_MERL'
-    property_list = { 'Filename' : bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' ) }
-    def get_sort_prop(self):
-        return [ ( 'Filename' , 'string' , bpy.path.abspath( self.Filename ) ) ];
+    property_list = [ { 'class' : bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' ) , 'name' : 'Filename' , 'sort_type' : 'path' } ]
 
 class SORTNode_BXDF_Fourier(SORTShadingNode_BXDF):
     bl_label = 'Fourier BXDF'
     bl_idname = 'SORTNode_BXDF_Fourier'
-    property_list = { 'Filename' : bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' ) }
-    def get_sort_prop(self):
-        return [ ( 'Filename' , 'string' , bpy.path.abspath( self.Filename ) ) ];
+    property_list = [ { 'class' : bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' ) , 'name' : 'Filename' , 'sort_type' : 'path' } ]
     def export_pbrt(self, file):
         abs_file_path = bpy.path.abspath( self.Filename )
         file.write( "  \"string type\" \"fourier\"\n" )
@@ -485,9 +473,7 @@ class SORTNodeCheckbox(SORTShadingNode):
 class SORTNodeImage(SORTShadingNode):
     bl_label = 'Image'
     bl_idname = 'SORTNodeImage'
-    property_list = { 'Filename' : bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' ) }
-    def get_sort_prop(self):
-        return [ ( 'Filename' , 'string' , bpy.path.abspath( self.Filename ) ) ];
+    property_list = [ { 'class' : bpy.props.StringProperty(name="", default="", subtype='FILE_PATH' ) , 'name' : 'Filename' , 'sort_type' : 'path' } ]
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Constant Nodes for SORT
@@ -503,8 +489,7 @@ class SORTNodeConstant(SORTShadingNode):
 class SORTNodeOutput(SORTShadingNode):
     bl_label = 'SORT_output'
     bl_idname = 'SORTNodeOutput'
-    def init(self, context):
-        input = self.inputs.new('sockets.SORTNodeSocketBxdf', 'Surface')
+    socket_list = [ { 'class' : sockets.SORTNodeSocketBxdf , 'name' : 'Surface' } ]
 #------------------------------------------------------------------------------------------------------------------------------------
 
 class SORTMaterial(bpy.types.PropertyGroup):
