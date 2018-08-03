@@ -14,7 +14,6 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
-import xml.etree.cElementTree as ET
 import nodeitems_utils
 from nodeitems_utils import NodeItem
 from . import sockets
@@ -51,6 +50,7 @@ class SORTShadingNode(bpy.types.Node):
     output_type = 'SORTNodeSocketColor'
     property_list = []
 
+    # register all property and sockets
     def register_prop(self):
         # register all sockets
         for socket in self.property_list:
@@ -61,6 +61,8 @@ class SORTShadingNode(bpy.types.Node):
                 self.inputs[socket['name']].default_value = socket['default']
         self.outputs.new( self.output_type , 'Result' )
 
+    # this is not an overriden interface
+    # draw all properties ( not socket ) in material panel
     def draw_props(self, context, layout, indented_label):
         for prop in self.property_list:
             if prop['class'].is_socket():
@@ -73,10 +75,21 @@ class SORTShadingNode(bpy.types.Node):
             prop_row.prop(self,prop['name'],text="")
         pass
 
-    def export_pbrt(self, file):
+    # override the base interface
+    # draw all properties ( not socket ) in material nodes
+    def draw_buttons(self, context, layout):
+        for prop in self.property_list:
+            if prop['class'].is_socket():
+                continue
+            layout.prop(self,prop['name'])
+        pass
+
+    # export data to pbrt
+    def export_pbrt(self, output_pbrt_type , output_pbrt_prop):
         pass
     
-    def export_prop(self, xml_node):
+    # export data to sort
+    def export_sort(self, output_sort_prop):
         for prop in self.property_list:
             if prop['class'].is_socket():
                 continue
@@ -84,26 +97,14 @@ class SORTShadingNode(bpy.types.Node):
             attr = getattr(self, prop['name'])
             t = attr_wrapper.export_sort_socket_type(attr_wrapper)
             v = attr_wrapper.export_socket_value(attr_wrapper, attr)
-            ET.SubElement( xml_node , 'Property' , name=prop['name'] , type=t, value=v )
-
-    #draw property in node
-    def draw_button(self, layout, label, prop):
-        row = layout.row()
-        split = row.split(0.3)
-        split.label(label)
-        prop_row = split.row()
-        prop_row.prop(self,prop,text="")
+            output_sort_prop( prop['name'] , t , v )
 
     @classmethod
     def get_mro(cls, attribname):
-        for k in cls.__mro__:
+        for k in reversed(cls.__mro__):
             vs = vars(k)
             if attribname in vs:
                 yield vs[attribname]
-
-    def do_mro(self, methname, *args, **kwargs):
-        for meth in self.get_mro(methname):
-            yield meth(self, *args, **kwargs)
 
     @classmethod
     def register(cls):
@@ -139,20 +140,15 @@ class SORTShadingNode(bpy.types.Node):
                 else:
                     delattr(cls, k)
     
+    # register all properties in constructor
     def init(self, context):
-        for _ in self.do_mro('_init', context):
+        def do_mro(self, methname, *args, **kwargs):
+            for meth in self.get_mro(methname):
+                yield meth(self, *args, **kwargs)
+        for _ in do_mro(self, 'register_prop'):
             pass
 
-    def _init(self,context):
-        self.register_prop()
-
-    def draw_buttons(self, context, layout):
-        for prop in self.property_list:
-            if prop['class'].is_socket():
-                continue
-            layout.prop(self,prop['name'])
-        pass
-
+# Base class for SORT BXDF Node
 class SORTShadingNode_BXDF(SORTShadingNode):
     bl_label = 'ShadingNode'
     bl_idname = 'SORTShadingNode'
@@ -162,25 +158,26 @@ class SORTShadingNode_BXDF(SORTShadingNode):
     pbrt_bxdf_type = ''
 
     def register_prop(self):
-        super().register_prop()
         # register all sockets in BXDF
-        for socket in SORTShadingNode_BXDF.bxdf_property_list:
-            self.inputs.new( socket['class'].__name__ , socket['name'] )
-            if 'default' in socket:
-                self.inputs[socket['name']].default_value = socket['default']
+        for prop in SORTShadingNode_BXDF.bxdf_property_list:
+            self.inputs.new( prop['class'].__name__ , prop['name'] )
+            if 'default' in prop:
+                self.inputs[prop['name']].default_value = prop['default']
 
-    def export_pbrt(self, file):
+    def export_pbrt(self, output_pbrt_type , output_pbrt_prop):
         # disable pbrt export by default, not all materials are supported in pbrt
         if self.pbrt_bxdf_type is '':
             # fall back to a default grey matte material
-            file.write( "  \"string type\" \"matte\"\n\n" )
+            output_pbrt_type( 'matte' )
             return
-        # register all sockets
-        file.write( "  \"string type\" \"" + self.pbrt_bxdf_type + "\"\n" )
-        for socket in self.property_list:
-            if 'pbrt_name' in socket:
-                file.write( "  \"" + self.inputs[socket['name']].export_pbrt_socket_type() + " " + socket['pbrt_name'] + "\" [%s]\n"%self.inputs[socket['name']].export_socket_value())
-        file.write( "\n" )
+        # output pbrt properties
+        output_pbrt_type( self.pbrt_bxdf_type )
+        for prop in self.property_list:
+            if 'pbrt_name' in prop:
+                n = prop['pbrt_name']
+                t = self.inputs[prop['name']].export_pbrt_socket_type()
+                v = self.inputs[prop['name']].export_socket_value()
+                output_pbrt_prop( n , t , v )
 
 class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
     @classmethod
@@ -312,14 +309,13 @@ class SORTNode_Material_Measured(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_Material_Measured'
     property_list = [ { 'class' : sockets.SORTNodePropertyEnum , 'name' : 'Type' , 'items' : [ ("Fourier", "Fourier", "", 1) , ("MERL" , "MERL" , "", 2) ] , 'default' : 'Fourier' } ,
                       { 'class' : sockets.SORTNodePropertyPath , 'name' : 'Filename' } ]
-    def export_pbrt(self, file):
+    def export_pbrt(self, output_pbrt_type , output_pbrt_prop):
         abs_file_path = bpy.path.abspath( self.Filename )
         if self.Type == 'Fourier':
-            file.write( "  \"string type\" \"fourier\"\n" )
-            file.write( "  \"string bsdffile\" \"%s\"\n" % abs_file_path.replace( '\\' , '/' ) )
+            output_pbrt_type( 'fourier' )
+            output_pbrt_prop( n , 'string' , abs_file_path.replace( '\\' , '/' ) )
         else:
-            file.write( "  \"string type\" \"matte\"\n" )
-        file.write( "\n" )
+            output_pbrt_type( 'matte' )
 
 class SORTNode_Material_Layered(SORTShadingNode_BXDF):
     bl_label = 'Layered Material'
@@ -327,13 +323,17 @@ class SORTNode_Material_Layered(SORTShadingNode_BXDF):
     bxdf_count = bpy.props.IntProperty( name = 'Bxdf Count' , default = 2 , min = 1 , max = 8 )
 
     def init(self, context):
-        super().register_prop()
+        SORTShadingNode.register_prop(self)
         for x in range(0,8):
             self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
             self.inputs.new( 'SORTNodeSocketColor' , 'Weight'+str(x) )
 
     def draw_buttons(self, context, layout):
-        self.draw_button(layout, "Bxdf Count" , "bxdf_count")
+        row = layout.row()
+        split = row.split(0.4)
+        split.label("BXDF Count")
+        prop_row = split.row()
+        prop_row.prop(self,'bxdf_count',text="")
 
         for x in range( 0 , 8 ):
             if x < self.bxdf_count:
@@ -402,11 +402,6 @@ class SORTNode_BXDF_Fourier(SORTShadingNode_BXDF):
     bl_label = 'Fourier BXDF'
     bl_idname = 'SORTNode_BXDF_Fourier'
     property_list = [ { 'class' : sockets.SORTNodePropertyPath , 'name' : 'Filename' } ]
-    def export_pbrt(self, file):
-        abs_file_path = bpy.path.abspath( self.Filename )
-        file.write( "  \"string type\" \"fourier\"\n" )
-        file.write( "  \"string bsdffile\" \"%s\"\n" % abs_file_path.replace( '\\' , '/' ) )
-        file.write( "\n" )
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Operator Nodes for SORT
