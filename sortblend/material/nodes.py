@@ -65,10 +65,14 @@ class SORTPatternGraph(bpy.types.NodeTree):
     def register(cls):
         bpy.types.Material.sort_material = bpy.props.PointerProperty(type=SORTMaterial, name="SORT Material Settings")
         cats = []
-        for c, l in cls.node_categories.items():
+        for c, l in sorted(cls.node_categories.items()):
             cid = c.replace(' ', '').upper()
             items = [nodeitems_utils.NodeItem(nc.__name__) for nc in l]
             cats.append(SORTPatternNodeCategory(cid, c, items=items))
+
+            cls.nodetypes[c] = []
+            for item in l :
+                cls.nodetypes[c].append(item.__name__)
         nodeitems_utils.register_node_categories('SORTSHADERNODES', cats)
 
     @classmethod
