@@ -34,7 +34,7 @@ class SORT_Add_Node:
         for category , types in nodes.SORTPatternGraph.nodetypes.items():
             items.append(('', category, ''))
             for type in types:
-                items.append(( type , type , type))
+                items.append(( type[0] , type[1] , type[1] ))
         items.append(('', 'Link', ''))
         items.append(('REMOVE', 'Remove', 'Remove the node connected to this socket'))
         items.append(('DISCONNECT', 'Disconnect', 'Disconnect the node connected to this socket'))
