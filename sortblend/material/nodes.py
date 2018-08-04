@@ -72,7 +72,7 @@ class SORTPatternGraph(bpy.types.NodeTree):
 
             cls.nodetypes[c] = []
             for item in l :
-                cls.nodetypes[c].append(item.__name__)
+                cls.nodetypes[c].append((item.__name__,item.bl_label))
         nodeitems_utils.register_node_categories('SORTSHADERNODES', cats)
 
     @classmethod
@@ -89,7 +89,7 @@ class SORTShadingNode(bpy.types.Node):
     property_list = []
 
     # register all property and sockets
-    def register_prop(self):
+    def register_prop(self,disable_output = False):
         # register all sockets
         for socket in self.property_list:
             if socket['class'].is_socket() is False:
@@ -97,7 +97,8 @@ class SORTShadingNode(bpy.types.Node):
             self.inputs.new( socket['class'].__name__ , socket['name'] )
             if 'default' in socket:
                 self.inputs[socket['name']].default_value = socket['default']
-        self.outputs.new( self.output_type , 'Result' )
+        if disable_output is False:
+            self.outputs.new( self.output_type , 'Result' )
 
     # this is not an overriden interface
     # draw all properties ( not socket ) in material panel
@@ -487,3 +488,6 @@ class SORTNodeOutput(SORTShadingNode):
     bl_label = 'SORT_output'
     bl_idname = 'SORTNodeOutput'
     property_list = [ { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Surface' } ]
+    def init(self, context):
+        super().register_prop(True)
+        pass
