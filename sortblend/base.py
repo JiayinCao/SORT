@@ -14,25 +14,24 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
-from . import ui_render
-from . import ui_camera
-from . import ui_lamp
-from . import ui_material
+import bpy_types
 
-def get_panels():
-    types = bpy.types
-    panels = [
-        "DATA_PT_lens",
-        "DATA_PT_camera",
-        "RENDER_PT_dimensions",
-        ]
+REGISTRARS = []
 
-    return [getattr(types, p) for p in panels if hasattr(types, p)]
+def registrar(register, unregister, name=None):
+    global REGISTRARS
+    if name is None or not [True for _, _, n in REGISTRARS if n == name]:
+        REGISTRARS.append((register, unregister, name))
 
+# somehow this will cause class registered twice, ignoring it
 def register():
-    for panel in get_panels():
-        panel.COMPAT_ENGINES.add('sortblend')
-        
+    pass
+
 def unregister():
-    for panel in get_panels():
-        panel.COMPAT_ENGINES.add('sortblend')
+    for _, u, n in REGISTRARS:
+        print('Unregister ' + n )
+        u()
+
+def register_class(cls):
+    registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)
+    return cls

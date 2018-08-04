@@ -63,7 +63,6 @@ class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
     socket_color = (0.2, 0.2, 1.0, 1.0)
     default_value = None
 
-
 # Socket for Color
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketColor'
