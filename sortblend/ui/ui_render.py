@@ -15,6 +15,7 @@
 
 import bpy
 import os
+import bl_ui
 import platform
 import subprocess
 from ..exporter import sort_exporter
@@ -40,7 +41,11 @@ class SORTRenderPanel:
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
-    COMPAT_ENGINES = {'sortblend'}
+    COMPAT_ENGINES = {'SORT_RENDERER'}
+
+    @classmethod
+    def register(cls):
+        bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add('SORT_RENDERER')
 
     @classmethod
     def poll(cls, context):
