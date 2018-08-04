@@ -38,7 +38,7 @@ class SORTPatternGraph(bpy.types.NodeTree):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.render.engine == 'sortblend'
+        return context.scene.render.engine == 'SORT_RENDERER'
 
     # Return a node tree from the context to be used in the editor
     @classmethod
@@ -56,8 +56,8 @@ class SORTPatternGraph(bpy.types.NodeTree):
     def register_node(cls, category):
         def registrar(nodecls):
             base.register_class(nodecls)
-            #d = cls.node_categories.setdefault(category, [])
-            #d.append(nodecls)
+            d = cls.node_categories.setdefault(category, [])
+            d.append(nodecls)
             return nodecls
         return registrar
 
