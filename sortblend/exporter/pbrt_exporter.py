@@ -29,6 +29,8 @@ pbrt_process = None
 # get the path of pbrt binary folder
 def get_pbrt_dir():
     return_path = exporter_common.getPreference().pbrt_export_path
+    if return_path is '':
+        return ''
     if platform.system() == 'Windows':
         return return_path
     return efutil.filesystem_path(return_path) + "/"

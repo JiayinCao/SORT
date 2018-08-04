@@ -26,14 +26,16 @@ class SORTMaterialPanel:
 
     @classmethod
     def poll(cls, context):
-        rd = context.scene.render
-        return rd.engine in cls.COMPAT_ENGINES
+        return context.scene.render.engine in cls.COMPAT_ENGINES
 
 class SORT_Add_Node:
     def get_type_items(self, context):
         items = []
-        for nodetype in nodes.SORTPatternGraph.nodetypes.values():
-            items.append((nodetype, nodetype,nodetype))
+        for category , types in nodes.SORTPatternGraph.nodetypes.items():
+            items.append(('', category, ''))
+            for type in types:
+                items.append(( type , type , type))
+        items.append(('', 'Link', ''))
         items.append(('REMOVE', 'Remove', 'Remove the node connected to this socket'))
         items.append(('DISCONNECT', 'Disconnect', 'Disconnect the node connected to this socket'))
         return items
@@ -55,12 +57,14 @@ class SORT_Add_Node:
         input_node = socket_node_input(nt, socket)
 
         if new_type == 'REMOVE':
-            nt.nodes.remove(input_node)
+            if input_node is not None:
+                nt.nodes.remove(input_node)
             return {'FINISHED'}
 
         if new_type == 'DISCONNECT':
             link = next((l for l in nt.links if l.to_socket == socket), None)
-            nt.links.remove(link)
+            if link is not None:
+                nt.links.remove(link)
             return {'FINISHED'}
 
         # add a new node to existing socket
@@ -104,26 +108,19 @@ class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
 
         if ob:
             row = layout.row()
-
             row.template_list("MATERIAL_UL_matslots", "", ob, "material_slots", ob, "active_material_index", rows=4)
-
             col = row.column(align=True)
-
             col.operator("object.material_slot_add", icon='ZOOMIN', text="")
             col.operator("object.material_slot_remove", icon='ZOOMOUT', text="")
-
             if ob.mode == 'EDIT':
                 row = layout.row(align=True)
                 row.operator("object.material_slot_assign", text="Assign")
                 row.operator("object.material_slot_select", text="Select")
                 row.operator("object.material_slot_deselect", text="Deselect")
-
         split = layout.split(percentage=0.75)
-
         if ob:
             split.template_ID(ob, "active_material", new="material.new")
             row = split.row()
-
             if slot:
                 row.prop(slot, "link", text="")
             else:
@@ -136,7 +133,6 @@ class SORT_use_shading_nodes(bpy.types.Operator):
     """Enable nodes on a material, world or lamp"""
     bl_idname = "sort.use_shading_nodes"
     bl_label = "Use Nodes"
-
     idtype = bpy.props.StringProperty(name="ID Type", default="material")
 
     @classmethod
@@ -163,89 +159,6 @@ class SORT_use_shading_nodes(bpy.types.Operator):
         nt.links.new(default.outputs[0], output.inputs[0])
         return {'FINISHED'}
 
-def draw_node_properties_recursive(layout, context, nt, node, level=0):
-
-    def indented_label(layout):
-        for i in range(level):
-            layout.label('',icon='BLANK1')
-
-    layout.context_pointer_set("nodetree", nt)
-    layout.context_pointer_set("node", node)
-
-    # draw socket property in panel
-    def draw_props(node, layout):
-        # node properties
-        node.draw_props(context,layout,indented_label)
-
-        # inputs
-        for socket in node.inputs:
-            layout.context_pointer_set("socket", socket)
-
-            if socket.is_linked:
-                def socket_node_input(nt, socket):
-                    return next((l.from_node for l in nt.links if l.to_socket == socket), None)
-                input_node = socket_node_input(nt, socket)
-                ui_open = socket.ui_open
-                icon = 'DISCLOSURE_TRI_DOWN' if ui_open else 'DISCLOSURE_TRI_RIGHT'
-                split = layout.split(0.3)
-                row = split.row()
-                indented_label(row)
-                row.prop(socket, "ui_open", icon=icon, text='', icon_only=True, emboss=False)
-                row.label(socket.name+":")
-                split.operator_menu_enum("node.add_surface" , "node_type", text=input_node.bl_idname , icon= 'DOT')
-                if socket.ui_open:
-                    draw_node_properties_recursive(layout, context, nt, input_node, level=level+1)
-            else:
-                split = layout.split(0.3)
-                row = split.row()
-                indented_label(row)
-                row.label(socket.name)
-                prop_panel = split.row( align=True )
-                if socket.default_value is not None:
-                    prop_panel.prop(socket,'default_value',text="")
-                prop_panel.operator_menu_enum("node.add_surface" , "node_type", text='',icon='DOT')
-
-    draw_props(node, layout)
-    layout.separator()
-
-def panel_node_draw(layout, context, id_data, input_name):
-    # find current material
-    target = None
-    for group in bpy.data.node_groups:
-        if group.name == id_data.sort_material.sortnodetree:
-            target = group
-
-    if target is None:
-        layout.operator("sort.use_shading_nodes", icon='NODETREE')
-        return False
-
-    ntree = bpy.data.node_groups[id_data.sort_material.sortnodetree]
-
-    # find the output node, duplicated code, to be cleaned
-    def find_output_node(material):
-        if material and material.sort_material and material.sort_material.sortnodetree:
-            ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-            for node in ntree.nodes:
-                if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
-                    return node
-        return None
-
-    output_node = find_output_node(id_data)
-
-    if output_node is None:
-        layout.operator("sort.use_shading_nodes", icon='NODETREE')
-        return False
-
-    socket = output_node.inputs[input_name]
-
-    layout.context_pointer_set("nodetree", ntree)
-    layout.context_pointer_set("node", output_node)
-    layout.context_pointer_set("socket", socket)
-
-    if output_node is not None:
-        draw_node_properties_recursive(layout, context, ntree, output_node)
-
-from .. import material
 
 class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
     bl_label = "Surface"
@@ -255,4 +168,81 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
         return context.material and SORTMaterialPanel.poll(context)
 
     def draw(self, context):
-        panel_node_draw(self.layout, context, context.material, 'Surface')
+        # find current material
+        target = None
+        for group in bpy.data.node_groups:
+            if group.name == context.material.sort_material.sortnodetree:
+                target = group
+
+        if target is None:
+            self.layout.operator("sort.use_shading_nodes", icon='NODETREE')
+            return
+
+        ntree = bpy.data.node_groups[context.material.sort_material.sortnodetree]
+
+        # find the output node, duplicated code, to be cleaned
+        def find_output_node(material):
+            if material and material.sort_material and material.sort_material.sortnodetree:
+                ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+                for node in ntree.nodes:
+                    if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
+                        return node
+            return None
+
+        output_node = find_output_node(context.material)
+        if output_node is None:
+            self.layout.operator("sort.use_shading_nodes", icon='NODETREE')
+            return
+
+        socket = output_node.inputs['Surface']
+
+        self.layout.context_pointer_set("nodetree", ntree)
+        self.layout.context_pointer_set("node", output_node)
+        self.layout.context_pointer_set("socket", socket)
+
+        if output_node is not None:
+            self.draw_node_properties_recursive(self.layout, context, ntree, output_node)
+
+    def draw_node_properties_recursive(self,layout, context, nt, node, level=0):
+        def indented_label(layout):
+            for i in range(level):
+                layout.label('',icon='BLANK1')
+
+        layout.context_pointer_set("nodetree", nt)
+        layout.context_pointer_set("node", node)
+
+        # draw socket property in panel
+        def draw_props(node, layout):
+            # node properties
+            node.draw_props(context,layout,indented_label)
+
+            # inputs
+            for socket in node.inputs:
+                layout.context_pointer_set("socket", socket)
+
+                if socket.is_linked:
+                    def socket_node_input(nt, socket):
+                        return next((l.from_node for l in nt.links if l.to_socket == socket), None)
+                    input_node = socket_node_input(nt, socket)
+                    ui_open = socket.ui_open
+                    icon = 'DISCLOSURE_TRI_DOWN' if ui_open else 'DISCLOSURE_TRI_RIGHT'
+                    split = layout.split(0.3)
+                    row = split.row()
+                    indented_label(row)
+                    row.prop(socket, "ui_open", icon=icon, text='', icon_only=True, emboss=False)
+                    row.label(socket.name+":")
+                    split.operator_menu_enum("node.add_surface" , "node_type", text=input_node.bl_idname , icon= 'DOT')
+                    if socket.ui_open:
+                        self.draw_node_properties_recursive(layout, context, nt, input_node, level=level+1)
+                else:
+                    split = layout.split(0.3)
+                    row = split.row()
+                    indented_label(row)
+                    row.label(socket.name)
+                    prop_panel = split.row( align=True )
+                    if socket.default_value is not None:
+                        prop_panel.prop(socket,'default_value',text="")
+                    prop_panel.operator_menu_enum("node.add_surface" , "node_type", text='',icon='DOT')
+
+        draw_props(node, layout)
+        layout.separator()
