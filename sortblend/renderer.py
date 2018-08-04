@@ -22,6 +22,7 @@ import numpy
 import platform
 from .exporter import sort_exporter
 from extensions_framework.util import TimerThread
+from . import base
 
 class SORT_Thread(TimerThread):
     render_engine = None
@@ -95,10 +96,11 @@ class SORT_Thread(TimerThread):
 
         return active_tiles
 
+@base.register_class
 class SORT_RENDERER(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
     # RenderEngine; define its internal name, visible name and capabilities.
-    bl_idname = 'sortblend'
+    bl_idname = 'SORT_RENDERER'
     bl_label = 'SORT'
     bl_use_preview = True
 
@@ -127,7 +129,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         self.sort_thread.setsharedmemory(self.sharedmemory)
         self.sort_thread.set_kick_period(1)
         self.sort_thread.start()
-    
+
     def __init__(self):
         self.sort_available = True
         self.cmd_argument = []
@@ -233,11 +235,3 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
             # close shared memory connection
             self.sharedmemory.close()
-
-def register():
-    # Register the RenderEngine
-    bpy.utils.register_class(SORT_RENDERER)
-
-def unregister():
-    # Unregister RenderEngine
-    bpy.utils.unregister_class(SORT_RENDERER)

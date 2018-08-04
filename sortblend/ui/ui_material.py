@@ -14,17 +14,82 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
+from ..material import nodes
+from .. import base
+from bl_ui import properties_data_camera
 
 class SORTMaterialPanel:
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "material"
-    COMPAT_ENGINES = {'sortblend'}
+    COMPAT_ENGINES = {'SORT_RENDERER'}
 
     @classmethod
     def poll(cls, context):
         rd = context.scene.render
         return rd.engine in cls.COMPAT_ENGINES
+
+class SORT_Add_Node:
+    def get_type_items(self, context):
+        items = []
+        for nodetype in nodes.SORTPatternGraph.nodetypes.values():
+            items.append((nodetype, nodetype,nodetype))
+        items.append(('REMOVE', 'Remove', 'Remove the node connected to this socket'))
+        items.append(('DISCONNECT', 'Disconnect', 'Disconnect the node connected to this socket'))
+        return items
+
+    node_type = bpy.props.EnumProperty(name="Node Type",
+        description='Node type to add to this socket',
+        items=get_type_items)
+
+    def execute(self, context):
+        new_type = self.properties.node_type
+        if new_type == 'DEFAULT':
+            return {'CANCELLED'}
+
+        nt = context.nodetree
+        node = context.node
+        socket = context.socket
+        def socket_node_input(nt, socket):
+            return next((l.from_node for l in nt.links if l.to_socket == socket), None)
+        input_node = socket_node_input(nt, socket)
+
+        if new_type == 'REMOVE':
+            nt.nodes.remove(input_node)
+            return {'FINISHED'}
+
+        if new_type == 'DISCONNECT':
+            link = next((l for l in nt.links if l.to_socket == socket), None)
+            nt.links.remove(link)
+            return {'FINISHED'}
+
+        # add a new node to existing socket
+        if input_node is None:
+            newnode = nt.nodes.new(new_type)
+            newnode.location = node.location
+            newnode.location[0] -= 300
+            newnode.selected = False
+            if self.input_type == 'Pattern':
+                link_node(nt, newnode, socket)
+            else:
+                nt.links.new(newnode.outputs[self.input_type], socket)
+
+        # replace input node with a new one
+        else:
+            newnode = nt.nodes.new(new_type)
+            input = socket
+            old_node = input.links[0].from_node
+            nt.links.new(newnode.outputs[self.input_type], socket)
+            newnode.location = old_node.location
+
+            nt.nodes.remove(old_node)
+        return {'FINISHED'}
+
+class NODE_OT_add_surface(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface'
+    bl_label = 'Add Bxdf Node'
+    bl_description = 'Connect a Bxdf to this socket'
+    input_type = bpy.props.StringProperty(default='Result')
 
 class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Slot'

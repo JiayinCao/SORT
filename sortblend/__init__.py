@@ -23,15 +23,17 @@ bl_info = {
     "warning": "Still under development", # used for warning icon and text in addons panel
     "category": "Render"}
 
-import bpy
-from . import renderer
-from .material import nodes
 from extensions_framework import Addon
-
 SORTAddon = Addon(bl_info)
 addon_register, addon_unregister = SORTAddon.init_functions()
 
-from .ui import ui_init
+import bpy
+from . import base
+from . import renderer
+from .ui import ui_render
+from .ui import ui_camera
+from .ui import ui_lamp
+from .ui import ui_material
 
 class SORTAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = 'sortblend'
@@ -41,22 +43,19 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
             name="Path to SORT binary",
             description='Path to SORT binary',
             subtype='DIR_PATH',
-            default='',
-            )
+            default='',)
 
     install_path_debug = bpy.props.StringProperty(
             name='Path to SORT binary(debug)',
             description='Path to SORT binary(debug)',
             subtype='DIR_PATH',
-            default='',
-            )
+            default='')
 
     pbrt_export_path = bpy.props.StringProperty(
             name='Pbrt exporting path',
             description='Path to exported pbrt scene',
             subtype='DIR_PATH',
-            default='',
-            )
+            default='')
 
     def draw(self, context):
         self.layout.prop(self, "install_path")
@@ -65,16 +64,8 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
 
 def register():
     addon_register()
-
     bpy.utils.register_module(__name__)
-
-    ui_init.register()
-    nodes.register()
-
+    
 def unregister():
     addon_unregister()
-
     bpy.utils.unregister_module(__name__)
-
-    ui_init.unregister()
-    nodes.unregister()
