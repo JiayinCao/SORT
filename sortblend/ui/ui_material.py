@@ -224,6 +224,8 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
                     def socket_node_input(nt, socket):
                         return next((l.from_node for l in nt.links if l.to_socket == socket), None)
                     input_node = socket_node_input(nt, socket)
+                    if input_node is None:
+                        return
                     ui_open = socket.ui_open
                     icon = 'DISCLOSURE_TRI_DOWN' if ui_open else 'DISCLOSURE_TRI_RIGHT'
                     split = layout.split(0.3)
