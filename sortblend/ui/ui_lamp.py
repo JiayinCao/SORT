@@ -46,13 +46,9 @@ class SORTLampPanel(bl_ui.properties_data_lamp.DataButtonsPanel):
     COMPAT_ENGINES = {'SORT_RENDERER'}
     @classmethod
     def poll(cls, context):
-        rd = context.scene.render
-        return super().poll(context) and rd.engine in cls.COMPAT_ENGINES
-    @classmethod
-    def poll(cls, context):
         if cls.sort_lamp_type is '' :
-            return True
-        return super().poll(context) and context.lamp.type == cls.sort_lamp_type
+            return super().poll(context) and rd.engine in cls.COMPAT_ENGINES 
+        return super().poll(context) and context.lamp.type == cls.sort_lamp_type and rd.engine in cls.COMPAT_ENGINES
 
 class LampPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Property'

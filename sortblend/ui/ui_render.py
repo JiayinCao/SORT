@@ -210,22 +210,22 @@ class PBRT_checkresult(bpy.types.Operator):
     bl_label = "Check PBRT Result"
     def execute(self, context):
         OpenFile( pbrt_exporter.get_pbrt_filename() )
-
+        return {'FINISHED'}
 
 class PBRT_openfolder(bpy.types.Operator):
     bl_idname = "sort.openfolder_pbrt"
     bl_label = "Open PBRT folder"
     def execute(self, context):
         OpenFolder( pbrt_exporter.get_pbrt_dir() )
-
-
+        return {'FINISHED'}
+        
 class PBRTDebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'PBRT Debug Panel'
     bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
 
     @classmethod
     def poll(cls,context):
-        return pbrt_exporter.get_pbrt_dir() is not ''
+        return pbrt_exporter.get_pbrt_dir() is not '' and super().poll(context)
 
     def draw(self, context):
         self.layout.operator("sort.export_pbrt_scene",text=export_pbrt_lable)

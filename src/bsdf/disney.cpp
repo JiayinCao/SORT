@@ -126,10 +126,10 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 }
 
 Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
-    if( bs.u < ( 1.0f - metallic ) * ( 1.0f - specular * 0.92f ) ){
+    const float t = ( 1.0f - metallic ) * ( 1.0f - specular * 0.92f ) * basecolor.GetIntensity();
+    if( bs.u < t || t == 1.0f ){
         // Cosine-weighted sample
-        wi = CosSampleHemisphere( bs.u / ( ( 1.0f - metallic ) * 0.92f ) , bs.v );
-        if( !SameHemiSphere(wo, wi) ) wi.z = -wi.z;
+        wi = CosSampleHemisphere( bs.u / t , bs.v );
     }else{
         const float r = sort_canonical();
         BsdfSample sample(true);
@@ -142,7 +142,7 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
         const float specular_intensity = Cspec0.GetIntensity();
         const float total_intensity = clearcoat_intensity + specular_intensity;
         if( total_intensity == 0.0f ){
-            wi = CosSampleHemisphere( bs.u / ( ( 1.0f - metallic ) * 0.92f ) , bs.v );
+            wi = CosSampleHemisphere( bs.u / t , bs.v );
         }else{
             const float clearcoat_ratio = clearcoat_intensity / total_intensity;
             if( r < clearcoat_ratio || clearcoat_ratio == 1.0f ){
@@ -155,7 +155,6 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
             }
             wi = 2 * Dot( wo , wh ) * wh - wo;
         }
-        if( !SameHemiSphere(wo, wi) ) wi.z = -wi.z;
     }
     
     if( pPdf ) *pPdf = pdf( wo , wi );
@@ -183,5 +182,5 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
         return CosHemispherePdf(wi);
     const Vector wh = Normalize( wi + wo );
     const float pdf_wh = lerp( ggx.Pdf(wh) , cggx.Pdf(wh) , clearcoat_ratio );
-    return lerp( pdf_wh / ( 4.0f * Dot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.92f ) );
+    return lerp( pdf_wh / ( 4.0f * Dot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.92f ) * basecolor.GetIntensity() );
 }
