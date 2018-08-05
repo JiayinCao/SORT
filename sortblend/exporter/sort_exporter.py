@@ -412,8 +412,6 @@ def export_mesh(obj,scene,force_debug):
             f_v = [(vi, me_verts[v_idx], l_idx)
                        for vi, (v_idx, l_idx) in enumerate(zip(f.vertices, f.loop_indices))]
             file.write("f")
-            #for vi, v, li in f_v:
-            #    file.write(" %d//%d" % (v.index+1, loops_to_normals[li]+1))
 
             totverts = 1
             totuvco = 1
@@ -424,7 +422,6 @@ def export_mesh(obj,scene,force_debug):
                                       totuvco + uv_face_mapping[f_index][vi],
                                       totno + loops_to_normals[li],
                                       ))  # vert, uv, normal
-                #face_vert_index += len(f_v)
             else:  # No UV's
                 for vi, v, li in f_v:
                     file.write(" %d//%d" % (totverts + v.index, totno + loops_to_normals[li]))
