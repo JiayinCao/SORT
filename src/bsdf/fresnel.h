@@ -30,7 +30,7 @@ inline float SchlickFresnel(const float F0, float cos) {
     return F0 + pow(1.0f - cos, 5.0f) * ( 1.0f - F0 );
 }
 inline float SchlickWeight( float cos ){
-    return pow( saturate( saturate( 1.0f - cos ) ) , 5.0f );
+    return pow( saturate( 1.0f - cos ) , 5.0f );
 }
 inline float DielectricFresnel( float cosI , float eta_i , float eta_t ){
     const bool entering = cosI > 0.0f;
