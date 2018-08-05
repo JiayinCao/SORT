@@ -29,12 +29,9 @@ Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
     const float cos_theta_o = AbsCosTheta(wo);
     const float cos_theta_i = AbsCosTheta(wi);
     
-#define pow5(x) ( (x*x)*(x*x)*x )
     // Diffuse  : f_diffuse( wo , wi ) = 28.0f / ( 23.0f * PI ) * ( 1.0 - R ) * ( 1.0 - ( 1.0 - 0.5 * CosTheta(wo) ) ^ 5 ) * ( 1.0 - ( 1.0 - 0.5f * CosTheta(wi) ) ^ 5
     // Specular : f_specular( wo , wi ) = D(h) * SchlickFresnel(S,Dot(wi,h)) / ( 4.0f * AbsDot( wi , h ) * max( AbsDot(wi,n) , AbsDot(wo,n) )
-    const Spectrum diffuse = 0.3875f * D * ( Spectrum( 1.0f ) - S )
-                             * ( 1.0f - pow5( 1.0f - 0.5f * cos_theta_o ) )
-                             * ( 1.0f - pow5( 1.0f - 0.5f * cos_theta_i ) );
+    const Spectrum diffuse = 0.3875f * D * ( Spectrum( 1.0f ) - S ) * ( 1.0f - SchlickWeight( 0.5f * cos_theta_o ) ) * ( 1.0f - SchlickWeight( 0.5f * cos_theta_i ) );
     
     Vector h = wo + wi;
     if( h.IsZero() ) return 0.0f;
@@ -42,7 +39,6 @@ Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
     
     const float IoH = AbsDot( wi , h );
     const Spectrum specular = ( distribution.D(h) * SchlickFresnel(S, IoH) ) / ( 4.0f * IoH * max( cos_theta_i , cos_theta_o ) ) ;
-#undef pow5
     
     return diffuse + specular;
 }
@@ -51,12 +47,11 @@ Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfS
     if( bs.u < 0.5f ){
         // Cosine-weighted sample
         wi = CosSampleHemisphere( 2.0f * bs.u , bs.v );
-        if( !SameHemiSphere(wo, wi) ) wi.z = -wi.z;
+        if( !SameHemiSphere(wo, wi) ) wi *= -1.0f;
     }else{
         BsdfSample sample(true);
         Vector wh = distribution.sample_f(sample,wo);
         wi = 2 * Dot( wo , wh ) * wh - wo;
-        if( !SameHemiSphere(wo, wi) ) return 0.0f;
     }
     if( pPdf ) *pPdf = pdf( wo , wi );
     
@@ -72,5 +67,5 @@ float AshikhmanShirley::pdf( const Vector& wo , const Vector& wi ) const{
     
     const Vector wh = Normalize( wi + wo );
     float pdf_wh = distribution.Pdf(wh);
-    return 0.5f * ( CosHemispherePdf(wi) + pdf_wh / ( 4.0f * Dot( wo , wh ) ) );
+    return lerp( CosHemispherePdf(wi) , pdf_wh / ( 4.0f * Dot( wo , wh ) ) , 0.5f );
 }

@@ -168,32 +168,27 @@ class PBRT_export_scene(bpy.types.Operator):
             # this is a very hacky way to update the UI, somehow this line will invalidate the window forcing a redraw
             color = context.user_preferences.themes[0].view_3d.space.gradients.high_gradient
             color.s = color.s
-
             if pbrt_exporter.is_pbrt_executing() is False:
                 global export_pbrt_lable
                 export_pbrt_lable = "Render in PBRT"
-
                 # chexk the result automatically
                 if pbrt_running is True:
                     pbrt_file_name = pbrt_exporter.get_pbrt_filename()
                     OpenFile( pbrt_file_name )
-
                 # remove timer
                 wm = context.window_manager
                 wm.event_timer_remove(self._timer)
                 return {'CANCELLED'}
-
         return {'PASS_THROUGH'}
+
     def execute(self, context):
         global export_pbrt_lable
         global pbrt_running
         if pbrt_exporter.is_pbrt_executing() is False:
             pbrt_running = True
-
             wm = context.window_manager
             self._timer = wm.event_timer_add(0.01, context.window)
             wm.modal_handler_add(self)
-
             export_pbrt_lable = "Shutdown PBRT"
             pbrt_exporter.export_blender(context.scene,True)
         else:
@@ -201,7 +196,6 @@ class PBRT_export_scene(bpy.types.Operator):
             export_pbrt_lable = "Render in PBRT"
             pbrt_exporter.shutdown_pbrt()
             return {'CANCELLED'}
-
         return {'RUNNING_MODAL'}
 
 
@@ -218,7 +212,7 @@ class PBRT_openfolder(bpy.types.Operator):
     def execute(self, context):
         OpenFolder( pbrt_exporter.get_pbrt_dir() )
         return {'FINISHED'}
-        
+
 class PBRTDebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'PBRT Debug Panel'
     bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)

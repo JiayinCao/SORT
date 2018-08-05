@@ -162,7 +162,7 @@ void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     
     const Spectrum spec(GET_MATERIALNODE_PROPERTY_SPECTRUM(specular));
     if( !spec.IsBlack() ){
-        const Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.0f, 1.2f);
+        const Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.0f, 1.5f);
         const float rough = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
         const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
         bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist , weight , n ));
