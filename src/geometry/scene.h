@@ -29,6 +29,7 @@
 class Accelerator;
 class Light;
 class Distribution1D;
+class TiXmlNode;
 
 ////////////////////////////////////////////////////////////////////////////
 // definition of scene class
@@ -40,9 +41,9 @@ public:
 	~Scene(){ Release(); }
 
 	// load the scene from script file
-	// para 'str' : the name for the file
+	// para 'root' : the node for the file
 	// result     : 'true' if parsing is successful
-	bool	LoadScene( const string& str );
+	bool	LoadScene(  TiXmlNode* root );
 
 	// get the intersection between a ray and the scene
 	// para 'r' : the ray

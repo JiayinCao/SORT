@@ -98,14 +98,23 @@ def lookAtSORT(camera):
 
 # export blender information
 def export_blender(scene, force_debug=False):
+    # create root node
+    root = ET.Element("Root")
+
     # create immediate file path
     create_path(scene, force_debug)
     # export sort file
-    export_sort_file(scene, force_debug)
-    # export scene
-    export_scene(scene, force_debug)
+    export_sort_file(scene, root, force_debug)
     # export material
-    export_material(scene, force_debug )
+    export_material(scene, root, force_debug)
+    # export scene
+    export_scene(scene, root, force_debug)
+
+    # output the xml
+    output_sort_file = get_immediate_dir(force_debug) + 'sort_scene.xml'
+    tree = ET.ElementTree(root)
+    tree.write(output_sort_file)
+    print( 'SORT Scene File:\t' + output_sort_file )
 
 # clear old data and create new path
 def create_path(scene, force_debug):
@@ -122,12 +131,14 @@ def create_path(scene, force_debug):
         os.mkdir(output_dir)
 
 # open sort file
-def export_sort_file(scene, force_debug):
-    # create root node
-    root = ET.Element("Root")
+def export_sort_file(scene, root, force_debug):
     # the scene node
     output_dir = get_immediate_dir(force_debug)
-    ET.SubElement(root, 'Scene', value=output_dir + 'blender.xml')
+
+    # resource path node
+    output_dir = get_immediate_dir(force_debug)
+    ET.SubElement(root , 'Resource', path= output_dir )
+
     # the integrator node
     integrator_type = scene.integrator_type_prop
     integrator_node = ET.SubElement(root, 'Integrator', type=integrator_type)
@@ -181,25 +192,17 @@ def export_sort_file(scene, force_debug):
     # output thread num
     thread_num = scene.thread_num_prop
     ET.SubElement( root , 'ThreadNum', name='%s'%thread_num)
-    # output the xml
-    output_sort_file = get_immediate_dir(force_debug) + 'blender_exported.xml'
-    tree = ET.ElementTree(root)
-    tree.write(output_sort_file)
-    print( 'SORT Scene File:\t' + output_sort_file )
 
 # export scene
-def export_scene(scene, force_debug):
-    # create root node
-    root = ET.Element("Root")
-    # resource path node
-    output_dir = get_immediate_dir(force_debug)
-    ET.SubElement( root , 'Resource', path= output_dir )
+def export_scene(scene, root, force_debug):
+    scene_root = ET.SubElement( root , 'Scene' )
+
     # acceleration structure
     accelerator_type = scene.accelerator_type_prop
-    ET.SubElement( root , 'Accel', type=accelerator_type)
+    ET.SubElement( scene_root , 'Accel', type=accelerator_type)
 
     for ob in exporter_common.getMeshList(scene):
-        model_node = ET.SubElement( root , 'Model' , filename=ob.name + '.obj', name = ob.name )
+        model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.obj', name = ob.name )
         transform_node = ET.SubElement( model_node , 'Transform' )
         ET.SubElement( transform_node , 'Matrix' , value = 'm '+ exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world) )
         # output the mesh to file
@@ -211,20 +214,20 @@ def export_scene(scene, force_debug):
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
         world_matrix = MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() * flip_mat
         if lamp.type == 'SUN':
-            light_node = ET.SubElement( root , 'Light' , type='distant')
+            light_node = ET.SubElement( scene_root , 'Light' , type='distant')
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
             ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
             ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
         elif lamp.type == 'POINT':
-            light_node = ET.SubElement( root , 'Light' , type='point')
+            light_node = ET.SubElement( scene_root , 'Light' , type='point')
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
             light_position = world_matrix.col[3]
             ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
             ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
         elif lamp.type == 'SPOT':
-            light_node = ET.SubElement( root , 'Light' , type='spot')
+            light_node = ET.SubElement( scene_root , 'Light' , type='spot')
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
             light_dir = world_matrix.col[2] * -1.0
@@ -234,7 +237,7 @@ def export_scene(scene, force_debug):
             ET.SubElement( light_node , 'Property' , name='falloff_start' ,value="%d"%(degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)))
             ET.SubElement( light_node , 'Property' , name='range' ,value="%d"%(degrees(lamp.spot_size*0.5)))
         elif lamp.type == 'AREA':
-            light_node = ET.SubElement( root , 'Light' , type='area')
+            light_node = ET.SubElement( scene_root , 'Light' , type='area')
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
             light_dir = world_matrix.col[2] * -1.0
@@ -254,16 +257,11 @@ def export_scene(scene, force_debug):
         elif lamp.type == 'HEMI':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
-            light_node = ET.SubElement( root , 'Light' , type='skylight')
+            light_node = ET.SubElement( scene_root , 'Light' , type='skylight')
             ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
             ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() ) )
             ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
             ET.SubElement( light_node , 'Property' , name='image' ,value= bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ) )
-
-    # output the xml
-    output_scene_file = get_immediate_dir(force_debug) + 'blender.xml'
-    tree = ET.ElementTree(root)
-    tree.write(output_scene_file)
 
 mtl_dict = {}
 mtl_rev_dict = {}
@@ -292,9 +290,6 @@ def export_mesh(obj,scene,force_debug):
     mesh.calc_normals_split()
     with open(output_path, 'w') as file:
         file.write("# OBJ file\n")
-
-        # all materials are exported in blender_material.xml
-        file.write("mtllib blender_material.xml\n")
 
         contextMat = None
         materials = mesh.materials[:]
@@ -431,9 +426,8 @@ def export_mesh(obj,scene,force_debug):
 
             file.write("\n")
 
-def export_material(scene,force_debug):
-    # create root node
-    root = ET.Element("Root")
+def export_material(scene, root, force_debug):
+    mat_root = ET.SubElement( root , 'Materials' )
 
     for material in exporter_common.getMaterialList(scene):
         # get the sort tree nodes
@@ -456,7 +450,7 @@ def export_material(scene,force_debug):
         print( 'Exporting material: ' + material.name )
 
         # material node
-        mat_node = ET.SubElement( root , 'Material', name=material.name )
+        mat_node = ET.SubElement( mat_root , 'Material', name=material.name )
         
         def export_props(mat_node , xml_node):
             export_prop_in_sort = lambda n , t , v : ET.SubElement( xml_node , 'Property' , name=n , type=t, value=v )
@@ -475,9 +469,4 @@ def export_material(scene,force_debug):
                     ET.SubElement( xml_node , 'Property' , name=socket.name , type=socket.export_sort_socket_type(), value=socket.export_socket_value() )
 
         export_props(output_node, mat_node)
-    
-    # output the xml
-    output_material_file = get_immediate_dir(force_debug) + 'blender_material.xml'
-    tree = ET.ElementTree(root)
-    tree.write(output_material_file)
 

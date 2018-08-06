@@ -25,6 +25,7 @@
 
 // pre-decleration
 class Material;
+class TiXmlNode;
 
 /////////////////////////////////////////////////////////////////////////////
 //	definition of material manager
@@ -48,9 +49,9 @@ public:
     std::shared_ptr<Material>	GetDefaultMat();
 
 	// parse material file and add the materials into the manager
-	// para 'str' : name of the material file
-	// result     : the number of materials in the file
-	unsigned	ParseMatFile( const string& str );
+	// para 'mat_node'  : material node
+	// result           : the number of materials in the file
+	unsigned	ParseMatFile( TiXmlNode* mat_node );
 
 	// get material number
 	unsigned	GetMatCount() const;

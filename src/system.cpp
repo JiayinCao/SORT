@@ -72,13 +72,6 @@ void System::Render()
     SORT_STATS( sRenderingTime = renderingTime );
 }
 
-// load the scene
-bool System::LoadScene( const string& filename )
-{
-	string str = GetFullPath(filename);
-	return m_Scene.LoadScene( str );
-}
-
 // pre-process before rendering
 void System::PreProcess()
 {
@@ -282,19 +275,13 @@ bool System::Setup( const char* str )
 	// get the root of xml
 	TiXmlNode*	root = doc.RootElement();
 	
-	// try to load the scene , note: only the first node matters
-	TiXmlElement* element = root->FirstChildElement( "Scene" );
-	if( element )
-	{
-		const char* str_scene = element->Attribute( "value" );
-        if (str_scene) {
-            SORT_PROFILE("Loading Scene");
-            LoadScene(str_scene);
-        }else
-			return false;
-	}else
-		return false;
-	
+    // Setup intermediate resource path
+    TiXmlElement* element = root->FirstChildElement( "Resource" );
+    if( element ){
+        const char* path = element->Attribute( "path" );
+        if( path )    SetResourcePath( path );
+    }
+    
 	// get the integrater
 	element = root->FirstChildElement( "Integrator" );
 	if( element )
@@ -371,6 +358,12 @@ bool System::Setup( const char* str )
 		}
 	}
 
+    element = root->FirstChildElement("Materials");
+    MatManager::GetSingleton().ParseMatFile( element );
+    
+    element = root->FirstChildElement("Scene");
+    m_Scene.LoadScene( element );
+    
 	element = root->FirstChildElement("OutputFile");
 	if( element )
         m_imagesensor->SetProperty("filename", element->Attribute("name"));
@@ -378,7 +371,7 @@ bool System::Setup( const char* str )
 	element = root->FirstChildElement("ThreadNum");
 	if( element )
 		m_thread_num = atoi(element->Attribute("name"));
-
+    
 	// setup image sensor
     m_camera->SetImageSensor(m_imagesensor);
 
