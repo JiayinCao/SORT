@@ -25,9 +25,6 @@ class MmapSharedMemory
 {
 // public method
 public:
-	// default constructor
-	MmapSharedMemory();
-
 	// Initialize shared memory
 	void CreateSharedMemory(const string& sm_name, int size, unsigned type);
 

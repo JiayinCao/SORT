@@ -114,12 +114,13 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # on mac os
         if platform.system() == "Darwin" or platform.system() == "Linux":
             # open a new file
-            self.file = open( sort_exporter.get_immediate_dir() + "sharedmem.bin" , "wb" , self.sm_size)
+            intermediate_dir = sort_exporter.get_immediate_dir()
+            self.file = open( intermediate_dir + "sharedmem.bin" , "wb" , self.sm_size)
             self.file.write( bytes( "\0" * self.sm_size , "utf-8" ) )
             self.file.close()
         
             # open it in append mode
-            self.file = open( sort_exporter.get_immediate_dir() + "sharedmem.bin" , "a+b" , self.sm_size)
+            self.file = open( intermediate_dir + "sharedmem.bin" , "a+b" , self.sm_size)
 
             # allocate shared memory first
             self.sharedmemory = mmap.mmap(self.file.fileno(), self.sm_size)
