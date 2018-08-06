@@ -23,7 +23,8 @@
 #include "utility/log.h"
 #include <sys/mman.h>
 #include <sys/types.h>
-
+#include "utility/path.h"
+#include "utility/strhelper.h"
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <err.h>
@@ -33,17 +34,13 @@
 #include <string.h>
 #include <unistd.h>
 
-// default constructor
-MmapSharedMemory::MmapSharedMemory()
-{
-}
-
 void MmapSharedMemory::CreateSharedMemory( const string& name , int size , unsigned type )
 {
-    fd = open( "blender_intermediate/sharedmem.bin" , O_RDWR , 0 );
+    const char* filename = GetFullPath(name).c_str();
+    fd = open( filename , O_RDWR , 0 );
     if( fd == -1 )
     {
-        slog( WARNING , GENERAL , "Failed to load shared memory file");
+        slog( WARNING , GENERAL , stringFormat( "Failed to load shared memory file %s " , filename ) );
         return;
     }
     
