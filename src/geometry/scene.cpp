@@ -36,39 +36,8 @@ SORT_STATS_COUNTER("Statistics", "Total Primitive Count", sScenePrimitiveCount);
 SORT_STATS_COUNTER("Statistics", "Total Light Count", sSceneLightCount);
 
 // load the scene from script file
-bool Scene::LoadScene( const string& str )
+bool Scene::LoadScene( TiXmlNode* root )
 {
-	// copy the filename
-	m_filename = str;
-
-	// load the xml file
-	TiXmlDocument doc( str.c_str() );
-	doc.LoadFile();
-
-    sAssert( !doc.Error() , GENERAL );
-
-	// get the root of xml
-	TiXmlNode*	root = doc.RootElement();
-
-	// get the resource path if there is
-	string oldpath = GetResourcePath();
-	TiXmlElement* element = root->FirstChildElement( "Resource" );
-	if( element )
-	{
-		const char* path = element->Attribute( "path" );
-		if( path )	SetResourcePath( path );
-	}
-
-	// parse materials
-	TiXmlElement* material = root->FirstChildElement( "Material" );
-	while( material )
-	{
-		const char* mat_name = material->Attribute( "value" );
-		if( mat_name != 0 )
-			MatManager::GetSingleton().ParseMatFile( mat_name );
-		material = material->NextSiblingElement( "Material" );
-	}
-
 	// parse the triangle mesh
 	TiXmlElement* meshNode = root->FirstChildElement( "Model" );
 	while( meshNode )
@@ -180,9 +149,6 @@ bool Scene::LoadScene( const string& str )
 		if( type != 0 )	m_pAccelerator = CREATE_TYPE( type , Accelerator );
 	}
 
-	// restore resource path
-	//SetResourcePath( oldpath );
-    
     SORT_STATS(sScenePrimitiveCount=(StatsInt)m_triBuf.size());
     SORT_STATS(sSceneLightCount=(StatsInt)m_lights.size());
 

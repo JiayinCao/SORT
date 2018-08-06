@@ -19,6 +19,7 @@ import subprocess
 import math
 import struct
 import numpy
+import shutil
 import platform
 from .exporter import sort_exporter
 from extensions_framework.util import TimerThread
@@ -111,21 +112,23 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # setup shared memory size
         self.sm_size = self.image_size_in_bytes * 2 + self.image_header_size + 2
  
+        intermediate_dir = sort_exporter.get_immediate_dir()
+        sm_full_path = intermediate_dir + "SORTBLEND_SHAREMEM"
         # on mac os
         if platform.system() == "Darwin" or platform.system() == "Linux":
             # open a new file
-            intermediate_dir = sort_exporter.get_immediate_dir()
-            self.file = open( intermediate_dir + "sharedmem.bin" , "wb" , self.sm_size)
+            
+            self.file = open( sm_full_path , "wb" , self.sm_size)
             self.file.write( bytes( "\0" * self.sm_size , "utf-8" ) )
             self.file.close()
         
             # open it in append mode
-            self.file = open( intermediate_dir + "sharedmem.bin" , "a+b" , self.sm_size)
+            self.file = open( sm_full_path , "a+b" , self.sm_size)
 
             # allocate shared memory first
             self.sharedmemory = mmap.mmap(self.file.fileno(), self.sm_size)
         elif platform.system() == "Windows":
-            self.sharedmemory = mmap.mmap(0, self.sm_size , "SORTBLEND_SHAREMEM")
+            self.sharedmemory = mmap.mmap(0, self.sm_size , sm_full_path)
 
         self.sort_thread.setsharedmemory(self.sharedmemory)
         self.sort_thread.set_kick_period(1)
@@ -195,7 +198,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         intermediate_dir = sort_exporter.get_immediate_dir()
         # execute binary
         self.cmd_argument = [binary_path];
-        self.cmd_argument.append( intermediate_dir + 'blender_exported.xml')
+        self.cmd_argument.append( intermediate_dir + 'sort_scene.xml')
         self.cmd_argument.append('blendermode')
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 
@@ -236,3 +239,6 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
             # close shared memory connection
             self.sharedmemory.close()
+
+        # clear immediate directory
+        shutil.rmtree(intermediate_dir)

@@ -45,8 +45,6 @@ public:
 	// setup system from file
 	bool Setup( const char* str );
 	
-	// load the scene
-	bool LoadScene( const string& str );
 	// get scene
 	const Scene& GetScene() const { return m_Scene; }
 
