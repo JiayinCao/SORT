@@ -277,7 +277,7 @@ bool System::Setup( const char* str )
 	TiXmlDocument doc( full_name.c_str() );
 	doc.LoadFile();
 	
-    sAssert( !doc.Error() , GENERAL );
+    sAssertMsg( !doc.Error() , GENERAL , stringFormat( "Can't load scene file %s" , full_name.c_str() ) );
 	
 	// get the root of xml
 	TiXmlNode*	root = doc.RootElement();
