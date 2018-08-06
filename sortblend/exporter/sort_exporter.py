@@ -266,14 +266,14 @@ def export_scene(scene, root, force_debug):
 mtl_dict = {}
 mtl_rev_dict = {}
 
+def name_compat(name):
+    if name is None:
+        return 'None'
+    else:
+        return name.replace(' ', '_')
+
 # export mesh file
 def export_mesh(obj,scene,force_debug):
-    def name_compat(name):
-        if name is None:
-            return 'None'
-        else:
-            return name.replace(' ', '_')
-
     output_path = get_immediate_dir(force_debug) + obj.name + '.obj'
 
     # the mesh object
@@ -450,7 +450,7 @@ def export_material(scene, root, force_debug):
         print( 'Exporting material: ' + material.name )
 
         # material node
-        mat_node = ET.SubElement( mat_root , 'Material', name=material.name )
+        mat_node = ET.SubElement( mat_root , 'Material', name=name_compat(material.name) )
         
         def export_props(mat_node , xml_node):
             export_prop_in_sort = lambda n , t , v : ET.SubElement( xml_node , 'Property' , name=n , type=t, value=v )
