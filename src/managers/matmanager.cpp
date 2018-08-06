@@ -43,25 +43,13 @@ std::shared_ptr<Material> MatManager::GetDefaultMat()
 }
 
 // parse material file and add the materials into the manager
-unsigned MatManager::ParseMatFile( const string& str )
+unsigned MatManager::ParseMatFile( TiXmlNode* mat_node )
 {
-	// load the xml file
-	const string& full_filename_path = GetFullPath(str).c_str();
-	TiXmlDocument doc( full_filename_path.c_str() );
-	doc.LoadFile();
-
-	// if there is error , return false
-	if( doc.Error() )
-	{
-        slog( WARNING , MATERIAL , stringFormat( "%s. Material \"%s\" file load failed" , doc.ErrorDesc() , str.c_str() ) );
-		return false;
-	}
-
-	// get the root of xml
-	TiXmlNode*	root = doc.RootElement();
-
+	if( !mat_node )
+        return 0;
+    
 	// parse materials
-	TiXmlElement* material = root->FirstChildElement( "Material" );
+    TiXmlElement* material = mat_node->FirstChildElement( "Material" );
 	while( material )
 	{
 		// parse the material

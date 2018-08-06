@@ -72,11 +72,6 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 			file>>trunkname;
             trunk = std::make_shared<Trunk>( trunkname );
 			mem->m_TrunkBuffer.push_back( trunk );
-		}else if( strcmp( prefix.c_str() , "mtllib" ) == 0 )
-		{
-			string name;
-			file>>name;
-			MatManager::GetSingleton().ParseMatFile( name );
 		}else if( strcmp( prefix.c_str() , "usemtl" ) == 0 )
 		{
 			string name;
