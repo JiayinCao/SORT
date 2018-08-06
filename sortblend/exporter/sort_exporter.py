@@ -19,19 +19,16 @@ import mathutils
 import shutil
 import numpy as np
 import platform
+import tempfile
 from math import degrees
 from . import exporter_common
 import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
 
 def get_sort_dir(force_debug=False):
-    addon_prefs = exporter_common.getPreference()
-    debug = bpy.context.scene.debug_prop
-    return_path = addon_prefs.install_path
-    if debug is True:
-        return_path = addon_prefs.install_path_debug
+    return_path = exporter_common.getPreference().install_path
     if force_debug:
-        return_path = addon_prefs.install_path_debug
+        return_path = exporter_common.getPreference().install_path_debug
     if platform.system() == 'Windows':
         return return_path
     return efutil.filesystem_path(return_path) + "/"
@@ -48,13 +45,16 @@ def get_sort_bin_path(force_debug=False):
         raise Exception("SORT is only supported on Windows, Ubuntu and Mac OS")
     return sort_bin_path
 
+intermediate_dir = ''
 def get_immediate_dir(force_debug=False):
-    sort_bin_dir = get_sort_dir(force_debug)
-    immediate_dir = sort_bin_dir + 'blender_intermediate/'
-    return immediate_dir
+    global intermediate_dir
+    return_path = intermediate_dir
+    if force_debug:
+        return_path = exporter_common.getPreference().install_path_debug
+    return efutil.filesystem_path(return_path) + "/"
 
 def get_immediate_res_dir(force_debug=False):
-    return get_immediate_dir(force_debug) + 'res/'
+    return get_immediate_dir(force_debug)
 
 def MatrixSortToBlender():
     from bpy_extras.io_utils import axis_conversion
@@ -109,24 +109,25 @@ def export_blender(scene, force_debug=False):
 
 # clear old data and create new path
 def create_path(scene, force_debug):
+    global intermediate_dir
+    intermediate_dir = tempfile.mkdtemp(suffix='w')
     # get immediate directory
     output_dir = get_immediate_dir(force_debug)
-    output_res_dir = get_immediate_res_dir(force_debug)
+    
     # clear the old directory
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
     # create one if there is no such directory
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
-    if not os.path.exists(output_res_dir):
-        os.mkdir(output_res_dir)
 
 # open sort file
 def export_sort_file(scene, force_debug):
     # create root node
     root = ET.Element("Root")
     # the scene node
-    ET.SubElement(root, 'Scene', value='blender_intermediate/blender.xml')
+    output_dir = get_immediate_dir(force_debug)
+    ET.SubElement(root, 'Scene', value=output_dir + 'blender.xml')
     # the integrator node
     integrator_type = scene.integrator_type_prop
     integrator_node = ET.SubElement(root, 'Integrator', type=integrator_type)
@@ -144,7 +145,7 @@ def export_sort_file(scene, force_debug):
     yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
     ET.SubElement(root, 'RenderTargetSize', w='%d'%xres, h='%d'%yres )
     # output file name
-    ET.SubElement(root, 'OutputFile', name='blender_intermediate/blender_generated.exr')
+    ET.SubElement(root, 'OutputFile', name='blender_generated.exr')
     # sampler type
     sampler_type = scene.sampler_type_prop
     sampler_count = scene.sampler_count_prop
@@ -184,13 +185,15 @@ def export_sort_file(scene, force_debug):
     output_sort_file = get_immediate_dir(force_debug) + 'blender_exported.xml'
     tree = ET.ElementTree(root)
     tree.write(output_sort_file)
+    print( 'SORT Scene File:\t' + output_sort_file )
 
 # export scene
 def export_scene(scene, force_debug):
     # create root node
     root = ET.Element("Root")
     # resource path node
-    ET.SubElement( root , 'Resource', path="./blender_intermediate/res/")
+    output_dir = get_immediate_dir(force_debug)
+    ET.SubElement( root , 'Resource', path= output_dir )
     # acceleration structure
     accelerator_type = scene.accelerator_type_prop
     ET.SubElement( root , 'Accel', type=accelerator_type)
@@ -273,7 +276,7 @@ def export_mesh(obj,scene,force_debug):
         else:
             return name.replace(' ', '_')
 
-    output_path = get_immediate_res_dir(force_debug) + obj.name + '.obj'
+    output_path = get_immediate_dir(force_debug) + obj.name + '.obj'
 
     # the mesh object
     mesh = obj.data
@@ -291,7 +294,7 @@ def export_mesh(obj,scene,force_debug):
         file.write("# OBJ file\n")
 
         # all materials are exported in blender_material.xml
-        file.write("mtllib ../blender_material.xml\n")
+        file.write("mtllib blender_material.xml\n")
 
         contextMat = None
         materials = mesh.materials[:]

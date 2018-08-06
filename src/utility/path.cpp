@@ -79,18 +79,5 @@ void SetResourcePath( const string& str )
 // get resource path
 string GetResourcePath()
 {
-#if defined( SORT_IN_WINDOWS )
-	string abspath = GetExecutableDir();
-#elif defined( SORT_IN_LINUX ) || defined( SORT_IN_MAC )
-	string abspath = "";
-#endif
-	string res_path = g_System.GetResourcePath();
-	if( res_path.empty() )
-		return abspath;
-
-	// it's a relative path
-	if( res_path[0] == '.' )
-		return abspath + res_path;
-
-	return res_path;
+	return g_System.GetResourcePath();
 }
