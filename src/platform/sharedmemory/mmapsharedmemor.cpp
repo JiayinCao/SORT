@@ -21,6 +21,7 @@
 
 #include "sharedmemory.h"
 #include "utility/log.h"
+#include "utility/strhelper.h"
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/types.h>
