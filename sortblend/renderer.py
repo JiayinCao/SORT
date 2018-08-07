@@ -113,11 +113,10 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         self.sm_size = self.image_size_in_bytes * 2 + self.image_header_size + 2
  
         intermediate_dir = sort_exporter.get_immediate_dir()
-        sm_full_path = intermediate_dir + "SORTBLEND_SHAREMEM"
+        sm_full_path = intermediate_dir + "sharedmem.bin"
         # on mac os
         if platform.system() == "Darwin" or platform.system() == "Linux":
             # open a new file
-            
             self.file = open( sm_full_path , "wb" , self.sm_size)
             self.file.write( bytes( "\0" * self.sm_size , "utf-8" ) )
             self.file.close()

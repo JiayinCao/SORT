@@ -387,7 +387,7 @@ bool System::Setup( const char* str )
 			+ 2;										// progress data and final update flag
 
 	// create shared memory
-	const SharedMemory& sm = SMManager::GetSingleton().CreateSharedMemory("SORTBLEND_SHAREMEM", size, SharedMmeory_All);
+	const SharedMemory& sm = SMManager::GetSingleton().CreateSharedMemory("sharedmem.bin", size, SharedMmeory_All);
 	// clear the memory first
 	if (sm.bytes)
 	{
