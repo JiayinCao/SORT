@@ -73,7 +73,7 @@ void BlenderImage::PreProcess()
 	m_header_offset = m_tilenum_x * m_tilenum_y;
 	m_final_update_flag_offset = m_header_offset * g_iTileSize * g_iTileSize * 4 * sizeof(float) * 2 + m_header_offset + 1;
 
-	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("SORTBLEND_SHAREMEM");
+	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("sharedmem.bin");
 
 	ImageSensor::PreProcess();
 }
