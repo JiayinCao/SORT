@@ -16,6 +16,7 @@
  */
 
 #include "smmanager.h"
+#include "utility/path.h"
 
 SMManager::SMManager()
 {
@@ -42,7 +43,7 @@ SharedMemory SMManager::CreateSharedMemory(const string& sm_name, int size, unsi
 	PlatformSharedMemory sm;
 
 	// create shared memory
-	sm.CreateSharedMemory(sm_name, size, type);
+	sm.CreateSharedMemory(GetFullPath(sm_name), size, type);
 
 	// push it into the map
 	m_SharedMemory.insert(make_pair(sm_name, sm));

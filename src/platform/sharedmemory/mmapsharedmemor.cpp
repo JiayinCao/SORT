@@ -23,8 +23,6 @@
 #include "utility/log.h"
 #include <sys/mman.h>
 #include <sys/types.h>
-#include "utility/path.h"
-#include "utility/strhelper.h"
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <err.h>
@@ -36,11 +34,10 @@
 
 void MmapSharedMemory::CreateSharedMemory( const string& name , int size , unsigned type )
 {
-    const char* filename = GetFullPath(name).c_str();
-    fd = open( filename , O_RDWR , 0 );
+    fd = open(name.c_str(), O_RDWR , 0 );
     if( fd == -1 )
     {
-        slog( WARNING , GENERAL , stringFormat( "Failed to load shared memory file %s " , filename ) );
+        slog( WARNING , GENERAL , stringFormat( "Failed to load shared memory file %s " , name.c_str() ) );
         return;
     }
     
