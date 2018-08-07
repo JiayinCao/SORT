@@ -47,8 +47,8 @@ file(GLOB_RECURSE thirdparty_cs src/thirdparty/*.c)
 set(thirdparty_files ${thirdparty_headers} ${thirdparty_cpps} ${thirdparty_cs})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SORT_SOURCE_DIR}/bin")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/Debug")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${SORT_SOURCE_DIR}/Release")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${SORT_SOURCE_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/bin")
 
 add_executable(SORT ${all_files})
 
@@ -57,8 +57,7 @@ target_link_libraries(SORT easy_profiler)
 if (WIN32)
 file(GLOB easy_profiler_bin "${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.dll" 
 							"${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.exe")
-file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE})
-file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG})
+file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endif (WIN32)
 
 if(SORT_ENABLE_STATS)
@@ -74,6 +73,9 @@ if(UNIX)
 	target_link_libraries(SORT ${CMAKE_THREAD_LIBS_INIT})
 	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
+
+set_target_properties( SORT PROPERTIES RELEASE_OUTPUT_NAME "sort_r" )
+set_target_properties( SORT PROPERTIES DEBUG_OUTPUT_NAME "sort_d" )
 
 if(MSVC)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)

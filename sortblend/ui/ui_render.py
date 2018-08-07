@@ -146,9 +146,7 @@ class SORT_openfolder(bpy.types.Operator):
 
 class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'DebugPanel'
-    bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
     def draw(self, context):
-        self.layout.prop(context.scene,"debug_prop")
         self.layout.operator("sort.export_debug_scene")
         split = self.layout.split()
         left = split.column(align=True)
@@ -215,7 +213,6 @@ class PBRT_openfolder(bpy.types.Operator):
 
 class PBRTDebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'PBRT Debug Panel'
-    bpy.types.Scene.debug_prop = bpy.props.BoolProperty(name='Debug', default=False)
 
     @classmethod
     def poll(cls,context):
