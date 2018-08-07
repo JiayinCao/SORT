@@ -25,20 +25,18 @@ from . import exporter_common
 import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
 
-def get_sort_dir(force_debug=False):
+def get_sort_dir():
     return_path = exporter_common.getPreference().install_path
-    if force_debug:
-        return_path = exporter_common.getPreference().install_path_debug
     if platform.system() == 'Windows':
         return return_path
     return efutil.filesystem_path(return_path) + "/"
 
-def get_sort_bin_path(force_debug=False):
-    sort_bin_dir = get_sort_dir(force_debug)
+def get_sort_bin_path():
+    sort_bin_dir = get_sort_dir()
     if platform.system() == 'Darwin':   # for Mac OS
-        sort_bin_path = sort_bin_dir + "sort"
+        sort_bin_path = sort_bin_dir + "sort_r"
     elif platform.system() == 'Windows':    # for Windows
-        sort_bin_path = sort_bin_dir + "sort.exe"
+        sort_bin_path = sort_bin_dir + "sort_r.exe"
     elif platform.system() == "Linux":
         sort_bin_path = sort_bin_dir + "SORT"
     else:
@@ -49,12 +47,9 @@ intermediate_dir = ''
 def get_immediate_dir(force_debug=False):
     global intermediate_dir
     return_path = intermediate_dir
-    if force_debug:
-        return_path = exporter_common.getPreference().install_path_debug
+    if force_debug is True:
+        return_path = get_sort_dir() + "/intermediate/"
     return efutil.filesystem_path(return_path) + "/"
-
-def get_immediate_res_dir(force_debug=False):
-    return get_immediate_dir(force_debug)
 
 def MatrixSortToBlender():
     from bpy_extras.io_utils import axis_conversion

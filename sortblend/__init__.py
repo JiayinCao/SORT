@@ -45,12 +45,6 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
             subtype='DIR_PATH',
             default='',)
 
-    install_path_debug = bpy.props.StringProperty(
-            name='Path to SORT binary(debug)',
-            description='Path to SORT binary(debug)',
-            subtype='DIR_PATH',
-            default='')
-
     pbrt_export_path = bpy.props.StringProperty(
             name='Pbrt exporting path',
             description='Path to exported pbrt scene',
@@ -59,7 +53,6 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
 
     def draw(self, context):
         self.layout.prop(self, "install_path")
-        self.layout.prop(self, "install_path_debug")
         self.layout.prop(self, "pbrt_export_path")
 
 def register():
