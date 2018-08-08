@@ -148,13 +148,13 @@ protected:
 	const MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
 
 	//! @brief Get reflected direction based on incident direction and normal.
-    //! @param v    Incoming direction.
+    //! @param v    Incident direction.
     //! @param n    Normal of the surface.
     //! @return     Reflected direction.
 	inline Vector	getReflected( Vector v , Vector n ) const;
 
 	//! @brief Get refracted direction based on incident direction, normal and index of refraction.
-    //! @param v        Incoming direction. It can come from either inside or outside of the surface.
+    //! @param v        Incident direction. It can come from either inside or outside of the surface.
     //! @param n        Surface normal.
     //! @param in_eta   Index of refraction inside the surface.
     //! @param ext_eta  Index of refraction outside the surface.
@@ -175,23 +175,23 @@ public:
     MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight , const Vector& n , bool doubleSided = false ) : Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , R(reflectance), fresnel(f) {}
 	
     //! @brief Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
 	Spectrum f( const Vector& wo , const Vector& wi ) const override;
 	
     //! @brief Importance sampling for the microfacet brdf.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The Evaluated BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
 
-    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The probability of choosing the out-going direction based on the incoming direction.
+    //! @brief Evaluate the pdf of an existance direction given the Incident direction.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The probability of choosing the out-going direction based on the Incident direction.
 	float pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
@@ -221,23 +221,23 @@ public:
     }
 	
     //! @brief Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
     
     //! @brief Importance sampling for the microfacet btdf.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The Evaluated BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
     
-    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The probability of choosing the out-going direction based on the incoming direction.
+    //! @brief Evaluate the pdf of an existance direction given the Incident direction.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:

@@ -72,8 +72,8 @@ public:
     
 protected:
     //! @brief Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
 	virtual Spectrum f( const Vector& wo , const Vector& wi ) const = 0;
     
@@ -81,24 +81,24 @@ protected:
     //!
     //! This method is not pure virtual and it has a default
     //! implementation, which sample out-going directions that have linear probability with the
-    //! consine value between the out-going ray and the normal.\n
+    //! cosine value between the out-going ray and the normal.\n
     //! However, it is suggested that each bxdf has its own importance sampling method for optimal
     //! convergence rate.\n
-    //! One also needs to implement the function Pdf to make it consistance.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! One also needs to implement the function Pdf to make it consistent.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The Evaluated BRDF value.
 	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
     
-    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
+    //! @brief Evaluate the pdf of an existance direction given the Incident direction.
     //!
-    //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
+    //! If one implements customized sample_f for the brdf, it needs to have corresponding version of
     //! this function, otherwise it is not unbiased.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The probability of choosing the out-going direction based on the incoming direction.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The probability of choosing the out-going direction based on the Incident direction.
 	virtual float pdf( const Vector& wo , const Vector& wi ) const;
 
     //! @brief  Helper function to decide if a vector is pointing on the other side of the primitive
@@ -106,8 +106,8 @@ protected:
     bool    PointingUp( const Vector& v ) const;
     
     //! @brief Transform a vector from world coordinate to shading coordinate.
-    //! @param v    A vector in world coordiante.
-    //! @return     Cooresponding vector in shading coordinate.
+    //! @param v    A vector in world coordinate.
+    //! @return     corresponding vector in shading coordinate.
     inline Vector bsdfToBxdf( const Vector& v ) const{
         if( !normal_map_applied ) return v;
         return Vector( Dot(v,sn) , Dot(v,nn) , Dot(v,tn) );
@@ -115,7 +115,7 @@ protected:
     
     //! @brief Transform a vector from shading coordinate to world coordinate.
     //! @param v    A vector in shading coordinate.
-    //! @return     Cooresponding vector in world coordinate.
+    //! @return     corresponding vector in world coordinate.
     inline Vector bxdfToBsdf( const Vector& v ) const{
         if( !normal_map_applied ) return v;
         return Vector(  v.x * sn.x + v.y * nn.x + v.z * tn.x ,

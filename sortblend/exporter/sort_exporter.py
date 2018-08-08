@@ -44,7 +44,7 @@ def get_sort_bin_path():
     return sort_bin_path
 
 intermediate_dir = ''
-def get_immediate_dir(force_debug=False):
+def get_intermediate_dir(force_debug=False):
     global intermediate_dir
     return_path = intermediate_dir
     if force_debug is True:
@@ -106,7 +106,7 @@ def export_blender(scene, force_debug=False):
     export_scene(scene, root, force_debug)
 
     # output the xml
-    output_sort_file = get_immediate_dir(force_debug) + 'sort_scene.xml'
+    output_sort_file = get_intermediate_dir(force_debug) + 'sort_scene.xml'
     tree = ET.ElementTree(root)
     tree.write(output_sort_file)
     print( 'SORT Scene File:\t' + output_sort_file )
@@ -116,7 +116,7 @@ def create_path(scene, force_debug):
     global intermediate_dir
     intermediate_dir = tempfile.mkdtemp(suffix='w')
     # get immediate directory
-    output_dir = get_immediate_dir(force_debug)
+    output_dir = get_intermediate_dir(force_debug)
     
     # clear the old directory
     if os.path.exists(output_dir):
@@ -128,10 +128,10 @@ def create_path(scene, force_debug):
 # open sort file
 def export_sort_file(scene, root, force_debug):
     # the scene node
-    output_dir = get_immediate_dir(force_debug)
+    output_dir = get_intermediate_dir(force_debug)
 
     # resource path node
-    output_dir = get_immediate_dir(force_debug)
+    output_dir = get_intermediate_dir(force_debug)
     ET.SubElement(root , 'Resource', path= output_dir )
 
     # the integrator node
@@ -269,7 +269,7 @@ def name_compat(name):
 
 # export mesh file
 def export_mesh(obj,scene,force_debug):
-    output_path = get_immediate_dir(force_debug) + obj.name + '.obj'
+    output_path = get_intermediate_dir(force_debug) + obj.name + '.obj'
 
     # the mesh object
     mesh = obj.data
