@@ -26,11 +26,13 @@ Spectrum Phong::f( const Vector& wo , const Vector& wi ) const
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
     
+    // Diffuse  : f_diffuse( wo , wi ) = D / PI
+    // Specular : f_specular( wo , wi ) = ( power + 2.0 ) * S * ( ( reflect( wo ) , wi ) ^ power ) / ( 2 * PI )
     Spectrum ret = D * INV_PI;
     if (!S.IsBlack()) {
         const float alpha = SatDot(wi, reflect(wo));
         if (alpha > 0.0f)
-            ret += S * (power + 2) * pow(alpha, power) * INV_PI;
+            ret += S * (power + 2) * pow(alpha, power) * INV_TWOPI;
     }
     return ret;
 }
@@ -51,7 +53,7 @@ Spectrum Phong::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, flo
         Matrix m(t0.x, r.x, t1.x, 0.0f,
                  t0.y, r.y, t1.y, 0.0f,
                  t0.z, r.z, t1.z, 0.0f,
-                 0.0f, 0.0f, 0.0f, 0.0f);
+                 0.0f, 0.0f, 0.0f, 1.0f);
         wi = m(dir);
     }
 
