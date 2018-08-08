@@ -54,7 +54,7 @@ public:
 	// get color from render target
 	// para 'x' : x coordinate
 	// para 'y' : y coordinate
-	// result   : the cooresponding color
+	// result   : the corresponding color
 	// note     : the x or y is out of range , use filter to make them in the range.
 	//            if there is no data in the render target, there will be a run-time
 	//			  and log LOG_ERROR.

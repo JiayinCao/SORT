@@ -45,16 +45,16 @@ public:
 	//! @param The bxdf to be added.
 	void AddBxdf( const Bxdf* bxdf );
 
-	//! @brief Evaluate the value of BSDF based on the incoming and outgoing directions.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+	//! @brief Evaluate the value of BSDF based on the Incident and outgoing directions.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @param type The specific type to be considered.
     //! @return     The Evaluated value of the BSDF.
 	Spectrum f( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
     //! @brief Importance sampling for the bsdf.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @param type The specific bxdf type it considers during evaluation.
@@ -62,11 +62,11 @@ public:
     //! @return     The Evaluated BRDF value.
 	Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL , BXDF_TYPE* bxdf_type = 0 ) const;
 
-    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @brief Evaluate the pdf of an existance direction given the Incident direction.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @param type The specific bxdf type it considers during evaluation.
-    //! @return     The probability of choosing the out-going direction based on the incoming direction.
+    //! @return     The probability of choosing the out-going direction based on the Incident direction.
 	float Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type = BXDF_ALL ) const;
 
 	//! @brief Get intersection information of the point at which the bsdf is evaluated.
@@ -85,13 +85,13 @@ private:
     const Intersection intersect;   /**<    Intersection information of the point to be Evaluated. */
 
     //! @brief Transform a vector from world coordinate to shading coordinate.
-    //! @param v    A vector in world coordiante.
-    //! @return     Cooresponding vector in shading coordinate.
+    //! @param v    A vector in world coordinate.
+    //! @return     corresponding vector in shading coordinate.
 	Vector worldToLocal( const Vector& v ) const;
     
     //! @brief Transform a vector from shading coordinate to world coordinate.
     //! @param v    A vector in shading coordinate.
-    //! @return     Cooresponding vector in world coordinate.
+    //! @return     corresponding vector in world coordinate.
 	Vector localToWorld( const Vector& v ) const;
 };
 

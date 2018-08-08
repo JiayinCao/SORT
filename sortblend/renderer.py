@@ -112,7 +112,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # setup shared memory size
         self.sm_size = self.image_size_in_bytes * 2 + self.image_header_size + 2
  
-        intermediate_dir = sort_exporter.get_immediate_dir()
+        intermediate_dir = sort_exporter.get_intermediate_dir()
         sm_full_path = intermediate_dir + "sharedmem.bin"
         # on mac os
         if platform.system() == "Darwin" or platform.system() == "Linux":
@@ -194,7 +194,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         # start rendering process first
         binary_dir = sort_exporter.get_sort_dir()
         binary_path = sort_exporter.get_sort_bin_path()
-        intermediate_dir = sort_exporter.get_immediate_dir()
+        intermediate_dir = sort_exporter.get_intermediate_dir()
         # execute binary
         self.cmd_argument = [binary_path];
         self.cmd_argument.append( intermediate_dir + 'sort_scene.xml')

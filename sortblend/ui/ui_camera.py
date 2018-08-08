@@ -18,7 +18,7 @@ import bl_ui
 from .. import SORTAddon
 from extensions_framework import declarative_property_group
 
-# attach customized properties in lamp
+# attach customized properties in camera
 @SORTAddon.addon_register_class
 class sort_camera(declarative_property_group):
     ef_attach_to = ['Camera']

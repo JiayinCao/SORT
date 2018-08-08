@@ -33,9 +33,9 @@ def OpenFolder( path ):
     if platform.system() == 'Darwin':     # for Mac OS
         subprocess.call(["open", "-R", path])
     elif platform.system() == 'Windows':  # for Windows
-        subprocess.call("explorer \"%s\""%path) # to be verified
+        subprocess.call("explorer \"%s\""%path)
     elif platform.system() == "Linux":    # for linux
-        os.system( "xdg-open \"%s\""%filename ) # to be verified
+        os.system( "xdg-open \"%s\""%path )
 
 class SORTRenderPanel:
     bl_space_type = "PROPERTIES"

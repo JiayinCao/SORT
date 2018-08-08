@@ -35,12 +35,12 @@ VertexIndex	VertexIndexFromStr( const string& str );
 
 // get the type of file according to the file extension
 // para 'str' : string to parse
-// result     : a cooresponding mesh type
+// result     : a corresponding mesh type
 MESH_TYPE	MeshTypeFromStr( const string& str );
 
 // get the type of image file from file extension
 // para 'str' : string to parse
-// result     : a cooresponding mesh type
+// result     : a corresponding mesh type
 TEX_TYPE	TexTypeFromStr( const string& str );
 
 class ToLower{

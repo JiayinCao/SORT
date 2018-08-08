@@ -25,8 +25,8 @@ public:
     ~MerlData() { SAFE_DELETE(m_data); }
     
     //! Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const;
     
@@ -60,8 +60,8 @@ public:
     Merl( const MerlData& md , const Spectrum& weight , const Vector& n , bool doubleSided = false) : Bxdf( weight, BXDF_ALL, n , doubleSided) , m_data(md) {}
 
     //! Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         if (!SameHemiSphere(wo, wi)) return 0.0f;
