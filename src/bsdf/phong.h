@@ -18,26 +18,28 @@
 #pragma once
 
 #include "bxdf.h"
-#include "microfacet.h"
 
-//! @brief AshikhmanShirley brdf.
+//! @brief Phong brdf.
 /**
- * An Anisotropic Phong BRDF Model
- * http://www.irisa.fr/prive/kadi/Lopez/ashikhmin00anisotropic.pdf
- * This BRDF model has two layer, specular and diffuse.
- * Unlike the modern PBR model ( microfacet + diffuse ), this model also counts fresnel effect when blending the two layer
+ * A modified version of Phong BRDF
+ * It is not suggested to use this BRDF in practice. Switching to more advanced BRDF, like Microfacet or AshikhmanShirley, would be much better.
  */
-class AshikhmanShirley : public Bxdf
+class Phong : public Bxdf
 {
 public:
 	//! Constructor
     //! @param diffuse          Direction-hemisphere reflection for diffuse.
-    //! @param specular         Direction-hemisphere reflection for specular, it is a scaler value because this model doesn't behave well with arbitary spectrum.
+    //! @param specular         Direction-hemisphere reflection for specular.
     //! @param roughnessU       Roughness along one axis.
     //! @param roughnessV       Roughness along the other axis
     //! @param weight           Weight of the BXDF
-    AshikhmanShirley(const Spectrum& diffuse, const float specular, const float roughnessU, const float roughnessV, const Spectrum& weight, const Vector& n , bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), distribution(roughnessU, roughnessV) {}
+    Phong(const Spectrum& diffuse, const Spectrum& specular, const float specularPower, const Spectrum& weight, const Vector& n , bool doubleSided = false)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , power(specularPower) {
+        // This is to make sure this modified phong model is still enerty conservative so that it is PBR, otherwise it could break some rendering algorithms.
+        const float diffRatio = diffuse.GetIntensity() / (diffuse.GetIntensity() + specular.GetIntensity());
+        D = diffRatio * diffuse;
+        S = (1.0f - diffRatio) * specular;
+    }
 	
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -60,6 +62,6 @@ public:
     float pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
-	const Spectrum  D , S;            /**< Direction-Hemisphere reflectance and transmittance. */
-    const Blinn     distribution;     /**< Normal Distribution Function. >**/
+	Spectrum  D , S;            /**< Direction-Hemisphere reflectance and transmittance. */
+    const float     power;      /**< Specular power, controlling the specular lobe. >**/
 };

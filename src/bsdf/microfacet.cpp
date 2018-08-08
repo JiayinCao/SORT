@@ -237,12 +237,6 @@ float GGX::G1( const Vector& v ) const
     return 2.0f / ( 1.0f + sqrt( 1.0f + alpha2 * tan_theta_sq ) );
 }
 
-// get reflected ray
-Vector	Microfacet::getReflected( Vector v , Vector n ) const
-{
-	return ( 2.0f * Dot( v , n ) ) * n - v;
-}
-
 // get refracted ray
 Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const
 {
@@ -283,7 +277,7 @@ Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const B
 	const Vector wh = distribution->sample_f( bs , wo );
 
 	// reflect the incident direction
-	wi = getReflected( wo , wh );
+	wi = reflect( wo , wh );
 
     if (pPdf) *pPdf = pdf(wo, wi);
 
