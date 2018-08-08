@@ -43,7 +43,7 @@ Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
 	Matrix m( 	wcx.x , dir.x , wcy.x , 0.0f ,
 				wcx.y , dir.y , wcy.y , 0.0f ,
 				wcx.z , dir.z , wcy.z , 0.0f ,
-				0.0f , 0.0f , 0.0f , 0.0f );
+				0.0f , 0.0f , 0.0f , 1.0f );
 
 	float sq_sin_theta = radius * radius / delta.SquaredLength();
 	float cos_theta = sqrt( max( 0.0f , 1.0f - sq_sin_theta ) );
