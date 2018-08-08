@@ -85,6 +85,17 @@ class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     def export_socket_value(self):
         return '%f'%(self.default_value)
 
+# Socket for Float
+class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketLargeFloat'
+    bl_label = 'SORT Float Socket'
+    socket_color = (0.1, 0.1, 0.3, 1.0)
+    sort_type = 'float'
+    pbrt_type = 'float'
+    default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0)
+    def export_socket_value(self):
+        return '%f'%(self.default_value)
+
 # Socket for normal ( normal map )
 class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketNormal'
