@@ -175,3 +175,12 @@ inline Vector SphericalVec( float sintheta , float costheta , float phi ){
 	float z = sintheta * sin( phi );
 	return Vector( x , y , z );
 }
+
+inline Vector reflect(Vector v, Vector n){
+    return (2.0f * Dot(v, n)) * n - v;
+}
+
+// an optimized version only works in shading coordinate
+inline Vector reflect(Vector v) {
+    return Vector(-v.x, v.y, -v.z);
+}

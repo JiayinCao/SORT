@@ -333,8 +333,8 @@ class SORTNode_Material_Layered(SORTShadingNode_BXDF):
 class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
     bl_label = 'MicrofacetRelection'
     bl_idname = 'SORTNode_BXDF_MicrofacetReflection'
-    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name'  : 'RoughnessU' , 'default' : 0.1 } , 
-                      { 'class' : properties.SORTNodeSocketFloat , 'name'  : 'RoughnessV' , 'default' : 0.1 } , 
+    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessU' , 'default' : 0.1 } , 
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } , 
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ,
                       { 'class' : properties.SORTNodePropertyEnum , 'name' : 'MicroFacetDistribution' , 'default' : 'GGX' , 'items' : [ ("Blinn", "Blinn", "", 1), ("Beckmann" , "Beckmann" , "", 2), ("GGX" , "GGX" , "" , 3) ] } , 
                       { 'class' : properties.SORTNodePropertyFloatVector , 'name' : 'Interior_IOR' , 'default' : (0.37, 0.37, 0.37) , 'min' : 0.1 , 'max' : 10.0 } , 
@@ -344,8 +344,8 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
 class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
     bl_label = 'MicrofacetRefraction'
     bl_idname = 'SORTNode_BXDF_MicrofacetRefraction'
-    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name'  : 'RoughnessU' , 'default' : 0.1 } , 
-                      { 'class' : properties.SORTNodeSocketFloat , 'name'  : 'RoughnessV' , 'default' : 0.1 } , 
+    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessU' , 'default' : 0.1 } , 
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } , 
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' },
                       { 'class' : properties.SORTNodePropertyEnum , 'name' : 'MicroFacetDistribution' , 'default' : 'GGX' , 'items' : [ ("Blinn", "Blinn", "", 1), ("Beckmann" , "Beckmann" , "", 2), ("GGX" , "GGX" , "" , 3) ] } , 
                       { 'class' : properties.SORTNodePropertyFloat , 'name' : 'Interior_IOR' , 'default' : 1.1 , 'min' : 1.0 , 'max' : 10.0 } , 
@@ -355,9 +355,17 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
 class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
     bl_label = 'AshikhmanShirley'
     bl_idname = 'SORTNode_BXDF_AshikhmanShirley'
-    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name'  : 'Specular' } , 
-                      { 'class' : properties.SORTNodeSocketFloat , 'name'  : 'RoughnessU' , 'default' : 0.1 } , 
-                      { 'class' : properties.SORTNodeSocketFloat , 'name'  : 'RoughnessV' , 'default' : 0.1 } , 
+    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Specular' } , 
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessU' , 'default' : 0.1 } , 
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } , 
+                      { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
+
+@SORTPatternGraph.register_node('BXDFs')
+class SORTNode_BXDF_Phong(SORTShadingNode_BXDF):
+    bl_label = 'Phong'
+    bl_idname = 'SORTNode_BXDF_Phong'
+    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'SpecularPower' , 'default' : 1.0 , 'max' : 64.0 } , 
+                      { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' } , 
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
 
 @SORTPatternGraph.register_node('BXDFs')
@@ -376,7 +384,7 @@ class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
 class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
     bl_label = 'OrenNayar'
     bl_idname = 'SORTNode_BXDF_OrenNayar'
-    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name'  : 'Roughness' } , 
+    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' } , 
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
 
 @SORTPatternGraph.register_node('BXDFs')
