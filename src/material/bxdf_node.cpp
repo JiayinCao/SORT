@@ -170,17 +170,19 @@ PhongNode::PhongNode()
     REGISTER_MATERIALNODE_PROPERTY("Diffuse", diffuse);
     REGISTER_MATERIALNODE_PROPERTY("Specular", specular);
     REGISTER_MATERIALNODE_PROPERTY("SpecularPower", power);
+    REGISTER_MATERIALNODE_PROPERTY("DiffuseRatio", diffRatio);
 }
 
 void PhongNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
 {
     const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const float p = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(power));
+    const float p = GET_MATERIALNODE_PROPERTY_FLOAT(power);
+    const float r = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(diffRatio));
     const Spectrum& specDiffuse = GET_MATERIALNODE_PROPERTY_SPECTRUM(diffuse);
     const Spectrum& specSpecular = GET_MATERIALNODE_PROPERTY_SPECTRUM(specular);
     if (specDiffuse.GetIntensity() + specSpecular.GetIntensity() <= 0.0f)
         return;
-    bsdf->AddBxdf(SORT_MALLOC(Phong)(specDiffuse, specSpecular, p, weight, n));
+    bsdf->AddBxdf(SORT_MALLOC(Phong)(specDiffuse * r, specSpecular * ( 1.0f - r ), p, weight, n));
 }
 
 MerlNode::MerlNode()

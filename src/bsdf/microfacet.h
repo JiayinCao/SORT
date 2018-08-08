@@ -163,7 +163,7 @@ protected:
 	inline Vector	getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const;
 };
 
-//! @brief Microfacet for reflection surfaces.
+//! @brief Microfacet Reflection BRDF.
 class MicroFacetReflection : public Microfacet
 {
 public:
@@ -199,9 +199,11 @@ private:
     const Fresnel* fresnel = nullptr;   /**< Fresnel term. */
 };
 
-/////////////////////////////////////////////////////////////////////
-// microfacet refraction bxdf
-// Refer to "Microfacet Models for Refraction through Rough Surfaces" for further detail
+//! @brief Microfacet Refraction BTDF.
+/**
+ * 'Microfacet Models for Refraction through Rough Surfaces'
+ * https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
+ */
 class MicroFacetRefraction : public Microfacet
 {
 public:

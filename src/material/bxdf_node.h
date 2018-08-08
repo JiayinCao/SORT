@@ -162,6 +162,7 @@ private:
     MaterialNodeProperty	diffuse;
     MaterialNodeProperty	specular;
     MaterialNodeProperty	power;
+    MaterialNodeProperty	diffRatio;
 };
 
 // Merl node
