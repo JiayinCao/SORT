@@ -35,8 +35,8 @@ public:
 	OrenNayar( const Spectrum& reflectance , float roughness , const Spectrum& weight , const Vector& n, bool doubleSided = false);
 	
     //! Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
 	

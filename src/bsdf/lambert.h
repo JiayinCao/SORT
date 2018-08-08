@@ -22,7 +22,7 @@
 //! @brief Lambert brdf.
 /**
  * Lambert is the simplest BRDF that exists in any renderers.
- * It reflects equal radiance along all exitance directions.
+ * It reflects equal radiance along all Exitant directions.
  * One can use Lambert to simulate Matte-like material.
  */
 class Lambert : public Bxdf
@@ -35,8 +35,8 @@ public:
     Lambert( const Spectrum& s , const Spectrum& weight , const Vector& n , bool doubleSided = false):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), n, doubleSided),R(s){}
 
     //! Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
 
@@ -58,23 +58,23 @@ public:
     LambertTransmission( const Spectrum& t , const Spectrum& weight , const Vector& n ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_TRANSMISSION), n, true),T(t){}
     
     //! Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
     
     //! @brief Importance sampling for the microfacet btdf.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The Evaluated BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
     
-    //! @brief Evaluate the pdf of an existance direction given the incoming direction.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The probability of choosing the out-going direction based on the incoming direction.
+    //! @brief Evaluate the pdf of an existance direction given the Incident direction.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:

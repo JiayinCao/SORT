@@ -144,7 +144,7 @@ bool Scene::LoadScene( TiXmlNode* root )
 	TiXmlElement* accelNode = root->FirstChildElement( "Accel" );
 	if( accelNode )
 	{
-		// set cooresponding type of accelerator
+		// set corresponding type of accelerator
 		const char* type = accelNode->Attribute( "type" );
 		if( type != 0 )	m_pAccelerator = CREATE_TYPE( type , Accelerator );
 	}

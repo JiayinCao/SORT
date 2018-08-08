@@ -30,8 +30,8 @@ class FourierBxdfData
 {
 public:
     //! Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The evaluted BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const;
 	
@@ -39,24 +39,24 @@ public:
     //!
     //! This method is not pure virtual and it has a default
     //! implementation, which sample out-going directions that have linear probability with the
-    //! consine value between the out-going ray and the normal.\n
+    //! cosine value between the out-going ray and the normal.\n
     //! However, it is suggested that each bxdf has its own importance sampling method for optimal
     //! convergence rate.\n
-    //! One also needs to implement the function Pdf to make it consistance.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! One also needs to implement the function Pdf to make it consistent.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
     
-    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @brief Evalute the pdf of an existance direction given the Incident direction.
     //!
-    //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
+    //! If one implements customized sample_f for the brdf, it needs to have corresponding version of
     //! this function, otherwise it is not unbiased.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The probability of choosing the out-going direction based on the incoming direction.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const;
     
     //! Load brdf data from Fourier Bxdf file.
@@ -133,8 +133,8 @@ public:
     FourierBxdf( const FourierBxdfData& fd , const Spectrum& weight , const Vector& n ) : Bxdf( weight, BXDF_ALL, n , true ) , m_data(fd) {}
     
     //! Evaluate the BRDF
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @return     The evaluted BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         return m_data.f(wo,wi);
@@ -144,12 +144,12 @@ public:
     //!
     //! This method is not pure virtual and it has a default
     //! implementation, which sample out-going directions that have linear probability with the
-    //! consine value between the out-going ray and the normal.\n
+    //! cosine value between the out-going ray and the normal.\n
     //! However, it is suggested that each bxdf has its own importance sampling method for optimal
     //! convergence rate.\n
-    //! One also needs to implement the function Pdf to make it consistance.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
+    //! One also needs to implement the function Pdf to make it consistent.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
@@ -157,13 +157,13 @@ public:
         return m_data.sample_f( wo , wi , bs , pdf );
     }
     
-    //! @brief Evalute the pdf of an existance direction given the incoming direction.
+    //! @brief Evalute the pdf of an existance direction given the Incident direction.
     //!
-    //! If one implements customized sample_f for the brdf, it needs to have cooresponding version of
+    //! If one implements customized sample_f for the brdf, it needs to have corresponding version of
     //! this function, otherwise it is not unbiased.
-    //! @param wo   Exitance direction in shading coordinate.
-    //! @param wi   Incomiing direction in shading coordinate.
-    //! @return     The probability of choosing the out-going direction based on the incoming direction.
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override{
         return m_data.pdf( wo , wi );
     }
