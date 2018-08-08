@@ -19,6 +19,17 @@
 
 #include "bxdf.h"
 
+
+//! @brief Phong BRDF.
+/**
+ * MERL BRDF Database - Mitsubishi Electric Research Laboratories
+ * https://www.merl.com/brdf/
+ * The MERL BRDF database contains reflectance functions of 100 different materials. 
+ * Each reflectance function is stored as a densely measured Bidirectional Reflectance Distribution Function (BRDF).
+ *
+ * 'Efficient Isotropic BRDF Measurement'
+ * http://www.merl.com/publications/docs/TR2003-80.pdf
+ */
 class MerlData
 {
 public:

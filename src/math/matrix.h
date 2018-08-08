@@ -31,16 +31,14 @@ public:
 	// constructor from a float array containing 16 floats
 	// para 'data' : 16 float for the matrix
 	Matrix( const float data[] );
-	// constructrom from 16 float
+	// constructor from 16 float
 	Matrix( float _11 , float _12 , float _13 , float _14 ,
 			float _21 , float _22 , float _23 , float _24 ,
 			float _31 , float _32 , float _33 , float _34 ,
 			float _41 , float _42 , float _43 , float _44 );
-	// destructor
-	~Matrix(){}
 
 	// matrix multiplication
-	// para 'm' : the matrix to mutiply
+	// para 'm' : the matrix to multiply
 	// result : the composition of the two matrix
 	Matrix operator * ( const Matrix& m ) const;
 
@@ -59,7 +57,7 @@ public:
 
 	// transform a ray
 	// para 'r' : the ray to transform
-	// result   : transformd ray
+	// result   : transformed ray
 	Ray operator * ( const Ray& r ) const
 	{
 		return Ray( *this * r.m_Ori , *this * r.m_Dir , r.m_Depth , r.m_fMin , r.m_fMax );

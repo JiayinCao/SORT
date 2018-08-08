@@ -301,9 +301,6 @@ float MicroFacetReflection::pdf( const Vector& wo , const Vector& wi ) const
 // evaluate bxdf
 Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 {
-    // Microfacet Models for Refraction through Rough Surfaces
-    // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
-    
     if( SameHemiSphere(wi, wo) )
         return Spectrum(0.f);
     

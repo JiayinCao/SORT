@@ -17,9 +17,9 @@
 
 // include the header file
 #include "phong.h"
-#include "bsdf.h"
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
+#include "math/matrix.h"
 
 Spectrum Phong::f( const Vector& wo , const Vector& wi ) const
 {
@@ -35,12 +35,37 @@ Spectrum Phong::f( const Vector& wo , const Vector& wi ) const
     return ret;
 }
 
-Spectrum Phong::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
-    // To be implemented
-    return Bxdf::sample_f(wo, wi, bs, pPdf);
+Spectrum Phong::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
+    if (bs.u < diffRatio || diffRatio == 1.0f) {
+        sAssertMsg(diffRatio != 0.0f, MATERIAL, "Divided by 0!");
+        wi = CosSampleHemisphere(bs.u / diffRatio, bs.v);
+    }else{
+        const float cos_theta = pow(bs.v, 1.0f / (power + 1.0f));
+        const float sin_theta = sqrt(1.0f - cos_theta * cos_theta);
+        const float phi = TWO_PI * ( bs.u - diffRatio ) / (1.0f - diffRatio);
+        Vector dir = SphericalVec(sin_theta, cos_theta, phi);
+
+        Vector r = reflect(wo);
+        Vector t0, t1;
+        CoordinateSystem( r, t0, t1 );
+        Matrix m(t0.x, r.x, t1.x, 0.0f,
+                 t0.y, r.y, t1.y, 0.0f,
+                 t0.z, r.z, t1.z, 0.0f,
+                 0.0f, 0.0f, 0.0f, 0.0f);
+        wi = m(dir);
+    }
+
+    if (pPdf) *pPdf = pdf(wo, wi);
+    return f(wo, wi);
 }
 
 float Phong::pdf( const Vector& wo , const Vector& wi ) const{
-    // To be implemented
-    return Bxdf::pdf(wo, wi);
+    if (!SameHemiSphere(wo, wi)) return 0.0f;
+    if (!doubleSided && !PointingUp(wo)) return 0.0f;
+
+    const float alpha = SatDot(reflect(wo), wi);
+    const float pdf_spec = pow( alpha , power ) * ( power + 1.0f ) * INV_TWOPI;
+    const float pdf_diff = CosHemispherePdf(wi);
+
+    return lerp( pdf_spec, pdf_diff, diffRatio );
 }

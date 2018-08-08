@@ -20,15 +20,18 @@
 // include header file
 #include "bxdf.h"
 
-//! @brief OrenNayar brdf.
+//! @brief OrenNayar BRDF.
 /**
- * Like lambert brdf, OrenNayar presents similar quality with subtle differences.
+ * 'Generalization of Lambert’s Reflectance Model'
+ * http://www1.cs.columbia.edu/CAVE/publications/pdfs/Oren_SIGGRAPH94.pdf
+ *
+ * Like lambert BRDF, OrenNayar presents similar quality with subtle differences.
  * It has slightly brighter color at the contour.
  */
 class OrenNayar : public Bxdf
 {
 public:
-	//! Contstructor
+	//! Constructor
     //! @param reflectance  Direction-hemisphere reflection.
     //! @param roughness    It controls the roughness of the surface.
     //! @param weight       Weight of the BRDF
