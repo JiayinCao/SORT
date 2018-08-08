@@ -147,6 +147,23 @@ private:
     MaterialNodeProperty	roughnessV;
 };
 
+// Phong node
+class PhongNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR(PhongNode, MaterialNode, "SORTNode_BXDF_Phong");
+
+    // constructor
+    PhongNode();
+    // update bsdf
+    void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
+
+private:
+    MaterialNodeProperty	diffuse;
+    MaterialNodeProperty	specular;
+    MaterialNodeProperty	power;
+};
+
 // Merl node
 class MerlNode : public BxdfNode
 {

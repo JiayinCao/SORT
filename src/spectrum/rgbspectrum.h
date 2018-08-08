@@ -93,7 +93,7 @@ public:
 	// get intensity
 	float GetIntensity() const
 	{
-        const float YWeight[3] = { 0.212671f, 0.715160f, 0.072169f };
+        static const float YWeight[3] = { 0.212671f, 0.715160f, 0.072169f };
         return YWeight[0] * m_r + YWeight[1] * m_g + YWeight[2] * m_b;
 	}
     

@@ -22,10 +22,12 @@
 #include "bsdf/microfacet.h"
 #include "bsdf/fourierbxdf.h"
 #include "bsdf/ashikhmanshirley.h"
+#include "bsdf/phong.h"
 #include "managers/memmanager.h"
 #include "bsdf/bsdf.h"
 
 IMPLEMENT_CREATOR( AshikhmanShirleyNode );
+IMPLEMENT_CREATOR( PhongNode );
 IMPLEMENT_CREATOR( LambertNode );
 IMPLEMENT_CREATOR( LambertTransmissionNode );
 IMPLEMENT_CREATOR( OrenNayarNode );
@@ -158,8 +160,27 @@ void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
     const float rv = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(roughnessV));
     const auto specDiffuse = GET_MATERIALNODE_PROPERTY_SPECTRUM(diffuse);
     const auto specSpecular = GET_MATERIALNODE_PROPERTY_FLOAT(specular);
-
+    if (specDiffuse.GetIntensity()<= 0.0f)
+        return;
     bsdf->AddBxdf(SORT_MALLOC(AshikhmanShirley)(specDiffuse, specSpecular, ru, rv , weight , n ));
+}
+
+PhongNode::PhongNode()
+{
+    REGISTER_MATERIALNODE_PROPERTY("Diffuse", diffuse);
+    REGISTER_MATERIALNODE_PROPERTY("Specular", specular);
+    REGISTER_MATERIALNODE_PROPERTY("SpecularPower", power);
+}
+
+void PhongNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
+{
+    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    const float p = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(power));
+    const Spectrum& specDiffuse = GET_MATERIALNODE_PROPERTY_SPECTRUM(diffuse);
+    const Spectrum& specSpecular = GET_MATERIALNODE_PROPERTY_SPECTRUM(specular);
+    if (specDiffuse.GetIntensity() + specSpecular.GetIntensity() <= 0.0f)
+        return;
+    bsdf->AddBxdf(SORT_MALLOC(Phong)(specDiffuse, specSpecular, p, weight, n));
 }
 
 MerlNode::MerlNode()
