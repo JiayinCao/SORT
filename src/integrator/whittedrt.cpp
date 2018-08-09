@@ -73,7 +73,7 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 			}
 			bool visible = visibility.IsVisible();
 			if( visible )
-				t += (ld * f * SatDot( lightDir , ip.normal ) / pdf);
+				t += (ld * f / pdf);
 		}
 		it++;
 	}
