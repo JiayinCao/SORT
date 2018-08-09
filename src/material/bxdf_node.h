@@ -128,7 +128,6 @@ private:
 	MaterialNodePropertyString	mf_dist;
 };
 
-
 // AshikhmanShirley node
 class AshikhmanShirleyNode : public BxdfNode
 {
@@ -207,4 +206,21 @@ private:
 
     // fourier bxdf node
     FourierBxdfData fourierBxdfData;
+};
+
+// Phong node
+class SmoothCoatNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR(SmoothCoatNode, MaterialNode, "SORTNode_BXDF_SmoothCoat");
+    
+    // constructor
+    SmoothCoatNode();
+    // update bsdf
+    void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
+    
+private:
+    MaterialNodeProperty    basecolor;
+    MaterialNodeProperty    thickness;
+    MaterialNodeProperty    ior;
 };
