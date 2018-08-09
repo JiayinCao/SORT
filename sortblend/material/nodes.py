@@ -364,8 +364,8 @@ class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
 class SORTNode_BXDF_Phong(SORTShadingNode_BXDF):
     bl_label = 'Phong'
     bl_idname = 'SORTNode_BXDF_Phong'
-    property_list = [ { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'SpecularPower' , 'default' : 1.0 } , 
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'DiffuseRatio' , 'default' : 0.5 } , 
+    property_list = [ { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'SpecularPower' , 'default' : 32.0 } , 
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'DiffuseRatio' , 'default' : 0.2 } , 
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' } , 
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
 
@@ -387,6 +387,14 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_BXDF_OrenNayar'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' } , 
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
+
+@SORTPatternGraph.register_node('BXDFs')
+class SORTNode_BXDF_SmoothCoat(SORTShadingNode_BXDF):
+    bl_label = 'Smooth Coat'
+    bl_idname = 'SORTNode_BXDF_SmoothCoat'
+    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'IOR' } , 
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Thickness' } , 
+                      { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
 
 @SORTPatternGraph.register_node('BXDFs')
 class SORTNode_BXDF_MERL(SORTShadingNode_BXDF):
