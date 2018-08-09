@@ -84,7 +84,7 @@ void InstantRadiosity::PreProcess()
 				throughput /= continueProperbility;
 
 				// update throughput
-				throughput *= bsdf_value * ( AbsDot(wo, intersect.normal) / bsdf_pdf );
+				throughput *= bsdf_value / bsdf_pdf;
 
 				// update next ray
 				ray = Ray(intersect.intersect, wo, 0, 0.001f);
@@ -157,7 +157,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_inte
 
 		Bsdf* bsdf1 = it->intersect.primitive->GetMaterial()->GetBsdf(&(it->intersect));
 
-		float		gterm = AbsDot( n_delta , ip.normal ) * AbsDot( n_delta , it->intersect.normal ) / max( m_fMinSqrDist , sqrLen );
+		float		gterm = 1.0f / max( m_fMinSqrDist , sqrLen );
 		Spectrum	f0 = bsdf->f( -r.m_Dir , -n_delta );
 		Spectrum	f1 = bsdf1->f( n_delta , it->wi );
 
@@ -190,7 +190,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_inte
 
 			if( !li.IsBlack() )
 			{
-				float dgterm = AbsDot( wi , ip.normal ) * max( 0.0f , 1.0f - gather_dist * gather_dist / m_fMinSqrDist );
+				float dgterm = max( 0.0f , 1.0f - gather_dist * gather_dist / m_fMinSqrDist );
 				radiance += f * li * dgterm / bsdf_pdf;
 			}
 		}

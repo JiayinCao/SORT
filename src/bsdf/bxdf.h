@@ -45,10 +45,11 @@ public:
     const Spectrum& GetWeight() const { return m_weight; }
     
     inline Spectrum F( const Vector& wo , const Vector& wi ) const{
-        return f( bsdfToBxdf(wo) , bsdfToBxdf(wi) );
+        return f( bsdfToBxdf(wo) , bsdfToBxdf(wi) ) * fabs(bsdfToBxdf(wi).y);
     }
     inline Spectrum Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
-        const Spectrum res = sample_f( bsdfToBxdf(wo) , wi , bs , pdf );
+        Spectrum res = sample_f( bsdfToBxdf(wo) , wi , bs , pdf );
+        res *= fabs(wi.y);
         wi = bxdfToBsdf(wi);
         return res;
     }

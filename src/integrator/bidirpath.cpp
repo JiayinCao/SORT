@@ -105,7 +105,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf, BXDF_ALL);
 		bsdf_pdf *= rr;
 		const float cosOut = AbsDot(vert.wo, vert.n);
-		throughput *= bsdf_value * ( cosOut / bsdf_pdf );
+		throughput *= bsdf_value / bsdf_pdf;
 
 		if (bsdf_pdf == 0 || throughput.IsBlack())
 			break;
@@ -209,7 +209,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		Spectrum bsdf_value = vert.bsdf->sample_f(vert.wi, vert.wo, BsdfSample(true), &bsdf_pdf, BXDF_ALL);
 		bsdf_pdf *= rr;
 		const float cosOut = AbsDot(vert.wo, vert.n);
-		throughput *= bsdf_value * cosOut / bsdf_pdf;
+		throughput *= bsdf_value / bsdf_pdf;
 
 		if (bsdf_pdf == 0 || throughput.IsBlack())
 			break;
@@ -243,7 +243,7 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
 
 	const float cosAtP0 = AbsDot( p0.n , n_delta );
 	const float cosAtP1 = AbsDot( p1.n , n_delta );
-	const Spectrum g = p1.bsdf->f( p1.wi , n_delta ) * p0.bsdf->f( -n_delta, p0.wi ) * ( cosAtP0 * cosAtP1 * invDistcSqr );
+	const Spectrum g = p1.bsdf->f( p1.wi , n_delta ) * p0.bsdf->f( p0.wi , -n_delta ) * invDistcSqr;
 	if( g.IsBlack() )
 		return 0.0f;
 
@@ -287,7 +287,7 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 	float cosAtLight;
 	Spectrum li = light->sample_l(eye_vertex.inter, &sample, wi, 0 , &directPdfW, &emissionPdfW , &cosAtLight , visibility);
 	const float cosAtEyeVertex = AbsDot(eye_vertex.n, wi);
-	li *= eye_vertex.throughput * eye_vertex.bsdf->f(eye_vertex.wi, wi) * ( cosAtEyeVertex / directPdfW );
+	li *= eye_vertex.throughput * eye_vertex.bsdf->f(eye_vertex.wi, wi) / directPdfW;
 
 	if (li.IsBlack())
 		return 0.0f;
@@ -323,7 +323,6 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	const Vector delta = light_vertex.inter.intersect - eye_point;
 	const float invSqrLen = 1.0f / delta.SquaredLength();
 	const Vector n_delta = delta * sqrt(invSqrLen);
-	const float cosAtLightVertex = AbsDot( light_vertex.n , n_delta );
 	
 	if( Dot( delta , camera->GetForward() ) <= 0.0f )
 		return;
@@ -342,7 +341,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 		return;
 
 	const float total_pixel = (float)(camera->GetImageSensor()->GetWidth() * camera->GetImageSensor()->GetHeight());
-	const float gterm = cosAtCamera * cosAtLightVertex * invSqrLen;
+	const float gterm = cosAtCamera * invSqrLen;
 	Spectrum radiance = light_vertex.throughput * bsdf_value * we * gterm / (float)( sample_per_pixel * total_pixel * camera_pdfA );
 
 	if( !light_tracing_only )

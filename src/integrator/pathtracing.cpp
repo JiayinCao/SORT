@@ -85,7 +85,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 			break;
 
 		// update path weight
-		throughput *= f * AbsDot( wi , inter.normal ) / path_pdf;
+		throughput *= f / path_pdf;
 
 		if( throughput.GetIntensity() == 0.0f )
 			break;
