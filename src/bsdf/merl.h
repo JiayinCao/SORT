@@ -18,7 +18,7 @@
 #pragma once
 
 #include "bxdf.h"
-
+#include "bsdf.h"
 
 //! @brief Phong BRDF.
 /**
@@ -77,7 +77,7 @@ public:
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         if (!SameHemiSphere(wo, wi)) return 0.0f;
         if (!doubleSided && !PointingUp(wo)) return 0.0f;
-        return m_data.f(wo,wi);
+        return m_data.f(wo,wi) * AbsCosTheta(wi);
     }
 
 private:
