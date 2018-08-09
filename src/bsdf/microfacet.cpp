@@ -259,15 +259,14 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-	const float NoL = AbsCosTheta( wi );
 	const float NoV = AbsCosTheta( wo );
-	if (NoL == 0.f || NoV == 0.f)
+	if (NoV == 0.f)
 		return Spectrum(0.f);
 	
 	// evaluate fresnel term
 	const Vector wh = Normalize(wi + wo);
 	const Spectrum F = fresnel->Evaluate( Dot(wo,wh) );
-    return R * distribution->D(wh) * F * distribution->G(wo,wi) / ( 4.0f * NoL * NoV );
+    return R * distribution->D(wh) * F * distribution->G(wo,wi) / ( 4.0f * NoV );
 }
 
 // sample a direction randomly
@@ -304,9 +303,8 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
     if( SameHemiSphere(wi, wo) )
         return Spectrum(0.f);
     
-	const float NoL = CosTheta( wi );
 	const float NoV = CosTheta( wo );
-	if (NoL == 0.f || NoV == 0.f)
+	if (NoV == 0.f)
 		return Spectrum(0.f);
 	
 	const float eta = CosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
@@ -321,7 +319,7 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const
 	const Spectrum F = fresnel.Evaluate( Dot( wh , wo ) );
 	const float sqrtDenom = sVoH + eta * sIoH;
 	const float t = eta / sqrtDenom;
-    return (Spectrum(1.f) - F) * T * fabs(distribution->D(wh) * distribution->G(wo,wi) * t * t * sIoH * sVoH / ( NoV * NoL ));
+    return (Spectrum(1.f) - F) * T * fabs(distribution->D(wh) * distribution->G(wo,wi) * t * t * sIoH * sVoH / NoV );
 }
 
 // sample a direction using importance sampling
