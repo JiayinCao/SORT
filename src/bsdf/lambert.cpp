@@ -25,12 +25,12 @@
 Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
-    return R * INV_PI;
+    return R * INV_PI * AbsCosTheta(wi);
 }
 
 // evaluate bxdf
 Spectrum LambertTransmission::f( const Vector& wo , const Vector& wi ) const{
-    return SameHemiSphere( wo , wi ) ? 0.0f : T * INV_PI;
+    return SameHemiSphere( wo , wi ) ? 0.0f : T * INV_PI * AbsCosTheta(wi);
 }
 
 // sample a direction randomly

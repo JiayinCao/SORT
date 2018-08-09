@@ -66,5 +66,5 @@ Spectrum OrenNayar::f( const Vector& wo , const Vector& wi ) const
 		tanbeta = sintheta_i / abs_cos_theta_i;
 	}
 	
-	return R * INV_PI * ( A + B * dcos * sinalpha * tanbeta );
+	return R * INV_PI * ( A + B * dcos * sinalpha * tanbeta ) * AbsCosTheta(wi);
 }

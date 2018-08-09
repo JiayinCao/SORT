@@ -19,6 +19,7 @@
 
 // include header file
 #include "bxdf.h"
+#include "bsdf.h"
 
 //! @brief FourierBxdfData.
 /**
@@ -154,7 +155,7 @@ public:
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override{
-        return m_data.sample_f( wo , wi , bs , pdf );
+        return m_data.sample_f( wo , wi , bs , pdf ) * AbsCosTheta(wi);
     }
     
     //! @brief Evalute the pdf of an existance direction given the Incident direction.

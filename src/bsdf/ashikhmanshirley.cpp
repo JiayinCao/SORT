@@ -40,7 +40,7 @@ Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
     const float IoH = AbsDot( wi , h );
     const Spectrum specular = ( distribution.D(h) * SchlickFresnel(S, IoH) ) / ( 4.0f * IoH * max( cos_theta_i , cos_theta_o ) ) ;
     
-    return diffuse + specular;
+    return ( diffuse + specular ) * AbsCosTheta(wi);
 }
 
 Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{

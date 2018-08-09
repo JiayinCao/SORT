@@ -34,7 +34,7 @@ Spectrum Phong::f( const Vector& wo , const Vector& wi ) const
         if (alpha > 0.0f)
             ret += S * (power + 2) * pow(alpha, power) * INV_TWOPI;
     }
-    return ret;
+    return ret * AbsCosTheta(wi);
 }
 
 Spectrum Phong::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
