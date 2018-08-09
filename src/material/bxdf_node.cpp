@@ -15,6 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include "managers/memmanager.h"
 #include "bxdf_node.h"
 #include "bsdf/lambert.h"
 #include "bsdf/merl.h"
@@ -23,8 +24,8 @@
 #include "bsdf/fourierbxdf.h"
 #include "bsdf/ashikhmanshirley.h"
 #include "bsdf/phong.h"
-#include "managers/memmanager.h"
 #include "bsdf/bsdf.h"
+#include "bsdf/smoothcoat.h"
 
 IMPLEMENT_CREATOR( AshikhmanShirleyNode );
 IMPLEMENT_CREATOR( PhongNode );
@@ -35,6 +36,7 @@ IMPLEMENT_CREATOR( MicrofacetReflectionNode );
 IMPLEMENT_CREATOR( MicrofacetRefractionNode );
 IMPLEMENT_CREATOR( FourierBxdfNode );
 IMPLEMENT_CREATOR( MerlNode );
+IMPLEMENT_CREATOR( SmoothCoatNode );
 
 // check validation
 bool BxdfNode::CheckValidation()
@@ -226,4 +228,20 @@ void FourierBxdfNode::PostProcess()
     if( fourierBxdfFile.str.empty() == false )
         fourierBxdfData.LoadData( fourierBxdfFile.str );
     BxdfNode::PostProcess();
+}
+
+SmoothCoatNode::SmoothCoatNode()
+{
+    REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , basecolor );
+    REGISTER_MATERIALNODE_PROPERTY( "Thickness" , thickness );
+    REGISTER_MATERIALNODE_PROPERTY( "IOR" , ior );
+}
+
+void SmoothCoatNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+{
+    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    const Spectrum bc = GET_MATERIALNODE_PROPERTY_SPECTRUM(basecolor);
+    const float t = GET_MATERIALNODE_PROPERTY_FLOAT(thickness);
+    const float i = GET_MATERIALNODE_PROPERTY_FLOAT(ior);
+    bsdf->AddBxdf( SORT_MALLOC(SmoothCoat)( bc, t, i, weight, n ) );
 }
