@@ -208,19 +208,21 @@ private:
     FourierBxdfData fourierBxdfData;
 };
 
-// Phong node
-class SmoothCoatNode : public BxdfNode
+// Coat node
+class CoateNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR(SmoothCoatNode, MaterialNode, "SORTNode_BXDF_SmoothCoat");
+    DEFINE_CREATOR(CoateNode, MaterialNode, "SORTNode_BXDF_Coat");
     
     // constructor
-    SmoothCoatNode();
+    CoateNode();
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
     
 private:
     MaterialNodeProperty    basecolor;
     MaterialNodeProperty    thickness;
+    MaterialNodeProperty    roughness;
+    MaterialNodeProperty    sigma;
     MaterialNodeProperty    ior;
 };

@@ -117,7 +117,7 @@ public:
 	FresnelDielectric( float ei , float et ): eta_t(et),eta_i(ei) {}
 
     //! @brief Evaluate the Fresnel term.
-    //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
+    //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal.
     //! @return         Evaluated fresnel value.
 	Spectrum Evaluate( float cosI ) const override{
         return DielectricFresnel( cosI , eta_i , eta_t );

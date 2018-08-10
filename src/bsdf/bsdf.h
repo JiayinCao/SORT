@@ -176,11 +176,29 @@ inline Vector SphericalVec( float sintheta , float costheta , float phi ){
 	return Vector( x , y , z );
 }
 
-inline Vector reflect(Vector v, Vector n){
+inline Vector reflect(const Vector& v, const Vector& n){
     return (2.0f * Dot(v, n)) * n - v;
 }
 
 // an optimized version only works in shading coordinate
-inline Vector reflect(Vector v) {
+inline Vector reflect(const Vector& v) {
     return Vector(-v.x, v.y, -v.z);
+}
+
+//! @param v                    Incident direction. It can come from either inside or outside of the surface.
+//! @param n                    Surface normal.
+//! @param in_eta               Index of refraction inside the surface.
+//! @param ext_eta              Index of refraction outside the surface.
+//! @param inner_reflection     Whether it is a total inner reflection.
+//! @return                     Refracted vector based on Snell's law.
+inline Vector refract(const Vector& v, const Vector& n, float in_eta, float ext_eta, bool& inner_reflection){
+    const float coso = Dot(v, n);
+    const float eta = CosTheta(v) > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
+    const float t = 1.0f - eta * eta * max(0.0f, 1.0f - coso * coso);
+
+    // total inner reflection
+    inner_reflection = (t <= 0.0f);
+    if (inner_reflection)
+        return Vector(0.0f, 0.0f, 0.0f);
+    return -eta * v + (eta * coso - sqrt(t)) * n;
 }

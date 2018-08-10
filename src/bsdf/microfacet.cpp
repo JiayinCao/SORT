@@ -237,22 +237,6 @@ float GGX::G1( const Vector& v ) const
     return 2.0f / ( 1.0f + sqrt( 1.0f + alpha2 * tan_theta_sq ) );
 }
 
-// get refracted ray
-Vector Microfacet::getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const
-{
-	const float coso = Dot( v , n );
-	const float eta = CosTheta(v) > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
-	const float t = 1.0f - eta * eta * max( 0.0f , 1.0f - coso * coso );
-
-	// total inner reflection
-    inner_reflection = (t <= 0.0f);
-	if( inner_reflection )
-		return Vector(0.0f,0.0f,0.0f);
-
-	// get the refracted ray
-	return -eta * v  + ( eta * coso - sqrt(t)) * n;
-}
-
 // evaluate bxdf
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 {
@@ -333,7 +317,7 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 
 	// try to get refracted ray
 	bool total_reflection = false;
-	wi = getRefracted( wo , wh , etaT , etaI , total_reflection );
+	wi = refract( wo , wh , etaT , etaI , total_reflection );
 	if( total_reflection ) return 0.0f;
 
     if( pPdf ) *pPdf = pdf( wo , wi );

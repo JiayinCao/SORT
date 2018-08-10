@@ -18,26 +18,31 @@
 #pragma once
 
 #include "bxdf.h"
+#include "microfacet.h"
 
-//! @brief SmoothCoat BRDF.
+//! @brief Coat BRDF.
 /**
  * 'Arbitrarily Layered Micro-Facet Surfaces'
  * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.160.2363&rep=rep1&type=pdf
  *
- * This BRDF is a simplified version of the above mentioned work. Only one layer of coating is supported and the upper layer is a perfect smooth layer.
+ * This BRDF is a simplified version of the above mentioned work. Only one layer of coating is supported.
+ * The coating layer is hard-coded with Microfacet BRDF model, which is not configurable. However, the underlying layer could be configurable by attaching 
+ * other BXDF. If nothing is attached, Lambert model with white basecolor will be used by default.
  */
-class SmoothCoat : public Bxdf
+class Coat : public Bxdf
 {
 public:
 	//! Constructor
     //! @param basecolor        Direction-hemisphere reflection.
     //! @param thickness        Thickness of the layer.
     //! @param ior              Index of refraction outside the surface where the normal points to.
+    //! @param roughness        Roughness of the coating layer.
     //! @param weight           Weight of the BXDF.
     //! @param n                Normal from normal map.
     //! @param doubleSided      Whether the surface is double sided.
-    SmoothCoat(const Spectrum& basecolor, const float thickness, const float ior, const Spectrum& weight, const Vector& n , bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , basecolor(basecolor), thickness(thickness), ior(ior) {}
+    Coat(const Spectrum& basecolor, const float thickness, const float ior, const float roughness, const Spectrum& sigma , const Spectrum& weight, const Vector& n , bool doubleSided = false)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , basecolor(basecolor), thickness(thickness), ior(ior), sigma(sigma), ggx(roughness, roughness), 
+          fresnel(1.0f,ior), coat_weight( 1.0f ), coat(coat_weight, &fresnel , &ggx , coat_weight , n ) {}
 	
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -53,7 +58,7 @@ public:
     //! @return     The Evaluated BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
     
-    //! @brief Evaluate the pdf of an existance direction given the Incident direction.
+    //! @brief Evaluate the pdf of an exitant direction given the Incident direction.
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
@@ -63,4 +68,10 @@ private:
     const Spectrum basecolor ;  /**< Base color of the bottom layer. */
     const float thickness ;     /**< Thickness of the layer. */
     const float ior ;           /**< Index of refraction out side the surface where the normal points. */
+    const Spectrum sigma;       /**< Sigma of the BRDF model. */
+
+    const GGX                   ggx;     /**< Using GGX as default NDF. */
+    const FresnelDielectric     fresnel; /**< Fresnel term. */
+    const Spectrum              coat_weight; /**< Default weight for coated layer. */
+    const MicroFacetReflection  coat;    /**< Using Microfacet as coated layer. */
 };
