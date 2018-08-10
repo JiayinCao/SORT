@@ -146,21 +146,6 @@ public:
 
 protected:
 	const MicroFacetDistribution* distribution = nullptr; /**< Normal distribution of micro facets. */
-
-	//! @brief Get reflected direction based on incident direction and normal.
-    //! @param v    Incident direction.
-    //! @param n    Normal of the surface.
-    //! @return     Reflected direction.
-	inline Vector	getReflected( Vector v , Vector n ) const;
-
-	//! @brief Get refracted direction based on incident direction, normal and index of refraction.
-    //! @param v        Incident direction. It can come from either inside or outside of the surface.
-    //! @param n        Surface normal.
-    //! @param in_eta   Index of refraction inside the surface.
-    //! @param ext_eta  Index of refraction outside the surface.
-    //! @param inner_reflection     Whether it is a total innner relection.
-    //! @return         Refracted vector based on Snell's law.
-	inline Vector	getRefracted( Vector v , Vector n , float in_eta , float ext_eta , bool& inner_reflection ) const;
 };
 
 //! @brief Microfacet Reflection BRDF.

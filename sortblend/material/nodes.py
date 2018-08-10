@@ -389,11 +389,13 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
 
 @SORTPatternGraph.register_node('BXDFs')
-class SORTNode_BXDF_SmoothCoat(SORTShadingNode_BXDF):
-    bl_label = 'Smooth Coat'
-    bl_idname = 'SORTNode_BXDF_SmoothCoat'
-    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'IOR' } , 
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Thickness' } , 
+class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
+    bl_label = 'Coat'
+    bl_idname = 'SORTNode_BXDF_Coat'
+    property_list = [ { 'class' : properties.SORTNodePropertyFloat , 'name' : 'IOR' , 'default' : 1.1 , 'min' : 1.0 , 'max' : 10.0 } , 
+                      { 'class' : properties.SORTNodePropertyFloat , 'name' : 'Thickness' , 'default' : 1.0 , 'min' : 0.1 , 'max' : 10.0 } , 
+                      { 'class' : properties.SORTNodePropertyFloatVector , 'name' : 'Sigma' , 'default' : (0.0, 0.0, 0.0) , 'min' : 0.0 , 'max' : 256.0 }, # random maximum value for now
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'default' : 0.0 } , 
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
 
 @SORTPatternGraph.register_node('BXDFs')

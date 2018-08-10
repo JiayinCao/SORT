@@ -20,6 +20,7 @@
 
 #include "sort.h"
 #include "utility/define.h"
+#include <math.h>
 
 ///////////////////////////////////////////////////////////////////
 // definition of rgb spectrum
@@ -106,6 +107,10 @@ public:
         m_r = LinearToGamma(m_r);
         m_g = LinearToGamma(m_g);
         m_b = LinearToGamma(m_b);
+    }
+
+    RGBSpectrum Exp() const {
+        return RGBSpectrum(::exp(m_r), ::exp(m_g), ::exp(m_b));
     }
 
 // private field

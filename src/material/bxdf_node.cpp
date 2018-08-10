@@ -25,7 +25,7 @@
 #include "bsdf/ashikhmanshirley.h"
 #include "bsdf/phong.h"
 #include "bsdf/bsdf.h"
-#include "bsdf/smoothcoat.h"
+#include "bsdf/coat.h"
 
 IMPLEMENT_CREATOR( AshikhmanShirleyNode );
 IMPLEMENT_CREATOR( PhongNode );
@@ -36,7 +36,7 @@ IMPLEMENT_CREATOR( MicrofacetReflectionNode );
 IMPLEMENT_CREATOR( MicrofacetRefractionNode );
 IMPLEMENT_CREATOR( FourierBxdfNode );
 IMPLEMENT_CREATOR( MerlNode );
-IMPLEMENT_CREATOR( SmoothCoatNode );
+IMPLEMENT_CREATOR( CoateNode );
 
 // check validation
 bool BxdfNode::CheckValidation()
@@ -230,18 +230,22 @@ void FourierBxdfNode::PostProcess()
     BxdfNode::PostProcess();
 }
 
-SmoothCoatNode::SmoothCoatNode()
+CoateNode::CoateNode()
 {
     REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , basecolor );
     REGISTER_MATERIALNODE_PROPERTY( "Thickness" , thickness );
+    REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
+    REGISTER_MATERIALNODE_PROPERTY( "Sigma" , sigma );
     REGISTER_MATERIALNODE_PROPERTY( "IOR" , ior );
 }
 
-void SmoothCoatNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+void CoateNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
     const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
     const Spectrum bc = GET_MATERIALNODE_PROPERTY_SPECTRUM(basecolor);
+    const Spectrum s = GET_MATERIALNODE_PROPERTY_SPECTRUM(sigma);
     const float t = GET_MATERIALNODE_PROPERTY_FLOAT(thickness);
+    const float r = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
     const float i = GET_MATERIALNODE_PROPERTY_FLOAT(ior);
-    bsdf->AddBxdf( SORT_MALLOC(SmoothCoat)( bc, t, i, weight, n ) );
+    bsdf->AddBxdf( SORT_MALLOC(Coat)( bc, t, i, r, s, weight, n ) );
 }

@@ -19,7 +19,7 @@
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
 
-Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_weight(w), m_type(type), doubleSided(doubleSided){
+Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_weight(w), m_type(type), gnormal( Vector( 0.0f , 1.0f , 0.0f ) ), doubleSided(doubleSided){
     static const Vector up( 0.0f , 1.0f , 0.0f );
     if( n == up ) return;
     
