@@ -44,15 +44,15 @@ public:
     //! Get weight of this BXDF
     const Spectrum& GetWeight() const { return m_weight; }
     
-    inline Spectrum F( const Vector& wo , const Vector& wi ) const{
+    virtual Spectrum F( const Vector& wo , const Vector& wi ) const{
         return f( bsdfToBxdf(wo) , bsdfToBxdf(wi) );
     }
-    inline Spectrum Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
+    virtual Spectrum Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
         Spectrum res = sample_f( bsdfToBxdf(wo) , wi , bs , pdf );
         wi = bxdfToBsdf(wi);
         return res;
     }
-    inline float Pdf( const Vector& wo , const Vector& wi ) const{
+    virtual float Pdf( const Vector& wo , const Vector& wi ) const{
         return pdf( bsdfToBxdf(wo) , bsdfToBxdf(wi) );
     }
     

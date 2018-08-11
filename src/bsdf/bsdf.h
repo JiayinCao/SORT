@@ -34,7 +34,8 @@ class	Bsdf
 public:
 	//! @brief Constructor taking intersection data.
     //! @param intersection     Intersection data of the point to be Evaluated.
-	Bsdf( const Intersection* intersection );
+    //! @param sub_bsdf         Sub-bsdf doesn't transform the light again.
+	Bsdf( const Intersection* intersection , bool sub_bsdf = false );
 
 	//! @brief Get the number of components based on the type.
     //! @param type     The specific type to be checked.
@@ -80,14 +81,17 @@ private:
     Vector nn;  /**< Normal at the point to be Evaluated. */
     Vector sn;  /**< Bi-tangent at the point to be evaluated. */
     Vector tn;  /**< Tangent at the point to be Evaluated. */
+    
+    const bool  m_SubBSDF;      /**< SubBSDF doesn't transform light direction again. */
 
 	// intersection for the bsdf
     const Intersection intersect;   /**<    Intersection information of the point to be Evaluated. */
 
     //! @brief Transform a vector from world coordinate to shading coordinate.
-    //! @param v    A vector in world coordinate.
-    //! @return     corresponding vector in shading coordinate.
-	Vector worldToLocal( const Vector& v ) const;
+    //! @param v        A vector in world coordinate.
+    //! @param force    Force transform regardless whether this bsdf is sub-bsdf or not.
+    //! @return         corresponding vector in shading coordinate.
+	Vector worldToLocal( const Vector& v , bool force = false ) const;
     
     //! @brief Transform a vector from shading coordinate to world coordinate.
     //! @param v    A vector in shading coordinate.

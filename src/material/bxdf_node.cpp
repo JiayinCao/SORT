@@ -232,20 +232,29 @@ void FourierBxdfNode::PostProcess()
 
 CoateNode::CoateNode()
 {
-    REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , basecolor );
     REGISTER_MATERIALNODE_PROPERTY( "Thickness" , thickness );
     REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
     REGISTER_MATERIALNODE_PROPERTY( "Sigma" , sigma );
     REGISTER_MATERIALNODE_PROPERTY( "IOR" , ior );
+    REGISTER_MATERIALNODE_PROPERTY( "Surface" , bxdf );
 }
 
 void CoateNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
     const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const Spectrum bc = GET_MATERIALNODE_PROPERTY_SPECTRUM(basecolor);
     const Spectrum s = GET_MATERIALNODE_PROPERTY_SPECTRUM(sigma);
     const float t = GET_MATERIALNODE_PROPERTY_FLOAT(thickness);
     const float r = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
     const float i = GET_MATERIALNODE_PROPERTY_FLOAT(ior);
-    bsdf->AddBxdf( SORT_MALLOC(Coat)( bc, t, i, r, s, weight, n ) );
+    
+    Bsdf* bottom = SORT_MALLOC(Bsdf)( bsdf->GetIntersection() , true );
+    bxdf.UpdateBsdf( bottom , weight );
+    bsdf->AddBxdf( SORT_MALLOC(Coat)( t, i, r, s, bottom, weight, n ) );
+}
+
+// check validation
+bool CoateNode::CheckValidation()
+{
+    // Temporary solution, will provide a much better one later
+    return true;
 }
