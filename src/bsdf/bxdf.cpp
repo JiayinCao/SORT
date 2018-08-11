@@ -24,9 +24,9 @@ Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_w
     if( n == up ) return;
     
     normal_map_applied = true;
-    nn = n;
+    nn = Normalize(n);
     tn = Normalize(Cross( nn , Vector( 1.0f , 0.0f , 0.0f ) ));
-    sn = Cross( tn , nn );
+    sn = Normalize(Cross( tn , nn ));
 }
 
 // sample a direction randomly

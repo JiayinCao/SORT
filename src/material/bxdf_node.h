@@ -219,10 +219,13 @@ public:
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
     
+    // check validation
+    bool CheckValidation() override;
+    
 private:
-    MaterialNodeProperty    basecolor;
     MaterialNodeProperty    thickness;
     MaterialNodeProperty    roughness;
     MaterialNodeProperty    sigma;
     MaterialNodeProperty    ior;
+    MaterialNodeProperty    bxdf;
 };
