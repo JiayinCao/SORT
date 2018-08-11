@@ -110,7 +110,7 @@ public:
     }
 
     RGBSpectrum Exp() const {
-        return RGBSpectrum(::exp(m_r), ::exp(m_g), ::exp(m_b));
+        return RGBSpectrum((float)::exp(m_r), (float)::exp(m_g), (float)::exp(m_b));
     }
 
 // private field
