@@ -188,6 +188,10 @@ class SORTShadingNode(bpy.types.Node):
         for _ in do_mro(self, 'register_prop'):
             pass
 
+    # whether the node is a bxdf node
+    def isBxdfNode(self):
+        return False
+
 # Base class for SORT BXDF Node
 class SORTShadingNode_BXDF(SORTShadingNode):
     bl_label = 'ShadingNode'
@@ -218,6 +222,10 @@ class SORTShadingNode_BXDF(SORTShadingNode):
                 t = self.inputs[prop['name']].export_pbrt_socket_type()
                 v = self.inputs[prop['name']].export_socket_value()
                 output_pbrt_prop( n , t , v )
+
+    # whether the node is a bxdf node
+    def isBxdfNode(self):
+        return True
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Material Nodes for SORT
@@ -392,7 +400,7 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
 class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
     bl_label = 'Coat'
     bl_idname = 'SORTNode_BXDF_Coat'
-    property_list = [ { 'class' : properties.SORTNodePropertyFloat , 'name' : 'IOR' , 'default' : 1.1 , 'min' : 1.0 , 'max' : 10.0 } , 
+    property_list = [ { 'class' : properties.SORTNodePropertyFloat , 'name' : 'IOR' , 'default' : 1.5 , 'min' : 1.0 , 'max' : 10.0 } , 
                       { 'class' : properties.SORTNodePropertyFloat , 'name' : 'Thickness' , 'default' : 1.0 , 'min' : 0.1 , 'max' : 10.0 } , 
                       { 'class' : properties.SORTNodePropertyFloatVector , 'name' : 'Sigma' , 'default' : (0.0, 0.0, 0.0) , 'min' : 0.0 , 'max' : 256.0 }, # random maximum value for now
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'default' : 0.0 } , 
