@@ -26,21 +26,6 @@ IMPLEMENT_CREATOR( GammaToLinearNode );
 IMPLEMENT_CREATOR( LinearToGammaNode );
 IMPLEMENT_CREATOR( NormalDecoderNode );
 
-bool OperatorNode::CheckValidation()
-{
-    m_node_valid = MaterialNode::CheckValidation();
-    
-    for( auto input : m_props ){
-        auto type = input.second->node ? input.second->node->getNodeType() : MAT_NODE_CONSTANT;
-        if( type & MAT_NODE_BXDF ){
-            m_node_valid = false;
-            break;
-        }
-    }
-    
-    return m_node_valid;
-}
-
 // Adding node
 AddNode::AddNode()
 {
@@ -73,19 +58,6 @@ LerpNode::LerpNode()
 	REGISTER_MATERIALNODE_PROPERTY( "Factor" , factor );
 }
 
-// update bsdf
-void LerpNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
-	if( weight.IsBlack() )
-		return;
-
-    const float f = GET_MATERIALNODE_PROPERTY_FLOAT(factor);
-	if( src0.node )
-		src0.node->UpdateBSDF( bsdf, weight * ( 1.0f - f ) );
-	if( src1.node )
-		src1.node->UpdateBSDF( bsdf, weight * f );
-}
-
 // get property value
 MaterialPropertyValue LerpNode::GetNodeValue( Bsdf* bsdf )
 {
@@ -101,20 +73,6 @@ BlendNode::BlendNode()
 	REGISTER_MATERIALNODE_PROPERTY( "Factor2" , factor1 );
 }
 
-// update bsdf
-void BlendNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
-	if( weight.IsBlack() )
-		return;
-
-    const float f0 = GET_MATERIALNODE_PROPERTY_FLOAT(factor0);
-    const float f1 = GET_MATERIALNODE_PROPERTY_FLOAT(factor1);
-	if( src0.node )
-		src0.node->UpdateBSDF( bsdf, weight * f0 );
-	if( src1.node )
-		src1.node->UpdateBSDF( bsdf, weight * f1 );
-}
-
 // get property value
 MaterialPropertyValue BlendNode::GetNodeValue( Bsdf* bsdf )
 {
@@ -127,21 +85,6 @@ MutiplyNode::MutiplyNode()
 {
 	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
 	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
-}
-
-// update bsdf
-void MutiplyNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
-	if( weight.IsBlack() )
-		return;
-
-	MAT_NODE_TYPE type0 = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
-	MAT_NODE_TYPE type1 = (src1.node)?src1.node->getNodeType():MAT_NODE_CONSTANT;
-
-	if( type0 & MAT_NODE_BXDF )
-		src0.node->UpdateBSDF( bsdf , weight * GET_MATERIALNODE_PROPERTY_FLOAT(src1) );
-	else if( type1 & MAT_NODE_BXDF )
-		src1.node->UpdateBSDF( bsdf , weight * GET_MATERIALNODE_PROPERTY_FLOAT(src0) );
 }
 
 // get property value

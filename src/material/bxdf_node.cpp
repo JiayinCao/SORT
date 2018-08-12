@@ -36,23 +36,7 @@ IMPLEMENT_CREATOR( MicrofacetReflectionNode );
 IMPLEMENT_CREATOR( MicrofacetRefractionNode );
 IMPLEMENT_CREATOR( FourierBxdfNode );
 IMPLEMENT_CREATOR( MerlNode );
-IMPLEMENT_CREATOR( CoateNode );
-
-// check validation
-bool BxdfNode::CheckValidation()
-{
-    for( auto prop : m_props ){
-        MaterialNode* node = prop.second->node;
-        if( node ){
-            MAT_NODE_TYPE sub_type = node->getNodeType();
-            
-            // attaching bxdf result as an input of another bxdf doesn't make any sense at all
-            if( sub_type & MAT_NODE_BXDF )
-                return false;
-        }
-    }
-    return MaterialNode::CheckValidation();
-}
+IMPLEMENT_CREATOR( CoatNode );
 
 LambertNode::LambertNode()
 {
@@ -230,7 +214,7 @@ void FourierBxdfNode::PostProcess()
     BxdfNode::PostProcess();
 }
 
-CoateNode::CoateNode()
+CoatNode::CoatNode()
 {
     REGISTER_MATERIALNODE_PROPERTY( "Thickness" , thickness );
     REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
@@ -239,7 +223,7 @@ CoateNode::CoateNode()
     REGISTER_MATERIALNODE_PROPERTY( "Surface" , bxdf );
 }
 
-void CoateNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
+void CoatNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
     const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
     const Spectrum s = GET_MATERIALNODE_PROPERTY_SPECTRUM(sigma);
@@ -250,11 +234,4 @@ void CoateNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     Bsdf* bottom = SORT_MALLOC(Bsdf)( bsdf->GetIntersection() , true );
     bxdf.UpdateBsdf( bottom , weight );
     bsdf->AddBxdf( SORT_MALLOC(Coat)( t, i, r, s, bottom, weight, n ) );
-}
-
-// check validation
-bool CoateNode::CheckValidation()
-{
-    // Temporary solution, will provide a much better one later
-    return true;
 }

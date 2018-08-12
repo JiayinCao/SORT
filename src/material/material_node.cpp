@@ -65,16 +65,15 @@ void MaterialNodePropertyString::SetNodeProperty( const string& prop )
 }
 
 // parse property or socket
-void MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
+bool MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 {
 	TiXmlElement* prop = element->FirstChildElement( "Property" );
 	while(prop)
 	{
 		string prop_name = prop->Attribute( "name" );
-		string prop_type = prop->Attribute( "type" );
 
 		MaterialNodeProperty* node_prop = node->getProperty( prop_name );
-		if( node_prop == 0 )
+		if( node_prop == nullptr )
 		{
 			// output error log
             slog( WARNING , MATERIAL , stringFormat("Node property %s is ignored." , prop_name.c_str() ) );
@@ -87,9 +86,15 @@ void MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 		}
 
 		// add socket input
-		if( prop_type == "node" )
+		if( prop->Attribute( "node" ) )
 		{
 			node_prop->node = ParseNode( prop , node );
+            
+            string type = prop->Attribute( "type" );
+            if( ( type == "bxdf" && !node_prop->node->IsBxdfNode() ) || ( type != "bxdf" && node_prop->node->IsBxdfNode() ) ){
+                m_node_valid = false;
+                return false;
+            }
 		}else
 		{
 			string node_value = prop->Attribute( "value" );
@@ -99,6 +104,8 @@ void MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 		// get next property
 		prop = prop->NextSiblingElement( "Property" );
 	}
+    
+    return true;
 }
 
 // parse a new node
@@ -114,40 +121,9 @@ MaterialNode* MaterialNode::ParseNode( TiXmlElement* element , MaterialNode* nod
 	}
 
 	// parse node properties
-	ParseProperty( element , mat_node );
-
+	m_node_valid = ParseProperty( element , mat_node );
+    
 	return mat_node; 
-}
-
-// check validation
-bool MaterialNode::CheckValidation()
-{
-	// get subtree node type
-	getNodeType();
-
-	m_node_valid = true;
-    for( auto it : m_props ){
-		if( it.second->node )
-			m_node_valid &= it.second->node->CheckValidation();
-	}
-
-	return m_node_valid;
-}
-
-// get sub tree node type
-MAT_NODE_TYPE MaterialNode::getNodeType()
-{
-	MAT_NODE_TYPE type = MAT_NODE_NONE;
-
-    for( auto it : m_props ){
-		if( it.second->node )
-			type |= it.second->node->getNodeType();
-	}
-
-	// setup sub-tree type
-	subtree_node_type = type;
-
-	return type;
 }
 
 // post process
@@ -195,7 +171,7 @@ void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( !m_node_valid )
 	{
         static const Vector up( 0.0f , 1.0f , 0.0f );
-		static const Spectrum default_spectrum( 0.3f , 0.0f , 0.0f );
+		static const Spectrum default_spectrum( 0.1f , 0.1f , 0.1f );
 		const Lambert* lambert = SORT_MALLOC(Lambert)( default_spectrum , weight , up );
 		bsdf->AddBxdf( lambert );
 		return;
@@ -203,26 +179,4 @@ void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 	if( output.node )
 		output.node->UpdateBSDF( bsdf );
-}
-
-// check validation
-bool OutputNode::CheckValidation()
-{
-	// it is invalid if there is no node attached
-	if( output.node == 0 )
-		return false;
-
-	// get node type
-	MAT_NODE_TYPE type = output.node->getNodeType();
-
-	// make sure there is bxdf attached !!
-	if( ( output.node == 0 ) || !(type & MAT_NODE_BXDF) )
-	{
-		m_node_valid = false;
-		return false;
-	}
-
-	m_node_valid = MaterialNode::CheckValidation();
-
-	return m_node_valid;
 }

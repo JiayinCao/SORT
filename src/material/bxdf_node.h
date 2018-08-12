@@ -29,11 +29,8 @@ protected:
     // constructor
     BxdfNode() { REGISTER_MATERIALNODE_PROPERTY( "Normal" , normal ); }
     
-	// get node type
-    MAT_NODE_TYPE getNodeType() override { return MAT_NODE_BXDF | MaterialNode::getNodeType(); }
-
-	// check validation
-    bool CheckValidation() override;
+    // whether the node is a bxdf node
+    bool IsBxdfNode() const override { return true; }
     
     // normal map if provided
     MaterialNodeProperty    normal;
@@ -209,18 +206,15 @@ private:
 };
 
 // Coat node
-class CoateNode : public BxdfNode
+class CoatNode : public BxdfNode
 {
 public:
-    DEFINE_CREATOR(CoateNode, MaterialNode, "SORTNode_BXDF_Coat");
+    DEFINE_CREATOR(CoatNode, MaterialNode, "SORTNode_BXDF_Coat");
     
     // constructor
-    CoateNode();
+    CoatNode();
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
-    
-    // check validation
-    bool CheckValidation() override;
     
 private:
     MaterialNodeProperty    thickness;
