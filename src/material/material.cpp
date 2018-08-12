@@ -35,8 +35,8 @@ void Material::ParseMaterial( TiXmlElement* element )
 	root.ParseProperty( element , &root );
 
 	// check validation
-	if( !root.CheckValidation() )
-        slog( WARNING , MATERIAL , stringFormat( "Material %s is not valid , a default material will be used." , name.c_str() ) );
+	if( !root.IsNodeValid() )
+        slog( WARNING , MATERIAL , stringFormat( "Material '%s' is not valid , a default material will be used." , name.c_str() ) );
 	else
 		root.PostProcess();
 }

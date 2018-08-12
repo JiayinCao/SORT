@@ -25,9 +25,6 @@
 // constant node
 class ConstantNode : public MaterialNode
 {
-public:
-    // get node type
-    MAT_NODE_TYPE getNodeType() override { return MAT_NODE_CONSTANT | MaterialNode::getNodeType(); }
 };
 
 // Grid texture Node
@@ -44,9 +41,6 @@ public:
 
 	// post process
 	void PostProcess() override;
-
-	// check validation
-	bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	src0;
@@ -65,14 +59,11 @@ public:
 	CheckBoxTexNode();
 
 	// get property value
-	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
 	// post process
-	virtual void PostProcess();
-
-	// check validation
-	virtual bool CheckValidation();
-
+    void PostProcess() override;
+    
 private:
 	MaterialNodeProperty	src0;
 	MaterialNodeProperty	src1;
@@ -90,10 +81,10 @@ public:
 	ImageTexNode();
 
 	// get property value
-	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
+    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
 	// post process
-	virtual void PostProcess();
+    void PostProcess() override;
 
 private:
 	MaterialNodePropertyString	filename;
@@ -111,10 +102,7 @@ public:
 	ConstantColorNode();
 
 	// get property value
-	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf );
-
-	// check validation
-	virtual bool CheckValidation();
+    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
 private:
 	MaterialNodeProperty	src;

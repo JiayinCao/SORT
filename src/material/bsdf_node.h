@@ -58,8 +58,6 @@ public:
     LayeredMaterialNode();
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-    // check validation
-    bool CheckValidation() override;
     
 private:
     MaterialNodeProperty    bxdfs[MAX_BXDF_COUNT];

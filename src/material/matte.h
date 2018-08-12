@@ -35,7 +35,6 @@ public:
 	
 // private field
 private:
-	// a scaled color , default is ( 0.1f , 0.1f , 0.1f )
     Spectrum m_color = Spectrum( 0.1f , 0.1f , 0.1f );
 };
 

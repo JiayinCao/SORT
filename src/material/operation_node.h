@@ -21,12 +21,6 @@
 
 class OperatorNode : public MaterialNode
 {
-public:
-	// get node type
-	virtual MAT_NODE_TYPE getNodeType() override { return MAT_NODE_OPERATOR | MaterialNode::getNodeType(); }
-    
-    // check validation
-    bool CheckValidation() override;
 };
 
 // Adding node
@@ -62,7 +56,6 @@ private:
     MaterialNodeProperty    src;
 };
 
-// To be changed
 // Lerp node
 class LerpNode : public OperatorNode
 {
@@ -72,9 +65,6 @@ public:
 	// constructor
 	LerpNode();
 	
-	// update bsdf
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-
 	// get property value
     MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
@@ -93,9 +83,6 @@ public:
 	// constructor
 	BlendNode();
 	
-	// update bsdf
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-
 	// get property value
     MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 
@@ -114,10 +101,7 @@ public:
 
 	// constructor
 	MutiplyNode();
-	
-	// update bsdf
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-
+    
 	// get property value
     MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
 

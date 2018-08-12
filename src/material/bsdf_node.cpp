@@ -72,29 +72,6 @@ LayeredMaterialNode::LayeredMaterialNode(){
     }
 }
 
-bool LayeredMaterialNode::CheckValidation()
-{
-    for( auto bxdf_prop : bxdfs ){
-        if( bxdf_prop.node ){
-            // Only bxdf nodes are allowed to be connected to Layered Bxdf node
-            MAT_NODE_TYPE sub_type = bxdf_prop.node->getNodeType();
-            if( (sub_type & MAT_NODE_BXDF) == 0 )
-                return false;
-        }
-    }
-    
-    for( auto weight_prop : weights ){
-        if( weight_prop.node ){
-            // Only constant node is allowed to be connected with Layered Bxdf weight node
-            MAT_NODE_TYPE sub_type = weight_prop.node->getNodeType();
-            if( (sub_type & MAT_NODE_CONSTANT) == 0 )
-                return false;
-        }
-    }
-    
-    return MaterialNode::CheckValidation();
-}
-
 void LayeredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
     for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i )
