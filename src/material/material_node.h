@@ -28,17 +28,6 @@
 class Bsdf;
 class MaterialNode;
 class TiXmlElement;
-class Fresnel;
-class MicroFacetDistribution;
-class VisTerm;
-
-#define MAT_NODE_TYPE unsigned int
-#define MAT_NODE_CONSTANT   0x1
-#define MAT_NODE_INPUT      0x2
-#define MAT_NODE_BXDF       0x4
-#define MAT_NODE_OPERATOR   0x8
-#define MAT_NODE_OUTPUT     0x10
-#define MAT_NODE_NONE       0x0
 
 typedef Vector4<float> MaterialPropertyValue;
 
@@ -87,33 +76,28 @@ public:
 class MaterialNode
 {
 public:
-	MaterialNode(){
-		subtree_node_type = MAT_NODE_NONE;
-		m_node_valid = true;
-		m_post_processed = false;
-	}
 	virtual ~MaterialNode();
 
 	// update bsdf
 	virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
 
 	// parse property or socket
-	virtual void ParseProperty( TiXmlElement* element , MaterialNode* node );
+    bool ParseProperty( TiXmlElement* element , MaterialNode* node );
 
 	// parse a new node
-	virtual MaterialNode* ParseNode( TiXmlElement* element , MaterialNode* node );
+    MaterialNode* ParseNode( TiXmlElement* element , MaterialNode* node );
 
 	// get property value, this should never be called
 	virtual MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) { return 0.0f; }
 
 	// post process
 	virtual void PostProcess();
-
-	// check validation
-	virtual bool CheckValidation();
-
-	// get node type
-	virtual MAT_NODE_TYPE getNodeType();
+    
+    // whether the node is a bxdf node
+    virtual bool IsBxdfNode() const { return false; }
+    
+    // whether the node is valid
+    inline bool IsNodeValid() const { return m_node_valid; }
 
 protected:
 	// node properties
@@ -122,14 +106,11 @@ protected:
 	// get node property
 	MaterialNodeProperty*	getProperty( const string& name );
 
-	// node type of this sub-tree
-	MAT_NODE_TYPE subtree_node_type;
-
 	// valid node
-	bool m_node_valid;
+    bool m_node_valid = true;
 
 	// already post processed
-	bool m_post_processed;
+	bool m_post_processed = false;
 };
 
 // Mateiral output node
@@ -140,12 +121,6 @@ public:
 
 	// update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-
-	// get node type
-    MAT_NODE_TYPE getNodeType() override { return MAT_NODE_OUTPUT | MaterialNode::getNodeType(); }
-
-	// check validation
-    bool CheckValidation() override;
 
 private:
 	MaterialNodeProperty	output;

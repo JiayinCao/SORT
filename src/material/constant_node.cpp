@@ -50,18 +50,6 @@ void GridTexNode::PostProcess()
 	MaterialNode::PostProcess();
 }
 
-// check validation
-bool GridTexNode::CheckValidation()
-{
-	m_node_valid = MaterialNode::CheckValidation();
-	
-	MAT_NODE_TYPE type = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
-	if( type & MAT_NODE_BXDF )
-		m_node_valid = false;
-
-	return m_node_valid;
-}
-
 CheckBoxTexNode::CheckBoxTexNode()
 {
 	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
@@ -86,18 +74,6 @@ void CheckBoxTexNode::PostProcess()
 	checkbox_tex.SetCheckBoxColor( src0.GetPropertyValue(0).ToSpectrum() , src1.GetPropertyValue(0).ToSpectrum() );
 
 	MaterialNode::PostProcess();
-}
-
-// check validation
-bool CheckBoxTexNode::CheckValidation()
-{
-	m_node_valid = MaterialNode::CheckValidation();
-	
-	MAT_NODE_TYPE type = (src0.node)?src0.node->getNodeType():MAT_NODE_CONSTANT;
-	if( type & MAT_NODE_BXDF )
-		m_node_valid = false;
-
-	return m_node_valid;
 }
 
 ImageTexNode::ImageTexNode()
@@ -130,16 +106,4 @@ ConstantColorNode::ConstantColorNode(){
 // get property value
 MaterialPropertyValue ConstantColorNode::GetNodeValue( Bsdf* bsdf ){
 	return GET_MATERIALNODE_PROPERTY(src);
-}
-
-// check validation
-bool ConstantColorNode::CheckValidation()
-{
-	m_node_valid = MaterialNode::CheckValidation();
-
-	MAT_NODE_TYPE type = (src.node)?src.node->getNodeType():MAT_NODE_CONSTANT;
-	if( type & MAT_NODE_BXDF )
-		m_node_valid = false;
-
-	return m_node_valid;
 }
