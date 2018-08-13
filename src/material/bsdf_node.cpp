@@ -16,12 +16,13 @@
  */
 
 #include "bsdf_node.h"
+#include "managers/memmanager.h"
 #include "bsdf/lambert.h"
 #include "bsdf/merl.h"
 #include "bsdf/orennayar.h"
 #include "bsdf/microfacet.h"
 #include "bsdf/disney.h"
-#include "managers/memmanager.h"
+#include "bsdf/dielectric.h"
 #include "bsdf/bsdf.h"
 
 IMPLEMENT_CREATOR( DisneyPrincipleNode );
@@ -191,14 +192,8 @@ void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     const Spectrum t = GET_MATERIALNODE_PROPERTY_SPECTRUM(transmittance);
     if( r.IsBlack() && t.IsBlack() ) return;
     
-    const MicroFacetDistribution* dist = SORT_MALLOC(GGX)(roughU, roughV);   // GGX
-    if( !r.IsBlack() ){
-        const Fresnel* fresnel = SORT_MALLOC( FresnelDielectric )( 1.0f , 1.5f );
-        // This is one of the rare cases where there is double faces for perfect inner reflection.
-        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( r , fresnel , dist , weight , n , true ));
-    }
-    if( !t.IsBlack() )
-        bsdf->AddBxdf(SORT_MALLOC(MicroFacetRefraction)( t , dist , 1.0f , 1.5f , weight , n ));
+    const MicroFacetDistribution* dist = SORT_MALLOC(GGX)(roughU, roughV);
+    bsdf->AddBxdf(SORT_MALLOC(Dielectric)(r, t, dist, 1.0f, 1.5f, weight, n));
 }
 
 MirrorMaterialNode::MirrorMaterialNode(){
