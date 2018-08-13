@@ -18,6 +18,7 @@
 #include "microfacet.h"
 #include "bsdf.h"
 #include "sampler/sample.h"
+#include <cmath>
 
 // constructor
 Blinn::Blinn( float roughnessU , float roughnessV )
