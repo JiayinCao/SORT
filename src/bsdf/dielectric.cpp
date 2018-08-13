@@ -26,23 +26,29 @@ Spectrum Dielectric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     const float fr = fresnel.Evaluate(CosTheta(wo)).GetIntensity();
     const float r = fr * R.GetIntensity();
     const float t = ( 1.0f - fr ) * T.GetIntensity();
-    sAssertMsg(r + t > 0.0f, MATERIAL, "Divided by 0 in Dielectric BXDF.");
+    // comment it for now because there are invalid data in tangent space
+    if (isnan(fr)) return 0.0f;
+    //sAssertMsg(r + t > 0.0f, MATERIAL, "Divided by 0 in Dielectric BXDF.");
     const float spec_Ratio = r / (r + t);
 
+    Spectrum ret;
     BsdfSample new_bs(true);
-    if (bs.u < spec_Ratio)
-        mf_reflect.sample_f(wo, wi, new_bs, pPdf);
+    if (bs.u < spec_Ratio || spec_Ratio == 1.0f)
+        ret = mf_reflect.sample_f(wo, wi, new_bs, pPdf);
     else
-        mf_refract.sample_f(wo, wi, new_bs, pPdf);
+        ret = mf_refract.sample_f(wo, wi, new_bs, pPdf);
     if (pPdf) *pPdf = pdf(wo, wi);
-    return f(wo, wi);
+    return ret;
 }
 
 float Dielectric::pdf(const Vector& wo, const Vector& wi) const {
     const float fr = fresnel.Evaluate(CosTheta(wo)).GetIntensity();
     const float r = fr * R.GetIntensity();
     const float t = (1.0f - fr) * T.GetIntensity();
-    sAssertMsg(r + t > 0.0f, MATERIAL, "Divided by 0 in Dielectric BXDF.");
+    // comment it for now because there are invalid data in tangent space
+    if (isnan(fr))
+        return 0.0f;
+    //sAssertMsg(r + t > 0.0f, MATERIAL, "Divided by 0 in Dielectric BXDF.");
     const float spec_Ratio = r / (r + t);
 
     const float pdf_refract = mf_refract.pdf(wo, wi);
