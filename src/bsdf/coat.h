@@ -28,7 +28,7 @@
  *
  * This BRDF is a simplified version of the above mentioned work. Only one layer of coating is supported.
  * The coating layer is hard-coded with Microfacet BRDF model, which is not configurable. However, the underlying layer could be configurable by attaching 
- * other BXDF. If nothing is attached, a 'null' material, which is totally based will be at the bottome.
+ * other BXDF. If nothing is attached, a 'null' material, which is totally based will be at the bottom.
  */
 class Coat : public Bxdf
 {
@@ -37,7 +37,7 @@ public:
     //! @param thickness        Thickness of the layer.
     //! @param ior              Index of refraction outside the surface where the normal points to.
     //! @param roughness        Roughness of the coating layer.
-    //! @param sigma            Abosorption coefficient.
+    //! @param sigma            Absorption coefficient.
     //! @param bottom           Bottom layer BSDF.
     //! @param weight           Weight of the BXDF.
     //! @param n                Normal from normal map.
@@ -53,7 +53,7 @@ public:
     Spectrum F( const Vector& wo , const Vector& wi ) const override;
     
 	
-    //! @brief Importance sampling for the fresnel brdf.
+    //! @brief Importance sampling for the fresnel BRDF.
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
