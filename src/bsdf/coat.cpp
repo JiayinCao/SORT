@@ -19,8 +19,6 @@
 #include "coat.h"
 #include "bsdf.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
-#include "fresnel.h"
 
 Spectrum Coat::F( const Vector& wo , const Vector& wi ) const
 {
@@ -36,8 +34,8 @@ Spectrum Coat::F( const Vector& wo , const Vector& wi ) const
         const Spectrum attenuation = ( -thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
         // Fresnel attenuation between the boundary across layer0 and layer1
         const Spectrum T12 = (1.0f - fresnel.Evaluate(CosTheta(swo))) * (1.0f - fresnel.Evaluate(CosTheta(swi)));
-        // Atteunation of rays coming upward is exactly the same with the downward attenuation, but there is a constant factor for
-        // compensating the loss of TIR. The constant number is not mentioned in the original paper, 0.2 is used here by default.
+        // Attenuation of rays coming upward is exactly the same with the downward attenuation, but there is a constant factor for
+        // compensating the loss caused by TIR. The constant number is not mentioned in the original paper, 0.2 is used here by default.
         static const float G = 0.2f;
         ret += bottom->f( wo , wi ) * attenuation * T12 * lerp( T12 , 1.0f , G );
     }
