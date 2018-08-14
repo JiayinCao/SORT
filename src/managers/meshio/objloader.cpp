@@ -120,9 +120,6 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
                 trunk->m_IndexBuffer.push_back(vi1);
                 trunk->m_IndexBuffer.push_back(vi2);
             }
-            else {
-                int a = 0;
-            }
 
 			// check if there is another index
 			char t = file.peek();
@@ -142,9 +139,6 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
                     trunk->m_IndexBuffer.push_back(vi0);
                     trunk->m_IndexBuffer.push_back(vi2);
                     trunk->m_IndexBuffer.push_back(vi3);
-                }
-                else {
-                    int a = 0;
                 }
 			}
 		}
