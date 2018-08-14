@@ -41,7 +41,7 @@ public:
     //! @param n                Normal from normal map.
     //! @param doubleSided      Whether the surface is double sided.
     Dielectric(const Spectrum& reflectance, const Spectrum& tranmisttance, const MicroFacetDistribution* d, float ior, float ior_in, const Spectrum& weight, const Vector& n, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance), T(tranmisttance), fresnel(ior, ior_in), fullweight(1.0f), up(0.0f, 1.0f, 0.0f),
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance), T(tranmisttance), fullweight(1.0f), up(0.0f, 1.0f, 0.0f), fresnel(ior, ior_in), 
         mf_reflect(reflectance, &fresnel, d, fullweight, up, true),
         mf_refract(tranmisttance, d, ior, ior_in, fullweight, up)
         {}
