@@ -53,15 +53,15 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     Spectrum ret;
     if( bs.u < specProp ){
         // Importance sampling based on the top layer, Microfacet model
-        coat.sample_f( swo , lwi , BsdfSample(true) , pPdf );
+        ret = coat.sample_f( swo , lwi , BsdfSample(true) , pPdf );
         wi = bxdfToBsdf(lwi);
     }else{
         // Importance sampling using the underlying layer
-        bottom->sample_f( wo , wi , BsdfSample(true) , pPdf );
+        ret = bottom->sample_f( wo , wi , BsdfSample(true) , pPdf );
     }
     
     if( pPdf ) *pPdf = Pdf( wo , wi );
-    return F( wo , wi );
+    return ret;
 }
 
 float Coat::Pdf( const Vector& wo , const Vector& wi ) const{
