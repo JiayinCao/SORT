@@ -39,8 +39,8 @@ struct BDPT_Vertex
 
 	// For further detail, please refer to the paper "Implementing Vertex Connection and Merging"
 	// MIS factors
-	float		vc = 0.0f;
-	float		vcm = 0.0f;
+	double		vc = 0.0f;
+	double      vcm = 0.0f;
 
 	// depth of the vertex
     int			depth = 0;
@@ -115,7 +115,12 @@ private:
 	};
 
 	// mis factor
-	float MIS( float t ) const;
+    inline double MIS(double t) const {
+        return m_bMIS ? t * t : 1.0f;
+    }
+    inline float MIS(float t) const {
+        return m_bMIS ? t * t : 1.0f;
+    }
     
     SORT_STATS_ENABLE( "Bi-directional Path Tracing" )
 };

@@ -108,16 +108,21 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 			string strIndex;
 			file>>strIndex;
 			VertexIndex vi0 = VertexIndexFromStr( strIndex );
-			//CHECK_INDEX(vi0);
-			trunk->m_IndexBuffer.push_back( vi0 );
 			file>>strIndex;
 			VertexIndex vi1 = VertexIndexFromStr( strIndex );
-			//CHECK_INDEX(vi1);
-			trunk->m_IndexBuffer.push_back( vi1 );
 			file>>strIndex;
 			VertexIndex vi2 = VertexIndexFromStr( strIndex );
-			//CHECK_INDEX(vi2);
-			trunk->m_IndexBuffer.push_back( vi2 );
+
+            if (mem->m_PositionBuffer[vi0.posIndex] != mem->m_PositionBuffer[vi1.posIndex] &&
+                mem->m_PositionBuffer[vi1.posIndex] != mem->m_PositionBuffer[vi2.posIndex] &&
+                mem->m_PositionBuffer[vi2.posIndex] != mem->m_PositionBuffer[vi0.posIndex]) {
+                trunk->m_IndexBuffer.push_back(vi0);
+                trunk->m_IndexBuffer.push_back(vi1);
+                trunk->m_IndexBuffer.push_back(vi2);
+            }
+            else {
+                int a = 0;
+            }
 
 			// check if there is another index
 			char t = file.peek();
@@ -130,10 +135,17 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 			{
 				file>>strIndex;
 				VertexIndex vi3 = VertexIndexFromStr( strIndex );
-				//CHECK_INDEX(vi3);
-				trunk->m_IndexBuffer.push_back( vi0 );
-				trunk->m_IndexBuffer.push_back( vi2 );
-				trunk->m_IndexBuffer.push_back( vi3 );
+
+                if (mem->m_PositionBuffer[vi0.posIndex] != mem->m_PositionBuffer[vi2.posIndex] &&
+                    mem->m_PositionBuffer[vi2.posIndex] != mem->m_PositionBuffer[vi3.posIndex] &&
+                    mem->m_PositionBuffer[vi3.posIndex] != mem->m_PositionBuffer[vi0.posIndex]) {
+                    trunk->m_IndexBuffer.push_back(vi0);
+                    trunk->m_IndexBuffer.push_back(vi2);
+                    trunk->m_IndexBuffer.push_back(vi3);
+                }
+                else {
+                    int a = 0;
+                }
 			}
 		}
 
