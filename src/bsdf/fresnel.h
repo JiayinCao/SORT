@@ -37,7 +37,7 @@ inline float DielectricFresnel( float cosI , float eta_i , float eta_t ){
     const float _etaI = entering ? eta_i : eta_t;
     const float _etaT = entering ? eta_t : eta_i;
     
-    const float sinI = sqrt( 1.0f - cosI * cosI );
+    const float sinI = sqrt( 1.0f - saturate( cosI * cosI ) );
     const float sinT = _etaI * sinI / _etaT;
     if( sinT >= 1.0f ) return 1.0f;
     if( !entering ) cosI = -cosI;

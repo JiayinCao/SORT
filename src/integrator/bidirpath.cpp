@@ -58,8 +58,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	// Trace light path from light source
 	vector<BDPT_Vertex> light_path;
 	Ray wi = light_ray;
-	float vc = (light->IsDelta())?0.0f: MIS(cosAtLight / light_emission_pdf);
-	float vcm = MIS(light_pdfa / light_emission_pdf);
+	double vc = (light->IsDelta())?0.0f: MIS(cosAtLight / light_emission_pdf);
+	double vcm = MIS(light_pdfa / light_emission_pdf);
 	Spectrum throughput = le * cosAtLight / (light_emission_pdf * pdf);
 	float rr = 1.0f;
 	while ((int)light_path.size() < max_recursive_depth)
@@ -143,7 +143,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 					float emissionPdf;
 					float directPdfA;
 					Spectrum _li = light->Le( vert.inter, -wi.m_Dir , &directPdfA , &emissionPdf ) * throughput / light->PickPDF();
-					float weight = 1.0f / ( 1.0f + MIS( directPdfA ) * vcm + MIS( emissionPdf ) * vc );
+                    float weight = (float)(1.0f / (1.0f + MIS(directPdfA) * vcm + MIS(emissionPdf) * vc));
 					li += _li * weight;
 				}
 			}
@@ -169,7 +169,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 				float emissionPdf;
 				float directPdfA;
 				Spectrum _li = vert.inter.Le(-wi.m_Dir , &directPdfA , &emissionPdf ) * throughput / pdf;
-				li += _li / ( 1.0f + MIS( directPdfA ) * vcm + MIS( emissionPdf ) * vc );
+				li += _li / (float)( 1.0f + MIS( directPdfA ) * vcm + MIS( emissionPdf ) * vc );
 			}
 			else if( vert.depth == 0 )
 				li += vert.inter.Le(-wi.m_Dir) / pdf;
@@ -201,7 +201,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 		++light_path_len;
 
-		// russian roulette
+		// Russian Roulette
 		if (sort_canonical() > rr)
 			break;
 
@@ -231,7 +231,7 @@ void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsig
     sample_per_pixel = ps_num;
 }
 
-// connnect vertices
+// connect vertices
 Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 , const Light* light ) const
 {
 	if( p0.depth + p1.depth >= max_recursive_depth )
@@ -255,10 +255,10 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
 	const float p0_a = p1_bsdf_pdfw * cosAtP0 * invDistcSqr;
 	const float p1_a = p0_bsdf_pdfw * cosAtP1 * invDistcSqr;
 
-	const float mis_0 = MIS( p0_a ) * ( p0.vcm + p0.vc * MIS( p0_bsdf_rev_pdfw ) );
-	const float mis_1 = MIS( p1_a ) * ( p1.vcm + p1.vc * MIS( p1_bsdf_rev_pdfw ) );
+	const double mis_0 = MIS( p0_a ) * ( p0.vcm + p0.vc * MIS( p0_bsdf_rev_pdfw ) );
+	const double mis_1 = MIS( p1_a ) * ( p1.vcm + p1.vc * MIS( p1_bsdf_rev_pdfw ) );
 
-	const float weight = 1.0f / (mis_0 + 1.0f + mis_1);
+    const float weight = (float)(1.0f / (mis_0 + 1.0f + mis_1));
 
 	const Spectrum li = p0.throughput * p1.throughput * g * weight;
 	if( li.IsBlack() )
@@ -298,10 +298,10 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 	const float eye_bsdf_pdfw = eye_vertex.bsdf->Pdf( eye_vertex.wi , wi ) * eye_vertex.rr;
 	const float eye_bsdf_rev_pdfw = eye_vertex.bsdf->Pdf( wi , eye_vertex.wi ) * eye_vertex.rr;
 
-	const float mis0 = light->IsDelta()?0.0f:MIS(eye_bsdf_pdfw / directPdfW);
-	const float mis1 = MIS( cosAtEyeVertex * emissionPdfW / ( cosAtLight * directPdfW ) ) * ( eye_vertex.vcm + eye_vertex.vc * MIS( eye_bsdf_rev_pdfw ) );
+	const double mis0 = light->IsDelta()?0.0f:MIS(eye_bsdf_pdfw / directPdfW);
+	const double mis1 = MIS( cosAtEyeVertex * emissionPdfW / ( cosAtLight * directPdfW ) ) * ( eye_vertex.vcm + eye_vertex.vc * MIS( eye_bsdf_rev_pdfw ) );
 
-	const float weight = 1.0f / ( mis0 + mis1 + 1.0f );
+    const float weight = (float)(1.0f / (mis0 + mis1 + 1.0f));
 
 	return li * weight;
 }
@@ -348,8 +348,8 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	{
 		const float lightvert_pdfA = camera_pdfW * AbsDot( light_vertex.n, n_delta ) * invSqrLen ;
 		const float bsdf_rev_pdfw = light_vertex.bsdf->Pdf( -n_delta , light_vertex.wi ) * light_vertex.rr;
-		const float mis0 = ( light_vertex.vcm + light_vertex.vc * MIS( bsdf_rev_pdfw ) ) * MIS( lightvert_pdfA / total_pixel );
-		const float weight = 1.0f / ( 1.0f + mis0 );
+		const double mis0 = ( light_vertex.vcm + light_vertex.vc * MIS( bsdf_rev_pdfw ) ) * MIS( lightvert_pdfA / total_pixel );
+        const float weight = (float)(1.0f / (1.0f + mis0));
 
 		radiance *= weight;
 	}
@@ -359,14 +359,4 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	if (!is)
 		return;
 	is->UpdatePixel(coord.x , coord.y , radiance);
-}
-
-// mis factor
-float BidirPathTracing::MIS( float t ) const
-{
-	// power heuristic
-	if(m_bMIS)
-		return t * t;
-
-	return 1;
 }
