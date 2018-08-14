@@ -178,9 +178,8 @@ public:
 	bool operator == ( const Point& p ) const 
 	{
 		if( p.x == x && p.y == y && p.z == z )
-			return false;
-
-		return true;
+			return true;
+		return false;
 	}
 
 	// != operator
@@ -189,9 +188,8 @@ public:
 	bool operator != ( const Point& p ) const 
 	{
 		if( p.x == x && p.y == y && p.z == z )
-			return true;
-
-		return false;
+			return false;
+		return true;
 	}
 
     operator Vector3f() const
