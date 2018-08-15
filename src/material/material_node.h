@@ -49,8 +49,8 @@ public:
 	// get node property
 	virtual MaterialPropertyValue GetPropertyValue( Bsdf* bsdf );
     
-    // update bsdf, for layered brdf
-    void UpdateBsdf( Bsdf* bsdf , Spectrum weight );
+    // update bsdf, this is for bxdf wrappers like Blend , Coat or any other BXDF that can attach other BXDF as input
+    void UpdateBsdf( Bsdf* bsdf , Spectrum weight = Spectrum( 1.0f ) );
 
 	// sub node if it has value
 	MaterialNode*	node;

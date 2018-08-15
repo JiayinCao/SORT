@@ -24,15 +24,18 @@
 #include "bsdf/disney.h"
 #include "bsdf/dielectric.h"
 #include "bsdf/bsdf.h"
+#include "bsdf/blend.h"
+#include "bsdf/doublesided.h"
 
 IMPLEMENT_CREATOR( DisneyPrincipleNode );
-IMPLEMENT_CREATOR( LayeredMaterialNode );
 IMPLEMENT_CREATOR( PrincipleMaterialNode );
 IMPLEMENT_CREATOR( MatteMaterialNode );
 IMPLEMENT_CREATOR( PlasticMaterialNode );
 IMPLEMENT_CREATOR( GlassMaterialNode );
 IMPLEMENT_CREATOR( MirrorMaterialNode );
 IMPLEMENT_CREATOR( MeasuredMaterialNode );
+IMPLEMENT_CREATOR( BlendMaterialNode );
+IMPLEMENT_CREATOR( DoubleSidedMaterialNode );
 
 DisneyPrincipleNode::DisneyPrincipleNode()
 {
@@ -64,19 +67,6 @@ void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     const float     cc = GET_MATERIALNODE_PROPERTY_FLOAT(clearcoat);
     const float     ccg = GET_MATERIALNODE_PROPERTY_FLOAT(clearcoatGloss);
     bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)( bc , ss , m , s , st , r , a , sh , sht , cc , ccg , weight , n ));
-}
-
-LayeredMaterialNode::LayeredMaterialNode(){
-    for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i ){
-        REGISTER_MATERIALNODE_PROPERTY( "Bxdf" + to_string(i) , bxdfs[i] );
-        REGISTER_MATERIALNODE_PROPERTY( "Weight" + to_string(i) , weights[i] );
-    }
-}
-
-void LayeredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
-    for( int i = 0 ; i < MAX_BXDF_COUNT ; ++i )
-        bxdfs[i].UpdateBsdf(bsdf, GET_MATERIALNODE_PROPERTY_SPECTRUM(weights[i]) * weight );
 }
 
 PrincipleMaterialNode::PrincipleMaterialNode()
@@ -212,4 +202,34 @@ void MirrorMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
         const Fresnel* fresnel = SORT_MALLOC( FresnelNo )();
         bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( color , fresnel , dist , weight , n ));
     }
+}
+
+BlendMaterialNode::BlendMaterialNode() {
+    REGISTER_MATERIALNODE_PROPERTY("Bxdf0", bxdf0);
+    REGISTER_MATERIALNODE_PROPERTY("Bxdf1", bxdf1);
+    REGISTER_MATERIALNODE_PROPERTY("Factor", factor);
+}
+
+void BlendMaterialNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
+{
+    const float t = GET_MATERIALNODE_PROPERTY_FLOAT(factor);
+    Bsdf* bsdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+    Bsdf* bsdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+    bxdf0.UpdateBsdf(bsdf0);
+    bxdf1.UpdateBsdf(bsdf1);
+    bsdf->AddBxdf(SORT_MALLOC(Blend)(bsdf0, bsdf1, t, weight));
+}
+
+DoubleSidedMaterialNode::DoubleSidedMaterialNode() {
+    REGISTER_MATERIALNODE_PROPERTY("Bxdf0", bxdf0);
+    REGISTER_MATERIALNODE_PROPERTY("Bxdf1", bxdf1);
+}
+
+void DoubleSidedMaterialNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
+{
+    Bsdf* bsdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+    Bsdf* bsdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+    bxdf0.UpdateBsdf(bsdf0);
+    bxdf1.UpdateBsdf(bsdf1);
+    bsdf->AddBxdf(SORT_MALLOC(DoubleSided)(bsdf0, bsdf1, weight));
 }

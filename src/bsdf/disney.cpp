@@ -63,8 +63,6 @@ protected:
 
 Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 {
-    static const Vector up( 0.0f , 1.0f , 0.0f );
-    
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
@@ -109,12 +107,12 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
     const GGX ggx( roughness / aspect , roughness * aspect );
     const FresnelDisney fresnel0(Cspec0, 1.0f, 1.5f, metallic);
-    const MicroFacetReflection mf(Cspec0, &fresnel0, &ggx, white, up);
+    const MicroFacetReflection mf(Cspec0, &fresnel0, &ggx, white, Vector::UP);
     
     // Clear coat term (ior = 1.5 -> F0 = 0.04)
     const ClearcoatGGX cggx(sqrt(lerp(0.1f, 0.001f, clearcoatGloss)));
     const FresnelSchlick<float> fresnel1(0.04f);
-    const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f * clearcoat ) , &fresnel1, &cggx, white, up);
+    const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f * clearcoat ) , &fresnel1, &cggx, white, Vector::UP);
     
     mf.UpdateGNormal(gnormal);
     mf_clearcoat.UpdateGNormal(gnormal);

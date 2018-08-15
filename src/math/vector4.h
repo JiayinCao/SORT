@@ -20,6 +20,7 @@
 #include <math.h>
 #include "vector2.h"
 #include "utility/define.h"
+#include "spectrum/spectrum.h"
 
 template< class T >
 class Vector4
