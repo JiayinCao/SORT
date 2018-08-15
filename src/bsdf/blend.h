@@ -35,7 +35,7 @@ public:
     //! @param bxdf1        Bxdf1.
     //! @param bf           Blend factor.
     //! @param weight       Weight of the BXDF.
-    Blend(const Bsdf* bxdf0 , const Bsdf* bxdf1 , float bf , const Spectrum& weight ) : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector::UP, false), bxdf0(bxdf0), bxdf1(bxdf1) , weight( bf ){}
+    Blend(const Bsdf* bxdf0 , const Bsdf* bxdf1 , float bf , const Spectrum& weight ) : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), up, false), bxdf0(bxdf0), bxdf1(bxdf1) , weight( bf ){}
 	
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

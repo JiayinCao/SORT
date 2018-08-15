@@ -33,7 +33,7 @@ public:
     //! @param bxdf0        Bxdf0.
     //! @param bxdf1        Bxdf1.
     //! @param weight       Weight of the BXDF.
-    DoubleSided(const Bsdf* bxdf0 , const Bsdf* bxdf1 , const Spectrum& weight ) : Bxdf(weight, (BXDF_TYPE)(BXDF_ALL_TYPES), Vector::UP, false), bxdf0(bxdf0), bxdf1(bxdf1){}
+    DoubleSided(const Bsdf* bxdf0 , const Bsdf* bxdf1 , const Spectrum& weight ) : Bxdf(weight, (BXDF_TYPE)(BXDF_ALL_TYPES), DIR_UP, false), bxdf0(bxdf0), bxdf1(bxdf1){}
 	
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
