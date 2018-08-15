@@ -200,8 +200,11 @@ class SORTShadingNode_BXDF(SORTShadingNode):
     output_type = 'SORTNodeSocketBxdf'
     bxdf_property_list = [ { 'class' : properties.SORTNodeSocketNormal , 'name' : 'Normal' } ]
     pbrt_bxdf_type = ''
+    disable_normal = False
 
     def register_prop(self):
+        if self.disable_normal is True:
+            return
         # register all sockets in BXDF
         for prop in SORTShadingNode_BXDF.bxdf_property_list:
             self.inputs.new( prop['class'].__name__ , prop['name'] )
@@ -306,33 +309,21 @@ class SORTNode_Material_Measured(SORTShadingNode_BXDF):
             output_pbrt_type( 'matte' )
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_Material_Layered(SORTShadingNode_BXDF):
-    bl_label = 'Layered Material'
-    bl_idname = 'SORTNode_Material_Layered'
-    bxdf_count = bpy.props.IntProperty( name = 'Bxdf Count' , default = 2 , min = 1 , max = 8 )
+class SORTNode_Material_Blend(SORTShadingNode_BXDF):
+    bl_label = 'Blend'
+    bl_idname = 'SORTNode_Material_Blend'
+    disable_normal = True
+    property_list = [ { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf0' } , 
+                      { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf1' } , 
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Factor' } ] 
 
-    def init(self, context):
-        SORTShadingNode.register_prop(self)
-        for x in range(0,8):
-            self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
-            self.inputs.new( 'SORTNodeSocketColor' , 'Weight'+str(x) )
-
-    def draw_buttons(self, context, layout):
-        row = layout.row()
-        split = row.split(0.4)
-        split.label("BXDF Count")
-        prop_row = split.row()
-        prop_row.prop(self,'bxdf_count',text="")
-
-        for x in range( 0 , 8 ):
-            if x < self.bxdf_count:
-                if self.inputs.get('Bxdf'+str(x)) is None:
-                    self.inputs.new( 'SORTNodeSocketBxdf' , 'Bxdf'+str(x) )
-                    self.inputs.new( 'SORTNodeSocketColor' , 'Weight'+str(x) )
-            else:
-                if self.inputs.get('Bxdf'+str(x)) is not None:
-                    self.inputs.remove( self.inputs['Bxdf' + str(x)] )
-                    self.inputs.remove( self.inputs['Weight' + str(x)] )
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_DoubleSided(SORTShadingNode_BXDF):
+    bl_label = 'Double-Sided'
+    bl_idname = 'SORTNode_Material_DoubleSided'
+    disable_normal = True
+    property_list = [ { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf0' } , 
+                      { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf1' } ] 
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               BXDF Nodes for SORT

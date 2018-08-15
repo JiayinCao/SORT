@@ -48,22 +48,6 @@ private:
     MaterialNodeProperty        clearcoatGloss;
 };
 
-// Layered Material
-class LayeredMaterialNode : public BxdfNode
-{
-public:
-    DEFINE_CREATOR( LayeredMaterialNode , MaterialNode, "SORTNode_Material_Layered" );
-    
-    // constructor
-    LayeredMaterialNode();
-    // update bsdf
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-    
-private:
-    MaterialNodeProperty    bxdfs[MAX_BXDF_COUNT];
-    MaterialNodeProperty    weights[MAX_BXDF_COUNT];
-};
-
 // Priciple Material
 class PrincipleMaterialNode : public BxdfNode
 {
@@ -170,4 +154,39 @@ private:
     
     FourierBxdfData fourierBxdfData;
     MerlData        merlData;
+};
+
+// Blend Material
+class BlendMaterialNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR(BlendMaterialNode, MaterialNode, "SORTNode_Material_Blend");
+
+    // constructor
+    BlendMaterialNode();
+
+    // update bsdf
+    void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
+
+private:
+    MaterialNodeProperty    bxdf0;
+    MaterialNodeProperty    bxdf1;
+    MaterialNodeProperty    factor;
+};
+
+// Blend Material
+class DoubleSidedMaterialNode : public BxdfNode
+{
+public:
+    DEFINE_CREATOR(DoubleSidedMaterialNode, MaterialNode, "SORTNode_Material_DoubleSided");
+
+    // constructor
+    DoubleSidedMaterialNode();
+
+    // update bsdf
+    void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
+
+private:
+    MaterialNodeProperty    bxdf0;
+    MaterialNodeProperty    bxdf1;
 };
