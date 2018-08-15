@@ -110,7 +110,7 @@ public:
 	}
 
 
-// private field
+// public field
 public:
 	// the vector data
 	union
@@ -125,6 +125,8 @@ public:
 			T data[3];
 		};
 	};
+
+    static const Vector3<float> UP;
 };
 
 typedef Vector3<float>		Vector;		// Vector is 3-float vector by default

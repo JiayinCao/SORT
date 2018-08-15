@@ -41,9 +41,9 @@ public:
     //! @param n                Normal from normal map.
     //! @param doubleSided      Whether the surface is double sided.
     Dielectric(const Spectrum& reflectance, const Spectrum& tranmisttance, const MicroFacetDistribution* d, float ior, float ior_in, const Spectrum& weight, const Vector& n, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance), T(tranmisttance), fullweight(1.0f), up(0.0f, 1.0f, 0.0f), fresnel(ior, ior_in), 
-        mf_reflect(reflectance, &fresnel, d, fullweight, up, true),
-        mf_refract(tranmisttance, d, ior, ior_in, fullweight, up)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance), T(tranmisttance), fullweight(1.0f), fresnel(ior, ior_in), 
+        mf_reflect(reflectance, &fresnel, d, fullweight, Vector::UP, true),
+        mf_refract(tranmisttance, d, ior, ior_in, fullweight, Vector::UP)
         {}
 
     //! Evaluate the BRDF
@@ -69,7 +69,6 @@ public:
 private:
     const Spectrum              R, T;       /**< Reflectance and transmittance. */
     const Spectrum              fullweight; /**< Default weight for microfacet layer. */
-    const Vector                up;         /**< Default normal for microfacet model. */
     const FresnelDielectric     fresnel;    /**< Fresnel term. */
     const MicroFacetReflection  mf_reflect; /**< Microfacet reflection model. */
     const MicroFacetRefraction  mf_refract; /**< Microfacet refraction model. */
