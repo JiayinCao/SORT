@@ -247,7 +247,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
     pbrt_bxdf_type = 'disney'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'SubSurface' } , 
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Metallic' , 'default' : 1.0 , 'pbrt_name' : 'metallic' } , 
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Speulcar' } , 
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Specular' } , 
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'SpecularTint' , 'pbrt_name' : 'speculartint' } , 
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'pbrt_name' : 'roughness' } , 
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Anisotropic' , 'pbrt_name' : 'anisotropic' } , 
