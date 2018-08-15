@@ -19,8 +19,8 @@
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
 
-Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_weight(w), m_type(type), gnormal( Vector( 0.0f , 1.0f , 0.0f ) ), doubleSided(doubleSided){
-    if( n == Vector::UP ) return;
+Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_weight(w), m_type(type), gnormal( DIR_UP ), doubleSided(doubleSided){
+    if( n == DIR_UP ) return;
     
     normal_map_applied = true;
     nn = Normalize(n);

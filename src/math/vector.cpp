@@ -19,4 +19,4 @@
 #include "vector3.h"
 #include "vector4.h"
 
-const Vector3<float> Vector3<float>::UP = Vector3<float>(0.0f, 1.0f, 0.0f);
+const Vector DIR_UP( 0.0f , 1.0f , 0.0f );

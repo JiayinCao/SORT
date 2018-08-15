@@ -126,7 +126,7 @@ public:
 		};
 	};
 
-    static const Vector3<float> UP;
+    static const Vector3<T> UP;
 };
 
 typedef Vector3<float>		Vector;		// Vector is 3-float vector by default
@@ -134,6 +134,8 @@ typedef Vector3<float>		Vector3f;
 typedef Vector3<int>		Vector3i;
 typedef Vector3<unsigned>	Vector3u;
 typedef Vector3<double>		Vector3d;
+
+extern const Vector DIR_UP;
 
 // * operator
 // para 'f'  :	scaler
