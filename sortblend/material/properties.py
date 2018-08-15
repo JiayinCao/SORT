@@ -63,11 +63,7 @@ class SORTNodeSocket(SORTNodeProperty):
         if self.is_linked or self.is_output:
             self.draw_label(context,layout,node,text)
         else:
-            row = layout.row()
-            split = row.split(0.4)
-            split.label(text)
-            if node.inputs[text].default_value is not None:
-                split.prop(node.inputs[text],'default_value',text="")
+            layout.prop( node.inputs[text] , 'default_value' , text = text)
 
     @classmethod
     def is_socket(cls):
@@ -81,6 +77,12 @@ class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
     default_value = None
     sort_type = 'bxdf'
     need_bxdf_node = True
+
+    def draw(self, context, layout, node, text):
+        if self.is_linked or self.is_output:
+            self.draw_label(context,layout,node,text)
+        else:
+            layout.label(text)
 
 # Socket for Color
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):

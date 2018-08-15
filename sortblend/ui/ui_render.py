@@ -45,6 +45,7 @@ class SORTRenderPanel:
 
     @classmethod
     def register(cls):
+        bl_ui.properties_render.RENDER_PT_render.COMPAT_ENGINES.add('SORT_RENDERER')
         bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add('SORT_RENDERER')
 
     @classmethod

@@ -126,7 +126,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 }
 
 Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
-    const float t = ( 1.0f - metallic ) * ( 1.0f - specular * 0.92f ) * basecolor.GetIntensity();
+    const float t = ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f ) * basecolor.GetIntensity();
     if( bs.u < t || t == 1.0f ){
         // Cosine-weighted sample
         wi = CosSampleHemisphere( bs.u / t , bs.v );
@@ -182,5 +182,5 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
         return CosHemispherePdf(wi);
     const Vector wh = Normalize( wi + wo );
     const float pdf_wh = lerp( ggx.Pdf(wh) , cggx.Pdf(wh) , clearcoat_ratio );
-    return lerp( pdf_wh / ( 4.0f * Dot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.92f ) * basecolor.GetIntensity() );
+    return lerp( pdf_wh / ( 4.0f * Dot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f) * basecolor.GetIntensity() );
 }
