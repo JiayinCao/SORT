@@ -110,7 +110,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	sAssert( bxdf != 0 , GENERAL );
 
 	// transform the 'wo' from world space to shading coordinate
-	Vector swo = Normalize(worldToLocal( wo ));
+	Vector swo = worldToLocal( wo );
 
 	// sample the direction
 	Spectrum t = bxdf->Sample_F( swo , wi , bs , pdf ) * bxdf->GetWeight();
