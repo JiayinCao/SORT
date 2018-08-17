@@ -17,12 +17,6 @@
 
 // include header file
 #include "texmanager.h"
-#include "texio/bmpio.h"
-#include "texio/exrio.h"
-#include "texio/tgaio.h"
-#include "texio/pngio.h"
-#include "texio/jpgio.h"
-#include "texio/hdrio.h"
 #include "texture/imagetexture.h"
 #include "utility/strhelper.h"
 #include "utility/define.h"
@@ -40,45 +34,21 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "thirdparty/stb_image/stb_image.h"
 
-// default constructor
-TexManager::TexManager()
-{
-    // push the texture outputer
-    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new BmpIO()) );
-    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new ExrIO()) );
-    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new TgaIO()) );
-    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new PngIO()) );
-    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new JpgIO()) );
-    m_TexIOVec.push_back( std::unique_ptr<TexIO>(new HdrIO()) );
-}
-
 // output texture
 bool TexManager::Write( const string& filename , const Texture* tex )
 {
 	// get full path name
 	string str = GetFullPath( filename );
 
-	// get the type
-	TEX_TYPE type = TexTypeFromStr( str );
-
-	// find the specific texio first
-    const std::unique_ptr<TexIO>& io = FindTexIO( type );
-
-	if( io != nullptr )
-		io->Write( str , tex );
+    // Save image
+    saveImage(str, tex);
 	
 	return true;
 }
 
 // load the image from file , if the specific image is already existed in the current system , just return the pointer
-bool TexManager::Read( const string& filename , ImageTexture* tex )
+bool TexManager::Read( const string& str , ImageTexture* tex )
 {
-	// get full path name
-	string str = filename;
-
-	// get the type
-	TEX_TYPE type = TexTypeFromStr( str );
-
 	// try to find the image first , if it's already existed in the system , just set a pointer
     auto it = m_ImgContainer.find( str );
 	if( it != m_ImgContainer.end() )
@@ -90,58 +60,29 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 		return true;
 	}
 
-	// find the specific texio first
-    const std::unique_ptr<TexIO>& io = FindTexIO( type );
+	// create a new memory
+    std::shared_ptr<ImgMemory> mem = std::make_shared<ImgMemory>();
 
-	bool read = false;
-	if( io != nullptr )
-	{
-		// create a new memory
-        std::shared_ptr<ImgMemory> mem = std::make_shared<ImgMemory>();
+    if( loadImage(str, mem) ){
+        // set the texture
+        tex->m_pMemory = mem;
+        tex->m_iTexWidth = mem->m_iWidth;
+        tex->m_iTexHeight = mem->m_iHeight;
 
-        //if( !loadImage(str, mem) )
-        //   slog(WARNING, IMAGE, stringFormat("Can't load image file %s.", str.c_str()));
+        // insert it into the container
+        m_ImgContainer.insert(make_pair(str, mem));
+        return true;
+    }
 
-        // To be replaced!
-		// read the data
-		read = io->Read( str , mem );
-
-		if( read )
-		{
-			// set the texture
-			tex->m_pMemory = mem;
-			tex->m_iTexWidth = mem->m_iWidth;
-			tex->m_iTexHeight = mem->m_iHeight;
-			
-			// insert it into the container
-			m_ImgContainer.insert( make_pair( str , mem ) );
-		}else
-            slog( WARNING , IMAGE , stringFormat("Can't load image file %s." , str.c_str() ) );
-	}
-
-	return read;
-}
-
-// find correct texio
-const std::unique_ptr<TexIO>& TexManager::FindTexIO( TEX_TYPE tt ) const
-{
-	// find the specific texio first
-    auto it = m_TexIOVec.begin();
-	while( it != m_TexIOVec.end() )
-	{
-		if( (*it)->GetTT() == tt )
-            return *it;
-		it++;
-	}
-
-	return m_TexNull;
+    slog(WARNING, IMAGE, stringFormat("Can't load image file %s.", str.c_str()));
+	return false;
 }
 
 // para 'name'  : Load image file
 // return       : Return value
 bool TexManager::loadImage(const string& name, std::shared_ptr<ImgMemory>& mem )
 {
-    std::regex exr_reg( "((.?)+(.exr)+([\\s]))$" , regex_constants::icase);
+    std::regex exr_reg(".*\\.exr$", regex_constants::icase);
 
     if (std::regex_match(name, exr_reg)) {
         float* out = nullptr;
@@ -162,7 +103,6 @@ bool TexManager::loadImage(const string& name, std::shared_ptr<ImgMemory>& mem )
             return true;
         }
 
-        slog(WARNING, MATERIAL, err);
         return false;
     }
     else {
@@ -199,7 +139,32 @@ bool TexManager::loadImage(const string& name, std::shared_ptr<ImgMemory>& mem )
 
 // para 'name'  : Load image file
 // return       : Return value
-bool TexManager::saveImage(const string& name, std::shared_ptr<ImgMemory>& mem )
+bool TexManager::saveImage(const string& name, const Texture* tex )
 {
+    if (!tex) return false;
+
+    std::regex exr_reg(".*\\.exr$", regex_constants::icase);
+    if (std::regex_match(name, exr_reg)) {
+        unsigned totalXRes = tex->GetWidth();
+        unsigned totalYRes = tex->GetHeight();
+        unsigned total = totalXRes * totalYRes;
+        float *data = new float[total * 3];
+        for (unsigned i = 0; i < total; ++i)
+        {
+            unsigned x = i % totalXRes;
+            unsigned y = i / totalXRes;
+            Spectrum c = tex->GetColor(x, y);
+
+            data[3 * i] = c.GetR();
+            data[3 * i + 1] = c.GetG();
+            data[3 * i + 2] = c.GetB();
+        }
+
+        int ret = SaveEXR(data, tex->GetWidth(), tex->GetHeight(), 3, true, name.c_str());
+        delete[] data;
+        if (ret < 0)
+            slog(WARNING, MATERIAL, stringFormat("Fail to save image file %s", name.c_str()));
+        return ret >= 0;
+    }
     return false;
 }

@@ -70,35 +70,6 @@ MESH_TYPE	MeshTypeFromStr( const string& str )
 	return MT_NONE;
 }
 
-// get the type of image file from file extension
-TEX_TYPE	TexTypeFromStr( const string& str )
-{
-	// get the file extension
-	int index = (int)str.find_last_of( "." );
-	string substr = str.substr( index + 1 , str.length() - index );
-
-	// transform the extension to lower case
-	transform(substr.begin(),substr.end(),substr.begin(),ToLower());
-
-	if( strcmp( substr.c_str() , "bmp" ) == 0 )
-		return TT_BMP;
-	else if( strcmp( substr.c_str() , "exr" ) == 0 )
-		return TT_EXR;
-	else if( strcmp( substr.c_str() , "tga" ) == 0 )
-		return TT_TGA;
-	else if( strcmp( substr.c_str() , "jpg" ) == 0 )
-		return TT_JPG;
-    else if( strcmp( substr.c_str() , "png" ) == 0 )
-        return TT_PNG;
-	else if( strcmp( substr.c_str() , "hdr" ) == 0 )
-		return TT_HDR;
-
-	// log a warning
-    slog( WARNING , GENERAL , stringFormat( "Image type of \"%s\" is not supported" , substr.c_str() ) );
-    
-	return TT_NONE;
-}
-
 // transformation from string
 Transform TransformFromStr( const string& s )
 {
