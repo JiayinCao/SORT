@@ -17,18 +17,6 @@
 
 #pragma once
 
-// texture output type
-enum TEX_TYPE
-{
-	TT_BMP = 0,
-	TT_EXR = 1,
-	TT_TGA = 2,
-    TT_PNG = 3,
-	TT_JPG = 4,
-	TT_HDR = 5,
-	TT_NONE ,
-};
-
 // mesh file type
 enum MESH_TYPE
 {
