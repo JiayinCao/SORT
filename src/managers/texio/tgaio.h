@@ -31,18 +31,6 @@ class TgaIO : public TexIO
 public:
 	// default constructor
 	TgaIO(){m_TexType=TT_TGA;}
-	
-	// output the texture into bmp file
-	// para 'str' : the name of the outputed bmp file
-	// para 'tex' :	the texture for outputing
-	// result     : 'true' if saving is successful
-	bool Write( const string& str , const Texture* tex ) override;
-
-	// read data from file
-	// para 'str' : the name of the input entity
-	// para 'mem' : the memory for the image
-	// result     :	'true' if the input file is parsed successfully
-    bool Read( const string& str , std::shared_ptr<ImgMemory>& mem ) override;
 };
 
 #endif
