@@ -93,8 +93,6 @@ private:
 
 	// output progress
 	void	_outputProgress();
-	// uninitialize 3rd party library
-	void	_uninit3rdParty();
 	// do ray tracing in a multithread enviroment
 	void	_executeRenderingTasks();
 	// push rendering task
