@@ -24,7 +24,6 @@
 #include <unordered_map>
 #include <memory>
 #include "spectrum/spectrum.h"
-#include "managers/texio/texio.h"
 
 class Texture;
 class ImageTexture;
@@ -63,27 +62,17 @@ public:
     
 // private data
 private:
-	// a vector saving texture io
-    vector<std::unique_ptr<TexIO>>	m_TexIOVec;
-    unique_ptr<TexIO>               m_TexNull;
-
 	// map a string to the image memory
     unordered_map< string , std::shared_ptr<ImgMemory> > m_ImgContainer;
 
 // private method
 private:
-	// private default constructor
-	TexManager();
-    
-	// find correct texio
-    const std::unique_ptr<TexIO>&	FindTexIO( TEX_TYPE tt ) const;
-
     // para 'name'  : Load image file
     // return       : Return value
     bool loadImage(const string& name, std::shared_ptr<ImgMemory>& mem);
     // para 'name'  : Load image file
     // return       : Return value
-    bool saveImage(const string& name, std::shared_ptr<ImgMemory>& mem);
+    bool saveImage(const string& name, const Texture* mem);
 
 	friend class Singleton<TexManager>;
 };
