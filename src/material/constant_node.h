@@ -25,6 +25,9 @@
 // constant node
 class ConstantNode : public MaterialNode
 {
+public:
+    // get node return type
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_COLOR; }
 };
 
 // Grid texture Node
@@ -33,18 +36,14 @@ class GridTexNode : public ConstantNode
 public:
 	DEFINE_CREATOR( GridTexNode , MaterialNode , "SORTNodeGrid" );
 
-	// constructor
-	GridTexNode();
-
-	// get property value
-    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
-
+    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
+    
 	// post process
 	void PostProcess() override;
 
 private:
-	MaterialNodeProperty	src0;
-	MaterialNodeProperty	src1;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
 
 	GridTexture grid_tex;
 };
@@ -55,18 +54,14 @@ class CheckBoxTexNode : public ConstantNode
 public:
 	DEFINE_CREATOR( CheckBoxTexNode , MaterialNode , "SORTNodeCheckbox" );
 
-	// constructor
-	CheckBoxTexNode();
-
-	// get property value
-    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
-
+    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
+    
 	// post process
     void PostProcess() override;
     
 private:
-	MaterialNodeProperty	src0;
-	MaterialNodeProperty	src1;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
 
 	CheckBoxTexture checkbox_tex;
 };
@@ -77,17 +72,13 @@ class ImageTexNode : public ConstantNode
 public:
 	DEFINE_CREATOR( ImageTexNode , MaterialNode , "SORTNodeImage" );
 
-	// constructor
-	ImageTexNode();
-
-	// get property value
-    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
-
+    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
+    
 	// post process
     void PostProcess() override;
 
 private:
-	MaterialNodePropertyString	filename;
+	SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , filename );
 
 	ImageTexture image_tex;
 };
@@ -98,12 +89,6 @@ class ConstantColorNode : public ConstantNode
 public:
 	DEFINE_CREATOR( ConstantColorNode , MaterialNode , "SORTNodeConstant" );
 
-	// constructor
-	ConstantColorNode();
-
-	// get property value
-    MaterialPropertyValue	GetNodeValue( Bsdf* bsdf ) override;
-
 private:
-	MaterialNodeProperty	src;
+	SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , src );
 };
