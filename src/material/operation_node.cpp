@@ -26,111 +26,49 @@ IMPLEMENT_CREATOR( GammaToLinearNode );
 IMPLEMENT_CREATOR( LinearToGammaNode );
 IMPLEMENT_CREATOR( NormalDecoderNode );
 
-// Adding node
-AddNode::AddNode()
-{
-	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
-	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
+void AddNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+    SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR(c1,src1);
+    result = c0 + c1;
 }
 
-// get property value
-MaterialPropertyValue AddNode::GetNodeValue( Bsdf* bsdf )
-{
-	return GET_MATERIALNODE_PROPERTY(src0) + GET_MATERIALNODE_PROPERTY(src1);
+void SORTNodeOneMinus::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+    SORT_MATERIAL_GET_PROP_COLOR(c,src);
+    result = Spectrum( 1.0f ) - c;
 }
 
-// inverse node
-SORTNodeOneMinus::SORTNodeOneMinus()
-{
-    REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
+void LerpNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+    SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR(c1,src1);
+    SORT_MATERIAL_GET_PROP_FLOAT(f,factor);
+    result = lerp( c0 , c1 , f );
 }
 
-// get property value
-MaterialPropertyValue SORTNodeOneMinus::GetNodeValue( Bsdf* bsdf )
-{
-    return MaterialPropertyValue(1.0f) - GET_MATERIALNODE_PROPERTY(src);
+void BlendNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+    SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR(c1,src1);
+    SORT_MATERIAL_GET_PROP_FLOAT(f0,factor0);
+    SORT_MATERIAL_GET_PROP_FLOAT(f1,factor1);
+    result = c0 * f0 + c1 * f1;
 }
 
-LerpNode::LerpNode()
-{
-	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
-	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
-	REGISTER_MATERIALNODE_PROPERTY( "Factor" , factor );
+void MutiplyNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+    SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR(c1,src1);
+    result = c0 * c1;
 }
 
-// get property value
-MaterialPropertyValue LerpNode::GetNodeValue( Bsdf* bsdf )
-{
-	const float f = GET_MATERIALNODE_PROPERTY_FLOAT(factor);
-    return lerp(GET_MATERIALNODE_PROPERTY(src0) , GET_MATERIALNODE_PROPERTY(src1), f);
+void GammaToLinearNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+    SORT_MATERIAL_GET_PROP_COLOR(c,src);
+    result = Spectrum( GammaToLinear(c.GetR()) , GammaToLinear(c.GetG()) , GammaToLinear(c.GetB()) );
 }
 
-BlendNode::BlendNode()
-{
-	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
-	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
-	REGISTER_MATERIALNODE_PROPERTY( "Factor1" , factor0 );
-	REGISTER_MATERIALNODE_PROPERTY( "Factor2" , factor1 );
+void LinearToGammaNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+    SORT_MATERIAL_GET_PROP_COLOR(c,src);
+    result = Spectrum( LinearToGamma(c.GetR()) , LinearToGamma(c.GetG()) , LinearToGamma(c.GetB()) );
 }
 
-// get property value
-MaterialPropertyValue BlendNode::GetNodeValue( Bsdf* bsdf )
-{
-	const float f0 = GET_MATERIALNODE_PROPERTY_FLOAT(factor0);
-	const float f1 = GET_MATERIALNODE_PROPERTY_FLOAT(factor1);
-	return GET_MATERIALNODE_PROPERTY(src0) * f0 + GET_MATERIALNODE_PROPERTY(src1) * f1;
-}
-
-MutiplyNode::MutiplyNode()
-{
-	REGISTER_MATERIALNODE_PROPERTY( "Color1" , src0 );
-	REGISTER_MATERIALNODE_PROPERTY( "Color2" , src1 );
-}
-
-// get property value
-MaterialPropertyValue MutiplyNode::GetNodeValue( Bsdf* bsdf )
-{
-	return GET_MATERIALNODE_PROPERTY(src0) * GET_MATERIALNODE_PROPERTY(src1);
-}
-
-GammaToLinearNode::GammaToLinearNode()
-{
-    REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
-}
-
-// get property value
-MaterialPropertyValue GammaToLinearNode::GetNodeValue( Bsdf* bsdf )
-{
-    auto tmp = GET_MATERIALNODE_PROPERTY(src);
-    tmp.x = GammaToLinear(tmp.x);
-    tmp.y = GammaToLinear(tmp.y);
-    tmp.z = GammaToLinear(tmp.z);
-    return tmp;
-}
-
-LinearToGammaNode::LinearToGammaNode()
-{
-    REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
-}
-
-// get property value
-MaterialPropertyValue LinearToGammaNode::GetNodeValue( Bsdf* bsdf )
-{
-    auto tmp = GET_MATERIALNODE_PROPERTY(src);
-    tmp.x = LinearToGamma(tmp.x);
-    tmp.y = LinearToGamma(tmp.y);
-    tmp.z = LinearToGamma(tmp.z);
-    return tmp;
-}
-
-NormalDecoderNode::NormalDecoderNode()
-{
-    REGISTER_MATERIALNODE_PROPERTY( "Color" , src );
-}
-
-// get property value
-MaterialPropertyValue NormalDecoderNode::GetNodeValue( Bsdf* bsdf )
-{
-    const auto tmp = GET_MATERIALNODE_PROPERTY(src);
-    return MaterialPropertyValue( 2.0f * tmp.x - 1.0f , tmp.z , 2.0f * tmp.y - 1.0f , 0.0f );
+void NormalDecoderNode::GetMaterialProperty( Bsdf* bsdf , Vector& result ){
+    SORT_MATERIAL_GET_PROP_COLOR(n,src);
+    result = Vector( n.GetR() * 2.0f - 1.0f , n.GetB() * 2.0f - 1.0f , n.GetG() * 2.0f - 1.0f );
 }

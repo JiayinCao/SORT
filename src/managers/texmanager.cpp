@@ -19,12 +19,7 @@
 #include "texmanager.h"
 #include "texture/imagetexture.h"
 #include "utility/strhelper.h"
-#include "utility/define.h"
 #include "utility/path.h"
-#include "texture/checkboxtexture.h"
-#include "texture/gridtexture.h"
-#include "texture/constanttexture.h"
-#include "texture/imagetexture.h"
 #include "utility/log.h"
 #include <regex>
 
@@ -41,9 +36,7 @@ bool TexManager::Write( const string& filename , const Texture* tex )
 	string str = GetFullPath( filename );
 
     // Save image
-    saveImage(str, tex);
-	
-	return true;
+    return saveImage(str, tex);
 }
 
 // load the image from file , if the specific image is already existed in the current system , just return the pointer
@@ -166,5 +159,8 @@ bool TexManager::saveImage(const string& name, const Texture* tex )
             slog(WARNING, MATERIAL, stringFormat("Fail to save image file %s", name.c_str()));
         return ret >= 0;
     }
+    
+    sAssertMsg( false , IMAGE , stringFormat("SORT doesn't support exporting file %s",name.c_str()) )
+    
     return false;
 }

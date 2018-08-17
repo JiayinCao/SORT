@@ -38,147 +38,95 @@ IMPLEMENT_CREATOR( FourierBxdfNode );
 IMPLEMENT_CREATOR( MerlNode );
 IMPLEMENT_CREATOR( CoatNode );
 
-LambertNode::LambertNode()
-{
-	REGISTER_MATERIALNODE_PROPERTY( "Diffuse" , baseColor );
-}
-
 void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const auto  bc = GET_MATERIALNODE_PROPERTY_SPECTRUM(baseColor);
-	bsdf->AddBxdf( SORT_MALLOC(Lambert)(bc , weight , n ) );
-}
-
-LambertTransmissionNode::LambertTransmissionNode()
-{
-    REGISTER_MATERIALNODE_PROPERTY( "Diffuse" , baseColor );
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
+    SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
+	bsdf->AddBxdf( SORT_MALLOC(Lambert)(bc , weight , n) );
 }
 
 void LambertTransmissionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const auto  bc = GET_MATERIALNODE_PROPERTY_SPECTRUM(baseColor);
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
+    SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
     bsdf->AddBxdf( SORT_MALLOC(LambertTransmission)(bc, weight , n ) );
-}
-
-OrenNayarNode::OrenNayarNode()
-{
-	REGISTER_MATERIALNODE_PROPERTY( "Diffuse" , baseColor );
-	REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
 }
 
 void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const auto bc = GET_MATERIALNODE_PROPERTY_SPECTRUM(baseColor);
-    const auto r = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
+    SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
+    SORT_MATERIAL_GET_PROP_FLOAT(r,roughness);
     bsdf->AddBxdf( SORT_MALLOC(OrenNayar)(bc, r , weight , n ) );
-}
-
-MicrofacetReflectionNode::MicrofacetReflectionNode()
-{
-	REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , baseColor );
-	REGISTER_MATERIALNODE_PROPERTY( "MicroFacetDistribution" , mf_dist );
-	REGISTER_MATERIALNODE_PROPERTY( "RoughnessU" , roughnessU );
-    REGISTER_MATERIALNODE_PROPERTY( "RoughnessV" , roughnessV );
-	REGISTER_MATERIALNODE_PROPERTY( "Interior_IOR" , eta );
-	REGISTER_MATERIALNODE_PROPERTY( "Absorption_Coefficient" , k );
 }
 
 void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-	float ru = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(roughnessU));
-    float rv = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(roughnessV));
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
+    SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
+    SORT_MATERIAL_GET_PROP_FLOAT(ru,roughnessU);
+    SORT_MATERIAL_GET_PROP_FLOAT(rv,roughnessV);
+    SORT_MATERIAL_GET_PROP_STR(type,mf_dist);
+    SORT_MATERIAL_GET_PROP_COLOR(_eta,eta);
+    SORT_MATERIAL_GET_PROP_COLOR(_k,k);
+    
 	MicroFacetDistribution* dist = nullptr;
-	if( mf_dist.str == "Blinn" )
+	if( type == "Blinn" )
 		dist = SORT_MALLOC(Blinn)( ru , rv );
-	else if( mf_dist.str == "Beckmann" )
+	else if( type == "Beckmann" )
 		dist = SORT_MALLOC(Beckmann)( ru , rv );
 	else
 		dist = SORT_MALLOC(GGX)( ru , rv );	// GGX is default
 
-	const Fresnel* frenel = SORT_MALLOC( FresnelConductor )(GET_MATERIALNODE_PROPERTY_SPECTRUM(eta), GET_MATERIALNODE_PROPERTY_SPECTRUM(k));
-    const auto bc = GET_MATERIALNODE_PROPERTY_SPECTRUM(baseColor);
+	const Fresnel* frenel = SORT_MALLOC( FresnelConductor )(_eta, _k);
 	bsdf->AddBxdf( SORT_MALLOC(MicroFacetReflection)(bc , frenel , dist , weight , n ) );
-}
-
-MicrofacetRefractionNode::MicrofacetRefractionNode()
-{
-	REGISTER_MATERIALNODE_PROPERTY( "BaseColor" , baseColor );
-	REGISTER_MATERIALNODE_PROPERTY( "MicroFacetDistribution" , mf_dist );
-    REGISTER_MATERIALNODE_PROPERTY( "RoughnessU" , roughnessU );
-    REGISTER_MATERIALNODE_PROPERTY( "RoughnessV" , roughnessV );
-	REGISTER_MATERIALNODE_PROPERTY( "Interior_IOR" , in_ior );
-	REGISTER_MATERIALNODE_PROPERTY( "Exterior_IOR" , ext_ior );
 }
 
 void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const float ru = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(roughnessU));
-    const float rv = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(roughnessV));
-	MicroFacetDistribution* dist = nullptr;
-	if( mf_dist.str == "Blinn" )
-		dist = SORT_MALLOC(Blinn)( ru , rv );
-	else if( mf_dist.str == "Beckmann" )
-		dist = SORT_MALLOC(Beckmann)(ru, rv);
-	else
-		dist = SORT_MALLOC(GGX)(ru, rv);	// GGX is default
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
+    SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
+    SORT_MATERIAL_GET_PROP_FLOAT(ru,roughnessU);
+    SORT_MATERIAL_GET_PROP_FLOAT(rv,roughnessV);
+    SORT_MATERIAL_GET_PROP_STR(type,mf_dist);
+    SORT_MATERIAL_GET_PROP_FLOAT(in_eta,in_ior);    // index of refraction inside the surface
+    SORT_MATERIAL_GET_PROP_FLOAT(ext_eta,ext_ior);  // index of refraction outside the surface
+    
+    MicroFacetDistribution* dist = nullptr;
+    if( type == "Blinn" )
+        dist = SORT_MALLOC(Blinn)( ru , rv );
+    else if( type == "Beckmann" )
+        dist = SORT_MALLOC(Beckmann)( ru , rv );
+    else
+        dist = SORT_MALLOC(GGX)( ru , rv );    // GGX is default
 
-    const float in_eta = GET_MATERIALNODE_PROPERTY_FLOAT(in_ior);     // index of refraction inside the surface
-	const float ext_eta = GET_MATERIALNODE_PROPERTY_FLOAT(ext_ior);   // index of refraction outside the surface
-    const auto bc = GET_MATERIALNODE_PROPERTY_SPECTRUM(baseColor);    // Base color
 	bsdf->AddBxdf( SORT_MALLOC(MicroFacetRefraction)(bc, dist , ext_eta , in_eta , weight , n ) );
-}
-
-AshikhmanShirleyNode::AshikhmanShirleyNode()
-{
-    REGISTER_MATERIALNODE_PROPERTY("Diffuse", diffuse);
-    REGISTER_MATERIALNODE_PROPERTY("Specular", specular);
-    REGISTER_MATERIALNODE_PROPERTY("RoughnessU", roughnessU);
-    REGISTER_MATERIALNODE_PROPERTY("RoughnessV", roughnessV);
 }
 
 void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
 {
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const float ru = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(roughnessU));
-    const float rv = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(roughnessV));
-    const auto specDiffuse = GET_MATERIALNODE_PROPERTY_SPECTRUM(diffuse);
-    const auto specSpecular = GET_MATERIALNODE_PROPERTY_FLOAT(specular);
-    if (specDiffuse.GetIntensity()<= 0.0f)
-        return;
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
+    SORT_MATERIAL_GET_PROP_COLOR(specDiffuse,diffuse);
+    SORT_MATERIAL_GET_PROP_FLOAT(specSpecular,specular);
+    SORT_MATERIAL_GET_PROP_FLOAT(ru,roughnessU);
+    SORT_MATERIAL_GET_PROP_FLOAT(rv,roughnessV);
     bsdf->AddBxdf(SORT_MALLOC(AshikhmanShirley)(specDiffuse, specSpecular, ru, rv , weight , n ));
-}
-
-PhongNode::PhongNode()
-{
-    REGISTER_MATERIALNODE_PROPERTY("Diffuse", diffuse);
-    REGISTER_MATERIALNODE_PROPERTY("Specular", specular);
-    REGISTER_MATERIALNODE_PROPERTY("SpecularPower", power);
-    REGISTER_MATERIALNODE_PROPERTY("DiffuseRatio", diffRatio);
 }
 
 void PhongNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
 {
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const float p = GET_MATERIALNODE_PROPERTY_FLOAT(power);
-    const float r = saturate(GET_MATERIALNODE_PROPERTY_FLOAT(diffRatio));
-    const Spectrum& specDiffuse = GET_MATERIALNODE_PROPERTY_SPECTRUM(diffuse);
-    const Spectrum& specSpecular = GET_MATERIALNODE_PROPERTY_SPECTRUM(specular);
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
+    SORT_MATERIAL_GET_PROP_COLOR(specDiffuse,diffuse);
+    SORT_MATERIAL_GET_PROP_COLOR(specSpecular,specular);
+    SORT_MATERIAL_GET_PROP_FLOAT(p,power);
+    SORT_MATERIAL_GET_PROP_FLOAT(r,diffRatio);
+    
     if (specDiffuse.GetIntensity() + specSpecular.GetIntensity() <= 0.0f)
         return;
     bsdf->AddBxdf(SORT_MALLOC(Phong)(specDiffuse * r, specSpecular * ( 1.0f - r ), p, weight, n));
 }
 
-MerlNode::MerlNode()
-{
-    REGISTER_MATERIALNODE_PROPERTY( "Filename" , merlfile );
-}
-
 void MerlNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     bsdf->AddBxdf( SORT_MALLOC(Merl)( data , weight , n ) );
 }
 
@@ -187,19 +135,17 @@ void MerlNode::PostProcess()
     if( m_post_processed )
         return;
     
-    if( merlfile.str.empty() == false )
-        data.LoadData( merlfile.str );
+    Bsdf* bsdf = nullptr;
+    SORT_MATERIAL_GET_PROP_STR(file,merlfile);
+    
+    if( file.empty() == false )
+        data.LoadData( file );
     BxdfNode::PostProcess();
-}
-
-FourierBxdfNode::FourierBxdfNode()
-{
-    REGISTER_MATERIALNODE_PROPERTY( "Filename" , fourierBxdfFile );
 }
 
 void FourierBxdfNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( fourierBxdfData , weight , n ) );
 }
 
@@ -209,27 +155,21 @@ void FourierBxdfNode::PostProcess()
     if( m_post_processed )
         return;
 
-    if( fourierBxdfFile.str.empty() == false )
-        fourierBxdfData.LoadData( fourierBxdfFile.str );
+    Bsdf* bsdf = nullptr;
+    SORT_MATERIAL_GET_PROP_STR(file,fourierBxdfFile);
+    
+    if( file.empty() == false )
+        fourierBxdfData.LoadData( file );
     BxdfNode::PostProcess();
-}
-
-CoatNode::CoatNode()
-{
-    REGISTER_MATERIALNODE_PROPERTY( "Thickness" , thickness );
-    REGISTER_MATERIALNODE_PROPERTY( "Roughness" , roughness );
-    REGISTER_MATERIALNODE_PROPERTY( "Sigma" , sigma );
-    REGISTER_MATERIALNODE_PROPERTY( "IOR" , ior );
-    REGISTER_MATERIALNODE_PROPERTY( "Surface" , bxdf );
 }
 
 void CoatNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
-    const Vector n = GET_MATERIALNODE_PROPERTY_VECTOR(normal);
-    const Spectrum s = GET_MATERIALNODE_PROPERTY_SPECTRUM(sigma);
-    const float t = GET_MATERIALNODE_PROPERTY_FLOAT(thickness);
-    const float r = GET_MATERIALNODE_PROPERTY_FLOAT(roughness);
-    const float i = GET_MATERIALNODE_PROPERTY_FLOAT(ior);
+    SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
+    SORT_MATERIAL_GET_PROP_COLOR(s,sigma);
+    SORT_MATERIAL_GET_PROP_FLOAT(r,roughness);
+    SORT_MATERIAL_GET_PROP_FLOAT(i,ior);
+    SORT_MATERIAL_GET_PROP_FLOAT(t,thickness);
     
     Bsdf* bottom = SORT_MALLOC(Bsdf)( bsdf->GetIntersection() , true );
     bxdf.UpdateBsdf( bottom , weight );

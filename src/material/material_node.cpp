@@ -29,39 +29,10 @@ MaterialNodeProperty* MaterialNode::getProperty( const string& name )
     return m_props.count(name) ? m_props[name] : nullptr;
 }
 
-// set node property
-void MaterialNodeProperty::SetNodeProperty( const string& prop )
-{
-	string str = prop;
-	string x = NextToken( str , ' ' );
-	string y = NextToken( str , ' ' );
-	string z = NextToken( str , ' ' );
-	string w = NextToken( str , ' ' );
-
-	value.x = (float)atof( x.c_str() );
-	value.y = (float)atof( y.c_str() );
-	value.z = (float)atof( z.c_str() );
-	value.w = (float)atof( w.c_str() );
-}
-
-// get node property
-MaterialPropertyValue MaterialNodeProperty::GetPropertyValue( Bsdf* bsdf )
-{
-	if( node )
-		return node->GetNodeValue( bsdf );
-	return value;
-}
-
 // update bsdf, for layered brdf
 void MaterialNodeProperty::UpdateBsdf( Bsdf* bsdf , Spectrum weight ){
     if( node )
         node->UpdateBSDF( bsdf , weight );
-}
-
-// set node property
-void MaterialNodePropertyString::SetNodeProperty( const string& prop )
-{
-	str = prop;
 }
 
 // parse property or socket
@@ -90,8 +61,7 @@ bool MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 		{
 			node_prop->node = ParseNode( prop , node );
             
-            string type = prop->Attribute( "type" );
-            if( ( type == "bxdf" && !node_prop->node->IsBxdfNode() ) || ( type != "bxdf" && node_prop->node->IsBxdfNode() ) ){
+            if( node_prop->node && node_prop->GetNodeReturnType() != node_prop->node->GetNodeReturnType() ){
                 m_node_valid = false;
                 return false;
             }
@@ -156,12 +126,6 @@ MaterialNode::~MaterialNode()
 {
     for( auto it : m_props )
 		delete it.second->node;
-}
-
-OutputNode::OutputNode()
-{
-	// register node property
-	REGISTER_MATERIALNODE_PROPERTY( "Surface" , output );
 }
 
 // update bsdf

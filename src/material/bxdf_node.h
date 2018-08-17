@@ -26,14 +26,10 @@
 class BxdfNode : public MaterialNode
 {
 protected:
-    // constructor
-    BxdfNode() { REGISTER_MATERIALNODE_PROPERTY( "Normal" , normal ); }
+    // get node return type
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_BXDF; }
     
-    // whether the node is a bxdf node
-    bool IsBxdfNode() const override { return true; }
-    
-    // normal map if provided
-    MaterialNodeProperty    normal;
+    SORT_MATERIAL_DEFINE_PROP_VECTOR( "Normal" , normal );
 };
 
 // Lambert node
@@ -42,14 +38,11 @@ class LambertNode : public BxdfNode
 public:
 	DEFINE_CREATOR( LambertNode , MaterialNode , "SORTNode_BXDF_Lambert" );
 
-	// constructor
-	LambertNode();
-
 	// update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 private:
-	MaterialNodeProperty	baseColor;
+	SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , baseColor );
 };
 
 // Lambert node
@@ -58,14 +51,11 @@ class LambertTransmissionNode : public BxdfNode
 public:
     DEFINE_CREATOR( LambertTransmissionNode , MaterialNode , "SORTNode_BXDF_LambertTransmission" );
     
-    // constructor
-    LambertTransmissionNode();
-    
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
 private:
-    MaterialNodeProperty    baseColor;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , baseColor );
 };
 
 // Oren nayar node
@@ -74,15 +64,12 @@ class OrenNayarNode : public BxdfNode
 public:
 	DEFINE_CREATOR( OrenNayarNode , MaterialNode , "SORTNode_BXDF_OrenNayar" );
 
-	// constructor
-	OrenNayarNode();
-
 	// update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 private:
-	MaterialNodeProperty	baseColor;
-	MaterialNodeProperty	roughness;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , baseColor );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );
 };
 
 // Microfacet node
@@ -91,18 +78,16 @@ class MicrofacetReflectionNode : public BxdfNode
 public:
 	DEFINE_CREATOR( MicrofacetReflectionNode , MaterialNode , "SORTNode_BXDF_MicrofacetReflection" );
 
-	// constructor
-	MicrofacetReflectionNode();
 	// update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 private:
-	MaterialNodeProperty	baseColor;
-	MaterialNodeProperty	roughnessU;
-    MaterialNodeProperty    roughnessV;
-	MaterialNodeProperty	eta;
-	MaterialNodeProperty	k;
-	MaterialNodePropertyString	mf_dist;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
+    SORT_MATERIAL_DEFINE_PROP_STR( "MicroFacetDistribution" , mf_dist );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessU" , roughnessU );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessV" , roughnessV );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Interior_IOR" , eta );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Absorption_Coefficient" , k );
 };
 
 // Microfacet node
@@ -111,18 +96,16 @@ class MicrofacetRefractionNode : public BxdfNode
 public:
 	DEFINE_CREATOR( MicrofacetRefractionNode , MaterialNode , "SORTNode_BXDF_MicrofacetRefraction" );
 
-	// constructor
-	MicrofacetRefractionNode();
 	// update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
 private:
-	MaterialNodeProperty	baseColor;
-    MaterialNodeProperty	roughnessU;
-    MaterialNodeProperty	roughnessV;
-	MaterialNodeProperty	in_ior;
-	MaterialNodeProperty	ext_ior;
-	MaterialNodePropertyString	mf_dist;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
+    SORT_MATERIAL_DEFINE_PROP_STR( "MicroFacetDistribution" , mf_dist );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessU" , roughnessU );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessV" , roughnessV );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Interior_IOR" , in_ior );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Exterior_IOR" , ext_ior );
 };
 
 // AshikhmanShirley node
@@ -131,16 +114,14 @@ class AshikhmanShirleyNode : public BxdfNode
 public:
     DEFINE_CREATOR(AshikhmanShirleyNode, MaterialNode, "SORTNode_BXDF_AshikhmanShirley");
 
-    // constructor
-    AshikhmanShirleyNode();
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
 
 private:
-    MaterialNodeProperty	diffuse;
-    MaterialNodeProperty	specular;
-    MaterialNodeProperty	roughnessU;
-    MaterialNodeProperty	roughnessV;
+    SORT_MATERIAL_DEFINE_PROP_COLOR("Diffuse", diffuse);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT("Specular", specular);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT("RoughnessU", roughnessU);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT("RoughnessV", roughnessV);
 };
 
 // Phong node
@@ -149,16 +130,14 @@ class PhongNode : public BxdfNode
 public:
     DEFINE_CREATOR(PhongNode, MaterialNode, "SORTNode_BXDF_Phong");
 
-    // constructor
-    PhongNode();
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
 
 private:
-    MaterialNodeProperty	diffuse;
-    MaterialNodeProperty	specular;
-    MaterialNodeProperty	power;
-    MaterialNodeProperty	diffRatio;
+    SORT_MATERIAL_DEFINE_PROP_COLOR("Diffuse", diffuse);
+    SORT_MATERIAL_DEFINE_PROP_COLOR("Specular", specular);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT("SpecularPower", power);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT("DiffuseRatio", diffRatio);
 };
 
 // Merl node
@@ -166,9 +145,6 @@ class MerlNode : public BxdfNode
 {
 public:
     DEFINE_CREATOR( MerlNode , MaterialNode , "SORTNode_BXDF_MERL" );
-
-    // constructor
-    MerlNode();
     
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
@@ -177,7 +153,7 @@ public:
     void PostProcess() override;
     
 private:
-    MaterialNodePropertyString    merlfile;
+    SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , merlfile );
 
     // the merl data
     MerlData data;
@@ -188,9 +164,6 @@ class FourierBxdfNode : public BxdfNode
 {
 public:
     DEFINE_CREATOR( FourierBxdfNode , MaterialNode , "SORTNode_BXDF_Fourier" );
-    
-    // constructor
-    FourierBxdfNode();
 
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
@@ -199,7 +172,7 @@ public:
     void PostProcess() override;
 
 private:
-    MaterialNodePropertyString  fourierBxdfFile;
+    SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , fourierBxdfFile );
 
     // fourier bxdf node
     FourierBxdfData fourierBxdfData;
@@ -211,15 +184,13 @@ class CoatNode : public BxdfNode
 public:
     DEFINE_CREATOR(CoatNode, MaterialNode, "SORTNode_BXDF_Coat");
     
-    // constructor
-    CoatNode();
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
     
 private:
-    MaterialNodeProperty    thickness;
-    MaterialNodeProperty    roughness;
-    MaterialNodeProperty    sigma;
-    MaterialNodeProperty    ior;
-    MaterialNodeProperty    bxdf;
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Thickness" , thickness );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Sigma" , sigma );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "IOR" , ior );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Surface" , bxdf );
 };
