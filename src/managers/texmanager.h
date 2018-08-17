@@ -78,5 +78,12 @@ private:
 	// find correct texio
     const std::unique_ptr<TexIO>&	FindTexIO( TEX_TYPE tt ) const;
 
+    // para 'name'  : Load image file
+    // return       : Return value
+    bool loadImage(const string& name, std::shared_ptr<ImgMemory>& mem);
+    // para 'name'  : Load image file
+    // return       : Return value
+    bool saveImage(const string& name, std::shared_ptr<ImgMemory>& mem);
+
 	friend class Singleton<TexManager>;
 };
