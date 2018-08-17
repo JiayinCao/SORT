@@ -32,6 +32,13 @@
 #include "texture/constanttexture.h"
 #include "texture/imagetexture.h"
 #include "utility/log.h"
+#include <regex>
+
+#define TINYEXR_IMPLEMENTATION
+#include "thirdparty/tiny_exr/tinyexr.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "thirdparty/stb_image/stb_image.h"
 
 // default constructor
 TexManager::TexManager()
@@ -92,6 +99,10 @@ bool TexManager::Read( const string& filename , ImageTexture* tex )
 		// create a new memory
         std::shared_ptr<ImgMemory> mem = std::make_shared<ImgMemory>();
 
+        //if( !loadImage(str, mem) )
+        //   slog(WARNING, IMAGE, stringFormat("Can't load image file %s.", str.c_str()));
+
+        // To be replaced!
 		// read the data
 		read = io->Read( str , mem );
 
@@ -124,4 +135,71 @@ const std::unique_ptr<TexIO>& TexManager::FindTexIO( TEX_TYPE tt ) const
 	}
 
 	return m_TexNull;
+}
+
+// para 'name'  : Load image file
+// return       : Return value
+bool TexManager::loadImage(const string& name, std::shared_ptr<ImgMemory>& mem )
+{
+    std::regex exr_reg( "((.?)+(.exr)+([\\s]))$" , regex_constants::icase);
+
+    if (std::regex_match(name, exr_reg)) {
+        float* out = nullptr;
+        int width, height;
+        const char* err;
+
+        int ret = LoadEXR(&out, &width, &height, name.c_str(), &err);
+
+        if (ret >= 0) {
+            mem->m_iWidth = width;
+            mem->m_iHeight = height;
+            unsigned total = mem->m_iWidth * mem->m_iHeight;
+            mem->m_ImgMem = std::unique_ptr<Spectrum[]>(new Spectrum[total]);
+            for (unsigned i = 0; i < total; i++)
+                mem->m_ImgMem[i] = Spectrum(out[4 * i], out[4 * i + 1], out[4 * i + 2]);
+
+            delete[] out;
+            return true;
+        }
+
+        slog(WARNING, MATERIAL, err);
+        return false;
+    }
+    else {
+        stbi_ldr_to_hdr_gamma(1.0f);
+        stbi_ldr_to_hdr_scale(1.0f);
+
+        int w, h;
+        int channel = 0, desired_channel = 3;
+        float* data = stbi_loadf(name.c_str(), &w, &h, &channel, desired_channel);
+
+        int real_channel = min(desired_channel, channel);
+        if (data && real_channel) {
+            mem->m_ImgMem = std::unique_ptr<Spectrum[]>(new Spectrum[w*h]);
+            for (int i = 0; i < h; ++i) {
+                for (int j = 0; j < w; ++j) {
+                    int k = i * w + j;
+                    float r = data[real_channel * k];
+                    float g = data[real_channel * k + 1];
+                    float b = data[real_channel * k + 2];
+                    mem->m_ImgMem[i * w + j].SetColor(r, g, b);
+                }
+            }
+            mem->m_iWidth = w;
+            mem->m_iHeight = h;
+
+            delete[] data;
+            return true;
+        }
+        return false;
+    }
+
+    return true;
+}
+
+// para 'name'  : Load image file
+// return       : Return value
+bool TexManager::saveImage(const string& name, std::shared_ptr<ImgMemory>& mem )
+{
+    return false;
 }
