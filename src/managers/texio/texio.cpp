@@ -18,7 +18,6 @@
 #include "texio.h"
 #include "managers/texmanager.h"
 
-#define STB_IMAGE_IMPLEMENTATION
 #include "thirdparty/stb_image/stb_image.h"
 
 bool TexIO::Read(const string& str, std::shared_ptr<ImgMemory>& mem)

@@ -21,7 +21,7 @@
 #include "managers/texmanager.h"
 #include "utility/log.h"
 
-#define TINYEXR_IMPLEMENTATION
+
 #include "thirdparty/tiny_exr/tinyexr.h"
 
 // read data from file
@@ -40,6 +40,7 @@ bool ExrIO::Read( const string& name , std::shared_ptr<ImgMemory>& mem )
         mem->m_ImgMem = std::unique_ptr<Spectrum[]>(new Spectrum[total]);
         for (unsigned i = 0; i < total; i++)
             mem->m_ImgMem[i] = Spectrum(out[4 * i], out[4 * i + 1], out[4 * i + 2]);
+        delete[] out;
         return true;
     }
 
