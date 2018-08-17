@@ -18,85 +18,56 @@
 // include the header
 #include "exrio.h"
 #include "texture/texture.h"
-#include <ImfInputFile.h>
-#include <ImathBox.h>
 #include "managers/texmanager.h"
-#include <half.h>
-#include <ImfRgba.h>
-#include <ImfRgbaFile.h>
 #include "utility/log.h"
 
-using namespace Imf;
-using namespace Imath;
+#define TINYEXR_IMPLEMENTATION
+#include "thirdparty/tiny_exr/tinyexr.h"
 
 // read data from file
 bool ExrIO::Read( const string& name , std::shared_ptr<ImgMemory>& mem )
 {
-	try {
-		InputFile file(name.c_str());
-		Box2i dw = file.header().dataWindow();
-		mem->m_iWidth  = dw.max.x - dw.min.x + 1;
-		mem->m_iHeight = dw.max.y - dw.min.y + 1;
+    float* out = nullptr;
+    int width , height;
+    const char* err;
 
-		half *rgb = new half[3 * mem->m_iWidth * mem->m_iHeight];
+    int ret = LoadEXR(&out, &width, &height, name.c_str(), &err);
 
-		FrameBuffer frameBuffer;
-		frameBuffer.insert("R", Slice(HALF, (char *)rgb,
-			3*sizeof(half), mem->m_iWidth * 3 * sizeof(half), 1, 1, 0.0));
-		frameBuffer.insert("G", Slice(HALF, (char *)rgb+sizeof(half),
-			3*sizeof(half), mem->m_iWidth * 3 * sizeof(half), 1, 1, 0.0));
-		frameBuffer.insert("B", Slice(HALF, (char *)rgb+2*sizeof(half),
-			3*sizeof(half), mem->m_iWidth * 3 * sizeof(half), 1, 1, 0.0));
-
-		file.setFrameBuffer(frameBuffer);
-		file.readPixels(dw.min.y, dw.max.y);
-
-		unsigned total = mem->m_iWidth * mem->m_iHeight;
-        mem->m_ImgMem = std::unique_ptr<Spectrum[]>( new Spectrum[ total ] );
-
-		for( unsigned i = 0 ; i < total ; i++ )
-			mem->m_ImgMem[i] = Spectrum( rgb[3*i] , rgb[3*i+1] , rgb[3*i+2] );
-
-		SAFE_DELETE_ARRAY( rgb );
-
-		return true;
-    }catch (const std::exception &e) {
-        slog( WARNING , IMAGE , stringFormat("Unable to read image file \"%s\": %s" , name.c_str() , e.what() ) );
-        return false;
+    if (ret >= 0) {
+        mem->m_iWidth = width;
+        mem->m_iHeight = height;
+        unsigned total = mem->m_iWidth * mem->m_iHeight;
+        mem->m_ImgMem = std::unique_ptr<Spectrum[]>(new Spectrum[total]);
+        for (unsigned i = 0; i < total; i++)
+            mem->m_ImgMem[i] = Spectrum(out[4 * i], out[4 * i + 1], out[4 * i + 2]);
+        return true;
     }
 
-	return true;
+    slog( WARNING , MATERIAL , err );
+	return false;
 }
 
 // output the texture into bmp file
 bool ExrIO::Write( const string& name , const Texture* tex )
 {
-	unsigned totalXRes = tex->GetWidth();
-	unsigned totalYRes = tex->GetHeight();
-	unsigned total = totalXRes * totalYRes;
-
-	Rgba *hrgba = new Rgba[total];
+    unsigned totalXRes = tex->GetWidth();
+    unsigned totalYRes = tex->GetHeight();
+    unsigned total = totalXRes * totalYRes;
+    float *data = new float[total * 3];
     for (unsigned i = 0; i < total; ++i)
-	{
-		unsigned x = i % totalXRes;
-		unsigned y = i / totalXRes;
-		Spectrum c = tex->GetColor( x , y );
-		hrgba[i] = Rgba( c.GetR() , c.GetG() , c.GetB() , 1.f);
-	}
-	
-    Box2i displayWindow(V2i(0,0), V2i(totalXRes-1, totalYRes-1));
-    Box2i dataWindow(V2i(0, 0), V2i(totalXRes - 1, totalYRes - 1));
+    {
+        unsigned x = i % totalXRes;
+        unsigned y = i / totalXRes;
+        Spectrum c = tex->GetColor(x, y);
 
-    try {
-        RgbaOutputFile file(name.c_str(), displayWindow, dataWindow, WRITE_RGBA);
-        file.setFrameBuffer(hrgba, 1, totalXRes);
-        file.writePixels(totalYRes);
-    }
-    catch (const std::exception &e) {
-        slog( WARNING , IMAGE , stringFormat("Unable to write image file \"%s\": %s" , name.c_str() , e.what() ) );
+        data[3 * i] = c.GetR();
+        data[3 * i + 1] = c.GetG();
+        data[3 * i + 2] = c.GetB();
     }
 
-    delete[] hrgba;
-
-	return true;
+    int ret = SaveEXR(data, tex->GetWidth(), tex->GetHeight(), 3, true, name.c_str());
+    delete[] data;
+    if (ret < 0)
+        slog(WARNING, MATERIAL, stringFormat("Fail to save image file %s", name.c_str()));
+	return ret >= 0;
 }
