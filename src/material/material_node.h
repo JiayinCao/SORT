@@ -138,7 +138,7 @@ class MaterialNodePropertyFloat : public MaterialNodeProperty
 {
 public:
     // set node property
-    void SetNodeProperty( const string& str ) override{ value = atof(str.c_str()); }
+    void SetNodeProperty( const string& str ) override{ value = (float)atof(str.c_str()); }
     void GetMaterialProperty( Bsdf* bsdf , float& result ) {
         if( node )
             node->GetMaterialProperty(bsdf, result);
