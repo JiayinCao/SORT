@@ -23,8 +23,8 @@
 #include <memory>
 
 // pre-declare texture class
-class Texture;
 class ImgMemory;
+class Texture;
 
 ////////////////////////////////////////////////////////////////////////////
 // definition of TexIO
@@ -33,32 +33,32 @@ class ImgMemory;
 // popping an window showing the texture.
 class	TexIO
 {
-// public method
+    // public method
 public:
-	// default constructor
-	TexIO(){m_TexType=TT_NONE;}
-	// constructor from a type
-	// para 'tot' : texture output type
-	// note	      :	actually set tot_type in TexIO gains nothing
-	TexIO( TEX_TYPE tt ) { m_TexType = tt; }
-	// destructor
-	virtual ~TexIO() {}
+    // default constructor
+    TexIO() { m_TexType = TT_NONE; }
+    // constructor from a type
+    // para 'tot' : texture output type
+    // note	      :	actually set tot_type in TexIO gains nothing
+    TexIO(TEX_TYPE tt) { m_TexType = tt; }
+    // destructor
+    virtual ~TexIO() {}
 
-	// output the file in different ways
-	// para 'str' : the name of the output entity
-	// para 'tex' : the texture for outputing
-	// result     : 'true' if outputing is successed
-	virtual bool Write( const string& str , const Texture* tex ) = 0;
+    // output the file in different ways
+    // para 'str' : the name of the output entity
+    // para 'tex' : the texture for outputing
+    // result     : 'true' if outputing is successed
+    virtual bool Write(const string& str, const Texture* tex)
+    {
+        return true;
+    }
 
 	// read data from file
 	// para 'str' : the name of the input entity
-	// para 'tex' : the texture for aside the memory
+	// para 'mem' : the texture for aside the memory
 	// result     :	return true if loading is successful
 	// note       : it's not a pure function because some shower doesn't need a reading func
-    virtual bool Read( const string& str , std::shared_ptr<ImgMemory>& tex )
-	{
-		return false;
-	}
+    virtual bool Read(const string& str, std::shared_ptr<ImgMemory>& mem);
 
 	// get tot type
 	TEX_TYPE GetTT()
