@@ -28,7 +28,6 @@
 #include "utility/creator.h"
 #include "sampler/sampler.h"
 #include "utility/multithread/multithread.h"
-#include <ImfHeader.h>
 #include "utility/strhelper.h"
 #include "camera/camera.h"
 #include "integrator/integrator.h"
@@ -121,12 +120,6 @@ void System::_outputProgress()
     }
 }
 
-// uninitialize 3rd party library
-void System::_uninit3rdParty()
-{
-	Imf::staticUninitialize();
-}
-
 // uninitialize
 void System::Uninit()
 {
@@ -141,8 +134,6 @@ void System::Uninit()
     SAFE_DELETE(m_camera);
     SAFE_DELETE(m_pSampler);
     SAFE_DELETE_ARRAY(m_taskDone);
-
-	_uninit3rdParty();
 }
 
 // push rendering task
