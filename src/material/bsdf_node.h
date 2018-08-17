@@ -28,24 +28,21 @@ class DisneyPrincipleNode : public BxdfNode
 public:
     DEFINE_CREATOR( DisneyPrincipleNode , MaterialNode , "SORTNode_Material_DisneyBRDF" );
     
-    // constructor
-    DisneyPrincipleNode();
-    
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
 private:
-    MaterialNodeProperty        basecolor;
-    MaterialNodeProperty        subsurface;
-    MaterialNodeProperty        metallic;
-    MaterialNodeProperty        specular;
-    MaterialNodeProperty        specularTint;
-    MaterialNodeProperty        roughness;
-    MaterialNodeProperty        anisotropic;
-    MaterialNodeProperty        sheen;
-    MaterialNodeProperty        sheenTint;
-    MaterialNodeProperty        clearcoat;
-    MaterialNodeProperty        clearcoatGloss;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" ,      basecolor );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "SubSurface" ,     subsurface );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Metallic" ,       metallic );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Specular" ,       specular );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "SpecularTint" ,   specularTint );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" ,      roughness );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Anisotropic" ,    anisotropic );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Sheen" ,          sheen );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "SheenTint" ,      sheenTint );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Clearcoat" ,      clearcoat );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "ClearcoatGloss" , clearcoatGloss );
 };
 
 // Priciple Material
@@ -54,17 +51,15 @@ class PrincipleMaterialNode : public BxdfNode
 public:
     DEFINE_CREATOR( PrincipleMaterialNode , MaterialNode, "SORTNode_Material_Principle" );
     
-    // constructor
-    PrincipleMaterialNode();
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
 private:
-    MaterialNodeProperty    baseColor;
-    MaterialNodeProperty    roughnessU;
-    MaterialNodeProperty    roughnessV;
-    MaterialNodeProperty    metallic;
-    MaterialNodeProperty    specular;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessU" , roughnessU );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessV" , roughnessV );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Metallic" , metallic );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Specular" , specular );
 };
 
 // Matte Material
@@ -73,14 +68,12 @@ class MatteMaterialNode : public BxdfNode
 public:
     DEFINE_CREATOR( MatteMaterialNode , MaterialNode, "SORTNode_Material_Matte" );
     
-    // constructor
-    MatteMaterialNode();
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
 private:
-    MaterialNodeProperty    baseColor;
-    MaterialNodeProperty    roughness;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );
 };
 
 // Plastic Material
@@ -89,15 +82,13 @@ class PlasticMaterialNode : public BxdfNode
 public:
     DEFINE_CREATOR( PlasticMaterialNode , MaterialNode, "SORTNode_Material_Plastic" );
     
-    // constructor
-    PlasticMaterialNode();
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
 private:
-    MaterialNodeProperty    diffuse;
-    MaterialNodeProperty    specular;
-    MaterialNodeProperty    roughness;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , diffuse );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Specular" , specular );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );
 };
 
 // Glass Material
@@ -106,16 +97,14 @@ class GlassMaterialNode : public BxdfNode
 public:
     DEFINE_CREATOR( GlassMaterialNode , MaterialNode, "SORTNode_Material_Glass" );
     
-    // constructor
-    GlassMaterialNode();
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
 private:
-    MaterialNodeProperty    reflectance;
-    MaterialNodeProperty    transmittance;
-    MaterialNodeProperty    roughnessU;
-    MaterialNodeProperty    roughnessV;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Reflectance" , reflectance );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "Transmittance" , transmittance );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessU" , roughnessU );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessV" , roughnessV );
 };
 
 // Mirror Material
@@ -124,13 +113,11 @@ class MirrorMaterialNode : public BxdfNode
 public:
     DEFINE_CREATOR( MirrorMaterialNode , MaterialNode, "SORTNode_Material_Mirror" );
     
-    // constructor
-    MirrorMaterialNode();
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
 private:
-    MaterialNodeProperty    basecolor;
+    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , basecolor );
 };
 
 // Measured Material
@@ -139,9 +126,6 @@ class MeasuredMaterialNode : public BxdfNode
 public:
     DEFINE_CREATOR( MeasuredMaterialNode , MaterialNode , "SORTNode_Material_Measured" );
     
-    // constructor
-    MeasuredMaterialNode();
-    
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
@@ -149,8 +133,8 @@ public:
     void PostProcess() override;
     
 private:
-    MaterialNodePropertyString  bxdfFilePath;
-    MaterialNodePropertyString  bxdfType;
+    SORT_MATERIAL_DEFINE_PROP_STR( "Type" , bxdfType );
+    SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , bxdfFilePath );
     
     FourierBxdfData fourierBxdfData;
     MerlData        merlData;
@@ -162,31 +146,25 @@ class BlendMaterialNode : public BxdfNode
 public:
     DEFINE_CREATOR(BlendMaterialNode, MaterialNode, "SORTNode_Material_Blend");
 
-    // constructor
-    BlendMaterialNode();
-
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
 
 private:
-    MaterialNodeProperty    bxdf0;
-    MaterialNodeProperty    bxdf1;
-    MaterialNodeProperty    factor;
+    SORT_MATERIAL_DEFINE_PROP_BXDF("Bxdf0", bxdf0);
+    SORT_MATERIAL_DEFINE_PROP_BXDF("Bxdf1", bxdf1);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT("Factor", factor);
 };
 
-// Blend Material
+// Double-Sided Material
 class DoubleSidedMaterialNode : public BxdfNode
 {
 public:
     DEFINE_CREATOR(DoubleSidedMaterialNode, MaterialNode, "SORTNode_Material_DoubleSided");
 
-    // constructor
-    DoubleSidedMaterialNode();
-
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
 
 private:
-    MaterialNodeProperty    bxdf0;
-    MaterialNodeProperty    bxdf1;
+    SORT_MATERIAL_DEFINE_PROP_BXDF("Bxdf0", bxdf0);
+    SORT_MATERIAL_DEFINE_PROP_BXDF("Bxdf1", bxdf1);
 };
