@@ -16,69 +16,19 @@
  */
 
 #include "constant_node.h"
-#include "geometry/intersection.h"
 #include "bsdf/bsdf.h"
 
-IMPLEMENT_CREATOR( GridTexNode );
-IMPLEMENT_CREATOR( CheckBoxTexNode );
-IMPLEMENT_CREATOR( ImageTexNode );
 IMPLEMENT_CREATOR( ConstantColorNode );
+IMPLEMENT_CREATOR( ConstantFloatNode );
 
-void GridTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result )
+void ConstantColorNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result )
 {
-    const Intersection* intesection = bsdf->GetIntersection();
-    result = grid_tex.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
+    SORT_MATERIAL_GET_PROP_COLOR(c,src);
+    result = c;
 }
 
-// post process
-void GridTexNode::PostProcess()
+void ConstantFloatNode::GetMaterialProperty( Bsdf* bsdf , float& result )
 {
-	if( m_post_processed )
-		return;
-
-    Bsdf* bsdf = nullptr;
-    SORT_MATERIAL_GET_PROP_COLOR(s0,src0);
-    SORT_MATERIAL_GET_PROP_COLOR(s1,src1);
-    
-	// set grid texture
-	grid_tex.SetGridColor( s0 , s1 );
-
-	MaterialNode::PostProcess();
-}
-
-void CheckBoxTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result )
-{
-    const Intersection* intesection = bsdf->GetIntersection();
-    result = checkbox_tex.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
-}
-
-// post process
-void CheckBoxTexNode::PostProcess()
-{
-	if( m_post_processed )
-		return;
-
-    Bsdf* bsdf = nullptr;
-    SORT_MATERIAL_GET_PROP_COLOR(s0,src0);
-    SORT_MATERIAL_GET_PROP_COLOR(s1,src1);
-    
-	// set grid texture
-	checkbox_tex.SetCheckBoxColor( s0 , s1 );
-
-	MaterialNode::PostProcess();
-}
-
-void ImageTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    const Intersection* intesection = bsdf->GetIntersection();
-    result = image_tex.GetColorFromUV( intesection->u , intesection->v );
-}
-
-// post process
-void ImageTexNode::PostProcess()
-{
-	if( m_post_processed )
-		return;
-
-	// set grid texture
-	image_tex.LoadImageFromFile( filename.str );
+    SORT_MATERIAL_GET_PROP_FLOAT(f,value);
+    result = f;
 }

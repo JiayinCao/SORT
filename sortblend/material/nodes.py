@@ -134,9 +134,8 @@ class SORTShadingNode(bpy.types.Node):
                 continue
             attr_wrapper = getattr(self, prop['name'] + '_wrapper' )
             attr = getattr(self, prop['name'])
-            t = attr_wrapper.export_sort_socket_type(attr_wrapper)
             v = attr_wrapper.export_socket_value(attr_wrapper, attr)
-            output_sort_prop( prop['name'] , t , v )
+            output_sort_prop( prop['name'] , v )
 
     # register all properties in the class
     @classmethod
@@ -188,10 +187,6 @@ class SORTShadingNode(bpy.types.Node):
         for _ in do_mro(self, 'register_prop'):
             pass
 
-    # whether the node is a bxdf node
-    def isBxdfNode(self):
-        return False
-
 # Base class for SORT BXDF Node
 class SORTShadingNode_BXDF(SORTShadingNode):
     bl_label = 'ShadingNode'
@@ -225,10 +220,6 @@ class SORTShadingNode_BXDF(SORTShadingNode):
                 t = self.inputs[prop['name']].export_pbrt_socket_type()
                 v = self.inputs[prop['name']].export_socket_value()
                 output_pbrt_prop( n , t , v )
-
-    # whether the node is a bxdf node
-    def isBxdfNode(self):
-        return True
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Material Nodes for SORT
@@ -465,6 +456,7 @@ class SORTNodeGammaToLinear(SORTShadingNode):
 class SORTNodeDecodeNormal(SORTShadingNode):
     bl_label = 'DecodeNormal'
     bl_idname = 'SORTNodeDecodeNormal'
+    output_type = 'SORTNodeSocketNormal'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
 
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -495,8 +487,57 @@ class SORTNodeImage(SORTShadingNode):
 #------------------------------------------------------------------------------------------------------------------------------------
 @SORTPatternGraph.register_node('Constant')
 class SORTNodeConstant(SORTShadingNode):
-    bl_label = 'Constant'
+    bl_label = 'Constant Color'
     bl_idname = 'SORTNodeConstant'
+    property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
+
+@SORTPatternGraph.register_node('Constant')
+class SORTNodeConstantFloat(SORTShadingNode):
+    bl_label = 'Constant Float'
+    bl_idname = 'SORTNodeConstantFloat'
+    output_type = 'SORTNodeSocketFloat'
+    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Value' } ]
+
+#------------------------------------------------------------------------------------------------------------------------------------
+#                                               Constant Nodes for SORT
+#------------------------------------------------------------------------------------------------------------------------------------
+@SORTPatternGraph.register_node('Convertor')
+class SORTNodeComposite(SORTShadingNode):
+    bl_label = 'Composite'
+    bl_idname = 'SORTNodeComposite'
+    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'R' },
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'G' },
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'B' } ]
+
+# A better flow for extraction channel is to support multiple outputs per-node
+# This is doable in python code. However, it needs more complex design in C++ code.
+# Since this is only occurance of multi-results node, I will just use this naive way to support it.
+@SORTPatternGraph.register_node('Convertor')
+class SORTNodeExtractRed(SORTShadingNode):
+    bl_label = 'ExtractRed'
+    bl_idname = 'SORTNodeExtractRed'
+    output_type = 'SORTNodeSocketFloat'
+    property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
+
+@SORTPatternGraph.register_node('Convertor')
+class SORTNodeExtractGreen(SORTShadingNode):
+    bl_label = 'ExtractGreen'
+    bl_idname = 'SORTNodeExtractGreen'
+    output_type = 'SORTNodeSocketFloat'
+    property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
+
+@SORTPatternGraph.register_node('Convertor')
+class SORTNodeExtractBlue(SORTShadingNode):
+    bl_label = 'ExtractBlue'
+    bl_idname = 'SORTNodeExtractBlue'
+    output_type = 'SORTNodeSocketFloat'
+    property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
+
+@SORTPatternGraph.register_node('Convertor')
+class SORTNodeIntensity(SORTShadingNode):
+    bl_label = 'Intensity'
+    bl_idname = 'SORTNodeIntensity'
+    output_type = 'SORTNodeSocketFloat'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
 
 #------------------------------------------------------------------------------------------------------------------------------------

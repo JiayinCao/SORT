@@ -192,5 +192,5 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Sigma" , sigma );
     SORT_MATERIAL_DEFINE_PROP_FLOAT( "IOR" , ior );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Surface" , bxdf );
+    SORT_MATERIAL_DEFINE_PROP_BXDF( "Surface" , bxdf );
 };
