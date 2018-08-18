@@ -48,8 +48,8 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     Vector lwi;
     
     // Because attenuation from the incident direction is not considered at all, an scaled offset by roughness is added here to compensate it
-    const float specProp = saturate( 0.5f + 0.5f * ( 1.0f - roughness ) - ( -thickness * sigma * (1.0f / AbsCosTheta(swo))).Exp().GetIntensity() * (1.0f - fresnel.Evaluate(CosTheta(swo))).GetIntensity() );
-    
+    const float specProp = saturate( 0.5f + 0.5f * ( 1.0f - roughness ) - ( -thickness * sigma * (1.0f / AbsCosTheta(swo)) ).Exp().GetIntensity() * (1.0f - fresnel.Evaluate(CosTheta(swo))).GetIntensity() );
+
     Spectrum ret;
     if( bs.u < specProp ){
         // Importance sampling based on the top layer, Microfacet model
@@ -60,7 +60,13 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
         ret = bottom->sample_f( wo , wi , BsdfSample(true) , pPdf );
     }
     
-    if( pPdf ) *pPdf = Pdf( wo , wi );
+    if( pPdf ){
+        if( bs.u < specProp )
+            *pPdf = lerp( bottom->Pdf( wo , wi ) , *pPdf , specProp );
+        else
+            *pPdf = lerp( *pPdf , coat.pdf( swo , bsdfToBxdf(wi) ) , specProp );
+    }
+    
     return ret;
 }
 
