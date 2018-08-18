@@ -18,77 +18,31 @@
 #pragma once
 
 #include "material_node.h"
-#include "texture/gridtexture.h"
-#include "texture/checkboxtexture.h"
-#include "texture/imagetexture.h"
-
-// constant node
-class ConstantNode : public MaterialNode
-{
-public:
-    // get node return type
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_COLOR; }
-};
-
-// Grid texture Node
-class GridTexNode : public ConstantNode
-{
-public:
-	DEFINE_CREATOR( GridTexNode , MaterialNode , "SORTNodeGrid" );
-
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
-	// post process
-	void PostProcess() override;
-
-private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
-
-	GridTexture grid_tex;
-};
-
-// Grid texture Node
-class CheckBoxTexNode : public ConstantNode
-{
-public:
-	DEFINE_CREATOR( CheckBoxTexNode , MaterialNode , "SORTNodeCheckbox" );
-
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
-	// post process
-    void PostProcess() override;
-    
-private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
-
-	CheckBoxTexture checkbox_tex;
-};
-
-// Grid texture Node
-class ImageTexNode : public ConstantNode
-{
-public:
-	DEFINE_CREATOR( ImageTexNode , MaterialNode , "SORTNodeImage" );
-
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
-	// post process
-    void PostProcess() override;
-
-private:
-	SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , filename );
-
-	ImageTexture image_tex;
-};
 
 // constant color node
-class ConstantColorNode : public ConstantNode
+class ConstantColorNode : public MaterialNode
 {
 public:
 	DEFINE_CREATOR( ConstantColorNode , MaterialNode , "SORTNodeConstant" );
 
+    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
+    
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_COLOR; }
+    
 private:
 	SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , src );
+};
+
+// constant float node
+class ConstantFloatNode : public MaterialNode
+{
+public:
+    DEFINE_CREATOR( ConstantFloatNode , MaterialNode , "SORTNodeConstantFloat" );
+    
+    void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
+    
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_FLOAT; }
+    
+private:
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Value" , value );
 };

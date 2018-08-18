@@ -169,8 +169,6 @@ public:
 class MaterialNodePropertyBxdf : public MaterialNodeProperty
 {
 public:
-    void SetNodeProperty( const string& prop ) override { sAssertMsg( false , MATERIAL , "Setting value to BXDF!" ); }
-    
     void UpdateBsdf( Bsdf* bsdf , Spectrum weight = Spectrum(1.0f) ){
         if( node )
             node->UpdateBSDF(bsdf,weight);
