@@ -247,8 +247,8 @@ def export_scene(scene, root, force_debug):
             ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr(world_matrix) )
             ET.SubElement( light_node , 'Property' , name='shape' ,value=shape)
             ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-            ET.SubElement( light_node , 'Property' , name='sizex' ,value='%d'%sizeX )
-            ET.SubElement( light_node , 'Property' , name='sizey' ,value='%d'%sizeY )
+            ET.SubElement( light_node , 'Property' , name='sizex' ,value='%f'%sizeX )
+            ET.SubElement( light_node , 'Property' , name='sizey' ,value='%f'%sizeY )
         elif lamp.type == 'HEMI':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy

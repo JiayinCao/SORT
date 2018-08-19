@@ -145,6 +145,8 @@ float Bvh::pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , u
 	memset( bin , 0 , sizeof( unsigned ) * BVH_SPLIT_COUNT );
 	float split_start = inner.m_Min[axis];
 	float split_delta = inner.Delta(axis) * BVH_INV_SPLIT_COUNT;
+    if( split_delta == 0.0f )
+        return FLT_MAX;
 	float inv_split_delta = 1.0f / split_delta;
     for( unsigned i = _start ; i < _end ; i++ ){
 		int index = (int)((m_bvhpri[i].m_centroid[axis] - split_start) * inv_split_delta);
