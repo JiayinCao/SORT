@@ -56,8 +56,8 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
     bl_label = 'Renderer'
 
     # Integrator type
-    integrator_types = [ ("bdpt", "Bidirectional Path Tracing", "", 1),
-                         ("pt", "Path Tracing", "", 2),
+    integrator_types = [ ("pt", "Path Tracing", "", 1),
+                         ("bdpt", "Bidirectional Path Tracing", "", 2),
                          ("lt", "Light Tracing", "", 3),
                          ("ir", "Instant Radiosity", "", 4),
                          ("ao", "Ambient Occlusion", "", 5),
@@ -66,8 +66,8 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
     bpy.types.Scene.integrator_type_prop = bpy.props.EnumProperty(items=integrator_types, name='Integrator')
 
     # Accelerator type
-    accelerator_types = [ ("kd_tree", "SAH KDTree", "", 1),
-                          ("bvh", "Bounding Volume Hierarchy", "", 2),
+    accelerator_types = [ ("bvh", "Bounding Volume Hierarchy", "", 1),
+                          ("kd_tree", "SAH KDTree", "", 2),
                           ("uniform_grid", "Uniform Grid", "", 3),
                           ("octree" , "OcTree" , "" , 4),
                           ("bruteforce", "No Accelerator", "", 5) ]
