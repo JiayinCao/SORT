@@ -21,6 +21,7 @@ import struct
 import numpy
 import shutil
 import platform
+import threading
 from .exporter import sort_exporter
 from extensions_framework.util import TimerThread
 from . import base
@@ -105,6 +106,8 @@ class SORT_RENDERER(bpy.types.RenderEngine):
     bl_label = 'SORT'
     bl_use_preview = True
 
+    render_lock = threading.Lock()
+
     # spawn new rendering thread
     def spawnnewthread(self):
         import mmap
@@ -177,14 +180,58 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         if not self.sort_available:
             return
 
-        if scene.name == 'preview':
-            self.render_preview(scene)
-        else:
-            self.render_scene(scene)
+        with SORT_RENDERER.render_lock:
+            if scene.name == 'preview':
+                self.render_preview(scene)
+            else:
+                self.render_scene(scene)
 
     # preview render
     def render_preview(self, scene):
-        pass
+        #spawn new thread
+        self.spawnnewthread()
+
+        # start rendering process first
+        binary_dir = sort_exporter.get_sort_dir()
+        binary_path = sort_exporter.get_sort_bin_path()
+        intermediate_dir = sort_exporter.get_intermediate_dir()
+        # execute binary
+        self.cmd_argument = [binary_path];
+        self.cmd_argument.append( intermediate_dir + 'sort_scene.xml')
+        process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
+
+        # wait for the process to finish
+        while subprocess.Popen.poll(process) is None:
+            if self.test_break():
+                break
+            progress = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size]
+            self.update_progress(progress/100)
+
+        # terminate the process by force
+        if subprocess.Popen.poll(process) is None:
+            subprocess.Popen.terminate(process)
+
+        # wait for the thread to finish
+        if self.sort_thread.isAlive():
+            self.sort_thread.stop()
+            self.sort_thread.join()
+
+            # begin result
+            result = self.begin_result(0, 0, scene.render.resolution_x, scene.render.resolution_y)
+
+            # update image memory
+            output_file = intermediate_dir + 'blender_generated.exr'
+            print(output_file)
+            result.layers[0].load_from_file(output_file)
+
+            # refresh the update
+            self.end_result(result)
+
+            # close shared memory connection
+            self.sharedmemory.close()
+
+        # clear immediate directory
+        shutil.rmtree(intermediate_dir)
 
     # scene render
     def render_scene(self, scene):
@@ -224,6 +271,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
                 # begin result
                 result = self.begin_result(0, 0, bpy.data.scenes[0].render.resolution_x, bpy.data.scenes[0].render.resolution_y)
 
+                print(result)
                 self.sharedmemory.seek( self.image_header_size + self.image_size_in_bytes)
                 byptes = self.sharedmemory.read(self.image_pixel_count * 16)
 
