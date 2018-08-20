@@ -28,13 +28,33 @@ class SORTMaterialPanel:
     def poll(cls, context):
         return context.scene.render.engine in cls.COMPAT_ENGINES
 
+class SORTMaterialPreview(SORTMaterialPanel, bpy.types.Panel):
+    bl_label = "Preview"
+    bl_context = "material"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        return context.material and SORTMaterialPanel.poll(context)
+
+    def draw(self, context):
+        self.layout.template_preview(context.material)
+
 class SORT_Add_Node:
-    def get_type_items(self, context):
+    def get_type_items(cls, context):
         items = []
         for category , types in nodes.SORTPatternGraph.nodetypes.items():
+            found_item = False
+            for type in types:
+                if type[2] == cls.socket_type:
+                    found_item = True
+                    break
+            if found_item is False:
+                continue
             items.append(('', category, ''))
             for type in types:
-                items.append(( type[0] , type[1] , type[1] ))
+                if type[2] == cls.socket_type:
+                    items.append(( type[0] , type[1] , type[1] ))
         items.append(('', 'Link', ''))
         items.append(('REMOVE', 'Remove', 'Remove the node connected to this socket'))
         items.append(('DISCONNECT', 'Disconnect', 'Disconnect the node connected to this socket'))
@@ -73,27 +93,48 @@ class SORT_Add_Node:
             newnode.location = node.location
             newnode.location[0] -= 300
             newnode.selected = False
-            if self.input_type == 'Pattern':
-                link_node(nt, newnode, socket)
-            else:
-                nt.links.new(newnode.outputs[self.input_type], socket)
+            nt.links.new(newnode.outputs['Result'], socket)
 
         # replace input node with a new one
         else:
             newnode = nt.nodes.new(new_type)
             input = socket
             old_node = input.links[0].from_node
-            nt.links.new(newnode.outputs[self.input_type], socket)
+            nt.links.new(newnode.outputs['Result'], socket)
             newnode.location = old_node.location
 
             nt.nodes.remove(old_node)
         return {'FINISHED'}
 
-class NODE_OT_add_surface(bpy.types.Operator, SORT_Add_Node):
-    bl_idname = 'node.add_surface'
+class NODE_OT_add_surface_SORTNodeSocketBxdf(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketbxdf'
     bl_label = 'Add Bxdf Node'
-    bl_description = 'Connect a Bxdf to this socket'
-    input_type = bpy.props.StringProperty(default='Result')
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketBxdf')
+
+class NODE_OT_add_surface_SORTNodeSocketColor(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketcolor'
+    bl_label = 'Add Color Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketColor')
+
+class NODE_OT_add_surface_SORTNodeSocketFloat(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketfloat'
+    bl_label = 'Add Float Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketFloat')
+
+class NODE_OT_add_surface_SORTNodeSocketLargeFloat(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketlargefloat'
+    bl_label = 'Add Bxdf Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketLargeFloat')
+
+class NODE_OT_add_surface_SORTNodeSocketNormal(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketnormal'
+    bl_label = 'Add Bxdf Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketNormal')
 
 class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Slot'
@@ -233,7 +274,7 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
                     indented_label(row)
                     row.prop(socket, "ui_open", icon=icon, text='', icon_only=True, emboss=False)
                     row.label(socket.name+":")
-                    split.operator_menu_enum("node.add_surface" , "node_type", text=input_node.bl_idname , icon= 'DOT')
+                    split.operator_menu_enum("node.add_surface_" + socket.bl_idname.lower() , "node_type", text=input_node.bl_idname , icon= 'DOT')
                     if socket.ui_open:
                         self.draw_node_properties_recursive(layout, context, nt, input_node, level=level+1)
                 else:
@@ -244,7 +285,7 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
                     prop_panel = split.row( align=True )
                     if socket.default_value is not None:
                         prop_panel.prop(socket,'default_value',text="")
-                    prop_panel.operator_menu_enum("node.add_surface" , "node_type", text='',icon='DOT')
+                    prop_panel.operator_menu_enum("node.add_surface_" + socket.bl_idname.lower() , "node_type", text='',icon='DOT')
 
         draw_props(node, layout)
         layout.separator()

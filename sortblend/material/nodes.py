@@ -72,7 +72,7 @@ class SORTPatternGraph(bpy.types.NodeTree):
 
             cls.nodetypes[c] = []
             for item in l :
-                cls.nodetypes[c].append((item.__name__,item.bl_label))
+                cls.nodetypes[c].append((item.__name__,item.bl_label,item.output_type))
         nodeitems_utils.register_node_categories('SORTSHADERNODES', cats)
 
     @classmethod
