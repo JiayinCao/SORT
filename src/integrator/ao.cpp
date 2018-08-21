@@ -43,31 +43,27 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 	if( false == scene.GetIntersect( r , &ip ) )
 		return 0.0f;
 
-	//return Spectrum((ip.normal.x + 1.0f)*0.5f, (ip.normal.y+1.0f)*0.5f, (ip.normal.z + 1.0f) * 0.5f);
-	Vector nn = ip.normal;
+	Vector nn = FaceForward( ip.normal , r.m_Dir ) ? -ip.normal : ip.normal;
 	Vector tn = Normalize(Cross( nn , ip.tangent ));
-	Vector sn = Cross( tn , nn );
+	Vector sn = Normalize(Cross( tn , nn ));
 	Vector _wi = CosSampleHemisphere( sort_canonical() , sort_canonical() );
-
+    const float pdf = CosHemispherePdf(_wi);
 	Vector wi = Vector( _wi.x * sn.x + _wi.y * nn.x + _wi.z * tn.x ,
 						_wi.x * sn.y + _wi.y * nn.y + _wi.z * tn.y ,
 						_wi.x * sn.z + _wi.y * nn.z + _wi.z * tn.z );
 
-	// flip the incident direction if necessary
-	if (Dot(r.m_Dir, nn)>0.0f)
-		wi *= -1.0f;
+    // Due to precision issue, sometimes the dot product between normal and incident vector could be slightly smaller than 0, leading a negative value, ignoring these cases in AO evaluation.
+    const float dot = Dot(wi, nn);
+    if (dot <= 0.0f)
+        return 0.0f;
 
 	// the ray to be tested
 	Ray ray( ip.intersect , wi , 0 , 0.001f , maxDistance );
 
-	// if there is no intersection, return 1.0 as full illumination
 	Intersection aoip;
 	if( !scene.GetIntersect( ray , &aoip ) )
-		return 1.0f;
-
-	float distance = Distance( aoip.intersect , ray.m_Ori );
-	float ao = distance / maxDistance;
-	return ao * ao;
+		return dot * INV_PI / pdf;
+    return 0.0f;
 }
 
 void AmbientOcclusion::_registerAllProperty()
