@@ -55,9 +55,10 @@ class SORT_Add_Node:
             for type in types:
                 if type[2] == cls.socket_type:
                     items.append(( type[0] , type[1] , type[1] ))
-        items.append(('', 'Link', ''))
-        items.append(('REMOVE', 'Remove', 'Remove the node connected to this socket'))
-        items.append(('DISCONNECT', 'Disconnect', 'Disconnect the node connected to this socket'))
+        if cls.connected:
+            items.append(('', 'Link', ''))
+            items.append(('REMOVE', 'Remove', 'Remove the node connected to this socket'))
+            items.append(('DISCONNECT', 'Disconnect', 'Disconnect the node connected to this socket'))
         return items
 
     node_type = bpy.props.EnumProperty(name="Node Type",
@@ -106,35 +107,76 @@ class SORT_Add_Node:
             nt.nodes.remove(old_node)
         return {'FINISHED'}
 
+# there must be a much better way to design this class registeration!
 class NODE_OT_add_surface_SORTNodeSocketBxdf(bpy.types.Operator, SORT_Add_Node):
     bl_idname = 'node.add_surface_sortnodesocketbxdf'
     bl_label = 'Add Bxdf Node'
     bl_description = 'Connect a node to this socket'
     socket_type = bpy.props.StringProperty(default='SORTNodeSocketBxdf')
+    connected = bpy.props.BoolProperty(default=True)
 
 class NODE_OT_add_surface_SORTNodeSocketColor(bpy.types.Operator, SORT_Add_Node):
     bl_idname = 'node.add_surface_sortnodesocketcolor'
     bl_label = 'Add Color Node'
     bl_description = 'Connect a node to this socket'
     socket_type = bpy.props.StringProperty(default='SORTNodeSocketColor')
+    connected = bpy.props.BoolProperty(default=True)
 
 class NODE_OT_add_surface_SORTNodeSocketFloat(bpy.types.Operator, SORT_Add_Node):
     bl_idname = 'node.add_surface_sortnodesocketfloat'
     bl_label = 'Add Float Node'
     bl_description = 'Connect a node to this socket'
     socket_type = bpy.props.StringProperty(default='SORTNodeSocketFloat')
+    connected = bpy.props.BoolProperty(default=True)
 
 class NODE_OT_add_surface_SORTNodeSocketLargeFloat(bpy.types.Operator, SORT_Add_Node):
     bl_idname = 'node.add_surface_sortnodesocketlargefloat'
     bl_label = 'Add Bxdf Node'
     bl_description = 'Connect a node to this socket'
     socket_type = bpy.props.StringProperty(default='SORTNodeSocketLargeFloat')
+    connected = bpy.props.BoolProperty(default=True)
 
 class NODE_OT_add_surface_SORTNodeSocketNormal(bpy.types.Operator, SORT_Add_Node):
     bl_idname = 'node.add_surface_sortnodesocketnormal'
     bl_label = 'Add Bxdf Node'
     bl_description = 'Connect a node to this socket'
     socket_type = bpy.props.StringProperty(default='SORTNodeSocketNormal')
+    connected = bpy.props.BoolProperty(default=True)
+
+class NODE_OT_add_surface_SORTNodeSocketBxdf_NoRemove(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketbxdf_no_remove'
+    bl_label = 'Add Bxdf Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketBxdf')
+    connected = bpy.props.BoolProperty(default=False)
+
+class NODE_OT_add_surface_SORTNodeSocketColor_NoRemove(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketcolor_no_remove'
+    bl_label = 'Add Color Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketColor')
+    connected = bpy.props.BoolProperty(default=False)
+
+class NODE_OT_add_surface_SORTNodeSocketFloat_NoRemove(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketfloat_no_remove'
+    bl_label = 'Add Float Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketFloat')
+    connected = bpy.props.BoolProperty(default=False)
+
+class NODE_OT_add_surface_SORTNodeSocketLargeFloat_NoRemove(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketlargefloat_no_remove'
+    bl_label = 'Add Bxdf Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketLargeFloat')
+    connected = bpy.props.BoolProperty(default=False)
+
+class NODE_OT_add_surface_SORTNodeSocketNormal_NoRemove(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketnormal_no_remove'
+    bl_label = 'Add Bxdf Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeSocketNormal')
+    connected = bpy.props.BoolProperty(default=False)
 
 class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Slot'
@@ -285,7 +327,7 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
                     prop_panel = split.row( align=True )
                     if socket.default_value is not None:
                         prop_panel.prop(socket,'default_value',text="")
-                    prop_panel.operator_menu_enum("node.add_surface_" + socket.bl_idname.lower() , "node_type", text='',icon='DOT')
+                    prop_panel.operator_menu_enum("node.add_surface_" + socket.bl_idname.lower() + "_no_remove" , "node_type", text='',icon='DOT')
 
         draw_props(node, layout)
         layout.separator()
