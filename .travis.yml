@@ -7,19 +7,11 @@ matrix:
       compiler: clang
     - os: linux
       compiler: gcc
-      env:
-        -CXX_COMPILER=g++-5
-        -C_COMPILER=gcc-5
-      addons:
-         apt:
-           sources:
-            - ubuntu-toolchain-r-test
-           packages:
-            - g++-5
 script:
 - mkdir release
 - cd release
 - cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make
 - cd ..
 - mkdir debug
+- cd debug
 - cmake -DCMAKE_BUILD_TYPE=Debug DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make
