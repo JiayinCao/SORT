@@ -13,7 +13,12 @@
             "cwd": "${workspaceFolder}/../bin",
             "environment": [],
             "externalConsole": true, // Will be false after I figure out a way to support /r /n in Debug Console
-            "MIMode": "lldb"
+            "osx":{
+                "MIMode": "lldb"
+            },
+            "linux":{
+                "MIMode":"gdb"
+            }
         },
         {
             "name": "Run Release",
@@ -26,7 +31,12 @@
             "cwd": "${workspaceFolder}/../bin",
             "environment": [],
             "externalConsole": true, // Will be false after I figure out a way to support /r /n in Debug Console
-            "MIMode": "lldb"
+            "osx":{
+                "MIMode": "lldb"
+            },
+            "linux":{
+                "MIMode":"gdb"
+            }
         }
     ]
 }
