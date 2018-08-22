@@ -44,7 +44,7 @@ endif(SORT_ENABLE_STATS)
 
 if(UNIX)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
+	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -pthread")
 endif(UNIX)
 
 set_target_properties( SORT PROPERTIES RELEASE_OUTPUT_NAME "sort_r" )
