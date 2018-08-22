@@ -1,24 +1,10 @@
 cmake_minimum_required (VERSION 2.6)
 
-SET( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )
-
-# Disable Profiling system by default
-SET( SORT_ENABLE_PROFILER "NO" CACHE BOOL "Enable SORT profiling system. It is false by default." )
 SET( SORT_ENABLE_STATS "YES" CACHE BOOL "Enable SORT stats system. It is true by default." )
 
 project (SORT)
 
-find_package(easy_profiler REQUIRED)
-
 include_directories( "${SORT_SOURCE_DIR}/src" )
-
-# needs to move them to dependencies later
-include_directories( "${SORT_SOURCE_DIR}/src/thirdparty/ilmbase-1.0.2" )
-include_directories( "${SORT_SOURCE_DIR}/src/thirdparty/zlib-1.2.5" )
-include_directories( "${SORT_SOURCE_DIR}/src/thirdparty/openexr-1.7.0" )
-
-# dependencies include
-include_directories( "${SORT_SOURCE_DIR}/dependencies/thirdparty/easy_profiler/include" )
 
 macro(source_group_by_dir source_files)
     set(sgbd_cur_dir ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -52,21 +38,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/bin")
 
 add_executable(SORT ${all_files})
 
-target_link_libraries(SORT easy_profiler)
-
-if (WIN32)
-file(GLOB easy_profiler_bin "${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.dll" 
-							"${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.exe")
-file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-endif (WIN32)
-
 if(SORT_ENABLE_STATS)
 	add_definitions(-DSORT_ENABLE_STATS_COLLECTION)
 endif(SORT_ENABLE_STATS)
-
-if(SORT_ENABLE_PROFILER)
-	add_definitions(-DSORT_ENABLE_PROFILER)
-endif(SORT_ENABLE_PROFILER)
 
 if(UNIX)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)

@@ -17,25 +17,32 @@ this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 #pragma once
 
-#include "sort.h"
+#include "../sort.h"
 
-// Easy_Profiler is used in SORT to profile data. 
+// SORT used to use this profiler as default one.
 // It is a open-source cross-platform project, which is available on git https://github.com/yse/easy_profiler
+// However, it doesn't scale well with billions of rays, for which reason, this feature is dropped.
 
-// There is no implementation until it is fully integrated on all platforms
+// Seeking more affordable implementation. And the task-based graph is not as useful as it is in real time rendering
+// because it is all very similar task for every ray. A random sampling profiler may be more suitable for this project.
+// Here is the Github issue tracking the feature
+// https://github.com/JerryCao1985/SORT/issues/69
+
 #ifdef SORT_ENABLE_PROFILER
 
-#include "easy/profiler.h"
-
-#define SORT_PROFILE_ENABLE         EASY_PROFILER_ENABLE
-#define SORT_PROFILE_ISENABLED      ::profiler::isEnabled()
-#define SORT_PROFILE(e)             EASY_BLOCK(e)
-#define SORT_PROFILE_END            EASY_END_BLOCK
-#define SORT_PROFILE_DUMP(file)     profiler::dumpBlocksToFile(file)
-#else
+// There is no implementation yet
 #define SORT_PROFILE_ENABLE
 #define SORT_PROFILE_ISENABLED      false
 #define SORT_PROFILE(e)
 #define SORT_PROFILE_END
 #define SORT_PROFILE_DUMP(file)     0
+
+#else
+
+#define SORT_PROFILE_ENABLE
+#define SORT_PROFILE_ISENABLED      false
+#define SORT_PROFILE(e)
+#define SORT_PROFILE_END
+#define SORT_PROFILE_DUMP(file)     0
+
 #endif
