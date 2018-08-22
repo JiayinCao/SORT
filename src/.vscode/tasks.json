@@ -5,38 +5,42 @@
         {
             "label": "Build (Debug)",
             "type": "shell",
-            "command": "cd ..;mkdir _out;cd _out;cmake -DCMAKE_BUILD_TYPE=Debug ..;make",
+            "command": "cd ..;mkdir proj_debug;cd proj_debug;cmake -DCMAKE_BUILD_TYPE=Debug ..;make",
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "problemMatcher": "$gcc"
         },
         {
             "label": "Re-Build (Debug)",
             "type": "shell",
-            "command": "cd ..;mkdir _out;cd _out;cmake -DCMAKE_BUILD_TYPE=Debug ..;make clean;make",
+            "command": "cd ..;mkdir proj_debug;cd proj_debug;cmake -DCMAKE_BUILD_TYPE=Debug ..;make clean;make",
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "problemMatcher": "$gcc"
         },
         {
             "label": "Build (Release)",
             "type": "shell",
-            "command": "cd ..;mkdir _out;cd _out;cmake -DCMAKE_BUILD_TYPE=Release ..;make",
+            "command": "cd ..;mkdir proj_release;cd proj_release;cmake -DCMAKE_BUILD_TYPE=Release ..;make",
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "problemMatcher": "$gcc"
         },
         {
             "label": "Re-Build (Release)",
             "type": "shell",
-            "command": "cd ..;mkdir _out;cd _out;cmake -DCMAKE_BUILD_TYPE=Release ..;make clean;make",
+            "command": "cd ..;mkdir proj_release;cd proj_release;cmake -DCMAKE_BUILD_TYPE=Release ..;make clean;make",
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "problemMatcher": "$gcc"
         }
     ]
 }
