@@ -1,0 +1,42 @@
+{
+    // This task file works on Linux and Mac. For windows, mingw may be needed with different configuration here
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build (Debug)",
+            "type": "shell",
+            "command": "cd ..;mkdir _out;cd _out;cmake -DCMAKE_BUILD_TYPE=Debug ..;make",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Re-Build (Debug)",
+            "type": "shell",
+            "command": "cd ..;mkdir _out;cd _out;cmake -DCMAKE_BUILD_TYPE=Debug ..;make clean;make",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Build (Release)",
+            "type": "shell",
+            "command": "cd ..;mkdir _out;cd _out;cmake -DCMAKE_BUILD_TYPE=Release ..;make",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Re-Build (Release)",
+            "type": "shell",
+            "command": "cd ..;mkdir _out;cd _out;cmake -DCMAKE_BUILD_TYPE=Release ..;make clean;make",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 #endif
 {
     addLogDispatcher(new StdOutLogDispatcher());
-    addLogDispatcher(new FileLogDispatcher("log.txt"));
+    addLogDispatcher(new FileLogDispatcher( GetExecutableDir() + "log.txt" ) );
 
     // enable profiler
     SORT_PROFILE_ENABLE;
@@ -49,10 +49,6 @@ int main(int argc, char** argv)
     }
 
     slog(INFO, GENERAL, commandline);
-    if (SORT_PROFILE_ISENABLED)
-        slog(INFO, GENERAL, "Easy profiler is enabled.");
-    else
-        slog(INFO, GENERAL, "Easy profiler is disabled.");
 #if SORT_ENABLE_STATS_COLLECTION
     slog( INFO, GENERAL, "Stats collection is enabled.");
 #else

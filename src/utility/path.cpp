@@ -59,6 +59,10 @@ string GetExecutableDir()
 	pid_t pid = getpid();
     int ret = proc_pidpath (pid, buf, sizeof(buf));
     sAssertMsg( ret > 0 , GENERAL , "Can't get current directory." );
+
+	int i = strlen(buf);
+	while( i > 0 && buf[i] != '/' )
+		buf[i--] = 0;
 #endif
 
 	return string(buf);
