@@ -44,7 +44,6 @@ endif(SORT_ENABLE_STATS)
 
 if(UNIX)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
-	target_link_libraries(SORT ${CMAKE_THREAD_LIBS_INIT})
 	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11")
 endif(UNIX)
 
@@ -53,6 +52,4 @@ set_target_properties( SORT PROPERTIES DEBUG_OUTPUT_NAME "sort_d" )
 
 if(MSVC)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
-	set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/Gz" )
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)

@@ -217,10 +217,6 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-Release/
-Debug/
 _out/
-res/
-*.sort
-*.sort
-src/integrator/pathtracing.cpp
+proj_release/
+proj_debug/
