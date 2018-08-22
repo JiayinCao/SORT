@@ -1,0 +1,32 @@
+{
+    // This task file works on Linux and Mac. For windows, mingw may be needed with different configuration here
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Debug",
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "Build (Debug)",
+            "program": "${workspaceFolder}/../bin/sort_d",
+            "args": ["${workspaceFolder}/../bin/intermediate/sort_scene.xml"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/../bin",
+            "environment": [],
+            "externalConsole": true, // Will be false after I figure out a way to support /r /n in Debug Console
+            "MIMode": "lldb"
+        },
+        {
+            "name": "Run Release",
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "Build (Release)",
+            "program": "${workspaceFolder}/../bin/sort_r",
+            "args": ["${workspaceFolder}/../bin/intermediate/sort_scene.xml"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/../bin",
+            "environment": [],
+            "externalConsole": true, // Will be false after I figure out a way to support /r /n in Debug Console
+            "MIMode": "lldb"
+        }
+    ]
+}
