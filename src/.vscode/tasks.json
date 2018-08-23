@@ -10,7 +10,10 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": "$gcc"
+            "problemMatcher": "$gcc",
+            "windows":{
+                "command": "cd ..;New-Item -Force -ItemType directory -Path proj_debug;cd proj_debug;cmake -A x64 ..;msbuild /p:Configuration=Debug /property:GenerateFullPaths=true /t:build SORT.sln"
+            }
         },
         {
             "label": "Re-Build (Debug)",
@@ -20,7 +23,10 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": "$gcc"
+            "problemMatcher": "$gcc",
+            "windows":{
+                "command": "cd ..;New-Item -Force -ItemType directory -Path proj_debug;cd proj_debug;cmake -A x64 ..;msbuild /p:Configuration=Debug /property:GenerateFullPaths=true /t:clean,build SORT.sln"
+            }
         },
         {
             "label": "Build (Release)",
@@ -30,7 +36,10 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": "$gcc"
+            "problemMatcher": "$gcc",
+            "windows":{
+                "command": "cd ..;New-Item -Force -ItemType directory -Path proj_release;cd proj_release;cmake -A x64 ..;msbuild /p:Configuration=Release /property:GenerateFullPaths=true /t:build SORT.sln"
+            }
         },
         {
             "label": "Re-Build (Release)",
@@ -40,7 +49,10 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "problemMatcher": "$gcc"
+            "problemMatcher": "$gcc",
+            "windows":{
+                "command": "cd ..;New-Item -Force -ItemType directory -Path proj_release;cd proj_release;cmake -A x64 ..;msbuild /p:Configuration=Release /property:GenerateFullPaths=true /t:clean,build SORT.sln"
+            }
         }
     ]
 }

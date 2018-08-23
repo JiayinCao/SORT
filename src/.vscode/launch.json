@@ -18,6 +18,10 @@
             },
             "linux":{
                 "MIMode":"gdb"
+            },
+            "windows":{
+                "type": "cppvsdbg",
+                "program": "${workspaceFolder}/../bin/sort_d.exe"
             }
         },
         {
@@ -36,6 +40,10 @@
             },
             "linux":{
                 "MIMode":"gdb"
+            },
+            "windows":{
+                "type": "cppvsdbg",
+                "program": "${workspaceFolder}/../bin/sort_r.exe"
             }
         }
     ]
