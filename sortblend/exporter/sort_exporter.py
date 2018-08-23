@@ -38,7 +38,7 @@ def get_sort_bin_path():
     elif platform.system() == 'Windows':    # for Windows
         sort_bin_path = sort_bin_dir + "sort_r.exe"
     elif platform.system() == "Linux":
-        sort_bin_path = sort_bin_dir + "SORT"
+        sort_bin_path = sort_bin_dir + "sort_r"
     else:
         raise Exception("SORT is only supported on Windows, Ubuntu and Mac OS")
     return sort_bin_path

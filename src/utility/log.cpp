@@ -51,9 +51,10 @@ const string logTimeString(){
         return string( size - s.size(), '0' ) + s;
     };
     
-    time_t t = time(0);
-    struct tm * now = localtime( &t );
-    return "[" + tostr(now->tm_year + 1900 , 4) + '-' + tostr(now->tm_mon + 1) + '-' + tostr( now->tm_mday) + ' ' + tostr(now->tm_hour) + ':' + tostr(now->tm_min) + ':' + tostr( now->tm_sec) + "]";
+    time_t t = time(nullptr);
+    struct tm now;
+    localtime_s( &now , &t );
+    return "[" + tostr(now.tm_year + 1900 , 4) + '-' + tostr(now.tm_mon + 1) + '-' + tostr( now.tm_mday) + ' ' + tostr(now.tm_hour) + ':' + tostr(now.tm_min) + ':' + tostr( now.tm_sec) + "]";
 }
 
 const string levelToString( LOG_LEVEL level ){
