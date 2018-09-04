@@ -33,11 +33,12 @@ Spectrum Coat::F( const Vector& wo , const Vector& wi ) const
         // Bouguer-Lambert-Beer law
         const Spectrum attenuation = ( -thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
         // Fresnel attenuation between the boundary across layer0 and layer1
-        const Spectrum T12 = (1.0f - fresnel.Evaluate(CosTheta(swo))) * (1.0f - fresnel.Evaluate(CosTheta(swi)));
+        const Spectrum T12 = (1.0f - fresnel.Evaluate(CosTheta(swo)));
+        const Spectrum T21 = (1.0f - fresnel.Evaluate(CosTheta(swi)));
         // Attenuation of rays coming upward is exactly the same with the downward attenuation, but there is a constant factor for
         // compensating the loss caused by TIR. The constant number is not mentioned in the original paper, 0.2 is used here by default.
         static const float G = 0.2f;
-        ret += bottom->f( wo , wi ) * attenuation * T12 * lerp( T12 , 1.0f , G );
+        ret += bottom->f( wo , wi ) * attenuation * T12 * lerp( T21 , 1.0f , G ) / ( ior * ior );
     }
 
     return ret;
@@ -47,8 +48,12 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     Vector swo = bsdfToBxdf( wo );
     Vector lwi;
     
-    // Because attenuation from the incident direction is not considered at all, an scaled offset by roughness is added here to compensate it
-    const float specProp = saturate( 0.5f + 0.5f * ( 1.0f - roughness ) - ( -thickness * sigma * (1.0f / AbsCosTheta(swo)) ).Exp().GetIntensity() * (1.0f - fresnel.Evaluate(CosTheta(swo))).GetIntensity() );
+    bool tir_o = false;
+    Vector r_wo = refract(swo, Vector(0.0f, 1.0f, 0.0f), ior, 1.0f, tir_o);
+    const Spectrum attenuation = ( -thickness * sigma * 2.0f / AbsCosTheta(r_wo) ).Exp();
+    const float I1 = fresnel.Evaluate(CosTheta(swo)).GetIntensity();
+    const float I2 = ( 1.0f - I1 ) * ( 1.0f - I1 ) * attenuation.GetIntensity() / ( ior * ior );
+    const float specProp = I1 / ( I1 + I2 );
 
     Spectrum ret;
     if( bs.u < specProp ){
@@ -67,16 +72,20 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
             *pPdf = lerp( *pPdf , coat.pdf( swo , bsdfToBxdf(wi) ) , specProp );
     }
     
-    return ret;
+    return F(wo , wi);
 }
 
 float Coat::Pdf( const Vector& wo , const Vector& wi ) const{
     Vector swo = bsdfToBxdf( wo );
     Vector swi = bsdfToBxdf( wi );
     
-    // Because attenuation from the incident direction is not considered at all, an scaled offset by roughness is added here to compensate it
-    const float specProp = saturate( 0.5f + 0.5f * ( 1.0f - roughness ) - ( -thickness * sigma * (1.0f / AbsCosTheta(swo)) ).Exp().GetIntensity() * (1.0f - fresnel.Evaluate(CosTheta(swo))).GetIntensity() );
-    
+    bool tir_o = false;
+    Vector r_wo = refract(swo, Vector(0.0f, 1.0f, 0.0f), ior, 1.0f, tir_o);
+    const Spectrum attenuation = ( -thickness * sigma * 2.0f / AbsCosTheta(r_wo) ).Exp();
+    const float I1 = fresnel.Evaluate(CosTheta(swo)).GetIntensity();
+    const float I2 = ( 1.0f - I1 ) * ( 1.0f - I1 ) * attenuation.GetIntensity() / ( ior * ior );
+    const float specProp = I1 / ( I1 + I2 );
+
     const float layer0_pdf = coat.pdf( swo , swi );
     const float layer1_pdf = bottom->Pdf( wo , wi );
     return lerp( layer1_pdf , layer0_pdf , specProp );
