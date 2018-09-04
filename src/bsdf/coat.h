@@ -25,7 +25,10 @@
 /**
  * 'Arbitrarily Layered Micro-Facet Surfaces'
  * http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.160.2363&rep=rep1&type=pdf
- *
+ * 
+ * 'Rendering Layered Materials'
+ * https://ivokabel.github.io/2018/05/15/rendering-layered-materials.html
+ * 
  * This BRDF is a simplified version of the above mentioned work. Only one layer of coating is supported.
  * The coating layer is hard-coded with Microfacet BRDF model, which is not configurable. However, the underlying layer could be configurable by attaching 
  * other BXDF. If nothing is attached, a 'null' material, which is totally based will be at the bottom.
