@@ -32,6 +32,7 @@
  * This BRDF is a simplified version of the above mentioned work. Only one layer of coating is supported.
  * The coating layer is hard-coded with Microfacet BRDF model, which is not configurable. However, the underlying layer could be configurable by attaching 
  * other BXDF. If nothing is attached, a 'null' material, which is totally based will be at the bottom.
+ * This BRDF doesn't work with tranmissive materials like glass.
  */
 class Coat : public Bxdf
 {
