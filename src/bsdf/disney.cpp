@@ -45,9 +45,7 @@ public:
         // theta = acos( sqrt( ( exp( 2 * ln(alpha) * v ) - 1 ) / ( alpha^2 - 1.0f ) ) )
         const float phi = TWO_PI * bs.u;
         const float theta = acos(sqrt((exp(log(alphaU2) * bs.v) - 1.0f) / (alphaU2 - 1.0f)));
-        auto wh = SphericalVec(theta, phi);
-        if (!SameHemiSphere(wh, wo)) wh = -wh;
-        return wh;
+        return SphericalVec(theta, phi);
     }
 
 protected:
