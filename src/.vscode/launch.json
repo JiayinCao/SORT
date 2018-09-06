@@ -45,6 +45,28 @@
                 "type": "cppvsdbg",
                 "program": "${workspaceFolder}/../bin/sort_r.exe"
             }
+        },
+        {
+            "name": "Run Unit Test",
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "Build (Release)",
+            "program": "${workspaceFolder}/../bin/sort_r",
+            "args": ["unittest"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/../bin",
+            "environment": [],
+            "externalConsole": true, // Will be false after I figure out a way to support /r /n in Debug Console
+            "osx":{
+                "MIMode": "lldb"
+            },
+            "linux":{
+                "MIMode":"gdb"
+            },
+            "windows":{
+                "type": "cppvsdbg",
+                "program": "${workspaceFolder}/../bin/sort_r.exe"
+            }
         }
     ]
 }

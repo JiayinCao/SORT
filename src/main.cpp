@@ -23,6 +23,8 @@
 #include "utility/profile.h"
 #include "utility/path.h"
 
+#include "thirdparty/gtest/gtest.h"
+
 // the global system
 System g_System;
 
@@ -61,6 +63,12 @@ int main(int argc, char** argv)
         slog(WARNING, GENERAL, "Miss file argument.");
         slog(INFO, GENERAL, stringFormat("Log file: \"%s\"", GetFullPath("log.txt").c_str()));
         return 0;
+    }
+
+    // Run unit tests
+    if (strcmp(argv[1], "unittest" ) == 0){
+        ::testing::InitGoogleTest(&argc, argv);
+        return RUN_ALL_TESTS();
     }
 
     slog(INFO, GENERAL, "Number of CPU cores " + to_string(NumSystemCores()));
