@@ -82,9 +82,7 @@ Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
     const float cos_theta = std::pow(bs.u, 1.0f / (alpha + 2.0f));
     const float sin_theta = sqrtf(max(0.0f, 1.0f - cos_theta * cos_theta));
 
-    auto wh = SphericalVec(sin_theta, cos_theta, phi);
-    if (!SameHemiSphere(wh, wo)) wh = -wh;
-    return wh;
+    return SphericalVec(sin_theta, cos_theta, phi);
 }
 
 //! @brief Smith shadow-masking function G1
@@ -153,9 +151,7 @@ Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
         theta = atan(sqrt(-logSample / ((1.0f - sin_phi_sq) / alphaU2 + sin_phi_sq / alphaV2)));
     }
     
-    auto wh = SphericalVec(theta, phi);
-    if (!SameHemiSphere(wh, wo)) wh = -wh;
-    return wh;
+    return SphericalVec(theta, phi);
 }
 
 //! @brief Smith shadow-masking function G1
@@ -222,9 +218,7 @@ Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
         float beta = 1.0f / ( cos_phi_sq / alphaU2 + sin_phi_sq / alphaV2 );
         theta = atan( sqrt( beta * bs.u / ( 1.0f - bs.u ) ) );
     }
-    auto wh = SphericalVec( theta , phi );
-    if( !SameHemiSphere(wh , wo) ) wh = -wh;
-    return wh;
+    return SphericalVec(theta, phi);
 }
 
 //! @brief Smith shadow-masking function G1
