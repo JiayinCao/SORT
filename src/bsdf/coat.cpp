@@ -34,8 +34,8 @@ Spectrum Coat::F( const Vector& wo , const Vector& wi ) const
     
     Spectrum ret = coat.f(swo, swi);
     bool tir_o = false, tir_i = false;
-    Vector r_wo = refract(swo, Vector(0.0f, 1.0f, 0.0f), ior, 1.0f, tir_o);
-    Vector r_wi = refract(swi, Vector(0.0f, 1.0f, 0.0f), ior, 1.0f, tir_i);
+    Vector r_wo = refract(swo, DIR_UP, ior, 1.0f, tir_o);
+    Vector r_wi = refract(swi, DIR_UP, ior, 1.0f, tir_i);
     if (!tir_o && !tir_i) {
         // Bouguer-Lambert-Beer law
         const Spectrum attenuation = ( -thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
@@ -54,7 +54,7 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     Vector swi;
     
     bool tir_o = false , tir_i = false;
-    Vector r_wo = refract(swo, Vector(0.0f, 1.0f, 0.0f), ior, 1.0f, tir_o);
+    Vector r_wo = refract(swo, DIR_UP, ior, 1.0f, tir_o);
     Vector r_wi;
     const Spectrum attenuation = ( -thickness * sigma * 2.0f / AbsCosTheta(r_wo) ).Exp();
     const float I1 = fresnel.Evaluate(CosTheta(swo)).GetIntensity();
@@ -62,12 +62,13 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     const float specProp = I1 / ( I1 + I2 );
 
     Spectrum ret;
+    auto nbs = BsdfSample(true);
     if( bs.u < specProp || specProp == 1.0f ){
         // Importance sampling based on the top layer, Microfacet model
-        ret = coat.sample_f( swo , swi, BsdfSample(true) , pPdf );
+        ret = coat.sample_f( swo , swi, nbs, pPdf );
         wi = bxdfToBsdf(swi);
 
-        Vector r_wi = refract(swi, Vector(0.0f, 1.0f, 0.0f), ior, 1.0f, tir_i);
+        Vector r_wi = refract(swi, DIR_UP, ior, 1.0f, tir_i);
         if (!tir_o && !tir_i) {
             // Bouguer-Lambert-Beer law
             const Spectrum attenuation = (-thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
@@ -79,13 +80,13 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
         }
 
         if(pPdf)
-            *pPdf = lerp(bottom->Pdf(r_wo,r_wi) , *pPdf, specProp);
+            *pPdf = lerp(bottom->Pdf(-r_wo,-r_wi) , *pPdf, specProp);
     }else{
         // Importance sampling using the underlying layer
         Vector r_wi;
-        ret = bottom->sample_f( -r_wo , r_wi, BsdfSample(true) , pPdf );
+        ret = bottom->sample_f( -r_wo , r_wi, nbs, pPdf );
 
-        swi = refract(-r_wi, Vector(0.0f, 1.0f, 0.0f), ior, 1.0f, tir_i);
+        swi = refract(-r_wi, DIR_UP, ior, 1.0f, tir_i);
         wi = bxdfToBsdf(swi);
 
         // Handle corner case where TIR happens
@@ -122,8 +123,8 @@ float Coat::Pdf( const Vector& wo , const Vector& wi ) const{
     Vector swi = bsdfToBxdf( wi );
     
     bool tir_o = false , tir_i = false;
-    Vector r_wo = refract(swo, Vector(0.0f, 1.0f, 0.0f), ior, 1.0f, tir_o);
-    Vector r_wi = refract(swi, Vector(0.0f, 1.0f, 0.0f), ior, 1.0f, tir_i);
+    Vector r_wo = refract(swo, DIR_UP, ior, 1.0f, tir_o);
+    Vector r_wi = refract(swi, DIR_UP, ior, 1.0f, tir_i);
     const Spectrum attenuation = ( -thickness * sigma * 2.0f / AbsCosTheta(r_wo) ).Exp();
     const float I1 = fresnel.Evaluate(CosTheta(swo)).GetIntensity();
     const float I2 = ( 1.0f - I1 ) * ( 1.0f - I1 ) * attenuation.GetIntensity() / ( ior * ior );

@@ -195,14 +195,16 @@ inline Vector reflect(const Vector& v) {
 //! @param ext_eta              Index of refraction outside the surface.
 //! @param inner_reflection     Whether it is a total inner reflection.
 //! @return                     Refracted vector based on Snell's law.
+//! @Note                       Both vectors ( the first parameter and the returned value ) should be pointing outside the surface.
 inline Vector refract(const Vector& v, const Vector& n, float in_eta, float ext_eta, bool& inner_reflection){
     const float coso = Dot(v, n);
-    const float eta = CosTheta(v) > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
+    const float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
     const float t = 1.0f - eta * eta * max(0.0f, 1.0f - coso * coso);
 
     // total inner reflection
     inner_reflection = (t <= 0.0f);
     if (inner_reflection)
         return Vector(0.0f, 0.0f, 0.0f);
-    return -eta * v + (eta * coso - sqrt(t)) * n;
+    const float scale = coso < 0.0f ? -1.0f : 1.0f;
+    return -eta * v + (eta * coso - scale * sqrt(t)) * n;
 }
