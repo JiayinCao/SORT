@@ -23,14 +23,16 @@ endmacro(source_group_by_dir)
 file(GLOB_RECURSE project_headers src/*.h)
 file(GLOB_RECURSE project_cpps src/*.cpp)
 file(GLOB_RECURSE project_cs src/*.c)
+file(GLOB_RECURSE project_ccs src/*.cc)
 
-set(all_files ${project_headers} ${project_cpps} ${project_cs})
+set(all_files ${project_headers} ${project_cpps} ${project_cs} ${project_ccs})
 source_group_by_dir(all_files)
 
 file(GLOB_RECURSE thirdparty_headers src/thirdparty/*.h)
 file(GLOB_RECURSE thirdparty_cpps src/thirdparty/*.cpp)
 file(GLOB_RECURSE thirdparty_cs src/thirdparty/*.c)
-set(thirdparty_files ${thirdparty_headers} ${thirdparty_cpps} ${thirdparty_cs})
+file(GLOB_RECURSE thirdparty_ccs src/thirdparty/*.cc)
+set(thirdparty_files ${thirdparty_headers} ${thirdparty_cpps} ${thirdparty_cs} ${thirdparty_ccs})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SORT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${SORT_SOURCE_DIR}/bin")
