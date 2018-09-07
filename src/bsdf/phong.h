@@ -18,6 +18,7 @@
 #pragma once
 
 #include "bxdf.h"
+#include "utility/sassert.h"
 
 //! @brief Phong BRDF.
 /**
@@ -47,7 +48,12 @@ public:
     //! @param weight           Weight of the BXDF
     Phong(const Spectrum& diffuse, const Spectrum& specular, const float specularPower, const Spectrum& weight, const Vector& n , bool doubleSided = false)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), power(specularPower), 
-          diffRatio(diffuse.GetIntensity()/(diffuse.GetIntensity()+specular.GetIntensity())) {}
+          diffRatio(diffuse.GetIntensity()/(diffuse.GetIntensity()+specular.GetIntensity())) {
+        const auto combined = D + S;
+        sAssert(combined.GetR() <= 1.0f, MATERIAL);
+        sAssert(combined.GetG() <= 1.0f, MATERIAL);
+        sAssert(combined.GetB() <= 1.0f, MATERIAL);
+    }
 	
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
