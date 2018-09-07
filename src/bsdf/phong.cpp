@@ -66,7 +66,7 @@ float Phong::pdf( const Vector& wo , const Vector& wi ) const{
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
     const float alpha = SatDot(reflect(wo), wi);
-    const float pdf_spec = pow( alpha , power ) * ( power + 1.0f ) * INV_TWOPI;
+    const float pdf_spec = pow( alpha , power + 1.0f ) * ( power + 2.0f ) * INV_TWOPI;
     const float pdf_diff = CosHemispherePdf(wi);
 
     return lerp( pdf_spec, pdf_diff, diffRatio );
