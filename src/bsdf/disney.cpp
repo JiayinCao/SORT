@@ -118,7 +118,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     // Final specular term
     const Spectrum spec = mf.f(wo,wi) + mf_clearcoat.f(wo, wi);
     
-    return ( diff + spec ) * AbsCosTheta(wi);
+    return diff * AbsCosTheta(wi) + spec;
 }
 
 Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{

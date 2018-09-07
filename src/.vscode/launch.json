@@ -1,5 +1,4 @@
 {
-    // This task file works on Linux and Mac. For windows, mingw may be needed with different configuration here
     "version": "0.2.0",
     "configurations": [
         {
@@ -12,7 +11,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/../bin",
             "environment": [],
-            "externalConsole": true, // Will be false after I figure out a way to support /r /n in Debug Console
+            "externalConsole": true,
             "osx":{
                 "MIMode": "lldb"
             },
@@ -34,7 +33,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/../bin",
             "environment": [],
-            "externalConsole": true, // Will be false after I figure out a way to support /r /n in Debug Console
+            "externalConsole": true,
             "osx":{
                 "MIMode": "lldb"
             },
@@ -56,7 +55,7 @@
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/../bin",
             "environment": [],
-            "externalConsole": true, // Will be false after I figure out a way to support /r /n in Debug Console
+            "externalConsole": true,
             "osx":{
                 "MIMode": "lldb"
             },

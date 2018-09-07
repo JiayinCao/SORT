@@ -22,14 +22,18 @@
 #include "bsdf/lambert.h"
 #include "bsdf/orennayar.h"
 #include "bsdf/phong.h"
+#include "bsdf/ashikhmanshirley.h"
+#include "bsdf/disney.h"
+#include "bsdf/microfacet.h"
+#include "bsdf/dielectric.h"
 
 void checkReciprocity(const Bxdf* bxdf) {
     static const int N = 8192;
 
     for (int i = 0; i < N; ++i) {
-        Vector wi(sort_canonical(), sort_canonical(), sort_canonical());
+        Vector wi(sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f);
         wi.Normalize();
-        Vector wo(sort_canonical(), sort_canonical(), sort_canonical());
+        Vector wo(sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f);
         wo.Normalize();
 
         const auto f0 = bxdf->F(wo, wi) * AbsCosTheta(wo);
@@ -40,7 +44,7 @@ void checkReciprocity(const Bxdf* bxdf) {
     }
 }
 
-void checkEnergyConservation(Bxdf* bxdf) {
+void checkEnergyConservation(const Bxdf* bxdf) {
     static const int N = 8192;
     static const Vector wo(DIR_UP);
 
@@ -57,35 +61,82 @@ void checkEnergyConservation(Bxdf* bxdf) {
     EXPECT_LE(rho.GetB(), 1.0f);
 }
 
+void checkPdf( const Bxdf* bxdf ){
+    Vector wo(sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f);
+    wo.Normalize();
+    float pdf = 0.0f;
+    Vector wi;
+    bxdf->Sample_F( wo , wi , BsdfSample(true) , &pdf );
+
+    float calculated_pdf = bxdf->Pdf( wo , wi );
+    EXPECT_NEAR(pdf, calculated_pdf, 0.001f);
+}
+
+void checkAll( const Bxdf* bxdf ){
+    checkPdf( bxdf );
+    checkEnergyConservation( bxdf );
+    checkReciprocity( bxdf );
+}
+
 TEST (BXDF, Labmert) { 
     static const Spectrum R(1.0f);
     Lambert lambert( R , R , DIR_UP );
-
-    checkReciprocity(&lambert);
-    checkEnergyConservation(&lambert);
+    checkAll( &lambert );
 }
 
 TEST(BXDF, LabmertTransmittion) {
     static const Spectrum R(1.0f);
     LambertTransmission lambert(R, R, DIR_UP);
-
-    checkReciprocity(&lambert);
-    checkEnergyConservation(&lambert);
+    checkAll(&lambert);
 }
 
 TEST(BXDF, OrenNayar) {
     static const Spectrum R(1.0f);
     OrenNayar orenNayar(R, sort_canonical(), R, DIR_UP);
-
-    checkReciprocity(&orenNayar);
-    checkEnergyConservation(&orenNayar);
+    checkAll(&orenNayar);
 }
 
 TEST(BXDF, Phong) {
     static const Spectrum R(1.0f);
     const float ratio = sort_canonical();
     Phong phong( R * ratio , R * ( 1.0f - ratio ) , sort_canonical(), R, DIR_UP);
+    checkAll(&phong);
+}
 
-    checkReciprocity(&phong);
-    checkEnergyConservation(&phong);
+TEST(BXDF, AshikhmanShirley) {
+    static const Spectrum R(1.0f);
+    AshikhmanShirley as( R , sort_canonical() , sort_canonical() , sort_canonical() , R , DIR_UP );
+    checkAll(&as);
+}
+
+TEST(BXDF, Disney) {
+    static const Spectrum R(1.0f);
+    DisneyBRDF disney( R , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , R , DIR_UP );
+    checkAll(&disney);
+}
+
+TEST(BXDF, MicroFacetReflection) {
+    static const Spectrum R(1.0f);
+    const FresnelConductor fresnel( 1.0f , 1.5f );
+    const GGX ggx( sort_canonical() , sort_canonical() );
+    MicroFacetReflection mf( R , &fresnel , &ggx , R , DIR_UP );
+    checkAll(&mf);
+}
+
+TEST(BXDF, MicroFacetRefraction) {
+    static const Spectrum R(1.0f);
+    const FresnelConductor fresnel( 1.0f , 1.5f );
+    const GGX ggx( sort_canonical() , sort_canonical() );
+    MicroFacetRefraction mr( R , &ggx , sort_canonical() , sort_canonical() , R , DIR_UP );
+    checkEnergyConservation( &mr );
+    checkPdf( &mr );
+}
+
+TEST(BXDF, Dielectric) {
+    static const Spectrum R(1.0f);
+    const FresnelConductor fresnel( 1.0f , 1.5f );
+    const GGX ggx( sort_canonical() , sort_canonical() );
+    Dielectric dielectric( R , R , &ggx , sort_canonical() , sort_canonical() , R , DIR_UP );
+    checkEnergyConservation( &dielectric );
+    checkPdf( &dielectric );
 }
