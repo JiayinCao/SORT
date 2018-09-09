@@ -61,7 +61,7 @@ float Blinn::D(const Vector& h) const
 }
 
 // sampling according to Blinn
-Vector Blinn::sample_f( const BsdfSample& bs , const Vector& wo ) const
+Vector Blinn::sample_f( const BsdfSample& bs ) const
 {
     float phi = 0.0f;
     if (expU == expV) {
@@ -130,7 +130,7 @@ float Beckmann::D(const Vector& h) const
 }
 
 // sampling according to Beckmann
-Vector Beckmann::sample_f( const BsdfSample& bs , const Vector& wo ) const
+Vector Beckmann::sample_f( const BsdfSample& bs ) const
 {
     const float logSample = std::log( bs.u );
     
@@ -198,7 +198,7 @@ float GGX::D(const Vector& h) const
     return 1.0f / ( PI * alphaUV * beta * beta );
 }
 
-Vector GGX::sample_f( const BsdfSample& bs , const Vector& wo ) const
+Vector GGX::sample_f( const BsdfSample& bs ) const
 {
     float theta, phi;
     if( alphaU == alphaV ){
@@ -251,7 +251,7 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const
 Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const
 {
 	// sampling the normal
-	const Vector wh = distribution->sample_f( bs , wo );
+	const Vector wh = distribution->sample_f( bs );
 
 	// reflect the incident direction
 	wi = reflect( wo , wh );
@@ -307,7 +307,7 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
         return 0.0f;
     
 	// sampling the normal
-	const Vector wh = distribution->sample_f( bs , wo );
+	const Vector wh = distribution->sample_f( bs );
 
 	// try to get refracted ray
 	bool total_reflection = false;

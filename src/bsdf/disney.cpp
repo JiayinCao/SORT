@@ -38,9 +38,8 @@ public:
     //! @brief Sampling a normal respect to the NDF.
     //!
     //! @param bs   Sample holding all necessary random variables.
-    //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
-    Vector sample_f(const BsdfSample& bs, const Vector& wo) const override {
+    Vector sample_f(const BsdfSample& bs) const override {
         // phi = 2 * PI * u
         // theta = acos( sqrt( ( exp( 2 * ln(alpha) * v ) - 1 ) / ( alpha^2 - 1.0f ) ) )
         const float phi = TWO_PI * bs.u;
@@ -143,11 +142,11 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
             const float clearcoat_ratio = clearcoat_intensity / total_intensity;
             if( r < clearcoat_ratio || clearcoat_ratio == 1.0f ){
                 const ClearcoatGGX cggx(sqrt(lerp(0.1f, 0.001f, clearcoatGloss)));
-                wh = cggx.sample_f(sample,wo);
+                wh = cggx.sample_f(sample);
             }else{
                 const float aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
                 const GGX ggx( roughness / aspect , roughness * aspect );
-                wh = ggx.sample_f(sample,wo);
+                wh = ggx.sample_f(sample);
             }
             wi = 2 * Dot( wo , wh ) * wh - wo;
         }
