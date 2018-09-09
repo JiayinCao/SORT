@@ -41,7 +41,7 @@ static Thread_Local bool seed_setup = false;
 // set the seed
 void sort_seed()
 {
-	unsigned seed = ThreadId() * (unsigned)time(0);
+	unsigned seed = ( ThreadId() + 1 ) * (unsigned)time(0);
 	mt[0]= seed & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {
         mt[mti] =
