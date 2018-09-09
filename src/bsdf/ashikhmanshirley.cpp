@@ -50,7 +50,7 @@ Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfS
         if( !SameHemiSphere(wo, wi) ) wi *= -1.0f;
     }else{
         BsdfSample sample(true);
-        Vector wh = distribution.sample_f(sample,wo);
+        Vector wh = distribution.sample_f(sample);
         wi = 2 * Dot( wo , wh ) * wh - wo;
     }
     if( pPdf ) *pPdf = pdf( wo , wi );

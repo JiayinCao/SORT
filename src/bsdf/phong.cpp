@@ -42,7 +42,9 @@ Spectrum Phong::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, flo
         sAssertMsg(diffRatio != 0.0f, MATERIAL, "Divided by 0!");
         wi = CosSampleHemisphere(bs.u / diffRatio, bs.v);
     }else{
-        const float cos_theta = pow(bs.v, 1.0f / (power + 1.0f));
+        // the exact way of importance sampling is taken from my algorithm derived in this blog post, not the ones from the mentioned papers
+        // https://agraphicsguy.wordpress.com/2015/11/01/sampling-microfacet-brdf/
+        const float cos_theta = pow(bs.v, 1.0f / (power + 2.0f));
         const float sin_theta = sqrt(1.0f - cos_theta * cos_theta);
         const float phi = TWO_PI * ( bs.u - diffRatio ) / (1.0f - diffRatio);
         Vector dir = SphericalVec(sin_theta, cos_theta, phi);
@@ -65,8 +67,8 @@ float Phong::pdf( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    const float alpha = SatDot(reflect(wo), wi);
-    const float pdf_spec = pow( alpha , power + 1.0f ) * ( power + 2.0f ) * INV_TWOPI;
+    const float cos_theta = SatDot(reflect(wo), wi);
+    const float pdf_spec = pow( cos_theta , power + 1.0f ) * ( power + 2.0f ) * INV_TWOPI;
     const float pdf_diff = CosHemispherePdf(wi);
 
     return lerp( pdf_spec, pdf_diff, diffRatio );

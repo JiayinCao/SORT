@@ -35,9 +35,8 @@ public:
 
 	//! @brief Sampling a normal respect to the NDF.
     //! @param bs   Sample holding all necessary random variables.
-    //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
-	virtual Vector sample_f( const BsdfSample& bs , const Vector& wo ) const = 0;
+	virtual Vector sample_f( const BsdfSample& bs ) const = 0;
     
     //! @brief PDF of sampling a specific normal direction
     //! @param wh   Normal direction to be sampled
@@ -68,9 +67,8 @@ public:
     //! @brief Sampling a normal respect to the NDF.
     //!
     //! @param bs   Sample holding all necessary random variables.
-    //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
-    Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
+    Vector sample_f( const BsdfSample& bs ) const override;
 
 private:
 	float expU , expV , exp , expUV;      /**< Internal data used for NDF calculation. */
@@ -95,9 +93,8 @@ public:
     //! @brief Sampling a normal respect to the NDF.
     //!
     //! @param bs   Sample holding all necessary random variables.
-    //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
-    Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
+    Vector sample_f( const BsdfSample& bs ) const override;
 
 private:
 	float alphaU , alphaV;        /**< Internal data used for NDF calculation. */
@@ -122,9 +119,8 @@ public:
     //! @brief Sampling a normal respect to the NDF.
     //!
     //! @param bs   Sample holding all necessary random variables.
-    //! @param wo   Outgoing direction
     //! @return     Sampled normal direction based on the NDF.
-    Vector sample_f( const BsdfSample& bs , const Vector& wo ) const override;
+    Vector sample_f( const BsdfSample& bs ) const override;
 
 protected:
 	float alphaU , alphaV;        /**< Internal data used for NDF calculation. */
