@@ -27,8 +27,9 @@
 #include "bsdf/microfacet.h"
 #include "bsdf/dielectric.h"
 #include <thread>
+#include "utility/samplemethod.h"
 
-static const int N = 8192;
+static const int N = 1024 * 1024;
 
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
@@ -58,9 +59,9 @@ void checkEnergyConservation(const Bxdf* bxdf) {
         rho += pdf > 0.0f ? r / pdf : 0.0f;
     }
     rho *= 1.0f / (float)N;
-    EXPECT_LE(rho.GetR(), 1.0f);
-    EXPECT_LE(rho.GetG(), 1.0f);
-    EXPECT_LE(rho.GetB(), 1.0f);
+    EXPECT_LE(rho.GetR(), 1.01f);
+    EXPECT_LE(rho.GetG(), 1.01f);
+    EXPECT_LE(rho.GetB(), 1.01f);
 }
 
 // Check whether the pdf evaluated from sample_f matches the one from Pdf
@@ -73,6 +74,7 @@ void checkPdf( const Bxdf* bxdf ){
     if( CosTheta( wo ) < 0.0f )
         wo = -wo;
 
+    // Check whether pdf and spectrum value from Sample_F matches the Pdf and F functions
     for( int i = 0 ; i < 1024 ; ++i ){
         float pdf = 0.0f;
         Vector wi;
@@ -90,36 +92,68 @@ void checkPdf( const Bxdf* bxdf ){
         EXPECT_NEAR(f0.GetB(), f1.GetB(), 0.001f);
     }
 
-    const int TN = 8;   // thread number
-    float total[TN] = { 0.0f };
-    std::thread threads[TN];
-    for( int i = 0 ; i < TN ; ++i ){
-        threads[i] = std::thread([&]( int tid ) {
-            const long long N = 1024 * 1024 * 8;
-            double local = 0.0f;
-            for( long long i = 0 ; i < N ; ++i ){
-                Vector wi;
-                float pdf;
-                bxdf->Sample_F( wo , wi , BsdfSample(true) , &pdf );
-                local += pdf != 0.0f ? 1.0f / pdf : 0.0f;
-            }
-            total[tid] += local / ( N * TN );
-        } , i );
+    // Check whether pdf adds together is less to 1.0
+    // The sum won't converge to 1.0 because there are cases where importance sampling method will generated rays under the surface,
+    // leading to 'invalid' sampling, which is simply dropped by setting pdf to 0.0.
+    {
+        const int TN = 8;   // thread number
+        double total[TN] = { 0.0f };
+        std::thread threads[TN];
+        for (int i = 0; i < TN; ++i) {
+            threads[i] = std::thread([&](int tid) {
+                const long long N = 1024 * 1024 * 8;
+                double local = 0.0f;
+                for (long long i = 0; i < N; ++i) {
+                    Vector wi = UniformSampleSphere(sort_canonical(), sort_canonical());
+                    float pdf = UniformSpherePdf();
+                    if (pdf > 0.0f)
+                        local += bxdf->Pdf(wo, wi) / pdf;
+                }
+                total[tid] += (double)local / (double)(N * TN);
+            }, i);
+        }
+        for (int i = 0; i < TN; ++i)
+            threads[i].join();
+        double final_total = 0.0f;
+        for (int i = 0; i < TN; ++i)
+            final_total += total[i];
+        EXPECT_LE(final_total, 1.01f); // 1% error is tolerated
     }
-    for( int i = 0 ; i < TN ; ++i )
-        threads[i].join();
 
-    double final_total = 0.0f;
-    for( int i = 0 ; i < TN ; ++i )
-        final_total += total[i];
-    // 0.5% error is tolorated
-    EXPECT_NEAR( final_total , TWO_PI , 0.03f);
+    // Check whether the pdf actually matches the way rays are sampled
+    {
+        const int TN = 8;   // thread number
+        double total[TN] = { 0.0f };
+        std::thread threads[TN];
+        for (int i = 0; i < TN; ++i) {
+            threads[i] = std::thread([&](int tid) {
+                const long long N = 1024 * 1024 * 8;
+                double local = 0.0f;
+                for (long long i = 0; i < N; ++i) {
+                    Vector wi;
+                    float pdf;
+                    bxdf->Sample_F(wo, wi, BsdfSample(true), &pdf);
+                    local += pdf != 0.0f ? 1.0f / pdf : 0.0f;
+                }
+                total[tid] += (double)local / (double)(N * TN);
+            }, i);
+        }
+        for (int i = 0; i < TN; ++i)
+            threads[i].join();
+        double final_total = 0.0f;
+        for (int i = 0; i < TN; ++i)
+            final_total += total[i];
+        EXPECT_NEAR(final_total, TWO_PI, 0.03f); // 0.5% error is tolerated
+    }
 }
 
-void checkAll( const Bxdf* bxdf ){
-    checkPdf( bxdf );
-    checkEnergyConservation( bxdf );
-    checkReciprocity( bxdf );
+void checkAll( const Bxdf* bxdf , bool cPdf = true , bool cReciprocity = true , bool cEnergyConservation = true ){
+    if(cPdf) 
+        checkPdf( bxdf );
+    if(cReciprocity) 
+        checkReciprocity( bxdf );
+    if (cEnergyConservation)
+        checkEnergyConservation(bxdf);
 }
 
 TEST (BXDF, Labmert) { 
@@ -162,7 +196,7 @@ TEST(BXDF, Disney) {
 TEST(BXDF, MicroFacetReflection) {
     static const Spectrum R(1.0f);
     const FresnelConductor fresnel( 1.0f , 1.5f );
-    const Beckmann ggx( sort_canonical() , sort_canonical() );
+    const Blinn ggx(0.5f, 0.5f);//sort_canonical(), sort_canonical() );
     MicroFacetReflection mf( R , &fresnel , &ggx , R , DIR_UP );
     checkAll(&mf);
 }
@@ -172,8 +206,7 @@ TEST(BXDF, MicroFacetRefraction) {
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx( sort_canonical() , sort_canonical() );
     MicroFacetRefraction mr( R , &ggx , sort_canonical() , sort_canonical() , R , DIR_UP );
-    checkEnergyConservation( &mr );
-    //checkPdf( &mr );
+    checkAll( &mr , false , false , true );
 }
 
 TEST(BXDF, Dielectric) {
@@ -181,6 +214,5 @@ TEST(BXDF, Dielectric) {
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx( sort_canonical() , sort_canonical() );
     Dielectric dielectric( R , R , &ggx , sort_canonical() , sort_canonical() , R , DIR_UP );
-    checkEnergyConservation( &dielectric );
-    //checkPdf( &dielectric );
+    checkAll( &dielectric , false , false , true );
 }
