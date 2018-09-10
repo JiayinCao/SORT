@@ -31,8 +31,9 @@ public:
 
     //! @brief probability of facet with specific normal (h)
     float D(const Vector& h) const override {
-        // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) )
-        return (alphaU2 - 1) / (TWO_PI * log(alphaU) * (1 + (alphaU2 - 1) * CosTheta(h)));
+        // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) ^ 2 )
+        const float cos = CosTheta(h);
+        return (alphaU2 - 1) / (TWO_PI * log(alphaU) * (1 + (alphaU2 - 1) * cos * cos));
     }
 
     //! @brief Sampling a normal respect to the NDF.
@@ -177,5 +178,5 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
         return CosHemispherePdf(wi);
     const Vector wh = Normalize( wi + wo );
     const float pdf_wh = lerp( ggx.Pdf(wh) , cggx.Pdf(wh) , clearcoat_ratio );
-    return lerp( pdf_wh / ( 4.0f * Dot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f) * basecolor.GetIntensity() );
+    return lerp( pdf_wh / ( 4.0f * AbsDot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f) * basecolor.GetIntensity() );
 }

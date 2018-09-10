@@ -50,18 +50,31 @@ void checkReciprocity(const Bxdf* bxdf) {
 // A physically based BRDF/BTDF should not reflect more energy than it receives
 void checkEnergyConservation(const Bxdf* bxdf) {
     static const Vector wo(DIR_UP);
+    static const int TN = 8;   // thread number
+    static const int N = 1024 * 1024 * 4;
+    {
+        Spectrum rho[TN];
+        std::thread threads[TN];
+        for (int i = 0; i < TN; ++i) {
+            threads[i] = std::thread([&](int tid) {
+                for( int i = 0 ; i < N ; ++i ){
+                    Vector wi;
+                    float pdf = 0.0f;
+                    Spectrum r = bxdf->Sample_F(wo, wi, BsdfSample(true), &pdf);
+                    rho[tid] += pdf > 0.0f ? r / pdf : 0.0f;
+                }
+            }, i);
+        }
+        for (int i = 0; i < TN; ++i)
+            threads[i].join();
+        Spectrum total = 0.0f;
+        for (int i = 0; i < TN; ++i)
+            total += rho[i] / ( TN * N );
 
-    Spectrum rho;
-    for (int i = 0; i < N; ++i) {
-        Vector wi;
-        float pdf = 0.0f;
-        Spectrum r = bxdf->Sample_F(wo, wi, BsdfSample(true), &pdf);
-        rho += pdf > 0.0f ? r / pdf : 0.0f;
+        EXPECT_LE(total.GetR(), 1.01f);
+        EXPECT_LE(total.GetG(), 1.01f);
+        EXPECT_LE(total.GetB(), 1.01f);
     }
-    rho *= 1.0f / (float)N;
-    EXPECT_LE(rho.GetR(), 1.01f);
-    EXPECT_LE(rho.GetG(), 1.01f);
-    EXPECT_LE(rho.GetB(), 1.01f);
 }
 
 // Check whether the pdf evaluated from sample_f matches the one from Pdf
