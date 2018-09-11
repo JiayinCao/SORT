@@ -49,22 +49,53 @@ void checkDist( const MicroFacetDistribution* dist ){
     EXPECT_NEAR(final_total, TWO_PI, 0.03f); // 0.5% error is tolerated
 }
 
+// Check Pdf
+void checkPdf( const MicroFacetDistribution* dist ){
+    const int TN = 8;   // thread number
+    double total[TN] = { 0.0f };
+    std::thread threads[TN];
+    for (int i = 0; i < TN; ++i) {
+        threads[i] = std::thread([&](int tid) {
+            const long long N = 1024 * 1024 * 2;
+            double local = 0.0f;
+            for (long long i = 0; i < N; ++i) {
+                const Vector h = UniformSampleHemisphere(sort_canonical(), sort_canonical());
+                const float pdf = UniformHemispherePdf();
+                if (pdf > 0.0f)
+                    local += dist->Pdf(h) / pdf;
+            }
+            total[tid] += (double)local / (double)(N * TN);
+        }, i);
+    }
+    for (int i = 0; i < TN; ++i)
+        threads[i].join();
+    double final_total = 0.0f;
+    for (int i = 0; i < TN; ++i)
+        final_total += total[i];
+    EXPECT_NEAR(final_total, 1.00f, 0.01f ); // 1% error is tolerated
+}
+
+void checkAll( const MicroFacetDistribution* dist ){
+    checkPdf( dist );
+    checkDist( dist );
+}
+
 TEST(DISTRIBUTION, GGX) {
     const GGX ggx(0.5f,0.5f);
-    checkDist(&ggx);
+    checkAll(&ggx);
 }
 
 TEST(DISTRIBUTION, Beckmann) {
     const Beckmann beckmann(0.5f,0.5f);
-    checkDist(&beckmann);
+    checkAll(&beckmann);
 }
 
 TEST(DISTRIBUTION, Blinn) {
     const Blinn blinn(0.5f,0.5f);
-    checkDist(&blinn);
+    checkAll(&blinn);
 }
 
 TEST(DISTRIBUTION, ClearcoatGGX) {
     const ClearcoatGGX cggx(0.5f);
-    checkDist(&cggx);
+    checkAll(&cggx);
 }
