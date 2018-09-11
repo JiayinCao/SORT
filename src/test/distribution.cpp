@@ -55,16 +55,16 @@ TEST(DISTRIBUTION, GGX) {
 }
 
 TEST(DISTRIBUTION, Beckmann) {
-    const Beckmann ggx(0.5f,0.5f);
-    checkDist(&ggx);
+    const Beckmann beckmann(0.5f,0.5f);
+    checkDist(&beckmann);
 }
 
 TEST(DISTRIBUTION, Blinn) {
-    const Blinn ggx(0.5f,0.5f);
-    checkDist(&ggx);
+    const Blinn blinn(0.5f,0.5f);
+    checkDist(&blinn);
 }
 
 TEST(DISTRIBUTION, ClearcoatGGX) {
-    const ClearcoatGGX ggx(0.5f);
-    checkDist(&ggx);
+    const ClearcoatGGX cggx(0.5f);
+    checkDist(&cggx);
 }
