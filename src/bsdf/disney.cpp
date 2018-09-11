@@ -21,43 +21,32 @@
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 
-//! @brief Clearcoat GGX NDF.
-class ClearcoatGGX : public GGX
-{
-public:
-    //! @brief Constructor
-    //! @param roughness    Roughness of the surface formed by the micro facets.
-    ClearcoatGGX(float roughness) : GGX(roughness, roughness) {}
+float ClearcoatGGX::D(const Vector& h) const {
+    // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) ^ 2 )
 
-    //! @brief probability of facet with specific normal (h)
-    float D(const Vector& h) const override {
-        // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) ^ 2 )
-        const float cos = CosTheta(h);
-        return (alphaU2 - 1) / (TWO_PI * log(alphaU) * (1 + (alphaU2 - 1) * cos * cos));
-    }
+    // Corner case where roughness equals to 1.0
+    if (alphaU == 1.0f)
+        return INV_PI;  // Limit(alpha->1.0) D(h) = 1.0 / PI
 
-    //! @brief Sampling a normal respect to the NDF.
-    //!
-    //! @param bs   Sample holding all necessary random variables.
-    //! @return     Sampled normal direction based on the NDF.
-    Vector sample_f(const BsdfSample& bs) const override {
-        // phi = 2 * PI * u
-        // theta = acos( sqrt( ( exp( 2 * ln(alpha) * v ) - 1 ) / ( alpha^2 - 1.0f ) ) )
-        const float phi = TWO_PI * bs.u;
-        const float theta = acos(sqrt((exp(log(alphaU2) * bs.v) - 1.0f) / (alphaU2 - 1.0f)));
-        return SphericalVec(theta, phi);
-    }
+    const float cos = CosTheta(h);
+    return (alphaU2 - 1) / (TWO_PI * log(alphaU) * (1 + (alphaU2 - 1) * cos * cos));
+}
 
-protected:
-    //! @brief Smith shadow-masking function G1
-    float G1(const Vector& v) const override{
-        const float tan_theta_sq = TanTheta2(v);
-        if (isinf(tan_theta_sq)) return 0.0f;
-        static const float roughness = 0.25f;
-        const float alpha2 = roughness * roughness;
-        return 2.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
-    }
-};
+Vector ClearcoatGGX::sample_f(const BsdfSample& bs) const {
+    // phi = 2 * PI * u
+    // theta = acos( sqrt( ( exp( 2 * ln(alpha) * v ) - 1 ) / ( alpha^2 - 1.0f ) ) )
+    const float phi = TWO_PI * bs.u;
+    const float theta = alphaU2 == 1.0f ? acos(sqrt(bs.v)) : acos(sqrt((exp(log(alphaU2) * bs.v) - 1.0f) / (alphaU2 - 1.0f)));
+    return SphericalVec(theta, phi);
+}
+
+float ClearcoatGGX::G1(const Vector& v) const {
+    const float tan_theta_sq = TanTheta2(v);
+    if (isinf(tan_theta_sq)) return 0.0f;
+    static const float roughness = 0.25f;
+    const float alpha2 = roughness * roughness;
+    return 2.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
+}
 
 Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 {
