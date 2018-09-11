@@ -20,7 +20,7 @@
 #include "bxdf.h"
 #include "microfacet.h"
 
-//! @brief Disney Principle brdf.
+//! @brief Disney Principle BRDF.
 /**
  * Disney Principle BRDF
  * https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
@@ -74,4 +74,26 @@ private:
     const float     sheenTint;      /**< Amount to tint sheen towards base color. */
     const float     clearcoat;      /**< A second, special-purpose specular lobe. */
     const float     clearcoatGloss; /**< controls clearcoat glossiness (0 = a “satin” appearance, 1 = a “gloss” appearance). */
+};
+
+//! @brief Clearcoat GGX NDF.
+class ClearcoatGGX : public GGX
+{
+public:
+    //! @brief Constructor
+    //! @param roughness    Roughness of the surface formed by the micro facets.
+    ClearcoatGGX(float roughness) : GGX(roughness, roughness) {}
+
+    //! @brief probability of facet with specific normal (h)
+    float D(const Vector& h) const override;
+
+    //! @brief Sampling a normal respect to the NDF.
+    //!
+    //! @param bs   Sample holding all necessary random variables.
+    //! @return     Sampled normal direction based on the NDF.
+    Vector sample_f(const BsdfSample& bs) const override;
+
+protected:
+    //! @brief Smith shadow-masking function G1
+    float G1(const Vector& v) const override;
 };
