@@ -209,7 +209,7 @@ TEST(BXDF, Disney) {
 TEST(BXDF, MicroFacetReflection) {
     static const Spectrum R(1.0f);
     const FresnelConductor fresnel( 1.0f , 1.5f );
-    const Blinn ggx(0.5f, 0.5f);//sort_canonical(), sort_canonical() );
+    const GGX ggx(0.5f, 0.5f);
     MicroFacetReflection mf( R , &fresnel , &ggx , R , DIR_UP );
     checkAll(&mf);
 }
