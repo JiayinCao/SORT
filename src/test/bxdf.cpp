@@ -29,10 +29,9 @@
 #include <thread>
 #include "utility/samplemethod.h"
 
-static const int N = 1024 * 1024;
-
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
+    static const int N = 1024;
     for (int i = 0; i < N; ++i) {
         Vector wi(sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f);
         wi.Normalize();
@@ -51,7 +50,7 @@ void checkReciprocity(const Bxdf* bxdf) {
 void checkEnergyConservation(const Bxdf* bxdf) {
     static const Vector wo(DIR_UP);
     static const int TN = 8;   // thread number
-    static const int N = 1024 * 1024 * 4;
+    static const int N = 1024 * 1024 * 2;
     {
         Spectrum rho[TN];
         std::thread threads[TN];
@@ -114,7 +113,7 @@ void checkPdf( const Bxdf* bxdf ){
         std::thread threads[TN];
         for (int i = 0; i < TN; ++i) {
             threads[i] = std::thread([&](int tid) {
-                const long long N = 1024 * 1024 * 8;
+                const long long N = 1024 * 1024 * 2;
                 double local = 0.0f;
                 for (long long i = 0; i < N; ++i) {
                     Vector wi = UniformSampleSphere(sort_canonical(), sort_canonical());
