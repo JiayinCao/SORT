@@ -16,6 +16,7 @@
  */
 
 #include "thirdparty/gtest/gtest.h"
+#include "unittest_common.h"
 #include "bsdf/bsdf.h"
 #include "sampler/sample.h"
 #include "spectrum/spectrum.h"
@@ -26,52 +27,21 @@
 
 // Check PDF evaluation 
 void checkDist( const MicroFacetDistribution* dist ){
-    const int TN = 8;   // thread number
-    double total[TN] = { 0.0f };
-    std::thread threads[TN];
-    for (int i = 0; i < TN; ++i) {
-        threads[i] = std::thread([&](int tid) {
-            const long long N = 1024 * 1024 * 8;
-            double local = 0.0f;
-            for (long long i = 0; i < N; ++i) {
-                auto h = dist->sample_f(BsdfSample(true));
-                auto pdf = dist->Pdf(h);
-                local += pdf != 0.0f ? 1.0f / pdf : 0.0f;
-            }
-            total[tid] += (double)local / (double)(N * TN);
-        }, i);
-    }
-    for (int i = 0; i < TN; ++i)
-        threads[i].join();
-    double final_total = 0.0f;
-    for (int i = 0; i < TN; ++i)
-        final_total += total[i];
+    double final_total = ParrallReduction<double, 8>( [&](){
+            auto h = dist->sample_f(BsdfSample(true));
+            auto pdf = dist->Pdf(h);
+            return pdf != 0.0f ? 1.0f / pdf : 0.0f;
+        } );
     EXPECT_NEAR(final_total, TWO_PI, 0.03f); // 0.5% error is tolerated
 }
 
 // Check Pdf
 void checkPdf( const MicroFacetDistribution* dist ){
-    const int TN = 8;   // thread number
-    double total[TN] = { 0.0f };
-    std::thread threads[TN];
-    for (int i = 0; i < TN; ++i) {
-        threads[i] = std::thread([&](int tid) {
-            const long long N = 1024 * 1024 * 2;
-            double local = 0.0f;
-            for (long long i = 0; i < N; ++i) {
-                const Vector h = UniformSampleHemisphere(sort_canonical(), sort_canonical());
-                const float pdf = UniformHemispherePdf();
-                if (pdf > 0.0f)
-                    local += dist->Pdf(h) / pdf;
-            }
-            total[tid] += (double)local / (double)(N * TN);
-        }, i);
-    }
-    for (int i = 0; i < TN; ++i)
-        threads[i].join();
-    double final_total = 0.0f;
-    for (int i = 0; i < TN; ++i)
-        final_total += total[i];
+    double final_total = ParrallReduction<double, 8>( [&](){
+            const Vector h = UniformSampleHemisphere(sort_canonical(), sort_canonical());
+            const float pdf = UniformHemispherePdf();
+            return pdf > 0.0f ? dist->Pdf(h) / pdf : 0.0f;
+        } );
     EXPECT_NEAR(final_total, 1.00f, 0.01f ); // 1% error is tolerated
 }
 
