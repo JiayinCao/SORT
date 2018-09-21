@@ -30,6 +30,7 @@
 #include "bsdf/dielectric.h"
 #include <thread>
 #include "utility/samplemethod.h"
+#include <mutex>
 
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
