@@ -42,7 +42,7 @@ void checkPdf( const MicroFacetDistribution* dist ){
             const float pdf = UniformHemispherePdf();
             return pdf > 0.0f ? dist->Pdf(h) / pdf : 0.0f;
         } );
-    EXPECT_LE(final_total, 1.00f, 0.01f ); // 1% error is tolerated
+    EXPECT_LE(final_total, 1.01f); // 1% error is tolerated
 }
 
 void checkAll( const MicroFacetDistribution* dist ){
