@@ -44,6 +44,9 @@ enum class LOG_TYPE{
 
 class LogDispatcher{
 public:
+    // virtual destructor
+    virtual ~LogDispatcher() {}
+
     // dispatch a log
     void dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line );
     
