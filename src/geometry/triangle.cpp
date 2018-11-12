@@ -21,7 +21,17 @@
 #include "intersection.h"
 #include "utility/samplemethod.h"
 
-// check if the triangle is intersected with the ray
+static inline int MajorAxis( const Vector3f& v ){
+	if( abs( v[0] ) > abs( v[1] ) && abs( v[0] ) > abs( v[2] ) ) 
+		return 0;
+	return abs( v[1] ) > abs( v[2] ) ? 1 : 2;
+}
+static inline Vector3f Permute( const Vector3f& v , int ax , int ay , int az ){
+	return Vector3f( v[ax] , v[ay] , v[az] );
+}
+
+// 'Watertight Ray/Triangle Intersection' (Sven Woop, Carsten Benthin, Ingo Wald)
+// http://jcgt.org/published/0002/01/05/paper.pdf
 bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 {
 	// get the memory
@@ -32,49 +42,84 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const
 	int id2 = m_Index[2].posIndex;
 
 	// get three vertexes
-	const Point& p0 = mem->m_PositionBuffer[id0] ;
-	const Point& p1 = mem->m_PositionBuffer[id1] ;
-	const Point& p2 = mem->m_PositionBuffer[id2] ;
+	const Point& op0 = mem->m_PositionBuffer[id0] ;
+	const Point& op1 = mem->m_PositionBuffer[id1] ;
+	const Point& op2 = mem->m_PositionBuffer[id2] ;
 
-	float delta = 0.0000001f;
-	Vector e1 = p1 - p0;
-	Vector e2 = p2 - p0;
-	Vector s1 = Cross( r.m_Dir , e2 );
-	float divisor = Dot( s1 , e1 );
-	if( fabs(divisor) < delta )
-		return false;
-	float invDivisor = 1.0f / divisor;
+	Point p0 = op0;
+	Point p1 = op1;
+	Point p2 = op2;
 
-	Vector d = r.m_Ori - p0;
-	float u = Dot( d , s1 ) * invDivisor;
-	if( u < -delta || u > 1.0f + delta )
+	// transform the vertices from world space to ray coordinate
+	// step 0 : translate the vertices with ray origin
+	p0 -= r.m_Ori;
+	p1 -= r.m_Ori;
+	p2 -= r.m_Ori;
+
+	// step 1 : pick the major axis to avoid dividing by zero in the sheering pass.
+	//          by picking the major axis, we can also make sure we sheer as little as possible
+	const int ay = MajorAxis( r.m_Dir );
+	const int az = ( ay + 1 ) % 3;
+	const int ax = ( az + 1 ) % 3;
+	Vector3f d = Permute( r.m_Dir , ax , ay , az );
+	p0 = Permute( p0 , ax , ay , az );
+	p1 = Permute( p1 , ax , ay , az );
+	p2 = Permute( p2 , ax , ay , az );
+
+	// step 2 : sheer the vertices so that the ray direction points to ( 0 , 1 , 0 )
+	const float sx = -d.x / d.y;
+	const float sz = -d.z / d.y;
+	const float sy = 1.0f / d.y;
+	p0.x += sx * p0.y;
+	p0.z += sz * p0.y;
+	p1.x += sx * p1.y;
+	p1.z += sz * p1.y;
+	p2.x += sx * p2.y;
+	p2.z += sz * p2.y;
+
+	// compute the edge functions
+	float e0 = p1.x * p2.z - p1.z * p2.x;
+	float e1 = p2.x * p0.z - p2.z * p0.x;
+	float e2 = p0.x * p1.z - p0.z * p1.x;
+
+	// fall back to double precision for better accuracy at some performance cost
+	if( ( e0 == 0.0f || e1 == 0.0f || e2 == 0.0f ) ){
+		e0 = (float)( (double)p1.x * (double)p2.z - (double)p1.z * (double)p2.x );
+		e1 = (float)( (double)p2.x * (double)p0.z - (double)p2.z * (double)p0.x );
+		e2 = (float)( (double)p0.x * (double)p1.z - (double)p0.z * (double)p1.x );
+	}
+
+	if( ( e0 < 0 || e1 < 0 || e2 < 0 ) && ( e0 > 0 || e1 > 0 || e2 > 0 ) )
 		return false;
-	Vector s2 = Cross( d , e1 );
-	float v = Dot( r.m_Dir , s2 ) * invDivisor;
-	if( v < -delta || u + v > 1.0f + delta )
-		return false;
-	float t = Dot( e2 , s2 ) * invDivisor;
-	if( t < r.m_fMin || t > r.m_fMax )
+	const float det = e0 + e1 + e2;
+	if( det == .0f )
 		return false;
 
-	if( intersect == 0 )
-		return t > r.m_fMin && t < r.m_fMax;
-
-	// if t is out of range , return false
+	p0.y *= sy;
+	p1.y *= sy;
+	p2.y *= sy;
+	const float invDet = 1.0f / det;
+	float t = ( e0 * p0.y + e1 * p1.y + e2 * p2.y ) * invDet;
+	if( t <= r.m_fMin || t >= r.m_fMax )
+		return false;
+	if( intersect == nullptr )
+		return true;
 	if( t > intersect->t )
 		return false;
 
+	const float u = e1 * invDet;
+	const float v = e2 * invDet;
+	const float w = 1 - u - v;
+
 	// store the intersection
 	intersect->intersect = r(t);
-
-	float w = 1 - u - v;
 
 	// store normal if the info is available
 	id0 = m_Index[0].norIndex;
 	id1 = m_Index[1].norIndex;
 	id2 = m_Index[2].norIndex;
 
-    intersect->gnormal = Normalize(Cross( e2 , e1 ));
+    intersect->gnormal = Normalize(Cross( ( op2 - op0 ) , ( op1 - op0 ) ));
 	intersect->normal = ( w * mem->m_NormalBuffer[id0] + u * mem->m_NormalBuffer[id1] + v * mem->m_NormalBuffer[id2]).Normalize();
 	intersect->tangent = ( w * mem->m_TangentBuffer[id0] + u * mem->m_TangentBuffer[id1] + v * mem->m_TangentBuffer[id2]).Normalize();
 
@@ -163,8 +208,7 @@ static void Project(const Point* points, int count , const Vector& axis, float& 
 	}
 }
 
-// intersection test between a triangle and a bounding box
-// Detail algorithm is descripted in this paper : "Fast 3D Triangle-Box Overlap Testing".
+// 'Fast 3D Triangle-Box Overlap Testing'
 // http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox_tam.pdf
 // para 'triangle' : the input triangle
 // para 'bb' : bounding box
