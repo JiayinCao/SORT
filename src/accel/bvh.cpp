@@ -98,8 +98,8 @@ void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned
 	for( unsigned i = _start ; i < _end ; i++ )
 		node->bbox.Union( m_bvhpri[i].GetBBox() );
 
-	unsigned tri_num = _end - _start;
-	if( tri_num <= m_maxPriInLeaf ){
+	unsigned primitive_num = _end - _start;
+	if( primitive_num <= m_maxPriInLeaf ){
 		makeLeaf( node , _start , _end );
 		return;
 	}
@@ -108,7 +108,7 @@ void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned
 	unsigned split_axis;
 	float split_pos;
 	float sah = pickBestSplit( split_axis , split_pos , node , _start , _end );
-	if( sah >= tri_num ){
+	if( sah >= primitive_num ){
 		makeLeaf( node , _start , _end );
 		return;
 	}
@@ -134,11 +134,11 @@ float Bvh::pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , u
 	for( unsigned i = _start ; i < _end ; i++ )
 		inner.Union( m_bvhpri[i].m_centroid );
 
-	unsigned tri_num = _end - _start;
+	unsigned primitive_num = _end - _start;
 	axis = inner.MaxAxisId();
 	float min_sah = FLT_MAX;
 
-	// distribute the triangles into bins
+	// distribute the primitives into bins
 	unsigned	bin[BVH_SPLIT_COUNT];
 	BBox		bbox[BVH_SPLIT_COUNT];
 	BBox		rbox[BVH_SPLIT_COUNT-1];
@@ -163,7 +163,7 @@ float Bvh::pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , u
 	BBox		lbox = bbox[0];
 	float pos = split_delta + split_start ;
 	for( unsigned i = 0 ; i < BVH_SPLIT_COUNT - 1 ; i++ ){
-		float sah_value = sah( left , tri_num - left , lbox , rbox[i] , node->bbox );
+		float sah_value = sah( left , primitive_num - left , lbox , rbox[i] , node->bbox );
 		if( sah_value < min_sah ){
 			min_sah = sah_value;
 			split_pos = pos;
@@ -225,8 +225,8 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
 	
     if( node->pri_num != 0 ){
         unsigned _start = node->pri_offset;
-        unsigned _tri = node->pri_num;
-        unsigned _end = _start + _tri;
+        unsigned _pri = node->pri_num;
+        unsigned _end = _start + _pri;
         
         bool inter = false;
         for( unsigned i = _start ; i < _end ; i++ ){

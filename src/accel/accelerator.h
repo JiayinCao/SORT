@@ -32,11 +32,10 @@ class Ray;
 /**
  * Accelerator is an interface rather than a base class. There is no instance of it.
  * It is responsible for acceleration of intersection tests between ray and primitives.
- * A ray tracing algorithm without a spatial acceleration structure is O(M*N) where M is
- * the number of rays and N is the number of primitives. Spatial acceleration structure
- * can optimize the algorithm so that it is O(M*lg(N)), a significant improvement over
- * the naive brute force ray tracing.
- * Common spatial structures inlcude KD-Tree, BVH and Uniform Grid.
+ * Tracing a ray against the scene without a spatial acceleration structure is O(N) where
+ * N is the number of primitives. Spatial acceleration structure can optimize the 
+ * algorithm so that it is O(lg(N)), a significant improvement over the naive brute 
+ * force ray tracing. Common spatial structures inlcude KD-Tree, BVH and Uniform Grid.
  */
 class	Accelerator
 {
@@ -46,14 +45,13 @@ public:
 
     //! @brief Get intersection between the ray and the primitive set.
     //!
-    //! Pretty much all spatial accelerators perform this operation
-    //! in O(lg(N)) where n is the number of primitives in the set.
-    //! It will return true if there is intersection between the ray and the primitive set.
-    //! In case of an existed intersection, if intersect is not empty, it will fill the
-    //! structure and return the nearest intersection.
+    //! Pretty much all spatial accelerators perform this operation in O(lg(N)) where n is 
+    //! he number of primitives in the set. It will return true if there is intersection 
+    //! between the ray and the primitive set. In case of an existed intersection, if intersect 
+    //! is not empty, it will fill the structure and return the nearest intersection.
     //! If intersect is nullptr, it will stop as long as one intersection is found, it is not
     //! necessary to be the nearest one.
-    //! False will be returned if there is no intersection at all.
+    //! False will be returned if there is no intersection at all.POC
     //! @param r            The input ray to be tested.
     //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
     //!                     long as it finds an intersection. It is faster than the one with intersection information
