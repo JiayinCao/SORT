@@ -59,29 +59,29 @@ public:
         BBox						bb;                     /**< Bounding box for this octree node.*/
     };
     
-    //! @brief Triangle information in octree node.
-    struct NodeTriangleContainer{
+    //! @brief Primitive information in octree node.
+    struct NodePrimitiveContainer{
         vector<const Primitive*>	primitives;		/**< Primitive buffer used during octree construction.*/
     };
     
 private:
 	OcTreeNode*	m_pRoot = nullptr;				/**< Pointer to the root node of this octree.*/
-	const unsigned	m_uMaxTriInLeaf = 16;		/**< Maximum number of triangles allowed in a leaf node, 16 is the default value.*/
+	const unsigned	m_uMaxPriInLeaf = 16;		/**< Maximum number of primitives allowed in a leaf node, 16 is the default value.*/
 	const unsigned	m_uMaxDepthInOcTree = 16;	/**< Maximum depth of the octree, 16 is the default value.*/
 
 	//! @brief Split current node into eight if criteria is not met. Otherwise, it will make it a leaf.\n
 	//! This function invokes itself recursively, so the whole sub-tree will be built once it is called.
 	//! @param node         Node to be splitted.
-	//! @param container    Container holding all triangle information in this node.
+	//! @param container    Container holding all primitive information in this node.
 	//! @param bb           Bounding box of this node.
 	//! @param depth        Current depth of this node.
-	void splitNode( OcTreeNode* node , NodeTriangleContainer* container , unsigned depth );
+	void splitNode( OcTreeNode* node , NodePrimitiveContainer* container , unsigned depth );
 
 	//! @brief Making the current node as a leaf node.
 	//! An new index buffer will be allocated in this node.
 	//! @param node         Node to be made as a leaf node.
-	//! @param container    Container holdes all triangle information in this node.
-	void makeLeaf( OcTreeNode* node , NodeTriangleContainer* container );
+	//! @param container    Container holdes all primitive information in this node.
+	void makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container );
 
 	//! @brief Traverse OcTree recursively and return if there is interesection.
 	//! @param node         Sub-tree belongs to this node will be visited in a depth first manner.

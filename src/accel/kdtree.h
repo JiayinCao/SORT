@@ -72,7 +72,7 @@ public:
         Kd_Node*					leftChild = nullptr;	/**< Pointer to the left child of the KD-Tree node. */
         Kd_Node*					rightChild = nullptr;	/**< Pointer to the right child of the KD-Tree node. */
         BBox						bbox;                   /**< Bounding box of the KD-Tree node. */
-        vector<const Primitive*>	trilist;                /**< Vector holding all primitives in the node. It 
+        vector<const Primitive*>	primitivelist;          /**< Vector holding all primitives in the node. It 
                                                              should be empty for interior nodes. */
         unsigned					flag = 0;               /**< Special mask used for nodes. The node is a leaf node if it is 3. 
                                                              For interior nodes, it will be the cooreponding id of the split axis.*/
@@ -129,7 +129,7 @@ private:
 	unsigned char*	m_temp = nullptr;           /**< Temporary buffer for marking primitives. */
 
 	const unsigned	m_maxDepth = 28;            /**< Maximum allowed depth of KD-Tree. */
-	const unsigned	m_maxTriInLeaf = 32;        /**< Maximum allowed number of primitives in a leaf node. */
+	const unsigned	m_maxPriInLeaf = 32;        /**< Maximum allowed number of primitives in a leaf node. */
 
     //! @brief Split current KD-Tree node.
     //! @param node     The KD-Tree node to be split.

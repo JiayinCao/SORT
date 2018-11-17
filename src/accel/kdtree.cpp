@@ -55,7 +55,7 @@ void KDTree::Build()
 	if( m_primitives->size() == 0 )
 		return;
 
-	// pre-malloc node and leaf triangle list memory
+	// pre-malloc node and leaf primitive list memory
 	m_temp = new unsigned char[m_primitives->size()];
 
 	// get the bounding box for the whole primitive list
@@ -94,7 +94,7 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 {
     SORT_STATS(sKDTreeDepth = max(sKDTreeDepth, (StatsInt)depth+1));
     
-	if( prinum < m_maxTriInLeaf || depth > m_maxDepth ){
+	if( prinum < m_maxPriInLeaf || depth > m_maxDepth ){
 		makeLeaf( node , splits , prinum );
 		return;
 	}
@@ -114,7 +114,7 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 
 	// ----------------------------------------------------------------------------------------
 	// step 2
-	// distribute triangles
+	// distribute primitives
     const unsigned split_count = prinum * 2;
 	Split* _splits = splits.split[split_Axis];
 	unsigned l_num = 0 , r_num = 0;
@@ -235,7 +235,7 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum )
         if( splits.split[0][i].type == Split_Type::Split_Start ){
 			const Primitive* primitive = splits.split[0][i].primitive;
 			if( primitive->GetIntersect( node->bbox ) )
-				node->trilist.push_back(primitive);
+				node->primitivelist.push_back(primitive);
 		}
 	}
 	splits.Release();
@@ -281,9 +281,9 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 	// it's a leaf node
 	if( (node->flag & mask) == 3 ){
 		bool inter = false;
-        for( auto tri : node->trilist ){
+        for( auto primitive : node->primitivelist ){
             SORT_STATS(++sIntersectionTest);
-			inter |= tri->GetIntersect( ray , intersect );
+			inter |= primitive->GetIntersect( ray , intersect );
 			if( intersect == 0 && inter )
 				return true;
 		}
