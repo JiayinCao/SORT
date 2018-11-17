@@ -80,8 +80,8 @@ void OcTree::Build()
 	// generate aabb
 	computeBBox();
 
-	// initialize a triangle container
-	NodeTriangleContainer* container = new NodeTriangleContainer();
+	// initialize a primitive container
+	NodePrimitiveContainer* container = new NodePrimitiveContainer();
     for( auto primitive : *m_primitives )
 		container->primitives.push_back( primitive );
 	
@@ -114,24 +114,24 @@ void OcTree::releaseOcTree( OcTreeNode* node ){
 // Split current node into eight if criteria is not met. Otherwise, it will make it a leaf.\n
 // This function invokes itself recursively, so the whole sub-tree will be built once it is called.
 // @param node Node to be splited.
-// @param container Container holding all triangle information in this node.
+// @param container Container holding all primitives information in this node.
 // @param bb Bounding box of this node.
 // @param depth Current depth of this node.
-void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , unsigned depth )
+void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , unsigned depth )
 {
     SORT_STATS( sOcTreeDepth = max( sOcTreeDepth , (StatsInt) depth + 1 ) );
     
 	// make a leaf if there are not enough points
-	if( container->primitives.size() < (int)m_uMaxTriInLeaf || depth > m_uMaxDepthInOcTree ){
+	if( container->primitives.size() < (int)m_uMaxPriInLeaf || depth > m_uMaxDepthInOcTree ){
 		makeLeaf( node , container );
 		return;
 	}
 
 	// container for child node
-	NodeTriangleContainer* childcontainer[8];
+	NodePrimitiveContainer* childcontainer[8];
 	for( int i = 0; i < 8 ; ++i ){
 		node->child[i] = new OcTreeNode();
-		childcontainer[i] = new NodeTriangleContainer();
+		childcontainer[i] = new NodePrimitiveContainer();
 	}
     
 	// get the center point of this tree node
@@ -148,7 +148,7 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 		}
 	}
 	
-	// distribute triangles
+	// distribute primitives
 	vector<const Primitive*>::const_iterator it = container->primitives.begin();
 	while( it != container->primitives.end() ){
 		for( int i = 0 ; i < 8 ; ++i ){
@@ -159,13 +159,13 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 		++it;
 	}
 
-	// There are cases where triangles lie along diagnonal direction and it will be 
+	// There are cases where primitive lie along diagnonal direction and it will be 
 	// extremely difficult, if not impossible, to separate them from different nodes.
 	// In these very case, we need to stop immediately to avoid memory exploition.
-	int total_child_tri = 0;
+	int total_child_pri = 0;
 	for( int i = 0 ; i < 8 ; ++i )
-		total_child_tri += (int)childcontainer[i]->primitives.size();
-	if( total_child_tri > (int)(2 * container->primitives.size()) && depth > 8 ){
+		total_child_pri += (int)childcontainer[i]->primitives.size();
+	if( total_child_pri > (int)(2 * container->primitives.size()) && depth > 8 ){
 		// make leaf
 		makeLeaf( node , container );
 
@@ -192,8 +192,8 @@ void OcTree::splitNode( OcTreeNode* node , NodeTriangleContainer* container , un
 // Making the current node as a leaf node.
 // An new index buffer will be allocated in this node.
 // @param node Node to be made as a leaf node.
-// @param container Container holdes all triangle information in this node.
-void OcTree::makeLeaf( OcTreeNode* node , NodeTriangleContainer* container )
+// @param container Container holdes all primitive information in this node.
+void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container )
 {
     SORT_STATS(++sOcTreeLeafNodeCount);
     SORT_STATS(sOcTreeMaxPriCountInLeaf = max( sOcTreeMaxPriCountInLeaf , (StatsInt)container->primitives.size()) );
@@ -224,9 +224,9 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 
 	// Iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
 	if( node->child[0] == nullptr ){
-        for( auto tri : node->primitives ){
+        for( auto primitive : node->primitives ){
             SORT_STATS(++sIntersectionTest);
-			inter |= tri->GetIntersect( ray , intersect );
+			inter |= primitive->GetIntersect( ray , intersect );
 			if( !intersect && inter )
 				return true;
 		}

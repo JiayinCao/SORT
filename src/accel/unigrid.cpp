@@ -182,7 +182,7 @@ void UniGrid::Build()
 					bb.m_Min = m_bbox.m_Min + Vector( (float)k , (float)j , (float)i ) * m_voxelExtent;
 					bb.m_Max = bb.m_Min + m_voxelExtent;
 
-					// only add the triangle if it is actually intersected
+					// only add the primitives if it is actually intersected
 					if( (*it)->GetIntersect( bb ) )
 						m_pVoxels[offset( k , j , i )].push_back( *it );
 				}
@@ -218,7 +218,7 @@ Point UniGrid::voxelId2Point( int id[3] ) const
 	return p;
 }
 
-// get intersection between the ray and the triangles in the grid
+// get intersection between the ray and the primitives in the grid
 bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const
 {
     sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "asfsa" );

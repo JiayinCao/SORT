@@ -91,7 +91,7 @@ bool Scene::LoadScene( TiXmlNode* root )
 		meshNode = meshNode->NextSiblingElement( "Model" );
 	}
 	// generate triangle buffer after parsing from file
-	_generateTriBuf();
+	_generatePriBuf();
 	
 	// parse the lights
 	TiXmlElement* lightNode = root->FirstChildElement( "Light" );
@@ -217,7 +217,7 @@ void Scene::Release()
 }
 
 // generate triangle buffer
-void Scene::_generateTriBuf()
+void Scene::_generatePriBuf()
 {
 	// iterator the mesh
 	vector<TriMesh*>::iterator it = m_meshBuf.begin();

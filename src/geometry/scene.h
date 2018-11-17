@@ -49,7 +49,7 @@ public:
 	// para 'r' : the ray
 	// result   : the intersection information between the ray and the scene
 	// note     : if there is no acceleration structure , it will iterator all
-	//			  of the triangles which will cost much!
+	//			  of the primitives which will cost much!
 	bool	GetIntersect( const Ray& r , Intersection* intersect ) const;
 
 	// release the memory of the scene
@@ -94,7 +94,7 @@ private:
 	// the buffer for the triangle mesh
 	vector<TriMesh*>	m_meshBuf;
 
-	// the triangle buffer for the scene
+	// the primitive buffer for the scene
 	vector<Primitive*>	m_triBuf;
 
 	// the light
@@ -121,7 +121,7 @@ private:
 	bool	_bfIntersect( const Ray& r , Intersection* intersect ) const;
 
 	// generate triangle buffer
-	void	_generateTriBuf();
+	void	_generatePriBuf();
 
 	// initialize default data
 	void	_init();

@@ -29,8 +29,8 @@ void Accelerator::computeBBox()
 	m_bbox.InvalidBBox();
 
 	// update bounding box again
-    for( auto tri : *m_primitives )
-		m_bbox.Union( tri->GetBBox() );
+    for( auto primitive : *m_primitives )
+		m_bbox.Union( primitive->GetBBox() );
 
 	// enlarge the bounding box a little
 	static const float threshold = 0.001f;
