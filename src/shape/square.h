@@ -54,5 +54,5 @@ public:
 // protected method
 protected:
 	// get intersected point between the ray and the shape
-	float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* intersect = 0 ) const override;
+	float getIntersect( const Ray& ray , Point& p , Intersection* intersect = nullptr ) const override;
 };

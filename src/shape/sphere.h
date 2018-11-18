@@ -59,6 +59,8 @@ public:
     
 // private method
 private:
+	float radius = 1.0f;	/**< Radius of the sphere. */
+	
 	// get intersection between a ray and the sphere
-	float	_getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* inter = 0 ) const override;
+	float	getIntersect( const Ray& ray , Point& p , Intersection* inter = nullptr ) const override;
 };

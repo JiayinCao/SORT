@@ -95,9 +95,9 @@ Spectrum AreaLight::Power() const
 void AreaLight::_registerAllProperty()
 {
 	Light::_registerAllProperty();
-    _registerProperty( "shape" , new ShapeProperty(this) );
-	_registerProperty( "sizex" , new SizeXProperty(this) );
-    _registerProperty( "sizey" , new SizeYProperty(this) );
+    //_registerProperty( "shape" , new ShapeProperty(this) );
+	//_registerProperty( "sizex" , new SizeXProperty(this) );
+    //_registerProperty( "sizey" , new SizeYProperty(this) );
 }
 
 // sample light density

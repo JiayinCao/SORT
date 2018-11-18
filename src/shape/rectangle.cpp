@@ -72,10 +72,12 @@ float Rectangle::SurfaceArea() const
 }
 
 // get intersected point between the ray and the shape
-float Rectangle::_getIntersect( const Ray& ray , Point& p , float limit , Intersection* intersect ) const
+float Rectangle::getIntersect( const Ray& ray , Point& p , Intersection* intersect ) const
 {
 	if( ray.m_Dir.y == 0.0f )
 		return -1.0f;
+
+	const float limit = intersect ? intersect->t : FLT_MAX;
 
 	float t = -ray.m_Ori.y / ray.m_Dir.y;
 	if( t > limit || t <= ray.m_fMin || t > ray.m_fMax )
@@ -95,7 +97,6 @@ float Rectangle::_getIntersect( const Ray& ray , Point& p , float limit , Inters
 		intersect->intersect = transform( p );
 		intersect->normal = transform.invMatrix.Transpose()(DIR_UP);
 		intersect->tangent = transform(Vector( 0.0f , 0.0f , 1.0f ));
-		intersect->primitive = const_cast<Rectangle*>(this);
 	}
 
 	return t;

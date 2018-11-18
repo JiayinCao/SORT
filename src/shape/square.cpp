@@ -70,13 +70,14 @@ float Square::SurfaceArea() const
 }
 
 // get intersected point between the ray and the shape
-float Square::_getIntersect( const Ray& ray , Point& p , float limit , Intersection* intersect ) const
+float Square::getIntersect( const Ray& ray , Point& p , Intersection* intersect ) const
 {
     const float radius = sizeX * 0.5f;
     
 	if( ray.m_Dir.y == 0.0f )
 		return -1.0f;
 
+	const float limit = intersect ? intersect->t : FLT_MAX;
 	float t = -ray.m_Ori.y / ray.m_Dir.y;
 	if( t > limit || t <= ray.m_fMin || t > ray.m_fMax )
 		return -1.0f;
@@ -93,7 +94,6 @@ float Square::_getIntersect( const Ray& ray , Point& p , float limit , Intersect
 		intersect->intersect = transform( p );
 		intersect->normal = transform.invMatrix.Transpose()(DIR_UP);
 		intersect->tangent = transform(Vector( 0.0f , 0.0f , 1.0f ));
-		intersect->primitive = const_cast<Square*>(this);
 	}
 
 	return t;
