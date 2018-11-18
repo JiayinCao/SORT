@@ -17,22 +17,16 @@
 
 // include header
 #include "sphere.h"
-#include "geometry/ray.h"
-#include "geometry/intersection.h"
-#include "math/vector3.h"
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
-#include "utility/rand.h"
 #include "utility/log.h"
 
-IMPLEMENT_CREATOR( Sphere );
-
 // sample a point on shape
-Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
+Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
 {
     sAssertMsg(false, SAMPLING, "N is not filled in Sphere::sample_l");
     
-	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
+	Point center = m_transform( Point( 0.0f , 0.0f , 0.0f ) );
 	Vector delta = center - p;
 	Vector dir = Normalize( delta );
 	Vector wcx , wcy;
@@ -52,11 +46,11 @@ Point Sphere::sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
 	if( pdf ) *pdf = UniformConePdf( cos_theta );
 
 	Point _p;
-	Ray r = transform.invMatrix(Ray( p , wi ));
-	if( getIntersect( r , _p ) < 0.0f )
+	Ray r = m_transform.invMatrix(Ray( p , wi ));
+	if( !GetIntersect( r , _p ) )
 		_p = r( Dot( delta , wi ) );
 	
-	return transform(_p);
+	return m_transform(_p);
 }
 
 // get pdf of specific direction
@@ -75,14 +69,16 @@ float Sphere::SurfaceArea() const
 }
 
 // get intersection between a ray and the sphere
-float Sphere::getIntersect( const Ray& r , Point& p , Intersection* intersect ) const
+bool Sphere::GetIntersect( const Ray& ray , Point& p , Intersection* intersect ) const
 {
+	Ray r = m_transform.invMatrix( ray );
+
 	float _b = 2.0f * ( r.m_Dir.x * r.m_Ori.x + r.m_Dir.y * r.m_Ori.y + r.m_Dir.z * r.m_Ori.z );
 	float _c = r.m_Ori.x * r.m_Ori.x + r.m_Ori.y * r.m_Ori.y + r.m_Ori.z * r.m_Ori.z - radius * radius;
 
 	float delta = _b * _b - 4.0f * _c ;
 	if( delta < 0.0f )
-		return -1.0f;
+		return false;
 	delta = sqrt( delta );
 
 	float min_t = ( -_b - delta ) * 0.5f;
@@ -90,18 +86,18 @@ float Sphere::getIntersect( const Ray& r , Point& p , Intersection* intersect ) 
 
 	const float limit = intersect ? intersect->t : FLT_MAX;
 	if( min_t > limit || max_t <= 0.0f )
-		return -1.0f;
+		return false;
 
 	float t;
 	if( min_t > 0.0f )
 		t = min_t;
 	else if( max_t > limit )
-		return -1.0f;
+		return false;
 	else
 		t = max_t;
 
 	if( t > r.m_fMax || t < r.m_fMin )
-		return -1.0f;
+		return false;
 
 	p = r(t);
 
@@ -111,16 +107,16 @@ float Sphere::getIntersect( const Ray& r , Point& p , Intersection* intersect ) 
 		Vector n = Normalize(Vector( p.x , p.y , p.z ));
 		Vector v0 , v1;
 		CoordinateSystem( n , v0 , v1 );
-		intersect->intersect = transform(p);
-		intersect->normal = transform.invMatrix.Transpose()(n);
-		intersect->tangent = transform(v0);
+		intersect->intersect = m_transform(p);
+		intersect->normal = m_transform.invMatrix.Transpose()(n);
+		intersect->tangent = m_transform(v0);
 	}
 
-	return t;
+	return true;
 }
 
 // sample a ray from light
-void Sphere::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
+void Sphere::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
@@ -129,7 +125,7 @@ void Sphere::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
 	r.m_Dir = UniformSampleSphere( sort_canonical() , sort_canonical() );
 	if( Dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
 		r.m_Dir = -r.m_Dir;
-	n = transform.invMatrix.Transpose()( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z ) );
+	n = m_transform.invMatrix.Transpose()( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z ) );
 
 	if( pdf ) *pdf = 1.0f / ( 8.0f * PI * PI * radius * radius );
 }
@@ -137,7 +133,7 @@ void Sphere::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
 // get the bounding box of the primitive
 const BBox&	Sphere::GetBBox() const
 {
-	Point center = transform( Point( 0.0f , 0.0f , 0.0f ) );
+	Point center = m_transform( Point( 0.0f , 0.0f , 0.0f ) );
 
 	if( !m_bbox )
 	{

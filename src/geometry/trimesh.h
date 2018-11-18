@@ -29,7 +29,6 @@ class	Material;
 //	definition of trimesh
 class TriMesh
 {
-// public method
 public:
 	// default constructor
 	TriMesh(const string& name);
@@ -50,7 +49,6 @@ public:
 	// para 'matname' : the material name
 	void ResetMaterial( const string& setname , const string& matname );
 
-// private field
 public:
 	// the name of the model
 	const string	m_Name;
@@ -59,7 +57,7 @@ public:
 	Transform		m_Transform;
 
 	// whether the mesh is instanced
-	bool			m_bInstanced;
+	bool			m_bInstanced = false;
 
     // the memory for the mesh
     std::shared_ptr<BufferMemory>  m_pMemory;
@@ -67,7 +65,6 @@ public:
 	// the materials for instanced mesh
     std::vector<std::shared_ptr<Material>>      m_Materials;
 
-// private method
 	// get the subset of the mesh
 	int		_getSubsetID( const string& setname );
 	// copy materials
@@ -75,5 +72,4 @@ public:
 
 // set friend class
 friend	class	MeshManager;
-friend	class	Triangle;
 };

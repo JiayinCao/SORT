@@ -19,20 +19,15 @@
 #include "disk.h"
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
-#include "math/vector3.h"
-#include "geometry/intersection.h"
-#include "utility/rand.h"
-
-IMPLEMENT_CREATOR( Disk );
 
 // sample a point on shape
-Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
+Point Disk::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
 {
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 
-	Point lp = transform( Point( u * radius , 0.0f , v * radius ) );
-    n = transform( Vector( 0 , 1.0f , 0 ) );
+	Point lp = m_transform( Point( u * radius , 0.0f , v * radius ) );
+    n = m_transform( Vector( 0 , 1.0f , 0 ) );
 	Vector delta = lp - p;
 	wi = Normalize( delta );
 
@@ -49,16 +44,16 @@ Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vect
 }
 
 // sample a ray from light
-void Disk::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
+void Disk::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
-	r.m_Ori = transform(Point( u * radius , 0.0f , v * radius ));
+	r.m_Ori = m_transform(Point( u * radius , 0.0f , v * radius ));
 	Vector wi = UniformSampleHemisphere(sort_canonical() , sort_canonical());
-	r.m_Dir = transform(wi);
-	n = transform.invMatrix.Transpose()( DIR_UP );
+	r.m_Dir = m_transform(wi);
+	n = m_transform.invMatrix.Transpose()( DIR_UP );
 
 	if( pdf ) *pdf = 1.0f / ( radius * radius * PI * TWO_PI );
 }
@@ -70,30 +65,32 @@ float Disk::SurfaceArea() const
 }
 
 // get intersected point between the ray and the shape
-float Disk::getIntersect( const Ray& ray , Point& p , Intersection* intersect ) const
+bool Disk::GetIntersect( const Ray& r , Point& p , Intersection* intersect ) const
 {   
+	Ray ray = m_transform.invMatrix( r );
+
 	if( ray.m_Dir.y == 0.0f )
-		return -1.0f;
+		return false;
 
 	const float limit = intersect ? intersect->t : FLT_MAX;
 	
 	float t = -ray.m_Ori.y / ray.m_Dir.y;
 	if( t > limit || t <= ray.m_fMin || t > ray.m_fMax )
-		return -1.0f;
+		return false;
 	p = ray(t);
 	float sqLength = p.x * p.x + p.z * p.z;
 	if( sqLength > radius * radius )
-		return -1.0f;
+		return false;
 
 	if( intersect )
 	{
 		intersect->t = t;
-		intersect->intersect = transform( p );
-		intersect->normal = transform.invMatrix.Transpose()(DIR_UP);
-		intersect->tangent = transform(Vector( 0.0f , 0.0f , 1.0f ));
+		intersect->intersect = m_transform( p );
+		intersect->normal = m_transform.invMatrix.Transpose()(DIR_UP);
+		intersect->tangent = m_transform(Vector( 0.0f , 0.0f , 1.0f ));
 	}
 
-	return t;
+	return true;
 }
 
 // get the bounding box of the primitive
@@ -102,10 +99,10 @@ const BBox&	Disk::GetBBox() const
 	if( !m_bbox )
 	{
         m_bbox = std::unique_ptr<BBox>( new BBox() );
-		m_bbox->Union( transform( Point( radius , 0.0f , radius ) ) );
-		m_bbox->Union( transform( Point( radius , 0.0f , -radius ) ) );
-		m_bbox->Union( transform( Point( -radius , 0.0f , radius ) ) );
-		m_bbox->Union( transform( Point( -radius , 0.0f , -radius ) ) );
+		m_bbox->Union( m_transform( Point( radius , 0.0f , radius ) ) );
+		m_bbox->Union( m_transform( Point( radius , 0.0f , -radius ) ) );
+		m_bbox->Union( m_transform( Point( -radius , 0.0f , radius ) ) );
+		m_bbox->Union( m_transform( Point( -radius , 0.0f , -radius ) ) );
 	}
 
 	return *m_bbox;
