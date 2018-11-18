@@ -150,7 +150,7 @@ bool Scene::LoadScene( TiXmlNode* root )
 		if( type != 0 )	m_pAccelerator = CREATE_TYPE( type , Accelerator );
 	}
 
-    SORT_STATS(sScenePrimitiveCount=(StatsInt)m_triBuf.size());
+    SORT_STATS(sScenePrimitiveCount=(StatsInt)m_primitiveBuf.size());
     SORT_STATS(sSceneLightCount=(StatsInt)m_lights.size());
 
 	return true;
@@ -173,10 +173,10 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
 bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 {
 	if( intersect ) intersect->t = FLT_MAX;
-	int n = (int)m_triBuf.size();
+	int n = (int)m_primitiveBuf.size();
 	for( int k = 0 ; k < n ; k++ )
 	{
-		bool flag = m_triBuf[k]->GetIntersect( r , intersect );
+		bool flag = m_primitiveBuf[k]->GetIntersect( r , intersect );
 		if( flag && intersect == 0 )
 			return true;
 	}
@@ -192,13 +192,13 @@ void Scene::Release()
 	SAFE_DELETE( m_pAccelerator );
 	SAFE_DELETE( m_pLightsDis );
 
-	vector<Primitive*>::iterator it = m_triBuf.begin();
-	while( it != m_triBuf.end() )
+	vector<Primitive*>::iterator it = m_primitiveBuf.begin();
+	while( it != m_primitiveBuf.end() )
 	{
 		delete *it;
 		it++;
 	}
-	m_triBuf.clear();
+	m_primitiveBuf.clear();
 
 	vector<TriMesh*>::iterator tri_it = m_meshBuf.begin();
 	while( tri_it != m_meshBuf.end() )
@@ -217,14 +217,14 @@ void Scene::Release()
 	m_lights.clear();
 }
 
-// generate triangle buffer
+// generate primitive buffer
 void Scene::_generatePriBuf()
 {
 	// iterator the mesh
 	vector<TriMesh*>::iterator it = m_meshBuf.begin();
 	while( it != m_meshBuf.end() )
 	{
-		(*it)->FillTriBuf( m_triBuf );
+		(*it)->FillTriBuf( m_primitiveBuf );
 		it++;
 	}
 }
@@ -235,7 +235,7 @@ void Scene::PreProcess()
 	// set uniform grid as acceleration structure as default
 	if( m_pAccelerator )
 	{
-		m_pAccelerator->SetPrimitives( &m_triBuf );
+		m_pAccelerator->SetPrimitives( &m_primitiveBuf );
 		m_pAccelerator->Build();
 	}
 }
@@ -264,8 +264,8 @@ const BBox& Scene::GetBBox() const
 		return m_pAccelerator->GetBBox();
 
 	// if there is no bounding box for the scene, generate one
-	vector<Primitive*>::const_iterator it = m_triBuf.begin();
-	while( it != m_triBuf.end() )
+	vector<Primitive*>::const_iterator it = m_primitiveBuf.begin();
+	while( it != m_primitiveBuf.end() )
 	{
 		m_BBox.Union( (*it)->GetBBox() );
 		it++;

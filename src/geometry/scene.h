@@ -94,7 +94,7 @@ private:
 	vector<TriMesh*>	m_meshBuf;
 
 	// the primitive buffer for the scene
-	vector<Primitive*>	m_triBuf;
+	vector<Primitive*>	m_primitiveBuf;
 
 	// the light
 	vector<Light*>		m_lights;
