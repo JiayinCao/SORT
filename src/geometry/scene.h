@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SCENE
-#define	SORT_SCENE
+#pragma once
 
 // include the header file
 #include "sort.h"
@@ -132,5 +131,3 @@ private:
 	// compute light cdf
 	void	_genLightDistribution();
 };
-
-#endif

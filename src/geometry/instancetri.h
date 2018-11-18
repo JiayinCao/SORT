@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_INSTANCETRI
-#define	SORT_INSTANCETRI
+#pragma once
 
 // include the header
 #include "triangle.h"
@@ -51,5 +50,3 @@ private:
 	// the transformation of the triangle
 	Transform* transform;
 };
-
-#endif

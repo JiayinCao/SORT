@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_PRIMITIVE
-#define	SORT_PRIMITIVE
+#pragma once
 
 // include header file
 #include "bbox.h"
@@ -77,5 +76,3 @@ protected:
 	// the binded light
 	Light*		light;
 };
-
-#endif

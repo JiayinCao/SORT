@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_BBOX
-#define SORT_BBOX
+#pragma once
 
 // include the header file
 #include "sort.h"
@@ -157,5 +156,3 @@ inline float Intersect( const Ray& ray , const BBox& bb , float* fmax = 0 )
 
 	return tmin;
 }
-
-#endif

@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_MATRIX
-#define	SORT_MATRIX
+#pragma once
 
 #include "geometry/ray.h"
 
@@ -86,5 +85,3 @@ public:
 	// m[12] m[13] m[14] m[15]
 	float	m[16];
 };
-
-#endif

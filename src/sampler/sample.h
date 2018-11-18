@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SAMPLE
-#define	SORT_SAMPLE
+#pragma once
 
 #include "sort.h"
 #include <vector>
@@ -128,5 +127,3 @@ public:
 		return offset;
 	}
 };
-
-#endif
