@@ -120,12 +120,13 @@ bool Scene::LoadScene( TiXmlNode* root )
 					prop = prop->NextSiblingElement( "Property" );
 				}
 
+				/* refactoring shape
 				Shape* shape = light->GetShape();
 				if( shape )
 				{
 					shape->SetID((unsigned)m_triBuf.size() );
 					m_triBuf.push_back( shape );
-				}
+				}*/
 
 				if( strcmp( type , "skylight" ) == 0 )
 					m_skyLight = light;

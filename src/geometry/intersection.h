@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_INTERSECTION
-#define	SORT_INTERSECTION
+#pragma once
 
 // include the header
 #include "math/point.h"
@@ -52,5 +51,3 @@ public:
 	// the intersected primitive
 	Primitive* 	primitive = nullptr;
 };
-
-#endif

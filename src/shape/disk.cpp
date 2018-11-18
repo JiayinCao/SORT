@@ -28,8 +28,6 @@ IMPLEMENT_CREATOR( Disk );
 // sample a point on shape
 Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
 {
-    const float radius = sizeX * 0.5f;
-    
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 
@@ -53,8 +51,6 @@ Point Disk::sample_l( const LightSample& ls , const Point& p , Vector& wi , Vect
 // sample a ray from light
 void Disk::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
 {
-    const float radius = sizeX * 0.5f;
-    
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 	r.m_fMin = 0.0f;
@@ -70,18 +66,17 @@ void Disk::sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) c
 // the surface area of the shape
 float Disk::SurfaceArea() const
 {
-    const float radius = sizeX * 0.5f;
 	return PI * radius * radius;
 }
 
 // get intersected point between the ray and the shape
-float Disk::_getIntersect( const Ray& ray , Point& p , float limit , Intersection* intersect ) const
-{
-    const float radius = sizeX * 0.5f;
-    
+float Disk::getIntersect( const Ray& ray , Point& p , Intersection* intersect ) const
+{   
 	if( ray.m_Dir.y == 0.0f )
 		return -1.0f;
 
+	const float limit = intersect ? intersect->t : FLT_MAX;
+	
 	float t = -ray.m_Ori.y / ray.m_Dir.y;
 	if( t > limit || t <= ray.m_fMin || t > ray.m_fMax )
 		return -1.0f;
@@ -96,7 +91,6 @@ float Disk::_getIntersect( const Ray& ray , Point& p , float limit , Intersectio
 		intersect->intersect = transform( p );
 		intersect->normal = transform.invMatrix.Transpose()(DIR_UP);
 		intersect->tangent = transform(Vector( 0.0f , 0.0f , 1.0f ));
-		intersect->primitive = const_cast<Disk*>(this);
 	}
 
 	return t;
@@ -105,8 +99,6 @@ float Disk::_getIntersect( const Ray& ray , Point& p , float limit , Intersectio
 // get the bounding box of the primitive
 const BBox&	Disk::GetBBox() const
 {
-    const float radius = sizeX * 0.5f;
-    
 	if( !m_bbox )
 	{
         m_bbox = std::unique_ptr<BBox>( new BBox() );
