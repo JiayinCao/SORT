@@ -55,6 +55,8 @@ public:
 	float SurfaceArea() const override;
 
 protected:
+	float radius = 1.0f;	/**< The radius of the disk. */
+
 	// get intersected point between the ray and the shape
-	float _getIntersect( const Ray& ray , Point& p , float limit = FLT_MAX , Intersection* inter = 0 ) const override;
+	float getIntersect( const Ray& ray , Point& p , Intersection* inter = nullptr ) const override;
 };

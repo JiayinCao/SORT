@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_TRIANGLE
-#define	SORT_TRIANGLE
+#pragma once
 
 #include "primitive.h"
 
@@ -66,5 +65,3 @@ protected:
 	// the index
 	const VertexIndex*	m_Index;
 };
-
-#endif

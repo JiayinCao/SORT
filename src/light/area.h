@@ -76,6 +76,9 @@ private:
 	// register property
 	void _registerAllProperty();
 
+/*
+	Refactoring shape class, disable area light for now.
+
 	class ShapeProperty : public PropertyHandler<Light>
 	{
 	public:
@@ -124,4 +127,5 @@ private:
             }
         }
     };
+*/
 };
