@@ -20,8 +20,7 @@
 #include "sort.h"
 #include "math/point.h"
 #include "managers/meshmanager.h"
-#include "geometry/triangle.h"
-#include "geometry/instancetri.h"
+#include "shape/triangle.h"
 #include "utility/log.h"
 #include "managers/memmanager.h"
 #include "managers/matmanager.h"
@@ -61,28 +60,17 @@ void TriMesh::_copyMaterial()
 void TriMesh::FillTriBuf( vector<Primitive*>& vec )
 {
 	unsigned base = (unsigned)vec.size();
-	if( m_bInstanced == false )
+
+	// generate the triangles
+	unsigned trunkNum = (unsigned)m_pMemory->m_TrunkBuffer.size();
+	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
-		// generate the triangles
-		unsigned trunkNum = (unsigned)m_pMemory->m_TrunkBuffer.size();
-		for( unsigned i = 0 ; i < trunkNum ; i++ )
-		{
-			unsigned trunkTriNum = (unsigned)m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
-			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new Triangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , m_Materials[i]) );
-			base += (unsigned)(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3);
+		unsigned trunkTriNum = (unsigned)m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+		for( unsigned k = 0 ; k < trunkTriNum ; k++ ){
+			Triangle* tri = new Triangle( this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) );
+			vec.push_back( new Primitive( m_Materials[i] , tri ) );
 		}
-	}else
-	{
-		// generate the triangles
-		unsigned trunkNum = (unsigned)m_pMemory->m_TrunkBuffer.size();
-		for( unsigned i = 0 ; i < trunkNum ; i++ )
-		{
-			unsigned trunkTriNum = (unsigned)(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3);
-			for( unsigned k = 0 ; k < trunkTriNum ; k++ )
-				vec.push_back( new InstanceTriangle( base+k , this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) , &m_Transform , m_Materials[i] ) );
-			base += (unsigned)(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3);
-		}
+		base += (unsigned)(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3);
 	}
 }
 

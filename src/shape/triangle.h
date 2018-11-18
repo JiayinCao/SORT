@@ -18,16 +18,23 @@
 #pragma once
 
 #include "shape.h"
-#include "utility/creator.h"
 
-//! @brief Disk class defines the basic behavior of disk.
+class TriMesh;
+class VertexIndex;
+
+//! @brief Triangle class defines the basic behavior of triangle.
 /**
- * The disk center is always at the origin of its local coordinate, the normal of the disk points exactly
- * upward in its local coordinate.
+ * Triangle is the most common shape that is used in a ray tracer.
  */
-class	Disk : public Shape
+class	Triangle : public Shape
 {
 public:
+	//! @brief Constructor
+	//!
+	//! @param trimesh 		The triangle mesh it belongs to
+	//! @param index   		The index buffer
+    Triangle( const TriMesh* mesh , const VertexIndex* index ): m_trimesh(mesh) , m_Index(index) {}
+
 	//! @brief Sample a point on the surface of the shape given a shading point.
 	//!
 	//! Sample a position on the surface of the shape. This function is heavily
@@ -39,7 +46,7 @@ public:
 	//! @param wi		The vector from shading point to sampled point, it is normalized.
 	//! @param pdf 		The pdf w.r.t solid angle ( not surface area ) of picking the sampled point.
 	//! @return			The sampled point on the surface of the shape.
-    Point 			Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n, float* pdf ) const override;
+    Point 			Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n, float* pdf ) const override{return Point();}
 
 	//! @brief Sample a ray from the light source without a given shading point.
 	//!
@@ -50,15 +57,13 @@ public:
 	//!					the direction of the ray will point outward depending on the normal.
 	//! @param n		The normal at the surface where the ray shoots from.
 	//! @param pdf		The pdf w.r.t solid angle of picking the ray.
-	void 			Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const override;
+	void 			Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const override{}
 
 	//! @brief		Get intersected point between the ray and the shape.
 	//!
-	//!	Get the intersection between a ray and the shape. This is a function that every child 
-	//! class needs to overwrite with their own behavior.
-	//! Default implementation will simply crash the program. Any non-compound shape should
-	//! implement the function with its own algorithm. All compound shape shouldn't overwrite
-	//! this function because it will be flattened during spatial structure constructure.
+	//! SORT implements a watertight ray triangle intersection for better precision.
+	//! The detail algorithm could be found in this paper,
+	//! <a href="http://jcgt.org/published/0002/01/05/paper.pdf">Watertight Ray/Triangle Intersection</a>.
 	//!
 	//! @param ray		The ray to be tested against.
 	//! @param p		The intersected point in local space.
@@ -66,6 +71,14 @@ public:
 	//!					for the intersection.
 	//! @return			Whether the ray intersects the shape.
 	bool 			GetIntersect( const Ray& ray , Point& p , Intersection* inter = nullptr ) const override;
+
+	//! @brief Intersection test between the shape and a bounding box.
+	//!
+	//! Detail algorithm of triangle and bounding box intersection comes from this paper,
+	//! <a href="http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox_tam.pdf">Fast 3D Triangle-Box Overlap Testing</a>.
+	//!
+	//! param box 		Bounding box to be checked.
+	bool 			GetIntersect( const BBox& box ) const override;
 
 	//! @brief		Get bounding box of the shape in world space.
 	//!
@@ -84,5 +97,8 @@ public:
 	float 			SurfaceArea() const override;
 
 private:
-	float radius = 1.0f;	/**< The radius of the disk. */
+	// the triangle mesh
+	const TriMesh*		m_trimesh = nullptr;
+	// the index
+	const VertexIndex*	m_Index = nullptr;
 };

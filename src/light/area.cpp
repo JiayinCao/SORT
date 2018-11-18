@@ -30,7 +30,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 
     // sample a point from light
     Vector normal;
-	const Point ps = shape->sample_l( *ls , intersect.intersect , dirToLight , normal , pdfW );
+	const Point ps = shape->Sample_l( *ls , intersect.intersect , dirToLight , normal , pdfW );
     
     // get the delta
     const Vector dlt = ps - intersect.intersect;
@@ -62,7 +62,7 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 {
     sAssert( shape != nullptr , LIGHT );
     Vector n;
-    shape->sample_l( ls , r , n , pdfW );
+    shape->Sample_l( ls , r , n , pdfW );
     
     if( pdfA )
         *pdfA = 1.0f / shape->SurfaceArea();
@@ -122,7 +122,8 @@ bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radianc
 	sAssert( shape != nullptr , LIGHT );
 
 	// get intersect
-	const bool result = shape->GetIntersect( ray , intersect );
+    Point tmp;
+	const bool result = shape->GetIntersect( ray , tmp , intersect );
 
 	// transform the intersection result back to world coordinate
 	if( result && intersect != nullptr )
