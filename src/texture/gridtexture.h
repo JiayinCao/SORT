@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_GRIDTEXTURE
-#define	SORT_GRIDTEXTURE
+#pragma once
 
 // include the file
 #include "texture.h"
@@ -111,5 +110,3 @@ private:
 		}
 	};
 };
-
-#endif

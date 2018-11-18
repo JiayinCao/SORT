@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SAMPLER
-#define	SORT_SAMPLER
+#pragma once
 
 #include "sort.h"
 #include <vector>
@@ -63,5 +62,3 @@ inline const unsigned* ShuffleIndex( unsigned size )
 	
 	return shuffle;
 }
-
-#endif

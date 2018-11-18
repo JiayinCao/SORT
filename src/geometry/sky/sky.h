@@ -15,8 +15,7 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifndef	SORT_SKY
-#define	SORT_SKY
+#pragma once
 
 // include the header
 #include "spectrum/spectrum.h"
@@ -63,5 +62,3 @@ public:
 protected:
 	Transform m_transform;
 };
-
-#endif

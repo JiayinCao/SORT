@@ -15,8 +15,7 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifndef	SORT_SKYSPHERE
-#define	SORT_SKYSPHERE
+#pragma once
 
 #include "sky.h"
 #include "texture/imagetexture.h"
@@ -79,5 +78,3 @@ private:
 		}
 	};
 };
-
-#endif

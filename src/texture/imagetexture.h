@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_IMAGETEXTURE
-#define	SORT_IMAGETEXTURE
+#pragma once
 
 // include the header file
 #include "texture.h"
@@ -98,5 +97,3 @@ private:
 		}
 	};
 };
-
-#endif
