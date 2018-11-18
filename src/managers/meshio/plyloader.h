@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_PLYLOADER
-#define	SORT_PLYLOADER
+#pragma once
 
 // include the header file
 #include "meshloader.h"
@@ -57,5 +56,3 @@ public:
 	// result     : true if loading is successful
     bool	LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem ) override;
 };
-
-#endif

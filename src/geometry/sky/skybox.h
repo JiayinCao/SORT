@@ -15,8 +15,7 @@
                 linux and windows , g++ or visual studio 2008 is required.
 */
 
-#ifndef	SORT_SKYBOX
-#define	SORT_SKYBOX
+#pragma once
 
 // include the headers
 #include "sky.h"
@@ -142,5 +141,3 @@ private:
 		}
 	};
 };
-
-#endif

@@ -15,13 +15,10 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_SPECTRUM
-#define	SORT_SPECTRUM
+#pragma once
 
 // include the header
 #include "rgbspectrum.h"
 
 // spectrum is actualy a macro for later extending the system
 #define Spectrum RGBSpectrum
-
-#endif

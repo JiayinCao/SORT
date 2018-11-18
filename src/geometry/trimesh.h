@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_TRIMESH
-#define	SORT_TRIMESH
+#pragma once
 
 // include the headers
 #include <vector>
@@ -78,5 +77,3 @@ public:
 friend	class	MeshManager;
 friend	class	Triangle;
 };
-
-#endif

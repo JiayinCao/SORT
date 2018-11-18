@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_RGBSPECTRUM
-#define	SORT_RGBSPECTRUM
+#pragma once
 
 #include "sort.h"
 #include "utility/define.h"
@@ -141,7 +140,3 @@ inline RGBSpectrum operator*( float t , const RGBSpectrum& s )
 {
 	return s * t;
 }
-
-#endif
-
-

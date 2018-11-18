@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_MESHLOADER
-#define	SORT_MESHLOADER
+#pragma once
 
 // include the header
 #include "sort.h"
@@ -51,5 +50,3 @@ protected:
 	// the type for the mesh
 	MESH_TYPE	m_MeshType;
 };
-
-#endif

@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_RANDOM
-#define	SORT_RANDOM
+#pragma once
 
 #include "sampler.h"
 
@@ -43,5 +42,3 @@ public:
 	// para 'num'    : the number of samples to be generated
 	virtual void Generate2D( float* sample , unsigned num , bool accept_uniform = false ) const;
 };
-
-#endif

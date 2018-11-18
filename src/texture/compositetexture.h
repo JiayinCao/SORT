@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifndef	SORT_COMPOSITETEXTURE
-#define	SORT_COMPOSITETEXTURE
+#pragma once
 
 // include texture
 #include "texture.h"
@@ -84,5 +83,3 @@ protected:
 	void	_copy( const Texture& tex );
 	void	_copy( const ComTexture& tex );
 };
-
-#endif
