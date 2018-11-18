@@ -17,13 +17,12 @@
 
 #pragma once
 
-// include header file
+#include <memory>
 #include "bbox.h"
 #include "material/material.h"
 #include "intersection.h"
-#include <memory>
+#include "shape/shape.h"
 
-// pre-decleration
 class	Intersection;
 class	Light;
 
@@ -34,44 +33,48 @@ class	Primitive
 // public method
 public:
 	// constructor from a id
-    Primitive( unsigned id , std::shared_ptr<Material> mat ) { m_primitive_id = id; m_mat = mat; light = nullptr; }
-	// destructor
-	virtual ~Primitive(){}
+    Primitive( std::shared_ptr<Material> mat , Shape* shape ):m_mat(mat), m_shape(shape), light(nullptr){}
 
 	// get the intersection between a ray and a primitive
-	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
+	inline bool GetIntersect( const Ray& r , Intersection* intersect ) const{
+		Point tmp;
+		bool ret = m_shape->GetIntersect( r, tmp , intersect );
+		if( ret && intersect )
+			intersect->primitive = const_cast<Primitive*>(this);
+		return ret;
+	}
 	// get the intersection between a bounding box and a ray
-    virtual bool GetIntersect( const BBox& box ) const { return true; }
+    inline bool GetIntersect( const BBox& box ) const { 
+		return m_shape->GetIntersect( box );
+	}
 
 	// get the bounding box of the primitive
-	virtual const BBox&	GetBBox() const = 0;
+	inline const BBox&	GetBBox() const {
+		return m_shape->GetBBox();
+	}
 
 	// get surface area of the primitive
-	virtual float	SurfaceArea() const = 0;
-
-	// set primitive id
-	void	SetID( unsigned id ) { m_primitive_id = id; }
-	// get primitive id
-	unsigned GetID() const { return m_primitive_id; }
+	inline float	SurfaceArea() const{
+		return m_shape->SurfaceArea();
+	}
 
 	// get material
     std::shared_ptr<Material> GetMaterial() const;
 	// set material
-    void	SetMaterial( std::shared_ptr<Material>& mat ) { m_mat = mat; }
+    inline void	SetMaterial( std::shared_ptr<Material>& mat ) { m_mat = mat; }
 
 	// get light
-	Light* GetLight() const { return light; }
+	inline Light* GetLight() const { return light; }
     // set light
-    void SetLight( Light* _light ) { light = _light; }
+    inline void SetLight( Light* _light ) { light = _light; }
 
 // protected field
 protected:
-	// bounding box
-    mutable std::unique_ptr<BBox> m_bbox;
-	// id for the primitive
-	unsigned		m_primitive_id;
 	// the material
     std::shared_ptr<Material>	m_mat;
+
+	// the shape of the primitive
+	Shape* 		m_shape;
 
 	// the binded light
 	Light*		light;

@@ -21,7 +21,6 @@
 #include "meshio/objloader.h"
 #include "meshio/plyloader.h"
 #include "geometry/trimesh.h"
-#include "geometry/triangle.h"
 #include "utility/path.h"
 #include "bsdf/bsdf.h"
 #include "utility/log.h"
