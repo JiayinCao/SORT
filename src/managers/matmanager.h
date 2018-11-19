@@ -37,7 +37,6 @@ class TiXmlNode;
 //			material system is also responsible for deallocating textures.
 class	MatManager : public Singleton<MatManager>
 {
-// public method
 public:
 	// find specific material
 	// para 'mat_name' : the name for the material
@@ -56,7 +55,6 @@ public:
 	// get material number
 	unsigned	GetMatCount() const;
 
-// private field
 private:
 	// material pool
     std::unordered_map< string , std::shared_ptr<Material> >	m_matPool;

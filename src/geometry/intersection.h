@@ -29,7 +29,6 @@ class Primitive;
 //	definition of intersection
 class	Intersection
 {
-// public method
 public :
 	// get the emissive
 	Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;

@@ -25,7 +25,6 @@
 
 class WinSharedMemory
 {
-// public method
 public:
 	// default constructor
 	WinSharedMemory();

@@ -25,7 +25,6 @@
 template< class T >
 class Vector4
 {
-// public method
 public:
 	Vector4() :	x(0),y(0),z(0),w(0){
 	}
@@ -122,7 +121,6 @@ public:
         return Vector( x , y , z );
     }
 
-// private field
 public:
 	// the vector data
 	union

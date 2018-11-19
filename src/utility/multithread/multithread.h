@@ -77,7 +77,6 @@ public:
 
 class RenderTaskQueue : public Singleton<RenderTaskQueue>
 {
-// public method
 public:
     // Add Task
     void PushTask( RenderTask task ){
@@ -96,7 +95,6 @@ public:
         return m_taskList.empty();
     }
     
-    // private field
 private:
     std::list<RenderTask> m_taskList;
     

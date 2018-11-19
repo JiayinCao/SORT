@@ -45,7 +45,6 @@ public:
 //			loaded from the same image file.
 class TexManager : public Singleton<TexManager>
 {
-// public method
 public:
 	// output the img
 	// para 'str' :	name of the output entity
@@ -60,13 +59,10 @@ public:
 	// result      : 'true' if loading is successful
 	bool Read( const string& str , ImageTexture* tex );
     
-// private data
 private:
 	// map a string to the image memory
     unordered_map< string , std::shared_ptr<ImgMemory> > m_ImgContainer;
 
-// private method
-private:
     // para 'name'  : Load image file
     // return       : Return value
     bool loadImage(const string& name, std::shared_ptr<ImgMemory>& mem);

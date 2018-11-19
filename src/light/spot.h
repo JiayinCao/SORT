@@ -25,7 +25,6 @@
 // definition of spot light
 class SpotLight : public Light
 {
-// public method
 public:
 	DEFINE_CREATOR( SpotLight , Light, "spot" );
 
@@ -50,7 +49,6 @@ public:
 	// para 'pdf'      : the properbility density function
 	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const;
 
-// private field
 private:
     float	cos_falloff_start = Radians( 25.0f );
     float	cos_total_range = Radians( 30.0f );

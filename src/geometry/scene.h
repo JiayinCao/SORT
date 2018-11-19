@@ -24,7 +24,6 @@
 #include "spectrum/spectrum.h"
 #include "thirdparty/tinyxml/tinyxml.h"
 
-// pre-decleration of classes
 class Accelerator;
 class Light;
 class Distribution1D;
@@ -34,7 +33,6 @@ class TiXmlNode;
 // definition of scene class
 class	Scene
 {
-// public method
 public:
 	// destructor
 	~Scene(){ Release(); }
@@ -88,7 +86,7 @@ public:
 	// Evaluate sky
 	Spectrum	Le( const Ray& ray ) const;
 
-// private field
+
 private:
 	// the buffer for the triangle mesh
 	vector<TriMesh*>	m_meshBuf;
@@ -112,8 +110,6 @@ private:
 	// bounding box for the scene
 	mutable BBox	m_BBox;
 
-// private method
-	
 	// brute force intersection test ( it will only invoked if there is no acceleration structor
 	// para 'r' : the ray
 	// result   : the intersection information between the ray and the scene

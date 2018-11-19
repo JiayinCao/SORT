@@ -30,7 +30,6 @@ class	Light;
 //	definition of primitive
 class	Primitive
 {
-// public method
 public:
 	// constructor from a id
     Primitive( std::shared_ptr<Material> mat , Shape* shape ):m_mat(mat), m_shape(shape), light(nullptr){}

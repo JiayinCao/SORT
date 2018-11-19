@@ -139,7 +139,6 @@ inline float UniformSpherePdf()
 // one dimensional distribution
 class Distribution1D
 {
-// public method
 public:
 	// constructor
 	Distribution1D( const float* f , unsigned n ):
@@ -235,7 +234,6 @@ public:
 		return cdf[i+1]-cdf[i];
 	}
 
-// private field
 private:
 	const unsigned	count;
 	float*	cdf;
@@ -245,7 +243,6 @@ private:
 // two dimensional distribution
 class Distribution2D
 {
-// public method
 public:
 	// default constructor
 	Distribution2D( const float* data , unsigned nu , unsigned nv )
@@ -300,7 +297,6 @@ public:
 		return pConditions[iv]->GetProperty( iu ) * m_nu * marginal->GetProperty( iv ) * m_nv ;// ( pConditions[iv]->GetSum() * marginal->GetSum() );
 	}
 
-// private field
 private:
 	// the distribution in each row
 	std::vector<Distribution1D*>	pConditions;

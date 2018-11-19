@@ -58,7 +58,6 @@ struct Pending_Sample
 // i'll try to finish it after i finish some more integrators.
 class BidirPathTracing : public Integrator
 {
-// public method
 public:
 	DEFINE_CREATOR( BidirPathTracing , Integrator , "bdpt" );
 
@@ -79,7 +78,6 @@ public:
 	// support pending write
 	virtual bool SupportPendingWrite() { return true; }
 
-// private field
 protected:
 	bool	light_tracing_only = false;		// only do light tracing
 	int		sample_per_pixel = 1;           // light sample per pixel
@@ -96,7 +94,6 @@ protected:
 	// connnect vertices
 	Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light ) const;
 
-// private field
 private:
 	// use multiple importance sampling to sample direct illumination
 	bool	m_bMIS = true;

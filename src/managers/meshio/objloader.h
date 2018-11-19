@@ -24,7 +24,6 @@
 //	definition of objloader
 class	ObjLoader : public MeshLoader
 {
-// public method
 public:
 	// default constructor
 	ObjLoader(){m_MeshType = MT_OBJ;}

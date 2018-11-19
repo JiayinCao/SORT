@@ -26,7 +26,6 @@
 // definition of axis aligned bounding box
 class BBox
 {
-// public method
 public:
 	// default constructor
 	BBox();
@@ -73,7 +72,6 @@ public:
 	// set the bounding box as invalid
 	void InvalidBBox();
 
-// public data
 public:
 	// the minium and maxium point of the bounding box
 	Point	m_Min;

@@ -26,14 +26,12 @@
 #include "geometry/scene.h"
 #include "math/vector3.h"
 
-// pre-decleration
 class Intersection;
 class LightSample;
 class Shape;
 
 class Visibility
 {
-// public method
 public:
 	// default constructor
 	Visibility( const Scene& s ):scene(s){}
@@ -54,10 +52,9 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////
-// definition of ligth
+// definition of light
 class	Light : public PropertySet<Light>
 {
-// public method
 public:
     // constructor
     Light() {_registerAllProperty();}
@@ -114,7 +111,6 @@ public:
 		return pickProp;
 	}
 
-// protected field
 protected:
 	// scene containing the light
     const Scene* scene = nullptr;

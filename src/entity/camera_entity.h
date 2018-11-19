@@ -21,8 +21,8 @@
 
 //! @brief Camera entity definition.
 /**
- * Camera definintion in the scene. SORT supports several type of cameras, like perspective camera,
- * othogonal camera and environment camera.
+ * Camera definition in the scene. SORT supports several type of cameras, like perspective camera,
+ * orthogonal camera and environment camera.
  */
 class CameraEntity : public Entity{
 public:

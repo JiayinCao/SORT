@@ -28,7 +28,6 @@
 // definitation of the sampler
 class	Sampler
 {
-// public method
 public:
 	// default constructor
 	Sampler();

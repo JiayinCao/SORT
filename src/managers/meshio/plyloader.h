@@ -45,7 +45,6 @@ struct PlyIndex
 // defination of plyloader
 class	PlyLoader : public MeshLoader
 {
-// public method
 public:
 	// default constructor
 	PlyLoader(){m_MeshType = MT_PLY;}
