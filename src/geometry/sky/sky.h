@@ -29,11 +29,10 @@ class Point;
 //	definition of sky
 //	note: we could also use a very large box or sphere to replace
 //		  the sky we need , while that would make some accelerator
-//		  such as uniform grid unefficient. So we use a isolated
+//		  such as uniform grid inefficient. So we use a isolated
 //		  sky to show the environment.
 class	Sky : public PropertySet<Sky>
 {
-// public method
 public:
 	// default constructor
 	Sky(){}

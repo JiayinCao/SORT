@@ -23,7 +23,6 @@
 //	definition of matrix
 class	Matrix
 {
-// public method
 public:
 	// default constructor , initialize a identity matrix
 	Matrix();
@@ -76,7 +75,6 @@ public:
 	// whether the matrix have scale factor
 	bool	HasScale() const;
 
-// public field
 public:
 	// the data of the 4x4 matrix
 	// m[0]  m[1]  m[2]  m[3]

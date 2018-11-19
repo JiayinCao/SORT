@@ -25,7 +25,6 @@
 // definition of rgb spectrum
 class	RGBSpectrum
 {
-// public method
 public:
 	// default constructor
 	RGBSpectrum();
@@ -112,7 +111,6 @@ public:
         return RGBSpectrum((float)::exp(m_r), (float)::exp(m_g), (float)::exp(m_b));
     }
 
-// private field
 private:
 	// the rgb color
 	float m_r;

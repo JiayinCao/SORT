@@ -29,7 +29,6 @@ int ThreadId();
 
 class RenderThreadStd
 {
-// public method
 public:
     // Constructor
     RenderThreadStd( unsigned tid , std::shared_ptr<Integrator> integrator ) : m_tid(tid) , m_pIntegrator( integrator ) {}
@@ -45,7 +44,6 @@ public:
 		return m_thread.join();
 	}
     
-// private field
 private:
     std::thread m_thread;
     unsigned    m_tid = 0;

@@ -52,7 +52,6 @@ struct Memory
 //			more time on allocating memory.
 class	MemManager : public Singleton<MemManager>
 {
-// public method
 public:
 	// default constructor
 	MemManager();
@@ -91,7 +90,6 @@ public:
 		return mem->m_offset;
 	}
 
-// private field
 private:
 	// the memories
 	unordered_map<unsigned,Memory*> m_MemPool;

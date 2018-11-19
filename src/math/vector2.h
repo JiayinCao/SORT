@@ -23,7 +23,6 @@
 template< class T >
 class Vector2
 {
-// public method
 public:
 	Vector2() :	x(0),y(0){
 	}
@@ -106,8 +105,6 @@ public:
 		return *this;
 	}
 
-
-// private field
 public:
 	// the vector data
 	union

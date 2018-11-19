@@ -33,7 +33,6 @@ class SORTOutput;
 //	definition of the system
 class	System
 {
-// public method
 public:
 	// pre-process before rendering
 	void PreProcess();
@@ -56,7 +55,6 @@ public:
 	// set resource path
 	void SetResourcePath( const string& str ) { m_ResourcePath = str; }
 
-//private field:
 private:
     // image sensor
     ImageSensor*    m_imagesensor = nullptr;

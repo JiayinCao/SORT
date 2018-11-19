@@ -25,7 +25,6 @@
 //	definition of area light
 class	AreaLight : public Light
 {
-// public method
 public:
 	DEFINE_CREATOR(AreaLight, Light, "area");
 
@@ -65,7 +64,7 @@ public:
 	// get the shape of light
 	virtual Shape* GetShape() const { return shape; }
 
-// private field
+
 private:
 	// the shape binded to the area light
     Shape*	shape = nullptr;

@@ -25,7 +25,6 @@
 // definition of point light
 class PointLight : public Light
 {
-// public method
 public:
 	DEFINE_CREATOR( PointLight , Light , "point" );
 

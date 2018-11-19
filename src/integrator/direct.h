@@ -25,7 +25,6 @@
 //	and it supports soft shadow and area light.
 class	DirectLight : public Integrator
 {
-// public method
 public:
 	DEFINE_CREATOR( DirectLight , Integrator , "direct" );
 
@@ -53,7 +52,6 @@ public:
 	// para 'scene'   : the scene to be rendered
 	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const;
 
-// private field
 private:
 	unsigned		ls_per_light = 16; // light sample per pixel sample per light
 

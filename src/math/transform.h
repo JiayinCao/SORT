@@ -35,7 +35,6 @@ Ray		operator* ( const Transform& t , const Ray& r );
 //	definition of transform
 class	Transform
 {
-// public method
 public:
 	// Default constructor
 	Transform(){}
@@ -64,9 +63,8 @@ public:
 		return Transform( m , invm );
 	}
 
-// public field
 public:
-	// the matrix for tranformation
+	// the matrix for transformation
 	Matrix	matrix;
 	// the inverse of the original matrix
 	Matrix	invMatrix;

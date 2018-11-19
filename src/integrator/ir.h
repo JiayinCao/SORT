@@ -41,7 +41,6 @@ struct VirtualLightSource
 //        directlight integrator.
 class	InstantRadiosity : public Integrator
 {
-// public method
 public:
 
 	DEFINE_CREATOR( InstantRadiosity , Integrator , "ir" );
@@ -67,7 +66,6 @@ public:
 	// post-process after rendering
 	virtual void PostProcess();
 
-// private field
 private:
 	// light path set
 	int		m_nLightPathSet;

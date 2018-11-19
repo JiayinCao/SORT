@@ -23,7 +23,6 @@
 // definition of random sampler
 class RandomSampler : public Sampler
 {
-// public method
 public:
 	DEFINE_CREATOR( RandomSampler , Sampler , "random" );
 

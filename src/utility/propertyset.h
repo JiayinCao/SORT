@@ -31,7 +31,6 @@ class Texture;
 template< typename T >
 class PropertyHandler
 {
-// public metdod
 public:
 	// default constructor
 	PropertyHandler( T* t ):m_target(t){};
@@ -47,7 +46,6 @@ public:
 	// the target
 	T*		m_target;
 
-// private copy constructor
 private:
 	explicit PropertyHandler( PropertyHandler<T>& ){}
 };
@@ -57,7 +55,7 @@ private:
 template< typename T >
 class PropertySet
 {
-// public method
+
 public:
 	// default constructor
 	PropertySet() {}

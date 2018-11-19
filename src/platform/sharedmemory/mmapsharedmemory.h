@@ -23,7 +23,6 @@
 
 class MmapSharedMemory
 {
-// public method
 public:
 	// Initialize shared memory
 	void CreateSharedMemory(const string& sm_name, int size, unsigned type);

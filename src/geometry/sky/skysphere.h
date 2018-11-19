@@ -26,7 +26,6 @@ class Distribution2D;
 // definition of sky sphere
 class	SkySphere : public Sky
 {
-// public method
 public:
 	DEFINE_CREATOR( SkySphere , Sky , "sky_sphere" );
 
@@ -49,7 +48,6 @@ public:
 	// get the pdf
 	float Pdf( const Vector& wi ) const ;
 
-// private field
 private:
 	ImageTexture	m_sky;
 	Distribution2D*	distribution;

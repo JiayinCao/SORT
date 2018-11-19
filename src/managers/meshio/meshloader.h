@@ -29,7 +29,6 @@ class	BufferMemory;
 //	definition of meshloader
 class	MeshLoader
 {
-// public method
 public:
 	// default constructor
 	MeshLoader(){ m_MeshType = MT_NONE; }
@@ -45,7 +44,6 @@ public:
 	// get the type of the mesh loader
 	MESH_TYPE GetMT() const { return m_MeshType; }
 
-// protected data
 protected:
 	// the type for the mesh
 	MESH_TYPE	m_MeshType;

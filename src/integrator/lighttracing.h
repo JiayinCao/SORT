@@ -25,7 +25,6 @@
 // i'll try to finish it after i finish some more integrators.
 class LightTracing : public BidirPathTracing
 {
-// public method
 public:
 	DEFINE_CREATOR(LightTracing, Integrator , "lt" );
 

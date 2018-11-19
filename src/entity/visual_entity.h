@@ -19,10 +19,10 @@
 
 #include "entity.h"
 
-//! @brief Visual entity is the basic visibile unit can't be seen in SORT.
+//! @brief Visual entity is the basic visible unit can't be seen in SORT.
 /**
  * VisualEntity could be a single shape, like sphere, triangle. It could also be a set of triangles,
- * triangle mesh. Basically, visual entity is the most fundermental unit in SORT that is visible.
+ * triangle mesh. Basically, visual entity is the most fundamental unit in SORT that is visible.
  */
 class VisualEntity : public Entity{
 public:

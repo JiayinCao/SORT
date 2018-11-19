@@ -55,7 +55,7 @@ public:
 	// set check box color
 	void SetCheckBoxColor( const Spectrum& c0 , const Spectrum& c1 );
 
-// private field
+
 private:
 	// two colors
 	Spectrum	m_Color0;
