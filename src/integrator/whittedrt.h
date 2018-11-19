@@ -27,7 +27,6 @@
 //		  light, like color bleeding , is not supported.
 class	WhittedRT : public Integrator
 {
-// public method
 public:
 	DEFINE_CREATOR( WhittedRT , Integrator , "whitted" );
 

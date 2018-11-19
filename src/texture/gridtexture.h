@@ -25,7 +25,6 @@
 // definition of grid texture
 class	GridTexture : public Texture
 {
-// public method
 public:
 	DEFINE_CREATOR( GridTexture , Texture , "grid" );
 
@@ -55,17 +54,14 @@ public:
 	// set color of the spectrum
 	void	SetGridColor( const Spectrum& c0 , const Spectrum& c1 );
 
-// protected field
 private:
 	// two colors
 	Spectrum	m_Color0;
 	Spectrum	m_Color1;
 
 	// the threshold for the center grid , default value is 0.9f
-	float		m_Threshold;
+    float		m_Threshold;
 
-// private method
-private:
 	// init default values
 	void	_init();
 

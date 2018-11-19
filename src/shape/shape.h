@@ -28,7 +28,7 @@ class LightSample;
 
 //! @brief Shape class defines basic interface of shape.
 /**
- * A shape class defines the very fundermental concept of shape supported in SORT.
+ * A shape class defines the very fundamental concept of shape supported in SORT.
  * It serves as the basic interface for different shapes supported in SORT. Shape is 
  * purely a mathematical concept, which doesn't have any information about the 
  * material attached to the shape or anything else.
@@ -36,7 +36,7 @@ class LightSample;
 class Shape
 {
 public:
-	//! Empty vitual destructor.
+	//! Empty virtual destructor.
 	virtual ~Shape(){}
 
 	//! @brief Sample a point on the surface of the shape given a shading point.
@@ -65,7 +65,7 @@ public:
 
 	//! @brief	Get the pdf w.r.t solid angle of picking a point on the surface where the ray intersects.
 	//!
-	//! By shooting a ray, starting from @param p along @param wi, we can caculate the intersection
+	//! By shooting a ray, starting from @param p along @param wi, we can calculate the intersection
 	//! between the ray and the shape. This function returns the pdf w.r.t solid angle of picking such a
 	//! point on the surface of the shape.
 	//!
@@ -92,7 +92,7 @@ public:
 	//! class needs to overwrite with their own behavior.
 	//! Default implementation will simply crash the program. Any non-compound shape should
 	//! implement the function with its own algorithm. All compound shape shouldn't overwrite
-	//! this function because it will be flattened during spatial structure constructure.
+	//! this function because it will be flattened during spatial structure construction.
 	//!
 	//! @param ray		The ray to be tested against.
 	//! @param p		The intersected point in local space.
@@ -119,14 +119,14 @@ public:
 	//! @brief		Get the surface area of the shape.
 	//!
 	//! Get the surface area of the shape. This function is heavily used in the case of picking a area light
-	//! among lots of them, surface area is one of the singals telling us how strong the light is.
+	//! among lots of them, surface area is one of the signals telling us how strong the light is.
 	//!
 	//! @return		Surface area of the shape.
 	virtual float	SurfaceArea() const = 0;
 
 	//! @brief		Whether the shape is a compound shape.
 	//!
-	//!	Most shapes are not compound one. However, ont typical example is 'TriMesh', which holds an array of
+	//!	Most shapes are not compound one. However, one typical example is 'TriMesh', which holds an array of
 	//! triangles. Compound shape doesn't support GetIntersect method.
 	//!
 	//! @return		Whether the shape is a compound shape.

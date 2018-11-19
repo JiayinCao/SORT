@@ -25,7 +25,6 @@
 // definition of image texture
 class ImageTexture : public Texture 
 {
-// public method
 public:
 	DEFINE_CREATOR( ImageTexture , Texture , "image" );
 
@@ -58,7 +57,6 @@ public:
 	// get average color
 	Spectrum GetAverage() const;
 
-// private field
 private:
 	// array saving the color of image
     std::shared_ptr<ImgMemory>	m_pMemory;

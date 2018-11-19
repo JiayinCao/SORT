@@ -38,7 +38,6 @@ class Creator : public Singleton<Creator<T>>
 {
     typedef unordered_map<string,ItemCreator<T>*> CREATOR_CONTAINER;
     
-// public method
 public:
     
 	// Create instance
@@ -57,7 +56,6 @@ public:
         return m_container;
     }
 
-// private field
 private:
 	// the container
 	CREATOR_CONTAINER	m_container;

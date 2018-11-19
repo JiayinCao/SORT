@@ -34,7 +34,6 @@ class	Scene;
 //	definition of integrator
 class	Integrator : public PropertySet<Integrator>
 {
-// public method
 public:
 	// default constructor
 	Integrator();

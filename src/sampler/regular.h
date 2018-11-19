@@ -23,7 +23,6 @@
 // definition of regular sampling
 class RegularSampler : public Sampler
 {
-// public method
 public:
 	DEFINE_CREATOR( RegularSampler , Sampler , "regular" );
 

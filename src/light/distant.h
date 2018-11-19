@@ -24,7 +24,6 @@
 // definition of distant
 class DistantLight : public Light
 {
-// public method
 public:
 	DEFINE_CREATOR(DistantLight, Light, "distant");
 

@@ -24,7 +24,6 @@
 //	definition of direct light
 class	PathTracing : public Integrator
 {
-// public method
 public:
 	DEFINE_CREATOR( PathTracing , Integrator , "pt" );
     

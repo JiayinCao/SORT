@@ -20,10 +20,9 @@
 #include "sampler.h"
 
 /////////////////////////////////////////////////////////////////////////////////
-// definitation of the sampler
+// definition of the sampler
 class StratifiedSampler : public Sampler
 {
-// public method
 public:
 	DEFINE_CREATOR( StratifiedSampler , Sampler , "stratified" );
 

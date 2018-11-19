@@ -26,14 +26,12 @@
 // definition of matte material
 class Matte : public Material
 {
-// public method
 public:
 	DEFINE_CREATOR( Matte , Material, "Matte" );
 
 	// get bsdf
     Bsdf* GetBsdf( const Intersection* intersect ) const override;
 	
-// private field
 private:
     Spectrum m_color = Spectrum( 0.1f , 0.1f , 0.1f );
 };

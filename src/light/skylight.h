@@ -26,7 +26,6 @@
 // definition of sky light
 class	SkyLight : public Light
 {
-// public method
 public:
 	DEFINE_CREATOR(SkyLight, Light, "skylight");
 
@@ -68,7 +67,7 @@ public:
 	// note : none-delta light must overwrite this method
 	virtual float Pdf( const Point& p , const Vector& wi ) const;
 
-// private field
+
 private:
 	// the sky
 	Sky*	sky;

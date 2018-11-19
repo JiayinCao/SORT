@@ -26,7 +26,6 @@
 // definition of constant texture
 class ConstantTexture : public Texture
 {
-// public method
 public:
 	DEFINE_CREATOR( ConstantTexture , Texture , "constant" );
 
@@ -57,13 +56,10 @@ public:
 		return m_Color;
 	}
 
-// private field
 private:
 	// the color for the texture
 	Spectrum	m_Color;
 
-// private method
-private:
 	// initialize the data
 	void _init();
 

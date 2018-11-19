@@ -54,7 +54,6 @@ struct VertexIndex
 // a trunk only contains index information
 class Trunk
 {
-// public method
 public:
 	// the name for the current trunk
 	string	name;
@@ -74,7 +73,6 @@ public:
 // the buffer memory for the mesh
 class BufferMemory
 {
-// public data
 public:
 	// the vertex buffer
 	vector<Point>	m_PositionBuffer;
@@ -137,7 +135,6 @@ public:
 	// generate texture coordinate
 	void	GenTexCoord();
 
-// private method
 private:
 	void	_genFlatNormal();
     Vector	_genTagentForTri( const std::shared_ptr<Trunk>& trunk , unsigned k  ) const;
@@ -152,7 +149,6 @@ private:
 //			in the current system.
 class	MeshManager : public Singleton<MeshManager>
 {
-// public method
 public:
 	// load the mesh from file
 	// para 'str'  : name of the file
@@ -160,7 +156,6 @@ public:
 	// result      : 'true' if loading is successful
 	bool LoadMesh( const string& str , TriMesh* mesh );
 
-// private field
 private:
 	// the mesh loaders
     vector<std::shared_ptr<MeshLoader>>	m_MeshLoader;
@@ -168,7 +163,6 @@ private:
 	// the memory for meshes
     unordered_map< string , std::shared_ptr<BufferMemory> > m_Buffers;
 
-// private method
 private:
 	// default constructor
     MeshManager();

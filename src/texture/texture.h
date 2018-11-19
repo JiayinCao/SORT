@@ -32,7 +32,6 @@ class Intersection;
 // definition of class Texture
 class Texture : public PropertySet<Texture>
 {
-// public method
 public:
 	// default constructor
 	Texture();
@@ -94,7 +93,6 @@ public:
 	// whether the texture is valid
 	virtual bool IsValid() { return true; }
 
-// protected field
 protected:
 	// the size of the texture
 	// default values are zero
@@ -105,8 +103,6 @@ protected:
 	// default value is warp
 	TEXCOORDFILTER	m_TexCoordFilter;
 
-// protected method
-protected:
 	// initialize default value for texture
 	void _init();
 

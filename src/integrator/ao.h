@@ -24,7 +24,6 @@
 // definition of Ambient Occulusion
 class	AmbientOcclusion : public Integrator
 {
-// public method
 public:
 	DEFINE_CREATOR( AmbientOcclusion , Integrator , "ao" );
 
@@ -36,7 +35,6 @@ public:
 	// result       : radiance along the ray from the scene<F3>
 	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const;
 
-// private field
 private:
 	float	maxDistance = 10.0f;
 

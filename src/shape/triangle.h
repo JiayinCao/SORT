@@ -20,7 +20,7 @@
 #include "shape.h"
 
 class TriMesh;
-class VertexIndex;
+struct VertexIndex;
 
 //! @brief Triangle class defines the basic behavior of triangle.
 /**
@@ -31,7 +31,7 @@ class	Triangle : public Shape
 public:
 	//! @brief Constructor
 	//!
-	//! @param trimesh 		The triangle mesh it belongs to
+	//! @param mesh 		The triangle mesh it belongs to
 	//! @param index   		The index buffer
     Triangle( const TriMesh* mesh , const VertexIndex* index ): m_trimesh(mesh) , m_Index(index) {}
 
@@ -91,7 +91,7 @@ public:
 	//! @brief		Get the surface area of the shape.
 	//!
 	//! Get the surface area of the shape. This function is heavily used in the case of picking a area light
-	//! among lots of them, surface area is one of the singals telling us how strong the light is.
+	//! among lots of them, surface area is one of the signals telling us how strong the light is.
 	//!
 	//! @return		Surface area of the shape.
 	float 			SurfaceArea() const override;

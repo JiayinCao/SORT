@@ -71,7 +71,7 @@ public:
 	ComTexture& operator = ( const Texture& tex ) { _copy( tex ); return *this;}
 	ComTexture& operator = ( const ComTexture& tex ) { _copy( tex ); return *this; }
 
-// private field
+
 protected:
 	// the texture data
 	Spectrum*	m_pData;

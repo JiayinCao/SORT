@@ -23,7 +23,6 @@
 // definition of timer
 class	Timer : public Singleton<Timer>
 {
-// public method
 public:
 	// set the timer
 	void StartTimer();
@@ -38,7 +37,6 @@ public:
 	// reset the timer
 	void ResetTimer();
 
-// private field
 private:
 	// the time
 	unsigned long m_elapsed;

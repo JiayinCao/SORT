@@ -27,7 +27,6 @@
 //			switching to skysphere for better quality and high performance
 class	SkyBox : public Sky
 {
-// public method
 public:
 	DEFINE_CREATOR( SkyBox , Sky , "sky_box" );
 
@@ -50,7 +49,6 @@ public:
 	// get the pdf
 	float Pdf( const Vector& wi ) const;
 
-// private field
 private:
 	// the image textures
 	ImageTexture	m_up;
