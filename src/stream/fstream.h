@@ -22,13 +22,15 @@
 
 //! @brief Streaming from file.
 /**
- * IFileStream only works for stream data from a file. Any attempt to write data
+ * IFileStream only works for streaming data from a file. Any attempt to write data
  * to a file will result in immediate crash.
  */
 class IFileStream : public IStream
 {
 public:
     //! @brief Constructing from a file name.
+    //!
+    //! @param filename     Name of the file to be streamed.
     IFileStream(const std::string& filename) {
         m_file.open(filename, std::ios::in | std::ios::binary );
         if (!m_file.is_open())
@@ -37,30 +39,99 @@ public:
 
     //! @brief Destructor will close the file.
     ~IFileStream() {
-        if(m_file.is_open())
-            m_file.close();
+        Close();
     }
 
-    //! @brief Streaming in a float number to file
+    //! @brief Open a new stream file.
     //!
-    //! @param t    Value to be serialized
-    void operator >> (float& t) override {
-        m_file.read(reinterpret_cast<char*>(&t), sizeof(float));
+    //! @param filename     Name of the file to be streamed to.
+    //! @param force        Forcing to open the stream file if there is already a file open. Default value is 'true'
+    //! @return             Whether the new streamed file is opened. It could failed due to several reasons, like no
+    //!                     access to the file, no right to open the file or there is already a file opened, while
+    //!                     @param force is false.
+    bool    Open( const std::string& filename , bool force = true ){
+        if( m_file.is_open() ){
+            if( force )
+                m_file.close();
+            else
+                return false;
+        }
+
+        m_file.open( filename.c_str() );
+        return m_file.is_open();
+    }
+
+    //! @brief Close the currently opened stream file.
+    //!
+    //! @return             It returns true if there is a currently opened file, otherwise false will be returned.
+    bool    Close(){
+        if( !m_file.is_open() )
+            return false;
+        m_file.close();
+        return true;
+    }
+
+    //! @brief Streaming in a float number to file.
+    //!
+    //! @param v            Value to be loaded.
+    //! @return             Reference of the stream itself.
+    Stream& operator >> (float& v) override {
+        m_file.read(reinterpret_cast<char*>(&v), sizeof(float));
+        return *this;
+    }
+
+    //! @brief Streaming in an integer number to file.
+    //!
+    //! @param v            Value to be loaded.
+    //! @return             Reference of the stream itself.
+    Stream& operator >> (int& v) override {
+        m_file.read(reinterpret_cast<char*>(&v), sizeof(int));
+        return *this;
+    }
+
+    //! @brief Streaming in an unsigned integer number to file.
+    //!
+    //! @param v            Value to be loaded.
+    //! @return             Reference of the stream itself.
+    Stream& operator >> (unsigned int& v) override {
+        m_file.read(reinterpret_cast<char*>(&v), sizeof(unsigned int));
+        return *this;
+    }
+
+    //! @brief Streaming in a string to file.
+    //!
+    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
+    //! result in one single string instead of two like.
+    //!
+    //! @param v            Value to be loaded.
+    //! @return             Reference of the stream itself.
+    Stream& operator >> (std::string& v) override {
+        v = "";
+        char c;
+        do{
+            m_file.read(reinterpret_cast<char*>(&c), sizeof(char));
+            if( c == 0 ) 
+                break;
+            v += c;
+        }while(true);
+        return *this;
     }
 
 private:
-    std::ifstream m_file;
+    std::ifstream m_file;       /**< File to be streamed from. */
 };
 
 //! @brief Streaming to file.
 /**
- * OFileStream only works for stream data to a file. Any attempt to read data
+ * OFileStream only works for streaming data to a file. Any attempt to read data
  * from a file will result in immediate crash.
  */
 class OFileStream : public OStream
 {
 public:
     //! @brief Constructing from a file name.
+    //!
+    //! @param filename     Name of the file to be streamed.
     OFileStream(const std::string& filename) {
         m_file.open(filename, std::ios::out | std::ios::binary );
         if (!m_file.is_open())
@@ -69,17 +140,79 @@ public:
 
     //! @brief Destructor will close the file.
     ~OFileStream() {
-        if (m_file.is_open())
-            m_file.close();
+        Close();
     }
 
-    //! @brief Streaming out a float number from file
+    //! @brief Open a new stream file.
     //!
-    //! @param t    Value to be saved
-    void operator << (const float t) override {
-        m_file.write(reinterpret_cast<const char*>(&t), sizeof(float));
+    //! @param filename     Name of the file to be streamed to.
+    //! @param force        Forcing to open the stream file if there is already a file open. Default value is 'true'
+    //! @return             Whether the new streamed file is opened. It could failed due to several reasons, like no
+    //!                     access to the file, no right to open the file or there is already a file opened, while
+    //!                     @param force is false.
+    bool    Open( const std::string& filename , bool force = true ){
+        if( m_file.is_open() ){
+            if( force )
+                m_file.close();
+            else
+                return false;
+        }
+
+        m_file.open( filename.c_str() );
+        return m_file.is_open();
+    }
+
+    //! @brief Close the currently opened stream file.
+    //!
+    //! @return             It returns true if there is a currently opened file, otherwise false will be returned.
+    bool    Close(){
+        if( !m_file.is_open() )
+            return false;
+        m_file.close();
+        return true;
+    }
+
+    //! @brief Streaming out a float number from file.
+    //!
+    //! @param v            Value to be saved.
+    //! @return             Reference of the stream itself.
+    Stream& operator << (const float v) override {
+        m_file.write(reinterpret_cast<const char*>(&v), sizeof(float));
+        return *this;
+    }
+
+    //! @brief Streaming out an integer number from file.
+    //!
+    //! @param v            Value to be saved.
+    //! @return             Reference of the stream itself.
+    Stream& operator << (const int v) override {
+        m_file.write(reinterpret_cast<const char*>(&v), sizeof(int));
+        return *this;
+    }
+
+    //! @brief Streaming out an unsigned integer number from file.
+    //!
+    //! @param v            Value to be saved.
+    //! @return             Reference of the stream itself.
+    Stream& operator << (const unsigned int v) override {
+        m_file.write(reinterpret_cast<const char*>(&v), sizeof(unsigned int));
+        return *this;
+    }
+
+    //! @brief Streaming out a string from file.
+    //!
+    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
+    //! result in one single string instead of two like.
+    //!
+    //! @param v            Value to be saved.
+    //! @return             Reference of the stream itself.
+    Stream& operator << (const std::string& v) override {
+        m_file.write(v.c_str(), v.size());
+        char end = 0;
+        m_file.write(&end, sizeof(end));
+        return *this;
     }
 
 private:
-    std::ofstream m_file;
+    std::ofstream m_file;       /**< File to be streamed to. */
 };
