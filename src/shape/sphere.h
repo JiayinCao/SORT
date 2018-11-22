@@ -65,7 +65,15 @@ public:
 	//! @return			Whether the ray intersects the shape.
 	bool			GetIntersect( const Ray& ray , Point& p , Intersection* inter = nullptr ) const override;
 
-	// get the pdf of specific direction
+	//! @brief	Get the pdf w.r.t solid angle of picking a point on the surface where the ray intersects.
+	//!
+	//! By shooting a ray, starting from @param p along @param wi, we can calculate the intersection
+	//! between the ray and the shape. This function returns the pdf w.r.t solid angle of picking such a
+	//! point on the surface of the shape.
+	//!
+	//! @param p		Origin of the ray.
+	//! @param wi		Direction of the ray.
+	//! @return			PDF w.r.t the solid angle of picking this sample point on the surface of the shape.
 	float 			Pdf( const Point& p , const Vector& wi ) const override;
 
 	//! @brief		Get bounding box of the shape in world space.

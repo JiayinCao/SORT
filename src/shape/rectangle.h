@@ -84,6 +84,6 @@ public:
 	float 			SurfaceArea() const override;
     
 protected:
-	float sizeX = 1.0f;
-	float sizeY = 1.0f;
+	float sizeX = 1.0f;		/**< The size of the rectangle along x axis. */
+	float sizeY = 1.0f;		/**< The size of the rectangle along y axis. */
 };
