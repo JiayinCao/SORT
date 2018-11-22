@@ -57,7 +57,7 @@ public:
     //! @brief Streaming in a string to memory.
     //!
     //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
-    //! result in one single string instead of two like.
+    //! result in one single string instead of two.
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
@@ -105,7 +105,7 @@ public:
     //! @brief Streaming out a string from memory.
     //!
     //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
-    //! result in one single string instead of two like.
+    //! result in one single string instead of two.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
