@@ -21,30 +21,96 @@
 
 //! @brief Streaming from memory.
 /**
- * IMemoryStream only works for stream data from memory. Any attempt to write data
+ * IMemoryStream only works for streaming data from memory. Any attempt to write data
  * to memory will result in immediate crash.
  */
 class IMemoryStream : public IStream
 {
 public:
-    //! @brief Streaming in a float number to memory
+    //! @brief Streaming in a float number to memory.
     //!
-    //! @param t    Value to be loaded
-    void operator >> (float& t) override {
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    Stream& operator >> (float& v) override {
+        // to be implemented
+        return *this;
+    }
+
+    //! @brief Streaming in an integer number to memory.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    Stream& operator >> (int& v) override {
+        // to be implemented
+        return *this;
+    }
+
+    //! @brief Streaming in an unsigned integer number to memory.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    Stream& operator >> (unsigned int& v) override {
+        // to be implemented
+        return *this;
+    }
+
+    //! @brief Streaming in a string to memory.
+    //!
+    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
+    //! result in one single string instead of two like.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    Stream& operator >> (std::string& v) override {
+        // to be implemented
+        return *this;
     }
 };
 
 //! @brief Streaming to memory.
 /**
- * OMemoryStream only works for stream data to memory. Any attempt to read data
+ * OMemoryStream only works for streaming data to memory. Any attempt to read data
  * from memory will result in immediate crash.
  */
 class OMemoryStream : public OStream
 {
 public:
-    //! @brief Streaming out a float number from memory
+    //! @brief Streaming out a float number from memory.
     //!
-    //! @param t    Value to be saved
-    void operator << (const float t) override {
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    Stream& operator << (const float v) override {
+        // to be implemented
+        return *this;
+    }
+
+    //! @brief Streaming out an integer number from memory.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    Stream& operator << (const int v) override {
+        // to be implemented
+        return *this;
+    }
+
+    //! @brief Streaming out an unsigned integer number from memory.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    Stream& operator << (const unsigned int v) override {
+        // to be implemented
+        return *this;
+    }
+
+    //! @brief Streaming out a string from memory.
+    //!
+    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
+    //! result in one single string instead of two like.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    Stream& operator << (const std::string& v) override {
+        // to be implemented
+        return *this;
     }
 };

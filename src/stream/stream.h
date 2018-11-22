@@ -35,15 +35,59 @@ public:
     //! Empty virtual destructor.
     virtual ~Stream() {}
 
-    //! @brief Streaming in a float number
+    //! @brief Streaming in a float number.
     //!
-    //! @param t    Value to be saved
-    virtual void operator << (const float t) = 0;
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    virtual Stream& operator << (const float v) = 0;
 
     //! @brief Streaming out a float number.
     //!
-    //! @param t    Value to be loaded
-    virtual void operator >> (float& t) = 0;
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    virtual Stream& operator >> (float& v) = 0;
+
+    //! @brief Streaming in a integer number.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    virtual Stream& operator << (const int v) = 0;
+
+    //! @brief Streaming out a integer number.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    virtual Stream& operator >> (int& v) = 0;
+
+    //! @brief Streaming in an unsigned integer number.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    virtual Stream& operator << (const unsigned int v) = 0;
+
+    //! @brief Streaming out an unsigned integer number.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    virtual Stream& operator >> (unsigned int& v) = 0;
+
+    //! @brief Streaming in a string.
+    //!
+    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
+    //! result in one single string instead of two like.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    virtual Stream& operator << (const std::string& v) = 0;
+
+    //! @brief Streaming out a string
+    //!
+    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
+    //! result in one single string instead of two like.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    virtual Stream& operator >> (std::string& v) = 0;
 };
 
 //! @brief Streaming in data
@@ -55,7 +99,31 @@ class IStream : public Stream
 {
 public:
     //! @brief Disable streaming in a float number. Attempting to do it will result in crash!
-    void operator << (const float t) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); }
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    Stream& operator << (const float v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+
+    //! @brief Disable streaming in a integer number. Attempting to do it will result in crash!
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    Stream& operator << (const int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+
+    //! @brief Disable streaming in an unsigned integer number. Attempting to do it will result in crash!
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    Stream& operator << (const unsigned int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+
+    //! @brief Disable streaming in an unsigned integer number. Attempting to do it will result in crash!
+    //!
+    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
+    //! result in one single string instead of two like.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    Stream& operator << (const std::string& v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
 };
 
 //! @brief Streaming out data
@@ -67,5 +135,29 @@ class OStream : public Stream
 {
 public:
     //! @brief Disable streaming out a float number. Attempting to do it will result in crash!
-    void operator >> (float& t) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); }
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    Stream& operator >> (float& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+
+    //! @brief Disable streaming out a integer number. Attempting to do it will result in crash!
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    Stream& operator >> (int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+
+    //! @brief Disable streaming out an unsigned integer number. Attempting to do it will result in crash!
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    Stream& operator >> (unsigned int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+
+    //! @brief Disable streaming out an unsigned integer number. Attempting to do it will result in crash!
+    //!
+    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
+    //! result in one single string instead of two like.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    Stream& operator >> (std::string& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
 };

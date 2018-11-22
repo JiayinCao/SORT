@@ -97,8 +97,6 @@ public:
 	float 			SurfaceArea() const override;
 
 private:
-	// the triangle mesh
-	const TriMesh*		m_trimesh = nullptr;
-	// the index
-	const VertexIndex*	m_Index = nullptr;
+	const TriMesh*		m_trimesh = nullptr;	/**< Vertex buffer holds the triangle information. */
+	const VertexIndex*	m_Index = nullptr;		/**< Index buffer points to the index of this triangle. */
 };
