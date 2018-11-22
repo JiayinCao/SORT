@@ -22,22 +22,34 @@
 #define STREAM_SAMPLE_COUNT 10000
 
 TEST(STREAM, FileStream) {
-    vector<float> vec;
-    {
-        OFileStream ofile("test.bin");
-        for (unsigned i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
-            vec.push_back(sort_canonical());
-            ofile << vec.back();
-        }
+    vector<float>           vec_f;
+    vector<int>             vec_i;
+    vector<unsigned int>    vec_u;
+    OFileStream ofile("test.bin");
+    string str = "this is a random string";
+    ofile<<str;
+    for (unsigned i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
+        vec_f.push_back( sort_canonical() );
+        vec_i.push_back( (int)( ( 2.0f * sort_canonical() - 1.0f ) * STREAM_SAMPLE_COUNT ) );
+        vec_u.push_back( (unsigned int)( sort_canonical() * STREAM_SAMPLE_COUNT ) );
+        ofile << vec_f.back() << vec_i.back() ;
+        ofile << vec_u.back();
     }
+    ofile.Close();
 
-    {
-        IFileStream ifile("test.bin");
-        for (int i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
-            float tmp = 0.0f;
-            ifile >> tmp;
-            EXPECT_EQ(tmp, vec[i]);
-        }
+    IFileStream ifile("test.bin");
+    string str_copy;
+    ifile>>str_copy;
+    cout<<str_copy<<endl;
+    EXPECT_EQ( str_copy , str );
+    for (int i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
+        float t0 = 0.0f;
+        int t1 = 0;
+        unsigned int t2 = 0;
+        ifile >> t0 >> t1 >> t2;
+        EXPECT_EQ(t0, vec_f[i]);
+        EXPECT_EQ(t1, vec_i[i]);
+        EXPECT_EQ(t2, vec_u[i]);
     }
 }
 
