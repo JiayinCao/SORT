@@ -74,7 +74,7 @@ public:
     //! @brief Streaming in a string.
     //!
     //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
-    //! result in one single string instead of two like.
+    //! result in one single string instead of two.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
@@ -83,7 +83,7 @@ public:
     //! @brief Streaming out a string
     //!
     //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
-    //! result in one single string instead of two like.
+    //! result in one single string instead of two.
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
@@ -119,7 +119,7 @@ public:
     //! @brief Disable streaming in an unsigned integer number. Attempting to do it will result in crash!
     //!
     //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
-    //! result in one single string instead of two like.
+    //! result in one single string instead of two.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
@@ -155,7 +155,7 @@ public:
     //! @brief Disable streaming out an unsigned integer number. Attempting to do it will result in crash!
     //!
     //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
-    //! result in one single string instead of two like.
+    //! result in one single string instead of two.
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
