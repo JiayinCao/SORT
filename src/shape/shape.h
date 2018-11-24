@@ -124,14 +124,6 @@ public:
 	//! @return		Surface area of the shape.
 	virtual float	SurfaceArea() const = 0;
 
-	//! @brief		Whether the shape is a compound shape.
-	//!
-	//!	Most shapes are not compound one. However, one typical example is 'TriMesh', which holds an array of
-	//! triangles. Compound shape doesn't support GetIntersect method.
-	//!
-	//! @return		Whether the shape is a compound shape.
-	virtual bool	IsCompound() const { return false; }
-
 	//! @brief Set transform for the shape.
 	//!
 	//! @param transform	The new transform of the shape to be set.

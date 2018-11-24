@@ -18,6 +18,7 @@
 // include the header
 #include "intersection.h"
 #include "light/light.h"
+#include "geometry/primitive.h"
 
 // get the emissive
 Spectrum Intersection::Le( const Vector& wo , float* directPdfA , float* emissionPdf ) const

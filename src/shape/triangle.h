@@ -19,7 +19,7 @@
 
 #include "shape.h"
 
-class TriMesh;
+class MeshEntity;
 struct VertexIndex;
 
 //! @brief Triangle class defines the basic behavior of triangle.
@@ -33,7 +33,7 @@ public:
 	//!
 	//! @param mesh 		The triangle mesh it belongs to
 	//! @param index   		The index buffer
-    Triangle( const TriMesh* mesh , const VertexIndex* index ): m_trimesh(mesh) , m_Index(index) {}
+    Triangle( const MeshEntity* mesh , const VertexIndex* index ): m_meshEntity(mesh) , m_Index(index) {}
 
 	//! @brief Sample a point on the surface of the shape given a shading point.
 	//!
@@ -97,6 +97,6 @@ public:
 	float 			SurfaceArea() const override;
 
 private:
-	const TriMesh*		m_trimesh = nullptr;	/**< Vertex buffer holds the triangle information. */
-	const VertexIndex*	m_Index = nullptr;		/**< Index buffer points to the index of this triangle. */
+	const MeshEntity*		m_meshEntity = nullptr;		/**< Entity holding the vertex buffer. */
+	const VertexIndex*		m_Index = nullptr;			/**< Index buffer points to the index of this triangle. */
 };

@@ -19,6 +19,8 @@
 
 #include "math/transform.h"
 
+class Scene;
+
 //! @brief Basic unit of objects in world.
 /**
  * An entity is the very basic concept in a world. Everything, including camera, mesh, light or anything else is an
@@ -30,6 +32,28 @@ public:
     //! Empty virtual destructor
     virtual ~Entity() {}
 
+    //! @brief  Set transformation of the entity
+    //!
+    //! @param  transform   New transform to be set up.
+    void  SetTransform( const Transform& transform ){
+        m_transform = transform;
+    }
+
+    //! @brief  Get current transformation of the entity
+    //!
+    //! @return             Current transformation of the entity
+    const Transform&    GetTransform() const{
+        return m_transform;
+    }
+
+    //! @brief  Fill the scene with primitives.
+    //!
+    //! Some entity, like Visual entity, will commonly fill primitives in the scene. Others like Light Entity, will fill
+    //! lights in the scene.
+    //!
+    //! @param  scene       The scene to be filled.
+    virtual void        FillScene( Scene& scene ) {};
+
 protected:
-    Transform   m_transform;
+    Transform   m_transform;    /**< Transform of the entity from local space to world space. */
 };
