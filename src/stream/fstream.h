@@ -117,6 +117,15 @@ public:
         return *this;
     }
 
+    //! @brief Streaming in a boolean value to file.
+    //!
+    //! @param v            Value to be loaded.
+    //! @return             Reference of the stream itself.
+    Stream& operator >> (bool& v) override {
+        m_file.read(reinterpret_cast<char*>(&v), sizeof(bool));
+        return *this;
+    }
+
 private:
     std::ifstream m_file;       /**< File to be streamed from. */
 };
@@ -210,6 +219,15 @@ public:
         m_file.write(v.c_str(), v.size());
         char end = 0;
         m_file.write(&end, sizeof(end));
+        return *this;
+    }
+
+    //! @brief Streaming out a boolean value from file.
+    //!
+    //! @param v            Value to be saved.
+    //! @return             Reference of the stream itself.
+    Stream& operator << (const bool v) override {
+        m_file.write(reinterpret_cast<const char*>(&v), sizeof(bool));
         return *this;
     }
 
