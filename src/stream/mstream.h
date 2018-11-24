@@ -65,6 +65,15 @@ public:
         // to be implemented
         return *this;
     }
+
+    //! @brief Streaming in a boolean value to memory.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    Stream& operator >> (bool& v) override {
+        // to be implemented
+        return *this;
+    }
 };
 
 //! @brief Streaming to memory.
@@ -110,6 +119,15 @@ public:
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
     Stream& operator << (const std::string& v) override {
+        // to be implemented
+        return *this;
+    }
+
+    //! @brief Streaming out a boolean value from memory.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    Stream& operator << (const bool v) override {
         // to be implemented
         return *this;
     }

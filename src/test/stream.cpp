@@ -28,6 +28,8 @@ TEST(STREAM, FileStream) {
     OFileStream ofile("test.bin");
     string str = "this is a random string";
     ofile<<str;
+    bool flag = true;
+    ofile<<flag;
     for (unsigned i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
         vec_f.push_back( sort_canonical() );
         vec_i.push_back( (int)( ( 2.0f * sort_canonical() - 1.0f ) * STREAM_SAMPLE_COUNT ) );
@@ -40,8 +42,10 @@ TEST(STREAM, FileStream) {
     IFileStream ifile("test.bin");
     string str_copy;
     ifile>>str_copy;
-    cout<<str_copy<<endl;
     EXPECT_EQ( str_copy , str );
+    bool flag_copy = false;
+    ifile>>flag_copy;
+    EXPECT_EQ( flag_copy , flag );
     for (int i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
         float t0 = 0.0f;
         int t1 = 0;
