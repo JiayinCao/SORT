@@ -28,6 +28,8 @@
 #include "shape/shape.h"
 #include "utility/sassert.h"
 #include "utility/stats.h"
+#include "entity/entity.h"
+#include "entity/visual_entity.h"
 
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
@@ -53,17 +55,13 @@ bool Scene::LoadScene( TiXmlNode* root )
                 slog( WARNING , GENERAL , stringFormat("Mesh defined in file %s doesn't have a model name, it will be skipped." , filename ) );
 				break;
 			}
-			if( nullptr != GetTriMesh( model_name ) ){
-                slog( WARNING , GENERAL , stringFormat("A mesh with name %s already existed." , model_name ) );
-				break;
-			}
 
 			// load the transform matrix
 			Transform transform = _parseTransform( meshNode->FirstChildElement( "Transform" ) );
 
 			// load the first mesh
-			TriMesh* mesh = new TriMesh(model_name);
-			if( mesh->LoadMesh( filename , transform ) )
+			MeshEntity* mEntity = new MeshEntity();
+			if( mEntity->LoadMesh( filename , transform ) )
 			{
 				// reset the material if neccessary
 				TiXmlElement* meshMat = meshNode->FirstChildElement( "Material" );
@@ -76,15 +74,15 @@ bool Scene::LoadScene( TiXmlNode* root )
 						const char* mat_name = meshMat->Attribute( "mat" );
 
 						if( set_name != 0 && mat_name != 0 )
-							mesh->ResetMaterial( set_name , mat_name );
+							mEntity->ResetMaterial( set_name , mat_name );
 
 						meshMat = meshMat->NextSiblingElement( "MatSet" );
 					}while( meshMat );
 				}
-				m_meshBuf.push_back( mesh );
+				m_entities.push_back( mEntity );
 			}
 			else
-				delete mesh;
+				delete mEntity;
 		}
 
 		// get to the next model
@@ -194,37 +192,26 @@ void Scene::Release()
 
 	vector<Primitive*>::iterator it = m_primitiveBuf.begin();
 	while( it != m_primitiveBuf.end() )
-	{
-		delete *it;
-		it++;
-	}
+		delete *it++;
 	m_primitiveBuf.clear();
 
-	vector<TriMesh*>::iterator tri_it = m_meshBuf.begin();
-	while( tri_it != m_meshBuf.end() )
-	{
-		delete *tri_it;
-		tri_it++;
-	}
-	m_meshBuf.clear();
+	vector<Entity*>::iterator pri_it = m_entities.begin();
+	while( pri_it != m_entities.end() )
+		delete *pri_it++;
+	m_entities.clear();
 
 	vector<Light*>::iterator light_it = m_lights.begin();
 	while( light_it != m_lights.end() )
-	{
-		delete *light_it;
-		light_it++;
-	}
+		delete *light_it++;
 	m_lights.clear();
 }
 
 // generate primitive buffer
 void Scene::_generatePriBuf()
 {
-	// iterator the mesh
-	vector<TriMesh*>::iterator it = m_meshBuf.begin();
-	while( it != m_meshBuf.end() )
-	{
-		(*it)->FillTriBuf( m_primitiveBuf );
+	vector<Entity*>::const_iterator it = m_entities.begin();
+	while( it != m_entities.end() ){
+		(*it)->FillScene( *this );
 		it++;
 	}
 }
@@ -317,19 +304,6 @@ float Scene::LightProperbility( unsigned i ) const
 {
 	sAssert( m_pLightsDis != 0 , LIGHT );
 	return m_pLightsDis->GetProperty( i );
-}
-
-// get triangle mesh set with a specific name
-TriMesh* Scene::GetTriMesh( const string& name ) const
-{
-	vector<TriMesh*>::const_iterator it = m_meshBuf.begin();
-	while( it != m_meshBuf.end() )
-	{
-		if( (*it)->m_Name == name )
-			return *it;
-		it++;
-	}
-	return 0;
 }
 
 // Evaluate sky
