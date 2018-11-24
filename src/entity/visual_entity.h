@@ -18,6 +18,12 @@
 #pragma once
 
 #include "entity.h"
+#include <vector>
+#include "geometry/primitive.h"
+#include "managers/meshmanager.h"
+#include "math/transform.h"
+
+class	Material;
 
 //! @brief Visual entity is the basic visible unit can be seen in SORT.
 /**
@@ -28,4 +34,29 @@ class VisualEntity : public Entity{
 public:
     //! Empty virtual destructor
     ~VisualEntity() {}
+};
+
+//! @brief Triangle Mesh entity.
+/**
+ * MeshEntity is the most common VisualEntity in a ray tracer. It is composited with a set of
+ * triangles. Most of the objects in a scene uses this entity.
+ */
+class MeshEntity : public VisualEntity{
+public:
+    //! @brief  Fill the scene with triangles.
+    //!
+    //! @param  scene       The scene to be filled.
+    void        FillScene( Scene& scene ) override;
+
+    // ------------------------------------------------------------------------
+    // Temporary solution before serialization is done.
+    bool LoadMesh( const string& filename , const Transform& transform );
+    void ResetMaterial( const string& setname , const string& matname );
+	int  _getSubsetID( const string& setname );
+	void _copyMaterial();
+    // ------------------------------------------------------------------------
+
+public:
+    std::shared_ptr<BufferMemory>               m_pMemory;      /**< Memory for the mesh. */
+    std::vector<std::shared_ptr<Material>>      m_Materials;    /**< Material referenced in the mesh */
 };

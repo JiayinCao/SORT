@@ -20,14 +20,18 @@
 // include the header file
 #include "sort.h"
 #include <vector>
-#include "trimesh.h"
+#include "utility/sassert.h"
+#include "bbox.h"
 #include "spectrum/spectrum.h"
 #include "thirdparty/tinyxml/tinyxml.h"
+#include "intersection.h"
+#include "math/transform.h"
 
 class Accelerator;
 class Light;
 class Distribution1D;
 class TiXmlNode;
+class Entity;
 
 ////////////////////////////////////////////////////////////////////////////
 // definition of scene class
@@ -76,8 +80,6 @@ public:
 	{ return (unsigned)m_lights.size(); }
 	// get bounding box of the scene
 	const BBox& GetBBox() const;
-	// get triangle mesh with a specific name
-	TriMesh*	GetTriMesh( const string& name ) const;
 
 	// get file name
 	const string& GetFileName() const
@@ -88,8 +90,7 @@ public:
 
 
 private:
-	// the buffer for the triangle mesh
-	vector<TriMesh*>	m_meshBuf;
+	vector<Entity*>		m_entities;			/**< Entities in the scene. */
 
 	// the primitive buffer for the scene
 	vector<Primitive*>	m_primitiveBuf;
@@ -126,4 +127,6 @@ private:
 
 	// compute light cdf
 	void	_genLightDistribution();
+
+	friend class MeshEntity;
 };

@@ -32,7 +32,7 @@
 
 // pre-declera class
 class MeshLoader;
-class TriMesh;
+class MeshEntity;
 
 // index for a vertex
 struct VertexIndex
@@ -90,8 +90,8 @@ public:
 	unsigned		m_iTriNum;
 	// the trunk number
 	unsigned		m_iTrunkNum;
-	// the tri mesh
-	TriMesh*		m_pPrototype;
+	// the tri mesh entity
+	MeshEntity*	m_pPrototypeEntity;
 	// the name for the file
 	std::string		m_filename;
 
@@ -103,12 +103,12 @@ public:
 		m_iTeBcount = 0;
 		m_iTBCount = 0;
 		m_iTriNum = 0;
-		m_pPrototype = 0;
+		m_pPrototypeEntity = nullptr;
 		m_iTrunkNum = 0;
 	}
 
 	// apply transform
-	void ApplyTransform( TriMesh* mesh );
+	void ApplyTransform( MeshEntity* mesh );
 
 	// calculate buffer number
 	void CalculateCount()
@@ -150,11 +150,8 @@ private:
 class	MeshManager : public Singleton<MeshManager>
 {
 public:
-	// load the mesh from file
-	// para 'str'  : name of the file
-	// para 'mesh' : triangle mesh
-	// result      : 'true' if loading is successful
-	bool LoadMesh( const string& str , TriMesh* mesh );
+	// Temporary
+	bool LoadMesh( const string& str , MeshEntity* mesh );
 
 private:
 	// the mesh loaders
