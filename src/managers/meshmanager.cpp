@@ -373,7 +373,7 @@ void BufferMemory::Serialize( IStream& stream , MeshEntity* mesh ){
 	stream >> m_iTrunkNum;
 	m_TrunkBuffer.clear();
     m_TrunkBuffer.resize( m_iTrunkNum );
-	for( int i = 0 ; i < m_iTrunkNum ; ++i ){
+	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
 		stream >> m_TrunkBuffer[i].m_iTriNum;
 		string name;
 		stream >> name;
@@ -381,20 +381,20 @@ void BufferMemory::Serialize( IStream& stream , MeshEntity* mesh ){
 	}
 
 	m_PositionBuffer.resize( m_iVBCount );
-	for( int i = 0 ; i < m_iVBCount ; ++i )
+	for( unsigned i = 0 ; i < m_iVBCount ; ++i )
 		stream >> m_PositionBuffer[i];
 	m_NormalBuffer.resize( m_iNBCount );
-	for( int i = 0 ; i < m_iNBCount ; ++i )
+	for( unsigned i = 0 ; i < m_iNBCount ; ++i )
 		stream >> m_NormalBuffer[i];
 	m_TexCoordBuffer.resize( m_iTBCount * 2 );
-	for( int i = 0 ; i < m_iTBCount ; ++i )
+	for( unsigned i = 0 ; i < m_iTBCount ; ++i )
 		stream >> m_TexCoordBuffer[2*i] >> m_TexCoordBuffer[2*i+1];
 
-	for( int i = 0 ; i < m_iTrunkNum ; ++i ){
-		const int index_cnt = m_TrunkBuffer[i].m_iTriNum * 3;
+	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
+		const unsigned index_cnt = m_TrunkBuffer[i].m_iTriNum * 3;
 		m_TrunkBuffer[i].m_IndexBuffer.clear();
 		m_TrunkBuffer[i].m_IndexBuffer.resize( index_cnt );
-		for( int j = 0 ; j < index_cnt ; ++j ){
+		for( unsigned j = 0 ; j < index_cnt ; ++j ){
 			stream >> m_TrunkBuffer[i].m_IndexBuffer[j].posIndex;
 			if( m_iNBCount )
 				stream >> m_TrunkBuffer[i].m_IndexBuffer[j].norIndex;
@@ -409,21 +409,21 @@ void BufferMemory::Serialize( OStream& stream ){
 	stream << ( m_hasInitNormal ? m_iNBCount : 0 );
 	stream << ( m_hasInitTexCoord ? m_iTBCount : 0 );
 	stream << m_iTrunkNum;
-	for( int i = 0 ; i < m_iTrunkNum ; ++i ){
+	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
 		stream << m_TrunkBuffer[i].m_iTriNum;
 		stream << ( m_TrunkBuffer[i].m_mat ? m_TrunkBuffer[i].m_mat->GetName() : "" );
 	}
 
-	for( int i = 0 ; i < m_iVBCount ; ++i )
+	for( unsigned i = 0 ; i < m_iVBCount ; ++i )
 		stream << m_PositionBuffer[i];
-	for( int i = 0 ; i < m_iNBCount && m_hasInitNormal ; ++i )
+	for( unsigned i = 0 ; i < m_iNBCount && m_hasInitNormal ; ++i )
 		stream << m_NormalBuffer[i];
-	for( int i = 0 ; i < m_iTBCount && m_hasInitTexCoord ; ++i )
+	for( unsigned i = 0 ; i < m_iTBCount && m_hasInitTexCoord ; ++i )
 		stream << m_TexCoordBuffer[2*i] << m_TexCoordBuffer[2*i+1];
 
-	for( int i = 0 ; i < m_iTrunkNum ; ++i ){
-		const int index_cnt = m_TrunkBuffer[i].m_iTriNum * 3;
-		for( int j = 0 ; j < index_cnt ; ++j ){
+	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
+		const unsigned index_cnt = m_TrunkBuffer[i].m_iTriNum * 3;
+		for( unsigned j = 0 ; j < index_cnt ; ++j ){
 			stream << m_TrunkBuffer[i].m_IndexBuffer[j].posIndex;
 			if( m_hasInitNormal )
 				stream << m_TrunkBuffer[i].m_IndexBuffer[j].norIndex;
