@@ -33,6 +33,8 @@
 // pre-declera class
 class MeshLoader;
 class MeshEntity;
+class IStream;
+class OStream;
 
 // index for a vertex
 struct VertexIndex
@@ -66,7 +68,7 @@ public:
 
 	// constructor
 	// para 'str' : name for the trunk
-	Trunk( const string& str ) : name(str)
+	Trunk( const string& str = "" ) : name(str)
 	{ m_iTriNum = 0; m_mat = 0; }
 };
 
@@ -83,7 +85,7 @@ public:
 	// the texture coordinate buffer
 	vector<float>	m_TexCoordBuffer;
 	// the trunk buffer
-    vector<std::shared_ptr<Trunk>>	m_TrunkBuffer;
+    vector<Trunk>	m_TrunkBuffer;
 	// the size for three buffers
 	unsigned		m_iVBCount , m_iNBCount , m_iTeBcount , m_iTBCount;
 	// the number of triangles 
@@ -91,9 +93,12 @@ public:
 	// the trunk number
 	unsigned		m_iTrunkNum;
 	// the tri mesh entity
-	MeshEntity*	m_pPrototypeEntity;
+	MeshEntity*		m_pPrototypeEntity;
 	// the name for the file
 	std::string		m_filename;
+	// whether the source file has normal or texture coordinate
+	bool			m_hasInitTexCoord;
+	bool			m_hasInitNormal;
 
 	// set default data for the buffer memory
 	BufferMemory()
@@ -105,6 +110,8 @@ public:
 		m_iTriNum = 0;
 		m_pPrototypeEntity = nullptr;
 		m_iTrunkNum = 0;
+		m_hasInitTexCoord = false;
+		m_hasInitNormal = false;
 	}
 
 	// apply transform
@@ -122,8 +129,8 @@ public:
 		auto it = m_TrunkBuffer.begin();
 		while( it != m_TrunkBuffer.end() )
 		{
-			(*it)->m_iTriNum = ((unsigned)(*it)->m_IndexBuffer.size()) / 3;
-			m_iTriNum += (*it)->m_iTriNum;
+			it->m_iTriNum = ((unsigned)it->m_IndexBuffer.size()) / 3;
+			m_iTriNum += it->m_iTriNum;
 			it++;
 		}
 	}
@@ -135,9 +142,13 @@ public:
 	// generate texture coordinate
 	void	GenTexCoord();
 
+	// serialization interface for BufferMemory
+    void    Serialize( IStream& stream , MeshEntity* mesh );
+	void    Serialize( OStream& stream );
+
 private:
 	void	_genFlatNormal();
-    Vector	_genTagentForTri( const std::shared_ptr<Trunk>& trunk , unsigned k  ) const;
+    Vector	_genTagentForTri( const Trunk& trunk , unsigned k  ) const;
 };
 
 /////////////////////////////////////////////////////////////////////////

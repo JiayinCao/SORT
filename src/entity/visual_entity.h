@@ -48,15 +48,31 @@ public:
     //! @param  scene       The scene to be filled.
     void        FillScene( Scene& scene ) override;
 
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the entity. Loading from an IStream, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void        Serialize( IStream& stream ) override;
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the entity. Saving to an OStream, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void        Serialize( OStream& stream ) override;
+
+public:
+    std::shared_ptr<BufferMemory>               m_memory;       /**< Memory for the mesh. */
+    std::vector<std::shared_ptr<Material>>      m_Materials;    /**< Material referenced in the mesh */
+
+
     // ------------------------------------------------------------------------
     // Temporary solution before serialization is done.
+public:
     bool LoadMesh( const string& filename , const Transform& transform );
     void ResetMaterial( const string& setname , const string& matname );
 	int  _getSubsetID( const string& setname );
 	void _copyMaterial();
     // ------------------------------------------------------------------------
-
-public:
-    std::shared_ptr<BufferMemory>               m_pMemory;      /**< Memory for the mesh. */
-    std::vector<std::shared_ptr<Material>>      m_Materials;    /**< Material referenced in the mesh */
 };

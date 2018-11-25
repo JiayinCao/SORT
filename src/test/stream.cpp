@@ -30,6 +30,8 @@ TEST(STREAM, FileStream) {
     ofile<<str;
     bool flag = true;
     ofile<<flag;
+    string empty_str = "";
+    ofile<<empty_str;
     for (unsigned i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
         vec_f.push_back( sort_canonical() );
         vec_i.push_back( (int)( ( 2.0f * sort_canonical() - 1.0f ) * STREAM_SAMPLE_COUNT ) );
@@ -46,6 +48,9 @@ TEST(STREAM, FileStream) {
     bool flag_copy = false;
     ifile>>flag_copy;
     EXPECT_EQ( flag_copy , flag );
+    string empty_str_copy;
+    ifile>>empty_str_copy;
+    EXPECT_EQ( empty_str_copy , empty_str );
     for (int i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
         float t0 = 0.0f;
         int t1 = 0;
