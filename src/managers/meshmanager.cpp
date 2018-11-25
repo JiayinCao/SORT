@@ -24,6 +24,8 @@
 #include "utility/path.h"
 #include "bsdf/bsdf.h"
 #include "utility/log.h"
+#include "stream/stream.h"
+#include "managers/matmanager.h"
 
 // default constructor
 MeshManager::MeshManager()
@@ -82,7 +84,8 @@ bool MeshManager::LoadMesh( const string& filename , MeshEntity* mesh ){
 			mem->GenTexCoord();
 			mem->GenSmoothTagent();
 
-			mesh->m_pMemory = mem;
+			// copy trunk memory pointer
+			mesh->m_memory = mem;
 
 			// and insert it into the map
 			m_Buffers.insert( make_pair( str , mem ) );
@@ -124,12 +127,12 @@ void BufferMemory::_genFlatNormal()
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
         auto& trunk = m_TrunkBuffer[i];
-		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
+		for( unsigned k = 0 ; k < trunk.m_iTriNum ; k++ )
 		{
 			unsigned offset = 3*k;
-			unsigned id0 = trunk->m_IndexBuffer[offset].posIndex;
-			unsigned id1 = trunk->m_IndexBuffer[offset+1].posIndex;
-			unsigned id2 = trunk->m_IndexBuffer[offset+2].posIndex;
+			unsigned id0 = trunk.m_IndexBuffer[offset].posIndex;
+			unsigned id1 = trunk.m_IndexBuffer[offset+1].posIndex;
+			unsigned id2 = trunk.m_IndexBuffer[offset+2].posIndex;
 
 			// get the vertexes
 			Vector v0 = m_PositionBuffer[id0] - m_PositionBuffer[id1];
@@ -140,12 +143,12 @@ void BufferMemory::_genFlatNormal()
 			n.Normalize();
 			m_NormalBuffer.push_back( n );
 
-			trunk->m_IndexBuffer[offset].norIndex = base+k;
-			trunk->m_IndexBuffer[offset+1].norIndex = base+k;
-			trunk->m_IndexBuffer[offset+2].norIndex = base+k;
+			trunk.m_IndexBuffer[offset].norIndex = base+k;
+			trunk.m_IndexBuffer[offset+1].norIndex = base+k;
+			trunk.m_IndexBuffer[offset+2].norIndex = base+k;
 		}
-		totalTriNum += trunk->m_iTriNum;
-		base += trunk->m_iTriNum;
+		totalTriNum += trunk.m_iTriNum;
+		base += trunk.m_iTriNum;
 	}
 	m_iNBCount = totalTriNum;
 }
@@ -166,22 +169,22 @@ void BufferMemory::GenSmoothNormal()
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
 		auto& trunk = m_TrunkBuffer[i];
-		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
+		for( unsigned k = 0 ; k < trunk.m_iTriNum ; k++ )
 		{
 			unsigned offset = 3 * k;
-			unsigned id0 = trunk->m_IndexBuffer[offset].posIndex;
-			unsigned id1 = trunk->m_IndexBuffer[offset+1].posIndex;
-			unsigned id2 = trunk->m_IndexBuffer[offset+2].posIndex;
+			unsigned id0 = trunk.m_IndexBuffer[offset].posIndex;
+			unsigned id1 = trunk.m_IndexBuffer[offset+1].posIndex;
+			unsigned id2 = trunk.m_IndexBuffer[offset+2].posIndex;
 
 			adjacency[id0].push_back( base + k );
 			adjacency[id1].push_back( base + k );
 			adjacency[id2].push_back( base + k );
 
-			trunk->m_IndexBuffer[offset].norIndex = trunk->m_IndexBuffer[offset].posIndex;
-			trunk->m_IndexBuffer[offset+1].norIndex = trunk->m_IndexBuffer[offset+1].posIndex;
-			trunk->m_IndexBuffer[offset+2].norIndex = trunk->m_IndexBuffer[offset+2].posIndex;
+			trunk.m_IndexBuffer[offset].norIndex = trunk.m_IndexBuffer[offset].posIndex;
+			trunk.m_IndexBuffer[offset+1].norIndex = trunk.m_IndexBuffer[offset+1].posIndex;
+			trunk.m_IndexBuffer[offset+2].norIndex = trunk.m_IndexBuffer[offset+2].posIndex;
 		}
-		base += trunk->m_iTriNum;
+		base += trunk.m_iTriNum;
 	}
 
 	// generate smooth normal
@@ -222,7 +225,7 @@ void BufferMemory::GenSmoothTagent()
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
         auto& trunk = m_TrunkBuffer[i];
-		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
+		for( unsigned k = 0 ; k < trunk.m_iTriNum ; k++ )
 			tagents.push_back( _genTagentForTri( trunk , k ) );
 	}
 
@@ -232,18 +235,18 @@ void BufferMemory::GenSmoothTagent()
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
 		auto& trunk = m_TrunkBuffer[i];
-		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
+		for( unsigned k = 0 ; k < trunk.m_iTriNum ; k++ )
 		{
 			unsigned offset = 3 * k;
-			unsigned id0 = trunk->m_IndexBuffer[offset].norIndex;
-			unsigned id1 = trunk->m_IndexBuffer[offset+1].norIndex;
-			unsigned id2 = trunk->m_IndexBuffer[offset+2].norIndex;
+			unsigned id0 = trunk.m_IndexBuffer[offset].norIndex;
+			unsigned id1 = trunk.m_IndexBuffer[offset+1].norIndex;
+			unsigned id2 = trunk.m_IndexBuffer[offset+2].norIndex;
 
 			adjacency[id0].push_back( base + k );
 			adjacency[id1].push_back( base + k );
 			adjacency[id2].push_back( base + k );
 		}
-		base += trunk->m_iTriNum;
+		base += trunk.m_iTriNum;
 	}
 
 	// generate smooth normal
@@ -270,21 +273,21 @@ void BufferMemory::GenSmoothTagent()
 }
 
 // generate tagent vector for a triangle
-Vector BufferMemory::_genTagentForTri( const std::shared_ptr<Trunk>& trunk , unsigned k ) const
+Vector BufferMemory::_genTagentForTri( const Trunk& trunk , unsigned k ) const
 {
 	unsigned offset = 3 * k;
-	unsigned pid0 = trunk->m_IndexBuffer[offset].posIndex;
-	unsigned pid1 = trunk->m_IndexBuffer[offset+1].posIndex;
-	unsigned pid2 = trunk->m_IndexBuffer[offset+2].posIndex;
+	unsigned pid0 = trunk.m_IndexBuffer[offset].posIndex;
+	unsigned pid1 = trunk.m_IndexBuffer[offset+1].posIndex;
+	unsigned pid2 = trunk.m_IndexBuffer[offset+2].posIndex;
 
 	// get three vertexes
 	const Point& p0 = m_PositionBuffer[pid0] ;
 	const Point& p1 = m_PositionBuffer[pid1] ;
 	const Point& p2 = m_PositionBuffer[pid2] ;
 
-	unsigned tid0 = 2 * trunk->m_IndexBuffer[offset].texIndex;
-	unsigned tid1 = 2 * trunk->m_IndexBuffer[offset+1].texIndex;
-	unsigned tid2 = 2 * trunk->m_IndexBuffer[offset+2].texIndex;
+	unsigned tid0 = 2 * trunk.m_IndexBuffer[offset].texIndex;
+	unsigned tid1 = 2 * trunk.m_IndexBuffer[offset+1].texIndex;
+	unsigned tid2 = 2 * trunk.m_IndexBuffer[offset+2].texIndex;
 
 	const float u0 = m_TexCoordBuffer[tid0];
 	const float u1 = m_TexCoordBuffer[tid1];
@@ -345,19 +348,87 @@ void BufferMemory::GenTexCoord()
 
 		it++;
 	}
-	m_iTBCount = (unsigned)m_TexCoordBuffer.size();
+	m_iTBCount = (unsigned)m_TexCoordBuffer.size() / 2;
 
 	// set the texture coordinate index
 	unsigned trunkNum = (unsigned)m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
 		auto& trunk = m_TrunkBuffer[i];
-		for( unsigned k = 0 ; k < trunk->m_iTriNum ; k++ )
+		for( unsigned k = 0 ; k < trunk.m_iTriNum ; k++ )
 		{
 			unsigned offset = 3*k;
-			trunk->m_IndexBuffer[offset].texIndex = trunk->m_IndexBuffer[offset].posIndex;
-			trunk->m_IndexBuffer[offset+1].texIndex = trunk->m_IndexBuffer[offset+1].posIndex;
-			trunk->m_IndexBuffer[offset+2].texIndex = trunk->m_IndexBuffer[offset+2].posIndex;
+			trunk.m_IndexBuffer[offset].texIndex = trunk.m_IndexBuffer[offset].posIndex;
+			trunk.m_IndexBuffer[offset+1].texIndex = trunk.m_IndexBuffer[offset+1].posIndex;
+			trunk.m_IndexBuffer[offset+2].texIndex = trunk.m_IndexBuffer[offset+2].posIndex;
+		}
+	}
+}
+
+// serialization interface for BufferMemory
+void BufferMemory::Serialize( IStream& stream , MeshEntity* mesh ){
+	stream >> m_iVBCount;
+	stream >> m_iNBCount;
+	stream >> m_iTBCount;
+	stream >> m_iTrunkNum;
+	m_TrunkBuffer.clear();
+    m_TrunkBuffer.resize( m_iTrunkNum );
+	for( int i = 0 ; i < m_iTrunkNum ; ++i ){
+		stream >> m_TrunkBuffer[i].m_iTriNum;
+		string name;
+		stream >> name;
+		m_TrunkBuffer[i].m_mat = MatManager::GetSingleton().FindMaterial( name );
+	}
+
+	m_PositionBuffer.resize( m_iVBCount );
+	for( int i = 0 ; i < m_iVBCount ; ++i )
+		stream >> m_PositionBuffer[i];
+	m_NormalBuffer.resize( m_iNBCount );
+	for( int i = 0 ; i < m_iNBCount ; ++i )
+		stream >> m_NormalBuffer[i];
+	m_TexCoordBuffer.resize( m_iTBCount * 2 );
+	for( int i = 0 ; i < m_iTBCount ; ++i )
+		stream >> m_TexCoordBuffer[2*i] >> m_TexCoordBuffer[2*i+1];
+
+	for( int i = 0 ; i < m_iTrunkNum ; ++i ){
+		const int index_cnt = m_TrunkBuffer[i].m_iTriNum * 3;
+		m_TrunkBuffer[i].m_IndexBuffer.clear();
+		m_TrunkBuffer[i].m_IndexBuffer.resize( index_cnt );
+		for( int j = 0 ; j < index_cnt ; ++j ){
+			stream >> m_TrunkBuffer[i].m_IndexBuffer[j].posIndex;
+			if( m_iNBCount )
+				stream >> m_TrunkBuffer[i].m_IndexBuffer[j].norIndex;
+			if( m_iTBCount )
+				stream >> m_TrunkBuffer[i].m_IndexBuffer[j].texIndex;
+		}
+	}
+}
+
+void BufferMemory::Serialize( OStream& stream ){
+	stream << m_iVBCount;
+	stream << ( m_hasInitNormal ? m_iNBCount : 0 );
+	stream << ( m_hasInitTexCoord ? m_iTBCount : 0 );
+	stream << m_iTrunkNum;
+	for( int i = 0 ; i < m_iTrunkNum ; ++i ){
+		stream << m_TrunkBuffer[i].m_iTriNum;
+		stream << ( m_TrunkBuffer[i].m_mat ? m_TrunkBuffer[i].m_mat->GetName() : "" );
+	}
+
+	for( int i = 0 ; i < m_iVBCount ; ++i )
+		stream << m_PositionBuffer[i];
+	for( int i = 0 ; i < m_iNBCount && m_hasInitNormal ; ++i )
+		stream << m_NormalBuffer[i];
+	for( int i = 0 ; i < m_iTBCount && m_hasInitTexCoord ; ++i )
+		stream << m_TexCoordBuffer[2*i] << m_TexCoordBuffer[2*i+1];
+
+	for( int i = 0 ; i < m_iTrunkNum ; ++i ){
+		const int index_cnt = m_TrunkBuffer[i].m_iTriNum * 3;
+		for( int j = 0 ; j < index_cnt ; ++j ){
+			stream << m_TrunkBuffer[i].m_IndexBuffer[j].posIndex;
+			if( m_hasInitNormal )
+				stream << m_TrunkBuffer[i].m_IndexBuffer[j].norIndex;
+			if( m_hasInitTexCoord )
+				stream << m_TrunkBuffer[i].m_IndexBuffer[j].texIndex;
 		}
 	}
 }

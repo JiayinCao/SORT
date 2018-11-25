@@ -57,9 +57,7 @@ bool PlyLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 	// set the memory
 	mem->m_filename = str;
 
-	// ply format doesn't support mutiple trunks , so there is only one trunk named 'default'
-    std::shared_ptr<Trunk>	trunk = std::make_shared<Trunk>("default");
-	mem->m_TrunkBuffer.push_back( trunk );
+	mem->m_TrunkBuffer.push_back( Trunk() );
 
 	for ( int i = 0; i < nelems; i++) 
 	{
@@ -98,11 +96,11 @@ bool PlyLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 				{
 					VertexIndex vid;
 					vid.posIndex = index.index[0];
-					trunk->m_IndexBuffer.push_back( vid );
+					mem->m_TrunkBuffer.back().m_IndexBuffer.push_back( vid );
 					vid.posIndex = index.index[curId];
-					trunk->m_IndexBuffer.push_back( vid );
+					mem->m_TrunkBuffer.back().m_IndexBuffer.push_back( vid );
 					vid.posIndex = index.index[curId+1];
-					trunk->m_IndexBuffer.push_back( vid );
+					mem->m_TrunkBuffer.back().m_IndexBuffer.push_back( vid );
 
 					curId++;
 				}

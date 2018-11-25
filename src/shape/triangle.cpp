@@ -34,7 +34,7 @@ bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect )
 {
 	// get the memory
 	// note : reference is not used here because it's not thread-safe
-	auto& mem = m_meshEntity->m_pMemory;
+	auto& mem = m_meshEntity->m_memory;
 	int id0 = m_Index[0].posIndex;
 	int id1 = m_Index[1].posIndex;
 	int id2 = m_Index[2].posIndex;
@@ -156,7 +156,7 @@ const BBox& Triangle::GetBBox() const
         m_bbox = std::unique_ptr<BBox>( new BBox() );
 
 		// get the memory
-        auto& mem = m_meshEntity->m_pMemory;
+        auto& mem = m_meshEntity->m_memory;
 		int id0 = m_Index[ 0 ].posIndex;
 		int id1 = m_Index[ 1 ].posIndex;
 		int id2 = m_Index[ 2 ].posIndex;
@@ -178,7 +178,7 @@ const BBox& Triangle::GetBBox() const
 float Triangle::SurfaceArea() const
 {
 	// get the memory
-	auto& mem = m_meshEntity->m_pMemory;
+	auto& mem = m_meshEntity->m_memory;
 	int id0 = m_Index[ 0 ].posIndex;
 	int id1 = m_Index[ 1 ].posIndex;
 	int id2 = m_Index[ 2 ].posIndex;
@@ -210,7 +210,7 @@ static inline void Project(const Point* points, int count , const Vector& axis, 
 bool Triangle::GetIntersect(const BBox& box) const
 {
     // get the memory
-    auto& mem = m_meshEntity->m_pMemory;
+    auto& mem = m_meshEntity->m_memory;
     int id0 = m_Index[0].posIndex;
     int id1 = m_Index[1].posIndex;
     int id2 = m_Index[2].posIndex;

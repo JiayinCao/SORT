@@ -19,6 +19,7 @@
 
 #include "utility/sassert.h"
 #include "utility/log.h"
+#include "math/point.h"
 
 //! @brief Interface for streaming/serialization.
 /**
@@ -100,6 +101,38 @@ public:
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
     virtual Stream& operator >> (bool& v) = 0;
+
+    //! @brief Streaming in a point value
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    inline Stream&  operator << ( const Point& v ){
+        return *this << v.x << v.y << v.z;
+    }
+
+    //! @brief Streaming out a point value
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    inline Stream&  operator >> ( Point& v ){
+        return *this >> v.x >> v.y >> v.z;
+    }
+
+    //! @brief Streaming in a vector value
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    inline Stream&  operator << ( const Vector& v ){
+        return *this << v.x << v.y << v.z;
+    }
+
+    //! @brief Streaming out a vector value
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    inline Stream&  operator >> ( Vector& v ){
+        return *this >> v.x >> v.y >> v.z;
+    }
 };
 
 //! @brief Streaming in data

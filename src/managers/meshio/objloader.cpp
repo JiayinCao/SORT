@@ -57,9 +57,6 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 
 	mem->m_filename = str;
 
-	// current trunk
-    std::shared_ptr<Trunk>	trunk = nullptr;
-
 	while( true )
 	{
 		string prefix;
@@ -70,16 +67,15 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 			// create a new trunk
 			string trunkname;
 			file>>trunkname;
-            trunk = std::make_shared<Trunk>( trunkname );
-			mem->m_TrunkBuffer.push_back( trunk );
+			mem->m_TrunkBuffer.push_back( Trunk() );
 		}else if( strcmp( prefix.c_str() , "usemtl" ) == 0 )
 		{
 			string name;
 			file>>name;
-			if( trunk )
+			if( mem->m_TrunkBuffer.size() )
 			{
-				trunk->m_mat = MatManager::GetSingleton().FindMaterial( name );
-				if( 0 == trunk->m_mat )
+				mem->m_TrunkBuffer.back().m_mat = MatManager::GetSingleton().FindMaterial( name );
+				if( 0 == mem->m_TrunkBuffer.back().m_mat )
                     slog( WARNING , MATERIAL , stringFormat("Material named %s not found, use default material in subset \"%s\"." , name.c_str() , str.c_str() ) );
 			}
 		}else if( strcmp( prefix.c_str() , "v" ) == 0 )
@@ -91,6 +87,7 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 			mem->m_PositionBuffer.push_back( p );	
 		}else if( strcmp( prefix.c_str() , "vn" ) == 0 )
 		{
+			mem->m_hasInitNormal = true;
 			Vector v;
 			file>>v.x;
 			file>>v.y;
@@ -98,12 +95,13 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 			mem->m_NormalBuffer.push_back( v );
 		}else if( strcmp( prefix.c_str() , "vt" ) == 0 )
 		{
+			mem->m_hasInitTexCoord = true;
 			float u , v;
 			file>>u;
 			file>>v;
 			mem->m_TexCoordBuffer.push_back( u );
 			mem->m_TexCoordBuffer.push_back( v );
-		}else if( strcmp( prefix.c_str() , "f" ) == 0 && trunk != 0 )
+		}else if( strcmp( prefix.c_str() , "f" ) == 0 && mem->m_TrunkBuffer.size() )
 		{
 			string strIndex;
 			file>>strIndex;
@@ -116,9 +114,9 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
             if (mem->m_PositionBuffer[vi0.posIndex] != mem->m_PositionBuffer[vi1.posIndex] &&
                 mem->m_PositionBuffer[vi1.posIndex] != mem->m_PositionBuffer[vi2.posIndex] &&
                 mem->m_PositionBuffer[vi2.posIndex] != mem->m_PositionBuffer[vi0.posIndex]) {
-                trunk->m_IndexBuffer.push_back(vi0);
-                trunk->m_IndexBuffer.push_back(vi1);
-                trunk->m_IndexBuffer.push_back(vi2);
+                mem->m_TrunkBuffer.back().m_IndexBuffer.push_back(vi0);
+                mem->m_TrunkBuffer.back().m_IndexBuffer.push_back(vi1);
+                mem->m_TrunkBuffer.back().m_IndexBuffer.push_back(vi2);
             }
 
 			// check if there is another index
@@ -136,9 +134,9 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
                 if (mem->m_PositionBuffer[vi0.posIndex] != mem->m_PositionBuffer[vi2.posIndex] &&
                     mem->m_PositionBuffer[vi2.posIndex] != mem->m_PositionBuffer[vi3.posIndex] &&
                     mem->m_PositionBuffer[vi3.posIndex] != mem->m_PositionBuffer[vi0.posIndex]) {
-                    trunk->m_IndexBuffer.push_back(vi0);
-                    trunk->m_IndexBuffer.push_back(vi2);
-                    trunk->m_IndexBuffer.push_back(vi3);
+                    mem->m_TrunkBuffer.back().m_IndexBuffer.push_back(vi0);
+                    mem->m_TrunkBuffer.back().m_IndexBuffer.push_back(vi2);
+                    mem->m_TrunkBuffer.back().m_IndexBuffer.push_back(vi3);
                 }
 			}
 		}

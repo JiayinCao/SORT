@@ -20,6 +20,8 @@
 #include "math/transform.h"
 
 class Scene;
+class IStream;
+class OStream;
 
 //! @brief Basic unit of objects in world.
 /**
@@ -53,6 +55,20 @@ public:
     //!
     //! @param  scene       The scene to be filled.
     virtual void        FillScene( Scene& scene ) {};
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the entity. Loading from an IStream, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    virtual void        Serialize( IStream& stream ) {}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the entity. Saving to an OStream, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    virtual void        Serialize( OStream& stream ) {}
 
 protected:
     Transform   m_transform;    /**< Transform of the entity from local space to world space. */
