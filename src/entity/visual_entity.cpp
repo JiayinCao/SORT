@@ -24,16 +24,24 @@ void MeshEntity::FillScene( Scene& scene ){
     unsigned base = (unsigned)scene.m_primitiveBuf.size();
 
 	// generate the triangles
-	unsigned trunkNum = (unsigned)m_pMemory->m_TrunkBuffer.size();
+	unsigned trunkNum = (unsigned)m_memory->m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
-		unsigned trunkTriNum = (unsigned)m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3;
+		unsigned trunkTriNum = (unsigned)m_memory->m_TrunkBuffer[i].m_IndexBuffer.size() / 3;
 		for( unsigned k = 0 ; k < trunkTriNum ; k++ ){
-			Triangle* tri = new Triangle( this , &(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer[3*k]) );
+			Triangle* tri = new Triangle( this , &(m_memory->m_TrunkBuffer[i].m_IndexBuffer[3*k]) );
 			scene.m_primitiveBuf.push_back( new Primitive( m_Materials[i] , tri ) );
 		}
-		base += (unsigned)(m_pMemory->m_TrunkBuffer[i]->m_IndexBuffer.size() / 3);
+		base += (unsigned)(m_memory->m_TrunkBuffer[i].m_IndexBuffer.size() / 3);
 	}
+}
+
+void MeshEntity::Serialize( IStream& stream ){
+	m_memory->Serialize(stream, this);
+}
+
+void MeshEntity::Serialize( OStream& stream ){
+	m_memory->Serialize(stream);
 }
 
 // ------------------------------------------------------------------------
@@ -58,7 +66,7 @@ void MeshEntity::ResetMaterial( const string& setname , const string& matname )
 	// if there is no set name , all of the sets are set the material with the name of 'matname'
 	if( setname.empty() )
 	{
-		unsigned size = (unsigned)m_pMemory->m_TrunkBuffer.size();
+		unsigned size = (unsigned)m_memory->m_TrunkBuffer.size();
 		for( unsigned i = 0 ; i < size ; ++i )
 			m_Materials[i] = mat;
 		return;
@@ -75,10 +83,10 @@ void MeshEntity::ResetMaterial( const string& setname , const string& matname )
 // get the subset of the mesh
 int MeshEntity::_getSubsetID( const string& setname )
 {
-	int size = (int)m_pMemory->m_TrunkBuffer.size();
+	int size = (int)m_memory->m_TrunkBuffer.size();
 	for( int i = 0 ; i < size ; ++i )
 	{
-		if( m_pMemory->m_TrunkBuffer[i]->name == setname )
+		if( m_memory->m_TrunkBuffer[i].name == setname )
 			return i;
 	}
 	return -1;
@@ -87,10 +95,10 @@ int MeshEntity::_getSubsetID( const string& setname )
 // copy materials
 void MeshEntity::_copyMaterial()
 {
-	unsigned trunk_size = (unsigned)m_pMemory->m_TrunkBuffer.size();
+	unsigned trunk_size = (unsigned)m_memory->m_TrunkBuffer.size();
     m_Materials.resize( trunk_size );
 	
 	for( unsigned i = 0 ; i < trunk_size ; ++i )
-        m_Materials[i] = m_pMemory->m_TrunkBuffer[i]->m_mat ? m_pMemory->m_TrunkBuffer[i]->m_mat : MatManager::GetSingleton().GetDefaultMat();
+        m_Materials[i] = m_memory->m_TrunkBuffer[i].m_mat ? m_memory->m_TrunkBuffer[i].m_mat : MatManager::GetSingleton().GetDefaultMat();
 }
 // ------------------------------------------------------------------------

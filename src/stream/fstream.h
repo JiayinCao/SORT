@@ -216,8 +216,9 @@ public:
     //! @param v            Value to be saved.
     //! @return             Reference of the stream itself.
     Stream& operator << (const std::string& v) override {
-        m_file.write(v.c_str(), v.size());
-        char end = 0;
+        if( !v.empty() )
+            m_file.write(v.c_str(), v.size());
+        static const char end = 0;
         m_file.write(&end, sizeof(end));
         return *this;
     }
