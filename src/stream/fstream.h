@@ -25,7 +25,7 @@
  * IFileStream only works for streaming data from a file. Any attempt to write data
  * to a file will result in immediate crash.
  */
-class IFileStream : public IStream
+class IFileStream : public IStreamBase
 {
 public:
     //! @brief Constructing from a file name.
@@ -75,7 +75,7 @@ public:
     //!
     //! @param v            Value to be loaded.
     //! @return             Reference of the stream itself.
-    Stream& operator >> (float& v) override {
+    StreamBase& operator >> (float& v) override {
         m_file.read(reinterpret_cast<char*>(&v), sizeof(float));
         return *this;
     }
@@ -84,7 +84,7 @@ public:
     //!
     //! @param v            Value to be loaded.
     //! @return             Reference of the stream itself.
-    Stream& operator >> (int& v) override {
+    StreamBase& operator >> (int& v) override {
         m_file.read(reinterpret_cast<char*>(&v), sizeof(int));
         return *this;
     }
@@ -93,7 +93,7 @@ public:
     //!
     //! @param v            Value to be loaded.
     //! @return             Reference of the stream itself.
-    Stream& operator >> (unsigned int& v) override {
+    StreamBase& operator >> (unsigned int& v) override {
         m_file.read(reinterpret_cast<char*>(&v), sizeof(unsigned int));
         return *this;
     }
@@ -105,7 +105,7 @@ public:
     //!
     //! @param v            Value to be loaded.
     //! @return             Reference of the stream itself.
-    Stream& operator >> (std::string& v) override {
+    StreamBase& operator >> (std::string& v) override {
         v = "";
         char c;
         do{
@@ -121,7 +121,7 @@ public:
     //!
     //! @param v            Value to be loaded.
     //! @return             Reference of the stream itself.
-    Stream& operator >> (bool& v) override {
+    StreamBase& operator >> (bool& v) override {
         m_file.read(reinterpret_cast<char*>(&v), sizeof(bool));
         return *this;
     }
@@ -135,7 +135,7 @@ private:
  * OFileStream only works for streaming data to a file. Any attempt to read data
  * from a file will result in immediate crash.
  */
-class OFileStream : public OStream
+class OFileStream : public OStreamBase
 {
 public:
     //! @brief Constructing from a file name.
@@ -185,7 +185,7 @@ public:
     //!
     //! @param v            Value to be saved.
     //! @return             Reference of the stream itself.
-    Stream& operator << (const float v) override {
+    StreamBase& operator << (const float v) override {
         m_file.write(reinterpret_cast<const char*>(&v), sizeof(float));
         return *this;
     }
@@ -194,7 +194,7 @@ public:
     //!
     //! @param v            Value to be saved.
     //! @return             Reference of the stream itself.
-    Stream& operator << (const int v) override {
+    StreamBase& operator << (const int v) override {
         m_file.write(reinterpret_cast<const char*>(&v), sizeof(int));
         return *this;
     }
@@ -203,7 +203,7 @@ public:
     //!
     //! @param v            Value to be saved.
     //! @return             Reference of the stream itself.
-    Stream& operator << (const unsigned int v) override {
+    StreamBase& operator << (const unsigned int v) override {
         m_file.write(reinterpret_cast<const char*>(&v), sizeof(unsigned int));
         return *this;
     }
@@ -215,7 +215,7 @@ public:
     //!
     //! @param v            Value to be saved.
     //! @return             Reference of the stream itself.
-    Stream& operator << (const std::string& v) override {
+    StreamBase& operator << (const std::string& v) override {
         if( !v.empty() )
             m_file.write(v.c_str(), v.size());
         static const char end = 0;
@@ -227,7 +227,7 @@ public:
     //!
     //! @param v            Value to be saved.
     //! @return             Reference of the stream itself.
-    Stream& operator << (const bool v) override {
+    StreamBase& operator << (const bool v) override {
         m_file.write(reinterpret_cast<const char*>(&v), sizeof(bool));
         return *this;
     }
