@@ -24,14 +24,14 @@
  * IMemoryStream only works for streaming data from memory. Any attempt to write data
  * to memory will result in immediate crash.
  */
-class IMemoryStream : public IStream
+class IMemoryStream : public IStreamBase
 {
 public:
     //! @brief Streaming in a float number to memory.
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (float& v) override {
+    StreamBase& operator >> (float& v) override {
         // to be implemented
         return *this;
     }
@@ -40,7 +40,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (int& v) override {
+    StreamBase& operator >> (int& v) override {
         // to be implemented
         return *this;
     }
@@ -49,7 +49,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (unsigned int& v) override {
+    StreamBase& operator >> (unsigned int& v) override {
         // to be implemented
         return *this;
     }
@@ -61,7 +61,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (std::string& v) override {
+    StreamBase& operator >> (std::string& v) override {
         // to be implemented
         return *this;
     }
@@ -70,7 +70,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (bool& v) override {
+    StreamBase& operator >> (bool& v) override {
         // to be implemented
         return *this;
     }
@@ -81,14 +81,14 @@ public:
  * OMemoryStream only works for streaming data to memory. Any attempt to read data
  * from memory will result in immediate crash.
  */
-class OMemoryStream : public OStream
+class OMemoryStream : public OStreamBase
 {
 public:
     //! @brief Streaming out a float number from memory.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const float v) override {
+    StreamBase& operator << (const float v) override {
         // to be implemented
         return *this;
     }
@@ -97,7 +97,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const int v) override {
+    StreamBase& operator << (const int v) override {
         // to be implemented
         return *this;
     }
@@ -106,7 +106,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const unsigned int v) override {
+    StreamBase& operator << (const unsigned int v) override {
         // to be implemented
         return *this;
     }
@@ -118,7 +118,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const std::string& v) override {
+    StreamBase& operator << (const std::string& v) override {
         // to be implemented
         return *this;
     }
@@ -127,7 +127,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const bool v) override {
+    StreamBase& operator << (const bool v) override {
         // to be implemented
         return *this;
     }

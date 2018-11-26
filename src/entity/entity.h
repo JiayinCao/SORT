@@ -60,14 +60,14 @@ public:
     //! Serialize the entity. Loading from an IStream, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void        Serialize( IStream& stream ) override {}
+    void        Serialize( IStreamBase& stream ) override {}
 
     //! @brief  Serialization interface. Saving data to stream.
     //!
     //! Serialize the entity. Saving to an OStream, which could be file, memory or network streaming.
     //!
     //! @param  stream      Output stream.
-    void        Serialize( OStream& stream ) override {}
+    void        Serialize( OStreamBase& stream ) override {}
 
 protected:
     Transform   m_transform;    /**< Transform of the entity from local space to world space. */

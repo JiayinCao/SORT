@@ -366,7 +366,7 @@ void BufferMemory::GenTexCoord()
 }
 
 // serialization interface for BufferMemory
-void BufferMemory::Serialize( IStream& stream , MeshEntity* mesh ){
+void BufferMemory::Serialize( IStreamBase& stream ){
 	stream >> m_iVBCount;
 	stream >> m_iNBCount;
 	stream >> m_iTBCount;
@@ -404,7 +404,7 @@ void BufferMemory::Serialize( IStream& stream , MeshEntity* mesh ){
 	}
 }
 
-void BufferMemory::Serialize( OStream& stream ){
+void BufferMemory::Serialize( OStreamBase& stream ){
 	stream << m_iVBCount;
 	stream << ( m_hasInitNormal ? m_iNBCount : 0 );
 	stream << ( m_hasInitTexCoord ? m_iTBCount : 0 );

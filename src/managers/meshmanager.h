@@ -29,6 +29,7 @@
 #include "math/transform.h"
 #include "material/material.h"
 #include <memory>
+#include "stream/stream.h"
 
 // pre-declera class
 class MeshLoader;
@@ -73,7 +74,7 @@ public:
 };
 
 // the buffer memory for the mesh
-class BufferMemory
+class BufferMemory : public SerializableObject
 {
 public:
 	// the vertex buffer
@@ -143,8 +144,8 @@ public:
 	void	GenTexCoord();
 
 	// serialization interface for BufferMemory
-    void    Serialize( IStream& stream , MeshEntity* mesh );
-	void    Serialize( OStream& stream );
+    void    Serialize( IStreamBase& stream ) override;
+	void    Serialize( OStreamBase& stream ) override;
 
 private:
 	void	_genFlatNormal();

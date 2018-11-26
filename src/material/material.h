@@ -73,7 +73,7 @@ public:
     //! Serialize the material. Loading from an IStream, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void        Serialize( IStream& stream ) override {
+    void        Serialize( IStreamBase& stream ) override {
 		// to be implemented
 	}
 
@@ -82,7 +82,7 @@ public:
     //! Serialize the material. Saving to an OStream, which could be file, memory or network streaming.
     //!
     //! @param  stream      Output stream.
-    void        Serialize( OStream& stream ) override {
+    void        Serialize( OStreamBase& stream ) override {
 		// to be implemented
 	}
 
