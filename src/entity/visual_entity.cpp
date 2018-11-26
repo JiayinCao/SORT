@@ -36,11 +36,11 @@ void MeshEntity::FillScene( Scene& scene ){
 	}
 }
 
-void MeshEntity::Serialize( IStream& stream ){
-	m_memory->Serialize(stream, this);
+void MeshEntity::Serialize( IStreamBase& stream ){
+	m_memory->Serialize(stream);
 }
 
-void MeshEntity::Serialize( OStream& stream ){
+void MeshEntity::Serialize( OStreamBase& stream ){
 	m_memory->Serialize(stream);
 }
 

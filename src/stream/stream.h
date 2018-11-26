@@ -23,54 +23,54 @@
 
 //! @brief Interface for streaming/serialization.
 /**
- * Stream is an interface defining the basic feature of serialization. It is an abstract class
+ * StreamBase is an interface defining the basic feature of serialization. It is an abstract class
  * that doesn't allow to be instanced. The pure virtual functions defines the minimal interface
  * supporting the streaming. The destination of where to stream is dependent on the derived class.
  * It could go to file by using FileStream, it could also flow to memory by using MemoryStream.
- * There is no guarantee that Stream is perfectly thread safe, it is the user's responsibility to
+ * There is no guarantee that StreamBase is perfectly thread safe, it is the user's responsibility to
  * avoid it.
  */
-class Stream 
+class StreamBase
 {
 public:
     //! Empty virtual destructor.
-    virtual ~Stream() {}
+    virtual ~StreamBase() {}
 
     //! @brief Streaming in a float number.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator << (const float v) = 0;
+    virtual StreamBase& operator << (const float v) = 0;
 
     //! @brief Streaming out a float number.
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator >> (float& v) = 0;
+    virtual StreamBase& operator >> (float& v) = 0;
 
     //! @brief Streaming in a integer number.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator << (const int v) = 0;
+    virtual StreamBase& operator << (const int v) = 0;
 
     //! @brief Streaming out a integer number.
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator >> (int& v) = 0;
+    virtual StreamBase& operator >> (int& v) = 0;
 
     //! @brief Streaming in an unsigned integer number.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator << (const unsigned int v) = 0;
+    virtual StreamBase& operator << (const unsigned int v) = 0;
 
     //! @brief Streaming out an unsigned integer number.
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator >> (unsigned int& v) = 0;
+    virtual StreamBase& operator >> (unsigned int& v) = 0;
 
     //! @brief Streaming in a string.
     //!
@@ -79,7 +79,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator << (const std::string& v) = 0;
+    virtual StreamBase& operator << (const std::string& v) = 0;
 
     //! @brief Streaming out a string
     //!
@@ -88,25 +88,25 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator >> (std::string& v) = 0;
+    virtual StreamBase& operator >> (std::string& v) = 0;
 
     //! @brief Streaming in a boolean value.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator << (const bool v) = 0;
+    virtual StreamBase& operator << (const bool v) = 0;
 
     //! @brief Streaming out a boolean value.
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    virtual Stream& operator >> (bool& v) = 0;
+    virtual StreamBase& operator >> (bool& v) = 0;
 
     //! @brief Streaming in a point value
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    inline Stream&  operator << ( const Point& v ){
+    inline StreamBase&  operator << ( const Point& v ){
         return *this << v.x << v.y << v.z;
     }
 
@@ -114,7 +114,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline Stream&  operator >> ( Point& v ){
+    inline StreamBase&  operator >> ( Point& v ){
         return *this >> v.x >> v.y >> v.z;
     }
 
@@ -122,7 +122,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    inline Stream&  operator << ( const Vector& v ){
+    inline StreamBase&  operator << ( const Vector& v ){
         return *this << v.x << v.y << v.z;
     }
 
@@ -130,36 +130,36 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline Stream&  operator >> ( Vector& v ){
+    inline StreamBase&  operator >> ( Vector& v ){
         return *this >> v.x >> v.y >> v.z;
     }
 };
 
 //! @brief Streaming in data
 /**
- * IStream is purely for streaming in data. Trying to stream out data with IStream will result in
+ * IStreamBase is purely for streaming in data. Trying to stream out data with IStreamBase will result in
  * crash. It is higher level code's responsibility to make sure it won't happen.
  */
-class IStream : public Stream 
+class IStreamBase : public StreamBase 
 {
 public:
     //! @brief Disable streaming in a float number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const float v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const float v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
 
     //! @brief Disable streaming in a integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
 
     //! @brief Disable streaming in an unsigned integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const unsigned int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const unsigned int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
 
     //! @brief Disable streaming in a string. Attempting to do it will result in crash!
     //!
@@ -168,40 +168,40 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const std::string& v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const std::string& v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
 
     //! @brief Disable streaming in a boolean value. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    Stream& operator << (const bool v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const bool v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
 };
 
 //! @brief Streaming out data
 /**
- * OStream is purely for streaming in data. Trying to stream in data with OStream will result in
+ * OStreamBase is purely for streaming in data. Trying to stream in data with OStreamBase will result in
  * crash. It is higher level code's responsibility to make sure it won't happen.
  */
-class OStream : public Stream
+class OStreamBase : public StreamBase
 {
 public:
     //! @brief Disable streaming out a float number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (float& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+    StreamBase& operator >> (float& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
 
     //! @brief Disable streaming out a integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+    StreamBase& operator >> (int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
 
     //! @brief Disable streaming out an unsigned integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (unsigned int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+    StreamBase& operator >> (unsigned int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
 
     //! @brief Disable streaming out a string. Attempting to do it will result in crash!
     //!
@@ -210,13 +210,13 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (std::string& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+    StreamBase& operator >> (std::string& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
 
     //! @brief Disable streaming out a boolean value. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    Stream& operator >> (bool& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+    StreamBase& operator >> (bool& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
 };
 
 //! @brief  Interface for serializable objects.
@@ -230,10 +230,10 @@ public:
     //! @brief      Serilizing data from stream
     //!
     //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
-    virtual void    Serialize( IStream& stream ) = 0;
+    virtual void    Serialize( IStreamBase& stream ) = 0;
 
     //! @brief      Serilizing data to stream
     //!
     //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
-    virtual void    Serialize( OStream& stream ) = 0;
+    virtual void    Serialize( OStreamBase& stream ) = 0;
 };
