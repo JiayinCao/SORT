@@ -49,12 +49,12 @@ public:
 	//! Higher level code should make sure the name is unique in the scene.
 	//!
 	//! @param	name	Name to be set to this material.
-	inline void SetName( const string& name ) { m_name = name; }
+	inline void SetName( const std::string& name ) { m_name = name; }
 
 	//! @brief	Get the unique name of this material.
 	//!
 	//! @return		The name of this material.
-	inline const string& GetName() const { return m_name; }
+	inline const std::string& GetName() const { return m_name; }
 
 	//! @brief	Get the root material node.
 	//!
@@ -70,7 +70,7 @@ public:
 
 	//! @brief  Serialization interface. Loading data from stream.
     //!
-    //! Serialize the material. Loading from an IStream, which could be coming from file, memory or network.
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
     void        Serialize( IStreamBase& stream ) override {
@@ -79,7 +79,7 @@ public:
 
     //! @brief  Serialization interface. Saving data to stream.
     //!
-    //! Serialize the material. Saving to an OStream, which could be file, memory or network streaming.
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
     //!
     //! @param  stream      Output stream.
     void        Serialize( OStreamBase& stream ) override {
@@ -87,6 +87,6 @@ public:
 	}
 
 private:
-	string				m_name;		/**< Unique name of the material. */
+	std::string			m_name;		/**< Unique name of the material. */
 	mutable OutputNode	m_root;		/**< Root node of material node graph tree. */
 };

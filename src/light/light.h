@@ -137,7 +137,7 @@ protected:
 		PH_CONSTRUCTOR(IntensityProperty,Light);
 
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			Light* light = CAST_TARGET(Light);
 			light->_setIntensity( SpectrumFromStr(str) );
@@ -148,7 +148,7 @@ protected:
     {
     public:
         PH_CONSTRUCTOR(TransformProperty,Light);
-        void SetValue( const string& str )
+        void SetValue( const std::string& str )
         {
             Light* light = CAST_TARGET(Light);
             light->SetTransform( TransformFromStr(str) );

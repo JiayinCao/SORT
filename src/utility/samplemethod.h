@@ -73,7 +73,7 @@ inline Vector CosSampleHemisphere( float u , float v )
 {
 	float x , z ;
 	UniformSampleDisk( u , v , x , z );
-	float y = sqrt( max( 0.0f , 1.0f - x * x - z * z ) );
+	float y = sqrt( std::max( 0.0f , 1.0f - x * x - z * z ) );
 	return Vector( x , y , z );
 }
 
@@ -174,7 +174,7 @@ public:
 		sAssert( count != 0 && cdf != 0 , SAMPLING );
 		sAssert( u <= 1.0f && u >= 0.0f , SAMPLING );
 
-		float* target = lower_bound( cdf , cdf + count + 1 , u );
+		float* target = std::lower_bound( cdf , cdf + count + 1 , u );
 		unsigned offset = (u<=0.0f)? 0:(int)(target-cdf-1);
 		// special care needs to be payed to situation when u == 0.0f
 		if( offset == 0 )
@@ -200,7 +200,7 @@ public:
 		sAssert( count != 0 && cdf != 0 , SAMPLING );
 		sAssert( u <= 1.0f && u >= 0.0f , SAMPLING );
 
-		float* target = lower_bound( cdf , cdf+count+1 , u );
+		float* target = std::lower_bound( cdf , cdf+count+1 , u );
 		unsigned offset = (u<=0.0f)?0:(int)(target-cdf-1);
 		// special care needs to be payed to situation when u == 0.0f
 		if( offset == 0 )

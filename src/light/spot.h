@@ -60,7 +60,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(FalloffStartProperty,Light);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
 			light->cos_falloff_start = (float)cos( Radians( (float)atof( str.c_str() ) ) );
@@ -70,7 +70,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(RangeProperty,Light);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SpotLight* light = CAST_TARGET(SpotLight);
             light->cos_total_range = (float)cos( Radians( (float)atof( str.c_str() ) ) );

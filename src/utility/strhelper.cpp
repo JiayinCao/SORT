@@ -24,39 +24,39 @@
 #include "utility/log.h"
 
 // convert string to vertex index
-VertexIndex	VertexIndexFromStr( const string& str )
+VertexIndex	VertexIndexFromStr( const std::string& str )
 {
 	VertexIndex vi;
-	string temp , rest;
+	std::string temp , rest;
 
 	// get the position index
 	int t0 = (int)str.find_first_of( '/' );
 	temp = str.substr( 0 , t0 );
 	vi.posIndex = atoi( temp.c_str() ) - 1;
-	if( t0 == string::npos )
+	if( t0 == std::string::npos )
 		return vi;
 	
 	// get the texture coordinate index
-	rest = str.substr( t0 + 1 , string::npos );
+	rest = str.substr( t0 + 1 , std::string::npos );
 	t0 = (int)rest.find_first_of( '/' );
 	temp = rest.substr( 0 , t0 );
 	vi.texIndex = temp.empty()?(-1):(atoi( temp.c_str() ) - 1);
-	if( t0 == string::npos )
+	if( t0 == std::string::npos )
 		return vi;
 
 	// get the normal index
-	rest = rest.substr( t0 + 1 , string::npos );
+	rest = rest.substr( t0 + 1 , std::string::npos );
 	vi.norIndex = rest.empty()?(-1):(atoi( rest.c_str() ) - 1 );
 
 	return vi;
 }
 
 // get the type of file according to the file extension
-MESH_TYPE	MeshTypeFromStr( const string& str )
+MESH_TYPE	MeshTypeFromStr( const std::string& str )
 {
 	// get the file extension
 	int index = (int)str.find_last_of( "." );
-	string substr = str.substr( index + 1 , str.length() - index );
+	std::string substr = str.substr( index + 1 , str.length() - index );
 
 	// transform the extension to lower case
 	std::transform(substr.begin(),substr.end(),substr.begin(),ToLower());
@@ -71,7 +71,7 @@ MESH_TYPE	MeshTypeFromStr( const string& str )
 }
 
 // transformation from string
-Transform TransformFromStr( const string& s )
+Transform TransformFromStr( const std::string& s )
 {
 	// if there is no such an value , just return identity matrix and log a warning
 	if( s.empty() )
@@ -80,10 +80,10 @@ Transform TransformFromStr( const string& s )
 		return Transform();
 	}
 
-	string str = s;
+	std::string str = s;
 
 	// get the first character
-	string t = NextToken( str , ' ' );
+	std::string t = NextToken( str , ' ' );
 	if( t[0] == 't' )
 	{
 		t = NextToken( str , ' ' );
@@ -139,16 +139,16 @@ Transform TransformFromStr( const string& s )
 }
 
 // spectrum from string
-Spectrum SpectrumFromStr( const string& s )
+Spectrum SpectrumFromStr( const std::string& s )
 {
 	// if the string is empty , return black color
 	if( s.empty() )
 		return Spectrum();
 
-	string str = s;
-	string r = NextToken( str , ' ' );
-	string g = NextToken( str , ' ' );
-	string b = NextToken( str , ' ' );
+	std::string str = s;
+	std::string r = NextToken( str , ' ' );
+	std::string g = NextToken( str , ' ' );
+	std::string b = NextToken( str , ' ' );
 
 	float fr = (float)atof( r.c_str() );
 	float fg = (float)atof( g.c_str() );
@@ -158,16 +158,16 @@ Spectrum SpectrumFromStr( const string& s )
 }
 
 // point from string
-Point PointFromStr( const string& s )
+Point PointFromStr( const std::string& s )
 {
 	// if the string is empty , return black color
 	if( s.empty() )
 		return Point();
 
-	string str = s;
-	string x = NextToken( str , ' ' );
-	string y = NextToken( str , ' ' );
-	string z = NextToken( str , ' ' );
+	std::string str = s;
+	std::string x = NextToken( str , ' ' );
+	std::string y = NextToken( str , ' ' );
+	std::string z = NextToken( str , ' ' );
 
 	float fx = (float)atof( x.c_str() );
 	float fy = (float)atof( y.c_str() );
@@ -177,14 +177,14 @@ Point PointFromStr( const string& s )
 }
 
 // vector from string
-Vector VectorFromStr( const string& s )
+Vector VectorFromStr( const std::string& s )
 {
 	if( s.empty() )
 		return Vector();
-	string str = s;
-	string x = NextToken( str , ' ' );
-	string y = NextToken( str , ' ' );
-	string z = NextToken( str , ' ' );
+	std::string str = s;
+	std::string x = NextToken( str , ' ' );
+	std::string y = NextToken( str , ' ' );
+	std::string z = NextToken( str , ' ' );
 
 	float fx = (float)atof( x.c_str() );
 	float fy = (float)atof( y.c_str() );
@@ -194,29 +194,29 @@ Vector VectorFromStr( const string& s )
 }
 
 // get the next token
-string NextToken( string& str , char t )
+std::string NextToken( std::string& str , char t )
 {
 	// get the next t index
 	unsigned id = (int)str.find_first_of( t );
 	while( id == 0 )
 	{
 		// get to the next one
-		str = str.substr( 1 , string::npos );
+		str = str.substr( 1 , std::string::npos );
 		id = (int)str.find_first_of( t );
 	}
-	string res = str.substr( 0 , id );
+	std::string res = str.substr( 0 , id );
 
 	// if there is no such a character , set it none
-	if( id == (unsigned)string::npos )
+	if( id == (unsigned)std::string::npos )
 		str = "";
 	else
-		str = str.substr( id + 1 , string::npos );
+		str = str.substr( id + 1 , std::string::npos );
 
 	return res;
 }
 
 // format the input string like sprintf
-string stringFormat( const char* fmt, ... ){
+std::string stringFormat( const char* fmt, ... ){
     std::vector<char> str(100,'\0');
     va_list ap;
     while (1) {

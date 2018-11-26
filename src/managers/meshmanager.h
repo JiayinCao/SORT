@@ -34,8 +34,6 @@
 // pre-declera class
 class MeshLoader;
 class MeshEntity;
-class IStream;
-class OStream;
 
 // index for a vertex
 struct VertexIndex
@@ -59,9 +57,9 @@ class Trunk
 {
 public:
 	// the name for the current trunk
-	string	name;
+	std::string	name;
 	// index buffer
-	vector<VertexIndex>	m_IndexBuffer;
+	std::vector<VertexIndex>	m_IndexBuffer;
 	// the triangle number
 	unsigned	m_iTriNum;
 	// the material
@@ -69,7 +67,7 @@ public:
 
 	// constructor
 	// para 'str' : name for the trunk
-	Trunk( const string& str = "" ) : name(str)
+	Trunk( const std::string& str = "" ) : name(str)
 	{ m_iTriNum = 0; m_mat = 0; }
 };
 
@@ -78,15 +76,15 @@ class BufferMemory : public SerializableObject
 {
 public:
 	// the vertex buffer
-	vector<Point>	m_PositionBuffer;
+	std::vector<Point>	m_PositionBuffer;
 	// the normal buffer
-	vector<Vector>	m_NormalBuffer;
+	std::vector<Vector>	m_NormalBuffer;
 	// the tagent buffer
-	vector<Vector>	m_TangentBuffer;
+	std::vector<Vector>	m_TangentBuffer;
 	// the texture coordinate buffer
-	vector<float>	m_TexCoordBuffer;
+	std::vector<float>	m_TexCoordBuffer;
 	// the trunk buffer
-    vector<Trunk>	m_TrunkBuffer;
+    std::vector<Trunk>	m_TrunkBuffer;
 	// the size for three buffers
 	unsigned		m_iVBCount , m_iNBCount , m_iTeBcount , m_iTBCount;
 	// the number of triangles 
@@ -163,14 +161,14 @@ class	MeshManager : public Singleton<MeshManager>
 {
 public:
 	// Temporary
-	bool LoadMesh( const string& str , MeshEntity* mesh );
+	bool LoadMesh( const std::string& str , MeshEntity* mesh );
 
 private:
 	// the mesh loaders
-    vector<std::shared_ptr<MeshLoader>>	m_MeshLoader;
+    std::vector<std::shared_ptr<MeshLoader>>	m_MeshLoader;
 
 	// the memory for meshes
-    unordered_map< string , std::shared_ptr<BufferMemory> > m_Buffers;
+    std::unordered_map< std::string , std::shared_ptr<BufferMemory> > m_Buffers;
 
 private:
 	// default constructor

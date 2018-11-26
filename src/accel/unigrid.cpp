@@ -73,7 +73,7 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( cur_t < 0.0f )
 		return false;
 	if( intersect )
-		intersect->t = min( intersect->t , maxt );
+		intersect->t = std::min( intersect->t , maxt );
 
 	int 	curGrid[3] , dir[3];
 	float	delta[3] , next[3];
@@ -151,7 +151,7 @@ void UniGrid::Build()
 	// the grid size
 	for( int i = 0 ; i < 3 ; i++ )
 	{
-		m_voxelNum[i] = (unsigned)(min( 256.0f , gridPerDistance * delta[i] ));
+		m_voxelNum[i] = (unsigned)(std::min( 256.0f , gridPerDistance * delta[i] ));
 		m_voxelInvExtent[i] = m_voxelNum[i] / delta[i];
 		m_voxelExtent[i] = 1.0f / m_voxelInvExtent[i];
 	}
@@ -160,10 +160,10 @@ void UniGrid::Build()
 
 	// allocate the memory
 	SAFE_DELETE_ARRAY( m_pVoxels );
-	m_pVoxels = new vector<Primitive*>[ m_voxelCount ];
+	m_pVoxels = new std::vector<Primitive*>[ m_voxelCount ];
 
 	// distribute the primitives
-	vector<Primitive*>::const_iterator it = m_primitives->begin();
+	std::vector<Primitive*>::const_iterator it = m_primitives->begin();
 	while( it != m_primitives->end() )
 	{
 		unsigned maxGridId[3];
@@ -198,7 +198,7 @@ void UniGrid::Build()
 // voxel id from point
 unsigned UniGrid::point2VoxelId( const Point& p , unsigned axis ) const
 {
-	return min( m_voxelNum[axis] - 1 , (unsigned)( ( p[axis] - m_bbox.m_Min[axis] ) * m_voxelInvExtent[axis] ) );
+	return std::min( m_voxelNum[axis] - 1 , (unsigned)( ( p[axis] - m_bbox.m_Min[axis] ) * m_voxelInvExtent[axis] ) );
 }
 
 // get the id offset

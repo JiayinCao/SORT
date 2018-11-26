@@ -46,7 +46,7 @@ void MeshEntity::Serialize( OStreamBase& stream ){
 
 // ------------------------------------------------------------------------
 // Temporary solution before serialization is done.
-bool MeshEntity::LoadMesh( const string& filename , const Transform& transform ){
+bool MeshEntity::LoadMesh( const std::string& filename , const Transform& transform ){
     m_transform = transform;
     bool flag = MeshManager::GetSingleton().LoadMesh( filename , this );
     if( false == flag )
@@ -56,7 +56,7 @@ bool MeshEntity::LoadMesh( const string& filename , const Transform& transform )
 
     return true;
 }
-void MeshEntity::ResetMaterial( const string& setname , const string& matname )
+void MeshEntity::ResetMaterial( const std::string& setname , const std::string& matname )
 {
 	// get the material first
     auto mat = MatManager::GetSingleton().FindMaterial( matname );
@@ -81,7 +81,7 @@ void MeshEntity::ResetMaterial( const string& setname , const string& matname )
 }
 
 // get the subset of the mesh
-int MeshEntity::_getSubsetID( const string& setname )
+int MeshEntity::_getSubsetID( const std::string& setname )
 {
 	int size = (int)m_memory->m_TrunkBuffer.size();
 	for( int i = 0 ; i < size ; ++i )

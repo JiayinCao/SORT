@@ -36,7 +36,7 @@ void InstantRadiosity::PreProcess()
 {
     SORT_PROFILE("Instant Radiosity (LPV distribution stage)");
     
-	m_pVirtualLightSources = new list<VirtualLightSource>[m_nLightPathSet];
+	m_pVirtualLightSources = new std::list<VirtualLightSource>[m_nLightPathSet];
 
 	for( int k = 0 ; k < m_nLightPathSet ; ++k )
 	{
@@ -78,7 +78,7 @@ void InstantRadiosity::PreProcess()
 					break;
 
 				// apply russian roulette
-				float continueProperbility = min( 1.0f , throughput.GetIntensity() );
+				float continueProperbility = std::min( 1.0f , throughput.GetIntensity() );
 				if( sort_canonical() > continueProperbility )
 					break;
 				throughput /= continueProperbility;
@@ -134,14 +134,14 @@ Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_inte
 		*first_intersect_dist = ip.t;
 
 	// pick a virtual light source randomly
-	const unsigned lps_id = min( m_nLightPathSet - 1 , (int)(sort_canonical() * m_nLightPathSet) );
-	list<VirtualLightSource> vps = m_pVirtualLightSources[lps_id];
+	const unsigned lps_id = std::min( m_nLightPathSet - 1 , (int)(sort_canonical() * m_nLightPathSet) );
+	std::list<VirtualLightSource> vps = m_pVirtualLightSources[lps_id];
 
 	Bsdf*	bsdf = ip.primitive->GetMaterial()->GetBsdf(&ip);
 
 	// evaluate indirect illumination
 	Spectrum indirectIllum;
-	list<VirtualLightSource>::const_iterator it = vps.begin();
+	std::list<VirtualLightSource>::const_iterator it = vps.begin();
 	while( it != vps.end() )
 	{
 		if( r.m_Depth + it->depth > max_recursive_depth )
@@ -157,7 +157,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_inte
 
 		Bsdf* bsdf1 = it->intersect.primitive->GetMaterial()->GetBsdf(&(it->intersect));
 
-		float		gterm = 1.0f / max( m_fMinSqrDist , sqrLen );
+		float		gterm = 1.0f / std::max( m_fMinSqrDist , sqrLen );
 		Spectrum	f0 = bsdf->f( -r.m_Dir , -n_delta );
 		Spectrum	f1 = bsdf1->f( n_delta , it->wi );
 
@@ -190,7 +190,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_inte
 
 			if( !li.IsBlack() )
 			{
-				float dgterm = max( 0.0f , 1.0f - gather_dist * gather_dist / m_fMinSqrDist );
+				float dgterm = std::max( 0.0f , 1.0f - gather_dist * gather_dist / m_fMinSqrDist );
 				radiance += f * li * dgterm / bsdf_pdf;
 			}
 		}

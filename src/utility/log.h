@@ -53,31 +53,31 @@ public:
     void dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line );
     
     // output result
-    virtual void output( const string& s ) = 0;
+    virtual void output( const std::string& s ) = 0;
     
 private:
     // format log
-    const string format( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line ) const;
+    const std::string format( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line ) const;
     
     // format log header
-    const string formatHead( LOG_LEVEL level , LOG_TYPE type , const char* file , const int line ) const;
+    const std::string formatHead( LOG_LEVEL level , LOG_TYPE type , const char* file , const int line ) const;
 };
 
 class FileLogDispatcher : public LogDispatcher {
 public:
-    FileLogDispatcher( const string& filename );
+    FileLogDispatcher( const std::string& filename );
     ~FileLogDispatcher();
     
-    void output( const string& s ) override;
+    void output( const std::string& s ) override;
 private:
     // file to output
-    ofstream file;
+    std::ofstream file;
 };
 
 class StdOutLogDispatcher : public LogDispatcher {
 public:
-    void output( const string& s ) override ;
+    void output( const std::string& s ) override ;
 };
 
-void sortLog( LOG_LEVEL level , LOG_TYPE type , const string& str , const char* file , const int line );
+void sortLog( LOG_LEVEL level , LOG_TYPE type , const std::string& str , const char* file , const int line );
 void addLogDispatcher( LogDispatcher* logdispatcher );

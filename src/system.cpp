@@ -111,7 +111,7 @@ void System::_outputProgress()
         progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
         
         if (!g_bBlenderMode)
-            cout<< "Progress: "<<progress<<"%\r";
+            std::cout<< "Progress: "<<progress<<"%\r";
         else if (m_pProgress)
             *m_pProgress = progress;
         
@@ -237,7 +237,7 @@ Integrator*	System::_allocateIntegrator()
 		return 0;
 	}
 
-	vector<Property>::iterator it = m_integratorProperty.begin();
+	std::vector<Property>::iterator it = m_integratorProperty.begin();
 	while( it != m_integratorProperty.end() )
 	{
 		integrator->SetProperty(it->_name,it->_property);
@@ -257,7 +257,7 @@ bool System::Setup( const char* str )
         m_imagesensor = new RenderTargetImage();
     
 	// load the xml file
-	string full_name = GetFullPath(str);
+	std::string full_name = GetFullPath(str);
 	TiXmlDocument doc( full_name.c_str() );
 	doc.LoadFile();
 	

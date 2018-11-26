@@ -41,7 +41,7 @@ public:
 	// output the texture
 	// para 'str' :	the name of the output entity
 	// result : return true , if outputing is successful
-	bool Output( const string& str );
+	bool Output( const std::string& str );
 
 	// get the texture value
 	// para 'x' :	x coordinate , if out of range , use filter

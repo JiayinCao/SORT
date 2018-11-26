@@ -75,7 +75,7 @@ private:
 		PH_CONSTRUCTOR(Color0Property,Texture);
 
 		// set value
-		void SetValue( const string& value )
+		void SetValue( const std::string& value )
 		{
 			GridTexture* ct = CAST_TARGET(GridTexture);
 			ct->m_Color0 = SpectrumFromStr( value );
@@ -87,7 +87,7 @@ private:
 		PH_CONSTRUCTOR(Color1Property,Texture);
 
 		// set value
-		void SetValue( const string& value )
+		void SetValue( const std::string& value )
 		{
 			GridTexture* ct = CAST_TARGET(GridTexture);
 			ct->m_Color1 = SpectrumFromStr( value );
@@ -99,7 +99,7 @@ private:
 		PH_CONSTRUCTOR(ThresholdProperty,Texture);
 
 		// set value
-		void SetValue( const string& value )
+		void SetValue( const std::string& value )
 		{
 			GridTexture* ct = CAST_TARGET(GridTexture);
 			ct->m_Threshold = (float)atof( value.c_str() );

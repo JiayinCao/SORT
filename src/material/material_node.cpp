@@ -24,7 +24,7 @@
 #include "utility/log.h"
 
 // get node property
-MaterialNodeProperty* MaterialNode::getProperty( const string& name )
+MaterialNodeProperty* MaterialNode::getProperty( const std::string& name )
 {
     return m_props.count(name) ? m_props[name] : nullptr;
 }
@@ -41,7 +41,7 @@ bool MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 	TiXmlElement* prop = element->FirstChildElement( "Property" );
 	while(prop)
 	{
-		string prop_name = prop->Attribute( "name" );
+		std::string prop_name = prop->Attribute( "name" );
 
 		MaterialNodeProperty* node_prop = node->getProperty( prop_name );
 		if( node_prop == nullptr )
@@ -67,7 +67,7 @@ bool MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
             }
 		}else
 		{
-			string node_value = prop->Attribute( "value" );
+			std::string node_value = prop->Attribute( "value" );
 			node_prop->SetNodeProperty( node_value );
 		}
 			
@@ -81,7 +81,7 @@ bool MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 // parse a new node
 MaterialNode* MaterialNode::ParseNode( TiXmlElement* element , MaterialNode* node )
 {
-	string node_type = element->Attribute( "node" );
+	std::string node_type = element->Attribute( "node" );
 	// create new material node
 	MaterialNode* mat_node = CREATE_TYPE( node_type , MaterialNode );
 	if( mat_node == nullptr )

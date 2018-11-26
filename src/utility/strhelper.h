@@ -31,12 +31,12 @@ struct VertexIndex;
 // convert string to vertex index
 // para 'str' : the string to parse
 // result     : a vertex index
-VertexIndex	VertexIndexFromStr( const string& str );
+VertexIndex	VertexIndexFromStr( const std::string& str );
 
 // get the type of file according to the file extension
 // para 'str' : string to parse
 // result     : a corresponding mesh type
-MESH_TYPE	MeshTypeFromStr( const string& str );
+MESH_TYPE	MeshTypeFromStr( const std::string& str );
 
 class ToLower{
 public:
@@ -46,19 +46,19 @@ public:
 };
 
 // transform from string
-Transform TransformFromStr( const string& str );
+Transform TransformFromStr( const std::string& str );
 
 // spectrum from string
-Spectrum SpectrumFromStr( const string& str );
+Spectrum SpectrumFromStr( const std::string& str );
 
 // point from string
-Point PointFromStr( const string& str );
+Point PointFromStr( const std::string& str );
 
 // direction from string
-Vector VectorFromStr( const string& str );
+Vector VectorFromStr( const std::string& str );
 
 // get the next token
-string NextToken( string& str , char t );
+std::string NextToken( std::string& str , char t );
 
 // format the input string like sprintf
-string stringFormat( const char* format, ... );
+std::string stringFormat( const char* format, ... );

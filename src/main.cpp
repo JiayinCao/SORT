@@ -44,9 +44,9 @@ int main(int argc, char** argv)
     SORT_PROFILE_ENABLE;
     SORT_PROFILE("Main Thread");
 
-    string commandline = "Command line arguments: \t";
+    std::string commandline = "Command line arguments: \t";
     for (int i = 0; i < argc; ++i) {
-        commandline += string(argv[i]);
+        commandline += std::string(argv[i]);
         commandline += " ";
     }
 
@@ -71,7 +71,7 @@ int main(int argc, char** argv)
         return RUN_ALL_TESTS();
     }
 
-    slog(INFO, GENERAL, "Number of CPU cores " + to_string(NumSystemCores()));
+    slog(INFO, GENERAL, "Number of CPU cores " + std::to_string(NumSystemCores()));
     slog(INFO, GENERAL, "Scene file (" + std::string(argv[1]) + ")");
 
     // enable blender mode if possible

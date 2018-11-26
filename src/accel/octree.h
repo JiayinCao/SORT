@@ -54,14 +54,14 @@ public:
 
     //! OcTree node structure
     struct OcTreeNode{
-        OcTreeNode*					child[8] = {nullptr};	/**< Child node pointers, all will be NULL if current node is a leaf.*/
-        vector<const Primitive*>	primitives;             /**< Primitives buffer.*/
-        BBox						bb;                     /**< Bounding box for this octree node.*/
+        OcTreeNode*					    child[8] = {nullptr};	/**< Child node pointers, all will be NULL if current node is a leaf.*/
+        std::vector<const Primitive*>	primitives;             /**< Primitives buffer.*/
+        BBox						    bb;                     /**< Bounding box for this octree node.*/
     };
     
     //! @brief Primitive information in octree node.
     struct NodePrimitiveContainer{
-        vector<const Primitive*>	primitives;		/**< Primitive buffer used during octree construction.*/
+        std::vector<const Primitive*>	primitives;		/**< Primitive buffer used during octree construction.*/
     };
     
 private:

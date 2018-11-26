@@ -65,7 +65,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(SamplerPerLightProperty,Integrator);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			DirectLight* direct = CAST_TARGET(DirectLight);
 

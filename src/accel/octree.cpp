@@ -119,7 +119,7 @@ void OcTree::releaseOcTree( OcTreeNode* node ){
 // @param depth Current depth of this node.
 void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , unsigned depth )
 {
-    SORT_STATS( sOcTreeDepth = max( sOcTreeDepth , (StatsInt) depth + 1 ) );
+    SORT_STATS( sOcTreeDepth = std::max( sOcTreeDepth , (StatsInt) depth + 1 ) );
     
 	// make a leaf if there are not enough points
 	if( container->primitives.size() < (int)m_uMaxPriInLeaf || depth > m_uMaxDepthInOcTree ){
@@ -149,7 +149,7 @@ void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , u
 	}
 	
 	// distribute primitives
-	vector<const Primitive*>::const_iterator it = container->primitives.begin();
+	std::vector<const Primitive*>::const_iterator it = container->primitives.begin();
 	while( it != container->primitives.end() ){
 		for( int i = 0 ; i < 8 ; ++i ){
 			// check for intersection
@@ -196,7 +196,7 @@ void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , u
 void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container )
 {
     SORT_STATS(++sOcTreeLeafNodeCount);
-    SORT_STATS(sOcTreeMaxPriCountInLeaf = max( sOcTreeMaxPriCountInLeaf , (StatsInt)container->primitives.size()) );
+    SORT_STATS(sOcTreeMaxPriCountInLeaf = std::max( sOcTreeMaxPriCountInLeaf , (StatsInt)container->primitives.size()) );
     SORT_STATS(sOcTreePrimitiveCount += (StatsInt)container->primitives.size());
     
     for( auto primitive : container->primitives )

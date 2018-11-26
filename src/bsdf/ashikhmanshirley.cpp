@@ -38,7 +38,7 @@ Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
     h = Normalize(h);
     
     const float IoH = AbsDot( wi , h );
-    const Spectrum specular = ( distribution.D(h) * SchlickFresnel(S, IoH) ) / ( 4.0f * IoH * max( cos_theta_i , cos_theta_o ) ) ;
+    const Spectrum specular = ( distribution.D(h) * SchlickFresnel(S, IoH) ) / ( 4.0f * IoH * std::max( cos_theta_i , cos_theta_o ) ) ;
     
     return ( diffuse + specular ) * AbsCosTheta(wi);
 }

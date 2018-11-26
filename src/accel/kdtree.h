@@ -69,14 +69,14 @@ public:
     struct Kd_Node
     {
     public:
-        Kd_Node*					leftChild = nullptr;	/**< Pointer to the left child of the KD-Tree node. */
-        Kd_Node*					rightChild = nullptr;	/**< Pointer to the right child of the KD-Tree node. */
-        BBox						bbox;                   /**< Bounding box of the KD-Tree node. */
-        vector<const Primitive*>	primitivelist;          /**< Vector holding all primitives in the node. It 
-                                                             should be empty for interior nodes. */
-        unsigned					flag = 0;               /**< Special mask used for nodes. The node is a leaf node if it is 3. 
-                                                             For interior nodes, it will be the cooreponding id of the split axis.*/
-        float						split = 0.0f;           /**< Split position */
+        Kd_Node*					    leftChild = nullptr;	/**< Pointer to the left child of the KD-Tree node. */
+        Kd_Node*					    rightChild = nullptr;	/**< Pointer to the right child of the KD-Tree node. */
+        BBox						    bbox;                   /**< Bounding box of the KD-Tree node. */
+        std::vector<const Primitive*>	primitivelist;          /**< Vector holding all primitives in the node. It 
+                                                                should be empty for interior nodes. */
+        unsigned					    flag = 0;               /**< Special mask used for nodes. The node is a leaf node if it is 3. 
+                                                                For interior nodes, it will be the cooreponding id of the split axis.*/
+        float						    split = 0.0f;           /**< Split position */
         
         //! @brief Constructor taking a bounding box.
         //! @param bb Bounding box of the node.

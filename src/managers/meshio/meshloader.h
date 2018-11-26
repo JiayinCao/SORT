@@ -39,7 +39,7 @@ public:
 	// para 'str' : name of the file
 	// para 'mem' : the memory to store
 	// result     : true if loading is successful
-    virtual bool LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem ) = 0;
+    virtual bool LoadMesh( const std::string& str , std::shared_ptr<BufferMemory>& mem ) = 0;
 
 	// get the type of the mesh loader
 	MESH_TYPE GetMT() const { return m_MeshType; }

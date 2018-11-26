@@ -105,7 +105,7 @@ protected:
 		PH_CONSTRUCTOR(EyeProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			Camera* camera = CAST_TARGET(Camera);
 			camera->SetEye( PointFromStr(str) );
@@ -120,7 +120,7 @@ protected:
 		PH_CONSTRUCTOR(SensorSizeProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			Camera* camera = CAST_TARGET(Camera);
 
@@ -140,13 +140,13 @@ protected:
 		PH_CONSTRUCTOR(AspectProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			Camera* camera = CAST_TARGET(Camera);
 
-			string _str = str;
-			string x = NextToken( _str , ' ' );
-			string y = NextToken( _str , ' ' );
+			std::string _str = str;
+			std::string x = NextToken( _str , ' ' );
+			std::string y = NextToken( _str , ' ' );
 
 			camera->m_aspectRatioW = (float)atof( x.c_str() );
 			camera->m_aspectRatioH = (float)atof( y.c_str() );

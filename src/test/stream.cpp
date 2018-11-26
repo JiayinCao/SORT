@@ -22,15 +22,15 @@
 #define STREAM_SAMPLE_COUNT 10000
 
 TEST(STREAM, FileStream) {
-    vector<float>           vec_f;
-    vector<int>             vec_i;
-    vector<unsigned int>    vec_u;
+    std::vector<float>           vec_f;
+    std::vector<int>             vec_i;
+    std::vector<unsigned int>    vec_u;
     OFileStream ofile("test.bin");
-    string str = "this is a random string";
+    std::string str = "this is a random string";
     ofile<<str;
     bool flag = true;
     ofile<<flag;
-    string empty_str = "";
+    std::string empty_str = "";
     ofile<<empty_str;
     for (unsigned i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
         vec_f.push_back( sort_canonical() );
@@ -42,13 +42,13 @@ TEST(STREAM, FileStream) {
     ofile.Close();
 
     IFileStream ifile("test.bin");
-    string str_copy;
+    std::string str_copy;
     ifile>>str_copy;
     EXPECT_EQ( str_copy , str );
     bool flag_copy = false;
     ifile>>flag_copy;
     EXPECT_EQ( flag_copy , flag );
-    string empty_str_copy;
+    std::string empty_str_copy;
     ifile>>empty_str_copy;
     EXPECT_EQ( empty_str_copy , empty_str );
     for (int i = 0; i < STREAM_SAMPLE_COUNT; ++i) {

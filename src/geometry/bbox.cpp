@@ -147,8 +147,8 @@ void BBox::Union( const BBox& box )
 {
 	for( int i = 0 ; i < 3 ; i++ )
 	{
-		m_Min[i] = min( m_Min[i] , box.m_Min[i] );
-		m_Max[i] = max( m_Max[i] , box.m_Max[i] );
+		m_Min[i] = std::min( m_Min[i] , box.m_Min[i] );
+		m_Max[i] = std::max( m_Max[i] , box.m_Max[i] );
 	}
 }
 

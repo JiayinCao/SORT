@@ -34,13 +34,13 @@ static const double MERL_GREEN_SCALE = 0.000766666666666667;
 static const double MERL_BLUE_SCALE = 0.0011066666666666667;
 
 // Load data from file
-void MerlData::LoadData( const string& filename )
+void MerlData::LoadData( const std::string& filename )
 {
     // get full path
-    string str = ( filename );
+    std::string str = ( filename );
     
     // try to open the file
-    ifstream file( str.c_str() , ios::binary );
+    std::ifstream file( str.c_str() , std::ios::binary );
     if( false == file.is_open() )
         return;
     
@@ -109,7 +109,7 @@ Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
 		wdPhi -= PI;
 
     // Compute indices _whThetaIndex_, _wdThetaIndex_, _wdPhiIndex_
-    int whThetaIndex = (int)clamp(sqrtf(max(0.f, whTheta * 2.0f * INV_PI )) * MERL_SAMPLING_RES_THETA_H,  0.f, (float)(MERL_SAMPLING_RES_THETA_H-1));
+    int whThetaIndex = (int)clamp(sqrtf(std::max(0.f, whTheta * 2.0f * INV_PI )) * MERL_SAMPLING_RES_THETA_H,  0.f, (float)(MERL_SAMPLING_RES_THETA_H-1));
     int wdThetaIndex = (int)clamp(wdTheta * INV_PI * 2.0f * MERL_SAMPLING_RES_THETA_D, 0.f , (float)(MERL_SAMPLING_RES_THETA_D-1));
     int wdPhiIndex = (int)clamp(wdPhi * INV_PI * MERL_SAMPLING_RES_PHI_D, 0.f , (float)(MERL_SAMPLING_RES_PHI_D - 1));
 

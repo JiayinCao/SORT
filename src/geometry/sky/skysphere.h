@@ -68,7 +68,7 @@ private:
 		PH_CONSTRUCTOR(ImageProperty,Sky);
 
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SkySphere* sky = CAST_TARGET(SkySphere);
 			sky->m_sky.LoadImageFromFile( str );

@@ -75,7 +75,7 @@ void SkySphere::_generateDistribution2D()
 		float sin_theta = sin( (float)i / (float)nv * PI );
 
 		for( unsigned j = 0 ; j < nu ; j++ )
-			data[offset+j] = max( 0.0f , m_sky.GetColor( (int)j , (int)i ).GetIntensity() * sin_theta );
+			data[offset+j] = std::max( 0.0f , m_sky.GetColor( (int)j , (int)i ).GetIntensity() * sin_theta );
 	}
 
 	distribution = new Distribution2D( data , nu , nv );

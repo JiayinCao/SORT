@@ -75,7 +75,7 @@ void KDTree::Build()
 		}
 	}
 	for( int i = 0 ; i < 3 ; i++ )
-		sort( splits.split[i] , splits.split[i] + 2 * count);
+		std::sort( splits.split[i] , splits.split[i] + 2 * count);
 
 	// create root node
 	m_root = new Kd_Node(m_bbox);
@@ -92,7 +92,7 @@ void KDTree::Build()
 // split node
 void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth )
 {
-    SORT_STATS(sKDTreeDepth = max(sKDTreeDepth, (StatsInt)depth+1));
+    SORT_STATS(sKDTreeDepth = std::max(sKDTreeDepth, (StatsInt)depth+1));
     
 	if( prinum < m_maxPriInLeaf || depth > m_maxDepth ){
 		makeLeaf( node , splits , prinum );
@@ -243,7 +243,7 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum )
     SORT_STATS(++sKDTreeLeafNodeCount);
     SORT_STATS(++sKDTreeNodeCount);
     SORT_STATS(sKDTreePrimitiveCount += prinum);
-    SORT_STATS(sKDTreeMaxPriCountInLeaf = max(sKDTreeMaxPriCountInLeaf, (StatsInt)prinum));
+    SORT_STATS(sKDTreeMaxPriCountInLeaf = std::max(sKDTreeMaxPriCountInLeaf, (StatsInt)prinum));
 }
 
 // get the intersection between the ray and the primitive set
@@ -298,16 +298,16 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 	const Kd_Node* first = node->leftChild;
 	const Kd_Node* second = node->rightChild;
 	if( dir < 0.0f || (dir==0.0f&&ray.m_Ori[split_axis] > node->split) )
-        swap(first, second);
+        std::swap(first, second);
 
 	bool inter = false;
 	if( t > fmin - delta ){
-		inter = traverse( first , ray , intersect , fmin , min( fmax , t ) );
+		inter = traverse( first , ray , intersect , fmin , std::min( fmax , t ) );
 		if( !intersect && inter )
 			return true;
 	}
 	if( !inter && ( fmax + delta ) > t )
-		return traverse( second , ray , intersect , max( t , fmin ) , fmax );
+		return traverse( second , ray , intersect , std::max( t , fmin ) , fmax );
 	return inter;
 }
 

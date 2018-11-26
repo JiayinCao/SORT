@@ -36,7 +36,7 @@ public:
 
 private:
     // filename
-    string      m_filename;
+    std::string      m_filename;
     
     // register property
     void _registerAllProperty()
@@ -50,7 +50,7 @@ private:
         PH_CONSTRUCTOR(FilenameProperty,ImageSensor);
         
         // set value
-        void SetValue( const string& str )
+        void SetValue( const std::string& str )
         {
             RenderTargetImage* rti = CAST_TARGET(RenderTargetImage);
             rti->m_filename = str;
