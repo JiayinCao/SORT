@@ -18,10 +18,9 @@
 #pragma once
 
 #include "math/transform.h"
+#include "stream/stream.h"
 
 class Scene;
-class IStream;
-class OStream;
 
 //! @brief Basic unit of objects in world.
 /**
@@ -29,7 +28,7 @@ class OStream;
  * entity. An entity could parse itself and decouple itself into one or multiple Primitive depending how its complexity.
  * An entity itself doesn't touch rendering directly. It serves as a place where the logic operations should be performed.
  */
-class Entity{
+class Entity : public SerializableObject{
 public:
     //! Empty virtual destructor
     virtual ~Entity() {}
@@ -61,14 +60,14 @@ public:
     //! Serialize the entity. Loading from an IStream, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    virtual void        Serialize( IStream& stream ) {}
+    void        Serialize( IStream& stream ) override {}
 
     //! @brief  Serialization interface. Saving data to stream.
     //!
     //! Serialize the entity. Saving to an OStream, which could be file, memory or network streaming.
     //!
     //! @param  stream      Output stream.
-    virtual void        Serialize( OStream& stream ) {}
+    void        Serialize( OStream& stream ) override {}
 
 protected:
     Transform   m_transform;    /**< Transform of the entity from local space to world space. */

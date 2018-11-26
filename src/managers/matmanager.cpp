@@ -25,8 +25,8 @@
 #include "utility/creator.h"
 #include "bsdf/merl.h"
 #include "utility/creator.h"
-#include "material/matte.h"
 #include "utility/log.h"
+#include "material/material.h"
 
 // find specific material
 std::shared_ptr<Material> MatManager::FindMaterial( const string& mat_name ) const
@@ -38,7 +38,7 @@ std::shared_ptr<Material> MatManager::FindMaterial( const string& mat_name ) con
 // whether the material exists
 std::shared_ptr<Material> MatManager::GetDefaultMat()
 {
-    static std::shared_ptr<Matte> defaultMat = std::make_shared<Matte>();
+    static std::shared_ptr<Material> defaultMat = std::make_shared<Material>();
 	return defaultMat;
 }
 

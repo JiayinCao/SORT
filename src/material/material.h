@@ -17,40 +17,76 @@
 
 #pragma once
 
-#include "utility/propertyset.h"
-#include "utility/creator.h"
-#include "spectrum/spectrum.h"
 #include "material_node.h"
+#include "stream/stream.h"
 
 class Bsdf;
 class Intersection;
 
-///////////////////////////////////////////////////////////
-// definition of material
-class Material
+//! @brief 	A thin layer of material definition.
+/**
+ * SORT supports node-graph based material system so that it could be flexible enough to support varies features.
+ * This is no pre-defined material in SORT. Every material is a combination of material node forming a tree, the topology
+ * of the tree defines the behavior of the material. With this design, it is very easy to drive different parameters by 
+ * textures or any other information. For invalid material node graph tree, a red default material is returned as default.
+ * Material class just holds a root node of material node tree. The exact definition of materials are defined in Blender.
+ */
+class Material : public SerializableObject
 {
 public:
-    // virtual destructor
-    virtual ~Material() {}
-    
-	// get bsdf
-	virtual Bsdf* GetBsdf( const Intersection* intersect ) const;
+	//! @brief	Get the BSDF.
+	//!
+	//! BSDF is a set of BXDF combined together. This function parse the material and fill the BSDF data structure.
+	//! A red warning material will be returned if this material is invalid.
+	//!
+	//! @param		intersect		The intersection information at the point to be shaded.
+	//! @return						A BSDF holding BXDF information will be returned. The BSDF is allocated in the memory pool,
+	//!								meaning this is no need to release the memory in BSDF.
+	Bsdf* GetBsdf( const Intersection* intersect ) const;
 
-	// set name
-	void SetName( const string& n ) { name = n; }
-	// get name of the material
-	const string& GetName() const { return name; }
+	//! @brief	Set the name of the material.
+	//!
+	//! Higher level code should make sure the name is unique in the scene.
+	//!
+	//! @param	name	Name to be set to this material.
+	inline void SetName( const string& name ) { m_name = name; }
 
-	// set root
-	MaterialNode* GetRootNode() { return &root; }
+	//! @brief	Get the unique name of this material.
+	//!
+	//! @return		The name of this material.
+	inline const string& GetName() const { return m_name; }
 
-	// parse material
+	//! @brief	Get the root material node.
+	//!
+	//! @return		The root of the material node graph tree.
+	inline MaterialNode* GetRootNode() { return &m_root; }
+
+	//! @brief	Parse material from XML.
+	//!
+	//! This interface is to be deprecated after serialization is fully supported.
+	//! 
+	//! @param	element		Root node for XML node.
 	void	ParseMaterial( TiXmlElement* element );
 
-private:
-	// the name for the material
-	string			name;
+	//! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStream, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void        Serialize( IStream& stream ) override {
+		// to be implemented
+	}
 
-	// the root node of the material
-	mutable OutputNode	root;
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStream, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void        Serialize( OStream& stream ) override {
+		// to be implemented
+	}
+
+private:
+	string				m_name;		/**< Unique name of the material. */
+	mutable OutputNode	m_root;		/**< Root node of material node graph tree. */
 };

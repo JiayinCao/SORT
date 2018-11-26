@@ -132,14 +132,12 @@ MaterialNode::~MaterialNode()
 void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
 	// return a default one for invalid material
-	if( !m_node_valid )
-	{
-		static const Spectrum default_spectrum( 0.1f , 0.1f , 0.1f );
+	if( !m_node_valid || !output.node ){
+		static const Spectrum default_spectrum( 0.5f , 0.1f , 0.1f );
 		const Lambert* lambert = SORT_MALLOC(Lambert)( default_spectrum , weight , DIR_UP);
 		bsdf->AddBxdf( lambert );
 		return;
 	}
 
-	if( output.node )
-		output.node->UpdateBSDF( bsdf );
+	output.node->UpdateBSDF( bsdf );
 }
