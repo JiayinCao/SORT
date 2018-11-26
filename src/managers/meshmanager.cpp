@@ -51,9 +51,9 @@ std::shared_ptr<MeshLoader>	MeshManager::_getMeshLoader( MESH_TYPE type ) const
 }
 
 // Temporary
-bool MeshManager::LoadMesh( const string& filename , MeshEntity* mesh ){
+bool MeshManager::LoadMesh( const std::string& filename , MeshEntity* mesh ){
 	// get full resource filename
-	string str = GetFullPath( filename );
+	std::string str = GetFullPath( filename );
 
 	// get the mesh type
 	MESH_TYPE type = MeshTypeFromStr( str );
@@ -64,7 +64,7 @@ bool MeshManager::LoadMesh( const string& filename , MeshEntity* mesh ){
 	if( loader )
 	{
 		// create the new memory
-        shared_ptr<BufferMemory> mem = std::make_shared<BufferMemory>();
+        std::shared_ptr<BufferMemory> mem = std::make_shared<BufferMemory>();
 
 		// load the mesh from file
 		read = loader->LoadMesh( str , mem );
@@ -99,13 +99,13 @@ bool MeshManager::LoadMesh( const string& filename , MeshEntity* mesh ){
 void BufferMemory::ApplyTransform( MeshEntity* mesh )
 {
 	const auto& transform = mesh->GetTransform();
-	vector<Point>::iterator p_it = m_PositionBuffer.begin();
+	std::vector<Point>::iterator p_it = m_PositionBuffer.begin();
 	while( p_it != m_PositionBuffer.end() )
 	{
 		*p_it = transform(*p_it);
 		p_it++;
 	}
-	vector<Vector>::iterator n_it = m_NormalBuffer.begin();
+	std::vector<Vector>::iterator n_it = m_NormalBuffer.begin();
 	while( n_it != m_NormalBuffer.end() )
 	{
 		*n_it = (transform.invMatrix.Transpose())(*n_it);	// use inverse transpose matrix here
@@ -162,7 +162,7 @@ void BufferMemory::GenSmoothNormal()
 	_genFlatNormal();
 
 	// get the adjacency information
-	vector<unsigned>* adjacency = new vector<unsigned>[m_iVBCount];
+	std::vector<unsigned>* adjacency = new std::vector<unsigned>[m_iVBCount];
 	// generate the triangles
 	unsigned trunkNum = (unsigned)m_TrunkBuffer.size();
 	unsigned base = 0;
@@ -188,12 +188,12 @@ void BufferMemory::GenSmoothNormal()
 	}
 
 	// generate smooth normal
-	vector<Vector> smoothNormal;
+	std::vector<Vector> smoothNormal;
 	for( unsigned i = 0 ; i < m_iVBCount ; i++ )
 	{
 		Vector n;
 
-		vector<unsigned>::iterator it = adjacency[i].begin();
+		std::vector<unsigned>::iterator it = adjacency[i].begin();
 		while( it != adjacency[i].end() )
 		{
 			n += m_NormalBuffer[*it];
@@ -220,7 +220,7 @@ void BufferMemory::GenSmoothTagent()
 		return;
 
 	// generate tagent for each triangle
-	vector<Vector> tagents;
+	std::vector<Vector> tagents;
 	const unsigned trunkNum = (unsigned)m_TrunkBuffer.size();
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
@@ -230,7 +230,7 @@ void BufferMemory::GenSmoothTagent()
 	}
 
 	// set the adjacency information
-	vector<unsigned>* adjacency = new vector<unsigned>[m_iNBCount];
+	std::vector<unsigned>* adjacency = new std::vector<unsigned>[m_iNBCount];
 	unsigned base = 0;
 	for( unsigned i = 0 ; i < trunkNum ; i++ )
 	{
@@ -254,7 +254,7 @@ void BufferMemory::GenSmoothTagent()
 	{
 		Vector t;
 
-		vector<unsigned>::iterator it = adjacency[i].begin();
+		std::vector<unsigned>::iterator it = adjacency[i].begin();
 		while( it != adjacency[i].end() )
 		{
 			t += tagents[*it];
@@ -326,7 +326,7 @@ void BufferMemory::GenTexCoord()
 
 	// find the center of the mesh
 	Point center;
-	vector<Point>::iterator it = m_PositionBuffer.begin();
+	std::vector<Point>::iterator it = m_PositionBuffer.begin();
 	while( it != m_PositionBuffer.end() )
 	{
 		center = center + *it;
@@ -375,7 +375,7 @@ void BufferMemory::Serialize( IStreamBase& stream ){
     m_TrunkBuffer.resize( m_iTrunkNum );
 	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
 		stream >> m_TrunkBuffer[i].m_iTriNum;
-		string name;
+		std::string name;
 		stream >> name;
 		m_TrunkBuffer[i].m_mat = MatManager::GetSingleton().FindMaterial( name );
 	}

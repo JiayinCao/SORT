@@ -73,7 +73,7 @@ private:
 		PH_CONSTRUCTOR(ColorProperty,Texture);
 
 		// set value
-		void SetValue( const string& value )
+		void SetValue( const std::string& value )
 		{
 			ConstantTexture* ct = CAST_TARGET(ConstantTexture);
 			ct->m_Color = SpectrumFromStr( value );

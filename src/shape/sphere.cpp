@@ -38,7 +38,7 @@ Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
 				0.0f , 0.0f , 0.0f , 1.0f );
 
 	float sq_sin_theta = radius * radius / delta.SquaredLength();
-	float cos_theta = sqrt( max( 0.0f , 1.0f - sq_sin_theta ) );
+	float cos_theta = sqrt( std::max( 0.0f , 1.0f - sq_sin_theta ) );
 
 	wi = UniformSampleCone( ls.u , ls.v , cos_theta );
 	wi = m(wi);
@@ -58,7 +58,7 @@ float Sphere::Pdf( const Point& p ,  const Vector& wi ) const
 {
 	Point center;
 	float sin_theta_sq = radius * radius / ( p - center ).SquaredLength();
-	float cos_theta = sqrt( max( 0.0f , 1.0f - sin_theta_sq ) );
+	float cos_theta = sqrt( std::max( 0.0f , 1.0f - sin_theta_sq ) );
 	return UniformConePdf( cos_theta );
 }
 

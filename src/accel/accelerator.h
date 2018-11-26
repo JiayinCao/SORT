@@ -68,13 +68,13 @@ public:
 
     //! @brief Set primitive set in the acceleration structure.
     //! @param pri The set of primitives in the scene.
-	void SetPrimitives( vector<Primitive*>* pri ){
+	void SetPrimitives( std::vector<Primitive*>* pri ){
 		m_primitives = pri;
 	}
 
 protected:
-	vector<Primitive*>* m_primitives;   /**< The vector holding all pritmitive pointers. */
-	BBox                m_bbox;         /**< The bounding box of all pritmives. */
+	std::vector<Primitive*>*    m_primitives;   /**< The vector holding all pritmitive pointers. */
+	BBox                        m_bbox;         /**< The bounding box of all pritmives. */
 
 	//! Generate the bounding box for the primitive set.
 	void computeBBox();

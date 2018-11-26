@@ -62,7 +62,7 @@ public:
     
     //! Load brdf data from Fourier Bxdf file.
     //! @param filename Name of Fourier Bxdf file.
-    void	LoadData( const string& filename );
+    void	LoadData( const std::string& filename );
 
 private:
     // Bxdf Table

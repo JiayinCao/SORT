@@ -21,13 +21,13 @@
 #include "sort.h"
 
 // get current directory
-string GetExecutableDir();
+std::string GetExecutableDir();
 
 // get full path
-string GetFullPath( const string& str );
+std::string GetFullPath( const std::string& str );
 
 // set resource path
-void SetResourcePath( const string& str );
+void SetResourcePath( const std::string& str );
 
 // get current resource path
-string GetResourcePath() ;
+std::string GetResourcePath() ;

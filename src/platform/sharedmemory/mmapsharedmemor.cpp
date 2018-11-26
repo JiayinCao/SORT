@@ -33,7 +33,7 @@
 #include <string.h>
 #include <unistd.h>
 
-void MmapSharedMemory::CreateSharedMemory( const string& name , int size , unsigned type )
+void MmapSharedMemory::CreateSharedMemory( const std::string& name , int size , unsigned type )
 {
     fd = open(name.c_str(), O_RDWR , 0 );
     if( fd == -1 )

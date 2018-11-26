@@ -35,7 +35,7 @@ inline float Degrees( float rad ) { return 180.0f * INV_PI * rad ; }
 #define Thread_Local thread_local
 
 // math macros
-#define saturate(x) max(0.0f,min(1.0f,x))
+#define saturate(x) std::max(0.0f,std::min(1.0f,x))
 inline float clamp( float x , float mi , float ma )
 {
 	if( x > ma ) x = ma;

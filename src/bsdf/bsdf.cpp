@@ -94,7 +94,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 		if( bxdf_type ) *bxdf_type = BXDF_NONE;
 		return 0.0f;
 	}
-	int bsdf_id = min( (int)(bs.t*(float)com_num) , (int)(com_num-1) );
+	int bsdf_id = std::min( (int)(bs.t*(float)com_num) , (int)(com_num-1) );
 	const Bxdf* bxdf = nullptr;
 	int count = bsdf_id;
 	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )

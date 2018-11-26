@@ -32,7 +32,7 @@
 extern System g_System;
 
 // get current directory
-string GetExecutableDir()
+std::string GetExecutableDir()
 {
 	const int maxLen = 2048;
 	char buf[ maxLen ];
@@ -65,23 +65,23 @@ string GetExecutableDir()
 		buf[i--] = 0;
 #endif
 
-	return string(buf);
+	return std::string(buf);
 }
 
 // get full path
-string GetFullPath( const string& str )
+std::string GetFullPath( const std::string& str )
 {
 	return GetResourcePath() + str;
 }
 
 // set resource path
-void SetResourcePath( const string& str )
+void SetResourcePath( const std::string& str )
 {
 	g_System.SetResourcePath( str );
 }
 
 // get resource path
-string GetResourcePath()
+std::string GetResourcePath()
 {
 	return g_System.GetResourcePath();
 }

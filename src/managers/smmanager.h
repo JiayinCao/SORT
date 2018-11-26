@@ -30,17 +30,17 @@ public:
 	~SMManager();
 
 	// Initialize shared memory
-	SharedMemory CreateSharedMemory(const string& sm_name, int length, unsigned type);
+	SharedMemory CreateSharedMemory(const std::string& sm_name, int length, unsigned type);
 
 	// Release share memory resource
-	void ReleaseSharedMemory(const string& sm_name);
+	void ReleaseSharedMemory(const std::string& sm_name);
 
 	// Get Shared Memory
-	SharedMemory GetSharedMemory(const string& sm_name);
+	SharedMemory GetSharedMemory(const std::string& sm_name);
 
 private:
 	// the map for shared memory
-	std::unordered_map< string, PlatformSharedMemory > m_SharedMemory;
+	std::unordered_map< std::string, PlatformSharedMemory > m_SharedMemory;
 
 	// private constructor
 	SMManager();

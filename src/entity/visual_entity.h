@@ -50,14 +50,14 @@ public:
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
-    //! Serialize the entity. Loading from an IStream, which could be coming from file, memory or network.
+    //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
     void        Serialize( IStreamBase& stream ) override;
 
     //! @brief  Serialization interface. Saving data to stream.
     //!
-    //! Serialize the entity. Saving to an OStream, which could be file, memory or network streaming.
+    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
     //!
     //! @param  stream      Output stream.
     void        Serialize( OStreamBase& stream ) override;
@@ -70,9 +70,9 @@ public:
     // ------------------------------------------------------------------------
     // Temporary solution before serialization is done.
 public:
-    bool LoadMesh( const string& filename , const Transform& transform );
-    void ResetMaterial( const string& setname , const string& matname );
-	int  _getSubsetID( const string& setname );
+    bool LoadMesh( const std::string& filename , const Transform& transform );
+    void ResetMaterial( const std::string& setname , const std::string& matname );
+	int  _getSubsetID( const std::string& setname );
 	void _copyMaterial();
     // ------------------------------------------------------------------------
 };

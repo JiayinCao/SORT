@@ -147,19 +147,19 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    StreamBase& operator << (const float v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const float v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStreamBase!"); return *this; }
 
     //! @brief Disable streaming in a integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    StreamBase& operator << (const int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStreamBase!"); return *this; }
 
     //! @brief Disable streaming in an unsigned integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    StreamBase& operator << (const unsigned int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const unsigned int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStreamBase!"); return *this; }
 
     //! @brief Disable streaming in a string. Attempting to do it will result in crash!
     //!
@@ -168,13 +168,13 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    StreamBase& operator << (const std::string& v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const std::string& v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStreamBase!"); return *this; }
 
     //! @brief Disable streaming in a boolean value. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    StreamBase& operator << (const bool v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStream!"); return *this; }
+    StreamBase& operator << (const bool v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStreamBase!"); return *this; }
 };
 
 //! @brief Streaming out data
@@ -189,19 +189,19 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    StreamBase& operator >> (float& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+    StreamBase& operator >> (float& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStreamBase!"); return *this; }
 
     //! @brief Disable streaming out a integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    StreamBase& operator >> (int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+    StreamBase& operator >> (int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStreamBase!"); return *this; }
 
     //! @brief Disable streaming out an unsigned integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    StreamBase& operator >> (unsigned int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+    StreamBase& operator >> (unsigned int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStreamBase!"); return *this; }
 
     //! @brief Disable streaming out a string. Attempting to do it will result in crash!
     //!
@@ -210,7 +210,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    StreamBase& operator >> (std::string& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+    StreamBase& operator >> (std::string& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStreamBase!"); return *this; }
 
     //! @brief Disable streaming out a boolean value. Attempting to do it will result in crash!
     //!

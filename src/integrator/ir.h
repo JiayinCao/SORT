@@ -78,7 +78,7 @@ private:
 	float	m_fMinSqrDist;
 
 	// container for light sources
-	list<VirtualLightSource>*	m_pVirtualLightSources;
+	std::list<VirtualLightSource>*	m_pVirtualLightSources;
 
 	// register property
 	void _registerAllProperty();
@@ -90,7 +90,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(LightPathNumProperty,Integrator);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
 			if( ir )
@@ -101,7 +101,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(MinDistanceProperty,Integrator);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
 			if( ir )
@@ -115,7 +115,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(LightPathSetProperty,Integrator);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
 			if( ir )

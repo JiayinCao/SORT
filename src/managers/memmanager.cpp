@@ -63,7 +63,7 @@ void MemManager::PreMalloc( unsigned size , unsigned id )
 	mem->m_size = size;
 
 	// push it into the map
-	m_MemPool.insert( make_pair( id , mem ) );
+	m_MemPool.insert( std::make_pair( id , mem ) );
 }
 
 // clear the allocated memory

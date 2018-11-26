@@ -24,9 +24,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-// use default name space
-using namespace std;
-
 // find the correct platform
 #if defined(_WIN32) || defined(_WIN64)
 	#define SORT_IN_WINDOWS

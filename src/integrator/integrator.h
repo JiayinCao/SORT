@@ -121,11 +121,11 @@ protected:
 	{
 	public:
 		PH_CONSTRUCTOR(MaxDepthProperty,Integrator);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			Integrator* ir = CAST_TARGET(Integrator);
 			if( ir )
-				ir->max_recursive_depth = max( 1 , atoi( str.c_str() ) );
+				ir->max_recursive_depth = std::max( 1 , atoi( str.c_str() ) );
 		}
 	};
 };

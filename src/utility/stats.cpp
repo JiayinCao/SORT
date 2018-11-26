@@ -93,7 +93,7 @@ void StatsItemRegister::FlushData() const
 }
 
 std::string StatsFormatter_Int::ToString(StatsInt v){
-    auto s = to_string(v);
+    auto s = std::to_string(v);
     if( s.size() < 5 )
         return s;
     int len = (int)s.size() - 1;

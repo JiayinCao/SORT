@@ -76,7 +76,7 @@ private:
 		PH_CONSTRUCTOR(Color0Property,Texture);
 
 		// set value
-		void SetValue( const string& value )
+		void SetValue( const std::string& value )
 		{
 			CheckBoxTexture* ct = CAST_TARGET(CheckBoxTexture);
 			ct->m_Color0 = SpectrumFromStr( value );
@@ -88,7 +88,7 @@ private:
 		PH_CONSTRUCTOR(Color1Property,Texture);
 
 		// set value
-		void SetValue( const string& value )
+		void SetValue( const std::string& value )
 		{
 			CheckBoxTexture* ct = CAST_TARGET(CheckBoxTexture);
 			ct->m_Color1 = SpectrumFromStr( value );

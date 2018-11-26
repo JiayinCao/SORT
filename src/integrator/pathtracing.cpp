@@ -92,7 +92,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
         
 		if( bounces > 3 && throughput.GetMaxComponent() < 0.1f )
 		{
-			float continueProperbility = max( 0.05f , 1.0f - throughput.GetMaxComponent() );
+			float continueProperbility = std::max( 0.05f , 1.0f - throughput.GetMaxComponent() );
 			if( sort_canonical() < continueProperbility )
 				break;
 			throughput /= 1 - continueProperbility;

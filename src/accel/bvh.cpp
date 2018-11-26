@@ -92,7 +92,7 @@ void Bvh::Build()
 // recursively split BVH node
 void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned depth )
 {
-    SORT_STATS(sBVHDepth = max( sBVHDepth , (StatsInt)depth + 1 ) );
+    SORT_STATS(sBVHDepth = std::max( sBVHDepth , (StatsInt)depth + 1 ) );
     
 	// generate the bounding box for the node
 	for( unsigned i = _start ; i < _end ; i++ )
@@ -115,7 +115,7 @@ void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned
 
 	// partition the data
     auto compare = [split_pos,split_axis](const Bvh::Bvh_Primitive& pri){return pri.m_centroid[split_axis] < split_pos;};
-	const Bvh_Primitive* middle = partition( &m_bvhpri[_start] , &m_bvhpri[_end-1]+1 , compare );
+	const Bvh_Primitive* middle = std::partition( &m_bvhpri[_start] , &m_bvhpri[_end-1]+1 , compare );
 	unsigned mid = (unsigned)(middle - m_bvhpri);
 
     node->left = new Bvh_Node();
@@ -150,7 +150,7 @@ float Bvh::pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , u
 	float inv_split_delta = 1.0f / split_delta;
     for( unsigned i = _start ; i < _end ; i++ ){
 		int index = (int)((m_bvhpri[i].m_centroid[axis] - split_start) * inv_split_delta);
-		index = min( index , (int)(BVH_SPLIT_COUNT - 1) );
+		index = std::min( index , (int)(BVH_SPLIT_COUNT - 1) );
 		bin[index]++;
 		bbox[index].Union( m_bvhpri[i].GetBBox() );
 	}
@@ -189,7 +189,7 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned _start , unsigned _end )
 	node->pri_offset = _start;
 
     SORT_STATS(++sBvhLeafNodeCount);
-    SORT_STATS(sBvhMaxPriCountInLeaf = max( sBvhMaxPriCountInLeaf , (StatsInt)node->pri_num) );
+    SORT_STATS(sBvhMaxPriCountInLeaf = std::max( sBvhMaxPriCountInLeaf , (StatsInt)node->pri_num) );
     SORT_STATS(sBvhPrimitiveCount += (StatsInt)node->pri_num);
 }
 

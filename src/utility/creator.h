@@ -36,15 +36,15 @@ public:
 template<class T>
 class Creator : public Singleton<Creator<T>>
 {
-    typedef unordered_map<string,ItemCreator<T>*> CREATOR_CONTAINER;
+    typedef std::unordered_map<std::string,ItemCreator<T>*> CREATOR_CONTAINER;
     
 public:
     
 	// Create instance
-	T* CreateType( const string& str ) const
+	T* CreateType( const std::string& str ) const
 	{
-		string _str = str;
-		::transform(_str.begin(),_str.end(),_str.begin(),ToLower());
+		std::string _str = str;
+		std::transform(_str.begin(),_str.end(),_str.begin(),ToLower());
 		const auto& it = m_container.find( _str );
 		if( it == m_container.end() )
 			return nullptr;
@@ -74,7 +74,7 @@ private:
 	T##Creator()\
 	{\
 		std::string _str( N );\
-		::transform(_str.begin(),_str.end(),_str.begin(),ToLower());\
+		std::transform(_str.begin(),_str.end(),_str.begin(),ToLower());\
         auto& container = Creator<B>::GetSingleton().GetContainer();\
 		if( container.count( _str ) )\
 		{\

@@ -30,17 +30,17 @@
 #include "thirdparty/stb_image/stb_image.h"
 
 // output texture
-bool TexManager::Write( const string& filename , const Texture* tex )
+bool TexManager::Write( const std::string& filename , const Texture* tex )
 {
 	// get full path name
-	string str = GetFullPath( filename );
+	std::string str = GetFullPath( filename );
 
     // Save image
     return saveImage(str, tex);
 }
 
 // load the image from file , if the specific image is already existed in the current system , just return the pointer
-bool TexManager::Read( const string& str , ImageTexture* tex )
+bool TexManager::Read( const std::string& str , ImageTexture* tex )
 {
 	// try to find the image first , if it's already existed in the system , just set a pointer
     auto it = m_ImgContainer.find( str );
@@ -73,9 +73,9 @@ bool TexManager::Read( const string& str , ImageTexture* tex )
 
 // para 'name'  : Load image file
 // return       : Return value
-bool TexManager::loadImage(const string& name, std::shared_ptr<ImgMemory>& mem )
+bool TexManager::loadImage(const std::string& name, std::shared_ptr<ImgMemory>& mem )
 {
-    std::regex exr_reg(".*\\.exr$", regex_constants::icase);
+    std::regex exr_reg(".*\\.exr$", std::regex_constants::icase);
 
     if (std::regex_match(name, exr_reg)) {
         float* out = nullptr;
@@ -106,7 +106,7 @@ bool TexManager::loadImage(const string& name, std::shared_ptr<ImgMemory>& mem )
         int channel = 0, desired_channel = 3;
         float* data = stbi_loadf(name.c_str(), &w, &h, &channel, desired_channel);
 
-        int real_channel = min(desired_channel, channel);
+        int real_channel = std::min(desired_channel, channel);
         if (data && real_channel) {
             mem->m_ImgMem = std::unique_ptr<Spectrum[]>(new Spectrum[w*h]);
             for (int i = 0; i < h; ++i) {
@@ -132,11 +132,11 @@ bool TexManager::loadImage(const string& name, std::shared_ptr<ImgMemory>& mem )
 
 // para 'name'  : Load image file
 // return       : Return value
-bool TexManager::saveImage(const string& name, const Texture* tex )
+bool TexManager::saveImage(const std::string& name, const Texture* tex )
 {
     if (!tex) return false;
 
-    std::regex exr_reg(".*\\.exr$", regex_constants::icase);
+    std::regex exr_reg(".*\\.exr$", std::regex_constants::icase);
     if (std::regex_match(name, exr_reg)) {
         unsigned totalXRes = tex->GetWidth();
         unsigned totalYRes = tex->GetHeight();
