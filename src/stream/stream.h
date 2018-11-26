@@ -218,3 +218,22 @@ public:
     //! @return     Reference of the stream itself.
     Stream& operator >> (bool& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
 };
+
+//! @brief  Interface for serializable objects.
+//!
+//! Any derived class will need to implement the two interface supporting serialization of objects.
+class SerializableObject{
+public:
+    //! @brief      Empty destructor
+    virtual ~SerializableObject() {}
+
+    //! @brief      Serilizing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    virtual void    Serialize( IStream& stream ) = 0;
+
+    //! @brief      Serilizing data to stream
+    //!
+    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
+    virtual void    Serialize( OStream& stream ) = 0;
+};

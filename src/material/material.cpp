@@ -23,8 +23,8 @@
 
 Bsdf* Material::GetBsdf( const Intersection* intersect ) const
 {
-	Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-	root.UpdateBSDF(bsdf);
+        Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
+	m_root.UpdateBSDF(bsdf);
 	return bsdf;
 }
 
@@ -32,11 +32,11 @@ Bsdf* Material::GetBsdf( const Intersection* intersect ) const
 void Material::ParseMaterial( TiXmlElement* element )
 {
 	// parse node property
-	root.ParseProperty( element , &root );
+	m_root.ParseProperty( element , &m_root );
 
 	// check validation
-	if( !root.IsNodeValid() )
-        slog( WARNING , MATERIAL , stringFormat( "Material '%s' is not valid , a default material will be used." , name.c_str() ) );
+	if( !m_root.IsNodeValid() )
+                slog( WARNING , MATERIAL , stringFormat( "Material '%s' is not valid , a default material will be used." , m_name.c_str() ) );
 	else
-		root.PostProcess();
+	        m_root.PostProcess();
 }
