@@ -22,9 +22,9 @@
 #include "utility/samplemethod.h"
 #include <fstream>
 
-void FourierBxdfData::LoadData( const string& filename )
+void FourierBxdfData::LoadData( const std::string& filename )
 {
-    ifstream file( filename.c_str(), ios::binary);
+    std::ifstream file( filename.c_str(), std::ios::binary);
     if( !file.is_open() )
         return;
     
@@ -99,7 +99,7 @@ Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
     int nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
     
-    float Y = max( 0.0f , fourier( ak , nMax , dPhi ) );
+    float Y = std::max( 0.0f , fourier( ak , nMax , dPhi ) );
     float scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
     if( muI * muO > 0.0f ){
         float eta = ( muI > 0.0f ) ? 1 / bsdfTable.eta : bsdfTable.eta;
@@ -135,9 +135,9 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
     
     float phi, pdfPhi;
     float Y = sampleFourier(ak, bsdfTable.recip, nMax, bs.v, &pdfPhi, &phi);
-    *pdf = max( 0.0f , pdfPhi * pdfMu );
+    *pdf = std::max( 0.0f , pdfPhi * pdfMu );
     
-    float sin2ThetaI = max( 0.0f , 1.0f - muI * muI );
+    float sin2ThetaI = std::max( 0.0f , 1.0f - muI * muI );
     float norm = sqrt( sin2ThetaI / SinTheta2(wo));
     if( isinf(norm) ) norm = 0.0f;
     float sinPhi = sin(phi) , cosPhi = cos(phi);
@@ -282,7 +282,7 @@ float FourierBxdfData::sampleCatmullRom2D( int size1 , int size2 , const float* 
         d1 = f1 - f0;
     
     // Approximate the intersection by assuming it is linear interpolant
-    float t = ( f0 != f1 ) ? ( f0 - sqrt(max( 0.0f , f0 * f0 + 2 * u * ( f1 - f0 ) ) ) ) / (f0 - f1 ) : u / f0;
+    float t = ( f0 != f1 ) ? ( f0 - sqrt(std::max( 0.0f , f0 * f0 + 2 * u * ( f1 - f0 ) ) ) ) / (f0 - f1 ) : u / f0;
     float a = 0.0f , b = 1.0f, Fhat , fhat;
     while(true){
         if( !( t >= a && t <= b ) )
@@ -339,7 +339,7 @@ float FourierBxdfData::sampleFourier( const float* ak , const float* recip , int
     double F, f;
     while( true ){
         double cosPhi = cos(phi);
-        double sinPhi = sqrt( max( 0.0 , 1.0f - cosPhi * cosPhi ) );
+        double sinPhi = sqrt( std::max( 0.0 , 1.0f - cosPhi * cosPhi ) );
         double cosPrevPhi = cosPhi , cosCurPhi = 1.0;
         double sinPrevPhi = -sinPhi , sinCurPhi = 0.0;
         
@@ -388,7 +388,7 @@ int FourierBxdfData::blendCoefficients( float* ak , int channel , int offsetI , 
             if( w != 0.0f ){
                 int m;
                 float* a = bsdfTable.GetAk(offsetI + j , offsetO + i, &m );
-                nMax = max( nMax , m );
+                nMax = std::max( nMax , m );
                 for( int c = 0 ; c < channel ; ++c ){
                     for( int k = 0 ; k < m ; ++k )
                         ak[ c * bsdfTable.nMax + k ] += w * a[ c * m + k ];

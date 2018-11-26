@@ -87,7 +87,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(TypeProperty,Light);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SkyLight* light = CAST_TARGET(SkyLight);
 			light->sky = CREATE_TYPE( str , Sky );
@@ -99,7 +99,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(PropertyPasser,Light);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SkyLight* light = CAST_TARGET(SkyLight);
 			if( light->sky )

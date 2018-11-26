@@ -45,7 +45,7 @@ void Texture::_init()
 }
 
 // output the texture
-bool Texture::Output( const string& str )
+bool Texture::Output( const std::string& str )
 {	
 	// output the texture
 	return TexManager::GetSingleton().Write( str , this );
@@ -79,8 +79,8 @@ void Texture::_texCoordFilter( int& x , int& y ) const
 			y = m_iTexHeight - ( -y ) % m_iTexHeight - 1;
 		break;
 	case TCF_CLAMP:
-		x = min( (int)m_iTexWidth - 1 , max( x , 0 ) );
-		y = min( (int)m_iTexHeight - 1 , max( y , 0 ) );
+		x = std::min( (int)m_iTexWidth - 1 , std::max( x , 0 ) );
+		y = std::min( (int)m_iTexHeight - 1 , std::max( y , 0 ) );
 		break;
 	case TCF_MIRROR:
 		x = ( x >= 0 )?x:(1-x);

@@ -53,5 +53,5 @@ public:
 	// para 'str' : name of the file
 	// para 'mem' : the memory to store
 	// result     : true if loading is successful
-    bool	LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem ) override;
+    bool	LoadMesh( const std::string& str , std::shared_ptr<BufferMemory>& mem ) override;
 };

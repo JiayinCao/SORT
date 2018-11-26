@@ -47,9 +47,9 @@ static const unsigned LINE_MAXLENGTH = 4096;
 }
 	
 // load obj from file
-bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem )
+bool ObjLoader::LoadMesh( const std::string& str , std::shared_ptr<BufferMemory>& mem )
 {
-	ifstream file( str.c_str() );
+	std::ifstream file( str.c_str() );
 
 	// if the specific file is not loaded return false
 	if( false == file.is_open() )
@@ -59,18 +59,18 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 
 	while( true )
 	{
-		string prefix;
+		std::string prefix;
 		file>>prefix;
 
 		if( strcmp( prefix.c_str() , "g" ) == 0 )
 		{
 			// create a new trunk
-			string trunkname;
+			std::string trunkname;
 			file>>trunkname;
 			mem->m_TrunkBuffer.push_back( Trunk() );
 		}else if( strcmp( prefix.c_str() , "usemtl" ) == 0 )
 		{
-			string name;
+			std::string name;
 			file>>name;
 			if( mem->m_TrunkBuffer.size() )
 			{
@@ -103,7 +103,7 @@ bool ObjLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem
 			mem->m_TexCoordBuffer.push_back( v );
 		}else if( strcmp( prefix.c_str() , "f" ) == 0 && mem->m_TrunkBuffer.size() )
 		{
-			string strIndex;
+			std::string strIndex;
 			file>>strIndex;
 			VertexIndex vi0 = VertexIndexFromStr( strIndex );
 			file>>strIndex;

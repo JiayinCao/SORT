@@ -92,12 +92,12 @@ public:
 
 private:
 	// the memories
-	unordered_map<unsigned,Memory*> m_MemPool;
+	std::unordered_map<unsigned,Memory*> m_MemPool;
 
 	// get memory
 	Memory*	_getMemory( unsigned id ) const
 	{
-		unordered_map<unsigned,Memory*>::const_iterator it = m_MemPool.find(id);
+		std::unordered_map<unsigned,Memory*>::const_iterator it = m_MemPool.find(id);
 		if( it != m_MemPool.end() )
 			return it->second;
 		return nullptr;
@@ -106,7 +106,7 @@ private:
 	// dealloc all memory
 	void _deallocAllMemory()
 	{
-		unordered_map<unsigned,Memory*>::const_iterator it = m_MemPool.begin();
+		std::unordered_map<unsigned,Memory*>::const_iterator it = m_MemPool.begin();
 		while( it != m_MemPool.end() )
 		{
 			delete it->second;

@@ -66,7 +66,7 @@ public:
 		return m_lights[i];
 	}
 	// get lights
-	const vector<Light*>& GetLights() const
+	const std::vector<Light*>& GetLights() const
 	{return m_lights;}
 	// get sky light
 	const Light* GetSkyLight() const
@@ -82,7 +82,7 @@ public:
 	const BBox& GetBBox() const;
 
 	// get file name
-	const string& GetFileName() const
+	const std::string& GetFileName() const
 	{ return m_filename; }
 
 	// Evaluate sky
@@ -90,13 +90,13 @@ public:
 
 
 private:
-	vector<Entity*>		m_entities;			/**< Entities in the scene. */
+	std::vector<Entity*>		m_entities;			/**< Entities in the scene. */
 
 	// the primitive buffer for the scene
-	vector<Primitive*>	m_primitiveBuf;
+	std::vector<Primitive*>	m_primitiveBuf;
 
 	// the light
-	vector<Light*>		m_lights;
+	std::vector<Light*>		m_lights;
 	// distribution of light power
 	Distribution1D*		m_pLightsDis = nullptr;
 	// the sky light
@@ -106,7 +106,7 @@ private:
 	Accelerator*		m_pAccelerator = nullptr;
 
 	// the file name for the scene
-	string		m_filename;
+	std::string		m_filename;
 
 	// bounding box for the scene
 	mutable BBox	m_BBox;

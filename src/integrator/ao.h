@@ -45,7 +45,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(MaxDistanceProperty,Integrator);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			AmbientOcclusion* ao = CAST_TARGET(AmbientOcclusion);
 			if( ao )

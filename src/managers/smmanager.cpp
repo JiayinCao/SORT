@@ -26,7 +26,7 @@ SMManager::SMManager()
 SMManager::~SMManager()
 {
 	// Release all shared memory
-	std::unordered_map< string, PlatformSharedMemory >::iterator it = m_SharedMemory.begin();
+	std::unordered_map< std::string, PlatformSharedMemory >::iterator it = m_SharedMemory.begin();
 	while (it != m_SharedMemory.end())
 	{
 		ReleaseSharedMemory(it->first);
@@ -37,7 +37,7 @@ SMManager::~SMManager()
 }
 
 // Initialize shared memory
-SharedMemory SMManager::CreateSharedMemory(const string& sm_name, int size, unsigned type)
+SharedMemory SMManager::CreateSharedMemory(const std::string& sm_name, int size, unsigned type)
 {
 	// platform dependent shared memory
 	PlatformSharedMemory sm;
@@ -46,17 +46,17 @@ SharedMemory SMManager::CreateSharedMemory(const string& sm_name, int size, unsi
 	sm.CreateSharedMemory(GetFullPath(sm_name), size, type);
 
 	// push it into the map
-	m_SharedMemory.insert(make_pair(sm_name, sm));
+	m_SharedMemory.insert(std::make_pair(sm_name, sm));
 
 	// return shared memory result
 	return sm.sharedmemory;
 }
 
 // Release shared memory
-void SMManager::ReleaseSharedMemory(const string& sm_name)
+void SMManager::ReleaseSharedMemory(const std::string& sm_name)
 {
 	// Release all shared memory
-	std::unordered_map< string, PlatformSharedMemory >::iterator it = m_SharedMemory.begin();
+	std::unordered_map< std::string, PlatformSharedMemory >::iterator it = m_SharedMemory.begin();
 	while (it != m_SharedMemory.end())
 	{
 		if (it->first == sm_name)
@@ -73,10 +73,10 @@ void SMManager::ReleaseSharedMemory(const string& sm_name)
 }
 
 // Release shared memory
-SharedMemory SMManager::GetSharedMemory(const string& sm_name)
+SharedMemory SMManager::GetSharedMemory(const std::string& sm_name)
 {
 	// Release all shared memory
-	std::unordered_map< string, PlatformSharedMemory >::iterator it = m_SharedMemory.begin();
+	std::unordered_map< std::string, PlatformSharedMemory >::iterator it = m_SharedMemory.begin();
 	while (it != m_SharedMemory.end())
 	{
 		if (it->first == sm_name)

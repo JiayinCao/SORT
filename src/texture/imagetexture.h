@@ -86,7 +86,7 @@ private:
 		PH_CONSTRUCTOR(FileNameProperty,Texture);
 
 		// set value
-		void SetValue( const string& value )
+		void SetValue( const std::string& value )
 		{
 			ImageTexture* ct = CAST_TARGET(ImageTexture);
 			

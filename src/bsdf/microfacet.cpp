@@ -28,7 +28,7 @@ Blinn::Blinn( float roughnessU , float roughnessV )
     // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
     // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT.
     const static auto convert_alpha = [](float roughness) {
-        roughness = max(0.01f, roughness);
+        roughness = std::max(0.01f, roughness);
         return pow( roughness , 4.0f );
     };
     const static auto convert_exp = [](float roughness) {
@@ -80,7 +80,7 @@ Vector Blinn::sample_f( const BsdfSample& bs ) const
     const float sin_phi_h_sq = sin_phi_h * sin_phi_h;
     const float alpha = expU * (1.0f - sin_phi_h_sq) + expV * sin_phi_h_sq;
     const float cos_theta = std::pow(bs.u, 1.0f / (alpha + 2.0f));
-    const float sin_theta = sqrtf(max(0.0f, 1.0f - cos_theta * cos_theta));
+    const float sin_theta = sqrtf(std::max(0.0f, 1.0f - cos_theta * cos_theta));
 
     return SphericalVec(sin_theta, cos_theta, phi);
 }

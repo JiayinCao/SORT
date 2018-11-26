@@ -29,9 +29,9 @@
 #include "material/material.h"
 
 // find specific material
-std::shared_ptr<Material> MatManager::FindMaterial( const string& mat_name ) const
+std::shared_ptr<Material> MatManager::FindMaterial( const std::string& mat_name ) const
 {
-    std::unordered_map< string , std::shared_ptr<Material> >::const_iterator it = m_matPool.find( mat_name );
+    std::unordered_map< std::string , std::shared_ptr<Material> >::const_iterator it = m_matPool.find( mat_name );
     return it == m_matPool.end() ? nullptr : it->second;
 }
 
@@ -53,7 +53,7 @@ unsigned MatManager::ParseMatFile( TiXmlNode* mat_node )
 	while( material )
 	{
 		// parse the material
-		string name = material->Attribute( "name" );
+		std::string name = material->Attribute( "name" );
 
 		// check if there is a material with the specific name
 		if( FindMaterial( name ) != 0 )

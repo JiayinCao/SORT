@@ -37,12 +37,12 @@ public:
     // destructor
     virtual ~PropertyHandler(){}
 	// set value
-	virtual void SetValue( const string& value ) {}
+	virtual void SetValue( const std::string& value ) {}
 	// set texture
 	virtual void SetValue( Texture* value ) {}
 
 	// property name
-	string	m_name;
+	std::string	m_name;
 	// the target
 	T*		m_target;
 
@@ -63,7 +63,7 @@ public:
 	virtual ~PropertySet() { _clearProperty(); }
 
 	// set property
-	bool SetProperty( const string& name , const string& value )
+	bool SetProperty( const std::string& name , const std::string& value )
 	{
 		// get the property handler first
 		PropertyHandler<T>* ph = _getPropertyHandler( name );
@@ -80,7 +80,7 @@ public:
 		return true;
 	}
 	// set property
-	bool SetProperty( const string& name , Texture* value )
+	bool SetProperty( const std::string& name , Texture* value )
 	{
 		// get the property handler first
 		PropertyHandler<T>* ph = _getPropertyHandler( name );
@@ -99,7 +99,7 @@ public:
 // protected field
 protected:
 	// the propery set
-	unordered_map< string , PropertyHandler<T>* > m_propertySet;
+	std::unordered_map< std::string , PropertyHandler<T>* > m_propertySet;
 
 	// register property
 	void _registerAllProperty(){}
@@ -107,7 +107,7 @@ protected:
 	// clear registered properties
 	void _clearProperty()
 	{
-		typename unordered_map< string , PropertyHandler<T>* >::iterator it = m_propertySet.begin();
+		typename std::unordered_map< std::string , PropertyHandler<T>* >::iterator it = m_propertySet.begin();
 		while( it != m_propertySet.end() )
 		{
 			delete it->second;
@@ -117,14 +117,14 @@ protected:
 	}
 
 	// set property
-	void _registerProperty( const string& name , PropertyHandler<T>* ph )
+	void _registerProperty( const std::string& name , PropertyHandler<T>* ph )
 	{
 		ph->m_name = name;
 		m_propertySet.insert( make_pair( name , ph ) );
 	}
 
 	// get property handler
-	PropertyHandler<T>* _getPropertyHandler( const string& name ){
+	PropertyHandler<T>* _getPropertyHandler( const std::string& name ){
         return m_propertySet.count( name ) ? m_propertySet[name] : nullptr;
 	}
 };

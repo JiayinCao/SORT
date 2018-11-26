@@ -51,24 +51,24 @@ public:
 	// para 'tex' : texture of the output
 	// para 'type': the way we output the texture
 	// result     : 'true' if the texture is output successfully
-	bool Write( const string& str , const Texture* tex );
+	bool Write( const std::string& str , const Texture* tex );
 
 	// load the image from file , if the specific image is already existed in the current system , just return the pointer
 	// para 'str'  : name of the image file
 	// para 'tex'  : output to the texture
 	// result      : 'true' if loading is successful
-	bool Read( const string& str , ImageTexture* tex );
+	bool Read( const std::string& str , ImageTexture* tex );
     
 private:
 	// map a string to the image memory
-    unordered_map< string , std::shared_ptr<ImgMemory> > m_ImgContainer;
+    std::unordered_map< std::string , std::shared_ptr<ImgMemory> > m_ImgContainer;
 
     // para 'name'  : Load image file
     // return       : Return value
-    bool loadImage(const string& name, std::shared_ptr<ImgMemory>& mem);
+    bool loadImage(const std::string& name, std::shared_ptr<ImgMemory>& mem);
     // para 'name'  : Load image file
     // return       : Return value
-    bool saveImage(const string& name, const Texture* mem);
+    bool saveImage(const std::string& name, const Texture* mem);
 
 	friend class Singleton<TexManager>;
 };

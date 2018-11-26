@@ -103,7 +103,7 @@ private:
 	{
 	public:
 		PH_CONSTRUCTOR(PTMISProperty,Integrator);
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			BidirPathTracing* bdpt = CAST_TARGET(BidirPathTracing);
 			if( bdpt )

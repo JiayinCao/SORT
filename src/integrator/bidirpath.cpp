@@ -56,7 +56,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	
 	//-----------------------------------------------------------------------------------------------------
 	// Trace light path from light source
-	vector<BDPT_Vertex> light_path;
+	std::vector<BDPT_Vertex> light_path;
 	Ray wi = light_ray;
 	double vc = (light->IsDelta())?0.0f: MIS(cosAtLight / light_emission_pdf);
 	double vcm = MIS(light_pdfa / light_emission_pdf);

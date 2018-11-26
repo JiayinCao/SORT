@@ -37,7 +37,7 @@
 #define SORT_MATERIAL_GET_PROP_COMMON(v,prop,T)         T v; prop.GetMaterialProperty(bsdf,v);
 #define SORT_MATERIAL_GET_PROP_FLOAT(v,prop)            SORT_MATERIAL_GET_PROP_COMMON(v,prop,float)
 #define SORT_MATERIAL_GET_PROP_COLOR(v,prop)            SORT_MATERIAL_GET_PROP_COMMON(v,prop,Spectrum)
-#define SORT_MATERIAL_GET_PROP_STR(v,prop)              SORT_MATERIAL_GET_PROP_COMMON(v,prop,string)
+#define SORT_MATERIAL_GET_PROP_STR(v,prop)              SORT_MATERIAL_GET_PROP_COMMON(v,prop,std::string)
 #define SORT_MATERIAL_GET_PROP_VECTOR(v,prop)           SORT_MATERIAL_GET_PROP_COMMON(v,prop,Vector)
 
 class Bsdf;
@@ -70,7 +70,7 @@ public:
     
     virtual void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) {sAssertMsg(false, MATERIAL, "Get spectrum from wrong data type" );}
     virtual void GetMaterialProperty( Bsdf* bsdf , float& result ) {sAssertMsg(false, MATERIAL, "Get float from wrong data type" );}
-    virtual void GetMaterialProperty( Bsdf* bsdf , string& result ) {sAssertMsg(false, MATERIAL, "Get string from wrong data type" );}
+    virtual void GetMaterialProperty( Bsdf* bsdf , std::string& result ) {sAssertMsg(false, MATERIAL, "Get string from wrong data type" );}
     virtual void GetMaterialProperty( Bsdf* bsdf , Vector& result ) {sAssertMsg(false, MATERIAL, "Get vector from wrong data type" );}
     
     // get node return type
@@ -84,10 +84,10 @@ public:
     
 protected:
     // node properties
-    std::unordered_map< string , MaterialNodeProperty * > m_props;
+    std::unordered_map< std::string , MaterialNodeProperty * > m_props;
     
     // get node property
-    MaterialNodeProperty*    getProperty( const string& name );
+    MaterialNodeProperty*    getProperty( const std::string& name );
     
     // valid node
     bool m_node_valid = true;
@@ -102,7 +102,7 @@ class MaterialNodeProperty
 {
 public:
 	// set node property
-    virtual void SetNodeProperty( const string& prop ){}
+    virtual void SetNodeProperty( const std::string& prop ){}
 
     // update bsdf, this is for bxdf wrappers like Blend , Coat or any other BXDF that can attach other BXDF as input
     void UpdateBsdf( Bsdf* bsdf , Spectrum weight = Spectrum( 1.0f ) );
@@ -118,7 +118,7 @@ class MaterialNodePropertyColor : public MaterialNodeProperty
 {
 public:
     // set node property
-    void SetNodeProperty( const string& str ) override{ color = SpectrumFromStr(str); }
+    void SetNodeProperty( const std::string& str ) override{ color = SpectrumFromStr(str); }
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) {
         if( node )
             node->GetMaterialProperty(bsdf, result);
@@ -138,7 +138,7 @@ class MaterialNodePropertyFloat : public MaterialNodeProperty
 {
 public:
     // set node property
-    void SetNodeProperty( const string& str ) override{ value = (float)atof(str.c_str()); }
+    void SetNodeProperty( const std::string& str ) override{ value = (float)atof(str.c_str()); }
     void GetMaterialProperty( Bsdf* bsdf , float& result ) {
         if( node )
             node->GetMaterialProperty(bsdf, result);
@@ -156,14 +156,14 @@ private:
 class MaterialNodePropertyString : public MaterialNodeProperty
 {
 public:
-    void SetNodeProperty( const string& prop ) override { str = prop; }
-    void GetMaterialProperty( Bsdf* bsdf , string& result ) { result = str; }
+    void SetNodeProperty( const std::string& prop ) override { str = prop; }
+    void GetMaterialProperty( Bsdf* bsdf , std::string& result ) { result = str; }
     
     // get node return type
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_STR; }
     
 	// color value
-	string	str;
+	std::string	str;
 };
 
 class MaterialNodePropertyBxdf : public MaterialNodeProperty
@@ -183,7 +183,7 @@ public:
 class MaterialNodePropertyVector : public MaterialNodeProperty
 {
 public:
-    void SetNodeProperty( const string& prop ) override { vec = VectorFromStr(prop); }
+    void SetNodeProperty( const std::string& prop ) override { vec = VectorFromStr(prop); }
     void GetMaterialProperty( Bsdf* bsdf , Vector& result ) {
         if( node )
             node->GetMaterialProperty(bsdf, result);
@@ -201,7 +201,7 @@ private:
 // Register a node automatically
 class MaterialNodeRegister{
 public:
-    MaterialNodeRegister( const string& name , MaterialNodeProperty& prop , MaterialNode& node ){
+    MaterialNodeRegister( const std::string& name , MaterialNodeProperty& prop , MaterialNode& node ){
         node.m_props.insert( make_pair( name , &prop ) );
     }
 };

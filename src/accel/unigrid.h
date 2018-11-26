@@ -53,11 +53,11 @@ public:
     void Build() override;
 
 private:
-	unsigned	m_voxelCount = 0;               /**< Total number of voxels. */
-    unsigned	m_voxelNum[3] = {};             /**< Number of voxels along each axis. */
-	Vector		m_voxelExtent;                  /**< Extent of one voxel along each axis. */
-	Vector		m_voxelInvExtent;               /**< Inverse of extent of one voxel along each axis. */
-	vector<Primitive*>*	m_pVoxels = nullptr;    /**< Vector holding all voxels. */
+	unsigned	                m_voxelCount = 0;               /**< Total number of voxels. */
+    unsigned	                m_voxelNum[3] = {};             /**< Number of voxels along each axis. */
+	Vector		                m_voxelExtent;                  /**< Extent of one voxel along each axis. */
+	Vector		                m_voxelInvExtent;               /**< Inverse of extent of one voxel along each axis. */
+	std::vector<Primitive*>*	m_pVoxels = nullptr;            /**< Vector holding all voxels. */
 
 	//! Release all allocated memory.
 	void release();

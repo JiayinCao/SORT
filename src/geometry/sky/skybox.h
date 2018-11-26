@@ -72,7 +72,7 @@ private:
 		PH_CONSTRUCTOR(UpProperty,Sky);
 
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_up.LoadImageFromFile( str );
@@ -84,7 +84,7 @@ private:
 		PH_CONSTRUCTOR(DownProperty,Sky);
 
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_down.LoadImageFromFile( str );
@@ -96,7 +96,7 @@ private:
 		PH_CONSTRUCTOR(FrontProperty,Sky);
 
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_front.LoadImageFromFile( str );
@@ -108,7 +108,7 @@ private:
 		PH_CONSTRUCTOR(BackProperty,Sky);
 
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_back.LoadImageFromFile( str );
@@ -120,7 +120,7 @@ private:
 		PH_CONSTRUCTOR(LeftProperty,Sky);
 
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_left.LoadImageFromFile( str );
@@ -132,7 +132,7 @@ private:
 		PH_CONSTRUCTOR(RightProperty,Sky);
 
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			SkyBox* sky = CAST_TARGET(SkyBox);
 			sky->m_right.LoadImageFromFile( str );

@@ -38,7 +38,7 @@ static PlyProperty face_props[] =
 };
 
 // load obj from file
-bool PlyLoader::LoadMesh( const string& str , std::shared_ptr<BufferMemory>& mem )
+bool PlyLoader::LoadMesh( const std::string& str , std::shared_ptr<BufferMemory>& mem )
 {
 	// some variable that will be used later
 	int nelems;

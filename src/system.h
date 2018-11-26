@@ -51,9 +51,9 @@ public:
 	void Uninit();
 
 	// get resource path
-	const string& GetResourcePath() const { return m_ResourcePath; }
+	const std::string& GetResourcePath() const { return m_ResourcePath; }
 	// set resource path
-	void SetResourcePath( const string& str ) { m_ResourcePath = str; }
+	void SetResourcePath( const std::string& str ) { m_ResourcePath = str; }
 
 private:
     // image sensor
@@ -67,14 +67,14 @@ private:
     char*			m_pProgress = nullptr;
 
 	// the integrator type
-	string			m_integratorType;
+	std::string			m_integratorType;
 	// integrator properties
 	struct Property
 	{
-		string _name;
-		string _property;
+		std::string _name;
+		std::string _property;
 	};
-	vector<Property>	m_integratorProperty;
+	std::vector<Property>	m_integratorProperty;
 	// the scene for rendering
 	Scene			m_Scene;
 	// the sampler
@@ -83,8 +83,8 @@ private:
     unsigned		m_iSamplePerPixel = 0;
 
 	// path for the resource
-	string			m_ResourcePath;
-	string			m_OutputFileName;
+	std::string			m_ResourcePath;
+	std::string			m_OutputFileName;
 
 	// number of thread to allocate
     unsigned		m_thread_num = 1;

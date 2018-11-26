@@ -190,17 +190,17 @@ void Scene::Release()
 	SAFE_DELETE( m_pAccelerator );
 	SAFE_DELETE( m_pLightsDis );
 
-	vector<Primitive*>::iterator it = m_primitiveBuf.begin();
+	std::vector<Primitive*>::iterator it = m_primitiveBuf.begin();
 	while( it != m_primitiveBuf.end() )
 		delete *it++;
 	m_primitiveBuf.clear();
 
-	vector<Entity*>::iterator pri_it = m_entities.begin();
+	std::vector<Entity*>::iterator pri_it = m_entities.begin();
 	while( pri_it != m_entities.end() )
 		delete *pri_it++;
 	m_entities.clear();
 
-	vector<Light*>::iterator light_it = m_lights.begin();
+	std::vector<Light*>::iterator light_it = m_lights.begin();
 	while( light_it != m_lights.end() )
 		delete *light_it++;
 	m_lights.clear();
@@ -209,7 +209,7 @@ void Scene::Release()
 // generate primitive buffer
 void Scene::_generatePriBuf()
 {
-	vector<Entity*>::const_iterator it = m_entities.begin();
+	std::vector<Entity*>::const_iterator it = m_entities.begin();
 	while( it != m_entities.end() ){
 		(*it)->FillScene( *this );
 		it++;
@@ -251,7 +251,7 @@ const BBox& Scene::GetBBox() const
 		return m_pAccelerator->GetBBox();
 
 	// if there is no bounding box for the scene, generate one
-	vector<Primitive*>::const_iterator it = m_primitiveBuf.begin();
+	std::vector<Primitive*>::const_iterator it = m_primitiveBuf.begin();
 	while( it != m_primitiveBuf.end() )
 	{
 		m_BBox.Union( (*it)->GetBBox() );

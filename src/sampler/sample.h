@@ -90,13 +90,13 @@ class PixelSample
 {
 // public field
 public:
-	float				img_u , img_v;	// the range of the float2 should be (0,0) <-> (1,1)
-	float				dof_u , dof_v;	// the range of the float2 should be (-1,-1) <-> (1,1)
-	LightSample*		light_sample;
-	BsdfSample*			bsdf_sample;
-	vector<unsigned>	light_dimension;
-	vector<unsigned>	bsdf_dimension;
-	float*				data;		// the data to used
+	float					img_u , img_v;	// the range of the float2 should be (0,0) <-> (1,1)
+	float					dof_u , dof_v;	// the range of the float2 should be (-1,-1) <-> (1,1)
+	LightSample*			light_sample;
+	BsdfSample*				bsdf_sample;
+	std::vector<unsigned>	light_dimension;
+	std::vector<unsigned>	bsdf_dimension;
+	float*					data;		// the data to used
 
 	// default constructor
 	PixelSample()

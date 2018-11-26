@@ -25,7 +25,7 @@ class MmapSharedMemory
 {
 public:
 	// Initialize shared memory
-	void CreateSharedMemory(const string& sm_name, int size, unsigned type);
+	void CreateSharedMemory(const std::string& sm_name, int size, unsigned type);
 
 	// Release share memory resource
 	void ReleaseSharedMemory();

@@ -109,7 +109,7 @@ inline float AbsCosTheta(const Vector &w){
 }
 
 inline float SinTheta2(const Vector &w){
-    return max(0.f, 1.f - CosTheta(w)*CosTheta(w));
+    return std::max(0.f, 1.f - CosTheta(w)*CosTheta(w));
 }
 
 inline float CosTheta2(const Vector &w){
@@ -199,7 +199,7 @@ inline Vector reflect(const Vector& v) {
 inline Vector refract(const Vector& v, const Vector& n, float in_eta, float ext_eta, bool& inner_reflection){
     const float coso = Dot(v, n);
     const float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
-    const float t = 1.0f - eta * eta * max(0.0f, 1.0f - coso * coso);
+    const float t = 1.0f - eta * eta * std::max(0.0f, 1.0f - coso * coso);
 
     // total inner reflection
     inner_reflection = (t <= 0.0f);

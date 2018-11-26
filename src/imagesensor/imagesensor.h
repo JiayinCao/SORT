@@ -80,7 +80,7 @@ public:
 	// add radiance
 	virtual void UpdatePixel(int x, int y, const Spectrum& color)
 	{
-        lock_guard<PlatformSpinlockMutex> lock(m_mutex[x][y]);
+        std::lock_guard<PlatformSpinlockMutex> lock(m_mutex[x][y]);
 		Spectrum _color = m_rendertarget.GetColor(x, y);
 		m_rendertarget.SetColor(x, y, _color + color);
 	}

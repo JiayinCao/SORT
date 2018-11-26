@@ -60,7 +60,7 @@ class StatsItemBase{
 public:
     virtual std::string ToString() const = 0;
     virtual void Merge( const StatsItemBase* item ) = 0;
-    virtual shared_ptr<StatsItemBase> MakeItem() const = 0;
+    virtual std::shared_ptr<StatsItemBase> MakeItem() const = 0;
 };
 
 #define SORT_STATS(eva) eva
@@ -91,8 +91,8 @@ public:\
         sAssertMsg( p != nullptr , GENERAL , "Merging incorrect stats data." );\
         data += p->data;\
     }\
-    shared_ptr<StatsItemBase> MakeItem() const override{\
-        return make_shared<NAME>(g_Global_Default);\
+    std::shared_ptr<StatsItemBase> MakeItem() const override{\
+        return std::make_shared<NAME>(g_Global_Default);\
     }\
     DATA& data;\
 };
@@ -151,7 +151,7 @@ public:
     void EnableCategory(const std::string& s);
 
 private:
-    std::map<string, std::map<string, std::shared_ptr<StatsItemBase>>> counters;
+    std::map<std::string, std::map<std::string, std::shared_ptr<StatsItemBase>>> counters;
     std::unordered_set<std::string> categories = { "Performance" , "Statistics" };
 };
 

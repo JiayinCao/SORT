@@ -117,7 +117,7 @@ protected:
 		PH_CONSTRUCTOR(UpProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
 			camera->SetUp( VectorFromStr(str) );
@@ -131,7 +131,7 @@ protected:
 		PH_CONSTRUCTOR(TargetProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
 			camera->SetTarget( PointFromStr(str) );
@@ -145,7 +145,7 @@ protected:
 		PH_CONSTRUCTOR(WidthProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
 			camera->SetCameraWidth( (float)atof(str.c_str()) );
@@ -159,7 +159,7 @@ protected:
 		PH_CONSTRUCTOR(HeightProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			OrthoCamera* camera = CAST_TARGET(OrthoCamera);
 			camera->SetCameraHeight( (float)atof(str.c_str()) );

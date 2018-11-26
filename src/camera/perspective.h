@@ -123,7 +123,7 @@ protected:
 		PH_CONSTRUCTOR(UpProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
 			camera->SetUp( VectorFromStr(str) );
@@ -137,7 +137,7 @@ protected:
 		PH_CONSTRUCTOR(TargetProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
 			camera->SetTarget( PointFromStr(str) );
@@ -151,7 +151,7 @@ protected:
 		PH_CONSTRUCTOR(FovProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
 			camera->SetFov( (float)atof(str.c_str()) );
@@ -165,7 +165,7 @@ protected:
 		PH_CONSTRUCTOR(LenProperty,Camera);
 		
 		// set value
-		void SetValue( const string& str )
+		void SetValue( const std::string& str )
 		{
 			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
 			camera->SetLen( (float)atof(str.c_str()) );
