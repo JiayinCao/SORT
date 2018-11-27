@@ -20,6 +20,7 @@
 #include "utility/sassert.h"
 #include "utility/log.h"
 #include "math/point.h"
+#include "math/transform.h"
 
 //! @brief Interface for streaming/serialization.
 /**
@@ -132,6 +133,44 @@ public:
     //! @return     Reference of the stream itself.
     inline StreamBase&  operator >> ( Vector& v ){
         return *this >> v.x >> v.y >> v.z;
+    }
+
+    //! @brief Streaming in a transform value.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator << (const Transform& v) {
+        return *this << v.matrix;
+    }
+
+    //! @brief Streaming out a transform value.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator >> (Transform& v) {
+        *this >> v.matrix;
+        v.matrix.Inverse(v.invMatrix);
+        return *this;
+    }
+
+    //! @brief Streaming in a matrix value.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator << (const Matrix& v) {
+        for (int i = 0; i < 16; ++i)
+            *this << v.m[i];
+        return *this;
+    }
+
+    //! @brief Streaming out a matrix value.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator >> (Matrix& v) {
+        for (int i = 0; i < 16; ++i)
+            *this >> v.m[i];
+        return *this;
     }
 };
 
