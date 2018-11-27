@@ -29,7 +29,7 @@ WinSharedMemory::WinSharedMemory()
 	hMapFile = 0;
 }
 
-void WinSharedMemory::CreateSharedMemory( const string& name , int size , unsigned type )
+void WinSharedMemory::CreateSharedMemory( const std::string& name , int size , unsigned type )
 {
 	hMapFile = OpenFileMapping(
 		FILE_MAP_ALL_ACCESS,	// read/write access

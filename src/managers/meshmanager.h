@@ -31,7 +31,11 @@
 #include <memory>
 #include "stream/stream.h"
 
-// pre-declera class
+#ifdef SORT_IN_WINDOWS
+// Suppress the warning of duplicated IStream definition.
+#pragma warning(disable:4099)
+#endif
+
 class MeshLoader;
 class MeshEntity;
 
