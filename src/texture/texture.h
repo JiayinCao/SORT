@@ -20,9 +20,9 @@
 // include header file
 #include "sort.h"
 #include "spectrum/spectrum.h"
-#include "utility/enum.h"
-#include "utility/propertyset.h"
-#include "utility/creator.h"
+#include "core/enum.h"
+#include "core/propertyset.h"
+#include "core/creator.h"
 
 // pre-declare class
 class ComTexture;

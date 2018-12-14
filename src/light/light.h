@@ -19,10 +19,10 @@
 
 // include header
 #include "spectrum/spectrum.h"
-#include "utility/propertyset.h"
+#include "core/propertyset.h"
 #include "math/transform.h"
-#include "utility/creator.h"
-#include "utility/strhelper.h"
+#include "core/creator.h"
+#include "core/strhelper.h"
 #include "core/scene.h"
 #include "math/vector3.h"
 

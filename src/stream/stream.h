@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "utility/sassert.h"
-#include "utility/log.h"
+#include "core/sassert.h"
+#include "core/log.h"
 #include "math/point.h"
 #include "math/transform.h"
 

@@ -18,8 +18,8 @@
 #include "unigrid.h"
 #include "core/primitive.h"
 #include "math/intersection.h"
-#include "utility/log.h"
-#include "utility/sassert.h"
+#include "core/log.h"
+#include "core/sassert.h"
 
 SORT_STATS_DEFINE_COUNTER(sUGGridCount)
 SORT_STATS_DEFINE_COUNTER(sUniformGridX)

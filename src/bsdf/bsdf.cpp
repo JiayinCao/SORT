@@ -19,7 +19,7 @@
 #include "bxdf.h"
 #include "math/intersection.h"
 #include "sampler/sample.h"
-#include "utility/sassert.h"
+#include "core/sassert.h"
 
 // constructor
 Bsdf::Bsdf( const Intersection* _intersect , bool sub_bsdf ) : m_SubBSDF(sub_bsdf), intersect( *_intersect )

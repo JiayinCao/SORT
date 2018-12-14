@@ -17,8 +17,8 @@
 
 // include the header file
 #include "random.h"
-#include "utility/sassert.h"
-#include "utility/rand.h"
+#include "core/sassert.h"
+#include "core/rand.h"
 
 IMPLEMENT_CREATOR( RandomSampler );
 

@@ -18,7 +18,7 @@
 #pragma once
 
 #include "spectrum/spectrum.h"
-#include "utility/enum.h"
+#include "core/enum.h"
 #include "math/vector3.h"
 
 class BsdfSample;

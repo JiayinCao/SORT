@@ -19,7 +19,7 @@
 #include "skybox.h"
 #include "math/vector3.h"
 #include <math.h>
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 
 IMPLEMENT_CREATOR( SkyBox );
 

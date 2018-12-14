@@ -16,7 +16,7 @@
  */
 
 #include "regular.h"
-#include "utility/sassert.h"
+#include "core/sassert.h"
 #include <math.h>
 
 IMPLEMENT_CREATOR( RegularSampler );

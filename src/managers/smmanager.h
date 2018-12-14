@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "utility/singleton.h"
+#include "core/singleton.h"
 #include <unordered_map>
 #include "platform/sharedmemory/sharedmemory.h"
 

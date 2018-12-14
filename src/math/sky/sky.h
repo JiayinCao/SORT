@@ -19,7 +19,7 @@
 
 // include the header
 #include "spectrum/spectrum.h"
-#include "utility/propertyset.h"
+#include "core/propertyset.h"
 #include "math/vector3.h"
 #include "math/transform.h"
 

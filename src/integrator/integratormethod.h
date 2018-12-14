@@ -19,7 +19,7 @@
 
 // include the header
 #include "integrator.h"
-#include "utility/enum.h"
+#include "core/enum.h"
 
 // pre-decleration
 class Intersection;

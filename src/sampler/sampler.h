@@ -22,7 +22,7 @@
 #include "sample.h"
 #include "managers/memmanager.h"
 #include <algorithm>
-#include "utility/creator.h"
+#include "core/creator.h"
 
 /////////////////////////////////////////////////////////////////////////////////
 // definitation of the sampler

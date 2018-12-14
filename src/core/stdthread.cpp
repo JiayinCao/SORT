@@ -18,8 +18,8 @@
 #include "stdthread.h"
 
 #include "managers/memmanager.h"
-#include "utility/stats.h"
-#include "utility/profile.h"
+#include "core/stats.h"
+#include "core/profile.h"
 
 // thread id
 static Thread_Local int g_ThreadId = 0;

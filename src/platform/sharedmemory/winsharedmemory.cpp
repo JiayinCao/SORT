@@ -20,8 +20,8 @@
 #if defined(SORT_IN_WINDOWS)
 
 #include "sharedmemory.h"
-#include "utility/log.h"
-#include "utility/strhelper.h"
+#include "core/log.h"
+#include "core/strhelper.h"
 
 // default constructor
 WinSharedMemory::WinSharedMemory()

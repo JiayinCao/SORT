@@ -18,7 +18,7 @@
 #pragma once
 
 #include "integrator.h"
-#include "utility/stats.h"
+#include "core/stats.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 //	definition of direct light

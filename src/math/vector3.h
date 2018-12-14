@@ -18,7 +18,7 @@
 #pragma once
 
 #include <math.h>
-#include "utility/define.h"
+#include "core/define.h"
 
 template< class T >
 class Vector3

@@ -19,7 +19,7 @@
 #include "spot.h"
 #include "math/intersection.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 
 IMPLEMENT_CREATOR( SpotLight );
 

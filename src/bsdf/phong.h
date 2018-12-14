@@ -18,7 +18,7 @@
 #pragma once
 
 #include "bxdf.h"
-#include "utility/sassert.h"
+#include "core/sassert.h"
 
 //! @brief Phong BRDF.
 /**

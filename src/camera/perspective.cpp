@@ -19,9 +19,9 @@
 #include "perspective.h"
 #include "texture/rendertarget.h"
 #include <math.h>
-#include "utility/sassert.h"
+#include "core/sassert.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 #include "imagesensor/imagesensor.h"
 #include "light/light.h"
 

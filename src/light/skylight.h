@@ -18,9 +18,9 @@
 #pragma once
 
 #include "light.h"
-#include "utility/creator.h"
+#include "core/creator.h"
 #include "math/sky/sky.h"
-#include "utility/log.h"
+#include "core/log.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 // definition of sky light

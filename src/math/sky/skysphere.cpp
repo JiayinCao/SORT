@@ -19,7 +19,7 @@
 #include "skysphere.h"
 #include "bsdf/bsdf.h"
 #include "math/ray.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 #include "managers/memmanager.h"
 
 IMPLEMENT_CREATOR( SkySphere );

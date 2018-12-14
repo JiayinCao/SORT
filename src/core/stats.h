@@ -34,8 +34,8 @@ void SortStatsEnableCategory( const std::string& s );
 #include <memory>
 #include <unordered_set>
 #include <unordered_map>
-#include "utility/sassert.h"
-#include "utility/strhelper.h"
+#include "core/sassert.h"
+#include "core/strhelper.h"
 #include "define.h"
 
 #define StatsInt                            long long

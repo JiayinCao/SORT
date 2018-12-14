@@ -24,7 +24,7 @@
 #include "light/light.h"
 #include "managers/memmanager.h"
 #include "sampler/sampler.h"
-#include "utility/log.h"
+#include "core/log.h"
 
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 

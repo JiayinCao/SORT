@@ -17,8 +17,8 @@
 
 #include "square.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
-#include "utility/rand.h"
+#include "core/samplemethod.h"
+#include "core/rand.h"
 
 // sample a point on shape
 Point Square::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const

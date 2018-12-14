@@ -17,9 +17,9 @@
 
 // include the headers
 #include "memmanager.h"
-#include "utility/define.h"
-#include "utility/log.h"
-#include "utility/strhelper.h"
+#include "core/define.h"
+#include "core/log.h"
+#include "core/strhelper.h"
 
 // default constructor
 MemManager::MemManager()

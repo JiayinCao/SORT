@@ -18,7 +18,7 @@
 #pragma once
 
 #include "sort.h"
-#include "utility/define.h"
+#include "core/define.h"
 #include <math.h>
 
 ///////////////////////////////////////////////////////////////////

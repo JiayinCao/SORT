@@ -19,7 +19,7 @@
 
 // include the header
 #include "texture.h"
-#include "utility/strhelper.h"
+#include "core/strhelper.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 //	definition of check box texture

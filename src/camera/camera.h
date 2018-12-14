@@ -19,11 +19,11 @@
 
 #include "math/point.h"
 #include "math/ray.h"
-#include "utility/enum.h"
+#include "core/enum.h"
 #include "spectrum/spectrum.h"
-#include "utility/propertyset.h"
-#include "utility/strhelper.h"
-#include "utility/creator.h"
+#include "core/propertyset.h"
+#include "core/strhelper.h"
+#include "core/creator.h"
 #include "math/vector2.h"
 
 class PixelSample;

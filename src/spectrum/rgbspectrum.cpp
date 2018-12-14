@@ -17,7 +17,7 @@
 
 // include the header
 #include "rgbspectrum.h"
-#include "utility/define.h"
+#include "core/define.h"
 #include "material/material_node.h"
 
 // default constructor

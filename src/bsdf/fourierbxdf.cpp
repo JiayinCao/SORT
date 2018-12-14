@@ -19,7 +19,7 @@
 #include "fourierbxdf.h"
 #include "bsdf.h"
 #include "managers/memmanager.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 #include <fstream>
 
 void FourierBxdfData::LoadData( const std::string& filename )

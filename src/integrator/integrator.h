@@ -21,10 +21,10 @@
 #include "spectrum/spectrum.h"
 #include "managers/memmanager.h"
 #include "sampler/sampler.h"
-#include "utility/creator.h"
-#include "utility/propertyset.h"
-#include "utility/stats.h"
-#include "utility/profile.h"
+#include "core/creator.h"
+#include "core/propertyset.h"
+#include "core/stats.h"
+#include "core/profile.h"
 #include "core/primitive.h"
 
 // pre-declera classes

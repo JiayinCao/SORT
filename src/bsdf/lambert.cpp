@@ -18,7 +18,7 @@
 #include "lambert.h"
 #include "math/vector3.h"
 #include "bsdf.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 #include "sampler/sample.h"
 
 // evaluate bxdf
