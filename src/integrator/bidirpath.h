@@ -20,7 +20,7 @@
 #include "integrator.h"
 #include "math/point.h"
 #include "math/vector3.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 
 class	Primitive;
 class	Bsdf;

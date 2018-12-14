@@ -17,7 +17,7 @@
 
 #include "bsdf.h"
 #include "bxdf.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 #include "sampler/sample.h"
 #include "utility/sassert.h"
 

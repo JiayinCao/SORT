@@ -17,7 +17,7 @@
 
 // include header
 #include "pointlight.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 #include "utility/samplemethod.h"
 #include "sampler/sample.h"
 

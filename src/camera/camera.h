@@ -18,7 +18,7 @@
 #pragma once
 
 #include "math/point.h"
-#include "geometry/ray.h"
+#include "math/ray.h"
 #include "utility/enum.h"
 #include "spectrum/spectrum.h"
 #include "utility/propertyset.h"

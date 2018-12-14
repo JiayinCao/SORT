@@ -18,7 +18,7 @@
 #pragma once
 
 #include "accelerator.h"
-#include "geometry/bbox.h"
+#include "math/bbox.h"
 
 //! @brief OcTree
 /**

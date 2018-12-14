@@ -19,7 +19,7 @@
 
 #include "light.h"
 #include "utility/creator.h"
-#include "geometry/sky/sky.h"
+#include "math/sky/sky.h"
 #include "utility/log.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -45,7 +45,7 @@ public:
 	// sample a ray from light
 	// para 'ls'       : light sample
 	// para 'r'       : the light vector
-	// para 'pdf'      : the properbility density function
+	// para 'pdf'      : the probability density function
 	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const;
 
 	// sample light density

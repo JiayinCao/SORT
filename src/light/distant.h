@@ -18,7 +18,7 @@
 #pragma once
 
 #include "light.h"
-#include "geometry/scene.h"
+#include "core/scene.h"
 
 //////////////////////////////////////////////////////////////////////
 // definition of distant

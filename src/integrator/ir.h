@@ -19,7 +19,7 @@
 
 // include the header file
 #include "integrator.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 
 class Bsdf;
 
