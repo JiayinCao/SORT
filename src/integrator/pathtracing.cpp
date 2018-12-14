@@ -16,9 +16,9 @@
  */
 
 #include "pathtracing.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 #include "bsdf/bsdf.h"
-#include "geometry/scene.h"
+#include "core/scene.h"
 #include "integratormethod.h"
 #include "camera/camera.h"
 #include "utility/log.h"

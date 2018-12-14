@@ -18,8 +18,8 @@
 // include header file
 #include "direct.h"
 #include "integratormethod.h"
-#include "geometry/intersection.h"
-#include "geometry/scene.h"
+#include "math/intersection.h"
+#include "core/scene.h"
 #include "bsdf/bsdf.h"
 #include "light/light.h"
 #include "managers/memmanager.h"

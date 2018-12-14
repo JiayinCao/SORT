@@ -18,7 +18,7 @@
 #pragma once
 
 #include "accelerator.h"
-#include "geometry/primitive.h"
+#include "core/primitive.h"
 
 //! @brief Bounding volume hierarchy.
 /**

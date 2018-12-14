@@ -15,26 +15,17 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "accelerator.h"
+// include the header
+#include "intersection.h"
+#include "light/light.h"
 #include "core/primitive.h"
 
-SORT_STATS_DEFINE_COUNTER(sRayCount)
-SORT_STATS_DEFINE_COUNTER(sShadowRayCount)
-SORT_STATS_DEFINE_COUNTER(sIntersectionTest)
-
-// Generate the bounding box for the primitive set.
-void Accelerator::computeBBox()
+// get the emissive
+Spectrum Intersection::Le( const Vector& wo , float* directPdfA , float* emissionPdf ) const
 {
-	// reset bounding box
-	m_bbox.InvalidBBox();
-
-	// update bounding box again
-    for( auto primitive : *m_primitives )
-		m_bbox.Union( primitive->GetBBox() );
-
-	// enlarge the bounding box a little
-	static const float threshold = 0.001f;
-	Vector delta = (m_bbox.m_Max - m_bbox.m_Min ) * threshold;
-	m_bbox.m_Min -= delta;
-	m_bbox.m_Max += delta;
+	if( primitive == 0 ) return 0.0f;
+	Light* light = primitive->GetLight();
+	if( light ) 
+		return light->Le( *this , wo , directPdfA , emissionPdf );
+	return 0.0f;
 }

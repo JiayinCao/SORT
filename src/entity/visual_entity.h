@@ -19,7 +19,7 @@
 
 #include "entity.h"
 #include <vector>
-#include "geometry/primitive.h"
+#include "core/primitive.h"
 #include "managers/meshmanager.h"
 #include "math/transform.h"
 

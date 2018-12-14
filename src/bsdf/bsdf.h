@@ -21,7 +21,7 @@
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
 #include "utility/enum.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 
 class Bxdf;
 class BsdfSample;

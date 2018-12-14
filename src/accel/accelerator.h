@@ -19,7 +19,7 @@
 
 #include "utility/define.h"
 #include <vector>
-#include "geometry/bbox.h"
+#include "math/bbox.h"
 #include "utility/creator.h"
 #include "utility/stats.h"
 #include "utility/profile.h"

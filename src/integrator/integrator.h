@@ -25,7 +25,7 @@
 #include "utility/propertyset.h"
 #include "utility/stats.h"
 #include "utility/profile.h"
-#include "geometry/primitive.h"
+#include "core/primitive.h"
 
 // pre-declera classes
 class	Ray;

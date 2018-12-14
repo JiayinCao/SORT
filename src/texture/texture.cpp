@@ -20,7 +20,7 @@
 #include <math.h>
 #include "managers/texmanager.h"
 #include "compositetexture.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 
 // default constructor
 Texture::Texture()

@@ -23,7 +23,7 @@
 #include "math/transform.h"
 #include "utility/creator.h"
 #include "utility/strhelper.h"
-#include "geometry/scene.h"
+#include "core/scene.h"
 #include "math/vector3.h"
 
 class Intersection;

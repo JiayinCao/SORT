@@ -16,8 +16,8 @@
  */
 
 #include "unigrid.h"
-#include "geometry/primitive.h"
-#include "geometry/intersection.h"
+#include "core/primitive.h"
+#include "math/intersection.h"
 #include "utility/log.h"
 #include "utility/sassert.h"
 

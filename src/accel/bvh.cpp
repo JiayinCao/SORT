@@ -17,10 +17,10 @@
 
 #include "bvh.h"
 #include <algorithm>
-#include "geometry/ray.h"
+#include "math/ray.h"
 #include "utility/log.h"
 #include "managers/memmanager.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 
 SORT_STATS_DEFINE_COUNTER(sBvhNodeCount)
 SORT_STATS_DEFINE_COUNTER(sBvhLeafNodeCount)
