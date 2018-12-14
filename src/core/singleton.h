@@ -30,8 +30,7 @@ class	Singleton
 //public method
 public:
 	// destructor
-	virtual ~Singleton(){
-	}
+	virtual ~Singleton(){}
 
 	// get singleton
 	static T& GetSingleton(){

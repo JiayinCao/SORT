@@ -18,7 +18,7 @@
 #pragma once
 
 #include "material_node.h"
-#include "stream/stream.h"
+#include "core/resource.h"
 
 class Bsdf;
 class Intersection;
@@ -31,7 +31,7 @@ class Intersection;
  * textures or any other information. For invalid material node graph tree, a red default material is returned as default.
  * Material class just holds a root node of material node tree. The exact definition of materials are defined in Blender.
  */
-class Material : public SerializableObject
+class Material : public Resource
 {
 public:
 	//! @brief	Get the BSDF.

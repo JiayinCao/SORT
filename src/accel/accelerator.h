@@ -24,10 +24,6 @@
 #include "core/stats.h"
 #include "core/profile.h"
 
-class Primitive;
-class Intersection;
-class Ray;
-
 //! @brief Spatial acceleration structure interface.
 /**
  * Accelerator is an interface rather than a base class. There is no instance of it.
@@ -35,13 +31,13 @@ class Ray;
  * Tracing a ray against the scene without a spatial acceleration structure is O(N) where
  * N is the number of primitives. Spatial acceleration structure can optimize the 
  * algorithm so that it is O(lg(N)), a significant improvement over the naive brute 
- * force ray tracing. Common spatial structures inlcude KD-Tree, BVH and Uniform Grid.
+ * force ray tracing. Common spatial structures include KD-Tree, BVH and Uniform Grid.
  */
 class	Accelerator
 {
 public:
 	//! Destructor of Accelerator, nothing is done in it.
-    virtual ~Accelerator() {};
+    virtual ~Accelerator() {}
 
     //! @brief Get intersection between the ray and the primitive set.
     //!
@@ -57,7 +53,7 @@ public:
     //!                     long as it finds an intersection. It is faster than the one with intersection information
     //!                     data and suitable for shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise it returns false.
-	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
+	virtual bool GetIntersect( const class Ray& r , class Intersection* intersect ) const = 0;
 
     //! @brief Build the acceleration structure.
 	virtual void Build() = 0;
@@ -68,13 +64,13 @@ public:
 
     //! @brief Set primitive set in the acceleration structure.
     //! @param pri The set of primitives in the scene.
-	void SetPrimitives( std::vector<Primitive*>* pri ){
+	void SetPrimitives( std::vector<class Primitive*>* pri ){
 		m_primitives = pri;
 	}
 
 protected:
-	std::vector<Primitive*>*    m_primitives;   /**< The vector holding all pritmitive pointers. */
-	BBox                        m_bbox;         /**< The bounding box of all pritmives. */
+	std::vector<class Primitive*>*      m_primitives;     /**< The vector holding all primitive pointers. */
+	BBox                                m_bbox;           /**< The bounding box of all primitives. */
 
 	//! Generate the bounding box for the primitive set.
 	void computeBBox();
