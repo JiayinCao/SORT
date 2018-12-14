@@ -18,9 +18,7 @@
 #pragma once
 
 #include "math/transform.h"
-#include "stream/stream.h"
-
-class Scene;
+#include "core/resource.h"
 
 //! @brief Basic unit of objects in world.
 /**
@@ -28,7 +26,7 @@ class Scene;
  * entity. An entity could parse itself and decouple itself into one or multiple Primitive depending how its complexity.
  * An entity itself doesn't touch rendering directly. It serves as a place where the logic operations should be performed.
  */
-class Entity : public SerializableObject{
+class Entity : public Resource {
 public:
     //! Empty virtual destructor
     virtual ~Entity() {}
@@ -53,7 +51,7 @@ public:
     //! lights in the scene.
     //!
     //! @param  scene       The scene to be filled.
-    virtual void        FillScene( Scene& scene ) {};
+    virtual void        FillScene( class Scene& scene ) {}
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
