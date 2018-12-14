@@ -21,8 +21,8 @@
 #include "core/scene.h"
 #include "light/light.h"
 #include "math/vector3.h"
-#include "utility/samplemethod.h"
-#include "utility/log.h"
+#include "core/samplemethod.h"
+#include "core/log.h"
 
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 

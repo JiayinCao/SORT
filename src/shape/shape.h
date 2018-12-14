@@ -18,7 +18,7 @@
 #pragma once
 
 #include <memory>
-#include "utility/log.h"
+#include "core/log.h"
 #include "math/transform.h"
 #include "math/bbox.h"
 #include "math/ray.h"

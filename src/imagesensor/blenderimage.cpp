@@ -16,7 +16,7 @@
  */
 
 #include "blenderimage.h"
-#include "utility/multithread/multithread.h"
+#include "core/multithread.h"
 #include "managers/smmanager.h"
 #include <mutex>
 

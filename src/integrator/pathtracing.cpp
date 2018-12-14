@@ -21,7 +21,7 @@
 #include "core/scene.h"
 #include "integratormethod.h"
 #include "camera/camera.h"
-#include "utility/log.h"
+#include "core/log.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalPathLength)
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)

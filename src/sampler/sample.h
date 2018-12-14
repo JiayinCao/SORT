@@ -19,8 +19,8 @@
 
 #include "sort.h"
 #include <vector>
-#include "utility/rand.h"
-#include "utility/define.h"
+#include "core/rand.h"
+#include "core/define.h"
 
 // Light Sample
 class	LightSample

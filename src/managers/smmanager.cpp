@@ -16,7 +16,7 @@
  */
 
 #include "smmanager.h"
-#include "utility/path.h"
+#include "core/path.h"
 
 SMManager::SMManager()
 {

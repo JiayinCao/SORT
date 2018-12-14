@@ -16,7 +16,7 @@
  */
 
 #include "thirdparty/gtest/gtest.h"
-#include "utility/multithread/stdthread.h"
+#include "core/stdthread.h"
 #include "unittest_common.h"
 #include "bsdf/bsdf.h"
 #include "sampler/sample.h"
@@ -29,7 +29,7 @@
 #include "bsdf/microfacet.h"
 #include "bsdf/dielectric.h"
 #include <thread>
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 #include <mutex>
 
 // A physically based BRDF should obey the rule of reciprocity

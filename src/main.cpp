@@ -18,10 +18,10 @@
 // include the header file
 #include "sort.h"
 #include "system.h"
-#include "utility/log.h"
-#include "utility/stats.h"
-#include "utility/profile.h"
-#include "utility/path.h"
+#include "core/log.h"
+#include "core/stats.h"
+#include "core/profile.h"
+#include "core/path.h"
 
 #include "thirdparty/gtest/gtest.h"
 

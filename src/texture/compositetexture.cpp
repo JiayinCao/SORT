@@ -18,8 +18,8 @@
 // include header file
 #include "compositetexture.h"
 #include "spectrum/spectrum.h"
-#include "utility/log.h"
-#include "utility/define.h"
+#include "core/log.h"
+#include "core/define.h"
 
 // constructor from a texture
 void ComTexture::_copy( const Texture& tex )

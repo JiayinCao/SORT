@@ -18,7 +18,7 @@
 #pragma once
 
 // include header file
-#include "utility/singleton.h"
+#include "core/singleton.h"
 #include <string>
 #include <unordered_map>
 #include <memory>

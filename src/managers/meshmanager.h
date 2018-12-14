@@ -19,9 +19,9 @@
 
 // include the headers
 #include "sort.h"
-#include "utility/singleton.h"
-#include "utility/enum.h"
-#include "utility/define.h"
+#include "core/singleton.h"
+#include "core/enum.h"
+#include "core/define.h"
 #include <vector>
 #include <unordered_map>
 #include "math/point.h"

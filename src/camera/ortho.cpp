@@ -16,7 +16,7 @@
  */
 
 #include "ortho.h"
-#include "utility/sassert.h"
+#include "core/sassert.h"
 #include "sampler/sample.h"
 #include "imagesensor/imagesensor.h"
 

@@ -17,18 +17,18 @@
 
 // include the header file
 #include "system.h"
-#include "utility/log.h"
+#include "core/log.h"
 #include "managers/texmanager.h"
 #include "managers/meshmanager.h"
 #include "managers/matmanager.h"
 #include "managers/memmanager.h"
-#include "utility/timer.h"
+#include "core/timer.h"
 #include "math/intersection.h"
-#include "utility/path.h"
-#include "utility/creator.h"
+#include "core/path.h"
+#include "core/creator.h"
 #include "sampler/sampler.h"
-#include "utility/multithread/multithread.h"
-#include "utility/strhelper.h"
+#include "core/multithread.h"
+#include "core/strhelper.h"
 #include "camera/camera.h"
 #include "integrator/integrator.h"
 #include "sampler/stratified.h"
@@ -37,8 +37,8 @@
 #include "math/vector2.h"
 #include "math/sky/sky.h"
 #include "shape/shape.h"
-#include "utility/stats.h"
-#include "utility/profile.h"
+#include "core/stats.h"
+#include "core/profile.h"
 
 extern bool g_bBlenderMode;
 extern int  g_iTileSize;

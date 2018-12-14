@@ -17,34 +17,25 @@
 
 #pragma once
 
-// include the header
 #include "sort.h"
-#include "core/enum.h"
-#include <memory>
+#include "core/log.h"
+#include <assert.h>
 
-// pre-decleration class
-class	BufferMemory;
+// assert
+#ifndef SORT_DEBUG
+    #define sAssert(expr,type) (void(0))
+    #define sAssertMsg(expr,type,str) (void(0))
+#else
+    #define sAssert(expr,type) \
+            if( false == (bool)(expr) ) {\
+                slog( CRITICAL , type , "Crashed!" );\
+                assert( false );\
+            }
 
-///////////////////////////////////////////////////////////////////////
-//	definition of meshloader
-class	MeshLoader
-{
-public:
-	// default constructor
-	MeshLoader(){ m_MeshType = MT_NONE; }
-	// destructor
-	virtual ~MeshLoader(){}
-
-	// load mesh from file
-	// para 'str' : name of the file
-	// para 'mem' : the memory to store
-	// result     : true if loading is successful
-    virtual bool LoadMesh( const std::string& str , std::shared_ptr<BufferMemory>& mem ) = 0;
-
-	// get the type of the mesh loader
-	MESH_TYPE GetMT() const { return m_MeshType; }
-
-protected:
-	// the type for the mesh
-	MESH_TYPE	m_MeshType;
-};
+    #define sAssertMsg(expr, type, str) \
+            if( false == (bool)(expr) )\
+            {\
+                slog( CRITICAL , type , str );\
+                abort();\
+            }
+#endif

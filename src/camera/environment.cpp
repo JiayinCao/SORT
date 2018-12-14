@@ -19,8 +19,8 @@
 #include "environment.h"
 #include "math/vector3.h"
 #include "math/ray.h"
-#include "utility/sassert.h"
-#include "utility/define.h"
+#include "core/sassert.h"
+#include "core/define.h"
 #include "imagesensor/imagesensor.h"
 #include <math.h>
 #include "sampler/sample.h"

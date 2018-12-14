@@ -20,7 +20,7 @@
 #include "math/intersection.h"
 #include "core/scene.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 
 IMPLEMENT_CREATOR( DistantLight );
 

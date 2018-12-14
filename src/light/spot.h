@@ -18,7 +18,7 @@
 #pragma once
 
 #include "light.h"
-#include "utility/strhelper.h"
+#include "core/strhelper.h"
 #include "math/vector3.h"
 
 ///////////////////////////////////////////////////////////////////////

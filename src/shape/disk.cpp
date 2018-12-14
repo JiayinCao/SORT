@@ -17,7 +17,7 @@
 
 // include header file
 #include "disk.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 #include "sampler/sample.h"
 
 // sample a point on shape

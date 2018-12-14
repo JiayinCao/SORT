@@ -18,14 +18,14 @@
 // include the header
 #include "sort.h"
 #include "matmanager.h"
-#include "utility/path.h"
+#include "core/path.h"
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "texmanager.h"
 #include "texture/constanttexture.h"
-#include "utility/creator.h"
+#include "core/creator.h"
 #include "bsdf/merl.h"
-#include "utility/creator.h"
-#include "utility/log.h"
+#include "core/creator.h"
+#include "core/log.h"
 #include "material/material.h"
 
 // find specific material

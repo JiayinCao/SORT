@@ -17,9 +17,9 @@
 
 // include the header
 #include "merl.h"
-#include "utility/define.h"
+#include "core/define.h"
 #include "managers/memmanager.h"
-#include "utility/path.h"
+#include "core/path.h"
 #include "math/vector3.h"
 #include <fstream>
 #include "bsdf.h"

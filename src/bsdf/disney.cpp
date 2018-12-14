@@ -19,7 +19,7 @@
 #include "disney.h"
 #include "microfacet.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 
 float ClearcoatGGX::D(const Vector& h) const {
     // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) ^ 2 )

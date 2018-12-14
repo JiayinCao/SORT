@@ -22,7 +22,7 @@
 #include "core/scene.h"
 #include "bsdf/bsdf.h"
 #include "light/light.h"
-#include "utility/log.h"
+#include "core/log.h"
 
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 

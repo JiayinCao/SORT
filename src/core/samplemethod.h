@@ -21,7 +21,7 @@
 #include "bsdf/bsdf.h"
 #include "texture/texture.h"
 #include <vector>
-#include "sassert.h"
+#include "core/sassert.h"
 
 /*
 description :

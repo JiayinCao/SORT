@@ -18,7 +18,7 @@
 // include header
 #include "pointlight.h"
 #include "math/intersection.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 #include "sampler/sample.h"
 
 IMPLEMENT_CREATOR( PointLight );

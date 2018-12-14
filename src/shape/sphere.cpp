@@ -18,8 +18,8 @@
 // include header
 #include "sphere.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
-#include "utility/log.h"
+#include "core/samplemethod.h"
+#include "core/log.h"
 
 // sample a point on shape
 Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
