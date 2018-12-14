@@ -21,8 +21,6 @@
 #include "core/enum.h"
 #include "math/vector3.h"
 
-class BsdfSample;
-
 //! @brief Brdf or btdf.
 /**
  * Bxdf is either brdf(bidirectional reflection density function) or btdf(
@@ -47,7 +45,7 @@ public:
     virtual Spectrum F( const Vector& wo , const Vector& wi ) const{
         return f( bsdfToBxdf(wo) , bsdfToBxdf(wi) );
     }
-    virtual Spectrum Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const{
+    virtual Spectrum Sample_F( const Vector& wo , Vector& wi , const class BsdfSample& bs , float* pdf ) const{
         Spectrum res = sample_f( bsdfToBxdf(wo) , wi , bs , pdf );
         wi = bxdfToBsdf(wi);
         return res;
@@ -90,7 +88,7 @@ protected:
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The Evaluated BRDF value.
-	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
+	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const class BsdfSample& bs , float* pdf ) const;
     
     //! @brief Evaluate the pdf of an existance direction given the Incident direction.
     //!

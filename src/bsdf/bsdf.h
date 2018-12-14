@@ -23,9 +23,6 @@
 #include "core/enum.h"
 #include "math/intersection.h"
 
-class Bxdf;
-class BsdfSample;
-
 #define	MAX_BXDF_COUNT 8
 
 //! @brief BSDF implementation.
@@ -44,7 +41,7 @@ public:
 
 	//! @brief Add a new bxdf in the BSDF, there will be at most 8 bxdf in it.
 	//! @param The bxdf to be added.
-	void AddBxdf( const Bxdf* bxdf );
+	void AddBxdf( const class Bxdf* bxdf );
 
 	//! @brief Evaluate the value of BSDF based on the Incident and outgoing directions.
     //! @param wo   Exitant direction in shading coordinate.
@@ -61,7 +58,7 @@ public:
     //! @param type The specific bxdf type it considers during evaluation.
     //! @param bxdf_type The specific bxdf type which it selects among all bxdfs in the BSDF.
     //! @return     The Evaluated BRDF value.
-	Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL , BXDF_TYPE* bxdf_type = 0 ) const;
+	Spectrum sample_f( const Vector& wo , Vector& wi , const class BsdfSample& bs , float* pdf , BXDF_TYPE type = BXDF_ALL , BXDF_TYPE* bxdf_type = 0 ) const;
 
     //! @brief Evaluate the pdf of an existance direction given the Incident direction.
     //! @param wo   Exitant direction in shading coordinate.
@@ -75,8 +72,8 @@ public:
 	const Intersection* GetIntersection() const { return &intersect; }
 
 private:
-    const Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
-	unsigned m_bxdfCount = 0;                   /**< Number of Bxdf in the BSDF. */
+    const class Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
+	unsigned m_bxdfCount = 0;                           /**< Number of Bxdf in the BSDF. */
 
     Vector nn;  /**< Normal at the point to be Evaluated. */
     Vector sn;  /**< Bi-tangent at the point to be evaluated. */

@@ -22,6 +22,7 @@
 #include "material/material.h"
 #include "math/intersection.h"
 #include "shape/shape.h"
+#include "managers/matmanager.h"
 
 class	Intersection;
 class	Light;
@@ -58,7 +59,10 @@ public:
 	}
 
 	// get material
-    std::shared_ptr<Material> GetMaterial() const;
+    std::shared_ptr<Material> GetMaterial() const{
+        return m_mat == nullptr ? MatManager::GetSingleton().GetDefaultMat() : m_mat;
+    }
+
 	// set material
     inline void	SetMaterial( std::shared_ptr<Material>& mat ) { m_mat = mat; }
 
