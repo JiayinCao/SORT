@@ -16,8 +16,8 @@
  */
 
 #include "kdtree.h"
-#include "geometry/primitive.h"
-#include "geometry/intersection.h"
+#include "core/primitive.h"
+#include "math/intersection.h"
 #include <algorithm>
 
 IMPLEMENT_CREATOR( KDTree );

@@ -17,7 +17,7 @@
 
 #include "visual_entity.h"
 #include "managers/matmanager.h"
-#include "geometry/scene.h"
+#include "core/scene.h"
 #include "shape/triangle.h"
 
 void MeshEntity::FillScene( Scene& scene ){

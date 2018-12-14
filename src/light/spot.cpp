@@ -17,7 +17,7 @@
 
 // include the header
 #include "spot.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 

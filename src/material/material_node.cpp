@@ -20,7 +20,7 @@
 #include "bsdf/bsdf.h"
 #include "bsdf/lambert.h"
 #include "thirdparty/tinyxml/tinyxml.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 #include "utility/log.h"
 
 // get node property

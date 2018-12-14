@@ -17,7 +17,7 @@
 
 #include "primitive.h"
 #include "light/light.h"
-#include "bbox.h"
+#include "math/bbox.h"
 #include "managers/matmanager.h"
 
 // get material

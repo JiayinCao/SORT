@@ -15,26 +15,38 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "accelerator.h"
-#include "core/primitive.h"
+#pragma once
 
-SORT_STATS_DEFINE_COUNTER(sRayCount)
-SORT_STATS_DEFINE_COUNTER(sShadowRayCount)
-SORT_STATS_DEFINE_COUNTER(sIntersectionTest)
+// include the header
+#include "math/point.h"
+#include "spectrum/spectrum.h"
+#include <float.h>
 
-// Generate the bounding box for the primitive set.
-void Accelerator::computeBBox()
+// pre-decleration class
+class Primitive;
+
+///////////////////////////////////////////////////////////////////////
+//	definition of intersection
+class	Intersection
 {
-	// reset bounding box
-	m_bbox.InvalidBBox();
+public :
+	// get the emissive
+	Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;
 
-	// update bounding box again
-    for( auto primitive : *m_primitives )
-		m_bbox.Union( primitive->GetBBox() );
-
-	// enlarge the bounding box a little
-	static const float threshold = 0.001f;
-	Vector delta = (m_bbox.m_Max - m_bbox.m_Min ) * threshold;
-	m_bbox.m_Min -= delta;
-	m_bbox.m_Max += delta;
-}
+// public field
+public:
+	// the interesection point
+	Point	intersect;
+	// the shading normal
+	Vector	normal;
+    // the geometry normal
+    Vector  gnormal;
+	// tangent vector
+	Vector	tangent;
+	// the uv coordinate
+    float	u = 0.0f , v = 0.0f;
+	// the delta distance from the orginal point
+	float	t = FLT_MAX;
+	// the intersected primitive
+	Primitive* 	primitive = nullptr;
+};

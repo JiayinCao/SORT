@@ -17,8 +17,8 @@
 
 // include header
 #include "distant.h"
-#include "geometry/intersection.h"
-#include "geometry/scene.h"
+#include "math/intersection.h"
+#include "core/scene.h"
 #include "sampler/sample.h"
 #include "utility/samplemethod.h"
 

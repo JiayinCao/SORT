@@ -17,7 +17,7 @@
 
 #include "sort.h"
 #include "bidirpath.h"
-#include "geometry/scene.h"
+#include "core/scene.h"
 #include "light/light.h"
 #include "bsdf/bsdf.h"
 #include "integratormethod.h"

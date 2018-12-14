@@ -17,8 +17,8 @@
 
 // include the header file
 #include "ao.h"
-#include "geometry/intersection.h"
-#include "geometry/scene.h"
+#include "math/intersection.h"
+#include "core/scene.h"
 #include "light/light.h"
 #include "math/vector3.h"
 #include "utility/samplemethod.h"

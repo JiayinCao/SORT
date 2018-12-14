@@ -23,7 +23,7 @@
 #include "managers/matmanager.h"
 #include "managers/memmanager.h"
 #include "utility/timer.h"
-#include "geometry/intersection.h"
+#include "math/intersection.h"
 #include "utility/path.h"
 #include "utility/creator.h"
 #include "sampler/sampler.h"
@@ -35,7 +35,7 @@
 #include <time.h>
 #include "managers/smmanager.h"
 #include "math/vector2.h"
-#include "geometry/sky/sky.h"
+#include "math/sky/sky.h"
 #include "shape/shape.h"
 #include "utility/stats.h"
 #include "utility/profile.h"

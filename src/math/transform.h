@@ -21,7 +21,7 @@
 #include "matrix.h"
 #include "math/vector3.h"
 #include "point.h"
-#include "geometry/ray.h"
+#include "math/ray.h"
 #include <math.h>
 
 class Transform;

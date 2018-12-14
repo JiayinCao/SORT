@@ -18,7 +18,7 @@
 #pragma once
 
 // include the header file
-#include "geometry/scene.h"
+#include "core/scene.h"
 #include "integrator/integrator.h"
 #include "imagesensor/blenderimage.h"
 #include "imagesensor/rendertargetimage.h"

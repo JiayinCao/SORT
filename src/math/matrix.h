@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "geometry/ray.h"
+#include "math/ray.h"
 
 ////////////////////////////////////////////////////////////////////
 //	definition of matrix

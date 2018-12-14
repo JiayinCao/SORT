@@ -17,10 +17,10 @@
 
 // include header files
 #include "integratormethod.h"
-#include "geometry/ray.h"
-#include "geometry/intersection.h"
+#include "math/ray.h"
+#include "math/intersection.h"
 #include "bsdf/bsdf.h"
-#include "geometry/primitive.h"
+#include "core/primitive.h"
 #include "material/material.h"
 #include "light/light.h"
 

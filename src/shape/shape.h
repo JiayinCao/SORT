@@ -20,9 +20,9 @@
 #include <memory>
 #include "utility/log.h"
 #include "math/transform.h"
-#include "geometry/bbox.h"
-#include "geometry/ray.h"
-#include "geometry/intersection.h"
+#include "math/bbox.h"
+#include "math/ray.h"
+#include "math/intersection.h"
 
 class LightSample;
 

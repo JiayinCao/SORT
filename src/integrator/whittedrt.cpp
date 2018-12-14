@@ -18,8 +18,8 @@
 // include the header file
 #include "whittedrt.h"
 #include "integratormethod.h"
-#include "geometry/intersection.h"
-#include "geometry/scene.h"
+#include "math/intersection.h"
+#include "core/scene.h"
 #include "bsdf/bsdf.h"
 #include "light/light.h"
 #include "utility/log.h"
