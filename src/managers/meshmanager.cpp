@@ -17,13 +17,13 @@
 
 // include the header file
 #include "meshmanager.h"
-#include "utility/strhelper.h"
+#include "core/strhelper.h"
 #include "meshio/objloader.h"
 #include "meshio/plyloader.h"
 #include "entity/visual_entity.h"
-#include "utility/path.h"
+#include "core/path.h"
 #include "bsdf/bsdf.h"
-#include "utility/log.h"
+#include "core/log.h"
 #include "stream/stream.h"
 #include "managers/matmanager.h"
 

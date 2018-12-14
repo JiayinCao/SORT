@@ -20,7 +20,7 @@
 // include the header file
 #include "sort.h"
 #include <vector>
-#include "utility/sassert.h"
+#include "core/sassert.h"
 #include "math/bbox.h"
 #include "spectrum/spectrum.h"
 #include "thirdparty/tinyxml/tinyxml.h"

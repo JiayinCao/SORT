@@ -18,9 +18,9 @@
 // include header file
 #include "texmanager.h"
 #include "texture/imagetexture.h"
-#include "utility/strhelper.h"
-#include "utility/path.h"
-#include "utility/log.h"
+#include "core/strhelper.h"
+#include "core/path.h"
+#include "core/log.h"
 #include <regex>
 
 #define TINYEXR_IMPLEMENTATION

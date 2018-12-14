@@ -17,7 +17,7 @@
 
 #include "rectangle.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 
 // sample a point on shape
 Point Rectangle::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const

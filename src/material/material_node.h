@@ -18,10 +18,10 @@
 #pragma once
 
 #include "spectrum/spectrum.h"
-#include "utility/creator.h"
+#include "core/creator.h"
 #include "spectrum/rgbspectrum.h"
 #include "math/vector4.h"
-#include "utility/strhelper.h"
+#include "core/strhelper.h"
 
 #define SORT_PROP_CAT_PROXY(v0, v1)                     v0 ## v1
 #define SORT_PROP_CAT(v0, v1)                           SORT_PROP_CAT_PROXY(v0,v1)

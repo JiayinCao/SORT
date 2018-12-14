@@ -18,7 +18,7 @@
 #include "bvh.h"
 #include <algorithm>
 #include "math/ray.h"
-#include "utility/log.h"
+#include "core/log.h"
 #include "managers/memmanager.h"
 #include "math/intersection.h"
 

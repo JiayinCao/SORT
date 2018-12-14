@@ -19,7 +19,7 @@
 
 // include the header file
 #include "vector3.h"
-#include "utility/sassert.h"
+#include "core/sassert.h"
 
 /////////////////////////////////////////////////////////////////////
 // definition of point

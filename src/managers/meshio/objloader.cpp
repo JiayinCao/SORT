@@ -21,9 +21,9 @@
 #include "math/point.h"
 #include "math/vector3.h"
 #include "managers/meshmanager.h"
-#include "utility/strhelper.h"
+#include "core/strhelper.h"
 #include "managers/matmanager.h"
-#include "utility/log.h"
+#include "core/log.h"
 
 // the maxmium length of a single line
 static const unsigned LINE_MAXLENGTH = 4096;

@@ -17,14 +17,12 @@
 
 #pragma once
 
-// somehow, pre-decleration will crash the program on Mac.
 #include "spectrum/spectrum.h"
-#include "utility/propertyset.h"
+#include "core/propertyset.h"
 #include "texture/rendertarget.h"
-#include "utility/multithread/multithread.h"
+#include "core/multithread.h"
 #include <mutex>
 
-// pre-decleration
 class RenderTask;
 
 // generate output

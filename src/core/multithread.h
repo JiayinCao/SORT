@@ -27,7 +27,7 @@ int ThreadId();
 
 #include <list>
 #include <memory>
-#include "utility/singleton.h"
+#include "core/singleton.h"
 #include "sampler/sample.h"
 #include "math/vector2.h"
 

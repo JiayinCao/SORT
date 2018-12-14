@@ -17,12 +17,12 @@
 
 #pragma once
 
-#include "utility/define.h"
+#include "core/define.h"
 #include <vector>
 #include "math/bbox.h"
-#include "utility/creator.h"
-#include "utility/stats.h"
-#include "utility/profile.h"
+#include "core/creator.h"
+#include "core/stats.h"
+#include "core/profile.h"
 
 class Primitive;
 class Intersection;

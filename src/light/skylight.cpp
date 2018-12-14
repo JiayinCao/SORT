@@ -19,7 +19,7 @@
 #include "skylight.h"
 #include "sampler/sample.h"
 #include "bsdf/bsdf.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 
 IMPLEMENT_CREATOR( SkyLight );
 

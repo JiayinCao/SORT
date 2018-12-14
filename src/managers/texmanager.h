@@ -18,8 +18,8 @@
 #pragma once
 
 // include header file
-#include "utility/singleton.h"
-#include "utility/enum.h"
+#include "core/singleton.h"
+#include "core/enum.h"
 #include <vector>
 #include <unordered_map>
 #include <memory>

@@ -20,7 +20,7 @@
 #include "sort.h"
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
-#include "utility/enum.h"
+#include "core/enum.h"
 #include "math/intersection.h"
 
 class Bxdf;

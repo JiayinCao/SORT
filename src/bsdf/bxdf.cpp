@@ -16,7 +16,7 @@
  */
 
 #include "bxdf.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 #include "sampler/sample.h"
 
 Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_weight(w), m_type(type), gnormal( DIR_UP ), doubleSided(doubleSided){

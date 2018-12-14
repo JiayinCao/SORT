@@ -19,7 +19,7 @@
 #include "ashikhmanshirley.h"
 #include "bsdf.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 
 Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
 {

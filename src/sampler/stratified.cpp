@@ -17,8 +17,8 @@
 
 // include the header
 #include "stratified.h"
-#include "utility/sassert.h"
-#include "utility/rand.h"
+#include "core/sassert.h"
+#include "core/rand.h"
 #include <math.h>
 
 IMPLEMENT_CREATOR( StratifiedSampler );

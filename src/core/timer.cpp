@@ -17,7 +17,7 @@
 
 // include the header
 #include "timer.h"
-#include "utility/log.h"
+#include "core/log.h"
 
 #if defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
 #include <unistd.h>

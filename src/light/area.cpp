@@ -18,7 +18,7 @@
 // include the header
 #include "area.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 
 IMPLEMENT_CREATOR( AreaLight );
 

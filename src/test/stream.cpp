@@ -17,7 +17,7 @@
 
 #include "thirdparty/gtest/gtest.h"
 #include "stream/fstream.h"
-#include "utility/rand.h"
+#include "core/rand.h"
 
 #define STREAM_SAMPLE_COUNT 10000
 

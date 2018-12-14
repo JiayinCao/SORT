@@ -23,7 +23,7 @@
 #include "bsdf/microfacet.h"
 #include "bsdf/disney.h"
 #include <thread>
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 
 // Check PDF evaluation 
 void checkDist( const MicroFacetDistribution* dist ){

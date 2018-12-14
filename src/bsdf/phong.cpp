@@ -18,7 +18,7 @@
 // include the header file
 #include "phong.h"
 #include "sampler/sample.h"
-#include "utility/samplemethod.h"
+#include "core/samplemethod.h"
 #include "math/matrix.h"
 
 Spectrum Phong::f( const Vector& wo , const Vector& wi ) const

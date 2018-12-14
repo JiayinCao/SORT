@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "utility/singleton.h"
+#include "core/singleton.h"
 #include <fstream>
 
 #define slog( level , type , s ) sortLog( LOG_LEVEL::LOG_##level , LOG_TYPE::LOG_##type , s , __FILE__ , __LINE__ )

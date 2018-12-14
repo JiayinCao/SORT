@@ -17,34 +17,17 @@
 
 #pragma once
 
-// include the header
-#include "sort.h"
-#include "core/enum.h"
-#include <memory>
+/*
+description :
+	Random number generation method, the default 'rand' function provided by c++ standard library is not so good,
+	another random number generation method is adapted here.
+*/
 
-// pre-decleration class
-class	BufferMemory;
+// set the seed
+void		sort_seed();
 
-///////////////////////////////////////////////////////////////////////
-//	definition of meshloader
-class	MeshLoader
-{
-public:
-	// default constructor
-	MeshLoader(){ m_MeshType = MT_NONE; }
-	// destructor
-	virtual ~MeshLoader(){}
+// generate a unsigned integer
+unsigned	sort_rand();
 
-	// load mesh from file
-	// para 'str' : name of the file
-	// para 'mem' : the memory to store
-	// result     : true if loading is successful
-    virtual bool LoadMesh( const std::string& str , std::shared_ptr<BufferMemory>& mem ) = 0;
-
-	// get the type of the mesh loader
-	MESH_TYPE GetMT() const { return m_MeshType; }
-
-protected:
-	// the type for the mesh
-	MESH_TYPE	m_MeshType;
-};
+// generate a canonical random number
+float		sort_canonical();

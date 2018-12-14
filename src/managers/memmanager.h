@@ -18,10 +18,10 @@
 #pragma once
 
 // include the header
-#include "utility/singleton.h"
-#include "utility/multithread/multithread.h"
-#include "utility/log.h"
-#include "utility/strhelper.h"
+#include "core/singleton.h"
+#include "core/multithread.h"
+#include "core/log.h"
+#include "core/strhelper.h"
 #include <unordered_map>
 
 struct Memory

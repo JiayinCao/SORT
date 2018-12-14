@@ -18,7 +18,7 @@
 #pragma once
 
 #include "stream.h"
-#include "utility/strhelper.h"
+#include "core/strhelper.h"
 
 //! @brief Streaming from file.
 /**
