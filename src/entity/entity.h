@@ -17,8 +17,11 @@
 
 #pragma once
 
+#include <list>
+#include <memory>
 #include "math/transform.h"
 #include "core/resource.h"
+#include "entity/visual.h"
 
 //! @brief Basic unit of objects in world.
 /**
@@ -47,26 +50,36 @@ public:
 
     //! @brief  Fill the scene with primitives.
     //!
-    //! Some entity, like Visual entity, will commonly fill primitives in the scene. Others like Light Entity, will fill
-    //! lights in the scene.
+    //! Each entity may have multiple visuals. Visual will be responsible for filling the scene with primivites.
     //!
     //! @param  scene       The scene to be filled.
-    virtual void        FillScene( class Scene& scene ) {}
+    void   FillScene( class Scene& scene ) {
+        for( auto visual : m_visuals )
+            visual->FillScene(scene);
+    }
+
+    //! @brief  Add visual to the entity
+    //!
+    //! @param  visual      Visual to be added in the entity.
+    void    AddVisual( std::shared_ptr<Visual> visual ){
+        m_visuals.push_back( visual );
+    }
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void        Serialize( IStreamBase& stream ) override {}
+    void    Serialize( IStreamBase& stream ) override {}
 
     //! @brief  Serialization interface. Saving data to stream.
     //!
     //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
     //!
     //! @param  stream      Output stream.
-    void        Serialize( OStreamBase& stream ) override {}
+    void    Serialize( OStreamBase& stream ) override {}
 
 protected:
-    Transform   m_transform;    /**< Transform of the entity from local space to world space. */
+    Transform                           m_transform;    /**< Transform of the entity from local space to world space. */
+    std::list<std::shared_ptr<Visual>>  m_visuals;      /**< Visual attached to this entity. */
 };
