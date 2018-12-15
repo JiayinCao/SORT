@@ -20,6 +20,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <queue>
+#include <memory>
 #include "core/singleton.h"
 
 // Default task priority is 1000.
