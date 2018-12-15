@@ -20,7 +20,8 @@
 #include "spectrum/spectrum.h"
 #include "core/propertyset.h"
 #include "texture/rendertarget.h"
-#include "core/multithread.h"
+#include "task/render_task.h"
+#include "core/thread.h"
 #include <mutex>
 
 class RenderTask;
@@ -39,9 +40,9 @@ public:
 	{
 		m_rendertarget.SetSize(m_width, m_height);
 
-		m_mutex = new PlatformSpinlockMutex*[m_width];
+		m_mutex = new spinlock_mutex*[m_width];
 		for( int i = 0 ; i < m_width ; ++i )
-			m_mutex[i] = new PlatformSpinlockMutex[m_height];
+			m_mutex[i] = new spinlock_mutex[m_height];
 	}
 
 	// set image size
@@ -52,10 +53,10 @@ public:
 	}
 
 	// finish image tile
-	virtual void FinishTile( int tile_x , int tile_y , const RenderTask& rt ){}
+	virtual void FinishTile( int tile_x , int tile_y , const Render_Task& rt ){}
 
     // store pixel information
-    virtual void StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt ) = 0;
+    virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) = 0;
     
 	// post process
     virtual void PostProcess(){
@@ -78,7 +79,7 @@ public:
 	// add radiance
 	virtual void UpdatePixel(int x, int y, const Spectrum& color)
 	{
-        std::lock_guard<PlatformSpinlockMutex> lock(m_mutex[x][y]);
+        std::lock_guard<spinlock_mutex> lock(m_mutex[x][y]);
 		Spectrum _color = m_rendertarget.GetColor(x, y);
 		m_rendertarget.SetColor(x, y, _color + color);
 	}
@@ -88,7 +89,7 @@ protected:
 	int m_height;
     
 	// the mutex
-	PlatformSpinlockMutex**	m_mutex;
+	spinlock_mutex**	m_mutex;
 
 	// the render target
 	RenderTarget m_rendertarget;

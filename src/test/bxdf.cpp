@@ -16,7 +16,7 @@
  */
 
 #include "thirdparty/gtest/gtest.h"
-#include "core/stdthread.h"
+#include "core/thread.h"
 #include "unittest_common.h"
 #include "bsdf/bsdf.h"
 #include "sampler/sample.h"
@@ -42,7 +42,7 @@ void checkReciprocity(const Bxdf* bxdf) {
         const auto f0 = bxdf->F(wo, wi) * AbsCosTheta(wo);
         const auto f1 = bxdf->F(wi, wo) * AbsCosTheta(wi);
 
-        std::lock_guard<PlatformSpinlockMutex> lock(mutex);
+        std::lock_guard<spinlock_mutex> lock(mutex);
         ASSERT_NEAR(f0.GetR(), f1.GetR(), 0.001f);
         ASSERT_NEAR(f0.GetG(), f1.GetG(), 0.001f);
         ASSERT_NEAR(f0.GetB(), f1.GetB(), 0.001f);
@@ -81,7 +81,7 @@ void checkPdf( const Bxdf* bxdf ){
         const float calculated_pdf = bxdf->Pdf( wo , wi );
         const auto f1 = bxdf->F( wo , wi );
 
-        std::lock_guard<PlatformSpinlockMutex> lock(mutex);
+        std::lock_guard<spinlock_mutex> lock(mutex);
         EXPECT_NEAR(pdf, calculated_pdf, 0.001f);
         EXPECT_TRUE( !isnan(pdf) );
         EXPECT_GE( pdf , 0.0f );

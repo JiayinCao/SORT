@@ -15,11 +15,12 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "stdthread.h"
+#include "thread.h"
 
 #include "managers/memmanager.h"
 #include "core/stats.h"
 #include "core/profile.h"
+#include "task/task.h"
 
 // thread id
 static Thread_Local int g_ThreadId = 0;
@@ -37,9 +38,9 @@ unsigned NumSystemCores()
 }
 
 // critical section
-PlatformSpinlockMutex g_mutex;
+spinlock_mutex g_mutex;
 
-void RenderThreadStd::BeginThread()
+void WorkerThread::BeginThread()
 {
 	m_thread = std::thread([&]() {
 		// setup lts
@@ -51,30 +52,11 @@ void RenderThreadStd::BeginThread()
 }
 
 // Run the thread
-void RenderThreadStd::RunThread()
+void WorkerThread::RunThread()
 {
     SORT_PROFILE("Rendering Thread")
 
-	while (true)
-	{
-        SORT_PROFILE( "Grabbing RT Task" )
-		g_mutex.lock();
-		if (RenderTaskQueue::GetSingleton().IsEmpty())
-		{
-			g_mutex.unlock();
-			break;
-		}
-		// Get a new task from the task queue
-		RenderTask task = RenderTaskQueue::GetSingleton().PopTask();
-		g_mutex.unlock();
-        SORT_PROFILE_END
-
-		// execute the task
-		task.Execute(m_pIntegrator);
-
-		// Destroy the task
-		RenderTask::DestoryRenderTask(task);
-	}
+	EXECUTING_TASKS();
 
     SortStatsFlushData();
 }

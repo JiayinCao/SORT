@@ -29,7 +29,7 @@ public:
         _registerAllProperty();
     }
 	// store pixel information
-	virtual void StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt );
+	virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt );
 
 	// post process
 	virtual void PostProcess();

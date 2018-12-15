@@ -16,6 +16,7 @@
  */
 
 // include the header file
+#include <time.h>
 #include "system.h"
 #include "core/log.h"
 #include "managers/texmanager.h"
@@ -27,18 +28,17 @@
 #include "core/path.h"
 #include "core/creator.h"
 #include "sampler/sampler.h"
-#include "core/multithread.h"
 #include "core/strhelper.h"
 #include "camera/camera.h"
 #include "integrator/integrator.h"
 #include "sampler/stratified.h"
-#include <time.h>
 #include "managers/smmanager.h"
 #include "math/vector2.h"
 #include "math/sky/sky.h"
 #include "shape/shape.h"
 #include "core/stats.h"
 #include "core/profile.h"
+#include "task/render_task.h"
 
 extern bool g_bBlenderMode;
 extern int  g_iTileSize;
@@ -139,6 +139,10 @@ void System::Uninit()
 // push rendering task
 void System::_pushRenderTask()
 {
+	std::shared_ptr<Integrator> integrator(_allocateIntegrator());
+	integrator->PreProcess();
+	integrator->SetupCamera(m_camera);
+
 	// Push render task into the queue
 	unsigned tilesize = g_iTileSize;
 	unsigned taskid = 0;
@@ -151,10 +155,6 @@ void System::_pushRenderTask()
 	m_taskDone = new bool[m_totalTask];
 	memset( m_taskDone , 0 , m_totalTask * sizeof(bool) );
 
-	RenderTask rt(m_Scene,m_pSampler,m_camera,m_taskDone,m_iSamplePerPixel);
-
-	//int tile_num_x = ceil(m_imagesensor->GetWidth() / (float)tilesize);
-	//int tile_num_y = ceil(m_imagesensor->GetHeight() / (float)tilesize);
 	Vector2i tile_num = Vector2i( (int)ceil(m_imagesensor->GetWidth() / (float)tilesize) , (int)ceil(m_imagesensor->GetHeight() / (float)tilesize) );
 
 	// start tile from center instead of top-left corner
@@ -164,22 +164,28 @@ void System::_pushRenderTask()
 	int cur_dir_len = 1;
 	const Vector2i dir[4] = { Vector2i( 0 , -1 ) , Vector2i( -1 , 0 ) , Vector2i( 0 , 1 ) , Vector2i( 1 , 0 ) };
 
+	unsigned int priority = DEFAULT_TASK_PRIORITY;
 	while (true)
 	{
 		// only process node inside the image region
 		if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y )
 		{
-			rt.taskId = taskid++;
-			rt.ori.x = cur_pos.x * tilesize;
-			rt.ori.y = cur_pos.y * tilesize;
-			rt.size.x = (tilesize < (m_imagesensor->GetWidth() - rt.ori.x)) ? tilesize : (m_imagesensor->GetWidth() - rt.ori.x);
-			rt.size.y = (tilesize < (m_imagesensor->GetHeight() - rt.ori.y)) ? tilesize : (m_imagesensor->GetHeight() - rt.ori.y);
+			auto rt = SCHEDULE_TASK<Render_Task>(priority--);
+			rt->scene = &m_Scene;
+			rt->sampler = m_pSampler;
+			rt->camera = m_camera;
+			rt->taskDone = m_taskDone;
+			rt->samplePerPixel = m_iSamplePerPixel;
+			rt->integrator = integrator;
+
+			rt->taskId = taskid++;
+			rt->ori.x = cur_pos.x * tilesize;
+			rt->ori.y = cur_pos.y * tilesize;
+			rt->size.x = (tilesize < (m_imagesensor->GetWidth() - rt->ori.x)) ? tilesize : (m_imagesensor->GetWidth() - rt->ori.x);
+			rt->size.y = (tilesize < (m_imagesensor->GetHeight() - rt->ori.y)) ? tilesize : (m_imagesensor->GetHeight() - rt->ori.y);
 
 			// create new pixel samples
-			rt.pixelSamples = new PixelSample[m_iSamplePerPixel];
-
-			// push the render task
-            RenderTaskQueue::GetSingleton().PushTask( rt );
+			rt->pixelSamples = new PixelSample[m_iSamplePerPixel];
 		}
 
 		// turn to the next direction
@@ -204,26 +210,25 @@ void System::_executeRenderingTasks()
 {
     m_imagesensor->PreProcess();
 
-    std::shared_ptr<Integrator> integrator(_allocateIntegrator());
-	integrator->PreProcess();
-	integrator->SetupCamera(m_camera);
-
 	// pre allocate memory for the specific thread
-	for( unsigned i = 0 ; i < m_thread_num ; ++i )
+	for( unsigned i = 0 ; i <= m_thread_num ; ++i )
 		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 1024 , i );
     
-    std::vector< std::unique_ptr<PlatformThreadUnit> > threads;
+    std::vector< std::unique_ptr<WorkerThread> > threads;
     for( unsigned i = 0 ; i < m_thread_num ; ++i )
-        threads.push_back( std::unique_ptr<PlatformThreadUnit>( new PlatformThreadUnit( i , integrator ) ) );
+        threads.push_back( std::unique_ptr<WorkerThread>( new WorkerThread( i + 1 ) ) );
 
     // start all threads
-    for_each( threads.begin() , threads.end() , []( std::unique_ptr<PlatformThreadUnit>& thread ) { thread->BeginThread(); } );
+    for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->BeginThread(); } );
 
-    // output progress
-    _outputProgress();
-    
+    // no output progress for now.
+	// will need to support low priority thread in the future for such tasks.
+    //_outputProgress();
+
+	EXECUTING_TASKS();
+
 	// wait for all the threads to be finished
-    for_each( threads.begin() , threads.end() , []( std::unique_ptr<PlatformThreadUnit>& thread ) { thread->Join(); } );
+    for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->Join(); } );
 }
 
 // allocate integrator

@@ -17,7 +17,7 @@
 
 #pragma once
 
-// include the header file
+#include <list>
 #include "integrator.h"
 #include "math/intersection.h"
 
