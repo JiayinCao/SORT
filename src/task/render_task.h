@@ -15,28 +15,20 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include header file
-#include "material.h"
-#include "bsdf/bsdf.h"
-#include "managers/memmanager.h"
-#include "core/log.h"
+#pragma once
 
-Bsdf* Material::GetBsdf( const Intersection* intersect ) const
-{
-        Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-	m_root.UpdateBSDF(bsdf);
-	return bsdf;
-}
+#include "task.h"
 
-// parse material
-void Material::ParseMaterial( TiXmlElement* element )
-{
-	// parse node property
-	m_root.ParseProperty( element , &m_root );
+//! @brief  Render_Task is a baic rendering unit doing ray tracing.
+//!
+//! Each renderin task is usually responsible for a tile of image to be rendered in
+//! most cases. In other cases, like light tracing, there is no difference between
+//! different render_task.
+class Render_Task : public Task{
+public:
+    //! @brief  Execute the task
+    void        Execute() override;
 
-	// check validation
-	if( !m_root.IsNodeValid() )
-                slog( WARNING , MATERIAL , stringFormat( "Material '%s' is not valid , a default material will be used." , m_name.c_str() ) );
-	else
-	        m_root.PostProcess();
-}
+private:
+
+};

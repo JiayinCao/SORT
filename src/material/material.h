@@ -19,9 +19,9 @@
 
 #include "material_node.h"
 #include "core/resource.h"
-
-class Bsdf;
-class Intersection;
+#include "bsdf/bsdf.h"
+#include "managers/memmanager.h"
+#include "core/log.h"
 
 //! @brief 	A thin layer of material definition.
 /**
@@ -42,7 +42,11 @@ public:
 	//! @param		intersect		The intersection information at the point to be shaded.
 	//! @return						A BSDF holding BXDF information will be returned. The BSDF is allocated in the memory pool,
 	//!								meaning this is no need to release the memory in BSDF.
-	Bsdf* GetBsdf( const Intersection* intersect ) const;
+	class Bsdf* GetBsdf( const class Intersection* intersect ) const{
+		Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
+		m_root.UpdateBSDF(bsdf);
+		return bsdf;
+	}
 
 	//! @brief	Set the name of the material.
 	//!
@@ -66,14 +70,23 @@ public:
 	//! This interface is to be deprecated after serialization is fully supported.
 	//! 
 	//! @param	element		Root node for XML node.
-	void	ParseMaterial( TiXmlElement* element );
+	inline void	ParseMaterial( TiXmlElement* element ){
+		// parse node property
+		m_root.ParseProperty( element , &m_root );
+
+		// check validation
+		if( !m_root.IsNodeValid() )
+			slog( WARNING , MATERIAL , stringFormat( "Material '%s' is not valid , a default material will be used." , m_name.c_str() ) );
+		else
+			m_root.PostProcess();
+	}
 
 	//! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void        Serialize( IStreamBase& stream ) override {
+    void Serialize( IStreamBase& stream ) override {
 		// to be implemented
 	}
 
@@ -82,7 +95,7 @@ public:
     //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
     //!
     //! @param  stream      Output stream.
-    void        Serialize( OStreamBase& stream ) override {
+    void Serialize( OStreamBase& stream ) override {
 		// to be implemented
 	}
 

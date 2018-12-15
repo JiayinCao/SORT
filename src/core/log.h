@@ -43,6 +43,7 @@ enum class LOG_TYPE{
     LOG_SHAPE,
     LOG_STREAM,
     LOG_RESOURCE,
+    LOG_TASK,
 };
 
 class LogDispatcher{
