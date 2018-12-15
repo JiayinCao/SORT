@@ -20,12 +20,13 @@
 #include "core/strhelper.h"
 #include "meshio/objloader.h"
 #include "meshio/plyloader.h"
-#include "entity/visual_entity.h"
+#include "entity/visual.h"
 #include "core/path.h"
 #include "bsdf/bsdf.h"
 #include "core/log.h"
 #include "stream/stream.h"
 #include "managers/matmanager.h"
+#include "entity/entity.h"
 
 // default constructor
 MeshManager::MeshManager()
@@ -51,7 +52,7 @@ std::shared_ptr<MeshLoader>	MeshManager::_getMeshLoader( MESH_TYPE type ) const
 }
 
 // Temporary
-bool MeshManager::LoadMesh( const std::string& filename , MeshEntity* mesh ){
+bool MeshManager::LoadMesh( const std::string& filename , MeshVisual* visual , const Transform& transform ){
 	// get full resource filename
 	std::string str = GetFullPath( filename );
 
@@ -76,7 +77,7 @@ bool MeshManager::LoadMesh( const std::string& filename , MeshEntity* mesh ){
 		if( read )
 		{
 			// apply the transformation
-			mem->ApplyTransform( mesh );
+			mem->ApplyTransform( transform );
 
 			// if there is no normal or texture coordinate or tagent , generate them
 			// because the rendering method requires all of the data
@@ -85,7 +86,7 @@ bool MeshManager::LoadMesh( const std::string& filename , MeshEntity* mesh ){
 			mem->GenSmoothTagent();
 
 			// copy trunk memory pointer
-			mesh->m_memory = mem;
+			visual->m_memory = mem;
 
 			// and insert it into the map
 			m_Buffers.insert( make_pair( str , mem ) );
@@ -96,9 +97,8 @@ bool MeshManager::LoadMesh( const std::string& filename , MeshEntity* mesh ){
 }
 
 // apply transform
-void BufferMemory::ApplyTransform( MeshEntity* mesh )
+void BufferMemory::ApplyTransform( const Transform& transform )
 {
-	const auto& transform = mesh->GetTransform();
 	std::vector<Point>::iterator p_it = m_PositionBuffer.begin();
 	while( p_it != m_PositionBuffer.end() )
 	{
@@ -108,10 +108,10 @@ void BufferMemory::ApplyTransform( MeshEntity* mesh )
 	std::vector<Vector>::iterator n_it = m_NormalBuffer.begin();
 	while( n_it != m_NormalBuffer.end() )
 	{
-		*n_it = (transform.invMatrix.Transpose())(*n_it);	// use inverse transpose matrix here
+		// use inverse transpose matrix here
+		*n_it = (transform.invMatrix.Transpose())(*n_it);
 		n_it++;
 	}
-	m_pPrototypeEntity = mesh;
 }
 
 // generate normal for the triangle mesh

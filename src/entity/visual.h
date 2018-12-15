@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "entity.h"
 #include <vector>
 #include "core/primitive.h"
 #include "managers/meshmanager.h"
@@ -30,10 +29,15 @@ class	Material;
  * VisualEntity could be a single shape, like sphere, triangle. It could also be a set of triangles,
  * triangle mesh. Basically, visual entity is the most fundamental unit in SORT that is visible.
  */
-class VisualEntity : public Entity{
+class Visual : public SerializableObject {
 public:
     //! Empty virtual destructor
-    ~VisualEntity() {}
+    ~Visual() {}
+
+    //! @brief  Fill the scene with triangles.
+    //!
+    //! @param  scene       The scene to be filled.
+    virtual void        FillScene( class Scene& scene ) = 0;
 };
 
 //! @brief Triangle Mesh entity.
@@ -41,12 +45,12 @@ public:
  * MeshEntity is the most common VisualEntity in a ray tracer. It is composited with a set of
  * triangles. Most of the objects in a scene uses this entity.
  */
-class MeshEntity : public VisualEntity{
+class MeshVisual : public Visual{
 public:
     //! @brief  Fill the scene with triangles.
     //!
     //! @param  scene       The scene to be filled.
-    void        FillScene( Scene& scene ) override;
+    void        FillScene( class Scene& scene ) override;
 
     //! @brief  Serialization interface. Loading data from stream.
     //!

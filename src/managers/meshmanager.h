@@ -37,7 +37,6 @@
 #endif
 
 class MeshLoader;
-class MeshEntity;
 
 // index for a vertex
 struct VertexIndex
@@ -95,8 +94,6 @@ public:
 	unsigned		m_iTriNum;
 	// the trunk number
 	unsigned		m_iTrunkNum;
-	// the tri mesh entity
-	MeshEntity*		m_pPrototypeEntity;
 	// the name for the file
 	std::string		m_filename;
 	// whether the source file has normal or texture coordinate
@@ -111,14 +108,13 @@ public:
 		m_iTeBcount = 0;
 		m_iTBCount = 0;
 		m_iTriNum = 0;
-		m_pPrototypeEntity = nullptr;
 		m_iTrunkNum = 0;
 		m_hasInitTexCoord = false;
 		m_hasInitNormal = false;
 	}
 
 	// apply transform
-	void ApplyTransform( MeshEntity* mesh );
+	void ApplyTransform( const Transform& );
 
 	// calculate buffer number
 	void CalculateCount()
@@ -165,7 +161,7 @@ class	MeshManager : public Singleton<MeshManager>
 {
 public:
 	// Temporary
-	bool LoadMesh( const std::string& str , MeshEntity* mesh );
+	bool LoadMesh( const std::string& str , class MeshVisual* visual , const Transform& );
 
 private:
 	// the mesh loaders

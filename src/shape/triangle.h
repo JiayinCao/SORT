@@ -19,9 +19,6 @@
 
 #include "shape.h"
 
-class MeshEntity;
-struct VertexIndex;
-
 //! @brief Triangle class defines the basic behavior of triangle.
 /**
  * Triangle is the most common shape that is used in a ray tracer.
@@ -33,7 +30,7 @@ public:
 	//!
 	//! @param mesh 		The triangle mesh it belongs to
 	//! @param index   		The index buffer
-    Triangle( const MeshEntity* mesh , const VertexIndex* index ): m_meshEntity(mesh) , m_Index(index) {}
+    Triangle( const class MeshVisual* mesh , const struct VertexIndex* index ): m_mesh_visual(mesh) , m_Index(index) {}
 
 	//! @brief Sample a point on the surface of the shape given a shading point.
 	//!
@@ -97,6 +94,6 @@ public:
 	float 			SurfaceArea() const override;
 
 private:
-	const MeshEntity*		m_meshEntity = nullptr;		/**< Entity holding the vertex buffer. */
-	const VertexIndex*		m_Index = nullptr;			/**< Index buffer points to the index of this triangle. */
+	const class MeshVisual*		m_mesh_visual = nullptr;	/**< Visual holding the vertex buffer. */
+	const struct VertexIndex*	m_Index = nullptr;			/**< Index buffer points to the index of this triangle. */
 };

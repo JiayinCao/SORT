@@ -15,12 +15,12 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "visual_entity.h"
+#include "visual.h"
 #include "managers/matmanager.h"
 #include "core/scene.h"
 #include "shape/triangle.h"
 
-void MeshEntity::FillScene( Scene& scene ){
+void MeshVisual::FillScene( Scene& scene ){
     unsigned base = (unsigned)scene.m_primitiveBuf.size();
 
 	// generate the triangles
@@ -36,19 +36,22 @@ void MeshEntity::FillScene( Scene& scene ){
 	}
 }
 
-void MeshEntity::Serialize( IStreamBase& stream ){
+void MeshVisual::Serialize( IStreamBase& stream ){
 	m_memory->Serialize(stream);
 }
 
-void MeshEntity::Serialize( OStreamBase& stream ){
+void MeshVisual::Serialize( OStreamBase& stream ){
 	m_memory->Serialize(stream);
 }
+
+
+
+
 
 // ------------------------------------------------------------------------
 // Temporary solution before serialization is done.
-bool MeshEntity::LoadMesh( const std::string& filename , const Transform& transform ){
-    m_transform = transform;
-    bool flag = MeshManager::GetSingleton().LoadMesh( filename , this );
+bool MeshVisual::LoadMesh( const std::string& filename , const Transform& transform ){
+    bool flag = MeshManager::GetSingleton().LoadMesh( filename , this , transform );
     if( false == flag )
         return false;
 
@@ -56,7 +59,7 @@ bool MeshEntity::LoadMesh( const std::string& filename , const Transform& transf
 
     return true;
 }
-void MeshEntity::ResetMaterial( const std::string& setname , const std::string& matname )
+void MeshVisual::ResetMaterial( const std::string& setname , const std::string& matname )
 {
 	// get the material first
     auto mat = MatManager::GetSingleton().FindMaterial( matname );
@@ -81,7 +84,7 @@ void MeshEntity::ResetMaterial( const std::string& setname , const std::string& 
 }
 
 // get the subset of the mesh
-int MeshEntity::_getSubsetID( const std::string& setname )
+int MeshVisual::_getSubsetID( const std::string& setname )
 {
 	int size = (int)m_memory->m_TrunkBuffer.size();
 	for( int i = 0 ; i < size ; ++i )
@@ -93,7 +96,7 @@ int MeshEntity::_getSubsetID( const std::string& setname )
 }
 
 // copy materials
-void MeshEntity::_copyMaterial()
+void MeshVisual::_copyMaterial()
 {
 	unsigned trunk_size = (unsigned)m_memory->m_TrunkBuffer.size();
     m_Materials.resize( trunk_size );
