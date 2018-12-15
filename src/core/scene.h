@@ -128,5 +128,5 @@ private:
 	// compute light cdf
 	void	_genLightDistribution();
 
-	friend class MeshEntity;
+	friend class MeshVisual;
 };

@@ -15,7 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header
+#include <memory>
 #include "scene.h"
 #include "math/intersection.h"
 #include "accel/accelerator.h"
@@ -29,7 +29,7 @@
 #include "core/sassert.h"
 #include "core/stats.h"
 #include "entity/entity.h"
-#include "entity/visual_entity.h"
+#include "entity/visual.h"
 
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
@@ -60,8 +60,8 @@ bool Scene::LoadScene( TiXmlNode* root )
 			Transform transform = _parseTransform( meshNode->FirstChildElement( "Transform" ) );
 
 			// load the first mesh
-			MeshEntity* mEntity = new MeshEntity();
-			if( mEntity->LoadMesh( filename , transform ) )
+			auto visual = std::make_shared<MeshVisual>();
+			if( visual->LoadMesh( filename , transform ) )
 			{
 				// reset the material if neccessary
 				TiXmlElement* meshMat = meshNode->FirstChildElement( "Material" );
@@ -74,15 +74,16 @@ bool Scene::LoadScene( TiXmlNode* root )
 						const char* mat_name = meshMat->Attribute( "mat" );
 
 						if( set_name != 0 && mat_name != 0 )
-							mEntity->ResetMaterial( set_name , mat_name );
+							visual->ResetMaterial( set_name , mat_name );
 
 						meshMat = meshMat->NextSiblingElement( "MatSet" );
 					}while( meshMat );
 				}
-				m_entities.push_back( mEntity );
+
+				Entity* entity = new Entity();
+				entity->AddVisual( visual );
+				m_entities.push_back( entity );
 			}
-			else
-				delete mEntity;
 		}
 
 		// get to the next model
