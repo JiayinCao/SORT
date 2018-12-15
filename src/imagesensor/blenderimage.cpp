@@ -16,7 +16,6 @@
  */
 
 #include "blenderimage.h"
-#include "core/multithread.h"
 #include "managers/smmanager.h"
 #include <mutex>
 
@@ -24,7 +23,7 @@
 extern int g_iTileSize;
 
 // store pixel information
-void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt )
+void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt )
 {
 	if (!m_sharedMemory.bytes)
 		return;
@@ -50,14 +49,14 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 
 	// for final update
     {
-        std::lock_guard<PlatformSpinlockMutex> lock(m_mutex[x][y]);
+        std::lock_guard<spinlock_mutex> lock(m_mutex[x][y]);
         Spectrum _color = m_rendertarget.GetColor(x,y);
         m_rendertarget.SetColor(x, y, color+_color);
     }
 }
 
 // finish image tile
-void BlenderImage::FinishTile( int tile_x , int tile_y , const RenderTask& rt )
+void BlenderImage::FinishTile( int tile_x , int tile_y , const Render_Task& rt )
 {
 	if (!m_sharedMemory.bytes)
 		return;

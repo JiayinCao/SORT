@@ -18,6 +18,15 @@
 #pragma once
 
 #include "task.h"
+#include "sampler/sample.h"
+#include "math/vector2.h"
+
+class Integrator;
+class Scene;
+class Sampler;
+class Camera;
+class RenderTarget;
+class ImageSensor;
 
 //! @brief  Render_Task is a baic rendering unit doing ray tracing.
 //!
@@ -26,9 +35,34 @@
 //! different render_task.
 class Render_Task : public Task{
 public:
+    //! Constructor
+    //!
+    //! @param priority     New priority of the task.
+    Render_Task( unsigned int priority ) : Task( priority ) {}
+    
     //! @brief  Execute the task
     void        Execute() override;
 
-private:
+public:
+    // the following parameters define where to calculate the image
+    Vector2i ori;
+	Vector2i size;
+    
+    // the task id
+    unsigned		taskId = 0;
+    bool*			taskDone = nullptr;	// used to show the progress
+    
+    // the pixel sample
+    PixelSample*	pixelSamples = nullptr;
+    unsigned		samplePerPixel = 0;
+    
+    // the sampler
+    Sampler*		sampler = nullptr;
+    // the camera
+    Camera*			camera = nullptr;
+    // the scene description
+    const Scene*	scene;
 
+    // integrator
+    std::shared_ptr<Integrator> integrator = nullptr;
 };

@@ -19,7 +19,7 @@
 
 // include the header
 #include "core/singleton.h"
-#include "core/multithread.h"
+#include "core/thread.h"
 #include "core/log.h"
 #include "core/strhelper.h"
 #include <unordered_map>

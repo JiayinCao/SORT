@@ -26,10 +26,10 @@ class BlenderImage : public ImageSensor
 {
 public:
 	// store pixel information
-	virtual void StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt );
+	virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt );
 
 	// finish image tile
-	virtual void FinishTile( int tile_x , int tile_y , const RenderTask& rt );
+	virtual void FinishTile( int tile_x , int tile_y , const Render_Task& rt );
 
 	// pre process
 	virtual void PreProcess();

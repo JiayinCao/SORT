@@ -18,6 +18,7 @@
 #include "rand.h"
 #include "sort.h"
 #include "core/define.h"
+#include "core/thread.h"
 
 #if defined(SORT_IN_LINUX) 
 #elif defined(SORT_IN_WINDOWS)
@@ -35,8 +36,6 @@ static const int N = 624;
 static Thread_Local unsigned long mt[N]; /* the array for the state vector  */
 static Thread_Local int mti;
 static Thread_Local bool seed_setup = false;
-
-#include "core/multithread.h"
 
 // set the seed
 void sort_seed()

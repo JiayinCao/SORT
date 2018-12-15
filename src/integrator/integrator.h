@@ -52,7 +52,7 @@ public:
 	void SetSamplePerPixel( unsigned spp ){ sample_per_pixel = spp; }
 
 	// setup camera
-	void SetupCamera(Camera* cam){
+	void SetupCamera(class Camera* cam){
 		camera = cam;
 	}
 

@@ -15,23 +15,22 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "sort.h"
-
 #pragma once
 
+#include "sort.h"
 #include <thread>
 #include <atomic>
 
-class Integrator;
-
 // get the thread id
 int ThreadId();
+// get the number of cpu cores in the system
+unsigned NumSystemCores();
 
-class RenderThreadStd
+class WorkerThread
 {
 public:
     // Constructor
-    RenderThreadStd( unsigned tid , std::shared_ptr<Integrator> integrator ) : m_tid(tid) , m_pIntegrator( integrator ) {}
+    WorkerThread( unsigned tid ) : m_tid(tid) {}
     
 	// Begin thread
 	void BeginThread();
@@ -47,10 +46,6 @@ public:
 private:
     std::thread m_thread;
     unsigned    m_tid = 0;
-    
-// the rendering data
-public:
-    std::shared_ptr<Integrator>	m_pIntegrator;
 };
 
 class spinlock_mutex
@@ -66,7 +61,3 @@ public:
 private:
     std::atomic_flag locked = ATOMIC_FLAG_INIT ;
 };
-
-#define PlatformThreadUnit      RenderThreadStd
-#define PlatformMutex           std::mutex
-#define PlatformSpinlockMutex   spinlock_mutex
