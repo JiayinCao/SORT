@@ -18,11 +18,6 @@
 #include "task.h"
 #include "core/sassert.h"
 
-// Compare tasks based on its priority, tasks with higher priority get executed earlier.
-Scheduler::Task_Comp Scheduler::task_comp = []( const std::shared_ptr<Task> t0 , const std::shared_ptr<Task> t1 ){
-    return t0->GetPriority() < t1->GetPriority();
-};
-
 Task::Task( unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies ) 
  : m_priority(priority) {
     for( auto dep : dependencies ){
@@ -35,6 +30,11 @@ Task::Task( unsigned int priority , const std::unordered_set<std::shared_ptr<Tas
     static unsigned int id_counter = 0;
     m_taskid = id_counter++;
 }
+
+// Compare tasks based on its priority, tasks with higher priority get executed earlier.
+Scheduler::Task_Comp Scheduler::task_comp = []( const std::shared_ptr<Task> t0 , const std::shared_ptr<Task> t1 ){
+    return t0->GetPriority() < t1->GetPriority();
+};
 
 Scheduler::Scheduler():m_availbleTasks(task_comp){
 }
