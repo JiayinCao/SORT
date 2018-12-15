@@ -16,6 +16,59 @@
  */
 
 #include "render_task.h"
+#include "integrator/integrator.h"
+#include "sampler/sampler.h"
+#include "camera/camera.h"
+#include "imagesensor/imagesensor.h"
+
+extern int g_iTileSize;
 
 void Render_Task::Execute(){
+    if( integrator == nullptr )
+        return;
+    ImageSensor* is = camera->GetImageSensor();
+    if( !is )
+        return;
+    
+    // request samples
+    integrator->RequestSample( sampler , pixelSamples , samplePerPixel );
+    
+	Vector2i rb = ori + size;
+    
+    unsigned tid = ThreadId();
+    for( int i = ori.y ; i < rb.y ; i++ )
+    {
+        for( int j = ori.x ; j < rb.x ; j++ )
+        {
+            // clear managed memory after each pixel
+            MemManager::GetSingleton().ClearMem(tid);
+            
+            // generate samples to be used later
+            integrator->GenerateSample( sampler , pixelSamples, samplePerPixel , *scene );
+            
+            // the radiance
+            Spectrum radiance;
+
+            for( unsigned k = 0 ; k < samplePerPixel ; ++k )
+            {
+                // generate rays
+                Ray r = camera->GenerateRay( (float)j , (float)i , pixelSamples[k] );
+                // accumulate the radiance
+                radiance += integrator->Li( r , pixelSamples[k] );
+            }
+            radiance /= (float)samplePerPixel;
+            
+            // store the pixel
+            is->StorePixel( j , i , radiance , *this );
+        }
+    }
+    
+	if( integrator->NeedRefreshTile() )
+	{
+		int x_off = ori.x / g_iTileSize;
+		int y_off = (is->GetHeight() - 1 - ori.y ) / g_iTileSize ;
+		is->FinishTile( x_off, y_off, *this );
+	}
+    
+    taskDone[taskId] = true;
 }

@@ -26,8 +26,8 @@
 #include <condition_variable>
 #include "core/singleton.h"
 
-// Default task priority is 1000.
-#define DEFAULT_TASK_PRIORITY       1000
+// Default task priority is 100000.
+#define DEFAULT_TASK_PRIORITY       100000
 // Definition of task id
 #define TASKID                      unsigned int
 
@@ -37,7 +37,7 @@
  * Only tasks without dependencies will get executed. There will be no cycles in the graph, otherwise 
  * the system will hang without proceeding. A task can range of rendering a piece of image to loading 
  * data from streams. Upon finishing of each task, it will remove its dependencies. Each task comes 
- * with a priority number. Default priority is 1000, higher priority task will be executed earlier 
+ * with a priority number. Default priority is 100000, higher priority task will be executed earlier 
  * than lower ones.
  */
 class Task{
@@ -55,8 +55,16 @@ public:
     virtual void        Execute() = 0;
 
     //! @brief  Get priority of the task.
+    //!
+    //! @return             Current priority of the task.
     inline unsigned int GetPriority() const { 
         return m_priority; 
+    }
+    //! @brief  Set priority of the task
+    //!
+    //! @param  priority    New priority to be set.
+    inline void SetPriority( unsigned int priority ){
+        m_priority = priority;
     }
 
     //! @brief  Remove dependency from task.
@@ -107,9 +115,6 @@ class Scheduler : public Singleton<Scheduler>{
     using TaskContainerAll = std::unordered_map<TASKID,std::weak_ptr<Task>>;
 
 public:
-    //! @brief  Default constructor
-    Scheduler();
-    
     //! @brief  Schedule a task.
     //!
     //! @param  task        Task to be scheduled.
@@ -136,17 +141,22 @@ public:
     void                    TaskFinished( const std::shared_ptr<Task> task );
     
 private:
+    //! @brief  Default constructor
+    Scheduler();
+
     TaskQueue                   m_availbleTasks;        /**< Heap of available tasks. */
     TaskContainer               m_backupTasks;          /**< Container for all tasks not direct available. */
     TaskContainerAll            m_allTasks;             /**< All tasks created in SORT. This container has a weak reference, which means it doesn't gurrantee the task's lifetime. */
     std::mutex                  m_mutex;                /**< Mutex to make sure scheduler is thread-safe. */
     std::condition_variable     m_cv;                   /**< Conditional variable for pick task. */
+
+    friend class Singleton<Scheduler>;
 };
 
 //! @brief      Schedule a task in task scheduler.
 template<class T>
-inline std::shared_ptr<T>  SCHEDULE_TASK(){
-    std::shared_ptr<T>  ptr = std::make_shared<T>();
+inline std::shared_ptr<T>  SCHEDULE_TASK( unsigned int priority ){
+    std::shared_ptr<T>  ptr = std::make_shared<T>( priority );
     Scheduler::GetSingleton().Schedule( ptr );
     return ptr;
 }

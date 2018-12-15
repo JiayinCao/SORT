@@ -18,7 +18,7 @@
 #include "rendertargetimage.h"
 
 // store pixel information
-void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , const RenderTask& rt )
+void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt )
 {
 	m_rendertarget.SetColor( x , y , color );
 }

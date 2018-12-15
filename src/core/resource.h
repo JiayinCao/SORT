@@ -44,8 +44,8 @@ public:
     void Unregister(class Resource* resource);
 
 private:
-    std::unordered_set<class Resource*>   m_resources;    /**< Containers holding all resources allocated in SORT. */
-    std::mutex                            m_mutex;        /**< Mutex to make sure it is thread safe. */
+    std::unordered_set<class Resource*>     m_resources;    /**< Containers holding all resources allocated in SORT. */
+    std::mutex                              m_mutex;        /**< Mutex to make sure it is thread safe. */
 };
 
 

@@ -16,11 +16,12 @@
  */
 
 // include the header file
+#include <fstream>
 #include "fourierbxdf.h"
 #include "bsdf.h"
 #include "managers/memmanager.h"
 #include "core/samplemethod.h"
-#include <fstream>
+#include "sampler/sample.h"
 
 void FourierBxdfData::LoadData( const std::string& filename )
 {
