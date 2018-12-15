@@ -17,14 +17,62 @@
 
 #pragma once
 
-// include the header files
+/*
+    -------------------------- Coding Standard ------------------------------------
+    SORT has been developped for quite a long time, several years. With limited 
+    time budget everyday, progress is relatively slow. Throughout the past years, 
+    my coding style changes, which results in different coding style in different 
+    parts of the system. Following is some general rules to following during coding, 
+    this is more of reminder for me for later references.
+
+    -   Class name
+        -   Each (sub)word in class name starts with a capital letter.
+        -   Don't use names that are too long.
+        -   Don't use meaningless names indicating nothing.
+    -   Class method name
+        -   Each (sub)word in class method names start with a capital letter.
+        -   Don't use meaningless names indicating nothing.
+    -   Class method parameter name
+        -   Use small case letter only.
+        -   Separate sub-words with '_'.
+    -   Class member name
+        -   Instance member variable should start with 'm_' to indicate it is an
+            instance member.
+        -   Static member variable should start with 's_' to indicate it is a
+            static member.
+        -   Use small case letter only.
+        -   Separate sub-words with '_'.
+    -   Class method modifiers
+        -   Use minimal access range. Meaning if it is enough to use private, don't
+            use protected to leak the access to derived class.
+        -   Use const as much as possible. For example, for method like 'GetTaskID()'
+            if nothing inside the function changes anything in the class, make sure 
+            it is marked as const. It also applied to return values and parameters.
+    -   Private method
+        -   Same naming convention with public method.
+        -   Defined at last after member variable definition.
+    -   Brackets
+        -   Open bracket should be appended right after class/method declaration or 
+            definition to save line numbers.
+        -   Closing bracket should occupy a separate line.
+        -   For one line function, they could be in the same line.
+    -   Comment
+        -   Doxygen standard. http://www.doxygen.nl/
+    -   Overriden method
+        -   All overriden class method has to specify 'override' for clarity. It is
+            legit to not specify 'override'. However, with 'override' it is very
+            clear if the function is an overiden function.
+        -   Don't add virtual in an overriden function, which gives us nothing.
+
+    ---------------------------------------------------------------------------------
+*/ 
+
 #include <iostream>
 #include <cstring>
 #include <string>
 #include <stdlib.h>
 #include <math.h>
 
-// find the correct platform
 #if defined(_WIN32) || defined(_WIN64)
 	#define SORT_IN_WINDOWS
 #elif defined(__linux__)
@@ -35,8 +83,6 @@
 
 // enable debug by default
 #define	SORT_DEBUG
-
-#include <math.h>
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1800) 
 #  include <algorithm> // for std::min and std::max 
