@@ -80,11 +80,15 @@ public:
     inline bool         NoDependency() const { return m_dependencies.empty(); }
 
     //! @brief  Get tasks depending on this task.
+    //!
+    //! @return Tasks this task depends on.
     inline const Task_Container& GetDependents() const { 
         return m_dependents;
     }
 
     //! @brief  Get the id of this task.
+    //!
+    //! @return Task id.
     inline TASKID       GetTaskID() const { return m_taskid; }
 
 private:

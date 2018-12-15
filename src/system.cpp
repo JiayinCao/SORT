@@ -39,9 +39,7 @@
 #include "core/stats.h"
 #include "core/profile.h"
 #include "task/render_task.h"
-
-extern bool g_bBlenderMode;
-extern int  g_iTileSize;
+#include "core/globalconfig.h"
 
 SORT_STATS_DEFINE_COUNTER(sPreprocessTime)
 SORT_STATS_DEFINE_COUNTER(sRenderingTime)
@@ -110,7 +108,7 @@ void System::_outputProgress()
         // output progress
         progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
         
-        if (!g_bBlenderMode)
+        if (!g_blender_mode)
             std::cout<< "Progress: "<<progress<<"%\r";
         else if (m_pProgress)
             *m_pProgress = progress;
@@ -144,7 +142,7 @@ void System::_pushRenderTask()
 	integrator->SetupCamera(m_camera);
 
 	// Push render task into the queue
-	unsigned tilesize = g_iTileSize;
+	const unsigned tilesize = g_tile_size;
 	unsigned taskid = 0;
 	
 	// get the number of total task
@@ -256,7 +254,7 @@ Integrator*	System::_allocateIntegrator()
 bool System::Setup( const char* str )
 {
     // setup image sensor first of all
-    if( g_bBlenderMode )
+    if( g_blender_mode )
         m_imagesensor = new BlenderImage();
     else
         m_imagesensor = new RenderTargetImage();
@@ -375,10 +373,10 @@ bool System::Setup( const char* str )
     m_camera->PreProcess();
     
 	// create shared memory
-	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_iTileSize));
-	int y_tile = (int)(ceil(m_imagesensor->GetHeight() / (float)g_iTileSize));
+	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_tile_size));
+	int y_tile = (int)(ceil(m_imagesensor->GetHeight() / (float)g_tile_size));
 	int header_size = x_tile * y_tile;
-	int size = header_size * g_iTileSize * g_iTileSize * 4 * sizeof(float) * 2	// image size
+	int size = header_size * g_tile_size * g_tile_size * 4 * sizeof(float) * 2	// image size
 			+ header_size								// header size
 			+ 2;										// progress data and final update flag
 

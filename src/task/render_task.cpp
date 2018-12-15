@@ -20,8 +20,7 @@
 #include "sampler/sampler.h"
 #include "camera/camera.h"
 #include "imagesensor/imagesensor.h"
-
-extern int g_iTileSize;
+#include "core/globalconfig.h"
 
 void Render_Task::Execute(){
     if( integrator == nullptr )
@@ -65,8 +64,8 @@ void Render_Task::Execute(){
     
 	if( integrator->NeedRefreshTile() )
 	{
-		int x_off = ori.x / g_iTileSize;
-		int y_off = (is->GetHeight() - 1 - ori.y ) / g_iTileSize ;
+		int x_off = ori.x / g_tile_size;
+		int y_off = (is->GetHeight() - 1 - ori.y ) / g_tile_size ;
 		is->FinishTile( x_off, y_off, *this );
 	}
     

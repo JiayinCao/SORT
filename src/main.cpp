@@ -22,13 +22,12 @@
 #include "core/stats.h"
 #include "core/profile.h"
 #include "core/path.h"
+#include "core/globalconfig.h"
 
 #include "thirdparty/gtest/gtest.h"
 
 // the global system
 System g_System;
-
-extern bool g_bBlenderMode;
 
 // the main func
 #ifdef SORT_IN_WINDOWS
@@ -78,7 +77,7 @@ int main(int argc, char** argv)
     if (argc > 2)
     {
         if (strcmp(argv[2], "blendermode") == 0)
-            g_bBlenderMode = true;
+            GlobalConfiguration::GetSingleton().SetBlenderMode(true);
     }
 
     // setup the system
