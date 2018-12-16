@@ -168,22 +168,28 @@ void System::_pushRenderTask()
 		// only process node inside the image region
 		if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y )
 		{
-			auto rt = SCHEDULE_TASK<Render_Task>(priority--);
-			rt->scene = &m_Scene;
+			Vector2i size , tl ;
+			tl.x = cur_pos.x * tilesize;
+			tl.y = cur_pos.y * tilesize;
+			size.x = (tilesize < (m_imagesensor->GetWidth() - tl.x)) ? tilesize : (m_imagesensor->GetWidth() - tl.x);
+			size.y = (tilesize < (m_imagesensor->GetHeight() - tl.y)) ? tilesize : (m_imagesensor->GetHeight() - tl.y);
+
+			auto rt = SCHEDULE_TASK<Render_Task>( 	priority-- , tl , size , &m_Scene , m_iSamplePerPixel , integrator , 
+											      	m_camera , m_pSampler , new PixelSample[m_iSamplePerPixel] );
+			/*rt->scene = &m_Scene;
 			rt->sampler = m_pSampler;
 			rt->camera = m_camera;
 			rt->taskDone = m_taskDone;
 			rt->samplePerPixel = m_iSamplePerPixel;
 			rt->integrator = integrator;
 
-			rt->taskId = taskid++;
 			rt->ori.x = cur_pos.x * tilesize;
 			rt->ori.y = cur_pos.y * tilesize;
 			rt->size.x = (tilesize < (m_imagesensor->GetWidth() - rt->ori.x)) ? tilesize : (m_imagesensor->GetWidth() - rt->ori.x);
 			rt->size.y = (tilesize < (m_imagesensor->GetHeight() - rt->ori.y)) ? tilesize : (m_imagesensor->GetHeight() - rt->ori.y);
 
 			// create new pixel samples
-			rt->pixelSamples = new PixelSample[m_iSamplePerPixel];
+			rt->pixelSamples = new PixelSample[m_iSamplePerPixel];*/
 		}
 
 		// turn to the next direction

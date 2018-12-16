@@ -72,7 +72,7 @@ std::shared_ptr<Task> Scheduler::PickTask(){
 void Scheduler::TaskFinished( const std::shared_ptr<Task> task ){
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    // starting remove all dependencies.
+    // Starting remove all dependencies.
     const auto dependent = task->GetDependents();
     for( auto id : dependent ){
         auto dep = m_backupTasks[id];
