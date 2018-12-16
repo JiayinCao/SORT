@@ -33,15 +33,15 @@
         -   Each (sub)word in class method names start with a capital letter.
         -   Don't use meaningless names indicating nothing.
     -   Class method parameter name
-        -   Use small case letter only.
-        -   Separate sub-words with '_'.
+        -   Use small case letter for the first word. Starting from the second word,
+            each word starts with a capital letter.
     -   Class member name
         -   Instance member variable should start with 'm_' to indicate it is an
             instance member.
         -   Static member variable should start with 's_' to indicate it is a
             static member.
-        -   Use small case letter only.
-        -   Separate sub-words with '_'.
+        -   Use small case letter for the first word. Starting from the second word,
+            each word starts with a capital letter.
     -   Class method modifiers
         -   Use minimal access range. Meaning if it is enough to use private, don't
             use protected to leak the access to derived class.
@@ -55,7 +55,8 @@
         -   Open bracket should be appended right after class/method declaration or 
             definition to save line numbers.
         -   Closing bracket should occupy a separate line.
-        -   For one line function, they could be in the same line.
+        -   For empty implementation, both the two brackets should be occupying the
+            same line.
     -   Comment
         -   Doxygen standard. http://www.doxygen.nl/
     -   Overriden method
