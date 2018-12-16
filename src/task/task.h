@@ -28,8 +28,6 @@
 
 // Default task priority is 100000.
 #define DEFAULT_TASK_PRIORITY       100000
-// Definition of task id
-#define TASKID                      unsigned int
 
 //! @brief 	Basic unit task in SORT system.
 /**
@@ -40,13 +38,15 @@
  * with a priority number. Default priority is 100000, higher priority task will be executed earlier 
  * than lower ones.
  */
-class Task{
+class Task : public std::enable_shared_from_this<Task>{
     // Dependency container for task
-    using Task_Container = std::unordered_set<TASKID>;
+    using Task_Container = std::unordered_set<std::shared_ptr<Task>>;
 
 public:
     //! @brief  Default constructor.
-    Task( unsigned int priority = DEFAULT_TASK_PRIORITY , const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} );
+    Task(   unsigned int priority = DEFAULT_TASK_PRIORITY , 
+            const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ):
+            m_priority(priority),m_dependencies(dependencies) {}
 
     //! @brief  Virtual destructor.
     virtual ~Task() {}
@@ -60,6 +60,7 @@ public:
     inline unsigned int GetPriority() const { 
         return m_priority; 
     }
+
     //! @brief  Set priority of the task
     //!
     //! @param  priority    New priority to be set.
@@ -70,7 +71,7 @@ public:
     //! @brief  Remove dependency from task.
     //!
     //! Upon the temination of any dependent task, it is necessary to remove it from its dependenty.
-    inline void         RemoveDependency( TASKID taskid ) { 
+    inline void         RemoveDependency( const std::shared_ptr<Task> taskid ) { 
         m_dependencies.erase( taskid ); 
     }
 
@@ -84,22 +85,28 @@ public:
     //! @brief  Get tasks depending on this task.
     //!
     //! @return Tasks this task depends on.
-    inline const Task_Container& GetDependents() const { 
+    inline Task_Container& GetDependents() { 
         return m_dependents; 
     }
 
-    //! @brief  Get the id of this task.
+    //! @brief  Add dependent.
     //!
-    //! @return Task id.
-    inline TASKID       GetTaskID() const {
-        return m_taskid; 
+    //! @param  Task to be added as a dependent.
+    inline void AddDependent( const std::shared_ptr<Task> task ){
+        m_dependents.insert( task );
+    }
+
+    //! @brief  Get tasks this task depends on.
+    //!
+    //! @return Tasks this task depends on.
+    inline Task_Container& GetDependencies(){
+        return m_dependencies;
     }
 
 private:
     Task_Container      m_dependencies;     /**< Tasks this task depends on. */
     Task_Container      m_dependents;       /**< Tasks depending on this task. */
     unsigned int        m_priority;         /**< Priority of the task. */
-    TASKID              m_taskid;           /**< Each task has an unique id. */
 };
 
 //! @brief  Scheduler for scheduling tasks.
@@ -118,9 +125,7 @@ class Scheduler : public Singleton<Scheduler>{
     /**< Task queue for availble tasks is actually a heap. */
     using TaskQueue = std::priority_queue<std::shared_ptr<Task>,std::vector<std::shared_ptr<Task>>,decltype(task_comp)>;
     /**< Task container for back-up tasks is just a hash container. */
-    using TaskContainer = std::unordered_map<TASKID,std::shared_ptr<Task>>;
-    /**< Task container for all tasks. */
-    using TaskContainerAll = std::unordered_map<TASKID,std::weak_ptr<Task>>;
+    using TaskContainer = std::unordered_set<std::shared_ptr<Task>>;
 
 public:
     //! @brief  Schedule a task.
@@ -150,11 +155,10 @@ public:
     
 private:
     //! @brief  Default constructor
-    Scheduler();
+    Scheduler():m_availbleTasks(task_comp){}
 
     TaskQueue                   m_availbleTasks;        /**< Heap of available tasks. */
     TaskContainer               m_backupTasks;          /**< Container for all tasks not direct available. */
-    TaskContainerAll            m_allTasks;             /**< All tasks created in SORT. This container has a weak reference, which means it doesn't gurrantee the task's lifetime. */
     std::mutex                  m_mutex;                /**< Mutex to make sure scheduler is thread-safe. */
     std::condition_variable     m_cv;                   /**< Conditional variable for pick task. */
 
@@ -163,10 +167,10 @@ private:
 
 //! @brief      Schedule a task in task scheduler.
 template<class T, typename... Args>
-inline std::shared_ptr<T>  SCHEDULE_TASK( unsigned int priority , Args... args){
-    std::shared_ptr<T>  ptr = std::make_shared<T>( args... , priority );
-    Scheduler::GetSingleton().Schedule( ptr );
-    return ptr;
+inline std::shared_ptr<T>  SCHEDULE_TASK( unsigned int priority , Args... args ){
+    auto ret = std::make_shared<T>( args... , priority );
+    Scheduler::GetSingleton().Schedule( ret );
+    return ret;
 }
 
 //! @brief      Executing tasks. It will exit if there is no other tasks.
