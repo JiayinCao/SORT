@@ -18,14 +18,12 @@
 #include "rendertargetimage.h"
 
 // store pixel information
-void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt )
-{
+void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ){
 	m_rendertarget.SetColor( x , y , color );
 }
 
 // post process
-void RenderTargetImage::PostProcess()
-{
+void RenderTargetImage::PostProcess(){
 	ImageSensor::PostProcess();
 
     if( !m_filename.empty() )

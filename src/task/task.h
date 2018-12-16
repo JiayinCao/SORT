@@ -35,7 +35,7 @@
 /**
  * SORT is driven by a graph based task system. The tasks form a directed acyclic graph (DAG).
  * Only tasks without dependencies will get executed. There will be no cycles in the graph, otherwise 
- * the system will hang without proceeding. A task can range of rendering a piece of image to loading 
+ * the system will hang without proceeding. A task can range from rendering a piece of image to loading 
  * data from streams. Upon finishing of each task, it will remove its dependencies. Each task comes 
  * with a priority number. Default priority is 100000, higher priority task will be executed earlier 
  * than lower ones.
@@ -63,33 +63,37 @@ public:
     //! @brief  Set priority of the task
     //!
     //! @param  priority    New priority to be set.
-    inline void SetPriority( unsigned int priority ){
+    inline void         SetPriority( unsigned int priority ){
         m_priority = priority;
     }
 
     //! @brief  Remove dependency from task.
     //!
     //! Upon the temination of any dependent task, it is necessary to remove it from its dependenty.
-    inline void         RemoveDependency( TASKID taskid ) {
-        m_dependencies.erase( taskid );
+    inline void         RemoveDependency( TASKID taskid ) { 
+        m_dependencies.erase( taskid ); 
     }
 
     //! @brief  If there is no dependent task anymore.
     //!
     //! @return True if all dependent tasks are finished. Otherwise, return false.
-    inline bool         NoDependency() const { return m_dependencies.empty(); }
+    inline bool         NoDependency() const { 
+        return m_dependencies.empty(); 
+    }
 
     //! @brief  Get tasks depending on this task.
     //!
     //! @return Tasks this task depends on.
     inline const Task_Container& GetDependents() const { 
-        return m_dependents;
+        return m_dependents; 
     }
 
     //! @brief  Get the id of this task.
     //!
     //! @return Task id.
-    inline TASKID       GetTaskID() const { return m_taskid; }
+    inline TASKID       GetTaskID() const {
+        return m_taskid; 
+    }
 
 private:
     Task_Container      m_dependencies;     /**< Tasks this task depends on. */
@@ -101,7 +105,7 @@ private:
 //! @brief  Scheduler for scheduling tasks.
 /**
  * Scheduler will pick a task without any dependencies that has highest priority. If there are
- * multiple candidate tasks, a randome one will be picked. Each task dependencies will only be
+ * multiple candidate tasks, a random one will be picked. Each task dependencies will only be
  * removed after it is fully finished, not after it gets started.
  * Scheduler is thread-safe, which means that multiple threads can retrieve tasks from scheduler
  * concurrently.
@@ -158,9 +162,9 @@ private:
 };
 
 //! @brief      Schedule a task in task scheduler.
-template<class T>
-inline std::shared_ptr<T>  SCHEDULE_TASK( unsigned int priority ){
-    std::shared_ptr<T>  ptr = std::make_shared<T>( priority );
+template<class T, typename... Args>
+inline std::shared_ptr<T>  SCHEDULE_TASK( unsigned int priority , Args... args){
+    std::shared_ptr<T>  ptr = std::make_shared<T>( args... , priority );
     Scheduler::GetSingleton().Schedule( ptr );
     return ptr;
 }

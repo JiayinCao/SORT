@@ -35,34 +35,67 @@ class ImageSensor;
 //! different render_task.
 class Render_Task : public Task{
 public:
-    //! Constructor
+    //! @brief Constructor
     //!
     //! @param priority     New priority of the task.
-    Render_Task( unsigned int priority ) : Task( priority ) {}
+    Render_Task(const Vector2i& ori , const Vector2i& size , Scene* scene , unsigned int spp ,
+                std::shared_ptr<Integrator> integrator , Camera* camera , Sampler* sampler , PixelSample* pixelSamples ,
+                unsigned int priority = DEFAULT_TASK_PRIORITY , const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ) : 
+                m_coord(ori), m_size(size), m_scene(*scene), m_samplePerPixel(spp), m_sampler( sampler ), m_pixelSamples(pixelSamples),
+                m_integrator(integrator), m_camera(camera), Task( priority , dependencies ) {}
     
     //! @brief  Execute the task
     void        Execute() override;
 
-public:
-    // the following parameters define where to calculate the image
-    Vector2i ori;
-	Vector2i size;
+    //! @brief  Get the coordinate of the tile, top-left corner.
+    //!
+    //! @return Top-left corner of the tile.
+    inline Vector2i    GetTopLeft() const {
+        return m_coord;
+    }
     
-    // the task id
-    unsigned		taskId = 0;
-    bool*			taskDone = nullptr;	// used to show the progress
-    
-    // the pixel sample
-    PixelSample*	pixelSamples = nullptr;
-    unsigned		samplePerPixel = 0;
-    
-    // the sampler
-    Sampler*		sampler = nullptr;
-    // the camera
-    Camera*			camera = nullptr;
-    // the scene description
-    const Scene*	scene;
+    //! @brief  Get the size of the tile.
+    //!
+    //! @return The size of the current tile.
+    inline Vector2i    GetTileSize() const {
+        return m_size;
+    }
 
-    // integrator
-    std::shared_ptr<Integrator> integrator = nullptr;
+    //! @brief  Get sample per pixel.
+    //!
+    //! @return Sample per pixel to take.
+    inline unsigned int    GetSamplePerPixel() const {
+        return m_samplePerPixel;
+    }
+
+    //! @brief  Get scene description.
+    //!
+    //! @return Scene description.
+    inline const Scene&    GetScene() const {
+        return m_scene;
+    }
+
+    //! @brief  Get camera description.
+    //!
+    //! @return Camera information of the scene.
+    inline const Camera*   GetCamera() const{
+        return m_camera;
+    }
+
+    //! @brief  Get integrator.
+    //!
+    //! @return The integrator used to evalute rendering equation.
+    inline const std::shared_ptr<Integrator>   GetIntegrator() const{
+        return m_integrator;
+    }
+
+private:
+    Vector2i                            m_coord;            /**< Top-left corner of the current tile. */
+    Vector2i                            m_size;             /**< Size of the current tile to be rendered. */
+    unsigned int                        m_samplePerPixel;   /**< Sample to take for each pixel. */
+    Scene&	                            m_scene;            /**< Scene for ray tracing. */
+    Camera*	                            m_camera;           /**< Camera information. */
+    const std::shared_ptr<Integrator>   m_integrator;       /**< Integrator for evaluating rendering equation. */
+    Sampler*                            m_sampler;          /**< Sampler for taking samples. Currently not used. */
+    PixelSample*                        m_pixelSamples;     /**< Samples to take. Currently not used. */
 };

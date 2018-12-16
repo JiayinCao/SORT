@@ -26,10 +26,10 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 	if (!m_sharedMemory.bytes)
 		return;
 
-	int tile_w = rt.size.x;
+	int tile_w = rt.GetTileSize().x;
 	int tile_size = g_tile_size * g_tile_size;
-	int x_off = (int)(rt.ori.x / g_tile_size);
-	int y_off = (int)(floor((m_height - 1 - rt.ori.y) / (float)g_tile_size));
+	int x_off = (int)(rt.GetTopLeft().x / g_tile_size);
+	int y_off = (int)(floor((m_height - 1 - rt.GetTopLeft().y) / (float)g_tile_size));
 	int tile_offset = y_off * m_tilenum_x + x_off;
 	int offset = 4 * tile_offset * tile_size;
 
@@ -37,7 +37,7 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 	float* data = (float*)(m_sharedMemory.bytes + m_header_offset);
 
 	// get offset
-	int inner_offset = offset + 4 * (x - rt.ori.x + (g_tile_size - 1 - (y - rt.ori.y)) * tile_w);
+	int inner_offset = offset + 4 * (x - rt.GetTopLeft().x + (g_tile_size - 1 - (y - rt.GetTopLeft().y)) * tile_w);
 
 	// copy data
 	data[ inner_offset ] = color.GetR();
