@@ -18,39 +18,25 @@
 #include "task.h"
 #include "core/sassert.h"
 
-Task::Task( unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies ) 
- : m_priority(priority) {
-    for( auto dep : dependencies ){
-       // Add tasks this task depend on.
-       m_dependencies.insert( dep->GetTaskID() );
-       // Make sure this task also exist in its depencies dependent list.
-       dep->m_dependents.insert( m_taskid );
-    }
-
-    static unsigned int id_counter = 0;
-    m_taskid = id_counter++;
-}
-
 // Compare tasks based on its priority, tasks with higher priority get executed earlier.
 Scheduler::Task_Comp Scheduler::task_comp = []( const std::shared_ptr<Task> t0 , const std::shared_ptr<Task> t1 ){
     return t0->GetPriority() < t1->GetPriority();
 };
-
-Scheduler::Scheduler():m_availbleTasks(task_comp){
-}
 
 void Scheduler::Schedule( const std::shared_ptr<Task> task ){
     if( task == nullptr )
         return;
 
     std::lock_guard<std::mutex> lock(m_mutex);
+
     if( task->NoDependency() )
         m_availbleTasks.push( task );
-    else
-        m_backupTasks.insert( make_pair( task->GetTaskID() , task ) );
-
-    sAssert( 0 == m_allTasks.count( task->GetTaskID() ) , TASK );
-    m_allTasks[task->GetTaskID()] = task;
+    else{
+        auto dependencies = task->GetDependencies();
+        for( auto dep : dependencies )
+            dep->AddDependent( task );
+        m_backupTasks.insert( task );
+    }
 }
 
 std::shared_ptr<Task> Scheduler::PickTask(){
@@ -74,14 +60,13 @@ void Scheduler::TaskFinished( const std::shared_ptr<Task> task ){
 
     // Starting remove all dependencies.
     const auto dependent = task->GetDependents();
-    for( auto id : dependent ){
-        auto dep = m_backupTasks[id];
+    for( auto dep : dependent ){
         // Remove its dependencies.
-        dep->RemoveDependency( task->GetTaskID() );
+        dep->RemoveDependency( task );
 
         // There is no dependent task of this 'dep' task anymore, push it into the heap and remove it from the backup tasks.
         if( dep->NoDependency() ){
-            m_backupTasks.erase( dep->GetTaskID() );
+            m_backupTasks.erase( dep );
             m_availbleTasks.push( dep );
 
             // Notify one waiting thread to pick up task.
