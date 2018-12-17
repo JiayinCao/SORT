@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "core/singleton.h"
 #include <fstream>
+#include <memory>
 
 #define slog( level , type , ... ) \
 [&]() \
