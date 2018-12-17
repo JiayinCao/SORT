@@ -21,7 +21,6 @@
 #include "math/point.h"
 #include "math/vector3.h"
 #include "managers/meshmanager.h"
-#include "core/strhelper.h"
 #include "managers/matmanager.h"
 #include "core/log.h"
 
@@ -76,7 +75,7 @@ bool ObjLoader::LoadMesh( const std::string& str , std::shared_ptr<BufferMemory>
 			{
 				mem->m_TrunkBuffer.back().m_mat = MatManager::GetSingleton().FindMaterial( name );
 				if( 0 == mem->m_TrunkBuffer.back().m_mat )
-                    slog( WARNING , MATERIAL , stringFormat("Material named %s not found, use default material in subset \"%s\"." , name.c_str() , str.c_str() ) );
+                    slog( WARNING , MATERIAL , "Material named %s not found, use default material in subset \"%s\"." , name.c_str() , str.c_str() );
 			}
 		}else if( strcmp( prefix.c_str() , "v" ) == 0 )
 		{

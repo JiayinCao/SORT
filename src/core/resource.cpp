@@ -16,13 +16,12 @@
  */
 
 #include "resource.h"
-#include "core/strhelper.h"
 #include "core/log.h"
 
 void ResourceManager::ReleaseAllResources() {
     std::lock_guard<std::mutex> lock(m_mutex);
     for (auto resource : m_resources) {
-        slog(INFO, RESOURCE, stringFormat("Releasing resource %s.", resource->GetName().c_str()));
+        slog(INFO, RESOURCE, "Releasing resource %s.", resource->GetName().c_str());
         resource->Release();
     }
     m_resources.clear();

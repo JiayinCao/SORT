@@ -19,7 +19,6 @@
 #include "scene.h"
 #include "math/intersection.h"
 #include "accel/accelerator.h"
-#include "core/strhelper.h"
 #include "core/path.h"
 #include "core/samplemethod.h"
 #include "core/sassert.h"
@@ -52,7 +51,7 @@ bool Scene::LoadScene( TiXmlNode* root )
 			// the name of the model
 			const char* model_name = meshNode->Attribute( "name" );
 			if( model_name == nullptr ){
-                slog( WARNING , GENERAL , stringFormat("Mesh defined in file %s doesn't have a model name, it will be skipped." , filename ) );
+                slog( WARNING , GENERAL , "Mesh defined in file %s doesn't have a model name, it will be skipped." , filename );
 				break;
 			}
 
@@ -133,7 +132,7 @@ bool Scene::LoadScene( TiXmlNode* root )
 				m_lights.push_back( light );
 			}
 		}else
-            slog( WARNING , LIGHT , stringFormat( "Undefined light type %s" , type ) );
+            slog( WARNING , LIGHT , "Undefined light type %s" , type );
 
 		// get to the next light
 		lightNode = lightNode->NextSiblingElement( "Light" );

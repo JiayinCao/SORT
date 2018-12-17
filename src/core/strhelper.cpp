@@ -15,7 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header
 #include "strhelper.h"
 #include "managers/meshmanager.h"
 #include <algorithm>
@@ -59,14 +58,14 @@ MESH_TYPE	MeshTypeFromStr( const std::string& str )
 	std::string substr = str.substr( index + 1 , str.length() - index );
 
 	// transform the extension to lower case
-	std::transform(substr.begin(),substr.end(),substr.begin(),ToLower());
+	std::transform(substr.begin(),substr.end(),substr.begin(),[](char c){return tolower(c);});
 
 	if( strcmp( substr.c_str() , "obj" ) == 0 )
 		return MT_OBJ;
 	else if( strcmp( substr.c_str() , "ply" ) == 0 )
 		return MT_PLY;
 		
-    slog( WARNING , GENERAL , stringFormat( "Mesh type of \"%s\" is not supported" , substr.c_str() ) );
+    slog( WARNING , GENERAL , "Mesh type of \"%s\" is not supported" , substr.c_str() );
 	return MT_NONE;
 }
 

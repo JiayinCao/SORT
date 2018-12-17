@@ -19,7 +19,6 @@
 
 // include the header
 #include "light.h"
-#include "core/strhelper.h"
 
 //////////////////////////////////////////////////////////////////////
 // definition of point light

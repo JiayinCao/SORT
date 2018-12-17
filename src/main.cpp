@@ -29,7 +29,6 @@
 // the global system
 System g_System;
 
-// the main func
 #ifdef SORT_IN_WINDOWS
 int __cdecl main( int argc , char** argv )
 #elif defined(SORT_IN_LINUX) || defined(SORT_IN_MAC)
@@ -49,7 +48,8 @@ int main(int argc, char** argv)
         commandline += " ";
     }
 
-    slog(INFO, GENERAL, commandline);
+    slog(INFO, GENERAL, "%s" , commandline.c_str() );
+
 #if SORT_ENABLE_STATS_COLLECTION
     slog( INFO, GENERAL, "Stats collection is enabled.");
 #else
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
     if (argc < 2)
     {
         slog(WARNING, GENERAL, "Miss file argument.");
-        slog(INFO, GENERAL, stringFormat("Log file: \"%s\"", GetFullPath("log.txt").c_str()));
+        slog(INFO, GENERAL, "Log file: \"%s\"", GetFullPath("log.txt").c_str());
         return 0;
     }
 
@@ -70,8 +70,8 @@ int main(int argc, char** argv)
         return RUN_ALL_TESTS();
     }
 
-    slog(INFO, GENERAL, "Number of CPU cores " + std::to_string(NumSystemCores()));
-    slog(INFO, GENERAL, "Scene file (" + std::string(argv[1]) + ")");
+    slog(INFO, GENERAL, "Number of CPU cores %d" , NumSystemCores() );
+    slog(INFO, GENERAL, "Scene file (%s)" , argv[1]);
 
     // enable blender mode if possible
     if (argc > 2)
@@ -101,9 +101,9 @@ int main(int argc, char** argv)
     if (SORT_PROFILE_ISENABLED){
         const std::string filename("sort.prof");
         SORT_PROFILE_DUMP(filename.c_str());
-        slog(INFO, GENERAL, stringFormat("Profiling file: \"%s\"", GetFullPath(filename).c_str()));
+        slog(INFO, GENERAL, "Profiling file: \"%s\"", GetFullPath(filename).c_str());
     }
-    slog(INFO, GENERAL, stringFormat("Log file: \"%s\"", GetFullPath("log.txt").c_str()));
+    slog(INFO, GENERAL, "Log file: \"%s\"", GetFullPath("log.txt").c_str());
 
 	return 0;
 }

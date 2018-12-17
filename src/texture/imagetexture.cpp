@@ -35,7 +35,7 @@ void ImageTexture::_init()
 Spectrum ImageTexture::GetColor( int x , int y ) const
 {
 	// if there is no image, just crash
-    sAssertMsg( m_pMemory != 0 && m_pMemory->m_ImgMem != 0 , IMAGE , stringFormat( "Texture %s not loaded!" , m_Name.c_str() ) );
+    sAssertMsg( m_pMemory != 0 && m_pMemory->m_ImgMem != 0 , IMAGE , "Texture %s not loaded!" , m_Name.c_str() );
 
 	// filter the texture coordinate
 	_texCoordFilter( x , y );

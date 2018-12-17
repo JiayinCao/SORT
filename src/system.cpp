@@ -28,7 +28,6 @@
 #include "core/path.h"
 #include "core/creator.h"
 #include "sampler/sampler.h"
-#include "core/strhelper.h"
 #include "camera/camera.h"
 #include "integrator/integrator.h"
 #include "sampler/stratified.h"
@@ -137,7 +136,6 @@ void System::_pushRenderTask()
 
 	// Push render task into the queue
 	const unsigned tilesize = g_tile_size;
-	unsigned taskid = 0;
 	
 	// get the number of total task
 	m_totalTask = 0;
@@ -168,22 +166,8 @@ void System::_pushRenderTask()
 			size.x = (tilesize < (m_imagesensor->GetWidth() - tl.x)) ? tilesize : (m_imagesensor->GetWidth() - tl.x);
 			size.y = (tilesize < (m_imagesensor->GetHeight() - tl.y)) ? tilesize : (m_imagesensor->GetHeight() - tl.y);
 
-			auto rt = SCHEDULE_TASK<Render_Task>( 	priority-- , tl , size , &m_Scene , m_iSamplePerPixel , integrator , 
-											      	m_camera , m_pSampler , new PixelSample[m_iSamplePerPixel] );
-			/*rt->scene = &m_Scene;
-			rt->sampler = m_pSampler;
-			rt->camera = m_camera;
-			rt->taskDone = m_taskDone;
-			rt->samplePerPixel = m_iSamplePerPixel;
-			rt->integrator = integrator;
-
-			rt->ori.x = cur_pos.x * tilesize;
-			rt->ori.y = cur_pos.y * tilesize;
-			rt->size.x = (tilesize < (m_imagesensor->GetWidth() - rt->ori.x)) ? tilesize : (m_imagesensor->GetWidth() - rt->ori.x);
-			rt->size.y = (tilesize < (m_imagesensor->GetHeight() - rt->ori.y)) ? tilesize : (m_imagesensor->GetHeight() - rt->ori.y);
-
-			// create new pixel samples
-			rt->pixelSamples = new PixelSample[m_iSamplePerPixel];*/
+			SCHEDULE_TASK<Render_Task>( priority-- , tl , size , &m_Scene , m_iSamplePerPixel , integrator , 
+										m_camera , m_pSampler , new PixelSample[m_iSamplePerPixel] );
 		}
 
 		// turn to the next direction
@@ -236,7 +220,7 @@ Integrator*	System::_allocateIntegrator()
 		
 	if( integrator == 0 )
 	{
-        slog( WARNING , GENERAL , stringFormat( "No integrator with name of %s" , m_integratorType.c_str() ) );
+        slog( WARNING , GENERAL , "No integrator with name of %s" , m_integratorType.c_str() );
 		return 0;
 	}
 
@@ -264,7 +248,7 @@ bool System::Setup( const char* str )
 	TiXmlDocument doc( full_name.c_str() );
 	doc.LoadFile();
 	
-    sAssertMsg( !doc.Error() , GENERAL , stringFormat( "Can't load scene file %s" , full_name.c_str() ) );
+    sAssertMsg( !doc.Error() , GENERAL , "Can't load scene file %s" , full_name.c_str() );
 	
 	// get the root of xml
 	TiXmlNode*	root = doc.RootElement();

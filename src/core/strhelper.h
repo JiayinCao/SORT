@@ -38,13 +38,6 @@ VertexIndex	VertexIndexFromStr( const std::string& str );
 // result     : a corresponding mesh type
 MESH_TYPE	MeshTypeFromStr( const std::string& str );
 
-class ToLower{
-public:
-     char operator()(char val){   
-        return tolower( val );
-    }
-};
-
 // transform from string
 Transform TransformFromStr( const std::string& str );
 

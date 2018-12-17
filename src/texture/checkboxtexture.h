@@ -17,9 +17,7 @@
 
 #pragma once
 
-// include the header
 #include "texture.h"
-#include "core/strhelper.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 //	definition of check box texture
