@@ -59,10 +59,8 @@ private:
 class Resource : public SerializableObject
 {
 public:
-    //! @brief  Constructor automatically register this resource.
-    Resource();
     //! @brief  Destructor of Accelerator, nothing is done in it.
-    virtual ~Resource();
+    virtual ~Resource() {}
 
     //! Get the name of the resource
     //!

@@ -41,11 +41,3 @@ void ResourceManager::Unregister(class Resource* resource) {
     sAssert(0 != m_resources.count(resource), RESOURCE);
     m_resources.erase(resource);
 }
-
-Resource::Resource(){
-    ResourceManager::GetSingleton().Register(this);
-}
-
-Resource::~Resource() {
-    ResourceManager::GetSingleton().Unregister(this);
-}
