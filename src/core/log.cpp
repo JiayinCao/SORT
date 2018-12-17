@@ -19,6 +19,7 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
+#include <chrono>
 
 static std::vector<std::unique_ptr<LogDispatcher>> logDispatcher;
 static bool logLevel = true;
