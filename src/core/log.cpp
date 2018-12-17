@@ -16,9 +16,9 @@
  */
 
 #include "log.h"
+#include <iostream>
 #include <vector>
-#include <memory>
-#include <time.h>
+#include <ctime>
 
 static std::vector<std::unique_ptr<LogDispatcher>> logDispatcher;
 static bool logLevel = true;
@@ -46,21 +46,10 @@ const std::string logTimeString(){
     if( !logTime )
         return "";
     
-    auto tostr = []( const int t , const int size = 2 ){
-        std::string s = std::to_string(t);
-        return std::string( size - s.size(), '0' ) + s;
-    };
-    
-#ifdef SORT_IN_WINDOWS
-    time_t t = time(nullptr);
-    struct tm now;
-    localtime_s( &now , &t );
-    return "[" + tostr(now.tm_year + 1900 , 4) + '-' + tostr(now.tm_mon + 1) + '-' + tostr( now.tm_mday) + ' ' + tostr(now.tm_hour) + ':' + tostr(now.tm_min) + ':' + tostr( now.tm_sec) + "]";
-#else
-    time_t t = time(0);
-    struct tm * now = localtime(&t);
-    return "[" + tostr(now->tm_year + 1900, 4) + '-' + tostr(now->tm_mon + 1) + '-' + tostr(now->tm_mday) + ' ' + tostr(now->tm_hour) + ':' + tostr(now->tm_min) + ':' + tostr(now->tm_sec) + "]";
-#endif
+    std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    std::string s(128, '\0');
+    std::strftime(&s[0], s.size(), "[%Y-%m-%d %H:%M:%S]", std::localtime(&now));
+    return s;
 }
 
 const std::string levelToString( LOG_LEVEL level ){

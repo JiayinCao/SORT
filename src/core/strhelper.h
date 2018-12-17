@@ -52,6 +52,3 @@ Vector VectorFromStr( const std::string& str );
 
 // get the next token
 std::string NextToken( std::string& str , char t );
-
-// format the input string like sprintf
-std::string stringFormat( const char* format, ... );
