@@ -17,36 +17,39 @@
 
 #pragma once
 
-#include "singleton.h"
+#include <chrono>
 
-////////////////////////////////////////////////////////////////////////////
-// definition of timer
-class	Timer : public Singleton<Timer>
+//! @brief  Timer is for evaluating time elapsed for a specific operation.
+/**
+ * Timer is a tiny class for evaluating elapsed time during an operation.
+ * Since there is no global state involved, one can use multiple Timer at
+ * the same time in multiple threads. The time window could even overlap
+ * with each other.
+ */
+class	Timer
 {
+    using clock = std::chrono::high_resolution_clock;
+
 public:
-	// set the timer
-	void StartTimer();
-	// stop timer
-	unsigned StopTimer();
+    //! @brief  Constructor will choose to start timer automatically.
+    Timer():m_start(clock::now()){}
 
-	// get elapsed time
-	unsigned long GetElapsedTime() const;
-	// get total elapsed time
-	unsigned long GetTotalElapsedTime() const;
+	//! @brief  Reset the timer.
+    inline void Reset() {
+        m_start = clock::now();
+    }
 
-	// reset the timer
-	void ResetTimer();
+	//! @brief  Get elapsed time since last time the timer is reset.
+    //!
+    //! This function won't reset the timer after returning the value.
+    //! The time will continuing evaluating time.
+    //!
+    //! @return Get the elapsed time in million second since last 
+    //!         time the timer is reset.
+    inline unsigned int GetElapsedTime() const {
+        return (unsigned int)std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - m_start).count();
+    }
 
 private:
-	// the time
-	unsigned long m_elapsed;
-	unsigned long m_totalElapsed;
-
-	// whether timer is set
-	bool	m_bTimerSet;
-
-	// constructor
-	Timer() { ResetTimer(); }
-
-	friend class Singleton<Timer>;
+    std::chrono::time_point<clock>  m_start;        /**< Start point of last time timer is triggered. */
 };

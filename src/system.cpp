@@ -41,13 +41,13 @@
 #include "task/render_task.h"
 #include "core/globalconfig.h"
 
-SORT_STATS_DEFINE_COUNTER(sPreprocessTime)
-SORT_STATS_DEFINE_COUNTER(sRenderingTime)
+SORT_STATS_DEFINE_COUNTER(sPreprocessTimeMS)
+SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
 SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
 
-SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTime);
-SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTime);
-SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount , sRenderingTime);
+SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTimeMS);
+SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTimeMS);
+SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount , sRenderingTimeMS);
 SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
 
 // render the image
@@ -56,24 +56,20 @@ void System::Render()
 	// pre-process before rendering
 	PreProcess();
 
-	// set timer before rendering
-	Timer::GetSingleton().StartTimer();
+    Timer timer;
 
 	// push rendering task
 	_pushRenderTask();
 	// execute rendering tasks
 	_executeRenderingTasks();
 	
-	// stop timer
-	auto renderingTime = Timer::GetSingleton().StopTimer();
-    SORT_STATS( sRenderingTime = renderingTime );
+    SORT_STATS(sRenderingTimeMS = timer.GetElapsedTime());
 }
 
 // pre-process before rendering
 void System::PreProcess()
 {
-	// set timer before pre-processing
-	Timer::GetSingleton().StartTimer();
+    Timer timer;
 
 	if( m_imagesensor == 0 )
 	{
@@ -89,9 +85,7 @@ void System::PreProcess()
 	// preprocess scene
 	m_Scene.PreProcess();
 
-	// stop timer
-	Timer::GetSingleton().StopTimer();
-    SORT_STATS(sPreprocessTime = Timer::GetSingleton().GetElapsedTime());
+    SORT_STATS(sPreprocessTimeMS = timer.GetElapsedTime());
 }
 
 // output progress
