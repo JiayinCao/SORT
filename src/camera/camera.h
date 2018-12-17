@@ -22,7 +22,6 @@
 #include "core/enum.h"
 #include "spectrum/spectrum.h"
 #include "core/propertyset.h"
-#include "core/strhelper.h"
 #include "core/creator.h"
 #include "math/vector2.h"
 

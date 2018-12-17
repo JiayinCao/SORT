@@ -16,6 +16,7 @@
  */
 
 #include "stats.h"
+#include "core/strhelper.h"
 
 #ifdef SORT_ENABLE_STATS_COLLECTION
 
@@ -51,9 +52,9 @@ void StatsSummary::PrintStats() const {
     }
 
     for (const auto& counterCat : outputs) {
-        slog(INFO, GENERAL, stringFormat("%s", counterCat.first.c_str()));
+        slog(INFO, GENERAL, "%s", counterCat.first.c_str());
             for (const auto& counterItem : counterCat.second) {
-                slog(INFO, GENERAL, stringFormat("    %-44s %s", counterItem.first.c_str() , counterItem.second.c_str()));
+                slog(INFO, GENERAL, "    %-44s %s", counterItem.first.c_str() , counterItem.second.c_str());
             }
     }
     slog(INFO, GENERAL, "----------------------------------------------------------------");

@@ -44,7 +44,7 @@ public:
 	T* CreateType( const std::string& str ) const
 	{
 		std::string _str = str;
-		std::transform(_str.begin(),_str.end(),_str.begin(),ToLower());
+		std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){ return tolower(c); });
 		const auto& it = m_container.find( _str );
 		if( it == m_container.end() )
 			return nullptr;
@@ -74,11 +74,11 @@ private:
 	T##Creator()\
 	{\
 		std::string _str( N );\
-		std::transform(_str.begin(),_str.end(),_str.begin(),ToLower());\
+		std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){return tolower(c);});\
         auto& container = Creator<B>::GetSingleton().GetContainer();\
 		if( container.count( _str ) )\
 		{\
-            slog( WARNING , GENERAL , stringFormat( "The creator type with specific name of %s already exxisted." , N ) );\
+            slog( WARNING , GENERAL , "The creator type with specific name of %s already exxisted." , N );\
 			return;\
 		}\
         container.insert( std::make_pair(_str , this) );\

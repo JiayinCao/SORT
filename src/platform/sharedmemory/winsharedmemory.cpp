@@ -21,7 +21,6 @@
 
 #include "sharedmemory.h"
 #include "core/log.h"
-#include "core/strhelper.h"
 
 // default constructor
 WinSharedMemory::WinSharedMemory()
@@ -38,7 +37,7 @@ void WinSharedMemory::CreateSharedMemory( const std::string& name , int size , u
 
 	if (hMapFile == NULL)
 	{
-        slog( WARNING , MATERIAL , stringFormat( "Creating shared memory failed %s" , name.c_str() ) );
+        slog( WARNING , MATERIAL , "Creating shared memory failed %s" , name.c_str() );
 		return;
 	}
 	sharedmemory.size = size;
@@ -52,7 +51,7 @@ void WinSharedMemory::CreateSharedMemory( const std::string& name , int size , u
 	{
 		sharedmemory.size = 0;
 		CloseHandle(hMapFile);
-        slog( WARNING , MATERIAL , stringFormat( "Creating shared memory failed %s" , name.c_str() ) );
+        slog( WARNING , MATERIAL ,  "Creating shared memory failed %s" , name.c_str() );
 	}
 }
 

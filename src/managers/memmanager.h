@@ -74,8 +74,8 @@ public:
 		// get the memory pointer first
 		Memory* mem = _getMemory(id);
 
-        sAssertMsg( nullptr != mem , GENERAL , stringFormat( "No memory with id %d." , id ) );
-        sAssertMsg( sizeof( T ) * count + mem->m_offset <= mem->m_size , GENERAL , stringFormat( "There is not enough memory in memory manager.(mem id:%d)" , id ) );
+        sAssertMsg( nullptr != mem , GENERAL , "No memory with id %d." , id );
+        sAssertMsg( sizeof( T ) * count + mem->m_offset <= mem->m_size , GENERAL , "There is not enough memory in memory manager.(mem id:%d)" , id );
         
 		unsigned addr = mem->m_offset;
 		mem->m_offset += sizeof(T) * count;
@@ -86,7 +86,7 @@ public:
 	unsigned GetOffset( unsigned id=0 ) const
 	{
 		Memory* mem = _getMemory(id);
-        sAssertMsg( nullptr != mem , GENERAL , stringFormat( "No memory with id %d. " , id ) );
+        sAssertMsg( nullptr != mem , GENERAL , "No memory with id %d. " , id );
 		return mem->m_offset;
 	}
 

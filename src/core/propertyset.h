@@ -22,7 +22,6 @@
 #include <string>
 #include <unordered_map>
 #include "core/log.h"
-#include "core/strhelper.h"
 
 // pre-declera class
 class Texture;
@@ -70,7 +69,7 @@ public:
 
 		if( 0 == ph )
 		{
-            slog( WARNING , GENERAL , stringFormat( "There is no such a property named %s." , name.c_str() ) );
+            slog( WARNING , GENERAL , "There is no such a property named %s." , name.c_str() );
 			return false;
 		}
 
@@ -87,7 +86,7 @@ public:
 
 		if( 0 == ph )
 		{
-            slog( WARNING , GENERAL , stringFormat( "There is no such a property named %s." , name.c_str() ) );
+            slog( WARNING , GENERAL , "There is no such a property named %s." , name.c_str() );
 			return false;
 		}
 		

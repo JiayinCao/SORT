@@ -76,7 +76,7 @@ public:
 
 		// check validation
 		if( !m_root.IsNodeValid() )
-			slog( WARNING , MATERIAL , stringFormat( "Material '%s' is not valid , a default material will be used." , m_name.c_str() ) );
+			slog( WARNING , MATERIAL , "Material '%s' is not valid , a default material will be used." , m_name.c_str() );
 		else
 			m_root.PostProcess();
 	}

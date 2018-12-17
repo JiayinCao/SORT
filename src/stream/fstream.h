@@ -18,7 +18,6 @@
 #pragma once
 
 #include "stream.h"
-#include "core/strhelper.h"
 
 //! @brief Streaming from file.
 /**
@@ -34,7 +33,7 @@ public:
     IFileStream(const std::string& filename) {
         m_file.open(filename, std::ios::in | std::ios::binary );
         if (!m_file.is_open())
-            slog(WARNING, STREAM, stringFormat("File %s can't be loaded.", filename.c_str()));
+            slog(WARNING, STREAM, "File %s can't be loaded.", filename.c_str());
     }
 
     //! @brief Destructor will close the file.
@@ -144,7 +143,7 @@ public:
     OFileStream(const std::string& filename) {
         m_file.open(filename, std::ios::out | std::ios::binary );
         if (!m_file.is_open())
-            slog(WARNING, STREAM, stringFormat("File %s can't be loaded.", filename.c_str()));
+            slog(WARNING, STREAM, "File %s can't be loaded.", filename.c_str());
     }
 
     //! @brief Destructor will close the file.

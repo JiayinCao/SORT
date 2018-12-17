@@ -20,7 +20,6 @@
 // include the header
 #include "texture.h"
 #include "spectrum/spectrum.h"
-#include "core/strhelper.h"
 
 ////////////////////////////////////////////////////////////
 // definition of constant texture
