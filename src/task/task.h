@@ -70,7 +70,7 @@ public:
 
     //! @brief  Remove dependency from task.
     //!
-    //! Upon the temination of any dependent task, it is necessary to remove it from its dependenty.
+    //! Upon the termination of any dependent task, it is necessary to remove it from its dependenty.
     inline void         RemoveDependency( const std::shared_ptr<Task> taskid ) { 
         m_dependencies.erase( taskid ); 
     }
@@ -122,7 +122,7 @@ class Scheduler : public Singleton<Scheduler>{
     using Task_Comp = std::function<bool(const std::shared_ptr<Task> , const std::shared_ptr<Task>)>;
     /**< Static task comparison functor based on its priority. */
     static Task_Comp task_comp;
-    /**< Task queue for availble tasks is actually a heap. */
+    /**< Task queue for available tasks is actually a heap. */
     using TaskQueue = std::priority_queue<std::shared_ptr<Task>,std::vector<std::shared_ptr<Task>>,decltype(task_comp)>;
     /**< Task container for back-up tasks is just a hash container. */
     using TaskContainer = std::unordered_set<std::shared_ptr<Task>>;
@@ -135,7 +135,7 @@ public:
 
     //! @brief  Pick a task with highest priority, but no dependencies.
     //!
-    //! The scheduler will try picking a task with highest priroity, but no dependencies.
+    //! The scheduler will try picking a task with highest priority, but no dependencies.
     //! If there is no such a task available for now, the scheduler will hang the thread
     //! and share its CPU resources to other threads for executing. In the case of a cycle
     //! graph tasks, it will hang forever. The task picked will be removed from the data
@@ -176,7 +176,7 @@ inline std::shared_ptr<T>  SCHEDULE_TASK( unsigned int priority , Args... args )
 //! @brief      Executing tasks. It will exit if there is no other tasks.
 inline void    EXECUTING_TASKS(){
     while( true ){
-        // Pick a task that is availble.
+        // Pick a task that is available.
         auto task = Scheduler::GetSingleton().PickTask();
 
         // If there is no task to be picked, break out of the loop.

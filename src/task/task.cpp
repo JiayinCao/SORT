@@ -42,12 +42,12 @@ void Scheduler::Schedule( const std::shared_ptr<Task> task ){
 std::shared_ptr<Task> Scheduler::PickTask(){
     std::unique_lock<std::mutex> lock(m_mutex);
 
-    // Return nullptr if there is no task available in the scheduler
-    if( m_backupTasks.empty() && m_availbleTasks.empty() )
-        return nullptr;
+    // Wait until this is at least one available task
+    m_cv.wait( lock , [&](){ return (m_backupTasks.empty() && m_availbleTasks.empty()) || m_availbleTasks.size(); } );
 
-    // Wait until this is at least one availble task
-    m_cv.wait( lock , [&](){ return m_availbleTasks.size(); } );
+    // Return nullptr if there is no task available in the scheduler
+    if (m_backupTasks.empty() && m_availbleTasks.empty())
+        return nullptr;
 
     // Get the available task that is with highest priority
     std::shared_ptr<Task> ret = m_availbleTasks.top();
