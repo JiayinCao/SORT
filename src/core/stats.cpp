@@ -20,6 +20,14 @@
 
 #ifdef SORT_ENABLE_STATS_COLLECTION
 
+template<typename... Args>
+static std::string stringFormat( const char* format, Args... arg ){
+    size_t size = snprintf( nullptr, 0, format, arg... ) + 1;
+    std::unique_ptr<char[]> buf( new char[ size ] ); 
+    snprintf( buf.get(), size, format, arg... );
+    return std::string( buf.get(), buf.get() + size - 1 );
+}
+
 // This is a container holding all statsItem per thread
 class StatsItemContainer {
 public:
