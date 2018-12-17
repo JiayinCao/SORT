@@ -17,7 +17,6 @@
 
 // include the header file
 #include "meshmanager.h"
-#include "core/strhelper.h"
 #include "meshio/objloader.h"
 #include "meshio/plyloader.h"
 #include "entity/visual.h"

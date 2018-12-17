@@ -22,7 +22,6 @@
 #include "core/propertyset.h"
 #include "math/transform.h"
 #include "core/creator.h"
-#include "core/strhelper.h"
 #include "core/scene.h"
 #include "math/vector3.h"
 

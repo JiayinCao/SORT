@@ -18,7 +18,6 @@
 // include header file
 #include "texmanager.h"
 #include "texture/imagetexture.h"
-#include "core/strhelper.h"
 #include "core/path.h"
 #include "core/log.h"
 #include <regex>
@@ -67,7 +66,7 @@ bool TexManager::Read( const std::string& str , ImageTexture* tex )
         return true;
     }
 
-    slog(WARNING, IMAGE, stringFormat("Can't load image file %s.", str.c_str()));
+    slog(WARNING, IMAGE, "Can't load image file %s.", str.c_str());
 	return false;
 }
 
@@ -156,11 +155,11 @@ bool TexManager::saveImage(const std::string& name, const Texture* tex )
         int ret = SaveEXR(data, tex->GetWidth(), tex->GetHeight(), 3, true, name.c_str());
         delete[] data;
         if (ret < 0)
-            slog(WARNING, MATERIAL, stringFormat("Fail to save image file %s", name.c_str()));
+            slog(WARNING, MATERIAL, "Fail to save image file %s", name.c_str());
         return ret >= 0;
     }
     
-    sAssertMsg( false , IMAGE , stringFormat("SORT doesn't support exporting file %s",name.c_str()) )
+    sAssertMsg( false , IMAGE , "SORT doesn't support exporting file %s",name.c_str())
     
     return false;
 }

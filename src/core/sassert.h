@@ -32,10 +32,10 @@
                 assert( false );\
             }
 
-    #define sAssertMsg(expr, type, str) \
+    #define sAssertMsg(expr, type, ... ) \
             if( false == (bool)(expr) )\
             {\
-                slog( CRITICAL , type , str );\
+                slog( CRITICAL , type , __VA_ARGS__ );\
                 abort();\
             }
 #endif

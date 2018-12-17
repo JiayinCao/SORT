@@ -21,7 +21,6 @@
 
 #include "sharedmemory.h"
 #include "core/log.h"
-#include "core/strhelper.h"
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/types.h>
@@ -38,7 +37,7 @@ void MmapSharedMemory::CreateSharedMemory( const std::string& name , int size , 
     fd = open(name.c_str(), O_RDWR , 0 );
     if( fd == -1 )
     {
-        slog( WARNING , GENERAL , stringFormat( "Failed to load shared memory file %s " , name.c_str() ) );
+        slog( WARNING , GENERAL , "Failed to load shared memory file %s " , name.c_str() );
         return;
     }
     

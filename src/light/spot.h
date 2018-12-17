@@ -18,7 +18,6 @@
 #pragma once
 
 #include "light.h"
-#include "core/strhelper.h"
 #include "math/vector3.h"
 
 ///////////////////////////////////////////////////////////////////////
