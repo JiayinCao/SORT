@@ -21,6 +21,7 @@
 #include <ctime>
 #include <chrono>
 #include <string>
+#include <mutex>
 
 static std::vector<std::unique_ptr<LogDispatcher>> logDispatcher;
 static bool logLevel = true;
@@ -41,7 +42,10 @@ void sortLog( LOG_LEVEL level , LOG_TYPE type , const std::string& str , const c
 }
 
 void LogDispatcher::dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line ){
-    output(format( level , type , str , file , line ));
+    auto s = format(level, type, str, file, line);
+    static std::mutex mutex;
+    std::lock_guard<std::mutex> lock(mutex);
+    output(s);
 }
 
 const std::string logTimeString(){
