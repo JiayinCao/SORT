@@ -20,6 +20,7 @@
 #include <vector>
 #include <ctime>
 #include <chrono>
+#include <string>
 
 static std::vector<std::unique_ptr<LogDispatcher>> logDispatcher;
 static bool logLevel = true;
@@ -48,9 +49,11 @@ const std::string logTimeString(){
         return "";
     
     std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    std::string s(128, '\0');
-    std::strftime(&s[0], s.size(), "[%Y-%m-%d %H:%M:%S]", std::localtime(&now));
-    return s;
+    struct tm t;
+    ::localtime_s(&t, &now);
+    char s[128] = { 0 };
+    std::strftime(s, 128, "[%Y-%m-%d %H:%M:%S]", &t);
+    return std::string(s);
 }
 
 const std::string levelToString( LOG_LEVEL level ){
@@ -72,7 +75,11 @@ const std::string typeToString( LOG_TYPE type ){
     ( LOG_TYPE::LOG_MATERIAL == type ) ? "[Material]" :
     ( LOG_TYPE::LOG_IMAGE == type ) ? "[Image]" :
     ( LOG_TYPE::LOG_SAMPLING == type ) ? "[Sampling]" :
-    ( LOG_TYPE::LOG_CAMERA == type ) ? "[Camera]" : "[Unknown]";
+    ( LOG_TYPE::LOG_CAMERA == type ) ? "[Camera]" : 
+    ( LOG_TYPE::LOG_SHAPE == type ) ? "[Shape]" :
+    ( LOG_TYPE::LOG_STREAM == type ) ? "[Stream]" :
+    ( LOG_TYPE::LOG_RESOURCE == type ) ? "[Resource]" :
+    ( LOG_TYPE::LOG_TASK == type ) ? "[Task]" : "[Unknown]";
 }
 
 const std::string lineInfoString( const char* file , int line ){
