@@ -49,10 +49,15 @@ const std::string logTimeString(){
         return "";
     
     std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    char s[128] = { 0 };
+
+#ifdef SORT_IN_WINDOWS
     struct tm t;
     ::localtime_s(&t, &now);
-    char s[128] = { 0 };
     std::strftime(s, 128, "[%Y-%m-%d %H:%M:%S]", &t);
+#else
+    std::strftime(s, 128, "[%Y-%m-%d %H:%M:%S]", std::localtime(&now) );
+#endif
     return std::string(s);
 }
 
