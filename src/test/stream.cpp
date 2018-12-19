@@ -61,7 +61,3 @@ TEST(STREAM, FileStream) {
         EXPECT_EQ(t2, vec_u[i]);
     }
 }
-
-TEST(STREAM, MemoryStream) {
-
-}

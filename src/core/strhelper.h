@@ -33,11 +33,6 @@ struct VertexIndex;
 // result     : a vertex index
 VertexIndex	VertexIndexFromStr( const std::string& str );
 
-// get the type of file according to the file extension
-// para 'str' : string to parse
-// result     : a corresponding mesh type
-MESH_TYPE	MeshTypeFromStr( const std::string& str );
-
 // transform from string
 Transform TransformFromStr( const std::string& str );
 

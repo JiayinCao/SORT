@@ -17,12 +17,7 @@
 
 #pragma once
 
-#include <vector>
-#include "core/primitive.h"
 #include "managers/meshmanager.h"
-#include "math/transform.h"
-
-class	Material;
 
 //! @brief Visual entity is the basic visible unit can be seen in SORT.
 /**
@@ -68,15 +63,4 @@ public:
 
 public:
     std::shared_ptr<BufferMemory>               m_memory;       /**< Memory for the mesh. */
-    std::vector<std::shared_ptr<Material>>      m_Materials;    /**< Material referenced in the mesh */
-
-
-    // ------------------------------------------------------------------------
-    // Temporary solution before serialization is done.
-public:
-    bool LoadMesh( const std::string& filename , const Transform& transform );
-    void ResetMaterial( const std::string& setname , const std::string& matname );
-	int  _getSubsetID( const std::string& setname );
-	void _copyMaterial();
-    // ------------------------------------------------------------------------
 };

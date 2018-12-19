@@ -20,6 +20,7 @@ import shutil
 import numpy as np
 import platform
 import tempfile
+import bmesh
 from math import degrees
 from . import exporter_common
 from ..stream import stream
@@ -198,7 +199,7 @@ def export_scene(scene, root, force_debug):
     ET.SubElement( scene_root , 'Accel', type=accelerator_type)
 
     for ob in exporter_common.getMeshList(scene):
-        model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.obj', name = ob.name )
+        model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme', name = ob.name )
         transform_node = ET.SubElement( model_node , 'Transform' )
         ET.SubElement( transform_node , 'Matrix' , value = 'm '+ exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world) )
         # output the mesh to file
@@ -268,9 +269,22 @@ def name_compat(name):
     else:
         return name.replace(' ', '_')
 
+def triangulate_object(obj):
+    me = obj.data
+    # Get a BMesh representation
+    bm = bmesh.new()
+    bm.from_mesh(me)
+
+    bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method=0, ngon_method=0)
+
+    # Finish up, write the bmesh back to the mesh
+    bm.to_mesh(me)
+    bm.free()
+
 # export mesh file
 def export_mesh(obj,scene,force_debug):
-    output_path = get_intermediate_dir(force_debug) + obj.name + '.obj'
+    # make sure there is no quad in the object
+    triangulate_object(obj)
 
     # the mesh object
     mesh = obj.data
@@ -282,186 +296,161 @@ def export_mesh(obj,scene,force_debug):
     # face index pairs
     face_index_pairs = [(face, index) for index, face in enumerate(mesh.polygons)]
 
-    fs = stream.FileStream( get_intermediate_dir(force_debug) + obj.name + '.sme' )
-
     # generate normal data
     mesh.calc_normals_split()
-    with open(output_path, 'w') as file:
-        file.write("# OBJ file\n")
+    fs = stream.FileStream( get_intermediate_dir(force_debug) + obj.name + '.sme' )
+    contextMat = None
+    materials = mesh.materials[:]
+    material_names = [m.name if m else None for m in materials]
 
-        contextMat = None
-        materials = mesh.materials[:]
-        material_names = [m.name if m else None for m in materials]
+    # avoid bad index errors
+    if not materials:
+        materials = [None]
+        material_names = [name_compat(None)]
 
-        # avoid bad index errors
-        if not materials:
-            materials = [None]
-            material_names = [name_compat(None)]
+    name1 = obj.name
+    name2 = obj.data.name
+    if name1 == name2:
+        obnamestring = name_compat(name1)
+    else:
+        obnamestring = '%s_%s' % (name_compat(name1), name_compat(name2))
 
-        name1 = obj.name
-        name2 = obj.data.name
-        if name1 == name2:
-            obnamestring = name_compat(name1)
+    # serialize vertices
+    fs.serialize(len(mesh.vertices))
+    for v in mesh.vertices:
+        fs.serialize(v.co[:])
+
+    # UV
+    uvs = []
+    uv_unique_count = no_unique_count = 0
+    if faceuv:
+        # in case removing some of these dont get defined.
+        uv = f_index = uv_index = uv_key = uv_val = uv_ls = None
+
+        uv_face_mapping = [None] * len(face_index_pairs)
+        uv_dict = {}
+        uv_get = uv_dict.get
+        for f, f_index in face_index_pairs:
+            uv_ls = uv_face_mapping[f_index] = []
+            for uv_index, l_index in enumerate(f.loop_indices):
+                uv = uv_layer[l_index].uv
+                uv_key = round(uv[0], 4), round(uv[1], 4)
+                uv_val = uv_get(uv_key)
+                if uv_val is None:
+                    uv_val = uv_dict[uv_key] = uv_unique_count
+                    
+                    uvs.append( uv[:] )
+                    uv_unique_count += 1
+                uv_ls.append(uv_val)
+        del uv_dict, uv, f_index, uv_index, uv_ls, uv_get, uv_key, uv_val
+
+    # serialize uv coordinate
+    fs.serialize(len(uvs))
+    for uv in uvs:
+        fs.serialize(uv[:])
+    del uvs
+
+    # output normal
+    no_key = no_val = None
+    normals_to_idx = {}
+    no_get = normals_to_idx.get
+    no_unique_count = 0
+    loops_to_normals = [0] * len(mesh.loops)
+    normals = []
+    for f, f_index in face_index_pairs:
+        for l_idx in f.loop_indices:
+            def veckey3d(v):
+                return round(v.x, 4), round(v.y, 4), round(v.z, 4)
+            no_key = veckey3d(mesh.loops[l_idx].normal)
+            no_val = no_get(no_key)
+            if no_val is None:
+                no_val = normals_to_idx[no_key] = no_unique_count
+                normals.append( no_key )
+                no_unique_count += 1
+            loops_to_normals[l_idx] = no_val
+    del normals_to_idx, no_get, no_key, no_val
+
+    # serialize normals
+    fs.serialize(len(normals))
+    for normal in normals:
+        fs.serialize(normal[:])
+    del normals
+
+    me_verts = mesh.vertices
+
+    class Trunk:
+        def __init__(self, mat_name):
+            self.mat_name = mat_name
+            self.face = []
+
+    trunks = []
+
+    for f, f_index in face_index_pairs:
+        f_smooth = f.use_smooth
+        f_mat = min(f.material_index, len(materials) - 1)
+
+        key = material_names[f_mat], None  # No image, use None instead.
+
+        # CHECK FOR CONTEXT SWITCH
+        if key == contextMat:
+            pass  # Context already switched, dont do anything
         else:
-            obnamestring = '%s_%s' % (name_compat(name1), name_compat(name2))
-
-        file.write('g %s\n' % obnamestring)
-
-        # output vertices
-        for v in mesh.vertices:
-            file.write("v %.4f %.4f %.4f\n" % (v.co[:]))
-
-        # serialize vertices
-        fs.serialize(len(mesh.vertices))
-        for v in mesh.vertices:
-            fs.serialize(v.co[:])
-
-        # UV
-        uv_unique_count = no_unique_count = 0
-        if faceuv:
-            # in case removing some of these dont get defined.
-            uv = f_index = uv_index = uv_key = uv_val = uv_ls = None
-
-            uv_face_mapping = [None] * len(face_index_pairs)
-
-            uvs = []
-            uv_dict = {}
-            uv_get = uv_dict.get
-            for f, f_index in face_index_pairs:
-                uv_ls = uv_face_mapping[f_index] = []
-                for uv_index, l_index in enumerate(f.loop_indices):
-                    uv = uv_layer[l_index].uv
-                    uv_key = round(uv[0], 4), round(uv[1], 4)
-                    uv_val = uv_get(uv_key)
-                    if uv_val is None:
-                        uv_val = uv_dict[uv_key] = uv_unique_count
-                        
-                        uvs.append( uv[:] )
-                        uv_unique_count += 1
-                    uv_ls.append(uv_val)
-            for uv in uvs:
-                file.write('vt %.6f %.6f\n' % uv[:])
-            del uv_dict, uv, f_index, uv_index, uv_ls, uv_get, uv_key, uv_val
-
-            # serialize uv coordinate
-            fs.serialize(len(uvs))
-            for uv in uvs:
-                fs.serialize(uv[:])
-            del uvs
-
-        # output normal
-        no_key = no_val = None
-        normals_to_idx = {}
-        no_get = normals_to_idx.get
-        no_unique_count = 0
-        loops_to_normals = [0] * len(mesh.loops)
-        normals = []
-        for f, f_index in face_index_pairs:
-            for l_idx in f.loop_indices:
-                def veckey3d(v):
-                    return round(v.x, 4), round(v.y, 4), round(v.z, 4)
-                no_key = veckey3d(mesh.loops[l_idx].normal)
-                no_val = no_get(no_key)
-                if no_val is None:
-                    no_val = normals_to_idx[no_key] = no_unique_count
-                    file.write('vn %.6f %.6f %.6f\n' % no_key)
-                    normals.append( no_key )
-                    no_unique_count += 1
-                loops_to_normals[l_idx] = no_val
-        del normals_to_idx, no_get, no_key, no_val
-
-        # serialize normals
-        fs.serialize(len(normals))
-        for normal in normals:
-            fs.serialize(normal[:])
-        del normals
-
-        me_verts = mesh.vertices
-
-        class Trunk:
-            def __init__(self, mat_name):
-                self.mat_name = mat_name
-                self.face = []
-
-        trunks = []
-
-        for f, f_index in face_index_pairs:
-            f_smooth = f.use_smooth
-            f_mat = min(f.material_index, len(materials) - 1)
-
-            key = material_names[f_mat], None  # No image, use None instead.
-
-            # CHECK FOR CONTEXT SWITCH
-            if key == contextMat:
-                pass  # Context already switched, dont do anything
+            if key[0] is None and key[1] is None:
+                pass
             else:
-                if key[0] is None and key[1] is None:
-                    # Write a null material, since we know the context has changed.
-                    #if EXPORT_GROUP_BY_MAT:
-                    # can be mat_image or (null)
-                    file.write("g %s_%s\n" % (name_compat(obj.name), name_compat(obj.data.name)))
-                    file.write("usemtl (null)\n")
-                else:
-                    mat_data = mtl_dict.get(key)
-                    if not mat_data:
-                        # First add to global dict so we can export to mtl
-                        # Then write mtl
+                mat_data = mtl_dict.get(key)
+                if not mat_data:
+                    # First add to global dict so we can export to mtl
+                    # Then write mtl
 
-                        # Make a new names from the mat and image name,
-                        # converting any spaces to underscores with name_compat.
+                    # Make a new names from the mat and image name,
+                    # converting any spaces to underscores with name_compat.
 
-                        # If none image dont bother adding it to the name
-                        # Try to avoid as much as possible adding texname (or other things)
-                        # to the mtl name (see [#32102])...
-                        mtl_name = "%s" % name_compat(key[0])
-                        if mtl_rev_dict.get(mtl_name, None) not in {key, None}:
-                            if key[1] is None:
-                                tmp_ext = "_NONE"
-                            else:
-                                tmp_ext = "_%s" % name_compat(key[1])
-                            i = 0
-                            while mtl_rev_dict.get(mtl_name + tmp_ext, None) not in {key, None}:
-                                i += 1
-                                tmp_ext = "_%3d" % i
-                            mtl_name += tmp_ext
-                        mat_data = mtl_dict[key] = mtl_name, materials[f_mat], None
-                        mtl_rev_dict[mtl_name] = key
+                    # If none image dont bother adding it to the name
+                    # Try to avoid as much as possible adding texname (or other things)
+                    # to the mtl name (see [#32102])...
+                    mtl_name = "%s" % name_compat(key[0])
+                    if mtl_rev_dict.get(mtl_name, None) not in {key, None}:
+                        if key[1] is None:
+                            tmp_ext = "_NONE"
+                        else:
+                            tmp_ext = "_%s" % name_compat(key[1])
+                        i = 0
+                        while mtl_rev_dict.get(mtl_name + tmp_ext, None) not in {key, None}:
+                            i += 1
+                            tmp_ext = "_%3d" % i
+                        mtl_name += tmp_ext
+                    mat_data = mtl_dict[key] = mtl_name, materials[f_mat], None
+                    mtl_rev_dict[mtl_name] = key
 
-                    file.write("g %s_%s_%s\n" % (name_compat(obj.name), name_compat(obj.data.name), mat_data[0]))
-                    file.write("usemtl %s\n" % mat_data[0])
+                trunks.append( Trunk(mat_data[0]) )
 
-                    trunks.append( Trunk(mat_data[0]) )
+        # update current context material
+        contextMat = key
 
-            # update current context material
-            contextMat = key
+        # output face information
+        f_v = [(vi, me_verts[v_idx], l_idx)
+                   for vi, (v_idx, l_idx) in enumerate(zip(f.vertices, f.loop_indices))]
 
-            # output face information
-            f_v = [(vi, me_verts[v_idx], l_idx)
-                       for vi, (v_idx, l_idx) in enumerate(zip(f.vertices, f.loop_indices))]
-            file.write("f")
+        totverts = 1
+        totuvco = 1
+        totno = 1
+        if faceuv:
+            for vi, v, li in f_v:
+                trunks[-1].face.append( (totverts + v.index, totuvco + uv_face_mapping[f_index][vi], totno + loops_to_normals[li] ) )
+        else:  # No UV's
+            for vi, v, li in f_v:
+                trunks[-1].face.append( (totverts + v.index, totno + loops_to_normals[li]) )
 
-            totverts = 1
-            totuvco = 1
-            totno = 1
-            if faceuv:
-                for vi, v, li in f_v:
-                    file.write(" %d/%d/%d" % (totverts + v.index, totuvco + uv_face_mapping[f_index][vi], totno + loops_to_normals[li], ))  # vert, uv, normal
-                    trunks[-1].face.append( (totverts + v.index, totuvco + uv_face_mapping[f_index][vi], totno + loops_to_normals[li] ) )
-            else:  # No UV's
-                for vi, v, li in f_v:
-                    file.write(" %d//%d" % (totverts + v.index, totno + loops_to_normals[li]))
-                    trunks[-1].face.append( (totverts + v.index, totno + loops_to_normals[li]) )
-
-            file.write("\n")
-
-        #serialize trunks
-        fs.serialize( len(trunks) )
-        for trunk in trunks:
-            fs.serialize( trunk.mat_name )
-            fs.serialize( len( trunk.face ) )
-            for ids in trunk.face:
-                fs.serialize( ids )
-        del trunks
+    #serialize trunks
+    fs.serialize( len(trunks) )
+    for trunk in trunks:
+        fs.serialize( trunk.mat_name )
+        fs.serialize( int(len( trunk.face ) / 3) )
+        for ids in trunk.face:
+            for id in ids:
+                fs.serialize( id - 1 )
+    del trunks
 
 
 def export_material(scene, root, force_debug):

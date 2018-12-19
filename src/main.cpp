@@ -23,7 +23,6 @@
 #include "core/profile.h"
 #include "core/path.h"
 #include "core/globalconfig.h"
-
 #include "thirdparty/gtest/gtest.h"
 
 // the global system
