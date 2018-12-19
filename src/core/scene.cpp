@@ -29,6 +29,7 @@
 #include "core/stats.h"
 #include "entity/entity.h"
 #include "entity/visual.h"
+#include "core/primitive.h"
 
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
@@ -60,25 +61,8 @@ bool Scene::LoadScene( TiXmlNode* root )
 
 			// load the first mesh
 			auto visual = std::make_shared<MeshVisual>();
-			if( visual->LoadMesh( filename , transform ) )
+			if( MeshManager::GetSingleton().LoadMesh( filename , visual , transform ) )
 			{
-				// reset the material if neccessary
-				TiXmlElement* meshMat = meshNode->FirstChildElement( "Material" );
-				if( meshMat )
-				{
-					meshMat = meshMat->FirstChildElement( "MatSet" );
-					do
-					{
-						const char* set_name = meshMat->Attribute( "name" );
-						const char* mat_name = meshMat->Attribute( "mat" );
-
-						if( set_name != 0 && mat_name != 0 )
-							visual->ResetMaterial( set_name , mat_name );
-
-						meshMat = meshMat->NextSiblingElement( "MatSet" );
-					}while( meshMat );
-				}
-
 				Entity* entity = new Entity();
 				entity->AddVisual( visual );
 				m_entities.push_back( entity );

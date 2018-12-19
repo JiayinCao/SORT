@@ -19,24 +19,17 @@
 
 // include the headers
 #include "sort.h"
+#include <vector>
+#include <unordered_map>
+#include <memory>
 #include "core/singleton.h"
 #include "core/enum.h"
 #include "core/define.h"
-#include <vector>
-#include <unordered_map>
 #include "math/point.h"
 #include "math/vector3.h"
 #include "math/transform.h"
 #include "material/material.h"
-#include <memory>
 #include "stream/stream.h"
-
-#ifdef SORT_IN_WINDOWS
-// Suppress the warning of duplicated IStream definition.
-#pragma warning(disable:4099)
-#endif
-
-class MeshLoader;
 
 // index for a vertex
 struct VertexIndex
@@ -161,21 +154,12 @@ class	MeshManager : public Singleton<MeshManager>
 {
 public:
 	// Temporary
-	bool LoadMesh( const std::string& str , class MeshVisual* visual , const Transform& );
+	bool LoadMesh( const std::string& str , std::shared_ptr<class MeshVisual> visual , const Transform& );
 
 private:
-	// the mesh loaders
-    std::vector<std::shared_ptr<MeshLoader>>	m_MeshLoader;
-
 	// the memory for meshes
     std::unordered_map< std::string , std::shared_ptr<BufferMemory> > m_Buffers;
 
 private:
-	// default constructor
-    MeshManager();
-    
-	// get the mesh loader
-	std::shared_ptr<MeshLoader>	_getMeshLoader( MESH_TYPE type ) const;
-
 	friend class Singleton<MeshManager>;
 };

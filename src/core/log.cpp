@@ -91,15 +91,15 @@ const std::string typeToString( LOG_TYPE type ){
     ( LOG_TYPE::LOG_TASK == type ) ? "[Task]" : "[Unknown]";
 }
 
-const std::string lineInfoString( const char* file , int line ){
-    if( !logLineInfo )
+const std::string lineInfoString( const char* file , int line , LOG_LEVEL level ){
+    if( !logLineInfo && level != LOG_LEVEL::LOG_CRITICAL )
         return "";
     return "[File:" + std::string(file) + "  Line:" + std::to_string(line) + "]";
 }
 
 // format log header
 const std::string LogDispatcher::formatHead( LOG_LEVEL level , LOG_TYPE type , const char* file , const int line ) const{
-    return logTimeString() + levelToString(level) + typeToString( type ) + lineInfoString( file , line ) + "\t";
+    return logTimeString() + levelToString(level) + typeToString( type ) + lineInfoString( file , line , level ) + "\t";
 }
 
 const std::string LogDispatcher::format( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line ) const{
