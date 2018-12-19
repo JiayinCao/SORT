@@ -17,8 +17,6 @@
 
 // include the header file
 #include "meshmanager.h"
-#include "meshio/objloader.h"
-#include "meshio/plyloader.h"
 #include "entity/visual.h"
 #include "core/path.h"
 #include "bsdf/bsdf.h"
@@ -26,73 +24,39 @@
 #include "stream/stream.h"
 #include "managers/matmanager.h"
 #include "entity/entity.h"
-
-// default constructor
-MeshManager::MeshManager()
-{
-	// register the mesh loaders
-    m_MeshLoader.push_back( std::make_shared<ObjLoader>() );
-    m_MeshLoader.push_back( std::make_shared<PlyLoader>() );
-}
-
-// get the mesh loader
-std::shared_ptr<MeshLoader>	MeshManager::_getMeshLoader( MESH_TYPE type ) const
-{
-	// unregister the mesh loader
-	auto it = m_MeshLoader.begin();
-	while( it != m_MeshLoader.end() )
-	{
-		if( (*it)->GetMT() == type )
-			return *it;
-		it++;
-	}
-
-	return nullptr;
-}
+#include "stream/fstream.h"
 
 // Temporary
-bool MeshManager::LoadMesh( const std::string& filename , MeshVisual* visual , const Transform& transform ){
+bool MeshManager::LoadMesh( const std::string& filename , std::shared_ptr<MeshVisual> visual , const Transform& transform ){
 	// get full resource filename
 	std::string str = GetFullPath( filename );
 
-	// get the mesh type
-	MESH_TYPE type = MeshTypeFromStr( str );
+	// create the new memory
+	std::shared_ptr<BufferMemory> mem = std::make_shared<BufferMemory>();
 
-	auto loader = _getMeshLoader( type );
+	// load the mesh from file
+	IFileStream fs( str );
+	mem->Serialize( fs );
 
-	bool read = false;
-	if( loader )
-	{
-		// create the new memory
-        std::shared_ptr<BufferMemory> mem = std::make_shared<BufferMemory>();
+	// reset count
+	mem->CalculateCount();
 
-		// load the mesh from file
-		read = loader->LoadMesh( str , mem );
+	// apply the transformation
+	mem->ApplyTransform( transform );
 
-		// reset count
-		mem->CalculateCount();
+	// if there is no normal or texture coordinate or tagent , generate them
+	// because the rendering method requires all of the data
+	mem->GenSmoothNormal();
+	mem->GenTexCoord();
+	mem->GenSmoothTagent();
 
-		// set the pointer
-		if( read )
-		{
-			// apply the transformation
-			mem->ApplyTransform( transform );
+	// copy trunk memory pointer
+	visual->m_memory = mem;
 
-			// if there is no normal or texture coordinate or tagent , generate them
-			// because the rendering method requires all of the data
-			mem->GenSmoothNormal();
-			mem->GenTexCoord();
-			mem->GenSmoothTagent();
+	// and insert it into the map
+	m_Buffers.insert( make_pair( str , mem ) );
 
-			// copy trunk memory pointer
-			visual->m_memory = mem;
-
-			// and insert it into the map
-			m_Buffers.insert( make_pair( str , mem ) );
-		}
-	}
-
-	return read;
+	return true;
 }
 
 // apply transform
@@ -367,67 +331,65 @@ void BufferMemory::GenTexCoord()
 // serialization interface for BufferMemory
 void BufferMemory::Serialize( IStreamBase& stream ){
 	stream >> m_iVBCount;
-	stream >> m_iNBCount;
+	m_PositionBuffer.resize( m_iVBCount );
+	for( unsigned i = 0 ; i < m_iVBCount ; ++i )
+		stream >> m_PositionBuffer[i];
 	stream >> m_iTBCount;
+	m_hasInitTexCoord = m_iTBCount > 0 ;
+	m_TexCoordBuffer.resize( m_iTBCount * 2 );
+	for( unsigned i = 0 ; i < 2 * m_iTBCount ; ++i )
+		stream >> m_TexCoordBuffer[i];
+	stream >> m_iNBCount;
+	m_hasInitNormal = m_iNBCount > 0;
+	m_NormalBuffer.resize( m_iNBCount );
+	for( unsigned i = 0 ; i < m_iNBCount ; ++i )
+		stream >> m_NormalBuffer[i];
+
 	stream >> m_iTrunkNum;
 	m_TrunkBuffer.clear();
     m_TrunkBuffer.resize( m_iTrunkNum );
 	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
-		stream >> m_TrunkBuffer[i].m_iTriNum;
 		std::string name;
 		stream >> name;
 		m_TrunkBuffer[i].m_mat = MatManager::GetSingleton().FindMaterial( name );
-	}
+		stream >> m_TrunkBuffer[i].m_iTriNum;
 
-	m_PositionBuffer.resize( m_iVBCount );
-	for( unsigned i = 0 ; i < m_iVBCount ; ++i )
-		stream >> m_PositionBuffer[i];
-	m_NormalBuffer.resize( m_iNBCount );
-	for( unsigned i = 0 ; i < m_iNBCount ; ++i )
-		stream >> m_NormalBuffer[i];
-	m_TexCoordBuffer.resize( m_iTBCount * 2 );
-	for( unsigned i = 0 ; i < m_iTBCount ; ++i )
-		stream >> m_TexCoordBuffer[2*i] >> m_TexCoordBuffer[2*i+1];
-
-	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
 		const unsigned index_cnt = m_TrunkBuffer[i].m_iTriNum * 3;
 		m_TrunkBuffer[i].m_IndexBuffer.clear();
 		m_TrunkBuffer[i].m_IndexBuffer.resize( index_cnt );
 		for( unsigned j = 0 ; j < index_cnt ; ++j ){
 			stream >> m_TrunkBuffer[i].m_IndexBuffer[j].posIndex;
-			if( m_iNBCount )
-				stream >> m_TrunkBuffer[i].m_IndexBuffer[j].norIndex;
-			if( m_iTBCount )
+			if( m_hasInitTexCoord )
 				stream >> m_TrunkBuffer[i].m_IndexBuffer[j].texIndex;
+			if( m_hasInitNormal )
+				stream >> m_TrunkBuffer[i].m_IndexBuffer[j].norIndex;
 		}
 	}
 }
 
 void BufferMemory::Serialize( OStreamBase& stream ){
 	stream << m_iVBCount;
-	stream << ( m_hasInitNormal ? m_iNBCount : 0 );
-	stream << ( m_hasInitTexCoord ? m_iTBCount : 0 );
-	stream << m_iTrunkNum;
-	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
-		stream << m_TrunkBuffer[i].m_iTriNum;
-		stream << ( m_TrunkBuffer[i].m_mat ? m_TrunkBuffer[i].m_mat->GetName() : "" );
-	}
-
 	for( unsigned i = 0 ; i < m_iVBCount ; ++i )
 		stream << m_PositionBuffer[i];
+	stream << ( m_hasInitTexCoord ? m_iTBCount : 0 );
+	for( unsigned i = 0 ; i < 2 * m_iTBCount && m_hasInitTexCoord ; ++i )
+		stream << m_TexCoordBuffer[i];
+	stream << ( m_hasInitNormal ? m_iNBCount : 0 );
 	for( unsigned i = 0 ; i < m_iNBCount && m_hasInitNormal ; ++i )
 		stream << m_NormalBuffer[i];
-	for( unsigned i = 0 ; i < m_iTBCount && m_hasInitTexCoord ; ++i )
-		stream << m_TexCoordBuffer[2*i] << m_TexCoordBuffer[2*i+1];
-
+	
+	stream << m_iTrunkNum;
 	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
+		stream << ( m_TrunkBuffer[i].m_mat ? m_TrunkBuffer[i].m_mat->GetName() : "" );
+		stream << m_TrunkBuffer[i].m_iTriNum;
+
 		const unsigned index_cnt = m_TrunkBuffer[i].m_iTriNum * 3;
 		for( unsigned j = 0 ; j < index_cnt ; ++j ){
 			stream << m_TrunkBuffer[i].m_IndexBuffer[j].posIndex;
+            if( m_hasInitTexCoord )
+                stream << m_TrunkBuffer[i].m_IndexBuffer[j].texIndex;
 			if( m_hasInitNormal )
 				stream << m_TrunkBuffer[i].m_IndexBuffer[j].norIndex;
-			if( m_hasInitTexCoord )
-				stream << m_TrunkBuffer[i].m_IndexBuffer[j].texIndex;
 		}
 	}
 }

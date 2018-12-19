@@ -22,53 +22,6 @@
 #include <stdarg.h>
 #include "core/log.h"
 
-// convert string to vertex index
-VertexIndex	VertexIndexFromStr( const std::string& str )
-{
-	VertexIndex vi;
-	std::string temp , rest;
-
-	// get the position index
-	int t0 = (int)str.find_first_of( '/' );
-	temp = str.substr( 0 , t0 );
-	vi.posIndex = atoi( temp.c_str() ) - 1;
-	if( t0 == std::string::npos )
-		return vi;
-	
-	// get the texture coordinate index
-	rest = str.substr( t0 + 1 , std::string::npos );
-	t0 = (int)rest.find_first_of( '/' );
-	temp = rest.substr( 0 , t0 );
-	vi.texIndex = temp.empty()?(-1):(atoi( temp.c_str() ) - 1);
-	if( t0 == std::string::npos )
-		return vi;
-
-	// get the normal index
-	rest = rest.substr( t0 + 1 , std::string::npos );
-	vi.norIndex = rest.empty()?(-1):(atoi( rest.c_str() ) - 1 );
-
-	return vi;
-}
-
-// get the type of file according to the file extension
-MESH_TYPE	MeshTypeFromStr( const std::string& str )
-{
-	// get the file extension
-	int index = (int)str.find_last_of( "." );
-	std::string substr = str.substr( index + 1 , str.length() - index );
-
-	// transform the extension to lower case
-	std::transform(substr.begin(),substr.end(),substr.begin(),[](char c){return tolower(c);});
-
-	if( strcmp( substr.c_str() , "obj" ) == 0 )
-		return MT_OBJ;
-	else if( strcmp( substr.c_str() , "ply" ) == 0 )
-		return MT_PLY;
-		
-    slog( WARNING , GENERAL , "Mesh type of \"%s\" is not supported" , substr.c_str() );
-	return MT_NONE;
-}
-
 // transformation from string
 Transform TransformFromStr( const std::string& s )
 {
