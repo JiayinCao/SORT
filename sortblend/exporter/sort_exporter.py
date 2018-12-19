@@ -22,6 +22,7 @@ import platform
 import tempfile
 from math import degrees
 from . import exporter_common
+from ..stream import stream
 import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
 
@@ -281,6 +282,8 @@ def export_mesh(obj,scene,force_debug):
     # face index pairs
     face_index_pairs = [(face, index) for index, face in enumerate(mesh.polygons)]
 
+    fs = stream.FileStream( get_intermediate_dir(force_debug) + obj.name + '.sme' )
+
     # generate normal data
     mesh.calc_normals_split()
     with open(output_path, 'w') as file:
@@ -308,6 +311,11 @@ def export_mesh(obj,scene,force_debug):
         for v in mesh.vertices:
             file.write("v %.4f %.4f %.4f\n" % (v.co[:]))
 
+        # serialize vertices
+        fs.serialize(len(mesh.vertices))
+        for v in mesh.vertices:
+            fs.serialize(v.co[:])
+
         # UV
         uv_unique_count = no_unique_count = 0
         if faceuv:
@@ -316,6 +324,7 @@ def export_mesh(obj,scene,force_debug):
 
             uv_face_mapping = [None] * len(face_index_pairs)
 
+            uvs = []
             uv_dict = {}
             uv_get = uv_dict.get
             for f, f_index in face_index_pairs:
@@ -326,11 +335,19 @@ def export_mesh(obj,scene,force_debug):
                     uv_val = uv_get(uv_key)
                     if uv_val is None:
                         uv_val = uv_dict[uv_key] = uv_unique_count
-                        file.write('vt %.6f %.6f\n' % uv[:])
+                        
+                        uvs.append( uv[:] )
                         uv_unique_count += 1
                     uv_ls.append(uv_val)
-
+            for uv in uvs:
+                file.write('vt %.6f %.6f\n' % uv[:])
             del uv_dict, uv, f_index, uv_index, uv_ls, uv_get, uv_key, uv_val
+
+            # serialize uv coordinate
+            fs.serialize(len(uvs))
+            for uv in uvs:
+                fs.serialize(uv[:])
+            del uvs
 
         # output normal
         no_key = no_val = None
@@ -338,6 +355,7 @@ def export_mesh(obj,scene,force_debug):
         no_get = normals_to_idx.get
         no_unique_count = 0
         loops_to_normals = [0] * len(mesh.loops)
+        normals = []
         for f, f_index in face_index_pairs:
             for l_idx in f.loop_indices:
                 def veckey3d(v):
@@ -347,11 +365,25 @@ def export_mesh(obj,scene,force_debug):
                 if no_val is None:
                     no_val = normals_to_idx[no_key] = no_unique_count
                     file.write('vn %.6f %.6f %.6f\n' % no_key)
+                    normals.append( no_key )
                     no_unique_count += 1
                 loops_to_normals[l_idx] = no_val
         del normals_to_idx, no_get, no_key, no_val
 
+        # serialize normals
+        fs.serialize(len(normals))
+        for normal in normals:
+            fs.serialize(normal[:])
+        del normals
+
         me_verts = mesh.vertices
+
+        class Trunk:
+            def __init__(self, mat_name):
+                self.mat_name = mat_name
+                self.face = []
+
+        trunks = []
 
         for f, f_index in face_index_pairs:
             f_smooth = f.use_smooth
@@ -398,6 +430,8 @@ def export_mesh(obj,scene,force_debug):
                     file.write("g %s_%s_%s\n" % (name_compat(obj.name), name_compat(obj.data.name), mat_data[0]))
                     file.write("usemtl %s\n" % mat_data[0])
 
+                    trunks.append( Trunk(mat_data[0]) )
+
             # update current context material
             contextMat = key
 
@@ -411,15 +445,24 @@ def export_mesh(obj,scene,force_debug):
             totno = 1
             if faceuv:
                 for vi, v, li in f_v:
-                    file.write(" %d/%d/%d" % (totverts + v.index,
-                                      totuvco + uv_face_mapping[f_index][vi],
-                                      totno + loops_to_normals[li],
-                                      ))  # vert, uv, normal
+                    file.write(" %d/%d/%d" % (totverts + v.index, totuvco + uv_face_mapping[f_index][vi], totno + loops_to_normals[li], ))  # vert, uv, normal
+                    trunks[-1].face.append( (totverts + v.index, totuvco + uv_face_mapping[f_index][vi], totno + loops_to_normals[li] ) )
             else:  # No UV's
                 for vi, v, li in f_v:
                     file.write(" %d//%d" % (totverts + v.index, totno + loops_to_normals[li]))
+                    trunks[-1].face.append( (totverts + v.index, totno + loops_to_normals[li]) )
 
             file.write("\n")
+
+        #serialize trunks
+        fs.serialize( len(trunks) )
+        for trunk in trunks:
+            fs.serialize( trunk.mat_name )
+            fs.serialize( len( trunk.face ) )
+            for ids in trunk.face:
+                fs.serialize( ids )
+        del trunks
+
 
 def export_material(scene, root, force_debug):
     mat_root = ET.SubElement( root , 'Materials' )
