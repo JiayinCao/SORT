@@ -266,12 +266,12 @@ public:
     //! @brief      Empty destructor
     virtual ~SerializableObject() {}
 
-    //! @brief      Serilizing data from stream
+    //! @brief      Serializing data from stream
     //!
     //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
     virtual void    Serialize( IStreamBase& stream ) = 0;
 
-    //! @brief      Serilizing data to stream
+    //! @brief      Serializing data to stream
     //!
     //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
     virtual void    Serialize( OStreamBase& stream ) = 0;
