@@ -65,6 +65,11 @@ public:
 		sAssert( i < m_lights.size() , LIGHT );
 		return m_lights[i];
 	}
+	// add light
+	void AddLight( Light* light ){
+		if( light )
+			m_lights.push_back( light );
+	}
 	// get lights
 	const std::vector<Light*>& GetLights() const
 	{return m_lights;}
@@ -90,7 +95,7 @@ public:
 
 
 private:
-	std::vector<Entity*>		m_entities;			/**< Entities in the scene. */
+	std::vector<std::shared_ptr<Entity>>		m_entities;			/**< Entities in the scene. */
 
 	// the primitive buffer for the scene
 	std::vector<Primitive*>	m_primitiveBuf;

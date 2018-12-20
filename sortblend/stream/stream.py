@@ -37,7 +37,7 @@ class FileStream(Stream):
     # Serialize data
     def serialize(self,data):
         def serialize_type(data):
-            if type(data).__name__ == 'float':
+            if type(data).__name__ == 'float' or type(data).__name__ == 'float64':
                 self.file.write(struct.pack( 'f' , data ) )
             elif type(data).__name__ == 'int':
                 self.file.write(struct.pack( 'i' , data ) )

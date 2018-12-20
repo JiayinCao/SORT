@@ -27,11 +27,12 @@
 #include "shape/shape.h"
 #include "core/sassert.h"
 #include "core/stats.h"
-#include "entity/entity.h"
+#include "entity/visual_entity.h"
 #include "entity/visual.h"
 #include "core/primitive.h"
 #include "stream/stream.h"
 #include "stream/fstream.h"
+#include "core/classtype.h"
 
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
@@ -46,24 +47,23 @@ bool Scene::LoadScene( TiXmlNode* root )
 	TiXmlElement* meshNode = root->FirstChildElement( "Model" );
 	while( meshNode )
 	{
-		// get the name of the file
+		// Get the name of the file
 		const char* filename = meshNode->Attribute( "filename" );
 
 		if( filename != nullptr ){
-			IFileStream stream(GetFullPath(filename));
-			IStreamBase& fs = stream;
+			IFileStream s(GetFullPath(filename));
+			IStreamBase& stream = s;
 
-			Transform transform;
-			fs >> transform;
+			// Instance the entity
+			unsigned int class_id = 0;
+			stream >> class_id;
+			std::shared_ptr<Entity>	entity = MakeEntity( class_id );
+			sAssert( entity != nullptr , RESOURCE );
 
-			// load the first mesh
-			auto visual = std::make_shared<MeshVisual>();
-			if( MeshManager::GetSingleton().LoadMesh( fs , visual , transform ) )
-			{
-				Entity* entity = new Entity();
-				entity->AddVisual( visual );
-				m_entities.push_back( entity );
-			}
+			// Serialize the entity
+			entity->Serialize( stream );
+
+			m_entities.push_back( entity );
 		}
 
 		// get to the next model
@@ -176,11 +176,6 @@ void Scene::Release()
 		delete *it++;
 	m_primitiveBuf.clear();
 
-	std::vector<Entity*>::iterator pri_it = m_entities.begin();
-	while( pri_it != m_entities.end() )
-		delete *pri_it++;
-	m_entities.clear();
-
 	std::vector<Light*>::iterator light_it = m_lights.begin();
 	while( light_it != m_lights.end() )
 		delete *light_it++;
@@ -190,7 +185,7 @@ void Scene::Release()
 // generate primitive buffer
 void Scene::_generatePriBuf()
 {
-	std::vector<Entity*>::const_iterator it = m_entities.begin();
+	std::vector<std::shared_ptr<Entity>>::const_iterator it = m_entities.begin();
 	while( it != m_entities.end() ){
 		(*it)->FillScene( *this );
 		it++;

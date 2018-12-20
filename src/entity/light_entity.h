@@ -18,6 +18,7 @@
 #pragma once
 
 #include "entity.h"
+#include "light/pointlight.h"
 
 //! @brief Light entity definition.
 /**
@@ -25,7 +26,108 @@
  * area light, directional light, spot light and sky light.
  */
 class LightEntity : public Entity{
-public:
-    //! Empty virtual destructor
-    ~LightEntity() {}
+};
+
+//! @brief  Point light entity.
+class PointLightEntity : public LightEntity {
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void    Serialize( IStreamBase& stream ) override;
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void    Serialize( OStreamBase& stream ) override;
+
+    //! @brief  Fill the scene with primitives.
+    //!
+    //! Fill the scene with a point light.
+    //!
+    //! @param  scene       The scene to be filled.
+    void   FillScene( class Scene& scene ) override;
+
+private:
+    PointLight  m_light;
+};
+
+//! @brief  Spot light entity.
+class SpotLightEntity : public LightEntity {
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void    Serialize( IStreamBase& stream ) override {}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void    Serialize( OStreamBase& stream ) override {}
+};
+
+//! @brief  Directional light entity.
+class DirLightEntity : public LightEntity {
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void    Serialize( IStreamBase& stream ) override {}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void    Serialize( OStreamBase& stream ) override {}
+};
+
+//! @brief  Area light entity.
+class AreaLightEntity : public LightEntity {
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void    Serialize( IStreamBase& stream ) override {}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void    Serialize( OStreamBase& stream ) override {}
+
+    //! @brief  Fill the scene with primitives.
+    //!
+    //! Base entity has nothing in it, which pops nothing in the world.
+    //!
+    //! @param  scene       The scene to be filled.
+    void   FillScene( class Scene& scene ) override {
+        // to be implemented
+    };
+};
+
+//! @brief  Sky light entity.
+class SkyLightEntity : public LightEntity {
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void    Serialize( IStreamBase& stream ) override {}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void    Serialize( OStreamBase& stream ) override {}
 };
