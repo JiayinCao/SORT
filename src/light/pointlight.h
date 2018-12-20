@@ -17,7 +17,6 @@
 
 #pragma once
 
-// include the header
 #include "light.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -25,8 +24,6 @@
 class PointLight : public Light
 {
 public:
-	DEFINE_CREATOR( PointLight , Light , "point" );
-
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'wi'		: input vector in world space
@@ -44,4 +41,6 @@ public:
 	// total power of the light
 	virtual Spectrum Power() const
 	{return 4 * PI * intensity;}
+
+	friend class PointLightEntity;
 };

@@ -53,6 +53,9 @@ def matrix_to_tuple(matrix):
 def vec3tostr(vec):
     return "%f %f %f"%(vec[0],vec[1],vec[2])
 
+def vec3_to_tuple(vec):
+    return (vec[0],vec[1],vec[2])
+
 def getPreference():
     return bpy.context.user_preferences.addons['sortblend'].preferences
 
