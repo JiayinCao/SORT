@@ -21,6 +21,7 @@
 #include "core/log.h"
 #include "math/point.h"
 #include "math/transform.h"
+#include "spectrum/spectrum.h"
 
 //! @brief Interface for streaming/serialization.
 /**
@@ -170,6 +171,26 @@ public:
     inline StreamBase&  operator >> (Matrix& v) {
         for (int i = 0; i < 16; ++i)
             *this >> v.m[i];
+        return *this;
+    }
+
+    //! @brief Streaming in a spectrum value.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator << (const Spectrum& v) {
+        *this << v.GetR() << v.GetG() << v.GetB();
+        return *this;
+    }
+
+    //! @brief Streaming out a spectrum value.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator >> (Spectrum& v) {
+        float r , g , b;
+        *this >> r >> g >> b;
+        v = Spectrum ( r , g , b );
         return *this;
     }
 };

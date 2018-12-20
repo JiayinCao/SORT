@@ -17,3 +17,17 @@
 
 #include "light_entity.h"
 
+void PointLightEntity::Serialize( IStreamBase& stream ){
+    stream >> m_light.light2world;
+    stream >> m_light.intensity;
+}
+
+void PointLightEntity::Serialize( OStreamBase& stream ){
+    stream << m_transform;
+    stream << m_light.intensity;
+}
+
+void PointLightEntity::FillScene( class Scene& scene ){
+    m_light.SetupScene(&scene);
+    scene.AddLight(&m_light);
+}

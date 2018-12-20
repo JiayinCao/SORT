@@ -27,6 +27,14 @@ from ..stream import stream
 import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
 
+# The following id has to match the definitions in src/core/classtype.h
+VISUAL_ENTITY       =   1
+POINT_LIGHT_ENTITY  =   2
+SPOT_LIGHT_ENTITY   =   3
+DIR_LIGHT_ENTITY    =   4
+AREA_LIGHT_ENTITY   =   5
+SKY_LIGHT_ENTITY    =   6
+
 def get_sort_dir():
     return_path = exporter_common.getPreference().install_path
     if platform.system() == 'Windows':
@@ -200,11 +208,14 @@ def export_scene(scene, root, force_debug):
 
     for ob in exporter_common.getMeshList(scene):
         model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
+
         fs = stream.FileStream( get_intermediate_dir(force_debug) + ob.name + '.sme' )
+        fs.serialize(VISUAL_ENTITY)
         fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * ob.matrix_world ) )
         export_mesh(ob, scene, fs)
 
     for ob in exporter_common.getLightList(scene):
+        fs = stream.FileStream( get_intermediate_dir(force_debug) + ob.name + '.sme' )
         lamp = ob.data
         # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
@@ -221,7 +232,13 @@ def export_scene(scene, root, force_debug):
             light_spectrum *= lamp.energy
             light_position = world_matrix.col[3]
             ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
+            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )
+            
+            # temporary solution
+            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
+            fs.serialize(POINT_LIGHT_ENTITY)
+            fs.serialize(exporter_common.matrix_to_tuple( world_matrix ))
+            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
         elif lamp.type == 'SPOT':
             light_node = ET.SubElement( scene_root , 'Light' , type='spot')
             light_spectrum = np.array(lamp.color[:])
