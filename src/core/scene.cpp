@@ -30,6 +30,8 @@
 #include "entity/entity.h"
 #include "entity/visual.h"
 #include "core/primitive.h"
+#include "stream/stream.h"
+#include "stream/fstream.h"
 
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
@@ -47,21 +49,16 @@ bool Scene::LoadScene( TiXmlNode* root )
 		// get the name of the file
 		const char* filename = meshNode->Attribute( "filename" );
 
-		if( filename != 0 )
-		{
-			// the name of the model
-			const char* model_name = meshNode->Attribute( "name" );
-			if( model_name == nullptr ){
-                slog( WARNING , GENERAL , "Mesh defined in file %s doesn't have a model name, it will be skipped." , filename );
-				break;
-			}
-
+		if( filename != nullptr ){
 			// load the transform matrix
-			Transform transform = _parseTransform( meshNode->FirstChildElement( "Transform" ) );
+			Transform transform;
+
+            IStreamBase& fs = IFileStream(GetFullPath(filename));
+            fs >> transform;
 
 			// load the first mesh
 			auto visual = std::make_shared<MeshVisual>();
-			if( MeshManager::GetSingleton().LoadMesh( filename , visual , transform ) )
+			if( MeshManager::GetSingleton().LoadMesh( fs , visual , transform ) )
 			{
 				Entity* entity = new Entity();
 				entity->AddVisual( visual );

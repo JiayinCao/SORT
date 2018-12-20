@@ -24,19 +24,15 @@
 #include "stream/stream.h"
 #include "managers/matmanager.h"
 #include "entity/entity.h"
-#include "stream/fstream.h"
+#include "stream/stream.h"
 
 // Temporary
-bool MeshManager::LoadMesh( const std::string& filename , std::shared_ptr<MeshVisual> visual , const Transform& transform ){
-	// get full resource filename
-	std::string str = GetFullPath( filename );
-
+bool MeshManager::LoadMesh( IStreamBase& stream , std::shared_ptr<MeshVisual> visual , const Transform& transform ){
 	// create the new memory
 	std::shared_ptr<BufferMemory> mem = std::make_shared<BufferMemory>();
 
 	// load the mesh from file
-	IFileStream fs( str );
-	mem->Serialize( fs );
+	mem->Serialize(stream);
 
 	// reset count
 	mem->CalculateCount();
@@ -52,9 +48,6 @@ bool MeshManager::LoadMesh( const std::string& filename , std::shared_ptr<MeshVi
 
 	// copy trunk memory pointer
 	visual->m_memory = mem;
-
-	// and insert it into the map
-	m_Buffers.insert( make_pair( str , mem ) );
 
 	return true;
 }
