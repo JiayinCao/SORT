@@ -50,11 +50,11 @@ bool Scene::LoadScene( TiXmlNode* root )
 		const char* filename = meshNode->Attribute( "filename" );
 
 		if( filename != nullptr ){
-			// load the transform matrix
-			Transform transform;
+			IFileStream stream(GetFullPath(filename));
+			IStreamBase& fs = stream;
 
-            IStreamBase& fs = IFileStream(GetFullPath(filename));
-            fs >> transform;
+			Transform transform;
+			fs >> transform;
 
 			// load the first mesh
 			auto visual = std::make_shared<MeshVisual>();
