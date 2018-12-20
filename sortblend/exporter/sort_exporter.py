@@ -199,11 +199,10 @@ def export_scene(scene, root, force_debug):
     ET.SubElement( scene_root , 'Accel', type=accelerator_type)
 
     for ob in exporter_common.getMeshList(scene):
-        model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme', name = ob.name )
-        transform_node = ET.SubElement( model_node , 'Transform' )
-        ET.SubElement( transform_node , 'Matrix' , value = 'm '+ exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world) )
-        # output the mesh to file
-        export_mesh(ob,scene, force_debug)
+        model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
+        fs = stream.FileStream( get_intermediate_dir(force_debug) + ob.name + '.sme' )
+        fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * ob.matrix_world ) )
+        export_mesh(ob, scene, fs)
 
     for ob in exporter_common.getLightList(scene):
         lamp = ob.data
@@ -282,7 +281,7 @@ def triangulate_object(obj):
     bm.free()
 
 # export mesh file
-def export_mesh(obj,scene,force_debug):
+def export_mesh(obj,scene,fs):
     # make sure there is no quad in the object
     triangulate_object(obj)
 
@@ -298,7 +297,6 @@ def export_mesh(obj,scene,force_debug):
 
     # generate normal data
     mesh.calc_normals_split()
-    fs = stream.FileStream( get_intermediate_dir(force_debug) + obj.name + '.sme' )
     contextMat = None
     materials = mesh.materials[:]
     material_names = [m.name if m else None for m in materials]

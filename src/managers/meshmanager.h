@@ -148,17 +148,13 @@ private:
 //	desc :	A mesh manager manages all of the geometry data used in the 
 //			rendering system. The meshes are not located here. Two meshes
 //			will share the same geometry memory if they are loaded from
-//			from the same model file, which means intancing is supported
+//			from the same model file, which means instancing is supported
 //			in the current system.
 class	MeshManager : public Singleton<MeshManager>
 {
 public:
 	// Temporary
-	bool LoadMesh( const std::string& str , std::shared_ptr<class MeshVisual> visual , const Transform& );
-
-private:
-	// the memory for meshes
-    std::unordered_map< std::string , std::shared_ptr<BufferMemory> > m_Buffers;
+	bool LoadMesh( IStreamBase& str , std::shared_ptr<class MeshVisual> visual , const Transform& );
 
 private:
 	friend class Singleton<MeshManager>;
