@@ -17,14 +17,6 @@
 
 #pragma once
 
-// mesh file type
-enum MESH_TYPE
-{
-	MT_OBJ = 0,
-	MT_PLY = 1,
-	MT_NONE ,
-};
-
 // texture filter
 enum TEXCOORDFILTER
 {
