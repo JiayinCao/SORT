@@ -43,8 +43,6 @@ static const unsigned   BVH_LEAF_PRILIST_MEMID  = 1027;
 static const unsigned   BVH_SPLIT_COUNT         = 16;
 static const float      BVH_INV_SPLIT_COUNT     = 0.0625f;
 
-IMPLEMENT_CREATOR( Bvh );
-
 // destructor
 Bvh::~Bvh()
 {

@@ -35,8 +35,6 @@ SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGrid
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
 SORT_STATS_AVG_COUNT("Spatial-Structure(UniformGrid)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-IMPLEMENT_CREATOR( UniGrid );
-
 // destructor
 UniGrid::~UniGrid()
 {

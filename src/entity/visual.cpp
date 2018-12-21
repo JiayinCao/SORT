@@ -30,7 +30,7 @@ void MeshVisual::FillScene( Scene& scene ){
 	{
 		unsigned trunkTriNum = (unsigned)m_memory->m_TrunkBuffer[i].m_IndexBuffer.size() / 3;
 		for( unsigned k = 0 ; k < trunkTriNum ; k++ ){
-			Triangle* tri = new Triangle( this , &(m_memory->m_TrunkBuffer[i].m_IndexBuffer[3*k]) );
+			std::shared_ptr<Triangle> tri = std::make_shared<Triangle>( this , &(m_memory->m_TrunkBuffer[i].m_IndexBuffer[3*k]) );
 			std::shared_ptr<Material> mat = m_memory->m_TrunkBuffer[i].m_mat ? m_memory->m_TrunkBuffer[i].m_mat : MatManager::GetSingleton().GetDefaultMat();
 			scene.m_primitiveBuf.push_back( new Primitive( mat , tri ) );
 		}
