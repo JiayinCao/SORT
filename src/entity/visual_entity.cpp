@@ -15,24 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header file
-#include "rendertarget.h"
-#include "core/sassert.h"
+#include "visual_entity.h"
 
-// set the color
-void RenderTarget::SetColor( int x , int y , float r , float g , float b )
-{
-	// check if there is memory
-    sAssertMsg( m_pData != nullptr , IMAGE , "There is no data in render target , can't set color" );
-    
-	// use filter first
-	_texCoordFilter( x , y );
-
-	// get the offset
-	unsigned offset = y * m_iTexWidth + x;
-
-	// set the color
-	m_pData[offset].SetColor( r , g , b );
-}
-
-
+IMPLEMENT_CREATOR(VisualEntity);

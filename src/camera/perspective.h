@@ -38,39 +38,6 @@ public:
     //! @return     The generated ray based on the input.
     Ray GenerateRay( float x , float y , const PixelSample& ps ) const override;
 
-	//! @brief Get camera viewing target.
-    //! @return Camera viewing target.
-	const Point& GetTarget() const { return m_target; }
-    
-    //! @brief Set camera viewing target in world space.
-    //! @param t Target point to be set.
-	void SetTarget( const Point& t ) { m_target = t; }
-
-	//! @brief Get camera up direction in world space.
-    //! @return Camera up direction in world space.
-	const Vector& GetUp() const { return m_up; }
-    
-    //! @brief Set camera up direction in world space.
-    //! @param u Camera up direction to be set.
-	void SetUp( const Vector& u ) { m_up = u; }
-
-	//! @brief Get the field of view for the camera.
-    //! @return The field of view for the camera.
-	float GetFov() const { return m_fov; }
-    
-    //! @brief Set the field of view for the camera.
-    //! @return The FOV to be set.
-	void SetFov( float fov ) { m_fov = fov; }
-
-	//! @brief Set lens radius. A non-zero lens radius means that there is DOF.
-    //! @param len The radius of the lens to be set.
-	void SetLen( float len )
-	{ m_lensRadius = len; }
-	
-    //! @brief Get lens radius.
-    //! return The radius of the lens for the camera.
-	float GetLen() const { return m_lensRadius; }
-	
     //! @brief Get camera coordinate according to a view direction in world space. It is used in light tracing or bi-directional path tracing algorithm.
     //! @param p                A point in world space. The calculation will connect it to the viewing point of the cammere seeking the intersected point between the direction and the image sensor.
     //! @param pdfw             PDF w.r.t the solid angle of choosing the direction.

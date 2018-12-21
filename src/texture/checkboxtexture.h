@@ -18,12 +18,12 @@
 #pragma once
 
 #include "texture.h"
+#include "core/strhelper.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
 //	definition of check box texture
 class	CheckBoxTexture : public Texture
 {
-// public funcion
 public:
 	DEFINE_CREATOR( CheckBoxTexture , Texture , "checkbox" );
 

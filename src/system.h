@@ -75,7 +75,7 @@ private:
 	// the scene for rendering
 	Scene			m_Scene;
 	// the sampler
-    Sampler*		m_pSampler = nullptr;
+    std::shared_ptr<Sampler>	m_sampler = nullptr;
 	// sample number per pixel
     unsigned		m_iSamplePerPixel = 0;
 
@@ -93,5 +93,5 @@ private:
 	// push rendering task
 	void	_pushRenderTask();
 	// allocate integrator
-	Integrator*	_allocateIntegrator();
+	std::shared_ptr<Integrator>	_allocateIntegrator();
 };

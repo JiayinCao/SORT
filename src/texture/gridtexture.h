@@ -19,6 +19,7 @@
 
 // include the file
 #include "texture.h"
+#include "core/strhelper.h"
 
 ///////////////////////////////////////////////////////////////
 // definition of grid texture

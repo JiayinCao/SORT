@@ -27,9 +27,9 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 		return;
 
 	int tile_w = rt.GetTileSize().x;
-	int tile_size = g_tile_size * g_tile_size;
-	int x_off = (int)(rt.GetTopLeft().x / g_tile_size);
-	int y_off = (int)(floor((m_height - 1 - rt.GetTopLeft().y) / (float)g_tile_size));
+	int tile_size = g_tileSize * g_tileSize;
+	int x_off = (int)(rt.GetTopLeft().x / g_tileSize);
+	int y_off = (int)(floor((m_height - 1 - rt.GetTopLeft().y) / (float)g_tileSize));
 	int tile_offset = y_off * m_tilenum_x + x_off;
 	int offset = 4 * tile_offset * tile_size;
 
@@ -37,7 +37,7 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 	float* data = (float*)(m_sharedMemory.bytes + m_header_offset);
 
 	// get offset
-	int inner_offset = offset + 4 * (x - rt.GetTopLeft().x + (g_tile_size - 1 - (y - rt.GetTopLeft().y)) * tile_w);
+	int inner_offset = offset + 4 * (x - rt.GetTopLeft().x + (g_tileSize - 1 - (y - rt.GetTopLeft().y)) * tile_w);
 
 	// copy data
 	data[ inner_offset ] = color.GetR();
@@ -65,10 +65,10 @@ void BlenderImage::FinishTile( int tile_x , int tile_y , const Render_Task& rt )
 // pre process
 void BlenderImage::PreProcess()
 {
-	m_tilenum_x = (int)(ceil(m_width / (float)g_tile_size));
-	m_tilenum_y = (int)(ceil(m_height / (float)g_tile_size));
+	m_tilenum_x = (int)(ceil(m_width / (float)g_tileSize));
+	m_tilenum_y = (int)(ceil(m_height / (float)g_tileSize));
 	m_header_offset = m_tilenum_x * m_tilenum_y;
-	m_final_update_flag_offset = m_header_offset * g_tile_size * g_tile_size * 4 * sizeof(float) * 2 + m_header_offset + 1;
+	m_final_update_flag_offset = m_header_offset * g_tileSize * g_tileSize * 4 * sizeof(float) * 2 + m_header_offset + 1;
 
 	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("sharedmem.bin");
 
@@ -79,7 +79,7 @@ void BlenderImage::PreProcess()
 void BlenderImage::PostProcess()
 {
 	// perform a copy from render target to shared memory
-	float* data = (float*)(m_sharedMemory.bytes + m_header_offset + m_header_offset * g_tile_size * g_tile_size * 4 * sizeof(float));
+	float* data = (float*)(m_sharedMemory.bytes + m_header_offset + m_header_offset * g_tileSize * g_tileSize * 4 * sizeof(float));
 
 	int offset = 0;
 	for (int i = 0; i < (int)m_rendertarget.GetHeight(); ++i)

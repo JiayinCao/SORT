@@ -27,6 +27,8 @@
  */
 class VisualEntity : public Entity{
 public:
+    DEFINE_CREATOR( VisualEntity , Entity , "VisualEntity" );
+
     //! @brief  Fill the scene with primitives.
     //!
     //! Each entity may have multiple visuals. Visual will be responsible for filling the scene with primivites.

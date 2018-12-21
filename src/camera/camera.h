@@ -53,25 +53,22 @@ public:
 	virtual Ray	GenerateRay( float x, float y, const PixelSample& ps) const = 0;
 
 	//! @brief Setup image sensor for the camera.
+    //!
     //! @param is   The pointer to an existed image sensor.
-	void SetImageSensor(ImageSensor* is) { m_imagesensor = is; }
+	void SetImageSensor(ImageSensor* is) { 
+        m_imagesensor = is; 
+    }
 
     //! @brief Get attached image sensor.
+    //!
     //! @return The attached image sensor.
     ImageSensor* GetImageSensor() {
         return m_imagesensor;
     }
-
-	//! @brief Get camera viewing point.
-    //! @return Viewing point of the camera.
-	const Point& GetEye() const { return m_eye; }
     
-    //! @brief Setup viewing point for the camera.
-    //! @param eye  Viewing point to set up in the camera.
-	virtual void SetEye(const Point& eye) { m_eye = eye; }
-
-	//! @brief Get viewing direction.
-    //! @return Camera forward direction.
+	//! @brief      Get viewing direction.
+    //!
+    //! @return     Camera forward direction in world space.
 	virtual Vector GetForward() const = 0;
 
     //! @brief Get camera coordinate according to a view direction in world space. It is used in light tracing or bi-directional path tracing algorithm.

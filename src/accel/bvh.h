@@ -32,6 +32,8 @@
 class Bvh : public Accelerator
 {
 public:
+    DEFINE_CREATOR( Bvh , Accelerator , "Bvh" );
+
 	//! Destructor
     ~Bvh() override;
 
