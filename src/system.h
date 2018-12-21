@@ -80,8 +80,8 @@ private:
     unsigned		m_iSamplePerPixel = 0;
 
 	// path for the resource
-	std::string			m_ResourcePath;
-	std::string			m_OutputFileName;
+    std::string			m_ResourcePath = "";
+    std::string			m_OutputFileName = "";
 
 	// number of thread to allocate
     unsigned		m_thread_num = 1;

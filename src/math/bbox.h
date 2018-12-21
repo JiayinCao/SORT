@@ -104,8 +104,8 @@ inline BBox Union( const BBox& bbox0 , const BBox& bbox1 )
 
 	for( int i = 0 ; i < 3 ; i++ )
 	{
-		result.m_Min[i] = std::min( bbox0.m_Min[i] , bbox1.m_Min[i] );
-		result.m_Max[i] = std::max( bbox0.m_Max[i] , bbox1.m_Max[i] );
+		result.m_Min[i] = std::fmin( bbox0.m_Min[i] , bbox1.m_Min[i] );
+		result.m_Max[i] = std::fmax( bbox0.m_Max[i] , bbox1.m_Max[i] );
 	}
 
 	return result;
@@ -115,7 +115,7 @@ inline BBox Union( const BBox& bbox0 , const BBox& bbox1 )
 // para 'ray' : the ray
 // para 'bb'  : the bounding box
 // para 'tmax': further away intersected point
-// result     : the first intersected point and retur -1.0f if not crossed
+// result     : the first intersected point and return -1.0f if not crossed
 inline float Intersect( const Ray& ray , const BBox& bb , float* fmax = 0 )
 {
 	//set default value for tmax and tmin
@@ -141,8 +141,8 @@ inline float Intersect( const Ray& ray , const BBox& bb , float* fmax = 0 )
 				t2 = t;
 			}
 
-			tmin = std::max( t1 , tmin );
-			tmax = std::min( t2 , tmax );
+			tmin = std::fmax( t1 , tmin );
+			tmax = std::fmin( t2 , tmax );
 
 			if( tmin > tmax )
 				return -1.0f;

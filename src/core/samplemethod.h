@@ -74,7 +74,7 @@ inline Vector CosSampleHemisphere( float u , float v )
 {
 	float x , z ;
 	UniformSampleDisk( u , v , x , z );
-	float y = sqrt( std::max( 0.0f , 1.0f - x * x - z * z ) );
+	float y = sqrt( std::fmax( 0.0f , 1.0f - x * x - z * z ) );
 	return Vector( x , y , z );
 }
 

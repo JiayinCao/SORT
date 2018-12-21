@@ -33,6 +33,7 @@
 #include "stream/stream.h"
 #include "stream/fstream.h"
 #include "core/classtype.h"
+#include "core/globalconfig.h"
 
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
@@ -44,7 +45,7 @@ SORT_STATS_COUNTER("Statistics", "Total Light Count", sSceneLightCount);
 bool Scene::LoadScene( TiXmlNode* root )
 {
 	// parse the triangle mesh
-	TiXmlElement* meshNode = root->FirstChildElement( "Model" );
+	TiXmlElement* meshNode = root->FirstChildElement( "Entity" );
 	while( meshNode )
 	{
 		// Get the name of the file
@@ -58,7 +59,6 @@ bool Scene::LoadScene( TiXmlNode* root )
 			unsigned int class_id = 0;
 			stream >> class_id;
 			std::shared_ptr<Entity>	entity = MakeEntity( class_id );
-			//sAssert( entity != nullptr , RESOURCE );
 
 			// Serialize the entity
             if (entity) {
@@ -69,21 +69,12 @@ bool Scene::LoadScene( TiXmlNode* root )
 		}
 
 		// get to the next model
-		meshNode = meshNode->NextSiblingElement( "Model" );
+		meshNode = meshNode->NextSiblingElement( "Entity" );
 	}
 	// generate triangle buffer after parsing from file
 	_generatePriBuf();
 	_genLightDistribution();
 	
-	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.
-	TiXmlElement* accelNode = root->FirstChildElement( "Accel" );
-	if( accelNode )
-	{
-		// set corresponding type of accelerator
-		const char* type = accelNode->Attribute( "type" );
-		if( type != 0 )	m_pAccelerator = CREATE_TYPE( type , Accelerator );
-	}
-
     SORT_STATS(sScenePrimitiveCount=(StatsInt)m_primitiveBuf.size());
     SORT_STATS(sSceneLightCount=(StatsInt)m_lights.size());
 
@@ -97,10 +88,10 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
 		intersect->t = FLT_MAX;
 
 	// brute force intersection test if there is no accelerator
-	if( m_pAccelerator == 0 )
+	if( GlobalConfiguration::GetSingleton().GetAccelerator() == nullptr )
 		return _bfIntersect( r , intersect );
 
-	return m_pAccelerator->GetIntersect( r , intersect );
+	return GlobalConfiguration::GetSingleton().GetAccelerator()->GetIntersect( r , intersect );
 }
 
 // get the intersection between a ray and the scene in a brute force way
@@ -123,9 +114,6 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 // release the memory of the scene
 void Scene::Release()
 {
-	SAFE_DELETE( m_pAccelerator );
-	SAFE_DELETE( m_pLightsDis );
-
 	std::vector<Primitive*>::iterator it = m_primitiveBuf.begin();
 	while( it != m_primitiveBuf.end() )
 		delete *it++;
@@ -146,10 +134,10 @@ void Scene::_generatePriBuf()
 void Scene::PreProcess()
 {
 	// set uniform grid as acceleration structure as default
-	if( m_pAccelerator )
+	if( std::shared_ptr<Accelerator> accel = GlobalConfiguration::GetSingleton().GetAccelerator() )
 	{
-		m_pAccelerator->SetPrimitives( &m_primitiveBuf );
-		m_pAccelerator->Build();
+        accel->SetPrimitives( &m_primitiveBuf );
+        accel->Build();
 	}
 }
 
@@ -173,8 +161,8 @@ Transform Scene::_parseTransform( const TiXmlElement* node )
 // get the bounding box for the scene
 const BBox& Scene::GetBBox() const
 {
-	if( m_pAccelerator != 0 )
-		return m_pAccelerator->GetBBox();
+	if( GlobalConfiguration::GetSingleton().GetAccelerator() != nullptr )
+		return GlobalConfiguration::GetSingleton().GetAccelerator()->GetBBox();
 
 	// if there is no bounding box for the scene, generate one
 	std::vector<Primitive*>::const_iterator it = m_primitiveBuf.begin();
@@ -204,8 +192,7 @@ void Scene::_genLightDistribution()
 	for( unsigned i = 0 ; i < count ; i++ )
 		m_lights[i]->SetPickPDF( pdf[i] / total_pdf );
 
-	SAFE_DELETE(m_pLightsDis);
-	m_pLightsDis = new Distribution1D( pdf , count );
+    m_lightsDis = std::make_shared<Distribution1D>(pdf, count);
 	delete[] pdf;
 }
 
@@ -213,10 +200,10 @@ void Scene::_genLightDistribution()
 const std::shared_ptr<Light> Scene::SampleLight( float u , float* pdf ) const
 {
 	sAssert( u >= 0.0f && u <= 1.0f , SAMPLING );
-	sAssertMsg( m_pLightsDis != 0 , SAMPLING , "No light in the scene." );
+	sAssertMsg(m_lightsDis != nullptr , SAMPLING , "No light in the scene." );
 
 	float _pdf;
-	int id = m_pLightsDis->SampleDiscrete( u , &_pdf );
+	int id = m_lightsDis->SampleDiscrete( u , &_pdf );
 	if( id >= 0 && id < (int)m_lights.size() && _pdf != 0.0f ){
 		if( pdf ) *pdf = _pdf;
 		return m_lights[id];
@@ -227,8 +214,8 @@ const std::shared_ptr<Light> Scene::SampleLight( float u , float* pdf ) const
 // get light sample property
 float Scene::LightProperbility( unsigned i ) const
 {
-	sAssert( m_pLightsDis != 0 , LIGHT );
-	return m_pLightsDis->GetProperty( i );
+	sAssert(m_lightsDis != nullptr , LIGHT );
+	return m_lightsDis->GetProperty( i );
 }
 
 // Evaluate sky
