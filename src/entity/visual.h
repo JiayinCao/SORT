@@ -62,5 +62,5 @@ public:
     void        Serialize( OStreamBase& stream ) override;
 
 public:
-    std::shared_ptr<BufferMemory>               m_memory;       /**< Memory for the mesh. */
+    std::shared_ptr<BufferMemory>  m_memory;       /**< Memory for the mesh. */
 };

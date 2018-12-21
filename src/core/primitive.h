@@ -24,61 +24,79 @@
 #include "shape/shape.h"
 #include "managers/matmanager.h"
 
-class	Intersection;
-class	Light;
-
-//////////////////////////////////////////////////////////////////
-//	definition of primitive
+//! @brief	Primitive of SORT world.
+/**
+ * Like primitives in rasterization program, which are usually triangle, point and lines, primitives can have many more different shapes.
+ * Common ones are triangles, disk, rectangle, splines, quadric curves. Each primitive is attached with a specific material, may also be
+ * emissive, which means that they are attached with a 'light source'.
+ * A primitive is the basic unit for spatial data struture. It is more of a lower level concept comparing with Entity.
+ */
 class	Primitive
 {
 public:
-	// constructor from a id
-    Primitive( std::shared_ptr<Material> mat , Shape* shape ):m_mat(mat), m_shape(shape), light(nullptr){}
+	//! @brief Constructor of Primitive.
+	//!
+	//! @param	mat		Material attached to the primitive.
+	//! @param	shape	Shape of the material.
+	//! @param	light	Light source attached to the material.
+    Primitive( std::shared_ptr<Material> mat , std::shared_ptr<Shape> shape , std::shared_ptr<class Light> light = nullptr ):
+		m_mat(mat), m_shape(shape), m_light(light){}
 
-	// get the intersection between a ray and a primitive
+	//! @brief	Get the intersection between a ray and the primitive.
+	//!
+	//! @param	r			Ray to be tested against the primitive. The input ray is in world space.
+	//! @param	intersect	Intersected result. If nullptr is passed in, the algorithm could be a little more performant.
+	//!						The information of the intersection is also returned in world space.
+	//! @return				Whether the ray intersects the primitive.
 	inline bool GetIntersect( const Ray& r , Intersection* intersect ) const{
 		Point tmp;
 		bool ret = m_shape->GetIntersect( r, tmp , intersect );
-		if( ret && intersect )
-			intersect->primitive = const_cast<Primitive*>(this);
-		return ret;
+		return ( ret && intersect ) ? (bool)( intersect->primitive = const_cast<Primitive*>(this) ) : ret;
 	}
-	// get the intersection between a bounding box and a ray
+
+	//! @brief	Get the intersection between an AABB and the primitive.
+	//!
+	//! Unlike the ray/primitive intersection test interface, this interface is generally used as an optimization to reject 
+	//! false-positives during spatial data structure construction process. A conservative algorithm could also be accepted.
+	//!
+	//! @param	box		Axis aligned bounding box in world space.
+	//! @return			Whether the primitive intersects the primitive.
     inline bool GetIntersect( const BBox& box ) const { 
 		return m_shape->GetIntersect( box );
 	}
 
-	// get the bounding box of the primitive
+	//! @brief	Get the axis aligned bounding box of the primitive in world space.
+	//!
+	//! @return			AABB in world space.
 	inline const BBox&	GetBBox() const {
 		return m_shape->GetBBox();
 	}
 
-	// get surface area of the primitive
+	//! @brief	Get the surface area of the primitive.
+	//!
+	//! @return 		Surface area of the primitive.
 	inline float	SurfaceArea() const{
 		return m_shape->SurfaceArea();
 	}
 
-	// get material
+	//! @brief	Get the material of the primitive.
+	//!
+	//! A default 'grey' material will be used for primitives with no materials or invalid materials.
+	//!
+	//! @return			Material attached to the primitives.
     std::shared_ptr<Material> GetMaterial() const{
         return m_mat == nullptr ? MatManager::GetSingleton().GetDefaultMat() : m_mat;
     }
 
-	// set material
-    inline void	SetMaterial( std::shared_ptr<Material>& mat ) { m_mat = mat; }
+	//! @brief	Get the light source of the primitive if there is one.
+	//!
+	//! Most pritmivies doesn't have light attached to it.
+	//!
+	//! @return			Light attached to the primitive. 'nullptr' means this is not an emissive primitive.
+	inline std::shared_ptr<class Light> GetLight() const { return m_light; }
 
-	// get light
-	inline std::shared_ptr<Light> GetLight() const { return light; }
-    // set light
-    inline void SetLight( std::shared_ptr<Light> _light ) { light = _light; }
-
-// protected field
-protected:
-	// the material
-    std::shared_ptr<Material>	m_mat;
-
-	// the shape of the primitive
-	Shape* 		m_shape;
-
-	// the binded light
-    std::shared_ptr<Light>		light;
+private:
+    std::shared_ptr<Material>		m_mat;		/**< The material attached to the primitive. */
+	std::shared_ptr<Shape> 			m_shape;	/**< The shape of the primitive. */
+    std::shared_ptr<class Light>	m_light;	/**< Light source attached to the primtive. */
 };

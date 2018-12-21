@@ -23,25 +23,25 @@
 #include <string>
 #include <mutex>
 
-static std::vector<std::unique_ptr<LogDispatcher>> logDispatcher;
-static bool logLevel = true;
-static bool logType = true;
-static bool logTime = true;
-static bool logLineInfo = false;
+static std::vector<std::unique_ptr<LogDispatcher>> g_logDispatcher;
+static bool g_logLevel = true;
+static bool g_logType = true;
+static bool g_logTime = true;
+static bool g_logLineInfo = false;
 static LOG_LEVEL logDefaultLevel = LOG_LEVEL::LOG_DEBUG;     // By default, debug information is avoided.
 
-void addLogDispatcher( LogDispatcher* logdispatcher ){
-    logDispatcher.push_back( std::unique_ptr<LogDispatcher>(logdispatcher) );
+void addLogDispatcher( LogDispatcher* logDispatcher ){
+    g_logDispatcher.push_back( std::unique_ptr<LogDispatcher>( logDispatcher ) );
 }
 
 void sortLog( LOG_LEVEL level , LOG_TYPE type , const std::string& str , const char* file , const int line ){
     if( level < logDefaultLevel )
         return;
-    for( const auto& it : logDispatcher )
-        it->dispatch( level , type , str.c_str() , file , line );
+    for( const auto& it : g_logDispatcher )
+        it->Dispatch( level , type , str.c_str() , file , line );
 }
 
-void LogDispatcher::dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line ){
+void LogDispatcher::Dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line ){
     auto s = format(level, type, str, file, line);
     static std::mutex mutex;
     std::lock_guard<std::mutex> lock(mutex);
@@ -49,7 +49,7 @@ void LogDispatcher::dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str 
 }
 
 const std::string logTimeString(){
-    if( !logTime )
+    if( !g_logTime )
         return "";
     
     std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
@@ -66,7 +66,7 @@ const std::string logTimeString(){
 }
 
 const std::string levelToString( LOG_LEVEL level ){
-    return !logLevel ? "" :
+    return !g_logLevel ? "" :
     ( LOG_LEVEL::LOG_DEBUG == level ) ? "[Debug]" :
     ( LOG_LEVEL::LOG_INFO == level ) ? "[Info]" :
     ( LOG_LEVEL::LOG_WARNING == level ) ? "[Warning]" :
@@ -75,7 +75,7 @@ const std::string levelToString( LOG_LEVEL level ){
 }
 
 const std::string typeToString( LOG_TYPE type ){
-    return !logType ? "" :
+    return !g_logType ? "" :
     ( LOG_TYPE::LOG_GENERAL == type ) ? "[General]" :
     ( LOG_TYPE::LOG_SPATIAL_ACCELERATOR == type ) ? "[Spatial Accelerator]":
     ( LOG_TYPE::LOG_PERFORMANCE == type ) ? "[Performance]" :
@@ -92,12 +92,11 @@ const std::string typeToString( LOG_TYPE type ){
 }
 
 const std::string lineInfoString( const char* file , int line , LOG_LEVEL level ){
-    if( !logLineInfo && level != LOG_LEVEL::LOG_CRITICAL )
+    if( !g_logLineInfo && level != LOG_LEVEL::LOG_CRITICAL )
         return "";
     return "[File:" + std::string(file) + "  Line:" + std::to_string(line) + "]";
 }
 
-// format log header
 const std::string LogDispatcher::formatHead( LOG_LEVEL level , LOG_TYPE type , const char* file , const int line ) const{
     return logTimeString() + levelToString(level) + typeToString( type ) + lineInfoString( file , line , level ) + "\t";
 }
@@ -113,6 +112,7 @@ void StdOutLogDispatcher::output( const std::string& s ){
 FileLogDispatcher::FileLogDispatcher( const std::string& filename ){
     file.open( filename.c_str() );
 }
+
 FileLogDispatcher::~FileLogDispatcher(){
     file.close();
 }
