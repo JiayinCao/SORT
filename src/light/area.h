@@ -26,11 +26,6 @@
 class	AreaLight : public Light
 {
 public:
-	DEFINE_CREATOR(AreaLight, Light, "area");
-
-	// default constructor
-	AreaLight(){_registerAllProperty();}
-
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'dirToLight': input vector in world space
@@ -62,69 +57,11 @@ public:
 	virtual float Pdf( const Point& p , const Vector& wi ) const;
 
 	// get the shape of light
-	virtual Shape* GetShape() const { return shape; }
-
+	virtual std::shared_ptr<Shape> GetShape() const { return shape; }
 
 private:
 	// the shape binded to the area light
-    Shape*	shape = nullptr;
-	// the radius for the shape
-    float	sizeX = 1.0f;
-    float   sizeY = 1.0f;
+    std::shared_ptr<Shape>	shape = nullptr;
 
-	// register property
-	void _registerAllProperty();
-
-/*
-	Refactoring shape class, disable area light for now.
-
-	class ShapeProperty : public PropertyHandler<Light>
-	{
-	public:
-		PH_CONSTRUCTOR(ShapeProperty,Light);
-		void SetValue( const string& str )
-		{
-			AreaLight* light = CAST_TARGET(AreaLight);
-			
-			SAFE_DELETE( light->shape );
-			light->shape = CREATE_TYPE( str , Shape );
-            if( light->shape ){
-				light->shape->SetSizeX( light->sizeX );
-                light->shape->SetSizeY( light->sizeY );
-                light->shape->SetTransform(light->light2world);
-                light->shape->SetLight(light);
-            }
-		}
-	};
-	class SizeXProperty : public PropertyHandler<Light>
-	{
-	public:
-		PH_CONSTRUCTOR(SizeXProperty,Light);
-		void SetValue( const string& str )
-		{
-			AreaLight* light = CAST_TARGET(AreaLight);
-			
-			light->sizeX = (float)atof( str.c_str() );
-            if( light->shape ){
-                light->shape->SetSizeX( light->sizeX );
-                light->shape->SetSizeY( light->sizeY );
-            }
-		}
-	};
-    class SizeYProperty : public PropertyHandler<Light>
-    {
-    public:
-        PH_CONSTRUCTOR(SizeYProperty,Light);
-        void SetValue( const string& str )
-        {
-            AreaLight* light = CAST_TARGET(AreaLight);
-            
-            light->sizeY = (float)atof( str.c_str() );
-            if( light->shape ){
-                light->shape->SetSizeX( light->sizeX );
-                light->shape->SetSizeY( light->sizeY );
-            }
-        }
-    };
-*/
+    friend class AreaLightEntity;
 };

@@ -33,7 +33,6 @@
 #include "sampler/stratified.h"
 #include "managers/smmanager.h"
 #include "math/vector2.h"
-#include "math/sky/sky.h"
 #include "shape/shape.h"
 #include "core/stats.h"
 #include "core/profile.h"

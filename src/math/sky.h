@@ -22,9 +22,10 @@
 #include "core/propertyset.h"
 #include "math/vector3.h"
 #include "math/transform.h"
+#include "texture/imagetexture.h"
+#include "core/samplemethod.h"
 
-class Point;
-
+/*
 //////////////////////////////////////////////////////////////////
 //	definition of sky
 //	note: we could also use a very large box or sphere to replace
@@ -53,11 +54,48 @@ public:
 	// get the pdf
 	virtual float Pdf( const Vector& wi ) const = 0;
 
-	// setup transformation
-	void SetTransform( const Transform& tf ){
-		m_transform = tf;
-	}
+	
+};*/
 
-protected:
-	Transform m_transform;
+////////////////////////////////////////////////////////////////////////
+// definition of sky sphere
+class	Sky
+{
+public:
+    // destructor
+    ~Sky() { SAFE_DELETE(distribution); }
+
+    // evaluate value from sky
+    // para 'r' : the ray which misses all of the triangle in the scene
+    // result   : the spectrum in the sky
+    Spectrum Evaluate(const Vector& r) const;
+
+    // get the average radiance
+    Spectrum GetAverage() const;
+
+    // sample direction
+    Vector sample_v(float u, float v, float* pdf, float* area_pdf) const;
+
+    // get the pdf
+    float Pdf(const Vector& wi) const;
+
+    // load image file
+    void Load(const std::string& str) {
+        m_sky.LoadImageFromFile(str);
+        _generateDistribution2D();
+    }
+
+    // setup transformation
+    void SetTransform(const Transform& tf) {
+        m_transform = tf;
+    }
+
+private:
+    Transform m_transform;
+
+    ImageTexture	m_sky;
+    class Distribution2D*	distribution = nullptr;
+
+    // generate 2d distribution
+    void _generateDistribution2D();
 };

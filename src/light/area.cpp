@@ -20,8 +20,6 @@
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 
-IMPLEMENT_CREATOR( AreaLight );
-
 // sample ray from light
 Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
@@ -89,15 +87,6 @@ Spectrum AreaLight::Power() const
 {
 	sAssert( shape != nullptr, LIGHT );
 	return shape->SurfaceArea() * intensity.GetIntensity() * TWO_PI;
-}
-
-// register property
-void AreaLight::_registerAllProperty()
-{
-	Light::_registerAllProperty();
-    //_registerProperty( "shape" , new ShapeProperty(this) );
-	//_registerProperty( "sizex" , new SizeXProperty(this) );
-    //_registerProperty( "sizey" , new SizeYProperty(this) );
 }
 
 // sample light density

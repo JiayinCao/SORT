@@ -25,8 +25,6 @@
 class DistantLight : public Light
 {
 public:
-	DEFINE_CREATOR(DistantLight, Light, "distant");
-
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'wi'		: input vector in world space
@@ -52,4 +50,6 @@ public:
 
 	// whether the light is an infinite light
 	virtual bool IsInfinite() const { return true; }
+
+    friend class DirLightEntity;
 };

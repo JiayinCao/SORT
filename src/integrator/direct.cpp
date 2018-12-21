@@ -52,7 +52,7 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 	unsigned light_num = scene.LightNum();
 	for( unsigned i = 0 ; i < light_num ; ++i )
 	{
-		const Light* light = scene.GetLight(i);
+		const std::shared_ptr<Light> light = scene.GetLight(i);
 		li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true), BXDF_TYPE( BXDF_ALL ) );
 	}
 
@@ -132,9 +132,4 @@ void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples 
 			samples[i].bsdf_sample[k].v = bsdf_2d[2*k+1];
 		}
 	}*/
-}
-
-void DirectLight::_registerAllProperty()
-{
-	_registerProperty( "sample_per_light" , new SamplerPerLightProperty(this) );
 }

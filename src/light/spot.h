@@ -25,11 +25,6 @@
 class SpotLight : public Light
 {
 public:
-	DEFINE_CREATOR( SpotLight , Light, "spot" );
-
-	// default constructor
-	SpotLight(){_registerAllProperty();}
-
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'wi'		: input vector in world space
@@ -52,27 +47,5 @@ private:
     float	cos_falloff_start = Radians( 25.0f );
     float	cos_total_range = Radians( 30.0f );
 
-	// register property
-	void _registerAllProperty();
-
-	class FalloffStartProperty : public PropertyHandler<Light>
-	{
-	public:
-		PH_CONSTRUCTOR(FalloffStartProperty,Light);
-		void SetValue( const std::string& str )
-		{
-			SpotLight* light = CAST_TARGET(SpotLight);
-			light->cos_falloff_start = (float)cos( Radians( (float)atof( str.c_str() ) ) );
-		}
-	};
-	class RangeProperty : public PropertyHandler<Light>
-	{
-	public:
-		PH_CONSTRUCTOR(RangeProperty,Light);
-		void SetValue( const std::string& str )
-		{
-			SpotLight* light = CAST_TARGET(SpotLight);
-            light->cos_total_range = (float)cos( Radians( (float)atof( str.c_str() ) ) );
-		}
-	};
+    friend class SpotLightEntity;
 };
