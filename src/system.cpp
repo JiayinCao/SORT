@@ -74,11 +74,6 @@ void System::PreProcess()
         slog( WARNING , GENERAL , "There is no render target in the system, can't render anything." );
 		return;
 	}
-	if( m_camera == 0 )
-	{
-        slog( WARNING , GENERAL , "There is no camera attached in the system , can't render anything." );
-		return;
-	}
 
 	// preprocess scene
 	m_Scene.PreProcess();
@@ -121,7 +116,6 @@ void System::Uninit()
 
     // delete the data
     SAFE_DELETE(m_imagesensor);
-    SAFE_DELETE(m_camera);
     SAFE_DELETE(m_pSampler);
     SAFE_DELETE_ARRAY(m_taskDone);
 }
@@ -131,7 +125,7 @@ void System::_pushRenderTask()
 {
 	std::shared_ptr<Integrator> integrator(_allocateIntegrator());
 	integrator->PreProcess();
-	integrator->SetupCamera(m_camera);
+	integrator->SetupCamera(m_Scene.GetCamera());
 
 	// Push render task into the queue
 	const unsigned tilesize = g_tile_size;
@@ -166,7 +160,7 @@ void System::_pushRenderTask()
 			size.y = (tilesize < (m_imagesensor->GetHeight() - tl.y)) ? tilesize : (m_imagesensor->GetHeight() - tl.y);
 
 			SCHEDULE_TASK<Render_Task>( priority-- , tl , size , &m_Scene , m_iSamplePerPixel , integrator , 
-										m_camera , m_pSampler , new PixelSample[m_iSamplePerPixel] );
+                                        m_pSampler , new PixelSample[m_iSamplePerPixel] );
 		}
 
 		// turn to the next direction
@@ -311,29 +305,6 @@ bool System::Setup( const char* str )
 		m_iSamplePerPixel = m_pSampler->RoundSize(16);
 	}
     SORT_STATS(sSamplePerPixel = m_iSamplePerPixel);
-	
-	element = root->FirstChildElement("Camera");
-	if( element )
-	{
-		const char* str_camera = element->Attribute("type");
-	
-		// create the camera
-		m_camera = CREATE_TYPE(str_camera,Camera);
-		
-		if( !m_camera )
-			return false;
-		
-		// set the properties
-		TiXmlElement* prop = element->FirstChildElement( "Property" );
-		while( prop )
-		{
-			const char* prop_name = prop->Attribute( "name" );
-			const char* prop_value = prop->Attribute( "value" );
-			if( prop_name != 0 && prop_value != 0 )
-				m_camera->SetProperty( prop_name , prop_value );
-			prop = prop->NextSiblingElement( "Property" );
-		}
-	}
 
     element = root->FirstChildElement("Materials");
     MatManager::GetSingleton().ParseMatFile( element );
@@ -348,12 +319,6 @@ bool System::Setup( const char* str )
 	element = root->FirstChildElement("ThreadNum");
 	if( element )
 		m_thread_num = atoi(element->Attribute("name"));
-    
-	// setup image sensor
-    m_camera->SetImageSensor(m_imagesensor);
-
-    // preprocess camera
-    m_camera->PreProcess();
     
 	// create shared memory
 	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_tile_size));

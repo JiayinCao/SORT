@@ -52,9 +52,7 @@ public:
 	void SetSamplePerPixel( unsigned spp ){ sample_per_pixel = spp; }
 
 	// setup camera
-	void SetupCamera(class Camera* cam){
-		camera = cam;
-	}
+	void SetupCamera(std::shared_ptr<class Camera> cam){ camera = cam; }
 
 	// generate samples
 	// para 'sampler' : the sampling method
@@ -103,7 +101,7 @@ public:
 // protected method
 protected:
 	// Camera
-	Camera*			camera = nullptr;
+    std::shared_ptr<class Camera>	camera = nullptr;
 
 	// maxium recursive depth
 	int				max_recursive_depth = 6;

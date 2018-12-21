@@ -18,6 +18,7 @@
 #pragma once
 
 #include "camera.h"
+#include "math/transform.h"
 
 //! @brief Perspective camera.
 /**
@@ -27,14 +28,6 @@
 class	PerspectiveCamera : public Camera
 {
 public:
-	DEFINE_CREATOR( PerspectiveCamera , Camera , "perspective" );
-
-	//! @brief Default constructor.
-    PerspectiveCamera(){
-        m_type = CT_PERSPECTIVE;
-        registerAllProperty();
-    }
-    
     //! @brief Pre-process after initialization.
     void PreProcess() override;
     
@@ -104,7 +97,7 @@ protected:
 	float   m_lensRadius = 0.0f;            /**< Radius of the camera lens. */
 	float   m_imagePlaneDist = 0.0f;        /**< Distance to the image plane with each pixel equals to exactly one. */
     float   m_focalDistance = 0.0f;         /**< The focal distance for DOF effect. */
-	float   m_inverseApartureSize = 0.0f;   /**< Recipocal of the aparture size. */
+	float   m_inverseApartureSize = 0.0f;   /**< Reciprocal of the aperture size. */
 
     Transform   m_cameraToClip;         /**< Transformation from view space to clip space. */
     Transform   m_clipToRaster;         /**< Transformation from clip space to screen space. */
@@ -112,63 +105,5 @@ protected:
     Transform   m_worldToCamera;        /**< Transformation from world space to camera space. */
     Transform   m_worldToRaster;        /**< Transformation from world space to screen space. */
 	
-	//! @brief Register all properties for camera.
-	void registerAllProperty();
-	
-	// property handler
-	class UpProperty : public PropertyHandler<Camera>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(UpProperty,Camera);
-		
-		// set value
-		void SetValue( const std::string& str )
-		{
-			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
-			camera->SetUp( VectorFromStr(str) );
-		}
-	};
-	// property handler
-	class TargetProperty : public PropertyHandler<Camera>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(TargetProperty,Camera);
-		
-		// set value
-		void SetValue( const std::string& str )
-		{
-			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
-			camera->SetTarget( PointFromStr(str) );
-		}
-	};
-	// property handler
-	class FovProperty : public PropertyHandler<Camera>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(FovProperty,Camera);
-		
-		// set value
-		void SetValue( const std::string& str )
-		{
-			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
-			camera->SetFov( (float)atof(str.c_str()) );
-		}
-	};
-	// property handler
-	class LenProperty : public PropertyHandler<Camera>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(LenProperty,Camera);
-		
-		// set value
-		void SetValue( const std::string& str )
-		{
-			PerspectiveCamera* camera = CAST_TARGET(PerspectiveCamera);
-			camera->SetLen( (float)atof(str.c_str()) );
-		}
-	};
+    friend class PerspectiveCameraEntity;
 };

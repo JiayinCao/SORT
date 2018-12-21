@@ -26,6 +26,7 @@
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "math/intersection.h"
 #include "math/transform.h"
+#include "camera/camera.h"
 
 class Accelerator;
 class Light;
@@ -95,20 +96,23 @@ public:
 	// Evaluate sky
 	Spectrum	Le( const Ray& ray ) const;
 
+    // Setup scene camera
+    void SetupCamera(std::shared_ptr<Camera> camera) { m_camera = camera; }
+    // Get camera from the scene
+    std::shared_ptr<Camera> GetCamera() const { return m_camera; }
 
 private:
-	std::vector<std::shared_ptr<Entity>>		m_entities;			/**< Entities in the scene. */
+	std::vector<std::shared_ptr<Entity>>	m_entities;		/**< Entities in the scene. */
+	std::vector<Primitive*>	                m_primitiveBuf; /**< Primitives in the scene. */
+	std::vector<std::shared_ptr<Light>>		m_lights;       /**< Lights in the scene. */
 
-	// the primitive buffer for the scene
-	std::vector<Primitive*>	m_primitiveBuf;
+    std::shared_ptr<Light>                  m_skyLight = nullptr;   /**< Sky light if available. */
+    std::shared_ptr<Camera>                 m_camera = nullptr;     /**< Camera of the scene. */
 
-	// the light
-	std::vector<std::shared_ptr<Light>>		m_lights;
 	// distribution of light power
 	Distribution1D*		m_pLightsDis = nullptr;
-	// the sky light
-	std::shared_ptr<Light>                  m_skyLight = nullptr;
-
+	
+    // to be removed from scene.
 	// the acceleration structure for the scene
 	Accelerator*		m_pAccelerator = nullptr;
 

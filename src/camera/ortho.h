@@ -28,11 +28,6 @@
 class	OrthoCamera : public Camera
 {
 public:
-	DEFINE_CREATOR( OrthoCamera , Camera , "ortho" );
-
-	//! @brief Default constructor
-	OrthoCamera();
-
     //! @brief Generating a primary ray.
     //! @param x    Coordinate along horizontal axis on the image sensor, it could be a float value.
     //! @param y    Coordinate along vertical axis on the image sensor, it could be a float value.
@@ -106,9 +101,7 @@ protected:
     //! @brief Udpate transformation
     void updateTransform();
     
-	//! @brief Register all properties.
-	void registerAllProperty();
-	
+    /*
 	// property handler
 	class UpProperty : public PropertyHandler<Camera>
 	{
@@ -165,4 +158,5 @@ protected:
 			camera->SetCameraHeight( (float)atof(str.c_str()) );
 		}
 	};
+    */
 };

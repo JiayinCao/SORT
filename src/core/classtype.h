@@ -21,16 +21,18 @@
 #include "entity/entity.h"
 #include "entity/light_entity.h"
 #include "entity/visual_entity.h"
+#include "entity/camera_entity.h"
 
 // The id definition in this file has to match with the ones defined in python plugin.
 // Otherwise, things will go wrong in serialization process.
 
-constexpr   unsigned int    VISUAL_ENTITY       =   1;
-constexpr   unsigned int    POINT_LIGHT_ENTITY  =   2;
-constexpr   unsigned int    SPOT_LIGHT_ENTITY   =   3;
-constexpr   unsigned int    DIR_LIGHT_ENTITY    =   4;
-constexpr   unsigned int    AREA_LIGHT_ENTITY   =   5;
-constexpr   unsigned int    SKY_LIGHT_ENTITY    =   6;
+constexpr   unsigned int    VISUAL_ENTITY             = 1;
+constexpr   unsigned int    POINT_LIGHT_ENTITY        = 2;
+constexpr   unsigned int    SPOT_LIGHT_ENTITY         = 3;
+constexpr   unsigned int    DIR_LIGHT_ENTITY          = 4;
+constexpr   unsigned int    AREA_LIGHT_ENTITY         = 5;
+constexpr   unsigned int    SKY_LIGHT_ENTITY          = 6;
+constexpr   unsigned int    PERSPECTIVE_CAMERA_ENTITY = 7;
 
 //! @brief  Instance an entity based on class id
 std::shared_ptr<Entity> MakeEntity( unsigned int class_id ){
@@ -47,6 +49,8 @@ std::shared_ptr<Entity> MakeEntity( unsigned int class_id ){
             return std::make_shared<AreaLightEntity>();
         case SKY_LIGHT_ENTITY:
             return std::make_shared<SkyLightEntity>();
+        case PERSPECTIVE_CAMERA_ENTITY:
+            return std::make_shared<PerspectiveCameraEntity>();
     }
     return nullptr;
 }

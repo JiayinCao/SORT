@@ -17,45 +17,11 @@
 
 #pragma once
 
-// include the header
 #include "spectrum/spectrum.h"
-#include "core/propertyset.h"
 #include "math/vector3.h"
 #include "math/transform.h"
 #include "texture/imagetexture.h"
 #include "core/samplemethod.h"
-
-/*
-//////////////////////////////////////////////////////////////////
-//	definition of sky
-//	note: we could also use a very large box or sphere to replace
-//		  the sky we need , while that would make some accelerator
-//		  such as uniform grid inefficient. So we use a isolated
-//		  sky to show the environment.
-class	Sky : public PropertySet<Sky>
-{
-public:
-	// default constructor
-	Sky(){}
-	// destructor
-	virtual ~Sky(){}
-
-	// evaluate value from sky
-	// para 'r' : the ray which misses all of the triangle in the scene
-	// result   : the spectrum in the sky
-	virtual Spectrum Evaluate( const Vector& r ) const = 0;
-
-	// get the average radiance
-	virtual Spectrum GetAverage() const = 0;
-
-	// sample direction
-	virtual Vector sample_v( float u , float v , float* pdf , float* area_pdf ) const = 0;
-
-	// get the pdf
-	virtual float Pdf( const Vector& wi ) const = 0;
-
-	
-};*/
 
 ////////////////////////////////////////////////////////////////////////
 // definition of sky sphere

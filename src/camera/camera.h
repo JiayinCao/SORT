@@ -21,21 +21,20 @@
 #include "math/ray.h"
 #include "core/enum.h"
 #include "spectrum/spectrum.h"
-#include "core/propertyset.h"
-#include "core/creator.h"
 #include "math/vector2.h"
+#include "math/matrix.h"
 
 class PixelSample;
 class ImageSensor;
 class Visibility;
 
-//! @brief Abstruct camera
+//! @brief Abstract camera
 /**
  * This class serves as an abstract interface for different camera model.
- * There are several derived classes, such as perspective camera, othogonal 
+ * There are several derived classes, such as perspective camera, orthogonal 
  * camera and environment camera.
  */
-class	Camera : public PropertySet<Camera>
+class	Camera
 {
 public:
 	//! @brief Virtual destructor.
@@ -89,66 +88,9 @@ public:
 protected:
 	Point           m_eye;                      /**< Viewing point of the camera. */
     ImageSensor*    m_imagesensor = nullptr;    /**< Image sensor. */
-	CAMERA_TYPE     m_type = CT_NONE;           /**< Camera type. */
     float           m_sensorW = 0.0f;           /**< Image sensor width. */
     float           m_sensorH = 0.0f;           /**< Image sensor height. */
     float           m_aspectRatioW = 0.0f;      /**< Aspect ratio along x axis. */
     float           m_aspectRatioH = 0.0f;      /**< Aspect ratio along y axis. */
 	int             m_aspectFit = 0;            /**< Aspect fit. It equals to 1 if it fits horizontally, otherwise it is 2. */
-
-	// property handler
-	class EyeProperty : public PropertyHandler<Camera>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(EyeProperty,Camera);
-		
-		// set value
-		void SetValue( const std::string& str )
-		{
-			Camera* camera = CAST_TARGET(Camera);
-			camera->SetEye( PointFromStr(str) );
-		}
-	};
-
-	// property handler
-	class SensorSizeProperty : public PropertyHandler<Camera>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(SensorSizeProperty,Camera);
-		
-		// set value
-		void SetValue( const std::string& str )
-		{
-			Camera* camera = CAST_TARGET(Camera);
-
-			Point p = PointFromStr(str);
-
-			camera->m_sensorW = p.x;
-			camera->m_sensorH = p.y;
-			camera->m_aspectFit = (int)p.z;
-		}
-	};
-
-	// property handler
-	class AspectProperty : public PropertyHandler<Camera>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(AspectProperty,Camera);
-		
-		// set value
-		void SetValue( const std::string& str )
-		{
-			Camera* camera = CAST_TARGET(Camera);
-
-			std::string _str = str;
-			std::string x = NextToken( _str , ' ' );
-			std::string y = NextToken( _str , ' ' );
-
-			camera->m_aspectRatioW = (float)atof( x.c_str() );
-			camera->m_aspectRatioH = (float)atof( y.c_str() );
-		}
-	};
 };

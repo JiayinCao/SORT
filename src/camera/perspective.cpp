@@ -25,21 +25,6 @@
 #include "imagesensor/imagesensor.h"
 #include "light/light.h"
 
-IMPLEMENT_CREATOR( PerspectiveCamera );
-
-// register all properties
-void PerspectiveCamera::registerAllProperty()
-{
-    _registerProperty( "aspect" , new AspectProperty( this ) );
-    _registerProperty( "sensorsize" , new SensorSizeProperty( this ) );
-    _registerProperty( "eye" , new EyeProperty( this ) );
-    _registerProperty( "up" , new UpProperty( this ) );
-    _registerProperty( "target" , new TargetProperty( this ) );
-    _registerProperty( "fov" , new FovProperty( this ) );
-    _registerProperty( "len" , new LenProperty( this ) );
-}
-
-// Preprocess
 void PerspectiveCamera::PreProcess()
 {
     float w = (float)m_imagesensor->GetWidth();

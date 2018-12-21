@@ -26,14 +26,6 @@
 class	EnvironmentCamera : public Camera
 {
 public:
-	DEFINE_CREATOR( EnvironmentCamera , Camera , "environment" );
-
-	//! @brief Default constructor.
-	EnvironmentCamera(){
-        m_type = CT_ENVIRONMENT;
-        _registerAllProperty();
-    }
-
     //! @brief Generating a primary ray.
     //! @param x    Coordinate along horizontal axis on the image sensor, it could be a float value.
     //! @param y    Coordinate along vertical axis on the image sensor, it could be a float value.

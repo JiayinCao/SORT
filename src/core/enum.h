@@ -39,15 +39,6 @@ enum BXDF_TYPE
 	BXDF_ALL = BXDF_ALL_REFLECTION | BXDF_ALL_TRANSMISSION 
 };
 
-// camera type
-enum CAMERA_TYPE
-{
-	CT_NONE = 0,
-	CT_ORTHO = 1,
-	CT_PERSPECTIVE = 2,
-	CT_ENVIRONMENT = 3,
-};
-
 // integrator type
 enum INTEGRATOR_TYPE
 {
