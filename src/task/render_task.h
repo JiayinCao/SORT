@@ -24,13 +24,12 @@
 class Integrator;
 class Scene;
 class Sampler;
-class Camera;
 class RenderTarget;
 class ImageSensor;
 
-//! @brief  Render_Task is a baic rendering unit doing ray tracing.
+//! @brief  Render_Task is a basic rendering unit doing ray tracing.
 //!
-//! Each renderin task is usually responsible for a tile of image to be rendered in
+//! Each render task is usually responsible for a tile of image to be rendered in
 //! most cases. In other cases, like light tracing, there is no difference between
 //! different render_task.
 class Render_Task : public Task{
@@ -39,10 +38,10 @@ public:
     //!
     //! @param priority     New priority of the task.
     Render_Task(const Vector2i& ori , const Vector2i& size , Scene* scene , unsigned int spp ,
-                std::shared_ptr<Integrator> integrator , Camera* camera , Sampler* sampler , PixelSample* pixelSamples ,
+                std::shared_ptr<Integrator> integrator , Sampler* sampler , PixelSample* pixelSamples ,
                 unsigned int priority = DEFAULT_TASK_PRIORITY , const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ) : 
                 m_coord(ori), m_size(size), m_scene(*scene), m_samplePerPixel(spp), m_sampler( sampler ), m_pixelSamples(pixelSamples),
-                m_integrator(integrator), m_camera(camera), Task( priority , dependencies ) {}
+                m_integrator(integrator), Task( priority , dependencies ) {}
     
     //! @brief  Execute the task
     void        Execute() override;
@@ -75,16 +74,9 @@ public:
         return m_scene;
     }
 
-    //! @brief  Get camera description.
-    //!
-    //! @return Camera information of the scene.
-    inline const Camera*   GetCamera() const{
-        return m_camera;
-    }
-
     //! @brief  Get integrator.
     //!
-    //! @return The integrator used to evalute rendering equation.
+    //! @return The integrator used to evaluate rendering equation.
     inline const std::shared_ptr<Integrator>   GetIntegrator() const{
         return m_integrator;
     }
@@ -94,7 +86,6 @@ private:
     Vector2i                            m_size;             /**< Size of the current tile to be rendered. */
     unsigned int                        m_samplePerPixel;   /**< Sample to take for each pixel. */
     Scene&	                            m_scene;            /**< Scene for ray tracing. */
-    Camera*	                            m_camera;           /**< Camera information. */
     const std::shared_ptr<Integrator>   m_integrator;       /**< Integrator for evaluating rendering equation. */
     Sampler*                            m_sampler;          /**< Sampler for taking samples. Currently not used. */
     PixelSample*                        m_pixelSamples;     /**< Samples to take. Currently not used. */

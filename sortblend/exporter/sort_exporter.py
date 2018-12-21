@@ -28,12 +28,13 @@ import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
 
 # The following id has to match the definitions in src/core/classtype.h
-VISUAL_ENTITY       =   1
-POINT_LIGHT_ENTITY  =   2
-SPOT_LIGHT_ENTITY   =   3
-DIR_LIGHT_ENTITY    =   4
-AREA_LIGHT_ENTITY   =   5
-SKY_LIGHT_ENTITY    =   6
+VISUAL_ENTITY               =   1
+POINT_LIGHT_ENTITY          =   2
+SPOT_LIGHT_ENTITY           =   3
+DIR_LIGHT_ENTITY            =   4
+AREA_LIGHT_ENTITY           =   5
+SKY_LIGHT_ENTITY            =   6
+PERSPECTIVE_CAMERA_ENTITY   =   7
 
 def get_sort_dir():
     return_path = exporter_common.getPreference().install_path
@@ -166,34 +167,6 @@ def export_sort_file(scene, root, force_debug):
     sampler_type = scene.sampler_type_prop
     sampler_count = scene.sampler_count_prop
     ET.SubElement(root, 'Sampler', type=sampler_type, round='%s'%sampler_count)
-    # camera node
-    camera = exporter_common.getCamera(scene)
-    pos, target, up = lookAtSORT(camera)
-    camera_node = ET.SubElement(root, 'Camera', type='perspective')
-    ET.SubElement( camera_node , "Property" , name="eye" , value=exporter_common.vec3tostr(pos))
-    ET.SubElement( camera_node , "Property" , name="up" , value=exporter_common.vec3tostr(up))
-    ET.SubElement( camera_node , "Property" , name="target" , value=exporter_common.vec3tostr(target))
-    ET.SubElement( camera_node , "Property" , name="len" , value='%f'%camera.data.sort_camera.sort_camera_lens.lens_size)
-    ET.SubElement( camera_node , "Property" , name="interaxial" , value="0")
-    ET.SubElement( camera_node , "Property" , name="width" , value="0")
-    ET.SubElement( camera_node , "Property" , name="height" , value="0")
-    sensor_w = bpy.data.cameras[0].sensor_width
-    sensor_h = bpy.data.cameras[0].sensor_height
-    sensor_fit = 0.0 # auto
-    sfit = bpy.data.cameras[0].sensor_fit
-    if sfit == 'VERTICAL':
-        sensor_fit = 2.0
-    elif sfit == 'HORIZONTAL':
-        sensor_fit = 1.0
-    ET.SubElement( camera_node , "Property" , name="sensorsize" , value= "%s %s %f"%(sensor_w,sensor_h,sensor_fit))
-    aspect_ratio_x = scene.render.pixel_aspect_x
-    aspect_ratio_y = scene.render.pixel_aspect_y
-    ET.SubElement( camera_node , "Property" , name="aspect" , value="%s %s"%(aspect_ratio_x,aspect_ratio_y))
-    fov_angle = bpy.data.cameras[0].angle
-    ET.SubElement( camera_node , "Property" , name="fov" , value= "%s"%fov_angle)
-    camera_shift_x = bpy.data.cameras[0].shift_x
-    camera_shift_y = bpy.data.cameras[0].shift_y
-    ET.SubElement( camera_node , "Property" , name="shift" , value="%s %s"%(camera_shift_x,camera_shift_y))
     # output thread num
     thread_num = scene.thread_num_prop
     ET.SubElement( root , 'ThreadNum', name='%s'%thread_num)
@@ -205,6 +178,35 @@ def export_scene(scene, root, force_debug):
     # acceleration structure
     accelerator_type = scene.accelerator_type_prop
     ET.SubElement( scene_root , 'Accel', type=accelerator_type)
+
+    # camera node
+    camera = exporter_common.getCamera(scene)
+    pos, target, up = lookAtSORT(camera)
+    sensor_w = bpy.data.cameras[0].sensor_width
+    sensor_h = bpy.data.cameras[0].sensor_height
+    sensor_fit = 0.0 # auto
+    sfit = bpy.data.cameras[0].sensor_fit
+    if sfit == 'VERTICAL':
+        sensor_fit = 2.0
+    elif sfit == 'HORIZONTAL':
+        sensor_fit = 1.0
+    aspect_ratio_x = scene.render.pixel_aspect_x
+    aspect_ratio_y = scene.render.pixel_aspect_y
+    fov_angle = bpy.data.cameras[0].angle
+    camera_shift_x = bpy.data.cameras[0].shift_x
+    camera_shift_y = bpy.data.cameras[0].shift_y
+
+    model_node = ET.SubElement( scene_root , 'Model' , filename= 'camera.sme' )
+    camera_fs = stream.FileStream( get_intermediate_dir(force_debug) + 'camera.sme' )
+    camera_fs.serialize(PERSPECTIVE_CAMERA_ENTITY)
+    camera_fs.serialize(exporter_common.vec3_to_tuple(pos))
+    camera_fs.serialize(exporter_common.vec3_to_tuple(up))
+    camera_fs.serialize(exporter_common.vec3_to_tuple(target))
+    camera_fs.serialize(camera.data.sort_camera.sort_camera_lens.lens_size)
+    camera_fs.serialize((sensor_w,sensor_h))
+    camera_fs.serialize(int(sensor_fit))
+    camera_fs.serialize((aspect_ratio_x,aspect_ratio_y))
+    camera_fs.serialize(fov_angle)
 
     for ob in exporter_common.getMeshList(scene):
         model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
@@ -253,6 +255,8 @@ def export_scene(scene, root, force_debug):
             light_spectrum *= lamp.energy
             sizeX = lamp.size
             sizeY = lamp.size_y
+            if lamp.shape == 'SQUARE':
+                sizeY = lamp.size
 
             model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
             fs.serialize(AREA_LIGHT_ENTITY)

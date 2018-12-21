@@ -21,11 +21,13 @@
 #include "camera/camera.h"
 #include "imagesensor/imagesensor.h"
 #include "core/globalconfig.h"
+#include "core/scene.h"
 
 void Render_Task::Execute(){
     if( m_integrator == nullptr )
         return;
-    ImageSensor* is = m_camera->GetImageSensor();
+    std::shared_ptr<Camera> camera = m_scene.GetCamera();
+    ImageSensor* is = camera->GetImageSensor();
     if( !is )
         return;
     
@@ -51,7 +53,7 @@ void Render_Task::Execute(){
             for( unsigned k = 0 ; k < m_samplePerPixel ; ++k )
             {
                 // generate rays
-                Ray r = m_camera->GenerateRay( (float)j , (float)i , m_pixelSamples[k] );
+                Ray r = camera->GenerateRay( (float)j , (float)i , m_pixelSamples[k] );
                 // accumulate the radiance
                 radiance += m_integrator->Li( r , m_pixelSamples[k] );
             }

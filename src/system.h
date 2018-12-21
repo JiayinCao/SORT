@@ -23,11 +23,8 @@
 #include "imagesensor/blenderimage.h"
 #include "imagesensor/rendertargetimage.h"
 
-// declare classes
-class Camera;
 class Sampler;
 class PixelSample;
-class SORTOutput;
 
 /////////////////////////////////////////////////////////////////////
 //	definition of the system
@@ -55,12 +52,12 @@ public:
 	// set resource path
 	void SetResourcePath( const std::string& str ) { m_ResourcePath = str; }
 
+    // ugly workaround, to be changed later.
+    ImageSensor*    GetImageSensor() { return m_imagesensor; }
+
 private:
     // image sensor
     ImageSensor*    m_imagesensor = nullptr;
-
-	// the camera for the system
-    Camera*			m_camera = nullptr;
 
     unsigned		m_totalTask = 0;
     bool*			m_taskDone = nullptr;
