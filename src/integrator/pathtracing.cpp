@@ -69,7 +69,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		float			light_pdf = 0.0f;
 		LightSample		light_sample = (bounces==0)?ps.light_sample[0]:LightSample(true);
 		BsdfSample		bsdf_sample = (bounces==0)?ps.bsdf_sample[0]:BsdfSample(true);
-		const Light*	light = scene.SampleLight( light_sample.t , &light_pdf );
+		const std::shared_ptr<Light>	light = scene.SampleLight( light_sample.t , &light_pdf );
 		if( light_pdf > 0.0f )
 			L += throughput * EvaluateDirect(	r  , scene , light , inter , light_sample ,
 												bsdf_sample , BXDF_TYPE(BXDF_ALL) ) / light_pdf;

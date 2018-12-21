@@ -60,24 +60,24 @@ public:
 	void	PreProcess();
 
 	// get light
-	const Light* GetLight( unsigned i ) const
+	const std::shared_ptr<Light> GetLight( unsigned i ) const
 	{
 		sAssert( i < m_lights.size() , LIGHT );
 		return m_lights[i];
 	}
 	// add light
-	void AddLight( Light* light ){
+	void AddLight( std::shared_ptr<Light> light ){
 		if( light )
 			m_lights.push_back( light );
 	}
 	// get lights
-	const std::vector<Light*>& GetLights() const
-	{return m_lights;}
+	const std::vector<std::shared_ptr<Light>>& GetLights() const {return m_lights;}
 	// get sky light
-	const Light* GetSkyLight() const
-	{return m_skyLight;}
+	const std::shared_ptr<Light> GetSkyLight() const {return m_skyLight;}
+    // set sky light
+    void SetSkyLight(std::shared_ptr<Light> light) { m_skyLight = light; }
 	// get sampled light
-	const Light* SampleLight( float u , float* pdf ) const;
+	const std::shared_ptr<Light> SampleLight( float u , float* pdf ) const;
 	// get the properbility of the sample
 	float LightProperbility( unsigned i ) const;
 	// get the number of lights
@@ -85,6 +85,8 @@ public:
 	{ return (unsigned)m_lights.size(); }
 	// get bounding box of the scene
 	const BBox& GetBBox() const;
+    // add primitives
+    void AddPrimitives(Primitive* primitive) { m_primitiveBuf.push_back(primitive); }
 
 	// get file name
 	const std::string& GetFileName() const
@@ -101,11 +103,11 @@ private:
 	std::vector<Primitive*>	m_primitiveBuf;
 
 	// the light
-	std::vector<Light*>		m_lights;
+	std::vector<std::shared_ptr<Light>>		m_lights;
 	// distribution of light power
 	Distribution1D*		m_pLightsDis = nullptr;
 	// the sky light
-	Light*				m_skyLight = nullptr;
+	std::shared_ptr<Light>                  m_skyLight = nullptr;
 
 	// the acceleration structure for the scene
 	Accelerator*		m_pAccelerator = nullptr;

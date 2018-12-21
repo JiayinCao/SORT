@@ -21,8 +21,6 @@
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 
-IMPLEMENT_CREATOR( SpotLight );
-
 // sample ray from light
 Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
 {
@@ -104,12 +102,4 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 		return 0.0f;
 
 	return intensity * d * d;
-}
-
-// register property
-void SpotLight::_registerAllProperty()
-{
-	Light::_registerAllProperty();
-	_registerProperty( "falloff_start" , new FalloffStartProperty(this) );
-	_registerProperty( "range" , new RangeProperty(this) );
 }

@@ -58,12 +58,14 @@ bool Scene::LoadScene( TiXmlNode* root )
 			unsigned int class_id = 0;
 			stream >> class_id;
 			std::shared_ptr<Entity>	entity = MakeEntity( class_id );
-			sAssert( entity != nullptr , RESOURCE );
+			//sAssert( entity != nullptr , RESOURCE );
 
 			// Serialize the entity
-			entity->Serialize( stream );
+            if (entity) {
+                entity->Serialize(stream);
 
-			m_entities.push_back( entity );
+                m_entities.push_back(entity);
+            }
 		}
 
 		// get to the next model
@@ -71,53 +73,6 @@ bool Scene::LoadScene( TiXmlNode* root )
 	}
 	// generate triangle buffer after parsing from file
 	_generatePriBuf();
-	
-	// parse the lights
-	TiXmlElement* lightNode = root->FirstChildElement( "Light" );
-	while( lightNode )
-	{
-		const char* type = lightNode->Attribute( "type" );
-		if( type != 0 )
-		{
-			Light* light = CREATE_TYPE( type , Light );
-			if( light )
-			{
-				// setup 
-				light->SetupScene( this );
-
-				// load the transform matrix
-				light->SetTransform( _parseTransform( lightNode->FirstChildElement( "Transform" ) ) );
-
-				// set the properties
-				TiXmlElement* prop = lightNode->FirstChildElement( "Property" );
-				while( prop )
-				{
-					const char* prop_name = prop->Attribute( "name" );
-					const char* prop_value = prop->Attribute( "value" );
-					if( prop_name != 0 && prop_value != 0 )
-						light->SetProperty( prop_name , prop_value );
-					prop = prop->NextSiblingElement( "Property" );
-				}
-
-				/* refactoring shape
-				Shape* shape = light->GetShape();
-				if( shape )
-				{
-					shape->SetID((unsigned)m_triBuf.size() );
-					m_triBuf.push_back( shape );
-				}*/
-
-				if( strcmp( type , "skylight" ) == 0 )
-					m_skyLight = light;
-
-				m_lights.push_back( light );
-			}
-		}else
-            slog( WARNING , LIGHT , "Undefined light type %s" , type );
-
-		// get to the next light
-		lightNode = lightNode->NextSiblingElement( "Light" );
-	}
 	_genLightDistribution();
 	
 	// get accelerator if there is, if there is no accelerator, intersection test is performed in a brute force way.
@@ -175,11 +130,6 @@ void Scene::Release()
 	while( it != m_primitiveBuf.end() )
 		delete *it++;
 	m_primitiveBuf.clear();
-
-	std::vector<Light*>::iterator light_it = m_lights.begin();
-	while( light_it != m_lights.end() )
-		delete *light_it++;
-	m_lights.clear();
 }
 
 // generate primitive buffer
@@ -260,19 +210,18 @@ void Scene::_genLightDistribution()
 }
 
 // get sampled light
-const Light* Scene::SampleLight( float u , float* pdf ) const
+const std::shared_ptr<Light> Scene::SampleLight( float u , float* pdf ) const
 {
 	sAssert( u >= 0.0f && u <= 1.0f , SAMPLING );
 	sAssertMsg( m_pLightsDis != 0 , SAMPLING , "No light in the scene." );
 
 	float _pdf;
 	int id = m_pLightsDis->SampleDiscrete( u , &_pdf );
-	if( id >= 0 && id < (int)m_lights.size() && _pdf != 0.0f )
-	{
+	if( id >= 0 && id < (int)m_lights.size() && _pdf != 0.0f ){
 		if( pdf ) *pdf = _pdf;
 		return m_lights[id];
 	}
-	return 0;
+	return nullptr;
 }
 
 // get light sample property

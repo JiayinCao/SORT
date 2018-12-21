@@ -58,21 +58,5 @@ private:
 	SampleOffset*	light_sample_offsets = nullptr;	// light sample offset
 	SampleOffset*	bsdf_sample_offsets = nullptr;	// bsdf sample offset
 
-	// register property
-	void _registerAllProperty();
-
-	class SamplerPerLightProperty : public PropertyHandler<Integrator>
-	{
-	public:
-		PH_CONSTRUCTOR(SamplerPerLightProperty,Integrator);
-		void SetValue( const std::string& str )
-		{
-			DirectLight* direct = CAST_TARGET(DirectLight);
-
-			if( direct )
-				direct->ls_per_light = atoi( str.c_str() );
-		}
-	};
-    
     SORT_STATS_ENABLE( "Direct Illumination" )
 };
