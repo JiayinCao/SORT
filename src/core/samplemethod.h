@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "sort.h"
 #include <algorithm>
 #include "bsdf/bsdf.h"
 #include "texture/texture.h"

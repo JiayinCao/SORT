@@ -17,11 +17,12 @@
 
 #pragma once
 
-// include header
+// WARNING:
+// Code in this folder is VERY VERY out-dated and badly implemented.
+// I need to refactor this part of the renderer once I have time.
+
 #include "spectrum/spectrum.h"
-#include "core/propertyset.h"
 #include "math/transform.h"
-#include "core/creator.h"
 #include "core/scene.h"
 #include "math/vector3.h"
 
@@ -34,16 +35,12 @@ class Visibility
 public:
 	// default constructor
 	Visibility( const Scene& s ):scene(s){}
-	// destructor
-	~Visibility(){}
 
 	// whether it's visible from the light source
-	bool	IsVisible() const
-	{
+	bool	IsVisible() const{
 		return !scene.GetIntersect( ray , 0 );
 	}
 
-// public field
 	// the shadow ray
 	Ray	ray;
 	// the scene
@@ -52,14 +49,9 @@ public:
 
 ////////////////////////////////////////////////////////////////////////
 // definition of light
-class	Light : public PropertySet<Light>
+class	Light
 {
 public:
-    // constructor
-    Light() {_registerAllProperty();}
-	// destructor
-	virtual ~Light(){scene=0;}
-
 	// setup scene
 	void	SetupScene( const Scene* s ) {scene=s;}
 	
@@ -77,23 +69,23 @@ public:
 	virtual bool IsInfinite() const { return false; }
 
 	// get the shape of light
-	virtual Shape* GetShape() const { return 0; }
+	virtual std::shared_ptr<Shape> GetShape() const { return nullptr; }
 
-	// the pdf for specific sampled directioin
+	// the pdf for specific sampled direction
 	virtual float Pdf( const Point& p , const Vector& wi ) const { return 1.0f; }
 
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'wi'		: input vector in world space
 	// para 'delta'		: a delta to offset the original point
-	// para 'pdf'		: properbility density function value of the input vector
+	// para 'pdf'		: probability density function value of the input vector
 	// para 'visibility': visibility tester
 	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const = 0;
 
 	// sample a ray from light
 	// para 'ls'       : light sample
 	// para 'r'       : the light vector
-	// para 'pdf'      : the properbility density function
+	// para 'pdf'      : the probability density function
 	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const = 0;
 
 	// sample light density
@@ -120,41 +112,4 @@ protected:
 
 	// pdf of picking the light
 	float		pickProp;
-
-	// register property
-	void _registerAllProperty()
-	{
-		_registerProperty( "intensity" , new IntensityProperty(this) );
-        _registerProperty( "transform" , new TransformProperty(this) );
-	}
-
-	// property handler
-	class IntensityProperty : public PropertyHandler<Light>
-	{
-	public:
-		// constructor
-		PH_CONSTRUCTOR(IntensityProperty,Light);
-
-		// set value
-		void SetValue( const std::string& str )
-		{
-			Light* light = CAST_TARGET(Light);
-			light->_setIntensity( SpectrumFromStr(str) );
-		}
-	};
-    
-    class TransformProperty : public PropertyHandler<Light>
-    {
-    public:
-        PH_CONSTRUCTOR(TransformProperty,Light);
-        void SetValue( const std::string& str )
-        {
-            Light* light = CAST_TARGET(Light);
-            light->SetTransform( TransformFromStr(str) );
-        }
-    };
-    
-	// set light intensity
-	virtual void _setIntensity( const Spectrum& e )
-	{ intensity = e; }
 };

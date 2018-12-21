@@ -16,28 +16,14 @@
  */
 
 // include the header
-#include "skysphere.h"
+#include "sky.h"
 #include "bsdf/bsdf.h"
 #include "math/ray.h"
 #include "core/samplemethod.h"
 #include "managers/memmanager.h"
 
-IMPLEMENT_CREATOR( SkySphere );
-
-// initialize default value
-void SkySphere::_init()
-{
-	_registerAllProperty();
-	distribution = 0;
-}
-// release
-void SkySphere::_release()
-{
-	SAFE_DELETE(distribution);
-}
-
 // evaluate value from sky
-Spectrum SkySphere::Evaluate( const Vector& wi ) const
+Spectrum Sky::Evaluate( const Vector& wi ) const
 {
 	float theta = SphericalTheta( wi );
 	float phi = SphericalPhi( wi );
@@ -48,20 +34,14 @@ Spectrum SkySphere::Evaluate( const Vector& wi ) const
 	return m_sky.GetColorFromUV( u , 1.0f - v );
 }
 
-// register property
-void SkySphere::_registerAllProperty()
-{
-	_registerProperty( "image" , new ImageProperty( this ) );
-}
-
 // get the average radiance
-Spectrum SkySphere::GetAverage() const
+Spectrum Sky::GetAverage() const
 {
 	return m_sky.GetAverage();
 }
 
 // generate 2d distribution
-void SkySphere::_generateDistribution2D()
+void Sky::_generateDistribution2D()
 {
 	SAFE_DELETE(distribution);
 
@@ -84,7 +64,7 @@ void SkySphere::_generateDistribution2D()
 }
 
 // sample direction
-Vector SkySphere::sample_v( float u , float v , float* pdf , float* area_pdf ) const
+Vector Sky::sample_v( float u , float v , float* pdf , float* area_pdf ) const
 {
 	sAssert( distribution != 0 , LIGHT );
 
@@ -113,7 +93,7 @@ Vector SkySphere::sample_v( float u , float v , float* pdf , float* area_pdf ) c
 }
 
 // get the pdf
-float SkySphere::Pdf( const Vector& lwi ) const
+float Sky::Pdf( const Vector& lwi ) const
 {
 	float sin_theta = SinTheta(lwi);
 	if( sin_theta == 0.0f ) return 0.0f;

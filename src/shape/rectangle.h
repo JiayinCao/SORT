@@ -83,6 +83,16 @@ public:
 	//! @return		Surface area of the shape.
 	float 			SurfaceArea() const override;
     
+    //! @brief      Set length along x axis of the rectangle.
+    //!
+    //! @param      x   Size along x axis.
+    void            SetSizeX(float x) { sizeX = x; }
+
+    //! @brief      Set length along y axis of the rectangle.
+    //!
+    //! @param      y   Size along y axis.
+    void            SetSizeY(float y) { sizeY = y; }
+
 protected:
 	float sizeX = 1.0f;		/**< The size of the rectangle along x axis. */
 	float sizeY = 1.0f;		/**< The size of the rectangle along y axis. */

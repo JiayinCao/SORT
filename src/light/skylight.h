@@ -19,7 +19,7 @@
 
 #include "light.h"
 #include "core/creator.h"
-#include "math/sky/sky.h"
+#include "math/sky.h"
 #include "core/log.h"
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -27,13 +27,6 @@
 class	SkyLight : public Light
 {
 public:
-	DEFINE_CREATOR(SkyLight, Light, "skylight");
-
-	// default constructor
-	SkyLight(){_init();}
-	// destructor
-	~SkyLight(){_release();}
-
 	// sample ray from light
 	// para 'intersect' : intersection information
 	// para 'wi'		: input vector in world space
@@ -67,45 +60,9 @@ public:
 	// note : none-delta light must overwrite this method
 	virtual float Pdf( const Point& p , const Vector& wi ) const;
 
-
 private:
 	// the sky
-	Sky*	sky;
+	Sky	sky;
 
-	// The transformation
-	Transform	transform;
-
-	// initialize default value
-	void _init();
-	// release
-	void _release();
-
-	// register all properties
-	void _registerAllProperty();
-
-	class TypeProperty : public PropertyHandler<Light>
-	{
-	public:
-		PH_CONSTRUCTOR(TypeProperty,Light);
-		void SetValue( const std::string& str )
-		{
-			SkyLight* light = CAST_TARGET(SkyLight);
-			light->sky = CREATE_TYPE( str , Sky );
-
-			light->sky->SetTransform( light->transform );
-		}
-	};
-	class PropertyPasser : public PropertyHandler<Light>
-	{
-	public:
-		PH_CONSTRUCTOR(PropertyPasser,Light);
-		void SetValue( const std::string& str )
-		{
-			SkyLight* light = CAST_TARGET(SkyLight);
-			if( light->sky )
-				light->sky->SetProperty( m_name , str );
-			else
-                slog( WARNING , LIGHT , "There is no sky attached to light" );
-		}
-	};
+    friend class SkyLightEntity;
 };

@@ -221,60 +221,54 @@ def export_scene(scene, root, force_debug):
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
         world_matrix = MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() * flip_mat
         if lamp.type == 'SUN':
-            light_node = ET.SubElement( scene_root , 'Light' , type='distant')
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
-            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )                
+
+            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
+            fs.serialize(DIR_LIGHT_ENTITY)
+            fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
+            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
         elif lamp.type == 'POINT':
-            light_node = ET.SubElement( scene_root , 'Light' , type='point')
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
-            light_position = world_matrix.col[3]
-            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )
-            
-            # temporary solution
+
             model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
             fs.serialize(POINT_LIGHT_ENTITY)
-            fs.serialize(exporter_common.matrix_to_tuple( world_matrix ))
+            fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
         elif lamp.type == 'SPOT':
-            light_node = ET.SubElement( scene_root , 'Light' , type='spot')
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
-            light_dir = world_matrix.col[2] * -1.0
-            light_position = world_matrix.col[3]
-            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( world_matrix ) )
-            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-            ET.SubElement( light_node , 'Property' , name='falloff_start' ,value="%d"%(degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)))
-            ET.SubElement( light_node , 'Property' , name='range' ,value="%d"%(degrees(lamp.spot_size*0.5)))
-        elif lamp.type == 'AREA':
-            light_node = ET.SubElement( scene_root , 'Light' , type='area')
-            light_spectrum = np.array(lamp.color[:])
-            light_spectrum *= lamp.energy
-            light_dir = world_matrix.col[2] * -1.0
-            light_position = world_matrix.col[3]
+            falloff_start = degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)
+            falloff_range = degrees(lamp.spot_size*0.5)
 
+            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
+            fs.serialize(SPOT_LIGHT_ENTITY)
+            fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
+            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(falloff_start)
+            fs.serialize(falloff_range)
+        elif lamp.type == 'AREA':
+            light_spectrum = np.array(lamp.color[:])
+            light_spectrum *= lamp.energy
             sizeX = lamp.size
             sizeY = lamp.size_y
-            shape = 'square'
-            if lamp.shape == 'RECTANGLE':
-                shape = 'rectangle'
-            
-            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr(world_matrix) )
-            ET.SubElement( light_node , 'Property' , name='shape' ,value=shape)
-            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-            ET.SubElement( light_node , 'Property' , name='sizex' ,value='%f'%sizeX )
-            ET.SubElement( light_node , 'Property' , name='sizey' ,value='%f'%sizeY )
+
+            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
+            fs.serialize(AREA_LIGHT_ENTITY)
+            fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
+            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(sizeX)
+            fs.serialize(sizeY)
         elif lamp.type == 'HEMI':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
-            light_node = ET.SubElement( scene_root , 'Light' , type='skylight')
-            ET.SubElement( light_node , 'Property' , name='intensity' , value=exporter_common.vec3tostr(light_spectrum))
-            ET.SubElement( light_node , 'Property' , name='transform' , value = "m " + exporter_common.matrixtostr( MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() ) )
-            ET.SubElement( light_node , 'Property' , name='type' ,value='sky_sphere')
-            ET.SubElement( light_node , 'Property' , name='image' ,value= bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ) )
+
+            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
+            fs.serialize(SKY_LIGHT_ENTITY)
+            fs.serialize(exporter_common.matrix_to_tuple(MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender()))
+            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ))
 
 mtl_dict = {}
 mtl_rev_dict = {}

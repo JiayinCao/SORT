@@ -67,9 +67,9 @@ public:
     inline void	SetMaterial( std::shared_ptr<Material>& mat ) { m_mat = mat; }
 
 	// get light
-	inline Light* GetLight() const { return light; }
+	inline std::shared_ptr<Light> GetLight() const { return light; }
     // set light
-    inline void SetLight( Light* _light ) { light = _light; }
+    inline void SetLight( std::shared_ptr<Light> _light ) { light = _light; }
 
 // protected field
 protected:
@@ -80,5 +80,5 @@ protected:
 	Shape* 		m_shape;
 
 	// the binded light
-	Light*		light;
+    std::shared_ptr<Light>		light;
 };
