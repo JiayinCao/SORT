@@ -35,6 +35,8 @@ class LightEntity : public Entity{
 //! @brief  Point light entity.
 class PointLightEntity : public LightEntity {
 public:
+    DEFINE_CREATOR( PointLightEntity , Entity , "PointLightEntity" );
+
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -63,6 +65,8 @@ protected:
 //! @brief  Spot light entity.
 class SpotLightEntity : public LightEntity {
 public:
+    DEFINE_CREATOR( SpotLightEntity , Entity , "SpotLightEntity" );
+
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -91,6 +95,8 @@ protected:
 //! @brief  Directional light entity.
 class DirLightEntity : public LightEntity {
 public:
+    DEFINE_CREATOR( DirLightEntity , Entity , "DirLightEntity" );
+
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -119,6 +125,8 @@ protected:
 //! @brief  Area light entity.
 class AreaLightEntity : public LightEntity {
 public:
+    DEFINE_CREATOR( AreaLightEntity , Entity , "AreaLightEntity" );
+
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -147,6 +155,8 @@ protected:
 //! @brief  Sky light entity.
 class SkyLightEntity : public LightEntity {
 public:
+    DEFINE_CREATOR( SkyLightEntity , Entity , "SkyLightEntity" );
+
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.

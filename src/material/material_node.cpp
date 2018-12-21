@@ -36,7 +36,7 @@ void MaterialNodeProperty::UpdateBsdf( Bsdf* bsdf , Spectrum weight ){
 }
 
 // parse property or socket
-bool MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
+bool MaterialNode::ParseProperty( TiXmlElement* element , std::shared_ptr<MaterialNode> node )
 {
 	TiXmlElement* prop = element->FirstChildElement( "Property" );
 	while(prop)
@@ -79,11 +79,11 @@ bool MaterialNode::ParseProperty( TiXmlElement* element , MaterialNode* node )
 }
 
 // parse a new node
-MaterialNode* MaterialNode::ParseNode( TiXmlElement* element , MaterialNode* node )
+std::shared_ptr<MaterialNode> MaterialNode::ParseNode( TiXmlElement* element , std::shared_ptr<MaterialNode> node )
 {
 	std::string node_type = element->Attribute( "node" );
 	// create new material node
-	MaterialNode* mat_node = CREATE_TYPE( node_type , MaterialNode );
+	std::shared_ptr<MaterialNode> mat_node = MakeInstance<MaterialNode>( node_type );
 	if( mat_node == nullptr )
 	{
         slog( WARNING , MATERIAL , "Node type %s is undefined." , node_type.c_str() );
@@ -125,7 +125,7 @@ void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 MaterialNode::~MaterialNode()
 {
     for( auto it : m_props )
-		delete it.second->node;
+		delete it.second;
 }
 
 // update bsdf

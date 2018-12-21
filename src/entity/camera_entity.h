@@ -31,6 +31,8 @@ class CameraEntity : public Entity{
 //! @brief Perspective camera.
 class PerspectiveCameraEntity : public CameraEntity {
 public:
+    DEFINE_CREATOR( PerspectiveCameraEntity , Entity , "PerspectiveCameraEntity" );
+
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.

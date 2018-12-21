@@ -44,7 +44,7 @@ public:
 	//!								meaning this is no need to release the memory in BSDF.
 	class Bsdf* GetBsdf( const class Intersection* intersect ) const{
 		Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-		m_root.UpdateBSDF(bsdf);
+		m_root->UpdateBSDF(bsdf);
 		return bsdf;
 	}
 
@@ -63,7 +63,7 @@ public:
 	//! @brief	Get the root material node.
 	//!
 	//! @return		The root of the material node graph tree.
-	inline MaterialNode* GetRootNode() { return &m_root; }
+	inline std::shared_ptr<MaterialNode> GetRootNode() { return m_root; }
 
 	//! @brief	Parse material from XML.
 	//!
@@ -72,13 +72,13 @@ public:
 	//! @param	element		Root node for XML node.
 	inline void	ParseMaterial( TiXmlElement* element ){
 		// parse node property
-		m_root.ParseProperty( element , &m_root );
+		m_root->ParseProperty( element , m_root );
 
 		// check validation
-		if( !m_root.IsNodeValid() )
+		if( !m_root->IsNodeValid() )
 			slog( WARNING , MATERIAL , "Material '%s' is not valid , a default material will be used." , m_name.c_str() );
 		else
-			m_root.PostProcess();
+			m_root->PostProcess();
 	}
 
 	//! @brief  Serialization interface. Loading data from stream.
@@ -100,6 +100,8 @@ public:
 	}
 
 private:
-	std::string			m_name;		/**< Unique name of the material. */
-	mutable OutputNode	m_root;		/**< Root node of material node graph tree. */
+	/**< Unique name of the material. */
+	std::string	 m_name;
+	/**< Root node of material node graph tree. */
+	mutable std::shared_ptr<OutputNode>	m_root = std::make_shared<OutputNode>();
 };

@@ -19,7 +19,9 @@
 
 #include "stream/stream.h"
 #include "core/singleton.h"
-#include "core/classtype.h"
+#include "accel/accelerator.h"
+#include "integrator/integrator.h"
+#include "core/creator.h"
 
 //! @brief	This needs to be update every time the content of GlobalConfiguration chagnes.
 constexpr unsigned int GLOBAL_CONFIGURATION_VERSION	= 0;
@@ -56,7 +58,7 @@ public:
 		sAssertMsg( GLOBAL_CONFIGURATION_VERSION == version , GENERAL , "Incompatible resource file with this version SORT.");
 		stream >> m_tileSize;
         stream >> m_accelType;
-        m_accelerator = MakeAccelerator(m_accelType);
+        m_accelerator = MakeInstance<Accelerator>(m_accelType);
 	};
 
     //! @brief      Serializing data to stream
@@ -73,12 +75,19 @@ public:
     //! @return     The spatial acceleration structure. Could be 'nullptr', meaning a bruteforce workaround will be used.
     std::shared_ptr<Accelerator>    GetAccelerator() { return m_accelerator; }
 
+	//! @brief      Get the integrator of the renderer.
+    //!
+	//! @return		Integrator used to evaluate rendering equation.
+    std::shared_ptr<Integrator>    GetIntegrator() { return m_integrator; }
+
 private:
 	unsigned int		            m_tileSize = 64;			/**< Size of tile for tasks to render each time. */
 	bool				            m_blenderMode = false;		/**< Whether the current running instance is attached with Blender. */
     std::shared_ptr<Accelerator>    m_accelerator = nullptr;    /**< Spatial accelerator for accelerating primitive/ray intersection test. */
+	std::shared_ptr<Integrator>		m_integrator = nullptr;		/**< Integrator used to evaluate rendering equation. */
 
-    unsigned int                    m_accelType = 0;            /**< Local cache of accelerator type. This is not exposed to other systems.*/
+    std::string                     m_accelType;            	/**< Local cache of accelerator type. This is not exposed to other systems.*/
+
 	//! @brief	Make constructor private
 	GlobalConfiguration(){}
 	//! @brief	Make copy constructor private
@@ -87,5 +96,7 @@ private:
 	friend class Singleton<GlobalConfiguration>;
 };
 
-#define	g_tile_size		GlobalConfiguration::GetSingleton().GetTileSize()
-#define	g_blender_mode	GlobalConfiguration::GetSingleton().GetBlenderMode()
+#define	g_tileSize		GlobalConfiguration::GetSingleton().GetTileSize()
+#define	g_blenderMode	GlobalConfiguration::GetSingleton().GetBlenderMode()
+#define g_accelerator	GlobalConfiguration::GetSingleton().GetAccelerator()
+#define g_integrator	GlobalConfiguration::GetSingleton().GetIntegrator()

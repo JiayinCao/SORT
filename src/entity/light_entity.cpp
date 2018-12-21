@@ -19,6 +19,12 @@
 #include "shape/rectangle.h"
 #include "core/primitive.h"
 
+IMPLEMENT_CREATOR(PointLightEntity);
+IMPLEMENT_CREATOR(DirLightEntity);
+IMPLEMENT_CREATOR(SpotLightEntity);
+IMPLEMENT_CREATOR(SkyLightEntity);
+IMPLEMENT_CREATOR(AreaLightEntity);
+
 void PointLightEntity::Serialize( IStreamBase& stream ){
     stream >> m_light->light2world;
     stream >> m_light->intensity;

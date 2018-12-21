@@ -34,6 +34,8 @@
 class KDTree : public Accelerator
 {
 public:
+    DEFINE_CREATOR( KDTree , Accelerator , "KDTree" );
+
 	//! Destructor that delete all allocated KD-Tree memory.
     ~KDTree() override;
 
