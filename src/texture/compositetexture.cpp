@@ -19,6 +19,7 @@
 #include "compositetexture.h"
 #include "spectrum/spectrum.h"
 #include "core/log.h"
+#include "core/sassert.h"
 #include "core/define.h"
 
 // constructor from a texture

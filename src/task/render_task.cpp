@@ -32,7 +32,8 @@ void Render_Task::Execute(){
         return;
     
     // request samples
-    m_integrator->RequestSample( m_sampler , m_pixelSamples , m_samplePerPixel );
+    // TODO : pass sampler as a shared_ptr, not raw pointer
+    m_integrator->RequestSample( m_sampler.get() , m_pixelSamples , m_samplePerPixel );
     
 	Vector2i rb = m_coord + m_size;
     
@@ -45,7 +46,8 @@ void Render_Task::Execute(){
             MemManager::GetSingleton().ClearMem(tid);
             
             // generate samples to be used later
-            m_integrator->GenerateSample( m_sampler , m_pixelSamples, m_samplePerPixel , m_scene );
+            // TODO : pass sampler as a shared_ptr, not raw pointer
+            m_integrator->GenerateSample( m_sampler.get() , m_pixelSamples, m_samplePerPixel , m_scene );
             
             // the radiance
             Spectrum radiance;
@@ -66,8 +68,8 @@ void Render_Task::Execute(){
     
 	if( m_integrator->NeedRefreshTile() )
 	{
-		int x_off = m_coord.x / g_tile_size;
-		int y_off = (is->GetHeight() - 1 - m_coord.y ) / g_tile_size ;
+		int x_off = m_coord.x / g_tileSize;
+		int y_off = (is->GetHeight() - 1 - m_coord.y ) / g_tileSize ;
 		is->FinishTile( x_off, y_off, *this );
 	}
 }

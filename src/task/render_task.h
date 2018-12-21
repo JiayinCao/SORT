@@ -38,7 +38,7 @@ public:
     //!
     //! @param priority     New priority of the task.
     Render_Task(const Vector2i& ori , const Vector2i& size , Scene* scene , unsigned int spp ,
-                std::shared_ptr<Integrator> integrator , Sampler* sampler , PixelSample* pixelSamples ,
+                std::shared_ptr<Integrator> integrator , std::shared_ptr<Sampler> sampler , PixelSample* pixelSamples ,
                 unsigned int priority = DEFAULT_TASK_PRIORITY , const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ) : 
                 m_coord(ori), m_size(size), m_scene(*scene), m_samplePerPixel(spp), m_sampler( sampler ), m_pixelSamples(pixelSamples),
                 m_integrator(integrator), Task( priority , dependencies ) {}
@@ -87,6 +87,6 @@ private:
     unsigned int                        m_samplePerPixel;   /**< Sample to take for each pixel. */
     Scene&	                            m_scene;            /**< Scene for ray tracing. */
     const std::shared_ptr<Integrator>   m_integrator;       /**< Integrator for evaluating rendering equation. */
-    Sampler*                            m_sampler;          /**< Sampler for taking samples. Currently not used. */
+    std::shared_ptr<Sampler>            m_sampler;          /**< Sampler for taking samples. Currently not used. */
     PixelSample*                        m_pixelSamples;     /**< Samples to take. Currently not used. */
 };

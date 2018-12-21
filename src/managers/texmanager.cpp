@@ -15,12 +15,12 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include header file
+#include <regex>
 #include "texmanager.h"
 #include "texture/imagetexture.h"
 #include "core/path.h"
 #include "core/log.h"
-#include <regex>
+#include "core/sassert.h"
 
 #define TINYEXR_IMPLEMENTATION
 #include "thirdparty/tiny_exr/tinyexr.h"
@@ -159,7 +159,7 @@ bool TexManager::saveImage(const std::string& name, const Texture* tex )
         return ret >= 0;
     }
     
-    sAssertMsg( false , IMAGE , "SORT doesn't support exporting file %s",name.c_str())
+    sAssertMsg( false , IMAGE , "SORT doesn't support exporting file %s",name.c_str());
     
     return false;
 }

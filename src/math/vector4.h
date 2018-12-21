@@ -19,6 +19,7 @@
 
 #include <math.h>
 #include "vector2.h"
+#include "vector3.h"
 #include "core/define.h"
 #include "spectrum/spectrum.h"
 

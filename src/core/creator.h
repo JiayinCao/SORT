@@ -17,73 +17,75 @@
 
 #pragma once
 
-#include "core/singleton.h"
 #include <unordered_map>
-#include <algorithm>
-#include "core/strhelper.h"
+#include "core/singleton.h"
 #include "core/log.h"
 
-// item creator
+//! @brief		This class serves as 'namespace' for each specific type so that
+//!				different class type names won't pollute each others pool.
 template<class T>
-class ItemCreator
-{
+class ItemCreator{
 public:
-	virtual T* CreateInstance() const = 0;
+	virtual std::shared_ptr<T> CreateInstance() const = 0;
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//	creator is responsible for creating different kinds of object
+//! @brief		Creator class is responsible for creating instances based on names.
 template<class T>
-class Creator : public Singleton<Creator<T>>
-{
+class Creator : public Singleton<Creator<T>>{
     typedef std::unordered_map<std::string,ItemCreator<T>*> CREATOR_CONTAINER;
-    
+
 public:
-    
-	// Create instance
-	T* CreateType( const std::string& str ) const
-	{
-		std::string _str = str;
-		std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){ return tolower(c); });
-		const auto& it = m_container.find( _str );
-		if( it == m_container.end() )
-			return nullptr;
-		return it->second->CreateInstance();
+	//! @brief	Create an instance of a specific type based on class name.
+	//!
+	//! @return		Return a reference of a newly created instance.
+	std::shared_ptr<T> CreateType( std::string str ) const{
+		std::transform(str.begin(),str.end(),str.begin(),[](char c){ return tolower(c); });
+		auto it = m_container.find( str );
+		return it == m_container.end() ? nullptr : it->second->CreateInstance();
 	}
-	
-	// get container
-	CREATOR_CONTAINER& GetContainer() {
-        return m_container;
-    }
+
+	//! @brief	Get the container that could be further modified.
+	//!
+	//! It is not perfect to return a reference of the class member. Since this class is not directly
+	//! exposed to upper level code, no code should directly call this interface.
+	//!
+	//! @return		Return the reference of the container.
+	CREATOR_CONTAINER& GetContainer(){
+		return m_container;
+	}
 
 private:
-	// the container
+	/**< Container for the class creators. */
 	CREATOR_CONTAINER	m_container;
 
-	// default constructor & copy constructor
+	//! @brief	Make sure constructor is private.
 	Creator(){}
+	//! @brief	Make sure copy constructor is private.
     Creator(const Creator<T>&){}
 
 	friend class Singleton<Creator>;
 };
 
-#define CREATE_TYPE(str,B) Creator<B>::GetSingleton().CreateType( str )
-
+#define IMPLEMENT_CREATOR( T )      static T::T##Creator g_creator##T;
 #define	DEFINE_CREATOR( T , B , N ) class T##Creator : public ItemCreator<B> \
-{ public: \
-	T##Creator()\
-	{\
+{public: \
+	T##Creator(){\
 		std::string _str( N );\
 		std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){return tolower(c);});\
-        auto& container = Creator<B>::GetSingleton().GetContainer();\
-		if( container.count( _str ) )\
-		{\
+		auto& container = Creator<B>::GetSingleton().GetContainer();\
+		if( container.count( _str ) ){\
             slog( WARNING , GENERAL , "The creator type with specific name of %s already exxisted." , N );\
 			return;\
 		}\
         container.insert( std::make_pair(_str , this) );\
 	}\
-	B* CreateInstance() const { return new T(); }\
+	std::shared_ptr<B> CreateInstance() const { return std::make_shared<T>(); }\
 };
 
-#define IMPLEMENT_CREATOR( T )          static T::T##Creator g_creator##T;
+//! @brief	Instance a class type based on name.
+//!
+//! @param	name		Name of the class. This has to match what is defined in python plugin.
+template<class T>
+std::shared_ptr<T> MakeInstance( const std::string& name ){
+	return Creator<T>::GetSingleton().CreateType( name );
+}

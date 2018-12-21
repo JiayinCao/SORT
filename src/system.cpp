@@ -27,10 +27,9 @@
 #include "math/intersection.h"
 #include "core/path.h"
 #include "core/creator.h"
-#include "sampler/sampler.h"
 #include "camera/camera.h"
 #include "integrator/integrator.h"
-#include "sampler/stratified.h"
+#include "sampler/random.h"
 #include "managers/smmanager.h"
 #include "math/vector2.h"
 #include "shape/shape.h"
@@ -96,7 +95,7 @@ void System::_outputProgress()
         // output progress
         progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
         
-        if (!g_blender_mode)
+        if (!g_blenderMode)
             std::cout<< "Progress: "<<progress<<"%\r";
         else if (m_pProgress)
             *m_pProgress = progress;
@@ -117,19 +116,18 @@ void System::Uninit()
 
     // delete the data
     SAFE_DELETE(m_imagesensor);
-    SAFE_DELETE(m_pSampler);
     SAFE_DELETE_ARRAY(m_taskDone);
 }
 
 // push rendering task
 void System::_pushRenderTask()
 {
-	std::shared_ptr<Integrator> integrator(_allocateIntegrator());
+	std::shared_ptr<Integrator> integrator = _allocateIntegrator();
 	integrator->PreProcess();
 	integrator->SetupCamera(m_Scene.GetCamera());
 
 	// Push render task into the queue
-	const unsigned tilesize = g_tile_size;
+	const unsigned tilesize = g_tileSize;
 	
 	// get the number of total task
 	m_totalTask = 0;
@@ -161,7 +159,7 @@ void System::_pushRenderTask()
 			size.y = (tilesize < (m_imagesensor->GetHeight() - tl.y)) ? tilesize : (m_imagesensor->GetHeight() - tl.y);
 
 			SCHEDULE_TASK<Render_Task>( priority-- , tl , size , &m_Scene , m_iSamplePerPixel , integrator , 
-                                        m_pSampler , new PixelSample[m_iSamplePerPixel] );
+                                        m_sampler , new PixelSample[m_iSamplePerPixel] );
 		}
 
 		// turn to the next direction
@@ -208,9 +206,9 @@ void System::_executeRenderingTasks()
 }
 
 // allocate integrator
-Integrator*	System::_allocateIntegrator()
+std::shared_ptr<Integrator>	System::_allocateIntegrator()
 {
-	Integrator* integrator = CREATE_TYPE( m_integratorType , Integrator );
+	std::shared_ptr<Integrator> integrator = MakeInstance<Integrator>( m_integratorType );
 		
 	if( integrator == 0 )
 	{
@@ -232,7 +230,7 @@ Integrator*	System::_allocateIntegrator()
 bool System::Setup( const char* str )
 {
     // setup image sensor first of all
-    if( g_blender_mode )
+    if( g_blenderMode )
         m_imagesensor = new BlenderImage();
     else
         m_imagesensor = new RenderTargetImage();
@@ -298,12 +296,12 @@ bool System::Setup( const char* str )
 		if( round < 1 ) round = 1;
 		
 		// create sampler
-		m_pSampler = CREATE_TYPE( str_type , Sampler );
-		m_iSamplePerPixel = m_pSampler->RoundSize(round);
+		m_sampler = MakeInstance<Sampler>( str_type );
+		m_iSamplePerPixel = m_sampler->RoundSize(round);
 	}else{
 		// user stratified sampler as default sampler
-		m_pSampler = new StratifiedSampler();
-		m_iSamplePerPixel = m_pSampler->RoundSize(16);
+		m_sampler = std::make_shared<RandomSampler>();
+		m_iSamplePerPixel = m_sampler->RoundSize(16);
 	}
     SORT_STATS(sSamplePerPixel = m_iSamplePerPixel);
 
@@ -322,10 +320,10 @@ bool System::Setup( const char* str )
 		m_thread_num = atoi(element->Attribute("name"));
     
 	// create shared memory
-	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_tile_size));
-	int y_tile = (int)(ceil(m_imagesensor->GetHeight() / (float)g_tile_size));
+	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_tileSize));
+	int y_tile = (int)(ceil(m_imagesensor->GetHeight() / (float)g_tileSize));
 	int header_size = x_tile * y_tile;
-	int size = header_size * g_tile_size * g_tile_size * 4 * sizeof(float) * 2	// image size
+	int size = header_size * g_tileSize * g_tileSize * 4 * sizeof(float) * 2	// image size
 			+ header_size								// header size
 			+ 2;										// progress data and final update flag
 

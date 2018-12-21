@@ -63,10 +63,10 @@ public:
     virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
     
     // parse property or socket
-    bool ParseProperty( TiXmlElement* element , MaterialNode* node );
+    bool ParseProperty( TiXmlElement* element , std::shared_ptr<MaterialNode> node );
     
     // parse a new node
-    MaterialNode* ParseNode( TiXmlElement* element , MaterialNode* node );
+    std::shared_ptr<MaterialNode> ParseNode( TiXmlElement* element , std::shared_ptr<MaterialNode> node );
     
     virtual void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) {sAssertMsg(false, MATERIAL, "Get spectrum from wrong data type" );}
     virtual void GetMaterialProperty( Bsdf* bsdf , float& result ) {sAssertMsg(false, MATERIAL, "Get float from wrong data type" );}
@@ -111,7 +111,7 @@ public:
     virtual MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const { return MNPT_NONE; }
     
 	// sub node if it has value
-    MaterialNode*	node = nullptr;
+    std::shared_ptr<MaterialNode>	node = nullptr;
 };
 
 class MaterialNodePropertyColor : public MaterialNodeProperty
@@ -177,7 +177,7 @@ public:
     // get node return type
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_BXDF; }
     
-    void GetMaterialProperty( Bsdf* bsdf , MaterialNode*& result ) { result = node; }
+    void GetMaterialProperty( Bsdf* bsdf , std::shared_ptr<MaterialNode>& result ) { result = node; }
 };
 
 class MaterialNodePropertyVector : public MaterialNodeProperty

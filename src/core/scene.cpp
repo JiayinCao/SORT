@@ -32,7 +32,6 @@
 #include "core/primitive.h"
 #include "stream/stream.h"
 #include "stream/fstream.h"
-#include "core/classtype.h"
 #include "core/globalconfig.h"
 
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
@@ -56,9 +55,9 @@ bool Scene::LoadScene( TiXmlNode* root )
 			IStreamBase& stream = s;
 
 			// Instance the entity
-			unsigned int class_id = 0;
-			stream >> class_id;
-			std::shared_ptr<Entity>	entity = MakeEntity( class_id );
+			std::string class_name;
+			stream >> class_name;
+			std::shared_ptr<Entity>	entity = MakeInstance<Entity>( class_name );
 
 			// Serialize the entity
             if (entity) {
@@ -87,10 +86,10 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
 		intersect->t = FLT_MAX;
 
 	// brute force intersection test if there is no accelerator
-	if( GlobalConfiguration::GetSingleton().GetAccelerator() == nullptr )
+	if( g_accelerator == nullptr )
 		return _bfIntersect( r , intersect );
 
-	return GlobalConfiguration::GetSingleton().GetAccelerator()->GetIntersect( r , intersect );
+	return g_accelerator->GetIntersect( r , intersect );
 }
 
 // get the intersection between a ray and the scene in a brute force way
@@ -133,10 +132,10 @@ void Scene::_generatePriBuf()
 void Scene::PreProcess()
 {
 	// set uniform grid as acceleration structure as default
-	if( std::shared_ptr<Accelerator> accel = GlobalConfiguration::GetSingleton().GetAccelerator() )
+	if( g_accelerator )
 	{
-        accel->SetPrimitives( &m_primitiveBuf );
-        accel->Build();
+        g_accelerator->SetPrimitives( &m_primitiveBuf );
+        g_accelerator->Build();
 	}
 }
 
@@ -160,8 +159,8 @@ Transform Scene::_parseTransform( const TiXmlElement* node )
 // get the bounding box for the scene
 const BBox& Scene::GetBBox() const
 {
-	if( GlobalConfiguration::GetSingleton().GetAccelerator() != nullptr )
-		return GlobalConfiguration::GetSingleton().GetAccelerator()->GetBBox();
+	if( g_accelerator != nullptr )
+		return g_accelerator->GetBBox();
 
 	// if there is no bounding box for the scene, generate one
 	std::vector<Primitive*>::const_iterator it = m_primitiveBuf.begin();

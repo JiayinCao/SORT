@@ -18,6 +18,7 @@
 // include the header file
 #include "imagetexture.h"
 #include "managers/texmanager.h"
+#include "core/sassert.h"
 
 IMPLEMENT_CREATOR( ImageTexture );
 

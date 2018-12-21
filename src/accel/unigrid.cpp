@@ -21,6 +21,8 @@
 #include "core/log.h"
 #include "core/sassert.h"
 
+IMPLEMENT_CREATOR(UniGrid);
+
 SORT_STATS_DEFINE_COUNTER(sUGGridCount)
 SORT_STATS_DEFINE_COUNTER(sUniformGridX)
 SORT_STATS_DEFINE_COUNTER(sUniformGridY)

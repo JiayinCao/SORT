@@ -19,6 +19,8 @@
 #include "core/scene.h"
 #include "system.h"
 
+IMPLEMENT_CREATOR(PerspectiveCameraEntity);
+
 extern System g_System;
 
 void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
