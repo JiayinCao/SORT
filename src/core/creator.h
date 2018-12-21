@@ -18,6 +18,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <algorithm>
 #include "core/singleton.h"
 #include "core/log.h"
 

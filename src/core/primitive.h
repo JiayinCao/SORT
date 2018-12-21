@@ -50,8 +50,12 @@ public:
 	//! @return				Whether the ray intersects the primitive.
 	inline bool GetIntersect( const Ray& r , Intersection* intersect ) const{
 		Point tmp;
-		bool ret = m_shape->GetIntersect( r, tmp , intersect );
-		return ( ret && intersect ) ? (bool)( intersect->primitive = const_cast<Primitive*>(this) ) : ret;
+		bool ret = m_shape->GetIntersect( r , tmp , intersect );
+		if( ret && intersect ){
+			intersect->primitive = const_cast<Primitive*>(this);
+			return true;
+		}
+		return ret;
 	}
 
 	//! @brief	Get the intersection between an AABB and the primitive.
