@@ -86,6 +86,7 @@
 #define	SORT_DEBUG
 
 #if defined(_MSC_VER) && (_MSC_VER >= 1800) 
+#define NOMINMAX
 #  include <algorithm> // for std::min and std::max 
 #endif
 
