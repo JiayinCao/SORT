@@ -109,6 +109,15 @@ def export_blender(scene, force_debug=False):
 
     # create immediate file path
     create_path(scene, force_debug)
+
+    # global renderer configuration
+    sort_config_file = get_intermediate_dir(force_debug) + 'global.sme'
+    fs = stream.FileStream( sort_config_file )
+    fs.serialize(0)
+    fs.serialize(64)    # tile size, hard-coded it until I need to update it throught exposed interface later.
+    mapping = { "bvh" : 1 , "kd_tree" : 2 , "uniform_grid" : 3 , "octree" : 4 }
+    fs.serialize( mapping[scene.accelerator_type_prop] )
+
     # export sort file
     export_sort_file(scene, root, force_debug)
     # export material
@@ -175,10 +184,6 @@ def export_sort_file(scene, root, force_debug):
 def export_scene(scene, root, force_debug):
     scene_root = ET.SubElement( root , 'Scene' )
 
-    # acceleration structure
-    accelerator_type = scene.accelerator_type_prop
-    ET.SubElement( scene_root , 'Accel', type=accelerator_type)
-
     # camera node
     camera = exporter_common.getCamera(scene)
     pos, target, up = lookAtSORT(camera)
@@ -196,7 +201,7 @@ def export_scene(scene, root, force_debug):
     camera_shift_x = bpy.data.cameras[0].shift_x
     camera_shift_y = bpy.data.cameras[0].shift_y
 
-    model_node = ET.SubElement( scene_root , 'Model' , filename= 'camera.sme' )
+    model_node = ET.SubElement( scene_root , 'Entity' , filename= 'camera.sme' )
     camera_fs = stream.FileStream( get_intermediate_dir(force_debug) + 'camera.sme' )
     camera_fs.serialize(PERSPECTIVE_CAMERA_ENTITY)
     camera_fs.serialize(exporter_common.vec3_to_tuple(pos))
@@ -209,7 +214,7 @@ def export_scene(scene, root, force_debug):
     camera_fs.serialize(fov_angle)
 
     for ob in exporter_common.getMeshList(scene):
-        model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
+        model_node = ET.SubElement( scene_root , 'Entity' , filename=ob.name + '.sme' )
 
         fs = stream.FileStream( get_intermediate_dir(force_debug) + ob.name + '.sme' )
         fs.serialize(VISUAL_ENTITY)
@@ -222,11 +227,12 @@ def export_scene(scene, root, force_debug):
         # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
         world_matrix = MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() * flip_mat
+
+        model_node = ET.SubElement( scene_root , 'Entity' , filename=ob.name + '.sme' )
         if lamp.type == 'SUN':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
 
-            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
             fs.serialize(DIR_LIGHT_ENTITY)
             fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
@@ -234,7 +240,6 @@ def export_scene(scene, root, force_debug):
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
 
-            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
             fs.serialize(POINT_LIGHT_ENTITY)
             fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
@@ -244,7 +249,6 @@ def export_scene(scene, root, force_debug):
             falloff_start = degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)
             falloff_range = degrees(lamp.spot_size*0.5)
 
-            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
             fs.serialize(SPOT_LIGHT_ENTITY)
             fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
@@ -258,7 +262,6 @@ def export_scene(scene, root, force_debug):
             if lamp.shape == 'SQUARE':
                 sizeY = lamp.size
 
-            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
             fs.serialize(AREA_LIGHT_ENTITY)
             fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
@@ -268,7 +271,6 @@ def export_scene(scene, root, force_debug):
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
 
-            model_node = ET.SubElement( scene_root , 'Model' , filename=ob.name + '.sme' )
             fs.serialize(SKY_LIGHT_ENTITY)
             fs.serialize(exporter_common.matrix_to_tuple(MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender()))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))

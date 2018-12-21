@@ -62,7 +62,8 @@ void Bvh::mallocMemory()
 // dealloc memory
 void Bvh::deallocMemory()
 {
-	SORT_DEALLOC( BVH_LEAF_PRILIST_MEMID );
+// TODO : Deallocation of BVH memory will crash the system because by the time it is destructed, memory manager is gone.
+//	SORT_DEALLOC( BVH_LEAF_PRILIST_MEMID );
     deleteNode( m_root );
 }
 
