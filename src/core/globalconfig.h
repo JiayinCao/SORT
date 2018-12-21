@@ -19,6 +19,7 @@
 
 #include "stream/stream.h"
 #include "core/singleton.h"
+#include "core/classtype.h"
 
 //! @brief	This needs to be update every time the content of GlobalConfiguration chagnes.
 constexpr unsigned int GLOBAL_CONFIGURATION_VERSION	= 0;
@@ -29,47 +30,55 @@ public:
 	//! @brief	Get render tile size.
 	//!
 	//! A tile is a group of pixels to be traced by one thread unit.
-	unsigned int	GetTileSize() const { return m_tile_size; }
+	unsigned int	GetTileSize() const { return m_tileSize; }
 	
 	//! @brief	Update tile size.
 	//!
 	//! @param	tile_size	Size of each tile.
-	void			SetTileSize( unsigned int tile_size ) { m_tile_size = tile_size; }
+	void			SetTileSize( unsigned int tile_size ) { m_tileSize = tile_size; }
 
 	//! @brief	Whether SORT is ran in Blender mode.
 	//!
 	//! Blender mode will stream the result directly to shared memory through IPC.
-	bool			GetBlenderMode() const { return m_blender_mode; }
+	bool			GetBlenderMode() const { return m_blenderMode; }
 
 	//! @brief	Update blender mode
 	//!
 	//! @param	mode		Whether blender mode is true or not.
-	void			SetBlenderMode( bool mode ) { m_blender_mode = mode; }
+	void			SetBlenderMode( bool mode ) { m_blenderMode = mode; }
 
-	//! @brief      Serilizing data from stream
+	//! @brief      Serializing data from stream
     //!
     //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
     void    Serialize( IStreamBase& stream ) override {
 		unsigned int version = 0;
 		stream >> version;
 		sAssertMsg( GLOBAL_CONFIGURATION_VERSION == version , GENERAL , "Incompatible resource file with this version SORT.");
-		stream >> m_tile_size;
-		stream >> m_blender_mode;
+		stream >> m_tileSize;
+        stream >> m_accelType;
+        m_accelerator = MakeAccelerator(m_accelType);
 	};
 
-    //! @brief      Serilizing data to stream
+    //! @brief      Serializing data to stream
     //!
     //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
     void    Serialize( OStreamBase& stream ) override {
 		stream << GLOBAL_CONFIGURATION_VERSION;
-		stream << m_tile_size;
-		stream << m_blender_mode;
+		stream << m_tileSize;
+        stream << m_accelType;
 	};
 
-private:
-	unsigned int		m_tile_size = 64;			/**< Size of tile for tasks to render each time. */
-	bool				m_blender_mode = false;		/**< Whether the current running instance is attached with Blender. */
+    //! @brief      Get the spatial accelerator structure.
+    //!
+    //! @return     The spatial acceleration structure. Could be 'nullptr', meaning a bruteforce workaround will be used.
+    std::shared_ptr<Accelerator>    GetAccelerator() { return m_accelerator; }
 
+private:
+	unsigned int		            m_tileSize = 64;			/**< Size of tile for tasks to render each time. */
+	bool				            m_blenderMode = false;		/**< Whether the current running instance is attached with Blender. */
+    std::shared_ptr<Accelerator>    m_accelerator = nullptr;    /**< Spatial accelerator for accelerating primitive/ray intersection test. */
+
+    unsigned int                    m_accelType = 0;            /**< Local cache of accelerator type. This is not exposed to other systems.*/
 	//! @brief	Make constructor private
 	GlobalConfiguration(){}
 	//! @brief	Make copy constructor private

@@ -110,28 +110,21 @@ private:
     std::shared_ptr<Camera>                 m_camera = nullptr;     /**< Camera of the scene. */
 
 	// distribution of light power
-	Distribution1D*		m_pLightsDis = nullptr;
+	std::shared_ptr<Distribution1D>		    m_lightsDis = nullptr;
 	
-    // to be removed from scene.
-	// the acceleration structure for the scene
-	Accelerator*		m_pAccelerator = nullptr;
-
 	// the file name for the scene
 	std::string		m_filename;
 
 	// bounding box for the scene
 	mutable BBox	m_BBox;
 
-	// brute force intersection test ( it will only invoked if there is no acceleration structor
+	// brute force intersection test ( it will only invoked if there is no acceleration structure
 	// para 'r' : the ray
 	// result   : the intersection information between the ray and the scene
 	bool	_bfIntersect( const Ray& r , Intersection* intersect ) const;
 
 	// generate triangle buffer
 	void	_generatePriBuf();
-
-	// initialize default data
-	void	_init();
 
 	// parse transformation
 	Transform	_parseTransform( const TiXmlElement* node );

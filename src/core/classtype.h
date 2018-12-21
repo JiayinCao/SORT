@@ -18,10 +18,13 @@
 #pragma once
 
 #include "sort.h"
-#include "entity/entity.h"
 #include "entity/light_entity.h"
 #include "entity/visual_entity.h"
 #include "entity/camera_entity.h"
+#include "accel/kdtree.h"
+#include "accel/bvh.h"
+#include "accel/octree.h"
+#include "accel/unigrid.h"
 
 // The id definition in this file has to match with the ones defined in python plugin.
 // Otherwise, things will go wrong in serialization process.
@@ -35,7 +38,7 @@ constexpr   unsigned int    SKY_LIGHT_ENTITY          = 6;
 constexpr   unsigned int    PERSPECTIVE_CAMERA_ENTITY = 7;
 
 //! @brief  Instance an entity based on class id
-std::shared_ptr<Entity> MakeEntity( unsigned int class_id ){
+inline std::shared_ptr<Entity> MakeEntity( unsigned int class_id ){
     switch( class_id ){
         case VISUAL_ENTITY:
             return std::make_shared<VisualEntity>();
@@ -51,6 +54,26 @@ std::shared_ptr<Entity> MakeEntity( unsigned int class_id ){
             return std::make_shared<SkyLightEntity>();
         case PERSPECTIVE_CAMERA_ENTITY:
             return std::make_shared<PerspectiveCameraEntity>();
+    }
+    return nullptr;
+}
+
+constexpr   unsigned int    BVH_ACCELERATOR         = 1;
+constexpr   unsigned int    KDTREE_ACCELERATOR      = 2;
+constexpr   unsigned int    UNIFORMGRID_ACCELERATOR = 3;
+constexpr   unsigned int    OCTREE_ACCELERATOR      = 4;
+
+//! @brief Instancing a spatial accelerator.
+inline std::shared_ptr<Accelerator>    MakeAccelerator(unsigned int class_id) {
+    switch (class_id) {
+        case BVH_ACCELERATOR:
+            return std::make_shared<Bvh>();
+        case KDTREE_ACCELERATOR:
+            return std::make_shared<KDTree>();
+        case UNIFORMGRID_ACCELERATOR:
+            return std::make_shared<UniGrid>();
+        case OCTREE_ACCELERATOR:
+            return std::make_shared<OcTree>();
     }
     return nullptr;
 }

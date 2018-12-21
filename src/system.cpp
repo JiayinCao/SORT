@@ -38,6 +38,7 @@
 #include "core/profile.h"
 #include "task/render_task.h"
 #include "core/globalconfig.h"
+#include "stream/fstream.h"
 
 SORT_STATS_DEFINE_COUNTER(sPreprocessTimeMS)
 SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
@@ -252,7 +253,7 @@ bool System::Setup( const char* str )
         const char* path = element->Attribute( "path" );
         if( path )    SetResourcePath( path );
     }
-    
+
 	// get the integrater
 	element = root->FirstChildElement( "Integrator" );
 	if( element )
@@ -336,9 +337,14 @@ bool System::Setup( const char* str )
 		// clear the memory
 		memset(sm.bytes, 0, sm.size);
 
-		// setup progess pointer
+		// setup progress pointer
 		m_pProgress = sm.bytes + sm.size - 2;
 	}
+
+    {
+        IFileStream s(GetFullPath("global.sme"));
+        GlobalConfiguration::GetSingleton().Serialize(s);
+    }
 
 	return true;
 }
