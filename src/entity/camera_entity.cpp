@@ -16,4 +16,34 @@
  */
 
 #include "camera_entity.h"
+#include "core/scene.h"
+#include "system.h"
 
+extern System g_System;
+
+void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
+    stream >> m_camera->m_eye;
+    stream >> m_camera->m_up;
+    stream >> m_camera->m_target;
+    stream >> m_camera->m_lensRadius;
+    stream >> m_camera->m_sensorW >> m_camera->m_sensorH >> m_camera->m_aspectFit;
+    stream >> m_camera->m_aspectRatioW >> m_camera->m_aspectRatioH;
+    stream >> m_camera->m_fov;
+
+    m_camera->SetImageSensor(g_System.GetImageSensor());
+    m_camera->PreProcess();
+}
+
+void PerspectiveCameraEntity::Serialize(OStreamBase& stream) {
+    stream << m_camera->m_eye;
+    stream << m_camera->m_up;
+    stream << m_camera->m_target;
+    stream << m_camera->m_lensRadius;
+    stream << m_camera->m_sensorW << m_camera->m_sensorH << m_camera->m_aspectFit;
+    stream << m_camera->m_aspectRatioW << m_camera->m_aspectRatioH;
+    stream << m_camera->m_fov;
+}
+
+void PerspectiveCameraEntity::FillScene(class Scene& scene) {
+    scene.SetupCamera(m_camera);
+}

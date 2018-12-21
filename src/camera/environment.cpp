@@ -25,8 +25,6 @@
 #include <math.h>
 #include "sampler/sample.h"
 
-IMPLEMENT_CREATOR( EnvironmentCamera );
-
 // generate a ray given a pixel
 Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
 {
@@ -45,10 +43,4 @@ Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) 
 	r = m_transform(r);
 
 	return r;
-}
-
-// register all properties
-void EnvironmentCamera::registerAllProperty()
-{
-	_registerProperty( "eye" , new EyeProperty( this ) );
 }

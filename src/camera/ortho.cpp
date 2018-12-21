@@ -20,18 +20,6 @@
 #include "sampler/sample.h"
 #include "imagesensor/imagesensor.h"
 
-IMPLEMENT_CREATOR( OrthoCamera );
-
-// default constructor
-OrthoCamera::OrthoCamera()
-{
-    // set type for tha camera
-    m_type = CT_ORTHO;
-    
-    // register properties
-    registerAllProperty();
-}
-
 // generate camera ray
 Ray OrthoCamera::GenerateRay( float x, float y, const PixelSample &ps) const
 {
@@ -76,7 +64,7 @@ void OrthoCamera::updateTransform()
 							0.0f , 0.0f , 0.0f , 1.0f );
 }
 
-// register all properties
+/*
 void OrthoCamera::registerAllProperty()
 {
 	_registerProperty( "eye" , new EyeProperty( this ) );
@@ -85,3 +73,4 @@ void OrthoCamera::registerAllProperty()
 	_registerProperty( "width" , new WidthProperty( this ) );
 	_registerProperty( "height" , new HeightProperty( this ) );
 }
+*/

@@ -18,6 +18,7 @@
 #pragma once
 
 #include "entity.h"
+#include "camera/perspective.h"
 
 //! @brief Camera entity definition.
 /**
@@ -25,7 +26,32 @@
  * orthogonal camera and environment camera.
  */
 class CameraEntity : public Entity{
+};
+
+//! @brief Perspective camera.
+class PerspectiveCameraEntity : public CameraEntity {
 public:
-    //! Empty virtual destructor
-    ~CameraEntity() {}
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void    Serialize(IStreamBase& stream) override;
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void    Serialize(OStreamBase& stream) override;
+
+    //! @brief  Setup the scene's camera.
+    //!
+    //! Setup camera for the scene.
+    //!
+    //! @param  scene       The scene to be filled.
+    void   FillScene(class Scene& scene) override;
+
+private:
+    std::shared_ptr<PerspectiveCamera>  m_camera = std::make_shared<PerspectiveCamera>();   /**< Perspective camera. */
 };
