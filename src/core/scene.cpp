@@ -63,7 +63,6 @@ bool Scene::LoadScene( TiXmlNode* root )
 			// Serialize the entity
             if (entity) {
                 entity->Serialize(stream);
-
                 m_entities.push_back(entity);
             }
 		}

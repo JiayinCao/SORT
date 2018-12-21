@@ -54,40 +54,84 @@ enum class LOG_TYPE{
     LOG_TASK,
 };
 
+//! @brief  LogDispatcher is an interface for dispatching log messages to different places.
 class LogDispatcher{
 public:
-    // virtual destructor
+    //! @brief  Empty destructor.
     virtual ~LogDispatcher() {}
 
-    // dispatch a log
-    void dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line );
-    
-    // output result
-    virtual void output( const std::string& s ) = 0;
+    //! @brief  Dispatch the log message. This guarantees the log is thread safe.
+    //!
+    //! @param  level       Level of the message.
+    //! @param  type        Type of the message.
+    //! @param  str         The message to be logged.
+    //! @param  file        The name of the file where the logging happens.
+    //! @param  line        The number of the line in the file where the logging happens.
+    void Dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line );
     
 private:
-    // format log
+    //! @brief  Output the log message.
+    //!
+    //! @oaram  s           The message to be output.
+    virtual void output( const std::string& s ) = 0;
+
+    //! @brief  Format the message.
+    //!
+    //! @param  level       Level of the message.
+    //! @param  type        Type of the message.
+    //! @param  str         The message to be logged.
+    //! @param  file        The name of the file where the logging happens.
+    //! @param  line        The number of the line in the file where the logging happens.
     const std::string format( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line ) const;
     
-    // format log header
+    //! @brief  Format the message header.
+    //!
+    //! @param  level       Level of the message.
+    //! @param  type        Type of the message.
+    //! @param  file        The name of the file where the logging happens.
+    //! @param  line        The number of the line in the file where the logging happens.
     const std::string formatHead( LOG_LEVEL level , LOG_TYPE type , const char* file , const int line ) const;
 };
 
+//! @brief  FileLogDispatcher dispatch logs to a file to be viewed afterward.
 class FileLogDispatcher : public LogDispatcher {
 public:
+    //! @brief  Constructor automatically opens the file.
+    //!
+    //! @param  filename    Name of the log file.
     FileLogDispatcher( const std::string& filename );
+
+    //! @brief  Destructor closes the file.
     ~FileLogDispatcher();
     
+    //! @brief  Output the log message to the file.
+    //!
+    //! @oaram  s           The message to be output.
     void output( const std::string& s ) override;
+
 private:
-    // file to output
-    std::ofstream file;
+    std::ofstream file;     /**< File to be logged. */
 };
 
+//! @brief   StdOutLogDispatcher outputs the message to std output.
 class StdOutLogDispatcher : public LogDispatcher {
 public:
+    //! @brief  Output the log message to the std-out.
+    //!
+    //! @oaram  s           The message to be output.
     void output( const std::string& s ) override ;
 };
 
+//! @brief  Format the message.
+//!
+//! @param  level       Level of the message.
+//! @param  type        Type of the message.
+//! @param  str         The message to be logged.
+//! @param  file        The name of the file where the logging happens.
+//! @param  line        The number of the line in the file where the logging happens.
 void sortLog( LOG_LEVEL level , LOG_TYPE type , const std::string& str , const char* file , const int line );
-void addLogDispatcher( LogDispatcher* logdispatcher );
+
+//! @brief  Add a dispatcher to the log system.
+//!
+//! @param  logDispatcher   Dispatcher to add in the log system.
+void addLogDispatcher( LogDispatcher* logDispatcher );

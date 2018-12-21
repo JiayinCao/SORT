@@ -49,8 +49,15 @@
             if nothing inside the function changes anything in the class, make sure 
             it is marked as const. It also applied to return values and parameters.
     -   Private method
-        -   Same naming convention with public method.
+        -   Same naming convention with public method apart from that the first letter
+            of the first world is smaller case.
         -   Defined at last after member variable definition.
+    -   Global method
+        -   Same naming convention with private class method.
+    -   Global parameters
+        -   Start with 'g_'.
+        -   First word has to be all small cases.
+        -   Each of the first letter of the following words are upper cases.
     -   Brackets
         -   Open bracket should be appended right after class/method declaration or 
             definition to save line numbers.

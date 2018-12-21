@@ -20,8 +20,6 @@
 #include "math/intersection.h"
 #include <algorithm>
 
-IMPLEMENT_CREATOR( KDTree );
-
 SORT_STATS_DEFINE_COUNTER(sKDTreeNodeCount)
 SORT_STATS_DEFINE_COUNTER(sKDTreeLeafNodeCount)
 SORT_STATS_DEFINE_COUNTER(sKDTreeDepth)
