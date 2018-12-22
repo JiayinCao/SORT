@@ -47,10 +47,10 @@ public:
     //!                     long as it finds an intersection. It is faster than the one with intersection information
     //!                     data and suitable for shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise it returns false.
-	virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const;
+    bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
 	//! Build the OcTree in O(Nlg(N)) time
-	virtual void Build();
+    void Build() override;
 
     //! OcTree node structure
     struct OcTreeNode{
@@ -63,7 +63,7 @@ public:
     struct NodePrimitiveContainer{
         std::vector<const Primitive*>	primitives;		/**< Primitive buffer used during octree construction.*/
     };
-    
+
 private:
 	OcTreeNode*	m_pRoot = nullptr;				/**< Pointer to the root node of this octree.*/
 	const unsigned	m_uMaxPriInLeaf = 16;		/**< Maximum number of primitives allowed in a leaf node, 16 is the default value.*/

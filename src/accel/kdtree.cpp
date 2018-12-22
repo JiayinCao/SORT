@@ -85,6 +85,8 @@ void KDTree::Build()
 
     SORT_STATS(++sKDTreeNodeCount);
 
+	m_isValid = true;
+	
 	// delete temporary memory
 	SAFE_DELETE_ARRAY(m_temp);
 }

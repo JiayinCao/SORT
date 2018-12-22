@@ -159,7 +159,7 @@ Transform Scene::_parseTransform( const TiXmlElement* node )
 // get the bounding box for the scene
 const BBox& Scene::GetBBox() const
 {
-	if( g_accelerator != nullptr )
+	if( g_accelerator != nullptr && g_accelerator->GetIsValid() )
 		return g_accelerator->GetBBox();
 
 	// if there is no bounding box for the scene, generate one

@@ -124,8 +124,9 @@ void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 
 MaterialNode::~MaterialNode()
 {
-    for( auto it : m_props )
-		delete it.second;
+// TODO : To be visited later. Somehow it causes a crash.
+//    for( auto it : m_props )
+//		delete it.second;
 }
 
 // update bsdf

@@ -27,15 +27,6 @@ from ..stream import stream
 import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
 
-# The following id has to match the definitions in src/core/classtype.h
-VISUAL_ENTITY               =   1
-POINT_LIGHT_ENTITY          =   2
-SPOT_LIGHT_ENTITY           =   3
-DIR_LIGHT_ENTITY            =   4
-AREA_LIGHT_ENTITY           =   5
-SKY_LIGHT_ENTITY            =   6
-PERSPECTIVE_CAMERA_ENTITY   =   7
-
 def get_sort_dir():
     return_path = exporter_common.getPreference().install_path
     if platform.system() == 'Windows':
@@ -111,15 +102,34 @@ def export_blender(scene, force_debug=False):
     create_path(scene, force_debug)
 
     # global renderer configuration
-    sort_config_file = get_intermediate_dir(force_debug) + 'global.sme'
-    fs = stream.FileStream( sort_config_file )
-    fs.serialize(0)
-    fs.serialize(64)    # tile size, hard-coded it until I need to update it throught exposed interface later.
-    mapping = { "bvh" : 1 , "kd_tree" : 2 , "uniform_grid" : 3 , "octree" : 4 }
-    fs.serialize( mapping[scene.accelerator_type_prop] )
+    sort_resource_path = get_intermediate_dir(force_debug)
+    sort_config_file = sort_resource_path + 'global.sme'
+    sort_output_file = 'blender_generated.exr'
+    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
+    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
+    integrator_type = scene.integrator_type_prop
 
-    # export sort file
-    export_sort_file(scene, root, force_debug)
+    fs = stream.FileStream( sort_config_file )
+    fs.serialize( 0 )
+    fs.serialize( sort_resource_path )
+    fs.serialize( sort_output_file )
+    fs.serialize( 64 )    # tile size, hard-coded it until I need to update it throught exposed interface later.
+    fs.serialize( int(scene.thread_num_prop) )
+    fs.serialize( int(scene.sampler_count_prop) )
+    fs.serialize( int(xres) )
+    fs.serialize( int(yres) )
+    fs.serialize( scene.accelerator_type_prop )
+    fs.serialize( scene.integrator_type_prop )
+    fs.serialize( int(scene.inte_max_recur_depth) )
+    if integrator_type == "ao":
+        fs.serialize( scene.ao_max_dist )
+    if integrator_type == "bdpt":
+        fs.serialize( bool(scene.bdpt_mis) )
+    if integrator_type == 'ir':
+        fs.serialize( scene.ir_light_path_set_num )
+        fs.serialize( scene.ir_light_path_num )
+        fs.serialize( scene.ir_min_dist )
+    
     # export material
     export_material(scene, root, force_debug)
     # export scene
@@ -145,41 +155,6 @@ def create_path(scene, force_debug):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-# open sort file
-def export_sort_file(scene, root, force_debug):
-    # the scene node
-    output_dir = get_intermediate_dir(force_debug)
-
-    # resource path node
-    output_dir = get_intermediate_dir(force_debug)
-    ET.SubElement(root , 'Resource', path= output_dir )
-
-    # the integrator node
-    integrator_type = scene.integrator_type_prop
-    integrator_node = ET.SubElement(root, 'Integrator', type=integrator_type)
-    ET.SubElement( integrator_node , "Property" , name="inte_max_recur_depth" , value="%d"%scene.inte_max_recur_depth )
-    if integrator_type == "ao":
-        ET.SubElement( integrator_node , "Property" , name="max_distance" , value="%f"%scene.ao_max_dist)
-    if integrator_type == "bdpt":
-        ET.SubElement( integrator_node , "Property" , name="bdpt_mis" , value="%d"%scene.bdpt_mis)
-    if integrator_type == 'ir':
-        ET.SubElement( integrator_node , "Property" , name="light_path_set_num" , value='%d'%scene.ir_light_path_set_num)
-        ET.SubElement( integrator_node , "Property" , name="light_path_num" , value='%d'%scene.ir_light_path_num)
-        ET.SubElement( integrator_node , "Property" , name="min_distance" , value='%f'%scene.ir_min_dist)
-    # image size
-    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
-    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
-    ET.SubElement(root, 'RenderTargetSize', w='%d'%xres, h='%d'%yres )
-    # output file name
-    ET.SubElement(root, 'OutputFile', name='blender_generated.exr')
-    # sampler type
-    sampler_type = scene.sampler_type_prop
-    sampler_count = scene.sampler_count_prop
-    ET.SubElement(root, 'Sampler', type=sampler_type, round='%s'%sampler_count)
-    # output thread num
-    thread_num = scene.thread_num_prop
-    ET.SubElement( root , 'ThreadNum', name='%s'%thread_num)
-
 # export scene
 def export_scene(scene, root, force_debug):
     scene_root = ET.SubElement( root , 'Scene' )
@@ -203,7 +178,7 @@ def export_scene(scene, root, force_debug):
 
     model_node = ET.SubElement( scene_root , 'Entity' , filename= 'camera.sme' )
     camera_fs = stream.FileStream( get_intermediate_dir(force_debug) + 'camera.sme' )
-    camera_fs.serialize(PERSPECTIVE_CAMERA_ENTITY)
+    camera_fs.serialize('PerspectiveCameraEntity')
     camera_fs.serialize(exporter_common.vec3_to_tuple(pos))
     camera_fs.serialize(exporter_common.vec3_to_tuple(up))
     camera_fs.serialize(exporter_common.vec3_to_tuple(target))
@@ -217,7 +192,7 @@ def export_scene(scene, root, force_debug):
         model_node = ET.SubElement( scene_root , 'Entity' , filename=ob.name + '.sme' )
 
         fs = stream.FileStream( get_intermediate_dir(force_debug) + ob.name + '.sme' )
-        fs.serialize(VISUAL_ENTITY)
+        fs.serialize('VisualEntity')
         fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * ob.matrix_world ) )
         export_mesh(ob, scene, fs)
 
@@ -233,14 +208,14 @@ def export_scene(scene, root, force_debug):
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
 
-            fs.serialize(DIR_LIGHT_ENTITY)
+            fs.serialize('DirLightEntity')
             fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
         elif lamp.type == 'POINT':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
 
-            fs.serialize(POINT_LIGHT_ENTITY)
+            fs.serialize('PointLightEntity')
             fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
         elif lamp.type == 'SPOT':
@@ -249,7 +224,7 @@ def export_scene(scene, root, force_debug):
             falloff_start = degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)
             falloff_range = degrees(lamp.spot_size*0.5)
 
-            fs.serialize(SPOT_LIGHT_ENTITY)
+            fs.serialize('SpotLightEntity')
             fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
             fs.serialize(falloff_start)
@@ -262,7 +237,7 @@ def export_scene(scene, root, force_debug):
             if lamp.shape == 'SQUARE':
                 sizeY = lamp.size
 
-            fs.serialize(AREA_LIGHT_ENTITY)
+            fs.serialize('AreaLightEntity')
             fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
             fs.serialize(sizeX)
@@ -271,7 +246,7 @@ def export_scene(scene, root, force_debug):
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
 
-            fs.serialize(SKY_LIGHT_ENTITY)
+            fs.serialize('SkyLightEntity')
             fs.serialize(exporter_common.matrix_to_tuple(MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender()))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
             fs.serialize(bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ))

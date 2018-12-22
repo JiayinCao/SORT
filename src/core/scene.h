@@ -89,10 +89,6 @@ public:
     // add primitives
     void AddPrimitives(Primitive* primitive) { m_primitiveBuf.push_back(primitive); }
 
-	// get file name
-	const std::string& GetFileName() const
-	{ return m_filename; }
-
 	// Evaluate sky
 	Spectrum	Le( const Ray& ray ) const;
 
@@ -112,9 +108,6 @@ private:
 	// distribution of light power
 	std::shared_ptr<Distribution1D>		    m_lightsDis = nullptr;
 	
-	// the file name for the scene
-	std::string		m_filename;
-
 	// bounding box for the scene
 	mutable BBox	m_BBox;
 

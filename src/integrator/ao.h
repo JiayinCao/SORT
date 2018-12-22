@@ -17,7 +17,6 @@
 
 #pragma once
 
-// include the header file
 #include "integrator.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -27,31 +26,30 @@ class	AmbientOcclusion : public Integrator
 public:
 	DEFINE_CREATOR( AmbientOcclusion , Integrator , "ao" );
 
-	AmbientOcclusion() { _registerAllProperty(); }
-
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
-	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const;
+	Spectrum	Li( const Ray& ray , const PixelSample& ps ) const override;
+
+	//! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+		stream >> maxDistance;
+	}
+
+    //! @brief      Serializing data to stream
+    //!
+    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
+    void    Serialize( OStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+		stream << maxDistance;
+	}
 
 private:
 	float	maxDistance = 10.0f;
 
-	void _registerAllProperty();
-
-	// Max Distance Property
-	class MaxDistanceProperty : public PropertyHandler<Integrator>
-	{
-	public:
-		PH_CONSTRUCTOR(MaxDistanceProperty,Integrator);
-		void SetValue( const std::string& str )
-		{
-			AmbientOcclusion* ao = CAST_TARGET(AmbientOcclusion);
-			if( ao )
-				ao->maxDistance = (float)atof( str.c_str() );
-		}
-	};
-    
     SORT_STATS_ENABLE( "Ambient Occlusion" )
 };

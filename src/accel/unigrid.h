@@ -51,7 +51,7 @@ public:
 
 	//! Build uniform grid structure in O(N).
     void Build() override;
-
+    
 private:
 	unsigned	                m_voxelCount = 0;               /**< Total number of voxels. */
     unsigned	                m_voxelNum[3] = {};             /**< Number of voxels along each axis. */

@@ -23,7 +23,6 @@
 #include "imagesensor/blenderimage.h"
 #include "imagesensor/rendertargetimage.h"
 
-class Sampler;
 class PixelSample;
 
 /////////////////////////////////////////////////////////////////////
@@ -46,12 +45,7 @@ public:
 
 	// uninitialize
 	void Uninit();
-
-	// get resource path
-	const std::string& GetResourcePath() const { return m_ResourcePath; }
-	// set resource path
-	void SetResourcePath( const std::string& str ) { m_ResourcePath = str; }
-
+	
     // ugly workaround, to be changed later.
     ImageSensor*    GetImageSensor() { return m_imagesensor; }
 
@@ -74,17 +68,6 @@ private:
 	std::vector<Property>	m_integratorProperty;
 	// the scene for rendering
 	Scene			m_Scene;
-	// the sampler
-    std::shared_ptr<Sampler>	m_sampler = nullptr;
-	// sample number per pixel
-    unsigned		m_iSamplePerPixel = 0;
-
-	// path for the resource
-    std::string			m_ResourcePath = "";
-    std::string			m_OutputFileName = "";
-
-	// number of thread to allocate
-    unsigned		m_thread_num = 1;
 
 	// output progress
 	void	_outputProgress();
