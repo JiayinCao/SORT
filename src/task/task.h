@@ -46,7 +46,7 @@ public:
     //! @brief  Default constructor.
     Task(   unsigned int priority = DEFAULT_TASK_PRIORITY , 
             const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ):
-            m_priority(priority),m_dependencies(dependencies) {}
+            m_dependencies(dependencies),m_priority(priority) {}
 
     //! @brief  Virtual destructor.
     virtual ~Task() {}

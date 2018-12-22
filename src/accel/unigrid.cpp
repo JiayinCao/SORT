@@ -20,6 +20,7 @@
 #include "math/intersection.h"
 #include "core/log.h"
 #include "core/sassert.h"
+#include "core/profile.h"
 
 IMPLEMENT_CREATOR(UniGrid);
 

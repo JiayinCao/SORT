@@ -101,6 +101,9 @@ protected:
 class MaterialNodeProperty
 {
 public:
+    //! @brief  Empty virtual destructor.
+    virtual ~MaterialNodeProperty() {}
+    
 	// set node property
     virtual void SetNodeProperty( const std::string& prop ){}
 

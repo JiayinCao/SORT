@@ -53,8 +53,6 @@ public:
 	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const;
 
 private:
-	unsigned		ls_per_light = 16; // light sample per pixel sample per light
-
 	SampleOffset*	light_sample_offsets = nullptr;	// light sample offset
 	SampleOffset*	bsdf_sample_offsets = nullptr;	// bsdf sample offset
 
