@@ -209,23 +209,12 @@ void System::_executeRenderingTasks()
     for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->Join(); } );
 }
 
-// allocate integrator
-std::shared_ptr<Integrator>	System::_allocateIntegrator()
-{
-	std::shared_ptr<Integrator> integrator = MakeInstance<Integrator>( m_integratorType );
-	if( integrator == nullptr ){
-        slog( WARNING , GENERAL , "No integrator with name of %s" , m_integratorType.c_str() );
-		return nullptr;
-	}
-	return integrator;
-}
-
 // setup system from file
 bool System::Setup( const char* str )
 {
 	{
 		// a very hacky solution as a workaround before serialization is totally done.
-		int j = std::strlen( str );
+		int j = (int)std::strlen( str );
 		while( j > 0 && str[j-1] != '/' )
 			--j;
 		std::string folder( j , '\0' );
