@@ -190,6 +190,8 @@ void UniGrid::Build()
 		it++;
 	}
     
+	m_isValid = true;
+	
     SORT_STATS(sUniformGridX = m_voxelNum[0]);
     SORT_STATS(sUniformGridY = m_voxelNum[1]);
     SORT_STATS(sUniformGridZ = m_voxelNum[2]);

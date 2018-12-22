@@ -16,6 +16,7 @@
  */
 
 #include "rendertargetimage.h"
+#include "core/globalconfig.h"
 
 // store pixel information
 void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ){
@@ -26,8 +27,5 @@ void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , cons
 void RenderTargetImage::PostProcess(){
 	ImageSensor::PostProcess();
 
-    if( !m_filename.empty() )
-        m_rendertarget.Output(m_filename);
-    else
-        m_rendertarget.Output("default.bmp");	
+    m_rendertarget.Output(g_outputFileName);
 }

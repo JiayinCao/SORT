@@ -65,8 +65,3 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 		return dot * INV_PI / pdf;
     return 0.0f;
 }
-
-void AmbientOcclusion::_registerAllProperty()
-{
-	_registerProperty( "max_distance" , new MaxDistanceProperty(this) );
-}

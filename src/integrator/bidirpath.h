@@ -61,22 +61,33 @@ class BidirPathTracing : public Integrator
 public:
 	DEFINE_CREATOR( BidirPathTracing , Integrator , "bdpt" );
 
-	// default constructor
-	BidirPathTracing() {
-		_registerProperty( "bdpt_mis" , new PTMISProperty(this) );
-	}
-
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
-	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const;
+	Spectrum	Li( const Ray& ray , const PixelSample& ps ) const override;
     
     // request sample
-    void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num );
+    void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ) override;
 
 	// support pending write
-	virtual bool SupportPendingWrite() { return true; }
+	bool SupportPendingWrite() override { return true; }
+
+	//! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+		stream >> m_bMIS;
+	}
+
+    //! @brief      Serializing data to stream
+    //!
+    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
+    void    Serialize( OStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+		stream << m_bMIS;
+	}
 
 protected:
 	bool	light_tracing_only = false;		// only do light tracing
@@ -97,19 +108,6 @@ protected:
 private:
 	// use multiple importance sampling to sample direct illumination
 	bool	m_bMIS = true;
-
-	// Max Distance Property
-	class PTMISProperty : public PropertyHandler<Integrator>
-	{
-	public:
-		PH_CONSTRUCTOR(PTMISProperty,Integrator);
-		void SetValue( const std::string& str )
-		{
-			BidirPathTracing* bdpt = CAST_TARGET(BidirPathTracing);
-			if( bdpt )
-				bdpt->m_bMIS = (atoi( str.c_str() )==1);
-		}
-	};
 
 	// mis factor
     inline double MIS(double t) const {

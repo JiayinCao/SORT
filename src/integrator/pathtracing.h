@@ -31,17 +31,31 @@ public:
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
-	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const;
+	Spectrum	Li( const Ray& ray , const PixelSample& ps ) const override;
 
 	// request samples
-	virtual void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num );
+	void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ) override;
 
 	// generate samples
 	// para 'sampler' : the sampling method
 	// para 'samples' : the samples to be generated
 	// para 'ps'      : number of pixel sample to be generated
 	// para 'scene'   : the scene to be rendered
-	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const;
+	void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const override;
+
+	//! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+	}
+
+    //! @brief      Serializing data to stream
+    //!
+    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
+    void    Serialize( OStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+	}
 
     SORT_STATS_ENABLE( "Path Tracing" )
 };

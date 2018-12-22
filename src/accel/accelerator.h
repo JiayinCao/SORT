@@ -17,8 +17,8 @@
 
 #pragma once
 
-#include "core/define.h"
 #include <vector>
+#include "core/define.h"
 #include "math/bbox.h"
 #include "core/creator.h"
 #include "core/stats.h"
@@ -67,10 +67,15 @@ public:
 	void SetPrimitives( std::vector<class Primitive*>* pri ){
 		m_primitives = pri;
 	}
+    
+    //! @brief Whether the spatial data structure is constructed.
+    //! @return Whether the spatial data structure is constructed.
+    bool GetIsValid() const { return m_isValid; }
 
 protected:
-	std::vector<class Primitive*>*      m_primitives;     /**< The vector holding all primitive pointers. */
-	BBox                                m_bbox;           /**< The bounding box of all primitives. */
+	std::vector<class Primitive*>*      m_primitives;       /**< The vector holding all primitive pointers. */
+	BBox                                m_bbox;             /**< The bounding box of all primitives. */
+    bool                                m_isValid = false;  /**< Whether the spatial structure is constructed before. */
 
 	//! Generate the bounding box for the primitive set.
 	void computeBBox();
