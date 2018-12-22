@@ -38,15 +38,18 @@
 #include "task/render_task.h"
 #include "core/globalconfig.h"
 #include "stream/fstream.h"
+#include "core/globalconfig.h"
 
 SORT_STATS_DEFINE_COUNTER(sPreprocessTimeMS)
 SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
 SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
+SORT_STATS_DEFINE_COUNTER(sThreadCnt)
 
 SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTimeMS);
 SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTimeMS);
 SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount , sRenderingTimeMS);
 SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
+SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
 
 // render the image
 void System::Render()
@@ -62,6 +65,8 @@ void System::Render()
 	_executeRenderingTasks();
 	
     SORT_STATS(sRenderingTimeMS = timer.GetElapsedTime());
+	SORT_STATS(sThreadCnt = g_threadCnt);
+	SORT_STATS(sSamplePerPixel = g_samplePerPixel);
 }
 
 // pre-process before rendering
@@ -122,9 +127,8 @@ void System::Uninit()
 // push rendering task
 void System::_pushRenderTask()
 {
-	std::shared_ptr<Integrator> integrator = _allocateIntegrator();
-	integrator->PreProcess();
-	integrator->SetupCamera(m_Scene.GetCamera());
+	g_integrator->PreProcess();
+	g_integrator->SetupCamera(m_Scene.GetCamera());
 
 	// Push render task into the queue
 	const unsigned tilesize = g_tileSize;
@@ -158,8 +162,8 @@ void System::_pushRenderTask()
 			size.x = (tilesize < (m_imagesensor->GetWidth() - tl.x)) ? tilesize : (m_imagesensor->GetWidth() - tl.x);
 			size.y = (tilesize < (m_imagesensor->GetHeight() - tl.y)) ? tilesize : (m_imagesensor->GetHeight() - tl.y);
 
-			SCHEDULE_TASK<Render_Task>( priority-- , tl , size , &m_Scene , m_iSamplePerPixel , integrator , 
-                                        m_sampler , new PixelSample[m_iSamplePerPixel] );
+			SCHEDULE_TASK<Render_Task>( priority-- , tl , size , &m_Scene , g_samplePerPixel , g_integrator , 
+                                        std::make_shared<RandomSampler>() , new PixelSample[g_samplePerPixel] );
 		}
 
 		// turn to the next direction
@@ -185,11 +189,11 @@ void System::_executeRenderingTasks()
     m_imagesensor->PreProcess();
 
 	// pre allocate memory for the specific thread
-	for( unsigned i = 0 ; i <= m_thread_num ; ++i )
+	for( unsigned i = 0 ; i <= g_threadCnt ; ++i )
 		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 1024 , i );
     
     std::vector< std::unique_ptr<WorkerThread> > threads;
-    for( unsigned i = 0 ; i < m_thread_num ; ++i )
+    for( unsigned i = 0 ; i < g_threadCnt ; ++i )
         threads.push_back( std::unique_ptr<WorkerThread>( new WorkerThread( i + 1 ) ) );
 
     // start all threads
@@ -209,115 +213,51 @@ void System::_executeRenderingTasks()
 std::shared_ptr<Integrator>	System::_allocateIntegrator()
 {
 	std::shared_ptr<Integrator> integrator = MakeInstance<Integrator>( m_integratorType );
-		
-	if( integrator == 0 )
-	{
+	if( integrator == nullptr ){
         slog( WARNING , GENERAL , "No integrator with name of %s" , m_integratorType.c_str() );
-		return 0;
+		return nullptr;
 	}
-
-	std::vector<Property>::iterator it = m_integratorProperty.begin();
-	while( it != m_integratorProperty.end() )
-	{
-		integrator->SetProperty(it->_name,it->_property);
-		++it;
-	}
-
 	return integrator;
 }
 
 // setup system from file
 bool System::Setup( const char* str )
 {
+	{
+		// a very hacky solution as a workaround before serialization is totally done.
+		int j = std::strlen( str );
+		while( j > 0 && str[j-1] != '/' )
+			--j;
+		std::string folder( j , '\0' );
+		for( int i = 0 ; i < j ; ++i )
+			folder[i] = str[i];
+		std::string fullFilePath = folder + "global.sme";
+        IFileStream s( fullFilePath );
+		slog( INFO , GENERAL , "Global configuration file %s" , fullFilePath.c_str() );
+        GlobalConfiguration::GetSingleton().Serialize(s);
+    }
+
     // setup image sensor first of all
     if( g_blenderMode )
         m_imagesensor = new BlenderImage();
     else
         m_imagesensor = new RenderTargetImage();
-    
+	m_imagesensor->SetSensorSize( g_resultResollution.x , g_resultResollution.y );
+
 	// load the xml file
-	std::string full_name = GetFullPath(str);
-	TiXmlDocument doc( full_name.c_str() );
+	TiXmlDocument doc( str );
 	doc.LoadFile();
 	
-    sAssertMsg( !doc.Error() , GENERAL , "Can't load scene file %s" , full_name.c_str() );
+    sAssertMsg( !doc.Error() , GENERAL , "Can't load scene file %s" , str );
 	
 	// get the root of xml
 	TiXmlNode*	root = doc.RootElement();
 	
-    // Setup intermediate resource path
-    TiXmlElement* element = root->FirstChildElement( "Resource" );
-    if( element ){
-        const char* path = element->Attribute( "path" );
-        if( path )    SetResourcePath( path );
-    }
-
-	// get the integrater
-	element = root->FirstChildElement( "Integrator" );
-	if( element )
-	{
-		m_integratorType = element->Attribute( "type" );
-
-		// set the properties
-		TiXmlElement* prop = element->FirstChildElement( "Property" );
-		while( prop )
-		{
-			const char* prop_name = prop->Attribute( "name" );
-			const char* prop_value = prop->Attribute( "value" );
-
-			Property property;
-			property._name = prop_name;
-			property._property = prop_value;
-			m_integratorProperty.push_back( property );
-
-			prop = prop->NextSiblingElement( "Property" );
-		}
-	}else
-		return false;
-	
-	// get the render target
-	element = root->FirstChildElement( "RenderTargetSize" );
-	if( element )
-	{
-		const char* str_width = element->Attribute("w");
-		const char* str_height = element->Attribute("h");
-		m_imagesensor->SetSensorSize( atoi( str_width ) , atoi( str_height ) );
-	}else
-		m_imagesensor->SetSensorSize( 1920 , 1080 );
-	
-	// get sampler
-	element = root->FirstChildElement( "Sampler" );
-	if( element )
-	{
-		const char* str_type = element->Attribute("type");
-		const char* str_round = element->Attribute("round");
-		
-		unsigned round = atoi( str_round );
-		if( round < 1 ) round = 1;
-		
-		// create sampler
-		m_sampler = MakeInstance<Sampler>( str_type );
-		m_iSamplePerPixel = m_sampler->RoundSize(round);
-	}else{
-		// user stratified sampler as default sampler
-		m_sampler = std::make_shared<RandomSampler>();
-		m_iSamplePerPixel = m_sampler->RoundSize(16);
-	}
-    SORT_STATS(sSamplePerPixel = m_iSamplePerPixel);
-
-    element = root->FirstChildElement("Materials");
+    auto element = root->FirstChildElement("Materials");
     MatManager::GetSingleton().ParseMatFile( element );
     
     element = root->FirstChildElement("Scene");
     m_Scene.LoadScene( element );
-    
-	element = root->FirstChildElement("OutputFile");
-	if( element )
-        m_imagesensor->SetProperty("filename", element->Attribute("name"));
-
-	element = root->FirstChildElement("ThreadNum");
-	if( element )
-		m_thread_num = atoi(element->Attribute("name"));
     
 	// create shared memory
 	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_tileSize));
@@ -338,11 +278,6 @@ bool System::Setup( const char* str )
 		// setup progress pointer
 		m_pProgress = sm.bytes + sm.size - 2;
 	}
-
-    {
-        IFileStream s(GetFullPath("global.sme"));
-        GlobalConfiguration::GetSingleton().Serialize(s);
-    }
 
 	return true;
 }

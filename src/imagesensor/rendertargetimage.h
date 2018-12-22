@@ -23,37 +23,9 @@
 class RenderTargetImage : public ImageSensor
 {
 public:
-    // constructor
-    RenderTargetImage()
-    {
-        _registerAllProperty();
-    }
 	// store pixel information
 	virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt );
 
 	// post process
 	virtual void PostProcess();
-
-private:
-    // filename
-    std::string      m_filename;
-    
-    // register property
-    void _registerAllProperty()
-    {
-        _registerProperty( "filename" , new FilenameProperty( this ) );
-    }
-    
-    class FilenameProperty : public PropertyHandler<ImageSensor>
-    {
-    public:
-        PH_CONSTRUCTOR(FilenameProperty,ImageSensor);
-        
-        // set value
-        void SetValue( const std::string& str )
-        {
-            RenderTargetImage* rti = CAST_TARGET(RenderTargetImage);
-            rti->m_filename = str;
-        }
-    };
 };

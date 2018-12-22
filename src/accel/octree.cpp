@@ -92,6 +92,8 @@ void OcTree::Build()
 	// split octree node
 	splitNode( m_pRoot , container , 0 );
     
+	m_isValid = true;
+	
     SORT_STATS(++sOcTreeNodeCount);
     SORT_STATS(sOcTreeLeafNodeCountCopy = sOcTreeLeafNodeCount);
 }

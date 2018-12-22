@@ -24,6 +24,10 @@
 #include <algorithm>
 #include "core/creator.h"
 
+// WARNING: Code in this folder is very outdated. Not even functional.
+//			The whole sampler implementation will be redesigned later.
+//			But the priority is relatively low for now.
+
 /////////////////////////////////////////////////////////////////////////////////
 // definitation of the sampler
 class	Sampler

@@ -17,7 +17,7 @@
 
 // include header file
 #include "path.h"
-#include "system.h"
+#include "core/globalconfig.h"
 
 #if defined(SORT_IN_WINDOWS)
 #include <windows.h>
@@ -27,9 +27,6 @@
 #elif defined(SORT_IN_LINUX)
 #include <unistd.h>
 #endif
-
-
-extern System g_System;
 
 // get current directory
 std::string GetExecutableDir()
@@ -71,17 +68,5 @@ std::string GetExecutableDir()
 // get full path
 std::string GetFullPath( const std::string& str )
 {
-	return GetResourcePath() + str;
-}
-
-// set resource path
-void SetResourcePath( const std::string& str )
-{
-	g_System.SetResourcePath( str );
-}
-
-// get resource path
-std::string GetResourcePath()
-{
-	return g_System.GetResourcePath();
+	return g_resourcePath + str;
 }

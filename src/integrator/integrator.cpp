@@ -22,8 +22,5 @@ SORT_STATS_DEFINE_COUNTER(sPrimaryRayCount)
 
 extern System g_System;
 
-Integrator::Integrator()
-	:scene( g_System.GetScene() )
-{
-	_registerProperty( "inte_max_recur_depth" , new MaxDepthProperty(this) );
+Integrator::Integrator() :scene( g_System.GetScene() ){
 }

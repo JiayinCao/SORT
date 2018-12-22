@@ -86,6 +86,8 @@ void Bvh::Build()
     m_root = new Bvh_Node();
 	splitNode( m_root , 0u , (unsigned)m_primitives->size() , 0u );
     
+	m_isValid = true;
+	
     SORT_STATS(++sBvhNodeCount);
     SORT_STATS(sBvhLeafNodeCountCopy = sBvhLeafNodeCount);
 }

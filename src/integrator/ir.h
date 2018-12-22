@@ -50,8 +50,6 @@ public:
 		m_fMinDist = 1.0f;
 		m_fMinSqrDist = 1.0f;
 		m_nLightPathSet = 1;
-
-		_registerAllProperty();
 	}
 
 	// return the radiance of a specific direction
@@ -65,6 +63,26 @@ public:
     virtual void PreProcess();
 	// post-process after rendering
 	virtual void PostProcess();
+
+	//! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+		stream >> m_nLightPathSet;
+		stream >> m_nLightPaths;
+		stream >> m_fMinDist;
+	}
+
+    //! @brief      Serializing data to stream
+    //!
+    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
+    void    Serialize( OStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+		stream << m_nLightPathSet;
+		stream << m_nLightPaths;
+		stream << m_fMinDist;
+	}
 
 private:
 	// light path set
@@ -80,48 +98,8 @@ private:
 	// container for light sources
 	std::list<VirtualLightSource>*	m_pVirtualLightSources;
 
-	// register property
-	void _registerAllProperty();
-
 	// private method of li
 	Spectrum _li( const Ray& ray , bool ignoreLe = false , float* first_intersect_dist = 0 ) const;
 
-	class LightPathNumProperty : public PropertyHandler<Integrator>
-	{
-	public:
-		PH_CONSTRUCTOR(LightPathNumProperty,Integrator);
-		void SetValue( const std::string& str )
-		{
-			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
-			if( ir )
-				ir->m_nLightPaths = atoi( str.c_str() );
-		}
-	};
-	class MinDistanceProperty : public PropertyHandler<Integrator>
-	{
-	public:
-		PH_CONSTRUCTOR(MinDistanceProperty,Integrator);
-		void SetValue( const std::string& str )
-		{
-			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
-			if( ir )
-			{
-				ir->m_fMinDist = (float)atof( str.c_str() );
-				ir->m_fMinSqrDist = ir->m_fMinDist * ir->m_fMinDist;
-			}
-		}
-	};
-	class LightPathSetProperty : public PropertyHandler<Integrator>
-	{
-	public:
-		PH_CONSTRUCTOR(LightPathSetProperty,Integrator);
-		void SetValue( const std::string& str )
-		{
-			InstantRadiosity* ir = CAST_TARGET(InstantRadiosity);
-			if( ir )
-				ir->m_nLightPathSet = (int)atof( str.c_str() );
-		}
-	};
-    
     SORT_STATS_ENABLE( "Instant Radiosity" )
 };

@@ -18,7 +18,6 @@
 #pragma once
 
 #include "spectrum/spectrum.h"
-#include "core/propertyset.h"
 #include "texture/rendertarget.h"
 #include "task/render_task.h"
 #include "core/thread.h"
@@ -27,12 +26,9 @@
 class RenderTask;
 
 // generate output
-class ImageSensor : public PropertySet<ImageSensor>
+class ImageSensor
 {
 public:
-    ImageSensor(){
-        _registerAllProperty();
-    }
     virtual ~ImageSensor(){}
     
 	// pre process

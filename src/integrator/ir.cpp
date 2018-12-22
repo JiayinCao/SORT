@@ -198,11 +198,3 @@ Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_inte
 
 	return radiance;
 }
-
-// register property
-void InstantRadiosity::_registerAllProperty()
-{
-	_registerProperty( "light_path_num" , new LightPathNumProperty(this) );
-	_registerProperty( "light_path_set_num" , new LightPathSetProperty(this) );
-	_registerProperty( "min_distance" , new MinDistanceProperty(this) );
-}

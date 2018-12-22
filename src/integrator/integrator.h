@@ -22,10 +22,10 @@
 #include "managers/memmanager.h"
 #include "sampler/sampler.h"
 #include "core/creator.h"
-#include "core/propertyset.h"
 #include "core/stats.h"
 #include "core/profile.h"
 #include "core/primitive.h"
+#include "stream/stream.h"
 
 // pre-declera classes
 class	Ray;
@@ -33,7 +33,7 @@ class	Scene;
 
 ////////////////////////////////////////////////////////////////////////////
 //	definition of integrator
-class	Integrator : public PropertySet<Integrator>
+class	Integrator : public SerializableObject
 {
 public:
 	// default constructor
@@ -98,7 +98,20 @@ public:
 	// refresh tile in blender
 	virtual bool NeedRefreshTile() const { return true; }
 
-// protected method
+	//! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override {
+		stream >> max_recursive_depth;
+	}
+
+    //! @brief      Serializing data to stream
+    //!
+    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
+    void    Serialize( OStreamBase& stream ) override {
+		stream << max_recursive_depth;
+	}
+
 protected:
 	// Camera
     std::shared_ptr<class Camera>	camera = nullptr;
@@ -114,16 +127,4 @@ protected:
 
 	// light sample per pixel sample per light
 	unsigned sample_per_pixel;
-
-	class MaxDepthProperty : public PropertyHandler<Integrator>
-	{
-	public:
-		PH_CONSTRUCTOR(MaxDepthProperty,Integrator);
-		void SetValue( const std::string& str )
-		{
-			Integrator* ir = CAST_TARGET(Integrator);
-			if( ir )
-				ir->max_recursive_depth = std::max( 1 , atoi( str.c_str() ) );
-		}
-	};
 };

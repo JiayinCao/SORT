@@ -28,8 +28,6 @@ class	DirectLight : public Integrator
 public:
 	DEFINE_CREATOR( DirectLight , Integrator , "direct" );
 
-	// default constructor
-	DirectLight(){_registerAllProperty();}
 	// destructor
 	~DirectLight(){
         SAFE_DELETE_ARRAY(light_sample_offsets);
@@ -51,6 +49,20 @@ public:
 	// para 'ps'      : number of pixel sample to be generated
 	// para 'scene'   : the scene to be rendered
 	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const;
+
+	//! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+	}
+
+    //! @brief      Serializing data to stream
+    //!
+    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
+    void    Serialize( OStreamBase& stream ) override {
+		Integrator::Serialize( stream );
+	}
 
 private:
 	SampleOffset*	light_sample_offsets = nullptr;	// light sample offset
