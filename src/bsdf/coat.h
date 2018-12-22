@@ -47,7 +47,7 @@ public:
     //! @param n                Normal from normal map.
     //! @param doubleSided      Whether the surface is double sided.
     Coat(const float thickness, const float ior, const float roughness, const Spectrum& sigma , const Bsdf* bottom, const Spectrum& weight, const Vector& n , bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), thickness(thickness), ior(ior), sigma(sigma), roughness(roughness), ggx(roughness, roughness),
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), thickness(thickness), ior(ior), sigma(sigma), ggx(roughness, roughness),
           fresnel(1.0f,ior), coat_weight( 1.0f ), coat(coat_weight, &fresnel , &ggx , coat_weight , n ), bottom(bottom) {}
 	
     //! Evaluate the BRDF
@@ -76,7 +76,6 @@ private:
     const float ior ;           /**< Index of refraction out side the surface where the normal points. */
     const Spectrum sigma;       /**< Sigma of the BRDF model. */
 
-    const float                 roughness;      /**< Roughness of the coating layer. */
     const GGX                   ggx;            /**< Using GGX as default NDF. */
     const FresnelDielectric     fresnel;        /**< Fresnel term. */
     const Spectrum              coat_weight;    /**< Default weight for coated layer. */

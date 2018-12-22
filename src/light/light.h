@@ -52,6 +52,9 @@ public:
 class	Light
 {
 public:
+    //! @brief Empty virtual destructor.
+    virtual ~Light() {}
+    
 	// setup scene
 	void	SetupScene( const Scene* s ) {scene=s;}
 	

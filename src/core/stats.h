@@ -57,6 +57,7 @@ struct StatsData_Ratio{
 
 class StatsItemBase{
 public:
+    virtual ~StatsItemBase(){}
     virtual std::string ToString() const = 0;
     virtual void Merge( const StatsItemBase* item ) = 0;
     virtual std::shared_ptr<StatsItemBase> MakeItem() const = 0;

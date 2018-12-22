@@ -22,8 +22,11 @@
 #include "imagesensor/imagesensor.h"
 #include "core/globalconfig.h"
 #include "core/scene.h"
+#include "core/profile.h"
 
 void Render_Task::Execute(){
+    SORT_PROFILE("Render Task");
+    
     if( m_integrator == nullptr )
         return;
     std::shared_ptr<Camera> camera = m_scene.GetCamera();
