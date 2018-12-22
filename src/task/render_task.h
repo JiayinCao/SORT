@@ -40,8 +40,8 @@ public:
     Render_Task(const Vector2i& ori , const Vector2i& size , Scene* scene , unsigned int spp ,
                 std::shared_ptr<Integrator> integrator , std::shared_ptr<Sampler> sampler , PixelSample* pixelSamples ,
                 unsigned int priority = DEFAULT_TASK_PRIORITY , const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ) : 
-                m_coord(ori), m_size(size), m_scene(*scene), m_samplePerPixel(spp), m_sampler( sampler ), m_pixelSamples(pixelSamples),
-                m_integrator(integrator), Task( priority , dependencies ) {}
+                Task( priority , dependencies ), m_coord(ori), m_size(size), m_samplePerPixel(spp), m_scene(*scene), m_integrator(integrator), m_sampler( sampler ),
+                m_pixelSamples(pixelSamples) {}
     
     //! @brief  Execute the task
     void        Execute() override;

@@ -8,7 +8,7 @@ matrix:
     - os: linux
       compiler: gcc
 script:
-- mkdir release
+- sudo /bin/sh ./getdep_linux.sh
 - cd release
 - cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make
 - cd ..
