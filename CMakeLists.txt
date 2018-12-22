@@ -62,7 +62,8 @@ if(SORT_ENABLE_STATS)
 endif(SORT_ENABLE_STATS)
 
 if(SORT_ENABLE_PROFILER)	
- 	add_definitions(-DSORT_ENABLE_PROFILER)	
+ 	add_definitions(-DSORT_ENABLE_PROFILER)
+    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 endif(SORT_ENABLE_PROFILER)
 
 if(UNIX)
