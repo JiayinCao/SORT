@@ -56,13 +56,13 @@ public:
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
-	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const;
+	Spectrum	Li( const Ray& ray , const PixelSample& ps ) const override;
     
 	// Preprocess: In preprocessing stage, numbers of virtual light sources
     // are generated along the path tracing from light sources.
-    virtual void PreProcess();
+    void PreProcess() override;
 	// post-process after rendering
-	virtual void PostProcess();
+	void PostProcess() override;
 
 	//! @brief      Serializing data from stream
     //!

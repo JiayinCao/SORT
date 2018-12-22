@@ -19,11 +19,8 @@
 
 // include the header file
 #include "core/scene.h"
-#include "integrator/integrator.h"
 #include "imagesensor/blenderimage.h"
 #include "imagesensor/rendertargetimage.h"
-
-class PixelSample;
 
 /////////////////////////////////////////////////////////////////////
 //	definition of the system
@@ -34,8 +31,6 @@ public:
 	void PreProcess();
 	// render the image
 	void Render();
-	// output the render target
-	void OutputRT();
 
 	// setup system from file
 	bool Setup( const char* str );
@@ -57,15 +52,6 @@ private:
     bool*			m_taskDone = nullptr;
     char*			m_pProgress = nullptr;
 
-	// the integrator type
-	std::string			m_integratorType;
-	// integrator properties
-	struct Property
-	{
-		std::string _name;
-		std::string _property;
-	};
-	std::vector<Property>	m_integratorProperty;
 	// the scene for rendering
 	Scene			m_Scene;
 
@@ -75,6 +61,4 @@ private:
 	void	_executeRenderingTasks();
 	// push rendering task
 	void	_pushRenderTask();
-	// allocate integrator
-	std::shared_ptr<Integrator>	_allocateIntegrator();
 };
