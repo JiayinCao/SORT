@@ -9,9 +9,10 @@ matrix:
       compiler: gcc
 script:
 - sudo /bin/sh ./getdep_linux.sh
-- cd release
+- mkdir proj_release
+- cd proj_release
 - cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make
 - cd ..
-- mkdir debug
-- cd debug
+- mkdir proj_debug
+- cd proj_debug
 - cmake -DCMAKE_BUILD_TYPE=Debug DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make
