@@ -62,17 +62,17 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" ,      basecolor );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "SubSurface" ,     subsurface );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Metallic" ,       metallic );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Specular" ,       specular );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "SpecularTint" ,   specularTint );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" ,      roughness );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Anisotropic" ,    anisotropic );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Sheen" ,          sheen );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "SheenTint" ,      sheenTint );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Clearcoat" ,      clearcoat );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "ClearcoatGloss" , clearcoatGloss );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( basecolor );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( subsurface );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( metallic );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( specular );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( specularTint );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( anisotropic );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( sheen );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( sheenTint );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( clearcoat );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( clearcoatGloss );
 };
 
 // Priciple Material
@@ -109,11 +109,11 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessU" , roughnessU );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessV" , roughnessV );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Metallic" , metallic );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Specular" , specular );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessU );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessV );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( metallic );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( specular );
 };
 
 // Matte Material
@@ -147,8 +147,8 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
 };
 
 // Plastic Material
@@ -183,9 +183,9 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , diffuse );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Specular" , specular );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( diffuse );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( specular );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
 };
 
 // Glass Material
@@ -221,10 +221,10 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Reflectance" , reflectance );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Transmittance" , transmittance );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessU" , roughnessU );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessV" , roughnessV );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( reflectance );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( transmittance );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessU );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessV );
 };
 
 // Mirror Material
@@ -256,7 +256,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , basecolor );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( basecolor );
 };
 
 // Measured Material
@@ -292,8 +292,8 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_STR( "Type" , bxdfType );
-    SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , bxdfFilePath );
+    SORT_MATERIAL_DEFINE_PROP_STR( bxdfType );
+    SORT_MATERIAL_DEFINE_PROP_STR( bxdfFilePath );
     
     FourierBxdfData fourierBxdfData;
     MerlData        merlData;
@@ -330,9 +330,9 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_BXDF("Bxdf0", bxdf0);
-    SORT_MATERIAL_DEFINE_PROP_BXDF("Bxdf1", bxdf1);
-    SORT_MATERIAL_DEFINE_PROP_FLOAT("Factor", factor);
+    SORT_MATERIAL_DEFINE_PROP_BXDF(bxdf0);
+    SORT_MATERIAL_DEFINE_PROP_BXDF(bxdf1);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(factor);
 };
 
 // Double-Sided Material
@@ -365,6 +365,6 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_BXDF("Bxdf0", bxdf0);
-    SORT_MATERIAL_DEFINE_PROP_BXDF("Bxdf1", bxdf1);
+    SORT_MATERIAL_DEFINE_PROP_BXDF(bxdf0);
+    SORT_MATERIAL_DEFINE_PROP_BXDF(bxdf1);
 };

@@ -49,9 +49,9 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "R" , R );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "G" , G );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "B" , B );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( R );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( G );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( B );
 };
 
 class SORTNodeExtractRed : public MaterialNode
@@ -82,7 +82,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , color );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( color );
 };
 
 class SORTNodeExtractGreen : public MaterialNode
@@ -113,7 +113,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , color );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( color );
 };
 
 class SORTNodeExtractBlue : public MaterialNode
@@ -144,7 +144,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , color );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( color );
 };
 
 class SORTNodeExtractIntensity : public MaterialNode
@@ -175,5 +175,5 @@ public:
 	}
     
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , color );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( color );
 };

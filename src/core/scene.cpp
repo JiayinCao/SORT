@@ -41,35 +41,22 @@ SORT_STATS_COUNTER("Statistics", "Total Primitive Count", sScenePrimitiveCount);
 SORT_STATS_COUNTER("Statistics", "Total Light Count", sSceneLightCount);
 
 // load the scene from script file
-bool Scene::LoadScene( TiXmlNode* root )
+bool Scene::LoadScene( IStreamBase& stream )
 {
-	// parse the triangle mesh
-	TiXmlElement* meshNode = root->FirstChildElement( "Entity" );
-	while( meshNode )
-	{
-		// Get the name of the file
-		const char* filename = meshNode->Attribute( "filename" );
+	while( true ){
+		std::string class_id;
+		stream >> class_id;
+		if( class_id == "" )
+			break;
+		
+		std::shared_ptr<Entity>	entity = MakeInstance<Entity>( class_id );
+		sAssertMsg( entity , RESOURCE , "Serialization is broken." );
 
-		if( filename != nullptr ){
-			IFileStream s(GetFullPath(filename));
-			IStreamBase& stream = s;
-
-			// Instance the entity
-			std::string class_name;
-			stream >> class_name;
-			std::shared_ptr<Entity>	entity = MakeInstance<Entity>( class_name );
-
-			// Serialize the entity
-            if (entity) {
-                entity->Serialize(stream);
-                m_entities.push_back(entity);
-            }
-		}
-
-		// get to the next model
-		meshNode = meshNode->NextSiblingElement( "Entity" );
+        entity->Serialize(stream);
+        m_entities.push_back(entity);
 	}
-	// generate triangle buffer after parsing from file
+
+	// generate triangle buffer after parsing from stream
 	_generatePriBuf();
 	_genLightDistribution();
 	
@@ -137,23 +124,6 @@ void Scene::PreProcess()
         g_accelerator->SetPrimitives( &m_primitiveBuf );
         g_accelerator->Build();
 	}
-}
-
-// parse transformation
-Transform Scene::_parseTransform( const TiXmlElement* node )
-{
-	Transform transform;
-	if( node )
-	{
-		node = node->FirstChildElement( "Matrix" );
-		while( node )
-		{
-			const char* trans = node->Attribute( "value" );
-			if( trans )	transform = TransformFromStr( trans ) * transform;
-			node = node->NextSiblingElement( "Matrix" );
-		}
-	}
-	return transform;
 }
 
 // get the bounding box for the scene
