@@ -496,22 +496,3 @@ def export_material(scene, root, force_debug):
         serialize_prop(output_node, fs)
         del fs
 
-        def export_props(mat_node , xml_node):
-            # to be replaced with serialization system.
-            export_prop_in_sort = lambda n , v : ET.SubElement( xml_node , 'Property' , name=n , value=v )
-            mat_node.export_sort(export_prop_in_sort)
-
-            inputs = mat_node.inputs
-            for socket in inputs:
-                if socket.is_linked:
-                    def socket_node_input(nt, socket):
-                        return next((l.from_node for l in nt.links if l.to_socket == socket), None)
-                    input_node = socket_node_input(ntree, socket)
-                    sub_xml_node = ET.SubElement( xml_node , 'Property' , name=socket.name , node=input_node.bl_idname)
-
-                    export_props(input_node,sub_xml_node)
-                else:
-                    ET.SubElement( xml_node , 'Property' , name=socket.name , value=socket.export_socket_value() )
-
-        export_props(output_node, mat_node)
-

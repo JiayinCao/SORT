@@ -64,12 +64,6 @@ public:
     // update bsdf
     virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
     
-    // parse property or socket
-    bool ParseProperty( TiXmlElement* element , std::shared_ptr<MaterialNode> node );
-    
-    // parse a new node
-    std::shared_ptr<MaterialNode> ParseNode( TiXmlElement* element , std::shared_ptr<MaterialNode> node );
-    
     virtual void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) {sAssertMsg(false, MATERIAL, "Get spectrum from wrong data type" );}
     virtual void GetMaterialProperty( Bsdf* bsdf , float& result ) {sAssertMsg(false, MATERIAL, "Get float from wrong data type" );}
     virtual void GetMaterialProperty( Bsdf* bsdf , std::string& result ) {sAssertMsg(false, MATERIAL, "Get string from wrong data type" );}
@@ -110,9 +104,6 @@ class MaterialNodeProperty : public SerializableObject
 public:
     //! @brief  Empty virtual destructor.
     virtual ~MaterialNodeProperty() {}
-    
-	// set node property
-    virtual void SetNodeProperty( const std::string& prop ){}
 
     // update bsdf, this is for bxdf wrappers like Blend , Coat or any other BXDF that can attach other BXDF as input
     void UpdateBsdf( Bsdf* bsdf , Spectrum weight = Spectrum( 1.0f ) );
@@ -134,6 +125,13 @@ public:
     //! @param  stream      Output stream.
     virtual void Serialize( OStreamBase& stream ) = 0;
 
+    //! @brief  Get the node attached to the current socket.
+    //!
+    //! @return Node attached to the current socket. 'nullptr' means no node attached.
+    inline std::shared_ptr<MaterialNode>    GetNode() { 
+        return node; 
+    }
+protected:
 	// sub node if it has value
     std::shared_ptr<MaterialNode>	node = nullptr;
 };
@@ -141,8 +139,6 @@ public:
 class MaterialNodePropertyColor : public MaterialNodeProperty
 {
 public:
-    // set node property
-    void SetNodeProperty( const std::string& str ) override{ color = SpectrumFromStr(str); }
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) {
         if( node )
             node->GetMaterialProperty(bsdf, result);
@@ -185,8 +181,6 @@ private:
 class MaterialNodePropertyFloat : public MaterialNodeProperty
 {
 public:
-    // set node property
-    void SetNodeProperty( const std::string& str ) override{ value = (float)atof(str.c_str()); }
     void GetMaterialProperty( Bsdf* bsdf , float& result ) {
         if( node )
             node->GetMaterialProperty(bsdf, result);
@@ -228,7 +222,6 @@ private:
 class MaterialNodePropertyString : public MaterialNodeProperty
 {
 public:
-    void SetNodeProperty( const std::string& prop ) override { str = prop; }
     void GetMaterialProperty( Bsdf* bsdf , std::string& result ) { result = str; }
     
     // get node return type
@@ -299,7 +292,6 @@ public:
 class MaterialNodePropertyVector : public MaterialNodeProperty
 {
 public:
-    void SetNodeProperty( const std::string& prop ) override { vec = VectorFromStr(prop); }
     void GetMaterialProperty( Bsdf* bsdf , Vector& result ) {
         if( node )
             node->GetMaterialProperty(bsdf, result);

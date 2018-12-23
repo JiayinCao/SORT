@@ -22,16 +22,6 @@
 
 IMPLEMENT_CREATOR( ImageTexture );
 
-// initialize default data
-void ImageTexture::_init()
-{
-	// set default value
-	m_pMemory = 0;
-
-	// register properties
-	_registerAllProperty();
-}
-
 // get color from image
 Spectrum ImageTexture::GetColor( int x , int y ) const
 {
@@ -48,20 +38,9 @@ Spectrum ImageTexture::GetColor( int x , int y ) const
 	return m_pMemory->m_ImgMem[ offset ];
 }
 
-// release the texture memory
-void ImageTexture::Release()
-{
-	m_pMemory = 0;
-	m_iTexWidth = 0;
-	m_iTexHeight = 0;
-}
-
 // load image from file
 bool ImageTexture::LoadImageFromFile( const std::string& str )
 {
-	// release an image first
-	Release();
-
     m_Name = str;
 
 	// get the texture manager
@@ -71,12 +50,6 @@ bool ImageTexture::LoadImageFromFile( const std::string& str )
 		return true;
 	}
 	return false;
-}
-
-// register properties
-void ImageTexture::_registerAllProperty()
-{
-	_registerProperty( "filename" , new FileNameProperty( this ) );
 }
 
 // get average color

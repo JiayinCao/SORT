@@ -48,13 +48,6 @@ public:
 		return bsdf;
 	}
 
-	//! @brief	Set the name of the material.
-	//!
-	//! Higher level code should make sure the name is unique in the scene.
-	//!
-	//! @param	name	Name to be set to this material.
-	inline void SetName( const std::string& name ) { m_name = name; }
-
 	//! @brief	Get the unique name of this material.
 	//!
 	//! @return		The name of this material.
@@ -64,22 +57,6 @@ public:
 	//!
 	//! @return		The root of the material node graph tree.
 	inline std::shared_ptr<MaterialNode> GetRootNode() { return m_root; }
-
-	//! @brief	Parse material from XML.
-	//!
-	//! This interface is to be deprecated after serialization is fully supported.
-	//! 
-	//! @param	element		Root node for XML node.
-	inline void	ParseMaterial( TiXmlElement* element ){
-		// parse node property
-		m_root->ParseProperty( element , m_root );
-
-		// check validation
-		if( !m_root->IsNodeValid() )
-			slog( WARNING , MATERIAL , "Material '%s' is not valid , a default material will be used." , m_name.c_str() );
-		else
-			m_root->PostProcess();
-	}
 
 	//! @brief  Serialization interface. Loading data from stream.
     //!

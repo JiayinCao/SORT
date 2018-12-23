@@ -21,8 +21,11 @@
 #include "sort.h"
 #include "spectrum/spectrum.h"
 #include "core/enum.h"
-#include "core/propertyset.h"
 #include "core/creator.h"
+
+// WARNING : Code in this folder is easily several years old.
+// 			 It is just functional for now. Will re-implement everything later.
+//		 	 Priority is very low.
 
 // pre-declare class
 class ComTexture;
@@ -30,7 +33,7 @@ class Intersection;
 
 //////////////////////////////////////////////////////////////
 // definition of class Texture
-class Texture : public PropertySet<Texture>
+class Texture
 {
 public:
 	// default constructor

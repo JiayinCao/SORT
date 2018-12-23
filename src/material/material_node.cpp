@@ -19,7 +19,6 @@
 #include "managers/memmanager.h"
 #include "bsdf/bsdf.h"
 #include "bsdf/lambert.h"
-#include "thirdparty/tinyxml/tinyxml.h"
 #include "math/intersection.h"
 #include "core/log.h"
 
@@ -35,67 +34,6 @@ void MaterialNodeProperty::UpdateBsdf( Bsdf* bsdf , Spectrum weight ){
         node->UpdateBSDF( bsdf , weight );
 }
 
-// parse property or socket
-bool MaterialNode::ParseProperty( TiXmlElement* element , std::shared_ptr<MaterialNode> node )
-{
-	TiXmlElement* prop = element->FirstChildElement( "Property" );
-	while(prop)
-	{
-		std::string prop_name = prop->Attribute( "name" );
-
-		MaterialNodeProperty* node_prop = node->getProperty( prop_name );
-		if( node_prop == nullptr )
-		{
-			// output error log
-            slog( WARNING , MATERIAL , "Node property %s is ignored." , prop_name.c_str() );
-
-			// get next property
-			prop = prop->NextSiblingElement( "Property" );
-
-			// proceed to the next property
-			continue;
-		}
-
-		// add socket input
-		if( prop->Attribute( "node" ) )
-		{
-			node_prop->node = ParseNode( prop , node );
-            
-            if( node_prop->node && node_prop->GetNodeReturnType() != node_prop->node->GetNodeReturnType() ){
-                m_node_valid = false;
-                return false;
-            }
-		}else
-		{
-			std::string node_value = prop->Attribute( "value" );
-			node_prop->SetNodeProperty( node_value );
-		}
-			
-		// get next property
-		prop = prop->NextSiblingElement( "Property" );
-	}
-    
-    return true;
-}
-
-// parse a new node
-std::shared_ptr<MaterialNode> MaterialNode::ParseNode( TiXmlElement* element , std::shared_ptr<MaterialNode> node )
-{
-	std::string node_type = element->Attribute( "node" );
-	// create new material node
-	std::shared_ptr<MaterialNode> mat_node = MakeInstance<MaterialNode>( node_type );
-	if( mat_node == nullptr )
-	{
-        slog( WARNING , MATERIAL , "Node type %s is undefined." , node_type.c_str() );
-		return mat_node;
-	}
-
-	// parse node properties
-	m_node_valid = ParseProperty( element , mat_node );
-    
-	return mat_node; 
-}
-
 // post process
 void MaterialNode::PostProcess()
 {
@@ -103,8 +41,8 @@ void MaterialNode::PostProcess()
 		return;
 
     for( auto it : m_props ){
-		if( it.second->node )
-			it.second->node->PostProcess();
+		if( it.second->GetNode() )
+			it.second->GetNode()->PostProcess();
 	}
 
 	m_post_processed = true;
@@ -117,8 +55,8 @@ void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 		return;
 
     for( auto it : m_props ){
-		if( it.second->node )
-			it.second->node->UpdateBSDF(bsdf , weight);
+		if( it.second->GetNode() )
+			it.second->GetNode()->UpdateBSDF(bsdf , weight);
 	}
 }
 
@@ -133,12 +71,12 @@ MaterialNode::~MaterialNode()
 void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 {
 	// return a default one for invalid material
-	if( !m_node_valid || !output.node ){
+	if( !m_node_valid || !output.GetNode() ){
 		static const Spectrum default_spectrum( 0.5f , 0.1f , 0.1f );
 		const Lambert* lambert = SORT_MALLOC(Lambert)( default_spectrum , weight , DIR_UP);
 		bsdf->AddBxdf( lambert );
 		return;
 	}
 
-	output.node->UpdateBSDF( bsdf );
+	output.GetNode()->UpdateBSDF( bsdf );
 }
