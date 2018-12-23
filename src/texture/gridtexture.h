@@ -30,21 +30,6 @@ public:
 
 	// default constructor
 	GridTexture();
-	// constructor from two colors
-	// para 'c0' :	color0
-	// para 'c1' :	color1
-	GridTexture( const Spectrum& c0 , const Spectrum& c1 );
-	// constructor from six float
-	// para 'r0' :	r component of the first color
-	// para 'g0' :	g component of the first color
-	// para 'b0' :	b component of the first color
-	// para 'r1' :	r component of the second color
-	// para 'g1' :	g component of the second color
-	// para 'b1' :	b component of the second color
-	GridTexture( 	float r0 , float g0 , float b0 ,
-					float r1 , float g1 , float b1 );
-	// destructor
-	~GridTexture();
 	
 	// get the texture value
 	// para 'x'	:	x coordinate , if out of range , use filter
@@ -61,48 +46,4 @@ private:
 
 	// the threshold for the center grid , default value is 0.9f
     float		m_Threshold;
-
-	// init default values
-	void	_init();
-
-	// register properties
-	void _registerAllProperty();
-
-	// property handler
-	class Color0Property : public PropertyHandler<Texture>
-	{
-	public:
-		PH_CONSTRUCTOR(Color0Property,Texture);
-
-		// set value
-		void SetValue( const std::string& value )
-		{
-			GridTexture* ct = CAST_TARGET(GridTexture);
-			ct->m_Color0 = SpectrumFromStr( value );
-		}
-	};
-	class Color1Property : public PropertyHandler<Texture>
-	{
-	public:
-		PH_CONSTRUCTOR(Color1Property,Texture);
-
-		// set value
-		void SetValue( const std::string& value )
-		{
-			GridTexture* ct = CAST_TARGET(GridTexture);
-			ct->m_Color1 = SpectrumFromStr( value );
-		}
-	};
-	class ThresholdProperty : public PropertyHandler<Texture>
-	{
-	public:
-		PH_CONSTRUCTOR(ThresholdProperty,Texture);
-
-		// set value
-		void SetValue( const std::string& value )
-		{
-			GridTexture* ct = CAST_TARGET(GridTexture);
-			ct->m_Threshold = (float)atof( value.c_str() );
-		}
-	};
 };

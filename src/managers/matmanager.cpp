@@ -21,7 +21,6 @@
 #include "core/path.h"
 #include "thirdparty/tinyxml/tinyxml.h"
 #include "texmanager.h"
-#include "texture/constanttexture.h"
 #include "core/creator.h"
 #include "bsdf/merl.h"
 #include "core/creator.h"
@@ -67,10 +66,8 @@ unsigned MatManager::ParseMatFile( TiXmlNode* mat_node )
 		}
 
         std::shared_ptr<Material> mat = std::make_shared<Material>();
-		//mat->SetName(name);
-		//mat->ParseMaterial( material );
-		auto filename = GetFullPath(name+".sme");
-		IFileStream stream( filename );
+		
+		IFileStream stream( GetFullPath(name+".sme") );
 		mat->Serialize( stream );
 
 		// push the material

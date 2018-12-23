@@ -28,11 +28,6 @@ class ImageTexture : public Texture
 public:
 	DEFINE_CREATOR( ImageTexture , Texture , "image" );
 
-	// default constructor
-	ImageTexture() { _init(); }
-	// destructor
-	~ImageTexture() { Release(); }
-
 	// load image from file
 	// para 'str'  : the name of the image file to be loaded
 	// result      : whether loading is successful
@@ -48,9 +43,6 @@ public:
 	// set the size of the texture
 	void	SetSize( unsigned w , unsigned h ) override{}
 
-	// release the texture memory
-	virtual void Release();
-
 	// whether the image is valid
 	bool IsValid() override { return (bool)m_pMemory; }
 
@@ -59,7 +51,7 @@ public:
 
 private:
 	// array saving the color of image
-    std::shared_ptr<ImgMemory>	m_pMemory;
+    std::shared_ptr<ImgMemory>	m_pMemory = nullptr;
 
 	// the average radiance of the texture
 	Spectrum	m_Average;
@@ -67,31 +59,9 @@ private:
     // texture name
     std::string m_Name;
 
-// private method
-	// initialize default data
-	void	_init();
 	// compute average radiance
 	void	_average();
 
 	// set texture manager as a friend
 	friend class TexManager;
-
-	// register properties
-	void _registerAllProperty();
-
-// property handler
-	class FileNameProperty : public PropertyHandler<Texture>
-	{
-	public:
-		PH_CONSTRUCTOR(FileNameProperty,Texture);
-
-		// set value
-		void SetValue( const std::string& value )
-		{
-			ImageTexture* ct = CAST_TARGET(ImageTexture);
-			
-			// load image file
-			ct->LoadImageFromFile( value );
-		}
-	};
 };
