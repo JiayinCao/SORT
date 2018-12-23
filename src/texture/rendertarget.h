@@ -27,10 +27,6 @@ class	RenderTarget : public ComTexture
 {
 //public method
 public:
-	// constructor and destructor
-	RenderTarget(){}
-	~RenderTarget(){}
-
 	// para 'x' : x coordinate
 	// para 'y' : y coordinate
 	// para 'r' : red component

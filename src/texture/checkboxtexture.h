@@ -29,67 +29,20 @@ public:
 
 	// default constructor
 	CheckBoxTexture();
-	// constructor from two colors
-	// para 'c0' :	color0
-	// para 'c1' :	color1
-	CheckBoxTexture( const Spectrum& c0 , const Spectrum& c1 );
-	// constructor from six float
-	// para 'r0' :	r component of the first color
-	// para 'g0' :	g component of the first color
-	// para 'b0' :	b component of the first color
-	// para 'r1' :	r component of the second color
-	// para 'g1' :	g component of the second color
-	// para 'b1' :	b component of the second color
-	CheckBoxTexture( 	float r0 , float g0 , float b0 ,
-					float r1 , float g1 , float b1 );
-	// destructor
-	~CheckBoxTexture();
 
 	// get the texture value
 	// para 'x'	:	x coordinate , if out of range , use filter
 	// para 'y' :	y coordinate , if out of range , use filter
 	virtual Spectrum GetColor( int x , int y ) const;
 
-	// set check box color
-	void SetCheckBoxColor( const Spectrum& c0 , const Spectrum& c1 );
-
-
+    // set check box color
+    void SetCheckBoxColor( const Spectrum& c0 , const Spectrum& c1 ){
+        m_Color0 = c0;
+        m_Color1 = c1;
+    }
+    
 private:
 	// two colors
 	Spectrum	m_Color0;
 	Spectrum	m_Color1;
-
-// private method
-private:
-	// init default values
-	void	_init();
-
-	// register properties
-	void _registerAllProperty();
-
-// property handler
-	class Color0Property : public PropertyHandler<Texture>
-	{
-	public:
-		PH_CONSTRUCTOR(Color0Property,Texture);
-
-		// set value
-		void SetValue( const std::string& value )
-		{
-			CheckBoxTexture* ct = CAST_TARGET(CheckBoxTexture);
-			ct->m_Color0 = SpectrumFromStr( value );
-		}
-	};
-	class Color1Property : public PropertyHandler<Texture>
-	{
-	public:
-		PH_CONSTRUCTOR(Color1Property,Texture);
-
-		// set value
-		void SetValue( const std::string& value )
-		{
-			CheckBoxTexture* ct = CAST_TARGET(CheckBoxTexture);
-			ct->m_Color1 = SpectrumFromStr( value );
-		}
-	};
 };
