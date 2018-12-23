@@ -38,15 +38,6 @@ public:
         src.Serialize( stream );
     }
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
 	SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
@@ -69,15 +60,6 @@ public:
     void Serialize( IStreamBase& stream ) override {
         value.Serialize( stream );
     }
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
 
 private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( value );

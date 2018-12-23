@@ -294,6 +294,9 @@ public:
 
     //! @brief      Serializing data to stream
     //!
+    //! Unlike serializing data from stream, this version has a default empty implementation. SORT won't implement serializing its scene into stream
+    //! for simplicity. There is almost no occasion when it is needed. It is the plugin's task to stream out the scene.
+    //!
     //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
-    virtual void    Serialize( OStreamBase& stream ) = 0;
+    virtual void    Serialize( OStreamBase& stream ) {};
 };

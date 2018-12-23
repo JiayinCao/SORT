@@ -81,14 +81,6 @@ public:
 		stream >> m_bMIS;
 	}
 
-    //! @brief      Serializing data to stream
-    //!
-    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
-    void    Serialize( OStreamBase& stream ) override {
-		Integrator::Serialize( stream );
-		stream << m_bMIS;
-	}
-
 protected:
 	bool	light_tracing_only = false;		// only do light tracing
 	int		sample_per_pixel = 1;           // light sample per pixel

@@ -127,16 +127,6 @@ class SORTShadingNode(bpy.types.Node):
     def export_pbrt(self, output_pbrt_type , output_pbrt_prop):
         pass
     
-    # export data to sort
-    def export_sort(self, output_sort_prop):
-        for prop in self.property_list:
-            if prop['class'].is_socket():
-                continue
-            attr_wrapper = getattr(self, prop['name'] + '_wrapper' )
-            attr = getattr(self, prop['name'])
-            v = attr_wrapper.export_socket_value(attr_wrapper, attr)
-            output_sort_prop( prop['name'] , v )
-
     def serializae_prop(self, serialize_method):
         for prop in self.property_list:
             if prop['class'].is_socket():

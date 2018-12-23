@@ -359,30 +359,3 @@ void BufferMemory::Serialize( IStreamBase& stream ){
 		}
 	}
 }
-
-void BufferMemory::Serialize( OStreamBase& stream ){
-	stream << m_iVBCount;
-	for( unsigned i = 0 ; i < m_iVBCount ; ++i )
-		stream << m_PositionBuffer[i];
-	stream << ( m_hasInitTexCoord ? m_iTBCount : 0 );
-	for( unsigned i = 0 ; i < 2 * m_iTBCount && m_hasInitTexCoord ; ++i )
-		stream << m_TexCoordBuffer[i];
-	stream << ( m_hasInitNormal ? m_iNBCount : 0 );
-	for( unsigned i = 0 ; i < m_iNBCount && m_hasInitNormal ; ++i )
-		stream << m_NormalBuffer[i];
-	
-	stream << m_iTrunkNum;
-	for( unsigned i = 0 ; i < m_iTrunkNum ; ++i ){
-		stream << ( m_TrunkBuffer[i].m_mat ? m_TrunkBuffer[i].m_mat->GetName() : "" );
-		stream << m_TrunkBuffer[i].m_iTriNum;
-
-		const unsigned index_cnt = m_TrunkBuffer[i].m_iTriNum * 3;
-		for( unsigned j = 0 ; j < index_cnt ; ++j ){
-			stream << m_TrunkBuffer[i].m_IndexBuffer[j].posIndex;
-            if( m_hasInitTexCoord )
-                stream << m_TrunkBuffer[i].m_IndexBuffer[j].texIndex;
-			if( m_hasInitNormal )
-				stream << m_TrunkBuffer[i].m_IndexBuffer[j].norIndex;
-		}
-	}
-}

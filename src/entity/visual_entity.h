@@ -53,11 +53,4 @@ public:
         sAssert( ret , RESOURCE );
         m_visuals.push_back( visual );
     }
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void    Serialize( OStreamBase& stream ) override {}
 };
