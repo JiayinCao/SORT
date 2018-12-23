@@ -19,14 +19,13 @@
 #include "sort.h"
 #include "matmanager.h"
 #include "core/path.h"
-#include "thirdparty/tinyxml/tinyxml.h"
 #include "texmanager.h"
 #include "core/creator.h"
 #include "bsdf/merl.h"
 #include "core/creator.h"
 #include "core/log.h"
 #include "material/material.h"
-#include "stream/fstream.h"
+#include "stream/stream.h"
 
 // find specific material
 std::shared_ptr<Material> MatManager::FindMaterial( const std::string& mat_name ) const
@@ -43,45 +42,14 @@ std::shared_ptr<Material> MatManager::GetDefaultMat()
 }
 
 // parse material file and add the materials into the manager
-unsigned MatManager::ParseMatFile( TiXmlNode* mat_node )
+unsigned MatManager::ParseMatFile( IStreamBase& stream )
 {
-	if( !mat_node )
-        return 0;
-    
-	// parse materials
-    TiXmlElement* material = mat_node->FirstChildElement( "Material" );
-	while( material )
-	{
-		// parse the material
-		std::string name = material->Attribute( "name" );
-
-		// check if there is a material with the specific name
-		if( FindMaterial( name ) != 0 )
-		{
-			// parse the next material
-			material = material->NextSiblingElement( "Material" );
-
-			// skip this material
-			continue;
-		}
-
-        std::shared_ptr<Material> mat = std::make_shared<Material>();
-		
-		IFileStream stream( GetFullPath(name+".sme") );
+	unsigned int material_cnt = 0;
+	stream >> material_cnt;
+	for( int i = 0 ; i < material_cnt ; ++i ){
+		std::shared_ptr<Material> mat = std::make_shared<Material>();
 		mat->Serialize( stream );
-
-		// push the material
-		m_matPool.insert( make_pair( name , mat ) );
-
-		// parse the next material
-		material = material->NextSiblingElement( "Material" );
+		m_matPool.insert( make_pair( mat->GetName() , mat ) );
 	}
-
-	return 0;
-}
-
-// get material number
-unsigned MatManager::GetMatCount() const
-{
-	return (unsigned)m_matPool.size();
+	return material_cnt;
 }

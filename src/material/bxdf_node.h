@@ -29,7 +29,7 @@ protected:
     // get node return type
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_BXDF; }
     
-    SORT_MATERIAL_DEFINE_PROP_VECTOR( "Normal" , normal );
+    SORT_MATERIAL_DEFINE_PROP_VECTOR( normal );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -79,7 +79,7 @@ public:
 	}
 
 private:
-	SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , baseColor );
+	SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
 };
 
 // Lambert node
@@ -111,7 +111,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , baseColor );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
 };
 
 // Oren nayar node
@@ -144,8 +144,8 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , baseColor );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
 };
 
 // Microfacet node
@@ -182,12 +182,12 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
-    SORT_MATERIAL_DEFINE_PROP_STR( "MicroFacetDistribution" , mf_dist );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessU" , roughnessU );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessV" , roughnessV );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Interior_IOR" , eta );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Absorption_Coefficient" , k );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
+    SORT_MATERIAL_DEFINE_PROP_STR( mf_dist );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessU );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessV );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( eta );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( k );
 };
 
 // Microfacet node
@@ -224,12 +224,12 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
-    SORT_MATERIAL_DEFINE_PROP_STR( "MicroFacetDistribution" , mf_dist );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessU" , roughnessU );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "RoughnessV" , roughnessV );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Interior_IOR" , in_ior );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Exterior_IOR" , ext_ior );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
+    SORT_MATERIAL_DEFINE_PROP_STR( mf_dist );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessU );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessV );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( in_ior );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( ext_ior );
 };
 
 // AshikhmanShirley node
@@ -264,10 +264,10 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR("Diffuse", diffuse);
-    SORT_MATERIAL_DEFINE_PROP_FLOAT("Specular", specular);
-    SORT_MATERIAL_DEFINE_PROP_FLOAT("RoughnessU", roughnessU);
-    SORT_MATERIAL_DEFINE_PROP_FLOAT("RoughnessV", roughnessV);
+    SORT_MATERIAL_DEFINE_PROP_COLOR(diffuse);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(specular);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(roughnessU);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(roughnessV);
 };
 
 // Phong node
@@ -302,10 +302,10 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR("Diffuse", diffuse);
-    SORT_MATERIAL_DEFINE_PROP_COLOR("Specular", specular);
-    SORT_MATERIAL_DEFINE_PROP_FLOAT("SpecularPower", power);
-    SORT_MATERIAL_DEFINE_PROP_FLOAT("DiffuseRatio", diffRatio);
+    SORT_MATERIAL_DEFINE_PROP_COLOR(diffuse);
+    SORT_MATERIAL_DEFINE_PROP_COLOR(specular);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(power);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(diffRatio);
 };
 
 // Merl node
@@ -340,7 +340,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , merlfile );
+    SORT_MATERIAL_DEFINE_PROP_STR( merlfile );
 
     // the merl data
     MerlData data;
@@ -378,7 +378,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , fourierBxdfFile );
+    SORT_MATERIAL_DEFINE_PROP_STR( fourierBxdfFile );
 
     // fourier bxdf node
     FourierBxdfData fourierBxdfData;
@@ -417,9 +417,9 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Thickness" , thickness );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Sigma" , sigma );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "IOR" , ior );
-    SORT_MATERIAL_DEFINE_PROP_BXDF( "Surface" , bxdf );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( thickness );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( sigma );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( ior );
+    SORT_MATERIAL_DEFINE_PROP_BXDF( bxdf );
 };

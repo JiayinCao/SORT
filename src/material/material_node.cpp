@@ -22,12 +22,6 @@
 #include "math/intersection.h"
 #include "core/log.h"
 
-// get node property
-MaterialNodeProperty* MaterialNode::getProperty( const std::string& name )
-{
-    return m_props.count(name) ? m_props[name] : nullptr;
-}
-
 // update bsdf, for layered brdf
 void MaterialNodeProperty::UpdateBsdf( Bsdf* bsdf , Spectrum weight ){
     if( node )
@@ -40,9 +34,9 @@ void MaterialNode::PostProcess()
 	if( m_post_processed )
 		return;
 
-    for( auto it : m_props ){
-		if( it.second->GetNode() )
-			it.second->GetNode()->PostProcess();
+    for( auto node : m_props ){
+		if( node->GetNode() )
+			node->GetNode()->PostProcess();
 	}
 
 	m_post_processed = true;
@@ -54,17 +48,10 @@ void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	if( weight.IsBlack() )
 		return;
 
-    for( auto it : m_props ){
-		if( it.second->GetNode() )
-			it.second->GetNode()->UpdateBSDF(bsdf , weight);
+    for( auto node : m_props ){
+		if( node->GetNode() )
+			node->GetNode()->UpdateBSDF(bsdf , weight);
 	}
-}
-
-MaterialNode::~MaterialNode()
-{
-// TODO : To be visited later. Somehow it causes a crash.
-//    for( auto it : m_props )
-//		delete it.second;
 }
 
 // update bsdf

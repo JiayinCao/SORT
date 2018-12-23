@@ -212,42 +212,24 @@ void System::_executeRenderingTasks()
 // setup system from file
 bool System::Setup( const char* str )
 {
-	{
-		// a very hacky solution as a workaround before serialization is totally done.
-		int j = (int)std::strlen( str );
-		while( j > 0 && str[j-1] != '/' )
-			--j;
-		std::string folder( j , '\0' );
-		for( int i = 0 ; i < j ; ++i )
-			folder[i] = str[i];
-		std::string fullFilePath = folder + "global.sme";
-        IFileStream s( fullFilePath );
-		slog( INFO , GENERAL , "Global configuration file %s" , fullFilePath.c_str() );
-        GlobalConfiguration::GetSingleton().Serialize(s);
-    }
+	IFileStream s( str );
 
-    // setup image sensor first of all
-    if( g_blenderMode )
-        m_imagesensor = new BlenderImage();
-    else
-        m_imagesensor = new RenderTargetImage();
+	// Load the global configuration from stream
+	GlobalConfiguration::GetSingleton().Serialize(s);
+
+	// Load materials from stream
+	MatManager::GetSingleton().ParseMatFile( s );
+
+	// setup image sensor first of all
+	if( g_blenderMode )
+		m_imagesensor = new BlenderImage();
+	else
+		m_imagesensor = new RenderTargetImage();
 	m_imagesensor->SetSensorSize( g_resultResollution.x , g_resultResollution.y );
 
-	// load the xml file
-	TiXmlDocument doc( str );
-	doc.LoadFile();
-	
-    sAssertMsg( !doc.Error() , GENERAL , "Can't load scene file %s" , str );
-	
-	// get the root of xml
-	TiXmlNode*	root = doc.RootElement();
-	
-    auto element = root->FirstChildElement("Materials");
-    MatManager::GetSingleton().ParseMatFile( element );
-    
-    element = root->FirstChildElement("Scene");
-    m_Scene.LoadScene( element );
-    
+	// Serialize the scene entities
+	m_Scene.LoadScene( s );
+
 	// create shared memory
 	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_tileSize));
 	int y_tile = (int)(ceil(m_imagesensor->GetHeight() / (float)g_tileSize));

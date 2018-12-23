@@ -48,7 +48,7 @@ public:
 	}
 
 private:
-	SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , src );
+	SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
 
 // constant float node
@@ -80,5 +80,5 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Value" , value );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( value );
 };

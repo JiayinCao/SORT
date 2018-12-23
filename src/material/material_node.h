@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <unordered_set>
 #include "spectrum/spectrum.h"
 #include "core/creator.h"
 #include "spectrum/rgbspectrum.h"
@@ -28,12 +29,12 @@
 #define SORT_PROP_CAT(v0, v1)                           SORT_PROP_CAT_PROXY(v0,v1)
 #define SORT_STATS_UNIQUE_PROP(var)                     SORT_PROP_CAT(SORT_PROP_CAT(var, __LINE__), var)
 
-#define SORT_MATERIAL_DEFINE_PROP_COMMON(name,prop,T)   T prop; MaterialNodeRegister SORT_STATS_UNIQUE_PROP(prop) = MaterialNodeRegister( name , prop , *this );
-#define SORT_MATERIAL_DEFINE_PROP_COLOR(name,prop)      SORT_MATERIAL_DEFINE_PROP_COMMON(name,prop,MaterialNodePropertyColor)
-#define SORT_MATERIAL_DEFINE_PROP_STR(name,prop)        SORT_MATERIAL_DEFINE_PROP_COMMON(name,prop,MaterialNodePropertyString)
-#define SORT_MATERIAL_DEFINE_PROP_FLOAT(name,prop)      SORT_MATERIAL_DEFINE_PROP_COMMON(name,prop,MaterialNodePropertyFloat)
-#define SORT_MATERIAL_DEFINE_PROP_VECTOR(name,prop)     SORT_MATERIAL_DEFINE_PROP_COMMON(name,prop,MaterialNodePropertyVector)
-#define SORT_MATERIAL_DEFINE_PROP_BXDF(name,prop)       SORT_MATERIAL_DEFINE_PROP_COMMON(name,prop,MaterialNodePropertyBxdf)
+#define SORT_MATERIAL_DEFINE_PROP_COMMON(prop,T)   T prop; MaterialNodeRegister SORT_STATS_UNIQUE_PROP(prop) = MaterialNodeRegister( prop , *this );
+#define SORT_MATERIAL_DEFINE_PROP_COLOR(prop)      SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyColor)
+#define SORT_MATERIAL_DEFINE_PROP_STR(prop)        SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyString)
+#define SORT_MATERIAL_DEFINE_PROP_FLOAT(prop)      SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyFloat)
+#define SORT_MATERIAL_DEFINE_PROP_VECTOR(prop)     SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyVector)
+#define SORT_MATERIAL_DEFINE_PROP_BXDF(prop)       SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyBxdf)
 
 #define SORT_MATERIAL_GET_PROP_COMMON(v,prop,T)         T v; prop.GetMaterialProperty(bsdf,v);
 #define SORT_MATERIAL_GET_PROP_FLOAT(v,prop)            SORT_MATERIAL_GET_PROP_COMMON(v,prop,float)
@@ -59,7 +60,7 @@ class MaterialNode : public SerializableObject
 {
 public:
     //! @brief  Empty virtual destructor.
-    virtual ~MaterialNode();
+    virtual ~MaterialNode() {}
     
     // update bsdf
     virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
@@ -80,10 +81,7 @@ public:
 
 protected:
     // node properties
-    std::unordered_map< std::string , MaterialNodeProperty * > m_props;
-    
-    // get node property
-    MaterialNodeProperty*    getProperty( const std::string& name );
+    std::unordered_set< MaterialNodeProperty* > m_props;
     
     // valid node
     bool m_node_valid = true;
@@ -333,8 +331,8 @@ private:
 // Register a node automatically
 class MaterialNodeRegister{
 public:
-    MaterialNodeRegister( const std::string& name , MaterialNodeProperty& prop , MaterialNode& node ){
-        node.m_props.insert( make_pair( name , &prop ) );
+    MaterialNodeRegister( MaterialNodeProperty& prop , MaterialNode& node ){
+        node.m_props.insert( &prop );
     }
 };
 
@@ -364,5 +362,5 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_BXDF( "Surface" , output );
+    SORT_MATERIAL_DEFINE_PROP_BXDF( output );
 };

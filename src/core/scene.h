@@ -23,7 +23,6 @@
 #include "core/sassert.h"
 #include "math/bbox.h"
 #include "spectrum/spectrum.h"
-#include "thirdparty/tinyxml/tinyxml.h"
 #include "math/intersection.h"
 #include "math/transform.h"
 #include "camera/camera.h"
@@ -42,10 +41,8 @@ public:
 	// destructor
 	~Scene(){ Release(); }
 
-	// load the scene from script file
-	// para 'root' : the node for the file
-	// result     : 'true' if parsing is successful
-	bool	LoadScene(  TiXmlNode* root );
+	//! @brief Serialize scene from stream.
+	bool	LoadScene( class IStreamBase& root );
 
 	// get the intersection between a ray and the scene
 	// para 'r' : the ray
@@ -118,9 +115,6 @@ private:
 
 	// generate triangle buffer
 	void	_generatePriBuf();
-
-	// parse transformation
-	Transform	_parseTransform( const TiXmlElement* node );
 
 	// compute light cdf
 	void	_genLightDistribution();
