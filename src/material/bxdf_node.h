@@ -30,6 +30,24 @@ protected:
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_BXDF; }
     
     SORT_MATERIAL_DEFINE_PROP_VECTOR( "Normal" , normal );
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        normal.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
 };
 
 // Lambert node
@@ -40,6 +58,25 @@ public:
 
 	// update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        baseColor.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
 
 private:
 	SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , baseColor );
@@ -54,6 +91,25 @@ public:
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        baseColor.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , baseColor );
 };
@@ -66,6 +122,26 @@ public:
 
 	// update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        roughness.Serialize( stream );
+        baseColor.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
 
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Diffuse" , baseColor );
@@ -80,6 +156,30 @@ public:
 
 	// update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        mf_dist.Serialize( stream );
+        eta.Serialize( stream );
+        k.Serialize( stream );
+        roughnessU.Serialize( stream );
+        roughnessV.Serialize( stream );
+        baseColor.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
 
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
@@ -99,6 +199,30 @@ public:
 	// update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        mf_dist.Serialize( stream );
+        in_ior.Serialize( stream );
+        ext_ior.Serialize( stream );
+        roughnessU.Serialize( stream );
+        roughnessV.Serialize( stream );
+        baseColor.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "BaseColor" , baseColor );
     SORT_MATERIAL_DEFINE_PROP_STR( "MicroFacetDistribution" , mf_dist );
@@ -117,6 +241,28 @@ public:
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
 
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        specular.Serialize( stream );
+        roughnessU.Serialize( stream );
+        roughnessV.Serialize( stream );
+        diffuse.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR("Diffuse", diffuse);
     SORT_MATERIAL_DEFINE_PROP_FLOAT("Specular", specular);
@@ -132,6 +278,28 @@ public:
 
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        power.Serialize( stream );
+        diffRatio.Serialize( stream );
+        specular.Serialize( stream );
+        diffuse.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
 
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR("Diffuse", diffuse);
@@ -152,6 +320,25 @@ public:
     // post process
     void PostProcess() override;
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        merlfile.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , merlfile );
 
@@ -171,6 +358,25 @@ public:
     // post process
     void PostProcess() override;
 
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        fourierBxdfFile.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , fourierBxdfFile );
 
@@ -187,6 +393,29 @@ public:
     // update bsdf
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        ior.Serialize( stream );
+        thickness.Serialize( stream );
+        sigma.Serialize( stream );
+        roughness.Serialize( stream );
+        bxdf.Serialize( stream );
+        BxdfNode::Serialize( stream );
+    }
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( "Thickness" , thickness );
     SORT_MATERIAL_DEFINE_PROP_FLOAT( "Roughness" , roughness );

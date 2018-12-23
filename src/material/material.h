@@ -87,7 +87,14 @@ public:
     //!
     //! @param  stream      Input stream for data.
     void Serialize( IStreamBase& stream ) override {
-		// to be implemented
+		stream >> m_name;
+		m_root->Serialize( stream );
+
+		// check validation
+		if( !m_root->IsNodeValid() )
+			slog( WARNING , MATERIAL , "Material '%s' is not valid , a default material will be used." , m_name.c_str() );
+		else
+			m_root->PostProcess();
 	}
 
     //! @brief  Serialization interface. Saving data to stream.
