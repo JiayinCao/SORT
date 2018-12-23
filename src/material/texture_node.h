@@ -37,6 +37,25 @@ public:
 	// post process
 	void PostProcess() override;
 
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        src0.Serialize( stream );
+        src1.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
@@ -55,6 +74,25 @@ public:
 	// post process
     void PostProcess() override;
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        src0.Serialize( stream );
+        src1.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
@@ -72,6 +110,24 @@ public:
     
 	// post process
     void PostProcess() override;
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        filename.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
 
 private:
 	SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , filename );

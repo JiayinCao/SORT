@@ -22,6 +22,7 @@
 #include "spectrum/rgbspectrum.h"
 #include "math/vector4.h"
 #include "core/strhelper.h"
+#include "stream/stream.h"
 
 #define SORT_PROP_CAT_PROXY(v0, v1)                     v0 ## v1
 #define SORT_PROP_CAT(v0, v1)                           SORT_PROP_CAT_PROXY(v0,v1)
@@ -53,10 +54,11 @@ enum MATERIAL_NODE_PROPERTY_TYPE{
     MNPT_BXDF
 };
 
-// base material node
-class MaterialNode
+//! @brief  Material node is the base class for node in material editor.
+class MaterialNode : public SerializableObject
 {
 public:
+    //! @brief  Empty virtual destructor.
     virtual ~MaterialNode();
     
     // update bsdf
@@ -81,7 +83,7 @@ public:
     
     // whether the node is valid
     inline bool IsNodeValid() const { return m_node_valid; }
-    
+
 protected:
     // node properties
     std::unordered_map< std::string , MaterialNodeProperty * > m_props;
@@ -98,7 +100,12 @@ protected:
     friend class MaterialNodeRegister;
 };
 
-class MaterialNodeProperty
+//! @brief  Basic socket property in material node.
+/**
+ * A socket may be connected with a sub node, which means that 'node' member will not be 'nullptr'.
+ * Otherwise, this will be merely a property defined in sub-classes.
+ */
+class MaterialNodeProperty : public SerializableObject
 {
 public:
     //! @brief  Empty virtual destructor.
@@ -113,6 +120,20 @@ public:
     // get node return type
     virtual MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const { return MNPT_NONE; }
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    virtual void Serialize( IStreamBase& stream ) = 0;
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    virtual void Serialize( OStreamBase& stream ) = 0;
+
 	// sub node if it has value
     std::shared_ptr<MaterialNode>	node = nullptr;
 };
@@ -132,6 +153,30 @@ public:
     // get node return type
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_COLOR; }
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        std::string class_id;
+        stream >> class_id;
+        node = MakeInstance<MaterialNode>( class_id );
+        if( node )
+            node->Serialize( stream );
+        else
+            stream >> color;
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     // value
     Spectrum color;
@@ -152,6 +197,30 @@ public:
     // get node return type
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_FLOAT; }
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        std::string class_id;
+        stream >> class_id;
+        node = MakeInstance<MaterialNode>( class_id );
+        if( node )
+            node->Serialize( stream );
+        else
+            stream >> value;
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     float value;
 };
@@ -165,6 +234,28 @@ public:
     // get node return type
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_STR; }
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        std::string dummy;
+        stream >> dummy;
+        stream >> str;
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+        std::string dummy;
+        stream >> dummy;
+        stream << str;
+	}
+
 	// color value
 	std::string	str;
 };
@@ -181,6 +272,28 @@ public:
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_BXDF; }
     
     void GetMaterialProperty( Bsdf* bsdf , std::shared_ptr<MaterialNode>& result ) { result = node; }
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        std::string class_id;
+        stream >> class_id;
+        node = MakeInstance<MaterialNode>( class_id );
+        if( node )
+            node->Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
 };
 
 class MaterialNodePropertyVector : public MaterialNodeProperty
@@ -197,6 +310,30 @@ public:
     // get node return type
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_VECTOR; }
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        std::string class_id;
+        stream >> class_id;
+        node = MakeInstance<MaterialNode>( class_id );
+        if( node )
+            node->Serialize( stream );
+        else
+            stream >> vec;
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     Vector    vec;
 };
@@ -216,6 +353,24 @@ public:
     // update bsdf
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+		output.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_BXDF( "Surface" , output );
 };

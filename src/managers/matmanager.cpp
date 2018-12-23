@@ -27,6 +27,7 @@
 #include "core/creator.h"
 #include "core/log.h"
 #include "material/material.h"
+#include "stream/fstream.h"
 
 // find specific material
 std::shared_ptr<Material> MatManager::FindMaterial( const std::string& mat_name ) const
@@ -66,8 +67,11 @@ unsigned MatManager::ParseMatFile( TiXmlNode* mat_node )
 		}
 
         std::shared_ptr<Material> mat = std::make_shared<Material>();
-		mat->SetName(name);
-		mat->ParseMaterial( material );
+		//mat->SetName(name);
+		//mat->ParseMaterial( material );
+		auto filename = GetFullPath(name+".sme");
+		IFileStream stream( filename );
+		mat->Serialize( stream );
 
 		// push the material
 		m_matPool.insert( make_pair( name , mat ) );

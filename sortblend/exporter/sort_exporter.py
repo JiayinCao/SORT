@@ -466,10 +466,38 @@ def export_material(scene, root, force_debug):
 
         print( 'Exporting material: ' + material.name )
 
-        # material node
+        # serilizing materials to separate files for now.
+        sort_resource_path = get_intermediate_dir(force_debug)
+        sort_material_file = sort_resource_path + material.name + '.sme'
+        fs = stream.FileStream( sort_material_file )
+        fs.serialize( name_compat(material.name) )
+
+        # to be replaced with serialization system.
         mat_node = ET.SubElement( mat_root , 'Material', name=name_compat(material.name) )
-        
+
+        def serialize_prop(mat_node , fs):
+            # output the properties
+            seriliaze_prop_in_sort = lambda n , v : ( fs.serialize( '' ) , fs.serialize( v ) )
+            mat_node.serializae_prop(seriliaze_prop_in_sort)
+
+            inputs = mat_node.inputs
+            for socket in inputs:
+                if socket.is_linked:
+                    def socket_node_input(nt, socket):
+                        return next((l.from_node for l in nt.links if l.to_socket == socket), None)
+                    input_node = socket_node_input(ntree, socket)
+
+                    fs.serialize(input_node.bl_idname)
+                    serialize_prop(input_node,fs)
+                else:
+                    fs.serialize('')
+                    fs.serialize( socket.export_serialization_value() )
+
+        serialize_prop(output_node, fs)
+        del fs
+
         def export_props(mat_node , xml_node):
+            # to be replaced with serialization system.
             export_prop_in_sort = lambda n , v : ET.SubElement( xml_node , 'Property' , name=n , value=v )
             mat_node.export_sort(export_prop_in_sort)
 
