@@ -40,13 +40,6 @@ public:
     //! @param  stream      Input stream for data.
     void    Serialize(IStreamBase& stream) override;
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void    Serialize(OStreamBase& stream) override;
-
     //! @brief  Setup the scene's camera.
     //!
     //! Setup camera for the scene.

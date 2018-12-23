@@ -52,15 +52,6 @@ public:
         BxdfNode::Serialize( stream );
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( basecolor );
     SORT_MATERIAL_DEFINE_PROP_FLOAT( subsurface );
@@ -99,15 +90,6 @@ public:
         BxdfNode::Serialize( stream );
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
     SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessU );
@@ -137,15 +119,6 @@ public:
         BxdfNode::Serialize( stream );
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
     SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
@@ -171,15 +144,6 @@ public:
         roughness.Serialize( stream );
 
         BxdfNode::Serialize( stream );
-	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
 	}
 
 private:
@@ -211,15 +175,6 @@ public:
         BxdfNode::Serialize( stream );
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( reflectance );
     SORT_MATERIAL_DEFINE_PROP_COLOR( transmittance );
@@ -245,15 +200,6 @@ public:
         basecolor.Serialize( stream );
         BxdfNode::Serialize( stream );
     }
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
 
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( basecolor );
@@ -281,15 +227,6 @@ public:
         bxdfFilePath.Serialize( stream );
         BxdfNode::Serialize( stream );
     }
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
 
 private:
     SORT_MATERIAL_DEFINE_PROP_STR( bxdfType );
@@ -320,15 +257,6 @@ public:
         BxdfNode::Serialize( stream );
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     SORT_MATERIAL_DEFINE_PROP_BXDF(bxdf0);
     SORT_MATERIAL_DEFINE_PROP_BXDF(bxdf1);
@@ -353,15 +281,6 @@ public:
         bxdf0.Serialize( stream );
         bxdf1.Serialize( stream );
         BxdfNode::Serialize( stream );
-	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
 	}
 
 private:

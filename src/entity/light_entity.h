@@ -44,13 +44,6 @@ public:
     //! @param  stream      Input stream for data.
     void    Serialize( IStreamBase& stream ) override;
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void    Serialize( OStreamBase& stream ) override;
-
     //! @brief  Fill the scene with primitives.
     //!
     //! Fill the scene with the light.
@@ -73,13 +66,6 @@ public:
     //!
     //! @param  stream      Input stream for data.
     void    Serialize(IStreamBase& stream) override;
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void    Serialize(OStreamBase& stream) override;
 
     //! @brief  Fill the scene with primitives.
     //!
@@ -104,13 +90,6 @@ public:
     //! @param  stream      Input stream for data.
     void    Serialize(IStreamBase& stream) override;
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void    Serialize(OStreamBase& stream) override;
-
     //! @brief  Fill the scene with primitives.
     //!
     //! Fill the scene with a point light.
@@ -134,13 +113,6 @@ public:
     //! @param  stream      Input stream for data.
     void    Serialize(IStreamBase& stream) override;
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void    Serialize(OStreamBase& stream) override;
-
     //! @brief  Fill the scene with primitives.
     //!
     //! Base entity has nothing in it, which pops nothing in the world.
@@ -163,13 +135,6 @@ public:
     //!
     //! @param  stream      Input stream for data.
     void    Serialize(IStreamBase& stream) override;
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void    Serialize(OStreamBase& stream) override;
 
     //! @brief  Fill the scene with primitives.
     //!

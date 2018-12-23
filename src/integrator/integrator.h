@@ -105,13 +105,6 @@ public:
 		stream >> max_recursive_depth;
 	}
 
-    //! @brief      Serializing data to stream
-    //!
-    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
-    void    Serialize( OStreamBase& stream ) override {
-		stream << max_recursive_depth;
-	}
-
 protected:
 	// Camera
     std::shared_ptr<class Camera>	camera = nullptr;

@@ -41,7 +41,3 @@ void MeshVisual::FillScene( Scene& scene ){
 void MeshVisual::Serialize( IStreamBase& stream ){
 	m_memory->Serialize(stream);
 }
-
-void MeshVisual::Serialize( OStreamBase& stream ){
-	m_memory->Serialize(stream);
-}

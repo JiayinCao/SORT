@@ -56,14 +56,7 @@ public:
     void    Serialize( IStreamBase& stream ) override {
 		Integrator::Serialize( stream );
 	}
-
-    //! @brief      Serializing data to stream
-    //!
-    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
-    void    Serialize( OStreamBase& stream ) override {
-		Integrator::Serialize( stream );
-	}
-
+	
 private:
 	SampleOffset*	light_sample_offsets = nullptr;	// light sample offset
 	SampleOffset*	bsdf_sample_offsets = nullptr;	// bsdf sample offset

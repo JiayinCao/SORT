@@ -44,15 +44,6 @@ public:
         src1.Serialize( stream );
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
@@ -73,15 +64,6 @@ public:
     //! @param  stream      Input stream for data.
     void Serialize( IStreamBase& stream ) override {
         src.Serialize( stream );
-	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
 	}
 
 private:
@@ -105,15 +87,6 @@ public:
         src0.Serialize( stream );
         src1.Serialize( stream );
         factor.Serialize( stream );
-	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
 	}
 
 private:
@@ -142,15 +115,6 @@ public:
         factor1.Serialize( stream );
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
@@ -176,15 +140,6 @@ public:
         src1.Serialize( stream );
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
@@ -207,15 +162,6 @@ public:
         src.Serialize( stream );
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
@@ -235,15 +181,6 @@ public:
     //! @param  stream      Input stream for data.
     void Serialize( IStreamBase& stream ) override {
         src.Serialize( stream );
-	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
 	}
 
 private:
@@ -268,15 +205,6 @@ public:
     //! @param  stream      Input stream for data.
     void Serialize( IStreamBase& stream ) override {
         src.Serialize( stream );
-	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
 	}
 
 private:

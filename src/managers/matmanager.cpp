@@ -15,15 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header
-#include "sort.h"
 #include "matmanager.h"
-#include "core/path.h"
-#include "texmanager.h"
-#include "core/creator.h"
-#include "bsdf/merl.h"
-#include "core/creator.h"
-#include "core/log.h"
 #include "material/material.h"
 #include "stream/stream.h"
 
@@ -46,7 +38,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream )
 {
 	unsigned int material_cnt = 0;
 	stream >> material_cnt;
-	for( int i = 0 ; i < material_cnt ; ++i ){
+	for( unsigned int i = 0 ; i < material_cnt ; ++i ){
 		std::shared_ptr<Material> mat = std::make_shared<Material>();
 		mat->Serialize( stream );
 		m_matPool.insert( make_pair( mat->GetName() , mat ) );

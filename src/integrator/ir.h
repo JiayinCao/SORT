@@ -74,16 +74,6 @@ public:
 		stream >> m_fMinDist;
 	}
 
-    //! @brief      Serializing data to stream
-    //!
-    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
-    void    Serialize( OStreamBase& stream ) override {
-		Integrator::Serialize( stream );
-		stream << m_nLightPathSet;
-		stream << m_nLightPaths;
-		stream << m_fMinDist;
-	}
-
 private:
 	// light path set
 	int		m_nLightPathSet;

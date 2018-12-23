@@ -54,13 +54,6 @@ public:
     //! @param  stream      Input stream for data.
     void        Serialize( IStreamBase& stream ) override;
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the entity. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void        Serialize( OStreamBase& stream ) override;
-
 public:
     std::shared_ptr<BufferMemory>  m_memory;       /**< Memory for the mesh. */
 };

@@ -17,13 +17,11 @@
 
 #pragma once
 
-// include header file
-#include "core/singleton.h"
 #include <string>
 #include <unordered_map>
 #include <memory>
-
-class Material;
+#include "sort.h"
+#include "core/singleton.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //	definition of material manager
@@ -40,10 +38,10 @@ public:
 	// para 'mat_name' : the name for the material
 	// result          : the material with specific material , default material
 	//					 if there is no material with the name.
-    std::shared_ptr<Material>	FindMaterial( const std::string& mat_name ) const;
+    std::shared_ptr<class Material>	FindMaterial( const std::string& mat_name ) const;
 
 	// get default material
-    std::shared_ptr<Material>	GetDefaultMat();
+    std::shared_ptr<class Material>	GetDefaultMat();
 
 	// parse material file and add the materials into the manager
 	// result           : the number of materials in the file
@@ -51,7 +49,7 @@ public:
 
 private:
 	// material pool
-    std::unordered_map< std::string , std::shared_ptr<Material> >	m_matPool;
+    std::unordered_map< std::string , std::shared_ptr<class Material> >	m_matPool;
 
 	friend class Singleton<MatManager>;
 };
