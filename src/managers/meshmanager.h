@@ -136,7 +136,6 @@ public:
 
 	// serialization interface for BufferMemory
     void    Serialize( IStreamBase& stream ) override;
-	void    Serialize( OStreamBase& stream ) override;
 
 private:
 	void	_genFlatNormal();

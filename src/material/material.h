@@ -74,15 +74,6 @@ public:
 			m_root->PostProcess();
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
 	/**< Unique name of the material. */
 	std::string	 m_name;

@@ -158,7 +158,7 @@ public:
     //! @return             Whether the new streamed file is opened. It could failed due to several reasons, like no
     //!                     access to the file, no right to open the file or there is already a file opened, while
     //!                     @param force is false.
-    bool    Open( const std::string& filename , bool force = true ){
+    inline bool    Open( const std::string& filename , bool force = true ){
         if( m_file.is_open() ){
             if( force )
                 m_file.close();
@@ -173,7 +173,7 @@ public:
     //! @brief Close the currently opened stream file.
     //!
     //! @return             It returns true if there is a currently opened file, otherwise false will be returned.
-    bool    Close(){
+    inline bool    Close(){
         if( !m_file.is_open() )
             return false;
         m_file.close();

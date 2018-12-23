@@ -17,10 +17,7 @@
 
 #pragma once
 
-// include the header file
 #include "core/scene.h"
-#include "imagesensor/blenderimage.h"
-#include "imagesensor/rendertargetimage.h"
 
 /////////////////////////////////////////////////////////////////////
 //	definition of the system

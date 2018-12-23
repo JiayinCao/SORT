@@ -99,14 +99,7 @@ public:
 		if( m_integrator != nullptr )
 			m_integrator->Serialize( stream );
 	};
-
-    //! @brief      Serializing data to stream
-    //!
-    //! @param      Stream where the serialization data goes to. Depending on different situation, it could come from different places.#pragma endregion
-    void    Serialize( OStreamBase& stream ) override {
-		// TODO : to be implemented.
-	};
-
+	
 private:
 	std::string						m_resourcePath = "";			/**< Full path of the resource files. */
 	std::string						m_outputFile;					/**< Name of the output file. */

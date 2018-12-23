@@ -78,6 +78,13 @@ public:
     
     // whether the node is valid
     inline bool IsNodeValid() const { return m_node_valid; }
+    
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {}
 
 protected:
     // node properties
@@ -109,26 +116,20 @@ public:
     // get node return type
     virtual MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const { return MNPT_NONE; }
     
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    virtual void Serialize( IStreamBase& stream ) = 0;
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    virtual void Serialize( OStreamBase& stream ) = 0;
-
     //! @brief  Get the node attached to the current socket.
     //!
     //! @return Node attached to the current socket. 'nullptr' means no node attached.
     inline std::shared_ptr<MaterialNode>    GetNode() { 
         return node; 
     }
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {}
+
 protected:
 	// sub node if it has value
     std::shared_ptr<MaterialNode>	node = nullptr;
@@ -160,15 +161,6 @@ public:
             node->Serialize( stream );
         else
             stream >> color;
-	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
 	}
 
 private:
@@ -204,15 +196,6 @@ public:
             stream >> value;
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     float value;
 };
@@ -234,17 +217,6 @@ public:
         std::string dummy;
         stream >> dummy;
         stream >> str;
-	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-        std::string dummy;
-        stream >> dummy;
-        stream << str;
 	}
 
 	// color value
@@ -276,15 +248,6 @@ public:
         if( node )
             node->Serialize( stream );
 	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
 };
 
 class MaterialNodePropertyVector : public MaterialNodeProperty
@@ -315,15 +278,6 @@ public:
             stream >> vec;
 	}
 
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
-	}
-
 private:
     Vector    vec;
 };
@@ -350,15 +304,6 @@ public:
     //! @param  stream      Input stream for data.
     void Serialize( IStreamBase& stream ) override {
 		output.Serialize( stream );
-	}
-
-    //! @brief  Serialization interface. Saving data to stream.
-    //!
-    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
-    //!
-    //! @param  stream      Output stream.
-    void Serialize( OStreamBase& stream ) override {
-		// to be implemented
 	}
 
 private:
