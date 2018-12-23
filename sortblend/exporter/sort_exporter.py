@@ -24,7 +24,6 @@ import bmesh
 from math import degrees
 from . import exporter_common
 from ..stream import stream
-import xml.etree.cElementTree as ET
 from extensions_framework import util as efutil
 
 def get_sort_dir():
@@ -50,7 +49,7 @@ def get_intermediate_dir(force_debug=False):
     global intermediate_dir
     return_path = intermediate_dir
     if force_debug is True:
-        return_path = get_sort_dir() + "/intermediate/"
+        return_path = get_sort_dir()
     return efutil.filesystem_path(return_path) + "/"
 
 def MatrixSortToBlender():
@@ -95,51 +94,18 @@ def lookAtSORT(camera):
 
 # export blender information
 def export_blender(scene, force_debug=False):
-    # create root node
-    root = ET.Element("Root")
-
     # create immediate file path
-    create_path(scene, force_debug)
+    sort_resource_path = create_path(scene, force_debug)
 
-    # global renderer configuration
-    sort_resource_path = get_intermediate_dir(force_debug)
-    sort_config_file = sort_resource_path + 'global.sme'
-    sort_output_file = 'blender_generated.exr'
-    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
-    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
-    integrator_type = scene.integrator_type_prop
-
+    sort_config_file = sort_resource_path + 'scene.sort'
     fs = stream.FileStream( sort_config_file )
-    fs.serialize( 0 )
-    fs.serialize( sort_resource_path )
-    fs.serialize( sort_output_file )
-    fs.serialize( 64 )    # tile size, hard-coded it until I need to update it throught exposed interface later.
-    fs.serialize( int(scene.thread_num_prop) )
-    fs.serialize( int(scene.sampler_count_prop) )
-    fs.serialize( int(xres) )
-    fs.serialize( int(yres) )
-    fs.serialize( scene.accelerator_type_prop )
-    fs.serialize( scene.integrator_type_prop )
-    fs.serialize( int(scene.inte_max_recur_depth) )
-    if integrator_type == "ao":
-        fs.serialize( scene.ao_max_dist )
-    if integrator_type == "bdpt":
-        fs.serialize( bool(scene.bdpt_mis) )
-    if integrator_type == 'ir':
-        fs.serialize( scene.ir_light_path_set_num )
-        fs.serialize( scene.ir_light_path_num )
-        fs.serialize( scene.ir_min_dist )
     
+    # export global material settings
+    export_global_config(scene, fs, sort_resource_path)
     # export material
-    export_material(scene, root, force_debug)
+    export_material(scene, fs)
     # export scene
-    export_scene(scene, root, force_debug)
-
-    # output the xml
-    output_sort_file = get_intermediate_dir(force_debug) + 'sort_scene.xml'
-    tree = ET.ElementTree(root)
-    tree.write(output_sort_file)
-    print( 'SORT Scene File:\t' + output_sort_file )
+    export_scene(scene, fs)
 
 # clear old data and create new path
 def create_path(scene, force_debug):
@@ -148,17 +114,13 @@ def create_path(scene, force_debug):
     # get immediate directory
     output_dir = get_intermediate_dir(force_debug)
     
-    # clear the old directory
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
     # create one if there is no such directory
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
+    return output_dir
 
 # export scene
-def export_scene(scene, root, force_debug):
-    scene_root = ET.SubElement( root , 'Scene' )
-
+def export_scene(scene, fs):
     # camera node
     camera = exporter_common.getCamera(scene)
     pos, target, up = lookAtSORT(camera)
@@ -176,34 +138,27 @@ def export_scene(scene, root, force_debug):
     camera_shift_x = bpy.data.cameras[0].shift_x
     camera_shift_y = bpy.data.cameras[0].shift_y
 
-    model_node = ET.SubElement( scene_root , 'Entity' , filename= 'camera.sme' )
-    camera_fs = stream.FileStream( get_intermediate_dir(force_debug) + 'camera.sme' )
-    camera_fs.serialize('PerspectiveCameraEntity')
-    camera_fs.serialize(exporter_common.vec3_to_tuple(pos))
-    camera_fs.serialize(exporter_common.vec3_to_tuple(up))
-    camera_fs.serialize(exporter_common.vec3_to_tuple(target))
-    camera_fs.serialize(camera.data.sort_camera.sort_camera_lens.lens_size)
-    camera_fs.serialize((sensor_w,sensor_h))
-    camera_fs.serialize(int(sensor_fit))
-    camera_fs.serialize((aspect_ratio_x,aspect_ratio_y))
-    camera_fs.serialize(fov_angle)
+    fs.serialize('PerspectiveCameraEntity')
+    fs.serialize(exporter_common.vec3_to_tuple(pos))
+    fs.serialize(exporter_common.vec3_to_tuple(up))
+    fs.serialize(exporter_common.vec3_to_tuple(target))
+    fs.serialize(camera.data.sort_camera.sort_camera_lens.lens_size)
+    fs.serialize((sensor_w,sensor_h))
+    fs.serialize(int(sensor_fit))
+    fs.serialize((aspect_ratio_x,aspect_ratio_y))
+    fs.serialize(fov_angle)
 
     for ob in exporter_common.getMeshList(scene):
-        model_node = ET.SubElement( scene_root , 'Entity' , filename=ob.name + '.sme' )
-
-        fs = stream.FileStream( get_intermediate_dir(force_debug) + ob.name + '.sme' )
         fs.serialize('VisualEntity')
         fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * ob.matrix_world ) )
         export_mesh(ob, scene, fs)
 
     for ob in exporter_common.getLightList(scene):
-        fs = stream.FileStream( get_intermediate_dir(force_debug) + ob.name + '.sme' )
         lamp = ob.data
         # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
         world_matrix = MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() * flip_mat
 
-        model_node = ET.SubElement( scene_root , 'Entity' , filename=ob.name + '.sme' )
         if lamp.type == 'SUN':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
@@ -250,6 +205,9 @@ def export_scene(scene, root, force_debug):
             fs.serialize(exporter_common.matrix_to_tuple(MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender()))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
             fs.serialize(bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ))
+
+    # to indicate the scene stream comes to an end
+    fs.serialize('')
 
 mtl_dict = {}
 mtl_rev_dict = {}
@@ -443,41 +401,66 @@ def export_mesh(obj,scene,fs):
     del trunks
 
 
-def export_material(scene, root, force_debug):
-    mat_root = ET.SubElement( root , 'Materials' )
+def export_global_config(scene, fs, sort_resource_path):
+    # global renderer configuration
+    sort_output_file = 'blender_generated.exr'
+    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
+    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
+    integrator_type = scene.integrator_type_prop
 
+    fs.serialize( 0 )
+    fs.serialize( sort_resource_path )
+    fs.serialize( sort_output_file )
+    fs.serialize( 64 )    # tile size, hard-coded it until I need to update it throught exposed interface later.
+    fs.serialize( int(scene.thread_num_prop) )
+    fs.serialize( int(scene.sampler_count_prop) )
+    fs.serialize( int(xres) )
+    fs.serialize( int(yres) )
+    fs.serialize( scene.accelerator_type_prop )
+    fs.serialize( scene.integrator_type_prop )
+    fs.serialize( int(scene.inte_max_recur_depth) )
+    if integrator_type == "ao":
+        fs.serialize( scene.ao_max_dist )
+    if integrator_type == "bdpt":
+        fs.serialize( bool(scene.bdpt_mis) )
+    if integrator_type == 'ir':
+        fs.serialize( scene.ir_light_path_set_num )
+        fs.serialize( scene.ir_light_path_num )
+        fs.serialize( scene.ir_min_dist )
+
+def export_material(scene, fs):
+    # find the output node, duplicated code, to be cleaned
+    def find_output_node(material):
+        if material and material.sort_material and material.sort_material.sortnodetree:
+            ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+            for node in ntree.nodes:
+                if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
+                    return node
+        return None
+
+    material_count = 0
+    for material in exporter_common.getMaterialList(scene):
+        # get output nodes
+        output_node = find_output_node(material)
+        if output_node is None:
+            continue
+        material_count += 1
+
+    fs.serialize( int(material_count) )
     for material in exporter_common.getMaterialList(scene):
         # get the sort tree nodes
         ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-
-        # find the output node, duplicated code, to be cleaned
-        def find_output_node(material):
-            if material and material.sort_material and material.sort_material.sortnodetree:
-                ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-                for node in ntree.nodes:
-                    if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
-                        return node
-            return None
 
         # get output nodes
         output_node = find_output_node(material)
         if output_node is None:
             continue
 
-        print( 'Exporting material: ' + material.name )
-
-        # serilizing materials to separate files for now.
-        sort_resource_path = get_intermediate_dir(force_debug)
-        sort_material_file = sort_resource_path + material.name + '.sme'
-        fs = stream.FileStream( sort_material_file )
         fs.serialize( name_compat(material.name) )
-
-        # to be replaced with serialization system.
-        mat_node = ET.SubElement( mat_root , 'Material', name=name_compat(material.name) )
 
         def serialize_prop(mat_node , fs):
             # output the properties
-            seriliaze_prop_in_sort = lambda n , v : ( fs.serialize( '' ) , fs.serialize( v ) )
+            seriliaze_prop_in_sort = lambda n , v , fs = fs : ( fs.serialize( '' ) , fs.serialize( v ) )
             mat_node.serializae_prop(seriliaze_prop_in_sort)
 
             inputs = mat_node.inputs
@@ -492,7 +475,6 @@ def export_material(scene, root, force_debug):
                 else:
                     fs.serialize('')
                     fs.serialize( socket.export_serialization_value() )
-
         serialize_prop(output_node, fs)
-        del fs
+    del fs
 

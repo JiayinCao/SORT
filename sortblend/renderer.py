@@ -197,7 +197,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         intermediate_dir = sort_exporter.get_intermediate_dir()
         # execute binary
         self.cmd_argument = [binary_path];
-        self.cmd_argument.append( intermediate_dir + 'sort_scene.xml')
+        self.cmd_argument.append( intermediate_dir + 'scene.sort')
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 
         # wait for the process to finish
@@ -244,7 +244,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         intermediate_dir = sort_exporter.get_intermediate_dir()
         # execute binary
         self.cmd_argument = [binary_path];
-        self.cmd_argument.append( intermediate_dir + 'sort_scene.xml')
+        self.cmd_argument.append( intermediate_dir + 'scene.sort')
         self.cmd_argument.append('blendermode')
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 
