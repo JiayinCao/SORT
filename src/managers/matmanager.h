@@ -23,9 +23,7 @@
 #include <unordered_map>
 #include <memory>
 
-// pre-decleration
 class Material;
-class TiXmlNode;
 
 /////////////////////////////////////////////////////////////////////////////
 //	definition of material manager
@@ -48,12 +46,8 @@ public:
     std::shared_ptr<Material>	GetDefaultMat();
 
 	// parse material file and add the materials into the manager
-	// para 'mat_node'  : material node
 	// result           : the number of materials in the file
-	unsigned	ParseMatFile( TiXmlNode* mat_node );
-
-	// get material number
-	unsigned	GetMatCount() const;
+	unsigned	ParseMatFile( class IStreamBase& stream );
 
 private:
 	// material pool

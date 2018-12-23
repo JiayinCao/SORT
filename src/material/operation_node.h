@@ -54,8 +54,8 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
 };
 
 // Inverse node
@@ -85,7 +85,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , src );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
 
 // Lerp node
@@ -117,9 +117,9 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Factor" , factor );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( factor );
 };
 
 // Blend node
@@ -152,10 +152,10 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Factor1" , factor0 );
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( "Factor2" , factor1 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( factor0 );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( factor1 );
 };
 
 // Mutiply node
@@ -186,8 +186,8 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
 };
 
 // Gamma correction Node
@@ -217,7 +217,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , src );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
 
 // Gamma correction Node
@@ -247,7 +247,7 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , src );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
 
 // Gamma correction Node
@@ -280,5 +280,5 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , src );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };

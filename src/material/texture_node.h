@@ -57,8 +57,8 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
 
 	GridTexture grid_tex;
 };
@@ -94,8 +94,8 @@ public:
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color1" , src0 );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( "Color2" , src1 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
 
 	CheckBoxTexture checkbox_tex;
 };
@@ -130,7 +130,7 @@ public:
 	}
 
 private:
-	SORT_MATERIAL_DEFINE_PROP_STR( "Filename" , filename );
+	SORT_MATERIAL_DEFINE_PROP_STR( filename );
 
 	ImageTexture image_tex;
 };
