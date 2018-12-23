@@ -42,7 +42,6 @@ class FileStream(Stream):
             elif type(data).__name__ == 'int':
                 self.file.write(struct.pack( 'i' , data ) )
             elif type(data).__name__ == 'bool':
-                print( data )
                 self.file.write(struct.pack( '?' , data ) )
 
         if type(data).__name__ == 'str' :

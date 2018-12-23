@@ -28,6 +28,26 @@ public:
     
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        R.Serialize( stream );
+        G.Serialize( stream );
+        B.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( "R" , R );
     SORT_MATERIAL_DEFINE_PROP_FLOAT( "G" , G );
@@ -43,6 +63,24 @@ public:
     
     void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        color.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , color );
 };
@@ -56,6 +94,24 @@ public:
     
     void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        color.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , color );
 };
@@ -69,6 +125,24 @@ public:
     
     void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        color.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
+
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , color );
 };
@@ -81,6 +155,24 @@ public:
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_FLOAT; }
     
     void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
+    
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void Serialize( IStreamBase& stream ) override {
+        color.Serialize( stream );
+	}
+
+    //! @brief  Serialization interface. Saving data to stream.
+    //!
+    //! Serialize the material. Saving to an OStreamBase, which could be file, memory or network streaming.
+    //!
+    //! @param  stream      Output stream.
+    void Serialize( OStreamBase& stream ) override {
+		// to be implemented
+	}
     
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( "Color" , color );

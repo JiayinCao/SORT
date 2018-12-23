@@ -77,6 +77,9 @@ class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
         else:
             layout.label(text)
 
+    def export_serialization_value(self):
+        pass
+
 # Socket for Color
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketColor'
@@ -86,6 +89,8 @@ class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
     default_value = bpy.props.FloatVectorProperty( name='Color' , default=(1.0, 1.0, 1.0) ,subtype='COLOR',soft_min = 0.0, soft_max = 1.0)
     def export_socket_value(self):
         return '%f %f %f'%(self.default_value[:])
+    def export_serialization_value(self):
+        return self.default_value[:]
 
 # Socket for Float
 class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
@@ -96,6 +101,8 @@ class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0, max=1.0 )
     def export_socket_value(self):
         return '%f'%(self.default_value)
+    def export_serialization_value(self):
+        return self.default_value
 
 # Socket for Float
 class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
@@ -106,6 +113,8 @@ class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0)
     def export_socket_value(self):
         return '%f'%(self.default_value)
+    def export_serialization_value(self):
+        return self.default_value
 
 # Socket for normal ( normal map )
 class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
@@ -115,6 +124,8 @@ class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
     default_value = bpy.props.FloatVectorProperty( name='Normal' , default=(0.0,1.0,0.0) , min=-1.0, max=1.0 )
     def export_socket_value(self):
         return '%f %f %f'%(self.default_value[:])
+    def export_serialization_value(self):
+        return self.default_value[:]
     # normal socket doesn't show the vector because it is not supposed to be edited this way.
     def draw(self, context, layout, node, text):
         if self.is_linked or self.is_output:
@@ -128,6 +139,8 @@ class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
 class SORTNodePropertyFloat(SORTNodeProperty):
     def export_socket_value(self,value):
         return '%f'%value
+    def export_serialization_value(self,value):
+        return value
     @classmethod
     def setup( cls , prop ):
         cls.default_value = bpy.props.FloatProperty( name=prop['name'] , default=prop['default'] , min=prop['min'], max=prop['max'] )
@@ -136,6 +149,8 @@ class SORTNodePropertyFloat(SORTNodeProperty):
 class SORTNodePropertyFloatVector(SORTNodeProperty):
     def export_socket_value(self,value):
         return '%f %f %f'%(value[:])
+    def export_serialization_value(self,value):
+        return value[:]
     @classmethod
     def setup( cls , prop ):
         cls.default_value = bpy.props.FloatVectorProperty( name=prop['name'] , default=prop['default'] , min=prop['min'], max=prop['max'] )
@@ -143,6 +158,8 @@ class SORTNodePropertyFloatVector(SORTNodeProperty):
 # Property for enum
 class SORTNodePropertyEnum(SORTNodeProperty):
     def export_socket_value(self,value):
+        return value
+    def export_serialization_value(self,value):
         return value
     @classmethod
     def setup( cls , prop ):
@@ -152,6 +169,8 @@ class SORTNodePropertyEnum(SORTNodeProperty):
 class SORTNodePropertyPath(SORTNodeProperty):
     pbrt_type = 'property'
     def export_socket_value(self,value):
+        return bpy.path.abspath( value )
+    def export_serialization_value(self,value):
         return bpy.path.abspath( value )
     @classmethod
     def setup( cls , prop ):
