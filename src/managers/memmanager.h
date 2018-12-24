@@ -21,7 +21,6 @@
 #include "core/singleton.h"
 #include "core/thread.h"
 #include "core/log.h"
-#include "core/strhelper.h"
 #include "core/sassert.h"
 
 struct Memory

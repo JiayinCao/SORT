@@ -43,7 +43,7 @@ SharedMemory SMManager::CreateSharedMemory(const std::string& sm_name, int size,
 	PlatformSharedMemory sm;
 
 	// create shared memory
-	sm.CreateSharedMemory(GetFullPath(sm_name), size, type);
+	sm.CreateSharedMemory(GetFilePathInResourceFolder(sm_name), size, type);
 
 	// push it into the map
 	m_SharedMemory.insert(std::make_pair(sm_name, sm));
