@@ -17,7 +17,7 @@ this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 #pragma once
 
-#include "../sort.h"
+#include "sort.h"
 #include "easy/profiler.h"
 
 // SORT used to use this profiler as default one.
