@@ -17,12 +17,12 @@
 
 #pragma once
 
-// include the header
+#include <unordered_map>
 #include "core/singleton.h"
 #include "core/thread.h"
 #include "core/log.h"
 #include "core/strhelper.h"
-#include <unordered_map>
+#include "core/sassert.h"
 
 struct Memory
 {
