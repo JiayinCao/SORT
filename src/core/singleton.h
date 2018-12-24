@@ -17,29 +17,20 @@
 
 #pragma once
 
-// include the header
 #include "sort.h"
 
-//////////////////////////////////////////////////////////////////////
-//	definition of Singleton class
-//	actually it's a template, any class wants to be singleton could 
-//	inherit from it.
+//! @brief  Singleton implementation.
 template<typename T>
-class	Singleton
-{
-//public method
+class	Singleton{
 public:
-	// destructor
+    //! @brief  Empty destructor.
 	virtual ~Singleton(){}
 
-	// get singleton
+    //! @brief  Get the singleton instance.
+    //!
+    //! @return The single instance of the class.
 	static T& GetSingleton(){
         static T m_Singleton;
 		return m_Singleton;
-	}
-
-	// get singleton pointer
-	static T* GetSingletonPtr(){
-		return &GetSingleton();
 	}
 };

@@ -100,22 +100,21 @@ public:
     //!
     //! @param  filename    Name of the log file.
     FileLogDispatcher( const std::string& filename );
-
+    
     //! @brief  Destructor closes the file.
     ~FileLogDispatcher();
+
+private:
+    std::ofstream   m_file;     /**< File to be logged. */
     
     //! @brief  Output the log message to the file.
     //!
     //! @oaram  s           The message to be output.
     void output( const std::string& s ) override;
-
-private:
-    std::ofstream file;     /**< File to be logged. */
 };
 
 //! @brief   StdOutLogDispatcher outputs the message to std output.
 class StdOutLogDispatcher : public LogDispatcher {
-public:
     //! @brief  Output the log message to the std-out.
     //!
     //! @oaram  s           The message to be output.

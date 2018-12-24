@@ -15,7 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header file
 #include "sort.h"
 #include "system.h"
 #include "core/log.h"
@@ -34,12 +33,12 @@ int __cdecl main( int argc , char** argv )
 int main(int argc, char** argv)
 #endif
 {
-    addLogDispatcher(new StdOutLogDispatcher());
-    addLogDispatcher(new FileLogDispatcher( GetExecutableDir() + "log.txt" ) );
-
     // enable profiler
     SORT_PROFILE_ENABLE;
     SORT_PROFILE("Main Thread");
+    
+    addLogDispatcher(new StdOutLogDispatcher());
+    addLogDispatcher(new FileLogDispatcher( "log.txt" ));
 
     std::string commandline = "Command line arguments: \t";
     for (int i = 0; i < argc; ++i) {
@@ -47,19 +46,15 @@ int main(int argc, char** argv)
         commandline += " ";
     }
 
-    slog(INFO, GENERAL, "%s" , commandline.c_str() );
-
-#if SORT_ENABLE_STATS_COLLECTION
-    slog( INFO, GENERAL, "Stats collection is enabled.");
-#else
-    slog( INFO, GENERAL, "Stats collection is disabled." );
-#endif
+    slog( INFO , GENERAL , "%s" , commandline.c_str() );
+    slog( INFO, GENERAL, "Stats collection is %s." , SORT_ENABLE_STATS_COLLECTION ? "enabled" : "disabled" );
+    slog( INFO, GENERAL, "Profiling system is %s." , SORT_PROFILE_ISENABLED ? "enabled" : "disabled" );
 
     // check if there is file argument
     if (argc < 2)
     {
         slog(WARNING, GENERAL, "Miss file argument.");
-        slog(INFO, GENERAL, "Log file: \"%s\"", GetFullPath("log.txt").c_str());
+        slog(INFO, GENERAL, "Log file: \"%s\"", GetFilePathInResourceFolder("log.txt").c_str());
         return 0;
     }
 
@@ -70,7 +65,6 @@ int main(int argc, char** argv)
     }
 
     slog(INFO, GENERAL, "Number of CPU cores %d" , NumSystemCores() );
-    slog(INFO, GENERAL, "Scene file (%s)" , argv[1]);
 
     // enable blender mode if possible
     if (argc > 2)
@@ -100,9 +94,9 @@ int main(int argc, char** argv)
     if (SORT_PROFILE_ISENABLED){
         const std::string filename("sort.prof");
         SORT_PROFILE_DUMP(filename.c_str());
-        slog(INFO, GENERAL, "Profiling file: \"%s\"", GetFullPath(filename).c_str());
+        slog(INFO, GENERAL, "Profiling file: \"%s\"", GetFilePathInExeFolder(filename).c_str());
     }
-    slog(INFO, GENERAL, "Log file: \"%s\"", GetFullPath("log.txt").c_str());
+    slog(INFO, GENERAL, "Log file: \"%s\"", GetFilePathInExeFolder("log.txt").c_str());
 
 	return 0;
 }

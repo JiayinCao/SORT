@@ -32,7 +32,7 @@
 bool TexManager::Write( const std::string& filename , const Texture* tex )
 {
 	// get full path name
-	std::string str = GetFullPath( filename );
+	std::string str = GetFilePathInExeFolder( filename );
 
     // Save image
     return saveImage(str, tex);
