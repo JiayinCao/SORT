@@ -22,6 +22,7 @@
 #include <chrono>
 #include <string>
 #include <mutex>
+#include "core/path.h"
 
 static std::vector<std::unique_ptr<LogDispatcher>> g_logDispatcher;
 static bool g_logLevel = true;
@@ -110,15 +111,15 @@ void StdOutLogDispatcher::output( const std::string& s ){
 }
 
 FileLogDispatcher::FileLogDispatcher( const std::string& filename ){
-    file.open( filename.c_str() );
+    m_file.open( GetFilePathInExeFolder(filename) );
 }
 
 FileLogDispatcher::~FileLogDispatcher(){
-    file.close();
+    m_file.close();
 }
 
 void FileLogDispatcher::output( const std::string& s ){
-    if( !file.is_open() )
+    if( !m_file.is_open() )
         return;
-    file<<s<<std::endl;
+    m_file<<s<<std::endl;
 }

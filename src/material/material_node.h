@@ -22,7 +22,6 @@
 #include "core/creator.h"
 #include "spectrum/rgbspectrum.h"
 #include "math/vector4.h"
-#include "core/strhelper.h"
 #include "stream/stream.h"
 
 #define SORT_PROP_CAT_PROXY(v0, v1)                     v0 ## v1

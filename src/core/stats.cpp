@@ -16,7 +16,6 @@
  */
 
 #include "stats.h"
-#include "core/strhelper.h"
 
 #ifdef SORT_ENABLE_STATS_COLLECTION
 

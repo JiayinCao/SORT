@@ -17,11 +17,41 @@
 
 #pragma once
 
-// include header file
 #include "sort.h"
+#include <stdio.h>
+#ifdef WINDOWS
+#include <direct.h>
+#define GetCurrentDir _getcwd
+#else
+#include <unistd.h>
+#define GetCurrentDir getcwd
+#endif
+#include "core/globalconfig.h"
 
-// get current directory
-std::string GetExecutableDir();
+//! @brief  Full path of files in the resource folder.
+//!
+//! This is just a very simple function that appends the resource folder to the filename.
+//! It is the caller's responsibilty to make sure the file is in the resource folder.
+//!
+//! @param filename     Name of the file in the resource folder.
+//! @return             Full path that has the file name.
+inline std::string GetFilePathInResourceFolder( const std::string& filename ){
+    return g_resourcePath + filename;
+}
 
-// get full path
-std::string GetFullPath( const std::string& str );
+//! @brief  Full path of files in the executable folder.
+//!
+//! This is just a very simple function that appends the executable folder to the filename.
+//! It is the caller's responsibilty to make sure the file is in the executable folder.
+//!
+//! @param filename     Name of the file in the executable folder.
+//! @return             Full path that has the file name.
+inline std::string GetFilePathInExeFolder( const std::string& filename ){
+    char buff[FILENAME_MAX];
+    GetCurrentDir( buff, FILENAME_MAX );
+#ifdef WINDOWS
+    return std::string(buff) + "\\" + filename;
+#else
+    return std::string(buff) + "/" + filename;
+#endif
+}
