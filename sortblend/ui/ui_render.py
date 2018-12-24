@@ -117,15 +117,12 @@ class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
         self.layout.prop(context.scene,"sampler_type_prop")
         self.layout.prop(context.scene,"sampler_count_prop")
 
-# export debug scene
 class SORT_export_debug_scene(bpy.types.Operator):
     bl_idname = "sort.export_debug_scene"
     bl_label = "Export SORT Scene"
-
     def execute(self, context):
         sort_exporter.export_blender(context.scene,True)
         return {'FINISHED'}
-
 
 class SORT_open_log(bpy.types.Operator):
     bl_idname = "sort.open_log"
@@ -135,18 +132,16 @@ class SORT_open_log(bpy.types.Operator):
         OpenFile( logfile )
         return {'FINISHED'}
 
-
 class SORT_openfolder(bpy.types.Operator):
     bl_idname = "sort.openfolder_sort"
     bl_label = "Open SORT folder"
-    
     def execute(self, context):
         OpenFolder( sort_exporter.get_sort_dir() )
         return {'FINISHED'}
 
-
 class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'DebugPanel'
+    bpy.types.Scene.detailedLog = bpy.props.BoolProperty(name='Output Detailed Output',default=False)
     def draw(self, context):
         self.layout.operator("sort.export_debug_scene")
         split = self.layout.split()
@@ -154,7 +149,7 @@ class DebugPanel(SORTRenderPanel, bpy.types.Panel):
         left.operator("sort.open_log")
         right = split.column(align=True)
         right.operator("sort.openfolder_sort")
-
+        self.layout.prop(context.scene, "detailedLog")
 
 export_pbrt_lable = "Render in PBRT"
 pbrt_running = False

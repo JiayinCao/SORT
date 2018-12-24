@@ -15,7 +15,13 @@
 
 import os
 import mathutils
+from datetime import datetime
 import bpy
+
+scene = None
+def setScene( sc ):
+    global scene
+    scene = sc
 
 def getCamera(scene):
     camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
@@ -91,3 +97,12 @@ def getMeshList( scene ):
         if ob.type == 'MESH':
             exported_meshes.append( ob )
     return exported_meshes
+
+def log(s):
+    header = '[' + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '][SORT Plugin] '
+    print( header + s)
+
+def logD(s):
+    if scene.detailedLog is False:
+        return
+    log(s)
