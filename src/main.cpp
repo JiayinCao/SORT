@@ -47,7 +47,11 @@ int main(int argc, char** argv)
     }
 
     slog( INFO , GENERAL , "%s" , commandline.c_str() );
-    slog( INFO, GENERAL, "Stats collection is %s." , SORT_ENABLE_STATS_COLLECTION ? "enabled" : "disabled" );
+#ifdef SORT_ENABLE_STATS_COLLECTION
+    slog( INFO, GENERAL, "Stats collection is enabled." );
+#else
+    slog( INFO, GENERAL, "Stats collection is disabled." );
+#endif
     slog( INFO, GENERAL, "Profiling system is %s." , SORT_PROFILE_ISENABLED ? "enabled" : "disabled" );
 
     // check if there is file argument
