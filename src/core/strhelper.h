@@ -19,31 +19,13 @@
 
 #include "sort.h"
 #include "core/enum.h"
-#include "math/transform.h"
 #include "spectrum/spectrum.h"
-
-// pre-decleration
-struct VertexIndex;
 
 ////////////////////////////////////////////////////////////////////////
 // there are some global functions for parsing string
 
-// convert string to vertex index
-// para 'str' : the string to parse
-// result     : a vertex index
-VertexIndex	VertexIndexFromStr( const std::string& str );
-
-// transform from string
-Transform TransformFromStr( const std::string& str );
-
 // spectrum from string
 Spectrum SpectrumFromStr( const std::string& str );
-
-// point from string
-Point PointFromStr( const std::string& str );
-
-// direction from string
-Vector VectorFromStr( const std::string& str );
 
 // get the next token
 std::string NextToken( std::string& str , char t );

@@ -21,6 +21,7 @@ import numpy as np
 import platform
 import tempfile
 import bmesh
+import time
 from math import degrees
 from . import exporter_common
 from ..stream import stream
@@ -94,18 +95,34 @@ def lookAtSORT(camera):
 
 # export blender information
 def export_blender(scene, force_debug=False):
+    exporter_common.setScene(scene)
+
     # create immediate file path
     sort_resource_path = create_path(scene, force_debug)
 
     sort_config_file = sort_resource_path + 'scene.sort'
     fs = stream.FileStream( sort_config_file )
     
+    exporter_common.log("Exporting sort file %s" % sort_config_file)
+
     # export global material settings
+    current_time = time.time()
+    exporter_common.log("Exporting global configuration.")
     export_global_config(scene, fs, sort_resource_path)
+    exporter_common.log("Exported configuration %.2f" % (time.time() - current_time))
+    current_time = time.time()
+
     # export material
+    exporter_common.log("Exporting materials.")
     export_material(scene, fs)
+    exporter_common.log("Exported materials %.2f" % (time.time() - current_time))
+    current_time = time.time()
+
     # export scene
+    exporter_common.log("Exporting scene.")
     export_scene(scene, fs)
+    exporter_common.log("Exported scene %.2f" % (time.time() - current_time))
+    current_time = time.time()
 
 # clear old data and create new path
 def create_path(scene, force_debug):
@@ -148,10 +165,22 @@ def export_scene(scene, fs):
     fs.serialize((aspect_ratio_x,aspect_ratio_y))
     fs.serialize(fov_angle)
 
+    total_vert_cnt = 0
+    total_normal_cnt = 0
+    total_uv_cnt = 0
+    total_face_cnt = 0
     for ob in exporter_common.getMeshList(scene):
         fs.serialize('VisualEntity')
         fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * ob.matrix_world ) )
-        export_mesh(ob, scene, fs)
+        stat = export_mesh(ob, scene, fs)
+        total_vert_cnt += stat[0]
+        total_normal_cnt += stat[1]
+        total_uv_cnt += stat[2]
+        total_face_cnt += stat[3]
+    exporter_common.log( "Total vertices: %d." % total_vert_cnt )
+    exporter_common.log( "Total normals: %d." % total_normal_cnt )
+    exporter_common.log( "Total uvs: %d." % total_uv_cnt )
+    exporter_common.log( "Total faces: %d." % total_face_cnt )
 
     for ob in exporter_common.getLightList(scene):
         lamp = ob.data
@@ -230,10 +259,49 @@ def triangulate_object(obj):
     bm.to_mesh(me)
     bm.free()
 
+done = True
+def test( obj ):
+    global done
+    if done:
+        return
+    done = True
+
+    mesh = obj.data
+
+    normals = []
+    indices = []
+    for face in mesh.polygons:
+        indices.append(face.vertices[0])
+        indices.append(face.vertices[1])
+        indices.append(face.vertices[2])
+        for i in range(len(face.vertices)):
+            v = mesh.vertices[face.vertices[i]]
+            normals.append([v.normal[0],v.normal[1],v.normal[2]])
+
+    verts = []
+    for vert in mesh.vertices:
+        verts.append(vert.co.xyz)
+
+    uvs = []
+    for uv_layer in mesh.uv_layers:
+        for x in range(len(uv_layer.data)):
+            uvs.append(uv_layer.data[x].uv)
+
+    print(indices)
+    print(verts)
+    print(uvs)
+    print(normals)
+
 # export mesh file
 def export_mesh(obj,scene,fs):
+    global done
+
+    exporter_common.logD("Exporting object: %s." % obj.name)
     # make sure there is no quad in the object
+    current_time = time.time()
     triangulate_object(obj)
+    exporter_common.logD("Triangulating object. %.2f (s)" % (time.time() - current_time))
+    current_time = time.time()
 
     # the mesh object
     mesh = obj.data
@@ -247,6 +315,8 @@ def export_mesh(obj,scene,fs):
 
     # generate normal data
     mesh.calc_normals_split()
+    exporter_common.logD("Calculating split normals. %.2f(s), %d vertices." %((time.time() - current_time),len(mesh.vertices)))
+    current_time = time.time()
     contextMat = None
     materials = mesh.materials[:]
     material_names = [m.name if m else None for m in materials]
@@ -258,19 +328,25 @@ def export_mesh(obj,scene,fs):
 
     name1 = obj.name
     name2 = obj.data.name
-    if name1 == name2:
-        obnamestring = name_compat(name1)
-    else:
-        obnamestring = '%s_%s' % (name_compat(name1), name_compat(name2))
+    obnamestring = '%s_%s' % (name_compat(name1), name_compat(name2))
 
     # serialize vertices
     fs.serialize(len(mesh.vertices))
     for v in mesh.vertices:
         fs.serialize(v.co[:])
 
+        if done is False:
+            print(v.co[:])
+
+    vert_cnt = len(mesh.vertices)
+    exporter_common.logD("Exporting vertices. %.2f(s), %d vertices." % ((time.time() - current_time) , vert_cnt))
+    current_time = time.time()
+
     # UV
     uvs = []
-    uv_unique_count = no_unique_count = 0
+    uv_unique_count = 0
+    testw = {1}
+    testw.add(1)
     if faceuv:
         # in case removing some of these dont get defined.
         uv = f_index = uv_index = uv_key = uv_val = uv_ls = None
@@ -282,6 +358,7 @@ def export_mesh(obj,scene,fs):
             uv_ls = uv_face_mapping[f_index] = []
             for uv_index, l_index in enumerate(f.loop_indices):
                 uv = uv_layer[l_index].uv
+                #testw.add( l_index )
                 uv_key = round(uv[0], 4), round(uv[1], 4)
                 uv_val = uv_get(uv_key)
                 if uv_val is None:
@@ -293,36 +370,47 @@ def export_mesh(obj,scene,fs):
         del uv_dict, uv, f_index, uv_index, uv_ls, uv_get, uv_key, uv_val
 
     # serialize uv coordinate
+    #print( "%d %d" % ( len(uvs) , len( uvs ) ) )
     fs.serialize(len(uvs))
     for uv in uvs:
+        if done is False:
+            print(uv[:])
         fs.serialize(uv[:])
+    uv_cnt = len(uvs)
     del uvs
+    exporter_common.logD("Exporting uvs. %.2f(s), %d uvs." %((time.time() - current_time),uv_cnt))
+    current_time = time.time()
 
     # output normal
-    no_key = no_val = None
+    nor_key = nor_val = None
     normals_to_idx = {}
-    no_get = normals_to_idx.get
-    no_unique_count = 0
+    nor_get = normals_to_idx.get
+    nor_unique_count = 0
     loops_to_normals = [0] * len(mesh.loops)
     normals = []
     for f, f_index in face_index_pairs:
         for l_idx in f.loop_indices:
             def veckey3d(v):
                 return round(v.x, 4), round(v.y, 4), round(v.z, 4)
-            no_key = veckey3d(mesh.loops[l_idx].normal)
-            no_val = no_get(no_key)
-            if no_val is None:
-                no_val = normals_to_idx[no_key] = no_unique_count
-                normals.append( no_key )
-                no_unique_count += 1
-            loops_to_normals[l_idx] = no_val
-    del normals_to_idx, no_get, no_key, no_val
+            nor_key = veckey3d(mesh.loops[l_idx].normal)
+            nor_val = nor_get(nor_key)
+            if nor_val is None:
+                nor_val = normals_to_idx[nor_key] = nor_unique_count
+                normals.append( nor_key )
+                nor_unique_count += 1
+            loops_to_normals[l_idx] = nor_val
+    del normals_to_idx, nor_get, nor_key, nor_val
 
     # serialize normals
     fs.serialize(len(normals))
     for normal in normals:
+        if done is False:
+            print(normal[:])
         fs.serialize(normal[:])
+    normal_cnt = len(normals)
     del normals
+    exporter_common.logD("Exporting normals. %.2f(s), %d normals." %((time.time() - current_time),normal_cnt))
+    current_time = time.time()
 
     me_verts = mesh.vertices
 
@@ -391,15 +479,24 @@ def export_mesh(obj,scene,fs):
                 trunks[-1].face.append( (totverts + v.index, totno + loops_to_normals[li]) )
 
     #serialize trunks
+    face_cnt = 0
     fs.serialize( len(trunks) )
     for trunk in trunks:
         fs.serialize( trunk.mat_name )
         fs.serialize( int(len( trunk.face ) / 3) )
+        face_cnt += len(trunk.face) / 3
         for ids in trunk.face:
+            if done is False:
+                print( ids[:] )
             for id in ids:
                 fs.serialize( id - 1 )
     del trunks
+    exporter_common.logD("Exporting faces. %.2f(s), %d faces." %((time.time() - current_time),face_cnt))
+    current_time = time.time()
 
+    test(obj)
+
+    return ( vert_cnt , normal_cnt , uv_cnt , face_cnt )
 
 def export_global_config(scene, fs, sort_resource_path):
     # global renderer configuration
