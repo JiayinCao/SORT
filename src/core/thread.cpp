@@ -22,6 +22,7 @@
 #include "core/profile.h"
 #include "task/task.h"
 #include "core/profile.h"
+#include "core/define.h"
 
 // thread id
 static Thread_Local int g_ThreadId = 0;
