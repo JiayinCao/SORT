@@ -235,6 +235,13 @@ def export_scene(scene, fs):
     # to indicate the scene stream comes to an end
     fs.serialize('')
 
+# avoid having space in material name
+def name_compat(name):
+    if name is None:
+        return 'None'
+    else:
+        return name.replace(' ', '_')
+
 def export_mesh(mesh, fs):
     LENFMT = struct.Struct('=i')
     VERTFMT = struct.Struct('=ffffffff')
@@ -294,9 +301,9 @@ def export_mesh(mesh, fs):
             oi.append(out_idx)
 
         global matname_to_id
-        matid = f.material_index
-        matname = material_names[matid]
-        matid = matname_to_id[matname]
+        matid = -1
+        matname = name_compat(material_names[f.material_index]) if len( material_names ) > 0 else None
+        matid = matname_to_id[matname] if matname in matname_to_id else -1
         if len(oi) == 3:
             # triangle
             wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
@@ -353,13 +360,6 @@ def export_material(scene, fs):
                     return node
         return None
 
-    # avoid having space in material name
-    def name_compat(name):
-        if name is None:
-            return 'None'
-        else:
-            return name.replace(' ', '_')
-
     material_count = 0
     for material in exporter_common.getMaterialList(scene):
         # get output nodes
@@ -380,9 +380,10 @@ def export_material(scene, fs):
         if output_node is None:
             continue
 
-        matname_to_id[material.name] = i
+        matname_to_id[name_compat(material.name)] = i
         i += 1
         fs.serialize( name_compat(material.name) )
+        exporter_common.logD( 'Exporting material %s.' % name_compat(material.name) )
 
         def serialize_prop(mat_node , fs):
             # output the properties
