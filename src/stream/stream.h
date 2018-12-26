@@ -20,6 +20,7 @@
 #include "core/sassert.h"
 #include "core/log.h"
 #include "math/point.h"
+#include "math/vector2.h"
 #include "math/transform.h"
 #include "spectrum/spectrum.h"
 
@@ -134,6 +135,22 @@ public:
     //! @return     Reference of the stream itself.
     inline StreamBase&  operator >> ( Vector& v ){
         return *this >> v.x >> v.y >> v.z;
+    }
+
+    //! @brief Streaming in a vector value
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator << (const Vector2f& v) {
+        return *this << v.x << v.y;
+    }
+
+    //! @brief Streaming out a vector value
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator >> (Vector2f& v) {
+        return *this >> v.x >> v.y;
     }
 
     //! @brief Streaming in a transform value.

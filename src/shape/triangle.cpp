@@ -34,15 +34,19 @@ bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect )
 {
 	// get the memory
 	// note : reference is not used here because it's not thread-safe
-	auto& mem = m_mesh_visual->m_memory;
-	int id0 = m_Index[0].posIndex;
-	int id1 = m_Index[1].posIndex;
-	int id2 = m_Index[2].posIndex;
+	auto& mem = m_meshVisual->m_memory;
+	int id0 = m_index.m_id[0];
+	int id1 = m_index.m_id[1];
+	int id2 = m_index.m_id[2];
+
+    const MeshVertex& mv0 = mem->m_vertices[id0];
+    const MeshVertex& mv1 = mem->m_vertices[id1];
+    const MeshVertex& mv2 = mem->m_vertices[id2];
 
 	// get three vertexes
-	const Point& op0 = mem->m_PositionBuffer[id0] ;
-	const Point& op1 = mem->m_PositionBuffer[id1] ;
-	const Point& op2 = mem->m_PositionBuffer[id2] ;
+	const Point& op0 = mv0.m_position;
+	const Point& op1 = mv1.m_position;
+	const Point& op2 = mv2.m_position;
 
 	Point p0 = op0;
 	Point p1 = op1;
@@ -112,36 +116,13 @@ bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect )
 	// store the intersection
 	intersect->intersect = r(t);
 
-	// store normal if the info is available
-	id0 = m_Index[0].norIndex;
-	id1 = m_Index[1].norIndex;
-	id2 = m_Index[2].norIndex;
-
     intersect->gnormal = Normalize(Cross( ( op2 - op0 ) , ( op1 - op0 ) ));
-	intersect->normal = ( w * mem->m_NormalBuffer[id0] + u * mem->m_NormalBuffer[id1] + v * mem->m_NormalBuffer[id2]).Normalize();
-	intersect->tangent = ( w * mem->m_TangentBuffer[id0] + u * mem->m_TangentBuffer[id1] + v * mem->m_TangentBuffer[id2]).Normalize();
+	intersect->normal = ( w * mv0.m_normal + u * mv1.m_normal + v * mv2.m_normal).Normalize();
+	intersect->tangent = ( w * mv0.m_tangent + u * mv1.m_tangent + v * mv2.m_tangent).Normalize();
 
-	// store texture coordinate
-	if( mem->m_iTBCount > 0 )
-	{
-		id0 = 2*m_Index[0].texIndex;
-		id1 = 2*m_Index[1].texIndex;
-		id2 = 2*m_Index[2].texIndex;
-
-		float u0 = mem->m_TexCoordBuffer[id0];
-		float u1 = mem->m_TexCoordBuffer[id1];
-		float u2 = mem->m_TexCoordBuffer[id2];
-		float v0 = mem->m_TexCoordBuffer[id0+1];
-		float v1 = mem->m_TexCoordBuffer[id1+1];
-		float v2 = mem->m_TexCoordBuffer[id2+1];
-		intersect->u = w * u0 + u * u1 + v * u2;
-		intersect->v = w * v0 + u * v1 + v * v2;
-	}else
-	{
-		intersect->u = 0.0f;
-		intersect->v = 0.0f;
-	}
-
+    auto uv = w * mv0.m_texCoord + u * mv1.m_texCoord + v * mv2.m_texCoord;
+    intersect->u = uv.x;
+    intersect->v = uv.y;
 	intersect->t = t;
 
     return t > 0.0f ;
@@ -155,16 +136,14 @@ const BBox& Triangle::GetBBox() const
 	{
         m_bbox = std::unique_ptr<BBox>( new BBox() );
 
-		// get the memory
-        auto& mem = m_mesh_visual->m_memory;
-		int id0 = m_Index[ 0 ].posIndex;
-		int id1 = m_Index[ 1 ].posIndex;
-		int id2 = m_Index[ 2 ].posIndex;
+        auto& mem = m_meshVisual->m_memory;
+        int id0 = m_index.m_id[0];
+        int id1 = m_index.m_id[1];
+        int id2 = m_index.m_id[2];
 
-		// get three vertexes
-		const Point& p0 = mem->m_PositionBuffer[id0] ;
-		const Point& p1 = mem->m_PositionBuffer[id1] ;
-		const Point& p2 = mem->m_PositionBuffer[id2] ;
+        const Point& p0 = mem->m_vertices[id0].m_position;
+        const Point& p1 = mem->m_vertices[id1].m_position;
+        const Point& p2 = mem->m_vertices[id2].m_position;
 
 		m_bbox->Union( p0 );
 		m_bbox->Union( p1 );
@@ -177,17 +156,15 @@ const BBox& Triangle::GetBBox() const
 // get the surface area of the triangle
 float Triangle::SurfaceArea() const
 {
-	// get the memory
-	auto& mem = m_mesh_visual->m_memory;
-	int id0 = m_Index[ 0 ].posIndex;
-	int id1 = m_Index[ 1 ].posIndex;
-	int id2 = m_Index[ 2 ].posIndex;
+	auto& mem = m_meshVisual->m_memory;
+    int id0 = m_index.m_id[0];
+    int id1 = m_index.m_id[1];
+    int id2 = m_index.m_id[2];
 
-	// get three vertexes
-	const Point& p0 = mem->m_PositionBuffer[id0] ;
-	const Point& p1 = mem->m_PositionBuffer[id1] ;
-	const Point& p2 = mem->m_PositionBuffer[id2] ;
-	
+    const Point& p0 = mem->m_vertices[id0].m_position;
+    const Point& p1 = mem->m_vertices[id1].m_position;
+    const Point& p2 = mem->m_vertices[id2].m_position;
+
 	Vector e0 = p1 - p0 ;
 	Vector e1 = p2 - p0 ;
 	Vector t = Cross( e0 , e1 );
@@ -207,15 +184,18 @@ static inline void Project(const Point* points, int count , const Vector& axis, 
 
 // 'Fast 3D Triangle-Box Overlap Testing'
 // http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox_tam.pdf
-bool Triangle::GetIntersect(const BBox& box) const
-{
-    // get the memory
-    auto& mem = m_mesh_visual->m_memory;
-    int id0 = m_Index[0].posIndex;
-    int id1 = m_Index[1].posIndex;
-    int id2 = m_Index[2].posIndex;
-    Point tri[3] = { mem->m_PositionBuffer[id0] , mem->m_PositionBuffer[id1] , mem->m_PositionBuffer[id2] };
-    
+bool Triangle::GetIntersect(const BBox& box) const{
+    auto& mem = m_meshVisual->m_memory;
+    int id0 = m_index.m_id[0];
+    int id1 = m_index.m_id[1];
+    int id2 = m_index.m_id[2];
+
+    const MeshVertex& mv0 = mem->m_vertices[id0];
+    const MeshVertex& mv1 = mem->m_vertices[id1];
+    const MeshVertex& mv2 = mem->m_vertices[id2];
+
+    Point tri[3] = { mv0.m_position , mv1.m_position , mv2.m_position };
+
 	float triMin , triMax;	// will initialize later
 	float boxMin = FLT_MAX, boxMax = -FLT_MAX;
 

@@ -66,7 +66,7 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( clearcoatGloss );
 };
 
-// Priciple Material
+// Principle Material
 class PrincipleMaterialNode : public BxdfNode
 {
 public:

@@ -44,7 +44,9 @@ class FileStream(Stream):
             elif type(data).__name__ == 'bool':
                 self.file.write(struct.pack( '?' , data ) )
 
-        if type(data).__name__ == 'str' :
+        if type(data).__name__ == 'bytes' or type(data).__name__ == 'bytearray':
+            self.file.write(data)
+        elif type(data).__name__ == 'str' :
             self.file.write(data.encode('ascii'))
             end = 0
             self.file.write(end.to_bytes(1, byteorder='little'))
