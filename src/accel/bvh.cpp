@@ -45,7 +45,6 @@ static const unsigned   BVH_LEAF_PRILIST_MEMID  = 1027;
 static const unsigned   BVH_SPLIT_COUNT         = 16;
 static const float      BVH_INV_SPLIT_COUNT     = 0.0625f;
 
-// destructor
 Bvh::~Bvh()
 {
     SORT_PROFILE("Destructe Bvh");
@@ -84,7 +83,7 @@ void Bvh::Build()
     
 	// recursively split node
     m_root = new Bvh_Node();
-	splitNode( m_root , 0u , (unsigned)m_primitives->size() , 0u );
+	splitNode( m_root , 0u , (unsigned)m_primitives->size() , 1u );
     
 	m_isValid = true;
 	
@@ -102,7 +101,7 @@ void Bvh::splitNode( Bvh_Node* node , unsigned _start , unsigned _end , unsigned
 		node->bbox.Union( m_bvhpri[i].GetBBox() );
 
 	unsigned primitive_num = _end - _start;
-	if( primitive_num <= m_maxPriInLeaf ){
+	if( primitive_num <= m_maxPriInLeaf || depth == m_maxNodeDepth ){
 		makeLeaf( node , _start , _end );
 		return;
 	}

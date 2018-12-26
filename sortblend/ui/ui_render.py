@@ -63,15 +63,7 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
                          ("ao", "Ambient Occlusion", "", 5),
                          ("direct", "Direct Lighting", "", 6),
                          ("whitted", "Whitted", "", 7) ]
-    bpy.types.Scene.integrator_type_prop = bpy.props.EnumProperty(items=integrator_types, name='Integrator')
-
-    # Accelerator type
-    accelerator_types = [ ("bvh", "Bounding Volume Hierarchy", "", 1),
-                          ("KDTree", "SAH KDTree", "", 2),
-                          ("UniGrid", "Uniform Grid", "", 3),
-                          ("OcTree" , "OcTree" , "" , 4),
-                          ("bruteforce", "No Accelerator", "", 5) ]
-    bpy.types.Scene.accelerator_type_prop = bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
+    bpy.types.Scene.integrator_type_prop = bpy.props.EnumProperty(items=integrator_types, name='Accelerator')
 
     # general integrator parameters
     bpy.types.Scene.inte_max_recur_depth = bpy.props.IntProperty(name='Maximum Recursive Depth', default=16, min=1)
@@ -90,6 +82,7 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
     def draw(self, context):
         self.layout.prop(context.scene,"integrator_type_prop")
         integrator_type = context.scene.integrator_type_prop
+
         if integrator_type != "whitted" and integrator_type != "direct" and integrator_type != "ao":
             self.layout.prop(context.scene,"inte_max_recur_depth")
         if integrator_type == "ao":
@@ -100,7 +93,28 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
             self.layout.prop(context.scene,"ir_light_path_set_num")
             self.layout.prop(context.scene,"ir_light_path_num")
             self.layout.prop(context.scene, "ir_min_dist")
+
+class AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
+    bl_label = 'Accelerator'
+
+    # Accelerator type
+    accelerator_types = [ ("bvh", "Bounding Volume Hierarchy", "", 1),
+                          ("KDTree", "SAH KDTree", "", 2),
+                          ("UniGrid", "Uniform Grid", "", 3),
+                          ("OcTree" , "OcTree" , "" , 4),
+                          ("bruteforce", "No Accelerator", "", 5) ]
+    bpy.types.Scene.accelerator_type_prop = bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
+
+    # bvh properties
+    bpy.types.Scene.bvh_max_node_depth = bpy.props.IntProperty(name='Maximum Recursive Depth', default=16, min=8)
+    bpy.types.Scene.bvh_max_pri_in_leaf = bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=8, min=8, max=64)
+
+    def draw(self, context):
         self.layout.prop(context.scene,"accelerator_type_prop")
+        accelerator_type = context.scene.accelerator_type_prop
+        if accelerator_type == "bvh":
+            self.layout.prop(context.scene,"bvh_max_node_depth")
+            self.layout.prop(context.scene,"bvh_max_pri_in_leaf")
 
 class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'MultiThread'
@@ -110,11 +124,11 @@ class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
 
 class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'Sample'
-    sampler_types = [ ("stratified", "Stratified", "", 3), ("random", "Random", "", 2), ("regular", "Uniform", "", 1) ]
-    bpy.types.Scene.sampler_type_prop = bpy.props.EnumProperty(items=sampler_types, name='Type')
+    #sampler_types = [ ("stratified", "Stratified", "", 3), ("random", "Random", "", 2), ("regular", "Uniform", "", 1) ]
+    #bpy.types.Scene.sampler_type_prop = bpy.props.EnumProperty(items=sampler_types, name='Type')
     bpy.types.Scene.sampler_count_prop = bpy.props.IntProperty(name='Count',default=1, min=1)
     def draw(self, context):
-        self.layout.prop(context.scene,"sampler_type_prop")
+        #self.layout.prop(context.scene,"sampler_type_prop")
         self.layout.prop(context.scene,"sampler_count_prop")
 
 class SORT_export_debug_scene(bpy.types.Operator):

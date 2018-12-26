@@ -23,6 +23,7 @@
 #include "core/creator.h"
 #include "core/stats.h"
 #include "core/profile.h"
+#include "stream/stream.h"
 
 //! @brief Spatial acceleration structure interface.
 /**
@@ -33,8 +34,7 @@
  * algorithm so that it is O(lg(N)), a significant improvement over the naive brute 
  * force ray tracing. Common spatial structures include KD-Tree, BVH and Uniform Grid.
  */
-class	Accelerator
-{
+class	Accelerator : public SerializableObject{
 public:
 	//! Destructor of Accelerator, nothing is done in it.
     virtual ~Accelerator() {}
@@ -71,6 +71,11 @@ public:
     //! @brief Whether the spatial data structure is constructed.
     //! @return Whether the spatial data structure is constructed.
     bool GetIsValid() const { return m_isValid; }
+
+    //! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override {}
 
 protected:
 	std::vector<class Primitive*>*      m_primitives;       /**< The vector holding all primitive pointers. */

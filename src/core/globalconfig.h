@@ -94,6 +94,8 @@ public:
 		stream >> m_resWidth >> m_resHeight;
         stream >> m_accelType;
         m_accelerator = MakeInstance<Accelerator>(m_accelType);
+		if( m_accelerator )
+			m_accelerator->Serialize( stream );
 		stream >> m_integratorType;
 		m_integrator = MakeInstance<Integrator>(m_integratorType);
 		if( m_integrator != nullptr )

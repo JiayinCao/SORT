@@ -29,8 +29,7 @@
  * <a href="http://www.sci.utah.edu/~wald/Publications/2007/ParallelBVHBuild/fastbuild.pdf">
  * On fast Construction of SAH-based Bounding Volume Hierarchies</a> for further details.
  */
-class Bvh : public Accelerator
-{
+class Bvh : public Accelerator{
 public:
     DEFINE_CREATOR( Bvh , Accelerator , "Bvh" );
 
@@ -82,11 +81,19 @@ public:
         {return primitive->GetBBox();}
     };
     
-private:
-    Bvh_Primitive*	m_bvhpri = nullptr; /**< Primitive list during BVH construction. */
-    Bvh_Node*       m_root = nullptr;   /**< Root node of the BVH structure. */
+    //! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override{
+	    //stream >> m_maxPriInLeaf;
+    	//stream >> m_maxNodeDepth;
+    }
 
-	const unsigned	m_maxPriInLeaf = 8; /**< Maximum primitives in a leaf node. During BVH construction, a node with less primitives will be marked as a leaf node. */
+private:
+    Bvh_Primitive*	m_bvhpri = nullptr;     /**< Primitive list during BVH construction. */
+    Bvh_Node*       m_root = nullptr;       /**< Root node of the BVH structure. */
+	unsigned	    m_maxPriInLeaf = 8;     /**< Maximum primitives in a leaf node. During BVH construction, a node with less primitives will be marked as a leaf node. */
+    unsigned        m_maxNodeDepth = 16;    /**< Maximum depth of node in BVH. */
 
 	//! Malloc necessary memory.
 	void mallocMemory();
