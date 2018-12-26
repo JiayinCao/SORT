@@ -22,20 +22,10 @@
 #include "core/primitive.h"
 
 void MeshVisual::FillScene( Scene& scene ){
-    unsigned base = (unsigned)scene.m_primitiveBuf.size();
-
-	// generate the triangles
-	unsigned trunkNum = (unsigned)m_memory->m_TrunkBuffer.size();
-	for( unsigned i = 0 ; i < trunkNum ; i++ )
-	{
-		unsigned trunkTriNum = (unsigned)m_memory->m_TrunkBuffer[i].m_IndexBuffer.size() / 3;
-		for( unsigned k = 0 ; k < trunkTriNum ; k++ ){
-			std::shared_ptr<Triangle> tri = std::make_shared<Triangle>( this , &(m_memory->m_TrunkBuffer[i].m_IndexBuffer[3*k]) );
-			std::shared_ptr<Material> mat = m_memory->m_TrunkBuffer[i].m_mat ? m_memory->m_TrunkBuffer[i].m_mat : MatManager::GetSingleton().GetDefaultMat();
-			scene.m_primitiveBuf.push_back( new Primitive( mat , tri ) );
-		}
-		base += (unsigned)(m_memory->m_TrunkBuffer[i].m_IndexBuffer.size() / 3);
-	}
+    for (const MeshIndex& mi : m_memory->m_indices) {
+        std::shared_ptr<Triangle> tri = std::make_shared<Triangle>(this, mi);
+        scene.m_primitiveBuf.push_back(new Primitive( mi.m_mat , tri ));
+    }
 }
 
 void MeshVisual::Serialize( IStreamBase& stream ){
