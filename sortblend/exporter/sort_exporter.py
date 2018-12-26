@@ -328,6 +328,7 @@ def export_global_config(scene, fs, sort_resource_path):
     xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
     yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
     integrator_type = scene.integrator_type_prop
+    accelerator_type = scene.accelerator_type_prop
 
     fs.serialize( 0 )
     fs.serialize( sort_resource_path )
@@ -337,8 +338,12 @@ def export_global_config(scene, fs, sort_resource_path):
     fs.serialize( int(scene.sampler_count_prop) )
     fs.serialize( int(xres) )
     fs.serialize( int(yres) )
-    fs.serialize( scene.accelerator_type_prop )
-    fs.serialize( scene.integrator_type_prop )
+    fs.serialize( accelerator_type )
+    if accelerator_type == "bvh":
+        #fs.serialize( int(scene.bvh_max_node_depth) )
+        #fs.serialize( int(scene.bvh_max_pri_in_leaf) )
+        pass
+    fs.serialize( integrator_type )
     fs.serialize( int(scene.inte_max_recur_depth) )
     if integrator_type == "ao":
         fs.serialize( scene.ao_max_dist )
