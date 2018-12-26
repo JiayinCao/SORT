@@ -26,8 +26,7 @@
  * time complexity to build. However the travesal efficiency may be lower than
  * its peers.
  */
-class UniGrid : public Accelerator
-{
+class UniGrid : public Accelerator{
 public:
     DEFINE_CREATOR( UniGrid , Accelerator , "UniGrid" );
 
@@ -52,6 +51,13 @@ public:
 	//! Build uniform grid structure in O(N).
     void Build() override;
     
+    //! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override{
+        // to be implemented
+    }
+
 private:
 	unsigned	                m_voxelCount = 0;               /**< Total number of voxels. */
     unsigned	                m_voxelNum[3] = {};             /**< Number of voxels along each axis. */

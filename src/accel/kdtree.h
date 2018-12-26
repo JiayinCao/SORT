@@ -31,8 +31,7 @@
  * <a href="http://www.eng.utah.edu/~cs6965/papers/kdtree.pdf">
  * On building fast kd-Trees for Ray Tracing, and on doing that in O(N log N)</a> for further details.
  */
-class KDTree : public Accelerator
-{
+class KDTree : public Accelerator{
 public:
     DEFINE_CREATOR( KDTree , Accelerator , "KDTree" );
 
@@ -124,6 +123,13 @@ public:
         }
     };
     
+    //! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override{
+        // to be implemented
+    }
+
 private:
 	Kd_Node*		m_root = nullptr;           /**< Root node of the KD-Tree. */
 	unsigned char*	m_temp = nullptr;           /**< Temporary buffer for marking primitives. */

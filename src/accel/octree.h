@@ -26,8 +26,7 @@
  * Instead of scene visibility management, it can also serves for the purpose of accelerating ray
  * tracer applications.
  */
-class OcTree : public Accelerator
-{
+class OcTree : public Accelerator{
 public:
     DEFINE_CREATOR( OcTree , Accelerator , "OcTree" );
 
@@ -63,6 +62,13 @@ public:
     struct NodePrimitiveContainer{
         std::vector<const Primitive*>	primitives;		/**< Primitive buffer used during octree construction.*/
     };
+
+    //! @brief      Serializing data from stream
+    //!
+    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    void    Serialize( IStreamBase& stream ) override{
+        // to be implemented
+    }
 
 private:
 	OcTreeNode*	m_pRoot = nullptr;				/**< Pointer to the root node of this octree.*/
