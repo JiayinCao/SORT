@@ -22,7 +22,7 @@
 #include "core/singleton.h"
 #include "core/log.h"
 
-//! @brief		This class serves as 'namespace' for each specific type so that
+//! @brief		This class serves as 'name space' for each specific type so that
 //!				different class type names won't pollute each others pool.
 template<class T>
 class ItemCreator{

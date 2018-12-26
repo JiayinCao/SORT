@@ -307,6 +307,7 @@ def export_mesh(mesh, fs):
             wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
             trii += 2
 
+    fs.serialize(bool(has_uv))
     fs.serialize(LENFMT.pack(verti))
     fs.serialize(wo3_verts)
     fs.serialize(LENFMT.pack(trii))
