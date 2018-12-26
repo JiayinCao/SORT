@@ -17,10 +17,9 @@
 
 #pragma once
 
-#include <string>
-#include <unordered_map>
-#include <memory>
 #include "sort.h"
+#include <vector>
+#include <memory>
 #include "core/singleton.h"
 
 /////////////////////////////////////////////////////////////////////////////
