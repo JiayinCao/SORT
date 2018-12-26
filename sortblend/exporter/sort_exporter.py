@@ -22,6 +22,7 @@ import platform
 import tempfile
 import bmesh
 import time
+import struct
 from math import degrees
 from . import exporter_common
 from ..stream import stream
@@ -115,13 +116,13 @@ def export_blender(scene, force_debug=False):
     # export material
     exporter_common.log("Exporting materials.")
     export_material(scene, fs)
-    exporter_common.log("Exported materials %.2f" % (time.time() - current_time))
+    exporter_common.log("Exported materials %.2f(s)" % (time.time() - current_time))
     current_time = time.time()
 
     # export scene
     exporter_common.log("Exporting scene.")
     export_scene(scene, fs)
-    exporter_common.log("Exported scene %.2f" % (time.time() - current_time))
+    exporter_common.log("Exported scene %.2f(s)" % (time.time() - current_time))
     current_time = time.time()
 
 # clear old data and create new path
@@ -172,14 +173,10 @@ def export_scene(scene, fs):
     for ob in exporter_common.getMeshList(scene):
         fs.serialize('VisualEntity')
         fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * ob.matrix_world ) )
-        stat = export_mesh(ob, scene, fs)
+        stat = export_mesh(ob.data,fs)
         total_vert_cnt += stat[0]
-        total_normal_cnt += stat[1]
-        total_uv_cnt += stat[2]
-        total_face_cnt += stat[3]
+        total_face_cnt += stat[1]
     exporter_common.log( "Total vertices: %d." % total_vert_cnt )
-    exporter_common.log( "Total normals: %d." % total_normal_cnt )
-    exporter_common.log( "Total uvs: %d." % total_uv_cnt )
     exporter_common.log( "Total faces: %d." % total_face_cnt )
 
     for ob in exporter_common.getLightList(scene):
@@ -238,265 +235,84 @@ def export_scene(scene, fs):
     # to indicate the scene stream comes to an end
     fs.serialize('')
 
-mtl_dict = {}
-mtl_rev_dict = {}
+def export_mesh(mesh, fs):
+    LENFMT = struct.Struct('=i')
+    VERTFMT = struct.Struct('=ffffffff')
+    TRIFMT = struct.Struct('=iiii')
 
-def name_compat(name):
-    if name is None:
-        return 'None'
-    else:
-        return name.replace(' ', '_')
-
-def triangulate_object(obj):
-    me = obj.data
-    # Get a BMesh representation
-    bm = bmesh.new()
-    bm.from_mesh(me)
-
-    bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method=0, ngon_method=0)
-
-    # Finish up, write the bmesh back to the mesh
-    bm.to_mesh(me)
-    bm.free()
-
-done = True
-def test( obj ):
-    global done
-    if done:
-        return
-    done = True
-
-    mesh = obj.data
-
-    normals = []
-    indices = []
-    for face in mesh.polygons:
-        indices.append(face.vertices[0])
-        indices.append(face.vertices[1])
-        indices.append(face.vertices[2])
-        for i in range(len(face.vertices)):
-            v = mesh.vertices[face.vertices[i]]
-            normals.append([v.normal[0],v.normal[1],v.normal[2]])
-
-    verts = []
-    for vert in mesh.vertices:
-        verts.append(vert.co.xyz)
-
-    uvs = []
-    for uv_layer in mesh.uv_layers:
-        for x in range(len(uv_layer.data)):
-            uvs.append(uv_layer.data[x].uv)
-
-    print(indices)
-    print(verts)
-    print(uvs)
-    print(normals)
-
-# export mesh file
-def export_mesh(obj,scene,fs):
-    global done
-
-    exporter_common.logD("Exporting object: %s." % obj.name)
-    # make sure there is no quad in the object
-    current_time = time.time()
-    triangulate_object(obj)
-    exporter_common.logD("Triangulating object. %.2f (s)" % (time.time() - current_time))
-    current_time = time.time()
-
-    # the mesh object
-    mesh = obj.data
-
-    faceuv = len(mesh.uv_textures) > 0
-    if faceuv:
-        uv_layer = mesh.uv_layers.active.data[:]
-
-    # face index pairs
-    face_index_pairs = [(face, index) for index, face in enumerate(mesh.polygons)]
-
-    # generate normal data
-    mesh.calc_normals_split()
-    exporter_common.logD("Calculating split normals. %.2f(s), %d vertices." %((time.time() - current_time),len(mesh.vertices)))
-    current_time = time.time()
-    contextMat = None
     materials = mesh.materials[:]
     material_names = [m.name if m else None for m in materials]
 
-    # avoid bad index errors
-    if not materials:
-        materials = [None]
-        material_names = [name_compat(None)]
+    mesh.calc_normals()
+    if not mesh.tessfaces and mesh.polygons:
+        mesh.calc_tessface()
 
-    name1 = obj.name
-    name2 = obj.data.name
-    obnamestring = '%s_%s' % (name_compat(name1), name_compat(name2))
+    has_uv = bool(mesh.tessface_uv_textures)
 
-    # serialize vertices
-    fs.serialize(len(mesh.vertices))
-    for v in mesh.vertices:
-        fs.serialize(v.co[:])
-
-        if done is False:
-            print(v.co[:])
-
-    vert_cnt = len(mesh.vertices)
-    exporter_common.logD("Exporting vertices. %.2f(s), %d vertices." % ((time.time() - current_time) , vert_cnt))
-    current_time = time.time()
-
-    # UV
-    uvs = []
-    uv_unique_count = 0
-    testw = {1}
-    testw.add(1)
-    if faceuv:
-        # in case removing some of these dont get defined.
-        uv = f_index = uv_index = uv_key = uv_val = uv_ls = None
-
-        uv_face_mapping = [None] * len(face_index_pairs)
-        uv_dict = {}
-        uv_get = uv_dict.get
-        for f, f_index in face_index_pairs:
-            uv_ls = uv_face_mapping[f_index] = []
-            for uv_index, l_index in enumerate(f.loop_indices):
-                uv = uv_layer[l_index].uv
-                #testw.add( l_index )
-                uv_key = round(uv[0], 4), round(uv[1], 4)
-                uv_val = uv_get(uv_key)
-                if uv_val is None:
-                    uv_val = uv_dict[uv_key] = uv_unique_count
-                    
-                    uvs.append( uv[:] )
-                    uv_unique_count += 1
-                uv_ls.append(uv_val)
-        del uv_dict, uv, f_index, uv_index, uv_ls, uv_get, uv_key, uv_val
-
-    # serialize uv coordinate
-    #print( "%d %d" % ( len(uvs) , len( uvs ) ) )
-    fs.serialize(len(uvs))
-    for uv in uvs:
-        if done is False:
-            print(uv[:])
-        fs.serialize(uv[:])
-    uv_cnt = len(uvs)
-    del uvs
-    exporter_common.logD("Exporting uvs. %.2f(s), %d uvs." %((time.time() - current_time),uv_cnt))
-    current_time = time.time()
-
-    # output normal
-    nor_key = nor_val = None
-    normals_to_idx = {}
-    nor_get = normals_to_idx.get
-    nor_unique_count = 0
-    loops_to_normals = [0] * len(mesh.loops)
-    normals = []
-    for f, f_index in face_index_pairs:
-        for l_idx in f.loop_indices:
-            def veckey3d(v):
-                return round(v.x, 4), round(v.y, 4), round(v.z, 4)
-            nor_key = veckey3d(mesh.loops[l_idx].normal)
-            nor_val = nor_get(nor_key)
-            if nor_val is None:
-                nor_val = normals_to_idx[nor_key] = nor_unique_count
-                normals.append( nor_key )
-                nor_unique_count += 1
-            loops_to_normals[l_idx] = nor_val
-    del normals_to_idx, nor_get, nor_key, nor_val
-
-    # serialize normals
-    fs.serialize(len(normals))
-    for normal in normals:
-        if done is False:
-            print(normal[:])
-        fs.serialize(normal[:])
-    normal_cnt = len(normals)
-    del normals
-    exporter_common.logD("Exporting normals. %.2f(s), %d normals." %((time.time() - current_time),normal_cnt))
-    current_time = time.time()
-
-    me_verts = mesh.vertices
-
-    class Trunk:
-        def __init__(self, mat_name):
-            self.mat_name = mat_name
-            self.face = []
-
-    trunks = []
-
-    for f, f_index in face_index_pairs:
-        f_smooth = f.use_smooth
-        f_mat = min(f.material_index, len(materials) - 1)
-
-        key = material_names[f_mat], None  # No image, use None instead.
-
-        # CHECK FOR CONTEXT SWITCH
-        if key == contextMat:
-            pass  # Context already switched, dont do anything
+    if has_uv:
+        active_uv_layer = mesh.tessface_uv_textures.active
+        if not active_uv_layer:
+            has_uv = False
         else:
-            if key[0] is None and key[1] is None:
-                pass
-            else:
-                mat_data = mtl_dict.get(key)
-                if not mat_data:
-                    # First add to global dict so we can export to mtl
-                    # Then write mtl
+            active_uv_layer = active_uv_layer.data
 
-                    # Make a new names from the mat and image name,
-                    # converting any spaces to underscores with name_compat.
+    verts = mesh.vertices
+    wo3_verts = bytearray()
+    verti = 0
+    wo3_indices = [{} for _ in range(len(verts))]
+    wo3_tris = bytearray()
+    trii = 0
 
-                    # If none image dont bother adding it to the name
-                    # Try to avoid as much as possible adding texname (or other things)
-                    # to the mtl name (see [#32102])...
-                    mtl_name = "%s" % name_compat(key[0])
-                    if mtl_rev_dict.get(mtl_name, None) not in {key, None}:
-                        if key[1] is None:
-                            tmp_ext = "_NONE"
-                        else:
-                            tmp_ext = "_%s" % name_compat(key[1])
-                        i = 0
-                        while mtl_rev_dict.get(mtl_name + tmp_ext, None) not in {key, None}:
-                            i += 1
-                            tmp_ext = "_%3d" % i
-                        mtl_name += tmp_ext
-                    mat_data = mtl_dict[key] = mtl_name, materials[f_mat], None
-                    mtl_rev_dict[mtl_name] = key
+    uvcoord = (0.0, 0.0)
+    for i, f in enumerate(mesh.tessfaces):
+        smooth = f.use_smooth
+        if not smooth:
+            normal = f.normal[:]
 
-                trunks.append( Trunk(mat_data[0]) )
+        if has_uv:
+            uv = active_uv_layer[i]
+            uv = (uv.uv1, uv.uv2, uv.uv3, uv.uv4)
 
-        # update current context material
-        contextMat = key
+        oi = []
+        for j, vidx in enumerate(f.vertices):
+            v = verts[vidx]
 
-        # output face information
-        f_v = [(vi, me_verts[v_idx], l_idx)
-                   for vi, (v_idx, l_idx) in enumerate(zip(f.vertices, f.loop_indices))]
+            if smooth:
+                normal = v.normal[:]
 
-        totverts = 1
-        totuvco = 1
-        totno = 1
-        if faceuv:
-            for vi, v, li in f_v:
-                trunks[-1].face.append( (totverts + v.index, totuvco + uv_face_mapping[f_index][vi], totno + loops_to_normals[li] ) )
-        else:  # No UV's
-            for vi, v, li in f_v:
-                trunks[-1].face.append( (totverts + v.index, totno + loops_to_normals[li]) )
+            if has_uv:
+                uvcoord = (uv[j][0], uv[j][1])
 
-    #serialize trunks
-    face_cnt = 0
-    fs.serialize( len(trunks) )
-    for trunk in trunks:
-        fs.serialize( trunk.mat_name )
-        fs.serialize( int(len( trunk.face ) / 3) )
-        face_cnt += len(trunk.face) / 3
-        for ids in trunk.face:
-            if done is False:
-                print( ids[:] )
-            for id in ids:
-                fs.serialize( id - 1 )
-    del trunks
-    exporter_common.logD("Exporting faces. %.2f(s), %d faces." %((time.time() - current_time),face_cnt))
-    current_time = time.time()
+            key = (normal, uvcoord)
+            out_idx = wo3_indices[vidx].get(key)
+            if out_idx is None:
+                out_idx = verti
+                wo3_indices[vidx][key] = out_idx
+                wo3_verts += VERTFMT.pack(v.co[0], v.co[1], v.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
+                verti += 1
 
-    test(obj)
+            oi.append(out_idx)
 
-    return ( vert_cnt , normal_cnt , uv_cnt , face_cnt )
+        global matname_to_id
+        matid = f.material_index
+        matname = material_names[matid]
+        matid = matname_to_id[matname]
+        if len(oi) == 3:
+            # triangle
+            wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
+            trii += 1
+        else:
+            # quad
+            wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
+            wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
+            trii += 2
+
+    fs.serialize(LENFMT.pack(verti))
+    fs.serialize(wo3_verts)
+    fs.serialize(LENFMT.pack(trii))
+    fs.serialize(wo3_tris)
+
+    return (verti, trii)
 
 def export_global_config(scene, fs, sort_resource_path):
     # global renderer configuration
@@ -525,6 +341,7 @@ def export_global_config(scene, fs, sort_resource_path):
         fs.serialize( scene.ir_light_path_num )
         fs.serialize( scene.ir_min_dist )
 
+matname_to_id = {}
 def export_material(scene, fs):
     # find the output node, duplicated code, to be cleaned
     def find_output_node(material):
@@ -535,6 +352,13 @@ def export_material(scene, fs):
                     return node
         return None
 
+    # avoid having space in material name
+    def name_compat(name):
+        if name is None:
+            return 'None'
+        else:
+            return name.replace(' ', '_')
+
     material_count = 0
     for material in exporter_common.getMaterialList(scene):
         # get output nodes
@@ -543,6 +367,8 @@ def export_material(scene, fs):
             continue
         material_count += 1
 
+    global matname_to_id
+    i = 0
     fs.serialize( int(material_count) )
     for material in exporter_common.getMaterialList(scene):
         # get the sort tree nodes
@@ -553,6 +379,8 @@ def export_material(scene, fs):
         if output_node is None:
             continue
 
+        matname_to_id[material.name] = i
+        i += 1
         fs.serialize( name_compat(material.name) )
 
         def serialize_prop(mat_node , fs):

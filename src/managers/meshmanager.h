@@ -31,115 +31,47 @@
 #include "material/material.h"
 #include "stream/stream.h"
 
-// index for a vertex
-struct VertexIndex
-{
-	int	posIndex;
-	int	norIndex;
-	int	texIndex;
-
-	VertexIndex()
-	{
-		posIndex = -1;
-		norIndex = -1;
-		texIndex = -1;
-	}
-	~VertexIndex(){}
+struct MeshVertex {
+    Point       m_position;
+    Vector      m_normal;
+    Vector      m_tangent;
+    Vector2f    m_texCoord;
 };
 
-// trunk (submesh)
-// a trunk only contains index information
-class Trunk
-{
-public:
-	// the name for the current trunk
-	std::string	name;
-	// index buffer
-	std::vector<VertexIndex>	m_IndexBuffer;
-	// the triangle number
-	unsigned	m_iTriNum;
-	// the material
-    std::shared_ptr<Material>	m_mat;
-
-	// constructor
-	// para 'str' : name for the trunk
-	Trunk( const std::string& str = "" ) : name(str)
-	{ m_iTriNum = 0; m_mat = 0; }
+struct MeshIndex {
+    int                         m_id[3] = { -1 };   /**< Indices for one triangle. */
+    std::shared_ptr<Material>   m_mat;              /**< Materials attached to the triangle. */
 };
 
-// the buffer memory for the mesh
+//! @brief  A wrapper for mesh information.
+//!
+//! Instead of using obj style memory layout, an approach that is similar to vertex buffer and index buffer
+//! in real time rendering is used here. An array of struct is used here for better cache performance during
+//! rendering.
+//! The old solution was to isolate the position, normal and texture coordinate buffers so that we can try
+//! saving minimal information without duplicating unnecessary data. However, the effort to generate such a
+//! layout of date requires quite some time in Blender, due to which reason, it was deprecated.
 class BufferMemory : public SerializableObject
 {
 public:
-	// the vertex buffer
-	std::vector<Point>	m_PositionBuffer;
-	// the normal buffer
-	std::vector<Vector>	m_NormalBuffer;
-	// the tagent buffer
-	std::vector<Vector>	m_TangentBuffer;
-	// the texture coordinate buffer
-	std::vector<float>	m_TexCoordBuffer;
-	// the trunk buffer
-    std::vector<Trunk>	m_TrunkBuffer;
-	// the size for three buffers
-	unsigned		m_iVBCount , m_iNBCount , m_iTeBcount , m_iTBCount;
-	// the number of triangles 
-	unsigned		m_iTriNum;
-	// the trunk number
-	unsigned		m_iTrunkNum;
-	// the name for the file
-	std::string		m_filename;
-	// whether the source file has normal or texture coordinate
-	bool			m_hasInitTexCoord;
-	bool			m_hasInitNormal;
+    std::vector<MeshVertex> m_vertices;         /**< Vertex information including position, normal and etc.*/
+    std::vector<MeshIndex>  m_indices;          /**< Index information of the mesh, there is also material id in it. */
+    bool                    m_hasUV = false;    /**< Whether the mesh has UV information. */
 
-	// set default data for the buffer memory
-	BufferMemory()
-	{
-		m_iVBCount = 0;
-		m_iNBCount = 0;
-		m_iTeBcount = 0;
-		m_iTBCount = 0;
-		m_iTriNum = 0;
-		m_iTrunkNum = 0;
-		m_hasInitTexCoord = false;
-		m_hasInitNormal = false;
-	}
+    // generate UV coordinate
+    void    GenUV();
 
 	// apply transform
-	void ApplyTransform( const Transform& );
+	void    ApplyTransform( const Transform& );
 
-	// calculate buffer number
-	void CalculateCount()
-	{
-		m_iVBCount = (unsigned)m_PositionBuffer.size();
-		m_iTBCount = (unsigned)m_TexCoordBuffer.size();
-		m_iNBCount = (unsigned)m_NormalBuffer.size();
-		m_iTeBcount = (unsigned)m_TangentBuffer.size();
-		m_iTrunkNum = (unsigned)m_TrunkBuffer.size();
-		m_iTriNum = 0;
-		auto it = m_TrunkBuffer.begin();
-		while( it != m_TrunkBuffer.end() )
-		{
-			it->m_iTriNum = ((unsigned)it->m_IndexBuffer.size()) / 3;
-			m_iTriNum += it->m_iTriNum;
-			it++;
-		}
-	}
-
-	// generate normal for the triangle mesh
-	void	GenSmoothNormal();
-	// generate tagent for the triangle mesh
+	// generate tangent for the triangle mesh
 	void	GenSmoothTagent();
-	// generate texture coordinate
-	void	GenTexCoord();
 
 	// serialization interface for BufferMemory
     void    Serialize( IStreamBase& stream ) override;
 
 private:
-	void	_genFlatNormal();
-    Vector	_genTagentForTri( const Trunk& trunk , unsigned k  ) const;
+    Vector	_genTagentForTri( const MeshIndex& ) const;
 };
 
 /////////////////////////////////////////////////////////////////////////

@@ -221,7 +221,6 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
             # update image memory
             output_file = intermediate_dir + 'blender_generated.exr'
-            print(output_file)
             result.layers[0].load_from_file(output_file)
 
             # refresh the update
@@ -271,7 +270,6 @@ class SORT_RENDERER(bpy.types.RenderEngine):
                 # begin result
                 result = self.begin_result(0, 0, bpy.data.scenes[0].render.resolution_x, bpy.data.scenes[0].render.resolution_y)
 
-                print(result)
                 self.sharedmemory.seek( self.image_header_size + self.image_size_in_bytes)
                 byptes = self.sharedmemory.read(self.image_pixel_count * 16)
 

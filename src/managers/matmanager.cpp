@@ -19,20 +19,6 @@
 #include "material/material.h"
 #include "stream/stream.h"
 
-// find specific material
-std::shared_ptr<Material> MatManager::FindMaterial( const std::string& mat_name ) const
-{
-    std::unordered_map< std::string , std::shared_ptr<Material> >::const_iterator it = m_matPool.find( mat_name );
-    return it == m_matPool.end() ? nullptr : it->second;
-}
-
-// whether the material exists
-std::shared_ptr<Material> MatManager::GetDefaultMat()
-{
-    static std::shared_ptr<Material> defaultMat = std::make_shared<Material>();
-	return defaultMat;
-}
-
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( IStreamBase& stream )
 {
@@ -41,7 +27,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream )
 	for( unsigned int i = 0 ; i < material_cnt ; ++i ){
 		std::shared_ptr<Material> mat = std::make_shared<Material>();
 		mat->Serialize( stream );
-		m_matPool.insert( make_pair( mat->GetName() , mat ) );
+		m_matPool.push_back( mat );
 	}
 	return material_cnt;
 }
