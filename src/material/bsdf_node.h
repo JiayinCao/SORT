@@ -254,7 +254,6 @@ public:
         bxdf0.Serialize( stream );
         bxdf1.Serialize( stream );
         factor.Serialize( stream );
-        BxdfNode::Serialize( stream );
 	}
 
 private:
@@ -280,7 +279,6 @@ public:
     void Serialize( IStreamBase& stream ) override {
         bxdf0.Serialize( stream );
         bxdf1.Serialize( stream );
-        BxdfNode::Serialize( stream );
 	}
 
 private:

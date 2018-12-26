@@ -15,7 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header file
 #include <time.h>
 #include "system.h"
 #include "core/log.h"
@@ -209,6 +208,8 @@ void System::_executeRenderingTasks()
 // setup system from file
 bool System::Setup( const char* str )
 {
+    Timer timer;
+
 	IFileStream s( str );
 
 	// Load the global configuration from stream
@@ -226,6 +227,8 @@ bool System::Setup( const char* str )
 
 	// Serialize the scene entities
 	m_Scene.LoadScene( s );
+
+    slog(INFO, GENERAL, "Serializing scene cost %f (s).", (float)(timer.GetElapsedTime() / 1000.0f) );
 
 	// create shared memory
 	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_tileSize));
