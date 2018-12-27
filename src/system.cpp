@@ -210,13 +210,13 @@ bool System::Setup( const char* str )
 {
     Timer timer;
 
-	IFileStream s( str );
+	IFileStream stream( str );
 
 	// Load the global configuration from stream
-	GlobalConfiguration::GetSingleton().Serialize(s);
+	GlobalConfiguration::GetSingleton().Serialize(stream);
 
 	// Load materials from stream
-	MatManager::GetSingleton().ParseMatFile( s );
+	MatManager::GetSingleton().ParseMatFile(stream);
 
 	// setup image sensor first of all
 	if( g_blenderMode )
@@ -226,7 +226,7 @@ bool System::Setup( const char* str )
 	m_imagesensor->SetSensorSize( g_resultResollution.x , g_resultResollution.y );
 
 	// Serialize the scene entities
-	m_Scene.LoadScene( s );
+	m_Scene.LoadScene(stream);
 
     slog(INFO, GENERAL, "Serializing scene cost %f (s).", (float)(timer.GetElapsedTime() / 1000.0f) );
 
