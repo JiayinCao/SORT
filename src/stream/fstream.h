@@ -18,14 +18,14 @@
 #pragma once
 
 #include "stream.h"
+#include "stream/mstream.h"
 
 //! @brief Streaming from file.
 /**
  * IFileStream only works for streaming data from a file. Any attempt to write data
  * to a file will result in immediate crash.
  */
-class IFileStream : public IStreamBase
-{
+class IFileStream : public IStreamBase{
 public:
     //! @brief Constructing from a file name.
     //!
@@ -125,6 +125,22 @@ public:
         return *this;
     }
 
+    //! @brief Convert the file stream to memory stream.
+    //!
+    //! @return     A memory stream holding a copy of the data in the file.
+    std::shared_ptr<IMemoryStream>   ConvertToMemoryStream(){
+        unsigned int ori_pos = m_file.tellg();
+
+        m_file.seekg(0, std::ios::end);
+        std::streamsize size = m_file.tellg();
+        m_file.seekg(0, std::ios::beg);
+
+        std::vector<char> buffer(size);
+        m_file.read(buffer.data(), size);
+        m_file.seekg(ori_pos, std::ios::beg);
+        return std::make_shared<IMemoryStream>(size , buffer.data());
+    }
+
 private:
     std::ifstream m_file;       /**< File to be streamed from. */
 };
@@ -134,8 +150,7 @@ private:
  * OFileStream only works for streaming data to a file. Any attempt to read data
  * from a file will result in immediate crash.
  */
-class OFileStream : public OStreamBase
-{
+class OFileStream : public OStreamBase{
 public:
     //! @brief Constructing from a file name.
     //!

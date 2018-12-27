@@ -33,8 +33,7 @@
  * There is no guarantee that StreamBase is perfectly thread safe, it is the user's responsibility to
  * avoid it.
  */
-class StreamBase
-{
+class StreamBase{
 public:
     //! Empty virtual destructor.
     virtual ~StreamBase() {}
@@ -217,8 +216,7 @@ public:
  * IStreamBase is purely for streaming in data. Trying to stream out data with IStreamBase will result in
  * crash. It is higher level code's responsibility to make sure it won't happen.
  */
-class IStreamBase : public StreamBase 
-{
+class IStreamBase : public StreamBase {
 public:
     //! @brief Disable streaming in a float number. Attempting to do it will result in crash!
     //!
@@ -259,8 +257,7 @@ public:
  * OStreamBase is purely for streaming in data. Trying to stream in data with OStreamBase will result in
  * crash. It is higher level code's responsibility to make sure it won't happen.
  */
-class OStreamBase : public StreamBase
-{
+class OStreamBase : public StreamBase{
 public:
     //! @brief Disable streaming out a float number. Attempting to do it will result in crash!
     //!
