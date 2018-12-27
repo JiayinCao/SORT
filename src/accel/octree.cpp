@@ -38,19 +38,12 @@ SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOc
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCountCopy);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-// destructor
-OcTree::~OcTree()
-{
+OcTree::~OcTree(){
     SORT_PROFILE("Destructe OcTree");
-	releaseOcTree( m_pRoot );
+	releaseOcTree( m_root );
 }
 
-// Get the intersection between the ray and the primitive set
-// @param r The ray
-// @param intersect The intersection result
-// @return 'true' if the ray pierce one of the primitive in the list
-bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
-{
+bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect == nullptr);
@@ -60,7 +53,7 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 	if( fmin < 0.0f )
 		return false;
 
-	if( traverseOcTree( m_pRoot , r , intersect , fmin , fmax ) ){
+	if( traverseOcTree( m_root , r , intersect , fmin , fmax ) ){
 		if( !intersect )
 			return true;
 		return nullptr != intersect->primitive;
@@ -68,9 +61,7 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const
 	return false;
 }
 
-// build the acceleration structure
-void OcTree::Build()
-{
+void OcTree::Build(){
     SORT_PROFILE("Build OcTree");
 
 	// handling empty mesh case
@@ -86,11 +77,11 @@ void OcTree::Build()
 		container->primitives.push_back( primitive );
 	
 	// create root node
-	m_pRoot = new OcTreeNode();
-	m_pRoot->bb = m_bbox;
+	m_root = new OcTreeNode();
+	m_root->bb = m_bbox;
 
 	// split octree node
-	splitNode( m_pRoot , container , 0 );
+	splitNode( m_root , container , 0 );
     
 	m_isValid = true;
 	
@@ -98,33 +89,19 @@ void OcTree::Build()
     SORT_STATS(sOcTreeLeafNodeCountCopy = sOcTreeLeafNodeCount);
 }
 
-// Release OcTree memory.
-// @param node Sub-tree belongs to this node will be released recursively.
 void OcTree::releaseOcTree( OcTreeNode* node ){
-	// return for empty node
 	if( !node )
 		return;
-
-	// release all child nodes
 	for( int i = 0 ; i < 8 ; ++i )
 		releaseOcTree( node->child[i] );
-
-	// delete current node
 	delete node;
 }
 
-// Split current node into eight if criteria is not met. Otherwise, it will make it a leaf.\n
-// This function invokes itself recursively, so the whole sub-tree will be built once it is called.
-// @param node Node to be splited.
-// @param container Container holding all primitives information in this node.
-// @param bb Bounding box of this node.
-// @param depth Current depth of this node.
-void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , unsigned depth )
-{
+void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , unsigned depth ){
     SORT_STATS( sOcTreeDepth = std::max( sOcTreeDepth , (StatsInt) depth + 1 ) );
     
 	// make a leaf if there are not enough points
-	if( container->primitives.size() < (int)m_uMaxPriInLeaf || depth > m_uMaxDepthInOcTree ){
+	if( container->primitives.size() <= (int)m_maxPriInLeaf || depth >= m_maxDepthInOcTree ){
 		makeLeaf( node , container );
 		return;
 	}
@@ -191,12 +168,7 @@ void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , u
     SORT_STATS(sOcTreeNodeCount+=8);
 }
 
-// Making the current node as a leaf node.
-// An new index buffer will be allocated in this node.
-// @param node Node to be made as a leaf node.
-// @param container Container holdes all primitive information in this node.
-void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container )
-{
+void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container ){
     SORT_STATS(++sOcTreeLeafNodeCount);
     SORT_STATS(sOcTreeMaxPriCountInLeaf = std::max( sOcTreeMaxPriCountInLeaf , (StatsInt)container->primitives.size()) );
     SORT_STATS(sOcTreePrimitiveCount += (StatsInt)container->primitives.size());
@@ -206,15 +178,7 @@ void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container )
 	delete container;
 }
 
-// Traverse OcTree recursively.
-// @param node Sub-tree belongs to this node will be visited in a depth first manner.
-// @param ray The input ray to be tested.
-// @param fmin Current minimum value along the range.
-// @param fmax Current maximum value along the range.
-// @param ray_max Maximum value in along the range for optimization of shadow ray.
-// @result Whether the ray intersects anything in the primitive set
-bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const
-{
+bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const{
 	static const float	delta = 0.001f;
 	bool inter = false;
 

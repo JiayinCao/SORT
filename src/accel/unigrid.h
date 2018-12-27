@@ -33,19 +33,21 @@ public:
 	//! Destructor releasing all voxel data.
     ~UniGrid() override;
 
-    //! @brief Get intersection between the ray and the primitive set using uniform grid.
+    //! @brief      Get intersection between the ray and the primitive set using KD-Tree.
     //!
-    //! It will return true if there is intersection between the ray and the primitive set.
-    //! In case of an existed intersection, if intersect is not empty, it will fill the
-    //! structure and return the nearest intersection.
-    //! If intersect is nullptr, it will stop as long as one intersection is found, it is not
-    //! necessary to be the nearest one.
-    //! False will be returned if there is no intersection at all.
+    //! It will return true if there is intersection between the ray and the primitive 
+    //! set. In case of an existed intersection, if intersect is not empty, it will fill 
+    //! the structure and return the nearest intersection.
+    //! If intersect is nullptr, it will stop as long as one intersection is found, it 
+    //! is not necessary to be the nearest one.
+    //!
     //! @param r            The input ray to be tested.
-    //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
-    //!                     long as it finds an intersection. It is faster than the one with intersection information
-    //!                     data and suitable for shadow ray calculation.
-    //! @return             It will return true if there is an intersection, otherwise it returns false.
+    //! @param intersect    The intersection result. If a nullptr pointer is provided, 
+    //!                     it stops as long as it finds an intersection. It is faster 
+    //!                     than the one with intersection information data and suitable 
+    //!                     for shadow ray calculation.
+    //! @return             It will return true if there is an intersection, otherwise 
+    //!                     it returns false.
     bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
 	//! Build uniform grid structure in O(N).
@@ -53,44 +55,46 @@ public:
     
     //! @brief      Serializing data from stream
     //!
-    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    //! @param      Stream where the serialization data comes from. Depending on different 
+    //!             situation, it could come from different places.
     void    Serialize( IStreamBase& stream ) override{
         // to be implemented
     }
 
 private:
-	unsigned	                m_voxelCount = 0;               /**< Total number of voxels. */
-    unsigned	                m_voxelNum[3] = {};             /**< Number of voxels along each axis. */
-	Vector		                m_voxelExtent;                  /**< Extent of one voxel along each axis. */
-	Vector		                m_voxelInvExtent;               /**< Inverse of extent of one voxel along each axis. */
-	std::vector<Primitive*>*	m_pVoxels = nullptr;            /**< Vector holding all voxels. */
+    /**< Total number of voxels. */
+	unsigned	                m_voxelCount = 0;
+    /**< Number of voxels along each axis. */
+    unsigned	                m_voxelNum[3] = {};
+    /**< Extent of one voxel along each axis. */
+	Vector		                m_voxelExtent;
+    /**< Inverse of extent of one voxel along each axis. */
+	Vector		                m_voxelInvExtent;
+    /**< Vector holding all voxels. */
+	std::vector<Primitive*>*	m_voxels = nullptr;
 
-	//! Release all allocated memory.
-	void release();
-    
-	//! @brief Locate the id of the voxel that the point belongs to along a specific axis.
-    //! @param p    The point to be evaluated.
-    //! @param axis The id of axis to be tested along.
-    //! @return     The id of the voxel along the selected axis.
+	//! @brief      Locate the id of the voxel that the point belongs to along a specific axis.
+    //!
+    //! @param p        The point to be evaluated.
+    //! @param axis     The id of axis to be tested along.
+    //! @return         The id of the voxel along the selected axis.
 	unsigned point2VoxelId( const Point& p , unsigned axis ) const;
     
-	//! @brief Caculate the point with the minimal values along each axis in the voxel.
-    //! @param voxel    The id of the voxel to be Evaluated along three dimensions.
-    //! @return         The point with minimal value along each axis in the voxel.
-	Point	voxelId2Point( int voxel[3] ) const;
-    
-	//! @brief Translate voxel id from three-dimensional to one-dimentional.
-    //! @param x ID of voxel along axis-x.
-    //! @param y ID of voxel along axis-y.
-    //! @param z ID of voxel along axis-z.
-    //! @return  ID of the voxel in one single dimension.
+	//! @brief      Translate voxel id from three-dimensional to one-dimentional.
+    //! @param x        ID of voxel along axis-x.
+    //! @param y        ID of voxel along axis-y.
+    //! @param z        ID of voxel along axis-z.
+    //! @return         ID of the voxel in one single dimension.
 	unsigned offset( unsigned x , unsigned y , unsigned z ) const;
 	
-    //! @brief Get the nearest intersection between a ray and the primitive set.
+    //! @brief      Get the nearest intersection between a ray and the primitive set.
     //! @param r            The ray to be tested.
-    //! @param intersect    A pointer to the intersection information. If it is empty, it will return true as long as there is an intersection detected, which is not necessarily the nearest one.
+    //! @param intersect    A pointer to the intersection information. If it is empty, it will return 
+    //!                     true as long as there is an intersection detected, which is not necessarily 
+    //!                     the nearest one.
     //! @param voxelId      ID of the voxel to be tested.
-    //! @param nextT        The intersected position of the ray and the next to-be-traversed voxel along the ray.
+    //! @param nextT        The intersected position of the ray and the next to-be-traversed voxel along 
+    //!                     the ray.
     //! @return             It will return true if there is an intersection, otherwise it returns false.
 	bool getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const;
     
