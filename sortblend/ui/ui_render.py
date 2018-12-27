@@ -106,8 +106,12 @@ class AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
     bpy.types.Scene.accelerator_type_prop = bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
 
     # bvh properties
-    bpy.types.Scene.bvh_max_node_depth = bpy.props.IntProperty(name='Maximum Recursive Depth', default=16, min=8)
+    bpy.types.Scene.bvh_max_node_depth = bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)
     bpy.types.Scene.bvh_max_pri_in_leaf = bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=8, min=8, max=64)
+
+    # kdtree properties
+    bpy.types.Scene.kdtree_max_node_depth = bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)
+    bpy.types.Scene.kdtree_max_pri_in_leaf = bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=32, min=8, max=64)
 
     def draw(self, context):
         self.layout.prop(context.scene,"accelerator_type_prop")
@@ -115,6 +119,9 @@ class AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
         if accelerator_type == "bvh":
             self.layout.prop(context.scene,"bvh_max_node_depth")
             self.layout.prop(context.scene,"bvh_max_pri_in_leaf")
+        elif accelerator_type == "KDTree":
+            self.layout.prop(context.scene,"kdtree_max_node_depth")
+            self.layout.prop(context.scene,"kdtree_max_pri_in_leaf")
 
 class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'MultiThread'
