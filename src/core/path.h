@@ -48,10 +48,10 @@ inline std::string GetFilePathInResourceFolder( const std::string& filename ){
 //! @return             Full path that has the file name.
 inline std::string GetFilePathInExeFolder( const std::string& filename ){
     char buff[FILENAME_MAX];
-    GetCurrentDir( buff, FILENAME_MAX );
+    const char* tmp = GetCurrentDir( buff, FILENAME_MAX );
 #ifdef WINDOWS
-    return std::string(buff) + "\\" + filename;
+    return std::string(tmp) + "\\" + filename;
 #else
-    return std::string(buff) + "/" + filename;
+    return std::string(tmp) + "/" + filename;
 #endif
 }
