@@ -342,6 +342,9 @@ def export_global_config(scene, fs, sort_resource_path):
     if accelerator_type == "bvh":
         fs.serialize( int(scene.bvh_max_node_depth) )
         fs.serialize( int(scene.bvh_max_pri_in_leaf) )
+    elif accelerator_type == "KDTree":
+        fs.serialize( int(scene.kdtree_max_node_depth) )
+        fs.serialize( int(scene.kdtree_max_pri_in_leaf) )
     fs.serialize( integrator_type )
     fs.serialize( int(scene.inte_max_recur_depth) )
     if integrator_type == "ao":
