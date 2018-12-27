@@ -116,7 +116,7 @@ inline BBox Union( const BBox& bbox0 , const BBox& bbox1 )
 // para 'bb'  : the bounding box
 // para 'tmax': further away intersected point
 // result     : the first intersected point and return -1.0f if not crossed
-inline float Intersect( const Ray& ray , const BBox& bb , float* fmax = 0 )
+inline float Intersect( const Ray& ray , const BBox& bb , float* fmax = nullptr )
 {
 	//set default value for tmax and tmin
 	float tmax = ray.m_fMax;
