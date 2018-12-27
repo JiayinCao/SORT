@@ -133,7 +133,7 @@ public:
     //! for further details.
 	void Build() override;
 
-    //! @brief      Serializing data from stream
+    //! @brief      Serializing data from stream.
     //!
     //! @param      Stream where the serialization data comes from. Depending on different
     //!             situation, it could come from different places.
@@ -151,7 +151,7 @@ private:
     /**< Maximum allowed depth of KD-Tree. */
 	unsigned	    m_maxDepth = 28;
     /**< Maximum allowed number of primitives in a leaf node. */
-    unsigned	    m_maxPriInLeaf = 32;
+    unsigned	    m_maxPriInLeaf = 8;
 
     //! @brief  Split current KD-Tree node.
     //!

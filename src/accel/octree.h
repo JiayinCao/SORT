@@ -18,7 +18,6 @@
 #pragma once
 
 #include "accelerator.h"
-#include "math/bbox.h"
 
 //! @brief OcTree
 /**
@@ -27,56 +26,70 @@
  * tracer applications.
  */
 class OcTree : public Accelerator{
+    //! @brief      OcTree node structure
+    struct OcTreeNode{
+        /**< Child node pointers, all will be NULL if current node is a leaf.*/
+        OcTreeNode*					    child[8] = {nullptr};
+        /**< Primitives buffer.*/
+        std::vector<const Primitive*>	primitives;
+        /**< Bounding box for this octree node.*/
+        BBox						    bb;
+    };
+
 public:
     DEFINE_CREATOR( OcTree , Accelerator , "OcTree" );
 
-	//! destructor
+	//! @brief      Destructor.
 	~OcTree();
 
-    //! @brief Get intersection between the ray and the primitive set using OcTree.
+    //! @brief      Get intersection between the ray and the primitive set using KD-Tree.
     //!
-    //! It will return true if there is intersection between the ray and the primitive set.
-    //! In case of an existed intersection, if intersect is not empty, it will fill the
-    //! structure and return the nearest intersection.
-    //! If intersect is nullptr, it will stop as long as one intersection is found, it is not
-    //! necessary to be the nearest one.
-    //! False will be returned if there is no intersection at all.
+    //! It will return true if there is intersection between the ray and the primitive 
+    //! set. In case of an existed intersection, if intersect is not empty, it will fill 
+    //! the structure and return the nearest intersection.
+    //! If intersect is nullptr, it will stop as long as one intersection is found, it 
+    //! is not necessary to be the nearest one.
+    //!
     //! @param r            The input ray to be tested.
-    //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
-    //!                     long as it finds an intersection. It is faster than the one with intersection information
-    //!                     data and suitable for shadow ray calculation.
-    //! @return             It will return true if there is an intersection, otherwise it returns false.
+    //! @param intersect    The intersection result. If a nullptr pointer is provided, 
+    //!                     it stops as long as it finds an intersection. It is faster 
+    //!                     than the one with intersection information data and suitable 
+    //!                     for shadow ray calculation.
+    //! @return             It will return true if there is an intersection, otherwise 
+    //!                     it returns false.
     bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
-	//! Build the OcTree in O(Nlg(N)) time
+	//! Build the OcTree in O(Nlg(N)) time.
     void Build() override;
-
-    //! OcTree node structure
-    struct OcTreeNode{
-        OcTreeNode*					    child[8] = {nullptr};	/**< Child node pointers, all will be NULL if current node is a leaf.*/
-        std::vector<const Primitive*>	primitives;             /**< Primitives buffer.*/
-        BBox						    bb;                     /**< Bounding box for this octree node.*/
-    };
     
-    //! @brief Primitive information in octree node.
+    //! @brief      Primitive information in octree node.
     struct NodePrimitiveContainer{
-        std::vector<const Primitive*>	primitives;		/**< Primitive buffer used during octree construction.*/
+        /**< Primitive buffer used during octree construction.*/
+        std::vector<const Primitive*>	primitives;
     };
 
-    //! @brief      Serializing data from stream
+    //! @brief      Serializing data from stream.
     //!
-    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    //! @param      Stream where the serialization data comes from. Depending on different 
+    //!             situation, it could come from different places.
     void    Serialize( IStreamBase& stream ) override{
-        // to be implemented
+        stream >> m_maxDepthInOcTree;
+        stream >> m_maxPriInLeaf;
     }
 
 private:
-	OcTreeNode*	m_pRoot = nullptr;				/**< Pointer to the root node of this octree.*/
-	const unsigned	m_uMaxPriInLeaf = 16;		/**< Maximum number of primitives allowed in a leaf node, 16 is the default value.*/
-	const unsigned	m_uMaxDepthInOcTree = 16;	/**< Maximum depth of the octree, 16 is the default value.*/
+    /**< Pointer to the root node of this octree.*/
+	OcTreeNode*	m_root = nullptr;
+    /**< Maximum number of primitives allowed in a leaf node, 16 is the default value.*/
+	unsigned	m_maxPriInLeaf = 16;
+    /**< Maximum depth of the octree, 16 is the default value.*/
+	unsigned	m_maxDepthInOcTree = 16;
 
-	//! @brief Split current node into eight if criteria is not met. Otherwise, it will make it a leaf.\n
-	//! This function invokes itself recursively, so the whole sub-tree will be built once it is called.
+	//! @brief  Split current node into eight if criteria is not met. Otherwise, it will make it a leaf.
+    //!
+	//! This function invokes itself recursively, so the whole sub-tree will be built 
+    //! once it is called.
+    //!
 	//! @param node         Node to be splitted.
 	//! @param container    Container holding all primitive information in this node.
 	//! @param bb           Bounding box of this node.
@@ -89,18 +102,22 @@ private:
 	//! @param container    Container holdes all primitive information in this node.
 	void makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container );
 
-	//! @brief Traverse OcTree recursively and return if there is interesection.
+	//! @brief  Traverse OcTree recursively and return if there is interesection.
+    //!
 	//! @param node         Sub-tree belongs to this node will be visited in a depth first manner.
 	//! @param ray          The input ray to be tested.
-    //! @param intersect    A pointer to the result intersection information. If empty is passed, it will return as long as an intersection is
-    //!                     detected and it is not necessarily to be the nearest one.
+    //! @param intersect    A pointer to the result intersection information. If empty is passed, 
+    //!                     it will return as long as an intersection is detected and it is not 
+    //!                     necessarily to be the nearest one.
 	//! @param fmin         Current minimum value along the ray
 	//! @param fmax         Current maximum value along the ray.
 	//! @return             Whether the ray intersects anything in the primitive set
-	bool traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
+	bool traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , 
+                         float fmin , float fmax ) const;
 
-	//! @brief Release OcTree memory.
-	//! @param node Sub-tree belongs to this node will be released recursively.
+	//! @brief  Release OcTree memory.
+    //!
+	//! @param node     Sub-tree belongs to this node will be released recursively.
 	void releaseOcTree( OcTreeNode* node );
     
     SORT_STATS_ENABLE( "Spatial-Structure(OcTree)" )

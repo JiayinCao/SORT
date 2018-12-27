@@ -97,7 +97,7 @@ public:
     //! On fast Construction of SAH - based Bounding Volume Hierarchies< / a> for further details.
 	void    Build() override;
     
-    //! @brief      Serializing data from stream
+    //! @brief      Serializing data from stream.
     //!
     //! @param      Stream where the serialization data comes from. Depending on different situation,
     //!             it could come from different places.
