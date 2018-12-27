@@ -129,7 +129,7 @@ public:
     //!
     //! @return     A memory stream holding a copy of the data in the file.
     std::shared_ptr<IMemoryStream>   ConvertToMemoryStream(){
-        unsigned int ori_pos = m_file.tellg();
+        auto ori_pos = m_file.tellg();
 
         m_file.seekg(0, std::ios::end);
         std::streamsize size = m_file.tellg();
