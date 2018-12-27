@@ -51,7 +51,29 @@
             "request": "launch",
             "preLaunchTask": "Build (Release)",
             "program": "${workspaceFolder}/../bin/sort_r",
-            "args": ["unittest"],
+            "args": ["unittest", "--gtest_filter=*MemoryStream"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/../bin",
+            "environment": [],
+            "externalConsole": true,
+            "osx":{
+                "MIMode": "lldb"
+            },
+            "linux":{
+                "MIMode":"gdb"
+            },
+            "windows":{
+                "type": "cppvsdbg",
+                "program": "${workspaceFolder}/../bin/sort_r.exe"
+            }
+        },
+        {
+            "name": "Debug Unit Test",
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "Build (Debug)",
+            "program": "${workspaceFolder}/../bin/sort_d",
+            "args": ["unittest", "--gtest_filter=*MemoryStream"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/../bin",
             "environment": [],
