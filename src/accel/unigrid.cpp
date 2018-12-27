@@ -38,35 +38,26 @@ SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGrid
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
 SORT_STATS_AVG_COUNT("Spatial-Structure(UniformGrid)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-// destructor
-UniGrid::~UniGrid()
-{
+UniGrid::~UniGrid(){
     SORT_PROFILE("Destructe Uniform Grid");
-	release();
+	SAFE_DELETE_ARRAY( m_voxels );
 }
 
-// release the data
-void UniGrid::release()
-{
-	SAFE_DELETE_ARRAY( m_pVoxels );
-	for( int i = 0 ; i < 3 ; i++ )
-	{
-		m_voxelNum[i] = 0;
-		m_voxelExtent[i] = 0.0f;
-		m_voxelInvExtent[i] = 0.0f;
-	}
-	m_voxelCount = 0;
-}
-
-// get the intersection between the ray and the primitive set
-bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
-{
+bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_PROFILE("Traverse Uniform Grid");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect == nullptr);
     
-	if( m_pVoxels == 0 || m_primitives == 0 )
+	if( m_voxels == nullptr || m_primitives == nullptr )
 		return false;
+
+	static const auto voxelId2Point = [&]( int id[3] ){
+		Point p;
+		p.x = m_bbox.m_Min.x + id[0] * m_voxelExtent[0];
+		p.y = m_bbox.m_Min.y + id[1] * m_voxelExtent[1];
+		p.z = m_bbox.m_Min.z + id[2] * m_voxelExtent[2];
+		return p;
+	};
 
 	// get the intersect point
 	float maxt;
@@ -116,19 +107,17 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const
 		curGrid[nextAxis] += dir[nextAxis];
 
 		if( curGrid[nextAxis] < 0 || (unsigned)curGrid[nextAxis] >= m_voxelNum[nextAxis] )
-			return ( intersect && intersect->t < maxt && ( intersect->primitive != 0 ));
+			return ( intersect && intersect->t < maxt && ( intersect->primitive != nullptr ));
 
 		// update next
 		cur_t = next[nextAxis];
 		next[nextAxis] += delta[nextAxis];
 	}
 	
-	return ( intersect && intersect->t < maxt && ( intersect->primitive != 0 ));
+	return ( intersect && intersect->t < maxt && ( intersect->primitive != nullptr ));
 }
 
-// build the acceleration structure
-void UniGrid::Build()
-{
+void UniGrid::Build(){
     SORT_PROFILE("Build Uniform Grid");
 	if( nullptr == m_primitives || m_primitives->empty() ){
         slog( WARNING , SPATIAL_ACCELERATOR , "There is no primitive in uniform grid." );
@@ -160,13 +149,12 @@ void UniGrid::Build()
 	m_voxelCount = m_voxelNum[0] * m_voxelNum[1] * m_voxelNum[2];
 
 	// allocate the memory
-	SAFE_DELETE_ARRAY( m_pVoxels );
-	m_pVoxels = new std::vector<Primitive*>[ m_voxelCount ];
+	SAFE_DELETE_ARRAY( m_voxels );
+	m_voxels = new std::vector<Primitive*>[ m_voxelCount ];
 
 	// distribute the primitives
 	std::vector<Primitive*>::const_iterator it = m_primitives->begin();
-	while( it != m_primitives->end() )
-	{
+	while( it != m_primitives->end() ){
 		unsigned maxGridId[3];
 		unsigned minGridId[3];
 		for( int i = 0 ; i < 3 ; i++ )
@@ -185,7 +173,7 @@ void UniGrid::Build()
 
 					// only add the primitives if it is actually intersected
 					if( (*it)->GetIntersect( bb ) )
-						m_pVoxels[offset( k , j , i )].push_back( *it );
+						m_voxels[offset( k , j , i )].push_back( *it );
 				}
 		it++;
 	}
@@ -198,40 +186,24 @@ void UniGrid::Build()
     SORT_STATS(sUGGridCount = m_voxelCount);
 }
 
-// voxel id from point
-unsigned UniGrid::point2VoxelId( const Point& p , unsigned axis ) const
-{
+unsigned UniGrid::point2VoxelId( const Point& p , unsigned axis ) const{
 	return std::min( m_voxelNum[axis] - 1 , (unsigned)( ( p[axis] - m_bbox.m_Min[axis] ) * m_voxelInvExtent[axis] ) );
 }
 
 // get the id offset
-unsigned UniGrid::offset( unsigned x , unsigned y , unsigned z ) const
-{
+unsigned UniGrid::offset( unsigned x , unsigned y , unsigned z ) const{
 	return z * m_voxelNum[1] * m_voxelNum[0] + y * m_voxelNum[0] + x;
 }
 
-// voxel id to point
-Point UniGrid::voxelId2Point( int id[3] ) const
-{
-	Point p;
-	p.x = m_bbox.m_Min.x + id[0] * m_voxelExtent[0];
-	p.y = m_bbox.m_Min.y + id[1] * m_voxelExtent[1];
-	p.z = m_bbox.m_Min.z + id[2] * m_voxelExtent[2];
-
-	return p;
-}
-
-// get intersection between the ray and the primitives in the grid
-bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const
-{
+bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const{
     sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "asfsa" );
     
 	bool inter = false;
-    for( auto voxel : m_pVoxels[voxelId] ){
+    for( auto voxel : m_voxels[voxelId] ){
         SORT_STATS(++sIntersectionTest);
 		// get intersection
 		inter |= voxel->GetIntersect( r , intersect );
-		if( intersect == 0 && inter )
+		if( !intersect && inter )
 			return true;
 	}
 
