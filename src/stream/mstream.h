@@ -234,7 +234,7 @@ public:
     StreamBase& operator << (const std::string& v) override {
         if( !v.empty() ){
             memcpy( m_data + m_pos , v.c_str() , sizeof(char) * v.size() );
-            m_pos += v.size();
+            m_pos += (unsigned int)v.size();
         }
         m_data[m_pos++] = 0;
         return *this;
