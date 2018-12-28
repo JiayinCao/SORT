@@ -155,7 +155,7 @@ public:
     void Serialize( IStreamBase& stream ) override {
         std::string class_id;
         stream >> class_id;
-        node = MakeInstance<MaterialNode>( class_id );
+        node = MakeSharedInstance<MaterialNode>( class_id );
         if( node )
             node->Serialize( stream );
         else
@@ -188,7 +188,7 @@ public:
     void Serialize( IStreamBase& stream ) override {
         std::string class_id;
         stream >> class_id;
-        node = MakeInstance<MaterialNode>( class_id );
+        node = MakeSharedInstance<MaterialNode>( class_id );
         if( node )
             node->Serialize( stream );
         else
@@ -243,7 +243,7 @@ public:
     void Serialize( IStreamBase& stream ) override {
         std::string class_id;
         stream >> class_id;
-        node = MakeInstance<MaterialNode>( class_id );
+        node = MakeSharedInstance<MaterialNode>( class_id );
         if( node )
             node->Serialize( stream );
 	}
@@ -270,7 +270,7 @@ public:
     void Serialize( IStreamBase& stream ) override {
         std::string class_id;
         stream >> class_id;
-        node = MakeInstance<MaterialNode>( class_id );
+        node = MakeSharedInstance<MaterialNode>( class_id );
         if( node )
             node->Serialize( stream );
         else
