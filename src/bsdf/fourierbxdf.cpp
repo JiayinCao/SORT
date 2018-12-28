@@ -23,8 +23,7 @@
 #include "core/samplemethod.h"
 #include "sampler/sample.h"
 
-void FourierBxdfData::LoadData( const std::string& filename )
-{
+void FourierBxdfData::LoadData( const std::string& filename ){
     std::ifstream file( filename.c_str(), std::ios::binary);
     if( !file.is_open() )
         return;
@@ -54,7 +53,7 @@ void FourierBxdfData::LoadData( const std::string& filename )
     if( !ReadFile( (char*)&bsdfTable.eta , 4 ) ) {file.close(); return;}
     if( !ReadFile( (char*)unused , 16 ) ) {file.close(); return;}
     
-    const int sqMu = bsdfTable.nMu * bsdfTable.nMu;
+    const auto sqMu = bsdfTable.nMu * bsdfTable.nMu;
     bsdfTable.mu = new float[bsdfTable.nMu];
     bsdfTable.cdf = new float[sqMu];
     offsetAndLength.reset( new int[sqMu * 2] );
@@ -86,9 +85,9 @@ void FourierBxdfData::LoadData( const std::string& filename )
 // evaluate bxdf
 Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
 {
-    const float muI = CosTheta( -wi );
-    const float muO = CosTheta( wo );
-    const float dPhi = CosDPhi( wo , -wi );
+    const auto muI = CosTheta( -wi );
+    const auto muO = CosTheta( wo );
+    const auto dPhi = CosDPhi( wo , -wi );
     
     int offsetI , offsetO;
     float weightsI[4] , weightsO[4];
@@ -98,29 +97,29 @@ Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
     
     float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
-    int nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
+    auto nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
     
-    float Y = std::max( 0.0f , fourier( ak , nMax , dPhi ) );
-    float scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
+    auto Y = std::max( 0.0f , fourier( ak , nMax , dPhi ) );
+    auto scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
     if( muI * muO > 0.0f ){
-        float eta = ( muI > 0.0f ) ? 1 / bsdfTable.eta : bsdfTable.eta;
+        auto eta = ( muI > 0.0f ) ? 1 / bsdfTable.eta : bsdfTable.eta;
         scale *= eta * eta;
     }
     
     if( bsdfTable.nChannels == 1 )
         return scale * Y;
     
-    float R = fourier( ak + 1 * bsdfTable.nMax , nMax , dPhi );
-    float B = fourier( ak + 2 * bsdfTable.nMax , nMax , dPhi );
-    float G = 1.39829f * Y - 0.100913f * B - 0.297375f * R;
+    auto R = fourier( ak + 1 * bsdfTable.nMax , nMax , dPhi );
+    auto B = fourier( ak + 2 * bsdfTable.nMax , nMax , dPhi );
+    auto G = 1.39829f * Y - 0.100913f * B - 0.297375f * R;
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
 Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
-    float muO = CosTheta(wo);
+    auto muO = CosTheta(wo);
     float pdfMu;
-    float muI = sampleCatmullRom2D(bsdfTable.nMu, bsdfTable.nMu, bsdfTable.mu, bsdfTable.mu, bsdfTable.a0, bsdfTable.cdf, muO, bs.u, nullptr, &pdfMu);
+    auto muI = sampleCatmullRom2D(bsdfTable.nMu, bsdfTable.nMu, bsdfTable.mu, bsdfTable.mu, bsdfTable.a0, bsdfTable.cdf, muO, bs.u, nullptr, &pdfMu);
     
     int offsetI , offsetO;
     float weightsI[4] , weightsO[4];
@@ -132,23 +131,23 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
     
     float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
-    int nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
+    auto nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
     
     float phi, pdfPhi;
-    float Y = sampleFourier(ak, bsdfTable.recip, nMax, bs.v, &pdfPhi, &phi);
+    auto Y = sampleFourier(ak, bsdfTable.recip, nMax, bs.v, &pdfPhi, &phi);
     *pdf = std::max( 0.0f , pdfPhi * pdfMu );
     
-    float sin2ThetaI = std::max( 0.0f , 1.0f - muI * muI );
-    float norm = sqrt( sin2ThetaI / SinTheta2(wo));
+    auto sin2ThetaI = std::max( 0.0f , 1.0f - muI * muI );
+    auto norm = sqrt( sin2ThetaI / SinTheta2(wo));
     if( isinf(norm) ) norm = 0.0f;
-    float sinPhi = sin(phi) , cosPhi = cos(phi);
+    auto sinPhi = sin(phi) , cosPhi = cos(phi);
     wi = -Vector3f( norm * ( cosPhi * wo.x - sinPhi * wo.z ),
                     muI ,
                     norm * ( sinPhi * wo.x + cosPhi * wo.z ));
     
     wi.Normalize();
     
-    float scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
+    auto scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
     if( muI * muO > 0.0f ){
         float eta = ( muI > 0.0f ) ? 1 / bsdfTable.eta : bsdfTable.eta;
         scale *= eta * eta;
@@ -157,16 +156,16 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
     if( bsdfTable.nChannels == 1 )
         return scale * Y;
     
-    float R = fourier( ak + 1 * bsdfTable.nMax , nMax , cosPhi );
-    float B = fourier( ak + 2 * bsdfTable.nMax , nMax , cosPhi );
-    float G = 1.39829f * Y - 0.100913f * B - 0.297375f * R;
+    auto R = fourier( ak + 1 * bsdfTable.nMax , nMax , cosPhi );
+    auto B = fourier( ak + 2 * bsdfTable.nMax , nMax , cosPhi );
+    auto G = 1.39829f * Y - 0.100913f * B - 0.297375f * R;
     return Spectrum( R * scale , G * scale , B * scale ).Clamp( 0.0f , FLT_MAX );
 }
 
 float FourierBxdfData::pdf( const Vector& wo , const Vector& wi ) const
 {
-    float muI = CosTheta(-wi) , muO = CosTheta(wo);
-    float cosPhi = CosDPhi( -wi , wo );
+    auto muI = CosTheta(-wi) , muO = CosTheta(wo);
+    auto cosPhi = CosDPhi( -wi , wo );
     
     int offsetI , offsetO;
     float weightsI[4] , weightsO[4];
@@ -176,15 +175,15 @@ float FourierBxdfData::pdf( const Vector& wo , const Vector& wi ) const
     
     float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax );
-    int nMax = blendCoefficients( ak , 1 , offsetI, offsetO, weightsI, weightsO );
+    auto nMax = blendCoefficients( ak , 1 , offsetI, offsetO, weightsI, weightsO );
     
-    float rho = 0.0f;
-    for( int o = 0 ; o < 4 ; ++o ){
+    auto rho = 0.0f;
+    for(auto o = 0 ; o < 4 ; ++o ){
         if( weightsO[o] == 0 ) continue;
         rho += weightsO[o] * bsdfTable.cdf[ (offsetO + o) * bsdfTable.nMu + bsdfTable.nMu - 1 ] * TWO_PI;
     }
 
-    float Y = fourier(ak, nMax, cosPhi);
+    auto Y = fourier(ak, nMax, cosPhi);
     return (rho > 0.0f && Y > 0.0f) ? (Y/rho) : 0.0f;
 }
 
@@ -193,7 +192,7 @@ template<typename Predicate>
 int FourierBxdfData::findInterval( int cnt , const Predicate& pred ) const
 {
     // use binary search to get the offset
-    int l = 0 , r = cnt - 1;
+    auto l = 0 , r = cnt - 1;
     while( l < r ){
         int m = l + (( r - l ) >> 1);
         if( pred(m) )
@@ -213,27 +212,27 @@ bool FourierBxdfData::getCatmullRomWeights( float x , int& offset , float* weigh
     // use binary search to get the offset
     offset = findInterval( bsdfTable.nMu , [&](int i) { return bsdfTable.mu[i] <= x; } ) - 1;
     
-    float x1 = bsdfTable.mu[offset+1] , x2 = bsdfTable.mu[offset+2];
-    float t = ( x - x1 ) / ( x2 - x1 ) , t2 = t * t, t3 = t2 * t;
+    auto x1 = bsdfTable.mu[offset+1] , x2 = bsdfTable.mu[offset+2];
+    auto t = ( x - x1 ) / ( x2 - x1 ) , t2 = t * t, t3 = t2 * t;
     
     weights[0] = weights[3] = 0.0f;
     weights[1] = 2 * t3 - 3 * t2 + 1;
     weights[2] = -2 * t3 + 3 * t2;
     if( offset >= 0 ){
-        float w0 = (t3 - 2 * t2 + t) * (x2 - x1) / (x2 - bsdfTable.mu[offset]);
+        auto w0 = (t3 - 2 * t2 + t) * (x2 - x1) / (x2 - bsdfTable.mu[offset]);
         weights[0] = -w0;
         weights[2] += w0;
     }else{
-        float w0 = t3 - 2 * t2 + t;
+        auto w0 = t3 - 2 * t2 + t;
         weights[1] -= w0;
         weights[2] += w0;
     }
     if( offset < bsdfTable.nMu - 3 ){
-        float w3 = (t3 - t2) * (x2 - x1) / (bsdfTable.mu[offset+3] - x1);
+        auto w3 = (t3 - t2) * (x2 - x1) / (bsdfTable.mu[offset+3] - x1);
         weights[1] -= w3;
         weights[3] = w3;
     }else{
-        float w3 = t3 - t2;
+        auto w3 = t3 - t2;
         weights[1] -= w3;
         weights[2] += w3;
     }
@@ -261,14 +260,14 @@ float FourierBxdfData::sampleCatmullRom2D( int size1 , int size2 , const float* 
         return value;
     };
     
-    float maximum = interpolate( cdf , size2 - 1 );
+    auto maximum = interpolate( cdf , size2 - 1 );
     u *= maximum;
     int idx = findInterval( size2, [&](int i){ return interpolate(cdf,i) <= u; } );
     
-    float f0 = interpolate( values , idx );
-    float f1 = interpolate( values , idx + 1 );
-    float x0 = nodes2[idx] , x1 = nodes2[idx+1];
-    float w = x1 - x0;
+    auto f0 = interpolate( values , idx );
+    auto f1 = interpolate( values , idx + 1 );
+    auto x0 = nodes2[idx] , x1 = nodes2[idx+1];
+    auto w = x1 - x0;
     float d0 , d1;
     
     u = ( u - interpolate( cdf , idx ) ) / w;
@@ -283,8 +282,9 @@ float FourierBxdfData::sampleCatmullRom2D( int size1 , int size2 , const float* 
         d1 = f1 - f0;
     
     // Approximate the intersection by assuming it is linear interpolant
-    float t = ( f0 != f1 ) ? ( f0 - sqrt(std::max( 0.0f , f0 * f0 + 2 * u * ( f1 - f0 ) ) ) ) / (f0 - f1 ) : u / f0;
-    float a = 0.0f , b = 1.0f, Fhat , fhat;
+    auto t = ( f0 != f1 ) ? ( f0 - sqrt(std::max( 0.0f , f0 * f0 + 2 * u * ( f1 - f0 ) ) ) ) / (f0 - f1 ) : u / f0;
+    auto a = 0.0f, b = 1.0f;
+    float Fhat, fhat;
     while(true){
         if( !( t >= a && t <= b ) )
             t = ( a + b ) * 0.5f;
@@ -316,7 +316,7 @@ float FourierBxdfData::fourier( const float* ak , int m , double cosPhi ) const
     double value = 0.0;
     double cosKMinusOnePhi = cosPhi;
     double cosKPhi = 1.0;
-    for( int i = 0 ; i < m ; ++i ){
+    for(auto i = 0 ; i < m ; ++i ){
         value += cosKPhi * ak[i];
         double cosKPlusPhi = 2.0 * cosPhi * cosKPhi - cosKMinusOnePhi;
         cosKMinusOnePhi = cosKPhi;
@@ -331,7 +331,7 @@ float FourierBxdfData::fourier( const float* ak , int m , double cosPhi ) const
 // Newton method :      https://en.wikipedia.org/wiki/Newton%27s_method
 float FourierBxdfData::sampleFourier( const float* ak , const float* recip , int m , float u , float* pdf , float* phiptr ) const
 {
-    bool flip = u >= 0.5f;
+    auto flip = u >= 0.5f;
     if( flip ) u = 2.0f * ( 1.0f - u );
     else u *= 2.0f;
     
@@ -382,16 +382,16 @@ float FourierBxdfData::sampleFourier( const float* ak , const float* recip , int
 // helper functio to blend coefficients for fourier
 int FourierBxdfData::blendCoefficients( float* ak , int channel , int offsetI , int offsetO , float* weightsI , float* weightsO ) const
 {
-    int nMax = 0;
-    for( int i = 0 ; i < 4 ; ++i ){
-        for( int j = 0 ; j < 4 ; ++j ){
-            float w = weightsI[j] * weightsO[i];
+    auto nMax = 0;
+    for(auto i = 0 ; i < 4 ; ++i ){
+        for(auto j = 0 ; j < 4 ; ++j ){
+            auto w = weightsI[j] * weightsO[i];
             if( w != 0.0f ){
                 int m;
                 float* a = bsdfTable.GetAk(offsetI + j , offsetO + i, &m );
                 nMax = std::max( nMax , m );
-                for( int c = 0 ; c < channel ; ++c ){
-                    for( int k = 0 ; k < m ; ++k )
+                for(auto c = 0 ; c < channel ; ++c ){
+                    for(auto k = 0 ; k < m ; ++k )
                         ak[ c * bsdfTable.nMax + k ] += w * a[ c * m + k ];
                 }
             }

@@ -15,30 +15,28 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header file
 #include "ashikhmanshirley.h"
 #include "bsdf.h"
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 
-Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const
-{
+Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
     
-    const float cos_theta_o = AbsCosTheta(wo);
-    const float cos_theta_i = AbsCosTheta(wi);
+    const auto cos_theta_o = AbsCosTheta(wo);
+    const auto cos_theta_i = AbsCosTheta(wi);
     
     // Diffuse  : f_diffuse( wo , wi ) = 28.0f / ( 23.0f * PI ) * ( 1.0 - R ) * ( 1.0 - ( 1.0 - 0.5 * CosTheta(wo) ) ^ 5 ) * ( 1.0 - ( 1.0 - 0.5f * CosTheta(wi) ) ^ 5
     // Specular : f_specular( wo , wi ) = D(h) * SchlickFresnel(S,Dot(wi,h)) / ( 4.0f * AbsDot( wi , h ) * max( AbsDot(wi,n) , AbsDot(wo,n) )
-    const Spectrum diffuse = 0.3875f * D * ( Spectrum( 1.0f ) - S ) * ( 1.0f - SchlickWeight( 0.5f * cos_theta_o ) ) * ( 1.0f - SchlickWeight( 0.5f * cos_theta_i ) );
+    const auto diffuse = 0.3875f * D * ( Spectrum( 1.0f ) - S ) * ( 1.0f - SchlickWeight( 0.5f * cos_theta_o ) ) * ( 1.0f - SchlickWeight( 0.5f * cos_theta_i ) );
     
-    Vector h = wo + wi;
+    auto h = wo + wi;
     if( h.IsZero() ) return 0.0f;
     h = Normalize(h);
     
-    const float IoH = AbsDot( wi , h );
-    const Spectrum specular = ( distribution.D(h) * SchlickFresnel(S, IoH) ) / ( 4.0f * IoH * std::max( cos_theta_i , cos_theta_o ) ) ;
+    const auto IoH = AbsDot( wi , h );
+    const auto specular = ( distribution.D(h) * SchlickFresnel(S, IoH) ) / ( 4.0f * IoH * std::max( cos_theta_i , cos_theta_o ) ) ;
     
     return ( diffuse + specular ) * AbsCosTheta(wi);
 }
@@ -65,7 +63,7 @@ float AshikhmanShirley::pdf( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
     
-    const Vector wh = Normalize( wi + wo );
-    float pdf_wh = distribution.Pdf(wh);
+    const auto wh = Normalize( wi + wo );
+    const auto pdf_wh = distribution.Pdf(wh);
     return lerp( CosHemispherePdf(wi) , pdf_wh / ( 4.0f * Dot( wo , wh ) ) , 0.5f );
 }

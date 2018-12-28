@@ -37,37 +37,36 @@ static const double MERL_BLUE_SCALE = 0.0011066666666666667;
 void MerlData::LoadData( const std::string& filename )
 {
     // get full path
-    std::string str = ( filename );
+    auto str = ( filename );
     
     // try to open the file
     std::ifstream file( str.c_str() , std::ios::binary );
     if( false == file.is_open() )
         return;
     
-    int dims[3];
-    file.read( (char*)dims , sizeof( int ) * 3 );
+    unsigned int dims[3];
+    file.read( (char*)dims , sizeof(unsigned int) * 3 );
     
     // check dimension
     if( dims[0] != MERL_SAMPLING_RES_THETA_H ||
        dims[1] != MERL_SAMPLING_RES_THETA_D ||
-       dims[2] != MERL_SAMPLING_RES_PHI_D )
-    {
+       dims[2] != MERL_SAMPLING_RES_PHI_D ){
         file.close();
         return;
     }
     
     // allocate data
-    unsigned trunksize = dims[0] * dims[1] * dims[2];
-    unsigned size = 3 * trunksize;
+    auto trunksize = dims[0] * dims[1] * dims[2];
+    auto size = 3u * trunksize;
     m_data = new double[size];
     file.read( (char*)m_data , sizeof( double ) * size );
     
     unsigned offset = 0;
-    for( unsigned i = 0 ; i < trunksize ; i++ )
+    for(auto i = 0u ; i < trunksize ; i++ )
         m_data[offset++] *= MERL_RED_SCALE;
-    for( unsigned i = 0 ; i < trunksize ; i++ )
+    for(auto i = 0u ; i < trunksize ; i++ )
         m_data[offset++] *= MERL_GREEN_SCALE;
-    for( unsigned i = 0 ; i < trunksize ; i++ )
+    for(auto i = 0u ; i < trunksize ; i++ )
         m_data[offset++] *= MERL_BLUE_SCALE;
     
     file.close();
@@ -76,17 +75,16 @@ void MerlData::LoadData( const std::string& filename )
 // evaluate bxdf
 Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
 {
-	Vector wo = Wo;
-	Vector wi = Wi;
+    auto wo = Wo;
+    auto wi = Wi;
 
     // ignore reflection at the back face
     if( wo.y <= 0.0f )
         return 0.0f;
 	
 	// Compute wh and transform wi to halfangle coordinate system
-    Vector wh = wo + wi;
-	if( wh.y < 0.0f )
-	{
+    auto wh = wo + wi;
+	if( wh.y < 0.0f ){
 		wh = -wh;
 		wi = -wi;
 		wo = -wo;
@@ -95,32 +93,32 @@ Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
 		return Spectrum (0.f);
     wh = Normalize(wh);
 
-	float whTheta = SphericalTheta(wh);
-    float whCosPhi = CosPhi(wh), whSinPhi = SinPhi(wh);
-    float whCosTheta = CosTheta(wh), whSinTheta = SinTheta(wh);
+    auto whTheta = SphericalTheta(wh);
+    auto whCosPhi = CosPhi(wh), whSinPhi = SinPhi(wh);
+    auto whCosTheta = CosTheta(wh), whSinTheta = SinTheta(wh);
 
 	Vector whx( whSinPhi , 0 , -whCosPhi );
 	Vector why( whCosPhi * whCosTheta , -whSinTheta , whSinPhi * whCosTheta );
     Vector wd(Dot(wi, whx), Dot(wi, wh), Dot(wi, why));
 
     // Compute _index_ into measured BRDF tables
-    float wdTheta = SphericalTheta(wd), wdPhi = SphericalPhi(wd);
+    auto wdTheta = SphericalTheta(wd), wdPhi = SphericalPhi(wd);
     if (wdPhi > PI) 
 		wdPhi -= PI;
 
     // Compute indices _whThetaIndex_, _wdThetaIndex_, _wdPhiIndex_
-    int whThetaIndex = (int)clamp(sqrtf(std::max(0.f, whTheta * 2.0f * INV_PI )) * MERL_SAMPLING_RES_THETA_H,  0.f, (float)(MERL_SAMPLING_RES_THETA_H-1));
-    int wdThetaIndex = (int)clamp(wdTheta * INV_PI * 2.0f * MERL_SAMPLING_RES_THETA_D, 0.f , (float)(MERL_SAMPLING_RES_THETA_D-1));
-    int wdPhiIndex = (int)clamp(wdPhi * INV_PI * MERL_SAMPLING_RES_PHI_D, 0.f , (float)(MERL_SAMPLING_RES_PHI_D - 1));
+    auto whThetaIndex = (int)clamp(sqrtf(std::max(0.f, whTheta * 2.0f * INV_PI )) * MERL_SAMPLING_RES_THETA_H,  0.f, (float)(MERL_SAMPLING_RES_THETA_H-1));
+    auto wdThetaIndex = (int)clamp(wdTheta * INV_PI * 2.0f * MERL_SAMPLING_RES_THETA_D, 0.f , (float)(MERL_SAMPLING_RES_THETA_D-1));
+    auto wdPhiIndex = (int)clamp(wdPhi * INV_PI * MERL_SAMPLING_RES_PHI_D, 0.f , (float)(MERL_SAMPLING_RES_PHI_D - 1));
 
 	// calculate the index
-    int index = wdPhiIndex + MERL_SAMPLING_RES_PHI_D * (wdThetaIndex + whThetaIndex * MERL_SAMPLING_RES_THETA_D);
+    auto index = wdPhiIndex + MERL_SAMPLING_RES_PHI_D * (wdThetaIndex + whThetaIndex * MERL_SAMPLING_RES_THETA_D);
 
-	const float r = (float)( m_data[ index ] );
+	const auto r = (float)( m_data[ index ] );
 	index += MERL_SAMPLING_COUNT;
-	const float g = (float)( m_data[ index ] );
+	const auto g = (float)( m_data[ index ] );
 	index += MERL_SAMPLING_COUNT;
-	const float b = (float)( m_data[ index ] );
+	const auto b = (float)( m_data[ index ] );
 
 	return Spectrum( r , g , b );
 }

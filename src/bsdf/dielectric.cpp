@@ -23,10 +23,10 @@ Spectrum Dielectric::f(const Vector& wo, const Vector& wi) const{
 }
 
 Spectrum Dielectric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
-    const float fr = fresnel.Evaluate(CosTheta(wo)).GetIntensity();
-    const float r = fr * R.GetIntensity();
-    const float t = ( 1.0f - fr ) * T.GetIntensity();
-    const float spec_Ratio = r / (r + t);
+    const auto fr = fresnel.Evaluate(CosTheta(wo)).GetIntensity();
+    const auto r = fr * R.GetIntensity();
+    const auto t = ( 1.0f - fr ) * T.GetIntensity();
+    const auto spec_Ratio = r / (r + t);
 
     Spectrum ret;
     BsdfSample new_bs(true);
@@ -39,12 +39,12 @@ Spectrum Dielectric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
 }
 
 float Dielectric::pdf(const Vector& wo, const Vector& wi) const {
-    const float fr = fresnel.Evaluate(CosTheta(wo)).GetIntensity();
-    const float r = fr * R.GetIntensity();
-    const float t = (1.0f - fr) * T.GetIntensity();
-    const float spec_Ratio = r / (r + t);
+    const auto fr = fresnel.Evaluate(CosTheta(wo)).GetIntensity();
+    const auto r = fr * R.GetIntensity();
+    const auto t = (1.0f - fr) * T.GetIntensity();
+    const auto spec_Ratio = r / (r + t);
 
-    const float pdf_refract = mf_refract.pdf(wo, wi);
-    const float pdf_reflect = mf_reflect.pdf(wo, wi);
+    const auto pdf_refract = mf_refract.pdf(wo, wi);
+    const auto pdf_reflect = mf_reflect.pdf(wo, wi);
     return lerp(pdf_refract, pdf_reflect, spec_Ratio);
 }

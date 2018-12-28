@@ -30,7 +30,8 @@
 class AshikhmanShirley : public Bxdf
 {
 public:
-	//! Constructor
+	//! Constructor.
+    //!
     //! @param diffuse          Direction-hemisphere reflection for diffuse.
     //! @param specular         Direction-hemisphere reflection for specular, it is a scaler value because this model doesn't behave well with arbitary spectrum.
     //! @param roughnessU       Roughness along one axis.
@@ -40,12 +41,14 @@ public:
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), distribution(roughnessU, roughnessV) {}
 	
     //! Evaluate the BRDF
+    //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
 	
     //! @brief Importance sampling for the fresnel brdf.
+    //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
@@ -54,6 +57,7 @@ public:
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
     
     //! @brief Evaluate the pdf of an existance direction given the Incident direction.
+    //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
