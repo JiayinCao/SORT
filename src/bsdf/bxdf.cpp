@@ -28,9 +28,7 @@ Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_w
     sn = Normalize(Cross( tn , nn ));
 }
 
-// sample a direction randomly
-Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const
-{
+Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
 	wi = CosSampleHemisphere( bs.u , bs.v );
 	if( pPdf ) *pPdf = pdf( wo , wi );
 	return f( wo , wi );

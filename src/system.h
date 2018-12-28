@@ -45,15 +45,9 @@ private:
     // image sensor
     ImageSensor*    m_imagesensor = nullptr;
 
-    unsigned		m_totalTask = 0;
-    bool*			m_taskDone = nullptr;
-    char*			m_pProgress = nullptr;
-
 	// the scene for rendering
 	Scene			m_Scene;
-
-	// output progress
-	void	_outputProgress();
+    
 	// do ray tracing in a multithread enviroment
 	void	_executeRenderingTasks();
 	// push rendering task
