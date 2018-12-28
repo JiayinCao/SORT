@@ -29,7 +29,7 @@
  * 'Illumination for Computer Generated Pictures'
  * http://www.cs.northwestern.edu/~ago820/cs395/Papers/Phong_1975.pdf
  *
- * Although, this modified Phong model is a PBR based BRDF, its non-PBR parameter interface really limits its application.
+ * Although this modified Phong model is a PBR based BRDF, its non-PBR parameter interface really limits its application.
  * As a matter of fact, this is no guarantee that the original modified BRDF is energy conservative if DiffuseColor combined with SpecularColor is larger 1.
  * It was explicitly mentioned in the paper that the sum of diffuse and specular has to be smaller to be physically based. However, such an implicit constraint
  * is not very user-friendly to artist because sometimes, especially when it is driven by textures, it is not quite easy to obey the rule.

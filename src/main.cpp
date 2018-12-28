@@ -24,8 +24,10 @@
 #include "core/globalconfig.h"
 #include "thirdparty/gtest/gtest.h"
 
-// the global system
 System g_System;
+
+#include <regex>
+using namespace std;
 
 #ifdef SORT_IN_WINDOWS
 int __cdecl main( int argc , char** argv )
@@ -40,13 +42,10 @@ int main(int argc, char** argv)
     addLogDispatcher(new StdOutLogDispatcher());
     addLogDispatcher(new FileLogDispatcher( "log.txt" ));
 
-    std::string commandline = "Command line arguments: \t";
-    for (int i = 0; i < argc; ++i) {
-        commandline += std::string(argv[i]);
-        commandline += " ";
-    }
+    // Parse command line arguments.
+    GlobalConfiguration::GetSingleton().ParseCommandLine( argc , argv );
 
-    slog( INFO , GENERAL , "%s" , commandline.c_str() );
+    slog(INFO, GENERAL, "Number of CPU cores %d" , NumSystemCores() );
 #ifdef SORT_ENABLE_STATS_COLLECTION
     slog( INFO, GENERAL, "Stats collection is enabled." );
 #else
@@ -54,32 +53,14 @@ int main(int argc, char** argv)
 #endif
     slog( INFO, GENERAL, "Profiling system is %s." , SORT_PROFILE_ISENABLED ? "enabled" : "disabled" );
 
-    // check if there is file argument
-    if (argc < 2)
-    {
-        slog(WARNING, GENERAL, "Miss file argument.");
-        slog(INFO, GENERAL, "Log file: \"%s\"", GetFilePathInResourceFolder("log.txt").c_str());
-        return 0;
-    }
-
-    // Run unit tests
-    if (strcmp(argv[1], "unittest" ) == 0){
+    // Run in unit test mode.
+    if( g_unitTestMode ){
         ::testing::InitGoogleTest(&argc, argv);
         return RUN_ALL_TESTS();
     }
 
-    slog(INFO, GENERAL, "Number of CPU cores %d" , NumSystemCores() );
-
-    // enable blender mode if possible
-    if (argc > 2)
-    {
-        if (strcmp(argv[2], "blendermode") == 0)
-            GlobalConfiguration::GetSingleton().SetBlenderMode(true);
-    }
-
     // setup the system
-    if (g_System.Setup(argv[1]))
-    {
+    if (g_System.Setup(argv[1])){
         // do ray tracing
         g_System.Render();
     }

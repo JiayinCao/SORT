@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <string>
+#include "core/log.h"
 #include "stream/stream.h"
 #include "core/singleton.h"
 #include "accel/accelerator.h"
@@ -26,58 +28,112 @@
 //! @brief	This needs to be update every time the content of GlobalConfiguration chagnes.
 constexpr unsigned int GLOBAL_CONFIGURATION_VERSION	= 0;
 
+// Pre-declare the function because the file defining this interface includes this file first.
+std::string GetFilePathInExeFolder( const std::string& filename );
+
 //! @brief	GlobalConfiguration saves some global state.
 class GlobalConfiguration : public Singleton<GlobalConfiguration> , SerializableObject {
 public:
 	//! @brief	Get render tile size.
 	//!
 	//! A tile is a group of pixels to be traced by one thread unit.
-	unsigned int	GetTileSize() const { return m_tileSize; }
+	unsigned int	GetTileSize() const { 
+		return m_tileSize; 
+	}
 	
 	//! @brief	Whether SORT is ran in Blender mode.
 	//!
 	//! Blender mode will stream the result directly to shared memory through IPC.
-	bool			GetBlenderMode() const { return m_blenderMode; }
+	bool			GetBlenderMode() const { 
+		return m_blenderMode; 
+	}
 
-	//! @brief	Update blender mode
+	//! @brief	Whether SORT is in unit test mode.
 	//!
-	//! @param	mode		Whether blender mode is true or not.
-	void			SetBlenderMode( bool mode ) { m_blenderMode = mode; }
+	//! @return		Whether the current running instance is in unit test mode.
+	bool			GetIsUnitTestMode() const {
+		return m_unitTestMode;
+	}
 
 	//! @brief      Get the spatial accelerator structure.
     //!
     //! @return     The spatial acceleration structure. Could be 'nullptr', meaning a bruteforce workaround will be used.
-    Accelerator*    GetAccelerator() { return m_accelerator.get(); }
+    Accelerator*    GetAccelerator() {
+		return m_accelerator.get(); 
+	}
 
 	//! @brief      Get the integrator of the renderer.
     //!
 	//! @return		Integrator used to evaluate rendering equation.
-    Integrator*    	GetIntegrator() { return m_integrator.get(); }
+    Integrator*    	GetIntegrator() {
+		return m_integrator.get(); 
+	}
 
 	//! @brief		Get the number of worker threads.
 	//!
 	//! @return		Number of worker thread. Default value is 16.
-	unsigned int					GetThreadCnt() const { return m_threadCnt; }
+	unsigned int					GetThreadCnt() const {
+		return m_threadCnt;
+	}
 
 	//! @brief		Get sampler per pixel.
 	//!
 	//! @return		Number of sample per pixel.
-	unsigned int					GetSamplePerPixel() const { return m_samplePerPixel; }
+	unsigned int					GetSamplePerPixel() const {
+		return m_samplePerPixel;
+	}
 
 	//! @brief		Get full path of the resource.
 	//!
 	//! @return		Full path of the resources files.
-	const std::string&				GetResourcePath() const { return m_resourcePath; }
+	const std::string&				GetResourcePath() const {
+		return m_resourcePath;
+	}
 
 	//! @brief		Get output file name.
 	//!
 	//! @return		Name of the output file.
-	const std::string&				GetOutputFileName() const { return m_outputFile; }
+	const std::string&				GetOutputFileName() const {
+		return m_outputFile;
+	}
 
 	//! @brief		Get resolution of the final result.
 	//!
 	//! @return 	Resolution of the final result.
-	const Vector2i					GetResultResolution() const { return Vector2i( m_resWidth , m_resHeight ); }
+	const Vector2i					GetResultResolution() const {
+		return Vector2i( m_resWidth , m_resHeight );
+	}
+
+	//! @brief		Parse command line.
+	//!
+	//!	@param	argc	Number of parameters, including the executable as the first parameter too.
+	//! @param	argv	Input command line parameters.
+	void			ParseCommandLine( int argc , char** argv ){
+		std::string commandline = "Command line arguments: \t";
+		for (int i = 0; i < argc; ++i) {
+			commandline += std::string(argv[i]);
+			commandline += " ";
+		}
+		slog( INFO , GENERAL , "%s" , commandline.c_str() );
+
+		// check if there is file argument
+		if (argc < 2){
+			slog(WARNING, GENERAL, "Miss file argument.");
+			slog(INFO, GENERAL, "Log file: \"%s\"", GetFilePathInExeFolder("log.txt").c_str());
+			return;
+		}
+
+		if (strcmp(argv[1], "unittest" ) == 0){
+			m_unitTestMode = true;
+			return;
+		}
+
+		// enable blender mode if possible
+		if (argc > 2){
+			if (strcmp(argv[2], "blendermode") == 0)
+				m_blenderMode = true;
+		}
+	}
 
 	//! @brief      Serializing data from stream
     //!
@@ -106,7 +162,6 @@ private:
 	std::string						m_resourcePath = "";			/**< Full path of the resource files. */
 	std::string						m_outputFile;					/**< Name of the output file. */
 	unsigned int		            m_tileSize = 64;				/**< Size of tile for tasks to render each time. */
-	bool				            m_blenderMode = false;			/**< Whether the current running instance is attached with Blender. */
 	unsigned int					m_resWidth = 1024;				/**< Width of the result resolution. */
 	unsigned int					m_resHeight = 1024;				/**< Height of the result resolution. */
     unsigned int					m_threadCnt = 16;				/**< Number of worker thread ( including the main thread as a woker thread ). */
@@ -114,6 +169,9 @@ private:
 	std::unique_ptr<Accelerator>    m_accelerator = nullptr;    	/**< Spatial accelerator for accelerating primitive/ray intersection test. */
 	std::unique_ptr<Integrator>		m_integrator = nullptr;			/**< Integrator used to evaluate rendering equation. */
 	
+	bool				            m_blenderMode = false;			/**< Whether the current running instance is attached with Blender. */
+	bool							m_unitTestMode = false;			/**< Whether the current running instance is in unit test mode. */
+
     std::string                     m_accelType;            		/**< Local cache of accelerator type. This is not exposed to other systems.*/
 	std::string						m_integratorType;				/**< Integrator type. */
 
@@ -134,3 +192,4 @@ private:
 #define g_resourcePath		GlobalConfiguration::GetSingleton().GetResourcePath()
 #define g_outputFileName	GlobalConfiguration::GetSingleton().GetOutputFileName()
 #define g_resultResollution GlobalConfiguration::GetSingleton().GetResultResolution()
+#define	g_unitTestMode		GlobalConfiguration::GetSingleton().GetIsUnitTestMode()
