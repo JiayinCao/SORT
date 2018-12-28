@@ -21,12 +21,6 @@
 #include "sampler/sample.h"
 #include "math/vector2.h"
 
-class Integrator;
-class Scene;
-class Sampler;
-class RenderTarget;
-class ImageSensor;
-
 //! @brief  Render_Task is a basic rendering unit doing ray tracing.
 //!
 //! Each render task is usually responsible for a tile of image to be rendered in
@@ -37,10 +31,9 @@ public:
     //! @brief Constructor
     //!
     //! @param priority     New priority of the task.
-    Render_Task(const Vector2i& ori , const Vector2i& size , Scene* scene , unsigned int spp ,
-                std::shared_ptr<Integrator> integrator , std::shared_ptr<Sampler> sampler , PixelSample* pixelSamples ,
+    Render_Task(const Vector2i& ori , const Vector2i& size , class Scene* scene , class Sampler* sampler , PixelSample* pixelSamples ,
                 unsigned int priority = DEFAULT_TASK_PRIORITY , const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ) : 
-                Task( priority , dependencies ), m_coord(ori), m_size(size), m_samplePerPixel(spp), m_scene(*scene), m_integrator(integrator), m_sampler( sampler ),
+                Task( priority , dependencies ), m_coord(ori), m_size(size), m_scene(*scene), m_sampler( sampler ),
                 m_pixelSamples(pixelSamples) {}
     
     //! @brief  Execute the task
@@ -60,13 +53,6 @@ public:
         return m_size;
     }
 
-    //! @brief  Get sample per pixel.
-    //!
-    //! @return Sample per pixel to take.
-    inline unsigned int    GetSamplePerPixel() const {
-        return m_samplePerPixel;
-    }
-
     //! @brief  Get scene description.
     //!
     //! @return Scene description.
@@ -74,19 +60,10 @@ public:
         return m_scene;
     }
 
-    //! @brief  Get integrator.
-    //!
-    //! @return The integrator used to evaluate rendering equation.
-    inline const std::shared_ptr<Integrator>   GetIntegrator() const{
-        return m_integrator;
-    }
-
 private:
-    Vector2i                            m_coord;            /**< Top-left corner of the current tile. */
-    Vector2i                            m_size;             /**< Size of the current tile to be rendered. */
-    unsigned int                        m_samplePerPixel;   /**< Sample to take for each pixel. */
-    Scene&	                            m_scene;            /**< Scene for ray tracing. */
-    const std::shared_ptr<Integrator>   m_integrator;       /**< Integrator for evaluating rendering equation. */
-    std::shared_ptr<Sampler>            m_sampler;          /**< Sampler for taking samples. Currently not used. */
-    PixelSample*                        m_pixelSamples;     /**< Samples to take. Currently not used. */
+    Vector2i              m_coord;            /**< Top-left corner of the current tile. */
+    Vector2i              m_size;             /**< Size of the current tile to be rendered. */
+    class Scene&	      m_scene;            /**< Scene for ray tracing. */
+    class Sampler*        m_sampler;          /**< Sampler for taking samples. Currently not used. */
+    PixelSample*          m_pixelSamples;     /**< Samples to take. Currently not used. */
 };

@@ -27,7 +27,7 @@
 template<class T>
 class ItemCreator{
 public:
-	virtual std::shared_ptr<T> CreateInstance() const = 0;
+	virtual T* CreateInstance() const = 0;
 };
 
 //! @brief		Creator class is responsible for creating instances based on names.
@@ -39,7 +39,7 @@ public:
 	//! @brief	Create an instance of a specific type based on class name.
 	//!
 	//! @return		Return a reference of a newly created instance.
-	std::shared_ptr<T> CreateType( std::string str ) const{
+	T* CreateType( std::string str ) const{
 		std::transform(str.begin(),str.end(),str.begin(),[](char c){ return tolower(c); });
 		auto it = m_container.find( str );
 		return it == m_container.end() ? nullptr : it->second->CreateInstance();
@@ -80,13 +80,23 @@ private:
 		}\
         container.insert( std::make_pair(_str , this) );\
 	}\
-	std::shared_ptr<B> CreateInstance() const { return std::make_shared<T>(); }\
+	B* CreateInstance() const { return new T(); }\
 };
 
 //! @brief	Instance a class type based on name.
 //!
 //! @param	name		Name of the class. This has to match what is defined in python plugin.
+//! @return             Shared pointer holding the instance.
 template<class T>
-std::shared_ptr<T> MakeInstance( const std::string& name ){
-	return Creator<T>::GetSingleton().CreateType( name );
+std::shared_ptr<T> MakeSharedInstance( const std::string& name ){
+    return std::shared_ptr<T>(Creator<T>::GetSingleton().CreateType(name));
+}
+
+//! @brief  Instance a class and an unique pointer is returned.
+//!
+//! @param  name        Name of the class. This has to match what is defined in python plugin.
+//! @return             An unique pointer pointing to the instance.
+template<class T>
+std::unique_ptr<T> MakeUniqueInstance( const std::string& name ) {
+    return std::unique_ptr<T>(Creator<T>::GetSingleton().CreateType(name));
 }

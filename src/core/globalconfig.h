@@ -47,12 +47,12 @@ public:
 	//! @brief      Get the spatial accelerator structure.
     //!
     //! @return     The spatial acceleration structure. Could be 'nullptr', meaning a bruteforce workaround will be used.
-    std::shared_ptr<Accelerator>    GetAccelerator() { return m_accelerator; }
+    Accelerator*    GetAccelerator() { return m_accelerator.get(); }
 
 	//! @brief      Get the integrator of the renderer.
     //!
 	//! @return		Integrator used to evaluate rendering equation.
-    std::shared_ptr<Integrator>    	GetIntegrator() { return m_integrator; }
+    Integrator*    	GetIntegrator() { return m_integrator.get(); }
 
 	//! @brief		Get the number of worker threads.
 	//!
@@ -93,11 +93,11 @@ public:
 		stream >> m_samplePerPixel;
 		stream >> m_resWidth >> m_resHeight;
         stream >> m_accelType;
-        m_accelerator = MakeInstance<Accelerator>(m_accelType);
+        m_accelerator = MakeUniqueInstance<Accelerator>(m_accelType);
 		if( m_accelerator )
 			m_accelerator->Serialize( stream );
 		stream >> m_integratorType;
-		m_integrator = MakeInstance<Integrator>(m_integratorType);
+		m_integrator = MakeUniqueInstance<Integrator>(m_integratorType);
 		if( m_integrator != nullptr )
 			m_integrator->Serialize( stream );
 	};
@@ -111,8 +111,8 @@ private:
 	unsigned int					m_resHeight = 1024;				/**< Height of the result resolution. */
     unsigned int					m_threadCnt = 16;				/**< Number of worker thread ( including the main thread as a woker thread ). */
 	unsigned int					m_samplePerPixel = 4;			/**< Sample of per-pixel. Default value is 4 for fast iteration. */
-	std::shared_ptr<Accelerator>    m_accelerator = nullptr;    	/**< Spatial accelerator for accelerating primitive/ray intersection test. */
-	std::shared_ptr<Integrator>		m_integrator = nullptr;			/**< Integrator used to evaluate rendering equation. */
+	std::unique_ptr<Accelerator>    m_accelerator = nullptr;    	/**< Spatial accelerator for accelerating primitive/ray intersection test. */
+	std::unique_ptr<Integrator>		m_integrator = nullptr;			/**< Integrator used to evaluate rendering equation. */
 	
     std::string                     m_accelType;            		/**< Local cache of accelerator type. This is not exposed to other systems.*/
 	std::string						m_integratorType;				/**< Integrator type. */

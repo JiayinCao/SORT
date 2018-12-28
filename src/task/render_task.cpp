@@ -27,52 +27,46 @@
 void Render_Task::Execute(){
     SORT_PROFILE("Render Task");
     
-    if( m_integrator == nullptr )
+    if(g_integrator == nullptr )
         return;
-    std::shared_ptr<Camera> camera = m_scene.GetCamera();
-    ImageSensor* is = camera->GetImageSensor();
+    auto camera = m_scene.GetCamera();
+    auto is = camera->GetImageSensor();
     if( !is )
         return;
     
     // request samples
-    // TODO : pass sampler as a shared_ptr, not raw pointer
-    m_integrator->RequestSample( m_sampler.get() , m_pixelSamples , m_samplePerPixel );
+    g_integrator->RequestSample( m_sampler , m_pixelSamples , g_samplePerPixel);
     
 	Vector2i rb = m_coord + m_size;
     
     unsigned tid = ThreadId();
-    for( int i = m_coord.y ; i < rb.y ; i++ )
-    {
-        for( int j = m_coord.x ; j < rb.x ; j++ )
-        {
+    for( int i = m_coord.y ; i < rb.y ; i++ ){
+        for( int j = m_coord.x ; j < rb.x ; j++ ){
             // clear managed memory after each pixel
             MemManager::GetSingleton().ClearMem(tid);
             
             // generate samples to be used later
-            // TODO : pass sampler as a shared_ptr, not raw pointer
-            m_integrator->GenerateSample( m_sampler.get() , m_pixelSamples, m_samplePerPixel , m_scene );
+            g_integrator->GenerateSample( m_sampler , m_pixelSamples, g_samplePerPixel, m_scene );
             
             // the radiance
             Spectrum radiance;
 
-            for( unsigned k = 0 ; k < m_samplePerPixel ; ++k )
-            {
+            for( unsigned k = 0 ; k < g_samplePerPixel; ++k ){
                 // generate rays
-                Ray r = camera->GenerateRay( (float)j , (float)i , m_pixelSamples[k] );
+                auto r = camera->GenerateRay( (float)j , (float)i , m_pixelSamples[k] );
                 // accumulate the radiance
-                radiance += m_integrator->Li( r , m_pixelSamples[k] );
+                radiance += g_integrator->Li( r , m_pixelSamples[k] );
             }
-            radiance /= (float)m_samplePerPixel;
+            radiance /= (float)g_samplePerPixel;
             
             // store the pixel
             is->StorePixel( j , i , radiance , *this );
         }
     }
     
-	if( m_integrator->NeedRefreshTile() )
-	{
-		int x_off = m_coord.x / g_tileSize;
-		int y_off = (is->GetHeight() - 1 - m_coord.y ) / g_tileSize ;
+	if( g_integrator->NeedRefreshTile() ){
+		auto x_off = m_coord.x / g_tileSize;
+		auto y_off = (is->GetHeight() - 1 - m_coord.y ) / g_tileSize ;
 		is->FinishTile( x_off, y_off, *this );
 	}
 }
