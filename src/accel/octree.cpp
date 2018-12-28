@@ -49,7 +49,7 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_STATS(sShadowRayCount += intersect == nullptr);
     
 	float fmax;
-	float fmin = Intersect( r , m_bbox , &fmax );
+	auto fmin = Intersect( r , m_bbox , &fmax );
 	if( fmin < 0.0f )
 		return false;
 
@@ -68,7 +68,7 @@ void OcTree::Build(){
 	if( m_primitives->size() == 0 )
 		return ;
 
-	// generate aabb
+	// generate AABB
 	computeBBox();
 
 	// initialize a primitive container
@@ -80,7 +80,7 @@ void OcTree::Build(){
 	m_root = new OcTreeNode();
 	m_root->bb = m_bbox;
 
-	// split octree node
+	// split OCTree node
 	splitNode( m_root , container , 0 );
     
 	m_isValid = true;
@@ -92,7 +92,7 @@ void OcTree::Build(){
 void OcTree::releaseOcTree( OcTreeNode* node ){
 	if( !node )
 		return;
-	for( int i = 0 ; i < 8 ; ++i )
+	for(auto i = 0 ; i < 8 ; ++i )
 		releaseOcTree( node->child[i] );
 	delete node;
 }
@@ -108,17 +108,17 @@ void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , u
 
 	// container for child node
 	NodePrimitiveContainer* childcontainer[8];
-	for( int i = 0; i < 8 ; ++i ){
+	for(auto i = 0; i < 8 ; ++i ){
 		node->child[i] = new OcTreeNode();
 		childcontainer[i] = new NodePrimitiveContainer();
 	}
     
 	// get the center point of this tree node
-	int offset = 0;
-	Vector length = ( node->bb.m_Max - node->bb.m_Min ) * 0.5f;
-	for( int i = 0 ; i < 2; ++i ){
-		for( int j = 0 ; j < 2 ; ++j ){
-			for( int k = 0 ; k < 2 ; ++k ){
+    auto offset = 0;
+    auto length = ( node->bb.m_Max - node->bb.m_Min ) * 0.5f;
+	for(auto i = 0 ; i < 2; ++i ){
+		for(auto j = 0 ; j < 2 ; ++j ){
+			for(auto k = 0 ; k < 2 ; ++k ){
 				// setup the lower left bottom point
 				node->child[offset]->bb.m_Min = node->bb.m_Min + Vector( (float)k , (float)j , (float)i ) * length;
 				node->child[offset]->bb.m_Max = node->child[offset]->bb.m_Min + length;
@@ -130,7 +130,7 @@ void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , u
 	// distribute primitives
 	std::vector<const Primitive*>::const_iterator it = container->primitives.begin();
 	while( it != container->primitives.end() ){
-		for( int i = 0 ; i < 8 ; ++i ){
+		for(auto i = 0 ; i < 8 ; ++i ){
 			// check for intersection
 			if( (*it)->GetIntersect( node->child[i]->bb ) )
 				childcontainer[i]->primitives.push_back( *it );
@@ -138,11 +138,11 @@ void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , u
 		++it;
 	}
 
-	// There are cases where primitive lie along diagnonal direction and it will be 
+	// There are cases where primitive lie along diagonal direction and it will be 
 	// extremely difficult, if not impossible, to separate them from different nodes.
-	// In these very case, we need to stop immediately to avoid memory exploition.
-	int total_child_pri = 0;
-	for( int i = 0 ; i < 8 ; ++i )
+	// In these very case, we need to stop immediately to avoid memory exploration.
+    auto total_child_pri = 0;
+	for(auto i = 0 ; i < 8 ; ++i )
 		total_child_pri += (int)childcontainer[i]->primitives.size();
 	if( total_child_pri > (int)(2 * container->primitives.size()) && depth > 8 ){
 		// make leaf
@@ -162,7 +162,7 @@ void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , u
 	delete container;
     
 	// split children node
-	for( int i = 0 ; i < 8 ; ++i )
+	for(auto i = 0 ; i < 8 ; ++i )
 		splitNode( node->child[i] , childcontainer[i], depth + 1 );
     
     SORT_STATS(sOcTreeNodeCount+=8);
@@ -179,8 +179,8 @@ void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container ){
 }
 
 bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const{
-	static const float	delta = 0.001f;
-	bool inter = false;
+	static const auto	delta = 0.001f;
+    auto inter = false;
 
 	// Early rejections
 	if( fmin >= fmax )
@@ -199,26 +199,26 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 		return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
 	}
     
-	const Point contact = ray(fmin);
-	const Point center = ( node->bb.m_Max + node->bb.m_Min ) * 0.5f;
-    int node_index = ( contact.x > center.x ) + ( contact.y > center.y ) * 2 + ( contact.z > center.z ) * 4;
+	const auto contact = ray(fmin);
+	const auto center = ( node->bb.m_Max + node->bb.m_Min ) * 0.5f;
+    auto node_index = ( contact.x > center.x ) + ( contact.y > center.y ) * 2 + ( contact.z > center.z ) * 4;
 
-	float	_curt = fmin;
-	int 	_dir[3];
-	float	_delta[3],_next[3];
-	for( int i = 0 ; i < 3 ; i++ ){
+    auto	        _curt = fmin;
+    int 	        _dir[3];
+    float	        _delta[3],_next[3];
+	for(auto i = 0 ; i < 3 ; i++ ){
 		_dir[i] = ( ray.m_Dir[i] > 0.0f ) ? 1 : -1;
         _delta[i] = ( ray.m_Dir[i] != 0.0f )?fabs( node->bb.Delta(i) / ray.m_Dir[i] ) * 0.5f : FLT_MAX;
 	}
-	for( int i = 0 ; i < 3 ; i++ ){
-		const float target = node->child[node_index]->bb.m_Min[i] + ((_dir[i]+1)>>1) * node->bb.Delta(i) * 0.5f;
+	for(auto i = 0 ; i < 3 ; i++ ){
+		const auto target = node->child[node_index]->bb.m_Min[i] + ((_dir[i]+1)>>1) * node->bb.Delta(i) * 0.5f;
         _next[i] = ( ray.m_Dir[i] == 0.0f )?FLT_MAX:( target - ray.m_Ori[i] ) / ray.m_Dir[i];
 	}
 
-	// traverse the octree
+	// traverse the OcTree
 	while( ( intersect && _curt < intersect->t ) || !intersect ){
 		// get the axis along which the ray leaves the node fastest.
-		unsigned nextAxis = (_next[0] <= _next[1]) ? 0 : 1;
+        auto nextAxis = (_next[0] <= _next[1]) ? 0 : 1;
 		nextAxis = (_next[nextAxis] <= _next[2]) ? nextAxis : 2;
 
 		// check if there is intersection in the current grid
