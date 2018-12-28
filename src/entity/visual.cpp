@@ -23,7 +23,7 @@
 
 void MeshVisual::FillScene( Scene& scene ){
     for (const MeshIndex& mi : m_memory->m_indices) {
-        std::shared_ptr<Triangle> tri = std::make_shared<Triangle>(this, mi);
+        Triangle* tri = new Triangle(this, mi);
         scene.m_primitiveBuf.push_back(new Primitive( mi.m_mat , tri ));
     }
 }

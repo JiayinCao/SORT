@@ -92,7 +92,6 @@ void AreaLightEntity::FillScene(class Scene& scene) {
     m_light->SetupScene(&scene);
     scene.AddLight(m_light);
 
-    // TODO: this is very ugly, will be fixed later.
-    Primitive* primitive = new Primitive(nullptr, m_light->shape , m_light);
+    Primitive* primitive = new Primitive(nullptr, m_light->shape.get() , m_light.get());
     scene.AddPrimitives(primitive);
 }

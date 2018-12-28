@@ -52,7 +52,7 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 	unsigned light_num = scene.LightNum();
 	for( unsigned i = 0 ; i < light_num ; ++i )
 	{
-		const std::shared_ptr<Light> light = scene.GetLight(i);
+		const auto light = scene.GetLight(i);
 		li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true), BXDF_TYPE( BXDF_ALL ) );
 	}
 

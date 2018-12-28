@@ -95,12 +95,12 @@ Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
         !getCatmullRomWeights( muO , offsetO , weightsO ) )
         return 0.0f;
     
-    float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
+    auto ak = (float*)SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
     auto nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
     
-    auto Y = std::max( 0.0f , fourier( ak , nMax , dPhi ) );
-    auto scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
+    auto Y = (float)(std::max(0.0f, fourier(ak, nMax, dPhi)));
+    auto scale = (float)((muI != 0.0f) ? (1.0f / fabs(muI)) : 0.0f);
     if( muI * muO > 0.0f ){
         auto eta = ( muI > 0.0f ) ? 1 / bsdfTable.eta : bsdfTable.eta;
         scale *= eta * eta;
@@ -129,7 +129,7 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
         return 0.0f;
     }
     
-    float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
+    auto ak = (float*)SORT_MALLOC_ARRAY(float, bsdfTable.nMax * bsdfTable.nChannels );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax * bsdfTable.nChannels );
     auto nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
     
@@ -147,7 +147,7 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
     
     wi.Normalize();
     
-    auto scale = ( muI != 0.0f ) ? ( 1 / fabs(muI) ) : 0.0f;
+    auto scale = (float)((muI != 0.0f) ? (1.0f / fabs(muI)) : 0.0f);
     if( muI * muO > 0.0f ){
         float eta = ( muI > 0.0f ) ? 1 / bsdfTable.eta : bsdfTable.eta;
         scale *= eta * eta;
@@ -173,7 +173,7 @@ float FourierBxdfData::pdf( const Vector& wo , const Vector& wi ) const
         !getCatmullRomWeights( muO , offsetO , weightsO ) )
         return 0.0f;
     
-    float* ak = SORT_MALLOC_ARRAY(float, bsdfTable.nMax );
+    auto ak = (float*)SORT_MALLOC_ARRAY(float, bsdfTable.nMax );
     memset( ak , 0 , sizeof( float ) * bsdfTable.nMax );
     auto nMax = blendCoefficients( ak , 1 , offsetI, offsetO, weightsI, weightsO );
     

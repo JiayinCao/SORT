@@ -61,7 +61,7 @@ public:
         return m_priority; 
     }
 
-    //! @brief  Set priority of the task
+    //! @brief  Set priority of the task.
     //!
     //! @param  priority    New priority to be set.
     inline void         SetPriority( unsigned int priority ){

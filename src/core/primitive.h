@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include <memory>
 #include "math/bbox.h"
 #include "material/material.h"
 #include "math/intersection.h"
@@ -39,7 +38,7 @@ public:
 	//! @param	mat		Material attached to the primitive.
 	//! @param	shape	Shape of the material.
 	//! @param	light	Light source attached to the material.
-    Primitive( std::shared_ptr<Material> mat , std::shared_ptr<Shape> shape , std::shared_ptr<class Light> light = nullptr ):
+    Primitive( Material* mat , Shape* shape , class Light* light = nullptr ):
 		m_mat(mat), m_shape(shape), m_light(light){}
 
 	//! @brief	Get the intersection between a ray and the primitive.
@@ -88,7 +87,7 @@ public:
 	//! A default red material will be used for primitives with no materials or invalid materials.
 	//!
 	//! @return			Material attached to the primitives.
-    std::shared_ptr<Material> GetMaterial() const{
+    inline Material* GetMaterial() const{
         return m_mat == nullptr ? MatManager::GetSingleton().GetDefaultMat() : m_mat;
     }
 
@@ -97,10 +96,10 @@ public:
 	//! Most primitives doesn't have light attached to it.
 	//!
 	//! @return			Light attached to the primitive. 'nullptr' means this is not an missive primitive.
-	inline std::shared_ptr<class Light> GetLight() const { return m_light; }
+	inline class Light* GetLight() const { return m_light; }
 
 private:
-    std::shared_ptr<Material>		m_mat;		/**< The material attached to the primitive. */
-	std::shared_ptr<Shape> 			m_shape;	/**< The shape of the primitive. */
-    std::shared_ptr<class Light>	m_light;	/**< Light source attached to the primitive. */
+    Material*		m_mat;		/**< The material attached to the primitive. */
+	Shape* 			m_shape;	/**< The shape of the primitive. */
+    class Light*	m_light;	/**< Light source attached to the primitive. */
 };
