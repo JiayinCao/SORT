@@ -158,8 +158,7 @@ void System::_pushRenderTask()
 			size.x = (tilesize < (m_imagesensor->GetWidth() - tl.x)) ? tilesize : (m_imagesensor->GetWidth() - tl.x);
 			size.y = (tilesize < (m_imagesensor->GetHeight() - tl.y)) ? tilesize : (m_imagesensor->GetHeight() - tl.y);
 
-			SCHEDULE_TASK<Render_Task>( priority-- , tl , size , &m_Scene , g_samplePerPixel , g_integrator , 
-                                        std::make_shared<RandomSampler>() , new PixelSample[g_samplePerPixel] );
+			SCHEDULE_TASK<Render_Task>( priority-- , tl , size , &m_Scene , new RandomSampler() , new PixelSample[g_samplePerPixel] );
 		}
 
 		// turn to the next direction

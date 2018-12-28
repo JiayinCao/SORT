@@ -49,7 +49,7 @@ bool Scene::LoadScene( IStreamBase& stream )
 		if( class_id == "" )
 			break;
 		
-		std::shared_ptr<Entity>	entity = MakeInstance<Entity>( class_id );
+		std::shared_ptr<Entity>	entity = MakeSharedInstance<Entity>( class_id );
 		sAssertMsg( entity , RESOURCE , "Serialization is broken." );
 
         entity->Serialize(stream);
