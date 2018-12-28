@@ -30,20 +30,24 @@
 class Blend : public Bxdf
 {
 public:
-	//! Constructor
+	//! Constructor.
+    //!
     //! @param bxdf0        Bxdf0.
     //! @param bxdf1        Bxdf1.
     //! @param bf           Blend factor.
     //! @param weight       Weight of the BXDF.
-    Blend(const Bsdf* bxdf0 , const Bsdf* bxdf1 , float bf , const Spectrum& weight ) : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, false), bxdf0(bxdf0), bxdf1(bxdf1) , weight( bf ){}
+    Blend(const Bsdf* bxdf0 , const Bsdf* bxdf1 , float bf , const Spectrum& weight ) : 
+        Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, false), bxdf0(bxdf0), bxdf1(bxdf1) , weight( bf ){}
 	
-    //! Evaluate the BRDF
+    //! Evaluate the BRDF.
+    //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
 	
     //! @brief Importance sampling for the fresnel BRDF.
+    //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
@@ -52,6 +56,7 @@ public:
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
     
     //! @brief Evaluate the pdf of an exitant direction given the Incident direction.
+    //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.

@@ -19,7 +19,7 @@
 
 /*
     -------------------------- Coding Standard ------------------------------------
-    SORT has been developped for quite a long time, several years. With limited 
+    SORT has been developed for quite a long time, several years. With limited 
     time budget everyday, progress is relatively slow. Throughout the past years, 
     my coding style changes, which results in different coding style in different 
     parts of the system. Following is some general rules to following during coding, 
@@ -66,11 +66,13 @@
             same line.
     -   Comment
         -   Doxygen standard. http://www.doxygen.nl/
-    -   Overriden method
-        -   All overriden class method has to specify 'override' for clarity. It is
+    -   Overridden method
+        -   All overridden class method has to specify 'override' for clarity. It is
             legit to not specify 'override'. However, with 'override' it is very
-            clear if the function is an overiden function.
-        -   Don't add virtual in an overriden function, which gives us nothing.
+            clear if the function is an overridden function.
+        -   Don't add virtual in an overridden function, which gives us nothing.
+    -   Local Parameter type
+        -   Use 'auto' as much as possible, instead of explicitly specific the type.
 
     ---------------------------------------------------------------------------------
 */ 

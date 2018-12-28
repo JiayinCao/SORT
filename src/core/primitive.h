@@ -28,8 +28,8 @@
 /**
  * Like primitives in rasterization program, which are usually triangle, point and lines, primitives can have many more different shapes.
  * Common ones are triangles, disk, rectangle, splines, quadric curves. Each primitive is attached with a specific material, may also be
- * emissive, which means that they are attached with a 'light source'.
- * A primitive is the basic unit for spatial data struture. It is more of a lower level concept comparing with Entity.
+ * missive, which means that they are attached with a 'light source'.
+ * A primitive is the basic unit for spatial data structure. It is more of a lower level concept comparing with Entity.
  */
 class	Primitive
 {
@@ -85,7 +85,7 @@ public:
 
 	//! @brief	Get the material of the primitive.
 	//!
-	//! A default 'grey' material will be used for primitives with no materials or invalid materials.
+	//! A default red material will be used for primitives with no materials or invalid materials.
 	//!
 	//! @return			Material attached to the primitives.
     std::shared_ptr<Material> GetMaterial() const{
@@ -94,13 +94,13 @@ public:
 
 	//! @brief	Get the light source of the primitive if there is one.
 	//!
-	//! Most pritmivies doesn't have light attached to it.
+	//! Most primitives doesn't have light attached to it.
 	//!
-	//! @return			Light attached to the primitive. 'nullptr' means this is not an emissive primitive.
+	//! @return			Light attached to the primitive. 'nullptr' means this is not an missive primitive.
 	inline std::shared_ptr<class Light> GetLight() const { return m_light; }
 
 private:
     std::shared_ptr<Material>		m_mat;		/**< The material attached to the primitive. */
 	std::shared_ptr<Shape> 			m_shape;	/**< The shape of the primitive. */
-    std::shared_ptr<class Light>	m_light;	/**< Light source attached to the primtive. */
+    std::shared_ptr<class Light>	m_light;	/**< Light source attached to the primitive. */
 };
