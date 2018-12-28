@@ -78,9 +78,6 @@
 */ 
 
 #include <iostream>
-#include <cstring>
-#include <string>
-#include <stdlib.h>
 #include <math.h>
 
 #if defined(_WIN32) || defined(_WIN64)

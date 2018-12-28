@@ -82,30 +82,6 @@ void System::PreProcess()
     SORT_STATS(sPreprocessTimeMS = timer.GetElapsedTime());
 }
 
-// output progress
-void System::_outputProgress()
-{
-    unsigned progress = 0;
-    
-    while( progress < 100 ){
-        // get the number of tasks done
-        unsigned taskDone = 0;
-        for( unsigned i = 0; i < m_totalTask; ++i )
-            taskDone += m_taskDone[i];
-        
-        // output progress
-        progress = (unsigned)( (float)(taskDone) / (float)m_totalTask * 100 );
-        
-        if (!g_blenderMode)
-            std::cout<< "Progress: "<<progress<<"%\r";
-        else if (m_pProgress)
-            *m_pProgress = progress;
-        
-        if( taskDone == m_totalTask )
-            break;
-    }
-}
-
 // uninitialize
 void System::Uninit()
 {
@@ -117,7 +93,6 @@ void System::Uninit()
 
     // delete the data
     SAFE_DELETE(m_imagesensor);
-    SAFE_DELETE_ARRAY(m_taskDone);
 }
 
 // push rendering task
@@ -130,13 +105,6 @@ void System::_pushRenderTask()
 	const unsigned tilesize = g_tileSize;
 	
 	// get the number of total task
-	m_totalTask = 0;
-	for( unsigned i = 0 ; i < m_imagesensor->GetHeight() ; i += tilesize )
-		for( unsigned j = 0 ; j < m_imagesensor->GetWidth() ; j += tilesize )
-			++m_totalTask;
-	m_taskDone = new bool[m_totalTask];
-	memset( m_taskDone , 0 , m_totalTask * sizeof(bool) );
-
 	Vector2i tile_num = Vector2i( (int)ceil(m_imagesensor->GetWidth() / (float)tilesize) , (int)ceil(m_imagesensor->GetHeight() / (float)tilesize) );
 
 	// start tile from center instead of top-left corner
@@ -241,13 +209,7 @@ bool System::Setup( const char* str )
 	const SharedMemory& sm = SMManager::GetSingleton().CreateSharedMemory("sharedmem.bin", size, SharedMmeory_All);
 	// clear the memory first
 	if (sm.bytes)
-	{
-		// clear the memory
 		memset(sm.bytes, 0, sm.size);
-
-		// setup progress pointer
-		m_pProgress = sm.bytes + sm.size - 2;
-	}
 
 	return true;
 }
