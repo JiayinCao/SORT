@@ -59,7 +59,7 @@ void Bvh::Build(){
 	// build bounding box
 	computeBBox();
 
-	// generate bvh primitives
+	// generate BVH primitives
     for( auto primitive : *m_primitives )
         SORT_MALLOC_ID(Bvh_Primitive,BVH_LEAF_PRILIST_MEMID)(primitive);
     
@@ -78,7 +78,7 @@ bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect) const{
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect != nullptr);
 
-    float fmin = Intersect(ray, m_bbox);
+    auto fmin = Intersect(ray, m_bbox);
     if (fmin < 0.0f)
         return false;
 
@@ -91,19 +91,19 @@ void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned d
     SORT_STATS(sBVHDepth = std::max( sBVHDepth , (StatsInt)depth + 1 ) );
     
 	// generate the bounding box for the node
-	for( unsigned i = start ; i < end ; i++ )
+	for( auto i = start ; i < end ; i++ )
 		node->bbox.Union( m_bvhpri[i].GetBBox() );
 
-	unsigned primitive_num = end - start;
+	auto primitive_num = end - start;
 	if( primitive_num <= m_maxPriInLeaf || depth == m_maxNodeDepth ){
 		makeLeaf( node , start , end );
 		return;
 	}
 
 	// pick best split plane
-	unsigned split_axis;
-	float split_pos;
-	float sah = pickBestSplit( split_axis , split_pos , node , start , end );
+	unsigned    split_axis;
+    float       split_pos;
+    auto sah = pickBestSplit( split_axis , split_pos , node , start , end );
 	if( sah >= primitive_num ){
 		makeLeaf( node , start , end );
 		return;
@@ -111,8 +111,16 @@ void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned d
 
 	// partition the data
     auto compare = [split_pos,split_axis](const Bvh::Bvh_Primitive& pri){return pri.m_centroid[split_axis] < split_pos;};
-	const Bvh_Primitive* middle = std::partition( &m_bvhpri[start] , &m_bvhpri[end-1]+1 , compare );
-	unsigned mid = (unsigned)(middle - m_bvhpri);
+    auto middle = std::partition( &m_bvhpri[start] , &m_bvhpri[end-1]+1 , compare );
+    auto mid = (unsigned)(middle - m_bvhpri);
+
+    // To avoid degenerated node that has nothing in it.
+    // Technically, this shouldn't happen. Unlike KD-Tree implementation, there is only 16 split plane candidate, it is
+    // totally possible to pick one with no primitive on one side of the plane, resulting a crash later during ray tracing.
+    if (mid == start || mid == end){
+        makeLeaf(node, start, end);
+        return;
+    }
 
     node->left = new Bvh_Node();
 	splitNode( node->left , start , mid , depth + 1 );
@@ -125,24 +133,24 @@ void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned d
 
 float Bvh::pickBestSplit( unsigned& axis , float& splitPos , Bvh_Node* node , unsigned start , unsigned end ){
 	BBox inner;
-	for( unsigned i = start ; i < end ; i++ )
+	for(auto i = start ; i < end ; i++ )
 		inner.Union( m_bvhpri[i].m_centroid );
 
-	unsigned primitive_num = end - start;
+    auto primitive_num = end - start;
 	axis = inner.MaxAxisId();
-	float min_sah = FLT_MAX;
+    auto min_sah = FLT_MAX;
 
 	// distribute the primitives into bins
 	unsigned	bin[BVH_SPLIT_COUNT];
 	BBox		bbox[BVH_SPLIT_COUNT];
 	BBox		rbox[BVH_SPLIT_COUNT-1];
 	memset( bin , 0 , sizeof( unsigned ) * BVH_SPLIT_COUNT );
-	float split_start = inner.m_Min[axis];
-	float split_delta = inner.Delta(axis) * BVH_INV_SPLIT_COUNT;
+    auto split_start = inner.m_Min[axis];
+    auto split_delta = inner.Delta(axis) * BVH_INV_SPLIT_COUNT;
     if( split_delta == 0.0f )
         return FLT_MAX;
-	float inv_split_delta = 1.0f / split_delta;
-    for( unsigned i = start ; i < end ; i++ ){
+    auto inv_split_delta = 1.0f / split_delta;
+    for(auto i = start ; i < end ; i++ ){
 		int index = (int)((m_bvhpri[i].m_centroid[axis] - split_start) * inv_split_delta);
 		index = std::min( index , (int)(BVH_SPLIT_COUNT - 1) );
 		bin[index]++;
@@ -153,11 +161,11 @@ float Bvh::pickBestSplit( unsigned& axis , float& splitPos , Bvh_Node* node , un
 	for( int i = BVH_SPLIT_COUNT-3; i >= 0 ; i-- )
 		rbox[i] = Union( rbox[i+1] , bbox[i+1] );
 
-	unsigned	left = bin[0];
-	BBox		lbox = bbox[0];
-	float pos = split_delta + split_start ;
-	for( unsigned i = 0 ; i < BVH_SPLIT_COUNT - 1 ; i++ ){
-		float sah_value = sah( left , primitive_num - left , lbox , rbox[i] , node->bbox );
+    auto	left = bin[0];
+    auto	lbox = bbox[0];
+    auto    pos = split_delta + split_start ;
+	for(auto i = 0 ; i < BVH_SPLIT_COUNT - 1 ; i++ ){
+        auto sah_value = sah( left , primitive_num - left , lbox , rbox[i] , node->bbox );
 		if( sah_value < min_sah ){
 			min_sah = sah_value;
 			splitPos = pos;
@@ -191,12 +199,12 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
 		return true;
 	
     if( node->pri_num != 0 ){
-        unsigned _start = node->pri_offset;
-        unsigned _pri = node->pri_num;
-        unsigned _end = _start + _pri;
+        auto _start = node->pri_offset;
+        auto _pri = node->pri_num;
+        auto _end = _start + _pri;
         
-        bool inter = false;
-        for( unsigned i = _start ; i < _end ; i++ ){
+        auto inter = false;
+        for(auto i = _start ; i < _end ; i++ ){
             SORT_STATS(++sIntersectionTest);
             inter |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
             if( intersect == nullptr && inter )
@@ -205,13 +213,13 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         return inter;
 	}
 
-    const Bvh_Node* left = node->left;
-	const Bvh_Node* right = node->right;
+    auto left = node->left;
+    auto right = node->right;
 
-	float _fmin0 = Intersect( ray , left->bbox );
-	float _fmin1 = Intersect( ray , right->bbox );
+    auto _fmin0 = Intersect( ray , left->bbox );
+    auto _fmin1 = Intersect( ray , right->bbox );
 
-	bool inter = false;
+    auto inter = false;
 	if( _fmin1 > _fmin0 ){
 		inter |= traverseNode( left , ray , intersect , _fmin0 );
 		if( inter && intersect == nullptr ) return true;
