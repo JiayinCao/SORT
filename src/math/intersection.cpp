@@ -24,7 +24,7 @@
 Spectrum Intersection::Le( const Vector& wo , float* directPdfA , float* emissionPdf ) const
 {
 	if( primitive == 0 ) return 0.0f;
-	std::shared_ptr<Light> light = primitive->GetLight();
+	auto light = primitive->GetLight();
 	if( light ) 
 		return light->Le( *this , wo , directPdfA , emissionPdf );
 	return 0.0f;

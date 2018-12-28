@@ -41,7 +41,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
     
 	// pick a light randomly
 	float pdf;
-	const std::shared_ptr<Light> light = scene.SampleLight( sort_canonical() , &pdf );
+	const auto light = scene.SampleLight( sort_canonical() , &pdf );
 	if( light == 0 || pdf == 0.0f )
 		return 0.0f;
 
@@ -232,7 +232,7 @@ void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsig
 }
 
 // connect vertices
-Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 , const std::shared_ptr<Light> light ) const
+Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 , const Light* light ) const
 {
 	if( p0.depth + p1.depth >= max_recursive_depth )
 		return 0.0f;
@@ -273,7 +273,7 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
 }
 
 // connect light sample
-Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const std::shared_ptr<Light> light ) const
+Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const Light* light ) const
 {
 	if( eye_vertex.depth >= max_recursive_depth )
 		return 0.0f;
@@ -307,7 +307,7 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const s
 }
 
 // connect camera point
-void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const std::shared_ptr<Light> light ) const
+void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const Light* light ) const
 {
 	if( light_vertex.depth > max_recursive_depth )
 		return;

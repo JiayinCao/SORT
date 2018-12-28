@@ -21,6 +21,7 @@
 #include <vector>
 #include <memory>
 #include "core/singleton.h"
+#include "material/material.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //	definition of material manager
@@ -39,17 +40,17 @@ public:
     //!
     //! @param  matId   Id of the material. If this is an out-of-boundary id, default material
     //!                 will be returned.
-    //! @return         Shared pointer for material returned.
-    std::shared_ptr<class Material> GetMaterial(int matId) const {
+    //! @return         Pointer for material returned.
+    class Material* GetMaterial(int matId) const {
         if (matId < 0 || matId >(int)m_matPool.size())
             return GetDefaultMat();
-        return m_matPool[matId];
+        return m_matPool[matId].get();
     }
 
 	// get default material
-    std::shared_ptr<class Material>	GetDefaultMat() const{
-        static std::shared_ptr<Material> defaultMat = std::make_shared<Material>();
-        return defaultMat;
+    class Material*	GetDefaultMat() const{
+        static Material defaultMat;
+        return &defaultMat;
     }
 
 	// parse material file and add the materials into the manager

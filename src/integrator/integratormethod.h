@@ -17,17 +17,11 @@
 
 #pragma once
 
-// include the header
 #include "integrator.h"
-#include "core/enum.h"
-
-// pre-decleration
-class Intersection;
-class Light;
 
 // evaluate direct lighting
-Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const std::shared_ptr<Light> light , const Intersection& ip , 
+Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const class Light* light , const class Intersection& ip , 
 							const LightSample& ls ,	const BsdfSample& bs , BXDF_TYPE type = BXDF_ALL );
 
-// mutilpe importance sampling factors
+// multiple importance sampling factors
 float		MisFactor( int nf, float fPdf, int ng, float gPdf );
