@@ -22,9 +22,7 @@ SORT_STATS_DEFINE_COUNTER(sRayCount)
 SORT_STATS_DEFINE_COUNTER(sShadowRayCount)
 SORT_STATS_DEFINE_COUNTER(sIntersectionTest)
 
-// Generate the bounding box for the primitive set.
-void Accelerator::computeBBox()
-{
+void Accelerator::computeBBox(){
 	// reset bounding box
 	m_bbox.InvalidBBox();
 
@@ -33,8 +31,8 @@ void Accelerator::computeBBox()
 		m_bbox.Union( primitive->GetBBox() );
 
 	// enlarge the bounding box a little
-	static const float threshold = 0.001f;
-	Vector delta = (m_bbox.m_Max - m_bbox.m_Min ) * threshold;
+	static const auto threshold = 0.001f;
+	auto delta = (m_bbox.m_Max - m_bbox.m_Min ) * threshold;
 	m_bbox.m_Min -= delta;
 	m_bbox.m_Max += delta;
 }

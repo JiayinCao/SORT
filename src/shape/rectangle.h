@@ -25,8 +25,7 @@
  * The rectangle center is always at the origin of its local coordinate, the normal of the rectangle points exactly
  * upward in its local coordinate.
  */
-class	Rectangle : public Shape
-{
+class	Rectangle : public Shape{
 public:
 	//! @brief Sample a point on the surface of the shape given a shading point.
 	//!

@@ -58,10 +58,9 @@ public:
 	void	PreProcess();
 
 	// get light
-	const std::shared_ptr<Light> GetLight( unsigned i ) const
-	{
+	const Light* GetLight( unsigned i ) const{
 		sAssert( i < m_lights.size() , LIGHT );
-		return m_lights[i];
+		return m_lights[i].get();
 	}
 	// add light
 	void AddLight( std::shared_ptr<Light> light ){
@@ -71,11 +70,11 @@ public:
 	// get lights
 	const std::vector<std::shared_ptr<Light>>& GetLights() const {return m_lights;}
 	// get sky light
-	const std::shared_ptr<Light> GetSkyLight() const {return m_skyLight;}
+	const Light* GetSkyLight() const {return m_skyLight.get();}
     // set sky light
     void SetSkyLight(std::shared_ptr<Light> light) { m_skyLight = light; }
 	// get sampled light
-	const std::shared_ptr<Light> SampleLight( float u , float* pdf ) const;
+	const Light* SampleLight( float u , float* pdf ) const;
 	// get the properbility of the sample
 	float LightProperbility( unsigned i ) const;
 	// get the number of lights

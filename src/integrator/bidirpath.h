@@ -89,13 +89,13 @@ protected:
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
 	// connect light sample
-	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const std::shared_ptr<Light> light ) const;
+	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light ) const;
 	
 	// connect camera point
-	void _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const std::shared_ptr<Light> light ) const;
+	void _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light ) const;
 
-	// connnect vertices
-	Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const std::shared_ptr<Light> light ) const;
+	// connect vertices
+	Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light ) const;
 
 private:
 	// use multiple importance sampling to sample direct illumination

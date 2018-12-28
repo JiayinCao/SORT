@@ -165,8 +165,7 @@ void Scene::_genLightDistribution()
 }
 
 // get sampled light
-const std::shared_ptr<Light> Scene::SampleLight( float u , float* pdf ) const
-{
+const Light* Scene::SampleLight( float u , float* pdf ) const{
 	sAssert( u >= 0.0f && u <= 1.0f , SAMPLING );
 	sAssertMsg(m_lightsDis != nullptr , SAMPLING , "No light in the scene." );
 
@@ -174,7 +173,7 @@ const std::shared_ptr<Light> Scene::SampleLight( float u , float* pdf ) const
 	int id = m_lightsDis->SampleDiscrete( u , &_pdf );
 	if( id >= 0 && id < (int)m_lights.size() && _pdf != 0.0f ){
 		if( pdf ) *pdf = _pdf;
-		return m_lights[id];
+		return m_lights[id].get();
 	}
 	return nullptr;
 }

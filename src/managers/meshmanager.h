@@ -39,8 +39,8 @@ struct MeshVertex {
 };
 
 struct MeshIndex {
-    int                         m_id[3] = { -1 };   /**< Indices for one triangle. */
-    std::shared_ptr<Material>   m_mat;              /**< Materials attached to the triangle. */
+    int        m_id[3] = { -1 };   /**< Indices for one triangle. */
+    Material*  m_mat = nullptr;    /**< Materials attached to the triangle. */
 };
 
 //! @brief  A wrapper for mesh information.
