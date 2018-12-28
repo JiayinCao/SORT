@@ -22,19 +22,17 @@
 #include "core/sassert.h"
 
 // constructor
-Bsdf::Bsdf( const Intersection* _intersect , bool sub_bsdf ) : m_SubBSDF(sub_bsdf), intersect( *_intersect )
-{
+Bsdf::Bsdf( const Intersection* _intersect , bool sub_bsdf ) : 
+    m_SubBSDF(sub_bsdf), intersect( *_intersect ){
 	nn = Normalize(intersect.normal);
 	tn = Normalize(Cross( nn , intersect.tangent ));
 	sn = Normalize(Cross( tn , nn ));
 }
 
 // get the number of components in current bsdf
-unsigned Bsdf::NumComponents( BXDF_TYPE type ) const
-{
-	unsigned count = 0;
-	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )
-	{
+unsigned Bsdf::NumComponents( BXDF_TYPE type ) const{
+    auto count = 0u;
+	for(auto i = 0u ; i < m_bxdfCount ; i++ ){
 		if( m_bxdf[i]->MatchFlag( type ) )
 			count++;
 	}
@@ -42,8 +40,7 @@ unsigned Bsdf::NumComponents( BXDF_TYPE type ) const
 }
 
 // add a new bxdf
-void Bsdf::AddBxdf( const Bxdf* bxdf )
-{
+void Bsdf::AddBxdf( const Bxdf* bxdf ){
 	if( m_bxdfCount == MAX_BXDF_COUNT || bxdf == 0 || bxdf->GetWeight().IsBlack() ) return;
 	m_bxdf[m_bxdfCount] = bxdf ;
     m_bxdf[m_bxdfCount]->UpdateGNormal( worldToLocal(intersect.gnormal, true) );
@@ -51,16 +48,13 @@ void Bsdf::AddBxdf( const Bxdf* bxdf )
 }
 
 // evaluate bxdf
-Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
-{
-	// the result
+Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const{
 	Spectrum r;
 
-	Vector swo = worldToLocal( wo );
-	Vector swi = worldToLocal( wi );
+    auto swo = worldToLocal( wo );
+    auto swi = worldToLocal( wi );
 
-	for( unsigned i = 0 ; i < m_bxdfCount ; i++ )
-	{
+	for( unsigned i = 0 ; i < m_bxdfCount ; i++ ){
 		if( m_bxdf[i]->MatchFlag( type ) )
 			r += m_bxdf[i]->F( swo , swi ) * m_bxdf[i]->GetWeight();
 	}
@@ -69,15 +63,13 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
 }
 
 // transform vector from world coordinate to shading coordinate
-Vector Bsdf::worldToLocal( const Vector& v , bool force ) const
-{
+Vector Bsdf::worldToLocal( const Vector& v , bool force ) const{
     if( m_SubBSDF && !force ) return v;
 	return Vector( Dot(v,sn) , Dot(v,nn) , Dot(v,tn) );
 }
 
 // transform vector from shading coordinate to world coordinate
-Vector Bsdf::localToWorld( const Vector& v ) const
-{
+Vector Bsdf::localToWorld( const Vector& v ) const{
     if( m_SubBSDF ) return v;
 	return Vector( 	v.x * sn.x + v.y * nn.x + v.z * tn.x ,
 					v.x * sn.y + v.y * nn.y + v.z * tn.y ,
@@ -85,22 +77,20 @@ Vector Bsdf::localToWorld( const Vector& v ) const
 }
 
 // sample a ray from bsdf
-Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type , BXDF_TYPE* bxdf_type ) const
-{
-	unsigned com_num = NumComponents(type);
+Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf , BXDF_TYPE type , BXDF_TYPE* bxdf_type ) const{
+    auto com_num = NumComponents(type);
 	if( com_num == 0 )
 	{
 		if( pdf ) *pdf = 0.0f;
 		if( bxdf_type ) *bxdf_type = BXDF_NONE;
 		return 0.0f;
 	}
-	int bsdf_id = std::min( (int)(bs.t*(float)com_num) , (int)(com_num-1) );
+    auto bsdf_id = std::min( (int)(bs.t*(float)com_num) , (int)(com_num-1) );
 	const Bxdf* bxdf = nullptr;
-	int count = bsdf_id;
-	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
+    auto count = bsdf_id;
+	for(auto i = 0u ; i < m_bxdfCount ; ++i )
 		if( m_bxdf[i]->MatchFlag(type) ){
-			if( count == 0 )
-			{
+			if( count == 0 ){
 				bxdf = m_bxdf[i];
 				break;
 			}
@@ -110,10 +100,10 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	sAssert( bxdf != 0 , GENERAL );
 
 	// transform the 'wo' from world space to shading coordinate
-	Vector swo = worldToLocal( wo );
+    auto swo = worldToLocal( wo );
 
 	// sample the direction
-	Spectrum t = bxdf->Sample_F( swo , wi , bs , pdf ) * bxdf->GetWeight();
+    auto t = bxdf->Sample_F( swo , wi , bs , pdf ) * bxdf->GetWeight();
 
 	// if there is no properbility of sampling that direction , just return 0.0f
 	if( pdf && *pdf == 0.0f ) return 0.0f;
@@ -128,7 +118,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 	}
 	if( pdf ) *pdf /= com_num;
 	
-	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
+	for(auto i = 0u ; i < m_bxdfCount ; ++i )
 		if( bxdf != m_bxdf[i] && m_bxdf[i]->MatchFlag(type) )
 			t += m_bxdf[i]->F(wo,wi) * m_bxdf[i]->GetWeight();
 	
@@ -139,16 +129,14 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 }
 
 // get the pdf according to sampled direction
-float Bsdf::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const
-{
-	Vector lwo = worldToLocal( wo );
-	Vector lwi = worldToLocal( wi );
+float Bsdf::Pdf( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const{
+    auto lwo = worldToLocal( wo );
+    auto lwi = worldToLocal( wi );
 
-    unsigned int count = 0;
+    auto count = 0u;
 	float pdf = 0.0f;
 	for( unsigned i = 0 ; i < m_bxdfCount ; ++i )
-		if( m_bxdf[i]->MatchFlag( type ) )
-        {
+		if( m_bxdf[i]->MatchFlag( type ) ){
             ++count;
             pdf += m_bxdf[i]->Pdf( lwo , lwi );
         }

@@ -20,8 +20,7 @@
 #include "bsdf.h"
 #include "sampler/sample.h"
 
-Spectrum Blend::f(const Vector& wo, const Vector& wi) const
-{
+Spectrum Blend::f(const Vector& wo, const Vector& wi) const {
     if (bxdf0 == nullptr && bxdf1 == nullptr) return 0.0f;
     if (bxdf0 == nullptr) return bxdf1->f(wo, wi);
     if (bxdf1 == nullptr) return bxdf0->f(wo, wi);

@@ -25,7 +25,7 @@ OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spect
 	// roughness ranges from 0 to infinity
 	roughness = std::max( 0.0f , roughness );
 
-	const float roughness2 = roughness * roughness;
+	const auto roughness2 = roughness * roughness;
 	A = 1.0f - (roughness2 / ( 2.0f * (roughness2+0.33f)));
 	B = 0.45f * roughness2 / ( roughness2 + 0.09f );
 }
@@ -39,18 +39,18 @@ Spectrum OrenNayar::f( const Vector& wo , const Vector& wi ) const
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-	float sintheta_i = SinTheta(wi);
-	float sintheta_o = SinTheta(wo);
+    auto sintheta_i = SinTheta(wi);
+    auto sintheta_o = SinTheta(wo);
 	
-	float sinphii = SinPhi(wi);
-	float cosphii = CosPhi(wi);
-	float sinphio = SinPhi(wo);
-	float cosphio = CosPhi(wo);
-	float dcos = cosphii * cosphio + sinphii * sinphio;
+    auto sinphii = SinPhi(wi);
+    auto cosphii = CosPhi(wi);
+    auto sinphio = SinPhi(wo);
+    auto cosphio = CosPhi(wo);
+    auto dcos = cosphii * cosphio + sinphii * sinphio;
 	if( dcos < 0.0f ) dcos = 0.0f;
 	
-	float abs_cos_theta_o = (float)AbsCosTheta(wo);
-	float abs_cos_theta_i = (float)AbsCosTheta(wi);
+    auto abs_cos_theta_o = (float)AbsCosTheta(wo);
+    auto abs_cos_theta_i = (float)AbsCosTheta(wi);
 	
 	if( abs_cos_theta_i < 0.00001f && abs_cos_theta_o < 0.00001f )
 		return 0.0f;

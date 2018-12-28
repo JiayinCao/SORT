@@ -37,7 +37,8 @@
 class Coat : public Bxdf
 {
 public:
-	//! Constructor
+	//! Constructor.
+    //!
     //! @param thickness        Thickness of the layer.
     //! @param ior              Index of refraction outside the surface where the normal points to.
     //! @param roughness        Roughness of the coating layer.
@@ -50,7 +51,8 @@ public:
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), thickness(thickness), ior(ior), sigma(sigma), ggx(roughness, roughness),
           fresnel(1.0f,ior), coat_weight( 1.0f ), coat(coat_weight, &fresnel , &ggx , coat_weight , n ), bottom(bottom) {}
 	
-    //! Evaluate the BRDF
+    //! Evaluate the BRDF.
+    //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
@@ -58,6 +60,7 @@ public:
     
 	
     //! @brief Importance sampling for the fresnel BRDF.
+    //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @param bs   Sample for bsdf that holds some random variables.
@@ -66,6 +69,7 @@ public:
     Spectrum Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
     
     //! @brief Evaluate the pdf of an exitant direction given the Incident direction.
+    //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.

@@ -39,20 +39,21 @@ public:
 	//! @brief  Empty destructor.
     virtual ~Accelerator() = default;
 
-    //! @brief Get intersection between the ray and the primitive set.
+    //! @brief Get intersection between the ray and the primitive set using BVH.
     //!
-    //! Pretty much all spatial accelerators perform this operation in O(lg(N)) where n is 
-    //! he number of primitives in the set. It will return true if there is intersection 
-    //! between the ray and the primitive set. In case of an existed intersection, if intersect 
-    //! is not empty, it will fill the structure and return the nearest intersection.
-    //! If intersect is nullptr, it will stop as long as one intersection is found, it is not
-    //! necessary to be the nearest one.
+    //! It will return true if there is intersection between the ray and the primitive set.
+    //! In case of an existed intersection, if intersect is not empty, it will fill the
+    //! structure and return the nearest intersection.If intersect is empty, it will stop 
+    //! as long as one intersection is found, it is not necessary to be the nearest one.
     //! False will be returned if there is no intersection at all.
+    //!
     //! @param r            The input ray to be tested.
-    //! @param intersect    The intersection result. If a nullptr pointer is provided, it stops as
-    //!                     long as it finds an intersection. It is faster than the one with intersection information
-    //!                     data and suitable for shadow ray calculation.
-    //! @return             It will return true if there is an intersection, otherwise it returns false.
+    //! @param intersect    The intersection result. If a nullptr pointer is provided, it 
+    //!                     stops as long as it finds an intersection. It is faster than 
+    //!                     the one with intersection information data and suitable for 
+    //!                     shadow ray calculation.
+    //! @return             It will return true if there is an intersection, otherwise 
+    //!                     it returns false.
 	virtual bool GetIntersect( const class Ray& r , class Intersection* intersect ) const = 0;
 
     //! @brief Build the acceleration structure.
@@ -65,25 +66,28 @@ public:
         return m_bbox; 
     }
 
-    //! @brief Set primitive set in the acceleration structure.
+    //! @brief  Set primitive set in the acceleration structure.
     //!
-    //! @param pri The set of primitives in the scene.
+    //! @param pri  The set of primitives in the scene.
 	inline void SetPrimitives( std::vector<class Primitive*>* pri ){
 		m_primitives = pri;
 	}
     
-    //! @brief Whether the spatial data structure is constructed.
+    //! @brief  Whether the spatial data structure is constructed.
     //!
-    //! @return Whether the spatial data structure is constructed.
+    //! @return     Whether the spatial data structure is constructed.
     inline bool GetIsValid() const { 
         return m_isValid; 
     }
 
 protected:
-	std::vector<class Primitive*>*      m_primitives;       /**< The vector holding all primitive pointers. */
-	BBox                                m_bbox;             /**< The bounding box of all primitives. */
-    bool                                m_isValid = false;  /**< Whether the spatial structure is constructed before. */
+    /**< The vector holding all primitive pointers. */
+	std::vector<class Primitive*>*      m_primitives;
+    /**< The bounding box of all primitives. */
+    BBox                                m_bbox;
+    /**< Whether the spatial structure is constructed before. */
+    bool                                m_isValid = false;
 
-	//! Generate the bounding box for the primitive set.
+	//! @brief Generate the bounding box for the primitive set.
 	void computeBBox();
 };
