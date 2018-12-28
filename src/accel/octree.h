@@ -21,7 +21,7 @@
 
 //! @brief OcTree
 /**
- * OcTree is a popular data strucutre in scene management, which is commonly seen in game engines.
+ * OcTree is a popular data structure in scene management, which is commonly seen in game engines.
  * Instead of scene visibility management, it can also serves for the purpose of accelerating ray
  * tracer applications.
  */
@@ -32,7 +32,7 @@ class OcTree : public Accelerator{
         OcTreeNode*					    child[8] = {nullptr};
         /**< Primitives buffer.*/
         std::vector<const Primitive*>	primitives;
-        /**< Bounding box for this octree node.*/
+        /**< Bounding box for this OcTree node.*/
         BBox						    bb;
     };
 
@@ -62,9 +62,9 @@ public:
 	//! Build the OcTree in O(Nlg(N)) time.
     void Build() override;
     
-    //! @brief      Primitive information in octree node.
+    //! @brief      Primitive information in OcTree node.
     struct NodePrimitiveContainer{
-        /**< Primitive buffer used during octree construction.*/
+        /**< Primitive buffer used during OcTree construction.*/
         std::vector<const Primitive*>	primitives;
     };
 
@@ -78,11 +78,11 @@ public:
     }
 
 private:
-    /**< Pointer to the root node of this octree.*/
+    /**< Pointer to the root node of this OcTree.*/
 	OcTreeNode*	m_root = nullptr;
     /**< Maximum number of primitives allowed in a leaf node, 16 is the default value.*/
 	unsigned	m_maxPriInLeaf = 16;
-    /**< Maximum depth of the octree, 16 is the default value.*/
+    /**< Maximum depth of the OcTree, 16 is the default value.*/
 	unsigned	m_maxDepthInOcTree = 16;
 
 	//! @brief  Split current node into eight if criteria is not met. Otherwise, it will make it a leaf.
@@ -90,7 +90,7 @@ private:
 	//! This function invokes itself recursively, so the whole sub-tree will be built 
     //! once it is called.
     //!
-	//! @param node         Node to be splitted.
+	//! @param node         Node to be slitted.
 	//! @param container    Container holding all primitive information in this node.
 	//! @param bb           Bounding box of this node.
 	//! @param depth        Current depth of this node.
@@ -99,10 +99,10 @@ private:
 	//! @brief Making the current node as a leaf node.
 	//! An new index buffer will be allocated in this node.
 	//! @param node         Node to be made as a leaf node.
-	//! @param container    Container holdes all primitive information in this node.
+	//! @param container    Container holding all primitive information in this node.
 	void makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container );
 
-	//! @brief  Traverse OcTree recursively and return if there is interesection.
+	//! @brief  Traverse OcTree recursively and return if there is intersection.
     //!
 	//! @param node         Sub-tree belongs to this node will be visited in a depth first manner.
 	//! @param ray          The input ray to be tested.

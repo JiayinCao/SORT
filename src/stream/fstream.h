@@ -132,7 +132,7 @@ public:
         auto ori_pos = m_file.tellg();
 
         m_file.seekg(0, std::ios::end);
-        std::streamsize size = m_file.tellg();
+        auto size = (unsigned int)m_file.tellg();
         m_file.seekg(0, std::ios::beg);
 
         std::vector<char> buffer(size);

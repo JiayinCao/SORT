@@ -56,19 +56,19 @@ void KDTree::Build(){
 	computeBBox();
 	
 	// create the split candidates
-	unsigned count = (unsigned)m_primitives->size();
+    auto count = (unsigned int)m_primitives->size();
 	Splits splits;
-	for( int i = 0 ; i < 3 ; i++ )
+	for(auto i = 0 ; i < 3 ; i++ )
 		splits.split[i] = new Split[2*count];
-	for( int k = 0 ; k < 3 ; k++ ){
-		for( unsigned i = 0 ; i < count ; i++ ){
+	for(auto k = 0 ; k < 3 ; k++ ){
+		for(auto i = 0u ; i < count ; i++ ){
 			Primitive* pri = (*m_primitives)[i];
-			const BBox& box = pri->GetBBox();
+            auto box = pri->GetBBox();
             splits.split[k][2*i] = Split(box.m_Min[k], Split_Type::Split_Start, i, pri);
             splits.split[k][2*i+1] = Split(box.m_Max[k], Split_Type::Split_End, i, pri);
 		}
 	}
-	for( int i = 0 ; i < 3 ; i++ )
+	for(auto i = 0 ; i < 3 ; i++ )
 		std::sort( splits.split[i] , splits.split[i] + 2 * count);
 
 	// create root node
@@ -97,7 +97,7 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	// pick best split
 	unsigned	split_offset;
 	unsigned 	split_Axis;
-	float sah = pickSplitting( splits , prinum , node->bbox , split_Axis , split_offset);
+    auto sah = pickSplitting( splits , prinum , node->bbox , split_Axis , split_offset);
 	if( sah >= prinum ){
 		makeLeaf( node , splits , prinum );
 		return;
@@ -108,12 +108,12 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	// ----------------------------------------------------------------------------------------
 	// step 2
 	// distribute primitives
-    const unsigned split_count = prinum * 2;
+    const auto split_count = prinum * 2;
 	Split* _splits = splits.split[split_Axis];
-	unsigned l_num = 0 , r_num = 0;
-	for( unsigned i = 0 ; i < split_count; i++ )
+    auto l_num = 0 , r_num = 0;
+	for(auto i = 0u ; i < split_count; i++ )
 		m_temp[splits.split[split_Axis][i].id] = 0;
-	for( unsigned i = 0 ; i < split_count; i++ )
+	for(auto i = 0u ; i < split_count; i++ )
 	{
         if (i < split_offset) {
             if (_splits[i].type == Split_Type::Split_Start) {
@@ -134,15 +134,15 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	// generate new events
 	Splits l_splits;
 	Splits r_splits;
-	for( int k = 0 ; k < 3 ; k++ ){
+	for(auto k = 0 ; k < 3 ; k++ ){
 		l_splits.split[k] = new Split[2*l_num];
 		r_splits.split[k] = new Split[2*r_num];
 	}
-	for( int k = 0 ; k < 3 ; k++ ){
-        int l_offset = 0, r_offset = 0;
-		for( unsigned i = 0 ; i < split_count ; i++ ){
+	for(auto k = 0 ; k < 3 ; k++ ){
+        auto l_offset = 0, r_offset = 0;
+		for(auto i = 0u ; i < split_count ; i++ ){
             const Split& old = splits.split[k][i];
-            unsigned id = old.id;
+            auto id = old.id;
             if (m_temp[id] & 0x01)
                 l_splits.split[k][l_offset++] = old;
             if (m_temp[id] & 0x02)
@@ -153,12 +153,12 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	}
 	splits.Release();
 
-	BBox left_box = node->bbox;
+    auto left_box = node->bbox;
 	left_box.m_Max[split_Axis] = node->split;
 	node->leftChild = new Kd_Node(left_box);
 	splitNode( node->leftChild , l_splits , l_num , depth + 1 );
 
-	BBox right_box = node->bbox;
+    auto right_box = node->bbox;
 	right_box.m_Min[split_Axis] = node->split;
 	node->rightChild = new Kd_Node(right_box);
 	splitNode( node->rightChild , r_splits , r_num , depth + 1 );
@@ -167,24 +167,24 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 }
 
 float KDTree::sah( unsigned l , unsigned r , unsigned axis , float split , const BBox& box ){
-	float inv_sarea = 1.0f / box.HalfSurfaceArea();
+    auto inv_sarea = 1.0f / box.HalfSurfaceArea();
 
-	Vector delta = box.m_Max - box.m_Min;
+    auto delta = box.m_Max - box.m_Min;
 	delta[axis] = split - box.m_Min[axis];
-	float l_sarea = delta.x * delta.y + delta.y * delta.z + delta.z * delta.x;
+    auto l_sarea = delta.x * delta.y + delta.y * delta.z + delta.z * delta.x;
 	delta[axis] = box.m_Max[axis] - split;
-	float r_sarea = delta.x * delta.y + delta.y * delta.z + delta.z * delta.x;
+    auto r_sarea = delta.x * delta.y + delta.y * delta.z + delta.z * delta.x;
 
 	return ( l * l_sarea + r * r_sarea ) * inv_sarea;
 }
 
 float KDTree::pickSplitting( const Splits& splits , unsigned prinum , const BBox& box , unsigned& splitAxis , unsigned& split_offset ){
-	float min_sah = FLT_MAX;
-	for( int k = 0 ; k < 3 ; k++ ){
-		unsigned n_l = 0 ;
-		unsigned n_r = prinum ;
-		unsigned split_count = prinum * 2;
-		unsigned i = 0;
+    auto min_sah = FLT_MAX;
+	for(auto k = 0 ; k < 3 ; k++ ){
+        auto n_l = 0 ;
+        auto n_r = prinum ;
+        auto split_count = prinum * 2;
+        auto i = 0u;
 		while( i < split_count ){
             if (splits.split[k][i].pos <= box.m_Min[k] ){
                 ++i;
@@ -197,7 +197,7 @@ float KDTree::pickSplitting( const Splits& splits , unsigned prinum , const BBox
                 --n_r;
 
 			// get the sah
-			float sahv = sah( n_l , n_r , k , splits.split[k][i].pos , box );
+            auto sahv = sah( n_l , n_r , k , splits.split[k][i].pos , box );
 			if( sahv < min_sah ){
 				min_sah = sahv;
 				splitAxis = k;
@@ -216,9 +216,9 @@ float KDTree::pickSplitting( const Splits& splits , unsigned prinum , const BBox
 
 void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum ){
 	node->flag = 3;
-	for( unsigned i = 0 ; i < prinum * 2; i++ ){
+	for(auto i = 0u ; i < prinum * 2; i++ ){
         if( splits.split[0][i].type == Split_Type::Split_Start ){
-			const Primitive* primitive = splits.split[0][i].primitive;
+			const auto primitive = splits.split[0][i].primitive;
 			if( primitive->GetIntersect( node->bbox ) )
 				node->primitivelist.push_back(primitive);
 		}
@@ -237,7 +237,7 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_STATS(sShadowRayCount += (intersect == nullptr));
 
 	float fmax;
-	float fmin = Intersect( r , m_bbox , &fmax );
+    auto fmin = Intersect( r , m_bbox , &fmax );
 	if( fmin < 0.0f )
 		return false;
 
@@ -250,8 +250,8 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
 }
 
 bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const{
-	static const unsigned	mask = 0x00000003;
-	static const float		delta = 0.001f;
+	static const auto	    mask = 0x00000003u;
+	static const auto		delta = 0.001f;
 
     if( fmin > fmax )
         return false;
@@ -261,7 +261,7 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 
 	// it's a leaf node
 	if( (node->flag & mask) == 3 ){
-		bool inter = false;
+        auto inter = false;
         for( auto primitive : node->primitivelist ){
             SORT_STATS(++sIntersectionTest);
 			inter |= primitive->GetIntersect( ray , intersect );
@@ -272,16 +272,16 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 	}
 
 	// get the intersection point between the ray and the splitting plane
-	const unsigned split_axis = node->flag & mask;
-	const float dir = ray.m_Dir[split_axis];
-	const float t = (dir==0.0f) ? FLT_MAX : ( node->split - ray.m_Ori[split_axis] ) / dir;
+	const auto split_axis = node->flag & mask;
+	const auto dir = ray.m_Dir[split_axis];
+	const auto t = (dir==0.0f) ? FLT_MAX : ( node->split - ray.m_Ori[split_axis] ) / dir;
 	
 	const Kd_Node* first = node->leftChild;
 	const Kd_Node* second = node->rightChild;
 	if( dir < 0.0f || (dir==0.0f&&ray.m_Ori[split_axis] > node->split) )
         std::swap(first, second);
 
-	bool inter = false;
+    auto inter = false;
 	if( t > fmin - delta ){
 		inter = traverse( first , ray , intersect , fmin , std::min( fmax , t ) );
 		if( !intersect && inter )
