@@ -15,13 +15,13 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header
+#include <string.h>
+#include <fstream>
 #include "merl.h"
 #include "core/define.h"
 #include "managers/memmanager.h"
 #include "core/path.h"
 #include "math/vector3.h"
-#include <fstream>
 #include "bsdf.h"
 
 // constant to be used in merl

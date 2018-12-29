@@ -19,6 +19,7 @@
 
 #include "sort.h"
 #include <stdio.h>
+#include <string.h>
 #ifdef SORT_IN_WINDOWS
 #include <direct.h>
 #define GetCurrentDir _getcwd
