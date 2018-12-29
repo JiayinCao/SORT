@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "sort.h"
+#include "core/define.h"
 
 // Flush per-thread stats to StatsSummary, this should be called at the end of per-thread
 void SortStatsFlushData( bool mainThread = false );

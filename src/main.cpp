@@ -15,16 +15,12 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include "core/define.h"
 #include "sort.h"
-#include "system.h"
 #include "core/log.h"
 #include "core/stats.h"
 #include "core/profile.h"
 #include "core/path.h"
-#include "core/globalconfig.h"
-#include "thirdparty/gtest/gtest.h"
-
-System g_System;
 
 #ifdef SORT_IN_WINDOWS
 int __cdecl main( int argc , char** argv )
@@ -39,9 +35,6 @@ int main(int argc, char** argv)
     addLogDispatcher(new StdOutLogDispatcher());
     addLogDispatcher(new FileLogDispatcher( "log.txt" ));
 
-    // Parse command line arguments.
-    GlobalConfiguration::GetSingleton().ParseCommandLine( argc , argv );
-
     slog(INFO, GENERAL, "Number of CPU cores %d" , NumSystemCores() );
 #ifdef SORT_ENABLE_STATS_COLLECTION
     slog( INFO, GENERAL, "Stats collection is enabled." );
@@ -50,25 +43,12 @@ int main(int argc, char** argv)
 #endif
     slog( INFO, GENERAL, "Profiling system is %s." , SORT_PROFILE_ISENABLED ? "enabled" : "disabled" );
 
-    // Run in unit test mode.
-    if( g_unitTestMode ){
-        ::testing::InitGoogleTest(&argc, argv);
-        return RUN_ALL_TESTS();
-    }
+    RunSORT( argc , argv );
 
-    // setup the system
-    if (g_System.Setup(argv[1])){
-        // do ray tracing
-        g_System.Render();
-    }
-    
     // Flush main thread data
     SortStatsFlushData(true);
     // Output stats data
     SortStatsPrintData();
-
-    // unitialize the system
-    g_System.Uninit();
 
     SORT_PROFILE_END; // Main Thread
 

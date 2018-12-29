@@ -95,7 +95,9 @@ public:
     //! The BVH construction algorithm is in O(N*lg(N)). Please refer to this paper
     //! <a href = "http://www.sci.utah.edu/~wald/Publications/2007/ParallelBVHBuild/fastbuild.pdf">
     //! On fast Construction of SAH - based Bounding Volume Hierarchies< / a> for further details.
-	void    Build() override;
+    //!
+    //! @param scene    The rendering scene.
+	void    Build(const Scene& scene) override;
     
     //! @brief      Serializing data from stream.
     //!

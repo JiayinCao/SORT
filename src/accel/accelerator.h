@@ -24,6 +24,7 @@
 #include "core/stats.h"
 #include "core/profile.h"
 #include "stream/stream.h"
+#include "core/scene.h"
 
 //! @brief Spatial acceleration structure interface.
 /**
@@ -57,7 +58,9 @@ public:
 	virtual bool GetIntersect( const class Ray& r , class Intersection* intersect ) const = 0;
 
     //! @brief Build the acceleration structure.
-	virtual void Build() = 0;
+    //!
+    //! @oaram  The rendering scene.
+	virtual void Build( const Scene& scene ) = 0;
 
 	//! @brief Get the bounding box of the primitive set.
     //!
@@ -66,13 +69,6 @@ public:
         return m_bbox; 
     }
 
-    //! @brief  Set primitive set in the acceleration structure.
-    //!
-    //! @param pri  The set of primitives in the scene.
-	inline void SetPrimitives( std::vector<class Primitive*>* pri ){
-		m_primitives = pri;
-	}
-    
     //! @brief  Whether the spatial data structure is constructed.
     //!
     //! @return     Whether the spatial data structure is constructed.
@@ -82,11 +78,11 @@ public:
 
 protected:
     /**< The vector holding all primitive pointers. */
-	std::vector<class Primitive*>*      m_primitives;
+	const std::vector<class Primitive*>*    m_primitives = nullptr;
     /**< The bounding box of all primitives. */
-    BBox                                m_bbox;
+    BBox                                    m_bbox;
     /**< Whether the spatial structure is constructed before. */
-    bool                                m_isValid = false;
+    bool                                    m_isValid = false;
 
 	//! @brief Generate the bounding box for the primitive set.
 	void computeBBox();

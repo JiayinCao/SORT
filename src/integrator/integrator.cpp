@@ -16,11 +16,10 @@
  */
 
 #include "integrator.h"
-#include "system.h"
 
 SORT_STATS_DEFINE_COUNTER(sPrimaryRayCount)
 
-extern System g_System;
-
-Integrator::Integrator() :scene( g_System.GetScene() ){
+extern Scene g_scene;
+Integrator::Integrator() :scene( g_scene ){
 }
+ 

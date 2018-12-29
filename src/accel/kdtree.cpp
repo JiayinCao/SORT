@@ -43,8 +43,10 @@ KDTree::~KDTree(){
 	deleteKdNode( m_root );
 }
 
-void KDTree::Build(){
+void KDTree::Build( const Scene& scene ){
     SORT_PROFILE("Build KdTree");
+
+	m_primitives = scene.GetPrimitives();
 
 	if( m_primitives->size() == 0 )
 		return;

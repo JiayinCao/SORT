@@ -18,6 +18,7 @@
 #pragma once
 
 #include <chrono>
+#include "core/log.h"
 
 //! @brief  Timer is for evaluating time elapsed for a specific operation.
 /**
@@ -53,3 +54,23 @@ public:
 private:
     std::chrono::time_point<clock>  m_start;        /**< Start point of last time timer is triggered. */
 };
+
+//! @brief  A simple wrapper for outputing elapsed time during the life time of its instance.
+class   TimerWrapper{
+public:
+    //! @brief  Constructor.
+    //!
+    //! @param  name    Name of the timer.
+    TimerWrapper( const std::string name ):m_name(name){}
+
+    //! @brief  Report elapsed time during the life time of this instance.
+    ~TimerWrapper(){
+        slog(INFO, GENERAL, "%s costs %f (s).", m_name.c_str() , (float)(m_timer.GetElapsedTime() / 1000.0f) );
+    }
+
+private:
+    Timer           m_timer;    /**< Timer of the wrapper. */
+    std::string     m_name;     /**< Name of the wrapper. */
+};
+
+#define TIMING_EVENT( name )    TimerWrapper    localTimerWrapper(name);

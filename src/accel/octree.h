@@ -60,7 +60,9 @@ public:
     bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
 	//! Build the OcTree in O(Nlg(N)) time.
-    void Build() override;
+    //!
+    //! @param scene    The rendering scene.
+	void    Build(const Scene& scene) override;
     
     //! @brief      Primitive information in OcTree node.
     struct NodePrimitiveContainer{

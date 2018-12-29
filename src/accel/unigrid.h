@@ -51,7 +51,9 @@ public:
     bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
 	//! Build uniform grid structure in O(N).
-    void Build() override;
+    //!
+    //! @param scene    The rendering scene.
+	void    Build(const Scene& scene) override;
     
     //! @brief      Serializing data from stream
     //!

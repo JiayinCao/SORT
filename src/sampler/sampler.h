@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "sort.h"
+#include "core/define.h"
 #include <vector>
 #include "sample.h"
 #include "managers/memmanager.h"

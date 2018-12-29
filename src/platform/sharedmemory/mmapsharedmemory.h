@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "sort.h"
+#include "core/define.h"
 
 #if defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
 

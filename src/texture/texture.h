@@ -17,8 +17,7 @@
 
 #pragma once
 
-// include header file
-#include "sort.h"
+#include "core/define.h"
 #include "spectrum/spectrum.h"
 #include "core/enum.h"
 #include "core/creator.h"

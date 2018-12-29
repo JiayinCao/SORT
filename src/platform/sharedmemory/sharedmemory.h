@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "sort.h"
+#include "core/define.h"
 
 #define SharedMemory_Read 0x01
 #define	SharedMemory_Write 0x02

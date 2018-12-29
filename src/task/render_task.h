@@ -32,8 +32,8 @@ public:
     //!
     //! @param priority     New priority of the task.
     Render_Task(const Vector2i& ori , const Vector2i& size , class Scene* scene , class Sampler* sampler , PixelSample* pixelSamples ,
-                unsigned int priority = DEFAULT_TASK_PRIORITY , const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ) : 
-                Task( priority , dependencies ), m_coord(ori), m_size(size), m_scene(*scene), m_sampler( sampler ),
+                const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
+                Task( name , priority , dependencies ), m_coord(ori), m_size(size), m_scene(*scene), m_sampler( sampler ),
                 m_pixelSamples(pixelSamples) {}
     
     //! @brief  Execute the task
@@ -51,13 +51,6 @@ public:
     //! @return The size of the current tile.
     inline Vector2i    GetTileSize() const {
         return m_size;
-    }
-
-    //! @brief  Get scene description.
-    //!
-    //! @return Scene description.
-    inline const Scene&    GetScene() const {
-        return m_scene;
     }
 
 private:
