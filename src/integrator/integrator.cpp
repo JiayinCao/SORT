@@ -18,8 +18,3 @@
 #include "integrator.h"
 
 SORT_STATS_DEFINE_COUNTER(sPrimaryRayCount)
-
-extern Scene g_scene;
-Integrator::Integrator() :scene( g_scene ){
-}
- 

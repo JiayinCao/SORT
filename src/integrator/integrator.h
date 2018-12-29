@@ -26,18 +26,15 @@
 #include "core/profile.h"
 #include "core/primitive.h"
 #include "stream/stream.h"
+#include "core/scene.h"
 
-// pre-declera classes
 class	Ray;
-class	Scene;
 
 ////////////////////////////////////////////////////////////////////////////
 //	definition of integrator
 class	Integrator : public SerializableObject
 {
 public:
-	// default constructor
-	Integrator();
 	// destructor
 	virtual ~Integrator(){}
 
@@ -50,9 +47,12 @@ public:
 	// set sample per pixel
 	// para 'spp' : sample per pixel
 	void SetSamplePerPixel( unsigned spp ){ sample_per_pixel = spp; }
-
-	// setup camera
-	void SetupCamera(std::shared_ptr<class Camera> cam){ camera = cam; }
+	
+	// setup scene
+	inline void SetupScene( const Scene* scene ) { 
+		m_scene = scene;
+		camera = m_scene->GetCamera(); 
+	}
 
 	// generate samples
 	// para 'sampler' : the sampling method
@@ -113,7 +113,7 @@ protected:
 	int				max_recursive_depth = 6;
 
 	// the scene description
-	const Scene&	scene;
+	const Scene*	m_scene;
 
 	// the pixel sample
 	PixelSample		pixel_sample;

@@ -53,10 +53,10 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 		// get the intersection between the ray and the scene
 		// if it's a light , accumulate the radiance and break
-		if( false == scene.GetIntersect( r , &inter ) )
+		if( false == m_scene->GetIntersect( r , &inter ) )
 		{
 			if( bounces == 0 )
-				return scene.Le( r );
+				return m_scene->Le( r );
 			break;
 		}
 
@@ -70,9 +70,9 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		float			light_pdf = 0.0f;
 		LightSample		light_sample = (bounces==0)?ps.light_sample[0]:LightSample(true);
 		BsdfSample		bsdf_sample = (bounces==0)?ps.bsdf_sample[0]:BsdfSample(true);
-		const auto	light = scene.SampleLight( light_sample.t , &light_pdf );
+		const auto	light = m_scene->SampleLight( light_sample.t , &light_pdf );
 		if( light_pdf > 0.0f )
-			L += throughput * EvaluateDirect(	r  , scene , light , inter , light_sample ,
+			L += throughput * EvaluateDirect(	r  , *m_scene , light , inter , light_sample ,
 												bsdf_sample , BXDF_TYPE(BXDF_ALL) ) / light_pdf;
 
 		// sample the next direction using bsdf

@@ -33,7 +33,6 @@ SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount 
 SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
 SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
 
-Scene g_scene;
 ImageSensor* m_imagesensor = nullptr;
 
 void	RunSORT( int argc , char** argv ){
@@ -48,12 +47,14 @@ void	RunSORT( int argc , char** argv ){
 		return;
     }
 
-    auto loading_task = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , g_scene);
-    SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structor Construction." , DEFAULT_TASK_PRIORITY, {loading_task} , g_scene);
+	Scene scene;
+
+    auto loading_task = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , &scene);
+    SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structor Construction." , DEFAULT_TASK_PRIORITY, {loading_task} , &scene);
     EXECUTING_TASKS();
 
     g_integrator->PreProcess();
-	g_integrator->SetupCamera(g_scene.GetCamera());
+	g_integrator->SetupScene(&scene);
 
 	Timer timer;
 
@@ -84,7 +85,7 @@ void	RunSORT( int argc , char** argv ){
 			size.x = (tilesize < (width - tl.x)) ? tilesize : (width - tl.x);
 			size.y = (tilesize < (height - tl.y)) ? tilesize : (height - tl.y);
 
-			SCHEDULE_TASK<Render_Task>( "render task" , priority-- , {} , tl , size , &g_scene , new RandomSampler() , new PixelSample[g_samplePerPixel] );
+			SCHEDULE_TASK<Render_Task>( "render task" , priority-- , {} , tl , size , &scene , new RandomSampler() , new PixelSample[g_samplePerPixel] );
 		}
 
 		// turn to the next direction

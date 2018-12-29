@@ -17,8 +17,8 @@
 
 #include "ortho.h"
 #include "core/sassert.h"
+#include "core/globalconfig.h"
 #include "sampler/sample.h"
-#include "imagesensor/imagesensor.h"
 
 // generate camera ray
 Ray OrthoCamera::GenerateRay( float x, float y, const PixelSample &ps) const
@@ -26,8 +26,8 @@ Ray OrthoCamera::GenerateRay( float x, float y, const PixelSample &ps) const
 	x += ps.img_u;
 	y += ps.img_v;
 
-	float w = (float)m_imagesensor->GetWidth();
-	float h = (float)m_imagesensor->GetHeight();
+	float w = (float)g_resultResollutionWidth;
+	float h = (float)g_resultResollutionHeight;
 
 	x = ( ( x / w ) - 0.5f ) * m_camWidth;
 	y = -1.0f * ( ( y / h - 0.5f ) ) * m_camHeight;

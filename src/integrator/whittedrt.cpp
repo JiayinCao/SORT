@@ -40,8 +40,8 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 
 	// get the intersection between the ray and the scene
 	Intersection ip;
-	if( false == scene.GetIntersect( r , &ip ) )
-		return scene.Le(r);
+	if( false == m_scene->GetIntersect( r , &ip ) )
+		return m_scene->Le(r);
 
 	Spectrum t;
 
@@ -49,8 +49,8 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
 
 	// lights
-	Visibility visibility(scene);
-	const std::vector<std::shared_ptr<Light>>& lights = scene.GetLights();
+	Visibility visibility(*m_scene);
+	const std::vector<std::shared_ptr<Light>>& lights = m_scene->GetLights();
 	std::vector<std::shared_ptr<Light>>::const_iterator it = lights.begin();
 	while( it != lights.end() )
 	{

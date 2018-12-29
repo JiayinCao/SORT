@@ -40,7 +40,7 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 
 	// get the intersection between the ray and the scene
 	Intersection ip;
-	if( false == scene.GetIntersect( r , &ip ) )
+	if( false == m_scene->GetIntersect( r , &ip ) )
 		return 0.0f;
 
 	Vector nn = FaceForward( ip.normal , r.m_Dir ) ? -ip.normal : ip.normal;
@@ -61,7 +61,7 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 	Ray ray( ip.intersect , wi , 0 , 0.001f , maxDistance );
 
 	Intersection aoip;
-	if( !scene.GetIntersect( ray , &aoip ) )
+	if( !m_scene->GetIntersect( ray , &aoip ) )
 		return dot * INV_PI / pdf;
     return 0.0f;
 }

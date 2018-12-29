@@ -18,6 +18,7 @@
 #pragma once
 
 #include "task.h"
+#include "core/scene.h"
 
 //! @brief  Loading_Task is responsible for loading data to intiailize the system.
 class Loading_Task : public Task{
@@ -25,7 +26,7 @@ public:
     //! @brief Constructor.
     //!
     //! @param  scene     Scene to be filled during loading.
-    Loading_Task( class Scene& scene , const char* name , unsigned int priority , 
+    Loading_Task( Scene* scene , const char* name , unsigned int priority , 
                   const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
         Task( name , DEFAULT_TASK_PRIORITY , dependencies ) , m_scene(scene) {}
     
@@ -34,7 +35,7 @@ public:
 
 private:
     /**< The scene description to be filled with during loading. */
-    class Scene&      m_scene;
+    Scene*      m_scene;
 };
 
 //! @brief  Constructe acceleration data structure.
@@ -43,7 +44,7 @@ public:
     //! @brief Constructor.
     //!
     //! @param  scene     Scene to be filled during loading.
-    SpatialAccelerationConstruction_Task( class Scene& scene, const char* name , unsigned int priority , 
+    SpatialAccelerationConstruction_Task( class Scene* scene, const char* name , unsigned int priority , 
                    const std::unordered_set<std::shared_ptr<Task>>& dependencies ) :
         Task( name , DEFAULT_TASK_PRIORITY, dependencies  ) , m_scene(scene) {}
 
@@ -52,5 +53,5 @@ public:
 
 private:
     /**< The scene description to be filled with during loading. */
-    class Scene&      m_scene;
+    class Scene*      m_scene;
 };
