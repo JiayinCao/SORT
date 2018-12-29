@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <string>
+#include <string.h>
 #include "core/log.h"
 #include "stream/stream.h"
 #include "core/singleton.h"
