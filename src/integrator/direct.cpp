@@ -43,17 +43,17 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 	// get the intersection between the ray and the scene
 	Intersection ip;
 	// evaluate light directly
-	if( false == scene.GetIntersect( r , &ip ) )
-		return scene.Le( r );
+	if( false == m_scene->GetIntersect( r , &ip ) )
+		return m_scene->Le( r );
 
 	Spectrum li = ip.Le( -r.m_Dir );
 
 	// eavluate direct light
-	unsigned light_num = scene.LightNum();
+	unsigned light_num = m_scene->LightNum();
 	for( unsigned i = 0 ; i < light_num ; ++i )
 	{
-		const auto light = scene.GetLight(i);
-		li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true), BXDF_TYPE( BXDF_ALL ) );
+		const auto light = m_scene->GetLight(i);
+		li += EvaluateDirect( r , *m_scene , light , ip , LightSample(true) , BsdfSample(true), BXDF_TYPE( BXDF_ALL ) );
 	}
 
 	return li;

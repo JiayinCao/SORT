@@ -22,13 +22,13 @@
 #include "core/sassert.h"
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
-#include "imagesensor/imagesensor.h"
+#include "core/globalconfig.h"
 #include "light/light.h"
 
 void PerspectiveCamera::PreProcess()
 {
-    float w = (float)m_imagesensor->GetWidth();
-    float h = (float)m_imagesensor->GetHeight();
+    float w = (float)g_resultResollutionWidth;
+    float h = (float)g_resultResollutionHeight;
     float aspect = w/h * m_aspectRatioW/m_aspectRatioH;
     
     float yScale = 1.0f / tan( m_fov * 0.5f );
@@ -65,11 +65,7 @@ void PerspectiveCamera::PreProcess()
 }
 
 // generate ray
-Ray	PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
-{
-	// check if there is render target
-	sAssert( m_imagesensor != 0 , CAMERA );
-	
+Ray	PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) const{	
     const Point rastP( x + ps.img_u , y + ps.img_v , 0.0f );
     Vector view_dir = m_cameraToRaster.invMatrix( rastP );
 	

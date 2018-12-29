@@ -15,27 +15,23 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header
+#include <math.h>
 #include "environment.h"
 #include "math/vector3.h"
 #include "math/ray.h"
 #include "core/sassert.h"
 #include "core/define.h"
-#include "imagesensor/imagesensor.h"
-#include <math.h>
 #include "sampler/sample.h"
+#include "core/globalconfig.h"
 
 // generate a ray given a pixel
-Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const
-{
-	sAssert( m_imagesensor != 0 , CAMERA );
-
+Ray	EnvironmentCamera::GenerateRay( float x , float y , const PixelSample& ps ) const{
 	x += ps.img_u;
 	y += ps.img_v;
 
 	// generate ray
-	float theta = PI * y / m_imagesensor->GetHeight();
-	float phi = 2 * PI * x / m_imagesensor->GetWidth();
+	float theta = PI * y / (float)g_resultResollutionHeight;
+	float phi = 2 * PI * x / (float)g_resultResollutionWidth;
 	Vector dir( sinf( theta ) * cosf( phi ) , cosf( theta ) , sinf( theta ) * sinf( phi ) );
 	Ray r( m_eye , dir );
 
