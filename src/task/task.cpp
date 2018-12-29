@@ -17,6 +17,17 @@
 
 #include "task.h"
 #include "core/sassert.h"
+#include "core/profile.h"
+
+void Task::ExecuteTask(){
+    SORT_PROFILE(m_name);
+
+    // Execute the task.
+    Execute();
+
+    // Upon termination of a task, release its dependents' dependencies on this task.
+    Scheduler::GetSingleton().TaskFinished( shared_from_this() );
+}
 
 // Compare tasks based on its priority, tasks with higher priority get executed earlier.
 Scheduler::Task_Comp Scheduler::task_comp = []( const std::shared_ptr<Task> t0 , const std::shared_ptr<Task> t1 ){

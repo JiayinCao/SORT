@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "sort.h"
+#include "core/define.h"
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
 #include "core/enum.h"

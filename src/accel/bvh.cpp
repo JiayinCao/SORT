@@ -50,9 +50,11 @@ Bvh::~Bvh(){
     deleteNode(m_root);
 }
 
-void Bvh::Build(){
+void Bvh::Build(const Scene& scene){
     SORT_PROFILE("Build Bvh");
 
+    m_primitives = scene.GetPrimitives();
+    
     // This memory allocation will be automatically deleted, meaning BVH class won't be responsible for clearing this memory.
     SORT_PREMALLOC((unsigned)(sizeof(Bvh_Primitive) * m_primitives->size()), BVH_LEAF_PRILIST_MEMID);
     m_bvhpri = SORT_MEMORY_ID(Bvh_Primitive, BVH_LEAF_PRILIST_MEMID);

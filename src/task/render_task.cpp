@@ -25,8 +25,6 @@
 #include "core/profile.h"
 
 void Render_Task::Execute(){
-    SORT_PROFILE("Render Task");
-    
     if(g_integrator == nullptr )
         return;
     auto camera = m_scene.GetCamera();

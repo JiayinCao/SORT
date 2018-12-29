@@ -61,8 +61,10 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	return false;
 }
 
-void OcTree::Build(){
+void OcTree::Build( const Scene& scene ){
     SORT_PROFILE("Build OcTree");
+
+	m_primitives = scene.GetPrimitives();
 
 	// handling empty mesh case
 	if( m_primitives->size() == 0 )

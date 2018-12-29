@@ -17,8 +17,7 @@
 
 #pragma once
 
-// include the header file
-#include "sort.h"
+#include "core/define.h"
 #include "math/point.h"
 #include "ray.h"
 

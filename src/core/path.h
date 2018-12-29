@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "sort.h"
+#include "core/define.h"
 #include <stdio.h>
 #include <string.h>
 #ifdef SORT_IN_WINDOWS

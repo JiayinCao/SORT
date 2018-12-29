@@ -44,15 +44,18 @@ class Task : public std::enable_shared_from_this<Task>{
 
 public:
     //! @brief  Default constructor.
-    Task(   unsigned int priority = DEFAULT_TASK_PRIORITY , 
+    Task(   const char* name  , unsigned int priority = DEFAULT_TASK_PRIORITY , 
             const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ):
-            m_dependencies(dependencies),m_priority(priority) {}
+            m_name(name), m_dependencies(dependencies),m_priority(priority) {}
 
     //! @brief  Virtual destructor.
     virtual ~Task() {}
 
     //! @brief  Execute the task
     virtual void        Execute() = 0;
+
+    //! @brief  Execute the task, this also includes outputing profiling data and removing dependencies.
+    void        ExecuteTask();
 
     //! @brief  Get priority of the task.
     //!
@@ -107,6 +110,7 @@ private:
     Task_Container      m_dependencies;     /**< Tasks this task depends on. */
     Task_Container      m_dependents;       /**< Tasks depending on this task. */
     unsigned int        m_priority;         /**< Priority of the task. */
+    const std::string   m_name;             /**< Name of the task. */
 };
 
 //! @brief  Scheduler for scheduling tasks.
@@ -167,8 +171,8 @@ private:
 
 //! @brief      Schedule a task in task scheduler.
 template<class T, typename... Args>
-inline std::shared_ptr<T>  SCHEDULE_TASK( unsigned int priority , Args... args ){
-    auto ret = std::make_shared<T>( args... , priority );
+inline std::shared_ptr<T>  SCHEDULE_TASK( const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies , Args... args ){
+    auto ret = std::make_shared<T>( args... , name , priority , dependencies );
     Scheduler::GetSingleton().Schedule( ret );
     return ret;
 }
@@ -184,9 +188,6 @@ inline void    EXECUTING_TASKS(){
             return;
 
         // Execute the task.
-        task->Execute();
-
-        // Upon termination of a task, release its dependents' dependencies on this task.
-        Scheduler::GetSingleton().TaskFinished( task );
+        task->ExecuteTask();
     }
 }

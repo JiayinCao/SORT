@@ -16,7 +16,7 @@
  */
 
 #include "rand.h"
-#include "sort.h"
+#include "core/define.h"
 #include "core/define.h"
 #include "core/thread.h"
 

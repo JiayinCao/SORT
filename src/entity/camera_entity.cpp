@@ -17,11 +17,10 @@
 
 #include "camera_entity.h"
 #include "core/scene.h"
-#include "system.h"
 
 IMPLEMENT_CREATOR(PerspectiveCameraEntity);
 
-extern System g_System;
+extern ImageSensor* m_imagesensor;
 
 void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
     stream >> m_camera->m_eye;
@@ -32,7 +31,7 @@ void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
     stream >> m_camera->m_aspectRatioW >> m_camera->m_aspectRatioH;
     stream >> m_camera->m_fov;
 
-    m_camera->SetImageSensor(g_System.GetImageSensor());
+    m_camera->SetImageSensor(m_imagesensor);
     m_camera->PreProcess();
 }
 

@@ -131,7 +131,9 @@ public:
     //! Please refer to this paper <a href = "http://www.eng.utah.edu/~cs6965/papers/kdtree.pdf">
     //! On building fast KD-Trees for Ray Tracing, and on doing that in O(N log N)</a> 
     //! for further details.
-	void Build() override;
+	//!
+    //! @param scene    The rendering scene.
+	void    Build(const Scene& scene) override;
 
     //! @brief      Serializing data from stream.
     //!

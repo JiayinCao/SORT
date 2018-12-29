@@ -125,22 +125,6 @@ public:
         return *this;
     }
 
-    //! @brief Convert the file stream to memory stream.
-    //!
-    //! @return     A memory stream holding a copy of the data in the file.
-    std::shared_ptr<IMemoryStream>   ConvertToMemoryStream(){
-        auto ori_pos = m_file.tellg();
-
-        m_file.seekg(0, std::ios::end);
-        auto size = (unsigned int)m_file.tellg();
-        m_file.seekg(0, std::ios::beg);
-
-        std::vector<char> buffer(size);
-        m_file.read(buffer.data(), size);
-        m_file.seekg(ori_pos, std::ios::beg);
-        return std::make_shared<IMemoryStream>(size , buffer.data());
-    }
-
 private:
     std::ifstream m_file;       /**< File to be streamed from. */
 };

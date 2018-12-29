@@ -15,8 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#pragma once
-
 /*
     -------------------------- Coding Standard ------------------------------------
     SORT has been developed for quite a long time, several years. With limited 
@@ -77,30 +75,10 @@
     ---------------------------------------------------------------------------------
 */ 
 
-#include <iostream>
-#include <math.h>
+#pragma once
 
-#if defined(_WIN32) || defined(_WIN64)
-	#define SORT_IN_WINDOWS
-#elif defined(__linux__)
-	#define SORT_IN_LINUX
-#elif defined(__APPLE__)
-	#define SORT_IN_MAC
-#endif
-
-// enable debug by default
-#define	SORT_DEBUG
-
-#if defined(_MSC_VER) && (_MSC_VER >= 1800) 
-#define NOMINMAX
-#  include <algorithm> // for std::min and std::max 
-#endif
-
-inline float LinearToGamma( float value ){
-    if (value <= 0.0031308f) return 12.92f * value;
-    return 1.055f * pow(value, (float)(1.f / 2.4f)) - 0.055f;
-}
-inline float GammaToLinear( float value ){
-    if (value <= 0.04045f) return value * 1.f / 12.92f;
-    return pow((value + 0.055f) * 1.f / 1.055f, (float)2.4f);
-}
+//! @brief		Run SORT.
+//!
+//! @param	argc	Number of arguments, including the executable instance itself.
+//! @param	argv	The command arguments.
+void	RunSORT( int argc , char** argv );
