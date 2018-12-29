@@ -114,8 +114,11 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	return ( intersect && intersect->t < maxt && ( intersect->primitive != nullptr ));
 }
 
-void UniGrid::Build(){
+void UniGrid::Build( const Scene& scene ){
     SORT_PROFILE("Build Uniform Grid");
+
+	m_primitives = scene.GetPrimitives();
+	
 	if( nullptr == m_primitives || m_primitives->empty() ){
         slog( WARNING , SPATIAL_ACCELERATOR , "There is no primitive in uniform grid." );
 		return;

@@ -104,6 +104,13 @@ public:
 		return Vector2i( m_resWidth , m_resHeight );
 	}
 
+	//! @brief		Get full path to the input file.
+	//!
+	//! @return		Full path to the input file.
+	const std::string& 				GetInputFilePath() const{
+		return m_inputFile;
+	}
+
 	//! @brief		Parse command line.
 	//!
 	//!	@param	argc	Number of parameters, including the executable as the first parameter too.
@@ -133,6 +140,8 @@ public:
 			if (strcmp(argv[2], "blendermode") == 0)
 				m_blenderMode = true;
 		}
+
+		m_inputFile = std::string( argv[1] );
 	}
 
 	//! @brief      Serializing data from stream
@@ -148,12 +157,13 @@ public:
 		stream >> m_threadCnt;
 		stream >> m_samplePerPixel;
 		stream >> m_resWidth >> m_resHeight;
-        stream >> m_accelType;
-        m_accelerator = MakeUniqueInstance<Accelerator>(m_accelType);
+		std::string accelType , integratorType;
+        stream >> accelType;
+        m_accelerator = MakeUniqueInstance<Accelerator>(accelType);
 		if( m_accelerator )
 			m_accelerator->Serialize( stream );
-		stream >> m_integratorType;
-		m_integrator = MakeUniqueInstance<Integrator>(m_integratorType);
+		stream >> integratorType;
+		m_integrator = MakeUniqueInstance<Integrator>(integratorType);
 		if( m_integrator != nullptr )
 			m_integrator->Serialize( stream );
 	};
@@ -171,9 +181,7 @@ private:
 	
 	bool				            m_blenderMode = false;			/**< Whether the current running instance is attached with Blender. */
 	bool							m_unitTestMode = false;			/**< Whether the current running instance is in unit test mode. */
-
-    std::string                     m_accelType;            		/**< Local cache of accelerator type. This is not exposed to other systems.*/
-	std::string						m_integratorType;				/**< Integrator type. */
+	std::string						m_inputFile;					/**< Full path of the input file. */
 
 	//! @brief	Make constructor private
 	GlobalConfiguration(){}
@@ -193,3 +201,4 @@ private:
 #define g_outputFileName	GlobalConfiguration::GetSingleton().GetOutputFileName()
 #define g_resultResollution GlobalConfiguration::GetSingleton().GetResultResolution()
 #define	g_unitTestMode		GlobalConfiguration::GetSingleton().GetIsUnitTestMode()
+#define g_inputFilePath		GlobalConfiguration::GetSingleton().GetInputFilePath()

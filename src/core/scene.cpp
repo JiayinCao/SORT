@@ -115,17 +115,6 @@ void Scene::_generatePriBuf()
 	}
 }
 
-// preprocess
-void Scene::PreProcess()
-{
-	// set uniform grid as acceleration structure as default
-	if( g_accelerator )
-	{
-        g_accelerator->SetPrimitives( &m_primitiveBuf );
-        g_accelerator->Build();
-	}
-}
-
 // get the bounding box for the scene
 const BBox& Scene::GetBBox() const
 {

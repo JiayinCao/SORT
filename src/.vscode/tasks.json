@@ -1,5 +1,4 @@
 {
-    // This task file works on Linux and Mac. For windows, mingw may be needed with different configuration here
     "version": "2.0.0",
     "tasks": [
         {

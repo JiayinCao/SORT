@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include "sort.h"
+#include "core/define.h"
 
 //! @brief  Singleton implementation.
 template<typename T>

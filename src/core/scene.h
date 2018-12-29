@@ -17,8 +17,7 @@
 
 #pragma once
 
-// include the header file
-#include "sort.h"
+#include "core/define.h"
 #include <vector>
 #include "core/sassert.h"
 #include "math/bbox.h"
@@ -84,6 +83,8 @@ public:
 	const BBox& GetBBox() const;
     // add primitives
     void AddPrimitives(Primitive* primitive) { m_primitiveBuf.push_back(primitive); }
+	// get primtives
+	const std::vector<Primitive*>*	 GetPrimitives() const { return &m_primitiveBuf; }
 
 	// Evaluate sky
 	Spectrum	Le( const Ray& ray ) const;

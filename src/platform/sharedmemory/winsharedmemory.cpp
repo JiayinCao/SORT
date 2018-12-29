@@ -15,7 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "sort.h"
+#include "core/define.h"
 
 #if defined(SORT_IN_WINDOWS)
 
