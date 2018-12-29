@@ -23,6 +23,7 @@
 #include "integratormethod.h"
 #include "camera/camera.h"
 #include "imagesensor/imagesensor.h"
+#include "core/globalconfig.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromEye)
 SORT_STATS_DEFINE_COUNTER(sTotalLengthPathFromLight)
@@ -41,7 +42,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
     
 	// pick a light randomly
 	float pdf;
-	const auto light = scene.SampleLight( sort_canonical() , &pdf );
+	const auto light = m_scene->SampleLight( sort_canonical() , &pdf );
 	if( light == 0 || pdf == 0.0f )
 		return 0.0f;
 
@@ -67,7 +68,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
         SORT_STATS(++sTotalLengthPathFromLight);
         
 		BDPT_Vertex vert;
-		if (false == scene.GetIntersect(wi, &vert.inter))
+		if (false == m_scene->GetIntersect(wi, &vert.inter))
 			break;
         
 		const float distSqr = vert.inter.t * vert.inter.t;
@@ -120,7 +121,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 	//-----------------------------------------------------------------------------------------------------
 	// Trace light path from eye point
 	const unsigned lps = (const unsigned)light_path.size();
-	const unsigned int total_pixel = camera->GetImageSensor()->GetWidth() * camera->GetImageSensor()->GetHeight();
+	const unsigned int total_pixel = g_resultResollutionWidth * g_resultResollutionHeight;
 	wi = ray;
 	throughput = 1.0f;
 	int light_path_len = 0;
@@ -133,10 +134,10 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
         
 		BDPT_Vertex vert;
 		vert.depth = light_path_len;
-		if (false == scene.GetIntersect(wi, &vert.inter))
+		if (false == m_scene->GetIntersect(wi, &vert.inter))
 		{
 			// the following code needs to be modified
-			if (scene.GetSkyLight() == light)
+			if (m_scene->GetSkyLight() == light)
 			{
 				if( vert.depth <= max_recursive_depth && vert.depth > 0 )
 				{
@@ -149,7 +150,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 			}
 
 			if( vert.depth == 0 )
-				li += scene.Le( wi );
+				li += m_scene->Le( wi );
 
 			break;
 		}
@@ -264,7 +265,7 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
 	if( li.IsBlack() )
 		return li;
 
-	Visibility visible( scene );
+	Visibility visible( *m_scene );
 	visible.ray = Ray( p1.p , n_delta  , 0 , 0.001f , delta.Length() - 0.001f );
 	if( visible.IsVisible() == false )
 		return 0.0f;
@@ -281,7 +282,7 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 	// drop the light vertex, take a new sample here
 	const LightSample sample(true);
 	Vector wi;
-	Visibility visibility(scene);
+	Visibility visibility(*m_scene);
 	float directPdfW;
 	float emissionPdfW;
 	float cosAtLight;
@@ -312,7 +313,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	if( light_vertex.depth > max_recursive_depth )
 		return;
 
-	Visibility visible( scene );
+	Visibility visible( *m_scene );
 	float camera_pdfA;
 	float camera_pdfW;
 	float cosAtCamera;
@@ -328,8 +329,8 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 		return;
 
 	if (coord.x < 0.0f || coord.y < 0.0f ||
-		coord.x >= (int)camera->GetImageSensor()->GetWidth() ||
-		coord.y >= (int)camera->GetImageSensor()->GetHeight() ||
+		coord.x >= (int)g_resultResollutionWidth ||
+		coord.y >= (int)g_resultResollutionHeight ||
 		camera_pdfW == 0.0f )
 		return;
 
@@ -340,7 +341,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	if( visible.IsVisible() == false )
 		return;
 
-	const float total_pixel = (float)(camera->GetImageSensor()->GetWidth() * camera->GetImageSensor()->GetHeight());
+	const float total_pixel = (float)(g_resultResollutionWidth * g_resultResollutionHeight);
 	const float gterm = cosAtCamera * invSqrLen;
 	Spectrum radiance = light_vertex.throughput * bsdf_value * we * gterm / (float)( sample_per_pixel * total_pixel * camera_pdfA );
 

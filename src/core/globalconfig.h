@@ -191,14 +191,16 @@ private:
 	friend class Singleton<GlobalConfiguration>;
 };
 
-#define	g_tileSize			GlobalConfiguration::GetSingleton().GetTileSize()
-#define	g_blenderMode		GlobalConfiguration::GetSingleton().GetBlenderMode()
-#define g_accelerator		GlobalConfiguration::GetSingleton().GetAccelerator()
-#define g_integrator		GlobalConfiguration::GetSingleton().GetIntegrator()
-#define g_threadCnt			GlobalConfiguration::GetSingleton().GetThreadCnt()
-#define g_samplePerPixel	GlobalConfiguration::GetSingleton().GetSamplePerPixel()
-#define g_resourcePath		GlobalConfiguration::GetSingleton().GetResourcePath()
-#define g_outputFileName	GlobalConfiguration::GetSingleton().GetOutputFileName()
-#define g_resultResollution GlobalConfiguration::GetSingleton().GetResultResolution()
-#define	g_unitTestMode		GlobalConfiguration::GetSingleton().GetIsUnitTestMode()
-#define g_inputFilePath		GlobalConfiguration::GetSingleton().GetInputFilePath()
+#define	g_tileSize					GlobalConfiguration::GetSingleton().GetTileSize()
+#define	g_blenderMode				GlobalConfiguration::GetSingleton().GetBlenderMode()
+#define g_accelerator				GlobalConfiguration::GetSingleton().GetAccelerator()
+#define g_integrator				GlobalConfiguration::GetSingleton().GetIntegrator()
+#define g_threadCnt					GlobalConfiguration::GetSingleton().GetThreadCnt()
+#define g_samplePerPixel			GlobalConfiguration::GetSingleton().GetSamplePerPixel()
+#define g_resourcePath				GlobalConfiguration::GetSingleton().GetResourcePath()
+#define g_outputFileName			GlobalConfiguration::GetSingleton().GetOutputFileName()
+#define g_resultResollution 		GlobalConfiguration::GetSingleton().GetResultResolution()
+#define g_resultResollutionWidth 	GlobalConfiguration::GetSingleton().GetResultResolution().x
+#define g_resultResollutionHeight 	GlobalConfiguration::GetSingleton().GetResultResolution().y
+#define	g_unitTestMode				GlobalConfiguration::GetSingleton().GetIsUnitTestMode()
+#define g_inputFilePath				GlobalConfiguration::GetSingleton().GetInputFilePath()

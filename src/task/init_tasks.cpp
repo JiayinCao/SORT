@@ -28,7 +28,6 @@
 #include "imagesensor/blenderimage.h"
 #include "imagesensor/rendertargetimage.h"
 extern ImageSensor* m_imagesensor ;
-extern Scene g_scene;
 
 SORT_STATS_DEFINE_COUNTER(sPreprocessTimeMS)
 SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTimeMS);
@@ -52,11 +51,11 @@ void Loading_Task::Execute(){
 	m_imagesensor->SetSensorSize( g_resultResollution.x , g_resultResollution.y );
 
 	// Serialize the scene entities
-	g_scene.LoadScene(stream);
+	m_scene->LoadScene(stream);
 
     // create shared memory
-	int x_tile = (int)(ceil(m_imagesensor->GetWidth() / (float)g_tileSize));
-	int y_tile = (int)(ceil(m_imagesensor->GetHeight() / (float)g_tileSize));
+	int x_tile = (int)(ceil(g_resultResollutionWidth / (float)g_tileSize));
+	int y_tile = (int)(ceil(g_resultResollutionHeight / (float)g_tileSize));
 	int header_size = x_tile * y_tile;
 	int size = header_size * g_tileSize * g_tileSize * 4 * sizeof(float) * 2	// image size
 			+ header_size								// header size
@@ -73,6 +72,6 @@ void SpatialAccelerationConstruction_Task::Execute(){
     TIMING_EVENT( "Spatial acceleration structure construction" );
 
     Timer timer;
-    g_accelerator->Build( g_scene );
+    g_accelerator->Build( *m_scene );
     sPreprocessTimeMS = timer.GetElapsedTime();
 }
