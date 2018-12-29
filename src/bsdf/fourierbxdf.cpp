@@ -15,7 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header file
+#include <string.h>
 #include <fstream>
 #include "fourierbxdf.h"
 #include "bsdf.h"
