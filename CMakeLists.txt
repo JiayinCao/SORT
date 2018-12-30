@@ -72,7 +72,7 @@ endif(SORT_ENABLE_PROFILER)
 
 if(UNIX)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++14 -pthread")
+	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
 endif(UNIX)
 
 set_target_properties( SORT PROPERTIES RELEASE_OUTPUT_NAME "sort_r" )
