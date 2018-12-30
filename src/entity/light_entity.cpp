@@ -32,7 +32,7 @@ void PointLightEntity::Serialize( IStreamBase& stream ){
 
 void PointLightEntity::FillScene(class Scene& scene) {
     m_light->SetupScene(&scene);
-    scene.AddLight(m_light);
+    scene.AddLight(m_light.get());
 }
 
 void DirLightEntity::Serialize(IStreamBase& stream) {
@@ -42,7 +42,7 @@ void DirLightEntity::Serialize(IStreamBase& stream) {
 
 void DirLightEntity::FillScene(class Scene& scene) {
     m_light->SetupScene(&scene);
-    scene.AddLight(m_light);
+    scene.AddLight(m_light.get());
 }
 
 void SpotLightEntity::Serialize(IStreamBase& stream) {
@@ -57,7 +57,7 @@ void SpotLightEntity::Serialize(IStreamBase& stream) {
 
 void SpotLightEntity::FillScene(class Scene& scene) {
     m_light->SetupScene(&scene);
-    scene.AddLight(m_light);
+    scene.AddLight(m_light.get());
 }
 
 void SkyLightEntity::Serialize(IStreamBase& stream) {
@@ -72,8 +72,8 @@ void SkyLightEntity::Serialize(IStreamBase& stream) {
 
 void SkyLightEntity::FillScene(class Scene& scene) {
     m_light->SetupScene(&scene);
-    scene.AddLight(m_light);
-    scene.SetSkyLight(m_light);
+    scene.AddLight(m_light.get());
+    scene.SetSkyLight(m_light.get());
 }
 
 void AreaLightEntity::Serialize(IStreamBase& stream) {
@@ -90,8 +90,8 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
 
 void AreaLightEntity::FillScene(class Scene& scene) {
     m_light->SetupScene(&scene);
-    scene.AddLight(m_light);
+    scene.AddLight(m_light.get());
 
     Primitive* primitive = new Primitive(nullptr, m_light->shape.get() , m_light.get());
-    scene.AddPrimitives(primitive);
+    scene.AddPrimitive(primitive);
 }

@@ -24,7 +24,7 @@
 void MeshVisual::FillScene( Scene& scene ){
     for (const MeshIndex& mi : m_memory->m_indices) {
         Triangle* tri = new Triangle(this, mi);
-        scene.m_primitiveBuf.push_back(new Primitive( mi.m_mat , tri ));
+        scene.AddPrimitive( new Primitive( mi.m_mat , tri ) );
     }
 }
 

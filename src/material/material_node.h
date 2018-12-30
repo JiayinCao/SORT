@@ -42,7 +42,6 @@
 #define SORT_MATERIAL_GET_PROP_VECTOR(v,prop)           SORT_MATERIAL_GET_PROP_COMMON(v,prop,Vector)
 
 class Bsdf;
-class TiXmlElement;
 class MaterialNodeProperty;
 
 enum MATERIAL_NODE_PROPERTY_TYPE{

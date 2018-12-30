@@ -152,7 +152,7 @@ void UniGrid::Build( const Scene& scene ){
 	m_voxels = new std::vector<Primitive*>[ m_voxelCount ];
 
 	// distribute the primitives
-    for( auto primitive : *m_primitives ){
+    for( auto& primitive : *m_primitives ){
 		unsigned maxGridId[3];
 		unsigned minGridId[3];
 		for(auto i = 0 ; i < 3 ; i++ ){
@@ -169,7 +169,7 @@ void UniGrid::Build( const Scene& scene ){
 
 					// only add the primitives if it is actually intersected
 					if( primitive->GetIntersect( bb ) )
-						m_voxels[offset( k , j , i )].push_back(primitive);
+						m_voxels[offset( k , j , i )].push_back(primitive.get());
 				}
 	}
     

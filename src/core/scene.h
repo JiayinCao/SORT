@@ -25,21 +25,16 @@
 #include "math/intersection.h"
 #include "math/transform.h"
 #include "camera/camera.h"
+#include "entity/entity.h"
+#include "core/primitive.h"
+#include "core/samplemethod.h"
 
-class Accelerator;
 class Light;
-class Distribution1D;
-class TiXmlNode;
-class Entity;
 
 ////////////////////////////////////////////////////////////////////////////
 // definition of scene class
-class	Scene
-{
+class	Scene{
 public:
-	// destructor
-	~Scene(){ Release(); }
-
 	//! @brief Serialize scene from stream.
 	bool	LoadScene( class IStreamBase& root );
 
@@ -59,51 +54,62 @@ public:
 	// get light
 	const Light* GetLight( unsigned i ) const{
 		sAssert( i < m_lights.size() , LIGHT );
-		return m_lights[i].get();
+		return m_lights[i];
 	}
 	// add light
-	void AddLight( std::shared_ptr<Light> light ){
+	void AddLight( Light* light ){
 		if( light )
 			m_lights.push_back( light );
 	}
 	// get lights
-	const std::vector<std::shared_ptr<Light>>& GetLights() const {return m_lights;}
+	const std::vector<Light*>& GetLights() const {return m_lights;}
 	// get sky light
-	const Light* GetSkyLight() const {return m_skyLight.get();}
+	const Light* GetSkyLight() const {return m_skyLight;}
     // set sky light
-    void SetSkyLight(std::shared_ptr<Light> light) { m_skyLight = light; }
+    void SetSkyLight(Light* light){
+		m_skyLight = light;
+	}
 	// get sampled light
 	const Light* SampleLight( float u , float* pdf ) const;
 	// get the properbility of the sample
 	float LightProperbility( unsigned i ) const;
 	// get the number of lights
-	unsigned LightNum() const
-	{ return (unsigned)m_lights.size(); }
+	unsigned LightNum() const{
+		return (unsigned)m_lights.size();
+	}
 	// get bounding box of the scene
 	const BBox& GetBBox() const;
     // add primitives
-    void AddPrimitives(Primitive* primitive) { m_primitiveBuf.push_back(primitive); }
+    void AddPrimitive(Primitive* primitive) {
+		m_primitiveBuf.push_back( std::unique_ptr<Primitive>(primitive) );
+	}
 	// get primtives
-	const std::vector<Primitive*>*	 GetPrimitives() const { return &m_primitiveBuf; }
+	const std::vector<std::unique_ptr<Primitive>>*	 GetPrimitives() const {
+		return &m_primitiveBuf; 
+	}
 
 	// Evaluate sky
 	Spectrum	Le( const Ray& ray ) const;
 
     // Setup scene camera
-    void SetupCamera(std::shared_ptr<Camera> camera) { m_camera = camera; }
+    void SetupCamera(Camera* camera) { 
+		m_camera = camera; 
+	}
     // Get camera from the scene
-    Camera* GetCamera() const { return m_camera.get(); }
+    Camera* GetCamera() const { 
+		return m_camera; 
+	}
 
 private:
-	std::vector<std::shared_ptr<Entity>>	m_entities;		/**< Entities in the scene. */
-	std::vector<Primitive*>	                m_primitiveBuf; /**< Primitives in the scene. */
-	std::vector<std::shared_ptr<Light>>		m_lights;       /**< Lights in the scene. */
+	std::vector<std::unique_ptr<Entity>>		m_entities;		/**< Entities in the scene. */
+	std::vector<std::unique_ptr<Primitive>>		m_primitiveBuf; /**< Primitives in the scene. */
+	std::vector<Light*>							m_lights;       /**< Lights in the scene. */
 
-    std::shared_ptr<Light>                  m_skyLight = nullptr;   /**< Sky light if available. */
-    std::shared_ptr<Camera>                 m_camera = nullptr;     /**< Camera of the scene. */
+	Light*                  m_skyLight = nullptr;   /**< Sky light if available. */
+	Camera*                 m_camera = nullptr;     /**< Camera of the scene. */
 
-	// distribution of light power
-	std::shared_ptr<Distribution1D>		    m_lightsDis = nullptr;
+	/**< distribution of light power */
+	std::unique_ptr<Distribution1D>		    	m_lightsDis = nullptr;
 	
 	// bounding box for the scene
 	mutable BBox	m_BBox;

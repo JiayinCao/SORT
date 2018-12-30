@@ -48,5 +48,5 @@ public:
     void   FillScene(class Scene& scene) override;
 
 private:
-    std::shared_ptr<PerspectiveCamera>  m_camera = std::make_shared<PerspectiveCamera>();   /**< Perspective camera. */
+    std::unique_ptr<PerspectiveCamera>  m_camera = std::unique_ptr<PerspectiveCamera>( new PerspectiveCamera() );   /**< Perspective camera. */
 };

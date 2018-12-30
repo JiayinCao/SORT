@@ -63,8 +63,8 @@ void Bvh::Build(const Scene& scene){
 	computeBBox();
 
 	// generate BVH primitives
-    for( auto primitive : *m_primitives )
-        SORT_MALLOC_ID(Bvh_Primitive,BVH_LEAF_PRILIST_MEMID)(primitive);
+    for( auto& primitive : *m_primitives )
+        SORT_MALLOC_ID(Bvh_Primitive,BVH_LEAF_PRILIST_MEMID)(primitive.get());
     
 	// recursively split node
     m_root = new Bvh_Node();
