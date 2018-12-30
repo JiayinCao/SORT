@@ -36,9 +36,6 @@ void Loading_Task::Execute(){
 }
 
 void SpatialAccelerationConstruction_Task::Execute(){
-    TIMING_EVENT( "Spatial acceleration structure construction" );
-
-    Timer timer;
+    TIMING_EVENT_STAT( "Spatial acceleration structure construction" , sPreprocessTimeMS );
     g_accelerator->Build( m_scene );
-    sPreprocessTimeMS = timer.GetElapsedTime();
 }

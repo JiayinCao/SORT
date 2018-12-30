@@ -19,6 +19,7 @@
 
 #include <chrono>
 #include "core/log.h"
+#include "core/stats.h"
 
 //! @brief  Timer is for evaluating time elapsed for a specific operation.
 /**
@@ -61,16 +62,22 @@ public:
     //! @brief  Constructor.
     //!
     //! @param  name    Name of the timer.
-    TimerWrapper( const std::string name ):m_name(name){}
+    //! @param  stat    SORT Stats profiling counter.
+    TimerWrapper( const std::string name , StatsInt* stat = nullptr ):m_name(name),m_stat(stat){}
 
     //! @brief  Report elapsed time during the life time of this instance.
     ~TimerWrapper(){
-        slog(INFO, GENERAL, "%s costs %f (s).", m_name.c_str() , (float)(m_timer.GetElapsedTime() / 1000.0f) );
+        if( !m_name.empty() )
+            slog(INFO, GENERAL, "%s costs %f (s).", m_name.c_str() , (float)(m_timer.GetElapsedTime() / 1000.0f) );
+        if( m_stat )
+            *m_stat = m_timer.GetElapsedTime();
     }
 
 private:
     Timer           m_timer;    /**< Timer of the wrapper. */
     std::string     m_name;     /**< Name of the wrapper. */
+    StatsInt*       m_stat;     /**< Pointer to stat data. */
 };
 
-#define TIMING_EVENT( name )    TimerWrapper    localTimerWrapper(name);
+#define TIMING_EVENT( name )                TimerWrapper    localTimerWrapper(name);
+#define TIMING_EVENT_STAT( name , stat )    TimerWrapper    localTimerWrapper(name,&stat);
