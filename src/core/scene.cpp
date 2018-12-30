@@ -135,7 +135,7 @@ void Scene::_genLightDistribution()
 	for( unsigned i = 0 ; i < count ; i++ )
 		m_lights[i]->SetPickPDF( pdf[i] / total_pdf );
 
-    m_lightsDis = std::unique_ptr<Distribution1D>( new Distribution1D( pdf , count ) );
+    m_lightsDis = std::make_unique<Distribution1D>( pdf , count );
 	delete[] pdf;
 }
 

@@ -137,7 +137,7 @@ const BBox&	Sphere::GetBBox() const
 
 	if( !m_bbox )
 	{
-        m_bbox = std::unique_ptr<BBox>( new BBox() );
+        m_bbox = std::make_unique<BBox>();
 		Vector vec_r = Vector( radius , radius , radius );
 		m_bbox->m_Min = center - vec_r ;
 		m_bbox->m_Max = center + vec_r ;

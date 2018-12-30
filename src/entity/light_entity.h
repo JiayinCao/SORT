@@ -52,7 +52,7 @@ public:
     void   FillScene(class Scene& scene) override;
 
 protected:
-    std::unique_ptr<PointLight>  m_light = std::unique_ptr<PointLight>( new PointLight() );    /**< Light in the entity. */
+    std::unique_ptr<PointLight>  m_light = std::make_unique<PointLight>();    /**< Light in the entity. */
 };
 
 //! @brief  Spot light entity.
@@ -75,7 +75,7 @@ public:
     void   FillScene(class Scene& scene) override;
 
 protected:
-    std::unique_ptr<SpotLight>  m_light = std::unique_ptr<SpotLight>( new SpotLight() );    /**< Light in the entity. */
+    std::unique_ptr<SpotLight>  m_light = std::make_unique<SpotLight>();    /**< Light in the entity. */
 };
 
 //! @brief  Directional light entity.
@@ -98,7 +98,7 @@ public:
     void   FillScene(class Scene& scene) override;
 
 protected:
-    std::unique_ptr<DistantLight>  m_light = std::unique_ptr<DistantLight>();    /**< Light in the entity. */
+    std::unique_ptr<DistantLight>  m_light = std::make_unique<DistantLight>();    /**< Light in the entity. */
 };
 
 //! @brief  Area light entity.
@@ -121,7 +121,7 @@ public:
     void   FillScene(class Scene& scene) override;
 
 protected:
-    std::unique_ptr<AreaLight>  m_light = std::unique_ptr<AreaLight>( new AreaLight() );    /**< Light in the entity. */
+    std::unique_ptr<AreaLight>  m_light = std::make_unique<AreaLight>();    /**< Light in the entity. */
 };
 
 //! @brief  Sky light entity.
@@ -144,5 +144,5 @@ public:
     void   FillScene(class Scene& scene) override;
 
 protected:
-    std::unique_ptr<SkyLight>  m_light = std::unique_ptr<SkyLight>( new SkyLight() );    /**< Light in the entity. */
+    std::unique_ptr<SkyLight>  m_light = std::make_unique<SkyLight>();    /**< Light in the entity. */
 };

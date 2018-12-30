@@ -134,7 +134,7 @@ const BBox& Triangle::GetBBox() const
 	// if there is no bounding box , cache it
 	if( !m_bbox )
 	{
-        m_bbox = std::unique_ptr<BBox>( new BBox() );
+        m_bbox = std::make_unique<BBox>();
 
         auto& mem = m_meshVisual->m_memory;
         int id0 = m_index.m_id[0];

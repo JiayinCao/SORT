@@ -98,7 +98,7 @@ const BBox&	Disk::GetBBox() const
 {
 	if( !m_bbox )
 	{
-        m_bbox = std::unique_ptr<BBox>( new BBox() );
+        m_bbox = std::make_unique<BBox>();
 		m_bbox->Union( m_transform( Point( radius , 0.0f , radius ) ) );
 		m_bbox->Union( m_transform( Point( radius , 0.0f , -radius ) ) );
 		m_bbox->Union( m_transform( Point( -radius , 0.0f , radius ) ) );
