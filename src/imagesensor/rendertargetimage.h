@@ -23,6 +23,9 @@
 class RenderTargetImage : public ImageSensor
 {
 public:
+    // constructor
+    RenderTargetImage( int w , int h ):ImageSensor(w,h){}
+
 	// store pixel information
 	virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt );
 

@@ -19,10 +19,10 @@
 #include "core/globalconfig.h"
 #include "thirdparty/gtest/gtest.h"
 #include "task/init_tasks.h"
-#include "imagesensor/imagesensor.h"
 #include "core/scene.h"
 #include "sampler/random.h"
 #include "core/timer.h"
+#include "stream/fstream.h"
 
 SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
 SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
@@ -32,8 +32,6 @@ SORT_STATS_TIME("Performance", "Rendering Time", sRenderingTimeMS);
 SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount , sRenderingTimeMS);
 SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
 SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
-
-ImageSensor* m_imagesensor = nullptr;
 
 void	RunSORT( int argc , char** argv ){
 	// Parse command line arguments.
@@ -47,14 +45,15 @@ void	RunSORT( int argc , char** argv ){
 		return;
     }
 
+	// Load the global configuration from stream
+	IFileStream stream( g_inputFilePath );
+	GlobalConfiguration::GetSingleton().Serialize(stream);
+
 	Scene scene;
 
-    auto loading_task = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , &scene);
-    SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structor Construction." , DEFAULT_TASK_PRIORITY, {loading_task} , &scene);
-    EXECUTING_TASKS();
-
-    g_integrator->PreProcess();
-	g_integrator->SetupScene(&scene);
+    auto loading_task = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , scene, stream);
+    auto sac_task = SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structor Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
+	auto pre_render_task = SCHEDULE_TASK<PreRender_Task>( "Pre rendering pass" , DEFAULT_TASK_PRIORITY, {sac_task} , scene);
 
 	Timer timer;
 
@@ -74,8 +73,7 @@ void	RunSORT( int argc , char** argv ){
 	const Vector2i dir[4] = { Vector2i( 0 , -1 ) , Vector2i( -1 , 0 ) , Vector2i( 0 , 1 ) , Vector2i( 1 , 0 ) };
 
 	unsigned int priority = DEFAULT_TASK_PRIORITY;
-	while (true)
-	{
+	while (true){
 		// only process node inside the image region
 		if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y )
 		{
@@ -85,26 +83,22 @@ void	RunSORT( int argc , char** argv ){
 			size.x = (tilesize < (width - tl.x)) ? tilesize : (width - tl.x);
 			size.y = (tilesize < (height - tl.y)) ? tilesize : (height - tl.y);
 
-			SCHEDULE_TASK<Render_Task>( "render task" , priority-- , {} , tl , size , &scene , new RandomSampler() , new PixelSample[g_samplePerPixel] );
+			SCHEDULE_TASK<Render_Task>( "render task" , priority-- , {pre_render_task} , tl , size , scene );
 		}
 
 		// turn to the next direction
-		if (cur_len >= cur_dir_len)
-		{
+		if (cur_len >= cur_dir_len){
 			cur_dir = (cur_dir + 1) % 4;
 			cur_len = 0;
 			cur_dir_len += 1 - cur_dir % 2;
 		}
 
 		cur_pos += dir[cur_dir];
-
 		++cur_len;
 
 		if( (cur_pos.x < 0 || cur_pos.x >= tile_num.x ) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y ) )
 			break;
 	}
-
-    m_imagesensor->PreProcess();
 
 	// pre allocate memory for the specific thread
 	for( unsigned i = 0 ; i <= g_threadCnt ; ++i )
@@ -127,5 +121,5 @@ void	RunSORT( int argc , char** argv ){
 	SORT_STATS(sThreadCnt = g_threadCnt);
 
     // Post process for image sensor
-    m_imagesensor->PostProcess();
+    g_imageSensor->PostProcess();
 }

@@ -25,7 +25,6 @@
 #include "math/matrix.h"
 
 class PixelSample;
-class ImageSensor;
 class Visibility;
 
 //! @brief Abstract camera
@@ -51,20 +50,6 @@ public:
     //! @param ps   Pixel sample holding several useful random variables.
     //! @return     The generated ray based on the input.
 	virtual Ray	GenerateRay( float x, float y, const PixelSample& ps) const = 0;
-
-	//! @brief Setup image sensor for the camera.
-    //!
-    //! @param is   The pointer to an existed image sensor.
-	void SetImageSensor(ImageSensor* is) { 
-        m_imagesensor = is; 
-    }
-
-    //! @brief Get attached image sensor.
-    //!
-    //! @return The attached image sensor.
-    ImageSensor* GetImageSensor() {
-        return m_imagesensor;
-    }
     
 	//! @brief      Get viewing direction.
     //!
@@ -84,7 +69,6 @@ public:
 
 protected:
 	Point           m_eye;                      /**< Viewing point of the camera. */
-    ImageSensor*    m_imagesensor = nullptr;    /**< Image sensor. */
     float           m_sensorW = 0.0f;           /**< Image sensor width. */
     float           m_sensorH = 0.0f;           /**< Image sensor height. */
     float           m_aspectRatioW = 0.0f;      /**< Aspect ratio along x axis. */

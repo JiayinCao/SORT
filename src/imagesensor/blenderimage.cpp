@@ -65,26 +65,34 @@ void BlenderImage::FinishTile( int tile_x , int tile_y , const Render_Task& rt )
 // pre process
 void BlenderImage::PreProcess()
 {
-	m_tilenum_x = (int)(ceil(m_width / (float)g_tileSize));
-	m_tilenum_y = (int)(ceil(m_height / (float)g_tileSize));
+	// create shared memory
+	m_tilenum_x = (int)(ceil(g_resultResollutionWidth / (float)g_tileSize));
+	m_tilenum_y = (int)(ceil(g_resultResollutionHeight / (float)g_tileSize));
 	m_header_offset = m_tilenum_x * m_tilenum_y;
 	m_final_update_flag_offset = m_header_offset * g_tileSize * g_tileSize * 4 * sizeof(float) * 2 + m_header_offset + 1;
 
-	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("sharedmem.bin");
+	int size = m_header_offset * g_tileSize * g_tileSize * 4 * sizeof(float) * 2	// image size
+			 + m_header_offset														// header size
+			 + 2;																	// progress data and final update flag
 
+	// create shared memory
+	const SharedMemory& sm = SMManager::GetSingleton().CreateSharedMemory("sharedmem.bin", size, SharedMmeory_All);
+	// clear the memory first
+	if (sm.bytes)
+		memset(sm.bytes, 0, sm.size);
+	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("sharedmem.bin");
+	
 	ImageSensor::PreProcess();
 }
 
 // post process
-void BlenderImage::PostProcess()
-{
+void BlenderImage::PostProcess(){
 	// perform a copy from render target to shared memory
 	float* data = (float*)(m_sharedMemory.bytes + m_header_offset + m_header_offset * g_tileSize * g_tileSize * 4 * sizeof(float));
 
 	int offset = 0;
 	for (int i = 0; i < (int)m_rendertarget.GetHeight(); ++i)
-		for (int j = 0; j < (int)m_rendertarget.GetWidth(); ++j)
-		{
+		for (int j = 0; j < (int)m_rendertarget.GetWidth(); ++j){
 			const Spectrum& c = m_rendertarget.GetColor(j, m_rendertarget.GetHeight() - i - 1);
 			data[offset++] = c.GetR();
 			data[offset++] = c.GetG();

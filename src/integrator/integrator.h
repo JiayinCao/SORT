@@ -35,24 +35,23 @@ class	Ray;
 class	Integrator : public SerializableObject
 {
 public:
-	// destructor
+	//! @brief	Empty virtual destructor.
 	virtual ~Integrator(){}
 
-	// return the radiance of a specific direction
-	// para 'scene' : scene containing geometry data
-	// para 'ray'   : ray with specific direction
-	// result       : radiance along the ray from the scene
-	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps ) const = 0;
+	//! @brief	Evaluate the radiance along the opposite direction of the ray in the scene.
+	//!
+	//! The exact way of importance sampling could depend on the rendering algorithm itself.
+	//! Each way of rendering has their unique features.
+	//!
+	//! @param	ray		The extent ray in rendering equation.
+	//! @param	ps		The pixel samples. Currently not used.
+	//! @param	scene	The rendering scene.
+	//! @return			The spectrum of the radiance along the opposite direction of the ray.
+	virtual Spectrum	Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const = 0;
 
 	// set sample per pixel
 	// para 'spp' : sample per pixel
 	void SetSamplePerPixel( unsigned spp ){ sample_per_pixel = spp; }
-	
-	// setup scene
-	inline void SetupScene( const Scene* scene ) { 
-		m_scene = scene;
-		camera = m_scene->GetCamera(); 
-	}
 
 	// generate samples
 	// para 'sampler' : the sampling method
@@ -87,7 +86,7 @@ public:
 	// by default , nothing is done in pre-process
 	// some integrator, such as Photon Mapping use pre-process step to
 	// generate some neccessary infomation by latter stage.
-	virtual void PreProcess() {}
+	virtual void PreProcess(const Scene& scene) {}
 
 	// post process
 	virtual void PostProcess() {}
@@ -106,14 +105,8 @@ public:
 	}
 
 protected:
-	// Camera
-    std::shared_ptr<class Camera>	camera = nullptr;
-
 	// maxium recursive depth
 	int				max_recursive_depth = 6;
-
-	// the scene description
-	const Scene*	m_scene;
 
 	// the pixel sample
 	PixelSample		pixel_sample;

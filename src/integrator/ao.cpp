@@ -15,7 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the header file
 #include "ao.h"
 #include "math/intersection.h"
 #include "core/scene.h"
@@ -31,7 +30,7 @@ SORT_STATS_COUNTER("Ambient Occlusion", "Primary Ray Count" , sPrimaryRayCount);
 IMPLEMENT_CREATOR( AmbientOcclusion );
 
 // radiance along a specific ray direction
-Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
+Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const
 {
     SORT_STATS(++sPrimaryRayCount);
     
@@ -40,7 +39,7 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 
 	// get the intersection between the ray and the scene
 	Intersection ip;
-	if( false == m_scene->GetIntersect( r , &ip ) )
+	if( false == scene.GetIntersect( r , &ip ) )
 		return 0.0f;
 
 	Vector nn = FaceForward( ip.normal , r.m_Dir ) ? -ip.normal : ip.normal;
@@ -61,7 +60,7 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps ) const
 	Ray ray( ip.intersect , wi , 0 , 0.001f , maxDistance );
 
 	Intersection aoip;
-	if( !m_scene->GetIntersect( ray , &aoip ) )
+	if( !scene.GetIntersect( ray , &aoip ) )
 		return dot * INV_PI / pdf;
     return 0.0f;
 }
