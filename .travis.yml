@@ -8,14 +8,17 @@ matrix:
     - os: linux
       compiler: gcc
       env:
-        -CXX_COMPILER=g++-5
-        -C_COMPILER=gcc-5
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
       addons:
          apt:
            sources:
             - ubuntu-toolchain-r-test
            packages:
-            - g++-5
+            - g++-7
+
+before_install:
+    - eval "${MATRIX_EVAL}"
+    
 script:
 - sudo /bin/sh ./getdep_linux.sh
 - mkdir proj_release
