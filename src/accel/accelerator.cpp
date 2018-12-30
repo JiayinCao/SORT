@@ -27,7 +27,7 @@ void Accelerator::computeBBox(){
 	m_bbox.InvalidBBox();
 
 	// update bounding box again
-    for( auto primitive : *m_primitives )
+    for( auto& primitive : *m_primitives )
 		m_bbox.Union( primitive->GetBBox() );
 
 	// enlarge the bounding box a little

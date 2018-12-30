@@ -75,8 +75,8 @@ void OcTree::Build( const Scene& scene ){
 
 	// initialize a primitive container
 	NodePrimitiveContainer* container = new NodePrimitiveContainer();
-    for( auto primitive : *m_primitives )
-		container->primitives.push_back( primitive );
+    for( auto& primitive : *m_primitives )
+		container->primitives.push_back( primitive.get() );
 	
 	// create root node
 	m_root = new OcTreeNode();
