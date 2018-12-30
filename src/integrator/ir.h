@@ -56,11 +56,11 @@ public:
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
-	Spectrum	Li( const Ray& ray , const PixelSample& ps ) const override;
+	Spectrum	Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
     
 	// Preprocess: In preprocessing stage, numbers of virtual light sources
     // are generated along the path tracing from light sources.
-    void PreProcess() override;
+    void PreProcess( const Scene& scene ) override;
 	// post-process after rendering
 	void PostProcess() override;
 
@@ -89,7 +89,7 @@ private:
 	std::list<VirtualLightSource>*	m_pVirtualLightSources;
 
 	// private method of li
-	Spectrum _li( const Ray& ray , bool ignoreLe = false , float* first_intersect_dist = 0 ) const;
+	Spectrum _li( const Ray& ray , const Scene& scene , bool ignoreLe = false , float* first_intersect_dist = 0 ) const;
 
     SORT_STATS_ENABLE( "Instant Radiosity" )
 };

@@ -65,7 +65,7 @@ public:
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
-	Spectrum	Li( const Ray& ray , const PixelSample& ps ) const override;
+	Spectrum	Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
     
     // request sample
     void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ) override;
@@ -89,13 +89,13 @@ protected:
 	Spectrum	_Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
 	// connect light sample
-	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light ) const;
+	Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light , const Scene& scene ) const;
 	
 	// connect camera point
-	void _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light ) const;
+	void _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light , const Scene& scene ) const;
 
 	// connect vertices
-	Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light ) const;
+	Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light , const Scene& scene ) const;
 
 private:
 	// use multiple importance sampling to sample direct illumination

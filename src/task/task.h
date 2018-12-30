@@ -171,7 +171,7 @@ private:
 
 //! @brief      Schedule a task in task scheduler.
 template<class T, typename... Args>
-inline std::shared_ptr<T>  SCHEDULE_TASK( const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies , Args... args ){
+inline std::shared_ptr<T>  SCHEDULE_TASK( const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies , Args&... args ){
     auto ret = std::make_shared<T>( args... , name , priority , dependencies );
     Scheduler::GetSingleton().Schedule( ret );
     return ret;

@@ -35,7 +35,7 @@ IMPLEMENT_CREATOR( PathTracing );
 // return the radiance of a specific direction
 // note : there are one factor makes the method biased.
 //		there is a limitation on the number of vertexes in the path
-Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
+Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const
 {
     SORT_PROFILE("Path tracing");
     SORT_STATS(++sPrimaryRayCount);
@@ -53,10 +53,10 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 
 		// get the intersection between the ray and the scene
 		// if it's a light , accumulate the radiance and break
-		if( false == m_scene->GetIntersect( r , &inter ) )
+		if( false == scene.GetIntersect( r , &inter ) )
 		{
 			if( bounces == 0 )
-				return m_scene->Le( r );
+				return scene.Le( r );
 			break;
 		}
 
@@ -70,9 +70,9 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps ) const
 		float			light_pdf = 0.0f;
 		LightSample		light_sample = (bounces==0)?ps.light_sample[0]:LightSample(true);
 		BsdfSample		bsdf_sample = (bounces==0)?ps.bsdf_sample[0]:BsdfSample(true);
-		const auto	light = m_scene->SampleLight( light_sample.t , &light_pdf );
+		const auto	light = scene.SampleLight( light_sample.t , &light_pdf );
 		if( light_pdf > 0.0f )
-			L += throughput * EvaluateDirect(	r  , *m_scene , light , inter , light_sample ,
+			L += throughput * EvaluateDirect(	r  , scene , light , inter , light_sample ,
 												bsdf_sample , BXDF_TYPE(BXDF_ALL) ) / light_pdf;
 
 		// sample the next direction using bsdf

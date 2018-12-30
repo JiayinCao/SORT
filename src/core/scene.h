@@ -92,7 +92,7 @@ public:
     // Setup scene camera
     void SetupCamera(std::shared_ptr<Camera> camera) { m_camera = camera; }
     // Get camera from the scene
-    std::shared_ptr<Camera> GetCamera() const { return m_camera; }
+    Camera* GetCamera() const { return m_camera.get(); }
 
 private:
 	std::vector<std::shared_ptr<Entity>>	m_entities;		/**< Entities in the scene. */

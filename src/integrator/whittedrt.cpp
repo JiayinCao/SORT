@@ -31,7 +31,7 @@ SORT_STATS_COUNTER("Whitted Ray Tracing", "Primary Ray Count" , sPrimaryRayCount
 IMPLEMENT_CREATOR( WhittedRT );
 
 // radiance along a specific ray direction
-Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
+Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const
 {
     SORT_STATS(++sPrimaryRayCount);
     
@@ -40,8 +40,8 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 
 	// get the intersection between the ray and the scene
 	Intersection ip;
-	if( false == m_scene->GetIntersect( r , &ip ) )
-		return m_scene->Le(r);
+	if( false == scene.GetIntersect( r , &ip ) )
+		return scene.Le(r);
 
 	Spectrum t;
 
@@ -49,25 +49,21 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps ) const
 	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
 
 	// lights
-	Visibility visibility(*m_scene);
-	const std::vector<std::shared_ptr<Light>>& lights = m_scene->GetLights();
+	Visibility visibility(scene);
+	const std::vector<std::shared_ptr<Light>>& lights = scene.GetLights();
 	std::vector<std::shared_ptr<Light>>::const_iterator it = lights.begin();
-	while( it != lights.end() )
-	{
+	while( it != lights.end() ){
 		// only delta light is evaluated
-		if( (*it)->IsDelta() )
-		{
+		if( (*it)->IsDelta() ){
 			Vector	lightDir;
 			float	pdf;
 			Spectrum ld = (*it)->sample_l( ip , &ps.light_sample[0] , lightDir , 0 , &pdf , 0 , 0 , visibility );
-			if( ld.IsBlack() )
-			{
+			if( ld.IsBlack() ){
 				it++;
 				continue;
 			}
 			Spectrum f = bsdf->f( -r.m_Dir , lightDir );
-			if( f.IsBlack() )
-			{
+			if( f.IsBlack() ){
 				it++;
 				continue;
 			}

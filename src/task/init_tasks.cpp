@@ -18,16 +18,9 @@
 #include <string.h>
 #include "init_tasks.h"
 #include "core/timer.h"
-#include "stream/fstream.h"
 #include "managers/matmanager.h"
 #include "core/globalconfig.h"
 #include "core/scene.h"
-
-// to be removed.
-#include "imagesensor/imagesensor.h"
-#include "imagesensor/blenderimage.h"
-#include "imagesensor/rendertargetimage.h"
-extern ImageSensor* m_imagesensor ;
 
 SORT_STATS_DEFINE_COUNTER(sPreprocessTimeMS)
 SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTimeMS);
@@ -35,43 +28,17 @@ SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTimeMS);
 void Loading_Task::Execute(){
     TIMING_EVENT( "Serializing scene" );
 
-	IFileStream stream( g_inputFilePath );
-
-	// Load the global configuration from stream
-	GlobalConfiguration::GetSingleton().Serialize(stream);
-
 	// Load materials from stream
-	MatManager::GetSingleton().ParseMatFile(stream);
-
-    // To be moved to somewhere else, this is very ugly.
-	if( g_blenderMode )
-		m_imagesensor = new BlenderImage();
-	else
-		m_imagesensor = new RenderTargetImage();
-	m_imagesensor->SetSensorSize( g_resultResollution.x , g_resultResollution.y );
+	MatManager::GetSingleton().ParseMatFile(m_stream);
 
 	// Serialize the scene entities
-	m_scene->LoadScene(stream);
-
-    // create shared memory
-	int x_tile = (int)(ceil(g_resultResollutionWidth / (float)g_tileSize));
-	int y_tile = (int)(ceil(g_resultResollutionHeight / (float)g_tileSize));
-	int header_size = x_tile * y_tile;
-	int size = header_size * g_tileSize * g_tileSize * 4 * sizeof(float) * 2	// image size
-			+ header_size								// header size
-			+ 2;										// progress data and final update flag
-
-	// create shared memory
-	const SharedMemory& sm = SMManager::GetSingleton().CreateSharedMemory("sharedmem.bin", size, SharedMmeory_All);
-	// clear the memory first
-	if (sm.bytes)
-		memset(sm.bytes, 0, sm.size);
+	m_scene.LoadScene(m_stream);
 }
 
 void SpatialAccelerationConstruction_Task::Execute(){
     TIMING_EVENT( "Spatial acceleration structure construction" );
 
     Timer timer;
-    g_accelerator->Build( *m_scene );
+    g_accelerator->Build( m_scene );
     sPreprocessTimeMS = timer.GetElapsedTime();
 }

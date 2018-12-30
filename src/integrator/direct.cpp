@@ -24,7 +24,6 @@
 #include "light/light.h"
 #include "managers/memmanager.h"
 #include "sampler/sampler.h"
-#include "core/log.h"
 
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 
@@ -33,7 +32,7 @@ SORT_STATS_COUNTER("Direct Illumination", "Primary Ray Count" , sPrimaryRayCount
 IMPLEMENT_CREATOR( DirectLight );
 
 // radiance along a specific ray direction
-Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
+Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const
 {
     SORT_STATS(++sPrimaryRayCount);
     
@@ -43,93 +42,17 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps ) const
 	// get the intersection between the ray and the scene
 	Intersection ip;
 	// evaluate light directly
-	if( false == m_scene->GetIntersect( r , &ip ) )
-		return m_scene->Le( r );
+	if( false == scene.GetIntersect( r , &ip ) )
+		return scene.Le( r );
 
-	Spectrum li = ip.Le( -r.m_Dir );
+	auto li = ip.Le( -r.m_Dir );
 
 	// eavluate direct light
-	unsigned light_num = m_scene->LightNum();
-	for( unsigned i = 0 ; i < light_num ; ++i )
-	{
-		const auto light = m_scene->GetLight(i);
-		li += EvaluateDirect( r , *m_scene , light , ip , LightSample(true) , BsdfSample(true), BXDF_TYPE( BXDF_ALL ) );
+	auto light_num = scene.LightNum();
+	for( auto i = 0u ; i < light_num ; ++i ){
+		const auto light = scene.GetLight(i);
+		li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true), BXDF_TYPE( BXDF_ALL ) );
 	}
 
 	return li;
-}
-
-// request samples
-void DirectLight::RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num )
-{
-	/*SAFE_DELETE_ARRAY(light_sample_offsets);
-	SAFE_DELETE_ARRAY(bsdf_sample_offsets);
-
-	unsigned light_num = scene.LightNum();
-	unsigned total_light_num = ls_per_light * light_num;
-	light_sample_offsets = new SampleOffset[light_num];
-	bsdf_sample_offsets = new SampleOffset[light_num];
-
-	total_samples = 0;
-	for( unsigned i = 0 ; i < ps_num ; i++ )
-	{
-		for( unsigned k = 0 ; k < light_num ; k++ )
-		{
-			float properbility = scene.LightProperbility(k);
-			unsigned lsn = (unsigned)( properbility * total_light_num + 0.5f );
-
-			const Light* light = scene.GetLight(k);
-			if( light->IsDelta() ) lsn = 1;
-
-			if( i == 0 )
-			{
-				light_sample_offsets[k].num = sampler->RoundSize( lsn );
-				light_sample_offsets[k].offset = ps[i].RequestMoreLightSample( light_sample_offsets[i].num );
-				bsdf_sample_offsets[k].num = light_sample_offsets[k].num;
-				bsdf_sample_offsets[k].offset = ps[i].RequestMoreBsdfSample( bsdf_sample_offsets[i].num );
-				total_samples += bsdf_sample_offsets[k].num;
-			}else
-			{
-				ps[i].RequestMoreLightSample( light_sample_offsets[i].num );
-				ps[i].RequestMoreLightSample( light_sample_offsets[i].num );
-			}
-		}
-		ps[i].bsdf_sample = new BsdfSample[ total_samples ];
-		ps[i].light_sample = new LightSample[ total_samples ];
-	}
-
-	// allocate the data to be used
-	ps[0].data = new float[ total_samples * 5 ];*/
-}
-
-// generate samples
-void DirectLight::GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
-{
-	Integrator::GenerateSample( sampler , samples , ps , scene );
-	/*
-	unsigned light_num = scene.LightNum();
-	for( unsigned i = 0 ; i < ps ; ++i )
-	{
-		unsigned offset = 0;
-
-		float* light_2d = samples[0].data;
-		float* bsdf_1d = samples[0].data + total_samples * 2;
-		float* bsdf_2d = samples[0].data + total_samples ;
-		for( unsigned k = 0 ; k < light_num ; ++k )
-		{
-			sampler->Generate2D( light_2d + 2 * offset , light_sample_offsets[k].num );
-			sampler->Generate1D( bsdf_1d + offset , light_sample_offsets[k].num );
-			sampler->Generate2D( bsdf_2d + 2 * offset , bsdf_sample_offsets[k].num );
-			offset += bsdf_sample_offsets[k].num;
-		}
-
-		for( unsigned k = 0 ; k < total_samples ; k++ )
-		{
-			samples[i].light_sample[k].u = light_2d[2*k];
-			samples[i].light_sample[k].v = light_2d[2*k+1];
-			samples[i].bsdf_sample[k].t = bsdf_1d[k];
-			samples[i].bsdf_sample[k].u = bsdf_2d[2*k];
-			samples[i].bsdf_sample[k].v = bsdf_2d[2*k+1];
-		}
-	}*/
 }

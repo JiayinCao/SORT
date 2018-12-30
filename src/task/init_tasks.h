@@ -26,16 +26,17 @@ public:
     //! @brief Constructor.
     //!
     //! @param  scene     Scene to be filled during loading.
-    Loading_Task( Scene* scene , const char* name , unsigned int priority , 
+    Loading_Task( class Scene& scene , IStreamBase& stream , const char* name , unsigned int priority , 
                   const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
-        Task( name , DEFAULT_TASK_PRIORITY , dependencies ) , m_scene(scene) {}
+        Task( name , DEFAULT_TASK_PRIORITY , dependencies ) , m_scene(scene) , m_stream(stream) {}
     
     //! @brief  Load data from input file.
     void        Execute() override;
 
 private:
     /**< The scene description to be filled with during loading. */
-    Scene*      m_scene;
+    class Scene&            m_scene;
+    class IStreamBase&      m_stream;
 };
 
 //! @brief  Constructe acceleration data structure.
@@ -44,8 +45,8 @@ public:
     //! @brief Constructor.
     //!
     //! @param  scene     Scene to be filled during loading.
-    SpatialAccelerationConstruction_Task( class Scene* scene, const char* name , unsigned int priority , 
-                   const std::unordered_set<std::shared_ptr<Task>>& dependencies ) :
+    SpatialAccelerationConstruction_Task( class Scene& scene, const char* name , 
+    unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies ) :
         Task( name , DEFAULT_TASK_PRIORITY, dependencies  ) , m_scene(scene) {}
 
     //! @brief  Load data from input file.
@@ -53,5 +54,5 @@ public:
 
 private:
     /**< The scene description to be filled with during loading. */
-    class Scene*      m_scene;
+    class Scene&      m_scene;
 };

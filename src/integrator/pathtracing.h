@@ -30,7 +30,7 @@ public:
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
 	// result       : radiance along the ray from the scene<F3>
-	Spectrum	Li( const Ray& ray , const PixelSample& ps ) const override;
+	Spectrum	Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
 
 	// request samples
 	void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ) override;
