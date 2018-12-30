@@ -58,7 +58,7 @@ public:
 	unsigned	ParseMatFile( class IStreamBase& stream );
 
 private:
-    std::vector<std::shared_ptr<class Material>> m_matPool;     /**< Material pool holding all materials. */
+    std::vector<std::unique_ptr<class Material>> m_matPool;     /**< Material pool holding all materials. */
 
 	friend class Singleton<MatManager>;
 };

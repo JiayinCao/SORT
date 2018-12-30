@@ -23,11 +23,8 @@
 
 // get the thread id
 int ThreadId();
-// get the number of cpu cores in the system
-unsigned NumSystemCores();
 
-class WorkerThread
-{
+class WorkerThread{
 public:
     // Constructor
     WorkerThread( unsigned tid ) : m_tid(tid) {}
@@ -48,8 +45,7 @@ private:
     unsigned    m_tid = 0;
 };
 
-class spinlock_mutex
-{
+class spinlock_mutex{
 public:
     void lock() {
         while (locked.test_and_set(std::memory_order_acquire)) { ; }

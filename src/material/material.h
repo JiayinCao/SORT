@@ -22,6 +22,7 @@
 #include "bsdf/bsdf.h"
 #include "managers/memmanager.h"
 #include "core/log.h"
+#include "material_node.h"
 
 //! @brief 	A thin layer of material definition.
 /**
@@ -56,7 +57,7 @@ public:
 	//! @brief	Get the root material node.
 	//!
 	//! @return		The root of the material node graph tree.
-	inline std::shared_ptr<MaterialNode> GetRootNode() { return m_root; }
+	inline MaterialNode* GetRootNode() { return m_root.get(); }
 
 	//! @brief  Serialization interface. Loading data from stream.
     //!
@@ -78,5 +79,5 @@ private:
 	/**< Unique name of the material. */
 	std::string	 m_name;
 	/**< Root node of material node graph tree. */
-	mutable std::shared_ptr<OutputNode>	m_root = std::make_shared<OutputNode>();
+	mutable std::unique_ptr<OutputNode>	m_root = std::unique_ptr<OutputNode>( new OutputNode() );
 };

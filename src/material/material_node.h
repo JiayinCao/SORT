@@ -117,8 +117,8 @@ public:
     //! @brief  Get the node attached to the current socket.
     //!
     //! @return Node attached to the current socket. 'nullptr' means no node attached.
-    inline std::shared_ptr<MaterialNode>    GetNode() { 
-        return node; 
+    inline MaterialNode*    GetNode() { 
+        return node.get(); 
     }
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -130,7 +130,7 @@ public:
 
 protected:
 	// sub node if it has value
-    std::shared_ptr<MaterialNode>	node = nullptr;
+    std::unique_ptr<MaterialNode>	node = nullptr;
 };
 
 class MaterialNodePropertyColor : public MaterialNodeProperty
@@ -154,7 +154,7 @@ public:
     void Serialize( IStreamBase& stream ) override {
         std::string class_id;
         stream >> class_id;
-        node = MakeSharedInstance<MaterialNode>( class_id );
+        node = MakeUniqueInstance<MaterialNode>( class_id );
         if( node )
             node->Serialize( stream );
         else
@@ -187,7 +187,7 @@ public:
     void Serialize( IStreamBase& stream ) override {
         std::string class_id;
         stream >> class_id;
-        node = MakeSharedInstance<MaterialNode>( class_id );
+        node = MakeUniqueInstance<MaterialNode>( class_id );
         if( node )
             node->Serialize( stream );
         else
@@ -232,7 +232,7 @@ public:
     // get node return type
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_BXDF; }
     
-    void GetMaterialProperty( Bsdf* bsdf , std::shared_ptr<MaterialNode>& result ) { result = node; }
+    void GetMaterialProperty( Bsdf* bsdf , MaterialNode*& result ) { result = node.get(); }
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -242,7 +242,7 @@ public:
     void Serialize( IStreamBase& stream ) override {
         std::string class_id;
         stream >> class_id;
-        node = MakeSharedInstance<MaterialNode>( class_id );
+        node = MakeUniqueInstance<MaterialNode>( class_id );
         if( node )
             node->Serialize( stream );
 	}
@@ -269,7 +269,7 @@ public:
     void Serialize( IStreamBase& stream ) override {
         std::string class_id;
         stream >> class_id;
-        node = MakeSharedInstance<MaterialNode>( class_id );
+        node = MakeUniqueInstance<MaterialNode>( class_id );
         if( node )
             node->Serialize( stream );
         else
