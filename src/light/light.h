@@ -72,7 +72,7 @@ public:
 	virtual bool IsInfinite() const { return false; }
 
 	// get the shape of light
-	virtual std::shared_ptr<Shape> GetShape() const { return nullptr; }
+	virtual Shape* GetShape() const { return nullptr; }
 
 	// the pdf for specific sampled direction
 	virtual float Pdf( const Point& p , const Vector& wi ) const { return 1.0f; }

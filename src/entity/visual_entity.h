@@ -35,8 +35,8 @@ public:
     //!
     //! @param  scene       The scene to be filled.
     void   FillScene( class Scene& scene ) override {
-        for( auto visual : m_visuals )
-            visual->FillScene(scene);
+        for_each( m_visuals.begin() , m_visuals.end() , 
+            [&]( const std::unique_ptr<Visual>& visual ) { visual->FillScene(scene); } );
     }
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -48,9 +48,9 @@ public:
         stream >> m_transform;
 
         // For now there is only one visual in each visual entity, it can easily be extended.
-        auto visual = std::make_shared<MeshVisual>();
+        auto visual = new MeshVisual();
         bool ret = MeshManager::GetSingleton().LoadMesh( stream , visual , m_transform );
         sAssert( ret , RESOURCE );
-        m_visuals.push_back( visual );
+        m_visuals.push_back( std::unique_ptr<Visual>( visual ) );
     }
 };

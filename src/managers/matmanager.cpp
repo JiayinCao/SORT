@@ -25,9 +25,9 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream )
 	unsigned int material_cnt = 0;
 	stream >> material_cnt;
 	for( unsigned int i = 0 ; i < material_cnt ; ++i ){
-		std::shared_ptr<Material> mat = std::make_shared<Material>();
+        Material* mat = new Material();
 		mat->Serialize( stream );
-		m_matPool.push_back( mat );
+		m_matPool.push_back( std::unique_ptr<Material>(mat) );
 	}
 	return material_cnt;
 }

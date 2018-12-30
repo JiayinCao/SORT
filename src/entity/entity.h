@@ -44,5 +44,5 @@ public:
 
 protected:
     Transform                           m_transform;    /**< Transform of the entity from local space to world space. */
-    std::list<std::shared_ptr<Visual>>  m_visuals;      /**< Visual attached to this entity. */
+    std::list<std::unique_ptr<Visual>>  m_visuals;      /**< Visual attached to this entity. */
 };

@@ -26,9 +26,6 @@
  */
 class Visual : public SerializableObject {
 public:
-    //! Empty virtual destructor
-    ~Visual() {}
-
     //! @brief  Fill the scene with triangles.
     //!
     //! @param  scene       The scene to be filled.

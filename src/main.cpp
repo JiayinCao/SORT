@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     addLogDispatcher(new StdOutLogDispatcher());
     addLogDispatcher(new FileLogDispatcher( "log.txt" ));
 
-    slog(INFO, GENERAL, "Number of CPU cores %d" , NumSystemCores() );
+    slog(INFO, GENERAL, "Number of CPU cores %d" , std::thread::hardware_concurrency() );
 #ifdef SORT_ENABLE_STATS_COLLECTION
     slog( INFO, GENERAL, "Stats collection is enabled." );
 #else

@@ -84,7 +84,7 @@ class	MeshManager : public Singleton<MeshManager>
 {
 public:
 	// Temporary
-	bool LoadMesh( IStreamBase& str , std::shared_ptr<class MeshVisual> visual , const Transform& );
+	bool LoadMesh( IStreamBase& str , class MeshVisual* visual , const Transform& );
 
 private:
 	friend class Singleton<MeshManager>;

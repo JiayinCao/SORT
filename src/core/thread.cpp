@@ -24,41 +24,23 @@
 #include "core/profile.h"
 #include "core/define.h"
 
-// thread id
 static Thread_Local int g_ThreadId = 0;
-
-// get the thread id
-int ThreadId()
-{
+int ThreadId(){
 	return g_ThreadId;
 }
 
-// get the number of cpu cores in the system
-unsigned NumSystemCores()
-{
-	return std::thread::hardware_concurrency();
-}
-
-// critical section
 spinlock_mutex g_mutex;
 
-void WorkerThread::BeginThread()
-{
+void WorkerThread::BeginThread(){
 	m_thread = std::thread([&]() {
-		// setup lts
         g_ThreadId = m_tid;
-
-		// run the thread
 		RunThread();
 	});
 }
 
-// Run the thread
-void WorkerThread::RunThread()
-{
-    SORT_PROFILE("Rendering Thread")
-
+void WorkerThread::RunThread(){
+    static std::string thread_name = "Thread " + std::to_string( g_ThreadId );
+    SORT_PROFILE(thread_name.c_str())
 	EXECUTING_TASKS();
-
     SortStatsFlushData();
 }
