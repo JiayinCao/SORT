@@ -105,7 +105,7 @@ void	RunSORT( int argc , char** argv ){
     
     std::vector< std::unique_ptr<WorkerThread> > threads;
     for( unsigned i = 0 ; i < g_threadCnt ; ++i )
-        threads.push_back( std::unique_ptr<WorkerThread>( new WorkerThread( i + 1 ) ) );
+        threads.push_back( std::make_unique<WorkerThread>( i + 1 ) );
 
     // start all threads
     for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->BeginThread(); } );

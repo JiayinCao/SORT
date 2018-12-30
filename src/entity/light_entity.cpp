@@ -79,7 +79,7 @@ void SkyLightEntity::FillScene(class Scene& scene) {
 void AreaLightEntity::Serialize(IStreamBase& stream) {
     stream >> m_light->light2world;
     stream >> m_light->intensity;
-    auto rect = std::unique_ptr<Rectangle>( new Rectangle() );
+    auto rect = std::make_unique<Rectangle>();
     float sizeX, sizeY;
     stream >> sizeX >> sizeY;
     rect->SetSizeX(sizeX);

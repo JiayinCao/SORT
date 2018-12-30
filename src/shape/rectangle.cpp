@@ -107,7 +107,7 @@ const BBox&	Rectangle::GetBBox() const
     const float halfy = sizeY * 0.5f;
 	if( !m_bbox )
 	{
-        m_bbox = std::unique_ptr<BBox>( new BBox() );
+        m_bbox = std::make_unique<BBox>();
 		m_bbox->Union( m_transform( Point( halfx , 0.0f , halfy ) ) );
 		m_bbox->Union( m_transform( Point( halfx , 0.0f , -halfy ) ) );
 		m_bbox->Union( m_transform( Point( -halfx , 0.0f , halfy ) ) );

@@ -176,8 +176,10 @@ public:
 		if( m_integrator != nullptr )
 			m_integrator->Serialize( stream );
 
-		m_imageSensor = m_blenderMode ? std::unique_ptr<ImageSensor>( new BlenderImage( m_resWidth , m_resHeight ) ) :
-						std::unique_ptr<ImageSensor>( new RenderTargetImage(m_resWidth,m_resHeight) );
+		if( m_blenderMode )
+			m_imageSensor = std::make_unique<BlenderImage>( m_resWidth , m_resHeight );
+		else
+			m_imageSensor =	std::make_unique<RenderTargetImage>( m_resWidth , m_resHeight );
 		m_imageSensor->PreProcess();
 	};
 	

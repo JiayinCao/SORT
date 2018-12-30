@@ -79,5 +79,5 @@ private:
 	/**< Unique name of the material. */
 	std::string	 m_name;
 	/**< Root node of material node graph tree. */
-	mutable std::unique_ptr<OutputNode>	m_root = std::unique_ptr<OutputNode>( new OutputNode() );
+	mutable std::unique_ptr<OutputNode>	m_root = std::make_unique<OutputNode>();
 };
