@@ -25,19 +25,15 @@
 // Temporary
 bool MeshManager::LoadMesh( IStreamBase& stream , std::shared_ptr<MeshVisual> visual , const Transform& transform ){
 	// create the new memory
-	std::shared_ptr<BufferMemory> mem = std::make_shared<BufferMemory>();
+    visual->m_memory = std::unique_ptr<BufferMemory>( new BufferMemory );
 
 	// load the mesh from file
-	mem->Serialize(stream);
+	visual->m_memory->Serialize(stream);
 
 	// apply the transformation
-	mem->ApplyTransform( transform );
-
-    mem->GenUV();
-	mem->GenSmoothTagent();
-
-	// copy trunk memory pointer
-	visual->m_memory = mem;
+	visual->m_memory->ApplyTransform( transform );
+    visual->m_memory->GenUV();
+	visual->m_memory->GenSmoothTagent();
 
 	return true;
 }

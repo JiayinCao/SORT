@@ -64,7 +64,7 @@ void KDTree::Build( const Scene& scene ){
 		splits.split[i] = new Split[2*count];
 	for(auto k = 0 ; k < 3 ; k++ ){
 		for(auto i = 0u ; i < count ; i++ ){
-			Primitive* pri = (*m_primitives)[i];
+			auto pri = (*m_primitives)[i].get();
             auto box = pri->GetBBox();
             splits.split[k][2*i] = Split(box.m_Min[k], Split_Type::Split_Start, i, pri);
             splits.split[k][2*i+1] = Split(box.m_Max[k], Split_Type::Split_End, i, pri);

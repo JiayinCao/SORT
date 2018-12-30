@@ -33,5 +33,5 @@ void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
 }
 
 void PerspectiveCameraEntity::FillScene(class Scene& scene) {
-    scene.SetupCamera(m_camera);
+    scene.SetupCamera(m_camera.get());
 }

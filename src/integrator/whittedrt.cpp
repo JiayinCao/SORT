@@ -50,8 +50,8 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
 
 	// lights
 	Visibility visibility(scene);
-	const std::vector<std::shared_ptr<Light>>& lights = scene.GetLights();
-	std::vector<std::shared_ptr<Light>>::const_iterator it = lights.begin();
+	auto lights = scene.GetLights();
+	auto it = lights.begin();
 	while( it != lights.end() ){
 		// only delta light is evaluated
 		if( (*it)->IsDelta() ){

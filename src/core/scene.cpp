@@ -49,11 +49,11 @@ bool Scene::LoadScene( IStreamBase& stream )
 		if( class_id == "" )
 			break;
 		
-		std::shared_ptr<Entity>	entity = MakeSharedInstance<Entity>( class_id );
+		auto entity = MakeUniqueInstance<Entity>( class_id );
 		sAssertMsg( entity , RESOURCE , "Serialization is broken." );
 
         entity->Serialize(stream);
-        m_entities.push_back(entity);
+        m_entities.push_back(std::move(entity));
 	}
 
 	// generate triangle buffer after parsing from stream
@@ -96,23 +96,9 @@ bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
 	return intersect->t < r.m_fMax && ( intersect->primitive != 0 );
 }
 
-// release the memory of the scene
-void Scene::Release()
-{
-	std::vector<Primitive*>::iterator it = m_primitiveBuf.begin();
-	while( it != m_primitiveBuf.end() )
-		delete *it++;
-	m_primitiveBuf.clear();
-}
-
-// generate primitive buffer
-void Scene::_generatePriBuf()
-{
-	std::vector<std::shared_ptr<Entity>>::const_iterator it = m_entities.begin();
-	while( it != m_entities.end() ){
-		(*it)->FillScene( *this );
-		it++;
-	}
+void Scene::_generatePriBuf(){
+	for( auto& entity : m_entities )
+		entity->FillScene( *this );
 }
 
 // get the bounding box for the scene
@@ -122,12 +108,19 @@ const BBox& Scene::GetBBox() const
 		return g_accelerator->GetBBox();
 
 	// if there is no bounding box for the scene, generate one
-	std::vector<Primitive*>::const_iterator it = m_primitiveBuf.begin();
-	while( it != m_primitiveBuf.end() )
-	{
-		m_BBox.Union( (*it)->GetBBox() );
-		it++;
-	}
+//	for( auto& primitive : m_primitiveBuf )
+//		m_BBox.Union( primitive->GetBBox() );
+	for_each( m_primitiveBuf.begin() , m_primitiveBuf.end() , 
+		[&]( const std::unique_ptr<Primitive>& primitive ){
+			m_BBox.Union( primitive->GetBBox() );
+		}
+	);
+
+	//for_each( threads.begin() , threads.end() , 
+//		[]( std::unique_ptr<WorkerThread>& thread ) { thread->BeginThread(); } 
+// for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->BeginThread(); } );
+//	);
+
 	return m_BBox;
 }
 
@@ -149,7 +142,7 @@ void Scene::_genLightDistribution()
 	for( unsigned i = 0 ; i < count ; i++ )
 		m_lights[i]->SetPickPDF( pdf[i] / total_pdf );
 
-    m_lightsDis = std::make_shared<Distribution1D>(pdf, count);
+    m_lightsDis = std::unique_ptr<Distribution1D>( new Distribution1D( pdf , count ) );
 	delete[] pdf;
 }
 
@@ -162,7 +155,7 @@ const Light* Scene::SampleLight( float u , float* pdf ) const{
 	int id = m_lightsDis->SampleDiscrete( u , &_pdf );
 	if( id >= 0 && id < (int)m_lights.size() && _pdf != 0.0f ){
 		if( pdf ) *pdf = _pdf;
-		return m_lights[id].get();
+		return m_lights[id];
 	}
 	return nullptr;
 }
