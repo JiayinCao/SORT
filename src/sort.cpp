@@ -33,6 +33,51 @@ SORT_STATS_AVG_RAY_SECOND("Performance", "Number of rays per second", sRayCount 
 SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
 SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
 
+void SchedulTasks( Scene& scene , IStreamBase& stream ){
+	auto loading_task = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , scene, stream);
+	auto sac_task = SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structor Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
+	auto pre_render_task = SCHEDULE_TASK<PreRender_Task>( "Pre rendering pass" , DEFAULT_TASK_PRIORITY, {sac_task} , scene);
+
+	// Push render task into the queue
+	const auto tilesize = (int)g_tileSize;
+	const auto width = (int)g_resultResollution[0];
+	const auto height = (int)g_resultResollution[1];
+	
+	// get the number of total task
+	Vector2i tile_num = Vector2i( (int)ceil(width / (float)tilesize) , (int)ceil(height / (float)tilesize) );
+
+	// start tile from center instead of top-left corner
+	Vector2i cur_pos( tile_num / 2 );
+	int cur_dir = 0;
+	int cur_len = 0;
+	int cur_dir_len = 1;
+	const Vector2i dir[4] = { Vector2i( 0 , -1 ) , Vector2i( -1 , 0 ) , Vector2i( 0 , 1 ) , Vector2i( 1 , 0 ) };
+
+	unsigned int priority = DEFAULT_TASK_PRIORITY;
+	while (true){
+		// only process node inside the image region
+		if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y ){
+			Vector2i tl( cur_pos.x * tilesize , cur_pos.y * tilesize );
+			Vector2i size( (tilesize < (width - tl.x)) ? tilesize : (width - tl.x) , 
+						   (tilesize < (height - tl.y)) ? tilesize : (height - tl.y) );
+
+			SCHEDULE_TASK<Render_Task>( "render task" , priority-- , {pre_render_task} , tl , size , scene );
+		}
+
+		// turn to the next direction
+		if (cur_len >= cur_dir_len){
+			cur_dir = (cur_dir + 1) % 4;
+			cur_len = 0;
+			cur_dir_len += 1 - cur_dir % 2;
+		}
+
+		cur_pos += dir[cur_dir];
+		++cur_len;
+		if( (cur_pos.x < 0 || cur_pos.x >= tile_num.x ) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y ) )
+			break;
+	}
+}
+
 void	RunSORT( int argc , char** argv ){
 	// Parse command line arguments.
     GlobalConfiguration::GetSingleton().ParseCommandLine( argc , argv );
@@ -51,54 +96,8 @@ void	RunSORT( int argc , char** argv ){
 
 	Scene scene;
 
-    auto loading_task = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , scene, stream);
-    auto sac_task = SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structor Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
-	auto pre_render_task = SCHEDULE_TASK<PreRender_Task>( "Pre rendering pass" , DEFAULT_TASK_PRIORITY, {sac_task} , scene);
-
-	Timer timer;
-
-	// Push render task into the queue
-	const auto tilesize = g_tileSize;
-	const auto width = g_resultResollution[0];
-	const auto height = g_resultResollution[1];
-	
-	// get the number of total task
-	Vector2i tile_num = Vector2i( (int)ceil(width / (float)tilesize) , (int)ceil(height / (float)tilesize) );
-
-	// start tile from center instead of top-left corner
-	Vector2i cur_pos( tile_num / 2 );
-	int cur_dir = 0;
-	int cur_len = 0;
-	int cur_dir_len = 1;
-	const Vector2i dir[4] = { Vector2i( 0 , -1 ) , Vector2i( -1 , 0 ) , Vector2i( 0 , 1 ) , Vector2i( 1 , 0 ) };
-
-	unsigned int priority = DEFAULT_TASK_PRIORITY;
-	while (true){
-		// only process node inside the image region
-		if (cur_pos.x >= 0 && cur_pos.x < tile_num.x && cur_pos.y >= 0 && cur_pos.y < tile_num.y )
-		{
-			Vector2i size , tl ;
-			tl.x = cur_pos.x * tilesize;
-			tl.y = cur_pos.y * tilesize;
-			size.x = (tilesize < (width - tl.x)) ? tilesize : (width - tl.x);
-			size.y = (tilesize < (height - tl.y)) ? tilesize : (height - tl.y);
-
-			SCHEDULE_TASK<Render_Task>( "render task" , priority-- , {pre_render_task} , tl , size , scene );
-		}
-
-		// turn to the next direction
-		if (cur_len >= cur_dir_len){
-			cur_dir = (cur_dir + 1) % 4;
-			cur_len = 0;
-			cur_dir_len += 1 - cur_dir % 2;
-		}
-
-		cur_pos += dir[cur_dir];
-		++cur_len;
-
-		if( (cur_pos.x < 0 || cur_pos.x >= tile_num.x ) && (cur_pos.y < 0 || cur_pos.y >= tile_num.y ) )
-			break;
-	}
+	// Schedule all tasks.
+    SchedulTasks( scene , stream );
 
 	// pre allocate memory for the specific thread
 	for( unsigned i = 0 ; i <= g_threadCnt ; ++i )
@@ -111,12 +110,14 @@ void	RunSORT( int argc , char** argv ){
     // start all threads
     for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->BeginThread(); } );
 
-	EXECUTING_TASKS();
+	{
+		TIMING_EVENT_STAT( "" , sRenderingTimeMS );
+		EXECUTING_TASKS();
 
-	// wait for all the threads to be finished
-    for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->Join(); } );
+		// wait for all the threads to be finished
+    	for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->Join(); } );
+	}
     
-	SORT_STATS(sRenderingTimeMS = timer.GetElapsedTime());
 	SORT_STATS(sSamplePerPixel = g_samplePerPixel);
 	SORT_STATS(sThreadCnt = g_threadCnt);
 
