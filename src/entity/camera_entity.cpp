@@ -20,8 +20,6 @@
 
 IMPLEMENT_CREATOR(PerspectiveCameraEntity);
 
-extern ImageSensor* m_imagesensor;
-
 void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
     stream >> m_camera->m_eye;
     stream >> m_camera->m_up;
@@ -30,9 +28,6 @@ void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
     stream >> m_camera->m_sensorW >> m_camera->m_sensorH >> m_camera->m_aspectFit;
     stream >> m_camera->m_aspectRatioW >> m_camera->m_aspectRatioH;
     stream >> m_camera->m_fov;
-
-    // TODO : figure out a better way to pass the information.
-    m_camera->SetImageSensor(m_imagesensor);
     
     m_camera->PreProcess();
 }

@@ -32,7 +32,7 @@ SORT_STATS_COUNTER("Instant Radiosity", "Virtual Point Lights Count" , sVPLCount
 IMPLEMENT_CREATOR( InstantRadiosity );
 
 // Preprocess
-void InstantRadiosity::PreProcess()
+void InstantRadiosity::PreProcess( const Scene& scene )
 {
     SORT_PROFILE("Instant Radiosity (LPV distribution stage)");
     
@@ -44,7 +44,7 @@ void InstantRadiosity::PreProcess()
 		{
 			// pick a light first
 			float light_pick_pdf;
-			const Light* light = m_scene->SampleLight( sort_canonical() , &light_pick_pdf );
+			const Light* light = scene.SampleLight( sort_canonical() , &light_pick_pdf );
 
 			// sample a ray from the light source
 			float	light_emission_pdf = 0.0f;
@@ -59,7 +59,7 @@ void InstantRadiosity::PreProcess()
 			Intersection intersect;
 			while( true )
 			{
-				if (false == m_scene->GetIntersect(ray, &intersect))
+				if (false == scene.GetIntersect(ray, &intersect))
 					break;
 
 				VirtualLightSource ls;
@@ -102,15 +102,15 @@ void InstantRadiosity::PostProcess()
 }
 
 // radiance along a specific ray direction
-Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps ) const
+Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps  , const Scene& scene ) const
 {
     SORT_STATS( ++sPrimaryRayCount );
     
-	return _li( r );
+	return _li( r , scene );
 }
 
 // private method of li
-Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_intersect_dist ) const
+Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreLe , float* first_intersect_dist ) const
 {
 	// return if it is larger than the maximum depth
     if( r.m_Depth > max_recursive_depth )
@@ -118,15 +118,15 @@ Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_inte
 
 	// get intersection from camera ray
 	Intersection ip;
-	if( false == m_scene->GetIntersect( r , &ip ) )
-		return ignoreLe?0.0f:m_scene->Le( r );
+	if( false == scene.GetIntersect( r , &ip ) )
+		return ignoreLe?0.0f:scene.Le( r );
 
 	// evaluate light path less than two vertices
 	Spectrum radiance = ignoreLe?0.0f:ip.Le( -r.m_Dir );
-	unsigned light_num = m_scene->LightNum();
+	unsigned light_num = scene.LightNum();
 	for( unsigned i = 0 ; i < light_num ; ++i ){
-		const auto light = m_scene->GetLight(i);
-		radiance += EvaluateDirect( r , *m_scene , light , ip , LightSample(true) , BsdfSample(true) , BXDF_TYPE( BXDF_ALL ) );
+		const auto light = scene.GetLight(i);
+		radiance += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , BXDF_TYPE( BXDF_ALL ) );
 	}
 	
 	if( first_intersect_dist )
@@ -163,7 +163,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_inte
 		Spectrum	contr = gterm * f0 * f1 * it->power;
 		if( !contr.IsBlack() )
 		{
-			Visibility vis(*m_scene);
+			Visibility vis(scene);
 			vis.ray = Ray( it->intersect.intersect , n_delta , 0 , 0.001f , len - 0.001f );
 
 			if( vis.IsVisible() )
@@ -185,7 +185,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , bool ignoreLe , float* first_inte
 			PixelSample ps;
 			float gather_dist;
 			Ray gather_ray( ip.intersect , wi , r.m_Depth + 1 , 0.001f , m_fMinDist - 0.001f );
-			Spectrum li = _li( gather_ray , true , &gather_dist );
+			Spectrum li = _li( gather_ray , scene , true , &gather_dist );
 
 			if( !li.IsBlack() )
 			{

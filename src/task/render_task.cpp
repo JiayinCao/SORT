@@ -19,19 +19,23 @@
 #include "integrator/integrator.h"
 #include "sampler/sampler.h"
 #include "camera/camera.h"
-#include "imagesensor/imagesensor.h"
 #include "core/globalconfig.h"
 #include "core/scene.h"
 #include "core/profile.h"
+#include "sampler/random.h"
+
+Render_Task::Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
+            const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
+            Task( name , priority , dependencies ), m_coord(ori), m_size(size), m_scene(scene){
+    m_sampler = new RandomSampler();
+    m_pixelSamples = new PixelSample[g_samplePerPixel];
+}
 
 void Render_Task::Execute(){
     if(g_integrator == nullptr )
         return;
     auto camera = m_scene.GetCamera();
-    auto is = camera->GetImageSensor();
-    if( !is )
-        return;
-    
+
     // request samples
     g_integrator->RequestSample( m_sampler , m_pixelSamples , g_samplePerPixel);
     
@@ -53,18 +57,22 @@ void Render_Task::Execute(){
                 // generate rays
                 auto r = camera->GenerateRay( (float)j , (float)i , m_pixelSamples[k] );
                 // accumulate the radiance
-                radiance += g_integrator->Li( r , m_pixelSamples[k] );
+                radiance += g_integrator->Li( r , m_pixelSamples[k] , m_scene );
             }
             radiance /= (float)g_samplePerPixel;
             
             // store the pixel
-            is->StorePixel( j , i , radiance , *this );
+            g_imageSensor->StorePixel( j , i , radiance , *this );
         }
     }
     
 	if( g_integrator->NeedRefreshTile() ){
 		auto x_off = m_coord.x / g_tileSize;
-		auto y_off = (is->GetHeight() - 1 - m_coord.y ) / g_tileSize ;
-		is->FinishTile( x_off, y_off, *this );
+		auto y_off = (g_resultResollutionHeight - 1 - m_coord.y ) / g_tileSize ;
+		g_imageSensor->FinishTile( x_off, y_off, *this );
 	}
+}
+
+void PreRender_Task::Execute(){
+    g_integrator->PreProcess(m_scene);
 }

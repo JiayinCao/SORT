@@ -20,6 +20,7 @@
 #include "task.h"
 #include "sampler/sample.h"
 #include "math/vector2.h"
+#include "core/scene.h"
 
 //! @brief  Render_Task is a basic rendering unit doing ray tracing.
 //!
@@ -31,10 +32,8 @@ public:
     //! @brief Constructor
     //!
     //! @param priority     New priority of the task.
-    Render_Task(const Vector2i& ori , const Vector2i& size , class Scene* scene , class Sampler* sampler , PixelSample* pixelSamples ,
-                const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
-                Task( name , priority , dependencies ), m_coord(ori), m_size(size), m_scene(*scene), m_sampler( sampler ),
-                m_pixelSamples(pixelSamples) {}
+    Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
+                const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies );
     
     //! @brief  Execute the task
     void        Execute() override;
@@ -54,9 +53,29 @@ public:
     }
 
 private:
-    Vector2i              m_coord;            /**< Top-left corner of the current tile. */
-    Vector2i              m_size;             /**< Size of the current tile to be rendered. */
-    class Scene&	      m_scene;            /**< Scene for ray tracing. */
-    class Sampler*        m_sampler;          /**< Sampler for taking samples. Currently not used. */
-    PixelSample*          m_pixelSamples;     /**< Samples to take. Currently not used. */
+    Vector2i                m_coord;            /**< Top-left corner of the current tile. */
+    Vector2i                m_size;             /**< Size of the current tile to be rendered. */
+    const Scene&	        m_scene;            /**< Scene for ray tracing. */
+    class Sampler*          m_sampler;          /**< Sampler for taking samples. Currently not used. */
+    PixelSample*            m_pixelSamples;     /**< Samples to take. Currently not used. */
+};
+
+//! @brief  PreRender_Task provides a chance for integrators to preprocess some data before rendering.
+//!
+//! One example of such a case is to shoot virtual point light before evaluating rendering equation
+//! in a second stage in an instance radiosity algorithm.
+class PreRender_Task : public Task {
+public:
+    //! @brief Constructor
+    //!
+    //! @param priority     New priority of the task.
+    PreRender_Task( const Scene& scene , const char* name , unsigned int priority , 
+                    const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
+                    Task( name , priority , dependencies ), m_scene(scene){}
+    
+    //! @brief  Execute the task
+    void        Execute() override;
+
+private:
+    const Scene&   m_scene;
 };

@@ -24,6 +24,8 @@
 #include "accel/accelerator.h"
 #include "integrator/integrator.h"
 #include "core/creator.h"
+#include "imagesensor/blenderimage.h"
+#include "imagesensor/rendertargetimage.h"
 
 //! @brief	This needs to be update every time the content of GlobalConfiguration chagnes.
 constexpr unsigned int GLOBAL_CONFIGURATION_VERSION	= 0;
@@ -111,6 +113,13 @@ public:
 		return m_inputFile;
 	}
 
+	//! @brief		Get image sensor.
+	//!
+	//! @return		Image sensor.
+	ImageSensor*	GetImageSensor(){
+		return m_imageSensor.get();
+	}
+
 	//! @brief		Parse command line.
 	//!
 	//!	@param	argc	Number of parameters, including the executable as the first parameter too.
@@ -166,6 +175,10 @@ public:
 		m_integrator = MakeUniqueInstance<Integrator>(integratorType);
 		if( m_integrator != nullptr )
 			m_integrator->Serialize( stream );
+
+		m_imageSensor = m_blenderMode ? std::unique_ptr<ImageSensor>( new BlenderImage( m_resWidth , m_resHeight ) ) :
+						std::unique_ptr<ImageSensor>( new RenderTargetImage(m_resWidth,m_resHeight) );
+		m_imageSensor->PreProcess();
 	};
 	
 private:
@@ -178,6 +191,7 @@ private:
 	unsigned int					m_samplePerPixel = 4;			/**< Sample of per-pixel. Default value is 4 for fast iteration. */
 	std::unique_ptr<Accelerator>    m_accelerator = nullptr;    	/**< Spatial accelerator for accelerating primitive/ray intersection test. */
 	std::unique_ptr<Integrator>		m_integrator = nullptr;			/**< Integrator used to evaluate rendering equation. */
+	std::unique_ptr<ImageSensor>	m_imageSensor = nullptr;		/**< Image sensor to hold the result of ray tracing. */
 	
 	bool				            m_blenderMode = false;			/**< Whether the current running instance is attached with Blender. */
 	bool							m_unitTestMode = false;			/**< Whether the current running instance is in unit test mode. */
@@ -204,3 +218,4 @@ private:
 #define g_resultResollutionHeight 	GlobalConfiguration::GetSingleton().GetResultResolution().y
 #define	g_unitTestMode				GlobalConfiguration::GetSingleton().GetIsUnitTestMode()
 #define g_inputFilePath				GlobalConfiguration::GetSingleton().GetInputFilePath()
+#define g_imageSensor				GlobalConfiguration::GetSingleton().GetImageSensor()

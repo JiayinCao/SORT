@@ -29,6 +29,7 @@ class RenderTask;
 class ImageSensor
 {
 public:
+	ImageSensor( int w , int h ) : m_width(w) , m_height(h) {}
     virtual ~ImageSensor(){}
     
 	// pre process
@@ -39,13 +40,6 @@ public:
 		m_mutex = new spinlock_mutex*[m_width];
 		for( int i = 0 ; i < m_width ; ++i )
 			m_mutex[i] = new spinlock_mutex[m_height];
-	}
-
-	// set image size
-	virtual void SetSensorSize( int w , int h )
-	{
-		m_width = w;
-		m_height = h;
 	}
 
 	// finish image tile
@@ -81,8 +75,8 @@ public:
 	}
 
 protected:
-	int m_width;
-	int m_height;
+	const int m_width;
+	const int m_height;
     
 	// the mutex
 	spinlock_mutex**	m_mutex;

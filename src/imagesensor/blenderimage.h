@@ -25,6 +25,9 @@
 class BlenderImage : public ImageSensor
 {
 public:
+	// constructor
+	BlenderImage( int w , int h ) : ImageSensor( w , h ) {}
+
 	// store pixel information
 	virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt );
 
