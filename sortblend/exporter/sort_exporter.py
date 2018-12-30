@@ -353,7 +353,7 @@ def export_global_config(scene, fs, sort_resource_path):
     fs.serialize( int(scene.inte_max_recur_depth) )
     if integrator_type == "ao":
         fs.serialize( scene.ao_max_dist )
-    if integrator_type == "bdpt":
+    if integrator_type == "bdpt" or integrator_type == "lt":
         fs.serialize( bool(scene.bdpt_mis) )
     if integrator_type == 'ir':
         fs.serialize( scene.ir_light_path_set_num )

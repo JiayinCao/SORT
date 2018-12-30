@@ -18,7 +18,6 @@
 #pragma once
 
 #include "task.h"
-#include "core/scene.h"
 
 //! @brief  Loading_Task is responsible for loading data to intiailize the system.
 class Loading_Task : public Task{
@@ -26,7 +25,7 @@ public:
     //! @brief Constructor.
     //!
     //! @param  scene     Scene to be filled during loading.
-    Loading_Task( class Scene& scene , IStreamBase& stream , const char* name , unsigned int priority , 
+    Loading_Task( class Scene& scene , class IStreamBase& stream , const char* name , unsigned int priority , 
                   const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
         Task( name , DEFAULT_TASK_PRIORITY , dependencies ) , m_scene(scene) , m_stream(stream) {}
     
