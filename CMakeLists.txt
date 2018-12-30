@@ -1,4 +1,8 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.1)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 SET( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )	
  
@@ -68,7 +72,7 @@ endif(SORT_ENABLE_PROFILER)
 
 if(UNIX)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++11 -pthread")
+	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -std=c++14 -pthread")
 endif(UNIX)
 
 set_target_properties( SORT PROPERTIES RELEASE_OUTPUT_NAME "sort_r" )

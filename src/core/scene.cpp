@@ -108,18 +108,11 @@ const BBox& Scene::GetBBox() const
 		return g_accelerator->GetBBox();
 
 	// if there is no bounding box for the scene, generate one
-//	for( auto& primitive : m_primitiveBuf )
-//		m_BBox.Union( primitive->GetBBox() );
 	for_each( m_primitiveBuf.begin() , m_primitiveBuf.end() , 
 		[&]( const std::unique_ptr<Primitive>& primitive ){
 			m_BBox.Union( primitive->GetBBox() );
 		}
 	);
-
-	//for_each( threads.begin() , threads.end() , 
-//		[]( std::unique_ptr<WorkerThread>& thread ) { thread->BeginThread(); } 
-// for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->BeginThread(); } );
-//	);
 
 	return m_BBox;
 }
