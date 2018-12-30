@@ -25,7 +25,7 @@
 // Temporary
 bool MeshManager::LoadMesh( IStreamBase& stream , MeshVisual* visual , const Transform& transform ){
 	// create the new memory
-    visual->m_memory = std::unique_ptr<BufferMemory>( new BufferMemory );
+    visual->m_memory = std::make_unique<BufferMemory>();
 
 	// load the mesh from file
 	visual->m_memory->Serialize(stream);

@@ -87,7 +87,7 @@ bool TexManager::loadImage(const std::string& name, std::shared_ptr<ImgMemory>& 
             mem->m_iWidth = width;
             mem->m_iHeight = height;
             unsigned total = mem->m_iWidth * mem->m_iHeight;
-            mem->m_ImgMem = std::unique_ptr<Spectrum[]>(new Spectrum[total]);
+            mem->m_ImgMem = std::make_unique<Spectrum[]>(total);
             for (unsigned i = 0; i < total; i++)
                 mem->m_ImgMem[i] = Spectrum(out[4 * i], out[4 * i + 1], out[4 * i + 2]);
 
@@ -107,7 +107,7 @@ bool TexManager::loadImage(const std::string& name, std::shared_ptr<ImgMemory>& 
 
         int real_channel = std::min(desired_channel, channel);
         if (data && real_channel) {
-            mem->m_ImgMem = std::unique_ptr<Spectrum[]>(new Spectrum[w*h]);
+            mem->m_ImgMem = std::make_unique<Spectrum[]>(w*h);
             for (int i = 0; i < h; ++i) {
                 for (int j = 0; j < w; ++j) {
                     int k = i * w + j;
