@@ -92,7 +92,7 @@ public:\
         data += p->data;\
     }\
     std::unique_ptr<StatsItemBase> MakeItem() const override{\
-        return std::unique_ptr<NAME>( new NAME(g_Global_Default) );\
+        return std::make_unique<NAME>( g_Global_Default );\
     }\
     DATA& data;\
 };
