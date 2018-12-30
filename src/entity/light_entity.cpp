@@ -79,13 +79,13 @@ void SkyLightEntity::FillScene(class Scene& scene) {
 void AreaLightEntity::Serialize(IStreamBase& stream) {
     stream >> m_light->light2world;
     stream >> m_light->intensity;
-    std::shared_ptr<Rectangle> rect = std::make_shared<Rectangle>();
+    auto rect = std::unique_ptr<Rectangle>( new Rectangle() );
     float sizeX, sizeY;
     stream >> sizeX >> sizeY;
     rect->SetSizeX(sizeX);
     rect->SetSizeY(sizeY);
     rect->SetTransform(m_light->light2world);
-    m_light->shape = rect;
+    m_light->shape = std::move(rect);
 }
 
 void AreaLightEntity::FillScene(class Scene& scene) {

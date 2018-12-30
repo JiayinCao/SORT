@@ -57,11 +57,11 @@ public:
 	virtual float Pdf( const Point& p , const Vector& wi ) const;
 
 	// get the shape of light
-	virtual std::shared_ptr<Shape> GetShape() const { return shape; }
+	virtual Shape* GetShape() const { return shape.get(); }
 
 private:
 	// the shape binded to the area light
-    std::shared_ptr<Shape>	shape = nullptr;
+    std::unique_ptr<Shape>	shape = nullptr;
 
     friend class AreaLightEntity;
 };
