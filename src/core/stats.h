@@ -26,6 +26,9 @@ void SortStatsPrintData();
 // Enable specific category
 void SortStatsEnableCategory( const std::string& s );
 
+#define StatsInt                            long long
+#define StatsFloat                          float
+
 #ifdef SORT_ENABLE_STATS_COLLECTION
 #include <functional>
 #include <map>
@@ -36,9 +39,6 @@ void SortStatsEnableCategory( const std::string& s );
 #include <unordered_map>
 #include "core/sassert.h"
 #include "define.h"
-
-#define StatsInt                            long long
-#define StatsFloat                          float
 
 #define SORT_CAT_PROXY(v0, v1)              v0 ## v1
 #define SORT_CAT(v0, v1)                    SORT_CAT_PROXY(v0,v1)
