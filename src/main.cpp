@@ -31,29 +31,30 @@ int main(int argc, char** argv)
     // enable profiler
     SORT_PROFILE_ENABLE;
     SORT_PROFILE("Main Thread");
-    
+
     addLogDispatcher(new StdOutLogDispatcher());
-    addLogDispatcher(new FileLogDispatcher( "log.txt" ));
+    addLogDispatcher(new FileLogDispatcher("log.txt"));
 
-    slog(INFO, GENERAL, "Number of CPU cores %d" , std::thread::hardware_concurrency() );
+    slog(INFO, GENERAL, "Number of CPU cores %d", std::thread::hardware_concurrency());
 #ifdef SORT_ENABLE_STATS_COLLECTION
-    slog( INFO, GENERAL, "Stats collection is enabled." );
+    slog(INFO, GENERAL, "Stats collection is enabled.");
 #else
-    slog( INFO, GENERAL, "Stats collection is disabled." );
+    slog(INFO, GENERAL, "Stats collection is disabled.");
 #endif
-    slog( INFO, GENERAL, "Profiling system is %s." , SORT_PROFILE_ISENABLED ? "enabled" : "disabled" );
+    slog(INFO, GENERAL, "Profiling system is %s.", SORT_PROFILE_ISENABLED ? "enabled" : "disabled");
 
-    RunSORT( argc , argv );
+    const auto valid_args = RunSORT(argc, argv);
 
     // Flush main thread data
     SortStatsFlushData(true);
     // Output stats data
-    SortStatsPrintData();
+    if(valid_args)
+        SortStatsPrintData();
 
     SORT_PROFILE_END; // Main Thread
 
     // dump profile data
-    if (SORT_PROFILE_ISENABLED){
+    if (SORT_PROFILE_ISENABLED && valid_args){
         const std::string filename("sort.prof");
         SORT_PROFILE_DUMP(filename.c_str());
         slog(INFO, GENERAL, "Profiling file: \"%s\"", GetFilePathInExeFolder(filename).c_str());

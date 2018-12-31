@@ -49,13 +49,13 @@ public:
             m_name(name), m_dependencies(dependencies),m_priority(priority) {}
 
     //! @brief  Virtual destructor.
-    virtual ~Task() {}
+    virtual             ~Task() {}
 
     //! @brief  Execute the task
     virtual void        Execute() = 0;
 
-    //! @brief  Execute the task, this also includes outputing profiling data and removing dependencies.
-    void        ExecuteTask();
+    //! @brief  Execute the task, this also includes outputting profiling data and removing dependencies.
+    void                ExecuteTask();
 
     //! @brief  Get priority of the task.
     //!
@@ -64,16 +64,9 @@ public:
         return m_priority; 
     }
 
-    //! @brief  Set priority of the task.
-    //!
-    //! @param  priority    New priority to be set.
-    inline void         SetPriority( unsigned int priority ){
-        m_priority = priority;
-    }
-
     //! @brief  Remove dependency from task.
     //!
-    //! Upon the termination of any dependent task, it is necessary to remove it from its dependenty.
+    //! Upon the termination of any dependent task, it is necessary to remove it from its dependency.
     inline void         RemoveDependency( const std::shared_ptr<Task> taskid ) { 
         m_dependencies.erase( taskid ); 
     }
@@ -171,7 +164,7 @@ private:
 
 //! @brief      Schedule a task in task scheduler.
 template<class T, typename... Args>
-inline std::shared_ptr<T>  SCHEDULE_TASK( const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies , Args&... args ){
+inline std::shared_ptr<T>  SCHEDULE_TASK( const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies , Args&&... args ){
     auto ret = std::make_shared<T>( args... , name , priority , dependencies );
     Scheduler::GetSingleton().Schedule( ret );
     return ret;

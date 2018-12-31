@@ -19,7 +19,7 @@
 
 #include "task.h"
 
-//! @brief  Loading_Task is responsible for loading data to intiailize the system.
+//! @brief  Loading_Task is responsible for loading data to initialize the system.
 class Loading_Task : public Task{
 public:
     //! @brief Constructor.
@@ -38,7 +38,7 @@ private:
     class IStreamBase&      m_stream;
 };
 
-//! @brief  Constructe acceleration data structure.
+//! @brief  Spatial acceleration data structure construction pass.
 class SpatialAccelerationConstruction_Task : public Task{
 public:
     //! @brief Constructor.

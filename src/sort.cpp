@@ -78,16 +78,23 @@ void SchedulTasks( Scene& scene , IStreamBase& stream ){
 	}
 }
 
-void	RunSORT( int argc , char** argv ){
+bool	RunSORT( int argc , char** argv ){
 	// Parse command line arguments.
-    GlobalConfiguration::GetSingleton().ParseCommandLine( argc , argv );
+    bool valid_args = GlobalConfiguration::GetSingleton().ParseCommandLine( argc , argv );
+    if (!valid_args) {
+        slog(INFO, GENERAL, "There is not enough command line arguments.");
+        slog(INFO, GENERAL, "  --input:<filename>   Specify the sort input file.");
+        slog(INFO, GENERAL, "  --blendermode        SORT is triggered from Blender.");
+        slog(INFO, GENERAL, "  --unitest            Run unit tests.");
+        return false;
+    }
 	
 	// Run in unit test mode if required.
     if( g_unitTestMode ){
         ::testing::InitGoogleTest(&argc, argv);
         auto ret = RUN_ALL_TESTS();
-		slog( INFO , GENERAL , ( ret ? "All tests are passed." : "There are broken tests." ) ) ;
-		return;
+		slog( INFO , GENERAL , ( ret ? "There are broken tests." : "All tests are passed." ) ) ;
+		return false;
     }
 
 	// Load the global configuration from stream
@@ -123,4 +130,6 @@ void	RunSORT( int argc , char** argv ){
 
     // Post process for image sensor
     g_imageSensor->PostProcess();
+
+    return true;
 }
