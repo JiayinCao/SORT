@@ -81,4 +81,5 @@
 //!
 //! @param	argc	Number of arguments, including the executable instance itself.
 //! @param	argv	The command arguments.
-void	RunSORT( int argc , char** argv );
+//! @return         Whether the program actually ray traces anything.
+bool	RunSORT( int argc , char** argv );
