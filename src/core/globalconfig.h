@@ -18,6 +18,7 @@
 #pragma once
 
 #include <string.h>
+#include <regex>
 #include "core/log.h"
 #include "stream/stream.h"
 #include "core/singleton.h"
@@ -122,9 +123,15 @@ public:
 
 	//! @brief		Parse command line.
 	//!
+    //! This is not a perfect way to parse command line arguments. If there is a space in the path,
+    //! the algorithm won't be able to adjust very well. However, since there is generally working
+    //! fine for me most of the cases. Unless I do need to update the algorithm to support better 
+    //! flexibility, I'll leave it the way it is for now. 
+    //!
 	//!	@param	argc	Number of parameters, including the executable as the first parameter too.
 	//! @param	argv	Input command line parameters.
-	void			ParseCommandLine( int argc , char** argv ){
+    //! @return         Whether command line arguments are valid.
+	bool			ParseCommandLine( int argc , char** argv ){
 		std::string commandline = "Command line arguments: \t";
 		for (int i = 0; i < argc; ++i) {
 			commandline += std::string(argv[i]);
@@ -132,25 +139,29 @@ public:
 		}
 		slog( INFO , GENERAL , "%s" , commandline.c_str() );
 
-		// check if there is file argument
-		if (argc < 2){
-			slog(WARNING, GENERAL, "Miss file argument.");
-			slog(INFO, GENERAL, "Log file: \"%s\"", GetFilePathInExeFolder("log.txt").c_str());
-			return;
-		}
+        bool com_arg_valid = false;
+        std::regex word_regex("--(\\w+)(?:\\s*:\\s*([^ \\n]+)\\s*)?");
+        auto words_begin = std::sregex_iterator(commandline.begin(), commandline.end(), word_regex);
+        for (std::sregex_iterator it = words_begin; it != std::sregex_iterator(); ++it) {
+            const auto m = *it;
+            std::string key_str = m[1];
+            std::string value_str = m.size() >= 3 ? std::string(m[2]) : "";
+            
+            // not case sensitive for key, but it is for value.
+            std::transform(key_str.begin(), key_str.end(), key_str.begin(), ::tolower);
 
-		if (strcmp(argv[1], "unittest" ) == 0){
-			m_unitTestMode = true;
-			return;
-		}
+            if (key_str == "input") {
+                m_inputFile = value_str;
+                com_arg_valid = true;
+            }else if (key_str == "blendermode")
+                m_blenderMode = true;
+            else if (key_str == "unittest") {
+                m_unitTestMode = true;
+                com_arg_valid = true;
+            }
+        }
 
-		// enable blender mode if possible
-		if (argc > 2){
-			if (strcmp(argv[2], "blendermode") == 0)
-				m_blenderMode = true;
-		}
-
-		m_inputFile = std::string( argv[1] );
+        return com_arg_valid;
 	}
 
 	//! @brief      Serializing data from stream
