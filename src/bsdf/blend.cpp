@@ -33,9 +33,9 @@ Spectrum Blend::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, flo
         return 0.0f;
 
     if (bs.u < weight || weight == 1.0f || bxdf0 == nullptr )
-        bxdf1->sample_f(wo, wi, BsdfSample(true), nullptr);
+        bxdf1->sample_f(wo, wi, BsdfSample(true), pPdf);
     else
-        bxdf0->sample_f(wo, wi, BsdfSample(true), nullptr);
+        bxdf0->sample_f(wo, wi, BsdfSample(true), pPdf);
     if (pPdf) *pPdf = pdf(wo, wi);
     return f(wo, wi);
 }
