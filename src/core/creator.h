@@ -27,7 +27,8 @@
 template<class T>
 class ItemCreator{
 public:
-	virtual T* CreateInstance() const = 0;
+	virtual std::shared_ptr<T> CreateSharedInstance() const = 0;
+	virtual std::unique_ptr<T> CreateUniqueInstance() const = 0;
 };
 
 //! @brief		Creator class is responsible for creating instances based on names.
@@ -36,13 +37,22 @@ class Creator : public Singleton<Creator<T>>{
     typedef std::unordered_map<std::string,ItemCreator<T>*> CREATOR_CONTAINER;
 
 public:
-	//! @brief	Create an instance of a specific type based on class name.
+	//! @brief	Create a shared instance of a specific type based on class name.
 	//!
 	//! @return		Return a reference of a newly created instance.
-	T* CreateType( std::string str ) const{
+	auto CreateSharedType( std::string str ) const{
 		std::transform(str.begin(),str.end(),str.begin(),[](char c){ return tolower(c); });
 		auto it = m_container.find( str );
-		return it == m_container.end() ? nullptr : it->second->CreateInstance();
+		return it == m_container.end() ? nullptr : it->second->CreateSharedInstance();
+	}
+
+	//! @brief	Create an unique instance of a specific type based on class name.
+	//!
+	//! @return		Return a reference of a newly created instance.
+	auto CreateUniqueType( std::string str ) const{
+		std::transform(str.begin(),str.end(),str.begin(),[](char c){ return tolower(c); });
+		auto it = m_container.find( str );
+		return it == m_container.end() ? nullptr : it->second->CreateUniqueInstance();
 	}
 
 	//! @brief	Get the container that could be further modified.
@@ -80,7 +90,8 @@ private:
 		}\
         container.insert( std::make_pair(_str , this) );\
 	}\
-	B* CreateInstance() const { return new T(); }\
+	std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
+	std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\
 };
 
 //! @brief	Instance a class type based on name.
@@ -89,7 +100,7 @@ private:
 //! @return             Shared pointer holding the instance.
 template<class T>
 std::shared_ptr<T> MakeSharedInstance( const std::string& name ){
-    return std::shared_ptr<T>(Creator<T>::GetSingleton().CreateType(name));
+    return std::shared_ptr<T>(Creator<T>::GetSingleton().CreateSharedType(name));
 }
 
 //! @brief  Instance a class and an unique pointer is returned.
@@ -98,5 +109,5 @@ std::shared_ptr<T> MakeSharedInstance( const std::string& name ){
 //! @return             An unique pointer pointing to the instance.
 template<class T>
 std::unique_ptr<T> MakeUniqueInstance( const std::string& name ) {
-    return std::unique_ptr<T>(Creator<T>::GetSingleton().CreateType(name));
+    return std::unique_ptr<T>(Creator<T>::GetSingleton().CreateUniqueType(name));
 }

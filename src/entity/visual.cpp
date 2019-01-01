@@ -22,9 +22,9 @@
 #include "core/primitive.h"
 
 void MeshVisual::FillScene( Scene& scene ){
-    for (const MeshIndex& mi : m_memory->m_indices) {
-        Triangle* tri = new Triangle(this, mi);
-        scene.AddPrimitive( new Primitive( mi.m_mat , tri ) );
+    for (const MeshIndex& mi : m_memory->m_indices){
+        m_triangles.push_back( std::make_unique<Triangle>( this , mi ) );
+        scene.AddPrimitive( std::make_unique<Primitive>( mi.m_mat , m_triangles.back().get() ) );
     }
 }
 

@@ -32,8 +32,8 @@ int main(int argc, char** argv)
     SORT_PROFILE_ENABLE;
     SORT_PROFILE("Main Thread");
 
-    addLogDispatcher(new StdOutLogDispatcher());
-    addLogDispatcher(new FileLogDispatcher("log.txt"));
+    addLogDispatcher(std::make_unique<StdOutLogDispatcher>());
+    addLogDispatcher(std::make_unique<FileLogDispatcher>("log.txt"));
 
     slog(INFO, GENERAL, "Number of CPU cores %d", std::thread::hardware_concurrency());
 #ifdef SORT_ENABLE_STATS_COLLECTION

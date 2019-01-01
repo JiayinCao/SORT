@@ -48,7 +48,7 @@ void Sky::_generateDistribution2D()
 	unsigned nu = m_sky.GetWidth();
 	unsigned nv = m_sky.GetHeight();
 	sAssert( nu != 0 && nv != 0 , LIGHT );
-	float* data = new float[nu*nv];
+	auto data = std::make_unique<float[]>(nu*nv);
 	for( unsigned i = 0 ; i < nv ; i++ )
 	{
 		unsigned offset = i * nu;
@@ -58,9 +58,7 @@ void Sky::_generateDistribution2D()
 			data[offset+j] = std::max( 0.0f , m_sky.GetColor( (int)j , (int)i ).GetIntensity() * sin_theta );
 	}
 
-	distribution = new Distribution2D( data , nu , nv );
-
-	delete[] data;
+	distribution = new Distribution2D( data.get() , nu , nv );
 }
 
 // sample direction

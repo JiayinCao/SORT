@@ -18,7 +18,7 @@
 #pragma once
 
 #include "task.h"
-#include "sampler/sample.h"
+#include "sampler/sampler.h"
 #include "math/vector2.h"
 #include "core/scene.h"
 
@@ -53,11 +53,11 @@ public:
     }
 
 private:
-    Vector2i                m_coord;            /**< Top-left corner of the current tile. */
-    Vector2i                m_size;             /**< Size of the current tile to be rendered. */
-    const Scene&	        m_scene;            /**< Scene for ray tracing. */
-    class Sampler*          m_sampler;          /**< Sampler for taking samples. Currently not used. */
-    PixelSample*            m_pixelSamples;     /**< Samples to take. Currently not used. */
+    Vector2i                            m_coord;            /**< Top-left corner of the current tile. */
+    Vector2i                            m_size;             /**< Size of the current tile to be rendered. */
+    const Scene&	                    m_scene;            /**< Scene for ray tracing. */
+    std::unique_ptr<Sampler>            m_sampler;          /**< Sampler for taking samples. Currently not used. */
+    std::unique_ptr<PixelSample[]>      m_pixelSamples;     /**< Samples to take. Currently not used. */
 };
 
 //! @brief  PreRender_Task provides a chance for integrators to preprocess some data before rendering.

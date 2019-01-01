@@ -80,8 +80,8 @@ public:
 	// get bounding box of the scene
 	const BBox& GetBBox() const;
     // add primitives
-    void AddPrimitive(Primitive* primitive) {
-		m_primitiveBuf.push_back( std::unique_ptr<Primitive>(primitive) );
+    void AddPrimitive( std::unique_ptr<Primitive> primitive) {
+		m_primitiveBuf.push_back( std::move(primitive) );
 	}
 	// get primtives
 	const std::vector<std::unique_ptr<Primitive>>*	 GetPrimitives() const {

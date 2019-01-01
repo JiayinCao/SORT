@@ -30,16 +30,12 @@ class ImageSensor
 {
 public:
 	ImageSensor( int w , int h ) : m_width(w) , m_height(h) {}
-    virtual ~ImageSensor(){}
+	virtual ~ImageSensor(){}
     
 	// pre process
-    virtual void PreProcess()
-	{
+    virtual void PreProcess(){
 		m_rendertarget.SetSize(m_width, m_height);
-
-		m_mutex = new spinlock_mutex*[m_width];
-		for( int i = 0 ; i < m_width ; ++i )
-			m_mutex[i] = new spinlock_mutex[m_height];
+		m_mutex = std::make_unique<spinlock_mutex[]>( m_width * m_height );
 	}
 
 	// finish image tile
@@ -47,14 +43,6 @@ public:
 
     // store pixel information
     virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) = 0;
-    
-	// post process
-    virtual void PostProcess(){
-		// delete the mutex
-		for( int i = 0 ; i < m_width ; ++i )
-			delete[] m_mutex[i];
-		delete[] m_mutex;
-	}
     
     // get width
     unsigned GetWidth() const {
@@ -66,10 +54,12 @@ public:
         return m_height;
     }
 
+	// post process
+    virtual void PostProcess(){}
+
 	// add radiance
-	virtual void UpdatePixel(int x, int y, const Spectrum& color)
-	{
-        std::lock_guard<spinlock_mutex> lock(m_mutex[x][y]);
+	virtual void UpdatePixel(int x, int y, const Spectrum& color){
+        std::lock_guard<spinlock_mutex> lock(m_mutex[y * m_width + x]);
 		Spectrum _color = m_rendertarget.GetColor(x, y);
 		m_rendertarget.SetColor(x, y, _color + color);
 	}
@@ -79,7 +69,7 @@ protected:
 	const int m_height;
     
 	// the mutex
-	spinlock_mutex**	m_mutex;
+	std::unique_ptr<spinlock_mutex[]>	m_mutex;
 
 	// the render target
 	RenderTarget m_rendertarget;

@@ -48,9 +48,9 @@ public:
         stream >> m_transform;
 
         // For now there is only one visual in each visual entity, it can easily be extended.
-        auto visual = new MeshVisual();
-        bool ret = MeshManager::GetSingleton().LoadMesh( stream , visual , m_transform );
+        auto visual = std::make_unique<MeshVisual>();
+        bool ret = MeshManager::GetSingleton().LoadMesh( stream , visual.get() , m_transform );
         sAssert( ret , RESOURCE );
-        m_visuals.push_back( std::unique_ptr<Visual>( visual ) );
+        m_visuals.push_back( std::move(visual) );
     }
 };

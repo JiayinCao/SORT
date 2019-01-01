@@ -27,8 +27,8 @@
 Render_Task::Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
             const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
             Task( name , priority , dependencies ), m_coord(ori), m_size(size), m_scene(scene){
-    m_sampler = new RandomSampler();
-    m_pixelSamples = new PixelSample[g_samplePerPixel];
+    m_sampler = std::make_unique<RandomSampler>();
+    m_pixelSamples = std::make_unique<PixelSample[]>(g_samplePerPixel);
 }
 
 void Render_Task::Execute(){
@@ -37,7 +37,7 @@ void Render_Task::Execute(){
     auto camera = m_scene.GetCamera();
 
     // request samples
-    g_integrator->RequestSample( m_sampler , m_pixelSamples , g_samplePerPixel);
+    g_integrator->RequestSample( m_sampler.get() , m_pixelSamples.get() , g_samplePerPixel);
     
 	Vector2i rb = m_coord + m_size;
     
@@ -48,7 +48,7 @@ void Render_Task::Execute(){
             MemManager::GetSingleton().ClearMem(tid);
             
             // generate samples to be used later
-            g_integrator->GenerateSample( m_sampler , m_pixelSamples, g_samplePerPixel, m_scene );
+            g_integrator->GenerateSample( m_sampler.get() , m_pixelSamples.get(), g_samplePerPixel, m_scene );
             
             // the radiance
             Spectrum radiance;
