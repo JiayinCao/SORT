@@ -147,8 +147,6 @@ public:
 private:
     /**< Root node of the KD-Tree. */
 	Kd_Node*		m_root = nullptr;
-    /**< Temporary buffer for marking primitives. */
-    unsigned char*	m_temp = nullptr;
 
     /**< Maximum allowed depth of KD-Tree. */
 	unsigned	    m_maxDepth = 28;
@@ -161,7 +159,8 @@ private:
     //! @param splits       The split plane that holds all primitive pointers.
     //! @param prinum       The number of primitives in the node.
     //! @param depth        The current depth of the node.
-	void splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth );
+    //! @oaram tmp          Temporary buffer for marking primitives.
+	void splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth , unsigned char* tmp );
 
     //! @brief  Evaluate SAH value for a specific split plane.
     //!

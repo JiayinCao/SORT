@@ -52,7 +52,7 @@ void KDTree::Build( const Scene& scene ){
 		return;
 
 	// pre-malloc node and leaf primitive list memory
-	m_temp = new unsigned char[m_primitives->size()];
+	auto tmp = std::make_unique<unsigned char[]>(m_primitives->size());
 
 	// get the bounding box for the whole primitive list
 	computeBBox();
@@ -77,16 +77,14 @@ void KDTree::Build( const Scene& scene ){
 	m_root = new Kd_Node(m_bbox);
 
 	// build kd-tree
-	splitNode( m_root , splits , count , 0 );
+	splitNode( m_root , splits , count , 0 , tmp.get() );
 
     SORT_STATS(++sKDTreeNodeCount);
 
 	m_isValid = true;
-	
-	SAFE_DELETE_ARRAY(m_temp);
 }
 
-void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth ){
+void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth , unsigned char* tmp ){
     SORT_STATS(sKDTreeDepth = std::max(sKDTreeDepth, (StatsInt)depth+1));
     
 	if( prinum < m_maxPriInLeaf || depth > m_maxDepth ){
@@ -114,18 +112,18 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	Split* _splits = splits.split[split_Axis];
     auto l_num = 0 , r_num = 0;
 	for(auto i = 0u ; i < split_count; i++ )
-		m_temp[splits.split[split_Axis][i].id] = 0;
+		tmp[splits.split[split_Axis][i].id] = 0;
 	for(auto i = 0u ; i < split_count; i++ )
 	{
         if (i < split_offset) {
             if (_splits[i].type == Split_Type::Split_Start) {
-                m_temp[_splits[i].id] |= 1;
+                tmp[_splits[i].id] |= 1;
                 ++l_num;
             }
         }
         else if (i > split_offset) {
             if (_splits[i].type == Split_Type::Split_End) {
-                m_temp[_splits[i].id] |= 2;
+                tmp[_splits[i].id] |= 2;
                 ++r_num;
             }
         }
@@ -145,9 +143,9 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 		for(auto i = 0u ; i < split_count ; i++ ){
             const Split& old = splits.split[k][i];
             auto id = old.id;
-            if (m_temp[id] & 0x01)
+            if (tmp[id] & 0x01)
                 l_splits.split[k][l_offset++] = old;
-            if (m_temp[id] & 0x02)
+            if (tmp[id] & 0x02)
                 r_splits.split[k][r_offset++] = old;
 		}
         sAssert(l_offset == 2 * l_num, SPATIAL_ACCELERATOR);
@@ -158,12 +156,12 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
     auto left_box = node->bbox;
 	left_box.m_Max[split_Axis] = node->split;
 	node->leftChild = new Kd_Node(left_box);
-	splitNode( node->leftChild , l_splits , l_num , depth + 1 );
+	splitNode( node->leftChild , l_splits , l_num , depth + 1 , tmp );
 
     auto right_box = node->bbox;
 	right_box.m_Min[split_Axis] = node->split;
 	node->rightChild = new Kd_Node(right_box);
-	splitNode( node->rightChild , r_splits , r_num , depth + 1 );
+	splitNode( node->rightChild , r_splits , r_num , depth + 1 , tmp );
 
     SORT_STATS(sKDTreeNodeCount += 2);
 }

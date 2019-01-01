@@ -63,14 +63,3 @@ void OrthoCamera::updateTransform()
 							xaxis.z , yaxis.z , zaxis.z , m_eye.z ,
 							0.0f , 0.0f , 0.0f , 1.0f );
 }
-
-/*
-void OrthoCamera::registerAllProperty()
-{
-	_registerProperty( "eye" , new EyeProperty( this ) );
-	_registerProperty( "up" , new UpProperty( this ) );
-	_registerProperty( "target" , new TargetProperty( this ) );
-	_registerProperty( "width" , new WidthProperty( this ) );
-	_registerProperty( "height" , new HeightProperty( this ) );
-}
-*/
