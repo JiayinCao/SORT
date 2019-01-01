@@ -31,10 +31,6 @@ public:
 	//! @param index   		The index buffer
     Triangle( const class MeshVisual* mesh , const struct MeshIndex& index ): m_meshVisual(mesh) , m_index(index) {}
 
-    ~Triangle() {
-        int debug = 0;
-
-    }
 	//! @brief Sample a point on the surface of the shape given a shading point.
 	//!
 	//! Sample a position on the surface of the shape. This function is heavily
