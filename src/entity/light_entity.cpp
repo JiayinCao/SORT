@@ -92,6 +92,6 @@ void AreaLightEntity::FillScene(class Scene& scene) {
     m_light->SetupScene(&scene);
     scene.AddLight(m_light.get());
 
-    Primitive* primitive = new Primitive(nullptr, m_light->shape.get() , m_light.get());
-    scene.AddPrimitive(primitive);
+    auto primitive = std::make_unique<Primitive>(nullptr, m_light->shape.get() , m_light.get());
+    scene.AddPrimitive(std::move(primitive));
 }

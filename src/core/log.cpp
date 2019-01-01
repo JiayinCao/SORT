@@ -31,8 +31,8 @@ static bool g_logTime = true;
 static bool g_logLineInfo = false;
 static LOG_LEVEL logDefaultLevel = LOG_LEVEL::LOG_DEBUG;     // By default, debug information is avoided.
 
-void addLogDispatcher( LogDispatcher* logDispatcher ){
-    g_logDispatcher.push_back( std::unique_ptr<LogDispatcher>( logDispatcher ) );
+void addLogDispatcher( std::unique_ptr<LogDispatcher> logDispatcher ){
+    g_logDispatcher.push_back( std::move(logDispatcher) );
 }
 
 void sortLog( LOG_LEVEL level , LOG_TYPE type , const std::string& str , const char* file , const int line ){

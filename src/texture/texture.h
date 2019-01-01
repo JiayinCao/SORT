@@ -83,15 +83,6 @@ public:
 		m_iTexHeight = h;
 	}
 
-	// texture supports + - * operator for blending
-	ComTexture operator + ( const Texture& tex ) const ;
-	ComTexture operator - ( const Texture& tex ) const ;
-	ComTexture operator * ( const Texture& tex ) const ;
-
-	ComTexture operator + ( float ) const;
-	ComTexture operator - ( float ) const;
-	ComTexture operator * ( float ) const;
-
 	// whether the texture is valid
 	virtual bool IsValid() { return true; }
 

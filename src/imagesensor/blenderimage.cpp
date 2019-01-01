@@ -47,7 +47,7 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 
 	// for final update
     {
-        std::lock_guard<spinlock_mutex> lock(m_mutex[x][y]);
+        std::lock_guard<spinlock_mutex> lock(m_mutex[y*m_width+x]);
         Spectrum _color = m_rendertarget.GetColor(x,y);
         m_rendertarget.SetColor(x, y, color+_color);
     }
