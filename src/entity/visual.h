@@ -18,6 +18,7 @@
 #pragma once
 
 #include "managers/meshmanager.h"
+#include "shape/shape.h"
 
 //! @brief Visual entity is the basic visible unit can be seen in SORT.
 /**
@@ -52,5 +53,8 @@ public:
     void        Serialize( IStreamBase& stream ) override;
 
 public:
-    std::unique_ptr<BufferMemory>  m_memory;       /**< Memory for the mesh. */
+    /**< Memory for the mesh. */
+    std::unique_ptr<BufferMemory>           m_memory;
+    /**< This is to make sure the memory of triangles will be properly cleared. */
+    std::vector<std::unique_ptr<Shape>>    m_triangles;
 };

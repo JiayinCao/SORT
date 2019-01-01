@@ -124,7 +124,7 @@ void Scene::_genLightDistribution()
 	if( count == 0 )
 		return ;
 
-	float* pdf = new float[count];
+	std::unique_ptr<float[]> pdf = std::make_unique<float[]>(count);
 	for( unsigned i = 0 ; i < count ; i++ )
 		pdf[i] = m_lights[i]->Power().GetIntensity();
 
@@ -135,8 +135,7 @@ void Scene::_genLightDistribution()
 	for( unsigned i = 0 ; i < count ; i++ )
 		m_lights[i]->SetPickPDF( pdf[i] / total_pdf );
 
-    m_lightsDis = std::make_unique<Distribution1D>( pdf , count );
-	delete[] pdf;
+    m_lightsDis = std::make_unique<Distribution1D>( pdf.get() , count );
 }
 
 // get sampled light

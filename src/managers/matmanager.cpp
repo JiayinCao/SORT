@@ -20,14 +20,13 @@
 #include "stream/stream.h"
 
 // parse material file and add the materials into the manager
-unsigned MatManager::ParseMatFile( IStreamBase& stream )
-{
+unsigned MatManager::ParseMatFile( IStreamBase& stream ){
 	unsigned int material_cnt = 0;
 	stream >> material_cnt;
 	for( unsigned int i = 0 ; i < material_cnt ; ++i ){
-        Material* mat = new Material();
+        auto mat = std::make_unique<Material>();
 		mat->Serialize( stream );
-		m_matPool.push_back( std::unique_ptr<Material>(mat) );
+		m_matPool.push_back( std::move(mat) );
 	}
 	return material_cnt;
 }

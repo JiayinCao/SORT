@@ -133,4 +133,4 @@ void sortLog( LOG_LEVEL level , LOG_TYPE type , const std::string& str , const c
 //! @brief  Add a dispatcher to the log system.
 //!
 //! @param  logDispatcher   Dispatcher to add in the log system.
-void addLogDispatcher( LogDispatcher* logDispatcher );
+void addLogDispatcher( std::unique_ptr<LogDispatcher> logDispatcher );

@@ -140,7 +140,7 @@ bool TexManager::saveImage(const std::string& name, const Texture* tex )
         unsigned totalXRes = tex->GetWidth();
         unsigned totalYRes = tex->GetHeight();
         unsigned total = totalXRes * totalYRes;
-        float *data = new float[total * 3];
+        auto data = std::make_unique<float[]>(total * 3);
         for (unsigned i = 0; i < total; ++i)
         {
             unsigned x = i % totalXRes;
@@ -152,8 +152,7 @@ bool TexManager::saveImage(const std::string& name, const Texture* tex )
             data[3 * i + 2] = c.GetB();
         }
 
-        int ret = SaveEXR(data, tex->GetWidth(), tex->GetHeight(), 3, true, name.c_str());
-        delete[] data;
+        int ret = SaveEXR(data.get(), tex->GetWidth(), tex->GetHeight(), 3, true, name.c_str());
         if (ret < 0)
             slog(WARNING, MATERIAL, "Fail to save image file %s", name.c_str());
         return ret >= 0;
