@@ -28,12 +28,6 @@ class	DirectLight : public Integrator
 public:
 	DEFINE_CREATOR( DirectLight , Integrator , "direct" );
 
-	// destructor
-	~DirectLight(){
-        SAFE_DELETE_ARRAY(light_sample_offsets);
-        SAFE_DELETE_ARRAY(bsdf_sample_offsets);
-    }
-
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
 	// para 'ray'   : ray with specific direction
@@ -48,8 +42,5 @@ public:
 	}
 	
 private:
-	SampleOffset*	light_sample_offsets = nullptr;	// light sample offset
-	SampleOffset*	bsdf_sample_offsets = nullptr;	// bsdf sample offset
-
     SORT_STATS_ENABLE( "Direct Illumination" )
 };

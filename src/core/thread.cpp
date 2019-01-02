@@ -24,7 +24,7 @@
 #include "core/profile.h"
 #include "core/define.h"
 
-static Thread_Local int g_ThreadId = 0;
+static thread_local int g_ThreadId = 0;
 int ThreadId(){
 	return g_ThreadId;
 }

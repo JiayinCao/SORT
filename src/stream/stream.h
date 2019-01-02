@@ -209,6 +209,18 @@ public:
         v = Spectrum ( r , g , b );
         return *this;
     }
+
+    //! @brief Loading data from stream directly.
+    //!
+    //! @param  data    Data to be filled.
+    //! @param  size    Size of the data to be filled in bytes.
+    virtual StreamBase& Load( char* data , int size ) = 0;
+
+    //! @brief Writing data to stream.
+    //!
+    //! @param  data    Data to be written.
+    //! @param  size    Size of the data to be filled in bytes.
+    virtual StreamBase& Write( char* data , int size ) = 0;
 };
 
 //! @brief Streaming in data
@@ -250,6 +262,12 @@ public:
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
     StreamBase& operator << (const bool v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStreamBase!"); return *this; }
+
+    //! @brief Writing data to stream.
+    //!
+    //! @param  data    Data to be written.
+    //! @param  size    Size of the data to be filled in bytes.
+    StreamBase& Write( char* data , int size ) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStreamBase!"); return *this; }
 };
 
 //! @brief Streaming out data
@@ -291,6 +309,12 @@ public:
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
     StreamBase& operator >> (bool& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+
+    //! @brief Disable streaming in an array of bytes. Attempting to do it will result in crash!
+    //!
+    //! @param  data    Data to be filled.
+    //! @param  size    Size of the data to be filled in bytes.
+    StreamBase& Load( char* data , int size ) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
 };
 
 //! @brief  Interface for serializable objects.

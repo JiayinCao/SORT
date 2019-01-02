@@ -18,7 +18,7 @@
 #pragma once
 
 #include "material_node.h"
-#include "core/resource.h"
+#include "stream/stream.h"
 #include "bsdf/bsdf.h"
 #include "managers/memmanager.h"
 #include "core/log.h"
@@ -32,7 +32,7 @@
  * textures or any other information. For invalid material node graph tree, a red default material is returned as default.
  * Material class just holds a root node of material node tree. The exact definition of materials are defined in Blender.
  */
-class Material : public Resource
+class Material : public SerializableObject
 {
 public:
 	//! @brief	Get the BSDF.

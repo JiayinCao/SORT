@@ -45,9 +45,6 @@ public:
 	//			  of the primitives which will cost much!
 	bool	GetIntersect( const Ray& r , Intersection* intersect ) const;
 
-	// release the memory of the scene
-	void	Release();
-
 	// preprocess
 	void	PreProcess();
 

@@ -21,6 +21,8 @@
 #include "core/define.h"
 #include "stream/fstream.h"
 
+#define FREE_DATA_ARRAY(p)      if(p) free(p)
+
 //! @brief Streaming from memory.
 /**
  * IMemoryStream only works for streaming data from memory. Any attempt to write data
@@ -42,7 +44,7 @@ public:
 
     //! @bried  Destructor.
     ~IMemoryStream(){
-        SAFE_DELETE_ARRAY( m_data );
+        FREE_DATA_ARRAY( m_data );
     }
 
     //! @brief  Resize the stream.
@@ -138,6 +140,20 @@ public:
         return m_data;
     }
 
+    //! @brief Loading data from stream directly.
+    //!
+    //! @param  data    Data to be filled.
+    //! @param  size    Size of the data to be filled in bytes.
+    StreamBase& Load( char* data , int size ) override {
+        if( m_pos + size > m_capacity ){
+            memset( data , 0 , size );
+        }else{
+            memcpy( data , m_data , size );
+            m_pos += size;
+        }
+        return *this;
+    }
+
 private:
     /**< Pointer points to the address where the memory is. */
     char*               m_data = nullptr;
@@ -166,7 +182,7 @@ public:
 
     //! @bried  Destructor.
     ~OMemoryStream(){
-        SAFE_DELETE_ARRAY( m_data );
+        FREE_DATA_ARRAY( m_data );
     }
 
     //! @brief  Resize the stream.
@@ -269,6 +285,21 @@ public:
     //! @return     The size of written bytes.
     unsigned int    GetDataSize() const { 
         return m_pos;
+    }
+
+    //! @brief Writing data to stream.
+    //!
+    //! @param  data    Data to be written.
+    //! @param  size    Size of the data to be filled in bytes.
+    virtual StreamBase& Write( char* data , int size ) override {
+        if( m_pos + size > m_capacity ){
+            Resize( 2 * m_capacity );
+            return Write( data , size );
+        }else{
+            memcpy( data , m_data + m_pos , size );
+            m_pos += size;
+        }
+        return *this;
     }
 
 private:
