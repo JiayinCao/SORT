@@ -2,7 +2,7 @@
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
  
-    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+    Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
  
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
@@ -29,9 +29,6 @@
 class UniGrid : public Accelerator{
 public:
     DEFINE_CREATOR( UniGrid , Accelerator , "UniGrid" );
-
-	//! Destructor releasing all voxel data.
-    ~UniGrid() override;
 
     //! @brief      Get intersection between the ray and the primitive set using KD-Tree.
     //!
@@ -65,15 +62,15 @@ public:
 
 private:
     /**< Total number of voxels. */
-	unsigned	                m_voxelCount = 0;
+	unsigned	                                m_voxelCount = 0;
     /**< Number of voxels along each axis. */
-    unsigned	                m_voxelNum[3] = {};
+    unsigned	                                m_voxelNum[3] = {};
     /**< Extent of one voxel along each axis. */
-	Vector		                m_voxelExtent;
+	Vector		                                m_voxelExtent;
     /**< Inverse of extent of one voxel along each axis. */
-	Vector		                m_voxelInvExtent;
+	Vector		                                m_voxelInvExtent;
     /**< Vector holding all voxels. */
-	std::vector<Primitive*>*	m_voxels = nullptr;
+	std::vector<std::vector<Primitive*>>	    m_voxels;
 
 	//! @brief      Locate the id of the voxel that the point belongs to along a specific axis.
     //!

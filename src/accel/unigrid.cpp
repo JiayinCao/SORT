@@ -2,7 +2,7 @@
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
  
-    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+    Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
  
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
@@ -38,19 +38,11 @@ SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGrid
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
 SORT_STATS_AVG_COUNT("Spatial-Structure(UniformGrid)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-UniGrid::~UniGrid(){
-    SORT_PROFILE("Destructe Uniform Grid");
-	SAFE_DELETE_ARRAY( m_voxels );
-}
-
 bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_PROFILE("Traverse Uniform Grid");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect == nullptr);
     
-	if( m_voxels == nullptr || m_primitives == nullptr )
-		return false;
-
 	static const auto voxelId2Point = [&]( int id[3] ){
 		Point p;
 		p.x = m_bbox.m_Min.x + id[0] * m_voxelExtent[0];
@@ -148,8 +140,7 @@ void UniGrid::Build( const Scene& scene ){
 	m_voxelCount = m_voxelNum[0] * m_voxelNum[1] * m_voxelNum[2];
 
 	// allocate the memory
-	SAFE_DELETE_ARRAY( m_voxels );
-	m_voxels = new std::vector<Primitive*>[ m_voxelCount ];
+	m_voxels.resize( m_voxelCount );
 
 	// distribute the primitives
     for( auto& primitive : *m_primitives ){

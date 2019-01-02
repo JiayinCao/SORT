@@ -2,7 +2,7 @@
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
  
-    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+    Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
  
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
@@ -17,12 +17,11 @@
 
 #pragma once
 
-// include header file
 #include "bxdf.h"
 
 //! @brief OrenNayar BRDF.
 /**
- * 'Generalization of Lambert’s Reflectance Model'
+ * 'Generalization of Lambertï¿½s Reflectance Model'
  * http://www1.cs.columbia.edu/CAVE/publications/pdfs/Oren_SIGGRAPH94.pdf
  *
  * Like lambert BRDF, OrenNayar presents similar quality with subtle differences.
