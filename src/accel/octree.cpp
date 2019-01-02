@@ -38,11 +38,6 @@ SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOc
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCountCopy);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-OcTree::~OcTree(){
-    SORT_PROFILE("Destructe OcTree");
-	releaseOcTree( m_root );
-}
-
 bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
@@ -53,7 +48,7 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	if( fmin < 0.0f )
 		return false;
 
-	if( traverseOcTree( m_root , r , intersect , fmin , fmax ) ){
+	if( traverseOcTree( m_root.get() , r , intersect , fmin , fmax ) ){
 		if( !intersect )
 			return true;
 		return nullptr != intersect->primitive;
@@ -74,29 +69,21 @@ void OcTree::Build( const Scene& scene ){
 	computeBBox();
 
 	// initialize a primitive container
-	NodePrimitiveContainer* container = new NodePrimitiveContainer();
+	std::unique_ptr<NodePrimitiveContainer> container = std::make_unique<NodePrimitiveContainer>();
     for( auto& primitive : *m_primitives )
 		container->primitives.push_back( primitive.get() );
 	
 	// create root node
-	m_root = new OcTreeNode();
+    m_root = std::make_unique<OcTreeNode>();
 	m_root->bb = m_bbox;
 
 	// split OCTree node
-	splitNode( m_root , container , 0 );
+	splitNode( m_root.get() , container.get() , 0 );
     
 	m_isValid = true;
 	
     SORT_STATS(++sOcTreeNodeCount);
     SORT_STATS(sOcTreeLeafNodeCountCopy = sOcTreeLeafNodeCount);
-}
-
-void OcTree::releaseOcTree( OcTreeNode* node ){
-	if( !node )
-		return;
-	for(auto i = 0 ; i < 8 ; ++i )
-		releaseOcTree( node->child[i] );
-	delete node;
 }
 
 void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , unsigned depth ){
@@ -109,11 +96,11 @@ void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , u
 	}
 
 	// container for child node
-	NodePrimitiveContainer* childcontainer[8];
-	for(auto i = 0; i < 8 ; ++i ){
-		node->child[i] = new OcTreeNode();
-		childcontainer[i] = new NodePrimitiveContainer();
-	}
+	std::unique_ptr<NodePrimitiveContainer> childcontainer[8];
+    for (auto i = 0; i < 8; ++i) {
+        node->child[i] = std::make_unique<OcTreeNode>();
+        childcontainer[i] = std::make_unique<NodePrimitiveContainer>();
+    }
     
 	// get the center point of this tree node
     auto offset = 0;
@@ -151,21 +138,16 @@ void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , u
 		makeLeaf( node , container );
 
 		// splitting plane information is no useful anymore.
-        for( int i = 0 ; i < 8 ; ++i ){
-            SAFE_DELETE( node->child[i] );
-            SAFE_DELETE( childcontainer[i] );
-        }
+        for (int i = 0; i < 8; ++i)
+            node->child[i].reset();
 
 		// no need to process any more
 		return;
 	}
 	
-	// container for this level is no useful any more
-	delete container;
-    
 	// split children node
 	for(auto i = 0 ; i < 8 ; ++i )
-		splitNode( node->child[i] , childcontainer[i], depth + 1 );
+		splitNode( node->child[i].get() , childcontainer[i].get() , depth + 1 );
     
     SORT_STATS(sOcTreeNodeCount+=8);
 }
@@ -177,7 +159,6 @@ void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container ){
     
     for( auto primitive : container->primitives )
 		node->primitives.push_back( primitive );
-	delete container;
 }
 
 bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const{
@@ -224,7 +205,7 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 		nextAxis = (_next[nextAxis] <= _next[2]) ? nextAxis : 2;
 
 		// check if there is intersection in the current grid
-		if( traverseOcTree( node->child[node_index] , ray , intersect , _curt , _next[nextAxis] ) )
+		if( traverseOcTree( node->child[node_index].get() , ray , intersect , _curt , _next[nextAxis] ) )
 			return true;
 
 		// get to the next node based on distance

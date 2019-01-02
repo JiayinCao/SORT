@@ -40,11 +40,11 @@
 class Bvh : public Accelerator{
     //! @brief Bounding volume hierarchy node.
     struct Bvh_Node {
-        BBox		bbox;                   /**< Bounding box of the BVH node. */
-        unsigned 	pri_num = 0;            /**< Number of primitives in the BVH node. */
-        unsigned	pri_offset = 0;         /**< Offset in the primitive buffer. It is 0 for interior nodes. */
-        Bvh_Node*   left = nullptr;         /**< Left child of the BVH node. */
-        Bvh_Node*   right = nullptr;        /**< Right child of the BVH node. */
+        BBox		                bbox;                   /**< Bounding box of the BVH node. */
+        unsigned 	                pri_num = 0;            /**< Number of primitives in the BVH node. */
+        unsigned	                pri_offset = 0;         /**< Offset in the primitive buffer. It is 0 for interior nodes. */
+        std::unique_ptr<Bvh_Node>   left = nullptr;         /**< Left child of the BVH node. */
+        std::unique_ptr<Bvh_Node>   right = nullptr;        /**< Right child of the BVH node. */
     };
 
     //! @brief Bounding volume hierarchy node primitives. It is used during BVH construction.
@@ -69,9 +69,6 @@ class Bvh : public Accelerator{
 
 public:
     DEFINE_CREATOR( Bvh , Accelerator , "Bvh" );
-
-	//! Destructor.
-    ~Bvh() override;
 
     //! @brief Get intersection between the ray and the primitive set using BVH.
     //!
@@ -110,13 +107,13 @@ public:
 
 private:
     /**< Primitive list during BVH construction. */
-    Bvh_Primitive*	m_bvhpri = nullptr;
+    Bvh_Primitive*	            m_bvhpri = nullptr;
     /**< Root node of the BVH structure. */
-    Bvh_Node*       m_root = nullptr;
+    std::unique_ptr<Bvh_Node>   m_root = nullptr;
     /**< Maximum primitives in a leaf node. During BVH construction, a node with less primitives will be marked as a leaf node. */
-    unsigned	    m_maxPriInLeaf = 8;
+    unsigned	                m_maxPriInLeaf = 8;
     /**< Maximum depth of node in BVH. */
-    unsigned        m_maxNodeDepth = 16; 
+    unsigned                    m_maxNodeDepth = 16; 
 
 	//! @brief Split current BVH node.
     //!
@@ -163,13 +160,6 @@ private:
     //! @param fmin         The minimum range along the ray.
     //! @return             True if there is intersection, otherwise it will return false.
 	bool    traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const;
-    
-    //! @brief Delete all nodes in the BVH.
-    //!
-    //! This function will recursively call every child node, eventually kill the whole (sub)tree.
-    //!
-    //! @param node     The node to be deleted.
-    void    deleteNode( Bvh_Node* node );
     
     SORT_STATS_ENABLE( "Spatial-Structure(BVH)" )
 };
