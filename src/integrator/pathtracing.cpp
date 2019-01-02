@@ -121,11 +121,11 @@ void PathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsigned p
 	{
 		// the first half samples are used to sample bsdf for shading
 		// the second half samples are used to sample bsdf for direction
-		ps[i].bsdf_sample = new BsdfSample[ 2 ];
-		ps[i].light_sample = new LightSample[ 1 ];
+        ps[i].bsdf_sample = std::make_unique<BsdfSample[]>(2);
+		ps[i].light_sample = std::make_unique<LightSample[]>(1);
 	}
 
-	ps[0].data = new float[ ps_num * 3 ];
+    ps[0].data = std::make_unique<float[]>(ps_num * 3);
 }
 
 // generate samples
@@ -135,8 +135,8 @@ void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples 
 
 	if( sampler->RoundSize( ps ) == ps )
 	{
-		float* data_1d = samples[0].data;
-		float* data_2d = samples[0].data + ps;
+		float* data_1d = samples[0].data.get();
+		float* data_2d = samples[0].data.get() + ps;
 
 		sampler->Generate1D( data_1d , ps );
 		sampler->Generate2D( data_2d , ps );

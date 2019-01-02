@@ -150,7 +150,7 @@ public:
 		if( f == 0 || n == 0 )
 			return;
 
-		cdf = new float[n+1];
+        cdf = std::make_unique<float[]>(n + 1);
 		cdf[0] = 0;
 		for( unsigned i = 0 ; i < n ; i++ )
 			cdf[i+1] = cdf[i] + f[i];
@@ -163,20 +163,18 @@ public:
 			for( unsigned i = 0 ; i < n+1 ; ++i )
 				cdf[i] = (float)i / (float)(n);
 	}
-	// destructor
-	~Distribution1D(){ SAFE_DELETE_ARRAY(cdf); }
 
 	// get a discrete sample
 	// para 'u' : a canonical random variable
-	// para 'pdf' : propery density function value for the sample
+	// para 'pdf' : probability density function value for the sample
 	// result   : corresponding bucket straddle the u, -1 if there is no data in the distribution
 	int SampleDiscrete( float u , float* pdf ) const
 	{
 		sAssert( count != 0 && cdf != 0 , SAMPLING );
 		sAssert( u <= 1.0f && u >= 0.0f , SAMPLING );
 
-		float* target = std::lower_bound( cdf , cdf + count + 1 , u );
-		unsigned offset = (u<=0.0f)? 0:(int)(target-cdf-1);
+		float* target = std::lower_bound( cdf.get() , cdf.get() + count + 1 , u );
+		unsigned offset = (u<=0.0f)? 0:(int)(target-cdf.get()-1);
 		// special care needs to be payed to situation when u == 0.0f
 		if( offset == 0 )
 		{
@@ -193,7 +191,7 @@ public:
 		return offset;
 	}
 
-	// get a contineous sample
+	// get a continuous sample
 	// para 'u' : a canonical random variable
 	// para 'pdf' : property density function value for the sample
 	float SampleContinuous( float u , float* pdf ) const
@@ -201,8 +199,8 @@ public:
 		sAssert( count != 0 && cdf != 0 , SAMPLING );
 		sAssert( u <= 1.0f && u >= 0.0f , SAMPLING );
 
-		float* target = std::lower_bound( cdf , cdf+count+1 , u );
-		unsigned offset = (u<=0.0f)?0:(int)(target-cdf-1);
+		float* target = std::lower_bound( cdf.get() , cdf.get()+count+1 , u );
+		unsigned offset = (u<=0.0f)?0:(int)(target-cdf.get()-1);
 		// special care needs to be payed to situation when u == 0.0f
 		if( offset == 0 )
 		{
@@ -236,9 +234,9 @@ public:
 	}
 
 private:
-	const unsigned	count;
-	float*	cdf;
-	float	sum;
+	const unsigned	            count;
+	std::unique_ptr<float[]>	cdf;
+	float	                    sum;
 };
 
 // two dimensional distribution
@@ -253,23 +251,14 @@ public:
 		unsigned nu = tex->GetWidth();
 		unsigned nv = tex->GetHeight();
 		sAssert( nu != 0 && nv != 0 , GENERAL );
-		float* data = new float[nu*nv];
+        std::unique_ptr<float[]> data = std::make_unique<float[]>(nu*nv);
 		for( unsigned i = 0 ; i < nv ; i++ )
 		{
 			unsigned offset = i * nu;
 			for( unsigned j = 0 ; j < nu ; j++ )
 				data[offset+j] = tex->GetColor( j , i ).GetIntensity();
 		}
-		_init( data , nu , nv );
-		SAFE_DELETE_ARRAY(data);
-	}
-	// destructor
-	~Distribution2D()
-	{
-		SAFE_DELETE( marginal );
-		for( unsigned i = 0 ; i < m_nv ; i++ )
-			SAFE_DELETE(pConditions[i]);
-		pConditions.clear();
+		_init( data.get() , nu , nv );
 	}
 
 	// get a sample point
@@ -300,9 +289,9 @@ public:
 
 private:
 	// the distribution in each row
-	std::vector<Distribution1D*>	pConditions;
-	// the marginal sampleing distribution
-	Distribution1D*			marginal;
+	std::vector<std::unique_ptr<Distribution1D>>	pConditions;
+	// the marginal sampling distribution
+	std::unique_ptr<Distribution1D> marginal;
 	// the size for the two dimensions
 	unsigned m_nu , m_nv;
 
@@ -310,13 +299,12 @@ private:
 	void _init( const float* data , unsigned nu , unsigned nv )
 	{
 		for( unsigned i = 0 ; i < nv ; i++ )
-			pConditions.push_back( new Distribution1D( &data[i*nu] , nu ) );
-		float* m = new float[nv];
+			pConditions.push_back( std::make_unique<Distribution1D>( &data[i*nu] , nu ) );
+        std::unique_ptr<float[]> m = std::make_unique<float[]>(nv);
 		for( unsigned i = 0 ; i < nv ; i++ )
 			m[i] = pConditions[i]->GetSum();
-		marginal = new Distribution1D( m , nv );
+		marginal = std::make_unique<Distribution1D>( m.get() , nv );
 		m_nu = nu;
 		m_nv = nv;
-		delete[] m;
 	}
 };

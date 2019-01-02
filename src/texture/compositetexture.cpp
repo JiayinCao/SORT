@@ -59,14 +59,6 @@ void ComTexture::_init()
 	m_iTexHeight = 0;
 }
 
-// release the memory
-void ComTexture::Release()
-{
-	SAFE_DELETE_ARRAY( m_pData );
-	m_iTexWidth = 0;
-	m_iTexHeight = 0;
-}
-
 // get color from the texture
 Spectrum ComTexture::GetColor( int x , int y ) const
 {
@@ -93,9 +85,7 @@ void ComTexture::SetSize( unsigned w , unsigned h )
 	m_iTexWidth = w;
 	m_iTexHeight = h;
 
-	// delete the previous data
-	SAFE_DELETE_ARRAY( m_pData );
-
 	// allocate the data
-	m_pData = new Spectrum[ w * h ];
+    m_pData.reset();
+	m_pData = std::make_unique<Spectrum[]>(w * h);
 }

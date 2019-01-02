@@ -54,19 +54,19 @@ void FourierBxdfData::LoadData( const std::string& filename ){
     if( !ReadFile( (char*)unused , 16 ) ) {file.close(); return;}
     
     const auto sqMu = bsdfTable.nMu * bsdfTable.nMu;
-    bsdfTable.mu = new float[bsdfTable.nMu];
-    bsdfTable.cdf = new float[sqMu];
-    offsetAndLength.reset( new int[sqMu * 2] );
-    bsdfTable.m = new int[sqMu];
-    bsdfTable.aOffset = new int[sqMu];
-    bsdfTable.a = new float[coeff];
-    bsdfTable.a0 = new float[sqMu];
-    bsdfTable.recip = new float[bsdfTable.nMu];
+    bsdfTable.mu = std::make_unique<float[]>(bsdfTable.nMu);
+    bsdfTable.cdf = std::make_unique<float[]>(sqMu);
+    offsetAndLength = std::make_unique<int[]>(sqMu * 2);
+    bsdfTable.m = std::make_unique<int[]>(sqMu);
+    bsdfTable.aOffset = std::make_unique<int[]>(sqMu);
+    bsdfTable.a = std::make_unique<float[]>(coeff);
+    bsdfTable.a0 = std::make_unique<float[]>(sqMu);
+    bsdfTable.recip = std::make_unique<float[]>(bsdfTable.nMu);
     
-    if(!ReadFile( (char*)bsdfTable.mu , bsdfTable.nMu * sizeof(float) ) ||
-       !ReadFile( (char*)bsdfTable.cdf , sqMu * sizeof(float) ) ||
+    if(!ReadFile( (char*)bsdfTable.mu.get() , bsdfTable.nMu * sizeof(float) ) ||
+       !ReadFile( (char*)bsdfTable.cdf.get() , sqMu * sizeof(float) ) ||
        !ReadFile( (char*)offsetAndLength.get() , 2 * sqMu * sizeof(int) ) ||
-       !ReadFile( (char*)bsdfTable.a , coeff * sizeof( float ) ) )
+       !ReadFile( (char*)bsdfTable.a.get() , coeff * sizeof( float ) ) )
         {file.close(); return;}
     
     for( int i = 0 ; i < bsdfTable.nMu * bsdfTable.nMu ; ++i ){
@@ -119,7 +119,7 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
 {
     auto muO = CosTheta(wo);
     float pdfMu;
-    auto muI = sampleCatmullRom2D(bsdfTable.nMu, bsdfTable.nMu, bsdfTable.mu, bsdfTable.mu, bsdfTable.a0, bsdfTable.cdf, muO, bs.u, nullptr, &pdfMu);
+    auto muI = sampleCatmullRom2D(bsdfTable.nMu, bsdfTable.nMu, bsdfTable.mu.get(), bsdfTable.mu.get(), bsdfTable.a0.get(), bsdfTable.cdf.get(), muO, bs.u, nullptr, &pdfMu);
     
     int offsetI , offsetO;
     float weightsI[4] , weightsO[4];
@@ -134,7 +134,7 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
     auto nMax = blendCoefficients( ak , bsdfTable.nChannels , offsetI, offsetO, weightsI, weightsO );
     
     float phi, pdfPhi;
-    auto Y = sampleFourier(ak, bsdfTable.recip, nMax, bs.v, &pdfPhi, &phi);
+    auto Y = sampleFourier(ak, bsdfTable.recip.get(), nMax, bs.v, &pdfPhi, &phi);
     *pdf = std::max( 0.0f , pdfPhi * pdfMu );
     
     auto sin2ThetaI = std::max( 0.0f , 1.0f - muI * muI );
