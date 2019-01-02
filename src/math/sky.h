@@ -28,9 +28,6 @@
 class	Sky
 {
 public:
-    // destructor
-    ~Sky() { SAFE_DELETE(distribution); }
-
     // evaluate value from sky
     // para 'r' : the ray which misses all of the triangle in the scene
     // result   : the spectrum in the sky
@@ -60,7 +57,7 @@ private:
     Transform m_transform;
 
     ImageTexture	m_sky;
-    class Distribution2D*	distribution = nullptr;
+    std::unique_ptr<class Distribution2D>	distribution = nullptr;
 
     // generate 2d distribution
     void _generateDistribution2D();

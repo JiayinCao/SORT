@@ -55,7 +55,7 @@ void MemManager::PreMalloc( unsigned size , unsigned id )
 
 	// create new memory
 	mem = new Memory();
-	mem->m_memory = new char[size];
+    mem->m_memory = std::make_unique<char[]>(size);
 	// reset offset
 	mem->m_offset = 0;
 	// set size

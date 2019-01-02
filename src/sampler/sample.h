@@ -17,8 +17,9 @@
 
 #pragma once
 
-#include "core/define.h"
+#include <memory>
 #include <vector>
+#include "core/define.h"
 #include "core/rand.h"
 #include "core/define.h"
 
@@ -90,29 +91,15 @@ class PixelSample
 {
 // public field
 public:
-	float					img_u , img_v;	// the range of the float2 should be (0,0) <-> (1,1)
-	float					dof_u , dof_v;	// the range of the float2 should be (-1,-1) <-> (1,1)
-	LightSample*			light_sample;
-	BsdfSample*				bsdf_sample;
-	std::vector<unsigned>	light_dimension;
-	std::vector<unsigned>	bsdf_dimension;
-	float*					data;		// the data to used
+    float					        img_u = 0.0f;
+    float                           img_v = 0.0f;	// the range of the float2 should be (0,0) <-> (1,1)
+	float					        dof_u , dof_v;	// the range of the float2 should be (-1,-1) <-> (1,1)
+	std::unique_ptr<LightSample[]>  light_sample = nullptr;
+	std::unique_ptr<BsdfSample[]>   bsdf_sample = nullptr;
+	std::vector<unsigned>	        light_dimension;
+	std::vector<unsigned>	        bsdf_dimension;
+	std::unique_ptr<float[]>        data;		// the data to used
 
-	// default constructor
-	PixelSample()
-	{
-		img_u = 0.0f;
-		img_v = 0.0f;
-		light_sample = 0;
-		bsdf_sample = 0;
-		data = 0;
-	}
-	~PixelSample()
-	{
-		SAFE_DELETE_ARRAY( light_sample );
-		SAFE_DELETE_ARRAY( bsdf_sample );
-		SAFE_DELETE_ARRAY( data );
-	}
 	// request more samples
 	unsigned RequestMoreLightSample( unsigned num )
 	{

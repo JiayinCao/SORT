@@ -25,22 +25,9 @@
 
 struct Memory
 {
-	char*		m_memory;
-	unsigned	m_offset;
-	unsigned	m_size;
-
-	Memory()
-	{
-		m_memory=0;
-		m_offset=0;
-		m_size=0;
-	}
-	~Memory()
-	{
-		delete[] m_memory;
-		m_offset=0;
-		m_size=0;
-	}
+	std::unique_ptr<char[]>		m_memory;
+    unsigned	m_offset = 0;
+    unsigned	m_size = 0;
 };
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -78,7 +65,7 @@ public:
         
 		unsigned addr = mem->m_offset;
 		mem->m_offset += sizeof(T) * count;
-		return (T*)(mem->m_memory + addr);
+		return (T*)(mem->m_memory.get() + addr);
 	}
 
 	// get the offset of the memory

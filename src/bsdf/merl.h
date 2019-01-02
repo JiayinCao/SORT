@@ -33,8 +33,6 @@
 class MerlData
 {
 public:
-    ~MerlData() { SAFE_DELETE(m_data); }
-    
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
@@ -50,7 +48,7 @@ public:
     bool    IsValid() { return m_data != 0; }
     
 private:
-    double*    m_data = nullptr;   /**< The actual data of MERL brdf. */
+    std::unique_ptr<double[]>    m_data = nullptr;   /**< The actual data of MERL brdf. */
 };
 
 //! @brief  MERL brdf.

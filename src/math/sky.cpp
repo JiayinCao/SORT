@@ -43,8 +43,6 @@ Spectrum Sky::GetAverage() const
 // generate 2d distribution
 void Sky::_generateDistribution2D()
 {
-	SAFE_DELETE(distribution);
-
 	unsigned nu = m_sky.GetWidth();
 	unsigned nv = m_sky.GetHeight();
 	sAssert( nu != 0 && nv != 0 , LIGHT );
@@ -58,7 +56,8 @@ void Sky::_generateDistribution2D()
 			data[offset+j] = std::max( 0.0f , m_sky.GetColor( (int)j , (int)i ).GetIntensity() * sin_theta );
 	}
 
-	distribution = new Distribution2D( data.get() , nu , nv );
+    distribution.reset();
+	distribution = std::make_unique<Distribution2D>( data.get() , nu , nv );
 }
 
 // sample direction

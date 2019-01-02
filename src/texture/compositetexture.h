@@ -34,21 +34,6 @@ public:
 	// constructor from a comtexture
 	// para 'tex' : texture to copy
 	ComTexture( const ComTexture& tex ) { _init(); _copy( tex ); }
-	// constructor for texture to construct a comtexture
-	// para 'data' : the memory to the image data
-	// para 'w'    : the width for the texture
-	// para 'h'    : the height for the texture
-	ComTexture( Spectrum* data , unsigned w , unsigned h ) 
-	{
-		m_pData = data ;
-		m_iTexWidth = w;
-		m_iTexHeight = h;
-	}
-	// destructor
-	virtual ~ComTexture() { Release(); }
-
-	// release the memory
-	virtual void Release();
 
 	// get color from render target
 	// para 'x' : x coordinate
@@ -71,10 +56,9 @@ public:
 	ComTexture& operator = ( const Texture& tex ) { _copy( tex ); return *this;}
 	ComTexture& operator = ( const ComTexture& tex ) { _copy( tex ); return *this; }
 
-
 protected:
 	// the texture data
-	Spectrum*	m_pData;
+	std::unique_ptr<Spectrum[]>	m_pData;
 
 // private method
 	// initialize default data

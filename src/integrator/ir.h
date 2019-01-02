@@ -42,7 +42,6 @@ struct VirtualLightSource
 class	InstantRadiosity : public Integrator
 {
 public:
-
 	DEFINE_CREATOR( InstantRadiosity , Integrator , "ir" );
 
 	InstantRadiosity() {
@@ -61,8 +60,6 @@ public:
 	// Preprocess: In preprocessing stage, numbers of virtual light sources
     // are generated along the path tracing from light sources.
     void PreProcess( const Scene& scene ) override;
-	// post-process after rendering
-	void PostProcess() override;
 
 	//! @brief      Serializing data from stream
     //!
@@ -86,7 +83,7 @@ private:
 	float	m_fMinSqrDist;
 
 	// container for light sources
-	std::list<VirtualLightSource>*	m_pVirtualLightSources;
+	std::unique_ptr<std::list<VirtualLightSource>[]>	m_pVirtualLightSources;
 
 	// private method of li
 	Spectrum _li( const Ray& ray , const Scene& scene , bool ignoreLe = false , float* first_intersect_dist = 0 ) const;
