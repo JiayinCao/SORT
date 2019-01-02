@@ -2,7 +2,7 @@
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
  
-    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+    Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
  
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
@@ -36,13 +36,10 @@ struct Memory
 //			it would pre-allocate some memmory space , it will return alloacted space 
 //			when asked for memory space , not really allocate it so that to save
 //			more time on allocating memory.
-class	MemManager : public Singleton<MemManager>
-{
+class	MemManager : public Singleton<MemManager>{
 public:
 	// default constructor
 	MemManager();
-	// destructor
-	~MemManager();
 
 	// pre-allocate memory
 	void PreMalloc( unsigned size , unsigned id = 0 );
@@ -55,8 +52,7 @@ public:
 
 	// get pointer and set the offset
 	template< typename T >
-	T* GetPtr(unsigned count , unsigned id=0)
-	{
+	T* GetPtr(unsigned count , unsigned id=0){
 		// get the memory pointer first
 		Memory* mem = _getMemory(id);
 
@@ -69,8 +65,7 @@ public:
 	}
 
 	// get the offset of the memory
-	unsigned GetOffset( unsigned id=0 ) const
-	{
+	unsigned GetOffset( unsigned id=0 ) const{
 		Memory* mem = _getMemory(id);
         sAssertMsg( nullptr != mem , GENERAL , "No memory with id %d. " , id );
 		return mem->m_offset;
@@ -78,27 +73,14 @@ public:
 
 private:
 	// the memories
-	std::unordered_map<unsigned,Memory*> m_MemPool;
+	std::unordered_map<unsigned,std::unique_ptr<Memory>> m_MemPool;
 
 	// get memory
-	Memory*	_getMemory( unsigned id ) const
-	{
-		std::unordered_map<unsigned,Memory*>::const_iterator it = m_MemPool.find(id);
+	Memory*	_getMemory( unsigned id ) const{
+		auto it = m_MemPool.find(id);
 		if( it != m_MemPool.end() )
-			return it->second;
+			return it->second.get();
 		return nullptr;
-	}
-
-	// dealloc all memory
-	void _deallocAllMemory()
-	{
-		std::unordered_map<unsigned,Memory*>::const_iterator it = m_MemPool.begin();
-		while( it != m_MemPool.end() )
-		{
-			delete it->second;
-			it++;
-		}
-		m_MemPool.clear();
 	}
 
 	friend class Singleton<MemManager>;

@@ -2,7 +2,7 @@
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
  
-    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
+    Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
  
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
@@ -15,7 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// include the headers
 #include "memmanager.h"
 #include "core/define.h"
 #include "core/log.h"
@@ -25,12 +24,6 @@ MemManager::MemManager()
 {
 	// 16mb memory for default
 	PreMalloc( 1024 * 1024 * 1024 );
-}
-
-// destructor
-MemManager::~MemManager()
-{
-	_deallocAllMemory();
 }
 
 // pre-allocate memory
@@ -54,15 +47,12 @@ void MemManager::PreMalloc( unsigned size , unsigned id )
 	}
 
 	// create new memory
-	mem = new Memory();
-    mem->m_memory = std::make_unique<char[]>(size);
+	m_MemPool[id] = std::make_unique<Memory>();
+    m_MemPool[id]->m_memory = std::make_unique<char[]>(size);
 	// reset offset
-	mem->m_offset = 0;
+	m_MemPool[id]->m_offset = 0;
 	// set size
-	mem->m_size = size;
-
-	// push it into the map
-	m_MemPool.insert( std::make_pair( id , mem ) );
+	m_MemPool[id]->m_size = size;
 }
 
 // clear the allocated memory
