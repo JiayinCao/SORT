@@ -29,7 +29,7 @@ class OcTree : public Accelerator{
     //! @brief      OcTree node structure
     struct OcTreeNode{
         /**< Child node pointers, all will be NULL if current node is a leaf.*/
-        OcTreeNode*					    child[8] = {nullptr};
+        std::unique_ptr<OcTreeNode>     child[8] = {nullptr};
         /**< Primitives buffer.*/
         std::vector<const Primitive*>	primitives;
         /**< Bounding box for this OcTree node.*/
@@ -38,9 +38,6 @@ class OcTree : public Accelerator{
 
 public:
     DEFINE_CREATOR( OcTree , Accelerator , "OcTree" );
-
-	//! @brief      Destructor.
-	~OcTree();
 
     //! @brief      Get intersection between the ray and the primitive set using KD-Tree.
     //!
@@ -81,7 +78,7 @@ public:
 
 private:
     /**< Pointer to the root node of this OcTree.*/
-	OcTreeNode*	m_root = nullptr;
+	std::unique_ptr<OcTreeNode>	m_root = nullptr;
     /**< Maximum number of primitives allowed in a leaf node, 16 is the default value.*/
 	unsigned	m_maxPriInLeaf = 16;
     /**< Maximum depth of the OcTree, 16 is the default value.*/

@@ -45,11 +45,6 @@ static const unsigned   BVH_LEAF_PRILIST_MEMID  = 1027;
 static const unsigned   BVH_SPLIT_COUNT         = 16;
 static const float      BVH_INV_SPLIT_COUNT     = 0.0625f;
 
-Bvh::~Bvh(){
-    SORT_PROFILE("Destructe Bvh");
-    deleteNode(m_root);
-}
-
 void Bvh::Build(const Scene& scene){
     SORT_PROFILE("Build Bvh");
 
@@ -67,8 +62,8 @@ void Bvh::Build(const Scene& scene){
         SORT_MALLOC_ID(Bvh_Primitive,BVH_LEAF_PRILIST_MEMID)(primitive.get());
     
 	// recursively split node
-    m_root = new Bvh_Node();
-	splitNode( m_root , 0u , (unsigned)m_primitives->size() , 1u );
+    m_root = std::make_unique<Bvh_Node>();
+	splitNode( m_root.get() , 0u , (unsigned)m_primitives->size() , 1u );
     
 	m_isValid = true;
 	
@@ -85,7 +80,7 @@ bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect) const{
     if (fmin < 0.0f)
         return false;
 
-    if (traverseNode(m_root, ray, intersect, fmin))
+    if (traverseNode(m_root.get(), ray, intersect, fmin))
         return !intersect || intersect->primitive ;
     return false;
 }
@@ -125,11 +120,11 @@ void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned d
         return;
     }
 
-    node->left = new Bvh_Node();
-	splitNode( node->left , start , mid , depth + 1 );
+    node->left = std::make_unique<Bvh_Node>();
+	splitNode( node->left.get() , start , mid , depth + 1 );
 
-    node->right = new Bvh_Node();
-	splitNode( node->right , mid , end , depth + 1 );
+    node->right = std::make_unique<Bvh_Node>();
+	splitNode( node->right.get() , mid , end , depth + 1 );
     
     SORT_STATS(sBvhNodeCount+=2);
 }
@@ -216,29 +211,21 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         return inter;
 	}
 
-    auto left = node->left;
-    auto right = node->right;
+    auto left = node->left.get();
+    auto right = node->right.get();
 
-    auto _fmin0 = Intersect( ray , left->bbox );
-    auto _fmin1 = Intersect( ray , right->bbox );
+    auto fmin0 = Intersect( ray , left->bbox );
+    auto fmin1 = Intersect( ray , right->bbox );
 
     auto inter = false;
-	if( _fmin1 > _fmin0 ){
-		inter |= traverseNode( left , ray , intersect , _fmin0 );
+	if( fmin1 > fmin0 ){
+		inter |= traverseNode( left , ray , intersect , fmin0 );
 		if( inter && intersect == nullptr ) return true;
-		inter |= traverseNode( right , ray , intersect , _fmin1 );
+		inter |= traverseNode( right , ray , intersect , fmin1 );
 	}else{
-		inter |= traverseNode( right , ray , intersect , _fmin1 );
+		inter |= traverseNode( right , ray , intersect , fmin1 );
 		if( inter && intersect == nullptr) return true;
-		inter |= traverseNode( left , ray , intersect , _fmin0 );
+		inter |= traverseNode( left , ray , intersect , fmin0 );
 	}
     return intersect == nullptr ? inter : true;
-}
-
-void Bvh::deleteNode( Bvh_Node* node ){
-    if( !node )
-        return;
-    deleteNode( node->left );
-    deleteNode( node->right );
-    delete node;
 }

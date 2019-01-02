@@ -38,11 +38,6 @@ SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sKD
 SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sKDTreePrimitiveCount , sKDTreeLeafNodeCount );
 SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-KDTree::~KDTree(){
-    SORT_PROFILE("Destructe KD-Tree");
-	deleteKdNode( m_root );
-}
-
 void KDTree::Build( const Scene& scene ){
     SORT_PROFILE("Build KdTree");
 
@@ -61,7 +56,7 @@ void KDTree::Build( const Scene& scene ){
     auto count = (unsigned int)m_primitives->size();
 	Splits splits;
 	for(auto i = 0 ; i < 3 ; i++ )
-		splits.split[i] = new Split[2*count];
+		splits.split[i] = std::make_unique<Split[]>(2*count);
 	for(auto k = 0 ; k < 3 ; k++ ){
 		for(auto i = 0u ; i < count ; i++ ){
 			auto pri = (*m_primitives)[i].get();
@@ -71,13 +66,13 @@ void KDTree::Build( const Scene& scene ){
 		}
 	}
 	for(auto i = 0 ; i < 3 ; i++ )
-		std::sort( splits.split[i] , splits.split[i] + 2 * count);
+		std::sort( splits.split[i].get() , splits.split[i].get() + 2 * count);
 
 	// create root node
-	m_root = new Kd_Node(m_bbox);
+	m_root = std::make_unique<Kd_Node>(m_bbox);
 
 	// build kd-tree
-	splitNode( m_root , splits , count , 0 , tmp.get() );
+	splitNode( m_root.get() , splits , count , 0 , tmp.get() );
 
     SORT_STATS(++sKDTreeNodeCount);
 
@@ -109,7 +104,7 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	// step 2
 	// distribute primitives
     const auto split_count = prinum * 2;
-	Split* _splits = splits.split[split_Axis];
+	auto _splits = splits.split[split_Axis].get();
     auto l_num = 0 , r_num = 0;
 	for(auto i = 0u ; i < split_count; i++ )
 		tmp[splits.split[split_Axis][i].id] = 0;
@@ -135,8 +130,8 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
 	Splits l_splits;
 	Splits r_splits;
 	for(auto k = 0 ; k < 3 ; k++ ){
-		l_splits.split[k] = new Split[2*l_num];
-		r_splits.split[k] = new Split[2*r_num];
+		l_splits.split[k] = std::make_unique<Split[]>(2*l_num);
+		r_splits.split[k] = std::make_unique<Split[]>(2*r_num);
 	}
 	for(auto k = 0 ; k < 3 ; k++ ){
         auto l_offset = 0, r_offset = 0;
@@ -151,17 +146,16 @@ void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsig
         sAssert(l_offset == 2 * l_num, SPATIAL_ACCELERATOR);
         sAssert(r_offset == 2 * r_num, SPATIAL_ACCELERATOR);
 	}
-	splits.Release();
 
     auto left_box = node->bbox;
 	left_box.m_Max[split_Axis] = node->split;
-	node->leftChild = new Kd_Node(left_box);
-	splitNode( node->leftChild , l_splits , l_num , depth + 1 , tmp );
+	node->leftChild = std::make_unique<Kd_Node>(left_box);
+	splitNode( node->leftChild.get() , l_splits , l_num , depth + 1 , tmp );
 
     auto right_box = node->bbox;
 	right_box.m_Min[split_Axis] = node->split;
-	node->rightChild = new Kd_Node(right_box);
-	splitNode( node->rightChild , r_splits , r_num , depth + 1 , tmp );
+	node->rightChild = std::make_unique<Kd_Node>(right_box);
+	splitNode( node->rightChild.get() , r_splits , r_num , depth + 1 , tmp );
 
     SORT_STATS(sKDTreeNodeCount += 2);
 }
@@ -223,7 +217,6 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum ){
 				node->primitivelist.push_back(primitive);
 		}
 	}
-	splits.Release();
 
     SORT_STATS(++sKDTreeLeafNodeCount);
     SORT_STATS(++sKDTreeNodeCount);
@@ -241,7 +234,7 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	if( fmin < 0.0f )
 		return false;
 
-	if( traverse( m_root , r , intersect , fmin , fmax ) ){
+	if( traverse( m_root.get() , r , intersect , fmin , fmax ) ){
 		if( intersect == 0 )
 			return true;
 		return intersect->primitive != 0;
@@ -276,8 +269,8 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 	const auto dir = ray.m_Dir[split_axis];
 	const auto t = (dir==0.0f) ? FLT_MAX : ( node->split - ray.m_Ori[split_axis] ) / dir;
 	
-	const Kd_Node* first = node->leftChild;
-	const Kd_Node* second = node->rightChild;
+	const Kd_Node* first = node->leftChild.get();
+	const Kd_Node* second = node->rightChild.get();
 	if( dir < 0.0f || (dir==0.0f&&ray.m_Ori[split_axis] > node->split) )
         std::swap(first, second);
 
@@ -290,12 +283,4 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 	if( !inter && ( fmax + delta ) > t )
 		return traverse( second , ray , intersect , std::max( t , fmin ) , fmax );
 	return inter;
-}
-
-void KDTree::deleteKdNode( Kd_Node* node ){
-	if( !node )
-		return;
-	deleteKdNode( node->leftChild );
-	deleteKdNode( node->rightChild );
-	delete node;
 }

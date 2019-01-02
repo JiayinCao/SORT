@@ -38,9 +38,9 @@ class KDTree : public Accelerator{
     struct Kd_Node {
     public:
         /**< Pointer to the left child of the KD-Tree node. */
-        Kd_Node*					    leftChild = nullptr;
+        std::unique_ptr<Kd_Node>					    leftChild = nullptr;
         /**< Pointer to the right child of the KD-Tree node. */
-        Kd_Node*					    rightChild = nullptr;
+        std::unique_ptr<Kd_Node>					    rightChild = nullptr;
         /**< Bounding box of the KD-Tree node. */
         BBox						    bbox;
         /**< Vector holding all primitives in the node. It should be empty for interior nodes. */
@@ -92,20 +92,11 @@ class KDTree : public Accelerator{
     //! @brief  The structure holds all possible split plane during KD-Tree construction.
     struct Splits {
         /**< Split planes along three different axis. */
-        Split*		split[3] = { nullptr , nullptr , nullptr }; 
-        //! Release the allocated memory.
-        void Release(){
-            SAFE_DELETE_ARRAY(split[0]);
-            SAFE_DELETE_ARRAY(split[1]);
-            SAFE_DELETE_ARRAY(split[2]);
-        }
+        std::unique_ptr<Split[]>		split[3] = { nullptr , nullptr , nullptr }; 
     };
 
 public:
     DEFINE_CREATOR( KDTree , Accelerator , "KDTree" );
-
-	//! @brief Destructor that delete all allocated KD-Tree memory.
-    ~KDTree() override;
 
     //! @brief Get intersection between the ray and the primitive set using KD-Tree.
     //!
@@ -146,7 +137,7 @@ public:
 
 private:
     /**< Root node of the KD-Tree. */
-	Kd_Node*		m_root = nullptr;
+	std::unique_ptr<Kd_Node>		m_root = nullptr;
 
     /**< Maximum allowed depth of KD-Tree. */
 	unsigned	    m_maxDepth = 28;
@@ -159,7 +150,7 @@ private:
     //! @param splits       The split plane that holds all primitive pointers.
     //! @param prinum       The number of primitives in the node.
     //! @param depth        The current depth of the node.
-    //! @oaram tmp          Temporary buffer for marking primitives.
+    //! @param tmp          Temporary buffer for marking primitives.
 	void splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth , unsigned char* tmp );
 
     //! @brief  Evaluate SAH value for a specific split plane.
