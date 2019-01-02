@@ -25,7 +25,7 @@
 [&]() \
 { \
     const std::size_t size = snprintf(nullptr, 0, __VA_ARGS__) + 1; \
-    std::unique_ptr<char[]> buf( new char[ size ] ); \
+    std::unique_ptr<char[]> buf = std::make_unique<char[]>(size); \
     snprintf(buf.get(), size, __VA_ARGS__); \
     sortLog( LOG_LEVEL::LOG_##level , LOG_TYPE::LOG_##type , buf.get() , __FILE__ , __LINE__ );\
 }()
