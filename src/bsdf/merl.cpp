@@ -58,8 +58,8 @@ void MerlData::LoadData( const std::string& filename )
     // allocate data
     auto trunksize = dims[0] * dims[1] * dims[2];
     auto size = 3u * trunksize;
-    m_data = new double[size];
-    file.read( (char*)m_data , sizeof( double ) * size );
+    m_data = std::make_unique<double[]>(size);
+    file.read( (char*)m_data.get() , sizeof( double ) * size );
     
     unsigned offset = 0;
     for(auto i = 0u ; i < trunksize ; i++ )

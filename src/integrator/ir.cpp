@@ -36,7 +36,7 @@ void InstantRadiosity::PreProcess( const Scene& scene )
 {
     SORT_PROFILE("Instant Radiosity (LPV distribution stage)");
     
-	m_pVirtualLightSources = new std::list<VirtualLightSource>[m_nLightPathSet];
+	m_pVirtualLightSources = std::make_unique<std::list<VirtualLightSource>[]>(m_nLightPathSet);
 
 	for( int k = 0 ; k < m_nLightPathSet ; ++k )
 	{
@@ -93,12 +93,6 @@ void InstantRadiosity::PreProcess( const Scene& scene )
         
         SORT_STATS(sVPLCount+=m_pVirtualLightSources[k].size());
 	}
-}
-
-// PostProcess
-void InstantRadiosity::PostProcess()
-{
-	SAFE_DELETE_ARRAY(m_pVirtualLightSources);
 }
 
 // radiance along a specific ray direction

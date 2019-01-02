@@ -101,10 +101,6 @@ protected:
 
 	// do texture filter
 	void _texCoordFilter( int& u , int&v ) const;
-
-// set friend class
-friend ComTexture operator-( float t , const Texture& tex );
-
 };
 
 ComTexture operator+( float t , const Texture& tex );

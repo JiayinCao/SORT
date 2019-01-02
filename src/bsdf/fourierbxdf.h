@@ -71,28 +71,18 @@ private:
         int     nMax = 0;
         int     nChannels = 1;
         int     nMu = 0;
-        float   *mu = nullptr;
-        int     *m = nullptr;
-        int     *aOffset = nullptr;
-        float   *a = nullptr;
-        float   *a0 = nullptr;
-        float   *cdf = nullptr;
-        float   *recip = nullptr;
-        
-        ~FourierBxdfTable(){
-            SAFE_DELETE_ARRAY(mu);
-            SAFE_DELETE_ARRAY(m);
-            SAFE_DELETE_ARRAY(aOffset);
-            SAFE_DELETE_ARRAY(a);
-            SAFE_DELETE_ARRAY(a0);
-            SAFE_DELETE_ARRAY(cdf);
-            SAFE_DELETE_ARRAY(recip);
-        }
+        std::unique_ptr<float[]>   mu = nullptr;
+        std::unique_ptr<int[]>     m = nullptr;
+        std::unique_ptr<int[]>     aOffset = nullptr;
+        std::unique_ptr<float[]>   a = nullptr;
+        std::unique_ptr<float[]>   a0 = nullptr;
+        std::unique_ptr<float[]>   cdf = nullptr;
+        std::unique_ptr<float[]>   recip = nullptr;
         
         float* GetAk( int offsetI , int offsetO , int* mptr ) const{
             const int offset = offsetO * nMu + offsetI;
             *mptr = m[offset];
-            return a + aOffset[offset];
+            return a.get() + aOffset[offset];
         }
     };
     
