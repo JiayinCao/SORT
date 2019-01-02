@@ -125,6 +125,15 @@ public:
         return *this;
     }
 
+    //! @brief Loading data from stream directly.
+    //!
+    //! @param  data    Data to be filled.
+    //! @param  size    Size of the data to be filled in bytes.
+    StreamBase& Load( char* data , int size ) override {
+        m_file.read(data, size);
+        return *this;
+    }
+
 private:
     std::ifstream m_file;       /**< File to be streamed from. */
 };
@@ -227,6 +236,15 @@ public:
     //! @return             Reference of the stream itself.
     StreamBase& operator << (const bool v) override {
         m_file.write(reinterpret_cast<const char*>(&v), sizeof(bool));
+        return *this;
+    }
+
+    //! @brief Writing data to stream.
+    //!
+    //! @param  data    Data to be written.
+    //! @param  size    Size of the data to be filled in bytes.
+    virtual StreamBase& Write( char* data , int size ) override {
+        m_file.write(data, size);
         return *this;
     }
 

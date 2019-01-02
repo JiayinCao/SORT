@@ -33,9 +33,9 @@
 
 // variables used for random number generation
 static const int N = 624;
-static Thread_Local unsigned long mt[N]; /* the array for the state vector  */
-static Thread_Local int mti;
-static Thread_Local bool seed_setup = false;
+static thread_local unsigned long mt[N]; /* the array for the state vector  */
+static thread_local int mti;
+static thread_local bool seed_setup = false;
 
 // set the seed
 void sort_seed()
@@ -61,7 +61,7 @@ unsigned sort_rand()
 {
 	unsigned long y;
 	{
-		static Thread_Local unsigned long mag01[2]={0x0UL, MATRIX_A};
+		static thread_local unsigned long mag01[2]={0x0UL, MATRIX_A};
 		/* mag01[x] = x * MATRIX_A  for x=0,1 */
 
 		if( seed_setup == false )

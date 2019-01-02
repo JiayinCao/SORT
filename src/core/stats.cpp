@@ -20,14 +20,6 @@
 
 #ifdef SORT_ENABLE_STATS_COLLECTION
 
-template<typename... Args>
-static std::string stringFormat( const char* format, Args... arg ){
-    size_t size = snprintf( nullptr, 0, format, arg... ) + 1;
-    std::unique_ptr<char[]> buf = std::make_unique<char[]>(size);
-    snprintf( buf.get(), size, format, arg... );
-    return std::string( buf.get(), buf.get() + size - 1 );
-}
-
 // This is a container holding all statsItem per thread
 class StatsItemContainer {
 public:
@@ -47,6 +39,23 @@ private:
     std::vector<const StatsItemRegister*> container;
     std::unordered_map<std::string,std::unordered_set<std::string>> registered;
 };
+
+static StatsSummary             g_StatsSummary;
+
+// It is not a global variable because the order of intialization won't be correct if it were one.
+// Static variable in a function will gets intialized the first time it gets executed.
+static auto  GetStatsItemContainer(){
+    static std::unique_ptr<StatsItemContainer> container = std::make_unique<StatsItemContainer>();
+    return container.get();
+}
+
+template<typename... Args>
+static std::string stringFormat( const char* format, Args... arg ){
+    size_t size = snprintf( nullptr, 0, format, arg... ) + 1;
+    std::unique_ptr<char[]> buf = std::make_unique<char[]>(size);
+    snprintf( buf.get(), size, format, arg... );
+    return std::string( buf.get(), buf.get() + size - 1 );
+}
 
 void StatsSummary::PrintStats() const {
     slog(INFO, GENERAL, "----------------------------------------------------------------");
@@ -81,17 +90,12 @@ void StatsSummary::EnableCategory(const std::string& s) {
     categories.insert(s);
 }
 
-static StatsSummary             g_StatsSummary;
-static StatsItemContainer*      g_pStatsItemContainer = nullptr;
-
 // Recording all necessary data in constructor
 StatsItemRegister::StatsItemRegister( const stats_update f , const std::string& cat , const std::string& name ): func(f){
     static std::mutex statsMutex;
     std::lock_guard<std::mutex> lock(statsMutex);
     
-    if( nullptr == g_pStatsItemContainer )
-        g_pStatsItemContainer = new StatsItemContainer();
-    g_pStatsItemContainer->Register(this, cat, name);
+    GetStatsItemContainer()->Register(this, cat, name);
 }
 
 // Flush the data into StatsSummary
@@ -147,9 +151,7 @@ std::string StatsFormatter_RayPerSecond::ToString( StatsData_Ratio ratio ){
 
 void SortStatsFlushData( bool mainThread ){
 #ifdef SORT_ENABLE_STATS_COLLECTION
-    if( !g_pStatsItemContainer ) return;
-    g_pStatsItemContainer->FlushData();
-    if( mainThread ) SAFE_DELETE(g_pStatsItemContainer); // don't need it anymore
+    GetStatsItemContainer()->FlushData();
 #endif
 }
 void SortStatsPrintData(){

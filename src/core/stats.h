@@ -65,11 +65,11 @@ public:
 
 #define SORT_STATS(eva) eva
 
-#define SORT_STATS_DEFINE_COUNTER( var ) Thread_Local StatsInt var = 0l;
-#define SORT_STATS_DEFINE_FCOUNTER( var ) Thread_Local StatsFloat var = 0.0f;
+#define SORT_STATS_DEFINE_COUNTER( var ) thread_local StatsInt var = 0l;
+#define SORT_STATS_DEFINE_FCOUNTER( var ) thread_local StatsFloat var = 0.0f;
 
-#define SORT_STATS_DECLARE_COUNTER( var ) extern Thread_Local StatsInt var;
-#define SORT_STATS_DECLARE_FCOUNTER( var ) extern Thread_Local StatsFloat var;
+#define SORT_STATS_DECLARE_COUNTER( var ) extern thread_local StatsInt var;
+#define SORT_STATS_DECLARE_FCOUNTER( var ) extern thread_local StatsFloat var;
 
 #define SORT_STATS_ENABLE(category) \
     class StatsCategoryEnabler{ \
@@ -99,29 +99,29 @@ public:\
 
 #define SORT_STATS_BASE_TYPE( cat , name , var , formatter , type , data_type )\
     SORT_STATS_ITEM( type , data_type )\
-    static Thread_Local type<formatter> g_StatsItem(var); \
+    static thread_local type<formatter> g_StatsItem(var); \
     static void update_counter(StatsSummary& ss) { ss.FlushCounter( cat , name , &g_StatsItem );}\
     static StatsItemRegister g_StatsItemRegister( update_counter , cat , name );
 
 #define SORT_STATS_INT_TYPE( cat , name , var , formatter) \
-    extern Thread_Local StatsInt var;\
+    extern thread_local StatsInt var;\
     namespace SORT_STATS_UNIQUE_NAMESPACE(var){\
         static StatsInt g_Global_Default = 0l;\
         SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemInt , StatsInt );\
     }
 
 #define SORT_STATS_FLOAT_TYPE( cat , name , var , formatter ) \
-    extern Thread_Local StatsFloat var;\
+    extern thread_local StatsFloat var;\
     namespace SORT_STATS_UNIQUE_NAMESPACE(var){\
         static StatsFloat g_Global_Default = 0.0f;\
         SORT_STATS_BASE_TYPE( cat , name , var , formatter , StatsItemFloat , StatsFloat );\
     }
 
 #define SORT_STATS_RATIO_TYPE( cat , name , var0 , var1 , formatter ) \
-    extern Thread_Local StatsInt var0;\
-    extern Thread_Local StatsInt var1;\
+    extern thread_local StatsInt var0;\
+    extern thread_local StatsInt var1;\
     namespace SORT_STATS_UNIQUE_NAMESPACE(g##var0##_##var1){\
-        static Thread_Local StatsData_Ratio g##var0##_##var1( var0 , var1 );\
+        static thread_local StatsData_Ratio g##var0##_##var1( var0 , var1 );\
         static StatsInt g_Global_Var0 = 0l;\
         static StatsInt g_Global_Var1 = 0l;\
         static StatsData_Ratio g_Global_Default( g_Global_Var0 , g_Global_Var1 );\
