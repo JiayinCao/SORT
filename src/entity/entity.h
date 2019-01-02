@@ -20,7 +20,7 @@
 #include <list>
 #include <memory>
 #include "math/transform.h"
-#include "core/resource.h"
+#include "stream/stream.h"
 #include "core/creator.h"
 #include "entity/visual.h"
 
@@ -30,7 +30,7 @@
  * entity. An entity could parse itself and decouple itself into one or multiple primitives depending its complexity.
  * An entity itself doesn't touch rendering directly. It serves as a place where the logic operations should be performed.
  */
-class Entity : public Resource {
+class Entity : public SerializableObject {
 public:
     //! Empty virtual destructor
     virtual ~Entity() {}

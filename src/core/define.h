@@ -54,12 +54,6 @@ inline float GammaToLinear( float value ){
 inline float Radians( float deg ) { return PI / 180.0f * deg; }
 inline float Degrees( float rad ) { return 180.0f * INV_PI * rad ; }
 
-// some useful macro
-#define SAFE_DELETE(p) { if(p) { delete p; p = nullptr; } }
-#define SAFE_DELETE_ARRAY(p) { if(p) { delete[] p; p = nullptr ; } }
-
-#define Thread_Local thread_local
-
 // math macros
 #define saturate(x) std::max(0.0f,std::min(1.0f,x))
 inline float clamp( float x , float mi , float ma )
