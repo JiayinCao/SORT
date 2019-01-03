@@ -67,7 +67,7 @@ TEST(STREAM, MemoryStream) {
     std::vector<float>           vec_f;
     std::vector<int>             vec_i;
     std::vector<unsigned int>    vec_u;
-    OMemoryStream ostream;
+    OMemoryStream ostream(0u);
     std::string str = "this is a random string";
     ostream<<str;
     bool flag = true;
