@@ -39,7 +39,7 @@ void WorkerThread::BeginThread(){
 }
 
 void WorkerThread::RunThread(){
-    static std::string thread_name = "Thread " + std::to_string( g_ThreadId );
+    static thread_local std::string thread_name = "Thread " + std::to_string( ThreadId() );
     SORT_PROFILE(thread_name.c_str())
 	EXECUTING_TASKS();
     SortStatsFlushData();

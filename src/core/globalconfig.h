@@ -132,6 +132,8 @@ public:
 	//! @param	argv	Input command line parameters.
     //! @return         Whether command line arguments are valid.
 	bool			ParseCommandLine( int argc , char** argv ){
+		SORT_PROFILE("Parse Commandline");
+
 		std::string commandline = "Command line arguments: \t";
 		for (int i = 0; i < argc; ++i) {
 			commandline += std::string(argv[i]);
@@ -168,6 +170,8 @@ public:
     //!
     //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
     void    Serialize( IStreamBase& stream ) override {
+		SORT_PROFILE("Parsing Global Configuration");
+
 		unsigned int version = 0;
 		stream >> version;
 		sAssertMsg( GLOBAL_CONFIGURATION_VERSION == version , GENERAL , "Incompatible resource file with this version SORT.");
