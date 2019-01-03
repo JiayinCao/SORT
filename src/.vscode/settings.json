@@ -23,6 +23,12 @@
         "string_view": "cpp",
         "vector": "cpp",
         "ostream": "cpp",
-        "iosfwd": "cpp"
+        "iosfwd": "cpp",
+        "queue": "cpp",
+        "__mutex_base": "cpp",
+        "condition_variable": "cpp",
+        "__split_buffer": "cpp",
+        "deque": "cpp",
+        "list": "cpp"
     }
 }

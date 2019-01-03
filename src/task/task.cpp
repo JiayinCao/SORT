@@ -54,7 +54,8 @@ std::shared_ptr<Task> Scheduler::PickTask(){
     std::unique_lock<std::mutex> lock(m_mutex);
 
     // Wait until this is at least one available task
-    m_cv.wait( lock , [&](){ return (m_backupTasks.empty() && m_availbleTasks.empty()) || m_availbleTasks.size(); } );
+    while( !( (m_backupTasks.empty() && m_availbleTasks.empty()) || m_availbleTasks.size() ) )
+        m_cv.wait_for( lock , std::chrono::seconds(1) );
 
     // Return nullptr if there is no task available in the scheduler
     if (m_backupTasks.empty() && m_availbleTasks.empty())
