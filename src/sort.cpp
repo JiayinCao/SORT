@@ -34,6 +34,8 @@ SORT_STATS_COUNTER("Statistics", "Sample per Pixel", sSamplePerPixel);
 SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
 
 void SchedulTasks( Scene& scene , IStreamBase& stream ){
+	SORT_PROFILE("Schedule Tasks");
+
 	auto loading_task = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , scene, stream);
 	auto sac_task = SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structor Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
 	auto pre_render_task = SCHEDULE_TASK<PreRender_Task>( "Pre rendering pass" , DEFAULT_TASK_PRIORITY, {sac_task} , scene);
@@ -107,8 +109,11 @@ bool	RunSORT( int argc , char** argv ){
     SchedulTasks( scene , stream );
 
 	// pre allocate memory for the specific thread
-	for( unsigned i = 0 ; i <= g_threadCnt ; ++i )
-		MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 1024 , i );
+	{
+		SORT_PROFILE("Memory Allocation");
+		for( unsigned i = 0 ; i <= g_threadCnt ; ++i )
+			MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 1024 , i );
+	}
     
     std::vector< std::unique_ptr<WorkerThread> > threads;
     for( unsigned i = 0 ; i < g_threadCnt ; ++i )

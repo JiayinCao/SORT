@@ -23,6 +23,7 @@
 #include "managers/memmanager.h"
 #include "core/log.h"
 #include "material_node.h"
+#include "core/profile.h"
 
 //! @brief 	A thin layer of material definition.
 /**
@@ -66,6 +67,9 @@ public:
     //! @param  stream      Input stream for data.
     void Serialize( IStreamBase& stream ) override {
 		stream >> m_name;
+		auto message = "Parsing Material '" + m_name + "'";
+		SORT_PROFILE( message.c_str() );
+
 		m_root->Serialize( stream );
 
 		// check validation

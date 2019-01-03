@@ -18,9 +18,12 @@
 #include "matmanager.h"
 #include "material/material.h"
 #include "stream/stream.h"
+#include "core/profile.h"
 
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){
+    SORT_PROFILE("Parsing Materials");
+
 	unsigned int material_cnt = 0;
 	stream >> material_cnt;
 	for( unsigned int i = 0 ; i < material_cnt ; ++i ){
