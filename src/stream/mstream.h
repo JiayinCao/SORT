@@ -21,8 +21,6 @@
 #include "core/define.h"
 #include "stream/fstream.h"
 
-#define FREE_DATA_ARRAY(p)      if(p) free(p)
-
 //! @brief Streaming from memory.
 /**
  * IMemoryStream only works for streaming data from memory. Any attempt to write data
@@ -37,24 +35,25 @@ public:
     //!
     //! @param  initSize    Initial size of the stream.
     //! @param  initData    Initial data of the stream.
-    IMemoryStream( unsigned int initSize = 1024 , void* initData = nullptr ){
+    IMemoryStream( unsigned int initSize = 1024u , void* initData = nullptr ){
+        if( initSize == 0u )
+            return;
         Resize( initSize );
-        memcpy( m_data , initData , initSize );
-    }
-
-    //! @bried  Destructor.
-    ~IMemoryStream(){
-        FREE_DATA_ARRAY( m_data );
+        memcpy( m_data.get() , initData , initSize );
     }
 
     //! @brief  Resize the stream.
     //!
     //! @param  size    The new size to be resized.
     inline void    Resize( unsigned int size ){
-        m_data = (char *) ( ( m_data == NULL ) ? malloc(size) : realloc(m_data, size) );
+        size = std::max( 1024u , size );
+        auto new_data = std::make_unique<char[]>( size );
+        if( m_capacity )
+            memcpy( new_data.get() , m_data.get() , m_capacity );
         if (size > m_capacity)
-            memset((char*)m_data + m_capacity, 0, size - m_capacity);
+            memset(new_data.get() + m_capacity, 0, size - m_capacity);
 	    m_capacity = size;
+        m_data = std::move(new_data);
     }
 
     //! @brief Streaming in a float number to memory.
@@ -65,7 +64,7 @@ public:
         if( m_pos + sizeof( v ) > m_capacity )
             v = 0;
         else{
-            memcpy( &v , m_data + m_pos , sizeof( v ) );
+            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
             m_pos += sizeof( v );
         }
         return *this;
@@ -79,7 +78,7 @@ public:
         if( m_pos + sizeof( v ) > m_capacity )
             v = 0;
         else{
-            memcpy( &v , m_data + m_pos , sizeof( v ) );
+            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
             m_pos += sizeof( v );
         }
         return *this;
@@ -93,7 +92,7 @@ public:
         if( m_pos + sizeof( v ) > m_capacity )
             v = 0;
         else{
-            memcpy( &v , m_data + m_pos , sizeof( v ) );
+            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
             m_pos += sizeof( v );
         }
         return *this;
@@ -125,7 +124,7 @@ public:
         if( m_pos + sizeof( v ) > m_capacity )
             v = 0;
         else{
-            memcpy( &v , m_data + m_pos , sizeof( v ) );
+            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
             m_pos += sizeof( v );
         }
         return *this;
@@ -137,7 +136,7 @@ public:
     //!
     //! @return     Return a pointer points to the memory.
     void*       GetRawData(){
-        return m_data;
+        return m_data.get();
     }
 
     //! @brief Loading data from stream directly.
@@ -148,7 +147,7 @@ public:
         if( m_pos + size > m_capacity ){
             memset( data , 0 , size );
         }else{
-            memcpy( data , m_data , size );
+            memcpy( data , m_data.get() , size );
             m_pos += size;
         }
         return *this;
@@ -156,11 +155,11 @@ public:
 
 private:
     /**< Pointer points to the address where the memory is. */
-    char*               m_data = nullptr;
+    std::unique_ptr<char[]>     m_data = nullptr;
     /**< Capacity of the current stream. */
-    unsigned int        m_capacity = 0;
+    unsigned int                m_capacity = 0;
     /**< Current position of streaming. */
-    unsigned int        m_pos = 0;
+    unsigned int                m_pos = 0;
 };
 
 //! @brief Streaming to memory.
@@ -176,23 +175,24 @@ public:
     //! bytes available. There will be unknown behavior otherwise.
     //!
     //! @param  initSize    Initial size of the stream.
-    OMemoryStream( unsigned int initSize = 1024 ){
+    OMemoryStream( unsigned int initSize = 1024u ){
+        if( initSize == 0u )
+            return;
         Resize( initSize );
-    }
-
-    //! @bried  Destructor.
-    ~OMemoryStream(){
-        FREE_DATA_ARRAY( m_data );
     }
 
     //! @brief  Resize the stream.
     //!
     //! @param  size    The new size to be resized.
     inline void    Resize( unsigned int size ){
-        m_data = (char *) ( ( m_data == NULL ) ? malloc(size) : realloc(m_data, size) );
+        size = std::max( 1024u , size );
+        auto new_data = std::make_unique<char[]>( size );
+        if( m_capacity )
+            memcpy( new_data.get() , m_data.get() , m_capacity );
         if (size > m_capacity)
-            memset((char*)m_data + m_capacity, 0, size - m_capacity);
+            memset((char*)new_data.get() + m_capacity, 0, size - m_capacity);
 	    m_capacity = size;
+        m_data = std::move( new_data );
     }
 
     //! @brief Streaming out a float number from memory.
@@ -204,7 +204,7 @@ public:
             Resize( 2 * m_capacity );
             return *this << v;
         }else{
-            memcpy( m_data + m_pos , &v , sizeof( v ) );
+            memcpy( m_data.get() + m_pos , &v , sizeof( v ) );
             m_pos += sizeof( v );
         }
         return *this;
@@ -219,7 +219,7 @@ public:
             Resize( 2 * m_capacity );
             return *this << v;
         }else{
-            memcpy( m_data + m_pos , &v , sizeof( v ) );
+            memcpy( m_data.get() + m_pos , &v , sizeof( v ) );
             m_pos += sizeof( v );
         }
         return *this;
@@ -234,7 +234,7 @@ public:
             Resize( 2 * m_capacity );
             return *this << v;
         }else{
-            memcpy( m_data + m_pos , &v , sizeof( v ) );
+            memcpy( m_data.get() + m_pos , &v , sizeof( v ) );
             m_pos += sizeof( v );
         }
         return *this;
@@ -248,8 +248,13 @@ public:
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
     StreamBase& operator << (const std::string& v) override {
+        if( ( v.size() + 1 ) + m_pos > m_capacity ){
+            Resize( 2 * m_capacity );
+            return *this << v;
+        }
+
         if( !v.empty() ){
-            memcpy( m_data + m_pos , v.c_str() , sizeof(char) * v.size() );
+            memcpy( m_data.get() + m_pos , v.c_str() , sizeof(char) * v.size() );
             m_pos += (unsigned int)v.size();
         }
         m_data[m_pos++] = 0;
@@ -265,7 +270,7 @@ public:
             Resize( 2 * m_capacity );
             return *this << v;
         }else{
-            memcpy( m_data + m_pos , &v , sizeof( v ) );
+            memcpy( m_data.get() + m_pos , &v , sizeof( v ) );
             m_pos += sizeof( v );
         }
         return *this;
@@ -277,7 +282,7 @@ public:
     //!
     //! @return     Return a pointer points to the memory.
     void*           GetRawData(){
-        return m_data;
+        return m_data.get();
     }
 
     //! @brief  Get written size of the stream.
@@ -296,7 +301,7 @@ public:
             Resize( 2 * m_capacity );
             return Write( data , size );
         }else{
-            memcpy( data , m_data + m_pos , size );
+            memcpy( data , m_data.get() + m_pos , size );
             m_pos += size;
         }
         return *this;
@@ -304,9 +309,9 @@ public:
 
 private:
     /**< Pointer points to the address where the memory is. */
-    char*               m_data = nullptr;
+    std::unique_ptr<char[]>     m_data = nullptr;
     /**< Capacity of the current stream. */
-    unsigned int        m_capacity = 0;
+    unsigned int                m_capacity = 0;
     /**< Current position of streaming. */
-    unsigned int        m_pos = 0;
+    unsigned int                m_pos = 0;
 };
