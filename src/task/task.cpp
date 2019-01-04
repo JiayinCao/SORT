@@ -26,31 +26,36 @@ void Task::ExecuteTask(){
     Execute();
 
     // Upon termination of a task, release its dependents' dependencies on this task.
-    Scheduler::GetSingleton().TaskFinished( shared_from_this() );
+    Scheduler::GetSingleton().TaskFinished( this );
 }
 
 // Compare tasks based on its priority, tasks with higher priority get executed earlier.
-Scheduler::Task_Comp Scheduler::task_comp = []( const std::shared_ptr<Task> t0 , const std::shared_ptr<Task> t1 ){
+Scheduler::Task_Comp Scheduler::task_comp = []( const Task* t0 , const Task* t1 ){
     return t0->GetPriority() < t1->GetPriority();
 };
 
-void Scheduler::Schedule( const std::shared_ptr<Task> task ){
+Task* Scheduler::Schedule( std::unique_ptr<Task> task ){
     if( task == nullptr )
-        return;
+        return nullptr;
 
     std::lock_guard<std::mutex> lock(m_mutex);
 
-    if( task->NoDependency() )
-        m_availbleTasks.push( task );
+    auto taskID = task->GetTaskID();
+    m_tasks[taskID] = std::move(task);
+    
+    auto task_ptr = m_tasks[taskID].get();
+    if(task_ptr->NoDependency() )
+        m_availbleTasks.push(task_ptr);
     else{
-        auto dependencies = task->GetDependencies();
+        auto dependencies = task_ptr->GetDependencies();
         for( auto dep : dependencies )
-            dep->AddDependent( task );
-        m_backupTasks.insert( task );
+            dep->AddDependent(task_ptr);
+        m_backupTasks.insert(task_ptr);
     }
+    return task_ptr;
 }
 
-std::shared_ptr<Task> Scheduler::PickTask(){
+Task* Scheduler::PickTask(){
     std::unique_lock<std::mutex> lock(m_mutex);
 
     // Wait until this is at least one available task
@@ -62,16 +67,16 @@ std::shared_ptr<Task> Scheduler::PickTask(){
         return nullptr;
 
     // Get the available task that is with highest priority
-    std::shared_ptr<Task> ret = m_availbleTasks.top();
+    Task* ret = m_availbleTasks.top();
     m_availbleTasks.pop();
     return ret;
 }
 
-void Scheduler::TaskFinished( const std::shared_ptr<Task> task ){
+void Scheduler::TaskFinished( Task* task ){
     std::lock_guard<std::mutex> lock(m_mutex);
 
     // Starting remove all dependencies.
-    const auto dependent = task->GetDependents();
+    const auto& dependent = task->GetDependents();
     for( auto dep : dependent ){
         // Remove its dependencies.
         dep->RemoveDependency( task );
@@ -85,4 +90,6 @@ void Scheduler::TaskFinished( const std::shared_ptr<Task> task ){
             m_cv.notify_one();
         }
     }
+
+    m_tasks.erase(task->GetTaskID());
 }

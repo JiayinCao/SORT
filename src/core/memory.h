@@ -50,6 +50,9 @@ public:
 class MemoryAllocator {
 public:
     //! @brief  Allocate memory from memory pool.
+    //!
+    //! @param  cnt     Number of instance it needs allocate.
+    //! @return         The pointer pointing to memory that could hold the instance(s).
     template<class T>
     T*  Allocate(unsigned int cnt = 1u) {
         unsigned int size_to_allocate = (unsigned int)(sizeof(T) * cnt);
@@ -73,11 +76,7 @@ public:
 
     //! @brief  Reset the memory allocator.
     void Reset() {
-        while (m_usedBlocks.size()) {
-            std::unique_ptr<MemoryBlock> block = std::move(m_usedBlocks.front());
-            m_availableBlocks.push_front(std::move(block));
-            m_usedBlocks.pop_front();
-        }
+        m_availableBlocks.splice(m_availableBlocks.begin(), m_usedBlocks);
         for (auto& block : m_availableBlocks)
             block->m_start = 0;
     }
@@ -89,8 +88,11 @@ private:
     std::list<std::unique_ptr<MemoryBlock>>  m_usedBlocks;
 };
 
-// Each thread has their own memory allocator.
+//! @brief Get static allocator.
+//!
+//! @return Thread based memory allocator.
 inline MemoryAllocator& GetStaticAllocator() {
+    // Each thread has their own memory allocator.
     static thread_local MemoryAllocator memoryAllocator;
     return memoryAllocator;
 }
