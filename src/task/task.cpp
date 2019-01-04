@@ -43,13 +43,15 @@ Task* Scheduler::Schedule( std::unique_ptr<Task> task ){
     auto taskID = task->GetTaskID();
     m_tasks[taskID] = std::move(task);
     
-    auto task_ptr = m_tasks[taskID].get();
+    const auto task_ptr = m_tasks[taskID].get();
     if(task_ptr->NoDependency() )
         m_availbleTasks.push(task_ptr);
     else{
         auto dependencies = task_ptr->GetDependencies();
-        for( auto dep : dependencies )
-            dep->AddDependent(task_ptr);
+        for (auto dep : dependencies) {
+            auto no_const_dep = const_cast<Task*>(dep);
+            no_const_dep->AddDependent(task_ptr);
+        }
         m_backupTasks.insert(task_ptr);
     }
     return task_ptr;
@@ -72,7 +74,7 @@ Task* Scheduler::PickTask(){
     return ret;
 }
 
-void Scheduler::TaskFinished( Task* task ){
+void Scheduler::TaskFinished( const Task* task ){
     std::lock_guard<std::mutex> lock(m_mutex);
 
     // Starting remove all dependencies.
