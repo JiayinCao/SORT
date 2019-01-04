@@ -52,10 +52,11 @@ class Bvh : public Accelerator{
         Primitive*	primitive;              /**< Primitive lists for this node. */
         Point		m_centroid;             /**< Center point of the BVH node. */
 
-        //! @brief Constructor of Bvh_Primitive.
+        //! @brief Set primitive.
         //!
         //! @param p    Primitive list holding all primitives in the node.
-        Bvh_Primitive(Primitive* p) :primitive(p) {
+        void SetPrimitive(Primitive* p){
+            primitive = p;
             m_centroid = (p->GetBBox().m_Max + p->GetBBox().m_Min) * 0.5f;
         }
 
@@ -107,13 +108,13 @@ public:
 
 private:
     /**< Primitive list during BVH construction. */
-    Bvh_Primitive*	            m_bvhpri = nullptr;
+    std::unique_ptr<Bvh_Primitive[]>        m_bvhpri = nullptr;
     /**< Root node of the BVH structure. */
-    std::unique_ptr<Bvh_Node>   m_root = nullptr;
+    std::unique_ptr<Bvh_Node>               m_root = nullptr;
     /**< Maximum primitives in a leaf node. During BVH construction, a node with less primitives will be marked as a leaf node. */
-    unsigned	                m_maxPriInLeaf = 8;
+    unsigned	                            m_maxPriInLeaf = 8;
     /**< Maximum depth of node in BVH. */
-    unsigned                    m_maxNodeDepth = 16; 
+    unsigned                                m_maxNodeDepth = 16; 
 
 	//! @brief Split current BVH node.
     //!

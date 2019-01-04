@@ -45,7 +45,7 @@ void Render_Task::Execute(){
     for( int i = m_coord.y ; i < rb.y ; i++ ){
         for( int j = m_coord.x ; j < rb.x ; j++ ){
             // clear managed memory after each pixel
-            MemManager::GetSingleton().ClearMem(tid);
+            SORT_CLEAR_MEMPOOL();
             
             // generate samples to be used later
             g_integrator->GenerateSample( m_sampler.get() , m_pixelSamples.get(), g_samplePerPixel, m_scene );
