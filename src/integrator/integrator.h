@@ -57,22 +57,24 @@ public:
 	// para 'samples' : the samples to be generated
 	// para 'ps'      : number of pixel sample to be generated
 	// para 'scene'   : the scene to be rendered
-	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
-	{
-		float* data = SORT_MALLOC_ARRAY( float , 2 * ps )();
-		sampler->Generate2D( data , ps , true );
+	virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const{
+        auto data = std::make_unique<float[]>(2 * ps);
+		sampler->Generate2D( data.get() , ps , true );
 		for( unsigned i = 0 ; i < ps ; ++i )
 		{
 			samples[i].img_u = data[2*i];
 			samples[i].img_v = data[2*i+1];
 		}
 
-		// shuffle the index
-		const unsigned* shuffled_id = ShuffleIndex( ps );
-		sampler->Generate2D( data , ps );
+        auto shuffle = std::make_unique<unsigned[]>(ps);
+        for (unsigned i = 0; i < ps; i++)
+            shuffle[i] = i;
+        std::random_shuffle(shuffle.get(), shuffle.get() + ps);
+
+		sampler->Generate2D(data.get(), ps );
 		for( unsigned i = 0 ; i < ps ; ++i )
 		{
-			unsigned sid = 2*shuffled_id[i];
+			unsigned sid = 2* shuffle[i];
 			samples[i].dof_u = data[sid];
 			samples[i].dof_v = data[sid+1];
 		}

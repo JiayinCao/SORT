@@ -109,7 +109,7 @@ bool	RunSORT( int argc , char** argv ){
     SchedulTasks( scene , stream );
 
     std::vector< std::unique_ptr<WorkerThread> > threads;
-    for( unsigned i = 0 ; i < g_threadCnt ; ++i )
+    for( unsigned i = 0 ; i < g_threadCnt - 1 ; ++i )
         threads.push_back( std::make_unique<WorkerThread>( i + 1 ) );
 
     // start all threads
