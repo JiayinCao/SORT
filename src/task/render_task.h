@@ -33,7 +33,7 @@ public:
     //!
     //! @param priority     New priority of the task.
     Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
-                const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies );
+                const char* name , unsigned int priority , const Task::Task_Container& dependencies );
     
     //! @brief  Execute the task
     void        Execute() override;
@@ -70,7 +70,7 @@ public:
     //!
     //! @param priority     New priority of the task.
     PreRender_Task( const Scene& scene , const char* name , unsigned int priority , 
-                    const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
+                    const Task::Task_Container& dependencies ) :
                     Task( name , priority , dependencies ), m_scene(scene){}
     
     //! @brief  Execute the task

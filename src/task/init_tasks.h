@@ -26,7 +26,7 @@ public:
     //!
     //! @param  scene     Scene to be filled during loading.
     Loading_Task( class Scene& scene , class IStreamBase& stream , const char* name , unsigned int priority , 
-                  const std::unordered_set<std::shared_ptr<Task>>& dependencies ) : 
+                  const Task::Task_Container& dependencies ) :
         Task( name , DEFAULT_TASK_PRIORITY , dependencies ) , m_scene(scene) , m_stream(stream) {}
     
     //! @brief  Load data from input file.
@@ -45,7 +45,7 @@ public:
     //!
     //! @param  scene     Scene to be filled during loading.
     SpatialAccelerationConstruction_Task( class Scene& scene, const char* name , 
-    unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies ) :
+                 unsigned int priority , const Task::Task_Container& dependencies ) :
         Task( name , DEFAULT_TASK_PRIORITY, dependencies  ) , m_scene(scene) {}
 
     //! @brief  Load data from input file.

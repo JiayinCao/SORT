@@ -29,6 +29,8 @@
 // Default task priority is 100000.
 #define DEFAULT_TASK_PRIORITY       100000
 
+using TaskID = unsigned int;
+
 //! @brief 	Basic unit task in SORT system.
 /**
  * SORT is driven by a graph based task system. The tasks form a directed acyclic graph (DAG).
@@ -38,15 +40,21 @@
  * with a priority number. Default priority is 100000, higher priority task will be executed earlier 
  * than lower ones.
  */
-class Task : public std::enable_shared_from_this<Task>{
-    // Dependency container for task
-    using Task_Container = std::unordered_set<std::shared_ptr<Task>>;
-
+class Task{
 public:
+    // Dependency container for task
+    using Task_Container = std::unordered_set<Task*>;
+
     //! @brief  Default constructor.
     Task(   const char* name  , unsigned int priority = DEFAULT_TASK_PRIORITY , 
-            const std::unordered_set<std::shared_ptr<Task>>& dependencies = {} ):
-            m_name(name), m_dependencies(dependencies),m_priority(priority) {}
+            const std::unordered_set<Task*>& dependencies = {} ):
+            m_name(name), m_dependencies(dependencies),m_priority(priority) {
+        static std::mutex m;
+        static unsigned int taskId = 0;
+
+        std::lock_guard<std::mutex> lock(m);
+        m_taskId = (TaskID)++taskId;
+    }
 
     //! @brief  Virtual destructor.
     virtual             ~Task() {}
@@ -67,7 +75,7 @@ public:
     //! @brief  Remove dependency from task.
     //!
     //! Upon the termination of any dependent task, it is necessary to remove it from its dependency.
-    inline void         RemoveDependency( const std::shared_ptr<Task> taskid ) { 
+    inline void         RemoveDependency( Task* taskid ) { 
         m_dependencies.erase( taskid ); 
     }
 
@@ -88,8 +96,15 @@ public:
     //! @brief  Add dependent.
     //!
     //! @param  Task to be added as a dependent.
-    inline void AddDependent( const std::shared_ptr<Task> task ){
+    inline void AddDependent( Task* task ){
         m_dependents.insert( task );
+    }
+
+    //! @brief  Get the id of the task
+    //!
+    //! @return Id of the current task.
+    inline TaskID GetTaskID() const {
+        return m_taskId;
     }
 
     //! @brief  Get tasks this task depends on.
@@ -104,6 +119,7 @@ private:
     Task_Container      m_dependents;       /**< Tasks depending on this task. */
     unsigned int        m_priority;         /**< Priority of the task. */
     const std::string   m_name;             /**< Name of the task. */
+    TaskID              m_taskId;           /**< This is to identify the task with id. */
 };
 
 //! @brief  Scheduler for scheduling tasks.
@@ -116,19 +132,22 @@ private:
  */
 class Scheduler : public Singleton<Scheduler>{
     /**< Task comparison functor. */
-    using Task_Comp = std::function<bool(const std::shared_ptr<Task> , const std::shared_ptr<Task>)>;
+    using Task_Comp = std::function<bool(const Task* , const Task*)>;
     /**< Static task comparison functor based on its priority. */
     static Task_Comp task_comp;
     /**< Task queue for available tasks is actually a heap. */
-    using TaskQueue = std::priority_queue<std::shared_ptr<Task>,std::vector<std::shared_ptr<Task>>,decltype(task_comp)>;
+    using TaskQueue = std::priority_queue<Task*,std::vector<Task*>,decltype(task_comp)>;
     /**< Task container for back-up tasks is just a hash container. */
-    using TaskContainer = std::unordered_set<std::shared_ptr<Task>>;
+    using BackupTaskContainer = std::unordered_set<Task*>;
+    /**< Task container for keeping tasks alive. */
+    using TaskContainer = std::unordered_map<TaskID, std::unique_ptr<Task>>;
 
 public:
     //! @brief  Schedule a task.
     //!
     //! @param  task        Task to be scheduled.
-    void                    Schedule( const std::shared_ptr<Task> task );
+    //! @param              Raw pointer to the task.
+    Task*    Schedule( std::unique_ptr<Task> task );
 
     //! @brief  Pick a task with highest priority, but no dependencies.
     //!
@@ -140,7 +159,7 @@ public:
     //! If there is no task in the scheduler, nullptr will be returned.
     //!
     //! @return    The task picked from scheduler.
-    std::shared_ptr<Task>   PickTask();
+    Task*   PickTask();
 
     //! @brief  Remove dependencies for a task.
     //!
@@ -148,26 +167,26 @@ public:
     //! tasks depending on this task will get chance to be executed in the future.
     //!
     //! @param task     Task that is finished. This task should not be in the scheduler.
-    void                    TaskFinished( const std::shared_ptr<Task> task );
+    void    TaskFinished( Task* task );
     
 private:
     //! @brief  Default constructor
     Scheduler():m_availbleTasks(task_comp){}
 
     TaskQueue                   m_availbleTasks;        /**< Heap of available tasks. */
-    TaskContainer               m_backupTasks;          /**< Container for all tasks not direct available. */
+    BackupTaskContainer         m_backupTasks;          /**< Container for all tasks not direct available. */
     std::mutex                  m_mutex;                /**< Mutex to make sure scheduler is thread-safe. */
     std::condition_variable     m_cv;                   /**< Conditional variable for pick task. */
+    TaskContainer               m_tasks;                /**< This holds all tasks to keep them alive. */
 
     friend class Singleton<Scheduler>;
 };
 
 //! @brief      Schedule a task in task scheduler.
 template<class T, typename... Args>
-inline std::shared_ptr<T>  SCHEDULE_TASK( const char* name , unsigned int priority , const std::unordered_set<std::shared_ptr<Task>>& dependencies , Args&&... args ){
-    auto ret = std::make_shared<T>( args... , name , priority , dependencies );
-    Scheduler::GetSingleton().Schedule( ret );
-    return ret;
+inline Task*  SCHEDULE_TASK( const char* name , unsigned int priority , const Task::Task_Container& dependencies , Args&&... args ){
+    auto ret = std::make_unique<T>(args..., name, priority, dependencies);
+    return Scheduler::GetSingleton().Schedule( std::move(ret) );
 }
 
 //! @brief      Executing tasks. It will exit if there is no other tasks.
