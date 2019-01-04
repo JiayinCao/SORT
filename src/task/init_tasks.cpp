@@ -37,5 +37,6 @@ void Loading_Task::Execute(){
 
 void SpatialAccelerationConstruction_Task::Execute(){
     TIMING_EVENT_STAT( "Spatial acceleration structure construction" , sPreprocessTimeMS );
-    g_accelerator->Build( m_scene );
+    if(g_accelerator)
+        g_accelerator->Build( m_scene );
 }

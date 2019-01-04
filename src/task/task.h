@@ -43,11 +43,12 @@ using TaskID = unsigned int;
 class Task{
 public:
     // Dependency container for task
-    using Task_Container = std::unordered_set<Task*>;
+    using Task_Container = std::unordered_set<const Task*>;
+    using DependentTask_Container = std::unordered_set<Task*>;
 
     //! @brief  Default constructor.
     Task(   const char* name  , unsigned int priority = DEFAULT_TASK_PRIORITY , 
-            const std::unordered_set<Task*>& dependencies = {} ):
+            const Task_Container& dependencies = {} ):
             m_name(name), m_dependencies(dependencies),m_priority(priority) {
         static std::mutex m;
         static unsigned int taskId = 0;
@@ -75,7 +76,7 @@ public:
     //! @brief  Remove dependency from task.
     //!
     //! Upon the termination of any dependent task, it is necessary to remove it from its dependency.
-    inline void         RemoveDependency( Task* taskid ) { 
+    inline void         RemoveDependency( const Task* taskid ) { 
         m_dependencies.erase( taskid ); 
     }
 
@@ -89,7 +90,7 @@ public:
     //! @brief  Get tasks depending on this task.
     //!
     //! @return Tasks this task depends on.
-    inline Task_Container& GetDependents() { 
+    inline const DependentTask_Container& GetDependents() const  {
         return m_dependents; 
     }
 
@@ -115,11 +116,11 @@ public:
     }
 
 private:
-    Task_Container      m_dependencies;     /**< Tasks this task depends on. */
-    Task_Container      m_dependents;       /**< Tasks depending on this task. */
-    unsigned int        m_priority;         /**< Priority of the task. */
-    const std::string   m_name;             /**< Name of the task. */
-    TaskID              m_taskId;           /**< This is to identify the task with id. */
+    Task_Container              m_dependencies;     /**< Tasks this task depends on. */
+    DependentTask_Container     m_dependents;       /**< Tasks depending on this task. */
+    unsigned int                m_priority;         /**< Priority of the task. */
+    const std::string           m_name;             /**< Name of the task. */
+    TaskID                      m_taskId;           /**< This is to identify the task with id. */
 };
 
 //! @brief  Scheduler for scheduling tasks.
@@ -167,7 +168,7 @@ public:
     //! tasks depending on this task will get chance to be executed in the future.
     //!
     //! @param task     Task that is finished. This task should not be in the scheduler.
-    void    TaskFinished( Task* task );
+    void    TaskFinished( const Task* task );
     
 private:
     //! @brief  Default constructor
