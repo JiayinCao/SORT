@@ -19,7 +19,7 @@
 #include <fstream>
 #include "merl.h"
 #include "core/define.h"
-#include "managers/memmanager.h"
+#include "core/memory.h"
 #include "core/path.h"
 #include "math/vector3.h"
 #include "bsdf.h"

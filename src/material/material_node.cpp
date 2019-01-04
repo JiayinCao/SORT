@@ -16,7 +16,7 @@
  */
 
 #include "material_node.h"
-#include "managers/memmanager.h"
+#include "core/memory.h"
 #include "bsdf/bsdf.h"
 #include "bsdf/lambert.h"
 #include "math/intersection.h"

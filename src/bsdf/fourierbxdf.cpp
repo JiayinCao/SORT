@@ -19,7 +19,7 @@
 #include <fstream>
 #include "fourierbxdf.h"
 #include "bsdf.h"
-#include "managers/memmanager.h"
+#include "core/memory.h"
 #include "core/samplemethod.h"
 #include "sampler/sample.h"
 

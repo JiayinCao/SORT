@@ -21,7 +21,7 @@
 #include "core/scene.h"
 #include "bsdf/bsdf.h"
 #include "light/light.h"
-#include "managers/memmanager.h"
+#include "core/memory.h"
 #include "sampler/sampler.h"
 
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)

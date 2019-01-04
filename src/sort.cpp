@@ -108,13 +108,6 @@ bool	RunSORT( int argc , char** argv ){
 	// Schedule all tasks.
     SchedulTasks( scene , stream );
 
-	// pre allocate memory for the specific thread
-	{
-		SORT_PROFILE("Memory Allocation");
-		for( unsigned i = 0 ; i <= g_threadCnt ; ++i )
-			MemManager::GetSingleton().PreMalloc( 1024 * 1024 * 1024 , i );
-	}
-    
     std::vector< std::unique_ptr<WorkerThread> > threads;
     for( unsigned i = 0 ; i < g_threadCnt ; ++i )
         threads.push_back( std::make_unique<WorkerThread>( i + 1 ) );

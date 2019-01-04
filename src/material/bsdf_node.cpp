@@ -16,7 +16,7 @@
  */
 
 #include "bsdf_node.h"
-#include "managers/memmanager.h"
+#include "core/memory.h"
 #include "bsdf/lambert.h"
 #include "bsdf/merl.h"
 #include "bsdf/orennayar.h"
