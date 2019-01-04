@@ -54,14 +54,3 @@ public:
 	// para 'num'    : the number of samples to be generated
 	virtual void Generate2D( float* sample , unsigned num , bool accept_uniform = false ) const = 0;
 };
-
-// generate shuffle index
-inline const unsigned* ShuffleIndex( unsigned size )
-{
-	unsigned* shuffle = SORT_MALLOC_ARRAY( unsigned , size );
-	for( unsigned i = 0 ; i < size ; i++ )
-		shuffle[i] = i;
-	std::random_shuffle( shuffle , shuffle + size );
-	
-	return shuffle;
-}
