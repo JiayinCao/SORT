@@ -20,7 +20,7 @@
 #include "material_node.h"
 #include "stream/stream.h"
 #include "bsdf/bsdf.h"
-#include "managers/memmanager.h"
+#include "core/memory.h"
 #include "core/log.h"
 #include "material_node.h"
 #include "core/profile.h"

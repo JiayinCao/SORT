@@ -19,7 +19,7 @@
 #include "bsdf/bsdf.h"
 #include "math/ray.h"
 #include "core/samplemethod.h"
-#include "managers/memmanager.h"
+#include "core/memory.h"
 
 // evaluate value from sky
 Spectrum Sky::Evaluate( const Vector& wi ) const

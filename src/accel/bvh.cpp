@@ -19,7 +19,6 @@
 #include <algorithm>
 #include "bvh.h"
 #include "math/ray.h"
-#include "managers/memmanager.h"
 #include "math/intersection.h"
 
 IMPLEMENT_CREATOR(Bvh);
@@ -41,7 +40,6 @@ SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sBvhMa
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sBvhPrimitiveCount , sBvhLeafNodeCountCopy );
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-static const unsigned   BVH_LEAF_PRILIST_MEMID  = 1027;
 static const unsigned   BVH_SPLIT_COUNT         = 16;
 static const float      BVH_INV_SPLIT_COUNT     = 0.0625f;
 
@@ -49,18 +47,15 @@ void Bvh::Build(const Scene& scene){
     SORT_PROFILE("Build Bvh");
 
     m_primitives = scene.GetPrimitives();
-    
-    // This memory allocation will be automatically deleted, meaning BVH class won't be responsible for clearing this memory.
-    SORT_PREMALLOC((unsigned)(sizeof(Bvh_Primitive) * m_primitives->size()), BVH_LEAF_PRILIST_MEMID);
-    m_bvhpri = SORT_MEMORY_ID(Bvh_Primitive, BVH_LEAF_PRILIST_MEMID);
+    m_bvhpri = std::make_unique<Bvh_Primitive[]>(m_primitives->size());
 
 	// build bounding box
 	computeBBox();
 
 	// generate BVH primitives
-    for( auto& primitive : *m_primitives )
-        SORT_MALLOC_ID(Bvh_Primitive,BVH_LEAF_PRILIST_MEMID)(primitive.get());
-    
+    for (auto i = 0u; i < m_primitives->size(); ++i)
+        m_bvhpri[i].SetPrimitive((*m_primitives)[i].get());
+
 	// recursively split node
     m_root = std::make_unique<Bvh_Node>();
 	splitNode( m_root.get() , 0u , (unsigned)m_primitives->size() , 1u );
@@ -109,8 +104,8 @@ void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned d
 
 	// partition the data
     auto compare = [split_pos,split_axis](const Bvh::Bvh_Primitive& pri){return pri.m_centroid[split_axis] < split_pos;};
-    auto middle = std::partition( &m_bvhpri[start] , &m_bvhpri[end-1]+1 , compare );
-    auto mid = (unsigned)(middle - m_bvhpri);
+    auto middle = std::partition( m_bvhpri.get() + start , m_bvhpri.get() + end, compare );
+    auto mid = (unsigned)(middle - m_bvhpri.get());
 
     // To avoid degenerated node that has nothing in it.
     // Technically, this shouldn't happen. Unlike KD-Tree implementation, there is only 16 split plane candidate, it is

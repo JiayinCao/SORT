@@ -17,11 +17,11 @@
 
 #pragma once
 
-#include "core/define.h"
-#include <vector>
-#include "sample.h"
-#include "managers/memmanager.h"
 #include <algorithm>
+#include <vector>
+#include "core/define.h"
+#include "sample.h"
+#include "core/memory.h"
 #include "core/creator.h"
 
 // WARNING: Code in this folder is very outdated. Not even functional.

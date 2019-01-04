@@ -17,7 +17,7 @@
 
 #include "thread.h"
 
-#include "managers/memmanager.h"
+#include "core/memory.h"
 #include "core/stats.h"
 #include "core/profile.h"
 #include "task/task.h"

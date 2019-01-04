@@ -18,7 +18,7 @@
 #pragma once
 
 #include "spectrum/spectrum.h"
-#include "managers/memmanager.h"
+#include "core/memory.h"
 #include "sampler/sampler.h"
 #include "core/creator.h"
 #include "core/stats.h"

@@ -15,7 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "managers/memmanager.h"
+#include "core/memory.h"
 #include "bxdf_node.h"
 #include "bsdf/lambert.h"
 #include "bsdf/merl.h"
