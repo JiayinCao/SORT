@@ -7,7 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 SET( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )	
  
 # Disable Profiling system by default	
-SET( SORT_ENABLE_PROFILER "YES" CACHE BOOL "Enable SORT profiling system. It is false by default." )
+SET( SORT_ENABLE_PROFILER "NO" CACHE BOOL "Enable SORT profiling system. It is false by default." )
 SET( SORT_ENABLE_STATS "YES" CACHE BOOL "Enable SORT stats system. It is true by default." )
 
 project (SORT)
