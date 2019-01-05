@@ -19,26 +19,15 @@
 
 #include "texture.h"
 
-///////////////////////////////////////////////////////////////
-// definition of grid texture
-class	GridTexture : public Texture
-{
+class	GridTexture : public Texture{
 public:
-	DEFINE_CREATOR( GridTexture , Texture , "grid" );
-
-	// default constructor
-	GridTexture();
+	GridTexture( const Spectrum& c0 , const Spectrum& c1 )
+		:Texture(16,16),m_Color0(c0),m_Color1(c1),m_Threshold(0.9f){
+	}
 	
-	// get the texture value
-	// para 'x'	:	x coordinate , if out of range , use filter
-	// para 'y' :	y coordinate , if out of range , use filter
-	virtual Spectrum GetColor( int x , int y ) const;
-
-	// set color of the spectrum
-	void	SetGridColor( const Spectrum& c0 , const Spectrum& c1 );
+	Spectrum GetColor( int x , int y ) const override;
 
 private:
-	// two colors
 	Spectrum	m_Color0;
 	Spectrum	m_Color1;
 

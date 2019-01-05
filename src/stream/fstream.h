@@ -243,9 +243,14 @@ public:
     //!
     //! @param  data    Data to be written.
     //! @param  size    Size of the data to be filled in bytes.
-    virtual StreamBase& Write( char* data , int size ) override {
+    StreamBase& Write( char* data , int size ) override {
         m_file.write(data, size);
         return *this;
+    }
+
+    //! @brief Flush current written result.
+    void Flush() override{
+        m_file.flush();
     }
 
 private:

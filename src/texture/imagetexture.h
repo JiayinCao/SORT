@@ -25,8 +25,6 @@
 class ImageTexture : public Texture 
 {
 public:
-	DEFINE_CREATOR( ImageTexture , Texture , "image" );
-
 	// load image from file
 	// para 'str'  : the name of the image file to be loaded
 	// result      : whether loading is successful
@@ -37,10 +35,6 @@ public:
 	// para 'y' :	y coordinate , if out of range , use filter
 	// result	:	spectrum value in the position
     Spectrum GetColor( int x , int y ) const override;
-
-	// it means nothing to set the size of the image file
-	// set the size of the texture
-	void	SetSize( unsigned w , unsigned h ) override{}
 
 	// whether the image is valid
 	bool IsValid() override { return (bool)m_pMemory; }

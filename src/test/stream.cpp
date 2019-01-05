@@ -67,36 +67,36 @@ TEST(STREAM, MemoryStream) {
     std::vector<float>           vec_f;
     std::vector<int>             vec_i;
     std::vector<unsigned int>    vec_u;
-    OMemoryStream ostream(0u);
+    IMemoryStream istream(0u);
     std::string str = "this is a random string";
-    ostream<<str;
+    istream<<str;
     bool flag = true;
-    ostream<<flag;
+    istream<<flag;
     std::string empty_str = "";
-    ostream<<empty_str;
+    istream<<empty_str;
     for (unsigned i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
         vec_f.push_back( sort_canonical() );
         vec_i.push_back( (int)( ( 2.0f * sort_canonical() - 1.0f ) * STREAM_SAMPLE_COUNT ) );
         vec_u.push_back( (unsigned int)( sort_canonical() * STREAM_SAMPLE_COUNT ) );
-        ostream << vec_f.back() << vec_i.back() ;
-        ostream << vec_u.back();
+        istream << vec_f.back() << vec_i.back() ;
+        istream << vec_u.back();
     }
 
-    IMemoryStream istream( ostream.GetDataSize() , ostream.GetRawData() );
+    OMemoryStream ostream( istream );
     std::string str_copy;
-    istream>>str_copy;
+    ostream>>str_copy;
     EXPECT_EQ( str_copy , str );
     bool flag_copy = false;
-    istream>>flag_copy;
+    ostream>>flag_copy;
     EXPECT_EQ( flag_copy , flag );
     std::string empty_str_copy;
-    istream>>empty_str_copy;
+    ostream>>empty_str_copy;
     EXPECT_EQ( empty_str_copy , empty_str );
     for (int i = 0; i < STREAM_SAMPLE_COUNT; ++i) {
         float t0 = 0.0f;
         int t1 = 0;
         unsigned int t2 = 0;
-        istream >> t0 >> t1 >> t2;
+        ostream >> t0 >> t1 >> t2;
         EXPECT_EQ(t0, vec_f[i]);
         EXPECT_EQ(t1, vec_i[i]);
         EXPECT_EQ(t2, vec_u[i]);

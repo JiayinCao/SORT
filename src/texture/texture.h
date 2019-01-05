@@ -20,14 +20,12 @@
 #include "core/define.h"
 #include "spectrum/spectrum.h"
 #include "core/enum.h"
-#include "core/creator.h"
 
 // WARNING : Code in this folder is easily several years old.
 // 			 It is just functional for now. Will re-implement everything later.
 //		 	 Priority is very low.
 
 // pre-declare class
-class ComTexture;
 class Intersection;
 
 //////////////////////////////////////////////////////////////
@@ -37,6 +35,8 @@ class Texture
 public:
 	// default constructor
 	Texture();
+	Texture( int w , int h ) : m_iTexWidth(w) , m_iTexHeight(h) , m_TexCoordFilter(TCF_WARP) {
+	}
 	// destructor
 	virtual ~Texture();
 
@@ -54,10 +54,6 @@ public:
 	// get color from uv coordinate
 	virtual Spectrum GetColorFromUV( float u , float v ) const;
 
-	// whether the texture support outputing
-	// result : 'true' if the texture supports texture output
-	virtual	bool CanOutput() const { return true; }
-
 	// get the texture value
 	// para 'intersect' : the intersection
 	// result :	the spectrum value
@@ -67,24 +63,16 @@ public:
 	void	SetTexCoordFilter( TEXCOORDFILTER mode );
 
 	// get the size of the texture
-	unsigned	GetWidth() const
-	{
+	unsigned	GetWidth() const{
 		return m_iTexWidth;
 	}
-	unsigned	GetHeight() const
-	{
+	unsigned	GetHeight() const{
 		return m_iTexHeight;
 	}
-
-	// set the size of the texture
-	virtual void	SetSize( unsigned w , unsigned h )
-	{
-		m_iTexWidth = w;
-		m_iTexHeight = h;
-	}
-
 	// whether the texture is valid
-	virtual bool IsValid() { return true; }
+	virtual bool IsValid() {
+		return true;
+	}
 
 protected:
 	// the size of the texture
@@ -102,8 +90,3 @@ protected:
 	// do texture filter
 	void _texCoordFilter( int& u , int&v ) const;
 };
-
-ComTexture operator+( float t , const Texture& tex );
-ComTexture operator*( float t , const Texture& tex );
-ComTexture operator-( float t , const Texture& tex );
-
