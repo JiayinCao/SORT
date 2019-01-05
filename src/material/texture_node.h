@@ -27,8 +27,7 @@ class TextureNode : public MaterialNode{
 };
 
 // Grid texture Node
-class GridTexNode : public TextureNode
-{
+class GridTexNode : public TextureNode{
 public:
 	DEFINE_CREATOR( GridTexNode , MaterialNode , "SORTNodeGrid" );
 
@@ -55,8 +54,7 @@ private:
 };
 
 // Grid texture Node
-class CheckBoxTexNode : public TextureNode
-{
+class CheckBoxTexNode : public TextureNode{
 public:
 	DEFINE_CREATOR( CheckBoxTexNode , MaterialNode , "SORTNodeCheckbox" );
 
@@ -83,8 +81,7 @@ private:
 };
 
 // Grid texture Node
-class ImageTexNode : public TextureNode
-{
+class ImageTexNode : public TextureNode{
 public:
 	DEFINE_CREATOR( ImageTexNode , MaterialNode , "SORTNodeImage" );
 

@@ -22,7 +22,6 @@
 #include "bsdf/bsdf.h"
 #include "core/memory.h"
 #include "core/log.h"
-#include "material_node.h"
 #include "core/profile.h"
 
 //! @brief 	A thin layer of material definition.

@@ -22,13 +22,15 @@
 #include "bsdf/merl.h"
 #include "bsdf/fourierbxdf.h"
 
-// Disney Principle BRDF node
-class DisneyPrincipleNode : public BxdfNode
-{
+//! @brief  Disney Principle BRDF node
+class DisneyPrincipleNode : public BxdfNode{
 public:
     DEFINE_CREATOR( DisneyPrincipleNode , MaterialNode , "SORTNode_Material_DisneyBRDF" );
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -48,7 +50,6 @@ public:
         clearcoat.Serialize( stream );
         clearcoatGloss.Serialize( stream );
         basecolor.Serialize( stream );
-
         BxdfNode::Serialize( stream );
 	}
 
@@ -66,13 +67,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( clearcoatGloss );
 };
 
-// Principle Material
-class PrincipleMaterialNode : public BxdfNode
-{
+//! Principle Material is very similiar with UE4 shading model.
+class PrincipleMaterialNode : public BxdfNode{
 public:
     DEFINE_CREATOR( PrincipleMaterialNode , MaterialNode, "SORTNode_Material_Principle" );
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -86,7 +89,6 @@ public:
         metallic.Serialize( stream );
         specular.Serialize( stream );
         baseColor.Serialize( stream );
-
         BxdfNode::Serialize( stream );
 	}
 
@@ -98,13 +100,18 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( specular );
 };
 
-// Matte Material
-class MatteMaterialNode : public BxdfNode
-{
+//! @brief  Matte Material.
+/**
+ * Depending on the roughness, this material could be pure lambert BRDF or OrenNayar BRDF.
+ */
+class MatteMaterialNode : public BxdfNode{
 public:
     DEFINE_CREATOR( MatteMaterialNode , MaterialNode, "SORTNode_Material_Matte" );
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -115,7 +122,6 @@ public:
     void Serialize( IStreamBase& stream ) override {
         baseColor.Serialize( stream );
         roughness.Serialize( stream );
-
         BxdfNode::Serialize( stream );
 	}
 
@@ -124,13 +130,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
 };
 
-// Plastic Material
-class PlasticMaterialNode : public BxdfNode
-{
+//! @brief  Plastic material is a combination of lambert BRDF and microfacet BRDF.
+class PlasticMaterialNode : public BxdfNode{
 public:
     DEFINE_CREATOR( PlasticMaterialNode , MaterialNode, "SORTNode_Material_Plastic" );
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -152,13 +160,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
 };
 
-// Glass Material
-class GlassMaterialNode : public BxdfNode
-{
+//! @brief  Glass material node uses microfacet refraction model.
+class GlassMaterialNode : public BxdfNode{
 public:
     DEFINE_CREATOR( GlassMaterialNode , MaterialNode, "SORTNode_Material_Glass" );
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -171,7 +181,6 @@ public:
         transmittance.Serialize( stream );
         roughnessU.Serialize( stream );
         roughnessV.Serialize( stream );
-
         BxdfNode::Serialize( stream );
 	}
 
@@ -182,13 +191,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( roughnessV );
 };
 
-// Mirror Material
-class MirrorMaterialNode : public BxdfNode
-{
+//! @brief  Mirror material is microfacet reflection model with 0 as roughness.
+class MirrorMaterialNode : public BxdfNode{
 public:
     DEFINE_CREATOR( MirrorMaterialNode , MaterialNode, "SORTNode_Material_Mirror" );
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -205,16 +216,18 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( basecolor );
 };
 
-// Measured Material
-class MeasuredMaterialNode : public BxdfNode
-{
+//! @brief  Measured Material could be fourier or MERL brdf.
+class MeasuredMaterialNode : public BxdfNode{
 public:
     DEFINE_CREATOR( MeasuredMaterialNode , MaterialNode , "SORTNode_Material_Measured" );
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
-    // post process
+    //! @brief  Measured BRDF file is loaded in post-processing.
     void PostProcess() override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -232,17 +245,19 @@ private:
     SORT_MATERIAL_DEFINE_PROP_STR( bxdfType );
     SORT_MATERIAL_DEFINE_PROP_STR( bxdfFilePath );
     
-    FourierBxdfData fourierBxdfData;
-    MerlData        merlData;
+    FourierBxdfData m_fourierBxdfData;        /**< Measured BRDF data in the form of fourier. */
+    MerlData        m_merlData;               /**< Measured BRDF data in the form of MERL. */
 };
 
-// Blend Material
-class BlendMaterialNode : public BxdfNode
-{
+//! @brief  Blend material node is used to implement layered material.
+class BlendMaterialNode : public BxdfNode{
 public:
     DEFINE_CREATOR(BlendMaterialNode, MaterialNode, "SORTNode_Material_Blend");
 
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -262,13 +277,20 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT(factor);
 };
 
-// Double-Sided Material
-class DoubleSidedMaterialNode : public BxdfNode
-{
+//! @brief  Double-sided material node shows another BRDF on the other side of the primitive.
+/**
+ * It is up to the user to make sure valid materials are setup. There is no enough reason to check invalid material
+ * setup using this node. It is totally possible to setup a BTDF on the other side to break the renderer. Users of
+ * SORT should generally not do this.
+ */
+class DoubleSidedMaterialNode : public BxdfNode{
 public:
     DEFINE_CREATOR(DoubleSidedMaterialNode, MaterialNode, "SORTNode_Material_DoubleSided");
 
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
 
     //! @brief  Serialization interface. Loading data from stream.
