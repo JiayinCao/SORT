@@ -17,20 +17,7 @@
 
 #include "gridtexture.h"
 
-IMPLEMENT_CREATOR( GridTexture );
-
-// default constructor
-GridTexture::GridTexture():
-	m_Color0( 0.0f , 0.0f , 0.0f ),
-	m_Color1( 1.0f , 1.0f , 1.0f )
-{
-	m_iTexWidth = m_iTexHeight = 16;
-	m_Threshold = 0.9f;
-}
-
-// get the color
-Spectrum GridTexture::GetColor( int x , int y ) const 
-{
+Spectrum GridTexture::GetColor( int x , int y ) const {
 	// filter the coorindate first
 	_texCoordFilter( x , y );
 
@@ -47,11 +34,4 @@ Spectrum GridTexture::GetColor( int x , int y ) const
 		return m_Color1;
 	else
 		return m_Color0;
-}
-
-// set color of the spectrum
-void GridTexture::SetGridColor( const Spectrum& c0 , const Spectrum& c1 )
-{
-	m_Color0 = c0;
-	m_Color1 = c1;
 }

@@ -315,6 +315,9 @@ public:
     //! @param  data    Data to be filled.
     //! @param  size    Size of the data to be filled in bytes.
     StreamBase& Load( char* data , int size ) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStream!"); return *this; }
+
+    //! @brief Flush current written result.
+    virtual void Flush() {}
 };
 
 //! @brief  Interface for serializable objects.
