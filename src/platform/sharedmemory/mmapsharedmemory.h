@@ -28,7 +28,7 @@ public:
 	void CreateSharedMemory(const std::string& sm_name, int size, unsigned type);
 
 	// Release share memory resource
-	void ReleaseSharedMemory();
+	~MmapSharedMemory();
 
 	// shared memory data
 	SharedMemory	sharedmemory;

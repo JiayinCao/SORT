@@ -23,11 +23,8 @@
 #include "core/thread.h"
 #include <mutex>
 
-class RenderTask;
-
 // generate output
-class ImageSensor
-{
+class ImageSensor{
 public:
 	ImageSensor( int w , int h ) : m_width(w) , m_height(h) {}
 	virtual ~ImageSensor(){}
@@ -45,12 +42,12 @@ public:
     virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) = 0;
     
     // get width
-    unsigned GetWidth() const {
+    inline unsigned GetWidth() const {
         return m_width;
     }
     
     // get height
-    unsigned GetHeight() const {
+    inline unsigned GetHeight() const {
         return m_height;
     }
 

@@ -20,15 +20,14 @@
 #include "imagesensor.h"
 
 // generate output
-class RenderTargetImage : public ImageSensor
-{
+class RenderTargetImage : public ImageSensor{
 public:
     // constructor
     RenderTargetImage( int w , int h ):ImageSensor(w,h){}
 
 	// store pixel information
-	virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt );
+	void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) override;
 
 	// post process
-	virtual void PostProcess();
+	void PostProcess() override;
 };

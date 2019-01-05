@@ -19,7 +19,7 @@
 
 #include "imagesensor.h"
 #include "texture/rendertarget.h"
-#include "managers/smmanager.h"
+#include "platform/sharedmemory/sharedmemory.h"
 
 // generate output
 class BlenderImage : public ImageSensor
@@ -29,16 +29,16 @@ public:
 	BlenderImage( int w , int h ) : ImageSensor( w , h ) {}
 
 	// store pixel information
-	virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt );
+	void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) override;
 
 	// finish image tile
-	virtual void FinishTile( int tile_x , int tile_y , const Render_Task& rt );
+	void FinishTile( int tile_x , int tile_y , const Render_Task& rt ) override;
 
 	// pre process
-	virtual void PreProcess();
+	void PreProcess() override;
 
 	// post process
-	virtual void PostProcess();
+	void PostProcess() override;
 
 private:
 	int				m_header_offset;
@@ -46,5 +46,5 @@ private:
 	int				m_tilenum_x;
 	int				m_tilenum_y;
 
-	SharedMemory	m_sharedMemory;
+	PlatformSharedMemory	m_sharedMemory;
 };

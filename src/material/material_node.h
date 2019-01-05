@@ -42,7 +42,6 @@
 #define SORT_MATERIAL_GET_PROP_VECTOR(v,prop)           SORT_MATERIAL_GET_PROP_COMMON(v,prop,Vector)
 
 class Bsdf;
-class MaterialNodeProperty;
 
 enum MATERIAL_NODE_PROPERTY_TYPE{
     MNPT_NONE = 0,
@@ -118,7 +117,7 @@ public:
     
 protected:
     /**< All properties in the node. */
-    std::unordered_set< MaterialNodeProperty* > m_props;
+    std::unordered_set< class MaterialNodeProperty* > m_props;
     
     /**< Whether the node is valid or not. */
     bool m_node_valid = true;
