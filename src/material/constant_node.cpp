@@ -21,14 +21,12 @@
 IMPLEMENT_CREATOR( ConstantColorNode );
 IMPLEMENT_CREATOR( ConstantFloatNode );
 
-void ConstantColorNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result )
-{
+void ConstantColorNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     SORT_MATERIAL_GET_PROP_COLOR(c,src);
     result = c;
 }
 
-void ConstantFloatNode::GetMaterialProperty( Bsdf* bsdf , float& result )
-{
+void ConstantFloatNode::GetMaterialProperty( Bsdf* bsdf , float& result ){
     SORT_MATERIAL_GET_PROP_FLOAT(f,value);
     result = f;
 }

@@ -19,19 +19,26 @@
 
 #include "material_node.h"
 
-class OperatorNode : public MaterialNode
-{
+//! @brief  Operator node.
+class OperatorNode : public MaterialNode{
 public:
-    // get node return type
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_COLOR; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_COLOR;
+    }
 };
 
-// Adding node
-class AddNode : public OperatorNode
-{
+//! @brief  Add two color.
+class AddNode : public OperatorNode{
 public:
 	DEFINE_CREATOR( AddNode , MaterialNode , "SORTNodeAdd" );
 
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -49,12 +56,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
 };
 
-// Inverse node
-class SORTNodeOneMinus : public OperatorNode
-{
+//! @brief  Get the inverse ( 1 - src ) color.
+class SORTNodeOneMinus : public OperatorNode{
 public:
     DEFINE_CREATOR( SORTNodeOneMinus , MaterialNode , "SORTNodeOneMinus" );
     
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -70,12 +80,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
 
-// Lerp node
-class LerpNode : public OperatorNode
-{
+//! @brief  Lerp node.
+class LerpNode : public OperatorNode{
 public:
 	DEFINE_CREATOR( LerpNode , MaterialNode , "SORTNodeLerp" );
 
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -95,12 +108,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( factor );
 };
 
-// Blend node
-class BlendNode : public OperatorNode
-{
+//! @brief  Blend node.
+class BlendNode : public OperatorNode{
 public:
 	DEFINE_CREATOR( BlendNode , MaterialNode , "SORTNodeBlend" );
 
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -122,12 +138,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( factor1 );
 };
 
-// Mutiply node
-class MutiplyNode : public OperatorNode
-{
+//! @brief  Mutiply two spectrums.
+class MutiplyNode : public OperatorNode{
 public:
 	DEFINE_CREATOR( MutiplyNode , MaterialNode , "SORTNodeMultiply" );
     
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -145,12 +164,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
 };
 
-// Gamma correction Node
-class GammaToLinearNode : public OperatorNode
-{
+//! @brief  Gamma correction Node.
+class GammaToLinearNode : public OperatorNode{
 public:
     DEFINE_CREATOR( GammaToLinearNode , MaterialNode , "SORTNodeGammaToLinear" );
     
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -166,12 +188,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
 
-// Gamma correction Node
-class LinearToGammaNode : public OperatorNode
-{
+//! @brief  Gamma correction Node.
+class LinearToGammaNode : public OperatorNode{
 public:
     DEFINE_CREATOR( LinearToGammaNode , MaterialNode , "SORTNodeLinearToGamma" );
     
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -187,15 +212,20 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
 
-// Gamma correction Node
-class NormalDecoderNode : public OperatorNode
-{
+//! @brief  Normal decoding node.
+class NormalDecoderNode : public OperatorNode{
 public:
     DEFINE_CREATOR( NormalDecoderNode , MaterialNode , "SORTNodeDecodeNormal" );
     
+    //! @brief  Get vector material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Vector data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Vector& result ) override;
     
-    // get node return type
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_VECTOR; }
     
     //! @brief  Serialization interface. Loading data from stream.

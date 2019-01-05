@@ -37,8 +37,7 @@ IMPLEMENT_CREATOR( MeasuredMaterialNode );
 IMPLEMENT_CREATOR( BlendMaterialNode );
 IMPLEMENT_CREATOR( DoubleSidedMaterialNode );
 
-void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,basecolor);
     SORT_MATERIAL_GET_PROP_FLOAT(ss,subsurface);
@@ -55,8 +54,7 @@ void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)( bc , ss , m , s , st , r , a , sh , sht , cc , ccg , weight , n ));
 }
 
-void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(basecolor,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(spec,specular);
@@ -64,18 +62,17 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     SORT_MATERIAL_GET_PROP_FLOAT(ru, roughnessU);
     SORT_MATERIAL_GET_PROP_FLOAT(rv, roughnessV);
     
-    const Spectrum eta = Spectrum( 0.37f , 0.37f , 0.37f );
+    const auto eta = Spectrum( 0.37f , 0.37f , 0.37f );
     const Spectrum k( 2.82f );
-    const MicroFacetDistribution* dist = SORT_MALLOC(GGX)(ru , rv);
+    const auto dist = SORT_MALLOC(GGX)(ru , rv);
     
-    const Fresnel* fresnel = SORT_MALLOC( FresnelConductor )( eta , k );
+    const auto fresnel = SORT_MALLOC( FresnelConductor )( eta , k );
     
     bsdf->AddBxdf(SORT_MALLOC(Lambert)(basecolor , weight * (1 - m) * 0.92f , n));
     bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(basecolor, fresnel, dist , weight * (m * 0.92f + 0.08f * spec) , n));
 }
 
-void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(basecolor,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(rn,roughness);
@@ -88,8 +85,7 @@ void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     }
 }
 
-void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(diff,diffuse);
     SORT_MATERIAL_GET_PROP_COLOR(spec,specular);
@@ -99,14 +95,13 @@ void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
         bsdf->AddBxdf(SORT_MALLOC(Lambert)( diff , weight , n ));
     
     if( !spec.IsBlack() ){
-        const Fresnel *fresnel = SORT_MALLOC(FresnelDielectric)(1.0f, 1.5f);
-        const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
+        const auto fresnel = SORT_MALLOC(FresnelDielectric)(1.0f, 1.5f);
+        const auto dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
         bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist , weight , n ));
     }
 }
 
-void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(r,reflectance);
     SORT_MATERIAL_GET_PROP_COLOR(t,transmittance);
@@ -114,26 +109,24 @@ void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     SORT_MATERIAL_GET_PROP_FLOAT(roughV,roughnessV);
     
     if( r.IsBlack() && t.IsBlack() ) return;
-    const MicroFacetDistribution* dist = SORT_MALLOC(GGX)(roughU, roughV);
+    const auto dist = SORT_MALLOC(GGX)(roughU, roughV);
     bsdf->AddBxdf(SORT_MALLOC(Dielectric)(r, t, dist, 1.0f, 1.5f, weight, n));
 }
 
-void MirrorMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void MirrorMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(color,basecolor);
     if( color.IsBlack() ) return;
     
     // This is not perfect mirror reflection in term of physically based rendering, but it looks good enough so far.
-    const MicroFacetDistribution* dist = SORT_MALLOC(GGX)( 0.0f , 0.0f );   // GGX
+    const auto dist = SORT_MALLOC(GGX)( 0.0f , 0.0f );   // GGX
     if( !color.IsBlack() ){
-        const Fresnel* fresnel = SORT_MALLOC( FresnelNo )();
+        const auto fresnel = SORT_MALLOC( FresnelNo )();
         bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( color , fresnel , dist , weight , n ));
     }
 }
 
-void MeasuredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void MeasuredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_STR(type,bxdfType);
     
@@ -161,21 +154,19 @@ void MeasuredMaterialNode::PostProcess(){
     BxdfNode::PostProcess();
 }
 
-void BlendMaterialNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
-{
+void BlendMaterialNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight){
     SORT_MATERIAL_GET_PROP_FLOAT(t,factor);
     
-    Bsdf* bsdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-    Bsdf* bsdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+    auto bsdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+    auto bsdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
     bxdf0.UpdateBsdf(bsdf0);
     bxdf1.UpdateBsdf(bsdf1);
     bsdf->AddBxdf(SORT_MALLOC(Blend)(bsdf0, bsdf1, t, weight));
 }
 
-void DoubleSidedMaterialNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
-{
-    Bsdf* bsdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-    Bsdf* bsdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+void DoubleSidedMaterialNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight){
+    auto bsdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+    auto bsdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
     bxdf0.UpdateBsdf(bsdf0);
     bxdf1.UpdateBsdf(bsdf1);
     bsdf->AddBxdf(SORT_MALLOC(DoubleSided)(bsdf0, bsdf1, weight));
