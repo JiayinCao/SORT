@@ -19,15 +19,23 @@
 
 #include "material_node.h"
 
-// constant color node
-class ConstantColorNode : public MaterialNode
-{
+//! @brief Constant color node.
+class ConstantColorNode : public MaterialNode{
 public:
 	DEFINE_CREATOR( ConstantColorNode , MaterialNode , "SORTNodeConstant" );
 
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_COLOR; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_COLOR;
+    }
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -42,15 +50,23 @@ private:
 	SORT_MATERIAL_DEFINE_PROP_COLOR( src );
 };
 
-// constant float node
-class ConstantFloatNode : public MaterialNode
-{
+//! @brief  Constant float node.
+class ConstantFloatNode : public MaterialNode{
 public:
     DEFINE_CREATOR( ConstantFloatNode , MaterialNode , "SORTNodeConstantFloat" );
     
+    //! @brief  Get float material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Float data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_FLOAT; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_FLOAT;
+    }
     
     //! @brief  Serialization interface. Loading data from stream.
     //!

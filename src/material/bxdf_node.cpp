@@ -50,16 +50,14 @@ void LambertTransmissionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     bsdf->AddBxdf( SORT_MALLOC(LambertTransmission)(bc, weight , n ) );
 }
 
-void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void OrenNayarNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(r,roughness);
     bsdf->AddBxdf( SORT_MALLOC(OrenNayar)(bc, r , weight , n ) );
 }
 
-void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(ru,roughnessU);
@@ -76,12 +74,11 @@ void MicrofacetReflectionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	else
 		dist = SORT_MALLOC(GGX)( ru , rv );	// GGX is default
 
-	const Fresnel* frenel = SORT_MALLOC( FresnelConductor )(_eta, _k);
+	const auto frenel = SORT_MALLOC( FresnelConductor )(_eta, _k);
 	bsdf->AddBxdf( SORT_MALLOC(MicroFacetReflection)(bc , frenel , dist , weight , n ) );
 }
 
-void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(ru,roughnessU);
@@ -101,8 +98,7 @@ void MicrofacetRefractionNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	bsdf->AddBxdf( SORT_MALLOC(MicroFacetRefraction)(bc, dist , ext_eta , in_eta , weight , n ) );
 }
 
-void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
-{
+void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(specDiffuse,diffuse);
     SORT_MATERIAL_GET_PROP_FLOAT(specSpecular,specular);
@@ -111,8 +107,7 @@ void AshikhmanShirleyNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
     bsdf->AddBxdf(SORT_MALLOC(AshikhmanShirley)(specDiffuse, specSpecular, ru, rv , weight , n ));
 }
 
-void PhongNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
-{
+void PhongNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(specDiffuse,diffuse);
     SORT_MATERIAL_GET_PROP_COLOR(specSpecular,specular);
@@ -124,14 +119,12 @@ void PhongNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight)
     bsdf->AddBxdf(SORT_MALLOC(Phong)(specDiffuse * r, specSpecular * ( 1.0f - r ), p, weight, n));
 }
 
-void MerlNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void MerlNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     bsdf->AddBxdf( SORT_MALLOC(Merl)( data , weight , n ) );
 }
 
-void MerlNode::PostProcess()
-{
+void MerlNode::PostProcess(){
     if( m_post_processed )
         return;
     
@@ -143,15 +136,13 @@ void MerlNode::PostProcess()
     BxdfNode::PostProcess();
 }
 
-void FourierBxdfNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void FourierBxdfNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( fourierBxdfData , weight , n ) );
 }
 
 // post process
-void FourierBxdfNode::PostProcess()
-{
+void FourierBxdfNode::PostProcess(){
     if( m_post_processed )
         return;
 
@@ -163,8 +154,7 @@ void FourierBxdfNode::PostProcess()
     BxdfNode::PostProcess();
 }
 
-void CoatNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void CoatNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(s,sigma);
     SORT_MATERIAL_GET_PROP_FLOAT(r,roughness);

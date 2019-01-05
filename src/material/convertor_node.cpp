@@ -23,34 +23,29 @@ IMPLEMENT_CREATOR( SORTNodeExtractGreen );
 IMPLEMENT_CREATOR( SORTNodeExtractBlue );
 IMPLEMENT_CREATOR( SORTNodeExtractIntensity );
 
-void SORTNodeComposite::GetMaterialProperty( Bsdf* bsdf , Spectrum& result )
-{
+void SORTNodeComposite::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     SORT_MATERIAL_GET_PROP_FLOAT(r,R);
     SORT_MATERIAL_GET_PROP_FLOAT(g,G);
     SORT_MATERIAL_GET_PROP_FLOAT(b,B);
     result.SetColor(r, g, b);
 }
 
-void SORTNodeExtractRed::GetMaterialProperty( Bsdf* bsdf , float& result )
-{
+void SORTNodeExtractRed::GetMaterialProperty( Bsdf* bsdf , float& result ){
     SORT_MATERIAL_GET_PROP_COLOR(c,color);
     result = c.GetR();
 }
 
-void SORTNodeExtractGreen::GetMaterialProperty( Bsdf* bsdf , float& result )
-{
+void SORTNodeExtractGreen::GetMaterialProperty( Bsdf* bsdf , float& result ){
     SORT_MATERIAL_GET_PROP_COLOR(c,color);
     result = c.GetG();
 }
 
-void SORTNodeExtractBlue::GetMaterialProperty( Bsdf* bsdf , float& result )
-{
+void SORTNodeExtractBlue::GetMaterialProperty( Bsdf* bsdf , float& result ){
     SORT_MATERIAL_GET_PROP_COLOR(c,color);
     result = c.GetB();
 }
 
-void SORTNodeExtractIntensity::GetMaterialProperty( Bsdf* bsdf , float& result )
-{
+void SORTNodeExtractIntensity::GetMaterialProperty( Bsdf* bsdf , float& result ){
     SORT_MATERIAL_GET_PROP_COLOR(c,color);
     result = c.GetIntensity();
 }

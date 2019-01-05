@@ -22,18 +22,28 @@
 #include "texture/checkboxtexture.h"
 #include "texture/imagetexture.h"
 
+//! @brief  Base class for texture node.
 class TextureNode : public MaterialNode{
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_COLOR; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_COLOR;
+    }
 };
 
-// Grid texture Node
+//! @brief  Grid texture Node.
 class GridTexNode : public TextureNode{
 public:
 	DEFINE_CREATOR( GridTexNode , MaterialNode , "SORTNodeGrid" );
 
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
-	// post process
+	//! @brief  Update texture data.
 	void PostProcess() override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -50,17 +60,22 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
 
-	GridTexture grid_tex;
+    /**< Grid texture. */
+	GridTexture m_gridTexture;
 };
 
-// Grid texture Node
+//! @brief  Grid texture Node.
 class CheckBoxTexNode : public TextureNode{
 public:
 	DEFINE_CREATOR( CheckBoxTexNode , MaterialNode , "SORTNodeCheckbox" );
 
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
-	// post process
+	//! Update the checker box texture.
     void PostProcess() override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -77,17 +92,22 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
 
-	CheckBoxTexture checkbox_tex;
+    /**< The checker box texture. */
+	CheckBoxTexture m_checkerBoxTexture;
 };
 
-// Grid texture Node
+//! @brief  Image texture node.
 class ImageTexNode : public TextureNode{
 public:
 	DEFINE_CREATOR( ImageTexNode , MaterialNode , "SORTNodeImage" );
 
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
-	// post process
+	//! Load texture from tile.
     void PostProcess() override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -102,5 +122,6 @@ public:
 private:
 	SORT_MATERIAL_DEFINE_PROP_STR( filename );
 
-	ImageTexture image_tex;
+    /**< The image texture. */
+	ImageTexture m_imageTexture;
 };
