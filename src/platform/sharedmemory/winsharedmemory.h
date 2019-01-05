@@ -26,19 +26,14 @@
 class WinSharedMemory
 {
 public:
-	// default constructor
-	WinSharedMemory();
+    ~WinSharedMemory();
 
 	// Initialize shared memory
 	void CreateSharedMemory(const std::string& sm_name, int size, unsigned type);
 
-	// Release share memory resource
-	void ReleaseSharedMemory();
-
 	// shared memory data
 	SharedMemory	sharedmemory;
 
-// platform dependent fields, still invisible from others
 private:
 	HANDLE	hMapFile;
 };
