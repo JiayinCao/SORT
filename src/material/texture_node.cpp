@@ -24,7 +24,7 @@ IMPLEMENT_CREATOR( ImageTexNode );
 
 void GridTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     const Intersection* intesection = bsdf->GetIntersection();
-    result = grid_tex.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
+    result = m_gridTexture.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
 }
 
 void GridTexNode::PostProcess(){
@@ -36,14 +36,14 @@ void GridTexNode::PostProcess(){
     SORT_MATERIAL_GET_PROP_COLOR(s1,src1);
     
 	// set grid texture
-	grid_tex.SetGridColor( s0 , s1 );
+	m_gridTexture.SetGridColor( s0 , s1 );
 
 	MaterialNode::PostProcess();
 }
 
 void CheckBoxTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     const Intersection* intesection = bsdf->GetIntersection();
-    result = checkbox_tex.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
+    result = m_checkerBoxTexture.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
 }
 
 void CheckBoxTexNode::PostProcess(){
@@ -54,13 +54,13 @@ void CheckBoxTexNode::PostProcess(){
     SORT_MATERIAL_GET_PROP_COLOR(s0,src0);
     SORT_MATERIAL_GET_PROP_COLOR(s1,src1);
     
-	checkbox_tex.SetCheckBoxColor( s0 , s1 );
+	m_checkerBoxTexture.SetCheckBoxColor( s0 , s1 );
 	MaterialNode::PostProcess();
 }
 
 void ImageTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     const Intersection* intesection = bsdf->GetIntersection();
-    result = image_tex.GetColorFromUV( intesection->u , intesection->v );
+    result = m_imageTexture.GetColorFromUV( intesection->u , intesection->v );
 }
 
 void ImageTexNode::PostProcess(){
@@ -69,5 +69,5 @@ void ImageTexNode::PostProcess(){
 
     Bsdf* bsdf = nullptr;
     SORT_MATERIAL_GET_PROP_STR(file,filename);
-	image_tex.LoadImageFromFile( file );
+	m_imageTexture.LoadImageFromFile( file );
 }

@@ -19,13 +19,22 @@
 
 #include "material_node.h"
 
-class SORTNodeComposite : public MaterialNode
-{
+//! @brief  Composite SORT material node.
+class SORTNodeComposite : public MaterialNode{
 public:
     DEFINE_CREATOR( SORTNodeComposite , MaterialNode , "SORTNodeComposite" );
     
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_COLOR; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_COLOR;
+    }
     
+    //! @brief  Get spectrum material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -45,13 +54,22 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( B );
 };
 
-class SORTNodeExtractRed : public MaterialNode
-{
+//! @brief  Extracting red channel of the source code.
+class SORTNodeExtractRed : public MaterialNode{
 public:
     DEFINE_CREATOR( SORTNodeExtractRed , MaterialNode , "SORTNodeExtractRed" );
     
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_FLOAT; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_FLOAT;
+    }
     
+    //! @brief  Get float material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   The result to be filled.
     void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -67,13 +85,22 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( color );
 };
 
-class SORTNodeExtractGreen : public MaterialNode
-{
+//! @brief  Extracting green channel of the source color.
+class SORTNodeExtractGreen : public MaterialNode{
 public:
     DEFINE_CREATOR( SORTNodeExtractGreen , MaterialNode , "SORTNodeExtractGreen" );
     
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_FLOAT; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_FLOAT;
+    }
     
+    //! @brief  Get float material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   The result to be filled.
     void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -89,13 +116,22 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( color );
 };
 
-class SORTNodeExtractBlue : public MaterialNode
-{
+//! @brief  Extracting blue channel of the source color.
+class SORTNodeExtractBlue : public MaterialNode{
 public:
     DEFINE_CREATOR( SORTNodeExtractBlue , MaterialNode , "SORTNodeExtractBlue" );
     
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_FLOAT; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_FLOAT;
+    }
     
+    //! @brief  Get float material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   The result to be filled.
     void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -111,13 +147,22 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( color );
 };
 
-class SORTNodeExtractIntensity : public MaterialNode
-{
+//! @brief  Extracting intensity of the source spectrum.
+class SORTNodeExtractIntensity : public MaterialNode{
 public:
     DEFINE_CREATOR( SORTNodeExtractIntensity , MaterialNode , "SORTNodeIntensity" );
     
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_FLOAT; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_FLOAT;
+    }
     
+    //! @brief  Get float material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   The result to be filled.
     void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.

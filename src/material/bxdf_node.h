@@ -22,12 +22,15 @@
 #include "bsdf/merl.h"
 #include "bsdf/fourierbxdf.h"
 
-// Bxdf node
-class BxdfNode : public MaterialNode
-{
+//! @brief  Base class for BXDF node.
+class BxdfNode : public MaterialNode{
 protected:
-    // get node return type
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { return MNPT_BXDF; }
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_BXDF;
+    }
     
     SORT_MATERIAL_DEFINE_PROP_VECTOR( normal );
 
@@ -41,13 +44,15 @@ protected:
 	}
 };
 
-// Lambert node
-class LambertNode : public BxdfNode
-{
+//! @brief  Lambert node.
+class LambertNode : public BxdfNode{
 public:
 	DEFINE_CREATOR( LambertNode , MaterialNode , "SORTNode_BXDF_Lambert" );
 
-	// update bsdf
+	//! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -64,13 +69,15 @@ private:
 	SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
 };
 
-// Lambert node
-class LambertTransmissionNode : public BxdfNode
-{
+//! @brief Lambert transmitance node.
+class LambertTransmissionNode : public BxdfNode{
 public:
     DEFINE_CREATOR( LambertTransmissionNode , MaterialNode , "SORTNode_BXDF_LambertTransmission" );
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -87,13 +94,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( baseColor );
 };
 
-// Oren nayar node
-class OrenNayarNode : public BxdfNode
-{
+//! @brief  OrenNayar node.
+class OrenNayarNode : public BxdfNode{
 public:
 	DEFINE_CREATOR( OrenNayarNode , MaterialNode , "SORTNode_BXDF_OrenNayar" );
 
-	// update bsdf
+	//! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -112,13 +121,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
 };
 
-// Microfacet node
-class MicrofacetReflectionNode : public BxdfNode
-{
+//! @brief  Microfacet reflection node.
+class MicrofacetReflectionNode : public BxdfNode{
 public:
 	DEFINE_CREATOR( MicrofacetReflectionNode , MaterialNode , "SORTNode_BXDF_MicrofacetReflection" );
 
-	// update bsdf
+	//! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -145,13 +156,16 @@ private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( k );
 };
 
-// Microfacet node
+//! @brief  Microfacet refraction node.
 class MicrofacetRefractionNode : public BxdfNode
 {
 public:
 	DEFINE_CREATOR( MicrofacetRefractionNode , MaterialNode , "SORTNode_BXDF_MicrofacetRefraction" );
 
-	// update bsdf
+	//! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -178,13 +192,15 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( ext_ior );
 };
 
-// AshikhmanShirley node
-class AshikhmanShirleyNode : public BxdfNode
-{
+//! @brief AshikhmanShirley node.
+class AshikhmanShirleyNode : public BxdfNode{
 public:
     DEFINE_CREATOR(AshikhmanShirleyNode, MaterialNode, "SORTNode_BXDF_AshikhmanShirley");
 
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -207,13 +223,16 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT(roughnessV);
 };
 
-// Phong node
+//! @brief  Phong node.
 class PhongNode : public BxdfNode
 {
 public:
     DEFINE_CREATOR(PhongNode, MaterialNode, "SORTNode_BXDF_Phong");
 
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -236,16 +255,18 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT(diffRatio);
 };
 
-// Merl node
-class MerlNode : public BxdfNode
-{
+//! @brief  Merl node.
+class MerlNode : public BxdfNode{
 public:
     DEFINE_CREATOR( MerlNode , MaterialNode , "SORTNode_BXDF_MERL" );
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
-    // post process
+    //! @brief  Measured BRDF file is loaded in post-processing.
     void PostProcess() override;
     
     //! @brief  Serialization interface. Loading data from stream.
@@ -261,20 +282,22 @@ public:
 private:
     SORT_MATERIAL_DEFINE_PROP_STR( merlfile );
 
-    // the merl data
+    /**< The MERL BRDF data. */
     MerlData data;
 };
 
-// Fourier bxdf node
-class FourierBxdfNode : public BxdfNode
-{
+//! @brief  Fourier bxdf node.
+class FourierBxdfNode : public BxdfNode{
 public:
     DEFINE_CREATOR( FourierBxdfNode , MaterialNode , "SORTNode_BXDF_Fourier" );
 
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
 
-    // post process
+    //! @brief  Measured BRDF file is loaded in post-processing.
     void PostProcess() override;
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -294,13 +317,15 @@ private:
     FourierBxdfData fourierBxdfData;
 };
 
-// Coat node
-class CoatNode : public BxdfNode
-{
+//! @brief  Coat node.
+class CoatNode : public BxdfNode{
 public:
     DEFINE_CREATOR(CoatNode, MaterialNode, "SORTNode_BXDF_Coat");
     
-    // update bsdf
+    //! @brief  Update BSDF for this node.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
     void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
     
     //! @brief  Serialization interface. Loading data from stream.
