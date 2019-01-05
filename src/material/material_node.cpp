@@ -20,15 +20,12 @@
 #include "bsdf/bsdf.h"
 #include "bsdf/lambert.h"
 #include "math/intersection.h"
-#include "core/log.h"
 
-// update bsdf, for layered brdf
 void MaterialNodeProperty::UpdateBsdf( Bsdf* bsdf , Spectrum weight ){
-    if( node )
-        node->UpdateBSDF( bsdf , weight );
+    if( m_node )
+        m_node->UpdateBSDF( bsdf , weight );
 }
 
-// post process
 void MaterialNode::PostProcess()
 {
 	if( m_post_processed )
@@ -42,9 +39,7 @@ void MaterialNode::PostProcess()
 	m_post_processed = true;
 }
 
-// update bsdf
-void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
 	if( weight.IsBlack() )
 		return;
 
@@ -54,9 +49,7 @@ void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
 	}
 }
 
-// update bsdf
-void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
-{
+void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
 	// return a default one for invalid material
 	if( !m_node_valid || !output.GetNode() ){
 		static const Spectrum default_spectrum( 0.5f , 0.1f , 0.1f );

@@ -138,25 +138,26 @@ void MeasuredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight )
     SORT_MATERIAL_GET_PROP_STR(type,bxdfType);
     
     if( type == "Fourier" )
-        bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( fourierBxdfData , weight , n ) );
+        bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( m_fourierBxdfData , weight , n ) );
     else if( type == "MERL" )
-        bsdf->AddBxdf( SORT_MALLOC(Merl)(merlData, weight , n) );
+        bsdf->AddBxdf( SORT_MALLOC(Merl)(m_merlData, weight , n) );
 }
 
-// post process
-void MeasuredMaterialNode::PostProcess()
-{
-    if( m_post_processed || bxdfFilePath.str.empty() )
+void MeasuredMaterialNode::PostProcess(){
+    if( m_post_processed )
         return;
     
     Bsdf* bsdf = nullptr;
     SORT_MATERIAL_GET_PROP_STR(type,bxdfType);
     SORT_MATERIAL_GET_PROP_STR(file,bxdfFilePath);
     
+    if( file.empty() )
+        return;
+
     if( type == "Fourier" )
-        fourierBxdfData.LoadData( file );
+        m_fourierBxdfData.LoadData( file );
     else if( type == "MERL" )
-        merlData.LoadData( file );
+        m_merlData.LoadData( file );
     BxdfNode::PostProcess();
 }
 
