@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <memory>
 #include "texture.h"
 
 class	RenderTarget : public Texture{
