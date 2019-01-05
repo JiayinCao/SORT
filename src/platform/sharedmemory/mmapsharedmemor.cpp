@@ -19,21 +19,14 @@
 
 #if defined(SORT_IN_MAC) || defined(SORT_IN_LINUX)
 
-#include "sharedmemory.h"
-#include "core/log.h"
 #include <sys/mman.h>
-#include <sys/types.h>
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <err.h>
 #include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include "sharedmemory.h"
+#include "core/log.h"
 
-void MmapSharedMemory::CreateSharedMemory( const std::string& name , int size , unsigned type )
-{
+void MmapSharedMemory::CreateSharedMemory( const std::string& name , int size , unsigned type ){
     fd = open(name.c_str(), O_RDWR , 0 );
     if( fd == -1 )
     {
@@ -49,8 +42,7 @@ void MmapSharedMemory::CreateSharedMemory( const std::string& name , int size , 
 }
 
 // Release share memory resource
-void MmapSharedMemory::ReleaseSharedMemory()
-{
+MmapSharedMemory::~MmapSharedMemory(){
     if( sharedmemory.bytes != 0 )
         munmap(sharedmemory.bytes, sharedmemory.size);
     if( fd != -1 )

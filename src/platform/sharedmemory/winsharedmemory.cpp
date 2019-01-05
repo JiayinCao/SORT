@@ -22,14 +22,7 @@
 #include "sharedmemory.h"
 #include "core/log.h"
 
-// default constructor
-WinSharedMemory::WinSharedMemory()
-{
-	hMapFile = 0;
-}
-
-void WinSharedMemory::CreateSharedMemory( const std::string& name , int size , unsigned type )
-{
+void WinSharedMemory::CreateSharedMemory( const std::string& name , int size , unsigned type ){
 	hMapFile = OpenFileMapping(
 		FILE_MAP_ALL_ACCESS,	// read/write access
 		FALSE,					// do not inherit the name
@@ -56,8 +49,7 @@ void WinSharedMemory::CreateSharedMemory( const std::string& name , int size , u
 }
 
 // Release share memory resource
-void WinSharedMemory::ReleaseSharedMemory()
-{
+WinSharedMemory::~WinSharedMemory(){
 	// unmap the view
 	if (sharedmemory.bytes)
 		UnmapViewOfFile(sharedmemory.bytes);

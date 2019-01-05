@@ -15,15 +15,13 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "blenderimage.h"
-#include "managers/smmanager.h"
 #include <mutex>
+#include "blenderimage.h"
 #include "core/globalconfig.h"
+#include "core/path.h"
 
-// store pixel information
-void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt )
-{
-	if (!m_sharedMemory.bytes)
+void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ){
+	if (!m_sharedMemory.sharedmemory.bytes)
 		return;
 
 	int tile_w = rt.GetTileSize().x;
@@ -34,7 +32,7 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
 	int offset = 4 * tile_offset * tile_size;
 
 	// get the data pointer
-	float* data = (float*)(m_sharedMemory.bytes + m_header_offset);
+	float* data = (float*)(m_sharedMemory.sharedmemory.bytes + m_header_offset);
 
 	// get offset
 	int inner_offset = offset + 4 * (x - rt.GetTopLeft().x + (g_tileSize - 1 - (y - rt.GetTopLeft().y)) * tile_w);
@@ -53,18 +51,14 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
     }
 }
 
-// finish image tile
-void BlenderImage::FinishTile( int tile_x , int tile_y , const Render_Task& rt )
-{
-	if (!m_sharedMemory.bytes)
+void BlenderImage::FinishTile( int tile_x , int tile_y , const Render_Task& rt ){
+	if (!m_sharedMemory.sharedmemory.bytes)
 		return;
 
-	m_sharedMemory.bytes[tile_y * m_tilenum_x + tile_x] = 1;
+	m_sharedMemory.sharedmemory.bytes[tile_y * m_tilenum_x + tile_x] = 1;
 }
 
-// pre process
-void BlenderImage::PreProcess()
-{
+void BlenderImage::PreProcess(){
 	// create shared memory
 	m_tilenum_x = (int)(ceil(g_resultResollutionWidth / (float)g_tileSize));
 	m_tilenum_y = (int)(ceil(g_resultResollutionHeight / (float)g_tileSize));
@@ -75,20 +69,18 @@ void BlenderImage::PreProcess()
 			 + m_header_offset														// header size
 			 + 2;																	// progress data and final update flag
 
-	// create shared memory
-	const SharedMemory& sm = SMManager::GetSingleton().CreateSharedMemory("sharedmem.bin", size, SharedMmeory_All);
+	m_sharedMemory.CreateSharedMemory(GetFilePathInResourceFolder("sharedmem.bin"), size, SharedMmeory_All);
+	auto& sm = m_sharedMemory.sharedmemory;
 	// clear the memory first
 	if (sm.bytes)
 		memset(sm.bytes, 0, sm.size);
-	m_sharedMemory = SMManager::GetSingleton().GetSharedMemory("sharedmem.bin");
-	
+
 	ImageSensor::PreProcess();
 }
 
-// post process
 void BlenderImage::PostProcess(){
 	// perform a copy from render target to shared memory
-	float* data = (float*)(m_sharedMemory.bytes + m_header_offset + m_header_offset * g_tileSize * g_tileSize * 4 * sizeof(float));
+	float* data = (float*)(m_sharedMemory.sharedmemory.bytes + m_header_offset + m_header_offset * g_tileSize * g_tileSize * 4 * sizeof(float));
 
 	int offset = 0;
 	for (int i = 0; i < (int)m_rendertarget.GetHeight(); ++i)
@@ -101,7 +93,7 @@ void BlenderImage::PostProcess(){
 		}
 
 	// signal a final update
-	m_sharedMemory.bytes[m_final_update_flag_offset] = 1;
+	m_sharedMemory.sharedmemory.bytes[m_final_update_flag_offset] = 1;
 
 	ImageSensor::PostProcess();
 }
