@@ -74,8 +74,6 @@ void BlenderImage::PreProcess(){
 	// clear the memory first
 	if (sm.bytes)
 		memset(sm.bytes, 0, sm.size);
-
-	ImageSensor::PreProcess();
 }
 
 void BlenderImage::PostProcess(){

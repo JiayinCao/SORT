@@ -19,29 +19,16 @@
 
 #include "texture.h"
 
-//////////////////////////////////////////////////////////////////////////////////////
-//	definition of check box texture
-class	CheckBoxTexture : public Texture
+class	CheckerBoxTexture : public Texture
 {
 public:
-	DEFINE_CREATOR( CheckBoxTexture , Texture , "checkbox" );
-
-	// default constructor
-	CheckBoxTexture();
-
-	// get the texture value
-	// para 'x'	:	x coordinate , if out of range , use filter
-	// para 'y' :	y coordinate , if out of range , use filter
-	virtual Spectrum GetColor( int x , int y ) const;
-
-    // set check box color
-    void SetCheckBoxColor( const Spectrum& c0 , const Spectrum& c1 ){
-        m_Color0 = c0;
-        m_Color1 = c1;
+    CheckerBoxTexture( const Spectrum& c0 , const Spectrum& c1 ) 
+        :Texture(16,16), m_Color0(c0) , m_Color1(c1){
     }
+
+	Spectrum GetColor( int x , int y ) const override;
     
 private:
-	// two colors
 	Spectrum	m_Color0;
 	Spectrum	m_Color1;
 };

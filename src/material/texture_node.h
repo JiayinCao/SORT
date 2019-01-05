@@ -19,7 +19,6 @@
 
 #include "material_node.h"
 #include "texture/gridtexture.h"
-#include "texture/checkboxtexture.h"
 #include "texture/imagetexture.h"
 
 //! @brief  Base class for texture node.
@@ -43,9 +42,6 @@ public:
     //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
-	//! @brief  Update texture data.
-	void PostProcess() override;
-
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -59,9 +55,6 @@ public:
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
-
-    /**< Grid texture. */
-	GridTexture m_gridTexture;
 };
 
 //! @brief  Grid texture Node.
@@ -75,9 +68,6 @@ public:
     //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
-	//! Update the checker box texture.
-    void PostProcess() override;
-    
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -91,9 +81,6 @@ public:
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
-
-    /**< The checker box texture. */
-	CheckBoxTexture m_checkerBoxTexture;
 };
 
 //! @brief  Image texture node.

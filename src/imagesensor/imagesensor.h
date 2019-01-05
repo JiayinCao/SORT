@@ -26,14 +26,13 @@
 // generate output
 class ImageSensor{
 public:
-	ImageSensor( int w , int h ) : m_width(w) , m_height(h) {}
+	ImageSensor( int w , int h ) : m_width(w) , m_height(h) , m_rendertarget( w , h ) {
+        m_mutex = std::make_unique<spinlock_mutex[]>( m_width * m_height );
+    }
 	virtual ~ImageSensor(){}
     
 	// pre process
-    virtual void PreProcess(){
-		m_rendertarget.SetSize(m_width, m_height);
-		m_mutex = std::make_unique<spinlock_mutex[]>( m_width * m_height );
-	}
+    virtual void PreProcess() {}
 
 	// finish image tile
 	virtual void FinishTile( int tile_x , int tile_y , const Render_Task& rt ){}

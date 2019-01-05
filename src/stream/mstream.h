@@ -19,163 +19,18 @@
 
 #include "stream.h"
 #include "core/define.h"
-#include "stream/fstream.h"
 
 //! @brief Streaming from memory.
 /**
  * IMemoryStream only works for streaming data from memory. Any attempt to write data
  * to memory will result in immediate crash.
  */
-class IMemoryStream : public IStreamBase{
+class IMemoryStream : public OStreamBase{
 public:
     //! @brief  Constructor.
     //!
-    //! It is the caller's job to make sure the memory passed in has at least 'initSize'
-    //! bytes available. There will be unknown behavior otherwise.
-    //!
     //! @param  initSize    Initial size of the stream.
-    //! @param  initData    Initial data of the stream.
-    IMemoryStream( unsigned int initSize = 1024u , void* initData = nullptr ){
-        if( initSize == 0u )
-            return;
-        Resize( initSize );
-        memcpy( m_data.get() , initData , initSize );
-    }
-
-    //! @brief  Resize the stream.
-    //!
-    //! @param  size    The new size to be resized.
-    inline void    Resize( unsigned int size ){
-        size = std::max( 1024u , size );
-        auto new_data = std::make_unique<char[]>( size );
-        if( m_capacity )
-            memcpy( new_data.get() , m_data.get() , m_capacity );
-        if (size > m_capacity)
-            memset(new_data.get() + m_capacity, 0, size - m_capacity);
-	    m_capacity = size;
-        m_data = std::move(new_data);
-    }
-
-    //! @brief Streaming in a float number to memory.
-    //!
-    //! @param v    Value to be loaded.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator >> (float& v) override {
-        if( m_pos + sizeof( v ) > m_capacity )
-            v = 0;
-        else{
-            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
-            m_pos += sizeof( v );
-        }
-        return *this;
-    }
-
-    //! @brief Streaming in an integer number to memory.
-    //!
-    //! @param v    Value to be loaded.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator >> (int& v) override {
-        if( m_pos + sizeof( v ) > m_capacity )
-            v = 0;
-        else{
-            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
-            m_pos += sizeof( v );
-        }
-        return *this;
-    }
-
-    //! @brief Streaming in an unsigned integer number to memory.
-    //!
-    //! @param v    Value to be loaded.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator >> (unsigned int& v) override {
-        if( m_pos + sizeof( v ) > m_capacity )
-            v = 0;
-        else{
-            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
-            m_pos += sizeof( v );
-        }
-        return *this;
-    }
-
-    //! @brief Streaming in a string to memory.
-    //!
-    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
-    //! result in one single string instead of two.
-    //!
-    //! @param v    Value to be loaded.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator >> (std::string& v) override {
-        v = "";
-        while( m_pos < m_capacity ){
-            char c = m_data[m_pos++];
-            if( c == 0 )
-                break;
-            v += c;
-        }
-        return *this;
-    }
-
-    //! @brief Streaming in a boolean value to memory.
-    //!
-    //! @param v    Value to be loaded.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator >> (bool& v) override {
-        if( m_pos + sizeof( v ) > m_capacity )
-            v = 0;
-        else{
-            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
-            m_pos += sizeof( v );
-        }
-        return *this;
-    }
-
-    //! @brief  Get raw memory.
-    //!
-    //! The caller doesn't own the memory. It has to make sure its life time still expand its usage.
-    //!
-    //! @return     Return a pointer points to the memory.
-    void*       GetRawData(){
-        return m_data.get();
-    }
-
-    //! @brief Loading data from stream directly.
-    //!
-    //! @param  data    Data to be filled.
-    //! @param  size    Size of the data to be filled in bytes.
-    StreamBase& Load( char* data , int size ) override {
-        if( m_pos + size > m_capacity ){
-            memset( data , 0 , size );
-        }else{
-            memcpy( data , m_data.get() , size );
-            m_pos += size;
-        }
-        return *this;
-    }
-
-private:
-    /**< Pointer points to the address where the memory is. */
-    std::unique_ptr<char[]>     m_data = nullptr;
-    /**< Capacity of the current stream. */
-    unsigned int                m_capacity = 0;
-    /**< Current position of streaming. */
-    unsigned int                m_pos = 0;
-};
-
-//! @brief Streaming to memory.
-/**
- * OMemoryStream only works for streaming data to memory. Any attempt to read data
- * from memory will result in immediate crash.
- */
-class OMemoryStream : public OStreamBase{
-public:
-    //! @brief  Constructor.
-    //!
-    //! It is the caller's job to make sure the memory passed in has at least 'initSize'
-    //! bytes available. There will be unknown behavior otherwise.
-    //!
-    //! @param  initSize    Initial size of the stream.
-    OMemoryStream( unsigned int initSize = 1024u ){
+    IMemoryStream( unsigned int initSize = 1024u ){
         if( initSize == 0u )
             return;
         Resize( initSize );
@@ -195,7 +50,7 @@ public:
         m_data = std::move( new_data );
     }
 
-    //! @brief Streaming out a float number from memory.
+    //! @brief Streaming in a float number from memory.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
@@ -210,7 +65,7 @@ public:
         return *this;
     }
 
-    //! @brief Streaming out an integer number from memory.
+    //! @brief Streaming in an integer number from memory.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
@@ -225,7 +80,7 @@ public:
         return *this;
     }
 
-    //! @brief Streaming out an unsigned integer number from memory.
+    //! @brief Streaming in an unsigned integer number from memory.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
@@ -240,7 +95,7 @@ public:
         return *this;
     }
 
-    //! @brief Streaming out a string from memory.
+    //! @brief Streaming in a string from memory.
     //!
     //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
     //! result in one single string instead of two.
@@ -261,7 +116,7 @@ public:
         return *this;
     }
 
-    //! @brief Streaming out a boolean value from memory.
+    //! @brief Streaming in a boolean value from memory.
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
@@ -276,15 +131,6 @@ public:
         return *this;
     }
 
-    //! @brief Get raw memory.
-    //!
-    //! The caller doesn't own the memory. It has to make sure its life time still expand its usage.
-    //!
-    //! @return     Return a pointer points to the memory.
-    void*           GetRawData(){
-        return m_data.get();
-    }
-
     //! @brief  Get written size of the stream.
     //!
     //! @return     The size of written bytes.
@@ -292,16 +138,146 @@ public:
         return m_pos;
     }
 
-    //! @brief Writing data to stream.
+    //! @brief Reading data from stream.
     //!
-    //! @param  data    Data to be written.
+    //! @param  data    Data to be filled.
     //! @param  size    Size of the data to be filled in bytes.
-    virtual StreamBase& Write( char* data , int size ) override {
+    StreamBase& Write( char* data , int size ) override {
         if( m_pos + size > m_capacity ){
             Resize( 2 * m_capacity );
             return Write( data , size );
         }else{
             memcpy( data , m_data.get() + m_pos , size );
+            m_pos += size;
+        }
+        return *this;
+    }
+
+private:
+    /**< Pointer points to the address where the memory is. */
+    std::unique_ptr<char[]>     m_data = nullptr;
+    /**< Capacity of the current stream. */
+    unsigned int                m_capacity = 0;
+    /**< Current position of streaming. */
+    unsigned int                m_pos = 0;
+
+    friend class OMemoryStream;
+};
+
+//! @brief Streaming to memory.
+/**
+ * OMemoryStream only works for streaming data to memory. Any attempt to read data
+ * from memory will result in immediate crash.
+ */
+class OMemoryStream : public IStreamBase{
+public:
+    //! @brief  Constructor.
+    //!
+    //! @param  istream      The IMemoryStream as input.
+    OMemoryStream( const IMemoryStream& istream ){
+        if( istream.m_pos == 0u )
+            return;
+        Resize( istream.m_pos );
+        memcpy( m_data.get() , istream.m_data.get() , istream.m_pos );
+    }
+
+    //! @brief  Resize the stream.
+    //!
+    //! @param  size    The new size to be resized.
+    inline void    Resize( unsigned int size ){
+        size = std::max( 1024u , size );
+        auto new_data = std::make_unique<char[]>( size );
+        if( m_capacity )
+            memcpy( new_data.get() , m_data.get() , m_capacity );
+        if (size > m_capacity)
+            memset(new_data.get() + m_capacity, 0, size - m_capacity);
+	    m_capacity = size;
+        m_data = std::move(new_data);
+    }
+
+    //! @brief Streaming out a float number to memory.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator >> (float& v) override {
+        if( m_pos + sizeof( v ) > m_capacity )
+            v = 0;
+        else{
+            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
+            m_pos += sizeof( v );
+        }
+        return *this;
+    }
+
+    //! @brief Streaming out an integer number to memory.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator >> (int& v) override {
+        if( m_pos + sizeof( v ) > m_capacity )
+            v = 0;
+        else{
+            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
+            m_pos += sizeof( v );
+        }
+        return *this;
+    }
+
+    //! @brief Streaming out an unsigned integer number to memory.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator >> (unsigned int& v) override {
+        if( m_pos + sizeof( v ) > m_capacity )
+            v = 0;
+        else{
+            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
+            m_pos += sizeof( v );
+        }
+        return *this;
+    }
+
+    //! @brief Streaming out a string to memory.
+    //!
+    //! Unlike standard stream, space doesn't count to separate strings. For example, streaming "hello world" in will
+    //! result in one single string instead of two.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator >> (std::string& v) override {
+        v = "";
+        while( m_pos < m_capacity ){
+            char c = m_data[m_pos++];
+            if( c == 0 )
+                break;
+            v += c;
+        }
+        return *this;
+    }
+
+    //! @brief Streaming out a boolean value to memory.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator >> (bool& v) override {
+        if( m_pos + sizeof( v ) > m_capacity )
+            v = 0;
+        else{
+            memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
+            m_pos += sizeof( v );
+        }
+        return *this;
+    }
+
+    //! @brief Writing data to stream directly.
+    //!
+    //! @param  data    Data to be filled.
+    //! @param  size    Size of the data to be filled in bytes.
+    StreamBase& Load( char* data , int size ) override {
+        if( m_pos + size > m_capacity ){
+            memset( data , 0 , size );
+        }else{
+            memcpy( data , m_data.get() , size );
             m_pos += size;
         }
         return *this;

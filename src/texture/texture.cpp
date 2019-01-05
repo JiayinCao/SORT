@@ -18,7 +18,6 @@
 #include "texture.h"
 #include <math.h>
 #include "managers/texmanager.h"
-#include "compositetexture.h"
 #include "math/intersection.h"
 
 // default constructor

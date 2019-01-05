@@ -17,27 +17,17 @@
 
 #pragma once
 
-#include "compositetexture.h"
+#include "texture.h"
 
-/////////////////////////////////////////////////////////////////////////
-//	definition of render target
-//	all of the generated image will be rendered to render target.
-class	RenderTarget : public ComTexture
-{
-//public method
+class	RenderTarget : public Texture{
 public:
-	// para 'x' : x coordinate
-	// para 'y' : y coordinate
-	// para 'r' : red component
-	// para 'g' : green component
-	// para 'b' : blue component
-	void SetColor( int x , int y , float r , float g , float b );
-
-	// para 'x' : x coordinate
-	// para 'y' : y coordinate
-	// para 'c' : color in spectrum form
-	void SetColor( int x , int y , const Spectrum& c )
-	{
-		SetColor( x , y , c.GetR() , c.GetG() , c.GetB() );
+	RenderTarget( int w , int h ) : Texture( w , h ){
+		m_pData = std::make_unique<Spectrum[]>( w * h );
 	}
+
+	void SetColor( int x , int y , const Spectrum& c );
+	Spectrum GetColor( int x , int y ) const;
+
+private:
+	std::unique_ptr<Spectrum[]>	m_pData;
 };

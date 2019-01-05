@@ -15,21 +15,10 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "checkboxtexture.h"
-
-IMPLEMENT_CREATOR( CheckBoxTexture );
-
-// default constructor
-CheckBoxTexture::CheckBoxTexture():
-	m_Color0( 1.0f , 1.0f , 1.0f ),
-	m_Color1( 0.0f , 0.0f , 0.0f )
-{
-	m_iTexWidth = m_iTexHeight = 16;
-}
+#include "checkerboxtexture.h"
 
 // get the color
-Spectrum CheckBoxTexture::GetColor( int x , int y ) const 
-{
+Spectrum CheckerBoxTexture::GetColor( int x , int y ) const {
 	// filter the coorindate first
 	_texCoordFilter( x , y );
 

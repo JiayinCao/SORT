@@ -19,11 +19,8 @@
 #include "managers/texmanager.h"
 #include "core/sassert.h"
 
-IMPLEMENT_CREATOR( ImageTexture );
-
 // get color from image
-Spectrum ImageTexture::GetColor( int x , int y ) const
-{
+Spectrum ImageTexture::GetColor( int x , int y ) const{
 	// if there is no image, just crash
     sAssertMsg( m_pMemory != 0 && m_pMemory->m_ImgMem != 0 , IMAGE , "Texture %s not loaded!" , m_Name.c_str() );
 
@@ -38,8 +35,7 @@ Spectrum ImageTexture::GetColor( int x , int y ) const
 }
 
 // load image from file
-bool ImageTexture::LoadImageFromFile( const std::string& str )
-{
+bool ImageTexture::LoadImageFromFile( const std::string& str ){
     m_Name = str;
 
 	// get the texture manager
@@ -52,14 +48,12 @@ bool ImageTexture::LoadImageFromFile( const std::string& str )
 }
 
 // get average color
-Spectrum ImageTexture::GetAverage() const
-{
+Spectrum ImageTexture::GetAverage() const{
 	return m_Average;
 }
 
 // compute average radiance
-void ImageTexture::_average()
-{
+void ImageTexture::_average(){
 	// if there is no image, just crash
 	if( m_pMemory == 0 || m_pMemory->m_ImgMem == 0 )
 		return;
