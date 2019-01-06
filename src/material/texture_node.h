@@ -58,9 +58,9 @@ private:
 };
 
 //! @brief  Grid texture Node.
-class CheckBoxTexNode : public TextureNode{
+class CheckerBoardTexNode : public TextureNode{
 public:
-	DEFINE_CREATOR( CheckBoxTexNode , MaterialNode , "SORTNodeCheckbox" );
+	DEFINE_CREATOR( CheckerBoardTexNode , MaterialNode , "SORTNodeCheckerBoard" );
 
     //! @brief  Get spectrum material property.
     //!

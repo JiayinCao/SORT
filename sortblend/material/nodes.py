@@ -469,9 +469,9 @@ class SORTNodeGrid(SORTShadingNode):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
 
 @SORTPatternGraph.register_node('Image')
-class SORTNodeCheckbox(SORTShadingNode):
-    bl_label = 'CheckBox'
-    bl_idname = 'SORTNodeCheckbox'
+class SORTNodeCheckerBoard(SORTShadingNode):
+    bl_label = 'CheckerBoard'
+    bl_idname = 'SORTNodeCheckerBoard'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } , 
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
 
