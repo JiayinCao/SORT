@@ -19,10 +19,9 @@
 
 #include "texture.h"
 
-class	CheckerBoxTexture : public Texture
-{
+class	CheckerBoardTexture : public Texture{
 public:
-    CheckerBoxTexture( const Spectrum& c0 , const Spectrum& c1 ) 
+    CheckerBoardTexture( const Spectrum& c0 , const Spectrum& c1 ) 
         :Texture(16,16), m_Color0(c0) , m_Color1(c1){
     }
 

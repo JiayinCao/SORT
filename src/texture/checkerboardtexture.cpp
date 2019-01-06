@@ -15,10 +15,10 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "checkerboxtexture.h"
+#include "checkerboardtexture.h"
 
 // get the color
-Spectrum CheckerBoxTexture::GetColor( int x , int y ) const {
+Spectrum CheckerBoardTexture::GetColor( int x , int y ) const {
 	// filter the coorindate first
 	_texCoordFilter( x , y );
 

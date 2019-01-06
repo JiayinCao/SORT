@@ -17,11 +17,11 @@
 
 #include "texture_node.h"
 #include "bsdf/bsdf.h"
-#include "texture/checkerboxtexture.h"
+#include "texture/checkerboardtexture.h"
 #include "texture/gridtexture.h"
 
 IMPLEMENT_CREATOR( GridTexNode );
-IMPLEMENT_CREATOR( CheckBoxTexNode );
+IMPLEMENT_CREATOR( CheckerBoardTexNode );
 IMPLEMENT_CREATOR( ImageTexNode );
 
 void GridTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
@@ -34,13 +34,13 @@ void GridTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     result = texture.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
 }
 
-void CheckBoxTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+void CheckerBoardTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     const Intersection* intesection = bsdf->GetIntersection();
 
     SORT_MATERIAL_GET_PROP_COLOR(s0,src0);
     SORT_MATERIAL_GET_PROP_COLOR(s1,src1);
 
-    CheckerBoxTexture texture( s0 , s1 );
+    CheckerBoardTexture texture( s0 , s1 );
     result = texture.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
 }
 
