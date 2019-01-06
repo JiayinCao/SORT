@@ -42,7 +42,7 @@ public:
     //!                 will be returned.
     //! @return         Pointer for material returned.
     class Material* GetMaterial(int matId) const {
-        if (matId < 0 || matId >(int)m_matPool.size())
+        if (matId < 0 || matId >= (int)m_matPool.size())
             return GetDefaultMat();
         return m_matPool[matId].get();
     }
