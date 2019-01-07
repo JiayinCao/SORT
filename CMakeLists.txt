@@ -58,7 +58,13 @@ target_link_libraries(SORT easy_profiler)
 if (WIN32)	
 file(GLOB easy_profiler_bin "${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.dll" 	
  							"${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.exe")	
-file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})	
+file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+include(ProcessorCount)
+ProcessorCount(N)
+SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} /MP${N}")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP${N}")
+
 endif (WIN32)
 
 if(SORT_ENABLE_STATS)
