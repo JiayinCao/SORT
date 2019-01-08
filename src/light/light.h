@@ -143,14 +143,14 @@ public:
 	//!
 	//! @param pdf		The pdf of picking the light source.
 	inline void SetPickPDF( float pdf ) {
-		pickProp = pdf;
+		m_pickProp = pdf;
 	}
 
 	//! @brief	Get the pdf to pick the light.
 	//!
 	//! @return			The pdf of picking the light source.
 	inline float PickPDF() const {
-		return pickProp;
+		return m_pickProp;
 	}
 
 	//! @brief	Get the radiance light starting from the light source and ending at the intersection point.
@@ -191,6 +191,6 @@ protected:
 	/**< The transformation transform vertices from light space to world space. */
 	Transform	m_light2world;
 
-	// pdf of picking the light
-	float		pickProp;
+	/**< The pdf of picking the light. */
+	float		m_pickProp;
 };

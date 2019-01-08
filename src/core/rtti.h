@@ -76,23 +76,6 @@ private:
 	friend class Singleton<Factory>;
 };
 
-#define IMPLEMENT_RTTI( T )      static T::T##FactoryMethod g_factoryMethod##T;
-#define	DEFINE_RTTI( T , B )     class T##FactoryMethod : public FactoryMethod<B> \
-{public: \
-	T##FactoryMethod(){\
-		std::string _str( #T );\
-		std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){return tolower(c);});\
-		auto& factoryMap = Factory<B>::GetSingleton().GetFactoryMap();\
-		if( factoryMap.count( _str ) ){\
-            slog( WARNING , GENERAL , "The class with specific name of %s already exxisted." , #T );\
-			return;\
-		}\
-        factoryMap.insert( std::make_pair(_str , this) );\
-	}\
-	std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
-	std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\
-};
-
 //! @brief	Instance a class type based on name.
 //!
 //! @param	name		Name of the class. This has to match what is defined in python plugin.
@@ -110,3 +93,20 @@ template<class T>
 std::unique_ptr<T> MakeUniqueInstance( const std::string& name ) {
     return std::unique_ptr<T>(Factory<T>::GetSingleton().CreateUniqueType(name));
 }
+
+#define IMPLEMENT_RTTI( T )      static T::T##FactoryMethod g_factoryMethod##T;
+#define	DEFINE_RTTI( T , B )     class T##FactoryMethod : public FactoryMethod<B> \
+{public: \
+	T##FactoryMethod(){\
+		std::string _str( #T );\
+		std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){return tolower(c);});\
+		auto& factoryMap = Factory<B>::GetSingleton().GetFactoryMap();\
+		if( factoryMap.count( _str ) ){\
+            slog( WARNING , GENERAL , "The class with specific name of %s already exxisted." , #T );\
+			return;\
+		}\
+        factoryMap.insert( std::make_pair(_str , this) );\
+	}\
+	std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
+	std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\
+};

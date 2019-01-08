@@ -96,7 +96,9 @@ public:
 	//! Most primitives doesn't have light attached to it.
 	//!
 	//! @return			Light attached to the primitive. 'nullptr' means this is not an missive primitive.
-	inline class Light* GetLight() const { return m_light; }
+	inline class Light* GetLight() const {
+		return m_light;
+	}
 
 private:
     Material*		m_mat;		/**< The material attached to the primitive. */
