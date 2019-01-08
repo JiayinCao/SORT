@@ -20,8 +20,6 @@
 #include "core/rand.h"
 #include <math.h>
 
-IMPLEMENT_CREATOR( StratifiedSampler );
-
 // generate sample in one dimension
 void StratifiedSampler::Generate1D( float* sample , unsigned num , bool accept_uniform ) const
 {

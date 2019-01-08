@@ -27,15 +27,15 @@
 #include "bsdf/blend.h"
 #include "bsdf/doublesided.h"
 
-IMPLEMENT_CREATOR( DisneyPrincipleNode );
-IMPLEMENT_CREATOR( PrincipleMaterialNode );
-IMPLEMENT_CREATOR( MatteMaterialNode );
-IMPLEMENT_CREATOR( PlasticMaterialNode );
-IMPLEMENT_CREATOR( GlassMaterialNode );
-IMPLEMENT_CREATOR( MirrorMaterialNode );
-IMPLEMENT_CREATOR( MeasuredMaterialNode );
-IMPLEMENT_CREATOR( BlendMaterialNode );
-IMPLEMENT_CREATOR( DoubleSidedMaterialNode );
+IMPLEMENT_RTTI( DisneyPrincipleNode );
+IMPLEMENT_RTTI( PrincipleMaterialNode );
+IMPLEMENT_RTTI( MatteMaterialNode );
+IMPLEMENT_RTTI( PlasticMaterialNode );
+IMPLEMENT_RTTI( GlassMaterialNode );
+IMPLEMENT_RTTI( MirrorMaterialNode );
+IMPLEMENT_RTTI( MeasuredMaterialNode );
+IMPLEMENT_RTTI( BlendMaterialNode );
+IMPLEMENT_RTTI( DoubleSidedMaterialNode );
 
 void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);

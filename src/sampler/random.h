@@ -24,13 +24,6 @@
 class RandomSampler : public Sampler
 {
 public:
-	DEFINE_CREATOR( RandomSampler , Sampler , "random" );
-
-	// default constructor
-	RandomSampler(){}
-	// destructor
-	~RandomSampler(){}
-
 	// generate sample in one dimension
 	// para 'sample' : the memory to save the sampled data
 	// para 'num'    : the number of samples to be generated

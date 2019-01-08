@@ -35,7 +35,7 @@ class LightEntity : public Entity{
 //! @brief  Point light entity.
 class PointLightEntity : public LightEntity {
 public:
-    DEFINE_CREATOR( PointLightEntity , Entity , "PointLightEntity" );
+    DEFINE_RTTI( PointLightEntity , Entity );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -58,7 +58,7 @@ protected:
 //! @brief  Spot light entity.
 class SpotLightEntity : public LightEntity {
 public:
-    DEFINE_CREATOR( SpotLightEntity , Entity , "SpotLightEntity" );
+    DEFINE_RTTI( SpotLightEntity , Entity );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -81,7 +81,7 @@ protected:
 //! @brief  Directional light entity.
 class DirLightEntity : public LightEntity {
 public:
-    DEFINE_CREATOR( DirLightEntity , Entity , "DirLightEntity" );
+    DEFINE_RTTI( DirLightEntity , Entity );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -104,7 +104,7 @@ protected:
 //! @brief  Area light entity.
 class AreaLightEntity : public LightEntity {
 public:
-    DEFINE_CREATOR( AreaLightEntity , Entity , "AreaLightEntity" );
+    DEFINE_RTTI( AreaLightEntity , Entity );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -127,7 +127,7 @@ protected:
 //! @brief  Sky light entity.
 class SkyLightEntity : public LightEntity {
 public:
-    DEFINE_CREATOR( SkyLightEntity , Entity , "SkyLightEntity" );
+    DEFINE_RTTI( SkyLightEntity , Entity );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!

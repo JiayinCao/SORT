@@ -18,7 +18,7 @@
 #pragma once
 
 #include "shape.h"
-#include "core/creator.h"
+#include "core/rtti.h"
 
 //! @brief Rectangle class defines the basic behavior of rectangle.
 /**

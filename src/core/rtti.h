@@ -77,7 +77,6 @@ private:
 	friend class Singleton<Creator>;
 };
 
-#define IMPLEMENT_CREATOR( T )      static T::T##Creator g_creator##T;
 #define	DEFINE_CREATOR( T , B , N ) class T##Creator : public ItemCreator<B> \
 {public: \
 	T##Creator(){\
@@ -86,6 +85,23 @@ private:
 		auto& container = Creator<B>::GetSingleton().GetContainer();\
 		if( container.count( _str ) ){\
             slog( WARNING , GENERAL , "The creator type with specific name of %s already exxisted." , N );\
+			return;\
+		}\
+        container.insert( std::make_pair(_str , this) );\
+	}\
+	std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
+	std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\
+};
+
+#define IMPLEMENT_RTTI( T )      static T::T##Creator g_creator##T;
+#define	DEFINE_RTTI( T , B )     class T##Creator : public ItemCreator<B> \
+{public: \
+	T##Creator(){\
+		std::string _str( #T );\
+		std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){return tolower(c);});\
+		auto& container = Creator<B>::GetSingleton().GetContainer();\
+		if( container.count( _str ) ){\
+            slog( WARNING , GENERAL , "The creator type with specific name of %s already exxisted." , #T );\
 			return;\
 		}\
         container.insert( std::make_pair(_str , this) );\

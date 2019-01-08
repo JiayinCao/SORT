@@ -23,12 +23,12 @@
 /**
  * Uniform grid is the simplest spatial acceleration structure in a ray tracer.
  * Unlike other complex data structure, like KD-Tree, uniform grid takes linear
- * time complexity to build. However the travesal efficiency may be lower than
+ * time complexity to build. However the traversal efficiency may be lower than
  * its peers.
  */
 class UniGrid : public Accelerator{
 public:
-    DEFINE_CREATOR( UniGrid , Accelerator , "UniGrid" );
+    DEFINE_RTTI( UniGrid , Accelerator );
 
     //! @brief      Get intersection between the ray and the primitive set using KD-Tree.
     //!

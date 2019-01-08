@@ -96,7 +96,7 @@ class KDTree : public Accelerator{
     };
 
 public:
-    DEFINE_CREATOR( KDTree , Accelerator , "KDTree" );
+    DEFINE_RTTI( KDTree , Accelerator );
 
     //! @brief Get intersection between the ray and the primitive set using KD-Tree.
     //!

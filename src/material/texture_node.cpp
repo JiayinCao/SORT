@@ -20,9 +20,9 @@
 #include "texture/checkerboardtexture.h"
 #include "texture/gridtexture.h"
 
-IMPLEMENT_CREATOR( GridTexNode );
-IMPLEMENT_CREATOR( CheckerBoardTexNode );
-IMPLEMENT_CREATOR( ImageTexNode );
+IMPLEMENT_RTTI( GridTexNode );
+IMPLEMENT_RTTI( CheckerBoardTexNode );
+IMPLEMENT_RTTI( ImageTexNode );
 
 void GridTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     const Intersection* intesection = bsdf->GetIntersection();

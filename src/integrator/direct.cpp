@@ -28,7 +28,7 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 
 SORT_STATS_COUNTER("Direct Illumination", "Primary Ray Count" , sPrimaryRayCount);
 
-IMPLEMENT_CREATOR( DirectLight );
+IMPLEMENT_RTTI( DirectLight );
 
 // radiance along a specific ray direction
 Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const

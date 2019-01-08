@@ -27,7 +27,7 @@
  */
 class VisualEntity : public Entity{
 public:
-    DEFINE_CREATOR( VisualEntity , Entity , "VisualEntity" );
+    DEFINE_RTTI( VisualEntity , Entity );
 
     //! @brief  Fill the scene with primitives.
     //!

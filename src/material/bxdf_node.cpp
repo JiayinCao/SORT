@@ -27,16 +27,16 @@
 #include "bsdf/bsdf.h"
 #include "bsdf/coat.h"
 
-IMPLEMENT_CREATOR( AshikhmanShirleyNode );
-IMPLEMENT_CREATOR( PhongNode );
-IMPLEMENT_CREATOR( LambertNode );
-IMPLEMENT_CREATOR( LambertTransmissionNode );
-IMPLEMENT_CREATOR( OrenNayarNode );
-IMPLEMENT_CREATOR( MicrofacetReflectionNode );
-IMPLEMENT_CREATOR( MicrofacetRefractionNode );
-IMPLEMENT_CREATOR( FourierBxdfNode );
-IMPLEMENT_CREATOR( MerlNode );
-IMPLEMENT_CREATOR( CoatNode );
+IMPLEMENT_RTTI( AshikhmanShirleyNode );
+IMPLEMENT_RTTI( PhongNode );
+IMPLEMENT_RTTI( LambertNode );
+IMPLEMENT_RTTI( LambertTransmissionNode );
+IMPLEMENT_RTTI( OrenNayarNode );
+IMPLEMENT_RTTI( MicrofacetReflectionNode );
+IMPLEMENT_RTTI( MicrofacetRefractionNode );
+IMPLEMENT_RTTI( FourierBxdfNode );
+IMPLEMENT_RTTI( MerlNode );
+IMPLEMENT_RTTI( CoatNode );
 
 void LambertNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);

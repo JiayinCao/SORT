@@ -18,7 +18,7 @@
 #pragma once
 
 #include "light.h"
-#include "core/creator.h"
+#include "core/rtti.h"
 #include "math/sky.h"
 #include "core/log.h"
 

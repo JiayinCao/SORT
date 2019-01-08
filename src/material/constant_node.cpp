@@ -18,8 +18,8 @@
 #include "constant_node.h"
 #include "bsdf/bsdf.h"
 
-IMPLEMENT_CREATOR( ConstantColorNode );
-IMPLEMENT_CREATOR( ConstantFloatNode );
+IMPLEMENT_RTTI( ConstantColorNode );
+IMPLEMENT_RTTI( ConstantFloatNode );
 
 void ConstantColorNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     SORT_MATERIAL_GET_PROP_COLOR(c,src);

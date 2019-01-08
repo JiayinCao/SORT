@@ -24,13 +24,6 @@
 class StratifiedSampler : public Sampler
 {
 public:
-	DEFINE_CREATOR( StratifiedSampler , Sampler , "stratified" );
-
-	// default constructor
-	StratifiedSampler(){}
-	// destructor
-	~StratifiedSampler(){}
-
 	// round the size for sampler
 	// para 'size' : number of samples to be generated
 	// result      : the modified number
