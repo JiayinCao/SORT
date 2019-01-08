@@ -71,7 +71,7 @@ private:
 	//! @brief	Make sure constructor is private.
 	Factory(){}
 	//! @brief	Make sure copy constructor is private.
-    Factory(const Factory<T>&) = delete;
+	Factory(const Factory<T>&) = delete;
 
 	friend class Singleton<Factory>;
 };

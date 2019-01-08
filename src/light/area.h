@@ -21,47 +21,97 @@
 #include "core/sassert.h"
 #include "shape/shape.h"
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//	definition of area light
-class	AreaLight : public Light
-{
+//! @brief	Definition of area light source.
+class	AreaLight : public Light{
 public:
-	// sample ray from light
-	// para 'intersect' : intersection information
-	// para 'dirToLight': input vector in world space
-	// para 'delta'		: a delta to offset the original point
-	// para 'pdf'		: property density function value of the input vector
-	// para 'visibility': visibility tester
-	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const;
+	//! @brief	Sample a direction given the intersection.
+	//!
+	//! Given an intersection, do importance sampling to pick a direction from intersection to light source. 
+	//! For some light sources, light point light, spot light and distant light, it is trival. However, it
+	//! needs some decent algorithm to make it efficient for some other light sources like area light.
+	//!
+	//! @param	intersect		The information of intersection.
+	//! @param	ls				The light sample information.
+	//! @param	dirToLight		The resulting direction goes from the intersection to light source.
+	//! @param	distance		The distance from the intersected point to the sampled point, which is the intersection 
+	//!							between the out-going direction and the light source.
+	//! @param	pdfw			The resulting pdf w.r.t solid angle to pick such a direction.
+	//! @param	emissionPdf		The pdf w.r.t solid angle if such a direction and position ( which is the intersection 
+	//!							between the resulting direction to the light source ) is picked by the light source.
+	//! @param	cosAtLight		The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
+	//! @param	visibility		The visibility data structured filled by the light source.
+	//! @return					The radiance goes from the light source to the intersected point.
+	Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const override;
 
-	// sample a ray from light
-	// para 'ls'       : light sample
-	// para 'r'       : the light vector
-	// para 'pdf'      : the properbility density function
-	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const;
+	//! @brief		Sample a point and light out-going direction.
+	//!
+	//! The difference of this version the the above one is there is no intersection data given.
+	//!
+	//! @param	ls				The light sample.
+	//! @param	r				The resulting sampled ray.
+	//! @param	pdfA			The pdf w.r.t area of picking such a light out-going ray. It is simply one for delta light.
+	//! @param	cosAtLight		The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
+	//! @return					The radiance goes from the light source to the intersected point.
+	Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const override;
 
-	// sample light density
-	virtual Spectrum Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const;
+	//! @brief	Get the radiance light starting from the light source and ending at the intersection point.
+	//!
+	//! It simply returns zero for delta function, meaning there is no way to pick a ray hitting the delta light source.
+	//! Integrator has to explicitly sample delta light sources instead of using this function and hoping to get radiances
+	//! even if with a ray that accidentally hits the delta light sources.
+	//!
+	//! @param	intersect		The intersection information.
+	//! @param	wo				The direction goes from the intersection to the light source.
+	//! @param	directPdfA		The pdf w.r.t area to pick the point, intersection between the direction and the light source.
+	//! @param	emissionPdf		The pdf w.r.t solid angle to pick to sample such a position and direction goes to the intersection.
+	//! @return					The radiance goes from the light source to the intersection, black if there is no intersection.
+	Spectrum Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const override;
 
-	// get intersection between the light and the ray
-	virtual bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const;
+	//! @brief	Given a ray, sample the light source if there is any intersection between the ray and the light source.
+	//!
+	//! It simply returns false for delta function, meaning there is no way to pick a ray hitting the delta light source.
+	//! Integrator has to explicitly sample delta light sources instead of using this function and hoping to get radiances
+	//! even if with a ray that accidentally hits the delta light sources.
+	//!
+	//! @param	ray				The ray to be evaluated.
+	//! @param	intersect		The intersection between the ray and the light source.
+	//! @param	radiance		The radiance goes from the light source to the ray origin.
+	//! @return					Whether there is an intersection between the ray and the light source.
+	bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const override;
 
-	// total power of the light
-	virtual Spectrum Power() const;
+	//! @brief	Approximation of total power of the light.
+	//!
+	//! The reason it is just an approximation is because there are certain kinds of light
+	//! whose power is hard to evaluate, like distant light, sky light. Since this value is
+	//! only used to pick a light for importance sampling, it is fine to be biased.
+	//!
+	//! @return		Approximation of the light power.
+	Spectrum Power() const override;
 
-	// it's not a delta light
-	bool	IsDelta() const { return false; }
+	//! @brief	Whether area light is a delta light.
+	//!
+	//! @return		Always return 'False' for area light because it is not delta light.
+	bool	IsDelta() const override{ 
+		return false; 
+	}
 
-	// the pdf for specific sampled directioin
-	// note : none-delta light must overwrite this method
-	virtual float Pdf( const Point& p , const Vector& wi ) const;
+	//! @brief	The pdf w.r.t solid angle to pick the point 'p' and direction 'dir'.
+	//!
+	//! @param	p		The point picked at the light source.
+	//! @param	wi		The out-going direction of the light.
+	//! @return			The pdf w.r.t solid angle if picking such a point and ray with the light source.
+	float Pdf( const Point& p , const Vector& wi ) const override;
 
-	// get the shape of light
-	virtual Shape* GetShape() const { return shape.get(); }
+	//! @brief	Get the shape of the area light.
+	//!
+	//! @return		It usually returns a valid shape for area light.
+	Shape* GetShape() const override {
+		return m_shape.get();
+	}
 
 private:
-	// the shape binded to the area light
-    std::unique_ptr<Shape>	shape = nullptr;
+	/**< The shape attached to the light source. */
+    std::unique_ptr<Shape>	m_shape = nullptr;
 
     friend class AreaLightEntity;
 };
