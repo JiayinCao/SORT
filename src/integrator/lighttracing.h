@@ -26,7 +26,7 @@
 class LightTracing : public BidirPathTracing
 {
 public:
-	DEFINE_CREATOR(LightTracing, Integrator , "lt" );
+	DEFINE_RTTI(LightTracing, Integrator );
 
     LightTracing(){
 		light_tracing_only = true;

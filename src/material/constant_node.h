@@ -22,7 +22,7 @@
 //! @brief Constant color node.
 class ConstantColorNode : public MaterialNode{
 public:
-	DEFINE_CREATOR( ConstantColorNode , MaterialNode , "SORTNodeConstant" );
+	DEFINE_RTTI( ConstantColorNode , MaterialNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -53,7 +53,7 @@ private:
 //! @brief  Constant float node.
 class ConstantFloatNode : public MaterialNode{
 public:
-    DEFINE_CREATOR( ConstantFloatNode , MaterialNode , "SORTNodeConstantFloat" );
+    DEFINE_RTTI( ConstantFloatNode , MaterialNode );
     
     //! @brief  Get float material property.
     //!

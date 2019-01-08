@@ -59,7 +59,7 @@ struct Pending_Sample
 class BidirPathTracing : public Integrator
 {
 public:
-	DEFINE_CREATOR( BidirPathTracing , Integrator , "bdpt" );
+	DEFINE_RTTI( BidirPathTracing , Integrator );
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data

@@ -25,7 +25,7 @@
 //! @brief  Disney Principle BRDF node
 class DisneyPrincipleNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( DisneyPrincipleNode , MaterialNode , "SORTNode_Material_DisneyBRDF" );
+    DEFINE_RTTI( DisneyPrincipleNode , MaterialNode );
     
     //! @brief  Update BSDF for this node.
     //!
@@ -70,7 +70,7 @@ private:
 //! Principle Material is very similiar with UE4 shading model.
 class PrincipleMaterialNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( PrincipleMaterialNode , MaterialNode, "SORTNode_Material_Principle" );
+    DEFINE_RTTI( PrincipleMaterialNode , MaterialNode );
     
     //! @brief  Update BSDF for this node.
     //!
@@ -106,7 +106,7 @@ private:
  */
 class MatteMaterialNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( MatteMaterialNode , MaterialNode, "SORTNode_Material_Matte" );
+    DEFINE_RTTI( MatteMaterialNode , MaterialNode );
     
     //! @brief  Update BSDF for this node.
     //!
@@ -133,7 +133,7 @@ private:
 //! @brief  Plastic material is a combination of lambert BRDF and microfacet BRDF.
 class PlasticMaterialNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( PlasticMaterialNode , MaterialNode, "SORTNode_Material_Plastic" );
+    DEFINE_RTTI( PlasticMaterialNode , MaterialNode );
     
     //! @brief  Update BSDF for this node.
     //!
@@ -163,7 +163,7 @@ private:
 //! @brief  Glass material node uses microfacet refraction model.
 class GlassMaterialNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( GlassMaterialNode , MaterialNode, "SORTNode_Material_Glass" );
+    DEFINE_RTTI( GlassMaterialNode , MaterialNode );
     
     //! @brief  Update BSDF for this node.
     //!
@@ -194,7 +194,7 @@ private:
 //! @brief  Mirror material is microfacet reflection model with 0 as roughness.
 class MirrorMaterialNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( MirrorMaterialNode , MaterialNode, "SORTNode_Material_Mirror" );
+    DEFINE_RTTI( MirrorMaterialNode , MaterialNode );
     
     //! @brief  Update BSDF for this node.
     //!
@@ -219,7 +219,7 @@ private:
 //! @brief  Measured Material could be fourier or MERL brdf.
 class MeasuredMaterialNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( MeasuredMaterialNode , MaterialNode , "SORTNode_Material_Measured" );
+    DEFINE_RTTI( MeasuredMaterialNode , MaterialNode );
     
     //! @brief  Update BSDF for this node.
     //!
@@ -252,7 +252,7 @@ private:
 //! @brief  Blend material node is used to implement layered material.
 class BlendMaterialNode : public BxdfNode{
 public:
-    DEFINE_CREATOR(BlendMaterialNode, MaterialNode, "SORTNode_Material_Blend");
+    DEFINE_RTTI(BlendMaterialNode, MaterialNode);
 
     //! @brief  Update BSDF for this node.
     //!
@@ -285,7 +285,7 @@ private:
  */
 class DoubleSidedMaterialNode : public BxdfNode{
 public:
-    DEFINE_CREATOR(DoubleSidedMaterialNode, MaterialNode, "SORTNode_Material_DoubleSided");
+    DEFINE_RTTI(DoubleSidedMaterialNode, MaterialNode);
 
     //! @brief  Update BSDF for this node.
     //!

@@ -47,7 +47,7 @@ protected:
 //! @brief  Lambert node.
 class LambertNode : public BxdfNode{
 public:
-	DEFINE_CREATOR( LambertNode , MaterialNode , "SORTNode_BXDF_Lambert" );
+	DEFINE_RTTI( LambertNode , MaterialNode );
 
 	//! @brief  Update BSDF for this node.
     //!
@@ -72,7 +72,7 @@ private:
 //! @brief Lambert transmitance node.
 class LambertTransmissionNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( LambertTransmissionNode , MaterialNode , "SORTNode_BXDF_LambertTransmission" );
+    DEFINE_RTTI( LambertTransmissionNode , MaterialNode );
     
     //! @brief  Update BSDF for this node.
     //!
@@ -97,7 +97,7 @@ private:
 //! @brief  OrenNayar node.
 class OrenNayarNode : public BxdfNode{
 public:
-	DEFINE_CREATOR( OrenNayarNode , MaterialNode , "SORTNode_BXDF_OrenNayar" );
+	DEFINE_RTTI( OrenNayarNode , MaterialNode );
 
 	//! @brief  Update BSDF for this node.
     //!
@@ -124,7 +124,7 @@ private:
 //! @brief  Microfacet reflection node.
 class MicrofacetReflectionNode : public BxdfNode{
 public:
-	DEFINE_CREATOR( MicrofacetReflectionNode , MaterialNode , "SORTNode_BXDF_MicrofacetReflection" );
+	DEFINE_RTTI( MicrofacetReflectionNode , MaterialNode );
 
 	//! @brief  Update BSDF for this node.
     //!
@@ -157,10 +157,9 @@ private:
 };
 
 //! @brief  Microfacet refraction node.
-class MicrofacetRefractionNode : public BxdfNode
-{
+class MicrofacetRefractionNode : public BxdfNode{
 public:
-	DEFINE_CREATOR( MicrofacetRefractionNode , MaterialNode , "SORTNode_BXDF_MicrofacetRefraction" );
+	DEFINE_RTTI( MicrofacetRefractionNode , MaterialNode );
 
 	//! @brief  Update BSDF for this node.
     //!
@@ -195,7 +194,7 @@ private:
 //! @brief AshikhmanShirley node.
 class AshikhmanShirleyNode : public BxdfNode{
 public:
-    DEFINE_CREATOR(AshikhmanShirleyNode, MaterialNode, "SORTNode_BXDF_AshikhmanShirley");
+    DEFINE_RTTI(AshikhmanShirleyNode, MaterialNode);
 
     //! @brief  Update BSDF for this node.
     //!
@@ -224,10 +223,9 @@ private:
 };
 
 //! @brief  Phong node.
-class PhongNode : public BxdfNode
-{
+class PhongNode : public BxdfNode{
 public:
-    DEFINE_CREATOR(PhongNode, MaterialNode, "SORTNode_BXDF_Phong");
+    DEFINE_RTTI(PhongNode, MaterialNode);
 
     //! @brief  Update BSDF for this node.
     //!
@@ -258,7 +256,7 @@ private:
 //! @brief  Merl node.
 class MerlNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( MerlNode , MaterialNode , "SORTNode_BXDF_MERL" );
+    DEFINE_RTTI( MerlNode , MaterialNode );
     
     //! @brief  Update BSDF for this node.
     //!
@@ -289,7 +287,7 @@ private:
 //! @brief  Fourier bxdf node.
 class FourierBxdfNode : public BxdfNode{
 public:
-    DEFINE_CREATOR( FourierBxdfNode , MaterialNode , "SORTNode_BXDF_Fourier" );
+    DEFINE_RTTI( FourierBxdfNode , MaterialNode );
 
     //! @brief  Update BSDF for this node.
     //!
@@ -320,7 +318,7 @@ private:
 //! @brief  Coat node.
 class CoatNode : public BxdfNode{
 public:
-    DEFINE_CREATOR(CoatNode, MaterialNode, "SORTNode_BXDF_Coat");
+    DEFINE_RTTI(CoatNode, MaterialNode);
     
     //! @brief  Update BSDF for this node.
     //!
