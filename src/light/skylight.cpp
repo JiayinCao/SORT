@@ -20,15 +20,13 @@
 #include "bsdf/bsdf.h"
 #include "core/samplemethod.h"
 
-// sample ray from light
-Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
-{
+Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
 	// sample a ray
     float _pdfw = 0.0f;
 	const Vector localDir = sky.sample_v( ls->u , ls->v , &_pdfw , 0 );
 	if( _pdfw == 0.0f )
 		return 0.0f;
-    dirToLight = light2world(localDir);
+    dirToLight = m_light2world(localDir);
     
     if( pdfw )
         *pdfw = _pdfw;
@@ -41,7 +39,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
     
     if( emissionPdf )
     {
-        const BBox& box = scene->GetBBox();
+        const BBox& box = m_scene->GetBBox();
         const Vector delta = box.m_Max - box.m_Min;
         *emissionPdf = _pdfw * 4.0f * INV_PI / delta.SquaredLength();
     }
@@ -53,13 +51,11 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
 	return sky.Evaluate( localDir ) * intensity;
 }
 
-// sample light density
-Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const
-{
-	const BBox& box = scene->GetBBox();
+Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const{
+	const BBox& box = m_scene->GetBBox();
 	const Vector delta = box.m_Max - box.m_Min;
 
-	const float directPdf = sky.Pdf( light2world.GetInversed()(-wo) );
+	const float directPdf = sky.Pdf( m_light2world.GetInversed()(-wo) );
 	const float positionPdf = 4.0f * INV_PI / delta.SquaredLength();
 
 	if( directPdfA )
@@ -67,19 +63,17 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float*
 	if( emissionPdf )
 		*emissionPdf = directPdf * positionPdf;
 
-	return sky.Evaluate( light2world.GetInversed()(-wo) ) * intensity;
+	return sky.Evaluate( m_light2world.GetInversed()(-wo) ) * intensity;
 }
 
-// sample a ray from light
-Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
-{
+Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
     float _pdfw;
 	auto localDir = -sky.sample_v( ls.u , ls.v , &_pdfw , 0 );
-    r.m_Dir = light2world(localDir);
+    r.m_Dir = m_light2world(localDir);
 
-	const BBox& box = scene->GetBBox();
+	const BBox& box = m_scene->GetBBox();
 	const Point center = ( box.m_Max + box.m_Min ) * 0.5f;
 	const Vector delta = box.m_Max - center;
 	float world_radius = delta.Length();
@@ -103,27 +97,22 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 	return sky.Evaluate( -localDir ) * intensity;
 }
 
-// total power of the light
-Spectrum SkyLight::Power() const
-{
-	sAssert( scene != nullptr , LIGHT );
-	const BBox box = scene->GetBBox();
+Spectrum SkyLight::Power() const{
+	sAssert( m_scene != nullptr , LIGHT );
+	const BBox box = m_scene->GetBBox();
 	const float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
 
 	return radius * radius * PI * sky.GetAverage() * intensity;
 }
 
-// get intersection between the light and the ray
-bool SkyLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
-{
+bool SkyLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const{
 	if( intersect && intersect->t != FLT_MAX )
 		return false;
 
-	radiance = sky.Evaluate( light2world.GetInversed()(ray.m_Dir) ) * intensity;
+	radiance = sky.Evaluate( m_light2world.GetInversed()(ray.m_Dir) ) * intensity;
 	return true;
 }
 
-// the pdf for specific sampled direction
 float SkyLight::Pdf( const Point& p , const Vector& wi ) const{
-	return sky.Pdf( light2world.GetInversed()(wi) );
+	return sky.Pdf( m_light2world.GetInversed()(wi) );
 }

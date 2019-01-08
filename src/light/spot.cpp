@@ -21,10 +21,9 @@
 #include "core/samplemethod.h"
 
 // sample ray from light
-Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
-{
-    const Vector light_dir = Vector3f( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
-    const Vector light_pos = Vector3f( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
+Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+    const Vector light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
+    const Vector light_pos = Vector3f( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
     
     // direction to light
 	const Vector _dirToLight = light_pos - intersect.intersect;
@@ -65,10 +64,9 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
 }
 
 // sample a ray from light
-Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
-{
-    const Vector light_dir = Vector3f( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
-    const Vector light_pos = Vector3f( light2world.matrix.m[3] , light2world.matrix.m[7] , light2world.matrix.m[11] );
+Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
+    const Vector light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
+    const Vector light_pos = Vector3f( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
     
     // udpate ray
 	r.m_fMin = 0.0f;
@@ -77,7 +75,7 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
     
     // sample a light direction
 	const Vector local_dir = UniformSampleCone( ls.u , ls.v , cos_total_range );
-	r.m_Dir = light2world.matrix( local_dir );
+	r.m_Dir = m_light2world.matrix( local_dir );
 
     // product of pdf of sampling a point w.r.t surface area and a direction w.r.t direction
 	if( pdfW )

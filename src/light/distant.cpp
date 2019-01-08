@@ -22,9 +22,8 @@
 #include "core/samplemethod.h"
 
 // sample a ray
-Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
-{
-    const Vector light_dir = Vector3f( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
+Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+    const Vector light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
     
 	// distant light direction
 	dirToLight = -light_dir;
@@ -37,7 +36,7 @@ Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSamp
     
     if( emissionPdf )
     {
-        const BBox& box = scene->GetBBox();
+        const BBox& box = m_scene->GetBBox();
         Vector delta = box.m_Max - box.m_Min;
         *emissionPdf = 4.0f * INV_PI / delta.SquaredLength();
     }
@@ -52,15 +51,14 @@ Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSamp
 }
 
 // sample a ray from light
-Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
-{
-    const Vector light_dir = Vector3f( light2world.matrix.m[1] , light2world.matrix.m[5] , light2world.matrix.m[9] );
+Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
+    const Vector light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
     
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
     r.m_Dir = light_dir;
 	
-	const BBox& box = scene->GetBBox();
+	const BBox& box = m_scene->GetBBox();
 	const Point center = ( box.m_Max + box.m_Min ) * 0.5f;
 	const Vector delta = box.m_Max - center;
 	const float world_radius = delta.Length();

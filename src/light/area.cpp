@@ -19,15 +19,13 @@
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 
-// sample ray from light
-Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const
-{
+Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
 	sAssert( ls != nullptr , LIGHT );
-	sAssert( shape != nullptr , LIGHT );
+	sAssert( m_shape != nullptr , LIGHT );
 
     // sample a point from light
     Vector normal;
-	const Point ps = shape->Sample_l( *ls , intersect.intersect , dirToLight , normal , pdfW );
+	const Point ps = m_shape->Sample_l( *ls , intersect.intersect , dirToLight , normal , pdfW );
     
     // get the delta
     const Vector dlt = ps - intersect.intersect;
@@ -45,7 +43,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
     
     // product of pdf of sampling a point w.r.t surface area and a direction w.r.t direction
     if( emissionPdf )
-        *emissionPdf = UniformHemispherePdf() / shape->SurfaceArea();
+        *emissionPdf = UniformHemispherePdf() / m_shape->SurfaceArea();
 
 	// setup visibility tester
     const float delta = 0.01f;
@@ -54,15 +52,13 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
 	return intensity;
 }
 
-// sample a ray from light
-Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const
-{
-    sAssert( shape != nullptr , LIGHT );
+Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
+    sAssert( m_shape != nullptr , LIGHT );
     Vector n;
-    shape->Sample_l( ls , r , n , pdfW );
+    m_shape->Sample_l( ls , r , n , pdfW );
     
     if( pdfA )
-        *pdfA = 1.0f / shape->SurfaceArea();
+        *pdfA = 1.0f / m_shape->SurfaceArea();
     
     if( cosAtLight )
         *cosAtLight = SatDot( r.m_Dir , n );
@@ -73,45 +69,36 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
     return intensity;
 }
 
-// the pdf of the direction
-float AreaLight::Pdf( const Point& p , const Vector& wi ) const
-{
-	sAssert(shape != nullptr, LIGHT);
-
-	return shape->Pdf( p , wi );
+float AreaLight::Pdf( const Point& p , const Vector& wi ) const{
+	sAssert(m_shape != nullptr, LIGHT);
+	return m_shape->Pdf( p , wi );
 }
 
-// total power of the light
-Spectrum AreaLight::Power() const
-{
-	sAssert( shape != nullptr, LIGHT );
-	return shape->SurfaceArea() * intensity.GetIntensity() * TWO_PI;
+Spectrum AreaLight::Power() const{
+	sAssert( m_shape != nullptr, LIGHT );
+	return m_shape->SurfaceArea() * intensity.GetIntensity() * TWO_PI;
 }
 
-// sample light density
-Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const
-{
+Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const{
 	const float cos = SatDot( wo , intersect.normal );
 	if( cos == 0.0f )
 		return 0.0f;
 
 	if( directPdfA )
-		*directPdfA = 1.0f / shape->SurfaceArea();
+		*directPdfA = 1.0f / m_shape->SurfaceArea();
 
 	if( emissionPdf )
-        *emissionPdf = UniformHemispherePdf() / shape->SurfaceArea();
+        *emissionPdf = UniformHemispherePdf() / m_shape->SurfaceArea();
 
 	return intensity;
 }
 
-// get intersection between the light and the ray
-bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const
-{
-	sAssert( shape != nullptr , LIGHT );
+bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const{
+	sAssert( m_shape != nullptr , LIGHT );
 
 	// get intersect
     Point tmp;
-	const bool result = shape->GetIntersect( ray , tmp , intersect );
+	const bool result = m_shape->GetIntersect( ray , tmp , intersect );
 
 	// transform the intersection result back to world coordinate
 	if( result && intersect != nullptr )

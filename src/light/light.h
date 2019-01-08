@@ -17,10 +17,6 @@
 
 #pragma once
 
-// WARNING:
-// Code in this folder is VERY VERY out-dated and badly implemented.
-// I need to refactor this part of the renderer once I have time.
-
 #include "spectrum/spectrum.h"
 #include "math/transform.h"
 #include "core/scene.h"
@@ -30,88 +26,170 @@ class Intersection;
 class LightSample;
 class Shape;
 
-class Visibility
-{
+//! @brief	Visibility tells whether there is a primitive blocking the ray.
+class Visibility{
 public:
-	// default constructor
-	Visibility( const Scene& s ):scene(s){}
+	//! @brief	Constructor.
+	//!
+	//! @param	scene	The current rendering scene.
+	Visibility( const Scene& scene ):m_scene(scene){}
 
-	// whether it's visible from the light source
+	//! @brief	Whether there is a blocker.
+	//!
+	//! The ray may not shoot infinitely far. Sometimes we only need a ray to be shoot along
+	//! certain distance.
+	//!
+	//! @return		'True' if there is no blocker along the ray, otherwise it returns 'False'.
 	bool	IsVisible() const{
-		return !scene.GetIntersect( ray , 0 );
+		return !m_scene.GetIntersect( ray , 0 );
 	}
 
-	// the shadow ray
+	/**< The ray to be evaluated. */
 	Ray	ray;
-	// the scene
-	const Scene& scene;
+
+private:
+	/**< The rendering scene. */
+	const Scene& m_scene;
 };
 
-////////////////////////////////////////////////////////////////////////
-// definition of light
-class	Light
-{
+//! @brief	Base interface for ligths.
+class	Light{
 public:
-    //! @brief Empty virtual destructor.
-    virtual ~Light() {}
+    //! @brief 	Empty virtual destructor.
+    virtual ~Light() = default;
     
-	// setup scene
-	void	SetupScene( const Scene* s ) {scene=s;}
+	//! @brief	Setup the rendering scene for lights.
+	//!
+	//! @param	scene	The rendering scene.
+	inline void			SetupScene( const Scene* scene ) {
+		m_scene=scene;
+	}
 	
-	// set transformation
-	virtual void	SetTransform( const Transform& transform ) {light2world = transform;}
+	//! @brief	Approximation of total power of the light.
+	//!
+	//! The reason it is just an approximation is because there are certain kinds of light
+	//! whose power is hard to evaluate, like distant light, sky light. Since this value is
+	//! only used to pick a light for importance sampling, it is fine to be biased.
+	//!
+	//! @return		Approximation of the light power.
+	virtual Spectrum 	Power() const = 0;
 
-	// total power of the light
-	virtual Spectrum Power() const = 0;
+	//! @brief	Whether the light is a delta light source.
+	//!
+	//! @return	 	Whether the light is a delta light.
+	virtual bool 		IsDelta() const { 
+		return true; 
+	}
 
-	// note : the following methods must be overwritten in non-delta light
-	// whether the light is a delta light
-	virtual bool IsDelta() const { return true; }
+	//! @brief	Whether the light is an infinite light source.
+	//!
+	//! @return	 	Whether the light is an infinite light.
+	virtual bool 		IsInfinite() const {
+		return false;
+	}
 
-	// whether the light is an infinite light
-	virtual bool IsInfinite() const { return false; }
+	//! @brief	Get the shape of light, if there is one.
+	//!
+	//! Some light source has shape attached to it, like area light.
+	//!
+	//! @return		The shape of the light. It could be 'nullptr', meaning there is no shape attached.
+	virtual Shape* 		GetShape() const { 
+		return nullptr; 
+	}
 
-	// get the shape of light
-	virtual Shape* GetShape() const { return nullptr; }
+	//! @brief	The pdf w.r.t solid angle to pick the point 'p' and direction 'dir'.
+	//!
+	//! Some of the parameters are ignored in some type of lights. Although it may not be perfectly correct,
+	//! the upper level code is gonna make sure this works. For example, point light just returns 1.0 for all
+	//! cases without even checking whether p and wi is correct or not.
+	//!
+	//! @param	p		The point picked at the light source.
+	//! @param	wi		The out-going direction of the light.
+	//! @return			The pdf w.r.t solid angle if picking such a point and ray with the light source.
+	virtual float 		Pdf( const Point& p , const Vector& wi ) const = 0;
 
-	// the pdf for specific sampled direction
-	virtual float Pdf( const Point& p , const Vector& wi ) const { return 1.0f; }
+	//! @brief	Sample a direction given the intersection.
+	//!
+	//! Given an intersection, do importance sampling to pick a direction from intersection to light source. 
+	//! For some light sources, light point light, spot light and distant light, it is trival. However, it
+	//! needs some decent algorithm to make it efficient for some other light sources like area light.
+	//!
+	//! @param	intersect		The information of intersection.
+	//! @param	ls				The light sample information.
+	//! @param	dirToLight		The resulting direction goes from the intersection to light source.
+	//! @param	distance		The distance from the intersected point to the sampled point, which is the intersection 
+	//!							between the out-going direction and the light source.
+	//! @param	pdfw			The resulting pdf w.r.t solid angle to pick such a direction.
+	//! @param	emissionPdf		The pdf w.r.t solid angle if such a direction and position ( which is the intersection 
+	//!							between the resulting direction to the light source ) is picked by the light source.
+	//! @param	cosAtLight		The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
+	//! @param	visibility		The visibility data structured filled by the light source.
+	//! @return					The radiance goes from the light source to the intersected point.
+	virtual Spectrum sample_l( 	const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , 
+								float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const = 0;
 
-	// sample ray from light
-	// para 'intersect' : intersection information
-	// para 'wi'		: input vector in world space
-	// para 'delta'		: a delta to offset the original point
-	// para 'pdf'		: probability density function value of the input vector
-	// para 'visibility': visibility tester
-	virtual Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const = 0;
-
-	// sample a ray from light
-	// para 'ls'       : light sample
-	// para 'r'       : the light vector
-	// para 'pdf'      : the probability density function
+	//! @brief		Sample a point and light out-going direction.
+	//!
+	//! The difference of this version the the above one is there is no intersection data given.
+	//!
+	//! @param	ls				The light sample.
+	//! @param	r				The resulting sampled ray.
+	//! @param	pdfA			The pdf w.r.t area of picking such a light out-going ray. It is simply one for delta light.
+	//! @param	cosAtLight		The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
+	//! @return					The radiance goes from the light source to the intersected point.
 	virtual Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const = 0;
 
-	// sample light density
-	virtual Spectrum Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const { return 0.0f; }
-
-	// get intersection between the light and the ray
-	virtual bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const { return false; }
-
-	// set pdf of picking the light
-	void SetPickPDF( float pdf ) {
+	//! @brief	Set up the pdf to pick the light.
+	//!
+	//! @param pdf		The pdf of picking the light source.
+	inline void SetPickPDF( float pdf ) {
 		pickProp = pdf;
 	}
-	float PickPDF() const {
+
+	//! @brief	Get the pdf to pick the light.
+	//!
+	//! @return			The pdf of picking the light source.
+	inline float PickPDF() const {
 		return pickProp;
 	}
 
+	//! @brief	Get the radiance light starting from the light source and ending at the intersection point.
+	//!
+	//! It simply returns zero for delta function, meaning there is no way to pick a ray hitting the delta light source.
+	//! Integrator has to explicitly sample delta light sources instead of using this function and hoping to get radiances
+	//! even if with a ray that accidentally hits the delta light sources.
+	//!
+	//! @param	intersect		The intersection information.
+	//! @param	wo				The direction goes from the intersection to the light source.
+	//! @param	directPdfA		The pdf w.r.t area to pick the point, intersection between the direction and the light source.
+	//! @param	emissionPdf		The pdf w.r.t solid angle to pick to sample such a position and direction goes to the intersection.
+	//! @return					The radiance goes from the light source to the intersection, black if there is no intersection.
+	virtual Spectrum Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const { 
+		return 0.0f; 
+	}
+
+	//! @brief	Given a ray, sample the light source if there is any intersection between the ray and the light source.
+	//!
+	//! It simply returns false for delta function, meaning there is no way to pick a ray hitting the delta light source.
+	//! Integrator has to explicitly sample delta light sources instead of using this function and hoping to get radiances
+	//! even if with a ray that accidentally hits the delta light sources.
+	//!
+	//! @param	ray				The ray to be evaluated.
+	//! @param	intersect		The intersection between the ray and the light source.
+	//! @param	radiance		The radiance goes from the light source to the ray origin.
+	//! @return					Whether there is an intersection between the ray and the light source.
+	virtual bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const {
+		return false;
+	}
+
 protected:
-	// scene containing the light
-    const Scene* scene = nullptr;
-	// intensity for the light
+	/**< The rendering scene. */
+    const Scene* m_scene = nullptr;
+
 	Spectrum	intensity;
-	// transformation of the light
-	Transform	light2world;
+
+	/**< The transformation transform vertices from light space to world space. */
+	Transform	m_light2world;
 
 	// pdf of picking the light
 	float		pickProp;

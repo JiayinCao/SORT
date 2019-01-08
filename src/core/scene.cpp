@@ -33,6 +33,7 @@
 #include "stream/stream.h"
 #include "stream/fstream.h"
 #include "core/globalconfig.h"
+#include "light/light.h"
 
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
@@ -169,4 +170,11 @@ Spectrum Scene::Le( const Ray& ray ) const
 		return r;
 	}
 	return 0.0f;
+}
+
+void Scene::AddLight( Light* light ){
+	if( light ){
+		m_lights.push_back( light );
+		light->SetupScene( this );
+	}
 }

@@ -26,27 +26,25 @@ IMPLEMENT_RTTI(SkyLightEntity);
 IMPLEMENT_RTTI(AreaLightEntity);
 
 void PointLightEntity::Serialize( IStreamBase& stream ){
-    stream >> m_light->light2world;
+    stream >> m_light->m_light2world;
     stream >> m_light->intensity;
 }
 
 void PointLightEntity::FillScene(class Scene& scene) {
-    m_light->SetupScene(&scene);
     scene.AddLight(m_light.get());
 }
 
 void DirLightEntity::Serialize(IStreamBase& stream) {
-    stream >> m_light->light2world;
+    stream >> m_light->m_light2world;
     stream >> m_light->intensity;
 }
 
 void DirLightEntity::FillScene(class Scene& scene) {
-    m_light->SetupScene(&scene);
     scene.AddLight(m_light.get());
 }
 
 void SpotLightEntity::Serialize(IStreamBase& stream) {
-    stream >> m_light->light2world;
+    stream >> m_light->m_light2world;
     stream >> m_light->intensity;
     float cos_falloff_start, cos_total_range;
     stream >> cos_falloff_start;
@@ -56,12 +54,11 @@ void SpotLightEntity::Serialize(IStreamBase& stream) {
 }
 
 void SpotLightEntity::FillScene(class Scene& scene) {
-    m_light->SetupScene(&scene);
     scene.AddLight(m_light.get());
 }
 
 void SkyLightEntity::Serialize(IStreamBase& stream) {
-    stream >> m_light->light2world;
+    stream >> m_light->m_light2world;
     stream >> m_light->intensity;
 
     // the following code needs to be changed later.
@@ -71,27 +68,25 @@ void SkyLightEntity::Serialize(IStreamBase& stream) {
 }
 
 void SkyLightEntity::FillScene(class Scene& scene) {
-    m_light->SetupScene(&scene);
     scene.AddLight(m_light.get());
     scene.SetSkyLight(m_light.get());
 }
 
 void AreaLightEntity::Serialize(IStreamBase& stream) {
-    stream >> m_light->light2world;
+    stream >> m_light->m_light2world;
     stream >> m_light->intensity;
     auto rect = std::make_unique<Rectangle>();
     float sizeX, sizeY;
     stream >> sizeX >> sizeY;
     rect->SetSizeX(sizeX);
     rect->SetSizeY(sizeY);
-    rect->SetTransform(m_light->light2world);
-    m_light->shape = std::move(rect);
+    rect->SetTransform(m_light->m_light2world);
+    m_light->m_shape = std::move(rect);
 }
 
 void AreaLightEntity::FillScene(class Scene& scene) {
-    m_light->SetupScene(&scene);
     scene.AddLight(m_light.get());
 
-    auto primitive = std::make_unique<Primitive>(nullptr, m_light->shape.get() , m_light.get());
+    auto primitive = std::make_unique<Primitive>(nullptr, m_light->m_shape.get() , m_light.get());
     scene.AddPrimitive(std::move(primitive));
 }
