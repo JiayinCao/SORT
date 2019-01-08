@@ -24,7 +24,7 @@
 #include "core/singleton.h"
 #include "accel/accelerator.h"
 #include "integrator/integrator.h"
-#include "core/creator.h"
+#include "core/rtti.h"
 #include "imagesensor/blenderimage.h"
 #include "imagesensor/rendertargetimage.h"
 

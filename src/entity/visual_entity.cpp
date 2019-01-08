@@ -17,4 +17,4 @@
 
 #include "visual_entity.h"
 
-IMPLEMENT_CREATOR(VisualEntity);
+IMPLEMENT_RTTI(VisualEntity);

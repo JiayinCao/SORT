@@ -27,7 +27,7 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 
 SORT_STATS_COUNTER("Whitted Ray Tracing", "Primary Ray Count" , sPrimaryRayCount);
 
-IMPLEMENT_CREATOR( WhittedRT );
+IMPLEMENT_RTTI( WhittedRT );
 
 // radiance along a specific ray direction
 Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const

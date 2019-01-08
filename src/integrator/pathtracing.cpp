@@ -30,7 +30,7 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 SORT_STATS_COUNTER("Path Tracing", "Primary Ray Count" , sPrimaryRayCount);
 SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength , sPrimaryRayCount);    // This also counts the case where ray hits sky
 
-IMPLEMENT_CREATOR( PathTracing );
+IMPLEMENT_RTTI( PathTracing );
 
 // return the radiance of a specific direction
 // note : there are one factor makes the method biased.

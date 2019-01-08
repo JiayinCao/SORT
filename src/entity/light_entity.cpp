@@ -19,11 +19,11 @@
 #include "shape/rectangle.h"
 #include "core/primitive.h"
 
-IMPLEMENT_CREATOR(PointLightEntity);
-IMPLEMENT_CREATOR(DirLightEntity);
-IMPLEMENT_CREATOR(SpotLightEntity);
-IMPLEMENT_CREATOR(SkyLightEntity);
-IMPLEMENT_CREATOR(AreaLightEntity);
+IMPLEMENT_RTTI(PointLightEntity);
+IMPLEMENT_RTTI(DirLightEntity);
+IMPLEMENT_RTTI(SpotLightEntity);
+IMPLEMENT_RTTI(SkyLightEntity);
+IMPLEMENT_RTTI(AreaLightEntity);
 
 void PointLightEntity::Serialize( IStreamBase& stream ){
     stream >> m_light->light2world;

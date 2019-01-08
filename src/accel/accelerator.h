@@ -20,7 +20,7 @@
 #include <vector>
 #include "core/define.h"
 #include "math/bbox.h"
-#include "core/creator.h"
+#include "core/rtti.h"
 #include "core/stats.h"
 #include "core/profile.h"
 #include "stream/stream.h"

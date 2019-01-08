@@ -21,7 +21,7 @@
 #include <memory>
 #include "math/transform.h"
 #include "stream/stream.h"
-#include "core/creator.h"
+#include "core/rtti.h"
 #include "entity/visual.h"
 
 //! @brief Basic unit of objects in world.

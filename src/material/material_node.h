@@ -19,7 +19,7 @@
 
 #include <unordered_set>
 #include "spectrum/spectrum.h"
-#include "core/creator.h"
+#include "core/rtti.h"
 #include "spectrum/rgbspectrum.h"
 #include "math/vector4.h"
 #include "stream/stream.h"
