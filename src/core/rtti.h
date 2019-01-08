@@ -22,19 +22,18 @@
 #include "core/singleton.h"
 #include "core/log.h"
 
-//! @brief		This class serves as 'name space' for each specific type so that
-//!				different class type names won't pollute each others pool.
+//!	@brief	This class has no member field. Its only purpose is to instancing class object.
 template<class T>
-class ItemCreator{
+class FactoryMethod{
 public:
 	virtual std::shared_ptr<T> CreateSharedInstance() const = 0;
 	virtual std::unique_ptr<T> CreateUniqueInstance() const = 0;
 };
 
-//! @brief		Creator class is responsible for creating instances based on names.
+//! @brief		Class Factory is responsible for creating instances based on names.
 template<class T>
-class Creator : public Singleton<Creator<T>>{
-    typedef std::unordered_map<std::string,ItemCreator<T>*> CREATOR_CONTAINER;
+class Factory : public Singleton<Factory<T>>{
+    typedef std::unordered_map<std::string,FactoryMethod<T>*> FACTORY_MAP;
 
 public:
 	//! @brief	Create a shared instance of a specific type based on class name.
@@ -42,8 +41,8 @@ public:
 	//! @return		Return a reference of a newly created instance.
 	auto CreateSharedType( std::string str ) const{
 		std::transform(str.begin(),str.end(),str.begin(),[](char c){ return tolower(c); });
-		auto it = m_container.find( str );
-		return it == m_container.end() ? nullptr : it->second->CreateSharedInstance();
+		auto it = m_factoryMap.find( str );
+		return it == m_factoryMap.end() ? nullptr : it->second->CreateSharedInstance();
 	}
 
 	//! @brief	Create an unique instance of a specific type based on class name.
@@ -51,60 +50,44 @@ public:
 	//! @return		Return a reference of a newly created instance.
 	auto CreateUniqueType( std::string str ) const{
 		std::transform(str.begin(),str.end(),str.begin(),[](char c){ return tolower(c); });
-		auto it = m_container.find( str );
-		return it == m_container.end() ? nullptr : it->second->CreateUniqueInstance();
+		auto it = m_factoryMap.find( str );
+		return it == m_factoryMap.end() ? nullptr : it->second->CreateUniqueInstance();
 	}
 
-	//! @brief	Get the container that could be further modified.
+	//! @brief	Get the container mapping from string to factory method.
 	//!
 	//! It is not perfect to return a reference of the class member. Since this class is not directly
 	//! exposed to upper level code, no code should directly call this interface.
 	//!
 	//! @return		Return the reference of the container.
-	CREATOR_CONTAINER& GetContainer(){
-		return m_container;
+	FACTORY_MAP& GetFactoryMap(){
+		return m_factoryMap;
 	}
 
 private:
-	/**< Container for the class creators. */
-	CREATOR_CONTAINER	m_container;
+	/**< Container for the factory methods. */
+	FACTORY_MAP		m_factoryMap;
 
 	//! @brief	Make sure constructor is private.
-	Creator(){}
+	Factory(){}
 	//! @brief	Make sure copy constructor is private.
-    Creator(const Creator<T>&){}
+    Factory(const Factory<T>&) = delete;
 
-	friend class Singleton<Creator>;
+	friend class Singleton<Factory>;
 };
 
-#define	DEFINE_CREATOR( T , B , N ) class T##Creator : public ItemCreator<B> \
+#define IMPLEMENT_RTTI( T )      static T::T##FactoryMethod g_factoryMethod##T;
+#define	DEFINE_RTTI( T , B )     class T##FactoryMethod : public FactoryMethod<B> \
 {public: \
-	T##Creator(){\
-		std::string _str( N );\
-		std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){return tolower(c);});\
-		auto& container = Creator<B>::GetSingleton().GetContainer();\
-		if( container.count( _str ) ){\
-            slog( WARNING , GENERAL , "The creator type with specific name of %s already exxisted." , N );\
-			return;\
-		}\
-        container.insert( std::make_pair(_str , this) );\
-	}\
-	std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
-	std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\
-};
-
-#define IMPLEMENT_RTTI( T )      static T::T##Creator g_creator##T;
-#define	DEFINE_RTTI( T , B )     class T##Creator : public ItemCreator<B> \
-{public: \
-	T##Creator(){\
+	T##FactoryMethod(){\
 		std::string _str( #T );\
 		std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){return tolower(c);});\
-		auto& container = Creator<B>::GetSingleton().GetContainer();\
-		if( container.count( _str ) ){\
-            slog( WARNING , GENERAL , "The creator type with specific name of %s already exxisted." , #T );\
+		auto& factoryMap = Factory<B>::GetSingleton().GetFactoryMap();\
+		if( factoryMap.count( _str ) ){\
+            slog( WARNING , GENERAL , "The class with specific name of %s already exxisted." , #T );\
 			return;\
 		}\
-        container.insert( std::make_pair(_str , this) );\
+        factoryMap.insert( std::make_pair(_str , this) );\
 	}\
 	std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
 	std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\
@@ -116,7 +99,7 @@ private:
 //! @return             Shared pointer holding the instance.
 template<class T>
 std::shared_ptr<T> MakeSharedInstance( const std::string& name ){
-    return std::shared_ptr<T>(Creator<T>::GetSingleton().CreateSharedType(name));
+    return std::shared_ptr<T>(Factory<T>::GetSingleton().CreateSharedType(name));
 }
 
 //! @brief  Instance a class and an unique pointer is returned.
@@ -125,5 +108,5 @@ std::shared_ptr<T> MakeSharedInstance( const std::string& name ){
 //! @return             An unique pointer pointing to the instance.
 template<class T>
 std::unique_ptr<T> MakeUniqueInstance( const std::string& name ) {
-    return std::unique_ptr<T>(Creator<T>::GetSingleton().CreateUniqueType(name));
+    return std::unique_ptr<T>(Factory<T>::GetSingleton().CreateUniqueType(name));
 }

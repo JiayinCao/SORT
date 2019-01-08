@@ -22,7 +22,7 @@
 //! @brief  Composite SORT material node.
 class SORTNodeComposite : public MaterialNode{
 public:
-    DEFINE_CREATOR( SORTNodeComposite , MaterialNode , "SORTNodeComposite" );
+    DEFINE_RTTI( SORTNodeComposite , MaterialNode );
     
     //! @brief  Get the type of the material node.
     //!
@@ -57,7 +57,7 @@ private:
 //! @brief  Extracting red channel of the source code.
 class SORTNodeExtractRed : public MaterialNode{
 public:
-    DEFINE_CREATOR( SORTNodeExtractRed , MaterialNode , "SORTNodeExtractRed" );
+    DEFINE_RTTI( SORTNodeExtractRed , MaterialNode );
     
     //! @brief  Get the type of the material node.
     //!
@@ -88,7 +88,7 @@ private:
 //! @brief  Extracting green channel of the source color.
 class SORTNodeExtractGreen : public MaterialNode{
 public:
-    DEFINE_CREATOR( SORTNodeExtractGreen , MaterialNode , "SORTNodeExtractGreen" );
+    DEFINE_RTTI( SORTNodeExtractGreen , MaterialNode );
     
     //! @brief  Get the type of the material node.
     //!
@@ -119,7 +119,7 @@ private:
 //! @brief  Extracting blue channel of the source color.
 class SORTNodeExtractBlue : public MaterialNode{
 public:
-    DEFINE_CREATOR( SORTNodeExtractBlue , MaterialNode , "SORTNodeExtractBlue" );
+    DEFINE_RTTI( SORTNodeExtractBlue , MaterialNode );
     
     //! @brief  Get the type of the material node.
     //!
@@ -150,7 +150,7 @@ private:
 //! @brief  Extracting intensity of the source spectrum.
 class SORTNodeExtractIntensity : public MaterialNode{
 public:
-    DEFINE_CREATOR( SORTNodeExtractIntensity , MaterialNode , "SORTNodeIntensity" );
+    DEFINE_RTTI( SORTNodeExtractIntensity , MaterialNode );
     
     //! @brief  Get the type of the material node.
     //!

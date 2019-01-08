@@ -24,7 +24,7 @@
 class	AmbientOcclusion : public Integrator
 {
 public:
-	DEFINE_CREATOR( AmbientOcclusion , Integrator , "ao" );
+	DEFINE_RTTI( AmbientOcclusion , Integrator );
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data

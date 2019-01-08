@@ -26,7 +26,7 @@
 class	DirectLight : public Integrator
 {
 public:
-	DEFINE_CREATOR( DirectLight , Integrator , "direct" );
+	DEFINE_RTTI( DirectLight , Integrator );
 
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data
