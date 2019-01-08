@@ -54,10 +54,7 @@ public:
 		return m_lights[i];
 	}
 	// add light
-	void AddLight( Light* light ){
-		if( light )
-			m_lights.push_back( light );
-	}
+	void AddLight( Light* light );
 	// get lights
 	const std::vector<Light*>& GetLights() const {return m_lights;}
 	// get sky light

@@ -23,8 +23,7 @@
 /**
  * Environment camera capture everything around the viewing point.
  */
-class	EnvironmentCamera : public Camera
-{
+class	EnvironmentCamera : public Camera{
 public:
     //! @brief Generating a primary ray.
     //! @param x    Coordinate along horizontal axis on the image sensor, it could be a float value.
@@ -32,9 +31,6 @@ public:
     //! @param ps   Pixel sample holding several useful random variables.
     //! @return     The generated ray based on the input.
 	virtual Ray	GenerateRay( float x , float y , const PixelSample& ps ) const;
-
-	//! @brief Set world transformation for the camera.
-	void SetTransform( const Matrix& m ) { m_transform = m; }
 
     //! @brief Get camera coordinate according to a view direction in world space. It is used in light tracing or bi-directional path tracing algorithm.
     //! @param p                A point in world space. The calculation will connect it to the viewing point of the cammere seeking the intersected point between the direction and the image sensor.
@@ -58,8 +54,6 @@ public:
 	}
 
 private:
-	Matrix	m_transform;        /**< World transformation. */
-	
-	//! @brief Register all properties.
-	void registerAllProperty();
+    /**< World transformation. */
+	Matrix	m_transform;
 };
