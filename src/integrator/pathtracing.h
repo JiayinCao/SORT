@@ -24,7 +24,7 @@
 class	PathTracing : public Integrator
 {
 public:
-	DEFINE_CREATOR( PathTracing , Integrator , "pt" );
+	DEFINE_RTTI( PathTracing , Integrator );
     
 	// return the radiance of a specific direction
 	// para 'scene' : scene containing geometry data

@@ -34,7 +34,7 @@ class TextureNode : public MaterialNode{
 //! @brief  Grid texture Node.
 class GridTexNode : public TextureNode{
 public:
-	DEFINE_CREATOR( GridTexNode , MaterialNode , "SORTNodeGrid" );
+	DEFINE_RTTI( GridTexNode , MaterialNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -60,7 +60,7 @@ private:
 //! @brief  Grid texture Node.
 class CheckerBoardTexNode : public TextureNode{
 public:
-	DEFINE_CREATOR( CheckerBoardTexNode , MaterialNode , "SORTNodeCheckerBoard" );
+	DEFINE_RTTI( CheckerBoardTexNode , MaterialNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -86,7 +86,7 @@ private:
 //! @brief  Image texture node.
 class ImageTexNode : public TextureNode{
 public:
-	DEFINE_CREATOR( ImageTexNode , MaterialNode , "SORTNodeImage" );
+	DEFINE_RTTI( ImageTexNode , MaterialNode );
 
     //! @brief  Get spectrum material property.
     //!

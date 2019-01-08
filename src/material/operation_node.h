@@ -33,7 +33,7 @@ public:
 //! @brief  Add two color.
 class AddNode : public OperatorNode{
 public:
-	DEFINE_CREATOR( AddNode , MaterialNode , "SORTNodeAdd" );
+	DEFINE_RTTI( AddNode , MaterialNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -59,7 +59,7 @@ private:
 //! @brief  Get the inverse ( 1 - src ) color.
 class SORTNodeOneMinus : public OperatorNode{
 public:
-    DEFINE_CREATOR( SORTNodeOneMinus , MaterialNode , "SORTNodeOneMinus" );
+    DEFINE_RTTI( SORTNodeOneMinus , MaterialNode );
     
     //! @brief  Get spectrum material property.
     //!
@@ -83,7 +83,7 @@ private:
 //! @brief  Lerp node.
 class LerpNode : public OperatorNode{
 public:
-	DEFINE_CREATOR( LerpNode , MaterialNode , "SORTNodeLerp" );
+	DEFINE_RTTI( LerpNode , MaterialNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -111,7 +111,7 @@ private:
 //! @brief  Blend node.
 class BlendNode : public OperatorNode{
 public:
-	DEFINE_CREATOR( BlendNode , MaterialNode , "SORTNodeBlend" );
+	DEFINE_RTTI( BlendNode , MaterialNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -141,7 +141,7 @@ private:
 //! @brief  Mutiply two spectrums.
 class MutiplyNode : public OperatorNode{
 public:
-	DEFINE_CREATOR( MutiplyNode , MaterialNode , "SORTNodeMultiply" );
+	DEFINE_RTTI( MutiplyNode , MaterialNode );
     
     //! @brief  Get spectrum material property.
     //!
@@ -167,7 +167,7 @@ private:
 //! @brief  Gamma correction Node.
 class GammaToLinearNode : public OperatorNode{
 public:
-    DEFINE_CREATOR( GammaToLinearNode , MaterialNode , "SORTNodeGammaToLinear" );
+    DEFINE_RTTI( GammaToLinearNode , MaterialNode );
     
     //! @brief  Get spectrum material property.
     //!
@@ -191,7 +191,7 @@ private:
 //! @brief  Gamma correction Node.
 class LinearToGammaNode : public OperatorNode{
 public:
-    DEFINE_CREATOR( LinearToGammaNode , MaterialNode , "SORTNodeLinearToGamma" );
+    DEFINE_RTTI( LinearToGammaNode , MaterialNode );
     
     //! @brief  Get spectrum material property.
     //!
@@ -215,7 +215,7 @@ private:
 //! @brief  Normal decoding node.
 class NormalDecoderNode : public OperatorNode{
 public:
-    DEFINE_CREATOR( NormalDecoderNode , MaterialNode , "SORTNodeDecodeNormal" );
+    DEFINE_RTTI( NormalDecoderNode , MaterialNode );
     
     //! @brief  Get vector material property.
     //!

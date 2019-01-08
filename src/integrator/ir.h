@@ -42,7 +42,7 @@ struct VirtualLightSource
 class	InstantRadiosity : public Integrator
 {
 public:
-	DEFINE_CREATOR( InstantRadiosity , Integrator , "ir" );
+	DEFINE_RTTI( InstantRadiosity , Integrator );
 
 	InstantRadiosity() {
 		m_nLightPaths = 64;

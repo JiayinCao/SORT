@@ -351,11 +351,11 @@ def export_global_config(scene, fs, sort_resource_path):
 
     fs.serialize( integrator_type )
     fs.serialize( int(scene.inte_max_recur_depth) )
-    if integrator_type == "ao":
+    if integrator_type == "AmbientOcclusion":
         fs.serialize( scene.ao_max_dist )
-    if integrator_type == "bdpt" or integrator_type == "lt":
+    if integrator_type == "BidirPathTracing" or integrator_type == "LightTracing":
         fs.serialize( bool(scene.bdpt_mis) )
-    if integrator_type == 'ir':
+    if integrator_type == "InstantRadiosity":
         fs.serialize( scene.ir_light_path_set_num )
         fs.serialize( scene.ir_light_path_num )
         fs.serialize( scene.ir_min_dist )
@@ -408,7 +408,7 @@ def export_material(scene, fs):
                         return next((l.from_node for l in nt.links if l.to_socket == socket), None)
                     input_node = socket_node_input(ntree, socket)
 
-                    fs.serialize(input_node.bl_idname)
+                    fs.serialize(input_node.sort_bxdf_type)
                     serialize_prop(input_node,fs)
                 else:
                     fs.serialize('')
