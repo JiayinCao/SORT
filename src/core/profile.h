@@ -22,12 +22,6 @@ this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 // SORT used to use this profiler as default one.
 // It is a open-source cross-platform project, which is available on git https://github.com/yse/easy_profiler
-// However, it doesn't scale well with billions of rays, for which reason, this feature is dropped.
-
-// Seeking more affordable implementation. And the task-based graph is not as useful as it is in real time rendering
-// because it is all very similar task for every ray. A random sampling profiler may be more suitable for this project.
-// Here is the Github issue tracking the feature
-// https://github.com/JerryCao1985/SORT/issues/69
 
 #ifdef SORT_ENABLE_PROFILER
 
