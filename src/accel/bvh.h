@@ -69,7 +69,7 @@ class Bvh : public Accelerator{
     };
 
 public:
-    DEFINE_CREATOR( Bvh , Accelerator , "Bvh" );
+    DEFINE_RTTI( Bvh , Accelerator );
 
     //! @brief Get intersection between the ray and the primitive set using BVH.
     //!

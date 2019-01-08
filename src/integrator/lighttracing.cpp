@@ -17,4 +17,4 @@
 
 #include "lighttracing.h"
 
-IMPLEMENT_CREATOR(LightTracing);
+IMPLEMENT_RTTI(LightTracing);

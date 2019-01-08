@@ -19,8 +19,6 @@
 #include "core/sassert.h"
 #include "core/rand.h"
 
-IMPLEMENT_CREATOR( RandomSampler );
-
 // generate sample in one dimension
 void RandomSampler::Generate1D( float* sample , unsigned num , bool accept_uniform ) const
 {

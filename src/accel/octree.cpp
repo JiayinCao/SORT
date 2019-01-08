@@ -19,7 +19,7 @@
 #include "core/primitive.h"
 #include "core/log.h"
 
-IMPLEMENT_CREATOR(OcTree);
+IMPLEMENT_RTTI(OcTree);
 
 SORT_STATS_DEFINE_COUNTER(sOcTreeNodeCount)
 SORT_STATS_DEFINE_COUNTER(sOcTreeLeafNodeCount)

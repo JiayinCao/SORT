@@ -24,13 +24,6 @@
 class RegularSampler : public Sampler
 {
 public:
-	DEFINE_CREATOR( RegularSampler , Sampler , "regular" );
-
-	// default constructor
-	RegularSampler(){}
-	// destructor
-	~RegularSampler(){}
-
 	// round the size for sampler
 	// para 'size' : number of samples to be generated
 	// result      : the modified number

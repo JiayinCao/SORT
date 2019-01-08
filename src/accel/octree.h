@@ -37,7 +37,7 @@ class OcTree : public Accelerator{
     };
 
 public:
-    DEFINE_CREATOR( OcTree , Accelerator , "OcTree" );
+    DEFINE_RTTI( OcTree , Accelerator );
 
     //! @brief      Get intersection between the ray and the primitive set using KD-Tree.
     //!

@@ -48,14 +48,7 @@ public:
         _generateDistribution2D();
     }
 
-    // setup transformation
-    void SetTransform(const Transform& tf) {
-        m_transform = tf;
-    }
-
 private:
-    Transform m_transform;
-
     ImageTexture	m_sky;
     std::unique_ptr<class Distribution2D>	distribution = nullptr;
 

@@ -22,7 +22,7 @@
 #include "core/define.h"
 #include "sample.h"
 #include "core/memory.h"
-#include "core/creator.h"
+#include "core/rtti.h"
 
 // WARNING: Code in this folder is very outdated. Not even functional.
 //			The whole sampler implementation will be redesigned later.

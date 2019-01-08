@@ -17,11 +17,11 @@
 
 #include "convertor_node.h"
 
-IMPLEMENT_CREATOR( SORTNodeComposite );
-IMPLEMENT_CREATOR( SORTNodeExtractRed );
-IMPLEMENT_CREATOR( SORTNodeExtractGreen );
-IMPLEMENT_CREATOR( SORTNodeExtractBlue );
-IMPLEMENT_CREATOR( SORTNodeExtractIntensity );
+IMPLEMENT_RTTI( SORTNodeComposite );
+IMPLEMENT_RTTI( SORTNodeExtractRed );
+IMPLEMENT_RTTI( SORTNodeExtractGreen );
+IMPLEMENT_RTTI( SORTNodeExtractBlue );
+IMPLEMENT_RTTI( SORTNodeExtractIntensity );
 
 void SORTNodeComposite::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     SORT_MATERIAL_GET_PROP_FLOAT(r,R);

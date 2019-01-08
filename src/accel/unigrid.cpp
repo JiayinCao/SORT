@@ -22,7 +22,7 @@
 #include "core/sassert.h"
 #include "core/profile.h"
 
-IMPLEMENT_CREATOR(UniGrid);
+IMPLEMENT_RTTI(UniGrid);
 
 SORT_STATS_DEFINE_COUNTER(sUGGridCount)
 SORT_STATS_DEFINE_COUNTER(sUniformGridX)

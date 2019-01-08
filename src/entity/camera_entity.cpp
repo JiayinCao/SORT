@@ -18,7 +18,7 @@
 #include "camera_entity.h"
 #include "core/scene.h"
 
-IMPLEMENT_CREATOR(PerspectiveCameraEntity);
+IMPLEMENT_RTTI(PerspectiveCameraEntity);
 
 void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
     stream >> m_camera->m_eye;

@@ -21,7 +21,7 @@
 #include "math/ray.h"
 #include "math/intersection.h"
 
-IMPLEMENT_CREATOR(Bvh);
+IMPLEMENT_RTTI(Bvh);
 
 SORT_STATS_DEFINE_COUNTER(sBvhNodeCount)
 SORT_STATS_DEFINE_COUNTER(sBvhLeafNodeCount)

@@ -20,7 +20,7 @@
 #include "spectrum/spectrum.h"
 #include "core/memory.h"
 #include "sampler/sampler.h"
-#include "core/creator.h"
+#include "core/rtti.h"
 #include "core/stats.h"
 #include "core/profile.h"
 #include "core/primitive.h"

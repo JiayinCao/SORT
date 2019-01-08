@@ -17,14 +17,14 @@
 
 #include "operation_node.h"
 
-IMPLEMENT_CREATOR( SORTNodeOneMinus );
-IMPLEMENT_CREATOR( AddNode );
-IMPLEMENT_CREATOR( LerpNode );
-IMPLEMENT_CREATOR( BlendNode );
-IMPLEMENT_CREATOR( MutiplyNode );
-IMPLEMENT_CREATOR( GammaToLinearNode );
-IMPLEMENT_CREATOR( LinearToGammaNode );
-IMPLEMENT_CREATOR( NormalDecoderNode );
+IMPLEMENT_RTTI( SORTNodeOneMinus );
+IMPLEMENT_RTTI( AddNode );
+IMPLEMENT_RTTI( LerpNode );
+IMPLEMENT_RTTI( BlendNode );
+IMPLEMENT_RTTI( MutiplyNode );
+IMPLEMENT_RTTI( GammaToLinearNode );
+IMPLEMENT_RTTI( LinearToGammaNode );
+IMPLEMENT_RTTI( NormalDecoderNode );
 
 void AddNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
