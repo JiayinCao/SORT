@@ -95,7 +95,7 @@ std::unique_ptr<T> MakeUniqueInstance( const std::string& name ) {
 }
 
 #define IMPLEMENT_RTTI( T )      static T::T##FactoryMethod g_factoryMethod##T;
-#define	DEFINE_RTTI( T , B )     class T##FactoryMethod : public FactoryMethod<B> \
+#define	DEFINE_RTTI( T , B )     class T##FactoryMethod : public FactoryMethod<B>\
 {public: \
 	T##FactoryMethod(){\
 		std::string _str( #T );\
