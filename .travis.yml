@@ -23,8 +23,8 @@ script:
 - sudo /bin/sh ./getdep_linux.sh
 - mkdir proj_release
 - cd proj_release
-- cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make
+- cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
 - cd ..
 - mkdir proj_debug
 - cd proj_debug
-- cmake -DCMAKE_BUILD_TYPE=Debug DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make
+- cmake -DCMAKE_BUILD_TYPE=Debug DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
