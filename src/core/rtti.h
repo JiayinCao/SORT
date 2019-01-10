@@ -110,3 +110,4 @@ std::unique_ptr<T> MakeUniqueInstance( const std::string& name ) {
 	std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
 	std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\
 };
+
