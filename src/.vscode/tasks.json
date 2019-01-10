@@ -17,7 +17,7 @@
         {
             "label": "Re-Build (Debug)",
             "type": "shell",
-            "command": "reset;cd ..;mkdir proj_debug;cd proj_debug;cmake -DCMAKE_BUILD_TYPE=Debug ..;make clean;make -j4",
+            "command": "reset;cd ..;rm -rf proj_debug;mkdir proj_debug;cd proj_debug;cmake -DCMAKE_BUILD_TYPE=Debug ..;make clean;make -j4",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -43,7 +43,7 @@
         {
             "label": "Re-Build (Release)",
             "type": "shell",
-            "command": "reset;cd ..;mkdir proj_release;cd proj_release;cmake -DCMAKE_BUILD_TYPE=Release ..;make clean;make -j4",
+            "command": "reset;cd ..;rm -rf proj_release;mkdir proj_release;cd proj_release;cmake -DCMAKE_BUILD_TYPE=Release ..;make clean;make -j4",
             "group": {
                 "kind": "build",
                 "isDefault": true
