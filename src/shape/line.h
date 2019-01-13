@@ -19,17 +19,34 @@
 
 #include "shape.h"
 
-//! @brief Triangle class defines the basic behavior of triangle.
+//! @brief 	Line is a common type for hair or fur rendering.
 /**
- * Triangle is the most common shape that is used in a ray tracer.
+ * Unlike line rendering in rasterization, which has a screen-based width regardless
+ * of how far away the viewer is, line in ray tracing represents a real line with some
+ * width. The 'face' of line always faces towards the viewer.
+ * Though being called line, this shape is actually line segment, which has a finite
+ * length instead of infinite length.
+ * Technically speaking, there is no such a thing like line in reality. All lines have
+ * a potential radius, occupying some volume, they may look like cylinder when zooming 
+ * in. It is possible to setup a scene where different algorithms result into slightly
+ * different result.
+ * Although there is not a pure phsically based shape, line shape is especially helpful
+ * in rendering things like fur, which is why SORT supports this kind of shape.
  */
-class	Triangle : public Shape{
+class	Line : public Shape{
 public:
 	//! @brief Constructor
 	//!
-	//! @param mesh 		The triangle mesh it belongs to
-	//! @param index   		The index buffer
-    Triangle( const class MeshVisual* mesh , const struct MeshIndex& index ): m_meshVisual(mesh) , m_index(index) {}
+	//! @param	p0		A point on one side of the line.
+	//! @param	p1		A point on the other side of the line.
+	//! @param	w0		Width at one side of the line.
+	//! @param	w1		Width at the other side of the line.
+    Line( const Point& p0 , const Point& p1 , float w0 , float w1 ) : 
+		m_p0(p0), m_p1(p1), m_w0(w0), m_w1(w1) {
+		sAssert( m_w0 >= 0.0f , GENERAL );
+		sAssert( m_w1 >= 0.0f , GENERAL );
+		m_length = Distance( p0 , p1 );
+	}
 
 	//! @brief Sample a point on the surface of the shape given a shading point.
 	//!
@@ -43,26 +60,24 @@ public:
 	//! @param pdf 		The pdf w.r.t solid angle ( not surface area ) of picking the sampled point.
 	//! @return			The sampled point on the surface of the shape.
     Point 			Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n, float* pdf ) const override{
-		// to be implemented
+		sAssertMsg( false , LIGHT , "Using line as a area light source shape.");
 		return Point();
 	}
 
 	//! @brief Sample a ray from the light source without a given shading point.
 	//!
-	//! Uniformly sample a random ray shooting from the surface of the shape.
+	//! This function should not be called, meaning line should not be used as a light source.
 	//!
 	//! @param ls		The light sample.
 	//! @param r		The ray randomly sampled, whose origin lies on the surface of the shape,
 	//!					the direction of the ray will point outward depending on the normal.
 	//! @param n		The normal at the surface where the ray shoots from.
 	//! @param pdf		The pdf w.r.t solid angle of picking the ray.
-	void 			Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const override{}
+	void 			Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const override{
+		sAssertMsg( false , LIGHT , "Using line as a area light source shape.");
+	}
 
 	//! @brief		Get intersected point between the ray and the shape.
-	//!
-	//! SORT implements a watertight ray triangle intersection for better precision.
-	//! The detail algorithm could be found in this paper,
-	//! <a href="http://jcgt.org/published/0002/01/05/paper.pdf">Watertight Ray/Triangle Intersection</a>.
 	//!
 	//! @param ray		The ray to be tested against.
 	//! @param p		The intersected point in local space.
@@ -73,29 +88,34 @@ public:
 
 	//! @brief Intersection test between the shape and a bounding box.
 	//!
-	//! Detail algorithm of triangle and bounding box intersection comes from this paper,
-	//! <a href="http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox_tam.pdf">Fast 3D Triangle-Box Overlap Testing</a>.
+	//! Because the accurate intersection test depends also on the viewing angle, which is not available
+	//! as an input here, this is more of a conservative solution.
 	//!
 	//! param box 		Bounding box to be checked.
 	bool 			GetIntersect( const BBox& box ) const override;
 
 	//! @brief		Get bounding box of the shape in world space.
 	//!
-	//!	Get the bounding box of the shape. Some shape may return a relatively conservative bounding
-	//! box, which is also acceptable to all rest systems call this function.
+	//! This is also a conservative solution by expending the AABB by half width, whichever is larger on
+	//! either side.
 	//!
 	//! @return		The bounding box of the shape.
 	const BBox&		GetBBox() const override;
 
 	//! @brief		Get the surface area of the shape.
 	//!
-	//! Get the surface area of the shape. This function is heavily used in the case of picking a area light
-	//! among lots of them, surface area is one of the signals telling us how strong the light is.
-	//!
 	//! @return		Surface area of the shape.
 	float 			SurfaceArea() const override;
 
 private:
-	const class MeshVisual*		m_meshVisual = nullptr;	    /**< Visual holding the vertex buffer. */
-	const struct MeshIndex&	    m_index;			        /**< Index buffer points to the index of this triangle. */
+	/**< Point at the end of the line. */
+	Point	m_p0;
+	/**< Point at the other side of the line. */
+	Point	m_p1;
+	/**< Width of the line at 'm_p0', it should always be positive. */
+	float	m_w0;
+	/**< Width of the line at 'm_p1', it should always be positive. */
+	float	m_w1;
+	/**< Length of the line segment. */
+	float	m_length;
 };
