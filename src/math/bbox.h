@@ -71,6 +71,11 @@ public:
 	// set the bounding box as invalid
 	void InvalidBBox();
 
+	//! @brief	Expend the axia aligned bounding box.
+	//!
+	//! @param	delta	The half delta to expend along each direction.
+	void	Expend( float delta );
+
 public:
 	// the minium and maxium point of the bounding box
 	Point	m_Min;

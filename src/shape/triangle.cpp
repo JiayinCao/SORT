@@ -27,10 +27,7 @@ static inline Vector3f Permute( const Vector3f& v , int ax , int ay , int az ){
 	return Vector3f( v[ax] , v[ay] , v[az] );
 }
 
-// 'Watertight Ray/Triangle Intersection' (Sven Woop, Carsten Benthin, Ingo Wald)
-// http://jcgt.org/published/0002/01/05/paper.pdf
-bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect ) const
-{
+bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect ) const{
 	// get the memory
 	// note : reference is not used here because it's not thread-safe
 	auto& mem = m_meshVisual->m_memory;
@@ -127,12 +124,9 @@ bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect )
     return t > 0.0f ;
 }
 
-// get the bounding box of the triangle
-const BBox& Triangle::GetBBox() const
-{
+const BBox& Triangle::GetBBox() const{
 	// if there is no bounding box , cache it
-	if( !m_bbox )
-	{
+	if( !m_bbox ){
         m_bbox = std::make_unique<BBox>();
 
         auto& mem = m_meshVisual->m_memory;
@@ -152,9 +146,7 @@ const BBox& Triangle::GetBBox() const
 	return *m_bbox;
 }
 
-// get the surface area of the triangle
-float Triangle::SurfaceArea() const
-{
+float Triangle::SurfaceArea() const{
 	auto& mem = m_meshVisual->m_memory;
     int id0 = m_index.m_id[0];
     int id1 = m_index.m_id[1];
@@ -171,19 +163,16 @@ float Triangle::SurfaceArea() const
 	return t.Length() * 0.5f;
 }
 
-// Project vertex along specific axis
-static inline void Project(const Point* points, int count , const Vector& axis, float& min, float& max)
-{
-	for( int i = 0; i < count; ++i ){
-		float val = Dot( axis , (Vector)points[i] );
-		if (val < min) min = val;
-		if (val > max) max = val;
-	}
-}
-
-// 'Fast 3D Triangle-Box Overlap Testing'
-// http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox_tam.pdf
 bool Triangle::GetIntersect(const BBox& box) const{
+	// Project vertex along specific axis
+	static const auto Project = [](const Point* points, int count , const Vector& axis, float& min, float& max){
+		for( int i = 0; i < count; ++i ){
+			float val = Dot( axis , (Vector)points[i] );
+			if (val < min) min = val;
+			if (val > max) max = val;
+		}
+	};
+
     auto& mem = m_meshVisual->m_memory;
     int id0 = m_index.m_id[0];
     int id1 = m_index.m_id[1];
