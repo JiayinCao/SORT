@@ -80,11 +80,10 @@ public:
 	//! @brief		Get intersected point between the ray and the shape.
 	//!
 	//! @param ray		The ray to be tested against.
-	//! @param p		The intersected point in local space.
 	//! @param inter	The intersection data to be filled. If it is nullptr, there is no detailed information
 	//!					for the intersection.
 	//! @return			Whether the ray intersects the shape.
-	bool 			GetIntersect( const Ray& ray , Point& p , Intersection* inter = nullptr ) const override;
+	bool 			GetIntersect( const Ray& ray , Intersection* inter = nullptr ) const override;
 
 	//! @brief Intersection test between the shape and a bounding box.
 	//!

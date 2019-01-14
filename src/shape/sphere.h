@@ -59,11 +59,10 @@ public:
 	//! this function because it will be flattened during spatial structure constructure.
 	//!
 	//! @param ray		The ray to be tested against.
-	//! @param p		The intersected point in local space.
 	//! @param inter	The intersection data to be filled. If it is nullptr, there is no detailed information
 	//!					for the intersection.
 	//! @return			Whether the ray intersects the shape.
-	bool			GetIntersect( const Ray& ray , Point& p , Intersection* inter = nullptr ) const override;
+	bool			GetIntersect( const Ray& ray , Intersection* inter = nullptr ) const override;
 
 	//! @brief	Get the pdf w.r.t solid angle of picking a point on the surface where the ray intersects.
 	//!
