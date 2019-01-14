@@ -47,10 +47,15 @@ public:
     void    Serialize( IStreamBase& stream ) override {
         stream >> m_transform;
 
-        // For now there is only one visual in each visual entity, it can easily be extended.
-        auto visual = std::make_unique<MeshVisual>();
-        bool ret = MeshManager::GetSingleton().LoadMesh( stream , visual.get() , m_transform );
-        sAssert( ret , RESOURCE );
+        // Instance the visual
+        std::string class_name;
+        stream >> class_name;
+        auto visual = MakeUniqueInstance<Visual>( class_name );
+        visual->Serialize( stream );
+
+        // Apply transform, some Visual applies transformation eariler for better performance.
+        visual->ApplyTransform( m_transform );
+
         m_visuals.push_back( std::move(visual) );
     }
 };

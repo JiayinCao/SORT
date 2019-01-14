@@ -21,6 +21,9 @@
 #include "shape/triangle.h"
 #include "core/primitive.h"
 
+IMPLEMENT_RTTI( MeshVisual );
+IMPLEMENT_RTTI( LineSetVisual );
+
 void MeshVisual::FillScene( Scene& scene ){
     for (const MeshIndex& mi : m_memory->m_indices){
         m_triangles.push_back( std::make_unique<Triangle>( this , mi ) );
@@ -29,5 +32,39 @@ void MeshVisual::FillScene( Scene& scene ){
 }
 
 void MeshVisual::Serialize( IStreamBase& stream ){
-	m_memory->Serialize(stream);
+    m_memory = std::make_unique<BufferMemory>();
+    m_memory->Serialize(stream);
+}
+
+void MeshVisual::ApplyTransform( const Transform& transform ){
+    m_memory->ApplyTransform( transform );
+    m_memory->GenUV();
+	m_memory->GenSmoothTagent();
+}
+
+void LineSetVisual::FillScene( Scene& scene ){
+    for( const auto& line : m_lines )
+        scene.AddPrimitive( std::make_unique<Primitive>( nullptr , line.get() ) );
+        return;
+    Point p0( 0.0f , 0.0f , 0.0f );
+    Point p1( 0.0f , 5.0f , 0.0f );
+    m_lines.push_back(std::make_unique<Line>( p0 , p1 , m_width0 , m_width1 ) );
+    scene.AddPrimitive( std::make_unique<Primitive>( nullptr , m_lines.back().get() ) );
+}
+
+void LineSetVisual::Serialize( IStreamBase& stream ){
+    stream >> m_width0;
+    stream >> m_width1;
+    unsigned int cnt = 0;
+    stream >> cnt;
+    for( int i = 0 ; i < cnt ; ++i ){
+        Point p0 , p1;
+        stream >> p0 >> p1;
+        m_lines.push_back(std::make_unique<Line>( p0 , p1 , m_width0 , m_width1 ) );
+    }
+}
+
+void LineSetVisual::ApplyTransform( const Transform& transform ){
+    for( auto& line : m_lines )
+        line->SetTransform( transform );
 }

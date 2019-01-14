@@ -23,49 +23,50 @@ bool Line::GetIntersect( const Ray& r , Point& p , Intersection* intersect ) con
 
 	// Calculating the intersection between the ray and the plane, whose normal is perpidencular to 
 	// both of the line and the ray forward direction.
-	const auto v0 = m_p0 - m_p1;				// Vector pointing along the line.
-	const auto v1 = Cross( r.m_Dir , v0 );	// Vector that is perpidencular to both v0 and ray forward direction.
+	const auto v0 = m_p1 - m_p0;					// Vector pointing along the line.
+	const auto v1 = Cross( ray.m_Dir , v0 );		// Vector that is perpidencular to both v0 and ray forward direction.
 
 	// This could happen if the ray forward direction is the same with the line direction.
 	if( v1.SquaredLength() <= 0.0f )
 		return false;
 
+	auto v2 = Normalize( -Cross( v0 , v1 ) );
+
 	// Distance along the ray direction to the intersection, early out if it is negative value.
-	const auto t0 = Dot( v1 , m_p0 - r.m_Ori ) / Dot( r.m_Dir , v1 );
+	const auto t0 = Dot( v2 , ray.m_Ori - m_p0 ) / -Dot( ray.m_Dir , v2 );
 	if( t0 <= 0 )
 		return false;
 
 	// This is the intersected point.
-	const auto p0 = r.m_Ori + t0 * r.m_Dir;
+	const auto p0 = ray.m_Ori + t0 * ray.m_Dir;
 
 	// Calculate the point on the line that is nearest to the intersected point.
 	// Early out if necessary.
-	const auto t1 = Dot( -v0 , m_p0 - p0 ) / v0.SquaredLength();
-	if( t1 < 0 || t0 > 1.0f )
+	const auto t1 = Dot( v0 , p0 - m_p0 ) / v0.SquaredLength();
+	if( t1 < 0 || t1 > 1.0f )
 		return false;
 	const auto p1 = lerp( m_p0 , m_p1 , t1 );
 
 	// Checking distance between the two intersected points.
-	const auto v2 = p1 - p0;
+	const auto v3 = p1 - p0;
 	const auto w = lerp( m_w0 , m_w1 , t1 );
-	if( v2.SquaredLength() > w * w * 0.25f )
+	if( v3.SquaredLength() > w * w * 0.25f )
 		return false;
 
 	// There is an intersection between the ray and the line.
-	p = m_p0 + v0 * w;
 	if( intersect ){
-		intersect->intersect = p0;
-		intersect->gnormal = Normalize( v1 );
-		intersect->normal = Normalize( v1 );
-		intersect->tangent = Normalize( v0 );
+		intersect->intersect = r.m_Ori + t0 * r.m_Dir;
+		intersect->gnormal = Normalize( m_transform.invMatrix.Transpose()(v2) );
+		intersect->normal = intersect->gnormal;
+		intersect->tangent = Normalize( m_transform(v0) );
 
 		intersect->u = t1;
-		const auto neg = Dot( Cross( v2 , v0 ) , v1 ) < 0.0f;
-		intersect->v = 0.5f + ( ( neg ? -0.5f : 0.5f ) * v2.Length() / w );
+		const auto neg = Dot( Cross( v3 , v0 ) , v2 ) < 0.0f;
+		intersect->v = 0.5f + ( ( neg ? -0.5f : 0.5f ) * v3.Length() / w );
 		intersect->t = t0;
 	}
 
-	return false;
+	return true;
 }
 
 const BBox& Line::GetBBox() const{

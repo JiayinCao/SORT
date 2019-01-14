@@ -22,25 +22,8 @@
 #include "entity/entity.h"
 #include "stream/stream.h"
 
-// Temporary
-bool MeshManager::LoadMesh( IStreamBase& stream , MeshVisual* visual , const Transform& transform ){
-	// create the new memory
-    visual->m_memory = std::make_unique<BufferMemory>();
-
-	// load the mesh from file
-	visual->m_memory->Serialize(stream);
-
-	// apply the transformation
-	visual->m_memory->ApplyTransform( transform );
-    visual->m_memory->GenUV();
-	visual->m_memory->GenSmoothTagent();
-
-	return true;
-}
-
 // apply transform
-void BufferMemory::ApplyTransform( const Transform& transform )
-{
+void BufferMemory::ApplyTransform( const Transform& transform ){
     for (MeshVertex& mv : m_vertices) {
         mv.m_position = transform(mv.m_position);
         mv.m_normal = (transform.invMatrix.Transpose())(mv.m_normal).Normalize();
@@ -48,8 +31,7 @@ void BufferMemory::ApplyTransform( const Transform& transform )
 }
 
 // generate tangent for the triangle mesh
-void BufferMemory::GenSmoothTagent()
-{
+void BufferMemory::GenSmoothTagent(){
 	// generate tangent for each triangle
     std::vector<std::vector<Vector>> tangent(m_vertices.size());
     for (auto mi : m_indices) {
@@ -69,7 +51,7 @@ void BufferMemory::GenSmoothTagent()
 
 // generate UV coordinate
 void BufferMemory::GenUV(){
-    if (m_hasUV)
+    if (m_hasUV || m_vertices.empty())
         return;
 
     Point center;
@@ -86,8 +68,7 @@ void BufferMemory::GenUV(){
 }
 
 // generate tangent vector for a triangle
-Vector BufferMemory::_genTagentForTri( const MeshIndex& mi ) const
-{
+Vector BufferMemory::_genTagentForTri( const MeshIndex& mi ) const{
     const auto& _v0 = m_vertices[mi.m_id[0]];
     const auto& _v1 = m_vertices[mi.m_id[1]];
     const auto& _v2 = m_vertices[mi.m_id[2]];
