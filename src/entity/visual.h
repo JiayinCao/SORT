@@ -99,10 +99,8 @@ public:
     void        ApplyTransform( const Transform& transform ) override;
     
 private:
+    /**< Vertex buffer of lines. */
+    std::vector<Point>                  m_vertices;
     /**< Memory container holding the lines. */
     std::vector<std::unique_ptr<Line>>  m_lines;
-    /**< Width at the first point of the lines. */
-    float       m_width0 = 0.0f;
-    /**< Width at the second point of the line. */
-    float       m_width1 = 0.0f;
 };
