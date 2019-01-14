@@ -97,8 +97,7 @@ bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radianc
 	sAssert( m_shape != nullptr , LIGHT );
 
 	// get intersect
-    Point tmp;
-	const bool result = m_shape->GetIntersect( ray , tmp , intersect );
+	const auto result = m_shape->GetIntersect( ray , intersect );
 
 	// transform the intersection result back to world coordinate
 	if( result && intersect != nullptr )

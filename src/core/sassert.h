@@ -29,7 +29,7 @@
     #define sAssert(expr,type) \
             if( false == (bool)(expr) ) {\
                 slog( CRITICAL , type , "Crashed!" );\
-                assert( false );\
+                abort();\
             }
 
     #define sAssertMsg(expr, type, ... ) \

@@ -19,9 +19,7 @@
 #include "core/samplemethod.h"
 #include "sampler/sample.h"
 
-// sample a point on shape
-Point Disk::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
-{
+Point Disk::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const{
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 
@@ -42,9 +40,7 @@ Point Disk::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vect
 	return lp;
 }
 
-// sample a ray from light
-void Disk::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
-{
+void Disk::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const{
 	float u , v;
 	UniformSampleDisk( ls.u , ls.v , u , v );
 	r.m_fMin = 0.0f;
@@ -57,32 +53,26 @@ void Disk::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) c
 	if( pdf ) *pdf = 1.0f / ( radius * radius * PI * TWO_PI );
 }
 
-// the surface area of the shape
-float Disk::SurfaceArea() const
-{
+float Disk::SurfaceArea() const{
 	return PI * radius * radius;
 }
 
-// get intersected point between the ray and the shape
-bool Disk::GetIntersect( const Ray& r , Point& p , Intersection* intersect ) const
-{   
-	Ray ray = m_transform.invMatrix( r );
-
+bool Disk::GetIntersect( const Ray& r , Intersection* intersect ) const{   
+	const auto ray = m_transform.invMatrix( r );
 	if( ray.m_Dir.y == 0.0f )
 		return false;
 
-	const float limit = intersect ? intersect->t : FLT_MAX;
-	
-	float t = -ray.m_Ori.y / ray.m_Dir.y;
+	const auto limit = intersect ? intersect->t : FLT_MAX;
+	const auto t = -ray.m_Ori.y / ray.m_Dir.y;
 	if( t > limit || t <= ray.m_fMin || t > ray.m_fMax )
 		return false;
-	p = ray(t);
-	float sqLength = p.x * p.x + p.z * p.z;
+		
+	const auto p = ray(t);
+	const auto sqLength = p.x * p.x + p.z * p.z;
 	if( sqLength > radius * radius )
 		return false;
 
-	if( intersect )
-	{
+	if( intersect ){
 		intersect->t = t;
 		intersect->intersect = m_transform( p );
 		intersect->normal = m_transform.invMatrix.Transpose()(DIR_UP);
@@ -92,11 +82,8 @@ bool Disk::GetIntersect( const Ray& r , Point& p , Intersection* intersect ) con
 	return true;
 }
 
-// get the bounding box of the primitive
-const BBox&	Disk::GetBBox() const
-{
-	if( !m_bbox )
-	{
+const BBox&	Disk::GetBBox() const{
+	if( !m_bbox ){
         m_bbox = std::make_unique<BBox>();
 		m_bbox->Union( m_transform( Point( radius , 0.0f , radius ) ) );
 		m_bbox->Union( m_transform( Point( radius , 0.0f , -radius ) ) );
