@@ -29,6 +29,8 @@
         "condition_variable": "cpp",
         "__split_buffer": "cpp",
         "deque": "cpp",
-        "list": "cpp"
+        "list": "cpp",
+        "__locale": "cpp",
+        "regex": "cpp"
     }
 }

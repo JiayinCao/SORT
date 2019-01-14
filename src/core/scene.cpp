@@ -41,9 +41,7 @@ SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
 SORT_STATS_COUNTER("Statistics", "Total Primitive Count", sScenePrimitiveCount);
 SORT_STATS_COUNTER("Statistics", "Total Light Count", sSceneLightCount);
 
-// load the scene from script file
-bool Scene::LoadScene( IStreamBase& stream )
-{
+bool Scene::LoadScene( IStreamBase& stream ){
 	while( true ){
 		std::string class_id;
 		stream >> class_id;
@@ -67,9 +65,7 @@ bool Scene::LoadScene( IStreamBase& stream )
 	return true;
 }
 
-// get the intersection between a ray and the scene
-bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
-{
+bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	if( intersect )
 		intersect->t = FLT_MAX;
 
@@ -80,9 +76,7 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const
 	return g_accelerator->GetIntersect( r , intersect );
 }
 
-// get the intersection between a ray and the scene in a brute force way
-bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const
-{
+bool Scene::_bfIntersect( const Ray& r , Intersection* intersect ) const{
 	if( intersect ) intersect->t = FLT_MAX;
 	int n = (int)m_primitiveBuf.size();
 	for( int k = 0 ; k < n ; k++ )
@@ -102,9 +96,7 @@ void Scene::_generatePriBuf(){
 		entity->FillScene( *this );
 }
 
-// get the bounding box for the scene
-const BBox& Scene::GetBBox() const
-{
+const BBox& Scene::GetBBox() const{
 	if( g_accelerator != nullptr && g_accelerator->GetIsValid() )
 		return g_accelerator->GetBBox();
 
@@ -118,9 +110,7 @@ const BBox& Scene::GetBBox() const
 	return m_BBox;
 }
 
-// compute light cdf
-void Scene::_genLightDistribution()
-{
+void Scene::_genLightDistribution(){
 	unsigned count = (unsigned)m_lights.size();
 	if( count == 0 )
 		return ;
@@ -139,7 +129,6 @@ void Scene::_genLightDistribution()
     m_lightsDis = std::make_unique<Distribution1D>( pdf.get() , count );
 }
 
-// get sampled light
 const Light* Scene::SampleLight( float u , float* pdf ) const{
 	sAssert( u >= 0.0f && u <= 1.0f , SAMPLING );
 	sAssertMsg(m_lightsDis != nullptr , SAMPLING , "No light in the scene." );

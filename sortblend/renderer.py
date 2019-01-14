@@ -1,15 +1,15 @@
 #    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
 #    platform physically based renderer.
-# 
-#    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
-# 
+#
+#    Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
+#
 #    SORT is a free software written for educational purpose. Anyone can distribute
 #    or modify it under the the terms of the GNU General Public License Version 3 as
 #    published by the Free Software Foundation. However, there is NO warranty that
 #    all components are functional in a perfect manner. Without even the implied
 #    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 #    General Public License for more details.
-# 
+#
 #    You should have received a copy of the GNU General Public License along with
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
@@ -114,7 +114,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
 
         # setup shared memory size
         self.sm_size = self.image_size_in_bytes * 2 + self.image_header_size + 2
- 
+
         intermediate_dir = sort_exporter.get_intermediate_dir()
         sm_full_path = intermediate_dir + "sharedmem.bin"
         # on mac os
@@ -123,7 +123,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
             self.file = open( sm_full_path , "wb" , self.sm_size)
             self.file.write( bytes( "\0" * self.sm_size , "utf-8" ) )
             self.file.close()
-        
+
             # open it in append mode
             self.file = open( sm_full_path , "a+b" , self.sm_size)
 
