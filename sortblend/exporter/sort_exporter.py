@@ -253,21 +253,22 @@ def export_mesh(mesh, fs):
     materials = mesh.materials[:]
     material_names = [m.name if m else None for m in materials]
 
-    verti = 0
-    trii = 0
+    vert_cnt = 0
+    primitive_cnt = 0
     verts = mesh.vertices
     wo3_verts = bytearray()
+
+    global matname_to_id
 
     if len(mesh.polygons) is 0 :
         # hacking parameters for now
         bottom = 0.2
         tip = 0.0
-        hair_step = 5
-        hair_step_inv = 0.2
+        hair_step = 4
+        hair_step_inv = 0.25
         i = 0
 
         # taking the first material for now.
-        global matname_to_id
         matid = -1
         matname = name_compat(mesh.materials[0].name) if len( mesh.materials ) > 0 else None
         matid = matname_to_id[matname] if matname in matname_to_id else -1
@@ -283,7 +284,10 @@ def export_mesh(mesh, fs):
             w0 = t * bottom + ( 1.0 - t ) * tip
             w1 = w0 + ( tip - bottom ) * hair_step_inv
             line_verts += LINEFMT.pack(v0,v1,w0,w1,matid)
-            i = ( i + 1 ) % 5
+            i = ( i + 1 ) % hair_step
+
+        vert_cnt = len(verts)
+        primitive_cnt += len( mesh.edges )
 
         fs.serialize( 'LineSetVisual' )
         fs.serialize( LENFMT.pack( len(verts) ) )
@@ -331,35 +335,34 @@ def export_mesh(mesh, fs):
                 key = (normal, uvcoord)
                 out_idx = wo3_indices[vidx].get(key)
                 if out_idx is None:
-                    out_idx = verti
+                    out_idx = vert_cnt
                     wo3_indices[vidx][key] = out_idx
                     wo3_verts += VERTFMT.pack(v.co[0], v.co[1], v.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
-                    verti += 1
+                    vert_cnt += 1
 
                 oi.append(out_idx)
 
-            global matname_to_id
             matid = -1
             matname = name_compat(material_names[f.material_index]) if len( material_names ) > 0 else None
             matid = matname_to_id[matname] if matname in matname_to_id else -1
             if len(oi) == 3:
                 # triangle
                 wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
-                trii += 1
+                primitive_cnt += 1
             else:
                 # quad
                 wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
                 wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
-                trii += 2
+                primitive_cnt += 2
 
         fs.serialize('MeshVisual')
         fs.serialize(bool(has_uv))
-        fs.serialize(LENFMT.pack(verti))
+        fs.serialize(LENFMT.pack(vert_cnt))
         fs.serialize(wo3_verts)
-        fs.serialize(LENFMT.pack(trii))
+        fs.serialize(LENFMT.pack(primitive_cnt))
         fs.serialize(wo3_tris)
 
-    return (verti, trii)
+    return (vert_cnt, primitive_cnt)
 
 def export_global_config(scene, fs, sort_resource_path):
     # global renderer configuration
