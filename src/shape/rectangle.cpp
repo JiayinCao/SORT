@@ -19,9 +19,7 @@
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 
-// sample a point on shape
-Point Rectangle::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
-{
+Point Rectangle::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const{
     const float halfx = sizeX * 0.5f;
     const float halfy = sizeY * 0.5f;
     
@@ -44,53 +42,45 @@ Point Rectangle::Sample_l( const LightSample& ls , const Point& p , Vector& wi ,
 	return lp;
 }
 
-// sample a ray from light
-void Rectangle::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
-{
-    const float halfx = sizeX * 0.5f;
-    const float halfy = sizeY * 0.5f;
+void Rectangle::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const{
+    const auto halfx = sizeX * 0.5f;
+    const auto halfy = sizeY * 0.5f;
     
-	float u = 2 * ls.u - 1.0f;
-	float v = 2 * ls.v - 1.0f;
+	const auto u = 2 * ls.u - 1.0f;
+	const auto v = 2 * ls.v - 1.0f;
 	r.m_fMin = 0.0f;
 	r.m_fMax = FLT_MAX;
 	r.m_Ori = m_transform( Point( halfx * u , 0.0f , halfy * v ) );
 	r.m_Dir = m_transform( UniformSampleHemisphere( sort_canonical() , sort_canonical() ) );
 	n = m_transform.invMatrix.Transpose()( DIR_UP );
 
-	if( pdf ) *pdf = 1.0f / ( SurfaceArea() * TWO_PI );
+	if( pdf ) 
+		*pdf = 1.0f / ( SurfaceArea() * TWO_PI );
 }
 
-// the surface area of the shape
-float Rectangle::SurfaceArea() const
-{
+float Rectangle::SurfaceArea() const{
     return sizeX * sizeY;
 }
 
-// get intersected point between the ray and the shape
-bool Rectangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect ) const
-{
-	Ray ray = m_transform.invMatrix( r );
-
+bool Rectangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
+	const auto ray = m_transform.invMatrix( r );
 	if( ray.m_Dir.y == 0.0f )
 		return false;
 
-	const float limit = intersect ? intersect->t : FLT_MAX;
-
-	float t = -ray.m_Ori.y / ray.m_Dir.y;
+	const auto limit = intersect ? intersect->t : FLT_MAX;
+	const auto t = -ray.m_Ori.y / ray.m_Dir.y;
 	if( t > limit || t <= ray.m_fMin || t > ray.m_fMax )
 		return false;
-	p = ray(t);
 
-    const float halfx = sizeX * 0.5f;
-    const float halfy = sizeY * 0.5f;
+	const auto p = r(t);
+    const auto halfx = sizeX * 0.5f;
+    const auto halfy = sizeY * 0.5f;
 	if( p.x > halfx || p.x < -halfx )
 		return false;
 	if( p.z > halfy || p.z < -halfy )
 		return false;
 
-	if( intersect )
-	{
+	if( intersect ){
 		intersect->t = t;
 		intersect->intersect = m_transform( p );
 		intersect->normal = m_transform.invMatrix.Transpose()(DIR_UP);
@@ -100,13 +90,10 @@ bool Rectangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect 
 	return true;
 }
 
-// get the bounding box of the primitive
-const BBox&	Rectangle::GetBBox() const
-{
-    const float halfx = sizeX * 0.5f;
-    const float halfy = sizeY * 0.5f;
-	if( !m_bbox )
-	{
+const BBox&	Rectangle::GetBBox() const{
+    const auto halfx = sizeX * 0.5f;
+    const auto halfy = sizeY * 0.5f;
+	if( !m_bbox ){
         m_bbox = std::make_unique<BBox>();
 		m_bbox->Union( m_transform( Point( halfx , 0.0f , halfy ) ) );
 		m_bbox->Union( m_transform( Point( halfx , 0.0f , -halfy ) ) );

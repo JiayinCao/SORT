@@ -20,14 +20,12 @@
 #include "core/samplemethod.h"
 #include "core/log.h"
 
-// sample a point on shape
-Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const
-{
+Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const{
     sAssertMsg(false, SAMPLING, "N is not filled in Sphere::sample_l");
     
-	Point center = m_transform( Point( 0.0f , 0.0f , 0.0f ) );
-	Vector delta = center - p;
-	Vector dir = Normalize( delta );
+	const auto center = m_transform( Point( 0.0f , 0.0f , 0.0f ) );
+	const auto delta = center - p;
+	const auto dir = Normalize( delta );
 	Vector wcx , wcy;
 	CoordinateSystem( dir , wcx , wcy );
 
@@ -36,54 +34,48 @@ Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
 				wcx.z , dir.z , wcy.z , 0.0f ,
 				0.0f , 0.0f , 0.0f , 1.0f );
 
-	float sq_sin_theta = radius * radius / delta.SquaredLength();
-	float cos_theta = sqrt( std::max( 0.0f , 1.0f - sq_sin_theta ) );
+	const auto sq_sin_theta = radius * radius / delta.SquaredLength();
+	const auto cos_theta = sqrt( std::max( 0.0f , 1.0f - sq_sin_theta ) );
 
 	wi = UniformSampleCone( ls.u , ls.v , cos_theta );
 	wi = m(wi);
 
 	if( pdf ) *pdf = UniformConePdf( cos_theta );
 
-	Point _p;
-	Ray r = m_transform.invMatrix(Ray( p , wi ));
-	if( !GetIntersect( r , _p ) )
-		_p = r( Dot( delta , wi ) );
+	Intersection intersection;
+	const auto r = m_transform.invMatrix(Ray( p , wi ));
+	if( !GetIntersect( r , &intersection ) )
+		intersection.intersect = r( Dot( delta , wi ) );
 	
-	return m_transform(_p);
+	return m_transform(intersection.intersect);
 }
 
-// get pdf of specific direction
-float Sphere::Pdf( const Point& p ,  const Vector& wi ) const
-{
+float Sphere::Pdf( const Point& p ,  const Vector& wi ) const{
 	Point center;
-	float sin_theta_sq = radius * radius / ( p - center ).SquaredLength();
-	float cos_theta = sqrt( std::max( 0.0f , 1.0f - sin_theta_sq ) );
+	const auto sin_theta_sq = radius * radius / ( p - center ).SquaredLength();
+	const auto cos_theta = sqrt( std::max( 0.0f , 1.0f - sin_theta_sq ) );
 	return UniformConePdf( cos_theta );
 }
 
-// the surface area of the shape
-float Sphere::SurfaceArea() const
-{
+float Sphere::SurfaceArea() const{
 	return 4 * PI * radius * radius ;
 }
 
-// get intersection between a ray and the sphere
-bool Sphere::GetIntersect( const Ray& ray , Point& p , Intersection* intersect ) const
-{
-	Ray r = m_transform.invMatrix( ray );
+bool Sphere::GetIntersect( const Ray& ray , Intersection* intersect ) const{
+	const auto r = m_transform.invMatrix( ray );
 
-	float _b = 2.0f * ( r.m_Dir.x * r.m_Ori.x + r.m_Dir.y * r.m_Ori.y + r.m_Dir.z * r.m_Ori.z );
-	float _c = r.m_Ori.x * r.m_Ori.x + r.m_Ori.y * r.m_Ori.y + r.m_Ori.z * r.m_Ori.z - radius * radius;
+	const auto _b = 2.0f * ( r.m_Dir.x * r.m_Ori.x + r.m_Dir.y * r.m_Ori.y + r.m_Dir.z * r.m_Ori.z );
+	const auto _c = r.m_Ori.x * r.m_Ori.x + r.m_Ori.y * r.m_Ori.y + r.m_Ori.z * r.m_Ori.z - radius * radius;
 
-	float delta = _b * _b - 4.0f * _c ;
+	auto delta = _b * _b - 4.0f * _c ;
 	if( delta < 0.0f )
 		return false;
 	delta = sqrt( delta );
 
-	float min_t = ( -_b - delta ) * 0.5f;
-	float max_t = ( -_b + delta ) * 0.5f;
+	const auto min_t = ( -_b - delta ) * 0.5f;
+	const auto max_t = ( -_b + delta ) * 0.5f;
 
-	const float limit = intersect ? intersect->t : FLT_MAX;
+	const auto limit = intersect ? intersect->t : FLT_MAX;
 	if( min_t > limit || max_t <= 0.0f )
 		return false;
 
@@ -97,9 +89,8 @@ bool Sphere::GetIntersect( const Ray& ray , Point& p , Intersection* intersect )
 
 	if( t > r.m_fMax || t < r.m_fMin )
 		return false;
-
-	p = r(t);
-
+		
+	const auto p = r(t);
 	if( intersect )
 	{
 		intersect->t = t;

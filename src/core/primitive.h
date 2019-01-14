@@ -48,8 +48,7 @@ public:
 	//!						The information of the intersection is also returned in world space.
 	//! @return				Whether the ray intersects the primitive.
 	inline bool GetIntersect( const Ray& r , Intersection* intersect ) const{
-		Point tmp;
-		bool ret = m_shape->GetIntersect( r , tmp , intersect );
+		auto ret = m_shape->GetIntersect( r , intersect );
 		if( ret && intersect ){
 			intersect->primitive = const_cast<Primitive*>(this);
 			return true;

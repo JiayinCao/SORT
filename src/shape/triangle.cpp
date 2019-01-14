@@ -27,26 +27,26 @@ static inline Vector3f Permute( const Vector3f& v , int ax , int ay , int az ){
 	return Vector3f( v[ax] , v[ay] , v[az] );
 }
 
-bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect ) const{
+bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	// get the memory
 	// note : reference is not used here because it's not thread-safe
 	auto& mem = m_meshVisual->m_memory;
-	int id0 = m_index.m_id[0];
-	int id1 = m_index.m_id[1];
-	int id2 = m_index.m_id[2];
+	const auto id0 = m_index.m_id[0];
+	const auto id1 = m_index.m_id[1];
+	const auto id2 = m_index.m_id[2];
 
-    const MeshVertex& mv0 = mem->m_vertices[id0];
-    const MeshVertex& mv1 = mem->m_vertices[id1];
-    const MeshVertex& mv2 = mem->m_vertices[id2];
+    const auto& mv0 = mem->m_vertices[id0];
+    const auto& mv1 = mem->m_vertices[id1];
+    const auto& mv2 = mem->m_vertices[id2];
 
 	// get three vertexes
-	const Point& op0 = mv0.m_position;
-	const Point& op1 = mv1.m_position;
-	const Point& op2 = mv2.m_position;
+	const auto& op0 = mv0.m_position;
+	const auto& op1 = mv1.m_position;
+	const auto& op2 = mv2.m_position;
 
-	Point p0 = op0;
-	Point p1 = op1;
-	Point p2 = op2;
+	auto p0 = op0;
+	auto p1 = op1;
+	auto p2 = op2;
 
 	// transform the vertices from world space to ray coordinate
 	// step 0 : translate the vertices with ray origin
@@ -56,18 +56,18 @@ bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect )
 
 	// step 1 : pick the major axis to avoid dividing by zero in the sheering pass.
 	//          by picking the major axis, we can also make sure we sheer as little as possible
-	const int ay = MajorAxis( r.m_Dir );
-	const int az = ( ay + 1 ) % 3;
-	const int ax = ( az + 1 ) % 3;
+	const auto ay = MajorAxis( r.m_Dir );
+	const auto az = ( ay + 1 ) % 3;
+	const auto ax = ( az + 1 ) % 3;
 	Vector3f d = Permute( r.m_Dir , ax , ay , az );
 	p0 = Permute( p0 , ax , ay , az );
 	p1 = Permute( p1 , ax , ay , az );
 	p2 = Permute( p2 , ax , ay , az );
 
 	// step 2 : sheer the vertices so that the ray direction points to ( 0 , 1 , 0 )
-	const float sx = -d.x / d.y;
-	const float sz = -d.z / d.y;
-	const float sy = 1.0f / d.y;
+	const auto sx = -d.x / d.y;
+	const auto sz = -d.z / d.y;
+	const auto sy = 1.0f / d.y;
 	p0.x += sx * p0.y;
 	p0.z += sz * p0.y;
 	p1.x += sx * p1.y;
@@ -76,9 +76,9 @@ bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect )
 	p2.z += sz * p2.y;
 
 	// compute the edge functions
-	float e0 = p1.x * p2.z - p1.z * p2.x;
-	float e1 = p2.x * p0.z - p2.z * p0.x;
-	float e2 = p0.x * p1.z - p0.z * p1.x;
+	auto e0 = p1.x * p2.z - p1.z * p2.x;
+	auto e1 = p2.x * p0.z - p2.z * p0.x;
+	auto e2 = p0.x * p1.z - p0.z * p1.x;
 
 	// fall back to double precision for better accuracy at some performance cost
 	if( ( e0 == 0.0f || e1 == 0.0f || e2 == 0.0f ) ){
@@ -89,15 +89,15 @@ bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect )
 
 	if( ( e0 < 0 || e1 < 0 || e2 < 0 ) && ( e0 > 0 || e1 > 0 || e2 > 0 ) )
 		return false;
-	const float det = e0 + e1 + e2;
+	const auto det = e0 + e1 + e2;
 	if( det == .0f )
 		return false;
 
 	p0.y *= sy;
 	p1.y *= sy;
 	p2.y *= sy;
-	const float invDet = 1.0f / det;
-	float t = ( e0 * p0.y + e1 * p1.y + e2 * p2.y ) * invDet;
+	const auto invDet = 1.0f / det;
+	const auto t = ( e0 * p0.y + e1 * p1.y + e2 * p2.y ) * invDet;
 	if( t <= r.m_fMin || t >= r.m_fMax )
 		return false;
 	if( intersect == nullptr )
@@ -105,9 +105,9 @@ bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect )
 	if( t > intersect->t )
 		return false;
 
-	const float u = e1 * invDet;
-	const float v = e2 * invDet;
-	const float w = 1 - u - v;
+	const auto u = e1 * invDet;
+	const auto v = e2 * invDet;
+	const auto w = 1 - u - v;
 
 	// store the intersection
 	intersect->intersect = r(t);
@@ -116,7 +116,7 @@ bool Triangle::GetIntersect( const Ray& r , Point& p , Intersection* intersect )
 	intersect->normal = ( w * mv0.m_normal + u * mv1.m_normal + v * mv2.m_normal).Normalize();
 	intersect->tangent = ( w * mv0.m_tangent + u * mv1.m_tangent + v * mv2.m_tangent).Normalize();
 
-    auto uv = w * mv0.m_texCoord + u * mv1.m_texCoord + v * mv2.m_texCoord;
+    const auto uv = w * mv0.m_texCoord + u * mv1.m_texCoord + v * mv2.m_texCoord;
     intersect->u = uv.x;
     intersect->v = uv.y;
 	intersect->t = t;
@@ -129,14 +129,14 @@ const BBox& Triangle::GetBBox() const{
 	if( !m_bbox ){
         m_bbox = std::make_unique<BBox>();
 
-        auto& mem = m_meshVisual->m_memory;
-        int id0 = m_index.m_id[0];
-        int id1 = m_index.m_id[1];
-        int id2 = m_index.m_id[2];
+        const auto& mem = m_meshVisual->m_memory;
+        const auto id0 = m_index.m_id[0];
+        const auto id1 = m_index.m_id[1];
+		const auto id2 = m_index.m_id[2];
 
-        const Point& p0 = mem->m_vertices[id0].m_position;
-        const Point& p1 = mem->m_vertices[id1].m_position;
-        const Point& p2 = mem->m_vertices[id2].m_position;
+        const auto& p0 = mem->m_vertices[id0].m_position;
+        const auto& p1 = mem->m_vertices[id1].m_position;
+        const auto& p2 = mem->m_vertices[id2].m_position;
 
 		m_bbox->Union( p0 );
 		m_bbox->Union( p1 );
@@ -147,18 +147,18 @@ const BBox& Triangle::GetBBox() const{
 }
 
 float Triangle::SurfaceArea() const{
-	auto& mem = m_meshVisual->m_memory;
-    int id0 = m_index.m_id[0];
-    int id1 = m_index.m_id[1];
-    int id2 = m_index.m_id[2];
+	const auto& mem = m_meshVisual->m_memory;
+    const auto id0 = m_index.m_id[0];
+    const auto id1 = m_index.m_id[1];
+    const auto id2 = m_index.m_id[2];
 
-    const Point& p0 = mem->m_vertices[id0].m_position;
-    const Point& p1 = mem->m_vertices[id1].m_position;
-    const Point& p2 = mem->m_vertices[id2].m_position;
+    const auto& p0 = mem->m_vertices[id0].m_position;
+    const auto& p1 = mem->m_vertices[id1].m_position;
+    const auto& p2 = mem->m_vertices[id2].m_position;
 
-	Vector e0 = p1 - p0 ;
-	Vector e1 = p2 - p0 ;
-	Vector t = Cross( e0 , e1 );
+	const auto e0 = p1 - p0 ;
+	const auto e1 = p2 - p0 ;
+	const auto t = Cross( e0 , e1 );
 
 	return t.Length() * 0.5f;
 }
@@ -166,34 +166,34 @@ float Triangle::SurfaceArea() const{
 bool Triangle::GetIntersect(const BBox& box) const{
 	// Project vertex along specific axis
 	static const auto Project = [](const Point* points, int count , const Vector& axis, float& min, float& max){
-		for( int i = 0; i < count; ++i ){
-			float val = Dot( axis , (Vector)points[i] );
+		for( auto i = 0; i < count; ++i ){
+			auto val = Dot( axis , (Vector)points[i] );
 			if (val < min) min = val;
 			if (val > max) max = val;
 		}
 	};
 
-    auto& mem = m_meshVisual->m_memory;
-    int id0 = m_index.m_id[0];
-    int id1 = m_index.m_id[1];
-    int id2 = m_index.m_id[2];
+    const auto& mem = m_meshVisual->m_memory;
+    const auto id0 = m_index.m_id[0];
+    const auto id1 = m_index.m_id[1];
+    const auto id2 = m_index.m_id[2];
 
-    const MeshVertex& mv0 = mem->m_vertices[id0];
-    const MeshVertex& mv1 = mem->m_vertices[id1];
-    const MeshVertex& mv2 = mem->m_vertices[id2];
+    const auto& mv0 = mem->m_vertices[id0];
+    const auto& mv1 = mem->m_vertices[id1];
+    const auto& mv2 = mem->m_vertices[id2];
 
     Point tri[3] = { mv0.m_position , mv1.m_position , mv2.m_position };
 
 	float triMin , triMax;	// will initialize later
-	float boxMin = FLT_MAX, boxMax = -FLT_MAX;
+	auto boxMin = FLT_MAX, boxMax = -FLT_MAX;
 
-	Vector	boxN[3] = { Point( 1.0f , 0.0f , 0.0f ) , 
-						Point( 0.0f , 1.0f , 0.0f ) ,
-						Point( 0.0f , 0.0f , 1.0f )};
+	Vector	boxN[3] = { Vector( 1.0f , 0.0f , 0.0f ) , 
+						Vector( 0.0f , 1.0f , 0.0f ) ,
+						Vector( 0.0f , 0.0f , 1.0f )};
 	
 	// Case 1 : try separating axis perpendicular to box surface normal , 3 tests
 	// along bounding box face normal directions first
-	for( int i = 0 ; i < 3 ; ++i ){
+	for( auto i = 0 ; i < 3 ; ++i ){
 		triMin = FLT_MAX;
 		triMax = -FLT_MAX;
 		Project( tri , 3 , boxN[i] , triMin , triMax );
@@ -203,9 +203,9 @@ bool Triangle::GetIntersect(const BBox& box) const{
 
 	// Case 2 : try triangle plane , 1 test
 	// get triangle normal
-	Vector triN = Cross( tri[1] - tri[0] , tri[2] - tri[0] );
+	const auto triN = Cross( tri[1] - tri[0] , tri[2] - tri[0] );
 	//triN = triN * ( 1.0f / triN.Length() );	// no need to normalize it at all
-	float triOffset = Dot( triN , (Vector)tri[0] );
+	const auto triOffset = Dot( triN , (Vector)tri[0] );
 	Point bbp[8] = { box.m_Min , 
 		Point( box.m_Min.x , box.m_Min.y , box.m_Max.z ) ,
 		Point( box.m_Min.x , box.m_Max.y , box.m_Min.z ),
@@ -219,12 +219,12 @@ bool Triangle::GetIntersect(const BBox& box) const{
 		return false;
 
 	// Case 3 : try cross product planes , 9 tests
-	Vector triangleEdges[3] = { tri[0] - tri[1] , tri[1] - tri[2] , tri[2] - tri[0] };
-	for( int i = 0 ; i < 3 ; ++i ){
-		for( int j = 0 ; j < 3 ; ++j ){
+	const Vector triangleEdges[3] = { tri[0] - tri[1] , tri[1] - tri[2] , tri[2] - tri[0] };
+	for( auto i = 0 ; i < 3 ; ++i ){
+		for( auto j = 0 ; j < 3 ; ++j ){
 			triMin = boxMin = FLT_MAX;
 			triMax = boxMax = -FLT_MAX;
-			Vector new_axis = Cross( triangleEdges[i] , boxN[j] );
+			const auto new_axis = Cross( triangleEdges[i] , boxN[j] );
 			Project( bbp , 8 , new_axis , boxMin , boxMax );
 			Project( tri , 3 , new_axis , triMin , triMax );
 

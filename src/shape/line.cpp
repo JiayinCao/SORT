@@ -17,7 +17,7 @@
 
 #include "line.h"
 
-bool Line::GetIntersect( const Ray& r , Point& p , Intersection* intersect ) const{
+bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	// Transform the ray from world space to local space.
 	const auto ray = m_transform.invMatrix( r );
 

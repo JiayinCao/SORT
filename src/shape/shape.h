@@ -76,9 +76,8 @@ public:
 		Point lp = m_transform.invMatrix( p );
 		Vector lwi = m_transform.invMatrix( wi );
 
-		Point intersect;
 		Intersection inter;
-		if( !GetIntersect( Ray( lp , lwi ) , intersect , &inter ) )
+		if( !GetIntersect( Ray( lp , lwi ) , &inter ) )
 			return 0.0f;
 
 		Vector delta = inter.intersect - p;
@@ -95,11 +94,10 @@ public:
 	//! this function because it will be flattened during spatial structure construction.
 	//!
 	//! @param ray		The ray to be tested against.
-	//! @param p		The intersected point in local space.
 	//! @param inter	The intersection data to be filled. If it is nullptr, there is no detailed information
 	//!					for the intersection.
 	//! @return			Whether the ray intersects the shape.
-	virtual bool 	GetIntersect( const Ray& ray , Point& p , Intersection* inter = nullptr ) const = 0;
+	virtual bool 	GetIntersect( const Ray& ray , Intersection* inter = nullptr ) const = 0;
 
 	//! @brief Intersection test between the shape and a bounding box.
 	//!
