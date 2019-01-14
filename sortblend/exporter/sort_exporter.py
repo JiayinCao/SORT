@@ -246,7 +246,8 @@ def export_mesh(mesh, fs):
     LENFMT = struct.Struct('=i')
     FLTFMT = struct.Struct('=f')
     VERTFMT = struct.Struct('=ffffffff')
-    LINEFMT = struct.Struct('=ffffff')
+    LINEFMT = struct.Struct('=iiffi')
+    POINTFMT = struct.Struct('=fff')
     TRIFMT = struct.Struct('=iiii')
 
     materials = mesh.materials[:]
@@ -255,17 +256,38 @@ def export_mesh(mesh, fs):
     verti = 0
     trii = 0
     verts = mesh.vertices
+    wo3_verts = bytearray()
 
     if len(mesh.polygons) is 0 :
+        # hacking parameters for now
+        bottom = 0.2
+        tip = 0.0
+        hair_step = 5
+        hair_step_inv = 0.2
+        i = 0
+
+        # taking the first material for now.
+        global matname_to_id
+        matid = -1
+        matname = name_compat(mesh.materials[0].name) if len( mesh.materials ) > 0 else None
+        matid = matname_to_id[matname] if matname in matname_to_id else -1
+
         line_verts = bytearray()
+        for vert in verts:
+            wo3_verts += POINTFMT.pack( vert.co[0] , vert.co[1] , vert.co[2] )
+
         for edge in mesh.edges:
-            v0 = verts[edge.vertices[0]].co
-            v1 = verts[edge.vertices[1]].co
-            line_verts += LINEFMT.pack(v0[0], v0[1], v0[2], v1[0], v1[1] , v1[2] )
+            v0 = edge.vertices[0]
+            v1 = edge.vertices[1]
+            t = ( hair_step - i ) * hair_step_inv
+            w0 = t * bottom + ( 1.0 - t ) * tip
+            w1 = w0 + ( tip - bottom ) * hair_step_inv
+            line_verts += LINEFMT.pack(v0,v1,w0,w1,matid)
+            i = ( i + 1 ) % 5
 
         fs.serialize( 'LineSetVisual' )
-        fs.serialize( FLTFMT.pack(0.05) )
-        fs.serialize( FLTFMT.pack(0.05) )
+        fs.serialize( LENFMT.pack( len(verts) ) )
+        fs.serialize( wo3_verts )
         fs.serialize( LENFMT.pack( len(mesh.edges) ) )
         fs.serialize( line_verts )
     else:
@@ -282,8 +304,6 @@ def export_mesh(mesh, fs):
                 has_uv = False
             else:
                 active_uv_layer = active_uv_layer.data
-
-        wo3_verts = bytearray()
 
         wo3_indices = [{} for _ in range(len(verts))]
         wo3_tris = bytearray()

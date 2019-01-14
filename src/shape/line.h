@@ -41,8 +41,9 @@ public:
 	//! @param	p1		A point on the other side of the line.
 	//! @param	w0		Width at one side of the line.
 	//! @param	w1		Width at the other side of the line.
-    Line( const Point& p0 , const Point& p1 , float w0 , float w1 ) : 
-		m_p0(p0), m_p1(p1), m_w0(w0), m_w1(w1) {
+	//! @param	matId	Material id of the line.
+    Line( const Point& p0 , const Point& p1 , float w0 , float w1 , int matId ) : 
+		m_p0(p0), m_p1(p1), m_w0(w0), m_w1(w1), m_matId(matId) {
 		sAssert( m_w0 >= 0.0f , GENERAL );
 		sAssert( m_w1 >= 0.0f , GENERAL );
 		m_length = Distance( p0 , p1 );
@@ -106,15 +107,24 @@ public:
 	//! @return		Surface area of the shape.
 	float 			SurfaceArea() const override;
 
+	//! @brief		Get the material id.
+	//!
+	//! @return		Material id of the shape.
+	int				GetMaterialId() const {
+		return m_matId;
+	}
+	
 private:
 	/**< Point at the end of the line. */
-	Point	m_p0;
+	const Point&	m_p0;
 	/**< Point at the other side of the line. */
-	Point	m_p1;
+	const Point&	m_p1;
 	/**< Width of the line at 'm_p0', it should always be positive. */
-	float	m_w0;
+	const float		m_w0;
 	/**< Width of the line at 'm_p1', it should always be positive. */
-	float	m_w1;
+	const float		m_w1;
 	/**< Length of the line segment. */
-	float	m_length;
+	float			m_length;
+	/**< Material index of the line segment. */
+	const int		m_matId;
 };

@@ -43,24 +43,30 @@ void MeshVisual::ApplyTransform( const Transform& transform ){
 }
 
 void LineSetVisual::FillScene( Scene& scene ){
-    for( const auto& line : m_lines )
-        scene.AddPrimitive( std::make_unique<Primitive>( nullptr , line.get() ) );
-        return;
-    Point p0( 0.0f , 0.0f , 0.0f );
-    Point p1( 0.0f , 5.0f , 0.0f );
-    m_lines.push_back(std::make_unique<Line>( p0 , p1 , m_width0 , m_width1 ) );
-    scene.AddPrimitive( std::make_unique<Primitive>( nullptr , m_lines.back().get() ) );
+    for( const auto& line : m_lines ){
+        auto mat = MatManager::GetSingleton().GetMaterial(line->GetMaterialId());
+        scene.AddPrimitive( std::make_unique<Primitive>( mat , line.get() ) );
+    }
 }
 
 void LineSetVisual::Serialize( IStreamBase& stream ){
-    stream >> m_width0;
-    stream >> m_width1;
-    unsigned int cnt = 0;
-    stream >> cnt;
-    for( int i = 0 ; i < cnt ; ++i ){
-        Point p0 , p1;
-        stream >> p0 >> p1;
-        m_lines.push_back(std::make_unique<Line>( p0 , p1 , m_width0 , m_width1 ) );
+    auto vert_cnt = 0u;
+    stream >> vert_cnt;
+    for( auto i = 0u ; i < vert_cnt ; ++i ){
+        m_vertices.push_back( Point() );
+        stream >> m_vertices.back();
+    }
+
+    auto line_cnt = 0u;
+    stream >> line_cnt;
+    for( auto i = 0u ; i < line_cnt ; ++i ){
+        unsigned int id0 , id1;
+        stream >> id0 >> id1;
+        float w0 , w1;
+        stream >> w0 >> w1;
+        int matId = -1;
+        stream >> matId;
+        m_lines.push_back(std::make_unique<Line>( m_vertices[id0] , m_vertices[id1] , w0 * 0.5f , w1 * 0.5f , matId ) );
     }
 }
 
