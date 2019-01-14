@@ -88,6 +88,7 @@ private:
     
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         sAssertMsg( false , MATERIAL , "This function shouldn't be called" );
+        return 0.0f;
     }
     float pdf( const Vector& wo , const Vector& wi ) const override{
         sAssertMsg( false , MATERIAL , "This function shouldn't be called" );

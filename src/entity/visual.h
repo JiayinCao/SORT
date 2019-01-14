@@ -18,12 +18,13 @@
 #pragma once
 
 #include "managers/meshmanager.h"
-#include "shape/shape.h"
+#include "shape/triangle.h"
+#include "shape/line.h"
 
-//! @brief Visual entity is the basic visible unit can be seen in SORT.
+//! @brief Visual is the container for a specific type of shape that can be seen in SORT.
 /**
- * VisualEntity could be a single shape, like sphere, triangle. It could also be a set of triangles,
- * triangle mesh. Basically, visual entity is the most fundamental unit in SORT that is visible.
+ * Visual could be a single shape, like sphere, triangle. It could also be a set of triangles,
+ * triangle mesh. Basically, visual is the most fundamental unit in SORT that is visible.
  */
 class Visual : public SerializableObject {
 public:
@@ -31,15 +32,22 @@ public:
     //!
     //! @param  scene       The scene to be filled.
     virtual void        FillScene( class Scene& scene ) = 0;
+
+    //! @brief  Some visual will apply transformation earlier for better performance.
+    //!
+    //! @param  transform   The transform of the visual to be applied.
+    virtual void        ApplyTransform( const Transform& transform ) = 0;
 };
 
-//! @brief Triangle Mesh entity.
+//! @brief Triangle Mesh Visual.
 /**
- * MeshEntity is the most common VisualEntity in a ray tracer. It is composited with a set of
- * triangles. Most of the objects in a scene uses this entity.
+ * MeshVisual is the most common Visual in a ray tracer. It is composited with a set of
+ * triangles. Most of the objects in a scene uses this visual.
  */
 class MeshVisual : public Visual{
 public:
+    DEFINE_RTTI( MeshVisual , Visual );
+
     //! @brief  Fill the scene with triangles.
     //!
     //! @param  scene       The scene to be filled.
@@ -47,14 +55,54 @@ public:
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
-    //! Serialize the entity. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //! Serialize the visual. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
     void        Serialize( IStreamBase& stream ) override;
 
+    //! @brief  Some visual will apply transformation earlier for better performance.
+    //!
+    //! @param  transform   The transform of the visual to be applied.
+    void        ApplyTransform( const Transform& transform ) override;
+
 public:
     /**< Memory for the mesh. */
-    std::unique_ptr<BufferMemory>           m_memory;
+    std::unique_ptr<BufferMemory>               m_memory;
     /**< This is to make sure the memory of triangles will be properly cleared. */
-    std::vector<std::unique_ptr<Shape>>    m_triangles;
+    std::vector<std::unique_ptr<Triangle>>      m_triangles;
+};
+
+//! LineSetVisual has a bunch of lines.
+/**
+ * Just like MeshVisual may have lots of triangles, LineSetVisual has loads of line shape in it.
+ * This visual is usually used to represent things like fur or hair.
+ */
+class LineSetVisual : public Visual{
+public:
+    DEFINE_RTTI( LineSetVisual , Visual );
+
+    //! @brief  Fill the scene with triangles.
+    //!
+    //! @param  scene       The scene to be filled.
+    void        FillScene( class Scene& scene ) override;
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the visual. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    void        Serialize( IStreamBase& stream ) override;
+
+    //! @brief  Some visual will apply transformation earlier for better performance.
+    //!
+    //! @param  transform   The transform of the visual to be applied.
+    void        ApplyTransform( const Transform& transform ) override;
+    
+private:
+    /**< Memory container holding the lines. */
+    std::vector<std::unique_ptr<Line>>  m_lines;
+    /**< Width at the first point of the lines. */
+    float       m_width0 = 0.0f;
+    /**< Width at the second point of the line. */
+    float       m_width1 = 0.0f;
 };

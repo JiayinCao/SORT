@@ -1,15 +1,15 @@
 #    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
 #    platform physically based renderer.
-# 
-#    Copyright (c) 2011-2018 by Cao Jiayin - All rights reserved.
-# 
+#
+#    Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
+#
 #    SORT is a free software written for educational purpose. Anyone can distribute
 #    or modify it under the the terms of the GNU General Public License Version 3 as
 #    published by the Free Software Foundation. However, there is NO warranty that
 #    all components are functional in a perfect manner. Without even the implied
 #    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 #    General Public License for more details.
-# 
+#
 #    You should have received a copy of the GNU General Public License along with
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
@@ -103,7 +103,7 @@ def export_blender(scene, force_debug=False):
 
     sort_config_file = sort_resource_path + 'scene.sort'
     fs = stream.FileStream( sort_config_file )
-    
+
     exporter_common.log("Exporting sort file %s" % sort_config_file)
 
     # export global material settings
@@ -131,7 +131,7 @@ def create_path(scene, force_debug):
     intermediate_dir = tempfile.mkdtemp(suffix='w')
     # get immediate directory
     output_dir = get_intermediate_dir(force_debug)
-    
+
     # create one if there is no such directory
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
@@ -244,81 +244,100 @@ def name_compat(name):
 
 def export_mesh(mesh, fs):
     LENFMT = struct.Struct('=i')
+    FLTFMT = struct.Struct('=f')
     VERTFMT = struct.Struct('=ffffffff')
+    LINEFMT = struct.Struct('=ffffff')
     TRIFMT = struct.Struct('=iiii')
 
     materials = mesh.materials[:]
     material_names = [m.name if m else None for m in materials]
 
-    mesh.calc_normals()
-    if not mesh.tessfaces and mesh.polygons:
-        mesh.calc_tessface()
-
-    has_uv = bool(mesh.tessface_uv_textures)
-
-    if has_uv:
-        active_uv_layer = mesh.tessface_uv_textures.active
-        if not active_uv_layer:
-            has_uv = False
-        else:
-            active_uv_layer = active_uv_layer.data
-
-    verts = mesh.vertices
-    wo3_verts = bytearray()
     verti = 0
-    wo3_indices = [{} for _ in range(len(verts))]
-    wo3_tris = bytearray()
     trii = 0
+    verts = mesh.vertices
 
-    uvcoord = (0.0, 0.0)
-    for i, f in enumerate(mesh.tessfaces):
-        smooth = f.use_smooth
-        if not smooth:
-            normal = f.normal[:]
+    if len(mesh.polygons) is 0 :
+        line_verts = bytearray()
+        for edge in mesh.edges:
+            v0 = verts[edge.vertices[0]].co
+            v1 = verts[edge.vertices[1]].co
+            line_verts += LINEFMT.pack(v0[0], v0[1], v0[2], v1[0], v1[1] , v1[2] )
+
+        fs.serialize( 'LineSetVisual' )
+        fs.serialize( FLTFMT.pack(0.05) )
+        fs.serialize( FLTFMT.pack(0.05) )
+        fs.serialize( LENFMT.pack( len(mesh.edges) ) )
+        fs.serialize( line_verts )
+    else:
+        # output the mesh information.
+        mesh.calc_normals()
+        if not mesh.tessfaces and mesh.polygons:
+            mesh.calc_tessface()
+
+        has_uv = bool(mesh.tessface_uv_textures)
 
         if has_uv:
-            uv = active_uv_layer[i]
-            uv = (uv.uv1, uv.uv2, uv.uv3, uv.uv4)
+            active_uv_layer = mesh.tessface_uv_textures.active
+            if not active_uv_layer:
+                has_uv = False
+            else:
+                active_uv_layer = active_uv_layer.data
 
-        oi = []
-        for j, vidx in enumerate(f.vertices):
-            v = verts[vidx]
+        wo3_verts = bytearray()
 
-            if smooth:
-                normal = v.normal[:]
+        wo3_indices = [{} for _ in range(len(verts))]
+        wo3_tris = bytearray()
+
+        uvcoord = (0.0, 0.0)
+        for i, f in enumerate(mesh.tessfaces):
+            smooth = f.use_smooth
+            if not smooth:
+                normal = f.normal[:]
 
             if has_uv:
-                uvcoord = (uv[j][0], uv[j][1])
+                uv = active_uv_layer[i]
+                uv = (uv.uv1, uv.uv2, uv.uv3, uv.uv4)
 
-            key = (normal, uvcoord)
-            out_idx = wo3_indices[vidx].get(key)
-            if out_idx is None:
-                out_idx = verti
-                wo3_indices[vidx][key] = out_idx
-                wo3_verts += VERTFMT.pack(v.co[0], v.co[1], v.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
-                verti += 1
+            oi = []
+            for j, vidx in enumerate(f.vertices):
+                v = verts[vidx]
 
-            oi.append(out_idx)
+                if smooth:
+                    normal = v.normal[:]
 
-        global matname_to_id
-        matid = -1
-        matname = name_compat(material_names[f.material_index]) if len( material_names ) > 0 else None
-        matid = matname_to_id[matname] if matname in matname_to_id else -1
-        if len(oi) == 3:
-            # triangle
-            wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
-            trii += 1
-        else:
-            # quad
-            wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
-            wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
-            trii += 2
+                if has_uv:
+                    uvcoord = (uv[j][0], uv[j][1])
 
-    fs.serialize(bool(has_uv))
-    fs.serialize(LENFMT.pack(verti))
-    fs.serialize(wo3_verts)
-    fs.serialize(LENFMT.pack(trii))
-    fs.serialize(wo3_tris)
+                key = (normal, uvcoord)
+                out_idx = wo3_indices[vidx].get(key)
+                if out_idx is None:
+                    out_idx = verti
+                    wo3_indices[vidx][key] = out_idx
+                    wo3_verts += VERTFMT.pack(v.co[0], v.co[1], v.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
+                    verti += 1
+
+                oi.append(out_idx)
+
+            global matname_to_id
+            matid = -1
+            matname = name_compat(material_names[f.material_index]) if len( material_names ) > 0 else None
+            matid = matname_to_id[matname] if matname in matname_to_id else -1
+            if len(oi) == 3:
+                # triangle
+                wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
+                trii += 1
+            else:
+                # quad
+                wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
+                wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
+                trii += 2
+
+        fs.serialize('MeshVisual')
+        fs.serialize(bool(has_uv))
+        fs.serialize(LENFMT.pack(verti))
+        fs.serialize(wo3_verts)
+        fs.serialize(LENFMT.pack(trii))
+        fs.serialize(wo3_tris)
 
     return (verti, trii)
 
