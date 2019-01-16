@@ -15,14 +15,13 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "meshmanager.h"
+#include "mesh.h"
 #include "entity/visual.h"
 #include "stream/stream.h"
 #include "managers/matmanager.h"
 #include "entity/entity.h"
 #include "stream/stream.h"
 
-// apply transform
 void BufferMemory::ApplyTransform( const Transform& transform ){
     for (MeshVertex& mv : m_vertices) {
         mv.m_position = transform(mv.m_position);
@@ -30,18 +29,17 @@ void BufferMemory::ApplyTransform( const Transform& transform ){
     }
 }
 
-// generate tangent for the triangle mesh
 void BufferMemory::GenSmoothTagent(){
 	// generate tangent for each triangle
     std::vector<std::vector<Vector>> tangent(m_vertices.size());
     for (auto mi : m_indices) {
-        auto t = _genTagentForTri(mi);
+        const auto t = genTagentForTri(mi);
 
         tangent[mi.m_id[0]].push_back(t);
         tangent[mi.m_id[1]].push_back(t);
         tangent[mi.m_id[2]].push_back(t);
     }
-    for (int i = 0; i < (int)m_vertices.size(); ++i) {
+    for (auto i = 0u; i < m_vertices.size(); ++i) {
         Vector t;
         for (auto v : tangent[i])
             t += v;
@@ -49,7 +47,6 @@ void BufferMemory::GenSmoothTagent(){
     }
 }
 
-// generate UV coordinate
 void BufferMemory::GenUV(){
     if (m_hasUV || m_vertices.empty())
         return;
@@ -67,8 +64,7 @@ void BufferMemory::GenUV(){
     }
 }
 
-// generate tangent vector for a triangle
-Vector BufferMemory::_genTagentForTri( const MeshIndex& mi ) const{
+Vector BufferMemory::genTagentForTri( const MeshFaceIndex& mi ) const{
     const auto& _v0 = m_vertices[mi.m_id[0]];
     const auto& _v1 = m_vertices[mi.m_id[1]];
     const auto& _v2 = m_vertices[mi.m_id[2]];
@@ -78,31 +74,28 @@ Vector BufferMemory::_genTagentForTri( const MeshIndex& mi ) const{
 	const auto& p1 = _v1.m_position ;
 	const auto& p2 = _v2.m_position ;
 
-	const float u0 = _v0.m_texCoord.x;
-	const float u1 = _v1.m_texCoord.x;
-	const float u2 = _v2.m_texCoord.x;
-	const float v0 = _v0.m_texCoord.y;
-	const float v1 = _v1.m_texCoord.y;
-	const float v2 = _v2.m_texCoord.y;
+	const auto u0 = _v0.m_texCoord.x;
+	const auto u1 = _v1.m_texCoord.x;
+	const auto u2 = _v2.m_texCoord.x;
+	const auto v0 = _v0.m_texCoord.y;
+	const auto v1 = _v1.m_texCoord.y;
+	const auto v2 = _v2.m_texCoord.y;
 
-	float du1 = u0 - u2;
-	float du2 = u1 - u2;
-	float dv1 = v0 - v2;
-	float dv2 = v1 - v2;
-	Vector dp1 = p0 - p2;
-	Vector dp2 = p1 - p2;
+	const auto du1 = u0 - u2;
+	const auto du2 = u1 - u2;
+	const auto dv1 = v0 - v2;
+	const auto dv2 = v1 - v2;
+	const auto dp1 = p0 - p2;
+	const auto dp2 = p1 - p2;
 
-	float determinant = du1 * dv2 - dv1 * du2 ;
+	const auto determinant = du1 * dv2 - dv1 * du2 ;
 	if( determinant == 0.0f ){
-		Vector n = Normalize( p0 - p1 );
+		const auto n = Normalize( p0 - p1 );
 		Vector t0 , t1;
 		CoordinateSystem( n , t0 , t1 );
 		return t0;
 	}
-
-	float invdet = 1.0f / determinant;
-	
-	return ( dv2 * dp1 - dv1 * dp2 ) * invdet;
+	return ( dv2 * dp1 - dv1 * dp2 ) / determinant;
 }
 
 // serialization interface for BufferMemory
@@ -116,7 +109,7 @@ void BufferMemory::Serialize( IStreamBase& stream ){
 
     stream >> ib_cnt;
     m_indices.resize(ib_cnt);
-    for (MeshIndex& mi : m_indices) {
+    for (auto& mi : m_indices) {
         stream >> mi.m_id[0] >> mi.m_id[1] >> mi.m_id[2];
         int mat_id = -1;
         stream >> mat_id;
