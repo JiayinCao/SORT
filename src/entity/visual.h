@@ -17,7 +17,8 @@
 
 #pragma once
 
-#include "managers/meshmanager.h"
+#include "core/rtti.h"
+#include "core/mesh.h"
 #include "shape/triangle.h"
 #include "shape/line.h"
 

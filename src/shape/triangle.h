@@ -29,7 +29,7 @@ public:
 	//!
 	//! @param mesh 		The triangle mesh it belongs to
 	//! @param index   		The index buffer
-    Triangle( const class MeshVisual* mesh , const struct MeshIndex& index ): m_meshVisual(mesh) , m_index(index) {}
+    Triangle( const class MeshVisual* mesh , const struct MeshFaceIndex& index ): m_meshVisual(mesh) , m_index(index) {}
 
 	//! @brief Sample a point on the surface of the shape given a shading point.
 	//!
@@ -95,6 +95,6 @@ public:
 	float 			SurfaceArea() const override;
 
 private:
-	const class MeshVisual*		m_meshVisual = nullptr;	    /**< Visual holding the vertex buffer. */
-	const struct MeshIndex&	    m_index;			        /**< Index buffer points to the index of this triangle. */
+	const class MeshVisual*			m_meshVisual = nullptr;	    /**< Visual holding the vertex buffer. */
+	const struct MeshFaceIndex&	    m_index;			        /**< Index buffer points to the index of this triangle. */
 };
