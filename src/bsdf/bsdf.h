@@ -20,14 +20,13 @@
 #include "core/define.h"
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
-#include "core/enum.h"
 #include "math/intersection.h"
+#include "bxdf.h"
 
 #define	MAX_BXDF_COUNT 8
 
 //! @brief BSDF implementation.
-class	Bsdf
-{
+class	Bsdf{
 public:
 	//! @brief Constructor taking intersection data.
     //! @param intersection     Intersection data of the point to be Evaluated.
@@ -72,8 +71,8 @@ public:
 	const Intersection* GetIntersection() const { return &intersect; }
 
 private:
-    const class Bxdf*	m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
-	unsigned m_bxdfCount = 0;                           /**< Number of Bxdf in the BSDF. */
+    const Bxdf*	        m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
+	unsigned            m_bxdfCount = 0;                /**< Number of Bxdf in the BSDF. */
 
     Vector nn;  /**< Normal at the point to be Evaluated. */
     Vector sn;  /**< Bi-tangent at the point to be evaluated. */

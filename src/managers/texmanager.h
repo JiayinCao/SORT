@@ -18,7 +18,6 @@
 #pragma once
 
 #include "core/singleton.h"
-#include "core/enum.h"
 #include <vector>
 #include <unordered_map>
 #include <memory>

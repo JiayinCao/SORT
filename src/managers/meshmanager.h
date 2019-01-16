@@ -22,7 +22,6 @@
 #include <unordered_map>
 #include <memory>
 #include "core/singleton.h"
-#include "core/enum.h"
 #include "core/define.h"
 #include "math/point.h"
 #include "math/vector3.h"
