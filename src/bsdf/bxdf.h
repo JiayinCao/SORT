@@ -18,8 +18,20 @@
 #pragma once
 
 #include "spectrum/spectrum.h"
-#include "core/enum.h"
 #include "math/vector3.h"
+
+//! @brief BXDF type.
+enum BXDF_TYPE{
+	BXDF_NONE = 0,
+	BXDF_DIFFUSE = 1,
+	BXDF_GLOSSY = 2,
+	BXDF_REFLECTION = 8,
+	BXDF_TRANSMISSION = 16,
+	BXDF_ALL_TYPES = BXDF_DIFFUSE | BXDF_GLOSSY ,
+	BXDF_ALL_REFLECTION = BXDF_ALL_TYPES | BXDF_REFLECTION ,
+	BXDF_ALL_TRANSMISSION = BXDF_ALL_TYPES | BXDF_TRANSMISSION ,
+	BXDF_ALL = BXDF_ALL_REFLECTION | BXDF_ALL_TRANSMISSION 
+};
 
 //! @brief Brdf or btdf.
 /**

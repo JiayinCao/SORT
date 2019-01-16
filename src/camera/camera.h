@@ -19,7 +19,6 @@
 
 #include "math/point.h"
 #include "math/ray.h"
-#include "core/enum.h"
 #include "spectrum/spectrum.h"
 #include "math/vector2.h"
 #include "math/matrix.h"
