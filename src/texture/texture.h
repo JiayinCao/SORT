@@ -19,7 +19,13 @@
 
 #include "core/define.h"
 #include "spectrum/spectrum.h"
-#include "core/enum.h"
+
+// texture filter
+enum TEXCOORDFILTER{
+	TCF_WARP = 0 ,
+	TCF_CLAMP ,
+	TCF_MIRROR
+};
 
 // WARNING : Code in this folder is easily several years old.
 // 			 It is just functional for now. Will re-implement everything later.
