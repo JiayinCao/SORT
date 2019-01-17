@@ -4,19 +4,31 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-SET( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )	
- 
-# Disable Profiling system by default	
+SET( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )
+
+# Disable Profiling system by default
 SET( SORT_ENABLE_PROFILER "NO" CACHE BOOL "Enable SORT profiling system. It is false by default." )
 SET( SORT_ENABLE_STATS "YES" CACHE BOOL "Enable SORT stats system. It is true by default." )
 
+# default build type is release
+set( DEFUALT_BULID_TYPE "Release")
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to '${DEFUALT_BULID_TYPE}' as none was specified.")
+  set(CMAKE_BUILD_TYPE "${DEFUALT_BULID_TYPE}" CACHE
+      STRING "Choose the type of build." FORCE)
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+    "Debug" "Release")
+endif()
+
 project (SORT)
 
-find_package(easy_profiler REQUIRED)	
- 
-include_directories( "${SORT_SOURCE_DIR}/src" ) 
+find_package(easy_profiler REQUIRED)
 
-# dependencies include	
+include_directories( "${SORT_SOURCE_DIR}/src" )
+
+# dependencies include
 include_directories( "${SORT_SOURCE_DIR}/dependencies/thirdparty/easy_profiler/include" )
 
 macro(source_group_by_dir source_files)
@@ -53,11 +65,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/bin")
 
 add_executable(SORT ${all_files})
 
-target_link_libraries(SORT easy_profiler)	
- 
-if (WIN32)	
-file(GLOB easy_profiler_bin "${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.dll" 	
- 							"${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.exe")	
+target_link_libraries(SORT easy_profiler)
+
+if (WIN32)
+file(GLOB easy_profiler_bin "${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.dll"
+ 							"${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.exe")
 file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 include(ProcessorCount)
@@ -71,7 +83,7 @@ if(SORT_ENABLE_STATS)
 	add_definitions(-DSORT_ENABLE_STATS_COLLECTION)
 endif(SORT_ENABLE_STATS)
 
-if(SORT_ENABLE_PROFILER)	
+if(SORT_ENABLE_PROFILER)
  	add_definitions(-DSORT_ENABLE_PROFILER)
     add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 endif(SORT_ENABLE_PROFILER)
