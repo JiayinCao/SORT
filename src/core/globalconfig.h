@@ -58,6 +58,17 @@ public:
 		return m_unitTestMode;
 	}
 
+	//! @brief	Whether profiling is enabled.
+	//!
+	//! Since profiling will have quite a lot impact in term of performance, it is
+	//! disabled by default. When enabled, it is usually for rendering with simple
+	//! setup and fewer spp.
+	//!
+	//! @return		Whether profiling is enabled.
+	bool			GetIsProfilingEnabled() const{
+		return m_profilingEnalbed;
+	}
+
 	//! @brief      Get the spatial accelerator structure.
     //!
     //! @return     The spatial acceleration structure. Could be 'nullptr', meaning a bruteforce workaround will be used.
@@ -155,12 +166,14 @@ public:
             if (key_str == "input") {
                 m_inputFile = value_str;
                 com_arg_valid = true;
-            }else if (key_str == "blendermode")
+            }else if (key_str == "blendermode"){
                 m_blenderMode = true;
-            else if (key_str == "unittest") {
+            }else if (key_str == "unittest") {
                 m_unitTestMode = true;
                 com_arg_valid = true;
-            }
+            }else if (key_str == "profiling"){
+				m_profilingEnalbed = value_str == "on";
+			}
         }
 
         return com_arg_valid;
@@ -212,6 +225,7 @@ private:
 	
 	bool				            m_blenderMode = false;			/**< Whether the current running instance is attached with Blender. */
 	bool							m_unitTestMode = false;			/**< Whether the current running instance is in unit test mode. */
+	bool							m_profilingEnalbed = false;		/**< Whether profiling is enabled in SORT. Since there is a big performance issue during rendering, it is turned off by default.*/
 	std::string						m_inputFile;					/**< Full path of the input file. */
 
 	//! @brief	Make constructor private
@@ -236,3 +250,4 @@ private:
 #define	g_unitTestMode				GlobalConfiguration::GetSingleton().GetIsUnitTestMode()
 #define g_inputFilePath				GlobalConfiguration::GetSingleton().GetInputFilePath()
 #define g_imageSensor				GlobalConfiguration::GetSingleton().GetImageSensor()
+#define g_profilingEnabled			GlobalConfiguration::GetSingleton().GetIsProfilingEnabled()

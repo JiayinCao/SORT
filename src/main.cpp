@@ -35,14 +35,6 @@ int main(int argc, char** argv)
     addLogDispatcher(std::make_unique<StdOutLogDispatcher>());
     addLogDispatcher(std::make_unique<FileLogDispatcher>("log.txt"));
 
-    slog(INFO, GENERAL, "Number of CPU cores %d", std::thread::hardware_concurrency());
-#ifdef SORT_ENABLE_STATS_COLLECTION
-    slog(INFO, GENERAL, "Stats collection is enabled.");
-#else
-    slog(INFO, GENERAL, "Stats collection is disabled.");
-#endif
-    slog(INFO, GENERAL, "Profiling system is %s.", SORT_PROFILE_ISENABLED ? "enabled" : "disabled");
-
     const auto valid_args = RunSORT(argc, argv);
 
     // Flush main thread data

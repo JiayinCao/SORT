@@ -26,6 +26,7 @@ this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 #ifdef SORT_ENABLE_PROFILER
 
 #define SORT_PROFILE_ENABLE         EASY_PROFILER_ENABLE
+#define SORT_PROFILE_DISABLE        EASY_PROFILER_DISABLE
 #define SORT_PROFILE_ISENABLED      ::profiler::isEnabled()
 #define SORT_PROFILE(e)             EASY_BLOCK(e)
 #define SORT_PROFILE_END            EASY_END_BLOCK
@@ -34,6 +35,7 @@ this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 #else
 
 #define SORT_PROFILE_ENABLE
+#define SORT_PROFILE_DISABLE
 #define SORT_PROFILE_ISENABLED      false
 #define SORT_PROFILE(e)
 #define SORT_PROFILE_END
