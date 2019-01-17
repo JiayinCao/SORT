@@ -245,6 +245,8 @@ class SORT_RENDERER(bpy.types.RenderEngine):
         self.cmd_argument = [binary_path];
         self.cmd_argument.append( '--input:' + intermediate_dir + 'scene.sort')
         self.cmd_argument.append( '--blendermode' )
+        if scene.profilingEnabled is True:
+            self.cmd_argument.append( '--profiling:on' )
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 
         # wait for the process to finish

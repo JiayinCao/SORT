@@ -88,8 +88,24 @@ bool	RunSORT( int argc , char** argv ){
         slog(INFO, GENERAL, "  --input:<filename>   Specify the sort input file.");
         slog(INFO, GENERAL, "  --blendermode        SORT is triggered from Blender.");
         slog(INFO, GENERAL, "  --unitest            Run unit tests.");
+		slog(INFO, GENERAL, "  --profiling:<on|off> Toggling profiling option, false by default.");
         return false;
-    }
+    }else{
+		slog(INFO, GENERAL, "Number of CPU cores %d", std::thread::hardware_concurrency());
+		#ifdef SORT_ENABLE_STATS_COLLECTION
+			if( g_profilingEnabled )
+				slog(INFO, GENERAL, "Stats collection is enabled.");
+			else
+				slog(INFO, GENERAL, "Stats collection is disabled.");
+		#else
+			slog(INFO, GENERAL, "Stats collection is disabled.");
+		#endif
+			slog(INFO, GENERAL, "Profiling system is %s.", SORT_PROFILE_ISENABLED ? "enabled" : "disabled");
+	}
+
+	// Disable profiling if necessary
+	if( !g_profilingEnabled )
+		SORT_PROFILE_DISABLE;
 	
 	// Run in unit test mode if required.
     if( g_unitTestMode ){

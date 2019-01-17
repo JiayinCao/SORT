@@ -492,7 +492,7 @@ class SORTNodeDecodeNormal(SORTShadingNode):
 class SORTNodeGrid(SORTShadingNode):
     bl_label = 'Grid'
     bl_idname = 'SORTNodeGrid'
-    sort_bxdf_type = 'SORTNodeGrid'
+    sort_bxdf_type = 'GridTexNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
 
