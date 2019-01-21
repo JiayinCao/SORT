@@ -80,9 +80,9 @@ void BlenderImage::PostProcess(){
 	// perform a copy from render target to shared memory
 	float* data = (float*)(m_sharedMemory.sharedmemory.bytes + m_header_offset + m_header_offset * g_tileSize * g_tileSize * 4 * sizeof(float));
 
-	int offset = 0;
-	for (int i = 0; i < (int)m_rendertarget.GetHeight(); ++i)
-		for (int j = 0; j < (int)m_rendertarget.GetWidth(); ++j){
+	auto offset = 0;
+	for (auto i = 0; i < m_rendertarget.GetHeight(); ++i)
+		for (auto j = 0; j < m_rendertarget.GetWidth(); ++j){
 			const Spectrum& c = m_rendertarget.GetColor(j, m_rendertarget.GetHeight() - i - 1);
 			data[offset++] = c.GetR();
 			data[offset++] = c.GetG();

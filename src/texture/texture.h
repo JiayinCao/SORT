@@ -31,20 +31,15 @@ enum TEXCOORDFILTER{
 // 			 It is just functional for now. Will re-implement everything later.
 //		 	 Priority is very low.
 
-// pre-declare class
-class Intersection;
-
 //////////////////////////////////////////////////////////////
 // definition of class Texture
-class Texture
-{
+class Texture{
 public:
 	// default constructor
-	Texture();
-	Texture( int w , int h ) : m_iTexWidth(w) , m_iTexHeight(h) , m_TexCoordFilter(TCF_WARP) {
-	}
-	// destructor
-	virtual ~Texture();
+	Texture():m_iTexWidth(0) , m_iTexHeight(0) , m_TexCoordFilter(TCF_WARP) {}
+	Texture( int w , int h ) : m_iTexWidth(w) , m_iTexHeight(h) , m_TexCoordFilter(TCF_WARP) {}
+	//! @brief	Empty virtual destructor.
+	virtual ~Texture() = default;
 
 	// output the texture
 	// para 'str' :	the name of the output entity
@@ -63,16 +58,16 @@ public:
 	// get the texture value
 	// para 'intersect' : the intersection
 	// result :	the spectrum value
-	virtual Spectrum Evaluate( const Intersection* intersect ) const;
+	virtual Spectrum Evaluate( const class Intersection* intersect ) const;
 
 	// set texture coordinate filter mode
 	void	SetTexCoordFilter( TEXCOORDFILTER mode );
 
 	// get the size of the texture
-	unsigned	GetWidth() const{
+	int	GetWidth() const{
 		return m_iTexWidth;
 	}
-	unsigned	GetHeight() const{
+	int	GetHeight() const{
 		return m_iTexHeight;
 	}
 	// whether the texture is valid
@@ -83,15 +78,12 @@ public:
 protected:
 	// the size of the texture
 	// default values are zero
-	unsigned	m_iTexWidth;
-	unsigned	m_iTexHeight;
+	int	m_iTexWidth = 0;
+	int	m_iTexHeight = 0;
 
 	// texture coordinate filter mode
 	// default value is warp
-	TEXCOORDFILTER	m_TexCoordFilter;
-
-	// initialize default value for texture
-	void _init();
+	TEXCOORDFILTER	m_TexCoordFilter = TCF_WARP;
 
 	// do texture filter
 	void _texCoordFilter( int& u , int&v ) const;

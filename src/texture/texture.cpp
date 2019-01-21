@@ -15,55 +15,52 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "texture.h"
+#include <regex>
 #include <math.h>
-#include "managers/texmanager.h"
+#include "texture.h"
+#include "core/sassert.h"
 #include "math/intersection.h"
+#include "thirdparty/tiny_exr/tinyexr.h"
+#include "thirdparty/stb_image/stb_image.h"
 
-// default constructor
-Texture::Texture()
-{
-	// inintialize default value
-	_init();
+bool Texture::Output( const std::string& name ){	
+	std::regex exr_reg(".*\\.exr$", std::regex_constants::icase);
+    if (std::regex_match(name, exr_reg)) {
+        const auto totalXRes = GetWidth();
+        const auto totalYRes = GetHeight();
+        const auto total = totalXRes * totalYRes;
+        const auto data = std::make_unique<float[]>(total * 3);
+        for (auto i = 0; i < total; ++i)
+        {
+            auto x = i % totalXRes;
+            auto y = i / totalXRes;
+            Spectrum c = GetColor(x, y);
+
+            data[3 * i] = c.GetR();
+            data[3 * i + 1] = c.GetG();
+            data[3 * i + 2] = c.GetB();
+        }
+
+        int ret = SaveEXR(data.get(), GetWidth(), GetHeight(), 3, true, name.c_str());
+        if (ret < 0)
+            slog(WARNING, MATERIAL, "Fail to save image file %s", name.c_str());
+        return ret >= 0;
+    }
+    
+    sAssertMsg( false , IMAGE , "SORT doesn't support exporting file %s",name.c_str());
+    
+    return false;
 }
 
-// destructor
-Texture::~Texture()
-{
-	m_iTexWidth = 0;
-	m_iTexHeight = 0;
-}
-
-// initialize default value
-void Texture::_init()
-{
-	m_iTexWidth = 0;
-	m_iTexHeight = 0;
-	m_TexCoordFilter = TCF_WARP;
-}
-
-// output the texture
-bool Texture::Output( const std::string& str )
-{	
-	// output the texture
-	return TexManager::GetSingleton().Write( str , this );
-}
-
-// get the color
-Spectrum Texture::Evaluate( const Intersection* intersect ) const
-{
+Spectrum Texture::Evaluate( const Intersection* intersect ) const{
 	return GetColor( (int) (intersect->u *  m_iTexWidth) , (int) (intersect->v * m_iTexHeight) );
 }
 
-// set texture coordinate filter mode
-void Texture::SetTexCoordFilter( TEXCOORDFILTER mode )
-{
+void Texture::SetTexCoordFilter( TEXCOORDFILTER mode ){
 	m_TexCoordFilter = mode;
 }
 
-// do texture coordinate filter
-void Texture::_texCoordFilter( int& x , int& y ) const
-{
+void Texture::_texCoordFilter( int& x , int& y ) const{
 	switch( m_TexCoordFilter )
 	{
 	case TCF_WARP:
@@ -95,7 +92,6 @@ void Texture::_texCoordFilter( int& x , int& y ) const
 	}
 }
 
-// get color from uv coordinate
 Spectrum Texture::GetColorFromUV( float u , float v ) const{
     int w = (int) (u * m_iTexWidth );
     int h = (int) (v * m_iTexHeight );

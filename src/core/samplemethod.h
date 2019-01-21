@@ -248,14 +248,14 @@ public:
 	{_init( data , nu , nv );}
 	Distribution2D( const Texture* tex )
 	{
-		unsigned nu = tex->GetWidth();
-		unsigned nv = tex->GetHeight();
+		auto nu = tex->GetWidth();
+		auto nv = tex->GetHeight();
 		sAssert( nu != 0 && nv != 0 , GENERAL );
         std::unique_ptr<float[]> data = std::make_unique<float[]>(nu*nv);
-		for( unsigned i = 0 ; i < nv ; i++ )
+		for( auto i = 0 ; i < nv ; i++ )
 		{
-			unsigned offset = i * nu;
-			for( unsigned j = 0 ; j < nu ; j++ )
+			auto offset = i * nu;
+			for( auto j = 0 ; j < nu ; j++ )
 				data[offset+j] = tex->GetColor( j , i ).GetIntensity();
 		}
 		_init( data.get() , nu , nv );

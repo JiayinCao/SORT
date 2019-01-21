@@ -26,6 +26,5 @@ void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , cons
 // post process
 void RenderTargetImage::PostProcess(){
 	ImageSensor::PostProcess();
-
-    m_rendertarget.Output(g_outputFileName);
+    m_rendertarget.Output(GetFilePathInExeFolder(g_outputFileName));
 }
