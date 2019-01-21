@@ -42,13 +42,13 @@ Spectrum Sky::GetAverage() const
 // generate 2d distribution
 void Sky::_generateDistribution2D()
 {
-	unsigned nu = m_sky.GetWidth();
-	unsigned nv = m_sky.GetHeight();
+	auto nu = m_sky.GetWidth();
+	auto nv = m_sky.GetHeight();
 	sAssert( nu != 0 && nv != 0 , LIGHT );
 	auto data = std::make_unique<float[]>(nu*nv);
-	for( unsigned i = 0 ; i < nv ; i++ )
+	for( auto i = 0 ; i < nv ; i++ )
 	{
-		unsigned offset = i * nu;
+		auto offset = i * nu;
 		float sin_theta = sin( (float)i / (float)nv * PI );
 
 		for( unsigned j = 0 ; j < nu ; j++ )

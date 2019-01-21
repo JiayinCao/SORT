@@ -18,7 +18,6 @@
 #pragma once
 
 #include "texture.h"
-#include "managers/texmanager.h"
 
 ///////////////////////////////////////////////////////////////
 // definition of image texture
@@ -43,8 +42,13 @@ public:
 	Spectrum GetAverage() const;
 
 private:
+	class ImgMemory{
+	public:
+		std::unique_ptr<Spectrum[]>	m_ImgMem;
+	};
+
 	// array saving the color of image
-    std::shared_ptr<ImgMemory>	m_pMemory = nullptr;
+    std::unique_ptr<ImgMemory>	m_pMemory = nullptr;
 
 	// the average radiance of the texture
 	Spectrum	m_Average;
@@ -54,7 +58,4 @@ private:
 
 	// compute average radiance
 	void	_average();
-
-	// set texture manager as a friend
-	friend class TexManager;
 };
