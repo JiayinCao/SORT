@@ -59,7 +59,7 @@ public:
 
     //! @brief Build the acceleration structure.
     //!
-    //! @oaram  The rendering scene.
+    //! @param  scene       The rendering scene.
 	virtual void Build( const Scene& scene ) = 0;
 
 	//! @brief Get the bounding box of the primitive set.

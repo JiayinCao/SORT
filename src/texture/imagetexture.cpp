@@ -55,7 +55,7 @@ bool ImageTexture::LoadImageFromFile( const std::string& str ){
         if (ret >= 0) {
             const auto total = m_iTexWidth * m_iTexHeight;
             m_pMemory->m_ImgMem = std::make_unique<Spectrum[]>(total);
-            for (auto i = 0u; i < total; i++)
+            for (auto i = 0; i < total; i++)
                 m_pMemory->m_ImgMem[i] = Spectrum(out[4 * i], out[4 * i + 1], out[4 * i + 2]);
 
             delete[] out;
@@ -106,14 +106,14 @@ void ImageTexture::_average(){
 		return;
 
 	Spectrum average;
-	for( unsigned i = 0 ; i < m_iTexHeight ; ++i )
-		for( unsigned j = 0 ; j < m_iTexWidth ; ++j )
-		{
-			// get the offset
-			int offset = i * m_iTexWidth + j;
-			// get the color
-			average += m_pMemory->m_ImgMem[ offset ];
-		}
+    for (auto i = 0; i < m_iTexHeight; ++i) {
+        for (auto j = 0; j < m_iTexWidth; ++j) {
+            // get the offset
+            int offset = i * m_iTexWidth + j;
+            // get the color
+            average += m_pMemory->m_ImgMem[offset];
+        }
+    }
 
 	m_Average = average / (float)( m_iTexWidth * m_iTexHeight );
 }
