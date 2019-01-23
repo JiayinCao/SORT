@@ -52,7 +52,7 @@ private:
 	const Scene& m_scene;
 };
 
-//! @brief	Base interface for ligths.
+//! @brief	Base interface for lights.
 class	Light{
 public:
     //! @brief 	Empty virtual destructor.

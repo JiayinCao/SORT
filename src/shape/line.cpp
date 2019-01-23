@@ -21,10 +21,10 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	// Transform the ray from world space to local space.
 	const auto ray = m_transform.invMatrix( r );
 
-	// Calculating the intersection between the ray and the plane, whose normal is perpidencular to 
+	// Calculating the intersection between the ray and the plane, whose normal is perpendicular to 
 	// both of the line and the ray forward direction.
 	const auto v0 = m_p1 - m_p0;					// Vector pointing along the line.
-	const auto v1 = Cross( ray.m_Dir , v0 );		// Vector that is perpidencular to both v0 and ray forward direction.
+	const auto v1 = Cross( ray.m_Dir , v0 );		// Vector that is perpendicular to both v0 and ray forward direction.
 
 	// This could happen if the ray forward direction is the same with the line direction.
 	if( v1.SquaredLength() <= 0.0f )
