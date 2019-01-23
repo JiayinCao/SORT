@@ -49,7 +49,7 @@ public:
     //! Fill the scene with the light.
     //!
     //! @param  scene       The scene to be filled.
-    void   FillScene(class Scene& scene) override;
+    void    FillScene(class Scene& scene) override;
 
 protected:
     std::unique_ptr<PointLight>  m_light = std::make_unique<PointLight>();    /**< Light in the entity. */
@@ -72,7 +72,7 @@ public:
     //! Fill the scene with the light.
     //!
     //! @param  scene       The scene to be filled.
-    void   FillScene(class Scene& scene) override;
+    void    FillScene(class Scene& scene) override;
 
 protected:
     std::unique_ptr<SpotLight>  m_light = std::make_unique<SpotLight>();    /**< Light in the entity. */
@@ -95,7 +95,7 @@ public:
     //! Fill the scene with a point light.
     //!
     //! @param  scene       The scene to be filled.
-    void   FillScene(class Scene& scene) override;
+    void    FillScene(class Scene& scene) override;
 
 protected:
     std::unique_ptr<DistantLight>  m_light = std::make_unique<DistantLight>();    /**< Light in the entity. */
@@ -118,7 +118,7 @@ public:
     //! Base entity has nothing in it, which pops nothing in the world.
     //!
     //! @param  scene       The scene to be filled.
-    void   FillScene(class Scene& scene) override;
+    void    FillScene(class Scene& scene) override;
 
 protected:
     std::unique_ptr<AreaLight>  m_light = std::make_unique<AreaLight>();    /**< Light in the entity. */
@@ -141,7 +141,7 @@ public:
     //! Fill the scene with a point light.
     //!
     //! @param  scene       The scene to be filled.
-    void   FillScene(class Scene& scene) override;
+    void    FillScene(class Scene& scene) override;
 
 protected:
     std::unique_ptr<SkyLight>  m_light = std::make_unique<SkyLight>();    /**< Light in the entity. */

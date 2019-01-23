@@ -40,7 +40,7 @@ public:
     AshikhmanShirley(const Spectrum& diffuse, const float specular, const float roughnessU, const float roughnessV, const Spectrum& weight, const Vector& n , bool doubleSided = false)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), distribution(roughnessU, roughnessV) {}
 	
-    //! Evaluate the BRDF
+    //! Evaluate the BRDF.
     //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
