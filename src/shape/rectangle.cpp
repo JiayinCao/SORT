@@ -72,7 +72,7 @@ bool Rectangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	if( t > limit || t <= ray.m_fMin || t > ray.m_fMax )
 		return false;
 
-	const auto p = r(t);
+	const auto p = ray(t);
     const auto halfx = sizeX * 0.5f;
     const auto halfy = sizeY * 0.5f;
 	if( p.x > halfx || p.x < -halfx )
