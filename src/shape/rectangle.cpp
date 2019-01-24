@@ -84,6 +84,7 @@ bool Rectangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
 		intersect->t = t;
 		intersect->intersect = m_transform( p );
 		intersect->normal = m_transform.invMatrix.Transpose()(DIR_UP);
+		intersect->gnormal = intersect->normal;
 		intersect->tangent = m_transform(Vector( 0.0f , 0.0f , 1.0f ));
 	}
 
