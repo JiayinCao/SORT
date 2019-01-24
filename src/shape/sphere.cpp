@@ -99,6 +99,7 @@ bool Sphere::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 		CoordinateSystem( n , v0 , v1 );
 		intersect->intersect = m_transform(p);
 		intersect->normal = m_transform.invMatrix.Transpose()(n);
+		intersect->gnormal = intersect->normal;
 		intersect->tangent = m_transform(v0);
 	}
 

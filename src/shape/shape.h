@@ -73,15 +73,17 @@ public:
 	//! @param wi		Direction of the ray.
 	//! @return			PDF w.r.t the solid angle of picking this sample point on the surface of the shape.
 	virtual float 	Pdf( const Point& p , const Vector& wi ) const{
-		Point lp = m_transform.invMatrix( p );
-		Vector lwi = m_transform.invMatrix( wi );
+		const auto lp = m_transform.invMatrix( p );
+		const auto lwi = m_transform.invMatrix( wi );
 
 		Intersection inter;
 		if( !GetIntersect( Ray( lp , lwi ) , &inter ) )
 			return 0.0f;
 
-		Vector delta = inter.intersect - p;
-		float dot = AbsDot( Normalize(delta) , inter.normal );
+		const auto delta = p - inter.intersect;
+		const auto dot = SatDot( Normalize(delta) , inter.normal );
+		if( dot <= 0.0f )
+			return 0.0f;
 		return delta.SquaredLength() / ( SurfaceArea() * dot );
 	}
 
