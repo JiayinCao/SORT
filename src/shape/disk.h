@@ -82,6 +82,13 @@ public:
 	//! @return		Surface area of the shape.
 	float 			SurfaceArea() const override;
 
+	//! @brief		Set the radius of the disk.
+	//!
+	//! @param	r	Radius to be set for the disk.
+	void			SetRadius( float r ){
+		radius = r;
+	}
+
 private:
 	float radius = 1.0f;	/**< The radius of the disk. */
 };
