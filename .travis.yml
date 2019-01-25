@@ -38,11 +38,11 @@ matrix:
             export CMAKE_GENERATOR="Visual Studio 15 2017";
           fi
       script:
-       - mkdir dependencies
-       - wget http://45.63.123.194/sort_dependencies/win/easy_profiler.zip -O easy_profiler.zip
-       - 7z x easy_profiler.zip -o./dependencies
-       - mkdir proj_release && cd proj_release
-       - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_GENERATOR_PLATFORM=x64 -G "${CMAKE_GENERATOR}" .. && MSBuild.exe SORT.sln /property:Configuration=Release
-       - cd .. && mkdir proj_debug && cd proj_debug
-       - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_GENERATOR_PLATFORM=x64 -G "${CMAKE_GENERATOR}" .. && MSBuild.exe SORT.sln /property:Configuration=Debug
-       - cd .. && cd bin && sort_r.exe --unittest
+        - mkdir dependencies
+        - wget http://45.63.123.194/sort_dependencies/win/easy_profiler.zip -O easy_profiler.zip
+        - 7z x easy_profiler.zip -o./dependencies
+        - mkdir proj_release && cd proj_release
+        - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_GENERATOR_PLATFORM=x64 -G "${CMAKE_GENERATOR}" .. && MSBuild.exe SORT.sln /property:Configuration=Release -maxcpucount
+        - cd .. && mkdir proj_debug && cd proj_debug
+        - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_GENERATOR_PLATFORM=x64 -G "${CMAKE_GENERATOR}" .. && MSBuild.exe SORT.sln /property:Configuration=Debug -maxcpucount
+        - cd ../bin && ./sort_r.exe --unittest
