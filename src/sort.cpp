@@ -80,7 +80,7 @@ void SchedulTasks( Scene& scene , IStreamBase& stream ){
 	}
 }
 
-bool	RunSORT( int argc , char** argv ){
+int	RunSORT( int argc , char** argv ){
 	// Parse command line arguments.
     bool valid_args = GlobalConfiguration::GetSingleton().ParseCommandLine( argc , argv );
     if (!valid_args) {
@@ -89,7 +89,7 @@ bool	RunSORT( int argc , char** argv ){
         slog(INFO, GENERAL, "  --blendermode        SORT is triggered from Blender.");
         slog(INFO, GENERAL, "  --unitest            Run unit tests.");
 		slog(INFO, GENERAL, "  --profiling:<on|off> Toggling profiling option, false by default.");
-        return false;
+        return -1;
     }else{
 		slog(INFO, GENERAL, "Number of CPU cores %d", std::thread::hardware_concurrency());
 		#ifdef SORT_ENABLE_STATS_COLLECTION
@@ -112,7 +112,7 @@ bool	RunSORT( int argc , char** argv ){
         ::testing::InitGoogleTest(&argc, argv);
         auto ret = RUN_ALL_TESTS();
 		slog( INFO , GENERAL , ( ret ? "There are broken tests." : "All tests are passed." ) ) ;
-		return false;
+		return ret;
     }
 
 	// Load the global configuration from stream
@@ -145,5 +145,5 @@ bool	RunSORT( int argc , char** argv ){
     // Post process for image sensor
     g_imageSensor->PostProcess();
 
-    return true;
+    return 0;
 }
