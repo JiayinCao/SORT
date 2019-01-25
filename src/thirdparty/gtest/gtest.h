@@ -51,6 +51,9 @@
 #ifndef GTEST_INCLUDE_GTEST_GTEST_H_
 #define GTEST_INCLUDE_GTEST_GTEST_H_
 
+// Somehow this warning will be triggered on travis windows platform
+#pragma warning( disable : 4996 )
+
 #include <limits>
 #include <ostream>
 #include <vector>
