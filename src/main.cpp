@@ -35,23 +35,23 @@ int main(int argc, char** argv)
     addLogDispatcher(std::make_unique<StdOutLogDispatcher>());
     addLogDispatcher(std::make_unique<FileLogDispatcher>("log.txt"));
 
-    const auto valid_args = RunSORT(argc, argv);
+    const auto ret = RunSORT(argc, argv);
 
     // Flush main thread data
     SortStatsFlushData(true);
     // Output stats data
-    if(valid_args)
+    if(ret == 0 && !g_unitTestMode)
         SortStatsPrintData();
 
     SORT_PROFILE_END; // Main Thread
 
     // dump profile data
-    if (SORT_PROFILE_ISENABLED && valid_args){
+    if (SORT_PROFILE_ISENABLED && ret == 0 ){
         const std::string filename("sort.prof");
         SORT_PROFILE_DUMP(filename.c_str());
         slog(INFO, GENERAL, "Profiling file: \"%s\"", GetFilePathInExeFolder(filename).c_str());
     }
     slog(INFO, GENERAL, "Log file: \"%s\"", GetFilePathInExeFolder("log.txt").c_str());
 
-	return 0;
+	return ret;
 }
