@@ -43,10 +43,11 @@ void sortLog( LOG_LEVEL level , LOG_TYPE type , const std::string& str , const c
 }
 
 void LogDispatcher::Dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line ){
-    auto s = format(level, type, str, file, line);
+    const auto header = formatHead( level , type , file , line );
+    const auto info = std::string( str );
     static std::mutex mutex;
     std::lock_guard<std::mutex> lock(mutex);
-    output(s);
+    output(level,header,info);
 }
 
 const std::string logTimeString(){
@@ -73,6 +74,15 @@ const std::string levelToString( LOG_LEVEL level ){
     ( LOG_LEVEL::LOG_WARNING == level ) ? "[Warning]" :
     ( LOG_LEVEL::LOG_ERROR == level ) ? "[Error]" :
     ( LOG_LEVEL::LOG_CRITICAL == level ) ? "[Critical]" : "";
+}
+
+const std::string levelToHeaderColorCode( LOG_LEVEL level ){
+    return !g_logLevel ? "\033[39m" :
+    ( LOG_LEVEL::LOG_DEBUG == level ) ? "\033[33m" :
+    ( LOG_LEVEL::LOG_INFO == level ) ? "\033[32m" :
+    ( LOG_LEVEL::LOG_WARNING == level ) ? "\033[31m" :
+    ( LOG_LEVEL::LOG_ERROR == level ) ? "\033[35m" :
+    ( LOG_LEVEL::LOG_CRITICAL == level ) ? "\033[35m" : "\033[39m";
 }
 
 const std::string typeToString( LOG_TYPE type ){
@@ -106,8 +116,10 @@ const std::string LogDispatcher::format( LOG_LEVEL level , LOG_TYPE type , const
     return formatHead( level , type , file , line ) + std::string(str);
 }
 
-void StdOutLogDispatcher::output( const std::string& s ){
-    std::cout<<s<<std::endl;
+void StdOutLogDispatcher::output( const LOG_LEVEL level , const std::string& header , const std::string& info ){
+    const auto color_code = levelToHeaderColorCode( level );
+    static const auto default_color_code = 39;
+    std::cout<<color_code<<header<<"\033[39m"<<" "<<info<<std::endl;
 }
 
 FileLogDispatcher::FileLogDispatcher( const std::string& filename ){
@@ -118,8 +130,8 @@ FileLogDispatcher::~FileLogDispatcher(){
     m_file.close();
 }
 
-void FileLogDispatcher::output( const std::string& s ){
+void FileLogDispatcher::output( const LOG_LEVEL level , const std::string& header , const std::string& info ){
     if( !m_file.is_open() )
         return;
-    m_file<<s<<std::endl;
+    m_file<<header<<" "<<info<<std::endl;
 }

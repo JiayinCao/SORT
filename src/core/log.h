@@ -72,8 +72,10 @@ public:
 private:
     //! @brief  Output the log message.
     //!
-    //! @oaram  s           The message to be output.
-    virtual void output( const std::string& s ) = 0;
+    //! @param  level       Level of the log.
+    //! @param  header      Header of the message.
+    //! @oaram  info        The message to be output.
+    virtual void output( const LOG_LEVEL level , const std::string& header , const std::string& info ) = 0;
 
     //! @brief  Format the message.
     //!
@@ -109,16 +111,20 @@ private:
     
     //! @brief  Output the log message to the file.
     //!
-    //! @oaram  s           The message to be output.
-    void output( const std::string& s ) override;
+    //! @param  level       Level of the log.
+    //! @param  header      Header of the message.
+    //! @oaram  info        The message to be output.
+    void output( const LOG_LEVEL level , const std::string& header , const std::string& info ) override ;
 };
 
 //! @brief   StdOutLogDispatcher outputs the message to std output.
 class StdOutLogDispatcher : public LogDispatcher {
     //! @brief  Output the log message to the std-out.
     //!
-    //! @oaram  s           The message to be output.
-    void output( const std::string& s ) override ;
+    //! @param  level       Level of the log.
+    //! @param  header      Header of the message.
+    //! @oaram  info        The message to be output.
+    void output( const LOG_LEVEL level , const std::string& header , const std::string& info ) override ;
 };
 
 //! @brief  Format the message.
