@@ -100,7 +100,7 @@ def getMeshList( scene ):
 
 def log(s):
     header = '[' + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '][SORT Plugin] '
-    print( header + s)
+    print( "\033[32m" + header + "\033[39m" + '\t' + s )
 
 def logD(s):
     if scene.detailedLog is False:
