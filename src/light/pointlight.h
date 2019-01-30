@@ -63,14 +63,14 @@ public:
 		return 4 * PI * intensity;
 	}
 
-	//! @brief	The pdf w.r.t solid angle to pick the point 'p' and direction 'dir'.
+	//! @brief	The pdf w.r.t solid angle if the ray starting from 'p', tracing through 'wi' hits the light source.'
 	//!
 	//! Instead of checking whether p and wi is valid, it always returns 1.0. It is higher level code's responsibility to
 	//! make sure nothing wrong happens.
 	//!
-	//! @param	p		The point picked at the light source.
-	//! @param	wi		The out-going direction of the light.
-	//! @return			The pdf w.r.t solid angle if picking such a point and ray with the light source.
+	//! @param	p		The point in world space to be shaded.
+	//! @param	wi		The direction pointing from the point.
+	//! @return			The pdf w.r.t solid angle if the ray starting from 'p', tracing through 'wi' hits the light source.
 	float Pdf( const Point& p , const Vector& wi ) const override {
 		return 1.0f;
 	}
