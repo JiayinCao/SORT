@@ -22,6 +22,3 @@
 // evaluate direct lighting
 Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const class Light* light , const class Intersection& ip , 
 							const LightSample& ls ,	const BsdfSample& bs , BXDF_TYPE type = BXDF_ALL );
-
-// multiple importance sampling factors
-float		MisFactor( int nf, float fPdf, int ng, float gPdf );

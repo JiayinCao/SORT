@@ -55,7 +55,7 @@ void Rectangle::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pd
 	n = m_transform.invMatrix.Transpose()( DIR_UP );
 
 	if( pdf ) 
-		*pdf = 1.0f / ( SurfaceArea() * TWO_PI );
+		*pdf = UniformHemispherePdf() / SurfaceArea();
 }
 
 float Rectangle::SurfaceArea() const{
@@ -82,7 +82,7 @@ bool Rectangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
 
 	if( intersect ){
 		intersect->t = t;
-		intersect->intersect = m_transform( p );
+		intersect->intersect = r(t);
 		intersect->normal = m_transform.invMatrix.Transpose()(DIR_UP);
 		intersect->gnormal = intersect->normal;
 		intersect->tangent = m_transform(Vector( 0.0f , 0.0f , 1.0f ));

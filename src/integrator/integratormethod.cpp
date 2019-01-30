@@ -23,50 +23,47 @@
 #include "material/material.h"
 #include "light/light.h"
 
-// evaluate direct lighting
+inline float MisFactor( float f, float g ){
+    return (f*f) / (f*f + g*g);
+}
+
 Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip , 
-							const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type )
-{
+							const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type ){
 	// get bsdf
-	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
+	const auto bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
 
 	Spectrum radiance;
 	Visibility visibility(scene);
 	float light_pdf;
 	float bsdf_pdf;
-	Vector wo = -r.m_Dir;
+	const auto wo = -r.m_Dir;
 	Vector wi;
-	Spectrum li = light->sample_l( ip , &ls , wi , 0 , &light_pdf , 0 , 0 , visibility );
-	if( light_pdf > 0.0f && !li.IsBlack() )
-	{
+	const auto li = light->sample_l( ip , &ls , wi , 0 , &light_pdf , 0 , 0 , visibility );
+	if( light_pdf > 0.0f && !li.IsBlack() ){
 		Spectrum f = bsdf->f( wo , wi , type );
-		if( f.IsBlack() == false && visibility.IsVisible() )
-		{
-			if( light->IsDelta() )
-				radiance = li * f / light_pdf;
-			else
-			{
+		if( !f.IsBlack() && visibility.IsVisible() ){
+			if( light->IsDelta() ){
+				radiance += li * f / light_pdf;
+			}else{
 				bsdf_pdf = bsdf->Pdf( wo , wi , type );
-				float power_hueristic = MisFactor( 1 , light_pdf , 1 , bsdf_pdf );
-				radiance = li * f * power_hueristic / light_pdf;
+				const auto weight = MisFactor( light_pdf , bsdf_pdf );
+				radiance = li * f * weight / light_pdf;
 			}
 		}
 	}
 
-	if( !light->IsDelta() )
-	{
+	if( !light->IsDelta() ){
 		BXDF_TYPE bxdf_type;
-		Spectrum f = bsdf->sample_f( wo , wi , bs , &bsdf_pdf , type , &bxdf_type );
-		if( !f.IsBlack() && bsdf_pdf != 0.0f )
-		{
-			float weight = 1.0f;
-			if( bxdf_type )
-			{
+		const auto f = bsdf->sample_f( wo , wi , bs , &bsdf_pdf , type , &bxdf_type );
+		if( !f.IsBlack() && bsdf_pdf != 0.0f ){
+			auto weight = 1.0f;
+			// There is no delta BRDF in SORT.
+			if( true ){
 				float light_pdf;
 				light_pdf = light->Pdf( ip.intersect , wi );
 				if( light_pdf <= 0.0f )
 					return radiance;
-				weight = MisFactor( 1 , bsdf_pdf , 1 , light_pdf );
+				weight = MisFactor( bsdf_pdf , light_pdf );
 			}
 			
 			Spectrum li;
@@ -76,16 +73,9 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 
 			visibility.ray = Ray( ip.intersect , wi , 0 , 0.001f , _ip.t - 0.001f );
 			if( !li.IsBlack() && visibility.IsVisible() )
-				radiance += li * f * weight / bsdf_pdf;
+				radiance += li * f * 0.5f / bsdf_pdf;
 		}
 	}
 
 	return radiance;
-}
-
-// mutilpe importance sampling factors , power heuristic is used 
-float	MisFactor( int nf, float fPdf, int ng, float gPdf )
-{
-	float f = nf * fPdf, g = ng * gPdf;
-    return (f*f) / (f*f + g*g);
 }
