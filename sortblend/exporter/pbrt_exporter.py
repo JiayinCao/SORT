@@ -145,7 +145,11 @@ def export_pbrt_file(scene, node):
     pbrt_sampler = "Sampler \"random\" \"integer pixelsamples\" " + '%d'%sample_count + "\n"
 
     # integrator
+    integrator_type = scene.integrator_type_prop
+    
     pbrt_integrator = "Integrator \"path\"" + " \"integer maxdepth\" " + '%d'%scene.inte_max_recur_depth + "\n\n"
+    if integrator_type == "BidirPathTracing":
+        pbrt_integrator = "Integrator \"bdpt\"" + " \"integer maxdepth\" " + '%d'%scene.inte_max_recur_depth + "\n\n"
 
     file = open(pbrt_file_fullpath,'w')
     file.write( pbrt_film )
