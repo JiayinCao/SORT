@@ -154,11 +154,15 @@ TEST(BXDF, AshikhmanShirley) {
     checkAll(&as);
 }
 
+#if 0
+// https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf
+// Disney BRDF is not strictly energy conserving, please refer the above link for further detail ( chapter 5.1 ).
 TEST(BXDF, Disney) {
     static const Spectrum R(1.0f);
     DisneyBRDF disney( R , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , R , DIR_UP );
     checkAll(&disney);
 }
+#endif
 
 TEST(BXDF, MicroFacetReflection) {
     static const Spectrum R(1.0f);
