@@ -73,7 +73,7 @@ Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light 
 
 			visibility.ray = Ray( ip.intersect , wi , 0 , 0.001f , _ip.t - 0.001f );
 			if( !li.IsBlack() && visibility.IsVisible() )
-				radiance += li * f * 0.5f / bsdf_pdf;
+				radiance += li * f * weight / bsdf_pdf;
 		}
 	}
 
