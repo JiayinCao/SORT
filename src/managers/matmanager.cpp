@@ -19,17 +19,21 @@
 #include "material/material.h"
 #include "stream/stream.h"
 #include "core/profile.h"
+#include "core/globalconfig.h"
 
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     SORT_PROFILE("Parsing Materials");
 
+    const bool noMaterialSupport = g_noMaterial;
 	unsigned int material_cnt = 0;
 	stream >> material_cnt;
 	for( unsigned int i = 0 ; i < material_cnt ; ++i ){
         auto mat = std::make_unique<Material>();
 		mat->Serialize( stream );
-		m_matPool.push_back( std::move(mat) );
+
+        if( !noMaterialSupport )
+		    m_matPool.push_back( std::move(mat) );
 	}
 	return material_cnt;
 }
