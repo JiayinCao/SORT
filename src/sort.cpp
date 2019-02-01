@@ -87,7 +87,8 @@ int	RunSORT( int argc , char** argv ){
         slog(INFO, GENERAL, "There is not enough command line arguments.");
         slog(INFO, GENERAL, "  --input:<filename>   Specify the sort input file.");
         slog(INFO, GENERAL, "  --blendermode        SORT is triggered from Blender.");
-        slog(INFO, GENERAL, "  --unitest            Run unit tests.");
+        slog(INFO, GENERAL, "  --unittest           Run unit tests.");
+		slog(INFO, GENERAL, "  --nomaterial			Disable materials in SORT.");
 		slog(INFO, GENERAL, "  --profiling:<on|off> Toggling profiling option, false by default.");
         return -1;
     }else{

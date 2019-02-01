@@ -171,6 +171,7 @@ class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'DebugPanel'
     bpy.types.Scene.detailedLog = bpy.props.BoolProperty(name='Output Detailed Output',default=False,description='Whether outputing detail log information in blender plugin.')
     bpy.types.Scene.profilingEnabled = bpy.props.BoolProperty(name='Enable Profiling',default=False,description='Enabling profiling will have a big impact on performance, only use it for simple scene')
+    bpy.types.Scene.allUseDefaultMaterial = bpy.props.BoolProperty(name='No Material',default=False,description='Disable all materials in SORT, use the default one.')
     def draw(self, context):
         self.layout.operator("sort.export_debug_scene")
         split = self.layout.split()
@@ -180,6 +181,7 @@ class DebugPanel(SORTRenderPanel, bpy.types.Panel):
         right.operator("sort.openfolder_sort")
         self.layout.prop(context.scene, "detailedLog")
         self.layout.prop(context.scene, "profilingEnabled")
+        self.layout.prop(context.scene, "allUseDefaultMaterial")
 
 export_pbrt_lable = "Render in PBRT"
 pbrt_running = False
