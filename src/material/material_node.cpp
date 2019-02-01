@@ -52,7 +52,7 @@ void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
 void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
 	// return a default one for invalid material
 	if( !m_node_valid || !output.GetNode() ){
-		static const Spectrum default_spectrum( 0.5f , 0.1f , 0.1f );
+		static const Spectrum default_spectrum( 0.5f , 0.5f , 0.5f );
 		const Lambert* lambert = SORT_MALLOC(Lambert)( default_spectrum , weight , DIR_UP);
 		bsdf->AddBxdf( lambert );
 		return;

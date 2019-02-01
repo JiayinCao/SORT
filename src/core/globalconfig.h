@@ -132,6 +132,13 @@ public:
 		return m_imageSensor.get();
 	}
 
+	//! @brief		Whether there is material support in SORT.
+	//!
+	//! @return		'True' if there is no material support.
+	bool			GetNoMaterial() const{
+		return m_noMaterialSupport;
+	}
+
 	//! @brief		Parse command line.
 	//!
     //! This is not a perfect way to parse command line arguments. If there is a space in the path,
@@ -173,6 +180,8 @@ public:
                 com_arg_valid = true;
             }else if (key_str == "profiling"){
 				m_profilingEnalbed = value_str == "on";
+			}else if (key_str == "nomaterial" ){
+				m_noMaterialSupport = true;
 			}
         }
 
@@ -226,6 +235,7 @@ private:
 	bool				            m_blenderMode = false;			/**< Whether the current running instance is attached with Blender. */
 	bool							m_unitTestMode = false;			/**< Whether the current running instance is in unit test mode. */
 	bool							m_profilingEnalbed = false;		/**< Whether profiling is enabled in SORT. Since there is a big performance issue during rendering, it is turned off by default.*/
+	bool							m_noMaterialSupport = false;	/**< Disable material support in SORT. */
 	std::string						m_inputFile;					/**< Full path of the input file. */
 
 	//! @brief	Make constructor private
@@ -251,3 +261,4 @@ private:
 #define g_inputFilePath				GlobalConfiguration::GetSingleton().GetInputFilePath()
 #define g_imageSensor				GlobalConfiguration::GetSingleton().GetImageSensor()
 #define g_profilingEnabled			GlobalConfiguration::GetSingleton().GetIsProfilingEnabled()
+#define g_noMaterial				GlobalConfiguration::GetSingleton().GetNoMaterial()
