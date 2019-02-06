@@ -107,20 +107,19 @@ Ray	PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) 
 }
 
 // get camera coordinate according to a view direction in world space
-Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosatcamera , Spectrum* we , Point* eyeP , Visibility* visibility) const
-{
-	const float delta = 0.001f;
-	Vector dir = p - m_eye;
-	const float len = dir.Length();
+Vector2i PerspectiveCamera::GetScreenCoord( const Intersection& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we , 
+                                            Point* eyeP , Visibility* visibility) const{
+	const auto delta = 0.001f;
+	Vector dir = inter.intersect - m_eye;
+	const auto len = dir.Length();
 	dir = dir / len;
 
 	// get view space dir
-    Point rastP = m_worldToRaster( p );
+    Point rastP = m_worldToRaster( inter.intersect );
 
 	// Handle DOF camera ray adaption
-	if( m_lensRadius != 0.0f )
-	{
-		Point view_target = m_worldToCamera( p );
+	if( m_lensRadius != 0.0f ){
+		Point view_target = m_worldToCamera( inter.intersect );
 
 		float s , t;
         UniformSampleDisk( sort_canonical() , sort_canonical() , s , t );
@@ -141,27 +140,23 @@ Vector2i PerspectiveCamera::GetScreenCoord(Point p, float* pdfw, float* pdfa, fl
 
 		if( eyeP )
 			*eyeP = shadow_ray.m_Ori;
-	}else
-	{
-		visibility->ray = Ray( p , -dir , 0 , delta , len - delta );
-
+	}else{
+		visibility->ray = Ray( inter.intersect , -dir , 0 , delta , len - delta );
 		if( eyeP )
 			*eyeP = m_eye;
 	}
 
 	// calculate the pdf for camera ray
-	const float cosAtCamera = Dot( m_forward , dir );
+	cosAtCamera = Dot( m_forward , dir );
 	const float imagePointToCameraDist = m_imagePlaneDist / cosAtCamera;
 	const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
-
+    
 	if( pdfw )
 		*pdfw = imageToSolidAngleFactor;
 	if( pdfa )
 		*pdfa = m_inverseApartureSize;
 	if( we )
 		*we = imageToSolidAngleFactor * m_inverseApartureSize / cosAtCamera;
-	if( cosatcamera )
-		*cosatcamera = cosAtCamera;
 
 	return Vector2i( (int)rastP.x , (int)rastP.y );
 }

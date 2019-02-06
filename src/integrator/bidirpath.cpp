@@ -306,9 +306,7 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 	return li * weight;
 }
 
-// connect camera point
-void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const Light* light , const Scene& scene ) const
-{
+void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const Light* light , const Scene& scene ) const{
 	if( light_vertex.depth > max_recursive_depth )
 		return;
 
@@ -320,7 +318,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 	float cosAtCamera;
 	Spectrum we;
 	Point eye_point;
-	const Vector2i coord = camera->GetScreenCoord(light_vertex.inter.intersect, &camera_pdfW, &camera_pdfA , &cosAtCamera , &we , &eye_point , &visible );
+	const Vector2i coord = camera->GetScreenCoord(light_vertex.inter, &camera_pdfW, &camera_pdfA , cosAtCamera , &we , &eye_point , &visible );
 
 	const Vector delta = light_vertex.inter.intersect - eye_point;
 	const float invSqrLen = 1.0f / delta.SquaredLength();
@@ -343,11 +341,10 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 		return;
 
 	const float total_pixel = (float)(g_resultResollutionWidth * g_resultResollutionHeight);
-	const float gterm = cosAtCamera * invSqrLen;
+	const float gterm = cosAtCamera * invSqrLen;	// the other cos in the g-term is hidden in the 'bsdf_value'.
 	Spectrum radiance = light_vertex.throughput * bsdf_value * we * gterm / (float)( sample_per_pixel * total_pixel * camera_pdfA );
 
-	if( !light_tracing_only )
-	{
+	if( !light_tracing_only ){
 		const float lightvert_pdfA = camera_pdfW * AbsDot( light_vertex.n, n_delta ) * invSqrLen ;
 		const float bsdf_rev_pdfw = light_vertex.bsdf->Pdf( -n_delta , light_vertex.wi ) * light_vertex.rr;
 		const double mis0 = ( light_vertex.vcm + light_vertex.vc * MIS( bsdf_rev_pdfw ) ) * MIS( lightvert_pdfA / total_pixel );
