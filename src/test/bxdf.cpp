@@ -51,7 +51,7 @@ void checkReciprocity(const Bxdf* bxdf) {
 
 // A physically based BRDF/BTDF should not reflect more energy than it receives
 void checkEnergyConservation(const Bxdf* bxdf) {
-    Spectrum total = ParrallReduction<Spectrum, 8, 1024 * 1024 * 2>( [&](){
+    Spectrum total = ParrallReduction<Spectrum, 8, 1024 * 1024 * 8>( [&](){
         Vector wi;
         float pdf = 0.0f;
         Spectrum r = bxdf->Sample_F(DIR_UP, wi, BsdfSample(true), &pdf);
