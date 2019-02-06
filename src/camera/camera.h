@@ -25,6 +25,7 @@
 
 class PixelSample;
 class Visibility;
+class Intersection;
 
 //! @brief Abstract camera
 /**
@@ -32,8 +33,7 @@ class Visibility;
  * There are several derived classes, such as perspective camera, orthogonal 
  * camera and environment camera.
  */
-class	Camera
-{
+class	Camera{
 public:
 	//! @brief Virtual destructor.
     virtual ~Camera() {}
@@ -56,7 +56,7 @@ public:
 	virtual Vector GetForward() const = 0;
 
     //! @brief Get camera coordinate according to a view direction in world space. It is used in light tracing or bi-directional path tracing algorithm.
-    //! @param p                A point in world space. The calculation will connect it to the viewing point of the cammere seeking the intersected point between the direction and the image sensor.
+    //! @param inter            The intersection to be considered when randomly sampling a point on the sensor.
     //! @param pdfw             PDF w.r.t the solid angle of choosing the direction.
     //! @param pdfa             PDF w.r.t the area of choosing the viewing point.
     //! @param cosAtCamera      The cosine factor of the angle between the viewing direction and forward direction.
@@ -64,7 +64,8 @@ public:
     //! @param eyeP             The selected random viewing point in world space.
     //! @param visibility       The structure holding visibility information.
     //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
-	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) const = 0;
+	virtual Vector2i GetScreenCoord(const Intersection& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we , 
+                                    Point* eyeP , Visibility* visibility) const = 0;
 
 protected:
 	Point           m_eye;                      /**< Viewing point of the camera. */
