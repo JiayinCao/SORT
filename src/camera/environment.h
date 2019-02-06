@@ -30,10 +30,10 @@ public:
     //! @param y    Coordinate along vertical axis on the image sensor, it could be a float value.
     //! @param ps   Pixel sample holding several useful random variables.
     //! @return     The generated ray based on the input.
-	virtual Ray	GenerateRay( float x , float y , const PixelSample& ps ) const;
+	Ray	GenerateRay( float x , float y , const PixelSample& ps ) const override;
 
     //! @brief Get camera coordinate according to a view direction in world space. It is used in light tracing or bi-directional path tracing algorithm.
-    //! @param p                A point in world space. The calculation will connect it to the viewing point of the cammere seeking the intersected point between the direction and the image sensor.
+    //! @param inter            The intersection to be considered when randomly sampling a point on the sensor.
     //! @param pdfw             PDF w.r.t the solid angle of choosing the direction.
     //! @param pdfa             PDF w.r.t the area of choosing the viewing point.
     //! @param cosAtCamera      The cosine factor of the angle between the viewing direction and forward direction.
@@ -41,14 +41,15 @@ public:
     //! @param eyeP             The selected random viewing point in world space.
     //! @param visibility       The structure holding visibility information.
     //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
-	virtual Vector2i GetScreenCoord(Point p, float* pdfw, float* pdfa, float* cosAtCamera , Spectrum* we , Point* eyeP , Visibility* visibility) const {
+    Vector2i GetScreenCoord(const Intersection& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we , 
+                                    Point* eyeP , Visibility* visibility) const override {
 		sAssert(false, GENERAL);
 		return Vector2i();
 	}
 
     //! @brief Get viewing direction.
     //! @return Camera forward direction.
-	virtual Vector GetForward() const {
+	Vector GetForward() const override{
 		sAssert(false, GENERAL);
 		return Vector();
 	}
