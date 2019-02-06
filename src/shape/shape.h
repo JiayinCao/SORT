@@ -127,6 +127,6 @@ public:
 	inline void 	SetTransform( const Transform& transform ) { m_transform = transform; }
 
 protected:
-	Transform						m_transform;	/**< Transform of the shape from local space to world space. */
+	Transform						m_transform;	/**< Transform of the shape from local space to world space. It is assumed there is no scaling in this matrix, the upper level code should handle it. */
 	mutable std::unique_ptr<BBox> 	m_bbox;			/**< Bounding box of the shape in world coordinate. */
 };

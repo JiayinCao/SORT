@@ -74,12 +74,19 @@ void SkyLightEntity::FillScene(class Scene& scene) {
 
 void AreaLightEntity::Serialize(IStreamBase& stream) {
     stream >> m_light->m_light2world;
+    const auto sx = Vector( m_light->m_light2world.matrix.m[0] , m_light->m_light2world.matrix.m[4] , m_light->m_light2world.matrix.m[8] ).Length();
+    const auto sy = Vector( m_light->m_light2world.matrix.m[1] , m_light->m_light2world.matrix.m[5] , m_light->m_light2world.matrix.m[9] ).Length();
+    const auto sz = Vector( m_light->m_light2world.matrix.m[2] , m_light->m_light2world.matrix.m[6] , m_light->m_light2world.matrix.m[10] ).Length();
+    const auto mat = m_light->m_light2world.matrix * Scale( 1 / sx , 1 / sy , 1 / sz ).matrix;
+    const auto inv_mat = Scale( sx , sy , sz ).matrix * m_light->m_light2world.invMatrix;
+    m_light->m_light2world = Transform( mat , inv_mat );
+
     stream >> m_light->intensity;
     auto rect = std::make_unique<Rectangle>();
     float sizeX, sizeY;
     stream >> sizeX >> sizeY;
-    rect->SetSizeX(sizeX);
-    rect->SetSizeY(sizeY);
+    rect->SetSizeX(sizeX * sx);
+    rect->SetSizeY(sizeY * sy);
     rect->SetTransform(m_light->m_light2world);
     m_light->m_shape = std::move(rect);
 }
