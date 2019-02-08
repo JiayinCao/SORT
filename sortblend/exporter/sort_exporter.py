@@ -170,10 +170,23 @@ def export_scene(scene, fs):
     total_normal_cnt = 0
     total_uv_cnt = 0
     total_face_cnt = 0
-    for ob in exporter_common.getMeshList(scene):
+    for obj in exporter_common.getMeshList(scene):
         fs.serialize('VisualEntity')
-        fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * ob.matrix_world ) )
-        stat = export_mesh(ob.data,fs)
+        fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
+        stat = None
+        # apply the modifier if there is one
+        if obj.type != 'MESH' or obj.is_modified(scene, 'RENDER'):
+            try:
+                # create a temporary mesh
+                mesh = obj.to_mesh(scene, True, 'RENDER')
+                # instead of exporting the original mesh, export the temporary mesh.
+                stat = export_mesh(mesh, fs)
+            finally:
+                # delete the temporay mesh
+                bpy.data.meshes.remove(mesh)
+        else:
+            stat = export_mesh(obj.data, fs)
+
         total_vert_cnt += stat[0]
         total_face_cnt += stat[1]
     exporter_common.log( "Total vertices: %d." % total_vert_cnt )
