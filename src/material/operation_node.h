@@ -34,6 +34,7 @@ public:
 class AddNode : public OperatorNode{
 public:
 	DEFINE_RTTI( AddNode , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , AddNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -46,9 +47,10 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src0.Serialize( stream );
-        src1.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src0.Serialize( stream , cache );
+        src1.Serialize( stream , cache );
 	}
 
 private:
@@ -60,6 +62,7 @@ private:
 class SORTNodeOneMinus : public OperatorNode{
 public:
     DEFINE_RTTI( SORTNodeOneMinus , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeOneMinus );
     
     //! @brief  Get spectrum material property.
     //!
@@ -72,8 +75,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src.Serialize( stream , cache );
 	}
 
 private:
@@ -84,6 +88,7 @@ private:
 class LerpNode : public OperatorNode{
 public:
 	DEFINE_RTTI( LerpNode , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , LerpNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -96,10 +101,11 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src0.Serialize( stream );
-        src1.Serialize( stream );
-        factor.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src0.Serialize( stream , cache );
+        src1.Serialize( stream , cache );
+        factor.Serialize( stream , cache );
 	}
 
 private:
@@ -112,6 +118,7 @@ private:
 class BlendNode : public OperatorNode{
 public:
 	DEFINE_RTTI( BlendNode , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , BlendNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -124,11 +131,12 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src0.Serialize( stream );
-        src1.Serialize( stream );
-        factor0.Serialize( stream );
-        factor1.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src0.Serialize( stream , cache );
+        src1.Serialize( stream , cache );
+        factor0.Serialize( stream , cache );
+        factor1.Serialize( stream , cache );
 	}
 
 private:
@@ -142,7 +150,8 @@ private:
 class MutiplyNode : public OperatorNode{
 public:
 	DEFINE_RTTI( MutiplyNode , MaterialNode );
-    
+    DEFINE_OUTPUT_CHANNEL( Result , MutiplyNode );
+
     //! @brief  Get spectrum material property.
     //!
     //! @param bsdf     The BSDF data structure.
@@ -154,9 +163,10 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src0.Serialize( stream );
-        src1.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src0.Serialize( stream , cache );
+        src1.Serialize( stream , cache );
 	}
 
 private:
@@ -168,6 +178,7 @@ private:
 class GammaToLinearNode : public OperatorNode{
 public:
     DEFINE_RTTI( GammaToLinearNode , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , GammaToLinearNode );
     
     //! @brief  Get spectrum material property.
     //!
@@ -180,8 +191,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src.Serialize( stream , cache );
 	}
 
 private:
@@ -192,6 +204,7 @@ private:
 class LinearToGammaNode : public OperatorNode{
 public:
     DEFINE_RTTI( LinearToGammaNode , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , LinearToGammaNode );
     
     //! @brief  Get spectrum material property.
     //!
@@ -204,8 +217,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src.Serialize( stream , cache );
 	}
 
 private:
@@ -216,7 +230,8 @@ private:
 class NormalDecoderNode : public OperatorNode{
 public:
     DEFINE_RTTI( NormalDecoderNode , MaterialNode );
-    
+    DEFINE_OUTPUT_CHANNEL( Result , NormalDecoderNode );
+
     //! @brief  Get vector material property.
     //!
     //! @param bsdf     The BSDF data structure.
@@ -233,8 +248,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src.Serialize( stream , cache );
 	}
 
 private:

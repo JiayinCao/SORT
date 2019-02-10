@@ -18,6 +18,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <unordered_map>
 #include "spectrum/spectrum.h"
 #include "core/rtti.h"
 #include "spectrum/rgbspectrum.h"
@@ -35,11 +36,39 @@
 #define SORT_MATERIAL_DEFINE_PROP_VECTOR(prop)          SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyVector)
 #define SORT_MATERIAL_DEFINE_PROP_BXDF(prop)            SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyBxdf)
 
-#define SORT_MATERIAL_GET_PROP_COMMON(v,prop,T)         T v; prop.GetMaterialProperty(bsdf,v);
+#define SORT_MATERIAL_GET_PROP_COMMON(v,prop,T)         T v; node->prop.GetMaterialProperty(bsdf,v);
 #define SORT_MATERIAL_GET_PROP_FLOAT(v,prop)            SORT_MATERIAL_GET_PROP_COMMON(v,prop,float)
 #define SORT_MATERIAL_GET_PROP_COLOR(v,prop)            SORT_MATERIAL_GET_PROP_COMMON(v,prop,Spectrum)
 #define SORT_MATERIAL_GET_PROP_STR(v,prop)              SORT_MATERIAL_GET_PROP_COMMON(v,prop,std::string)
 #define SORT_MATERIAL_GET_PROP_VECTOR(v,prop)           SORT_MATERIAL_GET_PROP_COMMON(v,prop,Vector)
+
+#define SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,T)     T v; prop.GetMaterialProperty(bsdf,v);
+#define SORT_MATERIAL_GET_PROP_FLOAT_TMP(v,prop)        SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,float)
+#define SORT_MATERIAL_GET_PROP_COLOR_TMP(v,prop)        SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,Spectrum)
+#define SORT_MATERIAL_GET_PROP_STR_TMP(v,prop)          SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,std::string)
+#define SORT_MATERIAL_GET_PROP_VECTOR_TMP(v,prop)       SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,Vector)
+
+#define DEFINE_OUTPUT_CHANNEL( CHANNEL , NODE )     \
+    class CHANNEL : public OutputSocket{\
+        public:\
+            using  NODE##CHANNEL = NODE::CHANNEL;\
+            DEFINE_RTTI( NODE##CHANNEL , OutputSocket );\
+            void UpdateBSDF( Bsdf* bsdf , Spectrum weight ) override;\
+    };\
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight ) override;
+
+#define IMPLEMENT_OUTPUT_CHANNEL_BEGIN( CHANNEL , NODE )  \
+    using NODE##CHANNEL = NODE::CHANNEL; \
+    IMPLEMENT_RTTI( NODE##CHANNEL );\
+    void NODE::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){\
+        sAssert( false , MATERIAL );\
+    }\
+    void NODE::CHANNEL::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){\
+        auto node = dynamic_cast<NODE*>(m_node.get());
+
+#define IMPLEMENT_OUTPUT_CHANNEL_END  }
+
+using MaterialNodeCache = std::unordered_map<std::string,std::shared_ptr<class MaterialNode>>;
 
 class Bsdf;
 
@@ -52,8 +81,38 @@ enum MATERIAL_NODE_PROPERTY_TYPE{
     MNPT_BXDF
 };
 
+//! @brief  Output socket of a node.
+class OutputSocket{
+public:
+    //! @brief  Virtual destructor.
+    virtual ~OutputSocket() {}
+
+    //! @brief  Update BRDF of the output channel.
+    //!
+    //! @param bsdf     The BSDF data structure to be filled.
+    //! @param weight   The weight for this bsdf sub-tree.
+    virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) = 0;
+
+    //! @brief  Update owning node.
+    //!
+    //! @param  Node owning this socket.
+    void UpdateOwningNode( std::shared_ptr<MaterialNode>& node ){
+        m_node = node;
+    }
+
+    //! @brief  Get owning node.
+    //!
+    //! @return Node owning this socket.
+    class MaterialNode*   GetOwningNode(){
+        return m_node.get();
+    }
+
+protected:
+    std::shared_ptr<MaterialNode>    m_node = nullptr;     /**< Node owning the socket. */
+};
+
 //! @brief  Material node is the base class for node in material editor.
-class MaterialNode : public SerializableObject{
+class MaterialNode{
 public:
     //! @brief  Empty virtual destructor.
     virtual ~MaterialNode() = default;
@@ -115,6 +174,14 @@ public:
         return m_node_valid; 
     }
     
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    virtual void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) {}
+
 protected:
     /**< All properties in the node. */
     std::unordered_set< class MaterialNodeProperty* > m_props;
@@ -133,7 +200,7 @@ protected:
  * A socket may be connected with a sub node, which means that 'node' member will not be 'nullptr'.
  * Otherwise, this will be merely a property defined in sub-classes.
  */
-class MaterialNodeProperty : public SerializableObject{
+class MaterialNodeProperty{
 public:
     //! @brief Update bsdf, this is for bxdf wrappers like Blend , Coat or any other BXDF that can attach other BXDF as input.
     //!
@@ -152,7 +219,7 @@ public:
     //!
     //! @return         Node attached to the current socket. 'nullptr' means no node attached.
     inline MaterialNode*    GetNode() { 
-        return m_node.get(); 
+        return m_socket != nullptr ? m_socket->GetOwningNode() : nullptr;
     }
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -160,11 +227,12 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {}
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    virtual void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) = 0;
 
 protected:
 	/**< sub node if it has value. */
-    std::unique_ptr<MaterialNode>	m_node = nullptr;
+    std::unique_ptr<OutputSocket>	m_socket = nullptr;
 };
 
 //! @brief  Color property in SORT material node.
@@ -175,8 +243,8 @@ public:
     //! @param bsdf     The BSDF data structure.
     //! @param result   Spectrum data structure to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) {
-        if( m_node )
-            m_node->GetMaterialProperty(bsdf, result);
+        if( auto node = m_socket ? m_socket->GetOwningNode() : nullptr )
+            node->GetMaterialProperty(bsdf, result);
         else
             result = color;
     }
@@ -193,14 +261,31 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        std::string class_id;
-        stream >> class_id;
-        m_node = MakeUniqueInstance<MaterialNode>( class_id );
-        if( m_node )
-            m_node->Serialize( stream );
-        else
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        std::string socket_type;
+        stream >> socket_type;
+        m_socket = MakeUniqueInstance<OutputSocket>( socket_type );
+
+        if( m_socket == nullptr ){
             stream >> color;
+        }else{
+            std::string class_name;
+            stream >> class_name;
+            if( cache.count( class_name ) == 0 ){
+                std::string class_id;
+                stream >> class_id;
+                auto node = MakeSharedInstance<MaterialNode>( class_id );
+                sAssert( node != nullptr , MATERIAL );
+
+                cache[class_name] = node;
+                m_socket->UpdateOwningNode( node );
+                node->Serialize( stream , cache );
+            }else{
+                // The node has at least two different path to root.
+                m_socket->UpdateOwningNode( cache[class_name] );
+            }
+        }
 	}
 
 private:
@@ -216,8 +301,8 @@ public:
     //! @param bsdf     The BSDF data structure.
     //! @param result   The result to be filled.
     void GetMaterialProperty( Bsdf* bsdf , float& result ) {
-        if( m_node )
-            m_node->GetMaterialProperty(bsdf, result);
+        if( auto node = m_socket ? m_socket->GetOwningNode() : nullptr )
+            node->GetMaterialProperty(bsdf, result);
         else
             result = m_value;
     }
@@ -234,14 +319,31 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        std::string class_id;
-        stream >> class_id;
-        m_node = MakeUniqueInstance<MaterialNode>( class_id );
-        if( m_node )
-            m_node->Serialize( stream );
-        else
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        std::string socket_type;
+        stream >> socket_type;
+        m_socket = MakeUniqueInstance<OutputSocket>( socket_type );
+        
+        if( m_socket == nullptr ){
             stream >> m_value;
+        }else{
+            std::string class_name;
+            stream >> class_name;
+            if( cache.count( class_name ) == 0 ){
+                std::string class_id;
+                stream >> class_id;
+                auto node = MakeSharedInstance<MaterialNode>( class_id );
+                sAssert( node != nullptr , MATERIAL );
+
+                cache[class_name] = node;
+                m_socket->UpdateOwningNode( node );
+                node->Serialize( stream , cache );
+            }else{
+                // The node has at least two different path to root.
+                m_socket->UpdateOwningNode( cache[class_name] );
+            }
+        }
 	}
 
 private:
@@ -272,7 +374,8 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
         std::string dummy;
         stream >> dummy;
         stream >> m_str;
@@ -290,9 +393,9 @@ public:
     //!
     //! @param bsdf     The BSDF data structure.
     //! @param weight   The weight for the BSDF sub-tree.
-    void UpdateBsdf( Bsdf* bsdf , Spectrum weight = Spectrum(1.0f) ){
-        if( m_node )
-            m_node->UpdateBSDF(bsdf,weight);
+    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = Spectrum(1.0f) ){
+        if( m_socket )
+            m_socket->UpdateBSDF(bsdf, weight);
     }
     
     //! @brief  Get the type of the material node property.
@@ -307,12 +410,29 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        std::string class_id;
-        stream >> class_id;
-        m_node = MakeUniqueInstance<MaterialNode>( class_id );
-        if( m_node )
-            m_node->Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        std::string socket_type;
+        stream >> socket_type;
+        m_socket = MakeUniqueInstance<OutputSocket>( socket_type );
+
+        if( m_socket != nullptr ){
+            std::string class_name;
+            stream >> class_name;
+            if( cache.count( class_name ) == 0 ){
+                std::string class_id;
+                stream >> class_id;
+                auto node = MakeSharedInstance<MaterialNode>( class_id );
+                sAssert( node != nullptr , MATERIAL );
+
+                cache[class_name] = node;
+                m_socket->UpdateOwningNode( node );
+                node->Serialize( stream , cache );
+            }else{
+                // The node has at least two different path to root.
+                m_socket->UpdateOwningNode( cache[class_name] );
+            }
+        }
 	}
 };
 
@@ -324,8 +444,8 @@ public:
     //! @param bsdf     The BSDF data structure.
     //! @param result   The result to be filled.
     void GetMaterialProperty( Bsdf* bsdf , Vector& result ) {
-        if( m_node )
-            m_node->GetMaterialProperty(bsdf, result);
+        if( auto node = m_socket ? m_socket->GetOwningNode() : nullptr )
+            node->GetMaterialProperty(bsdf, result);
         else
             result = m_vec;
     }
@@ -342,14 +462,31 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        std::string class_id;
-        stream >> class_id;
-        m_node = MakeUniqueInstance<MaterialNode>( class_id );
-        if( m_node )
-            m_node->Serialize( stream );
-        else
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        std::string socket_type;
+        stream >> socket_type;
+        m_socket = MakeUniqueInstance<OutputSocket>( socket_type );
+        
+        if( m_socket == nullptr ){
             stream >> m_vec;
+        }else{
+            std::string class_name;
+            stream >> class_name;
+            if( cache.count( class_name ) == 0 ){
+                std::string class_id;
+                stream >> class_id;
+                auto node = MakeSharedInstance<MaterialNode>( class_id );
+                sAssert( node != nullptr , MATERIAL );
+
+                cache[class_name] = node;
+                m_socket->UpdateOwningNode( node );
+                node->Serialize( stream , cache );
+            }else{
+                // The node has at least two different path to root.
+                m_socket->UpdateOwningNode( cache[class_name] );
+            }
+        }
 	}
 
 private:
@@ -390,8 +527,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-		output.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+		output.Serialize( stream , cache );
 	}
 
 private:

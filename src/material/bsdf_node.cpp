@@ -37,7 +37,7 @@ IMPLEMENT_RTTI( MeasuredMaterialNode );
 IMPLEMENT_RTTI( BlendMaterialNode );
 IMPLEMENT_RTTI( DoubleSidedMaterialNode );
 
-void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , DisneyPrincipleNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,basecolor);
     SORT_MATERIAL_GET_PROP_FLOAT(ss,subsurface);
@@ -52,9 +52,9 @@ void DisneyPrincipleNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     SORT_MATERIAL_GET_PROP_FLOAT(ccg,clearcoatGloss);
     
     bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)( bc , ss , m , s , st , r , a , sh , sht , cc , ccg , weight , n ));
-}
+IMPLEMENT_OUTPUT_CHANNEL_END
 
-void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , PrincipleMaterialNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(basecolor,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(spec,specular);
@@ -70,9 +70,9 @@ void PrincipleMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     
     bsdf->AddBxdf(SORT_MALLOC(Lambert)(basecolor , weight * (1 - m) * 0.92f , n));
     bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(basecolor, fresnel, dist , weight * (m * 0.92f + 0.08f * spec) , n));
-}
+IMPLEMENT_OUTPUT_CHANNEL_END
 
-void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , MatteMaterialNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(basecolor,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(rn,roughness);
@@ -83,9 +83,9 @@ void MatteMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
         else
             bsdf->AddBxdf( SORT_MALLOC(OrenNayar)( basecolor , rn , weight , n ) );
     }
-}
+IMPLEMENT_OUTPUT_CHANNEL_END
 
-void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , PlasticMaterialNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(diff,diffuse);
     SORT_MATERIAL_GET_PROP_COLOR(spec,specular);
@@ -99,9 +99,9 @@ void PlasticMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
         const auto dist = SORT_MALLOC(GGX)( rough , rough );   // GGX
         bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( spec , fresnel , dist , weight , n ));
     }
-}
+IMPLEMENT_OUTPUT_CHANNEL_END
 
-void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , GlassMaterialNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(r,reflectance);
     SORT_MATERIAL_GET_PROP_COLOR(t,transmittance);
@@ -111,9 +111,9 @@ void GlassMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
     if( r.IsBlack() && t.IsBlack() ) return;
     const auto dist = SORT_MALLOC(GGX)(roughU, roughV);
     bsdf->AddBxdf(SORT_MALLOC(Dielectric)(r, t, dist, 1.0f, 1.5f, weight, n));
-}
+IMPLEMENT_OUTPUT_CHANNEL_END
 
-void MirrorMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , MirrorMaterialNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(color,basecolor);
     if( color.IsBlack() ) return;
@@ -124,25 +124,25 @@ void MirrorMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
         const auto fresnel = SORT_MALLOC( FresnelNo )();
         bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( color , fresnel , dist , weight , n ));
     }
-}
+IMPLEMENT_OUTPUT_CHANNEL_END
 
-void MeasuredMaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , MeasuredMaterialNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_STR(type,bxdfType);
     
     if( type == "Fourier" )
-        bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( m_fourierBxdfData , weight , n ) );
+        bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( node->m_fourierBxdfData , weight , n ) );
     else if( type == "MERL" )
-        bsdf->AddBxdf( SORT_MALLOC(Merl)(m_merlData, weight , n) );
-}
+        bsdf->AddBxdf( SORT_MALLOC(Merl)(node->m_merlData, weight , n) );
+IMPLEMENT_OUTPUT_CHANNEL_END
 
 void MeasuredMaterialNode::PostProcess(){
     if( m_post_processed )
         return;
     
     Bsdf* bsdf = nullptr;
-    SORT_MATERIAL_GET_PROP_STR(type,bxdfType);
-    SORT_MATERIAL_GET_PROP_STR(file,bxdfFilePath);
+    SORT_MATERIAL_GET_PROP_STR_TMP(type,bxdfType);
+    SORT_MATERIAL_GET_PROP_STR_TMP(file,bxdfFilePath);
     
     if( file.empty() )
         return;
@@ -154,20 +154,20 @@ void MeasuredMaterialNode::PostProcess(){
     BxdfNode::PostProcess();
 }
 
-void BlendMaterialNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight){
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , BlendMaterialNode )
     SORT_MATERIAL_GET_PROP_FLOAT(t,factor);
     
     auto bsdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
     auto bsdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-    bxdf0.UpdateBsdf(bsdf0);
-    bxdf1.UpdateBsdf(bsdf1);
+    node->bxdf0.UpdateBsdf(bsdf0);
+    node->bxdf1.UpdateBsdf(bsdf1);
     bsdf->AddBxdf(SORT_MALLOC(Blend)(bsdf0, bsdf1, t, weight));
-}
+IMPLEMENT_OUTPUT_CHANNEL_END
 
-void DoubleSidedMaterialNode::UpdateBSDF(Bsdf* bsdf, Spectrum weight){
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , DoubleSidedMaterialNode )
     auto bsdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
     auto bsdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-    bxdf0.UpdateBsdf(bsdf0);
-    bxdf1.UpdateBsdf(bsdf1);
+    node->bxdf0.UpdateBsdf(bsdf0);
+    node->bxdf1.UpdateBsdf(bsdf1);
     bsdf->AddBxdf(SORT_MALLOC(DoubleSided)(bsdf0, bsdf1, weight));
-}
+IMPLEMENT_OUTPUT_CHANNEL_END

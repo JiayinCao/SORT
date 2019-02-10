@@ -23,7 +23,8 @@
 class SORTNodeComposite : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeComposite , MaterialNode );
-    
+    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeComposite );
+
     //! @brief  Get the type of the material node.
     //!
     //! @return         Material node type.
@@ -42,10 +43,11 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        R.Serialize( stream );
-        G.Serialize( stream );
-        B.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        R.Serialize( stream , cache );
+        G.Serialize( stream , cache );
+        B.Serialize( stream , cache );
 	}
 
 private:
@@ -58,7 +60,8 @@ private:
 class SORTNodeExtractRed : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeExtractRed , MaterialNode );
-    
+    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeExtractRed );
+
     //! @brief  Get the type of the material node.
     //!
     //! @return         Material node type.
@@ -77,8 +80,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        color.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        color.Serialize( stream , cache );
 	}
 
 private:
@@ -89,7 +93,8 @@ private:
 class SORTNodeExtractGreen : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeExtractGreen , MaterialNode );
-    
+    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeExtractGreen );
+
     //! @brief  Get the type of the material node.
     //!
     //! @return         Material node type.
@@ -108,8 +113,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        color.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        color.Serialize( stream , cache );
     }
 
 private:
@@ -120,7 +126,8 @@ private:
 class SORTNodeExtractBlue : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeExtractBlue , MaterialNode );
-    
+    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeExtractBlue );
+
     //! @brief  Get the type of the material node.
     //!
     //! @return         Material node type.
@@ -139,8 +146,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        color.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        color.Serialize( stream , cache );
 	}
 
 private:
@@ -151,7 +159,8 @@ private:
 class SORTNodeExtractIntensity : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeExtractIntensity , MaterialNode );
-    
+    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeExtractIntensity );
+
     //! @brief  Get the type of the material node.
     //!
     //! @return         Material node type.
@@ -170,8 +179,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        color.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        color.Serialize( stream , cache );
 	}
 
 private:

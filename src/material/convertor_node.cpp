@@ -22,30 +22,40 @@ IMPLEMENT_RTTI( SORTNodeExtractRed );
 IMPLEMENT_RTTI( SORTNodeExtractGreen );
 IMPLEMENT_RTTI( SORTNodeExtractBlue );
 IMPLEMENT_RTTI( SORTNodeExtractIntensity );
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , SORTNodeComposite )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , SORTNodeExtractRed )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , SORTNodeExtractGreen )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , SORTNodeExtractBlue )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , SORTNodeExtractIntensity )
+IMPLEMENT_OUTPUT_CHANNEL_END
 
 void SORTNodeComposite::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    SORT_MATERIAL_GET_PROP_FLOAT(r,R);
-    SORT_MATERIAL_GET_PROP_FLOAT(g,G);
-    SORT_MATERIAL_GET_PROP_FLOAT(b,B);
+    SORT_MATERIAL_GET_PROP_FLOAT_TMP(r,R);
+    SORT_MATERIAL_GET_PROP_FLOAT_TMP(g,G);
+    SORT_MATERIAL_GET_PROP_FLOAT_TMP(b,B);
     result.SetColor(r, g, b);
 }
 
 void SORTNodeExtractRed::GetMaterialProperty( Bsdf* bsdf , float& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c,color);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c,color);
     result = c.GetR();
 }
 
 void SORTNodeExtractGreen::GetMaterialProperty( Bsdf* bsdf , float& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c,color);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c,color);
     result = c.GetG();
 }
 
 void SORTNodeExtractBlue::GetMaterialProperty( Bsdf* bsdf , float& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c,color);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c,color);
     result = c.GetB();
 }
 
 void SORTNodeExtractIntensity::GetMaterialProperty( Bsdf* bsdf , float& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c,color);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c,color);
     result = c.GetIntensity();
 }

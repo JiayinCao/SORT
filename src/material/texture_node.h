@@ -35,6 +35,7 @@ class TextureNode : public MaterialNode{
 class GridTexNode : public TextureNode{
 public:
 	DEFINE_RTTI( GridTexNode , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , GridTexNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -47,9 +48,10 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src0.Serialize( stream );
-        src1.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src0.Serialize( stream , cache );
+        src1.Serialize( stream , cache );
 	}
 
 private:
@@ -61,6 +63,7 @@ private:
 class CheckerBoardTexNode : public TextureNode{
 public:
 	DEFINE_RTTI( CheckerBoardTexNode , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , CheckerBoardTexNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -73,9 +76,10 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src0.Serialize( stream );
-        src1.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src0.Serialize( stream , cache );
+        src1.Serialize( stream , cache );
 	}
 
 private:
@@ -87,6 +91,7 @@ private:
 class ImageTexNode : public TextureNode{
 public:
 	DEFINE_RTTI( ImageTexNode , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , ImageTexNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -102,8 +107,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        filename.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        filename.Serialize( stream , cache );
 	}
 
 private:
