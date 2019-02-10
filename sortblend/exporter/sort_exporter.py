@@ -451,7 +451,8 @@ def export_material(scene, fs):
         fs.serialize( name_compat(material.name) )
         exporter_common.logD( 'Exporting material %s.' % name_compat(material.name) )
 
-        def serialize_prop(mat_node , fs):
+        cache = set()
+        def serialize_prop(mat_node , fs, cache):
             # output the properties
             seriliaze_prop_in_sort = lambda n , v , fs = fs : ( fs.serialize( '' ) , fs.serialize( v ) )
             mat_node.serializae_prop(seriliaze_prop_in_sort)
@@ -459,15 +460,21 @@ def export_material(scene, fs):
             inputs = mat_node.inputs
             for socket in inputs:
                 if socket.is_linked:
-                    def socket_node_input(nt, socket):
-                        return next((l.from_node for l in nt.links if l.to_socket == socket), None)
-                    input_node = socket_node_input(ntree, socket)
+                    assert len(socket.links) == 1
+                    input_socket = socket.links[0].from_socket
+                    input_node = input_socket.node
 
-                    fs.serialize(input_node.sort_bxdf_type)
-                    serialize_prop(input_node,fs)
+                    fs.serialize(input_node.sort_bxdf_type + input_socket.name)
+                    fs.serialize(input_node.name)
+                    if input_node.name not in cache:
+                        fs.serialize(input_node.sort_bxdf_type)
+                        serialize_prop(input_node, fs, cache)
+
+                        # make sure it doesn't get serialized again
+                        cache.add(input_node.name)
                 else:
                     fs.serialize('')
                     fs.serialize( socket.export_serialization_value() )
-        serialize_prop(output_node, fs)
+        serialize_prop(output_node, fs, cache)
     del fs
 

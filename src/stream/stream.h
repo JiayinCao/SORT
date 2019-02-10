@@ -35,7 +35,7 @@
  */
 class StreamBase{
 public:
-    //! Empty virtual destructor.
+    //! @brief  Empty virtual destructor.
     virtual ~StreamBase() {}
 
     //! @brief Streaming in a float number.

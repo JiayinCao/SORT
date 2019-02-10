@@ -21,12 +21,18 @@
 IMPLEMENT_RTTI( ConstantColorNode );
 IMPLEMENT_RTTI( ConstantFloatNode );
 
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , ConstantColorNode )
+IMPLEMENT_OUTPUT_CHANNEL_END
+
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , ConstantFloatNode )
+IMPLEMENT_OUTPUT_CHANNEL_END
+
 void ConstantColorNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c,src);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c,src);
     result = c;
 }
 
 void ConstantFloatNode::GetMaterialProperty( Bsdf* bsdf , float& result ){
-    SORT_MATERIAL_GET_PROP_FLOAT(f,value);
+    SORT_MATERIAL_GET_PROP_FLOAT_TMP(f,value);
     result = f;
 }

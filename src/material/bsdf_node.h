@@ -26,31 +26,27 @@
 class DisneyPrincipleNode : public BxdfNode{
 public:
     DEFINE_RTTI( DisneyPrincipleNode , MaterialNode );
-    
-    //! @brief  Update BSDF for this node.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-    
+    DEFINE_OUTPUT_CHANNEL( Result , DisneyPrincipleNode );
+
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        subsurface.Serialize( stream );
-        metallic.Serialize( stream );
-        specular.Serialize( stream );
-        specularTint.Serialize( stream );
-        roughness.Serialize( stream );
-        anisotropic.Serialize( stream );
-        sheen.Serialize( stream );
-        sheenTint.Serialize( stream );
-        clearcoat.Serialize( stream );
-        clearcoatGloss.Serialize( stream );
-        basecolor.Serialize( stream );
-        BxdfNode::Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        subsurface.Serialize( stream , cache );
+        metallic.Serialize( stream , cache );
+        specular.Serialize( stream , cache );
+        specularTint.Serialize( stream , cache );
+        roughness.Serialize( stream , cache );
+        anisotropic.Serialize( stream , cache );
+        sheen.Serialize( stream , cache );
+        sheenTint.Serialize( stream , cache );
+        clearcoat.Serialize( stream , cache );
+        clearcoatGloss.Serialize( stream , cache );
+        basecolor.Serialize( stream , cache );
+        BxdfNode::Serialize( stream , cache );
 	}
 
 private:
@@ -71,25 +67,21 @@ private:
 class PrincipleMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( PrincipleMaterialNode , MaterialNode );
-    
-    //! @brief  Update BSDF for this node.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    DEFINE_OUTPUT_CHANNEL( Result , PrincipleMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        roughnessU.Serialize( stream );
-        roughnessV.Serialize( stream );
-        metallic.Serialize( stream );
-        specular.Serialize( stream );
-        baseColor.Serialize( stream );
-        BxdfNode::Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        roughnessU.Serialize( stream , cache );
+        roughnessV.Serialize( stream , cache );
+        metallic.Serialize( stream , cache );
+        specular.Serialize( stream , cache );
+        baseColor.Serialize( stream , cache );
+        BxdfNode::Serialize( stream , cache );
 	}
 
 private:
@@ -107,22 +99,18 @@ private:
 class MatteMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( MatteMaterialNode , MaterialNode );
-    
-    //! @brief  Update BSDF for this node.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    DEFINE_OUTPUT_CHANNEL( Result , MatteMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        baseColor.Serialize( stream );
-        roughness.Serialize( stream );
-        BxdfNode::Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        baseColor.Serialize( stream , cache );
+        roughness.Serialize( stream , cache );
+        BxdfNode::Serialize( stream , cache );
 	}
 
 private:
@@ -134,24 +122,20 @@ private:
 class PlasticMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( PlasticMaterialNode , MaterialNode );
-    
-    //! @brief  Update BSDF for this node.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    DEFINE_OUTPUT_CHANNEL( Result , PlasticMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        diffuse.Serialize( stream );
-        specular.Serialize( stream );
-        roughness.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        diffuse.Serialize( stream , cache );
+        specular.Serialize( stream , cache );
+        roughness.Serialize( stream , cache );
 
-        BxdfNode::Serialize( stream );
+        BxdfNode::Serialize( stream , cache );
 	}
 
 private:
@@ -164,24 +148,20 @@ private:
 class GlassMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( GlassMaterialNode , MaterialNode );
-    
-    //! @brief  Update BSDF for this node.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    DEFINE_OUTPUT_CHANNEL( Result , GlassMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        reflectance.Serialize( stream );
-        transmittance.Serialize( stream );
-        roughnessU.Serialize( stream );
-        roughnessV.Serialize( stream );
-        BxdfNode::Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        reflectance.Serialize( stream , cache );
+        transmittance.Serialize( stream , cache );
+        roughnessU.Serialize( stream , cache );
+        roughnessV.Serialize( stream , cache );
+        BxdfNode::Serialize( stream , cache );
 	}
 
 private:
@@ -195,21 +175,17 @@ private:
 class MirrorMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( MirrorMaterialNode , MaterialNode );
-    
-    //! @brief  Update BSDF for this node.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    DEFINE_OUTPUT_CHANNEL( Result , MirrorMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        basecolor.Serialize( stream );
-        BxdfNode::Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        basecolor.Serialize( stream , cache );
+        BxdfNode::Serialize( stream , cache );
     }
 
 private:
@@ -220,13 +196,8 @@ private:
 class MeasuredMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( MeasuredMaterialNode , MaterialNode );
-    
-    //! @brief  Update BSDF for this node.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
-    
+    DEFINE_OUTPUT_CHANNEL( Result , MeasuredMaterialNode );
+
     //! @brief  Measured BRDF file is loaded in post-processing.
     void PostProcess() override;
     
@@ -235,10 +206,11 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        bxdfType.Serialize( stream );
-        bxdfFilePath.Serialize( stream );
-        BxdfNode::Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        bxdfType.Serialize( stream , cache );
+        bxdfFilePath.Serialize( stream , cache );
+        BxdfNode::Serialize( stream , cache );
     }
 
 private:
@@ -253,22 +225,18 @@ private:
 class BlendMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI(BlendMaterialNode, MaterialNode);
-
-    //! @brief  Update BSDF for this node.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
+    DEFINE_OUTPUT_CHANNEL( Result , BlendMaterialNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        bxdf0.Serialize( stream );
-        bxdf1.Serialize( stream );
-        factor.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        bxdf0.Serialize( stream , cache );
+        bxdf1.Serialize( stream , cache );
+        factor.Serialize( stream , cache );
 	}
 
 private:
@@ -286,21 +254,17 @@ private:
 class DoubleSidedMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI(DoubleSidedMaterialNode, MaterialNode);
-
-    //! @brief  Update BSDF for this node.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF(Bsdf* bsdf, Spectrum weight = 1.0f) override;
+    DEFINE_OUTPUT_CHANNEL( Result , DoubleSidedMaterialNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        bxdf0.Serialize( stream );
-        bxdf1.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        bxdf0.Serialize( stream , cache );
+        bxdf1.Serialize( stream , cache );
 	}
 
 private:

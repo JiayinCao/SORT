@@ -23,6 +23,7 @@
 class ConstantColorNode : public MaterialNode{
 public:
 	DEFINE_RTTI( ConstantColorNode , MaterialNode );
+    DEFINE_OUTPUT_CHANNEL( Result , ConstantColorNode );
 
     //! @brief  Get spectrum material property.
     //!
@@ -42,8 +43,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        src.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        src.Serialize( stream , cache );
     }
 
 private:
@@ -54,7 +56,8 @@ private:
 class ConstantFloatNode : public MaterialNode{
 public:
     DEFINE_RTTI( ConstantFloatNode , MaterialNode );
-    
+    DEFINE_OUTPUT_CHANNEL( Result , ConstantFloatNode );
+
     //! @brief  Get float material property.
     //!
     //! @param bsdf     The BSDF data structure.
@@ -73,8 +76,9 @@ public:
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-        value.Serialize( stream );
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        value.Serialize( stream , cache );
     }
 
 private:
