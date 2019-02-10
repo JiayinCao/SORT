@@ -26,49 +26,67 @@ IMPLEMENT_RTTI( GammaToLinearNode );
 IMPLEMENT_RTTI( LinearToGammaNode );
 IMPLEMENT_RTTI( NormalDecoderNode );
 
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , SORTNodeOneMinus )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , AddNode )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , LerpNode )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , BlendNode )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , MutiplyNode )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , GammaToLinearNode )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , LinearToGammaNode )
+IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , NormalDecoderNode )
+IMPLEMENT_OUTPUT_CHANNEL_END
+
 void AddNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
-    SORT_MATERIAL_GET_PROP_COLOR(c1,src1);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c1,src1);
+
     result = c0 + c1;
 }
 
 void SORTNodeOneMinus::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c,src);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c,src);
     result = Spectrum( 1.0f ) - c;
 }
 
 void LerpNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
-    SORT_MATERIAL_GET_PROP_COLOR(c1,src1);
-    SORT_MATERIAL_GET_PROP_FLOAT(f,factor);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c1,src1);
+    SORT_MATERIAL_GET_PROP_FLOAT_TMP(f,factor);
     result = lerp( c0 , c1 , f );
 }
 
 void BlendNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
-    SORT_MATERIAL_GET_PROP_COLOR(c1,src1);
-    SORT_MATERIAL_GET_PROP_FLOAT(f0,factor0);
-    SORT_MATERIAL_GET_PROP_FLOAT(f1,factor1);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c1,src1);
+    SORT_MATERIAL_GET_PROP_FLOAT_TMP(f0,factor0);
+    SORT_MATERIAL_GET_PROP_FLOAT_TMP(f1,factor1);
     result = c0 * f0 + c1 * f1;
 }
 
 void MutiplyNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
-    SORT_MATERIAL_GET_PROP_COLOR(c1,src1);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c1,src1);
     result = c0 * c1;
 }
 
 void GammaToLinearNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c,src);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c,src);
     result = Spectrum( GammaToLinear(c.GetR()) , GammaToLinear(c.GetG()) , GammaToLinear(c.GetB()) );
 }
 
 void LinearToGammaNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(c,src);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(c,src);
     result = Spectrum( LinearToGamma(c.GetR()) , LinearToGamma(c.GetG()) , LinearToGamma(c.GetB()) );
 }
 
 void NormalDecoderNode::GetMaterialProperty( Bsdf* bsdf , Vector& result ){
-    SORT_MATERIAL_GET_PROP_COLOR(n,src);
+    SORT_MATERIAL_GET_PROP_COLOR_TMP(n,src);
     result = Vector( n.GetR() * 2.0f - 1.0f , n.GetB() * 2.0f - 1.0f , n.GetG() * 2.0f - 1.0f );
 }

@@ -36,7 +36,7 @@ class LightSample;
 class Shape
 {
 public:
-	//! Empty virtual destructor.
+	//! @brief	Empty virtual destructor.
 	virtual ~Shape(){}
 
 	//! @brief Sample a point on the surface of the shape given a shading point.

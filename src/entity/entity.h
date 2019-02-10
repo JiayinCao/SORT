@@ -32,7 +32,7 @@
  */
 class Entity : public SerializableObject {
 public:
-    //! Empty virtual destructor
+    //! @brief  Empty virtual destructor
     virtual ~Entity() {}
 
     //! @brief  Fill the scene with primitives.

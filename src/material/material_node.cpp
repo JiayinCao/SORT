@@ -22,12 +22,12 @@
 #include "math/intersection.h"
 
 void MaterialNodeProperty::UpdateBsdf( Bsdf* bsdf , Spectrum weight ){
-    if( m_node )
-        m_node->UpdateBSDF( bsdf , weight );
+	auto node = m_socket->GetOwningNode();
+    if( node )
+        node->UpdateBSDF( bsdf , weight );
 }
 
-void MaterialNode::PostProcess()
-{
+void MaterialNode::PostProcess(){
 	if( m_post_processed )
 		return;
 
@@ -58,5 +58,5 @@ void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
 		return;
 	}
 
-	output.GetNode()->UpdateBSDF( bsdf );
+	output.UpdateBSDF( bsdf );
 }

@@ -43,12 +43,12 @@ enum BXDF_TYPE{
 class	Bxdf
 {
 public:
-    //! Constructor
+    //! @brief Constructor
     //! @param w    Weight of the bxdf
     //! @param type Type of the bxdf
     Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n, bool doubleSided = false);
 
-    //! Virtual destructor.
+    //! @brief Virtual destructor.
     virtual ~Bxdf(){}
 
     //! Get weight of this BXDF

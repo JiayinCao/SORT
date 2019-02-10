@@ -69,7 +69,8 @@ public:
 		auto message = "Parsing Material '" + m_name + "'";
 		SORT_PROFILE( message.c_str() );
 
-		m_root->Serialize( stream );
+		MaterialNodeCache cache;
+		m_root->Serialize( stream , cache );
 
 		// check validation
 		if( !m_root->IsNodeValid() )
