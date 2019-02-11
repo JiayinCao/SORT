@@ -18,12 +18,12 @@
 #include "rendertargetimage.h"
 #include "core/globalconfig.h"
 
-// store pixel information
 void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ){
-	m_rendertarget.SetColor( x , y , color );
+    std::lock_guard<spinlock_mutex> lock(m_mutex[y*m_width + x]);
+    Spectrum _color = m_rendertarget.GetColor(x, y);
+    m_rendertarget.SetColor(x, y, color + _color);
 }
 
-// post process
 void RenderTargetImage::PostProcess(){
 	ImageSensor::PostProcess();
     m_rendertarget.Output(GetFilePathInExeFolder(g_outputFileName));

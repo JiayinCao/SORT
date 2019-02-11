@@ -509,7 +509,7 @@ public:
     }
 };
 
-//! @brief Mateiral output node.
+//! @brief Material output node.
 /**
  * By default, each material will have exactly one output node. For those who doesn't have any OutputNode,
  * it is defined as invalid material, a default material will be used to replace this material.
