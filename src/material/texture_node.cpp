@@ -23,37 +23,31 @@
 IMPLEMENT_RTTI( GridTexNode );
 IMPLEMENT_RTTI( CheckerBoardTexNode );
 IMPLEMENT_RTTI( ImageTexNode );
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , GridTexNode )
-IMPLEMENT_OUTPUT_CHANNEL_END
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , CheckerBoardTexNode )
-IMPLEMENT_OUTPUT_CHANNEL_END
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , ImageTexNode )
-IMPLEMENT_OUTPUT_CHANNEL_END
 
-void GridTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , GridTexNode )
     const Intersection* intesection = bsdf->GetIntersection();
 
-    SORT_MATERIAL_GET_PROP_COLOR_TMP(s0,src0);
-    SORT_MATERIAL_GET_PROP_COLOR_TMP(s1,src1);
+    SORT_MATERIAL_GET_PROP_COLOR(s0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR(s1,src1);
 
     GridTexture texture( s0 , s1 );
     result = texture.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
-}
+IMPLEMENT_OUTPUT_COLOR_SOCKET_END
 
-void CheckerBoardTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , CheckerBoardTexNode )
     const Intersection* intesection = bsdf->GetIntersection();
 
-    SORT_MATERIAL_GET_PROP_COLOR_TMP(s0,src0);
-    SORT_MATERIAL_GET_PROP_COLOR_TMP(s1,src1);
+    SORT_MATERIAL_GET_PROP_COLOR(s0,src0);
+    SORT_MATERIAL_GET_PROP_COLOR(s1,src1);
 
     CheckerBoardTexture texture( s0 , s1 );
     result = texture.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
-}
+IMPLEMENT_OUTPUT_COLOR_SOCKET_END
 
-void ImageTexNode::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
+IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , ImageTexNode )
     const Intersection* intesection = bsdf->GetIntersection();
-    result = m_imageTexture.GetColorFromUV( intesection->u , intesection->v );
-}
+    result = node->m_imageTexture.GetColorFromUV( intesection->u , intesection->v );
+IMPLEMENT_OUTPUT_COLOR_SOCKET_END
 
 void ImageTexNode::PostProcess(){
 	if( m_post_processed )

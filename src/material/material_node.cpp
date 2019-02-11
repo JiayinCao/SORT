@@ -19,44 +19,49 @@
 #include "core/memory.h"
 #include "bsdf/bsdf.h"
 #include "bsdf/lambert.h"
-#include "math/intersection.h"
+#include "stream/stream.h"
 
-void MaterialNodeProperty::UpdateBsdf( Bsdf* bsdf , Spectrum weight ){
-	auto node = m_socket->GetOwningNode();
-    if( node )
-        node->UpdateBSDF( bsdf , weight );
+void MaterialNode::LinkNode( const std::string& channel , MaterialNodeInputSocket* inputSocket ){
+	bool found = m_outputs.count( channel ) != 0;
+	sAssertMsg( found , MATERIAL , "Matrial node has no output socket named %s" , channel.c_str() );
+
+	inputSocket->m_fromSocket = m_outputs[channel];
 }
 
 void MaterialNode::PostProcess(){
 	if( m_post_processed )
 		return;
 
-    for( auto node : m_props ){
-		if( node->GetNode() )
-			node->GetNode()->PostProcess();
+    for( auto input : m_inputs ){
+		if( input->GetConnectedNode() )
+			input->GetConnectedNode()->PostProcess();
 	}
-
 	m_post_processed = true;
 }
 
-void MaterialNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+void MaterialNode::UpdateBSDF( Bsdf* bsdf , const Spectrum& weight ){
 	if( weight.IsBlack() )
 		return;
 
-    for( auto node : m_props ){
-		if( node->GetNode() )
-			node->GetNode()->UpdateBSDF(bsdf , weight);
+    for( auto input : m_inputs ){
+		sAssert( input , MATERIAL );
+		input->UpdateBSDF(bsdf , weight);
 	}
 }
 
-void OutputNode::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){
+void OutputNode::UpdateBSDF( Bsdf* bsdf , const Spectrum& weight ){
 	// return a default one for invalid material
-	if( !m_node_valid || !output.GetNode() ){
+	if( !m_node_valid || !output.GetConnectedNode() ){
 		static const Spectrum default_spectrum( 0.5f , 0.5f , 0.5f );
 		const Lambert* lambert = SORT_MALLOC(Lambert)( default_spectrum , weight , DIR_UP);
 		bsdf->AddBxdf( lambert );
 		return;
 	}
 
-	output.UpdateBSDF( bsdf );
+	static const Spectrum fullWeight( 1.0f );
+	output.UpdateBSDF( bsdf , fullWeight );
+}
+
+void OutputNode::Serialize( IStreamBase& stream , MaterialNodeCache& cache ){
+	output.Serialize( stream , cache );
 }
