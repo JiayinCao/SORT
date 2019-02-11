@@ -42,6 +42,11 @@ SORT_STATS_COUNTER("Statistics", "Total Primitive Count", sScenePrimitiveCount);
 SORT_STATS_COUNTER("Statistics", "Total Light Count", sSceneLightCount);
 
 bool Scene::LoadScene( IStreamBase& stream ){
+	constexpr unsigned int verificationBit = 1234567;
+	unsigned int checkingBit;
+	stream >> checkingBit;
+	sAssertMsg( checkingBit == verificationBit , RESOURCE , "Serialization is broken." );
+
 	while( true ){
 		std::string class_id;
 		stream >> class_id;

@@ -18,143 +18,35 @@
 #pragma once
 
 #include <unordered_set>
-#include <unordered_map>
-#include "spectrum/spectrum.h"
+#include "material_node_socket.h"
 #include "core/rtti.h"
-#include "spectrum/rgbspectrum.h"
-#include "math/vector4.h"
-#include "stream/stream.h"
-
-#define SORT_PROP_CAT_PROXY(v0, v1)                     v0 ## v1
-#define SORT_PROP_CAT(v0, v1)                           SORT_PROP_CAT_PROXY(v0,v1)
-#define SORT_STATS_UNIQUE_PROP(var)                     SORT_PROP_CAT(SORT_PROP_CAT(var, __LINE__), var)
-
-#define SORT_MATERIAL_DEFINE_PROP_COMMON(prop,T)        T prop; MaterialNodeRegister SORT_STATS_UNIQUE_PROP(prop) = MaterialNodeRegister( prop , *this );
-#define SORT_MATERIAL_DEFINE_PROP_COLOR(prop)           SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyColor)
-#define SORT_MATERIAL_DEFINE_PROP_STR(prop)             SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyString)
-#define SORT_MATERIAL_DEFINE_PROP_FLOAT(prop)           SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyFloat)
-#define SORT_MATERIAL_DEFINE_PROP_VECTOR(prop)          SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyVector)
-#define SORT_MATERIAL_DEFINE_PROP_BXDF(prop)            SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyBxdf)
-
-#define SORT_MATERIAL_GET_PROP_COMMON(v,prop,T)         T v; node->prop.GetMaterialProperty(bsdf,v);
-#define SORT_MATERIAL_GET_PROP_FLOAT(v,prop)            SORT_MATERIAL_GET_PROP_COMMON(v,prop,float)
-#define SORT_MATERIAL_GET_PROP_COLOR(v,prop)            SORT_MATERIAL_GET_PROP_COMMON(v,prop,Spectrum)
-#define SORT_MATERIAL_GET_PROP_STR(v,prop)              SORT_MATERIAL_GET_PROP_COMMON(v,prop,std::string)
-#define SORT_MATERIAL_GET_PROP_VECTOR(v,prop)           SORT_MATERIAL_GET_PROP_COMMON(v,prop,Vector)
-
-#define SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,T)     T v; prop.GetMaterialProperty(bsdf,v);
-#define SORT_MATERIAL_GET_PROP_FLOAT_TMP(v,prop)        SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,float)
-#define SORT_MATERIAL_GET_PROP_COLOR_TMP(v,prop)        SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,Spectrum)
-#define SORT_MATERIAL_GET_PROP_STR_TMP(v,prop)          SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,std::string)
-#define SORT_MATERIAL_GET_PROP_VECTOR_TMP(v,prop)       SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,Vector)
-
-#define DEFINE_OUTPUT_CHANNEL( CHANNEL , NODE )     \
-    class CHANNEL : public OutputSocket{\
-        public:\
-            using  NODE##CHANNEL = NODE::CHANNEL;\
-            DEFINE_RTTI( NODE##CHANNEL , OutputSocket );\
-            void UpdateBSDF( Bsdf* bsdf , Spectrum weight ) override;\
-    };\
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight ) override;
-
-#define IMPLEMENT_OUTPUT_CHANNEL_BEGIN( CHANNEL , NODE )  \
-    using NODE##CHANNEL = NODE::CHANNEL; \
-    IMPLEMENT_RTTI( NODE##CHANNEL );\
-    void NODE::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){\
-        sAssert( false , MATERIAL );\
-    }\
-    void NODE::CHANNEL::UpdateBSDF( Bsdf* bsdf , Spectrum weight ){\
-        auto node = dynamic_cast<NODE*>(m_node.get());
-
-#define IMPLEMENT_OUTPUT_CHANNEL_END  }
-
-using MaterialNodeCache = std::unordered_map<std::string,std::shared_ptr<class MaterialNode>>;
-
-class Bsdf;
-
-enum MATERIAL_NODE_PROPERTY_TYPE{
-    MNPT_NONE = 0,
-    MNPT_FLOAT,
-    MNPT_COLOR,
-    MNPT_STR,
-    MNPT_VECTOR,
-    MNPT_BXDF
-};
-
-//! @brief  Output socket of a node.
-class OutputSocket{
-public:
-    //! @brief  Virtual destructor.
-    virtual ~OutputSocket() {}
-
-    //! @brief  Update BRDF of the output channel.
-    //!
-    //! @param bsdf     The BSDF data structure to be filled.
-    //! @param weight   The weight for this bsdf sub-tree.
-    virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) = 0;
-
-    //! @brief  Update owning node.
-    //!
-    //! @param  Node owning this socket.
-    void UpdateOwningNode( std::shared_ptr<MaterialNode>& node ){
-        m_node = node;
-    }
-
-    //! @brief  Get owning node.
-    //!
-    //! @return Node owning this socket.
-    class MaterialNode*   GetOwningNode(){
-        return m_node.get();
-    }
-
-protected:
-    std::shared_ptr<MaterialNode>    m_node = nullptr;     /**< Node owning the socket. */
-};
 
 //! @brief  Material node is the base class for node in material editor.
+/**
+ * A material node is a basic unit in material definition. There are multiple types of material nodes in SORT material system.
+ * Each material node may have multiple input and output sockets. A material node is purely a collected of data and sockets, it
+ * defines no specific behavior of the node itself.
+ */
 class MaterialNode{
 public:
     //! @brief  Empty virtual destructor.
     virtual ~MaterialNode() = default;
+
+    //! @brief  Link node with input socket.
+    //!
+    //! If there is no such a name called @param channel, it means there is something wrong in serialization process,
+    //! in which case the program will crash right away.
+    //!
+    //! @param  channel     Name of the output socket to be linked.
+    //! @param  inputSocket The input socket to link.
+    void    LinkNode( const std::string& channel , MaterialNodeInputSocket* inputSocket );
     
     //! @brief  Update BSDF for this node.
     //!
     //! @param bsdf     The BSDF data structure to be filled.
     //! @param weight   The weight for this bsdf sub-tree.
-    virtual void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f );
-    
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    virtual void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) {
-        sAssertMsg(false, MATERIAL, "Get spectrum from wrong data type" );
-    }
+    virtual void UpdateBSDF( Bsdf* bsdf , const Spectrum& weight );
 
-    //! @brief  Get float material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    virtual void GetMaterialProperty( Bsdf* bsdf , float& result ) {
-        sAssertMsg(false, MATERIAL, "Get float from wrong data type" );
-    }
-
-    //! @brief  Get string material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    virtual void GetMaterialProperty( Bsdf* bsdf , std::string& result ) {
-        sAssertMsg(false, MATERIAL, "Get string from wrong data type" );
-    }
-
-    //! @brief  Get vector material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    virtual void GetMaterialProperty( Bsdf* bsdf , Vector& result ) {
-        sAssertMsg(false, MATERIAL, "Get vector from wrong data type" );
-    }
-    
     //! @brief  Get the type of the material node.
     //!
     //! @return         Material node type.
@@ -183,330 +75,43 @@ public:
     virtual void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) {}
 
 protected:
-    /**< All properties in the node. */
-    std::unordered_set< class MaterialNodeProperty* > m_props;
+    /**< All input sockets in the material node. */
+    std::unordered_set< class MaterialNodeInputSocket* >            m_inputs;
+    /**< All output sockets in the material node. */
+    std::unordered_map< std::string , MaterialNodeOutputSocket* >   m_outputs;
     
     /**< Whether the node is valid or not. */
     bool m_node_valid = true;
-    
     /**< Whether post processing is done for this node. */
     bool m_post_processed = false;
     
-    friend class MaterialNodeRegister;
-};
-
-//! @brief  Basic socket property in SORT material node.
-/**
- * A socket may be connected with a sub node, which means that 'node' member will not be 'nullptr'.
- * Otherwise, this will be merely a property defined in sub-classes.
- */
-class MaterialNodeProperty{
-public:
-    //! @brief Update bsdf, this is for bxdf wrappers like Blend , Coat or any other BXDF that can attach other BXDF as input.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBsdf( Bsdf* bsdf , Spectrum weight = Spectrum( 1.0f ) );
-
-    //! @brief Get the type of the node property.
-    //!
-    //! @return         The type of the node property.
-    virtual MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const { 
-        return MNPT_NONE; 
-    }
-    
-    //! @brief  Get the node attached to the current socket.
-    //!
-    //! @return         Node attached to the current socket. 'nullptr' means no node attached.
-    inline MaterialNode*    GetNode() { 
-        return m_socket != nullptr ? m_socket->GetOwningNode() : nullptr;
-    }
-
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    //! @param  cache       Cache for avoiding creating duplicated node.
-    virtual void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) = 0;
-
-protected:
-	/**< sub node if it has value. */
-    std::unique_ptr<OutputSocket>	m_socket = nullptr;
-};
-
-//! @brief  Color property in SORT material node.
-class MaterialNodePropertyColor : public MaterialNodeProperty{
-public:
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) {
-        if( auto node = m_socket ? m_socket->GetOwningNode() : nullptr )
-            node->GetMaterialProperty(bsdf, result);
-        else
-            result = color;
-    }
-    
-    //! @brief  Get the type of the material node property.
-    //!
-    //! @return         The type of the material node property.
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override { 
-        return MNPT_COLOR; 
-    }
-    
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    //! @param  cache       Cache for avoiding creating duplicated node.
-    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-        std::string socket_type;
-        stream >> socket_type;
-        m_socket = MakeUniqueInstance<OutputSocket>( socket_type );
-
-        if( m_socket == nullptr ){
-            stream >> color;
-        }else{
-            std::string class_name;
-            stream >> class_name;
-            if( cache.count( class_name ) == 0 ){
-                std::string class_id;
-                stream >> class_id;
-                auto node = MakeSharedInstance<MaterialNode>( class_id );
-                sAssert( node != nullptr , MATERIAL );
-
-                cache[class_name] = node;
-                m_socket->UpdateOwningNode( node );
-                node->Serialize( stream , cache );
-            }else{
-                // The node has at least two different path to root.
-                m_socket->UpdateOwningNode( cache[class_name] );
-            }
+    //! @brief  Auto register for node input socket.
+    class MaterialNodeInputSocketRegister{
+    public:
+        //! @brief  Constructor.
+        //!
+        //! @param  socket      Material node property.
+        //! @param  node        Reference of the node that this material property belongs to.
+        MaterialNodeInputSocketRegister( MaterialNodeInputSocket& socket , MaterialNode& node ){
+            node.m_inputs.insert( &socket );
         }
-	}
+    };
 
-private:
-    /**< The color value of the node property. */
-    Spectrum color;
-};
-
-//! @brief  Float property in SORT material node.
-class MaterialNodePropertyFloat : public MaterialNodeProperty{
-public:
-    //! @brief  Get float material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , float& result ) {
-        if( auto node = m_socket ? m_socket->GetOwningNode() : nullptr )
-            node->GetMaterialProperty(bsdf, result);
-        else
-            result = m_value;
-    }
-    
-    //! @brief  Get the type of the material node property.
-    //!
-    //! @return         The type of the material node property.
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
-        return MNPT_FLOAT;
-    }
-    
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    //! @param  cache       Cache for avoiding creating duplicated node.
-    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-        std::string socket_type;
-        stream >> socket_type;
-        m_socket = MakeUniqueInstance<OutputSocket>( socket_type );
-        
-        if( m_socket == nullptr ){
-            stream >> m_value;
-        }else{
-            std::string class_name;
-            stream >> class_name;
-            if( cache.count( class_name ) == 0 ){
-                std::string class_id;
-                stream >> class_id;
-                auto node = MakeSharedInstance<MaterialNode>( class_id );
-                sAssert( node != nullptr , MATERIAL );
-
-                cache[class_name] = node;
-                m_socket->UpdateOwningNode( node );
-                node->Serialize( stream , cache );
-            }else{
-                // The node has at least two different path to root.
-                m_socket->UpdateOwningNode( cache[class_name] );
-            }
+    //! @brief  Auto register for node output socket.
+    class MaterialNodeOutputSocketRegister{
+    public:
+        //! @brief  Constructor.
+        //!
+        //! @param  socket      Material node socket.
+        //! @param  name        Name of the output socket.
+        //! @param  node        Reference of the node that this material property belongs to.
+        MaterialNodeOutputSocketRegister( MaterialNodeOutputSocket& socket , 
+                                          const std::string& name , 
+                                          MaterialNode& node ){
+            node.m_outputs[name] = &socket;
+            socket.UpdateOwningNode(&node);
         }
-	}
-
-private:
-    /**< The float value of the node property. */
-    float m_value;
-};
-
-//! @brief  String property in SORT material node.
-class MaterialNodePropertyString : public MaterialNodeProperty{
-public:
-    //! @brief  Get string material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , std::string& result ) {
-        result = m_str;
-    }
-    
-    //! @brief  Get the type of the material node property.
-    //!
-    //! @return         The type of the material node property.
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
-        return MNPT_STR;
-    }
-    
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    //! @param  cache       Cache for avoiding creating duplicated node.
-    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-        std::string dummy;
-        stream >> dummy;
-        stream >> m_str;
-	}
-
-private:
-    /**< The string value of the node property. */
-	std::string	m_str;
-};
-
-//! @brief  BXDF property in SORT material node.
-class MaterialNodePropertyBxdf : public MaterialNodeProperty{
-public:
-    //! @brief  Update BSDF based on the sub-tree of the node.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param weight   The weight for the BSDF sub-tree.
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = Spectrum(1.0f) ){
-        if( m_socket )
-            m_socket->UpdateBSDF(bsdf, weight);
-    }
-    
-    //! @brief  Get the type of the material node property.
-    //!
-    //! @return         The type of the material node property.
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
-        return MNPT_BXDF;
-    }
-    
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    //! @param  cache       Cache for avoiding creating duplicated node.
-    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-        std::string socket_type;
-        stream >> socket_type;
-        m_socket = MakeUniqueInstance<OutputSocket>( socket_type );
-
-        if( m_socket != nullptr ){
-            std::string class_name;
-            stream >> class_name;
-            if( cache.count( class_name ) == 0 ){
-                std::string class_id;
-                stream >> class_id;
-                auto node = MakeSharedInstance<MaterialNode>( class_id );
-                sAssert( node != nullptr , MATERIAL );
-
-                cache[class_name] = node;
-                m_socket->UpdateOwningNode( node );
-                node->Serialize( stream , cache );
-            }else{
-                // The node has at least two different path to root.
-                m_socket->UpdateOwningNode( cache[class_name] );
-            }
-        }
-	}
-};
-
-//! @brief  Vector property of SORT material node.
-class MaterialNodePropertyVector : public MaterialNodeProperty{
-public:
-    //! @brief  Get vector material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Vector& result ) {
-        if( auto node = m_socket ? m_socket->GetOwningNode() : nullptr )
-            node->GetMaterialProperty(bsdf, result);
-        else
-            result = m_vec;
-    }
-    
-    //! @brief  Get the type of the material node property.
-    //!
-    //! @return         The type of the material node property.
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
-        return MNPT_VECTOR;
-    }
-    
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    //! @param  cache       Cache for avoiding creating duplicated node.
-    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-        std::string socket_type;
-        stream >> socket_type;
-        m_socket = MakeUniqueInstance<OutputSocket>( socket_type );
-        
-        if( m_socket == nullptr ){
-            stream >> m_vec;
-        }else{
-            std::string class_name;
-            stream >> class_name;
-            if( cache.count( class_name ) == 0 ){
-                std::string class_id;
-                stream >> class_id;
-                auto node = MakeSharedInstance<MaterialNode>( class_id );
-                sAssert( node != nullptr , MATERIAL );
-
-                cache[class_name] = node;
-                m_socket->UpdateOwningNode( node );
-                node->Serialize( stream , cache );
-            }else{
-                // The node has at least two different path to root.
-                m_socket->UpdateOwningNode( cache[class_name] );
-            }
-        }
-	}
-
-private:
-    /**< The vector value of the node property. */
-    Vector    m_vec;
-};
-
-//! @brief  Auto register for node socket properties.
-/**
- * This is a class hidden behind the macros. It should not be explicitly defined anywhere else in the code.
- */
-class MaterialNodeRegister{
-public:
-    //! @brief  Constructor.
-    //!
-    //! @param  prop        Material node property.
-    //! @param  node        Reference of the node that this material property belongs to.
-    MaterialNodeRegister( MaterialNodeProperty& prop , MaterialNode& node ){
-        node.m_props.insert( &prop );
-    }
+    };
 };
 
 //! @brief Material output node.
@@ -520,7 +125,7 @@ public:
     //!
     //! @param bsdf     The BSDF data structure to be filled.
     //! @param weight   The weight for this bsdf sub-tree.
-    void UpdateBSDF( Bsdf* bsdf , Spectrum weight = 1.0f ) override;
+    void UpdateBSDF( Bsdf* bsdf , const Spectrum& weight ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -528,9 +133,7 @@ public:
     //!
     //! @param  stream      Input stream for data.
     //! @param  cache       Cache for avoiding creating duplicated node.
-    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-		output.Serialize( stream , cache );
-	}
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override;
 
 private:
     SORT_MATERIAL_DEFINE_PROP_BXDF( output );

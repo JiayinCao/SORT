@@ -35,14 +35,8 @@ class TextureNode : public MaterialNode{
 class GridTexNode : public TextureNode{
 public:
 	DEFINE_RTTI( GridTexNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , GridTexNode );
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , GridTexNode );
 
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -63,13 +57,7 @@ private:
 class CheckerBoardTexNode : public TextureNode{
 public:
 	DEFINE_RTTI( CheckerBoardTexNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , CheckerBoardTexNode );
-
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , CheckerBoardTexNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -91,14 +79,8 @@ private:
 class ImageTexNode : public TextureNode{
 public:
 	DEFINE_RTTI( ImageTexNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , ImageTexNode );
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , ImageTexNode );
 
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
 	//! Load texture from tile.
     void PostProcess() override;
 

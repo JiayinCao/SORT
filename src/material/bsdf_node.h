@@ -26,7 +26,7 @@
 class DisneyPrincipleNode : public BxdfNode{
 public:
     DEFINE_RTTI( DisneyPrincipleNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , DisneyPrincipleNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , DisneyPrincipleNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -67,7 +67,7 @@ private:
 class PrincipleMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( PrincipleMaterialNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , PrincipleMaterialNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , PrincipleMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -99,7 +99,7 @@ private:
 class MatteMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( MatteMaterialNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , MatteMaterialNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , MatteMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -122,7 +122,7 @@ private:
 class PlasticMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( PlasticMaterialNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , PlasticMaterialNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , PlasticMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -148,7 +148,7 @@ private:
 class GlassMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( GlassMaterialNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , GlassMaterialNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , GlassMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -175,7 +175,7 @@ private:
 class MirrorMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( MirrorMaterialNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , MirrorMaterialNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , MirrorMaterialNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -196,7 +196,7 @@ private:
 class MeasuredMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI( MeasuredMaterialNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , MeasuredMaterialNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , MeasuredMaterialNode );
 
     //! @brief  Measured BRDF file is loaded in post-processing.
     void PostProcess() override;
@@ -225,7 +225,7 @@ private:
 class BlendMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI(BlendMaterialNode, MaterialNode);
-    DEFINE_OUTPUT_CHANNEL( Result , BlendMaterialNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , BlendMaterialNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -254,7 +254,7 @@ private:
 class DoubleSidedMaterialNode : public BxdfNode{
 public:
     DEFINE_RTTI(DoubleSidedMaterialNode, MaterialNode);
-    DEFINE_OUTPUT_CHANNEL( Result , DoubleSidedMaterialNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , DoubleSidedMaterialNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!

@@ -45,7 +45,8 @@ public:
 	//!								meaning this is no need to release the memory in BSDF.
 	class Bsdf* GetBsdf( const class Intersection* intersect ) const{
 		Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-		m_root->UpdateBSDF(bsdf);
+		Spectrum weight(1.0f);
+		m_root->UpdateBSDF( bsdf , weight );
 		return bsdf;
 	}
 
@@ -69,8 +70,7 @@ public:
 		auto message = "Parsing Material '" + m_name + "'";
 		SORT_PROFILE( message.c_str() );
 
-		MaterialNodeCache cache;
-		m_root->Serialize( stream , cache );
+		m_root->Serialize( stream , m_cache );
 
 		// check validation
 		if( !m_root->IsNodeValid() )
@@ -84,4 +84,6 @@ private:
 	std::string	 m_name;
 	/**< Root node of material node graph tree. */
 	mutable std::unique_ptr<OutputNode>	m_root = std::make_unique<OutputNode>();
+	/**< Container holding the nodes to make sure their life time stays with the node itself. */
+	MaterialNodeCache m_cache;
 };

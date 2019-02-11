@@ -34,14 +34,8 @@ public:
 class AddNode : public OperatorNode{
 public:
 	DEFINE_RTTI( AddNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , AddNode );
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , AddNode );
 
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -62,13 +56,7 @@ private:
 class SORTNodeOneMinus : public OperatorNode{
 public:
     DEFINE_RTTI( SORTNodeOneMinus , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeOneMinus );
-    
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , SORTNodeOneMinus );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -88,14 +76,8 @@ private:
 class LerpNode : public OperatorNode{
 public:
 	DEFINE_RTTI( LerpNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , LerpNode );
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , LerpNode );
 
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -118,14 +100,8 @@ private:
 class BlendNode : public OperatorNode{
 public:
 	DEFINE_RTTI( BlendNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , BlendNode );
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , BlendNode );
 
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -150,14 +126,8 @@ private:
 class MutiplyNode : public OperatorNode{
 public:
 	DEFINE_RTTI( MutiplyNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , MutiplyNode );
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , MutiplyNode );
 
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -178,13 +148,7 @@ private:
 class GammaToLinearNode : public OperatorNode{
 public:
     DEFINE_RTTI( GammaToLinearNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , GammaToLinearNode );
-    
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , GammaToLinearNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -204,13 +168,7 @@ private:
 class LinearToGammaNode : public OperatorNode{
 public:
     DEFINE_RTTI( LinearToGammaNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , LinearToGammaNode );
-    
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , LinearToGammaNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -230,14 +188,8 @@ private:
 class NormalDecoderNode : public OperatorNode{
 public:
     DEFINE_RTTI( NormalDecoderNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , NormalDecoderNode );
+    DEFINE_OUTPUT_VEC_SOCKET( Result , NormalDecoderNode );
 
-    //! @brief  Get vector material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Vector data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Vector& result ) override;
-    
     //! @brief  Get the type of the material node.
     //!
     //! @return         Material node type.
