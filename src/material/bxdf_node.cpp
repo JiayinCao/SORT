@@ -38,26 +38,26 @@ IMPLEMENT_RTTI( FourierBxdfNode );
 IMPLEMENT_RTTI( MerlNode );
 IMPLEMENT_RTTI( CoatNode );
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , LambertNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , LambertNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
 	bsdf->AddBxdf( SORT_MALLOC(Lambert)(bc , weight , n) );
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , LambertTransmissionNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , LambertTransmissionNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
     bsdf->AddBxdf( SORT_MALLOC(LambertTransmission)(bc, weight , n ) );
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , OrenNayarNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , OrenNayarNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(r,roughness);
     bsdf->AddBxdf( SORT_MALLOC(OrenNayar)(bc, r , weight , n ) );
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , MicrofacetReflectionNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , MicrofacetReflectionNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(ru,roughnessU);
@@ -76,9 +76,9 @@ IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , MicrofacetReflectionNode )
 
 	const auto frenel = SORT_MALLOC( FresnelConductor )(_eta, _k);
 	bsdf->AddBxdf( SORT_MALLOC(MicroFacetReflection)(bc , frenel , dist , weight , n ) );
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , MicrofacetRefractionNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , MicrofacetRefractionNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
     SORT_MATERIAL_GET_PROP_FLOAT(ru,roughnessU);
@@ -96,18 +96,18 @@ IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , MicrofacetRefractionNode )
         dist = SORT_MALLOC(GGX)( ru , rv );    // GGX is default
 
 	bsdf->AddBxdf( SORT_MALLOC(MicroFacetRefraction)(bc, dist , ext_eta , in_eta , weight , n ) );
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , AshikhmanShirleyNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , AshikhmanShirleyNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(specDiffuse,diffuse);
     SORT_MATERIAL_GET_PROP_FLOAT(specSpecular,specular);
     SORT_MATERIAL_GET_PROP_FLOAT(ru,roughnessU);
     SORT_MATERIAL_GET_PROP_FLOAT(rv,roughnessV);
     bsdf->AddBxdf(SORT_MALLOC(AshikhmanShirley)(specDiffuse, specSpecular, ru, rv , weight , n ));
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , PhongNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , PhongNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(specDiffuse,diffuse);
     SORT_MATERIAL_GET_PROP_COLOR(specSpecular,specular);
@@ -117,12 +117,12 @@ IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , PhongNode )
     if (specDiffuse.GetIntensity() + specSpecular.GetIntensity() <= 0.0f)
         return;
     bsdf->AddBxdf(SORT_MALLOC(Phong)(specDiffuse * r, specSpecular * ( 1.0f - r ), p, weight, n));
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , MerlNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , MerlNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     bsdf->AddBxdf( SORT_MALLOC(Merl)( node->data , weight , n ) );
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
 void MerlNode::PostProcess(){
     if( m_post_processed )
@@ -136,10 +136,10 @@ void MerlNode::PostProcess(){
     BxdfNode::PostProcess();
 }
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , FourierBxdfNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , FourierBxdfNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     bsdf->AddBxdf( SORT_MALLOC(FourierBxdf)( node->fourierBxdfData , weight , n ) );
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
 // post process
 void FourierBxdfNode::PostProcess(){
@@ -154,7 +154,7 @@ void FourierBxdfNode::PostProcess(){
     BxdfNode::PostProcess();
 }
 
-IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , CoatNode )
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , CoatNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
     SORT_MATERIAL_GET_PROP_COLOR(s,sigma);
     SORT_MATERIAL_GET_PROP_FLOAT(r,roughness);
@@ -162,6 +162,6 @@ IMPLEMENT_OUTPUT_CHANNEL_BEGIN( Result , CoatNode )
     SORT_MATERIAL_GET_PROP_FLOAT(t,thickness);
     
     Bsdf* bottom = SORT_MALLOC(Bsdf)( bsdf->GetIntersection() , true );
-    node->bxdf.UpdateBsdf( bottom , weight );
+    node->bxdf.UpdateBSDF( bottom , weight );
     bsdf->AddBxdf( SORT_MALLOC(Coat)( t, i, r, s, bottom, weight, n ) );
-IMPLEMENT_OUTPUT_CHANNEL_END
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END

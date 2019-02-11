@@ -139,6 +139,8 @@ def create_path(scene, force_debug):
 
 # export scene
 def export_scene(scene, fs):
+    fs.serialize( int(1234567) )
+
     # camera node
     camera = exporter_common.getCamera(scene)
     pos, target, up = lookAtSORT(camera)
@@ -434,13 +436,14 @@ def export_material(scene, fs):
             continue
         material_count += 1
 
+    if scene.allUseDefaultMaterial is True:
+        fs.serialize( int(0) )
+        return None
+
     global matname_to_id
     i = 0
     fs.serialize( int(material_count) )
     for material in exporter_common.getMaterialList(scene):
-        # get the sort tree nodes
-        ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-
         # get output nodes
         output_node = find_output_node(material)
         if output_node is None:
@@ -464,8 +467,8 @@ def export_material(scene, fs):
                     input_socket = socket.links[0].from_socket
                     input_node = input_socket.node
 
-                    fs.serialize(input_node.sort_bxdf_type + input_socket.name)
                     fs.serialize(input_node.name)
+                    fs.serialize(input_node.sort_bxdf_type + input_socket.name)
                     if input_node.name not in cache:
                         fs.serialize(input_node.sort_bxdf_type)
                         serialize_prop(input_node, fs, cache)
@@ -473,6 +476,7 @@ def export_material(scene, fs):
                         # make sure it doesn't get serialized again
                         cache.add(input_node.name)
                 else:
+                    fs.serialize('')
                     fs.serialize('')
                     fs.serialize( socket.export_serialization_value() )
         serialize_prop(output_node, fs, cache)

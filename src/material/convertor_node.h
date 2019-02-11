@@ -23,7 +23,7 @@
 class SORTNodeComposite : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeComposite , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeComposite );
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , SORTNodeComposite );
 
     //! @brief  Get the type of the material node.
     //!
@@ -31,12 +31,6 @@ public:
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
         return MNPT_COLOR;
     }
-    
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -60,7 +54,7 @@ private:
 class SORTNodeExtractRed : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeExtractRed , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeExtractRed );
+    DEFINE_OUTPUT_FLOAT_SOCKET( Result , SORTNodeExtractRed );
 
     //! @brief  Get the type of the material node.
     //!
@@ -68,12 +62,6 @@ public:
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
         return MNPT_FLOAT;
     }
-    
-    //! @brief  Get float material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -93,7 +81,7 @@ private:
 class SORTNodeExtractGreen : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeExtractGreen , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeExtractGreen );
+    DEFINE_OUTPUT_FLOAT_SOCKET( Result , SORTNodeExtractGreen );
 
     //! @brief  Get the type of the material node.
     //!
@@ -101,12 +89,6 @@ public:
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
         return MNPT_FLOAT;
     }
-    
-    //! @brief  Get float material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -126,7 +108,7 @@ private:
 class SORTNodeExtractBlue : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeExtractBlue , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeExtractBlue );
+    DEFINE_OUTPUT_FLOAT_SOCKET( Result , SORTNodeExtractBlue );
 
     //! @brief  Get the type of the material node.
     //!
@@ -134,13 +116,7 @@ public:
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
         return MNPT_FLOAT;
     }
-    
-    //! @brief  Get float material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
-    
+
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
@@ -159,7 +135,7 @@ private:
 class SORTNodeExtractIntensity : public MaterialNode{
 public:
     DEFINE_RTTI( SORTNodeExtractIntensity , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , SORTNodeExtractIntensity );
+    DEFINE_OUTPUT_FLOAT_SOCKET( Result , SORTNodeExtractIntensity );
 
     //! @brief  Get the type of the material node.
     //!
@@ -167,12 +143,6 @@ public:
     MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
         return MNPT_FLOAT;
     }
-    
-    //! @brief  Get float material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   The result to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
     
     //! @brief  Serialization interface. Loading data from stream.
     //!

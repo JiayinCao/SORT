@@ -23,14 +23,8 @@
 class ConstantColorNode : public MaterialNode{
 public:
 	DEFINE_RTTI( ConstantColorNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , ConstantColorNode );
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , ConstantColorNode );
 
-    //! @brief  Get spectrum material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Spectrum data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , Spectrum& result ) override;
-    
     //! @brief  Get the type of the material node.
     //!
     //! @return         Material node type.
@@ -56,14 +50,8 @@ private:
 class ConstantFloatNode : public MaterialNode{
 public:
     DEFINE_RTTI( ConstantFloatNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , ConstantFloatNode );
+    DEFINE_OUTPUT_COLOR_SOCKET( Result , ConstantFloatNode );
 
-    //! @brief  Get float material property.
-    //!
-    //! @param bsdf     The BSDF data structure.
-    //! @param result   Float data structure to be filled.
-    void GetMaterialProperty( Bsdf* bsdf , float& result ) override;
-    
     //! @brief  Get the type of the material node.
     //!
     //! @return         Material node type.

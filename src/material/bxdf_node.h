@@ -49,7 +49,7 @@ protected:
 class LambertNode : public BxdfNode{
 public:
 	DEFINE_RTTI( LambertNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , LambertNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , LambertNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -70,7 +70,7 @@ private:
 class LambertTransmissionNode : public BxdfNode{
 public:
     DEFINE_RTTI( LambertTransmissionNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , LambertTransmissionNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , LambertTransmissionNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -91,7 +91,7 @@ private:
 class OrenNayarNode : public BxdfNode{
 public:
 	DEFINE_RTTI( OrenNayarNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , OrenNayarNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , OrenNayarNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -114,7 +114,7 @@ private:
 class MicrofacetReflectionNode : public BxdfNode{
 public:
 	DEFINE_RTTI( MicrofacetReflectionNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , MicrofacetReflectionNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , MicrofacetReflectionNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -145,7 +145,7 @@ private:
 class MicrofacetRefractionNode : public BxdfNode{
 public:
 	DEFINE_RTTI( MicrofacetRefractionNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , MicrofacetRefractionNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , MicrofacetRefractionNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -176,7 +176,7 @@ private:
 class AshikhmanShirleyNode : public BxdfNode{
 public:
     DEFINE_RTTI(AshikhmanShirleyNode, MaterialNode);
-    DEFINE_OUTPUT_CHANNEL( Result , AshikhmanShirleyNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , AshikhmanShirleyNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -203,7 +203,7 @@ private:
 class PhongNode : public BxdfNode{
 public:
     DEFINE_RTTI(PhongNode, MaterialNode);
-    DEFINE_OUTPUT_CHANNEL( Result , PhongNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , PhongNode );
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
@@ -230,7 +230,7 @@ private:
 class MerlNode : public BxdfNode{
 public:
     DEFINE_RTTI( MerlNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , MerlNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , MerlNode );
     
     //! @brief  Measured BRDF file is loaded in post-processing.
     void PostProcess() override;
@@ -257,7 +257,7 @@ private:
 class FourierBxdfNode : public BxdfNode{
 public:
     DEFINE_RTTI( FourierBxdfNode , MaterialNode );
-    DEFINE_OUTPUT_CHANNEL( Result , FourierBxdfNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , FourierBxdfNode );
 
     //! @brief  Measured BRDF file is loaded in post-processing.
     void PostProcess() override;
@@ -284,7 +284,7 @@ private:
 class CoatNode : public BxdfNode{
 public:
     DEFINE_RTTI(CoatNode, MaterialNode);
-    DEFINE_OUTPUT_CHANNEL( Result , CoatNode );
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , CoatNode );
     
     //! @brief  Serialization interface. Loading data from stream.
     //!
