@@ -558,14 +558,6 @@ class SORTNodeExtract(SORTShadingNode):
         self.outputs.new( self.output_type , 'Intensity' )
         pass
 
-@SORTPatternGraph.register_node('Convertor')
-class SORTNodeIntensity(SORTShadingNode):
-    bl_label = 'Intensity'
-    bl_idname = 'SORTNodeIntensity'
-    output_type = 'SORTNodeSocketFloat'
-    sort_bxdf_type = 'SORTNodeExtractIntensity'
-    property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
-
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Output Nodes for SORT
 #------------------------------------------------------------------------------------------------------------------------------------
