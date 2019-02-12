@@ -477,7 +477,6 @@ def export_material(scene, fs):
                         cache.add(input_node.name)
                 else:
                     fs.serialize('')
-                    fs.serialize('')
                     fs.serialize( socket.export_serialization_value() )
         serialize_prop(output_node, fs, cache)
     del fs
