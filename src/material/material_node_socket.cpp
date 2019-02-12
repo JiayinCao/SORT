@@ -28,11 +28,13 @@ void MaterialNodePropertyColor::GetMaterialProperty( Bsdf* bsdf , Spectrum& resu
 }
 
 void MaterialNodePropertyColor::Serialize( IStreamBase& stream , MaterialNodeCache& cache ){
-    std::string materialNodeName , materialNodeOutputSocket;
-    stream >> materialNodeName >> materialNodeOutputSocket;
+    std::string materialNodeName;
+    stream >> materialNodeName;
     if( materialNodeName.empty() ){
         stream >> color;
     }else{
+        std::string materialNodeOutputSocket;
+        stream >> materialNodeOutputSocket;
         if( cache.count(materialNodeName) == 0 ){
             std::string materialNodeType;
             stream >> materialNodeType;
@@ -52,11 +54,13 @@ void MaterialNodePropertyFloat::GetMaterialProperty( Bsdf* bsdf , float& result 
 }
 
 void MaterialNodePropertyFloat::Serialize( IStreamBase& stream , MaterialNodeCache& cache ){
-    std::string materialNodeName , materialNodeOutputSocket;
-    stream >> materialNodeName >> materialNodeOutputSocket;
+    std::string materialNodeName;
+    stream >> materialNodeName;
     if( materialNodeName.empty() ){
         stream >> m_value;
     }else{
+        std::string materialNodeOutputSocket;
+        stream >> materialNodeOutputSocket;
         if( cache.count( materialNodeName) == 0 ){
             std::string materialNodeType;
             stream >> materialNodeType;
@@ -66,7 +70,6 @@ void MaterialNodePropertyFloat::Serialize( IStreamBase& stream , MaterialNodeCac
         }
         cache[materialNodeName]->LinkNode( materialNodeOutputSocket , this );
     }
-    
 }
 
 void MaterialNodePropertyString::GetMaterialProperty( Bsdf* bsdf , std::string& result ) {
@@ -85,10 +88,11 @@ void MaterialNodePropertyBxdf::UpdateBSDF( Bsdf* bsdf , const Spectrum& weight )
 }
 
 void MaterialNodePropertyBxdf::Serialize( IStreamBase& stream , MaterialNodeCache& cache ){
-    std::string materialNodeName , materialNodeOutputSocket;
+    std::string materialNodeName;
     stream >> materialNodeName;
-    stream >> materialNodeOutputSocket;
     if( !materialNodeName.empty() ){
+        std::string materialNodeOutputSocket;
+        stream >> materialNodeOutputSocket;
         if( cache.count( materialNodeName) == 0 ){
             std::string materialNodeType;
             stream >> materialNodeType;
@@ -109,11 +113,13 @@ void MaterialNodePropertyVector::GetMaterialProperty( Bsdf* bsdf , Vector& resul
 }
 
 void MaterialNodePropertyVector::Serialize( IStreamBase& stream , MaterialNodeCache& cache ){
-    std::string materialNodeName , materialNodeOutputSocket;
-    stream >> materialNodeName >> materialNodeOutputSocket;
+    std::string materialNodeName;
+    stream >> materialNodeName;
     if( materialNodeName.empty() ){
         stream >> m_vec;
     }else{
+        std::string materialNodeOutputSocket;
+        stream >> materialNodeOutputSocket;
         if( cache.count( materialNodeName) == 0 ){
             std::string materialNodeType;
             stream >> materialNodeType;

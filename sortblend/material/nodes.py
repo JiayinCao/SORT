@@ -541,32 +541,22 @@ class SORTNodeComposite(SORTShadingNode):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'G' },
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'B' } ]
 
-# A better flow for extraction channel is to support multiple outputs per-node
-# This is doable in python code. However, it needs more complex design in C++ code.
-# Since this is only occurance of multi-results node, I will just use this naive way to support it.
-@SORTPatternGraph.register_node('Convertor')
-class SORTNodeExtractRed(SORTShadingNode):
-    bl_label = 'ExtractRed'
-    bl_idname = 'SORTNodeExtractRed'
-    output_type = 'SORTNodeSocketFloat'
-    sort_bxdf_type = 'SORTNodeExtractRed'
-    property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
 
 @SORTPatternGraph.register_node('Convertor')
-class SORTNodeExtractGreen(SORTShadingNode):
-    bl_label = 'ExtractGreen'
-    bl_idname = 'SORTNodeExtractGreen'
+class SORTNodeExtract(SORTShadingNode):
+    bl_label = 'Extract'
+    bl_idname = 'SORTNodeExtract'
     output_type = 'SORTNodeSocketFloat'
-    sort_bxdf_type = 'SORTNodeExtractGreen'
+    sort_bxdf_type = 'SORTNodeExtract'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
 
-@SORTPatternGraph.register_node('Convertor')
-class SORTNodeExtractBlue(SORTShadingNode):
-    bl_label = 'ExtractBlue'
-    bl_idname = 'SORTNodeExtractBlue'
-    output_type = 'SORTNodeSocketFloat'
-    sort_bxdf_type = 'SORTNodeExtractBlue'
-    property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
+    def init(self, context):
+        super().register_prop(True)
+        self.outputs.new( self.output_type , 'Red' )
+        self.outputs.new( self.output_type , 'Green' )
+        self.outputs.new( self.output_type , 'Blue' )
+        self.outputs.new( self.output_type , 'Intensity' )
+        pass
 
 @SORTPatternGraph.register_node('Convertor')
 class SORTNodeIntensity(SORTShadingNode):

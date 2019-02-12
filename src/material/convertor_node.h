@@ -50,92 +50,14 @@ private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( B );
 };
 
-//! @brief  Extracting red channel of the source code.
-class SORTNodeExtractRed : public MaterialNode{
+//! @brief  Extracting a channel of the source code.
+class SORTNodeExtract : public MaterialNode{
 public:
-    DEFINE_RTTI( SORTNodeExtractRed , MaterialNode );
-    DEFINE_OUTPUT_FLOAT_SOCKET( Result , SORTNodeExtractRed );
-
-    //! @brief  Get the type of the material node.
-    //!
-    //! @return         Material node type.
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
-        return MNPT_FLOAT;
-    }
-    
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    //! @param  cache       Cache for avoiding creating duplicated node.
-    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-        color.Serialize( stream , cache );
-	}
-
-private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( color );
-};
-
-//! @brief  Extracting green channel of the source color.
-class SORTNodeExtractGreen : public MaterialNode{
-public:
-    DEFINE_RTTI( SORTNodeExtractGreen , MaterialNode );
-    DEFINE_OUTPUT_FLOAT_SOCKET( Result , SORTNodeExtractGreen );
-
-    //! @brief  Get the type of the material node.
-    //!
-    //! @return         Material node type.
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
-        return MNPT_FLOAT;
-    }
-    
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    //! @param  cache       Cache for avoiding creating duplicated node.
-    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-        color.Serialize( stream , cache );
-    }
-
-private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( color );
-};
-
-//! @brief  Extracting blue channel of the source color.
-class SORTNodeExtractBlue : public MaterialNode{
-public:
-    DEFINE_RTTI( SORTNodeExtractBlue , MaterialNode );
-    DEFINE_OUTPUT_FLOAT_SOCKET( Result , SORTNodeExtractBlue );
-
-    //! @brief  Get the type of the material node.
-    //!
-    //! @return         Material node type.
-    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
-        return MNPT_FLOAT;
-    }
-
-    //! @brief  Serialization interface. Loading data from stream.
-    //!
-    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
-    //!
-    //! @param  stream      Input stream for data.
-    //! @param  cache       Cache for avoiding creating duplicated node.
-    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-        color.Serialize( stream , cache );
-	}
-
-private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR( color );
-};
-
-//! @brief  Extracting intensity of the source spectrum.
-class SORTNodeExtractIntensity : public MaterialNode{
-public:
-    DEFINE_RTTI( SORTNodeExtractIntensity , MaterialNode );
-    DEFINE_OUTPUT_FLOAT_SOCKET( Result , SORTNodeExtractIntensity );
+    DEFINE_RTTI( SORTNodeExtract , MaterialNode );
+    DEFINE_OUTPUT_FLOAT_SOCKET( Red , SORTNodeExtract );
+    DEFINE_OUTPUT_FLOAT_SOCKET( Green , SORTNodeExtract );
+    DEFINE_OUTPUT_FLOAT_SOCKET( Blue , SORTNodeExtract );
+    DEFINE_OUTPUT_FLOAT_SOCKET( Intensity , SORTNodeExtract );
 
     //! @brief  Get the type of the material node.
     //!

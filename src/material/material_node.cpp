@@ -23,7 +23,7 @@
 
 void MaterialNode::LinkNode( const std::string& channel , MaterialNodeInputSocket* inputSocket ){
 	bool found = m_outputs.count( channel ) != 0;
-	sAssertMsg( found , MATERIAL , "Matrial node has no output socket named %s" , channel.c_str() );
+	sAssertMsg( found , MATERIAL , "Material node has no output socket named %s" , channel.c_str() );
 
 	inputSocket->m_fromSocket = m_outputs[channel];
 }
