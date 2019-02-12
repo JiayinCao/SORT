@@ -115,8 +115,8 @@ void MaterialNodePropertyVector::Serialize( IStreamBase& stream , MaterialNodeCa
         stream >> m_vec;
     }else{
         if( cache.count( materialNodeName) == 0 ){
-            std::string materialNodeType , materialNodeOutputSocket;
-            stream >> materialNodeType >> materialNodeOutputSocket;
+            std::string materialNodeType;
+            stream >> materialNodeType;
             cache[materialNodeName] = MakeUniqueInstance<MaterialNode>( materialNodeType );
             sAssert( cache[materialNodeName] != nullptr , MATERIAL );
             cache[materialNodeName]->Serialize( stream , cache );
