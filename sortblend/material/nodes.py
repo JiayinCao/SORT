@@ -494,7 +494,8 @@ class SORTNodeGrid(SORTShadingNode):
     bl_idname = 'SORTNodeGrid'
     sort_bxdf_type = 'GridTexNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } ,
-                      { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
+                      { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' },
+                      { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
 
 @SORTPatternGraph.register_node('Image')
 class SORTNodeCheckerBoard(SORTShadingNode):
@@ -502,26 +503,28 @@ class SORTNodeCheckerBoard(SORTShadingNode):
     bl_idname = 'SORTNodeCheckerBoard'
     sort_bxdf_type = 'CheckerBoardTexNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } ,
-                      { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
+                      { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
+                      { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
 
 @SORTPatternGraph.register_node('Image')
 class SORTNodeImage(SORTShadingNode):
     bl_label = 'Image'
     bl_idname = 'SORTNodeImage'
     sort_bxdf_type = 'ImageTexNode'
-    property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' } ]
+    property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' },
+                      { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
 
 #------------------------------------------------------------------------------------------------------------------------------------
-#                                               Constant Nodes for SORT
+#                                               Input Nodes for SORT
 #------------------------------------------------------------------------------------------------------------------------------------
-@SORTPatternGraph.register_node('Constant')
+@SORTPatternGraph.register_node('Input')
 class SORTNodeConstant(SORTShadingNode):
     bl_label = 'Constant Color'
     bl_idname = 'SORTNodeConstant'
     sort_bxdf_type = 'ConstantColorNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
 
-@SORTPatternGraph.register_node('Constant')
+@SORTPatternGraph.register_node('Input')
 class SORTNodeConstantFloat(SORTShadingNode):
     bl_label = 'Constant Float'
     bl_idname = 'SORTNodeConstantFloat'
@@ -529,8 +532,22 @@ class SORTNodeConstantFloat(SORTShadingNode):
     sort_bxdf_type = 'ConstantFloatNode'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Value' } ]
 
+@SORTPatternGraph.register_node('Input')
+class SORTNodeUVMapping(SORTShadingNode):
+    bl_label = 'UV Mapping'
+    bl_idname = 'SORTNodeUVMapping'
+    output_type = 'SORTNodeSocketUV'
+    sort_bxdf_type = 'UVMappingNode'
+    property_list = [ { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'U Tiling' , 'default' : 1.0 , 'min' : -float('inf') , 'max' : float('inf') } ,
+                      { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'V Tiling' , 'default' : 1.0, 'min' : -float('inf') , 'max' : float('inf') } ,
+                      { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'U Offset' , 'default' : 0.0, 'min' : -float('inf') , 'max' : float('inf') } ,
+                      { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'V Offset' , 'default' : 0.0, 'min' : -float('inf') , 'max' : float('inf') } ]
+    def init(self, context):
+        super().register_prop(True)
+        self.outputs.new( self.output_type , 'UVMapping' )
+
 #------------------------------------------------------------------------------------------------------------------------------------
-#                                               Constant Nodes for SORT
+#                                               Convertor Nodes for SORT
 #------------------------------------------------------------------------------------------------------------------------------------
 @SORTPatternGraph.register_node('Convertor')
 class SORTNodeComposite(SORTShadingNode):
@@ -556,7 +573,6 @@ class SORTNodeExtract(SORTShadingNode):
         self.outputs.new( self.output_type , 'Green' )
         self.outputs.new( self.output_type , 'Blue' )
         self.outputs.new( self.output_type , 'Intensity' )
-        pass
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Output Nodes for SORT
@@ -568,4 +584,3 @@ class SORTNodeOutput(SORTShadingNode):
     property_list = [ { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Surface' } ]
     def init(self, context):
         super().register_prop(True)
-        pass

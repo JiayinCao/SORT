@@ -30,6 +30,7 @@
 #define SORT_MATERIAL_DEFINE_PROP_COLOR(prop)           SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyColor)
 #define SORT_MATERIAL_DEFINE_PROP_STR(prop)             SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyString)
 #define SORT_MATERIAL_DEFINE_PROP_FLOAT(prop)           SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyFloat)
+#define SORT_MATERIAL_DEFINE_PROP_UV(prop)              SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyUV)
 #define SORT_MATERIAL_DEFINE_PROP_VECTOR(prop)          SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyVector)
 #define SORT_MATERIAL_DEFINE_PROP_BXDF(prop)            SORT_MATERIAL_DEFINE_PROP_COMMON(prop,MaterialNodePropertyBxdf)
 
@@ -38,30 +39,13 @@
 #define SORT_MATERIAL_GET_PROP_COLOR(v,prop)            SORT_MATERIAL_GET_PROP_COMMON(v,prop,Spectrum)
 #define SORT_MATERIAL_GET_PROP_STR(v,prop)              SORT_MATERIAL_GET_PROP_COMMON(v,prop,std::string)
 #define SORT_MATERIAL_GET_PROP_VECTOR(v,prop)           SORT_MATERIAL_GET_PROP_COMMON(v,prop,Vector)
+#define SORT_MATERIAL_GET_PROP_UV(v,prop)               SORT_MATERIAL_GET_PROP_COMMON(v,prop,Vector2f)
 
 #define SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,T)     T v; prop.GetMaterialProperty(bsdf,v);
 #define SORT_MATERIAL_GET_PROP_FLOAT_TMP(v,prop)        SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,float)
 #define SORT_MATERIAL_GET_PROP_COLOR_TMP(v,prop)        SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,Spectrum)
 #define SORT_MATERIAL_GET_PROP_STR_TMP(v,prop)          SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,std::string)
 #define SORT_MATERIAL_GET_PROP_VECTOR_TMP(v,prop)       SORT_MATERIAL_GET_PROP_COMMON_TMP(v,prop,Vector)
-
-#define DEFINE_OUTPUT_CHANNEL( CHANNEL , NODE )     \
-    class CHANNEL : public MaterialNodeOutputSocket{\
-        public:\
-            using  NODE##CHANNEL = NODE::CHANNEL;\
-            DEFINE_RTTI( NODE##CHANNEL , MaterialNodeOutputSocket );\
-            void UpdateBSDF( Bsdf* bsdf , const Spectrum& weight ) override;\
-    };\
-    void UpdateBSDF( Bsdf* bsdf , const Spectrum& weight ) override;
-#define IMPLEMENT_OUTPUT_CHANNEL_BEGIN( CHANNEL , NODE )  \
-    using NODE##CHANNEL = NODE::CHANNEL; \
-    IMPLEMENT_RTTI( NODE##CHANNEL );\
-    void NODE::UpdateBSDF( Bsdf* bsdf , const Spectrum& weight ){\
-        sAssert( false , MATERIAL );\
-    }\
-    void NODE::CHANNEL::UpdateBSDF( Bsdf* bsdf , const Spectrum& weight ){\
-        auto node = dynamic_cast<NODE*>(m_node);
-#define IMPLEMENT_OUTPUT_CHANNEL_END  }
 
 #define DEFINE_OUTPUT_BSDF_SOCKET( CHANNEL , NODE )  \
     class CHANNEL : public MaterialNodeOutputSocket{\
@@ -104,6 +88,10 @@
 #define IMPLEMENT_OUTPUT_VEC_SOCKET_BEGIN( CHANNEL , NODE )   DEFINE_OUTPUT_SOCKET_COMMON_BEGIN( CHANNEL , NODE , Vector )
 #define IMPLEMENT_OUTPUT_VEC_SOCKET_END                       }
 
+#define DEFINE_OUTPUT_UV_SOCKET( CHANNEL , NODE )            DEFINE_OUTPUT_SOCKET_COMMON( CHANNEL , NODE , Vector2f )
+#define IMPLEMENT_OUTPUT_UV_SOCKET_BEGIN( CHANNEL , NODE )   DEFINE_OUTPUT_SOCKET_COMMON_BEGIN( CHANNEL , NODE , Vector2f )
+#define IMPLEMENT_OUTPUT_UV_SOCKET_END                       }
+
 using MaterialNodeCache = std::unordered_map<std::string,std::unique_ptr<class MaterialNode>>;
 
 class Bsdf;
@@ -112,6 +100,7 @@ class IStreamBase;
 enum MATERIAL_NODE_PROPERTY_TYPE{
     MNPT_NONE = 0,
     MNPT_FLOAT,
+    MNPT_UV,
     MNPT_COLOR,
     MNPT_STR,
     MNPT_VECTOR,
@@ -169,6 +158,14 @@ public:
     //! @param result   The result to be filled.
     virtual void GetMaterialProperty( Bsdf* bsdf , Vector& result ) {
         sAssertMsg(false, MATERIAL, "Get vector from a wrong data type." );
+    }
+
+    //! @brief  Get uv material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   The result to be filled.
+    virtual void GetMaterialProperty( Bsdf* bsdf , Vector2f& result ){
+        sAssertMsg(false, MATERIAL, "Get uv from a wrong data type." );
     }
 };
 
@@ -296,6 +293,32 @@ private:
     /**< The float value of the node property. */
     float m_value;
 };
+
+//! @brief  Float2 property in SORT material node.
+class MaterialNodePropertyUV : public MaterialNodeInputSocket{
+public:
+    //! @brief  Get float material property.
+    //!
+    //! @param bsdf     The BSDF data structure.
+    //! @param result   The result to be filled.
+    void GetMaterialProperty( Bsdf* bsdf , Vector2f& result ) override;
+
+    //! @brief  Get the type of the material node property.
+    //!
+    //! @return         The type of the material node property.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_UV;
+    }
+    
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override;
+};
+
 
 //! @brief  String property in SORT material node.
 class MaterialNodePropertyString : public MaterialNodeInputSocket{
