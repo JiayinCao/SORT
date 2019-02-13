@@ -135,8 +135,38 @@ class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
             split = row.split(0.4)
             split.label(text)
 
+# Socket for UV Mapping
+class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketUV'
+    bl_label = 'SORT UV Mapping'
+    socket_color = (0.9, 0.2, 0.8, 1.0)
+    pbrt_type = 'NA'
+    default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0, max=1.0 )
+    def export_socket_value(self):
+        return '%f'%0.0
+    def export_serialization_value(self):
+        return 0.0
+    # uvmapping socket doesn't show the vector because it is not supposed to be edited this way.
+    def draw(self, context, layout, node, text):
+        if self.is_linked or self.is_output:
+            self.draw_label(context,layout,node,text)
+        else:
+            row = layout.row()
+            split = row.split(0.4)
+            split.label(text)
+
 # Property for Float
 class SORTNodePropertyFloat(SORTNodeProperty):
+    def export_socket_value(self,value):
+        return '%f'%value
+    def export_serialization_value(self,value):
+        return value
+    @classmethod
+    def setup( cls , prop ):
+        cls.default_value = bpy.props.FloatProperty( name=prop['name'] , default=prop['default'] , min=prop['min'], max=prop['max'] )
+
+# Property for Large Float
+class SORTNodePropertyLargeFloat(SORTNodeProperty):
     def export_socket_value(self,value):
         return '%f'%value
     def export_serialization_value(self,value):

@@ -15,11 +15,12 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "constant_node.h"
+#include "input_node.h"
 #include "bsdf/bsdf.h"
 
 IMPLEMENT_RTTI( ConstantColorNode );
 IMPLEMENT_RTTI( ConstantFloatNode );
+IMPLEMENT_RTTI( UVMappingNode );
 
 IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , ConstantColorNode )
     SORT_MATERIAL_GET_PROP_COLOR(c,src);
@@ -30,3 +31,15 @@ IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , ConstantFloatNode )
     SORT_MATERIAL_GET_PROP_FLOAT(f,value);
     result = f;
 IMPLEMENT_OUTPUT_COLOR_SOCKET_END
+
+IMPLEMENT_OUTPUT_UV_SOCKET_BEGIN( UVMapping , UVMappingNode )
+    SORT_MATERIAL_GET_PROP_FLOAT(ut,u_tiling);
+    SORT_MATERIAL_GET_PROP_FLOAT(vt,v_tiling);
+    SORT_MATERIAL_GET_PROP_FLOAT(uo,u_offset);
+    SORT_MATERIAL_GET_PROP_FLOAT(vo,v_offset);
+
+    auto intersection = bsdf->GetIntersection();
+    sAssert( intersection , MATERIAL );
+    result.x = ut * intersection->u + uo;
+    result.y = vt * intersection->v + vo;
+IMPLEMENT_OUTPUT_UV_SOCKET_END

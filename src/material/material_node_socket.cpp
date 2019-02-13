@@ -19,6 +19,7 @@
 #include "material_node.h"
 #include "stream/stream.h"
 #include "core/sassert.h"
+#include "bsdf/bsdf.h"
 
 void MaterialNodePropertyColor::GetMaterialProperty( Bsdf* bsdf , Spectrum& result ){
     if( m_fromSocket )
@@ -117,6 +118,38 @@ void MaterialNodePropertyVector::Serialize( IStreamBase& stream , MaterialNodeCa
     stream >> materialNodeName;
     if( materialNodeName.empty() ){
         stream >> m_vec;
+    }else{
+        std::string materialNodeOutputSocket;
+        stream >> materialNodeOutputSocket;
+        if( cache.count( materialNodeName) == 0 ){
+            std::string materialNodeType;
+            stream >> materialNodeType;
+            cache[materialNodeName] = MakeUniqueInstance<MaterialNode>( materialNodeType );
+            sAssert( cache[materialNodeName] != nullptr , MATERIAL );
+            cache[materialNodeName]->Serialize( stream , cache );
+        }
+
+        cache[materialNodeName]->LinkNode( materialNodeOutputSocket , this );
+    }
+}
+
+void MaterialNodePropertyUV::GetMaterialProperty( Bsdf* bsdf , Vector2f& result ) {
+    if( m_fromSocket )
+        m_fromSocket->GetMaterialProperty(bsdf, result);
+    else{
+        const auto intersection = bsdf->GetIntersection();
+        sAssert( intersection , MATERIAL );
+        result.x = intersection->u;
+        result.y = intersection->v;
+    }
+}
+
+void MaterialNodePropertyUV::Serialize( IStreamBase& stream , MaterialNodeCache& cache ){
+    std::string materialNodeName;
+    stream >> materialNodeName;
+    if( materialNodeName.empty() ){
+        float dummy;
+        stream >> dummy;
     }else{
         std::string materialNodeOutputSocket;
         stream >> materialNodeOutputSocket;

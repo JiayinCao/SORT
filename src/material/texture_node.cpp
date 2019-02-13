@@ -29,9 +29,10 @@ IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , GridTexNode )
 
     SORT_MATERIAL_GET_PROP_COLOR(s0,src0);
     SORT_MATERIAL_GET_PROP_COLOR(s1,src1);
+    SORT_MATERIAL_GET_PROP_UV(_uv,uv);
 
     GridTexture texture( s0 , s1 );
-    result = texture.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
+    result = texture.GetColorFromUV( _uv.x , _uv.y );
 IMPLEMENT_OUTPUT_COLOR_SOCKET_END
 
 IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , CheckerBoardTexNode )
@@ -39,14 +40,15 @@ IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , CheckerBoardTexNode )
 
     SORT_MATERIAL_GET_PROP_COLOR(s0,src0);
     SORT_MATERIAL_GET_PROP_COLOR(s1,src1);
+    SORT_MATERIAL_GET_PROP_UV(_uv,uv);
 
     CheckerBoardTexture texture( s0 , s1 );
-    result = texture.GetColorFromUV( intesection->u * 10.0f , intesection->v * 10.0f );
+    result = texture.GetColorFromUV( _uv.x , _uv.y );
 IMPLEMENT_OUTPUT_COLOR_SOCKET_END
 
 IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , ImageTexNode )
-    const Intersection* intesection = bsdf->GetIntersection();
-    result = node->m_imageTexture.GetColorFromUV( intesection->u , intesection->v );
+    SORT_MATERIAL_GET_PROP_UV(_uv,uv);
+    result = node->m_imageTexture.GetColorFromUV( _uv.x , _uv.y );
 IMPLEMENT_OUTPUT_COLOR_SOCKET_END
 
 void ImageTexNode::PostProcess(){
