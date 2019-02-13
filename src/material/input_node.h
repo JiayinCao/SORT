@@ -72,3 +72,36 @@ public:
 private:
     SORT_MATERIAL_DEFINE_PROP_FLOAT( value );
 };
+
+//! @brief  UV Mapping Node.
+class UVMappingNode : public MaterialNode{
+public:
+    DEFINE_RTTI( UVMappingNode , MaterialNode );
+    DEFINE_OUTPUT_UV_SOCKET( UVMapping , UVMappingNode );
+
+    //! @brief  Get the type of the material node.
+    //!
+    //! @return         Material node type.
+    MATERIAL_NODE_PROPERTY_TYPE GetNodeReturnType() const override {
+        return MNPT_UV;
+    }
+    
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        u_tiling.Serialize( stream , cache );
+        v_tiling.Serialize( stream , cache );
+        u_offset.Serialize( stream , cache );
+        v_offset.Serialize( stream , cache );
+    }
+
+private:
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( u_tiling );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( v_tiling );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( u_offset );
+    SORT_MATERIAL_DEFINE_PROP_FLOAT( v_offset );
+};

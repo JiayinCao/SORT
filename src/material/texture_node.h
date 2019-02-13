@@ -46,11 +46,13 @@ public:
     void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
         src0.Serialize( stream , cache );
         src1.Serialize( stream , cache );
+        uv.Serialize( stream , cache );
 	}
 
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
+    SORT_MATERIAL_DEFINE_PROP_UV( uv );
 };
 
 //! @brief  Grid texture Node.
@@ -68,11 +70,13 @@ public:
     void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
         src0.Serialize( stream , cache );
         src1.Serialize( stream , cache );
+        uv.Serialize( stream , cache );
 	}
 
 private:
     SORT_MATERIAL_DEFINE_PROP_COLOR( src0 );
     SORT_MATERIAL_DEFINE_PROP_COLOR( src1 );
+    SORT_MATERIAL_DEFINE_PROP_UV( uv );
 };
 
 //! @brief  Image texture node.
@@ -92,10 +96,12 @@ public:
     //! @param  cache       Cache for avoiding creating duplicated node.
     void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
         filename.Serialize( stream , cache );
+        uv.Serialize( stream , cache );
 	}
 
 private:
 	SORT_MATERIAL_DEFINE_PROP_STR( filename );
+    SORT_MATERIAL_DEFINE_PROP_UV( uv );
 
     /**< The image texture. */
 	ImageTexture m_imageTexture;
