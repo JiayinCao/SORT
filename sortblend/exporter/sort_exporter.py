@@ -280,6 +280,13 @@ def export_hair(ps, obj, scene, fs):
     width_tip = ps.settings.sort_particle.sort_particle_width.width_tip
     width_bottom = ps.settings.sort_particle.sort_particle_width.width_bottom
 
+    # extract the material of the hair
+    mat_local_index = ps.settings.material
+    assert mat_local_index <= len( obj.data.materials )
+    mat_index = -1
+    if mat_local_index > 0:
+        mat_index = matname_to_id[obj.data.materials[mat_local_index-1].name]
+
     # for some unknown reason
     steps = 2 ** hair_step
 
@@ -310,6 +317,7 @@ def export_hair(ps, obj, scene, fs):
     fs.serialize( hair_cnt )
     fs.serialize( width_tip )
     fs.serialize( width_bottom )
+    fs.serialize( mat_index )
     fs.serialize( verts )
 
     return (vert_cnt, total_hair_segs)
