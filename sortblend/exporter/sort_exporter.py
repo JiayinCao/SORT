@@ -169,9 +169,7 @@ def export_scene(scene, fs):
     fs.serialize(fov_angle)
 
     total_vert_cnt = 0
-    total_normal_cnt = 0
-    total_uv_cnt = 0
-    total_face_cnt = 0
+    total_prim_cnt = 0
     for obj in exporter_common.getMeshList(scene):
         fs.serialize('VisualEntity')
         fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
@@ -190,6 +188,9 @@ def export_scene(scene, fs):
         else:
             stat = export_mesh(obj.data, fs)
 
+        total_vert_cnt += stat[0]
+        total_prim_cnt += stat[1]
+
     for obj in exporter_common.getMeshList(scene):
         # output hair/fur information
         if len( obj.particle_systems ) > 0:
@@ -197,12 +198,11 @@ def export_scene(scene, fs):
             fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
             fs.serialize( len( obj.particle_systems ) )
             for ps in obj.particle_systems:
-                export_hair( ps , fs )
-                
-        total_vert_cnt += stat[0]
-        total_face_cnt += stat[1]
+                stat = export_hair( ps , obj , scene , fs )
+                total_vert_cnt += stat[0]
+                total_prim_cnt += stat[1]
     exporter_common.log( "Total vertices: %d." % total_vert_cnt )
-    exporter_common.log( "Total faces: %d." % total_face_cnt )
+    exporter_common.log( "Total primitives: %d." % total_prim_cnt )
 
     for ob in exporter_common.getLightList(scene):
         lamp = ob.data
@@ -267,31 +267,52 @@ def name_compat(name):
     else:
         return name.replace(' ', '_')
 
-def export_hair(ps, fs):
+def export_hair(ps, obj, scene, fs):
     LENFMT = struct.Struct('=i')
     POINTFMT = struct.Struct('=fff')
 
+    ps.set_resolution(scene, obj, 'RENDER')
+
     hairs = ps.particles
-    wo3_verts = bytearray()
-
-    # output the hair strands
-    for i, h in enumerate(hairs):
-        #print('hair number {i}:'.format(i=i))
-        for i, hv in enumerate(h.hair_keys):
-            #print('  vertex {i} coordinates: {co}'.format(i=i, co=hv.co))
-            wo3_verts += POINTFMT.pack( hv.co[0] , hv.co[1] , hv.co[2] )
-
+    
+    vert_cnt = 0
     hair_step = ps.settings.hair_step
-    hair_cnt = len(hairs)
     width_tip = ps.settings.sort_particle.sort_particle_width.width_tip
     width_bottom = ps.settings.sort_particle.sort_particle_width.width_bottom
 
+    # for some unknown reason
+    steps = 2 ** hair_step
+
+    verts = bytearray()
+
+    transform = obj.matrix_world.inverted()
+    num_parents = len(ps.particles)
+    num_children = len(ps.child_particles)
+    hair_cnt = num_parents + num_children
+    total_hair_segs = 0
+    for pindex in range(hair_cnt):
+        hair = []
+        for step in range(0, steps + 1):
+            co = ps.co_hair(obj, pindex, step)
+            # there could be a bug of ignoring point at origin
+            if not co.length_squared == 0:
+                co = transform * co
+                hair.append( co )
+                vert_cnt += 1
+
+        assert len(hair) > 0
+        verts += LENFMT.pack( len(hair) - 1 )
+        for h in hair :
+            verts += POINTFMT.pack( h[0] , h[1] , h[2] )
+        total_hair_segs += len(hair) - 1
+
     fs.serialize( 'HairVisual' )
     fs.serialize( hair_cnt )
-    fs.serialize( hair_step )
     fs.serialize( width_tip )
     fs.serialize( width_bottom )
-    fs.serialize( wo3_verts )
+    fs.serialize( verts )
+
+    return (vert_cnt, total_hair_segs)
 
 def export_mesh(mesh, fs):
     LENFMT = struct.Struct('=i')
