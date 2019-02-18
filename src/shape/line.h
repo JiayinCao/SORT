@@ -116,9 +116,9 @@ public:
 	
 private:
 	/**< Point at the end of the line. */
-	const Point&	m_p0;
+	const Point		m_p0;
 	/**< Point at the other side of the line. */
-	const Point&	m_p1;
+	const Point		m_p1;
 	/**< Width of the line at 'm_p0', it should always be positive. */
 	const float		m_w0;
 	/**< Width of the line at 'm_p1', it should always be positive. */

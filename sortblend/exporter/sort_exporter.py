@@ -175,6 +175,7 @@ def export_scene(scene, fs):
     for obj in exporter_common.getMeshList(scene):
         fs.serialize('VisualEntity')
         fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
+        fs.serialize( 1 )   # only one mesh for each mesh entity
         stat = None
         # apply the modifier if there is one
         if obj.type != 'MESH' or obj.is_modified(scene, 'RENDER'):
@@ -189,6 +190,15 @@ def export_scene(scene, fs):
         else:
             stat = export_mesh(obj.data, fs)
 
+    for obj in exporter_common.getMeshList(scene):
+        # output hair/fur information
+        if len( obj.particle_systems ) > 0:
+            fs.serialize('VisualEntity')
+            fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
+            fs.serialize( len( obj.particle_systems ) )
+            for ps in obj.particle_systems:
+                export_hair( ps , fs )
+                
         total_vert_cnt += stat[0]
         total_face_cnt += stat[1]
     exporter_common.log( "Total vertices: %d." % total_vert_cnt )
@@ -257,6 +267,32 @@ def name_compat(name):
     else:
         return name.replace(' ', '_')
 
+def export_hair(ps, fs):
+    LENFMT = struct.Struct('=i')
+    POINTFMT = struct.Struct('=fff')
+
+    hairs = ps.particles
+    wo3_verts = bytearray()
+
+    # output the hair strands
+    for i, h in enumerate(hairs):
+        #print('hair number {i}:'.format(i=i))
+        for i, hv in enumerate(h.hair_keys):
+            #print('  vertex {i} coordinates: {co}'.format(i=i, co=hv.co))
+            wo3_verts += POINTFMT.pack( hv.co[0] , hv.co[1] , hv.co[2] )
+
+    hair_step = ps.settings.hair_step
+    hair_cnt = len(hairs)
+    width_tip = ps.settings.sort_particle.sort_particle_width.width_tip
+    width_bottom = ps.settings.sort_particle.sort_particle_width.width_bottom
+
+    fs.serialize( 'HairVisual' )
+    fs.serialize( hair_cnt )
+    fs.serialize( hair_step )
+    fs.serialize( width_tip )
+    fs.serialize( width_bottom )
+    fs.serialize( wo3_verts )
+
 def export_mesh(mesh, fs):
     LENFMT = struct.Struct('=i')
     FLTFMT = struct.Struct('=f')
@@ -275,107 +311,72 @@ def export_mesh(mesh, fs):
 
     global matname_to_id
 
-    if len(mesh.polygons) is 0 :
-        # hacking parameters for now
-        bottom = 0.2
-        tip = 0.0
-        hair_step = 4
-        hair_step_inv = 0.25
-        i = 0
+    # output the mesh information.
+    mesh.calc_normals()
+    if not mesh.tessfaces and mesh.polygons:
+        mesh.calc_tessface()
 
-        # taking the first material for now.
-        matid = -1
-        matname = name_compat(mesh.materials[0].name) if len( mesh.materials ) > 0 else None
-        matid = matname_to_id[matname] if matname in matname_to_id else -1
+    has_uv = bool(mesh.tessface_uv_textures)
 
-        line_verts = bytearray()
-        for vert in verts:
-            wo3_verts += POINTFMT.pack( vert.co[0] , vert.co[1] , vert.co[2] )
+    if has_uv:
+        active_uv_layer = mesh.tessface_uv_textures.active
+        if not active_uv_layer:
+            has_uv = False
+        else:
+            active_uv_layer = active_uv_layer.data
 
-        for edge in mesh.edges:
-            v0 = edge.vertices[0]
-            v1 = edge.vertices[1]
-            t = ( hair_step - i ) * hair_step_inv
-            w0 = t * bottom + ( 1.0 - t ) * tip
-            w1 = w0 + ( tip - bottom ) * hair_step_inv
-            line_verts += LINEFMT.pack(v0,v1,w0,w1,matid)
-            i = ( i + 1 ) % hair_step
+    wo3_indices = [{} for _ in range(len(verts))]
+    wo3_tris = bytearray()
 
-        vert_cnt = len(verts)
-        primitive_cnt += len( mesh.edges )
-
-        fs.serialize( 'LineSetVisual' )
-        fs.serialize( LENFMT.pack( len(verts) ) )
-        fs.serialize( wo3_verts )
-        fs.serialize( LENFMT.pack( len(mesh.edges) ) )
-        fs.serialize( line_verts )
-    else:
-        # output the mesh information.
-        mesh.calc_normals()
-        if not mesh.tessfaces and mesh.polygons:
-            mesh.calc_tessface()
-
-        has_uv = bool(mesh.tessface_uv_textures)
+    uvcoord = (0.0, 0.0)
+    for i, f in enumerate(mesh.tessfaces):
+        smooth = f.use_smooth
+        if not smooth:
+            normal = f.normal[:]
 
         if has_uv:
-            active_uv_layer = mesh.tessface_uv_textures.active
-            if not active_uv_layer:
-                has_uv = False
-            else:
-                active_uv_layer = active_uv_layer.data
+            uv = active_uv_layer[i]
+            uv = (uv.uv1, uv.uv2, uv.uv3, uv.uv4)
 
-        wo3_indices = [{} for _ in range(len(verts))]
-        wo3_tris = bytearray()
+        oi = []
+        for j, vidx in enumerate(f.vertices):
+            v = verts[vidx]
 
-        uvcoord = (0.0, 0.0)
-        for i, f in enumerate(mesh.tessfaces):
-            smooth = f.use_smooth
-            if not smooth:
-                normal = f.normal[:]
+            if smooth:
+                normal = v.normal[:]
 
             if has_uv:
-                uv = active_uv_layer[i]
-                uv = (uv.uv1, uv.uv2, uv.uv3, uv.uv4)
+                uvcoord = (uv[j][0], uv[j][1])
 
-            oi = []
-            for j, vidx in enumerate(f.vertices):
-                v = verts[vidx]
+            key = (normal, uvcoord)
+            out_idx = wo3_indices[vidx].get(key)
+            if out_idx is None:
+                out_idx = vert_cnt
+                wo3_indices[vidx][key] = out_idx
+                wo3_verts += VERTFMT.pack(v.co[0], v.co[1], v.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
+                vert_cnt += 1
 
-                if smooth:
-                    normal = v.normal[:]
+            oi.append(out_idx)
 
-                if has_uv:
-                    uvcoord = (uv[j][0], uv[j][1])
+        matid = -1
+        matname = name_compat(material_names[f.material_index]) if len( material_names ) > 0 else None
+        matid = matname_to_id[matname] if matname in matname_to_id else -1
+        if len(oi) == 3:
+            # triangle
+            wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
+            primitive_cnt += 1
+        else:
+            # quad
+            wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
+            wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
+            primitive_cnt += 2
 
-                key = (normal, uvcoord)
-                out_idx = wo3_indices[vidx].get(key)
-                if out_idx is None:
-                    out_idx = vert_cnt
-                    wo3_indices[vidx][key] = out_idx
-                    wo3_verts += VERTFMT.pack(v.co[0], v.co[1], v.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
-                    vert_cnt += 1
-
-                oi.append(out_idx)
-
-            matid = -1
-            matname = name_compat(material_names[f.material_index]) if len( material_names ) > 0 else None
-            matid = matname_to_id[matname] if matname in matname_to_id else -1
-            if len(oi) == 3:
-                # triangle
-                wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
-                primitive_cnt += 1
-            else:
-                # quad
-                wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
-                wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
-                primitive_cnt += 2
-
-        fs.serialize('MeshVisual')
-        fs.serialize(bool(has_uv))
-        fs.serialize(LENFMT.pack(vert_cnt))
-        fs.serialize(wo3_verts)
-        fs.serialize(LENFMT.pack(primitive_cnt))
-        fs.serialize(wo3_tris)
+    fs.serialize('MeshVisual')
+    fs.serialize(bool(has_uv))
+    fs.serialize(LENFMT.pack(vert_cnt))
+    fs.serialize(wo3_verts)
+    fs.serialize(LENFMT.pack(primitive_cnt))
+    fs.serialize(wo3_tris)
 
     return (vert_cnt, primitive_cnt)
 
