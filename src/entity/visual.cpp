@@ -50,16 +50,19 @@ void HairVisual::FillScene( Scene& scene ){
 }
 
 void HairVisual::Serialize( IStreamBase& stream ){
-    auto hair_cnt = 0u , hair_step = 0u;
+    auto hair_cnt = 0u;
     auto width_tip = 0.0f , width_bottom = 0.0f;
-    stream >> hair_cnt >> hair_step;
+    stream >> hair_cnt;
     stream >> width_tip >> width_bottom;
-    sAssert( hair_step > 0 , RESOURCE );
-
-    auto width_delta = ( width_bottom - width_tip ) / (float)hair_step;
 
     Point prevP;
     for( auto i = 0u ; i < hair_cnt ; ++i ){
+        auto hair_step = 0u;
+        stream >> hair_step;
+        //sAssert( hair_step > 0 , RESOURCE );
+        
+        const auto width_delta = ( width_bottom - width_tip ) / (float)hair_step;
+        
         auto width = width_bottom;
         for( auto j = 0u ; j <= hair_step ; ++j ){
             Point curP;
