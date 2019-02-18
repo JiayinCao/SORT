@@ -73,14 +73,14 @@ public:
     std::vector<std::unique_ptr<Triangle>>      m_triangles;
 };
 
-//! LineSetVisual has a bunch of lines.
+//! HairVisual has a bunch of lines.
 /**
- * Just like MeshVisual may have lots of triangles, LineSetVisual has loads of line shape in it.
+ * Just like MeshVisual may have lots of triangles, HairVisual has loads of line shape in it.
  * This visual is usually used to represent things like fur or hair.
  */
-class LineSetVisual : public Visual{
+class HairVisual : public Visual{
 public:
-    DEFINE_RTTI( LineSetVisual , Visual );
+    DEFINE_RTTI( HairVisual , Visual );
 
     //! @brief  Fill the scene with triangles.
     //!
@@ -100,8 +100,6 @@ public:
     void        ApplyTransform( const Transform& transform ) override;
     
 private:
-    /**< Vertex buffer of lines. */
-    std::vector<Point>                  m_vertices;
     /**< Memory container holding the lines. */
     std::vector<std::unique_ptr<Line>>  m_lines;
 };

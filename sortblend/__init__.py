@@ -34,6 +34,7 @@ from .ui import ui_render
 from .ui import ui_camera
 from .ui import ui_lamp
 from .ui import ui_material
+from .ui import ui_particle
 
 class SORTAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = 'sortblend'

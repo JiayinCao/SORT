@@ -22,7 +22,7 @@
 #include "core/primitive.h"
 
 IMPLEMENT_RTTI( MeshVisual );
-IMPLEMENT_RTTI( LineSetVisual );
+IMPLEMENT_RTTI( HairVisual );
 
 void MeshVisual::FillScene( Scene& scene ){
     for (const auto& mi : m_memory->m_indices){
@@ -42,35 +42,42 @@ void MeshVisual::ApplyTransform( const Transform& transform ){
 	m_memory->GenSmoothTagent();
 }
 
-void LineSetVisual::FillScene( Scene& scene ){
+void HairVisual::FillScene( Scene& scene ){
     for( const auto& line : m_lines ){
         auto mat = MatManager::GetSingleton().GetMaterial(line->GetMaterialId());
         scene.AddPrimitive( std::make_unique<Primitive>( mat , line.get() ) );
     }
 }
 
-void LineSetVisual::Serialize( IStreamBase& stream ){
-    auto vert_cnt = 0u;
-    stream >> vert_cnt;
-    for( auto i = 0u ; i < vert_cnt ; ++i ){
-        m_vertices.push_back( Point() );
-        stream >> m_vertices.back();
-    }
+void HairVisual::Serialize( IStreamBase& stream ){
+    auto hair_cnt = 0u , hair_step = 0u;
+    auto width_tip = 0.0f , width_bottom = 0.0f;
+    stream >> hair_cnt >> hair_step;
+    stream >> width_tip >> width_bottom;
+    sAssert( hair_step > 0 , RESOURCE );
 
-    auto line_cnt = 0u;
-    stream >> line_cnt;
-    for( auto i = 0u ; i < line_cnt ; ++i ){
-        unsigned int id0 , id1;
-        stream >> id0 >> id1;
-        float w0 , w1;
-        stream >> w0 >> w1;
-        int matId = -1;
-        stream >> matId;
-        m_lines.push_back(std::make_unique<Line>( m_vertices[id0] , m_vertices[id1] , w0 * 0.5f , w1 * 0.5f , matId ) );
+    auto width_delta = ( width_bottom - width_tip ) / (float)hair_step;
+
+    Point prevP;
+    for( auto i = 0u ; i < hair_cnt ; ++i ){
+        auto width = width_bottom;
+        for( auto j = 0u ; j <= hair_step ; ++j ){
+            Point curP;
+            stream >> curP;
+
+            if( j > 0 ){
+                // Prevent float precision issue cauing negative width
+                const auto width_start = width;
+                const auto width_end = std::max( 0.0f , width - width_delta );
+                m_lines.push_back(std::make_unique<Line>( prevP , curP , width_start, width_end , -1 ) );
+                width -= width_delta;
+            }
+            prevP = curP;
+        }
     }
 }
 
-void LineSetVisual::ApplyTransform( const Transform& transform ){
+void HairVisual::ApplyTransform( const Transform& transform ){
     for( auto& line : m_lines )
         line->SetTransform( transform );
 }

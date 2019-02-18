@@ -47,15 +47,20 @@ public:
     void    Serialize( IStreamBase& stream ) override {
         stream >> m_transform;
 
-        // Instance the visual
-        std::string class_name;
-        stream >> class_name;
-        auto visual = MakeUniqueInstance<Visual>( class_name );
-        visual->Serialize( stream );
+        unsigned int visualCnt = 0;
+        stream >> visualCnt;
 
-        // Apply transform, some Visual applies transformation eariler for better performance.
-        visual->ApplyTransform( m_transform );
+        while( visualCnt-- > 0 ){
+            // Instance the visual
+            std::string class_name;
+            stream >> class_name;
+            auto visual = MakeUniqueInstance<Visual>( class_name );
+            visual->Serialize( stream );
 
-        m_visuals.push_back( std::move(visual) );
+            // Apply transform, some Visual applies transformation eariler for better performance.
+            visual->ApplyTransform( m_transform );
+
+            m_visuals.push_back( std::move(visual) );
+        }
     }
 };
