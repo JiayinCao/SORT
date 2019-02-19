@@ -57,14 +57,17 @@ void HairVisual::Serialize( IStreamBase& stream ){
     auto mat_id = -1;
     stream >> mat_id;
 
-    Point prevP;
     for( auto i = 0u ; i < hair_cnt ; ++i ){
         auto hair_step = 0u;
         stream >> hair_step;
         
         const auto width_delta = ( width_bottom - width_tip ) / (float)hair_step;
-        
+        const auto v_delta = 1.0f / ( float ) hair_step;
+        Point prevP;
+        auto prevV = 0.0f;
+
         auto width = width_bottom;
+        auto v = 0.0f;
         for( auto j = 0u ; j <= hair_step ; ++j ){
             Point curP;
             stream >> curP;
@@ -73,8 +76,12 @@ void HairVisual::Serialize( IStreamBase& stream ){
                 // Prevent float precision issue cauing negative width
                 const auto width_start = width;
                 const auto width_end = std::max( 0.0f , width - width_delta );
-                m_lines.push_back(std::make_unique<Line>( prevP , curP , width_start, width_end , mat_id ) );
+                const auto v_start = v;
+                const auto v_end = std::min( 1.0f , v + v_delta );
+
+                m_lines.push_back(std::make_unique<Line>( prevP , curP , v_start , v_end , width_start, width_end , mat_id ) );
                 width -= width_delta;
+                v += v_delta;
             }
             prevP = curP;
         }
