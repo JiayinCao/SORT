@@ -39,11 +39,13 @@ public:
 	//!
 	//! @param	p0		A point on one side of the line.
 	//! @param	p1		A point on the other side of the line.
+	//! @param	v0		V coordinate of @param p0.
+	//! @param	v1		V coordinate of @param p1.
 	//! @param	w0		Width at one side of the line.
 	//! @param	w1		Width at the other side of the line.
 	//! @param	matId	Material id of the line.
-    Line( const Point& p0 , const Point& p1 , float w0 , float w1 , int matId ) : 
-		m_p0(p0), m_p1(p1), m_w0(w0), m_w1(w1), m_matId(matId) {
+    Line( const Point& p0 , const Point& p1 , float v0 , float v1 , float w0 , float w1 , int matId ) : 
+		m_p0(p0), m_p1(p1), m_v0(v0), m_v1(v1), m_w0(w0), m_w1(w1), m_matId(matId) {
 		sAssert( m_w0 >= 0.0f , GENERAL );
 		sAssert( m_w1 >= 0.0f , GENERAL );
 		m_length = Distance( p0 , p1 );
@@ -123,6 +125,10 @@ private:
 	const float		m_w0;
 	/**< Width of the line at 'm_p1', it should always be positive. */
 	const float		m_w1;
+	/**< V coordinate at point p0. */
+	const float		m_v0;
+	/**< V coordinate at point p1. */
+	const float		m_v1;
 	/**< Length of the line segment. */
 	float			m_length;
 	/**< Material index of the line segment. */

@@ -60,12 +60,11 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 		intersect->normal = intersect->gnormal;
 		intersect->tangent = Normalize( m_transform(v0) );
 
-		intersect->u = t1;
 		const auto neg = Dot( Cross( v3 , v0 ) , v2 ) < 0.0f;
-		intersect->v = 0.5f + ( ( neg ? -0.5f : 0.5f ) * v3.Length() / w );
+		intersect->u = 0.5f + ( ( neg ? 0.5f : -0.5f ) * v3.Length() / w ) * 2.0f;
+		intersect->v = lerp( m_v0 , m_v1 , t1 );
 		intersect->t = t0;
 	}
-
 	return true;
 }
 
