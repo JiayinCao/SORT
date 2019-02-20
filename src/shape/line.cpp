@@ -26,15 +26,9 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	const auto tmp0 = m_w0 + ray.m_Ori.y * ( m_w1 - m_w0 ) / m_length;
 	const auto tmp1 = ray.m_Dir.y * ( m_w1 - m_w0 ) / m_length;
 
-#if 1
 	const auto a = SQR(ray.m_Dir.x) + SQR(ray.m_Dir.z) - SQR( tmp1 );
 	const auto b = 2.0f * ( ( ray.m_Ori.x * ray.m_Dir.x + ray.m_Ori.z * ray.m_Dir.z ) - tmp0 * tmp1 );
 	const auto c = SQR(ray.m_Ori.x) + SQR(ray.m_Ori.z) - SQR( tmp0 );
-#else
-	const auto a = SQR(ray.m_Dir.x) + SQR(ray.m_Dir.z);
-	const auto b = 2.0f * ( ray.m_Ori.x * ray.m_Dir.x + ray.m_Ori.z * ray.m_Dir.z ) ;
-	const auto c = SQR(ray.m_Ori.x) + SQR(ray.m_Ori.z) - SQR( m_w0 );
-#endif
 
 	const auto discriminant = b * b - 4.0f * a * c;
 	if( discriminant <= 0 )
@@ -50,22 +44,23 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 			return false;
 	}
 
+	if( t <= r.m_fMin || t >= r.m_fMax )
+		return false;
+
 	if( intersect == nullptr )
 		return true;
 	if( t >= intersect->t )
 		return false;
 
-	// to be removed after figuring out what is wrong in this algorithm.
-	const auto delta = 0.01f;
 	if( intersect ){
-		intersect->intersect = r(t - delta);
-		intersect->gnormal = m_world2Line.GetInversed()(Normalize( Vector( inter.x , 0.0f , inter.z ) ));
+		intersect->intersect = r(t);
+		intersect->gnormal = Normalize(m_world2Line.GetInversed()( Vector( inter.x , 0.0f , inter.z ) ) );
 		intersect->normal = intersect->gnormal;
-		intersect->tangent = m_world2Line.GetInversed()(Vector( 0.0f , 1.0f , 0.0f ));
+		intersect->tangent = Normalize( m_gp1 - m_gp0 );
 
-		intersect->u = 0.0f;
+		intersect->u = 1.0f;
 		intersect->v = lerp( m_v0 , m_v1 , inter.y / m_length );
-		intersect->t = t - delta;
+		intersect->t = t;
 	}
 	return true;
 }
@@ -81,8 +76,7 @@ const BBox& Line::GetBBox() const{
 }
 
 float Line::SurfaceArea() const{
-	// to be fixed
-	return m_length * ( m_w0 + m_w1 ) * 0.5f;
+	return m_length * ( m_w0 + m_w1 ) * PI;
 }
 
 bool Line::GetIntersect(const BBox& box) const{
