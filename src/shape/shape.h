@@ -124,7 +124,7 @@ public:
 	//! @brief Set transform for the shape.
 	//!
 	//! @param transform	The new transform of the shape to be set.
-	inline void 	SetTransform( const Transform& transform ) { m_transform = transform; }
+	virtual void 	SetTransform( const Transform& transform ) { m_transform = transform; }
 
 protected:
 	Transform						m_transform;	/**< Transform of the shape from local space to world space. It is assumed there is no scaling in this matrix, the upper level code should handle it. */

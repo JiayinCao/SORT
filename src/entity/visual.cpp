@@ -74,8 +74,8 @@ void HairVisual::Serialize( IStreamBase& stream ){
 
             if( j > 0 ){
                 // Prevent float precision issue cauing negative width
-                const auto width_start = width;
-                const auto width_end = std::max( 0.0f , width - width_delta );
+                const auto width_start = width * 0.5f;
+                const auto width_end = std::max( 0.0f , width - width_delta ) * 0.5f;
                 const auto v_start = v;
                 const auto v_end = std::min( 1.0f , v + v_delta );
 

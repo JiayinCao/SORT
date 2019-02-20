@@ -21,17 +21,12 @@
 
 //! @brief 	Line is a common type for hair or fur rendering.
 /**
- * Unlike line rendering in rasterization, which has a screen-based width regardless
- * of how far away the viewer is, line in ray tracing represents a real line with some
- * width. The 'face' of line always faces towards the viewer.
- * Though being called line, this shape is actually line segment, which has a finite
- * length instead of infinite length.
- * Technically speaking, there is no such a thing like line in reality. All lines have
- * a potential radius, occupying some volume, they may look like cylinder when zooming 
- * in. It is possible to setup a scene where different algorithms result into slightly
- * different result.
- * Although there is not a pure phsically based shape, line shape is especially helpful
- * in rendering things like fur, which is why SORT supports this kind of shape.
+ * Althgouh being called line, this shape is essentially open cylinder. Other choose is to represent line
+ * with billboard like faces that always face the ray, which is not physically accurate and can easily lead
+ * problems like self shadowing.
+ * With cylinder as the line shape, it respresents a surface in 3D space that doesn't depend on anything else.
+ * This is more robust in term of ray-shape intersection and leads way less problem than billboard solution,
+ * which may work well if the radius is small enough, but it is still buggy.
  */
 class	Line : public Shape{
 public:
@@ -45,7 +40,7 @@ public:
 	//! @param	w1		Width at the other side of the line.
 	//! @param	matId	Material id of the line.
     Line( const Point& p0 , const Point& p1 , float v0 , float v1 , float w0 , float w1 , int matId ) : 
-		m_p0(p0), m_p1(p1), m_v0(v0), m_v1(v1), m_w0(w0), m_w1(w1), m_matId(matId) {
+		m_p0(p0), m_p1(p1), m_gp0(p0), m_gp1(p1), m_v0(v0), m_v1(v1), m_w0(w0), m_w1(w1), m_matId(matId) {
 		sAssert( m_w0 >= 0.0f , GENERAL );
 		sAssert( m_w1 >= 0.0f , GENERAL );
 		m_length = Distance( p0 , p1 );
@@ -116,14 +111,29 @@ public:
 		return m_matId;
 	}
 	
+	//! @brief Set transform for the shape.
+	//!
+	//! Vertices of line in local space is pre-transformed into world space. The purpose of doing this is not
+	//! to avoid run-time ray transformation during intersection test, where there is still one. It is for tackling
+	//! situation where the matrix is not uniformly transformed, causing the shape of the line stretch along one
+	//! direction, which is not desired. Pre-tranforming the vertices into world space will ignore the transformation
+	//! on shapes, leading us a more unified way of defining width of the line, no matter what the transformation is.
+	//!
+	//! @param transform	The new transform of the shape to be set.
+	void 	SetTransform( const Transform& transform ) override;
+
 private:
 	/**< Point at the end of the line. */
 	const Point		m_p0;
 	/**< Point at the other side of the line. */
 	const Point		m_p1;
-	/**< Width of the line at 'm_p0', it should always be positive. */
+	/**< Point at the end of the line in global space. */
+	Point		m_gp0;
+	/**< Point at the other side of the line in global space. */
+	Point		m_gp1;
+	/**< Half width (radius) of the line at 'm_p0', it should always be positive. */
 	const float		m_w0;
-	/**< Width of the line at 'm_p1', it should always be positive. */
+	/**< Half width (radius) of the line at 'm_p1', it should always be positive. */
 	const float		m_w1;
 	/**< V coordinate at point p0. */
 	const float		m_v0;
@@ -133,4 +143,7 @@ private:
 	float			m_length;
 	/**< Material index of the line segment. */
 	const int		m_matId;
+	/**< Transformation from world space to line space, where the line points from origin upward, 
+	 * there is no scaling in the matrix. */
+	Transform		m_world2Line;
 };
