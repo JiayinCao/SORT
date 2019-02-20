@@ -17,53 +17,55 @@
 
 #include "line.h"
 
+#define SQR(x)		((x)*(x))
+
 bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
-	// Transform the ray from world space to local space.
-	const auto ray = m_transform.invMatrix( r );
+	// convert it to line space first
+	const auto ray = m_world2Line( r );
 
-	// Calculating the intersection between the ray and the plane, whose normal is perpendicular to 
-	// both of the line and the ray forward direction.
-	const auto v0 = m_p1 - m_p0;					// Vector pointing along the line.
-	const auto v1 = Cross( ray.m_Dir , v0 );		// Vector that is perpendicular to both v0 and ray forward direction.
+	const auto tmp0 = m_w0 + ray.m_Ori.y * ( m_w1 - m_w0 ) / m_length;
+	const auto tmp1 = ray.m_Dir.y * ( m_w1 - m_w0 ) / m_length;
 
-	// This could happen if the ray forward direction is the same with the line direction.
-	if( v1.SquaredLength() <= 0.0f )
+#if 1
+	const auto a = SQR(ray.m_Dir.x) + SQR(ray.m_Dir.z) - SQR( tmp1 );
+	const auto b = 2.0f * ( ( ray.m_Ori.x * ray.m_Dir.x + ray.m_Ori.z * ray.m_Dir.z ) - tmp0 * tmp1 );
+	const auto c = SQR(ray.m_Ori.x) + SQR(ray.m_Ori.z) - SQR( tmp0 );
+#else
+	const auto a = SQR(ray.m_Dir.x) + SQR(ray.m_Dir.z);
+	const auto b = 2.0f * ( ray.m_Ori.x * ray.m_Dir.x + ray.m_Ori.z * ray.m_Dir.z ) ;
+	const auto c = SQR(ray.m_Ori.x) + SQR(ray.m_Ori.z) - SQR( m_w0 );
+#endif
+
+	const auto discriminant = b * b - 4.0f * a * c;
+	if( discriminant <= 0 )
+		return false;
+	const auto sqrtDisc = sqrt( discriminant );
+	
+	float t = ( -b - sqrtDisc ) / ( 2.0f * a );
+	auto inter = ray(t);
+	if( inter.y > m_length || inter.y < 0.0f ){
+		t = ( -b + sqrtDisc ) / ( 2.0f * a );
+		inter = ray(t);
+		if( inter.y > m_length || inter.y < 0.0f )
+			return false;
+	}
+
+	if( intersect == nullptr )
+		return true;
+	if( t >= intersect->t )
 		return false;
 
-	auto v2 = Normalize( -Cross( v0 , v1 ) );
-
-	// Distance along the ray direction to the intersection, early out if it is negative value.
-	const auto t0 = Dot( v2 , ray.m_Ori - m_p0 ) / -Dot( ray.m_Dir , v2 );
-	if( t0 <= 0 )
-		return false;
-
-	// This is the intersected point.
-	const auto p0 = ray.m_Ori + t0 * ray.m_Dir;
-
-	// Calculate the point on the line that is nearest to the intersected point.
-	// Early out if necessary.
-	const auto t1 = Dot( v0 , p0 - m_p0 ) / v0.SquaredLength();
-	if( t1 < 0 || t1 > 1.0f )
-		return false;
-	const auto p1 = lerp( m_p0 , m_p1 , t1 );
-
-	// Checking distance between the two intersected points.
-	const auto v3 = p1 - p0;
-	const auto w = lerp( m_w0 , m_w1 , t1 );
-	if( v3.SquaredLength() > w * w * 0.25f )
-		return false;
-
-	// There is an intersection between the ray and the line.
+	// to be removed after figuring out what is wrong in this algorithm.
+	const auto delta = 0.01f;
 	if( intersect ){
-		intersect->intersect = r.m_Ori + t0 * r.m_Dir;
-		intersect->gnormal = Normalize( m_transform.invMatrix.Transpose()(v2) );
+		intersect->intersect = r(t - delta);
+		intersect->gnormal = m_world2Line.GetInversed()(Normalize( Vector( inter.x , 0.0f , inter.z ) ));
 		intersect->normal = intersect->gnormal;
-		intersect->tangent = Normalize( m_transform(v0) );
+		intersect->tangent = m_world2Line.GetInversed()(Vector( 0.0f , 1.0f , 0.0f ));
 
-		const auto neg = Dot( Cross( v3 , v0 ) , v2 ) < 0.0f;
-		intersect->u = 0.5f + ( ( neg ? 0.5f : -0.5f ) * v3.Length() / w ) * 2.0f;
-		intersect->v = lerp( m_v0 , m_v1 , t1 );
-		intersect->t = t0;
+		intersect->u = 0.0f;
+		intersect->v = lerp( m_v0 , m_v1 , inter.y / m_length );
+		intersect->t = t - delta;
 	}
 	return true;
 }
@@ -71,17 +73,38 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 const BBox& Line::GetBBox() const{
 	if( !m_bbox ){
 		m_bbox = std::make_unique<BBox>();
-		m_bbox->Union( m_transform(m_p0) );
-		m_bbox->Union( m_transform(m_p1) );
-		m_bbox->Expend( std::max( m_w0 , m_w1 ) * 0.5f );
+		m_bbox->Union( m_gp0 );
+		m_bbox->Union( m_gp1 );
+		m_bbox->Expend( std::max( m_w0 , m_w1 ) );
 	}
 	return *m_bbox;
 }
 
 float Line::SurfaceArea() const{
+	// to be fixed
 	return m_length * ( m_w0 + m_w1 ) * 0.5f;
 }
 
 bool Line::GetIntersect(const BBox& box) const{
-	return false;
+	return true;
+}
+
+void Line::SetTransform( const Transform& transform ){
+	m_transform = transform; 
+
+	m_gp0 = transform( m_p0 );
+	m_gp1 = transform( m_p1 );
+
+	auto y = Normalize( m_gp1 - m_gp0 );
+	Vector x , z;
+	CoordinateSystem( y , x , z );
+	Matrix world2line(	x.x, x.y, x.z, -( x.x * m_gp0.x + x.y * m_gp0.y + x.z * m_gp0.z ),
+						y.x, y.y, y.z, -( y.x * m_gp0.x + y.y * m_gp0.y + y.z * m_gp0.z ),
+						z.x, z.y, z.z, -( z.x * m_gp0.x + z.y * m_gp0.y + z.z * m_gp0.z ),
+						0.0f, 0.0f, 0.0f, 1.0f);
+	m_world2Line = FromMatrix( world2line );
+
+	const auto lp0 = world2line( m_gp0 );
+	const auto lp1 = world2line( m_gp1 );
+	m_length = lp1.y - lp0.y;
 }
