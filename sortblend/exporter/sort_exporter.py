@@ -276,7 +276,7 @@ def export_hair(ps, obj, scene, fs):
     hairs = ps.particles
     
     vert_cnt = 0
-    hair_step = ps.settings.hair_step
+    render_step = ps.settings.render_step
     width_tip = ps.settings.sort_particle.sort_particle_width.width_tip
     width_bottom = ps.settings.sort_particle.sort_particle_width.width_bottom
 
@@ -287,7 +287,7 @@ def export_hair(ps, obj, scene, fs):
         mat_index = matname_to_id[obj.data.materials[mat_local_index-1].name]
 
     # for some unknown reason
-    steps = 2 ** hair_step
+    steps = 2 ** render_step
 
     verts = bytearray()
 
@@ -302,9 +302,12 @@ def export_hair(ps, obj, scene, fs):
             co = ps.co_hair(obj, pindex, step)
             # there could be a bug of ignoring point at origin
             if not co.length_squared == 0:
+                #print( co[:] )
                 co = transform * co
                 hair.append( co )
                 vert_cnt += 1
+            else:
+                break
 
         assert len(hair) > 0
         verts += LENFMT.pack( len(hair) - 1 )
