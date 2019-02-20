@@ -26,19 +26,20 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	const auto tmp0 = m_w0 + ray.m_Ori.y * ( m_w1 - m_w0 ) / m_length;
 	const auto tmp1 = ray.m_Dir.y * ( m_w1 - m_w0 ) / m_length;
 
+	// The 2.0 factor is skipped because it is not needed and will be canceled out.
 	const auto a = SQR(ray.m_Dir.x) + SQR(ray.m_Dir.z) - SQR( tmp1 );
-	const auto b = 2.0f * ( ( ray.m_Ori.x * ray.m_Dir.x + ray.m_Ori.z * ray.m_Dir.z ) - tmp0 * tmp1 );
+	const auto b = ( ( ray.m_Ori.x * ray.m_Dir.x + ray.m_Ori.z * ray.m_Dir.z ) - tmp0 * tmp1 );
 	const auto c = SQR(ray.m_Ori.x) + SQR(ray.m_Ori.z) - SQR( tmp0 );
 
-	const auto discriminant = b * b - 4.0f * a * c;
+	const auto discriminant = b * b - a * c;
 	if( discriminant <= 0 )
 		return false;
 	const auto sqrtDisc = sqrt( discriminant );
 	
-	float t = ( -b - sqrtDisc ) / ( 2.0f * a );
+	float t = ( -b - sqrtDisc ) / a;
 	auto inter = ray(t);
 	if( inter.y > m_length || inter.y < 0.0f ){
-		t = ( -b + sqrtDisc ) / ( 2.0f * a );
+		t = ( -b + sqrtDisc ) / a;
 		inter = ray(t);
 		if( inter.y > m_length || inter.y < 0.0f )
 			return false;
@@ -54,9 +55,24 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 
 	if( intersect ){
 		intersect->intersect = r(t);
-		intersect->gnormal = Normalize(m_world2Line.GetInversed()( Vector( inter.x , 0.0f , inter.z ) ) );
-		intersect->normal = intersect->gnormal;
-		intersect->tangent = Normalize( m_gp1 - m_gp0 );
+
+		if( inter.y == m_length ){
+			// A corner case where the tip of the line is being intersected.
+			intersect->gnormal = Normalize( m_world2Line.GetInversed()( Vector( 0.0f , 1.0f , 0.0f ) ) );
+			intersect->normal = intersect->gnormal;
+			intersect->tangent = Normalize( m_world2Line.GetInversed()( Vector( 1.0f , 0.0f , 0.0f ) ) );
+		}else{
+			// There could be better way to calculate the normal with smarter math.
+			const auto w = lerp( m_w0 , m_w1 , inter.y / m_length );
+			Point top( m_w1 * inter.x / w , m_length ,  m_w1 * inter.z / w );
+			const auto tangent = Normalize( top - inter );
+			intersect->tangent = m_world2Line.GetInversed()( tangent );
+
+			const auto normal = Vector( inter.x , 0.0f , inter.z );
+			const auto biTangent = Cross( normal , tangent );
+			intersect->normal = Normalize( m_world2Line.GetInversed()( Cross( tangent , biTangent ) ) );
+			intersect->gnormal = intersect->normal;
+		}
 
 		intersect->u = 1.0f;
 		intersect->v = lerp( m_v0 , m_v1 , inter.y / m_length );
