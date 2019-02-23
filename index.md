@@ -32,6 +32,5 @@ Since SORT supports a node graph based material system, it is quite flexible in 
 <img src="assets/mat_bumpped_metal2.png" width="256" height="256" />
 <img src="assets/mat_cloth.png" width="256" height="256" />
 <img src="assets/mat_blended.png" width="256" height="256" />
-<img src="assets/mat_cloth.png" width="256" height="256" />
 <img src="assets/mat_coated2.png" width="256" height="256" />
 <img src="assets/mat_plastic2.png" width="256" height="256" />
