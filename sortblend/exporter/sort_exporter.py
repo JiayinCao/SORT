@@ -302,7 +302,6 @@ def export_hair(ps, obj, scene, fs):
             co = ps.co_hair(obj, pindex, step)
             # there could be a bug of ignoring point at origin
             if not co.length_squared == 0:
-                #print( co[:] )
                 co = transform * co
                 hair.append( co )
                 vert_cnt += 1
