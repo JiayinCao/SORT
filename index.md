@@ -49,3 +49,4 @@ For those who wants to connect, for whatever reason, please contact me through t
 * [Linkedin](https://www.linkedin.com/in/caojiayin/)
 * [Twitter](https://twitter.com/Cao_Jiayin)
 * [Email](mailto:caojiayin1985@gmail.com)
+* [Tech Blog](https://agraphicsguy.wordpress.com/)
