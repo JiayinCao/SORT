@@ -41,3 +41,11 @@ Here are some of the examples rendered by SORT
 ## Compilation and Deployment
 For those who are interested in compiling SORT by themselves, please check out [this page](/compilation.md) for further deatail.  
 After compiling SORT successfully, it is nessesary to install Blender plugin to start rendering in SORT, [this page](/deployment.md) mentioned all detailes needed.
+
+## About me & Contact
+I’m a senior graphics engineer at Ubisoft Singapore currently working on Skull and Bones, improving graphics rendering in the game engine. Prior to joining Ubisoft, I was a geforce devtech at NVIDIA Shanghai. My job at NVIDIA was to support third party developers with latest NVIDIA technologies and help them solve the issues they encountered during game development.
+
+For those who wants to connect, for whatever reason, please contact me through the following media
+* [Linkedin](https://www.linkedin.com/in/caojiayin/)
+* [Twitter](https://twitter.com/Cao_Jiayin)
+* [Email](caojiayin1985@gmail.com)
