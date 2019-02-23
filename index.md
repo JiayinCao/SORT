@@ -1,5 +1,4 @@
 SORT, short for Simple Open-source Ray Tracing, is my personal cross platform ray tracing renderer. It is a standalone ray tracing program, while works well in Blender as a renderer plugin. Simliar to other open source ray tracer, like PBRT, luxrenderer, SORT is also a physically based renderer. However, since it is a solo project that I worked on in my spare time, it is way simpler comparing with others.  
-For those who are interested in compiling SORT by themselves, please check out [this page](/compilation.md) for further deatail.
 
 ## Features
 
@@ -40,5 +39,5 @@ Here are some of the examples rendered by SORT
 <img src="assets/mat_plastic2.png" width="256" height="256" />
 
 ## Compilation and Deployment
-For those who are interested in compiling SORT by themselves, please check out [this page](/compilation.md) for further deatail.
-After compiling SORT successfully, it is nessesary to install Blender plugin to start rendering in SORT, [this page][/deployment.md] mentioned all detailes needed.
+For those who are interested in compiling SORT by themselves, please check out [this page](/compilation.md) for further deatail.  
+After compiling SORT successfully, it is nessesary to install Blender plugin to start rendering in SORT, [this page](/deployment.md) mentioned all detailes needed.
