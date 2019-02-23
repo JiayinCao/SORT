@@ -48,4 +48,4 @@ I’m a senior graphics engineer at Ubisoft Singapore currently working on Skull
 For those who wants to connect, for whatever reason, please contact me through the following media
 * [Linkedin](https://www.linkedin.com/in/caojiayin/)
 * [Twitter](https://twitter.com/Cao_Jiayin)
-* [Email](caojiayin1985@gmail.com)
+* [Email](mailto:caojiayin1985@gmail.com)
