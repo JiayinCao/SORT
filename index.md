@@ -38,3 +38,7 @@ Here are some of the examples rendered by SORT
 <img src="assets/mat_blended.png" width="256" height="256" />
 <img src="assets/mat_coated2.png" width="256" height="256" />
 <img src="assets/mat_plastic2.png" width="256" height="256" />
+
+## Compilation and Deployment
+For those who are interested in compiling SORT by themselves, please check out [this page](/compilation.md) for further deatail.
+After compiling SORT successfully, it is nessesary to install Blender plugin to start rendering in SORT, [this page][/deployment.md] mentioned all detailes needed.
