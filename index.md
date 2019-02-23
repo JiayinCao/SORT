@@ -25,19 +25,19 @@ Featuring a flexible graph node material system, SORT is designed to support a w
 ![](assets/main_page/material_system.png)
 
 Here are some of the examples rendered by SORT  
-<img src="assets/main_page/mat_matte.png" width="256" height="256" />
-<img src="assets/main_page/mat_glass.png" width="256" height="256" />
-<img src="assets/main_page/mat_mirror.png" width="256" height="256" />
-<img src="assets/main_page/mat_coated.png" width="256" height="256" />
-<img src="assets/main_page/mat_plastic.png" width="256" height="256" />
-<img src="assets/main_page/mat_rough_glass.png" width="256" height="256" />
-<img src="assets/main_page/mat_anisotropic.png" width="256" height="256" />
-<img src="assets/main_page/mat_bumpped_metal.png" width="256" height="256" />
-<img src="assets/main_page/mat_bumpped_metal2.png" width="256" height="256" />
-<img src="assets/main_page/mat_cloth.png" width="256" height="256" />
-<img src="assets/main_page/mat_blended.png" width="256" height="256" />
-<img src="assets/main_page/mat_coated2.png" width="256" height="256" />
-<img src="assets/main_page/mat_plastic2.png" width="256" height="256" />
+<img src="assets/main_page/mat_matte.png" width="220" height="220" />
+<img src="assets/main_page/mat_glass.png" width="220" height="220" />
+<img src="assets/main_page/mat_mirror.png" width="220" height="220" />
+<img src="assets/main_page/mat_coated.png" width="220" height="220" />
+<img src="assets/main_page/mat_plastic.png" width="220" height="220" />
+<img src="assets/main_page/mat_rough_glass.png" width="220" height="220" />
+<img src="assets/main_page/mat_anisotropic.png" width="220" height="220" />
+<img src="assets/main_page/mat_bumpped_metal.png" width="220" height="220" />
+<img src="assets/main_page/mat_bumpped_metal2.png" width="220" height="220" />
+<img src="assets/main_page/mat_cloth.png" width="220" height="220" />
+<img src="assets/main_page/mat_blended.png" width="220" height="220" />
+<img src="assets/main_page/mat_coated2.png" width="220" height="220" />
+<img src="assets/main_page/mat_plastic2.png" width="220" height="220" />
 
 ## Compilation and Deployment
 For those who are interested in compiling SORT by themselves, please check out [this page](/compilation.md) for further deatail.  
