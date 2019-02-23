@@ -26,6 +26,7 @@
 #include "bsdf/bsdf.h"
 #include "bsdf/blend.h"
 #include "bsdf/doublesided.h"
+#include "bsdf/hair.h"
 
 IMPLEMENT_RTTI( DisneyPrincipleNode );
 IMPLEMENT_RTTI( PrincipleMaterialNode );
@@ -36,6 +37,7 @@ IMPLEMENT_RTTI( MirrorMaterialNode );
 IMPLEMENT_RTTI( MeasuredMaterialNode );
 IMPLEMENT_RTTI( BlendMaterialNode );
 IMPLEMENT_RTTI( DoubleSidedMaterialNode );
+IMPLEMENT_RTTI( HairMaterialNode );
 
 IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , DisneyPrincipleNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
@@ -172,4 +174,10 @@ IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , DoubleSidedMaterialNode )
     node->bxdf0.UpdateBSDF(bsdf0,fullWeight);
     node->bxdf1.UpdateBSDF(bsdf1,fullWeight);
     bsdf->AddBxdf(SORT_MALLOC(DoubleSided)(bsdf0, bsdf1, weight));
+IMPLEMENT_OUTPUT_BSDF_SOCKET_END
+
+IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , HairMaterialNode )
+    SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
+    Spectrum fullWeight(1.0f);
+	bsdf->AddBxdf( SORT_MALLOC(Hair)(bc , fullWeight) );
 IMPLEMENT_OUTPUT_BSDF_SOCKET_END
