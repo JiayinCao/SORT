@@ -42,7 +42,7 @@ public:
 	//! @param	cosAtLight		The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
 	//! @param	visibility		The visibility data structured filled by the light source.
 	//! @return					The radiance goes from the light source to the intersected point.
-	Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const;
+	Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const override;
 
 	//! @brief		Sample a point and light out-going direction.
 	//!
@@ -53,7 +53,7 @@ public:
 	//! @param	pdfA			The pdf w.r.t area of picking such a light out-going ray. It is simply one for delta light.
 	//! @param	cosAtLight		The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
 	//! @return					The radiance goes from the light source to the intersected point.
-	Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const;
+	Spectrum sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const override;
 
 	//! @brief	Get the radiance light starting from the light source and ending at the intersection point.
 	//!
@@ -66,7 +66,7 @@ public:
 	//! @param	directPdfA		The pdf w.r.t area to pick the point, intersection between the direction and the light source.
 	//! @param	emissionPdf		The pdf w.r.t solid angle to pick to sample such a position and direction goes to the intersection.
 	//! @return					The radiance goes from the light source to the intersection, black if there is no intersection.
-	Spectrum Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const;
+	Spectrum Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const override;
 
 	//! @brief	Given a ray, sample the light source if there is any intersection between the ray and the light source.
 	//!
@@ -78,12 +78,12 @@ public:
 	//! @param	intersect		The intersection between the ray and the light source.
 	//! @param	radiance		The radiance goes from the light source to the ray origin.
 	//! @return					Whether there is an intersection between the ray and the light source.
-	bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const;
+	bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const override;
 
 	//! @brief	Whether the light is an infinite light source.
 	//!
 	//! @return	 	Whether the light is an infinite light.
-	bool IsInfinite() const {
+	bool IsInfinite() const override{
 		return true;
 	}
 
@@ -94,12 +94,12 @@ public:
 	//! only used to pick a light for importance sampling, it is fine to be biased.
 	//!
 	//! @return		Approximation of the light power.
-	Spectrum Power() const;
+	Spectrum Power() const override;
 
 	//! @brief	Whether the light is a delta light source.
 	//!
 	//! @return	 	Whether the light is a delta light.
-	bool IsDelta() const {
+	bool IsDelta() const  override{
 		return false;
 	}
 
@@ -108,7 +108,7 @@ public:
 	//! @param	p		The point in world space to be shaded.
 	//! @param	wi		The direction pointing from the point.
 	//! @return			The pdf w.r.t solid angle if the ray starting from 'p', tracing through 'wi' hits the light source.
-	float Pdf( const Point& p , const Vector& wi ) const;
+	float Pdf( const Point& p , const Vector& wi ) const override;
 
 private:
 	/**< Sky information. */
