@@ -271,3 +271,25 @@ private:
     SORT_MATERIAL_DEFINE_PROP_BXDF(bxdf0);
     SORT_MATERIAL_DEFINE_PROP_BXDF(bxdf1);
 };
+
+//! @brief  Hair material node.
+class HairMaterialNode : public BxdfNode{
+public:
+    DEFINE_RTTI(HairMaterialNode, MaterialNode);
+    DEFINE_OUTPUT_BSDF_SOCKET( Result , HairMaterialNode );
+
+    //! @brief  Serialization interface. Loading data from stream.
+    //!
+    //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
+    //!
+    //! @param  stream      Input stream for data.
+    //! @param  cache       Cache for avoiding creating duplicated node.
+    void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
+        baseColor.Serialize( stream , cache );
+        roughness.Serialize( stream , cache );
+	}
+
+private:
+    SORT_MATERIAL_DEFINE_PROP_COLOR(baseColor);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(roughness);
+};
