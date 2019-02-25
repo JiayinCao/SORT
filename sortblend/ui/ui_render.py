@@ -20,6 +20,11 @@ import platform
 import subprocess
 from ..exporter import sort_exporter
 from ..exporter import pbrt_exporter
+from .. import base
+from bl_ui import properties_render
+
+base.compatify_class(properties_render.RENDER_PT_render)
+base.compatify_class(properties_render.RENDER_PT_dimensions)
 
 def OpenFile( filename ):
     if platform.system() == 'Darwin':     # for Mac OS
@@ -42,11 +47,6 @@ class SORTRenderPanel:
     bl_region_type = "WINDOW"
     bl_context = "render"
     COMPAT_ENGINES = {'SORT_RENDERER'}
-
-    @classmethod
-    def register(cls):
-        bl_ui.properties_render.RENDER_PT_render.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_render.RENDER_PT_dimensions.COMPAT_ENGINES.add('SORT_RENDERER')
 
     @classmethod
     def poll(cls, context):
