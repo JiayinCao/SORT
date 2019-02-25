@@ -17,6 +17,23 @@ import bpy
 import bl_ui
 from .. import SORTAddon
 from extensions_framework import declarative_property_group
+from .. import base
+from bl_ui import properties_particle
+
+base.compatify_class(properties_particle.PARTICLE_PT_boidbrain)
+base.compatify_class(properties_particle.PARTICLE_PT_cache)
+base.compatify_class(properties_particle.PARTICLE_PT_children)
+base.compatify_class(properties_particle.PARTICLE_PT_context_particles)
+base.compatify_class(properties_particle.PARTICLE_PT_draw)
+base.compatify_class(properties_particle.PARTICLE_PT_emission)
+base.compatify_class(properties_particle.PARTICLE_PT_field_weights)
+base.compatify_class(properties_particle.PARTICLE_PT_force_fields)
+base.compatify_class(properties_particle.PARTICLE_PT_hair_dynamics)
+base.compatify_class(properties_particle.PARTICLE_PT_physics)
+base.compatify_class(properties_particle.PARTICLE_PT_render)
+base.compatify_class(properties_particle.PARTICLE_PT_rotation)
+base.compatify_class(properties_particle.PARTICLE_PT_velocity)
+base.compatify_class(properties_particle.PARTICLE_PT_vertexgroups)
 
 # attach customized properties in particles
 @SORTAddon.addon_register_class
@@ -56,24 +73,6 @@ class SORTParticlePanel(bl_ui.properties_particle.ParticleButtonsPanel):
     bl_region_type = "WINDOW"
     bl_context = "particle"
     COMPAT_ENGINES = {'SORT_RENDERER'}
-    @classmethod
-    def register(cls):
-        bl_ui.properties_particle.PARTICLE_PT_boidbrain.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_cache.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_children.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_context_particles.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_custom_props.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_draw.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_emission.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_field_weights.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_force_fields.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_hair_dynamics.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_physics.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_render.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_rotation.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_hair_dynamics.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_velocity.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_particle.PARTICLE_PT_vertexgroups.COMPAT_ENGINES.add('SORT_RENDERER')
 
     @classmethod
     def poll(cls, context):
