@@ -25,12 +25,26 @@ def registrar(register, unregister, name=None):
 
 # somehow this will cause class registered twice, ignoring it
 def register():
+	#for r, _, n in REGISTRARS:
+    #	r()
     pass
 
 def unregister():
     for _, u, n in REGISTRARS:
         print('Unregister ' + n )
         u()
+
+def compatify_class(cls):
+    def reg():
+        cls.COMPAT_ENGINES.add('SORT_RENDERER')
+
+    def unreg():
+        cls.COMPAT_ENGINES.remove('SORT_RENDERER')
+
+    cls.COMPAT_ENGINES.add('SORT_RENDERER')
+    
+    registrar(reg, unreg, cls.__name__)
+    return cls
 
 def register_class(cls):
     registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)

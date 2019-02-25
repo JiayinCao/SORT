@@ -16,7 +16,12 @@
 import bpy
 import bl_ui
 from .. import SORTAddon
+from .. import base
+from bl_ui import properties_data_camera
 from extensions_framework import declarative_property_group
+
+base.compatify_class(properties_data_camera.DATA_PT_lens)
+base.compatify_class(properties_data_camera.DATA_PT_camera)
 
 # attach customized properties in camera
 @SORTAddon.addon_register_class
@@ -46,10 +51,6 @@ class SORTCameraPanel(bl_ui.properties_data_camera.CameraButtonsPanel):
     bl_region_type = "WINDOW"
     bl_context = "data"
     COMPAT_ENGINES = {'SORT_RENDERER'}
-    @classmethod
-    def register(cls):
-        bl_ui.properties_data_camera.DATA_PT_lens.COMPAT_ENGINES.add('SORT_RENDERER')
-        bl_ui.properties_data_camera.DATA_PT_camera.COMPAT_ENGINES.add('SORT_RENDERER')
     @classmethod
     def poll(cls, context):
         rd = context.scene.render
