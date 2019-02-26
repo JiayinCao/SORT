@@ -124,30 +124,24 @@ public:
 
 		return *this;
 	}
+	
 	// para 'f' :	divider
 	// result   :	a divided point
-	Point operator / ( float f ) const
-	{
-		sAssert( fabs(f) > 0.000001f , GENERAL );
-
+	Point operator / ( float f ) const{
 		float t = 1.0f / f;
-
 		return (*this) * t;
 	}
+
 	// para 'f' :	divider
 	// result   :	current vector after dividing
-	Point& operator /= ( float f )
-	{
-		sAssert( fabs(f) > 0.000001f , GENERAL );
-
+	Point& operator /= ( float f ){
 		float t = 1.0f / f;
-
 		x *= t;
 		y *= t;
 		z *= t;
-
 		return *this;
 	}
+
 	// para 'p' :   point to copy
 	Point& operator = ( const Point& p )
 	{
