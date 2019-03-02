@@ -26,7 +26,7 @@ Bsdf::Bsdf( const Intersection* _intersect , bool sub_bsdf ) :
     m_SubBSDF(sub_bsdf), intersect( *_intersect ){
 	nn = Normalize(intersect.normal);
 	tn = Normalize(Cross( nn , intersect.tangent ));
-	sn = Normalize(Cross( tn , nn ));
+	btn = Normalize(Cross( tn , nn ));
 }
 
 // get the number of components in current bsdf
@@ -65,15 +65,15 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const{
 // transform vector from world coordinate to shading coordinate
 Vector Bsdf::worldToLocal( const Vector& v , bool force ) const{
     if( m_SubBSDF && !force ) return v;
-	return Vector( Dot(v,sn) , Dot(v,nn) , Dot(v,tn) );
+	return Vector( Dot(v,tn) , Dot(v,nn) , Dot(v,btn) );
 }
 
 // transform vector from shading coordinate to world coordinate
 Vector Bsdf::localToWorld( const Vector& v ) const{
     if( m_SubBSDF ) return v;
-	return Vector( 	v.x * sn.x + v.y * nn.x + v.z * tn.x ,
-					v.x * sn.y + v.y * nn.y + v.z * tn.y ,
-					v.x * sn.z + v.y * nn.z + v.z * tn.z );
+	return Vector( 	v.x * tn.x + v.y * nn.x + v.z * btn.x ,
+					v.x * tn.y + v.y * nn.y + v.z * btn.y ,
+					v.x * tn.z + v.y * nn.z + v.z * btn.z );
 }
 
 // sample a ray from bsdf
