@@ -27,6 +27,7 @@
 #include "bsdf/blend.h"
 #include "bsdf/doublesided.h"
 #include "bsdf/hair.h"
+#include "math/utils.h"
 
 IMPLEMENT_RTTI( DisneyPrincipleNode );
 IMPLEMENT_RTTI( PrincipleMaterialNode );
@@ -177,7 +178,17 @@ IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , DoubleSidedMaterialNode )
 IMPLEMENT_OUTPUT_BSDF_SOCKET_END
 
 IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , HairMaterialNode )
-    SORT_MATERIAL_GET_PROP_COLOR(bc,baseColor);
+    SORT_MATERIAL_GET_PROP_COLOR(hc,hairColor);
+    SORT_MATERIAL_GET_PROP_FLOAT(lr,longtitudinalRoughness);
+    SORT_MATERIAL_GET_PROP_FLOAT(ar,azimuthalRoughness);
+    SORT_MATERIAL_GET_PROP_FLOAT(ior,indexOfRefraction);
+
+    // A Practical and Controllable Hair and Fur Model for Production Path Tracing
+    // https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
+    const auto inv = 1.0f / (5.969f - 0.215f * ar + 2.532f * Pow<2>(ar) - 10.73f * Pow<3>(ar) + 5.574f * Pow<4>(ar) + 0.245f * Pow<5>(ar));
+    const auto func = [=]( const float x ) { return SQR( std::log(x) * inv ); };
+    Spectrum sigma( func( hc.GetR() ) , func( hc.GetG() ) , func( hc.GetB() ) );
+
     Spectrum fullWeight(1.0f);
-	bsdf->AddBxdf( SORT_MALLOC(Hair)(bc , fullWeight) );
+	bsdf->AddBxdf( SORT_MALLOC(Hair)(sigma, lr, ar, ior, fullWeight) );
 IMPLEMENT_OUTPUT_BSDF_SOCKET_END

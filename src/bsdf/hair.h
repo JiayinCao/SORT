@@ -20,6 +20,8 @@
 #include "bxdf.h"
 #include "core/sassert.h"
 
+#define PMAX        3
+
 //! @brief Hair BRDF.
 /**
  * 'The Implementation of a Hair Scattering Model' by Matt Pharr.
@@ -28,12 +30,13 @@
 class Hair : public Bxdf{
 public:
 	//! Constructor
-    //! @param baseColor        Base color of hair
+    //!
+    //! @param absorption       Absorption coefficient.
+    //! @param lRoughness       Longtitudinal Roughness.
+    //! @param aRoughness       Azimuthal Roughness.
+    //! @param ior              Index of Refraction inside hair.
     //! @param weight           Weight of the BXDF
-    Hair(const Spectrum& baseColor, const Spectrum& weight, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector(0.0f,1.0f,0.0f), doubleSided) ,
-        baseColor(baseColor){
-    }
+    Hair(const Spectrum& absorption, const float lRoughness, const float aRoughness, const float ior, const Spectrum& weight, bool doubleSided = false);
 	
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -56,5 +59,13 @@ public:
     float pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
-    const Spectrum baseColor;
+    const Spectrum  m_sigma;            /**< Absorption coefficient. */
+    const float     m_lRoughness;       /**< Longtitudinal roughness. */
+    const float     m_aRoughness;       /**< Azimuthal roughness. */
+    const float     m_eta;              /**< Index of refraction inside the hair volume. */
+
+    float           m_v[PMAX+1];          /**< Some pre-calculated cached data. */
+    float           m_cos2kAlpha[PMAX];   /**< Some pre-calculated cached data, cos( 2 ^ k ). */
+    float           m_sin2kAlpha[PMAX];   /**< Some pre-calculated cached data, sin( 2 ^ k ). */
+    float           m_scale;              /**< Azimuhthal logisitic scale factor. */
 };

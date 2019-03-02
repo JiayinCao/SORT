@@ -265,7 +265,7 @@ def name_compat(name):
     if name is None:
         return 'None'
     else:
-        return name.replace(' ', '_')
+        return name.replace(' ', '')
 
 def export_hair(ps, obj, scene, fs):
     LENFMT = struct.Struct('=i')
@@ -500,7 +500,7 @@ def export_material(scene, fs):
                     input_socket = socket.links[0].from_socket
                     input_node = input_socket.node
 
-                    fs.serialize(input_node.name)
+                    fs.serialize(name_compat(input_node.name))
                     fs.serialize(input_node.sort_bxdf_type + input_socket.name)
                     if input_node.name not in cache:
                         fs.serialize(input_node.sort_bxdf_type)
