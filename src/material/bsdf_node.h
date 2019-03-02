@@ -285,11 +285,15 @@ public:
     //! @param  stream      Input stream for data.
     //! @param  cache       Cache for avoiding creating duplicated node.
     void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
-        baseColor.Serialize( stream , cache );
-        roughness.Serialize( stream , cache );
+        hairColor.Serialize( stream , cache );
+        longtitudinalRoughness.Serialize( stream , cache );
+        azimuthalRoughness.Serialize( stream , cache );
+        indexOfRefraction.Serialize( stream , cache );
 	}
 
 private:
-    SORT_MATERIAL_DEFINE_PROP_COLOR(baseColor);
-    SORT_MATERIAL_DEFINE_PROP_FLOAT(roughness);
+    SORT_MATERIAL_DEFINE_PROP_COLOR(hairColor);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(longtitudinalRoughness);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(azimuthalRoughness);
+    SORT_MATERIAL_DEFINE_PROP_FLOAT(indexOfRefraction);
 };

@@ -74,9 +74,9 @@ private:
     const Bxdf*	        m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
 	unsigned            m_bxdfCount = 0;                /**< Number of Bxdf in the BSDF. */
 
-    Vector nn;  /**< Normal at the point to be Evaluated. */
-    Vector sn;  /**< Bi-tangent at the point to be evaluated. */
-    Vector tn;  /**< Tangent at the point to be Evaluated. */
+    Vector nn;      /**< Normal at the point to be Evaluated. */
+    Vector btn;     /**< Bi-tangent at the point to be evaluated. */
+    Vector tn;      /**< Tangent at the point to be Evaluated. */
     
     const bool  m_SubBSDF;      /**< SubBSDF doesn't transform light direction again. */
 

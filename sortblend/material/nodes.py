@@ -296,8 +296,10 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_Material_Hair'
     sort_bxdf_type = 'HairMaterialNode'
     disable_normal = True       # No normal map support for hair rendering, it is meaningless
-    property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } ,
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'pbrt_name' : 'sigma' } ]
+    property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'HairColor' },
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Longtitudinal Roughness' },
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Azimuthal Roughness' },
+                      { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'Index of Refraction' , 'default' : 1.55 } ]
 
 @SORTPatternGraph.register_node('Materials')
 class SORTNode_Material_Measured(SORTShadingNode_BXDF):
