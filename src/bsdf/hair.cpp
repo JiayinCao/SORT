@@ -240,7 +240,7 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
     const auto gammaT = asin( clamp( sinGammaT , -1.0f , 1.0f ) );
     const auto dphi = ( p < PMAX ) ? Phi( p , gammaO , gammaT ) + SampleTrimmedLogistic( sort_canonical() , m_scale , -PI , PI ) : TWO_PI * sort_canonical();
 
-    float phiI = phiO + dphi;
+    const auto phiI = phiO + dphi;
     wi = Vector3f( sinThetaI , cosThetaI * sin( phiI ) , cosThetaI * cos( phiI ) );
 
     if( pPdf ){

@@ -16,8 +16,7 @@
  */
 
 #include "line.h"
-
-#define SQR(x)		((x)*(x))
+#include "math/utils.h"
 
 bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 	// convert it to line space first
@@ -63,7 +62,7 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 			intersect->tangent = Normalize( m_world2Line.GetInversed()( Vector( 1.0f , 0.0f , 0.0f ) ) );
 		}else{
 			// There could be better way to calculate the normal with smarter math.
-			const auto w = lerp( m_w0 , m_w1 , inter.y / m_length );
+			/*const auto w = lerp( m_w0 , m_w1 , inter.y / m_length );
 			Point top( m_w1 * inter.x / w , m_length ,  m_w1 * inter.z / w );
 			const auto tangent = Normalize( top - inter );
 			intersect->tangent = m_world2Line.GetInversed()( tangent );
@@ -71,7 +70,12 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 			const auto normal = Vector( inter.x , 0.0f , inter.z );
 			const auto biTangent = Cross( normal , tangent );
 			intersect->normal = Normalize( m_world2Line.GetInversed()( Cross( tangent , biTangent ) ) );
-			intersect->gnormal = intersect->normal;
+			intersect->gnormal = intersect->normal;*/
+
+			// This may not be physically correct, but it should be fine for a pixel width line.
+			intersect->gnormal = Normalize(m_world2Line.GetInversed()( Vector( inter.x , 0.0f , inter.z ) ) );
+			intersect->normal = intersect->gnormal;
+			intersect->tangent = Normalize( m_gp1 - m_gp0 );
 		}
 
 		intersect->u = 1.0f;
