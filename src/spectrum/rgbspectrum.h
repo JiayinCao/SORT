@@ -18,8 +18,7 @@
 #pragma once
 
 #include "core/define.h"
-#include "core/define.h"
-#include <math.h>
+#include "math/utils.h"
 
 ///////////////////////////////////////////////////////////////////
 // definition of rgb spectrum
