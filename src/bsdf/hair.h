@@ -68,4 +68,5 @@ private:
     float           m_cos2kAlpha[PMAX];   /**< Some pre-calculated cached data, cos( 2 ^ k ). */
     float           m_sin2kAlpha[PMAX];   /**< Some pre-calculated cached data, sin( 2 ^ k ). */
     float           m_scale;              /**< Azimuhthal logisitic scale factor. */
+    float           m_etaSqr;             /**< Squared eta. */
 };

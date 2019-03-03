@@ -15,12 +15,15 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "thirdparty/gtest/gtest.h"
-#include "core/thread.h"
+#include <thread>
+#include <mutex>
 #include "unittest_common.h"
-#include "bsdf/bsdf.h"
+#include "thirdparty/gtest/gtest.h"
 #include "sampler/sample.h"
 #include "spectrum/spectrum.h"
+#include "core/thread.h"
+#include "core/samplemethod.h"
+#include "bsdf/bsdf.h"
 #include "bsdf/lambert.h"
 #include "bsdf/orennayar.h"
 #include "bsdf/phong.h"
@@ -28,9 +31,7 @@
 #include "bsdf/disney.h"
 #include "bsdf/microfacet.h"
 #include "bsdf/dielectric.h"
-#include <thread>
-#include "core/samplemethod.h"
-#include <mutex>
+#include "bsdf/hair.h"
 
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
@@ -110,7 +111,7 @@ void checkPdf( const Bxdf* bxdf ){
             bxdf->Sample_F(wo, wi, BsdfSample(true), &pdf);
             return pdf != 0.0f ? 1.0f / pdf : 0.0f;
         } );
-        EXPECT_NEAR(total, TWO_PI, 0.03f); // 0.5% error is tolerated
+        EXPECT_NEAR(total, TWO_PI, 0.03f); // 0.3% error is tolerated
     }
 }
 
@@ -190,3 +191,34 @@ TEST(BXDF, Dielectric) {
     Dielectric dielectric( R , R , &ggx , sort_canonical() , sort_canonical() , R , DIR_UP );
     checkAll( &dielectric , false , false , true );
 }
+
+#if 0
+TEST(BXDF, Hair) {
+    Spectrum sigma_a = 0.f;
+    Spectrum fullWeight = 1.0f;
+
+    Vector3f wo = UniformSampleSphere( sort_canonical() , sort_canonical() );
+    for (float beta_m = .1; beta_m < 1; beta_m += .2) {
+        for (float beta_n = .1; beta_n < 1; beta_n += .2) {
+            // Estimate reflected uniform incident radiance from hair
+            Spectrum sum = 0.f;
+            int count = 500000;
+            Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            for (int i = 0; i < count; ++i) {
+                Vector3f wi = UniformSampleSphere( sort_canonical() , sort_canonical() );
+                sum += hair.f(wo, wi);
+            }
+
+            float avg = sum.GetIntensity() / (count * UniformSpherePdf());
+            EXPECT_NEAR(avg, 1.0f, 0.05f);
+        }
+    }
+
+    for (float beta_m = .1; beta_m < 1; beta_m += .2) {
+        for (float beta_n = .1; beta_n < 1; beta_n += .2) {
+            Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            checkAll( &hair , true , false , true );
+        }
+    }
+}
+#endif

@@ -34,11 +34,10 @@ static inline void Ap( const float cosThetaO , const float eta , const float sin
 }
 
 static inline float I0(const float x) {
-    float val = 0.0f;
-    float x2i = 1.0f;
+    auto val = 0.0f;
+    auto x2i = 1.0f;
     int64_t ifact = 1;
-    int i4 = 1;
-    // I0(x) \approx Sum_i x^(2i) / (4^i (i!)^2)
+    auto i4 = 1;
     for (int i = 0; i < 10; ++i) {
         if (i > 1) ifact *= i;
         val += x2i / (i4 * SQR(ifact));
@@ -120,6 +119,8 @@ Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoug
     m_v[0] = SQR(0.726f * m_lRoughness + 0.812f * SQR(m_lRoughness) + 3.7f * Pow<20>(m_lRoughness));
     m_v[1] = .25 * m_v[0];
     m_v[2] = 4 * m_v[0];
+    for (int p = 3; p <= PMAX; ++p)
+        m_v[p] = m_v[2];
 
     // Hard coded tilt angle, 2 degrees by default.
     constexpr auto alpha = 2.0f / 180.0f;
@@ -130,8 +131,10 @@ Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoug
         m_cos2kAlpha[i] = SQR( m_cos2kAlpha[i-1] ) - SQR( m_sin2kAlpha[i-1] );
     }
 
-    const auto SqrtPiOver8 = sqrt( PI / 8.0f );
+    constexpr auto SqrtPiOver8 = 0.626657069f; //sqrt( PI / 8.0f );
     m_scale = SqrtPiOver8 * (0.265f * m_aRoughness + 1.194f * SQR(m_aRoughness) + 5.372f * Pow<22>(m_aRoughness));
+
+    m_etaSqr = SQR( m_eta );
 }
 
 Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
@@ -149,11 +152,11 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
     // Modified index of refraction.
     // 'Light Scattering from Human Hair Fibers'
     // http://www.graphics.stanford.edu/papers/hair/hair-sg03final.pdf
-    const auto etap = sqrt( SQR(m_eta) - SQR( sinThetaO ) ) / cosThetaO;
+    const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
 
     const auto cosGammaO = wo.y;
     const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
-    const auto gammaO = asin( clamp( cosGammaO , -1.0f , 1.0f ) );
+    const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 
     const auto sinGammaT = sinGammaO / etap;
     const auto cosGammaT = ssqrt( 1.0f - SQR(sinGammaT) );
@@ -228,7 +231,7 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
     sinThetaI = sinThetaIp;
     cosThetaI = cosThetaIp;
 
-    const auto etap = sqrt( SQR( m_eta ) - SQR( sinThetaO ) ) / cosThetaO;
+    const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
     const auto cosGammaO = wo.y;
     const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
@@ -280,14 +283,11 @@ float Hair::pdf( const Vector& wo , const Vector& wi ) const{
     const auto sinThetaT = sinThetaO / m_eta;
     const auto cosThetaT = ssqrt( 1.0f - SQR(sinThetaT) );
 
-    // Modified index of refraction.
-    // 'Light Scattering from Human Hair Fibers'
-    // http://www.graphics.stanford.edu/papers/hair/hair-sg03final.pdf
-    const auto etap = sqrt( SQR(m_eta) - SQR( sinThetaO ) ) / cosThetaO;
+    const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
 
     const auto cosGammaO = wo.y;
     const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
-    const auto gammaO = asin( clamp( cosGammaO , -1.0f , 1.0f ) );
+    const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 
     const auto sinGammaT = sinGammaO / etap;
     const auto cosGammaT = ssqrt( 1.0f - SQR(sinGammaT) );
