@@ -18,7 +18,18 @@
 #pragma once
 
 #include <math.h>
+#if defined(_MSC_VER) && (_MSC_VER >= 1800) 
+#define NOMINMAX
+#  include <algorithm> // for std::min and std::max 
+#endif
+
 #include "core/define.h"
+
+#define	PI		3.1415926f
+#define	TWO_PI	6.2831852f
+#define HALF_PI 1.5707963f
+#define	INV_PI	0.3183099f
+#define INV_TWOPI 0.15915494f
 
 #define	SQR(x)		(Pow<2>(x))
 
@@ -53,4 +64,53 @@ inline float Pow<1>( float x ){
 //! @return		The square root of @param x.
 inline float ssqrt( const float x ){
 	return sqrt( std::max( 0.0f , x ) );
+}
+
+#define saturate(x) 			std::max(0.0f,std::min(1.0f,x))
+#define lerp( a , b , t  )      ( a * ( 1.0f - t ) + b * t )
+
+//! @brief	Clamp a value
+//!
+//! @param	x	Value to be clampped.
+//! @param	mi	Lower bound of the range.
+//! @param	ma	Upper bound of the range.
+//! @return		Clampped value.
+inline float clamp( float x , float mi , float ma ){
+	if( x > ma ) x = ma;
+	if( x < mi ) x = mi;
+	return x;
+}
+
+//! @brief	Degree to radian.
+//!
+//! @param	deg	Degree to be converted.
+//! @return	Cooresponding radian.
+inline float Radians( float deg ) {
+	return PI / 180.0f * deg;
+}
+
+//! @brief	Radian to degree.
+//!
+//! @param	rad		Value to be converted.
+//! @return			Cooresponding degree.
+inline float Degrees( float rad ) {
+	return 180.0f * INV_PI * rad ;
+}
+
+//! @brief	Color from linear space to gamma space.
+//!
+//! @param	value	Linear space color.
+//! @return			Gamma space color.
+inline float LinearToGamma( float value ){
+    if (value <= 0.0031308f) return 12.92f * value;
+    return 1.055f * pow(value, (float)(1.f / 2.4f)) - 0.055f;
+}
+
+//! @brief	Color from gamma space to linear space.
+//!
+//! @param value	Gamma space color.
+//! @return			Linear space color.
+inline float GammaToLinear( float value ){
+    if (value <= 0.04045f) return value * 1.f / 12.92f;
+    return pow((value + 0.055f) * 1.f / 1.055f, (float)2.4f);
 }
