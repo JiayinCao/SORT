@@ -155,7 +155,8 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
     const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
 
     const auto cosGammaO = wo.y / cosThetaO;
-    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
+    const auto sign = wo.z < 0.0f ? -1.0f : 1.0f;
+    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) ) * sign;
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 
     const auto sinGammaT = sinGammaO / etap;
@@ -233,7 +234,8 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
 
     const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
     const auto cosGammaO = wo.y / cosThetaO;
-    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
+    const auto sign = wo.z < 0.0f ? -1.0f : 1.0f;
+    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) ) * sign;
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 
     const auto sinGammaT = sinGammaO / etap;
@@ -286,7 +288,8 @@ float Hair::pdf( const Vector& wo , const Vector& wi ) const{
     const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
 
     const auto cosGammaO = wo.y / cosThetaO;
-    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
+    const auto sign = wo.z < 0.0f ? -1.0f : 1.0f;
+    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) ) * sign;
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 
     const auto sinGammaT = sinGammaO / etap;
