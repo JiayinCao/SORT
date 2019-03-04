@@ -26,6 +26,3 @@
 #elif defined(__APPLE__)
 	#define SORT_IN_MAC
 #endif
-
-// enable debug by default
-#define	SORT_DEBUG

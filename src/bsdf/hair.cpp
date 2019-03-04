@@ -154,7 +154,7 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
     // http://www.graphics.stanford.edu/papers/hair/hair-sg03final.pdf
     const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
 
-    const auto cosGammaO = wo.y;
+    const auto cosGammaO = wo.y / cosThetaO;
     const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 
@@ -232,7 +232,7 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
     cosThetaI = cosThetaIp;
 
     const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
-    const auto cosGammaO = wo.y;
+    const auto cosGammaO = wo.y / cosThetaO;
     const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 
@@ -285,7 +285,7 @@ float Hair::pdf( const Vector& wo , const Vector& wi ) const{
 
     const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
 
-    const auto cosGammaO = wo.y;
+    const auto cosGammaO = wo.y / cosThetaO;
     const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 

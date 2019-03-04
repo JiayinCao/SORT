@@ -21,21 +21,15 @@
 #include "core/log.h"
 #include <assert.h>
 
-// assert
-#ifndef SORT_DEBUG
-    #define sAssert(expr,type) (void(0))
-    #define sAssertMsg(expr,type,str) (void(0))
-#else
-    #define sAssert(expr,type) \
-            if( false == (bool)(expr) ) {\
-                slog( CRITICAL , type , "Crashed!" );\
-                abort();\
-            }
+#define sAssert(expr,type) \
+    if( false == (bool)(expr) ) {\
+        slog( CRITICAL , type , "Crashed!" );\
+        abort();\
+    }
 
-    #define sAssertMsg(expr, type, ... ) \
-            if( false == (bool)(expr) )\
-            {\
-                slog( CRITICAL , type , __VA_ARGS__ );\
-                abort();\
-            }
-#endif
+#define sAssertMsg(expr, type, ... ) \
+    if( false == (bool)(expr) )\
+    {\
+        slog( CRITICAL , type , __VA_ARGS__ );\
+        abort();\
+    }
