@@ -24,8 +24,8 @@ Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_w
     
     normal_map_applied = true;
     nn = Normalize(n);
-    tn = Normalize(Cross( nn , Vector( 1.0f , 0.0f , 0.0f ) ));
-    sn = Normalize(Cross( tn , nn ));
+    btn = Normalize(Cross( nn , Vector( 1.0f , 0.0f , 0.0f ) ));
+    tn = Normalize(Cross( btn , nn ));
 }
 
 Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
