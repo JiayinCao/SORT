@@ -120,7 +120,7 @@ protected:
     //! @return     corresponding vector in shading coordinate.
     inline Vector bsdfToBxdf( const Vector& v ) const{
         if( !normal_map_applied ) return v;
-        return Vector( Dot(v,sn) , Dot(v,nn) , Dot(v,tn) );
+        return Vector( Dot(v,tn) , Dot(v,nn) , Dot(v,btn) );
     }
     
     //! @brief Transform a vector from shading coordinate to world coordinate.
@@ -128,9 +128,9 @@ protected:
     //! @return     corresponding vector in world coordinate.
     inline Vector bxdfToBsdf( const Vector& v ) const{
         if( !normal_map_applied ) return v;
-        return Vector(  v.x * sn.x + v.y * nn.x + v.z * tn.x ,
-                        v.x * sn.y + v.y * nn.y + v.z * tn.y ,
-                        v.x * sn.z + v.y * nn.z + v.z * tn.z );
+        return Vector(  v.x * tn.x + v.y * nn.x + v.z * btn.x ,
+                        v.x * tn.y + v.y * nn.y + v.z * btn.y ,
+                        v.x * tn.z + v.y * nn.z + v.z * btn.z );
     }
 
     inline bool SameHemiSphere(const Vector& wi, const Vector& wo) const {
@@ -141,8 +141,8 @@ protected:
     BXDF_TYPE   m_type = BXDF_NONE;         /**< The specific type of the bxdf. */
     bool        normal_map_applied = false; /**< Whether normal map is applied on the BXDF. */
     Vector      nn;                         /**< Normal at the point to be Evaluated. */
-    Vector      sn;                         /**< Bi-tangent at the point to be evaluated. */
     Vector      tn;                         /**< Tangent at the point to be Evaluated. */
+    Vector      btn;                        /**< Bi-tangent at the point to be evaluated. */
     mutable Vector      gnormal;            /**< Geometry normal. */
     const bool  doubleSided = false;        /**< Whether the bxdf is double sided. */
 };
