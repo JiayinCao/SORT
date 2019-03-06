@@ -265,6 +265,12 @@ def name_compat(name):
     if name is None:
         return 'None'
     else:
+        return name.replace(' ', '_')
+
+def name_compat_materialNode(name):
+    if name is None:
+        return 'None'
+    else:
         return name.replace(' ', '')
 
 def export_hair(ps, obj, scene, fs):
@@ -285,7 +291,7 @@ def export_hair(ps, obj, scene, fs):
     mat_index = -1
 
     if mat_local_index > 0 and mat_local_index <= len( obj.data.materials ):
-        mat_name = obj.data.materials[mat_local_index-1].name
+        mat_name = name_compat(obj.data.materials[mat_local_index-1].name)
         mat_index = matname_to_id[mat_name] if mat_name in matname_to_id else -1
 
     # for some unknown reason
@@ -500,7 +506,7 @@ def export_material(scene, fs):
                     input_socket = socket.links[0].from_socket
                     input_node = input_socket.node
 
-                    fs.serialize(name_compat(input_node.name))
+                    fs.serialize(name_compat_materialNode(input_node.name))
                     fs.serialize(input_node.sort_bxdf_type + input_socket.name)
                     if input_node.name not in cache:
                         fs.serialize(input_node.sort_bxdf_type)

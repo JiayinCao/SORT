@@ -25,8 +25,8 @@
 Bsdf::Bsdf( const Intersection* _intersect , bool sub_bsdf ) : 
     m_SubBSDF(sub_bsdf), intersect( *_intersect ){
 	nn = Normalize(intersect.normal);
-	tn = Normalize(Cross( nn , intersect.tangent ));
-	btn = Normalize(Cross( tn , nn ));
+	btn = Normalize(Cross( nn , intersect.tangent ));
+	tn = Normalize(Cross( btn , nn ));
 }
 
 // get the number of components in current bsdf
