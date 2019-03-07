@@ -294,17 +294,15 @@ public:
     //! @param  cache       Cache for avoiding creating duplicated node.
     void Serialize( IStreamBase& stream , MaterialNodeCache& cache ) override {
         ior.Serialize( stream , cache );
-        thickness.Serialize( stream , cache );
-        sigma.Serialize( stream , cache );
         roughness.Serialize( stream , cache );
+        colorTint.Serialize( stream , cache );
         bxdf.Serialize( stream , cache );
         BxdfNode::Serialize( stream , cache );
     }
     
 private:
-    SORT_MATERIAL_DEFINE_PROP_FLOAT( thickness );
     SORT_MATERIAL_DEFINE_PROP_FLOAT( roughness );
-    SORT_MATERIAL_DEFINE_PROP_COLOR( sigma );
+    SORT_MATERIAL_DEFINE_PROP_COLOR( colorTint );
     SORT_MATERIAL_DEFINE_PROP_FLOAT( ior );
     SORT_MATERIAL_DEFINE_PROP_BXDF( bxdf );
 };

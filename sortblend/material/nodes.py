@@ -409,11 +409,10 @@ class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
     bl_label = 'Coat'
     bl_idname = 'SORTNode_BXDF_Coat'
     sort_bxdf_type = 'CoatNode'
-    property_list = [ { 'class' : properties.SORTNodePropertyFloat , 'name' : 'IOR' , 'default' : 1.5 , 'min' : 1.0 , 'max' : 10.0 } ,
-                      { 'class' : properties.SORTNodePropertyFloat , 'name' : 'Thickness' , 'default' : 1.0 , 'min' : 0.1 , 'max' : 10.0 } ,
-                      { 'class' : properties.SORTNodePropertyFloatVector , 'name' : 'Sigma' , 'default' : (0.0, 0.0, 0.0) , 'min' : 0.0 , 'max' : 256.0 }, # random maximum value for now
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'default' : 0.0 } ,
-                      { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Surface' } ]
+    property_list = [ { 'class' : properties.SORTNodePropertyFloat  , 'name' : 'IOR'        , 'default' : 1.5 , 'min' : 1.0 , 'max' : 10.0 } ,
+                      { 'class' : properties.SORTNodeSocketFloat    , 'name' : 'Roughness'  , 'default' : 0.0 } ,
+                      { 'class' : properties.SORTNodeSocketColor    , 'name' : 'ColorTint' } ,
+                      { 'class' : properties.SORTNodeSocketBxdf     , 'name' : 'Surface' } ]
 
 @SORTPatternGraph.register_node('BXDFs')
 class SORTNode_BXDF_MERL(SORTShadingNode_BXDF):
