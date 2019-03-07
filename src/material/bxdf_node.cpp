@@ -156,12 +156,17 @@ void FourierBxdfNode::PostProcess(){
 
 IMPLEMENT_OUTPUT_BSDF_SOCKET_BEGIN( Result , CoatNode )
     SORT_MATERIAL_GET_PROP_VECTOR(n,normal);
-    SORT_MATERIAL_GET_PROP_COLOR(s,sigma);
+    SORT_MATERIAL_GET_PROP_COLOR(c,colorTint);
     SORT_MATERIAL_GET_PROP_FLOAT(r,roughness);
     SORT_MATERIAL_GET_PROP_FLOAT(i,ior);
-    SORT_MATERIAL_GET_PROP_FLOAT(t,thickness);
+
+    // A Practical and Controllable Hair and Fur Model for Production Path Tracing
+    // https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
+    const auto inv = 1.0f / (5.969f - 0.215f * r + 2.532f * Pow<2>(r) - 10.73f * Pow<3>(r) + 5.574f * Pow<4>(r) + 0.245f * Pow<5>(r));
+    const auto func = [=]( const float x ) { return SQR( std::log(x) * inv ); };
+    Spectrum sigma( func( c.GetR() ) , func( c.GetG() ) , func( c.GetB() ) );
     
     Bsdf* bottom = SORT_MALLOC(Bsdf)( bsdf->GetIntersection() , true );
     node->bxdf.UpdateBSDF( bottom , weight );
-    bsdf->AddBxdf( SORT_MALLOC(Coat)( t, i, r, s, bottom, weight, n ) );
+    bsdf->AddBxdf( SORT_MALLOC(Coat)( 1.0f, i, r, sigma, bottom, weight, n ) );
 IMPLEMENT_OUTPUT_BSDF_SOCKET_END
