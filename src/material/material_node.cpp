@@ -44,7 +44,7 @@ void MaterialNode::UpdateBSDF( Bsdf* bsdf , const Spectrum& weight ){
 		return;
 
     for( auto input : m_inputs ){
-		sAssert( input , MATERIAL );
+		sAssert( input != nullptr , MATERIAL );
 		input->UpdateBSDF(bsdf , weight);
 	}
 }

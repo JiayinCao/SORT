@@ -50,7 +50,7 @@ private:
 class ConstantFloatNode : public MaterialNode{
 public:
     DEFINE_RTTI( ConstantFloatNode , MaterialNode );
-    DEFINE_OUTPUT_COLOR_SOCKET( Result , ConstantFloatNode );
+    DEFINE_OUTPUT_FLOAT_SOCKET( Result , ConstantFloatNode );
 
     //! @brief  Get the type of the material node.
     //!
