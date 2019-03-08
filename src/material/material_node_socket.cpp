@@ -138,7 +138,7 @@ void MaterialNodePropertyUV::GetMaterialProperty( Bsdf* bsdf , Vector2f& result 
         m_fromSocket->GetMaterialProperty(bsdf, result);
     else{
         const auto intersection = bsdf->GetIntersection();
-        sAssert( intersection , MATERIAL );
+        sAssert( intersection != nullptr , MATERIAL );
         result.x = intersection->u;
         result.y = intersection->v;
     }

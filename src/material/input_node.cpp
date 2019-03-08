@@ -27,10 +27,10 @@ IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , ConstantColorNode )
     result = c;
 IMPLEMENT_OUTPUT_COLOR_SOCKET_END
 
-IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , ConstantFloatNode )
+IMPLEMENT_OUTPUT_FLOAT_SOCKET_BEGIN( Result , ConstantFloatNode )
     SORT_MATERIAL_GET_PROP_FLOAT(f,value);
     result = f;
-IMPLEMENT_OUTPUT_COLOR_SOCKET_END
+IMPLEMENT_OUTPUT_FLOAT_SOCKET_END
 
 IMPLEMENT_OUTPUT_UV_SOCKET_BEGIN( UVMapping , UVMappingNode )
     SORT_MATERIAL_GET_PROP_FLOAT(ut,u_tiling);
@@ -39,7 +39,7 @@ IMPLEMENT_OUTPUT_UV_SOCKET_BEGIN( UVMapping , UVMappingNode )
     SORT_MATERIAL_GET_PROP_FLOAT(vo,v_offset);
 
     auto intersection = bsdf->GetIntersection();
-    sAssert( intersection , MATERIAL );
+    sAssert( intersection != nullptr , MATERIAL );
     result.x = ut * intersection->u + uo;
     result.y = vt * intersection->v + vo;
 IMPLEMENT_OUTPUT_UV_SOCKET_END

@@ -40,7 +40,7 @@ static inline float I0(const float x) {
     auto i4 = 1;
     for (int i = 0; i < 10; ++i) {
         if (i > 1) ifact *= i;
-        val += x2i / (i4 * SQR(ifact));
+        val += x2i / (float)(i4*ifact*ifact);
         x2i *= x * x;
         i4 *= 4;
     }
@@ -48,7 +48,7 @@ static inline float I0(const float x) {
 }
 
 static inline float LogI0(float x) {
-    return (x > 12) ? x + 0.5 * (-log(TWO_PI) + log(1 / x) + 1 / (8 * x)) : log(I0(x));
+    return (x > 12) ? x + 0.5f * (-log(TWO_PI) + log(1 / x) + 1 / (8 * x)) : log(I0(x));
 }
 
 static inline float Mp( const float cosThetaI , const float cosThetaO , const float sinThetaI , const float sinThetaO , const float v ){
@@ -117,7 +117,7 @@ Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoug
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector(0.0f,1.0f,0.0f), doubleSided) ,
         m_sigma(absorption), m_lRoughness(lRoughness), m_aRoughness(aRoughness), m_eta(ior){
     m_v[0] = SQR(0.726f * m_lRoughness + 0.812f * SQR(m_lRoughness) + 3.7f * Pow<20>(m_lRoughness));
-    m_v[1] = .25 * m_v[0];
+    m_v[1] = 0.25f * m_v[0];
     m_v[2] = 4 * m_v[0];
     for (int p = 3; p <= PMAX; ++p)
         m_v[p] = m_v[2];
