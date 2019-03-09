@@ -15,10 +15,11 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <cmath>
 #include "microfacet.h"
 #include "bsdf.h"
 #include "sampler/sample.h"
-#include <cmath>
+#include "math/utils.h"
 
 Blinn::Blinn( float roughnessU , float roughnessV ) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
@@ -27,7 +28,7 @@ Blinn::Blinn( float roughnessU , float roughnessV ) {
     // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT.
     const static auto convert_alpha = [](float roughness) {
         roughness = std::max(0.01f, roughness);
-        return pow( roughness , 4.0f );
+        return Pow<4>( roughness );
     };
     const static auto convert_exp = [](float roughness) {
         return 2.0f / convert_alpha(roughness) - 2.0f;
@@ -74,7 +75,7 @@ Vector Blinn::sample_f( const BsdfSample& bs ) const {
     const auto sin_phi_h_sq = sin_phi_h * sin_phi_h;
     const auto alpha = expU * (1.0f - sin_phi_h_sq) + expV * sin_phi_h_sq;
     const auto cos_theta = std::pow(bs.u, 1.0f / (alpha + 2.0f));
-    const auto sin_theta = sqrtf(std::max(0.0f, 1.0f - cos_theta * cos_theta));
+    const auto sin_theta = sqrt( 1.0f - SQR( cos_theta ) ) ;
 
     return SphericalVec(sin_theta, cos_theta, phi);
 }
@@ -157,7 +158,7 @@ GGX::GGX( float roughnessU , float roughnessV ) {
     // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT. 
     const static auto convert = []( float roughness ) {
         roughness = std::max(roughness, (float)1e-3);
-        return roughness * roughness;
+        return SQR(roughness);
     };
     alphaU = convert( roughnessU );
     alphaV = convert( roughnessV );
