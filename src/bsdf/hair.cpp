@@ -105,7 +105,7 @@ static inline void ComputeApPdf(const float cosThetaO , const float cosThetaT ,
 
 Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoughness, const float ior, const Spectrum& weight, bool doubleSided)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector(0.0f,1.0f,0.0f), doubleSided) ,
-        m_sigma(absorption), m_lRoughness(lRoughness), m_aRoughness(aRoughness), m_eta(ior){
+        m_sigma(absorption), m_lRoughness( std::max( 0.01f , lRoughness) ), m_aRoughness( std::max( 0.01f , aRoughness ) ), m_eta(ior){
     m_v[0] = SQR(0.726f * m_lRoughness + 0.812f * SQR(m_lRoughness) + 3.7f * Pow<20>(m_lRoughness));
     m_v[1] = 0.25f * m_v[0];
     m_v[2] = 4 * m_v[0];
@@ -213,7 +213,8 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
     }
 
     r = sort_canonical();
-    const auto cosTheta = 1.0f + m_v[p] * log( r + ( 1.0f - r ) * exp( -2.0f / m_v[p] ) );
+    // special handling for corner case where 'r' equals to 0, leading exp( -2.0f / m_v[p] ) potentially reaches 0, eventually resulting in a 'Nan'
+    const auto cosTheta = r > 0.0f ? ( 1.0f + m_v[p] * log( r + ( 1.0f - r ) * exp( -2.0f / m_v[p] ) ) ) : 1.0f - 2.0f * m_v[p] / m_v[p] ;
     const auto sinTheta = ssqrt( 1.0f - SQR( cosTheta ) );
     const auto cosPhi = cos( TWO_PI * sort_canonical() );
     auto sinThetaI = -cosTheta * sinThetaO + sinTheta * cosPhi * cosThetaO;
@@ -262,6 +263,8 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
             }
             
             cosThetaIp = abs( cosThetaIp );
+            auto mp = Mp( cosThetaIp , cosThetaO , sinThetaIp , sinThetaO , m_v[p] );
+            auto np = Np( dphi, p, m_scale, gammaO, gammaT );
             *pPdf += Mp( cosThetaIp , cosThetaO , sinThetaIp , sinThetaO , m_v[p] ) * apPdf[p] * Np( dphi, p, m_scale, gammaO, gammaT );
         }
         *pPdf += Mp( cosThetaI , cosThetaO , sinThetaI , sinThetaO , m_v[PMAX] ) * apPdf[PMAX] * INV_TWOPI;
