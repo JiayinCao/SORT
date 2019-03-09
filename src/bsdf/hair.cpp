@@ -21,8 +21,7 @@
 #include "fresnel.h"
 #include "math/utils.h"
 
-static inline void Ap( const float cosThetaO , const float eta , const float sinGammaT , const Spectrum& T , Spectrum ap[] ){
-    const auto cosGammaO = ssqrt( 1.0f - SQR( sinGammaT ) );
+static inline void Ap( const float cosThetaO , const float eta , const float cosGammaO , const Spectrum& T , Spectrum ap[] ){
     const auto cosTheta = cosThetaO * cosGammaO;
     const auto f = DielectricFresnel( cosTheta , 1.0f , eta );
 
@@ -31,6 +30,9 @@ static inline void Ap( const float cosThetaO , const float eta , const float sin
     for( auto i = 2 ; i < PMAX ; ++i )
         ap[i] = ap[i-1] * T * f;
     ap[PMAX] = ap[PMAX - 1] * f * T / ( 1.0f - T * f );
+
+    if( isnan( ap[PMAX].GetR() ) )
+        int a = 0;
 }
 
 static inline float I0(const float x) {
@@ -87,23 +89,14 @@ static inline float Np( const float phi , const int p , const float scale , cons
     return TrimmedLogistic( dphi, scale, -PI, PI);
 }
 
-static inline void ComputeApPdf( const float cosGammaO , const float cosThetaO , const float sinThetaO , const float eta , const Spectrum sigma, float pdf[] ){
-    const auto sinThetaT = sinThetaO / eta;
-    const auto cosThetaT = ssqrt( 1.0f - SQR( sinThetaT ) );
-
-    const auto etap = sqrt( SQR( eta ) - SQR( sinThetaO ) ) / cosThetaO;
-
-    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) );
-
-    const auto sinGammaT = sinGammaO / etap;
-    const auto cosGammaT = ssqrt( 1.0f - SQR(sinGammaT) );
-    const auto gammaT = asin( clamp( sinGammaT , -1.0f , 1.0f ) );
-    
+static inline void ComputeApPdf(const float cosThetaO , const float cosThetaT , 
+                                const float cosGammaO , const float cosGammaT ,
+                                const float eta , const Spectrum sigma, float pdf[] ){
     const auto T = sigma * ( -2.0f * cosGammaT / cosThetaT );
     const auto expT = T.Exp();
     
     Spectrum ap[PMAX + 1];
-    Ap( cosThetaO , eta , sinGammaT , expT , ap );
+    Ap( cosThetaO , eta , cosGammaO , expT , ap );
 
     auto sumY = 0.0f;
     for( auto i = 0 ; i <= PMAX ; ++i )
@@ -138,6 +131,9 @@ Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoug
 }
 
 Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
+    if( wo.y <= 0.0f )
+        return 0.0f;
+
     const auto sinThetaO = wo.x;
     const auto cosThetaO = ssqrt( 1.0f - SQR(sinThetaO) );
     const auto phiO = atan2(wo.y, wo.z);
@@ -155,8 +151,7 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
     const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
 
     const auto cosGammaO = wo.y / cosThetaO;
-    const auto sign = wo.z < 0.0f ? -1.0f : 1.0f;
-    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) ) * sign;
+    const auto sinGammaO = wo.z / cosThetaO;
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 
     const auto sinGammaT = sinGammaO / etap;
@@ -168,7 +163,7 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
     const auto phi = phiI - phiO;
 
     Spectrum ap[PMAX + 1];
-    Ap( cosThetaO , m_eta , sinGammaT , expT , ap );
+    Ap( cosThetaO , m_eta , cosGammaO , expT , ap );
 
     Spectrum fsum(0.0f);
     for( auto p = 0 ; p < PMAX ; ++p ){
@@ -192,6 +187,9 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
     }
     fsum += Mp( cosThetaI, cosThetaO, sinThetaI, sinThetaO, m_v[PMAX] ) * ap[PMAX] * INV_TWOPI;
 
+    if( isnan( fsum.GetR() ) || isnan( fsum.GetG() ) || isnan( fsum.GetB() ) ){
+        int a = 0;
+    }
     return fsum;
 }
 
@@ -200,8 +198,19 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
     const auto cosThetaO = ssqrt( 1.0f - SQR( sinThetaO ) );
     const auto phiO = atan2( wo.y , wo.z );
 
+    const auto sinThetaT = sinThetaO / m_eta;
+    const auto cosThetaT = ssqrt( 1.0f - SQR(sinThetaT) );
+
+    const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
+
+    const auto cosGammaO = wo.y / cosThetaO;
+    const auto sinGammaO = wo.z / cosThetaO;
+
+    const auto sinGammaT = sinGammaO / etap;
+    const auto cosGammaT = ssqrt( 1.0f - SQR(sinGammaT) );
+
     float apPdf[PMAX + 1] = {0.0f};
-    ComputeApPdf( wo.y , cosThetaO , sinThetaO , m_eta , m_sigma , apPdf );
+    ComputeApPdf( cosThetaO , cosThetaT , cosGammaO , cosGammaT , m_eta , m_sigma , apPdf );
     auto r = sort_canonical();
     auto p = 0;
     for( ; p < PMAX ; ++p ){
@@ -232,13 +241,7 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
     sinThetaI = sinThetaIp;
     cosThetaI = cosThetaIp;
 
-    const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
-    const auto cosGammaO = wo.y / cosThetaO;
-    const auto sign = wo.z < 0.0f ? -1.0f : 1.0f;
-    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) ) * sign;
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
-
-    const auto sinGammaT = sinGammaO / etap;
     const auto gammaT = asin( clamp( sinGammaT , -1.0f , 1.0f ) );
     const auto dphi = ( p < PMAX ) ? Phi( p , gammaO , gammaT ) + SampleTrimmedLogistic( sort_canonical() , m_scale , -PI , PI ) : TWO_PI * sort_canonical();
 
@@ -288,8 +291,7 @@ float Hair::pdf( const Vector& wo , const Vector& wi ) const{
     const auto etap = sqrt( m_etaSqr - SQR( sinThetaO ) ) / cosThetaO;
 
     const auto cosGammaO = wo.y / cosThetaO;
-    const auto sign = wo.z < 0.0f ? -1.0f : 1.0f;
-    const auto sinGammaO = ssqrt( 1.0f - SQR( cosGammaO ) ) * sign;
+    const auto sinGammaO = wo.z / cosThetaO;
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
 
     const auto sinGammaT = sinGammaO / etap;
@@ -297,7 +299,7 @@ float Hair::pdf( const Vector& wo , const Vector& wi ) const{
     const auto gammaT = asin( clamp( sinGammaT , -1.0f , 1.0f ) );
 
     float apPdf[PMAX + 1] = {0.0f};
-    ComputeApPdf( wo.y , cosThetaO , sinThetaO , m_eta , m_sigma , apPdf );
+    ComputeApPdf( cosThetaO , cosThetaT , cosGammaO , cosGammaT , m_eta , m_sigma , apPdf );
 
     auto phi = phiI - phiO;
     auto pdf = 0.0f;
