@@ -30,9 +30,6 @@ static inline void Ap( const float cosThetaO , const float eta , const float cos
     for( auto i = 2 ; i < PMAX ; ++i )
         ap[i] = ap[i-1] * T * f;
     ap[PMAX] = ap[PMAX - 1] * f * T / ( 1.0f - T * f );
-
-    if( isnan( ap[PMAX].GetR() ) )
-        int a = 0;
 }
 
 static inline float I0(const float x) {
@@ -187,9 +184,6 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
     }
     fsum += Mp( cosThetaI, cosThetaO, sinThetaI, sinThetaO, m_v[PMAX] ) * ap[PMAX] * INV_TWOPI;
 
-    if( isnan( fsum.GetR() ) || isnan( fsum.GetG() ) || isnan( fsum.GetB() ) ){
-        int a = 0;
-    }
     return fsum;
 }
 
