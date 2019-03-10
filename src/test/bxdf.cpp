@@ -188,7 +188,7 @@ TEST(BXDF, Dielectric) {
 }
 
 TEST(BXDF, DISABLED_HairFurnace) {
-    Spectrum sigma_a = 0.f;
+    Spectrum sigma_a = 0.0f;
     Spectrum fullWeight = 1.0f;
 
     Vector3f wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
@@ -218,7 +218,7 @@ TEST(BXDF, HairPDFConsistant) {
     // Since the PDF of hair BXDF matches exactly with its BXDF value itself, there is a special PDF verification process for hair.
     auto checkPDF = [] ( const Bxdf* bxdf ){
         constexpr int CNT = 1024 * 1024;
-        constexpr auto Li = []( const Vector& w ) -> Spectrum { return w.y * w.y ; };
+        const auto Li = []( const Vector& w ) -> Spectrum { return w.y * w.y ; };
         const auto wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
 
         spinlock_mutex mutex0;
@@ -233,8 +233,8 @@ TEST(BXDF, HairPDFConsistant) {
         });
     };
 
-    for (float beta_m = .1; beta_m < 1; beta_m += .5) {
-        for (float beta_n = .1; beta_n < 1; beta_n += .5) {
+    for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
+        for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
             Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
             checkPDF( &hair );
         }
@@ -248,7 +248,7 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
     // Since the PDF of hair BXDF matches exactly with its BXDF value itself, there is a special PDF verification process for hair.
     auto checkPDF = [] ( const Bxdf* bxdf ){
         constexpr int CNT = 1024 * 64;
-        constexpr auto Li = []( const Vector& w ) -> Spectrum { return w.y * w.y ; };
+        const auto Li = []( const Vector& w ) -> Spectrum { return w.y * w.y ; };
 
         Vector wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
 
@@ -276,8 +276,8 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
         EXPECT_LE( fabs( ratio - 1.0f ) , 0.05f );
     };
 
-    for (float beta_m = .1; beta_m < 1; beta_m += .5) {
-        for (float beta_n = .1; beta_n < 1; beta_n += .5) {
+    for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
+        for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
             Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
             checkPDF( &hair );
         }
