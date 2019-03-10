@@ -50,29 +50,23 @@ void checkAll( const MicroFacetDistribution* dist ){
     checkDist( dist );
 }
 
-#if 0
 // Somehow, this unit test always fails. Need to investigate.
-TEST(DISTRIBUTION, GGX) {
+TEST(DISTRIBUTION, DISABLED_GGX) {
     const GGX ggx(0.5f,0.5f);
     checkAll(&ggx);
 }
-#endif
 
-#if 0
 // Somehow, this unit test always fails. Need to investigate.
-TEST(DISTRIBUTION, Beckmann) {
+TEST(DISTRIBUTION, DISABLED_Beckmann) {
     const Beckmann beckmann(0.5f,0.5f);
     checkAll(&beckmann);
 }
-#endif
 
-#if 0
 // Somehow, this unit test always fails. Need to investigate.
-TEST(DISTRIBUTION, Blinn) {
+TEST(DISTRIBUTION, DISABLED_Blinn) {
     const Blinn blinn(0.5f,0.5f);
     checkAll(&blinn);
 }
-#endif
 
 #if 0
 // Somehow, this unit test always fails. Need to investigate.
