@@ -112,6 +112,7 @@ Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoug
     for (int p = 3; p <= PMAX; ++p)
         m_v[p] = m_v[2];
 
+#ifndef DISABLE_ANGLE_TILT
     // Hard coded tilt angle, 2 degrees by default.
     constexpr auto alpha = 2.0f / 180.0f;
     m_sin2kAlpha[0] = sin( alpha );
@@ -120,6 +121,7 @@ Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoug
         m_sin2kAlpha[i] = 2 * m_cos2kAlpha[i-1] * m_sin2kAlpha[i-1];
         m_cos2kAlpha[i] = SQR( m_cos2kAlpha[i-1] ) - SQR( m_sin2kAlpha[i-1] );
     }
+#endif
 
     constexpr auto SqrtPiOver8 = 0.626657069f; //sqrt( PI / 8.0f );
     m_scale = SqrtPiOver8 * (0.265f * m_aRoughness + 1.194f * SQR(m_aRoughness) + 5.372f * Pow<22>(m_aRoughness));
@@ -128,7 +130,7 @@ Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoug
 }
 
 Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
-    if( wo.y <= 0.0f )
+    if( wo.y <= 0.0f || wi.y == 0.0f )
         return 0.0f;
 
     const auto sinThetaO = wo.x;
@@ -164,6 +166,7 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
 
     Spectrum fsum(0.0f);
     for( auto p = 0 ; p < PMAX ; ++p ){
+#ifndef DISABLE_ANGLE_TILT
         float sinThetaIp , cosThetaIp;
         if( p == 0 ){
             sinThetaIp = sinThetaI * m_cos2kAlpha[1] + cosThetaI * m_sin2kAlpha[1];
@@ -178,9 +181,11 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
             sinThetaIp = sinThetaI;
             cosThetaIp = cosThetaI;
         }
-        
         cosThetaIp = abs( cosThetaIp );
         fsum += Mp( cosThetaIp , cosThetaO , sinThetaIp , sinThetaO , m_v[p] ) * ap[p] * Np( phi, p, m_scale, gammaO, gammaT );
+#else
+        fsum += Mp( cosThetaI , cosThetaO , sinThetaI , sinThetaO , m_v[p] ) * ap[p] * Np( phi, p, m_scale, gammaO, gammaT );
+#endif   
     }
     fsum += Mp( cosThetaI, cosThetaO, sinThetaI, sinThetaO, m_v[PMAX] ) * ap[PMAX] * INV_TWOPI;
 
@@ -188,6 +193,12 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
 }
 
 Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
+    if( wo.y <= 0.0f ){
+        if( pPdf )
+            *pPdf = 0.0f;
+        return 0.0f;
+    }
+
     const auto sinThetaO = wo.x;
     const auto cosThetaO = ssqrt( 1.0f - SQR( sinThetaO ) );
     const auto phiO = atan2( wo.y , wo.z );
@@ -214,12 +225,13 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
 
     r = sort_canonical();
     // special handling for corner case where 'r' equals to 0, leading exp( -2.0f / m_v[p] ) potentially reaches 0, eventually resulting in a 'Nan'
-    const auto cosTheta = r > 0.0f ? ( 1.0f + m_v[p] * log( r + ( 1.0f - r ) * exp( -2.0f / m_v[p] ) ) ) : 1.0f - 2.0f * m_v[p] / m_v[p] ;
+    const auto cosTheta = r > 0.0f ? ( 1.0f + m_v[p] * log( r + ( 1.0f - r ) * exp( -2.0f / m_v[p] ) ) ) : -1.0f ;
     const auto sinTheta = ssqrt( 1.0f - SQR( cosTheta ) );
     const auto cosPhi = cos( TWO_PI * sort_canonical() );
     auto sinThetaI = -cosTheta * sinThetaO + sinTheta * cosPhi * cosThetaO;
     auto cosThetaI = ssqrt( 1.0f - SQR( sinThetaI ) );
 
+#ifndef DISABLE_ANGLE_TILT
     auto sinThetaIp = sinThetaI;
     auto cosThetaIp = cosThetaI;
     if( p == 0 ){
@@ -235,6 +247,7 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
 
     sinThetaI = sinThetaIp;
     cosThetaI = cosThetaIp;
+#endif
 
     const auto gammaO = asin( clamp( sinGammaO , -1.0f , 1.0f ) );
     const auto gammaT = asin( clamp( sinGammaT , -1.0f , 1.0f ) );
@@ -245,8 +258,8 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
 
     if( pPdf ){
         *pPdf = 0.0f;
-
         for( auto p = 0 ; p < PMAX ; ++p ){
+#ifndef DISABLE_ANGLE_TILT
             float sinThetaIp , cosThetaIp;
             if( p == 0 ){
                 sinThetaIp = sinThetaI * m_cos2kAlpha[1] + cosThetaI * m_sin2kAlpha[1];
@@ -261,19 +274,21 @@ Spectrum Hair::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, floa
                 sinThetaIp = sinThetaI;
                 cosThetaIp = cosThetaI;
             }
-            
             cosThetaIp = abs( cosThetaIp );
-            auto mp = Mp( cosThetaIp , cosThetaO , sinThetaIp , sinThetaO , m_v[p] );
-            auto np = Np( dphi, p, m_scale, gammaO, gammaT );
             *pPdf += Mp( cosThetaIp , cosThetaO , sinThetaIp , sinThetaO , m_v[p] ) * apPdf[p] * Np( dphi, p, m_scale, gammaO, gammaT );
+#else
+            *pPdf += Mp( cosThetaI , cosThetaO , sinThetaI , sinThetaO , m_v[p] ) * apPdf[p] * Np( dphi, p, m_scale, gammaO, gammaT );
+#endif
         }
         *pPdf += Mp( cosThetaI , cosThetaO , sinThetaI , sinThetaO , m_v[PMAX] ) * apPdf[PMAX] * INV_TWOPI;
     }
-
     return f( wo , wi );
 }
 
 float Hair::pdf( const Vector& wo , const Vector& wi ) const{
+    if( wo.y <= 0.0f || wi.y == 0.0f )
+        return 0.0f;
+
     const auto sinThetaO = wo.x;
     const auto cosThetaO = ssqrt( 1.0f - SQR(sinThetaO) );
     const auto phiO = atan2(wo.y, wo.z);
@@ -301,6 +316,7 @@ float Hair::pdf( const Vector& wo , const Vector& wi ) const{
     auto phi = phiI - phiO;
     auto pdf = 0.0f;
     for( auto p = 0 ; p < PMAX ; ++p ){
+#ifndef DISABLE_ANGLE_TILT
         float sinThetaIp , cosThetaIp;
         if( p == 0 ){
             sinThetaIp = sinThetaI * m_cos2kAlpha[1] + cosThetaI * m_sin2kAlpha[1];
@@ -315,9 +331,11 @@ float Hair::pdf( const Vector& wo , const Vector& wi ) const{
             sinThetaIp = sinThetaI;
             cosThetaIp = cosThetaI;
         }
-        
         cosThetaIp = abs( cosThetaIp );
         pdf += Mp( cosThetaIp , cosThetaO , sinThetaIp , sinThetaO , m_v[p] ) * apPdf[p] * Np( phi, p, m_scale, gammaO, gammaT );
+#else
+        pdf += Mp( cosThetaI , cosThetaO , sinThetaI , sinThetaO , m_v[p] ) * apPdf[p] * Np( phi, p, m_scale, gammaO, gammaT );
+#endif
     }
     pdf += Mp( cosThetaI , cosThetaO , sinThetaI , sinThetaO , m_v[PMAX] ) * apPdf[PMAX] * INV_TWOPI;
     return pdf;
