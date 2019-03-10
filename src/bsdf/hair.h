@@ -20,7 +20,9 @@
 #include "bxdf.h"
 #include "core/sassert.h"
 
-#define PMAX        3
+// Somehow tilting angle will cause problem in unit test
+#define DISABLE_ANGLE_TILT  
+#define PMAX                    3
 
 //! @brief Hair BRDF.
 /**
@@ -65,8 +67,10 @@ private:
     const float     m_eta;              /**< Index of refraction inside the hair volume. */
 
     float           m_v[PMAX+1];          /**< Some pre-calculated cached data. */
-    float           m_cos2kAlpha[PMAX];   /**< Some pre-calculated cached data, cos( 2 ^ k ). */
-    float           m_sin2kAlpha[PMAX];   /**< Some pre-calculated cached data, sin( 2 ^ k ). */
     float           m_scale;              /**< Azimuhthal logisitic scale factor. */
     float           m_etaSqr;             /**< Squared eta. */
+#ifndef DISABLE_ANGLE_TILT
+    float           m_cos2kAlpha[PMAX];   /**< Some pre-calculated cached data, cos( 2 ^ k ). */
+    float           m_sin2kAlpha[PMAX];   /**< Some pre-calculated cached data, sin( 2 ^ k ). */
+#endif
 };

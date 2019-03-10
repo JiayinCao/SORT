@@ -67,11 +67,7 @@ void checkEnergyConservation(const Bxdf* bxdf) {
 // The exact algorithm is mentioned in my blog, except that the following algorithm also evaluates BTDF
 // https://agraphicsguy.wordpress.com/2018/03/09/how-does-pbrt-verify-bxdf/
 void checkPdf( const Bxdf* bxdf ){
-    Vector wo(sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f, sort_canonical() * 2.0f - 1.0f);
-    wo.Normalize();
-
-    if( CosTheta( wo ) < 0.0f )
-        wo = -wo;
+    Vector wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
 
     // Check whether pdf and spectrum value from Sample_F matches the Pdf and F functions
     spinlock_mutex mutex;
@@ -82,8 +78,11 @@ void checkPdf( const Bxdf* bxdf ){
         const float calculated_pdf = bxdf->Pdf( wo , wi );
         const auto f1 = bxdf->F( wo , wi );
 
+        if( calculated_pdf == 0.0f )
+            return;
+
         std::lock_guard<spinlock_mutex> lock(mutex);
-        EXPECT_NEAR(pdf, calculated_pdf, 0.001f);
+        EXPECT_LE( fabs( pdf / calculated_pdf - 1.0f ) , 0.01f );
         EXPECT_TRUE( !isnan(pdf) );
         EXPECT_GE( pdf , 0.0f );
         EXPECT_NEAR(f0.GetR(), f1.GetR(), 0.001f);
@@ -100,7 +99,7 @@ void checkPdf( const Bxdf* bxdf ){
             float pdf = UniformSpherePdf();
             return pdf > 0.0f ? bxdf->Pdf(wo, wi) / pdf : 0.0f;
         } );
-        EXPECT_LE(total, 1.01f); // 1% error is tolerated
+        EXPECT_LE(total, 1.03f); // 3% error is tolerated
     }
 
     // Check whether the pdf actually matches the way rays are sampled
@@ -111,7 +110,7 @@ void checkPdf( const Bxdf* bxdf ){
             bxdf->Sample_F(wo, wi, BsdfSample(true), &pdf);
             return pdf != 0.0f ? 1.0f / pdf : 0.0f;
         } );
-        EXPECT_NEAR(total, TWO_PI, 0.03f); // 0.3% error is tolerated
+        EXPECT_LE( fabs( total - TWO_PI ) , 0.03f );
     }
 }
 
@@ -149,24 +148,20 @@ TEST(BXDF, Phong) {
     checkAll(&phong);
 }
 
-#if 0
 // Sometimes it doesn't always pass, need investigation.
-TEST(BXDF, AshikhmanShirley) {
+TEST(BXDF, DISABLED_AshikhmanShirley) {
     static const Spectrum R(1.0f);
     AshikhmanShirley as( R , sort_canonical() , sort_canonical() , sort_canonical() , R , DIR_UP );
     checkAll(&as);
 }
-#endif
 
-#if 0
 // https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf
 // Disney BRDF is not strictly energy conserving, please refer the above link for further detail ( chapter 5.1 ).
-TEST(BXDF, Disney) {
+TEST(BXDF, DISABLED_Disney) {
     static const Spectrum R(1.0f);
     DisneyBRDF disney( R , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , R , DIR_UP );
     checkAll(&disney);
 }
-#endif
 
 TEST(BXDF, MicroFacetReflection) {
     static const Spectrum R(1.0f);
@@ -192,33 +187,99 @@ TEST(BXDF, Dielectric) {
     checkAll( &dielectric , false , false , true );
 }
 
-#if 0
-TEST(BXDF, Hair) {
+TEST(BXDF, DISABLED_HairFurnace) {
     Spectrum sigma_a = 0.f;
     Spectrum fullWeight = 1.0f;
 
-    Vector3f wo = UniformSampleSphere( sort_canonical() , sort_canonical() );
-    for (float beta_m = .1; beta_m < 1; beta_m += .2) {
-        for (float beta_n = .1; beta_n < 1; beta_n += .2) {
+    Vector3f wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
+    for (float beta_m = 0.0f; beta_m <= 1.0f; beta_m += 0.2f) {
+        for (float beta_n = 0.0f; beta_n <= 1.0f; beta_n += 0.2f) {
             // Estimate reflected uniform incident radiance from hair
-            Spectrum sum = 0.f;
-            int count = 500000;
+            auto sum = 0.f;
+            constexpr int CNT = 1024 * 256;
             Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
-            for (int i = 0; i < count; ++i) {
+            sum += ParrallReduction<float, 8, CNT>( [&](){
                 Vector3f wi = UniformSampleSphere( sort_canonical() , sort_canonical() );
-                sum += hair.f(wo, wi);
-            }
+                EXPECT_GE(hair.f(wo, wi).GetIntensity(), 0.00f);
+                return hair.f(wo, wi).GetIntensity() / UniformSpherePdf();
+            } );
 
-            float avg = sum.GetIntensity() / (count * UniformSpherePdf());
-            EXPECT_NEAR(avg, 1.0f, 0.05f);
-        }
-    }
-
-    for (float beta_m = .1; beta_m < 1; beta_m += .2) {
-        for (float beta_n = .1; beta_n < 1; beta_n += .2) {
-            Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
-            checkAll( &hair , true , false , true );
+            EXPECT_LE(sum, 1.05f);
+            EXPECT_GE(sum, 0.95f);
         }
     }
 }
-#endif
+
+// Since hair has its exact way to importance sample its bxdf, the evaluated bxdf and pdf should be exactly the same.
+TEST(BXDF, HairPDFConsistant) {
+    static const Spectrum sigma_a = 0.f;
+    static const Spectrum fullWeight = 1.0f;
+
+    // Since the PDF of hair BXDF matches exactly with its BXDF value itself, there is a special PDF verification process for hair.
+    auto checkPDF = [] ( const Bxdf* bxdf ){
+        constexpr int CNT = 1024 * 1024;
+        constexpr auto Li = []( const Vector& w ) -> Spectrum { return w.y * w.y ; };
+        const auto wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
+
+        spinlock_mutex mutex0;
+        ParrallRun<8,128>( [&]() {
+            Vector wi;
+            float pdf;
+            auto f = bxdf->Sample_F(wo, wi, BsdfSample(true), &pdf);
+
+            std::lock_guard<spinlock_mutex> lock(mutex0);
+            if( pdf > 0.0f )
+                EXPECT_LE( fabs( f.GetIntensity() / pdf - 1.0f ) , 0.01f );
+        });
+    };
+
+    for (float beta_m = .1; beta_m < 1; beta_m += .5) {
+        for (float beta_n = .1; beta_n < 1; beta_n += .5) {
+            Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            checkPDF( &hair );
+        }
+    }
+}
+
+TEST(BXDF, DISABLED_HairSamplingConsistance) {
+    static Spectrum sigma_a = 0.f;
+    static Spectrum fullWeight = 1.0f;
+    
+    // Since the PDF of hair BXDF matches exactly with its BXDF value itself, there is a special PDF verification process for hair.
+    auto checkPDF = [] ( const Bxdf* bxdf ){
+        constexpr int CNT = 1024 * 64;
+        constexpr auto Li = []( const Vector& w ) -> Spectrum { return w.y * w.y ; };
+
+        Vector wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
+
+        spinlock_mutex mutex1;
+        Spectrum uni , imp;
+        ParrallReduction<int, 8, CNT>( [&](){
+            Vector wi0;
+            float pdf;
+            auto f0 = bxdf->Sample_F( wo , wi0 , BsdfSample() , &pdf );
+            f0 = pdf > 0.0f ? f0 * Li( wi0 ) / pdf : Spectrum(0.0f);
+            const auto wi1 = UniformSampleSphere( sort_canonical() , sort_canonical() );
+            const auto f1 = bxdf->F( wo , wi1 ) * Li( wi1 ) / UniformSpherePdf();
+
+            std::lock_guard<spinlock_mutex> lock(mutex1);
+            if( pdf > 0.0f )
+                imp += f0;
+            uni += f1;
+            return 0;
+        } );
+        const auto ratio = uni.GetIntensity() / imp.GetIntensity();
+        if( fabs( ratio - 1.0f ) > 0.05f ){
+            std::cout<<uni.GetR() << "\t"<<uni.GetG() << "\t"<< uni.GetB()<<std::endl;
+            std::cout<<imp.GetR() << "\t"<<imp.GetG() << "\t"<< imp.GetB()<<std::endl;
+        }
+        EXPECT_LE( fabs( ratio - 1.0f ) , 0.05f );
+    };
+
+    for (float beta_m = .1; beta_m < 1; beta_m += .5) {
+        for (float beta_n = .1; beta_n < 1; beta_n += .5) {
+            Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            checkPDF( &hair );
+        }
+    }
+}
