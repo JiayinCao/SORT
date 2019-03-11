@@ -299,7 +299,7 @@ def export_hair(ps, obj, scene, fs):
 
     verts = bytearray()
 
-    transform = obj.matrix_world.inverted()
+    world2Local = obj.matrix_world.inverted()
     num_parents = len(ps.particles)
     num_children = len(ps.child_particles)
     hair_cnt = num_parents + num_children
@@ -310,7 +310,7 @@ def export_hair(ps, obj, scene, fs):
             co = ps.co_hair(obj, pindex, step)
             # there could be a bug of ignoring point at origin
             if not co.length_squared == 0:
-                co = transform * co
+                co = world2Local * co
                 hair.append( co )
                 vert_cnt += 1
             else:
@@ -321,6 +321,8 @@ def export_hair(ps, obj, scene, fs):
         for h in hair :
             verts += POINTFMT.pack( h[0] , h[1] , h[2] )
         total_hair_segs += len(hair) - 1
+
+    ps.set_resolution(scene, obj, 'PREVIEW')
 
     fs.serialize( 'HairVisual' )
     fs.serialize( hair_cnt )
