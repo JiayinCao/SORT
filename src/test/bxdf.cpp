@@ -191,18 +191,18 @@ TEST(BXDF, DISABLED_HairFurnace) {
     Spectrum sigma_a = 0.0f;
     Spectrum fullWeight = 1.0f;
 
-    Vector3f wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
+    Vector3f wo = UniformSampleHemisphere(sort_canonical(), sort_canonical());
     for (float beta_m = 0.0f; beta_m <= 1.0f; beta_m += 0.2f) {
         for (float beta_n = 0.0f; beta_n <= 1.0f; beta_n += 0.2f) {
             // Estimate reflected uniform incident radiance from hair
             auto sum = 0.f;
             constexpr int CNT = 1024 * 256;
-            Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
-            sum += ParrallReduction<float, 8, CNT>( [&](){
-                Vector3f wi = UniformSampleSphere( sort_canonical() , sort_canonical() );
+            Hair hair(sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            sum += ParrallReduction<float, 8, CNT>([&]() {
+                Vector3f wi = UniformSampleSphere(sort_canonical(), sort_canonical());
                 EXPECT_GE(hair.f(wo, wi).GetIntensity(), 0.00f);
                 return hair.f(wo, wi).GetIntensity() / UniformSpherePdf();
-            } );
+            });
 
             EXPECT_LE(sum, 1.05f);
             EXPECT_GE(sum, 0.95f);
@@ -241,6 +241,18 @@ TEST(BXDF, HairPDFConsistant) {
     }
 }
 
+TEST(BXDF, DISABLED_HairStandardChecking) {
+    static Spectrum sigma_a = 0.f;
+    static Spectrum fullWeight = 1.0f;
+    for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
+        for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
+            Hair hair(sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            checkAll(&hair , true , false , true );
+        }
+    }
+}
+
+// This is generally not a very unstable way to test the BRDF. Disabled by default.
 TEST(BXDF, DISABLED_HairSamplingConsistance) {
     static Spectrum sigma_a = 0.f;
     static Spectrum fullWeight = 1.0f;
@@ -251,10 +263,9 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
         const auto Li = []( const Vector& w ) -> Spectrum { return w.y * w.y ; };
 
         Vector wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
-
         spinlock_mutex mutex1;
         Spectrum uni , imp;
-        ParrallReduction<int, 8, CNT>( [&](){
+        ParrallRun<8, CNT>( [&](){
             Vector wi0;
             float pdf;
             auto f0 = bxdf->Sample_F( wo , wi0 , BsdfSample() , &pdf );
@@ -266,7 +277,6 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
             if( pdf > 0.0f )
                 imp += f0;
             uni += f1;
-            return 0;
         } );
         const auto ratio = uni.GetIntensity() / imp.GetIntensity();
         if( fabs( ratio - 1.0f ) > 0.05f ){
