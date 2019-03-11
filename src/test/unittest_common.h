@@ -31,8 +31,8 @@ T ParrallReduction( std::function<T()> func ){
     for (int i = 0; i < TN; ++i)
         threads[i] = std::thread([&]( int tid ){
             T local = 0.0f;
-            for (long long j = 0; j < N; ++j )
-                local += func() * ( (double)1.0 / (double) ( N * TN ) );
+            for (long long j = 0; j < N; ++j)
+                local += (T)(func() * ((double)1.0 / (double)(N * TN)));
             total[tid] += local;
         }, i);
 
