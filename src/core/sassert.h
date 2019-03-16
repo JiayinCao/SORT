@@ -27,9 +27,8 @@
         abort();\
     }
 
-#define sAssertMsg(expr, type, ... ) \
-    if( false == (bool)(expr) )\
-    {\
+#define sAssertMsg(expr, type, ... )\
+    if( false == (bool)(expr) ){\
         slog( CRITICAL , type , __VA_ARGS__ );\
         abort();\
     }
