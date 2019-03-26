@@ -59,7 +59,7 @@
     using NODE##CHANNEL = NODE::CHANNEL; \
     IMPLEMENT_RTTI( NODE##CHANNEL );\
     void NODE::CHANNEL::UpdateBSDF( Bsdf* bsdf , const Spectrum& weight ){\
-        auto node = dynamic_cast<NODE*>(m_node);
+        auto node = dynamic_cast<NODE*>(m_node); 
 #define IMPLEMENT_OUTPUT_BSDF_SOCKET_END  }
 
 #define DEFINE_OUTPUT_SOCKET_COMMON( CHANNEL , NODE , TYPE )\

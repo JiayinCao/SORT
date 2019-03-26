@@ -79,7 +79,7 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 		}
 
 		intersect->u = 1.0f;
-		intersect->v = lerp( m_v0 , m_v1 , inter.y / m_length );
+		intersect->v = slerp( m_v0 , m_v1 , inter.y / m_length );
 		intersect->t = t;
 	}
 	return true;

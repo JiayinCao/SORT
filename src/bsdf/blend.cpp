@@ -24,7 +24,7 @@ Spectrum Blend::f(const Vector& wo, const Vector& wi) const {
     if (bxdf0 == nullptr) return bxdf1->f(wo, wi);
     if (bxdf1 == nullptr) return bxdf0->f(wo, wi);
 
-    return lerp(bxdf0->f(wo, wi), bxdf1->f(wo, wi), weight);
+    return slerp(bxdf0->f(wo, wi), bxdf1->f(wo, wi), weight);
 }
 
 Spectrum Blend::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
@@ -44,5 +44,5 @@ float Blend::pdf(const Vector& wo, const Vector& wi) const {
     if (bxdf0 == nullptr) return bxdf1->Pdf(wo, wi);
     if (bxdf1 == nullptr) return bxdf0->Pdf(wo, wi);
 
-    return lerp(bxdf0->Pdf(wo, wi), bxdf1->Pdf(wo, wi), weight);
+    return slerp(bxdf0->Pdf(wo, wi), bxdf1->Pdf(wo, wi), weight);
 }

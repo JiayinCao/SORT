@@ -65,5 +65,5 @@ float AshikhmanShirley::pdf( const Vector& wo , const Vector& wi ) const{
     
     const auto wh = Normalize( wi + wo );
     const auto pdf_wh = distribution.Pdf(wh);
-    return lerp( CosHemispherePdf(wi) , pdf_wh / ( 4.0f * Dot( wo , wh ) ) , 0.5f );
+    return slerp( CosHemispherePdf(wi) , pdf_wh / ( 4.0f * Dot( wo , wh ) ) , 0.5f );
 }
