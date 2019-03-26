@@ -41,7 +41,7 @@ IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , LerpNode )
     SORT_MATERIAL_GET_PROP_COLOR(c0,src0);
     SORT_MATERIAL_GET_PROP_COLOR(c1,src1);
     SORT_MATERIAL_GET_PROP_FLOAT(f,factor);
-    result = lerp( c0 , c1 , f );
+    result = slerp( c0 , c1 , f );
 IMPLEMENT_OUTPUT_COLOR_SOCKET_END
 
 IMPLEMENT_OUTPUT_COLOR_SOCKET_BEGIN( Result , BlendNode )

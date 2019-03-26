@@ -87,7 +87,7 @@ public:\
         return T::ToString(data);\
     }\
     void Merge( const StatsItemBase* item ) override{\
-        auto p = dynamic_cast<const NAME*>(item);\
+        auto p = (const NAME*)(item);\
         sAssertMsg( p != nullptr , GENERAL , "Merging incorrect stats data." );\
         data += p->data;\
     }\

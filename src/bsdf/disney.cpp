@@ -67,15 +67,15 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     // Sheen term in Disney BRDF model
     const auto luminance = basecolor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
-    const auto Cspec0 = lerp( specular * 0.08f * lerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
-    const auto Csheen = lerp( Spectrum(1.0f) , Ctint , sheenTint );
+    const auto Cspec0 = slerp( specular * 0.08f * slerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
+    const auto Csheen = slerp( Spectrum(1.0f) , Ctint , sheenTint );
     const auto Fsheen = FH * sheen * Csheen ;
     
     // Diffuse term in Disney BRDF model
     const auto FO = SchlickWeight( NoO );
     const auto FI = SchlickWeight( NoI );
     const auto Fd90 = 0.5f + 2.0f * HoO2 * roughness;
-    const auto Fd = lerp( 1.0f , Fd90 , FO )  * lerp( 1.0f , Fd90 , FI );
+    const auto Fd = slerp( 1.0f , Fd90 , FO )  * slerp( 1.0f , Fd90 , FI );
     
     // Reflection from Layered Surfaces due to Subsurface Scattering
     // https://cseweb.ucsd.edu/~ravir/6998/papers/p165-hanrahan.pdf
@@ -83,11 +83,11 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     // 1.25 scale is used to (roughly) preserve albedo
     // Fss90 used to "flatten" retro-reflection based on roughness
     const auto Fss90 = HoO2*roughness;
-    const auto Fss = lerp(1.0f, Fss90, FO) * lerp(1.0f, Fss90, FI);
+    const auto Fss = slerp(1.0f, Fss90, FO) * slerp(1.0f, Fss90, FI);
     const auto ss = 1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f);
     
     // Final diffuse term for Disney BRDF
-    const auto diff = ( INV_PI * lerp( Fd , ss , subsurface ) * basecolor + Fsheen ) * ( 1.0f - metallic );
+    const auto diff = ( INV_PI * slerp( Fd , ss , subsurface ) * basecolor + Fsheen ) * ( 1.0f - metallic );
     
     // Specular term in Disney BRDF
     const auto aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
@@ -96,7 +96,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     const MicroFacetReflection mf(Cspec0, &fresnel0, &ggx, white, DIR_UP);
     
     // Clear coat term (ior = 1.5 -> F0 = 0.04)
-    const ClearcoatGGX cggx(sqrt(lerp(0.1f, 0.001f, clearcoatGloss)));
+    const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
     const FresnelSchlick<float> fresnel1(0.04f);
     const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f * clearcoat ) , &fresnel1, &cggx, white, DIR_UP);
     
@@ -121,7 +121,7 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
         
         const auto luminance = basecolor.GetIntensity();
         const auto Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
-        const auto Cspec0 = lerp( specular * 0.08f * lerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
+        const auto Cspec0 = slerp( specular * 0.08f * slerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
         const auto clearcoat_intensity = 0.25f * clearcoat;
         const auto specular_intensity = Cspec0.GetIntensity();
         const auto total_intensity = clearcoat_intensity + specular_intensity;
@@ -130,7 +130,7 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
         }else{
             const auto clearcoat_ratio = clearcoat_intensity / total_intensity;
             if( r < clearcoat_ratio || clearcoat_ratio == 1.0f ){
-                const ClearcoatGGX cggx(sqrt(lerp(0.1f, 0.001f, clearcoatGloss)));
+                const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
                 wh = cggx.sample_f(sample);
             }else{
                 const auto aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
@@ -152,11 +152,11 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
     const auto aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
     const GGX ggx( roughness / aspect , roughness * aspect );
     
-    const ClearcoatGGX cggx(sqrt(lerp(0.1f, 0.001f, clearcoatGloss)));
+    const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
     
     const auto luminance = basecolor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
-    const auto Cspec0 = lerp( specular * 0.08f * lerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
+    const auto Cspec0 = slerp( specular * 0.08f * slerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
     const auto clearcoat_intensity = 0.25f * clearcoat;
     const auto specular_intensity = Cspec0.GetIntensity();
     const auto total_intensity = clearcoat_intensity + specular_intensity;
@@ -165,6 +165,6 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
     if( total_intensity == 0.0f )
         return CosHemispherePdf(wi);
     const auto wh = Normalize( wi + wo );
-    const auto pdf_wh = lerp( ggx.Pdf(wh) , cggx.Pdf(wh) , clearcoat_ratio );
-    return lerp( pdf_wh / ( 4.0f * AbsDot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f) * basecolor.GetIntensity() );
+    const auto pdf_wh = slerp( ggx.Pdf(wh) , cggx.Pdf(wh) , clearcoat_ratio );
+    return slerp( pdf_wh / ( 4.0f * AbsDot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f) * basecolor.GetIntensity() );
 }

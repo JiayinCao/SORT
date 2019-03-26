@@ -162,7 +162,7 @@ public:
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
     //! @return         Evaluated fresnel value.
     Spectrum Evaluate(float cosI) const override{
-        return lerp( DielectricFresnel(cosI, etai, etat) , SchlickFresnel(F0, cosI) , metallic );
+        return slerp( DielectricFresnel(cosI, etai, etat) , SchlickFresnel(F0, cosI) , metallic );
     }
     
 private:

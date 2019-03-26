@@ -133,7 +133,7 @@ int	RunSORT( int argc , char** argv ){
     for_each( threads.begin() , threads.end() , []( std::unique_ptr<WorkerThread>& thread ) { thread->BeginThread(); } );
 
 	{
-		TIMING_EVENT_STAT( "" , sRenderingTimeMS );
+		SORT_STATS( TIMING_EVENT_STAT( "" , sRenderingTimeMS ) );
 		EXECUTING_TASKS();
 
 		// wait for all the threads to be finished

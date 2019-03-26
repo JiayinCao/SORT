@@ -69,5 +69,5 @@ float Phong::pdf( const Vector& wo , const Vector& wi ) const{
     const auto pdf_spec = pow( cos_theta , power + 1.0f ) * ( power + 2.0f ) * INV_TWOPI;
     const auto pdf_diff = CosHemispherePdf(wi);
 
-    return lerp( pdf_spec, pdf_diff, diffRatio );
+    return slerp( pdf_spec, pdf_diff, diffRatio );
 }
