@@ -39,7 +39,7 @@ Spectrum Coat::F( const Vector& wo , const Vector& wi ) const{
         const auto attenuation = ( -thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
         // Fresnel attenuation between the boundary across layer0 and layer1
         const auto T12 = (1.0f - fresnel.Evaluate(CosTheta(swo)));
-        const auto T21 = lerp( 1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
+        const auto T21 = slerp( 1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
 
         ret += bottom->f( -r_wo , -r_wi ) * attenuation * T12 * T21 / ( ior * ior );
     }
@@ -72,13 +72,13 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
             const auto attenuation = (-thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
             // Fresnel attenuation between the boundary across layer0 and layer1
             const auto T12 = (1.0f - fresnel.Evaluate(CosTheta(swo)));
-            const auto T21 = lerp(1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
+            const auto T21 = slerp(1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
 
             ret += bottom->f(-r_wo, -r_wi) * attenuation * T12 * T21 / (ior * ior);
         }
 
         if(pPdf)
-            *pPdf = lerp(bottom->Pdf(-r_wo,-r_wi) , *pPdf, specProp);
+            *pPdf = slerp(bottom->Pdf(-r_wo,-r_wi) , *pPdf, specProp);
     }else{
         // Importance sampling using the underlying layer
         Vector r_wi;
@@ -97,12 +97,12 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
         const auto attenuation = (-thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
         // Fresnel attenuation between the boundary across layer0 and layer1
         const auto T12 = (1.0f - fresnel.Evaluate(CosTheta(swo)));
-        const auto T21 = lerp(1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
+        const auto T21 = slerp(1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
 
         ret *= attenuation * T12 * T21 / (ior * ior);
 
         if( pPdf )
-            *pPdf = lerp(*pPdf, coat.pdf( swo , swi ) , specProp);
+            *pPdf = slerp(*pPdf, coat.pdf( swo , swi ) , specProp);
     }
     
     if (!SameHemiSphere(wo, wi) || !PointingUp(wo)) {
@@ -130,5 +130,5 @@ float Coat::Pdf( const Vector& wo , const Vector& wi ) const{
 
     const auto layer0_pdf = coat.pdf( swo , swi );
     const auto layer1_pdf = (tir_o || tir_i) ? 0.0f : bottom->Pdf(-r_wo, -r_wi);
-    return lerp( layer1_pdf , layer0_pdf , specProp );
+    return slerp( layer1_pdf , layer0_pdf , specProp );
 }

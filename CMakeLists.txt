@@ -1,18 +1,60 @@
+#
+#    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
+#    platform physically based renderer.
+# 
+#    Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
+#
+#    SORT is a free software written for educational purpose. Anyone can distribute
+#    or modify it under the the terms of the GNU General Public License Version 3 as
+#    published by the Free Software Foundation. However, there is NO warranty that
+#    all components are functional in a perfect manner. Without even the implied
+#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along with
+#    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+#
+
 cmake_minimum_required (VERSION 3.1)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-SET( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" CACHE PATH "Path to easy profiler" )
+# define platform
+if (WIN32)
+    set(SORT_PLATFORM_WIN true)
+    set(SORT_PLATFORM_MAC false)
+    set(SORT_PLATFORM_LINUX false)
+    set(SORT_PLATFORM_NAME "Windows" )
+elseif(APPLE)
+    set(SORT_PLATFORM_WIN false)
+    set(SORT_PLATFORM_MAC true)
+    set(SORT_PLATFORM_LINUX false)
+    set(SORT_PLATFORM_NAME "Mac OS" )
+elseif(UNIX)
+    set(SORT_PLATFORM_WIN false)
+    set(SORT_PLATFORM_MAC false)
+    set(SORT_PLATFORM_LINUX true)
+    set(SORT_PLATFORM_NAME "Linux" )
+endif()
 
-# Disable Profiling system by default
-SET( SORT_ENABLE_PROFILER "YES" CACHE BOOL "Enable SORT profiling system. It is false by default." )
+# Set it to on to enable more debugging output
+#set(DEBUG_CMAKE ON)
+
+SET( SORT_ENABLE_PROFILER "YES" CACHE BOOL "Enable SORT profiling system. It is true by default." )
 SET( SORT_ENABLE_STATS "YES" CACHE BOOL "Enable SORT stats system. It is true by default." )
+
+# For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
+if(SORT_ENABLE_PROFILER)
+    set( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" )
+    MARK_AS_ADVANCED( easy_profiler_DIR )
+endif(SORT_ENABLE_PROFILER)
 
 # default build type is release
 set( DEFUALT_BULID_TYPE "Release")
 
+# Options to choose configuration type
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to '${DEFUALT_BULID_TYPE}' as none was specified.")
   set(CMAKE_BUILD_TYPE "${DEFUALT_BULID_TYPE}" CACHE
@@ -24,12 +66,14 @@ endif()
 
 project (SORT)
 
-find_package(easy_profiler REQUIRED)
+# include other modules
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/externalPackages.cmake")
+
+if(SORT_ENABLE_PROFILER)
+	find_package(easy_profiler REQUIRED)
+endif(SORT_ENABLE_PROFILER)
 
 include_directories( "${SORT_SOURCE_DIR}/src" )
-
-# dependencies include
-include_directories( "${SORT_SOURCE_DIR}/dependencies/thirdparty/easy_profiler/include" )
 
 macro(source_group_by_dir source_files)
     set(sgbd_cur_dir ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -65,37 +109,71 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/bin")
 
 add_executable(SORT ${all_files})
 
-target_link_libraries(SORT easy_profiler)
-
-if (WIN32)
-file(GLOB easy_profiler_bin "${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.dll"
- 							"${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.exe")
-file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-
-include(ProcessorCount)
-ProcessorCount(N)
-SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} /MP${N}")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP${N}")
-
-endif (WIN32)
-
-if(SORT_ENABLE_STATS)
-	add_definitions(-DSORT_ENABLE_STATS_COLLECTION)
-endif(SORT_ENABLE_STATS)
-
+target_link_libraries(SORT ${OPENIMAGEIO_LIBRARIES})
+target_link_libraries(SORT ${OSL_LIBRARIES})
 if(SORT_ENABLE_PROFILER)
- 	add_definitions(-DSORT_ENABLE_PROFILER)
-    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+    target_link_libraries(SORT easy_profiler)
 endif(SORT_ENABLE_PROFILER)
 
-if(UNIX)
+# Enable multi-thread compiling on Windows.
+if (SORT_PLATFORM_WIN)
+    file(GLOB easy_profiler_bin "${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.dll")
+    file(COPY ${easy_profiler_bin} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+    include(ProcessorCount)
+    ProcessorCount(N)
+    SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} /MP${N}")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP${N}")
+endif (SORT_PLATFORM_WIN)
+
+# Enable SORT Stats system.
+if(SORT_ENABLE_STATS)
+    message( "SORT Stats System Enabled.")
+	add_definitions(-DSORT_ENABLE_STATS_COLLECTION)
+else()
+    message( "SORT Stats Sysatem Disabled." )
+endif(SORT_ENABLE_STATS)
+
+# Enable Profiling system in SORT.
+if(SORT_ENABLE_PROFILER)
+    message( "SORT Profiling System Enabled." )
+    add_definitions(-DSORT_ENABLE_PROFILER)
+if (!SORT_PLATFORM_LINUX) # it doesn't link well with OSL
+    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+endif()
+else()
+    message( "SORT Profiling System Disabled." )
+endif(SORT_ENABLE_PROFILER)
+
+# Somehow OSL needs this, otherwise there will be undefined symbol issue
+#add_definitions( -fno-rtti )
+
+# Surpress a warning
+if(SORT_PLATFORM_MAC)
+    add_definitions( -Wno-deprecated-register )
+endif(SORT_PLATFORM_MAC)
+
+if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
 	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
-endif(UNIX)
+endif()
 
+# Setup correct output name for different configurations
 set_target_properties( SORT PROPERTIES RELEASE_OUTPUT_NAME "sort_r" )
 set_target_properties( SORT PROPERTIES DEBUG_OUTPUT_NAME "sort_d" )
 
+# Surpress warnings in thirdparty library.
 if(MSVC)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
 endif(MSVC)
+
+# Output include directories
+if( DEBUG_CMAKE )
+    get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+    message(STATUS "Including directories:")
+    foreach(dir ${dirs})
+      message(STATUS "\t'${dir}'")
+    endforeach()
+endif()
+
+MARK_AS_ADVANCED(CMAKE_INSTALL_PREFIX)

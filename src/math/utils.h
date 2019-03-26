@@ -67,7 +67,7 @@ inline float ssqrt( const float x ){
 }
 
 #define saturate(x) 			std::max(0.0f,std::min(1.0f,x))
-#define lerp( a , b , t  )      ( a * ( 1.0f - t ) + b * t )
+#define slerp( a , b , t  )      ( a * ( 1.0f - t ) + b * t )
 
 //! @brief	Clamp a value
 //!

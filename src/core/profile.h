@@ -18,12 +18,13 @@ this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 #pragma once
 
 #include "core/define.h"
-#include "easy/profiler.h"
 
 // SORT used to use this profiler as default one.
 // It is a open-source cross-platform project, which is available on git https://github.com/yse/easy_profiler
 
 #ifdef SORT_ENABLE_PROFILER
+
+#include "easy/profiler.h"
 
 #define SORT_PROFILE_ENABLE         EASY_PROFILER_ENABLE
 #define SORT_PROFILE_DISABLE        EASY_PROFILER_DISABLE

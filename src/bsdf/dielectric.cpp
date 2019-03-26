@@ -46,5 +46,5 @@ float Dielectric::pdf(const Vector& wo, const Vector& wi) const {
 
     const auto pdf_refract = mf_refract.pdf(wo, wi);
     const auto pdf_reflect = mf_reflect.pdf(wo, wi);
-    return lerp(pdf_refract, pdf_reflect, spec_Ratio);
+    return slerp(pdf_refract, pdf_reflect, spec_Ratio);
 }
