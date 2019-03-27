@@ -26,7 +26,7 @@
 
 # Notification of what is being done.
 if (NOT OpenSL_FIND_QUIETLY)
-    message( "Finding OpenShadingLanguage." )
+    message( STATUS "Finding OpenShadingLanguage." )
 endif ()
 
 set( OSL_ROOT_DIR ${SORT_SOURCE_DIR}/dependencies/osl )
@@ -56,13 +56,13 @@ MARK_AS_ADVANCED(
 
 # Output finding result
 if (NOT OpenSL_FIND_QUIETLY)
-	message( "OpenSL Found             = ${OSL_FOUND}")
-	message( "OSL_ROOT_DIR             = ${OSL_ROOT_DIR}")
-	message( "OSL_INCLUDE_DIR          = ${OSL_INCLUDE_DIR}")
-    message( "OSL_LIBRARY_DIR          = ${OSL_LIBRARY_DIR}")
-	message( "OSL_LIBRARIES            = ${OSL_LIBRARIES}")
+	message( STATUS "OpenSL Found             = ${OSL_FOUND}")
+	message( STATUS "OSL_ROOT_DIR             = ${OSL_ROOT_DIR}")
+	message( STATUS "OSL_INCLUDE_DIR          = ${OSL_INCLUDE_DIR}")
+    message( STATUS "OSL_LIBRARY_DIR          = ${OSL_LIBRARY_DIR}")
+	message( STATUS "OSL_LIBRARIES            = ${OSL_LIBRARIES}")
     if(SORT_PLATFORM_WIN)
-        message( "OSL_DLL                  = ${OSL_DLL}")
+        message( STATUS "OSL_DLL                  = ${OSL_DLL}")
     endif(SORT_PLATFORM_WIN)
 endif()
 
