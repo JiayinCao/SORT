@@ -20,9 +20,17 @@
 #include <OSL/oslquery.h>
 #include "thirdparty/gtest/gtest.h"
 
+#include "core/define.h"
+
 using namespace OSL;
 
 #define OSL_TEST_VERBOSE    0
+
+#if defined(SORT_IN_WINDOWS)
+    #define STDOSL_PATH     "..\\dependencies\\osl\\shader\\stdosl.h"
+#else
+    #define STDOSL_PATH     "../dependencies/osl/shader/stdosl.h"
+#endif
 
 class SORTRenderServices : public RendererServices{
 public:
@@ -55,8 +63,7 @@ bool compile_buffer ( ShadingSystem* shadingsys , const std::string &sourcecode,
     OSLCompiler compiler;
     std::string osobuffer;
     std::vector<std::string> options;
-    //options.push_back( "-I../depdendencies/osl/shaders");
-    if (! compiler.compile_buffer (sourcecode, osobuffer, options, "./stdosl.h" ) )
+    if (!compiler.compile_buffer(sourcecode, osobuffer, options, STDOSL_PATH))
         return false;
 
     // Load shader from compiled object file.
