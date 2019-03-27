@@ -128,25 +128,22 @@ endif (SORT_PLATFORM_WIN)
 
 # Enable SORT Stats system.
 if(SORT_ENABLE_STATS)
-    message( "SORT Stats System Enabled.")
+    message( STATUS "SORT Stats System Enabled.")
 	add_definitions(-DSORT_ENABLE_STATS_COLLECTION)
 else()
-    message( "SORT Stats Sysatem Disabled." )
+    message( STATUS "SORT Stats Sysatem Disabled." )
 endif(SORT_ENABLE_STATS)
 
 # Enable Profiling system in SORT.
 if(SORT_ENABLE_PROFILER)
-    message( "SORT Profiling System Enabled." )
+    message( STATUS "SORT Profiling System Enabled." )
     add_definitions(-DSORT_ENABLE_PROFILER)
 if (!SORT_PLATFORM_LINUX) # it doesn't link well with OSL
     add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 endif()
 else()
-    message( "SORT Profiling System Disabled." )
+    message( STATUS "SORT Profiling System Disabled." )
 endif(SORT_ENABLE_PROFILER)
-
-# Somehow OSL needs this, otherwise there will be undefined symbol issue
-#add_definitions( -fno-rtti )
 
 # Surpress a warning
 if(SORT_PLATFORM_MAC)
