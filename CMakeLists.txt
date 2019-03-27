@@ -162,6 +162,7 @@ set_target_properties( SORT PROPERTIES DEBUG_OUTPUT_NAME "sort_d" )
 # Surpress warnings in thirdparty library.
 if(MSVC)
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4305 /wd4800" )
 endif(MSVC)
 
 # Output include directories

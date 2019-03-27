@@ -26,7 +26,7 @@
 
 # Notification of what is being done.
 if (NOT OpenImageIO_FIND_QUIETLY)
-    message( "Finding OpenImageIO." )
+    message( STATUS "Finding OpenImageIO." )
 endif ()
 
 if( SORT_PLATFORM_WIN )
@@ -107,14 +107,14 @@ if (EXISTS "${OIIO_VERSION_HEADER}")
 endif ()
 
 if(NOT OpenImageIO_FIND_QUIETLY)
-    message( "OPENIMAGEIO Found        = ${OPENIMAGEIO_FOUND}")
-    message( "OpenImageIO Version      = ${OPENIMAGEIO_VERSION}" )
-    message( "OPENIMAGEIO_ROOT_DIR     = ${OPENIMAGEIO_ROOT_DIR}" )
-    message( "OpenImageIO includes     = ${OPENIMAGEIO_INCLUDE_DIR}" )
-    message( "OpenImageIO library_dirs = ${OPENIMAGEIO_LIBRARY_DIR}" )
-    message( "OpenImageIO libraries    = ${OPENIMAGEIO_LIBRARIES}" )
+    message( STATUS "OPENIMAGEIO Found        = ${OPENIMAGEIO_FOUND}")
+    message( STATUS "OpenImageIO Version      = ${OPENIMAGEIO_VERSION}" )
+    message( STATUS "OPENIMAGEIO_ROOT_DIR     = ${OPENIMAGEIO_ROOT_DIR}" )
+    message( STATUS "OpenImageIO includes     = ${OPENIMAGEIO_INCLUDE_DIR}" )
+    message( STATUS "OpenImageIO library_dirs = ${OPENIMAGEIO_LIBRARY_DIR}" )
+    message( STATUS "OpenImageIO libraries    = ${OPENIMAGEIO_LIBRARIES}" )
     if( SORT_PLATFORM_WIN )
-		message( "OpenImageIO DLLs         = ${OPENIMAGEIO_DLL}")
+		message( STATUS "OpenImageIO DLLs         = ${OPENIMAGEIO_DLL}")
 	endif( SORT_PLATFORM_WIN )
 endif()
 
