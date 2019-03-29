@@ -6,8 +6,7 @@ matrix:
     - os: osx
       compiler: clang
       script:
-        - brew install openimageio
-        - brew install llvm@4
+        - brew install llvm@8
         - sudo /bin/sh ./getdep_mac.sh
         - mkdir proj_release && cd proj_release
         - cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
