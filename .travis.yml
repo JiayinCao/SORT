@@ -23,9 +23,22 @@ matrix:
             - ubuntu-toolchain-r-test
            packages:
             - g++-7
+            - libboost-filesystem1.65.1
+            - libboost-python1.65.1
+            - libboost-regex1.65.1
+            - libboost-system1.65.1
+            - libboost-thread1.65.1
+            - libboost-wave1.65.1
       before_install:
         - eval "${MATRIX_EVAL}" 
       script:
+        - sudo apt-get install libopenexr-dev
+        - sudo apt-get install libtiff-dev
+        - sudo apt-get install libpng-dev
+        - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        - sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
+        - sudo apt-get update
+        - sudo apt-get install -y clang-6.0
         - sudo /bin/sh ./getdep_linux.sh
         - mkdir proj_release && cd proj_release
         - cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
