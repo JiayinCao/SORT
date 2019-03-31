@@ -33,7 +33,7 @@
 
 #define	SQR(x)		(Pow<2>(x))
 
-#if SORT_IN_LINUX
+#if defined(SORT_IN_LINUX)
     // This may not be 100% correct
     #define IsInf   std::isinf
     #define IsNan   std::isnan
