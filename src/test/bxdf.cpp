@@ -83,7 +83,7 @@ void checkPdf( const Bxdf* bxdf ){
 
         std::lock_guard<spinlock_mutex> lock(mutex);
         EXPECT_LE( fabs( pdf / calculated_pdf - 1.0f ) , 0.01f );
-        EXPECT_TRUE( !isnan(pdf) );
+        EXPECT_TRUE( !IsNan(pdf) );
         EXPECT_GE( pdf , 0.0f );
         EXPECT_NEAR(f0.GetR(), f1.GetR(), 0.001f);
         EXPECT_NEAR(f0.GetG(), f1.GetG(), 0.001f);

@@ -41,7 +41,7 @@ Vector ClearcoatGGX::sample_f(const BsdfSample& bs) const {
 
 float ClearcoatGGX::G1(const Vector& v) const {
     const auto tan_theta_sq = TanTheta2(v);
-    if (isinf(tan_theta_sq)) return 0.0f;
+    if (IsInf(tan_theta_sq)) return 0.0f;
     static const auto roughness = 0.25f;
     const auto alpha2 = roughness * roughness;
     return 2.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
