@@ -33,6 +33,15 @@
 
 #define	SQR(x)		(Pow<2>(x))
 
+#if SORT_IN_LINUX
+    // This may not be 100% correct
+    #define IsInf   std::isinf
+    #define IsNan   std::isnan
+#else
+    #define IsInf   isinf
+    #define IsNan   isnan
+#endif
+
 //! @brief	Power of a value.
 //!
 //! Instead of using the native one provided by C++, this involves O(ln(N)) multiplications

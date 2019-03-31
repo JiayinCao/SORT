@@ -139,7 +139,7 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
     
     auto sin2ThetaI = std::max( 0.0f , 1.0f - muI * muI );
     auto norm = sqrt( sin2ThetaI / SinTheta2(wo));
-    if( isinf(norm) ) norm = 0.0f;
+    if( IsInf(norm) ) norm = 0.0f;
     auto sinPhi = sin(phi) , cosPhi = cos(phi);
     wi = -Vector3f( norm * ( cosPhi * wo.x - sinPhi * wo.z ),
                     muI ,
