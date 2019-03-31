@@ -1,6 +1,5 @@
 language: cpp
 sudo: required
-dist: trusty
 matrix:
   include:
     - os: osx
@@ -14,6 +13,7 @@ matrix:
         - cmake -DCMAKE_BUILD_TYPE=Debug DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
         - cd ../bin && ./sort_r --unittest
     - os: linux
+      dist: xenial
       compiler: gcc
       env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
