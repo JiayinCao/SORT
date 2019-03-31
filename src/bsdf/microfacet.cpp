@@ -82,10 +82,10 @@ Vector Blinn::sample_f( const BsdfSample& bs ) const {
 
 float Blinn::G1( const Vector& v ) const {
     const auto absTan = fabs( TanTheta(v) );
-    if( isinf( absTan ) ) return 0.0f;
+    if( IsInf( absTan ) ) return 0.0f;
     const auto cos_phi_sq = CosPhi2(v);
     const auto a = 1.0f / ( sqrt( cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2 ) * absTan );
-    if( a > 1.6f || isinf( a ) ) return 1.0f;
+    if( a > 1.6f || IsInf( a ) ) return 1.0f;
     return ( 3.535f * a + 2.181f * a * a ) / ( 1.0f + 2.276f * a + 2.577f * a * a );
 }
 
@@ -144,10 +144,10 @@ Vector Beckmann::sample_f( const BsdfSample& bs ) const {
 
 float Beckmann::G1( const Vector& v ) const {
     const auto absTan = fabs( TanTheta(v) );
-    if( isinf( absTan ) ) return 0.0f;
+    if( IsInf( absTan ) ) return 0.0f;
     const auto cos_phi_sq = CosPhi2(v);
     const auto a = 1.0f / ( sqrt( cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2 ) * absTan );
-    if( a > 1.6f || isinf( a ) ) return 1.0f;
+    if( a > 1.6f || IsInf( a ) ) return 1.0f;
     return ( 3.535f * a + 2.181f * a * a ) / ( 1.0f + 2.276f * a + 2.577f * a * a );
 }
 
@@ -205,7 +205,7 @@ Vector GGX::sample_f( const BsdfSample& bs ) const {
 
 float GGX::G1( const Vector& v ) const {
     const auto tan_theta_sq = TanTheta2(v);
-    if( isinf( tan_theta_sq ) ) return 0.0f;
+    if( IsInf( tan_theta_sq ) ) return 0.0f;
     const auto cos_phi_sq = CosPhi2(v);
     const auto alpha2 = cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2;
     return 2.0f / ( 1.0f + sqrt( 1.0f + alpha2 * tan_theta_sq ) );

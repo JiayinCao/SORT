@@ -19,9 +19,6 @@
 
 #include <iostream>
 
-// temporary for now
-using namespace std;
-
 #if defined(_WIN32) || defined(_WIN64)
 	#define SORT_IN_WINDOWS
 #elif defined(__linux__)
