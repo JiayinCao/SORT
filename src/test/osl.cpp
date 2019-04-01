@@ -224,6 +224,7 @@ TEST(OSL, CheckingClosure) {
         { "diffuse"    , DIFFUSE_ID,            { CLOSURE_VECTOR_PARAM(DiffuseParams, N),
                                                   CLOSURE_FINISH_PARAM(DiffuseParams) }},
         { "oren_nayar" , OREN_NAYAR_ID,         { CLOSURE_VECTOR_PARAM(OrenNayarParams, N),
+                                                  CLOSURE_FLOAT_PARAM (OrenNayarParams, sigma),
                                                   CLOSURE_FINISH_PARAM(OrenNayarParams) }}
     };
     for( int i = 0 ; i < CC ; ++i )
@@ -263,11 +264,12 @@ TEST(OSL, CheckingClosure) {
     EXPECT_EQ( cwA.y , 1.25f );
     EXPECT_EQ( cwA.z , 0.125f );
 
-    // It doesn't work somehow, need investigation
-    //const auto* compB = closureB->as_comp();
-    //const auto& params = *compB->as<OrenNayarParams>();
-    //const float expected_sigam = 0.1f;
-    //EXPECT_EQ( params.sigma , expected_sigam );
+    // 0.1 can't be represented in 32 bits float, but it is picked for the purpose to check IEEE implementation of OSL.
+    // It should be exactly the same with C++ compiler if it does what IEEE standard requests.
+    const auto* compB = closureB->as_comp();
+    const auto& params = *compB->as<OrenNayarParams>();
+    const float expected_sigam = 0.1f;
+    EXPECT_EQ( params.sigma , expected_sigam );
 
     shadingsys->release_context (ctx);
     shadingsys->destroy_thread_info(thread_info);
