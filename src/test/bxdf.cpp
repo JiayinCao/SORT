@@ -145,7 +145,7 @@ TEST(BXDF, Phong) {
     static const Spectrum R(1.0f);
     const float ratio = sort_canonical();
     Phong phong( R * ratio , R * ( 1.0f - ratio ) , sort_canonical(), R, DIR_UP);
-    checkAll(&phong);
+    checkAll(&phong, false);
 }
 
 // Sometimes it doesn't always pass, need investigation.
