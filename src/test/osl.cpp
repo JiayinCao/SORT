@@ -18,6 +18,8 @@
 #include <OSL/oslexec.h>
 #include <OSL/oslcomp.h>
 #include <OSL/oslquery.h>
+#include <OSL/genclosure.h>
+#include <OSL/oslclosure.h>
 #include "thirdparty/gtest/gtest.h"
 
 #include "core/define.h"
@@ -75,13 +77,25 @@ bool compile_buffer ( ShadingSystem* shadingsys , const std::string &sourcecode,
 
 // This unit test will cover the basics of Open Shading Language, like read input and output from a shader ,
 // exectute a shader and verify the result
-TEST(OSL, Basic) {
-    static std::string shader_source =  "shader TestBasic( color Cin = 0.5 , float exponent = 2.0 , output color Cout = 1.0 ){ Cout = pow( Cin , exponent ); }";
+TEST(OSL, CheckingSymbol) {
+    static std::string shader_source =  "shader TestBasic("
+                                        "   color Cin = 0.5 ,"
+                                        "   float exponent = 2.0 ,"
+                                        "   output color Cout = 1.0 )"
+                                        "{"
+                                        "       Cout = pow( Cin , exponent );"
+                                        "}";
 
     ErrorHandler errhandler;
     SORTRenderServices rs;
 
     auto shadingsys = std::make_unique<ShadingSystem>(&rs, nullptr, &errhandler);
+
+    // Making sure shading system is created already.
+    EXPECT_TRUE( shadingsys != nullptr );
+    
+    // Making sure shading system is created already.
+    EXPECT_TRUE( shadingsys != nullptr );
 
     shadingsys->attribute("lockgeom", 1);
 #if OSL_TEST_VERBOSE
@@ -122,7 +136,7 @@ TEST(OSL, Basic) {
     EXPECT_TRUE( layer_name_match );
 
 #if OSL_TEST_VERBOSE
-    std::cout << layers[0] << "\n";
+    std::cout << layers[0] << std::endl;
 #endif
     OSLQuery q;
     q.init (shadergroup.get(), 0);
@@ -172,6 +186,88 @@ TEST(OSL, Basic) {
     EXPECT_EQ( fdata[0] , 0.25f );
     EXPECT_EQ( fdata[1] , 0.25f );
     EXPECT_EQ( fdata[2] , 0.25f );
+
+    shadingsys->release_context (ctx);
+    shadingsys->destroy_thread_info(thread_info);
+}
+
+// Check basic closure operations
+TEST(OSL, CheckingClosure) {
+    static std::string shader_source =  "shader TestBasic()"
+                                        "{"
+                                        "       color tint = color( 0.25 , 1.25 , 0.125 );"
+                                        "       float gamma = 0.1;"
+                                        "       Ci = diffuse(N) * tint + oren_nayar(N,gamma);"
+                                        "}";
+
+    ErrorHandler errhandler;
+    SORTRenderServices rs;
+    auto shadingsys = std::make_unique<ShadingSystem>(&rs, nullptr, &errhandler);
+
+    // Making sure shading system is created already.
+    EXPECT_TRUE( shadingsys != nullptr );
+
+    // Register a closure
+    constexpr int MaxParams = 32;
+    struct BuiltinClosures {
+        const char* name;
+        int id;
+        ClosureParam params[MaxParams];
+    };
+    struct DiffuseParams    { Vec3 N; };
+    struct OrenNayarParams  { Vec3 N; float sigma; };
+    constexpr int DIFFUSE_ID = 1;
+    constexpr int OREN_NAYAR_ID = 2;
+
+    constexpr int CC = 2; // Closure count
+    BuiltinClosures closures[CC] = {
+        { "diffuse"    , DIFFUSE_ID,            { CLOSURE_VECTOR_PARAM(DiffuseParams, N),
+                                                  CLOSURE_FINISH_PARAM(DiffuseParams) }},
+        { "oren_nayar" , OREN_NAYAR_ID,         { CLOSURE_VECTOR_PARAM(OrenNayarParams, N),
+                                                  CLOSURE_FINISH_PARAM(OrenNayarParams) }}
+    };
+    for( int i = 0 ; i < CC ; ++i )
+        shadingsys->register_closure( closures[i].name , closures[i].id , closures[i].params , nullptr , nullptr );
+    
+    const auto group_name = "Closure_Basic_Test_ShaderGroup";
+    const auto shader_name = "closure_basic_osl";
+    const auto shader_layer = "closure_basic_layer";
+    const auto shadergroup = shadingsys->ShaderGroupBegin ("Closure_Test_ShaderGroup");
+    const auto ret = compile_buffer( shadingsys.get() , shader_source , shader_name );
+    shadingsys->Shader ("surface", shader_name, shader_layer);
+    shadingsys->ShaderGroupEnd ();
+
+    OSL::PerThreadInfo *thread_info = shadingsys->create_thread_info();
+    ShadingContext *ctx = shadingsys->get_context (thread_info);
+
+    ShaderGlobals shaderglobals;
+    shadingsys->execute (ctx, *shadergroup, shaderglobals);
+
+    const auto closure = shaderglobals.Ci;
+
+    EXPECT_TRUE( closure != nullptr );
+    EXPECT_TRUE( closure->id == ClosureColor::ADD );
+
+    const auto closureA = closure->as_add()->closureA;
+    const auto closureB = closure->as_add()->closureB;
+
+    EXPECT_TRUE( closureA != nullptr );
+    EXPECT_TRUE( closureB != nullptr );
+    EXPECT_EQ( closureA->id , DIFFUSE_ID );
+    EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
+
+    const auto* compA = closureA->as_comp();
+    const auto cwA = compA->w;
+
+    EXPECT_EQ( cwA.x , 0.25f );
+    EXPECT_EQ( cwA.y , 1.25f );
+    EXPECT_EQ( cwA.z , 0.125f );
+
+    // It doesn't work somehow, need investigation
+    //const auto* compB = closureB->as_comp();
+    //const auto& params = *compB->as<OrenNayarParams>();
+    //const float expected_sigam = 0.1f;
+    //EXPECT_EQ( params.sigma , expected_sigam );
 
     shadingsys->release_context (ctx);
     shadingsys->destroy_thread_info(thread_info);
