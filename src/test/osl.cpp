@@ -450,8 +450,6 @@ TEST(OSL, CheckingDefaultValue) {
     EXPECT_EQ( cwA.y , iColor_0[1] );
     EXPECT_EQ( cwA.z , iColor_0[2] );
 
-    // 0.1 can't be represented in 32 bits float, but it is picked for the purpose to check IEEE implementation of OSL.
-    // It should be exactly the same with C++ compiler if it does what IEEE standard requests.
     const auto compB = closureB->as_comp();
     const auto& params = *compB->as<OrenNayarParams>();
     EXPECT_EQ( params.sigma , iScale_0 );
@@ -512,8 +510,6 @@ TEST(OSL, CheckingMultiThread) {
         EXPECT_EQ( cwA.y , 0.5f );
         EXPECT_EQ( cwA.z , 2.5f );
 
-        // 0.1 can't be represented in 32 bits float, but it is picked for the purpose to check IEEE implementation of OSL.
-        // It should be exactly the same with C++ compiler if it does what IEEE standard requests.
         const auto compB = closureB->as_comp();
         const auto& params = *compB->as<OrenNayarParams>();
         EXPECT_EQ( params.sigma , 12.0f );
@@ -574,8 +570,6 @@ TEST(OSL, CheckingGlobalContext) {
     EXPECT_EQ( cwA.y , shaderglobals.u );
     EXPECT_EQ( cwA.z , shaderglobals.u );
 
-    // 0.1 can't be represented in 32 bits float, but it is picked for the purpose to check IEEE implementation of OSL.
-    // It should be exactly the same with C++ compiler if it does what IEEE standard requests.
     const auto compB = closureB->as_mul();
     const auto cwB = compB->weight;
 
