@@ -117,7 +117,7 @@ std::unique_ptr<ShadingSystem>  MakeOSLShadingSys(){
     auto shadingsys = std::make_unique<ShadingSystem>(&rs, nullptr, &errhandler);
 
     // Making sure shading system is created already.
-    EXPECT_TRUE( shadingsys != nullptr );
+    EXPECT_NE( shadingsys , nullptr );
 
 #if OSL_TEST_VERBOSE
     errhandler.verbosity (ErrorHandler::VERBOSE);
@@ -172,8 +172,8 @@ TEST(OSL, CheckingSymbol) {
 #if OSL_TEST_VERBOSE
     std::cout << "Shader group name:\t" << groupname << std::endl;
 #endif
-    const auto group_name_match = std::strcmp( groupname.c_str() , group_name ) == 0;
-    EXPECT_TRUE( group_name_match );
+    const auto group_name_match = std::strcmp( groupname.c_str() , group_name );
+    EXPECT_EQ( group_name_match , 0 );
 
     // There should be exactly one layer
     int num_layers = 0;
@@ -186,8 +186,8 @@ TEST(OSL, CheckingSymbol) {
 #if OSL_TEST_VERBOSE
     std::cout<<"Layer name:\t\t"<<layers[0]<<std::endl;
 #endif
-    const auto layer_name_match = std::strcmp( layers[0] , shader_layer ) == 0;
-    EXPECT_TRUE( layer_name_match );
+    const auto layer_name_match = std::strcmp( layers[0] , shader_layer );
+    EXPECT_EQ( layer_name_match , 0 );
 
 #if OSL_TEST_VERBOSE
     std::cout << layers[0] << std::endl;
@@ -206,8 +206,8 @@ TEST(OSL, CheckingSymbol) {
 #if OSL_TEST_VERBOSE
         std::cout << "\t" << (param->isoutput ? "output "  : "input ") << param->type << ' ' << param->name << "\n";
 #endif
-        const auto param_match = std::strcmp( param->name.c_str() , name.c_str() ) == 0;
-        EXPECT_TRUE( param_match );
+        const auto param_match = std::strcmp( param->name.c_str() , name.c_str() );
+        EXPECT_EQ( param_match , 0 );
         EXPECT_EQ( param->isoutput , !input );
     };
 
@@ -275,14 +275,14 @@ TEST(OSL, CheckingClosure) {
 
     const auto closure = shaderglobals.Ci;
 
-    EXPECT_TRUE( closure != nullptr );
-    EXPECT_TRUE( closure->id == ClosureColor::ADD );
+    EXPECT_NE( closure , nullptr );
+    EXPECT_EQ( closure->id , ClosureColor::ADD );
 
     const auto closureA = closure->as_add()->closureA;
     const auto closureB = closure->as_add()->closureB;
 
-    EXPECT_TRUE( closureA != nullptr );
-    EXPECT_TRUE( closureB != nullptr );
+    EXPECT_NE( closureA , nullptr );
+    EXPECT_NE( closureB , nullptr );
     EXPECT_EQ( closureA->id , DIFFUSE_ID );
     EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
 
@@ -372,7 +372,7 @@ TEST(OSL, CheckingMultipleLayers) {
     const auto closureA = closure->as_add()->closureA;
     const auto closureB = closure->as_add()->closureB;
 
-    EXPECT_TRUE(closureA != nullptr);
+    EXPECT_NE(closureA , nullptr);
     EXPECT_EQ(closureA->id, ClosureColor::MUL);
 
     const auto cw = closureA->as_mul()->weight;
@@ -380,7 +380,7 @@ TEST(OSL, CheckingMultipleLayers) {
     EXPECT_EQ(cw.y, 0.05f);
     EXPECT_EQ(cw.z, 0.05f);
 
-    EXPECT_TRUE(closureB != nullptr);
+    EXPECT_NE(closureB , nullptr);
     EXPECT_EQ(closureB->id, OREN_NAYAR_ID);
 
     const auto compB = closureB->as_comp();
@@ -432,14 +432,14 @@ TEST(OSL, CheckingDefaultValue) {
 
     const auto closure = shaderglobals.Ci;
 
-    EXPECT_TRUE( closure != nullptr );
-    EXPECT_TRUE( closure->id == ClosureColor::ADD );
+    EXPECT_NE( closure , nullptr );
+    EXPECT_EQ( closure->id , ClosureColor::ADD );
 
     const auto closureA = closure->as_add()->closureA;
     const auto closureB = closure->as_add()->closureB;
 
-    EXPECT_TRUE( closureA != nullptr );
-    EXPECT_TRUE( closureB != nullptr );
+    EXPECT_NE( closureA , nullptr );
+    EXPECT_NE( closureB , nullptr );
     EXPECT_EQ( closureA->id , DIFFUSE_ID );
     EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
 
@@ -494,14 +494,14 @@ TEST(OSL, CheckingMultiThread) {
 
         const auto closure = shaderglobals.Ci;
 
-        EXPECT_TRUE( closure != nullptr );
-        EXPECT_TRUE( closure->id == ClosureColor::ADD );
+        EXPECT_NE( closure , nullptr );
+        EXPECT_EQ( closure->id , ClosureColor::ADD );
 
         const auto closureA = closure->as_add()->closureA;
         const auto closureB = closure->as_add()->closureB;
 
-        EXPECT_TRUE( closureA != nullptr );
-        EXPECT_TRUE( closureB != nullptr );
+        EXPECT_NE( closureA , nullptr );
+        EXPECT_NE( closureB , nullptr );
         EXPECT_EQ( closureA->id , DIFFUSE_ID );
         EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
 
@@ -518,4 +518,68 @@ TEST(OSL, CheckingMultiThread) {
         const auto& params = *compB->as<OrenNayarParams>();
         EXPECT_EQ( params.sigma , 12.0f );
     });
+}
+
+// Checking global data
+TEST(OSL, CheckingGlobalContext) {
+    static const std::string shader_source =  
+        "shader TestBasic("
+        "   color iColor_0 = color( 0.125 , 0.5 , 2.5 ) ,"
+        "   float iScale_0 = 12.0 )"
+        "{"
+        "    Ci = u * diffuse(N) + v * oren_nayar(N,iScale_0);"
+        "}";
+
+    // Create OSL shading system
+    auto shadingsys = MakeOSLShadingSys();
+
+    // Register closures
+    register_closures( shadingsys.get() );
+    
+    const auto group_name = "default_shader_group";
+    const auto shader_name = "default_shader";
+    const auto shader_layer = "default_layer";
+    const auto shadergroup = shadingsys->ShaderGroupBegin ("Closure_Test_ShaderGroup");
+    const auto ret = compile_buffer( shadingsys.get() , shader_source , shader_name );
+    shadingsys->Shader ("surface", shader_name, shader_layer);
+    shadingsys->ShaderGroupEnd ();
+
+    ShadingContextWrapper sc( shadingsys.get() );
+
+    ShaderGlobals shaderglobals;
+    shaderglobals.P = Vec3( 0.25f , 1.25f , 4.0 );
+    shaderglobals.N = Vec3( 0.0f , 1.0f , 0.0f );
+    shaderglobals.I = Vec3( 1.0f , 0.0f , 0.0f );
+    shaderglobals.u = 0.5f;
+    shaderglobals.v = 0.25f;
+    shadingsys->execute (sc.ctx, *shadergroup, shaderglobals);
+
+    const auto closure = shaderglobals.Ci;
+
+    EXPECT_NE( closure , nullptr );
+    EXPECT_EQ( closure->id , ClosureColor::ADD );
+
+    const auto closureA = closure->as_add()->closureA;
+    const auto closureB = closure->as_add()->closureB;
+
+    EXPECT_NE( closureA , nullptr );
+    EXPECT_NE( closureB , nullptr );
+    EXPECT_EQ( closureA->id , ClosureColor::MUL );
+    EXPECT_EQ( closureB->id , ClosureColor::MUL );
+
+    const auto compA = closureA->as_mul();
+    const auto cwA = compA->weight;
+
+    EXPECT_EQ( cwA.x , shaderglobals.u );
+    EXPECT_EQ( cwA.y , shaderglobals.u );
+    EXPECT_EQ( cwA.z , shaderglobals.u );
+
+    // 0.1 can't be represented in 32 bits float, but it is picked for the purpose to check IEEE implementation of OSL.
+    // It should be exactly the same with C++ compiler if it does what IEEE standard requests.
+    const auto compB = closureB->as_mul();
+    const auto cwB = compB->weight;
+
+    EXPECT_EQ( cwB.x , shaderglobals.v );
+    EXPECT_EQ( cwB.y , shaderglobals.v );
+    EXPECT_EQ( cwB.z , shaderglobals.v );
 }
