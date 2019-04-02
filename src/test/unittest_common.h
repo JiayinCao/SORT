@@ -61,3 +61,18 @@ void ParrallRun( std::function<void()> func ){
     for (int i = 0; i < TN; ++i)
         threads[i].join();
 }
+
+template<int TN , int N = 1024 * 1024 * 8 >
+void ParrallRun( std::function<void(int tid)> func ){
+    // executing tasks in different threads
+    std::thread threads[TN];
+    for (int i = 0; i < TN; ++i)
+        threads[i] = std::thread([&](int tid){
+            for (long long j = 0; j < N; ++j )
+                func(tid);
+        }, i );
+
+    // make sure all threads are finished
+    for (int i = 0; i < TN; ++i)
+        threads[i].join();
+}
