@@ -70,6 +70,6 @@ void Material::Serialize(IStreamBase& stream){
 
 Bsdf* Material::GetBsdf(const class Intersection* intersect) const {
     Bsdf* bsdf = SORT_MALLOC(Bsdf)(intersect);
-    execute_shader( bsdf , m_shader.get() );
+    execute_shader( bsdf , intersect , m_shader.get() );
     return bsdf;
 }

@@ -19,6 +19,7 @@
 #include <OSL/oslquery.h>
 #include <OSL/genclosure.h>
 #include <OSL/oslclosure.h>
+#include <algorithm>
 #include "osl_system.h"
 #include "spectrum/spectrum.h"
 #include "bsdf/bsdf.h"
@@ -26,6 +27,7 @@
 #include "bsdf/orennayar.h"
 #include "core/memory.h"
 #include "spectrum/spectrum.h"
+#include "math/intersection.h"
 
 using namespace OSL;
 
@@ -154,11 +156,13 @@ void process_closure (Bsdf* bsdf, const ClosureColor* closure, const Color3& w) 
    }
 }
 
-void execute_shader( Bsdf* bsdf , OSL::ShaderGroup* shader ){
+void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::ShaderGroup* shader ){
     auto thread_info = g_shadingsys->create_thread_info();
     auto ctx = g_shadingsys->get_context(thread_info);
 
     ShaderGlobals shaderglobals;
+    shaderglobals.u = intersection->u;
+    shaderglobals.v = intersection->v;
     g_shadingsys->execute(ctx, *shader, shaderglobals);
 
     process_closure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );

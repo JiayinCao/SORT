@@ -718,9 +718,9 @@ class SORTNodeConstant(SORTShadingNode):
     sort_bxdf_type = 'ConstantColorNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader ConstantColor( color iColor = @ ,
+        shader ConstantColor( color Color = @ ,
                               output color Result = color( 0.0 , 0.0 , 0.0 ) ){
-            Result = iColor;
+            Result = Color;
         }
     '''
 
