@@ -41,20 +41,27 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
 	stream >> material_cnt;
 	for( unsigned int i = 0 ; i < material_cnt ; ++i ){
         auto mat = std::make_unique<Material>();
+
+        // serialize shader
 		mat->Serialize( stream );
+
+        // compile shader
+        mat->BuildShader();
 
         if( !noMaterialSupport )
 		    m_matPool.push_back( std::move(mat) );
 	}
-	return material_cnt;
+	
+    return material_cnt;
 }
 
-std::string MatManager::ConstructShader(const std::string& shaderType, const std::vector<std::string>& paramValue) {
+std::string MatManager::ConstructShader(const std::string& shaderName, const std::string& shaderType, const std::vector<std::string>& paramValue) {
     std::string shader;
 
     // If there is no such a shader type, just return an empty string.
     if (m_shaderSources.count(shaderType) == 0) {
         slog(WARNING, MATERIAL, "Can't find OSL shader type %s.", shaderType.c_str());
+        slog(WARNING, MATERIAL, "Failed to build shader %s.", shaderName.c_str());
         return shader;
     }
 
@@ -67,6 +74,9 @@ std::string MatManager::ConstructShader(const std::string& shaderType, const std
         else
             shader += c;
     }
+
+    if( j < paramValue.size() )
+        slog(WARNING, MATERIAL, "Failed to build shader %s.", shaderName.c_str());
 
     return shader;
 }

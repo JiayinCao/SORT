@@ -17,11 +17,12 @@
 
 #pragma once
 
-#include "material_node.h"
+#include <vector>
+#include <string>
+#include <OSL/oslexec.h>
 #include "stream/stream.h"
 #include "bsdf/bsdf.h"
 #include "core/memory.h"
-#include "core/log.h"
 #include "core/profile.h"
 
 //! @brief 	A thin layer of material definition.
@@ -57,7 +58,31 @@ public:
     //! @param  stream      Input stream for data.
     void Serialize(IStreamBase& stream) override;
 
+    //! @brief  Build shader in OSL.
+    //!
+    //! @param  shadingSys      Open-Shading-Language shading system.
+    //! @return                 Whether the shader is created successfully.
+    bool    BuildShader();
+
 private:
 	/**< Unique name of the material. */
-	std::string	 m_name;
+	std::string	                    m_name;
+
+    struct ShaderSource{
+        std::string name;
+        std::string type;
+        std::string source;
+    };
+    struct ShaderConnection{
+        std::string source_shader , source_property;
+        std::string target_shader , target_property;
+    };
+
+    /**< Shader source code. */
+    std::vector<ShaderSource>       m_sources;
+    /**< Shader connections. */
+    std::vector<ShaderConnection>   m_connections;
+
+    /**< OSL device shader. */
+    OSL::ShaderGroupRef             m_shader = nullptr;
 };

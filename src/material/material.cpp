@@ -16,7 +16,22 @@
  */
 
 #include "material.h"
-#include "managers/matmanager.h"
+#include "matmanager.h"
+#include "core/log.h"
+#include "osl_system.h"
+
+bool Material::BuildShader(){
+    m_shader = beginShaderGroup( m_name );
+    for( const auto& shader : m_sources )
+        build_shader( shader.source , shader.name , shader.name , m_name );
+    for( const auto& connection : m_connections )
+        connect_shader( connection.source_shader , connection.source_property , connection.target_shader , connection.target_property );
+
+    bool ret = endShaderGroup();
+    if( ret )
+        slog( INFO , MATERIAL , "Build shader %s successfully." , m_name.c_str() );
+    return ret;
+}
 
 void Material::Serialize(IStreamBase& stream){
     stream >> m_name;
@@ -26,8 +41,8 @@ void Material::Serialize(IStreamBase& stream){
     auto shader_cnt = 0u, connection_cnt = 0u;
     stream >> shader_cnt;
     for (auto i = 0u; i < shader_cnt; ++i) {
-        std::string node_name, node_type;
-        stream >> node_name >> node_type;
+        ShaderSource shader_source;
+        stream >> shader_source.name >> shader_source.type;
 
         std::vector<std::string> paramDefaultValues;
         auto parameter_cnt = 0u;
@@ -39,24 +54,22 @@ void Material::Serialize(IStreamBase& stream){
         }
 
         // construct the shader source code
-        const auto shader_source = MatManager::GetSingleton().ConstructShader(node_type, paramDefaultValues);
+        shader_source.source = MatManager::GetSingleton().ConstructShader(shader_source.name, shader_source.type, paramDefaultValues);
+
+        m_sources.push_back( shader_source );
     }
 
     stream >> connection_cnt;
     for (auto i = 0u; i < connection_cnt; ++i) {
-        std::string source_shader, source_socket;
-        std::string target_shader, target_socket;
-        stream >> source_shader >> source_socket;
-        stream >> target_shader >> target_socket;
+        ShaderConnection connection;
+        stream >> connection.source_shader >> connection.source_property;
+        stream >> connection.target_shader >> connection.target_property;
+        m_connections.push_back( connection );
     }
 }
 
-// temporary solution before OSL shader is constructed
-#include "bsdf/lambert.h"
 Bsdf* Material::GetBsdf(const class Intersection* intersect) const {
     Bsdf* bsdf = SORT_MALLOC(Bsdf)(intersect);
-    Spectrum weight(1.0f);
-    const Lambert* lambert = SORT_MALLOC(Lambert)(weight, weight, DIR_UP);
-    bsdf->AddBxdf(lambert);
+    execute_shader( bsdf , m_shader.get() );
     return bsdf;
 }

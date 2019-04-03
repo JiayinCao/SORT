@@ -18,7 +18,7 @@
 #include "mesh.h"
 #include "entity/visual.h"
 #include "stream/stream.h"
-#include "managers/matmanager.h"
+#include "material/matmanager.h"
 #include "entity/entity.h"
 #include "stream/stream.h"
 

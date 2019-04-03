@@ -16,7 +16,7 @@
  */
 
 #include "visual.h"
-#include "managers/matmanager.h"
+#include "material/matmanager.h"
 #include "core/scene.h"
 #include "shape/triangle.h"
 #include "core/primitive.h"
