@@ -21,7 +21,7 @@
 #include "material/material.h"
 #include "math/intersection.h"
 #include "shape/shape.h"
-#include "managers/matmanager.h"
+#include "material/matmanager.h"
 
 //! @brief	Primitive of SORT world.
 /**

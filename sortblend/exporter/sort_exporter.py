@@ -577,7 +577,6 @@ def export_materials(scene, fs):
             node.serialize_prop( fs )
         fs.serialize( len( mat_connections ) )
         for connection in mat_connections:
-            print( connection )
             fs.serialize( connection[0] )
             fs.serialize( connection[1] )
             fs.serialize( connection[2] )

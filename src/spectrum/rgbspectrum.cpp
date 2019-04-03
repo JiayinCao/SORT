@@ -17,7 +17,6 @@
 
 #include "rgbspectrum.h"
 #include "core/define.h"
-#include "material/material_node.h"
 
 // default constructor
 RGBSpectrum::RGBSpectrum()
