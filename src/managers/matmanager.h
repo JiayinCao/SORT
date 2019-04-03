@@ -20,6 +20,7 @@
 #include "core/define.h"
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include "core/singleton.h"
 #include "material/material.h"
 
@@ -58,7 +59,8 @@ public:
 	unsigned	ParseMatFile( class IStreamBase& stream );
 
 private:
-    std::vector<std::unique_ptr<class Material>> m_matPool;     /**< Material pool holding all materials. */
+    std::vector<std::unique_ptr<class Material>>     m_matPool;         /**< Material pool holding all materials. */
+    std::unordered_map<std::string, std::string>     m_shaderSources;   /**< OSL shader source code. */
 
 	friend class Singleton<MatManager>;
 };

@@ -25,6 +25,16 @@
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     SORT_PROFILE("Parsing Materials");
 
+    auto shader_source_cnt = 0u;
+    stream >> shader_source_cnt;
+    for (auto i = 0u; i < shader_source_cnt; ++i) {
+        std::string shader_name;
+        std::string shader_source;
+        stream >> shader_name;
+        stream >> shader_source;
+        m_shaderSources[shader_name] = shader_source;
+    }
+
     const bool noMaterialSupport = g_noMaterial;
 	unsigned int material_cnt = 0;
 	stream >> material_cnt;

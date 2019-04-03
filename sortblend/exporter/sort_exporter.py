@@ -115,6 +115,8 @@ def export_blender(scene, force_debug=False):
 
     # export material
     exporter_common.log("Exporting materials.")
+    collect_shader_sources(scene, fs)
+    #export_materials(scene, fs)
     export_material(scene, fs)
     exporter_common.log("Exported materials %.2f(s)" % (time.time() - current_time))
     current_time = time.time()
@@ -458,17 +460,117 @@ def export_global_config(scene, fs, sort_resource_path):
         fs.serialize( scene.ir_light_path_num )
         fs.serialize( scene.ir_min_dist )
 
-matname_to_id = {}
-def export_material(scene, fs):
-    # find the output node, duplicated code, to be cleaned
-    def find_output_node(material):
-        if material and material.sort_material and material.sort_material.sortnodetree:
-            ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
-            for node in ntree.nodes:
-                if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
-                    return node
+# find the output node, duplicated code, to be cleaned
+def find_output_node(material):
+    if material and material.sort_material and material.sort_material.sortnodetree:
+        ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+        for node in ntree.nodes:
+            if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
+                return node
+    return None
+
+# This function will iterate through all visited nodes in the scene and populate everything in a hash table
+def collect_shader_sources(scene, fs):
+    # don't output any osl_shaders if using default materials
+    if scene.allUseDefaultMaterial is True:
         return None
 
+    osl_shaders = {}
+
+    for material in exporter_common.getMaterialList(scene):
+        # get output nodes
+        output_node = find_output_node(material)
+        if output_node is None:
+            continue
+
+        def serialize_prop(mat_node , shaders):
+            for socket in mat_node.inputs:
+                # only process the socket if it is linked.
+                if socket.is_linked:
+                    assert len(socket.links) == 1
+                    input_socket = socket.links[0].from_socket
+                    input_node = input_socket.node
+
+                    # populate the shader source code if it is not exported before
+                    if input_node.bl_label not in shaders:
+                        
+                        shaders[input_node.bl_label] = input_node.osl_shader
+
+        serialize_prop(output_node, osl_shaders)
+
+    fs.serialize( len( osl_shaders ) )
+    for key , value in osl_shaders.items():
+        fs.serialize( key )
+        fs.serialize( value )
+        exporter_common.logD( 'Exporting node source code for node %s. Source code: %s' %(key , value) )
+    del osl_shaders
+
+# This function is to be deprecated once the new system is fully functional
+matname_to_id = {}
+
+# Export open shading language shader group
+def export_materials(scene, fs):
+    material_count = 0
+    for material in exporter_common.getMaterialList(scene):
+        # get output nodes
+        output_node = find_output_node(material)
+        if output_node is None:
+            continue
+        material_count += 1
+
+    if scene.allUseDefaultMaterial is True:
+        fs.serialize( int(0) )
+        return None
+
+    global matname_to_id
+    i = 0
+    fs.serialize( int(material_count) )
+    for material in exporter_common.getMaterialList(scene):
+        # get output nodes
+        output_node = find_output_node(material)
+        if output_node is None:
+            continue
+
+        compact_material_name = name_compat(material.name)
+        matname_to_id[compact_material_name] = i
+        i += 1
+        fs.serialize( compact_material_name )
+        exporter_common.logD( 'Exporting material %s.' % compact_material_name )
+
+        # collect node count
+        mat_nodes = []  # resulting nodes
+        visited = set() # prevent a node to be serialized twice
+        def collect_node_count(mat_node, visited, to_be_serialized ):
+            inputs = mat_node.inputs
+            for socket in inputs:
+                if socket.is_linked:
+                    assert len(socket.links) == 1
+                    input_socket = socket.links[0].from_socket
+                    input_node = input_socket.node
+
+                    #fs.serialize(name_compat_materialNode(input_node.name))
+                    #fs.serialize(input_node.sort_bxdf_type + input_socket.name)
+                    if input_node.name not in visited:
+                        #fs.serialize(input_node.sort_bxdf_type)
+                        collect_node_count(input_node, visited, True)
+
+                        # make sure it doesn't get serialized again
+                        visited.add( input_node )
+
+            # topological sort is necessary here to preserve the order of shader definition.
+            if to_be_serialized:
+                mat_nodes.append( mat_node )
+
+        # collect all material nodes
+        collect_node_count(output_node, visited, False)
+
+        # serialize this material
+        fs.serialize( len( mat_nodes ) )
+        for node in mat_nodes:
+            print( node.name )
+            node.serialize_prop( fs )
+
+def export_material(scene, fs):
     material_count = 0
     for material in exporter_common.getMaterialList(scene):
         # get output nodes
