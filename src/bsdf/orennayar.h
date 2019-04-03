@@ -21,10 +21,10 @@
 
 //! @brief OrenNayar BRDF.
 /**
- * 'Generalization of Lambert�s Reflectance Model'
+ * 'Generalization of Lambert's Reflectance Model'
  * http://www1.cs.columbia.edu/CAVE/publications/pdfs/Oren_SIGGRAPH94.pdf
  *
- * Like lambert BRDF, OrenNayar presents similar quality with subtle differences.
+ * Like lambertian BRDF, OrenNayar presents similar quality with subtle differences.
  * It has slightly brighter color at the contour.
  */
 class OrenNayar : public Bxdf
