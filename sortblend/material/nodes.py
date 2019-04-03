@@ -136,6 +136,21 @@ class SORTShadingNode(bpy.types.Node):
             v = attr_wrapper.export_serialization_value(attr_wrapper,attr)
             serialize_method( prop['name'] , v )
 
+    def serialize_prop(self, fs):
+        fs.serialize( self.name )        # name of the shader instance layer
+        fs.serialize( self.bl_label )    # type of the shader instance
+        for prop in self.property_list:
+            if prop['class'].is_socket():
+                value = prop['class'].export_serialization_value( prop['class'] )
+                fs.serialize( value )
+                print( prop['name'] , value )
+            else:
+                attr_wrapper = getattr(self, prop['name'] + '_wrapper' )
+                attr = getattr(self, prop['name'])
+                v = attr_wrapper.export_serialization_value(attr_wrapper,attr)
+                fs.serialize( v )
+                print( ( prop['name'] , v ) )
+
     # register all properties in the class
     @classmethod
     def register(cls):
@@ -235,10 +250,10 @@ class SORTNode_Material_Principle(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
         shader Principle( float roughnessU = %f ,
-                                    float roughnessV = %f ,
-                                    float metallic = %f ,
-                                    float specular = %f ,
-                                    color baseColor = color( %f , %f , %f ) ){
+                          float roughnessV = %f ,
+                          float metallic = %f ,
+                          float specular = %f ,
+                          color baseColor = color( %f , %f , %f ) ){
             Ci = principle( baseColor , roughnessU , roughnessV , metallic , specular , N );
         }
     '''
