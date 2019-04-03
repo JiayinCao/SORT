@@ -21,19 +21,13 @@
 #include <OSL/genclosure.h>
 #include <OSL/oslclosure.h>
 #include "thirdparty/gtest/gtest.h"
-#include "unittest_common.h"
-
 #include "core/define.h"
+#include "unittest_common.h"
+#include "material/osl_system.h"
 
 using namespace OSL;
 
 #define OSL_TEST_VERBOSE    0
-
-#if defined(SORT_IN_WINDOWS)
-    #define STDOSL_PATH     "..\\dependencies\\osl\\shader\\stdosl.h"
-#else
-    #define STDOSL_PATH     "../dependencies/osl/shader/stdosl.h"
-#endif
 
 class SORTRenderServices : public RendererServices{
 public:
@@ -61,7 +55,7 @@ public:
 };
 
 // Compile OSL source code
-bool compile_buffer ( ShadingSystem* shadingsys , const std::string &sourcecode, const std::string &shadername){
+bool compile_buffer_test( ShadingSystem* shadingsys , const std::string &sourcecode, const std::string &shadername){
     // Compile a OSL shader.
     OSLCompiler compiler;
     std::string osobuffer;
@@ -77,16 +71,11 @@ bool compile_buffer ( ShadingSystem* shadingsys , const std::string &sourcecode,
 }
 
 // Build a shader from source code
-void build_shader( ShadingSystem* shadingsys , const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer , const std::string& shader_group_name = "" ) {
-    auto ret = compile_buffer(shadingsys, shader_source, shader_name);
+void build_shader_test( ShadingSystem* shadingsys , const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer , const std::string& shader_group_name = "" ) {
+    auto ret = compile_buffer_test(shadingsys, shader_source, shader_name);
     shadingsys->Shader("surface", shader_name, shader_layer);
     EXPECT_TRUE(ret);
 };
-
-struct DiffuseParams    { Vec3 N; };
-struct OrenNayarParams  { Vec3 N; float sigma; };
-constexpr int DIFFUSE_ID = 1;
-constexpr int OREN_NAYAR_ID = 2;
 
 // Register closures
 void register_closures( ShadingSystem* shadingsys ){
@@ -100,10 +89,12 @@ void register_closures( ShadingSystem* shadingsys ){
     
     constexpr int CC = 2; // Closure count
     BuiltinClosures closures[CC] = {
-        { "diffuse"    , DIFFUSE_ID,            { CLOSURE_VECTOR_PARAM(DiffuseParams, N),
-                                                  CLOSURE_FINISH_PARAM(DiffuseParams) }},
-        { "oren_nayar" , OREN_NAYAR_ID,         { CLOSURE_VECTOR_PARAM(OrenNayarParams, N),
+        { "lambert"    , LAMBERT_ID,            { CLOSURE_COLOR_PARAM(LambertParams, color),
+                                                  CLOSURE_VECTOR_PARAM(LambertParams, N),
+                                                  CLOSURE_FINISH_PARAM(LambertParams) }},
+        { "orenNayar" , OREN_NAYAR_ID,          { CLOSURE_COLOR_PARAM(OrenNayarParams, color),
                                                   CLOSURE_FLOAT_PARAM (OrenNayarParams, sigma),
+                                                  CLOSURE_VECTOR_PARAM(OrenNayarParams, N),
                                                   CLOSURE_FINISH_PARAM(OrenNayarParams) }}
     };
     for( int i = 0 ; i < CC ; ++i )
@@ -164,7 +155,7 @@ TEST(OSL, CheckingSymbol) {
     const auto shader_name = "test_basic_osl";
     const auto shader_layer = "test_basic_layer";
     const auto shadergroup = shadingsys->ShaderGroupBegin ("Basic_Test_ShaderGroup");
-    build_shader( shadingsys.get() , shader_source , shader_name , shader_layer , group_name );
+    build_shader_test( shadingsys.get() , shader_source , shader_name , shader_layer , group_name );
     shadingsys->ShaderGroupEnd ();
 
     ustring groupname;
@@ -252,7 +243,7 @@ TEST(OSL, CheckingClosure) {
         "{"
         "    color tint = color( 0.25 , 1.25 , 0.125 );"
         "    float gamma = 0.1;"
-        "    Ci = diffuse(N) * tint + oren_nayar(N,gamma);"
+        "    Ci = lambert(tint,N) * tint + orenNayar(tint,gamma,N);"
         "}";
 
     // Create OSL shading system
@@ -265,7 +256,7 @@ TEST(OSL, CheckingClosure) {
     const auto shader_name = "default_shader";
     const auto shader_layer = "default_layer";
     const auto shadergroup = shadingsys->ShaderGroupBegin ("Closure_Test_ShaderGroup");
-    build_shader( shadingsys.get() , shader_source , shader_name , shader_layer , group_name );
+    build_shader_test( shadingsys.get() , shader_source , shader_name , shader_layer , group_name );
     shadingsys->ShaderGroupEnd ();
 
     ShadingContextWrapper sc( shadingsys.get() );
@@ -283,7 +274,7 @@ TEST(OSL, CheckingClosure) {
 
     EXPECT_NE( closureA , nullptr );
     EXPECT_NE( closureB , nullptr );
-    EXPECT_EQ( closureA->id , DIFFUSE_ID );
+    EXPECT_EQ( closureA->id , LAMBERT_ID );
     EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
 
     const auto compA = closureA->as_comp();
@@ -326,7 +317,7 @@ TEST(OSL, CheckingMultipleLayers) {
         "   float iScale_1 = 0.2,"
         "   color iColor_0 = color( 0.2 , 0.2 , 0.2 ))"
         "{"
-        "    Ci = diffuse( N ) * iScale_0 + oren_nayar( N , iScale_1 ) * iColor_0;"
+        "    Ci = lambert( iColor_0 , N ) * iScale_0 + orenNayar( iColor_0 , iScale_1 , N ) * iColor_0;"
         "}";
     static const std::string shader3_source =
         "shader Extract("
@@ -347,11 +338,11 @@ TEST(OSL, CheckingMultipleLayers) {
     register_closures( shadingsys.get() );
 
     const auto shadergroup = shadingsys->ShaderGroupBegin("Default_Shader_Group");
-    build_shader(shadingsys.get(), shader0_source, "shader0", "shader0_layer");
-    build_shader(shadingsys.get(), shader1_source, "shader1", "shader1_layer");
-    build_shader(shadingsys.get(), shader3_source, "shader3_0", "extract0");
-    build_shader(shadingsys.get(), shader3_source, "shader3_1", "extract1");
-    build_shader(shadingsys.get(), shader2_source, "shader2", "shader2_layer");
+    build_shader_test(shadingsys.get(), shader0_source, "shader0", "shader0_layer");
+    build_shader_test(shadingsys.get(), shader1_source, "shader1", "shader1_layer");
+    build_shader_test(shadingsys.get(), shader3_source, "shader3_0", "extract0");
+    build_shader_test(shadingsys.get(), shader3_source, "shader3_1", "extract1");
+    build_shader_test(shadingsys.get(), shader2_source, "shader2", "shader2_layer");
     shadingsys->ConnectShaders("shader0_layer", "oColor_0", "extract0", "iColor_0");
     shadingsys->ConnectShaders("shader1_layer", "oColor_0", "extract1", "iColor_0");
     shadingsys->ConnectShaders("extract0", "oRed", "shader2_layer", "iScale_0");
@@ -394,7 +385,7 @@ TEST(OSL, CheckingMultipleLayers) {
     EXPECT_EQ(params.sigma, expected_sigam);
 
     const auto closureC = closureA->as_mul()->closure;
-    EXPECT_EQ(closureC->id, DIFFUSE_ID);
+    EXPECT_EQ(closureC->id, LAMBERT_ID);
 }
 
 // Checking reset default value for input parameters
@@ -404,7 +395,7 @@ TEST(OSL, CheckingDefaultValue) {
         "   color iColor_0 = color( 0.125 , 0.5 , 2.5 ) ,"
         "   float iScale_0 = 12.0 )"
         "{"
-        "    Ci = diffuse(N) * iColor_0 + oren_nayar(N,iScale_0);"
+        "    Ci = lambert( iColor_0 , N ) * iColor_0 + orenNayar( iColor_0, iScale_0, N );"
         "}";
 
     // Create OSL shading system
@@ -417,7 +408,7 @@ TEST(OSL, CheckingDefaultValue) {
     const auto shader_name = "default_shader";
     const auto shader_layer = "default_layer";
     const auto shadergroup = shadingsys->ShaderGroupBegin ("Closure_Test_ShaderGroup");
-    const auto ret = compile_buffer( shadingsys.get() , shader_source , shader_name );
+    const auto ret = compile_buffer_test( shadingsys.get() , shader_source , shader_name );
     const auto iScale_0 = 2.0f;
     shadingsys->Parameter( "iScale_0" , TypeDesc::TypeFloat, &iScale_0);
     const float iColor_0[3] = { 0.0125f , 1.25f , 5.0f };
@@ -440,7 +431,7 @@ TEST(OSL, CheckingDefaultValue) {
 
     EXPECT_NE( closureA , nullptr );
     EXPECT_NE( closureB , nullptr );
-    EXPECT_EQ( closureA->id , DIFFUSE_ID );
+    EXPECT_EQ( closureA->id , LAMBERT_ID );
     EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
 
     const auto compA = closureA->as_comp();
@@ -462,7 +453,7 @@ TEST(OSL, CheckingMultiThread) {
         "   color iColor_0 = color( 0.125 , 0.5 , 2.5 ) ,"
         "   float iScale_0 = 12.0 )"
         "{"
-        "    Ci = diffuse(N) * iColor_0 + oren_nayar(N,iScale_0);"
+        "    Ci = lambert(iColor_0,N) * iColor_0 + orenNayar(iColor_0,iScale_0,N);"
         "}";
 
     // Create OSL shading system
@@ -478,7 +469,7 @@ TEST(OSL, CheckingMultiThread) {
         const auto shader_name = "default_shader" + std::to_string( i );
         const auto shader_layer = "default_layer" + std::to_string( i );
         shadergroup[i] = shadingsys->ShaderGroupBegin("Default_Shader_Group");
-        build_shader( shadingsys.get() , shader_source , shader_name , shader_layer , group_name );
+        build_shader_test( shadingsys.get() , shader_source , shader_name , shader_layer , group_name );
         shadingsys->ShaderGroupEnd();
     }
 
@@ -500,7 +491,7 @@ TEST(OSL, CheckingMultiThread) {
 
         EXPECT_NE( closureA , nullptr );
         EXPECT_NE( closureB , nullptr );
-        EXPECT_EQ( closureA->id , DIFFUSE_ID );
+        EXPECT_EQ( closureA->id , LAMBERT_ID );
         EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
 
         const auto compA = closureA->as_comp();
@@ -523,7 +514,7 @@ TEST(OSL, CheckingGlobalContext) {
         "   color iColor_0 = color( 0.125 , 0.5 , 2.5 ) ,"
         "   float iScale_0 = 12.0 )"
         "{"
-        "    Ci = u * diffuse(N) + v * oren_nayar(N,iScale_0);"
+        "    Ci = u * lambert(iColor_0,N) + v * orenNayar(iColor_0,iScale_0,N);"
         "}";
 
     // Create OSL shading system
@@ -536,7 +527,7 @@ TEST(OSL, CheckingGlobalContext) {
     const auto shader_name = "default_shader";
     const auto shader_layer = "default_layer";
     const auto shadergroup = shadingsys->ShaderGroupBegin ("Closure_Test_ShaderGroup");
-    const auto ret = compile_buffer( shadingsys.get() , shader_source , shader_name );
+    const auto ret = compile_buffer_test( shadingsys.get() , shader_source , shader_name );
     shadingsys->Shader ("surface", shader_name, shader_layer);
     shadingsys->ShaderGroupEnd ();
 

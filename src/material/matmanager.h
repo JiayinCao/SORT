@@ -60,10 +60,11 @@ public:
 
     //! @brief  Construct shader source code given a list of parameters in string format.
     //!
+    //! @param  shaderName  The name of the shader to be constructed.
     //! @param  shaderType  The type of shader to be constructed.
     //! @param  paramValue  The default value of the parameters in string format to be set.
     //! @return             The constructed shader source code.
-    std::string ConstructShader(const std::string& shaderType, const std::vector<std::string>& paramValue);
+    std::string ConstructShader(const std::string& shaderName, const std::string& shaderType, const std::vector<std::string>& paramValue);
 
 private:
     std::vector<std::unique_ptr<class Material>>     m_matPool;         /**< Material pool holding all materials. */

@@ -18,7 +18,7 @@
 #include <string.h>
 #include "init_tasks.h"
 #include "core/timer.h"
-#include "managers/matmanager.h"
+#include "material/matmanager.h"
 #include "core/globalconfig.h"
 #include "core/scene.h"
 

@@ -22,7 +22,7 @@
 #include "core/path.h"
 #include "core/samplemethod.h"
 #include "core/sassert.h"
-#include "managers/matmanager.h"
+#include "material/matmanager.h"
 #include "light/light.h"
 #include "shape/shape.h"
 #include "core/sassert.h"

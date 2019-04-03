@@ -502,10 +502,10 @@ class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
     sort_bxdf_type = 'LambertNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader Lambert( color Diffuse = @ ){
-            Ci = lambert( color , N );
+        shader Lambert( color diffuse = @ ){
+            Ci = lambert( diffuse , N );
         }
-    '''
+    ''' 
 
 @SORTPatternGraph.register_node('BXDFs')
 class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
@@ -527,9 +527,9 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader OrenNayar( color diffuse = @ ,
-                          float roughness = @ ){
-            Ci = oren_nayar( diffuse , roughness , N );
+        shader OrenNayar( float roughness = @,
+                          color Diffuse = @ ){
+            Ci = orenNayar( Diffuse , roughness , N );
         }
     '''
 
@@ -719,8 +719,8 @@ class SORTNodeConstant(SORTShadingNode):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
         shader ConstantColor( color iColor = @ ,
-                              output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = iColor0;
+                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = iColor;
         }
     '''
 
