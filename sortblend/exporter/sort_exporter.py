@@ -116,8 +116,8 @@ def export_blender(scene, force_debug=False):
     # export material
     exporter_common.log("Exporting materials.")
     collect_shader_sources(scene, fs)
-    #export_materials(scene, fs)
-    export_material(scene, fs)
+    export_materials(scene, fs)
+    #export_material(scene, fs)
     exporter_common.log("Exported materials %.2f(s)" % (time.time() - current_time))
     current_time = time.time()
 
@@ -493,8 +493,9 @@ def collect_shader_sources(scene, fs):
 
                     # populate the shader source code if it is not exported before
                     if input_node.bl_label not in shaders:
-                        
                         shaders[input_node.bl_label] = input_node.osl_shader
+
+                    serialize_prop( input_node , shaders )
 
         serialize_prop(output_node, osl_shaders)
 
@@ -508,7 +509,7 @@ def collect_shader_sources(scene, fs):
 # This function is to be deprecated once the new system is fully functional
 matname_to_id = {}
 
-# Export open shading language shader group
+# Export OSL shader group
 def export_materials(scene, fs):
     material_count = 0
     for material in exporter_common.getMaterialList(scene):
@@ -538,15 +539,19 @@ def export_materials(scene, fs):
         exporter_common.logD( 'Exporting material %s.' % compact_material_name )
 
         # collect node count
-        mat_nodes = []  # resulting nodes
-        visited = set() # prevent a node to be serialized twice
-        def collect_node_count(mat_node, visited, to_be_serialized ):
+        mat_nodes = []          # resulting nodes
+        mat_connections = []    # connections between nodes
+        visited = set()         # prevent a node to be serialized twice
+        def collect_node_count(mat_node, visited, to_be_serialized):
             inputs = mat_node.inputs
             for socket in inputs:
                 if socket.is_linked:
                     assert len(socket.links) == 1
                     input_socket = socket.links[0].from_socket
                     input_node = input_socket.node
+
+                    if to_be_serialized:
+                        mat_connections.append( ( input_node.name , input_socket.name , mat_node.name , socket.name ) )
 
                     #fs.serialize(name_compat_materialNode(input_node.name))
                     #fs.serialize(input_node.sort_bxdf_type + input_socket.name)
@@ -567,8 +572,16 @@ def export_materials(scene, fs):
         # serialize this material
         fs.serialize( len( mat_nodes ) )
         for node in mat_nodes:
-            print( node.name )
+            fs.serialize( node.name )
+            fs.serialize( node.bl_label )
             node.serialize_prop( fs )
+        fs.serialize( len( mat_connections ) )
+        for connection in mat_connections:
+            print( connection )
+            fs.serialize( connection[0] )
+            fs.serialize( connection[1] )
+            fs.serialize( connection[2] )
+            fs.serialize( connection[3] )
 
 def export_material(scene, fs):
     material_count = 0

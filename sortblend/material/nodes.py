@@ -137,19 +137,16 @@ class SORTShadingNode(bpy.types.Node):
             serialize_method( prop['name'] , v )
 
     def serialize_prop(self, fs):
-        fs.serialize( self.name )        # name of the shader instance layer
-        fs.serialize( self.bl_label )    # type of the shader instance
+        fs.serialize( len( self.property_list ) )
         for prop in self.property_list:
             if prop['class'].is_socket():
-                value = prop['class'].export_serialization_value( prop['class'] )
+                value = self.inputs[prop['name']].export_osl_value()
                 fs.serialize( value )
-                print( prop['name'] , value )
             else:
                 attr_wrapper = getattr(self, prop['name'] + '_wrapper' )
                 attr = getattr(self, prop['name'])
-                v = attr_wrapper.export_serialization_value(attr_wrapper,attr)
-                fs.serialize( v )
-                print( ( prop['name'] , v ) )
+                value = attr_wrapper.export_osl_value(attr_wrapper,attr)
+                fs.serialize( value )
 
     # register all properties in the class
     @classmethod
@@ -249,11 +246,11 @@ class SORTNode_Material_Principle(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Specular' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
-        shader Principle( float roughnessU = %f ,
-                          float roughnessV = %f ,
-                          float metallic = %f ,
-                          float specular = %f ,
-                          color baseColor = color( %f , %f , %f ) ){
+        shader Principle( float roughnessU = @ ,
+                          float roughnessV = @ ,
+                          float metallic = @ ,
+                          float specular = @ ,
+                          color baseColor = @ ){
             Ci = principle( baseColor , roughnessU , roughnessV , metallic , specular , N );
         }
     '''
@@ -276,17 +273,17 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'ClearcoatGloss' , 'pbrt_name' : 'clearcoatgloass' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'color' } ]
     osl_shader = '''
-        shader Disney( float subsurface = %f ,
-                       float metallic = %f ,
-                       float specular = %f ,
-                       float specularTint = %f ,
-                       float roughness = %f ,
-                       float anisotropic = %f ,
-                       float sheen = %f ,
-                       float sheenTint = %f ,
-                       float clearCoat = %f ,
-                       float clearCoatGloss = %f ,
-                       color baseColor = color( %f , %f , %f ) ){
+        shader Disney( float subsurface = @ ,
+                       float metallic = @ ,
+                       float specular = @ ,
+                       float specularTint = @ ,
+                       float roughness = @ ,
+                       float anisotropic = @ ,
+                       float sheen = @ ,
+                       float sheenTint = @ ,
+                       float clearCoat = @ ,
+                       float clearCoatGloss = @ ,
+                       color baseColor = @ ){
             Ci = disney( subsurface , metallic , specular , specularTint , roughness , anisotropic , sheen , sheenTint , clearCoat , clearCoatGloss , N );
         }
     '''
@@ -302,10 +299,10 @@ class SORTNode_Material_Glass(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessU' , 'pbrt_name' : 'uroughness' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'pbrt_name' : 'vroughness' } ]
     osl_shader = '''
-        shader Glass( color kr = color( %f , %f , %f ) ,
-                      color kt = color( %f , %f , %f ) ,
-                      float roughnessU = %f ,
-                      float roughnessV = %f ){
+        shader Glass( color kr = @ ,
+                      color kt = @ ,
+                      float roughnessU = @ ,
+                      float roughnessV = @ ){
             Ci = glass( ki , kt , roughnessU , roughnessV , N );
         }
     '''
@@ -320,9 +317,9 @@ class SORTNode_Material_Plastic(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' , 'pbrt_name' : 'Ks' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'default' : 0.2 , 'pbrt_name' : 'roughness' } ]
     osl_shader = '''
-        shader Plastic( color kd = color( %f , %f , %f ) ,
-                        color ks = color( %f , %f , %f ) ,
-                        float roughness = %f ){
+        shader Plastic( color kd = @ ,
+                        color ks = @ ,
+                        float roughness = @ ){
             Ci = plastic( kd , ks , roughness , N );
         }
     '''
@@ -336,8 +333,8 @@ class SORTNode_Material_Matte(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'pbrt_name' : 'sigma' } ]
     osl_shader = '''
-        shader Matte( color kd = color( %f , %f , %f ) ,
-                      float sigma = %f ){
+        shader Matte( color kd = @ ,
+                      float sigma = @ ){
             Ci = oren_nayar( kd , roughness , N );
         }
     '''
@@ -350,7 +347,7 @@ class SORTNode_Material_Mirror(SORTShadingNode_BXDF):
     pbrt_bxdf_type = 'mirror'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } ]
     osl_shader = '''
-        shader Mirror( color kd = color( %f , %f , %f ) ){
+        shader Mirror( color kd = @ ){
             Ci = mirror( kd , N );
         }
     '''
@@ -366,10 +363,10 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Azimuthal Roughness' },
                       { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'Index of Refraction' , 'default' : 1.55 } ]
     osl_shader = '''
-        shader Hair( color hairColor = color( %f , %f , %f ) ,
-                     float lontitudinalRoughness = %f ,
-                     float azimuthalRoughness = %f ,
-                     float ior = %f ){
+        shader Hair( color hairColor = @ ,
+                     float lontitudinalRoughness = @ ,
+                     float azimuthalRoughness = @ ,
+                     float ior = @ ){
             Ci = hair( hairColor , lontitudinalRoughness , azimuthalRoughness , ior );
         }
     '''
@@ -399,9 +396,9 @@ class SORTNode_Material_Blend(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf1' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Factor' } ]
     osl_shader = '''
-        shader MicrofacetRelection(  color iBxdf0 = color( %f , %f , %f ) ,
-                                     color iBxdf1 = color( %f , %f , %f ) ,
-                                     float factor = %f ){
+        shader MicrofacetRelection(  color iBxdf0 = @ ,
+                                     color iBxdf1 = @ ,
+                                     float factor = @ ){
             Ci = iBxdf0 * ( 1.0f - factor ) + iBxdf1 * factor;
         }
     '''
@@ -430,12 +427,12 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
-        shader MicrofacetRelection(  string dist = %s ,
-                                     color  iIOR = color( %f , %f , %f ) ,
-                                     color  eIOR = color( %f , %f , %f ) ,
-                                     float  roughnessU = %f ,
-                                     float  roughnessV = %f ,
-                                     color  baseColor = color( %f , %f , %f ) ){
+        shader MicrofacetRelection(  string dist = @ ,
+                                     color  iIOR = @ ,
+                                     color  eIOR = @ ,
+                                     float  roughnessU = @ ,
+                                     float  roughnessV = @ ,
+                                     color  baseColor = @ ){
             Ci = microfacetrefraction( dist , iIOR , eIOR , roughnessU , roughnessV , baseColor , N );
         }
     '''
@@ -452,12 +449,12 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
-        shader MicrofacetRefraction( string dist = %s ,
-                                     float  iIOR = %f ,
-                                     float  eIOR = %f ,
-                                     float  roughnessU = %f ,
-                                     float  roughnessV = %f ,
-                                     color  baseColor = color( %f , %f , %f ) ){
+        shader MicrofacetRefraction( string dist = @ ,
+                                     float  iIOR = @ ,
+                                     float  eIOR = @ ,
+                                     float  roughnessU = @ ,
+                                     float  roughnessV = @ ,
+                                     color  baseColor = color( @ , @ , @ ) ){
             Ci = microfacetrefraction( dist , iIOR , eIOR , roughnessU , roughnessV , baseColor , N );
         }
     '''
@@ -472,10 +469,10 @@ class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader AshikhmanShirley( float specular = %f ,
-                                 float roughnessU = %f ,
-                                 float roughnessV = %f ,
-                                 color diffuse = color( %f , %f , %f ) ){
+        shader AshikhmanShirley( float specular = @ ,
+                                 float roughnessU = @ ,
+                                 float roughnessV = @ ,
+                                 color diffuse = @ ){
             Ci = ashikhmanshirley( diffuse , specular , roughnessU , roughnessV , N );
         }
     '''
@@ -490,10 +487,10 @@ class SORTNode_BXDF_Phong(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader Phong( float specularPower = %f ,
-                      float diffuseRatio = %f ,
-                      color specularColor = color( %f , %f , %f ) ,
-                      color diffuseColor = color( %f , %f , %f ) ){
+        shader Phong( float specularPower = @ ,
+                      float diffuseRatio = @ ,
+                      color specularColor = @ ,
+                      color diffuseColor = @ ){
             Ci = phong( diffuseRatio * diffuseRatio , ( 1.0 - diffuseRatio ) * specularColor , specularPower , N );
         }
     '''
@@ -505,7 +502,7 @@ class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
     sort_bxdf_type = 'LambertNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader Lambert( color Diffuse = color( %f , %f , %f ) ){
+        shader Lambert( color Diffuse = @ ){
             Ci = lambert( color , N );
         }
     '''
@@ -517,7 +514,7 @@ class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
     sort_bxdf_type = 'LambertTransmissionNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader LambertTransmission( color diffuse = color( %f , %f , %f ) ){
+        shader LambertTransmission( color diffuse = @ ){
             Ci = lambertTransmission( diffuse , N );
         }
     '''
@@ -530,8 +527,8 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader OrenNayar( color diffuse = color( %f , %f , %f ) ,
-                          float roughness = %f ){
+        shader OrenNayar( color diffuse = @ ,
+                          float roughness = @ ){
             Ci = oren_nayar( diffuse , roughness , N );
         }
     '''
@@ -571,9 +568,9 @@ class SORTNodeAdd(SORTShadingNode):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
     osl_shader = '''
-        shader Add( color iColor0 = color( %f , %f , %f ) ,
-                    color iColor1 = color( %f , %f , %f ) ,
-                    output color oColor = color( %f , %f , %f ) ){
+        shader Add( color iColor0 = @ ,
+                    color iColor1 = @ ,
+                    output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = iColor0 + iColor1;
         }
     '''
@@ -585,8 +582,8 @@ class SORTNodeOneMinus(SORTShadingNode):
     sort_bxdf_type = 'SORTNodeOneMinus'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader OneMinus( color iColor = color( %f , %f , %f ) ,
-                         output color oColor = color( %f , %f , %f ) ){
+        shader OneMinus( color iColor = @ ,
+                         output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = color( 1.0 , 1.0 , 1.0 ) - iColor;
         }
     '''
@@ -599,9 +596,9 @@ class SORTNodeMultiply(SORTShadingNode):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
     osl_shader = '''
-        shader Multiply( color iColor0 = color( %f , %f , %f ) ,
-                         color iColor1 = color( %f , %f , %f ) ,
-                         output color oColor = color( %f , %f , %f ) ){
+        shader Multiply( color iColor0 = @ ,
+                         color iColor1 = @ ,
+                         output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = iColor0 * iColor1;
         }
     '''
@@ -616,11 +613,11 @@ class SORTNodeBlend(SORTShadingNode):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Factor2' } ]
     osl_shader = '''
-        shader Blend( color iColor0 = color( %f , %f , %f ) ,
-                    float iScale0 = %f ,
-                    color iColor1 = color( %f , %f , %f ) ,
-                    float iScale1 = %f ,
-                    output color oColor = color( %f , %f , %f ) ){
+        shader Blend( color iColor0 = @ ,
+                    float iScale0 = @ ,
+                    color iColor1 = @ ,
+                    float iScale1 = @ ,
+                    output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = iColor0 * iScale0 + iColor1 * iScale1;
         }
     '''
@@ -634,10 +631,10 @@ class SORTNodeLerp(SORTShadingNode):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Factor' } ]
     osl_shader = '''
-        shader Lerp( color iColor0 = color( %f , %f , %f ) ,
-                     color iColor1 = color( %f , %f , %f ) ,
-                     float factor = %f ,
-                     output color oColor = color( %f , %f , %f ) ){
+        shader Lerp( color iColor0 = @ ,
+                     color iColor1 = @ ,
+                     float factor = @ ,
+                     output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = iColor0 * ( 1.0 - factor ) + iColor1 * factor;
         }
     '''
@@ -649,8 +646,8 @@ class SORTNodeLinearToGamma(SORTShadingNode):
     sort_bxdf_type = 'LinearToGammaNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader LinearToGamma( color iColor = color( %f , %f , %f ) ,
-                              output color oColor = color( %f , %f , %f ) ){
+        shader LinearToGamma( color iColor = @ ,
+                              output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = pow( iColor , 1.0/2.2 );
         }
     '''
@@ -662,8 +659,8 @@ class SORTNodeGammaToLinear(SORTShadingNode):
     sort_bxdf_type = 'GammaToLinearNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader GammaToLinear( color iColor = color( %f , %f , %f ) ,
-                              output color oColor = color( %f , %f , %f ) ){
+        shader GammaToLinear( color iColor = @ ,
+                              output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = pow( iColor , 2.2 );
         }
     '''
@@ -676,8 +673,8 @@ class SORTNodeDecodeNormal(SORTShadingNode):
     output_type = 'SORTNodeSocketNormal'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader DecodeNormal( color iColor = color( %f , %f , %f ) ,
-                             output color oColor = color( %f , %f , %f ) ){
+        shader DecodeNormal( color iColor = @ ,
+                             output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = 2.0 * iColor - 1.0;
         }
     '''
@@ -721,8 +718,8 @@ class SORTNodeConstant(SORTShadingNode):
     sort_bxdf_type = 'ConstantColorNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader Add( color iColor = color( %f , %f , %f ) ,
-                    output color oColor = color( %f , %f , %f ) ){
+        shader ConstantColor( color iColor = @ ,
+                              output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = iColor0;
         }
     '''
@@ -735,9 +732,9 @@ class SORTNodeConstantFloat(SORTShadingNode):
     sort_bxdf_type = 'ConstantFloatNode'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Value' } ]
     osl_shader = '''
-        shader Add( float iScale = %f ,
-                    output float oScale = %f ){
-            oScale = iScale;
+        shader ConstantFloat( float iScale = @ ,
+                              output float Result = 0.0 ){
+            Result = iScale;
         }
     '''
 
@@ -767,10 +764,10 @@ class SORTNodeComposite(SORTShadingNode):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'G' },
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'B' } ]
     osl_shader = '''
-        shader Composite( float r = %f ,
-                    float g = %f ,
-                    float b = %f ,
-                    output color oColor = color( %f , %f , %f ) ){
+        shader Composite( float r = @ ,
+                          float g = @ ,
+                          float b = @ ,
+                          output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
             oColor = color( r , g , b );
         }
     '''
@@ -783,11 +780,11 @@ class SORTNodeExtract(SORTShadingNode):
     sort_bxdf_type = 'SORTNodeExtract'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader Extract( color iColor = color( %f , %f , %f ),
-                        output float oRed = %f ,
-                        output float oGreen = %f ,
-                        output float oBlue = %f ,
-                        output float intensity = %f ){
+        shader Extract( color iColor = @,
+                        output float oRed = 0.0 ,
+                        output float oGreen = 0.0 ,
+                        output float oBlue = 0.0 ,
+                        output float intensity = 0.0 ){
             oRed = iColor[0];
             oGreen = iColor[1];
             oBlue = iColor[2];

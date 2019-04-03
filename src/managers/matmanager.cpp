@@ -20,6 +20,7 @@
 #include "stream/stream.h"
 #include "core/profile.h"
 #include "core/globalconfig.h"
+#include "core/log.h"
 
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){
@@ -46,4 +47,26 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
 		    m_matPool.push_back( std::move(mat) );
 	}
 	return material_cnt;
+}
+
+std::string MatManager::ConstructShader(const std::string& shaderType, const std::vector<std::string>& paramValue) {
+    std::string shader;
+
+    // If there is no such a shader type, just return an empty string.
+    if (m_shaderSources.count(shaderType) == 0) {
+        slog(WARNING, MATERIAL, "Can't find OSL shader type %s.", shaderType.c_str());
+        return shader;
+    }
+
+    const auto& shader_template = m_shaderSources[shaderType];
+    int i = 0, j = 0;
+    while (j < shader_template.size()) {
+        const char c = shader_template[j++];
+        if (i < paramValue.size() && c == '@')
+            shader += paramValue[i++];
+        else
+            shader += c;
+    }
+
+    return shader;
 }

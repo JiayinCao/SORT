@@ -91,6 +91,8 @@ class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
         return '%f %f %f'%(self.default_value[:])
     def export_serialization_value(self):
         return self.default_value[:]
+    def export_osl_value(self):
+        return 'color( %f, %f, %f )'%(self.default_value[:])
 
 # Socket for Float
 class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
@@ -103,6 +105,8 @@ class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return '%f'%(self.default_value)
     def export_serialization_value(self):
         return self.default_value
+    def export_osl_value(self):
+        return '%f'%(self.default_value)
 
 # Socket for Float
 class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
@@ -115,6 +119,8 @@ class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return '%f'%(self.default_value)
     def export_serialization_value(self):
         return self.default_value
+    def export_osl_value(self):
+        return '%f'%(self.default_value)
 
 # Socket for normal ( normal map )
 class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
@@ -161,6 +167,8 @@ class SORTNodePropertyFloat(SORTNodeProperty):
         return '%f'%value
     def export_serialization_value(self,value):
         return value
+    def export_osl_value(self,value):
+        return '%f'%(value)
     @classmethod
     def setup( cls , prop ):
         cls.default_value = bpy.props.FloatProperty( name=prop['name'] , default=prop['default'] , min=prop['min'], max=prop['max'] )
@@ -171,6 +179,8 @@ class SORTNodePropertyLargeFloat(SORTNodeProperty):
         return '%f'%value
     def export_serialization_value(self,value):
         return value
+    def export_osl_value(self,value):
+        return '%f'%(value)
     @classmethod
     def setup( cls , prop ):
         cls.default_value = bpy.props.FloatProperty( name=prop['name'] , default=prop['default'] , min=prop['min'], max=prop['max'] )
@@ -181,6 +191,8 @@ class SORTNodePropertyFloatVector(SORTNodeProperty):
         return '%f %f %f'%(value[:])
     def export_serialization_value(self,value):
         return value[:]
+    def export_osl_value(self,value):
+        return 'color( %f , %f , %f )'%(value[:])
     @classmethod
     def setup( cls , prop ):
         cls.default_value = bpy.props.FloatVectorProperty( name=prop['name'] , default=prop['default'] , min=prop['min'], max=prop['max'] )

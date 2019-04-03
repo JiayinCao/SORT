@@ -43,47 +43,21 @@ public:
 	//! @param		intersect		The intersection information at the point to be shaded.
 	//! @return						A BSDF holding BXDF information will be returned. The BSDF is allocated in the memory pool,
 	//!								meaning this is no need to release the memory in BSDF.
-	class Bsdf* GetBsdf( const class Intersection* intersect ) const{
-		Bsdf* bsdf = SORT_MALLOC(Bsdf)( intersect );
-		Spectrum weight(1.0f);
-		m_root->UpdateBSDF( bsdf , weight );
-		return bsdf;
-	}
+    class Bsdf* GetBsdf(const class Intersection* intersect) const;
 
 	//! @brief	Get the unique name of this material.
 	//!
 	//! @return		The name of this material.
 	inline const std::string& GetName() const { return m_name; }
 
-	//! @brief	Get the root material node.
-	//!
-	//! @return		The root of the material node graph tree.
-	inline MaterialNode* GetRootNode() { return m_root.get(); }
-
 	//! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize( IStreamBase& stream ) override {
-		stream >> m_name;
-		auto message = "Parsing Material '" + m_name + "'";
-		SORT_PROFILE( message.c_str() );
-
-		m_root->Serialize( stream , m_cache );
-
-		// check validation
-		if( !m_root->IsNodeValid() )
-			slog( WARNING , MATERIAL , "Material '%s' is not valid , a default material will be used." , m_name.c_str() );
-		else
-			m_root->PostProcess();
-	}
+    void Serialize(IStreamBase& stream) override;
 
 private:
 	/**< Unique name of the material. */
 	std::string	 m_name;
-	/**< Root node of material node graph tree. */
-	mutable std::unique_ptr<OutputNode>	m_root = std::make_unique<OutputNode>();
-	/**< Container holding the nodes to make sure their life time stays with the node itself. */
-	MaterialNodeCache m_cache;
 };
