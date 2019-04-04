@@ -30,10 +30,18 @@
     #define STDOSL_PATH     "../src/stdosl.h"
 #endif
 
-constexpr int LAMBERT_ID                = 1;
-constexpr int OREN_NAYAR_ID             = 2;
-constexpr int DISNEY_ID                 = 3;
-constexpr int MICROFACET_REFLECTION_ID  = 4;
+constexpr int LAMBERT_ID                            = 1;
+constexpr int OREN_NAYAR_ID                         = 2;
+constexpr int DISNEY_ID                             = 3;
+constexpr int MICROFACET_REFLECTION_ID              = 4;
+constexpr int MICROFACET_REFRACTION_ID              = 5;
+constexpr int ASHIKHMANSHIRLEY_ID                   = 6;
+constexpr int PHONG_ID                              = 7;
+constexpr int LAMBERT_TRANSMITTANCE_ID              = 8;
+constexpr int MIRROR_ID                             = 9;
+constexpr int DIELETRIC_ID                          = 10;
+constexpr int MICROFACET_REFLECTION_DIELETRIC_ID    = 11;
+constexpr int HAIR_ID                               = 12;
 
 // begin building shader
 OSL::ShaderGroupRef beginShaderGroup( const std::string& group_name );

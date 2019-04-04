@@ -30,6 +30,10 @@
 #include "bsdf/orennayar.h"
 #include "bsdf/disney.h"
 #include "bsdf/microfacet.h"
+#include "bsdf/ashikhmanshirley.h"
+#include "bsdf/phong.h"
+#include "bsdf/dielectric.h"
+#include "bsdf/hair.h"
 
 using namespace OSL;
 
@@ -59,8 +63,7 @@ void register_closures(ShadingSystem* shadingsys){
         ClosureParam params[MaxParams];
     };
     
-    constexpr int CC = 4; // Closure count
-    BuiltinClosures closures[CC] = {
+    BuiltinClosures closures[] = {
         { "lambert" , LAMBERT_ID, { 
             CLOSURE_COLOR_PARAM(Lambert::Params, baseColor),
             CLOSURE_VECTOR_PARAM(Lambert::Params, n),
@@ -92,8 +95,63 @@ void register_closures(ShadingSystem* shadingsys){
             CLOSURE_FLOAT_PARAM(MicroFacetReflection::Params, roughnessV),
             CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, baseColor),
             CLOSURE_VECTOR_PARAM(MicroFacetReflection::Params, n),
-            CLOSURE_FINISH_PARAM(MicroFacetReflection::Params) } }
+            CLOSURE_FINISH_PARAM(MicroFacetReflection::Params) } },
+        { "microfacetRefraction" , MICROFACET_REFRACTION_ID, {
+            CLOSURE_STRING_PARAM(MicroFacetRefraction::Params, dist),
+            CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, etaI),
+            CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, etaT),
+            CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, roughnessU),
+            CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, roughnessV),
+            CLOSURE_COLOR_PARAM(MicroFacetRefraction::Params, transmittance),
+            CLOSURE_VECTOR_PARAM(MicroFacetRefraction::Params, n),
+            CLOSURE_FINISH_PARAM(MicroFacetRefraction::Params) } },
+        { "ashikhmanShirley" , ASHIKHMANSHIRLEY_ID, {
+            CLOSURE_FLOAT_PARAM(AshikhmanShirley::Params, specular),
+            CLOSURE_FLOAT_PARAM(AshikhmanShirley::Params, roughnessU),
+            CLOSURE_FLOAT_PARAM(AshikhmanShirley::Params, roughnessV),
+            CLOSURE_COLOR_PARAM(AshikhmanShirley::Params, baseColor),
+            CLOSURE_VECTOR_PARAM(AshikhmanShirley::Params, n),
+            CLOSURE_FINISH_PARAM(AshikhmanShirley::Params) } },
+        { "phong" , PHONG_ID, {
+            CLOSURE_COLOR_PARAM(Phong::Params, diffuse),
+            CLOSURE_COLOR_PARAM(Phong::Params, specular),
+            CLOSURE_FLOAT_PARAM(Phong::Params, specularPower),
+            CLOSURE_VECTOR_PARAM(Phong::Params, n),
+            CLOSURE_FINISH_PARAM(Phong::Params) } },
+        { "lambertTransmission" , LAMBERT_TRANSMITTANCE_ID, { 
+            CLOSURE_COLOR_PARAM(LambertTransmission::Params, transmittance),
+            CLOSURE_VECTOR_PARAM(LambertTransmission::Params, n),
+            CLOSURE_FINISH_PARAM(LambertTransmission::Params) }},
+        { "mirror" , MIRROR_ID, {
+            CLOSURE_COLOR_PARAM(MicroFacetReflection::MirrorParams, baseColor),
+            CLOSURE_VECTOR_PARAM(MicroFacetReflection::MirrorParams, n),
+            CLOSURE_FINISH_PARAM(MicroFacetReflection::MirrorParams) } },
+        { "dieletric" , DIELETRIC_ID, {
+            CLOSURE_COLOR_PARAM(Dielectric::Params, reflectance),
+            CLOSURE_COLOR_PARAM(Dielectric::Params, transmittance),
+            CLOSURE_FLOAT_PARAM(Dielectric::Params, roughnessU),
+            CLOSURE_FLOAT_PARAM(Dielectric::Params, roughnessV),
+            CLOSURE_VECTOR_PARAM(Dielectric::Params, n),
+            CLOSURE_FINISH_PARAM(Dielectric::Params) } },
+        { "microfacetReflectionDieletric" , MICROFACET_REFLECTION_DIELETRIC_ID, {
+            CLOSURE_STRING_PARAM(MicroFacetReflection::ParamsDieletric, dist),
+            CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, iorI),
+            CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, iorT),
+            CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, roughnessU),
+            CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, roughnessV),
+            CLOSURE_COLOR_PARAM(MicroFacetReflection::ParamsDieletric, baseColor),
+            CLOSURE_VECTOR_PARAM(MicroFacetReflection::ParamsDieletric, n),
+            CLOSURE_FINISH_PARAM(MicroFacetReflection::ParamsDieletric) } },
+        { "hair" , HAIR_ID, {
+            CLOSURE_COLOR_PARAM(Hair::Params, baseColor),
+            CLOSURE_FLOAT_PARAM(Hair::Params, longtitudinalRoughness),
+            CLOSURE_FLOAT_PARAM(Hair::Params, azimuthalRoughness),
+            CLOSURE_FLOAT_PARAM(Hair::Params, ior),
+            CLOSURE_VECTOR_PARAM(Hair::Params, n),
+            CLOSURE_FINISH_PARAM(Hair::Params) } },
     };
+
+    constexpr int CC = sizeof( closures ) / sizeof( BuiltinClosures );
     for( int i = 0 ; i < CC ; ++i )
         shadingsys->register_closure( closures[i].name , closures[i].id , closures[i].params , nullptr , nullptr );
 }
@@ -161,7 +219,7 @@ void process_closure (Bsdf* bsdf, const ClosureColor* closure, const Color3& w) 
        default: {
             const ClosureComponent* comp = closure->as_comp();
             Color3 cw = w * comp->w;
-            Spectrum weight( 1.0f );
+            Spectrum weight( cw[0] , cw[1] , cw[2] );
             Vector n = Vector( 0.0f , 1.0f , 0.0f );
             switch (comp->id) {
                 case LAMBERT_ID:
@@ -185,8 +243,55 @@ void process_closure (Bsdf* bsdf, const ClosureColor* closure, const Color3& w) 
                 case MICROFACET_REFLECTION_ID:
                     {
                         const auto& params = *comp->as<MicroFacetReflection::Params>();
-                        const auto frenel = SORT_MALLOC( FresnelConductor )(params.eta, params.absorption);
-                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, frenel, weight));
+                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, weight));
+                    }
+                    break;
+                case MICROFACET_REFRACTION_ID:
+                    {
+                        const auto& params = *comp->as<MicroFacetRefraction::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, weight));
+                    }
+                    break;
+                case ASHIKHMANSHIRLEY_ID:
+                    {
+                        const auto& params = *comp->as<AshikhmanShirley::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(AshikhmanShirley)(params, weight));
+                    }
+                    break;
+                case PHONG_ID:
+                    {
+                        const auto& params = *comp->as<Phong::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(Phong)(params, weight));
+                    }
+                    break;
+                case LAMBERT_TRANSMITTANCE_ID:
+                    {
+                        const auto& params = *comp->as<LambertTransmission::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(LambertTransmission)(params, weight));
+                    }
+                    break;
+                case MIRROR_ID:
+                    {
+                        const auto& params = *comp->as<MicroFacetReflection::MirrorParams>();
+                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, weight ));
+                    }
+                    break;
+                case DIELETRIC_ID:
+                    {
+                        const auto& params = *comp->as<Dielectric::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(Dielectric)( params, weight ));
+                    }
+                    break;
+                case MICROFACET_REFLECTION_DIELETRIC_ID:
+                    {
+                        const auto& params = *comp->as<MicroFacetReflection::ParamsDieletric>();
+                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( params, weight ));
+                    }
+                    break;
+                case HAIR_ID:
+                    {
+                        const auto& params = *comp->as<Hair::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(Hair)( params, weight ));
                     }
                     break;
             }

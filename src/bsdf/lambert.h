@@ -25,8 +25,7 @@
  * It reflects equal radiance along all Exitant directions.
  * One can use Lambert to simulate Matte-like material.
  */
-class Lambert : public Bxdf
-{
+class Lambert : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
     struct Params {
@@ -35,6 +34,7 @@ public:
     };
 
 	//! Constructor taking spectrum information.
+    //!
     //! @param s            Direction-Hemisphere reflection.
     //! @param weight       Weight of this BRDF
     //! @param t            Type of this BRDF
@@ -61,9 +61,21 @@ private:
 /**
  * LambertTransmittance is the transmittance version of lambert model
  */
-class LambertTransmission : public Bxdf
-{
+class LambertTransmission : public Bxdf{
 public:
+    // Input parameters to construct the BRDF.
+    struct Params {
+        RGBSpectrum transmittance;
+        Vector n;
+    };
+
+    //! Constructor from parameter set.
+    //!
+    //! @param param        All parameters.
+    //! @param weight       Weight of this BRDF.
+    //! @param doubleSided  Whether the material is double-sided.
+    LambertTransmission( const Params& param , const Spectrum& weight):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.n, true),T(param.transmittance){}
+
     //! Constructor taking spectrum information.
     //! @param s            Direction-Hemisphere refraction.
     //! @param weight       Weight of this BRDF

@@ -171,13 +171,40 @@ public:
         Vector          n;
     };
 
+    struct ParamsDieletric{
+        OSL::ustring    dist;
+        float           iorI;
+        float           iorT;
+        float           roughnessU;
+        float           roughnessV;
+        RGBSpectrum     baseColor;
+        Vector          n;
+    };
+
+    struct MirrorParams{
+        RGBSpectrum     baseColor;
+        Vector          n;
+    };
+
     //! @brief Constructor from parameter set
     //!
     //! @param  params          Parameter set.
-    //! @param  f               Fresnel term.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    MicroFacetReflection(const Params &params, const Fresnel* f, const Spectrum& weight , bool doubleSided = false );
+    MicroFacetReflection(const Params &params, const Spectrum& weight , bool doubleSided = false );
+
+    //! @brief Constructor from parameter set
+    //!
+    //! @param  params          Parameter set.
+    //! @param  weight          Weight of this BRDF.
+    //! @param  doubleSided     Whether the BRDF is double sided.
+    MicroFacetReflection(const ParamsDieletric &params, const Spectrum& weight , bool doubleSided = false );
+
+    //! @brief Constructor a mirror
+    //!
+    //! @param  params          Parameter set.
+    //! @param  weight          Weight of this BRDF.
+    MicroFacetReflection(const MirrorParams &params, const Spectrum& weight);
 
 	//! @brief Constructor
     //! @param reflectance      Direction hemisphere reflection.
@@ -220,6 +247,24 @@ private:
 class MicroFacetRefraction : public Microfacet
 {
 public:
+    struct Params{
+        OSL::ustring    dist;
+        float           etaI;
+        float           etaT;
+        float           roughnessU;
+        float           roughnessV;
+        RGBSpectrum     transmittance;
+        Vector          n;
+    };
+
+    //! @brief Constructor from parameter set
+    //!
+    //! @param  params          Parameter set.
+    //! @param  f               Fresnel term.
+    //! @param  weight          Weight of this BRDF.
+    //! @param  doubleSided     Whether the BRDF is double sided.
+    MicroFacetRefraction(const Params &params,  const Spectrum& weight);
+    
     //! @brief Constructor
     //! @param transmittance    Direction hemisphere transmittance.
     //! @param f                Fresnel term.

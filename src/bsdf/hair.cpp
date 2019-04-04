@@ -103,6 +103,10 @@ static inline void ComputeApPdf(const float cosThetaO , const float cosThetaT ,
         pdf[i] = ap[i].GetIntensity() / sumY;
 }
 
+Hair::Hair(const Params& params, const Spectrum& weight): Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector(0.0f,1.0f,0.0f), true) ,
+        m_sigma(params.baseColor), m_lRoughness( std::max( 0.01f , params.longtitudinalRoughness) ), m_aRoughness( std::max( 0.01f , params.azimuthalRoughness ) ), m_eta(params.ior){
+}
+
 Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoughness, const float ior, const Spectrum& weight, bool doubleSided)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector(0.0f,1.0f,0.0f), doubleSided) ,
         m_sigma(absorption), m_lRoughness( std::max( 0.01f , lRoughness) ), m_aRoughness( std::max( 0.01f , aRoughness ) ), m_eta(ior){
