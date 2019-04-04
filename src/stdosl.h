@@ -442,36 +442,28 @@ string concat (string a, string b, string c, string d, string e, string f) {
 
 // Texture
 
-// SORT supported BXDFs
-closure color lambert( color albedo , normal N ) BUILTIN;
-closure color orenNayar( color albedo , float sigma , normal N ) BUILTIN;
-closure color disney( float subsurface , float metallic , float specular , float specularTint,
-                      float roughness , float anisotropic , float sheen , float sheenTint,
-					  float clearCoat , float clearCoatGloss , color baseColor , normal N ) BUILTIN;
-closure color microfacetReflection(string distribution, vector iIOR , vector eIOR , float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;
+
 // Closures
 
-closure color emission() BUILTIN;
-closure color background() BUILTIN;
+//closure color emission() BUILTIN;
+//closure color background() BUILTIN;
 //closure color diffuse(normal N) BUILTIN;
-closure color oren_nayar (normal N, float sigma) BUILTIN;
-closure color translucent(normal N) BUILTIN;
-closure color phong(normal N, float exponent) BUILTIN;
-closure color ward(normal N, vector T,float ax, float ay) BUILTIN;
-closure color microfacet(string distribution, normal N, vector U, float xalpha,
-                         float yalpha, float eta, int refract) BUILTIN;
-closure color microfacet(string distribution, normal N, float alpha, float eta,
-                         int refr)
-{
-    return microfacet(distribution, N, vector(0), alpha, alpha, eta, refr);
-}
-closure color reflection(normal N, float eta) BUILTIN;
-closure color reflection(normal N) { return reflection (N, 0.0); }
-closure color refraction(normal N, float eta) BUILTIN;
-closure color transparent() BUILTIN;
-closure color debug(string tag) BUILTIN;
-closure color holdout() BUILTIN;
-closure color subsurface(float eta, float g, color mfp, color albedo) BUILTIN;
+//closure color oren_nayar (normal N, float sigma) BUILTIN;
+//closure color translucent(normal N) BUILTIN;
+//closure color phong(normal N, float exponent) BUILTIN;
+//closure color ward(normal N, vector T,float ax, float ay) BUILTIN;
+//closure color microfacet(string distribution, normal N, vector U, float xalpha, float yalpha, float eta, int refract) BUILTIN;
+//closure color microfacet(string distribution, normal N, float alpha, float eta,                         int refr)
+//{
+//    return microfacet(distribution, N, vector(0), alpha, alpha, eta, refr);
+//}
+//closure color reflection(normal N, float eta) BUILTIN;
+//closure color reflection(normal N) { return reflection (N, 0.0); }
+//closure color refraction(normal N, float eta) BUILTIN;
+//closure color transparent() BUILTIN;
+//closure color debug(string tag) BUILTIN;
+//closure color holdout() BUILTIN;
+//closure color subsurface(float eta, float g, color mfp, color albedo) BUILTIN;
 
 // Renderer state
 int backfacing () BUILTIN;
@@ -487,10 +479,21 @@ int getmatrix (string fromspace, output matrix M) {
 }
 
 
-// Miscellaneous
-
-
-
+// SORT compatible closures
+closure color lambert( color albedo , normal N ) BUILTIN;
+closure color lambertTransmission( color transmittance , normal N ) BUILTIN;
+closure color orenNayar( color albedo , float sigma , normal N ) BUILTIN;
+closure color disney( float subsurface , float metallic , float specular , float specularTint,
+                      float roughness , float anisotropic , float sheen , float sheenTint,
+					  float clearCoat , float clearCoatGloss , color baseColor , normal N ) BUILTIN;
+closure color microfacetReflection(string distribution, vector eta , vector absorption , float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;
+closure color microfacetReflectionDieletric(string distribution, float iIOR, float eIOR, float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;
+closure color microfacetRefraction(string distribution, float iIOR , float eIOR , float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;
+closure color ashikhmanShirley(float specular, float roughnessU, float roughnessV, color baseColor, normal N ) BUILTIN;
+closure color phong( color diffuse , color specular , float specularPower , normal N ) BUILTIN;
+closure color mirror( color basecolor , normal N ) BUILTIN;
+closure color dieletric( color reflectance , color transmittance , float ru , float rv , normal N ) BUILTIN;
+closure color hair( color basecolor , float lr , float ar , float ior ) BUILTIN;
 
 #undef BUILTIN
 #undef BUILTIN_DERIV

@@ -21,6 +21,7 @@
 #include "sampler/sample.h"
 #include "math/utils.h"
 #include "core/memory.h"
+#include "bsdf/fresnel.h"
 
 Blinn::Blinn( float roughnessU , float roughnessV ) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
@@ -222,8 +223,18 @@ Microfacet::Microfacet(const std::string& distType, float ru , float rv , const 
         distribution = SORT_MALLOC(Blinn)( ru , rv );
 }
 
-MicroFacetReflection::MicroFacetReflection(const Params &params, const Fresnel* f, const Spectrum& weight , bool doubleSided):
-Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , R(params.baseColor), fresnel(f){
+MicroFacetReflection::MicroFacetReflection(const Params &params, const Spectrum& weight , bool doubleSided):
+Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , 
+R(params.baseColor), fresnel(SORT_MALLOC( FresnelConductor )(params.eta, params.absorption)){
+}
+
+MicroFacetReflection::MicroFacetReflection(const ParamsDieletric &params, const Spectrum& weight , bool doubleSided):
+Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , 
+R(params.baseColor), fresnel(SORT_MALLOC( FresnelDielectric )(params.iorI, params.iorT)){
+}
+
+MicroFacetReflection::MicroFacetReflection(const MirrorParams &params, const Spectrum& weight ):
+Microfacet( "GGX" , 0.0f , 0.0f , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, false) , R(params.baseColor), fresnel(SORT_MALLOC(FresnelNo)()){
 }
 
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const {
@@ -262,6 +273,11 @@ float MicroFacetReflection::pdf( const Vector& wo , const Vector& wi ) const {
 	const auto h = Normalize( wo + wi );
 	const auto EoH = AbsDot( wo , h );
 	return distribution->Pdf(h) / (4.0f * EoH);
+}
+
+MicroFacetRefraction::MicroFacetRefraction(const Params &params, const Spectrum& weight):
+Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, true), 
+T(params.transmittance), etaI(params.etaI) , etaT(params.etaT) , fresnel( params.etaI , params.etaT ) {
 }
 
 Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const {

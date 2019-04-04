@@ -31,6 +31,21 @@
  */
 class Hair : public Bxdf{
 public:
+    // Input parameters to construct the BRDF.
+    struct Params {
+        RGBSpectrum baseColor;
+        float       longtitudinalRoughness;
+        float       azimuthalRoughness;
+        float       ior;
+        Vector n;
+    };
+
+    //! Constructor
+    //!
+    //! @param absorption       Parameter set.
+    //! @param weight           Weight of the BXDF
+    Hair(const Params& absorption, const Spectrum& weight);
+
 	//! Constructor
     //!
     //! @param absorption       Absorption coefficient.

@@ -17,7 +17,11 @@
 
 #pragma once
 
+#include <OSL/genclosure.h>
+#include <OSL/oslexec.h>
+#include <OSL/oslclosure.h>
 #include "microfacet.h"
+#include "spectrum/rgbspectrum.h"
 
  //! @brief Coat BRDF.
  /**
@@ -29,9 +33,23 @@
   * is fairly important for this kind of BXDF rendering. Blending the two BXDF in BSDF will result too much noise, the convergence
   * rate is too slow to be practical.
   */
-class Dielectric : public Bxdf 
-{
+class Dielectric : public Bxdf {
 public:
+    // Input parameters to construct the BRDF.
+    struct Params {
+        RGBSpectrum     reflectance;
+        RGBSpectrum     transmittance;
+        float           roughnessU;
+        float           roughnessV;
+        Vector n;
+    };
+
+    //! Constructor from parameter set.
+    //!
+    //! @param param        All parameters.
+    //! @param weight       Weight of this BRDF.
+    Dielectric(const Params& params, const Spectrum& weight);
+
     //! Constructor
     //! @param reflectance      Direction hemisphere reflection.
     //! @param transmittance    Direction hemisphere transmittance.
@@ -40,8 +58,8 @@ public:
     //! @param weight           Weight of the BXDF.
     //! @param n                Normal from normal map.
     //! @param doubleSided      Whether the surface is double sided.
-    Dielectric(const Spectrum& reflectance, const Spectrum& tranmisttance, const MicroFacetDistribution* d, float ior, float ior_in, const Spectrum& weight, const Vector& n, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance), T(tranmisttance), fullweight(1.0f), fresnel(ior, ior_in), 
+    Dielectric(const Spectrum& reflectance, const Spectrum& tranmisttance, const MicroFacetDistribution* d, float ior, float ior_in, const Spectrum& weight, const Vector& n)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true), R(reflectance), T(tranmisttance), fullweight(1.0f), fresnel(ior, ior_in), 
         mf_reflect(reflectance, &fresnel, d, fullweight, DIR_UP, true),
         mf_refract(tranmisttance, d, ior, ior_in, fullweight, DIR_UP)
         {}

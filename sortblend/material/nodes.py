@@ -246,12 +246,14 @@ class SORTNode_Material_Principle(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Specular' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
-        shader Principle( float roughnessU = @ ,
-                          float roughnessV = @ ,
-                          float metallic = @ ,
-                          float specular = @ ,
-                          color baseColor = @ ){
-            Ci = principle( baseColor , roughnessU , roughnessV , metallic , specular , N );
+        shader Principle( float RoughnessU = @ ,
+                          float RoughnessV = @ ,
+                          float Metallic = @ ,
+                          float Specular = @ ,
+                          color BaseColor = @ ,
+                          output closure color Result = color(0) ){
+            // UE4 PBS model
+            Result = lambert( BaseColor , N ) * ( 1 - Metallic ) * 0.92 + microfacetReflection( "GGX", color( 0.37 ), color( 2.82 ), RoughnessU, RoughnessV, BaseColor , N ) * ( Metallic * 0.92 + 0.08 * Specular );
         }
     '''
 
@@ -303,8 +305,9 @@ class SORTNode_Material_Glass(SORTShadingNode_BXDF):
         shader Glass( color Reflectance = @ ,
                       color Transmittance = @ ,
                       float RoughnessU = @ ,
-                      float RoughnessV = @ ){
-            Ci = glass( Reflectance , Transmittance , RoughnessU , RoughnessV , N );
+                      float RoughnessV = @ ,
+                      output closure color Result = color(0) ){
+            Result = dieletric( Reflectance , Transmittance , RoughnessU , RoughnessV , N );
         }
     '''
 
@@ -318,10 +321,14 @@ class SORTNode_Material_Plastic(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' , 'pbrt_name' : 'Ks' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'default' : 0.2 , 'pbrt_name' : 'roughness' } ]
     osl_shader = '''
-        shader Plastic( color kd = @ ,
-                        color ks = @ ,
-                        float roughness = @ ){
-            Ci = plastic( kd , ks , roughness , N );
+        shader Plastic( color Diffuse = @ ,
+                        color Specular = @ ,
+                        float Roughness = @ ,
+                        output closure color Result = color(0) ){
+            if( Diffuse[0] != 0 || Diffuse[1] != 0 || Diffuse[2] != 0 )
+                Result += lambert( Diffuse , N );
+            if( Specular[0] != 0 || Specular[1] != 0 || Specular[2] != 0 )
+                Result += microfacetReflectionDieletric( "GGX", 1.0, 1.5, Roughness, Roughness, Specular , N );
         }
     '''
 
@@ -334,9 +341,13 @@ class SORTNode_Material_Matte(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'pbrt_name' : 'sigma' } ]
     osl_shader = '''
-        shader Matte( color kd = @ ,
-                      float sigma = @ ){
-            Ci = oren_nayar( kd , roughness , N );
+        shader Matte( color BaseColor = @ ,
+                      float Roughness = @ , 
+                      output closure color Result = color(0)){
+            if( Roughness == 0.0 )
+                Result = lambert( BaseColor , N );
+            else
+                Result = orenNayar( BaseColor , Roughness , N );
         }
     '''
 
@@ -348,8 +359,9 @@ class SORTNode_Material_Mirror(SORTShadingNode_BXDF):
     pbrt_bxdf_type = 'mirror'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } ]
     osl_shader = '''
-        shader Mirror( color kd = @ ){
-            Ci = mirror( kd , N );
+        shader Mirror( color BaseColor = @ , 
+                       output closure color Result = color(0) ){
+            Result = microfacetReflection( "GGX" , 1.0 , 1.0 , 0.0 , 0.0 , BaseColor , N );
         }
     '''
 
@@ -360,15 +372,16 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
     sort_bxdf_type = 'HairMaterialNode'
     disable_normal = True       # No normal map support for hair rendering, it is meaningless
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'HairColor' },
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Longtitudinal Roughness' },
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Azimuthal Roughness' },
-                      { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'Index of Refraction' , 'default' : 1.55 } ]
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'LongtitudinalRoughness' },
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'AzimuthalRoughness' },
+                      { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'IndexofRefraction' , 'default' : 1.55 } ]
     osl_shader = '''
-        shader Hair( color hairColor = @ ,
-                     float lontitudinalRoughness = @ ,
-                     float azimuthalRoughness = @ ,
-                     float ior = @ ){
-            Ci = hair( hairColor , lontitudinalRoughness , azimuthalRoughness , ior );
+        shader Hair( color HairColor = @ ,
+                     float LongtitudinalRoughness = @ ,
+                     float AzimuthalRoughness = @ ,
+                     float IndexofRefraction = @ , 
+                     output closure color Result = color(0) ){
+            Result = hair( HairColor , LongtitudinalRoughness , AzimuthalRoughness , IndexofRefraction );
         }
     '''
 
@@ -399,8 +412,9 @@ class SORTNode_Material_Blend(SORTShadingNode_BXDF):
     osl_shader = '''
         shader MaterialBlend(  closure color Bxdf0 = @ ,
                                closure color Bxdf1 = @ ,
-                               float factor = @ ){
-            Ci = Bxdf0 * ( 1.0f - factor ) + Bxdf1 * factor;
+                               float Factor = @ ,
+                               output closure color Result = color(0) ){
+            Result = Bxdf0 * ( 1.0 - Factor ) + Bxdf1 * Factor;
         }
     '''
 
@@ -451,13 +465,14 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
-        shader MicrofacetRefraction( string dist = @ ,
-                                     float  iIOR = @ ,
-                                     float  eIOR = @ ,
-                                     float  roughnessU = @ ,
-                                     float  roughnessV = @ ,
-                                     color  baseColor = color( @ , @ , @ ) ){
-            Ci = microfacetrefraction( dist , iIOR , eIOR , roughnessU , roughnessV , baseColor , N );
+        shader MicrofacetRefraction( string MicroFacetDistribution = @ ,
+                                     float  Interior_IOR = @ ,
+                                     float  Exterior_IOR = @ ,
+                                     float  RoughnessU = @ ,
+                                     float  RoughnessV = @ ,
+                                     color  BaseColor = @ , 
+                                     output closure color Result = color(0) ){
+            Result = microfacetRefraction( MicroFacetDistribution , Interior_IOR , Exterior_IOR , RoughnessU , RoughnessV , BaseColor , N );
         }
     '''
 
@@ -471,11 +486,12 @@ class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader AshikhmanShirley( float specular = @ ,
-                                 float roughnessU = @ ,
-                                 float roughnessV = @ ,
-                                 color diffuse = @ ){
-            Ci = ashikhmanshirley( diffuse , specular , roughnessU , roughnessV , N );
+        shader AshikhmanShirley( float Specular = @ ,
+                                 float RoughnessU = @ ,
+                                 float RoughnessV = @ ,
+                                 color Diffuse = @ ,
+                                 output closure color Result = color(0) ){
+            Result = ashikhmanShirley( Specular , RoughnessU , RoughnessV , Diffuse , N );
         }
     '''
 
@@ -489,11 +505,12 @@ class SORTNode_BXDF_Phong(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader Phong( float specularPower = @ ,
-                      float diffuseRatio = @ ,
-                      color specularColor = @ ,
-                      color diffuseColor = @ ){
-            Ci = phong( diffuseRatio * diffuseRatio , ( 1.0 - diffuseRatio ) * specularColor , specularPower , N );
+        shader Phong( float SpecularPower = @ ,
+                      float DiffuseRatio = @ ,
+                      color Specular = @ ,
+                      color Diffuse = @ ,
+                      output closure color Result = color(0) ){
+            Result = phong( Diffuse * DiffuseRatio , ( 1.0 - DiffuseRatio ) * Specular , SpecularPower , N );
         }
     '''
 
@@ -517,8 +534,9 @@ class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
     sort_bxdf_type = 'LambertTransmissionNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader LambertTransmission( color diffuse = @ ){
-            Ci = lambertTransmission( diffuse , N );
+        shader LambertTransmission( color Diffuse = @ ,
+                                    output closure color Result = color(0) ){
+            Result = lambertTransmission( Diffuse , N );
         }
     '''
 
