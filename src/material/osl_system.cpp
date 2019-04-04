@@ -22,12 +22,13 @@
 #include <algorithm>
 #include "osl_system.h"
 #include "spectrum/spectrum.h"
-#include "bsdf/bsdf.h"
-#include "bsdf/lambert.h"
-#include "bsdf/orennayar.h"
 #include "core/memory.h"
 #include "spectrum/spectrum.h"
 #include "math/intersection.h"
+#include "bsdf/bsdf.h"
+#include "bsdf/lambert.h"
+#include "bsdf/orennayar.h"
+#include "bsdf/disney.h"
 
 using namespace OSL;
 
@@ -48,7 +49,7 @@ public:
 std::unique_ptr<OSL::ShadingSystem>     g_shadingsys = nullptr;
 
 // Register closures
-void register_closures(){
+void register_closures(ShadingSystem* shadingsys){
     // Register a closure
     constexpr int MaxParams = 32;
     struct BuiltinClosures {
@@ -57,18 +58,34 @@ void register_closures(){
         ClosureParam params[MaxParams];
     };
     
-    constexpr int CC = 2; // Closure count
+    constexpr int CC = 3; // Closure count
     BuiltinClosures closures[CC] = {
-        { "lambert"    , LAMBERT_ID,            { CLOSURE_COLOR_PARAM(LambertParams, color),
-                                                  CLOSURE_VECTOR_PARAM(LambertParams, N),
-                                                  CLOSURE_FINISH_PARAM(LambertParams) }},
-        { "orenNayar" , OREN_NAYAR_ID,          { CLOSURE_COLOR_PARAM(OrenNayarParams, color),
-                                                  CLOSURE_FLOAT_PARAM (OrenNayarParams, sigma),
-                                                  CLOSURE_VECTOR_PARAM(OrenNayarParams, N),
-                                                  CLOSURE_FINISH_PARAM(OrenNayarParams) }}
-    };
+        { "lambert" , LAMBERT_ID, { 
+            CLOSURE_COLOR_PARAM(Lambert::Params, baseColor),
+            CLOSURE_VECTOR_PARAM(Lambert::Params, n),
+            CLOSURE_FINISH_PARAM(Lambert::Params) }},
+        { "orenNayar" , OREN_NAYAR_ID, { 
+            CLOSURE_COLOR_PARAM(OrenNayar::Params, baseColor),
+            CLOSURE_FLOAT_PARAM (OrenNayar::Params, sigma),
+            CLOSURE_VECTOR_PARAM(OrenNayar::Params, n),
+            CLOSURE_FINISH_PARAM(OrenNayar::Params) }},
+        { "disney" , DISNEY_ID, {
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, subsurface),
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, metallic),
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specular),
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specularTint),
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, roughness),
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, anisotropic),
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, sheen),
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, sheenTint),
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoat),
+            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoatGloss),
+            CLOSURE_COLOR_PARAM(DisneyBRDF::Params, baseColor),
+            CLOSURE_VECTOR_PARAM(DisneyBRDF::Params, n),
+            CLOSURE_FINISH_PARAM(DisneyBRDF::Params) } }
+        };
     for( int i = 0 ; i < CC ; ++i )
-        g_shadingsys->register_closure( closures[i].name , closures[i].id , closures[i].params , nullptr , nullptr );
+        shadingsys->register_closure( closures[i].name , closures[i].id , closures[i].params , nullptr , nullptr );
 }
 
 // Create shading system
@@ -105,7 +122,7 @@ bool build_shader( const std::string& shader_source, const std::string& shader_n
 ShaderGroupRef beginShaderGroup( const std::string& group_name ){
     if( !g_shadingsys ){
         g_shadingsys = MakeShadingSystem();
-        register_closures();
+        register_closures(g_shadingsys.get());
     }
     return g_shadingsys->ShaderGroupBegin( group_name );
 }
@@ -139,16 +156,20 @@ void process_closure (Bsdf* bsdf, const ClosureColor* closure, const Color3& w) 
             switch (comp->id) {
                 case LAMBERT_ID:
                     {
-                        const auto& params = *comp->as<LambertParams>();
-                        Spectrum baseColor( params.color[0] , params.color[1] , params.color[2] );
-                        bsdf->AddBxdf( SORT_MALLOC(Lambert)(baseColor, weight , n) );
+                        const auto& params = *comp->as<Lambert::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(Lambert)(params, weight));
                     }
                     break;
                 case OREN_NAYAR_ID:
                     {   
-                        const auto& params = *comp->as<OrenNayarParams>();
-                        Spectrum baseColor( params.color[0] , params.color[1] , params.color[2] );
-                        bsdf->AddBxdf( SORT_MALLOC(OrenNayar)(baseColor, params.sigma, weight, n) );
+                        const auto& params = *comp->as<OrenNayar::Params>();
+                        bsdf->AddBxdf( SORT_MALLOC(OrenNayar)(params, weight) );
+                    }
+                    break;
+                case DISNEY_ID:
+                    {
+                        const auto& params = *comp->as<DisneyBRDF::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight));
                     }
                     break;
             }
@@ -163,6 +184,7 @@ void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::Shader
     ShaderGlobals shaderglobals;
     shaderglobals.u = intersection->u;
     shaderglobals.v = intersection->v;
+    shaderglobals.N = Vec3(0.0f, 1.0f, 0.0f);
     g_shadingsys->execute(ctx, *shader, shaderglobals);
 
     process_closure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );

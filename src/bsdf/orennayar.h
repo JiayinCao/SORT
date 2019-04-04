@@ -30,11 +30,23 @@
 class OrenNayar : public Bxdf
 {
 public:
-	//! Constructor
+    // Input parameters to construct the BRDF.
+    struct Params {
+        RGBSpectrum baseColor;
+        float       sigma;
+        Vector n;
+    };
+
+    //! Constructor
     //! @param reflectance  Direction-hemisphere reflection.
     //! @param roughness    It controls the roughness of the surface.
     //! @param weight       Weight of the BRDF
-	OrenNayar( const Spectrum& reflectance , float roughness , const Spectrum& weight , const Vector& n, bool doubleSided = false);
+    OrenNayar(const Spectrum& reflectance, float roughness, const Spectrum& weight, const Vector& n, bool doubleSided = false);
+
+	//! Constructor
+    //! @param params       All parameters.
+    //! @param weight       Weight of the BRDF
+	OrenNayar(const Params& params , const Spectrum& weight , bool doubleSided = false);
 	
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
