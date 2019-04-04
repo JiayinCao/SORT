@@ -20,12 +20,12 @@
 #include "shape.h"
 #include "core/rtti.h"
 
-//! @brief Rectangle class defines the basic behavior of rectangle.
+//! @brief Quad class defines the basic behavior of rectangle.
 /**
- * The rectangle center is always at the origin of its local coordinate, the normal of the rectangle points exactly
+ * The quad center is always at the origin of its local coordinate, the normal of the quad points exactly
  * upward in its local coordinate.
  */
-class	Rectangle : public Shape{
+class	Quad : public Shape{
 public:
 	//! @brief Sample a point on the surface of the shape given a shading point.
 	//!
@@ -76,22 +76,22 @@ public:
 	//! @brief		Get the surface area of the shape.
 	//!
 	//! Get the surface area of the shape. This function is heavily used in the case of picking a area light
-	//! among lots of them, surface area is one of the singals telling us how strong the light is.
+	//! among lots of them, surface area is a kind of signal telling us how strong the light is.
 	//!
 	//! @return		Surface area of the shape.
 	float 			SurfaceArea() const override;
     
-    //! @brief      Set length along x axis of the rectangle.
+    //! @brief      Set length along x axis of the quad.
     //!
     //! @param      x   Size along x axis.
     void            SetSizeX(float x) { sizeX = x; }
 
-    //! @brief      Set length along y axis of the rectangle.
+    //! @brief      Set length along y axis of the quad.
     //!
     //! @param      y   Size along y axis.
     void            SetSizeY(float y) { sizeY = y; }
 
 protected:
-	float sizeX = 1.0f;		/**< The size of the rectangle along x axis. */
-	float sizeY = 1.0f;		/**< The size of the rectangle along y axis. */
+	float sizeX = 1.0f;		/**< The size of the quad along x axis. */
+	float sizeY = 1.0f;		/**< The size of the quad along y axis. */
 };
