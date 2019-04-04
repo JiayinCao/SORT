@@ -26,7 +26,7 @@
 //! @brief	Primitive of SORT world.
 /**
  * Like primitives in rasterization program, which are usually triangle, point and lines, primitives can have many more different shapes.
- * Common ones are triangles, disk, rectangle, splines, quadric curves. Each primitive is attached with a specific material, may also be
+ * Common ones are triangles, disk, quad, splines, quadric curves. Each primitive is attached with a specific material, may also be
  * missive, which means that they are attached with a 'light source'.
  * A primitive is the basic unit for spatial data structure. It is more of a lower level concept comparing with Entity.
  */

@@ -15,8 +15,9 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <algorithm>
 #include "light_entity.h"
-#include "shape/rectangle.h"
+#include "shape/quad.h"
 #include "core/primitive.h"
 
 IMPLEMENT_RTTI(PointLightEntity);
@@ -82,7 +83,7 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
     m_light->m_light2world = Transform( mat , inv_mat );
 
     stream >> m_light->intensity;
-    auto rect = std::make_unique<Rectangle>();
+    auto rect = std::make_unique<Quad>();
     float sizeX, sizeY;
     stream >> sizeX >> sizeY;
     rect->SetSizeX(sizeX * sx);
