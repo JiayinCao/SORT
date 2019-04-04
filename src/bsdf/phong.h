@@ -37,9 +37,29 @@
  * It is strongly not suggested to use this BRDF in practice. Switching to more advanced BRDF, like Microfacet or AshikhmanShirley, would be a much better idea.
  * Modern game engines have already deprecated this model for several years ever since they switched to physically based shading model.
  */
-class Phong : public Bxdf
-{
+class Phong : public Bxdf{
 public:
+    struct Params{
+        RGBSpectrum     diffuse;
+        RGBSpectrum     specular;
+        float           specularPower;
+        Vector          n;
+    };
+
+    //! Constructor
+    //!
+    //! @param  params          Parameter set.
+    //! @param  weight          BRDF weight.
+    //! @param  doubleSided     Whether the BRDF is double-sided.
+    Phong(const Params& params, const Spectrum& weight, bool doubleSided = false)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.diffuse), S(params.specular), power(params.specularPower), 
+          diffRatio(params.diffuse.GetIntensity()/(params.diffuse.GetIntensity()+params.specular.GetIntensity())) {
+        const auto combined = D + S;
+        sAssert(combined.GetR() <= 1.0f, MATERIAL);
+        sAssert(combined.GetG() <= 1.0f, MATERIAL);
+        sAssert(combined.GetB() <= 1.0f, MATERIAL);
+    }
+    
 	//! Constructor
     //! @param diffuse          Direction-hemisphere reflection for diffuse.
     //! @param specular         Direction-hemisphere reflection for specular.
