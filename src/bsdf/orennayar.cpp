@@ -18,15 +18,25 @@
 #include "orennayar.h"
 #include "bsdf.h"
 
-// constructor
-OrenNayar::OrenNayar( const Spectrum& reflectance , float roughness, const Spectrum& weight , const Vector& n, bool doubleSided) : Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , n, doubleSided) , R(reflectance)
-{
-	// roughness ranges from 0 to infinity
-	roughness = std::max( 0.0f , roughness );
+OrenNayar::OrenNayar(const Spectrum& reflectance, float sigma, const Spectrum& weight, const Vector& n, bool doubleSided) : 
+    Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance){
+    // roughness ranges from 0 to infinity
+    sigma = std::max(0.0f, sigma);
 
-	const auto roughness2 = roughness * roughness;
-	A = 1.0f - (roughness2 / ( 2.0f * (roughness2+0.33f)));
-	B = 0.45f * roughness2 / ( roughness2 + 0.09f );
+    const auto sigma2 = sigma * sigma;
+    A = 1.0f - (sigma2 / (2.0f * (sigma2 + 0.33f)));
+    B = 0.45f * sigma2 / (sigma2 + 0.09f);
+}
+
+// constructor
+OrenNayar::OrenNayar( const Params& params , const Spectrum& weight , bool doubleSided) : 
+    Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , params.n, doubleSided) , R(params.baseColor){
+	// roughness ranges from 0 to infinity
+	auto sigma = std::max( 0.0f , params.sigma );
+
+	const auto sigma2 = sigma * sigma;
+	A = 1.0f - (sigma2 / ( 2.0f * (sigma2 +0.33f)));
+	B = 0.45f * sigma2 / (sigma2 + 0.09f );
 }
 
 // evaluate bxdf

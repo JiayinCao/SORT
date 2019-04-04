@@ -77,30 +77,6 @@ void build_shader_test( ShadingSystem* shadingsys , const std::string& shader_so
     EXPECT_TRUE(ret);
 };
 
-// Register closures
-void register_closures( ShadingSystem* shadingsys ){
-    // Register a closure
-    constexpr int MaxParams = 32;
-    struct BuiltinClosures {
-        const char* name;
-        int id;
-        ClosureParam params[MaxParams];
-    };
-    
-    constexpr int CC = 2; // Closure count
-    BuiltinClosures closures[CC] = {
-        { "lambert"    , LAMBERT_ID,            { CLOSURE_COLOR_PARAM(LambertParams, color),
-                                                  CLOSURE_VECTOR_PARAM(LambertParams, N),
-                                                  CLOSURE_FINISH_PARAM(LambertParams) }},
-        { "orenNayar" , OREN_NAYAR_ID,          { CLOSURE_COLOR_PARAM(OrenNayarParams, color),
-                                                  CLOSURE_FLOAT_PARAM (OrenNayarParams, sigma),
-                                                  CLOSURE_VECTOR_PARAM(OrenNayarParams, N),
-                                                  CLOSURE_FINISH_PARAM(OrenNayarParams) }}
-    };
-    for( int i = 0 ; i < CC ; ++i )
-        shadingsys->register_closure( closures[i].name , closures[i].id , closures[i].params , nullptr , nullptr );
-}
-
 // Create shading system
 std::unique_ptr<ShadingSystem>  MakeOSLShadingSys(){
     static ErrorHandler errhandler;

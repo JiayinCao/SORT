@@ -28,11 +28,24 @@
 class Lambert : public Bxdf
 {
 public:
+    // Input parameters to construct the BRDF.
+    struct Params {
+        RGBSpectrum baseColor;
+        Vector n;
+    };
+
 	//! Constructor taking spectrum information.
     //! @param s            Direction-Hemisphere reflection.
     //! @param weight       Weight of this BRDF
     //! @param t            Type of this BRDF
-    Lambert( const Spectrum& s , const Spectrum& weight , const Vector& n , bool doubleSided = false):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), n, doubleSided),R(s){}
+    Lambert(const Spectrum& s, const Spectrum& weight, const Vector& n, bool doubleSided = false) :Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s) {}
+
+    //! Constructor from parameter set.
+    //!
+    //! @param param        All parameters.
+    //! @param weight       Weight of this BRDF.
+    //! @param doubleSided  Whether the material is double-sided.
+    Lambert( const Params& param , const Spectrum& weight , bool doubleSided = false):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.n, doubleSided),R(param.baseColor){}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

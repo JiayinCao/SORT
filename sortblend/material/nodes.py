@@ -273,18 +273,18 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'ClearcoatGloss' , 'pbrt_name' : 'clearcoatgloass' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'color' } ]
     osl_shader = '''
-        shader Disney( float subsurface = @ ,
-                       float metallic = @ ,
-                       float specular = @ ,
-                       float specularTint = @ ,
-                       float roughness = @ ,
-                       float anisotropic = @ ,
-                       float sheen = @ ,
-                       float sheenTint = @ ,
-                       float clearCoat = @ ,
-                       float clearCoatGloss = @ ,
-                       color baseColor = @ ){
-            Ci = disney( subsurface , metallic , specular , specularTint , roughness , anisotropic , sheen , sheenTint , clearCoat , clearCoatGloss , N );
+        shader Disney( float SubSurface = @ ,
+                       float Metallic = @ ,
+                       float Specular = @ ,
+                       float SpecularTint = @ ,
+                       float Roughness = @ ,
+                       float Anisotropic = @ ,
+                       float Sheen = @ ,
+                       float SheenTint = @ ,
+                       float Clearcoat = @ ,
+                       float ClearcoatGloss = @ ,
+                       color BaseColor = @ ){
+            Ci = disney( SubSurface , Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGloss , BaseColor , N );
         }
     '''
 
@@ -793,15 +793,15 @@ class SORTNodeExtract(SORTShadingNode):
     sort_bxdf_type = 'SORTNodeExtract'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader Extract( color iColor = @,
-                        output float oRed = 0.0 ,
-                        output float oGreen = 0.0 ,
-                        output float oBlue = 0.0 ,
-                        output float intensity = 0.0 ){
-            oRed = iColor[0];
-            oGreen = iColor[1];
-            oBlue = iColor[2];
-            oIntensity = iColor[0] * 0.212671f + iColor[1] * 0.715160f + iColor[2] * 0.072169f;
+        shader Extract( color Color = @,
+                        output float Red = 0.0 ,
+                        output float Green = 0.0 ,
+                        output float Blue = 0.0 ,
+                        output float Intensity = 0.0 ){
+            Red = Color[0];
+            Green = Color[1];
+            Blue = Color[2];
+            Intensity = Color[0] * 0.212671 + Color[1] * 0.715160 + Color[2] * 0.072169;
         }
     '''
 
