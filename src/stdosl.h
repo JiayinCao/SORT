@@ -445,7 +445,9 @@ string concat (string a, string b, string c, string d, string e, string f) {
 // SORT supported BXDFs
 closure color lambert( color albedo , normal N ) BUILTIN;
 closure color orenNayar( color albedo , float sigma , normal N ) BUILTIN;
-
+closure color disney( float subsurface , float metallic , float specular , float specularTint,
+                      float roughness , float anisotropic , float sheen , float sheenTint,
+					  float clearCoat , float clearCoatGloss , color baseColor , normal N ) BUILTIN;
 // Closures
 
 closure color emission() BUILTIN;

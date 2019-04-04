@@ -30,6 +30,31 @@
 class DisneyBRDF : public Bxdf
 {
 public:
+    // Input parameters to construct the disney BRDF.
+    struct Params {
+        float subsurface;
+        float metallic;
+        float specular;
+        float specularTint;
+        float roughness;
+        float anisotropic;
+        float sheen;
+        float sheenTint;
+        float clearcoat;
+        float clearcoatGloss;
+        RGBSpectrum baseColor;
+        Vector n;
+    };
+
+    //! Constructor
+    //!
+    //! @param params           All parameters.
+    //! @param weight           Weight of the BXDF
+    DisneyBRDF( const Params& param , const Spectrum& weight, bool doubleSided = false)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, doubleSided), basecolor(param.baseColor), subsurface(param.subsurface), metallic(param.metallic),
+        specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
+        clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss) {}
+
 	//! Constructor
     //! @param basecolor        Direction-hemisphere reflection for diffuse.
     //! @param specular         Direction-hemisphere reflection for specular.

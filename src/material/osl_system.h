@@ -30,9 +30,10 @@
     #define STDOSL_PATH     "../src/stdosl.h"
 #endif
 
-constexpr int LAMBERT_ID = 1;
-constexpr int OREN_NAYAR_ID = 2;
-struct LambertParams    { Vector color; Vector N; };
+constexpr int LAMBERT_ID        = 1;
+constexpr int OREN_NAYAR_ID     = 2;
+constexpr int DISNEY_ID         = 3;
+
 struct OrenNayarParams  { Vector color; float sigma; Vector N; };
 
 // begin building shader
@@ -50,3 +51,6 @@ bool connect_shader( const std::string& source_shader , const std::string& sourc
 
 // Execute a shader and populate the bsdf
 void execute_shader( class Bsdf* bsdf , const class Intersection* intersection , OSL::ShaderGroup* shader );
+
+// Register closures
+void register_closures(OSL::ShadingSystem* shadingsys);
