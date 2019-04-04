@@ -493,7 +493,7 @@ closure color ashikhmanShirley(float specular, float roughnessU, float roughness
 closure color phong( color diffuse , color specular , float specularPower , normal N ) BUILTIN;
 closure color mirror( color basecolor , normal N ) BUILTIN;
 closure color dieletric( color reflectance , color transmittance , float ru , float rv , normal N ) BUILTIN;
-closure color hair( color basecolor , float lr , float ar , float ior ) BUILTIN;
+closure color hair( color sigma , float lr , float ar , float ior ) BUILTIN;
 
 #undef BUILTIN
 #undef BUILTIN_DERIV
