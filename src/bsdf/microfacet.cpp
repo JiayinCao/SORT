@@ -20,6 +20,7 @@
 #include "bsdf.h"
 #include "sampler/sample.h"
 #include "math/utils.h"
+#include "core/memory.h"
 
 Blinn::Blinn( float roughnessU , float roughnessV ) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
@@ -209,6 +210,20 @@ float GGX::G1( const Vector& v ) const {
     const auto cos_phi_sq = CosPhi2(v);
     const auto alpha2 = cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2;
     return 2.0f / ( 1.0f + sqrt( 1.0f + alpha2 * tan_theta_sq ) );
+}
+
+Microfacet::Microfacet(const std::string& distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided ) : 
+    Bxdf(w, t, n, doubleSided ) {
+    if( distType == "GGX" )
+        distribution = SORT_MALLOC(GGX)( ru , rv );
+    else if( distType == "Beckmann" )
+        distribution = SORT_MALLOC(Beckmann)( ru , rv );
+    else if( distType == "Blinn" )
+        distribution = SORT_MALLOC(Blinn)( ru , rv );
+}
+
+MicroFacetReflection::MicroFacetReflection(const Params &params, const Fresnel* f, const Spectrum& weight , bool doubleSided):
+Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , R(params.baseColor), fresnel(f){
 }
 
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const {

@@ -29,6 +29,7 @@
 #include "bsdf/lambert.h"
 #include "bsdf/orennayar.h"
 #include "bsdf/disney.h"
+#include "bsdf/microfacet.h"
 
 using namespace OSL;
 
@@ -58,7 +59,7 @@ void register_closures(ShadingSystem* shadingsys){
         ClosureParam params[MaxParams];
     };
     
-    constexpr int CC = 3; // Closure count
+    constexpr int CC = 4; // Closure count
     BuiltinClosures closures[CC] = {
         { "lambert" , LAMBERT_ID, { 
             CLOSURE_COLOR_PARAM(Lambert::Params, baseColor),
@@ -82,8 +83,17 @@ void register_closures(ShadingSystem* shadingsys){
             CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoatGloss),
             CLOSURE_COLOR_PARAM(DisneyBRDF::Params, baseColor),
             CLOSURE_VECTOR_PARAM(DisneyBRDF::Params, n),
-            CLOSURE_FINISH_PARAM(DisneyBRDF::Params) } }
-        };
+            CLOSURE_FINISH_PARAM(DisneyBRDF::Params) } },
+        { "microfacetReflection" , MICROFACET_REFLECTION_ID, {
+            CLOSURE_STRING_PARAM(MicroFacetReflection::Params, dist),
+            CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, eta),
+            CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, absorption),
+            CLOSURE_FLOAT_PARAM(MicroFacetReflection::Params, roughnessU),
+            CLOSURE_FLOAT_PARAM(MicroFacetReflection::Params, roughnessV),
+            CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, baseColor),
+            CLOSURE_VECTOR_PARAM(MicroFacetReflection::Params, n),
+            CLOSURE_FINISH_PARAM(MicroFacetReflection::Params) } }
+    };
     for( int i = 0 ; i < CC ; ++i )
         shadingsys->register_closure( closures[i].name , closures[i].id , closures[i].params , nullptr , nullptr );
 }
@@ -170,6 +180,13 @@ void process_closure (Bsdf* bsdf, const ClosureColor* closure, const Color3& w) 
                     {
                         const auto& params = *comp->as<DisneyBRDF::Params>();
                         bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight));
+                    }
+                    break;
+                case MICROFACET_REFLECTION_ID:
+                    {
+                        const auto& params = *comp->as<MicroFacetReflection::Params>();
+                        const auto frenel = SORT_MALLOC( FresnelConductor )(params.eta, params.absorption);
+                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, frenel, weight));
                     }
                     break;
             }

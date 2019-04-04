@@ -17,9 +17,13 @@
 
 #pragma once
 
+#include <OSL/genclosure.h>
+#include <OSL/oslexec.h>
+#include <OSL/oslclosure.h>
 #include "bxdf.h"
 #include "bsdf.h"
 #include "fresnel.h"
+#include "spectrum/spectrum.h"
 
 //! @brief Normal distribution function.
 class MicroFacetDistribution
@@ -134,6 +138,15 @@ protected:
 class Microfacet : public Bxdf
 {
 public:
+    //! @brief  Constructor
+    //! @brief Constructor
+    //! @param distType     Distribution type, could be "GGX", "Beckmann" , "Blinn".
+    //! @param ru           Roughness along U axis.
+    //! @param rv           Roughness along V axis.
+    //! @param w            Weight of the bxdf
+    //! @param t            Type of the bxdf
+    Microfacet(const std::string& distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided );
+
     //! @brief Constructor
     //! @param d        Normal distribution term
     //! @param w        Weight of the bxdf
@@ -148,12 +161,31 @@ protected:
 class MicroFacetReflection : public Microfacet
 {
 public:
+    struct Params{
+        OSL::ustring    dist;
+        RGBSpectrum     eta;
+        RGBSpectrum     absorption;
+        float           roughnessU;
+        float           roughnessV;
+        RGBSpectrum     baseColor;
+        Vector          n;
+    };
+
+    //! @brief Constructor from parameter set
+    //!
+    //! @param  params          Parameter set.
+    //! @param  f               Fresnel term.
+    //! @param  weight          Weight of this BRDF.
+    //! @param  doubleSided     Whether the BRDF is double sided.
+    MicroFacetReflection(const Params &params, const Fresnel* f, const Spectrum& weight , bool doubleSided = false );
+
 	//! @brief Constructor
     //! @param reflectance      Direction hemisphere reflection.
     //! @param f                Fresnel term.
     //! @param d                NDF term.
     //! @param w                Weight of this BRDF
-    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight , const Vector& n , bool doubleSided = false ) : Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , R(reflectance), fresnel(f) {}
+    MicroFacetReflection(const Spectrum &reflectance, const Fresnel* f, const MicroFacetDistribution* d, const Spectrum& weight , const Vector& n , bool doubleSided = false ) :
+        Microfacet(d , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , R(reflectance), fresnel(f) {}
 	
     //! @brief Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

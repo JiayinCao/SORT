@@ -24,6 +24,7 @@
 #include "core/define.h"
 #include "unittest_common.h"
 #include "material/osl_system.h"
+#include "bsdf/orennayar.h"
 
 using namespace OSL;
 
@@ -263,7 +264,7 @@ TEST(OSL, CheckingClosure) {
     // 0.1 can't be represented in 32 bits float, but it is picked for the purpose to check IEEE implementation of OSL.
     // It should be exactly the same with C++ compiler if it does what IEEE standard requests.
     const auto compB = closureB->as_comp();
-    const auto& params = *compB->as<OrenNayarParams>();
+    const auto& params = *compB->as<OrenNayar::Params>();
     const float expected_sigam = 0.1f;
     EXPECT_EQ( params.sigma , expected_sigam );
 }
@@ -356,7 +357,7 @@ TEST(OSL, CheckingMultipleLayers) {
     EXPECT_EQ(w.y, 0.625f);
     EXPECT_EQ(w.z, 0.75f);
     
-    const auto& params = *compB->as<OrenNayarParams>();
+    const auto& params = *compB->as<OrenNayar::Params>();
     const float expected_sigam = 0.625f;
     EXPECT_EQ(params.sigma, expected_sigam);
 
@@ -418,7 +419,7 @@ TEST(OSL, CheckingDefaultValue) {
     EXPECT_EQ( cwA.z , iColor_0[2] );
 
     const auto compB = closureB->as_comp();
-    const auto& params = *compB->as<OrenNayarParams>();
+    const auto& params = *compB->as<OrenNayar::Params>();
     EXPECT_EQ( params.sigma , iScale_0 );
 }
 
@@ -478,7 +479,7 @@ TEST(OSL, CheckingMultiThread) {
         EXPECT_EQ( cwA.z , 2.5f );
 
         const auto compB = closureB->as_comp();
-        const auto& params = *compB->as<OrenNayarParams>();
+        const auto& params = *compB->as<OrenNayar::Params>();
         EXPECT_EQ( params.sigma , 12.0f );
     });
 }
