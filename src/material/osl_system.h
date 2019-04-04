@@ -30,11 +30,10 @@
     #define STDOSL_PATH     "../src/stdosl.h"
 #endif
 
-constexpr int LAMBERT_ID        = 1;
-constexpr int OREN_NAYAR_ID     = 2;
-constexpr int DISNEY_ID         = 3;
-
-struct OrenNayarParams  { Vector color; float sigma; Vector N; };
+constexpr int LAMBERT_ID                = 1;
+constexpr int OREN_NAYAR_ID             = 2;
+constexpr int DISNEY_ID                 = 3;
+constexpr int MICROFACET_REFLECTION_ID  = 4;
 
 // begin building shader
 OSL::ShaderGroupRef beginShaderGroup( const std::string& group_name );

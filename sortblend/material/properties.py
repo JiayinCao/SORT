@@ -79,6 +79,8 @@ class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
 
     def export_serialization_value(self):
         pass
+    def export_osl_value(self):
+        return 'color(0)'
 
 # Socket for Color
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
@@ -205,6 +207,8 @@ class SORTNodePropertyEnum(SORTNodeProperty):
         return value
     def export_serialization_value(self,value):
         return value
+    def export_osl_value(self,value):
+        return '\"%s\"' % value
     @classmethod
     def setup( cls , prop ):
         cls.default_value = bpy.props.EnumProperty( name=prop['name'] , items=prop['items'] , default = prop['default'])

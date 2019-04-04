@@ -283,8 +283,9 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
                        float SheenTint = @ ,
                        float Clearcoat = @ ,
                        float ClearcoatGloss = @ ,
-                       color BaseColor = @ ){
-            Ci = disney( SubSurface , Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGloss , BaseColor , N );
+                       color BaseColor = @ ,
+                       output closure color Result = color(0) ){
+            Result = disney( SubSurface , Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGloss , BaseColor , N );
         }
     '''
 
@@ -299,11 +300,11 @@ class SORTNode_Material_Glass(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessU' , 'pbrt_name' : 'uroughness' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'pbrt_name' : 'vroughness' } ]
     osl_shader = '''
-        shader Glass( color kr = @ ,
-                      color kt = @ ,
-                      float roughnessU = @ ,
-                      float roughnessV = @ ){
-            Ci = glass( ki , kt , roughnessU , roughnessV , N );
+        shader Glass( color Reflectance = @ ,
+                      color Transmittance = @ ,
+                      float RoughnessU = @ ,
+                      float RoughnessV = @ ){
+            Ci = glass( Reflectance , Transmittance , RoughnessU , RoughnessV , N );
         }
     '''
 
@@ -396,10 +397,10 @@ class SORTNode_Material_Blend(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf1' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Factor' } ]
     osl_shader = '''
-        shader MicrofacetRelection(  color iBxdf0 = @ ,
-                                     color iBxdf1 = @ ,
-                                     float factor = @ ){
-            Ci = iBxdf0 * ( 1.0f - factor ) + iBxdf1 * factor;
+        shader MaterialBlend(  closure color Bxdf0 = @ ,
+                               closure color Bxdf1 = @ ,
+                               float factor = @ ){
+            Ci = Bxdf0 * ( 1.0f - factor ) + Bxdf1 * factor;
         }
     '''
 
@@ -427,13 +428,14 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
-        shader MicrofacetRelection(  string dist = @ ,
-                                     color  iIOR = @ ,
-                                     color  eIOR = @ ,
-                                     float  roughnessU = @ ,
-                                     float  roughnessV = @ ,
-                                     color  baseColor = @ ){
-            Ci = microfacetrefraction( dist , iIOR , eIOR , roughnessU , roughnessV , baseColor , N );
+        shader MicrofacetRelection(  string MicroFacetDistribution = @ ,
+                                     color  Interior_IOR = @ ,
+                                     color  Absorption_Coefficient = @ ,
+                                     float  RoughnessU = @ ,
+                                     float  RoughnessV = @ ,
+                                     color  BaseColor = @ ,
+                                     output closure color Result = color(0) ){
+            Result = microfacetReflection( MicroFacetDistribution , Interior_IOR , Absorption_Coefficient , RoughnessU , RoughnessV , BaseColor , N );
         }
     '''
 
@@ -502,8 +504,9 @@ class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
     sort_bxdf_type = 'LambertNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader Lambert( color Diffuse = @ ){
-            Ci = lambert( Diffuse , N );
+        shader Lambert( color Diffuse = @ ,
+                        output closure color Result = color(0) ){
+            Result = lambert( Diffuse , N );
         }
     ''' 
 
@@ -528,8 +531,9 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
         shader OrenNayar( float roughness = @,
-                          color Diffuse = @ ){
-            Ci = orenNayar( Diffuse , roughness , N );
+                          color Diffuse = @ ,
+                          output closure color Result = color(0) ){
+            Result = orenNayar( Diffuse , roughness , N );
         }
     '''
 
@@ -745,9 +749,9 @@ class SORTNodeConstantFloat(SORTShadingNode):
     sort_bxdf_type = 'ConstantFloatNode'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Value' } ]
     osl_shader = '''
-        shader ConstantFloat( float iScale = @ ,
+        shader ConstantFloat( float Value = @ ,
                               output float Result = 0.0 ){
-            Result = iScale;
+            Result = Value;
         }
     '''
 
@@ -773,15 +777,15 @@ class SORTNodeComposite(SORTShadingNode):
     bl_label = 'Composite'
     bl_idname = 'SORTNodeComposite'
     sort_bxdf_type = 'SORTNodeComposite'
-    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'R' },
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'G' },
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'B' } ]
+    property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Red' },
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Green' },
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Blue' } ]
     osl_shader = '''
-        shader Composite( float r = @ ,
-                          float g = @ ,
-                          float b = @ ,
-                          output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = color( r , g , b );
+        shader Composite( float Red = @ ,
+                          float Green = @ ,
+                          float Blue = @ ,
+                          output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = color( Red , Green , Blue );
         }
     '''
 
@@ -820,5 +824,11 @@ class SORTNodeOutput(SORTShadingNode):
     bl_idname = 'SORTNodeOutput'
     sort_bxdf_type = ''
     property_list = [ { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Surface' } ]
+    osl_shader = '''
+        shader SORT_Shader( closure color Surface = @ ){
+            Ci = Surface;
+        }
+    '''
+
     def init(self, context):
         super().register_prop(True)
