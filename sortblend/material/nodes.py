@@ -376,12 +376,21 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'AzimuthalRoughness' },
                       { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'IndexofRefraction' , 'default' : 1.55 } ]
     osl_shader = '''
+        float helper( float x , float inv ){
+            float y = log(x) * inv;
+            return y * y;
+        }
         shader Hair( color HairColor = @ ,
                      float LongtitudinalRoughness = @ ,
                      float AzimuthalRoughness = @ ,
                      float IndexofRefraction = @ , 
                      output closure color Result = color(0) ){
-            Result = hair( HairColor , LongtitudinalRoughness , AzimuthalRoughness , IndexofRefraction );
+            // A Practical and Controllable Hair and Fur Model for Production Path Tracing
+            // https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
+            float inv = 1.0 / ( 5.969 - 0.215 * AzimuthalRoughness + 2.532 * pow(AzimuthalRoughness,2.0) - 10.73 * pow(AzimuthalRoughness,3.0) + 
+                        5.574 * pow(AzimuthalRoughness,4.0) + 0.245 * pow(AzimuthalRoughness, 5.0) );
+            color sigma = color( helper(HairColor[0],inv) , helper(HairColor[1],inv) , helper(HairColor[2],inv) );
+            Result = hair( color(1.0) , LongtitudinalRoughness , AzimuthalRoughness , IndexofRefraction );
         }
     '''
 
@@ -564,6 +573,8 @@ class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat    , 'name' : 'Roughness'  , 'default' : 0.0 } ,
                       { 'class' : properties.SORTNodeSocketColor    , 'name' : 'ColorTint' } ,
                       { 'class' : properties.SORTNodeSocketBxdf     , 'name' : 'Surface' } ]
+    osl_shader = '''
+    '''
 
 @SORTPatternGraph.register_node('BXDFs')
 class SORTNode_BXDF_MERL(SORTShadingNode_BXDF):
@@ -590,10 +601,10 @@ class SORTNodeAdd(SORTShadingNode):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
     osl_shader = '''
-        shader Add( color iColor0 = @ ,
-                    color iColor1 = @ ,
-                    output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = iColor0 + iColor1;
+        shader Add( color Color1 = @ ,
+                    color Color2 = @ ,
+                    output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = Color1 + Color2;
         }
     '''
 
@@ -604,9 +615,9 @@ class SORTNodeOneMinus(SORTShadingNode):
     sort_bxdf_type = 'SORTNodeOneMinus'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader OneMinus( color iColor = @ ,
-                         output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = color( 1.0 , 1.0 , 1.0 ) - iColor;
+        shader OneMinus( color Color = @ ,
+                         output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = color( 1.0 ) - Color;
         }
     '''
 
@@ -618,10 +629,10 @@ class SORTNodeMultiply(SORTShadingNode):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
     osl_shader = '''
-        shader Multiply( color iColor0 = @ ,
-                         color iColor1 = @ ,
-                         output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = iColor0 * iColor1;
+        shader Multiply( color Color1 = @ ,
+                         color Color2 = @ ,
+                         output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = Color1 * Color2;
         }
     '''
 
@@ -635,12 +646,12 @@ class SORTNodeBlend(SORTShadingNode):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Factor2' } ]
     osl_shader = '''
-        shader Blend( color iColor0 = @ ,
-                    float iScale0 = @ ,
-                    color iColor1 = @ ,
-                    float iScale1 = @ ,
-                    output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = iColor0 * iScale0 + iColor1 * iScale1;
+        shader Blend( color Color1 = @ ,
+                      float Factor1 = @ ,
+                      color Color2 = @ ,
+                      float Factor2 = @ ,
+                      output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = Color1 * Factor1 + Color2 * Factor2;
         }
     '''
 
@@ -653,11 +664,11 @@ class SORTNodeLerp(SORTShadingNode):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Factor' } ]
     osl_shader = '''
-        shader Lerp( color iColor0 = @ ,
-                     color iColor1 = @ ,
-                     float factor = @ ,
-                     output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = iColor0 * ( 1.0 - factor ) + iColor1 * factor;
+        shader Lerp( color Color1 = @ ,
+                     color Color2 = @ ,
+                     float Factor = @ ,
+                     output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = Color1 * ( 1.0 - Factor ) + Color2 * Factor;
         }
     '''
 
@@ -668,9 +679,9 @@ class SORTNodeLinearToGamma(SORTShadingNode):
     sort_bxdf_type = 'LinearToGammaNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader LinearToGamma( color iColor = @ ,
-                              output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = pow( iColor , 1.0/2.2 );
+        shader LinearToGamma( color Color = @ ,
+                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = pow( Color , 1.0/2.2 );
         }
     '''
 
@@ -681,9 +692,9 @@ class SORTNodeGammaToLinear(SORTShadingNode):
     sort_bxdf_type = 'GammaToLinearNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader GammaToLinear( color iColor = @ ,
-                              output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = pow( iColor , 2.2 );
+        shader GammaToLinear( color Color = @ ,
+                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = pow( Color , 2.2 );
         }
     '''
 
@@ -695,9 +706,9 @@ class SORTNodeDecodeNormal(SORTShadingNode):
     output_type = 'SORTNodeSocketNormal'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
-        shader DecodeNormal( color iColor = @ ,
-                             output color oColor = color( 0.0 , 0.0 , 0.0 ) ){
-            oColor = 2.0 * iColor - 1.0;
+        shader DecodeNormal( color Color = @ ,
+                             output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = 2.0 * iColor - 1.0;
         }
     '''
 
@@ -711,8 +722,25 @@ class SORTNodeGrid(SORTShadingNode):
     sort_bxdf_type = 'GridTexNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' },
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Treshold' , 'default' : 0.1 , 'min' : 0.0 , 'max' : 1.0 },
                       { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
+    osl_shader = '''
+        shader CheckerBoard( color Color1 = @ ,
+                             color Color2 = @ ,
+                             float Treshold = @ ,
+                             output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            // Temporary solution for now
+            float fu = 10.0 * u - floor( 10.0 * u ) - 0.5;
+            float fv = 10.0 * v - floor( 10.0 * v ) - 0.5;
 
+            float half_threshold = ( 1.0 - Treshold ) * 0.5;
+            if( fu <= half_threshold && fu >= -half_threshold && fv <= half_threshold && fv >= -half_threshold )
+                Result = Color1;
+            else
+                Result = Color2;
+        }
+    '''
+    
 @SORTPatternGraph.register_node('Image')
 class SORTNodeCheckerBoard(SORTShadingNode):
     bl_label = 'CheckerBoard'
@@ -742,6 +770,9 @@ class SORTNodeImage(SORTShadingNode):
     sort_bxdf_type = 'ImageTexNode'
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' },
                       { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
+    osl_shader = '''
+        
+    '''
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Input Nodes for SORT

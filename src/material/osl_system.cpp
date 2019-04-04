@@ -143,11 +143,10 @@ void register_closures(ShadingSystem* shadingsys){
             CLOSURE_VECTOR_PARAM(MicroFacetReflection::ParamsDieletric, n),
             CLOSURE_FINISH_PARAM(MicroFacetReflection::ParamsDieletric) } },
         { "hair" , HAIR_ID, {
-            CLOSURE_COLOR_PARAM(Hair::Params, baseColor),
+            CLOSURE_COLOR_PARAM(Hair::Params, sigma),
             CLOSURE_FLOAT_PARAM(Hair::Params, longtitudinalRoughness),
             CLOSURE_FLOAT_PARAM(Hair::Params, azimuthalRoughness),
             CLOSURE_FLOAT_PARAM(Hair::Params, ior),
-            CLOSURE_VECTOR_PARAM(Hair::Params, n),
             CLOSURE_FINISH_PARAM(Hair::Params) } },
     };
 
