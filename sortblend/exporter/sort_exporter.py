@@ -489,14 +489,11 @@ def collect_shader_sources(scene, fs):
                 # only process the socket if it is linked.
                 if socket.is_linked:
                     assert len(socket.links) == 1
-                    input_socket = socket.links[0].from_socket
-                    input_node = input_socket.node
+                    serialize_prop( socket.links[0].from_socket.node , shaders )
 
-                    # populate the shader source code if it is not exported before
-                    if input_node.bl_label not in shaders:
-                        shaders[input_node.bl_label] = input_node.osl_shader
-
-                    serialize_prop( input_node , shaders )
+            # populate the shader source code if it is not exported before
+            if mat_node.bl_label not in shaders:
+                shaders[mat_node.bl_label] = mat_node.osl_shader
 
         serialize_prop(output_node, osl_shaders)
 
@@ -554,10 +551,7 @@ def export_materials(scene, fs):
                     if to_be_serialized:
                         mat_connections.append( ( compact_material_name + '_' + input_node.name , input_socket.name , compact_material_name + '_' + mat_node.name , socket.name ) )
 
-                    #fs.serialize(name_compat_materialNode(input_node.name))
-                    #fs.serialize(input_node.sort_bxdf_type + input_socket.name)
                     if input_node.name not in visited:
-                        #fs.serialize(input_node.sort_bxdf_type)
                         collect_node_count(input_node, visited, True)
 
                         # make sure it doesn't get serialized again
@@ -568,7 +562,7 @@ def export_materials(scene, fs):
                 mat_nodes.append( mat_node )
 
         # collect all material nodes
-        collect_node_count(output_node, visited, False)
+        collect_node_count(output_node, visited, True)
 
         # serialize this material
         fs.serialize( len( mat_nodes ) )
@@ -578,7 +572,6 @@ def export_materials(scene, fs):
             node.serialize_prop( fs )
         fs.serialize( len( mat_connections ) )
         for connection in mat_connections:
-            print( connection )
             fs.serialize( connection[0] )
             fs.serialize( connection[1] )
             fs.serialize( connection[2] )

@@ -448,6 +448,7 @@ closure color orenNayar( color albedo , float sigma , normal N ) BUILTIN;
 closure color disney( float subsurface , float metallic , float specular , float specularTint,
                       float roughness , float anisotropic , float sheen , float sheenTint,
 					  float clearCoat , float clearCoatGloss , color baseColor , normal N ) BUILTIN;
+closure color microfacetReflection(string distribution, vector iIOR , vector eIOR , float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;
 // Closures
 
 closure color emission() BUILTIN;
