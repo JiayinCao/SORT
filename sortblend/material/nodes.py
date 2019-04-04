@@ -502,8 +502,8 @@ class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
     sort_bxdf_type = 'LambertNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader Lambert( color diffuse = @ ){
-            Ci = lambert( diffuse , N );
+        shader Lambert( color Diffuse = @ ){
+            Ci = lambert( Diffuse , N );
         }
     ''' 
 
@@ -699,6 +699,19 @@ class SORTNodeCheckerBoard(SORTShadingNode):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
                       { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
+    osl_shader = '''
+        shader CheckerBoard( color Color1 = @ ,
+                             color Color2 = @ ,
+                             output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            // Temporary solution for now
+            float fu = 10.0 * u - floor( 10.0 * u );
+            float fv = 10.0 * v - floor( 10.0 * v );
+            if( ( fu > 0.5 && fv > 0.5 ) || ( fu < 0.5 && fv < 0.5 ) )
+                Result = Color1;
+            else
+                Result = Color2;
+        }
+    '''
 
 @SORTPatternGraph.register_node('Image')
 class SORTNodeImage(SORTShadingNode):

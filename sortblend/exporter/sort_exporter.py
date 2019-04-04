@@ -473,6 +473,7 @@ def find_output_node(material):
 def collect_shader_sources(scene, fs):
     # don't output any osl_shaders if using default materials
     if scene.allUseDefaultMaterial is True:
+        fs.serialize( 0 )
         return None
 
     osl_shaders = {}
@@ -551,7 +552,7 @@ def export_materials(scene, fs):
                     input_node = input_socket.node
 
                     if to_be_serialized:
-                        mat_connections.append( ( input_node.name , input_socket.name , mat_node.name , socket.name ) )
+                        mat_connections.append( ( compact_material_name + '_' + input_node.name , input_socket.name , compact_material_name + '_' + mat_node.name , socket.name ) )
 
                     #fs.serialize(name_compat_materialNode(input_node.name))
                     #fs.serialize(input_node.sort_bxdf_type + input_socket.name)
@@ -577,6 +578,7 @@ def export_materials(scene, fs):
             node.serialize_prop( fs )
         fs.serialize( len( mat_connections ) )
         for connection in mat_connections:
+            print( connection )
             fs.serialize( connection[0] )
             fs.serialize( connection[1] )
             fs.serialize( connection[2] )

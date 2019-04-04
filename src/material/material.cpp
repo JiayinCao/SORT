@@ -18,7 +18,9 @@
 #include "material.h"
 #include "matmanager.h"
 #include "core/log.h"
+#include "core/globalconfig.h"
 #include "osl_system.h"
+#include "bsdf/lambert.h"
 
 bool Material::BuildShader(){
     m_shader = beginShaderGroup( m_name );
@@ -43,6 +45,9 @@ void Material::Serialize(IStreamBase& stream){
     for (auto i = 0u; i < shader_cnt; ++i) {
         ShaderSource shader_source;
         stream >> shader_source.name >> shader_source.type;
+
+        // it seems that shader name is a global unit, same shader name may conflict even if they are in different shader group
+        shader_source.name = m_name + "_" + shader_source.name;
 
         std::vector<std::string> paramDefaultValues;
         auto parameter_cnt = 0u;
@@ -70,6 +75,13 @@ void Material::Serialize(IStreamBase& stream){
 
 Bsdf* Material::GetBsdf(const class Intersection* intersect) const {
     Bsdf* bsdf = SORT_MALLOC(Bsdf)(intersect);
-    execute_shader( bsdf , intersect , m_shader.get() );
+
+    if (g_noMaterial) {
+        Spectrum weight(1.0f);
+        const Lambert* lambert = SORT_MALLOC(Lambert)(weight, weight, DIR_UP);
+        bsdf->AddBxdf(lambert);
+    } else {
+        execute_shader(bsdf, intersect, m_shader.get());
+    }
     return bsdf;
 }
