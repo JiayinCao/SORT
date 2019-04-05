@@ -494,6 +494,8 @@ closure color phong( color diffuse , color specular , float specularPower , norm
 closure color mirror( color basecolor , normal N ) BUILTIN;
 closure color dieletric( color reflectance , color transmittance , float ru , float rv , normal N ) BUILTIN;
 closure color hair( color sigma , float lr , float ar , float ior ) BUILTIN;
+closure color fourierBRDF(int idx, normal N) BUILTIN;
+closure color merlBRDF(int idx, normal N) BUILTIN;
 
 #undef BUILTIN
 #undef BUILTIN_DERIV

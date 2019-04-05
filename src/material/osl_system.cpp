@@ -34,6 +34,8 @@
 #include "bsdf/phong.h"
 #include "bsdf/dielectric.h"
 #include "bsdf/hair.h"
+#include "bsdf/fourierbxdf.h"
+#include "bsdf/merl.h"
 
 using namespace OSL;
 
@@ -148,6 +150,14 @@ void register_closures(ShadingSystem* shadingsys){
             CLOSURE_FLOAT_PARAM(Hair::Params, azimuthalRoughness),
             CLOSURE_FLOAT_PARAM(Hair::Params, ior),
             CLOSURE_FINISH_PARAM(Hair::Params) } },
+        { "fourierBRDF" , FOURIER_BDRF_ID,{
+            CLOSURE_INT_PARAM(FourierBxdf::Params, resIdx),
+            CLOSURE_VECTOR_PARAM(FourierBxdf::Params, n),
+            CLOSURE_FINISH_PARAM(FourierBxdf::Params) } },
+        { "merlBRDF" , MERL_BRDF_ID,{
+            CLOSURE_INT_PARAM(Merl::Params, resIdx),
+            CLOSURE_VECTOR_PARAM(Merl::Params, n),
+            CLOSURE_FINISH_PARAM(Merl::Params) } },
     };
 
     constexpr int CC = sizeof( closures ) / sizeof( BuiltinClosures );
@@ -297,6 +307,18 @@ void process_closure (Bsdf* bsdf, const ClosureColor* closure, const Color3& w) 
                         bsdf->AddBxdf(SORT_MALLOC(Hair)( params, weight ));
                     }
                     break;
+                case FOURIER_BDRF_ID:
+                    {
+                        const auto& params = *comp->as<FourierBxdf::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(FourierBxdf)(params, weight));
+                    }
+                    break;
+                case MERL_BRDF_ID:
+                    {
+                        const auto& params = *comp->as<Merl::Params>();
+                        bsdf->AddBxdf(SORT_MALLOC(Merl)(params, weight));
+                    }
+                    break;
             }
        }
    }
@@ -321,7 +343,5 @@ ShadingContextWrapper::ShadingContextWrapper(OSL::ShadingSystem* shadingsys) :sh
 
 ShadingContextWrapper::~ShadingContextWrapper() {
     shadingsys->release_context(ctx);
-    ctx = nullptr;
     shadingsys->destroy_thread_info(thread_info);
-    thread_info = nullptr;
 }

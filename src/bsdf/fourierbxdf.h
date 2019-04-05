@@ -19,6 +19,7 @@
 
 #include "bxdf.h"
 #include "bsdf.h"
+#include "material/resource.h"
 
 //! @brief FourierBxdfData.
 /**
@@ -26,8 +27,7 @@
  * However, it is much compact comparing with MERL in term of memory usage.
  * There is also an importance sampling method provided in the bxdf type.
  */
-class FourierBxdfData
-{
+class FourierBxdfData : public Resource {
 public:
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -60,8 +60,10 @@ public:
     float pdf( const Vector& wo , const Vector& wi ) const;
     
     //! Load brdf data from Fourier Bxdf file.
-    //! @param filename Name of Fourier Bxdf file.
-    void	LoadData( const std::string& filename );
+    //!
+    //! @param filename     Name of Fourier Bxdf file.
+    //! @return             Whether the resource is loaded
+    bool    LoadResource(const std::string& filename) override;
 
 private:
     // Bxdf Table
@@ -119,15 +121,24 @@ private:
 class FourierBxdf : public Bxdf
 {
 public:
-    //! Default constructor setting brdf type.
-    FourierBxdf( const FourierBxdfData& fd , const Spectrum& weight , const Vector& n ) : Bxdf( weight, BXDF_ALL, n , true ) , m_data(fd) {}
-    
+    // Input parameters to construct the BRDF.
+    struct Params {
+        int     resIdx;
+        Vector  n;
+    };
+
+    //! Constructor taking spectrum information.
+    //!
+    //! @param params       Parameter set.
+    //! @param weight       Weight of this BRDF
+    FourierBxdf(const Params& params, const Spectrum& weight);
+
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The evaluted BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
-        return m_data.f(wo,wi);
+        return m_data->f(wo,wi);
     }
     
     //! @brief Importance sampling for the bxdf.
@@ -144,7 +155,7 @@ public:
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override{
-        return m_data.sample_f( wo , wi , bs , pdf ) * AbsCosTheta(wi);
+        return m_data->sample_f( wo , wi , bs , pdf ) * AbsCosTheta(wi);
     }
     
     //! @brief Evalute the pdf of an existance direction given the Incident direction.
@@ -155,9 +166,9 @@ public:
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override{
-        return m_data.pdf( wo , wi );
+        return m_data->pdf( wo , wi );
     }
     
 private:
-    const FourierBxdfData&    m_data;   /**< The actual data of MERL brdf. */
+    const FourierBxdfData*    m_data;   /**< The actual data of Fourier brdf. */
 };

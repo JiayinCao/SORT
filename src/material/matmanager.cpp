@@ -21,6 +21,8 @@
 #include "core/profile.h"
 #include "core/globalconfig.h"
 #include "core/log.h"
+#include "bsdf/merl.h"
+#include "bsdf/fourierbxdf.h"
 
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){
@@ -34,6 +36,22 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
         stream >> shader_name;
         stream >> shader_source;
         m_shaderSources[shader_name] = shader_source;
+    }
+
+    auto resource_cnt = 0u;
+    stream >> resource_cnt;
+    for (auto i = 0u; i < resource_cnt; ++i) {
+        std::string resource_file, resource_type;
+        stream >> resource_file >> resource_type;
+
+        if (resource_type == "MerlBRDFMeasuredData")
+            m_resources.push_back(std::make_unique<MerlData>());
+        else if (resource_type == "FourierBRDFMeasuredData")
+            m_resources.push_back(std::make_unique<FourierBxdfData>());
+        else
+            sAssertMsg(false, MATERIAL, "Resource type %s not supported!" , resource_type.c_str());
+
+        m_resources.back()->LoadResource(resource_file);
     }
 
     const bool noMaterialSupport = g_noMaterial;
@@ -79,4 +97,10 @@ std::string MatManager::ConstructShader(const std::string& shaderName, const std
         slog(WARNING, MATERIAL, "Failed to build shader %s.", shaderName.c_str());
 
     return shader;
+}
+
+Resource* MatManager::GetResource(int index) {
+    if (index < 0 || index >= m_resources.size())
+        return nullptr;
+    return m_resources[index].get();
 }

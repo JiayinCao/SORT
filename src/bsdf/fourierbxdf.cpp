@@ -22,11 +22,12 @@
 #include "core/memory.h"
 #include "core/samplemethod.h"
 #include "sampler/sample.h"
+#include "material/matmanager.h"
 
-void FourierBxdfData::LoadData( const std::string& filename ){
+bool FourierBxdfData::LoadResource( const std::string& filename ){
     std::ifstream file( filename.c_str(), std::ios::binary);
     if( !file.is_open() )
-        return;
+        return false;
     
     // We assume both of the system and the file are of the same endian, which should be little endian on Intel chip.
     auto ReadFile = [&]( char* data , int sizeInByte )-> bool {
@@ -39,19 +40,19 @@ void FourierBxdfData::LoadData( const std::string& filename ){
     memset( file_header , 0 , sizeof( file_header ) );
     ReadFile( file_header , 8 );
     if( memcmp( file_header , header , 8 ) != 0 )
-        return;
+        return false;
     
     int flags = 0, coeff = 0, unused[4];
     std::unique_ptr<int[]> offsetAndLength;
     
-    if( !ReadFile( (char*)&flags , 4 ) || flags != 1 ) {file.close(); return;}
-    if( !ReadFile( (char*)&bsdfTable.nMu , 4 ) || bsdfTable.nMu <= 1 ) {file.close(); return;}
-    if( !ReadFile( (char*)&coeff , 4 ) || coeff <= 0 ) {file.close(); return;}
-    if( !ReadFile( (char*)&bsdfTable.nMax , 4 ) || bsdfTable.nMax <= 0 ) {file.close(); return;}
-    if( !ReadFile( (char*)&bsdfTable.nChannels , 4 ) || (bsdfTable.nChannels != 1 && bsdfTable.nChannels != 3) ) {file.close(); return;}
-    if( !ReadFile( (char*)unused , 16 ) ) {file.close(); return;}
-    if( !ReadFile( (char*)&bsdfTable.eta , 4 ) ) {file.close(); return;}
-    if( !ReadFile( (char*)unused , 16 ) ) {file.close(); return;}
+    if( !ReadFile( (char*)&flags , 4 ) || flags != 1 ) {file.close(); return false;}
+    if( !ReadFile( (char*)&bsdfTable.nMu , 4 ) || bsdfTable.nMu <= 1 ) {file.close(); return false;}
+    if( !ReadFile( (char*)&coeff , 4 ) || coeff <= 0 ) {file.close(); return false;}
+    if( !ReadFile( (char*)&bsdfTable.nMax , 4 ) || bsdfTable.nMax <= 0 ) {file.close(); return false;}
+    if( !ReadFile( (char*)&bsdfTable.nChannels , 4 ) || (bsdfTable.nChannels != 1 && bsdfTable.nChannels != 3) ) {file.close(); return false;}
+    if( !ReadFile( (char*)unused , 16 ) ) {file.close(); return false;}
+    if( !ReadFile( (char*)&bsdfTable.eta , 4 ) ) {file.close(); return false;}
+    if( !ReadFile( (char*)unused , 16 ) ) {file.close(); return false;}
     
     const auto sqMu = bsdfTable.nMu * bsdfTable.nMu;
     bsdfTable.mu = std::make_unique<float[]>(bsdfTable.nMu);
@@ -67,7 +68,7 @@ void FourierBxdfData::LoadData( const std::string& filename ){
        !ReadFile( (char*)bsdfTable.cdf.get() , sqMu * sizeof(float) ) ||
        !ReadFile( (char*)offsetAndLength.get() , 2 * sqMu * sizeof(int) ) ||
        !ReadFile( (char*)bsdfTable.a.get() , coeff * sizeof( float ) ) )
-        {file.close(); return;}
+        {file.close(); return false;}
     
     for( int i = 0 ; i < bsdfTable.nMu * bsdfTable.nMu ; ++i ){
         bsdfTable.aOffset[i] = offsetAndLength[2*i];
@@ -80,6 +81,7 @@ void FourierBxdfData::LoadData( const std::string& filename ){
         bsdfTable.recip[i] = 1.0f / (float) i;
     
     file.close();
+    return true;
 }
 
 // evaluate bxdf
@@ -398,4 +400,8 @@ int FourierBxdfData::blendCoefficients( float* ak , int channel , int offsetI , 
         }
     }
     return nMax;
+}
+
+FourierBxdf::FourierBxdf(const Params& params, const Spectrum& weight)
+    : Bxdf(weight, BXDF_ALL, params.n, true), m_data(dynamic_cast<FourierBxdfData*>(MatManager::GetSingleton().GetResource(params.resIdx))) {
 }
