@@ -127,15 +127,6 @@ class SORTShadingNode(bpy.types.Node):
     def export_pbrt(self, output_pbrt_type , output_pbrt_prop):
         pass
 
-    def serializae_prop(self, serialize_method):
-        for prop in self.property_list:
-            if prop['class'].is_socket():
-                continue
-            attr_wrapper = getattr(self, prop['name'] + '_wrapper' )
-            attr = getattr(self, prop['name'])
-            v = attr_wrapper.export_serialization_value(attr_wrapper,attr)
-            serialize_method( prop['name'] , v )
-
     def serialize_prop(self, fs):
         fs.serialize( len( self.property_list ) )
         for prop in self.property_list:
@@ -240,6 +231,29 @@ class SORTShadingNode_BXDF(SORTShadingNode):
                 v = self.inputs[prop['name']].export_socket_value()
                 output_pbrt_prop( n , t , v )
 
+    def serialize_prop(self, fs):
+        if not self.disable_normal:
+            fs.serialize( len( self.property_list ) + 1 )
+        else:
+            fs.serialize( len( self.property_list ) )
+
+        for prop in self.property_list:
+            if prop['class'].is_socket():
+                value = self.inputs[prop['name']].export_osl_value()
+                fs.serialize( value )
+            else:
+                attr_wrapper = getattr(self, prop['name'] + '_wrapper' )
+                attr = getattr(self, prop['name'])
+                value = attr_wrapper.export_osl_value(attr_wrapper,attr)
+                fs.serialize( value )
+
+        if not self.disable_normal:
+            #for prop in self.bxdf_property_list:
+                #attr_wrapper = getattr(self, prop['name'] + '_wrapper' )
+                #attr = getattr(self, prop['name'])
+            value = "normal(%f,%f,%f)" %self.inputs['Normal'].default_value[:]
+            fs.serialize( value )
+
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Material Nodes for SORT
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -258,9 +272,10 @@ class SORTNode_Material_Principle(SORTShadingNode_BXDF):
                           float Metallic = @ ,
                           float Specular = @ ,
                           color BaseColor = @ ,
+                          normal Normal = @ ,
                           output closure color Result = color(0) ){
             // UE4 PBS model
-            Result = lambert( BaseColor , N ) * ( 1 - Metallic ) * 0.92 + microfacetReflection( "GGX", color( 0.37 ), color( 2.82 ), RoughnessU, RoughnessV, BaseColor , N ) * ( Metallic * 0.92 + 0.08 * Specular );
+            Result = lambert( BaseColor , Normal ) * ( 1 - Metallic ) * 0.92 + microfacetReflection( "GGX", color( 0.37 ), color( 2.82 ), RoughnessU, RoughnessV, BaseColor , Normal ) * ( Metallic * 0.92 + 0.08 * Specular );
         }
     '''
 
@@ -292,8 +307,9 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
                        float Clearcoat = @ ,
                        float ClearcoatGloss = @ ,
                        color BaseColor = @ ,
+                       normal Normal = @ ,
                        output closure color Result = color(0) ){
-            Result = disney( SubSurface , Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGloss , BaseColor , N );
+            Result = disney( SubSurface , Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGloss , BaseColor , Normal );
         }
     '''
 
@@ -311,8 +327,9 @@ class SORTNode_Material_Glass(SORTShadingNode_BXDF):
                       color Transmittance = @ ,
                       float RoughnessU = @ ,
                       float RoughnessV = @ ,
+                      normal Normal = @ ,
                       output closure color Result = color(0) ){
-            Result = dieletric( Reflectance , Transmittance , RoughnessU , RoughnessV , N );
+            Result = dieletric( Reflectance , Transmittance , RoughnessU , RoughnessV , Normal );
         }
     '''
 
@@ -328,11 +345,12 @@ class SORTNode_Material_Plastic(SORTShadingNode_BXDF):
         shader Plastic( color Diffuse = @ ,
                         color Specular = @ ,
                         float Roughness = @ ,
+                        normal Normal = @ ,
                         output closure color Result = color(0) ){
             if( Diffuse[0] != 0 || Diffuse[1] != 0 || Diffuse[2] != 0 )
                 Result += lambert( Diffuse , N );
             if( Specular[0] != 0 || Specular[1] != 0 || Specular[2] != 0 )
-                Result += microfacetReflectionDieletric( "GGX", 1.0, 1.5, Roughness, Roughness, Specular , N );
+                Result += microfacetReflectionDieletric( "GGX", 1.0, 1.5, Roughness, Roughness, Specular , Normal );
         }
     '''
 
@@ -346,11 +364,12 @@ class SORTNode_Material_Matte(SORTShadingNode_BXDF):
     osl_shader = '''
         shader Matte( color BaseColor = @ ,
                       float Roughness = @ , 
+                      normal Normal = @ ,
                       output closure color Result = color(0)){
             if( Roughness == 0.0 )
                 Result = lambert( BaseColor , N );
             else
-                Result = orenNayar( BaseColor , Roughness , N );
+                Result = orenNayar( BaseColor , Roughness , Normal );
         }
     '''
 
@@ -362,8 +381,9 @@ class SORTNode_Material_Mirror(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } ]
     osl_shader = '''
         shader Mirror( color BaseColor = @ , 
+                       normal Normal = @ ,
                        output closure color Result = color(0) ){
-            Result = microfacetReflection( "GGX" , 1.0 , 1.0 , 0.0 , 0.0 , BaseColor , N );
+            Result = microfacetReflection( "GGX" , 1.0 , 1.0 , 0.0 , 0.0 , BaseColor , Normal );
         }
     '''
 
@@ -419,6 +439,13 @@ class SORTNode_Material_DoubleSided(SORTShadingNode_BXDF):
     disable_normal = True
     property_list = [ { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf0' } ,
                       { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf1' } ]
+    osl_shader = '''
+        shader MaterialBlend(  closure color Bxdf0 = @ ,
+                               closure color Bxdf1 = @ ,
+                               output closure color Result = color(0) ){
+            Result = Bxdf0 * ( 1.0 - Factor ) + Bxdf1 * Factor;
+        }
+    '''
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               BXDF Nodes for SORT
@@ -440,8 +467,9 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
                                      float  RoughnessU = @ ,
                                      float  RoughnessV = @ ,
                                      color  BaseColor = @ ,
+                                     normal Normal = @ ,
                                      output closure color Result = color(0) ){
-            Result = microfacetReflection( MicroFacetDistribution , Interior_IOR , Absorption_Coefficient , RoughnessU , RoughnessV , BaseColor , N );
+            Result = microfacetReflection( MicroFacetDistribution , Interior_IOR , Absorption_Coefficient , RoughnessU , RoughnessV , BaseColor , Normal );
         }
     '''
 
@@ -462,8 +490,9 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
                                      float  RoughnessU = @ ,
                                      float  RoughnessV = @ ,
                                      color  BaseColor = @ , 
+                                     normal Normal = @ ,
                                      output closure color Result = color(0) ){
-            Result = microfacetRefraction( MicroFacetDistribution , Interior_IOR , Exterior_IOR , RoughnessU , RoughnessV , BaseColor , N );
+            Result = microfacetRefraction( MicroFacetDistribution , Interior_IOR , Exterior_IOR , RoughnessU , RoughnessV , BaseColor , Normal );
         }
     '''
 
@@ -480,8 +509,9 @@ class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
                                  float RoughnessU = @ ,
                                  float RoughnessV = @ ,
                                  color Diffuse = @ ,
+                                 normal Normal = @ ,
                                  output closure color Result = color(0) ){
-            Result = ashikhmanShirley( Specular , RoughnessU , RoughnessV , Diffuse , N );
+            Result = ashikhmanShirley( Specular , RoughnessU , RoughnessV , Diffuse , Normal );
         }
     '''
 
@@ -498,8 +528,9 @@ class SORTNode_BXDF_Phong(SORTShadingNode_BXDF):
                       float DiffuseRatio = @ ,
                       color Specular = @ ,
                       color Diffuse = @ ,
+                      normal Normal = @ ,
                       output closure color Result = color(0) ){
-            Result = phong( Diffuse * DiffuseRatio , ( 1.0 - DiffuseRatio ) * Specular , SpecularPower , N );
+            Result = phong( Diffuse * DiffuseRatio , ( 1.0 - DiffuseRatio ) * Specular , SpecularPower , Normal );
         }
     '''
 
@@ -510,8 +541,9 @@ class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
         shader Lambert( color Diffuse = @ ,
+                        normal Normal = @ ,
                         output closure color Result = color(0) ){
-            Result = lambert( Diffuse , N );
+            Result = lambert( Diffuse , Normal );
         }
     ''' 
 
@@ -522,8 +554,9 @@ class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
         shader LambertTransmission( color Diffuse = @ ,
+                                    normal Normal = @ ,
                                     output closure color Result = color(0) ){
-            Result = lambertTransmission( Diffuse , N );
+            Result = lambertTransmission( Diffuse , Normal );
         }
     '''
 
@@ -536,8 +569,9 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
     osl_shader = '''
         shader OrenNayar( float roughness = @,
                           color Diffuse = @ ,
+                          normal Normal = @ ,
                           output closure color Result = color(0) ){
-            Result = orenNayar( Diffuse , roughness , N );
+            Result = orenNayar( Diffuse , roughness , Normal );
         }
     '''
 
@@ -558,12 +592,13 @@ class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
                      float     Roughness = @ ,
                      color     ColorTint = @ ,
                      closure color Surface = @ ,
+                     normal Normal = @ ,
                      output closure color Result = color(0) ){
             // A Practical and Controllable Hair and Fur Model for Production Path Tracing
             // https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
             float inv = 1.0 / ( 5.969 - 0.215 * Roughness + 2.532 * pow(Roughness,2.0) - 10.73 * pow(Roughness,3.0) + 5.574 * pow(Roughness,4.0) + 0.245 * pow(Roughness, 5.0) );
             color sigma = color( helper(ColorTint[0],inv) , helper(ColorTint[1],inv) , helper(ColorTint[2],inv) );
-            Result = coat( Surface , Roughness , IOR , sigma , N );
+            Result = coat( Surface , Roughness , IOR , sigma , Normal );
         }
     '''
 
@@ -574,8 +609,9 @@ class SORTNode_BXDF_MERL(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' } ]
 
     osl_shader = '''
-        shader merlBRDF( output closure color Result = color(0) ){
-            Result = merlBRDF( %s , N );
+        shader merlBRDF( normal Normal = @ ,
+                         output closure color Result = color(0) ){
+            Result = merlBRDF( %s , Normal );
         }
     '''
     def generate_osl_source(self):
@@ -599,8 +635,9 @@ class SORTNode_BXDF_Fourier(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' } ]
 
     osl_shader = '''
-        shader FourierBRDF( output closure color Result = color(0) ){
-            Result = fourierBRDF( %s , N );
+        shader FourierBRDF( normal Normal = @ ,
+                            output closure color Result = color(0) ){
+            Result = fourierBRDF( %s , Normal );
         }
     '''
     def generate_osl_source(self):

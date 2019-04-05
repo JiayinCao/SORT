@@ -350,6 +350,7 @@ void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::Shader
     shaderglobals.u = intersection->u;
     shaderglobals.v = intersection->v;
     shaderglobals.N = Vec3(0.0f, 1.0f, 0.0f);
+    //shaderglobals.I = intersection->
     g_shadingsys->execute(shadingContext.ctx, *shader, shaderglobals);
 
     process_closure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );
