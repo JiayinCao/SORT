@@ -29,10 +29,10 @@ bool Material::BuildShader(){
     for( const auto& connection : m_connections )
         connect_shader( connection.source_shader , connection.source_property , connection.target_shader , connection.target_property );
 
-    bool ret = endShaderGroup();
-    if( ret )
+    m_valid = endShaderGroup();
+    if( m_valid )
         slog( INFO , MATERIAL , "Build shader %s successfully." , m_name.c_str() );
-    return ret;
+    return m_valid;
 }
 
 void Material::Serialize(IStreamBase& stream){
@@ -76,7 +76,7 @@ void Material::Serialize(IStreamBase& stream){
 Bsdf* Material::GetBsdf(const class Intersection* intersect) const {
     Bsdf* bsdf = SORT_MALLOC(Bsdf)(intersect);
 
-    if (g_noMaterial) {
+    if (g_noMaterial || !m_valid) {
         Spectrum weight(1.0f);
         const Lambert* lambert = SORT_MALLOC(Lambert)(weight, weight, DIR_UP);
         bsdf->AddBxdf(lambert);

@@ -65,6 +65,8 @@ public:
     bool    BuildShader();
 
 private:
+    /**< Whether this is a valid material */
+    bool                            m_valid = false;
 	/**< Unique name of the material. */
 	std::string	                    m_name;
 
