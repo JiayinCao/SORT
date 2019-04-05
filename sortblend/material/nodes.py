@@ -712,6 +712,21 @@ class SORTNodeDecodeNormal(SORTShadingNode):
         }
     '''
 
+@SORTPatternGraph.register_node('Operator')
+class SORTNodePerlinNoise(SORTShadingNode):
+    bl_label = 'PerlinNoise'
+    bl_idname = 'SORTNodePerlinNoise'
+    property_list = [ { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'Scaling' , 'default' : 1.0 },
+                      { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
+    output_type = 'SORTNodeSocketUV'
+    osl_shader = '''
+        shader PerlinNoise( float Scaling = @ ,
+                            vector UVMapping = @ ,
+                            output vector Result = vector( 0.0 , 0.0 , 0.0 ) ){
+            Result = noise( "perlin" , UVMapping[0] , UVMapping[1] ) * Scaling + UVMapping;
+        }
+    '''
+
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Texture Nodes for SORT
 #------------------------------------------------------------------------------------------------------------------------------------
