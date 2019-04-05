@@ -86,6 +86,7 @@ bool Quad::GetIntersect( const Ray& r , Intersection* intersect ) const{
 		intersect->normal = m_transform.invMatrix.Transpose()(DIR_UP);
 		intersect->gnormal = intersect->normal;
 		intersect->tangent = m_transform(Vector( 0.0f , 0.0f , 1.0f ));
+		intersect->view = -r.m_Dir;
 	}
 
 	return true;

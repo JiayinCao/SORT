@@ -497,6 +497,7 @@ closure color hair( color sigma , float lr , float ar , float ior ) BUILTIN;
 closure color fourierBRDF(int idx, normal N) BUILTIN;
 closure color merlBRDF(int idx, normal N) BUILTIN;
 closure color coat( closure color bottom , float roughness , float ior , color sigma , normal N ) BUILTIN;
+closure color doubleSided( closure color bxdf0 , closure color bxdf1 ) BUILTIN;
 
 #undef BUILTIN
 #undef BUILTIN_DERIV

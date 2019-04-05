@@ -42,6 +42,8 @@ public:
     Vector  gnormal;
 	// tangent vector
 	Vector	tangent;
+    // viewing direction in world space, this is usually Wo.
+    Vector  view;
 	// the uv coordinate
     float	u = 0.0f , v = 0.0f;
 	// the delta distance from the orginal point

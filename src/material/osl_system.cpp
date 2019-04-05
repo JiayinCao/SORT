@@ -37,6 +37,7 @@
 #include "bsdf/fourierbxdf.h"
 #include "bsdf/merl.h"
 #include "bsdf/coat.h"
+#include "bsdf/doublesided.h"
 
 using namespace OSL;
 
@@ -166,6 +167,10 @@ void register_closures(ShadingSystem* shadingsys){
             CLOSURE_COLOR_PARAM(Coat::Params, sigma),
             CLOSURE_VECTOR_PARAM(Coat::Params, n),
             CLOSURE_FINISH_PARAM(Coat::Params) } },
+        { "doubleSided" , DOUBLESIDED_ID, {
+            CLOSURE_CLOSURE_PARAM(DoubleSided::Params, bxdf0),
+            CLOSURE_CLOSURE_PARAM(DoubleSided::Params, bxdf1),
+            CLOSURE_FINISH_PARAM(DoubleSided::Params) } },
     };
 
     constexpr int CC = sizeof( closures ) / sizeof( BuiltinClosures );
@@ -338,6 +343,16 @@ void process_closure (Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::C
                         bsdf->AddBxdf(SORT_MALLOC(Coat)( params, weight , bottom ));
                     }
                     break;
+                case DOUBLESIDED_ID:
+                    {
+                        const auto& params = *comp->as<DoubleSided::Params>();
+                        Bsdf* bxdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+                        Bsdf* bxdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+                        process_closure( bxdf0 , params.bxdf0 , Color3( 1.0f ) );
+                        process_closure( bxdf1 , params.bxdf1 , Color3( 1.0f ) );
+                        bsdf->AddBxdf(SORT_MALLOC(DoubleSided)( bxdf0 , bxdf1 , weight ));
+                    }
+                    break;
             }
        }
    }
@@ -349,8 +364,9 @@ void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::Shader
     ShaderGlobals shaderglobals;
     shaderglobals.u = intersection->u;
     shaderglobals.v = intersection->v;
-    shaderglobals.N = Vec3(0.0f, 1.0f, 0.0f);
-    //shaderglobals.I = intersection->
+    shaderglobals.N = Vec3( intersection->normal.x , intersection->normal.y , intersection->normal.z );
+    shaderglobals.Ng = Vec3( intersection->gnormal.x , intersection->gnormal.y , intersection->gnormal.z );
+    shaderglobals.I = Vec3( intersection->view.x , intersection->view.y , intersection->view.z );
     g_shadingsys->execute(shadingContext.ctx, *shader, shaderglobals);
 
     process_closure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );

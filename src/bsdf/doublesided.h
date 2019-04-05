@@ -26,9 +26,13 @@
  * This is a BXDF wrapper shows double sided BRDF.
  * Note there may be unknown behavior if this bxdf is fed with a BTDF, which is not suggested!
  */
-class DoubleSided : public Bxdf
-{
+class DoubleSided : public Bxdf{
 public:
+    struct Params{
+        OSL::ClosureColor*  bxdf0;
+        OSL::ClosureColor*  bxdf1;
+    };
+    
 	//! Constructor
     //! @param bxdf0        Bxdf0.
     //! @param bxdf1        Bxdf1.
