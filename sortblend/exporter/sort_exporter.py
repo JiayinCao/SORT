@@ -540,7 +540,7 @@ def export_materials(scene, fs):
         mat_nodes = []          # resulting nodes
         mat_connections = []    # connections between nodes
         visited = set()         # prevent a node to be serialized twice
-        def collect_node_count(mat_node, visited, to_be_serialized):
+        def collect_node_count(mat_node, visited):
             inputs = mat_node.inputs
             for socket in inputs:
                 if socket.is_linked:
@@ -548,23 +548,21 @@ def export_materials(scene, fs):
                     input_socket = socket.links[0].from_socket
                     input_node = input_socket.node
 
-                    if to_be_serialized:
-                        source_param = input_socket.name.replace(' ', '')
-                        target_param = socket.name.replace(' ' ,'')
-                        mat_connections.append( ( compact_material_name + '_' + input_node.name , source_param , compact_material_name + '_' + mat_node.name , target_param ) )
+                    source_param = input_socket.name.replace(' ', '')
+                    target_param = socket.name.replace(' ' ,'')
+                    mat_connections.append( ( compact_material_name + '_' + input_node.name , source_param , compact_material_name + '_' + mat_node.name , target_param ) )
 
                     if input_node.name not in visited:
-                        collect_node_count(input_node, visited, True)
+                        collect_node_count(input_node, visited)
 
                         # make sure it doesn't get serialized again
                         visited.add( input_node )
 
             # topological sort is necessary here to preserve the order of shader definition.
-            if to_be_serialized:
-                mat_nodes.append( mat_node )
+            mat_nodes.append( mat_node )
 
         # collect all material nodes
-        collect_node_count(output_node, visited, True)
+        collect_node_count(output_node, visited)
 
         # serialize this material
         fs.serialize( len( mat_nodes ) )
