@@ -23,15 +23,12 @@
 #include <unordered_map>
 #include "core/singleton.h"
 #include "material/material.h"
+#include "resource.h"
 
-/////////////////////////////////////////////////////////////////////////////
-//	definition of material manager
-//	desc :	Material manager is a singleton. All of the materials in the system
-//			are parsed from file and located in a single pool. And it's 
-//			responsible for deallocate all of the material memory.
-//	note :	There will be textures in most of materials. when materials are
-//			deleted the bind texture is also deleted. In another words ,
-//			material system is also responsible for deallocating textures.
+//! @brief Material manager.
+/**
+ * This could very likely be a temporary solution for now.
+ */
 class	MatManager : public Singleton<MatManager>
 {
 public:
@@ -66,9 +63,17 @@ public:
     //! @return             The constructed shader source code.
     std::string ConstructShader(const std::string& shaderName, const std::string& shaderType, const std::vector<std::string>& paramValue);
 
+    //! @brief  Get resource data based on index.
+    //!
+    //! @param  index       Index of the resource.
+    //! @return             The pointer of the resource. 'nullptr' will be returned if the index is out of range.
+    Resource*   GetResource(int index);
+
 private:
     std::vector<std::unique_ptr<class Material>>     m_matPool;         /**< Material pool holding all materials. */
     std::unordered_map<std::string, std::string>     m_shaderSources;   /**< OSL shader source code. */
+
+    std::vector<std::unique_ptr<Resource>>           m_resources;       /**< Resources used during BXDF evaluation. */
 
 	friend class Singleton<MatManager>;
 };

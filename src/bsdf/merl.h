@@ -19,6 +19,7 @@
 
 #include "bxdf.h"
 #include "bsdf.h"
+#include "material/resource.h"
 
 //! @brief Phong BRDF.
 /**
@@ -30,7 +31,7 @@
  * 'Efficient Isotropic BRDF Measurement'
  * http://www.merl.com/publications/docs/TR2003-80.pdf
  */
-class MerlData
+class MerlData : public Resource
 {
 public:
     //! Evaluate the BRDF
@@ -41,7 +42,7 @@ public:
     
     //! Load brdf data from MERL file.
     //! @param filename Name of the MERL file.
-    void    LoadData( const std::string& filename );
+    bool    LoadResource(const std::string& filename) override;
     
     //! Whether there is valid data loaded.
     //! @return True if data is valid, otherwise it will return false.
@@ -65,8 +66,17 @@ private:
 class Merl : public Bxdf
 {
 public:
-	//! Default constructor setting brdf type.
-    Merl( const MerlData& md , const Spectrum& weight , const Vector& n , bool doubleSided = false) : Bxdf( weight, BXDF_ALL, n , doubleSided) , m_data(md) {}
+    // Input parameters to construct the BRDF.
+    struct Params {
+        int     resIdx;
+        Vector  n;
+    };
+
+    //! Constructor taking spectrum information.
+    //!
+    //! @param params       Parameter set.
+    //! @param weight       Weight of this BRDF
+    Merl(const Params& params, const Spectrum& weight, bool doubleSided = false);
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -75,9 +85,9 @@ public:
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         if (!SameHemiSphere(wo, wi)) return 0.0f;
         if (!doubleSided && !PointingUp(wo)) return 0.0f;
-        return m_data.f(wo,wi) * AbsCosTheta(wi);
+        return m_data->f(wo,wi) * AbsCosTheta(wi);
     }
 
 private:
-	const MerlData&	m_data;   /**< The actual data of MERL brdf. */
+	const MerlData*	m_data;   /**< The actual data of MERL brdf. */
 };
