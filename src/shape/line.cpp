@@ -76,6 +76,8 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 			intersect->gnormal = Normalize(m_world2Line.GetInversed()( Vector( inter.x , 0.0f , inter.z ) ) );
 			intersect->normal = intersect->gnormal;
 			intersect->tangent = Normalize( m_gp1 - m_gp0 );
+
+			intersect->view = -r.m_Dir;
 		}
 
 		intersect->u = 1.0f;

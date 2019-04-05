@@ -443,7 +443,7 @@ class SORTNode_Material_DoubleSided(SORTShadingNode_BXDF):
         shader MaterialBlend(  closure color Bxdf0 = @ ,
                                closure color Bxdf1 = @ ,
                                output closure color Result = color(0) ){
-            Result = Bxdf0 * ( 1.0 - Factor ) + Bxdf1 * Factor;
+            Result = doubleSided( Bxdf0 , Bxdf1 );
         }
     '''
 
