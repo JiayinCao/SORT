@@ -37,20 +37,22 @@
 class Coat : public Bxdf
 {
 public:
-	//! Constructor.
+    // Input parameters to construct the BRDF.
+    struct Params {
+        OSL::ClosureColor*      closure;
+        float                   roughness;
+        float                   ior;
+        RGBSpectrum             sigma;
+        Vector n;
+    };
+
+    //! Constructor.
     //!
-    //! @param thickness        Thickness of the layer.
-    //! @param ior              Index of refraction outside the surface where the normal points to.
-    //! @param roughness        Roughness of the coating layer.
-    //! @param sigma            Absorption coefficient.
-    //! @param bottom           Bottom layer BSDF.
+    //! @param params           Parameter set.
     //! @param weight           Weight of the BXDF.
-    //! @param n                Normal from normal map.
-    //! @param doubleSided      Whether the surface is double sided.
-    Coat(const float thickness, const float ior, const float roughness, const Spectrum& sigma , const Bsdf* bottom, const Spectrum& weight, const Vector& n , bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), thickness(thickness), ior(ior), sigma(sigma), ggx(roughness, roughness),
-          fresnel(1.0f,ior), coat_weight( 1.0f ), coat(coat_weight, &fresnel , &ggx , coat_weight , n ), bottom(bottom) {}
-	
+    //! @param bottom           Bottom layer bsdf.
+    Coat( const Params& params , const Spectrum& weight , const Bsdf* bottom );
+
     //! Evaluate the BRDF.
     //!
     //! @param wo   Exitant direction in shading coordinate.
