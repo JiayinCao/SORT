@@ -94,26 +94,6 @@ std::unique_ptr<ShadingSystem>  MakeOSLShadingSys(){
     return std::move( shadingsys );
 }
 
-struct ShadingContextWrapper{
-public:
-    ShadingContextWrapper( ShadingSystem* shadingsys ):shadingsys(shadingsys){
-        thread_info = shadingsys->create_thread_info();
-        ctx = shadingsys->get_context(thread_info);
-    }
-    ~ShadingContextWrapper(){
-        shadingsys->release_context (ctx);
-        ctx = nullptr;
-        shadingsys->destroy_thread_info(thread_info);
-        thread_info = nullptr;
-    }
-
-    ShadingContext *ctx = nullptr;
-
-private:
-    OSL::PerThreadInfo  *thread_info = nullptr;
-    ShadingSystem       *shadingsys = nullptr;
-};
-
 // This unit test will cover the basics of Open Shading Language, like read input and output from a shader ,
 // execute a shader and verify the result
 TEST(OSL, CheckingSymbol) {

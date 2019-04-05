@@ -43,9 +43,24 @@ constexpr int DIELETRIC_ID                          = 10;
 constexpr int MICROFACET_REFLECTION_DIELETRIC_ID    = 11;
 constexpr int HAIR_ID                               = 12;
 
+struct ShadingContextWrapper {
+public:
+    ShadingContextWrapper(OSL::ShadingSystem* shadingsys);
+    ~ShadingContextWrapper();
+
+    OSL::ShadingContext *ctx = nullptr;
+
+private:
+    OSL::PerThreadInfo  *thread_info = nullptr;
+    OSL::ShadingSystem  *shadingsys = nullptr;
+};
+
 // begin building shader
 OSL::ShaderGroupRef beginShaderGroup( const std::string& group_name );
 bool endShaderGroup();
+
+// Optimize shader
+void optimizeShader(OSL::ShaderGroup* group);
 
 // Compile OSL source code
 bool compile_buffer ( const std::string &sourcecode, const std::string &shadername );
@@ -61,3 +76,6 @@ void execute_shader( class Bsdf* bsdf , const class Intersection* intersection ,
 
 // Register closures
 void register_closures(OSL::ShadingSystem* shadingsys);
+
+// Create OSL shading context
+void create_shading_context();
