@@ -174,7 +174,7 @@ bool compile_buffer ( const std::string &sourcecode, const std::string &shaderna
     // Load shader from compiled object file.
     if (! g_shadingsys->LoadMemoryCompiledShader (shadername, osobuffer))
         return false;
-    
+
     return true;
 }
 
@@ -195,6 +195,10 @@ ShaderGroupRef beginShaderGroup( const std::string& group_name ){
 }
 bool endShaderGroup(){
     return g_shadingsys->ShaderGroupEnd();
+}
+
+void optimizeShader(OSL::ShaderGroup* group) {
+    g_shadingsys->optimize_group(group);
 }
 
 bool connect_shader( const std::string& source_shader , const std::string& source_param , const std::string& target_shader , const std::string& target_param ){
@@ -299,17 +303,25 @@ void process_closure (Bsdf* bsdf, const ClosureColor* closure, const Color3& w) 
 }
 
 void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::ShaderGroup* shader ){
-    auto thread_info = g_shadingsys->create_thread_info();
-    auto ctx = g_shadingsys->get_context(thread_info);
+    static thread_local ShadingContextWrapper  shadingContext(g_shadingsys.get());
 
     ShaderGlobals shaderglobals;
     shaderglobals.u = intersection->u;
     shaderglobals.v = intersection->v;
     shaderglobals.N = Vec3(0.0f, 1.0f, 0.0f);
-    g_shadingsys->execute(ctx, *shader, shaderglobals);
+    g_shadingsys->execute(shadingContext.ctx, *shader, shaderglobals);
 
     process_closure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );
+}
 
-    g_shadingsys->release_context (ctx);
-    g_shadingsys->destroy_thread_info(thread_info);
+ShadingContextWrapper::ShadingContextWrapper(OSL::ShadingSystem* shadingsys) :shadingsys(shadingsys) {
+    thread_info = shadingsys->create_thread_info();
+    ctx = shadingsys->get_context(thread_info);
+}
+
+ShadingContextWrapper::~ShadingContextWrapper() {
+    shadingsys->release_context(ctx);
+    ctx = nullptr;
+    shadingsys->destroy_thread_info(thread_info);
+    thread_info = nullptr;
 }

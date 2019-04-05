@@ -390,7 +390,7 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
             float inv = 1.0 / ( 5.969 - 0.215 * AzimuthalRoughness + 2.532 * pow(AzimuthalRoughness,2.0) - 10.73 * pow(AzimuthalRoughness,3.0) + 
                         5.574 * pow(AzimuthalRoughness,4.0) + 0.245 * pow(AzimuthalRoughness, 5.0) );
             color sigma = color( helper(HairColor[0],inv) , helper(HairColor[1],inv) , helper(HairColor[2],inv) );
-            Result = hair( color(1.0) , LongtitudinalRoughness , AzimuthalRoughness , IndexofRefraction );
+            Result = hair( sigma , LongtitudinalRoughness , AzimuthalRoughness , IndexofRefraction );
         }
     '''
 
