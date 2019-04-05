@@ -30,8 +30,12 @@ bool Material::BuildShader(){
         connect_shader( connection.source_shader , connection.source_property , connection.target_shader , connection.target_property );
 
     m_valid = endShaderGroup();
-    if( m_valid )
-        slog( INFO , MATERIAL , "Build shader %s successfully." , m_name.c_str() );
+    if (m_valid) {
+        slog(INFO, MATERIAL, "Build shader %s successfully.", m_name.c_str());
+
+        // Optimize the shader
+        optimizeShader(m_shader.get());
+    }
     return m_valid;
 }
 
