@@ -36,6 +36,7 @@
 #include "bsdf/hair.h"
 #include "bsdf/fourierbxdf.h"
 #include "bsdf/merl.h"
+#include "bsdf/coat.h"
 
 using namespace OSL;
 
@@ -158,6 +159,13 @@ void register_closures(ShadingSystem* shadingsys){
             CLOSURE_INT_PARAM(Merl::Params, resIdx),
             CLOSURE_VECTOR_PARAM(Merl::Params, n),
             CLOSURE_FINISH_PARAM(Merl::Params) } },
+        { "coat" , COAT_ID, {
+            CLOSURE_CLOSURE_PARAM(Coat::Params, closure),
+            CLOSURE_FLOAT_PARAM(Coat::Params, roughness),
+            CLOSURE_FLOAT_PARAM(Coat::Params, ior),
+            CLOSURE_COLOR_PARAM(Coat::Params, sigma),
+            CLOSURE_VECTOR_PARAM(Coat::Params, n),
+            CLOSURE_FINISH_PARAM(Coat::Params) } },
     };
 
     constexpr int CC = sizeof( closures ) / sizeof( BuiltinClosures );
@@ -215,7 +223,7 @@ bool connect_shader( const std::string& source_shader , const std::string& sourc
     return g_shadingsys->ConnectShaders( source_shader , source_param , target_shader , target_param );
 }
 
-void process_closure (Bsdf* bsdf, const ClosureColor* closure, const Color3& w) {
+void process_closure (Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::Color3& w) {
    if (!closure)
        return;
    switch (closure->id) {
@@ -317,6 +325,17 @@ void process_closure (Bsdf* bsdf, const ClosureColor* closure, const Color3& w) 
                     {
                         const auto& params = *comp->as<Merl::Params>();
                         bsdf->AddBxdf(SORT_MALLOC(Merl)(params, weight));
+                    }
+                    break;
+                case COAT_ID:
+                    {
+                        const auto& params = *comp->as<Coat::Params>();
+
+                        // parse the bottom bsdf
+                        Bsdf* bottom = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
+                        process_closure( bottom , params.closure , Color3( 1.0f ) );
+
+                        bsdf->AddBxdf(SORT_MALLOC(Coat)( params, weight , bottom ));
                     }
                     break;
             }

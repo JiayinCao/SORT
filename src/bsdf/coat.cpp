@@ -23,6 +23,11 @@
 // when evaluating the attenuation upward. The exact number is not mentioned in the original paper, 0.2 is used as default here.
 #define TIR_COMPENSATION    0.2f
 
+Coat::Coat( const Params& params , const Spectrum& weight, const Bsdf* bottom )
+: Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, false), thickness(1.0f), ior(params.ior), sigma(params.sigma), ggx(params.roughness, params.roughness),
+fresnel(1.0f,params.ior), coat_weight( 1.0f ), coat(coat_weight, &fresnel , &ggx , coat_weight , params.n ), bottom( bottom ){
+}
+
 Spectrum Coat::F( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!PointingUp(wo)) return 0.0f;
