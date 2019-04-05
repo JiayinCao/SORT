@@ -549,7 +549,9 @@ def export_materials(scene, fs):
                     input_node = input_socket.node
 
                     if to_be_serialized:
-                        mat_connections.append( ( compact_material_name + '_' + input_node.name , input_socket.name , compact_material_name + '_' + mat_node.name , socket.name ) )
+                        source_param = input_socket.name.replace(' ', '')
+                        target_param = socket.name.replace(' ' ,'')
+                        mat_connections.append( ( compact_material_name + '_' + input_node.name , source_param , compact_material_name + '_' + mat_node.name , target_param ) )
 
                     if input_node.name not in visited:
                         collect_node_count(input_node, visited, True)
