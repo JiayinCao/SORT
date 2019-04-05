@@ -115,7 +115,7 @@ def export_blender(scene, force_debug=False):
 
     # export material
     exporter_common.log("Exporting materials.")
-    collect_shader_sources(scene, fs)
+    collect_shader_resources(scene, fs)
     export_materials(scene, fs)
     #export_material(scene, fs)
     exporter_common.log("Exported materials %.2f(s)" % (time.time() - current_time))
@@ -470,13 +470,15 @@ def find_output_node(material):
     return None
 
 # This function will iterate through all visited nodes in the scene and populate everything in a hash table
-def collect_shader_sources(scene, fs):
+# Apart from collecting shaders, it will also collect all heavy data, like measured BRDF data, texture.
+def collect_shader_resources(scene, fs):
     # don't output any osl_shaders if using default materials
     if scene.allUseDefaultMaterial is True:
         fs.serialize( 0 )
         return None
 
     osl_shaders = {}
+    resources = []
 
     for material in exporter_common.getMaterialList(scene):
         # get output nodes
@@ -491,9 +493,12 @@ def collect_shader_sources(scene, fs):
                     assert len(socket.links) == 1
                     serialize_prop( socket.links[0].from_socket.node , shaders )
 
+            # populate resources first if necessary
+            mat_node.populateResources( resources )
+
             # populate the shader source code if it is not exported before
             if mat_node.bl_label not in shaders:
-                shaders[mat_node.bl_label] = mat_node.osl_shader
+                shaders[mat_node.bl_label] = mat_node.generate_osl_source()
 
         serialize_prop(output_node, osl_shaders)
 
@@ -503,6 +508,10 @@ def collect_shader_sources(scene, fs):
         fs.serialize( value )
         exporter_common.logD( 'Exporting node source code for node %s. Source code: %s' %(key , value) )
     del osl_shaders
+    fs.serialize( len( resources ) )
+    for resource in resources:
+        fs.serialize( resource[0] ) # type
+        fs.serialize( resource[1] ) # external file name
 
 # This function is to be deprecated once the new system is fully functional
 matname_to_id = {}

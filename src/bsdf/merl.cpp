@@ -23,8 +23,9 @@
 #include "core/path.h"
 #include "math/vector3.h"
 #include "bsdf.h"
+#include "material/matmanager.h"
 
-// constant to be used in merl
+// constant to be used in MERL
 static const unsigned MERL_SAMPLING_RES_THETA_H = 90;
 static const unsigned MERL_SAMPLING_RES_THETA_D = 90;
 static const unsigned MERL_SAMPLING_RES_PHI_D = 180;
@@ -34,7 +35,7 @@ static const double MERL_GREEN_SCALE = 0.000766666666666667;
 static const double MERL_BLUE_SCALE = 0.0011066666666666667;
 
 // Load data from file
-void MerlData::LoadData( const std::string& filename )
+bool MerlData::LoadResource( const std::string& filename )
 {
     // get full path
     auto str = ( filename );
@@ -42,7 +43,7 @@ void MerlData::LoadData( const std::string& filename )
     // try to open the file
     std::ifstream file( str.c_str() , std::ios::binary );
     if( false == file.is_open() )
-        return;
+        return false;
     
     unsigned int dims[3];
     file.read( (char*)dims , sizeof(unsigned int) * 3 );
@@ -52,7 +53,7 @@ void MerlData::LoadData( const std::string& filename )
        dims[1] != MERL_SAMPLING_RES_THETA_D ||
        dims[2] != MERL_SAMPLING_RES_PHI_D ){
         file.close();
-        return;
+        return false;
     }
     
     // allocate data
@@ -70,6 +71,7 @@ void MerlData::LoadData( const std::string& filename )
         m_data[offset++] *= MERL_BLUE_SCALE;
     
     file.close();
+    return true;
 }
 
 // evaluate bxdf
@@ -121,4 +123,9 @@ Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
 	const auto b = (float)( m_data[ index ] );
 
 	return Spectrum( r , g , b );
+}
+
+Merl::Merl(const Params& params, const Spectrum& weight, bool doubleSided)
+    : Bxdf(weight, BXDF_ALL, params.n, doubleSided), m_data(dynamic_cast<MerlData*>(MatManager::GetSingleton().GetResource(params.resIdx)))
+{
 }

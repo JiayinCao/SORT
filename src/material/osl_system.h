@@ -42,6 +42,8 @@ constexpr int MIRROR_ID                             = 9;
 constexpr int DIELETRIC_ID                          = 10;
 constexpr int MICROFACET_REFLECTION_DIELETRIC_ID    = 11;
 constexpr int HAIR_ID                               = 12;
+constexpr int FOURIER_BDRF_ID                       = 13;
+constexpr int MERL_BRDF_ID                          = 14;
 
 struct ShadingContextWrapper {
 public:

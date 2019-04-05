@@ -198,6 +198,14 @@ class SORTShadingNode(bpy.types.Node):
         for _ in do_mro(self, 'register_prop'):
             pass
 
+    # output nothing by default
+    def populateResources( self , resources ):
+        pass
+
+    # generate open shading lanugage source code
+    def generate_osl_source(self):
+        return self.osl_shader
+
 # Base class for SORT BXDF Node
 class SORTShadingNode_BXDF(SORTShadingNode):
     bl_label = 'ShadingNode'
@@ -239,7 +247,6 @@ class SORTShadingNode_BXDF(SORTShadingNode):
 class SORTNode_Material_Principle(SORTShadingNode_BXDF):
     bl_label = 'Principle'
     bl_idname = 'SORTNode_Material_Principle'
-    sort_bxdf_type = 'PrincipleMaterialNode'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessU' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Metallic' , 'default' : 1.0 } ,
@@ -261,7 +268,6 @@ class SORTNode_Material_Principle(SORTShadingNode_BXDF):
 class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
     bl_label = 'Disney BRDF'
     bl_idname = 'SORTNode_Material_DisneyBRDF'
-    sort_bxdf_type = 'DisneyPrincipleNode'
     pbrt_bxdf_type = 'disney'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'SubSurface' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Metallic' , 'default' : 1.0 , 'pbrt_name' : 'metallic' } ,
@@ -295,7 +301,6 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
 class SORTNode_Material_Glass(SORTShadingNode_BXDF):
     bl_label = 'Glass'
     bl_idname = 'SORTNode_Material_Glass'
-    sort_bxdf_type = 'GlassMaterialNode'
     pbrt_bxdf_type = 'glass'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Reflectance' , 'pbrt_name' : 'Kr' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Transmittance' , 'pbrt_name' : 'Kt' } ,
@@ -315,7 +320,6 @@ class SORTNode_Material_Glass(SORTShadingNode_BXDF):
 class SORTNode_Material_Plastic(SORTShadingNode_BXDF):
     bl_label = 'Plastic'
     bl_idname = 'SORTNode_Material_Plastic'
-    sort_bxdf_type = 'PlasticMaterialNode'
     pbrt_bxdf_type = 'plastic'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' , 'pbrt_name' : 'Kd' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' , 'pbrt_name' : 'Ks' } ,
@@ -336,7 +340,6 @@ class SORTNode_Material_Plastic(SORTShadingNode_BXDF):
 class SORTNode_Material_Matte(SORTShadingNode_BXDF):
     bl_label = 'Matte'
     bl_idname = 'SORTNode_Material_Matte'
-    sort_bxdf_type = 'MatteMaterialNode'
     pbrt_bxdf_type = 'matte'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' , 'pbrt_name' : 'sigma' } ]
@@ -355,7 +358,6 @@ class SORTNode_Material_Matte(SORTShadingNode_BXDF):
 class SORTNode_Material_Mirror(SORTShadingNode_BXDF):
     bl_label = 'Mirror'
     bl_idname = 'SORTNode_Material_Mirror'
-    sort_bxdf_type = 'MirrorMaterialNode'
     pbrt_bxdf_type = 'mirror'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'Kd' } ]
     osl_shader = '''
@@ -369,7 +371,6 @@ class SORTNode_Material_Mirror(SORTShadingNode_BXDF):
 class SORTNode_Material_Hair(SORTShadingNode_BXDF):
     bl_label = 'Hair'
     bl_idname = 'SORTNode_Material_Hair'
-    sort_bxdf_type = 'HairMaterialNode'
     disable_normal = True       # No normal map support for hair rendering, it is meaningless
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'HairColor' },
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Longtitudinal Roughness' },
@@ -395,25 +396,9 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
     '''
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_Material_Measured(SORTShadingNode_BXDF):
-    bl_label = 'Measured'
-    bl_idname = 'SORTNode_Material_Measured'
-    sort_bxdf_type = 'MeasuredMaterialNode'
-    property_list = [ { 'class' : properties.SORTNodePropertyEnum , 'name' : 'Type' , 'items' : [ ("Fourier", "Fourier", "", 1) , ("MERL" , "MERL" , "", 2) ] , 'default' : 'Fourier' } ,
-                      { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' } ]
-    def export_pbrt(self, output_pbrt_type , output_pbrt_prop):
-        abs_file_path = bpy.path.abspath( self.Filename )
-        if self.Type == 'Fourier':
-            output_pbrt_type( 'fourier' )
-        else:
-            output_pbrt_type( 'matte' )
-        output_pbrt_prop( n , 'string' , abs_file_path.replace( '\\' , '/' ) )
-
-@SORTPatternGraph.register_node('Materials')
 class SORTNode_Material_Blend(SORTShadingNode_BXDF):
     bl_label = 'Blend'
     bl_idname = 'SORTNode_Material_Blend'
-    sort_bxdf_type = 'BlendMaterialNode'
     disable_normal = True
     property_list = [ { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf0' } ,
                       { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf1' } ,
@@ -431,7 +416,6 @@ class SORTNode_Material_Blend(SORTShadingNode_BXDF):
 class SORTNode_Material_DoubleSided(SORTShadingNode_BXDF):
     bl_label = 'Double-Sided'
     bl_idname = 'SORTNode_Material_DoubleSided'
-    sort_bxdf_type = 'DoubleSidedMaterialNode'
     disable_normal = True
     property_list = [ { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf0' } ,
                       { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Bxdf1' } ]
@@ -443,7 +427,6 @@ class SORTNode_Material_DoubleSided(SORTShadingNode_BXDF):
 class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
     bl_label = 'MicrofacetRelection'
     bl_idname = 'SORTNode_BXDF_MicrofacetReflection'
-    sort_bxdf_type = 'MicrofacetReflectionNode'
     property_list = [ { 'class' : properties.SORTNodePropertyEnum , 'name' : 'MicroFacetDistribution' , 'default' : 'GGX' , 'items' : [ ("Blinn", "Blinn", "", 1), ("Beckmann" , "Beckmann" , "", 2), ("GGX" , "GGX" , "" , 3) ] } ,
                       { 'class' : properties.SORTNodePropertyFloatVector , 'name' : 'Interior_IOR' , 'default' : (0.37, 0.37, 0.37) , 'min' : 0.1 , 'max' : 10.0 } ,
                       { 'class' : properties.SORTNodePropertyFloatVector , 'name' : 'Absorption_Coefficient' , 'default' : (2.82, 2.82, 2.82) , 'min' : 0.1 , 'max' : 10.0 },
@@ -466,7 +449,6 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
 class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
     bl_label = 'MicrofacetRefraction'
     bl_idname = 'SORTNode_BXDF_MicrofacetRefraction'
-    sort_bxdf_type = 'MicrofacetRefractionNode'
     property_list = [ { 'class' : properties.SORTNodePropertyEnum , 'name' : 'MicroFacetDistribution' , 'default' : 'GGX' , 'items' : [ ("Blinn", "Blinn", "", 1), ("Beckmann" , "Beckmann" , "", 2), ("GGX" , "GGX" , "" , 3) ] } ,
                       { 'class' : properties.SORTNodePropertyFloat , 'name' : 'Interior_IOR' , 'default' : 1.1 , 'min' : 1.0 , 'max' : 10.0 } ,
                       { 'class' : properties.SORTNodePropertyFloat , 'name' : 'Exterior_IOR' , 'default' : 1.0 , 'min' : 1.0 , 'max' : 10.0 } ,
@@ -489,7 +471,6 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
 class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
     bl_label = 'AshikhmanShirley'
     bl_idname = 'SORTNode_BXDF_AshikhmanShirley'
-    sort_bxdf_type = 'AshikhmanShirleyNode'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Specular' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessU' , 'default' : 0.1 } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } ,
@@ -508,7 +489,6 @@ class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
 class SORTNode_BXDF_Phong(SORTShadingNode_BXDF):
     bl_label = 'Phong'
     bl_idname = 'SORTNode_BXDF_Phong'
-    sort_bxdf_type = 'PhongNode'
     property_list = [ { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'SpecularPower' , 'default' : 32.0 } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'DiffuseRatio' , 'default' : 0.2 } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' } ,
@@ -527,7 +507,6 @@ class SORTNode_BXDF_Phong(SORTShadingNode_BXDF):
 class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
     bl_label = 'Lambert'
     bl_idname = 'SORTNode_BXDF_Lambert'
-    sort_bxdf_type = 'LambertNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
         shader Lambert( color Diffuse = @ ,
@@ -540,7 +519,6 @@ class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
 class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
     bl_label = 'Lambert Transmission'
     bl_idname = 'SORTNode_BXDF_LambertTransmission'
-    sort_bxdf_type = 'LambertTransmissionNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
         shader LambertTransmission( color Diffuse = @ ,
@@ -553,7 +531,6 @@ class SORTNode_BXDF_LambertTransmission(SORTShadingNode_BXDF):
 class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
     bl_label = 'OrenNayar'
     bl_idname = 'SORTNode_BXDF_OrenNayar'
-    sort_bxdf_type = 'OrenNayarNode'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Roughness' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
@@ -568,7 +545,6 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
 class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
     bl_label = 'Coat'
     bl_idname = 'SORTNode_BXDF_Coat'
-    sort_bxdf_type = 'CoatNode'
     property_list = [ { 'class' : properties.SORTNodePropertyFloat  , 'name' : 'IOR'        , 'default' : 1.5 , 'min' : 1.0 , 'max' : 10.0 } ,
                       { 'class' : properties.SORTNodeSocketFloat    , 'name' : 'Roughness'  , 'default' : 0.0 } ,
                       { 'class' : properties.SORTNodeSocketColor    , 'name' : 'ColorTint' } ,
@@ -580,15 +556,51 @@ class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
 class SORTNode_BXDF_MERL(SORTShadingNode_BXDF):
     bl_label = 'MERL'
     bl_idname = 'SORTNode_BXDF_MERL'
-    sort_bxdf_type = 'MerlNode'
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' } ]
+
+    osl_shader = '''
+        shader merlBRDF( output closure color Result = color(0) ){
+            Result = merlBRDF( %s , N );
+        }
+    '''
+    def generate_osl_source(self):
+        return self.osl_shader%(self.ResourceIndex)
+
+    # output nothing by default
+    def populateResources( self , resources ):
+        found = False
+        for resource in resources:
+            if resource[1] == self.Filename:
+                found = True
+        if not found:
+            self.ResourceIndex = len(resources)
+            resources.append( ( self.Filename , 'MerlBRDFMeasuredData' ) )
+        pass
 
 @SORTPatternGraph.register_node('BXDFs')
 class SORTNode_BXDF_Fourier(SORTShadingNode_BXDF):
     bl_label = 'Fourier BXDF'
     bl_idname = 'SORTNode_BXDF_Fourier'
-    sort_bxdf_type = 'FourierBxdfNode'
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' } ]
+
+    osl_shader = '''
+        shader FourierBRDF( output closure color Result = color(0) ){
+            Result = fourierBRDF( %s , N );
+        }
+    '''
+    def generate_osl_source(self):
+        return self.osl_shader%(self.ResourceIndex)
+
+    # output nothing by default
+    def populateResources( self , resources ):
+        found = False
+        for resource in resources:
+            if resource[1] == self.Filename:
+                found = True
+        if not found:
+            self.ResourceIndex = len(resources)
+            resources.append( ( self.Filename , 'FourierBRDFMeasuredData' ) )
+        pass
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Operator Nodes for SORT
@@ -597,7 +609,6 @@ class SORTNode_BXDF_Fourier(SORTShadingNode_BXDF):
 class SORTNodeAdd(SORTShadingNode):
     bl_label = 'Add'
     bl_idname = 'SORTNodeAdd'
-    sort_bxdf_type = 'AddNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
     osl_shader = '''
@@ -612,7 +623,6 @@ class SORTNodeAdd(SORTShadingNode):
 class SORTNodeOneMinus(SORTShadingNode):
     bl_label = 'One Minus'
     bl_idname = 'SORTNodeOneMinus'
-    sort_bxdf_type = 'SORTNodeOneMinus'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
         shader OneMinus( color Color = @ ,
@@ -625,7 +635,6 @@ class SORTNodeOneMinus(SORTShadingNode):
 class SORTNodeMultiply(SORTShadingNode):
     bl_label = 'Multiply'
     bl_idname = 'SORTNodeMultiply'
-    sort_bxdf_type = 'MutiplyNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ]
     osl_shader = '''
@@ -640,7 +649,6 @@ class SORTNodeMultiply(SORTShadingNode):
 class SORTNodeBlend(SORTShadingNode):
     bl_label = 'Blend'
     bl_idname = 'SORTNodeBlend'
-    sort_bxdf_type = 'BlendNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Factor1' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
@@ -659,7 +667,6 @@ class SORTNodeBlend(SORTShadingNode):
 class SORTNodeLerp(SORTShadingNode):
     bl_label = 'Lerp'
     bl_idname = 'SORTNodeLerp'
-    sort_bxdf_type = 'LerpNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Factor' } ]
@@ -676,7 +683,6 @@ class SORTNodeLerp(SORTShadingNode):
 class SORTNodeLinearToGamma(SORTShadingNode):
     bl_label = 'LinearToGamma'
     bl_idname = 'SORTNodeLinearToGamma'
-    sort_bxdf_type = 'LinearToGammaNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
         shader LinearToGamma( color Color = @ ,
@@ -689,7 +695,6 @@ class SORTNodeLinearToGamma(SORTShadingNode):
 class SORTNodeGammaToLinear(SORTShadingNode):
     bl_label = 'GammaToLinear'
     bl_idname = 'SORTNodeGammaToLinear'
-    sort_bxdf_type = 'GammaToLinearNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
         shader GammaToLinear( color Color = @ ,
@@ -702,7 +707,6 @@ class SORTNodeGammaToLinear(SORTShadingNode):
 class SORTNodeDecodeNormal(SORTShadingNode):
     bl_label = 'DecodeNormal'
     bl_idname = 'SORTNodeDecodeNormal'
-    sort_bxdf_type = 'NormalDecoderNode'
     output_type = 'SORTNodeSocketNormal'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
@@ -734,7 +738,6 @@ class SORTNodePerlinNoise(SORTShadingNode):
 class SORTNodeGrid(SORTShadingNode):
     bl_label = 'Grid'
     bl_idname = 'SORTNodeGrid'
-    sort_bxdf_type = 'GridTexNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' },
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Treshold' , 'default' : 0.1 , 'min' : 0.0 , 'max' : 1.0 },
@@ -759,7 +762,6 @@ class SORTNodeGrid(SORTShadingNode):
 class SORTNodeCheckerBoard(SORTShadingNode):
     bl_label = 'CheckerBoard'
     bl_idname = 'SORTNodeCheckerBoard'
-    sort_bxdf_type = 'CheckerBoardTexNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color1' , 'default' : ( 0.2 , 0.2 , 0.2 ) } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
                       { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
@@ -781,11 +783,12 @@ class SORTNodeCheckerBoard(SORTShadingNode):
 class SORTNodeImage(SORTShadingNode):
     bl_label = 'Image'
     bl_idname = 'SORTNodeImage'
-    sort_bxdf_type = 'ImageTexNode'
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' },
-                      { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV' } ]
+                      { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
     osl_shader = '''
-        
+        shader CheckerBoard( output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = color(1.0);
+        }
     '''
 
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -795,7 +798,6 @@ class SORTNodeImage(SORTShadingNode):
 class SORTNodeConstant(SORTShadingNode):
     bl_label = 'Constant Color'
     bl_idname = 'SORTNodeConstant'
-    sort_bxdf_type = 'ConstantColorNode'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
         shader ConstantColor( color Color = @ ,
@@ -809,7 +811,6 @@ class SORTNodeConstantFloat(SORTShadingNode):
     bl_label = 'Constant Float'
     bl_idname = 'SORTNodeConstantFloat'
     output_type = 'SORTNodeSocketFloat'
-    sort_bxdf_type = 'ConstantFloatNode'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Value' } ]
     osl_shader = '''
         shader ConstantFloat( float Value = @ ,
@@ -823,14 +824,13 @@ class SORTNodeUVMapping(SORTShadingNode):
     bl_label = 'UV Mapping'
     bl_idname = 'SORTNodeUVMapping'
     output_type = 'SORTNodeSocketUV'
-    sort_bxdf_type = 'UVMappingNode'
     property_list = [ { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'U Tiling' , 'default' : 1.0 , 'min' : -float('inf') , 'max' : float('inf') } ,
                       { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'V Tiling' , 'default' : 1.0, 'min' : -float('inf') , 'max' : float('inf') } ,
                       { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'U Offset' , 'default' : 0.0, 'min' : -float('inf') , 'max' : float('inf') } ,
                       { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'V Offset' , 'default' : 0.0, 'min' : -float('inf') , 'max' : float('inf') } ]
     def init(self, context):
         super().register_prop(True)
-        self.outputs.new( self.output_type , 'UV Mapping' )
+        self.outputs.new( self.output_type , 'UVMapping' )
     osl_shader = '''
         shader UVMappinp( float UTiling = @ ,
                           float VTiling = @ ,
@@ -848,7 +848,6 @@ class SORTNodeUVMapping(SORTShadingNode):
 class SORTNodeComposite(SORTShadingNode):
     bl_label = 'Composite'
     bl_idname = 'SORTNodeComposite'
-    sort_bxdf_type = 'SORTNodeComposite'
     property_list = [ { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Red' },
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Green' },
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Blue' } ]
@@ -866,7 +865,6 @@ class SORTNodeExtract(SORTShadingNode):
     bl_label = 'Extract'
     bl_idname = 'SORTNodeExtract'
     output_type = 'SORTNodeSocketFloat'
-    sort_bxdf_type = 'SORTNodeExtract'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color' } ]
     osl_shader = '''
         shader Extract( color Color = @,
@@ -894,7 +892,6 @@ class SORTNodeExtract(SORTShadingNode):
 class SORTNodeOutput(SORTShadingNode):
     bl_label = 'SORT_output'
     bl_idname = 'SORTNodeOutput'
-    sort_bxdf_type = ''
     property_list = [ { 'class' : properties.SORTNodeSocketBxdf , 'name' : 'Surface' } ]
     osl_shader = '''
         shader SORT_Shader( closure color Surface = @ ){

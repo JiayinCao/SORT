@@ -21,8 +21,8 @@
 #include <memory>
 #include "core/sassert.h"
 
-// 16KB memory for each memory block by default.
-#define MEM_BLOCK_SIZE                  16384
+// 32KB memory for each memory block by default.
+#define MEM_BLOCK_SIZE                  32768
 // Memory alignment size
 #define MEM_ALIGN_SIZE                  4u
 #define MEM_SIZE_ALIGNED(s)             (((s+MEM_ALIGN_SIZE-1)/MEM_ALIGN_SIZE) * MEM_ALIGN_SIZE)
