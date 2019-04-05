@@ -115,7 +115,8 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
     intersect->gnormal = Normalize(Cross( ( op2 - op0 ) , ( op1 - op0 ) ));
 	intersect->normal = ( w * mv0.m_normal + u * mv1.m_normal + v * mv2.m_normal).Normalize();
 	intersect->tangent = ( w * mv0.m_tangent + u * mv1.m_tangent + v * mv2.m_tangent).Normalize();
-
+	intersect->view = -r.m_Dir;
+	
     const auto uv = w * mv0.m_texCoord + u * mv1.m_texCoord + v * mv2.m_texCoord;
     intersect->u = uv.x;
     intersect->v = uv.y;
