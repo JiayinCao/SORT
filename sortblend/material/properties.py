@@ -163,7 +163,7 @@ class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
             split = row.split(0.4)
             split.label(text)
     def export_osl_value(self):
-        return '%f'%(self.default_value)
+        return 'vector( u , v , 0.0 )'
         
 # Property for Float
 class SORTNodePropertyFloat(SORTNodeProperty):

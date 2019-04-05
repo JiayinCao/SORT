@@ -372,9 +372,9 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
     sort_bxdf_type = 'HairMaterialNode'
     disable_normal = True       # No normal map support for hair rendering, it is meaningless
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'HairColor' },
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'LongtitudinalRoughness' },
-                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'AzimuthalRoughness' },
-                      { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'IndexofRefraction' , 'default' : 1.55 } ]
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Longtitudinal Roughness' },
+                      { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Azimuthal Roughness' },
+                      { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'Index of Refraction' , 'default' : 1.55 } ]
     osl_shader = '''
         float helper( float x , float inv ){
             float y = log(x) * inv;
@@ -728,11 +728,10 @@ class SORTNodeGrid(SORTShadingNode):
         shader CheckerBoard( color Color1 = @ ,
                              color Color2 = @ ,
                              float Treshold = @ ,
+                             vector UVMapping = @ ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
-            // Temporary solution for now
-            float fu = 10.0 * u - floor( 10.0 * u ) - 0.5;
-            float fv = 10.0 * v - floor( 10.0 * v ) - 0.5;
-
+            float fu = UVMapping[0] - floor( UVMapping[0] ) - 0.5;
+            float fv = UVMapping[1] - floor( UVMapping[1] ) - 0.5;
             float half_threshold = ( 1.0 - Treshold ) * 0.5;
             if( fu <= half_threshold && fu >= -half_threshold && fv <= half_threshold && fv >= -half_threshold )
                 Result = Color1;
@@ -752,10 +751,10 @@ class SORTNodeCheckerBoard(SORTShadingNode):
     osl_shader = '''
         shader CheckerBoard( color Color1 = @ ,
                              color Color2 = @ ,
+                             vector UVMapping = @ ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
-            // Temporary solution for now
-            float fu = 10.0 * u - floor( 10.0 * u );
-            float fv = 10.0 * v - floor( 10.0 * v );
+            float fu = UVMapping[0] - floor( UVMapping[0] );
+            float fv = UVMapping[1] - floor( UVMapping[1] );
             if( ( fu > 0.5 && fv > 0.5 ) || ( fu < 0.5 && fv < 0.5 ) )
                 Result = Color1;
             else
@@ -769,7 +768,7 @@ class SORTNodeImage(SORTShadingNode):
     bl_idname = 'SORTNodeImage'
     sort_bxdf_type = 'ImageTexNode'
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' },
-                      { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
+                      { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV' } ]
     osl_shader = '''
         
     '''
@@ -816,7 +815,16 @@ class SORTNodeUVMapping(SORTShadingNode):
                       { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'V Offset' , 'default' : 0.0, 'min' : -float('inf') , 'max' : float('inf') } ]
     def init(self, context):
         super().register_prop(True)
-        self.outputs.new( self.output_type , 'UVMapping' )
+        self.outputs.new( self.output_type , 'UV Mapping' )
+    osl_shader = '''
+        shader UVMappinp( float UTiling = @ ,
+                          float VTiling = @ ,
+                          float UOffset = @ ,
+                          float VOffset = @ ,
+                          output vector UVMapping = 0.0 ){
+            UVMapping = vector( u * UTiling + UOffset , v * VTiling + VOffset , 0.0 );
+        }
+    '''
 
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Convertor Nodes for SORT
