@@ -44,6 +44,7 @@ constexpr int MICROFACET_REFLECTION_DIELETRIC_ID    = 11;
 constexpr int HAIR_ID                               = 12;
 constexpr int FOURIER_BDRF_ID                       = 13;
 constexpr int MERL_BRDF_ID                          = 14;
+constexpr int COAT_ID                               = 15;
 
 struct ShadingContextWrapper {
 public:
@@ -81,3 +82,6 @@ void register_closures(OSL::ShadingSystem* shadingsys);
 
 // Create OSL shading context
 void create_shading_context();
+
+// Process closure
+void process_closure (Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::Color3& w);

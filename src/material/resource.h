@@ -26,6 +26,9 @@
  */
 class Resource {
 public:
+    //! @brief  Default virtual destructor.
+    virtual ~Resource() = default;
+
     //! @brief  Load the resource from file.
     //!
     //! @param  filename        Name of the external file holding the data.
