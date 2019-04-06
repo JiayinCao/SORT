@@ -178,6 +178,21 @@ class NODE_OT_add_surface_SORTNodeSocketNormal_NoRemove(bpy.types.Operator, SORT
     socket_type = bpy.props.StringProperty(default='SORTNodeSocketNormal')
     connected = bpy.props.BoolProperty(default=False)
 
+# temporary solution for now
+class NODE_OT_add_surface_sortnodesocketuv(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketuv'
+    bl_label = 'Add UV Mapping Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeUVMapping')
+    connected = bpy.props.BoolProperty(default=False)
+
+class NODE_OT_add_surface_sortnodesocketuv_no_remove(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketuv_no_remove'
+    bl_label = 'Add UV Mapping Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type = bpy.props.StringProperty(default='SORTNodeUVMapping')
+    connected = bpy.props.BoolProperty(default=False)
+
 class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Slot'
 
