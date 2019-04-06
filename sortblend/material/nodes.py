@@ -447,6 +447,33 @@ class SORTNode_Material_DoubleSided(SORTShadingNode_BXDF):
         }
     '''
 
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
+    bl_label = 'Coat'
+    bl_idname = 'SORTNode_BXDF_Coat'
+    property_list = [ { 'class' : properties.SORTNodePropertyFloat  , 'name' : 'IOR'        , 'default' : 1.5 , 'min' : 1.0 , 'max' : 10.0 } ,
+                      { 'class' : properties.SORTNodeSocketFloat    , 'name' : 'Roughness'  , 'default' : 0.0 } ,
+                      { 'class' : properties.SORTNodeSocketColor    , 'name' : 'ColorTint' } ,
+                      { 'class' : properties.SORTNodeSocketBxdf     , 'name' : 'Surface' } ]
+    osl_shader = '''
+        float helper( float x , float inv ){
+            float y = log(x) * inv;
+            return y * y;
+        }
+        shader Coat( float     IOR = @,
+                     float     Roughness = @ ,
+                     color     ColorTint = @ ,
+                     closure color Surface = @ ,
+                     normal Normal = @ ,
+                     output closure color Result = color(0) ){
+            // A Practical and Controllable Hair and Fur Model for Production Path Tracing
+            // https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
+            float inv = 1.0 / ( 5.969 - 0.215 * Roughness + 2.532 * pow(Roughness,2.0) - 10.73 * pow(Roughness,3.0) + 5.574 * pow(Roughness,4.0) + 0.245 * pow(Roughness, 5.0) );
+            color sigma = color( helper(ColorTint[0],inv) , helper(ColorTint[1],inv) , helper(ColorTint[2],inv) );
+            Result = coat( Surface , Roughness , IOR , sigma , Normal );
+        }
+    '''
+
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               BXDF Nodes for SORT
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -572,33 +599,6 @@ class SORTNode_BXDF_OrenNayar(SORTShadingNode_BXDF):
                           normal Normal = @ ,
                           output closure color Result = color(0) ){
             Result = orenNayar( Diffuse , roughness , Normal );
-        }
-    '''
-
-@SORTPatternGraph.register_node('BXDFs')
-class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
-    bl_label = 'Coat'
-    bl_idname = 'SORTNode_BXDF_Coat'
-    property_list = [ { 'class' : properties.SORTNodePropertyFloat  , 'name' : 'IOR'        , 'default' : 1.5 , 'min' : 1.0 , 'max' : 10.0 } ,
-                      { 'class' : properties.SORTNodeSocketFloat    , 'name' : 'Roughness'  , 'default' : 0.0 } ,
-                      { 'class' : properties.SORTNodeSocketColor    , 'name' : 'ColorTint' } ,
-                      { 'class' : properties.SORTNodeSocketBxdf     , 'name' : 'Surface' } ]
-    osl_shader = '''
-        float helper( float x , float inv ){
-            float y = log(x) * inv;
-            return y * y;
-        }
-        shader Coat( float     IOR = @,
-                     float     Roughness = @ ,
-                     color     ColorTint = @ ,
-                     closure color Surface = @ ,
-                     normal Normal = @ ,
-                     output closure color Result = color(0) ){
-            // A Practical and Controllable Hair and Fur Model for Production Path Tracing
-            // https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
-            float inv = 1.0 / ( 5.969 - 0.215 * Roughness + 2.532 * pow(Roughness,2.0) - 10.73 * pow(Roughness,3.0) + 5.574 * pow(Roughness,4.0) + 0.245 * pow(Roughness, 5.0) );
-            color sigma = color( helper(ColorTint[0],inv) , helper(ColorTint[1],inv) , helper(ColorTint[2],inv) );
-            Result = coat( Surface , Roughness , IOR , sigma , Normal );
         }
     '''
 
@@ -764,7 +764,7 @@ class SORTNodeDecodeNormal(SORTShadingNode):
     osl_shader = '''
         shader DecodeNormal( color Color = @ ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
-            Result = 2.0 * iColor - 1.0;
+            Result = 2.0 * Color - 1.0;
         }
     '''
 

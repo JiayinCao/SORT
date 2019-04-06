@@ -104,7 +104,7 @@ class SORT_RENDERER(bpy.types.RenderEngine):
     # RenderEngine; define its internal name, visible name and capabilities.
     bl_idname = 'SORT_RENDERER'
     bl_label = 'SORT'
-    bl_use_preview = True
+    bl_use_preview = False  # disable material preview until it works
 
     render_lock = threading.Lock()
 
