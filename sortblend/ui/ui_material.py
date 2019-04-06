@@ -283,9 +283,8 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
         self.layout.context_pointer_set("node", output_node)
         self.layout.context_pointer_set("socket", socket)
 
-        # Disable panel rendering in the future
-        #if output_node is not None:
-        #    self.draw_node_properties_recursive(self.layout, context, ntree, output_node)
+        if output_node is not None:
+            self.draw_node_properties_recursive(self.layout, context, ntree, output_node)
 
     def draw_node_properties_recursive(self,layout, context, nt, node, level=0):
         def indented_label(layout):
