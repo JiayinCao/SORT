@@ -117,7 +117,6 @@ def export_blender(scene, force_debug=False):
     exporter_common.log("Exporting materials.")
     collect_shader_resources(scene, fs)
     export_materials(scene, fs)
-    #export_material(scene, fs)
     exporter_common.log("Exported materials %.2f(s)" % (time.time() - current_time))
     current_time = time.time()
 
@@ -474,6 +473,7 @@ def find_output_node(material):
 def collect_shader_resources(scene, fs):
     # don't output any osl_shaders if using default materials
     if scene.allUseDefaultMaterial is True:
+        fs.serialize( 0 )
         fs.serialize( 0 )
         return None
 

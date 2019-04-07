@@ -49,14 +49,14 @@ constexpr int DOUBLESIDED_ID                        = 16;
 
 struct ShadingContextWrapper {
 public:
-    ShadingContextWrapper(OSL::ShadingSystem* shadingsys);
-    ~ShadingContextWrapper();
-
-    OSL::ShadingContext *ctx = nullptr;
+    OSL::ShadingContext* GetShadingContext(OSL::ShadingSystem* shadingsys);
+    void DestroyContext(OSL::ShadingSystem* shadingsys);
 
 private:
-    OSL::PerThreadInfo  *thread_info = nullptr;
-    OSL::ShadingSystem  *shadingsys = nullptr;
+    OSL::PerThreadInfo              *thread_info = nullptr;
+    OSL::TextureSystem::Perthread   *tex_thread_info = nullptr;
+    OSL::ShadingSystem              *shadingsys = nullptr;
+    OSL::ShadingContext *ctx = nullptr;
 };
 
 // begin building shader
@@ -80,3 +80,9 @@ void execute_shader( class Bsdf* bsdf , const class Intersection* intersection ,
 
 // Register closures
 void register_closures(OSL::ShadingSystem* shadingsys);
+
+// Create thread contexts
+void create_thread_contexts();
+
+// Destroy thread contexts
+void detroy_thread_contexts();

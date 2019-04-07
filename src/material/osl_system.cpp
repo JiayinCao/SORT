@@ -20,9 +20,12 @@
 #include <OSL/genclosure.h>
 #include <OSL/oslclosure.h>
 #include <algorithm>
+#include <vector>
+#include <core/thread.h>
 #include "osl_system.h"
 #include "spectrum/spectrum.h"
 #include "core/memory.h"
+#include "core/path.h"
 #include "spectrum/spectrum.h"
 #include "math/intersection.h"
 #include "bsdf/bsdf.h"
@@ -210,10 +213,6 @@ bool build_shader( const std::string& shader_source, const std::string& shader_n
 
 // begin building shader
 ShaderGroupRef beginShaderGroup( const std::string& group_name ){
-    if( !g_shadingsys ){
-        g_shadingsys = MakeShadingSystem();
-        register_closures(g_shadingsys.get());
-    }
     return g_shadingsys->ShaderGroupBegin( group_name );
 }
 bool endShaderGroup(){
@@ -335,11 +334,8 @@ void process_closure (Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::C
                 case COAT_ID:
                     {
                         const auto& params = *comp->as<Coat::Params>();
-
-                        // parse the bottom bsdf
                         Bsdf* bottom = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
                         process_closure( bottom , params.closure , Color3( 1.0f ) );
-
                         bsdf->AddBxdf(SORT_MALLOC(Coat)( params, weight , bottom ));
                     }
                     break;
@@ -358,26 +354,54 @@ void process_closure (Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::C
    }
 }
 
+std::vector<ShadingContext*>        contexts;
+std::vector<ShadingContextWrapper>  shadingContexts;
 void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::ShaderGroup* shader ){
-    static thread_local ShadingContextWrapper  shadingContext(g_shadingsys.get());
-
     ShaderGlobals shaderglobals;
     shaderglobals.u = intersection->u;
     shaderglobals.v = intersection->v;
     shaderglobals.N = Vec3( intersection->normal.x , intersection->normal.y , intersection->normal.z );
     shaderglobals.Ng = Vec3( intersection->gnormal.x , intersection->gnormal.y , intersection->gnormal.z );
     shaderglobals.I = Vec3( intersection->view.x , intersection->view.y , intersection->view.z );
-    g_shadingsys->execute(shadingContext.ctx, *shader, shaderglobals);
+    g_shadingsys->execute(contexts[ ThreadId() ], *shader, shaderglobals);
 
     process_closure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );
 }
 
-ShadingContextWrapper::ShadingContextWrapper(OSL::ShadingSystem* shadingsys) :shadingsys(shadingsys) {
-    thread_info = shadingsys->create_thread_info();
-    ctx = shadingsys->get_context(thread_info);
+void ShadingContextWrapper::DestroyContext(OSL::ShadingSystem* shadingsys) {
+    shadingsys->release_context(ctx);
+    auto texsys = shadingsys->texturesys();
+    texsys->destroy_thread_info( tex_thread_info );
+    shadingsys->destroy_thread_info(thread_info);
 }
 
-ShadingContextWrapper::~ShadingContextWrapper() {
-    shadingsys->release_context(ctx);
-    shadingsys->destroy_thread_info(thread_info);
+OSL::ShadingContext* ShadingContextWrapper::GetShadingContext(OSL::ShadingSystem* shadingsys){
+    thread_info = shadingsys->create_thread_info();
+    tex_thread_info = shadingsys->texturesys()->create_thread_info();
+    ctx = shadingsys->get_context(thread_info,tex_thread_info);
+    return ctx;
+}
+
+// Create thread contexts
+void create_thread_contexts(){
+    g_shadingsys = MakeShadingSystem();
+    register_closures(g_shadingsys.get());
+
+    auto texsys = g_shadingsys->texturesys();
+    texsys->attribute( "gray_to_rgb" , 1 );
+    //texsys->invalidate_all(true);
+
+    contexts.resize( g_threadCnt );
+    shadingContexts.resize( g_threadCnt );
+
+    for( int i = 0 ; i < g_threadCnt ; ++i )
+        contexts[i] = shadingContexts[i].GetShadingContext( g_shadingsys.get() );
+}
+
+// Destroy thread contexts
+void detroy_thread_contexts(){
+    for( int i = 0 ; i < g_threadCnt ; ++i ){
+        contexts[i] = nullptr;
+        shadingContexts[i].DestroyContext( g_shadingsys.get() );
+    }
 }

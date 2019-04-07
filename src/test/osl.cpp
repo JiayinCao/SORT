@@ -216,10 +216,11 @@ TEST(OSL, CheckingClosure) {
     build_shader_test( shadingsys.get() , shader_source , shader_name , shader_layer , group_name );
     shadingsys->ShaderGroupEnd ();
 
-    ShadingContextWrapper sc( shadingsys.get() );
+    ShadingContextWrapper sc;
+    auto ctx = sc.GetShadingContext( shadingsys.get() );
 
     ShaderGlobals shaderglobals;
-    shadingsys->execute (sc.ctx, *shadergroup, shaderglobals);
+    shadingsys->execute (ctx, *shadergroup, shaderglobals);
 
     const auto closure = shaderglobals.Ci;
 
@@ -307,10 +308,11 @@ TEST(OSL, CheckingMultipleLayers) {
     shadingsys->ConnectShaders("shader1_layer", "oColor_0", "shader2_layer", "iColor_0");
     shadingsys->ShaderGroupEnd();
 
-    ShadingContextWrapper sc( shadingsys.get() );
+    ShadingContextWrapper sc;
+    auto ctx = sc.GetShadingContext( shadingsys.get() );
 
     ShaderGlobals shaderglobals;
-    shadingsys->execute(sc.ctx, *shadergroup, shaderglobals);
+    shadingsys->execute(ctx, *shadergroup, shaderglobals);
 
     const auto closure = shaderglobals.Ci;
 
@@ -373,10 +375,11 @@ TEST(OSL, CheckingDefaultValue) {
     shadingsys->Shader ("surface", shader_name, shader_layer);
     shadingsys->ShaderGroupEnd ();
 
-    ShadingContextWrapper sc( shadingsys.get() );
+    ShadingContextWrapper sc;
+    auto ctx = sc.GetShadingContext( shadingsys.get() );
 
     ShaderGlobals shaderglobals;
-    shadingsys->execute (sc.ctx, *shadergroup, shaderglobals);
+    shadingsys->execute (ctx, *shadergroup, shaderglobals);
 
     const auto closure = shaderglobals.Ci;
 
@@ -432,11 +435,11 @@ TEST(OSL, CheckingMultiThread) {
 
     std::unique_ptr<ShadingContextWrapper> sc[TN];
     for( int i = 0 ; i < TN ; ++i )
-        sc[i] = std::make_unique<ShadingContextWrapper>( shadingsys.get() );
+        sc[i] = std::make_unique<ShadingContextWrapper>();
 
     ParrallRun<8,16>([&](int tid){
         ShaderGlobals shaderglobals;
-        shadingsys->execute (sc[tid]->ctx, *shadergroup[tid], shaderglobals);
+        shadingsys->execute (sc[tid]->GetShadingContext(shadingsys.get()), *shadergroup[tid], shaderglobals);
 
         const auto closure = shaderglobals.Ci;
 
@@ -488,7 +491,8 @@ TEST(OSL, CheckingGlobalContext) {
     shadingsys->Shader ("surface", shader_name, shader_layer);
     shadingsys->ShaderGroupEnd ();
 
-    ShadingContextWrapper sc( shadingsys.get() );
+    ShadingContextWrapper sc;
+    auto ctx = sc.GetShadingContext( shadingsys.get() );
 
     ShaderGlobals shaderglobals;
     shaderglobals.P = Vec3( 0.25f , 1.25f , 4.0 );
@@ -496,7 +500,7 @@ TEST(OSL, CheckingGlobalContext) {
     shaderglobals.I = Vec3( 1.0f , 0.0f , 0.0f );
     shaderglobals.u = 0.5f;
     shaderglobals.v = 0.25f;
-    shadingsys->execute (sc.ctx, *shadergroup, shaderglobals);
+    shadingsys->execute (ctx, *shadergroup, shaderglobals);
 
     const auto closure = shaderglobals.Ci;
 
