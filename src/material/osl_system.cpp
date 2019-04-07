@@ -46,7 +46,7 @@ using namespace OSL;
 
 class SORTRenderServices : public OSL::RendererServices{
 public:
-    SORTRenderServices(){}
+    SORTRenderServices( OIIO::TextureSystem* ts ) : OSL::RendererServices(ts){}
     int supports (OSL::string_view feature) const override { return 0; }
     bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::TransformationPtr xform, float time)override{ return true; }
     bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring from, float time)override{ return true; }
@@ -181,11 +181,13 @@ void register_closures(ShadingSystem* shadingsys){
         shadingsys->register_closure( closures[i].name , closures[i].id , closures[i].params , nullptr , nullptr );
 }
 
+static OIIO::TextureSystem*  textureSystem = OIIO::TextureSystem::create(true);
+static ErrorHandler errhandler;
+static SORTRenderServices g_rendererSystem(textureSystem);
+
 // Create shading system
 std::unique_ptr<ShadingSystem>  MakeShadingSystem(){
-    static ErrorHandler errhandler;
-    static SORTRenderServices rs;
-    return std::move( std::make_unique<ShadingSystem>(&rs, nullptr, &errhandler) );
+    return std::move( std::make_unique<ShadingSystem>(&g_rendererSystem, textureSystem, &errhandler) );
 }
 
 // Compile OSL source code
@@ -358,11 +360,15 @@ std::vector<ShadingContext*>        contexts;
 std::vector<ShadingContextWrapper>  shadingContexts;
 void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::ShaderGroup* shader ){
     ShaderGlobals shaderglobals;
+    shaderglobals.P = Vec3( intersection->intersect.x , intersection->intersect.y , intersection->intersect.z );
     shaderglobals.u = intersection->u;
     shaderglobals.v = intersection->v;
     shaderglobals.N = Vec3( intersection->normal.x , intersection->normal.y , intersection->normal.z );
     shaderglobals.Ng = Vec3( intersection->gnormal.x , intersection->gnormal.y , intersection->gnormal.z );
     shaderglobals.I = Vec3( intersection->view.x , intersection->view.y , intersection->view.z );
+    shaderglobals.dPdu = Vec3( 0.0f );
+    shaderglobals.dPdu = Vec3( 0.0f );
+
     g_shadingsys->execute(contexts[ ThreadId() ], *shader, shaderglobals);
 
     process_closure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );
@@ -370,15 +376,15 @@ void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::Shader
 
 void ShadingContextWrapper::DestroyContext(OSL::ShadingSystem* shadingsys) {
     shadingsys->release_context(ctx);
-    auto texsys = shadingsys->texturesys();
-    texsys->destroy_thread_info( tex_thread_info );
+    //auto texsys = shadingsys->texturesys();
+    //texsys->destroy_thread_info( tex_thread_info );
     shadingsys->destroy_thread_info(thread_info);
 }
 
 OSL::ShadingContext* ShadingContextWrapper::GetShadingContext(OSL::ShadingSystem* shadingsys){
     thread_info = shadingsys->create_thread_info();
-    tex_thread_info = shadingsys->texturesys()->create_thread_info();
-    ctx = shadingsys->get_context(thread_info,tex_thread_info);
+    //tex_thread_info = g_rendererSystem.get_texture_perthread();
+    ctx = shadingsys->get_context(thread_info);
     return ctx;
 }
 
@@ -388,7 +394,13 @@ void create_thread_contexts(){
     register_closures(g_shadingsys.get());
 
     auto texsys = g_shadingsys->texturesys();
-    texsys->attribute( "gray_to_rgb" , 1 );
+    texsys->attribute("gray_to_rgb" , 1);
+    texsys->attribute("automip", 0);
+    texsys->attribute("accept_untiled", 1);
+    texsys->attribute("accept_unmipped", 1);
+    texsys->attribute("gray_to_rgb", 1);
+    texsys->attribute("latlong_up", "y");
+    texsys->attribute("flip_t", 1);
     //texsys->invalidate_all(true);
 
     contexts.resize( g_threadCnt );
