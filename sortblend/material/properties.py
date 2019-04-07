@@ -221,7 +221,7 @@ class SORTNodePropertyPath(SORTNodeProperty):
     def export_serialization_value(self,value):
         return bpy.path.abspath( value )
     def export_osl_value(self,value):
-        return '\"%s\"' % value
+        return '\"%s\"' % bpy.path.abspath( value )
     @classmethod
     def setup( cls , prop ):
         cls.default_value = bpy.props.StringProperty( name=prop['name'] , subtype='FILE_PATH' )

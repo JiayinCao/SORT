@@ -764,7 +764,7 @@ class SORTNodeDecodeNormal(SORTShadingNode):
     osl_shader = '''
         shader DecodeNormal( color Color = @ ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
-            Result = 2.0 * Color - 1.0;
+            Result = 2.0 * color( Color[0] , Color[2] , Color[1] ) - 1.0;
         }
     '''
 
@@ -838,8 +838,10 @@ class SORTNodeImage(SORTShadingNode):
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' },
                       { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
     osl_shader = '''
-        shader CheckerBoard( output color Result = color( 0.0 , 0.0 , 0.0 ) ){
-            Result = color(1.0);
+        shader CheckerBoard( string filename = @ ,
+                             vector UVMapping = @ ,
+                             output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = texture( filename , UVMapping[0] - floor(UVMapping[0]) , UVMapping[1] - floor(UVMapping[1]) );
         }
     '''
 
