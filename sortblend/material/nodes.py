@@ -609,7 +609,8 @@ class SORTNode_BXDF_MERL(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' } ]
 
     osl_shader = '''
-        shader merlBRDF( normal Normal = @ ,
+        shader merlBRDF( string dummy = @,
+                         normal Normal = @ ,
                          output closure color Result = color(0) ){
             Result = merlBRDF( %s , Normal );
         }
@@ -635,7 +636,8 @@ class SORTNode_BXDF_Fourier(SORTShadingNode_BXDF):
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' } ]
 
     osl_shader = '''
-        shader FourierBRDF( normal Normal = @ ,
+        shader FourierBRDF( string dummy = @,
+                            normal Normal = @ ,
                             output closure color Result = color(0) ){
             Result = fourierBRDF( %s , Normal );
         }
@@ -841,7 +843,7 @@ class SORTNodeImage(SORTShadingNode):
         shader CheckerBoard( string filename = @ ,
                              vector UVMapping = @ ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
-            Result = texture( filename , UVMapping[0] - floor(UVMapping[0]) , UVMapping[1] - floor(UVMapping[1]) );
+            Result = texture( filename , UVMapping[0] , UVMapping[1] );
         }
     '''
 
