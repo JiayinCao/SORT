@@ -54,9 +54,8 @@ public:
 
 private:
     OSL::PerThreadInfo              *thread_info = nullptr;
-    OSL::TextureSystem::Perthread   *tex_thread_info = nullptr;
     OSL::ShadingSystem              *shadingsys = nullptr;
-    OSL::ShadingContext *ctx = nullptr;
+    OSL::ShadingContext             *ctx = nullptr;
 };
 
 // begin building shader

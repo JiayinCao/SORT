@@ -17,4 +17,33 @@
 
 #include "texture_system.h"
 
-//SORTTextureSystem g_textureSystem;
+RendererServices::TextureHandle* SORTTextureSystem::get_texture_handle(OSL::ustring filename, Perthread *thread_info) {
+    // Only process the texture if it has been seen before.
+    std::string std_filename(filename.c_str());
+    if (m_TexturePool.count(std_filename) == 0) {
+        // create a new texture and load it from file
+        m_TexturePool[std_filename] = std::make_unique<ImageTexture>();
+
+        // load the texture from file
+        ImageTexture*   sort_texture = m_TexturePool[std_filename].get();
+        sort_texture->LoadImageFromFile(std_filename);
+    }
+
+    return (RendererServices::TextureHandle*)m_TexturePool[std_filename].get();
+}
+
+bool SORTTextureSystem::good(TextureHandle* texture_handle) {
+    auto image_texture = (ImageTexture*)texture_handle;
+    return image_texture && image_texture->IsValid();
+}
+
+bool SORTTextureSystem::texture(TextureHandle *texture_handle, Perthread *thread_info, TextureOpt &options,
+    float s, float t, float dsdx, float dtdx, float dsdy, float dtdy, int nchannels, float *result,
+    float *dresultds , float *dresultdt ) {
+    const auto* image_texture = (const ImageTexture*)texture_handle;
+    RGBSpectrum color = image_texture->GetColorFromUV(s, t);
+    result[0] = color.GetR();
+    result[1] = color.GetG();
+    result[2] = color.GetB();
+    return true;
+}
