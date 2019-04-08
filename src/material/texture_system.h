@@ -79,10 +79,10 @@ public:
     }
 
     const ImageSpec *imagespec(ustring filename, int subimage = 0) override {
-        return false;
+        return nullptr;
     }
     const ImageSpec *imagespec(TextureHandle *texture_handle, Perthread *thread_info = NULL, int subimage = 0) override {
-        return false;
+        return nullptr;
     }
 
     bool get_texels(ustring filename, TextureOpt &options,
