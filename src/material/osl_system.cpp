@@ -196,8 +196,11 @@ bool compile_buffer ( const std::string &sourcecode, const std::string &shaderna
     OSL::OSLCompiler compiler;
     std::string osobuffer;
     std::vector<std::string> options;
-    if (!compiler.compile_buffer(sourcecode, osobuffer, options, STDOSL_PATH))
-        return false;
+    {
+        SORT_PROFILE("CompileShader");
+        if (!compiler.compile_buffer(sourcecode, osobuffer, options, STDOSL_PATH))
+            return false;
+    }
 
     // Load shader from compiled object file.
     if (! g_shadingsys->LoadMemoryCompiledShader (shadername, osobuffer))

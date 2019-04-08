@@ -23,6 +23,8 @@
 #include "bsdf/lambert.h"
 
 bool Material::BuildShader(){
+    SORT_PROFILE("BuildShader");
+
     m_shader = beginShaderGroup( m_name );
     for( const auto& shader : m_sources )
         build_shader( shader.source , shader.name , shader.name , m_name );
