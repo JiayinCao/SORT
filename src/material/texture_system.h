@@ -17,105 +17,343 @@
 
 #pragma once
 
-/*
-
 #include <OSL/oslexec.h>
+#include "core/sassert.h"
+#include "texture/imagetexture.h"
 
 using namespace OSL;
+using namespace OIIO;
 
-
-class SORTTextureSystem : public OSL::TextureSystem{
+class SORTTextureSystem : public TextureSystem {
 public:
     SORTTextureSystem() = default;
     ~SORTTextureSystem() = default;
 
-    bool attribute (OSL::string_view name, OSL::TypeDesc type, const void *val) override{ return true; }
-    // Shortcuts for common types
-    bool attribute (OSL::string_view name, int val) override{ return true; }
-    bool attribute (OSL::string_view name, float val) override{ return true; }
-    bool attribute (OSL::string_view name, double val) override{ return true; }
-    bool attribute (OSL::string_view name, OSL::string_view val) override{ return true; }
+    bool attribute(string_view name, TypeDesc type, const void *val) override { return true; }
+    bool attribute(string_view name, int val) override { return true; }
+    bool attribute(string_view name, float val) override { return true; }
+    bool attribute(string_view name, double val) override { return true; }
+    bool attribute(string_view name, string_view val) override { return true; }
 
-    /// Get the named attribute, store it in value.
-    bool getattribute (OSL::string_view name, OSL::TypeDesc type, void *val) const override{ return true; }
-    // Shortcuts for common types
-    bool getattribute(OSL::string_view name, int& val) const override{ return true; }
-    bool getattribute(OSL::string_view name, float& val) const override{ return true; }
-    bool getattribute(OSL::string_view name, double& val) const override{ return true; }
-    bool getattribute(OSL::string_view name, char** val) const override{ return true; }
-    bool getattribute(OSL::string_view name, std::string& val) const override{ return true; }
+    bool getattribute(string_view name, TypeDesc type, void *val) const override { return true; }
+    bool getattribute(string_view name, int& val) const override { return true; }
+    bool getattribute(string_view name, float& val) const override { return true; }
+    bool getattribute(string_view name, double& val) const override { return true; }
+    bool getattribute(string_view name, char** val) const override { return true; }
+    bool getattribute(string_view name, std::string& val) const override { return true; }
 
+    TextureHandle * get_texture_handle(ustring filename, Perthread *thread_info = NULL) override;
+    bool good(TextureHandle* texture_handle) override;
+
+    bool texture(TextureHandle *texture_handle,
+        Perthread *thread_info, TextureOpt &options,
+        float s, float t, float dsdx, float dtdx,
+        float dsdy, float dtdy,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override;
+
+    std::string resolve_filename(const std::string &filename) const override {
+        return "";
+    }
+
+    bool get_texture_info(ustring filename, int subimage,
+        ustring dataname, TypeDesc datatype, void *data) override {
+        return false;
+    }
+    bool get_texture_info(TextureHandle *texture_handle,
+        Perthread *thread_info, int subimage,
+        ustring dataname, TypeDesc datatype, void *data) override {
+        return false;
+    }
+
+    bool get_texture_info(TextureHandle *texture_handle, int subimage,
+        ustring dataname, TypeDesc datatype, void *data) override {
+        return false;
+    }
+
+    bool get_imagespec(ustring filename, int subimage, ImageSpec &spec) override {
+        return false;
+    }
+    bool get_imagespec(TextureHandle *texture_handle, Perthread *thread_info, int subimage, ImageSpec &spec) override {
+        return false;
+    }
+
+    const ImageSpec *imagespec(ustring filename, int subimage = 0) override {
+        return false;
+    }
+    const ImageSpec *imagespec(TextureHandle *texture_handle, Perthread *thread_info = NULL, int subimage = 0) override {
+        return false;
+    }
+
+    bool get_texels(ustring filename, TextureOpt &options,
+        int miplevel, int xbegin, int xend,
+        int ybegin, int yend, int zbegin, int zend,
+        int chbegin, int chend,
+        TypeDesc format, void *result) override {
+        return false;
+    }
+    bool get_texels(TextureHandle *texture_handle,
+        Perthread *thread_info, TextureOpt &options,
+        int miplevel, int xbegin, int xend,
+        int ybegin, int yend, int zbegin, int zend,
+        int chbegin, int chend,
+        TypeDesc format, void *result) override {
+        return false;
+    }
+
+    std::string geterror() const override { return ""; }
+    std::string getstats(int level = 1, bool icstats = true) const override { return ""; }
+    void invalidate(ustring filename) override {}
+    void invalidate_all(bool force = false) override {}
+    void reset_stats() override {}
+    void close(ustring filename) override {}
+    void close_all() override {}
+
+    // ---------------------------------------------------------------------------------------------------------
+    // Unsupported interfaces in SORT
+    bool texture3d(ustring filename, TextureOpt &options,
+        const Imath::V3f &P, const Imath::V3f &dPdx,
+        const Imath::V3f &dPdy, const Imath::V3f &dPdz,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL,
+        float *dresultdr = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling 3d texture for now.");
+        return false;
+    }
+
+    bool texture3d(TextureHandle *texture_handle,
+        Perthread *thread_info, TextureOpt &options,
+        const Imath::V3f &P, const Imath::V3f &dPdx,
+        const Imath::V3f &dPdy, const Imath::V3f &dPdz,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL,
+        float *dresultdr = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling 3d texture for now.");
+        return false;
+    }
+
+    virtual bool texture3d(ustring filename,
+        TextureOptBatch &options, Tex::RunMask mask,
+        const float *P, const float *dPdx,
+        const float *dPdy, const float *dPdz,
+        int nchannels, float *result,
+        float *dresultds = nullptr, float *dresultdt = nullptr,
+        float *dresultdr = nullptr) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling 3d texture for now.");
+        return false;
+    }
+    
+    bool texture3d(TextureHandle *texture_handle,
+        Perthread *thread_info,
+        TextureOptBatch &options, Tex::RunMask mask,
+        const float *P, const float *dPdx,
+        const float *dPdy, const float *dPdz,
+        int nchannels, float *result,
+        float *dresultds = nullptr, float *dresultdt = nullptr,
+        float *dresultdr = nullptr) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling 3d texture for now.");
+        return false;
+    }
+
+    bool texture3d(ustring filename, TextureOptions &options,
+        Runflag *runflags, int beginactive, int endactive,
+        VaryingRef<Imath::V3f> P,
+        VaryingRef<Imath::V3f> dPdx,
+        VaryingRef<Imath::V3f> dPdy,
+        VaryingRef<Imath::V3f> dPdz,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL,
+        float *dresultdr = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling 3d texture for now.");
+        return false;
+    }
+
+    bool texture3d(TextureHandle *texture_handle,
+        Perthread *thread_info, TextureOptions &options,
+        Runflag *runflags, int beginactive, int endactive,
+        VaryingRef<Imath::V3f> P,
+        VaryingRef<Imath::V3f> dPdx,
+        VaryingRef<Imath::V3f> dPdy,
+        VaryingRef<Imath::V3f> dPdz,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL,
+        float *dresultdr = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling 3d texture for now.");
+        return false;
+    }
+
+    bool shadow(ustring filename, TextureOpt &options,
+        const Imath::V3f &P, const Imath::V3f &dPdx,
+        const Imath::V3f &dPdy, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling shadow texture in SORT.");
+        return false;
+    }
+
+    bool shadow(TextureHandle *texture_handle, Perthread *thread_info,
+        TextureOpt &options,
+        const Imath::V3f &P, const Imath::V3f &dPdx,
+        const Imath::V3f &dPdy, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling shadow texture in SORT.");
+        return false;
+    }
+
+    bool shadow(ustring filename,
+        TextureOptBatch &options, Tex::RunMask mask,
+        const float *P, const float *dPdx, const float *dPdy,
+        float *result, float *dresultds = nullptr, float *dresultdt = nullptr) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling shadow texture in SORT.");
+        return false;
+    }
+    bool shadow(TextureHandle *texture_handle, Perthread *thread_info,
+        TextureOptBatch &options, Tex::RunMask mask,
+        const float *P, const float *dPdx, const float *dPdy,
+        float *result, float *dresultds = nullptr, float *dresultdt = nullptr) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling shadow texture in SORT.");
+        return false;
+    }
+
+    bool shadow(ustring filename, TextureOptions &options,
+        Runflag *runflags, int beginactive, int endactive,
+        VaryingRef<Imath::V3f> P,
+        VaryingRef<Imath::V3f> dPdx,
+        VaryingRef<Imath::V3f> dPdy,
+        float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling shadow texture in SORT.");
+        return false;
+    }
+    bool shadow(TextureHandle *texture_handle, Perthread *thread_info,
+        TextureOptions &options,
+        Runflag *runflags, int beginactive, int endactive,
+        VaryingRef<Imath::V3f> P,
+        VaryingRef<Imath::V3f> dPdx,
+        VaryingRef<Imath::V3f> dPdy,
+        float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling shadow texture in SORT.");
+        return false;
+    }
+
+    bool environment(ustring filename, TextureOpt &options,
+        const Imath::V3f &R, const Imath::V3f &dRdx,
+        const Imath::V3f &dRdy, int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling environment texture in SORT.");
+        return false;
+    }
+
+    bool environment(TextureHandle *texture_handle,
+        Perthread *thread_info, TextureOpt &options,
+        const Imath::V3f &R, const Imath::V3f &dRdx,
+        const Imath::V3f &dRdy, int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling environment texture in SORT.");
+        return false;
+    }
+
+    bool environment(ustring filename,
+        TextureOptBatch &options, Tex::RunMask mask,
+        const float *R, const float *dRdx, const float *dRdy,
+        int nchannels, float *result,
+        float *dresultds = nullptr, float *dresultdt = nullptr) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling environment texture in SORT.");
+        return false;
+    }
+    bool environment(TextureHandle *texture_handle, Perthread *thread_info,
+        TextureOptBatch &options, Tex::RunMask mask,
+        const float *R, const float *dRdx, const float *dRdy,
+        int nchannels, float *result,
+        float *dresultds = nullptr, float *dresultdt = nullptr) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling environment texture in SORT.");
+        return false;
+    }
+
+    bool environment(ustring filename, TextureOptions &options,
+        Runflag *runflags, int beginactive, int endactive,
+        VaryingRef<Imath::V3f> R,
+        VaryingRef<Imath::V3f> dRdx,
+        VaryingRef<Imath::V3f> dRdy,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling environment texture in SORT.");
+        return false;
+    }
+    bool environment(TextureHandle *texture_handle,
+        Perthread *thread_info, TextureOptions &options,
+        Runflag *runflags, int beginactive, int endactive,
+        VaryingRef<Imath::V3f> R,
+        VaryingRef<Imath::V3f> dRdx,
+        VaryingRef<Imath::V3f> dRdy,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling environment texture in SORT.");
+        return false;
+    }
+
+    // This is no per-thread information for current implementation of SORT texturing system.
     Perthread* get_perthread_info(Perthread* thread_info = NULL) override { return nullptr; }
-
     Perthread* create_thread_info() override { return nullptr; }
     void destroy_thread_info(Perthread* threadinfo) override {}
 
-    TextureHandle * get_texture_handle (OSL::ustring filename, Perthread *thread_info=NULL) override {
-        return nullptr;
+    bool texture(ustring filename, TextureOpt &options,
+        float s, float t, float dsdx, float dtdx,
+        float dsdy, float dtdy,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling texture without texture handle, which is very slow.");
+        return false;
     }
-    bool good(TextureHandle* texture_handle) override {
+
+    bool texture(ustring filename, TextureOptBatch &options,
+        Tex::RunMask mask, const float *s, const float *t,
+        const float *dsdx, const float *dtdx,
+        const float *dsdy, const float *dtdy,
+        int nchannels, float *result,
+        float *dresultds = nullptr,
+        float *dresultdt = nullptr) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling texture without texture handle, which is very slow.");
+        return false;
+    }
+
+    bool texture(ustring filename, TextureOptions &options,
+        Runflag *runflags, int beginactive, int endactive,
+        VaryingRef<float> s, VaryingRef<float> t,
+        VaryingRef<float> dsdx, VaryingRef<float> dtdx,
+        VaryingRef<float> dsdy, VaryingRef<float> dtdy,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "No support for sampling texture without texture handle, which is very slow.");
+        return false;
+    }
+
+    bool texture(TextureHandle *texture_handle,
+        Perthread *thread_info, TextureOptBatch &options,
+        Tex::RunMask mask, const float *s, const float *t,
+        const float *dsdx, const float *dtdx,
+        const float *dsdy, const float *dtdy,
+        int nchannels, float *result,
+        float *dresultds = nullptr,
+        float *dresultdt = nullptr) override {
+        sAssertMsg(false, MATERIAL, "Unimplemented interface of texture sampling.");
         return true;
     }
 
-    bool texture (ustring filename, TextureOpt &options,
-                    float s, float t, float dsdx, float dtdx,
-                    float dsdy, float dtdy,
-                    int nchannels, float *result,
-                    float *dresultds=NULL, float *dresultdt=NULL) override {
-                    return true;
+    bool texture(TextureHandle *texture_handle,
+        Perthread *thread_info, TextureOptions &options,
+        Runflag *runflags, int beginactive, int endactive,
+        VaryingRef<float> s, VaryingRef<float> t,
+        VaryingRef<float> dsdx, VaryingRef<float> dtdx,
+        VaryingRef<float> dsdy, VaryingRef<float> dtdy,
+        int nchannels, float *result,
+        float *dresultds = NULL, float *dresultdt = NULL) override {
+        sAssertMsg(false, MATERIAL, "Unimplemented interface of texture sampling.");
+        return true;
     }
-
-    bool texture (TextureHandle *texture_handle,
-                Perthread *thread_info, TextureOpt &options,
-                float s, float t, float dsdx, float dtdx,
-                float dsdy, float dtdy,
-                int nchannels, float *result,
-                float *dresultds=NULL, float *dresultdt=NULL) override {
-                    return true;
-                }
-
-    bool texture (ustring filename, OIIO::TextureOptBatch &options,
-                          OIIO::Tex::RunMask mask, const float *s, const float *t,
-                          const float *dsdx, const float *dtdx,
-                          const float *dsdy, const float *dtdy,
-                          int nchannels, float *result,
-                          float *dresultds=nullptr,
-                          float *dresultdt=nullptr) override {
-                              return true;
-                          }
-    bool texture (TextureHandle *texture_handle,
-                          Perthread *thread_info, OIIO::TextureOptBatch &options,
-                          OpenEXR::Tex::RunMask mask, const float *s, const float *t,
-                          const float *dsdx, const float *dtdx,
-                          const float *dsdy, const float *dtdy,
-                          int nchannels, float *result,
-                          float *dresultds=nullptr,
-                          float *dresultdt=nullptr) override {
-                              return true;
-                          }
-
-    bool texture (ustring filename, TextureOptions &options,
-                          Runflag *runflags, int beginactive, int endactive,
-                          VaryingRef<float> s, VaryingRef<float> t,
-                          VaryingRef<float> dsdx, VaryingRef<float> dtdx,
-                          VaryingRef<float> dsdy, VaryingRef<float> dtdy,
-                          int nchannels, float *result,
-                          float *dresultds=NULL, float *dresultdt=NULL) {
-                              return true;
-                          }
-    bool texture (TextureHandle *texture_handle,
-                          Perthread *thread_info, TextureOptions &options,
-                          Runflag *runflags, int beginactive, int endactive,
-                          VaryingRef<float> s, VaryingRef<float> t,
-                          VaryingRef<float> dsdx, VaryingRef<float> dtdx,
-                          VaryingRef<float> dsdy, VaryingRef<float> dtdy,
-                          int nchannels, float *result,
-                          float *dresultds=NULL, float *dresultdt=NULL) {
-                              return true;
-                          }
 
 private:
     void operator delete(void* todel) { ::delete ((char*)todel); }
-};
 
-*/
+    std::unordered_map<std::string, std::unique_ptr<ImageTexture>> m_TexturePool;
+};

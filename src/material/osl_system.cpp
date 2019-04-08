@@ -23,6 +23,7 @@
 #include <vector>
 #include <core/thread.h>
 #include "osl_system.h"
+#include "texture_system.h"
 #include "spectrum/spectrum.h"
 #include "core/memory.h"
 #include "core/path.h"
@@ -181,13 +182,12 @@ void register_closures(ShadingSystem* shadingsys){
         shadingsys->register_closure( closures[i].name , closures[i].id , closures[i].params , nullptr , nullptr );
 }
 
-static OIIO::TextureSystem*  textureSystem = OIIO::TextureSystem::create(true);
+static SORTTextureSystem g_textureSystem;
 static ErrorHandler errhandler;
-static SORTRenderServices g_rendererSystem(textureSystem);
-
+static SORTRenderServices g_rendererSystem(&g_textureSystem);
 // Create shading system
 std::unique_ptr<ShadingSystem>  MakeShadingSystem(){
-    return std::move( std::make_unique<ShadingSystem>(&g_rendererSystem, textureSystem, &errhandler) );
+    return std::move( std::make_unique<ShadingSystem>(&g_rendererSystem, &g_textureSystem, &errhandler) );
 }
 
 // Compile OSL source code
@@ -376,16 +376,12 @@ void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::Shader
 
 void ShadingContextWrapper::DestroyContext(OSL::ShadingSystem* shadingsys) {
     shadingsys->release_context(ctx);
-    //auto texsys = shadingsys->texturesys();
-    //texsys->destroy_thread_info( tex_thread_info );
     shadingsys->destroy_thread_info(thread_info);
 }
 
 OSL::ShadingContext* ShadingContextWrapper::GetShadingContext(OSL::ShadingSystem* shadingsys){
     thread_info = shadingsys->create_thread_info();
-    //tex_thread_info = g_rendererSystem.get_texture_perthread();
-    ctx = shadingsys->get_context(thread_info);
-    return ctx;
+    return ctx = shadingsys->get_context(thread_info);
 }
 
 // Create thread contexts
@@ -393,26 +389,16 @@ void create_thread_contexts(){
     g_shadingsys = MakeShadingSystem();
     register_closures(g_shadingsys.get());
 
-    auto texsys = g_shadingsys->texturesys();
-    texsys->attribute("gray_to_rgb" , 1);
-    texsys->attribute("automip", 0);
-    texsys->attribute("accept_untiled", 1);
-    texsys->attribute("accept_unmipped", 1);
-    texsys->attribute("gray_to_rgb", 1);
-    texsys->attribute("latlong_up", "y");
-    texsys->attribute("flip_t", 1);
-    //texsys->invalidate_all(true);
-
     contexts.resize( g_threadCnt );
     shadingContexts.resize( g_threadCnt );
 
-    for( int i = 0 ; i < g_threadCnt ; ++i )
+    for( auto i = 0u ; i < g_threadCnt ; ++i )
         contexts[i] = shadingContexts[i].GetShadingContext( g_shadingsys.get() );
 }
 
 // Destroy thread contexts
 void detroy_thread_contexts(){
-    for( int i = 0 ; i < g_threadCnt ; ++i ){
+    for( auto i = 0u ; i < g_threadCnt ; ++i ){
         contexts[i] = nullptr;
         shadingContexts[i].DestroyContext( g_shadingsys.get() );
     }
