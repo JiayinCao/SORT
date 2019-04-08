@@ -132,7 +132,7 @@ public:
         return false;
     }
 
-    virtual bool texture3d(ustring filename,
+    bool texture3d(ustring filename,
         TextureOptBatch &options, Tex::RunMask mask,
         const float *P, const float *dPdx,
         const float *dPdy, const float *dPdz,
