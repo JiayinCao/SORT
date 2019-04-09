@@ -207,7 +207,7 @@ TEST(OSL, CheckingClosure) {
     auto shadingsys = MakeOSLShadingSys();
 
     // Register closures
-    register_closures( shadingsys.get() );
+    RegisterClosures( shadingsys.get() );
 
     const auto group_name = "default_shader_group";
     const auto shader_name = "default_shader";
@@ -293,7 +293,7 @@ TEST(OSL, CheckingMultipleLayers) {
     auto shadingsys = MakeOSLShadingSys();
 
     // Register closures
-    register_closures( shadingsys.get() );
+    RegisterClosures( shadingsys.get() );
 
     const auto shadergroup = shadingsys->ShaderGroupBegin("Default_Shader_Group");
     build_shader_test(shadingsys.get(), shader0_source, "shader0", "shader0_layer");
@@ -361,7 +361,7 @@ TEST(OSL, CheckingDefaultValue) {
     auto shadingsys = MakeOSLShadingSys();
 
     // Register closures
-    register_closures( shadingsys.get() );
+    RegisterClosures( shadingsys.get() );
     
     const auto group_name = "default_shader_group";
     const auto shader_name = "default_shader";
@@ -420,7 +420,7 @@ TEST(OSL, CheckingMultiThread) {
     auto shadingsys = MakeOSLShadingSys();
 
     // Register closures
-    register_closures( shadingsys.get() );
+    RegisterClosures( shadingsys.get() );
 
     constexpr int TN = 8;
     ShaderGroupRef shadergroup[TN];
@@ -481,7 +481,7 @@ TEST(OSL, CheckingGlobalContext) {
     auto shadingsys = MakeOSLShadingSys();
 
     // Register closures
-    register_closures( shadingsys.get() );
+    RegisterClosures( shadingsys.get() );
     
     const auto group_name = "default_shader_group";
     const auto shader_name = "default_shader";

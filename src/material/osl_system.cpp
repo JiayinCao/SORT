@@ -52,41 +52,46 @@ std::unique_ptr<ShadingSystem>  MakeShadingSystem() {
     return std::move(std::make_unique<ShadingSystem>(&g_rendererSystem, &g_textureSystem, &g_errhandler));
 }
 
-bool build_shader(const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer, const std::string& shader_group_name) {
+bool BuildShader(const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer, const std::string& shader_group_name) {
     // Compile a OSL shader.
-    OSL::OSLCompiler compiler;
     std::string osobuffer;
-    std::vector<std::string> options;
     {
-        SORT_PROFILE("CompileShader");
+        OSL::OSLCompiler compiler;
+        std::vector<std::string> options;
+        const auto message = "Compile shader layer '" + shader_layer + "'";
+        SORT_PROFILE(message);
         if (!compiler.compile_buffer(shader_source, osobuffer, options, STDOSL_PATH))
             return false;
     }
 
     // Load shader from compiled object file.
-    if (!g_shadingsys->LoadMemoryCompiledShader(shader_name, osobuffer))
-        return false;
+    {
+        const auto message = "Loading shader obj file (" + shader_layer + ")";
+        SORT_PROFILE(message);
+        if (!g_shadingsys->LoadMemoryCompiledShader(shader_name, osobuffer))
+            return false;
+    }
 
     return g_shadingsys->Shader("surface", shader_name, shader_layer);
 };
 
-bool connect_shader(const std::string& source_shader, const std::string& source_param, const std::string& target_shader, const std::string& target_param) {
+bool ConnectShader(const std::string& source_shader, const std::string& source_param, const std::string& target_shader, const std::string& target_param) {
     return g_shadingsys->ConnectShaders(source_shader, source_param, target_shader, target_param);
 }
 
-ShaderGroupRef beginShaderGroup(const std::string& group_name) {
+ShaderGroupRef BeginShaderGroup(const std::string& group_name) {
     return g_shadingsys->ShaderGroupBegin(group_name);
 }
 
-bool endShaderGroup() {
+bool EndShaderGroup() {
     return g_shadingsys->ShaderGroupEnd();
 }
 
-void optimizeShader(OSL::ShaderGroup* group) {
+void OptimizeShader(OSL::ShaderGroup* group) {
     g_shadingsys->optimize_group(group);
 }
 
-void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::ShaderGroup* shader ){
+void ExecuteShader( Bsdf* bsdf , const Intersection* intersection , OSL::ShaderGroup* shader ){
     ShaderGlobals shaderglobals;
     shaderglobals.P = Vec3( intersection->intersect.x , intersection->intersect.y , intersection->intersect.z );
     shaderglobals.u = intersection->u;
@@ -98,7 +103,7 @@ void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::Shader
     shaderglobals.dPdu = Vec3( 0.0f );
     g_shadingsys->execute(g_contexts[ ThreadId() ], *shader, shaderglobals);
 
-    process_closure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );
+    ProcessClosure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );
 }
 
 void ShadingContextWrapper::DestroyContext(OSL::ShadingSystem* shadingsys) {
@@ -111,9 +116,9 @@ OSL::ShadingContext* ShadingContextWrapper::GetShadingContext(OSL::ShadingSystem
     return ctx = shadingsys->get_context(thread_info);
 }
 
-void create_thread_contexts(){
+void CreateOSLThreadContexts(){
     g_shadingsys = MakeShadingSystem();
-    register_closures(g_shadingsys.get());
+    RegisterClosures(g_shadingsys.get());
 
     g_contexts.resize( g_threadCnt );
     g_shadingContexts.resize( g_threadCnt );
@@ -122,7 +127,7 @@ void create_thread_contexts(){
         g_contexts[i] = g_shadingContexts[i].GetShadingContext( g_shadingsys.get() );
 }
 
-void detroy_thread_contexts(){
+void DestroyOSLThreadContexts(){
     for( auto i = 0u ; i < g_threadCnt ; ++i ){
         g_contexts[i] = nullptr;
         g_shadingContexts[i].DestroyContext( g_shadingsys.get() );

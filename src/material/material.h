@@ -21,17 +21,19 @@
 #include <string>
 #include <OSL/oslexec.h>
 #include "stream/stream.h"
-#include "bsdf/bsdf.h"
-#include "core/memory.h"
-#include "core/profile.h"
+
+class Bsdf;
+class Intersection;
 
 //! @brief 	A thin layer of material definition.
 /**
  * SORT supports node-graph based material system so that it could be flexible enough to support varies features.
- * This is no pre-defined material in SORT. Every material is a combination of material node forming a tree, the topology
+ * This is no pre-defined material in SORT. Every material is a combination of material nodes, the topology
  * of the tree defines the behavior of the material. With this design, it is very easy to drive different parameters by 
- * textures or any other information. For invalid material node graph tree, a red default material is returned as default.
- * Material class just holds a root node of material node tree. The exact definition of materials are defined in Blender.
+ * textures or any other information. For invalid material node graph tree, a white default material is returned as default.
+ * The implementation of material system heavily depends on Open Shading Language, an open-source project own by Sony Pictures
+ * Imageworks, following is the link to the github page to access its source code.
+ * https://github.com/imageworks/OpenShadingLanguage
  */
 class Material : public SerializableObject
 {
@@ -44,25 +46,20 @@ public:
 	//! @param		intersect		The intersection information at the point to be shaded.
 	//! @return						A BSDF holding BXDF information will be returned. The BSDF is allocated in the memory pool,
 	//!								meaning this is no need to release the memory in BSDF.
-    class Bsdf* GetBsdf(const class Intersection* intersect) const;
-
-	//! @brief	Get the unique name of this material.
-	//!
-	//! @return		The name of this material.
-	inline const std::string& GetName() const { return m_name; }
+    Bsdf* GetBsdf(const Intersection* intersect) const;
 
 	//! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void Serialize(IStreamBase& stream) override;
+    void    Serialize(IStreamBase& stream) override;
 
     //! @brief  Build shader in OSL.
     //!
     //! @param  shadingSys      Open-Shading-Language shading system.
     //! @return                 Whether the shader is created successfully.
-    bool    BuildShader();
+    bool    BuildMaterial();
 
 private:
     /**< Whether this is a valid material */

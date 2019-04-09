@@ -48,7 +48,7 @@
             it is marked as const. It also applied to return values and parameters.
     -   Private method
         -   Same naming convention with public method apart from that the first letter
-            of the first world is smaller case.
+            of the first word is smaller case.
         -   Defined at last after member variable definition.
     -   Global method
         -   Same naming convention with private class method.
