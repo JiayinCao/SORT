@@ -16,32 +16,14 @@
  */
 
 #include <OSL/oslcomp.h>
-#include <OSL/oslquery.h>
-#include <OSL/genclosure.h>
-#include <OSL/oslclosure.h>
 #include <algorithm>
 #include <vector>
-#include <core/thread.h>
 #include "osl_system.h"
 #include "texture_system.h"
-#include "spectrum/spectrum.h"
-#include "core/memory.h"
-#include "core/path.h"
-#include "spectrum/spectrum.h"
+#include "core/profile.h"
+#include "core/thread.h"
+#include "core/globalconfig.h"
 #include "math/intersection.h"
-#include "bsdf/bsdf.h"
-#include "bsdf/lambert.h"
-#include "bsdf/orennayar.h"
-#include "bsdf/disney.h"
-#include "bsdf/microfacet.h"
-#include "bsdf/ashikhmanshirley.h"
-#include "bsdf/phong.h"
-#include "bsdf/dielectric.h"
-#include "bsdf/hair.h"
-#include "bsdf/fourierbxdf.h"
-#include "bsdf/merl.h"
-#include "bsdf/coat.h"
-#include "bsdf/doublesided.h"
 
 using namespace OSL;
 
@@ -59,168 +41,44 @@ public:
     bool get_userdata (bool derivatives, OSL::ustring name, OSL::TypeDesc type, OSL::ShaderGlobals *sg, void *val)override{ return true;}
 };
 
-std::unique_ptr<OSL::ShadingSystem>     g_shadingsys = nullptr;
+static std::unique_ptr<OSL::ShadingSystem>  g_shadingsys = nullptr;
+static SORTTextureSystem                    g_textureSystem;
+static ErrorHandler                         g_errhandler;
+static SORTRenderServices                   g_rendererSystem(&g_textureSystem);
+static std::vector<ShadingContext*>         g_contexts;
+static std::vector<ShadingContextWrapper>   g_shadingContexts;
 
-// Register closures
-void register_closures(ShadingSystem* shadingsys){
-    // Register a closure
-    constexpr int MaxParams = 32;
-    struct BuiltinClosures {
-        const char* name;
-        int id;
-        ClosureParam params[MaxParams];
-    };
-    
-    BuiltinClosures closures[] = {
-        { "lambert" , LAMBERT_ID, { 
-            CLOSURE_COLOR_PARAM(Lambert::Params, baseColor),
-            CLOSURE_VECTOR_PARAM(Lambert::Params, n),
-            CLOSURE_FINISH_PARAM(Lambert::Params) }},
-        { "orenNayar" , OREN_NAYAR_ID, { 
-            CLOSURE_COLOR_PARAM(OrenNayar::Params, baseColor),
-            CLOSURE_FLOAT_PARAM (OrenNayar::Params, sigma),
-            CLOSURE_VECTOR_PARAM(OrenNayar::Params, n),
-            CLOSURE_FINISH_PARAM(OrenNayar::Params) }},
-        { "disney" , DISNEY_ID, {
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, subsurface),
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, metallic),
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specular),
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specularTint),
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, roughness),
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, anisotropic),
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, sheen),
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, sheenTint),
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoat),
-            CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoatGloss),
-            CLOSURE_COLOR_PARAM(DisneyBRDF::Params, baseColor),
-            CLOSURE_VECTOR_PARAM(DisneyBRDF::Params, n),
-            CLOSURE_FINISH_PARAM(DisneyBRDF::Params) } },
-        { "microfacetReflection" , MICROFACET_REFLECTION_ID, {
-            CLOSURE_STRING_PARAM(MicroFacetReflection::Params, dist),
-            CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, eta),
-            CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, absorption),
-            CLOSURE_FLOAT_PARAM(MicroFacetReflection::Params, roughnessU),
-            CLOSURE_FLOAT_PARAM(MicroFacetReflection::Params, roughnessV),
-            CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, baseColor),
-            CLOSURE_VECTOR_PARAM(MicroFacetReflection::Params, n),
-            CLOSURE_FINISH_PARAM(MicroFacetReflection::Params) } },
-        { "microfacetRefraction" , MICROFACET_REFRACTION_ID, {
-            CLOSURE_STRING_PARAM(MicroFacetRefraction::Params, dist),
-            CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, etaI),
-            CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, etaT),
-            CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, roughnessU),
-            CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, roughnessV),
-            CLOSURE_COLOR_PARAM(MicroFacetRefraction::Params, transmittance),
-            CLOSURE_VECTOR_PARAM(MicroFacetRefraction::Params, n),
-            CLOSURE_FINISH_PARAM(MicroFacetRefraction::Params) } },
-        { "ashikhmanShirley" , ASHIKHMANSHIRLEY_ID, {
-            CLOSURE_FLOAT_PARAM(AshikhmanShirley::Params, specular),
-            CLOSURE_FLOAT_PARAM(AshikhmanShirley::Params, roughnessU),
-            CLOSURE_FLOAT_PARAM(AshikhmanShirley::Params, roughnessV),
-            CLOSURE_COLOR_PARAM(AshikhmanShirley::Params, baseColor),
-            CLOSURE_VECTOR_PARAM(AshikhmanShirley::Params, n),
-            CLOSURE_FINISH_PARAM(AshikhmanShirley::Params) } },
-        { "phong" , PHONG_ID, {
-            CLOSURE_COLOR_PARAM(Phong::Params, diffuse),
-            CLOSURE_COLOR_PARAM(Phong::Params, specular),
-            CLOSURE_FLOAT_PARAM(Phong::Params, specularPower),
-            CLOSURE_VECTOR_PARAM(Phong::Params, n),
-            CLOSURE_FINISH_PARAM(Phong::Params) } },
-        { "lambertTransmission" , LAMBERT_TRANSMITTANCE_ID, { 
-            CLOSURE_COLOR_PARAM(LambertTransmission::Params, transmittance),
-            CLOSURE_VECTOR_PARAM(LambertTransmission::Params, n),
-            CLOSURE_FINISH_PARAM(LambertTransmission::Params) }},
-        { "mirror" , MIRROR_ID, {
-            CLOSURE_COLOR_PARAM(MicroFacetReflection::MirrorParams, baseColor),
-            CLOSURE_VECTOR_PARAM(MicroFacetReflection::MirrorParams, n),
-            CLOSURE_FINISH_PARAM(MicroFacetReflection::MirrorParams) } },
-        { "dieletric" , DIELETRIC_ID, {
-            CLOSURE_COLOR_PARAM(Dielectric::Params, reflectance),
-            CLOSURE_COLOR_PARAM(Dielectric::Params, transmittance),
-            CLOSURE_FLOAT_PARAM(Dielectric::Params, roughnessU),
-            CLOSURE_FLOAT_PARAM(Dielectric::Params, roughnessV),
-            CLOSURE_VECTOR_PARAM(Dielectric::Params, n),
-            CLOSURE_FINISH_PARAM(Dielectric::Params) } },
-        { "microfacetReflectionDieletric" , MICROFACET_REFLECTION_DIELETRIC_ID, {
-            CLOSURE_STRING_PARAM(MicroFacetReflection::ParamsDieletric, dist),
-            CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, iorI),
-            CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, iorT),
-            CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, roughnessU),
-            CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, roughnessV),
-            CLOSURE_COLOR_PARAM(MicroFacetReflection::ParamsDieletric, baseColor),
-            CLOSURE_VECTOR_PARAM(MicroFacetReflection::ParamsDieletric, n),
-            CLOSURE_FINISH_PARAM(MicroFacetReflection::ParamsDieletric) } },
-        { "hair" , HAIR_ID, {
-            CLOSURE_COLOR_PARAM(Hair::Params, sigma),
-            CLOSURE_FLOAT_PARAM(Hair::Params, longtitudinalRoughness),
-            CLOSURE_FLOAT_PARAM(Hair::Params, azimuthalRoughness),
-            CLOSURE_FLOAT_PARAM(Hair::Params, ior),
-            CLOSURE_FINISH_PARAM(Hair::Params) } },
-        { "fourierBRDF" , FOURIER_BDRF_ID,{
-            CLOSURE_INT_PARAM(FourierBxdf::Params, resIdx),
-            CLOSURE_VECTOR_PARAM(FourierBxdf::Params, n),
-            CLOSURE_FINISH_PARAM(FourierBxdf::Params) } },
-        { "merlBRDF" , MERL_BRDF_ID,{
-            CLOSURE_INT_PARAM(Merl::Params, resIdx),
-            CLOSURE_VECTOR_PARAM(Merl::Params, n),
-            CLOSURE_FINISH_PARAM(Merl::Params) } },
-        { "coat" , COAT_ID, {
-            CLOSURE_CLOSURE_PARAM(Coat::Params, closure),
-            CLOSURE_FLOAT_PARAM(Coat::Params, roughness),
-            CLOSURE_FLOAT_PARAM(Coat::Params, ior),
-            CLOSURE_COLOR_PARAM(Coat::Params, sigma),
-            CLOSURE_VECTOR_PARAM(Coat::Params, n),
-            CLOSURE_FINISH_PARAM(Coat::Params) } },
-        { "doubleSided" , DOUBLESIDED_ID, {
-            CLOSURE_CLOSURE_PARAM(DoubleSided::Params, bxdf0),
-            CLOSURE_CLOSURE_PARAM(DoubleSided::Params, bxdf1),
-            CLOSURE_FINISH_PARAM(DoubleSided::Params) } },
-    };
-
-    constexpr int CC = sizeof( closures ) / sizeof( BuiltinClosures );
-    for( int i = 0 ; i < CC ; ++i )
-        shadingsys->register_closure( closures[i].name , closures[i].id , closures[i].params , nullptr , nullptr );
+std::unique_ptr<ShadingSystem>  MakeShadingSystem() {
+    return std::move(std::make_unique<ShadingSystem>(&g_rendererSystem, &g_textureSystem, &g_errhandler));
 }
 
-static SORTTextureSystem g_textureSystem;
-static ErrorHandler errhandler;
-static SORTRenderServices g_rendererSystem(&g_textureSystem);
-// Create shading system
-std::unique_ptr<ShadingSystem>  MakeShadingSystem(){
-    return std::move( std::make_unique<ShadingSystem>(&g_rendererSystem, &g_textureSystem, &errhandler) );
-}
-
-// Compile OSL source code
-bool compile_buffer ( const std::string &sourcecode, const std::string &shadername ){    
+bool build_shader(const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer, const std::string& shader_group_name) {
     // Compile a OSL shader.
     OSL::OSLCompiler compiler;
     std::string osobuffer;
     std::vector<std::string> options;
     {
         SORT_PROFILE("CompileShader");
-        if (!compiler.compile_buffer(sourcecode, osobuffer, options, STDOSL_PATH))
+        if (!compiler.compile_buffer(shader_source, osobuffer, options, STDOSL_PATH))
             return false;
     }
 
     // Load shader from compiled object file.
-    if (! g_shadingsys->LoadMemoryCompiledShader (shadername, osobuffer))
+    if (!g_shadingsys->LoadMemoryCompiledShader(shader_name, osobuffer))
         return false;
 
-    return true;
-}
-
-// Build a shader from source code
-bool build_shader( const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer , const std::string& shader_group_name ) {
-    auto ret = compile_buffer(shader_source, shader_name);
-    g_shadingsys->Shader("surface", shader_name, shader_layer);
-    return ret;
+    return g_shadingsys->Shader("surface", shader_name, shader_layer);
 };
 
-// begin building shader
-ShaderGroupRef beginShaderGroup( const std::string& group_name ){
-    return g_shadingsys->ShaderGroupBegin( group_name );
+bool connect_shader(const std::string& source_shader, const std::string& source_param, const std::string& target_shader, const std::string& target_param) {
+    return g_shadingsys->ConnectShaders(source_shader, source_param, target_shader, target_param);
 }
-bool endShaderGroup(){
+
+ShaderGroupRef beginShaderGroup(const std::string& group_name) {
+    return g_shadingsys->ShaderGroupBegin(group_name);
+}
+
+bool endShaderGroup() {
     return g_shadingsys->ShaderGroupEnd();
 }
 
@@ -228,139 +86,6 @@ void optimizeShader(OSL::ShaderGroup* group) {
     g_shadingsys->optimize_group(group);
 }
 
-bool connect_shader( const std::string& source_shader , const std::string& source_param , const std::string& target_shader , const std::string& target_param ){
-    return g_shadingsys->ConnectShaders( source_shader , source_param , target_shader , target_param );
-}
-
-void process_closure (Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::Color3& w) {
-   if (!closure)
-       return;
-   switch (closure->id) {
-       case ClosureColor::MUL: {
-           Color3 cw = w * closure->as_mul()->weight;
-           process_closure(bsdf, closure->as_mul()->closure, cw);
-           break;
-       }
-       case ClosureColor::ADD: {
-           process_closure(bsdf, closure->as_add()->closureA, w);
-           process_closure(bsdf, closure->as_add()->closureB, w);
-           break;
-       }
-       default: {
-            const ClosureComponent* comp = closure->as_comp();
-            Color3 cw = w * comp->w;
-            Spectrum weight( cw[0] , cw[1] , cw[2] );
-            Vector n = Vector( 0.0f , 1.0f , 0.0f );
-            switch (comp->id) {
-                case LAMBERT_ID:
-                    {
-                        const auto& params = *comp->as<Lambert::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(Lambert)(params, weight));
-                    }
-                    break;
-                case OREN_NAYAR_ID:
-                    {   
-                        const auto& params = *comp->as<OrenNayar::Params>();
-                        bsdf->AddBxdf( SORT_MALLOC(OrenNayar)(params, weight) );
-                    }
-                    break;
-                case DISNEY_ID:
-                    {
-                        const auto& params = *comp->as<DisneyBRDF::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight));
-                    }
-                    break;
-                case MICROFACET_REFLECTION_ID:
-                    {
-                        const auto& params = *comp->as<MicroFacetReflection::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, weight));
-                    }
-                    break;
-                case MICROFACET_REFRACTION_ID:
-                    {
-                        const auto& params = *comp->as<MicroFacetRefraction::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, weight));
-                    }
-                    break;
-                case ASHIKHMANSHIRLEY_ID:
-                    {
-                        const auto& params = *comp->as<AshikhmanShirley::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(AshikhmanShirley)(params, weight));
-                    }
-                    break;
-                case PHONG_ID:
-                    {
-                        const auto& params = *comp->as<Phong::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(Phong)(params, weight));
-                    }
-                    break;
-                case LAMBERT_TRANSMITTANCE_ID:
-                    {
-                        const auto& params = *comp->as<LambertTransmission::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(LambertTransmission)(params, weight));
-                    }
-                    break;
-                case MIRROR_ID:
-                    {
-                        const auto& params = *comp->as<MicroFacetReflection::MirrorParams>();
-                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, weight ));
-                    }
-                    break;
-                case DIELETRIC_ID:
-                    {
-                        const auto& params = *comp->as<Dielectric::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(Dielectric)( params, weight ));
-                    }
-                    break;
-                case MICROFACET_REFLECTION_DIELETRIC_ID:
-                    {
-                        const auto& params = *comp->as<MicroFacetReflection::ParamsDieletric>();
-                        bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)( params, weight ));
-                    }
-                    break;
-                case HAIR_ID:
-                    {
-                        const auto& params = *comp->as<Hair::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(Hair)( params, weight ));
-                    }
-                    break;
-                case FOURIER_BDRF_ID:
-                    {
-                        const auto& params = *comp->as<FourierBxdf::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(FourierBxdf)(params, weight));
-                    }
-                    break;
-                case MERL_BRDF_ID:
-                    {
-                        const auto& params = *comp->as<Merl::Params>();
-                        bsdf->AddBxdf(SORT_MALLOC(Merl)(params, weight));
-                    }
-                    break;
-                case COAT_ID:
-                    {
-                        const auto& params = *comp->as<Coat::Params>();
-                        Bsdf* bottom = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-                        process_closure( bottom , params.closure , Color3( 1.0f ) );
-                        bsdf->AddBxdf(SORT_MALLOC(Coat)( params, weight , bottom ));
-                    }
-                    break;
-                case DOUBLESIDED_ID:
-                    {
-                        const auto& params = *comp->as<DoubleSided::Params>();
-                        Bsdf* bxdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-                        Bsdf* bxdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-                        process_closure( bxdf0 , params.bxdf0 , Color3( 1.0f ) );
-                        process_closure( bxdf1 , params.bxdf1 , Color3( 1.0f ) );
-                        bsdf->AddBxdf(SORT_MALLOC(DoubleSided)( bxdf0 , bxdf1 , weight ));
-                    }
-                    break;
-            }
-       }
-   }
-}
-
-std::vector<ShadingContext*>        contexts;
-std::vector<ShadingContextWrapper>  shadingContexts;
 void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::ShaderGroup* shader ){
     ShaderGlobals shaderglobals;
     shaderglobals.P = Vec3( intersection->intersect.x , intersection->intersect.y , intersection->intersect.z );
@@ -371,8 +96,7 @@ void execute_shader( Bsdf* bsdf , const Intersection* intersection , OSL::Shader
     shaderglobals.I = Vec3( intersection->view.x , intersection->view.y , intersection->view.z );
     shaderglobals.dPdu = Vec3( 0.0f );
     shaderglobals.dPdu = Vec3( 0.0f );
-
-    g_shadingsys->execute(contexts[ ThreadId() ], *shader, shaderglobals);
+    g_shadingsys->execute(g_contexts[ ThreadId() ], *shader, shaderglobals);
 
     process_closure( bsdf , shaderglobals.Ci , Color3( 1.0f ) );
 }
@@ -387,22 +111,20 @@ OSL::ShadingContext* ShadingContextWrapper::GetShadingContext(OSL::ShadingSystem
     return ctx = shadingsys->get_context(thread_info);
 }
 
-// Create thread contexts
 void create_thread_contexts(){
     g_shadingsys = MakeShadingSystem();
     register_closures(g_shadingsys.get());
 
-    contexts.resize( g_threadCnt );
-    shadingContexts.resize( g_threadCnt );
+    g_contexts.resize( g_threadCnt );
+    g_shadingContexts.resize( g_threadCnt );
 
     for( auto i = 0u ; i < g_threadCnt ; ++i )
-        contexts[i] = shadingContexts[i].GetShadingContext( g_shadingsys.get() );
+        g_contexts[i] = g_shadingContexts[i].GetShadingContext( g_shadingsys.get() );
 }
 
-// Destroy thread contexts
 void detroy_thread_contexts(){
     for( auto i = 0u ; i < g_threadCnt ; ++i ){
-        contexts[i] = nullptr;
-        shadingContexts[i].DestroyContext( g_shadingsys.get() );
+        g_contexts[i] = nullptr;
+        g_shadingContexts[i].DestroyContext( g_shadingsys.get() );
     }
 }

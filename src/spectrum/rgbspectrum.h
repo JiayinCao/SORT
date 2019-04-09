@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <OSL/oslexec.h>
 #include "core/define.h"
 #include "math/utils.h"
 
@@ -31,6 +32,8 @@ public:
 	RGBSpectrum( float r , float g , float b );
 	// constructor from three unsigned char
 	RGBSpectrum( unsigned char r , unsigned char g , unsigned char b );
+    // constructor from a OSL vector3
+    RGBSpectrum(const OSL::Vec3& v);
 	// constructor from one float
 	RGBSpectrum( float g );
 	// constructor from and unsigned char

@@ -232,8 +232,8 @@ TEST(OSL, CheckingClosure) {
 
     EXPECT_NE( closureA , nullptr );
     EXPECT_NE( closureB , nullptr );
-    EXPECT_EQ( closureA->id , LAMBERT_ID );
-    EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
+    EXPECT_EQ( closureA->id , CLOSURE_LAMBERT );
+    EXPECT_EQ( closureB->id , CLOSURE_OREN_NAYAR );
 
     const auto compA = closureA->as_comp();
     const auto cwA = compA->w;
@@ -331,7 +331,7 @@ TEST(OSL, CheckingMultipleLayers) {
     EXPECT_EQ(cw.z, 0.05f);
 
     EXPECT_NE(closureB , nullptr);
-    EXPECT_EQ(closureB->id, OREN_NAYAR_ID);
+    EXPECT_EQ(closureB->id, CLOSURE_OREN_NAYAR);
 
     const auto compB = closureB->as_comp();
     const auto w = compB->w;
@@ -344,7 +344,7 @@ TEST(OSL, CheckingMultipleLayers) {
     EXPECT_EQ(params.sigma, expected_sigam);
 
     const auto closureC = closureA->as_mul()->closure;
-    EXPECT_EQ(closureC->id, LAMBERT_ID);
+    EXPECT_EQ(closureC->id, CLOSURE_LAMBERT);
 }
 
 // Checking reset default value for input parameters
@@ -391,8 +391,8 @@ TEST(OSL, CheckingDefaultValue) {
 
     EXPECT_NE( closureA , nullptr );
     EXPECT_NE( closureB , nullptr );
-    EXPECT_EQ( closureA->id , LAMBERT_ID );
-    EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
+    EXPECT_EQ( closureA->id , CLOSURE_LAMBERT);
+    EXPECT_EQ( closureB->id , CLOSURE_OREN_NAYAR);
 
     const auto compA = closureA->as_comp();
     const auto cwA = compA->w;
@@ -451,8 +451,8 @@ TEST(OSL, CheckingMultiThread) {
 
         EXPECT_NE( closureA , nullptr );
         EXPECT_NE( closureB , nullptr );
-        EXPECT_EQ( closureA->id , LAMBERT_ID );
-        EXPECT_EQ( closureB->id , OREN_NAYAR_ID );
+        EXPECT_EQ( closureA->id , CLOSURE_LAMBERT);
+        EXPECT_EQ( closureB->id , CLOSURE_OREN_NAYAR);
 
         const auto compA = closureA->as_comp();
         const auto cwA = compA->w;

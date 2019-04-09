@@ -23,7 +23,7 @@
 #include <unordered_map>
 #include "core/singleton.h"
 #include "material/material.h"
-#include "resource.h"
+#include "core/resource.h"
 
 //! @brief Material manager.
 /**
