@@ -121,7 +121,7 @@ int	RunSORT( int argc , char** argv ){
 	IFileStream stream( g_inputFilePath );
 	GlobalConfiguration::GetSingleton().Serialize(stream);
 
-	create_thread_contexts();
+	CreateOSLThreadContexts();
 
 	Scene scene;
 	// Schedule all tasks.
@@ -148,7 +148,7 @@ int	RunSORT( int argc , char** argv ){
     // Post process for image sensor
     g_imageSensor->PostProcess();
 
-	detroy_thread_contexts();
+	DestroyOSLThreadContexts();
 	
     return 0;
 }

@@ -64,7 +64,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
 		mat->Serialize( stream );
 
         // compile shader
-        mat->BuildShader();
+        mat->BuildMaterial();
 
         if( !noMaterialSupport )
 		    m_matPool.push_back( std::move(mat) );

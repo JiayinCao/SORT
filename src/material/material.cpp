@@ -22,28 +22,31 @@
 #include "osl_system.h"
 #include "bsdf/lambert.h"
 
-bool Material::BuildShader(){
-    SORT_PROFILE("BuildShader");
+bool Material::BuildMaterial(){
+    const auto message = "Build Material '" + m_name + "'";
+    SORT_PROFILE(message);
 
-    m_shader = beginShaderGroup( m_name );
+    m_shader = BeginShaderGroup( m_name );
     for( const auto& shader : m_sources )
-        build_shader( shader.source , shader.name , shader.name , m_name );
+        BuildShader( shader.source , shader.name , shader.name , m_name );
     for( const auto& connection : m_connections )
-        connect_shader( connection.source_shader , connection.source_property , connection.target_shader , connection.target_property );
+        ConnectShader( connection.source_shader , connection.source_property , connection.target_shader , connection.target_property );
+    m_valid = EndShaderGroup();
 
-    m_valid = endShaderGroup();
     if (m_valid) {
         slog(INFO, MATERIAL, "Build shader %s successfully.", m_name.c_str());
+        const auto message = "Optimizing Material '" + m_name + "'";
+        SORT_PROFILE(message);
 
         // Optimize the shader
-        optimizeShader(m_shader.get());
+        OptimizeShader(m_shader.get());
     }
     return m_valid;
 }
 
 void Material::Serialize(IStreamBase& stream){
     stream >> m_name;
-    auto message = "Parsing Material '" + m_name + "'";
+    const auto message = "Parsing Material '" + m_name + "'";
     SORT_PROFILE(message.c_str());
 
     auto shader_cnt = 0u, connection_cnt = 0u;
@@ -82,12 +85,13 @@ void Material::Serialize(IStreamBase& stream){
 Bsdf* Material::GetBsdf(const class Intersection* intersect) const {
     Bsdf* bsdf = SORT_MALLOC(Bsdf)(intersect);
 
-    if (g_noMaterial || !m_valid) {
+    if ( !g_noMaterial && m_valid) {
+        ExecuteShader(bsdf, intersect, m_shader.get());
+    } else {
         Spectrum weight(1.0f);
         const Lambert* lambert = SORT_MALLOC(Lambert)(weight, weight, DIR_UP);
         bsdf->AddBxdf(lambert);
-    } else {
-        execute_shader(bsdf, intersect, m_shader.get());
     }
+
     return bsdf;
 }
