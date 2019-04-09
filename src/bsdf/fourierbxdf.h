@@ -19,7 +19,7 @@
 
 #include "bxdf.h"
 #include "bsdf.h"
-#include "material/resource.h"
+#include "core/resource.h"
 
 //! @brief FourierBxdfData.
 /**

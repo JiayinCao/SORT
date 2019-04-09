@@ -21,14 +21,21 @@
 #include "core/sassert.h"
 #include "texture/imagetexture.h"
 
+// Since only one single file will include this header file, it is OK to use the namespace in a header file.
 using namespace OSL;
 using namespace OIIO;
 
+//! @brief  Texture system implementation in SORT.
+/**
+ * This is the connection between OSL texturing system and SORT texturing system.
+ * In order to take full control of the rendering, SORT doesn't use the OSL implementation of texturing system.
+ * The current texturing system in SORT is extremely naive and simple.
+ * 
+ * Most of the following interfaces are not implemented for now due to the simplicity of SORT texturing system.
+ * There will be more features added in the future.
+ */
 class SORTTextureSystem : public TextureSystem {
 public:
-    SORTTextureSystem() = default;
-    ~SORTTextureSystem() = default;
-
     bool attribute(string_view name, TypeDesc type, const void *val) override { return true; }
     bool attribute(string_view name, int val) override { return true; }
     bool attribute(string_view name, float val) override { return true; }
@@ -355,5 +362,6 @@ public:
 private:
     void operator delete(void* todel) { ::delete ((char*)todel); }
 
+    // The texture pool
     std::unordered_map<std::string, std::unique_ptr<ImageTexture>> m_TexturePool;
 };
