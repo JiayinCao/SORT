@@ -50,17 +50,22 @@ namespace {
             ClosureParam params[MAXPARAMS];
         };
 
+        Closure_Base() = default;
+        virtual ~Closure_Base() = default;
         virtual void Process(Bsdf* bsdf, const ClosureComponent* comp, const OSL::Color3& w) = 0;
     };
 
     static std::vector<std::unique_ptr<Closure_Base>>   g_closures(CLOSURE_CNT);
 
     struct Closure_Lambert : public Closure_Base {
-        static constexpr char*  Name = "lambert";
         static constexpr int    ClosureID = CLOSURE_LAMBERT;
 
+        static const char* GetName(){
+            return "lambert";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID, {
+            BuiltinClosures closure = { GetName(), ClosureID, {
                 CLOSURE_COLOR_PARAM(Lambert::Params, baseColor),
                 CLOSURE_VECTOR_PARAM(Lambert::Params, n),
                 CLOSURE_FINISH_PARAM(Lambert::Params)
@@ -75,11 +80,14 @@ namespace {
     };
 
     struct Closure_OrenNayar : public Closure_Base {
-        static constexpr char*  Name = "orenNayar";
         static constexpr int    ClosureID = CLOSURE_OREN_NAYAR;
 
+        static const char* GetName(){
+            return "orenNayar";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID, {
+            BuiltinClosures closure = { GetName(), ClosureID, {
                 CLOSURE_COLOR_PARAM(OrenNayar::Params, baseColor),
                 CLOSURE_FLOAT_PARAM(OrenNayar::Params, sigma),
                 CLOSURE_VECTOR_PARAM(OrenNayar::Params, n),
@@ -95,11 +103,14 @@ namespace {
     };
 
     struct Closure_Disney : public Closure_Base {
-        static constexpr char*  Name = "disney";
         static constexpr int    ClosureID = CLOSURE_DISNEY;
 
+        static const char* GetName(){
+            return "disney";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, subsurface),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, metallic),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specular),
@@ -124,11 +135,14 @@ namespace {
     };
 
     struct Closure_MicrofacetReflection : public Closure_Base {
-        static constexpr char*  Name = "microfacetReflection";
         static constexpr int    ClosureID = CLOSURE_MICROFACET_REFLECTION;
 
+        static const char* GetName(){
+            return "microfacetReflection";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_STRING_PARAM(MicroFacetReflection::Params, dist),
                 CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, eta),
                 CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, absorption),
@@ -148,11 +162,14 @@ namespace {
     };
 
     struct Closure_MicrofacetRefraction : public Closure_Base {
-        static constexpr char*  Name = "microfacetRefraction";
         static constexpr int    ClosureID = CLOSURE_MICROFACET_REFRACTION;
 
+        static const char* GetName(){
+            return "microfacetRefraction";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_STRING_PARAM(MicroFacetRefraction::Params, dist),
                 CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, etaI),
                 CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, etaT),
@@ -172,11 +189,14 @@ namespace {
     };
 
     struct Closure_AshikhmanShirley : public Closure_Base {
-        static constexpr char*  Name = "ashikhmanShirley";
         static constexpr int    ClosureID = CLOSURE_ASHIKHMANSHIRLEY;
 
+        static const char* GetName(){
+            return "ashikhmanShirley";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_FLOAT_PARAM(AshikhmanShirley::Params, specular),
                 CLOSURE_FLOAT_PARAM(AshikhmanShirley::Params, roughnessU),
                 CLOSURE_FLOAT_PARAM(AshikhmanShirley::Params, roughnessV),
@@ -194,11 +214,14 @@ namespace {
     };
 
     struct Closure_Phong : public Closure_Base {
-        static constexpr char*  Name = "phong";
         static constexpr int    ClosureID = CLOSURE_PHONG;
 
+        static const char* GetName(){
+            return "phong";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_COLOR_PARAM(Phong::Params, diffuse),
                 CLOSURE_COLOR_PARAM(Phong::Params, specular),
                 CLOSURE_FLOAT_PARAM(Phong::Params, specularPower),
@@ -215,11 +238,14 @@ namespace {
     };
 
     struct Closure_LambertTransmission : public Closure_Base {
-        static constexpr char*  Name = "lambertTransmission";
         static constexpr int    ClosureID = CLOSURE_LAMBERT_TRANSMITTANCE;
 
+        static const char* GetName(){
+            return "lambertTransmission";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_COLOR_PARAM(LambertTransmission::Params, transmittance),
                 CLOSURE_VECTOR_PARAM(LambertTransmission::Params, n),
                 CLOSURE_FINISH_PARAM(LambertTransmission::Params)
@@ -234,11 +260,14 @@ namespace {
     };
 
     struct Closure_Mirror : public Closure_Base {
-        static constexpr char*  Name = "mirror";
         static constexpr int    ClosureID = CLOSURE_MIRROR;
 
+        static const char* GetName(){
+            return "mirror";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_COLOR_PARAM(MicroFacetReflection::MirrorParams, baseColor),
                 CLOSURE_VECTOR_PARAM(MicroFacetReflection::MirrorParams, n),
                 CLOSURE_FINISH_PARAM(MicroFacetReflection::MirrorParams)
@@ -253,11 +282,14 @@ namespace {
     };
 
     struct Closure_Dielectric : public Closure_Base {
-        static constexpr char*  Name = "dieletric";
         static constexpr int    ClosureID = CLOSURE_DIELETRIC;
 
+        static const char* GetName(){
+            return "dieletric";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_COLOR_PARAM(Dielectric::Params, reflectance),
                 CLOSURE_COLOR_PARAM(Dielectric::Params, transmittance),
                 CLOSURE_FLOAT_PARAM(Dielectric::Params, roughnessU),
@@ -275,11 +307,14 @@ namespace {
     };
 
     struct Closure_MicrofacetReflectionDielectric : public Closure_Base {
-        static constexpr char*  Name = "microfacetReflectionDieletric";
         static constexpr int    ClosureID = CLOSURE_MICROFACET_REFLECTION_DIELETRIC;
 
+        static const char* GetName(){
+            return "microfacetReflectionDieletric";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_STRING_PARAM(MicroFacetReflection::ParamsDieletric, dist),
                 CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, iorI),
                 CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, iorT),
@@ -299,11 +334,14 @@ namespace {
     };
 
     struct Closure_Hair : public Closure_Base {
-        static constexpr char*  Name = "hair";
         static constexpr int    ClosureID = CLOSURE_HAIR;
 
+        static const char* GetName(){
+            return "hair";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_COLOR_PARAM(Hair::Params, sigma),
                 CLOSURE_FLOAT_PARAM(Hair::Params, longtitudinalRoughness),
                 CLOSURE_FLOAT_PARAM(Hair::Params, azimuthalRoughness),
@@ -320,11 +358,14 @@ namespace {
     };
 
     struct Closure_FourierBRDF : public Closure_Base {
-        static constexpr char*  Name = "fourierBRDF";
         static constexpr int    ClosureID = CLOSURE_FOURIER_BDRF;
 
+        static const char* GetName(){
+            return "fourierBRDF";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_INT_PARAM(FourierBxdf::Params, resIdx),
                 CLOSURE_VECTOR_PARAM(FourierBxdf::Params, n),
                 CLOSURE_FINISH_PARAM(FourierBxdf::Params)
@@ -339,11 +380,14 @@ namespace {
     };
 
     struct Closure_MERL : public Closure_Base {
-        static constexpr char*  Name = "merlBRDF";
         static constexpr int    ClosureID = CLOSURE_MERL_BRDF;
 
+        static const char* GetName(){
+            return "merlBRDF";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_INT_PARAM(Merl::Params, resIdx),
                 CLOSURE_VECTOR_PARAM(Merl::Params, n),
                 CLOSURE_FINISH_PARAM(Merl::Params)
@@ -358,11 +402,14 @@ namespace {
     };
 
     struct Closure_Coat : public Closure_Base {
-        static constexpr char*  Name = "coat";
         static constexpr int    ClosureID = CLOSURE_COAT;
 
+        static const char* GetName(){
+            return "coat";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_CLOSURE_PARAM(Coat::Params, closure),
                 CLOSURE_FLOAT_PARAM(Coat::Params, roughness),
                 CLOSURE_FLOAT_PARAM(Coat::Params, ior),
@@ -382,11 +429,14 @@ namespace {
     };
 
     struct Closure_DoubleSided : public Closure_Base {
-        static constexpr char*  Name = "doubleSided";
         static constexpr int    ClosureID = CLOSURE_DOUBLESIDED;
 
+        static const char* GetName(){
+            return "doubleSided";
+        }
+
         static void Register(ShadingSystem* shadingsys) {
-            BuiltinClosures closure = { Name, ClosureID,{
+            BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_CLOSURE_PARAM(DoubleSided::Params, bxdf0),
                 CLOSURE_CLOSURE_PARAM(DoubleSided::Params, bxdf1),
                 CLOSURE_FINISH_PARAM(DoubleSided::Params)
