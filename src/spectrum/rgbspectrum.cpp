@@ -42,6 +42,12 @@ RGBSpectrum::RGBSpectrum( unsigned char r , unsigned char g , unsigned char b )
 	m_b = (float)b / 255.0f;
 }
 
+RGBSpectrum::RGBSpectrum(const OSL::Vec3& v) {
+    m_r = v[0];
+    m_g = v[1];
+    m_b = v[2];
+}
+
 // constructor from one float
 RGBSpectrum::RGBSpectrum( float g )
 {
