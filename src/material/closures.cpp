@@ -37,18 +37,19 @@
 using namespace OSL;
 
 // Process closures recursively
-void process_closure(Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::Color3& w);
+void ProcessClosure(Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::Color3& w);
 
 // These data structure is not supposed to be seen by other parts of the renderer
 namespace {
-    constexpr int MaxParams = 32;
-    struct BuiltinClosures {
-        const char* name;
-        int id;
-        ClosureParam params[MaxParams];
-    };
+    constexpr int MAXPARAMS = 32;
 
     struct Closure_Base {
+        struct BuiltinClosures {
+            const char* name;
+            int id;
+            ClosureParam params[MAXPARAMS];
+        };
+
         virtual void Process(Bsdf* bsdf, const ClosureComponent* comp, const OSL::Color3& w) = 0;
     };
 
@@ -375,7 +376,7 @@ namespace {
         void Process(Bsdf* bsdf, const ClosureComponent* comp, const OSL::Color3& w) override {
             const auto& params = *comp->as<Coat::Params>();
             Bsdf* bottom = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-            process_closure(bottom, params.closure, Color3(1.0f));
+            ProcessClosure(bottom, params.closure, Color3(1.0f));
             bsdf->AddBxdf(SORT_MALLOC(Coat)(params, w, bottom));
         }
     };
@@ -397,15 +398,15 @@ namespace {
             const auto& params = *comp->as<DoubleSided::Params>();
             Bsdf* bxdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
             Bsdf* bxdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-            process_closure(bxdf0, params.bxdf0, Color3(1.0f));
-            process_closure(bxdf1, params.bxdf1, Color3(1.0f));
+            ProcessClosure(bxdf0, params.bxdf0, Color3(1.0f));
+            ProcessClosure(bxdf1, params.bxdf1, Color3(1.0f));
             bsdf->AddBxdf(SORT_MALLOC(DoubleSided)(bxdf0, bxdf1, w));
         }
     };
 }
 
 template< typename T >
-void Register_Closure(OSL::ShadingSystem* shadingsys) {
+void registerClosure(OSL::ShadingSystem* shadingsys) {
     T::Register(shadingsys);
 
     // Unit test will register a closure multiple times
@@ -414,36 +415,36 @@ void Register_Closure(OSL::ShadingSystem* shadingsys) {
     g_closures[T::ClosureID] = std::make_unique<T>();
 }
 
-void register_closures(OSL::ShadingSystem* shadingsys) {
-    Register_Closure<Closure_Lambert>(shadingsys);
-    Register_Closure<Closure_OrenNayar>(shadingsys);
-    Register_Closure<Closure_Disney>(shadingsys);
-    Register_Closure<Closure_MicrofacetReflection>(shadingsys);
-    Register_Closure<Closure_MicrofacetRefraction>(shadingsys);
-    Register_Closure<Closure_AshikhmanShirley>(shadingsys);
-    Register_Closure<Closure_Phong>(shadingsys);
-    Register_Closure<Closure_LambertTransmission>(shadingsys);
-    Register_Closure<Closure_Mirror>(shadingsys);
-    Register_Closure<Closure_Dielectric>(shadingsys);
-    Register_Closure<Closure_MicrofacetReflectionDielectric>(shadingsys);
-    Register_Closure<Closure_Hair>(shadingsys);
-    Register_Closure<Closure_MERL>(shadingsys);
-    Register_Closure<Closure_Coat>(shadingsys);
-    Register_Closure<Closure_DoubleSided>(shadingsys);
+void RegisterClosures(OSL::ShadingSystem* shadingsys) {
+    registerClosure<Closure_Lambert>(shadingsys);
+    registerClosure<Closure_OrenNayar>(shadingsys);
+    registerClosure<Closure_Disney>(shadingsys);
+    registerClosure<Closure_MicrofacetReflection>(shadingsys);
+    registerClosure<Closure_MicrofacetRefraction>(shadingsys);
+    registerClosure<Closure_AshikhmanShirley>(shadingsys);
+    registerClosure<Closure_Phong>(shadingsys);
+    registerClosure<Closure_LambertTransmission>(shadingsys);
+    registerClosure<Closure_Mirror>(shadingsys);
+    registerClosure<Closure_Dielectric>(shadingsys);
+    registerClosure<Closure_MicrofacetReflectionDielectric>(shadingsys);
+    registerClosure<Closure_Hair>(shadingsys);
+    registerClosure<Closure_MERL>(shadingsys);
+    registerClosure<Closure_Coat>(shadingsys);
+    registerClosure<Closure_DoubleSided>(shadingsys);
 }
 
-void process_closure(Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::Color3& w) {
+void ProcessClosure(Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::Color3& w) {
     if (!closure)
         return;
     switch (closure->id) {
         case ClosureColor::MUL: {
             Color3 cw = w * closure->as_mul()->weight;
-            process_closure(bsdf, closure->as_mul()->closure, cw);
+            ProcessClosure(bsdf, closure->as_mul()->closure, cw);
             break;
         }
         case ClosureColor::ADD: {
-            process_closure(bsdf, closure->as_add()->closureA, w);
-            process_closure(bsdf, closure->as_add()->closureB, w);
+            ProcessClosure(bsdf, closure->as_add()->closureA, w);
+            ProcessClosure(bsdf, closure->as_add()->closureB, w);
             break;
         }
         default: {

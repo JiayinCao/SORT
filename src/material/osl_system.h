@@ -42,23 +42,23 @@ private:
 };
 
 // begin building shader
-OSL::ShaderGroupRef beginShaderGroup( const std::string& group_name );
-bool endShaderGroup();
+OSL::ShaderGroupRef BeginShaderGroup( const std::string& group_name );
+bool EndShaderGroup();
 
 // Optimize shader
-void optimizeShader(OSL::ShaderGroup* group);
+void OptimizeShader(OSL::ShaderGroup* group);
 
 // Build a shader from source code
-bool build_shader( const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer , const std::string& shader_group_name = "" );
+bool BuildShader( const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer , const std::string& shader_group_name = "" );
 
 // Connect parameters between shaders
-bool connect_shader( const std::string& source_shader , const std::string& source_param , const std::string& target_shader , const std::string& target_param );
+bool ConnectShader( const std::string& source_shader , const std::string& source_param , const std::string& target_shader , const std::string& target_param );
 
 // Execute a shader and populate the bsdf
-void execute_shader( class Bsdf* bsdf , const class Intersection* intersection , OSL::ShaderGroup* shader );
+void ExecuteShader( class Bsdf* bsdf , const class Intersection* intersection , OSL::ShaderGroup* shader );
 
 // Create thread contexts
-void create_thread_contexts();
+void CreateOSLThreadContexts();
 
 // Destroy thread contexts
-void detroy_thread_contexts();
+void DestroyOSLThreadContexts();
