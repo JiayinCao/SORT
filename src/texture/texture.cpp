@@ -52,10 +52,6 @@ bool Texture::Output( const std::string& name ){
     return false;
 }
 
-Spectrum Texture::Evaluate( const Intersection* intersect ) const{
-	return GetColor( (int) (intersect->u *  m_iTexWidth) , (int) (intersect->v * m_iTexHeight) );
-}
-
 void Texture::SetTexCoordFilter( TEXCOORDFILTER mode ){
 	m_TexCoordFilter = mode;
 }
@@ -93,7 +89,16 @@ void Texture::_texCoordFilter( int& x , int& y ) const{
 }
 
 Spectrum Texture::GetColorFromUV( float u , float v ) const{
-    int w = (int) (u * m_iTexWidth );
-    int h = (int) (v * m_iTexHeight );
-    return GetColor( w , h );
+    // Before I have time to work on texturing system, using linear sampling by default.
+    // This is by no means the most efficient way to implement bilinear sampling, but it works for now.
+
+    const auto fu = u * m_iTexWidth - 0.5f;
+    const auto fv = v * m_iTexHeight - 0.5f;
+    const auto iu = (int)( fu );
+    const auto iv = (int)( fv );
+    const auto _fu = fu - floor(fu);
+    const auto _fv = fv - floor(fv);
+
+    return  GetColor(iu, iv) * (1.0f - _fu) * (1.0f - _fv) + GetColor(iu + 1, iv) * _fu * (1.0f - _fv) +
+            GetColor(iu, iv + 1) * (1.0f - _fu) * _fv + GetColor(iu + 1, iv + 1) * _fu * _fv;
 }

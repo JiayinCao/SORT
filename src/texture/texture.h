@@ -55,11 +55,6 @@ public:
 	// get color from uv coordinate
 	virtual Spectrum GetColorFromUV( float u , float v ) const;
 
-	// get the texture value
-	// para 'intersect' : the intersection
-	// result :	the spectrum value
-	virtual Spectrum Evaluate( const class Intersection* intersect ) const;
-
 	// set texture coordinate filter mode
 	void	SetTexCoordFilter( TEXCOORDFILTER mode );
 
