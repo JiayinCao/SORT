@@ -268,12 +268,6 @@ def name_compat(name):
     else:
         return name.replace(' ', '_')
 
-def name_compat_materialNode(name):
-    if name is None:
-        return 'None'
-    else:
-        return name.replace(' ', '')
-
 def export_hair(ps, obj, scene, fs):
     LENFMT = struct.Struct('=i')
     POINTFMT = struct.Struct('=fff')
