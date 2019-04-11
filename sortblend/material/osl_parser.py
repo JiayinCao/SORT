@@ -161,16 +161,20 @@ def parseOneParameter( source ):
         return ( name , value )
 
     if source.startswith( 'color' ):
-        return ( 'SORTNodeSocketColor' , getParameterNameAndValue( source , len('color ' ) ) )
+        return ( 'SORTNodeSocketColor' , True , getParameterNameAndValue( source , len('color ' ) ) )
     if source.startswith( 'normal' ):
-        return ( 'SORTNodeSocketNormal' , getParameterNameAndValue( source , len('normal ' ) ) )
+        return ( 'SORTNodeSocketNormal' , True , getParameterNameAndValue( source , len('normal ' ) ) )
     if source.startswith( 'closure color' ):
-        return ( 'SORTNodeSocketBxdf' , getParameterNameAndValue( source , len('closure color ' ) ) )
+        return ( 'SORTNodeSocketBxdf' , True , getParameterNameAndValue( source , len('closure color ' ) ) )
     if source.startswith( 'float' ):
-        return ( 'SORTNodeSocketFloat' , getParameterNameAndValue( source , len('float ' ) ) )
+        return ( 'SORTNodeSocketFloat' , True , getParameterNameAndValue( source , len('float ' ) ) )
     if source.startswith( 'string' ):
-        return ( 'SORTNodePropertyPath' , getParameterNameAndValue( source , len('string ' ) ) )
-    return ( 'SORTNodeSocketLargeFloat' , 'Default' )
+        return ( 'SORTNodePropertyEnum' , False , getParameterNameAndValue( source , len('string ' ) ) )
+    if source.startswith( 'path' ):
+        return ( 'SORTNodePropertyPath' , False , getParameterNameAndValue( source , len('path ' ) ) )
+    if source.startswith( 'vector' ):
+        return ( 'SORTNodePropertyFloatVector' , False , getParameterNameAndValue( source , len('vector ' ) ) )
+    return ( 'SORTNodeSocketLargeFloat' , False , 'Default' )
 
 # extract meta data in parameters
 def extractMetaData( source ):
@@ -193,7 +197,7 @@ def extractParameter( source ):
         source = source[:meta_data_begin] + source[meta_data_end+1:]
 
     param = parseOneParameter( source )
-    return (param[0] , param[1] , metadata)
+    return (param[0] , param[1] , param[2] , metadata)
 
 # parse osl parameters
 def parse_osl_params(osl_shader_source):
@@ -208,15 +212,15 @@ def parse_osl_params(osl_shader_source):
     # parse the output parameters
     inputs_list = []
     outputs_list = []
-    print( clean_shader )
+    #print( clean_shader )
     for parameter in parameters:
         if parameter.startswith( 'output' ):
             data = extractParameter( parameter[len('output '):] )
             outputs_list.append( data )
-            print(data)
+            #print(data)
         else:
             data = extractParameter( parameter )
             inputs_list.append( data )
-            print(data)
+            #print(data)
 
     return ( inputs_list , outputs_list )

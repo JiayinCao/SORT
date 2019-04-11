@@ -75,6 +75,8 @@
     point  name (point x, float y) BUILTIN;     \
     color  name (color x, float y) BUILTIN;
 
+#define path string
+
 // Basic math
 normal degrees (normal x) { return x*(180.0/M_PI); }
 vector degrees (vector x) { return x*(180.0/M_PI); }

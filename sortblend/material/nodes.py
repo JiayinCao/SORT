@@ -107,9 +107,14 @@ class SORTShadingNode(bpy.types.Node):
 
         inputs_list , outputs_list = osl_parser.parse_osl_params( self.osl_shader )
         for input_param in inputs_list:
-            self.inputs.new( input_param[0] , input_param[1][0] )
+            if input_param[1]:  # make sure it is a socket
+                param_name = input_param[2][0]
+                self.inputs.new( input_param[0] , param_name )
+                for meta_data in input_param[3]:
+                    if meta_data[2][0] == 'default_value':
+                        self.inputs[param_name].default_value = meta_data[2][1]
         for output in outputs_list:
-            self.outputs.new( output[0] , output[1][0] )
+            self.outputs.new( output[0] , output[2][0] )
 
     # this is not an overriden interface
     # draw all properties ( not socket ) in material panel
@@ -153,6 +158,8 @@ class SORTShadingNode(bpy.types.Node):
     # register all properties in the class
     @classmethod
     def register(cls):
+        inputs_list , outputs_list = osl_parser.parse_osl_params( cls.osl_shader )
+
         for props in cls.get_mro('property_list'):
             if not props:
                 continue
@@ -216,16 +223,7 @@ class SORTShadingNode_BXDF(SORTShadingNode):
     output_type = 'SORTNodeSocketBxdf'
     bxdf_property_list = [ { 'class' : properties.SORTNodeSocketNormal , 'name' : 'Normal' } ]
     pbrt_bxdf_type = ''
-    disable_normal = False
-
-    def register_prop(self):
-        if self.disable_normal is True:
-            return
-        # register all sockets in BXDF
-        for prop in SORTShadingNode_BXDF.bxdf_property_list:
-            self.inputs.new( prop['class'].__name__ , prop['name'] )
-            if 'default' in prop:
-                self.inputs[prop['name']].default_value = prop['default']
+    disable_normal = False  # to be deleted
 
     def export_pbrt(self, output_pbrt_type , output_pbrt_prop):
         # disable pbrt export by default, not all materials are supported in pbrt
@@ -280,7 +278,7 @@ class SORTNode_Material_Principle(SORTShadingNode_BXDF):
     osl_shader = '''
         shader Principle( float RoughnessU = @ ,
                           float RoughnessV = @ ,
-                          float Metallic = @ ,
+                          float Metallic = @ [[ float default_value = 1.0 ]] ,
                           float Specular = @ ,
                           color BaseColor = @ ,
                           normal Normal = @ ,
@@ -308,7 +306,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' , 'pbrt_name' : 'color' } ]
     osl_shader = '''
         shader Disney( float SubSurface = @ ,
-                       float Metallic = @ ,
+                       float Metallic = @ [[ float default_value = 1.0 ]] ,
                        float Specular = @ ,
                        float SpecularTint = @ ,
                        float Roughness = @ ,
@@ -355,7 +353,7 @@ class SORTNode_Material_Plastic(SORTShadingNode_BXDF):
     osl_shader = '''
         shader Plastic( color Diffuse = @ ,
                         color Specular = @ ,
-                        float Roughness = @ ,
+                        float Roughness = @ [[ float default_value = 0.2 ]] ,
                         normal Normal = @ ,
                         output closure color Result = color(0) ){
             if( Diffuse[0] != 0 || Diffuse[1] != 0 || Diffuse[2] != 0 )
@@ -417,7 +415,7 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
         shader Hair( color HairColor = @ ,
                      float LongtitudinalRoughness = @ ,
                      float AzimuthalRoughness = @ ,
-                     float IndexofRefraction = @ , 
+                     float IndexofRefraction = @ [[ float default_value = 1.55 ]] , 
                      output closure color Result = color(0) ){
             float inv = 1.0 / ( 5.969 - 0.215 * AzimuthalRoughness + 2.532 * pow(AzimuthalRoughness,2.0) - 10.73 * pow(AzimuthalRoughness,3.0) + 
                         5.574 * pow(AzimuthalRoughness,4.0) + 0.245 * pow(AzimuthalRoughness, 5.0) );
@@ -474,7 +472,7 @@ class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
             float y = log(x) * inv;
             return y * y;
         }
-        shader Coat( float     IOR = @,
+        shader Coat( float     IOR = @ [[ float default_value = 1.5 ]] ,
                      float     Roughness = @ ,
                      color     ColorTint = @ ,
                      closure color Surface = @ ,
@@ -500,11 +498,11 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'RoughnessV' , 'default' : 0.1 } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
-        shader MicrofacetRelection(  string MicroFacetDistribution = @ ,
-                                     color  Interior_IOR = @ ,
-                                     color  Absorption_Coefficient = @ ,
-                                     float  RoughnessU = @ ,
-                                     float  RoughnessV = @ ,
+        shader MicrofacetRelection(  string MicroFacetDistribution = @ [[ string default_value = "Blinn;GGX;Beckmann" ]] ,
+                                     vector Interior_IOR = @ [[ vector default_value = vector(0.37) ]] ,
+                                     vector Absorption_Coefficient = @ [[ vector default_value = vector(2.82) ]] ,
+                                     float  RoughnessU = @ [[ float default_value = 0.1 ]] ,
+                                     float  RoughnessV = @ [[ float default_value = 0.1 ]] ,
                                      color  BaseColor = @ ,
                                      normal Normal = @ ,
                                      output closure color Result = color(0) ){
@@ -524,10 +522,10 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
         shader MicrofacetRefraction( string MicroFacetDistribution = @ ,
-                                     float  Interior_IOR = @ ,
-                                     float  Exterior_IOR = @ ,
-                                     float  RoughnessU = @ ,
-                                     float  RoughnessV = @ ,
+                                     float  Interior_IOR = @ [[ float default_value = 1.1 ]] ,
+                                     float  Exterior_IOR = @ [[ float default_value = 1.0 ]] ,
+                                     float  RoughnessU = @ [[ float default_value = 0.1 ]] ,
+                                     float  RoughnessV = @ [[ float default_value = 0.1 ]] ,
                                      color  BaseColor = @ , 
                                      normal Normal = @ ,
                                      output closure color Result = color(0) ){
@@ -545,8 +543,8 @@ class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
         shader AshikhmanShirley( float Specular = @ ,
-                                 float RoughnessU = @ ,
-                                 float RoughnessV = @ ,
+                                 float RoughnessU = @ [[ float default_value = 0.1 ]] ,
+                                 float RoughnessV = @ [[ float default_value = 0.1 ]] ,
                                  color Diffuse = @ ,
                                  normal Normal = @ ,
                                  output closure color Result = color(0) ){
@@ -563,8 +561,8 @@ class SORTNode_BXDF_Phong(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' } ,
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader Phong( float SpecularPower = @ ,
-                      float DiffuseRatio = @ ,
+        shader Phong( float SpecularPower = @ [[ float default_value = 32.0 ]] ,
+                      float DiffuseRatio = @  [[ float default_value = 0.2 ]] ,
                       color Specular = @ ,
                       color Diffuse = @ ,
                       normal Normal = @ ,
@@ -782,21 +780,6 @@ class SORTNodeDecodeNormal(SORTShadingNode):
         }
     '''
 
-@SORTPatternGraph.register_node('Operator')
-class SORTNodePerlinNoise(SORTShadingNode):
-    bl_label = 'PerlinNoise'
-    bl_idname = 'SORTNodePerlinNoise'
-    property_list = [ { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'Scaling' , 'default' : 1.0 },
-                      { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
-    output_type = 'SORTNodeSocketUV'
-    osl_shader = '''
-        shader PerlinNoise( float Scaling = @ ,
-                            vector UVMapping = @ ,
-                            output vector Result = vector( 0.0 , 0.0 , 0.0 ) ){
-            Result = noise( "perlin" , UVMapping[0] , UVMapping[1] ) * Scaling + UVMapping;
-        }
-    '''
-
 #------------------------------------------------------------------------------------------------------------------------------------
 #                                               Texture Nodes for SORT
 #------------------------------------------------------------------------------------------------------------------------------------
@@ -809,9 +792,9 @@ class SORTNodeGrid(SORTShadingNode):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Treshold' , 'default' : 0.1 , 'min' : 0.0 , 'max' : 1.0 },
                       { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
     osl_shader = '''
-        shader CheckerBoard( color Color1 = @ ,
+        shader CheckerBoard( color Color1 = @ [[ color default_value = 0.2 ]],
                              color Color2 = @ ,
-                             float Treshold = @ ,
+                             float Treshold = @ [[ float default_value = 0.1 ]] ,
                              vector UVMapping = @ ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
             float fu = UVMapping[0] - floor( UVMapping[0] ) - 0.5;
@@ -832,7 +815,7 @@ class SORTNodeCheckerBoard(SORTShadingNode):
                       { 'class' : properties.SORTNodeSocketColor , 'name' : 'Color2' } ,
                       { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
     osl_shader = '''
-        shader CheckerBoard( color Color1 = @ ,
+        shader CheckerBoard( color Color1 = @ [[ color default_value = 0.2 ]],
                              color Color2 = @ ,
                              vector UVMapping = @ ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
@@ -852,7 +835,7 @@ class SORTNodeImage(SORTShadingNode):
     property_list = [ { 'class' : properties.SORTNodePropertyPath , 'name' : 'Filename' },
                       { 'class' : properties.SORTNodeSocketUV , 'name' : 'UV Mapping' } ]
     osl_shader = '''
-        shader CheckerBoard( string filename = @ ,
+        shader CheckerBoard( path filename = @ ,
                              vector UVMapping = @ ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
             Result = texture( filename , UVMapping[0] , UVMapping[1] );
