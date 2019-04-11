@@ -166,6 +166,8 @@ def parseOneParameter( source ):
         return ( properties.SORTNodeSocketBxdf , True , getParameterNameAndValue( source , len('closure color ' ) ) )
     if source.startswith( 'float' ):
         return ( properties.SORTNodeSocketFloat , True , getParameterNameAndValue( source , len('float ' ) ) )
+    if source.startswith( 'lfloat' ):
+        return ( properties.SORTNodeSocketLargeFloat , True , getParameterNameAndValue( source , len('lfloat ' ) ) )
     if source.startswith( 'string' ):
         return ( properties.SORTNodePropertyEnum , False , getParameterNameAndValue( source , len('string ' ) ) )
     if source.startswith( 'path' ):

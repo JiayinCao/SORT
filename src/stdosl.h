@@ -478,8 +478,9 @@ int getmatrix (string fromspace, output matrix M) {
     return getmatrix (fromspace, "common", M);
 }
 
-#define path string
-#define uv vector
+#define path    string
+#define uv      vector
+#define lfloat  float
 
 // SORT compatible closures
 closure color lambert( color albedo , normal N ) BUILTIN;

@@ -492,9 +492,9 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
             return y * y;
         }
         shader Hair( color HairColor = @ ,
-                     float LongtitudinalRoughness = @ ,
-                     float AzimuthalRoughness = @ ,
-                     float IndexofRefraction = @ [[ float default_value = 1.55 ]] , 
+                     float LongtitudinalRoughness = @ [[ float default_value = 0.2 ]] ,
+                     float AzimuthalRoughness = @ [[ float default_value = 0.2 ]] ,
+                     lfloat IndexofRefraction = @ [[ lfloat default_value = 1.55 ]] , 
                      output closure color Result = color(0) ){
             float inv = 1.0 / ( 5.969 - 0.215 * AzimuthalRoughness + 2.532 * pow(AzimuthalRoughness,2.0) - 10.73 * pow(AzimuthalRoughness,3.0) + 
                         5.574 * pow(AzimuthalRoughness,4.0) + 0.245 * pow(AzimuthalRoughness, 5.0) );
@@ -551,7 +551,7 @@ class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
             float y = log(x) * inv;
             return y * y;
         }
-        shader Coat( float     IOR = @ [[ float default_value = 1.5 ]] ,
+        shader Coat( lfloat     IOR = @ [[ lfloat default_value = 1.5 ]] ,
                      float     Roughness = @ ,
                      color     ColorTint = @ ,
                      closure color Surface = @ ,
@@ -601,8 +601,8 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode_BXDF):
     #                  { 'class' : properties.SORTNodeSocketColor , 'name' : 'BaseColor' } ]
     osl_shader = '''
         shader MicrofacetRefraction( string MicroFacetDistribution = @ [[ string sort_items = "Blinn;GGX;Beckmann" , string default_value = "GGX" ]] ,
-                                     float  Interior_IOR = @ [[ float default_value = 1.1 ]] ,
-                                     float  Exterior_IOR = @ [[ float default_value = 1.0 ]] ,
+                                     lfloat  Interior_IOR = @ [[ float default_value = 1.1 ]] ,
+                                     lfloat  Exterior_IOR = @ [[ float default_value = 1.0 ]] ,
                                      float  RoughnessU = @ [[ float default_value = 0.1 ]] ,
                                      float  RoughnessV = @ [[ float default_value = 0.1 ]] ,
                                      color  BaseColor = @ , 
@@ -640,7 +640,7 @@ class SORTNode_BXDF_Phong(SORTShadingNode_BXDF):
     #                  { 'class' : properties.SORTNodeSocketColor , 'name' : 'Specular' } ,
     #                  { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader Phong( float SpecularPower = @ [[ float default_value = 32.0 ]] ,
+        shader Phong( lfloat SpecularPower = @ [[ lfloat default_value = 32.0 ]] ,
                       float DiffuseRatio = @  [[ float default_value = 0.2 ]] ,
                       color Specular = @ ,
                       color Diffuse = @ ,
@@ -875,7 +875,7 @@ class SORTNodeGrid(SORTShadingNode):
         shader CheckerBoard( color Color1 = @ [[ color default_value = color(0.2) ]],
                              color Color2 = @ ,
                              float Treshold = @ [[ float default_value = 0.1 ]] ,
-                             vector UVMapping = @ [[ vector default_value = vector( 0.0 , 0.0 , 0.0 ) ]] ,
+                             uv UVMapping = @ [[ uv default_value = uv( 0.0 , 0.0 , 0.0 ) ]] ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ){
             float fu = UVMapping[0] - floor( UVMapping[0] ) - 0.5;
             float fv = UVMapping[1] - floor( UVMapping[1] ) - 0.5;
@@ -963,10 +963,10 @@ class SORTNodeUVMapping(SORTShadingNode):
     #                  { 'class' : properties.SORTNodePropertyLargeFloat , 'name' : 'V Offset' , 'default' : 0.0, 'min' : -float('inf') , 'max' : float('inf') } ]
 
     osl_shader = '''
-        shader UVMappinp( float UTiling = @ ,
-                          float VTiling = @ ,
-                          float UOffset = @ ,
-                          float VOffset = @ ,
+        shader UVMappinp( lfloat UTiling = @ [[ lfloat default_value = 1.0 ]] ,
+                          lfloat VTiling = @ [[ lfloat default_value = 1.0 ]] ,
+                          lfloat UOffset = @ ,
+                          lfloat VOffset = @ ,
                           output uv UVMapping = 0.0 ){
             UVMapping = uv( u * UTiling + UOffset , v * VTiling + VOffset , 0.0 );
         }
