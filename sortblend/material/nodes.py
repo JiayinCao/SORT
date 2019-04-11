@@ -15,6 +15,7 @@
 
 import bpy
 import nodeitems_utils
+from . import osl_parser
 from . import properties
 from .. import base
 
@@ -91,7 +92,7 @@ class SORTShadingNode(bpy.types.Node):
 
     # register all property and sockets
     def register_prop(self,disable_output = False):
-        old_way = True
+        old_way = False
         if old_way:
             # register all sockets
             for socket in self.property_list:
@@ -104,11 +105,11 @@ class SORTShadingNode(bpy.types.Node):
                 self.outputs.new( self.output_type , 'Result' )
             return
 
-        inputs_list , outputs_list = self.parse_osl_params( self.osl_shader )
+        inputs_list , outputs_list = osl_parser.parse_osl_params( self.osl_shader )
         for input_param in inputs_list:
-            self.inputs.new( input_param[0] , input_param[1] )
+            self.inputs.new( input_param[0] , input_param[1][0] )
         for output in outputs_list:
-            self.outputs.new( output[0] , output[1] )
+            self.outputs.new( output[0] , output[1][0] )
 
     # this is not an overriden interface
     # draw all properties ( not socket ) in material panel
@@ -206,140 +207,6 @@ class SORTShadingNode(bpy.types.Node):
     # generate open shading lanugage source code
     def generate_osl_source(self):
         return self.osl_shader
-
-    # parse osl parameters
-    def parse_osl_params(self,osl_shader_source):
-        # remove all comments from source code
-        def removeComments(source):
-            res, buffer, block_comment_open = '', '', False
-            lines = source.split( '\n' )
-            for line in lines:
-                i = 0
-                while i < len(line):
-                    char = line[i]
-                    if char == '/' and (i + 1) < len(line) and line[i + 1] == '/' and not block_comment_open:
-                        i = len(line)
-                    elif char == '/' and (i + 1) < len(line) and line[i + 1] == '*' and not block_comment_open:
-                        block_comment_open = True
-                        i += 1
-                    elif char == '*' and (i + 1) < len(line) and line[i + 1] == '/' and block_comment_open:
-                        block_comment_open = False
-                        i += 1
-                    elif not block_comment_open:
-                        buffer += char
-                    i += 1
-                if buffer and not block_comment_open:
-                    res += buffer + '\n'
-                    buffer = ''
-            return res
-
-        # find the first shader keyword
-        def findShaderKeyword(source):
-            # separate parameters before analysing each parameter for simplicity
-            i = -1
-            while True:
-                # find keyword 'shader'
-                i = clean_shader.find( 'shader' , i + 1 )
-                # this is the end of the shader, it is most likely a broken one
-                if i + 6 == len(clean_shader):
-                    return -1
-                # there is no such a keyword at all
-                if i == -1:
-                    return -1
-                # check if the shader keyword is wrapped by white space
-                if ( i == 0 or clean_shader[i-1].isspace() ) and clean_shader[i+6].isspace():
-                    break
-            return i
-
-        # find the function name
-        def extractFunctionName(source,i):
-            function_name = ''
-            # skip the white spaces
-            while i < len(clean_shader) and clean_shader[i].isspace():
-                i += 1
-            # load the shader function name
-            while i < len(clean_shader) and clean_shader[i].isalnum() :
-                function_name += clean_shader[i]
-                i += 1
-            while i < len(clean_shader) and clean_shader[i] != '(':
-                i += 1
-            return ( function_name , i + 1 )
-
-        # extract parameter list
-        def extractParameters(source,i):
-            parameters = []
-            while i < len(source):
-                parameter_data = ''
-                meta_data = False
-                in_property = False
-                last_char_is_space = True
-                while i < len(source) and ( meta_data or in_property or ( source[i] is not ',' and source[i] is not ')' ) ):
-                    if source[i].isspace() is False:
-                        parameter_data += source[i]
-                        last_char_is_space = False
-                    elif last_char_is_space is False:
-                        parameter_data += ' '
-                        last_char_is_space = True
-
-                    if source[i] == '[':
-                        assert( i + 1 < len(source) and source[i+1] == '[' )
-                        i += 1
-                        meta_data = True
-                    if source[i] == ']':
-                        assert( i + 1 < len(source) and source[i+1] == ']' )
-                        i += 1
-                        meta_data = False
-                    if source[i] == '(':
-                        in_property = True
-                    if source[i] == ')':
-                        in_property = False
-                    i += 1
-                parameters.append( parameter_data )
-
-                if i < len(source) and source[i] is ')':
-                    break
-                i += 1
-
-            return parameters
-
-        # extract osl type
-        def extractType( source ):
-            def getParameterName( source , i ):
-                name = ''
-                while i < len(source) and source[i] != '=' and source[i].isspace() is False:
-                    name += source[i]
-                    i += 1
-                return name
-            if source.startswith( 'color' ):
-                return ( 'SORTNodeSocketColor' , getParameterName( source , len('color ' ) ) )
-            if source.startswith( 'normal' ):
-                return ( 'SORTNodeSocketNormal' , getParameterName( source , len('normal ' ) ) )
-            if source.startswith( 'closure color' ):
-                return ( 'SORTNodeSocketBxdf' , getParameterName( source , len('closure color ' ) ) )
-            if source.startswith( 'float' ):
-                return ( 'SORTNodeSocketFloat' , getParameterName( source , len('float ' ) ) )
-            return ( 'SORTNodeSocketLargeFloat' , 'Default' )
-
-        # remove comment first to get rid of some noise signal
-        clean_shader = removeComments( osl_shader_source )
-
-        # find the index where the shader decleration starts
-        i = findShaderKeyword(clean_shader)
-        function_name, i = extractFunctionName(clean_shader, i + 6)
-        parameters = extractParameters(clean_shader, i)
-
-        # parse the output parameters
-        inputs_list = []
-        outputs_list = []
-        for parameter in parameters:
-            if parameter.startswith( 'output' ):
-                data = extractType( parameter[len('output '):] )
-                outputs_list.append( data )
-            else:
-                data = extractType( parameter )
-                inputs_list.append( data )
-
-        return ( inputs_list , outputs_list )
 
 # Base class for SORT BXDF Node
 class SORTShadingNode_BXDF(SORTShadingNode):
@@ -540,6 +407,8 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Longtitudinal Roughness' },
                       { 'class' : properties.SORTNodeSocketFloat , 'name' : 'Azimuthal Roughness' },
                       { 'class' : properties.SORTNodeSocketLargeFloat , 'name' : 'Index of Refraction' , 'default' : 1.55 } ]
+    # A Practical and Controllable Hair and Fur Model for Production Path Tracing
+    # https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
     osl_shader = '''
         float helper( float x , float inv ){
             float y = log(x) * inv;
@@ -550,8 +419,6 @@ class SORTNode_Material_Hair(SORTShadingNode_BXDF):
                      float AzimuthalRoughness = @ ,
                      float IndexofRefraction = @ , 
                      output closure color Result = color(0) ){
-            // A Practical and Controllable Hair and Fur Model for Production Path Tracing
-            // https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
             float inv = 1.0 / ( 5.969 - 0.215 * AzimuthalRoughness + 2.532 * pow(AzimuthalRoughness,2.0) - 10.73 * pow(AzimuthalRoughness,3.0) + 
                         5.574 * pow(AzimuthalRoughness,4.0) + 0.245 * pow(AzimuthalRoughness, 5.0) );
             color sigma = color( helper(HairColor[0],inv) , helper(HairColor[1],inv) , helper(HairColor[2],inv) );
@@ -599,6 +466,9 @@ class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
                       { 'class' : properties.SORTNodeSocketFloat    , 'name' : 'Roughness'  , 'default' : 0.0 } ,
                       { 'class' : properties.SORTNodeSocketColor    , 'name' : 'ColorTint' } ,
                       { 'class' : properties.SORTNodeSocketBxdf     , 'name' : 'Surface' } ]
+                      
+    # A Practical and Controllable Hair and Fur Model for Production Path Tracing
+    # https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
     osl_shader = '''
         float helper( float x , float inv ){
             float y = log(x) * inv;
@@ -610,8 +480,6 @@ class SORTNode_BXDF_Coat(SORTShadingNode_BXDF):
                      closure color Surface = @ ,
                      normal Normal = @ ,
                      output closure color Result = color(0) ){
-            // A Practical and Controllable Hair and Fur Model for Production Path Tracing
-            // https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
             float inv = 1.0 / ( 5.969 - 0.215 * Roughness + 2.532 * pow(Roughness,2.0) - 10.73 * pow(Roughness,3.0) + 5.574 * pow(Roughness,4.0) + 0.245 * pow(Roughness, 5.0) );
             color sigma = color( helper(ColorTint[0],inv) , helper(ColorTint[1],inv) , helper(ColorTint[2],inv) );
             Result = coat( Surface , Roughness , IOR , sigma , Normal );
@@ -711,8 +579,8 @@ class SORTNode_BXDF_Lambert(SORTShadingNode_BXDF):
     bl_idname = 'SORTNode_BXDF_Lambert'
     property_list = [ { 'class' : properties.SORTNodeSocketColor , 'name' : 'Diffuse' } ]
     osl_shader = '''
-        shader Lambert( color Diffuse = @ ,
-                        normal Normal = @ ,
+        shader Lambert( color Diffuse = @ [[ color default_value = color( 1.0 ) ]] ,
+                        normal Normal = @ [[ normal default_value = normal( 0.0 , 1.0 , 0.0 ) , float min = 0.0 , string pbrt_name = \"test_for_now\" ]] ,
                         output closure color Result = color(0) ){
             Result = lambert( Diffuse , Normal );
         }
