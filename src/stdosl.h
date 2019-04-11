@@ -75,8 +75,6 @@
     point  name (point x, float y) BUILTIN;     \
     color  name (color x, float y) BUILTIN;
 
-#define path string
-
 // Basic math
 normal degrees (normal x) { return x*(180.0/M_PI); }
 vector degrees (vector x) { return x*(180.0/M_PI); }
@@ -480,6 +478,8 @@ int getmatrix (string fromspace, output matrix M) {
     return getmatrix (fromspace, "common", M);
 }
 
+#define path string
+#define uv vector
 
 // SORT compatible closures
 closure color lambert( color albedo , normal N ) BUILTIN;

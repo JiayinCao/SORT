@@ -17,10 +17,7 @@
 # This may not be a perfect solution comparing with calling osl APIs, but it is simple enough
 # and should be good enough for SORT renderer.
 
-import bpy
-import nodeitems_utils
 from . import properties
-from .. import base
 
 # remove all comments from source code
 def removeComments(source):
@@ -133,7 +130,7 @@ def parseOneParameter( source ):
             while i < len(source) and source[i].isspace():
                 i += 1
 
-            if source.startswith( 'color' , i ) or source.startswith( 'normal' , i ) or source.startswith( 'vector' , i ):
+            if source.startswith( 'color' , i ) or source.startswith( 'normal' , i ) or source.startswith( 'vector' , i ) or source.startswith( 'uv' , i ):
                 while i < len(source) and source[i] != '(':
                     i += 1
                 assert( i < len(source) and source[i] == '(' )
@@ -154,27 +151,30 @@ def parseOneParameter( source ):
                 value = float( source[i:j] )
             elif i < len(source) and source[i] == '\"':
                 # it must be string type
+                i += 1
                 j = i
-                while j < len(source) and ( source[i].isdigit() or source[i] == '\"' ):
+                while j < len(source) and source[j] != '\"':
                     j += 1
                 value = source[i:j]
         return ( name , value )
 
     if source.startswith( 'color' ):
-        return ( 'SORTNodeSocketColor' , True , getParameterNameAndValue( source , len('color ' ) ) )
+        return ( properties.SORTNodeSocketColor , True , getParameterNameAndValue( source , len('color ' ) ) )
     if source.startswith( 'normal' ):
-        return ( 'SORTNodeSocketNormal' , True , getParameterNameAndValue( source , len('normal ' ) ) )
+        return ( properties.SORTNodeSocketNormal , True , getParameterNameAndValue( source , len('normal ' ) ) )
     if source.startswith( 'closure color' ):
-        return ( 'SORTNodeSocketBxdf' , True , getParameterNameAndValue( source , len('closure color ' ) ) )
+        return ( properties.SORTNodeSocketBxdf , True , getParameterNameAndValue( source , len('closure color ' ) ) )
     if source.startswith( 'float' ):
-        return ( 'SORTNodeSocketFloat' , True , getParameterNameAndValue( source , len('float ' ) ) )
+        return ( properties.SORTNodeSocketFloat , True , getParameterNameAndValue( source , len('float ' ) ) )
     if source.startswith( 'string' ):
-        return ( 'SORTNodePropertyEnum' , False , getParameterNameAndValue( source , len('string ' ) ) )
+        return ( properties.SORTNodePropertyEnum , False , getParameterNameAndValue( source , len('string ' ) ) )
     if source.startswith( 'path' ):
-        return ( 'SORTNodePropertyPath' , False , getParameterNameAndValue( source , len('path ' ) ) )
+        return ( properties.SORTNodePropertyPath , False , getParameterNameAndValue( source , len('path ' ) ) )
     if source.startswith( 'vector' ):
-        return ( 'SORTNodePropertyFloatVector' , False , getParameterNameAndValue( source , len('vector ' ) ) )
-    return ( 'SORTNodeSocketLargeFloat' , False , 'Default' )
+        return ( properties.SORTNodePropertyFloatVector , False , getParameterNameAndValue( source , len('vector ' ) ) )
+    if source.startswith( 'uv' ):
+        return ( properties.SORTNodeSocketUV , True , getParameterNameAndValue( source , len('uv ' ) ) )
+    return ( properties.SORTNodeSocketColor , True , 'Default' )
 
 # extract meta data in parameters
 def extractMetaData( source ):

@@ -481,6 +481,7 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys) {
     registerClosure<Closure_MERL>(shadingsys);
     registerClosure<Closure_Coat>(shadingsys);
     registerClosure<Closure_DoubleSided>(shadingsys);
+    registerClosure<Closure_FourierBRDF>(shadingsys);
 }
 
 void ProcessClosure(Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::Color3& w) {

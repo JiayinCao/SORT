@@ -63,6 +63,9 @@ class SORTNodeSocket(SORTNodeProperty):
     def is_socket(cls):
         return True
 
+    def no_default_value(self):
+        return False
+
 # Socket for BXDF or Materials
 class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketBxdf'
@@ -142,6 +145,8 @@ class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
             row = layout.row()
             split = row.split(0.4)
             split.label(text)
+    def export_osl_value(self):
+        return 'normal( %f , %f , %f )' %(self.default_value[:])
 
 # Socket for UV Mapping
 class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
@@ -149,7 +154,7 @@ class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
     bl_label = 'SORT UV Mapping'
     socket_color = (0.9, 0.2, 0.8, 1.0)
     pbrt_type = 'NA'
-    default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0, max=1.0 )
+    default_value = bpy.props.FloatVectorProperty( name='Float' , default=(0.0,1.0,0.0) , min=0.0, max=1.0 )
     def export_socket_value(self):
         return '%f'%0.0
     def export_serialization_value(self):
@@ -162,6 +167,9 @@ class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
             row = layout.row()
             split = row.split(0.4)
             split.label(text)
+    # there is no default value for UV mapping node
+    def no_default_value(self):
+        return True
     def export_osl_value(self):
         return 'vector( u , v , 0.0 )'
         
@@ -175,7 +183,7 @@ class SORTNodePropertyFloat(SORTNodeProperty):
         return '%f'%(value)
     @classmethod
     def setup( cls , prop ):
-        cls.default_value = bpy.props.FloatProperty( name=prop['name'] , default=prop['default'] , min=prop['min'], max=prop['max'] )
+        cls.default_value = bpy.props.FloatProperty( name=prop['name'] , default=prop['default_value'] , min=prop['min'], max=prop['max'] )
 
 # Property for Large Float
 class SORTNodePropertyLargeFloat(SORTNodeProperty):
@@ -187,7 +195,7 @@ class SORTNodePropertyLargeFloat(SORTNodeProperty):
         return '%f'%(value)
     @classmethod
     def setup( cls , prop ):
-        cls.default_value = bpy.props.FloatProperty( name=prop['name'] , default=prop['default'] , min=prop['min'], max=prop['max'] )
+        cls.default_value = bpy.props.FloatProperty( name=prop['name'] , default=prop['default_value'] , min=prop['min'], max=prop['max'] )
 
 # Property for Float Vector
 class SORTNodePropertyFloatVector(SORTNodeProperty):
@@ -199,7 +207,7 @@ class SORTNodePropertyFloatVector(SORTNodeProperty):
         return 'color( %f , %f , %f )'%(value[:])
     @classmethod
     def setup( cls , prop ):
-        cls.default_value = bpy.props.FloatVectorProperty( name=prop['name'] , default=prop['default'] , min=prop['min'], max=prop['max'] )
+        cls.default_value = bpy.props.FloatVectorProperty( name=prop['name'] , default=prop['default_value'] , min=prop['min'], max=prop['max'] )
 
 # Property for enum
 class SORTNodePropertyEnum(SORTNodeProperty):
@@ -211,7 +219,7 @@ class SORTNodePropertyEnum(SORTNodeProperty):
         return '\"%s\"' % value
     @classmethod
     def setup( cls , prop ):
-        cls.default_value = bpy.props.EnumProperty( name=prop['name'] , items=prop['items'] , default = prop['default'])
+        cls.default_value = bpy.props.EnumProperty( name=prop['name'] , items=prop['items'] , default = prop['default_value'])
 
 # Property for path
 class SORTNodePropertyPath(SORTNodeProperty):
