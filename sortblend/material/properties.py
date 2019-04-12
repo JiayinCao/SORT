@@ -42,8 +42,8 @@ class SORTNodeSocket(SORTNodeProperty):
 
         source_node = socket_node_input(self,context)
         has_error = False
-        if source_node is not None and source_node.output_type != type(self).__name__:
-            has_error = True
+        #if source_node is not None and source_node.output_type != type(self).__name__:
+        #    has_error = True
         if has_error:
             layout.label(text,icon='CANCEL')
         else:
@@ -172,7 +172,7 @@ class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return True
     def export_osl_value(self):
         return 'vector( u , v , 0.0 )'
-        
+
 # Property for Float
 class SORTNodePropertyFloat(SORTNodeProperty):
     def export_socket_value(self,value):
