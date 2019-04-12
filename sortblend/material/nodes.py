@@ -15,7 +15,6 @@
 
 import bpy
 import nodeitems_utils
-from . import osl_parser
 from . import properties
 from .. import base
 
@@ -486,16 +485,23 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
         }
     '''
     distribution = bpy.props.EnumProperty(name='MicroFacetDistribution',default='GGX',items=[('GGX','GGX','',1),('Blinn','Blinn','',2),('Beckmann','Beckmann','',3)])
+    interior_ior = bpy.props.FloatVectorProperty( name='Interior IOR' , default=(1.55,1.55,1.55) , min=1.0, max=10.0 )
+    absopt_co = bpy.props.FloatVectorProperty( name='Absoprtion Coefficient' , default=(2.8,2.8,2.8) , min=0.0, max=10.0 )
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessU' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessV' )
         self.inputs.new( 'SORTNodeSocketColor' , 'BaseColor' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
-    def draw(self, context):
-        self.layout.prop(self.distribution,'Distribution')
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'distribution', text='Distribution')
+        layout.prop(self, 'interior_ior', text='Interior IOR')
+        layout.prop(self, 'absopt_co', text='Absorption Coefficient')
     def serialize_prop(self, fs):
-        fs.serialize( 4 )
+        fs.serialize( 7 )
+        fs.serialize( '\"%s\"'%(self.distribution))
+        fs.serialize( 'vector( %f,%f,%f )'%(self.interior_ior[:]))
+        fs.serialize( 'vector( %f,%f,%f )'%(self.absopt_co[:]))
         fs.serialize( self.inputs['RoughnessU'].export_osl_value() )
         fs.serialize( self.inputs['RoughnessV'].export_osl_value() )
         fs.serialize( self.inputs['BaseColor'].export_osl_value() )
@@ -626,3 +632,25 @@ class SORTNodeExtract(SORTShadingNode):
     def serialize_prop(self, fs):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Color'].export_osl_value() )
+
+
+@SORTPatternGraph.register_node('Constant')
+class SORTNodeColor(SORTShadingNode):
+    bl_idname = 'SORTNodeColor'
+    bl_label = 'Color'
+    osl_shader = '''
+        shader Extract( color Color = @,
+                        output color Result = color(0)){
+            Result = Color;
+        }
+    '''
+    color = bpy.props.FloatVectorProperty(name='Color', subtype='COLOR', min=0.0, max=1.0, size=3, default=(1.0, 1.0, 1.0))
+    def init(self, context):
+        self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
+    def draw_buttons(self, context, layout):
+        layout.template_color_picker(self, 'color', value_slider=True)
+        layout.prop(self, 'color', text='')
+    def serialize_prop(self, fs):
+        fs.serialize( 1 )
+        print(self.color)
+        fs.serialize( 'color( %f,%f,%f )'%(self.color[:]) )
