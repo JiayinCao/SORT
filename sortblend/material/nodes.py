@@ -1159,7 +1159,7 @@ class SORTNodeMathOpClamp(SORTShadingNode):
         else:
             self.inputs['Min Value'].default_value = 0.0
             self.inputs['Max Value'].default_value = 1.0
-    data_type = bpy.props.EnumProperty(name='Type',default='SORTNodeSocketAnyFloat',items=[('SORTNodeSocketAnyFloat','Float','',1),('SORTNodeSocketFloatVector','Vector','',2)],update=change_type)
+    data_type = bpy.props.EnumProperty(name='Type',default='SORTNodeSocketAnyFloat',items=[('SORTNodeSocketAnyFloat','Float','',1),('SORTNodeSocketColor','Color','',2),('SORTNodeSocketFloatVector','Vector','',3)],update=change_type)
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Min Value' )
         self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Max Value' )
@@ -1174,6 +1174,8 @@ class SORTNodeMathOpClamp(SORTShadingNode):
         fs.serialize( self.inputs['Value'].export_osl_value() )
     def generate_osl_source(self):
         dtype = 'float'
-        if self.data_type == 'SORTNodeSocketFloatVector':
+        if self.data_type == 'SORTNodeSocketColor':
+            dtype = 'color'
+        elif self.data_type == 'SORTNodeSocketFloatVector':
             dtype = 'vector'
         return self.osl_shader % ( dtype , dtype , dtype , dtype )
