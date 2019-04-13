@@ -821,7 +821,7 @@ class SORTNodeImage(SORTShadingNode):
         return self.image
     def serialize_prop(self, fs):
         fs.serialize( 2 )
-        fs.serialize( '\"%s\"'%(self.image.filepath) )
+        fs.serialize( '\"%s\"'%(bpy.path.abspath(self.image.filepath)) )
         fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
     def generate_osl_source(self):
         if self.color_space_type == 'sRGB':
