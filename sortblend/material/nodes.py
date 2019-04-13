@@ -116,30 +116,60 @@ class SORTNodeOutput(SORTShadingNode):
         }
     '''
     def init(self, context):
-        self.inputs.new( 'SORTNodeSocketBxdf' , 'Shader' )
+        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface' )
 
 #------------------------------------------------------------------------------------#
 #                                   BXDF Nodes                                       #
 #------------------------------------------------------------------------------------#
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_BXDF_Lambert(SORTShadingNode):
-    bl_label = 'Lambert'
-    bl_idname = 'SORTNode_BXDF_Lambert'
-    osl_shader = '''
+class SORTNode_Material_Diffuse(SORTShadingNode):
+    bl_label = 'Diffuse'
+    bl_idname = 'SORTNode_Material_Diffuse'
+    osl_shader_diffuse = '''
         shader Lambert( color Diffuse = @ ,
                         normal Normal = @ ,
                         output closure color Result = color(0) ){
             Result = lambert( Diffuse , Normal );
         }
     '''
+    osl_shader_orennayar = '''
+        shader OrenNayar( float Roughness = @,
+                          color Diffuse = @ ,
+                          normal Normal = @ ,
+                          output closure color Result = color(0) ){
+            Result = orenNayar( Diffuse , Roughness , Normal );
+        }
+    '''
+    def update_brdf(self,context):
+        if self.brdf_type == 'OrenNayar':
+            self.inputs['Roughness'].enabled = True
+        else:
+            self.inputs['Roughness'].enabled = False
+    brdf_type = bpy.props.EnumProperty(name='Type', items=[('Lambert','Lambert','',1),('OrenNayar','OrenNayar','',2)], default='Lambert', update=update_brdf)
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketColor' , 'Diffuse' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+        self.inputs['Roughness'].enabled = False
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'brdf_type', text='BRDF Type')
     def serialize_prop(self, fs):
-        fs.serialize( 2 )
-        fs.serialize( self.inputs['Diffuse'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        if self.brdf_type == 'OrenNayar':
+            fs.serialize( 3 )
+            fs.serialize( self.inputs['Roughness'].export_osl_value() )
+            fs.serialize( self.inputs['Diffuse'].export_osl_value() )
+            fs.serialize( self.inputs['Normal'].export_osl_value() )
+        else:
+            fs.serialize( 2 )
+            fs.serialize( self.inputs['Diffuse'].export_osl_value() )
+            fs.serialize( self.inputs['Normal'].export_osl_value() )
+    def generate_osl_source(self):
+        if self.brdf_type == 'Lambert':
+            return self.osl_shader_diffuse
+        return self.osl_shader_orennayar
+    def type_identifier(self):
+        return self.bl_label + self.brdf_type
 
 @SORTPatternGraph.register_node('Materials')
 class SORTNode_BXDF_LambertTransmission(SORTShadingNode):
@@ -158,29 +188,6 @@ class SORTNode_BXDF_LambertTransmission(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
     def serialize_prop(self, fs):
         fs.serialize( 2 )
-        fs.serialize( self.inputs['Color'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
-
-@SORTPatternGraph.register_node('Materials')
-class SORTNode_BXDF_OrenNayar(SORTShadingNode):
-    bl_label = 'OrenNayar'
-    bl_idname = 'SORTNode_BXDF_OrenNayar'
-    osl_shader = '''
-        shader OrenNayar( float roughness = @,
-                          color Diffuse = @ ,
-                          normal Normal = @ ,
-                          output closure color Result = color(0) ){
-            Result = orenNayar( Diffuse , roughness , Normal );
-        }
-    '''
-    def init(self, context):
-        self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
-        self.inputs.new( 'SORTNodeSocketColor' , 'Color' )
-        self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
-        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
-    def serialize_prop(self, fs):
-        fs.serialize( 3 )
-        fs.serialize( self.inputs['Roughness'].export_osl_value() )
         fs.serialize( self.inputs['Color'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
@@ -391,49 +398,6 @@ class SORTNode_Material_Hair(SORTShadingNode):
         fs.serialize( self.inputs['Index of Refraction'].export_osl_value() )
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_Material_Blend(SORTShadingNode):
-    bl_label = 'Blend'
-    bl_idname = 'SORTNode_Material_Blend'
-    osl_shader = '''
-        shader MaterialBlend(  closure color Surface0 = @ ,
-                               closure color Surface1 = @ ,
-                               float Factor = @ ,
-                               output closure color Result = color(0) ){
-            Result = Surface0 * ( 1.0 - Factor ) + Surface1 * Factor;
-        }
-    '''
-    def init(self, context):
-        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface0' )
-        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface1' )
-        self.inputs.new( 'SORTNodeSocketFloat' , 'Factor' )
-        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
-    def serialize_prop(self, fs):
-        fs.serialize( 3 )
-        fs.serialize( self.inputs['Surface0'].export_osl_value() )
-        fs.serialize( self.inputs['Surface1'].export_osl_value() )
-        fs.serialize( self.inputs['Factor'].export_osl_value() )
-
-@SORTPatternGraph.register_node('Materials')
-class SORTNode_Material_DoubleSided(SORTShadingNode):
-    bl_label = 'Double-Sided'
-    bl_idname = 'SORTNode_Material_DoubleSided'
-    osl_shader = '''
-        shader MaterialBlend(  closure color FrontSurface = @ ,
-                               closure color BackSurface = @ ,
-                               output closure color Result = color(0) ){
-            Result = doubleSided( FrontSurface , BackSurface );
-        }
-    '''
-    def init(self, context):
-        self.inputs.new( 'SORTNodeSocketBxdf' , 'Front Surface' )
-        self.inputs.new( 'SORTNodeSocketBxdf' , 'Back Surface' )
-        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
-    def serialize_prop(self, fs):
-        fs.serialize( 2 )
-        fs.serialize( self.inputs['Front Surface'].export_osl_value() )
-        fs.serialize( self.inputs['Back Surface'].export_osl_value() )
-
-@SORTPatternGraph.register_node('Materials')
 class SORTNode_BXDF_Coat(SORTShadingNode):
     bl_label = 'Coat'
     bl_idname = 'SORTNode_BXDF_Coat'
@@ -501,10 +465,9 @@ class SORTNode_BXDF_Measured(SORTShadingNode):
         layout.prop(self, 'brdf_type', text='BRDF Type')
         layout.prop(self, 'file_path', text='File Path')
     def generate_osl_source(self):
-        ret = self.osl_shader_merl
         if self.brdf_type == 'FourierBRDF':
-            ret = self.osl_shader_fourier
-        return ret
+            return self.osl_shader_fourier
+        return self.osl_shader_merl
     def populateResources( self , resources ):
         found = False
         for resource in resources:
@@ -540,8 +503,8 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
         }
     '''
     distribution = bpy.props.EnumProperty(name='MicroFacetDistribution',default='GGX',items=[('GGX','GGX','',1),('Blinn','Blinn','',2),('Beckmann','Beckmann','',3)])
-    interior_ior = bpy.props.FloatVectorProperty( name='Interior IOR' , default=(1.55,1.55,1.55) , min=1.0, max=10.0 )
-    absopt_co = bpy.props.FloatVectorProperty( name='Absoprtion Coefficient' , default=(2.8,2.8,2.8) , min=0.0, max=10.0 )
+    interior_ior = bpy.props.FloatVectorProperty( name='Interior IOR' , default=(0.37,0.37,0.37) , min=1.0, max=10.0 )
+    absopt_co = bpy.props.FloatVectorProperty( name='Absoprtion Coefficient' , default=(2.82,2.82,2.82) , min=0.0, max=10.0 )
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessU' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessV' )
@@ -561,6 +524,153 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
         fs.serialize( self.inputs['RoughnessV'].export_osl_value() )
         fs.serialize( self.inputs['BaseColor'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
+
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode):
+    bl_label = 'MicrofacetRefraction'
+    bl_idname = 'SORTNode_BXDF_MicrofacetRefraction'
+    osl_shader = '''
+        shader MicrofacetRefraction( string MicroFacetDistribution = @ ,
+                                     float  InteriorIOR = @ ,
+                                     float  ExteriorIOR = @ ,
+                                     float  RoughnessU = @ ,
+                                     float  RoughnessV = @ ,
+                                     color  BaseColor = @ , 
+                                     normal Normal = @ ,
+                                     output closure color Result = color(0) ){
+            Result = microfacetRefraction( MicroFacetDistribution , InteriorIOR , ExteriorIOR , RoughnessU , RoughnessV , BaseColor , Normal );
+        }
+    '''
+    distribution = bpy.props.EnumProperty(name='MicroFacetDistribution',default='GGX',items=[('GGX','GGX','',1),('Blinn','Blinn','',2),('Beckmann','Beckmann','',3)])
+    interior_ior = bpy.props.FloatProperty( name='Interior IOR' , default=1.1 , min=1.0, max=10.0 )
+    exterior_ior = bpy.props.FloatProperty( name='Exterior IOR' , default=1.0 , min=0.0, max=10.0 )
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessU' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessV' )
+        self.inputs.new( 'SORTNodeSocketColor' , 'BaseColor' )
+        self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+        self.inputs['RoughnessU'].default_value = 0.2
+        self.inputs['RoughnessV'].default_value = 0.2
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'distribution', text='Distribution')
+        layout.prop(self, 'interior_ior', text='Interior IOR')
+        layout.prop(self, 'exterior_ior', text='Exterior IOR')
+    def serialize_prop(self, fs):
+        fs.serialize( 7 )
+        fs.serialize( '\"%s\"'%(self.distribution))
+        fs.serialize( '%f'%(self.interior_ior))
+        fs.serialize( '%f'%(self.exterior_ior))
+        fs.serialize( self.inputs['RoughnessU'].export_osl_value() )
+        fs.serialize( self.inputs['RoughnessV'].export_osl_value() )
+        fs.serialize( self.inputs['BaseColor'].export_osl_value() )
+        fs.serialize( self.inputs['Normal'].export_osl_value() )
+
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode):
+    bl_label = 'AshikhmanShirley'
+    bl_idname = 'SORTNode_BXDF_AshikhmanShirley'
+    osl_shader = '''
+        shader AshikhmanShirley( float Specular = @ ,
+                                 float RoughnessU = @ ,
+                                 float RoughnessV = @ ,
+                                 color Diffuse = @ ,
+                                 normal Normal = @ ,
+                                 output closure color Result = color(0) ){
+            Result = ashikhmanShirley( Specular , RoughnessU , RoughnessV , Diffuse , Normal );
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Specular' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessU' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'RoughnessV' )
+        self.inputs.new( 'SORTNodeSocketColor' , 'Diffuse' )
+        self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+        self.inputs['RoughnessU'].default_value = 0.2
+        self.inputs['RoughnessV'].default_value = 0.2
+        self.inputs['Specular'].default_value = 0.5
+    def serialize_prop(self, fs):
+        fs.serialize( 5 )
+        fs.serialize( self.inputs['Specular'].export_osl_value() )
+        fs.serialize( self.inputs['RoughnessU'].export_osl_value() )
+        fs.serialize( self.inputs['RoughnessV'].export_osl_value() )
+        fs.serialize( self.inputs['Diffuse'].export_osl_value() )
+        fs.serialize( self.inputs['Normal'].export_osl_value() )
+
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_BXDF_ModifiedPhong(SORTShadingNode):
+    bl_label = 'Modified Phong'
+    bl_idname = 'SORTNode_BXDF_ModifiedPhong'
+    osl_shader = '''
+        shader Phong( float SpecularPower = @ ,
+                      float DiffuseRatio = @ ,
+                      color Specular = @ ,
+                      color Diffuse = @ ,
+                      normal Normal = @ ,
+                      output closure color Result = color(0) ){
+            Result = phong( Diffuse * DiffuseRatio , ( 1.0 - DiffuseRatio ) * Specular , SpecularPower , Normal );
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Specular Power' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Diffuse Ratio' )
+        self.inputs.new( 'SORTNodeSocketColor' , 'Diffuse' )
+        self.inputs.new( 'SORTNodeSocketColor' , 'Specular' )
+        self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+        self.inputs['Specular Power'].default_value = 32.0
+        self.inputs['Diffuse Ratio'].default_value = 0.2
+    def serialize_prop(self, fs):
+        fs.serialize( 5 )
+        fs.serialize( self.inputs['Specular Power'].export_osl_value() )
+        fs.serialize( self.inputs['Diffuse Ratio'].export_osl_value() )
+        fs.serialize( self.inputs['Diffuse'].export_osl_value() )
+        fs.serialize( self.inputs['Specular'].export_osl_value() )
+        fs.serialize( self.inputs['Normal'].export_osl_value() )
+
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Blend(SORTShadingNode):
+    bl_label = 'Blend'
+    bl_idname = 'SORTNode_Material_Blend'
+    osl_shader = '''
+        shader MaterialBlend(  closure color Surface0 = @ ,
+                               closure color Surface1 = @ ,
+                               float Factor = @ ,
+                               output closure color Result = color(0) ){
+            Result = Surface0 * ( 1.0 - Factor ) + Surface1 * Factor;
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface0' )
+        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface1' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Factor' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 3 )
+        fs.serialize( self.inputs['Surface0'].export_osl_value() )
+        fs.serialize( self.inputs['Surface1'].export_osl_value() )
+        fs.serialize( self.inputs['Factor'].export_osl_value() )
+
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_DoubleSided(SORTShadingNode):
+    bl_label = 'Double-Sided'
+    bl_idname = 'SORTNode_Material_DoubleSided'
+    osl_shader = '''
+        shader MaterialBlend(  closure color FrontSurface = @ ,
+                               closure color BackSurface = @ ,
+                               output closure color Result = color(0) ){
+            Result = doubleSided( FrontSurface , BackSurface );
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketBxdf' , 'Front Surface' )
+        self.inputs.new( 'SORTNodeSocketBxdf' , 'Back Surface' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 2 )
+        fs.serialize( self.inputs['Front Surface'].export_osl_value() )
+        fs.serialize( self.inputs['Back Surface'].export_osl_value() )
 
 #------------------------------------------------------------------------------------#
 #                                   Texture Nodes                                    #
@@ -599,9 +709,9 @@ class SORTNodeGrid(SORTShadingNode):
     bl_label = 'Grid'
     bl_idname = 'SORTNodeGrid'
     osl_shader = '''
-        shader Grid( color Color1 = @ [[ color default_value = color(0.2) ]],
+        shader Grid( color Color1 = @ ,
                      color Color2 = @ ,
-                     float Treshold = @ [[ float default_value = 0.1 ]] ,
+                     float Treshold = @ ,
                      uv UVCoordinate = @ ,
                      output color Result = color( 0.0 , 0.0 , 0.0 ) ){
             float fu = UVCoordinate[0] - floor( UVCoordinate[0] ) - 0.5;
@@ -726,8 +836,8 @@ class SORTNodeRemappingUV(SORTShadingNode):
     output_type = 'SORTNodeSocketFloat'
     osl_shader = '''
         shader Extract( uv     UVCoordinate = @,
-                        lfloat  TilingU = @ [[ lfloat default_value = 1.0 ]] ,
-                        lfloat  TilingV = @ [[ lfloat default_value = 1.0 ]] ,
+                        lfloat  TilingU = @ ,
+                        lfloat  TilingV = @ ,
                         lfloat  OffsetU = @ ,
                         lfloat  OffsetV = @ ,
                         output uv Result = uv( 0.0 ) ){

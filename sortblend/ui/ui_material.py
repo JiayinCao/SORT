@@ -251,7 +251,7 @@ class SORT_use_shading_nodes(bpy.types.Operator):
 
         mat.sort_material.sortnodetree = nt.name
         output = nt.nodes.new('SORTNodeOutput')
-        default = nt.nodes.new('SORTNode_Material_Principle')
+        default = nt.nodes.new('SORTNode_Material_Diffuse')
         default.location = output.location
         default.location[0] -= 300
         nt.links.new(default.outputs[0], output.inputs[0])
