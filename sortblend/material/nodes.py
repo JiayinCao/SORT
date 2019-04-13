@@ -742,7 +742,7 @@ class SORTNodeGrid(SORTShadingNode):
 preview_collections = {}
 @SORTPatternGraph.register_node('Textures')
 class SORTNodeImage(SORTShadingNode):
-    bl_label = 'Image Texture'
+    bl_label = 'Image'
     bl_idname = 'SORTNodeImage'
     bl_width_min = 200
     items = (('Linear', "Linear", "Linear"), ('sRGB', "sRGB", "sRGB"), ('Normal', 'Normal', 'Normal'))
@@ -847,7 +847,7 @@ class SORTNodeRemappingUV(SORTShadingNode):
         }
     '''
     def init(self, context):
-        self.inputs.new( 'SORTNodeSocketUV' , 'UV Coorindate' )
+        self.inputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
         self.inputs.new( 'SORTNodeSocketLargeFloat' , 'TilingU' )
         self.inputs.new( 'SORTNodeSocketLargeFloat' , 'TilingV' )
         self.inputs.new( 'SORTNodeSocketLargeFloat' , 'OffsetU' )
@@ -857,7 +857,7 @@ class SORTNodeRemappingUV(SORTShadingNode):
         self.inputs['TilingV'].default_value = 1.0
     def serialize_prop(self, fs):
         fs.serialize( 5 )
-        fs.serialize( self.inputs['UV Coorindate'].export_osl_value() )
+        fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
         fs.serialize( self.inputs['TilingU'].export_osl_value() )
         fs.serialize( self.inputs['TilingV'].export_osl_value() )
         fs.serialize( self.inputs['OffsetU'].export_osl_value() )
@@ -916,9 +916,9 @@ class SORTNodeComposite(SORTShadingNode):
 #                                 Input Nodes                                        #
 #------------------------------------------------------------------------------------#
 @SORTPatternGraph.register_node('Input')
-class SORTNodeInput(SORTShadingNode):
-    bl_label = 'Input'
-    bl_idname = 'SORTNodeInput'
+class SORTNodeInputIntersection(SORTShadingNode):
+    bl_label = 'Intersection'
+    bl_idname = 'SORTNodeInputIntersection'
     bl_width_min = 160
     osl_shader = '''
         shader InputShader( output vector WorldPosition = P ,
@@ -935,13 +935,10 @@ class SORTNodeInput(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketNormal' , 'World Geometry Normal' )
         self.outputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
 
-#------------------------------------------------------------------------------------#
-#                                 Constant Nodes                                     #
-#------------------------------------------------------------------------------------#
-@SORTPatternGraph.register_node('Constant')
-class SORTNodeConstantFloat(SORTShadingNode):
+@SORTPatternGraph.register_node('Input')
+class SORTNodeInputFloat(SORTShadingNode):
     bl_label = 'Float'
-    bl_idname = 'SORTNodeConstantFloat'
+    bl_idname = 'SORTNodeInputFloat'
     osl_shader = '''
         shader ConstantFloat( float Value = @ ,
                               output float Result = 0.0 ){
@@ -955,10 +952,10 @@ class SORTNodeConstantFloat(SORTShadingNode):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Value'].export_osl_value() )
 
-@SORTPatternGraph.register_node('Constant')
-class SORTNodeConstantFloatVector(SORTShadingNode):
+@SORTPatternGraph.register_node('Input')
+class SORTNodeInputFloatVector(SORTShadingNode):
     bl_label = 'Vector'
-    bl_idname = 'SORTNodeConstantFloatVector'
+    bl_idname = 'SORTNodeInputFloatVector'
     bl_width_min = 256
     osl_shader = '''
         shader ConstantFloat( vector Value = @ ,
@@ -973,10 +970,10 @@ class SORTNodeConstantFloatVector(SORTShadingNode):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Value'].export_osl_value() )
 
-@SORTPatternGraph.register_node('Constant')
-class SORTNodeColor(SORTShadingNode):
-    bl_idname = 'SORTNodeColor'
+@SORTPatternGraph.register_node('Input')
+class SORTNodeInputColor(SORTShadingNode):
     bl_label = 'Color'
+    bl_idname = 'SORTNodeInputColor'
     osl_shader = '''
         shader Extract( color Color = @,
                         output color Result = color(0)){
