@@ -15,6 +15,7 @@
 
 import bpy
 import nodeitems_utils
+import bpy.utils.previews
 from . import properties
 from .. import base
 
@@ -537,7 +538,7 @@ class SORTNode_Material_MicrofacetRefraction(SORTShadingNode):
                                      float  ExteriorIOR = @ ,
                                      float  RoughnessU = @ ,
                                      float  RoughnessV = @ ,
-                                     color  BaseColor = @ , 
+                                     color  BaseColor = @ ,
                                      normal Normal = @ ,
                                      output closure color Result = color(0) ){
             Result = microfacetRefraction( MicroFacetDistribution , InteriorIOR , ExteriorIOR , RoughnessU , RoughnessV , BaseColor , Normal );
