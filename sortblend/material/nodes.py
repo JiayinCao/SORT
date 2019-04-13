@@ -153,7 +153,7 @@ class SORTNode_Material_Diffuse(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
         self.inputs['Roughness'].enabled = False
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'brdf_type', text='BRDF Type')
+        layout.prop(self, 'brdf_type', text='BRDF Type', expand=True)
     def serialize_prop(self, fs):
         if self.brdf_type == 'OrenNayar':
             fs.serialize( 3 )
@@ -172,9 +172,9 @@ class SORTNode_Material_Diffuse(SORTShadingNode):
         return self.bl_label + self.brdf_type
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_BXDF_LambertTransmission(SORTShadingNode):
+class SORTNode_Material_LambertTransmission(SORTShadingNode):
     bl_label = 'Lambert Transmission'
-    bl_idname = 'SORTNode_BXDF_LambertTransmission'
+    bl_idname = 'SORTNode_Material_LambertTransmission'
     osl_shader = '''
         shader LambertTransmission( color Diffuse = @ ,
                                     normal Normal = @ ,
@@ -398,9 +398,9 @@ class SORTNode_Material_Hair(SORTShadingNode):
         fs.serialize( self.inputs['Index of Refraction'].export_osl_value() )
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_BXDF_Coat(SORTShadingNode):
+class SORTNode_Material_Coat(SORTShadingNode):
     bl_label = 'Coat'
-    bl_idname = 'SORTNode_BXDF_Coat'
+    bl_idname = 'SORTNode_Material_Coat'
     # A Practical and Controllable Hair and Fur Model for Production Path Tracing
     # https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
     osl_shader = '''
@@ -436,9 +436,9 @@ class SORTNode_BXDF_Coat(SORTShadingNode):
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_BXDF_Measured(SORTShadingNode):
+class SORTNode_Material_Measured(SORTShadingNode):
     bl_label = 'Measured BRDF'
-    bl_idname = 'SORTNode_BXDF_Measured'
+    bl_idname = 'SORTNode_Material_Measured'
     osl_shader_merl = '''
         shader merlBRDF( string Filename = @,
                          normal Normal = @ ,
@@ -462,7 +462,7 @@ class SORTNode_BXDF_Measured(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
         self.ResourceIndex = 0
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'brdf_type', text='BRDF Type')
+        layout.prop(self, 'brdf_type', text='BRDF Type', expand=True)
         layout.prop(self, 'file_path', text='File Path')
     def generate_osl_source(self):
         if self.brdf_type == 'FourierBRDF':
@@ -487,9 +487,10 @@ class SORTNode_BXDF_Measured(SORTShadingNode):
         fs.serialize( '%i'%self.ResourceIndex )
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
+class SORTNode_Material_MicrofacetReflection(SORTShadingNode):
     bl_label = 'MicrofacetRelection'
-    bl_idname = 'SORTNode_BXDF_MicrofacetReflection'
+    bl_idname = 'SORTNode_Material_MicrofacetReflection'
+    bl_width_min = 256
     osl_shader = '''
         shader MicrofacetRelection(  string MicroFacetDistribution = @ ,
                                      vector InteriorIOR = @ ,
@@ -512,7 +513,7 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'distribution', text='Distribution')
+        layout.prop(self, 'distribution', text='Distribution', expand=True)
         layout.prop(self, 'interior_ior', text='Interior IOR')
         layout.prop(self, 'absopt_co', text='Absorption Coefficient')
     def serialize_prop(self, fs):
@@ -526,9 +527,10 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode):
+class SORTNode_Material_MicrofacetRefraction(SORTShadingNode):
     bl_label = 'MicrofacetRefraction'
-    bl_idname = 'SORTNode_BXDF_MicrofacetRefraction'
+    bl_idname = 'SORTNode_Material_MicrofacetRefraction'
+    bl_width_min = 256
     osl_shader = '''
         shader MicrofacetRefraction( string MicroFacetDistribution = @ ,
                                      float  InteriorIOR = @ ,
@@ -553,7 +555,7 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode):
         self.inputs['RoughnessU'].default_value = 0.2
         self.inputs['RoughnessV'].default_value = 0.2
     def draw_buttons(self, context, layout):
-        layout.prop(self, 'distribution', text='Distribution')
+        layout.prop(self, 'distribution', text='Distribution', expand=True)
         layout.prop(self, 'interior_ior', text='Interior IOR')
         layout.prop(self, 'exterior_ior', text='Exterior IOR')
     def serialize_prop(self, fs):
@@ -567,9 +569,9 @@ class SORTNode_BXDF_MicrofacetRefraction(SORTShadingNode):
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode):
+class SORTNode_Material_AshikhmanShirley(SORTShadingNode):
     bl_label = 'AshikhmanShirley'
-    bl_idname = 'SORTNode_BXDF_AshikhmanShirley'
+    bl_idname = 'SORTNode_Material_AshikhmanShirley'
     osl_shader = '''
         shader AshikhmanShirley( float Specular = @ ,
                                  float RoughnessU = @ ,
@@ -599,9 +601,9 @@ class SORTNode_BXDF_AshikhmanShirley(SORTShadingNode):
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
 @SORTPatternGraph.register_node('Materials')
-class SORTNode_BXDF_ModifiedPhong(SORTShadingNode):
+class SORTNode_Material_ModifiedPhong(SORTShadingNode):
     bl_label = 'Modified Phong'
-    bl_idname = 'SORTNode_BXDF_ModifiedPhong'
+    bl_idname = 'SORTNode_Material_ModifiedPhong'
     osl_shader = '''
         shader Phong( float SpecularPower = @ ,
                       float DiffuseRatio = @ ,
@@ -804,7 +806,7 @@ class SORTNodeImage(SORTShadingNode):
     def draw_buttons(self, context, layout):
         layout.template_ID(self, "image", open="image.open")
         layout.template_icon_view(self, 'preview', show_labels=True)
-        layout.prop(self, 'color_space_type')
+        layout.prop(self, 'color_space_type', expand=True)
         layout.prop(self, 'wrap_type')
     def draw_label(self):
         img = self.get_image()
@@ -887,6 +889,90 @@ class SORTNodeExtract(SORTShadingNode):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Color'].export_osl_value() )
 
+@SORTPatternGraph.register_node('Convertor')
+class SORTNodeComposite(SORTShadingNode):
+    bl_label = 'Composite'
+    bl_idname = 'SORTNodeComposite'
+    osl_shader = '''
+        shader Composite( float Red = @ ,
+                          float Green = @ ,
+                          float Blue = @ ,
+                          output color Color = color( 0.0 , 0.0 , 0.0 ) ){
+            Color = color( Red , Green , Blue );
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Red' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Green' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Blue' )
+        self.outputs.new( 'SORTNodeSocketFloat' , 'Color' )
+    def serialize_prop(self, fs):
+        fs.serialize( 3 )
+        fs.serialize( self.inputs['Red'].export_osl_value() )
+        fs.serialize( self.inputs['Green'].export_osl_value() )
+        fs.serialize( self.inputs['Blue'].export_osl_value() )
+
+#------------------------------------------------------------------------------------#
+#                                 Input Nodes                                        #
+#------------------------------------------------------------------------------------#
+@SORTPatternGraph.register_node('Input')
+class SORTNodeInput(SORTShadingNode):
+    bl_label = 'Input'
+    bl_idname = 'SORTNodeInput'
+    bl_width_min = 160
+    osl_shader = '''
+        shader InputShader( output vector WorldPosition = P ,
+                            output vector WorldViewDirection = I ,
+                            output vector WorldShadingNormal = N ,
+                            output vector WorldGeometryNormal = Ng ,
+                            output vector UVCoordinate = vector( u , v , 0.0 ) ){
+        }
+    '''
+    def init(self, context):
+        self.outputs.new( 'SORTNodeSocketFloatVector' , 'World Position' )
+        self.outputs.new( 'SORTNodeSocketFloatVector' , 'World View Direction' )
+        self.outputs.new( 'SORTNodeSocketNormal' , 'World Shading Normal' )
+        self.outputs.new( 'SORTNodeSocketNormal' , 'World Geometry Normal' )
+        self.outputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
+
+#------------------------------------------------------------------------------------#
+#                                 Constant Nodes                                     #
+#------------------------------------------------------------------------------------#
+@SORTPatternGraph.register_node('Constant')
+class SORTNodeConstantFloat(SORTShadingNode):
+    bl_label = 'Float'
+    bl_idname = 'SORTNodeConstantFloat'
+    osl_shader = '''
+        shader ConstantFloat( float Value = @ ,
+                              output float Result = 0.0 ){
+            Result = Value;
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Value' )
+        self.outputs.new( 'SORTNodeSocketLargeFloat' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 1 )
+        fs.serialize( self.inputs['Value'].export_osl_value() )
+
+@SORTPatternGraph.register_node('Constant')
+class SORTNodeConstantFloatVector(SORTShadingNode):
+    bl_label = 'Vector'
+    bl_idname = 'SORTNodeConstantFloatVector'
+    bl_width_min = 256
+    osl_shader = '''
+        shader ConstantFloat( vector Value = @ ,
+                              output vector Result = 0.0 ){
+            Result = Value;
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketFloatVector' , 'Value' )
+        self.outputs.new( 'SORTNodeSocketFloatVector' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 1 )
+        fs.serialize( self.inputs['Value'].export_osl_value() )
+
 @SORTPatternGraph.register_node('Constant')
 class SORTNodeColor(SORTShadingNode):
     bl_idname = 'SORTNodeColor'
@@ -905,5 +991,4 @@ class SORTNodeColor(SORTShadingNode):
         layout.prop(self, 'color', text='')
     def serialize_prop(self, fs):
         fs.serialize( 1 )
-        print(self.color)
         fs.serialize( 'color( %f,%f,%f )'%(self.color[:]) )
