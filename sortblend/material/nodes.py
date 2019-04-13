@@ -102,6 +102,9 @@ class SORTShadingNode(bpy.types.Node):
     # to be deleted
     def draw_props(self, context, layout, indented_label):
         pass
+    # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
+    def type_identifier(self):
+        return self.bl_label
 
 @SORTPatternGraph.register_node('Output')
 class SORTNodeOutput(SORTShadingNode):
@@ -469,6 +472,58 @@ class SORTNode_BXDF_Coat(SORTShadingNode):
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
 @SORTPatternGraph.register_node('Materials')
+class SORTNode_BXDF_Measured(SORTShadingNode):
+    bl_label = 'Measured BRDF'
+    bl_idname = 'SORTNode_BXDF_Measured'
+    osl_shader_merl = '''
+        shader merlBRDF( string Filename = @,
+                         normal Normal = @ ,
+                         output closure color Result = color(0) ){
+            Result = merlBRDF( @ , Normal );
+        }
+    '''
+    osl_shader_fourier = '''
+        shader FourierBRDF( string Filename = @,
+                            normal Normal = @ ,
+                            output closure color Result = color(0) ){
+            Result = fourierBRDF( @ , Normal );
+        }
+    '''
+    osl_shader = osl_shader_fourier
+    brdf_type = bpy.props.EnumProperty(name='Type', items=[('FourierBRDF','FourierBRDF','',1),('MERL','MERL','',2)], default='FourierBRDF')
+    file_path = bpy.props.StringProperty( name='FilePath' , subtype='FILE_PATH' )
+    ResourceIndex = bpy.props.IntProperty( name='ResourceId' )
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+        self.ResourceIndex = 0
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'brdf_type', text='BRDF Type')
+        layout.prop(self, 'file_path', text='File Path')
+    def generate_osl_source(self):
+        ret = self.osl_shader_merl
+        if self.brdf_type == 'FourierBRDF':
+            ret = self.osl_shader_fourier
+        return ret
+    def populateResources( self , resources ):
+        found = False
+        for resource in resources:
+            if resource[1] == self.file_path:
+                found = True
+        if not found:
+            self.ResourceIndex = len(resources)
+            if self.brdf_type == 'FourierBRDF':
+                resources.append( ( self.file_path , 'FourierBRDFMeasuredData' ) )
+            else:
+                resources.append( ( self.file_path , 'MerlBRDFMeasuredData' ) )
+        pass
+    def serialize_prop(self, fs):
+        fs.serialize( 3 )
+        fs.serialize( '\"%s\"'%self.file_path )
+        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        fs.serialize( '%i'%self.ResourceIndex )
+
+@SORTPatternGraph.register_node('Materials')
 class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
     bl_label = 'MicrofacetRelection'
     bl_idname = 'SORTNode_BXDF_MicrofacetReflection'
@@ -508,9 +563,9 @@ class SORTNode_BXDF_MicrofacetReflection(SORTShadingNode):
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
 #------------------------------------------------------------------------------------#
-#                                   Image Nodes                                      #
+#                                   Texture Nodes                                    #
 #------------------------------------------------------------------------------------#
-@SORTPatternGraph.register_node('Image')
+@SORTPatternGraph.register_node('Textures')
 class SORTNodeCheckerBoard(SORTShadingNode):
     bl_label = 'CheckerBoard'
     bl_idname = 'SORTNodeCheckerBoard'
@@ -539,7 +594,7 @@ class SORTNodeCheckerBoard(SORTShadingNode):
         fs.serialize( self.inputs['Color2'].export_osl_value() )
         fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
 
-@SORTPatternGraph.register_node('Image')
+@SORTPatternGraph.register_node('Textures')
 class SORTNodeGrid(SORTShadingNode):
     bl_label = 'Grid'
     bl_idname = 'SORTNodeGrid'
@@ -571,6 +626,95 @@ class SORTNodeGrid(SORTShadingNode):
         fs.serialize( self.inputs['Color2'].export_osl_value() )
         fs.serialize( self.inputs['Treshold'].export_osl_value() )
         fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
+
+preview_collections = {}
+@SORTPatternGraph.register_node('Textures')
+class SORTNodeImage(SORTShadingNode):
+    bl_label = 'Image Texture'
+    bl_idname = 'SORTNodeImage'
+    bl_width_min = 200
+    items = (('Linear', "Linear", "Linear"), ('sRGB', "sRGB", "sRGB"), ('Normal', 'Normal', 'Normal'))
+    color_space_type = bpy.props.EnumProperty(name='Color Space', items=items, default='Linear')
+    wrap_items = (('REPEAT', "Repeat", "Repeating Texture"),
+             ('MIRRORED_REPEAT', "Mirror", "Texture mirrors outside of 0-1"),
+             ('CLAMP_TO_EDGE', "Clamp to Edge", "Clamp to Edge.  Outside 0-1 the texture will smear."),
+             ('CLAMP_ZERO', "Clamp to Black", "Clamp to Black outside 0-1"),
+             ('CLAMP_ONE', "Clamp to White", "Clamp to White outside 0-1"),)
+    wrap_type = bpy.props.EnumProperty(name='Wrap Type', items=wrap_items, default='REPEAT')
+    osl_shader_linear = '''
+        shader ImageShaderLinear( string Filename = @ ,
+                                  vector UVCoordinate = @ ,
+                                  output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            Result = texture( Filename , UVCoordinate[0] , UVCoordinate[1] );
+        }
+    '''
+    osl_shader_gamma = '''
+        shader ImageShaderGamma( string Filename = @ ,
+                                 vector UVCoordinate = @ ,
+                                 output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            color gamma_color = texture( Filename , UVCoordinate[0] , UVCoordinate[1] );
+            Result = pow( gamma_color , 2.2 );
+        }
+    '''
+    osl_shader_normal = '''
+        shader ImageShaderNormal( string Filename = @ ,
+                                 vector UVCoordinate = @ ,
+                                 output color Result = color( 0.0 , 0.0 , 0.0 ) ){
+            color encoded_color = texture( Filename , UVCoordinate[0] , UVCoordinate[1] );
+            Result = 2.0 * color( encoded_color[0] , encoded_color[2] , encoded_color[1] ) - 1.0;
+        }
+    '''
+    def generate_preview(self, context):
+        name = self.name + '_' + self.id_data.name
+        if name not in preview_collections:
+            item = bpy.utils.previews.new()
+            item.previews = ()
+            item.image_name = ''
+            preview_collections[name] = item
+        item = preview_collections[name]
+        wm = context.window_manager
+        enum_items = []
+        img = self.get_image()
+        if img:
+            new_image_name =img.name
+            if item.image_name == new_image_name:
+                return item.previews
+            else:
+                item.image_name = new_image_name
+            item.clear()
+            thumb = item.load(img.name, bpy.path.abspath(img.filepath), 'IMAGE')
+            enum_items = [(img.filepath, img.name, '', thumb.icon_id, 0)]
+        item.previews = enum_items
+        return item.previews
+    image = bpy.props.PointerProperty(type=bpy.types.Image)
+    preview = bpy.props.EnumProperty(items=generate_preview)
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
+        self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
+    def draw_buttons(self, context, layout):
+        layout.template_ID(self, "image", open="image.open")
+        layout.template_icon_view(self, 'preview', show_labels=True)
+        layout.prop(self, 'color_space_type')
+        layout.prop(self, 'wrap_type')
+    def draw_label(self):
+        img = self.get_image()
+        if not img:
+            return self.name
+        return img.name
+    def get_image(self):
+        return self.image
+    def serialize_prop(self, fs):
+        fs.serialize( 2 )
+        fs.serialize( '\"%s\"'%(self.image.filepath) )
+        fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
+    def generate_osl_source(self):
+        if self.color_space_type == 'sRGB':
+            return self.osl_shader_gamma
+        elif self.color_space_type == 'Normal':
+            return self.osl_shader_normal
+        return self.osl_shader_linear
+    def type_identifier(self):
+        return self.bl_label + self.color_space_type
 
 #------------------------------------------------------------------------------------#
 #                                 Convertor Nodes                                    #
@@ -632,7 +776,6 @@ class SORTNodeExtract(SORTShadingNode):
     def serialize_prop(self, fs):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Color'].export_osl_value() )
-
 
 @SORTPatternGraph.register_node('Constant')
 class SORTNodeColor(SORTShadingNode):

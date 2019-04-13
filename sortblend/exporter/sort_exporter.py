@@ -491,8 +491,9 @@ def collect_shader_resources(scene, fs):
             mat_node.populateResources( resources )
 
             # populate the shader source code if it is not exported before
-            if mat_node.bl_label not in shaders:
-                shaders[mat_node.bl_label] = mat_node.generate_osl_source()
+            shader_type = mat_node.type_identifier()
+            if shader_type not in shaders:
+                shaders[shader_type] = mat_node.generate_osl_source()
 
         serialize_prop(output_node, osl_shaders)
 
@@ -570,8 +571,9 @@ def export_materials(scene, fs):
         # serialize this material
         fs.serialize( len( mat_nodes ) )
         for node in mat_nodes:
+            shader_type = node.type_identifier()
             fs.serialize( node.name )
-            fs.serialize( node.bl_label )
+            fs.serialize( shader_type )
             node.serialize_prop( fs )
         fs.serialize( len( mat_connections ) )
         for connection in mat_connections:
