@@ -754,6 +754,7 @@ class SORTNodeImage(SORTShadingNode):
              ('CLAMP_ZERO', "Clamp to Black", "Clamp to Black outside 0-1"),
              ('CLAMP_ONE', "Clamp to White", "Clamp to White outside 0-1"),)
     wrap_type = bpy.props.EnumProperty(name='Wrap Type', items=wrap_items, default='REPEAT')
+    image_preview = bpy.props.BoolProperty(name='Preview Image', default=True)
     osl_shader_linear = '''
         shader ImageShaderLinear( string Filename = @ ,
                                   vector UVCoordinate = @ ,
@@ -806,7 +807,9 @@ class SORTNodeImage(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
     def draw_buttons(self, context, layout):
         layout.template_ID(self, "image", open="image.open")
-        layout.template_icon_view(self, 'preview', show_labels=True)
+        layout.prop(self, 'image_preview' )
+        if self.image_preview:
+            layout.template_icon_view(self, 'preview', show_labels=True)
         layout.prop(self, 'color_space_type', expand=True)
         layout.prop(self, 'wrap_type')
     def draw_label(self):
@@ -906,7 +909,7 @@ class SORTNodeComposite(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'Red' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Green' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Blue' )
-        self.outputs.new( 'SORTNodeSocketFloat' , 'Color' )
+        self.outputs.new( 'SORTNodeSocketColor' , 'Color' )
     def serialize_prop(self, fs):
         fs.serialize( 3 )
         fs.serialize( self.inputs['Red'].export_osl_value() )
@@ -990,3 +993,187 @@ class SORTNodeInputColor(SORTShadingNode):
     def serialize_prop(self, fs):
         fs.serialize( 1 )
         fs.serialize( 'color( %f,%f,%f )'%(self.color[:]) )
+
+#------------------------------------------------------------------------------------#
+#                                 Math Op Nodes                                      #
+#------------------------------------------------------------------------------------#
+@SORTPatternGraph.register_node('Math Ops')
+class SORTNodeMathOpUnary(SORTShadingNode):
+    bl_label = 'Unary Operator'
+    bl_idname = 'SORTNodeMathOpUnary'
+    bl_width_min = 240
+    osl_shader = '''
+        shader MathUnaryOp( %s Value0 = @ ,
+                            output %s Result = 0.0 ){
+            Result = %s(Value0);
+        }
+    '''
+    def change_type(self,context):
+        self.inputs.clear()
+        self.outputs.clear()
+        self.inputs.new( self.data_type , 'Value' )
+        self.outputs.new( self.data_type , 'Result' )
+        if self.data_type != 'SORTNodeSocketAnyFloat':
+            self.inputs['Value'].default_value = ( 1.0 , 1.0 , 1.0 )
+        else:
+            self.inputs['Value'].default_value = 1.0
+    op_type = bpy.props.EnumProperty(name='Type',default='-',items=[
+        ('-','Negation','',1), ('1.0-','One Minus','',2), ('sin','Sin','',3), ('cos','Cos','',4), ('tan','Tan','',5), ('asin','Asin','',6), ('acos','Acos','',7), ('atan','Atan','',8),
+        ('exp','Exp','',9), ('exp2','Exp2','',10), ('log','Log','',11), ('log2','Log2','',12), ('log10','Log10','',13), ('sqrt','Sqrt','',14), ('inversesqrt','Inverse Sqrt','',15),
+        ('fabs','Abs','', 16), ('sign','Sign','',17), ('floor','Floor','',18), ('ceil','Ceil','',19), ('round','Round','',20), ('trunc','Trunc','',21) ])
+    data_type = bpy.props.EnumProperty(name='Type',default='SORTNodeSocketAnyFloat',items=[('SORTNodeSocketAnyFloat','Float','',1),('SORTNodeSocketColor','Color','',2),('SORTNodeSocketFloatVector','Vector','',3)],update=change_type)
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Value' )
+        self.outputs.new( 'SORTNodeSocketAnyFloat' , 'Result' )
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'op_type', text='Type')
+        layout.prop(self, 'data_type', text='Type', expand=True)
+    def serialize_prop(self, fs):
+        fs.serialize( 1 )
+        fs.serialize( self.inputs['Value'].export_osl_value() )
+    def generate_osl_source(self):
+        dtype = 'float'
+        if self.data_type == 'SORTNodeSocketColor':
+            dtype = 'color'
+        elif self.data_type == 'SORTNodeSocketFloatVector':
+            dtype = 'vector'
+        return self.osl_shader % ( dtype , dtype , self.op_type )
+
+@SORTPatternGraph.register_node('Math Ops')
+class SORTNodeMathOpBinary(SORTShadingNode):
+    bl_label = 'Binary Operator'
+    bl_idname = 'SORTNodeMathOpBinary'
+    bl_width_min = 240
+    osl_shader = '''
+        shader MathBinaryOp( %s Value0 = @ ,
+                             %s Value1 = @ ,
+                             output %s Result = 0.0 ){
+            Result = Value0 %s Value1;
+        }
+    '''
+    def change_type(self,context):
+        self.inputs.clear()
+        self.outputs.clear()
+        self.inputs.new( self.data_type , 'Value0' )
+        self.inputs.new( self.data_type , 'Value1' )
+        self.outputs.new( self.data_type , 'Result' )
+        if self.data_type != 'SORTNodeSocketAnyFloat':
+            self.inputs['Value0'].default_value = ( 1.0 , 1.0 , 1.0 )
+            self.inputs['Value1'].default_value = ( 1.0 , 1.0 , 1.0 )
+        else:
+            self.inputs['Value0'].default_value = 1.0
+            self.inputs['Value1'].default_value = 1.0
+    op_type = bpy.props.EnumProperty(name='Type',default='+',items=[('+','Add','',1),('-','Substract','',2),('*','Multiply','',3),('/','Divide','',4)])
+    data_type = bpy.props.EnumProperty(name='Type',default='SORTNodeSocketAnyFloat',items=[('SORTNodeSocketAnyFloat','Float','',1),('SORTNodeSocketColor','Color','',2),('SORTNodeSocketFloatVector','Vector','',3)],update=change_type)
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Value0' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Value1' )
+        self.outputs.new( 'SORTNodeSocketAnyFloat' , 'Result' )
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'op_type', text='Type')
+        layout.prop(self, 'data_type', text='Type', expand=True)
+    def serialize_prop(self, fs):
+        fs.serialize( 2 )
+        fs.serialize( self.inputs['Value0'].export_osl_value() )
+        fs.serialize( self.inputs['Value1'].export_osl_value() )
+    def generate_osl_source(self):
+        dtype = 'float'
+        if self.data_type == 'SORTNodeSocketColor':
+            dtype = 'color'
+        elif self.data_type == 'SORTNodeSocketFloatVector':
+            dtype = 'vector'
+        return self.osl_shader % ( dtype , dtype , dtype , self.op_type )
+
+@SORTPatternGraph.register_node('Math Ops')
+class SORTNodeMathOpLerp(SORTShadingNode):
+    bl_label = 'Lerp'
+    bl_idname = 'SORTNodeMathOpLerp'
+    bl_width_min = 240
+    osl_shader = '''
+        shader MathBinaryOp( %s Value0 = @ ,
+                             %s Value1 = @ ,
+                             float Factor = @ ,
+                             output %s Result = 0.0 ){
+            Result = Value0 * ( 1.0 - Factor ) + Value1 * Factor;
+        }
+    '''
+    def change_type(self,context):
+        old_factor = self.inputs['Factor'].default_value
+        self.inputs.clear()
+        self.outputs.clear()
+        self.inputs.new( self.data_type , 'Value0' )
+        self.inputs.new( self.data_type , 'Value1' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Factor' )
+        self.inputs['Factor'].default_value = old_factor
+        self.outputs.new( self.data_type , 'Result' )
+        if self.data_type != 'SORTNodeSocketAnyFloat':
+            self.inputs['Value0'].default_value = ( 1.0 , 1.0 , 1.0 )
+            self.inputs['Value1'].default_value = ( 1.0 , 1.0 , 1.0 )
+        else:
+            self.inputs['Value0'].default_value = 1.0
+            self.inputs['Value1'].default_value = 1.0
+    data_type = bpy.props.EnumProperty(name='Type',default='SORTNodeSocketAnyFloat',items=[('SORTNodeSocketAnyFloat','Float','',1),('SORTNodeSocketColor','Color','',2),('SORTNodeSocketFloatVector','Vector','',3)],update=change_type)
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Value0' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Value1' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Factor' )
+        self.outputs.new( 'SORTNodeSocketAnyFloat' , 'Result' )
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'data_type', text='Type', expand=True)
+    def serialize_prop(self, fs):
+        fs.serialize( 3 )
+        fs.serialize( self.inputs['Value0'].export_osl_value() )
+        fs.serialize( self.inputs['Value1'].export_osl_value() )
+        fs.serialize( self.inputs['Factor'].export_osl_value() )
+    def generate_osl_source(self):
+        dtype = 'float'
+        if self.data_type == 'SORTNodeSocketColor':
+            dtype = 'color'
+        elif self.data_type == 'SORTNodeSocketFloatVector':
+            dtype = 'vector'
+        return self.osl_shader % ( dtype , dtype , dtype )
+
+@SORTPatternGraph.register_node('Math Ops')
+class SORTNodeMathOpClamp(SORTShadingNode):
+    bl_label = 'Clamp'
+    bl_idname = 'SORTNodeMathOpClamp'
+    bl_width_min = 240
+    osl_shader = '''
+        shader MathBinaryOp( %s MinValue = @ ,
+                             %s MaxValue = @ ,
+                             %s Value = @ ,
+                             output %s Result = 0.0 ){
+            Result = min( MaxValue , max( MinValue , Value ) );
+        }
+    '''
+    def change_type(self,context):
+        self.inputs.clear()
+        self.outputs.clear()
+        self.inputs.new( self.data_type , 'Min Value' )
+        self.inputs.new( self.data_type , 'Max Value' )
+        self.inputs.new( self.data_type , 'Value' )
+        self.outputs.new( self.data_type , 'Result' )
+        if self.data_type != 'SORTNodeSocketAnyFloat':
+            self.inputs['Min Value'].default_value = ( 0.0 , 0.0 , 0.0 )
+            self.inputs['Max Value'].default_value = ( 1.0 , 1.0 , 1.0 )
+        else:
+            self.inputs['Min Value'].default_value = 0.0
+            self.inputs['Max Value'].default_value = 1.0
+    data_type = bpy.props.EnumProperty(name='Type',default='SORTNodeSocketAnyFloat',items=[('SORTNodeSocketAnyFloat','Float','',1),('SORTNodeSocketFloatVector','Vector','',2)],update=change_type)
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Min Value' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Max Value' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Value' )
+        self.outputs.new( 'SORTNodeSocketAnyFloat' , 'Result' )
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'data_type', text='Type', expand=True)
+    def serialize_prop(self, fs):
+        fs.serialize( 3 )
+        fs.serialize( self.inputs['Min Value'].export_osl_value() )
+        fs.serialize( self.inputs['Max Value'].export_osl_value() )
+        fs.serialize( self.inputs['Value'].export_osl_value() )
+    def generate_osl_source(self):
+        dtype = 'float'
+        if self.data_type == 'SORTNodeSocketFloatVector':
+            dtype = 'vector'
+        return self.osl_shader % ( dtype , dtype , dtype , dtype )
