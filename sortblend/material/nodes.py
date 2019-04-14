@@ -73,7 +73,7 @@ class SORTPatternGraph(bpy.types.NodeTree):
 
             cls.nodetypes[c] = []
             #for item in l :
-            #    cls.nodetypes[c].append((item.__name__,item.bl_label,item.output_type))
+            #    cls.nodetypes[c].append((item.__name__,item.bl_label))
 
         cats.append(
             SORTPatternNodeCategory("RPR_LAYOUT", "Layout", items=[nodeitems_utils.NodeItem("NodeFrame")])
@@ -1077,9 +1077,9 @@ class SORTNodeMathOpUnary(SORTShadingNode):
     bl_idname = 'SORTNodeMathOpUnary'
     bl_width_min = 240
     osl_shader = '''
-        shader MathUnaryOp( %s Value0 = @ ,
+        shader MathUnaryOp( %s Value = @ ,
                             output %s Result = 0.0 ){
-            Result = %s(Value0);
+            Result = %s(Value);
         }
     '''
     def change_type(self,context):
@@ -1112,7 +1112,9 @@ class SORTNodeMathOpUnary(SORTShadingNode):
         elif self.data_type == 'SORTNodeSocketFloatVector':
             dtype = 'vector'
         return self.osl_shader % ( dtype , dtype , self.op_type )
-
+    def type_identifier(self):
+        return self.bl_label + self.data_type + self.op_type
+        
 @SORTPatternGraph.register_node('Math Ops')
 class SORTNodeMathOpBinary(SORTShadingNode):
     bl_label = 'Binary Operator'
@@ -1157,6 +1159,8 @@ class SORTNodeMathOpBinary(SORTShadingNode):
         elif self.data_type == 'SORTNodeSocketFloatVector':
             dtype = 'vector'
         return self.osl_shader % ( dtype , dtype , dtype , self.op_type )
+    def type_identifier(self):
+        return self.bl_label + self.data_type + self.op_type
 
 @SORTPatternGraph.register_node('Math Ops')
 class SORTNodeMathOpLerp(SORTShadingNode):
@@ -1206,6 +1210,8 @@ class SORTNodeMathOpLerp(SORTShadingNode):
         elif self.data_type == 'SORTNodeSocketFloatVector':
             dtype = 'vector'
         return self.osl_shader % ( dtype , dtype , dtype )
+    def type_identifier(self):
+        return self.bl_label + self.data_type
 
 @SORTPatternGraph.register_node('Math Ops')
 class SORTNodeMathOpClamp(SORTShadingNode):
@@ -1253,3 +1259,5 @@ class SORTNodeMathOpClamp(SORTShadingNode):
         elif self.data_type == 'SORTNodeSocketFloatVector':
             dtype = 'vector'
         return self.osl_shader % ( dtype , dtype , dtype , dtype )
+    def type_identifier(self):
+        return self.bl_label + self.data_type
