@@ -30,10 +30,16 @@ class SORTNodeSocket(SORTNodeProperty):
 
     # this is not an inherited function
     def draw_label(self, context, layout, node, text):
-        def from_socket(socket,context):
-            return next((l.from_socket for l in socket.links if l.to_socket == socket), None)
+        def get_from_socket(socket):
+            if not socket.is_linked:
+                return None
+            other = socket.links[0].from_socket
+            if other.node.bl_idname == 'NodeReroute':
+                return get_from_socket(other.node.inputs[0])
+            else:
+                return other
 
-        source_socket = from_socket(self,context)
+        source_socket = get_from_socket(self)
         has_error = False
         if source_socket is not None and source_socket.get_socket_data_type() != self.get_socket_data_type():
             has_error = True
@@ -96,7 +102,7 @@ class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     def get_socket_data_type(self):
         return 'float'
 
-# Socket for Float
+# Socket for Float Vector
 class SORTNodeSocketFloatVector(bpy.types.NodeSocketFloat, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketFloatVector'
     bl_label = 'SORT Float Vector Socket'
@@ -108,7 +114,7 @@ class SORTNodeSocketFloatVector(bpy.types.NodeSocketFloat, SORTNodeSocket):
     def get_socket_data_type(self):
         return 'vector3'
 
-# Socket for Float
+# Socket for Positive Float
 class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketLargeFloat'
     bl_label = 'SORT Float Socket'
@@ -120,7 +126,7 @@ class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     def get_socket_data_type(self):
         return 'float'
 
-# Socket for Float
+# Socket for Any Float
 class SORTNodeSocketAnyFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketAnyFloat'
     bl_label = 'SORT Float Socket'

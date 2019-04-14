@@ -462,6 +462,16 @@ def find_output_node(material):
                 return node
     return None
 
+# get the from node of this socket if there is one recursively
+def get_from_socket(socket):
+    if not socket.is_linked:
+        return None
+    other = socket.links[0].from_socket
+    if other.node.bl_idname == 'NodeReroute':
+        return get_from_socket(other.node.inputs[0])
+    else:
+        return other
+
 # This function will iterate through all visited nodes in the scene and populate everything in a hash table
 # Apart from collecting shaders, it will also collect all heavy data, like measured BRDF data, texture.
 def collect_shader_resources(scene, fs):
@@ -482,12 +492,11 @@ def collect_shader_resources(scene, fs):
 
         def serialize_prop(mat_node , shaders):
             for socket in mat_node.inputs:
-                # only process the socket if it is linked.
-                if socket.is_linked:
-                    assert len(socket.links) == 1
-                    serialize_prop( socket.links[0].from_socket.node , shaders )
+                from_socket = get_from_socket( socket )
+                if from_socket is not None:
+                    serialize_prop( from_socket.node , shaders )
 
-            # populate resources first if necessary
+            # populate the resources first
             mat_node.populateResources( resources )
 
             # populate the shader source code if it is not exported before
@@ -547,20 +556,20 @@ def export_materials(scene, fs):
         def collect_node_count(mat_node, visited):
             inputs = mat_node.inputs
             for socket in inputs:
-                if socket.is_linked:
-                    assert len(socket.links) == 1
-                    input_socket = socket.links[0].from_socket
-                    input_node = input_socket.node
+                input_socket = get_from_socket( socket )
+                if input_socket is None:
+                    continue
+                input_node = input_socket.node
 
-                    source_param = input_socket.name.replace(' ', '')
-                    target_param = socket.name.replace(' ' ,'')
-                    mat_connections.append( ( compact_material_name + '_' + input_node.name , source_param , compact_material_name + '_' + mat_node.name , target_param ) )
+                source_param = input_socket.name.replace(' ', '')
+                target_param = socket.name.replace(' ' ,'')
+                mat_connections.append( ( compact_material_name + '_' + input_node.name , source_param , compact_material_name + '_' + mat_node.name , target_param ) )
 
-                    if input_node.name not in visited:
-                        collect_node_count(input_node, visited)
+                if input_node.name not in visited:
+                    collect_node_count(input_node, visited)
 
-                        # make sure it doesn't get serialized again
-                        visited.add( input_node )
+                    # make sure it doesn't get serialized again
+                    visited.add( input_node )
 
             # topological sort is necessary here to preserve the order of shader definition.
             mat_nodes.append( mat_node )

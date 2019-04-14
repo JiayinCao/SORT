@@ -64,7 +64,7 @@ class SORTPatternGraph(bpy.types.NodeTree):
 
     @classmethod
     def register(cls):
-        bpy.types.Material.sort_material = bpy.props.PointerProperty(type=SORTMaterial, name="SORT Material Settings")
+        bpy.types.Material.sort_material = bpy.props.PointerProperty(type=SORTMaterial, name='SORT Material Settings')
         cats = []
         for c, l in sorted(cls.node_categories.items()):
             cid = 'SORT_' + c.replace(' ', '').upper()
@@ -76,7 +76,9 @@ class SORTPatternGraph(bpy.types.NodeTree):
             #    cls.nodetypes[c].append((item.__name__,item.bl_label))
 
         cats.append(
-            SORTPatternNodeCategory("RPR_LAYOUT", "Layout", items=[nodeitems_utils.NodeItem("NodeFrame")])
+            SORTPatternNodeCategory('SORT_LAYOUT', 'Layout', items=[nodeitems_utils.NodeItem('NodeFrame'),
+                nodeitems_utils.NodeItem('NodeReroute')
+                ])
         )
 
         nodeitems_utils.register_node_categories('SORTSHADERNODES', cats)
