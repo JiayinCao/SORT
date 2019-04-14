@@ -75,11 +75,7 @@ class SORTPatternGraph(bpy.types.NodeTree):
             #for item in l :
             #    cls.nodetypes[c].append((item.__name__,item.bl_label))
 
-        cats.append(
-            SORTPatternNodeCategory('SORT_LAYOUT', 'Layout', items=[nodeitems_utils.NodeItem('NodeFrame'),
-                nodeitems_utils.NodeItem('NodeReroute')
-                ])
-        )
+        cats.append(SORTPatternNodeCategory('SORT_LAYOUT', 'Layout', items=[nodeitems_utils.NodeItem('NodeFrame'),nodeitems_utils.NodeItem('NodeReroute')]))
 
         nodeitems_utils.register_node_categories('SORTSHADERNODES', cats)
 
@@ -116,7 +112,7 @@ class SORTShadingNode(bpy.types.Node):
 
 @SORTPatternGraph.register_node('Output')
 class SORTNodeOutput(SORTShadingNode):
-    bl_label = 'SORT_output'
+    bl_label = 'Shader Output'
     bl_idname = 'SORTNodeOutput'
     osl_shader = '''
         shader SORT_Shader( closure color Surface = color(0) ){
@@ -1165,6 +1161,27 @@ class SORTNodeMathOpBinary(SORTShadingNode):
         return self.bl_label + self.data_type + self.op_type
 
 @SORTPatternGraph.register_node('Math Ops')
+class SORTNodeMathOpDotProduce(SORTShadingNode):
+    bl_label = 'Dot Product'
+    bl_idname = 'SORTNodeMathOpDotProduce'
+    bl_width_min = 240
+    osl_shader = '''
+        shader MathBinaryOp( vector Value0 = @ ,
+                             vector Value1 = @ ,
+                             output vector Result = 0.0 ){
+            Result = dot( Value0 , Value1 );
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketFloatVector' , 'Value0' )
+        self.inputs.new( 'SORTNodeSocketFloatVector' , 'Value1' )
+        self.outputs.new( 'SORTNodeSocketAnyFloat' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 2 )
+        fs.serialize( self.inputs['Value0'].export_osl_value() )
+        fs.serialize( self.inputs['Value1'].export_osl_value() )
+    
+@SORTPatternGraph.register_node('Math Ops')
 class SORTNodeMathOpLerp(SORTShadingNode):
     bl_label = 'Lerp'
     bl_idname = 'SORTNodeMathOpLerp'
@@ -1247,6 +1264,7 @@ class SORTNodeMathOpClamp(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Max Value' )
         self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Value' )
         self.outputs.new( 'SORTNodeSocketAnyFloat' , 'Result' )
+        self.inputs['Max Value'].default_value = 1.0
     def draw_buttons(self, context, layout):
         layout.prop(self, 'data_type', text='Type', expand=True)
     def serialize_prop(self, fs):
