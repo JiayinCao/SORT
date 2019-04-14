@@ -74,6 +74,11 @@ class SORTPatternGraph(bpy.types.NodeTree):
             cls.nodetypes[c] = []
             #for item in l :
             #    cls.nodetypes[c].append((item.__name__,item.bl_label,item.output_type))
+
+        cats.append(
+            SORTPatternNodeCategory("RPR_LAYOUT", "Layout", items=[nodeitems_utils.NodeItem("NodeFrame")])
+        )
+
         nodeitems_utils.register_node_categories('SORTSHADERNODES', cats)
 
     @classmethod
@@ -769,6 +774,7 @@ class SORTNodeGrid(SORTShadingNode):
         self.outputs['Blue'].enabled = self.show_separate_channels
         self.outputs['Green'].enabled = self.show_separate_channels
         self.inputs['Treshold'].default_value = 0.1
+        self.inputs['Color1'].default_value = ( 0.2 , 0.2 , 0.2 )
     def serialize_prop(self, fs):
         fs.serialize( 4 )
         fs.serialize( self.inputs['Color1'].export_osl_value() )
