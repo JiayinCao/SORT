@@ -113,6 +113,10 @@ public:
         return RGBSpectrum((float)::exp(m_r), (float)::exp(m_g), (float)::exp(m_b));
     }
 
+    RGBSpectrum Sqrt() const {
+        return RGBSpectrum(sqrt(m_r), sqrt(m_g), sqrt(m_b));
+    }
+
 private:
 	// the rgb color
 	float m_r;

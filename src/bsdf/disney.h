@@ -22,13 +22,16 @@
 
 //! @brief Disney Principle BRDF.
 /**
- * Disney Principle BRDF
- * https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
- * This implementation is based on the open-source github project from Walt Disney Animation Studios
+ * Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering
+ * http://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf
+ *
+ * Physically Based Shading at Disney
+ * https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
+ *
+ * The initial implementation was based on the open-source Github project from Walt Disney Animation Studios
  * https://github.com/wdas/brdf
  */
-class DisneyBRDF : public Bxdf
-{
+class DisneyBRDF : public Bxdf{
 public:
     // Input parameters to construct the disney BRDF.
     struct Params {
@@ -55,22 +58,34 @@ public:
     //!
     //! @param params           All parameters.
     //! @param weight           Weight of the BXDF
-    DisneyBRDF( const Params& param , const Spectrum& weight, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, doubleSided), basecolor(param.baseColor), subsurface(param.subsurface), metallic(param.metallic),
+    DisneyBRDF( const Params& param , const Spectrum& weight)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), subsurface(param.subsurface), metallic(param.metallic),
         specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
         clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness), 
           diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
 
 	//! Constructor
-    //! @param basecolor        Direction-hemisphere reflection for diffuse.
+    //! @param basecolor        The surface color, usually supplied by texture maps.
+    //! @param subsurface       Controls diffuse shape using a subsurface approximation.
+    //! @param metallic         This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color.
     //! @param specular         Direction-hemisphere reflection for specular.
-    //! @param roughnessU       Roughness along one axis.
-    //! @param roughnessV       Roughness along the other axis
-    //! @param weight           Weight of the BXDF
+    //! @param speculatTint     A concession for artistic control that tints incident specular towards the base color.
+    //! @param roughness        Surface roughness, controls both diffuse and specular response.
+    //! @param anisotropic      Degree of anisotropy. This controls the aspect ratio of the specular highlight. (0 = isotropic, 1 = maximally anisotropic.)    //! @param sheen            An additional grazing component, primarily intended for cloth.
+    //! @param sheenTint        Amount to tint sheen towards base color.
+    //! @param clearcoat        A second, special-purpose specular lobe.
+    //! @param clearcoatGloss   Controls clearcoat glossiness (0 = a “satin” appearance, 1 = a “gloss” appearance)
+    //! @param specTrans        A blending factor controlling how transparent the surface is.
+    //! @param scatterDistance  The distance of scattering beneath the surface, a positive value indicates there is SSS.
+    //! @param flatness         A factor for blending diffuse and fakeSS for thin surface.
+    //! @param diffTrans        A blending factor for diffuse transmission and reflectance model.
+    //! @param thinSurface      Whether the surface is a thin surface.
+    //! @param weight           Weight of the BXDF.
+    //! @param n                Normal in shading coordinate.
     DisneyBRDF( const Spectrum& basecolor , float subsurface , float metallic , float specular , float specularTint , float roughness ,
                float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance , 
-               float flatness , float diffTrans , int thinSurface , const Spectrum& weight, const Vector& n , bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , basecolor(basecolor), subsurface(subsurface), metallic(metallic),
+               float flatness , float diffTrans , int thinSurface , const Spectrum& weight, const Vector& n )
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), subsurface(subsurface), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
           clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness), 
           diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}
@@ -115,8 +130,7 @@ private:
 };
 
 //! @brief Clearcoat GGX NDF.
-class ClearcoatGGX : public GGX
-{
+class ClearcoatGGX : public GGX{
 public:
     //! @brief Constructor
     //! @param roughness    Roughness of the surface formed by the micro facets.

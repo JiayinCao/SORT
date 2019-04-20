@@ -18,19 +18,20 @@
 #pragma once
 
 #include "spectrum/spectrum.h"
+#include "math/utils.h"
 
 // Memo on Fresnel equations
 // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
 
 // Schlick Fresnel Approximation
 inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
-    return F0 + pow( 1.0f - cos , 5.0f ) * ( Spectrum( 1.0f ) - F0);
+    return F0 + Pow<5>(1.0f - cos) * ( Spectrum( 1.0f ) - F0 );
 }
 inline float SchlickFresnel(const float F0, float cos) {
-    return F0 + pow(1.0f - cos, 5.0f) * ( 1.0f - F0 );
+    return F0 + Pow<5>(1.0f - cos) * ( 1.0f - F0 );
 }
 inline float SchlickWeight( float cos ){
-    return pow( saturate( 1.0f - cos ) , 5.0f );
+    return Pow<5>( saturate( 1.0f - cos ) );
 }
 inline float DielectricFresnel( float cosI , float eta_i , float eta_t ){
     const bool entering = cosI > 0.0f;

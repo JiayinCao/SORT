@@ -19,6 +19,7 @@
 #include "microfacet.h"
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
+#include "bsdf/lambert.h"
 
 float ClearcoatGGX::D(const Vector& h) const {
     // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) ^ 2 )
@@ -28,7 +29,7 @@ float ClearcoatGGX::D(const Vector& h) const {
         return INV_PI;  // Limit(alpha->1.0) D(h) = 1.0 / PI
 
     const auto cos = CosTheta(h);
-    return (alphaU2 - 1) / (TWO_PI * log(alphaU) * (1 + (alphaU2 - 1) * cos * cos));
+    return (alphaU2 - 1) / (TWO_PI * log(alphaU) * (1 + (alphaU2 - 1) * SQR(cos)));
 }
 
 Vector ClearcoatGGX::sample_f(const BsdfSample& bs) const {
@@ -40,104 +41,227 @@ Vector ClearcoatGGX::sample_f(const BsdfSample& bs) const {
 }
 
 float ClearcoatGGX::G1(const Vector& v) const {
+    /*
     const auto tan_theta_sq = TanTheta2(v);
     if (IsInf(tan_theta_sq)) return 0.0f;
     static const auto roughness = 0.25f;
     const auto alpha2 = roughness * roughness;
     return 2.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
+    */
+
+    const auto cos_theta = CosTheta(v);
+    const auto cos_theta_sq = SQR(cos_theta);
+    constexpr auto alpha = 0.25f;
+    const auto alpha2 = alpha * alpha;
+    return 1.0 / (cos_theta + sqrt(alpha2 + cos_theta_sq - alpha2 * cos_theta_sq));
 }
 
 Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
 {
-    if (!SameHemiSphere(wo, wi)) return 0.0f;
-    if (!doubleSided && !PointingUp(wo)) return 0.0f;
-
     const static Spectrum white(1.0f);
     
-    const auto NoO = CosTheta( wo );
-    const auto NoI = CosTheta( wi );
-    
-    const auto h = Normalize( wo + wi );
-    const auto HoO = Dot( wo , h );
+    constexpr float ior_in = 1.5f;          // hard coded index of refraction below the surface
+    constexpr float ior_ex = 1.0f;          // hard coded index of refraction above the surface
+    constexpr float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
+
+    const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
+    const auto diffuseWeight = (1.0f - metallic) * (1.0 - specTrans);
+
+    const auto NoO = CosTheta(wo);
+    const auto NoI = CosTheta(wi);
+
+    const auto wh = Normalize(wo + wi);
+    const auto HoO = Dot(wo, wh);
     const auto HoO2 = HoO * HoO;
-    
-    // Fresnel term
+    const auto HoO2ByRoughness = HoO2 * roughness;
     const auto FH = SchlickWeight(HoO);
+
+    // Diffuse
+    // Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, eq (4)
+    const auto FO = SchlickWeight(NoO);
+    const auto FI = SchlickWeight(NoI);
+    const auto fd = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));
+
+    // Special handling for thin surfaces
+    if (thinSurface) {
+        // Thin surface is guaranteed not to be metallic
+        const auto diffuseWeight = 1.0 - specTrans;
+        const auto disneyDiffuse = (1.0f - flatness) * (1.0f - diffTrans) * fd;
+
+        // Fake sub-surface scattering
+        // Reflection from Layered Surfaces due to Subsurface Scattering
+        // https://cseweb.ucsd.edu/~ravir/6998/papers/p165-hanrahan.pdf
+        // Based on Hanrahan-Krueger BRDF approximation of isotropic BSSRDF
+        // 1.25 scale is used to (roughly) preserve albedo
+        // Fss90 used to "flatten" retro-reflection based on roughness
+        const auto Fss90 = HoO2ByRoughness;
+        const auto Fss = slerp(1.0f, Fss90, FO) * slerp(1.0f, Fss90, FI);
+        const auto ss = basecolor * (1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f) * INV_PI);
+        const auto disneyFakeSS = flatness * (1.0f - diffTrans) * ss;
+
+        auto ret = diffuseWeight * (disneyDiffuse + disneyFakeSS) * NoI;
+
+        // Count diffuse transmission if needed
+        if (diffTrans > 0.0f && diffuseWeight > 0.0f) {
+            LambertTransmission lambert_transmission(basecolor, diffTrans, DIR_UP);
+            ret += diffuseWeight * lambert_transmission.f(wo, wi);
+        }
+
+        // Count specular reflection if needed
+        if (specTrans > 0.0f) {
+            const auto T = specTrans * basecolor.Sqrt();
+
+            // Scale roughness based on IOR (Burley 2015, Figure 15).
+            // const auto rscaled = (0.65f * eta - 0.35f) * roughness;
+            // const auto ru = SQR(rscaled) / aspect;
+            // const auto rv = SQR(rscaled) * aspect;
+            // const GGX scaledDist(ru, rv);
+
+            const GGX scaledDist(roughness / aspect, roughness * aspect);
+
+            MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, white, DIR_UP);
+            mr.UpdateGNormal(gnormal);
+            ret += mr.f(wo, wi);
+        }
+        return ret;
+    }
+
+    auto ret = RGBSpectrum(0.0f);
     
-    // Sheen term in Disney BRDF model
     const auto luminance = basecolor.GetIntensity();
-    const auto Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
-    const auto Cspec0 = slerp( specular * 0.08f * slerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
-    const auto Csheen = slerp( Spectrum(1.0f) , Ctint , sheenTint );
-    const auto Fsheen = FH * sheen * Csheen ;
-    
-    // Diffuse term in Disney BRDF model
-    const auto FO = SchlickWeight( NoO );
-    const auto FI = SchlickWeight( NoI );
-    const auto Fd90 = 0.5f + 2.0f * HoO2 * roughness;
-    const auto Fd = slerp( 1.0f , Fd90 , FO )  * slerp( 1.0f , Fd90 , FI );
-    
-    // Reflection from Layered Surfaces due to Subsurface Scattering
-    // https://cseweb.ucsd.edu/~ravir/6998/papers/p165-hanrahan.pdf
-    // Based on Hanrahan-Krueger BRDF approximation of isotropic BSSRDF
-    // 1.25 scale is used to (roughly) preserve albedo
-    // Fss90 used to "flatten" retro-reflection based on roughness
-    const auto Fss90 = HoO2*roughness;
-    const auto Fss = slerp(1.0f, Fss90, FO) * slerp(1.0f, Fss90, FI);
-    const auto ss = 1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f);
-    
-    // Final diffuse term for Disney BRDF
-    const auto diff = ( INV_PI * slerp( Fd , ss , subsurface ) * basecolor + Fsheen ) * ( 1.0f - metallic );
-    
+    const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
+
+    if (diffuseWeight > 0.0f) {
+        if (scatterDistance > 0.0f) {
+            // Handle sub-surface scattering branch, to be done.
+            // There is a following up task to support SSS in SORT, after which this can be easily done.
+            // Issue tracking ticket, https://github.com/JerryCao1985/SORT/issues/85
+        }
+        else {
+            ret += diffuseWeight * fd * NoI;
+        }
+
+        // Retro-reflection
+        // Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, eq (4)
+        const auto Rr = 2.0 * HoO2ByRoughness;
+        const auto frr = basecolor * (INV_PI * Rr * (FO + FI + FO * FI * (Rr - 1.0f)));
+        ret += diffuseWeight * frr * NoI;
+
+        // Count sheen if needed
+        if (sheen > 0.0f) {
+            // Sheen
+            const auto Csheen = slerp(Spectrum(1.0f), Ctint, sheenTint);
+            const auto Fsheen = FH * sheen * Csheen;
+
+            ret += diffuseWeight * Fsheen * NoI;
+        }
+    }
+
     // Specular term in Disney BRDF
-    const auto aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
-    const GGX ggx( roughness / aspect , roughness * aspect );
-    const FresnelDisney fresnel0(Cspec0, 1.0f, 1.5f, metallic);
+    const GGX ggx(roughness / aspect, roughness * aspect);
+    const auto Cspec0 = slerp(specular * 0.08f * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
+    const FresnelDisney fresnel0(Cspec0, ior_in, ior_ex, metallic);
     const MicroFacetReflection mf(Cspec0, &fresnel0, &ggx, white, DIR_UP);
-    
-    // Clear coat term (ior = 1.5 -> F0 = 0.04)
-    const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
-    const FresnelSchlick<float> fresnel1(0.04f);
-    const MicroFacetReflection mf_clearcoat( Spectrum( 0.25f * clearcoat ) , &fresnel1, &cggx, white, DIR_UP);
-    
     mf.UpdateGNormal(gnormal);
-    mf_clearcoat.UpdateGNormal(gnormal);
+    ret += mf.f(wo, wi);
+
+    // Clear coat
+    if (clearcoat > 0.0f) {
+        const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
+        const FresnelSchlick<float> fresnel1(0.04f);
+        const MicroFacetReflection mf_clearcoat(Spectrum(0.25f * clearcoat), &fresnel1, &cggx, white, DIR_UP);
+        mf_clearcoat.UpdateGNormal(gnormal);
+        ret += mf_clearcoat.f(wo, wi);
+    }
     
-    // Final specular term
-    const auto spec = mf.f(wo,wi) + mf_clearcoat.f(wo, wi);
-    
-    return diff * AbsCosTheta(wi) + spec;
+    // Specular transmittance
+    if (specTrans > 0.0f) {
+        const auto T = specTrans * basecolor.Sqrt();
+        MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, white, DIR_UP);
+        mr.UpdateGNormal(gnormal);
+        ret += mr.f(wo, wi);
+    }
+
+    return ret;
 }
 
 Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
+    const static Spectrum white(1.0f);
+    constexpr float ior_in = 1.5f;          // hard coded index of refraction below the surface
+    constexpr float ior_ex = 1.0f;          // hard coded index of refraction above the surface
+    constexpr float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
+
+    const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
+    
+    // Special handling for thin surface
+    if (thinSurface) {
+        const auto r = sort_canonical();
+        if ( r < specTrans || specTrans == 1.0f ) {
+            const auto T = specTrans * basecolor.Sqrt();
+
+            // Scale roughness based on IOR (Burley 2015, Figure 15).
+            // const auto rscaled = (0.65f * eta - 0.35f) * roughness;
+            // const auto ru = SQR(rscaled) / aspect;
+            // const auto rv = SQR(rscaled) * aspect;
+            // const GGX scaledDist(ru, rv);
+
+            const GGX scaledDist(roughness / aspect, roughness * aspect);
+            MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, white, DIR_UP);
+            mr.UpdateGNormal(gnormal);
+
+            mr.sample_f(wo, wi, bs, pPdf);
+        } else {
+            const auto r = sort_canonical();
+            if (r < diffTrans || diffTrans == 1.0f) {
+                LambertTransmission lambert_transmission(basecolor, diffTrans, DIR_UP);
+                lambert_transmission.sample_f(wo, wi, bs, pPdf);
+            }
+            else {
+                wi = CosSampleHemisphere(sort_canonical(), sort_canonical());
+            }
+        }
+
+        if (pPdf) *pPdf = pdf(wo, wi);
+        return f(wo, wi);
+    }
+
+    const GGX ggx(roughness / aspect, roughness * aspect);
     const auto t = ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f ) * basecolor.GetIntensity();
     if( bs.u < t || t == 1.0f ){
-        // Cosine-weighted sample
-        wi = CosSampleHemisphere( bs.u / t , bs.v );
+        const auto r = sort_canonical();
+        if (r < specTrans || specTrans == 1.0f) {
+            // Sampling the transmission BTDF
+            const auto T = specTrans * basecolor.Sqrt();
+            MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, white, DIR_UP);
+            mr.UpdateGNormal(gnormal);
+            mr.sample_f(wo, wi, bs, pPdf);
+        } else {
+            // Sampling the reflection BRDF
+            wi = CosSampleHemisphere(bs.u / t, bs.v);
+        }
     }else{
+        // Sampling the metallic BRDF, including clear-coat if needed
         const auto r = sort_canonical();
         BsdfSample sample(true);
         Vector wh;
-        
+
         const auto luminance = basecolor.GetIntensity();
-        const auto Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
-        const auto Cspec0 = slerp( specular * 0.08f * slerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
+        const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
+        const auto Cspec0 = slerp(specular * 0.08f * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
         const auto clearcoat_intensity = 0.25f * clearcoat;
         const auto specular_intensity = Cspec0.GetIntensity();
         const auto total_intensity = clearcoat_intensity + specular_intensity;
-        if( total_intensity == 0.0f ){
-            wi = CosSampleHemisphere( bs.u / t , bs.v );
-        }else{
+        if (total_intensity == 0.0f) {
+            wi = CosSampleHemisphere(bs.u / t, bs.v);
+        } else {
             const auto clearcoat_ratio = clearcoat_intensity / total_intensity;
-            if( r < clearcoat_ratio || clearcoat_ratio == 1.0f ){
+            if (r < clearcoat_ratio || clearcoat_ratio == 1.0f) {
                 const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
                 wh = cggx.sample_f(sample);
-            }else{
-                const auto aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
-                const GGX ggx( roughness / aspect , roughness * aspect );
+            } else {
                 wh = ggx.sample_f(sample);
             }
-            wi = 2 * Dot( wo , wh ) * wh - wo;
+            wi = 2 * Dot(wo, wh) * wh - wo;
         }
     }
     
@@ -146,25 +270,52 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
 }
 
 float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
-    if (!SameHemiSphere(wo, wi)) return 0.0f;
-    if (!doubleSided && !PointingUp(wo)) return 0.0f;
+    const static Spectrum white(1.0f);
+    constexpr float ior_in = 1.5f;          // hard coded index of refraction below the surface
+    constexpr float ior_ex = 1.0f;          // hard coded index of refraction above the surface
+    constexpr float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
 
     const auto aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
     const GGX ggx( roughness / aspect , roughness * aspect );
-    
     const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
-    
+    const auto T = specTrans * basecolor.Sqrt();
+
+    // Special handling for thin surface
+    if (thinSurface) {
+        LambertTransmission lambert_transmission(basecolor, diffTrans, DIR_UP);
+        const auto pdf_non_trans = slerp(CosHemispherePdf(wi), lambert_transmission.pdf(wo, wi), diffTrans);
+
+        // Scale roughness based on IOR (Burley 2015, Figure 15).
+        // const auto rscaled = (0.65f * eta - 0.35f) * roughness;
+        // const auto ru = SQR(rscaled) / aspect;
+        // const auto rv = SQR(rscaled) * aspect;
+        // const GGX scaledDist(ru, rv);
+
+        const GGX scaledDist(roughness / aspect, roughness * aspect);
+
+        MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, white, DIR_UP);
+        mr.UpdateGNormal(gnormal);
+
+        const auto pdf_trans = mr.pdf(wo, wi);
+        return slerp(pdf_non_trans, pdf_trans, specTrans);
+    }
+
     const auto luminance = basecolor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? basecolor * ( 1.0f / luminance ) : Spectrum( 1.0f );
     const auto Cspec0 = slerp( specular * 0.08f * slerp( Spectrum(1.0f) , Ctint , specularTint ) , basecolor , metallic);
     const auto clearcoat_intensity = 0.25f * clearcoat;
     const auto specular_intensity = Cspec0.GetIntensity();
     const auto total_intensity = clearcoat_intensity + specular_intensity;
-    const auto clearcoat_ratio = clearcoat_intensity / total_intensity;
+    const auto clearcoat_ratio = total_intensity == 0.0f ? 0.0f : clearcoat_intensity / total_intensity;
     
-    if( total_intensity == 0.0f )
+    MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, white, DIR_UP);
+    mr.UpdateGNormal(gnormal);
+    const auto non_metallic_pdf = slerp(CosHemispherePdf(wi), mr.pdf(wo, wi), specTrans);
+
+    if ( total_intensity == 0.0f && specTrans == 0.0f )
         return CosHemispherePdf(wi);
+
     const auto wh = Normalize( wi + wo );
     const auto pdf_wh = slerp( ggx.Pdf(wh) , cggx.Pdf(wh) , clearcoat_ratio );
-    return slerp( pdf_wh / ( 4.0f * AbsDot( wo , wh ) ) , CosHemispherePdf(wi) , ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f) * basecolor.GetIntensity() );
+    return slerp( pdf_wh / ( 4.0f * AbsDot( wo , wh ) ) , non_metallic_pdf, ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f) * basecolor.GetIntensity() );
 }
