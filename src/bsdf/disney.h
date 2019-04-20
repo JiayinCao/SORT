@@ -42,6 +42,11 @@ public:
         float sheenTint;
         float clearcoat;
         float clearcoatGloss;
+        float specTrans;
+        float scatterDistance;
+        float flatness;
+        float diffTrans;
+        int   thinSurface;
         RGBSpectrum baseColor;
         Vector n;
     };
@@ -53,7 +58,8 @@ public:
     DisneyBRDF( const Params& param , const Spectrum& weight, bool doubleSided = false)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, doubleSided), basecolor(param.baseColor), subsurface(param.subsurface), metallic(param.metallic),
         specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
-        clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss) {}
+        clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness), 
+          diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
 
 	//! Constructor
     //! @param basecolor        Direction-hemisphere reflection for diffuse.
@@ -62,10 +68,12 @@ public:
     //! @param roughnessV       Roughness along the other axis
     //! @param weight           Weight of the BXDF
     DisneyBRDF( const Spectrum& basecolor , float subsurface , float metallic , float specular , float specularTint , float roughness ,
-               float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , const Spectrum& weight, const Vector& n , bool doubleSided = false)
+               float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance , 
+               float flatness , float diffTrans , int thinSurface , const Spectrum& weight, const Vector& n , bool doubleSided = false)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , basecolor(basecolor), subsurface(subsurface), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
-          clearcoat(clearcoat), clearcoatGloss(clearcoatGloss) {}
+          clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness), 
+          diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}
 	
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -88,17 +96,22 @@ public:
     float pdf( const Vector& wo , const Vector& wi ) const override;
     
 private:
-	const Spectrum  basecolor;      /**< The surface color, usually supplied by texture maps. */
-    const float     subsurface;     /**< Controls diffuse shape using a subsurface approximation. */
-    const float     metallic;       /**< The metallic-ness (0 = dielectric, 1 = metallic). This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color. */
-    const float     specular;       /**< Incident specular amount. This is in lieu of an explicit index-of-refraction. */
-    const float     specularTint;   /**< A concession for artistic control that tints incident specular towards the base color. Grazing specular is still achromatic. */
-    const float     roughness;      /**< Surface roughness, controls both diffuse and specular response. */
-    const float     anisotropic;    /**< degree of anisotropy. This controls the aspect ratio of the specular highlight. (0 = isotropic, 1 = maximally anisotropic). */
-    const float     sheen;          /**< An additional grazing component, primarily intended for cloth. */
-    const float     sheenTint;      /**< Amount to tint sheen towards base color. */
-    const float     clearcoat;      /**< A second, special-purpose specular lobe. */
-    const float     clearcoatGloss; /**< controls clearcoat glossiness (0 = a “satin” appearance, 1 = a “gloss” appearance). */
+	const Spectrum  basecolor;          /**< The surface color, usually supplied by texture maps. */
+    const float     subsurface;         /**< Controls diffuse shape using a subsurface approximation. */
+    const float     metallic;           /**< The metallic-ness (0 = dielectric, 1 = metallic). This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color. */
+    const float     specular;           /**< Incident specular amount. This is in lieu of an explicit index-of-refraction. */
+    const float     specularTint;       /**< A concession for artistic control that tints incident specular towards the base color. Grazing specular is still achromatic. */
+    const float     roughness;          /**< Surface roughness, controls both diffuse and specular response. */
+    const float     anisotropic;        /**< degree of anisotropy. This controls the aspect ratio of the specular highlight. (0 = isotropic, 1 = maximally anisotropic). */
+    const float     sheen;              /**< An additional grazing component, primarily intended for cloth. */
+    const float     sheenTint;          /**< Amount to tint sheen towards base color. */
+    const float     clearcoat;          /**< A second, special-purpose specular lobe. */
+    const float     clearcoatGloss;     /**< controls clearcoat glossiness (0 = a “satin” appearance, 1 = a “gloss” appearance). */
+    const float     specTrans;          /**< Specular Transmission. */
+    const float     diffTrans;          /**< Diffuse Transmission. */
+    const float     flatness;
+    const float     scatterDistance;    /**< Distance of scattering in SSS. */
+    const bool      thinSurface;        /**< Whether the surface is thin surface. */
 };
 
 //! @brief Clearcoat GGX NDF.

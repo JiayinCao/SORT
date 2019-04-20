@@ -121,6 +121,11 @@ namespace {
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, sheenTint),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoat),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoatGloss),
+                CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specTrans),
+                CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, scatterDistance),
+                CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, flatness),
+                CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, diffTrans),
+                CLOSURE_INT_PARAM(DisneyBRDF::Params, thinSurface),
                 CLOSURE_COLOR_PARAM(DisneyBRDF::Params, baseColor),
                 CLOSURE_VECTOR_PARAM(DisneyBRDF::Params, n),
                 CLOSURE_FINISH_PARAM(DisneyBRDF::Params)

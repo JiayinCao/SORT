@@ -326,12 +326,18 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        float SheenTint = @ ,
                        float Clearcoat = @ ,
                        float ClearcoatGloss = @ ,
+                       float SpecTrans = @ ,
+                       float ScatterDistance = @ ,
+                       float Flatness = @ ,
+                       float DiffTrans = @ ,
+                       int   IsThinSurface = @ ,
                        color BaseColor = @ ,
                        normal Normal = @ ,
                        output closure color Result = color(0) ){
-            Result = disney( SubSurface , Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGloss , BaseColor , Normal );
+            Result = disney( SubSurface , Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGloss , SpecTrans , ScatterDistance , Flatness , DiffTrans , IsThinSurface , BaseColor , Normal );
         }
     '''
+    is_thin_surface = bpy.props.BoolProperty(name='Is Thin Surface', default=False)
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketColor' , 'BaseColor' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Metallic' )
@@ -344,12 +350,16 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'SheenTint' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'ClearcoatGloss' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'SpecTrans')
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Scatter Distance')
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Flatness' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'DiffTrans' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
         self.inputs['Metallic'].default_value = 1.0
         self.inputs['Roughness'].default_value = 0.2
     def serialize_prop(self, fs):
-        fs.serialize( 12 )
+        fs.serialize( 17 )
         fs.serialize( self.inputs['Subsurface'].export_osl_value() )
         fs.serialize( self.inputs['Metallic'].export_osl_value() )
         fs.serialize( self.inputs['Specular'].export_osl_value() )
@@ -360,8 +370,18 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         fs.serialize( self.inputs['SheenTint'].export_osl_value() )
         fs.serialize( self.inputs['Clearcoat'].export_osl_value() )
         fs.serialize( self.inputs['ClearcoatGloss'].export_osl_value() )
+        fs.serialize( self.inputs['SpecTrans'].export_osl_value() )
+        fs.serialize( self.inputs['Scatter Distance'].export_osl_value() )
+        fs.serialize( self.inputs['Flatness'].export_osl_value() )
+        fs.serialize( self.inputs['DiffTrans'].export_osl_value() )
+        if self.is_thin_surface:
+            fs.serialize( '1' )
+        else:
+            fs.serialize( '0' )
         fs.serialize( self.inputs['BaseColor'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'is_thin_surface', text='Is Thin Surface')
 
 @SORTPatternGraph.register_node('Materials')
 class SORTNode_Material_Hair(SORTShadingNode):
@@ -412,7 +432,7 @@ class SORTNode_Material_Coat(SORTShadingNode):
             float y = log(x) * inv;
             return y * y;
         }
-        shader Coat( lfloat    IndexofRefraction = @ ,
+        shader Coat( float     IndexofRefraction = @ ,
                      float     Roughness = @ ,
                      color     ColorTint = @ ,
                      closure color Surface = @ ,
@@ -737,7 +757,7 @@ class SORTNodeGrid(SORTShadingNode):
         shader Grid( color Color1 = @ ,
                      color Color2 = @ ,
                      float Treshold = @ ,
-                     uv UVCoordinate = @ ,
+                     vector UVCoordinate = @ ,
                      output color Result = color( 0.0 , 0.0 , 0.0 ) ,
                      output float Red = 0.0 ,
                      output float Green = 0.0 ,
@@ -913,13 +933,13 @@ class SORTNodeRemappingUV(SORTShadingNode):
     bl_idname = 'SORTNodeRemappingUV'
     output_type = 'SORTNodeSocketFloat'
     osl_shader = '''
-        shader Extract( uv     UVCoordinate = @,
-                        lfloat  TilingU = @ ,
-                        lfloat  TilingV = @ ,
-                        lfloat  OffsetU = @ ,
-                        lfloat  OffsetV = @ ,
-                        output uv Result = uv( 0.0 ) ){
-            Result = uv( UVCoordinate[0] * TilingV + OffsetU , UVCoordinate[1] * TilingU + OffsetV , 0.0 );
+        shader Extract( vector UVCoordinate = @,
+                        float  TilingU = @ ,
+                        float  TilingV = @ ,
+                        float  OffsetU = @ ,
+                        float  OffsetV = @ ,
+                        output vector Result = vector( 0.0 ) ){
+            Result = vector( UVCoordinate[0] * TilingV + OffsetU , UVCoordinate[1] * TilingU + OffsetV , 0.0 );
         }
     '''
     def init(self, context):

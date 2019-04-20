@@ -16,11 +16,9 @@
 import bpy
 import os
 import mathutils
-import shutil
 import numpy as np
 import platform
 import tempfile
-import bmesh
 import time
 import struct
 from math import degrees

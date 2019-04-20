@@ -478,17 +478,14 @@ int getmatrix (string fromspace, output matrix M) {
     return getmatrix (fromspace, "common", M);
 }
 
-#define path    string
-#define uv      vector
-#define lfloat  float
-
 // SORT compatible closures
 closure color lambert( color albedo , normal N ) BUILTIN;
 closure color lambertTransmission( color transmittance , normal N ) BUILTIN;
 closure color orenNayar( color albedo , float sigma , normal N ) BUILTIN;
 closure color disney( float subsurface , float metallic , float specular , float specularTint,
                       float roughness , float anisotropic , float sheen , float sheenTint,
-					  float clearCoat , float clearCoatGloss , color baseColor , normal N ) BUILTIN;
+					  float clearCoat , float clearCoatGloss , float specTrans , float scatterDistance , 
+                      float flatness , float diffTrans , int thinSurface , color baseColor , normal N ) BUILTIN;
 closure color microfacetReflection(string distribution, vector eta , vector absorption , float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;
 closure color microfacetReflectionDieletric(string distribution, float iIOR, float eIOR, float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;
 closure color microfacetRefraction(string distribution, float iIOR , float eIOR , float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;
