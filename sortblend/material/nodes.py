@@ -325,7 +325,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        float Sheen = @ ,
                        float SheenTint = @ ,
                        float Clearcoat = @ ,
-                       float ClearcoatGloss = @ ,
+                       float ClearcoatGlossiness = @ ,
                        float SpecTrans = @ ,
                        float ScatterDistance = @ ,
                        float Flatness = @ ,
@@ -334,9 +334,10 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        color BaseColor = @ ,
                        normal Normal = @ ,
                        output closure color Result = color(0) ){
-            Result = disney( SubSurface , Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGloss , SpecTrans , ScatterDistance , Flatness , DiffTrans , IsThinSurface , BaseColor , Normal );
+            Result = disney( SubSurface , Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness , SpecTrans , ScatterDistance , Flatness , DiffTrans , IsThinSurface , BaseColor , Normal );
         }
     '''
+    bl_width_min = 200
     is_thin_surface = bpy.props.BoolProperty(name='Is Thin Surface', default=False)
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketColor' , 'BaseColor' )
@@ -349,7 +350,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'Sheen' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'SheenTint' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat' )
-        self.inputs.new( 'SORTNodeSocketFloat' , 'ClearcoatGloss' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat Glossiness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'SpecTrans')
         self.inputs.new( 'SORTNodeSocketFloat' , 'Scatter Distance')
         self.inputs.new( 'SORTNodeSocketFloat' , 'Flatness' )
@@ -358,6 +359,9 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
         self.inputs['Metallic'].default_value = 1.0
         self.inputs['Roughness'].default_value = 0.2
+        self.inputs['Specular'].default_value = 1.0
+        self.inputs['Clearcoat Glossiness'].default_value = 1.0
+        self.inputs['Sheen'].default_value = 1.0
     def serialize_prop(self, fs):
         fs.serialize( 17 )
         fs.serialize( self.inputs['Subsurface'].export_osl_value() )
@@ -369,7 +373,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         fs.serialize( self.inputs['Sheen'].export_osl_value() )
         fs.serialize( self.inputs['SheenTint'].export_osl_value() )
         fs.serialize( self.inputs['Clearcoat'].export_osl_value() )
-        fs.serialize( self.inputs['ClearcoatGloss'].export_osl_value() )
+        fs.serialize( self.inputs['Clearcoat Glossiness'].export_osl_value() )
         fs.serialize( self.inputs['SpecTrans'].export_osl_value() )
         fs.serialize( self.inputs['Scatter Distance'].export_osl_value() )
         fs.serialize( self.inputs['Flatness'].export_osl_value() )

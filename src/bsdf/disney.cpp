@@ -22,6 +22,11 @@
 #include "core/sassert.h"
 #include "bsdf/lambert.h"
 
+constexpr static float ior_in = 1.5f;          // hard coded index of refraction below the surface
+constexpr static float ior_ex = 1.0f;          // hard coded index of refraction above the surface
+constexpr static float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
+constexpr static float inv_eta = 1.0f / eta;   // hard coded reciprocal of IOR ratio
+
 float ClearcoatGGX::D(const Vector& h) const {
     // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) ^ 2 )
 
@@ -52,14 +57,9 @@ float ClearcoatGGX::G1(const Vector& v) const {
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
 }
 
-Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
-{
+Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const static Spectrum white(1.0f);
     
-    constexpr float ior_in = 1.5f;          // hard coded index of refraction below the surface
-    constexpr float ior_ex = 1.0f;          // hard coded index of refraction above the surface
-    constexpr float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
-
     const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
     const auto diffuseWeight = (1.0f - metallic) * (1.0 - specTrans);
 
@@ -108,12 +108,10 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
             const auto T = specTrans * basecolor.Sqrt();
 
             // Scale roughness based on IOR (Burley 2015, Figure 15).
-            // const auto rscaled = (0.65f * eta - 0.35f) * roughness;
-            // const auto ru = SQR(rscaled) / aspect;
-            // const auto rv = SQR(rscaled) * aspect;
-            // const GGX scaledDist(ru, rv);
-
-            const GGX scaledDist(roughness / aspect, roughness * aspect);
+            const auto rscaled = (0.65f * inv_eta - 0.35f) * roughness;
+            const auto ru = SQR(rscaled) / aspect;
+            const auto rv = SQR(rscaled) * aspect;
+            const GGX scaledDist(ru, rv);
 
             MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, white, DIR_UP);
             mr.UpdateGNormal(gnormal);
@@ -181,12 +179,8 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     return ret;
 }
 
-Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
+Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const {
     const static Spectrum white(1.0f);
-    constexpr float ior_in = 1.5f;          // hard coded index of refraction below the surface
-    constexpr float ior_ex = 1.0f;          // hard coded index of refraction above the surface
-    constexpr float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
-
     const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
     
     // Special handling for thin surface
@@ -196,12 +190,11 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
             const auto T = specTrans * basecolor.Sqrt();
 
             // Scale roughness based on IOR (Burley 2015, Figure 15).
-            // const auto rscaled = (0.65f * eta - 0.35f) * roughness;
-            // const auto ru = SQR(rscaled) / aspect;
-            // const auto rv = SQR(rscaled) * aspect;
-            // const GGX scaledDist(ru, rv);
+            const auto rscaled = (0.65f * inv_eta - 0.35f) * roughness;
+            const auto ru = SQR(rscaled) / aspect;
+            const auto rv = SQR(rscaled) * aspect;
+            const GGX scaledDist(ru, rv);
 
-            const GGX scaledDist(roughness / aspect, roughness * aspect);
             MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, white, DIR_UP);
             mr.UpdateGNormal(gnormal);
 
@@ -265,11 +258,8 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
     return f( wo , wi );
 }
 
-float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
+float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     const static Spectrum white(1.0f);
-    constexpr float ior_in = 1.5f;          // hard coded index of refraction below the surface
-    constexpr float ior_ex = 1.0f;          // hard coded index of refraction above the surface
-    constexpr float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
 
     const auto aspect = sqrt(sqrt( 1.0f - anisotropic * 0.9f ));
     const GGX ggx( roughness / aspect , roughness * aspect );
@@ -282,12 +272,10 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const{
         const auto pdf_non_trans = slerp(CosHemispherePdf(wi), lambert_transmission.pdf(wo, wi), diffTrans);
 
         // Scale roughness based on IOR (Burley 2015, Figure 15).
-        // const auto rscaled = (0.65f * eta - 0.35f) * roughness;
-        // const auto ru = SQR(rscaled) / aspect;
-        // const auto rv = SQR(rscaled) * aspect;
-        // const GGX scaledDist(ru, rv);
-
-        const GGX scaledDist(roughness / aspect, roughness * aspect);
+        const auto rscaled = (0.65f * inv_eta - 0.35f) * roughness;
+        const auto ru = SQR(rscaled) / aspect;
+        const auto rv = SQR(rscaled) * aspect;
+        const GGX scaledDist(ru, rv);
 
         MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, white, DIR_UP);
         mr.UpdateGNormal(gnormal);

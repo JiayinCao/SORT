@@ -29,7 +29,7 @@
  * https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
  *
  * The initial implementation was based on the open-source Github project from Walt Disney Animation Studios
- * https://github.com/wdas/brdf
+ * https://github.com/wdas/brdf/blob/master/src/brdfs/disney.brdf
  */
 class DisneyBRDF : public Bxdf{
 public:
