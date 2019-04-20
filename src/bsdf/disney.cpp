@@ -19,14 +19,17 @@
 #include "microfacet.h"
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
+#include "core/sassert.h"
 #include "bsdf/lambert.h"
 
 float ClearcoatGGX::D(const Vector& h) const {
     // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) ^ 2 )
 
+    // The corner case is not possible with the current disney BRDF implementation.
     // Corner case where roughness equals to 1.0
-    if (alphaU == 1.0f)
-        return INV_PI;  // Limit(alpha->1.0) D(h) = 1.0 / PI
+    //if (alphaU == 1.0f)
+    //        return INV_PI;  // Limit(alpha->1.0) D(h) = 1.0 / PI
+    sAssert(alphaU != 1.0f, MATERIAL);
 
     const auto cos = CosTheta(h);
     return (alphaU2 - 1) / (TWO_PI * log(alphaU) * (1 + (alphaU2 - 1) * SQR(cos)));
@@ -41,19 +44,12 @@ Vector ClearcoatGGX::sample_f(const BsdfSample& bs) const {
 }
 
 float ClearcoatGGX::G1(const Vector& v) const {
-    /*
+    if (AbsCosTheta(v) == 1.0f)
+        return 0.0f;
     const auto tan_theta_sq = TanTheta2(v);
-    if (IsInf(tan_theta_sq)) return 0.0f;
-    static const auto roughness = 0.25f;
-    const auto alpha2 = roughness * roughness;
-    return 2.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
-    */
-
-    const auto cos_theta = CosTheta(v);
-    const auto cos_theta_sq = SQR(cos_theta);
     constexpr auto alpha = 0.25f;
-    const auto alpha2 = alpha * alpha;
-    return 1.0 / (cos_theta + sqrt(alpha2 + cos_theta_sq - alpha2 * cos_theta_sq));
+    constexpr auto alpha2 = alpha * alpha;
+    return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
 }
 
 Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
@@ -160,16 +156,16 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const
     // Specular term in Disney BRDF
     const GGX ggx(roughness / aspect, roughness * aspect);
     const auto Cspec0 = slerp(specular * 0.08f * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
-    const FresnelDisney fresnel0(Cspec0, ior_in, ior_ex, metallic);
-    const MicroFacetReflection mf(Cspec0, &fresnel0, &ggx, white, DIR_UP);
+    const FresnelDisney fresnel(Cspec0, ior_in, ior_ex, metallic);
+    const MicroFacetReflection mf(Cspec0, &fresnel, &ggx, white, DIR_UP);
     mf.UpdateGNormal(gnormal);
     ret += mf.f(wo, wi);
 
     // Clear coat
     if (clearcoat > 0.0f) {
         const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
-        const FresnelSchlick<float> fresnel1(0.04f);
-        const MicroFacetReflection mf_clearcoat(Spectrum(0.25f * clearcoat), &fresnel1, &cggx, white, DIR_UP);
+        const FresnelSchlick<float> fresnel(0.04f);
+        const MicroFacetReflection mf_clearcoat(Spectrum(clearcoat), &fresnel, &cggx, white, DIR_UP);
         mf_clearcoat.UpdateGNormal(gnormal);
         ret += mf_clearcoat.f(wo, wi);
     }
