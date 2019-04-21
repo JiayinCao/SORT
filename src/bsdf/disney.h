@@ -35,7 +35,6 @@ class DisneyBRDF : public Bxdf{
 public:
     // Input parameters to construct the disney BRDF.
     struct Params {
-        float subsurface;
         float metallic;
         float specular;
         float specularTint;
@@ -59,14 +58,13 @@ public:
     //! @param params           All parameters.
     //! @param weight           Weight of the BXDF
     DisneyBRDF( const Params& param , const Spectrum& weight)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), subsurface(param.subsurface), metallic(param.metallic),
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
         specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
         clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness), 
           diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
 
 	//! Constructor
     //! @param basecolor        The surface color, usually supplied by texture maps.
-    //! @param subsurface       Controls diffuse shape using a subsurface approximation.
     //! @param metallic         This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color.
     //! @param specular         Direction-hemisphere reflection for specular.
     //! @param speculatTint     A concession for artistic control that tints incident specular towards the base color.
@@ -82,10 +80,10 @@ public:
     //! @param thinSurface      Whether the surface is a thin surface.
     //! @param weight           Weight of the BXDF.
     //! @param n                Normal in shading coordinate.
-    DisneyBRDF( const Spectrum& basecolor , float subsurface , float metallic , float specular , float specularTint , float roughness ,
+    DisneyBRDF( const Spectrum& basecolor , float metallic , float specular , float specularTint , float roughness ,
                float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance , 
                float flatness , float diffTrans , int thinSurface , const Spectrum& weight, const Vector& n )
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), subsurface(subsurface), metallic(metallic),
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
           clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness), 
           diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}
@@ -112,7 +110,6 @@ public:
     
 private:
 	const Spectrum  basecolor;          /**< The surface color, usually supplied by texture maps. */
-    const float     subsurface;         /**< Controls diffuse shape using a subsurface approximation. */
     const float     metallic;           /**< The metallic-ness (0 = dielectric, 1 = metallic). This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color. */
     const float     specular;           /**< Incident specular amount. This is in lieu of an explicit index-of-refraction. */
     const float     specularTint;       /**< A concession for artistic control that tints incident specular towards the base color. Grazing specular is still achromatic. */
@@ -124,7 +121,7 @@ private:
     const float     clearcoatGloss;     /**< controls clearcoat glossiness (0 = a “satin” appearance, 1 = a “gloss” appearance). */
     const float     specTrans;          /**< Specular Transmission. */
     const float     diffTrans;          /**< Diffuse Transmission. */
-    const float     flatness;
+    const float     flatness;           /**< Blending factor between diffuse and fakeSS model. */
     const float     scatterDistance;    /**< Distance of scattering in SSS. */
     const bool      thinSurface;        /**< Whether the surface is thin surface. */
 };

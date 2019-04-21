@@ -159,7 +159,7 @@ TEST(BXDF, DISABLED_AshikhmanShirley) {
 // Disney BRDF is not strictly energy conserving, please refer the above link for further detail ( chapter 5.1 ).
 TEST(BXDF, DISABLED_Disney) {
     static const Spectrum R(1.0f);
-    DisneyBRDF disney( R , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , 
+    DisneyBRDF disney( R , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , 
                        sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , 
                        sort_canonical() , sort_canonical() , 0 , R , DIR_UP );
     checkAll(&disney);

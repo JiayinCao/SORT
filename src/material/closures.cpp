@@ -111,7 +111,6 @@ namespace {
 
         static void Register(ShadingSystem* shadingsys) {
             BuiltinClosures closure = { GetName(), ClosureID,{
-                CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, subsurface),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, metallic),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specular),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specularTint),
