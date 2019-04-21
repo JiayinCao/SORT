@@ -109,6 +109,8 @@ class SORTShadingNode(bpy.types.Node):
     # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
     def type_identifier(self):
         return self.bl_label
+    def export_pbrt(self,file):
+        file.write( "\"string type\" \"matte\"" )
 
 @SORTPatternGraph.register_node('Output')
 class SORTNodeOutput(SORTShadingNode):
@@ -174,6 +176,9 @@ class SORTNode_Material_Diffuse(SORTShadingNode):
         return self.osl_shader_orennayar
     def type_identifier(self):
         return self.bl_label + self.brdf_type
+    def export_pbrt(self,file):
+        file.write( "\"string type\" \"matte\"\n" )
+        file.write( "\"rgb Kd\" [%f %f %f]\n" %(self.inputs['Diffuse'].default_value[:]) )
 
 @SORTPatternGraph.register_node('Materials')
 class SORTNode_Material_LambertTransmission(SORTShadingNode):
@@ -325,15 +330,16 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        float SheenTint = @ ,
                        float Clearcoat = @ ,
                        float ClearcoatGlossiness = @ ,
-                       float SpecTrans = @ ,
+                       float SpecularTransmittance = @ ,
                        float ScatterDistance = @ ,
                        float Flatness = @ ,
-                       float DiffTrans = @ ,
+                       float DiffuseTransmittance = @ ,
                        int   IsThinSurface = @ ,
                        color BaseColor = @ ,
                        normal Normal = @ ,
                        output closure color Result = color(0) ){
-            Result = disney( Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness , SpecTrans , ScatterDistance , Flatness , DiffTrans , IsThinSurface , BaseColor , Normal );
+            Result = disney( Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness , 
+                             SpecularTransmittance , ScatterDistance , Flatness , DiffuseTransmittance , IsThinSurface , BaseColor , Normal );
         }
     '''
     bl_width_min = 200
@@ -344,15 +350,15 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Anisotropic' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Specular' )
-        self.inputs.new( 'SORTNodeSocketFloat' , 'SpecularTint' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Specular Tint' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Sheen' )
-        self.inputs.new( 'SORTNodeSocketFloat' , 'SheenTint' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Sheen Tint' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat Glossiness' )
-        self.inputs.new( 'SORTNodeSocketFloat' , 'SpecTrans')
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Specular Transmittance')
         self.inputs.new( 'SORTNodeSocketFloat' , 'Scatter Distance')
         self.inputs.new( 'SORTNodeSocketFloat' , 'Flatness' )
-        self.inputs.new( 'SORTNodeSocketFloat' , 'DiffTrans' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Diffuse Transmittance' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
         self.inputs['Metallic'].default_value = 1.0
@@ -364,25 +370,40 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         fs.serialize( 16 )
         fs.serialize( self.inputs['Metallic'].export_osl_value() )
         fs.serialize( self.inputs['Specular'].export_osl_value() )
-        fs.serialize( self.inputs['SpecularTint'].export_osl_value() )
+        fs.serialize( self.inputs['Specular Tint'].export_osl_value() )
         fs.serialize( self.inputs['Roughness'].export_osl_value() )
         fs.serialize( self.inputs['Anisotropic'].export_osl_value() )
         fs.serialize( self.inputs['Sheen'].export_osl_value() )
-        fs.serialize( self.inputs['SheenTint'].export_osl_value() )
+        fs.serialize( self.inputs['Sheen Tint'].export_osl_value() )
         fs.serialize( self.inputs['Clearcoat'].export_osl_value() )
         fs.serialize( self.inputs['Clearcoat Glossiness'].export_osl_value() )
-        fs.serialize( self.inputs['SpecTrans'].export_osl_value() )
+        fs.serialize( self.inputs['Specular Transmittance'].export_osl_value() )
         fs.serialize( self.inputs['Scatter Distance'].export_osl_value() )
         fs.serialize( self.inputs['Flatness'].export_osl_value() )
-        fs.serialize( self.inputs['DiffTrans'].export_osl_value() )
-        if self.is_thin_surface:
-            fs.serialize( '1' )
-        else:
-            fs.serialize( '0' )
+        fs.serialize( self.inputs['Diffuse Transmittance'].export_osl_value() )
+        fs.serialize( '1' if self.is_thin_surface else '0' )
         fs.serialize( self.inputs['BaseColor'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'is_thin_surface', text='Is Thin Surface')
+    def export_pbrt(self,file):
+        file.write( "\"string type\" \"disney\"\n" )
+        file.write( "\"rgb color\" [%f %f %f]\n"%(self.inputs['BaseColor'].default_value[:]))
+        file.write( "\"float anisotropic\" %f\n"%(self.inputs['Anisotropic'].default_value))
+        file.write( "\"float clearcoat\" %f\n"%(self.inputs['Clearcoat'].default_value))
+        file.write( "\"float clearcoatgloss\" %f\n"%(self.inputs['Clearcoat Glossiness'].default_value))
+        file.write( "\"float metallic\" %f\n"%(self.inputs['Metallic'].default_value))
+        file.write( "\"float roughness\" %f\n"%(self.inputs['Roughness'].default_value))
+        file.write( "\"float scatterdistance\" %f\n"%(self.inputs['Scatter Distance'].default_value))
+        file.write( "\"float sheen\" %f\n"%(self.inputs['Sheen'].default_value))
+        file.write( "\"float sheentint\" %f\n"%(self.inputs['Sheen Tint'].default_value))
+        file.write( "\"float spectrans\" %f\n"%(self.inputs['Specular Transmittance'].default_value))
+        file.write( "\"float speculartint\" %f\n"%(self.inputs['Specular Tint'].default_value))
+        file.write( "\"float spectrans\" %f\n"%(self.inputs['Specular Transmittance'].default_value))
+        file.write( "\"float scatterdistance\" %f\n"%(self.inputs['Scatter Distance'].default_value))
+        file.write( "\"bool thin\" %s\n"%('\"true\"' if self.is_thin_surface else '\"false\"'))
+        file.write( "\"float flatness\" %f\n"%(self.inputs['Flatness'].default_value))
+        file.write( "\"float difftrans\" %f\n"%(self.inputs['Diffuse Transmittance'].default_value))
 
 @SORTPatternGraph.register_node('Materials')
 class SORTNode_Material_Hair(SORTShadingNode):

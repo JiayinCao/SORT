@@ -209,7 +209,7 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
         } else {
             const auto r = sort_canonical();
 
-            if ( !thinSurface && ( r < diffTrans || diffTrans == 1.0f ) ) {
+            if ( thinSurface && ( r < diffTrans || diffTrans == 1.0f ) ) {
                 LambertTransmission lambert_transmission(basecolor, diffTrans, DIR_UP);
                 lambert_transmission.sample_f(wo, wi, bs, pPdf);
             } else {
@@ -227,8 +227,7 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
         if (r < clearcoat_ratio || clearcoat_ratio == 1.0f) {
             const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
             wh = cggx.sample_f(sample);
-        }
-        else {
+        } else {
             wh = ggx.sample_f(sample);
         }
         wi = 2 * Dot(wo, wh) * wh - wo;

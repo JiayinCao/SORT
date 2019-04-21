@@ -271,9 +271,7 @@ def export_material(scene):
         def socket_node_input(nt, socket):
             return next((l.from_node for l in nt.links if l.to_socket == socket), None)
         nput_node = socket_node_input(ntree, output_node.inputs[0])
-        output_pbrt_type = lambda t : file.write( "  \"string type\" \"" + t + "\"\n" )
-        output_pbrt_prop = lambda n , t , v : file.write( "  \"" + t + " " + n + "\" [" + v + "]\n")
-        nput_node.export_pbrt(output_pbrt_type , output_pbrt_prop)
+        nput_node.export_pbrt( file )
         file.write( '\n' )
 
     file.close()
