@@ -191,7 +191,6 @@ TEST(BXDF, Dielectric) {
 
 TEST(BXDF, DISABLED_HairFurnace) {
     Spectrum sigma_a = 0.0f;
-    Spectrum fullWeight = 1.0f;
 
     Vector3f wo = UniformSampleHemisphere(sort_canonical(), sort_canonical());
     for (float beta_m = 0.0f; beta_m <= 1.0f; beta_m += 0.2f) {
@@ -199,7 +198,7 @@ TEST(BXDF, DISABLED_HairFurnace) {
             // Estimate reflected uniform incident radiance from hair
             auto sum = 0.f;
             constexpr int CNT = 1024 * 256;
-            Hair hair(sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            Hair hair(sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             sum += ParrallReduction<float, 8, CNT>([&]() {
                 Vector3f wi = UniformSampleSphere(sort_canonical(), sort_canonical());
                 EXPECT_GE(hair.f(wo, wi).GetIntensity(), 0.00f);
@@ -215,7 +214,6 @@ TEST(BXDF, DISABLED_HairFurnace) {
 // Since hair has its exact way to importance sample its bxdf, the evaluated bxdf and pdf should be exactly the same.
 TEST(BXDF, HairPDFConsistant) {
     static const Spectrum sigma_a = 0.f;
-    static const Spectrum fullWeight = 1.0f;
 
     // Since the PDF of hair BXDF matches exactly with its BXDF value itself, there is a special PDF verification process for hair.
     auto checkPDF = [] ( const Bxdf* bxdf ){
@@ -237,7 +235,7 @@ TEST(BXDF, HairPDFConsistant) {
 
     for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
         for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
-            Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            Hair hair( sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             checkPDF( &hair );
         }
     }
@@ -245,10 +243,9 @@ TEST(BXDF, HairPDFConsistant) {
 
 TEST(BXDF, DISABLED_HairStandardChecking) {
     static Spectrum sigma_a = 0.f;
-    static Spectrum fullWeight = 1.0f;
     for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
         for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
-            Hair hair(sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            Hair hair(sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             checkAll(&hair , true , false , true );
         }
     }
@@ -257,8 +254,6 @@ TEST(BXDF, DISABLED_HairStandardChecking) {
 // This is generally not a very unstable way to test the BRDF. Disabled by default.
 TEST(BXDF, DISABLED_HairSamplingConsistance) {
     static Spectrum sigma_a = 0.f;
-    static Spectrum fullWeight = 1.0f;
-    
     // Since the PDF of hair BXDF matches exactly with its BXDF value itself, there is a special PDF verification process for hair.
     auto checkPDF = [] ( const Bxdf* bxdf ){
         constexpr int CNT = 1024 * 64;
@@ -290,7 +285,7 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
 
     for (float beta_m = 0.1f; beta_m < 1.0f; beta_m += 0.5f) {
         for (float beta_n = 0.1f; beta_n < 1.0f; beta_n += 0.5f) {
-            Hair hair( sigma_a, beta_m, beta_n, 1.55f, fullWeight);
+            Hair hair( sigma_a, beta_m, beta_n, 1.55f, FULL_WEIGHT);
             checkPDF( &hair );
         }
     }

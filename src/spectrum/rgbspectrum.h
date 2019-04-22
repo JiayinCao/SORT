@@ -23,8 +23,7 @@
 
 ///////////////////////////////////////////////////////////////////
 // definition of rgb spectrum
-class	RGBSpectrum
-{
+class	RGBSpectrum{
 public:
 	// default constructor
 	RGBSpectrum();
@@ -125,6 +124,9 @@ private:
 
 // set friend function
 friend inline RGBSpectrum operator-( float t , const RGBSpectrum& s );
+
+public:
+    static const RGBSpectrum    m_White;
 };
 
 // global operator for spectrum
@@ -144,3 +146,6 @@ inline RGBSpectrum operator*( float t , const RGBSpectrum& s )
 {
 	return s * t;
 }
+
+#define WHITE_SPECTRUM      RGBSpectrum::m_White
+#define FULL_WEIGHT         WHITE_SPECTRUM

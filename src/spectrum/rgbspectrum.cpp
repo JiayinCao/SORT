@@ -18,6 +18,8 @@
 #include "rgbspectrum.h"
 #include "core/define.h"
 
+const RGBSpectrum RGBSpectrum::m_White(1.0f);
+
 // default constructor
 RGBSpectrum::RGBSpectrum()
 {

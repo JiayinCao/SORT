@@ -55,30 +55,25 @@ float ClearcoatGGX::G1(const Vector& v) const {
 }
 
 Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
-    const static Spectrum white(1.0f);
-    
     const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
     const auto diffuseWeight = (1.0f - metallic) * (1.0 - specTrans);
 
-    const auto NoO = CosTheta(wo);
-    const auto NoI = CosTheta(wi);
-    const auto AbsNoI = fabs(NoI);
-
     const auto wh = Normalize(wo + wi);
     const auto HoO = Dot(wo, wh);
-    const auto HoO2 = HoO * HoO;
-    const auto HoO2ByRoughness = HoO2 * roughness;
-    const auto FH = SchlickWeight(HoO);
-
-    const auto FO = SchlickWeight(NoO);
-    const auto FI = SchlickWeight(NoI);
-
+    const auto HoO2ByRoughness = SQR(HoO) * roughness;
+    
     const auto luminance = basecolor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
 
     auto ret = RGBSpectrum(0.0f);
 
     if (diffuseWeight > 0.0f) {
+        const auto NoO = CosTheta(wo);
+        const auto NoI = CosTheta(wi);
+        const auto AbsNoI = fabs(NoI);
+        const auto FO = SchlickWeight(NoO);
+        const auto FI = SchlickWeight(NoI);
+
         if (thinSurface) {
             if (flatness < 1.0f) {
                 // Diffuse
@@ -95,9 +90,8 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
                 // Fss90 used to "flatten" retro-reflection based on roughness
                 const auto Fss90 = HoO2ByRoughness;
                 const auto Fss = slerp(1.0f, Fss90, FO) * slerp(1.0f, Fss90, FI);
-                const auto ss = basecolor * (1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f) * INV_PI);
-                const auto disneyFakeSS = flatness * (1.0f - diffTrans) * ss;
-                ret += diffuseWeight * disneyFakeSS * AbsNoI;
+                const auto disneyFakeSS = basecolor * (1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f) * INV_PI);
+                ret += diffuseWeight * flatness * (1.0f - diffTrans) * disneyFakeSS * AbsNoI;
             }
         } else {
             if (scatterDistance > 0.0f) {
@@ -121,6 +115,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
         // of microfacet inter-reflection/refraction and the sheen component can approximately compensate for it.
         if (sheen > 0.0f) {
             const auto Csheen = slerp(Spectrum(1.0f), Ctint, sheenTint);
+            const auto FH = SchlickWeight(HoO);
             const auto Fsheen = FH * sheen * Csheen;
             ret += diffuseWeight * Fsheen * AbsNoI;
         }
@@ -130,7 +125,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const GGX ggx(roughness / aspect, roughness * aspect);
     const auto Cspec0 = slerp(specular * 0.08f * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
     const FresnelDisney fresnel(Cspec0, ior_in, ior_ex, metallic);
-    const MicroFacetReflection mf(Cspec0, &fresnel, &ggx, white, DIR_UP);
+    const MicroFacetReflection mf(Cspec0, &fresnel, &ggx, FULL_WEIGHT, DIR_UP);
     mf.UpdateGNormal(gnormal);
     ret += mf.f(wo, wi);
 
@@ -138,7 +133,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     if (clearcoat > 0.0f) {
         const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
         const FresnelSchlick<float> fresnel(0.04f);
-        const MicroFacetReflection mf_clearcoat(Spectrum(clearcoat), &fresnel, &cggx, white, DIR_UP);
+        const MicroFacetReflection mf_clearcoat(Spectrum(clearcoat), &fresnel, &cggx, FULL_WEIGHT, DIR_UP);
         mf_clearcoat.UpdateGNormal(gnormal);
         ret += mf_clearcoat.f(wo, wi);
     }
@@ -153,13 +148,13 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
             const auto rv = SQR(rscaled) * aspect;
             const GGX scaledDist(ru, rv);
 
-            MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, white, DIR_UP);
+            MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
             mr.UpdateGNormal(gnormal);
             ret += mr.f(wo, wi);
         } else {
             // Microfacet Models for Refraction through Rough Surfaces
             // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
-            MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, white, DIR_UP);
+            MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
             mr.UpdateGNormal(gnormal);
             ret += mr.f(wo, wi);
         }
@@ -175,7 +170,6 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
 }
 
 Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const {
-    const static Spectrum white(1.0f);
     const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
     const auto luminance = basecolor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
@@ -197,13 +191,13 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
                 const GGX scaledDist(ru, rv);
 
                 const auto T = specTrans * basecolor.Sqrt();
-                MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, white, DIR_UP);
+                MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
                 mr.UpdateGNormal(gnormal);
                 mr.sample_f(wo, wi, bs, pPdf);
             } else {
                 // Sampling the transmission BTDF
                 const auto T = specTrans * basecolor.Sqrt();
-                MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, white, DIR_UP);
+                MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
                 mr.UpdateGNormal(gnormal);
                 mr.sample_f(wo, wi, bs, pPdf);
             }
@@ -239,7 +233,6 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
 }
 
 float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
-    const static Spectrum white(1.0f);
     const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
     const auto luminance = basecolor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
@@ -261,12 +254,12 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
         const auto rv = SQR(rscaled) * aspect;
         const GGX scaledDist(ru, rv);
 
-        MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, white, DIR_UP);
+        MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
         mr.UpdateGNormal(gnormal);
         pdf_sample_specular_tranmission = mr.pdf(wo, wi);
     } else {
         // Sampling the transmission BTDF
-        MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, white, DIR_UP);
+        MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
         mr.UpdateGNormal(gnormal);
         pdf_sample_specular_tranmission = mr.pdf(wo, wi);
     }
