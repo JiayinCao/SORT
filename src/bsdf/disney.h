@@ -30,6 +30,9 @@
  *
  * The initial implementation was based on the open-source Github project from Walt Disney Animation Studios
  * https://github.com/wdas/brdf/blob/master/src/brdfs/disney.brdf
+ *
+ * Rendering the Moana Island Scene Part 1: Implementing the Disney BSDF
+ * https://schuttejoe.github.io/post/disneybsdf/
  */
 class DisneyBRDF : public Bxdf{
 public:

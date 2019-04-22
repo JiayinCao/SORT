@@ -34,7 +34,7 @@ float ClearcoatGGX::D(const Vector& h) const {
     sAssert(alphaU != 1.0f, MATERIAL);
 
     const auto cos = CosTheta(h);
-    return (alphaU2 - 1) / (TWO_PI * log(alphaU) * (1 + (alphaU2 - 1) * SQR(cos)));
+    return (alphaU2 - 1) / (PI * log(alphaU2) * (1 + (alphaU2 - 1) * SQR(cos)));
 }
 
 Vector ClearcoatGGX::sample_f(const BsdfSample& bs) const {
@@ -62,6 +62,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
 
     const auto NoO = CosTheta(wo);
     const auto NoI = CosTheta(wi);
+    const auto AbsNoI = fabs(NoI);
 
     const auto wh = Normalize(wo + wi);
     const auto HoO = Dot(wo, wh);
@@ -83,7 +84,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
                 // Diffuse
                 // Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, eq (4)
                 const auto disneyDiffuse = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));
-                ret += diffuseWeight * (1.0 - flatness) * (1.0f - diffTrans) * disneyDiffuse;
+                ret += diffuseWeight * (1.0 - flatness) * (1.0f - diffTrans) * disneyDiffuse * AbsNoI;
             }
             if (flatness > 0.0f) {
                 // Fake sub-surface scattering
@@ -96,7 +97,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
                 const auto Fss = slerp(1.0f, Fss90, FO) * slerp(1.0f, Fss90, FI);
                 const auto ss = basecolor * (1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f) * INV_PI);
                 const auto disneyFakeSS = flatness * (1.0f - diffTrans) * ss;
-                ret += diffuseWeight * disneyFakeSS;
+                ret += diffuseWeight * disneyFakeSS * AbsNoI;
             }
         } else {
             if (scatterDistance > 0.0f) {
@@ -106,7 +107,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
             } else {
                 // Fall back to the Disney diffuse due to the lack of sub-surface scattering
                 const auto disneyDiffuse = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));
-                ret += diffuseWeight * disneyDiffuse;
+                ret += diffuseWeight * disneyDiffuse * AbsNoI;
             }
         }
 
@@ -114,14 +115,14 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
         // Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, eq (4)
         const auto Rr = 2.0 * HoO2ByRoughness;
         const auto frr = basecolor * (INV_PI * Rr * (FO + FI + FO * FI * (Rr - 1.0f)));
-        ret += diffuseWeight * frr * NoI;
+        ret += diffuseWeight * frr * AbsNoI;
 
         // This is not totally physically correct. However, dielectric model presented by Walter et al. loses energy due to lack
         // of microfacet inter-reflection/refraction and the sheen component can approximately compensate for it.
         if (sheen > 0.0f) {
             const auto Csheen = slerp(Spectrum(1.0f), Ctint, sheenTint);
             const auto Fsheen = FH * sheen * Csheen;
-            ret += diffuseWeight * Fsheen * NoI;
+            ret += diffuseWeight * Fsheen * AbsNoI;
         }
     }
 
@@ -280,12 +281,12 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
         return slerp(pdf_sample_diffuse, pdf_sample_specular_tranmission, specTrans);
 
     // Sampling the metallic BRDF, including clear-coat if needed
-    BsdfSample sample(true);
     const auto wh = Normalize(wi + wo);
     const auto clearcoat_ratio = clearcoat_intensity / total_specular_reflection;
     const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
     const auto pdf_wh_specular_reflection = slerp(ggx.Pdf(wh), cggx.Pdf(wh), clearcoat_ratio);
-    const auto pdf_specular_reflection = pdf_wh_specular_reflection / (4.0f * AbsDot(wo, wh));
+    const auto same_hemisphere = !((wi.y < 0.0f) ^ (wo.y < 0.0f));
+    const auto pdf_specular_reflection = same_hemisphere ? pdf_wh_specular_reflection / (4.0f * AbsDot(wo, wh)) : 0.0f;
 
     return slerp(pdf_specular_reflection, slerp(pdf_sample_diffuse, pdf_sample_specular_tranmission, specTrans), sample_nonspecular_reflection_ratio);
 }
