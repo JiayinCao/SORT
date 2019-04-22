@@ -209,7 +209,7 @@ class SORTNode_Material_Mirror(SORTShadingNode):
         shader Mirror( color BaseColor = @ ,
                        normal Normal = @ ,
                        output closure color Result = color(0) ){
-            Result = microfacetReflection( "GGX" , 1.0 , 1.0 , 0.0 , 0.0 , BaseColor , Normal );
+            Result = mirror( BaseColor , Normal );
         }
     '''
     def init(self, context):
