@@ -26,8 +26,7 @@
 #include "spectrum/spectrum.h"
 
 //! @brief Normal distribution function.
-class MicroFacetDistribution
-{
+class MicroFacetDistribution{
 public:
 	//! @brief probability of facet with specific normal (h)
 	virtual float D(const Vector& h) const = 0;
@@ -57,8 +56,7 @@ protected:
 };
 
 //! @brief Blinn NDF.
-class Blinn : public MicroFacetDistribution
-{
+class Blinn : public MicroFacetDistribution{
 public:
 	//! @brief Constructor
     //! @param roughnessU    Roughness of the surface formed by the micro facets.
@@ -83,8 +81,7 @@ private:
 };
 
 //! @brief Beckmann NDF.
-class Beckmann : public MicroFacetDistribution
-{
+class Beckmann : public MicroFacetDistribution{
 public:
     //! @brief Constructor
     //! @param roughnessU    Roughness of the surface formed by the micro facets.
@@ -109,8 +106,7 @@ private:
 };
 
 //! @brief GGX NDF.
-class GGX : public MicroFacetDistribution
-{
+class GGX : public MicroFacetDistribution{
 public:
     //! @brief Constructor
     //! @param roughnessU    Roughness of the surface formed by the micro facets.
@@ -135,8 +131,7 @@ protected:
 };
 
 //! @brief Interface for Microfacet bxdf.
-class Microfacet : public Bxdf
-{
+class Microfacet : public Bxdf{
 public:
     //! @brief  Constructor
     //! @brief Constructor
@@ -158,8 +153,7 @@ protected:
 };
 
 //! @brief Microfacet Reflection BRDF.
-class MicroFacetReflection : public Microfacet
-{
+class MicroFacetReflection : public Microfacet{
 public:
     struct Params{
         OSL::ustring    dist;
@@ -244,8 +238,7 @@ private:
  * 'Microfacet Models for Refraction through Rough Surfaces'
  * https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
  */
-class MicroFacetRefraction : public Microfacet
-{
+class MicroFacetRefraction : public Microfacet{
 public:
     struct Params{
         OSL::ustring    dist;

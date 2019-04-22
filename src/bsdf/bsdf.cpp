@@ -42,9 +42,7 @@ unsigned Bsdf::NumComponents( BXDF_TYPE type ) const{
 // add a new bxdf
 void Bsdf::AddBxdf( const Bxdf* bxdf ){
 	if( m_bxdfCount == MAX_BXDF_COUNT || bxdf == 0 || bxdf->GetWeight().IsBlack() ) return;
-	m_bxdf[m_bxdfCount] = bxdf ;
-    m_bxdf[m_bxdfCount]->UpdateGNormal( worldToLocal(intersect.gnormal, true) );
-	m_bxdfCount++;
+	m_bxdf[m_bxdfCount++] = bxdf ;
 }
 
 // evaluate bxdf

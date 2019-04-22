@@ -125,16 +125,14 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const GGX ggx(roughness / aspect, roughness * aspect);
     const auto Cspec0 = slerp(specular * 0.08f * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
     const FresnelDisney fresnel(Cspec0, ior_in, ior_ex, metallic);
-    const MicroFacetReflection mf(Cspec0, &fresnel, &ggx, FULL_WEIGHT, DIR_UP);
-    mf.UpdateGNormal(gnormal);
+    const MicroFacetReflection mf(Cspec0, &fresnel, &ggx, FULL_WEIGHT, nn);
     ret += mf.f(wo, wi);
 
     // Another layer of clear coat on top of everything below.
     if (clearcoat > 0.0f) {
         const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
         const FresnelSchlick<float> fresnel(0.04f);
-        const MicroFacetReflection mf_clearcoat(Spectrum(clearcoat), &fresnel, &cggx, FULL_WEIGHT, DIR_UP);
-        mf_clearcoat.UpdateGNormal(gnormal);
+        const MicroFacetReflection mf_clearcoat(Spectrum(clearcoat), &fresnel, &cggx, FULL_WEIGHT, nn);
         ret += mf_clearcoat.f(wo, wi);
     }
 
@@ -148,21 +146,19 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
             const auto rv = SQR(rscaled) * aspect;
             const GGX scaledDist(ru, rv);
 
-            MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
-            mr.UpdateGNormal(gnormal);
+            MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, nn);
             ret += mr.f(wo, wi);
         } else {
             // Microfacet Models for Refraction through Rough Surfaces
             // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
-            MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
-            mr.UpdateGNormal(gnormal);
+            MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
             ret += mr.f(wo, wi);
         }
     }
 
     // Diffuse transmission
     if ( thinSurface && diffTrans > 0.0f && diffuseWeight > 0.0f ) {
-        LambertTransmission lambert_transmission(basecolor , 1.0f, DIR_UP);
+        LambertTransmission lambert_transmission(basecolor , 1.0f, nn);
         ret += diffuseWeight * diffTrans * lambert_transmission.f(wo, wi);
     }
 
@@ -191,21 +187,19 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
                 const GGX scaledDist(ru, rv);
 
                 const auto T = specTrans * basecolor.Sqrt();
-                MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
-                mr.UpdateGNormal(gnormal);
+                MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, nn);
                 mr.sample_f(wo, wi, bs, pPdf);
             } else {
                 // Sampling the transmission BTDF
                 const auto T = specTrans * basecolor.Sqrt();
-                MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
-                mr.UpdateGNormal(gnormal);
+                MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
                 mr.sample_f(wo, wi, bs, pPdf);
             }
         } else {
             const auto r = sort_canonical();
 
             if ( thinSurface && ( r < diffTrans || diffTrans == 1.0f ) ) {
-                LambertTransmission lambert_transmission(basecolor, diffTrans, DIR_UP);
+                LambertTransmission lambert_transmission(basecolor, diffTrans, nn);
                 lambert_transmission.sample_f(wo, wi, bs, pPdf);
             } else {
                 // Sampling the reflection BRDF
@@ -254,19 +248,17 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
         const auto rv = SQR(rscaled) * aspect;
         const GGX scaledDist(ru, rv);
 
-        MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
-        mr.UpdateGNormal(gnormal);
+        MicroFacetRefraction mr(T, &scaledDist, ior_ex, ior_in, FULL_WEIGHT, nn);
         pdf_sample_specular_tranmission = mr.pdf(wo, wi);
     } else {
         // Sampling the transmission BTDF
-        MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, FULL_WEIGHT, DIR_UP);
-        mr.UpdateGNormal(gnormal);
+        MicroFacetRefraction mr(T, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
         pdf_sample_specular_tranmission = mr.pdf(wo, wi);
     }
 
     // Sampling diffuse component
     const auto pdf_sample_diffuse_reflection = CosHemispherePdf(wi);
-    LambertTransmission lambert_transmission(basecolor, diffTrans, DIR_UP);
+    LambertTransmission lambert_transmission(basecolor, diffTrans, nn);
     const auto pdf_sample_diffuse_tranmission = lambert_transmission.pdf(wo, wi);
     const auto pdf_sample_diffuse = (thinSurface) ? slerp(pdf_sample_diffuse_reflection, pdf_sample_diffuse_tranmission, diffTrans) : pdf_sample_diffuse_reflection;
 
@@ -278,7 +270,7 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     const auto clearcoat_ratio = clearcoat_intensity / total_specular_reflection;
     const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
     const auto pdf_wh_specular_reflection = slerp(ggx.Pdf(wh), cggx.Pdf(wh), clearcoat_ratio);
-    const auto same_hemisphere = !((wi.y < 0.0f) ^ (wo.y < 0.0f));
+    const auto same_hemisphere = SameHemiSphere( wi , wo );
     const auto pdf_specular_reflection = same_hemisphere ? pdf_wh_specular_reflection / (4.0f * AbsDot(wo, wh)) : 0.0f;
 
     return slerp(pdf_specular_reflection, slerp(pdf_sample_diffuse, pdf_sample_specular_tranmission, specTrans), sample_nonspecular_reflection_ratio);

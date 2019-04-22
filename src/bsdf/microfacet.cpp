@@ -114,11 +114,7 @@ float Beckmann::D(const Vector& h) const {
     // Isotropic model:     D(w_h) = pow( e , -(tan(\theta_h)/alpha)^2 ) / ( PI * alpha^2 * cos(\theta_h)^4 )
     const auto cos_theta_h_sq = CosTheta2(h);
     if( cos_theta_h_sq <= 0.0f ) return 0.f;
-    const auto tan_theta_h_sq = TanTheta2(h);
-    
-    const auto sin_phi_h_sq = SinPhi2(h);
-    const auto cos_phi_h_sq = 1.0f - sin_phi_h_sq;
-    return exp( -tan_theta_h_sq * ( cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2 ) ) / ( PI * alphaUV * cos_theta_h_sq * cos_theta_h_sq );
+    return exp( ( SQR( h.x ) / alphaU2 + SQR( h.z ) / alphaV2 ) / (-cos_theta_h_sq) ) / ( PI * alphaUV * SQR( cos_theta_h_sq ) );
 }
 
 Vector Beckmann::sample_f( const BsdfSample& bs ) const {
@@ -176,10 +172,7 @@ float GGX::D(const Vector& h) const {
     // Isotrocpic model:    D(w_h) = alpha ^ 2 / ( PI * ( 1 + ( alpha ^ 2 - 1 ) * cos(\theta) ^ 2 ) ^ 2
     const auto cos_theta_h_sq = CosTheta2(h);
     if( cos_theta_h_sq <= 0.0f ) return 0.f;
-    
-    const auto sin_phi_h_sq = SinPhi2(h);
-    const auto cos_phi_h_sq = 1.0f - sin_phi_h_sq;
-    const auto beta = ( cos_theta_h_sq + ( 1.0f - cos_theta_h_sq ) * (cos_phi_h_sq / alphaU2 + sin_phi_h_sq / alphaV2));
+    const auto beta = ( cos_theta_h_sq + ( SQR( h.x ) / alphaU2 + SQR( h.z ) / alphaV2));
     return 1.0f / ( PI * alphaUV * beta * beta );
 }
 

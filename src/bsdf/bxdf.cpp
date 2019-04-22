@@ -20,12 +20,18 @@
 #include "sampler/sample.h"
 
 Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : m_weight(w), m_type(type), gnormal( DIR_UP ), doubleSided(doubleSided){
-    if( n == DIR_UP ) return;
+    // Handle the special case where normal map is not applied, in which case, btn and tn will be invalid.
+    if( nn == DIR_UP ){
+        nn = n;
+        return;
+    }
     
     normal_map_applied = true;
     nn = Normalize(n);
     btn = Normalize(Cross( nn , Vector( 1.0f , 0.0f , 0.0f ) ));
     tn = Normalize(Cross( btn , nn ));
+
+    gnormal = bsdfToBxdf( DIR_UP );
 }
 
 Spectrum Bxdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
