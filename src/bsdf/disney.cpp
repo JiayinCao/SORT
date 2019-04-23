@@ -16,11 +16,11 @@
  */
 
 #include "disney.h"
-#include "microfacet.h"
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 #include "core/sassert.h"
-#include "bsdf/lambert.h"
+#include "lambert.h"
+#include "microfacet.h"
 
 constexpr static float ior_in = 1.5f;          // hard coded index of refraction below the surface
 constexpr static float ior_ex = 1.0f;          // hard coded index of refraction above the surface
@@ -67,71 +67,77 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
 
     auto ret = RGBSpectrum(0.0f);
 
+    const auto evaluate_reflection = PointingUp( wo ) && PointingUp( wi );
+
     if (diffuseWeight > 0.0f) {
         const auto NoO = CosTheta(wo);
         const auto NoI = CosTheta(wi);
-        const auto AbsNoI = fabs(NoI);
+        const auto Clampped_NoI = saturate(NoI);
         const auto FO = SchlickWeight(NoO);
         const auto FI = SchlickWeight(NoI);
 
         if (thinSurface) {
-            if (flatness < 1.0f) {
-                // Diffuse
-                // Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, eq (4)
-                const auto disneyDiffuse = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));
-                ret += diffuseWeight * (1.0 - flatness) * (1.0f - diffTrans) * disneyDiffuse * AbsNoI;
-            }
-            if (flatness > 0.0f) {
-                // Fake sub-surface scattering
-                // Reflection from Layered Surfaces due to Subsurface Scattering
-                // https://cseweb.ucsd.edu/~ravir/6998/papers/p165-hanrahan.pdf
-                // Based on Hanrahan-Krueger BRDF approximation of isotropic BSSRDF
-                // 1.25 scale is used to (roughly) preserve albedo
-                // Fss90 used to "flatten" retro-reflection based on roughness
-                const auto Fss90 = HoO2ByRoughness;
-                const auto Fss = slerp(1.0f, Fss90, FO) * slerp(1.0f, Fss90, FI);
-                const auto disneyFakeSS = basecolor * (1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f) * INV_PI);
-                ret += diffuseWeight * flatness * (1.0f - diffTrans) * disneyFakeSS * AbsNoI;
+            if( evaluate_reflection ){
+                if (flatness < 1.0f) {
+                    // Diffuse
+                    // Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, eq (4)
+                    const auto disneyDiffuse = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));
+                    ret += diffuseWeight * (1.0 - flatness) * (1.0f - diffTrans) * disneyDiffuse * Clampped_NoI;
+                }
+                if (flatness > 0.0f) {
+                    // Fake sub-surface scattering
+                    // Reflection from Layered Surfaces due to Subsurface Scattering
+                    // https://cseweb.ucsd.edu/~ravir/6998/papers/p165-hanrahan.pdf
+                    // Based on Hanrahan-Krueger BRDF approximation of isotropic BSSRDF
+                    // 1.25 scale is used to (roughly) preserve albedo
+                    // Fss90 used to "flatten" retro-reflection based on roughness
+                    const auto Fss90 = HoO2ByRoughness;
+                    const auto Fss = slerp(1.0f, Fss90, FO) * slerp(1.0f, Fss90, FI);
+                    const auto disneyFakeSS = basecolor * (1.25f * (Fss * (1 / (NoO + NoI) - 0.5f) + 0.5f) * INV_PI);
+                    ret += diffuseWeight * flatness * (1.0f - diffTrans) * disneyFakeSS * Clampped_NoI;
+                }
             }
         } else {
             if (scatterDistance > 0.0f) {
                 // Handle sub-surface scattering branch, to be done.
                 // There is a following up task to support SSS in SORT, after which this can be easily done.
                 // Issue tracking ticket, https://github.com/JerryCao1985/SORT/issues/85
-            } else {
+            } else if( evaluate_reflection ){
                 // Fall back to the Disney diffuse due to the lack of sub-surface scattering
                 const auto disneyDiffuse = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));
-                ret += diffuseWeight * disneyDiffuse * AbsNoI;
+                ret += diffuseWeight * disneyDiffuse * Clampped_NoI;
             }
         }
 
-        // Retro-reflection
-        // Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, eq (4)
-        const auto Rr = 2.0 * HoO2ByRoughness;
-        const auto frr = basecolor * (INV_PI * Rr * (FO + FI + FO * FI * (Rr - 1.0f)));
-        ret += diffuseWeight * frr * AbsNoI;
+        if( evaluate_reflection ){
+            // Retro-reflection
+            // Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, eq (4)
+            const auto Rr = 2.0 * HoO2ByRoughness;
+            const auto frr = basecolor * (INV_PI * Rr * (FO + FI + FO * FI * (Rr - 1.0f)));
+            ret += diffuseWeight * frr * Clampped_NoI;
 
-        // This is not totally physically correct. However, dielectric model presented by Walter et al. loses energy due to lack
-        // of microfacet inter-reflection/refraction and the sheen component can approximately compensate for it.
-        if (sheen > 0.0f) {
-            const auto Csheen = slerp(Spectrum(1.0f), Ctint, sheenTint);
-            const auto FH = SchlickWeight(HoO);
-            const auto Fsheen = FH * sheen * Csheen;
-            ret += diffuseWeight * Fsheen * AbsNoI;
+            // This is not totally physically correct. However, dielectric model presented by Walter et al. loses energy due to lack
+            // of microfacet inter-reflection/refraction and the sheen component can approximately compensate for it.
+            if (sheen > 0.0f) {
+                const auto Csheen = slerp(Spectrum(1.0f), Ctint, sheenTint);
+                const auto FH = SchlickWeight(HoO);
+                const auto Fsheen = FH * sheen * Csheen;
+                ret += diffuseWeight * Fsheen * Clampped_NoI;
+            }
         }
     }
 
     // Specular reflection term in Disney BRDF
     const GGX ggx(roughness / aspect, roughness * aspect);
-    const auto Cspec0 = slerp(specular * 0.08f * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
-    if (!Cspec0.IsBlack()) {
+    const auto Cspec0 = slerp(specular * SchlickR0FromEta( ior_ex / ior_in ) * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
+    if (!Cspec0.IsBlack() && evaluate_reflection) {
         const FresnelDisney fresnel(Cspec0, ior_ex, ior_in, metallic);
         const MicroFacetReflection mf(WHITE_SPECTRUM, &fresnel, &ggx, FULL_WEIGHT, nn);
         ret += mf.f(wo, wi);
     }
 
     // Another layer of clear coat on top of everything below.
-    if (clearcoat > 0.0f) {
+    if (clearcoat > 0.0f && evaluate_reflection) {
         const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
         const FresnelSchlick<float> fresnel(0.04f);
         const MicroFacetReflection mf_clearcoat(Spectrum(clearcoat), &fresnel, &cggx, FULL_WEIGHT, nn);
@@ -171,13 +177,14 @@ Spectrum DisneyBRDF::sample_f( const Vector& wo , Vector& wi , const BsdfSample&
     const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
     const auto luminance = basecolor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
-    const auto Cspec0 = slerp(specular * 0.08f * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
+    const auto min_specular_amount = SchlickR0FromEta( ior_ex / ior_in );
+    const auto Cspec0 = slerp(specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
     const auto clearcoat_intensity = clearcoat;
     const auto specular_intensity = Cspec0.GetIntensity();
     const auto total_specular_reflection = clearcoat_intensity + specular_intensity;
 
     const GGX ggx(roughness / aspect, roughness * aspect);
-    const auto sample_nonspecular_reflection_ratio = total_specular_reflection == 0.0f ? 1.0f : ( 1.0f - metallic ) * ( 1.0f - specular * 0.08f ) * basecolor.GetIntensity();
+    const auto sample_nonspecular_reflection_ratio = total_specular_reflection == 0.0f ? 1.0f : ( 1.0f - metallic ) * ( 1.0f - specular * min_specular_amount ) * basecolor.GetIntensity();
     if( bs.u < sample_nonspecular_reflection_ratio || sample_nonspecular_reflection_ratio == 1.0f ){
         const auto r = sort_canonical();
         if (r < specTrans || specTrans == 1.0f) {
@@ -232,13 +239,14 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
     const auto luminance = basecolor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
-    const auto Cspec0 = slerp(specular * 0.08f * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
+    const auto min_specular_amount = SchlickR0FromEta( ior_ex / ior_in );
+    const auto Cspec0 = slerp(specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
     const auto clearcoat_intensity = clearcoat;
     const auto specular_intensity = Cspec0.GetIntensity();
     const auto total_specular_reflection = clearcoat_intensity + specular_intensity;
 
     const GGX ggx(roughness / aspect, roughness * aspect);
-    const auto sample_nonspecular_reflection_ratio = (1.0f - metallic) * (1.0f - specular * 0.08f) * basecolor.GetIntensity();
+    const auto sample_nonspecular_reflection_ratio = (1.0f - metallic) * (1.0f - specular * min_specular_amount) * basecolor.GetIntensity();
 
     // Sampling specular transmission
     auto pdf_sample_specular_tranmission = 0.0f;

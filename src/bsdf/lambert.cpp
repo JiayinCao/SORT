@@ -36,6 +36,8 @@ Spectrum LambertTransmission::f( const Vector& wo , const Vector& wi ) const{
 // sample a direction randomly
 Spectrum LambertTransmission::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
     wi = -CosSampleHemisphere( bs.u , bs.v );
+    if( SameHemiSphere( wi , wo ) )
+        wi = -wi;
     if( pPdf ) *pPdf = pdf( wo , wi );
     return f( wo , wi );
 }

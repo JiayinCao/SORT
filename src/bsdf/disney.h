@@ -72,7 +72,8 @@ public:
     //! @param specular         Direction-hemisphere reflection for specular.
     //! @param speculatTint     A concession for artistic control that tints incident specular towards the base color.
     //! @param roughness        Surface roughness, controls both diffuse and specular response.
-    //! @param anisotropic      Degree of anisotropy. This controls the aspect ratio of the specular highlight. (0 = isotropic, 1 = maximally anisotropic.)    //! @param sheen            An additional grazing component, primarily intended for cloth.
+    //! @param anisotropic      Degree of anisotropy. This controls the aspect ratio of the specular highlight. (0 = isotropic, 1 = maximally anisotropic.)
+    //! @param sheen            An additional grazing component, primarily intended for cloth.
     //! @param sheenTint        Amount to tint sheen towards base color.
     //! @param clearcoat        A second, special-purpose specular lobe.
     //! @param clearcoatGloss   Controls clearcoat glossiness (0 = a “satin” appearance, 1 = a “gloss” appearance)
@@ -127,6 +128,16 @@ private:
     const float     flatness;           /**< Blending factor between diffuse and fakeSS model. */
     const float     scatterDistance;    /**< Distance of scattering in SSS. */
     const bool      thinSurface;        /**< Whether the surface is thin surface. */
+
+    //! @brief      Get R0 with relative IOR.
+    //!
+    //! Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, section 3.1
+    //!
+    //! @param rROI     Relative index of refraction, IOR_ouside / IOR_inside
+    //! @return         Evaluated R0 for Fresnel
+    inline float SchlickR0FromEta( float rROI ) const{
+        return SQR( ( rROI - 1.0f ) / ( rROI + 1.0f ) );
+    }
 };
 
 //! @brief Clearcoat GGX NDF.
