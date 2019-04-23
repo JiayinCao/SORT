@@ -124,9 +124,11 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     // Specular reflection term in Disney BRDF
     const GGX ggx(roughness / aspect, roughness * aspect);
     const auto Cspec0 = slerp(specular * 0.08f * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
-    const FresnelDisney fresnel(Cspec0, ior_in, ior_ex, metallic);
-    const MicroFacetReflection mf(Cspec0, &fresnel, &ggx, FULL_WEIGHT, nn);
-    ret += mf.f(wo, wi);
+    if (!Cspec0.IsBlack()) {
+        const FresnelDisney fresnel(Cspec0, ior_ex, ior_in, metallic);
+        const MicroFacetReflection mf(WHITE_SPECTRUM, &fresnel, &ggx, FULL_WEIGHT, nn);
+        ret += mf.f(wo, wi);
+    }
 
     // Another layer of clear coat on top of everything below.
     if (clearcoat > 0.0f) {

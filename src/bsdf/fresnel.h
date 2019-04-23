@@ -23,22 +23,39 @@
 // Memo on Fresnel equations
 // https://seblagarde.wordpress.com/2013/04/29/memo-on-fresnel-equations/
 
-// Schlick Fresnel Approximation
+//! @brief          Helper function to evaluate the part of Schlick's Fresnel approximation.
+//!
+//! @param   cos    Cosine of the angle between the incident direction and normal.
+//! @return         Evaluated fresnel weight.
+inline float SchlickWeight(float cos) {
+    return Pow<5>(saturate(1.0f - cos));
+}
+
+//! @brief          Evaluate schlick's fresnel approximation.
+//!
+//! @param  F0      Expected fresnel at perpendicular angle.
+//! @param  cos     Cosine of the angle between the incident direction and normal.
+//! @return         Evaluated fresnel value.
 inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
-    return F0 + Pow<5>(1.0f - cos) * ( Spectrum( 1.0f ) - F0 );
+    return F0 + SchlickWeight(cos) * ( Spectrum( 1.0f ) - F0 );
 }
 inline float SchlickFresnel(const float F0, float cos) {
-    return F0 + Pow<5>(1.0f - cos) * ( 1.0f - F0 );
+    return F0 + SchlickWeight( cos ) * ( 1.0f - F0 );
 }
-inline float SchlickWeight( float cos ){
-    return Pow<5>( saturate( 1.0f - cos ) );
-}
+
+//! @brief      Dielectric fresnel.
+//!
+//! @param  cosI    Cosine of the angle between the incident direction and normal. 
+//!                 It could be negative, meaning the ray is leaving the surface from inside.
+//! @param  eta_i   Index of refraction above the surface.
+//! @param  eta_t   Index of refraction below the surface.
+//! @return         Evaluated fresnel.
 inline float DielectricFresnel( float cosI , float eta_i , float eta_t ){
     const bool entering = cosI > 0.0f;
     const float _etaI = entering ? eta_i : eta_t;
     const float _etaT = entering ? eta_t : eta_i;
     
-    const float sinI = sqrt( 1.0f - saturate( cosI * cosI ) );
+    const float sinI = sqrt(saturate(1.0f - SQR(cosI)));
     const float sinT = _etaI * sinI / _etaT;
     if( sinT >= 1.0f ) return 1.0f;
     if( !entering ) cosI = -cosI;
