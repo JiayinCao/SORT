@@ -40,7 +40,7 @@ inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
     return F0 + SchlickWeight(cos) * ( Spectrum( 1.0f ) - F0 );
 }
 inline float SchlickFresnel(const float F0, float cos) {
-    return F0 + SchlickWeight( cos ) * ( 1.0f - F0 );
+    return F0 + SchlickWeight(cos) * ( 1.0f - F0 );
 }
 
 //! @brief      Dielectric fresnel.

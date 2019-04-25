@@ -131,7 +131,11 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const GGX ggx(roughness / aspect, roughness * aspect);
     const auto Cspec0 = slerp(specular * SchlickR0FromEta( ior_ex / ior_in ) * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
     if (!Cspec0.IsBlack() && evaluate_reflection) {
-        const FresnelDisney fresnel(Cspec0, ior_ex, ior_in, metallic);
+        // 2015 Disney BRDF will blend a more physically based fresnel with Schlick's approximation based on the parameter 'metallic'.
+        // However, when 'metallic' equals to one or zero, the parameter 'specular' and 'specularTint' are not used at all.
+        // Until it is totally figured out, SORT will fall back to only Schlick's approximation for now.
+        //const FresnelDisney fresnel(Cspec0, ior_ex, ior_in, metallic);
+        const FresnelSchlick<Spectrum> fresnel(Cspec0);
         const MicroFacetReflection mf(WHITE_SPECTRUM, &fresnel, &ggx, FULL_WEIGHT, nn);
         ret += mf.f(wo, wi);
     }
@@ -183,14 +187,13 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     const auto Cspec0 = slerp(specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
 
     const auto base_color_intensity = basecolor.GetIntensity();
-    const auto clearcoat_weight = clearcoat * 0.04;
-    const auto specular_reflection_weight = Cspec0.GetIntensity() * metallic;
+    const auto clearcoat_weight = clearcoat * 0.04f;
+    const auto specular_reflection_weight = Cspec0.GetIntensity();
     const auto specular_transmission_weight = base_color_intensity * (1.0f - metallic) * specTrans;
     const auto diffuse_reflection_weight = base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * (thinSurface ? (1.0f - diffTrans) : 1.0f);
     const auto diffuse_transmission_weight = thinSurface ? base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * diffTrans : 0.0f;
 
     const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
-    sAssert(total_weight > 0.0f, MATERIAL);
     if (total_weight <= 0.0f) {
         if (pPdf)
             *pPdf = 0.0f;
@@ -316,14 +319,15 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     const auto Cspec0 = slerp(specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
 
     const auto base_color_intensity = basecolor.GetIntensity();
-    const auto clearcoat_weight = clearcoat * 0.04;
-    const auto specular_reflection_weight = Cspec0.GetIntensity() * metallic;
+    const auto clearcoat_weight = clearcoat * 0.04f;
+    const auto specular_reflection_weight = Cspec0.GetIntensity();
     const auto specular_transmission_weight = base_color_intensity * (1.0f - metallic) * specTrans;
     const auto diffuse_reflection_weight = base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * (thinSurface ? (1.0f - diffTrans) : 1.0f);
     const auto diffuse_transmission_weight = thinSurface ? base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * diffTrans : 0.0f;
 
     const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
-    sAssert(total_weight > 0.0f, MATERIAL);
+    if (total_weight <= 0.0f)
+        return 0.0f;
 
     auto total_pdf = 0.0f;
     auto cc_pdf = 0.0f, sr_pdf = 0.0f, st_pdf = 0.0f, dr_pdf = 0.0f, dt_pdf = 0.0f;
