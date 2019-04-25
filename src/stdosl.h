@@ -482,7 +482,7 @@ int getmatrix (string fromspace, output matrix M) {
 closure color lambert( color albedo , normal N ) BUILTIN;
 closure color lambertTransmission( color transmittance , normal N ) BUILTIN;
 closure color orenNayar( color albedo , float sigma , normal N ) BUILTIN;
-closure color disney( float metallic , float specularTint, float roughness , float anisotropic , 
+closure color disney( float metallic , float specular , float specularTint, float roughness , float anisotropic , 
                       float sheen , float sheenTint, float clearCoat , float clearCoatGloss , float specTrans , 
                       float scatterDistance , float flatness , float diffTrans , int thinSurface , color baseColor , normal N ) BUILTIN;
 closure color microfacetReflection(string distribution, vector eta , vector absorption , float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;

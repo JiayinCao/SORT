@@ -39,6 +39,7 @@ public:
     // Input parameters to construct the disney BRDF.
     struct Params {
         float metallic;
+        float specular;
         float specularTint;
         float roughness;
         float anisotropic;
@@ -61,13 +62,14 @@ public:
     //! @param weight           Weight of the BXDF
     DisneyBRDF( const Params& param , const Spectrum& weight)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
-        specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
+        specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
         clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness), 
           diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
 
 	//! Constructor
     //! @param basecolor        The surface color, usually supplied by texture maps.
     //! @param metallic         This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color.
+    //! @param specular         Direction-hemisphere reflection for specular.
     //! @param speculatTint     A concession for artistic control that tints incident specular towards the base color.
     //! @param roughness        Surface roughness, controls both diffuse and specular response.
     //! @param anisotropic      Degree of anisotropy. This controls the aspect ratio of the specular highlight. (0 = isotropic, 1 = maximally anisotropic.)
@@ -86,7 +88,7 @@ public:
                float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance , 
                float flatness , float diffTrans , int thinSurface , const Spectrum& weight, const Vector& n )
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
-          specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
+          specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
           clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness), 
           diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}
 	
@@ -113,7 +115,7 @@ public:
 private:
 	const Spectrum  basecolor;          /**< The surface color, usually supplied by texture maps. */
     const float     metallic;           /**< The metallic-ness (0 = dielectric, 1 = metallic). This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color. */
-    //const float     specular;           /**< Incident specular amount. This is in lieu of an explicit index-of-refraction. */
+    const float     specular;           /**< Incident specular amount. This is in lieu of an explicit index-of-refraction. */
     const float     specularTint;       /**< A concession for artistic control that tints incident specular towards the base color. Grazing specular is still achromatic. */
     const float     roughness;          /**< Surface roughness, controls both diffuse and specular response. */
     const float     anisotropic;        /**< degree of anisotropy. This controls the aspect ratio of the specular highlight. (0 = isotropic, 1 = maximally anisotropic). */

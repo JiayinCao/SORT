@@ -322,6 +322,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
     bl_idname = 'SORTNode_Material_DisneyBRDF'
     osl_shader = '''
         shader Disney( float Metallic = @ ,
+                       float Specular = @ ,
                        float SpecularTint = @ ,
                        float Roughness = @ ,
                        float Anisotropic = @ ,
@@ -337,7 +338,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        color BaseColor = @ ,
                        normal Normal = @ ,
                        output closure color Result = color(0) ){
-            Result = disney( Metallic , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness , 
+            Result = disney( Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness , 
                              SpecularTransmittance , ScatterDistance , Flatness , DiffuseTransmittance , IsThinSurface , BaseColor , Normal );
         }
     '''
@@ -348,6 +349,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'Metallic' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Anisotropic' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Specular' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Specular Tint' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Sheen' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Sheen Tint' )
@@ -365,8 +367,9 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs['Clearcoat Glossiness'].default_value = 1.0
         self.inputs['Sheen'].default_value = 1.0
     def serialize_prop(self, fs):
-        fs.serialize( 15 )
+        fs.serialize( 16 )
         fs.serialize( self.inputs['Metallic'].export_osl_value() )
+        fs.serialize( self.inputs['Specular'].export_osl_value() )
         fs.serialize( self.inputs['Specular Tint'].export_osl_value() )
         fs.serialize( self.inputs['Roughness'].export_osl_value() )
         fs.serialize( self.inputs['Anisotropic'].export_osl_value() )
