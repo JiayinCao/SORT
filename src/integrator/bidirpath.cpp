@@ -84,7 +84,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
 		vert.p = vert.inter.intersect;
 		vert.n = vert.inter.normal;
 		vert.wi = -wi.m_Dir;
-		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
+		Bssrdf*	bssrdf = nullptr;	// not implemented yet
+		vert.inter.primitive->GetMaterial()->UpdateScattering(vert.inter , vert.bsdf , bssrdf);
 		vert.throughput = throughput;
 		vert.vcm = vcm;
 		vert.vc = vc;
@@ -184,7 +185,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
 		vert.p = vert.inter.intersect;
 		vert.n = vert.inter.normal;
 		vert.wi = -wi.m_Dir;
-		vert.bsdf = vert.inter.primitive->GetMaterial()->GetBsdf(&vert.inter);
+		Bssrdf* bssrdf = nullptr;
+		vert.inter.primitive->GetMaterial()->UpdateScattering(vert.inter, vert.bsdf, bssrdf);
 		vert.throughput = throughput;
 		vert.vc = vc;
 		vert.vcm = vcm;

@@ -20,6 +20,7 @@
 #include <OSL/oslexec.h>
 
 class Bsdf;
+class Bssrdf;
 
 enum BXDF_CLOSURE_TYPE {
     CLOSURE_LAMBERT = 0,
@@ -49,6 +50,7 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys);
 //! @brief  Process the closure tree result and populate the BSDF.
 //!
 //! @param  bsdf            The BSDF to be filled.
+//! @param  bssrdf          The BSSRDF to be filled.
 //! @param  closure         The closure tree from executed OSL shader.
 //! @param  w               The weight for the current sub-closure-tree
-void ProcessClosure(Bsdf* bsdf, const OSL::ClosureColor* closure, const OSL::Color3& w);
+void ProcessClosure(Bsdf* bsdf, Bssrdf*& bssrdf, const OSL::ClosureColor* closure, const OSL::Color3& w);

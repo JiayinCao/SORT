@@ -66,7 +66,9 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
 		sAssert( inter.primitive != 0 , INTEGRATOR );
 
 		// evaluate the light
-		Bsdf*			bsdf = inter.primitive->GetMaterial()->GetBsdf(&inter);
+		Bsdf* 	bsdf = nullptr;
+		Bssrdf*	bssrdf = nullptr;	// not implemented yet
+		inter.primitive->GetMaterial()->UpdateScattering(inter, bsdf, bssrdf);
 		float			light_pdf = 0.0f;
 		LightSample		light_sample = (bounces==0)?ps.light_sample[0]:LightSample(true);
 		BsdfSample		bsdf_sample = (bounces==0)?ps.bsdf_sample[0]:BsdfSample(true);

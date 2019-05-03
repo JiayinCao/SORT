@@ -82,16 +82,13 @@ void Material::Serialize(IStreamBase& stream){
     }
 }
 
-Bsdf* Material::GetBsdf(const class Intersection* intersect) const {
-    Bsdf* bsdf = SORT_MALLOC(Bsdf)(intersect);
-
+void Material::UpdateScattering(const class Intersection& intersect, Bsdf*& bsdf , Bssrdf*& bssrdf) const {
+    bsdf = SORT_MALLOC(Bsdf)(&intersect);
     if ( !g_noMaterial && m_valid) {
-        ExecuteShader(bsdf, intersect, m_shader.get());
+        ExecuteShader(bsdf, bssrdf, intersect, m_shader.get());
     } else {
         Spectrum weight(1.0f);
         const Lambert* lambert = SORT_MALLOC(Lambert)(weight, weight, DIR_UP);
         bsdf->AddBxdf(lambert);
     }
-
-    return bsdf;
 }

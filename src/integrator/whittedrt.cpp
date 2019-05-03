@@ -45,7 +45,9 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
 	Spectrum t;
 
 	// get bsdf
-	Bsdf* bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
+	Bsdf* 	bsdf = nullptr;
+	Bssrdf*	bssrdf = nullptr;	// not implemented yet
+	ip.primitive->GetMaterial()->UpdateScattering( ip , bsdf , bssrdf );
 
 	// lights
 	Visibility visibility(scene);

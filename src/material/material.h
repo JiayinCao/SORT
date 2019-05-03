@@ -23,6 +23,7 @@
 #include "stream/stream.h"
 
 class Bsdf;
+class Bssrdf;
 class Intersection;
 
 //! @brief 	A thin layer of material definition.
@@ -35,18 +36,15 @@ class Intersection;
  * Imageworks, following is the link to the github page to access its source code.
  * https://github.com/imageworks/OpenShadingLanguage
  */
-class Material : public SerializableObject
-{
+class Material : public SerializableObject{
 public:
-	//! @brief	Get the BSDF.
-	//!
-	//! BSDF is a set of BXDF combined together. This function parse the material and fill the BSDF data structure.
-	//! A red warning material will be returned if this material is invalid.
+	//! @brief	    Populate BSDF and BSSRDF if available.
 	//!
 	//! @param		intersect		The intersection information at the point to be shaded.
-	//! @return						A BSDF holding BXDF information will be returned. The BSDF is allocated in the memory pool,
+    //! @param      bsdf            A BSDF holding BXDF information will be returned. The BSDF is allocated in the memory pool,
 	//!								meaning this is no need to release the memory in BSDF.
-    Bsdf* GetBsdf(const Intersection* intersect) const;
+    //! @param      bssrdf          Bidirectional sub-surface scattering reflectance density function.
+    void    UpdateScattering(const Intersection& intersect, Bsdf*& bsdf , Bssrdf*& bssrdf) const;
 
 	//! @brief  Serialization interface. Loading data from stream.
     //!

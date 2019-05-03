@@ -102,6 +102,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
                 // Handle sub-surface scattering branch, to be done.
                 // There is a following up task to support SSS in SORT, after which this can be easily done.
                 // Issue tracking ticket, https://github.com/JerryCao1985/SORT/issues/85
+                bssrdf = nullptr;
             } else if( evaluate_reflection ){
                 // Fall back to the Disney diffuse due to the lack of sub-surface scattering
                 const auto disneyDiffuse = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));

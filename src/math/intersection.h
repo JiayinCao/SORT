@@ -21,19 +21,13 @@
 #include "spectrum/spectrum.h"
 #include <float.h>
 
-// pre-decleration class
 class Primitive;
 
-///////////////////////////////////////////////////////////////////////
-//	definition of intersection
-class	Intersection
-{
-public :
+class	Intersection{
+public:
 	// get the emissive
 	Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;
 
-// public field
-public:
 	// the interesection point
 	Point	intersect;
 	// the shading normal

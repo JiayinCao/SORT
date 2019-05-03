@@ -33,6 +33,8 @@
 #include "bsdf/dielectric.h"
 #include "bsdf/hair.h"
 
+class Bssrdf;
+
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
     spinlock_mutex mutex;
@@ -124,68 +126,60 @@ void checkAll( const Bxdf* bxdf , bool cPdf = true , bool cReciprocity = true , 
 }
 
 TEST (BXDF, Labmert) { 
-    static const Spectrum R(1.0f);
-    Lambert lambert( R , R , DIR_UP );
+    Lambert lambert( WHITE_SPECTRUM , WHITE_SPECTRUM , DIR_UP );
     checkAll( &lambert );
 }
 
 TEST(BXDF, LabmertTransmittion) {
-    static const Spectrum R(1.0f);
-    LambertTransmission lambert(R, R, DIR_UP);
+    LambertTransmission lambert(WHITE_SPECTRUM, WHITE_SPECTRUM, DIR_UP);
     checkAll(&lambert);
 }
 
 TEST(BXDF, OrenNayar) {
-    static const Spectrum R(1.0f);
-    OrenNayar orenNayar(R, sort_canonical(), R, DIR_UP);
+    OrenNayar orenNayar(WHITE_SPECTRUM, sort_canonical(), FULL_WEIGHT, DIR_UP);
     checkAll(&orenNayar);
 }
 
 TEST(BXDF, Phong) {
-    static const Spectrum R(1.0f);
     const float ratio = sort_canonical();
-    Phong phong( R * ratio , R * ( 1.0f - ratio ) , sort_canonical(), R, DIR_UP);
+    Phong phong( WHITE_SPECTRUM * ratio , WHITE_SPECTRUM * ( 1.0f - ratio ) , sort_canonical(), FULL_WEIGHT , DIR_UP);
     checkAll(&phong, false);
 }
 
 // Sometimes it doesn't always pass, need investigation.
 TEST(BXDF, DISABLED_AshikhmanShirley) {
-    static const Spectrum R(1.0f);
-    AshikhmanShirley as( R , sort_canonical() , sort_canonical() , sort_canonical() , R , DIR_UP );
+    AshikhmanShirley as( WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
     checkAll(&as);
 }
 
 // https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf
 // Disney BRDF is not strictly energy conserving, please refer the above link for further detail ( chapter 5.1 ).
 TEST(BXDF, DISABLED_Disney) {
-    static const Spectrum R(1.0f);
-    DisneyBRDF disney( R , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , 
+    Bssrdf* bssrdf = nullptr;
+    DisneyBRDF disney( WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , 
                        sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , 
-                       sort_canonical() , sort_canonical() , 0 , R , DIR_UP );
+                       sort_canonical() , sort_canonical() , 0 , bssrdf , FULL_WEIGHT , DIR_UP );
     checkAll(&disney);
 }
 
 TEST(BXDF, MicroFacetReflection) {
-    static const Spectrum R(1.0f);
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx(0.5f, 0.5f);
-    MicroFacetReflection mf( R , &fresnel , &ggx , R , DIR_UP );
+    MicroFacetReflection mf( WHITE_SPECTRUM , &fresnel , &ggx , FULL_WEIGHT , DIR_UP );
     checkAll(&mf);
 }
 
 TEST(BXDF, MicroFacetRefraction) {
-    static const Spectrum R(1.0f);
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx( sort_canonical() , sort_canonical() );
-    MicroFacetRefraction mr( R , &ggx , sort_canonical() , sort_canonical() , R , DIR_UP );
+    MicroFacetRefraction mr( WHITE_SPECTRUM , &ggx , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
     checkAll( &mr , false , false , true );
 }
 
 TEST(BXDF, Dielectric) {
-    static const Spectrum R(1.0f);
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx( sort_canonical() , sort_canonical() );
-    Dielectric dielectric( R , R , &ggx , sort_canonical() , sort_canonical() , R , DIR_UP );
+    Dielectric dielectric( WHITE_SPECTRUM , WHITE_SPECTRUM , &ggx , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
     checkAll( &dielectric , false , false , true );
 }
 

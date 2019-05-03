@@ -70,7 +70,9 @@ void InstantRadiosity::PreProcess( const Scene& scene )
 
 				float bsdf_pdf;
 				Vector wo;
-				Bsdf* bsdf = intersect.primitive->GetMaterial()->GetBsdf(&intersect);
+				Bsdf*	bsdf = nullptr;
+				Bssrdf*	bssrdf = nullptr;
+				intersect.primitive->GetMaterial()->UpdateScattering(intersect, bsdf, bssrdf);
 				Spectrum bsdf_value = bsdf->sample_f(ls.wi, wo, BsdfSample(true), &bsdf_pdf, BXDF_ALL);
 
 				if( bsdf_pdf == 0.0f )
@@ -129,7 +131,9 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
 	const unsigned lps_id = std::min( m_nLightPathSet - 1 , (int)(sort_canonical() * m_nLightPathSet) );
 	std::list<VirtualLightSource> vps = m_pVirtualLightSources[lps_id];
 
-	Bsdf*	bsdf = ip.primitive->GetMaterial()->GetBsdf(&ip);
+	Bsdf* 	bsdf = nullptr;
+	Bssrdf*	bssrdf = nullptr;	// not implemented yet
+	ip.primitive->GetMaterial()->UpdateScattering(ip, bsdf, bssrdf);
 
 	// evaluate indirect illumination
 	Spectrum indirectIllum;
@@ -147,7 +151,9 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
 		float	len = sqrt( sqrLen );
 		Vector	n_delta = delta / len;
 
-		Bsdf* bsdf1 = it->intersect.primitive->GetMaterial()->GetBsdf(&(it->intersect));
+		Bsdf*	bsdf1 = nullptr;
+		Bssrdf* bssrdf1 = nullptr; // not implemented yet
+		it->intersect.primitive->GetMaterial()->UpdateScattering(it->intersect, bsdf1, bssrdf1);
 
 		float		gterm = 1.0f / std::max( m_fMinSqrDist , sqrLen );
 		Spectrum	f0 = bsdf->f( -r.m_Dir , -n_delta );

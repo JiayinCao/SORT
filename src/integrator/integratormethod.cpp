@@ -29,8 +29,9 @@ inline float MisFactor( float f, float g ){
 
 Spectrum	EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip , 
 							const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type ){
-	// get bsdf
-	const auto bsdf = ip.primitive->GetMaterial()->GetBsdf( &ip );
+	Bsdf* 	bsdf = nullptr;
+	Bssrdf*	bssrdf = nullptr;	// not implemented yet
+	ip.primitive->GetMaterial()->UpdateScattering( ip , bsdf , bssrdf );
 
 	Spectrum radiance;
 	Visibility visibility(scene);
