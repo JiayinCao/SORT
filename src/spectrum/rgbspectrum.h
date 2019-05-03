@@ -21,6 +21,8 @@
 #include "core/define.h"
 #include "math/utils.h"
 
+#define RGBSPECTRUM_SAMPLE		3
+
 ///////////////////////////////////////////////////////////////////
 // definition of rgb spectrum
 class	RGBSpectrum{

@@ -23,6 +23,7 @@
 #include "math/point.h"
 
 class Intersection;
+class Scene;
 
 //! @brief BSDF implementation.
 /**
@@ -53,11 +54,12 @@ public:
 
     //! @brief  Importance sample the incident direction and position.
     //!
+    //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  wi      Incident direction to be updated.
     //! @param  pi      Incident position to be updated.
-    virtual Spectrum    Sample_S( const Vector& wo , const Point& po , Vector& wi , Point& pi ) const = 0;
+    virtual Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi ) const = 0;
 
 protected:
     const float ior_i;  /**< Index of refraction inside the surface. */
@@ -89,11 +91,12 @@ public:
 
     //! @brief  Importance sample the incident direction and position.
     //!
+    //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  wi      Incident direction to be updated.
     //! @param  pi      Incident position to be updated.
-    Spectrum    Sample_S( const Vector& wo , const Point& po , Vector& wi , Point& pi ) const override;
+    Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi ) const override;
 
 protected:
     //! @brief  Evalute the reflectance profile based on distance between the two points.
@@ -105,8 +108,9 @@ protected:
     //! @brief  Sampling a distance based on the reflectance profile.
     //!
     //! @param  ch      Spectrum channel.
+    //! @param  r       A canonical value used to randly sample distance
     //! @return         The distance sampled.
-    virtual float Sample_Sr(int ch) const = 0;
+    virtual float       Sample_Sr(int ch, float r) const = 0;
 
     //! @brief  Pdf of sampling such a distance based on the reflectance profile.
     //!

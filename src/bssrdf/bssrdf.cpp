@@ -19,8 +19,10 @@
 #include "math/intersection.h"
 #include "bsdf/fresnel.h"
 #include "bsdf/bsdf.h"
+#include "core/rand.h"
+#include "math/utils.h"
+#include "core/scene.h"
 
-// BSSRDF Utility Functions
 float FresnelMoment1(const float eta) {
     float eta2 = eta * eta, eta3 = eta2 * eta, eta4 = eta3 * eta, eta5 = eta4 * eta;
     if (eta < 1)
@@ -45,7 +47,50 @@ Spectrum SeperableBssrdf::Sw( const Vector& wi ) const{
     return (1 - F) / (c * PI);
 }
 
-Spectrum SeperableBssrdf::Sample_S( const Vector& wo , const Point& po , Vector& wi , Point& pi ) const {
-    // to be implemented
+Spectrum SeperableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi ) const {
+    Vector vx , vy , vz;
+    const auto r0 = sort_canonical();
+    if( r0 < 0.5f ){
+        vx = btn;
+        vy = nn;
+        vz = tn;
+    }else if( r0 < 0.75f ){
+        vx = tn;
+        vy = btn;
+        vz = nn;
+    }else{
+        vx = nn;
+        vy = tn;
+        vz = btn;
+    }
+
+    const auto ch = clamp( 0 , 2 , (int)(sort_canonical() * SPECTRUM_SAMPLE) );
+
+    const auto r = Sample_Sr(ch, sort_canonical());
+    if( r < 0.0f ) return 0.0f;
+    const auto phi = TWO_PI * sort_canonical();
+
+    const auto rMax = Sample_Sr(ch, 0.9999f);
+    if( r >= rMax ) return 0.0f;
+    const auto l = 2 * sqrt( SQR(rMax) - SQR(r) );
+
+    const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) - l * vy * 0.5f;
+    const auto target = source + l * vy;
+
+    auto current = source;
+
+    while( true ){
+        const auto t = Dot( current - target , vy );
+        if( t <= 0 )
+            break;
+
+        Ray r( current , -vy , 0 , 0.001f , t );
+        Intersection intersect;
+        if( !scene.GetIntersect( r , &intersect ) )
+            break;
+
+        current = intersect.intersect;
+    }
+
     return 1.0f;
 }

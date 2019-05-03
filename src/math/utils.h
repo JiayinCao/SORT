@@ -89,6 +89,11 @@ inline float clamp( float x , float mi , float ma ){
 	if( x < mi ) x = mi;
 	return x;
 }
+inline int clamp( int x , int mi , int ma ){
+	if( x > ma ) x = ma;
+	if( x < mi ) x = mi;
+	return x;
+}
 
 //! @brief	Degree to radian.
 //!

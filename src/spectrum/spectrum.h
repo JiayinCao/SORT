@@ -19,5 +19,5 @@
 
 #include "rgbspectrum.h"
 
-// spectrum is actualy a macro for later extending the system
-#define Spectrum RGBSpectrum
+#define Spectrum            RGBSpectrum
+#define SPECTRUM_SAMPLE     RGBSPECTRUM_SAMPLE
