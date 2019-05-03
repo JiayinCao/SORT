@@ -85,8 +85,7 @@ inline Spectrum ConductorFresnel( float cosI , const Spectrum& eta , const Spect
 }
 
 //! @brief Interface for fresnel.
-class	Fresnel
-{
+class	Fresnel{
 public:
 	//! @brief Evaluate the Fresnel term.
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
@@ -95,8 +94,7 @@ public:
 };
 
 //! @brief A hack that presents no fresnel.
-class	FresnelNo : public Fresnel
-{
+class	FresnelNo : public Fresnel{
 public:
     //! @brief Evaluate the Fresnel term.
     //! @param cosI     Absolute cosine value of the angle between the incident ray and the normal. Caller of this function has to make sure cosI >= 0.0f.
@@ -105,8 +103,7 @@ public:
 };
 
 //! @brief Fresnel for conductors.
-class	FresnelConductor : public Fresnel
-{
+class	FresnelConductor : public Fresnel{
 public:
 	//! Constructor
     //! @param  e   Index of refraction of the material.
@@ -126,8 +123,7 @@ private:
 };
 
 //! @brief Fresnel for dielectric.
-class	FresnelDielectric : public Fresnel
-{
+class	FresnelDielectric : public Fresnel{
 public:
     //! Constructor
     //! @param  ei      Index of refraction of the medium on the side normal points.
@@ -148,8 +144,7 @@ private:
 
 //! @brief Schlick Fresnel Approximation
 template<class T>
-class	FresnelSchlick : public Fresnel
-{
+class	FresnelSchlick : public Fresnel{
 public:
     //! Constructor
     //! @param  ei      Index of refraction of the medium on the side normal points.
@@ -168,8 +163,7 @@ private:
 };
 
 //! @brief Disney Fresnel Approximation
-class    FresnelDisney : public Fresnel
-{
+class    FresnelDisney : public Fresnel{
 public:
     //! Constructor
     //! @param  ei      Index of refraction of the medium on the side normal points.
