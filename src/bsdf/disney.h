@@ -19,6 +19,7 @@
 
 #include "bxdf.h"
 #include "microfacet.h"
+#include "bssrdf/bssrdf.h"
 
 class Bssrdf;
 
@@ -145,7 +146,7 @@ private:
     }
 };
 
-//! @brief Clearcoat GGX NDF.
+//! @brief  Clearcoat GGX NDF.
 class ClearcoatGGX : public GGX{
 public:
     //! @brief Constructor
@@ -164,4 +165,56 @@ public:
 protected:
     //! @brief Smith shadow-masking function G1
     float G1(const Vector& v) const override;
+};
+
+//! @brief  DisneyBssrdf implementation.
+/**
+ * Approximate Reflectance Profiles for Efficient Subsurface Scattering
+ * https://graphics.pixar.com/library/ApproxBSSRDF/paper.pdf
+ */
+class DisneyBssrdf : public SeparableBssrdf {
+public:
+    //! @brief  Constructor of DisneyBssrdf.
+    //!
+    //! @param  intersect   Intersection information at exitant point.
+    //! @param  R           Reflectance of the material.
+    //! @param  dd          Spectrum dependent mean distance.
+    //! @param  ior_i       Index of refraction inside the surface.
+    //! @param  ior_e       Index of refraction outside the surface.
+    DisneyBssrdf( const Intersection* intersect , const Spectrum& R , const Spectrum& dd , float ior_i , float ior_e );
+
+    //! @brief  Evalute the reflectance profile based on distance between the two points.
+    //!
+    //! @param  distance    Distance between the incident and extant positions.
+    //! @return             Reflectance profile based on the distance.
+    Spectrum    Sr( float distance ) const override;
+
+    //! @brief  Sampling a distance based on the reflectance profile.
+    //!
+    //! @param  ch      Spectrum channel.
+    //! @param  r       A canonical value used to randly sample distance
+    //! @return         The distance sampled.
+    float       Sample_Sr(int ch, float r) const override;
+
+    //! @brief  Pdf of sampling such a distance based on the reflectance profile.
+    //!
+    //! @param  ch      Spectrum channel.
+    //! @param  d       Distance from the extant point.
+    //! @return         Pdf of sampling it.
+    float       Pdf_Sr(int ch, float d) const override;
+
+    //! @brief  Evaluate the BSSRDF.
+    //!
+    //! Unlike BXDF, BSSRDF is more of a generalized version function of eight dimensions.
+    //!
+    //! @param  wo      Extant direction.
+    //! @param  po      Extant position.
+    //! @param  wi      Incident direction.
+    //! @param  pi      Incident position.
+    //! @return         To be figured out
+    Spectrum    S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const override;
+
+private:
+    Spectrum    R;
+    Spectrum    d;
 };

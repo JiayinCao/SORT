@@ -54,6 +54,48 @@ float ClearcoatGGX::G1(const Vector& v) const {
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
 }
 
+DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& dd , float ior_i , float ior_e )
+:R(R),SeparableBssrdf( intersection , ior_i , ior_e ){
+    // Approximate Reflectance Profiles for Efficient Subsurface Scattering, Eq 6
+    const auto s = Spectrum(1.9f) - R + 3.5f * ( R - Spectrum( 0.8f ) ) * ( R - Spectrum( 0.8f ) );
+    d = dd / s;
+}
+
+Spectrum DisneyBssrdf::S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const{
+    const auto d = Normalize( po - pi );
+    auto fade = 1.0f;
+    const auto cosTheta = Dot( d , nn );
+    if( cosTheta > 0.0f ){
+        const auto sinTheta = sqrt( fmax( 0.0f , 1.0f - SQR( cosTheta ) ) );
+        Vector  d2 = nn * sinTheta - ( d - nn * cosTheta ) * cosTheta / sinTheta;
+        fade = fmax( 0.0f , Dot( nn , d2 ) );
+    }
+    const auto fo = SchlickWeight( AbsCosTheta(wo) );
+    const auto fi = SchlickWeight( AbsCosTheta(wi) );
+    constexpr float FOUR_PI = 2.0f * TWO_PI;
+    return fade * ( 2.0f - fo ) * ( 2.0f - fi * 0.5f ) * Sr( Distance( po , pi ) ) / FOUR_PI;
+}
+
+Spectrum DisneyBssrdf::Sr( float r ) const{
+    r = ( r < 0.000001f ) ? 0.000001f : r;
+    constexpr auto EIGHT_PI = 4.0 * TWO_PI;
+    return R * ( ( Spectrum( -r ) / d ).Exp() + ( Spectrum( -r ) / ( 3.0f * d ) ).Exp() ) / ( EIGHT_PI * d * r );
+}
+
+float DisneyBssrdf::Sample_Sr(int ch, float r) const{
+    const auto rr = sort_canonical();
+    return rr < 0.25f ? -d[ch] * log( sort_canonical() ) : -3.0f * d[ch] * log( sort_canonical() );
+}
+
+float DisneyBssrdf::Pdf_Sr(int ch, float r) const{
+    r = ( r < 0.000001f ) ? 0.000001f : r;
+//    constexpr float SIX_PI = 3.0f * TWO_PI;
+//    return  0.25f * exp( -r / d[ch] ) / ( TWO_PI * d[ch] * r ) +
+//            0.75f * exp( -r / ( 3.0f * d[ch] ) ) / ( SIX_PI * d[ch] * r );
+    constexpr auto EIGHT_PI = 4.0f * TWO_PI;
+    return ( exp( -r / d[ch] ) + exp( -r / ( 3.0f * d[ch] ) ) ) / ( EIGHT_PI * d[ch] * r );
+}
+
 Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
     const auto diffuseWeight = (1.0f - metallic) * (1.0 - specTrans);

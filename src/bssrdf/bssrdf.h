@@ -21,6 +21,7 @@
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
 #include "math/point.h"
+#include "bsdf/bxdf.h"
 
 class Intersection;
 class Scene;
@@ -50,6 +51,8 @@ public:
     //! @param  po      Extant position.
     //! @param  wi      Incident direction.
     //! @param  pi      Incident position.
+    //! @param  pdf     Pdf of sampling such a point on the surface of the object.
+    //! @return         To be figured out
     virtual Spectrum    S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const = 0;
 
     //! @brief  Importance sample the incident direction and position.
@@ -59,25 +62,27 @@ public:
     //! @param  po      Extant position.
     //! @param  wi      Incident direction to be updated.
     //! @param  pi      Incident position to be updated.
-    virtual Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi ) const = 0;
+    //! @param  pdf     Pdf of sampling such a point on the surface of the object.
+    //! @return         To be figured out
+    virtual Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf ) const = 0;
 
 protected:
     const float ior_i;  /**< Index of refraction inside the surface. */
     const float ior_e;  /**< Index of refraction outside the surface. */
 };
 
-//! @brief  Seperable BSSRDF implementation.
+//! @brief  Separable BSSRDF implementation.
 /**
  * BSSRDF is usually very difficult to evaluate due to its eight dimensional nature. It is true for even simplest
  * cases like a slab. It is not uncommon to see BSSRDF implementation with lots of gross approximations to simplify
  * things so that it is tractable.
- * Seperable BSSRDF is one of them by making the following assumptions.
+ * Separable BSSRDF is one of them by making the following assumptions.
  *   - BSSRDF can be seperate with three different components, two of which are directional and the other one is spatial.
  *   - The spatial term purely depends on the distance between the incident and extant positions, this may break in cases of complex shapes.
  */
-class SeperableBssrdf : public Bssrdf{
+class SeparableBssrdf : public Bssrdf{
 public:
-    SeperableBssrdf( const Intersection* intersection , const float ior_i , const float ior_e );
+    SeparableBssrdf( const Intersection* intersection , const float ior_i , const float ior_e );
     
     //! @brief  Evaluate the BSSRDF.
     //!
@@ -87,6 +92,7 @@ public:
     //! @param  po      Extant position.
     //! @param  wi      Incident direction.
     //! @param  pi      Incident position.
+    //! @return         To be figured out
     Spectrum    S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const override;
 
     //! @brief  Importance sample the incident direction and position.
@@ -95,15 +101,35 @@ public:
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  wi      Incident direction to be updated.
+    //! @param  pi      This will be ignored.
+    //! @param  pdf     Pdf of sampling such a point on the surface of the object.
+    //! @return         The spatial term in separable Bssrdf multiplied by the fresnel term of the incident direction.
+    Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf ) const override;
+
+    //! @brief  Importance sample the incident position.
+    //!
+    //! @param  scene   The scene where ray tracing happens.
+    //! @param  wo      Extant direction.
+    //! @param  po      Extant position.
     //! @param  pi      Incident position to be updated.
-    Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi ) const override;
+    //! @param  pdf     Pdf of sampling such a point on the surface of the object.
+    //! @return         The spatial term in separable Bssrdf.
+    Spectrum    Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , Point& pi , float& pdf ) const;
+
+    //! @brief  PDF of sampling the reflectance profile.
+    //!
+    //! @param  po      Extant position in world coordinate.
+    //! @param  pi      Incident position in world coordinate.
+    //! @param  n       Normal in world coordinate at incident position.
+    //! @return         Pdf of sampling the distance based on the reflectance profile.
+    float       Pdf_Sp( const Point& po , const Point& pi , const Vector& n ) const;
 
 protected:
     //! @brief  Evalute the reflectance profile based on distance between the two points.
     //!
     //! @param  distance    Distance between the incident and extant positions.
     //! @return             Reflectance profile based on the distance.
-    virtual Spectrum    Sr( const float distance ) const = 0;
+    virtual Spectrum    Sr( float distance ) const = 0;
 
     //! @brief  Sampling a distance based on the reflectance profile.
     //!
@@ -115,17 +141,37 @@ protected:
     //! @brief  Pdf of sampling such a distance based on the reflectance profile.
     //!
     //! @param  ch      Spectrum channel.
+    //! @param  d       Distance from the extant point.
     //! @return         Pdf of sampling it.
-    virtual float Pdf_Sr(int ch) const = 0;
+    virtual float       Pdf_Sr(int ch, float d) const = 0;
 
-private:
     Vector nn;      /**< Normal at the point to be Evaluated. */
     Vector btn;     /**< Bi-tangent at the point to be evaluated. */
     Vector tn;      /**< Tangent at the point to be Evaluated. */
     
-    //! @brief  One of the directional components of seperable Bssrdf.
+    //! @brief  One of the directional components of separable Bssrdf.
     //!
     //! @param  wi      Incident direction.
     //! @return         This is usually related for fresnel.
     Spectrum    Sw( const Vector& wi ) const;
+
+    friend class SeparableBssrdfAdapter;
+};
+
+class SeparableBssrdfAdapter : public Bxdf {
+public:
+    //! @brief  Constructor taking a bssrdf.
+    //!
+    //! @param  bssrdf      Bssrdf that the adapter is used in.
+    SeparableBssrdfAdapter( const SeparableBssrdf* bssrdf );
+
+    //! Evalute the BXDF.
+    //!
+    //! @param  wo      The exitant direction in local space.
+    //! @param  wi      The incident direction in local space.
+    //! @return         Evaluted BRDF by cos(\theta)
+    Spectrum F( const Vector& wo , const Vector& wi ) const override;
+
+private:
+    const SeparableBssrdf*  m_bssrdf;
 };

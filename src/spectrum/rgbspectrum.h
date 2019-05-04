@@ -80,9 +80,10 @@ public:
 	RGBSpectrum& operator*=( float t ){ *this = *this * t ; return *this; }
 	RGBSpectrum& operator/=( float t ){ *this = *this / t ; return *this; }
 
+	inline float operator []( int i ) const { return data[i]; }
+
 	//whether the spectrum is black
-	bool IsBlack() const
-	{
+	bool IsBlack() const{
 		if( m_r > 0.0f )
 			return false;
 		if( m_g > 0.0f )
@@ -119,10 +120,16 @@ public:
     }
 
 private:
-	// the rgb color
-	float m_r;
-	float m_g;
-	float m_b;
+	// the vector data
+	union
+	{
+		struct{
+			float m_r , m_g , m_b;
+		};
+		struct{
+			float data[3];
+		};
+	};
 
 // set friend function
 friend inline RGBSpectrum operator-( float t , const RGBSpectrum& s );
