@@ -356,7 +356,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat Glossiness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Specular Transmittance')
-        self.inputs.new( 'SORTNodeSocketFloat' , 'Scatter Distance')
+        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Scatter Distance')
         self.inputs.new( 'SORTNodeSocketFloat' , 'Flatness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Diffuse Transmittance' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
@@ -396,7 +396,6 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         file.write( "\"float roughness\" %f\n"%(self.inputs['Roughness'].default_value))
         file.write( "\"float sheen\" %f\n"%(self.inputs['Sheen'].default_value))
         file.write( "\"float sheentint\" %f\n"%(self.inputs['Sheen Tint'].default_value))
-        file.write( "\"float spectrans\" %f\n"%(self.inputs['Specular Transmittance'].default_value))
         file.write( "\"float speculartint\" %f\n"%(self.inputs['Specular Tint'].default_value))
         file.write( "\"float spectrans\" %f\n"%(self.inputs['Specular Transmittance'].default_value))
         file.write( "\"rgb scatterdistance\" [%f %f %f]\n"%(self.inputs['Scatter Distance'].default_value,self.inputs['Scatter Distance'].default_value,self.inputs['Scatter Distance'].default_value))
@@ -674,6 +673,29 @@ class SORTNode_Material_ModifiedPhong(SORTShadingNode):
         fs.serialize( self.inputs['Diffuse Ratio'].export_osl_value() )
         fs.serialize( self.inputs['Diffuse'].export_osl_value() )
         fs.serialize( self.inputs['Specular'].export_osl_value() )
+        fs.serialize( self.inputs['Normal'].export_osl_value() )
+
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Cloth(SORTShadingNode):
+    bl_label = 'Cloth'
+    bl_idname = 'SORTNode_Material_Cloth'
+    osl_shader = '''
+        shader Cloth( color Diffuse = @ ,
+                      float Roughness = @ ,
+                      normal Normal = @ ,
+                      output closure color Result = color(0) ){
+            Result = distributionBRDF( Diffuse , Roughness , Normal );
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketColor' , 'Diffuse' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
+        self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 3 )
+        fs.serialize( self.inputs['Diffuse'].export_osl_value() )
+        fs.serialize( self.inputs['Roughness'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
 @SORTPatternGraph.register_node('Materials')
