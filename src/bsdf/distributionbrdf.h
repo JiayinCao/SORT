@@ -91,6 +91,6 @@ private:
     // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
     float convert( float roughness ) const {
         roughness = std::max(roughness, (float)1e-3);
-        return roughness * roughness;
+        return 1.0f - SQR(roughness);
     };
 };

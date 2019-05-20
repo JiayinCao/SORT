@@ -43,27 +43,34 @@ Spectrum DistributionBRDF::f( const Vector& wo , const Vector& wi ) const{
 }
 
 Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const{
-    //return Bxdf::sample_f( wo , wi , bs , pPdf );
-    const auto v = sort_canonical() * ( 1.0f + A * alphaSqr );
+    // Somehow the importance sampling algorithm is even worse than the default sampling algorithm, keep 20% chance of default sampling to remove fireflies
+    const auto specRatio = specular * 0.8f;
+    const auto r = sort_canonical();
+    if( r < specRatio ){
+        const auto v = sort_canonical() * ( 1.0f + A * alphaSqr );
 
-    // The equation to importance sample the pdf is
-    //  epsilon = ( sin(\theta)^2 + A * alpha^2 * exp( ( 1.0f - 1.0f / sin(\theta)^2 ) ) / alpha^2 ) ) / ( 1 + A * alpha^2 )
-    // Unfortunately, there is no analytical solver. However, since the function is mono-increasing, a binary search can be used
-    // as an alternative, not the optimal solution, but better than nothing.
-    auto l = 0.0f , r = 1.0f;
-    while( fabs( r - l ) > 0.001f ){
-        const auto m = ( l + r ) * 0.5f;
-        const auto t = m + A * alphaSqr * exp( ( 1 - 1.0f / m ) / alphaSqr );
-        if( t < v )
-            l = m;
-        else
-            r = m;
+        // The equation to importance sample the pdf is
+        //  epsilon = ( sin(\theta)^2 + A * alpha^2 * exp( ( 1.0f - 1.0f / sin(\theta)^2 ) ) / alpha^2 ) ) / ( 1 + A * alpha^2 )
+        // Unfortunately, there is no analytical solver. However, since the function is mono-increasing, a binary search can be used
+        // as an alternative, not the optimal solution, but better than nothing.
+        auto l = 0.0f , r = 1.0f;
+        while( fabs( r - l ) > 0.001f ){
+            const auto m = ( l + r ) * 0.5f;
+            const auto t = m + A * alphaSqr * exp( ( 1 - 1.0f / m ) / alphaSqr );
+            if( t < v )
+                l = m;
+            else
+                r = m;
+        }
+        const auto sin_theta = sqrt( l );
+        const auto cos_theta = sqrt( 1.0f - l );
+        const auto phi = TWO_PI * sort_canonical();
+        const auto wh = SphericalVec( sin_theta , cos_theta , phi );
+        wi = reflect( wo , wh );
+    }else{
+        // Fall back to the default sampling method
+        Bxdf::sample_f( wo , wi , bs , pPdf );
     }
-    const auto sin_theta = sqrt( l );
-    const auto cos_theta = sqrt( 1.0f - l );
-    const auto phi = TWO_PI * sort_canonical();
-    const auto wh = SphericalVec( sin_theta , cos_theta , phi );
-    wi = reflect( wo , wh );
 
     if( pPdf )
         *pPdf = pdf( wo , wi );
@@ -72,15 +79,15 @@ Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSamp
 }
 
 float DistributionBRDF::pdf(const Vector& wo, const Vector& wi) const{
-    //return Bxdf::pdf( wo , wi );
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
+    const auto specRatio = specular * 0.8f;
     const auto wh = Normalize( wo + wi );
     const auto OoH = Dot( wo , wh );
 
     // Pdf of wh w.r.t solid angle
     //   Pdf(wh) = ( 1.0f + A * exp( -1.0f / ( alpha^2 * tan_theta(wh)^2 ) ) / sin_theta(wh)^4 ) * cos_theta( wh ) / ( ( 1.0f + A * alpha^2 ) * PI )
     const auto p = ( 1.0f + A * exp( -1.0f / ( TanTheta2( wh ) * alphaSqr ) / Pow<4>( SinTheta(wh) ) ) ) * CosTheta( wh ) / ( ( 1.0f + A * alphaSqr ) * PI );
-    return p / ( 4.0f * OoH );
+    return slerp( Bxdf::pdf( wo , wi ) , p / ( 4.0f * OoH ) , specRatio );
 }
