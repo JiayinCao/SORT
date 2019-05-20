@@ -5,7 +5,7 @@ SORT, short for Simple Open-source Ray Tracing, is my personal cross platform ra
 Here are the features implemented so far:
   - Integrator. (Whitted ray tracing, direct lighting, path tracing, light tracing, bidirectional path tracing, instant radiosity, ambient occlusion)
   - Spatial acceleration structure. (KD-Tree, BVH, Uniform grid, OcTree)
-  - BXDF. (Disney BRDF, Lambert, LambertTransmission, Oran Nayar, MicroFacet Reflection, Microfacet Transmission, MERL, Fourier, AshikhmanShirley, Modified Phong, Coat, Blend, Double-Sided)
+  - BXDF. (Disney BRDF, Lambert, LambertTransmission, Oran Nayar, MicroFacet Reflection, Microfacet Transmission, MERL, Fourier, AshikhmanShirley, Modified Phong, Coat, Blend, Double-Sided, Distribution BRDF)
   - Support Open Shading Language.
   - Camera. (DOF)
   - Multi-thread rendering.
@@ -40,6 +40,7 @@ Here are some of the examples rendered by SORT
 <img src="assets/main_page/mat_coated2.png" width="225" height="225" />
 <img src="assets/main_page/mat_plastic2.png" width="225" height="225" />
 <img src="assets/main_page/mat_coated3.png" width="225" height="225" />
+<img src="assets/main_page/mat_velvet.png" width="225" height="225" />
 
 ## Compilation and Deployment
 For those who are interested in compiling SORT by themselves, please check out [this page](/compilation.md) for further deatail.  
