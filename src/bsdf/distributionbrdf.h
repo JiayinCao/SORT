@@ -33,6 +33,8 @@ public:
     struct Params {
         RGBSpectrum baseColor;
         float       roughness;
+        float       specular;
+        float       specularTint;
         Vector n;
     };
 
@@ -40,11 +42,13 @@ public:
     //!
     //! @param s            Direction-Hemisphere reflection.
     //! @oaram r            Roughnes.
+    //! @param specular     Reflectance of non-lambert part at normal incident.
+    //! @param st           Specular Tint towards @param s.
     //! @param weight       Weight of this BRDF
     //! @param n            Normal, usually from normal map, in local coordinate.
     //! @param doubleSided  Whether the BRDF is double sided.
-    DistributionBRDF(const Spectrum& s, const float r , const Spectrum& weight, const Vector& n, bool doubleSided = false) 
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s), alpha(convert(r)), alphaSqr(alpha*alpha) {
+    DistributionBRDF(const Spectrum& s, const float r , const float specular , const float st , const Spectrum& weight, const Vector& n, bool doubleSided = false) 
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s), alpha(convert(r)), alphaSqr(alpha*alpha), specular(specular), specularTint(st) {
     }
 
     //! Constructor from parameter set.
@@ -53,7 +57,7 @@ public:
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
     DistributionBRDF( const Params& param , const Spectrum& weight , bool doubleSided = false)
-        : DistributionBRDF( param.baseColor , param.roughness , weight , param.n ) {
+        : DistributionBRDF( param.baseColor , param.roughness , param.specular , param.specularTint , weight , param.n ) {
     }
 
     //! Evaluate the BRDF
@@ -77,9 +81,11 @@ public:
     float pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:
-	const Spectrum  R;          /**< Direction-Hemisphere reflection or total reflection. */
-    const float     alpha;      /**< Alpha of the Brdf. */
-    const float     alphaSqr;   /**< Squred of alpha. */
+	const Spectrum  R;              /**< Direction-Hemisphere reflection or total reflection. */
+    const float     alpha;          /**< Alpha of the Brdf. */
+    const float     alphaSqr;       /**< Squred of alpha. */
+    const float     specular;       /**< Reflectance of non-lambert part at normal incident. */
+    const float     specularTint;   /**< Specular Tint towards R. */
 
     // UE4's way of converting roughness to alpha
     // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html

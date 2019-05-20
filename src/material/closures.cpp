@@ -470,6 +470,8 @@ namespace {
             BuiltinClosures closure = { GetName(), ClosureID, {
                 CLOSURE_COLOR_PARAM(DistributionBRDF::Params, baseColor),
                 CLOSURE_FLOAT_PARAM(DistributionBRDF::Params, roughness),
+                CLOSURE_FLOAT_PARAM(DistributionBRDF::Params, specular),
+                CLOSURE_FLOAT_PARAM(DistributionBRDF::Params, specularTint),
                 CLOSURE_VECTOR_PARAM(DistributionBRDF::Params, n),
                 CLOSURE_FINISH_PARAM(DistributionBRDF::Params)
             } };

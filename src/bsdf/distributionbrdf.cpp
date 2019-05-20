@@ -34,14 +34,16 @@ Spectrum DistributionBRDF::f( const Vector& wo , const Vector& wi ) const{
 
     // Crafting a Next-Gen Material Pipeline for The Order: 1886, Eq. 22
     const auto dterm = [&]( const Vector& wh ){
-        return ( 1.0f + A * exp( -1.0f / ( TanTheta2(wh) * alphaSqr ) ) ) / ( PI * ( 1.0f + A * alphaSqr ) );
+        return ( 1.0f + A * exp( -1.0f / ( TanTheta2(wh) * alphaSqr ) ) / Pow<4>( SinTheta(wh) ) ) / ( PI * ( 1.0f + A * alphaSqr ) );
     };
 
-    const auto F = SchlickFresnel( 1.0f , IoH );
-    return slerp( R * INV_PI , R * dterm(wh) / ( 4.0f * ( OoN + IoN - OoN * IoN ) ) , F ) * IoN;
+    const auto F = SchlickFresnel( specular , IoH );
+    const auto SR = slerp( 1.0f , R , specularTint );
+    return slerp( R * INV_PI , SR * dterm(wh) / ( 4.0f * ( OoN + IoN - OoN * IoN ) ) , F ) * IoN;
 }
 
 Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const{
+    //return Bxdf::sample_f( wo , wi , bs , pPdf );
     const auto v = sort_canonical() * ( 1.0f + A * alphaSqr );
 
     // The equation to importance sample the pdf is
@@ -58,7 +60,7 @@ Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSamp
             r = m;
     }
     const auto sin_theta = sqrt( l );
-    const auto cos_theta = sqrt( 1.0f - SQR( sin_theta ) );
+    const auto cos_theta = sqrt( 1.0f - l );
     const auto phi = TWO_PI * sort_canonical();
     const auto wh = SphericalVec( sin_theta , cos_theta , phi );
     wi = reflect( wo , wh );
@@ -70,6 +72,7 @@ Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSamp
 }
 
 float DistributionBRDF::pdf(const Vector& wo, const Vector& wi) const{
+    //return Bxdf::pdf( wo , wi );
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
@@ -77,7 +80,7 @@ float DistributionBRDF::pdf(const Vector& wo, const Vector& wi) const{
     const auto OoH = Dot( wo , wh );
 
     // Pdf of wh w.r.t solid angle
-    //   Pdf(wh) = ( 1.0f + A * alpha^2 * exp( -1.0f / ( alpha^2 * tan_theta(wh)^2 ) ) / sin_theta(wh)^4 ) * cos_theta( wh ) ) / ( 1.0f + A * alpha^2 )
-    const auto p = ( 1.0f + A * exp( -1.0f / ( alphaSqr * TanTheta2( wh ) ) / ( Pow<4>( SinTheta(wh) ) ) ) * CosTheta( wh ) / ( 1.0f + A * alphaSqr ) );
-    return p / ( 4.0f * Dot( wh , wi ) );
+    //   Pdf(wh) = ( 1.0f + A * exp( -1.0f / ( alpha^2 * tan_theta(wh)^2 ) ) / sin_theta(wh)^4 ) * cos_theta( wh ) / ( ( 1.0f + A * alpha^2 ) * PI )
+    const auto p = ( 1.0f + A * exp( -1.0f / ( TanTheta2( wh ) * alphaSqr ) / Pow<4>( SinTheta(wh) ) ) ) * CosTheta( wh ) / ( ( 1.0f + A * alphaSqr ) * PI );
+    return p / ( 4.0f * OoH );
 }

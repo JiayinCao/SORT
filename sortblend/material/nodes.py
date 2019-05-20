@@ -682,20 +682,26 @@ class SORTNode_Material_Cloth(SORTShadingNode):
     osl_shader = '''
         shader Cloth( color Diffuse = @ ,
                       float Roughness = @ ,
+                      float Specular = @ ,
+                      float SpecularTint = @ ,
                       normal Normal = @ ,
                       output closure color Result = color(0) ){
-            Result = distributionBRDF( Diffuse , Roughness , Normal );
+            Result = distributionBRDF( Diffuse , Roughness , Specular , SpecularTint , Normal );
         }
     '''
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketColor' , 'Diffuse' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Specular' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'SpecularTint' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
     def serialize_prop(self, fs):
-        fs.serialize( 3 )
+        fs.serialize( 5 )
         fs.serialize( self.inputs['Diffuse'].export_osl_value() )
         fs.serialize( self.inputs['Roughness'].export_osl_value() )
+        fs.serialize( self.inputs['Specular'].export_osl_value() )
+        fs.serialize( self.inputs['SpecularTint'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
 @SORTPatternGraph.register_node('Materials')
