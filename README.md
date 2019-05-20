@@ -12,7 +12,7 @@ This is just a brief introduction of SORT. For further detail, please check out 
 Here are the features implemented so far:
   - Integrator. (Whitted ray tracing, direct lighting, path tracing, light tracing, bidirectional path tracing, instant radiosity, ambient occlusion)
   - Spatial acceleration structure. (KD-Tree, BVH, Uniform grid, OcTree)
-  - BXDF. (Disney BRDF, Lambert, LambertTransmission, Oran Nayar, MicroFacet Reflection, Microfacet Transmission, MERL, Fourier, AshikhmanShirley, Modified Phong, Coat, Blend, Double-Sided)
+  - BXDF. (Disney BRDF, Lambert, LambertTransmission, Oran Nayar, MicroFacet Reflection, Microfacet Transmission, MERL, Fourier, AshikhmanShirley, Modified Phong, Coat, Blend, Double-Sided, DistributionBRDF)
   - Support Open Shading Language.
   - Camera. (DOF)
   - Multi-thread rendering.
