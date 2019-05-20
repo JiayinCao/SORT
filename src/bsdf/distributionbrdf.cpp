@@ -27,9 +27,11 @@ Spectrum DistributionBRDF::f( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    const auto OoN = CosTheta( wo );
-    const auto IoN = CosTheta( wi );
-    const auto wh = Normalize( wo + wi );
+    const auto OoN = AbsCosTheta( wo );
+    const auto IoN = AbsCosTheta( wi );
+    auto wh = Normalize( wo + wi );
+    if( wh.Length() == 0.0f )
+        wh = DIR_UP;
     const auto IoH = Dot( wi , wh );
 
     // Crafting a Next-Gen Material Pipeline for The Order: 1886, Eq. 22
@@ -39,10 +41,13 @@ Spectrum DistributionBRDF::f( const Vector& wo , const Vector& wi ) const{
 
     const auto F = SchlickFresnel( specular , IoH );
     const auto SR = slerp( 1.0f , R , specularTint );
-    return slerp( R * INV_PI , SR * dterm(wh) / ( 4.0f * ( OoN + IoN - OoN * IoN ) ) , F ) * IoN;
+    return slerp( R * INV_PI , SR * dterm(wh) / fmax( 0.000000f , 4.0f * ( OoN + IoN - OoN * IoN ) ) , F ) * IoN;
 }
 
 Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const{
+    return Bxdf::sample_f( wo , wi , bs , pPdf );
+
+    /*
     // Somehow the importance sampling algorithm is even worse than the default sampling algorithm, keep 20% chance of default sampling to remove fireflies
     const auto specRatio = specular * 0.8f;
     const auto r = sort_canonical();
@@ -76,18 +81,25 @@ Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSamp
         *pPdf = pdf( wo , wi );
 
     return f( wo , wi );
+    */
 }
 
 float DistributionBRDF::pdf(const Vector& wo, const Vector& wi) const{
+    return Bxdf::pdf( wo , wi );
+
+/*
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
     const auto specRatio = specular * 0.8f;
-    const auto wh = Normalize( wo + wi );
+    auto wh = Normalize( wo + wi );
+    if( wh.Length() == 0.0f )
+        wh = DIR_UP;
     const auto OoH = Dot( wo , wh );
 
     // Pdf of wh w.r.t solid angle
     //   Pdf(wh) = ( 1.0f + A * exp( -1.0f / ( alpha^2 * tan_theta(wh)^2 ) ) / sin_theta(wh)^4 ) * cos_theta( wh ) / ( ( 1.0f + A * alpha^2 ) * PI )
     const auto p = ( 1.0f + A * exp( -1.0f / ( TanTheta2( wh ) * alphaSqr ) / Pow<4>( SinTheta(wh) ) ) ) * CosTheta( wh ) / ( ( 1.0f + A * alphaSqr ) * PI );
     return slerp( Bxdf::pdf( wo , wi ) , p / ( 4.0f * OoH ) , specRatio );
+*/
 }
