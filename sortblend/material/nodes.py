@@ -696,6 +696,8 @@ class SORTNode_Material_Cloth(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'SpecularTint' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+        self.inputs['Specular'].default_value = 1.0
+        self.inputs['SpecularTint'].default_value = 1.0
     def serialize_prop(self, fs):
         fs.serialize( 5 )
         fs.serialize( self.inputs['Diffuse'].export_osl_value() )
