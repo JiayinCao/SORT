@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -68,7 +68,7 @@ public:
     //! @param  file        The name of the file where the logging happens.
     //! @param  line        The number of the line in the file where the logging happens.
     void Dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line );
-    
+
 private:
     //! @brief  Output the log message.
     //!
@@ -85,7 +85,7 @@ private:
     //! @param  file        The name of the file where the logging happens.
     //! @param  line        The number of the line in the file where the logging happens.
     const std::string format( LOG_LEVEL level , LOG_TYPE type , const char* str , const char* file , const int line ) const;
-    
+
     //! @brief  Format the message header.
     //!
     //! @param  level       Level of the message.
@@ -102,13 +102,13 @@ public:
     //!
     //! @param  filename    Name of the log file.
     FileLogDispatcher( const std::string& filename );
-    
+
     //! @brief  Destructor closes the file.
     ~FileLogDispatcher();
 
 private:
     std::ofstream   m_file;     /**< File to be logged. */
-    
+
     //! @brief  Output the log message to the file.
     //!
     //! @param  level       Level of the log.

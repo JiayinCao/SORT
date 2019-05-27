@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -30,7 +30,7 @@ using namespace OIIO;
  * This is the connection between OSL texturing system and SORT texturing system.
  * In order to take full control of the rendering, SORT doesn't use the OSL implementation of texturing system.
  * The current texturing system in SORT is extremely naive and simple.
- * 
+ *
  * Most of the following interfaces are not implemented for now due to the simplicity of SORT texturing system.
  * There will be more features added in the future.
  */
@@ -149,7 +149,7 @@ public:
         sAssertMsg(false, MATERIAL, "No support for sampling 3d texture for now.");
         return false;
     }
-    
+
     bool texture3d(TextureHandle *texture_handle,
         Perthread *thread_info,
         TextureOptBatch &options, Tex::RunMask mask,

@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -86,12 +86,12 @@ static inline float Np( const float phi , const int p , const float scale , cons
     return TrimmedLogistic( dphi, scale, -PI, PI);
 }
 
-static inline void ComputeApPdf(const float cosThetaO , const float cosThetaT , 
+static inline void ComputeApPdf(const float cosThetaO , const float cosThetaT ,
                                 const float cosGammaO , const float cosGammaT ,
                                 const float eta , const Spectrum sigma, float pdf[] ){
     const auto T = sigma * ( -2.0f * cosGammaT / cosThetaT );
     const auto expT = T.Exp();
-    
+
     Spectrum ap[PMAX + 1];
     Ap( cosThetaO , eta , cosGammaO , expT , ap );
 
@@ -99,7 +99,7 @@ static inline void ComputeApPdf(const float cosThetaO , const float cosThetaT ,
     for( auto i = 0 ; i <= PMAX ; ++i )
         sumY += ap[i].GetIntensity();
 
-    for (int i = 0; i <= PMAX; ++i) 
+    for (int i = 0; i <= PMAX; ++i)
         pdf[i] = ap[i].GetIntensity() / sumY;
 }
 
@@ -210,7 +210,7 @@ Spectrum Hair::f( const Vector& wo , const Vector& wi ) const{
         fsum += Mp( cosThetaIp , cosThetaO , sinThetaIp , sinThetaO , m_v[p] ) * ap[p] * Np( phi, p, m_scale, gammaO, gammaT );
 #else
         fsum += Mp( cosThetaI , cosThetaO , sinThetaI , sinThetaO , m_v[p] ) * ap[p] * Np( phi, p, m_scale, gammaO, gammaT );
-#endif   
+#endif
     }
     fsum += Mp( cosThetaI, cosThetaO, sinThetaI, sinThetaO, m_v[PMAX] ) * ap[PMAX] * INV_TWOPI;
 

@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -52,35 +52,35 @@ public:
     //! @param  weight          BRDF weight.
     //! @param  doubleSided     Whether the BRDF is double-sided.
     Phong(const Params& params, const Spectrum& weight, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.diffuse), S(params.specular), power(params.specularPower), 
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.diffuse), S(params.specular), power(params.specularPower),
           diffRatio(params.diffuse.GetIntensity()/(params.diffuse.GetIntensity()+params.specular.GetIntensity())) {
         const auto combined = D + S;
         sAssert(combined.GetR() <= 1.0f, MATERIAL);
         sAssert(combined.GetG() <= 1.0f, MATERIAL);
         sAssert(combined.GetB() <= 1.0f, MATERIAL);
     }
-    
-	//! Constructor
+
+    //! Constructor
     //! @param diffuse          Direction-hemisphere reflection for diffuse.
     //! @param specular         Direction-hemisphere reflection for specular.
     //! @param roughnessU       Roughness along one axis.
     //! @param roughnessV       Roughness along the other axis
     //! @param weight           Weight of the BXDF
     Phong(const Spectrum& diffuse, const Spectrum& specular, const float specularPower, const Spectrum& weight, const Vector& n , bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), power(specularPower), 
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), power(specularPower),
           diffRatio(diffuse.GetIntensity()/(diffuse.GetIntensity()+specular.GetIntensity())) {
         const auto combined = D + S;
         sAssert(combined.GetR() <= 1.0f, MATERIAL);
         sAssert(combined.GetG() <= 1.0f, MATERIAL);
         sAssert(combined.GetB() <= 1.0f, MATERIAL);
     }
-	
+
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
-	
+
     //! @brief Importance sampling for the fresnel BRDF.
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
@@ -88,15 +88,15 @@ public:
     //! @param pdf  Probability density of the selected direction.
     //! @return     The Evaluated BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
-    
+
     //! @brief Evaluate the pdf of an exitant direction given the Incident direction.
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override;
-    
+
 private:
-	const Spectrum  D , S;      /**< Direction-Hemisphere reflectance and transmittance. */
+    const Spectrum  D , S;      /**< Direction-Hemisphere reflectance and transmittance. */
     const float     power;      /**< Specular power, controlling the specular lobe. */
     const float     diffRatio;  /**< Real ratio of diffuse term. */
 };

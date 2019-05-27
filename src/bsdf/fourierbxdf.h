@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -34,7 +34,7 @@ public:
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The evaluted BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const;
-	
+
     //! @brief Importance sampling for the bxdf.
     //!
     //! This method is not pure virtual and it has a default
@@ -49,7 +49,7 @@ public:
     //! @param pdf  Probability density of the selected direction.
     //! @return     The evaluted BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const;
-    
+
     //! @brief Evalute the pdf of an existance direction given the Incident direction.
     //!
     //! If one implements customized sample_f for the brdf, it needs to have corresponding version of
@@ -58,7 +58,7 @@ public:
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const;
-    
+
     //! Load brdf data from Fourier Bxdf file.
     //!
     //! @param filename     Name of Fourier Bxdf file.
@@ -79,16 +79,16 @@ private:
         std::unique_ptr<float[]>   a0 = nullptr;
         std::unique_ptr<float[]>   cdf = nullptr;
         std::unique_ptr<float[]>   recip = nullptr;
-        
+
         float* GetAk( int offsetI , int offsetO , int* mptr ) const{
             const int offset = offsetO * nMu + offsetI;
             *mptr = m[offset];
             return a.get() + aOffset[offset];
         }
     };
-    
+
     FourierBxdfTable    bsdfTable;
-    
+
     // Fourier interpolation
     float fourier( const float* ak , int m , double cosPhi ) const;
     // Importance sampling for fourier interpolation
@@ -99,15 +99,15 @@ private:
 
     // Get CatmullRomWeights
     bool getCatmullRomWeights( float x , int& offset , float* weights ) const;
-    
+
     // Importance sampling for catmull rom
     float sampleCatmullRom2D( int size1 , int size2 , const float* nodes1 , const float* nodes2 , const float* values , const float* cdf ,
                              float alpha , float u , float* fval , float* pdf ) const;
-    
+
     // helper function to find interval that wraps the target value
     template<typename Predicate>
     int findInterval( int cnt , const Predicate& pred ) const;
-    
+
     // helper functio to blend coefficients for fourier
     int blendCoefficients( float* ak , int channel , int offsetI , int offsetO , float* weightsI , float* weightsO ) const;
 };
@@ -140,7 +140,7 @@ public:
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         return m_data->f(wo,wi);
     }
-    
+
     //! @brief Importance sampling for the bxdf.
     //!
     //! This method is not pure virtual and it has a default
@@ -157,7 +157,7 @@ public:
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override{
         return m_data->sample_f( wo , wi , bs , pdf ) * AbsCosTheta(wi);
     }
-    
+
     //! @brief Evalute the pdf of an existance direction given the Incident direction.
     //!
     //! If one implements customized sample_f for the brdf, it needs to have corresponding version of
@@ -168,7 +168,7 @@ public:
     float pdf( const Vector& wo , const Vector& wi ) const override{
         return m_data->pdf( wo , wi );
     }
-    
+
 private:
     const FourierBxdfData*    m_data;   /**< The actual data of Fourier brdf. */
 };

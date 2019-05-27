@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -31,13 +31,13 @@
 
 using TaskID = unsigned int;
 
-//! @brief 	Basic unit task in SORT system.
+//! @brief  Basic unit task in SORT system.
 /**
  * SORT is driven by a graph based task system. The tasks form a directed acyclic graph (DAG).
- * Only tasks without dependencies will get executed. There will be no cycles in the graph, otherwise 
- * the system will hang without proceeding. A task can range from rendering a piece of image to loading 
- * data from streams. Upon finishing of each task, it will remove its dependencies. Each task comes 
- * with a priority number. Default priority is 100000, higher priority task will be executed earlier 
+ * Only tasks without dependencies will get executed. There will be no cycles in the graph, otherwise
+ * the system will hang without proceeding. A task can range from rendering a piece of image to loading
+ * data from streams. Upon finishing of each task, it will remove its dependencies. Each task comes
+ * with a priority number. Default priority is 100000, higher priority task will be executed earlier
  * than lower ones.
  */
 class Task{
@@ -47,7 +47,7 @@ public:
     using DependentTask_Container = std::unordered_set<Task*>;
 
     //! @brief  Default constructor.
-    Task(   const char* name  , unsigned int priority = DEFAULT_TASK_PRIORITY , 
+    Task(   const char* name  , unsigned int priority = DEFAULT_TASK_PRIORITY ,
             const Task_Container& dependencies = {} ):
             m_name(name), m_dependencies(dependencies),m_priority(priority) {
         static std::mutex m;
@@ -69,29 +69,29 @@ public:
     //! @brief  Get priority of the task.
     //!
     //! @return             Current priority of the task.
-    inline unsigned int GetPriority() const { 
-        return m_priority; 
+    inline unsigned int GetPriority() const {
+        return m_priority;
     }
 
     //! @brief  Remove dependency from task.
     //!
     //! Upon the termination of any dependent task, it is necessary to remove it from its dependency.
-    inline void         RemoveDependency( const Task* taskid ) { 
-        m_dependencies.erase( taskid ); 
+    inline void         RemoveDependency( const Task* taskid ) {
+        m_dependencies.erase( taskid );
     }
 
     //! @brief  If there is no dependent task anymore.
     //!
     //! @return True if all dependent tasks are finished. Otherwise, return false.
-    inline bool         NoDependency() const { 
-        return m_dependencies.empty(); 
+    inline bool         NoDependency() const {
+        return m_dependencies.empty();
     }
 
     //! @brief  Get tasks depending on this task.
     //!
     //! @return Tasks this task depends on.
     inline const DependentTask_Container& GetDependents() const  {
-        return m_dependents; 
+        return m_dependents;
     }
 
     //! @brief  Add dependent.
@@ -169,7 +169,7 @@ public:
     //!
     //! @param task     Task that is finished. This task should not be in the scheduler.
     void    TaskFinished( const Task* task );
-    
+
 private:
     //! @brief  Default constructor
     Scheduler():m_availbleTasks(task_comp){}

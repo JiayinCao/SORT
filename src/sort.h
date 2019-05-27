@@ -1,26 +1,26 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
 /*
     -------------------------- Coding Standard ------------------------------------
-    SORT has been developed for quite a long time, several years. With limited 
-    time budget everyday, progress is relatively slow. Throughout the past years, 
-    my coding style changes, which results in different coding style in different 
-    parts of the system. Following is some general rules to following during coding, 
+    SORT has been developed for quite a long time, several years. With limited
+    time budget everyday, progress is relatively slow. Throughout the past years,
+    my coding style changes, which results in different coding style in different
+    parts of the system. Following is some general rules to following during coding,
     this is more of reminder for me for later references.
 
     -   Class name
@@ -44,7 +44,7 @@
         -   Use minimal access range. Meaning if it is enough to use private, don't
             use protected to leak the access to derived class.
         -   Use const as much as possible. For example, for method like 'GetTaskID()'
-            if nothing inside the function changes anything in the class, make sure 
+            if nothing inside the function changes anything in the class, make sure
             it is marked as const. It also applied to return values and parameters.
     -   Private method
         -   Same naming convention with public method apart from that the first letter
@@ -57,7 +57,7 @@
         -   First word has to be all small cases.
         -   Each of the first letter of the following words are upper cases.
     -   Brackets
-        -   Open bracket should be appended right after class/method declaration or 
+        -   Open bracket should be appended right after class/method declaration or
             definition to save line numbers.
         -   Closing bracket should occupy a separate line.
         -   For empty implementation, both the two brackets should be occupying the
@@ -73,13 +73,13 @@
         -   Use 'auto' as much as possible, instead of explicitly specific the type.
 
     ---------------------------------------------------------------------------------
-*/ 
+*/
 
 #pragma once
 
-//! @brief		Run SORT.
+//! @brief      Run SORT.
 //!
-//! @param	argc	Number of arguments, including the executable instance itself.
-//! @param	argv	The command arguments.
+//! @param  argc    Number of arguments, including the executable instance itself.
+//! @param  argv    The command arguments.
 //! @return         Return value of '0' means nothing goes wrong, otherwise there is something wrong.
-int	    RunSORT( int argc , char** argv );
+int     RunSORT( int argc , char** argv );

@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -22,27 +22,27 @@
 
 //! @brief BXDF type.
 enum BXDF_TYPE{
-	BXDF_NONE = 0,
-	BXDF_DIFFUSE = 1,
-	BXDF_GLOSSY = 2,
-	BXDF_REFLECTION = 8,
-	BXDF_TRANSMISSION = 16,
-	BXDF_ALL_TYPES = BXDF_DIFFUSE | BXDF_GLOSSY ,
-	BXDF_ALL_REFLECTION = BXDF_ALL_TYPES | BXDF_REFLECTION ,
-	BXDF_ALL_TRANSMISSION = BXDF_ALL_TYPES | BXDF_TRANSMISSION ,
-	BXDF_ALL = BXDF_ALL_REFLECTION | BXDF_ALL_TRANSMISSION 
+    BXDF_NONE = 0,
+    BXDF_DIFFUSE = 1,
+    BXDF_GLOSSY = 2,
+    BXDF_REFLECTION = 8,
+    BXDF_TRANSMISSION = 16,
+    BXDF_ALL_TYPES = BXDF_DIFFUSE | BXDF_GLOSSY ,
+    BXDF_ALL_REFLECTION = BXDF_ALL_TYPES | BXDF_REFLECTION ,
+    BXDF_ALL_TRANSMISSION = BXDF_ALL_TYPES | BXDF_TRANSMISSION ,
+    BXDF_ALL = BXDF_ALL_REFLECTION | BXDF_ALL_TRANSMISSION
 };
 
 //! @brief BRDF or BTDF.
 /**
  * Bxdf is either BRDF(bidirectional reflection density function) or BTDF( bidirectional translation density function).\n
  * This class serves as a basic interface for varies bxdf types, it will not have any instance of itself. \n
- * One of the important concept used here is local coordinate and shading coordinate. Local coordiante means a local 
- * coordinate where the up axis ( Y axis ) is exactly the geometry normal. Shading coordinate is slightly different from 
- * local coordinate in the fact that its up axis could differ from geometry normal, named as a shading normal, usually 
+ * One of the important concept used here is local coordinate and shading coordinate. Local coordiante means a local
+ * coordinate where the up axis ( Y axis ) is exactly the geometry normal. Shading coordinate is slightly different from
+ * local coordinate in the fact that its up axis could differ from geometry normal, named as a shading normal, usually
  * taken from normal map.
  */
-class	Bxdf {
+class   Bxdf {
 public:
     //! @brief  Constructor.
     //!
@@ -56,14 +56,14 @@ public:
     //! Get weight of this BXDF.
     //!
     //! @return         The weight for the BRDF.
-    const Spectrum& GetWeight() const { 
-        return m_weight; 
+    const Spectrum& GetWeight() const {
+        return m_weight;
     }
-    
+
     //! Evalute the BXDF.
     //!
     //! IMPORTANT: Instead of returning exactly the value of BXDF, this function choose to return BXDF * cos(\theta),
-    //! where \theta is the angle between incident direction, usually the lighting direction, and the shading normal, which 
+    //! where \theta is the angle between incident direction, usually the lighting direction, and the shading normal, which
     //! could be normal mapped.\n
     //! This is for better precision for some BXDF.
     //!
@@ -99,7 +99,7 @@ public:
     virtual float Pdf( const Vector& wo , const Vector& wi ) const{
         return pdf( bsdfToBxdf(wo) , bsdfToBxdf(wi) );
     }
-    
+
     //! @brief  Check the type of the bxdf, it shouldn't be overridden by derived classes.
     //!
     //! @param type     The type to check.
@@ -107,26 +107,26 @@ public:
     virtual bool    MatchFlag( BXDF_TYPE type ) const final {
         return (type & m_type)==m_type;
     }
-    
+
     //! @brief  Get the type of the bxdf
     //!
     //! @return The specific type of the bxdf.
-    virtual BXDF_TYPE GetType() const final { 
-        return m_type; 
+    virtual BXDF_TYPE GetType() const final {
+        return m_type;
     }
-    
+
 protected:
     //! @brief Evaluate the BRDF.
     //!
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
-	virtual Spectrum f( const Vector& wo , const Vector& wi ) const = 0;
-    
+    virtual Spectrum f( const Vector& wo , const Vector& wi ) const = 0;
+
     //! @brief  Importance sampling for the bxdf.
     //!
-    //! This method is not pure virtual and it has a default implementation, which sample out-going 
-    //! directions that have linear probability with the cosine value between the out-going ray and 
+    //! This method is not pure virtual and it has a default implementation, which sample out-going
+    //! directions that have linear probability with the cosine value between the out-going ray and
     //! the normal.\n
     //! However, it is suggested that each bxdf has its own importance sampling method for optimal
     //! convergence rate.\n
@@ -137,8 +137,8 @@ protected:
     //! @param bs   Sample for bsdf that holds some random variables.
     //! @param pdf  Probability density of the selected direction.
     //! @return     The Evaluated BRDF value.
-	virtual Spectrum sample_f( const Vector& wo , Vector& wi , const class BsdfSample& bs , float* pdf ) const;
-    
+    virtual Spectrum sample_f( const Vector& wo , Vector& wi , const class BsdfSample& bs , float* pdf ) const;
+
     //! @brief  Evaluate the pdf of an existance direction given the Incident direction.
     //!
     //! If one implements customized sample_f for the brdf, it needs to have corresponding version of
@@ -147,7 +147,7 @@ protected:
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
-	virtual float pdf( const Vector& wo , const Vector& wi ) const;
+    virtual float pdf( const Vector& wo , const Vector& wi ) const;
 
     //! @brief  Helper function to decide if a vector is pointing on the other side of the primitive.
     //!
@@ -156,7 +156,7 @@ protected:
     //! @param v    A vector in shading coordinate to be evaluated.
     //! @return     Whether the vector is pointing up in local coordinate.
     bool    PointingUp( const Vector& v ) const;
-    
+
     //! @brief  This is a helpf function transforming vector from local coordinate to shading coordinate.
     //!
     //! Bsdf is only responsible for transforming vector from world space to local coordinate without taking
@@ -172,11 +172,11 @@ protected:
         if( !normal_map_applied ) return v;
         return Vector( Dot(v,tn) , Dot(v,nn) , Dot(v,btn) );
     }
-    
+
     //! @brief  Transform a vector from local coordinate to shading coordinate.
     //!
-    //! Just like the above function transforming vectors from local coordinate to shading coordinate, it is 
-    //! necessary to transform it back to local coordinate so that BSDF can further transform it back to world 
+    //! Just like the above function transforming vectors from local coordinate to shading coordinate, it is
+    //! necessary to transform it back to local coordinate so that BSDF can further transform it back to world
     //! coordinate.
     //!
     //! @param v    A vector in shading coordainte.

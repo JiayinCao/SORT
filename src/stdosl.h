@@ -255,7 +255,7 @@ void fresnel (vector I, normal N, float eta,
         F *= sqr (beta / (g+c));
         Kr = F;
         Kt = (1.0 - Kr) * eta*eta;
-        // OPT: the following recomputes some of the above values, but it 
+        // OPT: the following recomputes some of the above values, but it
         // gives us the same result as if the shader-writer called refract()
         T = refract(I, N, eta);
     } else {
@@ -482,8 +482,8 @@ int getmatrix (string fromspace, output matrix M) {
 closure color lambert( color albedo , normal N ) BUILTIN;
 closure color lambertTransmission( color transmittance , normal N ) BUILTIN;
 closure color orenNayar( color albedo , float sigma , normal N ) BUILTIN;
-closure color disney( float metallic , float specular , float specularTint, float roughness , float anisotropic , 
-                      float sheen , float sheenTint, float clearCoat , float clearCoatGloss , float specTrans , 
+closure color disney( float metallic , float specular , float specularTint, float roughness , float anisotropic ,
+                      float sheen , float sheenTint, float clearCoat , float clearCoatGloss , float specTrans ,
                       float scatterDistance , float flatness , float diffTrans , int thinSurface , color baseColor , normal N ) BUILTIN;
 closure color microfacetReflection(string distribution, vector eta , vector absorption , float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;
 closure color microfacetReflectionDieletric(string distribution, float iIOR, float eIOR, float roughnessU , float roughnessV , color baseColor , normal N ) BUILTIN;

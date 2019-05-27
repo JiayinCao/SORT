@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -34,7 +34,7 @@ public:
     //! @param priority     New priority of the task.
     Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
                 const char* name , unsigned int priority , const Task::Task_Container& dependencies );
-    
+
     //! @brief  Execute the task
     void        Execute() override;
 
@@ -44,7 +44,7 @@ public:
     inline Vector2i    GetTopLeft() const {
         return m_coord;
     }
-    
+
     //! @brief  Get the size of the tile.
     //!
     //! @return The size of the current tile.
@@ -55,7 +55,7 @@ public:
 private:
     Vector2i                            m_coord;            /**< Top-left corner of the current tile. */
     Vector2i                            m_size;             /**< Size of the current tile to be rendered. */
-    const Scene&	                    m_scene;            /**< Scene for ray tracing. */
+    const Scene&                        m_scene;            /**< Scene for ray tracing. */
     std::unique_ptr<Sampler>            m_sampler;          /**< Sampler for taking samples. Currently not used. */
     std::unique_ptr<PixelSample[]>      m_pixelSamples;     /**< Samples to take. Currently not used. */
 };
@@ -69,10 +69,10 @@ public:
     //! @brief Constructor
     //!
     //! @param priority     New priority of the task.
-    PreRender_Task( const Scene& scene , const char* name , unsigned int priority , 
+    PreRender_Task( const Scene& scene , const char* name , unsigned int priority ,
                     const Task::Task_Container& dependencies ) :
                     Task( name , priority , dependencies ), m_scene(scene){}
-    
+
     //! @brief  Execute the task
     void        Execute() override;
 

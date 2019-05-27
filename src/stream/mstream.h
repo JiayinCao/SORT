@@ -46,7 +46,7 @@ public:
             memcpy( new_data.get() , m_data.get() , m_capacity );
         if (size > m_capacity)
             memset((char*)new_data.get() + m_capacity, 0, size - m_capacity);
-	    m_capacity = size;
+        m_capacity = size;
         m_data = std::move( new_data );
     }
 
@@ -134,7 +134,7 @@ public:
     //! @brief  Get written size of the stream.
     //!
     //! @return     The size of written bytes.
-    unsigned int    GetDataSize() const { 
+    unsigned int    GetDataSize() const {
         return m_pos;
     }
 
@@ -191,7 +191,7 @@ public:
             memcpy( new_data.get() , m_data.get() , m_capacity );
         if (size > m_capacity)
             memset(new_data.get() + m_capacity, 0, size - m_capacity);
-	    m_capacity = size;
+        m_capacity = size;
         m_data = std::move(new_data);
     }
 

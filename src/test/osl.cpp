@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -46,12 +46,12 @@ public:
     virtual bool get_inverse_matrix (ShaderGlobals *sg, Matrix44 &result,
                                      ustring to, float time) { return true; }
 
-    virtual bool get_array_attribute (ShaderGlobals *sg, bool derivatives, 
+    virtual bool get_array_attribute (ShaderGlobals *sg, bool derivatives,
                                       ustring object, TypeDesc type, ustring name,
                                       int index, void *val ){ return true; }
     virtual bool get_attribute (ShaderGlobals *sg, bool derivatives, ustring object,
                                 TypeDesc type, ustring name, void *val){ return true; }
-    virtual bool get_userdata (bool derivatives, ustring name, TypeDesc type, 
+    virtual bool get_userdata (bool derivatives, ustring name, TypeDesc type,
                                ShaderGlobals *sg, void *val){ return true;}
 };
 
@@ -67,7 +67,7 @@ bool compile_buffer_test( ShadingSystem* shadingsys , const std::string &sourcec
     // Load shader from compiled object file.
     if (! shadingsys->LoadMemoryCompiledShader (shadername, osobuffer))
         return false;
-    
+
     return true;
 }
 
@@ -97,7 +97,7 @@ std::unique_ptr<ShadingSystem>  MakeOSLShadingSys(){
 // This unit test will cover the basics of Open Shading Language, like read input and output from a shader ,
 // execute a shader and verify the result
 TEST(OSL, CheckingSymbol) {
-    static const std::string shader_source =  
+    static const std::string shader_source =
         "shader TestBasic("
         "   color Cin = 0.5 ,"
         "   float exponent = 2.0 ,"
@@ -195,7 +195,7 @@ TEST(OSL, CheckingSymbol) {
 
 // Check basic closure operations
 TEST(OSL, CheckingClosure) {
-    static const std::string shader_source =  
+    static const std::string shader_source =
         "shader TestBasic()"
         "{"
         "    color tint = color( 0.25 , 1.25 , 0.125 );"
@@ -338,7 +338,7 @@ TEST(OSL, CheckingMultipleLayers) {
     EXPECT_EQ(w.x, 0.5625f);
     EXPECT_EQ(w.y, 0.625f);
     EXPECT_EQ(w.z, 0.75f);
-    
+
     const auto& params = *compB->as<OrenNayar::Params>();
     const float expected_sigam = 0.625f;
     EXPECT_EQ(params.sigma, expected_sigam);
@@ -349,7 +349,7 @@ TEST(OSL, CheckingMultipleLayers) {
 
 // Checking reset default value for input parameters
 TEST(OSL, CheckingDefaultValue) {
-    static const std::string shader_source =  
+    static const std::string shader_source =
         "shader TestBasic("
         "   color iColor_0 = color( 0.125 , 0.5 , 2.5 ) ,"
         "   float iScale_0 = 12.0 )"
@@ -362,7 +362,7 @@ TEST(OSL, CheckingDefaultValue) {
 
     // Register closures
     RegisterClosures( shadingsys.get() );
-    
+
     const auto group_name = "default_shader_group";
     const auto shader_name = "default_shader";
     const auto shader_layer = "default_layer";
@@ -408,7 +408,7 @@ TEST(OSL, CheckingDefaultValue) {
 
 // Checking mutli-thread execution of multiple shader group instance
 TEST(OSL, CheckingMultiThread) {
-    static const std::string shader_source =  
+    static const std::string shader_source =
         "shader TestBasic("
         "   color iColor_0 = color( 0.125 , 0.5 , 2.5 ) ,"
         "   float iScale_0 = 12.0 )"
@@ -469,7 +469,7 @@ TEST(OSL, CheckingMultiThread) {
 
 // Checking global data
 TEST(OSL, CheckingGlobalContext) {
-    static const std::string shader_source =  
+    static const std::string shader_source =
         "shader TestBasic("
         "   color iColor_0 = color( 0.125 , 0.5 , 2.5 ) ,"
         "   float iScale_0 = 12.0 )"
@@ -482,7 +482,7 @@ TEST(OSL, CheckingGlobalContext) {
 
     // Register closures
     RegisterClosures( shadingsys.get() );
-    
+
     const auto group_name = "default_shader_group";
     const auto shader_name = "default_shader";
     const auto shader_layer = "default_layer";

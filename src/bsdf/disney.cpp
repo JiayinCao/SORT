@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -103,7 +103,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const auto wh = Normalize(wo + wi);
     const auto HoO = Dot(wo, wh);
     const auto HoO2ByRoughness = SQR(HoO) * roughness;
-    
+
     const auto luminance = basecolor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
 
@@ -174,10 +174,6 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const GGX ggx(roughness / aspect, roughness * aspect);
     const auto Cspec0 = slerp(specular * SchlickR0FromEta( ior_ex / ior_in ) * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
     if (!Cspec0.IsBlack() && evaluate_reflection) {
-        // 2015 Disney BRDF will blend a more physically based fresnel with Schlick's approximation based on the parameter 'metallic'.
-        // However, when 'metallic' equals to one or zero, the parameter 'specular' and 'specularTint' are not used at all.
-        // Until it is totally figured out, SORT will fall back to only Schlick's approximation for now.
-        //const FresnelDisney fresnel(Cspec0, ior_ex, ior_in, metallic);
         const FresnelSchlick<Spectrum> fresnel(Cspec0);
         const MicroFacetReflection mf(WHITE_SPECTRUM, &fresnel, &ggx, FULL_WEIGHT, nn);
         ret += mf.f(wo, wi);

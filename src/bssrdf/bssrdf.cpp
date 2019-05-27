@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -40,8 +40,8 @@ float FresnelMoment1(const float eta) {
 
 SeparableBssrdf::SeparableBssrdf( const Intersection* intersection , const float ior_i , const float ior_e ): Bssrdf( ior_i , ior_e ) {
     nn = Normalize(intersection->normal);
-	btn = Normalize(Cross( nn , intersection->tangent ));
-	tn = Normalize(Cross( btn , nn ));
+    btn = Normalize(Cross( nn , intersection->tangent ));
+    tn = Normalize(Cross( btn , nn ));
 }
 
 Spectrum SeparableBssrdf::S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const{
@@ -121,7 +121,7 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
     }while( pick-- > 0 );
 
     pi = intersectNode->si.intersect;
-    
+
     pdf = Pdf_Sp( po , pi , intersectNode->si.gnormal ) / found;
     return Sr( Distance( po , pi ) );
 }
@@ -131,7 +131,7 @@ float SeparableBssrdf::Pdf_Sp( const Point& po , const Point& pi , const Vector&
     Vector dLocal( Dot( btn , d ) , Dot( tn , d ) , Dot( nn , d ) );
     Vector nLocal( Dot( btn , n ) , Dot( tn , n ) , Dot( nn , n ) );
 
-    float rProj[3] = { sqrt( SQR( dLocal.y ) + SQR( dLocal.z ) ) , 
+    float rProj[3] = { sqrt( SQR( dLocal.y ) + SQR( dLocal.z ) ) ,
                        sqrt( SQR( dLocal.x ) + SQR( dLocal.z ) ) ,
                        sqrt( SQR( nLocal.x ) + SQR( nLocal.y ) ) };
 

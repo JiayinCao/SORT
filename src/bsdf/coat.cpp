@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -34,7 +34,7 @@ Spectrum Coat::F( const Vector& wo , const Vector& wi ) const{
 
     const auto swo = bsdfToBxdf( wo );
     const auto swi = bsdfToBxdf( wi );
-    
+
     auto ret = coat.f(swo, swi);
     auto tir_o = false, tir_i = false;
     const auto r_wo = refract(swo, DIR_UP, ior, 1.0f, tir_o);
@@ -55,7 +55,7 @@ Spectrum Coat::F( const Vector& wo , const Vector& wi ) const{
 Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{
     const auto swo = bsdfToBxdf( wo );
     Vector swi;
-    
+
     auto tir_o = false , tir_i = false;
     const auto r_wo = refract(swo, DIR_UP, ior, 1.0f, tir_o);
     Vector r_wi;
@@ -109,7 +109,7 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
         if( pPdf )
             *pPdf = slerp(*pPdf, coat.pdf( swo , swi ) , specProp);
     }
-    
+
     if (!SameHemiSphere(wo, wi) || !PointingUp(wo)) {
         if (pPdf) *pPdf = 0.0f;
         return 0.0f;
@@ -124,7 +124,7 @@ float Coat::Pdf( const Vector& wo , const Vector& wi ) const{
 
     const auto swo = bsdfToBxdf( wo );
     const auto swi = bsdfToBxdf( wi );
-    
+
     auto tir_o = false , tir_i = false;
     const auto r_wo = refract(swo, DIR_UP, ior, 1.0f, tir_o);
     const auto r_wi = refract(swi, DIR_UP, ior, 1.0f, tir_i);

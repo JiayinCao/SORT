@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -39,7 +39,7 @@ void MeshVisual::Serialize( IStreamBase& stream ){
 void MeshVisual::ApplyTransform( const Transform& transform ){
     m_memory->ApplyTransform( transform );
     m_memory->GenUV();
-	m_memory->GenSmoothTagent();
+    m_memory->GenSmoothTagent();
 }
 
 void HairVisual::FillScene( Scene& scene ){
@@ -60,7 +60,7 @@ void HairVisual::Serialize( IStreamBase& stream ){
     for( auto i = 0u ; i < hair_cnt ; ++i ){
         auto hair_step = 0u;
         stream >> hair_step;
-        
+
         const auto width_delta = ( width_bottom - width_tip ) / (float)hair_step;
         const auto v_delta = 1.0f / ( float ) hair_step;
         Point prevP;

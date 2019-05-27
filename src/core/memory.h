@@ -40,11 +40,11 @@ public:
 /**
  * The main purpose of MemoryAllocator is to allocate small trunk of memory in a faster way than
  * naive 'new' method. MemoryAllocator achieves this by allocating a memory pool beforehand.
- * With a memory pool, memory allocation through MemoryAllocator benefits from avoiding page 
- * allocation under the hood. And the other benefit it gets is memory deallocation is not needed 
- * any more. There is no way to release allocated memory block for simplicity. Although SORT is 
- * memory protected by std::unique_ptrs, there is still a possibility for it to leak memory if 
- * a std::unique_ptr is allocated through this memory allocator. It is up to the higher level 
+ * With a memory pool, memory allocation through MemoryAllocator benefits from avoiding page
+ * allocation under the hood. And the other benefit it gets is memory deallocation is not needed
+ * any more. There is no way to release allocated memory block for simplicity. Although SORT is
+ * memory protected by std::unique_ptrs, there is still a possibility for it to leak memory if
+ * a std::unique_ptr is allocated through this memory allocator. It is up to the higher level
  * code to make sure it doesn't happen.
  */
 class MemoryAllocator {
@@ -97,6 +97,6 @@ inline MemoryAllocator& GetStaticAllocator() {
     return memoryAllocator;
 }
 
-#define	SORT_MALLOC(T)              new (GetStaticAllocator().Allocate<T>()) T
+#define SORT_MALLOC(T)              new (GetStaticAllocator().Allocate<T>()) T
 #define SORT_MALLOC_ARRAY(T,cnt)    new (GetStaticAllocator().Allocate<T>(cnt)) T
 #define SORT_CLEAR_MEMPOOL()        GetStaticAllocator().Reset()

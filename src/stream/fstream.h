@@ -109,7 +109,7 @@ public:
         char c;
         do{
             m_file.read(reinterpret_cast<char*>(&c), sizeof(char));
-            if( c == 0 ) 
+            if( c == 0 )
                 break;
             v += c;
         }while(true);

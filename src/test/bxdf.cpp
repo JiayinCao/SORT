@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -117,15 +117,15 @@ void checkPdf( const Bxdf* bxdf ){
 }
 
 void checkAll( const Bxdf* bxdf , bool cPdf = true , bool cReciprocity = true , bool cEnergyConservation = true ){
-    if(cPdf) 
+    if(cPdf)
         checkPdf( bxdf );
-    if(cReciprocity) 
+    if(cReciprocity)
         checkReciprocity( bxdf );
     if (cEnergyConservation)
         checkEnergyConservation(bxdf);
 }
 
-TEST (BXDF, Labmert) { 
+TEST (BXDF, Labmert) {
     Lambert lambert( WHITE_SPECTRUM , WHITE_SPECTRUM , DIR_UP );
     checkAll( &lambert );
 }
@@ -156,8 +156,8 @@ TEST(BXDF, DISABLED_AshikhmanShirley) {
 // Disney BRDF is not strictly energy conserving, please refer the above link for further detail ( chapter 5.1 ).
 TEST(BXDF, DISABLED_Disney) {
     Bssrdf* bssrdf = nullptr;
-    DisneyBRDF disney( WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , 
-                       sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , 
+    DisneyBRDF disney( WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() ,
+                       sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() ,
                        sort_canonical() , sort_canonical() , 0 , bssrdf , FULL_WEIGHT , DIR_UP );
     checkAll(&disney);
 }

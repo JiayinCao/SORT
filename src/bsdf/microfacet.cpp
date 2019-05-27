@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -35,7 +35,7 @@ Blinn::Blinn( float roughnessU , float roughnessV ) {
     const static auto convert_exp = [](float roughness) {
         return 2.0f / convert_alpha(roughness) - 2.0f;
     };
-    
+
     expU = convert_exp(roughnessU);
     expV = convert_exp(roughnessV);
     expUV = sqrt( ( expU + 2.0f ) * ( expV + 2.0f ) );
@@ -95,7 +95,7 @@ Beckmann::Beckmann( float roughnessU , float roughnessV ) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
     // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
     // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
-    // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT. 
+    // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT.
     const static auto convert = []( float roughness ) {
         roughness = std::max(roughness, (float)1e-3);
         return roughness * roughness;
@@ -119,7 +119,7 @@ float Beckmann::D(const Vector& h) const {
 
 Vector Beckmann::sample_f( const BsdfSample& bs ) const {
     const auto logSample = std::log( bs.u );
-    
+
     float theta, phi;
     if( alphaU == alphaV ){
         // Refer the following link ( my blog ) for a full derivation of isotropic importance sampling for Beckmann
@@ -136,7 +136,7 @@ Vector Beckmann::sample_f( const BsdfSample& bs ) const {
         const auto sin_phi_sq = sin_phi * sin_phi;
         theta = atan(sqrt(-logSample / ((1.0f - sin_phi_sq) / alphaU2 + sin_phi_sq / alphaV2)));
     }
-    
+
     return SphericalVec(theta, phi);
 }
 
@@ -153,7 +153,7 @@ GGX::GGX( float roughnessU , float roughnessV ) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
     // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
     // PBRT way of converting roughness will result slightly blurred reflection even with 0 as roughness.
-    // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT. 
+    // This is tackled in PBRT because it has a separate way to do perfect reflection, which is not available in SORT.
     const static auto convert = []( float roughness ) {
         roughness = std::max(roughness, (float)1e-3);
         return SQR(roughness);
@@ -206,7 +206,7 @@ float GGX::G1( const Vector& v ) const {
     return 2.0f / ( 1.0f + sqrt( 1.0f + alpha2 * tan_theta_sq ) );
 }
 
-Microfacet::Microfacet(const std::string& distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided ) : 
+Microfacet::Microfacet(const std::string& distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided ) :
     Bxdf(w, t, n, doubleSided ) {
     if( distType == "GGX" )
         distribution = SORT_MALLOC(GGX)( ru , rv );
@@ -217,12 +217,12 @@ Microfacet::Microfacet(const std::string& distType, float ru , float rv , const 
 }
 
 MicroFacetReflection::MicroFacetReflection(const Params &params, const Spectrum& weight , bool doubleSided):
-Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , 
+Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) ,
 R(params.baseColor), fresnel(SORT_MALLOC( FresnelConductor )(params.eta, params.absorption)){
 }
 
 MicroFacetReflection::MicroFacetReflection(const ParamsDieletric &params, const Spectrum& weight , bool doubleSided):
-Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , 
+Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) ,
 R(params.baseColor), fresnel(SORT_MALLOC( FresnelDielectric )(params.iorI, params.iorT)){
 }
 
@@ -234,89 +234,89 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const {
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-	const auto NoV = AbsCosTheta( wo );
-	if (NoV == 0.f)
-		return Spectrum(0.f);
-	
-	// evaluate fresnel term
-	const auto wh = Normalize(wi + wo);
-	const auto F = fresnel->Evaluate( Dot(wo,wh) );
+    const auto NoV = AbsCosTheta( wo );
+    if (NoV == 0.f)
+        return Spectrum(0.f);
+
+    // evaluate fresnel term
+    const auto wh = Normalize(wi + wo);
+    const auto F = fresnel->Evaluate( Dot(wo,wh) );
     return R * distribution->D(wh) * F * distribution->G(wo,wi) / ( 4.0f * NoV );
 }
 
 Spectrum MicroFacetReflection::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const {
-	// sampling the normal
-	const auto wh = distribution->sample_f( bs );
+    // sampling the normal
+    const auto wh = distribution->sample_f( bs );
 
-	// reflect the incident direction
-	wi = reflect( wo , wh );
+    // reflect the incident direction
+    wi = reflect( wo , wh );
 
     if (pPdf) *pPdf = pdf(wo, wi);
 
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-	return f( wo , wi );
+    return f( wo , wi );
 }
 
 float MicroFacetReflection::pdf( const Vector& wo , const Vector& wi ) const {
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-	const auto h = Normalize( wo + wi );
-	const auto EoH = AbsDot( wo , h );
-	return distribution->Pdf(h) / (4.0f * EoH);
+    const auto h = Normalize( wo + wi );
+    const auto EoH = AbsDot( wo , h );
+    return distribution->Pdf(h) / (4.0f * EoH);
 }
 
 MicroFacetRefraction::MicroFacetRefraction(const Params &params, const Spectrum& weight):
-Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, true), 
+Microfacet( params.dist.c_str() , params.roughnessU , params.roughnessV , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, true),
 T(params.transmittance), etaI(params.etaI) , etaT(params.etaT) , fresnel( params.etaI , params.etaT ) {
 }
 
 Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const {
     if( SameHemiSphere(wi, wo) )
         return Spectrum(0.f);
-    
-	const auto NoV = CosTheta( wo );
-	if (NoV == 0.f)
-		return Spectrum(0.f);
-	
-	const auto eta = CosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
+
+    const auto NoV = CosTheta( wo );
+    if (NoV == 0.f)
+        return Spectrum(0.f);
+
+    const auto eta = CosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
 
     Vector3f wh = Normalize(wo + wi * eta);
     if( wh.y < 0.0f ) wh = -wh;
 
-	const auto sVoH = Dot(wo, wh);
+    const auto sVoH = Dot(wo, wh);
     const auto sIoH = Dot(wi, wh);
-	
-	// Fresnel term
-	const auto F = fresnel.Evaluate( Dot( wh , wo ) );
-	const auto sqrtDenom = sVoH + eta * sIoH;
-	const auto t = eta / sqrtDenom;
+
+    // Fresnel term
+    const auto F = fresnel.Evaluate( Dot( wh , wo ) );
+    const auto sqrtDenom = sVoH + eta * sIoH;
+    const auto t = eta / sqrtDenom;
     return (Spectrum(1.f) - F) * T * fabs(distribution->D(wh) * distribution->G(wo,wi) * t * t * sIoH * sVoH / NoV );
 }
 
 Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const {
     if( CosTheta( wo ) == 0.0f )
         return 0.0f;
-    
-	// sampling the normal
-	const auto wh = distribution->sample_f( bs );
 
-	// try to get refracted ray
+    // sampling the normal
+    const auto wh = distribution->sample_f( bs );
+
+    // try to get refracted ray
     auto total_reflection = false;
-	wi = refract( wo , wh , etaT , etaI , total_reflection );
-	if( total_reflection ) return 0.0f;
+    wi = refract( wo , wh , etaT , etaI , total_reflection );
+    if( total_reflection ) return 0.0f;
 
     if( pPdf ) *pPdf = pdf( wo , wi );
-	return f( wo , wi );
+    return f( wo , wi );
 }
 
 float MicroFacetRefraction::pdf( const Vector& wo , const Vector& wi ) const {
-	if( SameHemisphere( wo , wi ) )
+    if( SameHemisphere( wo , wi ) )
         return 0.0f;
 
-	const auto eta = CosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
+    const auto eta = CosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
     const auto wh = Normalize(wo + wi * eta);
 
     // Compute change of variables _dwh\_dwi_ for microfacet transmission

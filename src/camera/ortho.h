@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -25,7 +25,7 @@
  * much smaller comparing with nearer objects. It is commonly used in applications
  * like 3ds max, CAD.
  */
-class	OrthoCamera : public Camera
+class   OrthoCamera : public Camera
 {
 public:
     //! @brief Generating a primary ray.
@@ -33,42 +33,42 @@ public:
     //! @param y    Coordinate along vertical axis on the image sensor, it could be a float value.
     //! @param ps   Pixel sample holding several useful random variables.
     //! @return     The generated ray based on the input.
-	Ray GenerateRay( float x , float y , const PixelSample& ps ) const override;
+    Ray GenerateRay( float x , float y , const PixelSample& ps ) const override;
 
     //! @brief Get camera viewing target.
     //! @return Camera viewing target.
     const Point& GetTarget() const { return m_target; }
-    
+
     //! @brief Set camera viewing target in world space.
     //! @param t Target point to be set.
     void SetTarget( const Point& t ) { m_target = t; updateTransform(); }
-    
+
     //! @brief Get camera up direction in world space.
     //! @return Camera up direction in world space.
     const Vector& GetUp() const { return m_up; }
-    
+
     //! @brief Set camera up direction in world space.
     //! @param u Camera up direction to be set.
     void SetUp( const Vector& u ) { m_up = u; updateTransform(); }
-	
+
     //! @brief Setup viewing point for the camera.
     //! @param eye  Viewing point to set up in the camera.
     void SetEye( const Point& eye ) { m_eye = eye; updateTransform(); }
 
-	//! @brief Get width of camera image plane in world space.
+    //! @brief Get width of camera image plane in world space.
     //! @return The width of camera image plane in world space.
-	float GetCameraWidth() const { return m_camWidth; }
-    
+    float GetCameraWidth() const { return m_camWidth; }
+
     //! @brief Get height of camera image plane in world space.
     //! @return The height of camera image plane in world space.
-	float GetCameraHeight() const { return m_camHeight; }
-    
+    float GetCameraHeight() const { return m_camHeight; }
+
     //! @brief Set width of camera image plane in world space.
     //! @param w Width to be set.
-	void SetCameraWidth( float w );
+    void SetCameraWidth( float w );
     //! @brief Set height of camera image plane in world space.
     //! @param h Height to be set.
-	void SetCameraHeight( float h );
+    void SetCameraHeight( float h );
 
     //! @brief Get camera coordinate according to a view direction in world space. It is used in light tracing or bi-directional path tracing algorithm.
     //! @param inter            The intersection to be considered when randomly sampling a point on the sensor.
@@ -79,27 +79,27 @@ public:
     //! @param eyeP             The selected random viewing point in world space.
     //! @param visibility       The structure holding visibility information.
     //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
-    Vector2i GetScreenCoord(const Intersection& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we , 
+    Vector2i GetScreenCoord(const Intersection& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
                                     Point* eyeP , Visibility* visibility) const override{
-		sAssert(false, CAMERA);
-		return Vector2i();
-	}
+        sAssert(false, CAMERA);
+        return Vector2i();
+    }
 
     //! @brief Get viewing direction.
     //! @return Camera forward direction.
     Vector GetForward() const override{
-		sAssert(false, CAMERA);
-		return Vector();
-	}
+        sAssert(false, CAMERA);
+        return Vector();
+    }
 
 protected:
-	Point   m_target;            /**< Viewing target of the camera in world space. */
-	Vector  m_up;                /**< Up direction of the camera in world space. */
+    Point   m_target;            /**< Viewing target of the camera in world space. */
+    Vector  m_up;                /**< Up direction of the camera in world space. */
     float   m_camWidth = 1.0f;   /**< Camera image plane width in world space. */
     float   m_camHeight = 1.0f;  /**< Camera image plane height in world space. */
-	Matrix  world2camera;        /**< Transformation from world space to view space. */
+    Matrix  world2camera;        /**< Transformation from world space to view space. */
 
     //! @brief Udpate transformation
     void updateTransform();
-    
+
 };

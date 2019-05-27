@@ -1,16 +1,16 @@
 /*
     This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
     platform physically based renderer.
- 
+
     Copyright (c) 2011-2019 by Cao Jiayin - All rights reserved.
- 
+
     SORT is a free software written for educational purpose. Anyone can distribute
     or modify it under the the terms of the GNU General Public License Version 3 as
     published by the Free Software Foundation. However, there is NO warranty that
     all components are functional in a perfect manner. Without even the implied
     warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
     General Public License for more details.
- 
+
     You should have received a copy of the GNU General Public License along with
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
@@ -67,10 +67,10 @@ public:
     DisneyBRDF( const Params& param , Bssrdf*& bssrdf , const Spectrum& weight)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
         specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
-        clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness), 
+        clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
           diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ), bssrdf(bssrdf) {}
 
-	//! Constructor
+    //! Constructor
     //! @param basecolor        The surface color, usually supplied by texture maps.
     //! @param metallic         This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color.
     //! @param specular         Direction-hemisphere reflection for specular.
@@ -90,19 +90,19 @@ public:
     //! @param weight           Weight of the BXDF.
     //! @param n                Normal in shading coordinate.
     DisneyBRDF( const Spectrum& basecolor , float metallic , float specular , float specularTint , float roughness ,
-               float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance , 
+               float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance ,
                float flatness , float diffTrans , int thinSurface , Bssrdf*& bssrdf , const Spectrum& weight, const Vector& n )
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
-          clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness), 
+          clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness),
           diffTrans(diffTrans), thinSurface( thinSurface != 0 ), bssrdf(bssrdf) {}
-	
+
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The Evaluated BRDF value.
     Spectrum f( const Vector& wo , const Vector& wi ) const override;
-	
+
     //! @brief Importance sampling for the fresnel brdf.
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
@@ -110,15 +110,15 @@ public:
     //! @param pdf  Probability density of the selected direction.
     //! @return     The Evaluated BRDF value.
     Spectrum sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const override;
-    
+
     //! @brief Evaluate the pdf of an existance direction given the Incident direction.
     //! @param wo   Exitant direction in shading coordinate.
     //! @param wi   Incident direction in shading coordinate.
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override;
-    
+
 private:
-	const Spectrum  basecolor;          /**< The surface color, usually supplied by texture maps. */
+    const Spectrum  basecolor;          /**< The surface color, usually supplied by texture maps. */
     const float     metallic;           /**< The metallic-ness (0 = dielectric, 1 = metallic). This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color. */
     const float     specular;           /**< Incident specular amount. This is in lieu of an explicit index-of-refraction. */
     const float     specularTint;       /**< A concession for artistic control that tints incident specular towards the base color. Grazing specular is still achromatic. */
