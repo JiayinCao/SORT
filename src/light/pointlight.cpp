@@ -25,15 +25,15 @@ Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample
     auto light_pos = Vector3f( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 
     // Get light position
-    const Vector _dirToLight = light_pos - intersect.intersect;
+    const auto _dirToLight = light_pos - intersect.intersect;
 
     // Normalize vec
-    const float sqrLen = _dirToLight.SquaredLength();
-    const float len = sqrt(sqrLen);
+    const auto sqrLen = _dirToLight.SquaredLength();
+    const auto len = sqrt(sqrLen);
     dirToLight = _dirToLight / len;
 
     // setup visibility ray
-    const float delta = 0.01f;
+    const auto delta = 0.01f;
     visibility.ray = Ray( light_pos , -dirToLight , 0 , 0.0f , len - delta );
 
     // direction pdf from 'intersect' to light source w.r.t solid angle

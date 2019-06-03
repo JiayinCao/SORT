@@ -84,12 +84,12 @@ public:
     //! @brief      Set length along x axis of the quad.
     //!
     //! @param      x   Size along x axis.
-    void            SetSizeX(float x) { sizeX = x; }
+    void            SetSizeX(float x) { sizeX = std::max( 0.0001f , x ); }
 
     //! @brief      Set length along y axis of the quad.
     //!
     //! @param      y   Size along y axis.
-    void            SetSizeY(float y) { sizeY = y; }
+    void            SetSizeY(float y) { sizeY = std::max( 0.0001f , y ); }
 
 protected:
     float sizeX = 1.0f;     /**< The size of the quad along x axis. */

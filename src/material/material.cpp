@@ -87,8 +87,7 @@ void Material::UpdateScattering(const class Intersection& intersect, Bsdf*& bsdf
     if ( !g_noMaterial && m_valid) {
         ExecuteShader(bsdf, bssrdf, intersect, m_shader.get());
     } else {
-        Spectrum weight(1.0f);
-        const Lambert* lambert = SORT_MALLOC(Lambert)(weight, weight, DIR_UP);
+        const Lambert* lambert = SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP);
         bsdf->AddBxdf(lambert);
     }
 }
