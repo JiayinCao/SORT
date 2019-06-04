@@ -679,16 +679,38 @@ class SORTNode_Material_ModifiedPhong(SORTShadingNode):
 class SORTNode_Material_Cloth(SORTShadingNode):
     bl_label = 'Cloth'
     bl_idname = 'SORTNode_Material_Cloth'
-    osl_shader = '''
-        shader Cloth( color Diffuse = @ ,
-                      float Roughness = @ ,
-                      float Specular = @ ,
-                      float SpecularTint = @ ,
-                      normal Normal = @ ,
-                      output closure color Result = color(0) ){
-            Result = distributionBRDF( Diffuse , Roughness , Specular , SpecularTint , Normal );
+    osl_shader_dbrdf = '''
+        shader DistributionBRDF(  color BaseColor = @ ,
+                                  float Roughness = @ ,
+                                  float Specular = @ ,
+                                  float SpecularTint = @ ,
+                                  normal Normal = @ ,
+                                  output closure color Result = color(0) ){
+            Result = distributionBRDF( BaseColor , Roughness , Specular , SpecularTint , Normal );
         }
     '''
+    osl_shader_dwa_fabric = '''
+        shader DWA_Fabric( color BaseColor = @ ,
+                           float Roughness = @ ,
+                           normal Normal = @ ,
+                           output closure color Result = color(0) ){
+            Result = fabric( BaseColor , Roughness , Normal );
+        }
+    '''
+    def update_brdf(self,context):
+        if self.brdf_type == 'TheOrder_Fabric':
+            self.inputs['Specular'].enabled = True
+            self.inputs['SpecularTint'].enabled = True
+        else:
+            self.inputs['Specular'].enabled = False
+            self.inputs['SpecularTint'].enabled = False
+    brdf_type = bpy.props.EnumProperty(name='Type', items=[('TheOrder_Fabric','TheOrder_Fabric','',1),('DreamWorks_Fabric','DreamWorks_Fabric','',2)], default='TheOrder_Fabric', update=update_brdf)
+    def generate_osl_source(self):
+        if self.brdf_type == 'TheOrder_Fabric':
+            return self.osl_shader_dbrdf
+        return self.osl_shader_dwa_fabric
+    def type_identifier(self):
+        return self.bl_label + self.brdf_type
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketColor' , 'Diffuse' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
@@ -696,15 +718,21 @@ class SORTNode_Material_Cloth(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'SpecularTint' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
-        self.inputs['Specular'].default_value = 1.0
-        self.inputs['SpecularTint'].default_value = 1.0
     def serialize_prop(self, fs):
-        fs.serialize( 5 )
+        if self.brdf_type == 'TheOrder_Fabric':
+            fs.serialize( 5 )
+        else:
+            fs.serialize( 3 )
         fs.serialize( self.inputs['Diffuse'].export_osl_value() )
+        print(self.inputs['Diffuse'].export_osl_value())
+        print(self.inputs['Roughness'].export_osl_value())
         fs.serialize( self.inputs['Roughness'].export_osl_value() )
-        fs.serialize( self.inputs['Specular'].export_osl_value() )
-        fs.serialize( self.inputs['SpecularTint'].export_osl_value() )
+        if self.brdf_type == 'TheOrder_Fabric':
+            fs.serialize( self.inputs['Specular'].export_osl_value() )
+            fs.serialize( self.inputs['SpecularTint'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
+    def draw_buttons(self, context, layout):
+        layout.prop(self, 'brdf_type', text='BRDF Type', expand=True)
 
 @SORTPatternGraph.register_node('Materials')
 class SORTNode_Material_Blend(SORTShadingNode):

@@ -498,6 +498,7 @@ closure color merlBRDF(int idx, normal N) BUILTIN;
 closure color coat( closure color bottom , float roughness , float ior , color sigma , normal N ) BUILTIN;
 closure color doubleSided( closure color bxdf0 , closure color bxdf1 ) BUILTIN;
 closure color distributionBRDF( color basecolor , float roughness , float specular , float specularTint , normal N ) BUILTIN;
+closure color fabric(color basecolor, float roughness, normal N) BUILTIN;
 
 #undef BUILTIN
 #undef BUILTIN_DERIV

@@ -34,6 +34,7 @@
 #include "bsdf/coat.h"
 #include "bsdf/doublesided.h"
 #include "bsdf/distributionbrdf.h"
+#include "bsdf/fabric.h"
 
 using namespace OSL;
 
@@ -483,6 +484,29 @@ namespace {
             bsdf->AddBxdf(SORT_MALLOC(DistributionBRDF)(params, w * comp->w));
         }
     };
+
+    struct Closure_Fabric : public Closure_Base {
+        static constexpr int    ClosureID = CLOSURE_FABRIC;
+
+        static const char* GetName() {
+            return "fabric";
+        }
+
+        static void Register(ShadingSystem* shadingsys) {
+            BuiltinClosures closure = { GetName(), ClosureID,{
+                CLOSURE_COLOR_PARAM(Fabric::Params, baseColor),
+                CLOSURE_FLOAT_PARAM(Fabric::Params, roughness),
+                CLOSURE_VECTOR_PARAM(Fabric::Params, n),
+                CLOSURE_FINISH_PARAM(Fabric::Params)
+            } };
+            shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
+        }
+
+        void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const ClosureComponent* comp, const OSL::Color3& w) override {
+            const auto& params = *comp->as<Fabric::Params>();
+            bsdf->AddBxdf(SORT_MALLOC(Fabric)(params, w * comp->w));
+        }
+    };
 }
 
 template< typename T >
@@ -513,6 +537,7 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys) {
     registerClosure<Closure_DoubleSided>(shadingsys);
     registerClosure<Closure_FourierBRDF>(shadingsys);
     registerClosure<Closure_DistributionBRDF>(shadingsys);
+    registerClosure<Closure_Fabric>(shadingsys);
 }
 
 void ProcessClosure(Bsdf* bsdf, Bssrdf*& bssrdf, const OSL::ClosureColor* closure, const OSL::Color3& w) {
