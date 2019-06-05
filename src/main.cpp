@@ -28,6 +28,25 @@ int __cdecl main( int argc , char** argv )
 int main(int argc, char* argv[])
 #endif
 {
+    /*
+    for( int i = 0 ; i < 256 ; ++i ){
+        if( i % 10 == 0 )
+            std::cout<<std::endl;
+
+        const int N = 10000;
+        float n = i / 255.0f * 30.0f;
+        float sum = 0;
+        for( int k = 0 ; k < N ; ++k ){
+            auto r = sort_canonical() * HALF_PI;
+            sum += pow( 1.0f - sin( r * 0.5f ) , n ) * sin( r );
+        }
+        sum *= TWO_PI / N;
+        std::cout<<sum<<",";
+    }
+    std::cout<<std::endl;
+    return 0;
+    */
+   
     // enable profiler
     SORT_PROFILE_ENABLE;
     SORT_PROFILE("Main Thread");
