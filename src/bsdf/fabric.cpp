@@ -76,17 +76,18 @@ Spectrum Fabric::f( const Vector& wo , const Vector& wi ) const{
     const auto i = (int)(( N / 30.0f ) * 255.0f);
     const auto io = Io[i];
 
-    const auto theta_o = asin( clamp( wo.x , -1.0f , 1.0f ) );
-    const auto theta_i = asin( clamp( wi.x , -1.0f , 1.0f ) );
-    const auto theta = ( theta_o + theta_i ) * 0.5f;
-    return baseColor * pow( 1.0f - sin( theta ) , N ) * AbsCosTheta(wi) / io;
+    //const auto theta_o = asin( clamp( wo.x , -1.0f , 1.0f ) );
+    //const auto theta_i = asin( clamp( wi.x , -1.0f , 1.0f ) );
+    //const auto theta = ( theta_o + theta_i ) * 0.5f;
+    const auto h = Normalize( wo + wi );
+    return baseColor * pow( 1.0f - fabs(h.x) , N ) * AbsCosTheta(wi) / io;
 }
 
 Spectrum Fabric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
-    //return Bxdf::sample_f( wo , wi , bs , pPdf );
-
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
+
+    //return Bxdf::sample_f( wo , wi , bs , pPdf );
 
     const auto N = ceil(1 + 29 * SQR(1 - roughness));
     const auto sign = sort_canonical() > 0.5f ? 1.0f : -1.0f;
@@ -103,10 +104,10 @@ Spectrum Fabric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, fl
 }
 
 float Fabric::pdf(const Vector& wo, const Vector& wi) const {
-    //return Bxdf::pdf( wo , wi );
-
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
+
+    //return Bxdf::pdf( wo , wi );
 
     const auto N = ceil(1 + 29 * SQR(1 - roughness));
 
