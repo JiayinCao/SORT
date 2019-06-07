@@ -76,9 +76,6 @@ Spectrum Fabric::f( const Vector& wo , const Vector& wi ) const{
     const auto i = (int)(( N / 30.0f ) * 255.0f);
     const auto io = Io[i];
 
-    //const auto theta_o = asin( clamp( wo.x , -1.0f , 1.0f ) );
-    //const auto theta_i = asin( clamp( wi.x , -1.0f , 1.0f ) );
-    //const auto theta = ( theta_o + theta_i ) * 0.5f;
     const auto h = Normalize( wo + wi );
     return baseColor * pow( 1.0f - fabs(h.x) , N ) * AbsCosTheta(wi) / io;
 }
@@ -87,7 +84,7 @@ Spectrum Fabric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, fl
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    //return Bxdf::sample_f( wo , wi , bs , pPdf );
+    return Bxdf::sample_f( wo , wi , bs , pPdf );
 
     const auto N = ceil(1 + 29 * SQR(1 - roughness));
     const auto sign = sort_canonical() > 0.5f ? 1.0f : -1.0f;
@@ -107,17 +104,11 @@ float Fabric::pdf(const Vector& wo, const Vector& wi) const {
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    //return Bxdf::pdf( wo , wi );
+    return Bxdf::pdf( wo , wi );
 
     const auto N = ceil(1 + 29 * SQR(1 - roughness));
 
     const auto wh = Normalize( wo + wi );
-    const auto pdf_theta = ( N + 1 ) * pow( 1.0f - wh.x , N ) * INV_TWOPI;
-    const auto pdf_phi = INV_PI;
-    const auto cos_theta_h = sqrt( saturate( 1.0f - SQR( wh.x ) ) );
-
-    if( cos_theta_h == 0.0f )
-        return 0.0f;
-
-    return pdf_theta * pdf_phi / ( cos_theta_h * 4.0f * Dot( wo , wh ) );
+    const auto pdf_h = ( N + 1 ) * pow( 1.0f - fabs(wh.x) , N ) * INV_TWOPI;
+    return pdf_h / ( 4.0f * Dot( wo , wh ) );
 }
