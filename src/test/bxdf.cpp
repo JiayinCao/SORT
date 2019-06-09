@@ -32,6 +32,7 @@
 #include "bsdf/microfacet.h"
 #include "bsdf/dielectric.h"
 #include "bsdf/hair.h"
+#include "bsdf/fabric.h"
 
 class Bssrdf;
 
@@ -181,6 +182,17 @@ TEST(BXDF, Dielectric) {
     const GGX ggx( sort_canonical() , sort_canonical() );
     Dielectric dielectric( WHITE_SPECTRUM , WHITE_SPECTRUM , &ggx , sort_canonical() , sort_canonical() , FULL_WEIGHT , DIR_UP );
     checkAll( &dielectric , false , false , true );
+}
+
+TEST(BXDF, DreamWork_Fabric) {
+    auto test_fabric = []( const float roughness ){
+        Fabric fabric( WHITE_SPECTRUM , roughness , FULL_WEIGHT , DIR_UP );
+        checkAll( &fabric );
+    };
+
+    test_fabric( 0.0f );
+    test_fabric( 0.5f );
+    test_fabric( 1.0f );
 }
 
 TEST(BXDF, DISABLED_HairFurnace) {
