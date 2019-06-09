@@ -83,8 +83,6 @@ Spectrum Fabric::f( const Vector& wo , const Vector& wi ) const{
 Spectrum Fabric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    return Bxdf::sample_f( wo , wi , bs , pPdf );
-
     const auto N = ceil(1 + 29 * SQR(1 - roughness));
     const auto sign = sort_canonical() > 0.5f ? 1.0f : -1.0f;
     const auto sin_theta_h = sign * saturate( 1.0f - pow( sort_canonical() , 1.0f / ( N + 1 ) ) );
@@ -103,8 +101,6 @@ float Fabric::pdf(const Vector& wo, const Vector& wi) const {
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    return Bxdf::pdf( wo , wi );
-    
     const auto N = ceil(1 + 29 * SQR(1 - roughness));
 
     const auto wh = Normalize( wo + wi );
