@@ -41,6 +41,7 @@ Here are some of the examples rendered by SORT
 <img src="assets/main_page/mat_plastic2.png" width="225" height="225" />
 <img src="assets/main_page/mat_coated3.png" width="225" height="225" />
 <img src="assets/main_page/mat_velvet.png" width="225" height="225" />
+<img src="assets/main_page/mat_dwa_fabric.png" width="225" height="225" />
 
 ## Compilation and Deployment
 For those who are interested in compiling SORT by themselves, please check out [this page](/compilation.md) for further deatail.  
