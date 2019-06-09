@@ -184,7 +184,7 @@ TEST(BXDF, Dielectric) {
     checkAll( &dielectric , false , false , true );
 }
 
-TEST(BXDF, DreamWork_Fabric) {
+TEST(BXDF, DISABLED_DreamWork_Fabric) {
     auto test_fabric = []( const float roughness ){
         Fabric fabric( WHITE_SPECTRUM , roughness , FULL_WEIGHT , DIR_UP );
         checkAll( &fabric );
