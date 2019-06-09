@@ -712,7 +712,7 @@ class SORTNode_Material_Cloth(SORTShadingNode):
     def type_identifier(self):
         return self.bl_label + self.brdf_type
     def init(self, context):
-        self.inputs.new( 'SORTNodeSocketColor' , 'Diffuse' )
+        self.inputs.new( 'SORTNodeSocketColor' , 'BaseColor' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Specular' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'SpecularTint' )
@@ -723,9 +723,7 @@ class SORTNode_Material_Cloth(SORTShadingNode):
             fs.serialize( 5 )
         else:
             fs.serialize( 3 )
-        fs.serialize( self.inputs['Diffuse'].export_osl_value() )
-        print(self.inputs['Diffuse'].export_osl_value())
-        print(self.inputs['Roughness'].export_osl_value())
+        fs.serialize( self.inputs['BaseColor'].export_osl_value() )
         fs.serialize( self.inputs['Roughness'].export_osl_value() )
         if self.brdf_type == 'TheOrder_Fabric':
             fs.serialize( self.inputs['Specular'].export_osl_value() )
