@@ -51,7 +51,7 @@
             "request": "launch",
             "preLaunchTask": "Build (Release)",
             "program": "${workspaceFolder}/../bin/sort_r",
-            "args": ["--unittest", "--gtest_filter=*"],
+            "args": ["--unittest", "--gtest_filter=*Fabric*"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/../bin",
             "environment": [],
