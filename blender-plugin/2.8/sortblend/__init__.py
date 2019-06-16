@@ -34,26 +34,16 @@ from . import base
 #from .ui import ui_space
 from .material import nodes
 
+@base.register_class
 class SORTAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
-
-    # this must match the addon name
-    install_path = bpy.props.StringProperty(
-            name="Path to SORT binary",
-            description='Path to SORT binary',
-            subtype='DIR_PATH',
-            default='',)
-
-    pbrt_export_path = bpy.props.StringProperty(
-            name='Pbrt exporting path',
-            description='Path to exported pbrt scene',
-            subtype='DIR_PATH',
-            default='')
-
+    install_path : bpy.props.StringProperty( name="Path to SORT binary", description='Path to SORT binary', subtype='DIR_PATH', default='',)
+    pbrt_export_path : bpy.props.StringProperty( name='Pbrt exporting path', description='Path to exported pbrt scene', subtype='DIR_PATH', default='')
     def draw(self, context):
         self.layout.prop(self, "install_path")
         self.layout.prop(self, "pbrt_export_path")
 
+@base.register_class
 class SORTRenderEngine(bpy.types.RenderEngine):
     bl_idname = 'SORT'
     bl_label = 'SORT'
@@ -68,15 +58,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         pass
 
 def register():
-    bpy.utils.register_class(SORTRenderEngine)
     base.register()
-    pass
-    #addon_register()
-    #bpy.utils.register_class(SORTAddonPreferences)
 
 def unregister():
     base.unregister()
-    bpy.utils.unregister_class(SORTRenderEngine)
-    pass
-    #addon_unregister()
-    #bpy.utils.unregister_class(SORTAddonPreferences)

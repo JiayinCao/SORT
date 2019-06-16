@@ -14,6 +14,7 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
+from .. import base
 
 # SORT Node property base class
 class SORTNodeProperty:
@@ -24,7 +25,7 @@ class SORTNodeProperty:
 
 # Base class for sort socket
 class SORTNodeSocket(SORTNodeProperty):
-    ui_open = bpy.props.BoolProperty(name='UI Open', default=True)
+    ui_open : bpy.props.BoolProperty(name='UI Open', default=True)
     socket_color = (0.1, 0.1, 0.1, 0.75)
     need_bxdf_node = False
 
@@ -44,9 +45,9 @@ class SORTNodeSocket(SORTNodeProperty):
         if source_socket is not None and source_socket.get_socket_data_type() != self.get_socket_data_type():
             has_error = True
         if has_error:
-            layout.label(text,icon='CANCEL')
+            layout.label(text=text,icon='CANCEL')
         else:
-            layout.label(text)
+            layout.label(text=text)
 
     # Customized color for the socket
     def draw_color(self, context, node):
@@ -63,7 +64,8 @@ class SORTNodeSocket(SORTNodeProperty):
         return 'None'
 
 # Socket for BXDF or Materials
-class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
+@base.register_class
+class SORTNodeSocketBxdf(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketBxdf'
     bl_label = 'SORT Shader Socket'
     socket_color = (0.2, 0.2, 1.0, 1.0)
@@ -72,14 +74,15 @@ class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
         if self.is_linked or self.is_output:
             self.draw_label(context,layout,node,text)
         else:
-            layout.label(text)
+            layout.label(text=text)
     def export_osl_value(self):
         return 'color(0)'
     def get_socket_data_type(self):
         return 'bxdf'
 
 # Socket for Color
-class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
+@base.register_class
+class SORTNodeSocketColor(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketColor'
     bl_label = 'SORT Color Socket'
     socket_color = (0.1, 1.0, 0.2, 1.0)
@@ -91,7 +94,8 @@ class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
         return 'vector3'
 
 # Socket for Float
-class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
+@base.register_class
+class SORTNodeSocketFloat(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketFloat'
     bl_label = 'SORT Float Socket'
     socket_color = (0.1, 0.1, 0.3, 1.0)
@@ -103,7 +107,8 @@ class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'float'
 
 # Socket for Float Vector
-class SORTNodeSocketFloatVector(bpy.types.NodeSocketFloat, SORTNodeSocket):
+@base.register_class
+class SORTNodeSocketFloatVector(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketFloatVector'
     bl_label = 'SORT Float Vector Socket'
     socket_color = (0.1, 0.6, 0.3, 1.0)
@@ -115,7 +120,8 @@ class SORTNodeSocketFloatVector(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'vector3'
 
 # Socket for Positive Float
-class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
+@base.register_class
+class SORTNodeSocketLargeFloat(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketLargeFloat'
     bl_label = 'SORT Float Socket'
     socket_color = (0.1, 0.1, 0.3, 1.0)
@@ -127,7 +133,8 @@ class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'float'
 
 # Socket for Any Float
-class SORTNodeSocketAnyFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
+@base.register_class
+class SORTNodeSocketAnyFloat(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketAnyFloat'
     bl_label = 'SORT Float Socket'
     socket_color = (0.1, 0.1, 0.3, 1.0)
@@ -139,7 +146,8 @@ class SORTNodeSocketAnyFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'float'
 
 # Socket for normal ( normal map )
-class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
+@base.register_class
+class SORTNodeSocketNormal(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketNormal'
     bl_label = 'SORT Normal Socket'
     socket_color = (0.1, 0.4, 0.3, 1.0)
@@ -150,15 +158,16 @@ class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
             self.draw_label(context,layout,node,text)
         else:
             row = layout.row()
-            split = row.split(0.4)
-            split.label(text)
+            split = row.split(factor=0.4)
+            split.label(text=text)
     def export_osl_value(self):
         return 'normal( %f , %f , %f )' %(self.default_value[:])
     def get_socket_data_type(self):
         return 'vector3'
 
 # Socket for UV Mapping
-class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
+@base.register_class
+class SORTNodeSocketUV(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketUV'
     bl_label = 'SORT UV Mapping'
     socket_color = (0.9, 0.2, 0.8, 1.0)
@@ -170,8 +179,8 @@ class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
             self.draw_label(context,layout,node,text)
         else:
             row = layout.row()
-            split = row.split(0.4)
-            split.label(text)
+            split = row.split(factor=0.4)
+            split.label(text=text)
     def export_osl_value(self):
         return 'vector( u , v , 0.0 )'
     def get_socket_data_type(self):

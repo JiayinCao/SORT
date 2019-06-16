@@ -29,7 +29,6 @@ class SORTMaterial(bpy.types.PropertyGroup):
     sortnodetree : bpy.props.StringProperty(name="Nodetree",default='')
     use_sort_nodes : bpy.props.BoolProperty(name="Nodetree",default=False)
 
-# node tree for sort
 @base.register_class
 class SORTShaderEditor(bpy.types.NodeTree):
     bl_idname = 'SORTShaderEditor'
@@ -84,9 +83,6 @@ class SORTShadingNode(bpy.types.Node):
     # empty implementation
     def serialize_prop(self,fs):
         fs.serialize(0)
-        pass
-    # to be deleted
-    def draw_props(self, context, layout, indented_label):
         pass
     # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
     def type_identifier(self):

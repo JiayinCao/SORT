@@ -14,23 +14,19 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
-import bpy_types
 
 REGISTRARS = []
-
 def registrar(register, unregister, name=None):
     global REGISTRARS
     if name is None or not [True for _, _, n in REGISTRARS if n == name]:
         REGISTRARS.append((register, unregister, name))
 
 def register():
-    for r, _, n in REGISTRARS:
-        print( 'Register ' + n )
+    for r, _, _ in REGISTRARS:
         r()
 
 def unregister():
-    for _, u, n in reversed(REGISTRARS):
-        print( 'Unregister ' + n )
+    for _, u, _ in reversed(REGISTRARS):
         u()
 
 def register_class(cls):
