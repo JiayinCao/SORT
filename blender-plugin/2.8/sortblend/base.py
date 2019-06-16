@@ -32,3 +32,12 @@ def unregister():
 def register_class(cls):
     registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)
     return cls
+
+def compatify_class(cls):
+    def reg():
+        cls.COMPAT_ENGINES.add('SORT')
+    def unreg():
+        cls.COMPAT_ENGINES.remove('SORT')
+    cls.COMPAT_ENGINES.add('SORT')
+    registrar(reg, unreg, cls.__name__)
+    return cls
