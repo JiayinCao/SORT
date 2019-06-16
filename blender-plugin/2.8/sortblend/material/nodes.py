@@ -22,6 +22,7 @@ from .. import base
 class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
     @classmethod
     def poll(cls, context):
+        # Making sure these shader nodes only appear in SORT Shader Editor
         return context.space_data.tree_type == 'SORTShaderEditor'
 
 class SORTMaterial(bpy.types.PropertyGroup):
@@ -39,8 +40,8 @@ class SORTShaderEditor(bpy.types.NodeTree):
 
     @classmethod
     def poll(cls, context):
-        return True
-        return context.scene.render.engine == 'SORT_RENDERER'
+        # Making sure the option only appears when the rendering engine is SORT in Blender
+        return context.scene.render.engine == 'SORT'
 
     @classmethod
     def register_node(cls, category):

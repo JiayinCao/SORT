@@ -23,10 +23,6 @@ bl_info = {
     "warning": "Still under development", # used for warning icon and text in addons panel
     "category": "Render"}
 
-#from extensions_framework import Addon
-#SORTAddon = Addon(bl_info)
-#addon_register, addon_unregister = SORTAddon.init_functions()
-
 import bpy
 from . import base
 #from . import renderer
@@ -60,7 +56,7 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
 
 class SORTRenderEngine(bpy.types.RenderEngine):
     bl_idname = 'SORT'
-    bl_label = 'SORT_RENDERER'
+    bl_label = 'SORT'
     bl_use_preview = False
     bl_use_material = True
     bl_use_shading_nodes = False
