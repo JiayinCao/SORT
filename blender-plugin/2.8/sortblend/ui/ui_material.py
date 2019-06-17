@@ -228,14 +228,16 @@ class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
             split.template_ID(space, "pin_id")
             split.separator()
 
+@base.register_class
 class SORT_use_shading_nodes(bpy.types.Operator):
     """Enable nodes on a material, world or lamp"""
     bl_idname = "sort.use_shading_nodes"
     bl_label = "Use Nodes"
-    idtype = bpy.props.StringProperty(name="ID Type", default="material")
+    idtype : bpy.props.StringProperty(name="ID Type", default="material")
 
     @classmethod
     def poll(cls, context):
+        return True
         return (getattr(context, "material", False) or getattr(context, "world", False) or
                 getattr(context, "lamp", False))
 
@@ -258,6 +260,7 @@ class SORT_use_shading_nodes(bpy.types.Operator):
         nt.links.new(default.outputs[0], output.inputs[0])
         return {'FINISHED'}
 
+@base.register_class
 class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
     bl_label = "Surface"
 

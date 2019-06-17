@@ -25,7 +25,7 @@ bl_info = {
 
 import bpy
 from . import base
-#from . import renderer
+from . import renderer
 from .ui import ui_render
 #from .ui import ui_camera
 #from .ui import ui_lamp
@@ -43,22 +43,10 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
         self.layout.prop(self, "install_path")
         self.layout.prop(self, "pbrt_export_path")
 
-@base.register_class
-class SORTRenderEngine(bpy.types.RenderEngine):
-    bl_idname = 'SORT'
-    bl_label = 'SORT'
-    bl_use_preview = False
-    bl_use_material = True
-    bl_use_shading_nodes = False
-    bl_use_shading_nodes_custom = False
-    bl_use_texture_preview = True
-    bl_use_texture = True
-
-    def render(self, scene):
-        pass
-
 def register():
     base.register()
+    nodes.register()
 
 def unregister():
+    nodes.unregister()
     base.unregister()
