@@ -85,12 +85,13 @@ class SORTShadingNode(bpy.types.Node):
     # empty implementation
     def serialize_prop(self,fs):
         fs.serialize(0)
-        pass
     # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
     def type_identifier(self):
         return self.bl_label
     def export_pbrt(self,file):
         file.write( "\"string type\" \"matte\"" )
+    def draw_props(self, context, layout, indented_label):
+        pass
 
 @register_node('Output')
 class SORTNodeOutput(SORTShadingNode):
