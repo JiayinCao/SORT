@@ -29,13 +29,8 @@ class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
     def poll(cls, context):
         return sort_shader_node_poll(context)
         
-class SORTMaterial(bpy.types.PropertyGroup):
-    sortnodetree : bpy.props.StringProperty(name="Nodetree",default='')
-    use_sort_nodes : bpy.props.BoolProperty(name="Nodetree",default=False)
-
 node_categories = {}
 def register_node(category):
-    bpy.types.Material.sort_material : bpy.props.PointerProperty(type=SORTMaterial, name='SORT Material Settings')
     def registrar(nodecls):
         base.register_class(nodecls)
         d = node_categories.setdefault(category, [])
