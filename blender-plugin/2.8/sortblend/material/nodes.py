@@ -20,12 +20,15 @@ from . import properties
 from .. import base
 from .. import renderer
 
+# Making sure these shader nodes only appear in SORT Shader Editor
+def sort_shader_node_poll(context):
+    return context.space_data.tree_type == 'ShaderNodeTree' and renderer.SORTRenderEngine.is_active(context)
+
 class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
     @classmethod
     def poll(cls, context):
-        # Making sure these shader nodes only appear in SORT Shader Editor
-        return context.space_data.tree_type == 'ShaderNodeTree' and renderer.SORTRenderEngine.is_active(context)
-
+        return sort_shader_node_poll(context)
+        
 class SORTMaterial(bpy.types.PropertyGroup):
     sortnodetree : bpy.props.StringProperty(name="Nodetree",default='')
     use_sort_nodes : bpy.props.BoolProperty(name="Nodetree",default=False)

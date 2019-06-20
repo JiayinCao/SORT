@@ -249,11 +249,14 @@ class SORT_use_shading_nodes(bpy.types.Operator):
     def execute(self, context):
         nt = context.material.node_tree
         nt.use_fake_user = True
-
+        
         output = nt.nodes.new('SORTNodeOutput')
         default = nt.nodes.new('SORTNode_Material_Diffuse')
         default.location = output.location
-        default.location[0] -= 300
+
+        # temporary , making sure it dosn't overlap with cycles/eevee default nodes before hiding them for now
+        default.location[0] -= 400
+        output.location[0] -= 200
         nt.links.new(default.outputs[0], output.inputs[0])
 
         return {'FINISHED'}
