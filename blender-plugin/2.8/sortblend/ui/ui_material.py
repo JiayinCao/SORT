@@ -46,27 +46,29 @@ class SORT_Add_Node:
         for category , types in nodes.SORTPatternGraph.nodetypes.items():
             found_item = False
             for type in types:
-                if type[2] == cls.socket_type:
+                if type[3] == cls.socket_type:
                     found_item = True
                     break
             if found_item is False:
                 continue
             items.append(('', category, ''))
             for type in types:
-                if type[2] == cls.socket_type:
-                    items.append(( type[0] , type[1] , type[1] ))
+                if type[3] == cls.socket_type:
+                    items.append(( type[0] + '#' + type[2] , type[1] , type[2] ))
         if cls.connected:
             items.append(('', 'Link', ''))
             items.append(('REMOVE', 'Remove', 'Remove the node connected to this socket'))
             items.append(('DISCONNECT', 'Disconnect', 'Disconnect the node connected to this socket'))
         return items
 
-    node_type : bpy.props.EnumProperty(name="Node Type",
-        description='Node type to add to this socket',
-        items=get_type_items)
+    node_type : bpy.props.EnumProperty(name="Node Type", description='Node type to add to this socket', items=get_type_items)
 
     def execute(self, context):
-        new_type = self.properties.node_type
+        encoded = self.properties.node_type
+        decoded = encoded.split('#')
+        new_type = decoded[0]
+        # socket to connect, some nodes have multiple sockets that match the source socket type
+        tc_socket = decoded[1] if len(decoded) > 1 else None
         if new_type == 'DEFAULT':
             return {'CANCELLED'}
 
@@ -88,26 +90,25 @@ class SORT_Add_Node:
                 nt.links.remove(link)
             return {'FINISHED'}
 
-        # add a new node to existing socket
         if input_node is None:
+            # add a new node to existing socket
             newnode = nt.nodes.new(new_type)
+            newnode.update_ui_from_output(tc_socket)
             newnode.location = node.location
             newnode.location[0] -= 300
             newnode.selected = False
-            nt.links.new(newnode.outputs['Result'], socket)
-
-        # replace input node with a new one
+            nt.links.new(newnode.outputs[tc_socket], socket)
         else:
+            # replace input node with a new one
             newnode = nt.nodes.new(new_type)
-            input = socket
-            old_node = input.links[0].from_node
-            nt.links.new(newnode.outputs['Result'], socket)
+            newnode.update_ui_from_output(tc_socket)
+            old_node = socket.links[0].from_node
+            nt.links.new(newnode.outputs[tc_socket], socket)
             newnode.location = old_node.location
 
             nt.nodes.remove(old_node)
         return {'FINISHED'}
 
-# there must be a much better way to design this class registeration!
 @base.register_class
 class NODE_OT_add_surface_SORTNodeSocketBxdf(bpy.types.Operator, SORT_Add_Node):
     bl_idname = 'node.add_surface_sortnodesocketbxdf'
@@ -247,12 +248,13 @@ class SORT_use_shading_nodes(bpy.types.Operator):
     idtype : bpy.props.StringProperty(name="ID Type", default="material")
 
     def execute(self, context):
-        material_name = 'SORTGroup_' + context.material.name
-        context.material.sort_material = bpy.data.node_groups.new(material_name, type='SORTPatternGraph')
+        context.material.sort_material = bpy.data.node_groups.new(context.material.name, type='SORTPatternGraph')
         context.material.sort_material.use_fake_user = True
         output = context.material.sort_material.nodes.new('SORTNodeOutput')
         default = context.material.sort_material.nodes.new('SORTNode_Material_Diffuse')
-        default.location[0] -= 200
+        output.location[0] += 200
+        output.location[1] += 200
+        default.location[1] += 200
         context.material.sort_material.links.new(default.outputs[0], output.inputs[0])
         return {'FINISHED'}
 

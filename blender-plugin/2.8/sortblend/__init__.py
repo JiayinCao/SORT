@@ -45,8 +45,6 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
 
 def register():
     base.register()
-    nodes.register()
 
 def unregister():
-    nodes.unregister()
     base.unregister()

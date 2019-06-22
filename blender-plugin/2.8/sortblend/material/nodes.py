@@ -34,6 +34,8 @@ class SORTPatternGraph(bpy.types.NodeTree):
     bl_idname = 'SORTPatternGraph'
     bl_label = 'SORT Shader Editor'
     bl_icon = 'MATERIAL'
+    nodetypes = {}
+    node_categories = {}
 
     # Return a node tree from the context to be used in the editor
     @classmethod
@@ -46,44 +48,55 @@ class SORTPatternGraph(bpy.types.NodeTree):
         return (None, None, None)
 
     @classmethod
+    def register_node(cls,category):
+        def registrar(nodecls):
+            base.register_class(nodecls)
+            d = cls.node_categories.setdefault(category, [])
+            d.append(nodecls)
+            return nodecls
+        return registrar
+
+    @classmethod
     def register(cls):
         bpy.types.Material.sort_material = bpy.props.PointerProperty(type=bpy.types.NodeTree, name='SORT Material Settings')
 
-node_categories = {}
-def register_node(category):
-    def registrar(nodecls):
-        base.register_class(nodecls)
-        d = node_categories.setdefault(category, [])
-        d.append(nodecls)
-        return nodecls
-    return registrar
+        # This is to hide the cycles/eevee options from SORT shader nodes
+        from nodeitems_builtins import (
+            ShaderNodeCategory
+        )
+        def _poll(fn):
+            @classmethod
+            def _fn(cls, context):
+                return (
+                    not renderer.SORTRenderEngine.is_active(context) and
+                    fn(context)
+                )
+            return _fn
+        ShaderNodeCategory.poll = _poll(ShaderNodeCategory.poll)
 
-def register():
-    # This is to hide the cycles/eevee options from SORT shader nodes
-    from nodeitems_builtins import (
-        ShaderNodeCategory
-    )
-    def _poll(fn):
-        @classmethod
-        def _fn(cls, context):
-            return (
-                not renderer.SORTRenderEngine.is_active(context) and
-                fn(context)
-            )
-        return _fn
-    ShaderNodeCategory.poll = _poll(ShaderNodeCategory.poll)
+        # Register all nodes
+        cats = []
+        for c, l in sorted(cls.node_categories.items()):
+            cid = 'SORT_' + c.replace(' ', '').upper()
+            items = [nodeitems_utils.NodeItem(nc.__name__) for nc in l]
+            cats.append(SORTPatternNodeCategory(cid, c, items=items))
 
-    # Register all nodes
-    cats = []
-    for c, l in sorted(node_categories.items()):
-        cid = 'SORT_' + c.replace(' ', '').upper()
-        items = [nodeitems_utils.NodeItem(nc.__name__) for nc in l]
-        cats.append(SORTPatternNodeCategory(cid, c, items=items))
-    cats.append(SORTPatternNodeCategory('SORT_LAYOUT', 'Layout', items=[nodeitems_utils.NodeItem('NodeFrame'),nodeitems_utils.NodeItem('NodeReroute')]))
-    nodeitems_utils.register_node_categories('SHADER_NODES_SORT', cats)
+            cls.nodetypes[c] = []
+            for item in l :
+                type_cnt = {}
+                for output in item.getOutputs():
+                    if output[1] not in type_cnt:
+                        type_cnt[output[1]] = 0
+                    type_cnt[output[1]] += 1
+                for output in item.getOutputs():
+                    name = item.bl_label if type_cnt[output[1]] == 1 else item.bl_label + ' (' + output[0] + ')'
+                    cls.nodetypes[c].append((item.__name__,name,output[0],output[1]))
+        cats.append(SORTPatternNodeCategory('SORT_LAYOUT', 'Layout', items=[nodeitems_utils.NodeItem('NodeFrame'),nodeitems_utils.NodeItem('NodeReroute')]))
+        nodeitems_utils.register_node_categories('SHADER_NODES_SORT', cats)
 
-def unregister():
-    nodeitems_utils.unregister_node_categories('SHADER_NODES_SORT')
+    @classmethod
+    def unregister():
+        nodeitems_utils.unregister_node_categories('SHADER_NODES_SORT')
 
 class SORTShadingNode(bpy.types.Node):
     bl_label = 'ShadingNode'
@@ -110,8 +123,32 @@ class SORTShadingNode(bpy.types.Node):
         file.write( "\"string type\" \"matte\"" )
     def draw_props(self, context, layout, indented_label):
         pass
+    @classmethod
+    def getOutputs(cls):
+        return {}
+    def update_ui_from_output(self,output_socket):
+        pass
 
-@register_node('Output')
+class SORTBXDFNode(SORTShadingNode):
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Result' , 'SORTNodeSocketBxdf' ) }
+
+class SORTTextureNode(SORTShadingNode):
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Result' , 'SORTNodeSocketColor' ) ,
+                 ( 'Red' , 'SORTNodeSocketFloat' ) ,
+                 ( 'Green' , 'SORTNodeSocketFloat' ) ,
+                 ( 'Blue' , 'SORTNodeSocketFloat' ) }
+    def update_ui_from_output(self,output_socket):
+        if output_socket == 'Red' or output_socket == 'Green' or output_socket == 'Blue':
+            self.show_separate_channels = True
+            self.outputs['Red'].enabled = self.show_separate_channels
+            self.outputs['Blue'].enabled = self.show_separate_channels
+            self.outputs['Green'].enabled = self.show_separate_channels
+
+@SORTPatternGraph.register_node('Output')
 class SORTNodeOutput(SORTShadingNode):
     bl_label = 'Shader Output'
     bl_idname = 'SORTNodeOutput'
@@ -126,8 +163,8 @@ class SORTNodeOutput(SORTShadingNode):
 #------------------------------------------------------------------------------------#
 #                                   BXDF Nodes                                       #
 #------------------------------------------------------------------------------------#
-@register_node('Materials')
-class SORTNode_Material_Diffuse(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Diffuse(SORTBXDFNode):
     bl_label = 'Diffuse'
     bl_idname = 'SORTNode_Material_Diffuse'
     osl_shader_diffuse = '''
@@ -179,8 +216,8 @@ class SORTNode_Material_Diffuse(SORTShadingNode):
         file.write( "\"string type\" \"matte\"\n" )
         file.write( "\"rgb Kd\" [%f %f %f]\n" %(self.inputs['Diffuse'].default_value[:]) )
 
-@register_node('Materials')
-class SORTNode_Material_LambertTransmission(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_LambertTransmission(SORTBXDFNode):
     bl_label = 'Lambert Transmission'
     bl_idname = 'SORTNode_Material_LambertTransmission'
     osl_shader = '''
@@ -199,8 +236,8 @@ class SORTNode_Material_LambertTransmission(SORTShadingNode):
         fs.serialize( self.inputs['Color'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_Mirror(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Mirror(SORTBXDFNode):
     bl_label = 'Mirror'
     bl_idname = 'SORTNode_Material_Mirror'
     pbrt_bxdf_type = 'mirror'
@@ -220,8 +257,8 @@ class SORTNode_Material_Mirror(SORTShadingNode):
         fs.serialize( self.inputs['Color'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_Plastic(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Plastic(SORTBXDFNode):
     bl_label = 'Plastic'
     bl_idname = 'SORTNode_Material_Plastic'
     osl_shader = '''
@@ -250,8 +287,8 @@ class SORTNode_Material_Plastic(SORTShadingNode):
         fs.serialize( self.inputs['Roughness'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_Glass(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Glass(SORTBXDFNode):
     bl_label = 'Glass'
     bl_idname = 'SORTNode_Material_Glass'
     osl_shader = '''
@@ -279,8 +316,8 @@ class SORTNode_Material_Glass(SORTShadingNode):
         fs.serialize( self.inputs['RoughnessV'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_UE4Principle(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_UE4Principle(SORTBXDFNode):
     bl_label = 'UE4 Principle'
     bl_idname = 'SORTNode_Material_UE4Principle'
     osl_shader = '''
@@ -315,8 +352,8 @@ class SORTNode_Material_UE4Principle(SORTShadingNode):
         fs.serialize( self.inputs['BaseColor'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_DisneyBRDF(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_DisneyBRDF(SORTBXDFNode):
     bl_label = 'Disney BRDF'
     bl_idname = 'SORTNode_Material_DisneyBRDF'
     osl_shader = '''
@@ -402,8 +439,8 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         file.write( "\"float flatness\" %f\n"%(self.inputs['Flatness'].default_value))
         file.write( "\"float difftrans\" %f\n"%(self.inputs['Diffuse Transmittance'].default_value))
 
-@register_node('Materials')
-class SORTNode_Material_Hair(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Hair(SORTBXDFNode):
     bl_label = 'Hair'
     bl_idname = 'SORTNode_Material_Hair'
     # A Practical and Controllable Hair and Fur Model for Production Path Tracing
@@ -440,8 +477,8 @@ class SORTNode_Material_Hair(SORTShadingNode):
         fs.serialize( self.inputs['Azimuthal Roughness'].export_osl_value() )
         fs.serialize( self.inputs['Index of Refraction'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_Coat(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Coat(SORTBXDFNode):
     bl_label = 'Coat'
     bl_idname = 'SORTNode_Material_Coat'
     # A Practical and Controllable Hair and Fur Model for Production Path Tracing
@@ -478,8 +515,8 @@ class SORTNode_Material_Coat(SORTShadingNode):
         fs.serialize( self.inputs['Surface'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_Measured(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Measured(SORTBXDFNode):
     bl_label = 'Measured BRDF'
     bl_idname = 'SORTNode_Material_Measured'
     osl_shader_merl = '''
@@ -529,8 +566,8 @@ class SORTNode_Material_Measured(SORTShadingNode):
         fs.serialize( self.inputs['Normal'].export_osl_value() )
         fs.serialize( '%i'%self.ResourceIndex )
 
-@register_node('Materials')
-class SORTNode_Material_MicrofacetReflection(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_MicrofacetReflection(SORTBXDFNode):
     bl_label = 'MicrofacetRelection'
     bl_idname = 'SORTNode_Material_MicrofacetReflection'
     bl_width_min = 256
@@ -569,8 +606,8 @@ class SORTNode_Material_MicrofacetReflection(SORTShadingNode):
         fs.serialize( self.inputs['BaseColor'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_MicrofacetRefraction(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_MicrofacetRefraction(SORTBXDFNode):
     bl_label = 'MicrofacetRefraction'
     bl_idname = 'SORTNode_Material_MicrofacetRefraction'
     bl_width_min = 256
@@ -611,8 +648,8 @@ class SORTNode_Material_MicrofacetRefraction(SORTShadingNode):
         fs.serialize( self.inputs['BaseColor'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_AshikhmanShirley(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_AshikhmanShirley(SORTBXDFNode):
     bl_label = 'AshikhmanShirley'
     bl_idname = 'SORTNode_Material_AshikhmanShirley'
     osl_shader = '''
@@ -643,8 +680,8 @@ class SORTNode_Material_AshikhmanShirley(SORTShadingNode):
         fs.serialize( self.inputs['Diffuse'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_ModifiedPhong(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_ModifiedPhong(SORTBXDFNode):
     bl_label = 'Modified Phong'
     bl_idname = 'SORTNode_Material_ModifiedPhong'
     osl_shader = '''
@@ -674,8 +711,8 @@ class SORTNode_Material_ModifiedPhong(SORTShadingNode):
         fs.serialize( self.inputs['Specular'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_Cloth(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Cloth(SORTBXDFNode):
     bl_label = 'Cloth'
     bl_idname = 'SORTNode_Material_Cloth'
     osl_shader_dbrdf = '''
@@ -731,8 +768,8 @@ class SORTNode_Material_Cloth(SORTShadingNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, 'brdf_type', text='BRDF Type', expand=True)
 
-@register_node('Materials')
-class SORTNode_Material_Blend(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_Blend(SORTBXDFNode):
     bl_label = 'Blend'
     bl_idname = 'SORTNode_Material_Blend'
     osl_shader = '''
@@ -754,8 +791,8 @@ class SORTNode_Material_Blend(SORTShadingNode):
         fs.serialize( self.inputs['Surface1'].export_osl_value() )
         fs.serialize( self.inputs['Factor'].export_osl_value() )
 
-@register_node('Materials')
-class SORTNode_Material_DoubleSided(SORTShadingNode):
+@SORTPatternGraph.register_node('Materials')
+class SORTNode_Material_DoubleSided(SORTBXDFNode):
     bl_label = 'Double-Sided'
     bl_idname = 'SORTNode_Material_DoubleSided'
     osl_shader = '''
@@ -777,8 +814,8 @@ class SORTNode_Material_DoubleSided(SORTShadingNode):
 #------------------------------------------------------------------------------------#
 #                                   Texture Nodes                                    #
 #------------------------------------------------------------------------------------#
-@register_node('Textures')
-class SORTNodeCheckerBoard(SORTShadingNode):
+@SORTPatternGraph.register_node('Textures')
+class SORTNodeCheckerBoard(SORTTextureNode):
     bl_label = 'CheckerBoard'
     bl_idname = 'SORTNodeCheckerBoard'
     osl_shader = '''
@@ -825,8 +862,8 @@ class SORTNodeCheckerBoard(SORTShadingNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "show_separate_channels")
 
-@register_node('Textures')
-class SORTNodeGrid(SORTShadingNode):
+@SORTPatternGraph.register_node('Textures')
+class SORTNodeGrid(SORTTextureNode):
     bl_label = 'Grid'
     bl_idname = 'SORTNodeGrid'
     osl_shader = '''
@@ -879,8 +916,8 @@ class SORTNodeGrid(SORTShadingNode):
         layout.prop(self, "show_separate_channels")
 
 preview_collections = {}
-@register_node('Textures')
-class SORTNodeImage(SORTShadingNode):
+@SORTPatternGraph.register_node('Textures')
+class SORTNodeImage(SORTTextureNode):
     bl_label = 'Image'
     bl_idname = 'SORTNodeImage'
     bl_width_min = 200
@@ -893,11 +930,6 @@ class SORTNodeImage(SORTShadingNode):
              ('CLAMP_ONE', "Clamp to White", "Clamp to White outside 0-1"),)
     wrap_type : bpy.props.EnumProperty(name='Wrap Type', items=wrap_items, default='REPEAT')
     image_preview : bpy.props.BoolProperty(name='Preview Image', default=True)
-    def toggle_result_channel(self,context):
-        self.outputs['Red'].enabled = self.show_separate_channels
-        self.outputs['Blue'].enabled = self.show_separate_channels
-        self.outputs['Green'].enabled = self.show_separate_channels
-    show_separate_channels : bpy.props.BoolProperty(name='All Channels', default=False, update=toggle_result_channel)
     osl_shader_linear = '''
         shader ImageShaderLinear( string Filename = @ ,
                                   vector UVCoordinate = @ ,
@@ -939,6 +971,11 @@ class SORTNodeImage(SORTShadingNode):
             Blue = Result[2];
         }
     '''
+    def toggle_result_channel(self,context):
+        self.outputs['Red'].enabled = self.show_separate_channels
+        self.outputs['Blue'].enabled = self.show_separate_channels
+        self.outputs['Green'].enabled = self.show_separate_channels
+    show_separate_channels : bpy.props.BoolProperty(name='All Channels', default=False, update=toggle_result_channel)
     def generate_preview(self, context):
         name = self.name + '_' + self.id_data.name
         if name not in preview_collections:
@@ -1003,7 +1040,7 @@ class SORTNodeImage(SORTShadingNode):
 #------------------------------------------------------------------------------------#
 #                                 Convertor Nodes                                    #
 #------------------------------------------------------------------------------------#
-@register_node('Convertor')
+@SORTPatternGraph.register_node('Convertor')
 class SORTNodeRemappingUV(SORTShadingNode):
     bl_label = 'RemappingUV'
     bl_idname = 'SORTNodeRemappingUV'
@@ -1035,7 +1072,7 @@ class SORTNodeRemappingUV(SORTShadingNode):
         fs.serialize( self.inputs['OffsetU'].export_osl_value() )
         fs.serialize( self.inputs['OffsetV'].export_osl_value() )
 
-@register_node('Convertor')
+@SORTPatternGraph.register_node('Convertor')
 class SORTNodeExtract(SORTShadingNode):
     bl_label = 'Extract'
     bl_idname = 'SORTNodeExtract'
@@ -1061,7 +1098,7 @@ class SORTNodeExtract(SORTShadingNode):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Color'].export_osl_value() )
 
-@register_node('Convertor')
+@SORTPatternGraph.register_node('Convertor')
 class SORTNodeComposite(SORTShadingNode):
     bl_label = 'Composite'
     bl_idname = 'SORTNodeComposite'
@@ -1087,7 +1124,7 @@ class SORTNodeComposite(SORTShadingNode):
 #------------------------------------------------------------------------------------#
 #                                 Input Nodes                                        #
 #------------------------------------------------------------------------------------#
-@register_node('Input')
+@SORTPatternGraph.register_node('Input')
 class SORTNodeInputIntersection(SORTShadingNode):
     bl_label = 'Intersection'
     bl_idname = 'SORTNodeInputIntersection'
@@ -1107,7 +1144,7 @@ class SORTNodeInputIntersection(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketNormal' , 'World Geometry Normal' )
         self.outputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
 
-@register_node('Input')
+@SORTPatternGraph.register_node('Input')
 class SORTNodeInputFloat(SORTShadingNode):
     bl_label = 'Float'
     bl_idname = 'SORTNodeInputFloat'
@@ -1124,7 +1161,7 @@ class SORTNodeInputFloat(SORTShadingNode):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Value'].export_osl_value() )
 
-@register_node('Input')
+@SORTPatternGraph.register_node('Input')
 class SORTNodeInputFloatVector(SORTShadingNode):
     bl_label = 'Vector'
     bl_idname = 'SORTNodeInputFloatVector'
@@ -1142,7 +1179,7 @@ class SORTNodeInputFloatVector(SORTShadingNode):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Value'].export_osl_value() )
 
-@register_node('Input')
+@SORTPatternGraph.register_node('Input')
 class SORTNodeInputColor(SORTShadingNode):
     bl_label = 'Color'
     bl_idname = 'SORTNodeInputColor'
@@ -1165,7 +1202,7 @@ class SORTNodeInputColor(SORTShadingNode):
 #------------------------------------------------------------------------------------#
 #                                 Math Op Nodes                                      #
 #------------------------------------------------------------------------------------#
-@register_node('Math Ops')
+@SORTPatternGraph.register_node('Math Ops')
 class SORTNodeMathOpUnary(SORTShadingNode):
     bl_label = 'Unary Operator'
     bl_idname = 'SORTNodeMathOpUnary'
@@ -1209,7 +1246,7 @@ class SORTNodeMathOpUnary(SORTShadingNode):
     def type_identifier(self):
         return self.bl_label + self.data_type + self.op_type
         
-@register_node('Math Ops')
+@SORTPatternGraph.register_node('Math Ops')
 class SORTNodeMathOpBinary(SORTShadingNode):
     bl_label = 'Binary Operator'
     bl_idname = 'SORTNodeMathOpBinary'
@@ -1256,7 +1293,7 @@ class SORTNodeMathOpBinary(SORTShadingNode):
     def type_identifier(self):
         return self.bl_label + self.data_type + self.op_type
 
-@register_node('Math Ops')
+@SORTPatternGraph.register_node('Math Ops')
 class SORTNodeMathOpDotProduce(SORTShadingNode):
     bl_label = 'Dot Product'
     bl_idname = 'SORTNodeMathOpDotProduce'
@@ -1277,7 +1314,7 @@ class SORTNodeMathOpDotProduce(SORTShadingNode):
         fs.serialize( self.inputs['Value0'].export_osl_value() )
         fs.serialize( self.inputs['Value1'].export_osl_value() )
     
-@register_node('Math Ops')
+@SORTPatternGraph.register_node('Math Ops')
 class SORTNodeMathOpLerp(SORTShadingNode):
     bl_label = 'Lerp'
     bl_idname = 'SORTNodeMathOpLerp'
@@ -1328,7 +1365,7 @@ class SORTNodeMathOpLerp(SORTShadingNode):
     def type_identifier(self):
         return self.bl_label + self.data_type
 
-@register_node('Math Ops')
+@SORTPatternGraph.register_node('Math Ops')
 class SORTNodeMathOpClamp(SORTShadingNode):
     bl_label = 'Clamp'
     bl_idname = 'SORTNodeMathOpClamp'
