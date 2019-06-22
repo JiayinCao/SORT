@@ -22,13 +22,33 @@ from .. import renderer
 
 # Making sure these shader nodes only appear in SORT Shader Editor
 def sort_shader_node_poll(context):
-    return context.space_data.tree_type == 'ShaderNodeTree' and renderer.SORTRenderEngine.is_active(context)
+    return context.space_data.tree_type == 'SORTPatternGraph' and renderer.SORTRenderEngine.is_active(context)
 
 class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
     @classmethod
     def poll(cls, context):
         return sort_shader_node_poll(context)
         
+@base.register_class
+class SORTPatternGraph(bpy.types.NodeTree):
+    bl_idname = 'SORTPatternGraph'
+    bl_label = 'SORT Shader Editor'
+    bl_icon = 'MATERIAL'
+
+    # Return a node tree from the context to be used in the editor
+    @classmethod
+    def get_from_context(cls, context):
+        ob = context.active_object
+        if ob.active_material is not None:
+            mat = ob.active_material
+            if mat is not None and mat.sort_material is not None:
+                return mat.sort_material , mat , mat
+        return (None, None, None)
+
+    @classmethod
+    def register(cls):
+        bpy.types.Material.sort_material = bpy.props.PointerProperty(type=bpy.types.NodeTree, name='SORT Material Settings')
+
 node_categories = {}
 def register_node(category):
     def registrar(nodecls):

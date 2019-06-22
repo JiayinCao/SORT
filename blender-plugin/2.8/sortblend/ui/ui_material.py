@@ -247,20 +247,13 @@ class SORT_use_shading_nodes(bpy.types.Operator):
     idtype : bpy.props.StringProperty(name="ID Type", default="material")
 
     def execute(self, context):
-        nt = context.material.node_tree
-        nt.use_fake_user = True
-
-        output = nt.nodes.new('SORTNodeOutput')
-        default = nt.nodes.new('SORTNode_Material_Diffuse')
-        default.location = output.location
-
-        # temporary , making sure it dosn't overlap with cycles/eevee default nodes before hiding them for now
-        output.location[1] -= 300
+        material_name = 'SORTGroup_' + context.material.name
+        context.material.sort_material = bpy.data.node_groups.new(material_name, type='SORTPatternGraph')
+        context.material.sort_material.use_fake_user = True
+        output = context.material.sort_material.nodes.new('SORTNodeOutput')
+        default = context.material.sort_material.nodes.new('SORTNode_Material_Diffuse')
         default.location[0] -= 200
-        default.location[1] -= 300
-        
-        nt.links.new(default.outputs[0], output.inputs[0])
-
+        context.material.sort_material.links.new(default.outputs[0], output.inputs[0])
         return {'FINISHED'}
 
     @classmethod
@@ -279,15 +272,18 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
         return context.material and SORTMaterialPanel.poll(context)
 
     def draw(self, context):
+        nt = context.material.sort_material
+
         # find the output node, duplicated code, to be cleaned
-        def find_output_node(material):
-            ntree = material.node_tree
+        def find_output_node(ntree):
+            if ntree is None:
+                return None
             for node in ntree.nodes:
                 if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
                     return node
             return None
 
-        output_node = find_output_node(context.material)
+        output_node = find_output_node(nt)
         if output_node is None:
             self.layout.operator("sort.use_shading_nodes", icon='NODETREE')
             return
@@ -298,7 +294,7 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
         self.layout.context_pointer_set("socket", socket)
 
         if output_node is not None:
-            self.draw_node_properties_recursive(self.layout, context, context.material.node_tree, output_node)
+            self.draw_node_properties_recursive(self.layout, context, nt, output_node)
 
     def draw_node_properties_recursive(self,layout, context, nt, node, level=0):
         def indented_label(layout):
