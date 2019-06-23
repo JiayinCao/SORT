@@ -325,6 +325,9 @@ class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
             self.layout.operator("sort.use_shading_nodes", icon='NODETREE')
             return
 
+        # This panel is close to useless and it is to be deprecated in the future.
+        return
+        
         socket = output_node.inputs['Surface']
         self.layout.context_pointer_set("nodetree", context.material.node_tree)
         self.layout.context_pointer_set("node", output_node)
