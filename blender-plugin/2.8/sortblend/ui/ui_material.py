@@ -15,6 +15,7 @@
 
 import bpy
 from ..material import nodes
+from ..material import properties
 from .. import base
 from bl_ui import properties_data_camera
 
@@ -46,14 +47,16 @@ class SORT_Add_Node:
         for category , types in nodes.SORTPatternGraph.nodetypes.items():
             found_item = False
             for type in types:
-                if type[3] == cls.socket_type:
+                if properties.isCompatible( type[3] , cls.socket_type ):
+                #if type[3] == cls.socket_type:
                     found_item = True
                     break
             if found_item is False:
                 continue
             items.append(('', category, ''))
             for type in types:
-                if type[3] == cls.socket_type:
+                if properties.isCompatible( type[3] , cls.socket_type ):
+                #if type[3] == cls.socket_type:
                     items.append(( type[0] + '#' + type[2] , type[1] , type[2] ))
         if cls.connected:
             items.append(('', 'Link', ''))
@@ -203,6 +206,38 @@ class NODE_OT_add_surface_sortnodesocketuv_no_remove(bpy.types.Operator, SORT_Ad
     bl_label = 'Add UV Mapping Node'
     bl_description = 'Connect a node to this socket'
     socket_type : bpy.props.StringProperty(default='SORTNodeUVMapping')
+    connected : bpy.props.BoolProperty(default=False)
+
+@base.register_class
+class NODE_OP_add_surface_sortnodesocketfloatvector(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketfloatvector'
+    bl_label = 'Add Vector Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type : bpy.props.StringProperty(default='SORTNodeSocketFloatVector')
+    connected : bpy.props.BoolProperty(default=False)
+
+@base.register_class
+class NODE_OP_add_surface_sortnodesocketfloatvector_no_remove(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketfloatvector_no_remove'
+    bl_label = 'Add Vector Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type : bpy.props.StringProperty(default='SORTNodeSocketFloatVector')
+    connected : bpy.props.BoolProperty(default=False)
+
+@base.register_class
+class NODE_OP_add_surface_sortnodesocketanyfloat(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketanyfloat'
+    bl_label = 'Add Float Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type : bpy.props.StringProperty(default='SORTNodeSocketFloatVector')
+    connected : bpy.props.BoolProperty(default=False)
+
+@base.register_class
+class NODE_OP_add_surface_sortnodesocketanyfloat_no_remove(bpy.types.Operator, SORT_Add_Node):
+    bl_idname = 'node.add_surface_sortnodesocketanyfloat_no_remove'
+    bl_label = 'Add Float Node'
+    bl_description = 'Connect a node to this socket'
+    socket_type : bpy.props.StringProperty(default='SORTNodeSocketAnyFloat')
     connected : bpy.props.BoolProperty(default=False)
 
 @base.register_class

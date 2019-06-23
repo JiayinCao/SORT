@@ -83,13 +83,9 @@ class SORTPatternGraph(bpy.types.NodeTree):
 
             cls.nodetypes[c] = []
             for item in l :
-                type_cnt = {}
+                count = len(item.getOutputs())
                 for output in item.getOutputs():
-                    if output[1] not in type_cnt:
-                        type_cnt[output[1]] = 0
-                    type_cnt[output[1]] += 1
-                for output in item.getOutputs():
-                    name = item.bl_label if type_cnt[output[1]] == 1 else item.bl_label + ' (' + output[0] + ')'
+                    name = item.bl_label if count == 1 else item.bl_label + ' (' + output[0] + ')'
                     cls.nodetypes[c].append((item.__name__,name,output[0],output[1]))
         cats.append(SORTPatternNodeCategory('SORT_LAYOUT', 'Layout', items=[nodeitems_utils.NodeItem('NodeFrame'),nodeitems_utils.NodeItem('NodeReroute')]))
         nodeitems_utils.register_node_categories('SHADER_NODES_SORT', cats)
@@ -147,6 +143,15 @@ class SORTTextureNode(SORTShadingNode):
             self.outputs['Red'].enabled = self.show_separate_channels
             self.outputs['Blue'].enabled = self.show_separate_channels
             self.outputs['Green'].enabled = self.show_separate_channels
+
+class SORTMathOpNode(SORTShadingNode):
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Result' , 'SORTNodeSocketColor' ) ,
+                 ( 'Result' , 'SORTNodeSocketFloat' ) ,
+                 ( 'Result' , 'SORTNodeSocketFloatVector' ) }
+    def update_ui_from_output(self,output_socket):
+        pass
 
 @SORTPatternGraph.register_node('Output')
 class SORTNodeOutput(SORTShadingNode):
@@ -1071,6 +1076,9 @@ class SORTNodeRemappingUV(SORTShadingNode):
         fs.serialize( self.inputs['TilingV'].export_osl_value() )
         fs.serialize( self.inputs['OffsetU'].export_osl_value() )
         fs.serialize( self.inputs['OffsetV'].export_osl_value() )
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Result' , 'SORTNodeSocketUV' ) }
 
 @SORTPatternGraph.register_node('Convertor')
 class SORTNodeExtract(SORTShadingNode):
@@ -1097,6 +1105,12 @@ class SORTNodeExtract(SORTShadingNode):
     def serialize_prop(self, fs):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Color'].export_osl_value() )
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Red' , 'SORTNodeSocketFloat' ) ,
+                 ( 'Green' , 'SORTNodeSocketFloat' ) ,
+                 ( 'Blue' , 'SORTNodeSocketFloat' ) ,
+                 ( 'Intensity' , 'SORTNodeSocketFloat' ) }
 
 @SORTPatternGraph.register_node('Convertor')
 class SORTNodeComposite(SORTShadingNode):
@@ -1120,6 +1134,9 @@ class SORTNodeComposite(SORTShadingNode):
         fs.serialize( self.inputs['Red'].export_osl_value() )
         fs.serialize( self.inputs['Green'].export_osl_value() )
         fs.serialize( self.inputs['Blue'].export_osl_value() )
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Color' , 'SORTNodeSocketColor' ) }
 
 #------------------------------------------------------------------------------------#
 #                                 Input Nodes                                        #
@@ -1143,6 +1160,13 @@ class SORTNodeInputIntersection(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketNormal' , 'World Shading Normal' )
         self.outputs.new( 'SORTNodeSocketNormal' , 'World Geometry Normal' )
         self.outputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'World Position' , 'SORTNodeSocketFloatVector' ) ,
+                 ( 'World View Direction' , 'SORTNodeSocketFloatVector' ) ,
+                 ( 'World Shading Normal' , 'SORTNodeSocketNormal' ) ,
+                 ( 'World Geometry Normal' , 'SORTNodeSocketNormal' ) ,
+                 ( 'UV Coordinate' , 'SORTNodeSocketUV' ) }
 
 @SORTPatternGraph.register_node('Input')
 class SORTNodeInputFloat(SORTShadingNode):
@@ -1160,6 +1184,9 @@ class SORTNodeInputFloat(SORTShadingNode):
     def serialize_prop(self, fs):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Value'].export_osl_value() )
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Result' , 'SORTNodeSocketLargeFloat' ) }
 
 @SORTPatternGraph.register_node('Input')
 class SORTNodeInputFloatVector(SORTShadingNode):
@@ -1178,6 +1205,9 @@ class SORTNodeInputFloatVector(SORTShadingNode):
     def serialize_prop(self, fs):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Value'].export_osl_value() )
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Result' , 'SORTNodeSocketFloatVector' ) }
 
 @SORTPatternGraph.register_node('Input')
 class SORTNodeInputColor(SORTShadingNode):
@@ -1198,12 +1228,15 @@ class SORTNodeInputColor(SORTShadingNode):
     def serialize_prop(self, fs):
         fs.serialize( 1 )
         fs.serialize( 'color( %f,%f,%f )'%(self.color[:]) )
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Result' , 'SORTNodeSocketColor' ) }
 
 #------------------------------------------------------------------------------------#
 #                                 Math Op Nodes                                      #
 #------------------------------------------------------------------------------------#
 @SORTPatternGraph.register_node('Math Ops')
-class SORTNodeMathOpUnary(SORTShadingNode):
+class SORTNodeMathOpUnary(SORTMathOpNode):
     bl_label = 'Unary Operator'
     bl_idname = 'SORTNodeMathOpUnary'
     bl_width_min = 240
@@ -1218,7 +1251,9 @@ class SORTNodeMathOpUnary(SORTShadingNode):
         self.outputs.clear()
         self.inputs.new( self.data_type , 'Value' )
         self.outputs.new( self.data_type , 'Result' )
-        if self.data_type != 'SORTNodeSocketAnyFloat':
+        if self.data_type == 'SORTNodeSocketFloatVector':
+            self.inputs['Value'].default_value = ( 0.0 , 0.0 , 0.0 )
+        elif self.data_type == 'SORTNodeSocketColor':
             self.inputs['Value'].default_value = ( 1.0 , 1.0 , 1.0 )
         else:
             self.inputs['Value'].default_value = 1.0
@@ -1247,7 +1282,7 @@ class SORTNodeMathOpUnary(SORTShadingNode):
         return self.bl_label + self.data_type + self.op_type
         
 @SORTPatternGraph.register_node('Math Ops')
-class SORTNodeMathOpBinary(SORTShadingNode):
+class SORTNodeMathOpBinary(SORTMathOpNode):
     bl_label = 'Binary Operator'
     bl_idname = 'SORTNodeMathOpBinary'
     bl_width_min = 240
@@ -1313,9 +1348,12 @@ class SORTNodeMathOpDotProduce(SORTShadingNode):
         fs.serialize( 2 )
         fs.serialize( self.inputs['Value0'].export_osl_value() )
         fs.serialize( self.inputs['Value1'].export_osl_value() )
+    @classmethod
+    def getOutputs(cls):
+        return { ( 'Result' , 'SORTNodeSocketLargeFloat' ) }
     
 @SORTPatternGraph.register_node('Math Ops')
-class SORTNodeMathOpLerp(SORTShadingNode):
+class SORTNodeMathOpLerp(SORTMathOpNode):
     bl_label = 'Lerp'
     bl_idname = 'SORTNodeMathOpLerp'
     bl_width_min = 240
@@ -1366,7 +1404,7 @@ class SORTNodeMathOpLerp(SORTShadingNode):
         return self.bl_label + self.data_type
 
 @SORTPatternGraph.register_node('Math Ops')
-class SORTNodeMathOpClamp(SORTShadingNode):
+class SORTNodeMathOpClamp(SORTMathOpNode):
     bl_label = 'Clamp'
     bl_idname = 'SORTNodeMathOpClamp'
     bl_width_min = 240

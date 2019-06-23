@@ -185,3 +185,16 @@ class SORTNodeSocketUV(bpy.types.NodeSocket, SORTNodeSocket):
         return 'vector( u , v , 0.0 )'
     def get_socket_data_type(self):
         return 'vector3'
+
+def isCompatible( val0 , val1 ):
+    mapping = {}
+    mapping['SORTNodeSocketBxdf'] = 'BXDF'
+    mapping['SORTNodeSocketColor'] = 'COLOR'
+    mapping['SORTNodeSocketFloatVector'] = 'VECTOR'
+    mapping['SORTNodeSocketNormal'] = 'VECTOR'
+    mapping['SORTNodeSocketUV'] = 'VECTOR'
+    mapping['SORTNodeSocketFloat'] = 'FLOAT'
+    mapping['SORTNodeSocketLargeFloat'] = 'FLOAT'
+    mapping['SORTNodeSocketAnyFloat'] = 'FLOAT'
+
+    return mapping[val0] == mapping[val1]
