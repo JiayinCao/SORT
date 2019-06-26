@@ -32,7 +32,7 @@ class SORT_Thread():
 
     def __init__(self, engine):
         self.render_engine = engine
-        self.thread = threading.Thread(name="Rendering Thread", target=self.kick)
+        self.thread = threading.Thread(name="Rendering Thread", target=self.update)
 
     def start(self):
         self.thread.start()
@@ -40,11 +40,8 @@ class SORT_Thread():
     def join(self):
         self.thread.join()
 
-    def stop(self):
-        self.thread.stop()
-
     def isAlive(self):
-        self.thread.isAlive()
+        return self.thread.isAlive()
 
     def setsharedmemory(self,sm):
         # setup shared memory
@@ -53,51 +50,51 @@ class SORT_Thread():
         # pack image content as float
         self.float_shared_memory = struct.pack('%sf'%(self.render_engine.image_size_in_bytes), *sm[self.render_engine.image_header_size:self.render_engine.image_size_in_bytes + self.render_engine.image_header_size] )
 
-    def kick(self, render_end=False):
-        while True:
-            self.update()
-
     def update(self, final_update=False):
         # total pixel count
         mod = self.render_engine.image_tile_size - ( self.render_engine.image_size_h % self.render_engine.image_tile_size )
         if mod is self.render_engine.image_tile_size:
             mod = 0
 
-        # pick active tiles to update
-        active_tiles = self.picknewtiles()
+        while True:
+            # pick active tiles to update
+            active_tiles , all_done = self.picknewtiles()
 
-        for i in active_tiles:
-            tile_x = i % self.render_engine.image_tile_count_x
-            tile_y = int(i / self.render_engine.image_tile_count_x)
+            for i in active_tiles:
+                tile_x = i % self.render_engine.image_tile_count_x
+                tile_y = int(i / self.render_engine.image_tile_count_x)
 
-            tile_x_offset = tile_x * self.render_engine.image_tile_size
-            tile_y_offset = tile_y * self.render_engine.image_tile_size
+                tile_x_offset = tile_x * self.render_engine.image_tile_size
+                tile_y_offset = tile_y * self.render_engine.image_tile_size
 
-            tile_size_x = min( self.render_engine.image_tile_size , self.render_engine.image_size_w - tile_x_offset )
-            tile_size_y = self.render_engine.image_tile_size
+                tile_size_x = min( self.render_engine.image_tile_size , self.render_engine.image_size_w - tile_x_offset )
+                tile_size_y = self.render_engine.image_tile_size
 
-            # y offset
-            offset_y = max( mod - tile_y_offset , 0 )
+                # y offset
+                offset_y = max( mod - tile_y_offset , 0 )
 
-            # load shared memory
-            self.shared_memory.seek( self.render_engine.image_header_size + i * self.render_engine.image_tile_size_in_bytes + offset_y * tile_size_x * 16)
-            byptes = self.shared_memory.read(self.render_engine.image_tile_size_in_bytes - offset_y * tile_size_x * 16)
+                # load shared memory
+                self.shared_memory.seek( self.render_engine.image_header_size + i * self.render_engine.image_tile_size_in_bytes + offset_y * tile_size_x * 16)
+                byptes = self.shared_memory.read(self.render_engine.image_tile_size_in_bytes - offset_y * tile_size_x * 16)
 
-            # convert binary to two dimensional array
-            tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
-            tile_rect = tile_data.reshape( ( ( self.render_engine.image_tile_pixel_count - offset_y * tile_size_x ) , 4 ) )
+                # convert binary to two dimensional array
+                tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
+                tile_rect = tile_data.reshape( ( ( self.render_engine.image_tile_pixel_count - offset_y * tile_size_x ) , 4 ) )
 
-            # begin result
-            result = self.render_engine.begin_result(tile_x_offset, max(tile_y_offset - mod,0), tile_size_x, tile_size_y - offset_y)
+                # begin result
+                result = self.render_engine.begin_result(tile_x_offset, max(tile_y_offset - mod,0), tile_size_x, tile_size_y - offset_y)
 
-            # update image memmory
-            result.layers[0].passes[0].rect = tile_rect
+                # update image memmory
+                result.layers[0].passes[0].rect = tile_rect
 
-            # refresh the update
-            self.render_engine.end_result(result)
+                # refresh the update
+                self.render_engine.end_result(result)
 
-            # update header info to make sure it is not processed again
-            self.shared_memory[i] = self.shared_memory[i] + 1
+                # update header info to make sure it is not processed again
+                self.shared_memory[i] = self.shared_memory[i] + 1
+
+            if all_done is True:
+                break
 
         # close the shared memory if it is the last update
         #if final_update:
@@ -105,11 +102,13 @@ class SORT_Thread():
 
     def picknewtiles(self):
         active_tiles = []
+        all_done = True
         for i in range( self.render_engine.image_header_size ):
             if self.shared_memory[i] is 1:
                 active_tiles.append(i)
-
-        return active_tiles
+            elif self.shared_memory[i] is 0:
+                all_done = False
+        return ( active_tiles , all_done )
 
 @base.register_class
 class SORT_RenderEngine(bpy.types.RenderEngine):
@@ -146,7 +145,6 @@ class SORT_RenderEngine(bpy.types.RenderEngine):
             self.sharedmemory = mmap.mmap(0, self.sm_size , sm_full_path)
 
         self.sort_thread.setsharedmemory(self.sharedmemory)
-        #self.sort_thread.set_kick_period(1)
         self.sort_thread.start()
 
     def __init__(self):
@@ -276,32 +274,11 @@ class SORT_RenderEngine(bpy.types.RenderEngine):
         if subprocess.Popen.poll(process) is None:
             subprocess.Popen.terminate(process)
 
-        # wait for the thread to finish
-        if self.sort_thread.isAlive():
-            self.sort_thread.stop()
-            self.sort_thread.join()
-            self.sort_thread.update(True)
+        # make sure the updating thread is done
+        self.sort_thread.join()
 
-            # if final update is necessary
-            final_update = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size + 1]
-            if final_update:
-                # begin result
-                result = self.begin_result(0, 0, bpy.data.scenes[0].render.resolution_x, bpy.data.scenes[0].render.resolution_y)
-
-                self.sharedmemory.seek( self.image_header_size + self.image_size_in_bytes)
-                byptes = self.sharedmemory.read(self.image_pixel_count * 16)
-
-                tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
-                tile_rect = tile_data.reshape( self.image_pixel_count , 4 )
-
-                # update image memory
-                result.layers[0].passes[0].rect = tile_rect
-
-                # refresh the update
-                self.end_result(result)
-
-            # close shared memory connection
-            #self.sharedmemory.close()
+        # close the shared memory tunnel
+        self.sharedmemory.close()
 
         # clear immediate directory
         shutil.rmtree(intermediate_dir)
