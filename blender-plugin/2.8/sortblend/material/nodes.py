@@ -91,7 +91,7 @@ class SORTPatternGraph(bpy.types.NodeTree):
         nodeitems_utils.register_node_categories('SHADER_NODES_SORT', cats)
 
     @classmethod
-    def unregister():
+    def unregister(cls):
         nodeitems_utils.unregister_node_categories('SHADER_NODES_SORT')
 
 class SORTShadingNode(bpy.types.Node):

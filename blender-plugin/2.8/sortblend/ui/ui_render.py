@@ -18,7 +18,7 @@ import os
 import bl_ui
 import platform
 import subprocess
-#from ..exporter import sort_exporter
+from ..export import sort_exporter
 #from ..exporter import pbrt_exporter
 from .. import base
 from bl_ui import properties_render
@@ -153,7 +153,7 @@ class SORT_export_debug_scene(bpy.types.Operator):
     bl_idname = "sort.export_debug_scene"
     bl_label = "Export SORT Scene"
     def execute(self, context):
-        #sort_exporter.export_blender(context.scene,True)
+        sort_exporter.export_blender(context.scene,True)
         return {'FINISHED'}
 
 @base.register_class
