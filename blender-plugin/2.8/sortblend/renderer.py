@@ -111,7 +111,7 @@ class SORT_Thread():
         return ( active_tiles , all_done )
 
 @base.register_class
-class SORT_RenderEngine(bpy.types.RenderEngine):
+class SORTRenderEngine(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
     # RenderEngine; define its internal name, visible name and capabilities.
     bl_idname = 'SORT'
@@ -120,6 +120,10 @@ class SORT_RenderEngine(bpy.types.RenderEngine):
 
     render_lock = threading.Lock()
 
+    @classmethod
+    def is_active(cls, context):
+        return context.scene.render.engine == cls.bl_idname
+        
     # spawn new rendering thread
     def spawnnewthread(self):
         import mmap
@@ -191,7 +195,7 @@ class SORT_RenderEngine(bpy.types.RenderEngine):
         if not self.sort_available:
             return
 
-        with SORT_RenderEngine.render_lock:
+        with SORTRenderEngine.render_lock:
             if scene.name == 'preview':
                 self.render_preview(scene)
             else:
