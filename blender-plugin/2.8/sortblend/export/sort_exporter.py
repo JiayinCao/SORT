@@ -24,14 +24,12 @@ import struct
 from math import degrees
 from . import export_common
 from ..stream import stream
-#from extensions_framework import util as efutil
 
 def get_sort_dir():
     return_path = export_common.getPreference().install_path
     if platform.system() == 'Windows':
         return return_path
     return return_path
-    #return efutil.filesystem_path(return_path) + "/"
 
 def get_sort_bin_path():
     sort_bin_dir = get_sort_dir()
@@ -52,7 +50,6 @@ def get_intermediate_dir(force_debug=False):
     if force_debug is True:
         return_path = get_sort_dir()
     return return_path + '/'
-    #return efutil.filesystem_path(return_path) + "/"
 
 def MatrixSortToBlender():
     from bpy_extras.io_utils import axis_conversion
@@ -87,6 +84,7 @@ def lookAtSORT(camera):
         focal_distance = delta.dot(forwards)
     else:
         focal_distance = max( camera.data.dof_distance , 0.01 )
+
     scaled_forward = mathutils.Vector((focal_distance * forwards[0], focal_distance * forwards[1], focal_distance * forwards[2] , 0.0))
     # viewing target
     target = (pos + scaled_forward)

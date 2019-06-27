@@ -53,7 +53,7 @@ class SORTRenderPanel:
         return context.scene.render.engine in cls.COMPAT_ENGINES
 
 @base.register_class
-class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
+class RENDER_PT_IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
     bl_label = 'Renderer'
 
     # Integrator type
@@ -95,7 +95,7 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
             self.layout.prop(context.scene, "ir_min_dist")
 
 @base.register_class
-class AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
+class RENDER_PT_AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
     bl_label = 'Accelerator'
 
     # Accelerator type
@@ -132,14 +132,14 @@ class AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
             self.layout.prop(context.scene,"octree_max_pri_in_leaf")
 
 @base.register_class
-class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
+class RENDER_PT_MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'MultiThread'
     bpy.types.Scene.thread_num_prop = bpy.props.IntProperty(name='Thread Num', default=8, min=1, max=32)
     def draw(self, context):
         self.layout.prop(context.scene,"thread_num_prop")
 
 @base.register_class
-class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
+class RENDER_PT_SamplerPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'Sample'
     #sampler_types = [ ("stratified", "Stratified", "", 3), ("random", "Random", "", 2), ("regular", "Uniform", "", 1) ]
     #bpy.types.Scene.sampler_type_prop = bpy.props.EnumProperty(items=sampler_types, name='Type')
@@ -174,7 +174,7 @@ class SORT_openfolder(bpy.types.Operator):
         return {'FINISHED'}
 
 @base.register_class
-class DebugPanel(SORTRenderPanel, bpy.types.Panel):
+class RENDER_PT_DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'DebugPanel'
     bpy.types.Scene.detailedLog = bpy.props.BoolProperty(name='Output Detailed Output',default=False,description='Whether outputing detail log information in blender plugin.')
     bpy.types.Scene.profilingEnabled = bpy.props.BoolProperty(name='Enable Profiling',default=False,description='Enabling profiling will have a big impact on performance, only use it for simple scene')

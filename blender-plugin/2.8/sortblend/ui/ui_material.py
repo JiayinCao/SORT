@@ -241,7 +241,7 @@ class NODE_OP_add_surface_sortnodesocketanyfloat_no_remove(bpy.types.Operator, S
     connected : bpy.props.BoolProperty(default=False)
 
 @base.register_class
-class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
+class MATERIAL_PT_MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Slot'
 
     def draw(self, context):
@@ -301,7 +301,7 @@ class SORT_use_shading_nodes(bpy.types.Operator):
         return True
 
 @base.register_class
-class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
+class MATERIAL_PT_SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
     bl_label = "Surface"
 
     @classmethod
