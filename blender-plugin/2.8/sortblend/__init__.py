@@ -33,6 +33,7 @@ from .ui import ui_material
 #from .ui import ui_particle
 #from .ui import ui_space
 from .material import nodes
+from .material import properties
 
 @base.register_class
 class SORTAddonPreferences(bpy.types.AddonPreferences):

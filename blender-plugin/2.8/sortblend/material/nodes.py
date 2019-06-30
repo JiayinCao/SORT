@@ -16,7 +16,6 @@
 import bpy
 import nodeitems_utils
 import bpy.utils.previews
-from . import properties
 from .. import base
 from .. import renderer
 
