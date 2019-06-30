@@ -40,7 +40,7 @@ class SORTMaterialPanel:
 class SORT_new_material(bpy.types.Operator):
     """Add a new material"""
     bl_idname = "sort_material.new"
-    bl_label = "Add a new material"
+    bl_label = "New"
 
     def execute(self, context):
         # currently picked object
@@ -51,7 +51,7 @@ class SORT_new_material(bpy.types.Operator):
 
         # initialize default sort shader nodes
         material.sort_material = bpy.data.node_groups.new(material.name, type='SORTPatternGraph')
-        material.sort_material.use_fake_user = True
+        material.use_fake_user = True
         output = material.sort_material.nodes.new('SORTNodeOutput')
         default = material.sort_material.nodes.new('SORTNode_Material_Diffuse')
         output.location[0] += 200
@@ -75,11 +75,7 @@ class MATERIAL_PT_MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-
-        mat = context.material
         ob = context.object
-        slot = context.material_slot
-        space = context.space_data
 
         if ob:
             row = layout.row()
@@ -95,11 +91,6 @@ class MATERIAL_PT_MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
         split = layout.split(factor=0.75)
         if ob:
             split.template_ID(ob, "active_material", new="sort_material.new")
-            row = split.row()
-            if slot:
-                row.prop(slot, "link", text="")
-            else:
-                row.label()
-        elif mat:
-            split.template_ID(space, "pin_id")
+        elif context.material:
+            split.template_ID(context.space_data, "pin_id")
             split.separator()
