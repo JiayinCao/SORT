@@ -15,18 +15,17 @@
 
 import bpy
 import bl_ui
-from .. import SORTAddon
-from extensions_framework import declarative_property_group
+from .. import base
 
 # attach customized properties in lamp
-@SORTAddon.addon_register_class
+#@base.register_class
 class sort_lamp(bpy.types.PropertyGroup):
     ef_attach_to = ['Lamp']
     controls = []
     visibility = {}
     properties = []
 
-@SORTAddon.addon_register_class
+#@base.register_class
 class sort_lamp_hemi(bpy.types.PropertyGroup):
     ef_attach_to = ['sort_lamp']
     controls = []
@@ -38,14 +37,15 @@ class sort_lamp_hemi(bpy.types.PropertyGroup):
                     'default': '',
                     'save_in_preset': True }]
 
-class SORTLampPanel(bl_ui.properties_data_lamp.DataButtonsPanel):
+class SORTLampPanel(bl_ui.properties_data_light.DataButtonsPanel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "data"
     sort_lamp_type = ''
-    COMPAT_ENGINES = {'SORT_RENDERER'}
+    COMPAT_ENGINES = {'SORT'}
     @classmethod
     def poll(cls, context):
+        return True
         if cls.sort_lamp_type is '' :
             return super().poll(context) and context.scene.render.engine in cls.COMPAT_ENGINES
         return super().poll(context) and context.lamp.type == cls.sort_lamp_type and context.scene.render.engine in cls.COMPAT_ENGINES
@@ -53,28 +53,31 @@ class SORTLampPanel(bl_ui.properties_data_lamp.DataButtonsPanel):
 class LampPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Property'
     def draw(self, context):
-        lamp = context.lamp
-        if context.lamp is not None:
+        lamp = context.light
+        if context.light is not None:
             self.layout.prop(lamp, "type", expand=True)
             self.layout.prop(lamp, "color")
             self.layout.prop(lamp, "energy")
 
+#@base.register_class
 class LampHemiPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Hemi Property'
     sort_lamp_type = 'HEMI'
     def draw(self, context):
-        self.layout.prop(context.lamp.sort_lamp.sort_lamp_hemi, "envmap_file", text="HDRI file")
+        self.layout.prop(context.light.sort_lamp.sort_lamp_hemi, "envmap_file", text="HDRI file")
 
 class LampAreaPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Area Property'
     sort_lamp_type = 'AREA'
     def draw(self, context):
         layout = self.layout
-        lamp = context.lamp
+        lamp = context.light
         split = layout.split()
         col = split.column(align=True)
         col.prop(lamp, "shape", text="")
         sub = split.column(align=True)
+        print( lamp )
+        print( dir(lamp) )
         if lamp.shape == 'SQUARE':
             sub.prop(lamp, "size")
         elif lamp.shape == 'RECTANGLE':

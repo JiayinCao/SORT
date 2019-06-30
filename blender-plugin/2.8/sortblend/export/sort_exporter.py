@@ -77,6 +77,7 @@ def lookAtSORT(camera):
     forwards = -matrix[2]       # get forward direction
 
     # get focal distance for DOF effect
+    """
     if camera.data.dof_object is not None:
         focal_object = camera.data.dof_object
         fo_mat = MatrixBlenderToSort() @ focal_object.matrix_world
@@ -84,7 +85,9 @@ def lookAtSORT(camera):
         focal_distance = delta.dot(forwards)
     else:
         focal_distance = max( camera.data.dof_distance , 0.01 )
+    """
 
+    focal_distance = 0.01
     scaled_forward = mathutils.Vector((focal_distance * forwards[0], focal_distance * forwards[1], focal_distance * forwards[2] , 0.0))
     # viewing target
     target = (pos + scaled_forward)

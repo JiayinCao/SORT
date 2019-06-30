@@ -57,7 +57,7 @@ class SORTCameraPanel(bl_ui.properties_data_camera.CameraButtonsPanel):
         return super().poll(context) and rd.engine in cls.COMPAT_ENGINES
 
 @base.register_class
-class CameraDOFPanel(SORTCameraPanel, bpy.types.Panel):
+class CameraDOFPanel(bpy.types.Panel):
     bl_label = 'Camera Depth of Field'
     def draw(self, context):
         layout = self.layout

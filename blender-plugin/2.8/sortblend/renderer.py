@@ -22,8 +22,10 @@ import numpy
 import shutil
 import platform
 import threading
+import time
 from . import base
 from .export import sort_exporter
+from .export import export_common
 
 class SORT_Thread():
     render_engine = None
@@ -31,6 +33,7 @@ class SORT_Thread():
     float_shared_memory = None
 
     def __init__(self, engine):
+        self.isTerminated = False
         self.render_engine = engine
         self.thread = threading.Thread(name="Rendering Thread", target=self.update)
 
@@ -39,6 +42,9 @@ class SORT_Thread():
 
     def join(self):
         self.thread.join()
+    
+    def stop(self):
+        self.isTerminated = True
 
     def isAlive(self):
         return self.thread.isAlive()
@@ -56,7 +62,7 @@ class SORT_Thread():
         if mod is self.render_engine.image_tile_size:
             mod = 0
 
-        while True:
+        while self.isTerminated is False:
             # pick active tiles to update
             active_tiles , all_done = self.picknewtiles()
 
@@ -190,8 +196,8 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         sort_exporter.export_blender(scene.scene)
 
     # render
-    def render(self, graph):
-        scene = graph.scene
+    def render(self, depsgraph):
+        scene = depsgraph.scene
         if not self.sort_available:
             return
 
@@ -202,8 +208,8 @@ class SORTRenderEngine(bpy.types.RenderEngine):
                 self.render_scene(scene)
 
     # preview render
-    def render_preview(self, graph):
-        scene = graph.scene
+    def render_preview(self, depsgraph):
+        scene = depsgraph.scene
         #spawn new thread
         self.spawnnewthread()
 
@@ -278,8 +284,38 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         if subprocess.Popen.poll(process) is None:
             subprocess.Popen.terminate(process)
 
-        # make sure the updating thread is done
-        self.sort_thread.join()
+        # wait for the thread to finish
+        if self.sort_thread.isAlive():
+            current_time = time.time()
+            self.sort_thread.stop()
+            self.sort_thread.join()
+            self.sort_thread.update(True)
+            export_common.log("Stopping thread %.2f" % (time.time() - current_time))
+            current_time = time.time()
+
+            # if final update is necessary
+            final_update = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size + 1]
+            if final_update:
+                # begin result
+                result = self.begin_result(0, 0, bpy.data.scenes[0].render.resolution_x, bpy.data.scenes[0].render.resolution_y)
+
+                self.sharedmemory.seek( self.image_header_size + self.image_size_in_bytes)
+                byptes = self.sharedmemory.read(self.image_pixel_count * 16)
+
+                tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
+                tile_rect = tile_data.reshape( self.image_pixel_count , 4 )
+
+                # update image memory
+                result.layers[0].passes[0].rect = tile_rect
+
+                # refresh the update
+                self.end_result(result)
+
+            export_common.log("Updating image %.2f" % (time.time() - current_time))
+            current_time = time.time()
+
+            # close shared memory connection
+            self.sharedmemory.close()
 
         # close the shared memory tunnel
         self.sharedmemory.close()
