@@ -76,8 +76,6 @@ class LampAreaPanel(SORTLampPanel, bpy.types.Panel):
         col = split.column(align=True)
         col.prop(lamp, "shape", text="")
         sub = split.column(align=True)
-        print( lamp )
-        print( dir(lamp) )
         if lamp.shape == 'SQUARE':
             sub.prop(lamp, "size")
         elif lamp.shape == 'RECTANGLE':

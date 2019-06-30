@@ -36,10 +36,7 @@ class SORTMaterialPanel:
     def poll(cls, context):
         return context.scene.render.engine in cls.COMPAT_ENGINES
 
-@base.register_class
-class SORT_new_material(bpy.types.Operator):
-    """Add a new material"""
-    bl_idname = "sort_material.new"
+class SORT_new_material_base(bpy.types.Operator):
     bl_label = "New"
 
     def execute(self, context):
@@ -50,8 +47,8 @@ class SORT_new_material(bpy.types.Operator):
         material = bpy.data.materials.new( 'Material' )
 
         # initialize default sort shader nodes
-        material.sort_material = bpy.data.node_groups.new(material.name, type='SORTPatternGraph')
-        material.use_fake_user = True
+        material.sort_material = bpy.data.node_groups.new( 'SORT_(' + material.name + ')' , type=nodes.SORTShaderNodeTree.bl_idname)
+
         output = material.sort_material.nodes.new('SORTNodeOutput')
         default = material.sort_material.nodes.new('SORTNode_Material_Diffuse')
         output.location[0] += 200
@@ -68,6 +65,16 @@ class SORT_new_material(bpy.types.Operator):
             materials.append(material)
 
         return { 'FINISHED' }
+
+@base.register_class
+class SORT_new_material(SORT_new_material_base):
+    """Add a new material"""
+    bl_idname = "sort_material.new"
+
+@base.register_class
+class SORT_new_material_menu(SORT_new_material_base):
+    """Add a new material"""
+    bl_idname = "node.new_node_tree"
 
 @base.register_class
 class MATERIAL_PT_MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
