@@ -16,55 +16,23 @@
 import bpy
 import nodeitems_utils
 import bpy.utils.previews
+from . import group
 from .. import base
-from .. import renderer
+from .matbase import SORTPatternNodeCategory
+from .matbase import SORTShaderNodeTree
 
-class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
-    @classmethod
-    def poll(cls, context):
-        return context.space_data.tree_type == SORTShaderNodeTree.bl_idname and renderer.SORTRenderEngine.is_active(context)
-        
 @base.register_class
-class SORTShaderNodeTree(bpy.types.NodeTree):
-    bl_idname = 'SORTShaderNodeTree'
-    bl_label = 'SORT Shader Editor'
-    bl_icon = 'MATERIAL'
-    node_categories = {}
-
-    # Return a node tree from the context to be used in the editor
-    @classmethod
-    def get_from_context(cls, context):
-        ob = context.active_object
-        if ob is not None and ob.active_material is not None:
-            mat = ob.active_material
-            return mat.sort_material , mat , mat
-        return (None, None, None)
-
-    @classmethod
-    def register_node(cls,category):
-        def registrar(nodecls):
-            base.register_class(nodecls)
-            d = cls.node_categories.setdefault(category, [])
-            d.append(nodecls)
-            return nodecls
-        return registrar
-
+class SORTNodeGroupData(bpy.types.PropertyGroup):
+    group_name_id : bpy.props.StringProperty( name='Group Tree Id', default='')
     @classmethod
     def register(cls):
-        bpy.types.Material.sort_material = bpy.props.PointerProperty(type=bpy.types.NodeTree, name='SORT Material Settings')
-
-        # Register all nodes
-        cats = []
-        for c, l in sorted(cls.node_categories.items()):
-            cid = 'SORT_' + c.replace(' ', '').upper()
-            items = [nodeitems_utils.NodeItem(nc.__name__) for nc in l]
-            cats.append(SORTPatternNodeCategory(cid, c, items=items))
-        cats.append(SORTPatternNodeCategory('SORT_LAYOUT', 'Layout', items=[nodeitems_utils.NodeItem('NodeFrame'),nodeitems_utils.NodeItem('NodeReroute')]))
-        nodeitems_utils.register_node_categories('SHADER_NODES_SORT', cats)
-
+        SORTShaderNodeTree.sort_data = bpy.props.PointerProperty(
+            name="RPR Data",
+            type=cls,
+        )
     @classmethod
     def unregister(cls):
-        nodeitems_utils.unregister_node_categories('SHADER_NODES_SORT')
+        del SORTShaderNodeTree.sort_data
 
 class SORTShadingNode(bpy.types.Node):
     bl_label = 'ShadingNode'
