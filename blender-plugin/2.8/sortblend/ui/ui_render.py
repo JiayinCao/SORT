@@ -19,7 +19,6 @@ import bl_ui
 import platform
 import subprocess
 from ..export import sort_exporter
-#from ..exporter import pbrt_exporter
 from .. import base
 from bl_ui import properties_render
 

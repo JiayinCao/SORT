@@ -38,10 +38,8 @@ from .material import nodes
 class SORTAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
     install_path : bpy.props.StringProperty( name="Path to SORT binary", description='Path to SORT binary', subtype='DIR_PATH', default='',)
-    pbrt_export_path : bpy.props.StringProperty( name='Pbrt exporting path', description='Path to exported pbrt scene', subtype='DIR_PATH', default='')
     def draw(self, context):
         self.layout.prop(self, "install_path")
-        self.layout.prop(self, "pbrt_export_path")
 
 def register():
     base.register()

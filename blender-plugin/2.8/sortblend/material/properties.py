@@ -18,10 +18,7 @@ from .. import base
 
 # SORT Node property base class
 class SORTNodeProperty:
-    pbrt_type = ''
-    # export type in PBRT
-    def export_pbrt_socket_type(self):
-        return self.pbrt_type
+    pass
 
 # Base class for sort socket
 class SORTNodeSocket(SORTNodeProperty):
@@ -86,7 +83,6 @@ class SORTNodeSocketColor(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketColor'
     bl_label = 'SORT Color Socket'
     socket_color = (0.1, 1.0, 0.2, 1.0)
-    pbrt_type = 'rgb'
     default_value : bpy.props.FloatVectorProperty( name='Color' , default=(1.0, 1.0, 1.0) ,subtype='COLOR',soft_min = 0.0, soft_max = 1.0)
     def export_osl_value(self):
         return 'color( %f, %f, %f )'%(self.default_value[:])
@@ -99,7 +95,6 @@ class SORTNodeSocketFloat(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketFloat'
     bl_label = 'SORT Float Socket'
     socket_color = (0.1, 0.1, 0.3, 1.0)
-    pbrt_type = 'float'
     default_value : bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0, max=1.0 )
     def export_osl_value(self):
         return '%f'%(self.default_value)
@@ -112,7 +107,6 @@ class SORTNodeSocketFloatVector(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketFloatVector'
     bl_label = 'SORT Float Vector Socket'
     socket_color = (0.1, 0.6, 0.3, 1.0)
-    pbrt_type = 'float'
     default_value : bpy.props.FloatVectorProperty( name='Float' , default=(0.0,0.0,0.0) , min=-float('inf'), max=float('inf') )
     def export_osl_value(self):
         return 'vector(%f,%f,%f)'%(self.default_value[:])
@@ -125,7 +119,6 @@ class SORTNodeSocketLargeFloat(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketLargeFloat'
     bl_label = 'SORT Float Socket'
     socket_color = (0.1, 0.1, 0.3, 1.0)
-    pbrt_type = 'float'
     default_value : bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0)
     def export_osl_value(self):
         return '%f'%(self.default_value)
@@ -138,7 +131,6 @@ class SORTNodeSocketAnyFloat(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketAnyFloat'
     bl_label = 'SORT Float Socket'
     socket_color = (0.1, 0.1, 0.3, 1.0)
-    pbrt_type = 'float'
     default_value : bpy.props.FloatProperty( name='Float' , default=0.0 , min=-float('inf'), max=float('inf'))
     def export_osl_value(self):
         return '%f'%(self.default_value)
@@ -171,7 +163,6 @@ class SORTNodeSocketUV(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketUV'
     bl_label = 'SORT UV Mapping'
     socket_color = (0.9, 0.2, 0.8, 1.0)
-    pbrt_type = 'NA'
     default_value : bpy.props.FloatVectorProperty( name='Float' , default=(0.0,1.0,0.0) , min=0.0, max=1.0 )
     # uvmapping socket doesn't show the vector because it is not supposed to be edited this way.
     def draw(self, context, layout, node, text):
