@@ -285,39 +285,28 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             subprocess.Popen.terminate(process)
 
         # wait for the thread to finish
-        if self.sort_thread.isAlive():
-            current_time = time.time()
-            self.sort_thread.stop()
-            self.sort_thread.join()
-            self.sort_thread.update(True)
-            export_common.log("Stopping thread %.2f" % (time.time() - current_time))
-            current_time = time.time()
+        self.sort_thread.stop()
+        self.sort_thread.join()
 
-            # if final update is necessary
-            final_update = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size + 1]
-            if final_update:
-                # begin result
-                result = self.begin_result(0, 0, bpy.data.scenes[0].render.resolution_x, bpy.data.scenes[0].render.resolution_y)
+        # if final update is necessary
+        final_update = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size + 1]
+        if final_update:
+            # begin result
+            result = self.begin_result(0, 0, bpy.data.scenes[0].render.resolution_x, bpy.data.scenes[0].render.resolution_y)
 
-                self.sharedmemory.seek( self.image_header_size + self.image_size_in_bytes)
-                byptes = self.sharedmemory.read(self.image_pixel_count * 16)
+            self.sharedmemory.seek( self.image_header_size + self.image_size_in_bytes)
+            byptes = self.sharedmemory.read(self.image_pixel_count * 16)
 
-                tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
-                tile_rect = tile_data.reshape( self.image_pixel_count , 4 )
+            tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
+            tile_rect = tile_data.reshape( self.image_pixel_count , 4 )
 
-                # update image memory
-                result.layers[0].passes[0].rect = tile_rect
+            # update image memory
+            result.layers[0].passes[0].rect = tile_rect
 
-                # refresh the update
-                self.end_result(result)
+            # refresh the update
+            self.end_result(result)
 
-            export_common.log("Updating image %.2f" % (time.time() - current_time))
-            current_time = time.time()
-
-            # close shared memory connection
-            self.sharedmemory.close()
-
-        # close the shared memory tunnel
+        # close shared memory connection
         self.sharedmemory.close()
 
         # clear immediate directory

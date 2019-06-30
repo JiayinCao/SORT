@@ -335,6 +335,8 @@ def export_hair(ps, obj, scene, fs):
 
     return (vert_cnt, total_hair_segs)
 
+# warning, this export function is not an optimal version, but it works.
+# I will get back to it some time later.
 def export_mesh(mesh, fs):
     LENFMT = struct.Struct('=i')
     FLTFMT = struct.Struct('=f')
@@ -358,26 +360,28 @@ def export_mesh(mesh, fs):
     mesh.calc_loop_triangles()
 
     has_uv = bool(mesh.uv_layers)
-
+    uv_layer = None
     if has_uv:
         active_uv_layer = mesh.uv_layers.active
         if not active_uv_layer:
             has_uv = False
         else:
-            active_uv_layer = active_uv_layer.data
+            uv_layer = active_uv_layer.data
 
     wo3_indices = [{} for _ in range(len(verts))]
     wo3_tris = bytearray()
+
+    uvs = [[0.0,0.0]] * len( verts )
+    for poly in mesh.polygons:
+        for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
+            vid = mesh.loops[loop_index].vertex_index
+            uvs[vid] = [uv_layer[loop_index].uv.x , uv_layer[loop_index].uv.y]
 
     uvcoord = (0.0, 0.0)
     for i, f in enumerate(mesh.loop_triangles):
         smooth = f.use_smooth
         if not smooth:
             normal = f.normal[:]
-
-        if has_uv:
-            uv = active_uv_layer[i]
-            uv = (uv.uv[0], uv.uv[1])
 
         oi = []
         for j, vidx in enumerate(f.vertices):
@@ -387,7 +391,8 @@ def export_mesh(mesh, fs):
                 normal = v.normal[:]
 
             if has_uv:
-                uvcoord = (uv[0], uv[1])
+                uv = uvs[vidx]
+                uvcoord = ( uv[0], uv[1] )
 
             key = (normal, uvcoord)
             out_idx = wo3_indices[vidx].get(key)

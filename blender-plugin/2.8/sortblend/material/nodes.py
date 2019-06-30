@@ -41,10 +41,9 @@ class SORTPatternGraph(bpy.types.NodeTree):
     @classmethod
     def get_from_context(cls, context):
         ob = context.active_object
-        if ob.active_material is not None:
+        if ob is not None and ob.active_material is not None:
             mat = ob.active_material
-            if mat is not None and mat.sort_material is not None:
-                return mat.sort_material , mat , mat
+            return mat.sort_material , mat , mat
         return (None, None, None)
 
     @classmethod
