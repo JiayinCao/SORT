@@ -28,7 +28,7 @@ from . import base
 from . import renderer
 from .ui import ui_render
 #from .ui import ui_camera
-#from .ui import ui_lamp
+#from .ui import ui_light
 from .ui import ui_material
 #from .ui import ui_particle
 #from .ui import ui_space
@@ -46,5 +46,18 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
 def register():
     base.register()
 
+    from bl_ui import (
+            properties_data_light,
+            )
+    properties_data_light.DATA_PT_EEVEE_light.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+
 def unregister():
     base.unregister()
+
+    from bl_ui import (
+            properties_data_light,
+            )
+    properties_data_light.DATA_PT_EEVEE_light.COMPAT_ENGINES.remove(renderer.SORTRenderEngine.bl_idname)
+
+if __name__ == "__main__":
+    register()

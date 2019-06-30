@@ -18,6 +18,7 @@
 #include <algorithm>
 #include "light_entity.h"
 #include "shape/quad.h"
+#include "shape/disk.h"
 #include "core/primitive.h"
 
 IMPLEMENT_RTTI(PointLightEntity);
@@ -83,13 +84,34 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
     m_light->m_light2world = Transform( mat , inv_mat );
 
     stream >> m_light->intensity;
-    auto rect = std::make_unique<Quad>();
-    float sizeX, sizeY;
-    stream >> sizeX >> sizeY;
-    rect->SetSizeX(sizeX * sx);
-    rect->SetSizeY(sizeY * sy);
-    rect->SetTransform(m_light->m_light2world);
-    m_light->m_shape = std::move(rect);
+
+    std::string area_type;
+    stream >> area_type;
+    if( area_type == "SQUARE" ){
+        auto rect = std::make_unique<Quad>();
+        float size;
+        stream >> size;
+        rect->SetSizeX(size * sx);
+        rect->SetSizeY(size * sy);
+        rect->SetTransform(m_light->m_light2world);
+        m_light->m_shape = std::move(rect);
+    }else if( area_type == "RECTANGLE" ){
+        auto rect = std::make_unique<Quad>();
+        float sizeX, sizeY;
+        stream >> sizeX >> sizeY;
+        rect->SetSizeX(sizeX * sx);
+        rect->SetSizeY(sizeY * sy);
+        rect->SetTransform(m_light->m_light2world);
+        m_light->m_shape = std::move(rect);
+    }else if( area_type == "DISK" ){
+        // scaling is not supported for now
+        auto rect = std::make_unique<Disk>();
+        float radius;
+        stream >> radius;
+        rect->SetRadius(radius);
+        rect->SetTransform(m_light->m_light2world);
+        m_light->m_shape = std::move(rect);
+    }
 }
 
 void AreaLightEntity::FillScene(class Scene& scene) {

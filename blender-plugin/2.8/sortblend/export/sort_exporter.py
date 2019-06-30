@@ -242,14 +242,20 @@ def export_scene(scene, fs):
             light_spectrum *= lamp.energy
             sizeX = lamp.size
             sizeY = lamp.size_y
-            if lamp.shape == 'SQUARE':
-                sizeY = lamp.size
 
             fs.serialize('AreaLightEntity')
             fs.serialize(export_common.matrix_to_tuple(world_matrix))
             fs.serialize(export_common.vec3_to_tuple(light_spectrum))
-            fs.serialize(sizeX)
-            fs.serialize(sizeY)
+
+            fs.serialize( lamp.shape )
+            if lamp.shape == 'SQUARE':
+                fs.serialize(sizeX)
+            elif lamp.shape == 'RECTANGLE':
+                fs.serialize(sizeX)
+                fs.serialize(sizeY)
+            elif lamp.shape == 'DISK':
+                fs.serialize(sizeX * 0.5)
+            
         elif lamp.type == 'HEMI':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy

@@ -156,7 +156,7 @@ class SORTMathOpNode(SORTShadingNode):
 #------------------------------------------------------------------------------------#
 #                              Shader Input/Output Nodes                             #
 #------------------------------------------------------------------------------------#
-@SORTPatternGraph.register_node('Shader Input/Output')
+@SORTPatternGraph.register_node('Shader Input Output')
 class SORTNodeOutput(SORTShadingNode):
     bl_label = 'Shader Output'
     bl_idname = 'SORTNodeOutput'
@@ -168,7 +168,7 @@ class SORTNodeOutput(SORTShadingNode):
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface' )
 
-@SORTPatternGraph.register_node('Shader Input/Output')
+@SORTPatternGraph.register_node('Shader Input Output')
 class SORTNodeExposedInputs(SORTShadingNode):
     bl_label = 'Shader Inputs'
     bl_idname = 'SORTNodeExposedInputs'
