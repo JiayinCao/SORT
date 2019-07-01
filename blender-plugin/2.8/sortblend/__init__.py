@@ -33,6 +33,7 @@ from .ui import ui_material
 #from .ui import ui_particle
 #from .ui import ui_space
 from .material import nodes
+from .material import group
 from .material import properties
 
 @base.register_class
@@ -49,6 +50,8 @@ def register():
             properties_data_light,
             )
     properties_data_light.DATA_PT_EEVEE_light.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+
+    bpy.app.handlers.load_post.append(group.node_groups_load_post)
 
 def unregister():
     base.unregister()

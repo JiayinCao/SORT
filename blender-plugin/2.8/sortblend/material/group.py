@@ -184,6 +184,12 @@ class SORTGroupNode(bpy.types.Node):
         for socket_name, socket_bl_idname in output_template:
             self.outputs.new(socket_bl_idname, socket_name)
 
+@bpy.app.handlers.persistent
+def node_groups_load_post(dummy):
+    node_groups = [ng for ng in bpy.data.node_groups if is_sort_node_group(ng)]
+    for ng in node_groups:
+        update_cls(ng)
+
 SORT_NODE_GROUP_PREFIX = 'SORTGroupName_'
 
 def instances(tree):
@@ -339,7 +345,6 @@ def generate_inputs(tree):
                 in_socket.append(data)
     return in_socket
 
-
 def generate_outputs(tree):
     out_socket = []
     output_node = tree.nodes.get("Group Outputs")
@@ -467,7 +472,6 @@ class SORT_Node_Group_Ungroup_Operator(bpy.types.Operator):
         bpy.ops.node.select_all(action='DESELECT')
         tree = get_node_groups_by_id(group_node.bl_idname)
         if not tree:
-            logging.warn("can't get tree: " , group_node.bl_idname)
             return {'CANCELLED'}
         path = context.space_data.path
         path.append(tree)
@@ -480,7 +484,6 @@ class SORT_Node_Group_Ungroup_Operator(bpy.types.Operator):
         input_node = get_selected_node_by_idname(current_tree, 'sort_shader_node_group_input')
         output_node = get_selected_node_by_idname(current_tree, 'sort_shader_node_group_output')
         if not input_node or not output_node:
-            logging.warn("can't get io nodes (%s, %s)" % (input_node, output_node))
             return {'CANCELLED'}
 
         bpy.ops.node.select_all(action='DESELECT')
@@ -530,10 +533,6 @@ class SORT_Node_Group_Edit_Operator(bpy.types.Operator):
             path.append(group_tree, node=node)
 
         return {"FINISHED"}
-
-#    def execute(self, context):
-#        print( 'group edit' )
-#        return { 'FINISHED' }
 
 def is_sort_node_group(ng):
     return hasattr(ng, 'sort_data') and ng.sort_data.group_name_id != ''
