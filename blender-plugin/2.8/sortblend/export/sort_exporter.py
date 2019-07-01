@@ -24,6 +24,7 @@ import struct
 from math import degrees
 from . import export_common
 from ..stream import stream
+from ..material import group
 
 def get_sort_dir():
     return_path = export_common.getPreference().install_path
@@ -478,8 +479,11 @@ def get_from_socket(socket):
     if not socket.is_linked:
         return None
     other = socket.links[0].from_socket
+
     if other.node.bl_idname == 'NodeReroute':
         return get_from_socket(other.node.inputs[0])
+    elif other.node.isGroupNode():
+        return get_from_socket(other.node.getOuputSocket(other))
     else:
         return other
 

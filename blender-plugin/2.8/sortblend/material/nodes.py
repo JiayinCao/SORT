@@ -18,26 +18,7 @@ import nodeitems_utils
 import bpy.utils.previews
 from . import group
 from .. import base
-from .group import SORTPatternNodeCategory, SORTShaderNodeTree
-
-class SORTShadingNode(bpy.types.Node):
-    bl_label = 'ShadingNode'
-    bl_idname = 'SORTShadingNode'
-    bl_icon = 'MATERIAL'
-    osl_shader = ''
-
-    # some material nodes depends on some heavy resources, this is the place for it to tell
-    def populateResources( self , resources ):
-        pass
-    # generate open shading lanugage source code
-    def generate_osl_source(self):
-        return self.osl_shader
-    # this function helps serializing the material information
-    def serialize_prop(self,fs):
-        fs.serialize(0)
-    # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
-    def type_identifier(self):
-        return self.bl_label
+from .group import SORTPatternNodeCategory, SORTShaderNodeTree, SORTShadingNode
 
 #------------------------------------------------------------------------------------#
 #                              Shader Input/Output Nodes                             #

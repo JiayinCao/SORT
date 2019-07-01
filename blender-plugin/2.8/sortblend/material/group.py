@@ -130,40 +130,38 @@ class SORTNodeSocketConnectorHelper:
 
             socket_list.new('sort_dummy_socket', '')
 
-@base.register_class
-class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, bpy.types.Node):
-    bl_idname = 'sort_shader_node_group_input'
-    bl_label = 'Group Inputs'
+class SORTShadingNode(bpy.types.Node):
+    bl_label = 'ShadingNode'
+    bl_idname = 'SORTShadingNode'
     bl_icon = 'MATERIAL'
-    bl_width_min = 100
+    osl_shader = ''
 
-    def init(self, context):
-        self.use_custom_color = True
-        self.color = (0.7, 0.72, 0.6)
-        self.outputs.new('sort_dummy_socket', '')
-        self.node_kind = 'outputs'
+    # some material nodes depends on some heavy resources, this is the place for it to tell
+    def populateResources( self , resources ):
+        pass
+    # generate open shading lanugage source code
+    def generate_osl_source(self):
+        return self.osl_shader
+    # this function helps serializing the material information
+    def serialize_prop(self,fs):
+        fs.serialize(0)
+    # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
+    def type_identifier(self):
+        return self.bl_label
+    # whether the node is a group node
+    def isGroupNode(self):
+        return False
 
-
-@base.register_class
-class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, bpy.types.Node):
-    bl_idname = 'sort_shader_node_group_output'
-    bl_label = 'Group Outputs'
-    bl_icon = 'MATERIAL'
-    bl_width_min = 100
-
-    def init(self, context):
-        self.use_custom_color = True
-        self.color = (0.7, 0.72, 0.6)
-        self.inputs.new('sort_dummy_socket', '')
-        self.node_kind = 'inputs'
-
-class SORTGroupNode(bpy.types.Node):
+class SORTGroupNode(SORTShadingNode):
     bl_icon = 'OUTLINER_OB_EMPTY'
     bl_width_min = 180
 
     @classmethod
     def poll(cls, context):
         return bpy.context.scene.render.engine == 'SORT'
+
+    def isGroupNode(self):
+        return True
 
     def draw_buttons(self, context, layout):
         ng = get_node_groups_by_id(self.bl_idname)
@@ -183,6 +181,44 @@ class SORTGroupNode(bpy.types.Node):
         output_template = generate_outputs(tree)
         for socket_name, socket_bl_idname in output_template:
             self.outputs.new(socket_bl_idname, socket_name)
+
+    def getOuputSocket( self , socket ):
+        for socket_name, socket_bl_idname in self.output_template:
+            if socket_bl_idname == socket.bl_idname:
+                output_node = self.group_tree.nodes.get("Group Outputs")
+                return output_node.inputs[socket_name]
+        return None
+
+@base.register_class
+class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
+    bl_idname = 'sort_shader_node_group_input'
+    bl_label = 'Group Inputs'
+    bl_icon = 'MATERIAL'
+    bl_width_min = 100
+
+    def init(self, context):
+        self.use_custom_color = True
+        self.color = (0.7, 0.72, 0.6)
+        self.outputs.new('sort_dummy_socket', '')
+        self.node_kind = 'outputs'
+        self.tree = None
+
+    # this is just a proxy node, to be implemented
+    def generate_osl_source(self):
+        return self.osl_shader
+
+@base.register_class
+class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
+    bl_idname = 'sort_shader_node_group_output'
+    bl_label = 'Group Outputs'
+    bl_icon = 'MATERIAL'
+    bl_width_min = 100
+
+    def init(self, context):
+        self.use_custom_color = True
+        self.color = (0.7, 0.72, 0.6)
+        self.inputs.new('sort_dummy_socket', '')
+        self.node_kind = 'inputs'
 
 @bpy.app.handlers.persistent
 def node_groups_load_post(dummy):
@@ -217,6 +253,7 @@ def group_make():
     node_input = nodes.new('sort_shader_node_group_input')
     node_input.location = (-300, 0)
     node_input.selected = False
+    node_input.tree = tree
 
     node_output = nodes.new('sort_shader_node_group_output')
     node_output.location = (300, 0)
@@ -363,6 +400,7 @@ def update_cls(tree):
         bl_label = 'SORT Group'
         input_template = generate_inputs(tree)
         output_template = generate_outputs(tree)
+        group_tree = tree
 
     C.__name__ = cls_name
 
