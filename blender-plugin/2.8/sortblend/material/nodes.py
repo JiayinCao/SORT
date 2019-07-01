@@ -18,21 +18,7 @@ import nodeitems_utils
 import bpy.utils.previews
 from . import group
 from .. import base
-from .matbase import SORTPatternNodeCategory
-from .matbase import SORTShaderNodeTree
-
-@base.register_class
-class SORTNodeGroupData(bpy.types.PropertyGroup):
-    group_name_id : bpy.props.StringProperty( name='Group Tree Id', default='')
-    @classmethod
-    def register(cls):
-        SORTShaderNodeTree.sort_data = bpy.props.PointerProperty(
-            name="RPR Data",
-            type=cls,
-        )
-    @classmethod
-    def unregister(cls):
-        del SORTShaderNodeTree.sort_data
+from .group import SORTPatternNodeCategory, SORTShaderNodeTree
 
 class SORTShadingNode(bpy.types.Node):
     bl_label = 'ShadingNode'
