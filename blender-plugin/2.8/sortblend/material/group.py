@@ -31,6 +31,10 @@ class SORTShaderNodeTree(bpy.types.NodeTree):
     bl_icon = 'MATERIAL'
     node_categories = {}
 
+    @classmethod
+    def poll(cls, context):
+        return renderer.SORTRenderEngine.is_active(context)
+
     # Return a node tree from the context to be used in the editor
     @classmethod
     def get_from_context(cls, context):
@@ -151,14 +155,27 @@ class SORTShadingNode(bpy.types.Node):
     # whether the node is a group node
     def isGroupNode(self):
         return False
+    # get shader parameter name
+    def getShaderInputParameterName(self,param):
+        return param
+    def getShaderOutputParameterName(self,param):
+        return param
+    # get inputs from node
+    def getShaderSocketInputs(self):
+        return self.inputs
 
-class SORTGroupNode(SORTShadingNode):
+class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
     bl_icon = 'OUTLINER_OB_EMPTY'
     bl_width_min = 180
+    node_mapping = {}
 
     @classmethod
     def poll(cls, context):
         return bpy.context.scene.render.engine == 'SORT'
+
+    @classmethod
+    def getSORTNodeByHash(cls, hash):
+        return cls.node_mapping[hash]
 
     def isGroupNode(self):
         return True
@@ -182,6 +199,13 @@ class SORTGroupNode(SORTShadingNode):
         for socket_name, socket_bl_idname in output_template:
             self.outputs.new(socket_bl_idname, socket_name)
 
+        node_hash = str(hash(self.as_pointer()))
+        self.node_mapping[node_hash] = self
+
+        input_node = tree.nodes.get("Group Inputs")
+        input_node.parent_node_hash = node_hash
+        print(node_hash)
+
     def getOuputSocket( self , socket ):
         for socket_name, socket_bl_idname in self.output_template:
             if socket_bl_idname == socket.bl_idname:
@@ -196,16 +220,63 @@ class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
     bl_icon = 'MATERIAL'
     bl_width_min = 100
 
+    @classmethod
+    def register(cls):
+        cls.parent_node_hash = bpy.props.StringProperty()
+
     def init(self, context):
         self.use_custom_color = True
         self.color = (0.7, 0.72, 0.6)
         self.outputs.new('sort_dummy_socket', '')
         self.node_kind = 'outputs'
-        self.tree = None
 
-    # this is just a proxy node, to be implemented
+    # get shader parameter name
+    def getShaderInputParameterName(self,param):
+        return 'i' + param
+    def getShaderOutputParameterName(self,param):
+        return 'o' + param
+    # this is just a proxy node
     def generate_osl_source(self):
-        return self.osl_shader
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color', 
+                               'SORTNodeSocketColor': 'color',
+                               'SORTNodeSocketFloat': 'float',
+                               'SORTNodeSocketFloatVector': 'vector',
+                               'SORTNodeSocketLargeFloat': 'float',
+                               'SORTNodeSocketAnyFloat': 'float',
+                               'SORTNodeSocketNormal': 'normal',
+                               'SORTNodeSocketUV': 'vector'}
+
+        inputs = SORTGroupNode.getSORTNodeByHash(self.parent_node_hash).inputs
+        outputs = self.outputs
+
+        # need more robust assert
+        assert( len(inputs) is len(outputs) - 1 )
+
+        osl_shader = 'shader PassThrough_GroupInput('
+        for i in range( 0 , len(inputs) ):
+            input = inputs[i]
+            input_type = socket_type_mapping[input.bl_idname]
+            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = ' + input.export_osl_value() + ',\n'
+        for i in range( 0 , len(outputs) - 1 ):
+            output = outputs[i]
+            output_type = socket_type_mapping[output.bl_idname]
+            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = ' + output.export_osl_value()
+            if i < len(outputs) - 2 :
+                osl_shader += ',\n'
+            else:
+                osl_shader += '){\n'
+
+        for i in range( 0 , len(inputs) ):
+            input = inputs[i]
+            output = outputs[i]
+            osl_shader += self.getShaderOutputParameterName(output.name) + ' = ' + self.getShaderInputParameterName(input.name) + ';\n'
+        osl_shader += '}'
+        return osl_shader
+
+    # get inputs from node
+    def getShaderSocketInputs(self):
+        parent_node = SORTGroupNode.getSORTNodeByHash(self.parent_node_hash)
+        return parent_node.inputs
 
 @base.register_class
 class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):

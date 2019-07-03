@@ -506,7 +506,7 @@ def collect_shader_resources(scene, fs):
             continue
 
         def serialize_prop(mat_node , shaders):
-            for socket in mat_node.inputs:
+            for socket in mat_node.getShaderSocketInputs():
                 from_socket = get_from_socket( socket )
                 if from_socket is not None:
                     serialize_prop( from_socket.node , shaders )
@@ -570,15 +570,15 @@ def export_materials(scene, fs):
         mat_connections = []    # connections between nodes
         visited = set()         # prevent a node to be serialized twice
         def collect_node_count(mat_node, visited):
-            inputs = mat_node.inputs
+            inputs = mat_node.getShaderSocketInputs()
             for socket in inputs:
                 input_socket = get_from_socket( socket )
                 if input_socket is None:
                     continue
                 input_node = input_socket.node
 
-                source_param = input_socket.name.replace(' ', '')
-                target_param = socket.name.replace(' ' ,'')
+                source_param = input_node.getShaderOutputParameterName(input_socket.name.replace(' ', '')).replace(' ', '')
+                target_param = mat_node.getShaderInputParameterName(socket.name.replace(' ' ,'')).replace(' ', '')
                 mat_connections.append( ( compact_material_name + '_' + input_node.name , source_param , compact_material_name + '_' + mat_node.name , target_param ) )
 
                 if input_node.name not in visited:
