@@ -204,7 +204,6 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
 
         input_node = tree.nodes.get("Group Inputs")
         input_node.parent_node_hash = node_hash
-        print(node_hash)
 
     def getOuputSocket( self , socket ):
         for socket_name, socket_bl_idname in self.output_template:
@@ -277,6 +276,10 @@ class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
     def getShaderSocketInputs(self):
         parent_node = SORTGroupNode.getSORTNodeByHash(self.parent_node_hash)
         return parent_node.inputs
+    
+    def type_identifier(self):
+        parent_node = SORTGroupNode.getSORTNodeByHash(self.parent_node_hash)
+        return parent_node.name + self.bl_label
 
 @base.register_class
 class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
