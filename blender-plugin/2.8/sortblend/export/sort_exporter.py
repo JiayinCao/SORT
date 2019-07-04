@@ -605,7 +605,7 @@ def export_materials(scene, fs):
             #print( 'visiting ' + mat_node.name )
 
             inputs = mat_node.inputs
-            output_shader_type = mat_node.name
+            output_shader_name = mat_node.getUniqueName()
                 
             for socket in inputs:
                 input_socket = get_from_socket( socket , parent_node_stack , visited )
@@ -616,17 +616,17 @@ def export_materials(scene, fs):
                 source_param = input_node.getShaderOutputParameterName(input_socket.name)
                 target_param = mat_node.getShaderInputParameterName(socket.name)
 
-                input_shader_type = input_node.name
+                input_shader_name = input_node.getUniqueName()
                 if input_node.isGroupInputNode():
                     parent_node , from_node_name = parent_node_stack.pop()
                     parent_node_stack.append( ( parent_node , from_node_name ) )
-                    input_shader_type = parent_node.bl_idname
+                    input_shader_name = parent_node.bl_idname
                     node_parent_mapping[input_node] = parent_node
                 elif mat_node.isGroupNode():
-                    output_shader_type = mat_node.bl_idname
+                    output_shader_name = mat_node.bl_idname
 
                 #print( ( compact_material_name + '_' + input_shader_type , source_param , compact_material_name + '_' + output_shader_type, target_param ) )
-                mat_connections.append( ( compact_material_name + '_' + input_shader_type , source_param , compact_material_name + '_' + output_shader_type, target_param ) )
+                mat_connections.append( ( compact_material_name + '_' + input_shader_name , source_param , compact_material_name + '_' + output_shader_name, target_param ) )
 
                 if input_node.name not in visited:
                     collect_node_count(input_node, visited, parent_node_stack)
@@ -659,7 +659,6 @@ def export_materials(scene, fs):
             parent_node = None
             if node in node_parent_mapping:
                 parent_node = node_parent_mapping[node]
-                #print( parent_node )
             shader_type = parent_node.bl_idname if parent_node is not None else node.type_identifier()
 
             if parent_node is not None:
@@ -667,11 +666,11 @@ def export_materials(scene, fs):
                 fs.serialize( parent_node.bl_idname )
                 parent_node.serialize_prop( fs )
             elif node.isGroupNode():
-                fs.serialize( node.name )
+                fs.serialize( node.getUniqueName() )
                 fs.serialize( node.bl_idname )
                 node.serialize_prop( fs )
             else:
-                fs.serialize( node.name )
+                fs.serialize( node.getUniqueName() )
                 fs.serialize( node.type_identifier() )
                 node.serialize_prop( fs )
         fs.serialize( len( mat_connections ) )
