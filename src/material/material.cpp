@@ -56,7 +56,7 @@ void Material::Serialize(IStreamBase& stream){
         stream >> shader_source.name >> shader_source.type;
 
         // it seems that shader name is a global unit, same shader name may conflict even if they are in different shader group
-        shader_source.name = m_name + "_" + shader_source.name;
+        shader_source.name = shader_source.name;
 
         std::vector<std::string> paramDefaultValues;
         auto parameter_cnt = 0u;
@@ -70,6 +70,9 @@ void Material::Serialize(IStreamBase& stream){
         // construct the shader source code
         shader_source.source = MatManager::GetSingleton().ConstructShader(shader_source.name, shader_source.type, paramDefaultValues);
 
+        std::cout<<shader_source.name<<std::endl;
+        std::cout<<shader_source.source<<std::endl;
+        
         m_sources.push_back( shader_source );
     }
 

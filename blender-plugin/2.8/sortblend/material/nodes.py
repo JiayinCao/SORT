@@ -93,7 +93,7 @@ class SORTNode_Material_Diffuse(SORTShadingNode):
             return self.osl_shader_diffuse
         return self.osl_shader_orennayar
     def type_identifier(self):
-        return self.bl_label + self.brdf_type
+        return self.bl_idname + self.brdf_type
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_LambertTransmission(SORTShadingNode):
@@ -608,7 +608,7 @@ class SORTNode_Material_Cloth(SORTShadingNode):
             return self.osl_shader_dbrdf
         return self.osl_shader_dwa_fabric
     def type_identifier(self):
-        return self.bl_label + self.brdf_type
+        return self.bl_idname + self.brdf_type
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketColor' , 'BaseColor' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Roughness' )
@@ -890,7 +890,7 @@ class SORTNodeImage(SORTShadingNode):
             return self.osl_shader_normal
         return self.osl_shader_linear
     def type_identifier(self):
-        return self.bl_label + self.color_space_type
+        return self.bl_idname + self.color_space_type
 
 #------------------------------------------------------------------------------------#
 #                                 Convertor Nodes                                    #
@@ -1101,7 +1101,7 @@ class SORTNodeMathOpUnary(SORTShadingNode):
             dtype = 'vector'
         return self.osl_shader % ( dtype , dtype , self.op_type )
     def type_identifier(self):
-        return self.bl_label + self.data_type + self.op_type
+        return self.bl_idname + self.data_type + self.op_type
         
 @SORTShaderNodeTree.register_node('Math Ops')
 class SORTNodeMathOpBinary(SORTShadingNode):
@@ -1148,7 +1148,7 @@ class SORTNodeMathOpBinary(SORTShadingNode):
             dtype = 'vector'
         return self.osl_shader % ( dtype , dtype , dtype , self.op_type )
     def type_identifier(self):
-        return self.bl_label + self.data_type + self.op_type
+        return self.bl_idname + self.data_type + self.op_type
 
 @SORTShaderNodeTree.register_node('Math Ops')
 class SORTNodeMathOpDotProduce(SORTShadingNode):
@@ -1220,7 +1220,7 @@ class SORTNodeMathOpLerp(SORTShadingNode):
             dtype = 'vector'
         return self.osl_shader % ( dtype , dtype , dtype )
     def type_identifier(self):
-        return self.bl_label + self.data_type
+        return self.bl_idname + self.data_type
 
 @SORTShaderNodeTree.register_node('Math Ops')
 class SORTNodeMathOpClamp(SORTShadingNode):
@@ -1270,4 +1270,4 @@ class SORTNodeMathOpClamp(SORTShadingNode):
             dtype = 'vector'
         return self.osl_shader % ( dtype , dtype , dtype , dtype )
     def type_identifier(self):
-        return self.bl_label + self.data_type
+        return self.bl_idname + self.data_type

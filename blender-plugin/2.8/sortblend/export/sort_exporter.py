@@ -555,7 +555,6 @@ def collect_shader_resources(scene, fs):
     for key , value in osl_shaders.items():
         fs.serialize( key )
         fs.serialize( value )
-
         export_common.logD( 'Exporting node source code for node %s. Source code: %s' %(key , value) )
     del osl_shaders
     fs.serialize( len( resources ) )
@@ -602,8 +601,6 @@ def export_materials(scene, fs):
         visited = set()         # prevent a node to be serialized twice
         node_parent_mapping = {}
         def collect_node_count(mat_node, visited, parent_node_stack):
-            #print( 'visiting ' + mat_node.name )
-
             inputs = mat_node.inputs
             output_shader_name = mat_node.getUniqueName()
                 
@@ -620,13 +617,12 @@ def export_materials(scene, fs):
                 if input_node.isGroupInputNode():
                     parent_node , from_node_name = parent_node_stack.pop()
                     parent_node_stack.append( ( parent_node , from_node_name ) )
-                    input_shader_name = parent_node.bl_idname
+                    input_shader_name = parent_node.getUniqueName()
                     node_parent_mapping[input_node] = parent_node
                 elif mat_node.isGroupNode():
-                    output_shader_name = mat_node.bl_idname
+                    output_shader_name = mat_node.getUniqueName()
 
-                #print( ( compact_material_name + '_' + input_shader_type , source_param , compact_material_name + '_' + output_shader_type, target_param ) )
-                mat_connections.append( ( compact_material_name + '_' + input_shader_name , source_param , compact_material_name + '_' + output_shader_name, target_param ) )
+                mat_connections.append( ( input_shader_name , source_param , output_shader_name, target_param ) )
 
                 if input_node.name not in visited:
                     collect_node_count(input_node, visited, parent_node_stack)
@@ -662,12 +658,12 @@ def export_materials(scene, fs):
             shader_type = parent_node.bl_idname if parent_node is not None else node.type_identifier()
 
             if parent_node is not None:
-                fs.serialize( parent_node.bl_idname )
+                fs.serialize( parent_node.getUniqueName() )
                 fs.serialize( parent_node.bl_idname )
                 parent_node.serialize_prop( fs )
             elif node.isGroupNode():
                 fs.serialize( node.getUniqueName() )
-                fs.serialize( node.bl_idname )
+                fs.serialize( node.type_identifier() )
                 node.serialize_prop( fs )
             else:
                 fs.serialize( node.getUniqueName() )

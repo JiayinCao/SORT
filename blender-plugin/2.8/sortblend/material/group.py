@@ -151,7 +151,7 @@ class SORTShadingNode(bpy.types.Node):
         fs.serialize(0)
     # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
     def type_identifier(self):
-        return self.bl_label
+        return self.bl_idname
     # whether the node is a group node
     def isGroupNode(self):
         return False
