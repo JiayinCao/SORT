@@ -50,6 +50,9 @@ def get_intermediate_dir(force_debug=False):
     return_path = intermediate_dir
     if force_debug is True:
         return_path = get_sort_dir()
+    if platform.system() == 'Windows':
+        return_path = return_path.replace( '\\' , '/' )
+        return return_path + '/'
     return return_path + '/'
 
 def MatrixSortToBlender():
