@@ -155,27 +155,25 @@ class SORTShadingNode(bpy.types.Node):
     # whether the node is a group node
     def isGroupNode(self):
         return False
+    # whether the node is a group input
+    def isGroupInputNode(self):
+        return False
+    # whether the node is a group output
+    def isGroupOutputNode(self):
+        return False
     # get shader parameter name
     def getShaderInputParameterName(self,param):
         return param
     def getShaderOutputParameterName(self,param):
         return param
-    # get inputs from node
-    def getShaderSocketInputs(self):
-        return self.inputs
 
 class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
     bl_icon = 'OUTLINER_OB_EMPTY'
     bl_width_min = 180
-    node_mapping = {}
 
     @classmethod
     def poll(cls, context):
         return bpy.context.scene.render.engine == 'SORT'
-
-    @classmethod
-    def getSORTNodeByHash(cls, hash):
-        return cls.node_mapping[hash]
 
     def isGroupNode(self):
         return True
@@ -199,12 +197,6 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
         for socket_name, socket_bl_idname in output_template:
             self.outputs.new(socket_bl_idname, socket_name)
 
-        node_hash = str(hash(self.as_pointer()))
-        self.node_mapping[node_hash] = self
-
-        input_node = tree.nodes.get("Group Inputs")
-        input_node.parent_node_hash = node_hash
-
     def getOuputSocket( self , socket ):
         for socket_name, socket_bl_idname in self.output_template:
             if socket_bl_idname == socket.bl_idname:
@@ -212,28 +204,12 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
                 return output_node.inputs[socket_name]
         return None
 
-@base.register_class
-class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
-    bl_idname = 'sort_shader_node_group_input'
-    bl_label = 'Group Inputs'
-    bl_icon = 'MATERIAL'
-    bl_width_min = 100
-
-    @classmethod
-    def register(cls):
-        cls.parent_node_hash = bpy.props.StringProperty()
-
-    def init(self, context):
-        self.use_custom_color = True
-        self.color = (0.7, 0.72, 0.6)
-        self.outputs.new('sort_dummy_socket', '')
-        self.node_kind = 'outputs'
-
     # get shader parameter name
     def getShaderInputParameterName(self,param):
-        return 'i' + param
+        return 'i' + param.replace(' ', '')
     def getShaderOutputParameterName(self,param):
-        return 'o' + param
+        return 'o' + param.replace(' ', '')
+
     # this is just a proxy node
     def generate_osl_source(self):
         socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color', 
@@ -245,41 +221,49 @@ class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
                                'SORTNodeSocketNormal': 'normal',
                                'SORTNodeSocketUV': 'vector'}
 
-        inputs = SORTGroupNode.getSORTNodeByHash(self.parent_node_hash).inputs
-        outputs = self.outputs
-
-        # need more robust assert
-        assert( len(inputs) is len(outputs) - 1 )
+        inputs = self.inputs
 
         osl_shader = 'shader PassThrough_GroupInput('
         for i in range( 0 , len(inputs) ):
             input = inputs[i]
             input_type = socket_type_mapping[input.bl_idname]
-            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = ' + input.export_osl_value() + ',\n'
-        for i in range( 0 , len(outputs) - 1 ):
-            output = outputs[i]
+            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = @ \n'
+        for i in range( 0 , len(inputs) ):
+            output = inputs[i]
             output_type = socket_type_mapping[output.bl_idname]
-            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = ' + output.export_osl_value()
-            if i < len(outputs) - 2 :
+            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = @'
+            if i < len(inputs) - 1 :
                 osl_shader += ',\n'
             else:
                 osl_shader += '){\n'
 
         for i in range( 0 , len(inputs) ):
-            input = inputs[i]
-            output = outputs[i]
-            osl_shader += self.getShaderOutputParameterName(output.name) + ' = ' + self.getShaderInputParameterName(input.name) + ';\n'
+            var_name = inputs[i].name
+            osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
         osl_shader += '}'
         return osl_shader
 
-    # get inputs from node
-    def getShaderSocketInputs(self):
-        parent_node = SORTGroupNode.getSORTNodeByHash(self.parent_node_hash)
-        return parent_node.inputs
-    
-    def type_identifier(self):
-        parent_node = SORTGroupNode.getSORTNodeByHash(self.parent_node_hash)
-        return parent_node.name + self.bl_label
+@base.register_class
+class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
+    bl_idname = 'sort_shader_node_group_input'
+    bl_label = 'Group Inputs'
+    bl_icon = 'MATERIAL'
+    bl_width_min = 100
+
+    def init(self, context):
+        self.use_custom_color = True
+        self.color = (0.7, 0.72, 0.6)
+        self.outputs.new('sort_dummy_socket', '')
+        self.node_kind = 'outputs'
+
+    # whether the node is a group input
+    def isGroupInputNode(self):
+        return True
+    # get shader parameter name
+    def getShaderInputParameterName(self,param):
+        return 'i' + param.replace(' ', '')
+    def getShaderOutputParameterName(self,param):
+        return 'o' + param.replace(' ', '')
 
 @base.register_class
 class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
@@ -293,6 +277,9 @@ class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode)
         self.color = (0.7, 0.72, 0.6)
         self.inputs.new('sort_dummy_socket', '')
         self.node_kind = 'inputs'
+    # whether the node is a group output
+    def isGroupOutputNode(self):
+        return True
 
 @bpy.app.handlers.persistent
 def node_groups_load_post(dummy):
