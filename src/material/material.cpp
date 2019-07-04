@@ -70,9 +70,6 @@ void Material::Serialize(IStreamBase& stream){
         // construct the shader source code
         shader_source.source = MatManager::GetSingleton().ConstructShader(shader_source.name, shader_source.type, paramDefaultValues);
 
-        std::cout<<shader_source.name<<std::endl;
-        std::cout<<shader_source.source<<std::endl;
-        
         m_sources.push_back( shader_source );
     }
 
