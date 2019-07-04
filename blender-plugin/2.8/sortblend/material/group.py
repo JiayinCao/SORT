@@ -163,9 +163,12 @@ class SORTShadingNode(bpy.types.Node):
         return False
     # get shader parameter name
     def getShaderInputParameterName(self,param):
-        return param
+        return param.replace( ' ' , '' )
     def getShaderOutputParameterName(self,param):
-        return param
+        return param.replace( ' ' , '' )
+    # get unique name
+    def getUniqueName(self):
+        return self.name + str( self.as_pointer() )
 
 class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
     bl_icon = 'OUTLINER_OB_EMPTY'
@@ -204,6 +207,9 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
                 return output_node.inputs[socket_name]
         return None
 
+    def getGroupOutputNode( self ):
+        return self.group_tree.nodes.get("Group Outputs")
+
     # get shader parameter name
     def getShaderInputParameterName(self,param):
         return 'i' + param.replace(' ', '')
@@ -227,7 +233,7 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
         for i in range( 0 , len(inputs) ):
             input = inputs[i]
             input_type = socket_type_mapping[input.bl_idname]
-            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = @ \n'
+            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = @, \n'
         for i in range( 0 , len(inputs) ):
             output = inputs[i]
             output_type = socket_type_mapping[output.bl_idname]
@@ -242,6 +248,16 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
             osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
         osl_shader += '}'
         return osl_shader
+
+    # this function helps serializing the material information
+    def serialize_prop(self,fs):
+        inputs = self.inputs
+        fs.serialize(len(inputs)*2)
+        for input in inputs:
+            fs.serialize( input.export_osl_value() )
+        # this time it is for output default values, this is useless, but needed by OSL compiler
+        for input in inputs:
+            fs.serialize( input.export_osl_value() )
 
 @base.register_class
 class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
