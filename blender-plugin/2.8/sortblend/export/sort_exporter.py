@@ -488,9 +488,10 @@ def get_from_socket(socket, parent_node_stack, visited):
 
     if other.node.bl_idname == 'NodeReroute':
         return get_from_socket(other.node.inputs[0], parent_node_stack, visited )
-    elif other.node.isGroupNode():
-        parent_node_stack.append((other.node,socket.node.name))
-        return get_from_socket(other.node.getOuputSocket(other), parent_node_stack, visited )
+#    elif other.node.isGroupNode():
+#        parent_node_stack.append((other.node,socket.node.name))
+#        return output_node = self.group_tree.nodes.get("Group Outputs")
+        #return get_from_socket(other.node.getOuputSocket(other), parent_node_stack, visited )
     else:
         return other
 
@@ -513,29 +514,33 @@ def collect_shader_resources(scene, fs):
         if output_node is None:
             continue
 
-        def serialize_prop(mat_node , shaders , parent_node_stack ):
-            for socket in mat_node.inputs:
-                from_socket = get_from_socket( socket , parent_node_stack , dummy )
-                if from_socket is not None:
-                    serialize_prop( from_socket.node , shaders , parent_node_stack )
+        def serialize_prop(mat_node , shaders , parent_node_stack , leaving_group = False ):
+            if mat_node is None:
+                return
+
+            cloned_parent_node_stack = parent_node_stack.copy()
+            if mat_node.isGroupNode() and leaving_group is False:
+                cloned_parent_node_stack.append( mat_node )
+                output_node = mat_node.group_tree.nodes.get("Group Outputs")
+                serialize_prop( output_node , shaders , cloned_parent_node_stack )
+            else:
+                for socket in mat_node.inputs:
+                    from_socket = get_from_socket( socket , parent_node_stack , dummy )
+                    if from_socket is not None:
+                        serialize_prop( from_socket.node , shaders , parent_node_stack )
 
             if mat_node.isGroupInputNode():
-                parent_node , from_node_name = parent_node_stack.pop()
-                parent_node_stack.append( ( parent_node , from_node_name ) )
-
-                serialize_prop( parent_node , shaders , parent_node_stack )
+                parent_node = cloned_parent_node_stack.pop()
+                serialize_prop( parent_node , shaders , cloned_parent_node_stack , True )
 
             # populate the resources first
             mat_node.populateResources( resources )
 
-            parent_node , from_node_name = parent_node_stack.pop()
-            parent_node_stack.append( ( parent_node , from_node_name ) )
-
             # populate the shader source code if it is not exported before
-            if mat_node.isGroupInputNode() is True:
+            if mat_node.isGroupInputNode():
                 # may there is a real stack instead of list?
-                parent_node , from_node_name = parent_node_stack.pop()
-                parent_node_stack.append( ( parent_node , from_node_name ) )
+                parent_node = parent_node_stack.pop()
+                parent_node_stack.append( parent_node )
 
                 shader_type = parent_node.bl_idname
                 if shader_type not in shaders:
@@ -544,12 +549,9 @@ def collect_shader_resources(scene, fs):
                 shader_type = mat_node.type_identifier()
                 if shader_type not in shaders:
                     shaders[shader_type] = mat_node.generate_osl_source()
-            
-            if mat_node.name == from_node_name:
-                parent_node_stack.pop()
 
         parent_node_stack = [(None,'')]
-        serialize_prop(output_node, osl_shaders, parent_node_stack)
+        serialize_prop(output_node, osl_shaders, parent_node_stack, False)
 
     fs.serialize( len( osl_shaders ) )
     for key , value in osl_shaders.items():
@@ -562,10 +564,8 @@ def collect_shader_resources(scene, fs):
         fs.serialize( resource[0] ) # type
         fs.serialize( resource[1] ) # external file name
 
-# This function is to be deprecated once the new system is fully functional
-matname_to_id = {}
-
 # Export OSL shader group
+matname_to_id = {}
 def export_materials(scene, fs):
     materials = export_common.getMaterialList(scene)
     material_count = 0
@@ -600,53 +600,54 @@ def export_materials(scene, fs):
         mat_connections = []    # connections between nodes
         visited = set()         # prevent a node to be serialized twice
         node_parent_mapping = {}
-        def collect_node_count(mat_node, visited, parent_node_stack):
+        def collect_node_count(mat_node, visited, parent_node_stack, leaving_group = False):
             inputs = mat_node.inputs
             output_shader_name = mat_node.getUniqueName()
-                
-            for socket in inputs:
-                input_socket = get_from_socket( socket , parent_node_stack , visited )
-                if input_socket is None:
-                    continue
-                input_node = input_socket.node
+            
+            cloned_parent_node_stack = parent_node_stack.copy()
 
-                source_param = input_node.getShaderOutputParameterName(input_socket.name)
-                target_param = mat_node.getShaderInputParameterName(socket.name)
+            if mat_node.isGroupNode() and leaving_group is False:
+                cloned_parent_node_stack.append( mat_node )
+                output_node = mat_node.group_tree.nodes.get("Group Outputs")
+                collect_node_count( output_node , visited , cloned_parent_node_stack )
+            else:
+                for socket in inputs:
+                    input_socket = get_from_socket( socket , parent_node_stack , visited )
+                    if input_socket is None:
+                        continue
+                    input_node = input_socket.node
 
-                input_shader_name = input_node.getUniqueName()
-                if input_node.isGroupInputNode():
-                    parent_node , from_node_name = parent_node_stack.pop()
-                    parent_node_stack.append( ( parent_node , from_node_name ) )
-                    input_shader_name = parent_node.getUniqueName()
-                    node_parent_mapping[input_node] = parent_node
-                elif mat_node.isGroupNode():
-                    output_shader_name = mat_node.getUniqueName()
+                    source_param = input_node.getShaderOutputParameterName(input_socket.name)
+                    target_param = mat_node.getShaderInputParameterName(socket.name)
 
-                mat_connections.append( ( input_shader_name , source_param , output_shader_name, target_param ) )
+                    input_shader_name = input_node.getUniqueName()
+                    if input_node.isGroupInputNode():
+                        parent_node = parent_node_stack.pop()
+                        parent_node_stack.append( parent_node )
+                        input_shader_name = parent_node.getUniqueName()
+                        node_parent_mapping[input_node] = parent_node
+                    elif mat_node.isGroupNode():
+                        output_shader_name = mat_node.getUniqueName()
 
-                if input_node.name not in visited:
-                    collect_node_count(input_node, visited, parent_node_stack)
+                    mat_connections.append( ( input_shader_name , source_param , output_shader_name, target_param ) )
 
-                    # make sure it doesn't get serialized again
-                    visited.add( input_node )
+                    print( ( input_shader_name , source_param , output_shader_name, target_param ) )
+                    
+                    if input_node.name not in visited:
+                        collect_node_count(input_node, visited, cloned_parent_node_stack)
 
-            if mat_node.isGroupInputNode():
-                parent_node , from_node_name = parent_node_stack.pop()
-                parent_node_stack.append( ( parent_node , from_node_name ) )
-
-                collect_node_count( parent_node , visited , parent_node_stack )
+                        # make sure it doesn't get serialized again
+                        visited.add( input_node )
 
             # topological sort is necessary here to preserve the order of shader definition.
             mat_nodes.append( mat_node )
 
-            parent_node , from_node_name = parent_node_stack.pop()
-            parent_node_stack.append( ( parent_node , from_node_name ) )
-
-            if mat_node.name == from_node_name:
-                parent_node_stack.pop()
+            if mat_node.isGroupInputNode():
+                parent_node = cloned_parent_node_stack.pop()
+                collect_node_count( parent_node , visited , cloned_parent_node_stack , True )
 
         # collect all material nodes
-        parent_node_stack = [(None,'')]
+        parent_node_stack = [None]
         collect_node_count(output_node, visited, parent_node_stack)
 
         # serialize this material
