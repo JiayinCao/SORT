@@ -542,11 +542,15 @@ def collect_shader_resources(scene, fs):
                 parent_node = parent_node_stack.pop()
                 parent_node_stack.append( parent_node )
 
-                shader_type = parent_node.bl_idname
+                shader_type = parent_node.getUniqueName() + '_GroupInput'
                 if shader_type not in shaders:
                     shaders[shader_type] = parent_node.generate_osl_source()
             elif mat_node.isGroupNode() is False:
                 shader_type = mat_node.type_identifier()
+                if mat_node.isGroupOutputNode():
+                    parent_node = parent_node_stack.pop()
+                    parent_node_stack.append( parent_node )
+                    shader_type =  parent_node.getUniqueName() + '_GroupOutput'
                 if shader_type not in shaders:
                     shaders[shader_type] = mat_node.generate_osl_source()
 
@@ -624,15 +628,22 @@ def export_materials(scene, fs):
                     if input_node.isGroupInputNode():
                         parent_node = parent_node_stack.pop()
                         parent_node_stack.append( parent_node )
-                        input_shader_name = parent_node.getUniqueName()
+                        input_shader_name = parent_node.getUniqueName() + '_GroupInput'
                         node_parent_mapping[input_node] = parent_node
-                    elif mat_node.isGroupNode():
-                        output_shader_name = mat_node.getUniqueName()
+                    elif input_node.isGroupNode():
+                        input_shader_name = input_node.getUniqueName() + '_GroupOutput'
+
+                    if mat_node.isGroupNode():
+                        output_shader_name = mat_node.getUniqueName() + '_GroupInput'
+                    elif mat_node.isGroupOutputNode():
+                        parent_node = parent_node_stack.pop()
+                        parent_node_stack.append( parent_node )
+                        output_shader_name = parent_node.getUniqueName() + '_GroupOutput'
 
                     mat_connections.append( ( input_shader_name , source_param , output_shader_name, target_param ) )
 
                     print( ( input_shader_name , source_param , output_shader_name, target_param ) )
-                    
+
                     if input_node.name not in visited:
                         collect_node_count(input_node, visited, cloned_parent_node_stack)
 

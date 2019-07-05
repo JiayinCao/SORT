@@ -259,6 +259,10 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
         for input in inputs:
             fs.serialize( input.export_osl_value() )
 
+    # get unique name, group node doesn't need to have instance even if it has, but the shaders are exactly the same
+    def getUniqueName(self):
+        return self.bl_idname
+
 @base.register_class
 class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
     bl_idname = 'sort_shader_node_group_input'
@@ -296,6 +300,53 @@ class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode)
     # whether the node is a group output
     def isGroupOutputNode(self):
         return True
+    # get shader parameter name
+    def getShaderInputParameterName(self,param):
+        return 'i' + param.replace(' ', '')
+    def getShaderOutputParameterName(self,param):
+        return 'o' + param.replace(' ', '')
+    
+    # this is just a proxy node
+    def generate_osl_source(self):
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color', 
+                               'SORTNodeSocketColor': 'color',
+                               'SORTNodeSocketFloat': 'float',
+                               'SORTNodeSocketFloatVector': 'vector',
+                               'SORTNodeSocketLargeFloat': 'float',
+                               'SORTNodeSocketAnyFloat': 'float',
+                               'SORTNodeSocketNormal': 'normal',
+                               'SORTNodeSocketUV': 'vector'}
+
+        inputs = self.inputs
+
+        last_input_id = -1
+        osl_shader = 'shader PassThrough_GroupInput('
+        for i in range( 0 , len(inputs) ):
+            input = inputs[i]
+            if input.bl_idname == SORTDummySocket.bl_idname:
+                continue
+            input_type = socket_type_mapping[input.bl_idname]
+            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = ' + input.export_osl_value() + ', \n'
+
+            last_input_id = i
+        for i in range( 0 , len(inputs) ):
+            output = inputs[i]
+            if output.bl_idname == SORTDummySocket.bl_idname:
+                continue
+            output_type = socket_type_mapping[output.bl_idname]
+            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = ' + output.export_osl_value() + ', \n'
+            if i != last_input_id:
+                osl_shader += ',\n'
+            else:
+                osl_shader += '){\n'
+
+        for i in range( 0 , len(inputs) ):
+            if inputs[i].bl_idname == SORTDummySocket.bl_idname:
+                continue
+            var_name = inputs[i].name
+            osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
+        osl_shader += '}'
+        return osl_shader
 
 @bpy.app.handlers.persistent
 def node_groups_load_post(dummy):
