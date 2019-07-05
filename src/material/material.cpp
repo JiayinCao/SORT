@@ -49,11 +49,15 @@ void Material::Serialize(IStreamBase& stream){
     const auto message = "Parsing Material '" + m_name + "'";
     SORT_PROFILE(message.c_str());
 
-    auto shader_cnt = 0u, connection_cnt = 0u;
-    stream >> shader_cnt;
-    for (auto i = 0u; i < shader_cnt; ++i) {
+    do{
         ShaderSource shader_source;
         stream >> shader_source.name >> shader_source.type;
+
+        if( shader_source.name.empty() ){
+            if( shader_source.type != "verification_string" )
+                sAssertMsg( false , RESOURCE , "Serialization is broken." );
+            break;
+        }
 
         // it seems that shader name is a global unit, same shader name may conflict even if they are in different shader group
         shader_source.name = shader_source.name;
@@ -71,8 +75,9 @@ void Material::Serialize(IStreamBase& stream){
         shader_source.source = MatManager::GetSingleton().ConstructShader(shader_source.name, shader_source.type, paramDefaultValues);
 
         m_sources.push_back( shader_source );
-    }
+    }while( true );
 
+    auto connection_cnt = 0u;
     stream >> connection_cnt;
     for (auto i = 0u; i < connection_cnt; ++i) {
         ShaderConnection connection;

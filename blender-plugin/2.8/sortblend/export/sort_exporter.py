@@ -488,10 +488,6 @@ def get_from_socket(socket, parent_node_stack, visited):
 
     if other.node.bl_idname == 'NodeReroute':
         return get_from_socket(other.node.inputs[0], parent_node_stack, visited )
-#    elif other.node.isGroupNode():
-#        parent_node_stack.append((other.node,socket.node.name))
-#        return output_node = self.group_tree.nodes.get("Group Outputs")
-        #return get_from_socket(other.node.getOuputSocket(other), parent_node_stack, visited )
     else:
         return other
 
@@ -542,7 +538,7 @@ def collect_shader_resources(scene, fs):
                 parent_node = parent_node_stack.pop()
                 parent_node_stack.append( parent_node )
 
-                shader_type = parent_node.getUniqueName() + '_GroupInput'
+                shader_type = parent_node.type_identifier() + '_GroupInput'
                 if shader_type not in shaders:
                     shaders[shader_type] = parent_node.generate_osl_source()
             elif mat_node.isGroupNode() is False:
@@ -550,7 +546,7 @@ def collect_shader_resources(scene, fs):
                 if mat_node.isGroupOutputNode():
                     parent_node = parent_node_stack.pop()
                     parent_node_stack.append( parent_node )
-                    shader_type =  parent_node.getUniqueName() + '_GroupOutput'
+                    shader_type =  parent_node.type_identifier() + '_GroupOutput'
                 if shader_type not in shaders:
                     shaders[shader_type] = mat_node.generate_osl_source()
 
@@ -642,26 +638,47 @@ def export_materials(scene, fs):
 
                     mat_connections.append( ( input_shader_name , source_param , output_shader_name, target_param ) )
 
-                    print( ( input_shader_name , source_param , output_shader_name, target_param ) )
-
-                    if input_node.name not in visited:
-                        collect_node_count(input_node, visited, cloned_parent_node_stack)
-
-                        # make sure it doesn't get serialized again
-                        visited.add( input_node )
-
-            # topological sort is necessary here to preserve the order of shader definition.
-            mat_nodes.append( mat_node )
+                    collect_node_count(input_node, visited, cloned_parent_node_stack)
 
             if mat_node.isGroupInputNode():
                 parent_node = cloned_parent_node_stack.pop()
                 collect_node_count( parent_node , visited , cloned_parent_node_stack , True )
 
+            shader_name = ''
+            shader_type = ''
+            shader_node = None
+            if mat_node.isGroupInputNode():
+                parent_node = parent_node_stack.pop()
+                parent_node_stack.append( parent_node )
+                shader_name = parent_node.getUniqueName() + '_GroupInput'
+                shader_type = parent_node.type_identifier() + '_GroupInput'
+                shader_node = parent_node
+            elif mat_node.isGroupOutputNode():
+                parent_node = parent_node_stack.pop()
+                parent_node_stack.append( parent_node )
+                shader_name = parent_node.getUniqueName() + '_GroupOutput'
+                shader_type = parent_node.type_identifier() + '_GroupOutput'
+                shader_node = parent_node
+            elif mat_node.isGroupNode() is False:
+                shader_name = mat_node.getUniqueName()
+                shader_type = mat_node.type_identifier()
+                shader_node = mat_node
+
+            if shader_name not in visited and shader_name != '':
+                fs.serialize( shader_name )
+                fs.serialize( shader_type )
+                shader_node.serialize_prop( fs )
+                visited.add( shader_name )
+
         # collect all material nodes
         parent_node_stack = [None]
         collect_node_count(output_node, visited, parent_node_stack)
 
+        fs.serialize( '' )
+        fs.serialize( 'verification_string' )
+
         # serialize this material
+        """
         fs.serialize( len( mat_nodes ) )
         for node in mat_nodes:
             parent_node = None
@@ -681,6 +698,7 @@ def export_materials(scene, fs):
                 fs.serialize( node.getUniqueName() )
                 fs.serialize( node.type_identifier() )
                 node.serialize_prop( fs )
+        """
         fs.serialize( len( mat_connections ) )
         for connection in mat_connections:
             fs.serialize( connection[0] )

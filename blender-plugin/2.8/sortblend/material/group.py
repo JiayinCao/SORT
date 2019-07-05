@@ -261,7 +261,7 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
 
     # get unique name, group node doesn't need to have instance even if it has, but the shaders are exactly the same
     def getUniqueName(self):
-        return self.bl_idname
+        return self.bl_idname + str( self.as_pointer() )
 
 @base.register_class
 class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):

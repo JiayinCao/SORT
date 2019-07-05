@@ -901,7 +901,7 @@ class SORTNodeRemappingUV(SORTShadingNode):
     bl_idname = 'SORTNodeRemappingUV'
     output_type = 'SORTNodeSocketFloat'
     osl_shader = '''
-        shader Extract( vector UVCoordinate = @,
+        shader RemappingUV( vector UVCoordinate = @,
                         float  TilingU = @ ,
                         float  TilingV = @ ,
                         float  OffsetU = @ ,
@@ -1039,8 +1039,8 @@ class SORTNodeInputColor(SORTShadingNode):
     bl_label = 'Color'
     bl_idname = 'SORTNodeInputColor'
     osl_shader = '''
-        shader Extract( color Color = @,
-                        output color Result = color(0)){
+        shader ConstantColor( color Color = @,
+                              output color Result = color(0)){
             Result = Color;
         }
     '''
