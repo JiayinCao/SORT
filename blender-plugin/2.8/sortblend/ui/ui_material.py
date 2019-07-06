@@ -174,7 +174,7 @@ class OpNodeSocketChangeName(bpy.types.Operator):
         return {"FINISHED"}
 
 @base.register_class
-class SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
+class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
     bl_label = "SORT In/Out Group Editor"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'

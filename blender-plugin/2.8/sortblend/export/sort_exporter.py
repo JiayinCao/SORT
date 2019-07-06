@@ -130,6 +130,9 @@ def export_blender(scene, force_debug=False):
     export_common.log("Exported scene %.2f(s)" % (time.time() - current_time))
     current_time = time.time()
 
+    fs.flush()
+    del fs
+
 # clear old data and create new path
 def create_path(scene, force_debug):
     global intermediate_dir
