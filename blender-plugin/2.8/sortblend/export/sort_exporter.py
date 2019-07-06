@@ -517,7 +517,7 @@ def collect_shader_resources(scene, fs):
             cloned_parent_node_stack = parent_node_stack.copy()
             if mat_node.isGroupNode() and leaving_group is False:
                 cloned_parent_node_stack.append( mat_node )
-                output_node = mat_node.group_tree.nodes.get("Group Outputs")
+                output_node = mat_node.getGroupTree().nodes.get("Group Outputs")
                 serialize_prop( output_node , shaders , cloned_parent_node_stack )
             else:
                 for socket in mat_node.inputs:
@@ -608,7 +608,7 @@ def export_materials(scene, fs):
 
             if mat_node.isGroupNode() and leaving_group is False:
                 cloned_parent_node_stack.append( ( mat_node , accumulative_name + mat_node.name ) )
-                output_node = mat_node.group_tree.nodes.get("Group Outputs")
+                output_node = mat_node.getGroupTree().nodes.get("Group Outputs")
                 collect_node_count( output_node , visited , cloned_parent_node_stack )
             else:
                 for socket in mat_node.inputs:

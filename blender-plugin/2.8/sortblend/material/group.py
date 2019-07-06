@@ -203,12 +203,12 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
     def getOuputSocket( self , socket ):
         for socket_name, socket_bl_idname in self.output_template:
             if socket_bl_idname == socket.bl_idname:
-                output_node = self.group_tree.nodes.get("Group Outputs")
+                output_node = self.getGroupTree().nodes.get("Group Outputs")
                 return output_node.inputs[socket_name]
         return None
 
     def getGroupOutputNode( self ):
-        return self.group_tree.nodes.get("Group Outputs")
+        return self.getGroupTree().nodes.get("Group Outputs")
 
     # get shader parameter name
     def getShaderInputParameterName(self,param):
@@ -528,7 +528,10 @@ def update_cls(tree):
         bl_label = 'SORT Group'
         input_template = generate_inputs(tree)
         output_template = generate_outputs(tree)
-        group_tree = tree
+
+        @classmethod
+        def getGroupTree(cls):
+            return get_node_groups_by_id(cls.bl_idname)
 
     C.__name__ = cls_name
 
