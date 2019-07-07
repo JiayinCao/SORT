@@ -15,8 +15,7 @@
 
 import bpy
 from .. import base
-from ..material import nodes
-from ..material import group
+from ..material import nodes, group
 
 # Whether there is output node in the material node tree
 def has_sort_output_node(ntree):
@@ -102,6 +101,20 @@ class MATERIAL_PT_MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
         elif context.material:
             split.template_ID(context.space_data, "pin_id")
             split.separator()
+
+@base.register_class
+class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
+    bl_label = 'Material Parameters'
+
+    def draw(self, context):
+        tree = context.material.sort_material
+
+        group_input_node = tree.nodes.get( "Shader Inputs" )
+        if group_input_node is None:
+            return
+        
+        for input in group_input_node.inputs:
+            self.layout.prop( input , 'default_value' , text = input.name )
 
 @base.register_class
 class OpNodeSocketMove(bpy.types.Operator):

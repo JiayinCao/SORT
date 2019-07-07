@@ -18,6 +18,7 @@ import random
 import nodeitems_utils
 from .. import base, renderer
 from nodeitems_utils import NodeItemCustom, NodeItem
+from .properties import SORTDummySocket
 
 class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
     @classmethod
@@ -86,17 +87,6 @@ class SORTNodeGroupData(bpy.types.PropertyGroup):
 #------------------------------------------------------------------------------------#
 #                                  Shader Group Nodes                                #
 #------------------------------------------------------------------------------------#
-
-@base.register_class
-class SORTDummySocket(bpy.types.NodeSocket):
-    bl_idname = "sort_dummy_socket"
-    bl_label = "SPRT Dummy Socket"
-
-    def draw(self, context, layout, node, text):
-        layout.label(text=text)
-
-    def draw_color(self, context, node):
-        return (0.6, 0.6, 0.6, 0.5)
 
 map_lookup = {'outputs': 'inputs', 'inputs': 'outputs'}
 class SORTNodeSocketConnectorHelper:

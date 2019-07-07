@@ -18,7 +18,7 @@ import nodeitems_utils
 import bpy.utils.previews
 from . import group
 from .. import base
-from .group import SORTPatternNodeCategory, SORTShaderNodeTree, SORTShadingNode
+from .group import SORTPatternNodeCategory, SORTShaderNodeTree, SORTShadingNode, SORTNodeSocketConnectorHelper
 
 #------------------------------------------------------------------------------------#
 #                              Shader Input/Output Nodes                             #
@@ -34,13 +34,82 @@ class SORTNodeOutput(SORTShadingNode):
     '''
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface' )
-
+    
 @SORTShaderNodeTree.register_node('Shader Input Output')
-class SORTNodeExposedInputs(SORTShadingNode):
+class SORTNodeExposedInputs(SORTNodeSocketConnectorHelper,SORTShadingNode):
     bl_label = 'Shader Inputs'
     bl_idname = 'SORTNodeExposedInputs'
     def init(self, context):
-        self.outputs.new( 'SORTNodeSocketAnyFloat' , 'Input' )
+        self.outputs.new( 'sort_dummy_socket' , 'Input' )
+        self.node_kind = 'outputs'
+    
+    def update(self):
+        last_output = self.outputs[-1]
+
+        # if last socket is not connected, nothing to do here.
+        if len(last_output.links) == 0:
+            return
+
+        link = last_output.links[0]
+        to_socket = link.to_socket
+
+        group.replace_socket(last_output, to_socket.bl_idname, new_name=to_socket.name)
+        
+        # it also needs an input since it is a real node with shader
+        input_socket = self.inputs.new( to_socket.bl_idname , to_socket.name )
+        input_socket.enabled = False
+
+        # create another dummy socket at last
+        self.outputs.new('sort_dummy_socket', '')
+
+    # get shader parameter name
+    def getShaderInputParameterName(self,param):
+        return 'i' + param.replace(' ', '')
+    def getShaderOutputParameterName(self,param):
+        return 'o' + param.replace(' ', '')
+    
+    # this is just a proxy node
+    def generate_osl_source(self):
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color', 
+                               'SORTNodeSocketColor': 'color',
+                               'SORTNodeSocketFloat': 'float',
+                               'SORTNodeSocketFloatVector': 'vector',
+                               'SORTNodeSocketLargeFloat': 'float',
+                               'SORTNodeSocketAnyFloat': 'float',
+                               'SORTNodeSocketNormal': 'normal',
+                               'SORTNodeSocketUV': 'vector'}
+
+        inputs = self.inputs
+
+        osl_shader = 'shader PassThrough_GroupInput('
+        for i in range( 0 , len(inputs) ):
+            input = inputs[i]
+            input_type = socket_type_mapping[input.bl_idname]
+            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = @, \n'
+        for i in range( 0 , len(inputs) ):
+            output = inputs[i]
+            output_type = socket_type_mapping[output.bl_idname]
+            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = @'
+            if i < len(inputs) - 1 :
+                osl_shader += ',\n'
+            else:
+                osl_shader += '){\n'
+
+        for i in range( 0 , len(inputs) ):
+            var_name = inputs[i].name
+            osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
+        osl_shader += '}'
+        return osl_shader
+    
+    # this function helps serializing the material information
+    def serialize_prop(self,fs):
+        inputs = self.inputs
+        fs.serialize(len(inputs)*2)
+        for input in inputs:
+            fs.serialize( input.export_osl_value() )
+        # this time it is for output default values, this is useless, but needed by OSL compiler
+        for input in inputs:
+            fs.serialize( input.export_osl_value() )
 
 #------------------------------------------------------------------------------------#
 #                                   BXDF Nodes                                       #

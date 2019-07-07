@@ -177,15 +177,13 @@ class SORTNodeSocketUV(bpy.types.NodeSocket, SORTNodeSocket):
     def get_socket_data_type(self):
         return 'vector3'
 
-def isCompatible( val0 , val1 ):
-    mapping = {}
-    mapping['SORTNodeSocketBxdf'] = 'BXDF'
-    mapping['SORTNodeSocketColor'] = 'COLOR'
-    mapping['SORTNodeSocketFloatVector'] = 'VECTOR'
-    mapping['SORTNodeSocketNormal'] = 'VECTOR'
-    mapping['SORTNodeSocketUV'] = 'VECTOR'
-    mapping['SORTNodeSocketFloat'] = 'FLOAT'
-    mapping['SORTNodeSocketLargeFloat'] = 'FLOAT'
-    mapping['SORTNodeSocketAnyFloat'] = 'FLOAT'
+@base.register_class
+class SORTDummySocket(bpy.types.NodeSocket, SORTNodeSocket):
+    bl_idname = "sort_dummy_socket"
+    bl_label = "SPRT Dummy Socket"
 
-    return mapping[val0] == mapping[val1]
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    def draw_color(self, context, node):
+        return (0.6, 0.6, 0.6, 0.5)
