@@ -80,18 +80,12 @@ class SORTShaderNodeTree(bpy.types.NodeTree):
         if is_sort_node_group(self) is False:
             return
 
-        # uncomment this line will cause a crash when ctrl + z is triggered
-        return
-
         # get the edited tree
         tree = get_node_groups_by_id( self.sort_data.group_name_id )
 
         # get group input and output
         input_node = tree.nodes.get( 'Group Inputs' )
         output_node = tree.nodes.get( 'Group Outputs' )
-
-        if input_node is None or output_node is None:
-            update_cls(tree)
 
         # update instances
         for instance in instances(tree):
