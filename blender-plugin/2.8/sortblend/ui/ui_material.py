@@ -117,9 +117,9 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
             self.layout.prop( input , 'default_value' , text = input.name )
 
 @base.register_class
-class OpNodeSocketMove(bpy.types.Operator):
+class SORT_OT_node_socket_base(bpy.types.Operator):
     """Move socket"""
-    bl_idname = "sort.node_socket_move"
+    bl_idname = "sort.node_socket_base"
     bl_label = "Move Socket"
 
     type : bpy.props.EnumProperty(
@@ -163,7 +163,22 @@ class OpNodeSocketMove(bpy.types.Operator):
         return {"FINISHED"}
 
 @base.register_class
-class OpNodeSocketRemove(OpNodeSocketMove):
+class SORT_OT_node_socket_move(SORT_OT_node_socket_base):
+    """Move socket"""
+    bl_idname = "sort.node_socket_move"
+    bl_label = "Remove Socket"
+
+    type : bpy.props.EnumProperty(
+        items=(('up', '', ''),
+               ('down', '', ''),
+               ('remove', '', ''),
+               ),
+    )
+    pos : bpy.props.IntProperty()
+    node_name : bpy.props.StringProperty()
+
+@base.register_class
+class SORT_OT_node_socket_remove(SORT_OT_node_socket_base):
     """Remove socket"""
     bl_idname = "sort.node_socket_remove"
     bl_label = "Remove Socket"
@@ -178,12 +193,41 @@ class OpNodeSocketRemove(OpNodeSocketMove):
     node_name : bpy.props.StringProperty()
 
 @base.register_class
-class OpNodeSocketChangeName(bpy.types.Operator):
-    """Change socket name"""
-    bl_idname = "sort.node_socket_change_name"
-    bl_label = "Change Socket Name"
+class SORT_OT_node_socket_restore_input_node(bpy.types.Operator):
+    """Move socket"""
+    bl_idname = "sort.node_socket_restore_group_input"
+    bl_label = "Restore Group Input"
 
     def execute(self, context):
+        tree = context.space_data.edit_tree
+
+        nodes = tree.nodes
+        if group.is_sort_node_group(tree):
+            node_input = nodes.new('sort_shader_node_group_input')    
+        else:
+            node_input = nodes.new('SORTNodeExposedInputs')
+
+        node_input.location = (-300, 0)
+        node_input.selected = False
+        node_input.tree = tree
+        
+        return {"FINISHED"}
+
+@base.register_class
+class SORT_OT_node_socket_restore_output_node(bpy.types.Operator):
+    """Move socket"""
+    bl_idname = "sort.node_socket_restore_group_output"
+    bl_label = "Restore Group Output"
+
+    def execute(self, context):
+        tree = context.space_data.edit_tree
+        nodes = tree.nodes
+
+        node_input = nodes.new('sort_shader_node_group_output')
+        node_input.location = (300, 0)
+        node_input.selected = False
+        node_input.tree = tree
+
         return {"FINISHED"}
 
 @base.register_class
@@ -197,32 +241,22 @@ class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
         tree = context.space_data.edit_tree
         if not tree:
             return False
-        return tree.bl_idname == nodes.SORTShaderNodeTree.bl_idname and group.is_sort_node_group(tree)
+        return tree.bl_idname == nodes.SORTShaderNodeTree.bl_idname
 
     def draw(self, context):
-        tree = context.space_data.edit_tree
-        input_node = tree.nodes.get("Group Inputs")
-        output_node = tree.nodes.get("Group Outputs")
-
-        if not (input_node and output_node):
-            return
-
-        layout = self.layout
-        row = layout.row()
-        if context.region.width > 340:
-            row = layout.row()
-            split = row.split(factor=0.5)
-            col1 = split.box().column()
-            split = split.split()
-            col2 = split.box().column()
-        else:
-            col1 = layout.row().box().column()
-            layout.separator()
-            col2 = layout.row().box().column()
-
         def set_attrs(cls, **kwargs):
             for name, value in kwargs.items():
                 setattr(cls, name, value)
+
+        tree = context.space_data.edit_tree
+        is_group_node = group.is_sort_node_group(tree)
+
+        layout = self.layout
+        row = layout.row()
+        col1 = layout.row().box().column()
+        if is_group_node:
+            layout.separator()
+            col2 = layout.row().box().column()
 
         def draw_socket(col, socket, index):
             if socket.bl_idname == 'sort_dummy_socket':
@@ -231,20 +265,38 @@ class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
 
             row = col.row(align=True)
             row.template_node_socket(color=(0.35, 0.5, 0.8, 1.0))
-            row.label(text=socket.name)
 
+            row.prop( socket , 'name' , text = '' )
             op = row.operator('sort.node_socket_move', icon='TRIA_UP', text='')
             set_attrs(op, type='up', **params)
             op = row.operator('sort.node_socket_move', icon='TRIA_DOWN', text='')
             set_attrs(op, type='down', **params)
             op = row.operator('sort.node_socket_remove', icon='X', text='')
             set_attrs(op, type='remove', **params)
-            op = row.operator('sort.node_socket_change_name', icon='MODIFIER', text='')
 
-        col1.label(text='Inputs:')
-        for i, socket in enumerate(input_node.outputs):
-            draw_socket(col1, socket, i)
+        input_node = tree.nodes.get("Group Inputs")
+        output_node = tree.nodes.get("Group Outputs")
 
-        col2.label(text='Outputs:')
-        for i, socket in enumerate(output_node.inputs):
-            draw_socket(col2, socket, i)
+        if group.is_sort_node_group( tree ) is False:
+            input_node = tree.nodes.get( 'Shader Inputs' )
+            output_node = None
+
+        display_label = 'Group Inputs' if is_group_node else 'Shader Inputs'
+        col1.label( text = display_label )
+        if input_node is not None:
+            for i, socket in enumerate(input_node.outputs):
+                draw_socket(col1, socket, i)
+        else:
+            row = col1.row(align=True)
+            display_text = 'Restore Group Input Node' if is_group_node else 'Add Shader Inputs'
+            row.operator('sort.node_socket_restore_group_input', text=display_text)
+
+        # root shader group doesn't have output
+        if is_group_node:
+            col2.label(text='Group Outputs:')
+            if output_node is not None:
+                for i, socket in enumerate(output_node.inputs):
+                    draw_socket(col2, socket, i)
+            else:
+                row = col2.row(align=True)
+                row.operator('sort.node_socket_restore_group_output', text='Restore Group Output Node')

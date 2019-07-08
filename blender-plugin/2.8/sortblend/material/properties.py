@@ -22,9 +22,7 @@ class SORTNodeProperty:
 
 # Base class for sort socket
 class SORTNodeSocket(SORTNodeProperty):
-    ui_open : bpy.props.BoolProperty(name='UI Open', default=True)
     socket_color = (0.1, 0.1, 0.1, 0.75)
-    need_bxdf_node = False
 
     # this is not an inherited function
     def draw_label(self, context, layout, node, text):

@@ -74,6 +74,35 @@ class SORTShaderNodeTree(bpy.types.NodeTree):
         nodeitems_utils.unregister_node_categories('SHADER_NODES_SORT')
         del bpy.types.Material.sort_material
 
+    # current this function is only used to update group input/outout socket
+    def update(self):
+        # only handle the deleting of group input/output nodes for now
+        if is_sort_node_group(self) is False:
+            return
+
+        # uncomment this line will cause a crash when ctrl + z is triggered
+        return
+
+        # get the edited tree
+        tree = get_node_groups_by_id( self.sort_data.group_name_id )
+
+        # get group input and output
+        input_node = tree.nodes.get( 'Group Inputs' )
+        output_node = tree.nodes.get( 'Group Outputs' )
+
+        if input_node is None or output_node is None:
+            update_cls(tree)
+
+        # update instances
+        for instance in instances(tree):
+            if input_node is None:
+                sockets = getattr(instance, 'inputs')
+                sockets.clear()
+            
+            if output_node is None:
+                sockets = getattr(instance, 'outputs')
+                sockets.clear()
+
 @base.register_class
 class SORTNodeGroupData(bpy.types.PropertyGroup):
     group_name_id : bpy.props.StringProperty( name='Group Tree Id', default='')
