@@ -140,9 +140,15 @@ class SORT_OT_node_socket_base(bpy.types.Operator):
 
         if self.type == 'remove':
             io.remove(socket)
-            # update instances
-            for instance in group.instances(tree):
-                sockets = getattr(instance, group.map_lookup[kind])
+            if group.is_sort_node_group(tree):
+                # update instances
+                for instance in group.instances(tree):
+                    sockets = getattr(instance, group.map_lookup[kind])
+                    sockets.remove(sockets[self.pos])
+            else:
+                # update root shader inputs
+                shader_input_node = tree.nodes.get( 'Shader Inputs' )
+                sockets = getattr(shader_input_node, group.map_lookup[kind])
                 sockets.remove(sockets[self.pos])
         else:
             step = -1 if self.type == 'up' else 1
@@ -153,9 +159,16 @@ class SORT_OT_node_socket_base(bpy.types.Operator):
 
             new_pos = calc_new_position(self.pos, step, count)
             io.move(self.pos, new_pos)
-            # update instances
-            for instance in group.instances(tree):
-                sockets = getattr(instance, group.map_lookup[kind])
+
+            if group.is_sort_node_group(tree):
+                # update instances
+                for instance in group.instances(tree):
+                    sockets = getattr(instance, group.map_lookup[kind])
+                    new_pos = calc_new_position(self.pos, step, len(sockets))
+                    sockets.move(self.pos, new_pos)
+            else:
+                shader_input_node = tree.nodes.get( 'Shader Inputs' )
+                sockets = getattr(shader_input_node, group.map_lookup[kind])
                 new_pos = calc_new_position(self.pos, step, len(sockets))
                 sockets.move(self.pos, new_pos)
 
@@ -210,7 +223,7 @@ class SORT_OT_node_socket_restore_input_node(bpy.types.Operator):
         node_input.location = (-300, 0)
         node_input.selected = False
         node_input.tree = tree
-        
+
         return {"FINISHED"}
 
 @base.register_class

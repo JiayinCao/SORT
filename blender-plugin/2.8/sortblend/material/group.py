@@ -213,13 +213,6 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
         for socket_name, socket_bl_idname in output_template:
             self.outputs.new(socket_bl_idname, socket_name)
 
-    def getOuputSocket( self , socket ):
-        for socket_name, socket_bl_idname in self.output_template:
-            if socket_bl_idname == socket.bl_idname:
-                output_node = self.getGroupTree().nodes.get("Group Outputs")
-                return output_node.inputs[socket_name]
-        return None
-
     def getGroupOutputNode( self ):
         return self.getGroupTree().nodes.get("Group Outputs")
 
