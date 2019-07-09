@@ -16,13 +16,87 @@
 import bpy
 from .. import base
 
-# SORT Node property base class
-class SORTNodeProperty:
-    pass
+# duplicated definition, need to resolve this later
+def instances(tree):
+    def is_sort_node_group(ng):
+        return hasattr(ng, 'sort_data') and ng.sort_data.group_name_id != ''
+
+    def is_node_group_id(ng, name):
+        return is_sort_node_group(ng) and ng.sort_data.group_name_id == name
+
+    res = []
+    all_trees = [ng for ng in bpy.data.node_groups if is_sort_node_group(ng) and ng.nodes]
+
+    for material in bpy.data.materials:
+        t = material.sort_material
+        if not t or not t.nodes:
+            continue
+        all_trees.append(t)
+
+    for t in all_trees:
+        for node in t.nodes:
+            if is_node_group_id(tree, node.bl_idname):
+                res.append(node)
+
+    return res
+
+def update_socket_name(self, context):
+    # check for name duplication
+    node = self.node
+    for input in node.inputs:
+        # reset the name if there is a duplication
+        if input.name == self.sort_label:
+            # this condition is necessary to avoid infinite recursive calling
+            if self.sort_label != self.name:
+                self.sort_label = self.name
+            return
+
+    idx = -1
+    if self.is_output:
+        for i , output in enumerate(node.outputs):
+            if output == self:
+                idx = i
+                break
+    else:
+        for i , input in enumerate(node.inputs):
+            if input == self:
+                idx = i
+                break
+
+    if node.isGroupInputNode():
+        if idx >= 0 and idx < len( node.outputs ):
+            node.outputs[idx].name = self.sort_label
+
+        # need to update all instances' inputs
+        tree = node.id_data
+        for instance in instances(tree):
+            if idx >= 0 and idx < len( instance.inputs ):
+                instance.inputs[idx].name = self.sort_label
+        return
+
+    if node.isGroupOutputNode():
+        if idx >= 0 and idx < len( node.inputs ):
+            node.inputs[idx].name = self.sort_label
+
+        # need to update all instances' inputs
+        tree = node.id_data
+        for instance in instances(tree):
+            if idx >= 0 and idx < len( instance.outputs ):
+                instance.outputs[idx].name = self.sort_label
+        return
+
+    # this must be shader group inputs
+    if idx >= 0 and idx < len( node.inputs ):
+        node.inputs[idx].name = self.sort_label
+    if idx >= 0 and idx < len( node.outputs ):
+        node.outputs[idx].name = self.sort_label
 
 # Base class for sort socket
-class SORTNodeSocket(SORTNodeProperty):
+class SORTNodeSocket:
     socket_color = (0.1, 0.1, 0.1, 0.75)
+
+    # this is a very hacky way to support name update in Blender because I have no idea how to get callback function from native str class
+    sort_label : bpy.props.StringProperty( name = '' , default = 'default' , update = update_socket_name )
 
     # this is not an inherited function
     def draw_label(self, context, layout, node, text):
@@ -57,6 +131,8 @@ class SORTNodeSocket(SORTNodeProperty):
 
     def get_socket_data_type(self):
         return 'None'
+    def __int__(self):
+        self.sort_label.default = self.name
 
 # Socket for BXDF or Materials
 @base.register_class
@@ -82,6 +158,7 @@ class SORTNodeSocketColor(bpy.types.NodeSocket, SORTNodeSocket):
     bl_label = 'SORT Color Socket'
     socket_color = (0.1, 1.0, 0.2, 1.0)
     default_value : bpy.props.FloatVectorProperty( name='Color' , default=(1.0, 1.0, 1.0) ,subtype='COLOR',soft_min = 0.0, soft_max = 1.0)
+
     def export_osl_value(self):
         return 'color( %f, %f, %f )'%(self.default_value[:])
     def get_socket_data_type(self):

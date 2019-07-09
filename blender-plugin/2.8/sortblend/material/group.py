@@ -208,13 +208,12 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
         input_template = generate_inputs(tree)
         for socket_name, socket_bl_idname in input_template:
             s = self.inputs.new(socket_bl_idname, socket_name)
+            s.sort_label = s.name
 
         output_template = generate_outputs(tree)
         for socket_name, socket_bl_idname in output_template:
-            self.outputs.new(socket_bl_idname, socket_name)
-
-    def getGroupOutputNode( self ):
-        return self.getGroupTree().nodes.get("Group Outputs")
+            s = self.outputs.new(socket_bl_idname, socket_name)
+            s.sort_label = s.name
 
     # get shader parameter name
     def getShaderInputParameterName(self,param):
@@ -488,6 +487,7 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
         outputs.remove(socket)
         new_socket = outputs.new(new_type, socket_name)
         outputs.move(len(outputs) - 1, socket_pos)
+        new_socket.sort_label = new_socket.name
 
         for to_socket in to_sockets:
             ng.links.new(new_socket, to_socket)
@@ -499,6 +499,7 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
         inputs.remove(socket)
         new_socket = inputs.new(new_type, socket_name)
         inputs.move(len(inputs) - 1, socket_pos)
+        new_socket.sort_label = new_socket.name
 
         if from_socket:
             ng.links.new(from_socket, new_socket)

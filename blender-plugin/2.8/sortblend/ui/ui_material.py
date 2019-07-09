@@ -283,7 +283,7 @@ class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
             row = col.row(align=True)
             row.template_node_socket(color=(0.35, 0.5, 0.8, 1.0))
 
-            row.prop( socket , 'name' , text = '' )
+            row.prop( socket , 'sort_label' , text = '' )
             op = row.operator('sort.node_socket_move', icon='TRIA_UP', text='')
             set_attrs(op, type='up', **params)
             op = row.operator('sort.node_socket_move', icon='TRIA_DOWN', text='')

@@ -35,7 +35,7 @@ class SORTNodeOutput(SORTShadingNode):
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface' )
     
-@SORTShaderNodeTree.register_node('Shader Input Output')
+@base.register_class
 class SORTNodeExposedInputs(SORTNodeSocketConnectorHelper,SORTShadingNode):
     bl_label = 'Shader Inputs'
     bl_idname = 'SORTNodeExposedInputs'
@@ -58,6 +58,9 @@ class SORTNodeExposedInputs(SORTNodeSocketConnectorHelper,SORTShadingNode):
         # it also needs an input since it is a real node with shader
         input_socket = self.inputs.new( to_socket.bl_idname , to_socket.name )
         input_socket.enabled = False
+
+        self.inputs[to_socket.name].sort_label = input_socket.name
+        self.outputs[to_socket.name].sort_label = to_socket.name
 
         # create another dummy socket at last
         self.outputs.new('sort_dummy_socket', '')
