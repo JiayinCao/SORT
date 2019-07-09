@@ -926,6 +926,10 @@ class SORTNodeImage(SORTShadingNode):
                 item.image_name = new_image_name
             item.clear()
             thumb = item.load(img.name, bpy.path.abspath(img.filepath), 'IMAGE')
+            
+            # somehow, it doesn't show the preview without this line
+            thumb.image_size[0]
+
             enum_items = [(img.filepath, img.name, '', thumb.icon_id, 0)]
         item.previews = enum_items
         return item.previews
