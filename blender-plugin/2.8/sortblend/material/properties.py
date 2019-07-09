@@ -43,13 +43,43 @@ def instances(tree):
 def update_socket_name(self, context):
     # check for name duplication
     node = self.node
-    for input in node.inputs:
-        # reset the name if there is a duplication
-        if input.name == self.sort_label:
-            # this condition is necessary to avoid infinite recursive calling
-            if self.sort_label != self.name:
-                self.sort_label = self.name
-            return
+    tree = node.id_data
+
+    def get_one_instance(tree):
+        for instance in instances(tree):
+            return instance
+        return None
+
+    if node.isGroupInputNode():
+        instance = get_one_instance( tree )
+        if instance:
+            for input in instance.inputs:
+                # reset the name if there is a duplication
+                if input.name == self.sort_label:
+                    # this condition is necessary to avoid infinite recursive calling
+                    if self.sort_label != self.name:
+                        self.sort_label = self.name
+                    return
+    elif node.isGroupOutputNode():
+        instance = get_one_instance( tree )
+        if instance:
+            for input in instance.outputs:
+                # reset the name if there is a duplication
+                if input.name == self.sort_label:
+                    # this condition is necessary to avoid infinite recursive calling
+                    if self.sort_label != self.name:
+                        self.sort_label = self.name
+                    return
+    elif node.isShaderGroupInputNode():
+        for input in node.inputs:
+            # reset the name if there is a duplication
+            if input.name == self.sort_label:
+                # this condition is necessary to avoid infinite recursive calling
+                if self.sort_label != self.name:
+                    self.sort_label = self.name
+                return
+    else:
+        return
 
     idx = -1
     if self.is_output:

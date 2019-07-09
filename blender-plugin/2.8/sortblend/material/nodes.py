@@ -43,6 +43,10 @@ class SORTNodeExposedInputs(SORTNodeSocketConnectorHelper,SORTShadingNode):
         self.outputs.new( 'sort_dummy_socket' , 'Input' )
         self.node_kind = 'outputs'
     
+    # whether the node is a shader group input
+    def isShaderGroupInputNode(self):
+        return True
+
     def update(self):
         last_output = self.outputs[-1]
 
@@ -53,14 +57,19 @@ class SORTNodeExposedInputs(SORTNodeSocketConnectorHelper,SORTShadingNode):
         link = last_output.links[0]
         to_socket = link.to_socket
 
-        group.replace_socket(last_output, to_socket.bl_idname, new_name=to_socket.name)
+        socket_names = []
+        for output in self.outputs:
+            socket_names.append( output.name )
+
+        new_socket_name = group.getUniqueSocketName( socket_names , to_socket.name )
+        group.replace_socket(last_output, to_socket.bl_idname, new_name=new_socket_name)
         
         # it also needs an input since it is a real node with shader
-        input_socket = self.inputs.new( to_socket.bl_idname , to_socket.name )
+        input_socket = self.inputs.new( to_socket.bl_idname , new_socket_name )
         input_socket.enabled = False
 
-        self.inputs[to_socket.name].sort_label = input_socket.name
-        self.outputs[to_socket.name].sort_label = to_socket.name
+        self.inputs[to_socket.name].sort_label = new_socket_name
+        self.outputs[to_socket.name].sort_label = new_socket_name
 
         # create another dummy socket at last
         self.outputs.new('sort_dummy_socket', '')

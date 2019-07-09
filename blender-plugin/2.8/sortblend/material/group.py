@@ -111,12 +111,43 @@ class SORTNodeGroupData(bpy.types.PropertyGroup):
 #                                  Shader Group Nodes                                #
 #------------------------------------------------------------------------------------#
 
+# keep appending a larger number until there is one available, there is not an optimal solution for sure
+# given the limted number of paramters in each shader node, it is fine to use it.
+def getUniqueSocketName(socket_names, socket_name):
+    i = 0
+    new_socket_name = socket_name
+    while True:
+        found_duplication = False
+        for name in socket_names:
+            if name == new_socket_name:
+                found_duplication = True
+        
+        if found_duplication:
+            new_socket_name = socket_name + str( i )
+            i += 1
+        else:
+            break
+
+    # should not be able to reach here
+    return new_socket_name
+
 map_lookup = {'outputs': 'inputs', 'inputs': 'outputs'}
 class SORTNodeSocketConnectorHelper:
     socket_map = {'outputs': 'to_socket', 'inputs': 'from_socket'}
     node_kind : bpy.props.StringProperty()
 
     def update(self):
+        def get_socket_names(sockets):
+            socket_names = []
+            for socket in sockets:
+                socket_names.append( socket.name )
+            return socket_names
+        
+        def get_one_instance(tree):
+            for instance in instances(tree):
+                return instance
+            return None
+            
         kind = self.node_kind
         if not kind:
             return
@@ -133,10 +164,20 @@ class SORTNodeSocketConnectorHelper:
         if socket_list[-1].is_linked:
             socket = socket_list[-1]
             cls = update_cls(tree)
+            socket_names = []
             if kind == "outputs":
                 new_name, new_type = cls.input_template[-1]
+                instance = get_one_instance(tree)
+                if instance is not None:
+                    socket_names = get_socket_names( instance.inputs )
             else:
                 new_name, new_type = cls.output_template[-1]
+                instance = get_one_instance(tree)
+                if instance is not None:
+                    socket_names = get_socket_names( instance.outputs )
+
+            # make sure the name is unique
+            new_name = getUniqueSocketName( socket_names , new_name )
 
             new_socket = replace_socket(socket, new_type, new_name=new_name)
 
@@ -174,6 +215,9 @@ class SORTShadingNode(bpy.types.Node):
     # whether the node is a group output
     def isGroupOutputNode(self):
         return False
+    # whether the node is a shader group input
+    def isShaderGroupInputNode(self):
+        return False
     # get shader parameter name
     def getShaderInputParameterName(self,param):
         return param.replace( ' ' , '' )
@@ -206,14 +250,14 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
             return
 
         input_template = generate_inputs(tree)
-        for socket_name, socket_bl_idname in input_template:
-            s = self.inputs.new(socket_bl_idname, socket_name)
-            s.sort_label = s.name
+        for socket_name , socket_bl_idname in input_template:
+            input_socket = self.inputs.new(socket_bl_idname, socket_name)
+            input_socket.sort_label = input_socket.name
 
         output_template = generate_outputs(tree)
-        for socket_name, socket_bl_idname in output_template:
-            s = self.outputs.new(socket_bl_idname, socket_name)
-            s.sort_label = s.name
+        for socket_name , socket_bl_idname in output_template:
+            output_socket = self.outputs.new(socket_bl_idname, socket_name)
+            output_socket.sort_label = output_socket.name
 
     # get shader parameter name
     def getShaderInputParameterName(self,param):
@@ -509,22 +553,27 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
 def generate_inputs(tree):
     in_socket = []
     input_node = tree.nodes.get("Group Inputs")
+    existed_name = []
     if input_node:
         for idx, socket in enumerate(input_node.outputs):
             if socket.is_linked:
                 socket_name, socket_bl_idname = get_socket_data(socket)
-                data = [socket_name, socket_bl_idname]
-                in_socket.append(data)
+                socket_name = getUniqueSocketName( existed_name , socket_name )
+                in_socket.append([socket_name, socket_bl_idname])
+                existed_name.append( socket_name )
     return in_socket
 
 def generate_outputs(tree):
     out_socket = []
     output_node = tree.nodes.get("Group Outputs")
+    existed_name = []
     if output_node:
         for socket in output_node.inputs:
             if socket.is_linked:
                 socket_name, socket_bl_idname = get_socket_data(socket)
+                socket_name = getUniqueSocketName( existed_name , socket_name )
                 out_socket.append((socket_name, socket_bl_idname))
+                existed_name.append( socket_name )
     return out_socket
 
 def update_cls(tree):
