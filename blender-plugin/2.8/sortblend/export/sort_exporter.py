@@ -667,7 +667,7 @@ def export_materials(scene, fs):
                 visited.add( shader_name )
 
         # collect all material nodes
-        parent_node_stack = [ ( None , '' ) ]
+        parent_node_stack = [ ( None , compact_material_name ) ]
         collect_node_count(output_node, visited, parent_node_stack)
 
         fs.serialize( '' )
