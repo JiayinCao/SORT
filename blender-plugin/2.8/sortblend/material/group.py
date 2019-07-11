@@ -20,6 +20,8 @@ from .. import base, renderer
 from nodeitems_utils import NodeItemCustom, NodeItem
 from .properties import SORTDummySocket
 
+SORT_NODE_GROUP_PREFIX = 'SORTGroupName_'
+
 class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
     @classmethod
     def poll(cls, context):
@@ -403,8 +405,6 @@ def node_groups_load_post(dummy):
     for ng in node_groups:
         update_cls(ng)
 
-SORT_NODE_GROUP_PREFIX = 'SORTGroupName_'
-
 def instances(tree):
     res = []
     all_trees = [ng for ng in bpy.data.node_groups if is_sort_node_group(ng) and ng.nodes]
@@ -438,50 +438,12 @@ def group_make():
 
     return tree
 
-def keys_sort(link):
-    return (socket_index(link.to_socket), link.from_node.location.y)
-
-def get_links(tree):
-    input_links = sorted([l for l in tree.links if (not l.from_node.select) and (l.to_node.select)], key=keys_sort)
-    output_links = sorted([l for l in tree.links if (l.from_node.select) and (not l.to_node.select)], key=keys_sort)
-    return dict(input=input_links, output=output_links)
-
 def socket_index(socket):
     node = socket.node
     sockets = node.outputs if socket.is_output else node.inputs
     for i, s in enumerate(sockets):
         if s == socket:
             return i
-
-def link_tree(tree, links):
-    nodes = tree.nodes
-    input_node = nodes.get("Group Inputs")
-    output_node = nodes.get("Group Outputs")
-    relink_in = []
-    relink_out = []
-    inputs_remap = {}
-
-    for index, l in enumerate(links['input']):
-        i = socket_index(l.to_socket)
-        socket = nodes[l.to_node.name].inputs[i]
-        if l.from_socket in inputs_remap:
-            out_index = inputs_remap[l.from_socket]
-            from_socket = input_node.outputs[out_index]
-            tree.links.new(from_socket, socket)
-        else:
-            inputs_remap[l.from_socket] = len(input_node.outputs) - 1
-            tree.links.new(input_node.outputs[-1], socket)
-
-        relink_in.append((l.from_socket, inputs_remap[l.from_socket]))
-
-    for index, l in enumerate(links['output']):
-        i = socket_index(l.from_socket)
-        socket = nodes[l.from_node.name].outputs[i]
-        tree.links.new(socket, output_node.inputs[-1])
-
-        relink_out.append((index, l.to_node.name, socket_index(l.to_socket)))
-
-    return relink_in, relink_out
 
 def get_io_node_locations(nodes):
     offset = 220
@@ -598,28 +560,73 @@ def update_cls(tree):
 
     return C
 
-def link_tree_instance(node, relinks):
-    tree = node.id_data
-    input_relink, output_relink = relinks
-    for socket, index in input_relink:
-        tree.links.new(socket, node.inputs[index])
-    for index, name, socket_index in output_relink:
-        tree.links.new(node.outputs[index], tree.nodes[name].inputs[socket_index])
-
-def get_average_location(nodes):
-    x, y = 0, 0
-    for node in nodes:
-        x += node.location[0]
-        y += node.location[1]
-    d = 1.0 / len(nodes)
-    return x * d, y * d
-
 @base.register_class
 class SORT_Node_Group_Make_Operator(bpy.types.Operator):
     bl_label = "Make Group"
     bl_idname = "sort.node_group_make"
 
     def execute(self, context):
+        # get all connected links
+        def get_links(tree):
+            def keys_sort(link):
+                return (socket_index(link.to_socket), link.from_node.location.y)
+            input_links = sorted([l for l in tree.links if (not l.from_node.select) and (l.to_node.select)], key=keys_sort)
+            output_links = sorted([l for l in tree.links if (l.from_node.select) and (not l.to_node.select)], key=keys_sort)
+            return dict(input=input_links, output=output_links)
+
+        # get average location of all nodes picked
+        def get_average_location(nodes):
+            x, y = 0, 0
+            for node in nodes:
+                x += node.location[0]
+                y += node.location[1]
+            d = 1.0 / len(nodes)
+            return x * d, y * d
+
+        # link nodes inside the group
+        def link_tree(tree, links):
+            nodes = tree.nodes
+            input_node = nodes.get("Group Inputs")
+            output_node = nodes.get("Group Outputs")
+            relink_in = []
+            relink_out = []
+
+            inputs_remap = {}
+            for index, l in enumerate(links['input']):
+                i = socket_index(l.to_socket)
+                to_socket = nodes[l.to_node.name].inputs[i]
+                if l.from_socket in inputs_remap:
+                    out_index = inputs_remap[l.from_socket]
+                    from_socket = input_node.outputs[out_index]
+                    tree.links.new(from_socket, to_socket)
+                else:
+                    inputs_remap[l.from_socket] = len(input_node.outputs) - 1
+                    tree.links.new(input_node.outputs[-1], to_socket)
+                relink_in.append((l.from_socket, inputs_remap[l.from_socket]))
+
+            outputs_map = {}
+            for index, l in enumerate(links['output']):
+                i = socket_index(l.from_socket)
+                from_socket = nodes[l.from_node.name].outputs[i]
+                if from_socket in outputs_map:
+                    index = outputs_map[from_socket]
+                    tree.links.new(from_socket, output_node.inputs[index])
+                else:
+                    outputs_map[from_socket] = len(output_node.inputs) - 1
+                    tree.links.new(from_socket, output_node.inputs[-1])
+                relink_out.append((outputs_map[from_socket], l.to_node.name, socket_index(l.to_socket)))
+
+            return relink_in, relink_out
+
+        # link all connections for parent node
+        def link_tree_instance(node, relinks):
+            tree = node.id_data
+            input_relink, output_relink = relinks
+            for socket, index in input_relink:
+                tree.links.new(socket, node.inputs[index])
+            for index, name, socket_index in output_relink:
+                tree.links.new(node.outputs[index], tree.nodes[name].inputs[socket_index])
+
         tree = context.space_data.edit_tree
         for node in tree.nodes:
             if node.bl_idname == 'sort_shader_node_group_input' or node.bl_idname == 'sort_shader_node_group_output':
@@ -668,14 +675,6 @@ class SORT_Node_Group_Make_Operator(bpy.types.Operator):
         bpy.ops.node.view_all()
         return { 'FINISHED' }
 
-def get_selected_node_by_idname(tree, name):
-    for node in tree.nodes:
-        if not node.select:
-            continue
-        if node.bl_idname == name:
-            return node
-    return None
-
 @base.register_class
 class SORT_Node_Group_Ungroup_Operator(bpy.types.Operator):
     bl_label = "Ungroup"
@@ -691,6 +690,16 @@ class SORT_Node_Group_Ungroup_Operator(bpy.types.Operator):
         return get_node_groups_by_id(group_node.bl_idname) != None
 
     def execute(self, context):
+        # get the picked node by ID
+        def get_selected_node_by_idname(tree, name):
+            for node in tree.nodes:
+                if not node.select:
+                    continue
+                if node.bl_idname == name:
+                    return node
+            return None
+
+        # current group node
         group_node = context.active_node
 
         # copy data
