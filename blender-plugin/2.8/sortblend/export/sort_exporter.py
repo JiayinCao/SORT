@@ -379,10 +379,11 @@ def export_mesh(mesh, fs):
     wo3_tris = bytearray()
 
     uvs = [[0.0,0.0]] * len( verts )
-    for poly in mesh.polygons:
-        for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
-            vid = mesh.loops[loop_index].vertex_index
-            uvs[vid] = [uv_layer[loop_index].uv.x , uv_layer[loop_index].uv.y]
+    if has_uv:
+        for poly in mesh.polygons:
+            for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
+                vid = mesh.loops[loop_index].vertex_index
+                uvs[vid] = [uv_layer[loop_index].uv.x , uv_layer[loop_index].uv.y]
 
     uvcoord = (0.0, 0.0)
     for i, f in enumerate(mesh.loop_triangles):
