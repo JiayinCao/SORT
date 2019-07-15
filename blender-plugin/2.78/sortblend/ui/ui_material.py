@@ -141,3 +141,57 @@ class SORT_new_material(SORT_new_material_base):
 class SORT_new_material_menu(SORT_new_material_base):
     """Add a new material"""
     bl_idname = "node.new_node_tree"
+
+class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
+    bl_label = 'Material Parameters'
+
+    @classmethod
+    def poll(self, context):
+        material = context.material
+        if material is None:
+            return False
+
+        tree = material.sort_material
+        return tree is not None
+
+    def draw(self, context):
+        material = context.material
+        if material is None:
+            return
+
+        tree = material.sort_material
+        if tree is None:
+            return
+        
+        is_group_node = nodes.is_sort_node_group(tree)
+        group_input_node = tree.nodes.get( "Shader Inputs" )
+        if group_input_node is None:
+            row = self.layout.row(align=True)
+            display_text = 'Restore Group Input Node' if is_group_node else 'Add Shader Inputs'
+            row.operator('sort.node_socket_restore_group_input', text=display_text)
+            return
+        
+        for input in group_input_node.inputs:
+            self.layout.prop( input , 'default_value' , text = input.name )
+
+@base.register_class
+class SORT_OT_node_socket_restore_input_node(bpy.types.Operator):
+    """Move socket"""
+    bl_idname = "sort.node_socket_restore_group_input"
+    bl_label = "Restore Group Input"
+
+    def execute(self, context):
+        # get current edited tree
+        tree = context.material.sort_material
+
+        # get property location for placing the input node
+        loc , _ = nodes.get_io_node_locations( tree.nodes )
+
+        # create an input node and place it on the left of all nodes
+        node_type = 'sort_shader_node_group_input' if nodes.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
+        node_input = tree.nodes.new(node_type)    
+        node_input.location = loc
+        node_input.selected = False
+        node_input.tree = tree
+
+        return {"FINISHED"}
