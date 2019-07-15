@@ -73,7 +73,7 @@ def getMaterialList( scene ):
         if ob.type == 'MESH':
             for material in ob.data.materials[:]:
                 # make sure it is a SORT material
-                if material and material.sort_material and material.sort_material.sortnodetree:
+                if material and material.sort_material:
                     # skip if the material is already exported
                     if exported_materials.count( material ) != 0:
                         continue

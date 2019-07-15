@@ -453,8 +453,8 @@ def export_global_config(scene, fs, sort_resource_path):
 
 # find the output node, duplicated code, to be cleaned
 def find_output_node(material):
-    if material and material.sort_material and material.sort_material.sortnodetree:
-        ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+    if material and material.sort_material:
+        ntree = material.sort_material
         for node in ntree.nodes:
             if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
                 return node

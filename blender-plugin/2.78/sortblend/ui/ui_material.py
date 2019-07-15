@@ -64,7 +64,7 @@ class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
                 row.operator("object.material_slot_deselect", text="Deselect")
         split = layout.split(percentage=0.75)
         if ob:
-            split.template_ID(ob, "active_material", new="material.new")
+            split.template_ID(ob, "active_material", new="sort_material.new")
             row = split.row()
             if slot:
                 row.prop(slot, "link", text="")
@@ -93,10 +93,10 @@ class SORT_use_shading_nodes(bpy.types.Operator):
 
         group_name = 'SORTGroup_' + idblock.name
 
-        nt = bpy.data.node_groups.new(group_name, type='SORTPatternGraph')
+        nt = bpy.data.node_groups.new(group_name, type='SORTShaderNodeTree')
         nt.use_fake_user = True
 
-        mat.sort_material.sortnodetree = nt.name
+        mat.sort_material = nt
         output = nt.nodes.new('SORTNodeOutput')
         default = nt.nodes.new('SORTNode_Material_Diffuse')
         default.location = output.location
@@ -104,21 +104,40 @@ class SORT_use_shading_nodes(bpy.types.Operator):
         nt.links.new(default.outputs[0], output.inputs[0])
         return {'FINISHED'}
 
+class SORT_new_material_base(bpy.types.Operator):
+    bl_label = "New"
 
-class SORTMaterialInstance(SORTMaterialPanel, bpy.types.Panel):
-    bl_label = "Surface"
+    def execute(self, context):
+        # currently picked object
+        obj = bpy.context.object
 
-    @classmethod
-    def poll(cls, context):
-        return context.material and SORTMaterialPanel.poll(context)
+        # add the new material
+        mat = bpy.data.materials.new( 'Material' )
 
-    def draw(self, context):
-        # find current material
-        target = None
-        for group in bpy.data.node_groups:
-            if group.name == context.material.sort_material.sortnodetree:
-                target = group
+        # initialize default sort shader nodes
+        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=nodes.SORTShaderNodeTree.bl_idname)
 
-        if target is None:
-            self.layout.operator("sort.use_shading_nodes", icon='NODETREE')
-            return
+        output = mat.sort_material.nodes.new('SORTNodeOutput')
+        default = mat.sort_material.nodes.new('SORTNode_Material_Diffuse')
+        output.location[0] += 200
+        output.location[1] += 200
+        default.location[1] += 200
+        mat.sort_material.links.new(default.outputs[0], output.inputs[0])
+
+        # add a new material slot or assign the newly added material in the picked empty slot
+        materials = obj.data.materials
+        cur_mat_id = obj.active_material_index
+        if cur_mat_id >= 0 and cur_mat_id < len(materials) and materials[cur_mat_id] is None:
+            materials[cur_mat_id] = mat
+        else:
+            materials.append(mat)
+
+        return { 'FINISHED' }
+
+class SORT_new_material(SORT_new_material_base):
+    """Add a new material"""
+    bl_idname = "sort_material.new"
+
+class SORT_new_material_menu(SORT_new_material_base):
+    """Add a new material"""
+    bl_idname = "node.new_node_tree"

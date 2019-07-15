@@ -62,6 +62,9 @@ class SORTNodeSocket(SORTNodeProperty):
     def get_socket_data_type(self):
         return 'None'
 
+    def isDummySocket(self):
+        return False
+
 # Socket for BXDF or Materials
 class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketBxdf'
@@ -176,3 +179,17 @@ class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'vector( u , v , 0.0 )'
     def get_socket_data_type(self):
         return 'vector3'
+
+# dummy socket used in shader group inputs/outputs
+class SORTDummySocket(bpy.types.NodeSocket, SORTNodeSocket):
+    bl_idname = "sort_dummy_socket"
+    bl_label = "SPRT Dummy Socket"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    def draw_color(self, context, node):
+        return (0.6, 0.6, 0.6, 0.5)
+    
+    def isDummySocket(self):
+        return True

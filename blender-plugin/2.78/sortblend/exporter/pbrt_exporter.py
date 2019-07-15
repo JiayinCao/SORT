@@ -247,12 +247,12 @@ def export_material(scene):
     file = open( pbrt_material_file_name , 'w' )
 
     for material in exporter_common.getMaterialList(scene):
-        ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+        ntree = material.sort_material
 
         # find the output node, duplicated code, to be cleaned
         def find_output_node(material):
-            if material and material.sort_material and material.sort_material.sortnodetree:
-                ntree = bpy.data.node_groups[material.sort_material.sortnodetree]
+            if material and material.sort_material:
+                ntree = material.sort_material
                 for node in ntree.nodes:
                     if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
                         return node
