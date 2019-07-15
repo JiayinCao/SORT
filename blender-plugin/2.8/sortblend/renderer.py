@@ -176,7 +176,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         self.image_size_in_bytes = self.image_tile_count_x * self.image_tile_count_y * self.image_tile_size_in_bytes
 
     # update frame
-    def update(self, data, scene):
+    def update(self, data, depsgraph):
         # check if the path for SORT is set correctly
         try:
             self.sort_available = True
@@ -193,7 +193,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             return
 
         # export the scene
-        sort_exporter.export_blender(scene.scene)
+        sort_exporter.export_blender(depsgraph)
 
     # render
     def render(self, depsgraph):

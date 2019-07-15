@@ -44,25 +44,25 @@ class SORT_new_material_base(bpy.types.Operator):
         obj = bpy.context.object
 
         # add the new material
-        material = bpy.data.materials.new( 'Material' )
+        mat = bpy.data.materials.new( 'Material' )
 
         # initialize default sort shader nodes
-        material.sort_material = bpy.data.node_groups.new( 'SORT_(' + material.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
+        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
 
-        output = material.sort_material.nodes.new('SORTNodeOutput')
-        default = material.sort_material.nodes.new('SORTNode_Material_Diffuse')
+        output = mat.sort_material.nodes.new('SORTNodeOutput')
+        default = mat.sort_material.nodes.new('SORTNode_Material_Diffuse')
         output.location[0] += 200
         output.location[1] += 200
         default.location[1] += 200
-        material.sort_material.links.new(default.outputs[0], output.inputs[0])
+        mat.sort_material.links.new(default.outputs[0], output.inputs[0])
 
         # add a new material slot or assign the newly added material in the picked empty slot
         materials = obj.data.materials
         cur_mat_id = obj.active_material_index
         if cur_mat_id >= 0 and cur_mat_id < len(materials) and materials[cur_mat_id] is None:
-            materials[cur_mat_id] = material
+            materials[cur_mat_id] = mat
         else:
-            materials.append(material)
+            materials.append(mat)
 
         return { 'FINISHED' }
 
@@ -112,6 +112,8 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
             return
 
         tree = material.sort_material
+        if tree is None:
+            return
 
         group_input_node = tree.nodes.get( "Shader Inputs" )
         if group_input_node is None:

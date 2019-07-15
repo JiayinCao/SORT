@@ -99,7 +99,8 @@ def lookAtSORT(camera):
     return (pos, target, up)
 
 # export blender information
-def export_blender(scene, force_debug=False):
+def export_blender(depsgraph, force_debug=False):
+    scene = depsgraph.scene
     export_common.setScene(scene)
 
     # create immediate file path
@@ -125,7 +126,7 @@ def export_blender(scene, force_debug=False):
 
     # export scene
     export_common.log("Exporting scene.")
-    export_scene(scene, fs)
+    export_scene(depsgraph, fs)
     export_common.log("Exported scene %.2f(s)" % (time.time() - current_time))
     current_time = time.time()
 
@@ -145,7 +146,8 @@ def create_path(scene, force_debug):
     return output_dir
 
 # export scene
-def export_scene(scene, fs):
+def export_scene(depsgraph, fs):
+    scene = depsgraph.scene
     fs.serialize( int(1234567) )
 
     # camera node
@@ -187,7 +189,7 @@ def export_scene(scene, fs):
         if obj.type != 'MESH' or obj.is_modified(scene, 'RENDER'):
             try:
                 # create a temporary mesh
-                mesh = obj.to_mesh(scene, True, 'RENDER')
+                mesh = obj.to_mesh(depsgraph , True)
                 # instead of exporting the original mesh, export the temporary mesh.
                 stat = export_mesh(mesh, fs)
             finally:
@@ -419,6 +421,7 @@ def export_mesh(mesh, fs):
             wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
             primitive_cnt += 1
         else:
+            assert( len(oi) == 4 )
             # quad
             wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
             wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
