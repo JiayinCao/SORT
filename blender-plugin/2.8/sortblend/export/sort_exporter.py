@@ -265,7 +265,7 @@ def export_scene(depsgraph, fs):
                 fs.serialize(sizeX * 0.5)
             
     hdr_sky_image = scene.sort_hdr_sky.hdr_image
-    if hdr_sky_image.filepath != '':
+    if hdr_sky_image is not None:
         fs.serialize('SkyLightEntity')
         fs.serialize(export_common.matrix_to_tuple(MatrixBlenderToSort() @ MatrixSortToBlender()))
         fs.serialize(( 1.0 , 1.0 , 1.0 ))
@@ -285,14 +285,14 @@ def export_hair(ps, obj, scene, fs):
     LENFMT = struct.Struct('=i')
     POINTFMT = struct.Struct('=fff')
 
-    ps.set_resolution(scene, obj, 'RENDER')
+    #ps.set_resolution(scene, obj, 'RENDER')
 
     hairs = ps.particles
     
     vert_cnt = 0
     render_step = ps.settings.render_step
-    width_tip = ps.settings.sort_particle.sort_particle_width.width_tip
-    width_bottom = ps.settings.sort_particle.sort_particle_width.width_bottom
+    width_tip = ps.settings.sort_hair.hair_tip
+    width_bottom = ps.settings.sort_hair.hair_bottom
 
     # extract the material of the hair
     mat_local_index = ps.settings.material
@@ -315,7 +315,7 @@ def export_hair(ps, obj, scene, fs):
     for pindex in range(hair_cnt):
         hair = []
         for step in range(0, steps + 1):
-            co = ps.co_hair(obj, pindex, step)
+            co = ps.co_hair(obj, particle_no = pindex, step = step)
             # there could be a bug of ignoring point at origin
             if not co.length_squared == 0:
                 co = world2Local @ co
@@ -330,7 +330,7 @@ def export_hair(ps, obj, scene, fs):
             verts += POINTFMT.pack( h[0] , h[1] , h[2] )
         total_hair_segs += len(hair) - 1
 
-    ps.set_resolution(scene, obj, 'PREVIEW')
+    #ps.set_resolution(scene, obj, 'PREVIEW')
 
     fs.serialize( 'HairVisual' )
     fs.serialize( hair_cnt )

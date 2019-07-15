@@ -18,21 +18,23 @@ import bl_ui
 from .. import base
 
 @base.register_class
-class SORTHDRSky(bpy.types.PropertyGroup):
-    hdr_image : bpy.props.PointerProperty(type=bpy.types.Image)
+class SORTHair(bpy.types.PropertyGroup):
+    hair_tip : bpy.props.FloatProperty(name='Hair Tip' , default=0.0 , min=0.0 )
+    hair_bottom : bpy.props.FloatProperty(name='Hair Bottom' , default=0.1 , min=0.0 )
+
     @classmethod
     def register(cls):
-        bpy.types.Scene.sort_hdr_sky = bpy.props.PointerProperty(name="SORT HDR Sky", type=cls)
+        bpy.types.ParticleSettings.sort_hair = bpy.props.PointerProperty(name="SORT Hair Setting", type=cls)
     @classmethod
     def unregister(cls):
-        del bpy.types.Scene.sort_hdr_sky
+        del bpy.types.Scene.sort_hair
 
 @base.register_class
-class SORT_PT_HDRSkyPanel(bpy.types.Panel):
+class SORT_PT_HairSettingPanel(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
-    bl_context = "world"
-    bl_label = 'HDR Sky'
+    bl_context = "particle"
+    bl_label = 'SORT Hair Setting'
 
     COMPAT_ENGINES = {'SORT'}
     @classmethod
@@ -40,4 +42,6 @@ class SORT_PT_HDRSkyPanel(bpy.types.Panel):
         return context.scene.render.engine in cls.COMPAT_ENGINES
 
     def draw(self, context):
-        self.layout.template_ID(context.scene.sort_hdr_sky, 'hdr_image', open='image.open')
+        hair = context.particle_settings.sort_hair
+        self.layout.prop(hair, "hair_tip")
+        self.layout.prop(hair, "hair_bottom")

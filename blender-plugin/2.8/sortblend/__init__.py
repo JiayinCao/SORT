@@ -28,11 +28,11 @@ from . import base
 from . import renderer
 from . import material
 from .ui import ui_render
+from .ui import ui_particle
 from .ui import ui_world
 #from .ui import ui_camera
 #from .ui import ui_light
 from .ui import ui_material
-#from .ui import ui_particle
 #from .ui import ui_space
 
 @base.register_class
@@ -47,8 +47,22 @@ def register():
 
     from bl_ui import (
             properties_data_light,
+            properties_particle,
             )
     properties_data_light.DATA_PT_EEVEE_light.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_emission.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_boidbrain.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_cache.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_children.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_children_clumping.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_children_kink.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_children_roughness.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_context_particles.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_draw.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_emission_source.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_field_weights.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_hair_dynamics_structure.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
+    properties_particle.PARTICLE_PT_render.COMPAT_ENGINES.add( renderer.SORTRenderEngine.bl_idname )
 
     bpy.app.handlers.load_post.append(material.node_groups_load_post)
 
