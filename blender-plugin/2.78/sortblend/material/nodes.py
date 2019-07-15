@@ -34,7 +34,6 @@ class SORTPatternGraph(bpy.types.NodeTree):
     bl_idname = 'SORTPatternGraph'
     bl_label = 'SORT Pattern Graph'
     bl_icon = 'MATERIAL'
-    nodetypes = {}
     node_categories = {}
 
     @classmethod
@@ -70,10 +69,6 @@ class SORTPatternGraph(bpy.types.NodeTree):
             cid = 'SORT_' + c.replace(' ', '').upper()
             items = [nodeitems_utils.NodeItem(nc.__name__) for nc in l]
             cats.append(SORTPatternNodeCategory(cid, c, items=items))
-
-            cls.nodetypes[c] = []
-            #for item in l :
-            #    cls.nodetypes[c].append((item.__name__,item.bl_label))
 
         cats.append(SORTPatternNodeCategory('SORT_LAYOUT', 'Layout', items=[nodeitems_utils.NodeItem('NodeFrame'),nodeitems_utils.NodeItem('NodeReroute')]))
 
