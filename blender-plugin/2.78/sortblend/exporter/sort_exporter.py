@@ -576,12 +576,15 @@ def export_materials(scene, fs):
         collect_node_count(output_node, visited)
 
         # serialize this material
-        fs.serialize( len( mat_nodes ) )
         for node in mat_nodes:
             shader_type = node.type_identifier()
-            fs.serialize( node.name )
+            fs.serialize( compact_material_name + '_' + node.name )
             fs.serialize( shader_type )
             node.serialize_prop( fs )
+
+        fs.serialize( '' )
+        fs.serialize( 'verification_string' )
+
         fs.serialize( len( mat_connections ) )
         for connection in mat_connections:
             fs.serialize( connection[0] )
