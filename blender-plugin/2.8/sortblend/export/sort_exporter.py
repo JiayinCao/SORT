@@ -189,7 +189,7 @@ def export_scene(depsgraph, fs):
         if obj.type != 'MESH' or obj.is_modified(scene, 'RENDER'):
             try:
                 # create a temporary mesh
-                mesh = obj.to_mesh(depsgraph , preserve_all_data_layers = True)
+                mesh = obj.to_mesh(depsgraph , True)
                 # instead of exporting the original mesh, export the temporary mesh.
                 stat = export_mesh(mesh, fs)
             finally:
@@ -265,7 +265,7 @@ def export_scene(depsgraph, fs):
                 fs.serialize(sizeX * 0.5)
             
     hdr_sky_image = scene.sort_hdr_sky.hdr_image
-    if hdr_sky_image != '':
+    if hdr_sky_image.filepath != '':
         fs.serialize('SkyLightEntity')
         fs.serialize(export_common.matrix_to_tuple(MatrixBlenderToSort() @ MatrixSortToBlender()))
         fs.serialize(( 1.0 , 1.0 , 1.0 ))
