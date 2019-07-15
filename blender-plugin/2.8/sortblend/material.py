@@ -874,9 +874,10 @@ class SORTNodeOutput(SORTShadingNode):
 class SORTNodeExposedInputs(SORTShadingNode):
     bl_label = 'Shader Inputs'
     bl_idname = 'SORTNodeExposedInputs'
+    node_kind = 'outputs'
+
     def init(self, context):
         self.outputs.new( 'sort_dummy_socket' , 'Input' )
-        self.node_kind = 'outputs'
     
     # whether the node is a shader group input
     def isShaderGroupInputNode(self):
