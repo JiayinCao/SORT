@@ -299,7 +299,7 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
         material = context.material
         if material is None:
             return False
-        return material.sort_material is not None
+        return material.sort_material is not None and SORTMaterialPanel.poll(context)
 
     def draw(self, context):
         mat = context.material
@@ -331,7 +331,7 @@ class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
         tree = context.space_data.edit_tree
         if not tree:
             return False
-        return tree.bl_idname == material.SORTShaderNodeTree.bl_idname
+        return tree.bl_idname == material.SORTShaderNodeTree.bl_idname and SORTMaterialPanel.poll(context)
 
     def draw(self, context):
         def set_attrs(cls, **kwargs):
