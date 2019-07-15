@@ -625,7 +625,7 @@ class SORTShadingNode(bpy.types.Node):
     # get unique name
     def getUniqueName(self):
         return self.name + str( self.as_pointer() )
-    
+
 #------------------------------------------------------------------------------------#
 #                                Group Node Operators                                #
 #------------------------------------------------------------------------------------#

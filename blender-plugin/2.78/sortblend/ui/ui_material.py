@@ -269,6 +269,28 @@ class SORT_OT_node_socket_restore_output_node(bpy.types.Operator):
 
         return {"FINISHED"}
 
+@base.register_class
+class SORT_OT_node_socket_restore_shader_group_input(bpy.types.Operator):
+    """Move socket"""
+    bl_idname = "sort.node_socket_restore_shader_group_input"
+    bl_label = "Restore Shader Group Input"
+
+    def execute(self, context):
+        # get current edited tree
+        tree = context.material.sort_material
+
+        # get property location for placing the input node
+        loc , _ = material.get_io_node_locations( tree.nodes )
+
+        # create an input node and place it on the left of all nodes
+        node_type = 'sort_shader_node_group_input' if material.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
+        node_input = tree.nodes.new(node_type)    
+        node_input.location = loc
+        node_input.selected = False
+        node_input.tree = tree
+
+        return {"FINISHED"}
+
 class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Parameters'
 
@@ -277,9 +299,7 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
         material = context.material
         if material is None:
             return False
-
-        tree = material.sort_material
-        return tree is not None
+        return material.sort_material is not None
 
     def draw(self, context):
         mat = context.material
@@ -295,7 +315,7 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
         if group_input_node is None:
             row = self.layout.row(align=True)
             display_text = 'Restore Group Input Node' if is_group_node else 'Add Shader Inputs'
-            row.operator('sort.node_socket_restore_group_input', text=display_text)
+            row.operator('sort.node_socket_restore_shader_group_input', text=display_text)
             return
         
         for input in group_input_node.inputs:

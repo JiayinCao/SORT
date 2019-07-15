@@ -646,7 +646,7 @@ class SORTNodeOutput(SORTShadingNode):
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface' )
 
-@SORTShaderNodeTree.register_node('Output')
+@base.register_class
 class SORTNodeExposedInputs(SORTShadingNode):
     bl_label = 'Shader Inputs'
     bl_idname = 'SORTNodeExposedInputs'

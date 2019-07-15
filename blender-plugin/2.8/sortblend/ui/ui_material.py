@@ -103,6 +103,28 @@ class MATERIAL_PT_MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
             split.separator()
 
 @base.register_class
+class SORT_OT_node_socket_restore_shader_group_input(bpy.types.Operator):
+    """Move socket"""
+    bl_idname = "sort.node_socket_restore_shader_group_input"
+    bl_label = "Restore Shader Group Input"
+
+    def execute(self, context):
+        # get current edited tree
+        tree = context.material.sort_material
+
+        # get property location for placing the input node
+        loc , _ = material.get_io_node_locations( tree.nodes )
+
+        # create an input node and place it on the left of all nodes
+        node_type = 'sort_shader_node_group_input' if material.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
+        node_input = tree.nodes.new(node_type)    
+        node_input.location = loc
+        node_input.selected = False
+        node_input.tree = tree
+
+        return {"FINISHED"}
+
+@base.register_class
 class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Parameters'
 
@@ -111,24 +133,23 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
         material = context.material
         if material is None:
             return False
-
-        tree = material.sort_material
-        if tree is None:
-            return False
-        
-        return tree.nodes.get( "Shader Inputs" ) is not None
+        return material.sort_material is not None
 
     def draw(self, context):
-        material = context.material
-        if material is None:
+        mat = context.material
+        if mat is None:
             return
 
-        tree = material.sort_material
+        tree = mat.sort_material
         if tree is None:
             return
-
+        
+        is_group_node = material.is_sort_node_group(tree)
         group_input_node = tree.nodes.get( "Shader Inputs" )
         if group_input_node is None:
+            row = self.layout.row(align=True)
+            display_text = 'Restore Group Input Node' if is_group_node else 'Add Shader Inputs'
+            row.operator('sort.node_socket_restore_shader_group_input', text=display_text)
             return
         
         for input in group_input_node.inputs:
