@@ -17,8 +17,7 @@ import bpy
 import nodeitems_utils
 import random
 import bpy.utils.previews
-from . import properties
-from .. import base
+from . import base
 
 SORT_NODE_GROUP_PREFIX = 'SORTGroupName_'
 
@@ -78,8 +77,6 @@ class SORTShaderNodeTree(bpy.types.NodeTree):
 
     # This function is only used to update group inputs/outouts when GroupInputNode/GroupOutputNode is deleted
     def update(self):
-        return
-        '''
         # only handle the deleting of group input/output nodes for now
         if is_sort_node_group(self) is False:
             return
@@ -102,7 +99,6 @@ class SORTShaderNodeTree(bpy.types.NodeTree):
             if output_node is None:
                 sockets = getattr(instance, 'outputs')
                 sockets.clear()
-        '''
 
 @base.register_class
 class SORTNodeGroupData(bpy.types.PropertyGroup):
@@ -113,6 +109,281 @@ class SORTNodeGroupData(bpy.types.PropertyGroup):
     @classmethod
     def unregister(cls):
         del SORTShaderNodeTree.sort_data
+
+#------------------------------------------------------------------------------------#
+#                                  Shader Node Socket                                #
+#------------------------------------------------------------------------------------#
+
+# SORT Node property base class
+class SORTNodeProperty:
+    pbrt_type = ''
+    # export type in PBRT
+    def export_pbrt_socket_type(self):
+        return self.pbrt_type
+
+# this function is to avoid setting duplicated names for group input/output or shader group input
+def update_socket_name(self, context):
+    # check for name duplication
+    node = self.node
+    tree = node.id_data
+
+    def get_one_instance(tree):
+        for instance in instances(tree):
+            return instance
+        return None
+
+    if node.isGroupInputNode():
+        instance = get_one_instance( tree )
+        if instance:
+            for input in instance.inputs:
+                # reset the name if there is a duplication
+                if input.name == self.sort_label:
+                    # this condition is necessary to avoid infinite recursive calling
+                    if self.sort_label != self.name:
+                        self.sort_label = self.name
+                    return
+    elif node.isGroupOutputNode():
+        instance = get_one_instance( tree )
+        if instance:
+            for input in instance.outputs:
+                # reset the name if there is a duplication
+                if input.name == self.sort_label:
+                    # this condition is necessary to avoid infinite recursive calling
+                    if self.sort_label != self.name:
+                        self.sort_label = self.name
+                    return
+    elif node.isShaderGroupInputNode():
+        for input in node.inputs:
+            # reset the name if there is a duplication
+            if input.name == self.sort_label:
+                # this condition is necessary to avoid infinite recursive calling
+                if self.sort_label != self.name:
+                    self.sort_label = self.name
+                return
+    else:
+        return
+
+    idx = -1
+    if self.is_output:
+        for i , output in enumerate(node.outputs):
+            if output == self:
+                idx = i
+                break
+    else:
+        for i , input in enumerate(node.inputs):
+            if input == self:
+                idx = i
+                break
+
+    if node.isGroupInputNode():
+        if idx >= 0 and idx < len( node.outputs ):
+            node.outputs[idx].name = self.sort_label
+
+        # need to update all instances' inputs
+        tree = node.id_data
+        for instance in instances(tree):
+            if idx >= 0 and idx < len( instance.inputs ):
+                instance.inputs[idx].name = self.sort_label
+        return
+
+    if node.isGroupOutputNode():
+        if idx >= 0 and idx < len( node.inputs ):
+            node.inputs[idx].name = self.sort_label
+
+        # need to update all instances' inputs
+        tree = node.id_data
+        for instance in instances(tree):
+            if idx >= 0 and idx < len( instance.outputs ):
+                instance.outputs[idx].name = self.sort_label
+        return
+
+    # this must be shader group inputs
+    if idx >= 0 and idx < len( node.inputs ):
+        node.inputs[idx].name = self.sort_label
+    if idx >= 0 and idx < len( node.outputs ):
+        node.outputs[idx].name = self.sort_label
+        
+# Base class for sort socket
+class SORTNodeSocket(SORTNodeProperty):
+    ui_open = bpy.props.BoolProperty(name='UI Open', default=True)
+    socket_color = (0.1, 0.1, 0.1, 0.75)
+    need_bxdf_node = False
+
+    # this is a very hacky way to support name update in Blender because I have no idea how to get callback function from native str class
+    sort_label = bpy.props.StringProperty( name = '' , default = 'default' , update = update_socket_name )
+
+    def __int__(self):
+        self.sort_label.default = self.name
+
+    # this is not an inherited function
+    def draw_label(self, context, layout, node, text):
+        def get_from_socket(socket):
+            if not socket.is_linked:
+                return None
+            other = socket.links[0].from_socket
+            if other.node.bl_idname == 'NodeReroute':
+                return get_from_socket(other.node.inputs[0])
+            else:
+                return other
+
+        source_socket = get_from_socket(self)
+        has_error = False
+        if source_socket is not None and source_socket.get_socket_data_type() != self.get_socket_data_type():
+            has_error = True
+        if has_error:
+            layout.label(text,icon='CANCEL')
+        else:
+            layout.label(text)
+
+    # Customized color for the socket
+    def draw_color(self, context, node):
+        return self.socket_color
+
+    #draw socket property in node
+    def draw(self, context, layout, node, text):
+        if self.is_linked or self.is_output:
+            self.draw_label(context,layout,node,text)
+        else:
+            layout.prop( node.inputs[text] , 'default_value' , text = text)
+
+    def get_socket_data_type(self):
+        return 'None'
+
+    def isDummySocket(self):
+        return False
+
+# Socket for BXDF or Materials
+class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketBxdf'
+    bl_label = 'SORT Shader Socket'
+    socket_color = (0.2, 0.2, 1.0, 1.0)
+    default_value = None
+    def draw(self, context, layout, node, text):
+        if self.is_linked or self.is_output:
+            self.draw_label(context,layout,node,text)
+        else:
+            layout.label(text)
+    def export_osl_value(self):
+        return 'color(0)'
+    def get_socket_data_type(self):
+        return 'bxdf'
+
+# Socket for Color
+class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketColor'
+    bl_label = 'SORT Color Socket'
+    socket_color = (0.1, 1.0, 0.2, 1.0)
+    pbrt_type = 'rgb'
+    default_value = bpy.props.FloatVectorProperty( name='Color' , default=(1.0, 1.0, 1.0) ,subtype='COLOR',soft_min = 0.0, soft_max = 1.0)
+    def export_osl_value(self):
+        return 'color( %f, %f, %f )'%(self.default_value[:])
+    def get_socket_data_type(self):
+        return 'vector3'
+
+# Socket for Float
+class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketFloat'
+    bl_label = 'SORT Float Socket'
+    socket_color = (0.1, 0.1, 0.3, 1.0)
+    pbrt_type = 'float'
+    default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0, max=1.0 )
+    def export_osl_value(self):
+        return '%f'%(self.default_value)
+    def get_socket_data_type(self):
+        return 'float'
+
+# Socket for Float Vector
+class SORTNodeSocketFloatVector(bpy.types.NodeSocketFloat, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketFloatVector'
+    bl_label = 'SORT Float Vector Socket'
+    socket_color = (0.1, 0.6, 0.3, 1.0)
+    pbrt_type = 'float'
+    default_value = bpy.props.FloatVectorProperty( name='Float' , default=(0.0,0.0,0.0) , min=-float('inf'), max=float('inf') )
+    def export_osl_value(self):
+        return 'vector(%f,%f,%f)'%(self.default_value[:])
+    def get_socket_data_type(self):
+        return 'vector3'
+
+# Socket for Positive Float
+class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketLargeFloat'
+    bl_label = 'SORT Float Socket'
+    socket_color = (0.1, 0.1, 0.3, 1.0)
+    pbrt_type = 'float'
+    default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=0.0)
+    def export_osl_value(self):
+        return '%f'%(self.default_value)
+    def get_socket_data_type(self):
+        return 'float'
+
+# Socket for Any Float
+class SORTNodeSocketAnyFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketAnyFloat'
+    bl_label = 'SORT Float Socket'
+    socket_color = (0.1, 0.1, 0.3, 1.0)
+    pbrt_type = 'float'
+    default_value = bpy.props.FloatProperty( name='Float' , default=0.0 , min=-float('inf'), max=float('inf'))
+    def export_osl_value(self):
+        return '%f'%(self.default_value)
+    def get_socket_data_type(self):
+        return 'float'
+
+# Socket for normal ( normal map )
+class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketNormal'
+    bl_label = 'SORT Normal Socket'
+    socket_color = (0.1, 0.4, 0.3, 1.0)
+    default_value = bpy.props.FloatVectorProperty( name='Normal' , default=(0.0,1.0,0.0) , min=-1.0, max=1.0 )
+    # normal socket doesn't show the vector because it is not supposed to be edited this way.
+    def draw(self, context, layout, node, text):
+        if self.is_linked or self.is_output:
+            self.draw_label(context,layout,node,text)
+        else:
+            row = layout.row()
+            split = row.split(0.4)
+            split.label(text)
+    def export_osl_value(self):
+        return 'normal( %f , %f , %f )' %(self.default_value[:])
+    def get_socket_data_type(self):
+        return 'vector3'
+
+# Socket for UV Mapping
+class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketUV'
+    bl_label = 'SORT UV Mapping'
+    socket_color = (0.9, 0.2, 0.8, 1.0)
+    pbrt_type = 'NA'
+    default_value = bpy.props.FloatVectorProperty( name='Float' , default=(0.0,1.0,0.0) , min=0.0, max=1.0 )
+    # uvmapping socket doesn't show the vector because it is not supposed to be edited this way.
+    def draw(self, context, layout, node, text):
+        if self.is_linked or self.is_output:
+            self.draw_label(context,layout,node,text)
+        else:
+            row = layout.row()
+            split = row.split(0.4)
+            split.label(text)
+    def export_osl_value(self):
+        return 'vector( u , v , 0.0 )'
+    def get_socket_data_type(self):
+        return 'vector3'
+
+# dummy socket used in shader group inputs/outputs
+class SORTDummySocket(bpy.types.NodeSocket, SORTNodeSocket):
+    bl_idname = "sort_dummy_socket"
+    bl_label = "SPRT Dummy Socket"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    def draw_color(self, context, node):
+        return (0.6, 0.6, 0.6, 0.5)
+    
+    def isDummySocket(self):
+        return True
+
+#------------------------------------------------------------------------------------#
+#                         Root base class for all SORT Node                          #
+#------------------------------------------------------------------------------------#
 
 class SORTShadingNode(bpy.types.Node):
     bl_label = 'ShadingNode'

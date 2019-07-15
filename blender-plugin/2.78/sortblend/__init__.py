@@ -30,13 +30,13 @@ addon_register, addon_unregister = SORTAddon.init_functions()
 import bpy
 from . import base
 from . import renderer
+from . import material
 from .ui import ui_render
 from .ui import ui_camera
 from .ui import ui_lamp
 from .ui import ui_material
 from .ui import ui_particle
 from .ui import ui_space
-from .material import nodes
 
 class SORTAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = 'sortblend'
@@ -62,7 +62,7 @@ def register():
     addon_register()
     bpy.utils.register_module(__name__)
 
-    bpy.app.handlers.load_post.append(nodes.node_groups_load_post)
+    bpy.app.handlers.load_post.append(material.node_groups_load_post)
 
 def unregister():
     addon_unregister()

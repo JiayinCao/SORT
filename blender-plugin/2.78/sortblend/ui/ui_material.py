@@ -14,7 +14,7 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
-from ..material import nodes
+from .. import material
 from .. import base
 from bl_ui import properties_data_camera
 
@@ -142,6 +142,133 @@ class SORT_new_material_menu(SORT_new_material_base):
     """Add a new material"""
     bl_idname = "node.new_node_tree"
 
+class SORT_OT_node_socket_base(bpy.types.Operator):
+    """Move socket"""
+    bl_idname = "sort.node_socket_base"
+    bl_label = "Move Socket"
+
+    type = bpy.props.EnumProperty(
+        items=(('up', '', ''),
+               ('down', '', ''),
+               ('remove', '', ''),
+               ),
+    )
+    pos = bpy.props.IntProperty()
+    node_name = bpy.props.StringProperty()
+
+    def execute(self, context):
+        node = context.space_data.edit_tree.nodes[self.node_name]
+        tree = node.id_data
+        kind = node.node_kind
+        io = getattr(node, kind)
+        socket = io[self.pos]
+
+        if self.type == 'remove':
+            io.remove(socket)
+            if material.is_sort_node_group(tree):
+                # update instances
+                for instance in material.instances(tree):
+                    sockets = getattr(instance, material.map_lookup[kind])
+                    sockets.remove(sockets[self.pos])
+            else:
+                # update root shader inputs
+                shader_input_node = tree.nodes.get( 'Shader Inputs' )
+                sockets = getattr(shader_input_node, material.map_lookup[kind])
+                sockets.remove(sockets[self.pos])
+        else:
+            step = -1 if self.type == 'up' else 1
+            count = len(io) - 1
+
+            def calc_new_position(pos, step, count):
+                return max(0, min(pos + step, count - 1))
+
+            new_pos = calc_new_position(self.pos, step, count)
+            io.move(self.pos, new_pos)
+
+            if material.is_sort_node_group(tree):
+                # update instances
+                for instance in material.instances(tree):
+                    sockets = getattr(instance, material.map_lookup[kind])
+                    new_pos = calc_new_position(self.pos, step, len(sockets))
+                    sockets.move(self.pos, new_pos)
+            else:
+                shader_input_node = tree.nodes.get( 'Shader Inputs' )
+                sockets = getattr(shader_input_node, material.map_lookup[kind])
+                new_pos = calc_new_position(self.pos, step, len(sockets))
+                sockets.move(self.pos, new_pos)
+
+        material.update_cls(tree)
+        return {"FINISHED"}
+
+@base.register_class
+class SORT_OT_node_socket_move(SORT_OT_node_socket_base):
+    """Move socket"""
+    bl_idname = "sort.node_socket_move"
+    bl_label = "Remove Socket"
+
+    type = bpy.props.EnumProperty(
+        items=(('up', '', ''),
+               ('down', '', ''),
+               ('remove', '', ''),
+               ),
+    )
+    pos = bpy.props.IntProperty()
+    node_name = bpy.props.StringProperty()
+
+@base.register_class
+class SORT_OT_node_socket_remove(SORT_OT_node_socket_base):
+    """Remove socket"""
+    bl_idname = "sort.node_socket_remove"
+    bl_label = "Remove Socket"
+
+    type = bpy.props.EnumProperty(
+        items=(('up', '', ''),
+               ('down', '', ''),
+               ('remove', '', ''),
+               ),
+    )
+    pos = bpy.props.IntProperty()
+    node_name = bpy.props.StringProperty()
+
+@base.register_class
+class SORT_OT_node_socket_restore_input_node(bpy.types.Operator):
+    """Move socket"""
+    bl_idname = "sort.node_socket_restore_group_input"
+    bl_label = "Restore Group Input"
+
+    def execute(self, context):
+        # get current edited tree
+        tree = context.space_data.edit_tree
+
+        # get property location for placing the input node
+        loc , _ = material.get_io_node_locations( tree.nodes )
+
+        # create an input node and place it on the left of all nodes
+        node_type = 'sort_shader_node_group_input' if material.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
+        node_input = tree.nodes.new(node_type)    
+        node_input.location = loc
+        node_input.selected = False
+        node_input.tree = tree
+
+        return {"FINISHED"}
+
+@base.register_class
+class SORT_OT_node_socket_restore_output_node(bpy.types.Operator):
+    """Move socket"""
+    bl_idname = "sort.node_socket_restore_group_output"
+    bl_label = "Restore Group Output"
+
+    def execute(self, context):
+        tree = context.space_data.edit_tree
+        nodes = tree.nodes
+
+        node_input = nodes.new('sort_shader_node_group_output')
+        node_input.location = (300, 0)
+        node_input.selected = False
+        node_input.tree = tree
+
+        return {"FINISHED"}
+
 class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Parameters'
 
@@ -155,15 +282,15 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
         return tree is not None
 
     def draw(self, context):
-        material = context.material
-        if material is None:
+        mat = context.material
+        if mat is None:
             return
 
-        tree = material.sort_material
+        tree = mat.sort_material
         if tree is None:
             return
         
-        is_group_node = nodes.is_sort_node_group(tree)
+        is_group_node = material.is_sort_node_group(tree)
         group_input_node = tree.nodes.get( "Shader Inputs" )
         if group_input_node is None:
             row = self.layout.row(align=True)
@@ -174,24 +301,72 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
         for input in group_input_node.inputs:
             self.layout.prop( input , 'default_value' , text = input.name )
 
-@base.register_class
-class SORT_OT_node_socket_restore_input_node(bpy.types.Operator):
-    """Move socket"""
-    bl_idname = "sort.node_socket_restore_group_input"
-    bl_label = "Restore Group Input"
+class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
+    bl_label = "SORT In/Out Group Editor"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
 
-    def execute(self, context):
-        # get current edited tree
-        tree = context.material.sort_material
+    @classmethod
+    def poll(cls, context):
+        tree = context.space_data.edit_tree
+        if not tree:
+            return False
+        return tree.bl_idname == material.SORTShaderNodeTree.bl_idname
 
-        # get property location for placing the input node
-        loc , _ = nodes.get_io_node_locations( tree.nodes )
+    def draw(self, context):
+        def set_attrs(cls, **kwargs):
+            for name, value in kwargs.items():
+                setattr(cls, name, value)
 
-        # create an input node and place it on the left of all nodes
-        node_type = 'sort_shader_node_group_input' if nodes.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
-        node_input = tree.nodes.new(node_type)    
-        node_input.location = loc
-        node_input.selected = False
-        node_input.tree = tree
+        tree = context.space_data.edit_tree
+        is_group_node = material.is_sort_node_group(tree)
 
-        return {"FINISHED"}
+        layout = self.layout
+        row = layout.row()
+        col1 = layout.row().box().column()
+        if is_group_node:
+            layout.separator()
+            col2 = layout.row().box().column()
+
+        def draw_socket(col, socket, index):
+            if socket.bl_idname == 'sort_dummy_socket':
+                return
+            params = dict(node_name=socket.node.name, pos=index)
+
+            row = col.row(align=True)
+            row.template_node_socket(color=(0.35, 0.5, 0.8, 1.0))
+
+            row.prop( socket , 'sort_label' , text = '' )
+            op = row.operator('sort.node_socket_move', icon='TRIA_UP', text='')
+            set_attrs(op, type='up', **params)
+            op = row.operator('sort.node_socket_move', icon='TRIA_DOWN', text='')
+            set_attrs(op, type='down', **params)
+            op = row.operator('sort.node_socket_remove', icon='X', text='')
+            set_attrs(op, type='remove', **params)
+
+        input_node = tree.nodes.get("Group Inputs")
+        output_node = tree.nodes.get("Group Outputs")
+
+        if material.is_sort_node_group( tree ) is False:
+            input_node = tree.nodes.get( 'Shader Inputs' )
+            output_node = None
+
+        display_label = 'Group Inputs' if is_group_node else 'Shader Inputs'
+        col1.label( text = display_label )
+        if input_node is not None:
+            for i, socket in enumerate(input_node.outputs):
+                draw_socket(col1, socket, i)
+        else:
+            row = col1.row(align=True)
+            display_text = 'Restore Group Input Node' if is_group_node else 'Add Shader Inputs'
+            row.operator('sort.node_socket_restore_group_input', text=display_text)
+
+        # root shader group doesn't have output
+        if is_group_node:
+            col2.label(text='Group Outputs:')
+            if output_node is not None:
+                for i, socket in enumerate(output_node.inputs):
+                    draw_socket(col2, socket, i)
+            else:
+                row = col2.row(align=True)
+                row.operator('sort.node_socket_restore_group_output', text='Restore Group Output Node')
