@@ -72,7 +72,7 @@ class SORTParticlePanel(bl_ui.properties_particle.ParticleButtonsPanel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "particle"
-    COMPAT_ENGINES = {'SORT_RENDERER'}
+    COMPAT_ENGINES = {'SORT'}
 
     @classmethod
     def poll(cls, context):

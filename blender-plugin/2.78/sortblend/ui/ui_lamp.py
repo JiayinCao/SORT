@@ -43,7 +43,7 @@ class SORTLampPanel(bl_ui.properties_data_lamp.DataButtonsPanel):
     bl_region_type = "WINDOW"
     bl_context = "data"
     sort_lamp_type = ''
-    COMPAT_ENGINES = {'SORT_RENDERER'}
+    COMPAT_ENGINES = {'SORT'}
     @classmethod
     def poll(cls, context):
         if cls.sort_lamp_type is '' :

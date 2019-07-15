@@ -15,6 +15,7 @@
 
 import bpy
 import nodeitems_utils
+import random
 import bpy.utils.previews
 from . import properties
 from .. import base
@@ -24,7 +25,7 @@ SORT_NODE_GROUP_PREFIX = 'SORTGroupName_'
 class SORTPatternNodeCategory(nodeitems_utils.NodeCategory):
     @classmethod
     def poll(cls, context):
-        return context.space_data.tree_type == SORTShaderNodeTree.bl_idname and context.scene.render.engine == 'SORT_RENDERER'
+        return context.space_data.tree_type == SORTShaderNodeTree.bl_idname and context.scene.render.engine == 'SORT'
 
 @base.register_class
 class SORTShaderNodeTree(bpy.types.NodeTree):
@@ -35,7 +36,7 @@ class SORTShaderNodeTree(bpy.types.NodeTree):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.render.engine == 'SORT_RENDERER'
+        return context.scene.render.engine == 'SORT'
 
     # Return a node tree from the context to be used in the editor
     @classmethod
@@ -119,27 +120,39 @@ class SORTShadingNode(bpy.types.Node):
     bl_icon = 'MATERIAL'
     osl_shader = ''
 
-    # register all properties in constructor
-    def init(self, context):
-        pass
-    # output nothing by default
+    # some material nodes depends on some heavy resources, this is the place for it to tell
     def populateResources( self , resources ):
         pass
     # generate open shading lanugage source code
     def generate_osl_source(self):
         return self.osl_shader
-    # empty implementation
+    # this function helps serializing the material information
     def serialize_prop(self,fs):
         fs.serialize(0)
-        pass
-    # to be deleted
-    def draw_props(self, context, layout, indented_label):
-        pass
     # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
     def type_identifier(self):
-        return self.bl_label
-    def export_pbrt(self,file):
-        file.write( "\"string type\" \"matte\"" )
+        return self.bl_idname
+    # whether the node is a group node
+    def isGroupNode(self):
+        return False
+    # whether the node is a group input
+    def isGroupInputNode(self):
+        return False
+    # whether the node is a group output
+    def isGroupOutputNode(self):
+        return False
+    # whether the node is a shader group input
+    def isShaderGroupInputNode(self):
+        return False
+    # get shader parameter name
+    def getShaderInputParameterName(self,param):
+        return param.replace( ' ' , '' )
+    def getShaderOutputParameterName(self,param):
+        return param.replace( ' ' , '' )
+    # get unique name
+    def getUniqueName(self):
+        return self.name + str( self.as_pointer() )
+
 #------------------------------------------------------------------------------------#
 #                                Misc Helper function                                #
 #------------------------------------------------------------------------------------#
@@ -454,6 +467,466 @@ class SORTNodeExposedInputs(SORTShadingNode):
         # this time it is for output default values, this is useless, but needed by OSL compiler
         for input in inputs:
             fs.serialize( input.export_osl_value() )
+
+
+#------------------------------------------------------------------------------------#
+#                                Group Node Operators                                #
+#------------------------------------------------------------------------------------#
+@base.register_class
+class SORT_Node_Group_Make_Operator(bpy.types.Operator):
+    bl_label = "Make Group"
+    bl_idname = "sort.node_group_make"
+
+    def execute(self, context):
+        # get all connected links
+        def get_links(tree):
+            def keys_sort(link):
+                return (socket_index(link.to_socket), link.from_node.location.y)
+            input_links = sorted([l for l in tree.links if (not l.from_node.select) and (l.to_node.select)], key=keys_sort)
+            output_links = sorted([l for l in tree.links if (l.from_node.select) and (not l.to_node.select)], key=keys_sort)
+            return dict(input=input_links, output=output_links)
+
+        # get average location of all nodes picked
+        def get_average_location(nodes):
+            x, y = 0, 0
+            for node in nodes:
+                x += node.location[0]
+                y += node.location[1]
+            d = 1.0 / len(nodes)
+            return x * d, y * d
+
+        # link nodes inside the group
+        def link_tree(tree, links):
+            nodes = tree.nodes
+            input_node = nodes.get("Group Inputs")
+            output_node = nodes.get("Group Outputs")
+            relink_in = []
+            relink_out = []
+
+            inputs_remap = {}
+            for index, l in enumerate(links['input']):
+                i = socket_index(l.to_socket)
+                to_socket = nodes[l.to_node.name].inputs[i]
+                if l.from_socket in inputs_remap:
+                    out_index = inputs_remap[l.from_socket]
+                    from_socket = input_node.outputs[out_index]
+                    tree.links.new(from_socket, to_socket)
+                else:
+                    inputs_remap[l.from_socket] = len(input_node.outputs) - 1
+                    tree.links.new(input_node.outputs[-1], to_socket)
+                relink_in.append((l.from_socket, inputs_remap[l.from_socket]))
+
+            outputs_map = {}
+            for index, l in enumerate(links['output']):
+                i = socket_index(l.from_socket)
+                from_socket = nodes[l.from_node.name].outputs[i]
+                if from_socket in outputs_map:
+                    index = outputs_map[from_socket]
+                    tree.links.new(from_socket, output_node.inputs[index])
+                else:
+                    outputs_map[from_socket] = len(output_node.inputs) - 1
+                    tree.links.new(from_socket, output_node.inputs[-1])
+                relink_out.append((outputs_map[from_socket], l.to_node.name, socket_index(l.to_socket)))
+
+            return relink_in, relink_out
+
+        # make a group
+        def group_make():
+            tree = bpy.data.node_groups.new('SORT Node Group', SORTShaderNodeTree.bl_idname)
+            tree.use_fake_user = True
+            nodes = tree.nodes
+
+            node_input = nodes.new('sort_shader_node_group_input')
+            node_input.location = (-300, 0)
+            node_input.selected = False
+            node_input.tree = tree
+
+            node_output = nodes.new('sort_shader_node_group_output')
+            node_output.location = (300, 0)
+            node_output.selected = False
+
+            return tree
+
+        # link all connections for parent node
+        def link_tree_instance(node, relinks):
+            tree = node.id_data
+            input_relink, output_relink = relinks
+            for socket, index in input_relink:
+                tree.links.new(socket, node.inputs[index])
+            for index, name, socket_index in output_relink:
+                tree.links.new(node.outputs[index], tree.nodes[name].inputs[socket_index])
+            
+        tree = context.space_data.edit_tree
+        for node in tree.nodes:
+            if node.isGroupInputNode() or node.isGroupOutputNode() or node.isShaderGroupInputNode():
+                node.select = False
+
+        nodes = [node for node in tree.nodes if node.select]
+        if not nodes:
+            self.report({"WARNING"}, "No nodes selected")
+            return {'CANCELLED'}
+
+        bpy.ops.node.clipboard_copy()
+        all_links = get_links(tree)
+        group = group_make()
+
+        # generate unique name
+        cls_name = SORT_NODE_GROUP_PREFIX + str(id(group) ^ random.randint(0, 4294967296))
+        group.sort_data.group_name_id = cls_name
+
+        path = context.space_data.path
+        path.append(group)
+
+        bpy.ops.node.clipboard_paste()
+
+        # calculate position for input & output nodes
+        input_location, output_loc = get_io_node_locations(nodes)
+
+        input_node = group.nodes.get("Group Inputs")
+        input_node.location = input_location
+        output_node = group.nodes.get("Group Outputs")
+        output_node.location = output_loc
+
+        relinks = link_tree(group, all_links)
+
+        # create class & register
+        cls_ref = update_cls(group)
+        parent_node = tree.nodes.new(cls_ref.bl_idname)
+        parent_node.select = False
+        parent_node.location = get_average_location(nodes)
+
+        for node in nodes:
+            tree.nodes.remove(node)
+
+        link_tree_instance(parent_node, relinks)
+        path.pop()
+        path.append(group, node=parent_node)
+        bpy.ops.node.view_all()
+        return { 'FINISHED' }
+
+@base.register_class
+class SORT_Node_Group_Ungroup_Operator(bpy.types.Operator):
+    bl_label = "Ungroup"
+    bl_idname = "sort.node_group_ungroup"
+
+    @classmethod
+    def poll(cls, context):
+        if context.scene.render.engine != 'SORT':
+            return False
+        group_node = context.active_node
+        if not group_node:
+            return False
+        return get_node_groups_by_id(group_node.bl_idname) != None
+
+    def execute(self, context):
+        # get the picked node by ID
+        def get_selected_node_by_idname(tree, name):
+            for node in tree.nodes:
+                if not node.select:
+                    continue
+                if node.bl_idname == name:
+                    return node
+            return None
+
+        # current group node
+        group_node = context.active_node
+
+        # copy data
+        bpy.ops.node.select_all(action='DESELECT')
+        tree = get_node_groups_by_id(group_node.bl_idname)
+        if not tree:
+            return {'CANCELLED'}
+        path = context.space_data.path
+        path.append(tree)
+        bpy.ops.node.select_all(action='SELECT')
+        bpy.ops.node.clipboard_copy()
+        path.pop()
+        bpy.ops.node.clipboard_paste()
+
+        current_tree = context.space_data.edit_tree
+        input_node = get_selected_node_by_idname(current_tree, 'sort_shader_node_group_input')
+        output_node = get_selected_node_by_idname(current_tree, 'sort_shader_node_group_output')
+        if not input_node or not output_node:
+            return {'CANCELLED'}
+
+        bpy.ops.node.select_all(action='DESELECT')
+
+        # relink input sockets
+        for socket, in_socket in zip(group_node.inputs, input_node.outputs):
+            if in_socket.is_linked and socket.is_linked:
+                from_socket = socket.links[0].from_socket
+                for link in in_socket.links:
+                    current_tree.links.new(from_socket, link.to_socket)
+
+        # relink output sockets
+        for out_socket, socket in zip(output_node.inputs, group_node.outputs):
+            if out_socket.is_linked and socket.is_linked:
+                from_socket = out_socket.links[0].from_socket
+                for link in socket.links:
+                    current_tree.links.new(from_socket, link.to_socket)
+
+        for node in (group_node, input_node, output_node):
+            current_tree.nodes.remove(node)
+
+        return {"FINISHED"}
+
+@base.register_class
+class SORT_Node_Group_Edit_Operator(bpy.types.Operator):
+    bl_label = "Edit"
+    bl_idname = "sort.node_group_edit"
+
+    from_shortcut = bpy.props.BoolProperty()
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.render.engine == 'SORT'
+
+    def execute(self, context):
+        ng = bpy.data.node_groups
+        node = context.active_node if self.from_shortcut else context.node
+        parent_tree = node.id_data
+        group_tree = get_node_groups_by_id(node.bl_idname)
+
+        path = context.space_data.path
+        space_data = context.space_data
+        if len(path) == 1:
+            path.start(parent_tree)
+            path.append(group_tree, node=node)
+        else:
+            path.append(group_tree, node=node)
+
+        return {"FINISHED"}
+        
+
+#------------------------------------------------------------------------------------#
+#                                  Shader Group Nodes                                #
+#------------------------------------------------------------------------------------#
+
+map_lookup = {'outputs': 'inputs', 'inputs': 'outputs'}
+class SORTNodeSocketConnectorHelper:
+    node_kind = bpy.props.StringProperty()
+
+    def update(self):
+        def get_socket_names(sockets):
+            socket_names = []
+            for socket in sockets:
+                socket_names.append( socket.name )
+            return socket_names
+        
+        def get_one_instance(tree):
+            for instance in instances(tree):
+                return instance
+            return None
+            
+        kind = self.node_kind
+        if not kind:
+            return
+
+        tree = self.id_data
+        if tree.bl_idname != SORTShaderNodeTree.bl_idname:
+            return
+
+        socket_list = getattr(self, kind)
+
+        if len(socket_list) == 0:
+            return
+
+        if socket_list[-1].is_linked:
+            socket = socket_list[-1]
+            cls = update_cls(tree)
+            socket_names = []
+            if kind == "outputs":
+                new_name, new_type = cls.input_template[-1]
+                instance = get_one_instance(tree)
+                if instance is not None:
+                    socket_names = get_socket_names( instance.inputs )
+            else:
+                new_name, new_type = cls.output_template[-1]
+                instance = get_one_instance(tree)
+                if instance is not None:
+                    socket_names = get_socket_names( instance.outputs )
+
+            # make sure the name is unique
+            new_name = getUniqueSocketName( socket_names , new_name )
+
+            new_socket = replace_socket(socket, new_type, new_name=new_name)
+
+            # update instances
+            for instance in instances(tree):
+                sockets = getattr(instance, map_lookup[kind])
+                new_socket = sockets.new(new_type, new_name)
+
+            socket_list.new('sort_dummy_socket', '')
+
+class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
+    bl_icon = 'OUTLINER_OB_EMPTY'
+    bl_width_min = 180
+
+    @classmethod
+    def poll(cls, context):
+        return bpy.context.scene.render.engine == 'SORT'
+
+    def isGroupNode(self):
+        return True
+
+    def draw_buttons(self, context, layout):
+        ng = get_node_groups_by_id(self.bl_idname)
+        if ng:
+            layout.prop(ng, 'name')
+        layout.operator('sort.node_group_edit', text='Edit')
+
+    def init(self, context):
+        tree = get_node_groups_by_id(self.bl_idname)
+        if not tree:
+            return
+
+        input_template = generate_inputs(tree)
+        for socket_name , socket_bl_idname in input_template:
+            input_socket = self.inputs.new(socket_bl_idname, socket_name)
+            input_socket.sort_label = input_socket.name
+
+        output_template = generate_outputs(tree)
+        for socket_name , socket_bl_idname in output_template:
+            output_socket = self.outputs.new(socket_bl_idname, socket_name)
+            output_socket.sort_label = output_socket.name
+
+    # get shader parameter name
+    def getShaderInputParameterName(self,param):
+        return 'i' + param.replace(' ', '')
+    def getShaderOutputParameterName(self,param):
+        return 'o' + param.replace(' ', '')
+
+    # this is just a proxy node
+    def generate_osl_source(self):
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color', 
+                               'SORTNodeSocketColor': 'color',
+                               'SORTNodeSocketFloat': 'float',
+                               'SORTNodeSocketFloatVector': 'vector',
+                               'SORTNodeSocketLargeFloat': 'float',
+                               'SORTNodeSocketAnyFloat': 'float',
+                               'SORTNodeSocketNormal': 'normal',
+                               'SORTNodeSocketUV': 'vector'}
+
+        inputs = self.inputs
+
+        osl_shader = 'shader PassThrough_GroupInput('
+        for i in range( 0 , len(inputs) ):
+            input = inputs[i]
+            input_type = socket_type_mapping[input.bl_idname]
+            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = @, \n'
+        for i in range( 0 , len(inputs) ):
+            output = inputs[i]
+            output_type = socket_type_mapping[output.bl_idname]
+            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = @'
+            if i < len(inputs) - 1 :
+                osl_shader += ',\n'
+            else:
+                osl_shader += '){\n'
+
+        for i in range( 0 , len(inputs) ):
+            var_name = inputs[i].name
+            osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
+        osl_shader += '}'
+        return osl_shader
+
+    # this function helps serializing the material information
+    def serialize_prop(self,fs):
+        inputs = self.inputs
+        fs.serialize(len(inputs)*2)
+        for input in inputs:
+            fs.serialize( input.export_osl_value() )
+        # this time it is for output default values, this is useless, but needed by OSL compiler
+        for input in inputs:
+            fs.serialize( input.export_osl_value() )
+
+    # get unique name, group node doesn't need to have instance even if it has, but the shaders are exactly the same
+    def getUniqueName(self):
+        return self.bl_idname + str( self.as_pointer() )
+
+@base.register_class
+class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
+    bl_idname = 'sort_shader_node_group_input'
+    bl_label = 'Group Inputs'
+    bl_icon = 'MATERIAL'
+    bl_width_min = 100
+
+    def init(self, context):
+        self.use_custom_color = True
+        self.color = (0.7, 0.72, 0.6)
+        self.outputs.new('sort_dummy_socket', '')
+        self.node_kind = 'outputs'
+
+    # whether the node is a group input
+    def isGroupInputNode(self):
+        return True
+    # get shader parameter name
+    def getShaderInputParameterName(self,param):
+        return 'i' + param.replace(' ', '')
+    def getShaderOutputParameterName(self,param):
+        return 'o' + param.replace(' ', '')
+
+@base.register_class
+class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
+    bl_idname = 'sort_shader_node_group_output'
+    bl_label = 'Group Outputs'
+    bl_icon = 'MATERIAL'
+    bl_width_min = 100
+
+    def init(self, context):
+        self.use_custom_color = True
+        self.color = (0.7, 0.72, 0.6)
+        self.inputs.new('sort_dummy_socket', '')
+        self.node_kind = 'inputs'
+    # whether the node is a group output
+    def isGroupOutputNode(self):
+        return True
+    # get shader parameter name
+    def getShaderInputParameterName(self,param):
+        return 'i' + param.replace(' ', '')
+    def getShaderOutputParameterName(self,param):
+        return 'o' + param.replace(' ', '')
+    
+    # this is just a proxy node
+    def generate_osl_source(self):
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color', 
+                               'SORTNodeSocketColor': 'color',
+                               'SORTNodeSocketFloat': 'float',
+                               'SORTNodeSocketFloatVector': 'vector',
+                               'SORTNodeSocketLargeFloat': 'float',
+                               'SORTNodeSocketAnyFloat': 'float',
+                               'SORTNodeSocketNormal': 'normal',
+                               'SORTNodeSocketUV': 'vector'}
+
+        inputs = self.inputs
+
+        last_input_id = -1
+        osl_shader = 'shader PassThrough_GroupInput('
+        for i in range( 0 , len(inputs) ):
+            input = inputs[i]
+            if input.isDummySocket():
+                continue
+            input_type = socket_type_mapping[input.bl_idname]
+            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = ' + input.export_osl_value() + ', \n'
+
+            last_input_id = i
+        for i in range( 0 , len(inputs) ):
+            output = inputs[i]
+            if output.isDummySocket():
+                continue
+            output_type = socket_type_mapping[output.bl_idname]
+            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = ' + output.export_osl_value() + ', \n'
+            if i != last_input_id:
+                osl_shader += ',\n'
+            else:
+                osl_shader += '){\n'
+
+        for i in range( 0 , len(inputs) ):
+            if inputs[i].isDummySocket():
+                continue
+            var_name = inputs[i].name
+            osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
+        osl_shader += '}'
+        return osl_shader
 
 #------------------------------------------------------------------------------------#
 #                                   BXDF Nodes                                       #

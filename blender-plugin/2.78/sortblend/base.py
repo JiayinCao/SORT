@@ -36,12 +36,12 @@ def unregister():
 
 def compatify_class(cls):
     def reg():
-        cls.COMPAT_ENGINES.add('SORT_RENDERER')
+        cls.COMPAT_ENGINES.add('SORT')
 
     def unreg():
-        cls.COMPAT_ENGINES.remove('SORT_RENDERER')
+        cls.COMPAT_ENGINES.remove('SORT')
 
-    cls.COMPAT_ENGINES.add('SORT_RENDERER')
+    cls.COMPAT_ENGINES.add('SORT')
     
     registrar(reg, unreg, cls.__name__)
     return cls

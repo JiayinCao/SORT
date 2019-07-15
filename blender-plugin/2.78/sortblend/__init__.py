@@ -36,6 +36,7 @@ from .ui import ui_lamp
 from .ui import ui_material
 from .ui import ui_particle
 from .ui import ui_space
+from .material import nodes
 
 class SORTAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = 'sortblend'
@@ -60,6 +61,8 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
 def register():
     addon_register()
     bpy.utils.register_module(__name__)
+
+    bpy.app.handlers.load_post.append(nodes.node_groups_load_post)
 
 def unregister():
     addon_unregister()

@@ -102,7 +102,7 @@ class SORT_Thread(TimerThread):
 class SORT_RENDERER(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
     # RenderEngine; define its internal name, visible name and capabilities.
-    bl_idname = 'SORT_RENDERER'
+    bl_idname = 'SORT'
     bl_label = 'SORT'
     bl_use_preview = False  # disable material preview until it works
 

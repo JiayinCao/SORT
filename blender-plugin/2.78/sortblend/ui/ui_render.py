@@ -46,7 +46,7 @@ class SORTRenderPanel:
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "render"
-    COMPAT_ENGINES = {'SORT_RENDERER'}
+    COMPAT_ENGINES = {'SORT'}
 
     @classmethod
     def poll(cls, context):
