@@ -28,6 +28,7 @@ from . import base
 from . import renderer
 from . import material
 from .ui import ui_render
+from .ui import ui_world
 #from .ui import ui_camera
 #from .ui import ui_light
 from .ui import ui_material

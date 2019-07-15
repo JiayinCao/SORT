@@ -883,6 +883,10 @@ class SORTNodeExposedInputs(SORTShadingNode):
     def isShaderGroupInputNode(self):
         return True
 
+    # need to expose this node every time it has an instance
+    def type_identifier(self):
+        return self.bl_idname + str( self.as_pointer() )
+
     def update(self):
         last_output = self.outputs[-1]
 

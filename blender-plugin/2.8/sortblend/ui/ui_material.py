@@ -106,6 +106,18 @@ class MATERIAL_PT_MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
 class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Parameters'
 
+    @classmethod
+    def poll(self, context):
+        material = context.material
+        if material is None:
+            return False
+
+        tree = material.sort_material
+        if tree is None:
+            return False
+        
+        return tree.nodes.get( "Shader Inputs" ) is not None
+
     def draw(self, context):
         material = context.material
         if material is None:

@@ -189,7 +189,7 @@ def export_scene(depsgraph, fs):
         if obj.type != 'MESH' or obj.is_modified(scene, 'RENDER'):
             try:
                 # create a temporary mesh
-                mesh = obj.to_mesh(depsgraph , True)
+                mesh = obj.to_mesh(depsgraph , preserve_all_data_layers = True)
                 # instead of exporting the original mesh, export the temporary mesh.
                 stat = export_mesh(mesh, fs)
             finally:
@@ -264,14 +264,12 @@ def export_scene(depsgraph, fs):
             elif lamp.shape == 'DISK':
                 fs.serialize(sizeX * 0.5)
             
-        elif lamp.type == 'HEMI':
-            light_spectrum = np.array(lamp.color[:])
-            light_spectrum *= lamp.energy
-
-            fs.serialize('SkyLightEntity')
-            fs.serialize(export_common.matrix_to_tuple(MatrixBlenderToSort() @ ob.matrix_world @ MatrixSortToBlender()))
-            fs.serialize(export_common.vec3_to_tuple(light_spectrum))
-            fs.serialize(bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ))
+    hdr_sky_image = scene.sort_hdr_sky.hdr_image
+    if hdr_sky_image != '':
+        fs.serialize('SkyLightEntity')
+        fs.serialize(export_common.matrix_to_tuple(MatrixBlenderToSort() @ MatrixSortToBlender()))
+        fs.serialize(( 1.0 , 1.0 , 1.0 ))
+        fs.serialize(bpy.path.abspath( hdr_sky_image.filepath ))
 
     # to indicate the scene stream comes to an end
     fs.serialize('')
@@ -556,7 +554,7 @@ def collect_shader_resources(scene, fs):
                 if shader_type not in shaders:
                     shaders[shader_type] = mat_node.generate_osl_source()
 
-        parent_node_stack = [(None,'')]
+        parent_node_stack = [None]
         serialize_prop(output_node, osl_shaders, parent_node_stack, False)
 
     fs.serialize( len( osl_shaders ) )
@@ -605,7 +603,6 @@ def export_materials(scene, fs):
         mat_nodes = []          # resulting nodes
         mat_connections = []    # connections between nodes
         visited = set()         # prevent a node to be serialized twice
-        node_parent_mapping = {}
         def collect_node_count(mat_node, visited, parent_node_stack, leaving_group = False):
             parent_node , accumulative_name = parent_node_stack.pop()
             parent_node_stack.append( ( parent_node , accumulative_name ) )
@@ -629,7 +626,6 @@ def export_materials(scene, fs):
                     input_shader_name = input_node.getUniqueName() + accumulative_name
                     if input_node.isGroupInputNode():
                         input_shader_name = parent_node.getUniqueName() + '_GI' + accumulative_name
-                        node_parent_mapping[input_node] = parent_node
                     elif input_node.isGroupNode():
                         input_shader_name = input_node.getUniqueName() + '_GO' + accumulative_name + input_node.name
 
