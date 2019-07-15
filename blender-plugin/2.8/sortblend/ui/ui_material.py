@@ -14,8 +14,8 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
+from .. import material
 from .. import base
-from ..material import nodes, group
 
 # Whether there is output node in the material node tree
 def has_sort_output_node(ntree):
@@ -47,7 +47,7 @@ class SORT_new_material_base(bpy.types.Operator):
         material = bpy.data.materials.new( 'Material' )
 
         # initialize default sort shader nodes
-        material.sort_material = bpy.data.node_groups.new( 'SORT_(' + material.name + ')' , type=nodes.SORTShaderNodeTree.bl_idname)
+        material.sort_material = bpy.data.node_groups.new( 'SORT_(' + material.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
 
         output = material.sort_material.nodes.new('SORTNodeOutput')
         default = material.sort_material.nodes.new('SORTNode_Material_Diffuse')
@@ -144,15 +144,15 @@ class SORT_OT_node_socket_base(bpy.types.Operator):
 
         if self.type == 'remove':
             io.remove(socket)
-            if group.is_sort_node_group(tree):
+            if material.is_sort_node_group(tree):
                 # update instances
-                for instance in group.instances(tree):
-                    sockets = getattr(instance, group.map_lookup[kind])
+                for instance in material.instances(tree):
+                    sockets = getattr(instance, material.map_lookup[kind])
                     sockets.remove(sockets[self.pos])
             else:
                 # update root shader inputs
                 shader_input_node = tree.nodes.get( 'Shader Inputs' )
-                sockets = getattr(shader_input_node, group.map_lookup[kind])
+                sockets = getattr(shader_input_node, material.map_lookup[kind])
                 sockets.remove(sockets[self.pos])
         else:
             step = -1 if self.type == 'up' else 1
@@ -164,19 +164,19 @@ class SORT_OT_node_socket_base(bpy.types.Operator):
             new_pos = calc_new_position(self.pos, step, count)
             io.move(self.pos, new_pos)
 
-            if group.is_sort_node_group(tree):
+            if material.is_sort_node_group(tree):
                 # update instances
-                for instance in group.instances(tree):
-                    sockets = getattr(instance, group.map_lookup[kind])
+                for instance in material.instances(tree):
+                    sockets = getattr(instance, material.map_lookup[kind])
                     new_pos = calc_new_position(self.pos, step, len(sockets))
                     sockets.move(self.pos, new_pos)
             else:
                 shader_input_node = tree.nodes.get( 'Shader Inputs' )
-                sockets = getattr(shader_input_node, group.map_lookup[kind])
+                sockets = getattr(shader_input_node, material.map_lookup[kind])
                 new_pos = calc_new_position(self.pos, step, len(sockets))
                 sockets.move(self.pos, new_pos)
 
-        group.update_cls(tree)
+        material.update_cls(tree)
         return {"FINISHED"}
 
 @base.register_class
@@ -216,15 +216,16 @@ class SORT_OT_node_socket_restore_input_node(bpy.types.Operator):
     bl_label = "Restore Group Input"
 
     def execute(self, context):
+        # get current edited tree
         tree = context.space_data.edit_tree
 
-        nodes = tree.nodes
-        if group.is_sort_node_group(tree):
-            node_input = nodes.new('sort_shader_node_group_input')    
-        else:
-            node_input = nodes.new('SORTNodeExposedInputs')
+        # get property location for placing the input node
+        loc , _ = material.get_io_node_locations( tree.nodes )
 
-        node_input.location = (-300, 0)
+        # create an input node and place it on the left of all nodes
+        node_type = 'sort_shader_node_group_input' if material.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
+        node_input = tree.nodes.new(node_type)    
+        node_input.location = loc
         node_input.selected = False
         node_input.tree = tree
 
@@ -258,7 +259,7 @@ class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
         tree = context.space_data.edit_tree
         if not tree:
             return False
-        return tree.bl_idname == nodes.SORTShaderNodeTree.bl_idname
+        return tree.bl_idname == material.SORTShaderNodeTree.bl_idname
 
     def draw(self, context):
         def set_attrs(cls, **kwargs):
@@ -266,7 +267,7 @@ class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
                 setattr(cls, name, value)
 
         tree = context.space_data.edit_tree
-        is_group_node = group.is_sort_node_group(tree)
+        is_group_node = material.is_sort_node_group(tree)
 
         layout = self.layout
         row = layout.row()
@@ -294,7 +295,7 @@ class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
         input_node = tree.nodes.get("Group Inputs")
         output_node = tree.nodes.get("Group Outputs")
 
-        if group.is_sort_node_group( tree ) is False:
+        if material.is_sort_node_group( tree ) is False:
             input_node = tree.nodes.get( 'Shader Inputs' )
             output_node = None
 

@@ -24,7 +24,6 @@ import struct
 from math import degrees
 from . import export_common
 from ..stream import stream
-from ..material import group
 
 def get_sort_dir():
     return_path = export_common.getPreference().install_path
