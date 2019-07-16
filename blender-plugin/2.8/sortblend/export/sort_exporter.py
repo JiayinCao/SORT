@@ -189,12 +189,12 @@ def export_scene(depsgraph, fs):
         if obj.type != 'MESH' or obj.is_modified(scene, 'RENDER'):
             try:
                 # create a temporary mesh
-                mesh = obj.to_mesh(depsgraph , True)
+                mesh = obj.to_mesh(preserve_all_data_layers = True, depsgraph = depsgraph)
                 # instead of exporting the original mesh, export the temporary mesh.
                 stat = export_mesh(mesh, fs)
             finally:
-                # delete the temporay mesh
-                bpy.data.meshes.remove(mesh)
+                # Unlike 2.7x, The result of 'to_mesh' is temporary and can not be used by objects from the main database
+                pass
         else:
             stat = export_mesh(obj.data, fs)
 
@@ -208,6 +208,7 @@ def export_scene(depsgraph, fs):
             fs.serialize( export_common.matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
             fs.serialize( len( obj.particle_systems ) )
             for ps in obj.particle_systems:
+                print( ps.name )
                 stat = export_hair( ps , obj , scene , fs )
                 total_vert_cnt += stat[0]
                 total_prim_cnt += stat[1]
@@ -312,6 +313,7 @@ def export_hair(ps, obj, scene, fs):
     num_children = len(ps.child_particles)
     hair_cnt = num_parents + num_children
     total_hair_segs = 0
+
     for pindex in range(hair_cnt):
         hair = []
         for step in range(0, steps + 1):
@@ -323,6 +325,9 @@ def export_hair(ps, obj, scene, fs):
                 vert_cnt += 1
             else:
                 break
+                
+        if len(hair) == 0:
+            continue
 
         assert len(hair) > 0
         verts += LENFMT.pack( len(hair) - 1 )
