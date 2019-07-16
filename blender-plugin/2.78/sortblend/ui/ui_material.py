@@ -104,7 +104,9 @@ class SORT_use_shading_nodes(bpy.types.Operator):
         nt.links.new(default.outputs[0], output.inputs[0])
         return {'FINISHED'}
 
-class SORT_new_material_base(bpy.types.Operator):
+class SORT_new_material(bpy.types.Operator):
+    """Add a new material"""
+    bl_idname = "sort_material.new"
     bl_label = "New"
 
     def execute(self, context):
@@ -115,7 +117,7 @@ class SORT_new_material_base(bpy.types.Operator):
         mat = bpy.data.materials.new( 'Material' )
 
         # initialize default sort shader nodes
-        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=nodes.SORTShaderNodeTree.bl_idname)
+        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
 
         output = mat.sort_material.nodes.new('SORTNodeOutput')
         default = mat.sort_material.nodes.new('SORTNode_Material_Diffuse')
@@ -134,13 +136,37 @@ class SORT_new_material_base(bpy.types.Operator):
 
         return { 'FINISHED' }
 
-class SORT_new_material(SORT_new_material_base):
-    """Add a new material"""
-    bl_idname = "sort_material.new"
-
-class SORT_new_material_menu(SORT_new_material_base):
+class SORT_new_material_menu(bpy.types.Operator):
     """Add a new material"""
     bl_idname = "node.new_node_tree"
+    bl_label = "New"
+
+    def execute(self, context):
+        # currently picked object
+        obj = bpy.context.object
+
+        # add the new material
+        mat = bpy.data.materials.new( 'Material' )
+
+        # initialize default sort shader nodes
+        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
+
+        output = mat.sort_material.nodes.new('SORTNodeOutput')
+        default = mat.sort_material.nodes.new('SORTNode_Material_Diffuse')
+        output.location[0] += 200
+        output.location[1] += 200
+        default.location[1] += 200
+        mat.sort_material.links.new(default.outputs[0], output.inputs[0])
+
+        # add a new material slot or assign the newly added material in the picked empty slot
+        materials = obj.data.materials
+        cur_mat_id = obj.active_material_index
+        if cur_mat_id >= 0 and cur_mat_id < len(materials) and materials[cur_mat_id] is None:
+            materials[cur_mat_id] = mat
+        else:
+            materials.append(mat)
+
+        return { 'FINISHED' }
 
 class SORT_OT_node_socket_base(bpy.types.Operator):
     """Move socket"""

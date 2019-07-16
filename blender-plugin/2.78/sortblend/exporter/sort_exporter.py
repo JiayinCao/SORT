@@ -124,6 +124,9 @@ def export_blender(scene, force_debug=False):
     exporter_common.log("Exported scene %.2f(s)" % (time.time() - current_time))
     current_time = time.time()
 
+    fs.flush()
+    del fs
+
 # clear old data and create new path
 def create_path(scene, force_debug):
     global intermediate_dir
@@ -239,14 +242,17 @@ def export_scene(scene, fs):
             light_spectrum *= lamp.energy
             sizeX = lamp.size
             sizeY = lamp.size_y
-            if lamp.shape == 'SQUARE':
-                sizeY = lamp.size
 
             fs.serialize('AreaLightEntity')
             fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
-            fs.serialize(sizeX)
-            fs.serialize(sizeY)
+
+            fs.serialize( lamp.shape )
+            if lamp.shape == 'SQUARE':
+                fs.serialize(sizeX)
+            elif lamp.shape == 'RECTANGLE':
+                fs.serialize(sizeX)
+                fs.serialize(sizeY)
         elif lamp.type == 'HEMI':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy

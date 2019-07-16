@@ -32,7 +32,12 @@ class FileStream(Stream):
 
     # Make sure we close the file
     def __del__(self):
+        self.file.flush()
         self.file.close()
+
+    # flush file content
+    def flush(self):
+        self.file.flush()
 
     # Serialize data
     def serialize(self,data):

@@ -111,6 +111,8 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
         rect->SetRadius(radius);
         rect->SetTransform(m_light->m_light2world);
         m_light->m_shape = std::move(rect);
+    }else{
+        slog( WARNING , LIGHT , "Area light type (%s) not supported" , area_type.c_str() );
     }
 }
 
