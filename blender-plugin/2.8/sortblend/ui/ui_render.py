@@ -151,7 +151,8 @@ class RENDER_PT_SamplerPanel(SORTRenderPanel, bpy.types.Panel):
 class SORT_export_debug_scene(bpy.types.Operator):
     bl_idname = "sort.export_debug_scene"
     bl_label = "Export SORT Scene"
-    def execute(self, depsgraph):
+    def execute(self, context):
+        depsgraph = context.depsgraph
         sort_exporter.export_blender(depsgraph,True)
         return {'FINISHED'}
 

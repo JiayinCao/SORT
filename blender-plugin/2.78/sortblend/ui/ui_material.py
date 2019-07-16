@@ -64,6 +64,25 @@ class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
             split.separator()
 
 @base.register_class
+class SORT_OT_use_sort_node(bpy.types.Operator):
+    """Use SORT Shader Node"""
+    bl_idname = "sort.use_sort_node"
+    bl_label = "Use SORT Shader Node"
+
+    def execute(self, context):
+        mat = context.material
+        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
+
+        output = mat.sort_material.nodes.new('SORTNodeOutput')
+        default = mat.sort_material.nodes.new('SORTNode_Material_Diffuse')
+        output.location[0] += 200
+        output.location[1] += 200
+        default.location[1] += 200
+        mat.sort_material.links.new(default.outputs[0], output.inputs[0])
+
+        return {"FINISHED"}
+
+@base.register_class
 class SORT_use_shading_nodes(bpy.types.Operator):
     """Enable nodes on a material, world or lamp"""
     bl_idname = "sort.use_shading_nodes"
@@ -317,9 +336,7 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
     @classmethod
     def poll(self, context):
         material = context.material
-        if material is None:
-            return False
-        return material.sort_material is not None and SORTMaterialPanel.poll(context)
+        return material is not None and SORTMaterialPanel.poll(context)
 
     def draw(self, context):
         mat = context.material
@@ -328,6 +345,7 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
 
         tree = mat.sort_material
         if tree is None:
+            self.layout.operator( 'sort.use_sort_node' , text='Use SORT Shader Node' )
             return
         
         is_group_node = material.is_sort_node_group(tree)

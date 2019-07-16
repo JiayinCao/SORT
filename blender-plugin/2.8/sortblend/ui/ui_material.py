@@ -17,15 +17,6 @@ import bpy
 from .. import material
 from .. import base
 
-# Whether there is output node in the material node tree
-def has_sort_output_node(ntree):
-    if ntree is None:
-        return False
-    for node in ntree.nodes:
-        if getattr(node, "bl_idname", None) == 'SORTNodeOutput':
-            return True
-    return False
-
 class SORTMaterialPanel:
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
@@ -103,6 +94,25 @@ class MATERIAL_PT_MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
             split.separator()
 
 @base.register_class
+class SORT_OT_use_sort_node(bpy.types.Operator):
+    """Use SORT Shader Node"""
+    bl_idname = "sort.use_sort_node"
+    bl_label = "Use SORT Shader Node"
+
+    def execute(self, context):
+        mat = context.material
+        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
+
+        output = mat.sort_material.nodes.new('SORTNodeOutput')
+        default = mat.sort_material.nodes.new('SORTNode_Material_Diffuse')
+        output.location[0] += 200
+        output.location[1] += 200
+        default.location[1] += 200
+        mat.sort_material.links.new(default.outputs[0], output.inputs[0])
+
+        return {"FINISHED"}
+
+@base.register_class
 class SORT_OT_node_socket_restore_shader_group_input(bpy.types.Operator):
     """Move socket"""
     bl_idname = "sort.node_socket_restore_shader_group_input"
@@ -123,37 +133,6 @@ class SORT_OT_node_socket_restore_shader_group_input(bpy.types.Operator):
         node_input.tree = tree
 
         return {"FINISHED"}
-
-@base.register_class
-class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
-    bl_label = 'Material Parameters'
-
-    @classmethod
-    def poll(self, context):
-        material = context.material
-        if material is None:
-            return False
-        return material.sort_material is not None and SORTMaterialPanel.poll(context)
-
-    def draw(self, context):
-        mat = context.material
-        if mat is None:
-            return
-
-        tree = mat.sort_material
-        if tree is None:
-            return
-        
-        is_group_node = material.is_sort_node_group(tree)
-        group_input_node = tree.nodes.get( "Shader Inputs" )
-        if group_input_node is None:
-            row = self.layout.row(align=True)
-            display_text = 'Restore Group Input Node' if is_group_node else 'Add Shader Inputs'
-            row.operator('sort.node_socket_restore_shader_group_input', text=display_text)
-            return
-        
-        for input in group_input_node.inputs:
-            self.layout.prop( input , 'default_value' , text = input.name )
 
 @base.register_class
 class SORT_OT_node_socket_base(bpy.types.Operator):
@@ -282,6 +261,35 @@ class SORT_OT_node_socket_restore_output_node(bpy.types.Operator):
         node_input.tree = tree
 
         return {"FINISHED"}
+
+@base.register_class
+class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
+    bl_label = 'Material Parameters'
+
+    @classmethod
+    def poll(self, context):
+        return context.material is not None and SORTMaterialPanel.poll(context)
+
+    def draw(self, context):
+        mat = context.material
+        if mat is None:
+            return
+
+        tree = mat.sort_material
+        if tree is None:
+            self.layout.operator( 'sort.use_sort_node' , text='Use SORT Shader Node' )
+            return
+        
+        is_group_node = material.is_sort_node_group(tree)
+        group_input_node = tree.nodes.get( "Shader Inputs" )
+        if group_input_node is None:
+            row = self.layout.row(align=True)
+            display_text = 'Restore Group Input Node' if is_group_node else 'Add Shader Inputs'
+            row.operator('sort.node_socket_restore_shader_group_input', text=display_text)
+            return
+        
+        for input in group_input_node.inputs:
+            self.layout.prop( input , 'default_value' , text = input.name )
 
 @base.register_class
 class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
