@@ -39,7 +39,13 @@ class SORT_PT_HairSettingPanel(bpy.types.Panel):
     COMPAT_ENGINES = {'SORT'}
     @classmethod
     def poll(cls, context):
-        return context.scene.render.engine in cls.COMPAT_ENGINES
+        psys = context.particle_system
+        engine = context.scene.render.engine
+        if psys is None:
+            return False
+        if psys.settings is None:
+            return False
+        return psys.settings.type == 'HAIR' and (engine in cls.COMPAT_ENGINES)
 
     def draw(self, context):
         hair = context.particle_settings.sort_hair

@@ -188,13 +188,13 @@ def export_scene(depsgraph, fs):
         # apply the modifier if there is one
         if obj.type != 'MESH' or obj.is_modified(scene, 'RENDER'):
             try:
-                # create a temporary mesh
-                mesh = obj.to_mesh(preserve_all_data_layers = True, depsgraph = depsgraph)
+                evaluted_obj = obj.evaluated_get(depsgraph)
+                mesh = evaluted_obj.to_mesh()
                 # instead of exporting the original mesh, export the temporary mesh.
                 stat = export_mesh(mesh, fs)
             finally:
                 # Unlike 2.7x, The result of 'to_mesh' is temporary and can not be used by objects from the main database
-                pass
+                evaluted_obj.to_mesh_clear()
         else:
             stat = export_mesh(obj.data, fs)
 
