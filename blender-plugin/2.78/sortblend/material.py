@@ -253,6 +253,7 @@ class SORTNodeSocket(SORTNodeProperty):
         return False
 
 # Socket for BXDF or Materials
+@base.register_class
 class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketBxdf'
     bl_label = 'SORT Shader Socket'
@@ -269,6 +270,7 @@ class SORTNodeSocketBxdf(bpy.types.NodeSocketShader, SORTNodeSocket):
         return 'bxdf'
 
 # Socket for Color
+@base.register_class
 class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketColor'
     bl_label = 'SORT Color Socket'
@@ -281,6 +283,7 @@ class SORTNodeSocketColor(bpy.types.NodeSocketColor, SORTNodeSocket):
         return 'vector3'
 
 # Socket for Float
+@base.register_class
 class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketFloat'
     bl_label = 'SORT Float Socket'
@@ -293,6 +296,7 @@ class SORTNodeSocketFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'float'
 
 # Socket for Float Vector
+@base.register_class
 class SORTNodeSocketFloatVector(bpy.types.NodeSocketFloat, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketFloatVector'
     bl_label = 'SORT Float Vector Socket'
@@ -305,6 +309,7 @@ class SORTNodeSocketFloatVector(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'vector3'
 
 # Socket for Positive Float
+@base.register_class
 class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketLargeFloat'
     bl_label = 'SORT Float Socket'
@@ -317,6 +322,7 @@ class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'float'
 
 # Socket for Any Float
+@base.register_class
 class SORTNodeSocketAnyFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketAnyFloat'
     bl_label = 'SORT Float Socket'
@@ -329,6 +335,7 @@ class SORTNodeSocketAnyFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'float'
 
 # Socket for normal ( normal map )
+@base.register_class
 class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketNormal'
     bl_label = 'SORT Normal Socket'
@@ -348,6 +355,7 @@ class SORTNodeSocketNormal(bpy.types.NodeSocketVector, SORTNodeSocket):
         return 'vector3'
 
 # Socket for UV Mapping
+@base.register_class
 class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
     bl_idname = 'SORTNodeSocketUV'
     bl_label = 'SORT UV Mapping'
@@ -368,6 +376,7 @@ class SORTNodeSocketUV(bpy.types.NodeSocketFloat, SORTNodeSocket):
         return 'vector3'
 
 # dummy socket used in shader group inputs/outputs
+@base.register_class
 class SORTDummySocket(bpy.types.NodeSocket, SORTNodeSocket):
     bl_idname = "sort_dummy_socket"
     bl_label = "SPRT Dummy Socket"

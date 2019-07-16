@@ -15,28 +15,18 @@
 
 import bpy
 import bl_ui
-from .. import SORTAddon
-from extensions_framework import declarative_property_group
+from .. import base
 
 # attach customized properties in lamp
-@SORTAddon.addon_register_class
-class sort_lamp(declarative_property_group):
-    ef_attach_to = ['Lamp']
-    controls = []
-    visibility = {}
-    properties = []
-
-@SORTAddon.addon_register_class
-class sort_lamp_hemi(declarative_property_group):
-    ef_attach_to = ['sort_lamp']
-    controls = []
-    properties = [{ 'type': 'string',
-                    'subtype': 'FILE_PATH',
-                    'attr': 'envmap_file',
-                    'name': 'HDRI Map',
-                    'description': 'EXR image to use for lighting (in latitude-longitude format)',
-                    'default': '',
-                    'save_in_preset': True }]
+@base.register_class
+class SORTLampData(bpy.types.PropertyGroup):
+    hdr_sky_image = bpy.props.StringProperty( name='HDR Sky File', default='', subtype='FILE_PATH')
+    @classmethod
+    def register(cls):
+        bpy.types.Lamp.sort_data = bpy.props.PointerProperty(name="SORT Data", type=cls)
+    @classmethod
+    def unregister(cls):
+        del bpy.types.Lamp.sort_data
 
 class SORTLampPanel(bl_ui.properties_data_lamp.DataButtonsPanel):
     bl_space_type = "PROPERTIES"
@@ -50,6 +40,7 @@ class SORTLampPanel(bl_ui.properties_data_lamp.DataButtonsPanel):
             return super().poll(context) and context.scene.render.engine in cls.COMPAT_ENGINES
         return super().poll(context) and context.lamp.type == cls.sort_lamp_type and context.scene.render.engine in cls.COMPAT_ENGINES
 
+@base.register_class
 class LampPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Property'
     def draw(self, context):
@@ -59,12 +50,14 @@ class LampPanel(SORTLampPanel, bpy.types.Panel):
             self.layout.prop(lamp, "color")
             self.layout.prop(lamp, "energy")
 
+@base.register_class
 class LampHemiPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Hemi Property'
     sort_lamp_type = 'HEMI'
     def draw(self, context):
-        self.layout.prop(context.lamp.sort_lamp.sort_lamp_hemi, "envmap_file", text="HDRI file")
+        self.layout.prop(context.lamp.sort_data, "hdr_sky_image", text="HDRI file")
 
+@base.register_class
 class LampAreaPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Area Property'
     sort_lamp_type = 'AREA'
@@ -81,6 +74,7 @@ class LampAreaPanel(SORTLampPanel, bpy.types.Panel):
             sub.prop(lamp, "size", text="Size X")
             sub.prop(lamp, "size_y", text="Size Y")
 
+@base.register_class
 class LampSpotPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Spot Property'
     sort_lamp_type = 'SPOT'

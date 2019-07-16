@@ -28,18 +28,7 @@ class SORTMaterialPanel:
     def poll(cls, context):
         return context.scene.render.engine in cls.COMPAT_ENGINES
 
-class SORTMaterialPreview(SORTMaterialPanel, bpy.types.Panel):
-    bl_label = "Preview"
-    bl_context = "material"
-    bl_options = {'DEFAULT_CLOSED'}
-
-    @classmethod
-    def poll(cls, context):
-        return context.material and SORTMaterialPanel.poll(context)
-
-    def draw(self, context):
-        self.layout.template_preview(context.material)
-
+@base.register_class
 class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Slot'
 
@@ -74,6 +63,7 @@ class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
             split.template_ID(space, "pin_id")
             split.separator()
 
+@base.register_class
 class SORT_use_shading_nodes(bpy.types.Operator):
     """Enable nodes on a material, world or lamp"""
     bl_idname = "sort.use_shading_nodes"
@@ -104,6 +94,7 @@ class SORT_use_shading_nodes(bpy.types.Operator):
         nt.links.new(default.outputs[0], output.inputs[0])
         return {'FINISHED'}
 
+@base.register_class
 class SORT_new_material(bpy.types.Operator):
     """Add a new material"""
     bl_idname = "sort_material.new"
@@ -136,6 +127,7 @@ class SORT_new_material(bpy.types.Operator):
 
         return { 'FINISHED' }
 
+@base.register_class
 class SORT_new_material_menu(bpy.types.Operator):
     """Add a new material"""
     bl_idname = "node.new_node_tree"
@@ -168,6 +160,7 @@ class SORT_new_material_menu(bpy.types.Operator):
 
         return { 'FINISHED' }
 
+@base.register_class
 class SORT_OT_node_socket_base(bpy.types.Operator):
     """Move socket"""
     bl_idname = "sort.node_socket_base"
@@ -317,6 +310,7 @@ class SORT_OT_node_socket_restore_shader_group_input(bpy.types.Operator):
 
         return {"FINISHED"}
 
+@base.register_class
 class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Parameters'
 
@@ -347,6 +341,7 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
         for input in group_input_node.inputs:
             self.layout.prop( input , 'default_value' , text = input.name )
 
+@base.register_class
 class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
     bl_label = "SORT In/Out Group Editor"
     bl_space_type = 'NODE_EDITOR'

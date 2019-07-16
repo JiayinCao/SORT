@@ -15,8 +15,6 @@
 
 import bpy
 import bl_ui
-from .. import SORTAddon
-from extensions_framework import declarative_property_group
 from .. import base
 from bl_ui import properties_particle
 
@@ -36,37 +34,16 @@ base.compatify_class(properties_particle.PARTICLE_PT_velocity)
 base.compatify_class(properties_particle.PARTICLE_PT_vertexgroups)
 
 # attach customized properties in particles
-@SORTAddon.addon_register_class
-class sort_particle(declarative_property_group):
-    ef_attach_to = ['ParticleSettings']
-    controls = []
-    visibility = {}
-    properties = []
-
-@SORTAddon.addon_register_class
-class sort_particle_width(declarative_property_group):
-    ef_attach_to = ['sort_particle']
-    controls = []
-    properties = [{ 'type': 'float',
-                    'attr': 'width_tip',
-                    'name': 'Width of hair (tip)',
-                    'description': 'Width at the tip of hair',
-                    'default': 0.00,
-                    'min': 0.0,
-                    'soft_min': 0.0,
-                    'max': 1e3,
-                    'soft_max': 1e3,
-                    'save_in_preset': True },
-                    { 'type': 'float',
-                    'attr': 'width_bottom',
-                    'name': 'Width of hair (bottom)',
-                    'description': 'Width at the bottom of hair',
-                    'default': 0.01,
-                    'min': 0.0,
-                    'soft_min': 0.0,
-                    'max': 1e3,
-                    'soft_max': 1e3,
-                    'save_in_preset': True }]
+@base.register_class
+class SORTParticleData(bpy.types.PropertyGroup):
+    fur_tip = bpy.props.FloatProperty( name='Fur Tip', default=0.0)
+    fur_bottom = bpy.props.FloatProperty( name='Fur Bottom', default=0.01)
+    @classmethod
+    def register(cls):
+        bpy.types.ParticleSettings.sort_data = bpy.props.PointerProperty(name="SORT Data", type=cls)
+    @classmethod
+    def unregister(cls):
+        del bpy.types.ParticleSettings.sort_data
 
 class SORTParticlePanel(bl_ui.properties_particle.ParticleButtonsPanel):
     bl_space_type = "PROPERTIES"
@@ -84,10 +61,12 @@ class SORTParticlePanel(bl_ui.properties_particle.ParticleButtonsPanel):
             return False
         return psys.settings.type == 'HAIR' and (engine in cls.COMPAT_ENGINES)
 
+@base.register_class
 class HairPanel(SORTParticlePanel, bpy.types.Panel):
     bl_label = 'SORT Hair Property'
     def draw(self, context):
         layout = self.layout
         ps = context.particle_settings
-        layout.prop(ps.sort_particle.sort_particle_width, "width_tip")
-        layout.prop(ps.sort_particle.sort_particle_width, "width_bottom")
+        print( type( ps ) )
+        layout.prop(ps.sort_data, "fur_tip")
+        layout.prop(ps.sort_data, "fur_bottom")

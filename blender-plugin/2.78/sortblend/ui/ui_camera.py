@@ -15,38 +15,23 @@
 
 import bpy
 import bl_ui
-from .. import SORTAddon
 from .. import base
 from bl_ui import properties_data_camera
-from extensions_framework import declarative_property_group
 
 base.compatify_class(properties_data_camera.DATA_PT_lens)
 base.compatify_class(properties_data_camera.DATA_PT_camera)
 
-# attach customized properties in camera
-@SORTAddon.addon_register_class
-class sort_camera(declarative_property_group):
-    ef_attach_to = ['Camera']
-    controls = []
-    visibility = {}
-    properties = []
+@base.register_class
+class SORTCameraData(bpy.types.PropertyGroup):
+    sort_camera_lens = bpy.props.FloatProperty( name='Camera Lens', default=0.0)
+    @classmethod
+    def register(cls):
+        bpy.types.Camera.sort_data = bpy.props.PointerProperty(name="SORT Data", type=cls)
+    @classmethod
+    def unregister(cls):
+        del bpy.types.Camera.sort_data
 
-@SORTAddon.addon_register_class
-class sort_camera_lens(declarative_property_group):
-    ef_attach_to = ['sort_camera']
-    controls = []
-    properties = [{ 'type': 'float',
-                    'attr': 'lens_size',
-                    'name': 'Size of Camera Lens',
-                    'description': 'The size of lens in camera',
-                    'default': 0.0,
-                    'min': 0.0,
-                    'soft_min': 0.0,
-                    'max': 1e3,
-                    'soft_max': 1e3,
-                    'save_in_preset': True }]
-
-class SORTCameraPanel(bl_ui.properties_data_camera.CameraButtonsPanel):
+class SORTCameraPanel(properties_data_camera.CameraButtonsPanel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "data"
@@ -56,6 +41,7 @@ class SORTCameraPanel(bl_ui.properties_data_camera.CameraButtonsPanel):
         rd = context.scene.render
         return super().poll(context) and rd.engine in cls.COMPAT_ENGINES
 
+@base.register_class
 class CameraDOFPanel(SORTCameraPanel, bpy.types.Panel):
     bl_label = 'Camera Depth of Field'
     def draw(self, context):
@@ -65,4 +51,4 @@ class CameraDOFPanel(SORTCameraPanel, bpy.types.Panel):
         row = layout.row()
         row.active = ( camera.dof_object == None )
         row.prop(camera, "dof_distance")
-        layout.prop(camera.sort_camera.sort_camera_lens, "lens_size")
+        layout.prop(camera.sort_data, "sort_camera_lens")

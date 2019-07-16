@@ -52,6 +52,7 @@ class SORTRenderPanel:
     def poll(cls, context):
         return context.scene.render.engine in cls.COMPAT_ENGINES
 
+@base.register_class
 class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
     bl_label = 'Renderer'
 
@@ -94,6 +95,7 @@ class IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
             self.layout.prop(context.scene,"ir_light_path_num")
             self.layout.prop(context.scene, "ir_min_dist")
 
+@base.register_class
 class AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
     bl_label = 'Accelerator'
 
@@ -130,12 +132,14 @@ class AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
             self.layout.prop(context.scene,"octree_max_node_depth")
             self.layout.prop(context.scene,"octree_max_pri_in_leaf")
 
+@base.register_class
 class MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'MultiThread'
     bpy.types.Scene.thread_num_prop = bpy.props.IntProperty(name='Thread Num', default=8, min=1, max=16)
     def draw(self, context):
         self.layout.prop(context.scene,"thread_num_prop")
 
+@base.register_class
 class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'Sample'
     #sampler_types = [ ("stratified", "Stratified", "", 3), ("random", "Random", "", 2), ("regular", "Uniform", "", 1) ]
@@ -145,6 +149,7 @@ class SamplerPanel(SORTRenderPanel, bpy.types.Panel):
         #self.layout.prop(context.scene,"sampler_type_prop")
         self.layout.prop(context.scene,"sampler_count_prop")
 
+@base.register_class
 class SORT_export_debug_scene(bpy.types.Operator):
     bl_idname = "sort.export_debug_scene"
     bl_label = "Export SORT Scene"
@@ -152,6 +157,7 @@ class SORT_export_debug_scene(bpy.types.Operator):
         sort_exporter.export_blender(context.scene,True)
         return {'FINISHED'}
 
+@base.register_class
 class SORT_open_log(bpy.types.Operator):
     bl_idname = "sort.open_log"
     bl_label = "Open Log"
@@ -160,6 +166,7 @@ class SORT_open_log(bpy.types.Operator):
         OpenFile( logfile )
         return {'FINISHED'}
 
+@base.register_class
 class SORT_openfolder(bpy.types.Operator):
     bl_idname = "sort.openfolder_sort"
     bl_label = "Open SORT folder"
@@ -167,6 +174,7 @@ class SORT_openfolder(bpy.types.Operator):
         OpenFolder( sort_exporter.get_sort_dir() )
         return {'FINISHED'}
 
+@base.register_class
 class DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'DebugPanel'
     bpy.types.Scene.detailedLog = bpy.props.BoolProperty(name='Output Detailed Output',default=False,description='Whether outputing detail log information in blender plugin.')
@@ -223,7 +231,6 @@ class PBRT_export_scene(bpy.types.Operator):
             pbrt_exporter.shutdown_pbrt()
             return {'CANCELLED'}
         return {'RUNNING_MODAL'}
-
 
 class PBRT_checkresult(bpy.types.Operator):
     bl_idname = "sort.checkresult_pbrt"

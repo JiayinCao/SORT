@@ -14,38 +14,34 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
-import bpy_types
+
+def register_class(cls):
+    registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)
+    return cls
 
 REGISTRARS = []
-
 def registrar(register, unregister, name=None):
     global REGISTRARS
     if name is None or not [True for _, _, n in REGISTRARS if n == name]:
         REGISTRARS.append((register, unregister, name))
 
-# somehow this will cause class registered twice, ignoring it
 def register():
-	#for r, _, n in REGISTRARS:
-    #	r()
-    pass
+    for r, _, n in REGISTRARS:
+        #print( 'register ' + n )
+        r()
 
 def unregister():
-    for _, u, n in REGISTRARS:
-        print('Unregister ' + n )
+    for _, u, _ in reversed(REGISTRARS):
         u()
+
+def register_class(cls):
+    registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)
+    return cls
 
 def compatify_class(cls):
     def reg():
         cls.COMPAT_ENGINES.add('SORT')
-
     def unreg():
         cls.COMPAT_ENGINES.remove('SORT')
-
-    cls.COMPAT_ENGINES.add('SORT')
-    
     registrar(reg, unreg, cls.__name__)
-    return cls
-
-def register_class(cls):
-    registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)
     return cls

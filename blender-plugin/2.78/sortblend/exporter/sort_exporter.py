@@ -164,7 +164,7 @@ def export_scene(scene, fs):
     fs.serialize(exporter_common.vec3_to_tuple(pos))
     fs.serialize(exporter_common.vec3_to_tuple(up))
     fs.serialize(exporter_common.vec3_to_tuple(target))
-    fs.serialize(camera.data.sort_camera.sort_camera_lens.lens_size)
+    fs.serialize(camera.data.sort_data.sort_camera_lens)
     fs.serialize((sensor_w,sensor_h))
     fs.serialize(int(sensor_fit))
     fs.serialize((aspect_ratio_x,aspect_ratio_y))
@@ -260,7 +260,7 @@ def export_scene(scene, fs):
             fs.serialize('SkyLightEntity')
             fs.serialize(exporter_common.matrix_to_tuple(MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender()))
             fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
-            fs.serialize(bpy.path.abspath( lamp.sort_lamp.sort_lamp_hemi.envmap_file ))
+            fs.serialize(bpy.path.abspath( lamp.sort_data.hdr_sky_image ))
 
     # to indicate the scene stream comes to an end
     fs.serialize('')
@@ -282,8 +282,8 @@ def export_hair(ps, obj, scene, fs):
     
     vert_cnt = 0
     render_step = ps.settings.render_step
-    width_tip = ps.settings.sort_particle.sort_particle_width.width_tip
-    width_bottom = ps.settings.sort_particle.sort_particle_width.width_bottom
+    width_tip = ps.settings.sort_data.fur_tip
+    width_bottom = ps.settings.sort_data.fur_bottom
 
     # extract the material of the hair
     mat_local_index = ps.settings.material
