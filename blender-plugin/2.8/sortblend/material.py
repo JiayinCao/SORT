@@ -830,6 +830,7 @@ class SORT_Node_Group_Ungroup_Operator(bpy.types.Operator):
 
 @base.register_class
 class SORT_Node_Group_Edit_Operator(bpy.types.Operator):
+    '''Edit the group'''
     bl_label = "Edit"
     bl_idname = "sort.node_group_edit"
 
@@ -1036,9 +1037,11 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
 
     def draw_buttons(self, context, layout):
         ng = get_node_groups_by_id(self.bl_idname)
-        if ng:
-            layout.prop(ng, 'name')
-        layout.operator('sort.node_group_edit', text='Edit')
+        assert( ng is not None )
+
+        row = layout.row()
+        row.prop(ng, 'name', text='')
+        row.operator('sort.node_group_edit', text='', icon= 'GROUP')
 
     def init(self, context):
         tree = get_node_groups_by_id(self.bl_idname)
