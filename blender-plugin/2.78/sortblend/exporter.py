@@ -19,15 +19,43 @@ import mathutils
 import numpy as np
 import platform
 import tempfile
-import time
 import struct
+from .log import log, logD
+from .stream import stream
 from math import degrees
-from . import exporter_common
-from ..stream import stream
+from time import time
 from extensions_framework import util as efutil
 
+# list all objects in the scene
+def renderable_objects(scene):
+    def is_renderable(scene, ob):
+        # whether the object is hidden
+        def is_visible_layer(scene, ob):
+            for i in range(len(scene.layers)):
+                if scene.layers[i] == True and ob.layers[i] == True:
+                    return True
+            return False
+        return (is_visible_layer(scene, ob) and not ob.hide_render)
+    return [ob for ob in scene.objects if is_renderable(scene, ob)]
+
+# get the list of material for the whole scene
+def getMaterialList( scene ):
+    exported_materials = []
+    all_nodes = renderable_objects(scene)
+    for ob in all_nodes:
+        if ob.type == 'MESH':
+            for material in ob.data.materials[:]:
+                # make sure it is a SORT material
+                if material and material.sort_material:
+                    # skip if the material is already exported
+                    if exported_materials.count( material ) != 0:
+                        continue
+                    exported_materials.append( material )
+    return exported_materials
+
 def get_sort_dir():
-    return_path = exporter_common.getPreference().install_path
+    preferences = bpy.context.user_preferences.addons['sortblend'].preferences
+    return_path = preferences.install_path
     if platform.system() == 'Windows':
         return return_path
     return efutil.filesystem_path(return_path) + "/"
@@ -94,35 +122,33 @@ def lookAtSORT(camera):
 
 # export blender information
 def export_blender(scene, force_debug=False):
-    exporter_common.setScene(scene)
-
     # create immediate file path
     sort_resource_path = create_path(scene, force_debug)
 
     sort_config_file = sort_resource_path + 'scene.sort'
     fs = stream.FileStream( sort_config_file )
 
-    exporter_common.log("Exporting sort file %s" % sort_config_file)
+    log("Exporting sort file %s" % sort_config_file)
 
     # export global material settings
-    current_time = time.time()
-    exporter_common.log("Exporting global configuration.")
+    current_time = time()
+    log("Exporting global configuration.")
     export_global_config(scene, fs, sort_resource_path)
-    exporter_common.log("Exported configuration %.2f" % (time.time() - current_time))
-    current_time = time.time()
+    log("Exported configuration %.2f" % (time() - current_time))
+    current_time = time()
 
     # export material
-    exporter_common.log("Exporting materials.")
+    log("Exporting materials.")
     collect_shader_resources(scene, fs)
     export_materials(scene, fs)
-    exporter_common.log("Exported materials %.2f(s)" % (time.time() - current_time))
-    current_time = time.time()
+    log("Exported materials %.2f(s)" % (time() - current_time))
+    current_time = time()
 
     # export scene
-    exporter_common.log("Exporting scene.")
+    log("Exporting scene.")
     export_scene(scene, fs)
-    exporter_common.log("Exported scene %.2f(s)" % (time.time() - current_time))
-    current_time = time.time()
+    log("Exported scene %.2f(s)" % (time() - current_time))
+    current_time = time()
 
     fs.flush()
     del fs
@@ -141,10 +167,43 @@ def create_path(scene, force_debug):
 
 # export scene
 def export_scene(scene, fs):
+    # get the main camera
+    def getCamera(scene):
+        camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
+        if camera is None:
+            print("Camera not found.")
+            return
+        return camera
+
+    # get the list of lights in the scene
+    def getLightList( scene ):
+        exported_lights = []
+        all_nodes = renderable_objects(scene)
+        for ob in all_nodes:
+            if ob.type == 'LAMP':
+                exported_lights.append( ob )
+        return exported_lights
+
+    # get the list of lights in the scene
+    def getMeshList( scene ):
+        exported_meshes = []
+        all_nodes = renderable_objects(scene)
+        for ob in all_nodes:
+            if ob.type == 'MESH':
+                exported_meshes.append( ob )
+        return exported_meshes
+        
+    # helper function to convert a matrix to a tuple
+    def matrix_to_tuple(matrix):
+        return (matrix[0][0],matrix[0][1],matrix[0][2],matrix[0][3],matrix[1][0],matrix[1][1],matrix[1][2],matrix[1][3],matrix[2][0],matrix[2][1],matrix[2][2],matrix[2][3],matrix[3][0],matrix[3][1],matrix[3][2],matrix[3][3])
+    # helper function to convert a vector to a tuple
+    def vec3_to_tuple(vec):
+        return (vec[0],vec[1],vec[2])
+
     fs.serialize( int(1234567) )
 
     # camera node
-    camera = exporter_common.getCamera(scene)
+    camera = getCamera(scene)
     pos, target, up = lookAtSORT(camera)
     sensor_w = bpy.data.cameras[0].sensor_width
     sensor_h = bpy.data.cameras[0].sensor_height
@@ -161,9 +220,9 @@ def export_scene(scene, fs):
     camera_shift_y = bpy.data.cameras[0].shift_y
 
     fs.serialize('PerspectiveCameraEntity')
-    fs.serialize(exporter_common.vec3_to_tuple(pos))
-    fs.serialize(exporter_common.vec3_to_tuple(up))
-    fs.serialize(exporter_common.vec3_to_tuple(target))
+    fs.serialize(vec3_to_tuple(pos))
+    fs.serialize(vec3_to_tuple(up))
+    fs.serialize(vec3_to_tuple(target))
     fs.serialize(camera.data.sort_data.sort_camera_lens)
     fs.serialize((sensor_w,sensor_h))
     fs.serialize(int(sensor_fit))
@@ -172,9 +231,9 @@ def export_scene(scene, fs):
 
     total_vert_cnt = 0
     total_prim_cnt = 0
-    for obj in exporter_common.getMeshList(scene):
+    for obj in getMeshList(scene):
         fs.serialize('VisualEntity')
-        fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
+        fs.serialize( matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
         fs.serialize( 1 )   # only one mesh for each mesh entity
         stat = None
         # apply the modifier if there is one
@@ -193,20 +252,20 @@ def export_scene(scene, fs):
         total_vert_cnt += stat[0]
         total_prim_cnt += stat[1]
 
-    for obj in exporter_common.getMeshList(scene):
+    for obj in getMeshList(scene):
         # output hair/fur information
         if len( obj.particle_systems ) > 0:
             fs.serialize('VisualEntity')
-            fs.serialize( exporter_common.matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
+            fs.serialize( matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
             fs.serialize( len( obj.particle_systems ) )
             for ps in obj.particle_systems:
                 stat = export_hair( ps , obj , scene , fs )
                 total_vert_cnt += stat[0]
                 total_prim_cnt += stat[1]
-    exporter_common.log( "Total vertices: %d." % total_vert_cnt )
-    exporter_common.log( "Total primitives: %d." % total_prim_cnt )
+    log( "Total vertices: %d." % total_vert_cnt )
+    log( "Total primitives: %d." % total_prim_cnt )
 
-    for ob in exporter_common.getLightList(scene):
+    for ob in getLightList(scene):
         lamp = ob.data
         # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
@@ -217,15 +276,15 @@ def export_scene(scene, fs):
             light_spectrum *= lamp.energy
 
             fs.serialize('DirLightEntity')
-            fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
-            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(matrix_to_tuple(world_matrix))
+            fs.serialize(vec3_to_tuple(light_spectrum))
         elif lamp.type == 'POINT':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
 
             fs.serialize('PointLightEntity')
-            fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
-            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(matrix_to_tuple(world_matrix))
+            fs.serialize(vec3_to_tuple(light_spectrum))
         elif lamp.type == 'SPOT':
             light_spectrum = np.array(lamp.color[:])
             light_spectrum *= lamp.energy
@@ -233,8 +292,8 @@ def export_scene(scene, fs):
             falloff_range = degrees(lamp.spot_size*0.5)
 
             fs.serialize('SpotLightEntity')
-            fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
-            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(matrix_to_tuple(world_matrix))
+            fs.serialize(vec3_to_tuple(light_spectrum))
             fs.serialize(falloff_start)
             fs.serialize(falloff_range)
         elif lamp.type == 'AREA':
@@ -244,8 +303,8 @@ def export_scene(scene, fs):
             sizeY = lamp.size_y
 
             fs.serialize('AreaLightEntity')
-            fs.serialize(exporter_common.matrix_to_tuple(world_matrix))
-            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(matrix_to_tuple(world_matrix))
+            fs.serialize(vec3_to_tuple(light_spectrum))
 
             fs.serialize( lamp.shape )
             if lamp.shape == 'SQUARE':
@@ -258,8 +317,8 @@ def export_scene(scene, fs):
             light_spectrum *= lamp.energy
 
             fs.serialize('SkyLightEntity')
-            fs.serialize(exporter_common.matrix_to_tuple(MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender()))
-            fs.serialize(exporter_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(matrix_to_tuple(MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender()))
+            fs.serialize(vec3_to_tuple(light_spectrum))
             fs.serialize(bpy.path.abspath( lamp.sort_data.hdr_sky_image ))
 
     # to indicate the scene stream comes to an end
@@ -484,7 +543,7 @@ def get_from_socket(socket, parent_node_stack, visited):
 # Apart from collecting shaders, it will also collect all heavy data, like measured BRDF data, texture.
 def collect_shader_resources(scene, fs):
     # don't output any osl_shaders if using default materials
-    if scene.allUseDefaultMaterial is True:
+    if scene.sort_data.allUseDefaultMaterial is True:
         fs.serialize( 0 )
         fs.serialize( 0 )
         return None
@@ -493,7 +552,7 @@ def collect_shader_resources(scene, fs):
     resources = []
 
     dummy = set()
-    for material in exporter_common.getMaterialList(scene):
+    for material in getMaterialList(scene):
         # get output nodes
         output_node = find_output_node(material)
         if output_node is None:
@@ -546,7 +605,7 @@ def collect_shader_resources(scene, fs):
     for key , value in osl_shaders.items():
         fs.serialize( key )
         fs.serialize( value )
-        exporter_common.logD( 'Exporting node source code for node %s. Source code: %s' %(key , value) )
+        logD( 'Exporting node source code for node %s. Source code: %s' %(key , value) )
     del osl_shaders
     fs.serialize( len( resources ) )
     for resource in resources:
@@ -556,7 +615,7 @@ def collect_shader_resources(scene, fs):
 # Export OSL shader group
 matname_to_id = {}
 def export_materials(scene, fs):
-    materials = exporter_common.getMaterialList(scene)
+    materials = getMaterialList(scene)
     material_count = 0
     for material in materials:
         # get output nodes
@@ -565,7 +624,7 @@ def export_materials(scene, fs):
             continue
         material_count += 1
 
-    if scene.allUseDefaultMaterial is True:
+    if scene.sort_data.allUseDefaultMaterial is True:
         fs.serialize( int(0) )
         return None
 
@@ -582,7 +641,7 @@ def export_materials(scene, fs):
         matname_to_id[compact_material_name] = i
         i += 1
         fs.serialize( compact_material_name )
-        exporter_common.logD( 'Exporting material %s.' % compact_material_name )
+        logD( 'Exporting material %s.' % compact_material_name )
 
         # collect node count
         mat_nodes = []          # resulting nodes
@@ -665,4 +724,4 @@ def export_materials(scene, fs):
             fs.serialize( connection[2] )
             fs.serialize( connection[3] )
 
-    exporter_common.log( 'Exported %d materials in total.' %(len(materials)) )
+    log( 'Exported %d materials in total.' %(len(materials)) )

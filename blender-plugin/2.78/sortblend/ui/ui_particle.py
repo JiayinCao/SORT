@@ -67,6 +67,5 @@ class HairPanel(SORTParticlePanel, bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         ps = context.particle_settings
-        print( type( ps ) )
         layout.prop(ps.sort_data, "fur_tip")
         layout.prop(ps.sort_data, "fur_bottom")
