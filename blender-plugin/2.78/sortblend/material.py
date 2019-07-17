@@ -840,7 +840,7 @@ class SORT_Node_Group_Make_Operator(bpy.types.Operator):
         for node in tree.nodes:
             if node.bl_idname == 'NodeReroute':
                 continue
-            if node.isGroupInputNode() or node.isGroupOutputNode() or node.isShaderGroupInputNode():
+            if node.isGroupInputNode() or node.isGroupOutputNode() or node.isShaderGroupInputNode() or node.bl_idname == SORTNodeOutput.bl_idname:
                 node.select = False
 
         nodes = [node for node in tree.nodes if node.select]
