@@ -27,7 +27,6 @@ def registrar(register, unregister, name=None):
 
 def register():
     for r, _, n in REGISTRARS:
-        #print( 'register ' + n )
         r()
 
 def unregister():

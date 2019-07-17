@@ -14,9 +14,8 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import os
-import mathutils
-from datetime import datetime
 import bpy
+from datetime import datetime
 
 scene = None
 def setScene( sc ):
@@ -29,13 +28,6 @@ def getCamera(scene):
         print("Camera not found.")
         return
     return camera
-
-# get edited file name
-def getEditedFileName():
-    pbrt_file_name = os.path.splitext(os.path.basename(bpy.data.filepath))[0]
-    if not pbrt_file_name:
-        pbrt_file_name = 'default_scene'
-    return pbrt_file_name
 
 # list all objects in the scene
 def renderable_objects(scene):
