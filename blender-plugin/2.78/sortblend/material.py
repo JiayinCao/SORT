@@ -779,8 +779,22 @@ class SORT_Node_Group_Make_Operator(bpy.types.Operator):
         def get_links(tree):
             def keys_sort(link):
                 return (socket_index(link.to_socket), link.from_node.location.y)
-            input_links = sorted([l for l in tree.links if (not l.from_node.select) and (l.to_node.select)], key=keys_sort)
-            output_links = sorted([l for l in tree.links if (l.from_node.select) and (not l.to_node.select)], key=keys_sort)
+            def is_input_connection_valid( link ):
+                if ( (not link.from_node.select) and (link.to_node.select) ) is False:
+                    return False
+                if link.to_node.bl_idname != 'NodeReroute':
+                    return True
+                return get_other_socket( link.from_socket ) is not None
+
+            def is_output_connection_valid( link ):
+                if ( (link.from_node.select) and (not link.to_node.select) ) is False:
+                    return False
+                if link.from_node.bl_idname != 'NodeReroute':
+                    return True
+                return get_other_socket( link.to_socket ) is not None
+
+            input_links = sorted([l for l in tree.links if is_input_connection_valid(l) ], key=keys_sort)
+            output_links = sorted([l for l in tree.links if is_output_connection_valid(l) ], key=keys_sort)
             return dict(input=input_links, output=output_links)
 
         # get average location of all nodes picked
