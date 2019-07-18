@@ -560,18 +560,22 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
 def get_other_socket(socket):
     if not socket.is_linked:
         return None
-    if not socket.is_output:
-        other = socket.links[0].from_socket
-    else:
-        other = socket.links[0].to_socket
-    if other.node.bl_idname == 'NodeReroute':
-        if not socket.is_output:
-            return get_other_socket(other.node.inputs[0])
-        else:
-            return get_other_socket(other.node.outputs[0])
-    else:
-        return other
+
+    for link in socket.links:
+        other = link.from_socket if not socket.is_output else link.to_socket
         
+        # special handling for reroute node
+        if other.node.bl_idname == 'NodeReroute':
+            sockets = other.node.inputs if not socket.is_output else other.node.outputs
+            ret = None
+            for socket in sockets:
+                ret = get_other_socket( socket )
+            if ret is not None:
+                return ret
+        else:
+            return other
+    return None
+
 def get_socket_data(socket):
     other = get_other_socket(socket)
     if socket.bl_idname == "sort_dummy_socket":
