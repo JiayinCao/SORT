@@ -17,7 +17,7 @@ import bpy
 from datetime import datetime
 
 # This file may be extended with more sophiscated implementation in the future.
-# However, it won't get upgraded unless there is a need
+# However, it won't get upgraded unless it is needed to be complex.
 
 # Output a log to blender terminal
 def log(s):
