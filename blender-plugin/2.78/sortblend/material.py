@@ -691,6 +691,8 @@ class SORTNodeExposedInputs(SORTShadingNode):
 
         to_socket = get_other_socket(last_output)
         if to_socket is None:
+            node_tree = self.id_data
+            node_tree.links.remove( last_output.links[0] )
             return
 
         socket_names = []
@@ -1025,7 +1027,13 @@ class SORTNodeSocketConnectorHelper:
         if len(socket_list) == 0:
             return
 
-        if get_other_socket( socket_list[-1] ) is not None:
+        if socket_list[-1].is_linked:
+            # remove the link, SORT doesn't allow connecting dummy socket to a reroute, it could be problematic in the case of further groupping nodes.
+            if get_other_socket( socket_list[-1] ) is None:
+                tree = self.id_data
+                tree.links.remove( socket_list[-1].links[0] )
+                return
+
             socket = socket_list[-1]
             cls = update_cls(tree)
             socket_names = []
