@@ -557,25 +557,29 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
 
     return new_socket
 
-def get_socket_data(socket):
-    def get_other_socket(socket):
-        if not socket.is_linked:
-            return None
+def get_other_socket(socket):
+    if not socket.is_linked:
+        return None
+    if not socket.is_output:
+        other = socket.links[0].from_socket
+    else:
+        other = socket.links[0].to_socket
+    if other.node.bl_idname == 'NodeReroute':
         if not socket.is_output:
-            other = socket.links[0].from_socket
+            return get_other_socket(other.node.inputs[0])
         else:
-            other = socket.links[0].to_socket
-        if other.node.bl_idname == 'NodeReroute':
-            if not socket.is_output:
-                return get_other_socket(other.node.inputs[0])
-            else:
-                return get_other_socket(other.node.outputs[0])
-        else:
-            return other
-
+            return get_other_socket(other.node.outputs[0])
+    else:
+        return other
+        
+def get_socket_data(socket):
     other = get_other_socket(socket)
     if socket.bl_idname == "sort_dummy_socket":
         socket = get_other_socket(socket)
+    # this could happen when connecting socket from group input/output node or shader group input node to a reroute node connects nothing
+    # in which case there will be no way to deduce the type and name of the newly created socket.
+    if socket is None:
+        return '' , ''
     return socket.name, socket.bl_idname
 
 def generate_inputs(tree):
@@ -586,6 +590,9 @@ def generate_inputs(tree):
         for idx, socket in enumerate(input_node.outputs):
             if socket.is_linked:
                 socket_name, socket_bl_idname = get_socket_data(socket)
+                if socket_name == '':
+                    assert( socket_bl_idname == '' )
+                    continue
                 socket_name = getUniqueSocketName( existed_name , socket_name )
                 in_socket.append([socket_name, socket_bl_idname])
                 existed_name.append( socket_name )
@@ -599,6 +606,9 @@ def generate_outputs(tree):
         for socket in output_node.inputs:
             if socket.is_linked:
                 socket_name, socket_bl_idname = get_socket_data(socket)
+                if socket_name == '':
+                    assert( socket_bl_idname == '' )
+                    continue
                 socket_name = getUniqueSocketName( existed_name , socket_name )
                 out_socket.append((socket_name, socket_bl_idname))
                 existed_name.append( socket_name )
@@ -679,8 +689,9 @@ class SORTNodeExposedInputs(SORTShadingNode):
         if len(last_output.links) == 0:
             return
 
-        link = last_output.links[0]
-        to_socket = link.to_socket
+        to_socket = get_other_socket(last_output)
+        if to_socket is None:
+            return
 
         socket_names = []
         for output in self.outputs:
@@ -1014,7 +1025,7 @@ class SORTNodeSocketConnectorHelper:
         if len(socket_list) == 0:
             return
 
-        if socket_list[-1].is_linked:
+        if get_other_socket( socket_list[-1] ) is not None:
             socket = socket_list[-1]
             cls = update_cls(tree)
             socket_names = []
