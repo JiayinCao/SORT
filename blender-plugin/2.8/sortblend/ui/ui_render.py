@@ -18,12 +18,25 @@ import os
 import bl_ui
 import platform
 import subprocess
-from ..export import sort_exporter
+from .. import exporter
 from .. import base
 from bl_ui import properties_render
 
 #base.compatify_class(properties_render.RENDER_PT_render)
 #base.compatify_class(properties_render.RENDER_PT_dimensions)
+
+# attach customized properties in particles
+@base.register_class
+class SORTRenderSettingData(bpy.types.PropertyGroup):
+    detailedLog : bpy.props.BoolProperty( name='Output Detailed Output', default=False, description='Whether outputing detail log information in blender plugin.' )
+    profilingEnabled : bpy.props.BoolProperty(name='Enable Profiling',default=False,description='Enabling profiling will have a big impact on performance, only use it for simple scene')
+    allUseDefaultMaterial : bpy.props.BoolProperty(name='No Material',default=False,description='Disable all materials in SORT, use the default one.')
+    @classmethod
+    def register(cls):
+        bpy.types.Scene.sort_data = bpy.props.PointerProperty(name="SORT Data", type=cls)
+    @classmethod
+    def unregister(cls):
+        del bpy.types.Scene.sort_data
 
 def OpenFile( filename ):
     if platform.system() == 'Darwin':     # for Mac OS
@@ -153,7 +166,7 @@ class SORT_export_debug_scene(bpy.types.Operator):
     bl_label = "Export SORT Scene"
     def execute(self, context):
         depsgraph = context.depsgraph
-        sort_exporter.export_blender(depsgraph,True)
+        exporter.export_blender(depsgraph,True)
         return {'FINISHED'}
 
 @base.register_class
@@ -161,8 +174,8 @@ class SORT_open_log(bpy.types.Operator):
     bl_idname = "sort.open_log"
     bl_label = "Open Log"
     def execute(self, context):
-        #logfile = sort_exporter.get_sort_dir() + "log.txt"
-        #OpenFile( logfile )
+        logfile = exporter.get_sort_dir() + "log.txt"
+        OpenFile( logfile )
         return {'FINISHED'}
 
 @base.register_class
@@ -170,15 +183,12 @@ class SORT_openfolder(bpy.types.Operator):
     bl_idname = "sort.openfolder_sort"
     bl_label = "Open SORT folder"
     def execute(self, context):
-        #OpenFolder( sort_exporter.get_sort_dir() )
+        OpenFolder( exporter.get_sort_dir() )
         return {'FINISHED'}
 
 @base.register_class
 class RENDER_PT_DebugPanel(SORTRenderPanel, bpy.types.Panel):
     bl_label = 'DebugPanel'
-    bpy.types.Scene.detailedLog = bpy.props.BoolProperty(name='Output Detailed Output',default=False,description='Whether outputing detail log information in blender plugin.')
-    bpy.types.Scene.profilingEnabled = bpy.props.BoolProperty(name='Enable Profiling',default=False,description='Enabling profiling will have a big impact on performance, only use it for simple scene')
-    bpy.types.Scene.allUseDefaultMaterial = bpy.props.BoolProperty(name='No Material',default=False,description='Disable all materials in SORT, use the default one.')
     def draw(self, context):
         self.layout.operator("sort.export_debug_scene")
         split = self.layout.split()
@@ -186,7 +196,8 @@ class RENDER_PT_DebugPanel(SORTRenderPanel, bpy.types.Panel):
         left.operator("sort.open_log")
         right = split.column(align=True)
         right.operator("sort.openfolder_sort")
-        self.layout.prop(context.scene, "detailedLog")
-        self.layout.prop(context.scene, "profilingEnabled")
-        self.layout.prop(context.scene, "allUseDefaultMaterial")
+
+        self.layout.prop(context.scene.sort_data, "detailedLog")
+        self.layout.prop(context.scene.sort_data, "profilingEnabled")
+        self.layout.prop(context.scene.sort_data, "allUseDefaultMaterial")
 

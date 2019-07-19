@@ -16,17 +16,46 @@
 import bpy
 import os
 import mathutils
-import numpy as np
 import platform
 import tempfile
-import time
 import struct
+from time import time
 from math import degrees
-from . import export_common
-from ..stream import stream
+from .log import log, logD
+from .stream import stream
+
+# List all objects in the scene
+def renderable_objects(scene):
+    def is_renderable(scene, ob):
+        # whether the object is hidden
+        def is_visible_layer(scene, ob):
+            for i in range(len(scene.view_layers)):
+                return True
+                if scene.view_layers[i] == True and ob.layers[i] == True:
+                    return True
+            return False
+        return (is_visible_layer(scene, ob) and not ob.hide_render)
+    return [ob for ob in scene.objects if is_renderable(scene, ob)]
+
+# Get the list of material for the whole scene, this function will only list materials that are currently
+# attached to an object in the scene. Non-used materials will not be needed to be exported to SORT.
+def list_materials( scene ):
+    exported_materials = []
+    all_nodes = renderable_objects(scene)
+    for ob in all_nodes:
+        if ob.type == 'MESH':
+            for material in ob.data.materials[:]:
+                # make sure it is a SORT material
+                if material and material.sort_material:
+                    # skip if the material is already exported
+                    if exported_materials.count( material ) != 0:
+                        continue
+                    exported_materials.append( material )
+    return exported_materials
 
 def get_sort_dir():
-    return_path = export_common.getPreference().install_path
+    preferences = bpy.context.preferences.addons['sortblend'].preferences
+    return_path = preferences.install_path
     if platform.system() == 'Windows':
         return return_path
     return return_path
@@ -46,14 +75,14 @@ def get_sort_bin_path():
 intermediate_dir = ''
 def get_intermediate_dir(force_debug=False):
     global intermediate_dir
-    return_path = intermediate_dir
-    if force_debug is True:
-        return_path = get_sort_dir()
+    return_path = intermediate_dir if force_debug is False else get_sort_dir()
     if platform.system() == 'Windows':
         return_path = return_path.replace( '\\' , '/' )
         return return_path + '/'
     return return_path + '/'
 
+# Blender and SORT doesn't share exactly the same coordinate system, the following functions are to be applied whenever
+# a matrix is used in other system.
 def MatrixSortToBlender():
     from bpy_extras.io_utils import axis_conversion
     global_matrix = axis_conversion(to_forward='-Z',to_up='Y').to_4x4()
@@ -71,7 +100,7 @@ def MatrixBlenderToSort():
     return global_matrix
 
 # get camera data
-def lookAtSORT(camera):
+def lookat_camera(camera):
     # it seems that the matrix return here is the inverse of view matrix.
     ori_matrix = MatrixBlenderToSort() @ camera.matrix_world.copy()
     # get the transpose matrix
@@ -92,51 +121,52 @@ def lookAtSORT(camera):
 
     focal_distance = 0.01
     scaled_forward = mathutils.Vector((focal_distance * forwards[0], focal_distance * forwards[1], focal_distance * forwards[2] , 0.0))
-    # viewing target
-    target = (pos + scaled_forward)
-    # up direction
-    up = matrix[1]
+    target = (pos + scaled_forward)  # viewing target
+    up = matrix[1]                   # up direction
     return (pos, target, up)
 
 # export blender information
 def export_blender(depsgraph, force_debug=False):
     scene = depsgraph.scene
-    export_common.setScene(scene)
 
-    # create immediate file path
+    # create intermediate resource path
     sort_resource_path = create_path(scene, force_debug)
+
+    # initialize the file to be fed as main input for the renderer
+    # this will potentially be replaced with socket streaming in the future
     sort_config_file = sort_resource_path + 'scene.sort'
     fs = stream.FileStream( sort_config_file )
+    log("Exporting sort file %s" % sort_config_file)
 
-    export_common.log("Exporting sort file %s" % sort_config_file)
-
-    # export global material settings
-    current_time = time.time()
-    export_common.log("Exporting global configuration.")
+    # export global settings for the renderer
+    current_time = time()
+    log("Exporting global configuration.")
     export_global_config(scene, fs, sort_resource_path)
-    export_common.log("Exported configuration %.2f" % (time.time() - current_time))
-    current_time = time.time()
-
-    # export material
-    export_common.log("Exporting materials.")
-    collect_shader_resources(scene, fs)
-    export_materials(scene, fs)
-    export_common.log("Exported materials %.2f(s)" % (time.time() - current_time))
-    current_time = time.time()
-
+    log("Exported configuration %.2f" % (time() - current_time))
+    
+    # export materials
+    current_time = time()
+    log("Exporting materials.")
+    collect_shader_resources(scene, fs)     # this is the place for material to signal heavy resources, like textures, measured BRDF, etc.
+    export_materials(scene, fs)             # this is the place for serializing OSL shader source code with proper default values.
+    log("Exported materials %.2f(s)" % (time() - current_time))
+    
     # export scene
-    export_common.log("Exporting scene.")
+    current_time = time()
+    log("Exporting scene.")
     export_scene(depsgraph, fs)
-    export_common.log("Exported scene %.2f(s)" % (time.time() - current_time))
-    current_time = time.time()
+    log("Exported scene %.2f(s)" % (time() - current_time))
 
+    # make sure the result of the file writting is flushed because it could be problematic on some machines
     fs.flush()
     del fs
 
 # clear old data and create new path
 def create_path(scene, force_debug):
     global intermediate_dir
-    intermediate_dir = tempfile.mkdtemp(suffix='w')
+    # only create the temporary folder when it is not exporting the scene
+    if force_debug is False:
+        intermediate_dir = tempfile.mkdtemp(suffix='w')
     # get immediate directory
     output_dir = get_intermediate_dir(force_debug)
 
@@ -147,12 +177,31 @@ def create_path(scene, force_debug):
 
 # export scene
 def export_scene(depsgraph, fs):
+    # helper function to convert a matrix to a tuple
+    def matrix_to_tuple(matrix):
+        return (matrix[0][0],matrix[0][1],matrix[0][2],matrix[0][3],matrix[1][0],matrix[1][1],matrix[1][2],matrix[1][3],
+                matrix[2][0],matrix[2][1],matrix[2][2],matrix[2][3],matrix[3][0],matrix[3][1],matrix[3][2],matrix[3][3])
+
+    # helper function to convert a vector to a tuple
+    def vec3_to_tuple(vec):
+        return (vec[0],vec[1],vec[2])
+
+    # helper function to acquire light intensity
+    def lamp_intensity(lamp):
+        return ( lamp.color[0] * lamp.energy , lamp.color[1] * lamp.energy , lamp.color[2] * lamp.energy )
+
     scene = depsgraph.scene
+
+    # this is a special code for the render to identify that the serialized input is still valid.
     fs.serialize( int(1234567) )
 
     # camera node
-    camera = export_common.getCamera(scene)
-    pos, target, up = lookAtSORT(camera)
+    camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
+    if camera is None:
+        print("Camera not found.")
+        return
+
+    pos, target, up = lookat_camera(camera)
     sensor_w = bpy.data.cameras[0].sensor_width
     sensor_h = bpy.data.cameras[0].sensor_height
     sensor_fit = 0.0 # auto
@@ -168,9 +217,9 @@ def export_scene(depsgraph, fs):
     camera_shift_y = bpy.data.cameras[0].shift_y
 
     fs.serialize('PerspectiveCameraEntity')
-    fs.serialize(export_common.vec3_to_tuple(pos))
-    fs.serialize(export_common.vec3_to_tuple(up))
-    fs.serialize(export_common.vec3_to_tuple(target))
+    fs.serialize(vec3_to_tuple(pos))
+    fs.serialize(vec3_to_tuple(up))
+    fs.serialize(vec3_to_tuple(target))
     fs.serialize( 0.0 )
     #fs.serialize(camera.data.sort_camera.sort_camera_lens.lens_size)
     fs.serialize((sensor_w,sensor_h))
@@ -178,11 +227,16 @@ def export_scene(depsgraph, fs):
     fs.serialize((aspect_ratio_x,aspect_ratio_y))
     fs.serialize(fov_angle)
 
+    all_renderable = renderable_objects(scene)
+    all_lights = [ ob for ob in all_renderable if ob.type == 'LIGHT' ]
+    all_meshes = [ ob for ob in all_renderable if ob.type == 'MESH' ]
+
     total_vert_cnt = 0
     total_prim_cnt = 0
-    for obj in export_common.getMeshList(scene):
+    # export meshes
+    for obj in all_meshes:
         fs.serialize('VisualEntity')
-        fs.serialize( export_common.matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
+        fs.serialize( matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
         fs.serialize( 1 )   # only one mesh for each mesh entity
         stat = None
         # apply the modifier if there is one
@@ -201,11 +255,12 @@ def export_scene(depsgraph, fs):
         total_vert_cnt += stat[0]
         total_prim_cnt += stat[1]
 
-    for obj in export_common.getMeshList(scene):
+    # output hair/fur exporting
+    for obj in all_meshes:
         # output hair/fur information
         if len( obj.particle_systems ) > 0:
             fs.serialize('VisualEntity')
-            fs.serialize( export_common.matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
+            fs.serialize( matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
             fs.serialize( len( obj.particle_systems ) )
 
             eval_ob = depsgraph.objects.get(obj.name, None)
@@ -213,63 +268,51 @@ def export_scene(depsgraph, fs):
                 stat = export_hair( ps , eval_ob , scene , fs )
                 total_vert_cnt += stat[0]
                 total_prim_cnt += stat[1]
-    export_common.log( "Total vertices: %d." % total_vert_cnt )
-    export_common.log( "Total primitives: %d." % total_prim_cnt )
 
-    for ob in export_common.getLightList(scene):
+    log( "Total vertices: %d." % total_vert_cnt )
+    log( "Total primitives: %d." % total_prim_cnt )
+
+    for ob in all_lights:
         lamp = ob.data
         # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
         world_matrix = MatrixBlenderToSort() @ ob.matrix_world @ MatrixSortToBlender() @ flip_mat
 
         if lamp.type == 'SUN':
-            light_spectrum = np.array(lamp.color[:])
-            light_spectrum *= lamp.energy
-
             fs.serialize('DirLightEntity')
-            fs.serialize(export_common.matrix_to_tuple(world_matrix))
-            fs.serialize(export_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(matrix_to_tuple(world_matrix))
+            fs.serialize(lamp_intensity(lamp))
         elif lamp.type == 'POINT':
-            light_spectrum = np.array(lamp.color[:])
-            light_spectrum *= lamp.energy
-
             fs.serialize('PointLightEntity')
-            fs.serialize(export_common.matrix_to_tuple(world_matrix))
-            fs.serialize(export_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(matrix_to_tuple(world_matrix))
+            fs.serialize(lamp_intensity(lamp))
         elif lamp.type == 'SPOT':
-            light_spectrum = np.array(lamp.color[:])
-            light_spectrum *= lamp.energy
             falloff_start = degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)
             falloff_range = degrees(lamp.spot_size*0.5)
 
             fs.serialize('SpotLightEntity')
-            fs.serialize(export_common.matrix_to_tuple(world_matrix))
-            fs.serialize(export_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(matrix_to_tuple(world_matrix))
+            fs.serialize(lamp_intensity(lamp))
             fs.serialize(falloff_start)
             fs.serialize(falloff_range)
         elif lamp.type == 'AREA':
-            light_spectrum = np.array(lamp.color[:])
-            light_spectrum *= lamp.energy
-            sizeX = lamp.size
-            sizeY = lamp.size_y
-
             fs.serialize('AreaLightEntity')
-            fs.serialize(export_common.matrix_to_tuple(world_matrix))
-            fs.serialize(export_common.vec3_to_tuple(light_spectrum))
+            fs.serialize(matrix_to_tuple(world_matrix))
+            fs.serialize(lamp_intensity(lamp))
 
             fs.serialize( lamp.shape )
             if lamp.shape == 'SQUARE':
-                fs.serialize(sizeX)
+                fs.serialize(lamp.size)
             elif lamp.shape == 'RECTANGLE':
-                fs.serialize(sizeX)
-                fs.serialize(sizeY)
+                fs.serialize(lamp.size)
+                fs.serialize(lamp.size_y)
             elif lamp.shape == 'DISK':
-                fs.serialize(sizeX * 0.5)
+                fs.serialize(lamp.size * 0.5)
             
     hdr_sky_image = scene.sort_hdr_sky.hdr_image
     if hdr_sky_image is not None:
         fs.serialize('SkyLightEntity')
-        fs.serialize(export_common.matrix_to_tuple(MatrixBlenderToSort() @ MatrixSortToBlender()))
+        fs.serialize(matrix_to_tuple(MatrixBlenderToSort() @ MatrixSortToBlender()))
         fs.serialize(( 1.0 , 1.0 , 1.0 ))
         fs.serialize(bpy.path.abspath( hdr_sky_image.filepath ))
 
@@ -283,59 +326,44 @@ def name_compat(name):
     else:
         return name.replace(' ', '_')
 
-def export_hair(ps, obj, scene, fs):
-    LENFMT = struct.Struct('=i')
-    POINTFMT = struct.Struct('=fff')
+# export glocal settings for the renderer
+def export_global_config(scene, fs, sort_resource_path):
+    # global renderer configuration
+    sort_output_file = 'blender_generated.exr'
+    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
+    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
+    integrator_type = scene.integrator_type_prop
+    accelerator_type = scene.accelerator_type_prop
 
-    vert_cnt = 0
-    hair_step = ps.settings.render_step
-    width_tip = ps.settings.sort_data.fur_tip
-    width_bottom = ps.settings.sort_data.fur_bottom
+    fs.serialize( 0 )
+    fs.serialize( sort_resource_path )
+    fs.serialize( sort_output_file )
+    fs.serialize( 64 )    # tile size, hard-coded it until I need to update it throught exposed interface later.
+    fs.serialize( int(scene.thread_num_prop) )
+    fs.serialize( int(scene.sampler_count_prop) )
+    fs.serialize( int(xres) )
+    fs.serialize( int(yres) )
+    fs.serialize( accelerator_type )
+    if accelerator_type == "bvh":
+        fs.serialize( int(scene.bvh_max_node_depth) )
+        fs.serialize( int(scene.bvh_max_pri_in_leaf) )
+    elif accelerator_type == "KDTree":
+        fs.serialize( int(scene.kdtree_max_node_depth) )
+        fs.serialize( int(scene.kdtree_max_pri_in_leaf) )
+    elif accelerator_type == "OcTree":
+        fs.serialize( int(scene.octree_max_node_depth) )
+        fs.serialize( int(scene.octree_max_pri_in_leaf) )
 
-    # extract the material of the hair
-    mat_local_index = ps.settings.material
-    mat_index = -1
-
-    if mat_local_index > 0 and mat_local_index <= len( obj.data.materials ):
-        mat_name = name_compat(obj.data.materials[mat_local_index-1].name)
-        mat_index = matname_to_id[mat_name] if mat_name in matname_to_id else -1
-
-    # for some unknown reason
-    steps = 2 ** hair_step
-
-    verts = bytearray()
-
-    world2Local = obj.matrix_world.inverted()
-    num_parents = len( ps.particles )
-    num_children = len( ps.child_particles )
-    hair_cnt = num_parents + num_children
-    total_hair_segs = 0
-
-    for pindex in range(hair_cnt):
-        hair = []
-        for step in range(0, steps + 1):
-            co = ps.co_hair(obj, particle_no = pindex, step = step)
-            co = world2Local @ co
-            hair.append( co )
-            vert_cnt += 1
-                
-        if len(hair) == 0:
-            continue
-
-        assert len(hair) > 0
-        verts += LENFMT.pack( len(hair) - 1 )
-        for h in hair :
-            verts += POINTFMT.pack( h[0] , h[1] , h[2] )
-        total_hair_segs += len(hair) - 1
-
-    fs.serialize( 'HairVisual' )
-    fs.serialize( hair_cnt )
-    fs.serialize( width_tip )
-    fs.serialize( width_bottom )
-    fs.serialize( mat_index )
-    fs.serialize( verts )
-
-    return (vert_cnt, total_hair_segs)
+    fs.serialize( integrator_type )
+    fs.serialize( int(scene.inte_max_recur_depth) )
+    if integrator_type == "AmbientOcclusion":
+        fs.serialize( scene.ao_max_dist )
+    if integrator_type == "BidirPathTracing" or integrator_type == "LightTracing":
+        fs.serialize( bool(scene.bdpt_mis) )
+    if integrator_type == "InstantRadiosity":
+        fs.serialize( scene.ir_light_path_set_num )
+        fs.serialize( scene.ir_light_path_num )
+        fs.serialize( scene.ir_min_dist )
 
 # warning, this export function is not an optimal version, but it works.
 # I will get back to it some time later.
@@ -430,43 +458,60 @@ def export_mesh(mesh, fs):
 
     return (vert_cnt, primitive_cnt)
 
-def export_global_config(scene, fs, sort_resource_path):
-    # global renderer configuration
-    sort_output_file = 'blender_generated.exr'
-    xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
-    yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
-    integrator_type = scene.integrator_type_prop
-    accelerator_type = scene.accelerator_type_prop
+# export hair information
+def export_hair(ps, obj, scene, fs):
+    LENFMT = struct.Struct('=i')
+    POINTFMT = struct.Struct('=fff')
 
-    fs.serialize( 0 )
-    fs.serialize( sort_resource_path )
-    fs.serialize( sort_output_file )
-    fs.serialize( 64 )    # tile size, hard-coded it until I need to update it throught exposed interface later.
-    fs.serialize( int(scene.thread_num_prop) )
-    fs.serialize( int(scene.sampler_count_prop) )
-    fs.serialize( int(xres) )
-    fs.serialize( int(yres) )
-    fs.serialize( accelerator_type )
-    if accelerator_type == "bvh":
-        fs.serialize( int(scene.bvh_max_node_depth) )
-        fs.serialize( int(scene.bvh_max_pri_in_leaf) )
-    elif accelerator_type == "KDTree":
-        fs.serialize( int(scene.kdtree_max_node_depth) )
-        fs.serialize( int(scene.kdtree_max_pri_in_leaf) )
-    elif accelerator_type == "OcTree":
-        fs.serialize( int(scene.octree_max_node_depth) )
-        fs.serialize( int(scene.octree_max_pri_in_leaf) )
+    vert_cnt = 0
+    hair_step = ps.settings.render_step
+    width_tip = ps.settings.sort_data.fur_tip
+    width_bottom = ps.settings.sort_data.fur_bottom
 
-    fs.serialize( integrator_type )
-    fs.serialize( int(scene.inte_max_recur_depth) )
-    if integrator_type == "AmbientOcclusion":
-        fs.serialize( scene.ao_max_dist )
-    if integrator_type == "BidirPathTracing" or integrator_type == "LightTracing":
-        fs.serialize( bool(scene.bdpt_mis) )
-    if integrator_type == "InstantRadiosity":
-        fs.serialize( scene.ir_light_path_set_num )
-        fs.serialize( scene.ir_light_path_num )
-        fs.serialize( scene.ir_min_dist )
+    # extract the material of the hair
+    mat_local_index = ps.settings.material
+    mat_index = -1
+
+    if mat_local_index > 0 and mat_local_index <= len( obj.data.materials ):
+        mat_name = name_compat(obj.data.materials[mat_local_index-1].name)
+        mat_index = matname_to_id[mat_name] if mat_name in matname_to_id else -1
+
+    # for some unknown reason
+    steps = 2 ** hair_step
+
+    verts = bytearray()
+
+    world2Local = obj.matrix_world.inverted()
+    num_parents = len( ps.particles )
+    num_children = len( ps.child_particles )
+    hair_cnt = num_parents + num_children
+    total_hair_segs = 0
+
+    for pindex in range(hair_cnt):
+        hair = []
+        for step in range(0, steps + 1):
+            co = ps.co_hair(obj, particle_no = pindex, step = step)
+            co = world2Local @ co
+            hair.append( co )
+            vert_cnt += 1
+                
+        if len(hair) == 0:
+            continue
+
+        assert len(hair) > 0
+        verts += LENFMT.pack( len(hair) - 1 )
+        for h in hair :
+            verts += POINTFMT.pack( h[0] , h[1] , h[2] )
+        total_hair_segs += len(hair) - 1
+
+    fs.serialize( 'HairVisual' )
+    fs.serialize( hair_cnt )
+    fs.serialize( width_tip )
+    fs.serialize( width_bottom )
+    fs.serialize( mat_index )
+    fs.serialize( verts )
+
+    return (vert_cnt, total_hair_segs)
 
 # find the output node, duplicated code, to be cleaned
 def find_output_node(material):
@@ -481,21 +526,21 @@ def find_output_node(material):
 def get_from_socket(socket, parent_node_stack, visited):
     if not socket.is_linked:
         return None
-    other = socket.links[0].from_socket
 
+    # there should be exactly one link attached to an input socket, this is guaranteed by Blender
+    assert( len( socket.links ) == 1 )
+    other = socket.links[0].from_socket
     if other.node in visited:
         return None
-
     if other.node.bl_idname == 'NodeReroute':
         return get_from_socket(other.node.inputs[0], parent_node_stack, visited )
-    else:
-        return other
+    return other
 
 # This function will iterate through all visited nodes in the scene and populate everything in a hash table
 # Apart from collecting shaders, it will also collect all heavy data, like measured BRDF data, texture.
 def collect_shader_resources(scene, fs):
     # don't output any osl_shaders if using default materials
-    if scene.allUseDefaultMaterial is True:
+    if scene.sort_data.allUseDefaultMaterial is True:
         fs.serialize( 0 )
         fs.serialize( 0 )
         return None
@@ -504,7 +549,7 @@ def collect_shader_resources(scene, fs):
     resources = []
 
     dummy = set()
-    for material in export_common.getMaterialList(scene):
+    for material in list_materials(scene):
         # get output nodes
         output_node = find_output_node(material)
         if output_node is None:
@@ -557,7 +602,7 @@ def collect_shader_resources(scene, fs):
     for key , value in osl_shaders.items():
         fs.serialize( key )
         fs.serialize( value )
-        export_common.logD( 'Exporting node source code for node %s. Source code: %s' %(key , value) )
+        logD( 'Exporting node source code for node %s. Source code: %s' %(key , value) )
     del osl_shaders
     fs.serialize( len( resources ) )
     for resource in resources:
@@ -567,7 +612,11 @@ def collect_shader_resources(scene, fs):
 # Export OSL shader group
 matname_to_id = {}
 def export_materials(scene, fs):
-    materials = export_common.getMaterialList(scene)
+    if scene.sort_data.allUseDefaultMaterial is True:
+        fs.serialize( int(0) )
+        return None
+
+    materials = list_materials(scene)
     material_count = 0
     for material in materials:
         # get output nodes
@@ -575,10 +624,6 @@ def export_materials(scene, fs):
         if output_node is None:
             continue
         material_count += 1
-
-    if scene.allUseDefaultMaterial is True:
-        fs.serialize( int(0) )
-        return None
 
     global matname_to_id
     i = 0
@@ -593,7 +638,7 @@ def export_materials(scene, fs):
         matname_to_id[compact_material_name] = i
         i += 1
         fs.serialize( compact_material_name )
-        export_common.logD( 'Exporting material %s.' % compact_material_name )
+        logD( 'Exporting material %s.' % compact_material_name )
 
         # collect node count
         mat_nodes = []          # resulting nodes
@@ -676,4 +721,4 @@ def export_materials(scene, fs):
             fs.serialize( connection[2] )
             fs.serialize( connection[3] )
 
-    export_common.log( 'Exported %d materials in total.' %(len(materials)) )
+    log( 'Exported %d materials in total.' %(len(materials)) )

@@ -24,8 +24,7 @@ import platform
 import threading
 import time
 from . import base
-from .export import sort_exporter
-from .export import export_common
+from . import exporter
 
 class SORT_Thread():
     render_engine = None
@@ -137,7 +136,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         # setup shared memory size
         self.sm_size = self.image_size_in_bytes * 2 + self.image_header_size + 2
 
-        intermediate_dir = sort_exporter.get_intermediate_dir()
+        intermediate_dir = exporter.get_intermediate_dir()
         sm_full_path = intermediate_dir + "sharedmem.bin"
         # on mac os
         if platform.system() == "Darwin" or platform.system() == "Linux":
@@ -180,7 +179,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         # check if the path for SORT is set correctly
         try:
             self.sort_available = True
-            sort_bin_path = sort_exporter.get_sort_bin_path()
+            sort_bin_path = exporter.get_sort_bin_path()
             if sort_bin_path is None:
                 raise Exception("Set the path where binary for SORT is located before rendering anything.")
             elif not os.path.exists(sort_bin_path):
@@ -193,7 +192,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             return
 
         # export the scene
-        sort_exporter.export_blender(depsgraph)
+        exporter.export_blender(depsgraph)
 
     # render
     def render(self, depsgraph):
@@ -214,9 +213,9 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         self.spawnnewthread()
 
         # start rendering process first
-        binary_dir = sort_exporter.get_sort_dir()
-        binary_path = sort_exporter.get_sort_bin_path()
-        intermediate_dir = sort_exporter.get_intermediate_dir()
+        binary_dir = exporter.get_sort_dir()
+        binary_path = exporter.get_sort_bin_path()
+        intermediate_dir = exporter.get_intermediate_dir()
         # execute binary
         self.cmd_argument = [binary_path];
         self.cmd_argument.append( intermediate_dir + 'scene.sort')
@@ -260,16 +259,16 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         self.spawnnewthread()
 
         # start rendering process first
-        binary_dir = sort_exporter.get_sort_dir()
-        binary_path = sort_exporter.get_sort_bin_path()
-        intermediate_dir = sort_exporter.get_intermediate_dir()
+        binary_dir = exporter.get_sort_dir()
+        binary_path = exporter.get_sort_bin_path()
+        intermediate_dir = exporter.get_intermediate_dir()
         # execute binary
         self.cmd_argument = [binary_path];
         self.cmd_argument.append( '--input:' + intermediate_dir + 'scene.sort')
         self.cmd_argument.append( '--blendermode' )
-        if scene.profilingEnabled is True:
+        if scene.sort_data.profilingEnabled is True:
             self.cmd_argument.append( '--profiling:on' )
-        if scene.allUseDefaultMaterial is True:
+        if scene.sort_data.allUseDefaultMaterial is True:
             self.cmd_argument.append( '--noMaterial' )
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 

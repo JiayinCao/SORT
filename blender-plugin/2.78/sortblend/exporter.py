@@ -171,32 +171,6 @@ def create_path(scene, force_debug):
 
 # export scene
 def export_scene(scene, fs):
-    # get the main camera
-    def list_camera(scene):
-        camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
-        if camera is None:
-            print("Camera not found.")
-            return
-        return camera
-
-    # get the list of lights in the scene
-    def list_lights( scene ):
-        exported_lights = []
-        all_nodes = renderable_objects(scene)
-        for ob in all_nodes:
-            if ob.type == 'LAMP':
-                exported_lights.append( ob )
-        return exported_lights
-
-    # get the list of lights in the scene
-    def list_meshes( scene ):
-        exported_meshes = []
-        all_nodes = renderable_objects(scene)
-        for ob in all_nodes:
-            if ob.type == 'MESH':
-                exported_meshes.append( ob )
-        return exported_meshes
-        
     # helper function to convert a matrix to a tuple
     def matrix_to_tuple(matrix):
         return (matrix[0][0],matrix[0][1],matrix[0][2],matrix[0][3],matrix[1][0],matrix[1][1],matrix[1][2],matrix[1][3],
@@ -214,7 +188,11 @@ def export_scene(scene, fs):
     fs.serialize( int(1234567) )
 
     # camera node
-    camera = list_camera(scene)
+    camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
+    if camera is None:
+        print("Camera not found.")
+        return
+
     pos, target, up = lookat_camera(camera)
     sensor_w = bpy.data.cameras[0].sensor_width
     sensor_h = bpy.data.cameras[0].sensor_height
@@ -240,10 +218,14 @@ def export_scene(scene, fs):
     fs.serialize((aspect_ratio_x,aspect_ratio_y))
     fs.serialize(fov_angle)
 
+    all_renderable = renderable_objects(scene)
+    all_lights = [ ob for ob in all_renderable if ob.type == 'LAMP' ]
+    all_meshes = [ ob for ob in all_renderable if ob.type == 'MESH' ]
+
     total_vert_cnt = 0
     total_prim_cnt = 0
     # export meshes
-    for obj in list_meshes(scene):
+    for obj in all_meshes:
         fs.serialize('VisualEntity')
         fs.serialize( matrix_to_tuple( matrix_blender_to_sort() * obj.matrix_world ) )
         fs.serialize( 1 )   # only one mesh for each mesh entity
@@ -265,11 +247,12 @@ def export_scene(scene, fs):
         total_prim_cnt += stat[1]
 
     # output hair/fur exporting
-    for obj in list_meshes(scene):
+    for obj in all_meshes:
         if len( obj.particle_systems ) > 0:
             fs.serialize('VisualEntity')
             fs.serialize( matrix_to_tuple( matrix_blender_to_sort() * obj.matrix_world ) )
             fs.serialize( len( obj.particle_systems ) )
+
             for ps in obj.particle_systems:
                 stat = export_hair( ps , obj , scene , fs )
                 total_vert_cnt += stat[0]
@@ -279,7 +262,7 @@ def export_scene(scene, fs):
     log( "Total primitives: %d." % total_prim_cnt )
 
     # exporting light information
-    for ob in list_lights(scene):
+    for ob in all_lights:
         lamp = ob.data
         # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
@@ -486,6 +469,7 @@ def export_hair(ps, obj, scene, fs):
     num_children = len(ps.child_particles)
     hair_cnt = num_parents + num_children
     total_hair_segs = 0
+
     for pindex in range(hair_cnt):
         hair = []
         for step in range(0, steps + 1):

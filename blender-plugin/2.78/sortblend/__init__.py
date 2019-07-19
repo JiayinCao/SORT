@@ -15,7 +15,7 @@
 
 bl_info = {
     "name": "SORT",
-    "description": "An open-source ray tracer project",
+    "description": "An open-source physically based renderer",
     "author": "Jiayin Cao",
     "version": (1, 0, 0),
     "blender": (2, 75, 0),
