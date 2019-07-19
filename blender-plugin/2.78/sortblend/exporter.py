@@ -462,8 +462,6 @@ def export_hair(ps, obj, scene, fs):
     POINTFMT = struct.Struct('=fff')
 
     ps.set_resolution(scene, obj, 'RENDER')
-
-    hairs = ps.particles
     
     vert_cnt = 0
     render_step = ps.settings.render_step

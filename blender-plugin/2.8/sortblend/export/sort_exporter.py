@@ -207,9 +207,10 @@ def export_scene(depsgraph, fs):
             fs.serialize('VisualEntity')
             fs.serialize( export_common.matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
             fs.serialize( len( obj.particle_systems ) )
-            for ps in obj.particle_systems:
-                print( ps.name )
-                stat = export_hair( ps , obj , scene , fs )
+
+            eval_ob = depsgraph.objects.get(obj.name, None)
+            for ps in eval_ob.particle_systems:
+                stat = export_hair( ps , eval_ob , scene , fs )
                 total_vert_cnt += stat[0]
                 total_prim_cnt += stat[1]
     export_common.log( "Total vertices: %d." % total_vert_cnt )
@@ -286,12 +287,8 @@ def export_hair(ps, obj, scene, fs):
     LENFMT = struct.Struct('=i')
     POINTFMT = struct.Struct('=fff')
 
-    #ps.set_resolution(scene, obj, 'RENDER')
-
-    hairs = ps.particles
-    
     vert_cnt = 0
-    render_step = ps.settings.render_step
+    hair_step = ps.settings.render_step
     width_tip = ps.settings.sort_hair.hair_tip
     width_bottom = ps.settings.sort_hair.hair_bottom
 
@@ -304,13 +301,13 @@ def export_hair(ps, obj, scene, fs):
         mat_index = matname_to_id[mat_name] if mat_name in matname_to_id else -1
 
     # for some unknown reason
-    steps = 2 ** render_step
+    steps = 2 ** hair_step
 
     verts = bytearray()
 
     world2Local = obj.matrix_world.inverted()
-    num_parents = len(ps.particles)
-    num_children = len(ps.child_particles)
+    num_parents = len( ps.particles )
+    num_children = len( ps.child_particles )
     hair_cnt = num_parents + num_children
     total_hair_segs = 0
 
@@ -318,13 +315,9 @@ def export_hair(ps, obj, scene, fs):
         hair = []
         for step in range(0, steps + 1):
             co = ps.co_hair(obj, particle_no = pindex, step = step)
-            # there could be a bug of ignoring point at origin
-            if not co.length_squared == 0:
-                co = world2Local @ co
-                hair.append( co )
-                vert_cnt += 1
-            else:
-                break
+            co = world2Local @ co
+            hair.append( co )
+            vert_cnt += 1
                 
         if len(hair) == 0:
             continue
@@ -334,8 +327,6 @@ def export_hair(ps, obj, scene, fs):
         for h in hair :
             verts += POINTFMT.pack( h[0] , h[1] , h[2] )
         total_hair_segs += len(hair) - 1
-
-    #ps.set_resolution(scene, obj, 'PREVIEW')
 
     fs.serialize( 'HairVisual' )
     fs.serialize( hair_cnt )
