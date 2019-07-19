@@ -236,22 +236,30 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
 def get_other_socket(socket):
     if not socket.is_linked:
         return None
-    if not socket.is_output:
-        other = socket.links[0].from_socket
-    else:
-        other = socket.links[0].to_socket
-    if other.node.bl_idname == 'NodeReroute':
-        if not socket.is_output:
-            return get_other_socket(other.node.inputs[0])
+
+    for link in socket.links:
+        other = link.from_socket if not socket.is_output else link.to_socket
+        
+        # special handling for reroute node
+        if other.node.bl_idname == 'NodeReroute':
+            sockets = other.node.inputs if not socket.is_output else other.node.outputs
+            ret = None
+            for socket in sockets:
+                ret = get_other_socket( socket )
+            if ret is not None:
+                return ret
         else:
-            return get_other_socket(other.node.outputs[0])
-    else:
-        return other
+            return other
+    return None
 
 def get_socket_data(socket):
     other = get_other_socket(socket)
     if socket.bl_idname == "sort_dummy_socket":
         socket = get_other_socket(socket)
+    # this could happen when connecting socket from group input/output node or shader group input node to a reroute node connects nothing
+    # in which case there will be no way to deduce the type and name of the newly created socket.
+    if socket is None:
+        return '' , ''
     return socket.name, socket.bl_idname
 
 def generate_inputs(tree):
@@ -262,6 +270,9 @@ def generate_inputs(tree):
         for idx, socket in enumerate(input_node.outputs):
             if socket.is_linked:
                 socket_name, socket_bl_idname = get_socket_data(socket)
+                if socket_name == '':
+                    assert( socket_bl_idname == '' )
+                    continue
                 socket_name = getUniqueSocketName( existed_name , socket_name )
                 in_socket.append([socket_name, socket_bl_idname])
                 existed_name.append( socket_name )
@@ -275,6 +286,9 @@ def generate_outputs(tree):
         for socket in output_node.inputs:
             if socket.is_linked:
                 socket_name, socket_bl_idname = get_socket_data(socket)
+                if socket_name == '':
+                    assert( socket_bl_idname == '' )
+                    continue
                 socket_name = getUniqueSocketName( existed_name , socket_name )
                 out_socket.append((socket_name, socket_bl_idname))
                 existed_name.append( socket_name )
@@ -641,8 +655,22 @@ class SORT_Node_Group_Make_Operator(bpy.types.Operator):
         def get_links(tree):
             def keys_sort(link):
                 return (socket_index(link.to_socket), link.from_node.location.y)
-            input_links = sorted([l for l in tree.links if (not l.from_node.select) and (l.to_node.select)], key=keys_sort)
-            output_links = sorted([l for l in tree.links if (l.from_node.select) and (not l.to_node.select)], key=keys_sort)
+            def is_input_connection_valid( link ):
+                if ( (not link.from_node.select) and (link.to_node.select) ) is False:
+                    return False
+                if link.to_node.bl_idname != 'NodeReroute':
+                    return True
+                return get_other_socket( link.from_socket ) is not None
+
+            def is_output_connection_valid( link ):
+                if ( (link.from_node.select) and (not link.to_node.select) ) is False:
+                    return False
+                if link.from_node.bl_idname != 'NodeReroute':
+                    return True
+                return get_other_socket( link.to_socket ) is not None
+
+            input_links = sorted([l for l in tree.links if is_input_connection_valid(l) ], key=keys_sort)
+            output_links = sorted([l for l in tree.links if is_output_connection_valid(l) ], key=keys_sort)
             return dict(input=input_links, output=output_links)
 
         # get average location of all nodes picked
@@ -717,7 +745,9 @@ class SORT_Node_Group_Make_Operator(bpy.types.Operator):
             
         tree = context.space_data.edit_tree
         for node in tree.nodes:
-            if node.isGroupInputNode() or node.isGroupOutputNode() or node.isShaderGroupInputNode():
+            if node.bl_idname == 'NodeReroute':
+                continue
+            if node.isGroupInputNode() or node.isGroupOutputNode() or node.isShaderGroupInputNode() or node.bl_idname == SORTNodeOutput.bl_idname:
                 node.select = False
 
         nodes = [node for node in tree.nodes if node.select]
@@ -896,8 +926,9 @@ class SORTNodeExposedInputs(SORTShadingNode):
         if len(last_output.links) == 0:
             return
 
-        link = last_output.links[0]
-        to_socket = link.to_socket
+        to_socket = get_other_socket(last_output)
+        if to_socket is None:
+            return
 
         socket_names = []
         for output in self.outputs:
@@ -998,6 +1029,9 @@ class SORTNodeSocketConnectorHelper:
             return
 
         if socket_list[-1].is_linked:
+            if get_other_socket( socket_list[-1] ) is None:
+                return
+
             socket = socket_list[-1]
             cls = update_cls(tree)
             socket_names = []
