@@ -109,17 +109,14 @@ def lookat_camera(camera):
     forwards = -matrix[2]       # get forward direction
 
     # get focal distance for DOF effect
-    """
-    if camera.data.dof_object is not None:
-        focal_object = camera.data.dof_object
+    if camera.data.dof.focus_object is not None:
+        focal_object = camera.data.dof.focus_object
         fo_mat = MatrixBlenderToSort() @ focal_object.matrix_world
         delta = fo_mat.to_translation() - pos.to_3d()
         focal_distance = delta.dot(forwards)
     else:
-        focal_distance = max( camera.data.dof_distance , 0.01 )
-    """
+        focal_distance = max( camera.data.dof.focus_distance , 0.01 )
 
-    focal_distance = 0.01
     scaled_forward = mathutils.Vector((focal_distance * forwards[0], focal_distance * forwards[1], focal_distance * forwards[2] , 0.0))
     target = (pos + scaled_forward)  # viewing target
     up = matrix[1]                   # up direction
@@ -220,8 +217,7 @@ def export_scene(depsgraph, fs):
     fs.serialize(vec3_to_tuple(pos))
     fs.serialize(vec3_to_tuple(up))
     fs.serialize(vec3_to_tuple(target))
-    fs.serialize( 0.0 )
-    #fs.serialize(camera.data.sort_camera.sort_camera_lens.lens_size)
+    fs.serialize(camera.data.sort_data.lens_size)
     fs.serialize((sensor_w,sensor_h))
     fs.serialize(int(sensor_fit))
     fs.serialize((aspect_ratio_x,aspect_ratio_y))

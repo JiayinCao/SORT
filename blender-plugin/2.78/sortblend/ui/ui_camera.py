@@ -21,9 +21,10 @@ from bl_ui import properties_data_camera
 base.compatify_class(properties_data_camera.DATA_PT_lens)
 base.compatify_class(properties_data_camera.DATA_PT_camera)
 
+# attach customized properties to particles
 @base.register_class
 class SORTCameraData(bpy.types.PropertyGroup):
-    sort_camera_lens = bpy.props.FloatProperty( name='Camera Lens', default=0.0)
+    lens_size = bpy.props.FloatProperty( name='Lens Size', default=0.0)
     @classmethod
     def register(cls):
         bpy.types.Camera.sort_data = bpy.props.PointerProperty(name="SORT Data", type=cls)
@@ -51,4 +52,4 @@ class CameraDOFPanel(SORTCameraPanel, bpy.types.Panel):
         row = layout.row()
         row.active = ( camera.dof_object == None )
         row.prop(camera, "dof_distance")
-        layout.prop(camera.sort_data, "sort_camera_lens")
+        layout.prop(camera.sort_data, "lens_size")

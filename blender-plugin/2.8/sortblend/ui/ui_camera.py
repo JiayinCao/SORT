@@ -14,39 +14,25 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
-import bl_ui
-from .. import base
 from bl_ui import properties_data_camera
-#from extensions_framework import declarative_property_group
+from .. import base
 
-#base.compatify_class(properties_data_camera.DATA_PT_lens)
-#base.compatify_class(properties_data_camera.DATA_PT_camera)
+import bl_ui
+base.compatify_class(properties_data_camera.DATA_PT_lens)
+base.compatify_class(properties_data_camera.DATA_PT_camera)
 
-# attach customized properties in camera
-#@base.register_class
-class sort_camera(bpy.types.PropertyGroup):
-    ef_attach_to = ['Camera']
-    controls = []
-    visibility = {}
-    properties = []
-
-#@base.register_class
-class sort_camera_lens(bpy.types.PropertyGroup):
-    ef_attach_to = ['sort_camera']
-    controls = []
-    properties = [{ 'type': 'float',
-                    'attr': 'lens_size',
-                    'name': 'Size of Camera Lens',
-                    'description': 'The size of lens in camera',
-                    'default': 0.0,
-                    'min': 0.0,
-                    'soft_min': 0.0,
-                    'max': 1e3,
-                    'soft_max': 1e3,
-                    'save_in_preset': True }]
-
+# attach customized properties to particles
 @base.register_class
-class SORTCameraPanel(bl_ui.properties_data_camera.CameraButtonsPanel):
+class SORTCameraData(bpy.types.PropertyGroup):
+    lens_size : bpy.props.FloatProperty( name='Lens Size', default=0.0)
+    @classmethod
+    def register(cls):
+        bpy.types.Camera.sort_data = bpy.props.PointerProperty(name="SORT Data", type=cls)
+    @classmethod
+    def unregister(cls):
+        del bpy.types.Camera.sort_data
+
+class SORTCameraPanel(properties_data_camera.CameraButtonsPanel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "data"
@@ -57,13 +43,13 @@ class SORTCameraPanel(bl_ui.properties_data_camera.CameraButtonsPanel):
         return super().poll(context) and rd.engine in cls.COMPAT_ENGINES
 
 @base.register_class
-class CameraDOFPanel(bpy.types.Panel):
+class CAMERA_PT_SORTDOFPanel(SORTCameraPanel, bpy.types.Panel):
     bl_label = 'Camera Depth of Field'
     def draw(self, context):
         layout = self.layout
         camera = context.camera
-        layout.prop(camera, "dof_object")
+        layout.prop(camera.dof, "focus_object")
         row = layout.row()
-        row.active = ( camera.dof_object == None )
-        row.prop(camera, "dof_distance")
-        layout.prop(camera.sort_camera.sort_camera_lens, "lens_size")
+        row.active = ( camera.dof.focus_object == None )
+        row.prop(camera.dof, "focus_distance")
+        layout.prop(camera.sort_data, "lens_size")

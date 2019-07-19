@@ -212,7 +212,7 @@ def export_scene(scene, fs):
     fs.serialize(vec3_to_tuple(pos))
     fs.serialize(vec3_to_tuple(up))
     fs.serialize(vec3_to_tuple(target))
-    fs.serialize(camera.data.sort_data.sort_camera_lens)
+    fs.serialize(camera.data.sort_data.lens_size)
     fs.serialize((sensor_w,sensor_h))
     fs.serialize(int(sensor_fit))
     fs.serialize((aspect_ratio_x,aspect_ratio_y))

@@ -62,7 +62,7 @@ class SORTParticlePanel(properties_particle.ParticleButtonsPanel):
         return psys.settings.type == 'HAIR' and (engine in cls.COMPAT_ENGINES)
 
 @base.register_class
-class SORT_PT_HairSettingPanel(SORTParticlePanel, bpy.types.Panel):
+class HAIR_PT_SORTSettingPanel(SORTParticlePanel, bpy.types.Panel):
     bl_label = 'SORT Hair Property'
     def draw(self, context):
         layout = self.layout

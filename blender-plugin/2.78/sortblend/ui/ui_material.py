@@ -268,7 +268,7 @@ class SORT_OT_node_socket_restore_output_node(bpy.types.Operator):
         return {"FINISHED"}
 
 @base.register_class
-class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
+class MATERIAL_PT_ParameterPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Parameters'
 
     @classmethod

@@ -30,10 +30,9 @@ from . import material
 from .ui import ui_render
 from .ui import ui_particle
 from .ui import ui_world
-#from .ui import ui_camera
+from .ui import ui_camera
 from .ui import ui_light
 from .ui import ui_material
-#from .ui import ui_space
 
 @base.register_class
 class SORTAddonPreferences(bpy.types.AddonPreferences):
@@ -45,7 +44,7 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
 def register():
     # register all classes in this plugin
     base.register()
-
+    
     # this is the place for initializing group node information saved last time
     bpy.app.handlers.load_post.append(material.node_groups_load_post)
 

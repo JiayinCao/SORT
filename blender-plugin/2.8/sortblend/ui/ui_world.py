@@ -28,7 +28,7 @@ class SORTHDRSky(bpy.types.PropertyGroup):
         del bpy.types.Scene.sort_hdr_sky
 
 @base.register_class
-class SORT_PT_HDRSkyPanel(bpy.types.Panel):
+class HDRSKY_PT_SORTPanel(bpy.types.Panel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "world"
