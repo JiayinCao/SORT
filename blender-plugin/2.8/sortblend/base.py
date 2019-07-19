@@ -15,28 +15,32 @@
 
 import bpy
 
+# a global container is used to keep all lambda function to register classes
 REGISTRARS = []
 def registrar(register, unregister, name=None):
     global REGISTRARS
     if name is None or not [True for _, _, n in REGISTRARS if n == name]:
         REGISTRARS.append((register, unregister, name))
 
-def register():
-    for r, _, _ in REGISTRARS:
-        r()
-
-def unregister():
-    for _, u, _ in reversed(REGISTRARS):
-        u()
-
-def register_class(cls):
-    registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)
-    return cls
-
+# this function registers the internal panel to SORT renderer so that they appear when SORT is the rendering engine
 def compatify_class(cls):
     def reg():
         cls.COMPAT_ENGINES.add('SORT')
     def unreg():
         cls.COMPAT_ENGINES.remove('SORT')
     registrar(reg, unreg, cls.__name__)
+
+# register a class in blender system, this function just 
+def register_class(cls):
+    registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)
     return cls
+
+# trigger the real registering of all lambda function in the container
+def register():
+    for r, _, _ in REGISTRARS:
+        r()
+
+# unregister everything already registered
+def unregister():
+    for _, u, _ in reversed(REGISTRARS):
+        u()

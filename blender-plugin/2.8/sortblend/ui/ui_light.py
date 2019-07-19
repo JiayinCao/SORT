@@ -15,28 +15,12 @@
 
 import bpy
 import bl_ui
+from bl_ui import properties_data_light
 from .. import base
 
-# attach customized properties in lamp
-#@base.register_class
-class sort_lamp(bpy.types.PropertyGroup):
-    ef_attach_to = ['Lamp']
-    controls = []
-    visibility = {}
-    properties = []
+base.compatify_class(properties_data_light.DATA_PT_EEVEE_light)
 
-#@base.register_class
-class sort_lamp_hemi(bpy.types.PropertyGroup):
-    ef_attach_to = ['sort_lamp']
-    controls = []
-    properties = [{ 'type': 'string',
-                    'subtype': 'FILE_PATH',
-                    'attr': 'envmap_file',
-                    'name': 'HDRI Map',
-                    'description': 'EXR image to use for lighting (in latitude-longitude format)',
-                    'default': '',
-                    'save_in_preset': True }]
-
+'''
 class SORTLampPanel(bl_ui.properties_data_light.DataButtonsPanel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
@@ -59,7 +43,6 @@ class LampPanel(SORTLampPanel, bpy.types.Panel):
             self.layout.prop(lamp, "color")
             self.layout.prop(lamp, "energy")
 
-#@base.register_class
 class LampHemiPanel(SORTLampPanel, bpy.types.Panel):
     bl_label = 'Lamp Hemi Property'
     sort_lamp_type = 'HEMI'
@@ -88,3 +71,4 @@ class LampSpotPanel(SORTLampPanel, bpy.types.Panel):
     def draw(self, context):
         self.layout.prop( context.lamp , "spot_size" , text="Spot Light Range" )
         self.layout.prop( context.lamp , "spot_blend" , text="Spot Light Blend" )
+'''

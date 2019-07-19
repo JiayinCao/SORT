@@ -89,6 +89,11 @@ class MATERIAL_PT_MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
         split = layout.split(factor=0.75)
         if ob:
             split.template_ID(ob, "active_material", new="sort_material.new")
+            row = split.row()
+            if context.material_slot:
+                row.prop(context.material_slot, "link", text="")
+            else:
+                row.label()
         elif context.material:
             split.template_ID(context.space_data, "pin_id")
             split.separator()

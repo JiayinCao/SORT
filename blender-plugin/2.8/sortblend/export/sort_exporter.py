@@ -289,8 +289,8 @@ def export_hair(ps, obj, scene, fs):
 
     vert_cnt = 0
     hair_step = ps.settings.render_step
-    width_tip = ps.settings.sort_hair.hair_tip
-    width_bottom = ps.settings.sort_hair.hair_bottom
+    width_tip = ps.settings.sort_data.fur_tip
+    width_bottom = ps.settings.sort_data.fur_bottom
 
     # extract the material of the hair
     mat_local_index = ps.settings.material

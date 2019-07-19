@@ -13,6 +13,16 @@
 #    You should have received a copy of the GNU General Public License along with
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
+bl_info = {
+    "name": "SORT",
+    "description": "An open-source ray tracer project",
+    "author": "Jiayin Cao",
+    "version": (1, 0, 0),
+    "blender": (2, 75, 0),
+    "location": "Info > RenderEngine",
+    "warning": "Still under development", # used for warning icon and text in addons panel
+    "category": "Render"}
+
 import bpy
 from . import base
 from . import renderer
@@ -23,16 +33,6 @@ from .ui import ui_lamp
 from .ui import ui_material
 from .ui import ui_particle
 from .ui import ui_space
-
-bl_info = {
-    "name": "SORT",
-    "description": "An open-source ray tracer project",
-    "author": "Jiayin Cao",
-    "version": (0, 0, 1),
-    "blender": (2, 75, 0),
-    "location": "Info > RenderEngine",
-    "warning": "Still under development", # used for warning icon and text in addons panel
-    "category": "Render"}
 
 @base.register_class
 class SORTAddonPreferences(bpy.types.AddonPreferences):

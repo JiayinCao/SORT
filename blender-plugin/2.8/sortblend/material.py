@@ -233,22 +233,22 @@ def replace_socket(socket, new_type, new_name=None, new_pos=None):
 
     return new_socket
 
-def get_socket_data(socket):
-    def get_other_socket(socket):
-        if not socket.is_linked:
-            return None
+def get_other_socket(socket):
+    if not socket.is_linked:
+        return None
+    if not socket.is_output:
+        other = socket.links[0].from_socket
+    else:
+        other = socket.links[0].to_socket
+    if other.node.bl_idname == 'NodeReroute':
         if not socket.is_output:
-            other = socket.links[0].from_socket
+            return get_other_socket(other.node.inputs[0])
         else:
-            other = socket.links[0].to_socket
-        if other.node.bl_idname == 'NodeReroute':
-            if not socket.is_output:
-                return get_other_socket(other.node.inputs[0])
-            else:
-                return get_other_socket(other.node.outputs[0])
-        else:
-            return other
+            return get_other_socket(other.node.outputs[0])
+    else:
+        return other
 
+def get_socket_data(socket):
     other = get_other_socket(socket)
     if socket.bl_idname == "sort_dummy_socket":
         socket = get_other_socket(socket)
@@ -412,6 +412,9 @@ class SORTNodeSocket:
     # this is a very hacky way to support name update in Blender because I have no idea how to get callback function from native str class
     sort_label : bpy.props.StringProperty( name = '' , default = 'default' , update = update_socket_name )
 
+    def __int__(self):
+        self.sort_label.default = self.name
+
     # this is not an inherited function
     def draw_label(self, context, layout, node, text):
         def get_from_socket(socket):
@@ -445,8 +448,6 @@ class SORTNodeSocket:
 
     def get_socket_data_type(self):
         return 'None'
-    def __int__(self):
-        self.sort_label.default = self.name
     
     def isDummySocket(self):
         return False
@@ -967,7 +968,6 @@ class SORTNodeExposedInputs(SORTShadingNode):
 #------------------------------------------------------------------------------------#
 #                                  Shader Group Nodes                                #
 #------------------------------------------------------------------------------------#
-
 map_lookup = {'outputs': 'inputs', 'inputs': 'outputs'}
 class SORTNodeSocketConnectorHelper:
     node_kind : bpy.props.StringProperty()

@@ -33,7 +33,7 @@ base.compatify_class(properties_particle.PARTICLE_PT_rotation)
 base.compatify_class(properties_particle.PARTICLE_PT_velocity)
 base.compatify_class(properties_particle.PARTICLE_PT_vertexgroups)
 
-# attach customized properties in particles
+# attach customized properties to particles
 @base.register_class
 class SORTParticleData(bpy.types.PropertyGroup):
     fur_tip = bpy.props.FloatProperty( name='Fur Tip', default=0.0)
@@ -45,7 +45,7 @@ class SORTParticleData(bpy.types.PropertyGroup):
     def unregister(cls):
         del bpy.types.ParticleSettings.sort_data
 
-class SORTParticlePanel(bl_ui.properties_particle.ParticleButtonsPanel):
+class SORTParticlePanel(properties_particle.ParticleButtonsPanel):
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "particle"
@@ -62,7 +62,7 @@ class SORTParticlePanel(bl_ui.properties_particle.ParticleButtonsPanel):
         return psys.settings.type == 'HAIR' and (engine in cls.COMPAT_ENGINES)
 
 @base.register_class
-class HairPanel(SORTParticlePanel, bpy.types.Panel):
+class SORT_PT_HairSettingPanel(SORTParticlePanel, bpy.types.Panel):
     bl_label = 'SORT Hair Property'
     def draw(self, context):
         layout = self.layout

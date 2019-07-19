@@ -16,7 +16,6 @@
 import bpy
 from .. import material
 from .. import base
-from bl_ui import properties_data_camera
 
 class SORTMaterialPanel:
     bl_space_type = "PROPERTIES"
@@ -28,17 +27,53 @@ class SORTMaterialPanel:
     def poll(cls, context):
         return context.scene.render.engine in cls.COMPAT_ENGINES
 
+class SORT_new_material_base(bpy.types.Operator):
+    bl_label = "New"
+
+    def execute(self, context):
+        # currently picked object
+        obj = bpy.context.object
+
+        # add the new material
+        mat = bpy.data.materials.new( 'Material' )
+
+        # initialize default sort shader nodes
+        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
+
+        output = mat.sort_material.nodes.new('SORTNodeOutput')
+        default = mat.sort_material.nodes.new('SORTNode_Material_Diffuse')
+        output.location[0] += 200
+        output.location[1] += 200
+        default.location[1] += 200
+        mat.sort_material.links.new(default.outputs[0], output.inputs[0])
+
+        # add a new material slot or assign the newly added material in the picked empty slot
+        materials = obj.data.materials
+        cur_mat_id = obj.active_material_index
+        if cur_mat_id >= 0 and cur_mat_id < len(materials) and materials[cur_mat_id] is None:
+            materials[cur_mat_id] = mat
+        else:
+            materials.append(mat)
+
+        return { 'FINISHED' }
+
+@base.register_class
+class SORT_new_material(SORT_new_material_base):
+    """Add a new material"""
+    bl_idname = "sort_material.new"
+
+@base.register_class
+class SORT_new_material_menu(SORT_new_material_base):
+    """Add a new material"""
+    bl_idname = "node.new_node_tree"
+    
 @base.register_class
 class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
     bl_label = 'Material Slot'
 
     def draw(self, context):
         layout = self.layout
-
-        mat = context.material
         ob = context.object
-        slot = context.material_slot
-        space = context.space_data
 
         if ob:
             row = layout.row()
@@ -55,12 +90,12 @@ class MaterialSlotPanel(SORTMaterialPanel, bpy.types.Panel):
         if ob:
             split.template_ID(ob, "active_material", new="sort_material.new")
             row = split.row()
-            if slot:
-                row.prop(slot, "link", text="")
+            if context.material_slot:
+                row.prop(context.material_slot, "link", text="")
             else:
                 row.label()
-        elif mat:
-            split.template_ID(space, "pin_id")
+        elif context.material:
+            split.template_ID(context.space_data, "pin_id")
             split.separator()
 
 @base.register_class
@@ -83,101 +118,26 @@ class SORT_OT_use_sort_node(bpy.types.Operator):
         return {"FINISHED"}
 
 @base.register_class
-class SORT_use_shading_nodes(bpy.types.Operator):
-    """Enable nodes on a material, world or lamp"""
-    bl_idname = "sort.use_shading_nodes"
-    bl_label = "Use Nodes"
-    idtype = bpy.props.StringProperty(name="ID Type", default="material")
-
-    @classmethod
-    def poll(cls, context):
-        return (getattr(context, "material", False) or getattr(context, "world", False) or
-                getattr(context, "lamp", False))
+class SORT_OT_node_socket_restore_shader_group_input(bpy.types.Operator):
+    """Move socket"""
+    bl_idname = "sort.node_socket_restore_shader_group_input"
+    bl_label = "Restore Shader Group Input"
 
     def execute(self, context):
-        mat = context.material
-        idtype = self.properties.idtype
-        context_data = {'material':context.material, 'lamp':context.lamp }
-        idblock = context_data[idtype]
+        # get current edited tree
+        tree = context.material.sort_material
 
-        group_name = 'SORTGroup_' + idblock.name
+        # get property location for placing the input node
+        loc , _ = material.get_io_node_locations( tree.nodes )
 
-        nt = bpy.data.node_groups.new(group_name, type='SORTShaderNodeTree')
-        nt.use_fake_user = True
+        # create an input node and place it on the left of all nodes
+        node_type = 'sort_shader_node_group_input' if material.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
+        node_input = tree.nodes.new(node_type)    
+        node_input.location = loc
+        node_input.selected = False
+        node_input.tree = tree
 
-        mat.sort_material = nt
-        output = nt.nodes.new('SORTNodeOutput')
-        default = nt.nodes.new('SORTNode_Material_Diffuse')
-        default.location = output.location
-        default.location[0] -= 300
-        nt.links.new(default.outputs[0], output.inputs[0])
-        return {'FINISHED'}
-
-@base.register_class
-class SORT_new_material(bpy.types.Operator):
-    """Add a new material"""
-    bl_idname = "sort_material.new"
-    bl_label = "New"
-
-    def execute(self, context):
-        # currently picked object
-        obj = bpy.context.object
-
-        # add the new material
-        mat = bpy.data.materials.new( 'Material' )
-
-        # initialize default sort shader nodes
-        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
-
-        output = mat.sort_material.nodes.new('SORTNodeOutput')
-        default = mat.sort_material.nodes.new('SORTNode_Material_Diffuse')
-        output.location[0] += 200
-        output.location[1] += 200
-        default.location[1] += 200
-        mat.sort_material.links.new(default.outputs[0], output.inputs[0])
-
-        # add a new material slot or assign the newly added material in the picked empty slot
-        materials = obj.data.materials
-        cur_mat_id = obj.active_material_index
-        if cur_mat_id >= 0 and cur_mat_id < len(materials) and materials[cur_mat_id] is None:
-            materials[cur_mat_id] = mat
-        else:
-            materials.append(mat)
-
-        return { 'FINISHED' }
-
-@base.register_class
-class SORT_new_material_menu(bpy.types.Operator):
-    """Add a new material"""
-    bl_idname = "node.new_node_tree"
-    bl_label = "New"
-
-    def execute(self, context):
-        # currently picked object
-        obj = bpy.context.object
-
-        # add the new material
-        mat = bpy.data.materials.new( 'Material' )
-
-        # initialize default sort shader nodes
-        mat.sort_material = bpy.data.node_groups.new( 'SORT_(' + mat.name + ')' , type=material.SORTShaderNodeTree.bl_idname)
-
-        output = mat.sort_material.nodes.new('SORTNodeOutput')
-        default = mat.sort_material.nodes.new('SORTNode_Material_Diffuse')
-        output.location[0] += 200
-        output.location[1] += 200
-        default.location[1] += 200
-        mat.sort_material.links.new(default.outputs[0], output.inputs[0])
-
-        # add a new material slot or assign the newly added material in the picked empty slot
-        materials = obj.data.materials
-        cur_mat_id = obj.active_material_index
-        if cur_mat_id >= 0 and cur_mat_id < len(materials) and materials[cur_mat_id] is None:
-            materials[cur_mat_id] = mat
-        else:
-            materials.append(mat)
-
-        return { 'FINISHED' }
+        return {"FINISHED"}
 
 @base.register_class
 class SORT_OT_node_socket_base(bpy.types.Operator):
@@ -302,28 +262,6 @@ class SORT_OT_node_socket_restore_output_node(bpy.types.Operator):
 
         node_input = nodes.new('sort_shader_node_group_output')
         node_input.location = (300, 0)
-        node_input.selected = False
-        node_input.tree = tree
-
-        return {"FINISHED"}
-
-@base.register_class
-class SORT_OT_node_socket_restore_shader_group_input(bpy.types.Operator):
-    """Move socket"""
-    bl_idname = "sort.node_socket_restore_shader_group_input"
-    bl_label = "Restore Shader Group Input"
-
-    def execute(self, context):
-        # get current edited tree
-        tree = context.material.sort_material
-
-        # get property location for placing the input node
-        loc , _ = material.get_io_node_locations( tree.nodes )
-
-        # create an input node and place it on the left of all nodes
-        node_type = 'sort_shader_node_group_input' if material.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
-        node_input = tree.nodes.new(node_type)    
-        node_input.location = loc
         node_input.selected = False
         node_input.tree = tree
 
