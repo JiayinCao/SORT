@@ -15,10 +15,6 @@
 
 import bpy
 import bl_ui
-from bl_ui import properties_data_light
-from .. import base
-
-base.compatify_class(properties_data_light.DATA_PT_EEVEE_light)
 
 '''
 class SORTLampPanel(bl_ui.properties_data_light.DataButtonsPanel):

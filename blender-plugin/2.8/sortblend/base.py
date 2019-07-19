@@ -22,25 +22,52 @@ def registrar(register, unregister, name=None):
     if name is None or not [True for _, _, n in REGISTRARS if n == name]:
         REGISTRARS.append((register, unregister, name))
 
-# this function registers the internal panel to SORT renderer so that they appear when SORT is the rendering engine
-def compatify_class(cls):
-    def reg():
-        cls.COMPAT_ENGINES.add('SORT')
-    def unreg():
-        cls.COMPAT_ENGINES.remove('SORT')
-    registrar(reg, unreg, cls.__name__)
-
 # register a class in blender system, this function just 
 def register_class(cls):
     registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)
     return cls
 
+# register some internal SORT compatible panels
+def get_sort_compatible_panels():
+    compatible_panels = {
+        'RENDER_PT_dimensions',
+        'DATA_PT_lens',
+        'DATA_PT_camera',
+        'DATA_PT_EEVEE_light',
+        'PARTICLE_PT_boidbrain',
+        'PARTICLE_PT_cache',
+        'PARTICLE_PT_children',
+        'PARTICLE_PT_context_particles',
+        'PARTICLE_PT_draw',
+        'PARTICLE_PT_emission',
+        'PARTICLE_PT_field_weights',
+        'PARTICLE_PT_force_fields',
+        'PARTICLE_PT_hair_dynamics',
+        'PARTICLE_PT_physics',
+        'PARTICLE_PT_render',
+        'PARTICLE_PT_rotation',
+        'PARTICLE_PT_velocity',
+        'PARTICLE_PT_vertexgroups'
+    }
+    panels = []
+    for panel in bpy.types.Panel.__subclasses__():
+        if hasattr(panel, 'COMPAT_ENGINES') and 'BLENDER_RENDER' in panel.COMPAT_ENGINES:
+            if panel.__name__ in compatible_panels:
+                panels.append(panel)
+    return panels
+
 # trigger the real registering of all lambda function in the container
 def register():
     for r, _, _ in REGISTRARS:
         r()
+    
+    for t in get_sort_compatible_panels():
+        t.COMPAT_ENGINES.add('SORT')
 
 # unregister everything already registered
 def unregister():
+    for t in get_sort_compatible_panels():
+        t.COMPAT_ENGINES.remove('SORT')
+
     for _, u, _ in reversed(REGISTRARS):
         u()

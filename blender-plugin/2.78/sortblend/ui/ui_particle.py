@@ -14,24 +14,8 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
-import bl_ui
 from .. import base
 from bl_ui import properties_particle
-
-base.compatify_class(properties_particle.PARTICLE_PT_boidbrain)
-base.compatify_class(properties_particle.PARTICLE_PT_cache)
-base.compatify_class(properties_particle.PARTICLE_PT_children)
-base.compatify_class(properties_particle.PARTICLE_PT_context_particles)
-base.compatify_class(properties_particle.PARTICLE_PT_draw)
-base.compatify_class(properties_particle.PARTICLE_PT_emission)
-base.compatify_class(properties_particle.PARTICLE_PT_field_weights)
-base.compatify_class(properties_particle.PARTICLE_PT_force_fields)
-base.compatify_class(properties_particle.PARTICLE_PT_hair_dynamics)
-base.compatify_class(properties_particle.PARTICLE_PT_physics)
-base.compatify_class(properties_particle.PARTICLE_PT_render)
-base.compatify_class(properties_particle.PARTICLE_PT_rotation)
-base.compatify_class(properties_particle.PARTICLE_PT_velocity)
-base.compatify_class(properties_particle.PARTICLE_PT_vertexgroups)
 
 # attach customized properties to particles
 @base.register_class

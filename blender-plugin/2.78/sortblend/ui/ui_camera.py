@@ -18,9 +18,6 @@ import bl_ui
 from .. import base
 from bl_ui import properties_data_camera
 
-base.compatify_class(properties_data_camera.DATA_PT_lens)
-base.compatify_class(properties_data_camera.DATA_PT_camera)
-
 # attach customized properties to particles
 @base.register_class
 class SORTCameraData(bpy.types.PropertyGroup):

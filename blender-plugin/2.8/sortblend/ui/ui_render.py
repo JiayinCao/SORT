@@ -15,15 +15,10 @@
 
 import bpy
 import os
-import bl_ui
 import platform
 import subprocess
 from .. import exporter
 from .. import base
-from bl_ui import properties_render
-
-#base.compatify_class(properties_render.RENDER_PT_render)
-#base.compatify_class(properties_render.RENDER_PT_dimensions)
 
 # attach customized properties in particles
 @base.register_class
