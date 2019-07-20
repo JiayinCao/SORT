@@ -33,7 +33,6 @@ def get_sort_compatible_panels():
         'RENDER_PT_dimensions',
         'DATA_PT_lens',
         'DATA_PT_camera',
-        'DATA_PT_EEVEE_light',
         'PARTICLE_PT_boidbrain',
         'PARTICLE_PT_cache',
         'PARTICLE_PT_children',
