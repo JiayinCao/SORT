@@ -1308,10 +1308,10 @@ class SORTNode_Material_Mirror(SORTShadingNode):
     bl_label = 'Mirror'
     bl_idname = 'SORTNode_Material_Mirror'
     osl_shader = '''
-        shader Mirror( color BaseColor = @ ,
+        shader Mirror( color Color = @ ,
                        normal Normal = @ ,
                        output closure color Result = color(0) ){
-            Result = mirror( BaseColor , Normal );
+            Result = mirror( Color , Normal );
         }
     '''
     def init(self, context):
