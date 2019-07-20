@@ -328,38 +328,41 @@ def export_global_config(scene, fs, sort_resource_path):
     sort_output_file = 'blender_generated.exr'
     xres = scene.render.resolution_x * scene.render.resolution_percentage / 100
     yres = scene.render.resolution_y * scene.render.resolution_percentage / 100
-    integrator_type = scene.integrator_type_prop
-    accelerator_type = scene.accelerator_type_prop
+
+    sort_data = scene.sort_data
+
+    integrator_type = sort_data.integrator_type_prop
+    accelerator_type = sort_data.accelerator_type_prop
 
     fs.serialize( 0 )
     fs.serialize( sort_resource_path )
     fs.serialize( sort_output_file )
     fs.serialize( 64 )    # tile size, hard-coded it until I need to update it throught exposed interface later.
-    fs.serialize( int(scene.thread_num_prop) )
-    fs.serialize( int(scene.sampler_count_prop) )
+    fs.serialize( int(sort_data.thread_num_prop) )
+    fs.serialize( int(sort_data.sampler_count_prop) )
     fs.serialize( int(xres) )
     fs.serialize( int(yres) )
     fs.serialize( accelerator_type )
     if accelerator_type == "bvh":
-        fs.serialize( int(scene.bvh_max_node_depth) )
-        fs.serialize( int(scene.bvh_max_pri_in_leaf) )
+        fs.serialize( int(sort_data.bvh_max_node_depth) )
+        fs.serialize( int(sort_data.bvh_max_pri_in_leaf) )
     elif accelerator_type == "KDTree":
-        fs.serialize( int(scene.kdtree_max_node_depth) )
-        fs.serialize( int(scene.kdtree_max_pri_in_leaf) )
+        fs.serialize( int(sort_data.kdtree_max_node_depth) )
+        fs.serialize( int(sort_data.kdtree_max_pri_in_leaf) )
     elif accelerator_type == "OcTree":
-        fs.serialize( int(scene.octree_max_node_depth) )
-        fs.serialize( int(scene.octree_max_pri_in_leaf) )
+        fs.serialize( int(sort_data.octree_max_node_depth) )
+        fs.serialize( int(sort_data.octree_max_pri_in_leaf) )
 
     fs.serialize( integrator_type )
-    fs.serialize( int(scene.inte_max_recur_depth) )
+    fs.serialize( int(sort_data.inte_max_recur_depth) )
     if integrator_type == "AmbientOcclusion":
-        fs.serialize( scene.ao_max_dist )
+        fs.serialize( sort_data.ao_max_dist )
     if integrator_type == "BidirPathTracing" or integrator_type == "LightTracing":
-        fs.serialize( bool(scene.bdpt_mis) )
+        fs.serialize( bool(sort_data.bdpt_mis) )
     if integrator_type == "InstantRadiosity":
-        fs.serialize( scene.ir_light_path_set_num )
-        fs.serialize( scene.ir_light_path_num )
-        fs.serialize( scene.ir_min_dist )
+        fs.serialize( sort_data.ir_light_path_set_num )
+        fs.serialize( sort_data.ir_light_path_num )
+        fs.serialize( sort_data.ir_min_dist )
 
 # warning, this export function is not an optimal version, but it works.
 # I will get back to it some time later.
