@@ -264,6 +264,7 @@ def export_scene(depsgraph, fs):
                 stat = export_hair( ps , eval_ob , scene , fs )
                 total_vert_cnt += stat[0]
                 total_prim_cnt += stat[1]
+            eval_ob.to_mesh_clear()
 
     log( "Total vertices: %d." % total_vert_cnt )
     log( "Total primitives: %d." % total_prim_cnt )

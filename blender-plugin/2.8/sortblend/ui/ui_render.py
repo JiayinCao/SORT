@@ -176,7 +176,7 @@ class SORT_export_debug_scene(bpy.types.Operator):
     bl_idname = "sort.export_debug_scene"
     bl_label = "Export SORT Scene"
     def execute(self, context):
-        depsgraph = context.depsgraph
+        depsgraph = context.evaluated_depsgraph_get()
         exporter.export_blender(depsgraph,True)
         return {'FINISHED'}
 
