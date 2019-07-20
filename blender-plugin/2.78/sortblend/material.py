@@ -745,7 +745,7 @@ class SORT_Node_Group_Make_Operator(bpy.types.Operator):
             
         tree = context.space_data.edit_tree
         for node in tree.nodes:
-            if node.bl_idname == 'NodeReroute':
+            if node.bl_idname == 'NodeReroute' or node.bl_idname == 'NodeFrame':
                 continue
             if node.isGroupInputNode() or node.isGroupOutputNode() or node.isShaderGroupInputNode() or node.bl_idname == SORTNodeOutput.bl_idname:
                 node.select = False
