@@ -17,6 +17,7 @@ import bpy
 import random
 import nodeitems_utils
 from . import base, renderer
+import bpy.utils.previews
 
 SORT_NODE_GROUP_PREFIX = 'SORTGroupName_'
 
