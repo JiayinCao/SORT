@@ -2108,10 +2108,10 @@ class SORTNodeRemappingUV(SORTShadingNode):
     '''
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
-        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'TilingU' )
-        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'TilingV' )
-        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'OffsetU' )
-        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'OffsetV' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'TilingU' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'TilingV' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'OffsetU' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'OffsetV' )
         self.outputs.new( 'SORTNodeSocketUV' , 'Result' )
         self.inputs['TilingU'].default_value = 1.0
         self.inputs['TilingV'].default_value = 1.0

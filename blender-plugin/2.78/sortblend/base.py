@@ -29,41 +29,38 @@ def register_class(cls):
 
 # register some internal SORT compatible panels
 def get_sort_compatible_panels():
-    compatible_panels = {
-        'RENDER_PT_render',
-        'RENDER_PT_dimensions',
-        'DATA_PT_lens',
-        'DATA_PT_camera',
-        'DATA_PT_EEVEE_light',
-        'PARTICLE_PT_boidbrain',
-        'PARTICLE_PT_cache',
-        'PARTICLE_PT_children',
-        'PARTICLE_PT_context_particles',
-        'PARTICLE_PT_draw',
-        'PARTICLE_PT_emission',
-        'PARTICLE_PT_field_weights',
-        'PARTICLE_PT_force_fields',
-        'PARTICLE_PT_hair_dynamics',
-        'PARTICLE_PT_physics',
-        'PARTICLE_PT_render',
-        'PARTICLE_PT_rotation',
-        'PARTICLE_PT_velocity',
-        'PARTICLE_PT_vertexgroups',
-        'DATA_PT_normals',
-        'DATA_PT_context_mesh',
-        'DATA_PT_texture_space',
-        'DATA_PT_vertex_groups',
-        'DATA_PT_shape_keys',
-        'DATA_PT_customdata',
-        'DATA_PT_vertex_colors',
-        'DATA_PT_uv_texture'
-    }
-    panels = []
-    for panel in bpy.types.Panel.__subclasses__():
-        if hasattr(panel, 'COMPAT_ENGINES') and 'BLENDER_RENDER' in panel.COMPAT_ENGINES:
-            if panel.__name__ in compatible_panels:
-                panels.append(panel)
-    return panels
+    def is_panel_compatible(panel):
+        compatible_panels = {
+            'RENDER_PT_render',
+            'RENDER_PT_dimensions',
+            'DATA_PT_lens',
+            'DATA_PT_camera',
+            'DATA_PT_EEVEE_light',
+            'PARTICLE_PT_boidbrain',
+            'PARTICLE_PT_cache',
+            'PARTICLE_PT_children',
+            'PARTICLE_PT_context_particles',
+            'PARTICLE_PT_draw',
+            'PARTICLE_PT_emission',
+            'PARTICLE_PT_field_weights',
+            'PARTICLE_PT_force_fields',
+            'PARTICLE_PT_hair_dynamics',
+            'PARTICLE_PT_physics',
+            'PARTICLE_PT_render',
+            'PARTICLE_PT_rotation',
+            'PARTICLE_PT_velocity',
+            'PARTICLE_PT_vertexgroups',
+            'DATA_PT_normals',
+            'DATA_PT_context_mesh',
+            'DATA_PT_texture_space',
+            'DATA_PT_vertex_groups',
+            'DATA_PT_shape_keys',
+            'DATA_PT_customdata',
+            'DATA_PT_vertex_colors',
+            'DATA_PT_uv_texture'
+        }
+        return hasattr(panel, 'COMPAT_ENGINES') and 'BLENDER_RENDER' in panel.COMPAT_ENGINES and panel.__name__ in compatible_panels
+    return [panel for panel in bpy.types.Panel.__subclasses__() if is_panel_compatible(panel)]
 
 # trigger the real registering of all lambda function in the container
 def register():
