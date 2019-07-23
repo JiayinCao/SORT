@@ -59,7 +59,7 @@ Compiling SORT with other tools, like [CodeBlock](http://www.codeblocks.org/), [
 ## Ubuntu
 Unlike the other two platforms, for which SORT has packed all necessary libararies in the dependency, some of the depedent libraries is OS dependent. SORT doesn't pack those OS dependent libraries with it, it is programmer's responsibility to setup the correct environment before building it, meaning compiling SORT on Ubuntu requires some basic setup first. 
 
-Following is the tools and library needed by SORT and the correct way to install them on Ubuntu 16.0.x (Xenial)
+Following is the tools and library needed by SORT and the correct way to install them on Ubuntu (Xenial)
 - OpenEXR
   - sudo apt-get install libopenexr-dev
 - Boost
@@ -78,7 +78,7 @@ Following is the tools and library needed by SORT and the correct way to install
   - sudo update-alternatives \-\-config gcc
 - Make sure to download the dependency through 'getdep_ubuntu_xenial.sh'
   
-Things are a bit easier on Ubuntu 18.04.x (Bionic)
+Things are a bit easier on Ubuntu (Bionic)
 - OpenEXR
   - sudo apt-get install libopenexr-dev
 - Boost
@@ -90,11 +90,9 @@ Things are a bit easier on Ubuntu 18.04.x (Bionic)
   - sudo apt-get install -y clang-6.0
 - Make sure to download the dependency through 'getdep_ubuntu_bionic.sh'
 
-There is no need to setup G++ on Ubuntu Bionic because the default version comes with the system is already G++7, which is good enough for SORT to compile.
+There is no need to setup G++ on Ubuntu Bionic since the default version comes with the system is already G++7, which is sufficient for compiling SORT.
 
-Warning, please make sure your Ubuntu version is either Xenial or Bionic, the above dependencies may be different on other version Ubuntus. And most of the above library is needed because of OSL dependencies, another version of the above library may result in failing in the compilation process.
-
-Unfortunately, due to limited resources, I don't have time try and maintain every single version of Ubuntu. If you happen to build SORT on other versions, you probably need to rebuild OSL library by yourself, which you can consult this [OSL main page](https://github.com/imageworks/OpenShadingLanguage) for detail information.
+Unfortunately, due to limited resources, I don't have time trying and maintaining SORT on every single version of Ubuntu. If you happen to build SORT on other version, you need to rebuild OSL library by yourself and setup the rest of the development environment, which you can consult this [OSL main page](https://github.com/imageworks/OpenShadingLanguage) for detail information.
 
 After setting up the environment, the rest of the process is no different from compiling SORT on MacOS except that there is no XCode support. You can either compile it with terminal or VS Code.
 
