@@ -33,7 +33,7 @@ matrix:
         - sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
         - sudo apt-get update
         - sudo apt-get install -y clang-6.0
-        - sudo /bin/sh ./getdep_linux.sh
+        - sudo /bin/sh ./getdep_ubuntu_xenial.sh
         - mkdir proj_release && cd proj_release
         - cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
         - cd .. && mkdir proj_debug && cd proj_debug
