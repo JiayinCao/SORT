@@ -72,7 +72,7 @@ Unlike the other two platforms, for which SORT has packed all necessary libarary
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
   - sudo apt update
   - sudo apt install g++-7 -y
-  - sudo update-alternatives \-\-install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
+  - sudo update-alternatives \-\-install /usr/bin/gcc gcc /usr/bin/gcc-7 60 \-\-slave /usr/bin/g++ g++ /usr/bin/g++-7
   - sudo update-alternatives \-\-config gcc
   
 Warning, please make sure your Ubuntu version is 16.0.x LTS (Xenial), the above dependencies may be different on other version Ubuntus. And most of the above library is needed because of OSL dependencies, another version of the above library may result in failing in the compilation process.
