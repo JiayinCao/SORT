@@ -84,7 +84,7 @@ Things are a bit easier on Ubuntu 18.04.x (Bionic)
   - sudo apt-get install libboost-all-dev
 - Clang 6
   - wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key \| sudo apt-key add -
-  - sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
+  - sudo apt-add-repository "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-6.0 main"
   - sudo apt-get update
   - sudo apt-get install -y clang-6.0
 
