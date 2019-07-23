@@ -22,7 +22,7 @@ This feature has very limited impact on rendering performance. Leaving it on sho
 ## Download Dependencies before Compiling
 SORT uses a third-party library that is not deployed with the source code together. In order to compile SORT successfully, it is mandatory to download the dependencies before compiling. Otherwise, it will have trouble locating the library, leading to the error in CMake generation.
 
-To download the dependency files, run 'getdep_linux.sh' or 'getdep_win.ps1' to retrieve it. However, if the script doesn't work somehow, it is also fine to [download](http://45.63.123.194) the file directly. It is necessary to make sure the platform matches the target platform it runs on. The exact folder to put the dependencies should be 'dependencies' in the root folder. It should look like this SORT_Root/dependencies/easy_profiler/(bin/lib/include).
+To download the dependency files, run 'getdep_mac.sh', 'getdep_win.ps1' or 'getdep_ubuntu_*.sh' to retrieve it. However, if the script doesn't work somehow, it is also fine to [download](http://45.63.123.194) the file directly. It is necessary to make sure the platform matches the target platform it runs on. The exact folder to put the dependencies should be 'dependencies' in the root folder. It should look like this SORT_Root/dependencies/easy_profiler/(bin/lib/include).
 
 The last resort is to compile the library with [source code](https://github.com/yse/easy_profiler) by yourself. This is not suggested to compile the source code of easy_profiler due to potential changes in different version may cause unknown problems in SORT. The pre-compiled ones are more desired than compiling it by yourself.
 
@@ -76,6 +76,7 @@ Following is the tools and library needed by SORT and the correct way to install
   - sudo apt install g++-7 -y
   - sudo update-alternatives \-\-install /usr/bin/gcc gcc /usr/bin/gcc-7 60 \-\-slave /usr/bin/g++ g++ /usr/bin/g++-7
   - sudo update-alternatives \-\-config gcc
+- Make sure to download the dependency through 'getdep_ubuntu_xenial.sh'
   
 Things are a bit easier on Ubuntu 18.04.x (Bionic)
 - OpenEXR
@@ -87,6 +88,7 @@ Things are a bit easier on Ubuntu 18.04.x (Bionic)
   - sudo apt-add-repository \"deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-6.0 main\"
   - sudo apt-get update
   - sudo apt-get install -y clang-6.0
+- Make sure to download the dependency through 'getdep_ubuntu_bionic.sh'
 
 There is no need to setup G++ on Ubuntu Bionic because the default version comes with the system is already G++7, which is good enough for SORT to compile.
 
