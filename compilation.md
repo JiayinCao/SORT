@@ -57,7 +57,7 @@ Building SORT with VS Code on Mac is highly suggested due to its simplicity. Dow
 Compiling SORT with other tools, like [CodeBlock](http://www.codeblocks.org/), [Sublime](https://www.sublimetext.com/), is also possible. But you will most likely not have the best debugging experience, for which reason it is not strongly suggested.
 
 ## Ubuntu
-Unlike the other two platforms, for which SORT has packed all necessary libarary in the dependencies, some of the depedent library is OS dependent. SORT doesn't pack those OS dependent library with it, it is programmer's responsibility to setup the correct environment before building it, meaning compiling SORT on Ubuntu requires some basic setup first. 
+Unlike the other two platforms, for which SORT has packed all necessary libararies in the dependency, some of the depedent libraries is OS dependent. SORT doesn't pack those OS dependent libraries with it, it is programmer's responsibility to setup the correct environment before building it, meaning compiling SORT on Ubuntu requires some basic setup first. 
 
 Following is the tools and library needed by SORT and the correct way to install them on Ubuntu 16.0.x (Xenial)
 - OpenEXR
