@@ -140,9 +140,9 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
                 }
             }
         } else {
-            if (scatterDistance[0] > 0.0f || scatterDistance[1] > 0.0f || scatterDistance[2] > 0.0f) {
+            if (!scatterDistance.IsBlack()) {
                 const GGX ggx(0.0f, 0.0f);
-                MicroFacetRefraction mr(basecolor.Sqrt(), &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
+                MicroFacetRefraction mr( diffuseWeight * basecolor.Sqrt(), &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
                 ret += mr.f( wo , wi );
             } else if( evaluate_reflection ){
                 // Fall back to the Disney diffuse due to the lack of sub-surface scattering
@@ -220,6 +220,7 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
     const auto min_specular_amount = SchlickR0FromEta(ior_ex / ior_in);
     const auto Cspec0 = slerp(specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
+    const auto hasSSS = !scatterDistance.IsBlack();
 
     const auto base_color_intensity = basecolor.GetIntensity();
     const auto clearcoat_weight = clearcoat * 0.04f;
@@ -271,7 +272,14 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
             mr.sample_f(wo, wi, bs, pPdf);
         }
     }else if (r <= dr_w) {
-        wi = CosSampleHemisphere(sort_canonical(), sort_canonical());
+        // albedo doesn't matter here, we are only interested in light direction.
+        if( hasSSS ){
+            const GGX ggx(0.0f, 0.0f);
+            MicroFacetRefraction mr( WHITE_SPECTRUM, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
+            mr.sample_f( wo, wi, bs, pPdf);
+        }else{
+            wi = CosSampleHemisphere(sort_canonical(), sort_canonical());
+        }
     }else // if( r <= dt_w )
     {
         LambertTransmission lambert_transmission(basecolor, diffTrans, nn);
@@ -296,7 +304,8 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     const auto specular_transmission_weight = base_color_intensity * (1.0f - metallic) * specTrans;
     const auto diffuse_reflection_weight = base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * (thinSurface ? (1.0f - diffTrans) : 1.0f);
     const auto diffuse_transmission_weight = thinSurface ? base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * diffTrans : 0.0f;
-
+    const auto hasSSS = !scatterDistance.IsBlack();
+    
     const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
     if (total_weight <= 0.0f)
         return 0.0f;
@@ -330,7 +339,14 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
         }
     }
     if (diffuse_reflection_weight > 0.0f) {
-        total_pdf += diffuse_reflection_weight * CosHemispherePdf(wi);
+        // albedo doesn't matter here, we are only interested in light direction.
+        if( hasSSS ){
+            const GGX ggx(0.0f, 0.0f);
+            MicroFacetRefraction mr( WHITE_SPECTRUM, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
+            total_pdf += mr.pdf( wo, wi );
+        }else{
+            total_pdf += diffuse_reflection_weight * CosHemispherePdf(wi);
+        }
     }
     if (diffuse_transmission_weight > 0.0f) {
         LambertTransmission lambert_transmission(basecolor, diffTrans, nn);

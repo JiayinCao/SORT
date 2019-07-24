@@ -21,8 +21,6 @@
 #include "microfacet.h"
 #include "bssrdf/bssrdf.h"
 
-class Bssrdf;
-
 //! @brief Disney Principle BRDF.
 /**
  * Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering
@@ -62,13 +60,12 @@ public:
     //! Constructor
     //!
     //! @param params           All parameters.
-    //! @param bssrdf           BSSRDF that may be filled depending on the parameter setup.
     //! @param weight           Weight of the BXDF
-    DisneyBRDF( const Params& param , Bssrdf*& bssrdf , const Spectrum& weight)
+    DisneyBRDF( const Params& param , const Spectrum& weight)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
         specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
         clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
-          diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ), bssrdf(bssrdf) {}
+          diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
 
     //! Constructor
     //! @param basecolor        The surface color, usually supplied by texture maps.
@@ -86,16 +83,15 @@ public:
     //! @param flatness         A factor for blending diffuse and fakeSS for thin surface.
     //! @param diffTrans        A blending factor for diffuse transmission and reflectance model.
     //! @param thinSurface      Whether the surface is a thin surface.
-    //! @param bssrdf           BSSRDF that may be filled depending on the parameter setup.
     //! @param weight           Weight of the BXDF.
     //! @param n                Normal in shading coordinate.
     DisneyBRDF( const Spectrum& basecolor , float metallic , float specular , float specularTint , float roughness ,
                float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance ,
-               float flatness , float diffTrans , int thinSurface , Bssrdf*& bssrdf , const Spectrum& weight, const Vector& n )
+               float flatness , float diffTrans , int thinSurface , const Spectrum& weight, const Vector& n )
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
           clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness),
-          diffTrans(diffTrans), thinSurface( thinSurface != 0 ), bssrdf(bssrdf) {}
+          diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -133,7 +129,6 @@ private:
     const float     flatness;           /**< Blending factor between diffuse and fakeSS model. */
     const Spectrum  scatterDistance;    /**< Distance of scattering in SSS. */
     const bool      thinSurface;        /**< Whether the surface is thin surface. */
-    Bssrdf*&        bssrdf;             /**< BSSRDF may be filled by the brdf. */
 
     //! @brief      Get R0 with relative IOR.
     //!

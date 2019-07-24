@@ -90,23 +90,22 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         // handle BSSRDF here
         if( bssrdf ){
             Intersection    bssrdf_inter;
-            Bsdf*           bssrdf_bsdf = nullptr;
-            Point pi;
+            Bsdf*           bsdf = nullptr;
             Vector wi;
             float pdf = 0.0f;
-            Spectrum S = bssrdf->Sample_S( scene, -r.m_Dir, inter.intersect, bssrdf_inter, pdf, bssrdf_bsdf);
-            if (S.IsBlack() || pdf == 0 || !bssrdf_bsdf )
+            Spectrum S = bssrdf->Sample_S( scene, -r.m_Dir, inter.intersect, bssrdf_inter, pdf, bsdf);
+            if (S.IsBlack() || pdf == 0 || !bsdf )
                 break;
 
             throughput *= S / pdf;
 
             // Accumulate the contribution from direct illumination
-            L += throughput * SampleOneLight( r , bssrdf_inter , scene );
+            L += throughput * SampleOneLight( bsdf , r , bssrdf_inter , scene );
 
             // Accumulate the contribution from indirect illumination
             pdf = 0.0f;
             BXDF_TYPE   dummy;
-            Spectrum f = bssrdf_bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
+            Spectrum f = bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
 
             if (f.IsBlack() || pdf == 0)
                 break;

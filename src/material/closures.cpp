@@ -136,7 +136,7 @@ namespace {
 
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w) override {
             const auto& params = *comp->as<DisneyBRDF::Params>();
-            bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)(params, bssrdf, w * comp->w));
+            bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)(params, w * comp->w));
 
             if( !params.scatterDistance.IsBlack() ){
                 // IORs are temporary

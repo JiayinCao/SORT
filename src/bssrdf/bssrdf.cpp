@@ -51,7 +51,7 @@ Spectrum SeparableBssrdf::S( const Vector& wo , const Point& po , const Vector& 
 
 Spectrum SeparableBssrdf::Sw( const Vector& wi ) const{
     const auto F = DielectricFresnel(CosTheta(wi), ior_e, ior_i);
-    const auto c = FresnelMoment1( ior_e / ior_i );
+    const auto c = 1.0f - 2.0f * FresnelMoment1( ior_e / ior_i );
     return (1 - F) / (c * PI);
 }
 
@@ -154,7 +154,7 @@ float SeparableBssrdf::Pdf_Sp( const Point& po , const Point& pi , const Vector&
 }
 
 SeparableBssrdfAdapter::SeparableBssrdfAdapter( const SeparableBssrdf* bssrdf )
-:m_bssrdf(bssrdf),Bxdf( WHITE_SPECTRUM , BXDF_REFLECTION , DIR_UP ){
+:m_bssrdf(bssrdf),Bxdf( WHITE_SPECTRUM , BXDF_REFLECTION , DIR_UP , true ){
 }
 
 Spectrum SeparableBssrdfAdapter::f( const Vector& wo , const Vector& wi ) const{

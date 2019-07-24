@@ -34,8 +34,6 @@
 #include "bsdf/hair.h"
 #include "bsdf/fabric.h"
 
-class Bssrdf;
-
 // A physically based BRDF should obey the rule of reciprocity
 void checkReciprocity(const Bxdf* bxdf) {
     spinlock_mutex mutex;
@@ -156,10 +154,9 @@ TEST(BXDF, DISABLED_AshikhmanShirley) {
 // https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf
 // Disney BRDF is not strictly energy conserving, please refer the above link for further detail ( chapter 5.1 ).
 TEST(BXDF, DISABLED_Disney) {
-    Bssrdf* bssrdf = nullptr;
     DisneyBRDF disney( WHITE_SPECTRUM , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() ,
                        sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() , sort_canonical() ,
-                       sort_canonical() , sort_canonical() , 0 , bssrdf , FULL_WEIGHT , DIR_UP );
+                       sort_canonical() , sort_canonical() , 0 , FULL_WEIGHT , DIR_UP );
     checkAll(&disney);
 }
 

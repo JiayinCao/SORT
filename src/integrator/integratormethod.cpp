@@ -27,12 +27,8 @@ inline float MisFactor( float f, float g ){
     return (f*f) / (f*f + g*g);
 }
 
-Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip ,
+Spectrum    EvaluateDirect( const Bsdf* bsdf , const Ray& r , const Scene& scene , const Light* light , const Intersection& ip ,
                             const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type ){
-    Bsdf*   bsdf = nullptr;
-    Bssrdf* bssrdf = nullptr;   // not implemented yet
-    ip.primitive->GetMaterial()->UpdateScattering( ip , bsdf , bssrdf );
-
     Spectrum radiance;
     Visibility visibility(scene);
     float light_pdf;
@@ -81,12 +77,20 @@ Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* lig
     return radiance;
 }
 
-Spectrum SampleOneLight( const Ray& r, const Intersection& inter, const Scene& scene) {
+Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip ,
+                            const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type ){
+    Bsdf*   bsdf = nullptr;
+    Bssrdf* dummy = nullptr;
+    ip.primitive->GetMaterial()->UpdateScattering( ip , bsdf , dummy );
+    return EvaluateDirect( bsdf , r , scene , light, ip , ls , bs , type );
+}
+
+Spectrum SampleOneLight( const Bsdf* bsdf , const Ray& r, const Intersection& inter, const Scene& scene) {
     // Uniformly choose a light, this may not be the optimal solution in case of more lights, need more research in this topic later.
     float light_pdf = 0.0f;
     const auto light = scene.SampleLight( sort_canonical() , &light_pdf );
     if( nullptr == light )
         return 0.0f;
 
-    return EvaluateDirect( r, scene, light , inter, LightSample(true), BsdfSample(true), BXDF_TYPE(BXDF_ALL) ) / light_pdf;
+    return EvaluateDirect( bsdf , r, scene, light , inter, LightSample(true), BsdfSample(true), BXDF_TYPE(BXDF_ALL) ) / light_pdf;
 }
