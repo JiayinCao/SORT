@@ -90,12 +90,12 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         // handle BSSRDF here
         if( bssrdf ){
             Intersection    bssrdf_inter;
-            Bsdf*           bssrdf_bsdf;
+            Bsdf*           bssrdf_bsdf = nullptr;
             Point pi;
             Vector wi;
             float pdf = 0.0f;
-            Spectrum S = bssrdf->Sample_S( scene, -r.m_Dir, inter.intersect, wi, pi, pdf, bssrdf_bsdf);
-            if (S.IsBlack() || pdf == 0)
+            Spectrum S = bssrdf->Sample_S( scene, -r.m_Dir, inter.intersect, bssrdf_inter, pdf, bssrdf_bsdf);
+            if (S.IsBlack() || pdf == 0 || !bssrdf_bsdf )
                 break;
 
             throughput *= S / pdf;
@@ -113,7 +113,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
 
             throughput *= f / pdf;
 
-            r.m_Ori = pi;
+            r.m_Ori = bssrdf_inter.intersect;
             r.m_Dir = wi;
             r.m_fMin = 0.0001f;
         }else{

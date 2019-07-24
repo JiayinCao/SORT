@@ -61,12 +61,11 @@ public:
     //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
-    //! @param  wi      Incident direction to be updated.
-    //! @param  pi      Incident position to be updated.
+    //! @param  inter   Incident intersection sampled.
     //! @param  pdf     Pdf of sampling such a point on the surface of the object.
     //! @param  bsdf    The bsdf at the incident intersection.
     //! @return         To be figured out
-    virtual Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf , Bsdf*& bsdf ) const = 0;
+    virtual Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf , Bsdf*& bsdf ) const = 0;
 
 protected:
     const float ior_i;  /**< Index of refraction inside the surface. */
@@ -102,22 +101,21 @@ public:
     //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
-    //! @param  wi      Incident direction to be updated.
-    //! @param  pi      This will be ignored.
+    //! @param  inter   Incident intersection sampled.
     //! @param  pdf     Pdf of sampling such a point on the surface of the object.
     //! @param  bsdf    The bsdf at the incident intersection.
     //! @return         The spatial term in separable Bssrdf multiplied by the fresnel term of the incident direction.
-    Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf , Bsdf*& bsdf ) const override;
+    Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf , Bsdf*& bsdf ) const override;
 
     //! @brief  Importance sample the incident position.
     //!
     //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
-    //! @param  pi      Incident position to be updated.
+    //! @param  inter   Incident intersection sampled.
     //! @param  pdf     Pdf of sampling such a point on the surface of the object.
     //! @return         The spatial term in separable Bssrdf.
-    Spectrum    Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , Point& pi , float& pdf ) const;
+    Spectrum    Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf ) const;
 
     //! @brief  PDF of sampling the reflectance profile.
     //!

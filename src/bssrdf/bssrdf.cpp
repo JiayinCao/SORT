@@ -55,14 +55,16 @@ Spectrum SeparableBssrdf::Sw( const Vector& wi ) const{
     return (1 - F) / (c * PI);
 }
 
-Spectrum SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf , Bsdf*& bsdf ) const {
-    auto sp = Sample_Sp( scene , wo , po , pi , pdf );
-    if( !sp.IsBlack() )
+Spectrum SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf , Bsdf*& bsdf ) const {
+    auto sp = Sample_Sp( scene , wo , po , inter , pdf );
+    if( !sp.IsBlack() ){
+        bsdf = SORT_MALLOC(Bsdf)(&inter);
         bsdf->AddBxdf( SORT_MALLOC(SeparableBssrdfAdapter)(this));
+    }
     return sp;
 }
 
-Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , Point& pi , float& pdf ) const {
+Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf ) const {
     Vector vx , vy , vz;
     const auto r0 = sort_canonical();
     if( r0 < 0.5f ){
@@ -79,24 +81,26 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
         vz = btn;
     }
 
-    const auto ch = clamp( 0 , 2 , (int)(sort_canonical() * SPECTRUM_SAMPLE) );
+    const auto ch = clamp( (int)(sort_canonical() * SPECTRUM_SAMPLE) , 0 , 2 );
 
-    const auto r = Sample_Sr(ch, sort_canonical());
+    const auto tmp = sort_canonical();
+    const auto r = Sample_Sr(ch, tmp);
     if( r < 0.0f ) return 0.0f;
-    const auto phi = TWO_PI * sort_canonical();
-
     const auto rMax = Sample_Sr(ch, 0.9999f);
     if( r >= rMax ) return 0.0f;
+
     const auto l = 2 * sqrt( SQR(rMax) - SQR(r) );
 
-    const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) - l * vy * 0.5f;
-    const auto target = source + l * vy;
+    const auto phi = TWO_PI * sort_canonical();
+    const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) + l * vy * 0.5f;
+    const auto target = source - l * vy;
 
     IntersectionChain dummyHead;
     IntersectionChain* intersectNode = &dummyHead;
 
     auto found = 0;
     auto current = source;
+
     while( true ){
         const auto t = Dot( current - target , vy );
         if( t <= 0 )
@@ -118,20 +122,22 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
     if( found == 0 )
         return 0.0f;
     auto pick = clamp( 0 , found - 1 , (int)( sort_canonical() * found ) );
+    intersectNode = &dummyHead;
     do{
+        sAssert( intersectNode != nullptr , MATERIAL );
         intersectNode = intersectNode->next;
-    }while( pick-- > 0 );
+    }while( --pick >= 0 );
 
-    pi = intersectNode->si.intersect;
+    inter = intersectNode->si;
 
-    pdf = Pdf_Sp( po , pi , intersectNode->si.gnormal ) / found;
-    return Sr( Distance( po , pi ) );
+    pdf = Pdf_Sp( po , inter.intersect , inter.gnormal ) / found;
+    return Sr( Distance( po , inter.intersect ) );
 }
 
 float SeparableBssrdf::Pdf_Sp( const Point& po , const Point& pi , const Vector& n ) const {
     Vector d = po - pi;
-    Vector dLocal( Dot( btn , d ) , Dot( tn , d ) , Dot( nn , d ) );
-    Vector nLocal( Dot( btn , n ) , Dot( tn , n ) , Dot( nn , n ) );
+    Vector dLocal( Dot( btn , d ) , Dot( nn , d ) , Dot( tn , d ) );
+    Vector nLocal( Dot( btn , n ) , Dot( nn , n ) , Dot( tn , n ) );
 
     float rProj[3] = { sqrt( SQR( dLocal.y ) + SQR( dLocal.z ) ) ,
                        sqrt( SQR( dLocal.x ) + SQR( dLocal.z ) ) ,

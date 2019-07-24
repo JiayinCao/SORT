@@ -84,8 +84,9 @@ Spectrum DisneyBssrdf::Sr( float r ) const{
 }
 
 float DisneyBssrdf::Sample_Sr(int ch, float r) const{
+    // This could be bug when r is '1.0f' to be handled later
     const auto rr = sort_canonical();
-    return rr < 0.25f ? -d[ch] * log( sort_canonical() ) : -3.0f * d[ch] * log( sort_canonical() );
+    return rr < 0.25f ? -d[ch] * log( 1.0f - r ) : -3.0f * d[ch] * log( 1.0f - r );
 }
 
 float DisneyBssrdf::Pdf_Sr(int ch, float r) const{
@@ -140,7 +141,9 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
             }
         } else {
             if (scatterDistance[0] > 0.0f || scatterDistance[1] > 0.0f || scatterDistance[2] > 0.0f) {
-                // This will be handled in other path, but may adding some specular light reflection here
+                const GGX ggx(0.0f, 0.0f);
+                MicroFacetRefraction mr(basecolor.Sqrt(), &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
+                ret += mr.f( wo , wi );
             } else if( evaluate_reflection ){
                 // Fall back to the Disney diffuse due to the lack of sub-surface scattering
                 const auto disneyDiffuse = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));
