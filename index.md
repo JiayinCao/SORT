@@ -6,6 +6,7 @@ Here are the features implemented so far:
   - Integrator. (Whitted ray tracing, direct lighting, path tracing, light tracing, bidirectional path tracing, instant radiosity, ambient occlusion)
   - Spatial acceleration structure. (KD-Tree, BVH, Uniform grid, OcTree)
   - BXDF. (Disney BRDF, Lambert, LambertTransmission, Oran Nayar, MicroFacet Reflection, Microfacet Transmission, MERL, Fourier, AshikhmanShirley, Modified Phong, Coat, Blend, Double-Sided, Distribution BRDF, DreamWorks Fabric BRDF)
+  - Subsurface Scattering
   - Fur, Hair.
   - Support Open Shading Language.
   - Camera. (DOF)
@@ -28,6 +29,7 @@ Featuring a flexible graph node material system, SORT is designed to support a w
 
 Here are some of the examples rendered by SORT  
 <img src="assets/main_page/mat_matte.png" width="225" height="225" />
+<img src="assets/main_page/mat_sss.png" width="225" height="225" />
 <img src="assets/main_page/mat_glass.png" width="225" height="225" />
 <img src="assets/main_page/mat_mirror.png" width="225" height="225" />
 <img src="assets/main_page/mat_coated.png" width="225" height="225" />
