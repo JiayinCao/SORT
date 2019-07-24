@@ -80,3 +80,13 @@ Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* lig
 
     return radiance;
 }
+
+Spectrum SampleOneLight( const Ray& r, const Intersection& inter, const Scene& scene) {
+    // Uniformly choose a light, this may not be the optimal solution in case of more lights, need more research in this topic later.
+    float light_pdf = 0.0f;
+    const auto light = scene.SampleLight( sort_canonical() , &light_pdf );
+    if( nullptr == light )
+        return 0.0f;
+
+    return EvaluateDirect( r, scene, light , inter, LightSample(true), BsdfSample(true), BXDF_TYPE(BXDF_ALL) ) / light_pdf;
+}

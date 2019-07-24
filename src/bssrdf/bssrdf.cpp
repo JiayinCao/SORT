@@ -55,8 +55,10 @@ Spectrum SeparableBssrdf::Sw( const Vector& wi ) const{
     return (1 - F) / (c * PI);
 }
 
-Spectrum SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf ) const {
+Spectrum SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf , Bsdf*& bsdf ) const {
     auto sp = Sample_Sp( scene , wo , po , pi , pdf );
+    if( !sp.IsBlack() )
+        bsdf->AddBxdf( SORT_MALLOC(SeparableBssrdfAdapter)(this));
     return sp;
 }
 
@@ -149,6 +151,6 @@ SeparableBssrdfAdapter::SeparableBssrdfAdapter( const SeparableBssrdf* bssrdf )
 :m_bssrdf(bssrdf),Bxdf( WHITE_SPECTRUM , BXDF_REFLECTION , DIR_UP ){
 }
 
-Spectrum SeparableBssrdfAdapter::F( const Vector& wo , const Vector& wi ) const{
+Spectrum SeparableBssrdfAdapter::f( const Vector& wo , const Vector& wi ) const{
     return m_bssrdf->Sw( wi ) * saturate( CosTheta( wi ) );
 }

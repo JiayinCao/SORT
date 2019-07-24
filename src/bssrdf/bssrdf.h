@@ -25,6 +25,7 @@
 
 class Intersection;
 class Scene;
+class Bsdf;
 
 //! @brief BSDF implementation.
 /**
@@ -63,8 +64,9 @@ public:
     //! @param  wi      Incident direction to be updated.
     //! @param  pi      Incident position to be updated.
     //! @param  pdf     Pdf of sampling such a point on the surface of the object.
+    //! @param  bsdf    The bsdf at the incident intersection.
     //! @return         To be figured out
-    virtual Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf ) const = 0;
+    virtual Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf , Bsdf*& bsdf ) const = 0;
 
 protected:
     const float ior_i;  /**< Index of refraction inside the surface. */
@@ -103,8 +105,9 @@ public:
     //! @param  wi      Incident direction to be updated.
     //! @param  pi      This will be ignored.
     //! @param  pdf     Pdf of sampling such a point on the surface of the object.
+    //! @param  bsdf    The bsdf at the incident intersection.
     //! @return         The spatial term in separable Bssrdf multiplied by the fresnel term of the incident direction.
-    Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf ) const override;
+    Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Vector& wi , Point& pi , float& pdf , Bsdf*& bsdf ) const override;
 
     //! @brief  Importance sample the incident position.
     //!
@@ -170,7 +173,14 @@ public:
     //! @param  wo      The exitant direction in local space.
     //! @param  wi      The incident direction in local space.
     //! @return         Evaluted BRDF by cos(\theta)
-    Spectrum F( const Vector& wo , const Vector& wi ) const override;
+    //Spectrum F( const Vector& wo , const Vector& wi ) const override;
+
+    //! @brief Evaluate the BRDF.
+    //!
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The Evaluated BRDF value.
+    Spectrum f( const Vector& wo , const Vector& wi ) const override;
 
 private:
     const SeparableBssrdf*  m_bssrdf;

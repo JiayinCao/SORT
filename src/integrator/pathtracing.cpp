@@ -18,6 +18,7 @@
 #include "pathtracing.h"
 #include "math/intersection.h"
 #include "bsdf/bsdf.h"
+#include "bssrdf/bssrdf.h"
 #include "core/scene.h"
 #include "integratormethod.h"
 #include "camera/camera.h"
@@ -77,7 +78,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         Spectrum f;
         BsdfSample  _bsdf_sample = (bounces==0)?ps.bsdf_sample[1]:BsdfSample(true);
         f = bsdf->sample_f( -r.m_Dir , wi , _bsdf_sample , &path_pdf , BXDF_ALL , &bxdf_type );
-        if( f.IsBlack() || path_pdf == 0.0f )
+        if( ( f.IsBlack() || path_pdf == 0.0f ) && !bssrdf )
             break;
 
         // update path weight
@@ -86,16 +87,47 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         if( 0.0f == throughput.GetIntensity() )
             break;
 
+        // handle BSSRDF here
+        if( bssrdf ){
+            Intersection    bssrdf_inter;
+            Bsdf*           bssrdf_bsdf;
+            Point pi;
+            Vector wi;
+            float pdf = 0.0f;
+            Spectrum S = bssrdf->Sample_S( scene, -r.m_Dir, inter.intersect, wi, pi, pdf, bssrdf_bsdf);
+            if (S.IsBlack() || pdf == 0)
+                break;
+
+            throughput *= S / pdf;
+
+            // Accumulate the contribution from direct illumination
+            L += throughput * SampleOneLight( r , bssrdf_inter , scene );
+
+            // Accumulate the contribution from indirect illumination
+            pdf = 0.0f;
+            BXDF_TYPE   dummy;
+            Spectrum f = bssrdf_bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
+
+            if (f.IsBlack() || pdf == 0)
+                break;
+
+            throughput *= f / pdf;
+
+            r.m_Ori = pi;
+            r.m_Dir = wi;
+            r.m_fMin = 0.0001f;
+        }else{
+            r.m_Ori = inter.intersect;
+            r.m_Dir = wi;
+            r.m_fMin = 0.0001f;
+        }
+
         if( bounces > 3 && throughput.GetMaxComponent() < 0.1f ){
             auto continueProperbility = std::max( 0.05f , 1.0f - throughput.GetMaxComponent() );
             if( sort_canonical() < continueProperbility )
                 break;
             throughput /= 1 - continueProperbility;
         }
-
-        r.m_Ori = inter.intersect;
-        r.m_Dir = wi;
-        r.m_fMin = 0.0001f;
 
         ++bounces;
 

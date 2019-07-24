@@ -21,6 +21,7 @@
 #include "core/sassert.h"
 #include "lambert.h"
 #include "microfacet.h"
+#include "core/memory.h"
 
 constexpr static float ior_in = 1.5f;          // hard coded index of refraction below the surface
 constexpr static float ior_ex = 1.0f;          // hard coded index of refraction above the surface
@@ -88,11 +89,9 @@ float DisneyBssrdf::Sample_Sr(int ch, float r) const{
 }
 
 float DisneyBssrdf::Pdf_Sr(int ch, float r) const{
-    r = ( r < 0.000001f ) ? 0.000001f : r;
-//    constexpr float SIX_PI = 3.0f * TWO_PI;
-//    return  0.25f * exp( -r / d[ch] ) / ( TWO_PI * d[ch] * r ) +
-//            0.75f * exp( -r / ( 3.0f * d[ch] ) ) / ( SIX_PI * d[ch] * r );
+    // Sr(ch,r) = 0.25f * exp( -r / d[ch] ) / ( TWO_PI * d[ch] * r ) + 0.75f * exp( -r / ( 3.0f * d[ch] ) ) / ( SIX_PI * d[ch] * r )
     constexpr auto EIGHT_PI = 4.0f * TWO_PI;
+    r = ( r < 0.000001f ) ? 0.000001f : r;
     return ( exp( -r / d[ch] ) + exp( -r / ( 3.0f * d[ch] ) ) ) / ( EIGHT_PI * d[ch] * r );
 }
 
@@ -141,10 +140,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
             }
         } else {
             if (scatterDistance > 0.0f) {
-                // Handle sub-surface scattering branch, to be done.
-                // There is a following up task to support SSS in SORT, after which this can be easily done.
-                // Issue tracking ticket, https://github.com/JerryCao1985/SORT/issues/85
-                bssrdf = nullptr;
+                // This will be handled in other path, but may adding some specular light reflection here
             } else if( evaluate_reflection ){
                 // Fall back to the Disney diffuse due to the lack of sub-surface scattering
                 const auto disneyDiffuse = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));

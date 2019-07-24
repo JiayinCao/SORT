@@ -22,3 +22,6 @@
 // evaluate direct lighting
 Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const class Light* light , const class Intersection& ip ,
                             const LightSample& ls , const BsdfSample& bs , BXDF_TYPE type = BXDF_ALL );
+
+// uniformly evaluate direct illumination from one light
+Spectrum    SampleOneLight( const Ray& r, const Intersection& inter, const Scene& scene);

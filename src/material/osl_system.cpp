@@ -103,7 +103,7 @@ void ExecuteShader( Bsdf* bsdf , Bssrdf*& bssrdf , const Intersection& intersect
     shaderglobals.dPdu = Vec3( 0.0f );
     g_shadingsys->execute(g_contexts[ ThreadId() ], *shader, shaderglobals);
 
-    ProcessClosure( bsdf , bssrdf , shaderglobals.Ci , Color3( 1.0f ) );
+    ProcessClosure( bsdf , bssrdf , intersection , shaderglobals.Ci , Color3( 1.0f ) );
 }
 
 void ShadingContextWrapper::DestroyContext(OSL::ShadingSystem* shadingsys) {
