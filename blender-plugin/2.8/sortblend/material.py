@@ -1434,7 +1434,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        float Clearcoat = @ ,
                        float ClearcoatGlossiness = @ ,
                        float SpecularTransmittance = @ ,
-                       float ScatterDistance = @ ,
+                       vector ScatterDistance = @ ,
                        float Flatness = @ ,
                        float DiffuseTransmittance = @ ,
                        int   IsThinSurface = @ ,
@@ -1459,7 +1459,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat Glossiness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Specular Transmittance')
-        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Scatter Distance')
+        self.inputs.new( 'SORTNodeSocketFloatVector' , 'Scatter Distance')
         self.inputs.new( 'SORTNodeSocketFloat' , 'Flatness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Diffuse Transmittance' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )

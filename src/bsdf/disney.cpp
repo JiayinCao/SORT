@@ -139,7 +139,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
                 }
             }
         } else {
-            if (scatterDistance > 0.0f) {
+            if (scatterDistance[0] > 0.0f || scatterDistance[1] > 0.0f || scatterDistance[2] > 0.0f) {
                 // This will be handled in other path, but may adding some specular light reflection here
             } else if( evaluate_reflection ){
                 // Fall back to the Disney diffuse due to the lack of sub-surface scattering

@@ -41,20 +41,20 @@ class DisneyBRDF : public Bxdf{
 public:
     // Input parameters to construct the disney BRDF.
     struct Params {
-        float metallic;
-        float specular;
-        float specularTint;
-        float roughness;
-        float anisotropic;
-        float sheen;
-        float sheenTint;
-        float clearcoat;
-        float clearcoatGloss;
-        float specTrans;
-        float scatterDistance;
-        float flatness;
-        float diffTrans;
-        int   thinSurface;
+        float       metallic;
+        float       specular;
+        float       specularTint;
+        float       roughness;
+        float       anisotropic;
+        float       sheen;
+        float       sheenTint;
+        float       clearcoat;
+        float       clearcoatGloss;
+        float       specTrans;
+        RGBSpectrum  scatterDistance;
+        float       flatness;
+        float       diffTrans;
+        int         thinSurface;
         RGBSpectrum baseColor;
         Vector n;
     };
@@ -131,7 +131,7 @@ private:
     const float     specTrans;          /**< Specular Transmission. */
     const float     diffTrans;          /**< Diffuse Transmission. */
     const float     flatness;           /**< Blending factor between diffuse and fakeSS model. */
-    const float     scatterDistance;    /**< Distance of scattering in SSS. */
+    const Spectrum  scatterDistance;    /**< Distance of scattering in SSS. */
     const bool      thinSurface;        /**< Whether the surface is thin surface. */
     Bssrdf*&        bssrdf;             /**< BSSRDF may be filled by the brdf. */
 
@@ -191,27 +191,27 @@ public:
 
     //! @brief  Sampling a distance based on the reflectance profile.
     //!
-    //! @param  ch      Spectrum channel.
-    //! @param  r       A canonical value used to randly sample distance
-    //! @return         The distance sampled.
+    //! @param  ch          Spectrum channel.
+    //! @param  r           A canonical value used to randly sample distance
+    //! @return             The distance sampled.
     float       Sample_Sr(int ch, float r) const override;
 
     //! @brief  Pdf of sampling such a distance based on the reflectance profile.
     //!
-    //! @param  ch      Spectrum channel.
-    //! @param  d       Distance from the extant point.
-    //! @return         Pdf of sampling it.
+    //! @param  ch          Spectrum channel.
+    //! @param  d           Distance from the extant point.
+    //! @return             Pdf of sampling it.
     float       Pdf_Sr(int ch, float d) const override;
 
     //! @brief  Evaluate the BSSRDF.
     //!
     //! Unlike BXDF, BSSRDF is more of a generalized version function of eight dimensions.
     //!
-    //! @param  wo      Extant direction.
-    //! @param  po      Extant position.
-    //! @param  wi      Incident direction.
-    //! @param  pi      Incident position.
-    //! @return         To be figured out
+    //! @param  wo          Extant direction.
+    //! @param  po          Extant position.
+    //! @param  wi          Incident direction.
+    //! @param  pi          Incident position.
+    //! @return             To be figured out
     Spectrum    S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const override;
 
 private:

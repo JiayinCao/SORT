@@ -123,7 +123,7 @@ namespace {
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoat),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoatGloss),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specTrans),
-                CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, scatterDistance),
+                CLOSURE_COLOR_PARAM(DisneyBRDF::Params, scatterDistance),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, flatness),
                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, diffTrans),
                 CLOSURE_INT_PARAM(DisneyBRDF::Params, thinSurface),
@@ -138,7 +138,7 @@ namespace {
             const auto& params = *comp->as<DisneyBRDF::Params>();
             bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)(params, bssrdf, w * comp->w));
 
-            if( params.scatterDistance > 0.0f ){
+            if( !params.scatterDistance.IsBlack() ){
                 // IORs are temporary
                 const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans);
                 bssrdf = SORT_MALLOC(DisneyBssrdf)( &intersection, diffuseWeight * params.baseColor , params.scatterDistance , 1.5f, 1.0f);
