@@ -243,6 +243,8 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     const auto dr_w = diffuse_reflection_weight * inv_total_weight + st_w;
     //const auto dt_w = diffuse_transmission_weight * inv_total_weight + dr_w;
 
+    samplingSSS = false;
+    
     const GGX ggx(roughness / aspect, roughness * aspect);
     const auto r = sort_canonical();
     if (r <= cc_w) {
@@ -277,6 +279,8 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
             const GGX ggx(0.0f, 0.0f);
             MicroFacetRefraction mr( WHITE_SPECTRUM, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
             mr.sample_f( wo, wi, bs, pPdf);
+
+            samplingSSS = true;
         }else{
             wi = CosSampleHemisphere(sort_canonical(), sort_canonical());
         }

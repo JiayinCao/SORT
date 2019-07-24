@@ -78,7 +78,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         Spectrum f;
         BsdfSample  _bsdf_sample = (bounces==0)?ps.bsdf_sample[1]:BsdfSample(true);
         f = bsdf->sample_f( -r.m_Dir , wi , _bsdf_sample , &path_pdf , BXDF_ALL , &bxdf_type );
-        if( ( f.IsBlack() || path_pdf == 0.0f ) && !bssrdf )
+        if( f.IsBlack() || path_pdf == 0.0f )
             break;
 
         // update path weight
@@ -88,7 +88,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
             break;
 
         // handle BSSRDF here
-        if( bssrdf ){
+        if( bssrdf && bsdf->SamplingSSS() ){
             Intersection    bssrdf_inter;
             Bsdf*           bsdf = nullptr;
             Vector wi;

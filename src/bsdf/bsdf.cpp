@@ -107,6 +107,8 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     if( pdf && *pdf == 0.0f ) return 0.0f;
     if( bxdf_type ) *bxdf_type = bxdf->GetType();
 
+    m_samplingSSS = bxdf->SamplingSSS();
+    
     // setup pdf
     if( pdf  && ( com_num > 1 ) )
     {

@@ -70,9 +70,17 @@ public:
     //! @return The intersection information of the point at which the bsdf is evaluated.
     const Intersection* GetIntersection() const { return &intersect; }
 
+    //! @brief  Whether the importance sampling is for SSS.
+    //!
+    //! @return Whether the last importance sampling is for SSS.
+    bool SamplingSSS() const{
+        return m_samplingSSS;
+    }
+
 private:
     const Bxdf*         m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
     unsigned            m_bxdfCount = 0;                /**< Number of Bxdf in the BSDF. */
+    mutable bool        m_samplingSSS = false;          /**< Indicate that last sampling is for SSS. */
 
     Vector nn;      /**< Normal at the point to be Evaluated. */
     Vector btn;     /**< Bi-tangent at the point to be evaluated. */
