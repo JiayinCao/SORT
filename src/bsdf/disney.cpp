@@ -142,7 +142,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
         } else {
             if (!scatterDistance.IsBlack()) {
                 const GGX ggx(0.0f, 0.0f);
-                MicroFacetRefraction mr( diffuseWeight * basecolor.Sqrt(), &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
+                MicroFacetRefraction mr( FULL_WEIGHT, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
                 ret += mr.f( wo , wi );
             } else if( evaluate_reflection ){
                 // Fall back to the Disney diffuse due to the lack of sub-surface scattering
