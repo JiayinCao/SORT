@@ -1873,12 +1873,14 @@ class SORTNodeCheckerBoard(SORTShadingNode):
         shader CheckerBoard( color Color1 = @ ,
                              color Color2 = @ ,
                              vector UVCoordinate = @ ,
+                             float  UVTiling = @ ,
                              output color Result = color( 0.0 , 0.0 , 0.0 ) ,
                              output float Red = 0.0 ,
                              output float Green = 0.0 ,
                              output float Blue = 0.0 ){
-            float fu = UVCoordinate[0] - floor( UVCoordinate[0] );
-            float fv = UVCoordinate[1] - floor( UVCoordinate[1] );
+            vector scaledUV = UVCoordinate * UVTiling;
+            float fu = scaledUV[0] - floor( scaledUV[0] );
+            float fv = scaledUV[1] - floor( scaledUV[1] );
             if( ( fu > 0.5 && fv > 0.5 ) || ( fu < 0.5 && fv < 0.5 ) )
                 Result = Color1;
             else
@@ -1897,6 +1899,7 @@ class SORTNodeCheckerBoard(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketColor' , 'Color1' )
         self.inputs.new( 'SORTNodeSocketColor' , 'Color2' )
         self.inputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'UV Tiling' )
         self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Red' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Green' )
@@ -1905,11 +1908,13 @@ class SORTNodeCheckerBoard(SORTShadingNode):
         self.outputs['Blue'].enabled = self.show_separate_channels
         self.outputs['Green'].enabled = self.show_separate_channels
         self.inputs['Color1'].default_value = ( 0.2 , 0.2 , 0.2 )
+        self.inputs['UV Tiling'].default_value = 1.0
     def serialize_prop(self, fs):
-        fs.serialize( 3 )
+        fs.serialize( 4 )
         fs.serialize( self.inputs['Color1'].export_osl_value() )
         fs.serialize( self.inputs['Color2'].export_osl_value() )
         fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
+        fs.serialize( self.inputs['UV Tiling'].export_osl_value() )
     def draw_buttons(self, context, layout):
         layout.prop(self, "show_separate_channels")
 
@@ -1922,12 +1927,14 @@ class SORTNodeGrid(SORTShadingNode):
                      color Color2 = @ ,
                      float Treshold = @ ,
                      vector UVCoordinate = @ ,
+                     float  UVTiling = @ ,
                      output color Result = color( 0.0 , 0.0 , 0.0 ) ,
                      output float Red = 0.0 ,
                      output float Green = 0.0 ,
                      output float Blue = 0.0 ){
-            float fu = UVCoordinate[0] - floor( UVCoordinate[0] ) - 0.5;
-            float fv = UVCoordinate[1] - floor( UVCoordinate[1] ) - 0.5;
+            vector scaledUV = UVCoordinate * UVTiling;
+            float fu = scaledUV[0] - floor( scaledUV[0] ) - 0.5;
+            float fv = scaledUV[1] - floor( scaledUV[1] ) - 0.5;
             float half_threshold = ( 1.0 - Treshold ) * 0.5;
             if( fu <= half_threshold && fu >= -half_threshold && fv <= half_threshold && fv >= -half_threshold )
                 Result = Color1;
@@ -1948,6 +1955,7 @@ class SORTNodeGrid(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketColor' , 'Color2' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Treshold' )
         self.inputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'UV Tiling' )
         self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Red' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Green' )
@@ -1957,12 +1965,14 @@ class SORTNodeGrid(SORTShadingNode):
         self.outputs['Green'].enabled = self.show_separate_channels
         self.inputs['Treshold'].default_value = 0.1
         self.inputs['Color1'].default_value = ( 0.2 , 0.2 , 0.2 )
+        self.inputs['UV Tiling'].default_value = 1.0
     def serialize_prop(self, fs):
-        fs.serialize( 4 )
+        fs.serialize( 5 )
         fs.serialize( self.inputs['Color1'].export_osl_value() )
         fs.serialize( self.inputs['Color2'].export_osl_value() )
         fs.serialize( self.inputs['Treshold'].export_osl_value() )
         fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
+        fs.serialize( self.inputs['UV Tiling'].export_osl_value() )
     def draw_buttons(self, context, layout):
         layout.prop(self, "show_separate_channels")
 
@@ -1984,11 +1994,13 @@ class SORTNodeImage(SORTShadingNode):
     osl_shader_linear = '''
         shader ImageShaderLinear( string Filename = @ ,
                                   vector UVCoordinate = @ ,
+                                  float  UVTiling = @ ,
                                   output color Result = color( 0.0 , 0.0 , 0.0 ) ,
                                   output float Red = 0.0 ,
                                   output float Green = 0.0 ,
                                   output float Blue = 0.0 ){
-            Result = texture( Filename , UVCoordinate[0] , UVCoordinate[1] );
+            vector scaledUV = UVCoordinate * UVTiling;
+            Result = texture( Filename , scaledUV[0] , scaledUV[1] );
             Red = Result[0];
             Green = Result[1];
             Blue = Result[2];
@@ -1997,11 +2009,13 @@ class SORTNodeImage(SORTShadingNode):
     osl_shader_gamma = '''
         shader ImageShaderGamma( string Filename = @ ,
                                  vector UVCoordinate = @ ,
+                                 float  UVTiling = @ ,
                                  output color Result = color( 0.0 , 0.0 , 0.0 ) ,
                                  output float Red = 0.0 ,
                                  output float Green = 0.0 ,
                                  output float Blue = 0.0 ){
-            color gamma_color = texture( Filename , UVCoordinate[0] , UVCoordinate[1] );
+            vector scaledUV = UVCoordinate * UVTiling;
+            color gamma_color = texture( Filename , scaledUV[0] , scaledUV[1] );
             Result = pow( gamma_color , 2.2 );
             Red = Result[0];
             Green = Result[1];
@@ -2011,11 +2025,13 @@ class SORTNodeImage(SORTShadingNode):
     osl_shader_normal = '''
         shader ImageShaderNormal( string Filename = @ ,
                                  vector UVCoordinate = @ ,
+                                 float  UVTiling = @ ,
                                  output color Result = color( 0.0 , 0.0 , 0.0 ) ,
                                  output float Red = 0.0 ,
                                  output float Green = 0.0 ,
                                  output float Blue = 0.0 ){
-            color encoded_color = texture( Filename , UVCoordinate[0] , UVCoordinate[1] );
+            vector scaledUV = UVCoordinate * UVTiling;
+            color encoded_color = texture( Filename , scaledUV[0] , scaledUV[1] );
             Result = 2.0 * color( encoded_color[0] , encoded_color[2] , encoded_color[1] ) - 1.0;
             Red = Result[0];
             Green = Result[1];
@@ -2057,10 +2073,12 @@ class SORTNodeImage(SORTShadingNode):
     preview : bpy.props.EnumProperty(items=generate_preview)
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
+        self.inputs.new( 'SORTNodeSocketAnyFloat' , 'UV Tiling' )
         self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Red' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Green' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Blue' )
+        self.inputs['UV Tiling'].default_value = 1.0
         self.outputs['Red'].enabled = self.show_separate_channels
         self.outputs['Blue'].enabled = self.show_separate_channels
         self.outputs['Green'].enabled = self.show_separate_channels
@@ -2073,9 +2091,10 @@ class SORTNodeImage(SORTShadingNode):
         layout.prop(self, 'color_space_type', expand=True)
         layout.prop(self, 'wrap_type')
     def serialize_prop(self, fs):
-        fs.serialize( 2 )
+        fs.serialize( 3 )
         fs.serialize( '\"%s\"'%(bpy.path.abspath(self.image.filepath)) )
         fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
+        fs.serialize( self.inputs['UV Tiling'].export_osl_value() )
     def generate_osl_source(self):
         if self.color_space_type == 'sRGB':
             return self.osl_shader_gamma
