@@ -109,6 +109,10 @@ public:
 
     //! @brief  Importance sample the incident position.
     //!
+    //! The exact importance sampling algorithm comes from this paper.
+    //! BSSRDF Importance Sampling
+    //! http://www.aconty.com/pdf/bssrdf.pdf
+    //!
     //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.

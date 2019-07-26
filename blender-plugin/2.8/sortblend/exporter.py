@@ -419,7 +419,7 @@ def export_mesh(mesh, fs):
 
             # use smooth normal if necessary
             if smooth:
-                smooth = vert.normal[:]
+                normal = vert.normal[:]
 
             # an unique key to identify the vertex
             key = (vid, loop_index, smooth)
