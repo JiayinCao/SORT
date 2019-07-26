@@ -401,53 +401,53 @@ def export_mesh(mesh, fs):
     wo3_indices = [{} for _ in range(len(verts))]
     wo3_tris = bytearray()
 
-    uvs = [[0.0,0.0]] * len( verts )
-    if has_uv:
-        for poly in mesh.polygons:
-            for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
-                vid = mesh.loops[loop_index].vertex_index
-                uvs[vid] = [uv_layer[loop_index].uv.x , uv_layer[loop_index].uv.y]
-
-    uvcoord = (0.0, 0.0)
-    for i, f in enumerate(mesh.loop_triangles):
-        smooth = f.use_smooth
-        if not smooth:
-            normal = f.normal[:]
+    vert_cnt = 0
+    remapping = {}
+    for poly in mesh.polygons:
+        smooth = poly.use_smooth
+        normal = poly.normal[:]
 
         oi = []
-        for j, vidx in enumerate(f.vertices):
-            v = verts[vidx]
+        for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
+            # vertex index
+            vid = mesh.loops[loop_index].vertex_index
+            # vertex information
+            vert = verts[vid]                           
 
+            # uv coordinate
+            uvcoord = uv_layer[loop_index].uv[:] if has_uv else ( 0.0 , 0.0 )
+
+            # use smooth normal if necessary
             if smooth:
-                normal = v.normal[:]
+                smooth = vert.normal[:]
 
-            if has_uv:
-                uv = uvs[vidx]
-                uvcoord = ( uv[0], uv[1] )
+            # an unique key to identify the vertex
+            key = (vid, loop_index, smooth)
 
-            key = (normal, uvcoord)
-            out_idx = wo3_indices[vidx].get(key)
+            # acquire the key if possible, otherwise pack one
+            out_idx = remapping.get(key)
             if out_idx is None:
                 out_idx = vert_cnt
-                wo3_indices[vidx][key] = out_idx
-                wo3_verts += VERTFMT.pack(v.co[0], v.co[1], v.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
+                remapping[key] = out_idx
+                wo3_verts += VERTFMT.pack(vert.co[0], vert.co[1], vert.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
                 vert_cnt += 1
-
             oi.append(out_idx)
-
+        
         matid = -1
-        matname = name_compat(material_names[f.material_index]) if len( material_names ) > 0 else None
+        matname = name_compat(material_names[poly.material_index]) if len( material_names ) > 0 else None
         matid = matname_to_id[matname] if matname in matname_to_id else -1
         if len(oi) == 3:
             # triangle
             wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
             primitive_cnt += 1
-        else:
-            assert( len(oi) == 4 )
+        elif len(oi) == 4:
             # quad
             wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
             wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
             primitive_cnt += 2
+        else:
+            # no other primitive supported in mesh
+            assert( False )
 
     fs.serialize('MeshVisual')
     fs.serialize(bool(has_uv))
