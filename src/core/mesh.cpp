@@ -27,10 +27,17 @@ void BufferMemory::ApplyTransform( const Transform& transform ){
     for (MeshVertex& mv : m_vertices) {
         mv.m_position = transform(mv.m_position);
         mv.m_normal = (transform.invMatrix.Transpose())(mv.m_normal).Normalize();
+
+        if(m_hasUV)
+            mv.m_tangent = transform(mv.m_tangent).Normalize();
     }
 }
 
 void BufferMemory::GenSmoothTagent(){
+    // If there is already UV, meaning that tangent is also ready, no need to generate tangent again.
+    if(m_hasUV)
+        return;
+
     // generate tangent for each triangle
     std::vector<std::vector<Vector>> tangent(m_vertices.size());
     for (auto mi : m_indices) {
@@ -106,7 +113,7 @@ void BufferMemory::Serialize( IStreamBase& stream ){
     stream >> vb_cnt;
     m_vertices.resize(vb_cnt);
     for (MeshVertex& mv : m_vertices)
-        stream >> mv.m_position >> mv.m_normal >> mv.m_texCoord;
+        stream >> mv.m_position >> mv.m_normal >> mv.m_tangent >> mv.m_texCoord;
 
     stream >> ib_cnt;
     m_indices.resize(ib_cnt);

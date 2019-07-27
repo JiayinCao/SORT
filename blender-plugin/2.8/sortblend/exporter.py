@@ -365,12 +365,11 @@ def export_global_config(scene, fs, sort_resource_path):
         fs.serialize( sort_data.ir_light_path_num )
         fs.serialize( sort_data.ir_min_dist )
 
-# warning, this export function is not an optimal version, but it works.
-# I will get back to it some time later.
+# export a mesh
 def export_mesh(mesh, fs):
     LENFMT = struct.Struct('=i')
     FLTFMT = struct.Struct('=f')
-    VERTFMT = struct.Struct('=ffffffff')
+    VERTFMT = struct.Struct('=fffffffffff')
     LINEFMT = struct.Struct('=iiffi')
     POINTFMT = struct.Struct('=fff')
     TRIFMT = struct.Struct('=iiii')
@@ -382,6 +381,7 @@ def export_mesh(mesh, fs):
     primitive_cnt = 0
     verts = mesh.vertices
     wo3_verts = bytearray()
+    wo3_tris = bytearray()
 
     global matname_to_id
 
@@ -398,8 +398,9 @@ def export_mesh(mesh, fs):
         else:
             uv_layer = active_uv_layer.data
 
-    wo3_indices = [{} for _ in range(len(verts))]
-    wo3_tris = bytearray()
+    # generate tangent if there is UV, there seems to always be true in Blender 2.8, but not in 2.7x
+    if has_uv:
+        mesh.calc_tangents()
 
     vert_cnt = 0
     remapping = {}
@@ -412,7 +413,7 @@ def export_mesh(mesh, fs):
             # vertex index
             vid = mesh.loops[loop_index].vertex_index
             # vertex information
-            vert = verts[vid]                           
+            vert = verts[vid]
 
             # uv coordinate
             uvcoord = uv_layer[loop_index].uv[:] if has_uv else ( 0.0 , 0.0 )
@@ -420,6 +421,8 @@ def export_mesh(mesh, fs):
             # use smooth normal if necessary
             if smooth:
                 normal = vert.normal[:]
+
+            tangent = mesh.loops[loop_index].tangent
 
             # an unique key to identify the vertex
             key = (vid, loop_index, smooth)
@@ -429,7 +432,7 @@ def export_mesh(mesh, fs):
             if out_idx is None:
                 out_idx = vert_cnt
                 remapping[key] = out_idx
-                wo3_verts += VERTFMT.pack(vert.co[0], vert.co[1], vert.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
+                wo3_verts += VERTFMT.pack(vert.co[0], vert.co[1], vert.co[2], normal[0], normal[1], normal[2], tangent[0], tangent[1], tangent[2], uvcoord[0], uvcoord[1])
                 vert_cnt += 1
             oi.append(out_idx)
         

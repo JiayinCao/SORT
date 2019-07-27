@@ -358,7 +358,7 @@ def export_global_config(scene, fs, sort_resource_path):
 def export_mesh(mesh, fs):
     LENFMT = struct.Struct('=i')
     FLTFMT = struct.Struct('=f')
-    VERTFMT = struct.Struct('=ffffffff')
+    VERTFMT = struct.Struct('=fffffffffff')
     LINEFMT = struct.Struct('=iiffi')
     POINTFMT = struct.Struct('=fff')
     TRIFMT = struct.Struct('=iiii')
@@ -370,68 +370,75 @@ def export_mesh(mesh, fs):
     primitive_cnt = 0
     verts = mesh.vertices
     wo3_verts = bytearray()
+    wo3_tris = bytearray()
 
     global matname_to_id
 
     # output the mesh information.
     mesh.calc_normals()
-    if not mesh.tessfaces and mesh.polygons:
-        mesh.calc_tessface()
 
-    has_uv = bool(mesh.tessface_uv_textures)
-
+    has_uv = bool(mesh.uv_layers)
+    uv_layer = None
     if has_uv:
-        active_uv_layer = mesh.tessface_uv_textures.active
+        active_uv_layer = mesh.uv_layers.active
         if not active_uv_layer:
             has_uv = False
         else:
-            active_uv_layer = active_uv_layer.data
+            uv_layer = active_uv_layer.data
+    
+    # generate tangent if there is UV, there seems to always be true in Blender 2.8, but not in 2.7x
+    if has_uv:
+        mesh.calc_tangents()
 
-    wo3_indices = [{} for _ in range(len(verts))]
-    wo3_tris = bytearray()
-
-    uvcoord = (0.0, 0.0)
-    for i, f in enumerate(mesh.tessfaces):
-        smooth = f.use_smooth
-        if not smooth:
-            normal = f.normal[:]
-
-        if has_uv:
-            uv = active_uv_layer[i]
-            uv = (uv.uv1, uv.uv2, uv.uv3, uv.uv4)
+    vert_cnt = 0
+    remapping = {}
+    for poly in mesh.polygons:
+        smooth = poly.use_smooth
+        normal = poly.normal[:]
 
         oi = []
-        for j, vidx in enumerate(f.vertices):
-            v = verts[vidx]
+        for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
+            # vertex index
+            vid = mesh.loops[loop_index].vertex_index
+            # vertex information
+            vert = verts[vid]
 
+            # uv coordinate
+            uvcoord = uv_layer[loop_index].uv[:] if has_uv else ( 0.0 , 0.0 )
+
+            # use smooth normal if necessary
             if smooth:
-                normal = v.normal[:]
+                normal = vert.normal[:]
 
-            if has_uv:
-                uvcoord = (uv[j][0], uv[j][1])
+            tangent = mesh.loops[loop_index].tangent
 
-            key = (normal, uvcoord)
-            out_idx = wo3_indices[vidx].get(key)
+            # an unique key to identify the vertex
+            key = (vid, loop_index, smooth)
+
+            # acquire the key if possible, otherwise pack one
+            out_idx = remapping.get(key)
             if out_idx is None:
                 out_idx = vert_cnt
-                wo3_indices[vidx][key] = out_idx
-                wo3_verts += VERTFMT.pack(v.co[0], v.co[1], v.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
+                remapping[key] = out_idx
+                wo3_verts += VERTFMT.pack(vert.co[0], vert.co[1], vert.co[2], normal[0], normal[1], normal[2], tangent[0], tangent[1], tangent[2], uvcoord[0], uvcoord[1])
                 vert_cnt += 1
-
             oi.append(out_idx)
-
+        
         matid = -1
-        matname = name_compat(material_names[f.material_index]) if len( material_names ) > 0 else None
+        matname = name_compat(material_names[poly.material_index]) if len( material_names ) > 0 else None
         matid = matname_to_id[matname] if matname in matname_to_id else -1
         if len(oi) == 3:
             # triangle
             wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
             primitive_cnt += 1
-        else:
+        elif len(oi) == 4:
             # quad
             wo3_tris += TRIFMT.pack(oi[0], oi[1], oi[2], matid)
             wo3_tris += TRIFMT.pack(oi[0], oi[2], oi[3], matid)
             primitive_cnt += 2
+        else:
+            # no other primitive supported in mesh
+            assert( False )
 
     fs.serialize('MeshVisual')
     fs.serialize(bool(has_uv))
