@@ -358,7 +358,7 @@ def export_global_config(scene, fs, sort_resource_path):
 def export_mesh(mesh, fs):
     LENFMT = struct.Struct('=i')
     FLTFMT = struct.Struct('=f')
-    VERTFMT = struct.Struct('=fffffffffff')
+    VERTFMT = struct.Struct('=ffffffff')
     LINEFMT = struct.Struct('=iiffi')
     POINTFMT = struct.Struct('=fff')
     TRIFMT = struct.Struct('=iiii')
@@ -386,9 +386,12 @@ def export_mesh(mesh, fs):
         else:
             uv_layer = active_uv_layer.data
     
+    # Warning this function seems to cause quite some trouble on MacOS during the first renderer somehow.
+    # And this problem only exists on MacOS not the other two OS.
+    # Since there is not a low hanging fruit solution for now, it is disabled by default
     # generate tangent if there is UV, there seems to always be true in Blender 2.8, but not in 2.7x
-    if has_uv:
-        mesh.calc_tangents()
+    #if has_uv:
+    #    mesh.calc_tangents( uvmap = uv_layer_name )
 
     vert_cnt = 0
     remapping = {}
@@ -410,7 +413,7 @@ def export_mesh(mesh, fs):
             if smooth:
                 normal = vert.normal[:]
 
-            tangent = mesh.loops[loop_index].tangent
+            #tangent = mesh.loops[loop_index].tangent
 
             # an unique key to identify the vertex
             key = (vid, loop_index, smooth)
@@ -420,7 +423,7 @@ def export_mesh(mesh, fs):
             if out_idx is None:
                 out_idx = vert_cnt
                 remapping[key] = out_idx
-                wo3_verts += VERTFMT.pack(vert.co[0], vert.co[1], vert.co[2], normal[0], normal[1], normal[2], tangent[0], tangent[1], tangent[2], uvcoord[0], uvcoord[1])
+                wo3_verts += VERTFMT.pack(vert.co[0], vert.co[1], vert.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
                 vert_cnt += 1
             oi.append(out_idx)
         
