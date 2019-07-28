@@ -89,7 +89,7 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
     const auto rMax = Sample_Sr(ch, 0.9999f);
     if( r >= rMax ) return 0.0f;
 
-    const auto l = 2 * sqrt( SQR(rMax) - SQR(r) );
+    const auto l = 2.0f * sqrt( SQR(rMax) - SQR(r) );
 
     const auto phi = TWO_PI * sort_canonical();
     const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) + l * vy * 0.5f;
@@ -121,7 +121,8 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
 
     if( found == 0 )
         return 0.0f;
-    auto pick = clamp( 0 , found - 1 , (int)( sort_canonical() * found ) );
+
+    auto pick = clamp( (int)( sort_canonical() * found ) , 0 , found - 1 );
     intersectNode = &dummyHead;
     do{
         sAssert( intersectNode != nullptr , MATERIAL );

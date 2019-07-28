@@ -87,7 +87,7 @@ void Material::Serialize(IStreamBase& stream){
     }
 }
 
-void Material::UpdateScattering(const class Intersection& intersect, Bsdf*& bsdf , Bssrdf*& bssrdf) const {
+void Material::UpdateScattering(const Intersection& intersect, Bsdf*& bsdf , Bssrdf*& bssrdf) const {
     bsdf = SORT_MALLOC(Bsdf)(&intersect);
     if ( !g_noMaterial && m_valid)
         ExecuteShader(bsdf, bssrdf, intersect, m_shader.get());

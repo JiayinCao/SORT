@@ -182,10 +182,10 @@ public:
     //!
     //! @param  intersect   Intersection information at exitant point.
     //! @param  R           Reflectance of the material.
-    //! @param  dd          Spectrum dependent mean distance.
+    //! @param  mfp         Spectrum dependent mean free path.
     //! @param  ior_i       Index of refraction inside the surface.
     //! @param  ior_e       Index of refraction outside the surface.
-    DisneyBssrdf( const Intersection* intersect , const Spectrum& R , const Spectrum& dd , float ior_i , float ior_e );
+    DisneyBssrdf( const Intersection* intersect , const Spectrum& R , const Spectrum& mfp , float ior_i , float ior_e );
 
     //! @brief  Evalute the reflectance profile based on distance between the two points.
     //!

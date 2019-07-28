@@ -55,13 +55,13 @@ float ClearcoatGGX::G1(const Vector& v) const {
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
 }
 
-DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& dd , float ior_i , float ior_e )
+DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , float ior_i , float ior_e )
 :R(R),SeparableBssrdf( intersection , ior_i , ior_e ){
     // Approximate Reflectance Profiles for Efficient Subsurface Scattering, Eq 6
     const auto s = Spectrum(1.9f) - R + 3.5f * ( R - Spectrum( 0.8f ) ) * ( R - Spectrum( 0.8f ) );
 
     // prevent the scatter distance to be zero, not a perfect solution, but it works.
-    d = dd.Clamp( 0.0001f , FLT_MAX ) / s;
+    d = mfp.Clamp( 0.0001f , FLT_MAX ) / s;
 }
 
 Spectrum DisneyBssrdf::S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const{
