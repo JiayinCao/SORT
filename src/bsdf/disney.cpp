@@ -86,13 +86,14 @@ Spectrum DisneyBssrdf::Sr( float r ) const{
 }
 
 float DisneyBssrdf::Sample_Sr(int ch, float r) const{
-    // This could be bug when r is '1.0f' to be handled later
-    const auto rr = sort_canonical();
-    return rr < 0.25f ? -d[ch] * log( 1.0f - r ) : -3.0f * d[ch] * log( 1.0f - r );
+    if( r < 0.25f )
+        return -d[ch] * log( 1.0f - 4.0f * r );
+    r = ( r - 0.25f ) * 3.0f / 4.0f * 0.9999f;
+    return -3.0f * d[ch] * log( 1.0f - r );
 }
 
 float DisneyBssrdf::Pdf_Sr(int ch, float r) const{
-    // Sr(ch,r) = 0.25f * exp( -r / d[ch] ) / ( TWO_PI * d[ch] * r ) + 0.75f * exp( -r / ( 3.0f * d[ch] ) ) / ( SIX_PI * d[ch] * r )
+    // Sr(ch,r) = ( 0.25f * exp( -r / d[ch] ) / ( TWO_PI * d[ch] * r ) + 0.75f * exp( -r / ( 3.0f * d[ch] ) ) / ( SIX_PI * d[ch] * r )
     constexpr auto EIGHT_PI = 4.0f * TWO_PI;
     r = ( r < 0.000001f ) ? 0.000001f : r;
     return ( exp( -r / d[ch] ) + exp( -r / ( 3.0f * d[ch] ) ) ) / ( EIGHT_PI * d[ch] * r );
