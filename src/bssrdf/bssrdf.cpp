@@ -142,15 +142,16 @@ float SeparableBssrdf::Pdf_Sp( const Point& po , const Point& pi , const Vector&
 
     float rProj[3] = { sqrt( SQR( dLocal.y ) + SQR( dLocal.z ) ) ,
                        sqrt( SQR( dLocal.x ) + SQR( dLocal.z ) ) ,
-                       sqrt( SQR( nLocal.x ) + SQR( nLocal.y ) ) };
+                       sqrt( SQR( dLocal.x ) + SQR( dLocal.y ) ) };
 
     constexpr float axisProb[3] = { 0.25f , 0.5f , 0.25f };
     constexpr auto chProb = 1.0f / (float)SPECTRUM_SAMPLE;
     auto pdf = 0.0f ;
     for( auto axis = 0 ; axis < 3 ; ++axis ){
         for( auto ch = 0 ; ch < SPECTRUM_SAMPLE ; ++ch )
-            pdf += Pdf_Sr( ch , rProj[axis] ) * std::abs( nLocal[axis] ) * chProb * axisProb[axis];
+            pdf += Pdf_Sr( ch , rProj[axis] ) * std::abs( nLocal[axis] ) * axisProb[axis];
     }
+    pdf *= chProb;
     return pdf;
 }
 
