@@ -108,7 +108,7 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
 
         // Instead of doing this, a better approach is to update the spatial data structure to support multi-intersection tests.
         auto* next = SORT_MALLOC(IntersectionChain)();
-        Ray r( current , -vy , 0 , 0.001f , t );
+        Ray r( current , -vy , 0 , 0.00001f , t );
         if( !scene.GetIntersect( r , &next->si ) )
             break;
 
