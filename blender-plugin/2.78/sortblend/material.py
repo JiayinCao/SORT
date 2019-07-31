@@ -520,6 +520,17 @@ class SORTNodeSocketFloatVector(bpy.types.NodeSocketFloat, SORTNodeSocket):
     def get_socket_data_type(self):
         return 'vector3'
 
+@base.register_class
+class SORTNodeSocketPositiveFloatVector(bpy.types.NodeSocket, SORTNodeSocket):
+    bl_idname = 'SORTNodeSocketPositiveFloatVector'
+    bl_label = 'SORT Float Vector Socket'
+    socket_color = (0.1, 0.6, 0.3, 1.0)
+    default_value = bpy.props.FloatVectorProperty( name='Float' , default=(0.0,0.0,0.0) , min=float(0.0), max=float('inf') )
+    def export_osl_value(self):
+        return 'vector(%f,%f,%f)'%(self.default_value[:])
+    def get_socket_data_type(self):
+        return 'vector3'
+
 # Socket for Positive Float
 @base.register_class
 class SORTNodeSocketLargeFloat(bpy.types.NodeSocketFloat, SORTNodeSocket):
@@ -1459,7 +1470,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Clearcoat Glossiness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Specular Transmittance')
-        self.inputs.new( 'SORTNodeSocketFloatVector' , 'Scatter Distance')
+        self.inputs.new( 'SORTNodeSocketPositiveFloatVector' , 'Scatter Distance')
         self.inputs.new( 'SORTNodeSocketFloat' , 'Flatness' )
         self.inputs.new( 'SORTNodeSocketFloat' , 'Diffuse Transmittance' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
