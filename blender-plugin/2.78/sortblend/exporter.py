@@ -83,7 +83,7 @@ def get_intermediate_dir(force_debug=False):
 
 # Blender and SORT doesn't share exactly the same coordinate system, the following functions are to be applied whenever
 # a matrix is used in other system.
-def matrix_sort_to_blender():
+def MatrixSortToBlender():
     from bpy_extras.io_utils import axis_conversion
     global_matrix = axis_conversion(to_forward='-Z',to_up='Y').to_4x4()
     global_matrix[2][0] *= -1.0
@@ -91,7 +91,7 @@ def matrix_sort_to_blender():
     global_matrix[2][2] *= -1.0
     return global_matrix
 
-def matrix_blender_to_sort():
+def MatrixBlenderToSort():
     from bpy_extras.io_utils import axis_conversion
     global_matrix = axis_conversion(to_forward='-Z',to_up='Y').to_4x4()
     global_matrix[2][0] *= -1.0
@@ -102,7 +102,7 @@ def matrix_blender_to_sort():
 # extracting camera information form a camera class instance
 def lookat_camera(camera):
     # it seems that the matrix return here is the inverse of view matrix.
-    ori_matrix = matrix_blender_to_sort() * camera.matrix_world.copy()
+    ori_matrix = MatrixBlenderToSort() * camera.matrix_world.copy()
     # get the transpose matrix
     matrix = ori_matrix.transposed()
     pos = matrix[3]             # get eye position
@@ -111,7 +111,7 @@ def lookat_camera(camera):
     # get focal distance for DOF effect
     if camera.data.dof_object is not None:
         focal_object = camera.data.dof_object
-        fo_mat = matrix_blender_to_sort() * focal_object.matrix_world
+        fo_mat = MatrixBlenderToSort() * focal_object.matrix_world
         delta = fo_mat.to_translation() - pos.to_3d()
         focal_distance = delta.dot(forwards)
     else:
@@ -180,10 +180,6 @@ def export_scene(scene, fs):
     def vec3_to_tuple(vec):
         return (vec[0],vec[1],vec[2])
 
-    # helper function to acquire light intensity
-    def lamp_intensity(lamp):
-        return ( lamp.color[0] * lamp.energy , lamp.color[1] * lamp.energy , lamp.color[2] * lamp.energy )
-
     # this is a special code for the render to identify that the serialized input is still valid.
     fs.serialize( int(1234567) )
 
@@ -227,7 +223,7 @@ def export_scene(scene, fs):
     # export meshes
     for obj in all_meshes:
         fs.serialize('VisualEntity')
-        fs.serialize( matrix_to_tuple( matrix_blender_to_sort() * obj.matrix_world ) )
+        fs.serialize( matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
         fs.serialize( 1 )   # only one mesh for each mesh entity
         stat = None
         # apply the modifier if there is one
@@ -250,7 +246,7 @@ def export_scene(scene, fs):
     for obj in all_meshes:
         if len( obj.particle_systems ) > 0:
             fs.serialize('VisualEntity')
-            fs.serialize( matrix_to_tuple( matrix_blender_to_sort() * obj.matrix_world ) )
+            fs.serialize( matrix_to_tuple( MatrixBlenderToSort() * obj.matrix_world ) )
             fs.serialize( len( obj.particle_systems ) )
 
             for ps in obj.particle_systems:
@@ -262,44 +258,48 @@ def export_scene(scene, fs):
     log( "Total primitives: %d." % total_prim_cnt )
 
     # exporting light information
+    mapping = {'SUN': 'DirLightEntity', 'POINT': 'PointLightEntity', 'SPOT': 'SpotLightEntity', 'AREA': 'AreaLightEntity', 'HEMI': 'SkyLightEntity' }
     for ob in all_lights:
         lamp = ob.data
+
         # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
-        world_matrix = matrix_blender_to_sort() * ob.matrix_world * matrix_sort_to_blender() * flip_mat
+        if lamp.type != 'HEMI':
+            world_matrix = MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender() * flip_mat
+        else:
+            world_matrix = MatrixBlenderToSort() * ob.matrix_world * MatrixSortToBlender()
 
-        if lamp.type == 'SUN':
-            fs.serialize('DirLightEntity')
-            fs.serialize(matrix_to_tuple(world_matrix))
-            fs.serialize(lamp_intensity(lamp))
-        elif lamp.type == 'POINT':
-            fs.serialize('PointLightEntity')
-            fs.serialize(matrix_to_tuple(world_matrix))
-            fs.serialize(lamp_intensity(lamp))
-        elif lamp.type == 'SPOT':
+        # make sure the type of the light is supported
+        assert( lamp.type in mapping )
+
+        # name identifier of the light
+        fs.serialize( mapping[lamp.type] )
+
+        # transformation of light source
+        fs.serialize(matrix_to_tuple(world_matrix))
+
+        # total light power, it defines how bright light is
+        fs.serialize(lamp.energy)
+
+        # light spectrum color, it defines color of the light
+        fs.serialize(lamp.color[:])
+
+        # spot light and area light have extra properties to be serialized
+        if lamp.type == 'SPOT':
             falloff_start = degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)
             falloff_range = degrees(lamp.spot_size*0.5)
-
-            fs.serialize('SpotLightEntity')
-            fs.serialize(matrix_to_tuple(world_matrix))
-            fs.serialize(lamp_intensity(lamp))
             fs.serialize(falloff_start)
             fs.serialize(falloff_range)
         elif lamp.type == 'AREA':
-            fs.serialize('AreaLightEntity')
-            fs.serialize(matrix_to_tuple(world_matrix))
-            fs.serialize(lamp_intensity(lamp))
-
             fs.serialize( lamp.shape )
             if lamp.shape == 'SQUARE':
                 fs.serialize(lamp.size)
             elif lamp.shape == 'RECTANGLE':
                 fs.serialize(lamp.size)
                 fs.serialize(lamp.size_y)
+            elif lamp.shape == 'DISK':
+                fs.serialize(lamp.size * 0.5)
         elif lamp.type == 'HEMI':
-            fs.serialize('SkyLightEntity')
-            fs.serialize(matrix_to_tuple(matrix_blender_to_sort() * ob.matrix_world * matrix_sort_to_blender()))
-            fs.serialize(lamp_intensity(lamp))
             fs.serialize(bpy.path.abspath( lamp.sort_data.hdr_sky_image ))
 
     # to indicate the scene stream comes to an end

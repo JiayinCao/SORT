@@ -111,7 +111,7 @@ public:
     //!
     //! The exact importance sampling algorithm comes from this paper.
     //! BSSRDF Importance Sampling
-    //! http://www.aconty.com/pdf/bssrdf.pdf
+    //! http://library.imageworks.com/pdfs/imageworks-library-BSSRDF-sampling.pdf
     //!
     //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.

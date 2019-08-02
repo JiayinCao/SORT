@@ -29,7 +29,10 @@ IMPLEMENT_RTTI(AreaLightEntity);
 
 void PointLightEntity::Serialize( IStreamBase& stream ){
     stream >> m_light->m_light2world;
+    auto energy = 0.0f;
+    stream >> energy;
     stream >> m_light->intensity;
+    m_light->intensity *= energy / FOUR_PI;
 }
 
 void PointLightEntity::FillScene(class Scene& scene) {
@@ -38,7 +41,11 @@ void PointLightEntity::FillScene(class Scene& scene) {
 
 void DirLightEntity::Serialize(IStreamBase& stream) {
     stream >> m_light->m_light2world;
+
+    auto energy = 0.0f;
+    stream >> energy;
     stream >> m_light->intensity;
+    m_light->intensity *= energy;
 }
 
 void DirLightEntity::FillScene(class Scene& scene) {
@@ -47,7 +54,12 @@ void DirLightEntity::FillScene(class Scene& scene) {
 
 void SpotLightEntity::Serialize(IStreamBase& stream) {
     stream >> m_light->m_light2world;
+
+    auto energy = 0.0f;
+    stream >> energy;
     stream >> m_light->intensity;
+    m_light->intensity *= energy / FOUR_PI;
+    
     float cos_falloff_start, cos_total_range;
     stream >> cos_falloff_start;
     stream >> cos_total_range;
@@ -61,7 +73,9 @@ void SpotLightEntity::FillScene(class Scene& scene) {
 
 void SkyLightEntity::Serialize(IStreamBase& stream) {
     stream >> m_light->m_light2world;
-    stream >> m_light->intensity;
+    auto energy = 1.0f;
+    stream >> energy >> m_light->intensity;
+    m_light->intensity *= energy;
 
     // the following code needs to be changed later.
     std::string filename;
@@ -82,7 +96,9 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
     const auto mat = m_light->m_light2world.matrix * Scale( 1 / sx , 1 / sy , 1 / sz ).matrix;
     const auto inv_mat = Scale( sx , sy , sz ).matrix * m_light->m_light2world.invMatrix;
     m_light->m_light2world = Transform( mat , inv_mat );
-
+    
+    auto energy = 0.0f;
+    stream >> energy;
     stream >> m_light->intensity;
 
     std::string area_type;
@@ -91,18 +107,25 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
         auto rect = std::make_unique<Quad>();
         float size;
         stream >> size;
-        rect->SetSizeX(size * sx);
-        rect->SetSizeY(size * sy);
+        rect->SetSizeX(size);
+        rect->SetSizeY(size);
         rect->SetTransform(m_light->m_light2world);
         m_light->m_shape = std::move(rect);
+        
+        // The 0.8 factor is purely just to stick the same power with cycles in Blender so that it is easier to compare results with Cycles.
+        m_light->intensity *= 0.8f * energy / ( SQR(size) * sx * sy * PI );
+
     }else if( area_type == "RECTANGLE" ){
         auto rect = std::make_unique<Quad>();
         float sizeX, sizeY;
         stream >> sizeX >> sizeY;
-        rect->SetSizeX(sizeX * sx);
-        rect->SetSizeY(sizeY * sy);
+        rect->SetSizeX(sizeX);
+        rect->SetSizeY(sizeY);
         rect->SetTransform(m_light->m_light2world);
         m_light->m_shape = std::move(rect);
+
+        // The 0.8 factor is purely just to stick the same power with cycles in Blender so that it is easier to compare results with Cycles.
+        m_light->intensity *= 0.8f * energy / ( sizeX * sx * sizeY * sy * PI );
     }else if( area_type == "DISK" ){
         // scaling is not supported for now
         auto rect = std::make_unique<Disk>();
@@ -111,6 +134,9 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
         rect->SetRadius(radius);
         rect->SetTransform(m_light->m_light2world);
         m_light->m_shape = std::move(rect);
+
+        // The 0.8 factor is purely just to stick the same power with cycles in Blender so that it is easier to compare results with Cycles.
+        m_light->intensity *= 0.8f * energy / ( SQR(radius * PI) * sx * sy );
     }else{
         slog( WARNING , LIGHT , "Area light type (%s) not supported" , area_type.c_str() );
     }

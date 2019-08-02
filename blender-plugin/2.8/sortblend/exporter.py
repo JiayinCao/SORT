@@ -183,10 +183,7 @@ def export_scene(depsgraph, fs):
     def vec3_to_tuple(vec):
         return (vec[0],vec[1],vec[2])
 
-    # helper function to acquire light intensity
-    def lamp_intensity(lamp):
-        return ( lamp.color[0] * lamp.energy , lamp.color[1] * lamp.energy , lamp.color[2] * lamp.energy )
-
+    # get the scene object from dependency graph
     scene = depsgraph.scene
 
     # this is a special code for the render to identify that the serialized input is still valid.
@@ -269,34 +266,35 @@ def export_scene(depsgraph, fs):
     log( "Total vertices: %d." % total_vert_cnt )
     log( "Total primitives: %d." % total_prim_cnt )
 
+    mapping = {'SUN': 'DirLightEntity', 'POINT': 'PointLightEntity', 'SPOT': 'SpotLightEntity', 'AREA': 'AreaLightEntity' }
     for ob in all_lights:
         lamp = ob.data
         # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
         world_matrix = MatrixBlenderToSort() @ ob.matrix_world @ MatrixSortToBlender() @ flip_mat
 
-        if lamp.type == 'SUN':
-            fs.serialize('DirLightEntity')
-            fs.serialize(matrix_to_tuple(world_matrix))
-            fs.serialize(lamp_intensity(lamp))
-        elif lamp.type == 'POINT':
-            fs.serialize('PointLightEntity')
-            fs.serialize(matrix_to_tuple(world_matrix))
-            fs.serialize(lamp_intensity(lamp))
-        elif lamp.type == 'SPOT':
+        # make sure the type of the light is supported
+        assert( lamp.type in mapping )
+
+        # name identifier of the light
+        fs.serialize( mapping[lamp.type] )
+
+        # transformation of light source
+        fs.serialize(matrix_to_tuple(world_matrix))
+
+        # total light power, it defines how bright light is
+        fs.serialize(lamp.energy)
+
+        # light spectrum color, it defines color of the light
+        fs.serialize(lamp.color[:])
+
+        # spot light and area light have extra properties to be serialized
+        if lamp.type == 'SPOT':
             falloff_start = degrees(lamp.spot_size * ( 1.0 - lamp.spot_blend ) * 0.5)
             falloff_range = degrees(lamp.spot_size*0.5)
-
-            fs.serialize('SpotLightEntity')
-            fs.serialize(matrix_to_tuple(world_matrix))
-            fs.serialize(lamp_intensity(lamp))
             fs.serialize(falloff_start)
             fs.serialize(falloff_range)
         elif lamp.type == 'AREA':
-            fs.serialize('AreaLightEntity')
-            fs.serialize(matrix_to_tuple(world_matrix))
-            fs.serialize(lamp_intensity(lamp))
-
             fs.serialize( lamp.shape )
             if lamp.shape == 'SQUARE':
                 fs.serialize(lamp.size)
@@ -305,12 +303,13 @@ def export_scene(depsgraph, fs):
                 fs.serialize(lamp.size_y)
             elif lamp.shape == 'DISK':
                 fs.serialize(lamp.size * 0.5)
-            
+
     hdr_sky_image = scene.sort_hdr_sky.hdr_image
     if hdr_sky_image is not None:
         fs.serialize('SkyLightEntity')
         fs.serialize(matrix_to_tuple(MatrixBlenderToSort() @ MatrixSortToBlender()))
-        fs.serialize(( 1.0 , 1.0 , 1.0 ))
+        fs.serialize(( 1.0 , 1.0 , 1.0 ))   # light tint color
+        fs.serialize( 1.0 )                 # sky light scaling, not supported since it is not pbs.
         fs.serialize(bpy.path.abspath( hdr_sky_image.filepath ))
 
     # to indicate the scene stream comes to an end
