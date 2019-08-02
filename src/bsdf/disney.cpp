@@ -75,7 +75,6 @@ Spectrum DisneyBssrdf::S( const Vector& wo , const Point& po , const Vector& wi 
     }
     const auto fo = SchlickWeight( AbsCosTheta(wo) );
     const auto fi = SchlickWeight( AbsCosTheta(wi) );
-    constexpr float FOUR_PI = 2.0f * TWO_PI;
     return fade * ( 2.0f - fo ) * ( 2.0f - fi ) * Sr( Distance( po , pi ) ) / FOUR_PI;
 }
 
