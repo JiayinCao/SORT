@@ -51,7 +51,7 @@ For those who are interested in compiling SORT by themselves, please check out [
 After compiling SORT successfully, it is nessesary to install Blender plugin to start rendering in SORT, [this page](/deployment.md) mentioned all detailes needed.
 
 ## About me & Contact
-I’m a senior graphics engineer at Ubisoft Singapore currently working on Skull and Bones, improving graphics rendering in the game engine. Prior to joining Ubisoft, I was a geforce devtech at NVIDIA Shanghai. My job at NVIDIA was to support third party developers with latest NVIDIA technologies and help them solve the issues they encountered during game development.
+With more or less ten years industrial experience at companies like NVIDIA, Ubisoft, AMD, Microsoft, I have rich experience of graphics programming and profiling. I am currenlty a graphics programmer at Naughty Dog.
 
 For those who wants to connect, for whatever reason, please contact me through the following media
 * [Linkedin](https://www.linkedin.com/in/caojiayin/)
