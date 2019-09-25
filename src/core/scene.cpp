@@ -19,21 +19,20 @@
 #include "scene.h"
 #include "math/intersection.h"
 #include "accel/accelerator.h"
+#include "material/matmanager.h"
 #include "core/path.h"
 #include "core/samplemethod.h"
 #include "core/sassert.h"
-#include "material/matmanager.h"
-#include "light/light.h"
-#include "shape/shape.h"
 #include "core/sassert.h"
 #include "core/stats.h"
+#include "core/globalconfig.h"
+#include "core/strid.h"
+#include "core/primitive.h"
 #include "entity/visual_entity.h"
 #include "entity/visual.h"
-#include "core/primitive.h"
-#include "stream/stream.h"
 #include "stream/fstream.h"
-#include "core/globalconfig.h"
 #include "light/light.h"
+#include "shape/shape.h"
 
 SORT_STATS_DEFINE_COUNTER(sScenePrimitiveCount)
 SORT_STATS_DEFINE_COUNTER(sSceneLightCount)
@@ -42,7 +41,10 @@ SORT_STATS_COUNTER("Statistics", "Total Primitive Count", sScenePrimitiveCount);
 SORT_STATS_COUNTER("Statistics", "Total Light Count", sSceneLightCount);
 
 bool Scene::LoadScene( IStreamBase& stream ){
+    // Will uncomment this line once I have the same hash function on python interface.
+    // constexpr unsigned int verificationBit = UINT_FROM_STRINGID( SID("Verification") );
     constexpr unsigned int verificationBit = 1234567;
+
     unsigned int checkingBit;
     stream >> checkingBit;
     sAssertMsg( checkingBit == verificationBit , RESOURCE , "Serialization is broken." );
