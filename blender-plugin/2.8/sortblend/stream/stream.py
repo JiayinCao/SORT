@@ -44,8 +44,7 @@ class FileStream(Stream):
             if type(data).__name__ == 'float' or type(data).__name__ == 'float64':
                 self.file.write(struct.pack( 'f' , data ) )
             elif type(data).__name__ == 'int':
-                data = struct.pack( 'I' , data )
-                self.file.write(data)
+                self.file.write(struct.pack( 'I' , data ))
             elif type(data).__name__ == 'bool':
                 self.file.write(struct.pack( '?' , data ) )
 

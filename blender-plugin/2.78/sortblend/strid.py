@@ -39,7 +39,7 @@ def crc32_bitwise( data , len ):
 
     # Technically speaking, this is a signed integer, but since the bits are the same and
     # the value is never used in a mathematic operation, this is not a big problem.
-    return ~crc
+    return (~crc) & 0xFFFFFFFF
 
 # convert a string to hashed key
 def SID( str ):
