@@ -28,7 +28,7 @@
 // Fast CRC32
 // https://create.stephan-brumme.com/crc32/#bitwise
 
-constexpr unsigned int crc32_bitwise(const char* data, unsigned int length ){
+constexpr unsigned int crc32_bitwise(const char* data, std::size_t length ){
     constexpr unsigned int Polynomial = 0xEDB88320;
 
     unsigned int crc = 0;
@@ -55,7 +55,7 @@ constexpr unsigned int crc32_bitwise(const char* data, unsigned int length ){
 using StringID = unsigned int;
 
 // Appending '_sid' converts a string to StringID, which is essentially an unsigned integer.
-constexpr StringID operator ""_sid( const char* str , unsigned long len ){
+constexpr StringID operator"" _sid( const char* str , std::size_t len ){
     return crc32_bitwise( str , len );
 }
 
