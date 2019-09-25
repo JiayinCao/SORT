@@ -48,9 +48,9 @@ bool Scene::LoadScene( IStreamBase& stream ){
     sAssertMsg( checkingBit == verificationBit , RESOURCE , "Serialization is broken." );
 
     while( true ){
-        std::string class_id;
+        StringID class_id;
         stream >> class_id;
-        if( class_id == "" )
+        if( SID("end of list") == class_id )
             break;
 
         auto entity = MakeUniqueInstance<Entity>( class_id );

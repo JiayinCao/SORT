@@ -47,7 +47,7 @@ constexpr unsigned int crc32_bitwise(const char* data, std::size_t length ){
     return ~crc;
 }
 
-// Game Engine Architecture, Chapeter 6.4.3.2
+// Game Engine Architecture, Chapter 6.4.3.2
 // https://www.gameenginebook.com/
 // 
 // String will be encoded as a 32-bit integer in SORT.

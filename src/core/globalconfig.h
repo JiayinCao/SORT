@@ -203,7 +203,7 @@ public:
         stream >> m_threadCnt;
         stream >> m_samplePerPixel;
         stream >> m_resWidth >> m_resHeight;
-        std::string accelType , integratorType;
+        StringID accelType , integratorType;
         stream >> accelType;
         m_accelerator = MakeUniqueInstance<Accelerator>(accelType);
         if( m_accelerator )

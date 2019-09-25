@@ -212,7 +212,7 @@ def export_scene(depsgraph, fs):
     camera_shift_x = bpy.data.cameras[0].shift_x
     camera_shift_y = bpy.data.cameras[0].shift_y
 
-    fs.serialize('PerspectiveCameraEntity')
+    fs.serialize(SID('PerspectiveCameraEntity'))
     fs.serialize(vec3_to_tuple(pos))
     fs.serialize(vec3_to_tuple(up))
     fs.serialize(vec3_to_tuple(target))
@@ -230,7 +230,7 @@ def export_scene(depsgraph, fs):
     total_prim_cnt = 0
     # export meshes
     for obj in all_meshes:
-        fs.serialize('VisualEntity')
+        fs.serialize(SID('VisualEntity'))
         fs.serialize( matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
         fs.serialize( 1 )   # only one mesh for each mesh entity
         stat = None
@@ -254,7 +254,7 @@ def export_scene(depsgraph, fs):
     for obj in all_meshes:
         # output hair/fur information
         if len( obj.particle_systems ) > 0:
-            fs.serialize('VisualEntity')
+            fs.serialize(SID('VisualEntity'))
             fs.serialize( matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
             fs.serialize( len( obj.particle_systems ) )
 
@@ -279,7 +279,7 @@ def export_scene(depsgraph, fs):
         assert( lamp.type in mapping )
 
         # name identifier of the light
-        fs.serialize( mapping[lamp.type] )
+        fs.serialize( SID(mapping[lamp.type]) )
 
         # transformation of light source
         fs.serialize(matrix_to_tuple(world_matrix))
@@ -308,14 +308,14 @@ def export_scene(depsgraph, fs):
 
     hdr_sky_image = scene.sort_hdr_sky.hdr_image
     if hdr_sky_image is not None:
-        fs.serialize('SkyLightEntity')
+        fs.serialize(SID('SkyLightEntity'))
         fs.serialize(matrix_to_tuple(MatrixBlenderToSort() @ MatrixSortToBlender()))
         fs.serialize(( 1.0 , 1.0 , 1.0 ))   # light tint color
         fs.serialize( 1.0 )                 # sky light scaling, not supported since it is not pbs.
         fs.serialize(bpy.path.abspath( hdr_sky_image.filepath ))
 
     # to indicate the scene stream comes to an end
-    fs.serialize('')
+    fs.serialize(SID('end of list'))
 
 # avoid having space in material name
 def name_compat(name):
@@ -344,18 +344,23 @@ def export_global_config(scene, fs, sort_resource_path):
     fs.serialize( int(sort_data.sampler_count_prop) )
     fs.serialize( int(xres) )
     fs.serialize( int(yres) )
-    fs.serialize( accelerator_type )
+
     if accelerator_type == "bvh":
+        fs.serialize( SID('Bvh') )
         fs.serialize( int(sort_data.bvh_max_node_depth) )
         fs.serialize( int(sort_data.bvh_max_pri_in_leaf) )
     elif accelerator_type == "KDTree":
+        fs.serialize( SID('KDTree') )
         fs.serialize( int(sort_data.kdtree_max_node_depth) )
         fs.serialize( int(sort_data.kdtree_max_pri_in_leaf) )
     elif accelerator_type == "OcTree":
+        fs.serialize( SID('OcTree') )
         fs.serialize( int(sort_data.octree_max_node_depth) )
         fs.serialize( int(sort_data.octree_max_pri_in_leaf) )
+    else:
+        fs.serialize( SID('UniGrid') )
 
-    fs.serialize( integrator_type )
+    fs.serialize( SID(integrator_type) )
     fs.serialize( int(sort_data.inte_max_recur_depth) )
     if integrator_type == "AmbientOcclusion":
         fs.serialize( sort_data.ao_max_dist )
@@ -457,7 +462,7 @@ def export_mesh(mesh, fs):
             # no other primitive supported in mesh
             assert( False )
 
-    fs.serialize('MeshVisual')
+    fs.serialize(SID('MeshVisual'))
     fs.serialize(bool(has_uv))
     fs.serialize(LENFMT.pack(vert_cnt))
     fs.serialize(wo3_verts)
@@ -512,7 +517,7 @@ def export_hair(ps, obj, scene, fs):
             verts += POINTFMT.pack( h[0] , h[1] , h[2] )
         total_hair_segs += len(hair) - 1
 
-    fs.serialize( 'HairVisual' )
+    fs.serialize( SID('HairVisual') )
     fs.serialize( hair_cnt )
     fs.serialize( width_tip )
     fs.serialize( width_bottom )

@@ -21,6 +21,7 @@
 #include <algorithm>
 #include "core/singleton.h"
 #include "core/log.h"
+#include "core/strid.h"
 
 //! @brief  This class has no member field. Its only purpose is to instancing class object.
 template<class T>
@@ -33,24 +34,22 @@ public:
 //! @brief      Class Factory is responsible for creating instances based on names.
 template<class T>
 class Factory : public Singleton<Factory<T>>{
-    typedef std::unordered_map<std::string,FactoryMethod<T>*> FACTORY_MAP;
+    typedef std::unordered_map<StringID,FactoryMethod<T>*> FACTORY_MAP;
 
 public:
     //! @brief  Create a shared instance of a specific type based on class name.
     //!
     //! @return     Return a reference of a newly created instance.
-    auto CreateSharedType( std::string str ) const{
-        std::transform(str.begin(),str.end(),str.begin(),[](char c){ return tolower(c); });
-        auto it = m_factoryMap.find( str );
+    auto CreateSharedType( const StringID sid ) const{
+        auto it = m_factoryMap.find(sid);
         return it == m_factoryMap.end() ? nullptr : it->second->CreateSharedInstance();
     }
 
     //! @brief  Create an unique instance of a specific type based on class name.
     //!
     //! @return     Return a reference of a newly created instance.
-    auto CreateUniqueType( std::string str ) const{
-        std::transform(str.begin(),str.end(),str.begin(),[](char c){ return tolower(c); });
-        auto it = m_factoryMap.find( str );
+    auto CreateUniqueType( const StringID sid ) const{
+        auto it = m_factoryMap.find(sid);
         return it == m_factoryMap.end() ? nullptr : it->second->CreateUniqueInstance();
     }
 
@@ -81,8 +80,8 @@ private:
 //! @param  name        Name of the class. This has to match what is defined in python plugin.
 //! @return             Shared pointer holding the instance.
 template<class T>
-std::shared_ptr<T> MakeSharedInstance( const std::string& name ){
-    return std::shared_ptr<T>(Factory<T>::GetSingleton().CreateSharedType(name));
+std::shared_ptr<T> MakeSharedInstance( const StringID sid){
+    return std::shared_ptr<T>(Factory<T>::GetSingleton().CreateSharedType(sid));
 }
 
 //! @brief  Instance a class and an unique pointer is returned.
@@ -90,22 +89,21 @@ std::shared_ptr<T> MakeSharedInstance( const std::string& name ){
 //! @param  name        Name of the class. This has to match what is defined in python plugin.
 //! @return             An unique pointer pointing to the instance.
 template<class T>
-std::unique_ptr<T> MakeUniqueInstance( const std::string& name ) {
-    return std::unique_ptr<T>(Factory<T>::GetSingleton().CreateUniqueType(name));
+std::unique_ptr<T> MakeUniqueInstance( const StringID sid ) {
+    return std::unique_ptr<T>(Factory<T>::GetSingleton().CreateUniqueType(sid));
 }
 
 #define IMPLEMENT_RTTI( T )      static T::T##FactoryMethod g_factoryMethod##T;
 #define DEFINE_RTTI( T , B )     class T##FactoryMethod : public FactoryMethod<B>\
 {public: \
     T##FactoryMethod(){\
-        std::string _str( #T );\
-        std::transform(_str.begin(),_str.end(),_str.begin(),[](char c){return tolower(c);});\
+		StringID sid(SID(#T));\
         auto& factoryMap = Factory<B>::GetSingleton().GetFactoryMap();\
-        if( factoryMap.count( _str ) ){\
+        if( factoryMap.count(sid) ){\
             slog( WARNING , GENERAL , "The class with specific name of %s already exxisted." , #T );\
             return;\
         }\
-        factoryMap.insert( std::make_pair(_str , this) );\
+        factoryMap.insert( std::make_pair(sid, this) );\
     }\
     std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
     std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\

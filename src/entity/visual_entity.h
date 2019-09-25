@@ -52,7 +52,7 @@ public:
 
         while( visualCnt-- > 0 ){
             // Instance the visual
-            std::string class_name;
+            StringID class_name;
             stream >> class_name;
             auto visual = MakeUniqueInstance<Visual>( class_name );
             visual->Serialize( stream );
