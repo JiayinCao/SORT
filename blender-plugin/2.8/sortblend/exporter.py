@@ -22,6 +22,7 @@ import struct
 from time import time
 from math import degrees
 from .log import log, logD
+from .strid import SID
 from .stream import stream
 
 # List all objects in the scene
@@ -140,14 +141,14 @@ def export_blender(depsgraph, force_debug=False):
     log("Exporting global configuration.")
     export_global_config(scene, fs, sort_resource_path)
     log("Exported configuration %.2f" % (time() - current_time))
-    
+
     # export materials
     current_time = time()
     log("Exporting materials.")
     collect_shader_resources(scene, fs)     # this is the place for material to signal heavy resources, like textures, measured BRDF, etc.
     export_materials(scene, fs)             # this is the place for serializing OSL shader source code with proper default values.
     log("Exported materials %.2f(s)" % (time() - current_time))
-    
+
     # export scene
     current_time = time()
     log("Exporting scene.")
@@ -187,7 +188,8 @@ def export_scene(depsgraph, fs):
     scene = depsgraph.scene
 
     # this is a special code for the render to identify that the serialized input is still valid.
-    fs.serialize( int(1234567) )
+    vericiation_bits = SID('verification bits')
+    fs.serialize( vericiation_bits )
 
     # camera node
     camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
@@ -406,6 +408,7 @@ def export_mesh(mesh, fs):
 
     vert_cnt = 0
     remapping = {}
+
     for poly in mesh.polygons:
         smooth = poly.use_smooth
         normal = poly.normal[:]
@@ -437,7 +440,7 @@ def export_mesh(mesh, fs):
                 wo3_verts += VERTFMT.pack(vert.co[0], vert.co[1], vert.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
                 vert_cnt += 1
             oi.append(out_idx)
-        
+
         matid = -1
         matname = name_compat(material_names[poly.material_index]) if len( material_names ) > 0 else None
         matid = matname_to_id[matname] if matname in matname_to_id else -1
@@ -499,7 +502,7 @@ def export_hair(ps, obj, scene, fs):
             co = world2Local @ co
             hair.append( co )
             vert_cnt += 1
-                
+
         if len(hair) == 0:
             continue
 

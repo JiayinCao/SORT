@@ -41,9 +41,7 @@ SORT_STATS_COUNTER("Statistics", "Total Primitive Count", sScenePrimitiveCount);
 SORT_STATS_COUNTER("Statistics", "Total Light Count", sSceneLightCount);
 
 bool Scene::LoadScene( IStreamBase& stream ){
-    // Will uncomment this line once I have the same hash function on python interface.
-    // constexpr unsigned int verificationBit = UINT_FROM_STRINGID( SID("Verification") );
-    constexpr unsigned int verificationBit = 1234567;
+    constexpr unsigned int verificationBit = UINT_FROM_STRINGID( SID("verification bits") );
 
     unsigned int checkingBit;
     stream >> checkingBit;

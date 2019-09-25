@@ -23,6 +23,7 @@ from math import degrees
 from time import time
 from extensions_framework import util as efutil
 from .log import log, logD
+from .strid import SID
 from .stream import stream
 
 # List all objects in the scene
@@ -137,14 +138,14 @@ def export_blender(scene, force_debug=False):
     log("Exporting global configuration.")
     export_global_config(scene, fs, sort_resource_path)
     log("Exported configuration %.2f" % (time() - current_time))
-    
+
     # export materials
     current_time = time()
     log("Exporting materials.")
     collect_shader_resources(scene, fs)     # this is the place for material to signal heavy resources, like textures, measured BRDF, etc.
     export_materials(scene, fs)             # this is the place for serializing OSL shader source code with proper default values.
     log("Exported materials %.2f(s)" % (time() - current_time))
-    
+
     # export scene
     current_time = time()
     log("Exporting scene.")
@@ -181,7 +182,8 @@ def export_scene(scene, fs):
         return (vec[0],vec[1],vec[2])
 
     # this is a special code for the render to identify that the serialized input is still valid.
-    fs.serialize( int(1234567) )
+    vericiation_bits = SID('verification bits')
+    fs.serialize( vericiation_bits )
 
     # camera node
     camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
@@ -385,7 +387,7 @@ def export_mesh(mesh, fs):
             has_uv = False
         else:
             uv_layer = active_uv_layer.data
-    
+
     # Warning this function seems to cause quite some trouble on MacOS during the first renderer somehow.
     # And this problem only exists on MacOS not the other two OS.
     # Since there is not a low hanging fruit solution for now, it is disabled by default
@@ -426,7 +428,7 @@ def export_mesh(mesh, fs):
                 wo3_verts += VERTFMT.pack(vert.co[0], vert.co[1], vert.co[2], normal[0], normal[1], normal[2], uvcoord[0], uvcoord[1])
                 vert_cnt += 1
             oi.append(out_idx)
-        
+
         matid = -1
         matname = name_compat(material_names[poly.material_index]) if len( material_names ) > 0 else None
         matid = matname_to_id[matname] if matname in matname_to_id else -1
@@ -458,7 +460,7 @@ def export_hair(ps, obj, scene, fs):
     POINTFMT = struct.Struct('=fff')
 
     ps.set_resolution(scene, obj, 'RENDER')
-    
+
     vert_cnt = 0
     render_step = ps.settings.render_step
     width_tip = ps.settings.sort_data.fur_tip
@@ -525,7 +527,7 @@ def find_output_node(material):
 def get_from_socket(socket, visited):
     if not socket.is_linked:
         return None
-    
+
     # there should be exactly one link attached to an input socket, this is guaranteed by Blender
     assert( len( socket.links ) == 1 )
     other = socket.links[0].from_socket
