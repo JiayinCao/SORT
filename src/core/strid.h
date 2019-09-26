@@ -65,7 +65,7 @@ constexpr sid_t operator"" _sid( const char* str , std::size_t len ){
 }
 
 // A helper macro to convert string to StringID
-#define SID(str)                str##_sid
+#define SID(str)                StringID(str##_sid)
 
 /**
  * Game Engine Architecture, Chapter 6.4.3.2
@@ -124,14 +124,5 @@ struct std::hash<StringID>{
     }
 };
 
-// Global helper function for comparing StringID with sid
-// StringID is passed by value instead of reference is on purpose.
-inline bool operator == ( const sid_t other , const StringID sid ) {
-    return sid.m_sid == other;
-}
-inline bool operator == ( const StringID sid , const sid_t other ) {
-    return sid.m_sid == other;
-}
-
-// Make sure the size of StringID is no larger than its internal represenation.
+// Make sure the size of StringID is no larger than its internal representation.
 static_assert( sizeof( StringID ) == sizeof( sid_t ) , "StringID size is incorrect, it should be 32bits.");
