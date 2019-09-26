@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <string>
 #include "core/define.h"
 
 // Current type of stringID is actually a 32 bits integer, which should be good enough for now.
@@ -55,7 +56,7 @@ constexpr unsigned int crc32_bitwise(const char* data, std::size_t length ){
 
 // Intern string
 inline sid_t InternString( const char* str ){
-    return crc32_bitwise( str , std::strlen( str ) );
+    return crc32_bitwise( str , std::char_traits<char>::length( str ) );
 }
 
 // Appending '_sid' converts a string to StringID, which is essentially an unsigned integer.
