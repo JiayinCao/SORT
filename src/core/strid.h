@@ -22,8 +22,8 @@
 // Current type of stringID is actually a 32 bits integer, which should be good enough for now.
 using sid_t = unsigned int;
 
-// Use 0 as invalid string id, hopefully nothing ends up 0.
-#define INVALID_SID   sid_t(0)
+// Use 0 as invalid string id, hopefully nothing but empty string ends up with the value of 0xFFFFFFFF.
+#define INVALID_SID   sid_t(0xFFFFFFFF)
 
 // Cyclic redundancy check
 // https://en.wikipedia.org/wiki/Cyclic_redundancy_check#CRC-32_algorithm
@@ -102,6 +102,13 @@ struct StringID{
     //! @param other  Comparing with the other StringID.
     bool operator == ( const StringID& other ) const {
         return m_sid == other.m_sid;
+    }
+
+    //! @brief != operator
+    //!
+    //! @param other  Comparing with the other StringID.
+    bool operator != ( const StringID& other ) const {
+        return m_sid != other.m_sid;
     }
 
     sid_t   m_sid;  /**< Hashed id of the original string. */
