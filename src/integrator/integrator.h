@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <random>
 #include "spectrum/spectrum.h"
 #include "core/memory.h"
 #include "sampler/sampler.h"
@@ -69,7 +70,7 @@ public:
         auto shuffle = std::make_unique<unsigned[]>(ps);
         for (unsigned i = 0; i < ps; i++)
             shuffle[i] = i;
-        std::random_shuffle(shuffle.get(), shuffle.get() + ps);
+        std::shuffle(shuffle.get(), shuffle.get() + ps, std::default_random_engine(sort_rand()));
 
         sampler->Generate2D(data.get(), ps );
         for( unsigned i = 0 ; i < ps ; ++i )
