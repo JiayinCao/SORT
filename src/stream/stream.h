@@ -23,6 +23,7 @@
 #include "math/vector2.h"
 #include "math/transform.h"
 #include "spectrum/spectrum.h"
+#include "core/strid.h"
 
 //! @brief Interface for streaming/serialization.
 /**
@@ -208,6 +209,22 @@ public:
         *this >> r >> g >> b;
         v = Spectrum ( r , g , b );
         return *this;
+    }
+
+    //! @brief  Streaming in a StringID
+    //!
+    //! @param sid  Value to be loaded.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator <<( const StringID sid ){
+        return *this << sid.m_sid;
+    }
+
+    //! @brief Streaming out a StringID.
+    //!
+    //! @param sid  Value to be loaded.
+    //! @return     Reference of the stream itself.
+    inline StreamBase&  operator >> (StringID& sid) {
+        return *this >> sid.m_sid;
     }
 
     //! @brief Loading data from stream directly.

@@ -34,7 +34,7 @@ public:
 //! @brief      Class Factory is responsible for creating instances based on names.
 template<class T>
 class Factory : public Singleton<Factory<T>>{
-    typedef std::unordered_map<StringID,FactoryMethod<T>*> FACTORY_MAP;
+    using FACTORY_MAP = std::unordered_map<StringID,FactoryMethod<T>*>;
 
 public:
     //! @brief  Create a shared instance of a specific type based on class name.
@@ -97,13 +97,13 @@ std::unique_ptr<T> MakeUniqueInstance( const StringID sid ) {
 #define DEFINE_RTTI( T , B )     class T##FactoryMethod : public FactoryMethod<B>\
 {public: \
     T##FactoryMethod(){\
-		StringID sid(SID(#T));\
+		StringID sid(#T);\
         auto& factoryMap = Factory<B>::GetSingleton().GetFactoryMap();\
         if( factoryMap.count(sid) ){\
             slog( WARNING , GENERAL , "The class with specific name of %s already exxisted." , #T );\
             return;\
         }\
-        factoryMap.insert( std::make_pair(sid, this) );\
+        factoryMap[sid] = this;\
     }\
     std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
     std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\
