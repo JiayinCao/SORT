@@ -297,7 +297,7 @@ def export_scene(depsgraph, fs):
             fs.serialize(falloff_start)
             fs.serialize(falloff_range)
         elif lamp.type == 'AREA':
-            fs.serialize( lamp.shape )
+            fs.serialize( SID(lamp.shape) )
             if lamp.shape == 'SQUARE':
                 fs.serialize(lamp.size)
             elif lamp.shape == 'RECTANGLE':
@@ -413,6 +413,8 @@ def export_mesh(mesh, fs):
 
     vert_cnt = 0
     remapping = {}
+
+    mesh_sid = SID( mesh.name )
 
     for poly in mesh.polygons:
         smooth = poly.use_smooth

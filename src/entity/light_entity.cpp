@@ -101,9 +101,9 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
     stream >> energy;
     stream >> m_light->intensity;
 
-    std::string area_type;
+    StringID area_type;
     stream >> area_type;
-    if( area_type == "SQUARE" ){
+    if( area_type == SID("SQUARE") ){
         auto rect = std::make_unique<Quad>();
         float size;
         stream >> size;
@@ -115,7 +115,7 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
         // The 0.8 factor is purely just to stick the same power with cycles in Blender so that it is easier to compare results with Cycles.
         m_light->intensity *= 0.8f * energy / ( SQR(size) * sx * sy * PI );
 
-    }else if( area_type == "RECTANGLE" ){
+    }else if( area_type == SID("RECTANGLE") ){
         auto rect = std::make_unique<Quad>();
         float sizeX, sizeY;
         stream >> sizeX >> sizeY;
@@ -126,7 +126,7 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
 
         // The 0.8 factor is purely just to stick the same power with cycles in Blender so that it is easier to compare results with Cycles.
         m_light->intensity *= 0.8f * energy / ( sizeX * sx * sizeY * sy * PI );
-    }else if( area_type == "DISK" ){
+    }else if( area_type == SID("DISK") ){
         // scaling is not supported for now
         auto rect = std::make_unique<Disk>();
         float radius;
@@ -138,7 +138,7 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
         // The 0.8 factor is purely just to stick the same power with cycles in Blender so that it is easier to compare results with Cycles.
         m_light->intensity *= 0.8f * energy / ( SQR(radius * PI) * sx * sy );
     }else{
-        slog( WARNING , LIGHT , "Area light type (%s) not supported" , area_type.c_str() );
+        slog( WARNING , LIGHT , "Unrecognized area light type (%u)." , area_type.m_sid );
     }
 }
 

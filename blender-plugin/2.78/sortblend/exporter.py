@@ -293,14 +293,12 @@ def export_scene(scene, fs):
             fs.serialize(falloff_start)
             fs.serialize(falloff_range)
         elif lamp.type == 'AREA':
-            fs.serialize( lamp.shape )
+            fs.serialize( SID(lamp.shape) )
             if lamp.shape == 'SQUARE':
                 fs.serialize(lamp.size)
             elif lamp.shape == 'RECTANGLE':
                 fs.serialize(lamp.size)
                 fs.serialize(lamp.size_y)
-            elif lamp.shape == 'DISK':
-                fs.serialize(lamp.size * 0.5)
         elif lamp.type == 'HEMI':
             fs.serialize(bpy.path.abspath( lamp.sort_data.hdr_sky_image ))
 
