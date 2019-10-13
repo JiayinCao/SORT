@@ -38,7 +38,7 @@ SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOc
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCountCopy);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
+bool OcTree::GetIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
     SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect == nullptr);
@@ -48,7 +48,7 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
     if( fmin < 0.0f )
         return false;
 
-    if( traverseOcTree( m_root.get() , r , intersect , fmin , fmax ) ){
+    if( traverseOcTree( m_root.get() , r , intersect , fmin , fmax , matID ) ){
         if( !intersect )
             return true;
         return nullptr != intersect->primitive;
@@ -161,9 +161,9 @@ void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container ){
         node->primitives.push_back( primitive );
 }
 
-bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const{
-    static const auto   delta = 0.001f;
-    auto inter = false;
+bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , const StringID matID ) const{
+    constexpr auto   delta = 0.001f;
+    auto found = false;
 
     // Early rejections
     if( fmin >= fmax )
@@ -173,13 +173,25 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
 
     // Iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
     if( node->child[0] == nullptr ){
-        for( auto primitive : node->primitives ){
-            SORT_STATS(++sIntersectionTest);
-            inter |= primitive->GetIntersect( ray , intersect );
-            if( !intersect && inter )
-                return true;
+        if( INVALID_SID == matID ){
+            for( auto primitive : node->primitives ){
+                SORT_STATS(++sIntersectionTest);
+                found |= primitive->GetIntersect( ray , intersect );
+                if( !intersect && found )
+                    return true;
+            }
+        }else{
+            for( auto primitive : node->primitives ){
+                if( matID != primitive->GetMaterial()->GetID() )
+                    continue;
+
+                SORT_STATS(++sIntersectionTest);
+                found |= primitive->GetIntersect( ray , intersect );
+                if( !intersect && found )
+                    return true;
+            }
         }
-        return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
+        return found && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
     }
 
     const auto contact = ray(fmin);
@@ -205,7 +217,7 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
         nextAxis = (_next[nextAxis] <= _next[2]) ? nextAxis : 2;
 
         // check if there is intersection in the current grid
-        if( traverseOcTree( node->child[node_index].get() , ray , intersect , _curt , _next[nextAxis] ) )
+        if( traverseOcTree( node->child[node_index].get() , ray , intersect , _curt , _next[nextAxis] , matID ) )
             return true;
 
         // get to the next node based on distance
@@ -222,5 +234,5 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
             break;
     }
 
-    return inter;
+    return found;
 }

@@ -19,6 +19,7 @@
 #include "matmanager.h"
 #include "core/log.h"
 #include "core/globalconfig.h"
+#include "core/strid.h"
 #include "osl_system.h"
 #include "bsdf/lambert.h"
 
@@ -46,6 +47,8 @@ bool Material::BuildMaterial(){
 
 void Material::Serialize(IStreamBase& stream){
     stream >> m_name;
+    m_matID = StringID(m_name);
+
     const auto message = "Parsing Material '" + m_name + "'";
     SORT_PROFILE(message.c_str());
 

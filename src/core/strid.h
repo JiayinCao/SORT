@@ -85,6 +85,11 @@ struct StringID{
     //! @param str   The string to be encoded.
     StringID( const char* str ) : m_sid( InternString(str) ) {}
 
+    //! @brief Constructor taking in a string.
+    //!
+    //! @param str   The string to be encoded.
+    StringID( const std::string& str ) : m_sid( InternString(str.c_str()) ) {}
+
     //! @brief Copy constructor
     //!
     //! @param other  The source to copy from.
@@ -114,6 +119,11 @@ struct StringID{
 
     sid_t   m_sid;  /**< Hashed id of the original string. */
 };
+
+//! @brief  Helper function to check whether sid_t equals to StringID
+inline bool operator == ( const sid_t sid , const StringID strID ){
+    return strID == sid;
+}
 
 // Use the CRC hashed key as key in hash table directly, this may not result in the best performance
 // due to the simplicity of the hash function, but it is simpler.

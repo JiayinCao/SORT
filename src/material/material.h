@@ -59,11 +59,20 @@ public:
     //! @return                 Whether the shader is created successfully.
     bool    BuildMaterial();
 
+    //! @brief  Get material ID.
+    //!
+    //! @return     Material ID that uniquely identifies the material.
+    inline StringID    GetID() const {
+        return m_matID;
+    }
+
 private:
     /**< Whether this is a valid material */
     bool                            m_valid = false;
     /**< Unique name of the material. */
     std::string                     m_name;
+    /**< Material id. */
+    StringID                        m_matID = INVALID_SID;
 
     struct ShaderSource{
         std::string name;

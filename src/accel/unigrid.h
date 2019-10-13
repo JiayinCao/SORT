@@ -43,9 +43,11 @@ public:
     //!                     it stops as long as it finds an intersection. It is faster
     //!                     than the one with intersection information data and suitable
     //!                     for shadow ray calculation.
+    //! @param  matID       In some cases, like SSS, we need intersection with primitives from the same material.
+    //!                     Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
+    bool GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const override;
 
     //! Build uniform grid structure in O(N).
     //!
@@ -94,8 +96,9 @@ private:
     //! @param voxelId      ID of the voxel to be tested.
     //! @param nextT        The intersected position of the ray and the next to-be-traversed voxel along
     //!                     the ray.
+    //! @param matID        Material ID to avoid if it is not invalid.
     //! @return             It will return true if there is an intersection, otherwise it returns false.
-    bool getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const;
+    bool getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT , const StringID matID ) const;
 
     SORT_STATS_ENABLE( "Spatial-Structure(UniformGrid)" )
 };

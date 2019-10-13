@@ -24,8 +24,8 @@
 #include "bsdf/bxdf.h"
 
 class Intersection;
-class Scene;
 class Bsdf;
+class Scene;
 
 //! @brief BSDF implementation.
 /**
@@ -153,6 +153,8 @@ protected:
     Vector nn;      /**< Normal at the point to be Evaluated. */
     Vector btn;     /**< Bi-tangent at the point to be evaluated. */
     Vector tn;      /**< Tangent at the point to be Evaluated. */
+
+    const Intersection*   intersection;   /**< Intersection that spawns the BSSRDF. */
 
     //! @brief  One of the directional components of separable Bssrdf.
     //!

@@ -38,7 +38,8 @@ float FresnelMoment1(const float eta) {
     return -4.61686f + 11.1136f * eta - 10.4646f * eta2 + 5.11455f * eta3 - 1.27198f * eta4 + 0.12746f * eta5;
 }
 
-SeparableBssrdf::SeparableBssrdf( const Intersection* intersection , const float ior_i , const float ior_e ): Bssrdf( ior_i , ior_e ) {
+SeparableBssrdf::SeparableBssrdf( const Intersection* intersection , const float ior_i , const float ior_e )
+    : Bssrdf( ior_i , ior_e ) , intersection(intersection) {
     nn = Normalize(intersection->normal);
     btn = Normalize(Cross( nn , intersection->tangent ));
     tn = Normalize(Cross( btn , nn ));
@@ -107,9 +108,12 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
             break;
 
         // Instead of doing this, a better approach is to update the spatial data structure to support multi-intersection tests.
+        // And don't look for intersections with primitives with other materials, a better approach may be to look for other primitives in the same sub-mesh.
+        // However, since SORT supports more than triangle primitives, there is no mesh concecpt for other primitive types. In order to keep it a general
+        // algorithm, it looks for primitives with same material.
         auto* next = SORT_MALLOC(IntersectionChain)();
         Ray r( current , -vy , 0 , 0.00001f , t );
-        if( !scene.GetIntersect( r , &next->si ) )
+        if( !scene.GetIntersect( r , &next->si , intersection->primitive->GetMaterial()->GetID() ) )
             break;
 
         intersectNode->next = next;

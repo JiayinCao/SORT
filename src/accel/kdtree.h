@@ -111,9 +111,11 @@ public:
     //!                     it stops as long as it finds an intersection. It is faster
     //!                     than the one with intersection information data and suitable
     //!                     for shadow ray calculation.
+    //! @param  matID       In some cases, like SSS, we need intersection with primitives from the same material.
+    //!                     Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
+    bool GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const override;
 
     //! @brief Build KD-Tree structure in O(N*lg(N)).
     //!
@@ -191,9 +193,10 @@ private:
     //!                     is found and it won't be necessary to be the nearest one.
     //! @param fmin         The minimum range along the ray.
     //! @param fmax         The maximum range along the ray.
+    //! @param matID        Material ID to avoid if it is not invalid.
     //! @return             True if there is intersection, otherwise it will return false.
     bool traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect ,
-                   float fmin , float fmax ) const;
+                   float fmin , float fmax , const StringID matID ) const;
 
     //! @brief  Delete all sub tree originating from node.
     //!

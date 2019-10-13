@@ -52,9 +52,11 @@ public:
     //!                     it stops as long as it finds an intersection. It is faster
     //!                     than the one with intersection information data and suitable
     //!                     for shadow ray calculation.
+    //! @param  matID       In some cases, like SSS, we need intersection with primitives from the same material.
+    //!                     Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
+    bool GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const override;
 
     //! Build the OcTree in O(Nlg(N)) time.
     //!
@@ -110,9 +112,10 @@ private:
     //!                     necessarily to be the nearest one.
     //! @param fmin         Current minimum value along the ray
     //! @param fmax         Current maximum value along the ray.
+    //! @param matID        Material ID to avoid if it is not invalid.
     //! @return             Whether the ray intersects anything in the primitive set
     bool traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect ,
-                         float fmin , float fmax ) const;
+                         float fmin , float fmax , const StringID matID ) const;
 
     //! @brief  Release OcTree memory.
     //!

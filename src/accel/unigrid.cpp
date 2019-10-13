@@ -38,7 +38,7 @@ SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGrid
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
 SORT_STATS_AVG_COUNT("Spatial-Structure(UniformGrid)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const{
+bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
     SORT_PROFILE("Traverse Uniform Grid");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect == nullptr);
@@ -89,7 +89,7 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const{
         nextAxis = idArray[nextAxis];
 
         // check if there is intersection in the current grid
-        if( getIntersect( r , intersect , voxelId , next[nextAxis] ) )
+        if( getIntersect( r , intersect , voxelId , next[nextAxis] , matID ) )
             return true;
 
         // get to the next voxel
@@ -181,16 +181,28 @@ unsigned UniGrid::offset( unsigned x , unsigned y , unsigned z ) const{
     return z * m_voxelNum[1] * m_voxelNum[0] + y * m_voxelNum[0] + x;
 }
 
-bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const{
-    sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "asfsa" );
+bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT , const StringID matID ) const{
+    sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "Invalid voxel id." );
 
     auto inter = false;
-    for( auto voxel : m_voxels[voxelId] ){
-        SORT_STATS(++sIntersectionTest);
-        // get intersection
-        inter |= voxel->GetIntersect( r , intersect );
-        if( !intersect && inter )
-            return true;
+    if( INVALID_SID == matID ){
+        for( auto voxel : m_voxels[voxelId] ){
+            SORT_STATS(++sIntersectionTest);
+            // get intersection
+            inter |= voxel->GetIntersect( r , intersect );
+            if( !intersect && inter )
+                return true;
+        }
+    }else{
+        for( auto voxel : m_voxels[voxelId] ){
+            if( matID != voxel->GetMaterial()->GetID() )
+                continue;
+            SORT_STATS(++sIntersectionTest);
+            // get intersection
+            inter |= voxel->GetIntersect( r , intersect );
+            if( !intersect && inter )
+                return true;
+        }
     }
 
     return inter && ( intersect->t < nextT + 0.00001f );

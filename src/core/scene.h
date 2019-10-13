@@ -31,22 +31,27 @@
 
 class Light;
 
-////////////////////////////////////////////////////////////////////////////
-// definition of scene class
+//! @brief  Data structure representing the whole scene.
+/**
+ * Scene is responsible for maintaining all of the lifetime of its own data structure.
+ */
 class   Scene{
 public:
     //! @brief Serialize scene from stream.
-    bool    LoadScene( class IStreamBase& root );
+    //!
+    //! @param  stream      The streaming source where scene information is loaded from.
+    //! @return             Whether the scene is loaded correctly.
+    bool    LoadScene( class IStreamBase& stream );
 
-    // get the intersection between a ray and the scene
-    // para 'r' : the ray
-    // result   : the intersection information between the ray and the scene
-    // note     : if there is no acceleration structure , it will iterator all
-    //            of the primitives which will cost much!
-    bool    GetIntersect( const Ray& r , Intersection* intersect ) const;
-
-    // preprocess
-    void    PreProcess();
+    //! @brief  Find the first intersection between a ray and the whole scene.
+    //!
+    //! @param  intersect   Intersection information at exitant point.
+    //! @param  r           The ray to be tested.
+    //! @param  intersect   The result where the intersected information is to be returned.
+    //! @param  matID       In some cases, like SSS, we need intersection with primitives from the same material.
+    //!                     Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
+    //! @return             Whether there is an intersection between the ray and the scene.
+    bool    GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const;
 
     // get light
     const Light* GetLight( unsigned i ) const{
@@ -108,12 +113,18 @@ private:
     // bounding box for the scene
     mutable BBox    m_BBox;
 
-    // brute force intersection test ( it will only invoked if there is no acceleration structure
-    // para 'r' : the ray
-    // result   : the intersection information between the ray and the scene
-    bool    _bfIntersect( const Ray& r , Intersection* intersect ) const;
+    //! @brief      Brute force solution to find intersection between a ray and the scene.
+    //!             This is generally an impractical solution to solve intersection test problem.
+    //!             It exists purely for reference purposes, any spatial data structure giving unbiased result is clearly wrong.
+    //!
+    //! @param  r               The ray to be tested against with.
+    //! @param  intersect       The result where the intersected information is to be returned.
+    //! @param  matID           In some cases, like SSS, we need intersection with primitives from the same material.
+    //!                         Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
+    //! @return                 Whether there is an intersection between the ray and the scene.
+    bool    bruteforceIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const;
 
-    // generate triangle buffer
+    // generate primitive buffer
     void    _generatePriBuf();
 
     // compute light cdf
