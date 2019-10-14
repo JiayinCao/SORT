@@ -98,10 +98,11 @@ float DisneyBssrdf::Sample_Sr(int ch, float r) const{
     r *= burley_max_cdf;
     float ret = 0.0f;
     if( r < quater_cutoff ){
+        sAssert( 1.0f - 4.0f * r > 0.0f , MATERIAL );
         ret = -d[ch] * log( 1.0f - 4.0f * r );
     }else{
         r = ( r - quater_cutoff ) * 4.0f / 3.0f;
-        sAssert( 1.0f > r , MATERIAL );
+        sAssert( 1.0f - r > 0.0f , MATERIAL );
         ret = -3.0f * d[ch] * log( 1.0f - r );
     }
 

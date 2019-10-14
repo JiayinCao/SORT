@@ -22,13 +22,13 @@
 #include <assert.h>
 
 #define sAssert(expr,type) \
-    if( false == (bool)(expr) ) {\
+    if( UNLIKELY(false == (bool)(expr)) ) {\
         slog( CRITICAL , type , "Crashed!" );\
         abort();\
     }
 
 #define sAssertMsg(expr, type, ... )\
-    if( false == (bool)(expr) ){\
+    if( UNLIKELY(false == (bool)(expr)) ){\
         slog( CRITICAL , type , __VA_ARGS__ );\
         abort();\
     }
