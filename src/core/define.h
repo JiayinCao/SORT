@@ -37,3 +37,5 @@
     #endif
 #endif
 
+#define UNLIKELY(EXP)       __builtin_expect((EXP),0)
+#define LIKELY(EXP)         __builtin_expect((EXP),1)

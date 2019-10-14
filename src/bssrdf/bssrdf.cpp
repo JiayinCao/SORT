@@ -86,9 +86,11 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
 
     const auto tmp = sort_canonical();
     const auto r = Sample_Sr(ch, tmp);
-    if( r < 0.0f ) return 0.0f;
-    const auto rMax = Max_Sr(ch);
+    // sample is invalid, this usually happens when sampling is out of maximum allowed distance
+    if( UNLIKELY( r < 0.0f ) )
+        return 0.0f;
 
+    const auto rMax = Max_Sr(ch);
     const auto l = 2.0f * sqrt( SQR(rMax) - SQR(r) );
 
     const auto phi = TWO_PI * sort_canonical();
