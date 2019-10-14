@@ -37,5 +37,10 @@
     #endif
 #endif
 
-#define UNLIKELY(EXP)       __builtin_expect((EXP),0)
-#define LIKELY(EXP)         __builtin_expect((EXP),1)
+#ifdef SORT_IN_WINDOWS
+    #define UNLIKELY(EXP)       (EXP)
+    #define LIKELY(EXP)         (EXP)
+#else
+    #define UNLIKELY(EXP)       __builtin_expect((EXP),0)
+    #define LIKELY(EXP)         __builtin_expect((EXP),1)
+#endif
