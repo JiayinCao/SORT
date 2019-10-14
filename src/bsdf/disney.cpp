@@ -93,18 +93,10 @@ Spectrum DisneyBssrdf::Sr( float r ) const{
 }
 
 float DisneyBssrdf::Sample_Sr(int ch, float r) const{
-    constexpr auto quater_cutoff = 0.25f * burley_max_cdf;
+    constexpr auto quater_cutoff = 0.25f;
 
-    r *= burley_max_cdf;
-    float ret = 0.0f;
-    if( r < quater_cutoff ){
-        sAssert( 1.0f - 4.0f * r > 0.0f , MATERIAL );
-        ret = -d[ch] * log( 1.0f - 4.0f * r );
-    }else{
-        r = ( r - quater_cutoff ) * 4.0f / 3.0f;
-        sAssert( 1.0f - r > 0.0f , MATERIAL );
-        ret = -3.0f * d[ch] * log( 1.0f - r );
-    }
+    // importance sampling burley profile
+    const auto ret = ( r < quater_cutoff ) ? -d[ch] * log( 4.0f * r ) : -3.0f * d[ch] * log( ( r - quater_cutoff ) * 1.3333f );
 
     // ignore all samples outside the sampling range
     return ( ret > burley_max_r_d * d[ch] ) ? -1.0f : ret;
