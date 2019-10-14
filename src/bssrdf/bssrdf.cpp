@@ -87,8 +87,7 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
     const auto tmp = sort_canonical();
     const auto r = Sample_Sr(ch, tmp);
     if( r < 0.0f ) return 0.0f;
-    const auto rMax = Sample_Sr(ch, 0.9999f);
-    if( r >= rMax ) return 0.0f;
+    const auto rMax = Max_Sr(ch);
 
     const auto l = 2.0f * sqrt( SQR(rMax) - SQR(r) );
 

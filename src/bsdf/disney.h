@@ -187,26 +187,6 @@ public:
     //! @param  ior_e       Index of refraction outside the surface.
     DisneyBssrdf( const Intersection* intersect , const Spectrum& R , const Spectrum& mfp , float ior_i , float ior_e );
 
-    //! @brief  Evalute the reflectance profile based on distance between the two points.
-    //!
-    //! @param  distance    Distance between the incident and extant positions.
-    //! @return             Reflectance profile based on the distance.
-    Spectrum    Sr( float distance ) const override;
-
-    //! @brief  Sampling a distance based on the reflectance profile.
-    //!
-    //! @param  ch          Spectrum channel.
-    //! @param  r           A canonical value used to randly sample distance
-    //! @return             The distance sampled.
-    float       Sample_Sr(int ch, float r) const override;
-
-    //! @brief  Pdf of sampling such a distance based on the reflectance profile.
-    //!
-    //! @param  ch          Spectrum channel.
-    //! @param  d           Distance from the extant point.
-    //! @return             Pdf of sampling it.
-    float       Pdf_Sr(int ch, float d) const override;
-
     //! @brief  Evaluate the BSSRDF.
     //!
     //! Unlike BXDF, BSSRDF is more of a generalized version function of eight dimensions.
@@ -217,6 +197,33 @@ public:
     //! @param  pi          Incident position.
     //! @return             To be figured out
     Spectrum    S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const override;
+
+protected:
+    //! @brief  Evalute the reflectance profile based on distance between the two points.
+    //!
+    //! @param  distance    Distance between the incident and extant positions.
+    //! @return             Reflectance profile based on the distance.
+    Spectrum    Sr( float distance ) const override;
+
+    //! @brief  Sampling a distance based on the reflectance profile.
+    //!
+    //! @param  ch          Spectrum channel.
+    //! @param  r           A canonical value used to randly sample distance
+    //! @return             The distance sampled.  A negative returned value means invalid sample.
+    float       Sample_Sr(int ch, float r) const override;
+
+    //! @brief  Get maximum profile sampling distance
+    //!
+    //! @param  ch          Spectrum channel of interest. The returned distance sometimes depends on spectrum channel.
+    //! @return             Maximum profile sampling distance.
+    float       Max_Sr( int ch ) const override;
+    
+    //! @brief  Pdf of sampling such a distance based on the reflectance profile.
+    //!
+    //! @param  ch          Spectrum channel.
+    //! @param  d           Distance from the extant point.
+    //! @return             Pdf of sampling it.
+    float       Pdf_Sr(int ch, float d) const override;
 
 private:
     Spectrum    R;

@@ -22,11 +22,19 @@
 #include "lambert.h"
 #include "microfacet.h"
 #include "core/memory.h"
+#include "math/exp.h"
 
 constexpr static float ior_in = 1.5f;          // hard coded index of refraction below the surface
 constexpr static float ior_ex = 1.0f;          // hard coded index of refraction above the surface
 constexpr static float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
 constexpr static float inv_eta = 1.0f / eta;   // hard coded reciprocal of IOR ratio
+
+constexpr float burley_max_cdf_calc( float max_r_d ){
+    return 0.25f * ( 4.0f - exp_compile( -max_r_d ) - 3.0f * exp_compile( -max_r_d ) );
+}
+constexpr static float burley_max_r_d = 64.0f;
+constexpr static float burley_max_cdf = burley_max_cdf_calc( burley_max_r_d );
+constexpr static float burley_inv_max_cdf = 1.0f / burley_max_cdf;
 
 float ClearcoatGGX::D(const Vector& h) const {
     // D(h) = ( alpha^2 - 1 ) / ( 2 * PI * ln(alpha) * ( 1 + ( alpha^2 - 1 ) * cos(\theta) ^ 2 )
@@ -85,17 +93,31 @@ Spectrum DisneyBssrdf::Sr( float r ) const{
 }
 
 float DisneyBssrdf::Sample_Sr(int ch, float r) const{
-    if( r < 0.25f )
-        return -d[ch] * log( 1.0f - 4.0f * r );
-    r = ( r - 0.25f ) * 3.0f / 4.0f * 0.9999f;
-    return -3.0f * d[ch] * log( 1.0f - r );
+    constexpr auto quater_cutoff = 0.25f * burley_max_cdf;
+
+    r *= burley_max_cdf;
+    float ret = 0.0f;
+    if( r < quater_cutoff ){
+        ret = -d[ch] * log( 1.0f - 4.0f * r );
+    }else{
+        r = ( r - quater_cutoff ) * 4.0f / 3.0f;
+        sAssert( 1.0f > r , MATERIAL );
+        ret = -3.0f * d[ch] * log( 1.0f - r );
+    }
+
+    // ignore all samples outside the sampling range
+    return ( ret > burley_max_r_d * d[ch] ) ? -1.0f : ret;
 }
 
 float DisneyBssrdf::Pdf_Sr(int ch, float r) const{
     // Sr(ch,r) = ( 0.25f * exp( -r / d[ch] ) / ( TWO_PI * d[ch] * r ) + 0.75f * exp( -r / ( 3.0f * d[ch] ) ) / ( SIX_PI * d[ch] * r )
     constexpr auto EIGHT_PI = 4.0f * TWO_PI;
     r = ( r < 0.000001f ) ? 0.000001f : r;
-    return ( exp( -r / d[ch] ) + exp( -r / ( 3.0f * d[ch] ) ) ) / ( EIGHT_PI * d[ch] * r );
+    return ( exp( -r / d[ch] ) + exp( -r / ( 3.0f * d[ch] ) ) ) / ( EIGHT_PI * d[ch] * r ) * burley_inv_max_cdf;
+}
+
+float DisneyBssrdf::Max_Sr(int ch) const{
+    return burley_max_r_d * d[ch];
 }
 
 Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {

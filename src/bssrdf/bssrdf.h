@@ -140,7 +140,7 @@ protected:
     //!
     //! @param  ch      Spectrum channel.
     //! @param  r       A canonical value used to randly sample distance
-    //! @return         The distance sampled.
+    //! @return         The distance sampled. A negative returned value means invalid sample.
     virtual float       Sample_Sr(int ch, float r) const = 0;
 
     //! @brief  Pdf of sampling such a distance based on the reflectance profile.
@@ -149,6 +149,12 @@ protected:
     //! @param  d       Distance from the extant point.
     //! @return         Pdf of sampling it.
     virtual float       Pdf_Sr(int ch, float d) const = 0;
+
+    //! @brief  Get maximum profile sampling distance
+    //!
+    //! @param  ch          Spectrum channel of interest. The returned distance sometimes depends on spectrum channel.
+    //! @return             Maximum profile sampling distance.
+    virtual float       Max_Sr( int ch ) const = 0;
 
     Vector nn;      /**< Normal at the point to be Evaluated. */
     Vector btn;     /**< Bi-tangent at the point to be evaluated. */
