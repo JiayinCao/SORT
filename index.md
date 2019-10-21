@@ -24,7 +24,6 @@ Thanks to [Christophe Desse](https://www.artstation.com/christophe-desse) for th
 ![Image](assets/main_page/table.png)
 ![Image](assets/main_page/coffee machine.png)
 ![Image](assets/main_page/cups.png)
-![Image](assets/main_page/dof.png)
 
 ## Materials System in SORT
 Featuring a flexible graph node material system, SORT is designed to support a wide variaty of materials. Most of the parameters in its BRDF could be driven by textures, providing quite some freedom in term of its material design. Following is a screenshot of SORT working in Blender
