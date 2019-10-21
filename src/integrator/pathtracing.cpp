@@ -55,7 +55,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
 
         if( bounces == 0 ) 
             L += inter.Le(-r.m_Dir);
-
+        
         // make sure there is intersected primitive
         sAssert( nullptr != inter.primitive , INTEGRATOR );
 
@@ -70,7 +70,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         if( light_pdf > 0.0f )
             L += throughput * EvaluateDirect(   r  , scene , light , inter , light_sample ,
                                                 bsdf_sample , BXDF_TYPE(BXDF_ALL) ) / light_pdf;
-
+        
         // sample the next direction using bsdf
         float       path_pdf;
         Vector      wi;
@@ -78,11 +78,12 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         Spectrum f;
         BsdfSample  _bsdf_sample = (bounces==0)?ps.bsdf_sample[1]:BsdfSample(true);
         f = bsdf->sample_f( -r.m_Dir , wi , _bsdf_sample , &path_pdf , BXDF_ALL , &bxdf_type );
-        if( f.IsBlack() || path_pdf == 0.0f )
+        if( ( f.IsBlack() || path_pdf == 0.0f ) && !bsdf->SamplingSSS() )
             break;
 
         // update path weight
-        throughput *= f / path_pdf;
+        if( !bsdf->SamplingSSS() )
+            throughput *= f / path_pdf;
 
         if( 0.0f == throughput.GetIntensity() )
             break;
@@ -101,7 +102,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
 
             // Accumulate the contribution from direct illumination
             L += throughput * SampleOneLight( bsdf , r , bssrdf_inter , scene );
-
+            
             // Accumulate the contribution from indirect illumination
             pdf = 0.0f;
             BXDF_TYPE   dummy;
@@ -135,7 +136,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         if( bounces >= max_recursive_depth )
             break;
     }
-
+    
     return L;
 }
 

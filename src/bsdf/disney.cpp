@@ -32,7 +32,7 @@ constexpr static float inv_eta = 1.0f / eta;   // hard coded reciprocal of IOR r
 constexpr float burley_max_cdf_calc( float max_r_d ){
     return 0.25f * ( 4.0f - exp_compile( -max_r_d ) - 3.0f * exp_compile( -max_r_d ) );
 }
-constexpr static float burley_max_r_d = 64.0f;
+constexpr static float burley_max_r_d = 16.0f;
 constexpr static float burley_max_cdf = burley_max_cdf_calc( burley_max_r_d );
 constexpr static float burley_inv_max_cdf = 1.0f / burley_max_cdf;
 
@@ -73,6 +73,10 @@ DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R
 }
 
 Spectrum DisneyBssrdf::S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const{
+#if 1
+    // This is clearly not disney BSSRDF, but it converges to lambert when mean free path is zero.
+    return Sr( Distance( po , pi ) );
+#else
     const auto d = Normalize( po - pi );
     auto fade = 1.0f;
     const auto cosTheta = Dot( d , nn );
@@ -84,6 +88,7 @@ Spectrum DisneyBssrdf::S( const Vector& wo , const Point& po , const Vector& wi 
     const auto fo = SchlickWeight( AbsCosTheta(wo) );
     const auto fi = SchlickWeight( AbsCosTheta(wi) );
     return fade * ( 2.0f - fo ) * ( 2.0f - fi ) * Sr( Distance( po , pi ) ) / FOUR_PI;
+#endif
 }
 
 Spectrum DisneyBssrdf::Sr( float r ) const{
@@ -158,9 +163,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
             }
         } else {
             if (!scatterDistance.IsBlack()) {
-                const GGX ggx(0.0f, 0.0f);
-                MicroFacetRefraction mr( FULL_WEIGHT, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
-                ret += mr.f( wo , wi );
+                // Nothing needs to be done in this branch, it is intentional.
             } else if( evaluate_reflection ){
                 // Fall back to the Disney diffuse due to the lack of sub-surface scattering
                 const auto disneyDiffuse = basecolor * (INV_PI * (1.0 - FO * 0.5f) * (1.0 - FI * 0.5f));
@@ -293,9 +296,6 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     }else if (r <= dr_w) {
         // albedo doesn't matter here, we are only interested in light direction.
         if( hasSSS ){
-            const GGX ggx(0.0f, 0.0f);
-            MicroFacetRefraction mr( WHITE_SPECTRUM, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
-            mr.sample_f( wo, wi, bs, pPdf);
 
             samplingSSS = true;
         }else{
@@ -332,7 +332,6 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
         return 0.0f;
 
     auto total_pdf = 0.0f;
-    auto cc_pdf = 0.0f, sr_pdf = 0.0f, st_pdf = 0.0f, dr_pdf = 0.0f, dt_pdf = 0.0f;
     const auto wh = Normalize(wi + wo);
     const GGX ggx(roughness / aspect, roughness * aspect);
     if (clearcoat_weight > 0.0f) {
@@ -362,9 +361,7 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     if (diffuse_reflection_weight > 0.0f) {
         // albedo doesn't matter here, we are only interested in light direction.
         if( hasSSS ){
-            const GGX ggx(0.0f, 0.0f);
-            MicroFacetRefraction mr( WHITE_SPECTRUM, &ggx, ior_ex, ior_in, FULL_WEIGHT, nn);
-            total_pdf += mr.pdf( wo, wi );
+            total_pdf += diffuse_reflection_weight;
         }else{
             total_pdf += diffuse_reflection_weight * CosHemispherePdf(wi);
         }

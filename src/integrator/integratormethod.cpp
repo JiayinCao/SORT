@@ -85,6 +85,7 @@ Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* lig
     return EvaluateDirect( bsdf , r , scene , light, ip , ls , bs , type );
 }
 
+// This is only used by SSS for now, since it is a smooth BRDF, there is no need to do MIS.
 Spectrum SampleOneLight( const Bsdf* bsdf , const Ray& r, const Intersection& inter, const Scene& scene) {
     // Uniformly choose a light, this may not be the optimal solution in case of more lights, need more research in this topic later.
     float light_pdf = 0.0f;
@@ -92,5 +93,18 @@ Spectrum SampleOneLight( const Bsdf* bsdf , const Ray& r, const Intersection& in
     if( nullptr == light )
         return 0.0f;
 
-    return EvaluateDirect( bsdf , r, scene, light , inter, LightSample(true), BsdfSample(true), BXDF_TYPE(BXDF_ALL) ) / light_pdf;
+    Spectrum radiance;
+    Visibility visibility(scene);
+    float bsdf_pdf;
+    const auto wo = -r.m_Dir;
+    Vector wi;
+    LightSample ls(true);
+    const auto li = light->sample_l( inter , &ls , wi , 0 , &light_pdf , 0 , 0 , visibility );
+    if( light_pdf > 0.0f && !li.IsBlack() ){
+        Spectrum f = bsdf->f( wo , wi , BXDF_TYPE(BXDF_ALL) );
+        if( !f.IsBlack() && visibility.IsVisible() ){
+            radiance += li * f / light_pdf;
+        }
+    }
+    return radiance;
 }

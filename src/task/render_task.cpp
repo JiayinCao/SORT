@@ -41,11 +41,8 @@ void Render_Task::Execute(){
 
     Vector2i rb = m_coord + m_size;
 
-    unsigned tid = ThreadId();
     for( int i = m_coord.y ; i < rb.y ; i++ ){
         for( int j = m_coord.x ; j < rb.x ; j++ ){
-            auto& allocator_mem = GetStaticAllocator();
-
             // generate samples to be used later
             g_integrator->GenerateSample( m_sampler.get() , m_pixelSamples.get(), g_samplePerPixel, m_scene );
 
@@ -55,14 +52,14 @@ void Render_Task::Execute(){
             for( unsigned k = 0 ; k < g_samplePerPixel; ++k ){
                 // clear managed memory after each pixel
                 SORT_CLEAR_MEMPOOL();
-
+                
                 // generate rays
                 auto r = camera->GenerateRay( (float)j , (float)i , m_pixelSamples[k] );
                 // accumulate the radiance
                 radiance += g_integrator->Li( r , m_pixelSamples[k] , m_scene );
             }
             radiance /= (float)g_samplePerPixel;
-
+            
             // store the pixel
             g_imageSensor->StorePixel( j , i , radiance , *this );
         }

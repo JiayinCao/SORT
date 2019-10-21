@@ -68,7 +68,9 @@ Spectrum SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , cons
 Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf ) const {
     Vector vx , vy , vz;
     const auto r0 = sort_canonical();
-    if( r0 < 0.5f ){
+
+    float pdf_x , pdf_y , pdf_z;
+    if( r0 <= 0.5f ){
         vx = btn;
         vy = nn;
         vz = tn;
@@ -86,7 +88,9 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
 
     const auto tmp = sort_canonical();
     const auto r = Sample_Sr(ch, tmp);
-    // sample is invalid, this usually happens when sampling is out of maximum allowed distance
+
+    // This is essentialy rejection sampling on top of inverse importance sampling, since the rejection region is fairly small, 
+    // there shouldn't be a performance problem.
     if( UNLIKELY( r < 0.0f ) )
         return 0.0f;
 
@@ -100,10 +104,14 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
     IntersectionChain dummyHead;
     IntersectionChain* intersectNode = &dummyHead;
 
-    auto found = 0;
     auto current = source;
+    
+    constexpr auto TOTAL_INTERSECTION_CNT = 4;
+    float weights[TOTAL_INTERSECTION_CNT+1] = { 0.0f };
+    auto total_weight = 0.0f;
 
-    while( true ){
+    auto k = 1;
+    while( k <= TOTAL_INTERSECTION_CNT ){
         const auto t = Dot( current - target , vy );
         if( t <= 0 )
             break;
@@ -113,30 +121,40 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
         // However, since SORT supports more than triangle primitives, there is no mesh concecpt for other primitive types. In order to keep it a general
         // algorithm, it looks for primitives with same material.
         auto* next = SORT_MALLOC(IntersectionChain)();
-        Ray r( current , -vy , 0 , 0.00001f , t );
+        Ray r( current , -vy , 0 , 0.01f , t );
         if( !scene.GetIntersect( r , &next->si , intersection->primitive->GetMaterial()->GetID() ) )
             break;
 
         intersectNode->next = next;
         intersectNode = next;
-        ++found;
 
         current = intersectNode->si.intersect;
+
+        weights[k] = Sr( Distance( current , po ) ).GetIntensity();
+        total_weight += weights[k++];
     }
 
-    if( found == 0 )
+    if( 0.0f == total_weight )
         return 0.0f;
 
-    auto pick = clamp( (int)( sort_canonical() * found ) , 0 , found - 1 );
+    for( int i = 1 ; i < k ; ++i )
+        weights[i] = weights[i] / total_weight + weights[i-1];
+        
+    auto pick = sort_canonical();
     intersectNode = &dummyHead;
+    k = 0;
     do{
         sAssert( intersectNode != nullptr , MATERIAL );
         intersectNode = intersectNode->next;
-    }while( --pick >= 0 );
 
+        if( weights[++k] >= pick )
+            break;
+    }while( k < TOTAL_INTERSECTION_CNT );
+    sAssert( intersectNode != nullptr , MATERIAL );
+    
     inter = intersectNode->si;
 
-    pdf = Pdf_Sp( po , inter.intersect , inter.gnormal ) / found;
+    pdf = Pdf_Sp( po , inter.intersect , inter.gnormal ) * ( weights[k] - weights[k-1] );
     return Sr( Distance( po , inter.intersect ) );
 }
 
