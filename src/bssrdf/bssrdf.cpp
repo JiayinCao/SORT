@@ -69,7 +69,6 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
     Vector vx , vy , vz;
     const auto r0 = sort_canonical();
 
-    float pdf_x , pdf_y , pdf_z;
     if( r0 <= 0.5f ){
         vx = btn;
         vy = nn;
@@ -94,7 +93,7 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
     if( UNLIKELY( r < 0.0f ) )
         return 0.0f;
 
-    const auto rMax = Max_Sr(ch);
+    const auto rMax = fmax( 0.015f , Max_Sr(ch) );
     const auto l = 2.0f * sqrt( SQR(rMax) - SQR(r) );
 
     const auto phi = TWO_PI * sort_canonical();
