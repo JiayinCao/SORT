@@ -470,11 +470,11 @@ def export_hair(ps, obj, scene, fs):
 
     # extract the material of the hair
     mat_local_index = ps.settings.material
-    mat_index = -1
+    mat_index = 0xffffffff
 
     if mat_local_index > 0 and mat_local_index <= len( obj.data.materials ):
         mat_name = name_compat(obj.data.materials[mat_local_index-1].name)
-        mat_index = matname_to_id[mat_name] if mat_name in matname_to_id else -1
+        mat_index = matname_to_id[mat_name] if mat_name in matname_to_id else 0xffffffff
 
     # for some unknown reason
     steps = 2 ** render_step
