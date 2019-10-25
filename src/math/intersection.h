@@ -17,12 +17,15 @@
 
 #pragma once
 
+#include <float.h>
 #include "math/point.h"
 #include "spectrum/spectrum.h"
-#include <float.h>
 
 class Primitive;
 
+/**
+ * Intersection records all necessary data when a ray intersection a primitive.
+ */ 
 class   Intersection{
 public:
     // get the emissive

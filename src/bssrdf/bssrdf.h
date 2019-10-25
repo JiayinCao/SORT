@@ -22,10 +22,26 @@
 #include "math/vector3.h"
 #include "math/point.h"
 #include "bsdf/bxdf.h"
+#include "math/intersection.h"
 
-class Intersection;
 class Bsdf;
 class Scene;
+
+// Up to 4 intersection supported.
+#define     TOTAL_INTERSECTION_CNT      4
+
+struct BSSRDFIntersection{
+    Intersection    intersection;
+    Spectrum        weight;
+};
+
+/**
+ * BSSRDFIntersection may have multiple, up to 4, intersections if needed.
+ */ 
+struct BSSRDFIntersections{
+    BSSRDFIntersection*     intersections[TOTAL_INTERSECTION_CNT] = { nullptr };
+    int                     cnt = 0;
+};
 
 //! @brief BSDF implementation.
 /**
@@ -62,10 +78,7 @@ public:
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  inter   Incident intersection sampled.
-    //! @param  pdf     Pdf of sampling such a point on the surface of the object.
-    //! @param  bsdf    The bsdf at the incident intersection.
-    //! @return         To be figured out
-    virtual Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf , Bsdf*& bsdf ) const = 0;
+    virtual void    Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const = 0;
 
 protected:
     const float ior_i;  /**< Index of refraction inside the surface. */
@@ -101,11 +114,8 @@ public:
     //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
-    //! @param  inter   Incident intersection sampled.
-    //! @param  pdf     Pdf of sampling such a point on the surface of the object.
-    //! @param  bsdf    The bsdf at the incident intersection.
-    //! @return         The spatial term in separable Bssrdf multiplied by the fresnel term of the incident direction.
-    Spectrum    Sample_S( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf , Bsdf*& bsdf ) const override;
+    //! @param  inter   Intersection between the rays and the objects with same material.
+    void    Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
 
     //! @brief  Importance sample the incident position.
     //!
@@ -116,10 +126,7 @@ public:
     //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
-    //! @param  inter   Incident intersection sampled.
-    //! @param  pdf     Pdf of sampling such a point on the surface of the object.
-    //! @return         The spatial term in separable Bssrdf.
-    Spectrum    Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf ) const;
+    void    Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const;
 
     //! @brief  PDF of sampling the reflectance profile.
     //!

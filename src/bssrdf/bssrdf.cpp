@@ -25,12 +25,6 @@
 #include "core/memory.h"
 #include "core/scene.h"
 
-class IntersectionChain{
-public:
-    Intersection        si;
-    IntersectionChain*  next = nullptr;
-};
-
 float FresnelMoment1(const float eta) {
     float eta2 = eta * eta, eta3 = eta2 * eta, eta4 = eta3 * eta, eta5 = eta4 * eta;
     if (eta < 1)
@@ -56,16 +50,11 @@ Spectrum SeparableBssrdf::Sw( const Vector& wi ) const{
     return (1 - F) / (c * PI);
 }
 
-Spectrum SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf , Bsdf*& bsdf ) const {
-    auto sp = Sample_Sp( scene , wo , po , inter , pdf );
-    if( !sp.IsBlack() ){
-        bsdf = SORT_MALLOC(Bsdf)(&inter);
-        bsdf->AddBxdf( SORT_MALLOC(SeparableBssrdfAdapter)(this));
-    }
-    return sp;
+void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const {
+    return Sample_Sp( scene , wo , po , inter );
 }
 
-Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , Intersection& inter , float& pdf ) const {
+void SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const {
     Vector vx , vy , vz;
     const auto r0 = sort_canonical();
 
@@ -91,7 +80,7 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
     // This is essentialy rejection sampling on top of inverse importance sampling, since the rejection region is fairly small, 
     // there shouldn't be a performance problem.
     if( UNLIKELY( r < 0.0f ) )
-        return 0.0f;
+        return;
 
     const auto rMax = fmax( 0.015f , Max_Sr(ch) );
     const auto l = 2.0f * sqrt( SQR(rMax) - SQR(r) );
@@ -100,17 +89,9 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
     const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) + l * vy * 0.5f;
     const auto target = source - l * vy;
 
-    IntersectionChain dummyHead;
-    IntersectionChain* intersectNode = &dummyHead;
-
     auto current = source;
-    
-    constexpr auto TOTAL_INTERSECTION_CNT = 4;
-    float weights[TOTAL_INTERSECTION_CNT+1] = { 0.0f };
-    auto total_weight = 0.0f;
 
-    auto k = 1;
-    while( k <= TOTAL_INTERSECTION_CNT ){
+    while( inter.cnt < TOTAL_INTERSECTION_CNT ){
         const auto t = Dot( current - target , vy );
         if( t <= 0 )
             break;
@@ -119,42 +100,22 @@ Spectrum SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , con
         // And don't look for intersections with primitives with other materials, a better approach may be to look for other primitives in the same sub-mesh.
         // However, since SORT supports more than triangle primitives, there is no mesh concecpt for other primitive types. In order to keep it a general
         // algorithm, it looks for primitives with same material.
-        auto* next = SORT_MALLOC(IntersectionChain)();
+        auto* pIntersection = SORT_MALLOC(BSSRDFIntersection)();
         Ray r( current , -vy , 0 , 0.01f , t );
-        if( !scene.GetIntersect( r , &next->si , intersection->primitive->GetMaterial()->GetID() ) )
+        if( !scene.GetIntersect( r , &pIntersection->intersection , intersection->primitive->GetMaterial()->GetID() ) )
             break;
-
-        intersectNode->next = next;
-        intersectNode = next;
-
-        current = intersectNode->si.intersect;
-
-        weights[k] = Sr( Distance( current , po ) ).GetIntensity();
-        total_weight += weights[k++];
-    }
-
-    if( 0.0f == total_weight )
-        return 0.0f;
-
-    for( int i = 1 ; i < k ; ++i )
-        weights[i] = weights[i] / total_weight + weights[i-1];
         
-    auto pick = sort_canonical();
-    intersectNode = &dummyHead;
-    k = 0;
-    do{
-        sAssert( intersectNode != nullptr , MATERIAL );
-        intersectNode = intersectNode->next;
+        const auto pdf = Pdf_Sp( po , pIntersection->intersection.intersect , pIntersection->intersection.gnormal );
+        const auto bssrdf = Sr( Distance( po , pIntersection->intersection.intersect ) );
+        if( pdf > 0.0f && !bssrdf.IsBlack() ){
+            // update intersection
+            pIntersection->weight = bssrdf / pdf;
+            inter.intersections[inter.cnt++] = pIntersection;
+        }
 
-        if( weights[++k] >= pick )
-            break;
-    }while( k < TOTAL_INTERSECTION_CNT );
-    sAssert( intersectNode != nullptr , MATERIAL );
-    
-    inter = intersectNode->si;
-
-    pdf = Pdf_Sp( po , inter.intersect , inter.gnormal ) * ( weights[k] - weights[k-1] );
-    return Sr( Distance( po , inter.intersect ) );
+        // update original of the next ray
+        current = pIntersection->intersection.intersect;
+    }
 }
 
 float SeparableBssrdf::Pdf_Sp( const Point& po , const Point& pi , const Vector& n ) const {

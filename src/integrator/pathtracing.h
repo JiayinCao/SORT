@@ -26,21 +26,13 @@ class   PathTracing : public Integrator
 public:
     DEFINE_RTTI( PathTracing , Integrator );
 
-    // return the radiance of a specific direction
-    // para 'scene' : scene containing geometry data
-    // para 'ray'   : ray with specific direction
-    // result       : radiance along the ray from the scene<F3>
+    //! @brief  Evalute the radiance along a specific direction.
+    //!
+    //! @param  ray             The ray to be tested with.
+    //! @param  ps              Pixel sample used to evaluate Monte Calor method.
+    //! @param  scene           The scene to be evaluted.
+    //! @return                 The radiance along the opposite direction that the ray points to.
     Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
-
-    // request samples
-    void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ) override;
-
-    // generate samples
-    // para 'sampler' : the sampling method
-    // para 'samples' : the samples to be generated
-    // para 'ps'      : number of pixel sample to be generated
-    // para 'scene'   : the scene to be rendered
-    void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const override;
 
     //! @brief      Serializing data from stream
     //!
@@ -50,4 +42,15 @@ public:
     }
 
     SORT_STATS_ENABLE( "Path Tracing" )
+
+private:
+    //! @brief  Evalute the radiance along a specific direction.
+    //!
+    //! @param  ray             The ray to be tested with.
+    //! @param  ps              Pixel sample used to evaluate Monte Calor method.
+    //! @param  scene           The scene to be evaluted.
+    //! @param  bounces         The current number of bounces considered.
+    //! @param  indirectOnly    Whether just to evalute the indirect light, default value is false.
+    //! @return                 The radiance along the opposite direction that the ray points to.
+    Spectrum    li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces = 0 , bool indirectOnly = false ) const;
 };

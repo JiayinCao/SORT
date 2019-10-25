@@ -24,6 +24,7 @@
 #include "camera/camera.h"
 #include "core/log.h"
 #include "core/profile.h"
+#include "bsdf/lambert.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalPathLength)
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
@@ -34,26 +35,33 @@ SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength 
 IMPLEMENT_RTTI( PathTracing );
 
 Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const{
+    return li( ray , ps , scene );
+}
+
+Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly ) const{
     SORT_PROFILE("Path tracing");
     SORT_STATS(++sPrimaryRayCount);
 
     Spectrum    L = 0.0f;
     Spectrum    throughput = 1.0f;
 
-    auto    bounces = 0;
     auto    r = ray;
     while(true){
+        // This introduces bias in the algorithm. 'max_recursive_depth' could be set very large to reduce the side-effect.
+        if( bounces > max_recursive_depth )
+            return L;
+
         SORT_STATS(++sTotalPathLength);
 
         // get the intersection between the ray and the scene if it's a light , accumulate the radiance and break
         Intersection inter;
         if( !scene.GetIntersect( r , &inter ) ){
             if( 0 == bounces )
-                return scene.Le( r );
+                return !indirectOnly ? scene.Le( r ) : 0.0f;
             break;
         }
 
-        if( bounces == 0 ) 
+        if( bounces == 0 && !indirectOnly ) 
             L += inter.Le(-r.m_Dir);
         
         // make sure there is intersected primitive
@@ -64,8 +72,8 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         Bssrdf* bssrdf = nullptr;
         inter.primitive->GetMaterial()->UpdateScattering(inter, bsdf, bssrdf);
         auto        light_pdf = 0.0f;
-        const auto  light_sample = (bounces==0)?ps.light_sample[0]:LightSample(true);
-        const auto  bsdf_sample = (bounces==0)?ps.bsdf_sample[0]:BsdfSample(true);
+        const auto  light_sample = LightSample(true);
+        const auto  bsdf_sample = BsdfSample(true);
         const auto  light = scene.SampleLight( light_sample.t , &light_pdf );
         if( light_pdf > 0.0f )
             L += throughput * EvaluateDirect(   r  , scene , light , inter , light_sample ,
@@ -76,7 +84,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         Vector      wi;
         BXDF_TYPE   bxdf_type;
         Spectrum f;
-        BsdfSample  _bsdf_sample = (bounces==0)?ps.bsdf_sample[1]:BsdfSample(true);
+        BsdfSample  _bsdf_sample = BsdfSample(true);
         f = bsdf->sample_f( -r.m_Dir , wi , _bsdf_sample , &path_pdf , BXDF_ALL , &bxdf_type );
         if( ( f.IsBlack() || path_pdf == 0.0f ) && !bsdf->SamplingSSS() )
             break;
@@ -90,32 +98,37 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
 
         // handle BSSRDF here
         if( bssrdf && bsdf->SamplingSSS() ){
-            Intersection    bssrdf_inter;
-            Bsdf*           bsdf = nullptr;
-            Vector wi;
-            float pdf = 0.0f;
-            Spectrum S = bssrdf->Sample_S( scene, -r.m_Dir, inter.intersect, bssrdf_inter, pdf, bsdf);
-            if (S.IsBlack() || pdf == 0 || !bsdf )
-                break;
+            BSSRDFIntersections bssrdf_inter;
+            bssrdf->Sample_S( scene, -r.m_Dir, inter.intersect, bssrdf_inter);
 
-            throughput *= S / pdf;
+            if( bssrdf_inter.cnt > 0 ){
+                Spectrum total_bssrdf;
 
-            // Accumulate the contribution from direct illumination
-            L += throughput * SampleOneLight( bsdf , r , bssrdf_inter , scene );
-            
-            // Accumulate the contribution from indirect illumination
-            pdf = 0.0f;
-            BXDF_TYPE   dummy;
-            Spectrum f = bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
+                for( auto i = 0 ; i < bssrdf_inter.cnt ; ++i ){
+                    const auto& pInter = bssrdf_inter.intersections[i];
+                    const auto& intersection = pInter->intersection;
 
-            if (f.IsBlack() || pdf == 0)
-                break;
+                    // Create a temporary lambert model to account the cos factor
+                    // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
+                    // there will be a discontinuty introduced when mean free path approaches zero.
+                    bsdf = SORT_MALLOC(Bsdf)(&pInter->intersection);
+                    bsdf->AddBxdf( SORT_MALLOC(SeparableBssrdfAdapter)( (SeparableBssrdf*)bssrdf ) );
 
-            throughput *= f / pdf;
+                    // Accumulate the contribution from direct illumination
+                    total_bssrdf += SampleOneLight( bsdf , r , intersection , scene ) * pInter->weight;
 
-            r.m_Ori = bssrdf_inter.intersect;
-            r.m_Dir = wi;
-            r.m_fMin = 0.0001f;
+                    // Counts the light from indirect illumination recursively
+                    // It is definitely necessary to optimize this recursive process since the time complexity is exponential, which is very likely not necessary.
+                    float pdf = 0.0f;
+                    BXDF_TYPE   dummy;
+                    Spectrum f = bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
+                    if( !f.IsBlack() && pdf > 0.0f )
+                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true ) * f / pdf;
+                }
+                
+                L += total_bssrdf * throughput;
+            }
+            return L;
         }else{
             r.m_Ori = inter.intersect;
             r.m_Dir = wi;
@@ -130,67 +143,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
         }
 
         ++bounces;
-
-        // note :   the following code makes the method biased
-        //          'path_per_pixel' could be set very large to reduce the side-effect.
-        if( bounces >= max_recursive_depth )
-            break;
     }
     
     return L;
-}
-
-void PathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ){
-    for( unsigned i = 0 ; i < ps_num ; i++ ){
-        // the first half samples are used to sample bsdf for shading
-        // the second half samples are used to sample bsdf for direction
-        ps[i].bsdf_sample = std::make_unique<BsdfSample[]>(2);
-        ps[i].light_sample = std::make_unique<LightSample[]>(1);
-    }
-
-    ps[0].data = std::make_unique<float[]>(ps_num * 3);
-}
-
-// generate samples
-void PathTracing::GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const
-{
-    Integrator::GenerateSample( sampler , samples , ps , scene );
-
-    if( sampler->RoundSize( ps ) == ps ){
-        float* data_1d = samples[0].data.get();
-        float* data_2d = samples[0].data.get() + ps;
-
-        sampler->Generate1D( data_1d , ps );
-        sampler->Generate2D( data_2d , ps );
-        for( unsigned k = 0 ; k < ps ; ++k ){
-            int two_k = 2*k;
-            samples[k].bsdf_sample[0].t = data_1d[k];
-            samples[k].bsdf_sample[0].u = data_2d[two_k];
-            samples[k].bsdf_sample[0].v = data_2d[two_k+1];
-        }
-
-        sampler->Generate1D( data_1d , ps );
-        sampler->Generate2D( data_2d , ps );
-        for( unsigned k = 0 ; k < ps ; ++k ){
-            int two_k = 2*k;
-            samples[k].bsdf_sample[1].t = data_1d[k];
-            samples[k].bsdf_sample[1].u = data_2d[two_k];
-            samples[k].bsdf_sample[1].v = data_2d[two_k+1];
-        }
-
-        sampler->Generate1D( data_1d , ps );
-        sampler->Generate2D( data_2d , ps );
-        for( unsigned k = 0 ; k < ps ; ++k ){
-            int two_k = 2*k;
-            samples[k].light_sample[0].t = data_1d[k];
-            samples[k].light_sample[0].u = data_2d[two_k];
-            samples[k].light_sample[0].v = data_2d[two_k+1];
-        }
-    }else{
-        for (unsigned k = 0; k < ps; ++k){
-            samples[k].bsdf_sample[0] = BsdfSample(true);
-            samples[k].bsdf_sample[1] = BsdfSample(true);
-            samples[k].light_sample[0] = LightSample(true);
-        }
-    }
 }
