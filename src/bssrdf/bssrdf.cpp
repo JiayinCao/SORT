@@ -51,7 +51,7 @@ Spectrum SeparableBssrdf::Sw( const Vector& wi ) const{
 }
 
 void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const {
-    return Sample_Sp( scene , wo , po , inter );
+    Sample_Sp( scene , wo , po , inter );
 }
 
 void SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const {

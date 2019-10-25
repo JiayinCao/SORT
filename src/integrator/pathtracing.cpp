@@ -122,8 +122,8 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     float pdf = 0.0f;
                     BXDF_TYPE   dummy;
                     Spectrum f = bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
-                    if( !f.IsBlack() && pdf > 0.0f )
-                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true ) * f / pdf;
+                    if( !f.IsBlack() && pdf > 0.0f && !pInter->weight.IsBlack() )
+                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true ) * f / pdf * pInter->weight;
                 }
                 
                 L += total_bssrdf * throughput;
