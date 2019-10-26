@@ -34,7 +34,18 @@ public:
     // pre process
     virtual void PreProcess() {}
 
-    // finish image tile
+	//! @brief	Start processing the tile.
+	//!
+	//! @param	tile_x	Tile id along x axis.
+	//! @param	tile_y	Tile id along y axis.
+	//!	@param	rt		The render task that works on this tile.
+	virtual void StartTile( int tile_x , int tile_y , const Render_Task& rt ){}
+
+    //! @brief	Finish image tile
+	//!
+	//! @param	tile_x	Tile id along x axis.
+	//! @param	tile_y	Tile id along y axis.
+	//!	@param	rt		The render task that works on this tile.
     virtual void FinishTile( int tile_x , int tile_y , const Render_Task& rt ){}
 
     // store pixel information
