@@ -112,7 +112,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
                     // there will be a discontinuity introduced when mean free path approaches zero.
                     bsdf = SORT_MALLOC(Bsdf)(&pInter->intersection);
-                    bsdf->AddBxdf( SORT_MALLOC(SeparableBssrdfAdapter)( (SeparableBssrdf*)bssrdf ) );
+                    bsdf->AddBxdf( SORT_MALLOC(Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
 
                     // Accumulate the contribution from direct illumination
                     total_bssrdf += SampleOneLight( bsdf , r , intersection , scene ) * pInter->weight;
