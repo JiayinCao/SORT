@@ -95,7 +95,6 @@ Spectrum SampleOneLight( const Bsdf* bsdf , const Ray& r, const Intersection& in
 
     Spectrum radiance;
     Visibility visibility(scene);
-    float bsdf_pdf;
     const auto wo = -r.m_Dir;
     Vector wi;
     LightSample ls(true);

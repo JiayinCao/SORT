@@ -105,8 +105,8 @@ void SeparableBssrdf::Sample_Sp( const Scene& scene , const Vector& wo , const P
         if( !scene.GetIntersect( r , &pIntersection->intersection , intersection->primitive->GetMaterial()->GetID() ) )
             break;
         
+		const auto bssrdf = Sr( Distance( po , pIntersection->intersection.intersect ) );
         const auto pdf = Pdf_Sp( po , pIntersection->intersection.intersect , pIntersection->intersection.gnormal );
-        const auto bssrdf = Sr( Distance( po , pIntersection->intersection.intersect ) );
         if( pdf > 0.0f && !bssrdf.IsBlack() ){
             // update intersection
             pIntersection->weight = bssrdf / pdf;

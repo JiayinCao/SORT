@@ -110,7 +110,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
 
                     // Create a temporary lambert model to account the cos factor
                     // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
-                    // there will be a discontinuty introduced when mean free path approaches zero.
+                    // there will be a discontinuity introduced when mean free path approaches zero.
                     bsdf = SORT_MALLOC(Bsdf)(&pInter->intersection);
                     bsdf->AddBxdf( SORT_MALLOC(SeparableBssrdfAdapter)( (SeparableBssrdf*)bssrdf ) );
 
@@ -123,7 +123,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     BXDF_TYPE   dummy;
                     Spectrum f = bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
                     if( !f.IsBlack() && pdf > 0.0f && !pInter->weight.IsBlack() )
-                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true ) * f / pdf * pInter->weight;
+                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true ) * f * pInter->weight / pdf;
                 }
                 
                 L += total_bssrdf * throughput;

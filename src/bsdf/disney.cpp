@@ -30,7 +30,7 @@ constexpr static float eta = ior_ex / ior_in;  // hard coded index of refraction
 constexpr static float inv_eta = 1.0f / eta;   // hard coded reciprocal of IOR ratio
 
 constexpr float burley_max_cdf_calc( float max_r_d ){
-    return 0.25f * ( 4.0f - exp_compile( -max_r_d ) - 3.0f * exp_compile( -max_r_d ) );
+    return 0.25f * ( 4.0f - exp_compile( -max_r_d ) - 3.0f * exp_compile( -max_r_d / 3.0f ) );
 }
 constexpr static float burley_max_r_d = 16.0f;
 constexpr static float burley_max_cdf = burley_max_cdf_calc( burley_max_r_d );
