@@ -39,12 +39,6 @@ void Render_Task::Execute(){
     // request samples
     g_integrator->RequestSample( m_sampler.get() , m_pixelSamples.get() , g_samplePerPixel);
 
-	if( g_integrator->NeedRefreshTile() ){
-		auto x_off = m_coord.x / g_tileSize;
-		auto y_off = (g_resultResollutionHeight - 1 - m_coord.y) / g_tileSize;
-		g_imageSensor->StartTile( x_off , y_off , *this );
-	}
-
     Vector2i rb = m_coord + m_size;
 
     for( int i = m_coord.y ; i < rb.y ; i++ ){

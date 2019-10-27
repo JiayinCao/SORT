@@ -21,44 +21,23 @@
 #include "texture/rendertarget.h"
 #include "platform/sharedmemory/sharedmemory.h"
 
-//! @brief	Image view in Blender.
-/** 
-  *	This class is responsible for communicating with Blender to update the image during rendering.
-  */
-class BlenderImage : public ImageSensor{
+// generate output
+class BlenderImage : public ImageSensor
+{
 public:
-    //! @brief	Constructor taking in size of the image.
-	//!
-	//! @param	Width of the image.
-	//! @param	Height of the image.
+    // constructor
     BlenderImage( int w , int h ) : ImageSensor( w , h ) {}
 
-    //! @brief	Store pixel information in the image.
-	//!
-	//! @param	tile_x	Tile id along x axis.
-	//! @param	tile_y	Tile id along y axis.
-	//! @param	color	The color to be saved.
-	//!	@param	rt		The render task that works on this tile.
-	void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) override;
+    // store pixel information
+    void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) override;
 
-	//! @brief	Start processing the tile.
-	//!
-	//! @param	tile_x	Tile id along x axis.
-	//! @param	tile_y	Tile id along y axis.
-	//!	@param	rt		The render task that works on this tile.
-	void StartTile(int tile_x, int tile_y, const Render_Task& rt) override;
-
-    //! @brief	Finish rendering image tile.
-	//!
-	//! @param	tile_x	Tile id along x axis.
-	//! @param	tile_y	Tile id along y axis.
-	//!	@param	rt		The render task that works on this tile.
+    // finish image tile
     void FinishTile( int tile_x , int tile_y , const Render_Task& rt ) override;
 
-    //! @brief	Pre-process before rendering.
+    // pre process
     void PreProcess() override;
 
-    //! @brief	Post processing after rendering is done.
+    // post process
     void PostProcess() override;
 
 private:

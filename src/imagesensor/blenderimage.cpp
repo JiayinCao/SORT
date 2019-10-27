@@ -20,9 +20,6 @@
 #include "core/globalconfig.h"
 #include "core/path.h"
 
-#define		TILE_RENDERING_BEGAN		2
-#define		TILE_RENDERING_END			1
-
 void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ){
     if (!m_sharedMemory.sharedmemory.bytes)
         return;
@@ -54,14 +51,11 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
     }
 }
 
-void BlenderImage::StartTile(int tile_x, int tile_y, const Render_Task& rt){
-	if (m_sharedMemory.sharedmemory.bytes)
-		m_sharedMemory.sharedmemory.bytes[tile_y * m_tilenum_x + tile_x] = TILE_RENDERING_BEGAN;
-}
-
 void BlenderImage::FinishTile( int tile_x , int tile_y , const Render_Task& rt ){
-    if (m_sharedMemory.sharedmemory.bytes)
-        m_sharedMemory.sharedmemory.bytes[tile_y * m_tilenum_x + tile_x] = TILE_RENDERING_END;
+    if (!m_sharedMemory.sharedmemory.bytes)
+        return;
+
+    m_sharedMemory.sharedmemory.bytes[tile_y * m_tilenum_x + tile_x] = 1;
 }
 
 void BlenderImage::PreProcess(){
