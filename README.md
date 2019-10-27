@@ -1,5 +1,5 @@
 # SORT
-[![Build status](https://travis-ci.org/JerryCao1985/SORT.svg?branch=master)](https://travis-ci.org/JerryCao1985/SORT)
+[![Build status](https://travis-ci.org/JiayinCao/SORT.svg?branch=master)](https://travis-ci.org/JiayinCao/SORT)
 [![Build status](https://ci.appveyor.com/api/projects/status/6kiio0dak0wc3ics?svg=true)](https://ci.appveyor.com/project/JerryCao1985/sort)
 [![License](https://img.shields.io/badge/License-GPL3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
