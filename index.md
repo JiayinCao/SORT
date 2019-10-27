@@ -54,7 +54,8 @@ For those who are interested in compiling SORT by themselves, please check out [
 After compiling SORT successfully, it is nessesary to install Blender plugin to start rendering in SORT, [this page](/deployment.md) mentioned all detailes needed.
 
 ## About me & Contact
-With more than 8 years working industry experiences, I’m currently working at Naughty Dog as a graphics programmer. Prior to joining Naughty Dog, I woked at Ubisoft, NVIDIA, AMD, and Microsoft before.
+I'm currently a graphics programmer at Naughty Dog. Prior to joining Naughty Dog, I used to at Ubisoft Singapore and NVIDIA Shanghai before.
+This is a side project that I have been maintaining for several years.
 
 For those who wants to connect, for whatever reason, please contact me through the following media
 * [Linkedin](https://www.linkedin.com/in/caojiayin/)
