@@ -23,6 +23,7 @@ Thanks to [Christophe Desse](https://www.artstation.com/christophe-desse) for th
 ![Image](assets/main_page/living room.png)
 ![Image](assets/main_page/table.png)
 ![Image](assets/main_page/coffee machine.png)
+![Image](assets/main_page/sss_dragon.png)
 ![Image](assets/main_page/cups.png)
 
 ## Materials System in SORT
