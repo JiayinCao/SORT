@@ -29,6 +29,13 @@ constexpr static float ior_ex = 1.0f;          // hard coded index of refraction
 constexpr static float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
 constexpr static float inv_eta = 1.0f / eta;   // hard coded reciprocal of IOR ratio
 
+// 8.0f bears no physical law, it is purely just to increase the properbility to avoid fireflies.
+// Microfacet specular reflection is easily the source of fireflies, scaling the value up will efficiently avoid fireflies caused by it.
+float specularPdfScale( const float roughness ){
+    constexpr static float specular_pdf_scale = 8.0f;
+    return specular_pdf_scale * ( 1.0f - roughness );
+}
+
 constexpr float burley_max_cdf_calc( float max_r_d ){
     return 0.25f * ( 4.0f - exp_compile( -max_r_d ) - 3.0f * exp_compile( -max_r_d / 3.0f ) );
 }
@@ -244,7 +251,7 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
 
     const auto base_color_intensity = basecolor.GetIntensity();
     const auto clearcoat_weight = clearcoat * 0.04f;
-    const auto specular_reflection_weight = Cspec0.GetIntensity();
+    const auto specular_reflection_weight = Cspec0.GetIntensity() * specularPdfScale( roughness );
     const auto specular_transmission_weight = base_color_intensity * (1.0f - metallic) * specTrans;
     const auto diffuse_reflection_weight = base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * (thinSurface ? (1.0f - diffTrans) : 1.0f);
     const auto diffuse_transmission_weight = thinSurface ? base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * diffTrans : 0.0f;
@@ -321,7 +328,7 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
 
     const auto base_color_intensity = basecolor.GetIntensity();
     const auto clearcoat_weight = clearcoat * 0.04f;
-    const auto specular_reflection_weight = Cspec0.GetIntensity();
+    const auto specular_reflection_weight = Cspec0.GetIntensity() * specularPdfScale( roughness );
     const auto specular_transmission_weight = base_color_intensity * (1.0f - metallic) * specTrans;
     const auto diffuse_reflection_weight = base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * (thinSurface ? (1.0f - diffTrans) : 1.0f);
     const auto diffuse_transmission_weight = thinSurface ? base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * diffTrans : 0.0f;
