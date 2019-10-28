@@ -135,17 +135,17 @@ namespace {
         }
 
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
-            const auto& params = *comp->as<DisneyBRDF::Params>();
+            auto params = *comp->as<DisneyBRDF::Params>();
+
+            // Ignore SSS if necessary
+            if( replaceBSSRDF )
+                params.scatterDistance = 0.0f;
+
             bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)(params, w * comp->w));
 
             if( !params.scatterDistance.IsBlack() ){
                 const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans);
-                if( !replaceBSSRDF ){
-                    // IORs are temporary
-                    bssrdf = SORT_MALLOC(DisneyBssrdf)( &intersection, diffuseWeight * params.baseColor , params.scatterDistance , 1.5f, 1.0f);
-                }else{
-                    bsdf->AddBxdf(SORT_MALLOC(Lambert)( diffuseWeight * params.baseColor, w * comp->w, params.n ));
-                }
+                bssrdf = SORT_MALLOC(DisneyBssrdf)( &intersection, diffuseWeight * params.baseColor , params.scatterDistance , 1.5f, 1.0f);
             }
         }
     };
