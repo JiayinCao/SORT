@@ -44,7 +44,8 @@ public:
     //! @param      bsdf            A BSDF holding BXDF information will be returned. The BSDF is allocated in the memory pool,
     //!                             meaning this is no need to release the memory in BSDF.
     //! @param      bssrdf          Bidirectional sub-surface scattering reflectance density function.
-    void    UpdateScattering(const Intersection& intersect, Bsdf*& bsdf , Bssrdf*& bssrdf) const;
+    //! @param      replaceBSSRDF   Whether to replace BSSRDF with BRDF, it is not necessary to need it in the second bounce.
+    void    UpdateScattering(const Intersection& intersect, Bsdf*& bsdf , Bssrdf*& bssrdf, bool replaceBSSRDF = false ) const;
 
     //! @brief  Serialization interface. Loading data from stream.
     //!

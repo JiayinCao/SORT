@@ -38,7 +38,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
     return li( ray , ps , scene );
 }
 
-Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly ) const{
+Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly , int bssrdfBounces ) const{
     SORT_PROFILE("Path tracing");
     SORT_STATS(++sPrimaryRayCount);
 
@@ -48,7 +48,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
     auto    r = ray;
     while(true){
         // This introduces bias in the algorithm. 'max_recursive_depth' could be set very large to reduce the side-effect.
-        if( bounces > max_recursive_depth )
+        if( bounces >= max_recursive_depth )
             return L;
 
         SORT_STATS(++sTotalPathLength);
@@ -67,10 +67,13 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         // make sure there is intersected primitive
         sAssert( nullptr != inter.primitive , INTEGRATOR );
 
+        // the lack of multiple bounces between different BSSRDF surfaces does introduce a bias.
+        const auto replaceBSSRDF = bssrdfBounces > m_maxBouncesInBSSRDFPath - 1 ;
+
         // evaluate the light
         Bsdf*   bsdf = nullptr;
         Bssrdf* bssrdf = nullptr;
-        inter.primitive->GetMaterial()->UpdateScattering(inter, bsdf, bssrdf);
+        inter.primitive->GetMaterial()->UpdateScattering(inter, bsdf, bssrdf , replaceBSSRDF );
         auto        light_pdf = 0.0f;
         const auto  light_sample = LightSample(true);
         const auto  bsdf_sample = BsdfSample(true);
@@ -118,12 +121,11 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     total_bssrdf += SampleOneLight( bsdf , r , intersection , scene ) * pInter->weight;
 
                     // Counts the light from indirect illumination recursively
-                    // It is definitely necessary to optimize this recursive process since the time complexity is exponential, which is very likely not necessary.
                     float pdf = 0.0f;
                     BXDF_TYPE   dummy;
                     Spectrum f = bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
                     if( !f.IsBlack() && pdf > 0.0f && !pInter->weight.IsBlack() )
-                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true ) * f * pInter->weight / pdf;
+                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true , bssrdfBounces + 1 ) * f * pInter->weight / pdf;
                 }
                 
                 L += total_bssrdf * throughput;
@@ -144,6 +146,6 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
 
         ++bounces;
     }
-    
+
     return L;
 }

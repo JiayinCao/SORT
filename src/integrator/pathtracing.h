@@ -39,11 +39,17 @@ public:
     //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
     void    Serialize( IStreamBase& stream ) override {
         Integrator::Serialize( stream );
+        stream >> m_maxBouncesInBSSRDFPath;
     }
 
     SORT_STATS_ENABLE( "Path Tracing" )
 
 private:
+    // Maximum bounces supported in BSSRDF path.
+    // BSSRDF solutions usually makes aggressive approximations resulting in less accuracy, multiple BSSRDF bounces will even make it worse.
+    // Most importantly, it kills the performance and introduces quite some fireflies with bounces more than 2.
+    int     m_maxBouncesInBSSRDFPath;
+
     //! @brief  Evalute the radiance along a specific direction.
     //!
     //! @param  ray             The ray to be tested with.
@@ -51,6 +57,7 @@ private:
     //! @param  scene           The scene to be evaluted.
     //! @param  bounces         The current number of bounces considered.
     //! @param  indirectOnly    Whether just to evalute the indirect light, default value is false.
+    //! @param  bssrdfBounces   Bounces on BSSRDF surfaces in the path.
     //! @return                 The radiance along the opposite direction that the ray points to.
-    Spectrum    li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces = 0 , bool indirectOnly = false ) const;
+    Spectrum    li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces = 0 , bool indirectOnly = false , int bssrdfBounces = 0 ) const;
 };

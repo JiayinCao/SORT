@@ -362,6 +362,8 @@ def export_global_config(scene, fs, sort_resource_path):
 
     fs.serialize( SID(integrator_type) )
     fs.serialize( int(sort_data.inte_max_recur_depth) )
+    if integrator_type == "PathTracing":
+        fs.serialize( int(sort_data.max_bssrdf_bounces) )
     if integrator_type == "AmbientOcclusion":
         fs.serialize( sort_data.ao_max_dist )
     if integrator_type == "BidirPathTracing" or integrator_type == "LightTracing":

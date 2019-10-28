@@ -91,7 +91,7 @@ void OptimizeShader(OSL::ShaderGroup* group) {
     g_shadingsys->optimize_group(group);
 }
 
-void ExecuteShader( Bsdf* bsdf , Bssrdf*& bssrdf , const Intersection& intersection , OSL::ShaderGroup* shader ){
+void ExecuteShader( Bsdf* bsdf , Bssrdf*& bssrdf , const Intersection& intersection , OSL::ShaderGroup* shader , bool replaceBSSRDF ){
     ShaderGlobals shaderglobals;
     shaderglobals.P = Vec3( intersection.intersect.x , intersection.intersect.y , intersection.intersect.z );
     shaderglobals.u = intersection.u;
@@ -103,7 +103,7 @@ void ExecuteShader( Bsdf* bsdf , Bssrdf*& bssrdf , const Intersection& intersect
     shaderglobals.dPdu = Vec3( 0.0f );
     g_shadingsys->execute(g_contexts[ ThreadId() ], *shader, shaderglobals);
 
-    ProcessClosure( bsdf , bssrdf , intersection , shaderglobals.Ci , Color3( 1.0f ) );
+    ProcessClosure( bsdf , bssrdf , intersection , shaderglobals.Ci , Color3( 1.0f ) , replaceBSSRDF );
 }
 
 void ShadingContextWrapper::DestroyContext(OSL::ShadingSystem* shadingsys) {

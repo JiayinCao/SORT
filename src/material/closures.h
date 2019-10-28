@@ -57,4 +57,4 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys);
 //! @param  intersection    The intersection information.
 //! @param  closure         The closure tree from executed OSL shader.
 //! @param  w               The weight for the current sub-closure-tree
-void ProcessClosure(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const OSL::ClosureColor* closure, const OSL::Color3& w);
+void ProcessClosure(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const OSL::ClosureColor* closure, const OSL::Color3& w , bool replaceBSSRDF );

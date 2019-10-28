@@ -39,6 +39,9 @@ class SORTRenderData(bpy.types.PropertyGroup):
     # general integrator parameters
     inte_max_recur_depth : bpy.props.IntProperty(name='Maximum Recursive Depth', default=16, min=1)
 
+    # maxmum bounces supported in BSSRDF, exceeding the threshold will result in replacing BSSRDF with Lambert
+    max_bssrdf_bounces : bpy.props.IntProperty(name='Maximum Bounces in SSS path', default=1, min=1)
+
     # ao integrator parameters
     ao_max_dist : bpy.props.FloatProperty(name='Maximum Distance', default=3.0, min=0.01)
 
@@ -133,6 +136,8 @@ class RENDER_PT_IntegratorPanel(SORTRenderPanel,bpy.types.Panel):
         integrator_type = data.integrator_type_prop
         if integrator_type != "WhittedRT" and integrator_type != "DirectLight" and integrator_type != "AmbientOcclusion":
             self.layout.prop(data,"inte_max_recur_depth")
+        if integrator_type == "PathTracing":
+            self.layout.prop(data,"max_bssrdf_bounces" )
         if integrator_type == "AmbientOcclusion":
             self.layout.prop(data,"ao_max_dist")
         if integrator_type == "BidirPathTracing":
