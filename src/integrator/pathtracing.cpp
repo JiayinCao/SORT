@@ -38,7 +38,7 @@ Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& 
     return li( ray , ps , scene );
 }
 
-Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly , int bssrdfBounces ) const{
+Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly , int bssrdfBounces , bool replaceSSS ) const{
     SORT_PROFILE("Path tracing");
     SORT_STATS(++sPrimaryRayCount);
 
@@ -68,12 +68,12 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         sAssert( nullptr != inter.primitive , INTEGRATOR );
 
         // the lack of multiple bounces between different BSSRDF surfaces does introduce a bias.
-        const auto replaceBSSRDF = bssrdfBounces > m_maxBouncesInBSSRDFPath - 1 ;
+        replaceSSS |= ( bssrdfBounces > m_maxBouncesInBSSRDFPath - 1 );
 
         // evaluate the light
         Bsdf*   bsdf = nullptr;
         Bssrdf* bssrdf = nullptr;
-        inter.primitive->GetMaterial()->UpdateScattering(inter, bsdf, bssrdf , replaceBSSRDF );
+        inter.primitive->GetMaterial()->UpdateScattering(inter, bsdf, bssrdf , replaceSSS );
         auto        light_pdf = 0.0f;
         const auto  light_sample = LightSample(true);
         const auto  bsdf_sample = BsdfSample(true);
@@ -125,7 +125,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     BXDF_TYPE   dummy;
                     Spectrum f = bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
                     if( !f.IsBlack() && pdf > 0.0f && !pInter->weight.IsBlack() )
-                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true , bssrdfBounces + 1 ) * f * pInter->weight / pdf;
+                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true , bssrdfBounces + 1 , true ) * f * pInter->weight / pdf;
                 }
                 
                 L += total_bssrdf * throughput;
@@ -145,6 +145,8 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         }
 
         ++bounces;
+
+        replaceSSS = false;
     }
 
     return L;

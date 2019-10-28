@@ -40,7 +40,7 @@ class SORTRenderSettingData(bpy.types.PropertyGroup):
     inte_max_recur_depth = bpy.props.IntProperty(name='Maximum Recursive Depth', default=16, min=1)
 
     # maxmum bounces supported in BSSRDF, exceeding the threshold will result in replacing BSSRDF with Lambert
-    max_bssrdf_bounces = bpy.props.IntProperty(name='Maximum Bounces in SSS path', default=1, min=1)
+    max_bssrdf_bounces = bpy.props.IntProperty(name='Maximum Bounces in SSS path', default=4, min=1)
 
     # ao integrator parameters
     ao_max_dist = bpy.props.FloatProperty(name='Maximum Distance', default=3.0, min=0.01)

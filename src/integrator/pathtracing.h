@@ -58,6 +58,7 @@ private:
     //! @param  bounces         The current number of bounces considered.
     //! @param  indirectOnly    Whether just to evalute the indirect light, default value is false.
     //! @param  bssrdfBounces   Bounces on BSSRDF surfaces in the path.
+    //! @param  replaceSSS      Whether to replace SSS with lambert.
     //! @return                 The radiance along the opposite direction that the ray points to.
-    Spectrum    li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces = 0 , bool indirectOnly = false , int bssrdfBounces = 0 ) const;
+    Spectrum    li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces = 0 , bool indirectOnly = false , int bssrdfBounces = 0 , bool replaceSSS = false ) const;
 };
