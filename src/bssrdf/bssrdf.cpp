@@ -73,7 +73,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
     const auto tmp = sort_canonical();
     const auto r = Sample_Sr(ch, tmp);
 
-    // This is essentialy rejection sampling on top of inverse importance sampling, since the rejection region is fairly small, 
+    // This is essentially rejection sampling on top of inverse importance sampling, since the rejection region is fairly small, 
     // there shouldn't be a performance problem.
     if( UNLIKELY( r < 0.0f ) )
         return;
@@ -94,7 +94,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
 
         // Instead of doing this, a better approach is to update the spatial data structure to support multi-intersection tests.
         // And don't look for intersections with primitives with other materials, a better approach may be to look for other primitives in the same sub-mesh.
-        // However, since SORT supports more than triangle primitives, there is no mesh concecpt for other primitive types. In order to keep it a general
+        // However, since SORT supports more than triangle primitives, there is no mesh concept for other primitive types. In order to keep it a general
         // algorithm, it looks for primitives with same material.
         auto* pIntersection = SORT_MALLOC(BSSRDFIntersection)();
         Ray r( current , -vy , 0 , 0.01f , t );

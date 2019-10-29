@@ -80,8 +80,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         const auto  bsdf_sample = BsdfSample(true);
         const auto  light = scene.SampleLight( light_sample.t , &light_pdf );
         if( light_pdf > 0.0f )
-            L += throughput * EvaluateDirect(   r  , scene , light , inter , light_sample ,
-                                                bsdf_sample , BXDF_TYPE(BXDF_ALL) , replaceSSS ) / light_pdf;
+            L += throughput * EvaluateDirect( bsdf , r , scene , light, inter , light_sample , bsdf_sample , BXDF_TYPE(BXDF_ALL) ) / light_pdf;;
         
         // sample the next direction using bsdf
         float       path_pdf;
@@ -106,26 +105,10 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             BSSRDFIntersections bssrdf_inter;
             bssrdf->Sample_S( scene, -r.m_Dir, inter.intersect, bssrdf_inter);
 
-            //bsdf = SORT_MALLOC(Bsdf)(&inter);
-            //bsdf->AddBxdf( SORT_MALLOC(Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
-
             const auto& intersection = inter;
 
             // Accumulate the contribution from direct illumination
             Spectrum total_bssrdf = 0.0f;
-            //total_bssrdf += SampleOneLight( bsdf , r , intersection , scene );
-
-            //total_bssrdf += EvaluateDirect( bsdf , r , scene , light, intersection , light_sample , _bsdf_sample , BXDF_TYPE(BXDF_ALL) , replaceSSS ) / light_pdf;
-
-            // Counts the light from indirect illumination recursively
-            //float pdf = 0.0f;
-            //BXDF_TYPE   dummy;
-            //Spectrum f = bsdf->sample_f( -r.m_Dir, wi, BsdfSample(true), &pdf, BXDF_ALL, &dummy);
-            //if( !f.IsBlack() && pdf > 0.0f )
-            //    total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , false , bssrdfBounces + 1 , true ) * f / pdf;
-            
-            //L += total_bssrdf * throughput / path_pdf;
-
             if( bssrdf_inter.cnt > 0 ){
                 Spectrum total_bssrdf;
 
@@ -133,6 +116,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     const auto& pInter = bssrdf_inter.intersections[i];
                     const auto& intersection = pInter->intersection;
 
+					// The base color is terribly wrong, it is clearly a bug, to be fixed later.
                     // Create a temporary lambert model to account the cos factor
                     // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
                     // there will be a discontinuity introduced when mean free path approaches zero.
