@@ -111,14 +111,6 @@ public:
 
     //! @brief  Importance sample the incident direction and position.
     //!
-    //! @param  scene   The scene where ray tracing happens.
-    //! @param  wo      Extant direction.
-    //! @param  po      Extant position.
-    //! @param  inter   Intersection between the rays and the objects with same material.
-    void    Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
-
-    //! @brief  Importance sample the incident position.
-    //!
     //! The exact importance sampling algorithm comes from this paper.
     //! BSSRDF Importance Sampling
     //! http://library.imageworks.com/pdfs/imageworks-library-BSSRDF-sampling.pdf
@@ -126,7 +118,8 @@ public:
     //! @param  scene   The scene where ray tracing happens.
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
-    void    Sample_Sp( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const;
+    //! @param  inter   Intersection between the rays and the objects with same material.
+    void        Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
 
     //! @brief  PDF of sampling the reflectance profile.
     //!

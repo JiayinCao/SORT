@@ -303,7 +303,6 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     }else if (r <= dr_w) {
         // albedo doesn't matter here, we are only interested in light direction.
         if( hasSSS ){
-
             samplingSSS = true;
         }else{
             wi = CosSampleHemisphere(sort_canonical(), sort_canonical());

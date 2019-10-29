@@ -24,7 +24,7 @@ Spectrum    EvaluateDirect( const Bsdf* bsdf , const Ray& r , const Scene& scene
                             const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type = BXDF_ALL );
 
 Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const class Light* light , const class Intersection& ip ,
-                            const LightSample& ls , const BsdfSample& bs , BXDF_TYPE type = BXDF_ALL );
+                            const LightSample& ls , const BsdfSample& bs , BXDF_TYPE type = BXDF_ALL , bool replaceSSS = false );
 
 // uniformly evaluate direct illumination from one light
 Spectrum    SampleOneLight( const Bsdf* bsdf , const Ray& r, const Intersection& inter, const Scene& scene);

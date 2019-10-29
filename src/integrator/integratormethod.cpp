@@ -78,10 +78,10 @@ Spectrum    EvaluateDirect( const Bsdf* bsdf , const Ray& r , const Scene& scene
 }
 
 Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip ,
-                            const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type ){
+                            const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type , bool replaceSSS ){
     Bsdf*   bsdf = nullptr;
     Bssrdf* dummy = nullptr;
-    ip.primitive->GetMaterial()->UpdateScattering( ip , bsdf , dummy );
+    ip.primitive->GetMaterial()->UpdateScattering( ip , bsdf , dummy , replaceSSS );
     return EvaluateDirect( bsdf , r , scene , light, ip , ls , bs , type );
 }
 
