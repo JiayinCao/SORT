@@ -81,7 +81,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         const auto  light = scene.SampleLight( light_sample.t , &light_pdf );
         if( light_pdf > 0.0f )
             L += throughput * EvaluateDirect( bsdf , r , scene , light, inter , light_sample , bsdf_sample , BXDF_TYPE(BXDF_ALL) ) / light_pdf;;
-        
+
         // sample the next direction using bsdf
         float       path_pdf;
         Vector      wi;
@@ -100,12 +100,9 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             break;
 
         // handle BSSRDF here
-        
         if( bssrdf && bsdf->SamplingSSS() ){
             BSSRDFIntersections bssrdf_inter;
             bssrdf->Sample_S( scene, -r.m_Dir, inter.intersect, bssrdf_inter);
-
-            const auto& intersection = inter;
 
             // Accumulate the contribution from direct illumination
             Spectrum total_bssrdf = 0.0f;
@@ -134,7 +131,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                         total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true , bssrdfBounces + 1 , true ) * f * pInter->weight / pdf;
                 }
                 
-                L += total_bssrdf * throughput / path_pdf;
+                L += total_bssrdf * throughput;
             }
             return L;
         }else{

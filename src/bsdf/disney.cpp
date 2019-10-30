@@ -71,13 +71,36 @@ float ClearcoatGGX::G1(const Vector& v) const {
 }
 
 DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , float ior_i , float ior_e )
-:R(R),SeparableBssrdf( intersection , ior_i , ior_e ){
+:SeparableBssrdf( R , intersection , ior_i , ior_e ){
     // Approximate Reflectance Profiles for Efficient Subsurface Scattering, Eq 6
     const auto s = Spectrum(1.9f) - R + 3.5f * ( R - Spectrum( 0.8f ) ) * ( R - Spectrum( 0.8f ) );
+    
+    channels = SPECTRUM_SAMPLE;
+
+#ifdef SSS_REPLACE_WITH_LAMBERT
+    constexpr float delta = 0.0001f;
+    for( int i = 0 ; i < SPECTRUM_SAMPLE ; ++i ){
+        if( mfp[i] == 0.0f )
+            --channels;
+    }
+#endif
 
     // prevent the scatter distance to be zero, not a perfect solution, but it works.
     d = mfp.Clamp( 0.0001f , FLT_MAX ) / s;
 }
+
+#ifdef SSS_REPLACE_WITH_LAMBERT
+int DisneyBssrdf::Sample_Ch() const{
+    auto ch = clamp( (int)(sort_canonical() * channels) , 0 , channels - 1 );
+    // Here it is assumed that the spectrum is RGB only. 
+    // This code needs change if SORT needs to support full spectrum rendering, which is not my plan for now.
+    if( ch == 0 )
+        ch = ( d[0] > 0.0f ) ? 0 : ( d[1] > 0.0f ? 1 : 2 );
+    else if( ch == 1 )
+        ch = ( d[1] > 0.0f ) ? 1 : 2;
+    return ch;
+}
+#endif
 
 Spectrum DisneyBssrdf::S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const{
 #if 1
@@ -367,6 +390,9 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     if (diffuse_reflection_weight > 0.0f) {
         // albedo doesn't matter here, we are only interested in light direction.
         if( hasSSS ){
+            // No PDF should be returned, otherwise it will introduce bugs!!
+
+            // The following line is clearly buggy, should be removed in the future.
             total_pdf += diffuse_reflection_weight;
         }else{
             total_pdf += diffuse_reflection_weight * CosHemispherePdf(wi);

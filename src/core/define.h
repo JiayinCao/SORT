@@ -44,3 +44,5 @@
     #define UNLIKELY(EXP)       __builtin_expect((EXP),0)
     #define LIKELY(EXP)         __builtin_expect((EXP),1)
 #endif
+
+//#define SSS_REPLACE_WITH_LAMBERT

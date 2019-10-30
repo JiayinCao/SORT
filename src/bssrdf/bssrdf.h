@@ -96,7 +96,7 @@ protected:
  */
 class SeparableBssrdf : public Bssrdf{
 public:
-    SeparableBssrdf( const Intersection* intersection , const float ior_i , const float ior_e );
+    SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const float ior_i , const float ior_e );
 
     //! @brief  Evaluate the BSSRDF.
     //!
@@ -109,7 +109,7 @@ public:
     //! @return         To be figured out
     Spectrum    S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const override;
 
-    //! @brief  Importance sample the incident direction and position.
+    //! @brief  Importance sample the incident position.
     //!
     //! The exact importance sampling algorithm comes from this paper.
     //! BSSRDF Importance Sampling
@@ -119,7 +119,7 @@ public:
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  inter   Intersection between the rays and the objects with same material.
-    void        Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
+    void    Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
 
     //! @brief  PDF of sampling the reflectance profile.
     //!
@@ -152,13 +152,21 @@ protected:
 
     //! @brief  Get maximum profile sampling distance
     //!
-    //! @param  ch          Spectrum channel of interest. The returned distance sometimes depends on spectrum channel.
-    //! @return             Maximum profile sampling distance.
+    //! @param  ch      Spectrum channel of interest. The returned distance sometimes depends on spectrum channel.
+    //! @return         Maximum profile sampling distance.
     virtual float       Max_Sr( int ch ) const = 0;
 
-    Vector nn;      /**< Normal at the point to be Evaluated. */
-    Vector btn;     /**< Bi-tangent at the point to be evaluated. */
-    Vector tn;      /**< Tangent at the point to be Evaluated. */
+    //! @brief  Sample a channel
+    //!
+    //! @return        Randomly pick a channel in spectrum, in which the mean free path is not zero.
+    virtual int         Sample_Ch() const;
+
+    Vector nn;          /**< Normal at the point to be Evaluated. */
+    Vector btn;         /**< Bi-tangent at the point to be evaluated. */
+    Vector tn;          /**< Tangent at the point to be Evaluated. */
+
+    int    channels;    /**< Number of channels in spectrum in which mfp is not zero. */
+    Spectrum    R;      /**< Reflectance of the BSSRDF. */
 
     const Intersection*   intersection;   /**< Intersection that spawns the BSSRDF. */
 

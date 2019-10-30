@@ -32,8 +32,8 @@ float FresnelMoment1(const float eta) {
     return -4.61686f + 11.1136f * eta - 10.4646f * eta2 + 5.11455f * eta3 - 1.27198f * eta4 + 0.12746f * eta5;
 }
 
-SeparableBssrdf::SeparableBssrdf( const Intersection* intersection , const float ior_i , const float ior_e )
-    : Bssrdf( ior_i , ior_e ) , intersection(intersection) {
+SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const float ior_i , const float ior_e )
+    : R(R) , Bssrdf( ior_i , ior_e ) , intersection(intersection) , channels(0) {
     nn = Normalize(intersection->normal);
     btn = Normalize(Cross( nn , intersection->tangent ));
     tn = Normalize(Cross( btn , nn ));
@@ -48,6 +48,10 @@ Spectrum SeparableBssrdf::Sw( const Vector& wi ) const{
     const auto F = DielectricFresnel(CosTheta(wi), ior_e, ior_i);
     const auto c = 1.0f - 2.0f * FresnelMoment1( ior_e / ior_i );
     return (1 - F) / (c * PI);
+}
+
+int SeparableBssrdf::Sample_Ch() const{
+    return clamp( (int)(sort_canonical() * channels) , 0 , 2 );
 }
 
 void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const {
@@ -68,8 +72,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
         vz = btn;
     }
 
-    const auto ch = clamp( (int)(sort_canonical() * SPECTRUM_SAMPLE) , 0 , 2 );
-
+    const auto ch = Sample_Ch();
     const auto tmp = sort_canonical();
     const auto r = Sample_Sr(ch, tmp);
 
@@ -78,7 +81,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
     if( UNLIKELY( r < 0.0f ) )
         return;
 
-    const auto rMax = fmax( 0.015f , Max_Sr(ch) );
+    const auto rMax = fmax( 0.0015f , Max_Sr(ch) );
     const auto l = 2.0f * sqrt( SQR(rMax) - SQR(r) );
 
     const auto phi = TWO_PI * sort_canonical();
@@ -97,7 +100,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
         // However, since SORT supports more than triangle primitives, there is no mesh concept for other primitive types. In order to keep it a general
         // algorithm, it looks for primitives with same material.
         auto* pIntersection = SORT_MALLOC(BSSRDFIntersection)();
-        Ray r( current , -vy , 0 , 0.01f , t );
+        Ray r( current , -vy , 0 , 0.001f , t );
         if( !scene.GetIntersect( r , &pIntersection->intersection , intersection->primitive->GetMaterial()->GetID() ) )
             break;
         
@@ -124,13 +127,17 @@ float SeparableBssrdf::Pdf_Sp( const Point& po , const Point& pi , const Vector&
                        sqrt( SQR( dLocal.x ) + SQR( dLocal.y ) ) };
 
     constexpr float axisProb[3] = { 0.25f , 0.5f , 0.25f };
-    constexpr auto chProb = 1.0f / (float)SPECTRUM_SAMPLE;
     auto pdf = 0.0f ;
     for( auto axis = 0 ; axis < 3 ; ++axis ){
-        for( auto ch = 0 ; ch < SPECTRUM_SAMPLE ; ++ch )
+        for( auto ch = 0 ; ch < SPECTRUM_SAMPLE ; ++ch ){
+            #ifdef SSS_REPLACE_WITH_LAMBERT
+            if( R[ch] == 0.0f )
+                continue;
+            #endif
             pdf += Pdf_Sr( ch , rProj[axis] ) * std::abs( nLocal[axis] ) * axisProb[axis];
+        }
     }
-    pdf *= chProb;
+    pdf /= channels;
     return pdf;
 }
 

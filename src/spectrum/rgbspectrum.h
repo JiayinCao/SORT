@@ -81,6 +81,7 @@ public:
     RGBSpectrum& operator/=( float t ){ *this = *this / t ; return *this; }
 
     inline float operator []( int i ) const { return data[i]; }
+    inline float& operator []( int i ) { return data[i]; }
 
     //whether the spectrum is black
     bool IsBlack() const{
