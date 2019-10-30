@@ -1854,6 +1854,26 @@ class SORTNode_Material_Blend(SORTShadingNode):
         fs.serialize( self.inputs['Factor'].export_osl_value() )
 
 @SORTShaderNodeTree.register_node('Materials')
+class SORTNode_Material_Add(SORTShadingNode):
+    bl_label = 'Add'
+    bl_idname = 'SORTNode_Material_Add'
+    osl_shader = '''
+        shader MaterialAdd(  closure color Surface0 = @ ,
+                             closure color Surface1 = @ ,
+                             output closure color Result = color(0) ){
+            Result = Surface0 + Surface1;
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface0' )
+        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface1' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 2 )
+        fs.serialize( self.inputs['Surface0'].export_osl_value() )
+        fs.serialize( self.inputs['Surface1'].export_osl_value() )
+
+@SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_DoubleSided(SORTShadingNode):
     bl_label = 'Double-Sided'
     bl_idname = 'SORTNode_Material_DoubleSided'
