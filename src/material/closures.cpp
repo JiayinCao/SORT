@@ -35,6 +35,7 @@
 #include "scatteringevent/bsdf/doublesided.h"
 #include "scatteringevent/bsdf/distributionbrdf.h"
 #include "scatteringevent/bsdf/fabric.h"
+#include "scatteringevent/scatteringevent.h"
 
 using namespace OSL;
 
@@ -55,6 +56,9 @@ namespace {
         Closure_Base() = default;
         virtual ~Closure_Base() = default;
         virtual void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w , bool replaceBSSRDF ) = 0;
+
+        // this will be a virtual function later
+        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se ) {}
     };
 
     static std::vector<std::unique_ptr<Closure_Base>>   g_closures(CLOSURE_CNT);
@@ -581,6 +585,7 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys) {
     registerClosure<Closure_Fabric>(shadingsys);
 }
 
+// to be deprecated
 void ProcessClosure(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const OSL::ClosureColor* closure, const OSL::Color3& w , bool replaceBSSRDF ) {
     if (!closure)
         return;
@@ -600,6 +605,30 @@ void ProcessClosure(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersectio
             sAssert(comp->id >= 0 && comp->id < CLOSURE_CNT, MATERIAL);
             sAssert(g_closures[comp->id] != nullptr, MATERIAL);
             g_closures[comp->id]->Process(bsdf, bssrdf, intersection , comp, w * comp->w , replaceBSSRDF);
+        }
+    }
+}
+
+void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se ){
+    if (!closure)
+        return;
+
+    switch (closure->id) {
+        case ClosureColor::MUL: {
+            Color3 cw = w * closure->as_mul()->weight;
+            ProcessClosure(closure->as_mul()->closure, cw , se);
+            break;
+        }
+        case ClosureColor::ADD: {
+            ProcessClosure(closure->as_add()->closureA, w , se);
+            ProcessClosure(closure->as_add()->closureB, w , se);
+            break;
+        }
+        default: {
+            const ClosureComponent* comp = closure->as_comp();
+            sAssert(comp->id >= 0 && comp->id < CLOSURE_CNT, MATERIAL);
+            sAssert(g_closures[comp->id] != nullptr, MATERIAL);
+            g_closures[comp->id]->Process(comp, w * comp->w , se);
         }
     }
 }

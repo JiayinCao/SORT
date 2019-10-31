@@ -22,6 +22,7 @@
 class Bsdf;
 class Bssrdf;
 class Intersection;
+class ScatteringEvent;
 
 enum BXDF_CLOSURE_TYPE {
     CLOSURE_LAMBERT = 0,
@@ -50,11 +51,12 @@ enum BXDF_CLOSURE_TYPE {
 //! @param  shadingsys      Shading system of OSL.
 void RegisterClosures(OSL::ShadingSystem* shadingsys);
 
+// To be deprecated
+void ProcessClosure(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const OSL::ClosureColor* closure, const OSL::Color3& w , bool replaceBSSRDF );
+
 //! @brief  Process the closure tree result and populate the BSDF.
 //!
-//! @param  bsdf            The BSDF to be filled.
-//! @param  bssrdf          The BSSRDF to be filled.
-//! @param  intersection    The intersection information.
-//! @param  closure         The closure tree from executed OSL shader.
-//! @param  w               The weight for the current sub-closure-tree
-void ProcessClosure(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const OSL::ClosureColor* closure, const OSL::Color3& w , bool replaceBSSRDF );
+//! @param  closure         The closure tree in the osl shader.
+//! @param  w               The weight of this closure tree, this also counts the weight inderits from the higher level tree nodes.
+//! @param  se              The result scattering event.
+void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se );

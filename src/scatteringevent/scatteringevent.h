@@ -21,6 +21,14 @@
 #include "math/intersection.h"
 #include "bssrdf/bssrdf.h"
 
+enum SE_Flag : unsigned int{
+    SE_ADD_BXDF         = 0x01,                                 // Parse bxdf in the material
+    SE_ADD_BSSRDF       = 0x02,                                 // Parse bssrdf in the material
+    SE_ADD_ALL          = ( SE_ADD_BXDF | SE_ADD_BSSRDF ),      // Everything will be parsed in the material
+
+    SE_SUB_EVENT        = 0x04,                                 // Whether this scattering event is a subevent of others.
+};
+
 #define SE_MAX_BXDF_COUNT          16      // Maximum number of bxdf in a material is 16 by default
 #define SE_MAX_BSSRDF_COUNT        4       // Maximum number of bssrdf in a mterial is 4 by default 
 
@@ -64,10 +72,8 @@ public:
     //! @brief Constructor taking intersection data.
     //!
     //! @param intersection         Intersection data of the point to be Evaluated.
-    //! @param subScatteringEvent   Whether the scattering event is a sub-event belongs to ohter event.
-    //!                             Ths happens in some cases like 'Coat' material can coat on top of another
-    //!                             scattering event.
-    ScatteringEvent( const Intersection& intersection , bool subScatteringEvent = false );
+    //! @param flag                 Scattering event flag.              
+    ScatteringEvent( const Intersection& intersection , const SE_Flag flag = SE_ADD_ALL );
 
     //! @brief  Add a new bxdf in the scattering event, there will be at most 16 bxdfs in it.
     //!
@@ -78,7 +84,11 @@ public:
     //! memory alive.
     //!
     //! @param  bxdf        The bxdf to be added.
-    inline  void    AddBxdf( const Bxdf* bxdf );
+    inline  void    AddBxdf( const Bxdf* bxdf ){
+        if( m_bxdfCnt == SE_MAX_BXDF_COUNT || bxdf == nullptr || bxdf->GetWeight().IsBlack() ) 
+            return;
+        m_bxdfs[m_bxdfCnt++] = bxdf;
+    }
 
     //! @brief  Add a bssrdf in the scattering event, there will be at most 4 bssrdf in it.
     //!
@@ -89,7 +99,11 @@ public:
     //! memory alive.
     //!
     //! @param  bssrdf      The bssrdf to be added.
-    inline  void    AddBssrdf( const Bssrdf* bssrdf );
+    inline  void    AddBssrdf( const Bssrdf* bssrdf ){
+        if( m_bssrdfCnt == SE_MAX_BSSRDF_COUNT || bssrdf == nullptr || bssrdf->GetWeight().IsBlack() ) 
+            return;
+        m_bssrdfs[m_bssrdfCnt++] = bssrdf;
+    }
 
     //! @brief  Randomly sample the scattering event by picking a BXDF/BSSRDF to evaluate.
     //!
@@ -110,7 +124,7 @@ private:
     const Bssrdf*       m_bssrdfs[SE_MAX_BSSRDF_COUNT]  = { nullptr };     /**< All bssrdfs in the scattering event. */
     int                 m_bssrdfCnt                     = 0;               /**< Number of bssrdfs in the scattering event. */
 
-    const bool          m_subEvent;         /**< Some scattering event is under other scattering event, like 'Blend' and 'Coat'. */
+    const SE_Flag       m_flag;             /**< Some scattering event is under other scattering event, like 'Blend' and 'Coat'. */
     Vector              m_n;                /**< Normal at the point to be evaluated. */
     Vector              m_t;                /**< Bi-tangent at the point to be evaluated. */
     Vector              m_bt;               /**< Tangent at the point to be evaluated. */

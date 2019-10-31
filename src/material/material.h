@@ -25,6 +25,7 @@
 class Bsdf;
 class Bssrdf;
 class Intersection;
+class ScatteringEvent;
 
 //! @brief  A thin layer of material definition.
 /**
@@ -46,6 +47,11 @@ public:
     //! @param      bssrdf          Bidirectional sub-surface scattering reflectance density function.
     //! @param      replaceBSSRDF   Whether to replace BSSRDF with BRDF, it is not necessary to need it in the second bounce.
     void    UpdateScattering(const Intersection& intersect, Bsdf*& bsdf , Bssrdf*& bssrdf, bool replaceBSSRDF = false ) const;
+
+    //! @brief      Parse scattering event from the material shader.
+    //!
+    //! @param      se              Scattering event to be returned.
+    void    UpdateScatteringEvent( ScatteringEvent& se ) const;
 
     //! @brief  Serialization interface. Loading data from stream.
     //!

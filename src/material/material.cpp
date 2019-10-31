@@ -21,6 +21,7 @@
 #include "core/globalconfig.h"
 #include "core/strid.h"
 #include "osl_system.h"
+#include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bsdf/lambert.h"
 
 bool Material::BuildMaterial(){
@@ -90,10 +91,18 @@ void Material::Serialize(IStreamBase& stream){
     }
 }
 
+// to be deprecated in the future
 void Material::UpdateScattering(const Intersection& intersect, Bsdf*& bsdf , Bssrdf*& bssrdf , bool replaceBSSRDF ) const {
     bsdf = SORT_MALLOC(Bsdf)(&intersect);
     if ( !g_noMaterial && m_valid)
         ExecuteShader(bsdf, bssrdf, intersect, m_shader.get() , replaceBSSRDF );
     else
         bsdf->AddBxdf(SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
+}
+
+void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
+    if( !g_noMaterial && m_valid )
+        ExecuteShader( m_shader.get() , se );
+    else
+        se.AddBxdf(SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
 }

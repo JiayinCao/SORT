@@ -19,32 +19,20 @@
 #include "bsdf/bxdf.h"
 #include "bssrdf/bssrdf.h"
 
-ScatteringEvent::ScatteringEvent( const Intersection& intersection , bool subScatteringEvent )
-: m_subEvent(subScatteringEvent), m_intersection( intersection ){
+ScatteringEvent::ScatteringEvent( const Intersection& intersection , const SE_Flag flag )
+: m_flag(flag), m_intersection( intersection ){
     m_n = Normalize(intersection.normal);
     m_bt = Normalize(Cross( m_n , intersection.tangent ));
     m_t = Normalize(Cross( m_bt , m_n ));
 }
 
-void ScatteringEvent::AddBxdf( const class Bxdf* bxdf ){
-    if( m_bxdfCnt == SE_MAX_BXDF_COUNT || bxdf == nullptr || bxdf->GetWeight().IsBlack() ) 
-        return;
-    m_bxdfs[m_bxdfCnt++] = bxdf;
-}
-
-void ScatteringEvent::AddBssrdf( const class Bssrdf* bssrdf ){
-    if( m_bssrdfCnt == SE_MAX_BSSRDF_COUNT || bssrdf == nullptr || bssrdf->GetWeight().IsBlack() ) 
-        return;
-    m_bssrdfs[m_bssrdfCnt++] = bssrdf;
-}
-
 Vector ScatteringEvent::worldToLocal( const Vector& v , bool forceTransform ) const{
-    if( m_subEvent && !forceTransform ) return v;
+    if( ( m_flag & SE_SUB_EVENT ) && !forceTransform ) return v;
     return Vector( Dot(v,m_t) , Dot(v,m_n) , Dot(v,m_bt) );
 }
 
 Vector ScatteringEvent::localToWorld( const Vector& v ) const{
-    if( m_subEvent ) return v;
+    if( m_flag & SE_SUB_EVENT ) return v;
     return Vector(  v.x * m_t.x + v.y * m_n.x + v.z * m_bt.x ,
                     v.x * m_t.y + v.y * m_n.y + v.z * m_bt.y ,
                     v.x * m_t.z + v.y * m_n.z + v.z * m_bt.z );
