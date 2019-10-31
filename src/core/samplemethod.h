@@ -19,7 +19,7 @@
 
 #include "core/define.h"
 #include <algorithm>
-#include "bsdf/bsdf.h"
+#include "scatteringevent/bsdf/bsdf.h"
 #include "texture/texture.h"
 #include <vector>
 #include "core/sassert.h"

@@ -20,7 +20,7 @@
 #include "math/intersection.h"
 #include "core/scene.h"
 #include "light/light.h"
-#include "bsdf/bsdf.h"
+#include "scatteringevent/bsdf/bsdf.h"
 
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 SORT_STATS_DEFINE_COUNTER(sVPLCount)

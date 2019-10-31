@@ -17,14 +17,14 @@
 
 #include "pathtracing.h"
 #include "math/intersection.h"
-#include "bsdf/bsdf.h"
-#include "bssrdf/bssrdf.h"
+#include "scatteringevent/bsdf/bsdf.h"
+#include "scatteringevent/bssrdf/bssrdf.h"
 #include "core/scene.h"
 #include "integratormethod.h"
 #include "camera/camera.h"
 #include "core/log.h"
 #include "core/profile.h"
-#include "bsdf/lambert.h"
+#include "scatteringevent/bsdf/lambert.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalPathLength)
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)

@@ -24,7 +24,7 @@
 #include "core/define.h"
 #include "unittest_common.h"
 #include "material/osl_system.h"
-#include "bsdf/orennayar.h"
+#include "scatteringevent/bsdf/orennayar.h"
 
 using namespace OSL;
 

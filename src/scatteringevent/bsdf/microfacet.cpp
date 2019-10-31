@@ -21,7 +21,7 @@
 #include "sampler/sample.h"
 #include "math/utils.h"
 #include "core/memory.h"
-#include "bsdf/fresnel.h"
+#include "scatteringevent/bsdf/fresnel.h"
 
 Blinn::Blinn( float roughnessU , float roughnessV ) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness

@@ -21,8 +21,8 @@
 #include "core/profile.h"
 #include "core/globalconfig.h"
 #include "core/log.h"
-#include "bsdf/merl.h"
-#include "bsdf/fourierbxdf.h"
+#include "scatteringevent/bsdf/merl.h"
+#include "scatteringevent/bsdf/fourierbxdf.h"
 
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){

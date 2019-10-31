@@ -17,11 +17,11 @@
 
 #include "thirdparty/gtest/gtest.h"
 #include "unittest_common.h"
-#include "bsdf/bsdf.h"
+#include "scatteringevent/bsdf/bsdf.h"
 #include "sampler/sample.h"
 #include "spectrum/spectrum.h"
-#include "bsdf/microfacet.h"
-#include "bsdf/disney.h"
+#include "scatteringevent/bsdf/microfacet.h"
+#include "scatteringevent/bsdf/disney.h"
 #include <thread>
 #include "core/samplemethod.h"
 

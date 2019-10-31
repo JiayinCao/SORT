@@ -17,7 +17,7 @@
 
 #include "distributionbrdf.h"
 #include "core/samplemethod.h"
-#include "bsdf/fresnel.h"
+#include "scatteringevent/bsdf/fresnel.h"
 #include "sampler/sample.h"
 
 // The scaling factor used in the original paper.

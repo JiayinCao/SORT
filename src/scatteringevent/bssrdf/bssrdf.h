@@ -21,7 +21,7 @@
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
 #include "math/point.h"
-#include "bsdf/bxdf.h"
+#include "scatteringevent/bsdf/bxdf.h"
 #include "math/intersection.h"
 
 class Bsdf;

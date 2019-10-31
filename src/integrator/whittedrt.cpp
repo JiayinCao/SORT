@@ -19,7 +19,7 @@
 #include "integratormethod.h"
 #include "math/intersection.h"
 #include "core/scene.h"
-#include "bsdf/bsdf.h"
+#include "scatteringevent/bsdf/bsdf.h"
 #include "light/light.h"
 #include "core/log.h"
 

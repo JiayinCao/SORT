@@ -21,7 +21,7 @@
 #include "core/globalconfig.h"
 #include "core/strid.h"
 #include "osl_system.h"
-#include "bsdf/lambert.h"
+#include "scatteringevent/bsdf/lambert.h"
 
 bool Material::BuildMaterial(){
     const auto message = "Build Material '" + m_name + "'";

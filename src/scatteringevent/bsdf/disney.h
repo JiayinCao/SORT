@@ -19,7 +19,7 @@
 
 #include "bxdf.h"
 #include "microfacet.h"
-#include "bssrdf/bssrdf.h"
+#include "scatteringevent/bssrdf/bssrdf.h"
 
 //! @brief Disney Principle BRDF.
 /**

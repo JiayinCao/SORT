@@ -19,7 +19,7 @@
 #include "bidirpath.h"
 #include "core/scene.h"
 #include "light/light.h"
-#include "bsdf/bsdf.h"
+#include "scatteringevent/bsdf/bsdf.h"
 #include "integratormethod.h"
 #include "camera/camera.h"
 #include "core/globalconfig.h"
