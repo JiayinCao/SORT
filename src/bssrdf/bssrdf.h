@@ -45,7 +45,7 @@ struct BSSRDFIntersections{
 
 //! @brief BSDF implementation.
 /**
- * Light sometimes penetrates through solid surfaces and bounces around beneath the surface, evetually
+ * Light sometimes penetrates through solid surfaces and bounces around beneath the surface, eventually
  * leaves the surface at another point other than the entry point. This kind of effects can usually be
  * observed in materials like wax, skin.
  */
@@ -78,7 +78,7 @@ public:
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  inter   Incident intersection sampled.
-    virtual void    Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const = 0;
+    virtual void		Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const = 0;
 
 protected:
     const float ior_i;  /**< Index of refraction inside the surface. */
@@ -91,23 +91,12 @@ protected:
  * cases like a slab. It is not uncommon to see BSSRDF implementation with lots of gross approximations to simplify
  * things so that it is tractable.
  * Separable BSSRDF is one of them by making the following assumptions.
- *   - BSSRDF can be seperate with three different components, two of which are directional and the other one is spatial.
+ *   - BSSRDF can be separate with three different components, two of which are directional and the other one is spatial.
  *   - The spatial term purely depends on the distance between the incident and extant positions, this may break in cases of complex shapes.
  */
 class SeparableBssrdf : public Bssrdf{
 public:
     SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const float ior_i , const float ior_e );
-
-    //! @brief  Evaluate the BSSRDF.
-    //!
-    //! Unlike BXDF, BSSRDF is more of a generalized version function of eight dimensions.
-    //!
-    //! @param  wo      Extant direction.
-    //! @param  po      Extant position.
-    //! @param  wi      Incident direction.
-    //! @param  pi      Incident position.
-    //! @return         To be figured out
-    Spectrum    S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const override;
 
     //! @brief  Importance sample the incident position.
     //!
@@ -119,7 +108,7 @@ public:
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  inter   Intersection between the rays and the objects with same material.
-    void    Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
+    void		Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
 
     //! @brief  PDF of sampling the reflectance profile.
     //!
@@ -130,7 +119,7 @@ public:
     float       Pdf_Sp( const Point& po , const Point& pi , const Vector& n ) const;
 
 protected:
-    //! @brief  Evalute the reflectance profile based on distance between the two points.
+    //! @brief  Evaluate the reflectance profile based on distance between the two points.
     //!
     //! @param  distance    Distance between the incident and extant positions.
     //! @return             Reflectance profile based on the distance.
@@ -139,7 +128,7 @@ protected:
     //! @brief  Sampling a distance based on the reflectance profile.
     //!
     //! @param  ch      Spectrum channel.
-    //! @param  r       A canonical value used to randly sample distance
+    //! @param  r       A canonical value used to randomly sample distance
     //! @return         The distance sampled. A negative returned value means invalid sample.
     virtual float       Sample_Sr(int ch, float r) const = 0;
 
@@ -158,8 +147,8 @@ protected:
 
     //! @brief  Sample a channel
     //!
-    //! @return        Randomly pick a channel in spectrum, in which the mean free path is not zero.
-    virtual int         Sample_Ch() const;
+    //! @return			Randomly pick a channel in spectrum, in which the mean free path is not zero.
+    virtual int         Sample_Ch() const = 0;
 
     Vector nn;          /**< Normal at the point to be Evaluated. */
     Vector btn;         /**< Bi-tangent at the point to be evaluated. */
@@ -169,37 +158,4 @@ protected:
     Spectrum    R;      /**< Reflectance of the BSSRDF. */
 
     const Intersection*   intersection;   /**< Intersection that spawns the BSSRDF. */
-
-    //! @brief  One of the directional components of separable Bssrdf.
-    //!
-    //! @param  wi      Incident direction.
-    //! @return         This is usually related for fresnel.
-    Spectrum    Sw( const Vector& wi ) const;
-
-    friend class SeparableBssrdfAdapter;
-};
-
-class SeparableBssrdfAdapter : public Bxdf {
-public:
-    //! @brief  Constructor taking a bssrdf.
-    //!
-    //! @param  bssrdf      Bssrdf that the adapter is used in.
-    SeparableBssrdfAdapter( const SeparableBssrdf* bssrdf );
-
-    //! Evalute the BXDF.
-    //!
-    //! @param  wo      The exitant direction in local space.
-    //! @param  wi      The incident direction in local space.
-    //! @return         Evaluted BRDF by cos(\theta)
-    //Spectrum F( const Vector& wo , const Vector& wi ) const override;
-
-    //! @brief Evaluate the BRDF.
-    //!
-    //! @param wo   Exitant direction in shading coordinate.
-    //! @param wi   Incident direction in shading coordinate.
-    //! @return     The Evaluated BRDF value.
-    Spectrum f( const Vector& wo , const Vector& wi ) const override;
-
-private:
-    const SeparableBssrdf*  m_bssrdf;
 };

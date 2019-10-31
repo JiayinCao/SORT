@@ -37,7 +37,7 @@ enum BXDF_TYPE{
 /**
  * Bxdf is either BRDF(bidirectional reflection density function) or BTDF( bidirectional translation density function).\n
  * This class serves as a basic interface for varies bxdf types, it will not have any instance of itself. \n
- * One of the important concept used here is local coordinate and shading coordinate. Local coordiante means a local
+ * One of the important concept used here is local coordinate and shading coordinate. Local coordinate means a local
  * coordinate where the up axis ( Y axis ) is exactly the geometry normal. Shading coordinate is slightly different from
  * local coordinate in the fact that its up axis could differ from geometry normal, named as a shading normal, usually
  * taken from normal map.
@@ -60,7 +60,7 @@ public:
         return m_weight;
     }
 
-    //! Evalute the BXDF.
+    //! Evaluate the BXDF.
     //!
     //! IMPORTANT: Instead of returning exactly the value of BXDF, this function choose to return BXDF * cos(\theta),
     //! where \theta is the angle between incident direction, usually the lighting direction, and the shading normal, which
@@ -69,7 +69,7 @@ public:
     //!
     //! @param  wo      The exitant direction in local space.
     //! @param  wi      The incident direction in local space.
-    //! @return         Evaluted BRDF by cos(\theta)
+    //! @return         Evaluated BRDF by cos(\theta)
     virtual Spectrum F( const Vector& wo , const Vector& wi ) const{
         return f( bsdfToBxdf(wo) , bsdfToBxdf(wi) );
     }
@@ -77,8 +77,8 @@ public:
     //! Importance sampling for the BXDF.
     //!
     //! Each of the BXDF should have its own importance sampling method so that it can converge quickly to the expected
-    //! result. Though, some of the BRDF, like MERL, doesn't have its own importance sampling method. It will fallk back to
-    //! the default importance sampling method, which is usualy a source of fireflies.
+    //! result. Though, some of the BRDF, like MERL, doesn't have its own importance sampling method. It will fall back to
+    //! the default importance sampling method, which is usually a source of fireflies.
     //!
     //! @param  wo      The exitant direction in local space.
     //! @param  wi      The outputted importance sampled direction in local space.
@@ -146,7 +146,7 @@ protected:
     //! @return     The Evaluated BRDF value.
     virtual Spectrum sample_f( const Vector& wo , Vector& wi , const class BsdfSample& bs , float* pdf ) const;
 
-    //! @brief  Evaluate the pdf of an existance direction given the Incident direction.
+    //! @brief  Evaluate the pdf of an exit direction given the Incident direction.
     //!
     //! If one implements customized sample_f for the brdf, it needs to have corresponding version of
     //! this function, otherwise it is not unbiased.
@@ -167,8 +167,8 @@ protected:
     //! @brief  This is a helpf function transforming vector from local coordinate to shading coordinate.
     //!
     //! Bsdf is only responsible for transforming vector from world space to local coordinate without taking
-    //! normal map into consideration. Another tranformation needs to be applied if there is normal map.
-    //! Local coordinate is exactly the same with shading coordingate if there is no normal map.
+    //! normal map into consideration. Another transformation needs to be applied if there is normal map.
+    //! Local coordinate is exactly the same with shading coordinate if there is no normal map.
     //! This is the function to perform the transformation if needed.
     //! Technically speaking, there is space for optimization to avoid one extra transformation by combining the
     //! two transformation together, SORT doesn't choose to do it for simplicity.
@@ -186,7 +186,7 @@ protected:
     //! necessary to transform it back to local coordinate so that BSDF can further transform it back to world
     //! coordinate.
     //!
-    //! @param v    A vector in shading coordainte.
+    //! @param v    A vector in shading coordinate.
     //! @return     The corresponding vector in local space.
     inline Vector bxdfToBsdf( const Vector& v ) const{
         if( !normal_map_applied ) return v;

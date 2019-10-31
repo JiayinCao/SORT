@@ -89,36 +89,25 @@ DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R
     d = mfp.Clamp( 0.0001f , FLT_MAX ) / s;
 }
 
-#ifdef SSS_REPLACE_WITH_LAMBERT
 int DisneyBssrdf::Sample_Ch() const{
     auto ch = clamp( (int)(sort_canonical() * channels) , 0 , channels - 1 );
+#ifdef SSS_REPLACE_WITH_LAMBERT
     // Here it is assumed that the spectrum is RGB only. 
     // This code needs change if SORT needs to support full spectrum rendering, which is not my plan for now.
     if( ch == 0 )
         ch = ( d[0] > 0.0f ) ? 0 : ( d[1] > 0.0f ? 1 : 2 );
     else if( ch == 1 )
         ch = ( d[1] > 0.0f ) ? 1 : 2;
+#endif
     return ch;
 }
-#endif
 
 Spectrum DisneyBssrdf::S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const{
-#if 1
     // This is clearly not disney BSSRDF, but it converges to lambert when mean free path is zero.
+	// Converging to lambert when mfp approaches to zero is a critically important feature in SORT renderer,
+	// this gives the flexibility of driving the parameter with a texture with black pixels and no noticeable
+	// gap will be since around the transition from SSS to lambert.
     return Sr( Distance( po , pi ) );
-#else
-    const auto d = Normalize( po - pi );
-    auto fade = 1.0f;
-    const auto cosTheta = Dot( d , nn );
-    if( cosTheta > 0.0f ){
-        const auto sinTheta = sqrt( fmax( 0.0f , 1.0f - SQR( cosTheta ) ) );
-        Vector  d2 = nn * sinTheta - ( d - nn * cosTheta ) * cosTheta / sinTheta;
-        fade = fmax( 0.0f , Dot( nn , d2 ) );
-    }
-    const auto fo = SchlickWeight( AbsCosTheta(wo) );
-    const auto fi = SchlickWeight( AbsCosTheta(wi) );
-    return fade * ( 2.0f - fo ) * ( 2.0f - fi ) * Sr( Distance( po , pi ) ) / FOUR_PI;
-#endif
 }
 
 Spectrum DisneyBssrdf::Sr( float r ) const{
@@ -209,7 +198,7 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
             ret += diffuseWeight * frr * Clampped_NoI;
 
             // This is not totally physically correct. However, dielectric model presented by Walter et al. loses energy due to lack
-            // of microfacet inter-reflection/refraction and the sheen component can approximately compensate for it.
+            // of MicroFacet inter-reflection/refraction and the sheen component can approximately compensate for it.
             if (sheen > 0.0f) {
                 const auto Csheen = slerp(Spectrum(1.0f), Ctint, sheenTint);
                 const auto FH = SchlickWeight(HoO);

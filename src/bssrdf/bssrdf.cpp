@@ -17,7 +17,6 @@
 
 #include "bssrdf.h"
 #include "math/intersection.h"
-#include "bsdf/fresnel.h"
 #include "bsdf/bsdf.h"
 #include "math/utils.h"
 #include "memory.h"
@@ -25,33 +24,11 @@
 #include "core/memory.h"
 #include "core/scene.h"
 
-float FresnelMoment1(const float eta) {
-    float eta2 = eta * eta, eta3 = eta2 * eta, eta4 = eta3 * eta, eta5 = eta4 * eta;
-    if (eta < 1)
-        return 0.45966f - 1.73965f * eta + 3.37668f * eta2 - 3.904945 * eta3 + 2.49277f * eta4 - 0.68441f * eta5;
-    return -4.61686f + 11.1136f * eta - 10.4646f * eta2 + 5.11455f * eta3 - 1.27198f * eta4 + 0.12746f * eta5;
-}
-
 SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const float ior_i , const float ior_e )
     : R(R) , Bssrdf( ior_i , ior_e ) , intersection(intersection) , channels(0) {
     nn = Normalize(intersection->normal);
     btn = Normalize(Cross( nn , intersection->tangent ));
     tn = Normalize(Cross( btn , nn ));
-}
-
-Spectrum SeparableBssrdf::S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const{
-    const auto F = DielectricFresnel(CosTheta(wo), ior_e, ior_i);
-    return (1 - F) * Sr( Distance( po , pi ) ) * Sw(wi);
-}
-
-Spectrum SeparableBssrdf::Sw( const Vector& wi ) const{
-    const auto F = DielectricFresnel(CosTheta(wi), ior_e, ior_i);
-    const auto c = 1.0f - 2.0f * FresnelMoment1( ior_e / ior_i );
-    return (1 - F) / (c * PI);
-}
-
-int SeparableBssrdf::Sample_Ch() const{
-    return clamp( (int)(sort_canonical() * channels) , 0 , 2 );
 }
 
 void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const {
@@ -139,12 +116,4 @@ float SeparableBssrdf::Pdf_Sp( const Point& po , const Point& pi , const Vector&
     }
     pdf /= channels;
     return pdf;
-}
-
-SeparableBssrdfAdapter::SeparableBssrdfAdapter( const SeparableBssrdf* bssrdf )
-:m_bssrdf(bssrdf),Bxdf( WHITE_SPECTRUM , BXDF_REFLECTION , DIR_UP , true ){
-}
-
-Spectrum SeparableBssrdfAdapter::f( const Vector& wo , const Vector& wi ) const{
-    return m_bssrdf->Sw( wi ) * saturate( CosTheta( wi ) );
 }

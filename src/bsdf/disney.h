@@ -212,12 +212,10 @@ protected:
     //! @return             The distance sampled.  A negative returned value means invalid sample.
     float       Sample_Sr(int ch, float r) const override;
 
-#ifdef SSS_REPLACE_WITH_LAMBERT
     //! @brief  Sample a channel
     //!
     //! @return        Randomly pick a channel in spectrum, in which the mean free path is not zero.
     int         Sample_Ch() const override;
-#endif
 
     //! @brief  Get maximum profile sampling distance
     //!
