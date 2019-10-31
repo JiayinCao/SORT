@@ -25,6 +25,7 @@
 #include "core/log.h"
 #include "core/profile.h"
 #include "scatteringevent/bsdf/lambert.h"
+#include "scatteringevent/scatteringevent.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalPathLength)
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
@@ -70,6 +71,11 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
 
         // the lack of multiple bounces between different BSSRDF surfaces does introduce a bias.
         replaceSSS |= ( bssrdfBounces > m_maxBouncesInBSSRDFPath - 1 );
+
+		// Parse the material and populate the results into a scatteringEvent.
+		SE_Flag seFlag = replaceSSS ? SE_Flag( SE_ADD_ALL | SE_REPLACE_BSSRDF ) : SE_ADD_ALL;
+		ScatteringEvent se(inter, seFlag);
+		inter.primitive->GetMaterial()->UpdateScatteringEvent(se);
 
         // evaluate the light
         Bsdf*   bsdf = nullptr;

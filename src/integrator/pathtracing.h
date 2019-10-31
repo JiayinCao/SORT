@@ -19,18 +19,20 @@
 
 #include "integrator.h"
 
-//////////////////////////////////////////////////////////////////////////////////////
-//  definition of direct light
-class   PathTracing : public Integrator
-{
+//! @brief	The core of path tracing algorithm, the most commonly used algorithm in SORT.
+/**
+ * A path tracing algorithm works by tracing rays recursively to converge to the correct approximation of rendering equation.
+ * It doesn't solve all corner cases well, but it is a pretty solid algorithm.
+ */
+class   PathTracing : public Integrator{
 public:
     DEFINE_RTTI( PathTracing , Integrator );
 
-    //! @brief  Evalute the radiance along a specific direction.
+    //! @brief  Evaluate the radiance along a specific direction.
     //!
     //! @param  ray             The ray to be tested with.
-    //! @param  ps              Pixel sample used to evaluate Monte Calor method.
-    //! @param  scene           The scene to be evaluted.
+    //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
+    //! @param  scene           The scene to be evaluated.
     //! @return                 The radiance along the opposite direction that the ray points to.
     Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
 
@@ -50,13 +52,13 @@ private:
     // Most importantly, it kills the performance and introduces quite some fireflies with bounces more than 2.
     int     m_maxBouncesInBSSRDFPath;
 
-    //! @brief  Evalute the radiance along a specific direction.
+    //! @brief  Evaluate the radiance along a specific direction.
     //!
     //! @param  ray             The ray to be tested with.
-    //! @param  ps              Pixel sample used to evaluate Monte Calor method.
-    //! @param  scene           The scene to be evaluted.
+    //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
+    //! @param  scene           The scene to be evaluated.
     //! @param  bounces         The current number of bounces considered.
-    //! @param  indirectOnly    Whether just to evalute the indirect light, default value is false.
+    //! @param  indirectOnly    Whether just to evaluate the indirect light, default value is false.
     //! @param  bssrdfBounces   Bounces on BSSRDF surfaces in the path.
     //! @param  replaceSSS      Whether to replace SSS with lambert.
     //! @return                 The radiance along the opposite direction that the ray points to.

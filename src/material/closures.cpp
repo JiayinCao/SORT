@@ -58,7 +58,7 @@ namespace {
         virtual void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w , bool replaceBSSRDF ) = 0;
 
         // this will be a virtual function later
-        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se ) {}
+        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se ) const {}
     };
 
     static std::vector<std::unique_ptr<Closure_Base>>   g_closures(CLOSURE_CNT);
@@ -79,10 +79,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<Lambert::Params>();
             bsdf->AddBxdf(SORT_MALLOC(Lambert)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se) const override {
+			const auto& params = *comp->as<Lambert::Params>();
+			se.AddBxdf(SORT_MALLOC(Lambert)(params, w * comp->w));
+		}
     };
 
     struct Closure_OrenNayar : public Closure_Base {
@@ -102,10 +108,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<OrenNayar::Params>();
             bsdf->AddBxdf(SORT_MALLOC(OrenNayar)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se) const override {
+			const auto& params = *comp->as<OrenNayar::Params>();
+			se.AddBxdf(SORT_MALLOC(OrenNayar)(params, w * comp->w));
+		}
     };
 
     struct Closure_Disney : public Closure_Base {
@@ -138,6 +150,7 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             auto params = *comp->as<DisneyBRDF::Params>();
             auto& mfp = params.scatterDistance;
@@ -183,6 +196,53 @@ namespace {
                 #endif
             }
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			auto params = *comp->as<DisneyBRDF::Params>();
+			auto& mfp = params.scatterDistance;
+
+			// Ignore SSS if necessary
+			if ( SE_NONE != ( se.GetFlag() & SE_SUB_EVENT ) )
+				mfp = 0.0f;
+
+			auto sssBaseColor = params.baseColor;
+
+#ifdef SSS_REPLACE_WITH_LAMBERT
+			constexpr float delta = 0.0001f;
+			bool addExtraLambert = false;
+			auto baseColor = params.baseColor;
+			for (int i = 0; i < SPECTRUM_SAMPLE; ++i) {
+				// If the reflectance is zero or the mean free path is too small, switch back to lambert.
+				if (params.baseColor[i] == 0.0f) {
+					mfp[i] = 0.0f;
+					continue;
+				}
+
+				// if the mean free distance is too small, replace it with lambert.
+				if (mfp[i] < delta) {
+					mfp[i] = 0.0f;
+					sssBaseColor[i] = 0.0f;
+					addExtraLambert = true;
+				}
+				else {
+					baseColor[i] = 0.0f;
+				}
+			}
+#endif
+
+			se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, w * comp->w));
+
+			if (!mfp.IsBlack()) {
+				const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans) * comp->w * w;
+				if (!sssBaseColor.IsBlack())
+					se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), diffuseWeight * sssBaseColor, params.scatterDistance, 1.5f, 1.0f) );
+
+#ifdef SSS_REPLACE_WITH_LAMBERT
+				if (addExtraLambert && !baseColor.IsBlack())
+					se.AddBxdf(SORT_MALLOC(Lambert)(baseColor * diffuseWeight, FULL_WEIGHT, params.n));
+#endif
+			}
+		}
     };
 
     struct Closure_MicrofacetReflection : public Closure_Base {
@@ -206,10 +266,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<MicroFacetReflection::Params>();
             bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<MicroFacetReflection::Params>();
+			se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w * comp->w));
+		}
     };
 
     struct Closure_MicrofacetRefraction : public Closure_Base {
@@ -233,10 +299,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<MicroFacetRefraction::Params>();
             bsdf->AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<MicroFacetRefraction::Params>();
+			se.AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, w * comp->w));
+		}
     };
 
     struct Closure_AshikhmanShirley : public Closure_Base {
@@ -258,10 +330,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<AshikhmanShirley::Params>();
             bsdf->AddBxdf(SORT_MALLOC(AshikhmanShirley)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<AshikhmanShirley::Params>();
+			se.AddBxdf(SORT_MALLOC(AshikhmanShirley)(params, w * comp->w));
+		}
     };
 
     struct Closure_Phong : public Closure_Base {
@@ -282,10 +360,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<Phong::Params>();
             bsdf->AddBxdf(SORT_MALLOC(Phong)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<Phong::Params>();
+			se.AddBxdf(SORT_MALLOC(Phong)(params, w * comp->w));
+		}
     };
 
     struct Closure_LambertTransmission : public Closure_Base {
@@ -304,10 +388,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<LambertTransmission::Params>();
             bsdf->AddBxdf(SORT_MALLOC(LambertTransmission)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<LambertTransmission::Params>();
+			se.AddBxdf(SORT_MALLOC(LambertTransmission)(params, w * comp->w));
+		}
     };
 
     struct Closure_Mirror : public Closure_Base {
@@ -326,10 +416,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<MicroFacetReflection::MirrorParams>();
             bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<MicroFacetReflection::MirrorParams>();
+			se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w * comp->w));
+		}
     };
 
     struct Closure_Dielectric : public Closure_Base {
@@ -351,10 +447,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<Dielectric::Params>();
             bsdf->AddBxdf(SORT_MALLOC(Dielectric)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<Dielectric::Params>();
+			se.AddBxdf(SORT_MALLOC(Dielectric)(params, w * comp->w));
+		}
     };
 
     struct Closure_MicrofacetReflectionDielectric : public Closure_Base {
@@ -378,10 +480,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<MicroFacetReflection::ParamsDieletric>();
             bsdf->AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<MicroFacetReflection::ParamsDieletric>();
+			se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w * comp->w));
+		}
     };
 
     struct Closure_Hair : public Closure_Base {
@@ -402,10 +510,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<Hair::Params>();
             bsdf->AddBxdf(SORT_MALLOC(Hair)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<Hair::Params>();
+			se.AddBxdf(SORT_MALLOC(Hair)(params, w * comp->w));
+		}
     };
 
     struct Closure_FourierBRDF : public Closure_Base {
@@ -424,10 +538,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<FourierBxdf::Params>();
             bsdf->AddBxdf(SORT_MALLOC(FourierBxdf)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<FourierBxdf::Params>();
+			se.AddBxdf(SORT_MALLOC(FourierBxdf)(params, w * comp->w));
+		}
     };
 
     struct Closure_MERL : public Closure_Base {
@@ -446,10 +566,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<Merl::Params>();
             bsdf->AddBxdf(SORT_MALLOC(Merl)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<Merl::Params>();
+			se.AddBxdf(SORT_MALLOC(Merl)(params, w * comp->w));
+		}
     };
 
     struct Closure_Coat : public Closure_Base {
@@ -471,12 +597,17 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<Coat::Params>();
             Bsdf* bottom = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
             ProcessClosure(bottom, bssrdf, intersection, params.closure, Color3(1.0f), replaceBSSRDF);
             bsdf->AddBxdf(SORT_MALLOC(Coat)(params, w, bottom));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			// not supported for now.
+		}
     };
 
     struct Closure_DoubleSided : public Closure_Base {
@@ -495,6 +626,7 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<DoubleSided::Params>();
             Bsdf* bxdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
@@ -503,6 +635,10 @@ namespace {
             ProcessClosure(bxdf1, bssrdf, intersection, params.bxdf1, Color3(1.0f) , replaceBSSRDF);
             bsdf->AddBxdf(SORT_MALLOC(DoubleSided)(bxdf0, bxdf1, w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			// not supported for now.
+		}
     };
 
     struct Closure_DistributionBRDF : public Closure_Base {
@@ -524,10 +660,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<DistributionBRDF::Params>();
             bsdf->AddBxdf(SORT_MALLOC(DistributionBRDF)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<DistributionBRDF::Params>();
+			se.AddBxdf(SORT_MALLOC(DistributionBRDF)(params, w * comp->w));
+		}
     };
 
     struct Closure_Fabric : public Closure_Base {
@@ -547,10 +689,16 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
+		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             const auto& params = *comp->as<Fabric::Params>();
             bsdf->AddBxdf(SORT_MALLOC(Fabric)(params, w * comp->w));
         }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<Fabric::Params>();
+			se.AddBxdf(SORT_MALLOC(Fabric)(params, w * comp->w));
+		}
     };
 }
 
