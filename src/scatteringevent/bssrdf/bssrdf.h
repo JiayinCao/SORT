@@ -80,6 +80,12 @@ public:
     //! @param  inter   Incident intersection sampled.
     virtual void		Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const = 0;
 
+    //! @brief  Get weight of the bssrdf.
+    //!
+    //! @return         The weight of the bssrdf, this will affect both of the final contribution and the pdf of picking 
+    //!                 the bssrdf in a scattering event.
+    inline  Spectrum    GetWeight() const { return 1.0f; }
+
 protected:
     const float ior_i;  /**< Index of refraction inside the surface. */
     const float ior_e;  /**< Index of refraction outside the surface. */
