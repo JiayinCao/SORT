@@ -67,6 +67,7 @@ public:
         if( m_bxdfCnt == SE_MAX_BXDF_COUNT || bxdf == nullptr || bxdf->GetWeight().IsBlack() ) 
             return;
         m_bxdfs[m_bxdfCnt++] = bxdf;
+        m_bxdfTotalWeight += bxdf->GetWeight().GetIntensity();
     }
 
     //! @brief  Add a bssrdf in the scattering event, there will be at most 4 bssrdf in it.
@@ -82,6 +83,7 @@ public:
         if( m_bssrdfCnt == SE_MAX_BSSRDF_COUNT || bssrdf == nullptr || bssrdf->GetWeight().IsBlack() ) 
             return;
         m_bssrdfs[m_bssrdfCnt++] = bssrdf;
+        m_bssrdfTotalWeight += bssrdf->GetWeight().GetIntensity();
     }
 
     //! @brief Get intersection information of the point at which the bsdf is evaluated.
@@ -139,8 +141,10 @@ public:
 private:
     const Bxdf*         m_bxdfs[SE_MAX_BXDF_COUNT]      = { nullptr };     /**< All bsdfs in the scattering event. */
     unsigned            m_bxdfCnt                       = 0;               /**< Number of bxdfs in the scattering event. */
+    float               m_bxdfTotalWeight               = 0.0f;            /**< Total weight of BXDF. */
     const Bssrdf*       m_bssrdfs[SE_MAX_BSSRDF_COUNT]  = { nullptr };     /**< All bssrdfs in the scattering event. */
     unsigned            m_bssrdfCnt                     = 0;               /**< Number of bssrdfs in the scattering event. */
+    float               m_bssrdfTotalWeight             = 0.0f;            /**< Total weight of BSSRDF. */
 
     const SE_Flag       m_flag;             /**< Some scattering event is under other scattering event, like 'Blend' and 'Coat'. */
     Vector              m_n;                /**< Normal at the point to be evaluated. */

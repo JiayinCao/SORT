@@ -20,6 +20,22 @@
 #include "bssrdf/bssrdf.h"
 #include "sampler/sample.h"
 
+template< class T  >
+static inline const T* pickScattering( const T* const scattering[] , int cnt , float totalWeight , float& pdf ){
+    const T* picked = nullptr;
+    auto r = sort_canonical() * totalWeight;
+    for( auto i = 0u ; i < cnt ; ++i ){
+        const auto weight = scattering[i]->GetWeight().GetIntensity();
+        if( r <= weight || i == cnt - 1 ){
+            picked = scattering[i];
+            pdf = weight / totalWeight;
+            break;
+        }
+        r -= weight;
+    }
+    return picked;
+}
+
 ScatteringEvent::ScatteringEvent( const Intersection& intersection , const SE_Flag flag )
 : m_flag(flag), m_intersection( intersection ){
     m_n = Normalize(intersection.normal);
@@ -66,8 +82,9 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
     if( m_bxdfCnt == 0 )
         return ret;
 
-    const auto bxdf_id = std::min( (int)(bs.t*(float)m_bxdfCnt) , (int)(m_bxdfCnt-1) );
-    const Bxdf* bxdf = m_bxdfs[bxdf_id];
+    // randomly pick a bxdf
+    float bxdf_pdf = 0.0f;
+    const Bxdf* bxdf = pickScattering<Bxdf>( m_bxdfs , m_bxdfCnt , m_bxdfTotalWeight , bxdf_pdf );
 
     // transform the 'wo' from world space to shading coordinate
     auto swo = worldToLocal( wo );
@@ -80,12 +97,13 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
         return ret;
     
     // setup pdf
-    for( auto i = 0u; i < m_bxdfCnt ; ++i )
-        if( i != bxdf_id ){
-            pdf += m_bxdfs[i]->Pdf( wo , wi );
+    for( auto i = 0u; i < m_bxdfCnt ; ++i ){
+        if( m_bxdfs[i] != bxdf )
             ret += m_bxdfs[i]->F(wo,wi) * m_bxdfs[i]->GetWeight();
-        }
-    pdf /= m_bxdfCnt;
+    }
+
+    // update the pdf
+    pdf *= bxdf_pdf;
 
     // transform the direction back
     wi = localToWorld( wi );
@@ -104,9 +122,11 @@ float ScatteringEvent::Pdf_BSDF( const Vector& wo , const Vector& wi ) const{
 }
 
 void ScatteringEvent::Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const{
-    // uniform sampling is used for now, this needs to be revised later for better convergence rate.
-    const auto bssrdf_id = std::min( (int)( sort_canonical() * (float)m_bssrdfCnt) , (int)(m_bssrdfCnt-1) );
-    const auto bssrdf = m_bssrdfs[bssrdf_id];
+    sAssert( m_bxdfTotalWeight > 0.0f , MATERIAL );
+
+    // Randomly pick a bssrdf
+    const Bssrdf* bssrdf = pickScattering<Bssrdf>( m_bssrdfs , m_bssrdfCnt , m_bssrdfTotalWeight , pdf );
+
+    // importance sampling the bssrdf
     bssrdf->Sample_S( scene , wo , po , inter );
-    pdf = 1.0f / (float) m_bssrdfCnt;
 }
