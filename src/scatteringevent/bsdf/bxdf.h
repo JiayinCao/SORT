@@ -115,13 +115,6 @@ public:
         return m_type;
     }
 
-    //! @brief  Whether last importance sampling is for SSS
-    //!
-    //! @return Whether the last importance sampling is for SSS.
-    virtual bool    SamplingSSS() const {
-        return false;
-    }
-
 protected:
     //! @brief Evaluate the BRDF.
     //!

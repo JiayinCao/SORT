@@ -23,44 +23,18 @@
 
 enum SE_Flag : unsigned int{
 	SE_NONE				= 0x00,
-    SE_ADD_BXDF         = 0x01,                                 // Parse bxdf in the material
-    SE_ADD_BSSRDF       = 0x02,                                 // Parse bssrdf in the material
-    SE_ADD_ALL          = ( SE_ADD_BXDF | SE_ADD_BSSRDF ),      // Everything will be parsed in the material
+    SE_EVALUATE_BXDF    = 0x01,                                         // Parse bxdf in the material
+    SE_EVALUATE_BSSRDF  = 0x02,                                         // Parse bssrdf in the material
+    SE_EVALUATE_ALL     = ( SE_EVALUATE_BXDF | SE_EVALUATE_BSSRDF ),    // Everything will be parsed in the material
 
-	SE_REPLACE_BSSRDF	= 0x04,									// Whether to replace BSSRDFD with lambert
-    SE_SUB_EVENT        = 0x08,                                 // Whether this scattering event is a sub-event of others
+	SE_REPLACE_BSSRDF	= 0x04,									        // Whether to replace BSSRDFD with lambert
+    SE_SUB_EVENT        = 0x08,                                         // Whether this scattering event is a sub-event of others
 };
 
 #define SE_MAX_BXDF_COUNT          16      // Maximum number of bxdf in a material is 16 by default
 #define SE_MAX_BSSRDF_COUNT        4       // Maximum number of bssrdf in a material is 4 by default 
 
 class Bxdf;
-
-//! @brief  This data structure holds the result of importance sampling a bxdf.
-struct SR_BxdfResult{
-    Spectrum    m_val;    /**< The evaluated spectrum of the incident and exitant direction with all bxdf in the scattering event. */
-    Vector      m_wi;     /**< The incident direction sampled. */
-    float       m_pdf;    /**< The pdf of sampling the incident direction. */
-};
-
-//! @brief  This data structure holds the result of importance sampling a bssrdf.
-struct SR_BssrdfResult{
-    BSSRDFIntersections m_intersections;    /**< BSSRDF intersection. */
-    float               m_pdf;              /**< The pdf of sampling this brssdf. */
-};
-
-//! @brief  This data structure holds the result of importance sampling a scattering event.
-struct ScatteringResult{
-    bool    m_isSamplingBSSRDF = false;
-
-    union{
-        SR_BssrdfResult m_bssrdfResult;
-        SR_BxdfResult   m_bxdfResult;
-    };
-
-	ScatteringResult() = default;
-	~ScatteringResult() {}
-};
 
 //! @brief  ScatteringEvent is a bsdf/bssrdf holder that could hold multiple of each.
 /**
@@ -78,7 +52,7 @@ public:
     //!
     //! @param intersection         Intersection data of the point to be Evaluated.
     //! @param flag                 Scattering event flag.              
-    ScatteringEvent( const Intersection& intersection , const SE_Flag flag = SE_ADD_ALL );
+    ScatteringEvent( const Intersection& intersection , const SE_Flag flag = SE_EVALUATE_ALL );
 
     //! @brief  Add a new bxdf in the scattering event, there will be at most 16 bxdfs in it.
     //!
@@ -110,13 +84,6 @@ public:
         m_bssrdfs[m_bssrdfCnt++] = bssrdf;
     }
 
-    //! @brief  Randomly sample the scattering event by picking a BXDF/BSSRDF to evaluate.
-    //!
-    //! @param wo   Exitant direction in shading coordinate.
-    //! @param bs   Sample for bsdf that holds some random variables.
-    //! @param pdf  Probability density of the selected direction.
-    inline void     Sample_SE( const Vector& wo , const class BsdfSample& bs , ScatteringResult& sr ) const;
-
     //! @brief Get intersection information of the point at which the bsdf is evaluated.
     //! @return The intersection information of the point at which the bsdf is evaluated.
     inline const Intersection& GetIntersection() const {
@@ -130,11 +97,50 @@ public:
 		return m_flag;
 	}
 
+    //! @brief  Randomly pick between bxdf and bssrdf
+    //!
+    //! @param  flag    Which catagory it picks, it could be SE_EVALUATE_BXDF/SE_EVALUATE_BSSRDF.
+    //! @return         The properbility of picking the bxdf/bssrdf.
+    float       SampleScatteringType( SE_Flag& flag ) const;
+
+    //! @brief Evaluate the value of BSDF based on the incident and outgoing directions.
+    //!
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @return     The Evaluated value of the BSDF.
+    Spectrum    Evaluate_BSDF( const Vector& wo , const Vector& wi ) const;
+
+    //! @brief Importance sampling for the bsdf.
+    //!
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @param bs   Sample for bsdf that holds some random variables.
+    //! @param pdf  Probability density of the selected direction.
+    //! @return     The Evaluated BRDF value.
+    Spectrum    Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf ) const;
+
+    //! @brief Evaluate the pdf of an existance direction given the Incident direction.
+    //!
+    //! @param wo   Exitant direction in shading coordinate.
+    //! @param wi   Incident direction in shading coordinate.
+    //! @param type The specific bxdf type it considers during evaluation.
+    //! @return     The probability of choosing the out-going direction based on the Incident direction.
+    float       Pdf_BSDF( const Vector& wo , const Vector& wi ) const;
+
+    //! @brief  Importance sample the incident direction and position.
+    //!
+    //! @param  scene   The scene where ray tracing happens.
+    //! @param  wo      Extant direction.
+    //! @param  po      Extant position.
+    //! @param  inter   Incident intersection sampled.
+    //! @param  pdf     The pdf of sampling this bssrdf among all bssrdfs.
+    void		Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const;
+
 private:
     const Bxdf*         m_bxdfs[SE_MAX_BXDF_COUNT]      = { nullptr };     /**< All bsdfs in the scattering event. */
-    int                 m_bxdfCnt                       = 0;               /**< Number of bxdfs in the scattering event. */
+    unsigned            m_bxdfCnt                       = 0;               /**< Number of bxdfs in the scattering event. */
     const Bssrdf*       m_bssrdfs[SE_MAX_BSSRDF_COUNT]  = { nullptr };     /**< All bssrdfs in the scattering event. */
-    int                 m_bssrdfCnt                     = 0;               /**< Number of bssrdfs in the scattering event. */
+    unsigned            m_bssrdfCnt                     = 0;               /**< Number of bssrdfs in the scattering event. */
 
     const SE_Flag       m_flag;             /**< Some scattering event is under other scattering event, like 'Blend' and 'Coat'. */
     Vector              m_n;                /**< Normal at the point to be evaluated. */

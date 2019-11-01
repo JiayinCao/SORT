@@ -65,7 +65,7 @@ public:
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
         specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
         clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
-          diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ), samplingSSS(false) {}
+          diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
 
     //! Constructor
     //! @param basecolor        The surface color, usually supplied by texture maps.
@@ -91,7 +91,7 @@ public:
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
           clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness),
-          diffTrans(diffTrans), thinSurface( thinSurface != 0 ), samplingSSS(false) {}
+          diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -113,13 +113,6 @@ public:
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override;
 
-    //! @brief  Whether last importance sampling is for SSS
-    //!
-    //! @return Whether the last importance sampling is for SSS.
-    bool    SamplingSSS() const override {
-        return samplingSSS;
-    }
-
 private:
     const Spectrum  basecolor;          /**< The surface color, usually supplied by texture maps. */
     const float     metallic;           /**< The metallic-ness (0 = dielectric, 1 = metallic). This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color. */
@@ -136,8 +129,6 @@ private:
     const float     flatness;           /**< Blending factor between diffuse and fakeSS model. */
     const Spectrum  scatterDistance;    /**< Distance of scattering in SSS. */
     const bool      thinSurface;        /**< Whether the surface is thin surface. */
-
-    mutable bool    samplingSSS;        /**< Whether last importance sampling is for SSS. */
 
     //! @brief      Get R0 with relative IOR.
     //!

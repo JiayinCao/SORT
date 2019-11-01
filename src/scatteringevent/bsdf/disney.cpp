@@ -282,8 +282,6 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     const auto dr_w = diffuse_reflection_weight * inv_total_weight + st_w;
     //const auto dt_w = diffuse_transmission_weight * inv_total_weight + dr_w;
 
-    samplingSSS = false;
-    
     const GGX ggx(roughness / aspect, roughness * aspect);
     const auto r = sort_canonical();
     if (r <= cc_w) {
@@ -315,7 +313,7 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     }else if (r <= dr_w) {
         // albedo doesn't matter here, we are only interested in light direction.
         if( hasSSS ){
-            samplingSSS = true;
+            // it is intentional to leave it empty
         }else{
             wi = CosSampleHemisphere(sort_canonical(), sort_canonical());
         }

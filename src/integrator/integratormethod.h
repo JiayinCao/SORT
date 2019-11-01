@@ -19,12 +19,20 @@
 
 #include "integrator.h"
 
+
 // evaluate direct lighting
+Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Scene& scene , const Light* light ,
+                            const LightSample& ls ,const BsdfSample& bs );
+// uniformly evaluate direct illumination from one light
+Spectrum    SampleOneLight( const ScatteringEvent& se , const Ray& r, const Intersection& inter, const Scene& scene);
+
+
+
+
+
+// to be deprecated
 Spectrum    EvaluateDirect( const Bsdf* bsdf , const Ray& r , const Scene& scene , const Light* light , const Intersection& ip ,
                             const LightSample& ls ,const BsdfSample& bs , BXDF_TYPE type = BXDF_ALL );
-
 Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const class Light* light , const class Intersection& ip ,
                             const LightSample& ls , const BsdfSample& bs , BXDF_TYPE type = BXDF_ALL , bool replaceSSS = false );
-
-// uniformly evaluate direct illumination from one light
 Spectrum    SampleOneLight( const Bsdf* bsdf , const Ray& r, const Intersection& inter, const Scene& scene);
