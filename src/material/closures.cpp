@@ -36,6 +36,7 @@
 #include "scatteringevent/bsdf/distributionbrdf.h"
 #include "scatteringevent/bsdf/fabric.h"
 #include "scatteringevent/scatteringevent.h"
+#include "scatteringevent/bssrdf/bssrdf.h"
 
 using namespace OSL;
 
@@ -188,7 +189,7 @@ namespace {
             if( !mfp.IsBlack() ){
                 const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans) * comp->w * w;
                 if( !sssBaseColor.IsBlack() )
-                    bssrdf = SORT_MALLOC(DisneyBssrdf)( &intersection, diffuseWeight * sssBaseColor, params.scatterDistance , 1.5f, 1.0f);
+                    bssrdf = SORT_MALLOC(DisneyBssrdf)( &intersection, diffuseWeight * sssBaseColor, params.scatterDistance );
 
                 #ifdef SSS_REPLACE_WITH_LAMBERT
                 if( addExtraLambert && !baseColor.IsBlack() )
@@ -235,7 +236,7 @@ namespace {
 			if (!mfp.IsBlack()) {
 				const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans) * comp->w * w;
 				if (!sssBaseColor.IsBlack())
-					se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), diffuseWeight * sssBaseColor, params.scatterDistance, 1.5f, 1.0f) );
+					se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), diffuseWeight * sssBaseColor, params.scatterDistance) );
 
 #ifdef SSS_REPLACE_WITH_LAMBERT
 				if (addExtraLambert && !baseColor.IsBlack())
@@ -700,6 +701,35 @@ namespace {
 			se.AddBxdf(SORT_MALLOC(Fabric)(params, w * comp->w));
 		}
     };
+
+    struct Closure_SSS : public Closure_Base {
+        static constexpr int    ClosureID = CLOSURE_SSS;
+
+        static const char* GetName() {
+            return "subsurfaceScattering";
+        }
+
+        static void Register(ShadingSystem* shadingsys) {
+            BuiltinClosures closure = { GetName(), ClosureID,{
+                CLOSURE_COLOR_PARAM(DisneyBssrdf::Params, baseColor),
+                CLOSURE_VECTOR_PARAM(DisneyBssrdf::Params, scatterDistance),
+                CLOSURE_VECTOR_PARAM(DisneyBssrdf::Params, n),
+                CLOSURE_FINISH_PARAM(DisneyBssrdf::Params)
+            } };
+            shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
+        }
+
+		// to be deprecated
+        void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
+            //const auto& params = *comp->as<Fabric::Params>();
+            //bsdf->AddBxdf(SORT_MALLOC(Fabric)(params, w * comp->w));
+        }
+
+		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+            const auto& params = *comp->as<DisneyBssrdf::Params>();
+            se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), params.baseColor, params.scatterDistance) );
+		}
+    };
 }
 
 template< typename T >
@@ -731,6 +761,7 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys) {
     registerClosure<Closure_FourierBRDF>(shadingsys);
     registerClosure<Closure_DistributionBRDF>(shadingsys);
     registerClosure<Closure_Fabric>(shadingsys);
+    registerClosure<Closure_SSS>(shadingsys);
 }
 
 // to be deprecated

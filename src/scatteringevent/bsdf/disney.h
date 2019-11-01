@@ -169,14 +169,24 @@ protected:
  */
 class DisneyBssrdf : public SeparableBssrdf {
 public:
+    struct Params{
+        RGBSpectrum     baseColor;
+        RGBSpectrum     scatterDistance;
+        Vector          n;
+    };
+
+    //! @brief  Constructor of DisneyBssrdf from shader input.
+    //!
+    //! @param  intersect   Intersection at the point of exit.
+    //! @param  param       Parameter set from shader
+    DisneyBssrdf( const Intersection* intersect , const Params& params );
+
     //! @brief  Constructor of DisneyBssrdf.
     //!
     //! @param  intersect   Intersection information at exitant point.
     //! @param  R           Reflectance of the material.
     //! @param  mfp         Spectrum dependent mean free path.
-    //! @param  ior_i       Index of refraction inside the surface.
-    //! @param  ior_e       Index of refraction outside the surface.
-    DisneyBssrdf( const Intersection* intersect , const Spectrum& R , const Spectrum& mfp , float ior_i , float ior_e );
+    DisneyBssrdf( const Intersection* intersect , const Spectrum& R , const Spectrum& mfp );
 
     //! @brief  Evaluate the BSSRDF.
     //!

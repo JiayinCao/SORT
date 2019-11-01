@@ -24,8 +24,8 @@
 #include "core/memory.h"
 #include "core/scene.h"
 
-SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const float ior_i , const float ior_e )
-    : R(R) , Bssrdf( ior_i , ior_e ) , intersection(intersection) , channels(0) {
+SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const Intersection* intersection )
+    : R(R) , intersection(intersection) , channels(0) {
     nn = Normalize(intersection->normal);
     btn = Normalize(Cross( nn , intersection->tangent ));
     tn = Normalize(Cross( btn , nn ));

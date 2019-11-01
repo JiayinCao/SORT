@@ -51,11 +51,8 @@ struct BSSRDFIntersections{
  */
 class Bssrdf{
 public:
-    //! @brief  Constructor
-    //!
-    //! @param  ior_i       Index of refraction beneath the surface.
-    //! @param  ior_o       Index of refraction above the surface.
-    Bssrdf( const float ior_i , const float ior_e ):ior_i(ior_i),ior_e(ior_e){}
+    //! @brief  Default constructor
+    Bssrdf() = default;
 
     //! @brief  Empty default destructor
     virtual ~Bssrdf() = default;
@@ -85,10 +82,6 @@ public:
     //! @return         The weight of the bssrdf, this will affect both of the final contribution and the pdf of picking 
     //!                 the bssrdf in a scattering event.
     inline  Spectrum    GetWeight() const { return 1.0f; }
-
-protected:
-    const float ior_i;  /**< Index of refraction inside the surface. */
-    const float ior_e;  /**< Index of refraction outside the surface. */
 };
 
 //! @brief  Separable BSSRDF implementation.
@@ -102,7 +95,7 @@ protected:
  */
 class SeparableBssrdf : public Bssrdf{
 public:
-    SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const float ior_i , const float ior_e );
+    SeparableBssrdf( const Spectrum& R , const Intersection* intersection );
 
     //! @brief  Importance sample the incident position.
     //!

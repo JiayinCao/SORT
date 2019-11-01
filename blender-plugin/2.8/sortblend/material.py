@@ -1831,6 +1831,52 @@ class SORTNode_Material_Cloth(SORTShadingNode):
         layout.prop(self, 'brdf_type', text='BRDF Type', expand=True)
 
 @SORTShaderNodeTree.register_node('Materials')
+class SORTNode_Material_SSS(SORTShadingNode):
+    bl_label = 'Subsurface Scattering'
+    bl_idname = 'SORTNode_Material_SSS'
+    bl_width_min = 300
+    osl_shader = '''
+        shader MaterialSSS(  color BaseColor = @ ,
+                             color ScatterDistance = @ ,
+                             vector Normal = @ ,
+                             output closure color Result = color(0) ){
+            Result = subsurfaceScattering( BaseColor , ScatterDistance , Normal );
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketColor' , 'Base Color' )
+        self.inputs.new( 'SORTNodeSocketPositiveFloatVector' , 'Scatter Distance')
+        self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+
+        self.inputs['Scatter Distance'].default_value = ( 0.2 , 0.1 , 0.05 )
+    def serialize_prop(self, fs):
+        fs.serialize( 3 )
+        fs.serialize( self.inputs['Base Color'].export_osl_value() )
+        fs.serialize( self.inputs['Scatter Distance'].export_osl_value() )
+        fs.serialize( self.inputs['Normal'].export_osl_value() )
+
+@SORTShaderNodeTree.register_node('Materials')
+class SORTNode_Material_Add(SORTShadingNode):
+    bl_label = 'Add'
+    bl_idname = 'SORTNode_Material_Add'
+    osl_shader = '''
+        shader MaterialAdd(  closure color Surface0 = @ ,
+                             closure color Surface1 = @ ,
+                             output closure color Result = color(0) ){
+            Result = Surface0 + Surface1;
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface0' )
+        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface1' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 2 )
+        fs.serialize( self.inputs['Surface0'].export_osl_value() )
+        fs.serialize( self.inputs['Surface1'].export_osl_value() )
+
+@SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Blend(SORTShadingNode):
     bl_label = 'Blend'
     bl_idname = 'SORTNode_Material_Blend'
@@ -1852,26 +1898,6 @@ class SORTNode_Material_Blend(SORTShadingNode):
         fs.serialize( self.inputs['Surface0'].export_osl_value() )
         fs.serialize( self.inputs['Surface1'].export_osl_value() )
         fs.serialize( self.inputs['Factor'].export_osl_value() )
-
-@SORTShaderNodeTree.register_node('Materials')
-class SORTNode_Material_Add(SORTShadingNode):
-    bl_label = 'Add'
-    bl_idname = 'SORTNode_Material_Add'
-    osl_shader = '''
-        shader MaterialAdd(  closure color Surface0 = @ ,
-                             closure color Surface1 = @ ,
-                             output closure color Result = color(0) ){
-            Result = Surface0 + Surface1;
-        }
-    '''
-    def init(self, context):
-        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface0' )
-        self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface1' )
-        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
-    def serialize_prop(self, fs):
-        fs.serialize( 2 )
-        fs.serialize( self.inputs['Surface0'].export_osl_value() )
-        fs.serialize( self.inputs['Surface1'].export_osl_value() )
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_DoubleSided(SORTShadingNode):
