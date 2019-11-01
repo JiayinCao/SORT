@@ -21,7 +21,9 @@
 #include "sampler/sample.h"
 
 template< class T  >
-static inline const T* pickScattering( const T* const scattering[] , int cnt , float totalWeight , float& pdf ){
+static inline const T* pickScattering( const T* const scattering[] , unsigned int cnt , float totalWeight , float& pdf ){
+	sAssert( totalWeight > 0.0f , MATERIAL );
+
     const T* picked = nullptr;
     auto r = sort_canonical() * totalWeight;
     for( auto i = 0u ; i < cnt ; ++i ){
@@ -56,13 +58,7 @@ Vector ScatteringEvent::localToWorld( const Vector& v ) const{
 }
 
 float ScatteringEvent::SampleScatteringType( SE_Flag& flag ) const{
-    float bxdf_weight = 0.0f , bssrdf_weight = 0.0f;
-    for( auto i = 0u ; i < m_bxdfCnt ; ++i )
-        bxdf_weight += m_bxdfs[i]->GetWeight().GetIntensity();
-    for( auto i = 0u ; i < m_bssrdfCnt ; ++i )
-        bssrdf_weight += m_bssrdfs[i]->GetWeight().GetIntensity();
-
-    const auto pdf_bxdf = bxdf_weight / ( bxdf_weight + bssrdf_weight );
+    const auto pdf_bxdf = m_bxdfTotalWeight / ( m_bxdfTotalWeight + m_bssrdfTotalWeight );
     const auto r = sort_canonical();
     flag = ( r < pdf_bxdf ) ? SE_EVALUATE_BXDF : SE_EVALUATE_BSSRDF;
     return flag == SE_EVALUATE_BXDF ? pdf_bxdf : 1.0f - pdf_bxdf;
@@ -92,7 +88,7 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
     // sample the direction
     ret = bxdf->Sample_F( swo , wi , bs , &pdf ) * bxdf->GetWeight();
 
-    // if there is no properbility of sampling that direction , just return 0.0f
+    // if there is no probability of sampling that direction , just return 0.0f
     if( pdf == 0.0f )
         return ret;
     
@@ -122,8 +118,6 @@ float ScatteringEvent::Pdf_BSDF( const Vector& wo , const Vector& wi ) const{
 }
 
 void ScatteringEvent::Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const{
-    sAssert( m_bxdfTotalWeight > 0.0f , MATERIAL );
-
     // Randomly pick a bssrdf
     const Bssrdf* bssrdf = pickScattering<Bssrdf>( m_bssrdfs , m_bssrdfCnt , m_bssrdfTotalWeight , pdf );
 
