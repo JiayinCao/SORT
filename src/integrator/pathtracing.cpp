@@ -78,7 +78,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
 		inter.primitive->GetMaterial()->UpdateScatteringEvent(se);
 
         SE_Flag scattering_type_flag;
-        float pdf_scattering_type = se.SampleScatteringType(scattering_type_flag);
+        auto pdf_scattering_type = se.SampleScatteringType(scattering_type_flag);
 
         if( scattering_type_flag & SE_EVALUATE_BXDF ){
             // evaluate the light
@@ -115,7 +115,6 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                 
                 L += total_bssrdf * throughput / pdf_scattering_type;
             }
-            return L;
         }
 
         // pick another time for the next path
@@ -129,7 +128,6 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             // sample the next direction using bsdf
             float       path_pdf;
             Vector      wi;
-            BXDF_TYPE   bxdf_type;
             Spectrum f;
             BsdfSample  _bsdf_sample = BsdfSample(true);
             f = se.Sample_BSDF( -r.m_Dir , wi , _bsdf_sample , path_pdf );
@@ -163,7 +161,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     // Create a temporary lambert model to account the cos factor
                     // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
                     // there will be a discontinuity introduced when mean free path approaches zero.
-                    ScatteringEvent se(pInter->intersection);
+                    ScatteringEvent se(pInter->intersection, SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ));
                     se.AddBxdf( SORT_MALLOC(Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
 
                     // Counts the light from indirect illumination recursively
