@@ -38,7 +38,7 @@ unsigned Bsdf::NumComponents( BXDF_TYPE type ) const{
 }
 
 void Bsdf::AddBxdf( const Bxdf* bxdf ){
-    if( m_bxdfCount == MAX_BXDF_COUNT || bxdf == 0 || bxdf->GetWeight().IsBlack() ) return;
+    if( m_bxdfCount == MAX_BXDF_COUNT || bxdf == 0 || bxdf->GetEvalWeight().IsBlack() ) return;
     m_bxdf[m_bxdfCount++] = bxdf ;
 }
 
@@ -50,7 +50,7 @@ Spectrum Bsdf::f( const Vector& wo , const Vector& wi , BXDF_TYPE type ) const{
 
     for( unsigned i = 0 ; i < m_bxdfCount ; i++ ){
         if( m_bxdf[i]->MatchFlag( type ) )
-            r += m_bxdf[i]->F( swo , swi ) * m_bxdf[i]->GetWeight();
+            r += m_bxdf[i]->F( swo , swi ) * m_bxdf[i]->GetEvalWeight();
     }
 
     return r;
@@ -93,7 +93,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     auto swo = worldToLocal( wo );
 
     // sample the direction
-    auto t = bxdf->Sample_F( swo , wi , bs , pdf ) * bxdf->GetWeight();
+    auto t = bxdf->Sample_F( swo , wi , bs , pdf ) * bxdf->GetEvalWeight();
 
     // if there is no properbility of sampling that direction , just return 0.0f
     if( pdf && *pdf == 0.0f ) return 0.0f;
@@ -109,7 +109,7 @@ Spectrum Bsdf::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , 
 
     for(auto i = 0u ; i < m_bxdfCount ; ++i )
         if( bxdf != m_bxdf[i] && m_bxdf[i]->MatchFlag(type) )
-            t += m_bxdf[i]->F(wo,wi) * m_bxdf[i]->GetWeight();
+            t += m_bxdf[i]->F(wo,wi) * m_bxdf[i]->GetEvalWeight();
 
     // transform the direction back
     wi = localToWorld( wi );

@@ -27,7 +27,7 @@ static inline const T* pickScattering( const T* const scattering[] , unsigned in
     const T* picked = nullptr;
     auto r = sort_canonical() * totalWeight;
     for( auto i = 0u ; i < cnt ; ++i ){
-        const auto weight = scattering[i]->GetWeight().GetIntensity();
+        const auto weight = scattering[i]->GetSampleWeight();
         if( r <= weight || i == cnt - 1 ){
             picked = scattering[i];
             pdf = weight / totalWeight;
@@ -58,7 +58,7 @@ Vector ScatteringEvent::localToWorld( const Vector& v ) const{
 }
 
 float ScatteringEvent::SampleScatteringType( SE_Flag& flag ) const{
-    const auto pdf_bxdf = m_bxdfTotalWeight / ( m_bxdfTotalWeight + m_bssrdfTotalWeight );
+    const auto pdf_bxdf = m_bxdfTotalSampleWeight / ( m_bxdfTotalSampleWeight + m_bssrdfTotalSampleWeight );
     const auto r = sort_canonical();
     flag = ( r < pdf_bxdf ) ? SE_EVALUATE_BXDF : SE_EVALUATE_BSSRDF;
     return flag == SE_EVALUATE_BXDF ? pdf_bxdf : 1.0f - pdf_bxdf;
@@ -69,7 +69,7 @@ Spectrum ScatteringEvent::Evaluate_BSDF( const Vector& wo , const Vector& wi ) c
     const auto swi = worldToLocal( wi );
     Spectrum r;
     for( auto i = 0u ; i < m_bxdfCnt ; ++i )
-        r += m_bxdfs[i]->F( swo , swi ) * m_bxdfs[i]->GetWeight();
+        r += m_bxdfs[i]->F( swo , swi ) * m_bxdfs[i]->GetEvalWeight();
     return r;
 }
 
@@ -80,13 +80,13 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
 
     // randomly pick a bxdf
     float bxdf_pdf = 0.0f;
-    const Bxdf* bxdf = pickScattering<Bxdf>( m_bxdfs , m_bxdfCnt , m_bxdfTotalWeight , bxdf_pdf );
+    const Bxdf* bxdf = pickScattering<Bxdf>( m_bxdfs , m_bxdfCnt , m_bxdfTotalSampleWeight , bxdf_pdf );
 
     // transform the 'wo' from world space to shading coordinate
     auto swo = worldToLocal( wo );
 
     // sample the direction
-    ret = bxdf->Sample_F( swo , wi , bs , &pdf ) * bxdf->GetWeight();
+    ret = bxdf->Sample_F( swo , wi , bs , &pdf ) * bxdf->GetEvalWeight();
 
     // if there is no probability of sampling that direction , just return 0.0f
     if( pdf == 0.0f )
@@ -95,7 +95,7 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
     // setup pdf
     for( auto i = 0u; i < m_bxdfCnt ; ++i ){
         if( m_bxdfs[i] != bxdf )
-            ret += m_bxdfs[i]->F(wo,wi) * m_bxdfs[i]->GetWeight();
+            ret += m_bxdfs[i]->F(wo,wi) * m_bxdfs[i]->GetEvalWeight();
     }
 
     // update the pdf
@@ -113,13 +113,13 @@ float ScatteringEvent::Pdf_BSDF( const Vector& wo , const Vector& wi ) const{
 
     auto pdf = 0.0f;
     for( auto i = 0u ; i < m_bxdfCnt ; ++i )
-        pdf += m_bxdfs[i]->Pdf( lwo , lwi );
-    return pdf / m_bxdfCnt;
+        pdf += m_bxdfs[i]->Pdf( lwo , lwi ) * m_bxdfs[i]->GetSampleWeight();
+    return pdf;
 }
 
 void ScatteringEvent::Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const{
     // Randomly pick a bssrdf
-    const Bssrdf* bssrdf = pickScattering<Bssrdf>( m_bssrdfs , m_bssrdfCnt , m_bssrdfTotalWeight , pdf );
+    const Bssrdf* bssrdf = pickScattering<Bssrdf>( m_bssrdfs , m_bssrdfCnt , m_bssrdfTotalSampleWeight , pdf );
 
     // importance sampling the bssrdf
     bssrdf->Sample_S( scene , wo , po , inter );

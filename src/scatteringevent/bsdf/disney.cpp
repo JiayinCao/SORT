@@ -31,9 +31,14 @@ constexpr static float inv_eta = 1.0f / eta;   // hard coded reciprocal of IOR r
 
 // 8.0f bears no physical law, it is purely just to increase the properbility to avoid fireflies.
 // Microfacet specular reflection is easily the source of fireflies, scaling the value up will efficiently avoid fireflies caused by it.
-float specularPdfScale( const float roughness ){
+static inline float specularPdfScale( const float roughness ){
     constexpr static float specular_pdf_scale = 8.0f;
     return specular_pdf_scale * ( 1.0f - roughness );
+}
+
+//! Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, section 3.1
+static inline float SchlickR0FromEta( float rROI ){
+    return SQR( ( rROI - 1.0f ) / ( rROI + 1.0f ) );
 }
 
 constexpr float burley_max_cdf_calc( float max_r_d ){
@@ -70,12 +75,16 @@ float ClearcoatGGX::G1(const Vector& v) const {
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
 }
 
-DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Params& params )
-:DisneyBssrdf( intersection , params.baseColor , params.scatterDistance ){
+DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Params& params , const Spectrum& ew )
+:DisneyBssrdf( intersection , params.baseColor , params.scatterDistance , ew , ew.GetIntensity() ){
 }
 
-DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp )
-:SeparableBssrdf( R , intersection ){
+DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew )
+:DisneyBssrdf( intersection , R , mfp , ew , ew.GetIntensity() ){
+}
+
+DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew , const float sw )
+:SeparableBssrdf( R , intersection , ew , sw ){
     // Approximate Reflectance Profiles for Efficient Subsurface Scattering, Eq 6
     const auto s = Spectrum(1.9f) - R + 3.5f * ( R - Spectrum( 0.8f ) ) * ( R - Spectrum( 0.8f ) );
     
@@ -382,9 +391,6 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
         // albedo doesn't matter here, we are only interested in light direction.
         if( hasSSS ){
             // No PDF should be returned, otherwise it will introduce bugs!!
-
-            // The following line is clearly buggy, should be removed in the future.
-            total_pdf += diffuse_reflection_weight;
         }else{
             total_pdf += diffuse_reflection_weight * CosHemispherePdf(wi);
         }
@@ -395,4 +401,28 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     }
 
     return total_pdf / total_weight;
+}
+
+float DisneyBRDF::Evaluate_PDF( const Params& params ){
+    const auto hasSSS = !params.scatterDistance.IsBlack();
+
+    // If there is no SSS, there will be 100% chance that a BXDF will be chosen.
+    if( !hasSSS )
+        return 1.0f;
+
+    const auto aspect = sqrt(sqrt(1.0f - params.anisotropic * 0.9f));
+    const auto luminance = params.baseColor.GetIntensity();
+    const auto Ctint = luminance > 0.0f ? params.baseColor * (1.0f / luminance) : Spectrum(1.0f);
+    const auto min_specular_amount = SchlickR0FromEta(ior_ex / ior_in);
+    const auto Cspec0 = slerp(params.specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, params.specularTint), params.baseColor, params.metallic);
+
+    const auto clearcoat_weight = params.clearcoat * 0.04f;
+    const auto specular_reflection_weight = Cspec0.GetIntensity() * specularPdfScale( params.roughness );
+    const auto specular_transmission_weight = luminance * (1.0f - params.metallic) * params.specTrans;
+    const auto diffuse_reflection_weight = luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * (params.thinSurface ? (1.0f - params.diffTrans) : 1.0f);
+    const auto diffuse_transmission_weight = params.thinSurface ? luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * params.diffTrans : 0.0f;
+    
+    const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
+
+    return 1.0f - diffuse_reflection_weight / total_weight;
 }

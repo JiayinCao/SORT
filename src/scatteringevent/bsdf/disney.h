@@ -60,9 +60,20 @@ public:
     //! Constructor
     //!
     //! @param params           All parameters.
-    //! @param weight           Weight of the BXDF
-    DisneyBRDF( const Params& param , const Spectrum& weight)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
+    //! @param ew               Evaluation weight of the BXDF.
+    //! @param sw               Sampling weight of the BXDF.
+    DisneyBRDF( const Params& param , const Spectrum& ew , const float sw)
+        : Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
+        specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
+        clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
+          diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
+    
+    //! Constructor
+    //!
+    //! @param params           All parameters.
+    //! @param ew               Evaluation weight of the BXDF.
+    DisneyBRDF( const Params& param , const Spectrum& ew)
+        : Bxdf(ew, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
         specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
         clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
           diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
@@ -83,12 +94,39 @@ public:
     //! @param flatness         A factor for blending diffuse and fakeSS for thin surface.
     //! @param diffTrans        A blending factor for diffuse transmission and reflectance model.
     //! @param thinSurface      Whether the surface is a thin surface.
-    //! @param weight           Weight of the BXDF.
+    //! @param ew               Evaluation weight of the BXDF.
+    //! @param sw               Sampling weight of the BXDF.
     //! @param n                Normal in shading coordinate.
     DisneyBRDF( const Spectrum& basecolor , float metallic , float specular , float specularTint , float roughness ,
                float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance ,
-               float flatness , float diffTrans , int thinSurface , const Spectrum& weight, const Vector& n )
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
+               float flatness , float diffTrans , int thinSurface , const Spectrum& ew, const float sw, const Vector& n )
+        : Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
+          specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
+          clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness),
+          diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}
+
+    //! Constructor
+    //! @param basecolor        The surface color, usually supplied by texture maps.
+    //! @param metallic         This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color.
+    //! @param specular         Direction-hemisphere reflection for specular.
+    //! @param speculatTint     A concession for artistic control that tints incident specular towards the base color.
+    //! @param roughness        Surface roughness, controls both diffuse and specular response.
+    //! @param anisotropic      Degree of anisotropy. This controls the aspect ratio of the specular highlight. (0 = isotropic, 1 = maximally anisotropic.)
+    //! @param sheen            An additional grazing component, primarily intended for cloth.
+    //! @param sheenTint        Amount to tint sheen towards base color.
+    //! @param clearcoat        A second, special-purpose specular lobe.
+    //! @param clearcoatGloss   Controls clearcoat glossiness (0 = a “satin” appearance, 1 = a “gloss” appearance)
+    //! @param specTrans        A blending factor controlling how transparent the surface is.
+    //! @param scatterDistance  The distance of scattering beneath the surface, a positive value indicates there is SSS.
+    //! @param flatness         A factor for blending diffuse and fakeSS for thin surface.
+    //! @param diffTrans        A blending factor for diffuse transmission and reflectance model.
+    //! @param thinSurface      Whether the surface is a thin surface.
+    //! @param ew               Evaluation weight of the BXDF.
+    //! @param n                Normal in shading coordinate.
+    DisneyBRDF( const Spectrum& basecolor , float metallic , float specular , float specularTint , float roughness ,
+               float anisotropic , float sheen , float sheenTint , float clearcoat , float clearcoatGloss , float specTrans , float scatterDistance ,
+               float flatness , float diffTrans , int thinSurface , const Spectrum& ew, const Vector& n )
+        : Bxdf(ew, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, true) , basecolor(basecolor), metallic(metallic),
           specular(specular), specularTint(specularTint), roughness(roughness), anisotropic(anisotropic), sheen(sheen), sheenTint(sheenTint),
           clearcoat(clearcoat), clearcoatGloss(clearcoatGloss), specTrans(specTrans), scatterDistance(scatterDistance), flatness(flatness),
           diffTrans(diffTrans), thinSurface( thinSurface != 0 ) {}
@@ -113,6 +151,12 @@ public:
     //! @return     The probability of choosing the out-going direction based on the Incident direction.
     float pdf( const Vector& wo , const Vector& wi ) const override;
 
+    //! @brief Helper function to evaluate the sampline weight of disney brdf.
+    //!
+    //! @param  params      Parameters used to construct the class instance.
+    //! @return             The properbility of sampling the bxdf, not the bssrdf.
+    static float Evaluate_PDF( const Params& params );
+
 private:
     const Spectrum  basecolor;          /**< The surface color, usually supplied by texture maps. */
     const float     metallic;           /**< The metallic-ness (0 = dielectric, 1 = metallic). This is a linear blend between two different models. The metallic model has no diffuse component and also has a tinted incident specular, equal to the base color. */
@@ -129,16 +173,6 @@ private:
     const float     flatness;           /**< Blending factor between diffuse and fakeSS model. */
     const Spectrum  scatterDistance;    /**< Distance of scattering in SSS. */
     const bool      thinSurface;        /**< Whether the surface is thin surface. */
-
-    //! @brief      Get R0 with relative IOR.
-    //!
-    //! Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, section 3.1
-    //!
-    //! @param rROI     Relative index of refraction, IOR_ouside / IOR_inside
-    //! @return         Evaluated R0 for Fresnel
-    inline float SchlickR0FromEta( float rROI ) const{
-        return SQR( ( rROI - 1.0f ) / ( rROI + 1.0f ) );
-    }
 };
 
 //! @brief  Clearcoat GGX NDF.
@@ -177,16 +211,28 @@ public:
 
     //! @brief  Constructor of DisneyBssrdf from shader input.
     //!
-    //! @param  intersect   Intersection at the point of exit.
-    //! @param  param       Parameter set from shader
-    DisneyBssrdf( const Intersection* intersect , const Params& params );
+    //! @param  intersection    Intersection at the point of exit.
+    //! @param  param           Parameter set from shader.
+    //! @param  weight          Evaluation weight.
+    DisneyBssrdf( const Intersection* intersection , const Params& params , const Spectrum& weight );
 
     //! @brief  Constructor of DisneyBssrdf.
     //!
-    //! @param  intersect   Intersection information at exitant point.
-    //! @param  R           Reflectance of the material.
-    //! @param  mfp         Spectrum dependent mean free path.
-    DisneyBssrdf( const Intersection* intersect , const Spectrum& R , const Spectrum& mfp );
+    //! @param  intersection    Intersection information at exitant point.
+    //! @param  R               Reflectance of the material.
+    //! @param  mfp             Spectrum dependent mean free path.
+    //! @param  ew              Evaluation weight.
+    //! @param  sw              Sampling weight.
+    DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew );
+
+    //! @brief  Constructor of DisneyBssrdf.
+    //!
+    //! @param  intersection    Intersection information at exitant point.
+    //! @param  R               Reflectance of the material.
+    //! @param  mfp             Spectrum dependent mean free path.
+    //! @param  ew              Evaluation weight.
+    //! @param  sw              Sampling weight.
+    DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew , const float sw);
 
     //! @brief  Evaluate the BSSRDF.
     //!

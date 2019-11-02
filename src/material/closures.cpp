@@ -154,51 +154,12 @@ namespace {
 		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
             auto params = *comp->as<DisneyBRDF::Params>();
-            auto& mfp = params.scatterDistance;
-
-            // Ignore SSS if necessary
-            if( replaceBSSRDF )
-                mfp = 0.0f;
-            
-            auto sssBaseColor = params.baseColor;
-            
-            #ifdef SSS_REPLACE_WITH_LAMBERT
-            constexpr float delta = 0.0001f;
-            bool addExtraLambert = false;
-            auto baseColor = params.baseColor;
-            for( int i = 0 ; i < SPECTRUM_SAMPLE ; ++i ){
-                // If the reflectance is zero or the mean free path is too small, switch back to lambert.
-                if( params.baseColor[i] == 0.0f ){
-                    mfp[i] = 0.0f;
-                    continue;
-                }
-
-                // if the mean free distance is too small, replace it with lambert.
-                if( mfp[i] < delta ){
-                    mfp[i] = 0.0f;
-                    sssBaseColor[i] = 0.0f;
-                    addExtraLambert = true;
-                }else{
-                    baseColor[i] = 0.0f;
-                }
-            }
-            #endif
-
             bsdf->AddBxdf(SORT_MALLOC(DisneyBRDF)(params, w * comp->w));
-
-            if( !mfp.IsBlack() ){
-                const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans) * comp->w * w;
-                if( !sssBaseColor.IsBlack() )
-                    bssrdf = SORT_MALLOC(DisneyBssrdf)( &intersection, diffuseWeight * sssBaseColor, params.scatterDistance );
-
-                #ifdef SSS_REPLACE_WITH_LAMBERT
-                if( addExtraLambert && !baseColor.IsBlack() )
-                    bsdf->AddBxdf(SORT_MALLOC(Lambert)( baseColor * diffuseWeight , FULL_WEIGHT , params.n ));
-                #endif
-            }
         }
 
 		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+            const auto weight = comp->w * w;
+            const auto sample_weight = ( weight[0] + weight[1] + weight[2] ) * 0.333f;
 			auto params = *comp->as<DisneyBRDF::Params>();
 			auto& mfp = params.scatterDistance;
 
@@ -230,19 +191,24 @@ namespace {
 				}
 			}
 #endif
-
-			se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, w * comp->w));
-
 			if (!mfp.IsBlack()) {
-				const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans) * comp->w * w;
-				if (!sssBaseColor.IsBlack())
-					se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), diffuseWeight * sssBaseColor, params.scatterDistance) );
+                const auto bxdf_sampling_weight = DisneyBRDF::Evaluate_PDF( params );
+
+                if( bxdf_sampling_weight > 0.0f )
+                    se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight, bxdf_sampling_weight * sample_weight));
+
+                const auto diffuseRatio = (1.0f - params.metallic) * (1.0 - params.specTrans);
+				const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans) * weight;
+				if (!sssBaseColor.IsBlack() && bxdf_sampling_weight < 1.0f )
+					se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight ) );
 
 #ifdef SSS_REPLACE_WITH_LAMBERT
 				if (addExtraLambert && !baseColor.IsBlack())
 					se.AddBxdf(SORT_MALLOC(Lambert)(baseColor * diffuseWeight, FULL_WEIGHT, params.n));
 #endif
-			}
+			}else{
+                se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight));
+            }
 		}
     };
 
@@ -727,7 +693,7 @@ namespace {
 
 		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
             const auto& params = *comp->as<DisneyBssrdf::Params>();
-            se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), params.baseColor, params.scatterDistance) );
+            se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), params.baseColor, params.scatterDistance, w * comp->w) );
 		}
     };
 }

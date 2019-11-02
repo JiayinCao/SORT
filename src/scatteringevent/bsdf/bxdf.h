@@ -19,6 +19,7 @@
 
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
+#include "scatteringevent/scatteringunit.h"
 
 //! @brief BXDF type.
 enum BXDF_TYPE{
@@ -42,23 +43,23 @@ enum BXDF_TYPE{
  * local coordinate in the fact that its up axis could differ from geometry normal, named as a shading normal, usually
  * taken from normal map.
  */
-class   Bxdf {
+class   Bxdf : public ScatteringUnit {
 public:
     //! @brief  Constructor.
     //!
-    //! @param w        Weight of the bxdf, this is for BSDF. It won't affect the evaluated BXDF value.
+    //! @param ew       Evaluation weight of the bxdf.
     //! @param type     Type of the bxdf, currently not wisely used.
     Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n, bool doubleSided = false);
 
+    //! @brief  Constructor.
+    //!
+    //! @param ew       Evaluation weight of the bxdf.
+    //! @param sw       Sampling weight of the bxdf;
+    //! @param type     Type of the bxdf, currently not wisely used.
+    Bxdf(const Spectrum& w, const float sw, BXDF_TYPE type, Vector n, bool doubleSided = false);
+
     //! @brief  Virtual destructor.
     virtual ~Bxdf() = default;
-
-    //! Get weight of this BXDF.
-    //!
-    //! @return         The weight for the BRDF.
-    const Spectrum& GetWeight() const {
-        return m_weight;
-    }
 
     //! Evaluate the BXDF.
     //!
@@ -200,7 +201,6 @@ protected:
         return !(PointingUp(wi) ^ PointingUp(wo));
     }
 
-    Spectrum    m_weight = 1.0f;            /**< The weight for the bxdf, usually between 0 and 1. */
     BXDF_TYPE   m_type = BXDF_NONE;         /**< The specific type of the bxdf. */
     bool        normal_map_applied = false; /**< Whether normal map is applied on the BXDF. */
     Vector      nn;                         /**< Normal at the point to be Evaluated. */

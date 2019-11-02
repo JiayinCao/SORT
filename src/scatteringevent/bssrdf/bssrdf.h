@@ -23,6 +23,7 @@
 #include "math/point.h"
 #include "scatteringevent/bsdf/bxdf.h"
 #include "math/intersection.h"
+#include "scatteringevent/scatteringunit.h"
 
 class Bsdf;
 class Scene;
@@ -49,10 +50,13 @@ struct BSSRDFIntersections{
  * leaves the surface at another point other than the entry point. This kind of effects can usually be
  * observed in materials like wax, skin.
  */
-class Bssrdf{
+class Bssrdf : public ScatteringUnit{
 public:
     //! @brief  Default constructor
-    Bssrdf() = default;
+    //!
+    //! @param  ew      Evaluation weight.
+    //! @param  sw      Sample weight.
+    Bssrdf( const Spectrum& ew , const float sw ) : ScatteringUnit( ew , sw ){}
 
     //! @brief  Empty default destructor
     virtual ~Bssrdf() = default;
@@ -76,12 +80,6 @@ public:
     //! @param  po      Extant position.
     //! @param  inter   Incident intersection sampled.
     virtual void		Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const = 0;
-
-    //! @brief  Get weight of the bssrdf.
-    //!
-    //! @return         The weight of the bssrdf, this will affect both of the final contribution and the pdf of picking 
-    //!                 the bssrdf in a scattering event.
-    inline  Spectrum    GetWeight() const { return 1.0f; }
 };
 
 //! @brief  Separable BSSRDF implementation.
@@ -95,7 +93,13 @@ public:
  */
 class SeparableBssrdf : public Bssrdf{
 public:
-    SeparableBssrdf( const Spectrum& R , const Intersection* intersection );
+    //! @brief   Constructor.
+    //!
+    //! @param  R               Base color of the bssrdf.
+    //! @param  intersection    Intersection of bssrdf, usually exit point.
+    //! @param  ew              Evaluation weight.
+    //! @param  sw              Sample weight.
+    SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const Spectrum& ew , const float sw );
 
     //! @brief  Importance sample the incident position.
     //!
