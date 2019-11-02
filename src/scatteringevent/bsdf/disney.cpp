@@ -99,7 +99,9 @@ DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R
 #endif
 
     // prevent the scatter distance to be zero, not a perfect solution, but it works.
-    d = mfp.Clamp( 0.0001f , FLT_MAX ) / s;
+	// the divide four pi thing is just to get similar result with Cycles SSS implementation with same inputs.
+	const auto l = mfp * INV_FOUR_PI;
+    d = l.Clamp( 0.0001f , FLT_MAX ) / s;
 }
 
 int DisneyBssrdf::Sample_Ch() const{

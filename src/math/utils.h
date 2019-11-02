@@ -25,12 +25,13 @@
 
 #include "core/define.h"
 
-#define PI      3.1415926f
-#define TWO_PI  6.2831852f
-#define FOUR_PI 12.5663704f
-#define HALF_PI 1.5707963f
-#define INV_PI  0.3183099f
-#define INV_TWOPI 0.15915494f
+#define PI				3.1415926f
+#define TWO_PI			6.2831852f
+#define FOUR_PI			12.5663704f
+#define HALF_PI			1.5707963f
+#define INV_PI			0.3183099f
+#define INV_TWOPI		0.15915494f
+#define INV_FOUR_PI		0.07957747f
 
 #define SQR(x)      (Pow<2>(x))
 

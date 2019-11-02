@@ -691,8 +691,13 @@ namespace {
         }
 
 		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-            const auto& params = *comp->as<DisneyBssrdf::Params>();
-            se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), params.baseColor, params.scatterDistance, w * comp->w) );
+			if (SE_NONE == (se.GetFlag() & SE_REPLACE_BSSRDF)){
+				const auto& params = *comp->as<DisneyBssrdf::Params>();
+				se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), params.baseColor, params.scatterDistance, w * comp->w) );
+			}else{
+				const auto& params = *comp->as<DisneyBssrdf::Params>();
+				se.AddBxdf(SORT_MALLOC(Lambert)(params.baseColor, w * comp->w , params.n));
+			}
 		}
     };
 }

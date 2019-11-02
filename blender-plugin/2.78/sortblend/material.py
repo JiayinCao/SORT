@@ -1849,7 +1849,7 @@ class SORTNode_Material_SSS(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
 
-        self.inputs['Scatter Distance'].default_value = ( 0.2 , 0.1 , 0.05 )
+        self.inputs['Scatter Distance'].default_value = ( 1.0 , 0.2 , 0.1 )
     def serialize_prop(self, fs):
         fs.serialize( 3 )
         fs.serialize( self.inputs['Base Color'].export_osl_value() )
