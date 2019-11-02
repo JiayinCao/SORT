@@ -113,7 +113,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     total_bssrdf += SampleOneLight( se , r , intersection , scene ) * pInter->weight;
                 }
                 
-                L += total_bssrdf * throughput / pdf_scattering_type;
+                L += total_bssrdf * throughput / pdf_scattering_type / bssrdf_pdf;
             }
         }
 
@@ -172,7 +172,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                         total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true , bssrdfBounces + 1 , true ) * f * pInter->weight / pdf;
                 }
                 
-                L += total_bssrdf * throughput;
+                L += total_bssrdf * throughput / bssrdf_pdf;
             }
             return L;
         }
