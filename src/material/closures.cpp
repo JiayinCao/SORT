@@ -164,7 +164,7 @@ namespace {
 			auto& mfp = params.scatterDistance;
 
 			// Ignore SSS if necessary
-			if ( SE_NONE != ( se.GetFlag() & SE_SUB_EVENT ) )
+			if ( SE_NONE != ( se.GetFlag() & SE_REPLACE_BSSRDF ) )
 				mfp = 0.0f;
 
 			auto sssBaseColor = params.baseColor;

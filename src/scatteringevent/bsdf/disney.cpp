@@ -410,7 +410,6 @@ float DisneyBRDF::Evaluate_PDF( const Params& params ){
     if( !hasSSS )
         return 1.0f;
 
-    const auto aspect = sqrt(sqrt(1.0f - params.anisotropic * 0.9f));
     const auto luminance = params.baseColor.GetIntensity();
     const auto Ctint = luminance > 0.0f ? params.baseColor * (1.0f / luminance) : Spectrum(1.0f);
     const auto min_specular_amount = SchlickR0FromEta(ior_ex / ior_in);
