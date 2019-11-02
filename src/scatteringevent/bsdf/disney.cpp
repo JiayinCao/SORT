@@ -278,7 +278,7 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     const auto clearcoat_weight = clearcoat * 0.04f;
     const auto specular_reflection_weight = Cspec0.GetIntensity() * specularPdfScale( roughness );
     const auto specular_transmission_weight = base_color_intensity * (1.0f - metallic) * specTrans;
-    const auto diffuse_reflection_weight = base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * (thinSurface ? (1.0f - diffTrans) : 1.0f);
+    const auto diffuse_reflection_weight = hasSSS ? 0.0f : base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * (thinSurface ? (1.0f - diffTrans) : 1.0f);
     const auto diffuse_transmission_weight = thinSurface ? base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * diffTrans : 0.0f;
 
     const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
@@ -347,14 +347,14 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     const auto Ctint = luminance > 0.0f ? basecolor * (1.0f / luminance) : Spectrum(1.0f);
     const auto min_specular_amount = SchlickR0FromEta(ior_ex / ior_in);
     const auto Cspec0 = slerp(specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
+    const auto hasSSS = !scatterDistance.IsBlack();
 
     const auto base_color_intensity = basecolor.GetIntensity();
     const auto clearcoat_weight = clearcoat * 0.04f;
     const auto specular_reflection_weight = Cspec0.GetIntensity() * specularPdfScale( roughness );
     const auto specular_transmission_weight = base_color_intensity * (1.0f - metallic) * specTrans;
-    const auto diffuse_reflection_weight = base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * (thinSurface ? (1.0f - diffTrans) : 1.0f);
+    const auto diffuse_reflection_weight = hasSSS ? 0.0f : base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * (thinSurface ? (1.0f - diffTrans) : 1.0f);
     const auto diffuse_transmission_weight = thinSurface ? base_color_intensity * (1.0f - metallic) * (1.0f - specTrans) * diffTrans : 0.0f;
-    const auto hasSSS = !scatterDistance.IsBlack();
     
     const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
     if (total_weight <= 0.0f)

@@ -159,7 +159,7 @@ namespace {
 
 		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
             const auto weight = comp->w * w;
-            const auto sample_weight = ( weight[0] + weight[1] + weight[2] ) * 0.333f;
+            const auto sample_weight = ( weight[0] + weight[1] + weight[2] ) / 3.0f;
 			auto params = *comp->as<DisneyBRDF::Params>();
 			auto& mfp = params.scatterDistance;
 
@@ -197,7 +197,6 @@ namespace {
                 if( bxdf_sampling_weight > 0.0f )
                     se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight, bxdf_sampling_weight * sample_weight));
 
-                const auto diffuseRatio = (1.0f - params.metallic) * (1.0 - params.specTrans);
 				const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans) * weight;
 				if (!sssBaseColor.IsBlack() && bxdf_sampling_weight < 1.0f )
 					se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight ) );
