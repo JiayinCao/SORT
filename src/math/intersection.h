@@ -47,4 +47,14 @@ public:
     float   t = FLT_MAX;
     // the intersected primitive
     Primitive*  primitive = nullptr;
+
+    //! @brief  Reset the intersection.
+    //!
+    //! Intersection has some input and output for primitive intersection test at the same time.
+    //! This is a helper function that clears the state ( not all of it, just the relevant ones )
+    //! so that the rest of the algorithm can treat it as a 'new' intersection data structure.
+    inline void Reset(){
+        t = FLT_MAX;
+        primitive = nullptr;
+    }
 };

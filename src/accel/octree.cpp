@@ -18,6 +18,8 @@
 #include "octree.h"
 #include "core/primitive.h"
 #include "core/log.h"
+#include "scatteringevent/scatteringevent.h"
+#include "core/memory.h"
 
 IMPLEMENT_RTTI(OcTree);
 
@@ -37,24 +39,6 @@ SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "OcTree Depth", sOcTreeDepth);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOcTreeMaxPriCountInLeaf);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCountCopy);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
-
-bool OcTree::GetIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
-    SORT_PROFILE("Traverse OcTree");
-    SORT_STATS(++sRayCount);
-    SORT_STATS(sShadowRayCount += intersect == nullptr);
-
-    float fmax;
-    auto fmin = Intersect( r , m_bbox , &fmax );
-    if( fmin < 0.0f )
-        return false;
-
-    if( traverseOcTree( m_root.get() , r , intersect , fmin , fmax , matID ) ){
-        if( !intersect )
-            return true;
-        return nullptr != intersect->primitive;
-    }
-    return false;
-}
 
 void OcTree::Build( const Scene& scene ){
     SORT_PROFILE("Build OcTree");
@@ -161,6 +145,24 @@ void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container ){
         node->primitives.push_back( primitive );
 }
 
+bool OcTree::GetIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
+    SORT_PROFILE("Traverse OcTree");
+    SORT_STATS(++sRayCount);
+    SORT_STATS(sShadowRayCount += intersect == nullptr);
+
+    float fmax;
+    auto fmin = Intersect( r , m_bbox , &fmax );
+    if( fmin < 0.0f )
+        return false;
+
+    if( traverseOcTree( m_root.get() , r , intersect , fmin , fmax , matID ) ){
+        if( !intersect )
+            return true;
+        return nullptr != intersect->primitive;
+    }
+    return false;
+}
+
 bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , const StringID matID ) const{
     constexpr auto   delta = 0.001f;
     auto found = false;
@@ -235,4 +237,102 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
     }
 
     return found;
+}
+
+void OcTree::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
+    SORT_PROFILE("Traverse OcTree");
+    SORT_STATS(++sRayCount);
+
+    sAssert( intersect.cnt == 0 , SPATIAL_ACCELERATOR );
+
+    float fmax;
+    auto fmin = Intersect( r , m_bbox , &fmax );
+    if( fmin < 0.0f )
+        return;
+
+    traverseOcTree( m_root.get() , r , intersect , fmin , fmax , matID );
+}
+
+void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , float fmax , const StringID matID ) const{
+    constexpr auto   delta = 0.001f;
+
+    // early rejections
+    if( fmin >= fmax )
+        return;
+    if( intersect.maxt < fmin )
+        return;
+
+    // iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
+    if( node->child[0] == nullptr ){
+        Intersection intersection;
+        for( auto primitive : node->primitives ){
+            if( matID != primitive->GetMaterial()->GetID() )
+                continue;
+            SORT_STATS(++sIntersectionTest);
+        
+            intersection.Reset();
+            const auto intersected = primitive->GetIntersect( ray , &intersection );
+            if( intersected ){
+                if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
+                    intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                    intersect.intersections[intersect.cnt++]->intersection = intersection;
+                }else{
+                    auto picked_i = -1;
+                    auto t = 0.0f;
+                    for( auto i = 0 ; i < TOTAL_SSS_INTERSECTION_CNT ; ++i ){
+                        if( t < intersect.intersections[i]->intersection.t ){
+                            t = intersect.intersections[i]->intersection.t;
+                            picked_i = i;
+                        }
+                    }
+                    if( picked_i >= 0 )
+                        intersect.intersections[picked_i]->intersection = intersection;
+
+                    intersect.maxt = 0.0f;
+                    for( auto i = 0u ; i < intersect.cnt ; ++i )
+                        intersect.maxt = std::max( intersect.maxt , intersect.intersections[i]->intersection.t );
+                }
+            }
+        }
+        return;
+    }
+
+    const auto contact = ray(fmin);
+    const auto center = ( node->bb.m_Max + node->bb.m_Min ) * 0.5f;
+    auto node_index = ( contact.x > center.x ) + ( contact.y > center.y ) * 2 + ( contact.z > center.z ) * 4;
+
+    auto            _curt = fmin;
+    int             _dir[3];
+    float           _delta[3],_next[3];
+    for(auto i = 0 ; i < 3 ; i++ ){
+        _dir[i] = ( ray.m_Dir[i] > 0.0f ) ? 1 : -1;
+        _delta[i] = ( ray.m_Dir[i] != 0.0f )?fabs( node->bb.Delta(i) / ray.m_Dir[i] ) * 0.5f : FLT_MAX;
+    }
+    for(auto i = 0 ; i < 3 ; i++ ){
+        const auto target = node->child[node_index]->bb.m_Min[i] + ((_dir[i]+1)>>1) * node->bb.Delta(i) * 0.5f;
+        _next[i] = ( ray.m_Dir[i] == 0.0f )?FLT_MAX:( target - ray.m_Ori[i] ) / ray.m_Dir[i];
+    }
+
+    // traverse the OcTree
+    while( _curt < intersect.maxt ){
+        // get the axis along which the ray leaves the node fastest.
+        auto nextAxis = (_next[0] <= _next[1]) ? 0 : 1;
+        nextAxis = (_next[nextAxis] <= _next[2]) ? nextAxis : 2;
+
+        // check if there is intersection in the current grid
+        traverseOcTree( node->child[node_index].get() , ray , intersect , _curt , _next[nextAxis] , matID );
+
+        // get to the next node based on distance
+        node_index += ( 1 << nextAxis ) * _dir[nextAxis];
+
+        // update next
+        _curt = _next[nextAxis];
+        _next[nextAxis] += _delta[nextAxis];
+
+        // check for early rejection
+        if( node_index < 0 || node_index > 7 )
+            break;
+        if( _curt > fmax + delta || _curt < fmin - delta )
+            break;
+    }
 }

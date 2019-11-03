@@ -117,6 +117,18 @@ public:
     //!                     it returns false.
     bool GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const override;
 
+    //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
+    //!
+    //! This is a specific interface designed for SSS during disk ray casting. Without this interface, the algorithm has to use the
+    //! above one to acquire all intersections in a brute force way, which obviously introduces quite some duplicated work.
+    //! The intersection returned doesn't guarrantee the order of the intersection of the results, but it does guarrantee to get the
+    //! nearest N intersections.
+    //!
+    //! @param  r           The input ray to be tested.
+    //! @param  intersect   The intersection result that holds all intersectionn.
+    //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
+    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
+
     //! @brief Build KD-Tree structure in O(N*lg(N)).
     //!
     //! The construction of this KD-Tree works in O(N*lg(N)), which is proved to be the
@@ -204,6 +216,16 @@ private:
     //!
     //! @param node         The KD-Tree node to be deleted.
     void deleteKdNode( Kd_Node* node );
+
+    //! @brief  A recursive function that traverses the KD-Tree node.
+    //!
+    //! @param node         The node to be traversed.
+    //! @param ray          The ray to be tested.
+    //! @param intersect    The data structure holds all intersections.
+    //! @param fmin         The minimum range along the ray.
+    //! @param fmax         The maximum range along the ray.
+    //! @param matID        Material ID to avoid if it is not invalid.
+    void traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , float fmax , const StringID matID ) const;
 
     SORT_STATS_ENABLE( "Spatial-Structure(KDTree)" )
 };

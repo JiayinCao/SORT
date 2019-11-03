@@ -15,10 +15,12 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <algorithm>
 #include "kdtree.h"
 #include "core/primitive.h"
 #include "math/intersection.h"
-#include <algorithm>
+#include "scatteringevent/scatteringevent.h"
+#include "core/memory.h"
 
 IMPLEMENT_RTTI(KDTree);
 
@@ -282,8 +284,8 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
     const auto dir = ray.m_Dir[split_axis];
     const auto t = (dir==0.0f) ? FLT_MAX : ( node->split - ray.m_Ori[split_axis] ) / dir;
 
-    const Kd_Node* first = node->leftChild.get();
-    const Kd_Node* second = node->rightChild.get();
+    const auto* first = node->leftChild.get();
+    const auto* second = node->rightChild.get();
     if( dir < 0.0f || (dir==0.0f&&ray.m_Ori[split_axis] > node->split) )
         std::swap(first, second);
 
@@ -296,4 +298,81 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
     if( !inter && ( fmax + delta ) > t )
         return traverse( second , ray , intersect , std::max( t , fmin ) , fmax , matID );
     return inter;
+}
+
+void KDTree::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
+    SORT_PROFILE("Traverse KD-Tree");
+    SORT_STATS(++sRayCount);
+
+    sAssert( intersect.cnt == 0 , SPATIAL_ACCELERATOR );
+
+    float fmax;
+    auto fmin = Intersect( ray , m_bbox , &fmax );
+    if( fmin < 0.0f )
+        return;
+
+    traverse( m_root.get() , ray , intersect , fmin , fmax , matID );
+}
+
+void KDTree::traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , float fmax , const StringID matID ) const{
+    static const auto       mask = 0x00000003u;
+    static const auto       delta = 0.001f;
+
+    if( fmin > fmax )
+        return;
+
+    if( intersect.maxt < fmin )
+        return;
+
+    // it's a leaf node
+    if( (node->flag & mask) == 3 ){
+        Intersection intersection;
+        
+        for( auto primitive : node->primitivelist ){
+            if( matID != primitive->GetMaterial()->GetID() )
+                continue;
+            SORT_STATS(++sIntersectionTest);
+        
+            intersection.Reset();
+            const auto intersected = primitive->GetIntersect( ray , &intersection );
+            if( intersected ){
+                if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
+                    intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                    intersect.intersections[intersect.cnt++]->intersection = intersection;
+                }else{
+                    auto picked_i = -1;
+                    auto t = 0.0f;
+                    for( auto i = 0 ; i < TOTAL_SSS_INTERSECTION_CNT ; ++i ){
+                        if( t < intersect.intersections[i]->intersection.t ){
+                            t = intersect.intersections[i]->intersection.t;
+                            picked_i = i;
+                        }
+                    }
+                    if( picked_i >= 0 )
+                        intersect.intersections[picked_i]->intersection = intersection;
+
+                    intersect.maxt = 0.0f;
+                    for( auto i = 0u ; i < intersect.cnt ; ++i )
+                        intersect.maxt = std::max( intersect.maxt , intersect.intersections[i]->intersection.t );
+                }
+            }
+        }
+
+        return;
+    }
+
+    // get the intersection point between the ray and the splitting plane
+    const auto split_axis = node->flag & mask;
+    const auto dir = ray.m_Dir[split_axis];
+    const auto t = (dir==0.0f) ? FLT_MAX : ( node->split - ray.m_Ori[split_axis] ) / dir;
+
+    const auto* first = node->leftChild.get();
+    const auto* second = node->rightChild.get();
+    if( dir < 0.0f || ( dir==0.0f && ray.m_Ori[split_axis] > node->split ) )
+        std::swap(first, second);
+
+    if( t > fmin - delta )
+        traverse( first , ray , intersect , fmin , std::min( fmax , t ) , matID );
+    if( ( fmax + delta ) > t )
+        traverse( second , ray , intersect , std::max( t , fmin ) , fmax , matID );
 }

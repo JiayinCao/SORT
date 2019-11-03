@@ -90,6 +90,18 @@ public:
     //!                     it returns false.
     bool    GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const override;
 
+    //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
+    //!
+    //! This is a specific interface designed for SSS during disk ray casting. Without this interface, the algorithm has to use the
+    //! above one to acquire all intersections in a brute force way, which obviously introduces quite some duplicated work.
+    //! The intersection returned doesn't guarrantee the order of the intersection of the results, but it does guarrantee to get the
+    //! nearest N intersections.
+    //!
+    //! @param  r           The input ray to be tested.
+    //! @param  intersect   The intersection result that holds all intersectionn.
+    //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
+    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
+
     //! @brief Build BVH structure in O(N*lg(N)).
     //!
     //! The BVH construction algorithm is in O(N*lg(N)). Please refer to this paper
@@ -164,6 +176,15 @@ private:
     //! @param matID        Material ID to avoid if it is not invalid.
     //! @return             True if there is intersection, otherwise it will return false.
     bool    traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , const StringID matID ) const;
+
+    //! @brief A recursive helper function that traverse the BVH to find all intersections.
+    //!
+    //! @param node         The root node of the (sub)tree to be traversed.
+    //! @param ray          The ray to be tested.
+    //! @param intersect    The result intersections.
+    //! @param fmin         The minimum range along the ray, any intersection before it will be ignored.
+    //! @param              Material ID to avoid if it is not invalid.
+    void    traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , const StringID matID ) const;
 
     SORT_STATS_ENABLE( "Spatial-Structure(BVH)" )
 };

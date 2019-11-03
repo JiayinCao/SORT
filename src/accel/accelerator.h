@@ -26,6 +26,10 @@
 #include "stream/stream.h"
 #include "core/scene.h"
 
+class Ray;
+class Intersection;
+struct BSSRDFIntersections;
+
 //! @brief Spatial acceleration structure interface.
 /**
  * Accelerator is an interface rather than a base class. There is no instance of it.
@@ -40,7 +44,7 @@ public:
     //! @brief  Empty destructor.
     virtual ~Accelerator() = default;
 
-    //! @brief Get intersection between the ray and the primitive set using BVH.
+    //! @brief Get intersection between the ray and the primitive set using spatial data structure.
     //!
     //! It will return true if there is intersection between the ray and the primitive set.
     //! In case of an existed intersection, if intersect is not empty, it will fill the
@@ -57,7 +61,19 @@ public:
     //!                     Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    virtual bool GetIntersect( const class Ray& r , class Intersection* intersect , const StringID matID = INVALID_SID ) const = 0;
+    virtual bool GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const = 0;
+
+    //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
+    //!
+    //! This is a specific interface designed for SSS during disk ray casting. Without this interface, the algorithm has to use the
+    //! above one to acquire all intersections in a brute force way, which obviously introduces quite some duplicated work.
+    //! The intersection returned doesn't guarrantee the order of the intersection of the results, but it does guarrantee to get the
+    //! nearest N intersections.
+    //!
+    //! @param  r           The input ray to be tested.
+    //! @param  intersect   The intersection result that holds all intersectionn.
+    //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
+    virtual void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const = 0;
 
     //! @brief Build the acceleration structure.
     //!

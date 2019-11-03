@@ -21,6 +21,8 @@
 #include "core/log.h"
 #include "core/sassert.h"
 #include "core/profile.h"
+#include "scatteringevent/scatteringevent.h"
+#include "core/memory.h"
 
 IMPLEMENT_RTTI(UniGrid);
 
@@ -37,74 +39,6 @@ SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension X", sUniformGrid
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGridY);
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
 SORT_STATS_AVG_COUNT("Spatial-Structure(UniformGrid)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
-
-bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
-    SORT_PROFILE("Traverse Uniform Grid");
-    SORT_STATS(++sRayCount);
-    SORT_STATS(sShadowRayCount += intersect == nullptr);
-
-    static const auto voxelId2Point = [&]( int id[3] ){
-        Point p;
-        p.x = m_bbox.m_Min.x + id[0] * m_voxelExtent[0];
-        p.y = m_bbox.m_Min.y + id[1] * m_voxelExtent[1];
-        p.z = m_bbox.m_Min.z + id[2] * m_voxelExtent[2];
-        return p;
-    };
-
-    // get the intersect point
-    float maxt;
-    auto cur_t = Intersect( r , m_bbox , &maxt );
-    if( cur_t < 0.0f )
-        return false;
-    if( intersect )
-        intersect->t = std::min( intersect->t , maxt );
-
-    int     curGrid[3] , dir[3];
-    float   delta[3] , next[3];
-    for(auto i = 0 ; i < 3 ; i++ ){
-        curGrid[i] = point2VoxelId( r(cur_t) , i );
-        dir[i] = ( r.m_Dir[i] > 0.0f ) ? 1 : -1;
-        if( r.m_Dir[i] != 0.0f )
-            delta[i] = fabs( m_voxelExtent[i] / r.m_Dir[i] );
-        else
-            delta[i] = FLT_MAX;
-    }
-    Point gridCorner = voxelId2Point( curGrid );
-    for(auto i = 0 ; i < 3 ; i++ ){
-        // get the next t
-        auto target = gridCorner[i] + ((dir[i]+1)>>1) * m_voxelExtent[i];
-        next[i] = ( target - r.m_Ori[i] ) / r.m_Dir[i];
-        if( r.m_Dir[i] == 0.0f )
-            next[i] = FLT_MAX;
-    }
-
-    // traverse the uniform grid
-    const unsigned idArray[] = { 0 , 0 , 1 , 0 , 2 , 2 , 1 , 0  };// [0] and [7] is impossible
-    while( ( intersect && cur_t < intersect->t ) || ( intersect == 0 ) ){
-        // current voxel id
-        auto voxelId = offset( curGrid[0] , curGrid[1] , curGrid[2] );
-
-        // get the next t
-        auto nextAxis = (next[0] <= next[1])+((unsigned)(next[1] <= next[2]))*2+((unsigned)(next[2] <= next[0]))*4;
-        nextAxis = idArray[nextAxis];
-
-        // check if there is intersection in the current grid
-        if( getIntersect( r , intersect , voxelId , next[nextAxis] , matID ) )
-            return true;
-
-        // get to the next voxel
-        curGrid[nextAxis] += dir[nextAxis];
-
-        if( curGrid[nextAxis] < 0 || (unsigned)curGrid[nextAxis] >= m_voxelNum[nextAxis] )
-            return intersect && intersect->t < maxt && intersect->primitive;
-
-        // update next
-        cur_t = next[nextAxis];
-        next[nextAxis] += delta[nextAxis];
-    }
-
-    return ( intersect && intersect->t < maxt && ( intersect->primitive != nullptr ));
-}
 
 void UniGrid::Build( const Scene& scene ){
     SORT_PROFILE("Build Uniform Grid");
@@ -181,7 +115,75 @@ unsigned UniGrid::offset( unsigned x , unsigned y , unsigned z ) const{
     return z * m_voxelNum[1] * m_voxelNum[0] + y * m_voxelNum[0] + x;
 }
 
-bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT , const StringID matID ) const{
+bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
+    SORT_PROFILE("Traverse Uniform Grid");
+    SORT_STATS(++sRayCount);
+    SORT_STATS(sShadowRayCount += intersect == nullptr);
+
+    static const auto voxelId2Point = [&]( int id[3] ){
+        Point p;
+        p.x = m_bbox.m_Min.x + id[0] * m_voxelExtent[0];
+        p.y = m_bbox.m_Min.y + id[1] * m_voxelExtent[1];
+        p.z = m_bbox.m_Min.z + id[2] * m_voxelExtent[2];
+        return p;
+    };
+
+    // get the intersect point
+    float maxt;
+    auto cur_t = Intersect( r , m_bbox , &maxt );
+    if( cur_t < 0.0f )
+        return false;
+    if( intersect )
+        intersect->t = std::min( intersect->t , maxt );
+
+    int     curGrid[3] , dir[3];
+    float   delta[3] , next[3];
+    for(auto i = 0 ; i < 3 ; i++ ){
+        curGrid[i] = point2VoxelId( r(cur_t) , i );
+        dir[i] = ( r.m_Dir[i] > 0.0f ) ? 1 : -1;
+        if( r.m_Dir[i] != 0.0f )
+            delta[i] = fabs( m_voxelExtent[i] / r.m_Dir[i] );
+        else
+            delta[i] = FLT_MAX;
+    }
+    Point gridCorner = voxelId2Point( curGrid );
+    for(auto i = 0 ; i < 3 ; i++ ){
+        // get the next t
+        auto target = gridCorner[i] + ((dir[i]+1)>>1) * m_voxelExtent[i];
+        next[i] = ( target - r.m_Ori[i] ) / r.m_Dir[i];
+        if( r.m_Dir[i] == 0.0f )
+            next[i] = FLT_MAX;
+    }
+
+    // traverse the uniform grid
+    const unsigned idArray[] = { 0 , 0 , 1 , 0 , 2 , 2 , 1 , 0  };// [0] and [7] is impossible
+    while( ( intersect && cur_t < intersect->t ) || ( intersect == 0 ) ){
+        // current voxel id
+        auto voxelId = offset( curGrid[0] , curGrid[1] , curGrid[2] );
+
+        // get the next t
+        auto nextAxis = (next[0] <= next[1])+((unsigned)(next[1] <= next[2]))*2+((unsigned)(next[2] <= next[0]))*4;
+        nextAxis = idArray[nextAxis];
+
+        // check if there is intersection in the current grid
+        if( traverse( r , intersect , voxelId , next[nextAxis] , matID ) )
+            return true;
+
+        // get to the next voxel
+        curGrid[nextAxis] += dir[nextAxis];
+
+        if( curGrid[nextAxis] < 0 || (unsigned)curGrid[nextAxis] >= m_voxelNum[nextAxis] )
+            return intersect && intersect->t < maxt && intersect->primitive;
+
+        // update next
+        cur_t = next[nextAxis];
+        next[nextAxis] += delta[nextAxis];
+    }
+
+    return ( intersect && intersect->t < maxt && ( intersect->primitive != nullptr ));
+}
+
+bool UniGrid::traverse( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT , const StringID matID ) const{
     sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "Invalid voxel id." );
 
     auto inter = false;
@@ -206,4 +208,103 @@ bool UniGrid::getIntersect( const Ray& r , Intersection* intersect , unsigned vo
     }
 
     return inter && ( intersect->t < nextT + 0.00001f );
+}
+
+void UniGrid::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
+    SORT_PROFILE("Traverse Uniform Grid");
+    SORT_STATS(++sRayCount);
+
+    static const auto voxelId2Point = [&]( int id[3] ){
+        Point p;
+        p.x = m_bbox.m_Min.x + id[0] * m_voxelExtent[0];
+        p.y = m_bbox.m_Min.y + id[1] * m_voxelExtent[1];
+        p.z = m_bbox.m_Min.z + id[2] * m_voxelExtent[2];
+        return p;
+    };
+
+    // get the intersect point
+    float maxt;
+    auto cur_t = Intersect( r , m_bbox , &maxt );
+    if( cur_t < 0.0f )
+        return;
+//  if( intersect )
+//        intersect->t = std::min( intersect->t , maxt );
+
+    int     curGrid[3] , dir[3];
+    float   delta[3] , next[3];
+    for(auto i = 0 ; i < 3 ; i++ ){
+        curGrid[i] = point2VoxelId( r(cur_t) , i );
+        dir[i] = ( r.m_Dir[i] > 0.0f ) ? 1 : -1;
+        if( r.m_Dir[i] != 0.0f )
+            delta[i] = fabs( m_voxelExtent[i] / r.m_Dir[i] );
+        else
+            delta[i] = FLT_MAX;
+    }
+    Point gridCorner = voxelId2Point( curGrid );
+    for(auto i = 0 ; i < 3 ; i++ ){
+        // get the next t
+        auto target = gridCorner[i] + ((dir[i]+1)>>1) * m_voxelExtent[i];
+        next[i] = ( target - r.m_Ori[i] ) / r.m_Dir[i];
+        if( r.m_Dir[i] == 0.0f )
+            next[i] = FLT_MAX;
+    }
+
+    // traverse the uniform grid
+    const unsigned idArray[] = { 0 , 0 , 1 , 0 , 2 , 2 , 1 , 0  };// [0] and [7] is impossible
+    while( cur_t < intersect.maxt ){
+        // current voxel id
+        auto voxelId = offset( curGrid[0] , curGrid[1] , curGrid[2] );
+
+        // get the next t
+        auto nextAxis = (next[0] <= next[1])+((unsigned)(next[1] <= next[2]))*2+((unsigned)(next[2] <= next[0]))*4;
+        nextAxis = idArray[nextAxis];
+
+        // check if there is intersection in the current grid
+        traverse( r , intersect , voxelId , next[nextAxis] , matID );
+
+        // get to the next voxel
+        curGrid[nextAxis] += dir[nextAxis];
+
+        if( curGrid[nextAxis] < 0 || (unsigned)curGrid[nextAxis] >= m_voxelNum[nextAxis] )
+            return;
+
+        // update next
+        cur_t = next[nextAxis];
+        next[nextAxis] += delta[nextAxis];
+    }
+}
+
+void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsigned voxelId , float nextT , const StringID matID ) const{
+    sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "Invalid voxel id." );
+
+    Intersection intersection;
+    for( auto primitive : m_voxels[voxelId] ){
+        if( matID != primitive->GetMaterial()->GetID() )
+            continue;
+        SORT_STATS(++sIntersectionTest);
+
+        intersection.Reset();
+        const auto intersected = primitive->GetIntersect( ray , &intersection );
+        if( intersected ){
+            if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
+                intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                intersect.intersections[intersect.cnt++]->intersection = intersection;
+            }else{
+                auto picked_i = -1;
+                auto t = 0.0f;
+                for( auto i = 0 ; i < TOTAL_SSS_INTERSECTION_CNT ; ++i ){
+                    if( t < intersect.intersections[i]->intersection.t ){
+                        t = intersect.intersections[i]->intersection.t;
+                        picked_i = i;
+                    }
+                }
+                if( picked_i >= 0 )
+                    intersect.intersections[picked_i]->intersection = intersection;
+
+                intersect.maxt = 0.0f;
+                for( auto i = 0u ; i < intersect.cnt ; ++i )
+                    intersect.maxt = std::max( intersect.maxt , intersect.intersections[i]->intersection.t );
+            }
+        }
+    }
 }

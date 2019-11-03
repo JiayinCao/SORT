@@ -20,6 +20,8 @@
 #include "bvh.h"
 #include "math/ray.h"
 #include "math/intersection.h"
+#include "scatteringevent/scatteringevent.h"
+#include "core/memory.h"
 
 IMPLEMENT_RTTI(Bvh);
 
@@ -64,20 +66,6 @@ void Bvh::Build(const Scene& scene){
 
     SORT_STATS(++sBvhNodeCount);
     SORT_STATS(sBvhLeafNodeCountCopy = sBvhLeafNodeCount);
-}
-
-bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect , const StringID matID ) const{
-    SORT_PROFILE("Traverse Bvh");
-    SORT_STATS(++sRayCount);
-    SORT_STATS(sShadowRayCount += intersect != nullptr);
-
-    auto fmin = Intersect(ray, m_bbox);
-    if (fmin < 0.0f)
-        return false;
-
-    if (traverseNode(m_root.get(), ray, intersect, fmin, matID))
-        return !intersect || intersect->primitive ;
-    return false;
 }
 
 void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned depth ){
@@ -184,6 +172,20 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned start , unsigned end ){
     SORT_STATS(sBvhPrimitiveCount += (StatsInt)node->pri_num);
 }
 
+bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect , const StringID matID ) const{
+    SORT_PROFILE("Traverse Bvh");
+    SORT_STATS(++sRayCount);
+    SORT_STATS(sShadowRayCount += intersect != nullptr);
+
+    const auto fmin = Intersect(ray, m_bbox);
+    if (fmin < 0.0f)
+        return false;
+
+    if (traverseNode(m_root.get(), ray, intersect, fmin, matID))
+        return !intersect || intersect->primitive ;
+    return false;
+}
+
 bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , const StringID matID ) const{
     if( fmin < 0.0f )
         return false;
@@ -217,11 +219,11 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         return found;
     }
 
-    auto left = node->left.get();
-    auto right = node->right.get();
+    const auto left = node->left.get();
+    const auto right = node->right.get();
 
-    auto fmin0 = Intersect( ray , left->bbox );
-    auto fmin1 = Intersect( ray , right->bbox );
+    const auto fmin0 = Intersect( ray , left->bbox );
+    const auto fmin1 = Intersect( ray , right->bbox );
 
     auto inter = false;
     if( fmin1 > fmin0 ){
@@ -234,4 +236,80 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         inter |= traverseNode( left , ray , intersect , fmin0 , matID );
     }
     return intersect == nullptr ? inter : true;
+}
+
+void Bvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
+    SORT_PROFILE("Traverse Bvh");
+    SORT_STATS(++sRayCount);
+
+    sAssert( intersect.cnt == 0 , SPATIAL_ACCELERATOR );
+
+    const auto fmin = Intersect(ray, m_bbox);
+    if( fmin < 0.0f )
+        return;
+    traverseNode(m_root.get(), ray, intersect, fmin, matID);
+}
+
+void Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , const StringID matID ) const{
+    sAssert( fmin >= 0.0f , SPATIAL_ACCELERATOR );
+
+    if( intersect.maxt < fmin )
+        return;
+
+    if( 0 != node->pri_num ){
+        auto _start = node->pri_offset;
+        auto _pri = node->pri_num;
+        auto _end = _start + _pri;
+
+        Intersection intersection;
+        for(auto i = _start ; i < _end ; i++ ){
+            if( matID != m_bvhpri[i].primitive->GetMaterial()->GetID() )
+                continue;
+            SORT_STATS(++sIntersectionTest);
+        
+            intersection.Reset();
+            const auto intersected = m_bvhpri[i].primitive->GetIntersect( ray , &intersection );
+            if( intersected ){
+                if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
+                    intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                    intersect.intersections[intersect.cnt++]->intersection = intersection;
+                }else{
+                    auto picked_i = -1;
+                    auto t = 0.0f;
+                    for( auto i = 0 ; i < TOTAL_SSS_INTERSECTION_CNT ; ++i ){
+                        if( t < intersect.intersections[i]->intersection.t ){
+                            t = intersect.intersections[i]->intersection.t;
+                            picked_i = i;
+                        }
+                    }
+                    if( picked_i >= 0 )
+                        intersect.intersections[picked_i]->intersection = intersection;
+
+                    intersect.maxt = 0.0f;
+                    for( auto i = 0u ; i < intersect.cnt ; ++i )
+                        intersect.maxt = std::max( intersect.maxt , intersect.intersections[i]->intersection.t );
+                }
+            }
+        }
+
+       return;
+    }
+
+    const auto left = node->left.get();
+    const auto right = node->right.get();
+
+    const auto fmin0 = Intersect( ray , left->bbox );
+    const auto fmin1 = Intersect( ray , right->bbox );
+
+    if( fmin1 > fmin0 ){
+        if( fmin0 >= 0.0f )
+            traverseNode( left , ray , intersect , fmin0 , matID );
+        if( fmin1 >= 0.0f )
+            traverseNode( right , ray , intersect , fmin1 , matID );
+    }else{
+        if( fmin1 >= 0.0f )
+            traverseNode( right , ray , intersect , fmin1 , matID );
+        if( fmin0 >= 0.0f )
+            traverseNode( left , ray , intersect , fmin0 , matID );
+    }
 }

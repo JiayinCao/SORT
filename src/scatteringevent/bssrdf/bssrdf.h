@@ -29,7 +29,7 @@ class Bsdf;
 class Scene;
 
 // Up to 4 intersection supported.
-#define     TOTAL_INTERSECTION_CNT      4
+#define     TOTAL_SSS_INTERSECTION_CNT      4
 
 struct BSSRDFIntersection{
     Intersection    intersection;
@@ -40,8 +40,11 @@ struct BSSRDFIntersection{
  * BSSRDFIntersection may have multiple, up to 4, intersections if needed.
  */ 
 struct BSSRDFIntersections{
-    BSSRDFIntersection*     intersections[TOTAL_INTERSECTION_CNT] = { nullptr };
+    BSSRDFIntersection*     intersections[TOTAL_SSS_INTERSECTION_CNT] = { nullptr };
     int                     cnt = 0;
+
+    // following field is only used for spatial data structure to evaluate intersections
+    float                   maxt = FLT_MAX;
 };
 
 //! @brief BSDF implementation.

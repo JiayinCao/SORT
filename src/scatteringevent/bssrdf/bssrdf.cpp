@@ -24,6 +24,8 @@
 #include "core/memory.h"
 #include "core/scene.h"
 
+//#define WITH_MULTI_INTERSECTION_SUPPORT
+
 SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const Spectrum& ew , const float sw )
     : Bssrdf( ew , sw ) , R(R) , intersection(intersection) , channels(0) {
     nn = Normalize(intersection->normal);
@@ -65,9 +67,25 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
     const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) + l * vy * 0.5f;
     const auto target = source - l * vy;
 
-    auto current = source;
+#ifdef WITH_MULTI_INTERSECTION_SUPPORT
+    const auto ray_length = Dot( source - target , vy );
+    const Ray ray( source , -vy , 0 , 0.0001f , l );
+    scene.GetIntersect( ray , inter , intersection->primitive->GetMaterial()->GetID() );
 
-    while( inter.cnt < TOTAL_INTERSECTION_CNT ){
+    for( auto i = 0u ; i < inter.cnt ; ++i ){
+        sAssert( inter.intersections[i] != nullptr , MATERIAL );
+
+        auto pIntersection = inter.intersections[i];
+        const auto bssrdf = Sr( Distance( po , pIntersection->intersection.intersect ) );
+        const auto pdf = Pdf_Sp( po , pIntersection->intersection.intersect , pIntersection->intersection.gnormal );
+        if( pdf > 0.0f && !bssrdf.IsBlack() )
+            pIntersection->weight = bssrdf / pdf * GetEvalWeight();
+    }
+#else
+    // This code will be removed once I have confirmed the above interface works well, it exists now purely for verification purpose.
+    auto current = source;
+    
+    while( inter.cnt < TOTAL_SSS_INTERSECTION_CNT ){
         const auto t = Dot( current - target , vy );
         if( t <= 0 )
             break;
@@ -92,6 +110,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
         // update original of the next ray
         current = pIntersection->intersection.intersect;
     }
+#endif
 }
 
 float SeparableBssrdf::Pdf_Sp( const Point& po , const Point& pi , const Vector& n ) const {

@@ -58,6 +58,18 @@ public:
     //!                     it returns false.
     bool GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const override;
 
+    //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
+    //!
+    //! This is a specific interface designed for SSS during disk ray casting. Without this interface, the algorithm has to use the
+    //! above one to acquire all intersections in a brute force way, which obviously introduces quite some duplicated work.
+    //! The intersection returned doesn't guarrantee the order of the intersection of the results, but it does guarrantee to get the
+    //! nearest N intersections.
+    //!
+    //! @param  r           The input ray to be tested.
+    //! @param  intersect   The intersection result that holds all intersectionn.
+    //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
+    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
+    
     //! Build the OcTree in O(Nlg(N)) time.
     //!
     //! @param scene    The rendering scene.
@@ -115,6 +127,17 @@ private:
     //! @param matID        Material ID to avoid if it is not invalid.
     //! @return             Whether the ray intersects anything in the primitive set
     bool traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect ,
+                         float fmin , float fmax , const StringID matID ) const;
+
+    //! @brief  Traverse OcTree recursively and return if there is intersection.
+    //!
+    //! @param node         Sub-tree belongs to this node will be visited in a depth first manner.
+    //! @param ray          The input ray to be tested.
+    //! @param intersect    BSS intersection that holds all intersections.
+    //! @param fmin         Current minimum value along the ray
+    //! @param fmax         Current maximum value along the ray.
+    //! @param matID        Material ID to avoid if it is not invalid.
+    void traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFIntersections& intersect ,
                          float fmin , float fmax , const StringID matID ) const;
 
     //! @brief  Release OcTree memory.

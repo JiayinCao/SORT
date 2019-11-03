@@ -81,6 +81,12 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect , const StringI
     return g_accelerator->GetIntersect( r , intersect , matID );
 }
 
+void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
+    // no brute force support in BSSRDF
+    if( g_accelerator != nullptr )
+        g_accelerator->GetIntersect( r , intersect , matID );
+}
+
 bool Scene::bruteforceIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
     if( intersect ) intersect->t = FLT_MAX;
     int n = (int)m_primitiveBuf.size();
