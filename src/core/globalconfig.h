@@ -139,6 +139,16 @@ public:
         return m_noMaterialSupport;
     }
 
+    //! @brief      Get clampping of radiance value.
+    //!
+    //! Before there is a better firefly cancelling solution, clampping is the easy low hanging fruit.
+    //! Clampping value with 0 means there is no clampping.
+    //!
+    //! @return     Clampping value.
+    float           GetClampping() const{
+        return m_clampping;
+    }
+
     //! @brief      Parse command line.
     //!
     //! This is not a perfect way to parse command line arguments. If there is a space in the path,
@@ -203,6 +213,7 @@ public:
         stream >> m_threadCnt;
         stream >> m_samplePerPixel;
         stream >> m_resWidth >> m_resHeight;
+        stream >> m_clampping;
         StringID accelType , integratorType;
         stream >> accelType;
         m_accelerator = MakeUniqueInstance<Accelerator>(accelType);
@@ -237,6 +248,7 @@ private:
     bool                            m_profilingEnalbed = false;     /**< Whether profiling is enabled in SORT. Since there is a big performance issue during rendering, it is turned off by default.*/
     bool                            m_noMaterialSupport = false;    /**< Disable material support in SORT. */
     std::string                     m_inputFile;                    /**< Full path of the input file. */
+    float                           m_clampping = 0.0f;             /**< Clampping value of evaluated radiance. */
 
     //! @brief  Make constructor private
     GlobalConfiguration(){}
@@ -262,3 +274,4 @@ private:
 #define g_imageSensor               GlobalConfiguration::GetSingleton().GetImageSensor()
 #define g_profilingEnabled          GlobalConfiguration::GetSingleton().GetIsProfilingEnabled()
 #define g_noMaterial                GlobalConfiguration::GetSingleton().GetNoMaterial()
+#define g_clammping                 GlobalConfiguration::GetSingleton().GetClampping()

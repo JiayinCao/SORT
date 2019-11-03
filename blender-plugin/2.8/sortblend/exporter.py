@@ -344,6 +344,7 @@ def export_global_config(scene, fs, sort_resource_path):
     fs.serialize( int(sort_data.sampler_count_prop) )
     fs.serialize( int(xres) )
     fs.serialize( int(yres) )
+    fs.serialize( sort_data.clampping )
 
     if accelerator_type == "bvh":
         fs.serialize( SID('Bvh') )

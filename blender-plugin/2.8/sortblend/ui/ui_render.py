@@ -77,6 +77,11 @@ class SORTRenderData(bpy.types.PropertyGroup):
     octree_max_pri_in_leaf : bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=16, min=8, max=64)
 
     #------------------------------------------------------------------------------------#
+    #                                 Clampping Settings                                 #
+    #------------------------------------------------------------------------------------#
+    clampping : bpy.props.FloatProperty(name='Clampping',default=0, min=0)
+
+    #------------------------------------------------------------------------------------#
     #                                 Sampling Settings                                  #
     #------------------------------------------------------------------------------------#
     sampler_count_prop : bpy.props.IntProperty(name='Count',default=1, min=1)
@@ -163,6 +168,13 @@ class RENDER_PT_AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
         elif accelerator_type == "OcTree":
             self.layout.prop(data,"octree_max_node_depth")
             self.layout.prop(data,"octree_max_pri_in_leaf")
+
+@base.register_class
+class RENDER_PT_ClamppingPanel(SORTRenderPanel,bpy.types.Panel):
+    bl_label = 'Clampping'
+    def draw(self, context):
+        data = context.scene.sort_data
+        self.layout.prop(data,"clampping")
 
 @base.register_class
 class RENDER_PT_MultiThreadPanel(SORTRenderPanel, bpy.types.Panel):
