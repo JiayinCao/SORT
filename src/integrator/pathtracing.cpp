@@ -102,7 +102,6 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     const auto& pInter = bssrdf_inter.intersections[i];
                     const auto& intersection = pInter->intersection;
 
-					// The base color is terribly wrong, it is clearly a bug, to be fixed later.
                     // Create a temporary lambert model to account the cos factor
                     // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
                     // there will be a discontinuity introduced when mean free path approaches zero.
@@ -157,7 +156,6 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     const auto& pInter = bssrdf_inter.intersections[i];
                     const auto& intersection = pInter->intersection;
 
-					// The base color is terribly wrong, it is clearly a bug, to be fixed later.
                     // Create a temporary lambert model to account the cos factor
                     // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
                     // there will be a discontinuity introduced when mean free path approaches zero.
