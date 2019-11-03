@@ -171,9 +171,13 @@ namespace {
 
 #ifdef SSS_REPLACE_WITH_LAMBERT
 			constexpr float delta = 0.0001f;
-			bool addExtraLambert = false;
+			auto bssrdf_channel_weight = 0.0f;
+			auto total_channel_weight = 0.0f;
+			auto addExtraLambert = false;
 			auto baseColor = params.baseColor;
 			for (int i = 0; i < SPECTRUM_SAMPLE; ++i) {
+				total_channel_weight += params.baseColor[i];
+
 				// If the reflectance is zero or the mean free path is too small, switch back to lambert.
 				if (params.baseColor[i] == 0.0f) {
 					mfp[i] = 0.0f;
@@ -188,8 +192,13 @@ namespace {
 				}
 				else {
 					baseColor[i] = 0.0f;
+					bssrdf_channel_weight += sssBaseColor[i];
 				}
 			}
+
+			const auto bssrdf_pdf = bssrdf_channel_weight / total_channel_weight;
+#else
+			constexpr auto bssrdf_pdf = 1.0f;
 #endif
 			if (!mfp.IsBlack()) {
                 const auto bxdf_sampling_weight = DisneyBRDF::Evaluate_PDF( params );
@@ -199,11 +208,11 @@ namespace {
 
 				const auto diffuseWeight = (1.0f - params.metallic) * (1.0 - params.specTrans) * weight;
 				if (!sssBaseColor.IsBlack() && bxdf_sampling_weight < 1.0f )
-					se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight ) );
+					se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight * bssrdf_pdf ) );
 
 #ifdef SSS_REPLACE_WITH_LAMBERT
 				if (addExtraLambert && !baseColor.IsBlack())
-					se.AddBxdf(SORT_MALLOC(Lambert)(baseColor * diffuseWeight, FULL_WEIGHT, params.n));
+					se.AddBxdf(SORT_MALLOC(Lambert)(baseColor, diffuseWeight, ( 1.0f - bxdf_sampling_weight ) * sample_weight * ( 1.0f - bssrdf_pdf ) , params.n));
 #endif
 			}else{
                 se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight));
@@ -689,12 +698,63 @@ namespace {
         }
 
 		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+			const auto& params = *comp->as<DisneyBssrdf::Params>();
+			if( params.baseColor.IsBlack() )
+				return;
+
+			const auto weight = w * comp->w;
+
 			if (SE_NONE == (se.GetFlag() & SE_REPLACE_BSSRDF)){
-				const auto& params = *comp->as<DisneyBssrdf::Params>();
-				se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), params.baseColor, params.scatterDistance, w * comp->w) );
+				auto sssBaseColor = params.baseColor;
+				auto pdf_weight = (weight[0] + weight[1] + weight[2]) / 3.0f;
+
+#ifdef SSS_REPLACE_WITH_LAMBERT
+				constexpr float delta = 0.0001f;
+				auto bssrdf_channel_weight = 0.0f;
+				auto total_channel_weight = 0.0f;
+				auto mfp = params.scatterDistance;
+				auto addExtraLambert = false;
+				auto baseColor = params.baseColor;
+				for (int i = 0; i < SPECTRUM_SAMPLE; ++i) {
+					total_channel_weight += params.baseColor[i];
+
+					// If the reflectance is zero or the mean free path is too small, switch back to lambert.
+					if (params.baseColor[i] == 0.0f) {
+						mfp[i] = 0.0f;
+						continue;
+					}
+
+					// if the mean free distance is too small, replace it with lambert.
+					if (mfp[i] < delta) {
+						mfp[i] = 0.0f;
+						sssBaseColor[i] = 0.0f;
+						addExtraLambert = true;
+					}
+					else {
+						baseColor[i] = 0.0f;
+						bssrdf_channel_weight += sssBaseColor[i];
+					}
+				}
+				
+				const auto bssrdf_pdf = bssrdf_channel_weight / total_channel_weight;
+#else
+				constexpr auto bssrdf_pdf = 1.0f;
+#endif
+
+#ifdef SSS_REPLACE_WITH_LAMBERT
+				if (!mfp.IsBlack())
+#endif
+				{
+					if (!sssBaseColor.IsBlack())
+						se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, params.scatterDistance, weight, pdf_weight * bssrdf_pdf ));
+				}
+
+#ifdef SSS_REPLACE_WITH_LAMBERT
+				if (addExtraLambert && !baseColor.IsBlack())
+					se.AddBxdf(SORT_MALLOC(Lambert)(baseColor, weight, pdf_weight * ( 1.0f - bssrdf_pdf ), params.n));
+#endif
 			}else{
-				const auto& params = *comp->as<DisneyBssrdf::Params>();
-				se.AddBxdf(SORT_MALLOC(Lambert)(params.baseColor, w * comp->w , params.n));
+				se.AddBxdf(SORT_MALLOC(Lambert)(params.baseColor, weight , params.n));
 			}
 		}
     };
