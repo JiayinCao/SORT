@@ -242,7 +242,8 @@ void Bvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const 
     SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
 
-    sAssert( intersect.cnt == 0 , SPATIAL_ACCELERATOR );
+    intersect.cnt = 0;
+    intersect.maxt = FLT_MAX;
 
     const auto fmin = Intersect(ray, m_bbox);
     if( fmin < 0.0f )

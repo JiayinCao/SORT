@@ -243,7 +243,8 @@ void OcTree::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const
     SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
 
-    sAssert( intersect.cnt == 0 , SPATIAL_ACCELERATOR );
+    intersect.cnt = 0;
+    intersect.maxt = FLT_MAX;
 
     float fmax;
     auto fmin = Intersect( r , m_bbox , &fmax );
@@ -268,6 +269,18 @@ void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFInt
         for( auto primitive : node->primitives ){
             if( matID != primitive->GetMaterial()->GetID() )
                 continue;
+            
+            // make sure the primitive is not checked before
+            auto checked = false;
+            for( auto i = 0u ; i < intersect.cnt ; ++i ){
+                if( primitive == intersect.intersections[i]->intersection.primitive ){
+                    checked = true;
+                    break;
+                }
+            }
+            if( checked )
+                continue;
+
             SORT_STATS(++sIntersectionTest);
         
             intersection.Reset();

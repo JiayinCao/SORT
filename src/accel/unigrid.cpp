@@ -214,6 +214,9 @@ void UniGrid::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , cons
     SORT_PROFILE("Traverse Uniform Grid");
     SORT_STATS(++sRayCount);
 
+    intersect.cnt = 0;
+    intersect.maxt = FLT_MAX;
+
     static const auto voxelId2Point = [&]( int id[3] ){
         Point p;
         p.x = m_bbox.m_Min.x + id[0] * m_voxelExtent[0];
@@ -227,8 +230,6 @@ void UniGrid::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , cons
     auto cur_t = Intersect( r , m_bbox , &maxt );
     if( cur_t < 0.0f )
         return;
-//  if( intersect )
-//        intersect->t = std::min( intersect->t , maxt );
 
     int     curGrid[3] , dir[3];
     float   delta[3] , next[3];
@@ -281,6 +282,18 @@ void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsign
     for( auto primitive : m_voxels[voxelId] ){
         if( matID != primitive->GetMaterial()->GetID() )
             continue;
+
+        // make sure the primitive is not checked before
+        auto checked = false;
+        for( auto i = 0u ; i < intersect.cnt ; ++i ){
+            if( primitive == intersect.intersections[i]->intersection.primitive ){
+                checked = true;
+                break;
+            }
+        }
+        if( checked )
+            continue;
+
         SORT_STATS(++sIntersectionTest);
 
         intersection.Reset();

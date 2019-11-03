@@ -304,7 +304,8 @@ void KDTree::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , con
     SORT_PROFILE("Traverse KD-Tree");
     SORT_STATS(++sRayCount);
 
-    sAssert( intersect.cnt == 0 , SPATIAL_ACCELERATOR );
+    intersect.cnt = 0;
+    intersect.maxt = FLT_MAX;
 
     float fmax;
     auto fmin = Intersect( ray , m_bbox , &fmax );
@@ -331,6 +332,18 @@ void KDTree::traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersection
         for( auto primitive : node->primitivelist ){
             if( matID != primitive->GetMaterial()->GetID() )
                 continue;
+            
+            // make sure the primitive is not checked before
+            auto checked = false;
+            for( auto i = 0u ; i < intersect.cnt ; ++i ){
+                if( primitive == intersect.intersections[i]->intersection.primitive ){
+                    checked = true;
+                    break;
+                }
+            }
+            if( checked )
+                continue;
+
             SORT_STATS(++sIntersectionTest);
         
             intersection.Reset();

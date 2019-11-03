@@ -24,7 +24,7 @@
 #include "core/memory.h"
 #include "core/scene.h"
 
-//#define WITH_MULTI_INTERSECTION_SUPPORT
+#define WITH_MULTI_INTERSECTION_SUPPORT
 
 SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const Spectrum& ew , const float sw )
     : Bssrdf( ew , sw ) , R(R) , intersection(intersection) , channels(0) {
@@ -65,10 +65,8 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
 
     const auto phi = TWO_PI * sort_canonical();
     const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) + l * vy * 0.5f;
-    const auto target = source - l * vy;
-
+    
 #ifdef WITH_MULTI_INTERSECTION_SUPPORT
-    const auto ray_length = Dot( source - target , vy );
     const Ray ray( source , -vy , 0 , 0.0001f , l );
     scene.GetIntersect( ray , inter , intersection->primitive->GetMaterial()->GetID() );
 
@@ -86,6 +84,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
     auto current = source;
     
     while( inter.cnt < TOTAL_SSS_INTERSECTION_CNT ){
+        const auto target = source - l * vy;
         const auto t = Dot( current - target , vy );
         if( t <= 0 )
             break;
