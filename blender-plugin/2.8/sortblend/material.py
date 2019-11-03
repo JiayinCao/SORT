@@ -2323,6 +2323,26 @@ class SORTNodeInputColor(SORTShadingNode):
         fs.serialize( 1 )
         fs.serialize( 'color( %f,%f,%f )'%(self.color[:]) )
 
+@SORTShaderNodeTree.register_node('Input')
+class SORTNodeInputFresnel(SORTShadingNode):
+    bl_label = 'Fresnel'
+    bl_idname = 'SORTNodeInputFresnel'
+    osl_shader = '''
+        shader SchlickFresnel( float F0 = @,
+                               output float Result = 0.0 ){
+            float cos_theta = dot( N , I );
+            Result = F0 + pow( 1.0 - cos_theta , 5.0 ) * ( 1.0 - F0 );
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketFloat' , 'F0' )
+        self.outputs.new( 'SORTNodeSocketFloat' , 'Result' )
+        self.inputs['F0'].default_value = 0.08
+        
+    def serialize_prop(self, fs):
+        fs.serialize( 1 )
+        fs.serialize( self.inputs['F0'].export_osl_value() )
+
 #------------------------------------------------------------------------------------#
 #                                 Math Op Nodes                                      #
 #------------------------------------------------------------------------------------#
