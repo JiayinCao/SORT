@@ -30,7 +30,7 @@
 #include "core/samplemethod.h"
 
 class Light;
-class BSSRDFIntersections;
+struct BSSRDFIntersections;
 
 //! @brief  Data structure representing the whole scene.
 /**
