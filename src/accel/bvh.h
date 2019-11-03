@@ -88,7 +88,7 @@ public:
     //!                     Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    bool    GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const override;
+    bool    GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
@@ -175,7 +175,7 @@ private:
     //! @param fmin         The minimum range along the ray.
     //! @param matID        Material ID to avoid if it is not invalid.
     //! @return             True if there is intersection, otherwise it will return false.
-    bool    traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , const StringID matID ) const;
+    bool    traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const;
 
     //! @brief A recursive helper function that traverse the BVH to find all intersections.
     //!

@@ -49,10 +49,8 @@ public:
     //! @param  intersect   Intersection information at exitant point.
     //! @param  r           The ray to be tested.
     //! @param  intersect   The result where the intersected information is to be returned.
-    //! @param  matID       In some cases, like SSS, we need intersection with primitives from the same material.
-    //!                     Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
     //! @return             Whether there is an intersection between the ray and the scene.
-    bool    GetIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const;
+    bool    GetIntersect( const Ray& r , Intersection* intersect ) const;
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
@@ -132,10 +130,8 @@ private:
     //!
     //! @param  r               The ray to be tested against with.
     //! @param  intersect       The result where the intersected information is to be returned.
-    //! @param  matID           In some cases, like SSS, we need intersection with primitives from the same material.
-    //!                         Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
     //! @return                 Whether there is an intersection between the ray and the scene.
-    bool    bruteforceIntersect( const Ray& r , Intersection* intersect , const StringID matID = INVALID_SID ) const;
+    bool    bruteforceIntersect( const Ray& r , Intersection* intersect ) const;
 
     // generate primitive buffer
     void    _generatePriBuf();

@@ -226,7 +226,7 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum ){
     SORT_STATS(sKDTreeMaxPriCountInLeaf = std::max(sKDTreeMaxPriCountInLeaf, (StatsInt)prinum));
 }
 
-bool KDTree::GetIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
+bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_PROFILE("Traverse KD-Tree");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += (intersect == nullptr));
@@ -236,7 +236,7 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect , const String
     if( fmin < 0.0f )
         return false;
 
-    if( traverse( m_root.get() , r , intersect , fmin , fmax , matID ) ){
+    if( traverse( m_root.get() , r , intersect , fmin , fmax ) ){
         if( intersect == 0 )
             return true;
         return intersect->primitive != 0;
@@ -244,7 +244,7 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect , const String
     return false;
 }
 
-bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax , const StringID matID ) const{
+bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const{
     static const auto       mask = 0x00000003u;
     static const auto       delta = 0.001f;
 
@@ -257,24 +257,11 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
     // it's a leaf node
     if( (node->flag & mask) == 3 ){
         auto inter = false;
-        if( INVALID_SID == matID ){
-            for( auto primitive : node->primitivelist ){
-                SORT_STATS(++sIntersectionTest);
-                inter |= primitive->GetIntersect( ray , intersect );
-                if( nullptr == intersect && inter )
-                    return true;
-            }
-            
-        }else{
-            for( auto primitive : node->primitivelist ){
-                if( matID != primitive->GetMaterial()->GetID() )
-                    continue;
-
-                SORT_STATS(++sIntersectionTest);
-                inter |= primitive->GetIntersect( ray , intersect );
-                if( nullptr ==  intersect && inter )
-                    return true;
-            }
+        for( auto primitive : node->primitivelist ){
+            SORT_STATS(++sIntersectionTest);
+            inter |= primitive->GetIntersect( ray , intersect );
+            if( nullptr == intersect && inter )
+                return true;
         }
         return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
     }
@@ -291,12 +278,12 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 
     auto inter = false;
     if( t > fmin - delta ){
-        inter = traverse( first , ray , intersect , fmin , std::min( fmax , t ) , matID );
+        inter = traverse( first , ray , intersect , fmin , std::min( fmax , t ) );
         if( !intersect && inter )
             return true;
     }
     if( !inter && ( fmax + delta ) > t )
-        return traverse( second , ray , intersect , std::max( t , fmin ) , fmax , matID );
+        return traverse( second , ray , intersect , std::max( t , fmin ) , fmax );
     return inter;
 }
 

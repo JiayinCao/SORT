@@ -172,7 +172,7 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned start , unsigned end ){
     SORT_STATS(sBvhPrimitiveCount += (StatsInt)node->pri_num);
 }
 
-bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect , const StringID matID ) const{
+bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect) const{
     SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect != nullptr);
@@ -181,12 +181,12 @@ bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect , const StringID 
     if (fmin < 0.0f)
         return false;
 
-    if (traverseNode(m_root.get(), ray, intersect, fmin, matID))
+    if (traverseNode(m_root.get(), ray, intersect, fmin))
         return !intersect || intersect->primitive ;
     return false;
 }
 
-bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin , const StringID matID ) const{
+bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const{
     if( fmin < 0.0f )
         return false;
 
@@ -199,22 +199,11 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         auto _end = _start + _pri;
 
         auto found = false;
-        if( INVALID_SID == matID ){
-            for(auto i = _start ; i < _end ; i++ ){
-                SORT_STATS(++sIntersectionTest);
-                found |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
-                if( intersect == nullptr && found )
-                    return true;
-            }
-        }else{
-            for(auto i = _start ; i < _end ; i++ ){
-                if( matID != m_bvhpri[i].primitive->GetMaterial()->GetID() )
-                    continue;
-                SORT_STATS(++sIntersectionTest);
-                found |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
-                if( intersect == nullptr && found )
-                    return true;
-            }
+        for(auto i = _start ; i < _end ; i++ ){
+            SORT_STATS(++sIntersectionTest);
+            found |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
+            if( intersect == nullptr && found )
+                return true;
         }
         return found;
     }
@@ -227,13 +216,13 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
 
     auto inter = false;
     if( fmin1 > fmin0 ){
-        inter |= traverseNode( left , ray , intersect , fmin0 , matID );
+        inter |= traverseNode( left , ray , intersect , fmin0 );
         if( inter && intersect == nullptr ) return true;
-        inter |= traverseNode( right , ray , intersect , fmin1 , matID );
+        inter |= traverseNode( right , ray , intersect , fmin1 );
     }else{
-        inter |= traverseNode( right , ray , intersect , fmin1 , matID );
+        inter |= traverseNode( right , ray , intersect , fmin1 );
         if( inter && intersect == nullptr) return true;
-        inter |= traverseNode( left , ray , intersect , fmin0 , matID );
+        inter |= traverseNode( left , ray , intersect , fmin0 );
     }
     return intersect == nullptr ? inter : true;
 }

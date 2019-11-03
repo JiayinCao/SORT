@@ -70,15 +70,15 @@ bool Scene::LoadScene( IStreamBase& stream ){
     return true;
 }
 
-bool Scene::GetIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
+bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const{
     if( intersect )
         intersect->t = FLT_MAX;
 
     // brute force intersection test if there is no accelerator
     if( g_accelerator == nullptr )
-        return bruteforceIntersect( r , intersect , matID );
+        return bruteforceIntersect( r , intersect );
 
-    return g_accelerator->GetIntersect( r , intersect , matID );
+    return g_accelerator->GetIntersect( r , intersect );
 }
 
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
@@ -87,23 +87,13 @@ void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const 
         g_accelerator->GetIntersect( r , intersect , matID );
 }
 
-bool Scene::bruteforceIntersect( const Ray& r , Intersection* intersect , const StringID matID ) const{
+bool Scene::bruteforceIntersect( const Ray& r , Intersection* intersect ) const{
     if( intersect ) intersect->t = FLT_MAX;
     int n = (int)m_primitiveBuf.size();
-    if( matID != INVALID_SID ){
-        for( int k = 0 ; k < n ; k++ ){
-            const auto found = m_primitiveBuf[k]->GetIntersect( r , intersect );
-            if( found && intersect == nullptr )
-                return true;
-        }
-    }else{
-        for( int k = 0 ; k < n ; k++ ){
-            if( matID == m_primitiveBuf[k]->GetMaterial()->GetID() )
-                continue;
-            const auto found = m_primitiveBuf[k]->GetIntersect( r , intersect );
-            if( found && intersect == nullptr )
-                return true;
-        }
+    for( int k = 0 ; k < n ; k++ ){
+        const auto found = m_primitiveBuf[k]->GetIntersect( r , intersect );
+        if( found && intersect == nullptr )
+            return true;
     }
 
     if( intersect == nullptr )
