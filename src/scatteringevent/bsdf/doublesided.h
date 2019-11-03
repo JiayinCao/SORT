@@ -19,7 +19,7 @@
 
 #include "bxdf.h"
 #include "core/sassert.h"
-#include "microfacet.h"
+#include "scatteringevent/scatteringevent.h"
 
 //! @brief DoubleSided BRDF.
 /**
@@ -37,7 +37,7 @@ public:
     //! @param bxdf0        Bxdf0.
     //! @param bxdf1        Bxdf1.
     //! @param weight       Weight of the BXDF.
-    DoubleSided(const Bsdf* bxdf0 , const Bsdf* bxdf1 , const Spectrum& weight ) : Bxdf(weight, (BXDF_TYPE)(BXDF_ALL_TYPES), DIR_UP, false), bxdf0(bxdf0), bxdf1(bxdf1){}
+    DoubleSided(const ScatteringEvent* se0 , const ScatteringEvent* se1 , const Spectrum& weight ) : Bxdf(weight, (BXDF_TYPE)(BXDF_ALL_TYPES), DIR_UP, false), m_se0(se0), m_se1(se1) {}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -60,6 +60,6 @@ public:
     float pdf( const Vector& wo , const Vector& wi ) const override;
 
 private:
-    const Bsdf* bxdf0;      /**< Bxdf 0 */
-    const Bsdf* bxdf1;      /**< Bxdf 1 */
+    const ScatteringEvent* m_se0;      /**< Scattering event on the front side of the surface. */
+    const ScatteringEvent* m_se1;      /**< Scattering event on the back side of the surface. */
 };

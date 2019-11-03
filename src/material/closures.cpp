@@ -565,14 +565,13 @@ namespace {
 
 		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
-            const auto& params = *comp->as<Coat::Params>();
-            Bsdf* bottom = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-            ProcessClosure(bottom, bssrdf, intersection, params.closure, Color3(1.0f), replaceBSSRDF);
-            bsdf->AddBxdf(SORT_MALLOC(Coat)(params, w, bottom));
         }
 
 		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-			// not supported for now.
+			const auto& params = *comp->as<Coat::Params>();
+			ScatteringEvent* bottom = SORT_MALLOC(ScatteringEvent)(se.GetIntersection(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+			ProcessClosure(params.closure, Color3(1.0f), *bottom);
+			se.AddBxdf(SORT_MALLOC(Coat)(params, w, bottom));
 		}
     };
 
@@ -594,16 +593,15 @@ namespace {
 
 		// to be deprecated
         void Process(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const ClosureComponent* comp, const OSL::Color3& w, bool replaceBSSRDF ) override {
-            const auto& params = *comp->as<DoubleSided::Params>();
-            Bsdf* bxdf0 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-            Bsdf* bxdf1 = SORT_MALLOC(Bsdf)(bsdf->GetIntersection(), true);
-            ProcessClosure(bxdf0, bssrdf, intersection, params.bxdf0, Color3(1.0f) , replaceBSSRDF);
-            ProcessClosure(bxdf1, bssrdf, intersection, params.bxdf1, Color3(1.0f) , replaceBSSRDF);
-            bsdf->AddBxdf(SORT_MALLOC(DoubleSided)(bxdf0, bxdf1, w));
         }
 
 		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-			// not supported for now.
+			const auto& params = *comp->as<DoubleSided::Params>();
+			ScatteringEvent* se0 = SORT_MALLOC(ScatteringEvent)(se.GetIntersection(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+			ScatteringEvent* se1 = SORT_MALLOC(ScatteringEvent)(se.GetIntersection(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+			ProcessClosure(params.bxdf0, Color3(1.0f), *se0);
+			ProcessClosure(params.bxdf1, Color3(1.0f), *se1);
+			se.AddBxdf(SORT_MALLOC(DoubleSided)(se0, se1, w));
 		}
     };
 

@@ -20,6 +20,7 @@
 #include "bxdf.h"
 #include "core/sassert.h"
 #include "microfacet.h"
+#include "scatteringevent/scatteringevent.h"
 
 //! @brief Coat BRDF.
 /**
@@ -33,9 +34,11 @@
  * The coating layer is hard-coded with Microfacet BRDF model, which is not configurable. However, the underlying layer could be configurable by attaching
  * other BXDF. If nothing is attached, a 'null' material, which is totally based will be at the bottom.
  * This BRDF doesn't work with transmissive materials like glass.
+ * Due to the assumption made in the algorithm, there is no support for coating BSSRDF materials since the exit position and enter position are different,
+ * leading to failure of some assumptions in the original algorithm, for which reason, SORT will fall back to Lambert for all BSSRDF materials under the coating
+ * layer.
  */
-class Coat : public Bxdf
-{
+class Coat : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
     struct Params {
@@ -50,8 +53,8 @@ public:
     //!
     //! @param params           Parameter set.
     //! @param weight           Weight of the BXDF.
-    //! @param bottom           Bottom layer bsdf.
-    Coat( const Params& params , const Spectrum& weight , const Bsdf* bottom );
+    //! @param bottom           Bottom layer scattering event.
+    Coat( const Params& params , const Spectrum& weight , const ScatteringEvent* bottom );
 
     //! Evaluate the BRDF.
     //!
@@ -86,7 +89,7 @@ private:
     const FresnelDielectric     fresnel;        /**< Fresnel term. */
     const Spectrum              coat_weight;    /**< Default weight for coated layer. */
     const MicroFacetReflection  coat;           /**< Using Microfacet as coated layer. */
-    const Bsdf*                 bottom;         /**< Bottom layer. */
+    const ScatteringEvent*      bottom;         /**< Bottom layer. */
 
     Spectrum f( const Vector& wo , const Vector& wi ) const override{
         sAssertMsg( false , MATERIAL , "This function shouldn't be called" );

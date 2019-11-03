@@ -92,14 +92,16 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
     if( pdf == 0.0f )
         return ret;
     
+	// update the pdf
+	pdf *= bxdf_pdf;
+
     // setup pdf
     for( auto i = 0u; i < m_bxdfCnt ; ++i ){
-        if( m_bxdfs[i] != bxdf )
+        if( m_bxdfs[i] != bxdf ){
             ret += m_bxdfs[i]->F(wo,wi) * m_bxdfs[i]->GetEvalWeight();
+			pdf += m_bxdfs[i]->Pdf(wo,wi) * m_bxdfs[i]->GetSampleWeight();
+		}
     }
-
-    // update the pdf
-    pdf *= bxdf_pdf;
 
     // transform the direction back
     wi = localToWorld( wi );

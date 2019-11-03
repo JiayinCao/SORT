@@ -23,7 +23,7 @@
 // when evaluating the attenuation upward. The exact number is not mentioned in the original paper, 0.2 is used as default here.
 #define TIR_COMPENSATION    0.2f
 
-Coat::Coat( const Params& params , const Spectrum& weight, const Bsdf* bottom )
+Coat::Coat( const Params& params , const Spectrum& weight, const ScatteringEvent* bottom )
 : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, false), thickness(1.0f), ior(params.ior), sigma(params.sigma), ggx(params.roughness, params.roughness),
 fresnel(1.0f,params.ior), coat_weight( 1.0f ), coat(coat_weight, &fresnel , &ggx , coat_weight , params.n ), bottom( bottom ){
 }
@@ -46,7 +46,7 @@ Spectrum Coat::F( const Vector& wo , const Vector& wi ) const{
         const auto T12 = (1.0f - fresnel.Evaluate(CosTheta(swo)));
         const auto T21 = slerp( 1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
 
-        ret += bottom->f( -r_wo , -r_wi ) * attenuation * T12 * T21 / ( ior * ior );
+        ret += bottom->Evaluate_BSDF( -r_wo , -r_wi ) * attenuation * T12 * T21 / ( ior * ior );
     }
 
     return ret;
@@ -79,18 +79,22 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
             const auto T12 = (1.0f - fresnel.Evaluate(CosTheta(swo)));
             const auto T21 = slerp(1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
 
-            ret += bottom->f(-r_wo, -r_wi) * attenuation * T12 * T21 / (ior * ior);
+            ret += bottom->Evaluate_BSDF(-r_wo, -r_wi) * attenuation * T12 * T21 / (ior * ior);
         }
 
         if(pPdf)
-            *pPdf = slerp(bottom->Pdf(-r_wo,-r_wi) , *pPdf, specProp);
+            *pPdf = slerp(bottom->Pdf_BSDF(-r_wo,-r_wi) , *pPdf, specProp);
     }else{
         // Importance sampling using the underlying layer
         Vector r_wi;
-        ret = bottom->sample_f( -r_wo , r_wi, nbs, pPdf );
+		auto bsdf_pdf = 0.0f;
+        ret = bottom->Sample_BSDF( -r_wo , r_wi, nbs, bsdf_pdf );
 
         swi = refract(-r_wi, DIR_UP, ior, 1.0f, tir_i);
         wi = bxdfToBsdf(swi);
+		
+		if( pPdf )
+			*pPdf = bsdf_pdf;
 
         // Handle corner case where TIR happens
         if (tir_i || tir_o) {
@@ -134,6 +138,6 @@ float Coat::Pdf( const Vector& wo , const Vector& wi ) const{
     const auto specProp = I1 / ( I1 + I2 );
 
     const auto layer0_pdf = coat.pdf( swo , swi );
-    const auto layer1_pdf = (tir_o || tir_i) ? 0.0f : bottom->Pdf(-r_wo, -r_wi);
+    const auto layer1_pdf = (tir_o || tir_i) ? 0.0f : bottom->Pdf_BSDF(-r_wo, -r_wi);
     return slerp( layer1_pdf , layer0_pdf , specProp );
 }

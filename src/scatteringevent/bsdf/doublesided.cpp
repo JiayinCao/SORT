@@ -25,8 +25,8 @@ Spectrum DoubleSided::f(const Vector& wo, const Vector& wi) const
     const auto back1 = CosTheta(wi) < 0.0f;
     if (back0 ^ back1) return 0.0f;
 
-    if (!back0) return bxdf0 ? bxdf0->f(wo, wi) : 0.0f;
-    if (back0) return bxdf1 ? bxdf1->f(-wo, -wi) : 0.0f;
+    if (!back0) return m_se0 ? m_se0->Evaluate_BSDF(wo, wi) : 0.0f;
+    if (back0) return m_se1 ? m_se1->Evaluate_BSDF(-wo, -wi) : 0.0f;
     return 0.0f;
 }
 
@@ -34,9 +34,10 @@ Spectrum DoubleSided::sample_f(const Vector& wo, Vector& wi, const BsdfSample& b
     const auto back0 = CosTheta(wo) < 0.0f;
 
     Spectrum ret;
-    if (!back0) ret = bxdf0 ? bxdf0->sample_f(wo, wi, bs, nullptr) : 0.0f;
+	auto dummy_pdf = 0.0f;
+    if (!back0) ret = m_se0 ? m_se0->Sample_BSDF(wo, wi, bs, dummy_pdf) : 0.0f;
     if (back0){
-        ret = bxdf1 ? bxdf1->sample_f(-wo, wi, bs, nullptr) : 0.0f;
+        ret = m_se1 ? m_se1->Sample_BSDF(-wo, wi, bs, dummy_pdf) : 0.0f;
         wi = -wi;
     }
     if (pPdf) *pPdf = pdf(wo, wi);
@@ -48,7 +49,7 @@ float DoubleSided::pdf(const Vector& wo, const Vector& wi) const {
     const auto back1 = CosTheta(wi) < 0.0f;
     if (back0 ^ back1) return 0.0f;
 
-    if (!back0) return bxdf0 ? bxdf0->Pdf(wo, wi) : 0.0f;
-    if (back0) return bxdf1 ? bxdf1->Pdf(-wo, -wi) : 0.0f;
+    if (!back0) return m_se0 ? m_se0->Pdf_BSDF(wo, wi) : 0.0f;
+    if (back0) return m_se1 ? m_se1->Pdf_BSDF(-wo, -wi) : 0.0f;
     return 0.0f;
 }
