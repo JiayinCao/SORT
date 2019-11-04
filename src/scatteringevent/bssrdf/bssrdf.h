@@ -41,7 +41,7 @@ struct BSSRDFIntersection{
  */ 
 struct BSSRDFIntersections{
     BSSRDFIntersection*     intersections[TOTAL_SSS_INTERSECTION_CNT] = { nullptr };
-    int                     cnt = 0;
+    unsigned                cnt = 0;
 
     // following field is only used for spatial data structure to evaluate intersections
     float                   maxt = FLT_MAX;

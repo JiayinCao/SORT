@@ -98,7 +98,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             if( bssrdf_inter.cnt > 0 ){
                 Spectrum total_bssrdf;
 
-                for( auto i = 0 ; i < bssrdf_inter.cnt ; ++i ){
+                for( auto i = 0u ; i < bssrdf_inter.cnt ; ++i ){
                     const auto& pInter = bssrdf_inter.intersections[i];
                     const auto& intersection = pInter->intersection;
 
@@ -152,7 +152,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             if( bssrdf_inter.cnt > 0 ){
                 Spectrum total_bssrdf;
 
-                for( auto i = 0 ; i < bssrdf_inter.cnt ; ++i ){
+                for( auto i = 0u ; i < bssrdf_inter.cnt ; ++i ){
                     const auto& pInter = bssrdf_inter.intersections[i];
                     const auto& intersection = pInter->intersection;
 
