@@ -42,7 +42,7 @@ endif()
 # Set it to on to enable more debugging output
 #set(DEBUG_CMAKE ON)
 
-SET( SORT_ENABLE_PROFILER "YES" CACHE BOOL "Enable SORT profiling system. It is true by default." )
+SET( SORT_ENABLE_PROFILER "NO" CACHE BOOL "Enable SORT profiling system. It is false by default." )
 SET( SORT_ENABLE_STATS "YES" CACHE BOOL "Enable SORT stats system. It is true by default." )
 
 # For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
