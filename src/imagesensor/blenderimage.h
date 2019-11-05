@@ -46,5 +46,7 @@ private:
     int             m_tilenum_x;
     int             m_tilenum_y;
 
+	int				m_finishedTileCnt = 0;
+
     PlatformSharedMemory    m_sharedMemory;
 };

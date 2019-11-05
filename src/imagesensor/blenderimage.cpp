@@ -20,6 +20,8 @@
 #include "core/globalconfig.h"
 #include "core/path.h"
 
+static std::mutex g_cntLock;
+
 void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ){
     if (!m_sharedMemory.sharedmemory.bytes)
         return;
@@ -56,6 +58,9 @@ void BlenderImage::FinishTile( int tile_x , int tile_y , const Render_Task& rt )
         return;
 
     m_sharedMemory.sharedmemory.bytes[tile_y * m_tilenum_x + tile_x] = 1;
+
+	std::lock_guard<std::mutex> lock(g_cntLock);
+	m_sharedMemory.sharedmemory.bytes[m_sharedMemory.sharedmemory.size - 2] = (int)((++m_finishedTileCnt) / (float)( m_tilenum_x * m_tilenum_y ) * 100.0f);
 }
 
 void BlenderImage::PreProcess(){
