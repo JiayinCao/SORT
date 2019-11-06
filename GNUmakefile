@@ -21,6 +21,8 @@ Available commands
         Print this help message.
     * about
         Introduction about SORT and myself.
+    * dep_info
+        Introduction about the third party libraries used in SORT.
 
 Convenience targets
 
@@ -98,7 +100,32 @@ Following are my contacts, feel free to contact me for any reason,
 endef
 
 # SORT root directory
-SORT_DIR		:=	$(shell pwd -P)
+SORT_DIR  := $(shell pwd -P)
+
+# Operating system name, it could be Darwin or Linux
+OS        := $(shell uname -s | tr A-Z a-z)
+
+# Update dependency command
+UPDATE_DEP_COMMAND = @echo "Unfortunately, the dependencies in this OS has not been prebuilt. You can choose to build them by yourself or find a platform with existed pre-built dependencies."
+
+# Mac OS
+ifeq ($(OS), darwin)
+	UPDATE_DEP_COMMAND = sh ./getdep_mac.sh
+endif
+
+# Ubuntu
+ifeq ($(OS), linux)
+	# Different Ubuntu have different version of libraries, we need to tell which version it is.
+	# I have only built dependencies for Ubuntu Xenial and Bionic. In order to build other versions,
+	# it is necessary to build the library first.
+	OS_VERS:=$(shell lsb_release -a 2>/dev/null | grep Description | awk '{ print $$2 "-" $$3 }')
+	ifeq ($(findstring Ubuntu-16,$(OS_VERS)),Ubuntu-16)
+		UPDATE_DEP_COMMAND = sh ./getdep_ubuntu_xenial.sh
+	endif
+	ifeq ($(findstring Ubuntu-18,$(OS_VERS)),Ubuntu-18)
+		UPDATE_DEP_COMMAND = sh ./getdep_ubuntu_bionic.sh
+	endif
+endif
 
 release: .FORCE
 	@echo 'building release version.'
@@ -118,8 +145,8 @@ update: .FORCE
 
 update_dep: .FORCE
 	@echo 'Syncing dependencies'
-	ifeq ($(OS), Darwin)
-		sh ./getdep_mac.sh
+	@echo $(OS_NAME)
+	$(UPDATE_DEP_COMMAND)
 
 clean: .FORCE
 	@echo 'Cleaning all generated files'
