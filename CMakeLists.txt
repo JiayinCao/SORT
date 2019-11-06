@@ -67,7 +67,7 @@ endif()
 project (SORT)
 
 # include other modules
-include("${CMAKE_CURRENT_LIST_DIR}/cmake/externalPackages.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/build-files/cmake/externalPackages.cmake")
 
 if(SORT_ENABLE_PROFILER)
 	find_package(easy_profiler REQUIRED)
