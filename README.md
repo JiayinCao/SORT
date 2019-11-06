@@ -1,6 +1,6 @@
 # SORT
 [![Build status](https://travis-ci.org/JiayinCao/SORT.svg?branch=master)](https://travis-ci.org/JiayinCao/SORT)
-[![Build status](https://ci.appveyor.com/api/github/webhook?id=4dp43qea3v68sqoe?svg=true)](https://ci.appveyor.com/project/JiayinCao/sort)
+[![Build status](https://ci.appveyor.com/api/projects/status/la6ixha9tqe52qyr?svg=true)](https://ci.appveyor.com/project/JiayinCao/sort)
 [![License](https://img.shields.io/badge/License-GPL3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Introduction
