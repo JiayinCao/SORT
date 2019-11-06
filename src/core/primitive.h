@@ -30,8 +30,7 @@
  * missive, which means that they are attached with a 'light source'.
  * A primitive is the basic unit for spatial data structure. It is more of a lower level concept comparing with Entity.
  */
-class   Primitive
-{
+class   Primitive{
 public:
     //! @brief Constructor of Primitive.
     //!

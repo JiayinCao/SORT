@@ -94,13 +94,13 @@ public:
     //!
     //! This is a specific interface designed for SSS during disk ray casting. Without this interface, the algorithm has to use the
     //! above one to acquire all intersections in a brute force way, which obviously introduces quite some duplicated work.
-    //! The intersection returned doesn't guarrantee the order of the intersection of the results, but it does guarrantee to get the
+    //! The intersection returned doesn't guarantee the order of the intersection of the results, but it does guarantee to get the
     //! nearest N intersections.
     //!
     //! @param  r           The input ray to be tested.
-    //! @param  intersect   The intersection result that holds all intersectionn.
+    //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
-    void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
+    void	GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
 
     //! @brief Build BVH structure in O(N*lg(N)).
     //!
