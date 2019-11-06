@@ -100,10 +100,11 @@ Following are my contacts, feel free to contact me for any reason,
 endef
 
 # SORT root directory
-SORT_DIR  := $(shell pwd -P)
-
+SORT_DIR       := $(shell pwd -P)
+# SORT dependency folder
+SORT_DEP_DIR   := $(SORT_DIR)/dependencies
 # Operating system name, it could be Darwin or Linux
-OS        := $(shell uname -s | tr A-Z a-z)
+OS             := $(shell uname -s | tr A-Z a-z)
 
 # Update dependency command
 UPDATE_DEP_COMMAND = @echo "Unfortunately, the dependencies in this OS has not been prebuilt. You can choose to build them by yourself or find a platform with existed pre-built dependencies."
@@ -127,17 +128,24 @@ ifeq ($(OS), linux)
 	endif
 endif
 
+BUILD_RELEASE_COMMAND = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4;cd ..;
+BUILD_DEBUG_COMMAND = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4
+
+# Check if the depedency files are already downloaded.
+ifeq ("$(wildcard $(SORT_DEP_DIR))","")
+    BUILD_RELEASE_COMMAND = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
+    BUILD_DEBUG_COMMAND   = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
+endif
+
 release: .FORCE
-	@echo 'building release version.'
-	cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Release ..;make -j 4
+	$(BUILD_RELEASE_COMMAND)
 
 final: .FORCE
 	@echo 'building final version.'
 	@echo 'Currently not supported.'
 
 debug: .FORCE
-	@echo 'building debug version.'
-	cd $(SORT_DIR); mkdir proj_debug; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4
+	$(BUILD_DEBUG_COMMAND)
 
 update: .FORCE
 	@echo 'Syncing source code from Github'
