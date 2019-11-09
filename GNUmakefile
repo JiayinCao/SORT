@@ -138,13 +138,15 @@ ifeq ("$(wildcard $(SORT_DEP_DIR))","")
 endif
 
 release: .FORCE
+	@echo 'Building release version'
 	$(BUILD_RELEASE_COMMAND)
 
 final: .FORCE
-	@echo 'building final version.'
-	@echo 'Currently not supported.'
+	@echo 'Building final version'
+	@echo 'Currently not supported'
 
 debug: .FORCE
+	@echo 'Building debug version'
 	$(BUILD_DEBUG_COMMAND)
 
 update: .FORCE

@@ -21,8 +21,24 @@ if NOT "%1" == "" (
 	) else if "%1" == "clean" (
 		set CLEAN=1
 		goto EOF
+	) else if "%1" == "release" (
+		set BUILD_RELEASE=1
+		goto EOF
+	) else if "%1" == "final" (
+		set BUILD_FINAL=1
+		goto EOF
+	) else if "%1" == "debug" (
+		set BUILD_DEBUG=1
+		goto EOF
+	) else if "%1" == "final" (
+		set BUILD_FINAL=1
+		goto EOF
 	)
+)else if "%1" == "" (
+	set BUILD_RELEASE=1
+	goto EOF
 )
+
 :EOF
 exit /b 0
 :ERR
