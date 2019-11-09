@@ -45,4 +45,9 @@
     #define LIKELY(EXP)         __builtin_expect((EXP),1)
 #endif
 
-//#define SSS_REPLACE_WITH_LAMBERT
+// This feature replaces SSS with small mean free path with Lambert, it greatly reduces noises in SSS implemenation.
+// However, it does introduces more fireflies, which is not acceptable, for which reason it is disabled by default.
+// The firefly is caused by multiple path with more bounces so that it leads to very low pdf because of each bounce.
+// Blending a red diffuse and Cyan will also results in the same firefly problem. Further investigation needs to be
+// done before enabling this feature.
+// #define SSS_REPLACE_WITH_LAMBERT

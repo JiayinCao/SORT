@@ -706,7 +706,7 @@ namespace {
 
 			if (SE_NONE == (se.GetFlag() & SE_REPLACE_BSSRDF)){
 				auto sssBaseColor = params.baseColor;
-				auto pdf_weight = (weight[0] + weight[1] + weight[2]) / 3.0f;
+				const auto pdf_weight = (weight[0] + weight[1] + weight[2]) / 3.0f;
 
 #ifdef SSS_REPLACE_WITH_LAMBERT
 				constexpr float delta = 0.0001f;
@@ -746,7 +746,7 @@ namespace {
 #endif
 				{
 					if (!sssBaseColor.IsBlack())
-						se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, params.scatterDistance, weight, pdf_weight * bssrdf_pdf ));
+						se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, mfp, weight, pdf_weight * bssrdf_pdf ));
 				}
 
 #ifdef SSS_REPLACE_WITH_LAMBERT
