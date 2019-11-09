@@ -90,7 +90,7 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
 
     // if there is no probability of sampling that direction , just return 0.0f
     if( pdf == 0.0f )
-        return ret;
+        return 0.0f;
     
 	// update the pdf
 	pdf *= bxdf_pdf;

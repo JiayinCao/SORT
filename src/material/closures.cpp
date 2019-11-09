@@ -705,10 +705,10 @@ namespace {
 			const auto weight = w * comp->w;
 
 			if (SE_NONE == (se.GetFlag() & SE_REPLACE_BSSRDF)){
+#ifdef SSS_REPLACE_WITH_LAMBERT
 				auto sssBaseColor = params.baseColor;
 				const auto pdf_weight = (weight[0] + weight[1] + weight[2]) / 3.0f;
 
-#ifdef SSS_REPLACE_WITH_LAMBERT
 				constexpr float delta = 0.0001f;
 				auto bssrdf_channel_weight = 0.0f;
 				auto total_channel_weight = 0.0f;
@@ -737,21 +737,13 @@ namespace {
 				}
 				
 				const auto bssrdf_pdf = bssrdf_channel_weight / total_channel_weight;
-#else
-				constexpr auto bssrdf_pdf = 1.0f;
-#endif
+				if (!mfp.IsBlack() && !sssBaseColor.IsBlack())
+					se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, mfp, weight, pdf_weight * bssrdf_pdf ));
 
-#ifdef SSS_REPLACE_WITH_LAMBERT
-				if (!mfp.IsBlack())
-#endif
-				{
-					if (!sssBaseColor.IsBlack())
-						se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, mfp, weight, pdf_weight * bssrdf_pdf ));
-				}
-
-#ifdef SSS_REPLACE_WITH_LAMBERT
 				if (addExtraLambert && !baseColor.IsBlack())
 					se.AddBxdf(SORT_MALLOC(Lambert)(baseColor, weight, pdf_weight * ( 1.0f - bssrdf_pdf ), params.n));
+#else
+                se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), params.baseColor, params.scatterDistance, weight ));
 #endif
 			}else{
 				se.AddBxdf(SORT_MALLOC(Lambert)(params.baseColor, weight , params.n));
