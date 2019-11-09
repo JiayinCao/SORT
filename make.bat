@@ -23,4 +23,31 @@ if "%SHOW_DEP_INFO%" == "1" (
 	goto EOF
 )
 
+if "%GIT_UPDATE%" == "1" (
+	echo Syncing source code from Github
+	git pull
+	goto EOF
+)
+
+if "%UPDATE_DEP%" == "1" (
+	echo Syncing dependencies
+	powershell .\build-files\win\getdep.ps1
+	goto EOF
+)
+
+if "%CLEAN_DEP%" == "1" (
+	echo Cleaning all dependency files
+	powershell Remove-Item -path ./dependencies -recurse -ErrorAction Ignore
+	goto EOF
+)
+
+if "%CLEAN%" == "1" (
+	echo Cleaning all generated file
+	powershell Remove-Item -path ./bin -recurse -ErrorAction Ignore
+	powershell Remove-Item -path ./_out -recurse -ErrorAction Ignore
+	powershell Remove-Item -path ./proj_release -recurse -ErrorAction Ignore
+	powershell Remove-Item -path ./proj_debug -recurse -ErrorAction Ignore
+	goto EOF
+)
+
 :EOF

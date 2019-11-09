@@ -158,10 +158,10 @@ update_dep: .FORCE
 
 clean: .FORCE
 	@echo 'Cleaning all generated files'
-	cd $(SORT_DIR); rm -rf bin ; rm -rf proj_release ; rm -rf proj_debug
+	cd $(SORT_DIR); rm -rf bin ; rm -rf proj_release ; rm -rf proj_debug ; rm -rf _out
 
 clean_dep: .FORCE
-	@echo 'Cleaning all generated files'
+	@echo 'Cleaning all dependency files'
 	cd $(SORT_DIR); rm -rf dependencies
 
 export HELP_TEXT
