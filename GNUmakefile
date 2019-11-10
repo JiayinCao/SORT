@@ -106,7 +106,7 @@ UPDATE_DEP_COMMAND = @echo "Unfortunately, the dependencies in this OS has not b
 
 # Mac OS
 ifeq ($(OS), darwin)
-	UPDATE_DEP_COMMAND = sh ./getdep_mac.sh
+	UPDATE_DEP_COMMAND = sh ./build-files/mac/getdep.sh
 endif
 
 # Ubuntu
@@ -116,10 +116,10 @@ ifeq ($(OS), linux)
 	# it is necessary to build the library first.
 	OS_VERS:=$(shell lsb_release -a 2>/dev/null | grep Description | awk '{ print $$2 "-" $$3 }')
 	ifeq ($(findstring Ubuntu-16,$(OS_VERS)),Ubuntu-16)
-		UPDATE_DEP_COMMAND = sh ./getdep_ubuntu_xenial.sh
+		UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_ubuntu_xenial.sh
 	endif
 	ifeq ($(findstring Ubuntu-18,$(OS_VERS)),Ubuntu-18)
-		UPDATE_DEP_COMMAND = sh ./getdep_ubuntu_bionic.sh
+		UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_ubuntu_bionic.sh
 	endif
 endif
 
@@ -135,10 +135,6 @@ endif
 release: .FORCE
 	@echo 'Building release version'
 	$(BUILD_RELEASE_COMMAND)
-
-final: .FORCE
-	@echo 'Building final version'
-	@echo 'Currently not supported'
 
 debug: .FORCE
 	@echo 'Building debug version'
