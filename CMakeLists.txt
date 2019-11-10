@@ -104,6 +104,7 @@ set(thirdparty_files ${thirdparty_headers} ${thirdparty_cpps} ${thirdparty_cs} $
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SORT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${SORT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${SORT_SOURCE_DIR}/bin")
 
 add_executable(SORT ${all_files})
 
@@ -156,6 +157,7 @@ endif()
 # Setup correct output name for different configurations
 set_target_properties( SORT PROPERTIES RELEASE_OUTPUT_NAME "sort_r" )
 set_target_properties( SORT PROPERTIES DEBUG_OUTPUT_NAME "sort_d" )
+set_target_properties( SORT PROPERTIES RELWITHDEBINFO_OUTPUT_NAME "sort_rd" )
 
 # Surpress warnings in thirdparty library.
 if(MSVC)
