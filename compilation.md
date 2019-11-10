@@ -75,7 +75,7 @@ Unfortunately, due to limited resources, I don't have time trying and maintainin
 * **make release**  
 Generate a release version build. 
 * **make debug**  
-Generate generate a debug version build.
+Generate a debug version build.
 
 Of course, it is also possible to manually generate the project and load it by yourself in any proper way you see fit.
 
