@@ -27,7 +27,6 @@ To download the dependency files, simply run 'make update_dep' to retrieve it. H
 The last resort is to compile the library with [source code](https://github.com/yse/easy_profiler) by yourself. This is not suggested to compile the source code of easy_profiler due to potential changes in different version may cause unknown problems in SORT. The pre-compiled ones are more desired than compiling it by yourself.
 
 ## Windows
-* **Visual Studio 2015 or above**
 It is necessary to install Visual Studio 2015 or above to compile SORT in Windows. And please also make sure that 'msbuild.exe' is in the system 'Path' folder so that the script can run it directly.
 
 ## Mac OS
