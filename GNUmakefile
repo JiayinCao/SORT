@@ -116,10 +116,10 @@ ifeq ($(OS), linux)
 	# it is necessary to build the library first.
 	OS_VERS:=$(shell lsb_release -a 2>/dev/null | grep Description | awk '{ print $$2 "-" $$3 }')
 	ifeq ($(findstring Ubuntu-16,$(OS_VERS)),Ubuntu-16)
-		UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_ubuntu_xenial.sh
+		UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_xenial.sh
 	endif
 	ifeq ($(findstring Ubuntu-18,$(OS_VERS)),Ubuntu-18)
-		UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_ubuntu_bionic.sh
+		UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_bionic.sh
 	endif
 endif
 
