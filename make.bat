@@ -51,7 +51,6 @@ if "%CLEAN%" == "1" (
 )
 
 if "%BUILD_RELEASE%" == "1" (
-	echo Build release version
 	powershell New-Item -Force -ItemType directory -Path proj_release
 	cd proj_release
 	cmake -A x64 ..
@@ -60,7 +59,6 @@ if "%BUILD_RELEASE%" == "1" (
 )
 
 if "%BUILD_DEBUG%" == "1" (
-	echo Build debug version
 	powershell New-Item -Force -ItemType directory -Path proj_debug
 	cd proj_debug
 	cmake -A x64 ..
