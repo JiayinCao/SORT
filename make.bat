@@ -59,11 +59,6 @@ if "%BUILD_RELEASE%" == "1" (
 	cd ..
 )
 
-if "%BUILD_FINAL%" == "1" (
-	echo Build final version
-	echo Currently not supported
-)
-
 if "%BUILD_DEBUG%" == "1" (
 	echo Build debug version
 	powershell New-Item -Force -ItemType directory -Path proj_debug

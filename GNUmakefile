@@ -2,8 +2,6 @@ define HELP_TEXT
 
 Available commands
 
-    * final
-        Build final version.
     * release
         Build release version.
     * debug
@@ -26,9 +24,6 @@ Available commands
 
 Convenience targets
 
-    * final       
-        The final version that has no debugging information. This is the
-        best option for practical rendering.
     * release
         The relatively performant build version that provides reasonable 
         information, like statistics and log. However, there is no debug
