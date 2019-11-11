@@ -43,7 +43,7 @@ struct float3{
     #ifdef SSE_ENABLED
         data(_mm_set_ps1(0.0f))
     #else
-        x(0.0f), y(0.0f), z(0.0f), w(0.0f)
+        x(0.0f), y(0.0f), z(0.0f)
     #endif
     {}
 
@@ -54,7 +54,7 @@ struct float3{
     #ifdef SSE_ENABLED
         data(_mm_set_ps1(v))
     #else
-        x(v),y(v),z(v),w(0.0f)
+        x(v),y(v),z(v)
     #endif
     {}
 
@@ -67,7 +67,7 @@ struct float3{
     #ifdef SSE_ENABLED
         data( _mm_set_ps(0.0f,v2,v1,v0) )
     #else
-        x(v0),y(v1),z(v2),w(0.0f)
+        x(v0),y(v1),z(v2)
     #endif
     {}
 
