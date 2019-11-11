@@ -23,7 +23,7 @@
 Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vector& n , float* pdf ) const{
     sAssertMsg(false, SAMPLING, "N is not filled in Sphere::sample_l");
 
-    const auto center = m_transform( Point( 0.0f , 0.0f , 0.0f ) );
+    const auto center = m_transform.TransformPoint( Point( 0.0f , 0.0f , 0.0f ) );
     const auto delta = center - p;
     const auto dir = Normalize( delta );
     Vector wcx , wcy;
@@ -47,7 +47,7 @@ Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
     if( !GetIntersect( r , &intersection ) )
         intersection.intersect = r( Dot( delta , wi ) );
 
-    return m_transform(intersection.intersect);
+    return m_transform.TransformPoint(intersection.intersect);
 }
 
 float Sphere::Pdf( const Point& p ,  const Vector& wi ) const{
@@ -96,10 +96,10 @@ bool Sphere::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         Vector n = Normalize(Vector( p.x , p.y , p.z ));
         Vector v0 , v1;
         CoordinateSystem( n , v0 , v1 );
-        intersect->intersect = m_transform(p);
-        intersect->normal = m_transform.invMatrix.Transpose().TransformVector(n);
+        intersect->intersect = m_transform.TransformPoint(p);
+        intersect->normal = m_transform.TransformNormal(n);
         intersect->gnormal = intersect->normal;
-        intersect->tangent = m_transform(v0);
+        intersect->tangent = m_transform.TransformVector(v0);
         intersect->view = -r.m_Dir;
     }
 
@@ -115,15 +115,14 @@ void Sphere::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
     r.m_Dir = UniformSampleSphere( sort_canonical() , sort_canonical() );
     if( Dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
         r.m_Dir = -r.m_Dir;
-    n = m_transform.invMatrix.Transpose().TransformVector( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z ) );
+    n = m_transform.TransformNormal( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z ) );
 
     if( pdf ) *pdf = 1.0f / ( 8.0f * PI * PI * radius * radius );
 }
 
 // get the bounding box of the primitive
-const BBox& Sphere::GetBBox() const
-{
-    Point center = m_transform( Point( 0.0f , 0.0f , 0.0f ) );
+const BBox& Sphere::GetBBox() const{
+    Point center = m_transform.TransformPoint( Point( 0.0f , 0.0f , 0.0f ) );
 
     if( !m_bbox )
     {

@@ -26,7 +26,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
     const Vector localDir = sky.sample_v( ls->u , ls->v , &_pdfw , 0 );
     if( _pdfw == 0.0f )
         return 0.0f;
-    dirToLight = m_light2world(localDir);
+    dirToLight = m_light2world.TransformVector(localDir);
 
     if( pdfw )
         *pdfw = _pdfw;
@@ -55,7 +55,7 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float*
     const BBox& box = m_scene->GetBBox();
     const Vector delta = box.m_Max - box.m_Min;
 
-    const float directPdf = sky.Pdf( m_light2world.GetInversed()(-wo) );
+    const float directPdf = sky.Pdf( m_light2world.GetInversed().TransformVector(-wo) );
     const float positionPdf = 4.0f * INV_PI / delta.SquaredLength();
 
     if( directPdfA )
@@ -63,7 +63,7 @@ Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float*
     if( emissionPdf )
         *emissionPdf = directPdf * positionPdf;
 
-    return sky.Evaluate( m_light2world.GetInversed()(-wo) ) * intensity;
+    return sky.Evaluate( m_light2world.GetInversed().TransformVector(-wo) ) * intensity;
 }
 
 Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
@@ -71,7 +71,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
     r.m_fMax = FLT_MAX;
     float _pdfw;
     auto localDir = -sky.sample_v( ls.u , ls.v , &_pdfw , 0 );
-    r.m_Dir = m_light2world(localDir);
+    r.m_Dir = m_light2world.TransformVector(localDir);
 
     const BBox& box = m_scene->GetBBox();
     const Point center = ( box.m_Max + box.m_Min ) * 0.5f;
@@ -109,10 +109,10 @@ bool SkyLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance
     if( intersect && intersect->t != FLT_MAX )
         return false;
 
-    radiance = sky.Evaluate( m_light2world.GetInversed()(ray.m_Dir) ) * intensity;
+    radiance = sky.Evaluate( m_light2world.GetInversed().TransformVector(ray.m_Dir) ) * intensity;
     return true;
 }
 
 float SkyLight::Pdf( const Point& p , const Vector& wi ) const{
-    return sky.Pdf( m_light2world.GetInversed()(wi) );
+    return sky.Pdf( m_light2world.GetInversed().TransformVector(wi) );
 }

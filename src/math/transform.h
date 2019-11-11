@@ -26,14 +26,11 @@
 class Transform;
 
 // pre-declera functions
-Point   operator* ( const Transform& t , const Point& p );
-Vector  operator* ( const Transform& t , const Vector& v );
 Ray     operator* ( const Transform& t , const Ray& r );
 
 ////////////////////////////////////////////////////////////////////////////
 //  definition of transform
-class   Transform
-{
+class   Transform{
 public:
     // Default constructor
     Transform(){}
@@ -46,9 +43,21 @@ public:
     bool    HasScale() const;
 
     // the operator for transformation
-    Point   operator()( const Point& p ) const { return this->matrix.TransformPoint(p); }
-    Vector  operator()( const Vector& v ) const { return *this * v; }
-    Ray     operator()( const Ray& r ) const { return *this * r; }
+    //Point   operator()( const Point& p ) const { return this->matrix.TransformPoint(p); }
+    //Vector  operator()( const Vector& v ) const { return *this * v; }
+    Point   TransformPoint( const Point& p ) const{
+        return matrix.TransformPoint(p);
+    }
+    Vector  TransformVector( const Vector& v ) const{
+        return matrix.TransformVector(v);
+    }
+    Vector  TransformNormal( const Vector& n ) const{
+        return invMatrix.Transpose().TransformVector(n);
+    }
+
+    Ray     operator()( const Ray& r ) const {
+        return *this * r;
+    }
 
     // Get the inversed transform
     Transform GetInversed() const { return Transform( invMatrix , matrix ); }
@@ -202,18 +211,7 @@ inline Transform Transpose( const Transform& t )
     return Transform( t.matrix.Transpose() , t.invMatrix.Transpose() );
 }
 
-// transform a point
-inline Point operator* ( const Transform& t , const Point& p ){
-    return t.matrix.TransformPoint(p);
-}
-
-// transform a vector
-// note : the vector could be a normal , which requires special care about the multiplication
-inline Vector operator* ( const Transform& t , const Vector& v ){
-    return t.matrix.TransformVector(v);
-}
-
 // transform a ray
 inline Ray  operator* ( const Transform& t , const Ray& r ){
-    return Ray( t(r.m_Ori) , t(r.m_Dir) , r.m_Depth , r.m_fMin , r.m_fMax );
+    return Ray( t.TransformPoint(r.m_Ori) , t.TransformVector(r.m_Dir) , r.m_Depth , r.m_fMin , r.m_fMax );
 }

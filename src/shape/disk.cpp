@@ -23,8 +23,8 @@ Point Disk::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vect
     float u , v;
     UniformSampleDisk( ls.u , ls.v , u , v );
 
-    Point lp = m_transform( Point( u * radius , 0.0f , v * radius ) );
-    n = m_transform( Vector( 0 , 1.0f , 0 ) );
+    Point lp = m_transform.TransformPoint( Point( u * radius , 0.0f , v * radius ) );
+    n = m_transform.TransformVector( Vector( 0 , 1.0f , 0 ) );
     Vector delta = lp - p;
     wi = Normalize( delta );
 
@@ -45,10 +45,10 @@ void Disk::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) c
     UniformSampleDisk( ls.u , ls.v , u , v );
     r.m_fMin = 0.0f;
     r.m_fMax = FLT_MAX;
-    r.m_Ori = m_transform(Point( u * radius , 0.0f , v * radius ));
+    r.m_Ori = m_transform.TransformPoint(Point( u * radius , 0.0f , v * radius ));
     Vector wi = UniformSampleHemisphere(sort_canonical() , sort_canonical());
-    r.m_Dir = m_transform(wi);
-    n = m_transform.invMatrix.Transpose().TransformVector( DIR_UP );
+    r.m_Dir = m_transform.TransformVector(wi);
+    n = m_transform.TransformNormal( DIR_UP );
 
     if( pdf ) *pdf = 1.0f / ( radius * radius * PI * TWO_PI );
 }
@@ -74,10 +74,10 @@ bool Disk::GetIntersect( const Ray& r , Intersection* intersect ) const{
 
     if( intersect ){
         intersect->t = t;
-        intersect->intersect = m_transform( p );
-        intersect->normal = m_transform.invMatrix.Transpose().TransformVector(DIR_UP);
+        intersect->intersect = m_transform.TransformPoint( p );
+        intersect->normal = m_transform.TransformNormal(DIR_UP);
         intersect->gnormal = intersect->normal;
-        intersect->tangent = m_transform(Vector( 0.0f , 0.0f , 1.0f ));
+        intersect->tangent = m_transform.TransformVector(Vector( 0.0f , 0.0f , 1.0f ));
         intersect->view = -r.m_Dir;
     }
 
@@ -87,10 +87,10 @@ bool Disk::GetIntersect( const Ray& r , Intersection* intersect ) const{
 const BBox& Disk::GetBBox() const{
     if( !m_bbox ){
         m_bbox = std::make_unique<BBox>();
-        m_bbox->Union( m_transform( Point( radius , 0.0f , radius ) ) );
-        m_bbox->Union( m_transform( Point( radius , 0.0f , -radius ) ) );
-        m_bbox->Union( m_transform( Point( -radius , 0.0f , radius ) ) );
-        m_bbox->Union( m_transform( Point( -radius , 0.0f , -radius ) ) );
+        m_bbox->Union( m_transform.TransformPoint( Point( radius , 0.0f , radius ) ) );
+        m_bbox->Union( m_transform.TransformPoint( Point( radius , 0.0f , -radius ) ) );
+        m_bbox->Union( m_transform.TransformPoint( Point( -radius , 0.0f , radius ) ) );
+        m_bbox->Union( m_transform.TransformPoint( Point( -radius , 0.0f , -radius ) ) );
     }
 
     return *m_bbox;

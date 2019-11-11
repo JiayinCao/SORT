@@ -25,8 +25,8 @@ Point Quad::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vect
 
     float u = 2 * ls.u - 1.0f;
     float v = 2 * ls.v - 1.0f;
-    Point lp = m_transform( Point( halfx * u , 0.0f , halfy * v ) );
-    n = m_transform( Vector( 0 , 1 , 0 ) );
+    Point lp = m_transform.TransformPoint( Point( halfx * u , 0.0f , halfy * v ) );
+    n = m_transform.TransformVector( Vector( 0 , 1 , 0 ) );
     Vector delta = lp - p;
     wi = Normalize( delta );
 
@@ -50,9 +50,9 @@ void Quad::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) c
     const auto v = 2 * ls.v - 1.0f;
     r.m_fMin = 0.0f;
     r.m_fMax = FLT_MAX;
-    r.m_Ori = m_transform( Point( halfx * u , 0.0f , halfy * v ) );
-    r.m_Dir = m_transform( UniformSampleHemisphere( sort_canonical() , sort_canonical() ) );
-    n = m_transform.invMatrix.Transpose().TransformVector( DIR_UP );
+    r.m_Ori = m_transform.TransformPoint( Point( halfx * u , 0.0f , halfy * v ) );
+    r.m_Dir = m_transform.TransformVector( UniformSampleHemisphere( sort_canonical() , sort_canonical() ) );
+    n = m_transform.TransformNormal( DIR_UP );
 
     if( pdf )
         *pdf = UniformHemispherePdf() / SurfaceArea();
@@ -83,9 +83,9 @@ bool Quad::GetIntersect( const Ray& r , Intersection* intersect ) const{
     if( intersect ){
         intersect->t = t;
         intersect->intersect = r(t);
-        intersect->normal = m_transform.invMatrix.Transpose().TransformVector(DIR_UP);
+        intersect->normal = m_transform.TransformNormal(DIR_UP);
         intersect->gnormal = intersect->normal;
-        intersect->tangent = m_transform(Vector( 0.0f , 0.0f , 1.0f ));
+        intersect->tangent = m_transform.TransformVector(Vector( 0.0f , 0.0f , 1.0f ));
         intersect->view = -r.m_Dir;
     }
 
@@ -97,10 +97,10 @@ const BBox& Quad::GetBBox() const{
     const auto halfy = sizeY * 0.5f;
     if( !m_bbox ){
         m_bbox = std::make_unique<BBox>();
-        m_bbox->Union( m_transform( Point( halfx , 0.0f , halfy ) ) );
-        m_bbox->Union( m_transform( Point( halfx , 0.0f , -halfy ) ) );
-        m_bbox->Union( m_transform( Point( -halfx , 0.0f , halfy ) ) );
-        m_bbox->Union( m_transform( Point( -halfx , 0.0f , -halfy ) ) );
+        m_bbox->Union( m_transform.TransformPoint( Point( halfx , 0.0f , halfy ) ) );
+        m_bbox->Union( m_transform.TransformPoint( Point( halfx , 0.0f , -halfy ) ) );
+        m_bbox->Union( m_transform.TransformPoint( Point( -halfx , 0.0f , halfy ) ) );
+        m_bbox->Union( m_transform.TransformPoint( Point( -halfx , 0.0f , -halfy ) ) );
     }
 
     return *m_bbox;

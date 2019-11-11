@@ -25,8 +25,8 @@
 
 void BufferMemory::ApplyTransform( const Transform& transform ){
     for (MeshVertex& mv : m_vertices) {
-        mv.m_position = transform(mv.m_position);
-        mv.m_normal = transform.invMatrix.Transpose().TransformVector((mv.m_normal).Normalize());
+        mv.m_position = transform.TransformPoint(mv.m_position);
+        mv.m_normal = transform.TransformNormal((mv.m_normal).Normalize());
 
         // Warning this function seems to cause quite some trouble on MacOS during the first renderer somehow.
         // And this problem only exists on MacOS not the other two OS.

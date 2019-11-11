@@ -115,11 +115,11 @@ Vector2i PerspectiveCamera::GetScreenCoord( const Intersection& inter, float* pd
     dir = dir / len;
 
     // get view space dir
-    Point rastP = m_worldToRaster( inter.intersect );
+    Point rastP = m_worldToRaster.TransformPoint( inter.intersect );
 
     // Handle DOF camera ray adaption
     if( m_lensRadius != 0.0f ){
-        Point view_target = m_worldToCamera( inter.intersect );
+        Point view_target = m_worldToCamera.TransformPoint( inter.intersect );
 
         float s , t;
         UniformSampleDisk( sort_canonical() , sort_canonical() , s , t );
@@ -133,7 +133,7 @@ Vector2i PerspectiveCamera::GetScreenCoord( const Intersection& inter, float* pd
         shadow_ray.m_fMin += delta;
 
         Point view_focal_target = shadow_ray( m_focalDistance / shadow_ray.m_Dir.z );
-        rastP = m_cameraToRaster( view_focal_target );
+        rastP = m_cameraToRaster.TransformPoint( view_focal_target );
 
         shadow_ray = m_worldToCamera.invMatrix( shadow_ray );
         visibility->ray = shadow_ray ;
