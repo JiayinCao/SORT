@@ -45,6 +45,25 @@
     #define LIKELY(EXP)         __builtin_expect((EXP),1)
 #endif
 
+#ifdef _MSC_VER
+    #define SORT_FORCEINLINE __forceinline
+#elif defined(__GNUC__)
+    #define SORT_FORCEINLINE inline __attribute__((__always_inline__))
+#else
+    #define SORT_FORCEINLINE inline
+#endif
+
+// SSE is heavily used in SORT to explore more power of CPU so that better performance could be achieved.
+// Basic data structure like Vector, Spectrum are implemented under the hood using SSE. And SSE is also used in
+// accelerating ray and primitives intersection tests.
+// The above comment is not true yet until I get it done. For now this feature is disabled for stability.
+// #define SSE_ENABLED
+
+// If AVX is enabled, AVX will be used to accelerate ray and primitives intersection intead of SSE so that even
+// better performance could be achieved. However, since most vectors only has up to four channels, SSE is still
+// the basic optimization for most of the Vector/Spectrum data structures.
+// #define AVX_ENABLED
+
 // This feature replaces SSS with small mean free path with Lambert, it greatly reduces noises in SSS implemenation.
 // However, it does introduces more fireflies, which is not acceptable, for which reason it is disabled by default.
 // The firefly is caused by multiple path with more bounces so that it leads to very low pdf because of each bounce.
