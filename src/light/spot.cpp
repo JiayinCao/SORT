@@ -75,7 +75,7 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 
     // sample a light direction
     const Vector local_dir = UniformSampleCone( ls.u , ls.v , cos_total_range );
-    r.m_Dir = m_light2world.matrix( local_dir );
+    r.m_Dir = m_light2world.matrix.TransformVector( local_dir );
 
     // product of pdf of sampling a point w.r.t surface area and a direction w.r.t direction
     if( pdfW )

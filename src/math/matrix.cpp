@@ -67,12 +67,11 @@ Matrix Matrix::operator *( const Matrix& mat) const
 }
 
 // transform point
-Point Matrix::operator *( const Point& p ) const
-{
-    float x = p.x * m[0] + p.y * m[1] + p.z * m[2] + m[3];
-    float y = p.x * m[4] + p.y * m[5] + p.z * m[6] + m[7];
-    float z = p.x * m[8] + p.y * m[9] + p.z * m[10] + m[11];
-    float w = p.x * m[12] + p.y * m[13] + p.z * m[14] + m[15];
+Point Matrix::TransformPoint( const Point& p ) const{
+    const auto x = p.x * m[0] + p.y * m[1] + p.z * m[2] + m[3];
+    const auto y = p.x * m[4] + p.y * m[5] + p.z * m[6] + m[7];
+    const auto z = p.x * m[8] + p.y * m[9] + p.z * m[10] + m[11];
+    const auto w = p.x * m[12] + p.y * m[13] + p.z * m[14] + m[15];
 
     // if w is one , just return the point
     // note it is very common that w is one
@@ -83,8 +82,7 @@ Point Matrix::operator *( const Point& p ) const
 }
 
 // transform vector
-Vector Matrix::operator *( const Vector& v ) const
-{
+Vector Matrix::TransformVector( const Vector& v ) const{
     float _x = v.x * m[0] + v.y * m[1] + v.z * m[2];
     float _y = v.x * m[4] + v.y * m[5] + v.z * m[6];
     float _z = v.x * m[8] + v.y * m[9] + v.z * m[10];

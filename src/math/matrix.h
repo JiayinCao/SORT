@@ -21,8 +21,7 @@
 
 ////////////////////////////////////////////////////////////////////
 //  definition of matrix
-class   Matrix
-{
+class   Matrix{
 public:
     // default constructor , initialize a identity matrix
     Matrix();
@@ -40,37 +39,34 @@ public:
     // result : the composition of the two matrix
     Matrix operator * ( const Matrix& m ) const;
 
-    // transform a point
-    // para 'p' : the point to transform
-    // result   : the transformed point
-    Point operator * ( const Point& p ) const;
-    Point operator () ( const Point& p ) const { return *this * p; }
+    //! @brief  Transform a point.
+    //!
+    //! @param p    Point to be transformed.
+    //! @return     Transformed point.
+    Point TransformPoint( const Point& p ) const;
 
-    // transform a vector
-    // para 'v' : the vector to transform
-    // result   : transformed vector
-    // note     : a matrix transformation applied to a normal is invalid
-    Vector operator * ( const Vector& v ) const;
-    Vector operator () ( const Vector& v ) const { return *this * v; }
+    //! @brief  Transform a vector.
+    //!
+    //! @param p    Vector to be transformed.
+    //! @return     Transformed vector.
+    Vector TransformVector( const Vector& v ) const;
 
     // transform a ray
     // para 'r' : the ray to transform
     // result   : transformed ray
-    Ray operator * ( const Ray& r ) const
-    {
-        return Ray( *this * r.m_Ori , *this * r.m_Dir , r.m_Depth , r.m_fMin , r.m_fMax );
+    Ray operator * ( const Ray& r ) const{
+        return Ray( TransformPoint(r.m_Ori) , TransformVector( r.m_Dir ) , r.m_Depth , r.m_fMin , r.m_fMax );
     }
-    Ray operator () ( const Ray& r ) const
-    {
+    Ray operator () ( const Ray& r ) const{
         return *this * r;
     }
 
     // transpose the matrix
-    Matrix Transpose() const;
+    Matrix  Transpose() const;
     // determinant of the matrix
     float   Determinant() const;
     // inverse of the matrix
-    bool Inverse(Matrix& out) const;
+    bool    Inverse(Matrix& out) const;
 
     // whether the matrix have scale factor
     bool    HasScale() const;

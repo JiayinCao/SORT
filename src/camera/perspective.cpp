@@ -66,7 +66,7 @@ void PerspectiveCamera::PreProcess()
 // generate ray
 Ray PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) const{
     const Point rastP( x + ps.img_u , y + ps.img_v , 0.0f );
-    Vector view_dir = m_cameraToRaster.invMatrix( rastP );
+    Vector view_dir = m_cameraToRaster.invMatrix.TransformPoint( rastP );
 
     Ray r;
     r.m_Dir = view_dir.Normalize();

@@ -38,7 +38,7 @@ Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
     const auto cos_theta = sqrt( std::max( 0.0f , 1.0f - sq_sin_theta ) );
 
     wi = UniformSampleCone( ls.u , ls.v , cos_theta );
-    wi = m(wi);
+    wi = m.TransformVector(wi);
 
     if( pdf ) *pdf = UniformConePdf( cos_theta );
 
@@ -91,14 +91,13 @@ bool Sphere::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         return false;
 
     const auto p = r(t);
-    if( intersect )
-    {
+    if( intersect ){
         intersect->t = t;
         Vector n = Normalize(Vector( p.x , p.y , p.z ));
         Vector v0 , v1;
         CoordinateSystem( n , v0 , v1 );
         intersect->intersect = m_transform(p);
-        intersect->normal = m_transform.invMatrix.Transpose()(n);
+        intersect->normal = m_transform.invMatrix.Transpose().TransformVector(n);
         intersect->gnormal = intersect->normal;
         intersect->tangent = m_transform(v0);
         intersect->view = -r.m_Dir;
@@ -108,8 +107,7 @@ bool Sphere::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 }
 
 // sample a ray from light
-void Sphere::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const
-{
+void Sphere::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const{
     r.m_fMin = 0.0f;
     r.m_fMax = FLT_MAX;
     Vector normalized_dir = UniformSampleSphere( ls.u , ls.v );
@@ -117,7 +115,7 @@ void Sphere::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
     r.m_Dir = UniformSampleSphere( sort_canonical() , sort_canonical() );
     if( Dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
         r.m_Dir = -r.m_Dir;
-    n = m_transform.invMatrix.Transpose()( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z ) );
+    n = m_transform.invMatrix.Transpose().TransformVector( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z ) );
 
     if( pdf ) *pdf = 1.0f / ( 8.0f * PI * PI * radius * radius );
 }

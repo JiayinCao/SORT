@@ -48,7 +48,7 @@ void Disk::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) c
     r.m_Ori = m_transform(Point( u * radius , 0.0f , v * radius ));
     Vector wi = UniformSampleHemisphere(sort_canonical() , sort_canonical());
     r.m_Dir = m_transform(wi);
-    n = m_transform.invMatrix.Transpose()( DIR_UP );
+    n = m_transform.invMatrix.Transpose().TransformVector( DIR_UP );
 
     if( pdf ) *pdf = 1.0f / ( radius * radius * PI * TWO_PI );
 }
@@ -75,7 +75,7 @@ bool Disk::GetIntersect( const Ray& r , Intersection* intersect ) const{
     if( intersect ){
         intersect->t = t;
         intersect->intersect = m_transform( p );
-        intersect->normal = m_transform.invMatrix.Transpose()(DIR_UP);
+        intersect->normal = m_transform.invMatrix.Transpose().TransformVector(DIR_UP);
         intersect->gnormal = intersect->normal;
         intersect->tangent = m_transform(Vector( 0.0f , 0.0f , 1.0f ));
         intersect->view = -r.m_Dir;

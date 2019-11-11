@@ -21,19 +21,18 @@
 #include "sampler/sample.h"
 
 // generate camera ray
-Ray OrthoCamera::GenerateRay( float x, float y, const PixelSample &ps) const
-{
+Ray OrthoCamera::GenerateRay( float x, float y, const PixelSample &ps) const{
     x += ps.img_u;
     y += ps.img_v;
 
-    float w = (float)g_resultResollutionWidth;
-    float h = (float)g_resultResollutionHeight;
+    const auto w = (float)g_resultResollutionWidth;
+    const auto h = (float)g_resultResollutionHeight;
 
     x = ( ( x / w ) - 0.5f ) * m_camWidth;
     y = -1.0f * ( ( y / h - 0.5f ) ) * m_camHeight;
 
-    Point ori = world2camera( Point( x , y , 0.0f ) );
-    Vector dir = world2camera( Vector( 0.0f , 0.0f , 1.0f ) );
+    const auto ori = world2camera.TransformPoint( Point( x , y , 0.0f ) );
+    const auto dir = world2camera.TransformVector( Vector( 0.0f , 0.0f , 1.0f ) );
 
     return Ray( ori , dir );
 }

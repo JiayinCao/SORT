@@ -54,7 +54,7 @@ Spectrum Phong::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, flo
                  t0.y, r.y, t1.y, 0.0f,
                  t0.z, r.z, t1.z, 0.0f,
                  0.0f, 0.0f, 0.0f, 1.0f);
-        wi = m(dir);
+        wi = m.TransformVector(dir);
     }
 
     if (pPdf) *pPdf = pdf(wo, wi);

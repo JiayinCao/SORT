@@ -120,7 +120,7 @@ void Line::SetTransform( const Transform& transform ){
                         0.0f, 0.0f, 0.0f, 1.0f);
     m_world2Line = FromMatrix( world2line );
 
-    const auto lp0 = world2line( m_gp0 );
-    const auto lp1 = world2line( m_gp1 );
+    const auto lp0 = world2line.TransformPoint( m_gp0 );
+    const auto lp1 = world2line.TransformPoint( m_gp1 );
     m_length = lp1.y - lp0.y;
 }
