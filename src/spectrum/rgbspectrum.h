@@ -20,6 +20,7 @@
 #include <OSL/oslexec.h>
 #include "core/define.h"
 #include "math/utils.h"
+#include "math/float3.h"
 
 #define RGBSPECTRUM_SAMPLE      3
 
@@ -28,27 +29,28 @@
 class   RGBSpectrum{
 public:
     // default constructor
-    RGBSpectrum();
+    RGBSpectrum(){}
     // constructor from three float
-    RGBSpectrum( float r , float g , float b );
+    RGBSpectrum( float r , float g , float b ):data( r , g , b ) {}
     // constructor from three unsigned char
-    RGBSpectrum( unsigned char r , unsigned char g , unsigned char b );
+    RGBSpectrum( unsigned char r , unsigned char g , unsigned char b ):data( r / 255.0f , g / 255.0f , b / 255.0f ){}
     // constructor from a OSL vector3
-    RGBSpectrum(const OSL::Vec3& v);
+    RGBSpectrum( const OSL::Vec3& v ):data( v.x , v.y , v.z ){}
     // constructor from one float
-    RGBSpectrum( float g );
+    RGBSpectrum( float g ):data(g){}
     // constructor from and unsigned char
-    RGBSpectrum( unsigned char g );
+    RGBSpectrum( unsigned char g ):data(g/255.0f){}
+    // constructor from float3
+    RGBSpectrum( const float3& color ):data(color){}
     // destructor
-    ~RGBSpectrum();
+    ~RGBSpectrum() = default;
 
     // get the color
     unsigned int GetColor() const;
     // set the color
     void SetColor( unsigned int color );
-    void SetColor( float r , float g , float b )
-    {
-        m_r = r; m_g = g ; m_b = b;
+    void SetColor( float r , float g , float b ){
+        data = float3( r , g , b );
     }
     // get each component
     float   GetR() const;
@@ -85,75 +87,50 @@ public:
 
     //whether the spectrum is black
     bool IsBlack() const{
-        if( m_r > 0.0f )
-            return false;
-        if( m_g > 0.0f )
-            return false;
-        if( m_b > 0.0f )
-            return false;
-        return true;
+        return data.isZero();
     }
 
     // get intensity
-    float GetIntensity() const
-    {
+    float GetIntensity() const{
         static const float YWeight[3] = { 0.212671f, 0.715160f, 0.072169f };
-        return YWeight[0] * m_r + YWeight[1] * m_g + YWeight[2] * m_b;
+        return YWeight[0] * data.r + YWeight[1] * data.g + YWeight[2] * data.b;
     }
 
     void ToLinear(){
-        m_r = GammaToLinear(m_r);
-        m_g = GammaToLinear(m_g);
-        m_b = GammaToLinear(m_b);
+        data.r = GammaToLinear(data.r);
+        data.g = GammaToLinear(data.g);
+        data.b = GammaToLinear(data.b);
     }
     void ToGamma(){
-        m_r = LinearToGamma(m_r);
-        m_g = LinearToGamma(m_g);
-        m_b = LinearToGamma(m_b);
+        data.r = LinearToGamma(data.r);
+        data.g = LinearToGamma(data.g);
+        data.b = LinearToGamma(data.b);
     }
 
     RGBSpectrum Exp() const {
-        return RGBSpectrum((float)::exp(m_r), (float)::exp(m_g), (float)::exp(m_b));
+        return exp(data);
     }
 
     RGBSpectrum Sqrt() const {
-        return RGBSpectrum(sqrt(m_r), sqrt(m_g), sqrt(m_b));
+        return sqrt(data);
     }
 
 private:
-    // the vector data
-    union
-    {
-        struct{
-            float m_r , m_g , m_b;
-        };
-        struct{
-            float data[3];
-        };
-    };
+    float3  data;
 
-// set friend function
-friend inline RGBSpectrum operator-( float t , const RGBSpectrum& s );
+    friend inline RGBSpectrum operator-( float t , const RGBSpectrum& s );
 
 public:
     static const RGBSpectrum    m_White;
 };
 
-// global operator for spectrum
-inline RGBSpectrum operator+( float t , const RGBSpectrum& s )
-{
+inline RGBSpectrum operator+( float t , const RGBSpectrum& s ){
     return s + t;
 }
-inline RGBSpectrum operator-( float t , const RGBSpectrum& s )
-{
-    float r = t - s.m_r;
-    float g = t - s.m_g;
-    float b = t - s.m_b;
-
-    return RGBSpectrum( r , g , b );
+inline RGBSpectrum operator-( float t , const RGBSpectrum& s ){
+    return t - s.data;
 }
-inline RGBSpectrum operator*( float t , const RGBSpectrum& s )
-{
+inline RGBSpectrum operator*( float t , const RGBSpectrum& s ){
     return s * t;
 }
 

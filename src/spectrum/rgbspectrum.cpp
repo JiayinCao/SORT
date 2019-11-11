@@ -20,173 +20,67 @@
 
 const RGBSpectrum RGBSpectrum::m_White(1.0f);
 
-// default constructor
-RGBSpectrum::RGBSpectrum()
-{
-    m_r = 0.0f;
-    m_g = 0.0f;
-    m_b = 0.0f;
-}
-
-// constructor from three float
-RGBSpectrum::RGBSpectrum( float r , float g , float b )
-{
-    m_r = r;
-    m_g = g;
-    m_b = b;
-}
-
-// constructor from three unsigned char
-RGBSpectrum::RGBSpectrum( unsigned char r , unsigned char g , unsigned char b )
-{
-    m_r = (float)r / 255.0f;
-    m_g = (float)g / 255.0f;
-    m_b = (float)b / 255.0f;
-}
-
-RGBSpectrum::RGBSpectrum(const OSL::Vec3& v) {
-    m_r = v[0];
-    m_g = v[1];
-    m_b = v[2];
-}
-
-// constructor from one float
-RGBSpectrum::RGBSpectrum( float g )
-{
-    m_r = g;
-    m_g = g;
-    m_b = g;
-}
-
-// constructor from one unsigned
-RGBSpectrum::RGBSpectrum( unsigned char g )
-{
-    m_r = (( float ) g ) / 255.0f;
-    m_g = m_r;
-    m_b = m_r;
-}
-
-// destructor
-RGBSpectrum::~RGBSpectrum()
-{
-}
-
-// get the color
-unsigned int RGBSpectrum::GetColor() const
-{
+unsigned int RGBSpectrum::GetColor() const{
     unsigned int color = 0;
 
-    color |= ((unsigned char)(255.0f*saturate(m_r)))<<16;
-    color |= ((unsigned char)(255.0f*saturate(m_g)))<<8;
-    color |= ((unsigned char)(255.0f*saturate(m_b)))<<0;
+    color |= ((unsigned char)(255.0f*saturate(data.r)))<<16;
+    color |= ((unsigned char)(255.0f*saturate(data.g)))<<8;
+    color |= ((unsigned char)(255.0f*saturate(data.b)))<<0;
 
     return color;
 }
 
-// set the color
-void RGBSpectrum::SetColor( unsigned int color )
-{
-    m_r = ((float)( ( color >> 16 ) & 255 )) / 255.0f;
-    m_g = ((float)( ( color >> 8 ) & 255 )) / 255.0f;
-    m_b = ((float)( ( color >> 0 ) & 255 )) / 255.0f;
+void RGBSpectrum::SetColor( unsigned int color ){
+    data.r = ((float)( ( color >> 16 ) & 255 )) / 255.0f;
+    data.g = ((float)( ( color >> 8 ) & 255 )) / 255.0f;
+    data.b = ((float)( ( color >> 0 ) & 255 )) / 255.0f;
 }
 
-// + operator
-RGBSpectrum RGBSpectrum::operator + ( const RGBSpectrum& c ) const
-{
-    float r = m_r + c.m_r;
-    float g = m_g + c.m_g;
-    float b = m_b + c.m_b;
-
-    return RGBSpectrum( r , g , b );
+RGBSpectrum RGBSpectrum::operator + ( const RGBSpectrum& c ) const{
+    return data + c.data;
 }
 
-// - operator
-RGBSpectrum RGBSpectrum::operator - ( const RGBSpectrum& c ) const
-{
-    float r = m_r - c.m_r;
-    float g = m_g - c.m_g;
-    float b = m_b - c.m_b;
-
-    return RGBSpectrum( r , g , b );
+RGBSpectrum RGBSpectrum::operator - ( const RGBSpectrum& c ) const{
+    return data - c.data;
 }
 
-// * operator
-RGBSpectrum RGBSpectrum::operator * ( const RGBSpectrum& c ) const
-{
-    float r = m_r * c.m_r;
-    float g = m_g * c.m_g;
-    float b = m_b * c.m_b;
-
-    return RGBSpectrum( r , g , b );
+RGBSpectrum RGBSpectrum::operator * ( const RGBSpectrum& c ) const{
+    return data * c.data;
 }
 
-// / operator
-RGBSpectrum RGBSpectrum::operator / ( const RGBSpectrum& c ) const
-{
-    float r = m_r / c.m_r;
-    float g = m_g / c.m_g;
-    float b = m_b / c.m_b;
-
-    return RGBSpectrum( r , g , b );
+RGBSpectrum RGBSpectrum::operator / ( const RGBSpectrum& c ) const{
+    return data / c.data;
 }
 
-// + operator
-RGBSpectrum RGBSpectrum::operator + ( float t ) const
-{
-    float r = t + m_r;
-    float g = t + m_g;
-    float b = t + m_b;
-
-    return RGBSpectrum( r , g , b );
+RGBSpectrum RGBSpectrum::operator + ( float t ) const{
+    return data + t;
 }
 
-// - operator
-RGBSpectrum RGBSpectrum::operator - ( float t ) const
-{
-    float r = m_r - t ;
-    float g = m_g - t ;
-    float b = m_b - t ;
-
-    return RGBSpectrum( r , g , b );
+RGBSpectrum RGBSpectrum::operator - ( float t ) const{
+    return data - t;
 }
 
-// + operator
-RGBSpectrum RGBSpectrum::operator * ( float t ) const
-{
-    float r = t * m_r;
-    float g = t * m_g ;
-    float b = t * m_b ;
-
-    return RGBSpectrum( r , g , b );
+RGBSpectrum RGBSpectrum::operator * ( float t ) const{
+    return data * t;
 }
 
-// / operator
-RGBSpectrum RGBSpectrum::operator / ( float t ) const
-{
-    float r = m_r / t;
-    float g = m_g / t;
-    float b = m_b / t;
-
-    return RGBSpectrum( r , g , b );
+RGBSpectrum RGBSpectrum::operator / ( float t ) const{
+    return data / t;
 }
 
-// get each component
 float RGBSpectrum::GetR() const {
-    return m_r;
+    return data.r;
 }
 float RGBSpectrum::GetG() const {
-    return m_g;
+    return data.g;
 }
 float RGBSpectrum::GetB() const {
-    return m_b;
+    return data.b;
 }
 float RGBSpectrum::GetMaxComponent() const{
-    return std::max( m_r , std::max( m_b , m_g ) );
+    return std::max( data.r , std::max( data.g , data.b ) );
 }
 
-// clamp the spectrum
-RGBSpectrum RGBSpectrum::Clamp( float low , float high ) const
-{
-    return RGBSpectrum( clamp(m_r, low, high) , clamp(m_g, low, high) , clamp(m_b, low, high) );
+RGBSpectrum RGBSpectrum::Clamp( float low , float high ) const{
+    return RGBSpectrum( clamp(data, low, high) );
 }

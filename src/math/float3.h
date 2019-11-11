@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include <math.h>
+#include <algorithm>
 #include "core/define.h"
 
 #ifdef SSE_ENABLED
@@ -116,7 +118,7 @@ struct float3{
     //! @return     True if the float3 is ( 0.0f , 0.0f , 0.0f )
     SORT_FORCEINLINE bool       isZero() const{
         #ifdef SSE_ENABLED
-            return _mm_movemask_ps(_mm_cmpeq_ps( data , _mm_set_ps1(0.0f) )) == 0xf;
+            return _mm_movemask_ps(_mm_cmpeq_ps( data , _mm_set_ps1(0.0f) )) == 0x7;
         #else
             return ( x == 0.0f ) && ( y == 0.0f ) && ( z == 0.0f );
         #endif
@@ -191,6 +193,14 @@ SORT_FORCEINLINE float3   operator  -( const float3& f0 , const float f1 ) {
     return _mm_sub_ps( f0.data , _mm_set_ps1(f1) );
 #else
     return float3( f0.x - f1 , f0.y - f1 , f0.z - f1 );
+#endif
+}
+
+SORT_FORCEINLINE float3   operator  -( const float f0 , const float3& f1 ) {
+#ifdef SSE_ENABLED
+    return _mm_sub_ps( _mm_set_ps1(f0) , f1.data );
+#else
+    return float3( f0 - f1.x , f0 - f1.y , f0 - f1.z );
 #endif
 }
 
@@ -279,5 +289,43 @@ SORT_FORCEINLINE bool     operator  !=( const float3& f0 , const float3& f1 ){
     return _mm_movemask_ps(_mm_cmpeq_ps( f0.data , f1.data )) == 0x0;
 #else
     return ( f0.x != f1.x ) || ( f0.y != f1.y ) || ( f0.z != f1.z );
+#endif
+}
+
+SORT_FORCEINLINE float3   sqrt( const float3& f ){
+#ifdef SSE_ENABLED
+    return _mm_sqrt_ps(f.data);
+#else
+    return float3( sqrt( f.x ) , sqrt( f.y ) , sqrt( f.z ) );
+#endif
+}
+
+SORT_FORCEINLINE float3   max( const float3& f , const float m ){
+#ifdef SSE_ENABLED
+    return _mm_max_ps(f.data, _mm_set_ps1(m));
+#else
+    return float3( std::max( f[0] , m ) , std::max( f[1] , m ) , std::max( f[2] , m ) );
+#endif
+}
+
+SORT_FORCEINLINE float3   min( const float3& f , const float m ){
+#ifdef SSE_ENABLED
+    return _mm_min_ps(f.data, _mm_set_ps1(m));
+#else
+    return float3( std::min( f.x , m ) , std::min( f.y , m ) , std::min( f.z , m ) );
+#endif
+}
+
+SORT_FORCEINLINE float3   clamp( const float3& f , const float minVal , const float maxVal ){
+    return max( min( f , maxVal ) , minVal );
+}
+
+SORT_FORCEINLINE float3   exp( const float3& f ){
+#ifdef SSE_ENABLED
+    // there is no such a function, further investigation needs to be done for better performance.
+    // return _mm_exp_ps(f.data);
+    return float3( exp( f.r ) , exp( f.g ) , exp( f.b ) );
+#else
+    return float3( exp( f.r ) , exp( f.g ) , exp( f.b ) );
 #endif
 }
