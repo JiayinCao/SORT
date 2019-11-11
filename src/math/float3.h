@@ -30,8 +30,6 @@
   * The catch of SSE version float3 implementation is that it is actually a 4-channel
   * float data structure instead of three. This is both for 128 bits alignment and
   * fitting the SSE data structure.
-  * In order to keep consistant memory layout, float3 will occupy 128 bits even if 
-  * there is no SSE enabled in case high level code assumes so.
   * One minor and important detail is that float3 doesn't gurrantee correctness
   * of the implicit forth channel, meaning it is totally possible we will ahve 'nan'
   * in it. However, as long as it doesn't crash the system, it is not a threat.
@@ -134,7 +132,11 @@ struct float3{
     };
 };
 
-static_assert( sizeof( float3 ) == 16 , "Incorrect float3 size." );
+#ifdef SSE_ENABLED
+    static_assert( sizeof( float3 ) == 16 , "Incorrect float3 size." );
+#else
+    static_assert( sizeof( float3 ) == 12 , "Incorrect float3 size." );
+#endif
 
 SORT_FORCEINLINE float3   operator  +( const float3& f0 , const float3& f1 ) {
 #ifdef SSE_ENABLED
