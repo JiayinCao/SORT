@@ -34,8 +34,8 @@ public:
         float           specular;
         float           roughnessU;
         float           roughnessV;
-        RGBSpectrum     baseColor;
-        Vector          n;
+        OSL::Vec3       baseColor;
+        OSL::Vec3       n;
     };
 
     //! Constructor.

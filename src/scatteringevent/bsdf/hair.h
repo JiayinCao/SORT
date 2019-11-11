@@ -33,7 +33,7 @@ class Hair : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
     struct Params {
-        RGBSpectrum sigma;
+        OSL::Vec3   sigma;
         float       longtitudinalRoughness;
         float       azimuthalRoughness;
         float       ior;

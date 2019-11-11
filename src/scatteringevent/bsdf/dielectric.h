@@ -37,11 +37,11 @@ class Dielectric : public Bxdf {
 public:
     // Input parameters to construct the BRDF.
     struct Params {
-        RGBSpectrum     reflectance;
-        RGBSpectrum     transmittance;
+        OSL::Vec3       reflectance;
+        OSL::Vec3       transmittance;
         float           roughnessU;
         float           roughnessV;
-        Vector n;
+        OSL::Vec3       n;
     };
 
     //! Constructor from parameter set.

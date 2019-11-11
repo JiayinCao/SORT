@@ -31,7 +31,7 @@ class DistributionBRDF : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
     struct Params {
-        RGBSpectrum baseColor;
+        OSL::Vec3   baseColor;
         float       roughness;
         float       specular;
         float       specularTint;

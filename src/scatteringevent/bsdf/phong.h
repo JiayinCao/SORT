@@ -19,6 +19,7 @@
 
 #include "bxdf.h"
 #include "core/sassert.h"
+#include "material/osl_utils.h"
 
 //! @brief Phong BRDF.
 /**
@@ -40,10 +41,10 @@
 class Phong : public Bxdf{
 public:
     struct Params{
-        RGBSpectrum     diffuse;
-        RGBSpectrum     specular;
-        float           specularPower;
-        Vector          n;
+        OSL::Vec3     diffuse;
+        OSL::Vec3     specular;
+        float         specularPower;
+        OSL::Vec3     n;
     };
 
     //! Constructor
@@ -53,7 +54,7 @@ public:
     //! @param  doubleSided     Whether the BRDF is double-sided.
     Phong(const Params& params, const Spectrum& weight, bool doubleSided = false)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.diffuse), S(params.specular), power(params.specularPower),
-          diffRatio(params.diffuse.GetIntensity()/(params.diffuse.GetIntensity()+params.specular.GetIntensity())) {
+          diffRatio(intensityOSLVec3(params.diffuse)/(intensityOSLVec3(params.diffuse)+intensityOSLVec3(params.specular))) {
         const auto combined = D + S;
         sAssert(combined.GetR() <= 1.0f, MATERIAL);
         sAssert(combined.GetG() <= 1.0f, MATERIAL);

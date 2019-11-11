@@ -161,13 +161,13 @@ namespace {
             const auto weight = comp->w * w;
             const auto sample_weight = ( weight[0] + weight[1] + weight[2] ) / 3.0f;
 			auto params = *comp->as<DisneyBRDF::Params>();
-			auto& mfp = params.scatterDistance;
+			RGBSpectrum mfp = params.scatterDistance;
 
 			// Ignore SSS if necessary
 			if ( SE_NONE != ( se.GetFlag() & SE_REPLACE_BSSRDF ) )
 				mfp = 0.0f;
 
-			auto sssBaseColor = params.baseColor;
+			RGBSpectrum sssBaseColor = params.baseColor;
 
 #ifdef SSS_REPLACE_WITH_LAMBERT
 			constexpr float delta = 0.0001f;

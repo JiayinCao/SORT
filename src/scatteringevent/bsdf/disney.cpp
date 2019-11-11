@@ -23,6 +23,7 @@
 #include "microfacet.h"
 #include "core/memory.h"
 #include "math/exp.h"
+#include "material/osl_utils.h"
 
 constexpr static float ior_in = 1.5f;          // hard coded index of refraction below the surface
 constexpr static float ior_ex = 1.0f;          // hard coded index of refraction above the surface
@@ -426,13 +427,13 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
 }
 
 float DisneyBRDF::Evaluate_PDF( const Params& params ){
-    const auto hasSSS = !params.scatterDistance.IsBlack();
+    const auto hasSSS = !isBlack(params.scatterDistance);
 
     // If there is no SSS, there will be 100% chance that a BXDF will be chosen.
     if( !hasSSS )
         return 1.0f;
 
-    const auto luminance = params.baseColor.GetIntensity();
+    const auto luminance = intensityOSLVec3( params.baseColor );
     const auto Ctint = luminance > 0.0f ? params.baseColor * (1.0f / luminance) : Spectrum(1.0f);
     const auto min_specular_amount = SchlickR0FromEta(ior_ex / ior_in);
     const auto Cspec0 = slerp(params.specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, params.specularTint), params.baseColor, params.metallic);

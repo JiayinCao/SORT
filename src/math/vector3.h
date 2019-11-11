@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <OSL/oslexec.h>
 #include <math.h>
 #include "math/utils.h"
 
@@ -29,6 +30,7 @@ public:
     Vector3( T t ) : x(t),y(t),z(t){}
     Vector3( const Vector3<T>& c ) : x(c.x), y(c.y), z(c.z){}
     Vector3( const T* const d ) : x(d[0]),y(d[1]),z(d[2]){}
+    Vector3( OSL::Vec3 v ) : x( v.x ) , y( v.y ) , z(v.z) {}
 
     Vector3<T>  operator+ ( const Vector3<T>& v) const {
         return Vector3<T>( x + v.x , y + v.y , z + v.z );

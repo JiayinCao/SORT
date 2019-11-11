@@ -29,8 +29,8 @@ class Lambert : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
     struct Params {
-        RGBSpectrum baseColor;
-        Vector n;
+        OSL::Vec3 baseColor;
+        OSL::Vec3 n;
     };
 
     //! Constructor taking spectrum information.

@@ -49,12 +49,12 @@ public:
         float       clearcoat;
         float       clearcoatGloss;
         float       specTrans;
-        RGBSpectrum  scatterDistance;
+        OSL::Vec3   scatterDistance;
         float       flatness;
         float       diffTrans;
         int         thinSurface;
-        RGBSpectrum baseColor;
-        Vector n;
+        OSL::Vec3   baseColor;
+        OSL::Vec3   n;
     };
 
     //! Constructor

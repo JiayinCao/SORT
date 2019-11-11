@@ -157,12 +157,12 @@ class MicroFacetReflection : public Microfacet{
 public:
     struct Params{
         OSL::ustring    dist;
-        RGBSpectrum     eta;
-        RGBSpectrum     absorption;
+        OSL::Vec3       eta;
+        OSL::Vec3       absorption;
         float           roughnessU;
         float           roughnessV;
-        RGBSpectrum     baseColor;
-        Vector          n;
+        OSL::Vec3       baseColor;
+        OSL::Vec3       n;
     };
 
     struct ParamsDieletric{
@@ -171,13 +171,13 @@ public:
         float           iorT;
         float           roughnessU;
         float           roughnessV;
-        RGBSpectrum     baseColor;
-        Vector          n;
+        OSL::Vec3       baseColor;
+        OSL::Vec3       n;
     };
 
     struct MirrorParams{
-        RGBSpectrum     baseColor;
-        Vector          n;
+        OSL::Vec3       baseColor;
+        OSL::Vec3       n;
     };
 
     //! @brief Constructor from parameter set
@@ -246,8 +246,8 @@ public:
         float           etaT;
         float           roughnessU;
         float           roughnessV;
-        RGBSpectrum     transmittance;
-        Vector          n;
+        OSL::Vec3       transmittance;
+        OSL::Vec3       n;
     };
 
     //! @brief Constructor from parameter set

@@ -32,9 +32,9 @@ class OrenNayar : public Bxdf
 public:
     // Input parameters to construct the BRDF.
     struct Params {
-        RGBSpectrum baseColor;
+        OSL::Vec3   baseColor;
         float       sigma;
-        Vector n;
+        OSL::Vec3   n;
     };
 
     //! Constructor
