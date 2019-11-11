@@ -18,6 +18,7 @@
 #include <OSL/oslclosure.h>
 #include <OSL/genclosure.h>
 #include "closures.h"
+#include "osl_utils.h"
 #include "core/memory.h"
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/bsdf/bsdf.h"
@@ -699,7 +700,7 @@ namespace {
 
 		void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
 			const auto& params = *comp->as<DisneyBssrdf::Params>();
-			if( params.baseColor.IsBlack() )
+			if( isBlack(params.baseColor) )
 				return;
 
 			const auto weight = w * comp->w;

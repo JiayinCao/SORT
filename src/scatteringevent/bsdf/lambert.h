@@ -73,8 +73,8 @@ class LambertTransmission : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
     struct Params {
-        RGBSpectrum transmittance;
-        Vector n;
+        OSL::Vec3 transmittance;
+        OSL::Vec3 n;
     };
 
     //! Constructor from parameter set.

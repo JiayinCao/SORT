@@ -204,9 +204,9 @@ protected:
 class DisneyBssrdf : public SeparableBssrdf {
 public:
     struct Params{
-        RGBSpectrum     baseColor;
-        RGBSpectrum     scatterDistance;
-        Vector          n;
+        OSL::Vec3     baseColor;
+        OSL::Vec3     scatterDistance;
+        OSL::Vec3     n;
     };
 
     //! @brief  Constructor of DisneyBssrdf from shader input.
