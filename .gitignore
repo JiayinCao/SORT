@@ -220,3 +220,4 @@ pip-log.txt
 _out/
 proj_release/
 proj_debug/
+proj_relwighdebinfo/

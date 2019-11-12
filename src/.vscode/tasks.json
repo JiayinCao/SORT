@@ -52,6 +52,32 @@
             "windows":{
                 "command": "cd ..;New-Item -Force -ItemType directory -Path proj_release;cd proj_release;cmake -A x64 ..;msbuild /p:Configuration=Release /property:GenerateFullPaths=true /t:clean,build SORT.sln"
             }
+        },
+        {
+            "label": "Build (Release with Debug Info)",
+            "type": "shell",
+            "command": "reset;cd ..;mkdir proj_relwighdebinfo;cd proj_relwighdebinfo;cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..;make -j6",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$gcc",
+            "windows":{
+                "command": "cd ..;New-Item -Force -ItemType directory -Path proj_relwighdebinfo;cd proj_relwighdebinfo;cmake -A x64 ..;msbuild /p:Configuration=RelWithDebInfo /property:GenerateFullPaths=true /t:build SORT.sln"
+            }
+        },
+        {
+            "label": "Re-Build (Release with Debug Info)",
+            "type": "shell",
+            "command": "reset;cd ..;rm -rf proj_relwighdebinfo;mkdir proj_relwighdebinfo;cd proj_relwighdebinfo;cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..;make clean;make -j6",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$gcc",
+            "windows":{
+                "command": "cd ..;New-Item -Force -ItemType directory -Path proj_relwighdebinfo;cd proj_relwighdebinfo;cmake -A x64 ..;msbuild /p:Configuration=RelWithDebInfo /property:GenerateFullPaths=true /t:clean,build SORT.sln"
+            }
         }
     ]
 }
