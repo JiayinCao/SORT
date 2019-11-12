@@ -6,6 +6,8 @@ Available commands
         Build release version.
     * debug
         Build debug version.
+    * relwithdebinfo
+        Build release version with debug information.
     * update
         Sync the latest code from Github
     * update_dep
@@ -31,6 +33,8 @@ Convenience targets
     * debug
         Standard debugging version that has everything, which is only for
         debugging purposes.
+    * relwithdebinfo
+        Release version with debug information.
 
 endef
 
@@ -123,13 +127,15 @@ ifeq ($(OS), linux)
 	endif
 endif
 
-BUILD_RELEASE_COMMAND = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Release ..;make -j 4;cd ..;
-BUILD_DEBUG_COMMAND = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_debug; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4
+BUILD_RELEASE_COMMAND        = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Release ..;make -j 4;cd ..;
+BUILD_DEBUG_COMMAND          = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_debug; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4;cd ..;
+BUILD_RELWITHDEBINFO_COMMAND = @echo "building release version with debug information.";cd $(SORT_DIR); mkdir proj_relwithdebinfo; cd proj_relwithdebinfo; cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..;make -j 4;cd ..;
 
 # Check if the depedency files are already downloaded.
 ifeq ("$(wildcard $(SORT_DEP_DIR))","")
-    BUILD_RELEASE_COMMAND = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
-    BUILD_DEBUG_COMMAND   = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
+    BUILD_RELEASE_COMMAND        = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
+    BUILD_DEBUG_COMMAND          = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
+    BUILD_RELWITHDEBINFO_COMMAND = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
 endif
 
 release: .FORCE
@@ -137,6 +143,9 @@ release: .FORCE
 
 debug: .FORCE
 	$(BUILD_DEBUG_COMMAND)
+
+relwithdebinfo: .FORCE
+	$(BUILD_RELWITHDEBINFO_COMMAND)
 
 update: .FORCE
 	@echo 'Syncing source code from Github'
@@ -149,7 +158,7 @@ update_dep: .FORCE
 
 clean: .FORCE
 	@echo 'Cleaning all generated files'
-	cd $(SORT_DIR); rm -rf bin ; rm -rf proj_release ; rm -rf proj_debug ; rm -rf _out
+	cd $(SORT_DIR); rm -rf bin ; rm -rf proj_release ; rm -rf proj_debug ; rm -rf proj_relwithdebinfo ; rm -rf _out ;
 
 clean_dep: .FORCE
 	@echo 'Cleaning all dependency files'

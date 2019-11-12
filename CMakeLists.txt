@@ -51,16 +51,18 @@ if(SORT_ENABLE_PROFILER)
     MARK_AS_ADVANCED( easy_profiler_DIR )
 endif(SORT_ENABLE_PROFILER)
 
-# set available configurations
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo" CACHE STRING "" FORCE )
-
 # default build type is release
-set( CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+set( DEFUALT_BULID_TYPE "Release")
 
-# Set the possible values of build type for cmake-gui
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY HELPSTRING "Choose the type of build")
-# set the valid options for cmake-gui drop-down list
-set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug;Release;RelWithDebInfo")
+# Options to choose configuration type
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to '${DEFUALT_BULID_TYPE}' as none was specified.")
+    set(CMAKE_BUILD_TYPE "${DEFUALT_BULID_TYPE}" CACHE STRING "Choose the type of build." FORCE)
+
+    # Set the possible values of build type for cmake-gui
+    set( CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo" CACHE STRING "" FORCE )
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo")
+endif()
 
 project (SORT)
 
