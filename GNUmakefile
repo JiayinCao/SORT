@@ -124,7 +124,7 @@ ifeq ($(OS), linux)
 endif
 
 BUILD_RELEASE_COMMAND = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Release ..;make -j 4;cd ..;
-BUILD_DEBUG_COMMAND = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4
+BUILD_DEBUG_COMMAND = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_debug; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4
 
 # Check if the depedency files are already downloaded.
 ifeq ("$(wildcard $(SORT_DEP_DIR))","")
