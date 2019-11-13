@@ -153,7 +153,7 @@ endif(SORT_PLATFORM_MAC)
 
 if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
+	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread -flto")
 endif()
 
 # Setup correct output name for different configurations
