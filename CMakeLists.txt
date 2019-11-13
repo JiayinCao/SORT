@@ -42,14 +42,16 @@ endif()
 # Set it to on to enable more debugging output
 #set(DEBUG_CMAKE ON)
 
-SET( SORT_ENABLE_PROFILER "NO" CACHE BOOL "Enable SORT profiling system. It is false by default." )
-SET( SORT_ENABLE_STATS "YES" CACHE BOOL "Enable SORT stats system. It is true by default." )
+SET( ENABLE_PROFILER               "NO"   CACHE BOOL "Enable SORT profiling system. It is disabled by default." )
+SET( ENABLE_STATS                  "YES"  CACHE BOOL "Enable SORT stats system. It is enabled by default." )
+SET( ENABLE_FASTMATH               "NO"   CACHE BOOL "Enable fast math. It may have potential risk in errors due to lower precision. Performance gain is quite limited and unstable, for which reason it is disabled by default." )
+SET( ENABLE_LINKTIME_OPTIMIZATION  "YES"  CACHE BOOL "Link time optimization is enabled by default since it does show some performance gain sometimes." )
 
 # For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
-if(SORT_ENABLE_PROFILER)
+if(ENABLE_PROFILER)
     set( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" )
     MARK_AS_ADVANCED( easy_profiler_DIR )
-endif(SORT_ENABLE_PROFILER)
+endif(ENABLE_PROFILER)
 
 # default build type is release
 set( DEFUALT_BULID_TYPE "Release")
@@ -69,9 +71,9 @@ project (SORT)
 # include other modules
 include("${CMAKE_CURRENT_LIST_DIR}/build-files/cmake/externalPackages.cmake")
 
-if(SORT_ENABLE_PROFILER)
+if(ENABLE_PROFILER)
 	find_package(easy_profiler REQUIRED)
-endif(SORT_ENABLE_PROFILER)
+endif(ENABLE_PROFILER)
 
 include_directories( "${SORT_SOURCE_DIR}/src" )
 
@@ -112,9 +114,9 @@ add_executable(SORT ${all_files})
 
 target_link_libraries(SORT ${OPENIMAGEIO_LIBRARIES})
 target_link_libraries(SORT ${OSL_LIBRARIES})
-if(SORT_ENABLE_PROFILER)
+if(ENABLE_PROFILER)
     target_link_libraries(SORT easy_profiler)
-endif(SORT_ENABLE_PROFILER)
+endif(ENABLE_PROFILER)
 
 # Enable multi-thread compiling on Windows.
 if (SORT_PLATFORM_WIN)
@@ -128,44 +130,64 @@ if (SORT_PLATFORM_WIN)
 endif (SORT_PLATFORM_WIN)
 
 # Enable SORT Stats system.
-if(SORT_ENABLE_STATS)
+if(ENABLE_STATS)
     message( STATUS "SORT Stats System Enabled.")
 	add_definitions(-DSORT_ENABLE_STATS_COLLECTION)
 else()
     message( STATUS "SORT Stats Sysatem Disabled." )
-endif(SORT_ENABLE_STATS)
+endif(ENABLE_STATS)
 
 # Enable Profiling system in SORT.
-if(SORT_ENABLE_PROFILER)
+if(ENABLE_PROFILER)
     message( STATUS "SORT Profiling System Enabled." )
-    add_definitions(-DSORT_ENABLE_PROFILER)
+    add_definitions(-DENABLE_PROFILER)
 if (!SORT_PLATFORM_LINUX) # it doesn't link well with OSL
     add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
 endif()
 else()
     message( STATUS "SORT Profiling System Disabled." )
-endif(SORT_ENABLE_PROFILER)
+endif(ENABLE_PROFILER)
 
 # Surpress a warning
 if(SORT_PLATFORM_MAC)
     add_definitions( -Wno-deprecated-register )
 endif(SORT_PLATFORM_MAC)
 
-if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
-	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread -flto")
-endif()
-
 # Setup correct output name for different configurations
 set_target_properties( SORT PROPERTIES RELEASE_OUTPUT_NAME "sort_r" )
 set_target_properties( SORT PROPERTIES DEBUG_OUTPUT_NAME "sort_d" )
 set_target_properties( SORT PROPERTIES RELWITHDEBINFO_OUTPUT_NAME "sort_rd" )
 
-# Surpress warnings in thirdparty library.
+# Specific settings in windows
 if(MSVC)
+	# enable whole program optimization, which gains roughly 8% in term of performance
+	if(ENABLE_LINKTIME_OPTIMIZATION)
+		set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/GL" )
+		set_target_properties( SORT PROPERTIES LINK_FLAGS_RELEASE "/LTCG")
+	endif()
+
+	# enable fast math for better performance
+	if(ENABLE_FASTMATH)
+		set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/fp:fast" )
+	endif()
+
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4305 /wd4800" )
 endif(MSVC)
+
+# Specific settings in Linux and Mac
+if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
+	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
+	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
+
+	if(ENABLE_LINKTIME_OPTIMIZATION)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+	endif()
+
+	if(ENABLE_FASTMATH)
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
+	endif()
+endif()
 
 # Output include directories
 if( DEBUG_CMAKE )
