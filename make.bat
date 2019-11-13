@@ -58,6 +58,14 @@ if "%BUILD_RELEASE%" == "1" (
 	cd ..
 )
 
+if "%BUILD_RELWITHDEBINFO%" == "1" (
+	powershell New-Item -Force -ItemType directory -Path proj_relwithdebinfo
+	cd proj_relwithdebinfo
+	cmake -A x64 ..
+	msbuild /p:Configuration=RelWithDebInfo SORT.sln
+	cd ..
+)
+
 if "%BUILD_DEBUG%" == "1" (
 	powershell New-Item -Force -ItemType directory -Path proj_debug
 	cd proj_debug

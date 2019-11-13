@@ -32,8 +32,8 @@
   * The catch of SSE version float3 implementation is that it is actually a 4-channel
   * float data structure instead of three. This is both for 128 bits alignment and
   * fitting the SSE data structure.
-  * One minor and important detail is that float3 doesn't gurrantee correctness
-  * of the implicit forth channel, meaning it is totally possible we will ahve 'nan'
+  * One minor and important detail is that float3 doesn't guarantee correctness
+  * of the implicit forth channel, meaning it is totally possible we will have 'nan'
   * in it. However, as long as it doesn't crash the system, it is not a threat.
   */
 struct float3{
@@ -91,10 +91,10 @@ struct float3{
         return *this;
     }
 
-    //! @brief  [] operator to retreive per channel data.
+    //! @brief  [] operator to retrieve per channel data.
     //!
     //! There will be no safety checking for performance reason since this is low level code.
-    //! It is up to whoever calls this function to make sure the index is alwasy valid.
+    //! It is up to whoever calls this function to make sure the index is always valid.
     //!
     //! @param i    Channel to be retrieved, it has to be 0/1/2.
     //! @return     The data stored in the channel.
@@ -102,10 +102,10 @@ struct float3{
         return f[i];
     }
 
-    //! @brief  [] operator to retreive per channel data.
+    //! @brief  [] operator to retrieve per channel data.
     //!
     //! There will be no safety checking for performance reason since this is low level code.
-    //! It is up to whoever calls this function to make sure the index is alwasy valid.
+    //! It is up to whoever calls this function to make sure the index is always valid.
     //!
     //! @param i    Channel to be retrieved, it has to be 0/1/2.
     //! @return     The data stored in the channel.
