@@ -171,6 +171,10 @@ if(MSVC)
 		set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/fp:fast" )
 	endif()
 
+	# this enables debuging in Visual Studio, otherwise it will crash
+	# somehow CMAKE_MSVC_RUNTIME_LIBRARY doesn't work
+	set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/MD" )
+
 	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4305 /wd4800" )
 endif(MSVC)
@@ -197,8 +201,5 @@ if( DEBUG_CMAKE )
       message(STATUS "\t'${dir}'")
     endforeach()
 endif()
-
-#set(CMAKE_CXX_FLAGS_RELEASE "/MD")
-#set(CMAKE_CXX_FLAGS_DEBUG "/MD")
 
 MARK_AS_ADVANCED(CMAKE_INSTALL_PREFIX)
