@@ -81,7 +81,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
     auto e2 = p0.x * p1.z - p0.z * p1.x;
 
     // fall back to double precision for better accuracy at some performance cost
-    if( ( e0 == 0.0f || e1 == 0.0f || e2 == 0.0f ) ){
+    if( UNLIKELY( e0 == 0.0f || e1 == 0.0f || e2 == 0.0f ) ){
         e0 = (float)( (double)p1.x * (double)p2.z - (double)p1.z * (double)p2.x );
         e1 = (float)( (double)p2.x * (double)p0.z - (double)p2.z * (double)p0.x );
         e2 = (float)( (double)p0.x * (double)p1.z - (double)p0.z * (double)p1.x );
