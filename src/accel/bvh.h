@@ -84,8 +84,6 @@ public:
     //!                     stops as long as it finds an intersection. It is faster than
     //!                     the one with intersection information data and suitable for
     //!                     shadow ray calculation.
-    //! @param  matID       In some cases, like SSS, we need intersection with primitives from the same material.
-    //!                     Most of the time, this parameter is invalid, meaning all primitives will be tested against the ray.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
     bool    GetIntersect( const Ray& r , Intersection* intersect ) const override;

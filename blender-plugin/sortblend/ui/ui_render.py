@@ -57,7 +57,8 @@ class SORTRenderData(bpy.types.PropertyGroup):
     #                              Spatial Accelerator Settings                          #
     #------------------------------------------------------------------------------------#
     # Accelerator type
-    accelerator_types = [ ("bvh", "Bounding Volume Hierarchy", "", 1),
+    accelerator_types = [ ("bvh", "Bounding Volume Hierarchy", "", 0),
+                          ("Qbvh", "Quad Bounding Volume Hierarchy", "" , 1),
                           ("KDTree", "SAH KDTree", "", 2),
                           ("UniGrid", "Uniform Grid", "", 3),
                           ("OcTree" , "OcTree" , "" , 4),
