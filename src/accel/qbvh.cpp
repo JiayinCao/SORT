@@ -66,8 +66,6 @@ void Qbvh::Build(const Scene& scene){
     SORT_STATS(sQbvhLeafNodeCountCopy = sQbvhLeafNodeCount);
 }
 
-int g0 , g1;
-
 void Qbvh::splitNode( Bvh_Node* const node , const BBox& node_bbox , unsigned depth ){
     SORT_STATS(sQbvhDepth = std::max( sQbvhDepth , (StatsInt)depth + 1 ) );
 
