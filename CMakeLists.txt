@@ -160,37 +160,37 @@ set_target_properties( SORT PROPERTIES RELWITHDEBINFO_OUTPUT_NAME "sort_rd" )
 
 # Specific settings in windows
 if(MSVC)
-	# enable whole program optimization, which gains roughly 8% in term of performance
-	if(ENABLE_LINKTIME_OPTIMIZATION)
-		set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/GL" )
-		set_target_properties( SORT PROPERTIES LINK_FLAGS_RELEASE "/LTCG")
-	endif()
+    # enable whole program optimization, which gains roughly 8% in term of performance
+    if(ENABLE_LINKTIME_OPTIMIZATION)
+        set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/GL" )
+        set_target_properties( SORT PROPERTIES LINK_FLAGS_RELEASE "/LTCG")
+    endif()
 
-	# enable fast math for better performance
-	if(ENABLE_FASTMATH)
-		set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/fp:fast" )
-	endif()
+    # enable fast math for better performance
+    if(ENABLE_FASTMATH)
+        set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/fp:fast" )
+    endif()
 
-	# this enables debuging in Visual Studio, otherwise it will crash
-	# somehow CMAKE_MSVC_RUNTIME_LIBRARY doesn't work
-	set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/MD" )
+    # this enables debuging in Visual Studio, otherwise it will crash
+    # somehow CMAKE_MSVC_RUNTIME_LIBRARY doesn't work
+    set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/MD" )
 
-	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
+    set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4305 /wd4800" )
 endif(MSVC)
 
 # Specific settings in Linux and Mac
 if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
-	set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
-	set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
+    set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
+    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
 
-	if(ENABLE_LINKTIME_OPTIMIZATION)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
-	endif()
+    if(ENABLE_LINKTIME_OPTIMIZATION)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+    endif()
 
-	if(ENABLE_FASTMATH)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
-	endif()
+    if(ENABLE_FASTMATH)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
+    endif()
 endif()
 
 # Output include directories
@@ -202,4 +202,11 @@ if( DEBUG_CMAKE )
     endforeach()
 endif()
 
+# hide the options that I never use
 MARK_AS_ADVANCED(CMAKE_INSTALL_PREFIX)
+if(SORT_PLATFORM_MAC)
+    MARK_AS_ADVANCED(CMAKE_OSX_ARCHITECTURES)
+    MARK_AS_ADVANCED(CMAKE_OSX_DEPLOYMENT_TARGET)
+    MARK_AS_ADVANCED(CMAKE_OSX_SYSROOT)
+    MARK_AS_ADVANCED(CMAKE_EXECUTABLE_FORMAT)
+endif()
