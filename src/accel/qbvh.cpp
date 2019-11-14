@@ -15,6 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <queue>
 #include "qbvh.h"
 #include "core/memory.h"
 #include "core/stats.h"
@@ -55,7 +56,7 @@ void Qbvh::Build(const Scene& scene){
     // recursively split node
     m_root = std::make_unique<Bvh_Node>();
     m_root->pri_offset = 0;
-    m_root->pri_cnt = m_primitives->size();
+    m_root->pri_cnt = (unsigned int)m_primitives->size();
     splitNode( m_root.get() , m_bbox , 1u );
 
     // if the algorithm reaches here, it is a valid QBVH
@@ -64,6 +65,8 @@ void Qbvh::Build(const Scene& scene){
     SORT_STATS(++sQbvhNodeCount);
     SORT_STATS(sQbvhLeafNodeCountCopy = sQbvhLeafNodeCount);
 }
+
+int g0 , g1;
 
 void Qbvh::splitNode( Bvh_Node* const node , const BBox& node_bbox , unsigned depth ){
     SORT_STATS(sQbvhDepth = std::max( sQbvhDepth , (StatsInt)depth + 1 ) );
@@ -77,72 +80,55 @@ void Qbvh::splitNode( Bvh_Node* const node , const BBox& node_bbox , unsigned de
         return;
     }
 
-    // pick best split plane
-    unsigned    split_axis0;
-    float       split_pos0;
-    const auto sah = pickBestSplit( split_axis0 , split_pos0 , m_bvhpri.get() , node_bbox , start , end );
-    if( sah >= primitive_num ){
-        makeLeaf( node , start , end );
-        return;
-    }
+	std::queue< std::pair<unsigned int, unsigned int> > to_split, done_splitting;
+	to_split.push( std::make_pair( start , end ) );
 
-    // partition the data
-    auto compare = [split_pos0,split_axis0](const Bvh_Primitive& pri){return pri.m_centroid[split_axis0] < split_pos0;};
-    auto middle = std::partition( m_bvhpri.get() + start , m_bvhpri.get() + end, compare );
-    auto mid = (unsigned)(middle - m_bvhpri.get());
+	while( !to_split.empty() && to_split.size() + done_splitting.size() < (unsigned int)QBVH_CHILD_CNT ){
+		auto cur_split = to_split.front();
+		to_split.pop();
 
-    // To avoid degenerated node that has nothing in it.
-    // Technically, this shouldn't happen. Unlike KD-Tree implementation, there is only 16 split plane candidate, it is
-    // totally possible to pick one with no primitive on one side of the plane, resulting a crash later during ray tracing.
-    if (mid == start || mid == end){
-        makeLeaf(node, start, end);
-        return;
-    }
+		const auto start	= cur_split.first;
+		const auto end		= cur_split.second;
+		const auto prim_cnt = end - start;
 
-    // pick best split plane
-    unsigned    split_axis1;
-    float       split_pos1;
-    const auto  sah1 = pickBestSplit( split_axis1 , split_pos1 , m_bvhpri.get() , node_bbox , start , mid );
-    auto        first_node_end = mid;
-    if( sah1 < mid - start ){
-        // partition the data
-        auto compare = [split_pos1,split_axis1](const Bvh_Primitive& pri){return pri.m_centroid[split_axis1] < split_pos1;};
-        auto middle = std::partition( m_bvhpri.get() + start , m_bvhpri.get() + mid, compare );
-        first_node_end = (unsigned)(middle - m_bvhpri.get());
-    }
+		unsigned    split_axis;
+		float       split_pos;
+		const auto sah = pickBestSplit(split_axis, split_pos, m_bvhpri.get(), node_bbox, start, end);
+		if (sah >= prim_cnt)
+			done_splitting.push( std::make_pair( start , end ) );
+		else{
+			const auto compare = [split_pos, split_axis](const Bvh_Primitive& pri) {return pri.m_centroid[split_axis] < split_pos; };
+			const auto middle = std::partition(m_bvhpri.get() + start, m_bvhpri.get() + end, compare);
+			const auto mid = (unsigned)(middle - m_bvhpri.get());
 
-    unsigned    split_axis2;
-    float       split_pos2;
-    const auto  sah2 = pickBestSplit( split_axis2 , split_pos2 , m_bvhpri.get() , node_bbox , mid , end );
-    auto        third_node_end = end;
-    if( sah2 < end - mid ){
-        // partition the data
-        auto compare = [split_pos2,split_axis2](const Bvh_Primitive& pri){return pri.m_centroid[split_axis2] < split_pos2;};
-        auto middle = std::partition( m_bvhpri.get() + mid , m_bvhpri.get() + end, compare );
-        third_node_end = (unsigned)(middle - m_bvhpri.get());
-    }
+			if (mid == start || mid == end){
+				done_splitting.push( std::make_pair( start , end ) );
+			}else{
+				to_split.push( std::make_pair( start , mid ) );
+				to_split.push( std::make_pair( mid , end ) );
+			}
+		}
+	}
 
-    int i = 0;
+	int i = 0;
+	if( to_split.size() + done_splitting.size() == 1 ){
+		makeLeaf( node , start , end );
+		return;
+	}else{
+		const auto populate_child = [&] ( Bvh_Node* node , std::queue<std::pair<unsigned,unsigned>>& q ){
+			while (!q.empty()) {
+				const auto cur = q.front();
+				q.pop();
 
-    node->children[i] = std::make_unique<Bvh_Node>();
-    node->children[i]->pri_offset = start;
-    node->children[i++]->pri_cnt = first_node_end - start;
+				node->children[i] = std::make_unique<Bvh_Node>();
+				node->children[i]->pri_offset = cur.first;
+				node->children[i++]->pri_cnt = cur.second - cur.first;
+			}
+		};
 
-    if( first_node_end < mid ){
-        node->children[i] = std::make_unique<Bvh_Node>();
-        node->children[i]->pri_offset = first_node_end;
-        node->children[i++]->pri_cnt = mid - first_node_end;
-    }
-
-    node->children[i] = std::make_unique<Bvh_Node>();
-    node->children[i]->pri_offset = mid;
-    node->children[i++]->pri_cnt = third_node_end - mid;
-
-    if( third_node_end < end ){
-        node->children[i] = std::make_unique<Bvh_Node>();
-        node->children[i]->pri_offset = third_node_end;
-        node->children[i++]->pri_cnt = end - third_node_end;
-    }
+		populate_child( node , to_split );
+		populate_child( node , done_splitting );
+	}
 
     // split children if needed.
     for( int j = 0 ; j < i ; ++j ){
@@ -207,8 +193,8 @@ bool Qbvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* i
     }
 
     int child_cnt = 0;
-    float dist[4] = { FLT_MAX };
-    for( ; child_cnt < 4 && node->children[child_cnt] ; ++child_cnt )
+    float dist[QBVH_CHILD_CNT] = { FLT_MAX };
+    for( ; child_cnt < QBVH_CHILD_CNT && node->children[child_cnt] ; ++child_cnt )
         dist[child_cnt] = Intersect( ray , node->bbox[child_cnt] );
 
     auto intersection_found = false;
@@ -291,8 +277,8 @@ void Qbvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersect
     }
 
     int child_cnt = 0;
-    float dist[4] = { FLT_MAX };
-    for( ; child_cnt < 4 && node->children[child_cnt] ; ++child_cnt )
+    float dist[QBVH_CHILD_CNT] = { FLT_MAX };
+    for( ; child_cnt < QBVH_CHILD_CNT && node->children[child_cnt] ; ++child_cnt )
         dist[child_cnt] = Intersect( ray , node->bbox[child_cnt] );
 
     for( int i = 0 ; i < child_cnt ; ++i ){

@@ -21,6 +21,10 @@
 #include "core/primitive.h"
 #include "bvh_utils.h"
 
+#define QBVH_CHILD_CNT		4
+
+static_assert( QBVH_CHILD_CNT > 1 , "Qbvh node has to have at least two children." );
+
 //! @brief Quad Bounding volume hierarchy.
 /**
  * Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays
@@ -80,12 +84,12 @@ public:
 
 private:
     struct Bvh_Node{
-        BBox                        bbox[4];            /**< Bounding boxes of its four children. */
-        std::unique_ptr<Bvh_Node>   children[4];        /**< Chilren of its four nodes. */
+        BBox                        bbox[QBVH_CHILD_CNT];       /**< Bounding boxes of its four children. */
+        std::unique_ptr<Bvh_Node>   children[QBVH_CHILD_CNT];   /**< Children of its four nodes. */
 
-        unsigned                    pri_cnt = 0;        /**< Number of primitives in the node. */
-        unsigned                    pri_offset = 0;     /**< Offset of primitives in the buffer. */
-        bool                        leaf_node = false;  /**< Whether this is a leaf node. */
+        unsigned                    pri_cnt = 0;				/**< Number of primitives in the node. */
+        unsigned                    pri_offset = 0;				/**< Offset of primitives in the buffer. */
+        bool                        leaf_node = false;			/**< Whether this is a leaf node. */
     };
 
     /**< Primitive list during QBVH construction. */
