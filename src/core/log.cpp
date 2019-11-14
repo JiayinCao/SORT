@@ -15,14 +15,15 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "log.h"
 #include <iostream>
 #include <vector>
 #include <ctime>
 #include <chrono>
 #include <string>
 #include <mutex>
+#include "core/define.h"
 #include "core/path.h"
+#include "log.h"
 
 static std::vector<std::unique_ptr<LogDispatcher>> g_logDispatcher;
 static bool g_logLevel = true;
@@ -69,20 +70,25 @@ const std::string logTimeString(){
 
 const std::string levelToString( LOG_LEVEL level ){
     return !g_logLevel ? "" :
-    ( LOG_LEVEL::LOG_DEBUG == level ) ? "[Debug]" :
-    ( LOG_LEVEL::LOG_INFO == level ) ? "[Info]" :
-    ( LOG_LEVEL::LOG_WARNING == level ) ? "[Warning]" :
-    ( LOG_LEVEL::LOG_ERROR == level ) ? "[Error]" :
-    ( LOG_LEVEL::LOG_CRITICAL == level ) ? "[Critical]" : "";
+    ( LOG_LEVEL::LOG_DEBUG == level )    ? "[Debug]"   :
+    ( LOG_LEVEL::LOG_INFO == level )     ? "[Info]"    :
+    ( LOG_LEVEL::LOG_WARNING == level )  ? "[Warning]" :
+    ( LOG_LEVEL::LOG_ERROR == level )    ? "[Error]"   :
+    ( LOG_LEVEL::LOG_CRITICAL == level ) ? "[Critical]": "";
 }
 
 const std::string levelToHeaderColorCode( LOG_LEVEL level ){
+#ifdef SORT_IN_WINDOWS
+	// cmd doesn't show colored text correctly
+	return "";
+#else
     return !g_logLevel ? "\033[39m" :
     ( LOG_LEVEL::LOG_DEBUG == level ) ? "\033[33m" :
     ( LOG_LEVEL::LOG_INFO == level ) ? "\033[32m" :
     ( LOG_LEVEL::LOG_WARNING == level ) ? "\033[31m" :
     ( LOG_LEVEL::LOG_ERROR == level ) ? "\033[35m" :
     ( LOG_LEVEL::LOG_CRITICAL == level ) ? "\033[35m" : "\033[39m";
+#endif
 }
 
 const std::string typeToString( LOG_TYPE type ){
@@ -119,7 +125,11 @@ const std::string LogDispatcher::format( LOG_LEVEL level , LOG_TYPE type , const
 void StdOutLogDispatcher::output( const LOG_LEVEL level , const std::string& header , const std::string& info ){
     const auto color_code = levelToHeaderColorCode( level );
     static const auto default_color_code = 39;
+#ifdef SORT_IN_WINDOWS
+	std::cout<<color_code<<header<<" "<<info<<std::endl;
+#else
     std::cout<<color_code<<header<<"\033[39m"<<" "<<info<<std::endl;
+#endif
 }
 
 FileLogDispatcher::FileLogDispatcher( const std::string& filename ){

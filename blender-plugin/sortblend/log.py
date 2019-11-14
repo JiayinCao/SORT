@@ -14,6 +14,7 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 
 import bpy
+import platform
 from datetime import datetime
 
 # This file may be extended with more sophiscated implementation in the future.
@@ -21,8 +22,12 @@ from datetime import datetime
 
 # Output a log to blender terminal
 def log(s):
-    header = '[' + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '][SORT Plugin] '
-    print( "\033[32m" + header + "\033[39m" + '\t' + s )
+    if platform.system() == 'Windows':
+        header = '[' + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '][SORT Plugin] '
+        print( header + '\t' + s )
+    else:
+        header = '[' + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '][SORT Plugin] '
+        print( "\033[32m" + header + "\033[39m" + '\t' + s )
 
 # Output more detailed log to blender terminal
 def logD(s):
