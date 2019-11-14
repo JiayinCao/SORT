@@ -31,9 +31,6 @@
 //! @brief  This needs to be update every time the content of GlobalConfiguration chagnes.
 constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
 
-// Pre-declare the function because the file defining this interface includes this file first.
-std::string GetFilePathInExeFolder( const std::string& filename );
-
 //! @brief  GlobalConfiguration saves some global state.
 class GlobalConfiguration : public Singleton<GlobalConfiguration> , SerializableObject {
 public:

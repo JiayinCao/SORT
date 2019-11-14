@@ -17,6 +17,7 @@
 
 #include "rendertargetimage.h"
 #include "core/globalconfig.h"
+#include "core/path.h"
 
 void RenderTargetImage::StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ){
     std::lock_guard<spinlock_mutex> lock(m_mutex[y*m_width + x]);
