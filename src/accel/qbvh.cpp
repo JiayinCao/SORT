@@ -69,7 +69,7 @@ void Qbvh::splitNode( Bvh_Node* const node , const BBox& node_bbox , unsigned de
     SORT_STATS(sQbvhDepth = std::max( sQbvhDepth , (StatsInt)depth + 1 ) );
 
     const auto start    = node->pri_offset;
-    const auto end      = node->pri_cnt;
+    const auto end      = start + node->pri_cnt;
 
     const auto primitive_num = end - start;
     if( primitive_num <= m_maxPriInLeaf || depth == m_maxNodeDepth ){
@@ -208,7 +208,7 @@ bool Qbvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* i
 
     int child_cnt = 0;
     float dist[4] = { FLT_MAX };
-    for( ; child_cnt < 4 && !node->children[child_cnt] ; ++child_cnt )
+    for( ; child_cnt < 4 && node->children[child_cnt] ; ++child_cnt )
         dist[child_cnt] = Intersect( ray , node->bbox[child_cnt] );
 
     auto intersection_found = false;
@@ -292,7 +292,7 @@ void Qbvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersect
 
     int child_cnt = 0;
     float dist[4] = { FLT_MAX };
-    for( ; child_cnt < 4 && !node->children[child_cnt] ; ++child_cnt )
+    for( ; child_cnt < 4 && node->children[child_cnt] ; ++child_cnt )
         dist[child_cnt] = Intersect( ray , node->bbox[child_cnt] );
 
     for( int i = 0 ; i < child_cnt ; ++i ){
