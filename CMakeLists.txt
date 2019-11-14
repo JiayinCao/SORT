@@ -46,6 +46,8 @@ SET( ENABLE_PROFILER               "NO"   CACHE BOOL "Enable SORT profiling syst
 SET( ENABLE_STATS                  "YES"  CACHE BOOL "Enable SORT stats system. It is enabled by default." )
 SET( ENABLE_FASTMATH               "NO"   CACHE BOOL "Enable fast math. It may have potential risk in errors due to lower precision. Performance gain is quite limited and unstable, for which reason it is disabled by default." )
 SET( ENABLE_LINKTIME_OPTIMIZATION  "YES"  CACHE BOOL "Link time optimization is enabled by default since it does show some performance gain sometimes." )
+SET( ENABLE_SSE_OPTIMIZATION       "YES"  CACHE BOOL "Enable SSE optimization, this could boost the performance of ray tracing." )
+SET( ENABLE_AVX_OPTIMIZATION       "YES"  CACHE BOOL "Enable AVX optimization, this could boost the performance of ray tracing even more." )
 
 # For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
 if(ENABLE_PROFILER)
@@ -104,6 +106,14 @@ file(GLOB_RECURSE thirdparty_cpps src/thirdparty/*.cpp)
 file(GLOB_RECURSE thirdparty_cs src/thirdparty/*.c)
 file(GLOB_RECURSE thirdparty_ccs src/thirdparty/*.cc)
 set(thirdparty_files ${thirdparty_headers} ${thirdparty_cpps} ${thirdparty_cs} ${thirdparty_ccs})
+
+if(ENABLE_SSE_OPTIMIZATION)
+    add_definitions( -DSSE_ENABLED )
+endif()
+
+if(ENABLE_AVX_OPTIMIZATION)
+    add_definitions( -DAVX_ENABLED )
+endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SORT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE "${SORT_SOURCE_DIR}/bin")

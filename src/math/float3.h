@@ -21,8 +21,16 @@
 #include <algorithm>
 #include "core/define.h"
 
-#ifdef SSE_ENABLED
-#include <nmmintrin.h>
+// This doesn't help in performance, it is disabled by default.
+// #define SSE_FLOAT3
+
+// If SSE is not even enabled, disable SSE support for float3
+#ifndef SSE_ENABLED
+    #undef  SSE_FLOAT3
+#endif
+
+#ifdef SSE_FLOAT3
+    #include <nmmintrin.h>
 #endif
 
 //! @brief  float3 is a low level data structure that holds three floats.
@@ -40,7 +48,7 @@ struct float3{
 
     //! @brief  Default constructor initialize values with zeros.
     SORT_FORCEINLINE float3() : 
-    #ifdef SSE_ENABLED
+    #ifdef SSE_FLOAT3
         data(_mm_set_ps1(0.0f))
     #else
         x(0.0f), y(0.0f), z(0.0f)
@@ -51,7 +59,7 @@ struct float3{
     //!
     //! @param v    Value to be populated in all channels of the internal float3.
     SORT_FORCEINLINE float3( const float v ) : 
-    #ifdef SSE_ENABLED
+    #ifdef SSE_FLOAT3
         data(_mm_set_ps1(v))
     #else
         x(v),y(v),z(v)
@@ -64,14 +72,14 @@ struct float3{
     //! @param v1   Value to fill the second channel of SSE data.
     //! @param v2   Value to fill the third channel of SSE data.
     SORT_FORCEINLINE float3( const float v0 , const float v1 , const float v2 ) : 
-    #ifdef SSE_ENABLED
+    #ifdef SSE_FLOAT3
         data( _mm_set_ps(0.0f,v2,v1,v0) )
     #else
         x(v0),y(v1),z(v2)
     #endif
     {}
 
-    #ifdef SSE_ENABLED
+    #ifdef SSE_FLOAT3
     //! @brief  Constructor that takes __m128.
     //!
     //! @param v    Value to be populated in all channels of the internal float3.
@@ -83,7 +91,7 @@ struct float3{
     //! @param v    Value to be copied from.
     //! @return     Value of the second float3.
     SORT_FORCEINLINE float3&   operator =( const float3& v ){
-        #ifdef SSE_ENABLED
+        #ifdef SSE_FLOAT3
             data = v.data;
         #else
             x = v.x; y = v.y; z = v.z;
@@ -117,7 +125,7 @@ struct float3{
     //!
     //! @return     True if the float3 is ( 0.0f , 0.0f , 0.0f )
     SORT_FORCEINLINE bool       isZero() const{
-        #ifdef SSE_ENABLED
+        #ifdef SSE_FLOAT3
             return _mm_movemask_ps(_mm_cmpeq_ps( data , _mm_set_ps1(0.0f) )) == 0x7;
         #else
             return ( x == 0.0f ) && ( y == 0.0f ) && ( z == 0.0f );
@@ -125,7 +133,7 @@ struct float3{
     }
 
     union{
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
         __m128  data;   /**< Although it is a three channel floats, but SORT will add another implicit channel for better perforamnce. */
 #endif
         struct { float x , y , z ; };
@@ -134,14 +142,14 @@ struct float3{
     };
 };
 
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     static_assert( sizeof( float3 ) == 16 , "Incorrect float3 size." );
 #else
     static_assert( sizeof( float3 ) == 12 , "Incorrect float3 size." );
 #endif
 
 SORT_FORCEINLINE float3   operator  +( const float3& f0 , const float3& f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_add_ps( f0.data , f1.data );
 #else
     return float3( f0.x + f1.x , f0.y + f1.y , f0.z + f1.z );
@@ -149,7 +157,7 @@ SORT_FORCEINLINE float3   operator  +( const float3& f0 , const float3& f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  +( const float3& f0 , const float f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_add_ps( f0.data , _mm_set_ps1( f1 ) );
 #else
     return float3( f0.x + f1 , f0.y + f1 , f0.z + f1 );
@@ -157,7 +165,7 @@ SORT_FORCEINLINE float3   operator  +( const float3& f0 , const float f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  +( float f0 , const float3& f1 ){
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_add_ps( f1.data , _mm_set_ps1( f0 ) );
 #else
     return float3( f1.x + f0 , f1.y + f0 , f1.z + f0 );
@@ -173,7 +181,7 @@ SORT_FORCEINLINE float3   operator  +=( float3& f0 , const float f1 ){
 }
 
 SORT_FORCEINLINE float3   operator  -( const float3& f ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_sub_ps( _mm_set_ps1( 0.0f ) , f.data );
 #else
     return float3( -f.x , -f.y , -f.z );
@@ -181,7 +189,7 @@ SORT_FORCEINLINE float3   operator  -( const float3& f ) {
 }
 
 SORT_FORCEINLINE float3   operator  -( const float3& f0 , const float3& f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_sub_ps( f0.data , f1.data );
 #else
     return float3( f0.x - f1.x , f0.y - f1.y , f0.z - f1.z );
@@ -189,7 +197,7 @@ SORT_FORCEINLINE float3   operator  -( const float3& f0 , const float3& f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  -( const float3& f0 , const float f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_sub_ps( f0.data , _mm_set_ps1(f1) );
 #else
     return float3( f0.x - f1 , f0.y - f1 , f0.z - f1 );
@@ -197,7 +205,7 @@ SORT_FORCEINLINE float3   operator  -( const float3& f0 , const float f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  -( const float f0 , const float3& f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_sub_ps( _mm_set_ps1(f0) , f1.data );
 #else
     return float3( f0 - f1.x , f0 - f1.y , f0 - f1.z );
@@ -213,7 +221,7 @@ SORT_FORCEINLINE float3   operator  -=( float3& f0 , const float f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  *( const float3& f0 , const float3& f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_mul_ps( f0.data , f1.data );
 #else
     return float3( f0.x * f1.x , f0.y * f1.y , f0.z * f1.z );
@@ -221,7 +229,7 @@ SORT_FORCEINLINE float3   operator  *( const float3& f0 , const float3& f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  *( const float3& f0 , const float f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_mul_ps( f0.data , _mm_set_ps1(f1) );
 #else
     return float3( f0.x * f1 , f0.y * f1 , f0.z * f1 );
@@ -229,7 +237,7 @@ SORT_FORCEINLINE float3   operator  *( const float3& f0 , const float f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  *( const float f0 , const float3& f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_mul_ps( f1.data , _mm_set_ps1(f0) );
 #else
     return float3( f1.x * f0 , f1.y * f0 , f1.z * f0 );
@@ -245,7 +253,7 @@ SORT_FORCEINLINE float3   operator  *=( float3& f0 , const float f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  /( const float3& f0 , const float3& f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_div_ps( f0.data , f1.data );
 #else
     return float3( f0.x / f1.x , f0.y / f1.y , f0.z / f1.z );
@@ -253,7 +261,7 @@ SORT_FORCEINLINE float3   operator  /( const float3& f0 , const float3& f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  /( const float3& f0 , const float f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_div_ps( f0.data , _mm_set_ps1(f1) );
 #else
     return float3( f0.x / f1 , f0.y / f1 , f0.z / f1 );
@@ -261,7 +269,7 @@ SORT_FORCEINLINE float3   operator  /( const float3& f0 , const float f1 ) {
 }
 
 SORT_FORCEINLINE float3   operator  /( const float f0 , const float3& f1 ) {
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_div_ps( _mm_set_ps1(f0) , f1.data );
 #else
     return float3( f0 / f1.x , f0 / f1.y, f0 / f1.z );
@@ -277,7 +285,7 @@ SORT_FORCEINLINE float3   operator  /=( float3& f0 , const float f1 ) {
 }
 
 SORT_FORCEINLINE bool     operator  ==( const float3& f0 , const float3& f1 ){
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return ( _mm_movemask_ps(_mm_cmpeq_ps( f0.data , f1.data )) & 0x7 ) == 0x7;
 #else
     return ( f0.x == f1.x ) && ( f0.y == f1.y ) && ( f0.z == f1.z );
@@ -285,7 +293,7 @@ SORT_FORCEINLINE bool     operator  ==( const float3& f0 , const float3& f1 ){
 }
 
 SORT_FORCEINLINE bool     operator  !=( const float3& f0 , const float3& f1 ){
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_movemask_ps(_mm_cmpeq_ps( f0.data , f1.data )) == 0x0;
 #else
     return ( f0.x != f1.x ) || ( f0.y != f1.y ) || ( f0.z != f1.z );
@@ -293,7 +301,7 @@ SORT_FORCEINLINE bool     operator  !=( const float3& f0 , const float3& f1 ){
 }
 
 SORT_FORCEINLINE float3   sqrt( const float3& f ){
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_sqrt_ps(f.data);
 #else
     return float3( sqrt( f.x ) , sqrt( f.y ) , sqrt( f.z ) );
@@ -301,7 +309,7 @@ SORT_FORCEINLINE float3   sqrt( const float3& f ){
 }
 
 SORT_FORCEINLINE float3   max( const float3& f , const float m ){
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_max_ps(f.data, _mm_set_ps1(m));
 #else
     return float3( std::max( f[0] , m ) , std::max( f[1] , m ) , std::max( f[2] , m ) );
@@ -309,7 +317,7 @@ SORT_FORCEINLINE float3   max( const float3& f , const float m ){
 }
 
 SORT_FORCEINLINE float3   min( const float3& f , const float m ){
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     return _mm_min_ps(f.data, _mm_set_ps1(m));
 #else
     return float3( std::min( f.x , m ) , std::min( f.y , m ) , std::min( f.z , m ) );
@@ -321,7 +329,7 @@ SORT_FORCEINLINE float3   clamp( const float3& f , const float minVal , const fl
 }
 
 SORT_FORCEINLINE float3   exp( const float3& f ){
-#ifdef SSE_ENABLED
+#ifdef SSE_FLOAT3
     // there is no such a function, further investigation needs to be done for better performance.
     // return _mm_exp_ps(f.data);
     return float3( exp( f.r ) , exp( f.g ) , exp( f.b ) );
