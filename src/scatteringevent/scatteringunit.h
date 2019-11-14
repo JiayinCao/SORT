@@ -54,14 +54,14 @@ public:
     //! @brief  Evaluation weight.
     //!
     //! @return     Evaluation weight defines how much contribution it makes to the final result.
-    inline Spectrum     GetEvalWeight() const {
+    SORT_FORCEINLINE Spectrum     GetEvalWeight() const {
         return m_evalWeight;
     }
 
     //! @brief  Sampling weight of the scattering unit.
     //!
     //! @return     The sampling weight that defines how much properbility it has to be picked.
-    inline float        GetSampleWeight() const {
+    SORT_FORCEINLINE float        GetSampleWeight() const {
         return m_sampleWeight;
     }
 protected:

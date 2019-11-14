@@ -53,7 +53,7 @@ public:
     //! Intersection has some input and output for primitive intersection test at the same time.
     //! This is a helper function that clears the state ( not all of it, just the relevant ones )
     //! so that the rest of the algorithm can treat it as a 'new' intersection data structure.
-    inline void Reset(){
+    SORT_FORCEINLINE void Reset(){
         t = FLT_MAX;
         primitive = nullptr;
     }

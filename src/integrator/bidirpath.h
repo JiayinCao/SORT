@@ -102,10 +102,10 @@ private:
     bool    m_bMIS = true;
 
     // mis factor
-    inline double MIS(double t) const {
+    SORT_FORCEINLINE double MIS(double t) const {
         return m_bMIS ? t * t : 1.0f;
     }
-    inline float MIS(float t) const {
+    SORT_FORCEINLINE float MIS(float t) const {
         return m_bMIS ? t * t : 1.0f;
     }
 

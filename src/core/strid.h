@@ -55,7 +55,7 @@ constexpr unsigned int crc32_bitwise(const char* data, std::size_t length ){
 }
 
 // Intern string
-inline sid_t InternString( const char* str ){
+SORT_FORCEINLINE sid_t InternString( const char* str ){
     return crc32_bitwise( str , std::char_traits<char>::length( str ) );
 }
 
@@ -121,7 +121,7 @@ struct StringID{
 };
 
 //! @brief  Helper function to check whether sid_t equals to StringID
-inline bool operator == ( const sid_t sid , const StringID strID ){
+SORT_FORCEINLINE bool operator == ( const sid_t sid , const StringID strID ){
     return strID == sid;
 }
 

@@ -79,7 +79,7 @@ public:
 };
 
 // from matrix
-inline Transform FromMatrix( const Matrix& m )
+SORT_FORCEINLINE Transform FromMatrix( const Matrix& m )
 {
     // get inverse matrix
     Matrix invm;
@@ -88,7 +88,7 @@ inline Transform FromMatrix( const Matrix& m )
 }
 
 // translate
-inline Transform Translate( const Vector& v )
+SORT_FORCEINLINE Transform Translate( const Vector& v )
 {
     Matrix m(   1.0f , 0.0f , 0.0f , v.x ,
                 0.0f , 1.0f , 0.0f , v.y ,
@@ -101,7 +101,7 @@ inline Transform Translate( const Vector& v )
     return Transform( m , invm );
 }
 
-inline Transform Translate( float x , float y , float z )
+SORT_FORCEINLINE Transform Translate( float x , float y , float z )
 {
     Matrix m(   1.0f , 0.0f , 0.0f , x ,
                 0.0f , 1.0f , 0.0f , y ,
@@ -115,7 +115,7 @@ inline Transform Translate( float x , float y , float z )
 }
 
 // scale
-inline Transform Scale( float x , float y , float z )
+SORT_FORCEINLINE Transform Scale( float x , float y , float z )
 {
     Matrix m( x , 0.0f , 0.0f , 0.0f ,
               0.0f , y , 0.0f , 0.0f ,
@@ -127,13 +127,13 @@ inline Transform Scale( float x , float y , float z )
                  0.0f , 0.0f , 0.0f , 1.0f );
     return Transform( m , invm );
 }
-inline Transform Scale( float s )
+SORT_FORCEINLINE Transform Scale( float s )
 {
     return Scale( s , s , s );
 }
 
 // rotate around x axis
-inline Transform RotateX( float angle )
+SORT_FORCEINLINE Transform RotateX( float angle )
 {
     float sin_t = sin( angle );
     float cos_t = cos( angle );
@@ -146,7 +146,7 @@ inline Transform RotateX( float angle )
 }
 
 // rotate around y axis
-inline Transform RotateY( float angle )
+SORT_FORCEINLINE Transform RotateY( float angle )
 {
     float sin_t = sin( angle );
     float cos_t = cos( angle );
@@ -158,7 +158,7 @@ inline Transform RotateY( float angle )
 }
 
 // rotate around z axis
-inline Transform RotateZ( float angle )
+SORT_FORCEINLINE Transform RotateZ( float angle )
 {
     float sin_t = sin( angle );
     float cos_t = cos( angle );
@@ -169,7 +169,7 @@ inline Transform RotateZ( float angle )
     return Transform( m , m.Transpose() );
 }
 
-inline Transform ViewLookat( const Point& eye , const Vector& dir , const Vector& up )
+SORT_FORCEINLINE Transform ViewLookat( const Point& eye , const Vector& dir , const Vector& up )
 {
     const Vector right = Cross( up , dir );
     const Vector adjusted_up = Cross( dir , right );
@@ -187,7 +187,7 @@ inline Transform ViewLookat( const Point& eye , const Vector& dir , const Vector
 }
 
 // perspective matrix
-inline Transform Perspective( float scaleX , float scaleY )
+SORT_FORCEINLINE Transform Perspective( float scaleX , float scaleY )
 {
     // the following values don't matter much in a ray tracer because there is no Z-buffer at all.
     const float n = 0.01f;
@@ -200,18 +200,18 @@ inline Transform Perspective( float scaleX , float scaleY )
 }
 
 // return the inverse of the transform
-inline Transform Inverse( const Transform& t )
+SORT_FORCEINLINE Transform Inverse( const Transform& t )
 {
     return Transform( t.invMatrix , t.matrix );
 }
 
 // return the transpose of the transform
-inline Transform Transpose( const Transform& t )
+SORT_FORCEINLINE Transform Transpose( const Transform& t )
 {
     return Transform( t.matrix.Transpose() , t.invMatrix.Transpose() );
 }
 
 // transform a ray
-inline Ray  operator* ( const Transform& t , const Ray& r ){
+SORT_FORCEINLINE Ray  operator* ( const Transform& t , const Ray& r ){
     return Ray( t.TransformPoint(r.m_Ori) , t.TransformVector(r.m_Dir) , r.m_Depth , r.m_fMin , r.m_fMax );
 }

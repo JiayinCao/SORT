@@ -53,19 +53,19 @@
 //! @param  x   Value to be evaluated.
 //! @return     x^n
 template<unsigned n>
-inline float Pow( float x ){
+SORT_FORCEINLINE float Pow( float x ){
     static_assert(n > 0, "Power can't be negative");
     const auto x2 = Pow<n / 2>(x);
     return x2 * x2 * Pow<n & 1>(x);
 }
 
 template<>
-inline float Pow<0>( float x ){
+SORT_FORCEINLINE float Pow<0>( float x ){
     return 1.0f;
 }
 
 template<>
-inline float Pow<1>( float x ){
+SORT_FORCEINLINE float Pow<1>( float x ){
     return x;
 }
 
@@ -73,7 +73,7 @@ inline float Pow<1>( float x ){
 //!
 //! @param  x   Value to be evaluated.
 //! @return     The square root of @param x.
-inline float ssqrt( const float x ){
+SORT_FORCEINLINE float ssqrt( const float x ){
     return sqrt( std::max( 0.0f , x ) );
 }
 
@@ -86,12 +86,12 @@ inline float ssqrt( const float x ){
 //! @param  mi  Lower bound of the range.
 //! @param  ma  Upper bound of the range.
 //! @return     Clampped value.
-inline float clamp( float x , float mi , float ma ){
+SORT_FORCEINLINE float clamp( float x , float mi , float ma ){
     if( x > ma ) x = ma;
     if( x < mi ) x = mi;
     return x;
 }
-inline int clamp( int x , int mi , int ma ){
+SORT_FORCEINLINE int clamp( int x , int mi , int ma ){
     if( x > ma ) x = ma;
     if( x < mi ) x = mi;
     return x;
@@ -101,7 +101,7 @@ inline int clamp( int x , int mi , int ma ){
 //!
 //! @param  deg Degree to be converted.
 //! @return Cooresponding radian.
-inline float Radians( float deg ) {
+SORT_FORCEINLINE float Radians( float deg ) {
     return PI / 180.0f * deg;
 }
 
@@ -109,7 +109,7 @@ inline float Radians( float deg ) {
 //!
 //! @param  rad     Value to be converted.
 //! @return         Cooresponding degree.
-inline float Degrees( float rad ) {
+SORT_FORCEINLINE float Degrees( float rad ) {
     return 180.0f * INV_PI * rad ;
 }
 
@@ -117,7 +117,7 @@ inline float Degrees( float rad ) {
 //!
 //! @param  value   Linear space color.
 //! @return         Gamma space color.
-inline float LinearToGamma( float value ){
+SORT_FORCEINLINE float LinearToGamma( float value ){
     if (value <= 0.0031308f) return 12.92f * value;
     return 1.055f * pow(value, (float)(1.f / 2.4f)) - 0.055f;
 }
@@ -126,7 +126,7 @@ inline float LinearToGamma( float value ){
 //!
 //! @param value    Gamma space color.
 //! @return         Linear space color.
-inline float GammaToLinear( float value ){
+SORT_FORCEINLINE float GammaToLinear( float value ){
     if (value <= 0.04045f) return value * 1.f / 12.92f;
     return pow((value + 0.055f) * 1.f / 1.055f, (float)2.4f);
 }

@@ -96,72 +96,72 @@ private:
 };
 
 // BSDF Inline Functions
-inline float CosTheta(const Vector &w){
+SORT_FORCEINLINE float CosTheta(const Vector &w){
     return w.y;
 }
 
-inline float AbsCosTheta(const Vector &w){
+SORT_FORCEINLINE float AbsCosTheta(const Vector &w){
     return fabsf(w.y);
 }
 
-inline float SinTheta2(const Vector &w){
+SORT_FORCEINLINE float SinTheta2(const Vector &w){
     return std::max(0.f, 1.f - CosTheta(w)*CosTheta(w));
 }
 
-inline float CosTheta2(const Vector &w){
+SORT_FORCEINLINE float CosTheta2(const Vector &w){
     return CosTheta(w) * CosTheta(w);
 }
 
-inline float TanTheta2(const Vector &w){
+SORT_FORCEINLINE float TanTheta2(const Vector &w){
     return 1.0f / CosTheta2(w) - 1.0f;
 }
 
-inline float CosDPhi( const Vector& w0 , const Vector& w1 ){
+SORT_FORCEINLINE float CosDPhi( const Vector& w0 , const Vector& w1 ){
     return clamp( ( w0.x * w1.x + w0.z * w1.z ) / sqrt( (w0.x * w0.x + w0.z * w0.z)*(w1.x * w1.x + w1.z*w1.z) ) , -1.0f , 1.0f );
 }
-inline float SinTheta(const Vector &w){
+SORT_FORCEINLINE float SinTheta(const Vector &w){
     return sqrtf(SinTheta2(w));
 }
-inline float CosPhi(const Vector &w){
+SORT_FORCEINLINE float CosPhi(const Vector &w){
     float sintheta = SinTheta(w);
     if (sintheta == 0.f) return 1.f;
     return clamp(w.x / sintheta, -1.f, 1.f);
 }
 
-inline float SinPhi(const Vector &w) {
+SORT_FORCEINLINE float SinPhi(const Vector &w) {
     float sintheta = SinTheta(w);
     if (sintheta == 0.f) return 0.f;
     return clamp(w.z / sintheta, -1.f, 1.f);
 }
 
-inline float SinPhi2(const Vector &w) {
+SORT_FORCEINLINE float SinPhi2(const Vector &w) {
     const float sinPhi = SinPhi(w);
     return sinPhi * sinPhi;
 }
 
-inline float CosPhi2(const Vector &w) {
+SORT_FORCEINLINE float CosPhi2(const Vector &w) {
     const float cosPhi = CosPhi(w);
     return cosPhi * cosPhi;
 }
 
-inline float TanTheta( const Vector& w){
+SORT_FORCEINLINE float TanTheta( const Vector& w){
     return SinTheta(w) / CosTheta(w);
 }
 
-inline bool SameHemisphere(const Vector &w, const Vector &wp) {
+SORT_FORCEINLINE bool SameHemisphere(const Vector &w, const Vector &wp) {
     return w.y * wp.y > 0.f;
 }
 
-inline float SphericalTheta(const Vector &v) {
+SORT_FORCEINLINE float SphericalTheta(const Vector &v) {
     return acosf(clamp(v.y, -1.f, 1.f));
 }
 
-inline float SphericalPhi(const Vector &v) {
+SORT_FORCEINLINE float SphericalPhi(const Vector &v) {
     float p = atan2f(v.z, v.x);
     return (p < 0.f) ? p + 2.f*PI : p;
 }
 
-inline Vector SphericalVec( float theta , float phi ){
+SORT_FORCEINLINE Vector SphericalVec( float theta , float phi ){
     float x = sin( theta ) * cos( phi );
     float y = cos( theta );
     float z = sin( theta ) * sin( phi );
@@ -169,19 +169,19 @@ inline Vector SphericalVec( float theta , float phi ){
     return Vector( x , y , z );
 }
 
-inline Vector SphericalVec( float sintheta , float costheta , float phi ){
+SORT_FORCEINLINE Vector SphericalVec( float sintheta , float costheta , float phi ){
     float x = sintheta * cos( phi );
     float y = costheta;
     float z = sintheta * sin( phi );
     return Vector( x , y , z );
 }
 
-inline Vector reflect(const Vector& v, const Vector& n){
+SORT_FORCEINLINE Vector reflect(const Vector& v, const Vector& n){
     return (2.0f * Dot(v, n)) * n - v;
 }
 
 // an optimized version only works in shading coordinate
-inline Vector reflect(const Vector& v) {
+SORT_FORCEINLINE Vector reflect(const Vector& v) {
     return Vector(-v.x, v.y, -v.z);
 }
 
@@ -192,7 +192,7 @@ inline Vector reflect(const Vector& v) {
 //! @param inner_reflection     Whether it is a total inner reflection.
 //! @return                     Refracted vector based on Snell's law.
 //! @Note                       Both vectors ( the first parameter and the returned value ) should be pointing outside the surface.
-inline Vector refract(const Vector& v, const Vector& n, float in_eta, float ext_eta, bool& inner_reflection){
+SORT_FORCEINLINE Vector refract(const Vector& v, const Vector& n, float in_eta, float ext_eta, bool& inner_reflection){
     const float coso = Dot(v, n);
     const float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
     const float t = 1.0f - eta * eta * std::max(0.0f, 1.0f - coso * coso);

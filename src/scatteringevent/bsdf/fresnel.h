@@ -27,7 +27,7 @@
 //!
 //! @param   cos    Cosine of the angle between the incident direction and normal.
 //! @return         Evaluated fresnel weight.
-inline float SchlickWeight(float cos) {
+SORT_FORCEINLINE float SchlickWeight(float cos) {
     return Pow<5>(saturate(1.0f - cos));
 }
 
@@ -36,10 +36,10 @@ inline float SchlickWeight(float cos) {
 //! @param  F0      Expected fresnel at perpendicular angle.
 //! @param  cos     Cosine of the angle between the incident direction and normal.
 //! @return         Evaluated fresnel value.
-inline Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
+SORT_FORCEINLINE Spectrum SchlickFresnel( const Spectrum& F0 , float cos ){
     return F0 + SchlickWeight(cos) * ( Spectrum( 1.0f ) - F0 );
 }
-inline float SchlickFresnel(const float F0, float cos) {
+SORT_FORCEINLINE float SchlickFresnel(const float F0, float cos) {
     return F0 + SchlickWeight(cos) * ( 1.0f - F0 );
 }
 
@@ -50,7 +50,7 @@ inline float SchlickFresnel(const float F0, float cos) {
 //! @param  eta_i   Index of refraction above the surface.
 //! @param  eta_t   Index of refraction below the surface.
 //! @return         Evaluated fresnel.
-inline float DielectricFresnel( float cosI , float eta_i , float eta_t ){
+SORT_FORCEINLINE float DielectricFresnel( float cosI , float eta_i , float eta_t ){
     const bool entering = cosI > 0.0f;
     const float _etaI = entering ? eta_i : eta_t;
     const float _etaT = entering ? eta_t : eta_i;
@@ -72,7 +72,7 @@ inline float DielectricFresnel( float cosI , float eta_i , float eta_t ){
     return ( Rparl * Rparl + Rparp * Rparp ) * 0.5f;
 }
 
-inline Spectrum ConductorFresnel( float cosI , const Spectrum& eta , const Spectrum& k ){
+SORT_FORCEINLINE Spectrum ConductorFresnel( float cosI , const Spectrum& eta , const Spectrum& k ){
     float sq_cos = cosI * cosI;
 
     Spectrum t = 2 * eta * cosI;

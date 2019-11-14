@@ -205,27 +205,27 @@ public:
 // some global math operations
 // para 'v' :   vector to add
 // result   :   a point with the offset 'v' to the current point
-inline Point operator + ( const Vector& v , const Point& p )
+SORT_FORCEINLINE Point operator + ( const Vector& v , const Point& p )
 {
     return p + v;
 }
 // para 'f' :   scaler
 // result   :   a scaled point
-inline Point operator * ( float f , const Point& p )
+SORT_FORCEINLINE Point operator * ( float f , const Point& p )
 {
     return p * f;
 }
 // para 'p0' :  a point
 // para 'p1' :  another point
 // result    :  the squared distance between the two points
-inline float SquaredDistance( const Point& p0 , const Point& p1 )
+SORT_FORCEINLINE float SquaredDistance( const Point& p0 , const Point& p1 )
 {
     return (p0-p1).SquaredLength();
 }
 // para 'p0' :  a point
 // para 'p1' :  another point
 // result    :  the distance between the two points
-inline float Distance( const Point& p0 , const Point& p1 )
+SORT_FORCEINLINE float Distance( const Point& p0 , const Point& p1 )
 {
     return (p0-p1).Length();
 }

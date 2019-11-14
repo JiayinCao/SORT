@@ -36,7 +36,7 @@
 //!
 //! @param filename     Name of the file in the resource folder.
 //! @return             Full path that has the file name.
-inline std::string GetFilePathInResourceFolder( const std::string& filename ){
+SORT_FORCEINLINE std::string GetFilePathInResourceFolder( const std::string& filename ){
     return g_resourcePath + filename;
 }
 
@@ -47,7 +47,7 @@ inline std::string GetFilePathInResourceFolder( const std::string& filename ){
 //!
 //! @param filename     Name of the file in the executable folder.
 //! @return             Full path that has the file name.
-inline std::string GetFilePathInExeFolder( const std::string& filename ){
+SORT_FORCEINLINE std::string GetFilePathInExeFolder( const std::string& filename ){
     char buff[FILENAME_MAX];
     const char* tmp = GetCurrentDir( buff, FILENAME_MAX );
 #ifdef WINDOWS

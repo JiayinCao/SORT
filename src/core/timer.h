@@ -37,7 +37,7 @@ public:
     Timer():m_start(clock::now()){}
 
     //! @brief  Reset the timer.
-    inline void Reset() {
+    SORT_FORCEINLINE void Reset() {
         m_start = clock::now();
     }
 
@@ -48,7 +48,7 @@ public:
     //!
     //! @return Get the elapsed time in million second since last
     //!         time the timer is reset.
-    inline unsigned int GetElapsedTime() const {
+    SORT_FORCEINLINE unsigned int GetElapsedTime() const {
         return (unsigned int)std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - m_start).count();
     }
 

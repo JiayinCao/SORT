@@ -18,12 +18,12 @@
 #include "triangle.h"
 #include "entity/visual.h"
 
-static inline int MajorAxis( const Vector3f& v ){
+static SORT_FORCEINLINE int MajorAxis( const Vector3f& v ){
     if( abs( v[0] ) > abs( v[1] ) && abs( v[0] ) > abs( v[2] ) )
         return 0;
     return abs( v[1] ) > abs( v[2] ) ? 1 : 2;
 }
-static inline Vector3f Permute( const Vector3f& v , int ax , int ay , int az ){
+static SORT_FORCEINLINE Vector3f Permute( const Vector3f& v , int ax , int ay , int az ){
     return Vector3f( v[ax] , v[ay] , v[az] );
 }
 

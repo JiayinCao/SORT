@@ -86,7 +86,7 @@ public:
 // para 'bbox' :    a bounding box to encapture
 // para 'p'    :    a point to encapture
 // result      :    a bounding box containg both 'bbox' and 'p'
-inline BBox Union( const BBox& bbox , const Point& p )
+SORT_FORCEINLINE BBox Union( const BBox& bbox , const Point& p )
 {
     BBox box;
     for( unsigned i = 0 ; i < 3 ; i++ )
@@ -102,7 +102,7 @@ inline BBox Union( const BBox& bbox , const Point& p )
 // para 'bbox0' :   first bounding box
 // para 'bbox1' :   second bounding box
 // result       :   a bounding box containing both of 'bbox0' and 'bbox1'
-inline BBox Union( const BBox& bbox0 , const BBox& bbox1 )
+SORT_FORCEINLINE BBox Union( const BBox& bbox0 , const BBox& bbox1 )
 {
     BBox result;
 
@@ -120,7 +120,7 @@ inline BBox Union( const BBox& bbox0 , const BBox& bbox1 )
 // para 'bb'  : the bounding box
 // para 'tmax': further away intersected point
 // result     : the first intersected point and return -1.0f if not crossed
-inline float Intersect( const Ray& ray , const BBox& bb , float* fmax = nullptr ){
+SORT_FORCEINLINE float Intersect( const Ray& ray , const BBox& bb , float* fmax = nullptr ){
     //set default value for tmax and tmin
     float tmax = ray.m_fMax;
     float tmin = ray.m_fMin;

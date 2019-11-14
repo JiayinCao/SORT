@@ -24,7 +24,7 @@
 #include "material/material.h"
 #include "light/light.h"
 
-inline float MisFactor( float f, float g ){
+SORT_FORCEINLINE float MisFactor( float f, float g ){
     return (f*f) / (f*f + g*g);
 }
 

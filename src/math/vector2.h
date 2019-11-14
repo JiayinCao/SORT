@@ -124,26 +124,26 @@ typedef Vector2<unsigned>   Vector2u;
 typedef Vector2<double>     Vector2d;
 
 template<class T>
-inline Vector2<T> operator *( float f , const Vector2<T>& v0 )
+SORT_FORCEINLINE Vector2<T> operator *( float f , const Vector2<T>& v0 )
 {
     return v0 * f;
 }
 
 template<class T>
-inline float Dot( const Vector2<T>& v0 , const Vector2<T>& v1 )
+SORT_FORCEINLINE float Dot( const Vector2<T>& v0 , const Vector2<T>& v1 )
 {
     return v0.x * v1.x + v0.y * v1.y;
 }
 
 template<class T>
-inline float AbsDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
+SORT_FORCEINLINE float AbsDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
 {
     float r = Dot( v0 , v1 );
     return ( r < 0.0f )? -r : r;
 }
 
 template<class T>
-inline float SatDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
+SORT_FORCEINLINE float SatDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
 {
     return clamp( Dot( v0 , v1 ) , 0.0f , 1.0f );
 }

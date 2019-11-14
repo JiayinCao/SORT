@@ -144,33 +144,33 @@ typedef Vector4<unsigned>   Vector4u;
 typedef Vector4<double>     Vector4d;
 
 template<class T>
-inline Vector4<T> operator *( float f , const Vector4<T>& v0 )
+SORT_FORCEINLINE Vector4<T> operator *( float f , const Vector4<T>& v0 )
 {
     return v0 * f;
 }
 
 template<class T>
-inline float Dot( const Vector4<T>& v0 , const Vector4<T>& v1 )
+SORT_FORCEINLINE float Dot( const Vector4<T>& v0 , const Vector4<T>& v1 )
 {
     return v0.x * v1.x + v0.y * v1.y + v0.z * v1.z + v0.w * v1.w;
 }
 
 template<class T>
-inline float AbsDot( const Vector4<T>& v0 , const Vector4<T>& v1 )
+SORT_FORCEINLINE float AbsDot( const Vector4<T>& v0 , const Vector4<T>& v1 )
 {
     float r = Dot( v0 , v1 );
     return ( r < 0.0f )? -r : r;
 }
 
 template<class T>
-inline float SatDot( const Vector4<T>& v0 , const Vector4<T>& v1 )
+SORT_FORCEINLINE float SatDot( const Vector4<T>& v0 , const Vector4<T>& v1 )
 {
     return clamp( Dot( v0 , v1 ) , 0.0f , 1.0f );
 }
 
 // normalize a vector
 template<class T>
-inline Vector4<T> Normalize( const Vector4<T>& v )
+SORT_FORCEINLINE Vector4<T> Normalize( const Vector4<T>& v )
 {
     float len = v.Length();
     if( len == 0.0f )
@@ -178,7 +178,7 @@ inline Vector4<T> Normalize( const Vector4<T>& v )
     return v / len;
 }
 
-inline Vector4f FromSpectrum( const Spectrum& rgb )
+SORT_FORCEINLINE Vector4f FromSpectrum( const Spectrum& rgb )
 {
     return Vector4f( rgb.GetR() , rgb.GetG() , rgb.GetB() , 0.0f );
 }

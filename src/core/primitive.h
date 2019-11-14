@@ -46,7 +46,7 @@ public:
     //! @param  intersect   Intersected result. If nullptr is passed in, the algorithm could be a little more performant.
     //!                     The information of the intersection is also returned in world space.
     //! @return             Whether the ray intersects the primitive.
-    inline bool GetIntersect( const Ray& r , Intersection* intersect ) const{
+    SORT_FORCEINLINE bool GetIntersect( const Ray& r , Intersection* intersect ) const{
         auto ret = m_shape->GetIntersect( r , intersect );
         if( ret && intersect ){
             intersect->primitive = const_cast<Primitive*>(this);
@@ -62,21 +62,21 @@ public:
     //!
     //! @param  box     Axis aligned bounding box in world space.
     //! @return         Whether the primitive intersects the primitive.
-    inline bool GetIntersect( const BBox& box ) const {
+    SORT_FORCEINLINE bool GetIntersect( const BBox& box ) const {
         return m_shape->GetIntersect( box );
     }
 
     //! @brief  Get the axis aligned bounding box of the primitive in world space.
     //!
     //! @return         AABB in world space.
-    inline const BBox&  GetBBox() const {
+    SORT_FORCEINLINE const BBox&  GetBBox() const {
         return m_shape->GetBBox();
     }
 
     //! @brief  Get the surface area of the primitive.
     //!
     //! @return         Surface area of the primitive.
-    inline float    SurfaceArea() const{
+    SORT_FORCEINLINE float    SurfaceArea() const{
         return m_shape->SurfaceArea();
     }
 
@@ -85,7 +85,7 @@ public:
     //! A default red material will be used for primitives with no materials or invalid materials.
     //!
     //! @return         Material attached to the primitives.
-    inline Material* GetMaterial() const{
+    SORT_FORCEINLINE Material* GetMaterial() const{
         return m_mat == nullptr ? MatManager::GetSingleton().GetDefaultMat() : m_mat;
     }
 
@@ -94,7 +94,7 @@ public:
     //! Most primitives doesn't have light attached to it.
     //!
     //! @return         Light attached to the primitive. 'nullptr' means this is not an missive primitive.
-    inline class Light* GetLight() const {
+    SORT_FORCEINLINE class Light* GetLight() const {
         return m_light;
     }
 

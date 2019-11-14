@@ -81,14 +81,14 @@ public:
     //! @brief Get the bounding box of the primitive set.
     //!
     //! @return Bounding box of the spatial acceleration structure.
-    inline const BBox& GetBBox() const {
+    SORT_FORCEINLINE const BBox& GetBBox() const {
         return m_bbox;
     }
 
     //! @brief  Whether the spatial data structure is constructed.
     //!
     //! @return     Whether the spatial data structure is constructed.
-    inline bool GetIsValid() const {
+    SORT_FORCEINLINE bool GetIsValid() const {
         return m_isValid;
     }
 

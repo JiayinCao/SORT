@@ -39,7 +39,7 @@ public:
     //! @brief  Resize the stream.
     //!
     //! @param  size    The new size to be resized.
-    inline void    Resize( unsigned int size ){
+    SORT_FORCEINLINE void    Resize( unsigned int size ){
         size = std::max( 1024u , size );
         auto new_data = std::make_unique<char[]>( size );
         if( m_capacity )
@@ -184,7 +184,7 @@ public:
     //! @brief  Resize the stream.
     //!
     //! @param  size    The new size to be resized.
-    inline void    Resize( unsigned int size ){
+    SORT_FORCEINLINE void    Resize( unsigned int size ){
         size = std::max( 1024u , size );
         auto new_data = std::make_unique<char[]>( size );
         if( m_capacity )

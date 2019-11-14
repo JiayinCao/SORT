@@ -32,13 +32,13 @@ constexpr static float inv_eta = 1.0f / eta;   // hard coded reciprocal of IOR r
 
 // 8.0f bears no physical law, it is purely just to increase the probability to avoid fireflies.
 // Microfacet specular reflection is easily the source of fireflies, scaling the value up will efficiently avoid fireflies caused by it.
-static inline float specularPdfScale( const float roughness ){
+static SORT_FORCEINLINE float specularPdfScale( const float roughness ){
     constexpr static float specular_pdf_scale = 8.0f;
     return specular_pdf_scale * ( 1.0f - roughness );
 }
 
 //! Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, section 3.1
-static inline float SchlickR0FromEta( float rROI ){
+static SORT_FORCEINLINE float SchlickR0FromEta( float rROI ){
     return SQR( ( rROI - 1.0f ) / ( rROI + 1.0f ) );
 }
 

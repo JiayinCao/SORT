@@ -41,14 +41,14 @@ public:
     //! @brief  Get the coordinate of the tile, top-left corner.
     //!
     //! @return Top-left corner of the tile.
-    inline Vector2i    GetTopLeft() const {
+    SORT_FORCEINLINE Vector2i    GetTopLeft() const {
         return m_coord;
     }
 
     //! @brief  Get the size of the tile.
     //!
     //! @return The size of the current tile.
-    inline Vector2i    GetTileSize() const {
+    SORT_FORCEINLINE Vector2i    GetTileSize() const {
         return m_size;
     }
 

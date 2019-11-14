@@ -21,7 +21,7 @@
 #include "sampler/sample.h"
 
 template< class T  >
-static inline const T* pickScattering( const T* const scattering[] , unsigned int cnt , float totalWeight , float& pdf ){
+static SORT_FORCEINLINE const T* pickScattering( const T* const scattering[] , unsigned int cnt , float totalWeight , float& pdf ){
 	sAssert( totalWeight > 0.0f , MATERIAL );
 
     const T* picked = nullptr;

@@ -63,7 +63,7 @@ public:
     //! memory alive.
     //!
     //! @param  bxdf        The bxdf to be added.
-    inline  void    AddBxdf( const Bxdf* bxdf ){
+    SORT_FORCEINLINE  void    AddBxdf( const Bxdf* bxdf ){
         if( m_bxdfCnt == SE_MAX_BXDF_COUNT || bxdf == nullptr || bxdf->GetEvalWeight().IsBlack() ) 
             return;
         m_bxdfs[m_bxdfCnt++] = bxdf;
@@ -79,7 +79,7 @@ public:
     //! memory alive.
     //!
     //! @param  bssrdf      The bssrdf to be added.
-    inline  void    AddBssrdf( const Bssrdf* bssrdf ){
+    SORT_FORCEINLINE  void    AddBssrdf( const Bssrdf* bssrdf ){
         if( m_bssrdfCnt == SE_MAX_BSSRDF_COUNT || bssrdf == nullptr || bssrdf->GetEvalWeight().IsBlack() ) 
             return;
         m_bssrdfs[m_bssrdfCnt++] = bssrdf;
@@ -88,14 +88,14 @@ public:
 
     //! @brief Get intersection information of the point at which the bsdf is evaluated.
     //! @return The intersection information of the point at which the bsdf is evaluated.
-    inline const Intersection& GetIntersection() const {
+    SORT_FORCEINLINE const Intersection& GetIntersection() const {
         return m_intersection;
     }
 
 	//! @brief	Get the flag of this scattering event.
 	//!
 	//! @return	 The current flag of this scattering event.
-	inline SE_Flag	GetFlag() const {
+	SORT_FORCEINLINE SE_Flag	GetFlag() const {
 		return m_flag;
 	}
 
@@ -157,11 +157,11 @@ private:
     //! @param v        A vector in world coordinate.
     //! @param force    Force transform regardless whether this scattering event is a sub-event or not.
     //! @return         The corresponding vector in local shading coordinate.
-    inline Vector worldToLocal( const Vector& v , bool force = false ) const;
+    SORT_FORCEINLINE Vector worldToLocal( const Vector& v , bool force = false ) const;
 
     //! @brief  Transform a vector from shading coordinate to world coordinate.
     //!
     //! @param v        A vector in shading coordinate.
     //! @return         The corresponding vector in world coordinate.
-    inline Vector localToWorld( const Vector& v ) const;
+    SORT_FORCEINLINE Vector localToWorld( const Vector& v ) const;
 };

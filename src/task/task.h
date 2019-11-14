@@ -69,49 +69,49 @@ public:
     //! @brief  Get priority of the task.
     //!
     //! @return             Current priority of the task.
-    inline unsigned int GetPriority() const {
+    SORT_FORCEINLINE unsigned int GetPriority() const {
         return m_priority;
     }
 
     //! @brief  Remove dependency from task.
     //!
     //! Upon the termination of any dependent task, it is necessary to remove it from its dependency.
-    inline void         RemoveDependency( const Task* taskid ) {
+    SORT_FORCEINLINE void         RemoveDependency( const Task* taskid ) {
         m_dependencies.erase( taskid );
     }
 
     //! @brief  If there is no dependent task anymore.
     //!
     //! @return True if all dependent tasks are finished. Otherwise, return false.
-    inline bool         NoDependency() const {
+    SORT_FORCEINLINE bool         NoDependency() const {
         return m_dependencies.empty();
     }
 
     //! @brief  Get tasks depending on this task.
     //!
     //! @return Tasks this task depends on.
-    inline const DependentTask_Container& GetDependents() const  {
+    SORT_FORCEINLINE const DependentTask_Container& GetDependents() const  {
         return m_dependents;
     }
 
     //! @brief  Add dependent.
     //!
     //! @param  Task to be added as a dependent.
-    inline void AddDependent( Task* task ){
+    SORT_FORCEINLINE void AddDependent( Task* task ){
         m_dependents.insert( task );
     }
 
     //! @brief  Get the id of the task
     //!
     //! @return Id of the current task.
-    inline TaskID GetTaskID() const {
+    SORT_FORCEINLINE TaskID GetTaskID() const {
         return m_taskId;
     }
 
     //! @brief  Get tasks this task depends on.
     //!
     //! @return Tasks this task depends on.
-    inline Task_Container& GetDependencies(){
+    SORT_FORCEINLINE Task_Container& GetDependencies(){
         return m_dependencies;
     }
 
@@ -185,13 +185,13 @@ private:
 
 //! @brief      Schedule a task in task scheduler.
 template<class T, typename... Args>
-inline Task*  SCHEDULE_TASK( const char* name , unsigned int priority , const Task::Task_Container& dependencies , Args&&... args ){
+SORT_FORCEINLINE Task*  SCHEDULE_TASK( const char* name , unsigned int priority , const Task::Task_Container& dependencies , Args&&... args ){
     auto ret = std::make_unique<T>(args..., name, priority, dependencies);
     return Scheduler::GetSingleton().Schedule( std::move(ret) );
 }
 
 //! @brief      Executing tasks. It will exit if there is no other tasks.
-inline void    EXECUTING_TASKS(){
+SORT_FORCEINLINE void    EXECUTING_TASKS(){
     while( true ){
         // Pick a task that is available.
         auto task = Scheduler::GetSingleton().PickTask();

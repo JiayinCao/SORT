@@ -138,7 +138,7 @@ extern const Vector DIR_UP;
 // para 'v0' :  the vector to scale
 // result    :  a scaled vector
 template<class T>
-inline Vector3<T> operator *( float f , const Vector3<T>& v0 )
+SORT_FORCEINLINE Vector3<T> operator *( float f , const Vector3<T>& v0 )
 {
     return v0 * f;
 }
@@ -146,7 +146,7 @@ inline Vector3<T> operator *( float f , const Vector3<T>& v0 )
 // para 'v1' :  another vector
 // result    :  the dot product of the two vectors
 template<class T>
-inline float Dot( const Vector3<T>& v0 , const Vector3<T>& v1 )
+SORT_FORCEINLINE float Dot( const Vector3<T>& v0 , const Vector3<T>& v1 )
 {
     return v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
 }
@@ -154,7 +154,7 @@ inline float Dot( const Vector3<T>& v0 , const Vector3<T>& v1 )
 // para 'v1' :  another vector
 // result    :  the absolute value of the dot product
 template<class T>
-inline float AbsDot( const Vector3<T>& v0 , const Vector3<T>& v1 )
+SORT_FORCEINLINE float AbsDot( const Vector3<T>& v0 , const Vector3<T>& v1 )
 {
     float r = Dot( v0 , v1 );
     return ( r < 0.0f )? -r : r;
@@ -163,7 +163,7 @@ inline float AbsDot( const Vector3<T>& v0 , const Vector3<T>& v1 )
 // para 'v1' :  another vector
 // reulst    :  saturated dot product
 template<class T>
-inline float SatDot( const Vector3<T>& v0 , const Vector3<T>& v1 )
+SORT_FORCEINLINE float SatDot( const Vector3<T>& v0 , const Vector3<T>& v1 )
 {
     return clamp( Dot( v0 , v1 ) , 0.0f , 1.0f );
 }
@@ -171,7 +171,7 @@ inline float SatDot( const Vector3<T>& v0 , const Vector3<T>& v1 )
 // para 'v1' :  another vector
 // result    :  the cross product of the two vectors
 template<class T>
-inline Vector Cross( const Vector3<T>& v0 , const Vector3<T>& v1 )
+SORT_FORCEINLINE Vector Cross( const Vector3<T>& v0 , const Vector3<T>& v1 )
 {
     return Vector ( v0.y * v1.z - v0.z * v1.y,
         v0.z * v1.x - v0.x * v1.z,
@@ -181,14 +181,14 @@ inline Vector Cross( const Vector3<T>& v0 , const Vector3<T>& v1 )
 // para 'v1' :  another vector
 // result    :  'true' if the two vector is facing towards the same direction, 'false' else
 template<class T>
-inline bool FaceForward( const Vector3<T>& v0 , const Vector3<T>& v1 )
+SORT_FORCEINLINE bool FaceForward( const Vector3<T>& v0 , const Vector3<T>& v1 )
 {
     return Dot( v0 , v1 ) >= 0.0f;
 }
 
 // normalize a vector
 template<class T>
-inline Vector Normalize( const Vector3<T>& v )
+SORT_FORCEINLINE Vector Normalize( const Vector3<T>& v )
 {
     float len = v.Length();
     if( len == 0.0f )
@@ -198,7 +198,7 @@ inline Vector Normalize( const Vector3<T>& v )
 
 // generate a coorindate system
 template<class T>
-inline void CoordinateSystem( const Vector3<T>& v0 , Vector3<T>& v1 , Vector3<T>& v2 )
+SORT_FORCEINLINE void CoordinateSystem( const Vector3<T>& v0 , Vector3<T>& v1 , Vector3<T>& v2 )
 {
     if( fabs( v0.x ) > fabs( v0.y ) )
     {

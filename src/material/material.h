@@ -69,7 +69,7 @@ public:
     //! @brief  Get material ID.
     //!
     //! @return     Material ID that uniquely identifies the material.
-    inline StringID    GetID() const {
+    SORT_FORCEINLINE StringID    GetID() const {
         return m_matID;
     }
 

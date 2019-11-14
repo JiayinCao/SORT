@@ -41,12 +41,12 @@ public:
     virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) = 0;
 
     // get width
-    inline int GetWidth() const {
+    SORT_FORCEINLINE int GetWidth() const {
         return m_width;
     }
 
     // get height
-    inline int GetHeight() const {
+    SORT_FORCEINLINE int GetHeight() const {
         return m_height;
     }
 

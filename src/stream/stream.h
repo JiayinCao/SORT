@@ -109,7 +109,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator << ( const Point& v ){
+    SORT_FORCEINLINE StreamBase&  operator << ( const Point& v ){
         return *this << v.x << v.y << v.z;
     }
 
@@ -117,7 +117,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator >> ( Point& v ){
+    SORT_FORCEINLINE StreamBase&  operator >> ( Point& v ){
         return *this >> v.x >> v.y >> v.z;
     }
 
@@ -125,7 +125,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator << ( const Vector& v ){
+    SORT_FORCEINLINE StreamBase&  operator << ( const Vector& v ){
         return *this << v.x << v.y << v.z;
     }
 
@@ -133,7 +133,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator >> ( Vector& v ){
+    SORT_FORCEINLINE StreamBase&  operator >> ( Vector& v ){
         return *this >> v.x >> v.y >> v.z;
     }
 
@@ -141,7 +141,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator << (const Vector2f& v) {
+    SORT_FORCEINLINE StreamBase&  operator << (const Vector2f& v) {
         return *this << v.x << v.y;
     }
 
@@ -149,7 +149,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator >> (Vector2f& v) {
+    SORT_FORCEINLINE StreamBase&  operator >> (Vector2f& v) {
         return *this >> v.x >> v.y;
     }
 
@@ -157,7 +157,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator << (const Transform& v) {
+    SORT_FORCEINLINE StreamBase&  operator << (const Transform& v) {
         return *this << v.matrix;
     }
 
@@ -165,7 +165,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator >> (Transform& v) {
+    SORT_FORCEINLINE StreamBase&  operator >> (Transform& v) {
         *this >> v.matrix;
         v.matrix.Inverse(v.invMatrix);
         return *this;
@@ -175,7 +175,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator << (const Matrix& v) {
+    SORT_FORCEINLINE StreamBase&  operator << (const Matrix& v) {
         for (int i = 0; i < 16; ++i)
             *this << v.m[i];
         return *this;
@@ -185,7 +185,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator >> (Matrix& v) {
+    SORT_FORCEINLINE StreamBase&  operator >> (Matrix& v) {
         for (int i = 0; i < 16; ++i)
             *this >> v.m[i];
         return *this;
@@ -195,7 +195,7 @@ public:
     //!
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator << (const Spectrum& v) {
+    SORT_FORCEINLINE StreamBase&  operator << (const Spectrum& v) {
         *this << v.GetR() << v.GetG() << v.GetB();
         return *this;
     }
@@ -204,7 +204,7 @@ public:
     //!
     //! @param v    Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator >> (Spectrum& v) {
+    SORT_FORCEINLINE StreamBase&  operator >> (Spectrum& v) {
         float r , g , b;
         *this >> r >> g >> b;
         v = Spectrum ( r , g , b );
@@ -215,7 +215,7 @@ public:
     //!
     //! @param sid  Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator <<( const StringID sid ){
+    SORT_FORCEINLINE StreamBase&  operator <<( const StringID sid ){
         return *this << sid.m_sid;
     }
 
@@ -223,7 +223,7 @@ public:
     //!
     //! @param sid  Value to be loaded.
     //! @return     Reference of the stream itself.
-    inline StreamBase&  operator >> (StringID& sid) {
+    SORT_FORCEINLINE StreamBase&  operator >> (StringID& sid) {
         return *this >> sid.m_sid;
     }
 

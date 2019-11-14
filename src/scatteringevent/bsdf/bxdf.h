@@ -169,7 +169,7 @@ protected:
     //!
     //! @param v    A vector in local coordinate.
     //! @return     The corresponding vector in shading coordinate.
-    inline Vector bsdfToBxdf( const Vector& v ) const{
+    SORT_FORCEINLINE Vector bsdfToBxdf( const Vector& v ) const{
         if( !normal_map_applied ) return v;
         return Vector( Dot(v,tn) , Dot(v,nn) , Dot(v,btn) );
     }
@@ -182,7 +182,7 @@ protected:
     //!
     //! @param v    A vector in shading coordinate.
     //! @return     The corresponding vector in local space.
-    inline Vector bxdfToBsdf( const Vector& v ) const{
+    SORT_FORCEINLINE Vector bxdfToBsdf( const Vector& v ) const{
         if( !normal_map_applied ) return v;
         return Vector(  v.x * tn.x + v.y * nn.x + v.z * btn.x ,
                         v.x * tn.y + v.y * nn.y + v.z * btn.y ,
@@ -197,7 +197,7 @@ protected:
     //! @param  wi      Incident vector in shading coordinate.
     //! @param  wo      Exitant vector in shading coordinate.
     //! @return         Whether the two vectors are on the same side of the surface.
-    inline bool SameHemiSphere(const Vector& wi, const Vector& wo) const {
+    SORT_FORCEINLINE bool SameHemiSphere(const Vector& wi, const Vector& wo) const {
         return !(PointingUp(wi) ^ PointingUp(wo));
     }
 

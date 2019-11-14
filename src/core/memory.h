@@ -91,7 +91,7 @@ private:
 //! @brief Get static allocator.
 //!
 //! @return Thread based memory allocator.
-inline MemoryAllocator& GetStaticAllocator() {
+SORT_FORCEINLINE MemoryAllocator& GetStaticAllocator() {
     // Each thread has their own memory allocator.
     static thread_local MemoryAllocator memoryAllocator;
     return memoryAllocator;

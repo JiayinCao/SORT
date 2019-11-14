@@ -16,10 +16,11 @@
 */
 
 #include <math.h>
+#include "core/define.h"
 #include "thirdparty/gtest/gtest.h"
 #include "math/exp.h"
 
-inline void exp_accuracy_test( const double x ){
+SORT_FORCEINLINE void exp_accuracy_test( const double x ){
     const double e0 = exp( x );
     const double e1 = exp_compile( x );
     EXPECT_NEAR( e0 , e1 , 0.01f * e0 );

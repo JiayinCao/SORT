@@ -34,7 +34,7 @@ description :
 // para 'v' : a canonical random variable
 // para 'x' : x position on the unit disk
 // para 'y' : y position on the unit disk
-inline void UniformSampleDisk( float u , float v , float& x , float& y )
+SORT_FORCEINLINE void UniformSampleDisk( float u , float v , float& x , float& y )
 {
     float r , theta;
     float su = 2.0f * u - 1.0f;
@@ -70,7 +70,7 @@ inline void UniformSampleDisk( float u , float v , float& x , float& y )
 // sampling a vector in a hemisphere using cosine pdf
 // para 'u' : a canonical random variable
 // para 'v' : a canonical random variable
-inline Vector CosSampleHemisphere( float u , float v )
+SORT_FORCEINLINE Vector CosSampleHemisphere( float u , float v )
 {
     float x , z ;
     UniformSampleDisk( u , v , x , z );
@@ -79,7 +79,7 @@ inline Vector CosSampleHemisphere( float u , float v )
 }
 
 // cosine hemisphere pdf
-inline float CosHemispherePdf( const Vector& v )
+SORT_FORCEINLINE float CosHemispherePdf( const Vector& v )
 {
     return AbsCosTheta(v) * INV_PI;
 }
@@ -87,7 +87,7 @@ inline float CosHemispherePdf( const Vector& v )
 // sampling a cone uniformly
 // para 'u' : a canonical random variable
 // para 'v' : a canonical random variable
-inline Vector UniformSampleCone( float u , float v , float cos_max )
+SORT_FORCEINLINE Vector UniformSampleCone( float u , float v , float cos_max )
 {
     sAssert( cos_max <= 1.0f && cos_max >= -1.0f , SAMPLING );
 
@@ -99,7 +99,7 @@ inline Vector UniformSampleCone( float u , float v , float cos_max )
 }
 
 // sampling a cone uniformly
-inline float UniformConePdf( float cos_max )
+SORT_FORCEINLINE float UniformConePdf( float cos_max )
 {
     return 1.0f / ( TWO_PI * ( 1.0f - cos_max ) );
 }
@@ -107,7 +107,7 @@ inline float UniformConePdf( float cos_max )
 // sampling a vector in a hemisphere uniformly
 // para 'u' : a canonical random variable
 // para 'v' : a canonical random variable
-inline Vector UniformSampleHemisphere( float u , float v )
+SORT_FORCEINLINE Vector UniformSampleHemisphere( float u , float v )
 {
     float theta = acos( u );
     float phi = TWO_PI * v;
@@ -116,7 +116,7 @@ inline Vector UniformSampleHemisphere( float u , float v )
 }
 
 // uniformly sample hemisphere pdf
-inline float UniformHemispherePdf()
+SORT_FORCEINLINE float UniformHemispherePdf()
 {
     return INV_TWOPI;
 }
@@ -124,7 +124,7 @@ inline float UniformHemispherePdf()
 // sampling a vector in sphere uniformly
 // para 'u' : a canonical random variable
 // para 'v' : a canonical random variable
-inline Vector UniformSampleSphere( float u , float v )
+SORT_FORCEINLINE Vector UniformSampleSphere( float u , float v )
 {
     float theta = acos( 1 - 2.0f * u );
     float phi = TWO_PI * v;
@@ -132,7 +132,7 @@ inline Vector UniformSampleSphere( float u , float v )
 }
 
 // pdf of uniformly sampling a vector on sphere
-inline float UniformSpherePdf()
+SORT_FORCEINLINE float UniformSpherePdf()
 {
     return INV_TWOPI * 0.5f;
 }

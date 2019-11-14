@@ -61,7 +61,7 @@ public:
     //! @brief  Setup the rendering scene for lights.
     //!
     //! @param  scene   The rendering scene.
-    inline void         SetupScene( const Scene* scene ) {
+    SORT_FORCEINLINE void         SetupScene( const Scene* scene ) {
         m_scene=scene;
     }
 
@@ -138,14 +138,14 @@ public:
     //! @brief  Set up the pdf to pick the light.
     //!
     //! @param pdf      The pdf of picking the light source.
-    inline void SetPickPDF( float pdf ) {
+    SORT_FORCEINLINE void SetPickPDF( float pdf ) {
         m_pickProp = pdf;
     }
 
     //! @brief  Get the pdf to pick the light.
     //!
     //! @return         The pdf of picking the light source.
-    inline float PickPDF() const {
+    SORT_FORCEINLINE float PickPDF() const {
         return m_pickProp;
     }
 
