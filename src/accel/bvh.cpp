@@ -84,14 +84,14 @@ void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned d
     // pick best split plane
     unsigned    split_axis;
     float       split_pos;
-    auto sah = pickBestSplit( split_axis , split_pos , node , start , end );
+    const auto sah = ::pickBestSplit( split_axis , split_pos , m_bvhpri.get() , node->bbox , start , end );
     if( sah >= primitive_num ){
         makeLeaf( node , start , end );
         return;
     }
 
     // partition the data
-    auto compare = [split_pos,split_axis](const Bvh::Bvh_Primitive& pri){return pri.m_centroid[split_axis] < split_pos;};
+    auto compare = [split_pos,split_axis](const Bvh_Primitive& pri){return pri.m_centroid[split_axis] < split_pos;};
     auto middle = std::partition( m_bvhpri.get() + start , m_bvhpri.get() + end, compare );
     auto mid = (unsigned)(middle - m_bvhpri.get());
 
@@ -110,57 +110,6 @@ void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned d
     splitNode( node->right.get() , mid , end , depth + 1 );
 
     SORT_STATS(sBvhNodeCount+=2);
-}
-
-float Bvh::pickBestSplit( unsigned& axis , float& splitPos , Bvh_Node* node , unsigned start , unsigned end ){
-    BBox inner;
-    for(auto i = start ; i < end ; i++ )
-        inner.Union( m_bvhpri[i].m_centroid );
-
-    auto primitive_num = end - start;
-    axis = inner.MaxAxisId();
-    auto min_sah = FLT_MAX;
-
-    // distribute the primitives into bins
-    unsigned    bin[BVH_SPLIT_COUNT];
-    BBox        bbox[BVH_SPLIT_COUNT];
-    BBox        rbox[BVH_SPLIT_COUNT-1];
-    memset( bin , 0 , sizeof( unsigned ) * BVH_SPLIT_COUNT );
-    auto split_start = inner.m_Min[axis];
-    auto split_delta = inner.Delta(axis) * BVH_INV_SPLIT_COUNT;
-    if( split_delta == 0.0f )
-        return FLT_MAX;
-    auto inv_split_delta = 1.0f / split_delta;
-    for(auto i = start ; i < end ; i++ ){
-        int index = (int)((m_bvhpri[i].m_centroid[axis] - split_start) * inv_split_delta);
-        index = std::min( index , (int)(BVH_SPLIT_COUNT - 1) );
-        bin[index]++;
-        bbox[index].Union( m_bvhpri[i].GetBBox() );
-    }
-
-    rbox[BVH_SPLIT_COUNT-2].Union( bbox[BVH_SPLIT_COUNT-1] );
-    for( int i = BVH_SPLIT_COUNT-3; i >= 0 ; i-- )
-        rbox[i] = Union( rbox[i+1] , bbox[i+1] );
-
-    auto    left = bin[0];
-    auto    lbox = bbox[0];
-    auto    pos = split_delta + split_start ;
-    for(auto i = 0 ; i < BVH_SPLIT_COUNT - 1 ; i++ ){
-        auto sah_value = sah( left , primitive_num - left , lbox , rbox[i] , node->bbox );
-        if( sah_value < min_sah ){
-            min_sah = sah_value;
-            splitPos = pos;
-        }
-        left += bin[i+1];
-        lbox.Union( bbox[i+1] );
-        pos += split_delta;
-    }
-
-    return min_sah;
-}
-
-float Bvh::sah( unsigned left , unsigned right , const BBox& lbox , const BBox& rbox , const BBox& box ){
-    return (left * lbox.HalfSurfaceArea() + right * rbox.HalfSurfaceArea()) / box.HalfSurfaceArea();
 }
 
 void Bvh::makeLeaf( Bvh_Node* node , unsigned start , unsigned end ){

@@ -19,6 +19,7 @@
 
 #include "accelerator.h"
 #include "core/primitive.h"
+#include "bvh_utils.h"
 
 //! @brief Bounding volume hierarchy.
 /**
@@ -45,27 +46,6 @@ class Bvh : public Accelerator{
         unsigned                    pri_offset = 0;         /**< Offset in the primitive buffer. It is 0 for interior nodes. */
         std::unique_ptr<Bvh_Node>   left = nullptr;         /**< Left child of the BVH node. */
         std::unique_ptr<Bvh_Node>   right = nullptr;        /**< Right child of the BVH node. */
-    };
-
-    //! @brief Bounding volume hierarchy node primitives. It is used during BVH construction.
-    struct Bvh_Primitive {
-        Primitive*  primitive;              /**< Primitive lists for this node. */
-        Point       m_centroid;             /**< Center point of the BVH node. */
-
-        //! @brief Set primitive.
-        //!
-        //! @param p    Primitive list holding all primitives in the node.
-        void SetPrimitive(Primitive* p){
-            primitive = p;
-            m_centroid = (p->GetBBox().m_Max + p->GetBBox().m_Min) * 0.5f;
-        }
-
-        //! Get bounding box of this primitive set.
-        //!
-        //! @return     Axis-Aligned bounding box holding all the primitives.
-        const BBox& GetBBox() const {
-            return primitive->GetBBox();
-        }
     };
 
 public:
@@ -142,26 +122,6 @@ private:
     //! @param start        The start offset of primitives that the node holds.
     //! @param end          The end offset of primitives that the node holds.
     void    makeLeaf( Bvh_Node* node , unsigned start , unsigned end );
-
-    //! @brief Evaluate the SAH value of a specific splitting.
-    //!
-    //! @param left         The number of primitives in the left node to be split.
-    //! @param right        The number of primitives in the right node to be split.
-    //! @param lbox         Bounding box of the left node to be split.
-    //! @param rbox         Bounding box of the right node to be split.
-    //! @param box          Bounding box of the current node.
-    //! @return             SAH value of the specific split plane.
-    float   sah( unsigned left , unsigned right , const BBox& lbox , const BBox& rbox , const BBox& box );
-
-    //! @brief Pick the best split among all possible splits.
-    //!
-    //! @param axis         The selected axis id of the picked split plane.
-    //! @param split_pos    Position of the selected split plane.
-    //! @param node         The node to be split.
-    //! @param start        The start offset of primitives that the node holds.
-    //! @param end          The end offset of primitives that the node holds.
-    //! @return             The SAH value of the selected best split plane.
-    float   pickBestSplit( unsigned& axis , float& split_pos , Bvh_Node* node , unsigned start , unsigned end );
 
     //! @brief A recursive function that traverses the BVH node.
     //!
