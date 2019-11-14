@@ -124,7 +124,6 @@ const std::string LogDispatcher::format( LOG_LEVEL level , LOG_TYPE type , const
 
 void StdOutLogDispatcher::output( const LOG_LEVEL level , const std::string& header , const std::string& info ){
     const auto color_code = levelToHeaderColorCode( level );
-    static const auto default_color_code = 39;
 #ifdef SORT_IN_WINDOWS
 	std::cout<<color_code<<header<<" "<<info<<std::endl;
 #else

@@ -220,8 +220,6 @@ TEST(BXDF, HairPDFConsistant) {
 
     // Since the PDF of hair BXDF matches exactly with its BXDF value itself, there is a special PDF verification process for hair.
     auto checkPDF = [] ( const Bxdf* bxdf ){
-        constexpr int CNT = 1024 * 1024;
-        const auto Li = []( const Vector& w ) -> Spectrum { return w.y * w.y ; };
         const auto wo = UniformSampleHemisphere( sort_canonical() , sort_canonical() );
 
         spinlock_mutex mutex0;

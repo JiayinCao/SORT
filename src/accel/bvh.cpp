@@ -42,9 +42,6 @@ SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sBvhMa
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sBvhPrimitiveCount , sBvhLeafNodeCountCopy );
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-static const unsigned   BVH_SPLIT_COUNT         = 16;
-static const float      BVH_INV_SPLIT_COUNT     = 0.0625f;
-
 void Bvh::Build(const Scene& scene){
     SORT_PROFILE("Build Bvh");
 

@@ -142,12 +142,12 @@ TEST(OSL, CheckingSymbol) {
 #endif
     OSLQuery q;
     q.init (shadergroup.get(), 0);
+#if OSL_TEST_VERBOSE
     for (size_t p = 0;  p < q.nparams(); ++p) {
         const OSLQuery::Parameter *param = q.getparam(p);
-#if OSL_TEST_VERBOSE
         std::cout << "\t" << (param->isoutput ? "output "  : "input ") << param->type << ' ' << param->name << "\n";
-#endif
     }
+#endif
 
     static const auto verify_param = [=]( const int index , const std::string& name , const bool input ){
         const auto param = q.getparam(index);
@@ -363,7 +363,6 @@ TEST(OSL, CheckingDefaultValue) {
     // Register closures
     RegisterClosures( shadingsys.get() );
 
-    const auto group_name = "default_shader_group";
     const auto shader_name = "default_shader";
     const auto shader_layer = "default_layer";
     const auto shadergroup = shadingsys->ShaderGroupBegin ("Closure_Test_ShaderGroup");

@@ -295,7 +295,6 @@ void Qbvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersect
     for( ; child_cnt < 4 && !node->children[child_cnt] ; ++child_cnt )
         dist[child_cnt] = Intersect( ray , node->bbox[child_cnt] );
 
-    auto intersection_found = false;
     for( int i = 0 ; i < child_cnt ; ++i ){
         int k = 0;
         float minDist = FLT_MAX;

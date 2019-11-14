@@ -73,7 +73,6 @@ public:
 private:
     const Bxdf*         m_bxdf[MAX_BXDF_COUNT] = {};    /**< List of Bxdf in the BSDF. */
     unsigned            m_bxdfCount = 0;                /**< Number of Bxdf in the BSDF. */
-    mutable bool        m_samplingSSS = false;          /**< Indicate that last sampling is for SSS. */
 
     Vector nn;      /**< Normal at the point to be Evaluated. */
     Vector btn;     /**< Bi-tangent at the point to be evaluated. */

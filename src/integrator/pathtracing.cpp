@@ -94,7 +94,6 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             se.Sample_BSSRDF( scene, -r.m_Dir, se.GetIntersection().intersect, bssrdf_inter , bssrdf_pdf);
 
             // Accumulate the contribution from direct illumination
-            Spectrum total_bssrdf = 0.0f;
             if( bssrdf_inter.cnt > 0 ){
                 Spectrum total_bssrdf;
 
@@ -148,7 +147,6 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             se.Sample_BSSRDF( scene, -r.m_Dir, se.GetIntersection().intersect, bssrdf_inter , bssrdf_pdf);
 
             // Accumulate the contribution from direct illumination
-            Spectrum total_bssrdf = 0.0f;
             if( bssrdf_inter.cnt > 0 ){
                 Spectrum total_bssrdf;
 

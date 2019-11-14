@@ -343,24 +343,6 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     if (pPdf) *pPdf = pdf(wo, wi);
 
     auto ret = f( wo , wi );
-
-	auto tt = ret.GetIntensity() / *pPdf;
-	if( tt > 20.0f ){
-		int k = 0;
-
-		const GGX ggx(roughness / aspect, roughness * aspect);
-		const auto Cspec0 = slerp(specular * SchlickR0FromEta(ior_ex / ior_in) * slerp(Spectrum(1.0f), Ctint, specularTint), basecolor, metallic);
-		if (!Cspec0.IsBlack()) {
-			const FresnelSchlick<Spectrum> fresnel(Cspec0);
-			const MicroFacetReflection mf(WHITE_SPECTRUM, &fresnel, &ggx, FULL_WEIGHT, nn);
-			auto t0 = mf.f(wo, wi);
-
-			const auto wh = Normalize(wi + wo);
-			auto t1 = ggx.Pdf(wh) / (4.0f * AbsDot(wo, wh));
-
-			k = 1;
-		}
-	}
 	return ret;
 }
 
