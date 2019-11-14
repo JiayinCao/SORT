@@ -84,7 +84,7 @@ void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned d
     // pick best split plane
     unsigned    split_axis;
     float       split_pos;
-    const auto sah = ::pickBestSplit( split_axis , split_pos , m_bvhpri.get() , node->bbox , start , end );
+    const auto sah = pickBestSplit( split_axis , split_pos , m_bvhpri.get() , node->bbox , start , end );
     if( sah >= primitive_num ){
         makeLeaf( node , start , end );
         return;

@@ -19,6 +19,7 @@
 
 #include "accelerator.h"
 #include "core/primitive.h"
+#include "bvh_utils.h"
 
 //! @brief Quad Bounding volume hierarchy.
 /**
@@ -73,8 +74,70 @@ public:
     //! @param      Stream where the serialization data comes from. Depending on different situation,
     //!             it could come from different places.
     void    Serialize( IStreamBase& stream ) override{
-        // empty for now
+        stream >> m_maxNodeDepth;
+        stream >> m_maxPriInLeaf;
     }
 
+private:
+    struct Bvh_Node{
+        BBox                        bbox[4];            /**< Bounding boxes of its four children. */
+        std::unique_ptr<Bvh_Node>   children[4];        /**< Chilren of its four nodes. */
+
+        unsigned                    pri_cnt = 0;        /**< Number of primitives in the node. */
+        unsigned                    pri_offset = 0;     /**< Offset of primitives in the buffer. */
+        bool                        leaf_node = false;  /**< Whether this is a leaf node. */
+    };
+
+    /**< Primitive list during QBVH construction. */
+    std::unique_ptr<Bvh_Primitive[]>    m_bvhpri = nullptr;
+
+    /**< Root node of the BVH. */
+    std::unique_ptr<Bvh_Node>           m_root;
+
+    /**< Maximum primitives in a leaf node. During BVH construction, a node with less primitives will be marked as a leaf node. */
+    unsigned                            m_maxPriInLeaf = 8;
+    /**< Maximum depth of node in BVH. */
+    unsigned                            m_maxNodeDepth = 16;
+
+    //! @brief Split current QBVH node.
+    //!
+    //! @param node         The QBVH node to be split.
+    //! @param node_bbox    The bounding box of the node.
+    //! @param depth        The current depth of the node. Starting from 1 for root node.
+    void    splitNode( Bvh_Node* const node , const BBox& node_bbox , unsigned depth );
+
+    //! @brief Mark the current node as leaf node.
+    //!
+    //! @param node         The BVH node to be marked as leaf node.
+    //! @param start        The start offset of primitives that the node holds.
+    //! @param end          The end offset of primitives that the node holds.
+    void    makeLeaf( Bvh_Node* const node , unsigned start , unsigned end );
+
+    //! @brief A helper function calculating bounding box of a node.
+    //!
+    //! @param node         Node to be evaluated.
+    //! @return             The bounding box of the node.
+    BBox    calcBoundingBox( const Bvh_Node* const node );
+
+    //! @brief A recursive function that traverses the BVH node.
+    //!
+    //! @param node         The root node of the (sub)tree to be traversed.
+    //! @param ray          The ray to be tested.
+    //! @param intersect    The structure holding the intersection information. If empty pointer is passed,
+    //!                     it will return as long as one intersection is found and it won't be necessary to be
+    //!                     the nearest one.
+    //! @param fmin         The minimum range along the ray.
+    //! @return             True if there is intersection, otherwise it will return false.
+    bool    traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const;
+
+    //! @brief A recursive helper function that traverse the BVH to find all intersections.
+    //!
+    //! @param node         The root node of the (sub)tree to be traversed.
+    //! @param ray          The ray to be tested.
+    //! @param intersect    The result intersections.
+    //! @param fmin         The minimum range along the ray, any intersection before it will be ignored.
+    //! @param              Material ID to avoid if it is not invalid.
+    void    traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , const StringID matID ) const;
+    
     SORT_STATS_ENABLE( "Spatial-Structure(QBVH)" )
 };

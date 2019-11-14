@@ -131,7 +131,6 @@ private:
     //!                     it will return as long as one intersection is found and it won't be necessary to be
     //!                     the nearest one.
     //! @param fmin         The minimum range along the ray.
-    //! @param matID        Material ID to avoid if it is not invalid.
     //! @return             True if there is intersection, otherwise it will return false.
     bool    traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const;
 

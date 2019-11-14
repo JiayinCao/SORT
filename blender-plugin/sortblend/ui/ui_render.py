@@ -160,7 +160,7 @@ class RENDER_PT_AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
         data = context.scene.sort_data
         self.layout.prop(data,"accelerator_type_prop")
         accelerator_type = data.accelerator_type_prop
-        if accelerator_type == "bvh":
+        if accelerator_type == "bvh" or accelerator_type == "Qbvh":
             self.layout.prop(data,"bvh_max_node_depth")
             self.layout.prop(data,"bvh_max_pri_in_leaf")
         elif accelerator_type == "KDTree":

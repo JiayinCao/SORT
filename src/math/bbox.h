@@ -120,26 +120,21 @@ inline BBox Union( const BBox& bbox0 , const BBox& bbox1 )
 // para 'bb'  : the bounding box
 // para 'tmax': further away intersected point
 // result     : the first intersected point and return -1.0f if not crossed
-inline float Intersect( const Ray& ray , const BBox& bb , float* fmax = nullptr )
-{
+inline float Intersect( const Ray& ray , const BBox& bb , float* fmax = nullptr ){
     //set default value for tmax and tmin
     float tmax = ray.m_fMax;
     float tmin = ray.m_fMin;
 
-    for( unsigned axis = 0 ; axis < 3 ; axis ++ )
-    {
-        if( ray.m_Dir[axis] < 0.00001f && ray.m_Dir[axis] > -0.00001f )
-        {
+    for( unsigned axis = 0 ; axis < 3 ; axis ++ ){
+        if( ray.m_Dir[axis] < 0.00001f && ray.m_Dir[axis] > -0.00001f ){
             if( ray.m_Ori[axis] > bb.m_Max[axis] || ray.m_Ori[axis] < bb.m_Min[axis] )
                 return -1.0f;
-        }else
-        {
+        }else{
             float ood = 1.0f / ray.m_Dir[axis];
             float t1 = ( bb.m_Max[axis] - ray.m_Ori[axis] ) * ood;
             float t2 = ( bb.m_Min[axis] - ray.m_Ori[axis] ) * ood;
 
-            if( t1 > t2 )
-            {
+            if( t1 > t2 ){
                 float t = t1;
                 t1 = t2;
                 t2 = t;
