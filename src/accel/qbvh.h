@@ -146,25 +146,5 @@ private:
 	BBox4	calcBoundingBox4(const Qbvh_Node* const node0, const Qbvh_Node* const node1, const Qbvh_Node* const node2, const Qbvh_Node* const node3) const;
 #endif
 
-    //! @brief A recursive function that traverses the BVH node.
-    //!
-    //! @param node         The root node of the (sub)tree to be traversed.
-    //! @param ray          The ray to be tested.
-    //! @param intersect    The structure holding the intersection information. If empty pointer is passed,
-    //!                     it will return as long as one intersection is found and it won't be necessary to be
-    //!                     the nearest one.
-    //! @param fmin         The minimum range along the ray.
-    //! @return             True if there is intersection, otherwise it will return false.
-    bool    traverseNode( const Qbvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const;
-
-    //! @brief A recursive helper function that traverse the BVH to find all intersections.
-    //!
-    //! @param node         The root node of the (sub)tree to be traversed.
-    //! @param ray          The ray to be tested.
-    //! @param intersect    The result intersections.
-    //! @param fmin         The minimum range along the ray, any intersection before it will be ignored.
-    //! @param              Material ID to avoid if it is not invalid.
-    void    traverseNode( const Qbvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , const StringID matID ) const;
-    
     SORT_STATS_ENABLE( "Spatial-Structure(QBVH)" )
 };

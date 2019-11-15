@@ -40,10 +40,6 @@ SORT_STATS_COUNTER("Spatial-Structure(QBVH)", "Maximum Primitive in Leaf", sQbvh
 SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Count in Leaf", sQbvhPrimitiveCount , sQbvhLeafNodeCountCopy );
 SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-// Disabled stackless traversal until I find the reason why it is slower by 2%.
-// Preallocate the stack would be an option here to reduce memory overhead.
-// #define QBVH_STACKLESS_TRAVERSAL
-
 static SORT_FORCEINLINE BBox calcBoundingBox(const Qbvh_Node* const node , const Bvh_Primitive* const primitives ) {
 	BBox node_bbox;
 	for (auto i = node->pri_offset; node && i < node->pri_offset + node->pri_cnt; i++)
@@ -187,6 +183,11 @@ BBox4 Qbvh::calcBoundingBox4(const Qbvh_Node* const node0 , const Qbvh_Node* con
 #endif
 
 bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
+	// std::stack is by no means an option here due to its overhead under the hood.
+	static thread_local std::unique_ptr<std::pair<Qbvh_Node*, float>[]> bvh_stack = nullptr;
+	if (UNLIKELY(nullptr == bvh_stack))
+		bvh_stack = std::make_unique<std::pair<Qbvh_Node*, float>[]>(m_depth * QBVH_CHILD_CNT);
+
     SORT_PROFILE("Traverse Qbvh");
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect != nullptr);
@@ -197,12 +198,6 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     const auto fmin = Intersect(ray, m_bbox);
     if (fmin < 0.0f)
         return false;
-
-#ifdef QBVH_STACKLESS_TRAVERSAL
-	// std::stack is by no means an option here due to its overhead under the hood.
-	static thread_local std::unique_ptr<std::pair<Qbvh_Node*, float>[]> bvh_stack = nullptr;
-	if( nullptr == bvh_stack )
-		bvh_stack = std::make_unique<std::pair<Qbvh_Node*, float>[]>( m_depth * QBVH_CHILD_CNT );
 
 	// stack index
 	auto si = 0;
@@ -281,88 +276,14 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #endif
     }
     return intersect && intersect->primitive;
-#else
-    if (traverseNode(m_root.get(), ray, intersect, fmin))
-        return !intersect || intersect->primitive ;
-    return false;
-#endif
-}
-
-bool Qbvh::traverseNode( const Qbvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const{
-    if( fmin < 0.0f )
-        return false;
-
-    if( intersect && intersect->t < fmin )
-        return true;
-
-    if( 0 == node->child_cnt ){
-        auto _start = node->pri_offset;
-        auto _pri = node->pri_cnt;
-        auto _end = _start + _pri;
-
-        auto found = false;
-        for(auto i = _start ; i < _end ; i++ ){
-            SORT_STATS(++sIntersectionTest);
-            found |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
-            if( intersect == nullptr && found )
-                return true;
-        }
-        return found;
-    }
-
-#ifndef SSE_ENABLED
-	float dist[QBVH_CHILD_CNT] = { FLT_MAX };
-    for( int i = 0 ; i < node->child_cnt ; ++i )
-        dist[i] = Intersect( ray , node->bbox[i] );
-
-    auto intersection_found = false;
-    for( int i = 0 ; i < node->child_cnt ; ++i ){
-        int k = 0;
-        float minDist = FLT_MAX;
-        for( int j = 0 ; j < node->child_cnt ; ++j ){
-            if( dist[j] < minDist ){
-                minDist = dist[j];
-                k = j;
-            }
-        }
-
-        dist[k] = FLT_MAX;
-        intersection_found |= traverseNode( node->children[k].get() , ray , intersect , minDist );
-        if( intersection_found && !intersect )
-            return true;
-    }
-#else
-	__m128 sse_f_max , sse_f_min;
-	IntersectBBox4( ray , node->bbox , sse_f_min , sse_f_max );
-
-	alignas(16) float f_max[4] , f_min[4];
-	_mm_store_ps(f_max , sse_f_max);
-	_mm_store_ps(f_min , sse_f_min);
-
-	auto intersection_found = false;
-    for( int i = 0 ; i < node->child_cnt ; ++i ){
-        int k = -1;
-        float minDist = FLT_MAX;
-        for( int j = 0 ; j < node->child_cnt ; ++j ){
-            if( f_min[j] < minDist && f_min[j] <= f_max[j] ){
-                minDist = f_min[j];
-                k = j;
-            }
-        }
-
-        if( k == -1 )
-            break;
-
-        f_min[k] = FLT_MAX;
-        intersection_found |= traverseNode( node->children[k].get() , ray , intersect , minDist );
-        if( intersection_found && !intersect )
-            return true;
-    }
-#endif
-    return intersect == nullptr ? intersection_found : true;
 }
 
 void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
+	// std::stack is by no means an option here due to its overhead under the hood.
+	static thread_local std::unique_ptr<std::pair<Qbvh_Node*, float>[]> bvh_stack = nullptr;
+	if ( UNLIKELY( nullptr == bvh_stack ) )
+		bvh_stack = std::make_unique<std::pair<Qbvh_Node*, float>[]>(m_depth * QBVH_CHILD_CNT);
+
     SORT_PROFILE("Traverse Qbvh");
     SORT_STATS(++sRayCount);
 
@@ -372,103 +293,109 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;
 
-    const auto fmin = Intersect(ray, m_bbox);
-    if( fmin < 0.0f )
-        return;
-    traverseNode(m_root.get(), ray, intersect, fmin, matID);
-}
+	const auto fmin = Intersect(ray, m_bbox);
+	if (fmin < 0.0f)
+		return;
 
-void Qbvh::traverseNode( const Qbvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , const StringID matID ) const{
-    sAssert( fmin >= 0.0f , SPATIAL_ACCELERATOR );
+	// stack index
+	auto si = 0;
+	bvh_stack[si++] = std::make_pair(m_root.get(), fmin);
 
-    if( intersect.maxt < fmin )
-        return;
+	while (si > 0) {
+		const auto top = bvh_stack[--si];
 
-    if( 0 == node->child_cnt ){
-        auto _start = node->pri_offset;
-        auto _pri = node->pri_cnt;
-        auto _end = _start + _pri;
+		const auto node = top.first;
+		const auto fmin = top.second;
+		if (intersect.maxt < fmin)
+			return;
 
-        Intersection intersection;
-        for(auto i = _start ; i < _end ; i++ ){
-            if( matID != m_bvhpri[i].primitive->GetMaterial()->GetID() )
-                continue;
+		// check if it is a leaf node, to be optimized by SSE/AVX
+		if (0 == node->child_cnt) {
+			auto _start = node->pri_offset;
+			auto _pri = node->pri_cnt;
+			auto _end = _start + _pri;
 
-            SORT_STATS(++sIntersectionTest);
+			Intersection intersection;
+			for (auto i = _start; i < _end; i++) {
+				if (matID != m_bvhpri[i].primitive->GetMaterial()->GetID())
+					continue;
 
-            intersection.Reset();
-            const auto intersected = m_bvhpri[i].primitive->GetIntersect( ray , &intersection );
-            if( intersected ){
-                if( intersect.cnt < TOTAL_SSS_INTERSECTION_CNT ){
-                    intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
-                    intersect.intersections[intersect.cnt++]->intersection = intersection;
-                }else{
-                    auto picked_i = -1;
-                    auto t = 0.0f;
-                    for( auto i = 0 ; i < TOTAL_SSS_INTERSECTION_CNT ; ++i ){
-                        if( t < intersect.intersections[i]->intersection.t ){
-                            t = intersect.intersections[i]->intersection.t;
-                            picked_i = i;
-                        }
-                    }
-                    if( picked_i >= 0 )
-                        intersect.intersections[picked_i]->intersection = intersection;
+				SORT_STATS(++sIntersectionTest);
 
-                    intersect.maxt = 0.0f;
-                    for( auto i = 0u ; i < intersect.cnt ; ++i )
-                        intersect.maxt = std::max( intersect.maxt , intersect.intersections[i]->intersection.t );
-                }
-            }
-        }
+				intersection.Reset();
+				const auto intersected = m_bvhpri[i].primitive->GetIntersect(ray, &intersection);
+				if (intersected) {
+					if (intersect.cnt < TOTAL_SSS_INTERSECTION_CNT) {
+						intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+						intersect.intersections[intersect.cnt++]->intersection = intersection;
+					}
+					else {
+						auto picked_i = -1;
+						auto t = 0.0f;
+						for (auto i = 0; i < TOTAL_SSS_INTERSECTION_CNT; ++i) {
+							if (t < intersect.intersections[i]->intersection.t) {
+								t = intersect.intersections[i]->intersection.t;
+								picked_i = i;
+							}
+						}
+						if (picked_i >= 0)
+							intersect.intersections[picked_i]->intersection = intersection;
 
-       return;
-    }
+						intersect.maxt = 0.0f;
+						for (auto i = 0u; i < intersect.cnt; ++i)
+							intersect.maxt = std::max(intersect.maxt, intersect.intersections[i]->intersection.t);
+					}
+				}
+			}
+
+			continue;
+		}
 
 #ifndef SSE_ENABLED
-    float dist[QBVH_CHILD_CNT] = { FLT_MAX };
-    for( auto i = 0 ; i < node->child_cnt ; ++i )
-        dist[i] = Intersect( ray , node->bbox[i] );
+		float f_min[QBVH_CHILD_CNT] = { FLT_MAX };
+		for (int i = 0; i < node->child_cnt; ++i)
+			f_min[i] = Intersect(ray, node->bbox[i]);
 
-    for( auto i = 0 ; i < node->child_cnt ; ++i ){
-        auto k = -1;
-        float minDist = FLT_MAX;
-        for( int j = 0 ; j < node->child_cnt ; ++j ){
-            if( dist[j] < minDist ){
-                minDist = dist[j];
-                k = j;
-            }
-        }
+		for (int i = 0; i < node->child_cnt; ++i) {
+			int k = -1;
+			float maxDist = -1.0f;
+			for (int j = 0; j < node->child_cnt; ++j) {
+				if (f_min[j] > maxDist) {
+					maxDist = f_min[j];
+					k = j;
+				}
+			}
 
-        if( k == -1 )
-            break;
+			if (k == -1)
+				break;
 
-        dist[k] = FLT_MAX;
-        if( minDist >= 0 )
-            traverseNode( node->children[k].get() , ray , intersect , minDist , matID );
-    }
+			f_min[k] = -1.0f;
+			bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
+		}
 #else
-	__m128 sse_f_max , sse_f_min;
-	IntersectBBox4( ray , node->bbox , sse_f_min , sse_f_max );
+		__m128 sse_f_max, sse_f_min;
+		IntersectBBox4(ray, node->bbox, sse_f_min, sse_f_max);
 
-	alignas(16) float f_max[4] , f_min[4];
-	_mm_store_ps(f_max , sse_f_max);
-	_mm_store_ps(f_min , sse_f_min);
+		alignas(16) float f_max[4], f_min[4];
+		_mm_store_ps(f_max, sse_f_max);
+		_mm_store_ps(f_min, sse_f_min);
 
-    for( int i = 0 ; i < node->child_cnt ; ++i ){
-        int k = -1;
-        float minDist = FLT_MAX;
-        for( int j = 0 ; j < node->child_cnt ; ++j ){
-            if( f_min[j] < minDist && f_min[j] <= f_max[j] ){
-                minDist = f_min[j];
-                k = j;
-            }
-        }
+		for (int i = 0; i < node->child_cnt; ++i) {
+			int k = -1;
+			float maxDist = -1.0f;
+			for (int j = 0; j < node->child_cnt; ++j) {
+				if (f_min[j] > maxDist && f_min[j] <= f_max[j]) {
+					maxDist = f_min[j];
+					k = j;
+				}
+			}
 
-        if( k == -1 )
-            break;
+			if (k == -1)
+				break;
 
-        f_min[k] = FLT_MAX;
-        traverseNode( node->children[k].get() , ray , intersect , minDist , matID );
-    }
+			f_min[k] = -1.0f;
+			bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
+		}
 #endif
+	}
 }
