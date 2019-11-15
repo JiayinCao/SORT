@@ -25,6 +25,20 @@
 
 static_assert( QBVH_CHILD_CNT > 1 , "Qbvh node has to have at least two children." );
 
+struct Qbvh_Node {
+#if SSE_ENABLED
+	BBox4						bbox;						/**< Bounding boxes of its four children. */
+#else
+	BBox                        bbox[QBVH_CHILD_CNT];       /**< Bounding boxes of its children. */
+#endif
+	std::unique_ptr<Qbvh_Node>  children[QBVH_CHILD_CNT];   /**< Children of its four nodes. */
+
+	unsigned                    pri_cnt = 0;				/**< Number of primitives in the node. */
+	unsigned                    pri_offset = 0;				/**< Offset of primitives in the buffer. */
+	bool                        leaf_node = false;			/**< Whether this is a leaf node. */
+};
+
+
 //! @brief Quad Bounding volume hierarchy.
 /**
  * Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays
@@ -83,20 +97,11 @@ public:
     }
 
 private:
-    struct Bvh_Node{
-        BBox                        bbox[QBVH_CHILD_CNT];       /**< Bounding boxes of its four children. */
-        std::unique_ptr<Bvh_Node>   children[QBVH_CHILD_CNT];   /**< Children of its four nodes. */
-
-        unsigned                    pri_cnt = 0;				/**< Number of primitives in the node. */
-        unsigned                    pri_offset = 0;				/**< Offset of primitives in the buffer. */
-        bool                        leaf_node = false;			/**< Whether this is a leaf node. */
-    };
-
     /**< Primitive list during QBVH construction. */
     std::unique_ptr<Bvh_Primitive[]>    m_bvhpri = nullptr;
 
     /**< Root node of the BVH. */
-    std::unique_ptr<Bvh_Node>           m_root;
+    std::unique_ptr<Qbvh_Node>          m_root;
 
     /**< Maximum primitives in a leaf node. During BVH construction, a node with less primitives will be marked as a leaf node. */
     unsigned                            m_maxPriInLeaf = 8;
@@ -108,20 +113,25 @@ private:
     //! @param node         The QBVH node to be split.
     //! @param node_bbox    The bounding box of the node.
     //! @param depth        The current depth of the node. Starting from 1 for root node.
-    void    splitNode( Bvh_Node* const node , const BBox& node_bbox , unsigned depth );
+    void    splitNode( Qbvh_Node* const node , const BBox& node_bbox , unsigned depth );
 
     //! @brief Mark the current node as leaf node.
     //!
     //! @param node         The BVH node to be marked as leaf node.
     //! @param start        The start offset of primitives that the node holds.
     //! @param end          The end offset of primitives that the node holds.
-    void    makeLeaf( Bvh_Node* const node , unsigned start , unsigned end );
+    void    makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end );
 
-    //! @brief A helper function calculating bounding box of a node.
-    //!
-    //! @param node         Node to be evaluated.
-    //! @return             The bounding box of the node.
-    BBox    calcBoundingBox( const Bvh_Node* const node );
+#ifdef SSE_ENABLED
+	//! @brief A helper function calculating bounding box of a node.
+	//!
+	//! @param node0        First child of the current node.
+	//! @param node1		Second child of the current node.
+	//! @param node2		Third child of the current node.
+	//! @param node3		Forth child of the current node.
+	//! @return             The 4 bounding box of the node, there could be degenerated ones if there is no four children.
+	BBox4	calcBoundingBox4(const Qbvh_Node* const node0, const Qbvh_Node* const node1, const Qbvh_Node* const node2, const Qbvh_Node* const node3) const;
+#endif
 
     //! @brief A recursive function that traverses the BVH node.
     //!
@@ -132,7 +142,7 @@ private:
     //!                     the nearest one.
     //! @param fmin         The minimum range along the ray.
     //! @return             True if there is intersection, otherwise it will return false.
-    bool    traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const;
+    bool    traverseNode( const Qbvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const;
 
     //! @brief A recursive helper function that traverse the BVH to find all intersections.
     //!
@@ -141,7 +151,7 @@ private:
     //! @param intersect    The result intersections.
     //! @param fmin         The minimum range along the ray, any intersection before it will be ignored.
     //! @param              Material ID to avoid if it is not invalid.
-    void    traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , const StringID matID ) const;
+    void    traverseNode( const Qbvh_Node* node , const Ray& ray , BSSRDFIntersections& intersect , float fmin , const StringID matID ) const;
     
     SORT_STATS_ENABLE( "Spatial-Structure(QBVH)" )
 };

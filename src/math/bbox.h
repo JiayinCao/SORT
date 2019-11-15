@@ -21,60 +21,83 @@
 #include "math/point.h"
 #include "ray.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// definition of axis aligned bounding box
-class BBox
-{
+#ifdef SSE_ENABLED
+	#include <nmmintrin.h>
+#endif
+
+//! @brief	Axis Aligned Bounding Box.
+class BBox{
 public:
-    // default constructor
+    //! @brief	Default constructor
+	//!
+	//! Default constructor will set the data in a way that it is invalid.
     BBox();
-    // constructor from two point
-    // para 'p0'     :  a point
-    // para 'p1'     :  another point
-    // para 'sorted' :  if sorted is true , it means p0 is minium point and p1 is maxium point
+
+	//! @brief	Constructor from two points
+	//!
+	//! @param p0		One of the eight corners of the AABB.
+	//! @param p1		The other of the eight corners of the AABB.
+	//! @param sorted	If it is true, p0 is min and p1 is max.
     BBox( const Point& p0 , const Point& p1 , bool sorted = true );
-    // copy constructor
-    // para 'bbox'   :  a bounding box to be copied
+    
+	//! @brief	Copy constructor.
+	//!
+	//! @param bbox		Another instance of bounding box to copy from.
     BBox( const BBox& bbox );
 
-    // check whether a specific point is in the bounding box
-    // para 'p'     :   a point
-    // para 'delta' :   enlarge the bounding box a little to avoid float format precision error
-    // result       :   return true if 'p' is in the bounding box
-    bool IsInBBox( const Point& p , float delta ) const;
+	//! @brief	Whether a point is inside the AABB.
+	//!
+	//! @param	p		The point to be tested.
+	//! @param	delta	A small value to avoid float precision problem.
+	//! @return			It returns true if the point is within the AABB.
+    bool		IsInBBox( const Point& p , float delta ) const;
 
     // get the surface area of the bounding box
     // result : the surface area of the bounding box
-    float SurfaceArea() const;
-    // half surface area
-    float HalfSurfaceArea() const;
 
-    // get the volumn of the bounding box
-    // result : the volumn of the bounding box
-    float Volumn() const;
+	//! @brief	The surface area of the bounding box.
+	//!
+	//! @return			The surface area of the bounding box.
+    float		SurfaceArea() const;
+    
+	//! @brief	Half of the surface area of the bounding box.
+	//!
+	//! @return			Half of the surface area of the bounding box.
+    float		HalfSurfaceArea() const;
 
-    // get the id of the axis with the longest extent
-    // result : the id of axis with the longest extent
-    unsigned MaxAxisId() const;
+	//! @brief	The volume of this bounding box.
+	//!
+	//! @return			The volume of the bounding box.
+    float		Volumn() const;
 
-    // union bbox
-    // para 'p' : a point
-    void Union( const Point& p );
+	//! @brief	The axis id with maximum edge.
+	//!
+	//! @return			The axis id ( 0 -> x , 1 -> y , 2 -> z ) that has the longest edge.
+    unsigned	MaxAxisId() const;
 
-    // union bbox
-    // para 'box' : another bounding box
-    void Union( const BBox& box );
+	//! @brief	Enlarge the bounding box to contain the point.
+	//!
+	//! @param	p		The point to contain.
+    void		Union( const Point& p );
 
-    // delta in a specific axis
-    float Delta( unsigned k ) const;
+	//! @brief	Enlarge the bounding box to contain the other bounding box.
+	//!
+	//! @param box		The other bounding box to contain.
+    void		Union( const BBox& box );
 
-    // set the bounding box as invalid
-    void InvalidBBox();
+	//! @brief	Length of the edge along a specific axis.
+	//!
+	//! @return			The length of the edge along specific edge.
+    float		Delta( unsigned k ) const;
 
-    //! @brief  Expend the axia aligned bounding box.
-    //!
+	//! @brief	Reset the bounding box so that it is an invalid one.
+    void		InvalidBBox();
+
     //! @param  delta   The half delta to expend along each direction.
-    void    Expend( float delta );
+	//! @brief	Expend the bounding box.
+	//!
+	//! @param delta	Half of the length to expend along every axis.
+    void		Expend( float delta );
 
 public:
     // the minium and maxium point of the bounding box
@@ -82,44 +105,26 @@ public:
     Point   m_Max;
 };
 
-// global functions
-// para 'bbox' :    a bounding box to encapture
-// para 'p'    :    a point to encapture
-// result      :    a bounding box containg both 'bbox' and 'p'
-SORT_FORCEINLINE BBox Union( const BBox& bbox , const Point& p )
-{
+SORT_FORCEINLINE BBox Union( const BBox& bbox , const Point& p ){
     BBox box;
-    for( unsigned i = 0 ; i < 3 ; i++ )
-    {
+    for( unsigned i = 0 ; i < 3 ; i++ ){
         if( p[i] < bbox.m_Min[i] )
             box.m_Min[i] = p[i];
         if( p[i] > bbox.m_Max[i] )
             box.m_Max[i] = p[i];
     }
-
     return box;
 }
-// para 'bbox0' :   first bounding box
-// para 'bbox1' :   second bounding box
-// result       :   a bounding box containing both of 'bbox0' and 'bbox1'
-SORT_FORCEINLINE BBox Union( const BBox& bbox0 , const BBox& bbox1 )
-{
-    BBox result;
 
-    for( int i = 0 ; i < 3 ; i++ )
-    {
+SORT_FORCEINLINE BBox Union( const BBox& bbox0 , const BBox& bbox1 ){
+    BBox result;
+    for( int i = 0 ; i < 3 ; i++ ){
         result.m_Min[i] = std::min( bbox0.m_Min[i] , bbox1.m_Min[i] );
         result.m_Max[i] = std::max( bbox0.m_Max[i] , bbox1.m_Max[i] );
     }
-
     return result;
 }
 
-// bounding box and ray intersection
-// para 'ray' : the ray
-// para 'bb'  : the bounding box
-// para 'tmax': further away intersected point
-// result     : the first intersected point and return -1.0f if not crossed
 SORT_FORCEINLINE float Intersect( const Ray& ray , const BBox& bb , float* fmax = nullptr ){
     //set default value for tmax and tmin
     float tmax = ray.m_fMax;
@@ -153,3 +158,51 @@ SORT_FORCEINLINE float Intersect( const Ray& ray , const BBox& bb , float* fmax 
 
     return tmin;
 }
+
+#ifdef SSE_ENABLED
+
+//! @brief	SIMD version bounding box.
+/**
+ * This is basically 4 bounding box in a single data structure. For best performance, they are saved in
+ * structure of arrays.
+ * Since this data structure is only used in limited places, only very few interfaces are implemented for
+ * simplicity.
+ */
+struct BBox4{
+public:
+	__m128	m_min_x;
+	__m128	m_min_y;
+	__m128	m_min_z;
+
+	__m128	m_max_x;
+	__m128	m_max_y;
+	__m128	m_max_z;
+};
+
+SORT_FORCEINLINE void IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_min , __m128& f_max) {
+	f_min = _mm_set_ps1( ray.m_fMin );
+	f_max = _mm_set_ps1( ray.m_fMax );
+
+	__m128 ray_ori	= _mm_set_ps1( ray.m_Ori[0] );
+	__m128 ood		= _mm_set_ps1( 1.0f / ray.m_Dir[0] );
+	__m128 t1		= _mm_mul_ps( ood , _mm_sub_ps( bb.m_max_x , ray_ori ) );
+	__m128 t2		= _mm_mul_ps( ood , _mm_sub_ps( bb.m_min_x , ray_ori ) );
+	f_min	= _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
+	f_max	= _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+
+	ray_ori = _mm_set_ps1(ray.m_Ori[1]);
+	ood		= _mm_set_ps1(1.0f / ray.m_Dir[1]);
+	t1		= _mm_mul_ps(ood, _mm_sub_ps(bb.m_max_y, ray_ori));
+	t2		= _mm_mul_ps(ood, _mm_sub_ps(bb.m_min_y, ray_ori));
+	f_min	= _mm_max_ps(f_min, _mm_min_ps(t1, t2));
+	f_max	= _mm_min_ps(f_max, _mm_max_ps(t1, t2));
+
+	ray_ori = _mm_set_ps1(ray.m_Ori[2]);
+	ood		= _mm_set_ps1(1.0f / ray.m_Dir[2]);
+	t1		= _mm_mul_ps(ood, _mm_sub_ps(bb.m_max_x, ray_ori));
+	t2		= _mm_mul_ps(ood, _mm_sub_ps(bb.m_min_x, ray_ori));
+	f_min	= _mm_max_ps(f_min, _mm_min_ps(t1, t2));
+	f_max	= _mm_min_ps(f_max, _mm_max_ps(t1, t2));
+}
+
+#endif
