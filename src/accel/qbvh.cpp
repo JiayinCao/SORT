@@ -21,6 +21,8 @@
 #include "core/stats.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
 
+#include "shape/simd_triangle.h"
+
 IMPLEMENT_RTTI(Qbvh);
 
 SORT_STATS_DEFINE_COUNTER(sQbvhNodeCount)
@@ -257,9 +259,9 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         _mm_store_ps(f_max , sse_f_max);
         _mm_store_ps(f_min , sse_f_min);
 
-        for( int i = 0 ; i < node->child_cnt ; ++i ){
-            int k = -1;
-            float maxDist = -1.0f;
+        for( auto i = 0 ; i < node->child_cnt ; ++i ){
+            auto k = -1;
+            auto maxDist = -1.0f;
             for( int j = 0 ; j < node->child_cnt ; ++j ){
                 if( f_min[j] > maxDist && f_min[j] <= f_max[j] ){
                     maxDist = f_min[j];
@@ -380,10 +382,10 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 		_mm_store_ps(f_max, sse_f_max);
 		_mm_store_ps(f_min, sse_f_min);
 
-		for (int i = 0; i < node->child_cnt; ++i) {
-			int k = -1;
-			float maxDist = -1.0f;
-			for (int j = 0; j < node->child_cnt; ++j) {
+		for (auto i = 0; i < node->child_cnt; ++i) {
+			auto k = -1;
+			auto maxDist = -1.0f;
+			for (auto j = 0; j < node->child_cnt; ++j) {
 				if (f_min[j] > maxDist && f_min[j] <= f_max[j]) {
 					maxDist = f_min[j];
 					k = j;

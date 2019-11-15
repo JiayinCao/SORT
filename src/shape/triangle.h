@@ -17,7 +17,12 @@
 
 #pragma once
 
+#include "core/define.h"
 #include "shape.h"
+
+#ifdef SSE_ENABLED
+    #include <nmmintrin.h>
+#endif
 
 //! @brief Triangle class defines the basic behavior of triangle.
 /**
@@ -56,7 +61,9 @@ public:
     //!                 the direction of the ray will point outward depending on the normal.
     //! @param n        The normal at the surface where the ray shoots from.
     //! @param pdf      The pdf w.r.t solid angle of picking the ray.
-    void            Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const override{}
+    void            Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf ) const override{
+        // to be implemented.
+    }
 
     //! @brief      Get intersected point between the ray and the shape.
     //!

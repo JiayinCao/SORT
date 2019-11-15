@@ -53,12 +53,6 @@
     #define SORT_FORCEINLINE inline
 #endif
 
-// SSE is heavily used in SORT to explore more power of CPU so that better performance could be achieved.
-// Basic data structure like Vector, Spectrum are implemented under the hood using SSE. And SSE is also used in
-// accelerating ray and primitives intersection tests.
-// The above comment is not true yet until I get it done. For now this feature is disabled for stability.
-// #define SSE_ENABLED
-
 // If AVX is enabled, AVX will be used to accelerate ray and primitives intersection instead of SSE so that even
 // better performance could be achieved. However, since most vectors only has up to four channels, SSE is still
 // the basic optimization for most of the Vector/Spectrum data structures.
