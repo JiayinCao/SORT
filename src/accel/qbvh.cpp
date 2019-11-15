@@ -113,7 +113,6 @@ void Qbvh::splitNode( Qbvh_Node* const node , const BBox& node_bbox , unsigned d
 		}
 	}
 
-	int i = 0;
 	if( to_split.size() + done_splitting.size() == 1 ){
 		makeLeaf( node , start , end );
 		return;
@@ -122,7 +121,7 @@ void Qbvh::splitNode( Qbvh_Node* const node , const BBox& node_bbox , unsigned d
 			while (!q.empty()) {
 				const auto cur = q.front();
 				q.pop();
-				node->children[i++] = std::make_unique<Qbvh_Node>( cur.first , cur.second - cur.first );
+				node->children[node->child_cnt++] = std::make_unique<Qbvh_Node>( cur.first , cur.second - cur.first );
 			}
 		};
 
@@ -131,7 +130,7 @@ void Qbvh::splitNode( Qbvh_Node* const node , const BBox& node_bbox , unsigned d
 	}
 
     // split children if needed.
-    for( int j = 0 ; j < i ; ++j ){
+    for( int j = 0 ; j < node->child_cnt ; ++j ){
 #ifndef SSE_ENABLED
         node->bbox[j] = calcBoundingBox( node->children[j].get() , m_bvhpri.get() );
 		splitNode( node->children[j].get() , node->bbox[j] , depth + 1 );
@@ -145,13 +144,13 @@ void Qbvh::splitNode( Qbvh_Node* const node , const BBox& node_bbox , unsigned d
 	node->bbox = calcBoundingBox4( node->children[0].get() , node->children[1].get() , node->children[2].get() , node->children[3].get() );
 #endif
 
-    SORT_STATS(sQbvhNodeCount+=i);
+    SORT_STATS(sQbvhNodeCount+=node->child_cnt);
 }
 
 void Qbvh::makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end ){
     node->pri_cnt = end - start;
     node->pri_offset = start;
-    node->leaf_node = true;
+    node->child_cnt = 0;
 
     SORT_STATS(++sQbvhLeafNodeCount);
     SORT_STATS(sQbvhMaxPriCountInLeaf = std::max( sQbvhMaxPriCountInLeaf , (StatsInt)node->pri_cnt) );
@@ -205,7 +204,7 @@ bool Qbvh::traverseNode( const Qbvh_Node* node , const Ray& ray , Intersection* 
     if( intersect && intersect->t < fmin )
         return true;
 
-    if( node->leaf_node ){
+    if( 0 == node->child_cnt ){
         auto _start = node->pri_offset;
         auto _pri = node->pri_cnt;
         auto _end = _start + _pri;
@@ -221,16 +220,15 @@ bool Qbvh::traverseNode( const Qbvh_Node* node , const Ray& ray , Intersection* 
     }
 
 #ifndef SSE_ENABLED
-	int child_cnt = 0;
 	float dist[QBVH_CHILD_CNT] = { FLT_MAX };
-    for( ; child_cnt < QBVH_CHILD_CNT && node->children[child_cnt] ; ++child_cnt )
-        dist[child_cnt] = Intersect( ray , node->bbox[child_cnt] );
+    for( int i = 0 ; i < node->child_cnt ; ++i )
+        dist[i] = Intersect( ray , node->bbox[i] );
 
     auto intersection_found = false;
-    for( int i = 0 ; i < child_cnt ; ++i ){
+    for( int i = 0 ; i < node->child_cnt ; ++i ){
         int k = 0;
         float minDist = FLT_MAX;
-        for( int j = 0 ; j < child_cnt ; ++j ){
+        for( int j = 0 ; j < node->child_cnt ; ++j ){
             if( dist[j] < minDist ){
                 minDist = dist[j];
                 k = j;
@@ -246,19 +244,15 @@ bool Qbvh::traverseNode( const Qbvh_Node* node , const Ray& ray , Intersection* 
 	__m128 sse_f_max , sse_f_min;
 	IntersectBBox4( ray , node->bbox , sse_f_min , sse_f_max );
 
-	float f_max[4] , f_min[4];
-	_mm_storeu_ps(f_max , sse_f_max);
-	_mm_storeu_ps(f_min , sse_f_min);
-
-	int child_cnt = 0;
-	while( child_cnt < QBVH_CHILD_CNT && node->children[child_cnt] )
-		++child_cnt;
+	alignas(16) float f_max[4] , f_min[4];
+	_mm_store_ps(f_max , sse_f_max);
+	_mm_store_ps(f_min , sse_f_min);
 
 	auto intersection_found = false;
-    for( int i = 0 ; i < child_cnt ; ++i ){
+    for( int i = 0 ; i < node->child_cnt ; ++i ){
         int k = -1;
         float minDist = FLT_MAX;
-        for( int j = 0 ; j < child_cnt ; ++j ){
+        for( int j = 0 ; j < node->child_cnt ; ++j ){
             if( f_min[j] < minDist && f_min[j] <= f_max[j] ){
                 minDist = f_min[j];
                 k = j;
@@ -283,7 +277,7 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 
     // pre-calculate some data
     ray.Prepare();
-    
+
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;
 
@@ -299,7 +293,7 @@ void Qbvh::traverseNode( const Qbvh_Node* node , const Ray& ray , BSSRDFIntersec
     if( intersect.maxt < fmin )
         return;
 
-    if( node->leaf_node ){
+    if( 0 == node->child_cnt ){
         auto _start = node->pri_offset;
         auto _pri = node->pri_cnt;
         auto _end = _start + _pri;
@@ -340,13 +334,11 @@ void Qbvh::traverseNode( const Qbvh_Node* node , const Ray& ray , BSSRDFIntersec
     }
 
 #ifndef SSE_ENABLED
-    int child_cnt = 0;
     float dist[QBVH_CHILD_CNT] = { FLT_MAX };
+    for( auto i = 0 ; i < node->child_cnt ; ++i )
+        dist[i] = Intersect( ray , node->bbox[i] );
 
-    for( ; child_cnt < QBVH_CHILD_CNT && node->children[child_cnt] ; ++child_cnt )
-        dist[child_cnt] = Intersect( ray , node->bbox[child_cnt] );
-
-    for( int i = 0 ; i < child_cnt ; ++i ){
+    for( int i = 0 ; i < node->child_cnt ; ++i ){
         int k = 0;
         float minDist = FLT_MAX;
         for( int j = 0 ; j < child_cnt ; ++j ){
@@ -364,18 +356,14 @@ void Qbvh::traverseNode( const Qbvh_Node* node , const Ray& ray , BSSRDFIntersec
 	__m128 sse_f_max , sse_f_min;
 	IntersectBBox4( ray , node->bbox , sse_f_min , sse_f_max );
 
-	float f_max[4] , f_min[4];
-	_mm_storeu_ps(f_max , sse_f_max);
-	_mm_storeu_ps(f_min , sse_f_min);
+	alignas(16) float f_max[4] , f_min[4];
+	_mm_store_ps(f_max , sse_f_max);
+	_mm_store_ps(f_min , sse_f_min);
 
-	int child_cnt = 0;
-	while( child_cnt < QBVH_CHILD_CNT && node->children[child_cnt] )
-		++child_cnt;
-
-    for( int i = 0 ; i < child_cnt ; ++i ){
+    for( int i = 0 ; i < node->child_cnt ; ++i ){
         int k = -1;
         float minDist = FLT_MAX;
-        for( int j = 0 ; j < child_cnt ; ++j ){
+        for( int j = 0 ; j < node->child_cnt ; ++j ){
             if( f_min[j] < minDist && f_min[j] <= f_max[j] ){
                 minDist = f_min[j];
                 k = j;

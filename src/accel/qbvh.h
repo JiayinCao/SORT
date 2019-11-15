@@ -35,7 +35,7 @@ struct Qbvh_Node {
 
 	unsigned                    pri_cnt = 0;				/**< Number of primitives in the node. */
 	unsigned                    pri_offset = 0;				/**< Offset of primitives in the buffer. */
-	bool                        leaf_node = false;			/**< Whether this is a leaf node. */
+	int                         child_cnt = 0;			    /**< 0 means it is a leaf node. */
 
     //! @brief  Constructor.
     //!
