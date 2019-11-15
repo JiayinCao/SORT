@@ -307,7 +307,7 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 		const auto node = top.first;
 		const auto fmin = top.second;
 		if (intersect.maxt < fmin)
-			return;
+			continue;
 
 		// check if it is a leaf node, to be optimized by SSE/AVX
 		if (0 == node->child_cnt) {
