@@ -41,10 +41,10 @@ struct Qbvh_Node {
     //!
     //! @param  offset      The offset of the first primitive in the whole buffer.
     //! @param  cnt         Number of primitives in the node.
-    Qbvh_Node( unsigned offset , unsigned cnt ) : pri_cnt(cnt),pri_offset(offset){
-        for( int i = 0 ; i < QBVH_CHILD_CNT ; ++i )
-            children[i] = nullptr;
-    }
+    Qbvh_Node( unsigned offset , unsigned cnt ) : pri_cnt(cnt),pri_offset(offset){}
+
+	//! @brief	Default constructor.
+	Qbvh_Node(): pri_cnt(0) , pri_offset(0) , child_cnt(0){}
 };
 
 
@@ -117,6 +117,9 @@ private:
     /**< Maximum depth of node in BVH. */
     unsigned                            m_maxNodeDepth = 16;
 
+	/**< Depth of the QBVH. */
+	unsigned							m_depth = 0;
+
     //! @brief Split current QBVH node.
     //!
     //! @param node         The QBVH node to be split.
@@ -129,7 +132,8 @@ private:
     //! @param node         The BVH node to be marked as leaf node.
     //! @param start        The start offset of primitives that the node holds.
     //! @param end          The end offset of primitives that the node holds.
-    void    makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end );
+	//! @param depth		Depth of the current node.
+    void    makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end , unsigned depth );
 
 #ifdef SSE_ENABLED
 	//! @brief A helper function calculating bounding box of a node.

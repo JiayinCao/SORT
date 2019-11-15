@@ -40,7 +40,7 @@ SORT_STATS_COUNTER("Spatial-Structure(QBVH)", "Maximum Primitive in Leaf", sQbvh
 SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Count in Leaf", sQbvhPrimitiveCount , sQbvhLeafNodeCountCopy );
 SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-// Disabled stackless traversal until I find the reason why it is slower by 10%.
+// Disabled stackless traversal until I find the reason why it is slower by 2%.
 // Preallocate the stack would be an option here to reduce memory overhead.
 // #define QBVH_STACKLESS_TRAVERSAL
 
@@ -83,7 +83,7 @@ void Qbvh::splitNode( Qbvh_Node* const node , const BBox& node_bbox , unsigned d
 
     const auto primitive_num = end - start;
     if( primitive_num <= m_maxPriInLeaf || depth == m_maxNodeDepth ){
-        makeLeaf( node , start , end );
+        makeLeaf( node , start , end , depth );
         return;
     }
 
@@ -118,7 +118,7 @@ void Qbvh::splitNode( Qbvh_Node* const node , const BBox& node_bbox , unsigned d
 	}
 
 	if( to_split.size() + done_splitting.size() == 1 ){
-		makeLeaf( node , start , end );
+		makeLeaf( node , start , end , depth );
 		return;
 	}else{
 		const auto populate_child = [&] ( Qbvh_Node* node , std::queue<std::pair<unsigned,unsigned>>& q ){
@@ -151,10 +151,12 @@ void Qbvh::splitNode( Qbvh_Node* const node , const BBox& node_bbox , unsigned d
     SORT_STATS(sQbvhNodeCount+=node->child_cnt);
 }
 
-void Qbvh::makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end ){
+void Qbvh::makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end , unsigned depth ){
     node->pri_cnt = end - start;
     node->pri_offset = start;
     node->child_cnt = 0;
+
+	m_depth = fmax( m_depth , depth );
 
     SORT_STATS(++sQbvhLeafNodeCount);
     SORT_STATS(sQbvhMaxPriCountInLeaf = std::max( sQbvhMaxPriCountInLeaf , (StatsInt)node->pri_cnt) );
@@ -197,12 +199,17 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         return false;
 
 #ifdef QBVH_STACKLESS_TRAVERSAL
-    std::stack<std::pair<Qbvh_Node*,float>> st;
-    st.push( std::make_pair( m_root.get() , fmin ) );
+	// std::stack is by no means an option here due to its overhead under the hood.
+	static thread_local std::unique_ptr<std::pair<Qbvh_Node*, float>[]> bvh_stack = nullptr;
+	if( nullptr == bvh_stack )
+		bvh_stack = std::make_unique<std::pair<Qbvh_Node*, float>[]>( m_depth * QBVH_CHILD_CNT );
 
-    while( st.size() ){
-        auto top = st.top();
-        st.pop();
+	// stack index
+	auto si = 0;
+	bvh_stack[si++] = std::make_pair( m_root.get() , fmin );
+
+    while( si > 0 ){
+        const auto top = bvh_stack[--si];
 
         const auto node = top.first;
         const auto fmin = top.second;
@@ -245,7 +252,7 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
                 break;
 
             f_min[k] = -1.0f;
-            st.push( std::make_pair( node->children[k].get() , maxDist ) );
+			bvh_stack[si++] = std::make_pair( node->children[k].get() , maxDist );
         }
 #else
         __m128 sse_f_max , sse_f_min;
@@ -269,7 +276,7 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
                 break;
 
             f_min[k] = -1.0f;
-            st.push( std::make_pair( node->children[k].get() , maxDist ) );
+			bvh_stack[si++] = std::make_pair( node->children[k].get() , maxDist );
         }
 #endif
     }
