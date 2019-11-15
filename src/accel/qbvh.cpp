@@ -186,6 +186,9 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect != nullptr);
 
+    // pre-calculate some data
+    ray.Prepare();
+
     const auto fmin = Intersect(ray, m_bbox);
     if (fmin < 0.0f)
         return false;
@@ -278,6 +281,9 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
     SORT_PROFILE("Traverse Qbvh");
     SORT_STATS(++sRayCount);
 
+    // pre-calculate some data
+    ray.Prepare();
+    
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;
 

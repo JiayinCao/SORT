@@ -183,26 +183,20 @@ SORT_FORCEINLINE void IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_
 	f_min = _mm_set_ps1( ray.m_fMin );
 	f_max = _mm_set_ps1( ray.m_fMax );
 
-	__m128 ray_ori	= _mm_set_ps1( ray.m_Ori[0] );
-	__m128 ood		= _mm_set_ps1( 1.0f / ray.m_Dir[0] );
-	__m128 t1		= _mm_mul_ps( ood , _mm_sub_ps( bb.m_max_x , ray_ori ) );
-	__m128 t2		= _mm_mul_ps( ood , _mm_sub_ps( bb.m_min_x , ray_ori ) );
-	f_min	= _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max	= _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+	__m128 t1	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_max_x ) );
+	__m128 t2	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_min_x ) );
+	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
+	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
 
-	ray_ori = _mm_set_ps1( ray.m_Ori[1] );
-	ood		= _mm_set_ps1( 1.0f / ray.m_Dir[1] );
-	t1		= _mm_mul_ps( ood , _mm_sub_ps( bb.m_max_y , ray_ori ) );
-	t2		= _mm_mul_ps( ood , _mm_sub_ps( bb.m_min_y , ray_ori ) );
-	f_min	= _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max	= _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+    t1		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_max_y ) );
+	t2		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_min_y ) );
+	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
+	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
 
-	ray_ori = _mm_set_ps1( ray.m_Ori[2] );
-	ood		= _mm_set_ps1( 1.0f / ray.m_Dir[2] );
-	t1		= _mm_mul_ps( ood , _mm_sub_ps( bb.m_max_z , ray_ori) );
-	t2		= _mm_mul_ps( ood , _mm_sub_ps( bb.m_min_z , ray_ori) );
-	f_min	= _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max	= _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+    t1		    = _mm_add_ps( ray.m_ori_dir_z , _mm_mul_ps( ray.m_rcp_dir_z , bb.m_max_z ) );
+	t2		    = _mm_add_ps( ray.m_ori_dir_z , _mm_mul_ps( ray.m_rcp_dir_z , bb.m_min_z ) );
+	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
+	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
 }
 
 #endif

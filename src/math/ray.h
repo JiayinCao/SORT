@@ -17,14 +17,18 @@
 
 #pragma once
 
+#include "core/define.h"
 #include "math/vector3.h"
 #include "math/point.h"
 #include "float.h"
 #include "spectrum/spectrum.h"
 
-////////////////////////////////////////////////////////////////////////////
-class Ray
-{
+#ifdef SSE_ENABLED
+	#include <nmmintrin.h>
+#endif
+
+//! @brief  Data structure representing a ray.
+class Ray{
 public:
     // default constructor
     Ray();
@@ -38,13 +42,14 @@ public:
     // copy constructor
     // para 'r' :   a ray to copy
     Ray( const Ray& r );
-    // destructor
-    ~Ray();
 
     // operator to get a point from the ray
     // para 't' :   the distance from the retrive point if the direction of the ray is normalized.
     // reslut   :   A point ( o + t * d )
     Point operator()(float t) const;
+
+    //! @brief  Pre-calculate some cached data for better performance. Only call this function after all ray data is prepared.
+    void    Prepare() const;
 
 // the original point and direction are also public
     // original point of the ray
@@ -62,6 +67,16 @@ public:
     float   m_fPdfW;
     float   m_fPdfA;
     float   m_fCosAtCamera;
+
+    // some data are pre-calculated so that it won't be redo later multiple times
+#ifdef SSE_ENABLED
+    mutable __m128  m_ori_dir_x;    /**< -Ori.x/Dir.x , this is used in ray AABB intersection. */
+    mutable __m128  m_ori_dir_y;    /**< -Ori.y/Dir.y , this is used in ray AABB intersection. */
+    mutable __m128  m_ori_dir_z;    /**< -Ori.z/Dir.z , this is used in ray AABB intersection. */
+    mutable __m128  m_rcp_dir_x;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
+    mutable __m128  m_rcp_dir_y;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
+    mutable __m128  m_rcp_dir_z;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
+#endif
 
     // importance value of the ray
     Spectrum m_we;

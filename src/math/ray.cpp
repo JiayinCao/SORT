@@ -54,13 +54,20 @@ Ray::Ray( const Ray& r )
     m_we = r.m_we;
     m_fCosAtCamera = r.m_fCosAtCamera;
 }
-// destructor
-Ray::~Ray()
-{
-}
 
 // operator to get a point on the ray
 Point Ray::operator ()( float t ) const
 {
     return m_Ori + t * m_Dir;
+}
+
+void Ray::Prepare() const{
+#ifdef SSE_ENABLED
+    m_rcp_dir_x	= _mm_set_ps1( 1.0f/m_Dir[0] );
+    m_rcp_dir_y = _mm_set_ps1( 1.0f/m_Dir[1] );
+    m_rcp_dir_z = _mm_set_ps1( 1.0f/m_Dir[2] );
+    m_ori_dir_x = _mm_set_ps1( -m_Ori[0]/m_Dir[0] );
+    m_ori_dir_y = _mm_set_ps1( -m_Ori[1]/m_Dir[1] ); 
+    m_ori_dir_z = _mm_set_ps1( -m_Ori[2]/m_Dir[2] ); 
+#endif
 }
