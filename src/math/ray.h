@@ -46,7 +46,9 @@ public:
     // operator to get a point from the ray
     // para 't' :   the distance from the retrive point if the direction of the ray is normalized.
     // reslut   :   A point ( o + t * d )
-    Point operator()(float t) const;
+    SORT_FORCEINLINE    Point operator ()( float t ) const{
+        return m_Ori + t * m_Dir;
+    }
 
     //! @brief  Pre-calculate some cached data for better performance. Only call this function after all ray data is prepared.
     void    Prepare() const;

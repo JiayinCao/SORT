@@ -17,9 +17,11 @@
 
 #include "ray.h"
 
-// default constructor
-Ray::Ray()
-{
+static SORT_FORCEINLINE float sign( const float x ){
+    return x < 0.0f ? -1.0f : 1.0f;
+}
+
+Ray::Ray(){
     m_Depth = 0;
     m_fMin = 0.0f;
     m_fMax = FLT_MAX;
@@ -28,9 +30,8 @@ Ray::Ray()
     m_we = 0.0f;
     m_fCosAtCamera = 0.0f;
 }
-// constructor from a point and a direction
-Ray::Ray( const Point& p , const Vector& dir , unsigned depth , float fmin , float fmax)
-{
+
+Ray::Ray( const Point& p , const Vector& dir , unsigned depth , float fmin , float fmax){
     m_Ori = p;
     m_Dir = dir;
     m_Depth = depth;
@@ -41,9 +42,8 @@ Ray::Ray( const Point& p , const Vector& dir , unsigned depth , float fmin , flo
     m_we = 0.0f;
     m_fCosAtCamera = 0.0f;
 }
-// copy constructor
-Ray::Ray( const Ray& r )
-{
+
+Ray::Ray( const Ray& r ){
     m_Ori = r.m_Ori;
     m_Dir = r.m_Dir;
     m_Depth = r.m_Depth;
@@ -55,19 +55,17 @@ Ray::Ray( const Ray& r )
     m_fCosAtCamera = r.m_fCosAtCamera;
 }
 
-// operator to get a point on the ray
-Point Ray::operator ()( float t ) const
-{
-    return m_Ori + t * m_Dir;
-}
-
 void Ray::Prepare() const{
 #ifdef SSE_ENABLED
-    m_rcp_dir_x	= _mm_set_ps1( 1.0f/m_Dir[0] );
-    m_rcp_dir_y = _mm_set_ps1( 1.0f/m_Dir[1] );
-    m_rcp_dir_z = _mm_set_ps1( 1.0f/m_Dir[2] );
-    m_ori_dir_x = _mm_set_ps1( -m_Ori[0]/m_Dir[0] );
-    m_ori_dir_y = _mm_set_ps1( -m_Ori[1]/m_Dir[1] ); 
-    m_ori_dir_z = _mm_set_ps1( -m_Ori[2]/m_Dir[2] ); 
+    constexpr float delta = 0.00001f;
+    const auto dir_x = fabs(m_Dir[0]) < delta ? sign(m_Dir[0]) * delta : m_Dir[0];
+    const auto dir_y = fabs(m_Dir[1]) < delta ? sign(m_Dir[1]) * delta : m_Dir[1];
+    const auto dir_z = fabs(m_Dir[2]) < delta ? sign(m_Dir[2]) * delta : m_Dir[2];
+    m_rcp_dir_x	= _mm_set_ps1( 1.0f/dir_x );
+    m_rcp_dir_y = _mm_set_ps1( 1.0f/dir_y );
+    m_rcp_dir_z = _mm_set_ps1( 1.0f/dir_z );
+    m_ori_dir_x = _mm_set_ps1( -m_Ori[0]/dir_x );
+    m_ori_dir_y = _mm_set_ps1( -m_Ori[1]/dir_y ); 
+    m_ori_dir_z = _mm_set_ps1( -m_Ori[2]/dir_z ); 
 #endif
 }
