@@ -233,7 +233,7 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         if( intersect && intersect->t < fmin )
             continue;
 
-#ifdef SSE_ENABLED_TO_BE_CORRECTED
+#ifdef SSE_ENABLED
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
             auto found = false;
@@ -248,7 +248,7 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
                 for( auto i = 0 ; i < node->other_list.size() ; ++i ){
                     found |= node->other_list[i]->GetIntersect( ray , intersect );
                     if( intersect == nullptr && found ){
-                        SORT_STATS(sIntersectionTest+= i * 4);
+                        SORT_STATS( sIntersectionTest += ( i + node->tri_list.size() ) * 4 );
                         return true;
                     }
                 }
