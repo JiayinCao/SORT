@@ -28,6 +28,12 @@
 
 #ifdef  SSE_ENABLED
 
+__forceinline int __bsf(int v){
+	unsigned long r = 0;
+	_BitScanForward(&r, v);
+	return r;
+}
+
 static const __m128 zeros = _mm_set_ps1( 0.0f );
 
 //! @brief  Triangle4 is more of a simplified resolved data structure holds only bare bone information of triangle.
@@ -50,6 +56,7 @@ struct Triangle4{
 
     //! @brief  Push a triangle in the data structure.
     //!
+	//! @param	pri		The original primitive.
     //! @param  tri     The triangle to be pushed in Triangle4.
     //! @return         Whether the data structure is full.
     bool PushTriangle( const Primitive* primitive ){
@@ -136,6 +143,15 @@ struct Triangle4{
 //! @param  mask    Mask results that are not valid.
 //! @param  ret     The result of intersection.
 SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4 , Intersection* ret ){
+#if 0
+	bool flag = false;
+	for( int i = 0 ; i < 4 ; ++i ){
+		if( tri4.m_ori_pri[i] == nullptr )
+			break;
+		flag |= tri4.m_ori_pri[i]->GetIntersect( ray , ret );
+	}
+	return flag;
+#else
     __m128 mask = tri4.m_mask;
 
 	// step 0 : translate the vertices to ray coordinate system
@@ -205,7 +221,7 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 
     const __m128 ray_min_t = _mm_set_ps1( ray.m_fMin );
     const __m128 ray_max_t = _mm_set_ps1( ray.m_fMax );
-    mask = _mm_and_ps( _mm_and_ps( mask , _mm_cmpgt_ps( t , ray_min_t ) ) , _mm_cmplt_ps( t , ray_max_t ) );
+    mask = _mm_and_ps( _mm_and_ps( mask , _mm_cmpgt_ps( t , ray_min_t ) ) , _mm_cmple_ps( t , ray_max_t ) );
     c = _mm_movemask_ps( mask );
     if( 0 == c )
         return false;
@@ -213,39 +229,49 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     if( nullptr == ret )
         return true;
 
-    mask = _mm_and_ps( _mm_and_ps( mask , _mm_cmpgt_ps( t , zeros ) ) , _mm_cmple_ps( t , _mm_set_ps1( ret->t ) ) );
+    mask = _mm_and_ps( _mm_and_ps( mask , _mm_cmpgt_ps( t , zeros ) ) , _mm_cmplt_ps( t , _mm_set_ps1( ret->t ) ) );
     c = _mm_movemask_ps( mask );
     if( 0 == c )
         return false;
     
     // resolve the result, it could be optimized with SIMD later.
     alignas(16) float f_t[4] , f_e1[4] , f_e2[4] , f_rcp_det[4];
-    _mm_store_ps( f_t , t );
-    _mm_store_ps( f_e1 , e1 );
-    _mm_store_ps( f_e2 , e2 );
-    _mm_store_ps( f_rcp_det , rcp_det );
+    _mm_storeu_ps( f_t , t );
+    _mm_storeu_ps( f_e1 , e1 );
+    _mm_storeu_ps( f_e2 , e2 );
+    _mm_storeu_ps( f_rcp_det , rcp_det );
 
 	c = _mm_movemask_ps( mask );
 
+#if 0
+	__m128 t0 = _mm_min_ps( t , _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(t), _MM_SHUFFLE(1, 0, 3, 2))) );
+	t0 = _mm_min_ps( t0 , _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(t0), _MM_SHUFFLE(1, 0, 3, 2))) );
+	int res_i = __bsf(_mm_movemask_ps( _mm_cmpeq_ps( t , t0 ) ));
+
+	float   res_t = ret->t;
+
+#else
 	// to be replaced after the bug is fixed.
     int     res_i = -1;
     float   res_t = ret->t;
-    if( ( ( c >> 0 ) & 0x01 ) && res_t > f_t[0] ){
+    if( ( ( c >> 0 ) & 0x01 ) && res_t >= f_t[0] && f_t[0] < ray.m_fMax && f_t[0] > ray.m_fMin ){
         res_i = 0;
         res_t = f_t[0];
     }
-    if( ( ( c >> 1 ) && 0x01 ) && res_t > f_t[1] ){
+    if( ( ( c >> 1 ) & 0x01 ) && res_t >= f_t[1] && f_t[1] < ray.m_fMax && f_t[1] > ray.m_fMin ){
         res_i = 1;
         res_t = f_t[1];
     }
-    if( ( ( c >> 2 ) && 0x01 ) && res_t > f_t[2] ){
+    if( ( ( c >> 2 ) & 0x01 ) && res_t >= f_t[2] && f_t[2] < ray.m_fMax && f_t[2] > ray.m_fMin ){
         res_i = 2;
         res_t = f_t[2];
     }
-    if( ( ( c >> 3 ) && 0x01 ) && res_t > f_t[3] ){
+    if( ( ( c >> 3 ) & 0x01 ) && res_t >= f_t[3] && f_t[3] < ray.m_fMax && f_t[3] > ray.m_fMin ){
         res_i = 3;
         res_t = f_t[3];
     }
+	sAssert( res_i != -1 , SPATIAL_ACCELERATOR );
+#endif
     
     const auto* triangle = tri4.m_ori_tri[res_i];
 
@@ -279,6 +305,8 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 	ret->primitive = tri4.m_ori_pri[res_i];
 
     return true;
+
+#endif
 }
 
 #endif

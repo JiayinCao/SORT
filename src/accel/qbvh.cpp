@@ -161,7 +161,7 @@ void Qbvh::makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end , uns
     const auto _start = node->pri_offset;
     const auto _end = _start + node->pri_cnt;
     for(auto i = _start ; i < _end ; i++ ){
-        const Primitive* primitive = (*m_primitives)[i].get();
+        const Primitive* primitive = m_bvhpri[i].primitive;
         if( primitive->GetShapeType() == SHAPE_TRIANGLE ){
             if( tri4.PushTriangle( primitive ) ){
                 if( tri4.PackData() ){

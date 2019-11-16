@@ -56,7 +56,6 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
 
     // step 1 : pick the major axis to avoid dividing by zero in the sheering pass.
     //          by picking the major axis, we can also make sure we sheer as little as possible
-    Vector3f d = Permute( r.m_Dir , r.m_local_x , r.m_local_y , r.m_local_z );
     p0 = Permute( p0 , r.m_local_x , r.m_local_y , r.m_local_z );
     p1 = Permute( p1 , r.m_local_x , r.m_local_y , r.m_local_z );
     p2 = Permute( p2 , r.m_local_x , r.m_local_y , r.m_local_z );
