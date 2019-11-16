@@ -18,8 +18,9 @@
 #pragma once
 
 #include "accelerator.h"
-#include "core/primitive.h"
 #include "bvh_utils.h"
+#include "core/primitive.h"
+#include "math/simd_bbox.h"
 
 #define QBVH_CHILD_CNT		4
 

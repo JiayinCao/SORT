@@ -20,10 +20,6 @@
 #include "core/define.h"
 #include "shape.h"
 
-#ifdef SSE_ENABLED
-    #include <nmmintrin.h>
-#endif
-
 //! @brief Triangle class defines the basic behavior of triangle.
 /**
  * Triangle is the most common shape that is used in a ray tracer.

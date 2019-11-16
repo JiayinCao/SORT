@@ -70,6 +70,9 @@ public:
     float   m_fPdfA;
     float   m_fCosAtCamera;
 
+	// importance value of the ray
+	Spectrum m_we;
+
     // some data are pre-calculated so that it won't be redo later multiple times
 #ifdef SSE_ENABLED
     mutable __m128  m_ori_dir_x;    /**< -Ori.x/Dir.x , this is used in ray AABB intersection. */
@@ -78,8 +81,14 @@ public:
     mutable __m128  m_rcp_dir_x;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
     mutable __m128  m_rcp_dir_y;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
     mutable __m128  m_rcp_dir_z;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
+	mutable __m128	m_ori_x;		/**< Ori.x , this is used in ray Triangle intersection. */
+	mutable __m128	m_ori_y;		/**< Ori.y , this is used in ray Triangle intersection. */
+	mutable __m128	m_ori_z;		/**< Ori.z , this is used in ray Triangle intersection. */
+	mutable __m128	m_sse_scale_x;	/**< Scaling along each axis in local coordinate. */
+	mutable __m128	m_sse_scale_y;	/**< Scaling along each axis in local coordinate. */
+	mutable __m128  m_sse_scale_z;	/**< Scaling along each axis in local coordinate. */
 #endif
 
-    // importance value of the ray
-    Spectrum m_we;
+	mutable int		m_local_x , m_local_y , m_local_z;	/**< Id used to identify axis in local coordinate. */
+	mutable float	m_scale_x , m_scale_y , m_scale_z;	/**< Scaling along each axis in local coordinate. */
 };
