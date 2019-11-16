@@ -30,7 +30,7 @@
 
 SORT_FORCEINLINE int __bsf(int v){
 	unsigned long r = 0;
-	_BitScanForward(&r, v);
+	//_BitScanForward(&r, v);
 	return r;
 }
 
