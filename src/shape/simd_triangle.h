@@ -28,6 +28,8 @@
 
 #ifdef  SSE_ENABLED
 
+static const __m128 zeros = _mm_set_ps1( 0.0f );
+
 //! @brief  Triangle4 is more of a simplified resolved data structure holds only bare bone information of triangle.
 /**
  * Triangle4 is used in QBVH to accelerate ray triangle intersection using SSE. Its sole purpose is to accelerate 
@@ -43,33 +45,44 @@ struct Triangle4{
     __m128  m_mask;
 
     /**< Pointers to original primitives. */
-    const Triangle*  m_ori_pri[4] = { nullptr };
+    const Triangle*  m_ori_tri[4] = { nullptr };
+	const Primitive* m_ori_pri[4] = { nullptr };
 
     //! @brief  Push a triangle in the data structure.
     //!
     //! @param  tri     The triangle to be pushed in Triangle4.
     //! @return         Whether the data structure is full.
-    bool PushTriangle( const Triangle* tri ){
+    bool PushTriangle( const Primitive* primitive ){
+		const Triangle* triangle = dynamic_cast<const Triangle*>(primitive->GetShape());
         if( m_ori_pri[0] == nullptr ){
-            m_ori_pri[0] = tri;
+            m_ori_pri[0] = primitive;
+			m_ori_tri[0] = triangle;
             return false;
         }else if( m_ori_pri[1] == nullptr ){
-            m_ori_pri[1] = tri;
+            m_ori_pri[1] = primitive;
+			m_ori_tri[1] = triangle;
             return false;
         }else if( m_ori_pri[2] == nullptr ){
-            m_ori_pri[2] = tri;
+            m_ori_pri[2] = primitive;
+			m_ori_tri[2] = triangle;
             return false;
         }
-        m_ori_pri[3] = tri;
+        m_ori_pri[3] = primitive;
+		m_ori_tri[3] = triangle;
         return true;
     }
 
     //! @brief  Pack triangle information into SSE compatible data.
-    void PackData(){
-        unsigned int mask[4] = {0x0};
+	//!
+	//! @return		Whether there is valid triangle inside.
+    bool PackData(){
+		if( !m_ori_pri[0] )
+			return false;
+
+        float	mask[4] = { 1.0f , 1.0f , 1.0f , 1.0f };
         float   p0_x[4] , p0_y[4] , p0_z[4] , p1_x[4] , p1_y[4] , p1_z[4] , p2_x[4] , p2_y[4] , p2_z[4];
         for( auto i = 0 ; i < 4 && m_ori_pri[i] ; ++i ){
-            const Triangle* triangle = m_ori_pri[i];
+            const Triangle* triangle = m_ori_tri[i];
 
             const auto& mem = triangle->GetMeshVisual()->m_memory;
             const auto id0 = triangle->GetIndices().m_id[0];
@@ -92,7 +105,7 @@ struct Triangle4{
             p2_y[i] = mv2.m_position.y;
             p2_z[i] = mv2.m_position.z;
 
-            mask[i] = 0xffffffff;
+            mask[i] = 0.0f;
         }
 
         m_p0_x = _mm_set_ps( p0_x[3] , p0_x[2] , p0_x[1] , p0_x[0] );
@@ -104,12 +117,15 @@ struct Triangle4{
         m_p2_x = _mm_set_ps( p2_x[3] , p2_x[2] , p2_x[1] , p2_x[0] );
         m_p2_y = _mm_set_ps( p2_y[3] , p2_y[2] , p2_y[1] , p2_y[0] );
         m_p2_z = _mm_set_ps( p2_z[3] , p2_z[2] , p2_z[1] , p2_z[0] );
-        m_mask = _mm_set_ps( mask[3] , mask[2] , mask[1] , mask[0] );
+        m_mask = _mm_cmpeq_ps( zeros , _mm_set_ps( mask[3] , mask[2] , mask[1] , mask[0] ) );
+
+		return true;
     }
 
     //! @brief  Reset the data for reuse
     void Reset(){
         m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = nullptr;
+		m_ori_tri[0] = m_ori_tri[1] = m_ori_tri[2] = m_ori_tri[3] = nullptr;
     }
 };
 
@@ -120,8 +136,6 @@ struct Triangle4{
 //! @param  mask    Mask results that are not valid.
 //! @param  ret     The result of intersection.
 SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4 , Intersection* ret ){
-    static const __m128 zeros = _mm_set_ps1( 0.0f );
-
     __m128 mask = tri4.m_mask;
 
 	// step 0 : translate the vertices to ray coordinate system
@@ -148,9 +162,9 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 	__m128 p1_y = p1[ray.m_local_y];
 	__m128 p1_z = p1[ray.m_local_z];
 
-	__m128 p2_x = p1[ray.m_local_x];
-	__m128 p2_y = p1[ray.m_local_y];
-	__m128 p2_z = p1[ray.m_local_z];
+	__m128 p2_x = p2[ray.m_local_x];
+	__m128 p2_y = p2[ray.m_local_y];
+	__m128 p2_z = p2[ray.m_local_z];
 
 	// step 2 : sheer the vertices so that the ray direction points to ( 0 , 1 , 0 )
 	p0_x = _mm_add_ps(p0_x, _mm_mul_ps(p0_y, ray.m_sse_scale_x));
@@ -161,35 +175,36 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 	p2_z = _mm_add_ps(p2_z, _mm_mul_ps(p2_y, ray.m_sse_scale_z));
 
 	// compute the edge functions
-	__m128 e0 = _mm_sub_ps( _mm_mul_ps( p1_x , p2_z ) , _mm_mul_ps( p1_z , p2_x ) );
-	__m128 e1 = _mm_sub_ps( _mm_mul_ps( p2_x , p0_z ) , _mm_mul_ps( p2_z , p0_x ) );
-	__m128 e2 = _mm_sub_ps( _mm_mul_ps( p0_x , p1_z ) , _mm_mul_ps( p0_z , p1_x ) );
+	const __m128 e0 = _mm_sub_ps( _mm_mul_ps( p1_x , p2_z ) , _mm_mul_ps( p1_z , p2_x ) );
+	const __m128 e1 = _mm_sub_ps( _mm_mul_ps( p2_x , p0_z ) , _mm_mul_ps( p2_z , p0_x ) );
+	const __m128 e2 = _mm_sub_ps( _mm_mul_ps( p0_x , p1_z ) , _mm_mul_ps( p0_z , p1_x ) );
 
-    __m128 c0 = _mm_and_ps( _mm_and_ps( _mm_cmpge_ps( e0 , zeros ) , _mm_cmpge_ps( e1 , zeros ) ) , _mm_cmpge_ps( e2 , zeros ) );
-    __m128 c1 = _mm_and_ps( _mm_and_ps( _mm_cmple_ps( e0 , zeros ) , _mm_cmple_ps( e1 , zeros ) ) , _mm_cmple_ps( e2 , zeros ) );
-    mask = _mm_and_ps( mask , _mm_and_ps( c0 , c1 ) );
+    const __m128 c0 = _mm_and_ps( _mm_and_ps( _mm_cmpge_ps( e0 , zeros ) , _mm_cmpge_ps( e1 , zeros ) ) , _mm_cmpge_ps( e2 , zeros ) );
+    const __m128 c1 = _mm_and_ps( _mm_and_ps( _mm_cmple_ps( e0 , zeros ) , _mm_cmple_ps( e1 , zeros ) ) , _mm_cmple_ps( e2 , zeros ) );
+    mask = _mm_and_ps( mask , _mm_or_ps( c0 , c1 ) );
     auto c = _mm_movemask_ps( mask );
     if( 0 == c )
         return false;
 
-    __m128 det = _mm_add_ps( e0 , _mm_add_ps( e1 , e2 ) );
+    const __m128 det = _mm_add_ps( e0 , _mm_add_ps( e1 , e2 ) );
     mask = _mm_and_ps( mask , _mm_cmpneq_ps( det , zeros ) );
     c = _mm_movemask_ps( mask );
     if( 0 == c )
         return false;
-    __m128 rcp_det = _mm_rcp_ps( det );
 
-    p0_y = _mm_add_ps( p0_y , ray.m_sse_scale_y );
-    p1_y = _mm_add_ps( p1_y , ray.m_sse_scale_y );
-    p2_y = _mm_add_ps( p2_y , ray.m_sse_scale_y );
+    const __m128 rcp_det = _mm_rcp_ps( det );
 
-    __m128 t = _mm_add_ps( e0 , p0_y );
+    p0_y = _mm_mul_ps( p0_y , ray.m_sse_scale_y );
+    p1_y = _mm_mul_ps( p1_y , ray.m_sse_scale_y );
+    p2_y = _mm_mul_ps( p2_y , ray.m_sse_scale_y );
+
+    __m128 t = _mm_mul_ps( e0 , p0_y );
     t = _mm_add_ps( t , _mm_mul_ps( e1 , p1_y ) );
     t = _mm_add_ps( t , _mm_mul_ps( e2 , p2_y ) );
     t = _mm_mul_ps( t , rcp_det );
 
-    __m128 ray_min_t = _mm_set_ps1( ray.m_fMin );
-    __m128 ray_max_t = _mm_set_ps1( ray.m_fMax );
+    const __m128 ray_min_t = _mm_set_ps1( ray.m_fMin );
+    const __m128 ray_max_t = _mm_set_ps1( ray.m_fMax );
     mask = _mm_and_ps( _mm_and_ps( mask , _mm_cmpgt_ps( t , ray_min_t ) ) , _mm_cmplt_ps( t , ray_max_t ) );
     c = _mm_movemask_ps( mask );
     if( 0 == c )
@@ -210,29 +225,29 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     _mm_store_ps( f_e2 , e2 );
     _mm_store_ps( f_rcp_det , rcp_det );
 
-    alignas(16) unsigned int b_mask[4];
-    _mm_store_ps( (float*)b_mask , mask );
+	c = _mm_movemask_ps( mask );
 
+	// to be replaced after the bug is fixed.
     int     res_i = -1;
-    float   res_t = -1.0f;
-    if( b_mask[0] && res_t > f_t[0] ){
+    float   res_t = ret->t;
+    if( ( ( c >> 0 ) & 0x01 ) && res_t > f_t[0] ){
         res_i = 0;
         res_t = f_t[0];
     }
-    if( b_mask[1] && res_t > f_t[1] ){
+    if( ( ( c >> 1 ) && 0x01 ) && res_t > f_t[1] ){
         res_i = 1;
         res_t = f_t[1];
     }
-    if( b_mask[2] && res_t > f_t[2] ){
+    if( ( ( c >> 2 ) && 0x01 ) && res_t > f_t[2] ){
         res_i = 2;
         res_t = f_t[2];
     }
-    if( b_mask[3] && res_t > f_t[3] ){
+    if( ( ( c >> 3 ) && 0x01 ) && res_t > f_t[3] ){
         res_i = 3;
         res_t = f_t[3];
     }
     
-    const auto* triangle = tri4.m_ori_pri[res_i];
+    const auto* triangle = tri4.m_ori_tri[res_i];
 
     const auto u = f_e1[res_i] * f_rcp_det[res_i];
     const auto v = f_e2[res_i] * f_rcp_det[res_i];
@@ -260,6 +275,8 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     ret->u = uv.x;
     ret->v = uv.y;
     ret->t = res_t;
+
+	ret->primitive = tri4.m_ori_pri[res_i];
 
     return true;
 }

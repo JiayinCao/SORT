@@ -31,7 +31,7 @@ public:
     // get the emissive
     Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;
 
-    // the interesection point
+    // the intersection point
     Point   intersect;
     // the shading normal
     Vector  normal;
@@ -43,10 +43,10 @@ public:
     Vector  view;
     // the uv coordinate
     float   u = 0.0f , v = 0.0f;
-    // the delta distance from the orginal point
+    // the delta distance from the original point
     float   t = FLT_MAX;
     // the intersected primitive
-    Primitive*  primitive = nullptr;
+    const Primitive*  primitive = nullptr;
 
     //! @brief  Reset the intersection.
     //!

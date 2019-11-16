@@ -51,7 +51,7 @@ public:
     SORT_FORCEINLINE bool GetIntersect( const Ray& r , Intersection* intersect ) const{
         auto ret = m_shape->GetIntersect( r , intersect );
         if( ret && intersect ){
-            intersect->primitive = const_cast<Primitive*>(this);
+            intersect->primitive = this;
             return true;
         }
         return ret;

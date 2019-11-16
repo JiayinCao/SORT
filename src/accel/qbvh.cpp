@@ -163,17 +163,19 @@ void Qbvh::makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end , uns
     for(auto i = _start ; i < _end ; i++ ){
         const Primitive* primitive = (*m_primitives)[i].get();
         if( primitive->GetShapeType() == SHAPE_TRIANGLE ){
-            const Triangle* triangle = dynamic_cast<const Triangle*>( primitive->GetShape() );
-            if( tri4.PushTriangle( triangle ) ){
-                tri4.PackData();
-                node->tri_list.push_back( tri4 );
-                tri4.Reset();
+            if( tri4.PushTriangle( primitive ) ){
+                if( tri4.PackData() ){
+					node->tri_list.push_back( tri4 );
+					tri4.Reset();
+				}
             }
         }else{
             // line will also be specially treated in the future.
             node->other_list.push_back( primitive );
         }
     }
+	if (tri4.PackData())
+		node->tri_list.push_back(tri4);
 #endif
 
     SORT_STATS(++sQbvhLeafNodeCount);
