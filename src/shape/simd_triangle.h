@@ -215,19 +215,19 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 
     int     res_i = -1;
     float   res_t = -1.0f;
-    if( mask[0] && res_t > f_t[0] ){
+    if( b_mask[0] && res_t > f_t[0] ){
         res_i = 0;
         res_t = f_t[0];
     }
-    if( mask[1] && res_t > f_t[1] ){
+    if( b_mask[1] && res_t > f_t[1] ){
         res_i = 1;
         res_t = f_t[1];
     }
-    if( mask[2] && res_t > f_t[2] ){
+    if( b_mask[2] && res_t > f_t[2] ){
         res_i = 2;
         res_t = f_t[2];
     }
-    if( mask[3] && res_t > f_t[3] ){
+    if( b_mask[3] && res_t > f_t[3] ){
         res_i = 3;
         res_t = f_t[3];
     }
