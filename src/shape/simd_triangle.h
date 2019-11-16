@@ -28,7 +28,7 @@
 
 #ifdef  SSE_ENABLED
 
-__forceinline int __bsf(int v){
+SORT_FORCEINLINE int __bsf(int v){
 	unsigned long r = 0;
 	_BitScanForward(&r, v);
 	return r;
