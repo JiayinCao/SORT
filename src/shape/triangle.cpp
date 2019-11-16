@@ -56,24 +56,18 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
 
     // step 1 : pick the major axis to avoid dividing by zero in the sheering pass.
     //          by picking the major axis, we can also make sure we sheer as little as possible
-    const auto ay = MajorAxis( r.m_Dir );
-    const auto az = ( ay + 1 ) % 3;
-    const auto ax = ( az + 1 ) % 3;
-    Vector3f d = Permute( r.m_Dir , ax , ay , az );
-    p0 = Permute( p0 , ax , ay , az );
-    p1 = Permute( p1 , ax , ay , az );
-    p2 = Permute( p2 , ax , ay , az );
+    Vector3f d = Permute( r.m_Dir , r.m_local_x , r.m_local_y , r.m_local_z );
+    p0 = Permute( p0 , r.m_local_x , r.m_local_y , r.m_local_z );
+    p1 = Permute( p1 , r.m_local_x , r.m_local_y , r.m_local_z );
+    p2 = Permute( p2 , r.m_local_x , r.m_local_y , r.m_local_z );
 
     // step 2 : sheer the vertices so that the ray direction points to ( 0 , 1 , 0 )
-    const auto sx = -d.x / d.y;
-    const auto sz = -d.z / d.y;
-    const auto sy = 1.0f / d.y;
-    p0.x += sx * p0.y;
-    p0.z += sz * p0.y;
-    p1.x += sx * p1.y;
-    p1.z += sz * p1.y;
-    p2.x += sx * p2.y;
-    p2.z += sz * p2.y;
+    p0.x += r.m_scale_x * p0.y;
+    p0.z += r.m_scale_z * p0.y;
+    p1.x += r.m_scale_x * p1.y;
+    p1.z += r.m_scale_z * p1.y;
+    p2.x += r.m_scale_x * p2.y;
+    p2.z += r.m_scale_z * p2.y;
 
     // compute the edge functions
     auto e0 = p1.x * p2.z - p1.z * p2.x;
@@ -93,9 +87,9 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
     if( det == .0f )
         return false;
 
-    p0.y *= sy;
-    p1.y *= sy;
-    p2.y *= sy;
+    p0.y *= r.m_scale_y;
+    p1.y *= r.m_scale_y;
+    p2.y *= r.m_scale_y;
     const auto invDet = 1.0f / det;
     const auto t = ( e0 * p0.y + e1 * p1.y + e2 * p2.y ) * invDet;
     if( t <= r.m_fMin || t >= r.m_fMax )

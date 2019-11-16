@@ -123,6 +123,8 @@ bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect) const{
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect != nullptr);
 
+	ray.Prepare();
+
     const auto fmin = Intersect(ray, m_bbox);
     if (fmin < 0.0f)
         return false;
@@ -176,6 +178,8 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
 void Bvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
     SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
+
+	ray.Prepare();
 
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;

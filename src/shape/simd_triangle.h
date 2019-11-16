@@ -64,9 +64,9 @@ struct Triangle4{
         return true;
     }
 
-    //! @brief  Pack triangle information into sse compatible data.
+    //! @brief  Pack triangle information into SSE compatible data.
     void PackData(){
-        unsigned int mask[4] = {0};
+        unsigned int mask[4] = {0x0};
         float   p0_x[4] , p0_y[4] , p0_z[4] , p1_x[4] , p1_y[4] , p1_z[4] , p2_x[4] , p2_y[4] , p2_z[4];
         for( auto i = 0 ; i < 4 && m_ori_pri[i] ; ++i ){
             const Triangle* triangle = m_ori_pri[i];
@@ -122,7 +122,7 @@ struct Triangle4{
 SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4 , Intersection* ret ){
     static const __m128 zeros = _mm_set_ps1( 0.0f );
 
-    __m128i mask = tri4.m_mask;
+    __m128 mask = tri4.m_mask;
 
 	// step 0 : translate the vertices to ray coordinate system
 	__m128 p0[3] , p1[3] , p2[3];

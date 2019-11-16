@@ -62,7 +62,7 @@ public:
     // the depth for the ray
     int     m_Depth;
 
-    // the maxium and minium value in the ray
+    // the maximum and minimum value in the ray
     float   m_fMin;
     float   m_fMax;
 
