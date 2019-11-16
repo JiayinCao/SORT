@@ -23,6 +23,8 @@
 #include "shape/shape.h"
 #include "material/matmanager.h"
 
+class Light;
+
 //! @brief  Primitive of SORT world.
 /**
  * Like primitives in rasterization program, which are usually triangle, point and lines, primitives can have many more different shapes.
@@ -94,8 +96,22 @@ public:
     //! Most primitives doesn't have light attached to it.
     //!
     //! @return         Light attached to the primitive. 'nullptr' means this is not an missive primitive.
-    SORT_FORCEINLINE class Light* GetLight() const {
+    SORT_FORCEINLINE Light* GetLight() const {
         return m_light;
+    }
+    
+    //! @brief  Get the type of the shape attached to the primitive.
+    //!
+    //! @return         Type of the attached shape.
+    SORT_FORCEINLINE SHAPE_TYPE GetShapeType() const {
+        return m_shape->GetShapeType();
+    }
+
+    //! @brief  Get the shape of the primitive.
+    //!
+    //! @return         The shape of the primitive.
+    SORT_FORCEINLINE const Shape*    GetShape() const{
+        return m_shape;
     }
 
 private:

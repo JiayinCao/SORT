@@ -91,6 +91,13 @@ public:
     //! @param      y   Size along y axis.
     void            SetSizeY(float y) { sizeY = std::max( 0.0001f , y ); }
 
+    //! @brief      Get the type of the shape
+    //!
+    //! @return     The type of the shape.
+    SHAPE_TYPE GetShapeType() const override{
+        return SHAPE_QUAD;
+    }
+
 protected:
     float sizeX = 1.0f;     /**< The size of the quad along x axis. */
     float sizeY = 1.0f;     /**< The size of the quad along y axis. */

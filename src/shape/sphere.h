@@ -23,8 +23,7 @@
 /**
  * The sphere center is always at the origin of its local coordinate.
  */
-class   Sphere : public Shape
-{
+class   Sphere : public Shape{
 public:
     //! @brief Sample a point on the surface of the shape given a shading point.
     //!
@@ -90,6 +89,13 @@ public:
     //!
     //! @return     Surface area of the shape.
     float           SurfaceArea() const override;
+
+    //! @brief      Get the type of the shape
+    //!
+    //! @return     The type of the shape.
+    SHAPE_TYPE GetShapeType() const override{
+        return SHAPE_SPHERE;
+    }
 
 private:
     float radius = 1.0f;    /**< Radius of the sphere. */

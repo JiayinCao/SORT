@@ -156,6 +156,26 @@ void Qbvh::makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end , uns
 
 	m_depth = fmax( m_depth , depth );
 
+#ifdef SSE_ENABLED
+    Triangle4   tri4;
+    const auto _start = node->pri_offset;
+    const auto _end = _start + node->pri_cnt;
+    for(auto i = _start ; i < _end ; i++ ){
+        const Primitive* primitive = (*m_primitives)[i].get();
+        if( primitive->GetShapeType() == SHAPE_TRIANGLE ){
+            const Triangle* triangle = dynamic_cast<const Triangle*>( primitive->GetShape() );
+            if( tri4.PushTriangle( triangle ) ){
+                tri4.PackData();
+                node->tri_list.push_back( tri4 );
+                tri4.Reset();
+            }
+        }else{
+            // line will also be specially treated in the future.
+            node->other_list.push_back( primitive );
+        }
+    }
+#endif
+
     SORT_STATS(++sQbvhLeafNodeCount);
     SORT_STATS(sQbvhMaxPriCountInLeaf = std::max( sQbvhMaxPriCountInLeaf , (StatsInt)node->pri_cnt) );
     SORT_STATS(sQbvhPrimitiveCount += (StatsInt)node->pri_cnt);
@@ -213,7 +233,31 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         if( intersect && intersect->t < fmin )
             continue;
 
-        // check if it is a leaf node, to be optimized by SSE/AVX
+#ifdef SSE_ENABLED_TO_BE_CORRECTED
+        // check if it is a leaf node
+        if( 0 == node->child_cnt ){
+            auto found = false;
+            for( auto i = 0 ; i < node->tri_list.size() ; ++i ){
+                found |= intersectTriangle4( ray , node->tri_list[i] , intersect );
+                if( intersect == nullptr && found ){
+                    SORT_STATS(sIntersectionTest+= i * 4);
+                    return true;
+                }
+            }
+            if( UNLIKELY(!node->other_list.empty()) ){
+                for( auto i = 0 ; i < node->other_list.size() ; ++i ){
+                    found |= node->other_list[i]->GetIntersect( ray , intersect );
+                    if( intersect == nullptr && found ){
+                        SORT_STATS(sIntersectionTest+= i * 4);
+                        return true;
+                    }
+                }
+            }
+            SORT_STATS(sIntersectionTest+=node->pri_cnt);
+            continue;
+        }
+#else
+        // check if it is a leaf node
         if( 0 == node->child_cnt ){
             const auto _start = node->pri_offset;
             const auto _end = _start + node->pri_cnt;
@@ -229,6 +273,7 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             SORT_STATS(sIntersectionTest+=node->pri_cnt);
             continue;
         }
+#endif
 
 #ifndef SSE_ENABLED
         float f_min[QBVH_CHILD_CNT] = { FLT_MAX };

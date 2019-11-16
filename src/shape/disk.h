@@ -25,8 +25,7 @@
  * The disk center is always at the origin of its local coordinate, the normal of the disk points exactly
  * upward in its local coordinate.
  */
-class   Disk : public Shape
-{
+class   Disk : public Shape{
 public:
     //! @brief Sample a point on the surface of the shape given a shading point.
     //!
@@ -87,6 +86,13 @@ public:
     //! @param  r   Radius to be set for the disk.
     void            SetRadius( float r ){
         radius = r;
+    }
+
+    //! @brief      Get the type of the shape
+    //!
+    //! @return     The type of the shape.
+    SHAPE_TYPE GetShapeType() const override{
+        return SHAPE_DISK;
     }
 
 private:

@@ -19,6 +19,9 @@
 
 #include "core/define.h"
 #include "math/ray.h"
+#include "math/intersection.h"
+#include "math/point.h"
+
 #ifdef SSE_ENABLED
     #include <nmmintrin.h>
 #endif
@@ -37,14 +40,90 @@ struct Triangle4{
     __m128  m_p0_x , m_p0_y , m_p0_z ;  /**< Position of point 0 of the triangle. */
     __m128  m_p1_x , m_p1_y , m_p1_z ;  /**< Position of point 1 of the triangle. */
     __m128  m_p2_x , m_p2_y , m_p2_z ;  /**< Position of point 2 of the triangle. */
+    __m128  m_mask;
+
+    /**< Pointers to original primitives. */
+    const Triangle*  m_ori_pri[4] = { nullptr };
+
+    //! @brief  Push a triangle in the data structure.
+    //!
+    //! @param  tri     The triangle to be pushed in Triangle4.
+    //! @return         Whether the data structure is full.
+    bool PushTriangle( const Triangle* tri ){
+        if( m_ori_pri[0] == nullptr ){
+            m_ori_pri[0] = tri;
+            return false;
+        }else if( m_ori_pri[1] == nullptr ){
+            m_ori_pri[1] = tri;
+            return false;
+        }else if( m_ori_pri[2] == nullptr ){
+            m_ori_pri[2] = tri;
+            return false;
+        }
+        m_ori_pri[3] = tri;
+        return true;
+    }
+
+    //! @brief  Pack triangle information into sse compatible data.
+    void PackData(){
+        unsigned int mask[4] = {0};
+        float   p0_x[4] , p0_y[4] , p0_z[4] , p1_x[4] , p1_y[4] , p1_z[4] , p2_x[4] , p2_y[4] , p2_z[4];
+        for( auto i = 0 ; i < 4 && m_ori_pri[i] ; ++i ){
+            const Triangle* triangle = m_ori_pri[i];
+
+            const auto& mem = triangle->GetMeshVisual()->m_memory;
+            const auto id0 = triangle->GetIndices().m_id[0];
+            const auto id1 = triangle->GetIndices().m_id[1];
+            const auto id2 = triangle->GetIndices().m_id[2];
+
+            const auto& mv0 = mem->m_vertices[id0];
+            const auto& mv1 = mem->m_vertices[id1];
+            const auto& mv2 = mem->m_vertices[id2];
+
+            p0_x[i] = mv0.m_position.x;
+            p0_y[i] = mv0.m_position.y;
+            p0_z[i] = mv0.m_position.z;
+
+            p1_x[i] = mv1.m_position.x;
+            p1_y[i] = mv1.m_position.y;
+            p1_z[i] = mv1.m_position.z;
+
+            p2_x[i] = mv2.m_position.x;
+            p2_y[i] = mv2.m_position.y;
+            p2_z[i] = mv2.m_position.z;
+
+            mask[i] = 0xffffffff;
+        }
+
+        m_p0_x = _mm_set_ps( p0_x[3] , p0_x[2] , p0_x[1] , p0_x[0] );
+        m_p0_y = _mm_set_ps( p0_y[3] , p0_y[2] , p0_y[1] , p0_y[0] );
+        m_p0_z = _mm_set_ps( p0_z[3] , p0_z[2] , p0_z[1] , p0_z[0] );
+        m_p1_x = _mm_set_ps( p1_x[3] , p1_x[2] , p1_x[1] , p1_x[0] );
+        m_p1_y = _mm_set_ps( p1_y[3] , p1_y[2] , p1_y[1] , p1_y[0] );
+        m_p1_z = _mm_set_ps( p1_z[3] , p1_z[2] , p1_z[1] , p1_z[0] );
+        m_p2_x = _mm_set_ps( p2_x[3] , p2_x[2] , p2_x[1] , p2_x[0] );
+        m_p2_y = _mm_set_ps( p2_y[3] , p2_y[2] , p2_y[1] , p2_y[0] );
+        m_p2_z = _mm_set_ps( p2_z[3] , p2_z[2] , p2_z[1] , p2_z[0] );
+        m_mask = _mm_set_ps( mask[3] , mask[2] , mask[1] , mask[0] );
+    }
+
+    //! @brief  Reset the data for reuse
+    void Reset(){
+        m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = nullptr;
+    }
 };
 
 //! @brief  With the power of SSE, this utility function helps intersect a ray with four triangles at the cost of one.
 //!
-//! @param  tri4    Data structure holds four triangles.
 //! @param  ray     Ray to be tested against.
+//! @param  tri4    Data structure holds four triangles.
+//! @param  mask    Mask results that are not valid.
 //! @param  ret     The result of intersection.
-SORT_FORCEINLINE void intersectTriangle4( const Triangle4& tri4 , const Ray& ray , Intersection& ret ){
+SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4 , Intersection* ret ){
+    static const __m128 zeros = _mm_set_ps1( 0.0f );
+
+    __m128i mask = tri4.m_mask;
+
 	// step 0 : translate the vertices to ray coordinate system
 	__m128 p0[3] , p1[3] , p2[3];
     p0[0] = _mm_sub_ps(tri4.m_p0_x, ray.m_ori_x);
@@ -85,6 +164,104 @@ SORT_FORCEINLINE void intersectTriangle4( const Triangle4& tri4 , const Ray& ray
 	__m128 e0 = _mm_sub_ps( _mm_mul_ps( p1_x , p2_z ) , _mm_mul_ps( p1_z , p2_x ) );
 	__m128 e1 = _mm_sub_ps( _mm_mul_ps( p2_x , p0_z ) , _mm_mul_ps( p2_z , p0_x ) );
 	__m128 e2 = _mm_sub_ps( _mm_mul_ps( p0_x , p1_z ) , _mm_mul_ps( p0_z , p1_x ) );
+
+    mask = mask && 
+           ( _mm_cmpge_ps( e0 , zeros ) && _mm_cmpge_ps( e1 , zeros ) && _mm_cmpge_ps( e2 , zeros ) ) &&
+           ( _mm_cmple_ps( e0 , zeros ) && _mm_cmple_ps( e1 , zeros ) && _mm_cmple_ps( e2 , zeros ) );
+    auto c = _mm_movemask_ps( mask );
+    if( 0 == c )
+        return false;
+
+    __m128 det = _mm_add_ps( e0 , _mm_add_ps( e1 , e2 ) );
+    mask = mask && _mm_cmpneq_ps( det , zeros );
+    c = _mm_movemask_ps( mask );
+    if( 0 == c )
+        return false;
+    __m128 rcp_det = _mm_rcp_ps( det );
+
+    p0_y = _mm_add_ps( p0_y , ray.m_sse_scale_y );
+    p1_y = _mm_add_ps( p1_y , ray.m_sse_scale_y );
+    p2_y = _mm_add_ps( p2_y , ray.m_sse_scale_y );
+
+    __m128 t = _mm_add_ps( e0 , p0_y );
+    t = _mm_add_ps( t , _mm_mul_ps( e1 , p1_y ) );
+    t = _mm_add_ps( t , _mm_mul_ps( e2 , p2_y ) );
+    t = _mm_mul_ps( t , rcp_det );
+
+    __m128 ray_min_t = _mm_set_ps1( ray.m_fMin );
+    __m128 ray_max_t = _mm_set_ps1( ray.m_fMax );
+    mask = mask && _mm_cmpgt_ps( t , ray_min_t ) && _mm_cmplt_ps( t , ray_max_t );
+    c = _mm_movemask_ps( mask );
+    if( 0 == c )
+        return false;
+    
+    if( nullptr == ret )
+        return true;
+
+    mask = mask && _mm_cmple_ps( t , _mm_set_ps1( ret->t ) ) && _mm_cmpgt_ps( t , zeros );
+    c = _mm_movemask_ps( mask );
+    if( 0 == c )
+        return false;
+    
+    // resolve the result, it could be optimized with SIMD later.
+    alignas(16) float f_t[4] , f_e1[4] , f_e2[4] , f_rcp_det[4];
+    _mm_store_ps( f_t , t );
+    _mm_store_ps( f_e1 , e1 );
+    _mm_store_ps( f_e2 , e2 );
+    _mm_store_ps( f_rcp_det , rcp_det );
+
+    alignas(16) unsigned int b_mask[4];
+    _mm_store_ps( (float*)b_mask , mask );
+
+    int     res_i = -1;
+    float   res_t = -1.0f;
+    if( mask[0] && res_t > f_t[0] ){
+        res_i = 0;
+        res_t = f_t[0];
+    }
+    if( mask[1] && res_t > f_t[1] ){
+        res_i = 1;
+        res_t = f_t[1];
+    }
+    if( mask[2] && res_t > f_t[2] ){
+        res_i = 2;
+        res_t = f_t[2];
+    }
+    if( mask[3] && res_t > f_t[3] ){
+        res_i = 3;
+        res_t = f_t[3];
+    }
+    
+    const auto* triangle = tri4.m_ori_pri[res_i];
+
+    const auto u = f_e1[res_i] * f_rcp_det[res_i];
+    const auto v = f_e2[res_i] * f_rcp_det[res_i];
+    const auto w = 1 - u - v;
+
+    // store the intersection
+    ret->intersect = ray(res_t);
+
+    const auto& mem = triangle->GetMeshVisual()->m_memory;
+    const auto id0 = triangle->GetIndices().m_id[0];
+    const auto id1 = triangle->GetIndices().m_id[1];
+    const auto id2 = triangle->GetIndices().m_id[2];
+
+    const auto& mv0 = mem->m_vertices[id0];
+    const auto& mv1 = mem->m_vertices[id1];
+    const auto& mv2 = mem->m_vertices[id2];
+
+    // get three vertexes
+    ret->gnormal = Normalize(Cross( ( mv2.m_position - mv0.m_position ) , ( mv1.m_position - mv0.m_position ) ));
+    ret->normal = ( w * mv0.m_normal + u * mv1.m_normal + v * mv2.m_normal).Normalize();
+    ret->tangent = ( w * mv0.m_tangent + u * mv1.m_tangent + v * mv2.m_tangent).Normalize();
+    ret->view = -ray.m_Dir;
+
+    const auto uv = w * mv0.m_texCoord + u * mv1.m_texCoord + v * mv2.m_texCoord;
+    ret->u = uv.x;
+    ret->v = uv.y;
+    ret->t = res_t;
+
+    return true;
 }
 
 #endif

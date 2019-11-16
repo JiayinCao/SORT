@@ -122,6 +122,13 @@ public:
     //! @param transform    The new transform of the shape to be set.
     void    SetTransform( const Transform& transform ) override;
 
+    //! @brief      Get the type of the shape
+    //!
+    //! @return     The type of the shape.
+    SHAPE_TYPE GetShapeType() const override{
+        return SHAPE_LINE;
+    }
+
 private:
     /**< Point at the end of the line. */
     const Point     m_p0;

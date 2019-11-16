@@ -26,6 +26,14 @@
 
 class LightSample;
 
+enum SHAPE_TYPE{
+    SHAPE_TRIANGLE  = 0,
+    SHAPE_LINE      = 1,
+    SHAPE_DISK      = 2,
+    SHAPE_QUAD      = 3,
+    SHAPE_SPHERE    = 4,
+};
+
 //! @brief Shape class defines basic interface of shape.
 /**
  * A shape class defines the very fundamental concept of shape supported in SORT.
@@ -121,11 +129,16 @@ public:
     //! @return     Surface area of the shape.
     virtual float   SurfaceArea() const = 0;
 
-    //! @brief Set transform for the shape.
+    //! @brief      Set transform for the shape.
     //!
     //! @param transform    The new transform of the shape to be set.
     virtual void    SetTransform( const Transform& transform ) { m_transform = transform; }
 
+    //! @brief      Get the type of the shape
+    //!
+    //! @return     The type of the shape.
+    virtual SHAPE_TYPE GetShapeType() const = 0;
+    
 protected:
     Transform                       m_transform;    /**< Transform of the shape from local space to world space. It is assumed there is no scaling in this matrix, the upper level code should handle it. */
     mutable std::unique_ptr<BBox>   m_bbox;         /**< Bounding box of the shape in world coordinate. */

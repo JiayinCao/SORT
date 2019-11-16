@@ -102,7 +102,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
         return false;
     if( intersect == nullptr )
         return true;
-    if( t > intersect->t )
+    if( t > intersect->t || t <= 0.0f )
         return false;
 
     const auto u = e1 * invDet;
@@ -122,7 +122,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
     intersect->v = uv.y;
     intersect->t = t;
 
-    return t > 0.0f ;
+    return true;
 }
 
 const BBox& Triangle::GetBBox() const{

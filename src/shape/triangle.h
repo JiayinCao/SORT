@@ -20,6 +20,9 @@
 #include "core/define.h"
 #include "shape.h"
 
+class   MeshVisual;
+struct  MeshFaceIndex;
+
 //! @brief Triangle class defines the basic behavior of triangle.
 /**
  * Triangle is the most common shape that is used in a ray tracer.
@@ -97,7 +100,28 @@ public:
     //! @return     Surface area of the shape.
     float           SurfaceArea() const override;
 
+    //! @brief      Get the mesh visual of this primitive.
+    //!
+    //! @return     MeshVisual that owns this triangle.
+    SORT_FORCEINLINE const MeshVisual*      GetMeshVisual() const{
+        return m_meshVisual;
+    }
+
+    //! @brief      Get face indices.
+    //!
+    //! @return     Face indices of the triangle.
+    SORT_FORCEINLINE const MeshFaceIndex&    GetIndices() const{
+        return m_index;
+    }
+
+    //! @brief      Get the type of the shape
+    //!
+    //! @return     The type of the shape.
+    SHAPE_TYPE GetShapeType() const override{
+        return SHAPE_TRIANGLE;
+    }
+
 private:
-    const class MeshVisual*         m_meshVisual = nullptr;     /**< Visual holding the vertex buffer. */
-    const struct MeshFaceIndex&     m_index;                    /**< Index buffer points to the index of this triangle. */
+    const MeshVisual*        m_meshVisual = nullptr;     /**< Visual holding the vertex buffer. */
+    const MeshFaceIndex&     m_index;                    /**< Index buffer points to the index of this triangle. */
 };

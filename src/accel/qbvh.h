@@ -21,6 +21,7 @@
 #include "bvh_utils.h"
 #include "core/primitive.h"
 #include "math/simd_bbox.h"
+#include "shape/simd_triangle.h"
 
 #define QBVH_CHILD_CNT		4
 
@@ -37,6 +38,11 @@ struct Qbvh_Node {
 	unsigned                    pri_cnt = 0;				/**< Number of primitives in the node. */
 	unsigned                    pri_offset = 0;				/**< Offset of primitives in the buffer. */
 	int                         child_cnt = 0;			    /**< 0 means it is a leaf node. */
+
+#if SSE_ENABLED
+    std::vector<Triangle4>            tri_list;
+    std::vector<const Primitive*>     other_list;
+#endif
 
     //! @brief  Constructor.
     //!
