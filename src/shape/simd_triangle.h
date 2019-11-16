@@ -165,15 +165,15 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 	__m128 e1 = _mm_sub_ps( _mm_mul_ps( p2_x , p0_z ) , _mm_mul_ps( p2_z , p0_x ) );
 	__m128 e2 = _mm_sub_ps( _mm_mul_ps( p0_x , p1_z ) , _mm_mul_ps( p0_z , p1_x ) );
 
-    mask = mask && 
-           ( _mm_cmpge_ps( e0 , zeros ) && _mm_cmpge_ps( e1 , zeros ) && _mm_cmpge_ps( e2 , zeros ) ) &&
-           ( _mm_cmple_ps( e0 , zeros ) && _mm_cmple_ps( e1 , zeros ) && _mm_cmple_ps( e2 , zeros ) );
+    __m128 c0 = _mm_and_ps( _mm_and_ps( _mm_cmpge_ps( e0 , zeros ) , _mm_cmpge_ps( e1 , zeros ) ) , _mm_cmpge_ps( e2 , zeros ) );
+    __m128 c1 = _mm_and_ps( _mm_and_ps( _mm_cmple_ps( e0 , zeros ) , _mm_cmple_ps( e1 , zeros ) ) , _mm_cmple_ps( e2 , zeros ) );
+    mask = _mm_and_ps( mask , _mm_and_ps( c0 , c1 ) );
     auto c = _mm_movemask_ps( mask );
     if( 0 == c )
         return false;
 
     __m128 det = _mm_add_ps( e0 , _mm_add_ps( e1 , e2 ) );
-    mask = mask && _mm_cmpneq_ps( det , zeros );
+    mask = _mm_and_ps( mask , _mm_cmpneq_ps( det , zeros ) );
     c = _mm_movemask_ps( mask );
     if( 0 == c )
         return false;
@@ -190,7 +190,7 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 
     __m128 ray_min_t = _mm_set_ps1( ray.m_fMin );
     __m128 ray_max_t = _mm_set_ps1( ray.m_fMax );
-    mask = mask && _mm_cmpgt_ps( t , ray_min_t ) && _mm_cmplt_ps( t , ray_max_t );
+    mask = _mm_and_ps( _mm_and_ps( mask , _mm_cmpgt_ps( t , ray_min_t ) ) , _mm_cmplt_ps( t , ray_max_t ) );
     c = _mm_movemask_ps( mask );
     if( 0 == c )
         return false;
@@ -198,7 +198,7 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     if( nullptr == ret )
         return true;
 
-    mask = mask && _mm_cmple_ps( t , _mm_set_ps1( ret->t ) ) && _mm_cmpgt_ps( t , zeros );
+    mask = _mm_and_ps( _mm_and_ps( mask , _mm_cmpgt_ps( t , zeros ) ) , _mm_cmple_ps( t , _mm_set_ps1( ret->t ) ) );
     c = _mm_movemask_ps( mask );
     if( 0 == c )
         return false;
