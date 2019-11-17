@@ -28,13 +28,18 @@
 
 #ifdef  SSE_ENABLED
 
-SORT_FORCEINLINE int __bsf(int v){
+static SORT_FORCEINLINE int __bsf(int v){
+#ifdef SORT_WINDOWS
 	unsigned long r = 0;
-	//_BitScanForward(&r, v);
-	return r;
+	_BitScanForward(&r, v);
+    return r;
+#else
+    return __builtin_ctz(v);
+#endif
 }
 
-static const __m128 zeros = _mm_set_ps1( 0.0f );
+static const __m128 zeros       = _mm_set_ps1( 0.0f );
+static const __m128 infinites   = _mm_set_ps1( FLT_MAX );
 
 //! @brief  Triangle4 is more of a simplified resolved data structure holds only bare bone information of triangle.
 /**
@@ -236,22 +241,30 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     
     // resolve the result, it could be optimized with SIMD later.
     alignas(16) float f_t[4] , f_e1[4] , f_e2[4] , f_rcp_det[4];
-    _mm_storeu_ps( f_t , t );
-    _mm_storeu_ps( f_e1 , e1 );
-    _mm_storeu_ps( f_e2 , e2 );
-    _mm_storeu_ps( f_rcp_det , rcp_det );
+    _mm_store_ps( f_t , t );
+    _mm_store_ps( f_e1 , e1 );
+    _mm_store_ps( f_e2 , e2 );
+    _mm_store_ps( f_rcp_det , rcp_det );
 
-	c = _mm_movemask_ps( mask );
+#if 1
+    // mask out the invalid values
+    t = _mm_or_ps( _mm_and_ps( mask , t ) , _mm_andnot_ps( mask , infinites ) );
 
-#if 0
-    // this code is not functional for now.
-	__m128 t0 = _mm_min_ps( t , _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(t), _MM_SHUFFLE(1, 0, 3, 2))) );
-	t0 = _mm_min_ps( t0 , _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(t0), _MM_SHUFFLE(1, 0, 3, 2))) );
-	int res_i = __bsf(_mm_movemask_ps( _mm_cmpeq_ps( t , t0 ) ));
+    // find the closest result
+    __m128 t0 = _mm_min_ps( t , _mm_shuffle_ps( t , t , _MM_SHUFFLE(2, 3, 0, 1) ) );
+	t0 = _mm_min_ps( t0 , _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(1, 0, 3, 2) ) );
 
-	float   res_t = ret->t;
+    // get the index of the closest one
+    const auto resolved_mask = _mm_movemask_ps( _mm_cmpeq_ps( t , t0 ) );
+	const auto res_i = __bsf(resolved_mask);
+    const auto res_t = ret->t;
+
+    sAssert( resolved_mask > 0 && resolved_mask < 16 , SPATIAL_ACCELERATOR );
+    sAssert( res_i >= 0 && res_i < 4 , SPATIAL_ACCELERATOR );
 #else
-	// to be replaced with the above code after the bug is fixed.
+    c = _mm_movemask_ps( mask );
+
+    // this branched code is only kept for a temporary period as a reference implementation for debugging purpose.
     int     res_i = -1;
     float   res_t = ret->t;
     if( ( ( c >> 0 ) & 0x01 ) && res_t >= f_t[0]  && f_t[0] < ray.m_fMax && f_t[0] > ray.m_fMin ){
