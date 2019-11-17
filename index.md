@@ -10,7 +10,7 @@ Here are the features implemented so far:
   - Fur, Hair.
   - Support Open Shading Language.
   - Camera. (DOF)
-  - Multi-thread rendering.
+  - Multi-thread rendering, SIMD(SSE) Optimized.
   - Blender 2.8 plugin.
 
 ## Gallery
