@@ -20,8 +20,7 @@
 #include "core/memory.h"
 #include "core/stats.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
-
-#include "shape/simd_triangle.h"
+#include "simd/simd_triangle.h"
 
 IMPLEMENT_RTTI(Qbvh);
 
@@ -258,6 +257,29 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             SORT_STATS(sIntersectionTest+=node->pri_cnt);
             continue;
         }
+
+		__m128 sse_f_min;
+        IntersectBBox4( ray , node->bbox , sse_f_min );
+
+        alignas(16) float f_min[4];
+        _mm_store_ps(f_min , sse_f_min);
+
+        for( auto i = 0 ; i < node->child_cnt ; ++i ){
+            auto k = -1;
+            auto maxDist = 0.0f;
+            for( int j = 0 ; j < node->child_cnt ; ++j ){
+                if( f_min[j] > maxDist ){
+                    maxDist = f_min[j];
+                    k = j;
+                }
+            }
+
+            if( k == -1 )
+                break;
+
+            f_min[k] = -1.0f;
+			bvh_stack[si++] = std::make_pair( node->children[k].get() , maxDist );
+        }
 #else
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
@@ -275,9 +297,7 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             SORT_STATS(sIntersectionTest+=node->pri_cnt);
             continue;
         }
-#endif
 
-#ifndef SSE_ENABLED
         float f_min[QBVH_CHILD_CNT] = { FLT_MAX };
         for( int i = 0 ; i < node->child_cnt ; ++i )
             f_min[i] = Intersect( ray , node->bbox[i] );
@@ -287,30 +307,6 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             float maxDist = -1.0f;
             for( int j = 0 ; j < node->child_cnt ; ++j ){
                 if( f_min[j] > maxDist ){
-                    maxDist = f_min[j];
-                    k = j;
-                }
-            }
-
-            if( k == -1 )
-                break;
-
-            f_min[k] = -1.0f;
-			bvh_stack[si++] = std::make_pair( node->children[k].get() , maxDist );
-        }
-#else
-        __m128 sse_f_max , sse_f_min;
-        IntersectBBox4( ray , node->bbox , sse_f_min , sse_f_max );
-
-        alignas(16) float f_max[4] , f_min[4];
-        _mm_store_ps(f_max , sse_f_max);
-        _mm_store_ps(f_min , sse_f_min);
-
-        for( auto i = 0 ; i < node->child_cnt ; ++i ){
-            auto k = -1;
-            auto maxDist = -1.0f;
-            for( int j = 0 ; j < node->child_cnt ; ++j ){
-                if( f_min[j] > maxDist && f_min[j] <= f_max[j] ){
                     maxDist = f_min[j];
                     k = j;
                 }
@@ -422,22 +418,21 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 			bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
 		}
 #else
-		__m128 sse_f_max, sse_f_min;
-		IntersectBBox4(ray, node->bbox, sse_f_min, sse_f_max);
+		__m128 sse_f_min;
+        IntersectBBox4( ray , node->bbox , sse_f_min );
 
-		alignas(16) float f_max[4], f_min[4];
-		_mm_store_ps(f_max, sse_f_max);
-		_mm_store_ps(f_min, sse_f_min);
+        alignas(16) float f_min[4];
+        _mm_store_ps(f_min , sse_f_min);
 
-		for (auto i = 0; i < node->child_cnt; ++i) {
-			auto k = -1;
-			auto maxDist = -1.0f;
-			for (auto j = 0; j < node->child_cnt; ++j) {
-				if (f_min[j] > maxDist && f_min[j] <= f_max[j]) {
-					maxDist = f_min[j];
-					k = j;
-				}
-			}
+        for( auto i = 0 ; i < node->child_cnt ; ++i ){
+            auto k = -1;
+            auto maxDist = -1.0f;
+            for( int j = 0 ; j < node->child_cnt ; ++j ){
+                if( f_min[j] > maxDist ){
+                    maxDist = f_min[j];
+                    k = j;
+                }
+            }
 
 			if (k == -1)
 				break;

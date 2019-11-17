@@ -18,7 +18,8 @@
 #pragma once
 
 #include "core/define.h"
-#include "ray.h"
+#include "math/ray.h"
+#include "simd_utils.h"
 
 #ifdef SSE_ENABLED
 	#include <nmmintrin.h>
@@ -44,14 +45,14 @@ public:
 	__m128	m_max_z;
 };
 
-SORT_FORCEINLINE void IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_min , __m128& f_max) {
+SORT_FORCEINLINE void IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_min ) {
 	f_min = _mm_set_ps1( ray.m_fMin );
-	f_max = _mm_set_ps1( ray.m_fMax );
+	__m128 f_max = _mm_set_ps1( ray.m_fMax );
 
 	__m128 t1	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_max_x ) );
 	__m128 t2	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_min_x ) );
 	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+	f_max		= _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
 
     t1		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_max_y ) );
 	t2		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_min_y ) );
@@ -62,6 +63,9 @@ SORT_FORCEINLINE void IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_
 	t2		    = _mm_add_ps( ray.m_ori_dir_z , _mm_mul_ps( ray.m_rcp_dir_z , bb.m_min_z ) );
 	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
 	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+
+	const __m128 mask = _mm_cmple_ps( f_min , f_max );
+	f_min = _mm_or_ps( _mm_and_ps( mask , f_min ) , _mm_andnot_ps( mask , neg_ones ) );
 }
 
 #endif

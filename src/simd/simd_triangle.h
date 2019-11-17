@@ -21,6 +21,7 @@
 #include "math/ray.h"
 #include "math/intersection.h"
 #include "math/point.h"
+#include "simd_utils.h"
 
 #ifdef SSE_ENABLED
     #include <nmmintrin.h>
@@ -37,9 +38,6 @@ static SORT_FORCEINLINE int __bsf(int v){
     return __builtin_ctz(v);
 #endif
 }
-
-static const __m128 zeros       = _mm_set_ps1( 0.0f );
-static const __m128 infinites   = _mm_set_ps1( FLT_MAX );
 
 //! @brief  Triangle4 is more of a simplified resolved data structure holds only bare bone information of triangle.
 /**

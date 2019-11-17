@@ -20,8 +20,8 @@
 #include "accelerator.h"
 #include "bvh_utils.h"
 #include "core/primitive.h"
-#include "math/simd_bbox.h"
-#include "shape/simd_triangle.h"
+#include "simd/simd_bbox.h"
+#include "simd/simd_triangle.h"
 
 #define QBVH_CHILD_CNT		4
 
