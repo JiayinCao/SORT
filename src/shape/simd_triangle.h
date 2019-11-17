@@ -140,10 +140,10 @@ struct Triangle4{
 //!
 //! @param  ray     Ray to be tested against.
 //! @param  tri4    Data structure holds four triangles.
-//! @param  mask    Mask results that are not valid.
 //! @param  ret     The result of intersection.
 SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4 , Intersection* ret ){
 #if 0
+    // This is a reference implementation for debugging purpose.
 	bool flag = false;
 	for( int i = 0 ; i < 4 ; ++i ){
 		if( tri4.m_ori_pri[i] == nullptr )
@@ -244,29 +244,29 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 	c = _mm_movemask_ps( mask );
 
 #if 0
+    // this code is not functional for now.
 	__m128 t0 = _mm_min_ps( t , _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(t), _MM_SHUFFLE(1, 0, 3, 2))) );
 	t0 = _mm_min_ps( t0 , _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(t0), _MM_SHUFFLE(1, 0, 3, 2))) );
 	int res_i = __bsf(_mm_movemask_ps( _mm_cmpeq_ps( t , t0 ) ));
 
 	float   res_t = ret->t;
-
 #else
-	// to be replaced after the bug is fixed.
+	// to be replaced with the above code after the bug is fixed.
     int     res_i = -1;
     float   res_t = ret->t;
-    if( ( ( c >> 0 ) & 0x01 ) && res_t >= f_t[0] && f_t[0] < ray.m_fMax && f_t[0] > ray.m_fMin ){
+    if( ( ( c >> 0 ) & 0x01 ) && res_t >= f_t[0]  && f_t[0] < ray.m_fMax && f_t[0] > ray.m_fMin ){
         res_i = 0;
         res_t = f_t[0];
     }
-    if( ( ( c >> 1 ) & 0x01 ) && res_t >= f_t[1] && f_t[1] < ray.m_fMax && f_t[1] > ray.m_fMin ){
+    if( ( ( c >> 1 ) & 0x01 ) && res_t >= f_t[1]  && f_t[1] < ray.m_fMax && f_t[1] > ray.m_fMin ){
         res_i = 1;
         res_t = f_t[1];
     }
-    if( ( ( c >> 2 ) & 0x01 ) && res_t >= f_t[2] && f_t[2] < ray.m_fMax && f_t[2] > ray.m_fMin ){
+    if( ( ( c >> 2 ) & 0x01 ) && res_t >= f_t[2]  && f_t[2] < ray.m_fMax && f_t[2] > ray.m_fMin ){
         res_i = 2;
         res_t = f_t[2];
     }
-    if( ( ( c >> 3 ) & 0x01 ) && res_t >= f_t[3] && f_t[3] < ray.m_fMax && f_t[3] > ray.m_fMin ){
+    if( ( ( c >> 3 ) & 0x01 ) && res_t >= f_t[3]  && f_t[3] < ray.m_fMax && f_t[3] > ray.m_fMin ){
         res_i = 3;
         res_t = f_t[3];
     }
@@ -279,9 +279,6 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     const auto v = f_e2[res_i] * f_rcp_det[res_i];
     const auto w = 1 - u - v;
 
-    // store the intersection
-    ret->intersect = ray(res_t);
-
     const auto& mem = triangle->GetMeshVisual()->m_memory;
     const auto id0 = triangle->GetIndices().m_id[0];
     const auto id1 = triangle->GetIndices().m_id[1];
@@ -290,6 +287,11 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     const auto& mv0 = mem->m_vertices[id0];
     const auto& mv1 = mem->m_vertices[id1];
     const auto& mv2 = mem->m_vertices[id2];
+
+    // Somehow ray(res_t) will expose self shadow, need further investigation.
+    // It is clear that the res_t is slightly higher than non-SSE version for some unknown reason.
+    ret->intersect = mv0.m_position * w + mv1.m_position * u + mv2.m_position * v;
+    ret->t = Dot( ret->intersect - ray.m_Ori , ray.m_Dir ) ; //res_t;
 
     // get three vertexes
     ret->gnormal = Normalize(Cross( ( mv2.m_position - mv0.m_position ) , ( mv1.m_position - mv0.m_position ) ));
@@ -300,8 +302,7 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     const auto uv = w * mv0.m_texCoord + u * mv1.m_texCoord + v * mv2.m_texCoord;
     ret->u = uv.x;
     ret->v = uv.y;
-    ret->t = res_t;
-
+    
 	ret->primitive = tri4.m_ori_pri[res_i];
 
     return true;
