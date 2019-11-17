@@ -58,7 +58,7 @@ After compiling SORT successfully, it is nessesary to install Blender plugin to 
 I'm currently a graphics programmer at Naughty Dog. Prior to joining Naughty Dog, I used to at Ubisoft Singapore and NVIDIA Shanghai before.
 This is a side project that I have been maintaining for several years.
 
-For those who wants to connect, for whatever reason, please contact me through the following media
+To those who wants to connect, for whatever reason, please contact me through the following media
 * [Linkedin](https://www.linkedin.com/in/caojiayin/)
 * [Twitter](https://twitter.com/Jiayin_Cao)
 * [Email](mailto:caojiayin1985@gmail.com)
