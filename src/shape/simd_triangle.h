@@ -29,7 +29,7 @@
 #ifdef  SSE_ENABLED
 
 static SORT_FORCEINLINE int __bsf(int v){
-#ifdef SORT_WINDOWS
+#ifdef SORT_IN_WINDOWS
 	unsigned long r = 0;
 	_BitScanForward(&r, v);
     return r;
