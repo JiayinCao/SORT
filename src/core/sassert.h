@@ -21,6 +21,8 @@
 #include "core/log.h"
 #include <assert.h>
 
+#ifdef SORT_DEBUG
+
 #define sAssert(expr,type) \
     if( UNLIKELY(false == (bool)(expr)) ) {\
         slog( CRITICAL , type , "Crashed!" );\
@@ -32,3 +34,10 @@
         slog( CRITICAL , type , __VA_ARGS__ );\
         abort();\
     }
+    
+#else
+
+#define sAssert(expr,type)
+#define sAssertMsg(expr, type, ... )
+
+#endif
