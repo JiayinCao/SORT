@@ -43,6 +43,8 @@ SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Tested per Ra
 
 static SORT_FORCEINLINE BBox calcBoundingBox(const Qbvh_Node* const node , const Bvh_Primitive* const primitives ) {
 	BBox node_bbox;
+	if (!node)
+		return node_bbox;
 	for (auto i = node->pri_offset; node && i < node->pri_offset + node->pri_cnt; i++)
 		node_bbox.Union(primitives[i].GetBBox());
 	return node_bbox;
