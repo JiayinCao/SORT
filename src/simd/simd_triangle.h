@@ -29,16 +29,6 @@
 
 #ifdef  SSE_ENABLED
 
-static SORT_FORCEINLINE int __bsf(int v){
-#ifdef SORT_IN_WINDOWS
-	unsigned long r = 0;
-	_BitScanForward(&r, v);
-    return r;
-#else
-    return __builtin_ctz(v);
-#endif
-}
-
 //! @brief  Triangle4 is more of a simplified resolved data structure holds only bare bone information of triangle.
 /**
  * Triangle4 is used in QBVH to accelerate ray triangle intersection using SSE. Its sole purpose is to accelerate 
@@ -269,7 +259,7 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 	
 	const auto res_t = sse_data(t, res_i);
 	ret->intersect = ray(sse_data( t , res_i ));
-	ret->t = t.m128_f32[res_i];
+	ret->t = res_t;
 
     // get three vertexes
     ret->gnormal = Normalize(Cross( ( mv2.m_position - mv0.m_position ) , ( mv1.m_position - mv0.m_position ) ));
