@@ -211,7 +211,8 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     if( 0 == c )
         return false;
 
-    const __m128 rcp_det = _mm_rcp_ps( det );
+	// DO NOT USE _mm_rcp_det which has a precision loss that will introduce problems!
+	const __m128 rcp_det = _mm_div_ps(ones, det);
 
     p0_y = _mm_mul_ps( p0_y , ray.m_sse_scale_y );
     p1_y = _mm_mul_ps( p1_y , ray.m_sse_scale_y );
@@ -299,10 +300,8 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     const auto& mv1 = mem->m_vertices[id1];
     const auto& mv2 = mem->m_vertices[id2];
 
-    // Somehow ray(res_t) will expose self shadow, need further investigation.
-    // It is clear that the res_t is slightly higher than non-SSE version for some unknown reason.
-    ret->intersect = mv0.m_position * w + mv1.m_position * u + mv2.m_position * v;
-    ret->t = Dot( ret->intersect - ray.m_Ori , ray.m_Dir ) ; //res_t;
+	ret->intersect = ray(f_t[res_i]);
+	ret->t = f_t[res_i];
 
     // get three vertexes
     ret->gnormal = Normalize(Cross( ( mv2.m_position - mv0.m_position ) , ( mv1.m_position - mv0.m_position ) ));

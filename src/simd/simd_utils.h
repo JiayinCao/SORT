@@ -25,6 +25,7 @@
 
 static const __m128 zeros       = _mm_set_ps1( 0.0f );
 static const __m128 infinites   = _mm_set_ps1( FLT_MAX );
-static const __m128 neg_ones   = _mm_set_ps1( -1.0f );
+static const __m128 neg_ones	= _mm_set_ps1( -1.0f );
+static const __m128 ones		= _mm_set_ps1(1.0f);
 
 #endif
