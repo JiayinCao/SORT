@@ -81,9 +81,12 @@ public:
     mutable __m128  m_rcp_dir_x;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
     mutable __m128  m_rcp_dir_y;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
     mutable __m128  m_rcp_dir_z;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
-	mutable __m128	m_ori_x;		/**< Ori.x , this is used in ray Triangle intersection. */
-	mutable __m128	m_ori_y;		/**< Ori.y , this is used in ray Triangle intersection. */
-	mutable __m128	m_ori_z;		/**< Ori.z , this is used in ray Triangle intersection. */
+	mutable __m128	m_ori_x;		/**< Ori.x , this is used in ray Triangle&Line intersection. */
+	mutable __m128	m_ori_y;		/**< Ori.y , this is used in ray Triangle&Line intersection. */
+	mutable __m128	m_ori_z;		/**< Ori.z , this is used in ray Triangle&Line intersection. */
+    mutable __m128  m_dir_x;        /**< Dir.x , this is used in ray Line intersection. */
+    mutable __m128  m_dir_y;        /**< Dir.x , this is used in ray Line intersection. */
+    mutable __m128  m_dir_z;        /**< Dir.x , this is used in ray Line intersection. */
 	mutable __m128	m_sse_scale_x;	/**< Scaling along each axis in local coordinate. */
 	mutable __m128	m_sse_scale_y;	/**< Scaling along each axis in local coordinate. */
 	mutable __m128  m_sse_scale_z;	/**< Scaling along each axis in local coordinate. */

@@ -26,10 +26,7 @@
 #include "simd_utils.h"
 
 #ifdef SSE_ENABLED
-    #include <nmmintrin.h>
-#endif
-
-#ifdef  SSE_ENABLED
+#include <nmmintrin.h>
 
 //! @brief  Triangle4 is more of a simplified resolved data structure holds only bare bone information of triangle.
 /**
@@ -52,7 +49,6 @@ struct Triangle4{
     //! @brief  Push a triangle in the data structure.
     //!
 	//! @param	pri		The original primitive.
-    //! @param  tri     The triangle to be pushed in Triangle4.
     //! @return         Whether the data structure is full.
     bool PushTriangle( const Primitive* primitive ){
 		const Triangle* triangle = dynamic_cast<const Triangle*>(primitive->GetShape());
@@ -84,12 +80,12 @@ struct Triangle4{
         float	mask[4] = { 1.0f , 1.0f , 1.0f , 1.0f };
         float   p0_x[4] , p0_y[4] , p0_z[4] , p1_x[4] , p1_y[4] , p1_z[4] , p2_x[4] , p2_y[4] , p2_z[4];
         for( auto i = 0 ; i < 4 && m_ori_pri[i] ; ++i ){
-            const Triangle* triangle = m_ori_tri[i];
+            const auto triangle = m_ori_tri[i];
 
-            const auto& mem = triangle->GetMeshVisual()->m_memory;
-            const auto id0 = triangle->GetIndices().m_id[0];
-            const auto id1 = triangle->GetIndices().m_id[1];
-            const auto id2 = triangle->GetIndices().m_id[2];
+            const auto& mem = triangle->m_meshVisual->m_memory;
+            const auto id0 = triangle->m_index.m_id[0];
+            const auto id1 = triangle->m_index.m_id[1];
+            const auto id2 = triangle->m_index.m_id[2];
 
             const auto& mv0 = mem->m_vertices[id0];
             const auto& mv1 = mem->m_vertices[id1];
@@ -197,8 +193,7 @@ SORT_FORCEINLINE bool intersectTriangle4Inner(const Ray& ray, const Triangle4& t
 	if (0 == c)
 		return false;
 
-	// DO NOT USE _mm_rcp_det which has a precision loss that will introduce problems!
-	const __m128 rcp_det = _mm_div_ps(ones, det);
+	const __m128 rcp_det = _mm_rcpa_ps(det);
 
 	p0_y = _mm_mul_ps(p0_y, ray.m_sse_scale_y);
 	p1_y = _mm_mul_ps(p1_y, ray.m_sse_scale_y);
@@ -249,10 +244,10 @@ SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, c
 	const auto v = sse_data(v4, id);
 	const auto w = 1 - u - v;
 
-	const auto& mem = triangle->GetMeshVisual()->m_memory;
-	const auto id0 = triangle->GetIndices().m_id[0];
-	const auto id1 = triangle->GetIndices().m_id[1];
-	const auto id2 = triangle->GetIndices().m_id[2];
+	const auto& mem = triangle->m_meshVisual->m_memory;
+	const auto id0 = triangle->m_index.m_id[0];
+	const auto id1 = triangle->m_index.m_id[1];
+	const auto id2 = triangle->m_index.m_id[2];
 
 	const auto& mv0 = mem->m_vertices[id0];
 	const auto& mv1 = mem->m_vertices[id1];

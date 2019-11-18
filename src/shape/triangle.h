@@ -23,6 +23,10 @@
 class   MeshVisual;
 struct  MeshFaceIndex;
 
+#ifdef SSE_ENABLED
+struct Triangle4;
+#endif
+
 //! @brief Triangle class defines the basic behavior of triangle.
 /**
  * Triangle is the most common shape that is used in a ray tracer.
@@ -100,20 +104,6 @@ public:
     //! @return     Surface area of the shape.
     float           SurfaceArea() const override;
 
-    //! @brief      Get the mesh visual of this primitive.
-    //!
-    //! @return     MeshVisual that owns this triangle.
-    SORT_FORCEINLINE const MeshVisual*      GetMeshVisual() const{
-        return m_meshVisual;
-    }
-
-    //! @brief      Get face indices.
-    //!
-    //! @return     Face indices of the triangle.
-    SORT_FORCEINLINE const MeshFaceIndex&    GetIndices() const{
-        return m_index;
-    }
-
     //! @brief      Get the type of the shape
     //!
     //! @return     The type of the shape.
@@ -124,4 +114,9 @@ public:
 private:
     const MeshVisual*        m_meshVisual = nullptr;     /**< Visual holding the vertex buffer. */
     const MeshFaceIndex&     m_index;                    /**< Index buffer points to the index of this triangle. */
+
+#ifdef SSE_ENABLED
+    friend struct Triangle4;
+    friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const __m128& t4, const __m128& u4, const __m128& v4, const int id, Intersection* intersection);
+#endif
 };

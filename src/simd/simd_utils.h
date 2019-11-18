@@ -46,4 +46,13 @@ static SORT_FORCEINLINE int __bsf(int v) {
 #endif
 }
 
+static SORT_FORCEINLINE __m128 _mm_sqr_ps( const __m128& m ){
+    return _mm_mul_ps( m , m );
+}
+
+// accurate rcp
+static SORT_FORCEINLINE __m128 _mm_rcpa_ps( const __m128& m ){
+    return _mm_div_ps(ones, m);
+}
+
 #endif

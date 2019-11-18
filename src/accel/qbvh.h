@@ -22,6 +22,7 @@
 #include "core/primitive.h"
 #include "simd/simd_bbox.h"
 #include "simd/simd_triangle.h"
+#include "simd/simd_line.h"
 
 #define QBVH_CHILD_CNT		4
 
@@ -41,6 +42,7 @@ struct Qbvh_Node {
 
 #if SSE_ENABLED
     std::vector<Triangle4>            tri_list;
+    std::vector<Line4>                line_list;
     std::vector<const Primitive*>     other_list;
 #endif
 

@@ -19,6 +19,10 @@
 
 #include "shape.h"
 
+#ifdef SSE_ENABLED
+struct Line4;
+#endif
+
 //! @brief  Line is a common type for hair or fur rendering.
 /**
  * Althgouh being called line, this shape is essentially open cylinder. Other choose is to represent line
@@ -135,9 +139,9 @@ private:
     /**< Point at the other side of the line. */
     const Point     m_p1;
     /**< Point at the end of the line in global space. */
-    Point       m_gp0;
+    Point           m_gp0;
     /**< Point at the other side of the line in global space. */
-    Point       m_gp1;
+    Point           m_gp1;
     /**< Half width (radius) of the line at 'm_p0', it should always be positive. */
     const float     m_w0;
     /**< Half width (radius) of the line at 'm_p1', it should always be positive. */
@@ -153,4 +157,8 @@ private:
     /**< Transformation from world space to line space, where the line points from origin upward,
      * there is no scaling in the matrix. */
     Transform       m_world2Line;
+
+#ifdef SSE_ENABLED
+    friend struct Line4;
+#endif
 };

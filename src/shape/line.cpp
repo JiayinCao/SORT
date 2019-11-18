@@ -33,12 +33,12 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
     const auto discriminant = b * b - a * c;
     if( discriminant <= 0 )
         return false;
-    const auto sqrtDisc = sqrt( discriminant );
+    const auto sqrt_dist = sqrt( discriminant );
 
-    float t = ( -b - sqrtDisc ) / a;
+    float t = ( -b - sqrt_dist ) / a;
     auto inter = ray(t);
     if( inter.y > m_length || inter.y < 0.0f ){
-        t = ( -b + sqrtDisc ) / a;
+        t = ( -b + sqrt_dist ) / a;
         inter = ray(t);
         if( inter.y > m_length || inter.y < 0.0f )
             return false;

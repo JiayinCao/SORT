@@ -91,6 +91,10 @@ void Ray::Prepare() const{
 	m_ori_y = _mm_set_ps1( m_Ori.y );
 	m_ori_z = _mm_set_ps1( m_Ori.z );
 
+    m_dir_x = _mm_set_ps1( m_Dir.x );
+    m_dir_y = _mm_set_ps1( m_Dir.y );
+    m_dir_z = _mm_set_ps1( m_Dir.z );
+
 	m_sse_scale_x = _mm_set_ps1( m_scale_x );
 	m_sse_scale_y = _mm_set_ps1( m_scale_y );
 	m_sse_scale_z = _mm_set_ps1( m_scale_z );

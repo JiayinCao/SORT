@@ -159,16 +159,25 @@ void Qbvh::makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end , uns
 
 #ifdef SSE_ENABLED
     Triangle4   tri4;
+    Line4       line4;
     const auto _start = node->pri_offset;
     const auto _end = _start + node->pri_cnt;
     for(auto i = _start ; i < _end ; i++ ){
         const Primitive* primitive = m_bvhpri[i].primitive;
-        if( primitive->GetShapeType() == SHAPE_TRIANGLE ){
+        const auto shape_type = primitive->GetShapeType();
+        if( SHAPE_TRIANGLE == shape_type ){
             if( tri4.PushTriangle( primitive ) ){
                 if( tri4.PackData() ){
 					node->tri_list.push_back( tri4 );
 					tri4.Reset();
 				}
+            }
+        }else if( SHAPE_LINE == shape_type ){
+            if( line4.PushLine( primitive ) ){
+                if( line4.PackData() ){
+                    node->line_list.push_back( line4 );
+                    line4.Reset();
+                }
             }
         }else{
             // line will also be specially treated in the future.
@@ -177,6 +186,8 @@ void Qbvh::makeLeaf( Qbvh_Node* const node , unsigned start , unsigned end , uns
     }
 	if (tri4.PackData())
 		node->tri_list.push_back(tri4);
+    if (line4.PackData())
+        node->line_list.push_back(line4);
 #endif
 
     SORT_STATS(++sQbvhLeafNodeCount);
@@ -242,6 +253,13 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             auto found = false;
             for( auto i = 0 ; i < node->tri_list.size() ; ++i ){
                 found |= intersectTriangle4( ray , node->tri_list[i] , intersect );
+                if( intersect == nullptr && found ){
+                    SORT_STATS(sIntersectionTest+= i * 4);
+                    return true;
+                }
+            }
+            for( auto i = 0 ; i < node->line_list.size() ; ++i ){
+                found |= intersectLine4( ray , node->line_list[i] , intersect );
                 if( intersect == nullptr && found ){
                     SORT_STATS(sIntersectionTest+= i * 4);
                     return true;
