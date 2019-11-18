@@ -45,6 +45,14 @@ struct BSSRDFIntersections{
 
     // following field is only used for spatial data structure to evaluate intersections
     float                   maxt = FLT_MAX;
+
+	//! @brief	Resoved the maximum depth of all intersections.
+	void	ResolveMaxDepth() {
+		maxt = 0.0f;
+		maxt = std::max(intersections[0]->intersection.t, intersections[1]->intersection.t);
+		maxt = std::max(maxt, intersections[2]->intersection.t);
+		maxt = std::max(maxt, intersections[3]->intersection.t);
+	}
 };
 
 //! @brief BSDF implementation.

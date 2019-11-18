@@ -37,7 +37,7 @@
     
 #else
 
-#define sAssert(expr,type)
-#define sAssertMsg(expr, type, ... )
+#define sAssert(expr,type)				{}
+#define sAssertMsg(expr, type, ... )	{}
 
 #endif

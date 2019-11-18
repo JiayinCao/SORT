@@ -356,6 +356,42 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 		if (intersect.maxt < fmin)
 			continue;
 
+#ifdef SSE_ENABLED
+		if (0 == node->child_cnt) {
+			// Note, only triangle shape support SSS here. This is the only big difference between SSE and non-SSE version implementation.
+			// There are only two major primitives in SORT, line and triangle.
+			// Line is usually used for hair, which has its own hair shader.
+			// Triangle is the only major primitive that has SSS.
+			for ( const auto& tri4 : node->tri_list )
+				intersectTriangle4(ray, tri4, matID, intersect);
+			
+			SORT_STATS(sIntersectionTest += node->pri_cnt);
+			continue;
+		}
+
+		__m128 sse_f_min;
+        IntersectBBox4( ray , node->bbox , sse_f_min );
+
+        alignas(16) float f_min[4];
+        _mm_store_ps(f_min , sse_f_min);
+
+        for( auto i = 0 ; i < node->child_cnt ; ++i ){
+            auto k = -1;
+            auto maxDist = -1.0f;
+            for( int j = 0 ; j < node->child_cnt ; ++j ){
+                if( f_min[j] > maxDist ){
+                    maxDist = f_min[j];
+                    k = j;
+                }
+            }
+
+			if (k == -1)
+				break;
+
+			f_min[k] = -1.0f;
+			bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
+		}
+#else
 		// check if it is a leaf node, to be optimized by SSE/AVX
 		if (0 == node->child_cnt) {
 			auto _start = node->pri_offset;
@@ -388,9 +424,7 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 						if (picked_i >= 0)
 							intersect.intersections[picked_i]->intersection = intersection;
 
-						intersect.maxt = 0.0f;
-						for (auto i = 0u; i < intersect.cnt; ++i)
-							intersect.maxt = std::max(intersect.maxt, intersect.intersections[i]->intersection.t);
+						intersect.ResolveMaxDepth();
 					}
 				}
 			}
@@ -398,7 +432,6 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 			continue;
 		}
 
-#ifndef SSE_ENABLED
 		float f_min[QBVH_CHILD_CNT] = { FLT_MAX };
 		for (int i = 0; i < node->child_cnt; ++i)
 			f_min[i] = Intersect(ray, node->bbox[i]);
@@ -412,29 +445,6 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 					k = j;
 				}
 			}
-
-			if (k == -1)
-				break;
-
-			f_min[k] = -1.0f;
-			bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
-		}
-#else
-		__m128 sse_f_min;
-        IntersectBBox4( ray , node->bbox , sse_f_min );
-
-        alignas(16) float f_min[4];
-        _mm_store_ps(f_min , sse_f_min);
-
-        for( auto i = 0 ; i < node->child_cnt ; ++i ){
-            auto k = -1;
-            auto maxDist = -1.0f;
-            for( int j = 0 ; j < node->child_cnt ; ++j ){
-                if( f_min[j] > maxDist ){
-                    maxDist = f_min[j];
-                    k = j;
-                }
-            }
 
 			if (k == -1)
 				break;

@@ -18,9 +18,11 @@
 #pragma once
 
 #include "core/define.h"
+#include "core/memory.h"
 #include "math/ray.h"
 #include "math/intersection.h"
 #include "math/point.h"
+#include "scatteringevent/bssrdf/bssrdf.h"
 #include "simd_utils.h"
 
 #ifdef SSE_ENABLED
@@ -129,27 +131,21 @@ struct Triangle4{
     }
 };
 
-//! @brief  With the power of SSE, this utility function helps intersect a ray with four triangles at the cost of one.
+//! @brief	Core algorithm of ray triangle intersection.
 //!
-//! @param  ray     Ray to be tested against.
-//! @param  tri4    Data structure holds four triangles.
-//! @param  ret     The result of intersection.
-SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4 , Intersection* ret ){
-#if 0
-    // This is a reference implementation for debugging purpose.
-	bool flag = false;
-	for( int i = 0 ; i < 4 ; ++i ){
-		if( tri4.m_ori_pri[i] == nullptr )
-			break;
-		flag |= tri4.m_ori_pri[i]->GetIntersect( ray , ret );
-	}
-	return flag;
-#else
-    __m128 mask = tri4.m_mask;
+//! @param	ray			The ray to be tested.
+//! @param	tri4		4 Triangles to be tested.
+//! @param	quick_quit	Whether to quit as long as an intersection is found, this is usually true for shadow ray.
+//! @param	maxt		The maximum distance we are interested. Any intersection behind it is ignored.
+//! @param	t4			Output, the distances from ray origin to triangles. It will be FLT_MAX if there is no intersection.
+//! @param	u4			Blending factor.
+//! @param	v4			Blending factor.
+SORT_FORCEINLINE bool intersectTriangle4Inner(const Ray& ray, const Triangle4& tri4, const bool quick_quit, const float maxt, __m128& t4, __m128& u4, __m128& v4, __m128& mask) {
+	mask = tri4.m_mask;
 
 	// step 0 : translate the vertices to ray coordinate system
-	__m128 p0[3] , p1[3] , p2[3];
-    p0[0] = _mm_sub_ps(tri4.m_p0_x, ray.m_ori_x);
+	__m128 p0[3], p1[3], p2[3];
+	p0[0] = _mm_sub_ps(tri4.m_p0_x, ray.m_ori_x);
 	p0[1] = _mm_sub_ps(tri4.m_p0_y, ray.m_ori_y);
 	p0[2] = _mm_sub_ps(tri4.m_p0_z, ray.m_ori_z);
 
@@ -184,98 +180,172 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 	p2_z = _mm_add_ps(p2_z, _mm_mul_ps(p2_y, ray.m_sse_scale_z));
 
 	// compute the edge functions
-	const __m128 e0 = _mm_sub_ps( _mm_mul_ps( p1_x , p2_z ) , _mm_mul_ps( p1_z , p2_x ) );
-	const __m128 e1 = _mm_sub_ps( _mm_mul_ps( p2_x , p0_z ) , _mm_mul_ps( p2_z , p0_x ) );
-	const __m128 e2 = _mm_sub_ps( _mm_mul_ps( p0_x , p1_z ) , _mm_mul_ps( p0_z , p1_x ) );
+	const __m128 e0 = _mm_sub_ps(_mm_mul_ps(p1_x, p2_z), _mm_mul_ps(p1_z, p2_x));
+	const __m128 e1 = _mm_sub_ps(_mm_mul_ps(p2_x, p0_z), _mm_mul_ps(p2_z, p0_x));
+	const __m128 e2 = _mm_sub_ps(_mm_mul_ps(p0_x, p1_z), _mm_mul_ps(p0_z, p1_x));
 
-    const __m128 c0 = _mm_and_ps( _mm_and_ps( _mm_cmpge_ps( e0 , zeros ) , _mm_cmpge_ps( e1 , zeros ) ) , _mm_cmpge_ps( e2 , zeros ) );
-    const __m128 c1 = _mm_and_ps( _mm_and_ps( _mm_cmple_ps( e0 , zeros ) , _mm_cmple_ps( e1 , zeros ) ) , _mm_cmple_ps( e2 , zeros ) );
-    mask = _mm_and_ps( mask , _mm_or_ps( c0 , c1 ) );
-    auto c = _mm_movemask_ps( mask );
-    if( 0 == c )
-        return false;
+	const __m128 c0 = _mm_and_ps(_mm_and_ps(_mm_cmpge_ps(e0, zeros), _mm_cmpge_ps(e1, zeros)), _mm_cmpge_ps(e2, zeros));
+	const __m128 c1 = _mm_and_ps(_mm_and_ps(_mm_cmple_ps(e0, zeros), _mm_cmple_ps(e1, zeros)), _mm_cmple_ps(e2, zeros));
+	mask = _mm_and_ps(mask, _mm_or_ps(c0, c1));
+	auto c = _mm_movemask_ps(mask);
+	if (0 == c)
+		return false;
 
-    const __m128 det = _mm_add_ps( e0 , _mm_add_ps( e1 , e2 ) );
-    mask = _mm_and_ps( mask , _mm_cmpneq_ps( det , zeros ) );
-    c = _mm_movemask_ps( mask );
-    if( 0 == c )
-        return false;
+	const __m128 det = _mm_add_ps(e0, _mm_add_ps(e1, e2));
+	mask = _mm_and_ps(mask, _mm_cmpneq_ps(det, zeros));
+	c = _mm_movemask_ps(mask);
+	if (0 == c)
+		return false;
 
 	// DO NOT USE _mm_rcp_det which has a precision loss that will introduce problems!
 	const __m128 rcp_det = _mm_div_ps(ones, det);
 
-    p0_y = _mm_mul_ps( p0_y , ray.m_sse_scale_y );
-    p1_y = _mm_mul_ps( p1_y , ray.m_sse_scale_y );
-    p2_y = _mm_mul_ps( p2_y , ray.m_sse_scale_y );
+	p0_y = _mm_mul_ps(p0_y, ray.m_sse_scale_y);
+	p1_y = _mm_mul_ps(p1_y, ray.m_sse_scale_y);
+	p2_y = _mm_mul_ps(p2_y, ray.m_sse_scale_y);
 
-    __m128 t = _mm_mul_ps( e0 , p0_y );
-    t = _mm_add_ps( t , _mm_mul_ps( e1 , p1_y ) );
-    t = _mm_add_ps( t , _mm_mul_ps( e2 , p2_y ) );
-    t = _mm_mul_ps( t , rcp_det );
+	t4 = _mm_mul_ps(e0, p0_y);
+	t4 = _mm_add_ps(t4, _mm_mul_ps(e1, p1_y));
+	t4 = _mm_add_ps(t4, _mm_mul_ps(e2, p2_y));
+	t4 = _mm_mul_ps(t4, rcp_det);
 
-    const __m128 ray_min_t = _mm_set_ps1( ray.m_fMin );
-    const __m128 ray_max_t = _mm_set_ps1( ray.m_fMax );
-    mask = _mm_and_ps( _mm_and_ps( mask , _mm_cmpgt_ps( t , ray_min_t ) ) , _mm_cmple_ps( t , ray_max_t ) );
-    c = _mm_movemask_ps( mask );
-    if( 0 == c )
-        return false;
-    
-    if( nullptr == ret )
-        return true;
+	const __m128 ray_min_t = _mm_set_ps1(ray.m_fMin);
+	const __m128 ray_max_t = _mm_set_ps1(ray.m_fMax);
+	mask = _mm_and_ps(_mm_and_ps(mask, _mm_cmpgt_ps(t4, ray_min_t)), _mm_cmple_ps(t4, ray_max_t));
+	c = _mm_movemask_ps(mask);
+	if (0 == c)
+		return false;
 
-    mask = _mm_and_ps( _mm_and_ps( mask , _mm_cmpgt_ps( t , zeros ) ) , _mm_cmplt_ps( t , _mm_set_ps1( ret->t ) ) );
-    c = _mm_movemask_ps( mask );
-    if( 0 == c )
-        return false;
-    
-    // mask out the invalid values
-    t = _mm_or_ps( _mm_and_ps( mask , t ) , _mm_andnot_ps( mask , infinites ) );
+	if (quick_quit)
+		return true;
+
+	mask = _mm_and_ps(_mm_and_ps(mask, _mm_cmpgt_ps(t4, zeros)), _mm_cmplt_ps(t4, _mm_set_ps1(maxt)));
+	c = _mm_movemask_ps(mask);
+	if (0 == c)
+		return false;
+
+	// mask out the invalid values
+	t4 = _mm_or_ps(_mm_and_ps(mask, t4), _mm_andnot_ps(mask, infinites));
+
+	u4 = _mm_mul_ps(e1, rcp_det);
+	v4 = _mm_mul_ps(e2, rcp_det);
+
+	return true;
+}
+
+//! @brief	A helper function setup the result of intersection.
+//!
+//! @param	tri4          The triangle4 data structure that has four triangles.
+//! @param  ray           Ray that we used to tested.
+//! @param	t4	          Output, the distances from ray origin to triangles. It will be FLT_MAX if there is no intersection.
+//! @param	u4		      Blending factor.
+//! @param	v4		      Blending factor.
+//! @param  id            Index of the intersection of our interest.
+//! @param  intersection  The pointer to the result to be filled. It can't be nullptr.
+SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const __m128& t4, const __m128& u4, const __m128& v4, const int id, Intersection* intersection) {
+	const auto* triangle = tri4.m_ori_tri[id];
+
+	const auto u = sse_data(u4, id);
+	const auto v = sse_data(v4, id);
+	const auto w = 1 - u - v;
+
+	const auto& mem = triangle->GetMeshVisual()->m_memory;
+	const auto id0 = triangle->GetIndices().m_id[0];
+	const auto id1 = triangle->GetIndices().m_id[1];
+	const auto id2 = triangle->GetIndices().m_id[2];
+
+	const auto& mv0 = mem->m_vertices[id0];
+	const auto& mv1 = mem->m_vertices[id1];
+	const auto& mv2 = mem->m_vertices[id2];
+
+	const auto res_t = sse_data(t4, id);
+	intersection->intersect = ray(sse_data(t4, id));
+	intersection->t = res_t;
+
+	intersection->gnormal = Normalize(Cross((mv2.m_position - mv0.m_position), (mv1.m_position - mv0.m_position)));
+	intersection->normal = (w * mv0.m_normal + u * mv1.m_normal + v * mv2.m_normal).Normalize();
+	intersection->tangent = (w * mv0.m_tangent + u * mv1.m_tangent + v * mv2.m_tangent).Normalize();
+	intersection->view = -ray.m_Dir;
+
+	const auto uv = w * mv0.m_texCoord + u * mv1.m_texCoord + v * mv2.m_texCoord;
+	intersection->u = uv.x;
+	intersection->v = uv.y;
+
+	intersection->primitive = tri4.m_ori_pri[id];
+}
+
+//! @brief  With the power of SSE, this utility function helps intersect a ray with four triangles at the cost of one.
+//!
+//! @param  ray     Ray to be tested against.
+//! @param  tri4    Data structure holds four triangles.
+//! @param  ret     The result of intersection.
+//! @return         Whether there is any intersection that is valid.
+SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4 , Intersection* ret ){
+	__m128	u4, v4, t4, mask;
+	const auto quick_quit = (nullptr == ret);
+	const auto maxt = ret ? ret->t : FLT_MAX;
+	const auto intersected = intersectTriangle4Inner(ray, tri4, quick_quit, maxt, t4, u4, v4, mask);
+	if (!intersected)
+		return false;
+	if (intersected && quick_quit)
+		return true;
 
     // find the closest result
-    __m128 t0 = _mm_min_ps( t , _mm_shuffle_ps( t , t , _MM_SHUFFLE(2, 3, 0, 1) ) );
+    __m128 t0 = _mm_min_ps( t4 , _mm_shuffle_ps( t4 , t4 , _MM_SHUFFLE(2, 3, 0, 1) ) );
 	t0 = _mm_min_ps( t0 , _mm_shuffle_ps(t0, t0, _MM_SHUFFLE(1, 0, 3, 2) ) );
 
     // get the index of the closest one
-    const auto resolved_mask = _mm_movemask_ps( _mm_cmpeq_ps( t , t0 ) );
+    const auto resolved_mask = _mm_movemask_ps( _mm_cmpeq_ps( t4 , t0 ) );
 	const auto res_i = __bsf(resolved_mask);
 
     sAssert( resolved_mask > 0 && resolved_mask < 16 , SPATIAL_ACCELERATOR );
     sAssert( res_i >= 0 && res_i < 4 , SPATIAL_ACCELERATOR );
     
-    const auto* triangle = tri4.m_ori_tri[res_i];
-
-    const auto u = sse_data( e1 , res_i ) * sse_data( rcp_det , res_i );
-    const auto v = sse_data( e2 , res_i ) * sse_data( rcp_det , res_i );
-    const auto w = 1 - u - v;
-
-    const auto& mem = triangle->GetMeshVisual()->m_memory;
-    const auto id0 = triangle->GetIndices().m_id[0];
-    const auto id1 = triangle->GetIndices().m_id[1];
-    const auto id2 = triangle->GetIndices().m_id[2];
-
-    const auto& mv0 = mem->m_vertices[id0];
-    const auto& mv1 = mem->m_vertices[id1];
-    const auto& mv2 = mem->m_vertices[id2];
-	
-	const auto res_t = sse_data(t, res_i);
-	ret->intersect = ray(sse_data( t , res_i ));
-	ret->t = res_t;
-
-    // get three vertexes
-    ret->gnormal = Normalize(Cross( ( mv2.m_position - mv0.m_position ) , ( mv1.m_position - mv0.m_position ) ));
-    ret->normal = ( w * mv0.m_normal + u * mv1.m_normal + v * mv2.m_normal).Normalize();
-    ret->tangent = ( w * mv0.m_tangent + u * mv1.m_tangent + v * mv2.m_tangent).Normalize();
-    ret->view = -ray.m_Dir;
-
-    const auto uv = w * mv0.m_texCoord + u * mv1.m_texCoord + v * mv2.m_texCoord;
-    ret->u = uv.x;
-    ret->v = uv.y;
-    
-	ret->primitive = tri4.m_ori_pri[res_i];
+	setupIntersection(tri4, ray, t4, u4, v4, res_i, ret);
 
     return true;
+}
 
-#endif
+//! @brief  Unlike the above function, this helper function will populate all results in the BSSRDFIntersection data structure.
+//!         It is for BSSRDF intersection tests.
+//!
+//! @param  ray     Ray to be tested against.
+//! @param  tri4    Data structure holds four triangles.
+//! @param  ret     The result of intersection.
+SORT_FORCEINLINE void intersectTriangle4(const Ray& ray, const Triangle4& tri4, const StringID matID , BSSRDFIntersections& intersections) {
+	__m128	u4, v4, t4, mask;
+	const auto maxt = intersections.maxt;
+	const auto intersected = intersectTriangle4Inner(ray, tri4, false, maxt, t4, u4, v4, mask);
+	if (!intersected)
+		return;
+
+	auto resolved_mask = _mm_movemask_ps(mask);
+	sAssert(resolved_mask > 0 && resolved_mask < 16, SPATIAL_ACCELERATOR);
+
+	// A better approach would be to sort the intersection before populating it into the results to avoid some unnecessary setup.
+	// However, the overhead to sort the result may out-weight the gain we expect.
+	while (resolved_mask) {
+		const auto res_i = __bsf(resolved_mask);
+		resolved_mask = resolved_mask & (resolved_mask - 1);
+
+		if (intersections.cnt < TOTAL_SSS_INTERSECTION_CNT) {
+			intersections.intersections[intersections.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+			setupIntersection(tri4, ray, t4, u4, v4, res_i, &intersections.intersections[intersections.cnt++]->intersection);
+		} else {
+			auto picked_i = -1;
+			auto t = 0.0f;
+			for (auto i = 0; i < TOTAL_SSS_INTERSECTION_CNT; ++i) {
+				if (t < intersections.intersections[i]->intersection.t) {
+					t = intersections.intersections[i]->intersection.t;
+					picked_i = i;
+				}
+			}
+			if( picked_i >= 0 )
+				setupIntersection(tri4, ray, t4, u4, v4, res_i, &intersections.intersections[picked_i]->intersection);
+
+			intersections.ResolveMaxDepth();
+		}
+	}
 }
 
 #endif
