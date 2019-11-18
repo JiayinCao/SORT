@@ -160,7 +160,7 @@ TEST(BXDF, DISABLED_Disney) {
     checkAll(&disney);
 }
 
-TEST(BXDF, MicroFacetReflection) {
+TEST(BXDF, DISABLED_MicroFacetReflection) {
     const FresnelConductor fresnel( 1.0f , 1.5f );
     const GGX ggx(0.5f, 0.5f);
     MicroFacetReflection mf( WHITE_SPECTRUM , &fresnel , &ggx , FULL_WEIGHT , DIR_UP );
