@@ -238,14 +238,6 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     if( 0 == c )
         return false;
     
-    // resolve the result, it could be optimized with SIMD later.
-    alignas(16) float f_t[4] , f_e1[4] , f_e2[4] , f_rcp_det[4];
-    _mm_store_ps( f_t , t );
-    _mm_store_ps( f_e1 , e1 );
-    _mm_store_ps( f_e2 , e2 );
-    _mm_store_ps( f_rcp_det , rcp_det );
-
-#if 1
     // mask out the invalid values
     t = _mm_or_ps( _mm_and_ps( mask , t ) , _mm_andnot_ps( mask , infinites ) );
 
@@ -256,39 +248,14 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     // get the index of the closest one
     const auto resolved_mask = _mm_movemask_ps( _mm_cmpeq_ps( t , t0 ) );
 	const auto res_i = __bsf(resolved_mask);
-    const auto res_t = ret->t;
 
     sAssert( resolved_mask > 0 && resolved_mask < 16 , SPATIAL_ACCELERATOR );
     sAssert( res_i >= 0 && res_i < 4 , SPATIAL_ACCELERATOR );
-#else
-    c = _mm_movemask_ps( mask );
-
-    // this branched code is only kept for a temporary period as a reference implementation for debugging purpose.
-    int     res_i = -1;
-    float   res_t = ret->t;
-    if( ( ( c >> 0 ) & 0x01 ) && res_t >= f_t[0]  && f_t[0] < ray.m_fMax && f_t[0] > ray.m_fMin ){
-        res_i = 0;
-        res_t = f_t[0];
-    }
-    if( ( ( c >> 1 ) & 0x01 ) && res_t >= f_t[1]  && f_t[1] < ray.m_fMax && f_t[1] > ray.m_fMin ){
-        res_i = 1;
-        res_t = f_t[1];
-    }
-    if( ( ( c >> 2 ) & 0x01 ) && res_t >= f_t[2]  && f_t[2] < ray.m_fMax && f_t[2] > ray.m_fMin ){
-        res_i = 2;
-        res_t = f_t[2];
-    }
-    if( ( ( c >> 3 ) & 0x01 ) && res_t >= f_t[3]  && f_t[3] < ray.m_fMax && f_t[3] > ray.m_fMin ){
-        res_i = 3;
-        res_t = f_t[3];
-    }
-	sAssert( res_i != -1 , SPATIAL_ACCELERATOR );
-#endif
     
     const auto* triangle = tri4.m_ori_tri[res_i];
 
-    const auto u = f_e1[res_i] * f_rcp_det[res_i];
-    const auto v = f_e2[res_i] * f_rcp_det[res_i];
+    const auto u = sse_data( e1 , res_i ) * sse_data( rcp_det , res_i );
+    const auto v = sse_data( e2 , res_i ) * sse_data( rcp_det , res_i );
     const auto w = 1 - u - v;
 
     const auto& mem = triangle->GetMeshVisual()->m_memory;
@@ -299,9 +266,10 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     const auto& mv0 = mem->m_vertices[id0];
     const auto& mv1 = mem->m_vertices[id1];
     const auto& mv2 = mem->m_vertices[id2];
-
-	ret->intersect = ray(f_t[res_i]);
-	ret->t = f_t[res_i];
+	
+	const auto res_t = sse_data(t, res_i);
+	ret->intersect = ray(sse_data( t , res_i ));
+	ret->t = t.m128_f32[res_i];
 
     // get three vertexes
     ret->gnormal = Normalize(Cross( ( mv2.m_position - mv0.m_position ) , ( mv1.m_position - mv0.m_position ) ));

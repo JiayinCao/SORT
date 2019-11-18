@@ -28,4 +28,12 @@ static const __m128 infinites   = _mm_set_ps1( FLT_MAX );
 static const __m128 neg_ones	= _mm_set_ps1( -1.0f );
 static const __m128 ones		= _mm_set_ps1(1.0f);
 
+float&	sse_data(__m128 simd , int index) {
+#ifdef SORT_IN_WINDOWS
+	return simd.m128_f32[index];
+#else
+	return simd[index];
+#endif
+}
+
 #endif
