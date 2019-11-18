@@ -360,8 +360,8 @@ def export_global_config(scene, fs, sort_resource_path):
         fs.serialize( int(sort_data.octree_max_pri_in_leaf) )
     elif accelerator_type == "Qbvh":
         fs.serialize( SID('Qbvh') )
-        fs.serialize( int(sort_data.bvh_max_node_depth) )
-        fs.serialize( int(sort_data.bvh_max_pri_in_leaf) )
+        fs.serialize( int(sort_data.qbvh_max_node_depth) )
+        fs.serialize( int(sort_data.qbvh_max_pri_in_leaf) )
     else:
         fs.serialize( SID('UniGrid') )
 

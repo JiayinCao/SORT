@@ -57,8 +57,8 @@ class SORTRenderData(bpy.types.PropertyGroup):
     #                              Spatial Accelerator Settings                          #
     #------------------------------------------------------------------------------------#
     # Accelerator type
-    accelerator_types = [ ("bvh", "Bounding Volume Hierarchy", "", 0),
-                          ("Qbvh", "Quad Bounding Volume Hierarchy", "" , 1),
+    accelerator_types = [ ("Qbvh", "QBVH", "" , 0),
+                          ("bvh", "Bounding Volume Hierarchy", "", 1),
                           ("KDTree", "SAH KDTree", "", 2),
                           ("UniGrid", "Uniform Grid", "", 3),
                           ("OcTree" , "OcTree" , "" , 4),
@@ -68,6 +68,10 @@ class SORTRenderData(bpy.types.PropertyGroup):
     # bvh properties
     bvh_max_node_depth : bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)
     bvh_max_pri_in_leaf : bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=8, min=8, max=64)
+
+    # qbvh properties
+    qbvh_max_node_depth : bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)
+    qbvh_max_pri_in_leaf : bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=8, min=8, max=64)
 
     # kdtree properties
     kdtree_max_node_depth : bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)
@@ -98,7 +102,7 @@ class SORTRenderData(bpy.types.PropertyGroup):
     detailedLog : bpy.props.BoolProperty( name='Output Detailed Output', default=False, description='Whether outputing detail log information in blender plugin.' )
     profilingEnabled : bpy.props.BoolProperty(name='Enable Profiling',default=False,description='Enabling profiling will have a big impact on performance, only use it for simple scene')
     allUseDefaultMaterial : bpy.props.BoolProperty(name='No Material',default=False,description='Disable all materials in SORT, use the default one.')
-    
+
     @classmethod
     def register(cls):
         bpy.types.Scene.sort_data = bpy.props.PointerProperty(name="SORT Data", type=cls)
@@ -160,9 +164,12 @@ class RENDER_PT_AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
         data = context.scene.sort_data
         self.layout.prop(data,"accelerator_type_prop")
         accelerator_type = data.accelerator_type_prop
-        if accelerator_type == "bvh" or accelerator_type == "Qbvh":
+        if accelerator_type == "bvh":
             self.layout.prop(data,"bvh_max_node_depth")
             self.layout.prop(data,"bvh_max_pri_in_leaf")
+        if accelerator_type == "Qbvh":
+            self.layout.prop(data,"qbvh_max_node_depth")
+            self.layout.prop(data,"qbvh_max_pri_in_leaf")
         elif accelerator_type == "KDTree":
             self.layout.prop(data,"kdtree_max_node_depth")
             self.layout.prop(data,"kdtree_max_pri_in_leaf")
