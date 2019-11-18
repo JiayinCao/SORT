@@ -323,6 +323,10 @@ SORT_FORCEINLINE void intersectTriangle4(const Ray& ray, const Triangle4& tri4, 
 		const auto res_i = __bsf(resolved_mask);
 		resolved_mask = resolved_mask & (resolved_mask - 1);
 
+		const auto primitive = tri4.m_ori_pri[res_i];
+		if (matID != primitive->GetMaterial()->GetID())
+			continue;
+
 		if (intersections.cnt < TOTAL_SSS_INTERSECTION_CNT) {
 			intersections.intersections[intersections.cnt] = SORT_MALLOC(BSSRDFIntersection)();
 			setupIntersection(tri4, ray, t4, u4, v4, res_i, &intersections.intersections[intersections.cnt++]->intersection);
