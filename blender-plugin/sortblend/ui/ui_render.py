@@ -57,12 +57,12 @@ class SORTRenderData(bpy.types.PropertyGroup):
     #                              Spatial Accelerator Settings                          #
     #------------------------------------------------------------------------------------#
     # Accelerator type
-    accelerator_types = [ ("Qbvh", "QBVH", "" , 0),
-                          ("bvh", "Bounding Volume Hierarchy", "", 1),
-                          ("KDTree", "SAH KDTree", "", 2),
-                          ("UniGrid", "Uniform Grid", "", 3),
-                          ("OcTree" , "OcTree" , "" , 4),
-                          ("bruteforce", "No Accelerator", "", 5) ]
+    accelerator_types = [ ("Qbvh", "QBVH", "SIMD Optimized BVH" , 0),
+                          ("bvh", "BVH", "Binary Bounding Volume Hierarchy", 1),
+                          ("KDTree", "SAH KDTree", "K-dimentional Tree", 2),
+                          ("UniGrid", "Uniform Grid", "This is not quite practical in all cases.", 3),
+                          ("OcTree" , "OcTree" , "This is not quite practical in all cases." , 4),
+                          ("bruteforce", "No Accelerator", "Only use it in a scene with a handsful of primitives", 5) ]
     accelerator_type_prop : bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
 
     # bvh properties

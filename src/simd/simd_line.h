@@ -80,7 +80,7 @@ struct Line4{
         float   mat_00[4] , mat_01[4] , mat_02[4] , mat_03[4];
         float   mat_10[4] , mat_11[4] , mat_12[4] , mat_13[4];
         float   mat_20[4] , mat_21[4] , mat_22[4] , mat_23[4];
-        float   mat_30[4] , mat_31[4] , mat_32[4] , mat_33[4];
+        //float   mat_30[4] , mat_31[4] , mat_32[4] , mat_33[4];
         for( auto i = 0 ; i < 4 && m_ori_pri[i] ; ++i ){
             const auto line = m_ori_line[i];
 
