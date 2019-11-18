@@ -25,10 +25,10 @@ struct Line4;
 
 //! @brief  Line is a common type for hair or fur rendering.
 /**
- * Althgouh being called line, this shape is essentially open cylinder. Other choose is to represent line
+ * Although being called line, this shape is essentially open cylinder. Other choose is to represent line
  * with billboard like faces that always face the ray, which is not physically accurate and can easily lead
  * problems like self shadowing.
- * With cylinder as the line shape, it respresents a surface in 3D space that doesn't depend on anything else.
+ * With cylinder as the line shape, it represents a surface in 3D space that doesn't depend on anything else.
  * This is more robust in term of ray-shape intersection and leads way less problem than billboard solution,
  * which may work well if the radius is small enough, but it is still buggy.
  */
@@ -160,5 +160,6 @@ private:
 
 #ifdef SSE_ENABLED
     friend struct Line4;
+	friend SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Intersection* ret );
 #endif
 };

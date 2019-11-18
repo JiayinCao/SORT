@@ -23,7 +23,7 @@
 #ifdef SSE_ENABLED
 #include <nmmintrin.h>
 
-//! @brief  Like Triangle4, Line4 is the cooresponding version for line shape.
+//! @brief  Like Triangle4, Line4 is the corresponding version for line shape.
 struct Line4{
     __m128  m_p0_x , m_p0_y , m_p0_z;   /**< Point at the end of the line. */
     __m128  m_p1_x , m_p1_y , m_p1_z;   /**< Point at the other end of the line. */
@@ -172,6 +172,7 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
     }
     return found;
 #else
+	// The following algorithm is buggy now, to be fixed shortly
     __m128  mask = line4.m_mask;
 
     const __m128 ray_ori_x = _mm_add_ps( _mm_add_ps( _mm_mul_ps( line4.m_mat_00 , ray.m_ori_x ) , _mm_mul_ps( line4.m_mat_01 , ray.m_ori_y ) ) ,
@@ -205,15 +206,17 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
     
     const auto sqrt_dist = _mm_sqrt_ps( discriminant );
     const auto t0 = _mm_div_ps( _mm_sub_ps( _mm_sub_ps( zeros , b ) , sqrt_dist ) , a );
-    const auto inter_y_0 = _mm_add_ps( ray_ori_y , _mm_mul_ps( ray_dir_y , t0 ) );
-    const auto mask0 = _mm_or_ps( _mm_cmpgt_ps( inter_y_0 , line4.m_length ) , _mm_cmplt_ps( inter_y_0 , zeros ) );
+    auto inter_y = _mm_add_ps( ray_ori_y , _mm_mul_ps( ray_dir_y , t0 ) );
+    const auto mask0 = _mm_or_ps( _mm_cmpgt_ps( inter_y , line4.m_length ) , _mm_cmplt_ps( inter_y , zeros ) );
 
     const auto t1 = _mm_div_ps( _mm_sub_ps( sqrt_dist , b ) , a );
-    const auto inter_y_1 = _mm_add_ps( ray_ori_y , _mm_mul_ps( ray_dir_y , t1 ) );
-    const auto mask1 = _mm_or_ps( _mm_cmpgt_ps( inter_y_1 , line4.m_length ) , _mm_cmplt_ps( inter_y_1 , zeros ) );
-    const auto mask2 = _mm_andnot_ps( mask1 , mask0 );
+    inter_y = _mm_or_ps( _mm_andnot_ps( mask0 , _mm_add_ps( ray_ori_y , _mm_mul_ps( ray_dir_y , t1 ) ) ) , _mm_and_ps( mask , t0 ) );
+    mask = _mm_and_ps( mask , _mm_or_ps( _mm_cmpgt_ps( inter_y , line4.m_length ) , _mm_cmplt_ps( inter_y , zeros ) ) );
+	cm = _mm_movemask_ps(mask);
+	if (0 == cm)
+		return false;
 
-    auto t = _mm_or_ps( _mm_and_ps( mask2 , t1 ) , _mm_andnot_ps( mask0 , t0 ) );
+    auto t = _mm_or_ps( _mm_and_ps( mask0 , t0 ) , _mm_andnot_ps( mask0 , t1 ) );
     t = _mm_or_ps( _mm_and_ps( mask , t ) , _mm_andnot_ps( mask , infinites ) );
 
     const __m128 ray_min_t = _mm_set_ps1(ray.m_fMin);
@@ -231,6 +234,9 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
 	if (0 == cm)
 		return false;
 
+	const auto inter_x = _mm_or_ps(_mm_andnot_ps(mask0, _mm_add_ps(ray_ori_x, _mm_mul_ps(ray_dir_x, t1))), _mm_and_ps(mask, _mm_add_ps(ray_ori_x, _mm_mul_ps(ray_dir_x, t0))));
+	const auto inter_z = _mm_or_ps(_mm_andnot_ps(mask0, _mm_add_ps(ray_ori_z, _mm_mul_ps(ray_dir_z, t1))), _mm_and_ps(mask, _mm_add_ps(ray_ori_z, _mm_mul_ps(ray_dir_z, t0))));
+
     // find the closest result
     __m128 t_min = _mm_min_ps( t , _mm_shuffle_ps( t , t , _MM_SHUFFLE(2, 3, 0, 1) ) );
 	t_min = _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
@@ -239,9 +245,30 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
     const auto resolved_mask = _mm_movemask_ps( _mm_cmpeq_ps( t , t_min ) );
 	const auto res_i = __bsf(resolved_mask);
     
-    ret->intersect = ray( t[res_i] );
+	const auto primitive = line4.m_ori_pri[res_i];
+	const auto line = line4.m_ori_line[res_i];
 
-    return false;
+    ret->intersect = ray( sse_data( t , res_i ) );
+
+	if( sse_data( inter_y , res_i ) == line->m_length ){
+        // A corner case where the tip of the line is being intersected.
+        ret->gnormal = Normalize( line->m_world2Line.GetInversed().TransformVector( Vector( 0.0f , 1.0f , 0.0f ) ) );
+        ret->normal = ret->gnormal;
+        ret->tangent = Normalize( line->m_world2Line.GetInversed().TransformVector( Vector( 1.0f , 0.0f , 0.0f ) ) );
+    }else{
+        // This may not be physically correct, but it should be fine for a pixel width line.
+        ret->gnormal = Normalize(line->m_world2Line.GetInversed().TransformVector( Vector( sse_data( inter_x , res_i ), 0.0f , sse_data( inter_z , res_i ) ) ) );
+        ret->normal = ret->gnormal;
+        ret->tangent = Normalize( line->m_gp1 - line->m_gp0 );
+
+        ret->view = -ray.m_Dir;
+	}
+
+    ret->u = 1.0f;
+    ret->v = slerp( line->m_v0 , line->m_v1 , sse_data( inter_y , res_i ) / line->m_length );
+    ret->t = sse_data( t , res_i );
+
+    return true;
 #endif
 }
 
