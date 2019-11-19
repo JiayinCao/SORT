@@ -65,7 +65,7 @@ SORT_FORCEINLINE void IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_
 	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
 
 	const __m128 mask = _mm_cmple_ps( f_min , f_max );
-	f_min = _mm_or_ps( _mm_and_ps( mask , f_min ) , _mm_andnot_ps( mask , neg_ones ) );
+	f_min = _mm_pick_ps( mask , f_min , neg_ones );
 }
 
 #endif

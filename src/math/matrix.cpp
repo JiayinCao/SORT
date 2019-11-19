@@ -75,7 +75,7 @@ Point Matrix::TransformPoint( const Point& p ) const{
 
     // if w is one , just return the point
     // note it is very common that w is one
-    if( w == 1.0f )
+    if( LIKELY( w == 1.0f ) )
         return Point( x , y , z );
 
     return Point( x , y , z ) / w;

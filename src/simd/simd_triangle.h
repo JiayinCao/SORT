@@ -168,12 +168,12 @@ SORT_FORCEINLINE bool intersectTriangle4Inner(const Ray& ray, const Triangle4& t
 	__m128 p2_z = p2[ray.m_local_z];
 
 	// step 2 : sheer the vertices so that the ray direction points to ( 0 , 1 , 0 )
-	p0_x = _mm_add_ps(p0_x, _mm_mul_ps(p0_y, ray.m_sse_scale_x));
-	p0_z = _mm_add_ps(p0_z, _mm_mul_ps(p0_y, ray.m_sse_scale_z));
-	p1_x = _mm_add_ps(p1_x, _mm_mul_ps(p1_y, ray.m_sse_scale_x));
-	p1_z = _mm_add_ps(p1_z, _mm_mul_ps(p1_y, ray.m_sse_scale_z));
-	p2_x = _mm_add_ps(p2_x, _mm_mul_ps(p2_y, ray.m_sse_scale_x));
-	p2_z = _mm_add_ps(p2_z, _mm_mul_ps(p2_y, ray.m_sse_scale_z));
+	p0_x = _mm_mad_ps(p0_y, ray.m_sse_scale_x, p0_x);
+	p0_z = _mm_mad_ps(p0_y, ray.m_sse_scale_z, p0_z);
+	p1_x = _mm_mad_ps(p1_y, ray.m_sse_scale_x, p1_x);
+	p1_z = _mm_mad_ps(p1_y, ray.m_sse_scale_z, p1_z);
+	p2_x = _mm_mad_ps(p2_y, ray.m_sse_scale_x, p2_x);
+	p2_z = _mm_mad_ps(p2_y, ray.m_sse_scale_z, p2_z);
 
 	// compute the edge functions
 	const __m128 e0 = _mm_sub_ps(_mm_mul_ps(p1_x, p2_z), _mm_mul_ps(p1_z, p2_x));
@@ -200,8 +200,8 @@ SORT_FORCEINLINE bool intersectTriangle4Inner(const Ray& ray, const Triangle4& t
 	p2_y = _mm_mul_ps(p2_y, ray.m_sse_scale_y);
 
 	t4 = _mm_mul_ps(e0, p0_y);
-	t4 = _mm_add_ps(t4, _mm_mul_ps(e1, p1_y));
-	t4 = _mm_add_ps(t4, _mm_mul_ps(e2, p2_y));
+	t4 = _mm_mad_ps(e1, p1_y, t4);
+	t4 = _mm_mad_ps(e2, p2_y, t4);
 	t4 = _mm_mul_ps(t4, rcp_det);
 
 	const __m128 ray_min_t = _mm_set_ps1(ray.m_fMin);
@@ -220,7 +220,7 @@ SORT_FORCEINLINE bool intersectTriangle4Inner(const Ray& ray, const Triangle4& t
 		return false;
 
 	// mask out the invalid values
-	t4 = _mm_or_ps(_mm_and_ps(mask, t4), _mm_andnot_ps(mask, infinites));
+	t4 = _mm_pick_ps( mask, t4, infinites);
 
 	u4 = _mm_mul_ps(e1, rcp_det);
 	v4 = _mm_mul_ps(e2, rcp_det);

@@ -50,9 +50,15 @@ static SORT_FORCEINLINE __m128 _mm_sqr_ps( const __m128& m ){
     return _mm_mul_ps( m , m );
 }
 
-// accurate rcp
 static SORT_FORCEINLINE __m128 _mm_rcpa_ps( const __m128& m ){
     return _mm_div_ps(ones, m);
 }
 
+static SORT_FORCEINLINE __m128 _mm_mad_ps( const __m128& a , const __m128& b , const __m128& c ){
+    return _mm_add_ps( _mm_mul_ps( a , b ) , c );
+}
+
+static SORT_FORCEINLINE __m128 _mm_pick_ps( const __m128& mask , const __m128& a , const __m128& b ){
+    return _mm_or_ps( _mm_and_ps( mask , a ) , _mm_andnot_ps( mask , b ) );
+}
 #endif

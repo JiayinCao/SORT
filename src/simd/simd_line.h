@@ -175,27 +175,21 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
 	// The following algorithm is buggy now, to be fixed shortly
     __m128  mask = line4.m_mask;
 
-    const __m128 ray_ori_x = _mm_add_ps( _mm_add_ps( _mm_mul_ps( line4.m_mat_00 , ray.m_ori_x ) , _mm_mul_ps( line4.m_mat_01 , ray.m_ori_y ) ) ,
-                                   _mm_add_ps( _mm_mul_ps( line4.m_mat_02 , ray.m_ori_z ) , line4.m_mat_03 ) );
-    const __m128 ray_ori_y = _mm_add_ps( _mm_add_ps( _mm_mul_ps( line4.m_mat_10 , ray.m_ori_x ) , _mm_mul_ps( line4.m_mat_11 , ray.m_ori_y ) ) ,
-                                   _mm_add_ps( _mm_mul_ps( line4.m_mat_12 , ray.m_ori_z ) , line4.m_mat_13 ) );
-    const __m128 ray_ori_z = _mm_add_ps( _mm_add_ps( _mm_mul_ps( line4.m_mat_20 , ray.m_ori_x ) , _mm_mul_ps( line4.m_mat_21 , ray.m_ori_y ) ) ,
-                                   _mm_add_ps( _mm_mul_ps( line4.m_mat_22 , ray.m_ori_z ) , line4.m_mat_23 ) );
+    const __m128 ray_ori_x = _mm_mad_ps( line4.m_mat_00, ray.m_ori_x, _mm_mad_ps( line4.m_mat_01, ray.m_ori_y, _mm_mad_ps( line4.m_mat_02, ray.m_ori_z, line4.m_mat_03)));
+    const __m128 ray_ori_y = _mm_mad_ps( line4.m_mat_10, ray.m_ori_x, _mm_mad_ps( line4.m_mat_11, ray.m_ori_y, _mm_mad_ps( line4.m_mat_12, ray.m_ori_z, line4.m_mat_13)));
+    const __m128 ray_ori_z = _mm_mad_ps( line4.m_mat_20, ray.m_ori_x, _mm_mad_ps( line4.m_mat_21, ray.m_ori_y, _mm_mad_ps( line4.m_mat_22, ray.m_ori_z, line4.m_mat_23)));
     
-    const __m128 ray_dir_x = _mm_add_ps( _mm_add_ps( _mm_mul_ps( line4.m_mat_00 , ray.m_dir_x ) , _mm_mul_ps( line4.m_mat_01 , ray.m_dir_y ) ) ,
-                                   _mm_mul_ps( line4.m_mat_02 , ray.m_dir_z ) );
-    const __m128 ray_dir_y = _mm_add_ps( _mm_add_ps( _mm_mul_ps( line4.m_mat_10 , ray.m_dir_x ) , _mm_mul_ps( line4.m_mat_11 , ray.m_dir_y ) ) ,
-                                   _mm_mul_ps( line4.m_mat_12 , ray.m_dir_z ) );
-    const __m128 ray_dir_z = _mm_add_ps( _mm_add_ps( _mm_mul_ps( line4.m_mat_20 , ray.m_dir_x ) , _mm_mul_ps( line4.m_mat_21 , ray.m_dir_y ) ) ,
-                                   _mm_mul_ps( line4.m_mat_22 , ray.m_dir_z ) );
+    const __m128 ray_dir_x = _mm_mad_ps( line4.m_mat_00, ray.m_dir_x, _mm_mad_ps( line4.m_mat_01, ray.m_dir_y, _mm_mul_ps( line4.m_mat_02, ray.m_dir_z )));
+    const __m128 ray_dir_y = _mm_mad_ps( line4.m_mat_10, ray.m_dir_x, _mm_mad_ps( line4.m_mat_11, ray.m_dir_y, _mm_mul_ps( line4.m_mat_12, ray.m_dir_z )));
+    const __m128 ray_dir_z = _mm_mad_ps( line4.m_mat_20, ray.m_dir_x, _mm_mad_ps( line4.m_mat_21, ray.m_dir_y, _mm_mul_ps( line4.m_mat_22, ray.m_dir_z )));
 
     const __m128 tmp =  _mm_div_ps( _mm_sub_ps( line4.m_w1 , line4.m_w0 ) , line4.m_length );
-    const __m128 tmp0 = _mm_add_ps( line4.m_w0 , _mm_mul_ps( ray_ori_y , tmp ) );
-    const __m128 tmp1 = _mm_mul_ps( ray_dir_y , tmp );
+    const __m128 tmp0 = _mm_mad_ps( ray_ori_y, tmp, line4.m_w0 );
+    const __m128 tmp1 = _mm_mul_ps( ray_dir_y, tmp);
 
     // The 2.0 factor is skipped because it is not needed and will be canceled out.
     const auto a = _mm_sub_ps( _mm_add_ps( _mm_sqr_ps( ray_dir_x ) , _mm_sqr_ps( ray_dir_z ) ) , _mm_sqr_ps( tmp1 ) );
-    const auto b = _mm_sub_ps( _mm_add_ps( _mm_mul_ps( ray_dir_x , ray_ori_x ) , _mm_mul_ps( ray_dir_z , ray_dir_x ) ) , _mm_mul_ps( tmp0 , tmp1 ) );
+    const auto b = _mm_sub_ps( _mm_mad_ps( ray_dir_x , ray_ori_x , _mm_mul_ps( ray_dir_z , ray_ori_x ) ) , _mm_mul_ps( tmp0 , tmp1 ) );
     const auto c = _mm_sub_ps( _mm_add_ps( _mm_sqr_ps( ray_ori_x ) , _mm_sqr_ps( ray_ori_z ) ) , _mm_sqr_ps( tmp0 ) );
 
     const auto discriminant = _mm_sub_ps( _mm_sqr_ps( b ) , _mm_mul_ps( a , c ) );
@@ -206,18 +200,20 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
     
     const auto sqrt_dist = _mm_sqrt_ps( discriminant );
     const auto t0 = _mm_div_ps( _mm_sub_ps( _mm_sub_ps( zeros , b ) , sqrt_dist ) , a );
-    auto inter_y = _mm_add_ps( ray_ori_y , _mm_mul_ps( ray_dir_y , t0 ) );
-    const auto mask0 = _mm_or_ps( _mm_cmpgt_ps( inter_y , line4.m_length ) , _mm_cmplt_ps( inter_y , zeros ) );
+    const auto inter_y0 = _mm_mad_ps( ray_dir_y, t0, ray_ori_y );
+    const auto mask0 = _mm_and_ps( _mm_cmplt_ps( inter_y0 , line4.m_length ) , _mm_cmpgt_ps( inter_y0 , zeros ) );
 
     const auto t1 = _mm_div_ps( _mm_sub_ps( sqrt_dist , b ) , a );
-    inter_y = _mm_or_ps( _mm_andnot_ps( mask0 , _mm_add_ps( ray_ori_y , _mm_mul_ps( ray_dir_y , t1 ) ) ) , _mm_and_ps( mask , t0 ) );
-    mask = _mm_and_ps( mask , _mm_or_ps( _mm_cmpgt_ps( inter_y , line4.m_length ) , _mm_cmplt_ps( inter_y , zeros ) ) );
+    const auto inter_y1 = _mm_mad_ps( t1 , ray_dir_y , ray_ori_y );
+    const auto inter_y = _mm_pick_ps( mask0 , inter_y0 , inter_y1 );
+    const auto mask1 = _mm_and_ps( _mm_cmplt_ps( inter_y , line4.m_length ) , _mm_cmpgt_ps( inter_y , zeros ) );
+    mask = _mm_and_ps( mask , mask1 );
 	cm = _mm_movemask_ps(mask);
 	if (0 == cm)
 		return false;
 
-    auto t = _mm_or_ps( _mm_and_ps( mask0 , t0 ) , _mm_andnot_ps( mask0 , t1 ) );
-    t = _mm_or_ps( _mm_and_ps( mask , t ) , _mm_andnot_ps( mask , infinites ) );
+    auto t = _mm_pick_ps( mask0 , t0 , t1 );
+    t = _mm_pick_ps( mask , t , infinites );
 
     const __m128 ray_min_t = _mm_set_ps1(ray.m_fMin);
 	const __m128 ray_max_t = _mm_set_ps1(ray.m_fMax);
@@ -229,13 +225,13 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
     if( nullptr == ret )
         return true;
     
-    mask = _mm_add_ps( mask , _mm_cmpge_ps( t , _mm_set_ps1(ret->t) ) );
+    mask = _mm_add_ps( mask , _mm_cmplt_ps( t , _mm_set_ps1(ret->t) ) );
     cm = _mm_movemask_ps(mask);
 	if (0 == cm)
 		return false;
 
-	const auto inter_x = _mm_or_ps(_mm_andnot_ps(mask0, _mm_add_ps(ray_ori_x, _mm_mul_ps(ray_dir_x, t1))), _mm_and_ps(mask, _mm_add_ps(ray_ori_x, _mm_mul_ps(ray_dir_x, t0))));
-	const auto inter_z = _mm_or_ps(_mm_andnot_ps(mask0, _mm_add_ps(ray_ori_z, _mm_mul_ps(ray_dir_z, t1))), _mm_and_ps(mask, _mm_add_ps(ray_ori_z, _mm_mul_ps(ray_dir_z, t0))));
+	const auto inter_x = _mm_pick_ps( mask0, _mm_mad_ps(t0, ray_dir_x, ray_ori_x), _mm_mad_ps(t1, ray_dir_x, ray_ori_x) );
+    const auto inter_z = _mm_pick_ps( mask0, _mm_mad_ps(t0, ray_dir_z, ray_dir_z), _mm_mad_ps(t1, ray_dir_z, ray_ori_z) );
 
     // find the closest result
     __m128 t_min = _mm_min_ps( t , _mm_shuffle_ps( t , t , _MM_SHUFFLE(2, 3, 0, 1) ) );
