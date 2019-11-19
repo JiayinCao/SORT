@@ -163,7 +163,7 @@ struct Line4{
 //! @param  ret     The result of intersection.
 //! @return         Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Intersection* ret ){
-#if 1
+#if 0
     bool found = false;
     for( int i = 0 ; i < 4 ; ++i ){
         if( line4.m_ori_pri[i] == nullptr )
@@ -189,7 +189,7 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
 
     // The 2.0 factor is skipped because it is not needed and will be canceled out.
     const auto a = _mm_sub_ps( _mm_add_ps( _mm_sqr_ps( ray_dir_x ) , _mm_sqr_ps( ray_dir_z ) ) , _mm_sqr_ps( tmp1 ) );
-    const auto b = _mm_sub_ps( _mm_mad_ps( ray_dir_x , ray_ori_x , _mm_mul_ps( ray_dir_z , ray_ori_x ) ) , _mm_mul_ps( tmp0 , tmp1 ) );
+    const auto b = _mm_sub_ps( _mm_mad_ps( ray_dir_x , ray_ori_x , _mm_mul_ps( ray_dir_z , ray_ori_z ) ) , _mm_mul_ps( tmp0 , tmp1 ) );
     const auto c = _mm_sub_ps( _mm_add_ps( _mm_sqr_ps( ray_ori_x ) , _mm_sqr_ps( ray_ori_z ) ) , _mm_sqr_ps( tmp0 ) );
 
     const auto discriminant = _mm_sub_ps( _mm_sqr_ps( b ) , _mm_mul_ps( a , c ) );
@@ -204,7 +204,7 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
     const auto mask0 = _mm_and_ps( _mm_cmplt_ps( inter_y0 , line4.m_length ) , _mm_cmpgt_ps( inter_y0 , zeros ) );
 
     const auto t1 = _mm_div_ps( _mm_sub_ps( sqrt_dist , b ) , a );
-    const auto inter_y1 = _mm_mad_ps( t1 , ray_dir_y , ray_ori_y );
+    const auto inter_y1 = _mm_mad_ps( ray_dir_y , t1 , ray_ori_y );
     const auto inter_y = _mm_pick_ps( mask0 , inter_y0 , inter_y1 );
     const auto mask1 = _mm_and_ps( _mm_cmplt_ps( inter_y , line4.m_length ) , _mm_cmpgt_ps( inter_y , zeros ) );
     mask = _mm_and_ps( mask , mask1 );
