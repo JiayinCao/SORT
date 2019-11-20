@@ -35,7 +35,6 @@ struct Line4{
     __m128  m_mat_00, m_mat_01, m_mat_02, m_mat_03;
     __m128  m_mat_10, m_mat_11, m_mat_12, m_mat_13;
     __m128  m_mat_20, m_mat_21, m_mat_22, m_mat_23;
-//    __m128  m_mat_30, m_mat_31, m_mat_32, m_mat_33;
 
     __m128  m_mask;                     /**< Mask marks which line is valid. */
 
@@ -109,10 +108,6 @@ struct Line4{
             mat_21[i] = line->m_world2Line.matrix.m[9];
             mat_22[i] = line->m_world2Line.matrix.m[10];
             mat_23[i] = line->m_world2Line.matrix.m[11];
-//            mat_30[i] = line->m_world2Line.matrix.m[12];
-//            mat_31[i] = line->m_world2Line.matrix.m[13];
-//            mat_32[i] = line->m_world2Line.matrix.m[14];
-//            mat_33[i] = line->m_world2Line.matrix.m[15];
 
             mask[i] = 0.0f;
         }
@@ -139,10 +134,6 @@ struct Line4{
         m_mat_21 = _mm_set_ps( mat_21[3] , mat_21[2] , mat_21[1] , mat_21[0] );
         m_mat_22 = _mm_set_ps( mat_22[3] , mat_22[2] , mat_22[1] , mat_22[0] );
         m_mat_23 = _mm_set_ps( mat_23[3] , mat_23[2] , mat_23[1] , mat_23[0] );
-//        m_mat_30 = _mm_set_ps( mat_30[3] , mat_30[2] , mat_30[1] , mat_30[0] );
-//        m_mat_31 = _mm_set_ps( mat_31[3] , mat_31[2] , mat_31[1] , mat_31[0] );
-//        m_mat_32 = _mm_set_ps( mat_32[3] , mat_32[2] , mat_32[1] , mat_32[0] );
-//        m_mat_33 = _mm_set_ps( mat_33[3] , mat_33[2] , mat_33[1] , mat_33[0] );
 
         m_mask = _mm_cmpeq_ps( zeros , _mm_set_ps( mask[3] , mask[2] , mask[1] , mask[0] ) );
 
