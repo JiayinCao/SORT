@@ -79,8 +79,10 @@ void HairVisual::Serialize( IStreamBase& stream ){
                 const auto v_start = v;
                 const auto v_end = std::min( 1.0f , v + v_delta );
 
-                m_lines.push_back(std::make_unique<Line>( prevP , curP , v_start , v_end , width_start, width_end , mat_id ) );
-                width -= width_delta;
+				if( prevP != curP )
+					m_lines.push_back(std::make_unique<Line>( prevP , curP , v_start , v_end , width_start, width_end , mat_id ) );
+                
+				width -= width_delta;
                 v += v_delta;
             }
             prevP = curP;
