@@ -261,7 +261,7 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             for( auto i = 0 ; i < node->line_list.size() ; ++i ){
                 found |= intersectLine4( ray , node->line_list[i] , intersect );
                 if( intersect == nullptr && found ){
-                    SORT_STATS(sIntersectionTest+= i * 4);
+                    SORT_STATS(sIntersectionTest+= ( i + node->tri_list.size() ) * 4 );
                     return true;
                 }
             }
@@ -269,7 +269,7 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
                 for( auto i = 0 ; i < node->other_list.size() ; ++i ){
                     found |= node->other_list[i]->GetIntersect( ray , intersect );
                     if( intersect == nullptr && found ){
-                        SORT_STATS( sIntersectionTest += ( i + node->tri_list.size() ) * 4 );
+                        SORT_STATS( sIntersectionTest += ( i + node->tri_list.size() + node->line_list.size() ) * 4 );
                         return true;
                     }
                 }
