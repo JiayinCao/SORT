@@ -45,7 +45,7 @@ public:
 	__m128	m_max_z;
 };
 
-SORT_FORCEINLINE void IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_min ) {
+SORT_FORCEINLINE __m128 IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_min ) {
 	f_min = _mm_set_ps1( ray.m_fMin );
 	__m128 f_max = _mm_set_ps1( ray.m_fMax );
 
@@ -66,6 +66,8 @@ SORT_FORCEINLINE void IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_
 
 	const __m128 mask = _mm_cmple_ps( f_min , f_max );
 	f_min = _mm_pick_ps( mask , f_min , neg_ones );
+
+	return mask;
 }
 
 #endif

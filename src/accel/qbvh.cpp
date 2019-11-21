@@ -279,27 +279,56 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         }
 
 		__m128 sse_f_min;
-        IntersectBBox4( ray , node->bbox , sse_f_min );
+        auto mask = IntersectBBox4( ray , node->bbox , sse_f_min );
 
-        alignas(16) float f_min[4];
-        _mm_store_ps(f_min , sse_f_min);
+		auto m = _mm_movemask_ps(mask);
+		if( 0 == m )
+			continue;
 
-        for( auto i = 0 ; i < node->child_cnt ; ++i ){
-            auto k = -1;
-            auto maxDist = 0.0f;
-            for( int j = 0 ; j < node->child_cnt ; ++j ){
-                if( f_min[j] > maxDist ){
-                    maxDist = f_min[j];
-                    k = j;
-                }
-            }
+		const int k0 = __bsf( m );
+		const auto t0 = sse_data( sse_f_min , k0 );
+		m &= m - 1;
+		if( LIKELY( 0 == m ) ){
+			sAssert( t0 >= 0.0f , SPATIAL_ACCELERATOR );
+			bvh_stack[si++] = std::make_pair( node->children[k0].get() , t0 );
+		}else{
+			const int k1 = __bsf( m );
+			m &= m - 1;
 
-            if( k == -1 )
-                break;
+			if( LIKELY( 0 == m ) ){
+				const auto t1 = sse_data( sse_f_min , k1 );
+				sAssert( t1 >= 0.0f , SPATIAL_ACCELERATOR );
 
-            f_min[k] = -1.0f;
-			bvh_stack[si++] = std::make_pair( node->children[k].get() , maxDist );
-        }
+				if( t0 < t1 ){
+					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1 );
+					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0 );
+				}else{
+					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
+					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
+				}
+			}else{
+				// fall back to the worst case
+				alignas(16) float f_min[4];
+				_mm_store_ps(f_min, sse_f_min);
+
+				for (auto i = 0; i < node->child_cnt; ++i) {
+					auto k = -1;
+					auto maxDist = 0.0f;
+					for (int j = 0; j < node->child_cnt; ++j) {
+						if (f_min[j] > maxDist) {
+							maxDist = f_min[j];
+							k = j;
+						}
+					}
+
+					if (k == -1)
+						break;
+
+					f_min[k] = -1.0f;
+					bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
+				}
+			}
+		}
 #else
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
@@ -388,26 +417,58 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 		}
 
 		__m128 sse_f_min;
-        IntersectBBox4( ray , node->bbox , sse_f_min );
+		auto mask = IntersectBBox4(ray, node->bbox, sse_f_min);
 
-        alignas(16) float f_min[4];
-        _mm_store_ps(f_min , sse_f_min);
+		auto m = _mm_movemask_ps(mask);
+		if (0 == m)
+			continue;
 
-        for( auto i = 0 ; i < node->child_cnt ; ++i ){
-            auto k = -1;
-            auto maxDist = -1.0f;
-            for( int j = 0 ; j < node->child_cnt ; ++j ){
-                if( f_min[j] > maxDist ){
-                    maxDist = f_min[j];
-                    k = j;
-                }
-            }
+		const int k0 = __bsf(m);
+		const auto t0 = sse_data(sse_f_min, k0);
+		m &= m - 1;
+		if (LIKELY(0 == m)) {
+			sAssert(t0 >= 0.0f, SPATIAL_ACCELERATOR);
+			bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
+		}
+		else {
+			const int k1 = __bsf(m);
+			m &= m - 1;
 
-			if (k == -1)
-				break;
+			if (LIKELY(0 == m)) {
+				const auto t1 = sse_data(sse_f_min, k1);
+				sAssert(t1 >= 0.0f, SPATIAL_ACCELERATOR);
 
-			f_min[k] = -1.0f;
-			bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
+				if (t0 < t1) {
+					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
+					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
+				}
+				else {
+					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
+					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
+				}
+			}
+			else {
+				// fall back to the worst case
+				alignas(16) float f_min[4];
+				_mm_store_ps(f_min, sse_f_min);
+
+				for (auto i = 0; i < node->child_cnt; ++i) {
+					auto k = -1;
+					auto maxDist = 0.0f;
+					for (int j = 0; j < node->child_cnt; ++j) {
+						if (f_min[j] > maxDist) {
+							maxDist = f_min[j];
+							k = j;
+						}
+					}
+
+					if (k == -1)
+						break;
+
+					f_min[k] = -1.0f;
+					bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
+				}
+			}
 		}
 #else
 		// check if it is a leaf node, to be optimized by SSE/AVX
