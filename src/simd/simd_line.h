@@ -221,7 +221,7 @@ SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Line4& line4 ,
 //! @return         Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Intersection* ret ){
     sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
-    
+
     __m128  mask, t4 , inter_x , inter_y , inter_z ;
     const auto intersected = intersectLine4Inner( ray , line4 , mask , t4 , inter_x , inter_y , inter_z );
     if( !intersected )
@@ -277,5 +277,10 @@ SORT_FORCEINLINE bool intersectLine4Fast( const Ray& ray , const Line4& line4 ){
     __m128 dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z;
     return intersectLine4Inner( ray , line4 , dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z );
 }
+
+#endif
+
+#ifdef AVX_ENABLED
+#include <immintrin.h>
 
 #endif

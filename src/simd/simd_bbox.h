@@ -22,10 +22,7 @@
 #include "simd_utils.h"
 
 #ifdef SSE_ENABLED
-	#include <nmmintrin.h>
-#endif
-
-#ifdef SSE_ENABLED
+#include <nmmintrin.h>
 
 //! @brief	SIMD version bounding box.
 /**
@@ -69,5 +66,11 @@ SORT_FORCEINLINE __m128 IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& 
 
 	return mask;
 }
+
+#endif
+
+
+#ifdef AVX_ENABLED
+#include <immintrin.h>
 
 #endif

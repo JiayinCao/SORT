@@ -57,12 +57,13 @@ class SORTRenderData(bpy.types.PropertyGroup):
     #                              Spatial Accelerator Settings                          #
     #------------------------------------------------------------------------------------#
     # Accelerator type
-    accelerator_types = [ ("Qbvh", "QBVH", "SIMD Optimized BVH" , 0),
-                          ("bvh", "BVH", "Binary Bounding Volume Hierarchy", 1),
-                          ("KDTree", "SAH KDTree", "K-dimentional Tree", 2),
-                          ("UniGrid", "Uniform Grid", "This is not quite practical in all cases.", 3),
-                          ("OcTree" , "OcTree" , "This is not quite practical in all cases." , 4),
-                          ("bruteforce", "No Accelerator", "Only use it in a scene with a handsful of primitives", 5) ]
+    accelerator_types = [ ("Qbvh", "QBVH", "SIMD(SSE) Optimized BVH" , 0),
+                          ("Obvh", "OBVH", "SIMD(AVX) Optimized BVH" , 1 ),
+                          ("bvh", "BVH", "Binary Bounding Volume Hierarchy", 2),
+                          ("KDTree", "SAH KDTree", "K-dimentional Tree", 3),
+                          ("UniGrid", "Uniform Grid", "This is not quite practical in all cases.", 4),
+                          ("OcTree" , "OcTree" , "This is not quite practical in all cases." , 5),
+                          ("bruteforce", "No Accelerator", "Only use it in a scene with a handsful of primitives", 6) ]
     accelerator_type_prop : bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
 
     # bvh properties
@@ -71,7 +72,11 @@ class SORTRenderData(bpy.types.PropertyGroup):
 
     # qbvh properties
     qbvh_max_node_depth : bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)
-    qbvh_max_pri_in_leaf : bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=8, min=8, max=64)
+    qbvh_max_pri_in_leaf : bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=16, min=4, max=64)
+
+    # obvh properties
+    obvh_max_node_depth : bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)
+    obvh_max_pri_in_leaf : bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=32, min=8, max=64)
 
     # kdtree properties
     kdtree_max_node_depth : bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)
@@ -167,9 +172,12 @@ class RENDER_PT_AcceleratorPanel(SORTRenderPanel,bpy.types.Panel):
         if accelerator_type == "bvh":
             self.layout.prop(data,"bvh_max_node_depth")
             self.layout.prop(data,"bvh_max_pri_in_leaf")
-        if accelerator_type == "Qbvh":
+        elif accelerator_type == "Qbvh":
             self.layout.prop(data,"qbvh_max_node_depth")
             self.layout.prop(data,"qbvh_max_pri_in_leaf")
+        elif accelerator_type == "Obvh":
+            self.layout.prop(data,"obvh_max_node_depth")
+            self.layout.prop(data,"obvh_max_pri_in_leaf")
         elif accelerator_type == "KDTree":
             self.layout.prop(data,"kdtree_max_node_depth")
             self.layout.prop(data,"kdtree_max_pri_in_leaf")

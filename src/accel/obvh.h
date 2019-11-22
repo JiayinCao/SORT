@@ -17,12 +17,12 @@
 
 #pragma once
 
-#define QBVH_IMPLEMENTATION
-#define Fbvh        Qbvh
-#define Fbvh_Node   Qbvh_Node
+#define OBVH_IMPLEMENTATION
+#define Fbvh        Obvh
+#define Fbvh_Node   Obvh_Node
 
 #include "fast_bvh.h"
 
-#undef QBVH_IMPLEMENTATION
+#undef OBVH_IMPLEMENTATION
 #undef Fbvh
 #undef Fbvh_Node

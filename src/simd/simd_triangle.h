@@ -360,3 +360,8 @@ SORT_FORCEINLINE void intersectTriangle4Multi(const Ray& ray, const Triangle4& t
 }
 
 #endif
+
+#ifdef AVX_ENABLED
+#include <immintrin.h>
+
+#endif

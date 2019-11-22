@@ -15,14 +15,13 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#pragma once
+#include "obvh.h"
 
-#define QBVH_IMPLEMENTATION
-#define Fbvh        Qbvh
-#define Fbvh_Node   Qbvh_Node
+#define OBVH_IMPEMENTATION
+#define Fbvh        Obvh
+#define Fbvh_Node   Obvh_Node
 
-#include "fast_bvh.h"
+#include "fast_bvh.hpp"
 
-#undef QBVH_IMPLEMENTATION
-#undef Fbvh
-#undef Fbvh_Node
+#undef  Fbvh
+#undef  Fbvh_Node
