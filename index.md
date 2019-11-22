@@ -4,7 +4,7 @@ SORT, short for Simple Open-source Ray Tracing, is my personal cross platform ra
 
 Here are the features implemented so far:
   - Integrator. (Whitted ray tracing, direct lighting, path tracing, light tracing, bidirectional path tracing, instant radiosity, ambient occlusion)
-  - Spatial acceleration structure. (QBVH, BVH, KD-Tree, Uniform grid, OcTree)
+  - Spatial acceleration structure. (OBVH, QBVH, BVH, KD-Tree, Uniform grid, OcTree)
   - BXDF. (Disney BRDF, Lambert, LambertTransmission, Oran Nayar, MicroFacet Reflection, Microfacet Transmission, MERL, Fourier, AshikhmanShirley, Modified Phong, Coat, Blend, Double-Sided, Distribution BRDF, DreamWorks Fabric BRDF)
   - Subsurface Scattering.
   - Fur, Hair.
