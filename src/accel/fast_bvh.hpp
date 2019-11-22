@@ -20,6 +20,7 @@
 #include "core/stats.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
 #include "simd/sse_triangle.h"
+#include "simd/sse_line.h"
 
 #ifdef QBVH_IMPLEMENTATION
 IMPLEMENT_RTTI(Qbvh);
@@ -316,29 +317,13 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #if defined(SSE_QBVH_IMPLEMENTATION)
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
-            auto found = false;
-            for( auto i = 0 ; i < node->tri_list.size() ; ++i ){
-                found |= intersectTriangle4( ray , node->tri_list[i] , intersect );
-                if( intersect == nullptr && found ){
-                    SORT_STATS(sIntersectionTest+= i * 4);
-                    return true;
-                }
-            }
-            for( auto i = 0 ; i < node->line_list.size() ; ++i ){
-                found |= intersectLine4( ray , node->line_list[i] , intersect );
-                if( intersect == nullptr && found ){
-                    SORT_STATS(sIntersectionTest+= ( i + node->tri_list.size() ) * 4 );
-                    return true;
-                }
-            }
+            for( auto i = 0 ; i < node->tri_list.size() ; ++i )
+                intersectTriangle4( ray , node->tri_list[i] , intersect );
+            for( auto i = 0 ; i < node->line_list.size() ; ++i )
+                intersectLine4( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
-                for( auto i = 0 ; i < node->other_list.size() ; ++i ){
-                    found |= node->other_list[i]->GetIntersect( ray , intersect );
-                    if( intersect == nullptr && found ){
-                        SORT_STATS( sIntersectionTest += ( i + node->tri_list.size() + node->line_list.size() ) * 4 );
-                        return true;
-                    }
-                }
+                for( auto i = 0 ; i < node->other_list.size() ; ++i )
+                    node->other_list[i]->GetIntersect( ray , intersect );
             }
             SORT_STATS(sIntersectionTest+=node->pri_cnt);
             continue;
@@ -397,14 +382,8 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             const auto _start = node->pri_offset;
             const auto _end = _start + node->pri_cnt;
 
-            auto found = false;
-            for(auto i = _start ; i < _end ; i++ ){
-                found |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
-                if( intersect == nullptr && found ){
-                    SORT_STATS(sIntersectionTest+= i - _start + 1);
-                    return true;
-                }
-            }
+            for(auto i = _start ; i < _end ; i++ )
+				m_bvhpri[i].primitive->GetIntersect( ray , intersect );
             SORT_STATS(sIntersectionTest+=node->pri_cnt);
             continue;
         }
@@ -647,15 +626,12 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 			}
 			else {
 				// fall back to the worst case
-				alignas(16) float f_min[4];
-				_mm_store_ps(f_min, sse_f_min.sse_data);
-
 				for (auto i = 0; i < node->child_cnt; ++i) {
 					auto k = -1;
 					auto maxDist = 0.0f;
 					for (int j = 0; j < node->child_cnt; ++j) {
-						if (f_min[j] > maxDist) {
-							maxDist = f_min[j];
+						if (sse_f_min[j] > maxDist) {
+							maxDist = sse_f_min[j];
 							k = j;
 						}
 					}
@@ -663,7 +639,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 					if (k == -1)
 						break;
 
-					f_min[k] = -1.0f;
+					sse_f_min[k] = -1.0f;
 					bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
 				}
 			}

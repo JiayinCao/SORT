@@ -21,22 +21,21 @@
 #include "math/ray.h"
 
 #ifdef SSE_ENABLED
-#include <nmmintrin.h>
 
 //! @brief  Like Triangle4, Line4 is the corresponding version for line shape.
 struct Line4{
-    __m128  m_p0_x , m_p0_y , m_p0_z;   /**< Point at the end of the line. */
-    __m128  m_p1_x , m_p1_y , m_p1_z;   /**< Point at the other end of the line. */
+    simd_data  m_p0_x , m_p0_y , m_p0_z;   /**< Point at the end of the line. */
+    simd_data  m_p1_x , m_p1_y , m_p1_z;   /**< Point at the other end of the line. */
 
-    __m128  m_w0 , m_w1;                /**< Half width of the line. */
-    __m128  m_length;                   /**< Length of the line. */
+    simd_data  m_w0 , m_w1;                /**< Half width of the line. */
+    simd_data  m_length;                   /**< Length of the line. */
 
     /**< Transformation from world space to line local space. */
-    __m128  m_mat_00, m_mat_01, m_mat_02, m_mat_03;
-    __m128  m_mat_10, m_mat_11, m_mat_12, m_mat_13;
-    __m128  m_mat_20, m_mat_21, m_mat_22, m_mat_23;
+    simd_data  m_mat_00, m_mat_01, m_mat_02, m_mat_03;
+    simd_data  m_mat_10, m_mat_11, m_mat_12, m_mat_13;
+    simd_data  m_mat_20, m_mat_21, m_mat_22, m_mat_23;
 
-    __m128  m_mask;                     /**< Mask marks which line is valid. */
+    simd_data  m_mask;                     /**< Mask marks which line is valid. */
 
     /**< Pointers to original primitive. */
     const Line*         m_ori_line[4] = { nullptr };
@@ -79,7 +78,6 @@ struct Line4{
         float   mat_00[4] , mat_01[4] , mat_02[4] , mat_03[4];
         float   mat_10[4] , mat_11[4] , mat_12[4] , mat_13[4];
         float   mat_20[4] , mat_21[4] , mat_22[4] , mat_23[4];
-        //float   mat_30[4] , mat_31[4] , mat_32[4] , mat_33[4];
         for( auto i = 0 ; i < 4 && m_ori_pri[i] ; ++i ){
             const auto line = m_ori_line[i];
 
@@ -112,30 +110,30 @@ struct Line4{
             mask[i] = 0.0f;
         }
 
-        m_p0_x = _mm_set_ps( p0_x[3] , p0_x[2] , p0_x[1] , p0_x[0] );
-        m_p0_y = _mm_set_ps( p0_y[3] , p0_y[2] , p0_y[1] , p0_y[0] );
-        m_p0_z = _mm_set_ps( p0_z[3] , p0_z[2] , p0_z[1] , p0_z[0] );
-        m_p1_x = _mm_set_ps( p1_x[3] , p1_x[2] , p1_x[1] , p1_x[0] );
-        m_p1_y = _mm_set_ps( p1_y[3] , p1_y[2] , p1_y[1] , p1_y[0] );
-        m_p1_z = _mm_set_ps( p1_z[3] , p1_z[2] , p1_z[1] , p1_z[0] );
-        m_w0 = _mm_set_ps( w0[3] , w0[2] , w0[1] , w0[0] );
-        m_w1 = _mm_set_ps( w1[3] , w1[2] , w1[1] , w1[0] );
-        m_length = _mm_set_ps( length[3] , length[2] , length[1] , length[0] );
+        m_p0_x = simd_set_ps( p0_x );
+        m_p0_y = simd_set_ps( p0_y );
+        m_p0_z = simd_set_ps( p0_z );
+        m_p1_x = simd_set_ps( p1_x );
+        m_p1_y = simd_set_ps( p1_y );
+        m_p1_z = simd_set_ps( p1_z );
+        m_w0 = simd_set_ps( w0 );
+        m_w1 = simd_set_ps( w1 );
+        m_length = simd_set_ps( length );
 
-        m_mat_00 = _mm_set_ps( mat_00[3] , mat_00[2] , mat_00[1] , mat_00[0] );
-        m_mat_01 = _mm_set_ps( mat_01[3] , mat_01[2] , mat_01[1] , mat_01[0] );
-        m_mat_02 = _mm_set_ps( mat_02[3] , mat_02[2] , mat_02[1] , mat_02[0] );
-        m_mat_03 = _mm_set_ps( mat_03[3] , mat_03[2] , mat_03[1] , mat_03[0] );
-        m_mat_10 = _mm_set_ps( mat_10[3] , mat_10[2] , mat_10[1] , mat_10[0] );
-        m_mat_11 = _mm_set_ps( mat_11[3] , mat_11[2] , mat_11[1] , mat_11[0] );
-        m_mat_12 = _mm_set_ps( mat_12[3] , mat_12[2] , mat_12[1] , mat_12[0] );
-        m_mat_13 = _mm_set_ps( mat_13[3] , mat_13[2] , mat_13[1] , mat_13[0] );
-        m_mat_20 = _mm_set_ps( mat_20[3] , mat_20[2] , mat_20[1] , mat_20[0] );
-        m_mat_21 = _mm_set_ps( mat_21[3] , mat_21[2] , mat_21[1] , mat_21[0] );
-        m_mat_22 = _mm_set_ps( mat_22[3] , mat_22[2] , mat_22[1] , mat_22[0] );
-        m_mat_23 = _mm_set_ps( mat_23[3] , mat_23[2] , mat_23[1] , mat_23[0] );
+        m_mat_00 = simd_set_ps( mat_00 );
+        m_mat_01 = simd_set_ps( mat_01 );
+        m_mat_02 = simd_set_ps( mat_02 );
+        m_mat_03 = simd_set_ps( mat_03 );
+        m_mat_10 = simd_set_ps( mat_10 );
+        m_mat_11 = simd_set_ps( mat_11 );
+        m_mat_12 = simd_set_ps( mat_12 );
+        m_mat_13 = simd_set_ps( mat_13 );
+        m_mat_20 = simd_set_ps( mat_20 );
+        m_mat_21 = simd_set_ps( mat_21 );
+        m_mat_22 = simd_set_ps( mat_22 );
+        m_mat_23 = simd_set_ps( mat_23 );
 
-        m_mask = _mm_cmpeq_ps( zeros , _mm_set_ps( mask[3] , mask[2] , mask[1] , mask[0] ) );
+        m_mask = simd_cmpeq_ps( simd_zeros , simd_set_ps( mask ) );
 
 		return true;
     }
@@ -147,6 +145,14 @@ struct Line4{
     }
 };
 
+#ifdef SIMD_SSE_IMPLEMENTATION
+	#define Simd_Line		Line4
+#endif
+
+#endif // SSE_ENABLED
+
+#if defined( SSE_ENABLED ) || defined( AVX_ENABLED )
+
 //! @brief  Helper function that implements the core algorithm of ray line intersection.
 //!
 //! @param  ray     Ray to be tested against.
@@ -157,58 +163,58 @@ struct Line4{
 //! @param  inter_y Intersection in local line space.
 //! @param  inter_z Intersection in local line space.
 //! @return         Whether there is intersection between the ray and the four lines.
-SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Line4& line4 , __m128& mask , __m128& t4 , __m128& inter_x , __m128& inter_y , __m128& inter_z ){
+SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Simd_Line& line4 , simd_data& mask , simd_data& t4 , simd_data& inter_x , simd_data& inter_y , simd_data& inter_z ){
     mask = line4.m_mask;
 
-    const __m128 ray_ori_x = _mm_add_ps( _mm_mad_ps( line4.m_mat_02, ray.m_ori_z, _mm_mad_ps( line4.m_mat_01, ray.m_ori_y, _mm_mul_ps( line4.m_mat_00, ray.m_ori_x) ) ) , line4.m_mat_03 );
-    const __m128 ray_ori_y = _mm_add_ps( _mm_mad_ps( line4.m_mat_12, ray.m_ori_z, _mm_mad_ps( line4.m_mat_11, ray.m_ori_y, _mm_mul_ps( line4.m_mat_10, ray.m_ori_x) ) ) , line4.m_mat_13 );
-    const __m128 ray_ori_z = _mm_add_ps( _mm_mad_ps( line4.m_mat_22, ray.m_ori_z, _mm_mad_ps( line4.m_mat_21, ray.m_ori_y, _mm_mul_ps( line4.m_mat_20, ray.m_ori_x) ) ) , line4.m_mat_23 );
+    const simd_data ray_ori_x = simd_add_ps( simd_mad_ps( line4.m_mat_02, ray.m_ori_z, simd_mad_ps( line4.m_mat_01, ray.m_ori_y, simd_mul_ps( line4.m_mat_00, ray.m_ori_x) ) ) , line4.m_mat_03 );
+    const simd_data ray_ori_y = simd_add_ps( simd_mad_ps( line4.m_mat_12, ray.m_ori_z, simd_mad_ps( line4.m_mat_11, ray.m_ori_y, simd_mul_ps( line4.m_mat_10, ray.m_ori_x) ) ) , line4.m_mat_13 );
+    const simd_data ray_ori_z = simd_add_ps( simd_mad_ps( line4.m_mat_22, ray.m_ori_z, simd_mad_ps( line4.m_mat_21, ray.m_ori_y, simd_mul_ps( line4.m_mat_20, ray.m_ori_x) ) ) , line4.m_mat_23 );
     
-    const __m128 ray_dir_x = _mm_mad_ps( line4.m_mat_02, ray.m_dir_z, _mm_mad_ps( line4.m_mat_01, ray.m_dir_y, _mm_mul_ps( line4.m_mat_00, ray.m_dir_x )));
-    const __m128 ray_dir_y = _mm_mad_ps( line4.m_mat_12, ray.m_dir_z, _mm_mad_ps( line4.m_mat_11, ray.m_dir_y, _mm_mul_ps( line4.m_mat_10, ray.m_dir_x )));
-    const __m128 ray_dir_z = _mm_mad_ps( line4.m_mat_22, ray.m_dir_z, _mm_mad_ps( line4.m_mat_21, ray.m_dir_y, _mm_mul_ps( line4.m_mat_20, ray.m_dir_x )));
+    const simd_data ray_dir_x = simd_mad_ps( line4.m_mat_02, ray.m_dir_z, simd_mad_ps( line4.m_mat_01, ray.m_dir_y, simd_mul_ps( line4.m_mat_00, ray.m_dir_x )));
+    const simd_data ray_dir_y = simd_mad_ps( line4.m_mat_12, ray.m_dir_z, simd_mad_ps( line4.m_mat_11, ray.m_dir_y, simd_mul_ps( line4.m_mat_10, ray.m_dir_x )));
+    const simd_data ray_dir_z = simd_mad_ps( line4.m_mat_22, ray.m_dir_z, simd_mad_ps( line4.m_mat_21, ray.m_dir_y, simd_mul_ps( line4.m_mat_20, ray.m_dir_x )));
 
-    const __m128 tmp =  _mm_div_ps( _mm_sub_ps( line4.m_w1 , line4.m_w0 ) , line4.m_length );
-    const __m128 tmp0 = _mm_mad_ps( ray_ori_y, tmp, line4.m_w0 );
-    const __m128 tmp1 = _mm_mul_ps( ray_dir_y, tmp);
+    const simd_data tmp =  simd_div_ps( simd_sub_ps( line4.m_w1 , line4.m_w0 ) , line4.m_length );
+    const simd_data tmp0 = simd_mad_ps( ray_ori_y, tmp, line4.m_w0 );
+    const simd_data tmp1 = simd_mul_ps( ray_dir_y, tmp);
 
     // The 2.0 factor is skipped because it is not needed and will be canceled out.
-    const auto a = _mm_sub_ps( _mm_add_ps( _mm_sqr_ps( ray_dir_x ) , _mm_sqr_ps( ray_dir_z ) ) , _mm_sqr_ps( tmp1 ) );
-    const auto b = _mm_sub_ps( _mm_mad_ps( ray_dir_x , ray_ori_x , _mm_mul_ps( ray_dir_z , ray_ori_z ) ) , _mm_mul_ps( tmp0 , tmp1 ) );
-    const auto c = _mm_sub_ps( _mm_add_ps( _mm_sqr_ps( ray_ori_x ) , _mm_sqr_ps( ray_ori_z ) ) , _mm_sqr_ps( tmp0 ) );
+    const simd_data a = simd_sub_ps( simd_add_ps( simd_sqr_ps( ray_dir_x ) , simd_sqr_ps( ray_dir_z ) ) , simd_sqr_ps( tmp1 ) );
+    const simd_data b = simd_sub_ps( simd_mad_ps( ray_dir_x , ray_ori_x , simd_mul_ps( ray_dir_z , ray_ori_z ) ) , simd_mul_ps( tmp0 , tmp1 ) );
+    const simd_data c = simd_sub_ps( simd_add_ps( simd_sqr_ps( ray_ori_x ) , simd_sqr_ps( ray_ori_z ) ) , simd_sqr_ps( tmp0 ) );
 
-    const auto discriminant = _mm_sub_ps( _mm_sqr_ps( b ) , _mm_mul_ps( a , c ) );
-    mask = _mm_and_ps( mask , _mm_cmpgt_ps( discriminant , zeros ) );
-    auto cm = _mm_movemask_ps(mask);
+    const simd_data discriminant = simd_sub_ps( simd_sqr_ps( b ) , simd_mul_ps( a , c ) );
+    mask = simd_and_ps( mask , simd_cmpgt_ps( discriminant , simd_zeros ) );
+    auto cm = simd_movemask_ps(mask);
     if (0 == cm)
 		return false;
     
-    const auto sqrt_dist = _mm_sqrt_ps( discriminant );
-    const auto t0 = _mm_div_ps( _mm_sub_ps( _mm_sub_ps( zeros , b ) , sqrt_dist ) , a );
-    const auto inter_y0 = _mm_mad_ps( ray_dir_y, t0, ray_ori_y );
-    const auto mask0 = _mm_and_ps( _mm_cmplt_ps( inter_y0 , line4.m_length ) , _mm_cmpgt_ps( inter_y0 , zeros ) );
+    const simd_data sqrt_dist = simd_sqrt_ps( discriminant );
+    const simd_data t0 = simd_div_ps( simd_sub_ps( simd_sub_ps( simd_zeros , b ) , sqrt_dist ) , a );
+    const simd_data inter_y0 = simd_mad_ps( ray_dir_y, t0, ray_ori_y );
+    const simd_data mask0 = simd_and_ps( simd_cmplt_ps( inter_y0 , line4.m_length ) , simd_cmpgt_ps( inter_y0 , simd_zeros ) );
 
-    const auto t1 = _mm_div_ps( _mm_sub_ps( sqrt_dist , b ) , a );
-    const auto inter_y1 = _mm_mad_ps( ray_dir_y , t1 , ray_ori_y );
-    inter_y = _mm_pick_ps( mask0 , inter_y0 , inter_y1 );
-    const auto mask1 = _mm_and_ps( _mm_cmplt_ps( inter_y , line4.m_length ) , _mm_cmpgt_ps( inter_y , zeros ) );
-    mask = _mm_and_ps( mask , mask1 );
-	cm = _mm_movemask_ps(mask);
+    const simd_data t1 = simd_div_ps( simd_sub_ps( sqrt_dist , b ) , a );
+    const simd_data inter_y1 = simd_mad_ps( ray_dir_y , t1 , ray_ori_y );
+    inter_y = simd_pick_ps( mask0 , inter_y0 , inter_y1 );
+    const simd_data mask1 = simd_and_ps( simd_cmplt_ps( inter_y , line4.m_length ) , simd_cmpgt_ps( inter_y , simd_zeros ) );
+    mask = simd_and_ps( mask , mask1 );
+	cm = simd_movemask_ps(mask);
 	if (0 == cm)
 		return false;
 
-    t4 = _mm_pick_ps( mask0 , t0 , t1 );
-    t4 = _mm_pick_ps( mask , t4 , infinites );
+    t4 = simd_pick_ps( mask0 , t0 , t1 );
+    t4 = simd_pick_ps( mask , t4 , simd_infinites );
 
-    const __m128 ray_min_t = _mm_set_ps1(ray.m_fMin);
-	const __m128 ray_max_t = _mm_set_ps1(ray.m_fMax);
-    mask = _mm_and_ps( mask , _mm_and_ps( _mm_cmpgt_ps( t4 , ray_min_t ) , _mm_cmplt_ps( t4 , ray_max_t ) ) );
-    cm = _mm_movemask_ps(mask);
+    const simd_data ray_min_t = simd_set_ps1(ray.m_fMin);
+	const simd_data ray_max_t = simd_set_ps1(ray.m_fMax);
+    mask = simd_and_ps( mask , simd_and_ps( simd_cmpgt_ps( t4 , ray_min_t ) , simd_cmplt_ps( t4 , ray_max_t ) ) );
+    cm = simd_movemask_ps(mask);
 	if (0 == cm)
 		return false;
     
-    inter_x = _mm_pick_ps( mask0, _mm_mad_ps(t0, ray_dir_x, ray_ori_x), _mm_mad_ps(t1, ray_dir_x, ray_ori_x) );
-    inter_z = _mm_pick_ps( mask0, _mm_mad_ps(t0, ray_dir_z, ray_ori_z), _mm_mad_ps(t1, ray_dir_z, ray_ori_z) );
+    inter_x = simd_pick_ps( mask0, simd_mad_ps(t0, ray_dir_x, ray_ori_x), simd_mad_ps(t1, ray_dir_x, ray_ori_x) );
+    inter_z = simd_pick_ps( mask0, simd_mad_ps(t0, ray_dir_z, ray_ori_z), simd_mad_ps(t1, ray_dir_z, ray_ori_z) );
 
     return true;
 }
@@ -219,40 +225,39 @@ SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Line4& line4 ,
 //! @param  line4   Data structure holds four lines.
 //! @param  ret     The result of intersection.
 //! @return         Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Intersection* ret ){
+SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Simd_Line& line4 , Intersection* ret ){
     sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
 
-    __m128  mask, t4 , inter_x , inter_y , inter_z ;
+    simd_data  mask, t4 , inter_x , inter_y , inter_z ;
     const auto intersected = intersectLine4Inner( ray , line4 , mask , t4 , inter_x , inter_y , inter_z );
     if( !intersected )
         return false;
     
-    mask = _mm_and_ps( mask , _mm_cmplt_ps( t4 , _mm_set_ps1(ret->t) ) );
-    const auto cm = _mm_movemask_ps(mask);
+    mask = simd_and_ps( mask , simd_cmplt_ps( t4 , simd_set_ps1(ret->t) ) );
+    const auto cm = simd_movemask_ps(mask);
 	if (0 == cm)
 		return false;
 
     // find the closest result
-    __m128 t_min = _mm_min_ps( t4 , _mm_shuffle_ps( t4 , t4 , _MM_SHUFFLE(2, 3, 0, 1) ) );
-	t_min = _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
+    simd_data t_min = simd_minreduction_ps( t4 );
 
     // get the index of the closest one
-    const auto resolved_mask = _mm_movemask_ps( _mm_cmpeq_ps( t4 , t_min ) );
+    const auto resolved_mask = simd_movemask_ps( simd_cmpeq_ps( t4 , t_min ) );
 	const auto res_i = __bsf(resolved_mask);
     
 	const auto primitive = line4.m_ori_pri[res_i];
 	const auto line = line4.m_ori_line[res_i];
 
-    ret->intersect = ray( sse_data( t4 , res_i ) );
+    ret->intersect = ray( t4[res_i] );
 
-	if( sse_data( inter_y , res_i ) == line->m_length ){
+	if( inter_y[res_i] == line->m_length ){
         // A corner case where the tip of the line is being intersected.
         ret->gnormal = Normalize( line->m_world2Line.GetInversed().TransformVector( Vector( 0.0f , 1.0f , 0.0f ) ) );
         ret->normal = ret->gnormal;
         ret->tangent = Normalize( line->m_world2Line.GetInversed().TransformVector( Vector( 1.0f , 0.0f , 0.0f ) ) );
     }else{
         // This may not be physically correct, but it should be fine for a pixel width line.
-        ret->gnormal = Normalize(line->m_world2Line.GetInversed().TransformVector( Vector( sse_data( inter_x , res_i ), 0.0f , sse_data( inter_z , res_i ) ) ) );
+        ret->gnormal = Normalize(line->m_world2Line.GetInversed().TransformVector( Vector( inter_x[res_i], 0.0f , inter_z[res_i] ) ) );
         ret->normal = ret->gnormal;
         ret->tangent = Normalize( line->m_gp1 - line->m_gp0 );
 
@@ -260,8 +265,8 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
 	}
 
     ret->u = 1.0f;
-    ret->v = slerp( line->m_v0 , line->m_v1 , sse_data( inter_y , res_i ) / line->m_length );
-    ret->t = sse_data( t4 , res_i );
+    ret->v = slerp( line->m_v0 , line->m_v1 , inter_y[res_i] / line->m_length );
+    ret->t = t4[res_i];
 
 	ret->primitive = line4.m_ori_pri[res_i];
 
@@ -273,14 +278,9 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
 //! @param  ray     Ray to be tested against.
 //! @param  line4   Data structure holds four lines.
 //! @return         Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectLine4Fast( const Ray& ray , const Line4& line4 ){
-    __m128 dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z;
+SORT_FORCEINLINE bool intersectLine4Fast( const Ray& ray , const Simd_Line& line4 ){
+    simd_data dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z;
     return intersectLine4Inner( ray , line4 , dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z );
 }
 
-#endif
-
-#ifdef AVX_ENABLED
-#include <immintrin.h>
-
-#endif
+#endif // SSE_ENABLED || AVX_ENABLED

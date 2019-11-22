@@ -19,7 +19,6 @@
 
 #include "core/define.h"
 #include "math/ray.h"
-#include "simd_utils.h"
 
 #ifdef SSE_ENABLED
 
@@ -74,4 +73,4 @@ SORT_FORCEINLINE int IntersectBBox4(const Ray& ray, const BBox4& bb, simd_data& 
 	return simd_movemask_ps( mask );
 }
 
-#endif
+#endif // SSE_ENABLED || AVX_ENABLED

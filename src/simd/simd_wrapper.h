@@ -80,6 +80,9 @@ static SORT_FORCEINLINE simd_data   simd_div_ps( const simd_data& s0 , const sim
 static SORT_FORCEINLINE simd_data   simd_sqr_ps( const simd_data& m ){
     return _mm_mul_ps( m.sse_data , m.sse_data );
 }
+static SORT_FORCEINLINE simd_data   simd_sqrt_ps( const simd_data& m ){
+    return _mm_sqrt_ps( m.sse_data );
+}
 static SORT_FORCEINLINE simd_data   simd_rcp_ps( const simd_data& m ){
     return _mm_div_ps( sse_ones , m.sse_data );
 }
@@ -133,3 +136,13 @@ static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
 #ifdef  SIMD_AVX_IMPLEMENTATION
 
 #endif
+
+static SORT_FORCEINLINE int __bsf(int v) {
+#ifdef SORT_IN_WINDOWS
+	unsigned long r = 0;
+	_BitScanForward(&r, v);
+	return r;
+#else
+	return __builtin_ctz(v);
+#endif
+}

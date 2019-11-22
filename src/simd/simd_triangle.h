@@ -23,7 +23,6 @@
 #include "math/intersection.h"
 #include "math/point.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
-#include "simd_utils.h"
 
 #ifdef SSE_ENABLED
 

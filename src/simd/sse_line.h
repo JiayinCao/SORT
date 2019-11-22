@@ -21,6 +21,6 @@
 
 #define SIMD_SSE_IMPLEMENTATION
 #include "simd_wrapper.h"
-#include "simd_line.h"
+#include "simd_bbox.h"
 
 #undef SIMD_SSE_IMPLEMENTATION

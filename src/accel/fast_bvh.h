@@ -22,7 +22,7 @@
 #include "core/primitive.h"
 #include "simd/sse_bbox.h"
 #include "simd/sse_triangle.h"
-#include "simd/simd_line.h"
+#include "simd/sse_line.h"
 
 #ifdef QBVH_IMPLEMENTATION
 #define FBVH_CHILD_CNT  4
