@@ -273,17 +273,16 @@ SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, c
 //!
 //! @param  ray     Ray to be tested against.
 //! @param  tri4    Data structure holds four triangles.
-//! @param  ret     The result of intersection.
+//! @param  ret     The result of intersection. It can't be nullptr.
 //! @return         Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4 , Intersection* ret ){
+	sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
+
 	__m128	u4, v4, t4, mask;
-	const auto quick_quit = (nullptr == ret);
-	const auto maxt = ret ? ret->t : FLT_MAX;
-	const auto intersected = intersectTriangle4Inner(ray, tri4, quick_quit, maxt, t4, u4, v4, mask);
+	const auto maxt = ret->t;
+	const auto intersected = intersectTriangle4Inner(ray, tri4, false, maxt, t4, u4, v4, mask);
 	if (!intersected)
 		return false;
-	if (intersected && quick_quit)
-		return true;
 
     // find the closest result
     __m128 t0 = _mm_min_ps( t4 , _mm_shuffle_ps( t4 , t4 , _MM_SHUFFLE(2, 3, 0, 1) ) );
@@ -311,7 +310,6 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 SORT_FORCEINLINE bool intersectTriangle4Fast(const Ray& ray, const Triangle4& tri4) {
 	// please optimize these value, compiler.
 	__m128	dummy_u4, dummy_v4, dummy_t4, mask;
-
 	return intersectTriangle4Inner(ray, tri4, true, FLT_MAX, dummy_t4, dummy_u4, dummy_v4, mask);
 }
 

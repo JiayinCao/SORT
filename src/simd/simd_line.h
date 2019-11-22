@@ -147,14 +147,18 @@ struct Line4{
     }
 };
 
-//! @brief  With the power of SSE, this utility function helps intersect a ray with four lines at the cost of one.
+//! @brief  Helper function that implements the core algorithm of ray line intersection.
 //!
 //! @param  ray     Ray to be tested against.
-//! @param  line4   Data structure holds four lines.
-//! @param  ret     The result of intersection.
-//! @return         Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Intersection* ret ){
-    __m128  mask = line4.m_mask;
+//! @param  line4   The data structure holds four lines. Some of them may be invalid.
+//! @param  mask    The mask of valid results.
+//! @param  t4      Distane from the ray origin to the intersected point on the line.
+//! @param  inter_x Intersection in local line space.
+//! @param  inter_y Intersection in local line space.
+//! @param  inter_z Intersection in local line space.
+//! @return         Whether there is intersection between the ray and the four lines.
+SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Line4& line4 , __m128& mask , __m128& t4 , __m128& inter_x , __m128& inter_y , __m128& inter_z ){
+    mask = line4.m_mask;
 
     const __m128 ray_ori_x = _mm_add_ps( _mm_mad_ps( line4.m_mat_02, ray.m_ori_z, _mm_mad_ps( line4.m_mat_01, ray.m_ori_y, _mm_mul_ps( line4.m_mat_00, ray.m_ori_x) ) ) , line4.m_mat_03 );
     const __m128 ray_ori_y = _mm_add_ps( _mm_mad_ps( line4.m_mat_12, ray.m_ori_z, _mm_mad_ps( line4.m_mat_11, ray.m_ori_y, _mm_mul_ps( line4.m_mat_10, ray.m_ori_x) ) ) , line4.m_mat_13 );
@@ -186,46 +190,60 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
 
     const auto t1 = _mm_div_ps( _mm_sub_ps( sqrt_dist , b ) , a );
     const auto inter_y1 = _mm_mad_ps( ray_dir_y , t1 , ray_ori_y );
-    const auto inter_y = _mm_pick_ps( mask0 , inter_y0 , inter_y1 );
+    inter_y = _mm_pick_ps( mask0 , inter_y0 , inter_y1 );
     const auto mask1 = _mm_and_ps( _mm_cmplt_ps( inter_y , line4.m_length ) , _mm_cmpgt_ps( inter_y , zeros ) );
     mask = _mm_and_ps( mask , mask1 );
 	cm = _mm_movemask_ps(mask);
 	if (0 == cm)
 		return false;
 
-    auto t = _mm_pick_ps( mask0 , t0 , t1 );
-    t = _mm_pick_ps( mask , t , infinites );
+    t4 = _mm_pick_ps( mask0 , t0 , t1 );
+    t4 = _mm_pick_ps( mask , t4 , infinites );
 
     const __m128 ray_min_t = _mm_set_ps1(ray.m_fMin);
 	const __m128 ray_max_t = _mm_set_ps1(ray.m_fMax);
-    mask = _mm_and_ps( mask , _mm_and_ps( _mm_cmpgt_ps( t , ray_min_t ) , _mm_cmplt_ps( t , ray_max_t ) ) );
+    mask = _mm_and_ps( mask , _mm_and_ps( _mm_cmpgt_ps( t4 , ray_min_t ) , _mm_cmplt_ps( t4 , ray_max_t ) ) );
     cm = _mm_movemask_ps(mask);
 	if (0 == cm)
 		return false;
-
-    if( nullptr == ret )
-        return true;
     
-    mask = _mm_and_ps( mask , _mm_cmplt_ps( t , _mm_set_ps1(ret->t) ) );
-    cm = _mm_movemask_ps(mask);
+    inter_x = _mm_pick_ps( mask0, _mm_mad_ps(t0, ray_dir_x, ray_ori_x), _mm_mad_ps(t1, ray_dir_x, ray_ori_x) );
+    inter_z = _mm_pick_ps( mask0, _mm_mad_ps(t0, ray_dir_z, ray_ori_z), _mm_mad_ps(t1, ray_dir_z, ray_ori_z) );
+
+    return true;
+}
+
+//! @brief  With the power of SSE, this utility function helps intersect a ray with four lines at the cost of one.
+//!
+//! @param  ray     Ray to be tested against.
+//! @param  line4   Data structure holds four lines.
+//! @param  ret     The result of intersection.
+//! @return         Whether there is any intersection that is valid.
+SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Intersection* ret ){
+    sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
+    
+    __m128  mask, t4 , inter_x , inter_y , inter_z ;
+    const auto intersected = intersectLine4Inner( ray , line4 , mask , t4 , inter_x , inter_y , inter_z );
+    if( !intersected )
+        return false;
+    
+    mask = _mm_and_ps( mask , _mm_cmplt_ps( t4 , _mm_set_ps1(ret->t) ) );
+    const auto cm = _mm_movemask_ps(mask);
 	if (0 == cm)
 		return false;
-
-	const auto inter_x = _mm_pick_ps( mask0, _mm_mad_ps(t0, ray_dir_x, ray_ori_x), _mm_mad_ps(t1, ray_dir_x, ray_ori_x) );
-    const auto inter_z = _mm_pick_ps( mask0, _mm_mad_ps(t0, ray_dir_z, ray_ori_z), _mm_mad_ps(t1, ray_dir_z, ray_ori_z) );
 
     // find the closest result
-    __m128 t_min = _mm_min_ps( t , _mm_shuffle_ps( t , t , _MM_SHUFFLE(2, 3, 0, 1) ) );
+    __m128 t_min = _mm_min_ps( t4 , _mm_shuffle_ps( t4 , t4 , _MM_SHUFFLE(2, 3, 0, 1) ) );
 	t_min = _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
 
     // get the index of the closest one
-    const auto resolved_mask = _mm_movemask_ps( _mm_cmpeq_ps( t , t_min ) );
+    const auto resolved_mask = _mm_movemask_ps( _mm_cmpeq_ps( t4 , t_min ) );
 	const auto res_i = __bsf(resolved_mask);
     
 	const auto primitive = line4.m_ori_pri[res_i];
 	const auto line = line4.m_ori_line[res_i];
 
-    ret->intersect = ray( sse_data( t , res_i ) );
+    ret->intersect = ray( sse_data( t4 , res_i ) );
 
 	if( sse_data( inter_y , res_i ) == line->m_length ){
         // A corner case where the tip of the line is being intersected.
@@ -243,11 +261,21 @@ SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Inte
 
     ret->u = 1.0f;
     ret->v = slerp( line->m_v0 , line->m_v1 , sse_data( inter_y , res_i ) / line->m_length );
-    ret->t = sse_data( t , res_i );
+    ret->t = sse_data( t4 , res_i );
 
 	ret->primitive = line4.m_ori_pri[res_i];
 
     return true;
+}
+
+//! @brief  With the power of SSE, this utility function helps intersect a ray with four lines at the cost of one.
+//!
+//! @param  ray     Ray to be tested against.
+//! @param  line4   Data structure holds four lines.
+//! @return         Whether there is any intersection that is valid.
+SORT_FORCEINLINE bool intersectLine4Fast( const Ray& ray , const Line4& line4 ){
+    __m128 dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z;
+    return intersectLine4Inner( ray , line4 , dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z );
 }
 
 #endif

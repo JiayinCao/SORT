@@ -401,13 +401,13 @@ bool  Qbvh::IsOccluded(const Ray& ray) const{
 		// check if it is a leaf node
 		if (0 == node->child_cnt) {
 			for (auto i = 0; i < node->tri_list.size(); ++i) {
-				if (intersectTriangle4(ray, node->tri_list[i], nullptr)) {
+				if (intersectTriangle4Fast(ray, node->tri_list[i])) {
 					SORT_STATS(sIntersectionTest += i * 4);
 					return true;
 				}
 			}
 			for (auto i = 0; i < node->line_list.size(); ++i) {
-				if (intersectLine4(ray, node->line_list[i], nullptr)) {
+				if (intersectLine4Fast(ray, node->line_list[i])) {
 					SORT_STATS(sIntersectionTest += (i + node->tri_list.size()) * 4);
 					return true;
 				}
