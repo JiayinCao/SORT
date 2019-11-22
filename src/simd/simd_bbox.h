@@ -73,4 +73,47 @@ SORT_FORCEINLINE __m128 IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& 
 #ifdef AVX_ENABLED
 #include <immintrin.h>
 
+//! @brief	AVX version bounding box.
+/**
+ * This is basically 8 bounding box in a single data structure. For best performance, they are saved in
+ * structure of arrays.
+ * Since this data structure is only used in limited places, only very few interfaces are implemented for
+ * simplicity.
+ */
+struct BBox4{
+public:
+	__m256	m_min_x;
+	__m256	m_min_y;
+	__m256	m_min_z;
+
+	__m256	m_max_x;
+	__m256	m_max_y;
+	__m256	m_max_z;
+};
+
+SORT_FORCEINLINE __m256 IntersectBBox4(const Ray& ray, const BBox4& bb, __m256& f_min ) {
+	f_min = _mm_set_ps1( ray.m_fMin );
+	__m256 f_max = _mm_set_ps1( ray.m_fMax );
+
+	__m256 t1	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_max_x ) );
+	__m256 t2	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_min_x ) );
+	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
+	f_max		= _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+
+    t1		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_max_y ) );
+	t2		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_min_y ) );
+	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
+	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+
+    t1		    = _mm_add_ps( ray.m_ori_dir_z , _mm_mul_ps( ray.m_rcp_dir_z , bb.m_max_z ) );
+	t2		    = _mm_add_ps( ray.m_ori_dir_z , _mm_mul_ps( ray.m_rcp_dir_z , bb.m_min_z ) );
+	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
+	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+
+	const __m256 mask = _mm_cmple_ps( f_min , f_max );
+	f_min = _mm_pick_ps( mask , f_min , neg_ones );
+
+	return mask;
+}
+
 #endif
