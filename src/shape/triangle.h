@@ -25,6 +25,7 @@ struct  MeshFaceIndex;
 
 #ifdef SSE_ENABLED
 struct Triangle4;
+struct simd_data_sse;
 #endif
 
 //! @brief Triangle class defines the basic behavior of triangle.
@@ -117,6 +118,6 @@ private:
 
 #ifdef SSE_ENABLED
     friend struct Triangle4;
-    friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const __m128& t4, const __m128& u4, const __m128& v4, const int id, Intersection* intersection);
+    friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const simd_data_sse& t4, const simd_data_sse& u4, const simd_data_sse& v4, const int id, Intersection* intersection);
 #endif
 };

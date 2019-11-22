@@ -19,7 +19,7 @@
 #include "core/memory.h"
 #include "core/stats.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
-#include "simd/simd_triangle.h"
+#include "simd/sse_triangle.h"
 
 #ifdef QBVH_IMPLEMENTATION
 IMPLEMENT_RTTI(Qbvh);

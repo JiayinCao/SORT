@@ -21,7 +21,7 @@
 #include "bvh_utils.h"
 #include "core/primitive.h"
 #include "simd/simd_bbox.h"
-#include "simd/simd_triangle.h"
+#include "simd/sse_triangle.h"
 #include "simd/simd_line.h"
 
 #ifdef QBVH_IMPLEMENTATION
