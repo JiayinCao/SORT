@@ -82,7 +82,7 @@ SORT_STATS_AVG_COUNT("Spatial-Structure(OBVH)", "Average Primitive Tested per Ra
 #define sFbvhLeafNodeCountCopy	sObvhLeafNodeCountCopy
 
 #ifdef AVX_ENABLED
-#define AVX_OBVH_IMPLEMENATION
+#define AVX_OBVH_IMPLEMENTATION
 #endif
 #endif
 
@@ -182,7 +182,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
 #if defined(SSE_QBVH_IMPLEMENTATION)
 		const auto bbox = calcBoundingBox(node->children[j].get(), m_bvhpri.get());
 		splitNode(node->children[j].get(), bbox, depth + 1);
-#elif defined( AVX_OBVH_IMPLEMENATION )
+#elif defined( AVX_OBVH_IMPLEMENTATION )
 		// to be implemented
 #else
         node->bbox[j] = calcBoundingBox( node->children[j].get() , m_bvhpri.get() );
@@ -194,7 +194,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
 	node->bbox = calcBoundingBox4( node->children[0].get() , node->children[1].get() , node->children[2].get() , node->children[3].get() );
 #endif
 
-#if defined(AVX_OBVH_IMPLEMENATION)
+#if defined(AVX_OBVH_IMPLEMENTATION)
 
 #endif
 
@@ -239,6 +239,10 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 		node->tri_list.push_back(tri4);
     if (line4.PackData())
         node->line_list.push_back(line4);
+#endif
+
+#ifdef AVX_OBVH_IMPLEMENTATION
+	// to be implemented
 #endif
 
     SORT_STATS(++sFbvhLeafNodeCount);
@@ -391,7 +395,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 				}
 			}
 		}
-#elif defined(SSE_OBVH_IMPLEMENTATION)
+#elif defined(AVX_OBVH_IMPLEMENTATION)
 		// to be implemented
 #else
         // check if it is a leaf node
@@ -541,7 +545,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 				}
 			}
 		}
-#elif defined(AVX_OBVH_IMPLEMENATION)
+#elif defined(AVX_OBVH_IMPLEMENTATION)
 		// to be implemented
 #else
 		// check if it is a leaf node
@@ -674,7 +678,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 				}
 			}
 		}
-#elif defined(AVX_OBVH_IMPLEMENATION)
+#elif defined(AVX_OBVH_IMPLEMENTATION)
 		// to be implemented
 #else
 		// check if it is a leaf node, to be optimized by SSE/AVX
