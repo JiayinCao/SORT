@@ -239,8 +239,8 @@ SORT_FORCEINLINE bool intersectTriangle4Inner(const Ray& ray, const Triangle4& t
 SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const simd_data& t4, const simd_data& u4, const simd_data& v4, const int id, Intersection* intersection) {
 	const auto* triangle = tri4.m_ori_tri[id];
 
-	const auto u = sse_data(u4, id);
-	const auto v = sse_data(v4, id);
+	const auto u = u4[id];
+	const auto v = v4[id];
 	const auto w = 1 - u - v;
 
 	const auto& mem = triangle->m_meshVisual->m_memory;
@@ -252,8 +252,8 @@ SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, c
 	const auto& mv1 = mem->m_vertices[id1];
 	const auto& mv2 = mem->m_vertices[id2];
 
-	const auto res_t = sse_data(t4, id);
-	intersection->intersect = ray(sse_data(t4, id));
+	const auto res_t = t4[id];
+	intersection->intersect = ray(res_t);
 	intersection->t = res_t;
 
 	intersection->gnormal = Normalize(Cross((mv2.m_position - mv0.m_position), (mv1.m_position - mv0.m_position)));

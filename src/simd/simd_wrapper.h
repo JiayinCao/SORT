@@ -121,14 +121,6 @@ static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
     return t_min;
 }
 
-static SORT_FORCEINLINE float sse_data( const simd_data& s , const int index ){
-#ifdef SORT_IN_WINDOWS
-	return s.sse_data.m128_f32[index];
-#else
-	return s.sse_data[index];
-#endif
-}
-
 #endif // SIMD_SSE_IMPLEMENTATION
 #endif // SSE_ENABLED
 
