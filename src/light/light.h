@@ -41,7 +41,7 @@ public:
     //!
     //! @return     'True' if there is no blocker along the ray, otherwise it returns 'False'.
     bool    IsVisible() const{
-        return !m_scene.GetIntersect( ray , 0 );
+        return !m_scene.IsOccluded( ray );
     }
 
     /**< The ray to be evaluated. */

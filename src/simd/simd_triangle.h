@@ -301,13 +301,27 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
     return true;
 }
 
+//! @brief  With the power of SSE, this utility function helps intersect a ray with four triangles at the cost of one.
+//!
+//! This function stops as long as there is an intersection, it is for shadow ray occlusion detection.
+//!
+//! @param  ray     Ray to be tested against.
+//! @param  tri4    Data structure holds four triangles.
+//! @return         Whether there is any intersection that is valid.
+SORT_FORCEINLINE bool intersectTriangle4Fast(const Ray& ray, const Triangle4& tri4) {
+	// please optimize these value, compiler.
+	__m128	dummy_u4, dummy_v4, dummy_t4, mask;
+
+	return intersectTriangle4Inner(ray, tri4, true, FLT_MAX, dummy_t4, dummy_u4, dummy_v4, mask);
+}
+
 //! @brief  Unlike the above function, this helper function will populate all results in the BSSRDFIntersection data structure.
 //!         It is for BSSRDF intersection tests.
 //!
 //! @param  ray     Ray to be tested against.
 //! @param  tri4    Data structure holds four triangles.
 //! @param  ret     The result of intersection.
-SORT_FORCEINLINE void intersectTriangle4(const Ray& ray, const Triangle4& tri4, const StringID matID , BSSRDFIntersections& intersections) {
+SORT_FORCEINLINE void intersectTriangle4Multi(const Ray& ray, const Triangle4& tri4, const StringID matID , BSSRDFIntersections& intersections) {
 	__m128	u4, v4, t4, mask;
 	const auto maxt = intersections.maxt;
 	const auto intersected = intersectTriangle4Inner(ray, tri4, false, maxt, t4, u4, v4, mask);

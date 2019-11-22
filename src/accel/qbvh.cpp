@@ -372,6 +372,133 @@ bool Qbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     return intersect && intersect->primitive;
 }
 
+bool  Qbvh::IsOccluded(const Ray& ray) const{
+	// std::stack is by no means an option here due to its overhead under the hood.
+	using Qbvh_Node_Ptr = Qbvh_Node*;
+	static thread_local std::unique_ptr<Qbvh_Node_Ptr[]> bvh_stack = nullptr;
+	if (UNLIKELY(nullptr == bvh_stack))
+		bvh_stack = std::make_unique<Qbvh_Node_Ptr[]>(m_depth * QBVH_CHILD_CNT);
+
+	SORT_PROFILE("Traverse Qbvh");
+	SORT_STATS(++sRayCount);
+	SORT_STATS(++sShadowRayCount);
+
+	// pre-calculate some data
+	ray.Prepare();
+
+	const auto fmin = Intersect(ray, m_bbox);
+	if (fmin < 0.0f)
+		return false;
+
+	// stack index
+	auto si = 0;
+	bvh_stack[si++] = m_root.get();
+
+	while (si > 0) {
+		const auto node = bvh_stack[--si];
+
+#ifdef SSE_ENABLED
+		// check if it is a leaf node
+		if (0 == node->child_cnt) {
+			for (auto i = 0; i < node->tri_list.size(); ++i) {
+				if (intersectTriangle4(ray, node->tri_list[i], nullptr)) {
+					SORT_STATS(sIntersectionTest += i * 4);
+					return true;
+				}
+			}
+			for (auto i = 0; i < node->line_list.size(); ++i) {
+				if (intersectLine4(ray, node->line_list[i], nullptr)) {
+					SORT_STATS(sIntersectionTest += (i + node->tri_list.size()) * 4);
+					return true;
+				}
+			}
+			if (UNLIKELY(!node->other_list.empty())) {
+				for (auto i = 0; i < node->other_list.size(); ++i) {
+					if (node->other_list[i]->GetIntersect(ray, nullptr)) {
+						SORT_STATS(sIntersectionTest += (i + node->tri_list.size() + node->line_list.size()) * 4);
+						return true;
+					}
+				}
+			}
+			SORT_STATS(sIntersectionTest += node->pri_cnt);
+			continue;
+		}
+
+		__m128 sse_f_min;
+		auto mask = IntersectBBox4(ray, node->bbox, sse_f_min);
+
+		auto m = _mm_movemask_ps(mask);
+		if (0 == m)
+			continue;
+
+		const int k0 = __bsf(m);
+		const auto t0 = sse_data(sse_f_min, k0);
+		m &= m - 1;
+		if (LIKELY(0 == m)) {
+			sAssert(t0 >= 0.0f, SPATIAL_ACCELERATOR);
+			bvh_stack[si++] = node->children[k0].get();
+		}
+		else {
+			const int k1 = __bsf(m);
+			const auto t1 = sse_data(sse_f_min, k1);
+			m &= m - 1;
+
+			sAssert(t1 >= 0.0f, SPATIAL_ACCELERATOR);
+
+			if (LIKELY(0 == m)) {
+				bvh_stack[si++] = node->children[k1].get();
+				bvh_stack[si++] = node->children[k0].get();
+			} else {
+				const int k2 = __bsf(m);
+				const auto t2 = sse_data(sse_f_min, k2);
+				sAssert(t2 >= 0.0f, SPATIAL_ACCELERATOR);
+
+				m &= m - 1;
+
+				if( LIKELY(0==m) ){
+					bvh_stack[si++] = node->children[k2].get();
+					bvh_stack[si++] = node->children[k1].get();
+					bvh_stack[si++] = node->children[k0].get();
+				}else{
+					const int k3 = __bsf(m);
+					const auto t3 = sse_data(sse_f_min, k3);
+					sAssert(t3 >= 0.0f, SPATIAL_ACCELERATOR);
+
+					bvh_stack[si++] = node->children[k2].get();
+					bvh_stack[si++] = node->children[k2].get();
+					bvh_stack[si++] = node->children[k1].get();
+					bvh_stack[si++] = node->children[k0].get();
+				}
+			}
+		}
+#else
+		// check if it is a leaf node
+		if (0 == node->child_cnt) {
+			const auto _start = node->pri_offset;
+			const auto _end = _start + node->pri_cnt;
+
+			for (auto i = _start; i < _end; i++) {
+				if (m_bvhpri[i].primitive->GetIntersect(ray, nullptr)) {
+					SORT_STATS(sIntersectionTest += i - _start + 1);
+					return true;
+				}
+			}
+			SORT_STATS(sIntersectionTest += node->pri_cnt);
+			continue;
+		}
+
+		float f_min[QBVH_CHILD_CNT] = { FLT_MAX };
+		for (auto i = 0; i < node->child_cnt; ++i)
+			f_min[i] = Intersect(ray, node->bbox[i]);
+
+		for (auto i = 0; i < node->child_cnt; ++i)
+			if( f_min[i] >= 0.0f )
+				bvh_stack[si++] = node->children[i].get();
+#endif
+	}
+	return false;
+}
+
 void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
 	// std::stack is by no means an option here due to its overhead under the hood.
 	static thread_local std::unique_ptr<std::pair<Qbvh_Node*, float>[]> bvh_stack = nullptr;
@@ -410,7 +537,7 @@ void Qbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 			// Line is usually used for hair, which has its own hair shader.
 			// Triangle is the only major primitive that has SSS.
 			for ( const auto& tri4 : node->tri_list )
-				intersectTriangle4(ray, tri4, matID, intersect);
+				intersectTriangle4Multi(ray, tri4, matID, intersect);
 			
 			SORT_STATS(sIntersectionTest += node->pri_cnt);
 			continue;
