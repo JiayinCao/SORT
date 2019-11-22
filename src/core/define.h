@@ -53,11 +53,6 @@
     #define SORT_FORCEINLINE inline
 #endif
 
-// If AVX is enabled, AVX will be used to accelerate ray and primitives intersection instead of SSE so that even
-// better performance could be achieved. However, since most vectors only has up to four channels, SSE is still
-// the basic optimization for most of the Vector/Spectrum data structures.
-// #define AVX_ENABLED
-
 // This feature replaces SSS with small mean free path with Lambert, it greatly reduces noises in SSS implementation.
 // However, it does introduces more fireflies, which is not acceptable, for which reason it is disabled by default.
 // The firefly is caused by multiple path with more bounces so that it leads to very low pdf because of each bounce.

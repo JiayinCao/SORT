@@ -19,6 +19,10 @@
 
 #include "core/define.h"
 
+#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+	static_assert( false , "More than one SIMD version is defined before including the wrapper." );
+#endif
+
 #ifdef SSE_ENABLED
 #include <nmmintrin.h>
 
@@ -38,6 +42,9 @@ struct simd_data_sse{
         return float_data[i];
     }
 };
+
+// zero tolerance in any extra size in this structure.
+static_assert( sizeof( simd_data_sse ) == sizeof( __m128 ) , "Incorrect SSE data size." );
 
 #ifdef  SIMD_SSE_IMPLEMENTATION
 
@@ -116,9 +123,8 @@ static SORT_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const sim
     return _mm_max_ps( s0.sse_data , s1.sse_data );
 }
 static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
-    __m128 t_min = _mm_min_ps( s.sse_data , _mm_shuffle_ps( s.sse_data , s.sse_data , _MM_SHUFFLE(2, 3, 0, 1) ) );
-	t_min = _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
-    return t_min;
+    const __m128 t_min = _mm_min_ps( s.sse_data , _mm_shuffle_ps( s.sse_data , s.sse_data , _MM_SHUFFLE(2, 3, 0, 1) ) );
+	return _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
 }
 
 #endif // SIMD_SSE_IMPLEMENTATION

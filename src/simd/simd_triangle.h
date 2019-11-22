@@ -126,6 +126,14 @@ struct Triangle4{
     }
 };
 
+#ifdef SIMD_SSE_IMPLEMENTATION
+	#define Simd_Triangle		Triangle4
+#endif
+
+#endif	// SSE_ENABLED
+
+#if defined( SSE_ENABLED ) || defined( AVX_ENABLED )
+
 //! @brief	Core algorithm of ray triangle intersection.
 //!
 //! @param	ray			The ray to be tested.
@@ -135,7 +143,7 @@ struct Triangle4{
 //! @param	t4			Output, the distances from ray origin to triangles. It will be FLT_MAX if there is no intersection.
 //! @param	u4			Blending factor.
 //! @param	v4			Blending factor.
-SORT_FORCEINLINE bool intersectTriangle4Inner(const Ray& ray, const Triangle4& tri4, const bool quick_quit, const float maxt, simd_data& t4, simd_data& u4, simd_data& v4, simd_data& mask) {
+SORT_FORCEINLINE bool intersectTriangle4Inner(const Ray& ray, const Simd_Triangle& tri4, const bool quick_quit, const float maxt, simd_data& t4, simd_data& u4, simd_data& v4, simd_data& mask) {
 	mask = tri4.m_mask;
 
 	// step 0 : translate the vertices to ray coordinate system
@@ -236,7 +244,7 @@ SORT_FORCEINLINE bool intersectTriangle4Inner(const Ray& ray, const Triangle4& t
 //! @param	v4		      Blending factor.
 //! @param  id            Index of the intersection of our interest.
 //! @param  intersection  The pointer to the result to be filled. It can't be nullptr.
-SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const simd_data& t4, const simd_data& u4, const simd_data& v4, const int id, Intersection* intersection) {
+SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri4, const Ray& ray, const simd_data& t4, const simd_data& u4, const simd_data& v4, const int id, Intersection* intersection) {
 	const auto* triangle = tri4.m_ori_tri[id];
 
 	const auto u = u4[id];
@@ -274,7 +282,7 @@ SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, c
 //! @param  tri4    Data structure holds four triangles.
 //! @param  ret     The result of intersection. It can't be nullptr.
 //! @return         Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4 , Intersection* ret ){
+SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Simd_Triangle& tri4 , Intersection* ret ){
 	sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
 
 	simd_data	u4, v4, t4, mask;
@@ -305,7 +313,7 @@ SORT_FORCEINLINE bool intersectTriangle4( const Ray& ray , const Triangle4& tri4
 //! @param  ray     Ray to be tested against.
 //! @param  tri4    Data structure holds four triangles.
 //! @return         Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectTriangle4Fast(const Ray& ray, const Triangle4& tri4) {
+SORT_FORCEINLINE bool intersectTriangle4Fast(const Ray& ray, const Simd_Triangle& tri4) {
 	// please optimize these value, compiler.
 	simd_data	dummy_u4, dummy_v4, dummy_t4, mask;
 	return intersectTriangle4Inner(ray, tri4, true, FLT_MAX, dummy_t4, dummy_u4, dummy_v4, mask);
@@ -317,7 +325,7 @@ SORT_FORCEINLINE bool intersectTriangle4Fast(const Ray& ray, const Triangle4& tr
 //! @param  ray     Ray to be tested against.
 //! @param  tri4    Data structure holds four triangles.
 //! @param  ret     The result of intersection.
-SORT_FORCEINLINE void intersectTriangle4Multi(const Ray& ray, const Triangle4& tri4, const StringID matID , BSSRDFIntersections& intersections) {
+SORT_FORCEINLINE void intersectTriangle4Multi(const Ray& ray, const Simd_Triangle& tri4, const StringID matID , BSSRDFIntersections& intersections) {
 	simd_data	u4, v4, t4, mask;
 	const auto maxt = intersections.maxt;
 	const auto intersected = intersectTriangle4Inner(ray, tri4, false, maxt, t4, u4, v4, mask);
@@ -357,4 +365,4 @@ SORT_FORCEINLINE void intersectTriangle4Multi(const Ray& ray, const Triangle4& t
 	}
 }
 
-#endif
+#endif // SSE_ENABLED || AVX_ENABLED

@@ -93,7 +93,7 @@ macro(source_group_by_dir source_files)
     endforeach(sgbd_file)
 endmacro(source_group_by_dir)
 
-file(GLOB_RECURSE project_headers src/*.h)
+file(GLOB_RECURSE project_headers src/*.h src/*.hpp)
 file(GLOB_RECURSE project_cpps src/*.cpp)
 file(GLOB_RECURSE project_cs src/*.c)
 file(GLOB_RECURSE project_ccs src/*.cc)

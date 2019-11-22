@@ -25,8 +25,6 @@
 
 static const __m128 zeros       = _mm_set_ps1( 0.0f );
 static const __m128 infinites   = _mm_set_ps1( FLT_MAX );
-static const __m128 neg_ones	= _mm_set_ps1( -1.0f );
-static const __m128 ones		= _mm_set_ps1(1.0f);
 
 static SORT_FORCEINLINE float	sse_data(__m128 simd , int index) {
 #ifdef SORT_IN_WINDOWS
@@ -51,6 +49,7 @@ static SORT_FORCEINLINE __m128 _mm_sqr_ps( const __m128& m ){
 }
 
 static SORT_FORCEINLINE __m128 _mm_rcpa_ps( const __m128& m ){
+	static const __m128 ones		= _mm_set_ps1(1.0f);
     return _mm_div_ps(ones, m);
 }
 

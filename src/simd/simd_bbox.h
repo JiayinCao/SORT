@@ -22,7 +22,6 @@
 #include "simd_utils.h"
 
 #ifdef SSE_ENABLED
-#include <nmmintrin.h>
 
 //! @brief	SIMD version bounding box.
 /**
@@ -33,87 +32,46 @@
  */
 struct BBox4{
 public:
-	__m128	m_min_x;
-	__m128	m_min_y;
-	__m128	m_min_z;
+	simd_data	m_min_x;
+	simd_data	m_min_y;
+	simd_data	m_min_z;
 
-	__m128	m_max_x;
-	__m128	m_max_y;
-	__m128	m_max_z;
+	simd_data	m_max_x;
+	simd_data	m_max_y;
+	simd_data	m_max_z;
 };
 
-SORT_FORCEINLINE __m128 IntersectBBox4(const Ray& ray, const BBox4& bb, __m128& f_min ) {
-	f_min = _mm_set_ps1( ray.m_fMin );
-	__m128 f_max = _mm_set_ps1( ray.m_fMax );
-
-	__m128 t1	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_max_x ) );
-	__m128 t2	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_min_x ) );
-	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max		= _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
-
-    t1		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_max_y ) );
-	t2		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_min_y ) );
-	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
-
-    t1		    = _mm_add_ps( ray.m_ori_dir_z , _mm_mul_ps( ray.m_rcp_dir_z , bb.m_max_z ) );
-	t2		    = _mm_add_ps( ray.m_ori_dir_z , _mm_mul_ps( ray.m_rcp_dir_z , bb.m_min_z ) );
-	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
-
-	const __m128 mask = _mm_cmple_ps( f_min , f_max );
-	f_min = _mm_pick_ps( mask , f_min , neg_ones );
-
-	return mask;
-}
-
+#ifdef SIMD_SSE_IMPLEMENTATION
+	#define Simd_BBox		BBox4
 #endif
 
+#endif // SSE_ENABLED
 
-#ifdef AVX_ENABLED
-#include <immintrin.h>
+#if defined( SSE_ENABLED ) || defined( AVX_ENABLED )
 
-//! @brief	AVX version bounding box.
-/**
- * This is basically 8 bounding box in a single data structure. For best performance, they are saved in
- * structure of arrays.
- * Since this data structure is only used in limited places, only very few interfaces are implemented for
- * simplicity.
- */
-struct BBox4{
-public:
-	__m256	m_min_x;
-	__m256	m_min_y;
-	__m256	m_min_z;
+SORT_FORCEINLINE int IntersectBBox4(const Ray& ray, const BBox4& bb, simd_data& f_min ) {
+	f_min = simd_set_ps1( ray.m_fMin );
+	simd_data f_max = simd_set_ps1( ray.m_fMax );
 
-	__m256	m_max_x;
-	__m256	m_max_y;
-	__m256	m_max_z;
-};
+	simd_data t1	= simd_add_ps( ray.m_ori_dir_x , simd_mul_ps( ray.m_rcp_dir_x , bb.m_max_x ) );
+	simd_data t2	= simd_add_ps( ray.m_ori_dir_x , simd_mul_ps( ray.m_rcp_dir_x , bb.m_min_x ) );
+	f_min	    = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
+	f_max		= simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-SORT_FORCEINLINE __m256 IntersectBBox4(const Ray& ray, const BBox4& bb, __m256& f_min ) {
-	f_min = _mm_set_ps1( ray.m_fMin );
-	__m256 f_max = _mm_set_ps1( ray.m_fMax );
+    t1		    = simd_add_ps( ray.m_ori_dir_y , simd_mul_ps( ray.m_rcp_dir_y , bb.m_max_y ) );
+	t2		    = simd_add_ps( ray.m_ori_dir_y , simd_mul_ps( ray.m_rcp_dir_y , bb.m_min_y ) );
+	f_min	    = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
+	f_max	    = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-	__m256 t1	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_max_x ) );
-	__m256 t2	= _mm_add_ps( ray.m_ori_dir_x , _mm_mul_ps( ray.m_rcp_dir_x , bb.m_min_x ) );
-	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max		= _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+    t1		    = simd_add_ps( ray.m_ori_dir_z , simd_mul_ps( ray.m_rcp_dir_z , bb.m_max_z ) );
+	t2		    = simd_add_ps( ray.m_ori_dir_z , simd_mul_ps( ray.m_rcp_dir_z , bb.m_min_z ) );
+	f_min	    = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
+	f_max	    = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-    t1		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_max_y ) );
-	t2		    = _mm_add_ps( ray.m_ori_dir_y , _mm_mul_ps( ray.m_rcp_dir_y , bb.m_min_y ) );
-	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
+	const simd_data mask = simd_cmple_ps( f_min , f_max );
+	f_min = simd_pick_ps( mask , f_min , simd_neg_ones );
 
-    t1		    = _mm_add_ps( ray.m_ori_dir_z , _mm_mul_ps( ray.m_rcp_dir_z , bb.m_max_z ) );
-	t2		    = _mm_add_ps( ray.m_ori_dir_z , _mm_mul_ps( ray.m_rcp_dir_z , bb.m_min_z ) );
-	f_min	    = _mm_max_ps( f_min , _mm_min_ps( t1 , t2 ) );
-	f_max	    = _mm_min_ps( f_max , _mm_max_ps( t1 , t2 ) );
-
-	const __m256 mask = _mm_cmple_ps( f_min , f_max );
-	f_min = _mm_pick_ps( mask , f_min , neg_ones );
-
-	return mask;
+	return simd_movemask_ps( mask );
 }
 
 #endif

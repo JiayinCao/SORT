@@ -20,7 +20,7 @@
 #include "accelerator.h"
 #include "bvh_utils.h"
 #include "core/primitive.h"
-#include "simd/simd_bbox.h"
+#include "simd/sse_bbox.h"
 #include "simd/sse_triangle.h"
 #include "simd/simd_line.h"
 
