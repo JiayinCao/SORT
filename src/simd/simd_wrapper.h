@@ -27,6 +27,12 @@
 #ifdef SSE_ENABLED
 #include <nmmintrin.h>
 
+#ifndef SORT_IN_WINDOWS
+#define simd_data_sse   __m128
+#else
+// somehow this data structure can introduce huge performance problem in MacOS
+// since it is purely for [] operator, it is only used in Windows, where there is no
+// performance issue by using it.
 struct simd_data_sse{
     union{
         __m128  sse_data;
@@ -43,6 +49,15 @@ struct simd_data_sse{
         return float_data[i];
     }
 };
+#endif
+
+static SORT_FORCEINLINE __m128 get_sse_data( const simd_data_sse& d ){
+#ifdef SORT_IN_MAC
+    return d;
+#else
+    return d.sse_data;
+#endif
+}
 
 // zero tolerance in any extra size in this structure.
 static_assert( sizeof( simd_data_sse ) == sizeof( __m128 ) , "Incorrect SSE data size." );
@@ -69,67 +84,67 @@ static SORT_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
     return _mm_set_ps( d[3] , d[2] , d[1] , d[0] );
 }
 static SORT_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_add_ps( s0.sse_data , s1.sse_data );
+    return _mm_add_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_sub_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_sub_ps( s0.sse_data , s1.sse_data );
+    return _mm_sub_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_mul_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_mul_ps( s0.sse_data , s1.sse_data );
+    return _mm_mul_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_div_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_div_ps( s0.sse_data , s1.sse_data );
+    return _mm_div_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_sqr_ps( const simd_data& m ){
-    return _mm_mul_ps( m.sse_data , m.sse_data );
+    return _mm_mul_ps( get_sse_data(m) , get_sse_data(m) );
 }
 static SORT_FORCEINLINE simd_data   simd_sqrt_ps( const simd_data& m ){
-    return _mm_sqrt_ps( m.sse_data );
+    return _mm_sqrt_ps( get_sse_data(m) );
 }
 static SORT_FORCEINLINE simd_data   simd_rcp_ps( const simd_data& m ){
-    return _mm_div_ps( sse_ones , m.sse_data );
+    return _mm_div_ps( sse_ones , get_sse_data(m) );
 }
 static SORT_FORCEINLINE simd_data   simd_mad_ps( const simd_data& a , const simd_data& b , const simd_data& c ){
-    return _mm_add_ps( _mm_mul_ps( a.sse_data , b.sse_data ) , c.sse_data );
+    return _mm_add_ps( _mm_mul_ps( get_sse_data(a) , get_sse_data(b) ) , get_sse_data(c) );
 }
 static SORT_FORCEINLINE simd_data   simd_pick_ps( const simd_data& mask , const simd_data& a , const simd_data& b ){
-    return _mm_or_ps( _mm_and_ps( mask.sse_data , a.sse_data ) , _mm_andnot_ps( mask.sse_data , b.sse_data ) );
+    return _mm_or_ps( _mm_and_ps( get_sse_data(mask) , get_sse_data(a) ) , _mm_andnot_ps( get_sse_data(mask) , get_sse_data(b) ) );
 }
 static SORT_FORCEINLINE simd_data   simd_cmpeq_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_cmpeq_ps( s0.sse_data , s1.sse_data );
+    return _mm_cmpeq_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_cmpneq_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_cmpneq_ps( s0.sse_data , s1.sse_data );
+    return _mm_cmpneq_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_cmple_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_cmple_ps( s0.sse_data , s1.sse_data );
+    return _mm_cmple_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_cmplt_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_cmplt_ps( s0.sse_data , s1.sse_data );
+    return _mm_cmplt_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_cmpge_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_cmpge_ps( s0.sse_data , s1.sse_data );
+    return _mm_cmpge_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_cmpgt_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_cmpgt_ps( s0.sse_data , s1.sse_data );
+    return _mm_cmpgt_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_and_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_and_ps( s0.sse_data , s1.sse_data );
+    return _mm_and_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_or_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_or_ps( s0.sse_data , s1.sse_data );
+    return _mm_or_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE int         simd_movemask_ps( const simd_data& mask ){
-    return _mm_movemask_ps( mask.sse_data );
+    return _mm_movemask_ps( get_sse_data(mask) );
 }
 static SORT_FORCEINLINE simd_data   simd_min_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_min_ps( s0.sse_data , s1.sse_data );
+    return _mm_min_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const simd_data& s1 ){
-    return _mm_max_ps( s0.sse_data , s1.sse_data );
+    return _mm_max_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
 static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
-    const __m128 t_min = _mm_min_ps( s.sse_data , _mm_shuffle_ps( s.sse_data , s.sse_data , _MM_SHUFFLE(2, 3, 0, 1) ) );
+    const __m128 t_min = _mm_min_ps( get_sse_data(s) , _mm_shuffle_ps( get_sse_data(s) , get_sse_data(s) , _MM_SHUFFLE(2, 3, 0, 1) ) );
 	return _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
 }
 
