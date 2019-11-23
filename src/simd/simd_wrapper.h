@@ -155,6 +155,9 @@ static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
 
 #include <immintrin.h>
 
+#ifndef SORT_IN_WINDOWS
+#define simd_data_avx   __m256
+#else
 struct simd_data_avx {
 	union {
 		__m256  avx_data;
@@ -171,20 +174,25 @@ struct simd_data_avx {
 		return float_data[i];
 	}
 };
+#endif
+
+static SORT_FORCEINLINE __m256 get_avx_data( const simd_data_avx& d ){
+#ifdef SORT_IN_WINDOWS
+    return d.avx_data;
+#else
+    return d;
+#endif
+}
 
 // zero tolerance in any extra size in this structure.
 static_assert(sizeof(simd_data_avx) == sizeof(__m256), "Incorrect AVX data size.");
 
 #ifdef SIMD_AVX_IMPLEMENTATION
 
-static SORT_FORCEINLINE __m256   simd_set_ps1(const float f) {
-	return _mm256_set_ps(f,f,f,f,f,f,f,f);
-}
-
-static const __m256 avx_zeros		= simd_set_ps1(0.0f);
-static const __m256 avx_infinites	= simd_set_ps1(FLT_MAX);
-static const __m256 avx_neg_ones	= simd_set_ps1(-1.0f);
-static const __m256 avx_ones		= simd_set_ps1(1.0f);
+static const __m256 avx_zeros		= _mm256_set_ps(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+static const __m256 avx_infinites	= _mm256_set_ps(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX );
+static const __m256 avx_neg_ones	= _mm256_set_ps(-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f);
+static const __m256 avx_ones		= _mm256_set_ps(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 
 #define simd_data       simd_data_avx
 #define simd_ones       avx_ones
@@ -193,6 +201,82 @@ static const __m256 avx_ones		= simd_set_ps1(1.0f);
 #define simd_infinites  avx_infinites
 
 #define SIMD_CHANNEL	8
+
+static SORT_FORCEINLINE simd_data   simd_set_ps1( const float f ){
+    return _mm256_set_ps(f,f,f,f,f,f,f,f);
+}
+static SORT_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
+    return _mm256_set_ps( d[7] , d[6] , d[5] , d[4] , d[3] , d[2] , d[1] , d[0] );
+}
+static SORT_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_add_ps( get_avx_data(s0) , get_avx_data(s1) );
+}
+static SORT_FORCEINLINE simd_data   simd_sub_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_sub_ps( get_avx_data(s0) , get_avx_data(s1) );
+}
+static SORT_FORCEINLINE simd_data   simd_mul_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_mul_ps( get_avx_data(s0) , get_avx_data(s1) );
+}
+static SORT_FORCEINLINE simd_data   simd_div_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_div_ps( get_avx_data(s0) , get_avx_data(s1) );
+}
+static SORT_FORCEINLINE simd_data   simd_sqr_ps( const simd_data& m ){
+    return _mm256_mul_ps( get_avx_data(m) , get_avx_data(m) );
+}
+static SORT_FORCEINLINE simd_data   simd_sqrt_ps( const simd_data& m ){
+    return _mm256_sqrt_ps( get_avx_data(m) );
+}
+static SORT_FORCEINLINE simd_data   simd_rcp_ps( const simd_data& m ){
+    return _mm256_div_ps( avx_ones , get_avx_data(m) );
+}
+static SORT_FORCEINLINE simd_data   simd_mad_ps( const simd_data& a , const simd_data& b , const simd_data& c ){
+    return _mm256_add_ps( _mm256_mul_ps( get_avx_data(a) , get_avx_data(b) ) , get_avx_data(c) );
+}
+static SORT_FORCEINLINE simd_data   simd_pick_ps( const simd_data& mask , const simd_data& a , const simd_data& b ){
+    return _mm256_or_ps( _mm256_and_ps( get_avx_data(mask) , get_avx_data(a) ) , _mm256_andnot_ps( get_avx_data(mask) , get_avx_data(b) ) );
+}
+static SORT_FORCEINLINE simd_data   simd_cmpeq_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_EQ_OQ );
+}
+static SORT_FORCEINLINE simd_data   simd_cmpneq_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_NEQ_OQ );
+}
+static SORT_FORCEINLINE simd_data   simd_cmple_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_LE_OQ );
+}
+static SORT_FORCEINLINE simd_data   simd_cmplt_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_LT_OQ );
+}
+static SORT_FORCEINLINE simd_data   simd_cmpge_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_GE_OQ );
+}
+static SORT_FORCEINLINE simd_data   simd_cmpgt_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_GT_OQ );
+}
+static SORT_FORCEINLINE simd_data   simd_and_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_and_ps( get_avx_data(s0) , get_avx_data(s1) );
+}
+static SORT_FORCEINLINE simd_data   simd_or_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_or_ps( get_avx_data(s0) , get_avx_data(s1) );
+}
+static SORT_FORCEINLINE int         simd_movemask_ps( const simd_data& mask ){
+    return _mm256_movemask_ps( get_avx_data(mask) );
+}
+static SORT_FORCEINLINE simd_data   simd_min_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_min_ps( get_avx_data(s0) , get_avx_data(s1) );
+}
+static SORT_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const simd_data& s1 ){
+    return _mm256_max_ps( get_avx_data(s0) , get_avx_data(s1) );
+}
+static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
+    // this is obviously not a final solution
+    float tmp[8];
+    _mm256_storeu_ps( tmp , s );
+    float maxv = std::max( tmp[0] , tmp[1] );
+    for( int i = 0 ; i < 8 ; ++i )
+        maxv = std::max( maxv , tmp[i] );
+    return simd_set_ps1( maxv );
+}
 
 #endif
 

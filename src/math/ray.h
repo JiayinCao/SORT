@@ -27,6 +27,13 @@
 	#include <nmmintrin.h>
 #endif
 
+enum RAY_PREPARE_FLAG{
+    RESOLVE_SSE_DATA = 0X01,
+    RESOLVE_AVX_DATA = 0x02,
+    RESOLVE_CPU_DATA = 0x03,
+    RESOLVE_NONE_DATA = 0x00
+};
+
 //! @brief  Data structure representing a ray.
 class Ray{
 public:
@@ -51,7 +58,7 @@ public:
     }
 
     //! @brief  Pre-calculate some cached data for better performance. Only call this function after all ray data is prepared.
-    void    Prepare() const;
+    void    Prepare( const RAY_PREPARE_FLAG flag = RESOLVE_CPU_DATA ) const;
 
 // the original point and direction are also public
     // original point of the ray
@@ -90,6 +97,24 @@ public:
 	mutable __m128	m_sse_scale_x;	/**< Scaling along each axis in local coordinate. */
 	mutable __m128	m_sse_scale_y;	/**< Scaling along each axis in local coordinate. */
 	mutable __m128  m_sse_scale_z;	/**< Scaling along each axis in local coordinate. */
+#endif
+
+#ifdef AVX_ENABLED
+    mutable __m256  m_ori_dir_x_avx;    /**< -Ori.x/Dir.x , this is used in ray AABB intersection. */
+    mutable __m256  m_ori_dir_y_avx;    /**< -Ori.y/Dir.y , this is used in ray AABB intersection. */
+    mutable __m256  m_ori_dir_z_avx;    /**< -Ori.z/Dir.z , this is used in ray AABB intersection. */
+    mutable __m256  m_rcp_dir_x_avx;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
+    mutable __m256  m_rcp_dir_y_avx;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
+    mutable __m256  m_rcp_dir_z_avx;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
+	mutable __m256	m_ori_x_avx;		/**< Ori.x , this is used in ray Triangle&Line intersection. */
+	mutable __m256	m_ori_y_avx;		/**< Ori.y , this is used in ray Triangle&Line intersection. */
+	mutable __m256	m_ori_z_avx;		/**< Ori.z , this is used in ray Triangle&Line intersection. */
+    mutable __m256  m_dir_x_avx;        /**< Dir.x , this is used in ray Line intersection. */
+    mutable __m256  m_dir_y_avx;        /**< Dir.x , this is used in ray Line intersection. */
+    mutable __m256  m_dir_z_avx;        /**< Dir.x , this is used in ray Line intersection. */
+	mutable __m256	m_sse_scale_x_avx;	/**< Scaling along each axis in local coordinate. */
+	mutable __m256	m_sse_scale_y_avx;	/**< Scaling along each axis in local coordinate. */
+	mutable __m256  m_sse_scale_z_avx;	/**< Scaling along each axis in local coordinate. */
 #endif
 
 	mutable int		m_local_x , m_local_y , m_local_z;	/**< Id used to identify axis in local coordinate. */

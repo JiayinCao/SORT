@@ -286,7 +286,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #ifdef QBVH_IMPLEMENTATION
 	SORT_PROFILE("Traverse Qbvh");
 #endif
-#ifdef QBVH_IMPLEMENTATION
+#ifdef OBVH_IMPLEMENTATION
 	SORT_PROFILE("Traverse Obvh");
 #endif
 
@@ -294,7 +294,14 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     SORT_STATS(sShadowRayCount += intersect != nullptr);
 
     // pre-calculate some data
-    ray.Prepare();
+	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
+#ifdef QBVH_IMPLEMENTATION
+	flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA );
+#endif
+#ifdef OBVH_IMPLEMENTATION
+	flag |= (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA );
+#endif
+    ray.Prepare(flag);
 
     const auto fmin = Intersect(ray, m_bbox);
     if (fmin < 0.0f)
