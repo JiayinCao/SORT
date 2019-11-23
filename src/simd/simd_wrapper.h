@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <float.h>
 #include "core/define.h"
 
 #if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
