@@ -52,10 +52,10 @@ struct simd_data_sse{
 #endif
 
 static SORT_FORCEINLINE __m128 get_sse_data( const simd_data_sse& d ){
-#ifdef SORT_IN_MAC
-    return d;
-#else
+#ifdef SORT_IN_WINDOWS
     return d.sse_data;
+#else
+    return d;
 #endif
 }
 
