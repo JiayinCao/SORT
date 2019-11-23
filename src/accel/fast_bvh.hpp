@@ -191,12 +191,8 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
 #endif
     }
 
-#if defined(SSE_QBVH_IMPLEMENTATION)
-	node->bbox = calcBoundingBox4( node->children[0].get() , node->children[1].get() , node->children[2].get() , node->children[3].get() );
-#endif
-
-#if defined(AVX_OBVH_IMPLEMENTATION)
-
+#if defined(SSE_QBVH_IMPLEMENTATION) || defined(AVX_OBVH_IMPLEMENTATION)
+	node->bbox = calcBoundingBoxSIMD( node->children );
 #endif
 
     SORT_STATS(sFbvhNodeCount+=node->child_cnt);
@@ -251,30 +247,32 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
     SORT_STATS(sFbvhPrimitiveCount += (StatsInt)node->pri_cnt);
 }
 
-#ifdef SSE_QBVH_IMPLEMENTATION
-BBox4 Fbvh::calcBoundingBox4(const Fbvh_Node* const node0 , const Fbvh_Node* const node1 , const Fbvh_Node* const node2 , const Fbvh_Node* const node3 ) const {
-	BBox4 node_bbox;
+#if defined(SSE_QBVH_IMPLEMENTATION) || defined(AVX_OBVH_IMPLEMENTATION)
+Simd_BBox Fbvh::calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) const {
+	Simd_BBox node_bbox;
 
-	const BBox bb0 = calcBoundingBox( node0 , m_bvhpri.get() );
-	const BBox bb1 = calcBoundingBox( node1 , m_bvhpri.get() );
-	const BBox bb2 = calcBoundingBox( node2 , m_bvhpri.get() );
-	const BBox bb3 = calcBoundingBox( node3 , m_bvhpri.get() );
+	float	min_x[SIMD_CHANNEL] , min_y[SIMD_CHANNEL] , min_z[SIMD_CHANNEL];
+	float	max_x[SIMD_CHANNEL] , max_y[SIMD_CHANNEL] , max_z[SIMD_CHANNEL];
+	for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
+		if( children[i] == nullptr )
+			break;
+		const auto bb = calcBoundingBox( children[i].get() , m_bvhpri.get() );
+		min_x[i] = bb.m_Min.x;
+		min_y[i] = bb.m_Min.y;
+		min_z[i] = bb.m_Min.z;
+		max_x[i] = bb.m_Max.x;
+		max_y[i] = bb.m_Max.y;
+		max_z[i] = bb.m_Max.z;
+	}
 
-	node_bbox.m_min_x = _mm_set_ps( bb3.m_Min.x , bb2.m_Min.x , bb1.m_Min.x , bb0.m_Min.x );
-	node_bbox.m_min_y = _mm_set_ps( bb3.m_Min.y , bb2.m_Min.y , bb1.m_Min.y , bb0.m_Min.y );
-	node_bbox.m_min_z = _mm_set_ps( bb3.m_Min.z , bb2.m_Min.z , bb1.m_Min.z , bb0.m_Min.z );
+	node_bbox.m_min_x = simd_set_ps( min_x );
+	node_bbox.m_min_y = simd_set_ps( min_y );
+	node_bbox.m_min_z = simd_set_ps( min_z );
     
-	node_bbox.m_max_x = _mm_set_ps( bb3.m_Max.x , bb2.m_Max.x , bb1.m_Max.x , bb0.m_Max.x );
-	node_bbox.m_max_y = _mm_set_ps( bb3.m_Max.y , bb2.m_Max.y , bb1.m_Max.y , bb0.m_Max.y );
-	node_bbox.m_max_z = _mm_set_ps( bb3.m_Max.z , bb2.m_Max.z , bb1.m_Max.z , bb0.m_Max.z );
+	node_bbox.m_max_x = simd_set_ps( max_x );
+	node_bbox.m_max_y = simd_set_ps( max_y );
+	node_bbox.m_max_z = simd_set_ps( max_z );
 
-	return node_bbox;
-}
-#endif
-
-#ifdef AVX_OBVH_IMPLEMENTATION
-BBox8 Fbvh::calcBoundingBox8( ... ) const{
-	BBox8 node_bbox;
 	return node_bbox;
 }
 #endif

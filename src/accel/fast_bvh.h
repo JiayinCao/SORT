@@ -20,9 +20,6 @@
 #include "accelerator.h"
 #include "bvh_utils.h"
 #include "core/primitive.h"
-#include "simd/sse_bbox.h"
-#include "simd/sse_triangle.h"
-#include "simd/sse_line.h"
 
 #ifdef QBVH_IMPLEMENTATION
 #define FBVH_CHILD_CNT  4
@@ -35,21 +32,23 @@
 struct Fbvh_Node {
 #ifdef QBVH_IMPLEMENTATION    
 #if SSE_ENABLED
-	BBox4						bbox;						/**< Bounding boxes of its four children. */
-
-    std::vector<Triangle4>            tri_list;
-    std::vector<Line4>                line_list;
-    std::vector<const Primitive*>     other_list;
+	BBox4							bbox;					/**< Bounding boxes of its four children. */
+    std::vector<Triangle4>          tri_list;
+    std::vector<Line4>              line_list;
+    std::vector<const Primitive*>   other_list;
 #else
-	BBox                        bbox[FBVH_CHILD_CNT];       /**< Bounding boxes of its children. */
+	BBox							bbox[4];				/**< Bounding boxes of its children. */
 #endif
 #endif
 
 #ifdef OBVH_IMPLEMENTATION
-#if ABX_ENABLED
-    // to be implemented
+#if AVX_ENABLED
+	BBox8							bbox;					/**< Bounding boxes of its four children. */
+	std::vector<Triangle8>          tri_list;
+	//std::vector<Line8>              line_list;
+	std::vector<const Primitive*>   other_list;
 #else
-    BBox                        bbox[FBVH_CHILD_CNT];       /**< Bounding boxes of its children. */
+    BBox							bbox[8];				/**< Bounding boxes of its children. */
 #endif
 #endif
 
@@ -172,15 +171,12 @@ private:
 	//! @param depth		Depth of the current node.
     void    makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , unsigned depth );
 
-#ifdef SSE_ENABLED
+#if defined(SSE_ENABLED) || defined(AVX_ENABLED)
 	//! @brief A helper function calculating bounding box of a node.
 	//!
-	//! @param node0        First child of the current node.
-	//! @param node1		Second child of the current node.
-	//! @param node2		Third child of the current node.
-	//! @param node3		Forth child of the current node.
-	//! @return             The 4 bounding box of the node, there could be degenerated ones if there is no four children.
-	BBox4	calcBoundingBox4(const Fbvh_Node* const node0, const Fbvh_Node* const node1, const Fbvh_Node* const node2, const Fbvh_Node* const node3) const;
+	//! @param children		The children nodes
+	//! @return             The 4/8 bounding box of the node, there could be degenerated ones if there is no four children.
+	Simd_BBox	calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) const;
 #endif
 
 #ifdef QBVH_IMPLEMENTATION

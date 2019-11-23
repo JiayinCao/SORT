@@ -21,6 +21,9 @@
 #define Fbvh        Qbvh
 #define Fbvh_Node   Qbvh_Node
 
+#include "simd/sse_bbox.h"
+#include "simd/sse_triangle.h"
+#include "simd/sse_line.h"
 #include "fast_bvh.h"
 
 #undef QBVH_IMPLEMENTATION

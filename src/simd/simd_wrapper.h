@@ -59,6 +59,8 @@ static const __m128 sse_ones		= _mm_set_ps1(1.0f);
 #define simd_neg_ones   sse_neg_ones
 #define simd_infinites  sse_infinites
 
+#define SIMD_CHANNEL	4
+
 static SORT_FORCEINLINE simd_data   simd_set_ps1( const float d ){
     return _mm_set_ps1( d );
 }
@@ -133,7 +135,50 @@ static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
 #endif // SIMD_SSE_IMPLEMENTATION
 #endif // SSE_ENABLED
 
-#ifdef  SIMD_AVX_IMPLEMENTATION
+#ifdef  AVX_ENABLED
+
+#include <immintrin.h>
+
+struct simd_data_avx {
+	union {
+		__m256  avx_data;
+		float   float_data[8];
+	};
+
+	SORT_FORCEINLINE simd_data_avx() {}
+	SORT_FORCEINLINE simd_data_avx(const __m256& data) :avx_data(data) {}
+
+	SORT_FORCEINLINE float  operator [](const int i) const {
+		return float_data[i];
+	}
+	SORT_FORCEINLINE float& operator [](const int i) {
+		return float_data[i];
+	}
+};
+
+// zero tolerance in any extra size in this structure.
+static_assert(sizeof(simd_data_avx) == sizeof(__m256), "Incorrect AVX data size.");
+
+#ifdef SIMD_AVX_IMPLEMENTATION
+
+static SORT_FORCEINLINE __m256   simd_set_ps1(const float f) {
+	return _mm256_set_ps(f,f,f,f,f,f,f,f);
+}
+
+static const __m256 avx_zeros		= simd_set_ps1(0.0f);
+static const __m256 avx_infinites	= simd_set_ps1(FLT_MAX);
+static const __m256 avx_neg_ones	= simd_set_ps1(-1.0f);
+static const __m256 avx_ones		= simd_set_ps1(1.0f);
+
+#define simd_data       simd_data_avx
+#define simd_ones       avx_ones
+#define simd_zeros      avx_zeros
+#define simd_neg_ones   avx_neg_ones
+#define simd_infinites  avx_infinites
+
+#define SIMD_CHANNEL	8
+
+#endif
 
 #endif
 

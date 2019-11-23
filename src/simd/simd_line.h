@@ -19,6 +19,8 @@
 
 #include "core/define.h"
 #include "math/ray.h"
+#include "shape/line.h"
+#include "core/primitive.h"
 
 #ifdef SSE_ENABLED
 

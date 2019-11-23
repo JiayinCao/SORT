@@ -17,12 +17,19 @@
 
 #pragma once
 
+#ifdef AVX_ENABLED
+
 #define OBVH_IMPLEMENTATION
 #define Fbvh        Obvh
 #define Fbvh_Node   Obvh_Node
 
+#include "simd/avx_bbox.h"
+#include "simd/avx_triangle.h"
+//#include "simd/avx_line.h"
 #include "fast_bvh.h"
 
 #undef OBVH_IMPLEMENTATION
 #undef Fbvh
 #undef Fbvh_Node
+
+#endif

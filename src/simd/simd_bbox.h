@@ -19,6 +19,7 @@
 
 #include "core/define.h"
 #include "math/ray.h"
+#include "math/bbox.h"
 
 #ifdef SSE_ENABLED
 
@@ -31,13 +32,13 @@
  */
 struct BBox4{
 public:
-	simd_data	m_min_x;
-	simd_data	m_min_y;
-	simd_data	m_min_z;
+	simd_data_sse	m_min_x;
+	simd_data_sse	m_min_y;
+	simd_data_sse	m_min_z;
 
-	simd_data	m_max_x;
-	simd_data	m_max_y;
-	simd_data	m_max_z;
+	simd_data_sse	m_max_x;
+	simd_data_sse	m_max_y;
+	simd_data_sse	m_max_z;
 };
 
 #ifdef SIMD_SSE_IMPLEMENTATION
@@ -45,6 +46,32 @@ public:
 #endif
 
 #endif // SSE_ENABLED
+
+#ifdef AVX_ENABLED
+
+//! @brief	SIMD version bounding box.
+/**
+ * This is basically 8 bounding box in a single data structure. For best performance, they are saved in
+ * structure of arrays.
+ * Since this data structure is only used in limited places, only very few interfaces are implemented for
+ * simplicity.
+ */
+struct BBox8{
+public:
+	simd_data_avx	m_min_x;
+	simd_data_avx	m_min_y;
+	simd_data_avx	m_min_z;
+
+	simd_data_avx	m_max_x;
+	simd_data_avx	m_max_y;
+	simd_data_avx	m_max_z;
+};
+
+#ifdef SIMD_AVX_IMPLEMENTATION
+	#define Simd_BBox		BBox8
+#endif
+
+#endif // AVX_ENABLED
 
 #if defined( SSE_ENABLED ) || defined( AVX_ENABLED )
 

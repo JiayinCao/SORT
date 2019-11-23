@@ -19,8 +19,8 @@
 
 #include "core/define.h"
 
-#define SIMD_SSE_IMPLEMENTATION
+#define SIMD_AVX_IMPLEMENTATION
 #include "simd_wrapper.h"
-#include "simd_line.h"
+#include "simd_bbox.h"
 
-#undef SIMD_SSE_IMPLEMENTATION
+#undef SIMD_AVX_IMPLEMENTATION

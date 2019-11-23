@@ -17,11 +17,16 @@
 
 #include "obvh.h"
 
+#ifdef AVX_ENABLED
 #define OBVH_IMPEMENTATION
 #define Fbvh        Obvh
 #define Fbvh_Node   Obvh_Node
 
+#include "simd/avx_bbox.h"
+#include "simd/avx_triangle.h"
+//#include "simd/avx_line.h"
 #include "fast_bvh.hpp"
 
 #undef  Fbvh
 #undef  Fbvh_Node
+#endif

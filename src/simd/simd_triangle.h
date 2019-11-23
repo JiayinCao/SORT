@@ -23,6 +23,9 @@
 #include "math/intersection.h"
 #include "math/point.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
+#include "core/primitive.h"
+#include "shape/triangle.h"
+#include "entity/visual.h"
 
 #ifdef SSE_ENABLED
 
