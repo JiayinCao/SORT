@@ -19,8 +19,7 @@
 
 #include "core/define.h"
 
-#define SIMD_SSE_IMPLEMENTATION
+#ifdef  SSE_ENABLED
 #include "simd_wrapper.h"
 #include "simd_triangle.h"
-
-#undef SIMD_SSE_IMPLEMENTATION
+#endif

@@ -19,8 +19,7 @@
 
 #include "core/define.h"
 
-#define SIMD_AVX_IMPLEMENTATION
+#ifdef AVX_ENABLED
 #include "simd_wrapper.h"
 #include "simd_bbox.h"
-
-#undef SIMD_AVX_IMPLEMENTATION
+#endif

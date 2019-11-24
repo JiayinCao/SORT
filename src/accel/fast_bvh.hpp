@@ -147,7 +147,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
 		unsigned    split_axis;
 		float       split_pos;
 		const auto sah = pickBestSplit(split_axis, split_pos, m_bvhpri.get(), node_bbox, start, end);
-		if (sah >= prim_cnt)
+		if (sah >= prim_cnt /*|| prim_cnt <= m_maxPriInLeaf*/ )
 			done_splitting.push( std::make_pair( start , end ) );
 		else{
 			const auto compare = [split_pos, split_axis](const Bvh_Primitive& pri) {return pri.m_centroid[split_axis] < split_pos; };
@@ -181,7 +181,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
 
     // split children if needed.
     for( int j = 0 ; j < node->child_cnt ; ++j ){
-#if defined(SSE_QBVH_IMPLEMENTATION) || defined( AVX_OBVH_IMPLEMENTATION )
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 		const auto bbox = calcBoundingBox(node->children[j].get(), m_bvhpri.get());
 		splitNode(node->children[j].get(), bbox, depth + 1);
 #else
@@ -190,7 +190,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
 #endif
     }
 
-#if defined(SSE_QBVH_IMPLEMENTATION) || defined(AVX_OBVH_IMPLEMENTATION)
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 	node->bbox = calcBoundingBoxSIMD( node->children );
 #endif
 
@@ -277,7 +277,7 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
     SORT_STATS(sFbvhPrimitiveCount += (StatsInt)node->pri_cnt);
 }
 
-#if defined(SSE_QBVH_IMPLEMENTATION) || defined(AVX_OBVH_IMPLEMENTATION)
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 Simd_BBox Fbvh::calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) const {
 	Simd_BBox node_bbox;
 

@@ -153,7 +153,7 @@ struct Line4{
 
 #endif // SSE_ENABLED
 
-#if defined( SSE_ENABLED ) || defined( AVX_ENABLED )
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 
 //! @brief  Helper function that implements the core algorithm of ray line intersection.
 //!

@@ -134,7 +134,7 @@ private:
     #endif
 #endif
 
-#ifdef SSE_ENABLED
+#ifdef AVX_ENABLED
     friend struct Triangle8;
     #ifdef SORT_IN_WINDOWS
         friend SORT_FORCEINLINE void setupIntersection(const Triangle8& tri4, const Ray& ray, const simd_data_avx& t8, const simd_data_avx& u8, const simd_data_avx& v8, const int id, Intersection* intersection);

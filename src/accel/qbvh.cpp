@@ -21,10 +21,18 @@
 #define Fbvh        Qbvh
 #define Fbvh_Node   Qbvh_Node
 
+#ifdef SSE_ENABLED
+#define SIMD_SSE_IMPLEMENTATION
+#endif
+
 #include "simd/sse_bbox.h"
 #include "simd/sse_triangle.h"
 #include "simd/sse_line.h"
 #include "fast_bvh.hpp"
+
+#ifdef SSE_ENABLED
+#undef SIMD_SSE_IMPLEMENTATION
+#endif
 
 #undef  Fbvh
 #undef  Fbvh_Node

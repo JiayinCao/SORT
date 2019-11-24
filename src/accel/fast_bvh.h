@@ -192,7 +192,7 @@ private:
 	//! @param depth		Depth of the current node.
     void    makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , unsigned depth );
 
-#if defined(SSE_ENABLED) || defined(AVX_ENABLED)
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 	//! @brief A helper function calculating bounding box of a node.
 	//!
 	//! @param children		The children nodes
