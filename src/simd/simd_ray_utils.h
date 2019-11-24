@@ -28,22 +28,22 @@
 #ifdef SSE_ENABLED
 
 #ifdef SIMD_SSE_IMPLEMENTATION
-simd_data_sse	ray_ori_dir_x( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_sse	ray_ori_dir_x( const Ray& ray ){
 	return ray.m_ori_dir_x;
 }
-simd_data_sse	ray_ori_dir_y( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_sse	ray_ori_dir_y( const Ray& ray ){
 	return ray.m_ori_dir_y;
 }
-simd_data_sse	ray_ori_dir_z( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_sse	ray_ori_dir_z( const Ray& ray ){
 	return ray.m_ori_dir_z;
 }
-simd_data_sse	ray_rcp_dir_x( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_sse	ray_rcp_dir_x( const Ray& ray ){
 	return ray.m_rcp_dir_x;
 }
-simd_data_sse	ray_rcp_dir_y( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_sse	ray_rcp_dir_y( const Ray& ray ){
 	return ray.m_rcp_dir_y;
 }
-simd_data_sse	ray_rcp_dir_z( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_sse	ray_rcp_dir_z( const Ray& ray ){
 	return ray.m_rcp_dir_z;
 }
 #endif
@@ -53,22 +53,22 @@ simd_data_sse	ray_rcp_dir_z( const Ray& ray ){
 #ifdef AVX_ENABLED
 
 #ifdef SIMD_AVX_IMPLEMENTATION
-simd_data_avx	ray_ori_dir_x( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_avx	ray_ori_dir_x( const Ray& ray ){
 	return ray.m_ori_dir_x_avx;
 }
-simd_data_avx	ray_ori_dir_y( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_avx	ray_ori_dir_y( const Ray& ray ){
 	return ray.m_ori_dir_y_avx;
 }
-simd_data_avx	ray_ori_dir_z( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_avx	ray_ori_dir_z( const Ray& ray ){
 	return ray.m_ori_dir_z_avx;
 }
-simd_data_avx	ray_rcp_dir_x( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_avx	ray_rcp_dir_x( const Ray& ray ){
 	return ray.m_rcp_dir_x_avx;
 }
-simd_data_avx	ray_rcp_dir_y( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_avx	ray_rcp_dir_y( const Ray& ray ){
 	return ray.m_rcp_dir_y_avx;
 }
-simd_data_avx	ray_rcp_dir_z( const Ray& ray ){
+static SORT_FORCEINLINE simd_data_avx	ray_rcp_dir_z( const Ray& ray ){
 	return ray.m_rcp_dir_z_avx;
 }
 #endif

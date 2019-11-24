@@ -78,7 +78,7 @@ public:
 #endif // AVX_ENABLED
 
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
-SORT_FORCEINLINE int IntersectBBox4(const Ray& ray, const Simd_BBox& bb, simd_data& f_min ) {
+SORT_FORCEINLINE int IntersectBBox_SIMD(const Ray& ray, const Simd_BBox& bb, simd_data& f_min ) {
 	f_min = simd_set_ps1( ray.m_fMin );
 	simd_data f_max = simd_set_ps1( ray.m_fMax );
 

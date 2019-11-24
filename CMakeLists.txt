@@ -47,7 +47,7 @@ SET( ENABLE_STATS                  "YES"  CACHE BOOL "Enable SORT stats system. 
 SET( ENABLE_FASTMATH               "NO"   CACHE BOOL "Enable fast math. It may have potential risk in errors due to lower precision. Performance gain is quite limited and unstable, for which reason it is disabled by default." )
 SET( ENABLE_LINKTIME_OPTIMIZATION  "YES"  CACHE BOOL "Link time optimization is enabled by default since it does show some performance gain sometimes." )
 SET( ENABLE_SSE_OPTIMIZATION       "YES"  CACHE BOOL "Enable SSE optimization, this could boost the performance of ray tracing." )
-SET( ENABLE_AVX_OPTIMIZATION       "NO"  CACHE BOOL "Enable AVX optimization, this could boost the performance of ray tracing even more." )
+SET( ENABLE_AVX_OPTIMIZATION       "YES"  CACHE BOOL "Enable AVX optimization, this could boost the performance of ray tracing even more." )
 
 # For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
 if(ENABLE_PROFILER)
@@ -196,6 +196,10 @@ if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
 
     if(ENABLE_LINKTIME_OPTIMIZATION)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
+    endif()
+
+    if(ENABLE_AVX_OPTIMIZATION)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
     endif()
 
     if(ENABLE_FASTMATH)

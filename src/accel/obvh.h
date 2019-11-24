@@ -24,7 +24,7 @@
 #define Fbvh_Node   Obvh_Node
 
 #include "simd/avx_bbox.h"
-#include "simd/avx_triangle.h"
+//#include "simd/avx_triangle.h"
 //#include "simd/avx_line.h"
 #include "fast_bvh.h"
 
