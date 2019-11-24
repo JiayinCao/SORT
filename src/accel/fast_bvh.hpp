@@ -237,36 +237,36 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 #endif
 
 #ifdef AVX_OBVH_IMPLEMENTATION
-	//Triangle4   tri4;
+	Triangle8   tri8;
     //Line4       line4;
     const auto _start = node->pri_offset;
     const auto _end = _start + node->pri_cnt;
     for(auto i = _start ; i < _end ; i++ ){
         const Primitive* primitive = m_bvhpri[i].primitive;
-        /*const auto shape_type = primitive->GetShapeType();
+        const auto shape_type = primitive->GetShapeType();
         if( SHAPE_TRIANGLE == shape_type ){
-            if( tri4.PushTriangle( primitive ) ){
-                if( tri4.PackData() ){
-					node->tri_list.push_back( tri4 );
-					tri4.Reset();
+            if( tri8.PushTriangle( primitive ) ){
+                if( tri8.PackData() ){
+					node->tri_list.push_back( tri8 );
+					tri8.Reset();
 				}
             }
-        }else if( SHAPE_LINE == shape_type ){
+        }/*else if( SHAPE_LINE == shape_type ){
             if( line4.PushLine( primitive ) ){
                 if( line4.PackData() ){
                     node->line_list.push_back( line4 );
                     line4.Reset();
                 }
             }
-        }else
-		*/
+        }*/
+		else
 		{
             // line will also be specially treated in the future.
             node->other_list.push_back( primitive );
         }
     }
-	//if (tri4.PackData())
-	//	node->tri_list.push_back(tri4);
+	if (tri8.PackData())
+		node->tri_list.push_back(tri8);
     //if (line4.PackData())
     //    node->line_list.push_back(line4);
 #endif
@@ -352,7 +352,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
             for( auto i = 0 ; i < node->tri_list.size() ; ++i )
-                intersectTriangle4( ray , node->tri_list[i] , intersect );
+                intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
             for( auto i = 0 ; i < node->line_list.size() ; ++i )
                 intersectLine4( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
@@ -411,8 +411,8 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #elif defined(AVX_OBVH_IMPLEMENTATION)
 		// check if it is a leaf node
         if( 0 == node->child_cnt ){
-           // for( auto i = 0 ; i < node->tri_list.size() ; ++i )
-           //     intersectTriangle4( ray , node->tri_list[i] , intersect );
+			for( auto i = 0 ; i < node->tri_list.size() ; ++i )
+                intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
            // for( auto i = 0 ; i < node->line_list.size() ; ++i )
            //     intersectLine4( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
@@ -540,7 +540,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 		// check if it is a leaf node
 		if (0 == node->child_cnt) {
 			for (auto i = 0; i < node->tri_list.size(); ++i) {
-				if (intersectTriangle4Fast(ray, node->tri_list[i])) {
+				if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
 					SORT_STATS(sIntersectionTest += i * 4);
 					return true;
 				}
@@ -611,12 +611,13 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 #elif defined(AVX_OBVH_IMPLEMENTATION)
 		// check if it is a leaf node
 		if (0 == node->child_cnt) {
-			/*for (auto i = 0; i < node->tri_list.size(); ++i) {
-				if (intersectTriangle4Fast(ray, node->tri_list[i])) {
+			for (auto i = 0; i < node->tri_list.size(); ++i) {
+				if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
 					SORT_STATS(sIntersectionTest += i * 4);
 					return true;
 				}
 			}
+			/*
 			for (auto i = 0; i < node->line_list.size(); ++i) {
 				if (intersectLine4Fast(ray, node->line_list[i])) {
 					SORT_STATS(sIntersectionTest += (i + node->tri_list.size()) * 4);
@@ -758,7 +759,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 			// Line is usually used for hair, which has its own hair shader.
 			// Triangle is the only major primitive that has SSS.
 			for ( const auto& tri4 : node->tri_list )
-				intersectTriangle4Multi(ray, tri4, matID, intersect);
+				intersectTriangleMulti_SIMD(ray, tri4, matID, intersect);
 			SORT_STATS(sIntersectionTest += node->pri_cnt);
 			continue;
 		}
@@ -813,19 +814,16 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 			}
 		}
 #elif defined(AVX_OBVH_IMPLEMENTATION)
-/*
-		// this is not supported in AVX now.
 		if (0 == node->child_cnt) {
-			// Note, only triangle shape support SSS here. This is the only big difference between SSE and non-SSE version implementation.
+			// Note, only triangle shape support SSS here. This is the only big difference between AVX and non-AVX version implementation.
 			// There are only two major primitives in SORT, line and triangle.
 			// Line is usually used for hair, which has its own hair shader.
 			// Triangle is the only major primitive that has SSS.
-			for ( const auto& tri4 : node->tri_list )
-				intersectTriangle4Multi(ray, tri4, matID, intersect);
+			for ( const auto& tri8 : node->tri_list )
+				intersectTriangleMulti_SIMD(ray, tri8, matID, intersect);
 			SORT_STATS(sIntersectionTest += node->pri_cnt);
 			continue;
 		}
-*/
 
 		simd_data sse_f_min;
 		auto m = IntersectBBox_SIMD(ray, node->bbox, sse_f_min);

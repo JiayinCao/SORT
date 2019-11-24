@@ -37,6 +37,15 @@ static SORT_FORCEINLINE simd_data_sse	ray_ori_dir_y( const Ray& ray ){
 static SORT_FORCEINLINE simd_data_sse	ray_ori_dir_z( const Ray& ray ){
 	return ray.m_ori_dir_z;
 }
+static SORT_FORCEINLINE simd_data_sse	ray_ori_x( const Ray& ray ){
+	return ray.m_ori_x;
+}
+static SORT_FORCEINLINE simd_data_sse	ray_ori_y( const Ray& ray ){
+	return ray.m_ori_y;
+}
+static SORT_FORCEINLINE simd_data_sse	ray_ori_z( const Ray& ray ){
+	return ray.m_ori_z;
+}
 static SORT_FORCEINLINE simd_data_sse	ray_rcp_dir_x( const Ray& ray ){
 	return ray.m_rcp_dir_x;
 }
@@ -45,6 +54,15 @@ static SORT_FORCEINLINE simd_data_sse	ray_rcp_dir_y( const Ray& ray ){
 }
 static SORT_FORCEINLINE simd_data_sse	ray_rcp_dir_z( const Ray& ray ){
 	return ray.m_rcp_dir_z;
+}
+static SORT_FORCEINLINE simd_data_sse	ray_scale_x( const Ray& ray ){
+	return ray.m_sse_scale_x;
+}
+static SORT_FORCEINLINE simd_data_sse	ray_scale_y( const Ray& ray ){
+	return ray.m_sse_scale_y;
+}
+static SORT_FORCEINLINE simd_data_sse	ray_scale_z( const Ray& ray ){
+	return ray.m_sse_scale_z;
 }
 #endif
 
@@ -62,6 +80,15 @@ static SORT_FORCEINLINE simd_data_avx	ray_ori_dir_y( const Ray& ray ){
 static SORT_FORCEINLINE simd_data_avx	ray_ori_dir_z( const Ray& ray ){
 	return ray.m_ori_dir_z_avx;
 }
+static SORT_FORCEINLINE simd_data_avx	ray_ori_x( const Ray& ray ){
+	return ray.m_ori_x_avx;
+}
+static SORT_FORCEINLINE simd_data_avx	ray_ori_y( const Ray& ray ){
+	return ray.m_ori_y_avx;
+}
+static SORT_FORCEINLINE simd_data_avx	ray_ori_z( const Ray& ray ){
+	return ray.m_ori_z_avx;
+}
 static SORT_FORCEINLINE simd_data_avx	ray_rcp_dir_x( const Ray& ray ){
 	return ray.m_rcp_dir_x_avx;
 }
@@ -70,6 +97,15 @@ static SORT_FORCEINLINE simd_data_avx	ray_rcp_dir_y( const Ray& ray ){
 }
 static SORT_FORCEINLINE simd_data_avx	ray_rcp_dir_z( const Ray& ray ){
 	return ray.m_rcp_dir_z_avx;
+}
+static SORT_FORCEINLINE simd_data_avx	ray_scale_x( const Ray& ray ){
+	return ray.m_scale_x_avx;
+}
+static SORT_FORCEINLINE simd_data_avx	ray_scale_y( const Ray& ray ){
+	return ray.m_scale_y_avx;
+}
+static SORT_FORCEINLINE simd_data_avx	ray_scale_z( const Ray& ray ){
+	return ray.m_scale_z_avx;
 }
 #endif
 

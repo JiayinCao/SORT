@@ -112,9 +112,9 @@ public:
     mutable __m256  m_dir_x_avx;        /**< Dir.x , this is used in ray Line intersection. */
     mutable __m256  m_dir_y_avx;        /**< Dir.x , this is used in ray Line intersection. */
     mutable __m256  m_dir_z_avx;        /**< Dir.x , this is used in ray Line intersection. */
-	mutable __m256	m_sse_scale_x_avx;	/**< Scaling along each axis in local coordinate. */
-	mutable __m256	m_sse_scale_y_avx;	/**< Scaling along each axis in local coordinate. */
-	mutable __m256  m_sse_scale_z_avx;	/**< Scaling along each axis in local coordinate. */
+	mutable __m256	m_scale_x_avx;	    /**< Scaling along each axis in local coordinate. */
+	mutable __m256	m_scale_y_avx;	    /**< Scaling along each axis in local coordinate. */
+	mutable __m256  m_scale_z_avx;	    /**< Scaling along each axis in local coordinate. */
 #endif
 
 	mutable int		m_local_x , m_local_y , m_local_z;	/**< Id used to identify axis in local coordinate. */

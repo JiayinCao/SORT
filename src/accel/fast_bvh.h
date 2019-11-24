@@ -37,18 +37,18 @@ struct Fbvh_Node {
     std::vector<Line4>              line_list;
     std::vector<const Primitive*>   other_list;
 #else
-	BBox							bbox[4];				/**< Bounding boxes of its children. */
+	BBox							bbox[FBVH_CHILD_CNT];	/**< Bounding boxes of its children. */
 #endif
 #endif
 
 #ifdef OBVH_IMPLEMENTATION
 #if AVX_ENABLED
 	BBox8							bbox;					/**< Bounding boxes of its four children. */
-	//std::vector<Triangle8>          tri_list;
+	std::vector<Triangle8>          tri_list;
 	//std::vector<Line8>              line_list;
 	std::vector<const Primitive*>   other_list;
 #else
-    BBox							bbox[8];				/**< Bounding boxes of its children. */
+    BBox							bbox[FBVH_CHILD_CNT];	/**< Bounding boxes of its children. */
 #endif
 #endif
 

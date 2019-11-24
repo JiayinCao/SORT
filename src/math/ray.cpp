@@ -131,9 +131,9 @@ void Ray::Prepare( const RAY_PREPARE_FLAG flag ) const{
         m_dir_y_avx = _mm256_set_ps( m_Dir.y, m_Dir.y, m_Dir.y, m_Dir.y, m_Dir.y, m_Dir.y, m_Dir.y, m_Dir.y );
         m_dir_z_avx = _mm256_set_ps( m_Dir.z, m_Dir.z, m_Dir.z, m_Dir.z, m_Dir.z, m_Dir.z, m_Dir.z, m_Dir.z );
 
-        m_sse_scale_x_avx = _mm256_set_ps( m_scale_x, m_scale_x, m_scale_x, m_scale_x, m_scale_x, m_scale_x, m_scale_x, m_scale_x );
-        m_sse_scale_y_avx = _mm256_set_ps( m_scale_y, m_scale_y, m_scale_y, m_scale_y, m_scale_y, m_scale_y, m_scale_y, m_scale_y );
-        m_sse_scale_z_avx = _mm256_set_ps( m_scale_z, m_scale_z, m_scale_z, m_scale_z, m_scale_z, m_scale_z, m_scale_z, m_scale_z );
+        m_scale_x_avx = _mm256_set_ps( m_scale_x, m_scale_x, m_scale_x, m_scale_x, m_scale_x, m_scale_x, m_scale_x, m_scale_x );
+        m_scale_y_avx = _mm256_set_ps( m_scale_y, m_scale_y, m_scale_y, m_scale_y, m_scale_y, m_scale_y, m_scale_y, m_scale_y );
+        m_scale_z_avx = _mm256_set_ps( m_scale_z, m_scale_z, m_scale_z, m_scale_z, m_scale_z, m_scale_z, m_scale_z, m_scale_z );
     }
 #endif
 }
