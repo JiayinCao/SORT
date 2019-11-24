@@ -61,7 +61,6 @@ struct Qbvh_Node {
 	Qbvh_Node(): pri_cnt(0) , pri_offset(0) , child_cnt(0){}
 };
 
-__declspec(align(32))
 struct Obvh_Node {
 #ifdef OBVH_IMPLEMENTATION
 #if AVX_ENABLED
