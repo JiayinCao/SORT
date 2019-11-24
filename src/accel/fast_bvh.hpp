@@ -19,8 +19,10 @@
 #include "core/memory.h"
 #include "core/stats.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
-//#include "simd/sse_triangle.h"
-//#include "simd/sse_line.h"
+
+#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+static_assert(false, "More than one SIMD version is defined before including fast_bvh.hpp");
+#endif
 
 #ifdef QBVH_IMPLEMENTATION
 IMPLEMENT_RTTI(Qbvh);
@@ -126,8 +128,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
     const auto start    = node->pri_offset;
     const auto end      = start + node->pri_cnt;
 
-    const auto primitive_num = end - start;
-    if( primitive_num <= m_maxPriInLeaf || depth == m_maxNodeDepth ){
+    if( node->pri_cnt <= m_maxPriInLeaf || depth == m_maxNodeDepth ){
         makeLeaf( node , start , end , depth );
         return;
     }
@@ -324,11 +325,11 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 
     // pre-calculate some data
 	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
-#ifdef QBVH_IMPLEMENTATION
+#ifdef SSE_QBVH_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA );
 #endif
-#ifdef OBVH_IMPLEMENTATION
-	flag |= (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA );
+#ifdef AVX_OBVH_IMPLEMENTATION
+	flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA );
 #endif
     ray.Prepare(flag);
 
@@ -523,7 +524,14 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 	SORT_STATS(++sShadowRayCount);
 
 	// pre-calculate some data
-	ray.Prepare();
+	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
+#ifdef SSE_QBVH_IMPLEMENTATION
+	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
+#endif
+#ifdef AVX_OBVH_IMPLEMENTATION
+	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
+#endif
+	ray.Prepare(flag);
 
 	const auto fmin = Intersect(ray, m_bbox);
 	if (fmin < 0.0f)
@@ -730,8 +738,15 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 
     SORT_STATS(++sRayCount);
 
-    // pre-calculate some data
-    ray.Prepare();
+	// pre-calculate some data
+	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
+#ifdef SSE_QBVH_IMPLEMENTATION
+	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
+#endif
+#ifdef AVX_OBVH_IMPLEMENTATION
+	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
+#endif
+	ray.Prepare(flag);
 
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;

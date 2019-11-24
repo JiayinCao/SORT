@@ -268,13 +268,25 @@ static SORT_FORCEINLINE simd_data   simd_min_ps( const simd_data& s0 , const sim
 static SORT_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_max_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
+
+// a temporary solution for now
+float _tmp_min(float a, float b) {
+	return a < b ? a : b;
+}
+
 static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
     // this is obviously not a final solution
     float tmp[8];
-    _mm256_storeu_ps( tmp , s );
-    float maxv = std::max( tmp[0] , tmp[1] );
+
+#ifdef SORT_IN_WINDOWS
+	_mm256_storeu_ps(tmp, s.avx_data);
+#else
+	_mm256_storeu_ps(tmp, s);
+#endif
+
+    float maxv = _tmp_min( tmp[0] , tmp[1] );
     for( int i = 0 ; i < 8 ; ++i )
-        maxv = std::max( maxv , tmp[i] );
+        maxv = _tmp_min( maxv , tmp[i] );
     return simd_set_ps1( maxv );
 }
 

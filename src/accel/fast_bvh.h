@@ -21,6 +21,10 @@
 #include "bvh_utils.h"
 #include "core/primitive.h"
 
+#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+static_assert(false, "More than one SIMD version is defined before including fast_bvh.h");
+#endif
+
 #ifdef QBVH_IMPLEMENTATION
 #define FBVH_CHILD_CNT  4
 #endif
@@ -29,7 +33,7 @@
 #define FBVH_CHILD_CNT  8
 #endif
 
-struct Fbvh_Node {
+struct Qbvh_Node {
 #ifdef QBVH_IMPLEMENTATION    
 #if SSE_ENABLED
 	BBox4							bbox;					/**< Bounding boxes of its four children. */
@@ -41,18 +45,7 @@ struct Fbvh_Node {
 #endif
 #endif
 
-#ifdef OBVH_IMPLEMENTATION
-#if AVX_ENABLED
-	BBox8							bbox;					/**< Bounding boxes of its four children. */
-	std::vector<Triangle8>          tri_list;
-	//std::vector<Line8>              line_list;
-	std::vector<const Primitive*>   other_list;
-#else
-    BBox							bbox[FBVH_CHILD_CNT];	/**< Bounding boxes of its children. */
-#endif
-#endif
-
-	std::unique_ptr<Fbvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
+	std::unique_ptr<Qbvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
 
 	unsigned                    pri_cnt = 0;				/**< Number of primitives in the node. */
 	unsigned                    pri_offset = 0;				/**< Offset of primitives in the buffer. */
@@ -62,10 +55,39 @@ struct Fbvh_Node {
     //!
     //! @param  offset      The offset of the first primitive in the whole buffer.
     //! @param  cnt         Number of primitives in the node.
-    Fbvh_Node( unsigned offset , unsigned cnt ) : pri_cnt(cnt),pri_offset(offset){}
+	Qbvh_Node( unsigned offset , unsigned cnt ) : pri_cnt(cnt),pri_offset(offset){}
 
 	//! @brief	Default constructor.
-	Fbvh_Node(): pri_cnt(0) , pri_offset(0) , child_cnt(0){}
+	Qbvh_Node(): pri_cnt(0) , pri_offset(0) , child_cnt(0){}
+};
+
+__declspec(align(32))
+struct Obvh_Node {
+#ifdef OBVH_IMPLEMENTATION
+#if AVX_ENABLED
+	BBox8							bbox;					/**< Bounding boxes of its four children. */
+	std::vector<Triangle8>          tri_list;
+	//std::vector<Line8>            line_list;
+	std::vector<const Primitive*>   other_list;
+#else
+	BBox							bbox[FBVH_CHILD_CNT];	/**< Bounding boxes of its children. */
+#endif
+#endif
+
+	std::unique_ptr<Obvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
+
+	unsigned                    pri_cnt = 0;				/**< Number of primitives in the node. */
+	unsigned                    pri_offset = 0;				/**< Offset of primitives in the buffer. */
+	int                         child_cnt = 0;			    /**< 0 means it is a leaf node. */
+
+	//! @brief  Constructor.
+	//!
+	//! @param  offset      The offset of the first primitive in the whole buffer.
+	//! @param  cnt         Number of primitives in the node.
+	Obvh_Node(unsigned offset, unsigned cnt) : pri_cnt(cnt), pri_offset(offset) {}
+
+	//! @brief	Default constructor.
+	Obvh_Node() : pri_cnt(0), pri_offset(0), child_cnt(0) {}
 };
 
 
