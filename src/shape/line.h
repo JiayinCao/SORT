@@ -23,6 +23,10 @@
 struct Line4;
 #endif
 
+#ifdef AVX_ENABLED
+struct Line8;
+#endif
+
 //! @brief  Line is a common type for hair or fur rendering.
 /**
  * Although being called line, this shape is essentially open cylinder. Other choose is to represent line
@@ -160,6 +164,11 @@ private:
 
 #ifdef SSE_ENABLED
     friend struct Line4;
-	friend SORT_FORCEINLINE bool intersectLine4( const Ray& ray , const Line4& line4 , Intersection* ret );
+	friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Line4& line_simd , Intersection* ret );
+#endif
+
+#ifdef AVX_ENABLED
+    friend struct Line8;
+    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Line8& line_simd , Intersection* ret );
 #endif
 };

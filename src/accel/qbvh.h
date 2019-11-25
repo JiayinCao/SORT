@@ -27,6 +27,7 @@
 #define SIMD_SSE_IMPLEMENTATION
 #endif
 
+#include "simd/simd_ray_utils.h"
 #include "simd/sse_bbox.h"
 #include "simd/sse_triangle.h"
 #include "simd/sse_line.h"

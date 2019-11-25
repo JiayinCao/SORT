@@ -27,9 +27,10 @@
 #define SIMD_AVX_IMPLEMENTATION
 #endif
 
+#include "simd/simd_ray_utils.h"
 #include "simd/avx_bbox.h"
 #include "simd/avx_triangle.h"
-//#include "simd/avx_line.h"
+#include "simd/avx_line.h"
 #include "fast_bvh.h"
 
 #ifdef AVX_ENABLED

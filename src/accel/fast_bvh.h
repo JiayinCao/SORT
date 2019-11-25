@@ -66,7 +66,7 @@ struct Obvh_Node {
 #if AVX_ENABLED
 	BBox8							bbox;					/**< Bounding boxes of its four children. */
 	std::vector<Triangle8>          tri_list;
-	//std::vector<Line8>            line_list;
+	std::vector<Line8>              line_list;
 	std::vector<const Primitive*>   other_list;
 #else
 	BBox							bbox[FBVH_CHILD_CNT];	/**< Bounding boxes of its children. */

@@ -239,7 +239,7 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 
 #ifdef AVX_OBVH_IMPLEMENTATION
 	Triangle8   tri8;
-    //Line4       line4;
+    Line8       line8;
     const auto _start = node->pri_offset;
     const auto _end = _start + node->pri_cnt;
     for(auto i = _start ; i < _end ; i++ ){
@@ -252,14 +252,14 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 					tri8.Reset();
 				}
             }
-        }/*else if( SHAPE_LINE == shape_type ){
-            if( line4.PushLine( primitive ) ){
-                if( line4.PackData() ){
-                    node->line_list.push_back( line4 );
-                    line4.Reset();
+        }else if( SHAPE_LINE == shape_type ){
+            if( line8.PushLine( primitive ) ){
+                if( line8.PackData() ){
+                    node->line_list.push_back( line8 );
+                    line8.Reset();
                 }
             }
-        }*/
+        }
 		else
 		{
             // line will also be specially treated in the future.
@@ -268,8 +268,8 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
     }
 	if (tri8.PackData())
 		node->tri_list.push_back(tri8);
-    //if (line4.PackData())
-    //    node->line_list.push_back(line4);
+    if (line8.PackData())
+        node->line_list.push_back(line8);
 #endif
 
     SORT_STATS(++sFbvhLeafNodeCount);
@@ -355,7 +355,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             for( auto i = 0 ; i < node->tri_list.size() ; ++i )
                 intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
             for( auto i = 0 ; i < node->line_list.size() ; ++i )
-                intersectLine4( ray , node->line_list[i] , intersect );
+                intersectLine_SIMD( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
                 for( auto i = 0 ; i < node->other_list.size() ; ++i )
                     node->other_list[i]->GetIntersect( ray , intersect );
@@ -414,8 +414,8 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         if( 0 == node->child_cnt ){
 			for( auto i = 0 ; i < node->tri_list.size() ; ++i )
                 intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
-           // for( auto i = 0 ; i < node->line_list.size() ; ++i )
-           //     intersectLine4( ray , node->line_list[i] , intersect );
+            for( auto i = 0 ; i < node->line_list.size() ; ++i )
+                intersectLine_SIMD( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
                 for( auto i = 0 ; i < node->other_list.size() ; ++i )
                     node->other_list[i]->GetIntersect( ray , intersect );
@@ -554,7 +554,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 				}
 			}
 			for (auto i = 0; i < node->line_list.size(); ++i) {
-				if (intersectLine4Fast(ray, node->line_list[i])) {
+				if (intersectLineFast_SIMD(ray, node->line_list[i])) {
 					SORT_STATS(sIntersectionTest += (i + node->tri_list.size()) * 4);
 					return true;
 				}
@@ -625,13 +625,12 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 					return true;
 				}
 			}
-			/*
 			for (auto i = 0; i < node->line_list.size(); ++i) {
-				if (intersectLine4Fast(ray, node->line_list[i])) {
+				if (intersectLineFast_SIMD(ray, node->line_list[i])) {
 					SORT_STATS(sIntersectionTest += (i + node->tri_list.size()) * 4);
 					return true;
 				}
-			}*/
+			}
 			if (UNLIKELY(!node->other_list.empty())) {
 				for (auto i = 0; i < node->other_list.size(); ++i) {
 					if (node->other_list[i]->GetIntersect(ray, nullptr)) {

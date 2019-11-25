@@ -26,7 +26,6 @@
 #include "core/primitive.h"
 #include "shape/triangle.h"
 #include "entity/visual.h"
-#include "simd_ray_utils.h"
 
 #if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
 	static_assert( false , "More than one SIMD version is defined before including simd_triangle." );

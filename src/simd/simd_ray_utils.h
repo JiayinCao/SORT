@@ -46,6 +46,15 @@ static SORT_FORCEINLINE simd_data_sse	ray_ori_y( const Ray& ray ){
 static SORT_FORCEINLINE simd_data_sse	ray_ori_z( const Ray& ray ){
 	return ray.m_ori_z;
 }
+static SORT_FORCEINLINE simd_data_sse	ray_dir_x( const Ray& ray ){
+	return ray.m_dir_x;
+}
+static SORT_FORCEINLINE simd_data_sse	ray_dir_y( const Ray& ray ){
+	return ray.m_dir_y;
+}
+static SORT_FORCEINLINE simd_data_sse	ray_dir_z( const Ray& ray ){
+	return ray.m_dir_z;
+}
 static SORT_FORCEINLINE simd_data_sse	ray_rcp_dir_x( const Ray& ray ){
 	return ray.m_rcp_dir_x;
 }
@@ -88,6 +97,15 @@ static SORT_FORCEINLINE simd_data_avx	ray_ori_y( const Ray& ray ){
 }
 static SORT_FORCEINLINE simd_data_avx	ray_ori_z( const Ray& ray ){
 	return ray.m_ori_z_avx;
+}
+static SORT_FORCEINLINE simd_data_avx	ray_dir_x( const Ray& ray ){
+	return ray.m_dir_x_avx;
+}
+static SORT_FORCEINLINE simd_data_avx	ray_dir_y( const Ray& ray ){
+	return ray.m_dir_y_avx;
+}
+static SORT_FORCEINLINE simd_data_avx	ray_dir_z( const Ray& ray ){
+	return ray.m_dir_z_avx;
 }
 static SORT_FORCEINLINE simd_data_avx	ray_rcp_dir_x( const Ray& ray ){
 	return ray.m_rcp_dir_x_avx;
