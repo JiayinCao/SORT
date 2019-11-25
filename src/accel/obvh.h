@@ -34,7 +34,7 @@
 #include "fast_bvh.h"
 
 #ifdef AVX_ENABLED
-#define SIMD_AVX_IMPLEMENTATION
+#undef SIMD_AVX_IMPLEMENTATION
 #endif
 
 #undef OBVH_IMPLEMENTATION

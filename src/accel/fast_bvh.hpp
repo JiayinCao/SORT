@@ -51,10 +51,6 @@ SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Tested per Ra
 #define sFbvhPrimitiveCount		sQbvhPrimitiveCount
 #define sFbvhLeafNodeCountCopy	sQbvhLeafNodeCountCopy
 
-#ifdef SSE_ENABLED
-#define	SSE_QBVH_IMPLEMENTATION
-#endif
-
 #endif
 
 #ifdef OBVH_IMPEMENTATION
@@ -84,9 +80,6 @@ SORT_STATS_AVG_COUNT("Spatial-Structure(OBVH)", "Average Primitive Tested per Ra
 #define sFbvhPrimitiveCount		sObvhPrimitiveCount
 #define sFbvhLeafNodeCountCopy	sObvhLeafNodeCountCopy
 
-#ifdef AVX_ENABLED
-#define AVX_OBVH_IMPLEMENTATION
-#endif
 #endif
 
 static SORT_FORCEINLINE BBox calcBoundingBox(const Fbvh_Node* const node , const Bvh_Primitive* const primitives ) {
@@ -204,7 +197,7 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 
 	m_depth = fmax( m_depth , depth );
 
-#ifdef SSE_QBVH_IMPLEMENTATION
+#ifdef SIMD_SSE_IMPLEMENTATION
     Triangle4   tri4;
     Line4       line4;
     const auto _start = node->pri_offset;
@@ -237,7 +230,7 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
         node->line_list.push_back(line4);
 #endif
 
-#ifdef AVX_OBVH_IMPLEMENTATION
+#ifdef SIMD_AVX_IMPLEMENTATION
 	Triangle8   tri8;
     Line8       line8;
     const auto _start = node->pri_offset;
@@ -325,10 +318,10 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 
     // pre-calculate some data
 	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
-#ifdef SSE_QBVH_IMPLEMENTATION
+#ifdef SIMD_SSE_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA );
 #endif
-#ifdef AVX_OBVH_IMPLEMENTATION
+#ifdef SIMD_AVX_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA );
 #endif
     ray.Prepare(flag);
@@ -349,7 +342,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         if( intersect && intersect->t < fmin )
             continue;
 
-#if defined(SSE_QBVH_IMPLEMENTATION)
+#if defined(SIMD_SSE_IMPLEMENTATION)
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
             for( auto i = 0 ; i < node->tri_list.size() ; ++i )
@@ -409,7 +402,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 				}
 			}
 		}
-#elif defined(AVX_OBVH_IMPLEMENTATION)
+#elif defined(SIMD_AVX_IMPLEMENTATION)
 		// check if it is a leaf node
         if( 0 == node->child_cnt ){
 			for( auto i = 0 ; i < node->tri_list.size() ; ++i )
@@ -525,10 +518,10 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 
 	// pre-calculate some data
 	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
-#ifdef SSE_QBVH_IMPLEMENTATION
+#ifdef SIMD_SSE_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
 #endif
-#ifdef AVX_OBVH_IMPLEMENTATION
+#ifdef SIMD_AVX_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
 #endif
 	ray.Prepare(flag);
@@ -544,7 +537,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 	while (si > 0) {
 		const auto node = bvh_stack[--si];
 
-#ifdef SSE_QBVH_IMPLEMENTATION
+#ifdef SIMD_SSE_IMPLEMENTATION
 		// check if it is a leaf node
 		if (0 == node->child_cnt) {
 			for (auto i = 0; i < node->tri_list.size(); ++i) {
@@ -616,7 +609,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 				}
 			}
 		}
-#elif defined(AVX_OBVH_IMPLEMENTATION)
+#elif defined(SIMD_AVX_IMPLEMENTATION)
 		// check if it is a leaf node
 		if (0 == node->child_cnt) {
 			for (auto i = 0; i < node->tri_list.size(); ++i) {
@@ -739,10 +732,10 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 
 	// pre-calculate some data
 	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
-#ifdef SSE_QBVH_IMPLEMENTATION
+#ifdef SIMD_SSE_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
 #endif
-#ifdef AVX_OBVH_IMPLEMENTATION
+#ifdef SIMD_AVX_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
 #endif
 	ray.Prepare(flag);
@@ -766,7 +759,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 		if (intersect.maxt < fmin)
 			continue;
 
-#ifdef SSE_QBVH_IMPLEMENTATION
+#ifdef SIMD_SSE_IMPLEMENTATION
 		if (0 == node->child_cnt) {
 			// Note, only triangle shape support SSS here. This is the only big difference between SSE and non-SSE version implementation.
 			// There are only two major primitives in SORT, line and triangle.
@@ -827,7 +820,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 				}
 			}
 		}
-#elif defined(AVX_OBVH_IMPLEMENTATION)
+#elif defined(SIMD_AVX_IMPLEMENTATION)
 		if (0 == node->child_cnt) {
 			// Note, only triangle shape support SSS here. This is the only big difference between AVX and non-AVX version implementation.
 			// There are only two major primitives in SORT, line and triangle.

@@ -25,13 +25,10 @@
 #define SIMD_AVX_IMPLEMENTATION
 #endif
 
-#include "simd/avx_bbox.h"
-#include "simd/avx_triangle.h"
-//#include "simd/avx_line.h"
 #include "fast_bvh.hpp"
 
 #ifdef AVX_ENABLED
-#define SIMD_AVX_IMPLEMENTATION
+#undef SIMD_AVX_IMPLEMENTATION
 #endif
 
 #undef  Fbvh
