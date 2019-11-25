@@ -277,8 +277,6 @@ Simd_BBox Fbvh::calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) 
 	float	min_x[SIMD_CHANNEL] , min_y[SIMD_CHANNEL] , min_z[SIMD_CHANNEL];
 	float	max_x[SIMD_CHANNEL] , max_y[SIMD_CHANNEL] , max_z[SIMD_CHANNEL];
 	for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
-		if( children[i] == nullptr )
-			break;
 		const auto bb = calcBoundingBox( children[i].get() , m_bvhpri.get() );
 		min_x[i] = bb.m_Min.x;
 		min_y[i] = bb.m_Min.y;
