@@ -197,26 +197,26 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 
 	m_depth = fmax( m_depth , depth );
 
-#ifdef SIMD_SSE_IMPLEMENTATION
-    Triangle4   tri4;
-    Line4       line4;
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+    Simd_Triangle   sind_tri;
+    Simd_Line       simd_line;
     const auto _start = node->pri_offset;
     const auto _end = _start + node->pri_cnt;
     for(auto i = _start ; i < _end ; i++ ){
         const Primitive* primitive = m_bvhpri[i].primitive;
         const auto shape_type = primitive->GetShapeType();
         if( SHAPE_TRIANGLE == shape_type ){
-            if( tri4.PushTriangle( primitive ) ){
-                if( tri4.PackData() ){
-					node->tri_list.push_back( tri4 );
-					tri4.Reset();
+            if( sind_tri.PushTriangle( primitive ) ){
+                if( sind_tri.PackData() ){
+					node->tri_list.push_back( sind_tri );
+					sind_tri.Reset();
 				}
             }
         }else if( SHAPE_LINE == shape_type ){
-            if( line4.PushLine( primitive ) ){
-                if( line4.PackData() ){
-                    node->line_list.push_back( line4 );
-                    line4.Reset();
+            if( simd_line.PushLine( primitive ) ){
+                if( simd_line.PackData() ){
+                    node->line_list.push_back( simd_line );
+                    simd_line.Reset();
                 }
             }
         }else{
@@ -224,45 +224,10 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
             node->other_list.push_back( primitive );
         }
     }
-	if (tri4.PackData())
-		node->tri_list.push_back(tri4);
-    if (line4.PackData())
-        node->line_list.push_back(line4);
-#endif
-
-#ifdef SIMD_AVX_IMPLEMENTATION
-	Triangle8   tri8;
-    Line8       line8;
-    const auto _start = node->pri_offset;
-    const auto _end = _start + node->pri_cnt;
-    for(auto i = _start ; i < _end ; i++ ){
-        const Primitive* primitive = m_bvhpri[i].primitive;
-        const auto shape_type = primitive->GetShapeType();
-        if( SHAPE_TRIANGLE == shape_type ){
-            if( tri8.PushTriangle( primitive ) ){
-                if( tri8.PackData() ){
-					node->tri_list.push_back( tri8 );
-					tri8.Reset();
-				}
-            }
-        }else if( SHAPE_LINE == shape_type ){
-            if( line8.PushLine( primitive ) ){
-                if( line8.PackData() ){
-                    node->line_list.push_back( line8 );
-                    line8.Reset();
-                }
-            }
-        }
-		else
-		{
-            // line will also be specially treated in the future.
-            node->other_list.push_back( primitive );
-        }
-    }
-	if (tri8.PackData())
-		node->tri_list.push_back(tri8);
-    if (line8.PackData())
-        node->line_list.push_back(line8);
+	if (sind_tri.PackData())
+		node->tri_list.push_back(sind_tri);
+    if (simd_line.PackData())
+        node->line_list.push_back(simd_line);
 #endif
 
     SORT_STATS(++sFbvhLeafNodeCount);
@@ -340,70 +305,10 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         if( intersect && intersect->t < fmin )
             continue;
 
-#if defined(SIMD_SSE_IMPLEMENTATION)
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
             for( auto i = 0 ; i < node->tri_list.size() ; ++i )
-                intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
-            for( auto i = 0 ; i < node->line_list.size() ; ++i )
-                intersectLine_SIMD( ray , node->line_list[i] , intersect );
-            if( UNLIKELY(!node->other_list.empty()) ){
-                for( auto i = 0 ; i < node->other_list.size() ; ++i )
-                    node->other_list[i]->GetIntersect( ray , intersect );
-            }
-            SORT_STATS(sIntersectionTest+=node->pri_cnt);
-            continue;
-        }
-
-		simd_data sse_f_min;
-        auto m = IntersectBBox_SIMD( ray , node->bbox , sse_f_min );
-		if( 0 == m )
-			continue;
-
-		const int k0 = __bsf( m );
-		const auto t0 = sse_f_min[k0];
-		m &= m - 1;
-		if( LIKELY( 0 == m ) ){
-			sAssert( t0 >= 0.0f , SPATIAL_ACCELERATOR );
-			bvh_stack[si++] = std::make_pair( node->children[k0].get() , t0 );
-		}else{
-			const int k1 = __bsf( m );
-			m &= m - 1;
-
-			if( LIKELY( 0 == m ) ){
-				const auto t1 = sse_f_min[k1];
-				sAssert( t1 >= 0.0f , SPATIAL_ACCELERATOR );
-
-				if( t0 < t1 ){
-					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1 );
-					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0 );
-				}else{
-					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
-					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
-				}
-			}else{
-				for (auto i = 0; i < node->child_cnt; ++i) {
-					auto k = -1;
-					auto maxDist = 0.0f;
-					for (int j = 0; j < node->child_cnt; ++j) {
-						if (sse_f_min[j] > maxDist) {
-							maxDist = sse_f_min[j];
-							k = j;
-						}
-					}
-
-					if (k == -1)
-						break;
-
-					sse_f_min[k] = -1.0f;
-					bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
-				}
-			}
-		}
-#elif defined(SIMD_AVX_IMPLEMENTATION)
-		// check if it is a leaf node
-        if( 0 == node->child_cnt ){
-			for( auto i = 0 ; i < node->tri_list.size() ; ++i )
                 intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
             for( auto i = 0 ; i < node->line_list.size() ; ++i )
                 intersectLine_SIMD( ray , node->line_list[i] , intersect );
@@ -535,7 +440,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 	while (si > 0) {
 		const auto node = bvh_stack[--si];
 
-#ifdef SIMD_SSE_IMPLEMENTATION
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 		// check if it is a leaf node
 		if (0 == node->child_cnt) {
 			for (auto i = 0; i < node->tri_list.size(); ++i) {
@@ -596,6 +501,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 					bvh_stack[si++] = node->children[k1].get();
 					bvh_stack[si++] = node->children[k0].get();
 				}else{
+#if defined(SIMD_AVX_IMPLEMENTATION)
 					const int k3 = __bsf(m);
 					const auto t3 = sse_f_min[k3];
 					sAssert(t3 >= 0.0f, SPATIAL_ACCELERATOR);
@@ -604,70 +510,8 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 					bvh_stack[si++] = node->children[k2].get();
 					bvh_stack[si++] = node->children[k1].get();
 					bvh_stack[si++] = node->children[k0].get();
-				}
-			}
-		}
-#elif defined(SIMD_AVX_IMPLEMENTATION)
-		// check if it is a leaf node
-		if (0 == node->child_cnt) {
-			for (auto i = 0; i < node->tri_list.size(); ++i) {
-				if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
-					SORT_STATS(sIntersectionTest += i * 4);
-					return true;
-				}
-			}
-			for (auto i = 0; i < node->line_list.size(); ++i) {
-				if (intersectLineFast_SIMD(ray, node->line_list[i])) {
-					SORT_STATS(sIntersectionTest += (i + node->tri_list.size()) * 4);
-					return true;
-				}
-			}
-			if (UNLIKELY(!node->other_list.empty())) {
-				for (auto i = 0; i < node->other_list.size(); ++i) {
-					if (node->other_list[i]->GetIntersect(ray, nullptr)) {
-						//SORT_STATS(sIntersectionTest += (i + node->tri_list.size() + node->line_list.size()) * 4);
-						return true;
-					}
-				}
-			}
-			SORT_STATS(sIntersectionTest += node->pri_cnt);
-			continue;
-		}
-
-		simd_data sse_f_min;
-		auto m = IntersectBBox_SIMD(ray, node->bbox, sse_f_min);
-		if (0 == m)
-			continue;
-
-		const int k0 = __bsf(m);
-		const auto t0 = sse_f_min[k0];
-		m &= m - 1;
-		if (LIKELY(0 == m)) {
-			sAssert(t0 >= 0.0f, SPATIAL_ACCELERATOR);
-			bvh_stack[si++] = node->children[k0].get();
-		}
-		else {
-			const int k1 = __bsf(m);
-			const auto t1 = sse_f_min[k0];
-			m &= m - 1;
-
-			sAssert(t1 >= 0.0f, SPATIAL_ACCELERATOR);
-
-			if (LIKELY(0 == m)) {
-				bvh_stack[si++] = node->children[k1].get();
-				bvh_stack[si++] = node->children[k0].get();
-			} else {
-				const int k2 = __bsf(m);
-				const auto t2 = sse_f_min[k2];
-				sAssert(t2 >= 0.0f, SPATIAL_ACCELERATOR);
-				m &= m - 1;
-
-				if( LIKELY(0==m) ){
-					bvh_stack[si++] = node->children[k2].get();
-					bvh_stack[si++] = node->children[k1].get();
-					bvh_stack[si++] = node->children[k0].get();
-				}else{
-					/*
+#endif
+#if defined(SIMD_SSE_IMPLEMENTATION)
 					const int k3 = __bsf(m);
 					const auto t3 = sse_f_min[k3];
 					sAssert(t3 >= 0.0f, SPATIAL_ACCELERATOR);
@@ -676,12 +520,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 					bvh_stack[si++] = node->children[k2].get();
 					bvh_stack[si++] = node->children[k1].get();
 					bvh_stack[si++] = node->children[k0].get();
-					*/
-					for( int i = 0 ; i < FBVH_CHILD_CNT ; ++i ){
-						if( node->children[i].get() == nullptr )
-							continue;
-						bvh_stack[si++] = node->children[i].get();
-					}
+#endif
 				}
 			}
 		}
@@ -757,68 +596,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 		if (intersect.maxt < fmin)
 			continue;
 
-#ifdef SIMD_SSE_IMPLEMENTATION
-		if (0 == node->child_cnt) {
-			// Note, only triangle shape support SSS here. This is the only big difference between SSE and non-SSE version implementation.
-			// There are only two major primitives in SORT, line and triangle.
-			// Line is usually used for hair, which has its own hair shader.
-			// Triangle is the only major primitive that has SSS.
-			for ( const auto& tri4 : node->tri_list )
-				intersectTriangleMulti_SIMD(ray, tri4, matID, intersect);
-			SORT_STATS(sIntersectionTest += node->pri_cnt);
-			continue;
-		}
-
-		simd_data sse_f_min;
-		auto m = IntersectBBox_SIMD(ray, node->bbox, sse_f_min);
-		if (0 == m)
-			continue;
-
-		const int k0 = __bsf(m);
-		const auto t0 = sse_f_min[k0];
-		m &= m - 1;
-		if (LIKELY(0 == m)) {
-			sAssert(t0 >= 0.0f, SPATIAL_ACCELERATOR);
-			bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
-		}
-		else {
-			const int k1 = __bsf(m);
-			m &= m - 1;
-
-			if (LIKELY(0 == m)) {
-				const auto t1 = sse_f_min[k1];
-				sAssert(t1 >= 0.0f, SPATIAL_ACCELERATOR);
-
-				if (t0 < t1) {
-					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
-					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
-				}
-				else {
-					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
-					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
-				}
-			}
-			else {
-				// fall back to the worst case
-				for (auto i = 0; i < node->child_cnt; ++i) {
-					auto k = -1;
-					auto maxDist = 0.0f;
-					for (int j = 0; j < node->child_cnt; ++j) {
-						if (sse_f_min[j] > maxDist) {
-							maxDist = sse_f_min[j];
-							k = j;
-						}
-					}
-
-					if (k == -1)
-						break;
-
-					sse_f_min[k] = -1.0f;
-					bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
-				}
-			}
-		}
-#elif defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 		if (0 == node->child_cnt) {
 			// Note, only triangle shape support SSS here. This is the only big difference between AVX and non-AVX version implementation.
 			// There are only two major primitives in SORT, line and triangle.

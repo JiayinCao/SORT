@@ -25,79 +25,53 @@
 static_assert(false, "More than one SIMD version is defined before including fast_bvh.h");
 #endif
 
-#ifdef QBVH_IMPLEMENTATION
+#if defined(QBVH_IMPLEMENTATION) || defined(OBVH_IMPLEMENTATION)
+
+#if defined(QBVH_IMPLEMENTATION)
+#define Fast_Bvh_Node   Qbvh_Node
 #define FBVH_CHILD_CNT  4
 #endif
 
-#ifdef OBVH_IMPLEMENTATION
+#if defined(OBVH_IMPLEMENTATION)
+#define Fast_Bvh_Node   Obvh_Node
 #define FBVH_CHILD_CNT  8
 #endif
 
-struct Qbvh_Node {
-#ifdef QBVH_IMPLEMENTATION    
-#if SSE_ENABLED
-	BBox4							bbox;					/**< Bounding boxes of its four children. */
-    std::vector<Triangle4>          tri_list;
-    std::vector<Line4>              line_list;
-    std::vector<const Primitive*>   other_list;
-#else
-	BBox							bbox[FBVH_CHILD_CNT];	/**< Bounding boxes of its children. */
-#endif
-#endif
-
-	std::unique_ptr<Qbvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
-
-	unsigned                    pri_cnt = 0;				/**< Number of primitives in the node. */
-	unsigned                    pri_offset = 0;				/**< Offset of primitives in the buffer. */
-	int                         child_cnt = 0;			    /**< 0 means it is a leaf node. */
-
-    //! @brief  Constructor.
-    //!
-    //! @param  offset      The offset of the first primitive in the whole buffer.
-    //! @param  cnt         Number of primitives in the node.
-	Qbvh_Node( unsigned offset , unsigned cnt ) : pri_cnt(cnt),pri_offset(offset){}
-
-	//! @brief	Default constructor.
-	Qbvh_Node(): pri_cnt(0) , pri_offset(0) , child_cnt(0){}
-};
-
-struct Obvh_Node {
-#ifdef OBVH_IMPLEMENTATION
-#if AVX_ENABLED
-	BBox8							bbox;					/**< Bounding boxes of its four children. */
-	std::vector<Triangle8>          tri_list;
-	std::vector<Line8>              line_list;
+struct Fast_Bvh_Node {
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+	Simd_BBox						bbox;					/**< Bounding boxes of its four children. */
+	std::vector<Simd_Triangle>      tri_list;
+	std::vector<Simd_Line>          line_list;
 	std::vector<const Primitive*>   other_list;
 #else
 	BBox							bbox[FBVH_CHILD_CNT];	/**< Bounding boxes of its children. */
 #endif
-#endif
 
-	std::unique_ptr<Obvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
+	std::unique_ptr<Fast_Bvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
 
-	unsigned                    pri_cnt = 0;				/**< Number of primitives in the node. */
-	unsigned                    pri_offset = 0;				/**< Offset of primitives in the buffer. */
-	int                         child_cnt = 0;			    /**< 0 means it is a leaf node. */
+	unsigned                        pri_cnt = 0;				/**< Number of primitives in the node. */
+	unsigned                        pri_offset = 0;				/**< Offset of primitives in the buffer. */
+	int                             child_cnt = 0;			    /**< 0 means it is a leaf node. */
 
 	//! @brief  Constructor.
 	//!
 	//! @param  offset      The offset of the first primitive in the whole buffer.
 	//! @param  cnt         Number of primitives in the node.
-	Obvh_Node(unsigned offset, unsigned cnt) : pri_cnt(cnt), pri_offset(offset) {}
+	Fast_Bvh_Node(unsigned offset, unsigned cnt) : pri_cnt(cnt), pri_offset(offset) {}
 
 	//! @brief	Default constructor.
-	Obvh_Node() : pri_cnt(0), pri_offset(0), child_cnt(0) {}
+	Fast_Bvh_Node() : pri_cnt(0), pri_offset(0), child_cnt(0) {}
 };
+#endif
 
-
-//! @brief Quad Bounding volume hierarchy.
+//! @brief Fast Bounding volume hierarchy.
 /**
  * Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays
  * https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.inst.100/institut/Papers/QBVH.pdf
  * 
- * Being different from traditional BVH, a quad BVH node has four children instead of two, making it a 4-ary tree, instead of 
- * a binary tree. It easily opens the door for SSE optimization during BVH traversal since we can do ray-AABB intersection 
- * four times more efficient. And also we can do the same to primitive ray intersection, instead of doing it one at a time,
+ * Being different from traditional BVH, a quad/oct BVH node has four/eight children instead of two, making it a 4/8-ary tree, instead of 
+ * a binary tree. It easily opens the door for SSE/AVX optimization during BVH traversal since we can do ray-AABB intersection 
+ * four/eight times more efficient. And also we can do the same to primitive ray intersection, instead of doing it one at a time,
  * QBVH/OBVH will check four/eight primitives at a time, boosting the performance of ray intersection test.
  */
 class Fbvh : public Accelerator{
