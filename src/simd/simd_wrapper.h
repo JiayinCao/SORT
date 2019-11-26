@@ -269,25 +269,16 @@ static SORT_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const sim
     return _mm256_max_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
 
-// a temporary solution for now
-float _tmp_min(float a, float b) {
-	return a < b ? a : b;
-}
-
 static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
-    // this is obviously not a final solution
-    float tmp[8];
+	const static __m256i shuffle_mask0 = _mm256_set_epi32(1, 0, 3, 2, 5, 4, 7, 6);
+	const static __m256i shuffle_mask1 = _mm256_set_epi32(2, 3, 0, 1, 6, 7, 4, 5);
 
-#ifdef SORT_IN_WINDOWS
-	_mm256_storeu_ps(tmp, s.avx_data);
-#else
-	_mm256_storeu_ps(tmp, s);
-#endif
-
-    float maxv = _tmp_min( tmp[0] , tmp[1] );
-    for( int i = 0 ; i < 8 ; ++i )
-        maxv = _tmp_min( maxv , tmp[i] );
-    return simd_set_ps1( maxv );
+	__m256 avx_data = get_avx_data(s);
+	__m256 shuffled = _mm256_permutevar_ps(avx_data, shuffle_mask1);
+	avx_data = _mm256_min_ps(shuffled, avx_data);
+	shuffled = _mm256_permutevar_ps(avx_data, shuffle_mask0);
+	simd_data_avx reduced_data = _mm256_min_ps(shuffled, avx_data);
+	return simd_set_ps1( reduced_data[0] < reduced_data[4] ? reduced_data[0] : reduced_data[4] );
 }
 
 #endif
