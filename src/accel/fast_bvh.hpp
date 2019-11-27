@@ -285,7 +285,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     SORT_STATS(sShadowRayCount += intersect != nullptr);
 
     // pre-calculate some data
-	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
+	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
 #ifdef SIMD_SSE_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA );
 #endif
@@ -425,7 +425,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 	SORT_STATS(++sShadowRayCount);
 
 	// pre-calculate some data
-	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
+	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
 #ifdef SIMD_SSE_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
 #endif
@@ -573,7 +573,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
     SORT_STATS(++sRayCount);
 
 	// pre-calculate some data
-	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_CPU_DATA;
+	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
 #ifdef SIMD_SSE_IMPLEMENTATION
 	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
 #endif

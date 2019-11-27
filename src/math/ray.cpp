@@ -76,7 +76,7 @@ void Ray::Prepare( const RAY_PREPARE_FLAG flag ) const{
 	m_scale_y = 1.0f / d.y;
 
 #ifdef SSE_ENABLED
-    {
+	if( flag & RESOLVE_SSE_DATA ){
         constexpr float delta = 0.00001f;
         const auto dir_x = fabs(m_Dir[0]) < delta ? sign(m_Dir[0]) * delta : m_Dir[0];
         const auto dir_y = fabs(m_Dir[1]) < delta ? sign(m_Dir[1]) * delta : m_Dir[1];

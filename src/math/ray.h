@@ -30,7 +30,6 @@
 enum RAY_PREPARE_FLAG{
     RESOLVE_SSE_DATA = 0X01,
     RESOLVE_AVX_DATA = 0x02,
-    RESOLVE_CPU_DATA = 0x04,
     RESOLVE_NONE_DATA = 0x00
 };
 
@@ -58,7 +57,7 @@ public:
     }
 
     //! @brief  Pre-calculate some cached data for better performance. Only call this function after all ray data is prepared.
-    void    Prepare( const RAY_PREPARE_FLAG flag = RESOLVE_CPU_DATA ) const;
+    void    Prepare( const RAY_PREPARE_FLAG flag = RESOLVE_NONE_DATA ) const;
 
 // the original point and direction are also public
     // original point of the ray
