@@ -42,6 +42,8 @@ public:
 	simd_data_sse	m_max_x;
 	simd_data_sse	m_max_y;
 	simd_data_sse	m_max_z;
+	
+	simd_data_sse	m_mask;
 };
 
 #if defined(SIMD_SSE_IMPLEMENTATION)
@@ -68,6 +70,8 @@ public:
 	simd_data_avx	m_max_x;
 	simd_data_avx	m_max_y;
 	simd_data_avx	m_max_z;
+
+	simd_data_avx	m_mask;
 };
 
 #if defined(SIMD_AVX_IMPLEMENTATION)
@@ -96,7 +100,7 @@ SORT_FORCEINLINE int IntersectBBox_SIMD(const Ray& ray, const Simd_BBox& bb, sim
 	f_min	    = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
 	f_max	    = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-	const simd_data mask = simd_cmple_ps( f_min , f_max );
+	const simd_data mask = simd_and_ps( bb.m_mask , simd_cmple_ps( f_min , f_max ) );
 	f_min = simd_pick_ps( mask , f_min , simd_neg_ones );
 
 	return simd_movemask_ps( mask );

@@ -24,6 +24,9 @@
 	static_assert( false , "More than one SIMD version is defined before including the wrapper." );
 #endif
 
+const static unsigned mask_true_i = 0xffffffff;
+const static float mask_true = *((float*)&( mask_true_i ));
+
 #ifdef SSE_ENABLED
 #include <nmmintrin.h>
 
@@ -82,6 +85,11 @@ static SORT_FORCEINLINE simd_data   simd_set_ps1( const float d ){
 }
 static SORT_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
     return _mm_set_ps( d[3] , d[2] , d[1] , d[0] );
+}
+static SORT_FORCEINLINE simd_data	simd_set_mask(const bool mask[]) {
+#define MASK_TO_INT(m)	(m?mask_true:0)
+	return _mm_set_ps(MASK_TO_INT(mask[3]), MASK_TO_INT(mask[2]), MASK_TO_INT(mask[1]), MASK_TO_INT(mask[0]));
+#undef MASK_TO_INT
 }
 static SORT_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_add_ps( get_sse_data(s0) , get_sse_data(s1) );
@@ -207,6 +215,11 @@ static SORT_FORCEINLINE simd_data   simd_set_ps1( const float f ){
 }
 static SORT_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
     return _mm256_set_ps( d[7] , d[6] , d[5] , d[4] , d[3] , d[2] , d[1] , d[0] );
+}
+static SORT_FORCEINLINE simd_data	simd_set_mask(const bool mask[]) {
+#define MASK_TO_INT(m)	(m?mask_true:0.0f)
+	return _mm256_set_ps( MASK_TO_INT( mask[7] ) , MASK_TO_INT( mask[6] ) , MASK_TO_INT( mask[5] ) , MASK_TO_INT( mask[4] ) , MASK_TO_INT( mask[3] ) , MASK_TO_INT( mask[2] ) , MASK_TO_INT( mask[1] ) , MASK_TO_INT( mask[0] ) );
+#undef MASK_TO_INT
 }
 static SORT_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_add_ps( get_avx_data(s0) , get_avx_data(s1) );

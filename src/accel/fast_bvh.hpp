@@ -140,7 +140,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
 		unsigned    split_axis;
 		float       split_pos;
 		const auto sah = pickBestSplit(split_axis, split_pos, m_bvhpri.get(), node_bbox, start, end);
-		if (sah >= prim_cnt /*|| prim_cnt <= m_maxPriInLeaf*/ )
+		if (sah >= prim_cnt || prim_cnt <= m_maxPriInLeaf )
 			done_splitting.push( std::make_pair( start , end ) );
 		else{
 			const auto compare = [split_pos, split_axis](const Bvh_Primitive& pri) {return pri.m_centroid[split_axis] < split_pos; };
@@ -241,6 +241,7 @@ Simd_BBox Fbvh::calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) 
 
 	float	min_x[SIMD_CHANNEL] , min_y[SIMD_CHANNEL] , min_z[SIMD_CHANNEL];
 	float	max_x[SIMD_CHANNEL] , max_y[SIMD_CHANNEL] , max_z[SIMD_CHANNEL];
+	bool	bb_valid[SIMD_CHANNEL] = { false };
 	for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
 		const auto bb = calcBoundingBox( children[i].get() , m_bvhpri.get() );
 		min_x[i] = bb.m_Min.x;
@@ -249,6 +250,8 @@ Simd_BBox Fbvh::calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) 
 		max_x[i] = bb.m_Max.x;
 		max_y[i] = bb.m_Max.y;
 		max_z[i] = bb.m_Max.z;
+
+		bb_valid[i] = ( nullptr != children[i].get() );
 	}
 
 	node_bbox.m_min_x = simd_set_ps( min_x );
@@ -258,6 +261,8 @@ Simd_BBox Fbvh::calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) 
 	node_bbox.m_max_x = simd_set_ps( max_x );
 	node_bbox.m_max_y = simd_set_ps( max_y );
 	node_bbox.m_max_z = simd_set_ps( max_z );
+
+	node_bbox.m_mask = simd_set_mask( bb_valid );
 
 	return node_bbox;
 }
