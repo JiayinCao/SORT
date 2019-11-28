@@ -17,6 +17,10 @@
 
 #pragma once
 
+// WARNING, following instructions will results in different results in SIMD and non-SIMD version.
+//  - 0.0f / 0.0f    ( SIMD, Nan 0x7fc00000 ) ( Non-SIMD, Nan 0xffc00000 )
+//  - Nan != Nan     ( SIMD, 0xffffffff )     ( Non-SIMD, false )
+
 #include <float.h>
 #include "core/define.h"
 
