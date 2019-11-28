@@ -507,21 +507,29 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 					bvh_stack[si++] = node->children[k0].get();
 				}else{
 #if defined(SIMD_AVX_IMPLEMENTATION)
-					const int k3 = __bsf(m);
-					const auto t3 = sse_f_min[k3];
-					sAssert(t3 >= 0.0f, SPATIAL_ACCELERATOR);
+					for (auto i = 0; i < node->child_cnt; ++i) {
+						auto k = -1;
+						auto maxDist = 0.0f;
+						for (int j = 0; j < node->child_cnt; ++j) {
+							if (sse_f_min[j] > maxDist) {
+								maxDist = sse_f_min[j];
+								k = j;
+							}
+						}
 
-					bvh_stack[si++] = node->children[k2].get();
-					bvh_stack[si++] = node->children[k2].get();
-					bvh_stack[si++] = node->children[k1].get();
-					bvh_stack[si++] = node->children[k0].get();
+						if (k == -1)
+							break;
+
+						sse_f_min[k] = -1.0f;
+						bvh_stack[si++] = node->children[k].get();
+					}
 #endif
 #if defined(SIMD_SSE_IMPLEMENTATION)
 					const int k3 = __bsf(m);
 					const auto t3 = sse_f_min[k3];
 					sAssert(t3 >= 0.0f, SPATIAL_ACCELERATOR);
 
-					bvh_stack[si++] = node->children[k2].get();
+					bvh_stack[si++] = node->children[k3].get();
 					bvh_stack[si++] = node->children[k2].get();
 					bvh_stack[si++] = node->children[k1].get();
 					bvh_stack[si++] = node->children[k0].get();
