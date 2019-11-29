@@ -29,6 +29,9 @@
 
 #if defined( SIMD_AVX_IMPLEMENTATION ) || defined( SIMD_SSE_IMPLEMENTATION )
 
+static constexpr float nan_unsigned = 0xffc00000;
+static constexpr float nan_float = *((float*)(&nan_unsigned));
+
 TEST(SIMD_TEST, simd_set_ps1) {
     constexpr float c_data = 2.0f;
     const auto simd_data = simd_set_ps1( c_data );
@@ -210,7 +213,7 @@ TEST(SIMD_TEST, simd_pick_ps) {
         data1[i] = i * i;
         data2[i] = i * i * i;
     }
-    data2[0] = 0.0f / 0.0f ;
+    data2[0] = nan_float;
 
     const auto simd_data0 = simd_set_mask( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -234,7 +237,7 @@ TEST(SIMD_TEST, simd_cmpeq_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-    data0[0] = data1[0] = 0.0f / 0.0f;
+	data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -258,7 +261,7 @@ TEST(SIMD_TEST, simd_cmpneq_ps) {
         data1[i] = i * i;
     }
     // check the warning in simd_wrapper.h, this line won't survive
-    // data0[0] = data1[0] = 0.0f / 0.0f;
+    // data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -281,7 +284,7 @@ TEST(SIMD_TEST, simd_cmple_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-    data0[0] = data1[0] = 0.0f / 0.0f;
+    data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -304,7 +307,7 @@ TEST(SIMD_TEST, simd_cmplt_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-    data0[0] = data1[0] = 0.0f / 0.0f;
+    data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -327,7 +330,7 @@ TEST(SIMD_TEST, simd_cmpge_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-    data0[0] = data1[0] = 0.0f / 0.0f;
+    data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -350,7 +353,7 @@ TEST(SIMD_TEST, simd_cmpgt_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-    data0[0] = data1[0] = 0.0f / 0.0f;
+    data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -373,7 +376,7 @@ TEST(SIMD_TEST, simd_min_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-    data0[0] = data1[0] = 0.0f / 0.0f;
+    data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -396,7 +399,7 @@ TEST(SIMD_TEST, simd_max_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-    data0[0] = data1[0] = 0.0f / 0.0f;
+    data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -419,7 +422,7 @@ TEST(SIMD_TEST, simd_and_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-    data0[0] = data1[0] = 0.0f / 0.0f;
+    data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
@@ -444,7 +447,7 @@ TEST(SIMD_TEST, simd_or_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-    data0[0] = data1[0] = 0.0f / 0.0f;
+    data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );
