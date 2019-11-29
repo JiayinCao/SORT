@@ -134,6 +134,8 @@ struct Triangle4{
 
 #define Simd_Triangle		Triangle4
 
+static_assert( sizeof( Triangle4 ) % 16 == 0 , "Incorrect size of Triangle4." );
+
 #endif	// SIMD_SSE_IMPLEMENTATION
 
 #ifdef SIMD_AVX_IMPLEMENTATION
@@ -155,6 +157,8 @@ struct Triangle8{
     /**< Pointers to original primitives. */
     const Triangle*  m_ori_tri[SIMD_CHANNEL] = { nullptr };
 	const Primitive* m_ori_pri[SIMD_CHANNEL] = { nullptr };
+
+	char padding[16];
 
     //! @brief  Push a triangle in the data structure.
     //!
@@ -256,6 +260,8 @@ struct Triangle8{
 #ifdef SIMD_AVX_IMPLEMENTATION
 	#define Simd_Triangle		Triangle8
 #endif
+
+static_assert( sizeof( Triangle8 ) % 32 == 0 , "Incorrect size of Triangle8." );
 
 #endif	// SIMD_AVX_IMPLEMENTATION
 

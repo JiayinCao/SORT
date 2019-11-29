@@ -149,6 +149,8 @@ struct Line4{
 
 #define Simd_Line		Line4
 
+static_assert( sizeof( Line4 ) % 16 == 0 , "Incorrect size of Line4." );
+
 #endif // SIMD_SSE_IMPLEMENTATION
 
 #ifdef SIMD_AVX_IMPLEMENTATION
@@ -171,6 +173,8 @@ struct Line8{
     /**< Pointers to original primitive. */
     const Line*         m_ori_line[SIMD_CHANNEL] = { nullptr };
     const Primitive*    m_ori_pri[SIMD_CHANNEL] = { nullptr };
+
+    char                padding[16];
 
     //! @brief  Push a line in the data structure.
     //!
@@ -291,6 +295,8 @@ struct Line8{
 		m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = m_ori_line[4] = m_ori_line[5] = m_ori_line[6] = m_ori_line[7] = nullptr;
     }
 };
+
+static_assert( sizeof( Line8 ) % 32 == 0 , "Incorrect size of Line8." );
 
 #define Simd_Line		Line8
 

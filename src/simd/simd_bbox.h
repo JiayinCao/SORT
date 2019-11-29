@@ -50,6 +50,8 @@ public:
 	#define Simd_BBox	BBox4
 #endif
 
+static_assert( sizeof( BBox4 ) % 16 == 0 , "Incorrect size of BBox4." );
+
 #endif // SSE_ENABLED
 
 #ifdef AVX_ENABLED
@@ -77,6 +79,8 @@ public:
 #if defined(SIMD_AVX_IMPLEMENTATION)
 	#define Simd_BBox	BBox8
 #endif
+
+static_assert( sizeof( BBox8 ) % 32 == 0 , "Incorrect size of BBox8." );
 
 #endif // AVX_ENABLED
 
