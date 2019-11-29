@@ -27,6 +27,8 @@
     #define SIMD_TEST       SIMD_SSE
 #endif
 
+#if defined( SIMD_AVX_IMPLEMENTATION ) || defined( SIMD_SSE_IMPLEMENTATION )
+
 TEST(SIMD_TEST, simd_set_ps1) {
     constexpr float c_data = 2.0f;
     const auto simd_data = simd_set_ps1( c_data );
@@ -489,3 +491,5 @@ TEST(SIMD_TEST, simd_minreduction_ps) {
     for( auto i = 0 ; i < SIMD_CHANNEL ; ++i )
         EXPECT_EQ( reduction[0] , correct_reduction[0] );
 }
+
+#endif
