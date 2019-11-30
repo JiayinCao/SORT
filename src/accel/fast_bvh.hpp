@@ -15,6 +15,10 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#ifdef SORT_IN_LINUX
+#include <stdlib.h>
+#endif
+
 #include <queue>
 #include "core/memory.h"
 #include "core/stats.h"
@@ -231,15 +235,28 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
     if (simd_line.PackData())
         line_list.push_back(simd_line);
 	
+
+	// Following code should have been merged in one branch. However, there are two blockers
+	//	- aligned_alloc is not easily available, it is only available with latest MacOS.
+	//	- alignas is ignored in GCC in Ubuntu.
 	if( tri_list.size() ){
 		node->tri_cnt = (unsigned int)tri_list.size();
+#ifdef SORT_IN_LINUX
+		node->tri_list = std::unique_ptr<Simd_Triangle[]>( (Simd_Triangle*)aligned_alloc(SIMD_ALIGNMENT, node->tri_cnt * sizeof(Simd_Triangle) ) );
+#else
 		node->tri_list = std::make_unique<Simd_Triangle[]>(node->tri_cnt);
+#endif
+
 		for( auto i = 0u ; i < node->tri_cnt ; ++i )
 			node->tri_list[i] = tri_list[i];
 	}
 	if( line_list.size() ){
 		node->line_cnt = (unsigned int)line_list.size();
+#ifdef SORT_IN_LINUX
+		node->line_list = std::unique_ptr<Simd_Line[]>( (Simd_Line*)aligned_alloc(SIMD_ALIGNMENT, node->line_cnt * sizeof(Simd_Line) ) );
+#else
 		node->line_list = std::make_unique<Simd_Line[]>(node->line_cnt);
+#endif
 		for( auto i = 0u ; i < node->line_cnt ; ++i )
 			node->line_list[i] = line_list[i];
 	}
