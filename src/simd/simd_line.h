@@ -22,10 +22,18 @@
 #include "shape/line.h"
 #include "core/primitive.h"
 
-#ifdef SIMD_SSE_IMPLEMENTATION
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 
-//! @brief  Like Triangle4, Line4 is the corresponding version for line shape.
-struct alignas(16) Line4{
+#ifdef SIMD_SSE_IMPLEMENTATION
+    #define Simd_Line   Line4
+#endif
+
+#ifdef SIMD_AVX_IMPLEMENTATION
+    #define Simd_Line   Line8
+#endif
+
+//! @brief  Like Triangle8, Line8 is the corresponding version for line shape.
+struct alignas(SIMD_ALIGNMENT) Simd_Line{
     simd_data  m_p0_x , m_p0_y , m_p0_z;   /**< Point at the end of the line. */
     simd_data  m_p1_x , m_p1_y , m_p1_z;   /**< Point at the other end of the line. */
 
@@ -43,12 +51,17 @@ struct alignas(16) Line4{
     const Line*         m_ori_line[SIMD_CHANNEL] = { nullptr };
     const Primitive*    m_ori_pri[SIMD_CHANNEL] = { nullptr };
 
+#ifdef SIMD_AVX_IMPLEMENTATION
+    char                padding[16];
+#endif
+
     //! @brief  Push a line in the data structure.
     //!
 	//! @param	pri		The original primitive.
     //! @return         Whether the data structure is full.
     bool PushLine( const Primitive* primitive ){
-		const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
+#ifdef SIMD_SSE_IMPLEMENTATION
+        const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
         if( m_ori_pri[0] == nullptr ){
             m_ori_pri[0] = primitive;
 			m_ori_line[0] = line;
@@ -65,122 +78,9 @@ struct alignas(16) Line4{
         m_ori_pri[3] = primitive;
 		m_ori_line[3] = line;
         return true;
-    }
-
-    //! @brief  Pack line information into SSE compatible data.
-	//!
-	//! @return		Whether there is valid line inside.
-    bool PackData(){
-		if( !m_ori_pri[0] )
-			return false;
-
-        float	mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f };
-        float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL];
-        float   w0[SIMD_CHANNEL] , w1[SIMD_CHANNEL] , length[SIMD_CHANNEL];
-        float   mat_00[SIMD_CHANNEL] , mat_01[SIMD_CHANNEL] , mat_02[SIMD_CHANNEL] , mat_03[SIMD_CHANNEL];
-        float   mat_10[SIMD_CHANNEL] , mat_11[SIMD_CHANNEL] , mat_12[SIMD_CHANNEL] , mat_13[SIMD_CHANNEL];
-        float   mat_20[SIMD_CHANNEL] , mat_21[SIMD_CHANNEL] , mat_22[SIMD_CHANNEL] , mat_23[SIMD_CHANNEL];
-        for( auto i = 0 ; i < SIMD_CHANNEL && m_ori_pri[i] ; ++i ){
-            const auto line = m_ori_line[i];
-
-            p0_x[i] = line->m_p0.x;
-            p0_y[i] = line->m_p0.y;
-            p0_z[i] = line->m_p0.z;
-
-            p1_x[i] = line->m_p1.x;
-            p1_y[i] = line->m_p1.y;
-            p1_z[i] = line->m_p1.z;
-
-            w0[i] = line->m_w0;
-            w1[i] = line->m_w1;
-
-            length[i] = line->m_length;
-
-            mat_00[i] = line->m_world2Line.matrix.m[0];
-            mat_01[i] = line->m_world2Line.matrix.m[1];
-            mat_02[i] = line->m_world2Line.matrix.m[2];
-            mat_03[i] = line->m_world2Line.matrix.m[3];
-            mat_10[i] = line->m_world2Line.matrix.m[4];
-            mat_11[i] = line->m_world2Line.matrix.m[5];
-            mat_12[i] = line->m_world2Line.matrix.m[6];
-            mat_13[i] = line->m_world2Line.matrix.m[7];
-            mat_20[i] = line->m_world2Line.matrix.m[8];
-            mat_21[i] = line->m_world2Line.matrix.m[9];
-            mat_22[i] = line->m_world2Line.matrix.m[10];
-            mat_23[i] = line->m_world2Line.matrix.m[11];
-
-            mask[i] = 0.0f;
-        }
-
-        m_p0_x = simd_set_ps( p0_x );
-        m_p0_y = simd_set_ps( p0_y );
-        m_p0_z = simd_set_ps( p0_z );
-        m_p1_x = simd_set_ps( p1_x );
-        m_p1_y = simd_set_ps( p1_y );
-        m_p1_z = simd_set_ps( p1_z );
-        m_w0 = simd_set_ps( w0 );
-        m_w1 = simd_set_ps( w1 );
-        m_length = simd_set_ps( length );
-
-        m_mat_00 = simd_set_ps( mat_00 );
-        m_mat_01 = simd_set_ps( mat_01 );
-        m_mat_02 = simd_set_ps( mat_02 );
-        m_mat_03 = simd_set_ps( mat_03 );
-        m_mat_10 = simd_set_ps( mat_10 );
-        m_mat_11 = simd_set_ps( mat_11 );
-        m_mat_12 = simd_set_ps( mat_12 );
-        m_mat_13 = simd_set_ps( mat_13 );
-        m_mat_20 = simd_set_ps( mat_20 );
-        m_mat_21 = simd_set_ps( mat_21 );
-        m_mat_22 = simd_set_ps( mat_22 );
-        m_mat_23 = simd_set_ps( mat_23 );
-
-        m_mask = simd_cmpeq_ps( simd_zeros , simd_set_ps( mask ) );
-
-		return true;
-    }
-
-    //! @brief  Reset the data for reuse
-    void Reset(){
-        m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = nullptr;
-		m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = nullptr;
-    }
-};
-
-#define Simd_Line		Line4
-
-static_assert( sizeof( Line4 ) % 16 == 0 , "Incorrect size of Line4." );
-
-#endif // SIMD_SSE_IMPLEMENTATION
+#endif
 
 #ifdef SIMD_AVX_IMPLEMENTATION
-
-//! @brief  Like Triangle8, Line8 is the corresponding version for line shape.
-struct alignas(32) Line8{
-    simd_data  m_p0_x , m_p0_y , m_p0_z;   /**< Point at the end of the line. */
-    simd_data  m_p1_x , m_p1_y , m_p1_z;   /**< Point at the other end of the line. */
-
-    simd_data  m_w0 , m_w1;                /**< Half width of the line. */
-    simd_data  m_length;                   /**< Length of the line. */
-
-    /**< Transformation from world space to line local space. */
-    simd_data  m_mat_00, m_mat_01, m_mat_02, m_mat_03;
-    simd_data  m_mat_10, m_mat_11, m_mat_12, m_mat_13;
-    simd_data  m_mat_20, m_mat_21, m_mat_22, m_mat_23;
-
-    simd_data  m_mask;                     /**< Mask marks which line is valid. */
-
-    /**< Pointers to original primitive. */
-    const Line*         m_ori_line[SIMD_CHANNEL] = { nullptr };
-    const Primitive*    m_ori_pri[SIMD_CHANNEL] = { nullptr };
-
-    char                padding[16];
-
-    //! @brief  Push a line in the data structure.
-    //!
-	//! @param	pri		The original primitive.
-    //! @return         Whether the data structure is full.
-    bool PushLine( const Primitive* primitive ){
 		const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
         if( m_ori_pri[0] == nullptr ){
             m_ori_pri[0] = primitive;
@@ -214,6 +114,7 @@ struct alignas(32) Line8{
         m_ori_pri[7] = primitive;
 		m_ori_line[7] = line;
         return true;
+#endif
     }
 
     //! @brief  Pack line information into SSE compatible data.
@@ -223,7 +124,13 @@ struct alignas(32) Line8{
 		if( !m_ori_pri[0] )
 			return false;
 
+#ifdef SIMD_SSE_IMPLEMENTATION
+        float	mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f };
+#endif
+#ifdef SIMD_AVX_IMPLEMENTATION
         float	mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f };
+#endif
+
         float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL];
         float   w0[SIMD_CHANNEL] , w1[SIMD_CHANNEL] , length[SIMD_CHANNEL];
         float   mat_00[SIMD_CHANNEL] , mat_01[SIMD_CHANNEL] , mat_02[SIMD_CHANNEL] , mat_03[SIMD_CHANNEL];
@@ -291,18 +198,19 @@ struct alignas(32) Line8{
 
     //! @brief  Reset the data for reuse
     void Reset(){
+#ifdef SIMD_SSE_IMPLEMENTATION
+        m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = nullptr;
+		m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = nullptr;
+#endif
+
+#ifdef SIMD_AVX_IMPLEMENTATION
         m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = m_ori_pri[4] = m_ori_pri[5] = m_ori_pri[6] = m_ori_pri[7] = nullptr;
 		m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = m_ori_line[4] = m_ori_line[5] = m_ori_line[6] = m_ori_line[7] = nullptr;
+#endif
     }
 };
 
-static_assert( sizeof( Line8 ) % 32 == 0 , "Incorrect size of Line8." );
-
-#define Simd_Line		Line8
-
-#endif // SIMD_AVX_IMPLEMENTATION
-
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+static_assert( sizeof( Simd_Line ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Simd_Line." );
 
 //! @brief  Helper function that implements the core algorithm of ray line intersection.
 //!

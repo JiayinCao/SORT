@@ -24,67 +24,38 @@
 	static_assert( false , "More than one SIMD version is defined before including simd_bbox." );
 #endif
 
-#ifdef SSE_ENABLED
-
-//! @brief	SIMD version bounding box.
-/**
- * This is basically 4 bounding box in a single data structure. For best performance, they are saved in
- * structure of arrays.
- * Since this data structure is only used in limited places, only very few interfaces are implemented for
- * simplicity.
- */
-struct alignas(16) BBox4{
-public:
-	simd_data_sse	m_min_x;
-	simd_data_sse	m_min_y;
-	simd_data_sse	m_min_z;
-
-	simd_data_sse	m_max_x;
-	simd_data_sse	m_max_y;
-	simd_data_sse	m_max_z;
-	
-	simd_data_sse	m_mask;
-};
-
-#if defined(SIMD_SSE_IMPLEMENTATION)
-	#define Simd_BBox	BBox4
-#endif
-
-static_assert( sizeof( BBox4 ) % 16 == 0 , "Incorrect size of BBox4." );
-
-#endif // SSE_ENABLED
-
-#ifdef AVX_ENABLED
-
-//! @brief	SIMD version bounding box.
-/**
- * This is basically 8 bounding box in a single data structure. For best performance, they are saved in
- * structure of arrays.
- * Since this data structure is only used in limited places, only very few interfaces are implemented for
- * simplicity.
- */
-struct alignas(32) BBox8{
-public:
-	simd_data_avx	m_min_x;
-	simd_data_avx	m_min_y;
-	simd_data_avx	m_min_z;
-
-	simd_data_avx	m_max_x;
-	simd_data_avx	m_max_y;
-	simd_data_avx	m_max_z;
-
-	simd_data_avx	m_mask;
-};
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 
 #if defined(SIMD_AVX_IMPLEMENTATION)
 	#define Simd_BBox	BBox8
 #endif
 
-static_assert( sizeof( BBox8 ) % 32 == 0 , "Incorrect size of BBox8." );
+#if defined(SIMD_SSE_IMPLEMENTATION)
+	#define Simd_BBox	BBox4
+#endif
 
-#endif // AVX_ENABLED
+//! @brief	SIMD version bounding box.
+/**
+ * This is basically 4/8 bounding box in a single data structure. For best performance, they are saved in
+ * structure of arrays.
+ * Since this data structure is only used in limited places, only very few interfaces are implemented for
+ * simplicity.
+ */
+struct alignas(SIMD_ALIGNMENT) Simd_BBox{
+public:
+	simd_data	m_min_x;
+	simd_data	m_min_y;
+	simd_data	m_min_z;
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+	simd_data	m_max_x;
+	simd_data	m_max_y;
+	simd_data	m_max_z;
+
+	simd_data	m_mask;
+};
+
+static_assert( sizeof( Simd_BBox ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Simd_BBox." );
+
 SORT_FORCEINLINE int IntersectBBox_SIMD(const Ray& ray, const Simd_BBox& bb, simd_data& f_min ) {
 	f_min = simd_set_ps1( ray.m_fMin );
 	simd_data f_max = simd_set_ps1( ray.m_fMax );

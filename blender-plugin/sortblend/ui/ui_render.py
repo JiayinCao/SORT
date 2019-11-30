@@ -76,7 +76,7 @@ class SORTRenderData(bpy.types.PropertyGroup):
 
     # obvh properties
     obvh_max_node_depth : bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)
-    obvh_max_pri_in_leaf : bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=32, min=8, max=64)
+    obvh_max_pri_in_leaf : bpy.props.IntProperty(name='Maximum Primitives in Leaf Node.', default=16, min=8, max=64)
 
     # kdtree properties
     kdtree_max_node_depth : bpy.props.IntProperty(name='Maximum Recursive Depth', default=28, min=8)

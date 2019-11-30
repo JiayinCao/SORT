@@ -31,17 +31,25 @@
 	static_assert( false , "More than one SIMD version is defined before including simd_triangle." );
 #endif
 
-#ifdef SIMD_SSE_IMPLEMENTATION
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 
-//! @brief  Triangle4 is more of a simplified resolved data structure holds only bare bone information of triangle.
+#ifdef SIMD_SSE_IMPLEMENTATION
+	#define Simd_Triangle		Triangle4
+#endif
+
+#ifdef SIMD_AVX_IMPLEMENTATION
+	#define Simd_Triangle		Triangle8
+#endif
+
+//! @brief  Simd_Triangle is more of a simplified resolved data structure holds only bare bone information of triangle.
 /**
- * Triangle4 is used in QBVH to accelerate ray triangle intersection using SSE. Its sole purpose is to accelerate 
- * ray triangle intersection by using SSE. Meaning there is no need to provide sophisticated interface of the class.
+ * Simd_Triangle is used in OBVH/QBVH to accelerate ray triangle intersection using AVX. Its sole purpose is to accelerate 
+ * ray triangle intersection by using AVX. Meaning there is no need to provide sophisticated interface of the class.
  * And since it is quite performance sensitive code, everything is inlined and there is no polymorphisms to keep it
  * as simple as possible. However, since there will be extra data kept in the system, it will also insignificantly 
  * incur more cost in term of memory usage.
  */
-struct alignas(16) Triangle4{
+struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
     simd_data  m_p0_x , m_p0_y , m_p0_z ;  /**< Position of point 0 of the triangle. */
     simd_data  m_p1_x , m_p1_y , m_p1_z ;  /**< Position of point 1 of the triangle. */
     simd_data  m_p2_x , m_p2_y , m_p2_z ;  /**< Position of point 2 of the triangle. */
@@ -51,11 +59,16 @@ struct alignas(16) Triangle4{
     const Triangle*  m_ori_tri[SIMD_CHANNEL] = { nullptr };
 	const Primitive* m_ori_pri[SIMD_CHANNEL] = { nullptr };
 
+#ifdef SIMD_AVX_IMPLEMENTATION
+	char padding[16];
+#endif
+
     //! @brief  Push a triangle in the data structure.
     //!
 	//! @param	pri		The original primitive.
     //! @return         Whether the data structure is full.
     bool PushTriangle( const Primitive* primitive ){
+#ifdef SIMD_SSE_IMPLEMENTATION
 		const Triangle* triangle = dynamic_cast<const Triangle*>(primitive->GetShape());
         if( m_ori_pri[0] == nullptr ){
             m_ori_pri[0] = primitive;
@@ -70,101 +83,12 @@ struct alignas(16) Triangle4{
 			m_ori_tri[2] = triangle;
             return false;
         }
-        m_ori_pri[3] = primitive;
+		m_ori_pri[3] = primitive;
 		m_ori_tri[3] = triangle;
         return true;
-    }
-
-    //! @brief  Pack triangle information into SSE compatible data.
-	//!
-	//! @return		Whether there is valid triangle inside.
-    bool PackData(){
-		if( !m_ori_pri[0] )
-			return false;
-
-        float	mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f };
-        float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL] , p2_x[SIMD_CHANNEL] , p2_y[SIMD_CHANNEL] , p2_z[SIMD_CHANNEL];
-        for( auto i = 0 ; i < SIMD_CHANNEL && m_ori_pri[i] ; ++i ){
-            const auto triangle = m_ori_tri[i];
-
-            const auto& mem = triangle->m_meshVisual->m_memory;
-            const auto id0 = triangle->m_index.m_id[0];
-            const auto id1 = triangle->m_index.m_id[1];
-            const auto id2 = triangle->m_index.m_id[2];
-
-            const auto& mv0 = mem->m_vertices[id0];
-            const auto& mv1 = mem->m_vertices[id1];
-            const auto& mv2 = mem->m_vertices[id2];
-
-            p0_x[i] = mv0.m_position.x;
-            p0_y[i] = mv0.m_position.y;
-            p0_z[i] = mv0.m_position.z;
-
-            p1_x[i] = mv1.m_position.x;
-            p1_y[i] = mv1.m_position.y;
-            p1_z[i] = mv1.m_position.z;
-
-            p2_x[i] = mv2.m_position.x;
-            p2_y[i] = mv2.m_position.y;
-            p2_z[i] = mv2.m_position.z;
-
-            mask[i] = 0.0f;
-        }
-
-        m_p0_x = simd_set_ps( p0_x );
-        m_p0_y = simd_set_ps( p0_y );
-        m_p0_z = simd_set_ps( p0_z );
-        m_p1_x = simd_set_ps( p1_x );
-        m_p1_y = simd_set_ps( p1_y );
-        m_p1_z = simd_set_ps( p1_z );
-        m_p2_x = simd_set_ps( p2_x );
-        m_p2_y = simd_set_ps( p2_y );
-        m_p2_z = simd_set_ps( p2_z );
-        m_mask = simd_cmpeq_ps( simd_zeros , simd_set_ps( mask ) );
-
-		return true;
-    }
-
-    //! @brief  Reset the data for reuse
-    void Reset(){
-        m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = nullptr;
-		m_ori_tri[0] = m_ori_tri[1] = m_ori_tri[2] = m_ori_tri[3] = nullptr;
-    }
-};
-
-#define Simd_Triangle		Triangle4
-
-static_assert( sizeof( Triangle4 ) % 16 == 0 , "Incorrect size of Triangle4." );
-
-#endif	// SIMD_SSE_IMPLEMENTATION
+#endif
 
 #ifdef SIMD_AVX_IMPLEMENTATION
-
-//! @brief  Triangle8 is more of a simplified resolved data structure holds only bare bone information of triangle.
-/**
- * Triangle8 is used in OBVH to accelerate ray triangle intersection using AVX. Its sole purpose is to accelerate 
- * ray triangle intersection by using AVX. Meaning there is no need to provide sophisticated interface of the class.
- * And since it is quite performance sensitive code, everything is inlined and there is no polymorphisms to keep it
- * as simple as possible. However, since there will be extra data kept in the system, it will also insignificantly 
- * incur more cost in term of memory usage.
- */
-struct alignas(32) Triangle8{
-    simd_data  m_p0_x , m_p0_y , m_p0_z ;  /**< Position of point 0 of the triangle. */
-    simd_data  m_p1_x , m_p1_y , m_p1_z ;  /**< Position of point 1 of the triangle. */
-    simd_data  m_p2_x , m_p2_y , m_p2_z ;  /**< Position of point 2 of the triangle. */
-    simd_data  m_mask;
-
-    /**< Pointers to original primitives. */
-    const Triangle*  m_ori_tri[SIMD_CHANNEL] = { nullptr };
-	const Primitive* m_ori_pri[SIMD_CHANNEL] = { nullptr };
-
-	char padding[16];
-
-    //! @brief  Push a triangle in the data structure.
-    //!
-	//! @param	pri		The original primitive.
-    //! @return         Whether the data structure is full.
-    bool PushTriangle( const Primitive* primitive ){
 		const Triangle* triangle = dynamic_cast<const Triangle*>(primitive->GetShape());
         if( m_ori_pri[0] == nullptr ){
             m_ori_pri[0] = primitive;
@@ -198,6 +122,7 @@ struct alignas(32) Triangle8{
         m_ori_pri[7] = primitive;
 		m_ori_tri[7] = triangle;
         return true;
+#endif
     }
 
     //! @brief  Pack triangle information into SSE compatible data.
@@ -207,8 +132,14 @@ struct alignas(32) Triangle8{
 		if( !m_ori_pri[0] )
 			return false;
 
+#ifdef SIMD_SSE_IMPLEMENTATION
+		float	mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f };
+#endif
+#ifdef SIMD_AVX_IMPLEMENTATION
         float	mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f };
-        float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL] , p2_x[SIMD_CHANNEL] , p2_y[SIMD_CHANNEL] , p2_z[SIMD_CHANNEL];
+#endif
+
+		float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL] , p2_x[SIMD_CHANNEL] , p2_y[SIMD_CHANNEL] , p2_z[SIMD_CHANNEL];
         for( auto i = 0 ; i < SIMD_CHANNEL && m_ori_pri[i] ; ++i ){
             const auto triangle = m_ori_tri[i];
 
@@ -252,20 +183,19 @@ struct alignas(32) Triangle8{
 
     //! @brief  Reset the data for reuse
     void Reset(){
-        m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = m_ori_pri[4] = m_ori_pri[5] = m_ori_pri[6] = m_ori_pri[7] = nullptr;
+#ifdef SIMD_SSE_IMPLEMENTATION
+        m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = nullptr;
+		m_ori_tri[0] = m_ori_tri[1] = m_ori_tri[2] = m_ori_tri[3] = nullptr;
+#endif
+
+#ifdef SIMD_AVX_IMPLEMENTATION
+		m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = m_ori_pri[4] = m_ori_pri[5] = m_ori_pri[6] = m_ori_pri[7] = nullptr;
 		m_ori_tri[0] = m_ori_tri[1] = m_ori_tri[2] = m_ori_tri[3] = m_ori_tri[4] = m_ori_tri[5] = m_ori_tri[6] = m_ori_tri[7] = nullptr;
+#endif
     }
 };
 
-#ifdef SIMD_AVX_IMPLEMENTATION
-	#define Simd_Triangle		Triangle8
-#endif
-
-static_assert( sizeof( Triangle8 ) % 32 == 0 , "Incorrect size of Triangle8." );
-
-#endif	// SIMD_AVX_IMPLEMENTATION
-
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+static_assert( sizeof( Simd_Triangle ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Triangle8." );
 
 //! @brief	Core algorithm of ray triangle intersection.
 //!
@@ -409,10 +339,10 @@ SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri_simd, const Ray
 	intersection->primitive = tri_simd.m_ori_pri[id];
 }
 
-//! @brief  With the power of SSE, this utility function helps intersect a ray with four triangles at the cost of one.
+//! @brief  With the power of SSE, this utility function helps intersect a ray with four/eight triangles at the cost of one.
 //!
 //! @param  ray     Ray to be tested against.
-//! @param  tri_simd    Data structure holds four triangles.
+//! @param  tri_simd    Data structure holds four/eight triangles.
 //! @param  ret     The result of intersection. It can't be nullptr.
 //! @return         Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Triangle& tri_simd , Intersection* ret ){
@@ -443,9 +373,9 @@ SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Triang
 //!
 //! This function stops as long as there is an intersection, it is for shadow ray occlusion detection.
 //!
-//! @param  ray     Ray to be tested against.
-//! @param  tri_simd    Data structure holds four triangles.
-//! @return         Whether there is any intersection that is valid.
+//! @param  ray     	Ray to be tested against.
+//! @param  tri_simd    Data structure holds four/eight triangles.
+//! @return         	Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Triangle& tri_simd) {
 	// please optimize these value, compiler.
 	simd_data	dummy_u, dummy_v, dummy_t, mask;
@@ -455,9 +385,9 @@ SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Tria
 //! @brief  Unlike the above function, this helper function will populate all results in the BSSRDFIntersection data structure.
 //!         It is for BSSRDF intersection tests.
 //!
-//! @param  ray     Ray to be tested against.
-//! @param  tri_simd    Data structure holds four triangles.
-//! @param  ret     The result of intersection.
+//! @param  ray     	Ray to be tested against.
+//! @param  tri_simd    Data structure holds four/eight triangles.
+//! @param  ret     	The result of intersection.
 SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Triangle& tri_simd, const StringID matID , BSSRDFIntersections& intersections) {
 	simd_data	u_simd, v_simd, t_simd, mask;
 	const auto maxt = intersections.maxt;
