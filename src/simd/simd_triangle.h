@@ -41,7 +41,7 @@
  * as simple as possible. However, since there will be extra data kept in the system, it will also insignificantly 
  * incur more cost in term of memory usage.
  */
-struct Triangle4{
+struct alignas(16) Triangle4{
     simd_data  m_p0_x , m_p0_y , m_p0_z ;  /**< Position of point 0 of the triangle. */
     simd_data  m_p1_x , m_p1_y , m_p1_z ;  /**< Position of point 1 of the triangle. */
     simd_data  m_p2_x , m_p2_y , m_p2_z ;  /**< Position of point 2 of the triangle. */
@@ -148,7 +148,7 @@ static_assert( sizeof( Triangle4 ) % 16 == 0 , "Incorrect size of Triangle4." );
  * as simple as possible. However, since there will be extra data kept in the system, it will also insignificantly 
  * incur more cost in term of memory usage.
  */
-struct Triangle8{
+struct alignas(32) Triangle8{
     simd_data  m_p0_x , m_p0_y , m_p0_z ;  /**< Position of point 0 of the triangle. */
     simd_data  m_p1_x , m_p1_y , m_p1_z ;  /**< Position of point 1 of the triangle. */
     simd_data  m_p2_x , m_p2_y , m_p2_z ;  /**< Position of point 2 of the triangle. */

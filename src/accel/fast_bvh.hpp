@@ -200,6 +200,8 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
     Simd_Triangle   sind_tri;
     Simd_Line       simd_line;
+	std::vector<Simd_Triangle>	tri_list;
+	std::vector<Simd_Line>		line_list;
     const auto _start = node->pri_offset;
     const auto _end = _start + node->pri_cnt;
     for(auto i = _start ; i < _end ; i++ ){
@@ -208,14 +210,14 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
         if( SHAPE_TRIANGLE == shape_type ){
             if( sind_tri.PushTriangle( primitive ) ){
                 if( sind_tri.PackData() ){
-					node->tri_list.push_back( sind_tri );
+					tri_list.push_back( sind_tri );
 					sind_tri.Reset();
 				}
             }
         }else if( SHAPE_LINE == shape_type ){
             if( simd_line.PushLine( primitive ) ){
                 if( simd_line.PackData() ){
-                    node->line_list.push_back( simd_line );
+                    line_list.push_back( simd_line );
                     simd_line.Reset();
                 }
             }
@@ -225,9 +227,22 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
         }
     }
 	if (sind_tri.PackData())
-		node->tri_list.push_back(sind_tri);
+		tri_list.push_back(sind_tri);
     if (simd_line.PackData())
-        node->line_list.push_back(simd_line);
+        line_list.push_back(simd_line);
+	
+	if( tri_list.size() ){
+		node->tri_cnt = (unsigned int)tri_list.size();
+		node->tri_list = std::make_unique<Simd_Triangle[]>(node->tri_cnt);
+		for( auto i = 0u ; i < node->tri_cnt ; ++i )
+			node->tri_list[i] = tri_list[i];
+	}
+	if( line_list.size() ){
+		node->line_cnt = (unsigned int)line_list.size();
+		node->line_list = std::make_unique<Simd_Line[]>(node->line_cnt);
+		for( auto i = 0u ; i < node->line_cnt ; ++i )
+			node->line_list[i] = line_list[i];
+	}
 #endif
 
     SORT_STATS(++sFbvhLeafNodeCount);
@@ -313,9 +328,9 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
-            for( auto i = 0 ; i < node->tri_list.size() ; ++i )
+            for( auto i = 0 ; i < node->tri_cnt ; ++i )
                 intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
-            for( auto i = 0 ; i < node->line_list.size() ; ++i )
+            for( auto i = 0 ; i < node->line_cnt ; ++i )
                 intersectLine_SIMD( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
                 for( auto i = 0 ; i < node->other_list.size() ; ++i )
@@ -448,22 +463,22 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 		// check if it is a leaf node
 		if (0 == node->child_cnt) {
-			for (auto i = 0; i < node->tri_list.size(); ++i) {
+			for (auto i = 0; i < node->tri_cnt; ++i) {
 				if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
 					SORT_STATS(sIntersectionTest += i * 4);
 					return true;
 				}
 			}
-			for (auto i = 0; i < node->line_list.size(); ++i) {
+			for (auto i = 0; i < node->line_cnt; ++i) {
 				if (intersectLineFast_SIMD(ray, node->line_list[i])) {
-					SORT_STATS(sIntersectionTest += (i + node->tri_list.size()) * 4);
+					SORT_STATS(sIntersectionTest += (i + node->tri_cnt) * 4);
 					return true;
 				}
 			}
 			if (UNLIKELY(!node->other_list.empty())) {
 				for (auto i = 0; i < node->other_list.size(); ++i) {
 					if (node->other_list[i]->GetIntersect(ray, nullptr)) {
-						SORT_STATS(sIntersectionTest += (i + node->tri_list.size() + node->line_list.size()) * 4);
+						SORT_STATS(sIntersectionTest += (i + node->tri_cnt + node->line_cnt ) * 4);
 						return true;
 					}
 				}
@@ -615,8 +630,8 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 			// There are only two major primitives in SORT, line and triangle.
 			// Line is usually used for hair, which has its own hair shader.
 			// Triangle is the only major primitive that has SSS.
-			for ( const auto& tri8 : node->tri_list )
-				intersectTriangleMulti_SIMD(ray, tri8, matID, intersect);
+			for ( auto i = 0u ; i < node->tri_cnt ; ++i )
+				intersectTriangleMulti_SIMD(ray, node->tri_list[i] , matID, intersect);
 			SORT_STATS(sIntersectionTest += node->pri_cnt);
 			continue;
 		}

@@ -25,7 +25,7 @@
 #ifdef SIMD_SSE_IMPLEMENTATION
 
 //! @brief  Like Triangle4, Line4 is the corresponding version for line shape.
-struct Line4{
+struct alignas(16) Line4{
     simd_data  m_p0_x , m_p0_y , m_p0_z;   /**< Point at the end of the line. */
     simd_data  m_p1_x , m_p1_y , m_p1_z;   /**< Point at the other end of the line. */
 
@@ -156,7 +156,7 @@ static_assert( sizeof( Line4 ) % 16 == 0 , "Incorrect size of Line4." );
 #ifdef SIMD_AVX_IMPLEMENTATION
 
 //! @brief  Like Triangle8, Line8 is the corresponding version for line shape.
-struct Line8{
+struct alignas(32) Line8{
     simd_data  m_p0_x , m_p0_y , m_p0_z;   /**< Point at the end of the line. */
     simd_data  m_p1_x , m_p1_y , m_p1_z;   /**< Point at the other end of the line. */
 

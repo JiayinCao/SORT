@@ -33,7 +33,7 @@
  * Since this data structure is only used in limited places, only very few interfaces are implemented for
  * simplicity.
  */
-struct BBox4{
+struct alignas(16) BBox4{
 public:
 	simd_data_sse	m_min_x;
 	simd_data_sse	m_min_y;
@@ -63,7 +63,7 @@ static_assert( sizeof( BBox4 ) % 16 == 0 , "Incorrect size of BBox4." );
  * Since this data structure is only used in limited places, only very few interfaces are implemented for
  * simplicity.
  */
-struct BBox8{
+struct alignas(32) BBox8{
 public:
 	simd_data_avx	m_min_x;
 	simd_data_avx	m_min_y;

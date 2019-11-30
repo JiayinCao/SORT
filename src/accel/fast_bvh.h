@@ -39,12 +39,16 @@ static_assert(false, "More than one SIMD version is defined before including fas
 
 struct Fast_Bvh_Node {
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
-	Simd_BBox						bbox;					/**< Bounding boxes of its four children. */
-	std::vector<Simd_Triangle>      tri_list;
-	std::vector<Simd_Line>          line_list;
+    using Simd_Triangle_Container = std::unique_ptr<Simd_Triangle[]>;
+    using Simd_Line_Container = std::unique_ptr<Simd_Line[]>;
+	Simd_BBox						bbox;					    /**< Bounding boxes of its four children. */
+	Simd_Triangle_Container         tri_list = nullptr;
+    unsigned int                    tri_cnt = 0;
+	Simd_Line_Container             line_list;
+    unsigned int                    line_cnt = 0;
 	std::vector<const Primitive*>   other_list;
 #else
-	BBox							bbox[FBVH_CHILD_CNT];	/**< Bounding boxes of its children. */
+	BBox							bbox[FBVH_CHILD_CNT];	    /**< Bounding boxes of its children. */
 #endif
 
 	std::unique_ptr<Fast_Bvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
