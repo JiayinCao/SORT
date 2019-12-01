@@ -327,13 +327,13 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
             const auto tri_cnt = node->tri_list.size();
-            for( auto i = 0 ; i < tri_cnt ; ++i )
+            for( auto i = 0u ; i < tri_cnt ; ++i )
                 intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
             const auto line_cnt = node->line_list.size();
-            for( auto i = 0 ; i < line_cnt ; ++i )
+            for( auto i = 0u ; i < line_cnt ; ++i )
                 intersectLine_SIMD( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
-                for( auto i = 0 ; i < node->other_list.size() ; ++i )
+                for( auto i = 0u ; i < node->other_list.size() ; ++i )
                     node->other_list[i]->GetIntersect( ray , intersect );
             }
             SORT_STATS(sIntersectionTest+=node->pri_cnt);
@@ -464,21 +464,21 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
         // check if it is a leaf node
         if (0 == node->child_cnt) {
             const auto tri_cnt = node->tri_list.size();
-            for (auto i = 0; i < tri_cnt; ++i) {
+            for (auto i = 0u; i < tri_cnt; ++i) {
                 if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
                     SORT_STATS(sIntersectionTest += i * 4);
                     return true;
                 }
             }
             const auto line_list = node->line_list.size();
-            for (auto i = 0; i < line_list; ++i) {
+            for (auto i = 0u; i < line_list; ++i) {
                 if (intersectLineFast_SIMD(ray, node->line_list[i])) {
                     SORT_STATS(sIntersectionTest += (i + tri_cnt) * 4);
                     return true;
                 }
             }
             if (UNLIKELY(!node->other_list.empty())) {
-                for (auto i = 0; i < node->other_list.size(); ++i) {
+                for (auto i = 0u; i < node->other_list.size(); ++i) {
                     if (node->other_list[i]->GetIntersect(ray, nullptr)) {
                         SORT_STATS(sIntersectionTest += (i + tri_cnt + line_list ) * 4);
                         return true;
