@@ -634,7 +634,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 			// Triangle is the only major primitive that has SSS.
 			for ( auto i = 0u ; i < node->tri_list.size() ; ++i )
 				intersectTriangleMulti_SIMD(ray, node->tri_list[i] , matID, intersect);
-			SORT_STATS(sIntersectionTest += node->pri_cnt);
+			SORT_STATS(sIntersectionTest += node->tri_list.size());
 			continue;
 		}
 

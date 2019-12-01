@@ -70,11 +70,11 @@ struct Simd_Primitive_Container{
     //! @param i    Index of primitive to read.
     //! @return     The element to read/write.
     SORT_FORCEINLINE const T& operator[]( unsigned int i ) const{
-        sAssert( i < cnt , SPATIAL_STRUCTURE );
+        sAssert( i < cnt , SPATIAL_ACCELERATOR );
         return aligned_address[i];
     }
     SORT_FORCEINLINE T& operator[]( unsigned int i ){
-        sAssert( i < cnt , SPATIAL_STRUCTURE );
+        sAssert( i < cnt , SPATIAL_ACCELERATOR );
         return aligned_address[i];
     }
 
