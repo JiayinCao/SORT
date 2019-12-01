@@ -21,7 +21,7 @@ Thanks to [rico cilliers](https://www.artstation.com/ricocilliers) for his open 
 ![Image](assets/main_page/car.png)
 Thanks to [Christophe Desse](https://www.artstation.com/christophe-desse) for this awesome asset.
 ![Image](assets/main_page/stormtrooper.png)
-Thanks to [ScottGraham](https://www.blendswap.com/blend/13953) for the free downloadable asset.
+Thanks to [ScottGraham](https://www.blendswap.com/blend/13953) for the free downloadable asset. The above rendered image is not used for any commercial purposes.
 ![Image](assets/main_page/dinning room.png)
 ![Image](assets/main_page/living room.png)
 ![Image](assets/main_page/table.png)
