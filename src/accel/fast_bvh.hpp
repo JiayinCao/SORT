@@ -15,10 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#ifdef SORT_IN_LINUX
-#include <stdlib.h>
-#endif
-
 #include <queue>
 #include "core/memory.h"
 #include "core/stats.h"
@@ -235,29 +231,14 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
     if (simd_line.PackData())
         line_list.push_back(simd_line);
 	
-
-	// Following code should have been merged in one branch. However, there are two blockers
-	//	- aligned_alloc is not easily available, it is only available with latest MacOS.
-	//	- alignas is ignored in GCC in Ubuntu.
 	if( tri_list.size() ){
-		node->tri_cnt = (unsigned int)tri_list.size();
-#ifdef SORT_IN_LINUX
-		node->tri_list = std::unique_ptr<Simd_Triangle[]>( (Simd_Triangle*)aligned_alloc(SIMD_ALIGNMENT, node->tri_cnt * sizeof(Simd_Triangle) ) );
-#else
-		node->tri_list = std::make_unique<Simd_Triangle[]>(node->tri_cnt);
-#endif
-
-		for( auto i = 0u ; i < node->tri_cnt ; ++i )
+		node->tri_list.allocate( (unsigned int)tri_list.size() );
+		for( auto i = 0u ; i < tri_list.size() ; ++i )
 			node->tri_list[i] = tri_list[i];
 	}
 	if( line_list.size() ){
-		node->line_cnt = (unsigned int)line_list.size();
-#ifdef SORT_IN_LINUX
-		node->line_list = std::unique_ptr<Simd_Line[]>( (Simd_Line*)aligned_alloc(SIMD_ALIGNMENT, node->line_cnt * sizeof(Simd_Line) ) );
-#else
-		node->line_list = std::make_unique<Simd_Line[]>(node->line_cnt);
-#endif
-		for( auto i = 0u ; i < node->line_cnt ; ++i )
+		node->line_list.allocate( (unsigned int)line_list.size() );
+		for( auto i = 0u ; i < line_list.size() ; ++i )
 			node->line_list[i] = line_list[i];
 	}
 #endif
@@ -345,9 +326,11 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
-            for( auto i = 0 ; i < node->tri_cnt ; ++i )
+			const auto tri_cnt = node->tri_list.size();
+            for( auto i = 0 ; i < tri_cnt ; ++i )
                 intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
-            for( auto i = 0 ; i < node->line_cnt ; ++i )
+			const auto line_cnt = node->line_list.size();
+            for( auto i = 0 ; i < line_cnt ; ++i )
                 intersectLine_SIMD( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
                 for( auto i = 0 ; i < node->other_list.size() ; ++i )
@@ -480,22 +463,24 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 		// check if it is a leaf node
 		if (0 == node->child_cnt) {
-			for (auto i = 0; i < node->tri_cnt; ++i) {
+			const auto tri_cnt = node->tri_list.size();
+			for (auto i = 0; i < tri_cnt; ++i) {
 				if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
 					SORT_STATS(sIntersectionTest += i * 4);
 					return true;
 				}
 			}
-			for (auto i = 0; i < node->line_cnt; ++i) {
+			const auto line_list = node->line_list.size();
+			for (auto i = 0; i < line_list; ++i) {
 				if (intersectLineFast_SIMD(ray, node->line_list[i])) {
-					SORT_STATS(sIntersectionTest += (i + node->tri_cnt) * 4);
+					SORT_STATS(sIntersectionTest += (i + tri_cnt) * 4);
 					return true;
 				}
 			}
 			if (UNLIKELY(!node->other_list.empty())) {
 				for (auto i = 0; i < node->other_list.size(); ++i) {
 					if (node->other_list[i]->GetIntersect(ray, nullptr)) {
-						SORT_STATS(sIntersectionTest += (i + node->tri_cnt + node->line_cnt ) * 4);
+						SORT_STATS(sIntersectionTest += (i + tri_cnt + line_list ) * 4);
 						return true;
 					}
 				}
@@ -647,7 +632,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 			// There are only two major primitives in SORT, line and triangle.
 			// Line is usually used for hair, which has its own hair shader.
 			// Triangle is the only major primitive that has SSS.
-			for ( auto i = 0u ; i < node->tri_cnt ; ++i )
+			for ( auto i = 0u ; i < node->tri_list.size() ; ++i )
 				intersectTriangleMulti_SIMD(ray, node->tri_list[i] , matID, intersect);
 			SORT_STATS(sIntersectionTest += node->pri_cnt);
 			continue;
