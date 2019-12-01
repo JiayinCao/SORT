@@ -9,7 +9,7 @@ Here are the features implemented so far:
   - Subsurface Scattering.
   - Fur, Hair.
   - Support Open Shading Language.
-  - Camera. (DOF)
+  - Depth of Field
   - Multi-thread rendering, SIMD(SSE,AVX) Optimized.
   - Blender 2.8 plugin.
 
