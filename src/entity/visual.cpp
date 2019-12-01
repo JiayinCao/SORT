@@ -64,7 +64,6 @@ void HairVisual::Serialize( IStreamBase& stream ){
         const auto width_delta = ( width_bottom - width_tip ) / (float)hair_step;
         const auto v_delta = 1.0f / ( float ) hair_step;
         Point prevP;
-        auto prevV = 0.0f;
 
         auto width = width_bottom;
         auto v = 0.0f;

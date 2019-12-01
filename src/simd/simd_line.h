@@ -303,8 +303,6 @@ SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Line& line
     // get the index of the closest one
     const auto resolved_mask = simd_movemask_ps( simd_cmpeq_ps( t4 , t_min ) );
 	const auto res_i = __bsf(resolved_mask);
-    
-	const auto primitive = line4.m_ori_pri[res_i];
 	const auto line = line4.m_ori_line[res_i];
 
     ret->intersect = ray( t4[res_i] );
