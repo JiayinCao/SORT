@@ -237,7 +237,7 @@ TEST(SIMD_TEST, simd_cmpeq_ps) {
         data0[i] = 2.0f * i;
         data1[i] = i * i;
     }
-	data0[0] = data1[0] = nan_float;
+    data0[0] = data1[0] = nan_float;
 
     const auto simd_data0 = simd_set_ps( data0 );
     const auto simd_data1 = simd_set_ps( data1 );

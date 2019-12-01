@@ -79,8 +79,8 @@ const std::string levelToString( LOG_LEVEL level ){
 
 const std::string levelToHeaderColorCode( LOG_LEVEL level ){
 #ifdef SORT_IN_WINDOWS
-	// cmd doesn't show colored text correctly
-	return "";
+    // cmd doesn't show colored text correctly
+    return "";
 #else
     return !g_logLevel ? "\033[39m" :
     ( LOG_LEVEL::LOG_DEBUG == level ) ? "\033[33m" :
@@ -125,7 +125,7 @@ const std::string LogDispatcher::format( LOG_LEVEL level , LOG_TYPE type , const
 void StdOutLogDispatcher::output( const LOG_LEVEL level , const std::string& header , const std::string& info ){
     const auto color_code = levelToHeaderColorCode( level );
 #ifdef SORT_IN_WINDOWS
-	std::cout<<color_code<<header<<" "<<info<<std::endl;
+    std::cout<<color_code<<header<<" "<<info<<std::endl;
 #else
     std::cout<<color_code<<header<<"\033[39m"<<" "<<info<<std::endl;
 #endif

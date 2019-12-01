@@ -35,8 +35,8 @@
 
 #else
 
-#define SORT_PROFILE_ENABLE			{}
-#define SORT_PROFILE_DISABLE		{}
+#define SORT_PROFILE_ENABLE         {}
+#define SORT_PROFILE_DISABLE        {}
 #define SORT_PROFILE_ISENABLED      false
 #define SORT_PROFILE(e)
 #define SORT_PROFILE_END

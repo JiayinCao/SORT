@@ -72,10 +72,10 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         // the lack of multiple bounces between different BSSRDF surfaces does introduce a bias.
         replaceSSS |= ( bssrdfBounces > m_maxBouncesInBSSRDFPath - 1 );
 
-		// Parse the material and populate the results into a scatteringEvent.
-		SE_Flag seFlag = replaceSSS ? SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ) : SE_EVALUATE_ALL;
-		ScatteringEvent se(inter, seFlag);
-		inter.primitive->GetMaterial()->UpdateScatteringEvent(se);
+        // Parse the material and populate the results into a scatteringEvent.
+        SE_Flag seFlag = replaceSSS ? SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ) : SE_EVALUATE_ALL;
+        ScatteringEvent se(inter, seFlag);
+        inter.primitive->GetMaterial()->UpdateScatteringEvent(se);
 
         SE_Flag scattering_type_flag;
         auto pdf_scattering_type = se.SampleScatteringType(scattering_type_flag);

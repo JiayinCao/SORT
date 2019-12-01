@@ -97,7 +97,7 @@ std::unique_ptr<T> MakeUniqueInstance( const StringID sid ) {
 #define DEFINE_RTTI( T , B )     class T##FactoryMethod : public FactoryMethod<B>\
 {public: \
     T##FactoryMethod(){\
-		StringID sid(#T);\
+        StringID sid(#T);\
         auto& factoryMap = Factory<B>::GetSingleton().GetFactoryMap();\
         if( factoryMap.count(sid) ){\
             slog( WARNING , GENERAL , "The class with specific name of %s already exxisted." , #T );\

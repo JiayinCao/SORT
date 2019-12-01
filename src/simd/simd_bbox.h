@@ -21,20 +21,20 @@
 #include "math/bbox.h"
 
 #if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
-	static_assert( false , "More than one SIMD version is defined before including simd_bbox." );
+    static_assert( false , "More than one SIMD version is defined before including simd_bbox." );
 #endif
 
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 
 #if defined(SIMD_AVX_IMPLEMENTATION)
-	#define Simd_BBox	BBox8
+    #define Simd_BBox   BBox8
 #endif
 
 #if defined(SIMD_SSE_IMPLEMENTATION)
-	#define Simd_BBox	BBox4
+    #define Simd_BBox   BBox4
 #endif
 
-//! @brief	SIMD version bounding box.
+//! @brief  SIMD version bounding box.
 /**
  * This is basically 4/8 bounding box in a single data structure. For best performance, they are saved in
  * structure of arrays.
@@ -43,41 +43,41 @@
  */
 struct alignas(SIMD_ALIGNMENT) Simd_BBox{
 public:
-	simd_data	m_min_x;
-	simd_data	m_min_y;
-	simd_data	m_min_z;
+    simd_data   m_min_x;
+    simd_data   m_min_y;
+    simd_data   m_min_z;
 
-	simd_data	m_max_x;
-	simd_data	m_max_y;
-	simd_data	m_max_z;
+    simd_data   m_max_x;
+    simd_data   m_max_y;
+    simd_data   m_max_z;
 
-	simd_data	m_mask;
+    simd_data   m_mask;
 };
 
 static_assert( sizeof( Simd_BBox ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Simd_BBox." );
 
 SORT_FORCEINLINE int IntersectBBox_SIMD(const Ray& ray, const Simd_BBox& bb, simd_data& f_min ) {
-	f_min = simd_set_ps1( ray.m_fMin );
-	simd_data f_max = simd_set_ps1( ray.m_fMax );
+    f_min = simd_set_ps1( ray.m_fMin );
+    simd_data f_max = simd_set_ps1( ray.m_fMax );
 
-	simd_data t1	= simd_add_ps( ray_ori_dir_x(ray) , simd_mul_ps( ray_rcp_dir_x(ray) , bb.m_max_x ) );
-	simd_data t2	= simd_add_ps( ray_ori_dir_x(ray) , simd_mul_ps( ray_rcp_dir_x(ray) , bb.m_min_x ) );
-	f_min	    = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
-	f_max		= simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
+    simd_data t1    = simd_add_ps( ray_ori_dir_x(ray) , simd_mul_ps( ray_rcp_dir_x(ray) , bb.m_max_x ) );
+    simd_data t2    = simd_add_ps( ray_ori_dir_x(ray) , simd_mul_ps( ray_rcp_dir_x(ray) , bb.m_min_x ) );
+    f_min       = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
+    f_max       = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-    t1		    = simd_add_ps( ray_ori_dir_y(ray) , simd_mul_ps( ray_rcp_dir_y(ray) , bb.m_max_y ) );
-	t2		    = simd_add_ps( ray_ori_dir_y(ray) , simd_mul_ps( ray_rcp_dir_y(ray) , bb.m_min_y ) );
-	f_min	    = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
-	f_max	    = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
+    t1          = simd_add_ps( ray_ori_dir_y(ray) , simd_mul_ps( ray_rcp_dir_y(ray) , bb.m_max_y ) );
+    t2          = simd_add_ps( ray_ori_dir_y(ray) , simd_mul_ps( ray_rcp_dir_y(ray) , bb.m_min_y ) );
+    f_min       = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
+    f_max       = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-    t1		    = simd_add_ps( ray_ori_dir_z(ray) , simd_mul_ps( ray_rcp_dir_z(ray) , bb.m_max_z ) );
-	t2		    = simd_add_ps( ray_ori_dir_z(ray) , simd_mul_ps( ray_rcp_dir_z(ray) , bb.m_min_z ) );
-	f_min	    = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
-	f_max	    = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
+    t1          = simd_add_ps( ray_ori_dir_z(ray) , simd_mul_ps( ray_rcp_dir_z(ray) , bb.m_max_z ) );
+    t2          = simd_add_ps( ray_ori_dir_z(ray) , simd_mul_ps( ray_rcp_dir_z(ray) , bb.m_min_z ) );
+    f_min       = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
+    f_max       = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-	const simd_data mask = simd_and_ps( bb.m_mask , simd_cmple_ps( f_min , f_max ) );
-	f_min = simd_pick_ps( mask , f_min , simd_neg_ones );
+    const simd_data mask = simd_and_ps( bb.m_mask , simd_cmple_ps( f_min , f_max ) );
+    f_min = simd_pick_ps( mask , f_min , simd_neg_ones );
 
-	return simd_movemask_ps( mask );
+    return simd_movemask_ps( mask );
 }
 #endif

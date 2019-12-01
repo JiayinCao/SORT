@@ -53,97 +53,97 @@ public:
         data = float3( r , g , b );
     }
 
-	SORT_FORCEINLINE RGBSpectrum operator + (const RGBSpectrum& c) const {
-		return data + c.data;
-	}
+    SORT_FORCEINLINE RGBSpectrum operator + (const RGBSpectrum& c) const {
+        return data + c.data;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum operator - (const RGBSpectrum& c) const {
-		return data - c.data;
-	}
+    SORT_FORCEINLINE RGBSpectrum operator - (const RGBSpectrum& c) const {
+        return data - c.data;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum operator * (const RGBSpectrum& c) const {
-		return data * c.data;
-	}
+    SORT_FORCEINLINE RGBSpectrum operator * (const RGBSpectrum& c) const {
+        return data * c.data;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum operator / (const RGBSpectrum& c) const {
-		return data / c.data;
-	}
+    SORT_FORCEINLINE RGBSpectrum operator / (const RGBSpectrum& c) const {
+        return data / c.data;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum operator + (float t) const {
-		return data + t;
-	}
+    SORT_FORCEINLINE RGBSpectrum operator + (float t) const {
+        return data + t;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum operator - (float t) const {
-		return data - t;
-	}
+    SORT_FORCEINLINE RGBSpectrum operator - (float t) const {
+        return data - t;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum operator * (float t) const {
-		return data * t;
-	}
+    SORT_FORCEINLINE RGBSpectrum operator * (float t) const {
+        return data * t;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum operator / (float t) const {
-		return data / t;
-	}
+    SORT_FORCEINLINE RGBSpectrum operator / (float t) const {
+        return data / t;
+    }
 
-	SORT_FORCEINLINE float GetR() const {
-		return data.r;
-	}
+    SORT_FORCEINLINE float GetR() const {
+        return data.r;
+    }
 
-	SORT_FORCEINLINE float GetG() const {
-		return data.g;
-	}
+    SORT_FORCEINLINE float GetG() const {
+        return data.g;
+    }
 
-	SORT_FORCEINLINE float GetB() const {
-		return data.b;
-	}
+    SORT_FORCEINLINE float GetB() const {
+        return data.b;
+    }
 
-	SORT_FORCEINLINE float GetMaxComponent() const {
-		return std::max(data.r, std::max(data.g, data.b));
-	}
+    SORT_FORCEINLINE float GetMaxComponent() const {
+        return std::max(data.r, std::max(data.g, data.b));
+    }
 
-	SORT_FORCEINLINE RGBSpectrum Clamp(float low, float high) const {
-		return RGBSpectrum(clamp(data, low, high));
-	}
+    SORT_FORCEINLINE RGBSpectrum Clamp(float low, float high) const {
+        return RGBSpectrum(clamp(data, low, high));
+    }
 
-	SORT_FORCEINLINE RGBSpectrum& operator+= (const RGBSpectrum& c) {
-		return *this = *this + c; 
-	}
+    SORT_FORCEINLINE RGBSpectrum& operator+= (const RGBSpectrum& c) {
+        return *this = *this + c; 
+    }
 
-	SORT_FORCEINLINE RGBSpectrum& operator-= (const RGBSpectrum& c) {
-		return *this = *this - c;
-	}
+    SORT_FORCEINLINE RGBSpectrum& operator-= (const RGBSpectrum& c) {
+        return *this = *this - c;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum& operator*= (const RGBSpectrum& c) {
-		return *this = *this * c;
-	}
+    SORT_FORCEINLINE RGBSpectrum& operator*= (const RGBSpectrum& c) {
+        return *this = *this * c;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum& operator/= (const RGBSpectrum& c) {
-		return *this = *this / c;
-	}
+    SORT_FORCEINLINE RGBSpectrum& operator/= (const RGBSpectrum& c) {
+        return *this = *this / c;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum& operator+=(float t) {
-		return *this = *this + t;
-	}
+    SORT_FORCEINLINE RGBSpectrum& operator+=(float t) {
+        return *this = *this + t;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum& operator-=(float t) {
-		return *this = *this - t;
-	}
+    SORT_FORCEINLINE RGBSpectrum& operator-=(float t) {
+        return *this = *this - t;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum& operator*=(float t) {
-		return *this = *this * t;
-	}
+    SORT_FORCEINLINE RGBSpectrum& operator*=(float t) {
+        return *this = *this * t;
+    }
 
-	SORT_FORCEINLINE RGBSpectrum& operator/=(float t) {
-		return *this = *this / t;
-	}
+    SORT_FORCEINLINE RGBSpectrum& operator/=(float t) {
+        return *this = *this / t;
+    }
 
     SORT_FORCEINLINE float operator []( int i ) const {
-		return data[i]; 
-	}
+        return data[i]; 
+    }
 
     SORT_FORCEINLINE float& operator []( int i ) {
-		return data[i];
-	}
+        return data[i];
+    }
 
     // whether the spectrum is black
     SORT_FORCEINLINE bool IsBlack() const{

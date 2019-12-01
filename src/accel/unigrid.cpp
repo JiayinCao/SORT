@@ -120,7 +120,7 @@ bool UniGrid::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect == nullptr);
 
-	r.Prepare();
+    r.Prepare();
 
     static const auto voxelId2Point = [&]( int id[3] ){
         Point p;
@@ -204,7 +204,7 @@ void UniGrid::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , cons
     SORT_PROFILE("Traverse Uniform Grid");
     SORT_STATS(++sRayCount);
 
-	r.Prepare();
+    r.Prepare();
 
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;

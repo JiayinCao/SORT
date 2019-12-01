@@ -231,7 +231,7 @@ bool KDTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += (intersect == nullptr));
 
-	r.Prepare();
+    r.Prepare();
 
     float fmax;
     auto fmin = Intersect( r , m_bbox , &fmax );
@@ -292,8 +292,8 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
 void KDTree::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
     SORT_PROFILE("Traverse KD-Tree");
     SORT_STATS(++sRayCount);
-	
-	ray.Prepare();
+    
+    ray.Prepare();
 
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;

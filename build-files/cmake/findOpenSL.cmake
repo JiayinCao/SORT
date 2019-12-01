@@ -31,7 +31,7 @@ endif ()
 
 set( OSL_ROOT_DIR ${SORT_SOURCE_DIR}/dependencies/osl )
 if( EXISTS ${OSL_ROOT_DIR})
-	set( OSL_FOUND TRUE )
+    set( OSL_FOUND TRUE )
     set( OSL_INCLUDE_DIR ${OSL_ROOT_DIR}/include )
     set( OSL_LIBRARY_DIR ${OSL_ROOT_DIR}/lib )
 if( SORT_PLATFORM_MAC )
@@ -43,7 +43,7 @@ else() # SORT_PLATFORM_WIN
     file( GLOB_RECURSE OSL_DLL  ${OSL_ROOT_DIR}/bin/*.dll )
 endif()
 else()
-	set( OSL_FOUND FALSE )
+    set( OSL_FOUND FALSE )
 endif()
 
 # Hide the options in UI
@@ -56,11 +56,11 @@ MARK_AS_ADVANCED(
 
 # Output finding result
 if (NOT OpenSL_FIND_QUIETLY)
-	message( STATUS "OpenSL Found             = ${OSL_FOUND}")
-	message( STATUS "OSL_ROOT_DIR             = ${OSL_ROOT_DIR}")
-	message( STATUS "OSL_INCLUDE_DIR          = ${OSL_INCLUDE_DIR}")
+    message( STATUS "OpenSL Found             = ${OSL_FOUND}")
+    message( STATUS "OSL_ROOT_DIR             = ${OSL_ROOT_DIR}")
+    message( STATUS "OSL_INCLUDE_DIR          = ${OSL_INCLUDE_DIR}")
     message( STATUS "OSL_LIBRARY_DIR          = ${OSL_LIBRARY_DIR}")
-	message( STATUS "OSL_LIBRARIES            = ${OSL_LIBRARIES}")
+    message( STATUS "OSL_LIBRARIES            = ${OSL_LIBRARIES}")
     if(SORT_PLATFORM_WIN)
         message( STATUS "OSL_DLL                  = ${OSL_DLL}")
     endif(SORT_PLATFORM_WIN)

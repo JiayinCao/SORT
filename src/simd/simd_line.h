@@ -57,78 +57,78 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
 
     //! @brief  Push a line in the data structure.
     //!
-	//! @param	pri		The original primitive.
+    //! @param  pri     The original primitive.
     //! @return         Whether the data structure is full.
     bool PushLine( const Primitive* primitive ){
 #ifdef SIMD_SSE_IMPLEMENTATION
         const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
         if( m_ori_pri[0] == nullptr ){
             m_ori_pri[0] = primitive;
-			m_ori_line[0] = line;
+            m_ori_line[0] = line;
             return false;
         }else if( m_ori_pri[1] == nullptr ){
             m_ori_pri[1] = primitive;
-			m_ori_line[1] = line;
+            m_ori_line[1] = line;
             return false;
         }else if( m_ori_pri[2] == nullptr ){
             m_ori_pri[2] = primitive;
-			m_ori_line[2] = line;
+            m_ori_line[2] = line;
             return false;
         }
         m_ori_pri[3] = primitive;
-		m_ori_line[3] = line;
+        m_ori_line[3] = line;
         return true;
 #endif
 
 #ifdef SIMD_AVX_IMPLEMENTATION
-		const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
+        const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
         if( m_ori_pri[0] == nullptr ){
             m_ori_pri[0] = primitive;
-			m_ori_line[0] = line;
+            m_ori_line[0] = line;
             return false;
         }else if( m_ori_pri[1] == nullptr ){
             m_ori_pri[1] = primitive;
-			m_ori_line[1] = line;
+            m_ori_line[1] = line;
             return false;
         }else if( m_ori_pri[2] == nullptr ){
             m_ori_pri[2] = primitive;
-			m_ori_line[2] = line;
+            m_ori_line[2] = line;
             return false;
         }else if( m_ori_pri[3] == nullptr ){
             m_ori_pri[3] = primitive;
-			m_ori_line[3] = line;
+            m_ori_line[3] = line;
             return false;
         }else if( m_ori_pri[4] == nullptr ){
             m_ori_pri[4] = primitive;
-			m_ori_line[4] = line;
+            m_ori_line[4] = line;
             return false;
         }else if( m_ori_pri[5] == nullptr ){
             m_ori_pri[5] = primitive;
-			m_ori_line[5] = line;
+            m_ori_line[5] = line;
             return false;
         }else if( m_ori_pri[6] == nullptr ){
             m_ori_pri[6] = primitive;
-			m_ori_line[6] = line;
+            m_ori_line[6] = line;
             return false;
         }
         m_ori_pri[7] = primitive;
-		m_ori_line[7] = line;
+        m_ori_line[7] = line;
         return true;
 #endif
     }
 
     //! @brief  Pack line information into SSE compatible data.
-	//!
-	//! @return		Whether there is valid line inside.
+    //!
+    //! @return     Whether there is valid line inside.
     bool PackData(){
-		if( !m_ori_pri[0] )
-			return false;
+        if( !m_ori_pri[0] )
+            return false;
 
 #ifdef SIMD_SSE_IMPLEMENTATION
-        float	mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f };
+        float   mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f };
 #endif
 #ifdef SIMD_AVX_IMPLEMENTATION
-        float	mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f };
+        float   mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f };
 #endif
 
         float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL];
@@ -193,19 +193,19 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
 
         m_mask = simd_cmpeq_ps( simd_zeros , simd_set_ps( mask ) );
 
-		return true;
+        return true;
     }
 
     //! @brief  Reset the data for reuse
     void Reset(){
 #ifdef SIMD_SSE_IMPLEMENTATION
         m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = nullptr;
-		m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = nullptr;
+        m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = nullptr;
 #endif
 
 #ifdef SIMD_AVX_IMPLEMENTATION
         m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = m_ori_pri[4] = m_ori_pri[5] = m_ori_pri[6] = m_ori_pri[7] = nullptr;
-		m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = m_ori_line[4] = m_ori_line[5] = m_ori_line[6] = m_ori_line[7] = nullptr;
+        m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = m_ori_line[4] = m_ori_line[5] = m_ori_line[6] = m_ori_line[7] = nullptr;
 #endif
     }
 };
@@ -246,7 +246,7 @@ SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Simd_Line& lin
     mask = simd_and_ps( mask , simd_cmpgt_ps( discriminant , simd_zeros ) );
     auto cm = simd_movemask_ps(mask);
     if (0 == cm)
-		return false;
+        return false;
     
     const simd_data sqrt_dist = simd_sqrt_ps( discriminant );
     const simd_data t0 = simd_div_ps( simd_sub_ps( simd_sub_ps( simd_zeros , b ) , sqrt_dist ) , a );
@@ -258,19 +258,19 @@ SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Simd_Line& lin
     inter_y = simd_pick_ps( mask0 , inter_y0 , inter_y1 );
     const simd_data mask1 = simd_and_ps( simd_cmplt_ps( inter_y , line4.m_length ) , simd_cmpgt_ps( inter_y , simd_zeros ) );
     mask = simd_and_ps( mask , mask1 );
-	cm = simd_movemask_ps(mask);
-	if (0 == cm)
-		return false;
+    cm = simd_movemask_ps(mask);
+    if (0 == cm)
+        return false;
 
     t4 = simd_pick_ps( mask0 , t0 , t1 );
     t4 = simd_pick_ps( mask , t4 , simd_infinites );
 
     const simd_data ray_min_t = simd_set_ps1(ray.m_fMin);
-	const simd_data ray_max_t = simd_set_ps1(ray.m_fMax);
+    const simd_data ray_max_t = simd_set_ps1(ray.m_fMax);
     mask = simd_and_ps( mask , simd_and_ps( simd_cmpgt_ps( t4 , ray_min_t ) , simd_cmplt_ps( t4 , ray_max_t ) ) );
     cm = simd_movemask_ps(mask);
-	if (0 == cm)
-		return false;
+    if (0 == cm)
+        return false;
     
     inter_x = simd_pick_ps( mask0, simd_mad_ps(t0, _ray_dir_x, _ray_ori_x), simd_mad_ps(t1, _ray_dir_x, _ray_ori_x) );
     inter_z = simd_pick_ps( mask0, simd_mad_ps(t0, _ray_dir_z, _ray_ori_z), simd_mad_ps(t1, _ray_dir_z, _ray_ori_z) );
@@ -294,20 +294,20 @@ SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Line& line
     
     mask = simd_and_ps( mask , simd_cmplt_ps( t4 , simd_set_ps1(ret->t) ) );
     const auto cm = simd_movemask_ps(mask);
-	if (0 == cm)
-		return false;
+    if (0 == cm)
+        return false;
 
     // find the closest result
     simd_data t_min = simd_minreduction_ps( t4 );
 
     // get the index of the closest one
     const auto resolved_mask = simd_movemask_ps( simd_cmpeq_ps( t4 , t_min ) );
-	const auto res_i = __bsf(resolved_mask);
-	const auto line = line4.m_ori_line[res_i];
+    const auto res_i = __bsf(resolved_mask);
+    const auto line = line4.m_ori_line[res_i];
 
     ret->intersect = ray( t4[res_i] );
 
-	if( inter_y[res_i] == line->m_length ){
+    if( inter_y[res_i] == line->m_length ){
         // A corner case where the tip of the line is being intersected.
         ret->gnormal = Normalize( line->m_world2Line.GetInversed().TransformVector( Vector( 0.0f , 1.0f , 0.0f ) ) );
         ret->normal = ret->gnormal;
@@ -319,13 +319,13 @@ SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Line& line
         ret->tangent = Normalize( line->m_gp1 - line->m_gp0 );
 
         ret->view = -ray.m_Dir;
-	}
+    }
 
     ret->u = 1.0f;
     ret->v = slerp( line->m_v0 , line->m_v1 , inter_y[res_i] / line->m_length );
     ret->t = t4[res_i];
 
-	ret->primitive = line4.m_ori_pri[res_i];
+    ret->primitive = line4.m_ori_pri[res_i];
 
     return true;
 }

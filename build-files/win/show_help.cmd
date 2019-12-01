@@ -12,10 +12,10 @@ echo         Sync the latest code from Github
 echo     * update_dep
 echo         Update dependency files.
 echo     * clean
-echo     	Clean up all generated file, including the binaries.
-echo     	But dependency will still exist.
+echo        Clean up all generated file, including the binaries.
+echo        But dependency will still exist.
 echo     * clean_dep
-echo     	Clean the dependency.
+echo        Clean the dependency.
 echo     * help
 echo         Print this help message.
 echo     * about

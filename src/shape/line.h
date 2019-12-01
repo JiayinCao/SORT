@@ -164,7 +164,7 @@ private:
 
 #ifdef SSE_ENABLED
     friend struct Line4;
-	friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Line4& line_simd , Intersection* ret );
+    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Line4& line_simd , Intersection* ret );
 #endif
 
 #ifdef AVX_ENABLED

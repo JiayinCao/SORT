@@ -22,12 +22,12 @@
 #include "bssrdf/bssrdf.h"
 
 enum SE_Flag : unsigned int{
-	SE_NONE				= 0x00,
+    SE_NONE             = 0x00,
     SE_EVALUATE_BXDF    = 0x01,                                         // Parse bxdf in the material
     SE_EVALUATE_BSSRDF  = 0x02,                                         // Parse bssrdf in the material
     SE_EVALUATE_ALL     = ( SE_EVALUATE_BXDF | SE_EVALUATE_BSSRDF ),    // Everything will be parsed in the material
 
-	SE_REPLACE_BSSRDF	= 0x04,									        // Whether to replace BSSRDFD with lambert
+    SE_REPLACE_BSSRDF   = 0x04,                                         // Whether to replace BSSRDFD with lambert
     SE_SUB_EVENT        = 0x08,                                         // Whether this scattering event is a sub-event of others
 };
 
@@ -92,12 +92,12 @@ public:
         return m_intersection;
     }
 
-	//! @brief	Get the flag of this scattering event.
-	//!
-	//! @return	 The current flag of this scattering event.
-	SORT_FORCEINLINE SE_Flag	GetFlag() const {
-		return m_flag;
-	}
+    //! @brief  Get the flag of this scattering event.
+    //!
+    //! @return  The current flag of this scattering event.
+    SORT_FORCEINLINE SE_Flag    GetFlag() const {
+        return m_flag;
+    }
 
     //! @brief  Randomly pick between bxdf and bssrdf
     //!
@@ -136,7 +136,7 @@ public:
     //! @param  po      Extant position.
     //! @param  inter   Incident intersection sampled.
     //! @param  pdf     The pdf of sampling this bssrdf among all bssrdfs.
-    void		Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const;
+    void        Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const;
 
 private:
     const Bxdf*         m_bxdfs[SE_MAX_BXDF_COUNT]      = { nullptr };     /**< All bsdfs in the scattering event. */

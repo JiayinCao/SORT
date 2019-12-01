@@ -150,7 +150,7 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect == nullptr);
 
-	r.Prepare();
+    r.Prepare();
 
     float fmax;
     auto fmin = Intersect( r , m_bbox , &fmax );
@@ -233,7 +233,7 @@ void OcTree::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const
     SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
 
-	r.Prepare();
+    r.Prepare();
 
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;

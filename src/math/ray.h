@@ -24,7 +24,7 @@
 #include "spectrum/spectrum.h"
 
 #ifdef SSE_ENABLED
-	#include <nmmintrin.h>
+    #include <nmmintrin.h>
 #endif
 
 enum RAY_PREPARE_FLAG{
@@ -76,8 +76,8 @@ public:
     float   m_fPdfA;
     float   m_fCosAtCamera;
 
-	// importance value of the ray
-	Spectrum m_we;
+    // importance value of the ray
+    Spectrum m_we;
 
     // some data are pre-calculated so that it won't be redo later multiple times
 #ifdef SSE_ENABLED
@@ -87,15 +87,15 @@ public:
     mutable __m128  m_rcp_dir_x;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
     mutable __m128  m_rcp_dir_y;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
     mutable __m128  m_rcp_dir_z;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
-	mutable __m128	m_ori_x;		/**< Ori.x , this is used in ray Triangle&Line intersection. */
-	mutable __m128	m_ori_y;		/**< Ori.y , this is used in ray Triangle&Line intersection. */
-	mutable __m128	m_ori_z;		/**< Ori.z , this is used in ray Triangle&Line intersection. */
+    mutable __m128  m_ori_x;        /**< Ori.x , this is used in ray Triangle&Line intersection. */
+    mutable __m128  m_ori_y;        /**< Ori.y , this is used in ray Triangle&Line intersection. */
+    mutable __m128  m_ori_z;        /**< Ori.z , this is used in ray Triangle&Line intersection. */
     mutable __m128  m_dir_x;        /**< Dir.x , this is used in ray Line intersection. */
     mutable __m128  m_dir_y;        /**< Dir.x , this is used in ray Line intersection. */
     mutable __m128  m_dir_z;        /**< Dir.x , this is used in ray Line intersection. */
-	mutable __m128	m_sse_scale_x;	/**< Scaling along each axis in local coordinate. */
-	mutable __m128	m_sse_scale_y;	/**< Scaling along each axis in local coordinate. */
-	mutable __m128  m_sse_scale_z;	/**< Scaling along each axis in local coordinate. */
+    mutable __m128  m_sse_scale_x;  /**< Scaling along each axis in local coordinate. */
+    mutable __m128  m_sse_scale_y;  /**< Scaling along each axis in local coordinate. */
+    mutable __m128  m_sse_scale_z;  /**< Scaling along each axis in local coordinate. */
 #endif
 
 #ifdef AVX_ENABLED
@@ -105,17 +105,17 @@ public:
     mutable __m256  m_rcp_dir_x_avx;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
     mutable __m256  m_rcp_dir_y_avx;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
     mutable __m256  m_rcp_dir_z_avx;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
-	mutable __m256	m_ori_x_avx;		/**< Ori.x , this is used in ray Triangle&Line intersection. */
-	mutable __m256	m_ori_y_avx;		/**< Ori.y , this is used in ray Triangle&Line intersection. */
-	mutable __m256	m_ori_z_avx;		/**< Ori.z , this is used in ray Triangle&Line intersection. */
+    mutable __m256  m_ori_x_avx;        /**< Ori.x , this is used in ray Triangle&Line intersection. */
+    mutable __m256  m_ori_y_avx;        /**< Ori.y , this is used in ray Triangle&Line intersection. */
+    mutable __m256  m_ori_z_avx;        /**< Ori.z , this is used in ray Triangle&Line intersection. */
     mutable __m256  m_dir_x_avx;        /**< Dir.x , this is used in ray Line intersection. */
     mutable __m256  m_dir_y_avx;        /**< Dir.x , this is used in ray Line intersection. */
     mutable __m256  m_dir_z_avx;        /**< Dir.x , this is used in ray Line intersection. */
-	mutable __m256	m_scale_x_avx;	    /**< Scaling along each axis in local coordinate. */
-	mutable __m256	m_scale_y_avx;	    /**< Scaling along each axis in local coordinate. */
-	mutable __m256  m_scale_z_avx;	    /**< Scaling along each axis in local coordinate. */
+    mutable __m256  m_scale_x_avx;      /**< Scaling along each axis in local coordinate. */
+    mutable __m256  m_scale_y_avx;      /**< Scaling along each axis in local coordinate. */
+    mutable __m256  m_scale_z_avx;      /**< Scaling along each axis in local coordinate. */
 #endif
 
-	mutable int		m_local_x , m_local_y , m_local_z;	/**< Id used to identify axis in local coordinate. */
-	mutable float	m_scale_x , m_scale_y , m_scale_z;	/**< Scaling along each axis in local coordinate. */
+    mutable int     m_local_x , m_local_y , m_local_z;  /**< Id used to identify axis in local coordinate. */
+    mutable float   m_scale_x , m_scale_y , m_scale_z;  /**< Scaling along each axis in local coordinate. */
 };

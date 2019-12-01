@@ -87,14 +87,14 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     }else{
         // Importance sampling using the underlying layer
         Vector r_wi;
-		auto bsdf_pdf = 0.0f;
+        auto bsdf_pdf = 0.0f;
         ret = bottom->Sample_BSDF( -r_wo , r_wi, nbs, bsdf_pdf );
 
         swi = refract(-r_wi, DIR_UP, ior, 1.0f, tir_i);
         wi = bxdfToBsdf(swi);
-		
-		if( pPdf )
-			*pPdf = bsdf_pdf;
+        
+        if( pPdf )
+            *pPdf = bsdf_pdf;
 
         // Handle corner case where TIR happens
         if (tir_i || tir_o) {

@@ -22,82 +22,82 @@
 #include "ray.h"
 
 #ifdef SSE_ENABLED
-	#include <nmmintrin.h>
+    #include <nmmintrin.h>
 #endif
 
-//! @brief	Axis Aligned Bounding Box.
+//! @brief  Axis Aligned Bounding Box.
 class BBox{
 public:
-    //! @brief	Default constructor
-	//!
-	//! Default constructor will set the data in a way that it is invalid.
+    //! @brief  Default constructor
+    //!
+    //! Default constructor will set the data in a way that it is invalid.
     BBox();
 
-	//! @brief	Constructor from two points
-	//!
-	//! @param p0		One of the eight corners of the AABB.
-	//! @param p1		The other of the eight corners of the AABB.
-	//! @param sorted	If it is true, p0 is min and p1 is max.
+    //! @brief  Constructor from two points
+    //!
+    //! @param p0       One of the eight corners of the AABB.
+    //! @param p1       The other of the eight corners of the AABB.
+    //! @param sorted   If it is true, p0 is min and p1 is max.
     BBox( const Point& p0 , const Point& p1 , bool sorted = true );
     
-	//! @brief	Copy constructor.
-	//!
-	//! @param bbox		Another instance of bounding box to copy from.
+    //! @brief  Copy constructor.
+    //!
+    //! @param bbox     Another instance of bounding box to copy from.
     BBox( const BBox& bbox );
 
-	//! @brief	Whether a point is inside the AABB.
-	//!
-	//! @param	p		The point to be tested.
-	//! @param	delta	A small value to avoid float precision problem.
-	//! @return			It returns true if the point is within the AABB.
-    bool		IsInBBox( const Point& p , float delta ) const;
+    //! @brief  Whether a point is inside the AABB.
+    //!
+    //! @param  p       The point to be tested.
+    //! @param  delta   A small value to avoid float precision problem.
+    //! @return         It returns true if the point is within the AABB.
+    bool        IsInBBox( const Point& p , float delta ) const;
 
     // get the surface area of the bounding box
     // result : the surface area of the bounding box
 
-	//! @brief	The surface area of the bounding box.
-	//!
-	//! @return			The surface area of the bounding box.
-    float		SurfaceArea() const;
+    //! @brief  The surface area of the bounding box.
+    //!
+    //! @return         The surface area of the bounding box.
+    float       SurfaceArea() const;
     
-	//! @brief	Half of the surface area of the bounding box.
-	//!
-	//! @return			Half of the surface area of the bounding box.
-    float		HalfSurfaceArea() const;
+    //! @brief  Half of the surface area of the bounding box.
+    //!
+    //! @return         Half of the surface area of the bounding box.
+    float       HalfSurfaceArea() const;
 
-	//! @brief	The volume of this bounding box.
-	//!
-	//! @return			The volume of the bounding box.
-    float		Volumn() const;
+    //! @brief  The volume of this bounding box.
+    //!
+    //! @return         The volume of the bounding box.
+    float       Volumn() const;
 
-	//! @brief	The axis id with maximum edge.
-	//!
-	//! @return			The axis id ( 0 -> x , 1 -> y , 2 -> z ) that has the longest edge.
-    unsigned	MaxAxisId() const;
+    //! @brief  The axis id with maximum edge.
+    //!
+    //! @return         The axis id ( 0 -> x , 1 -> y , 2 -> z ) that has the longest edge.
+    unsigned    MaxAxisId() const;
 
-	//! @brief	Enlarge the bounding box to contain the point.
-	//!
-	//! @param	p		The point to contain.
-    void		Union( const Point& p );
+    //! @brief  Enlarge the bounding box to contain the point.
+    //!
+    //! @param  p       The point to contain.
+    void        Union( const Point& p );
 
-	//! @brief	Enlarge the bounding box to contain the other bounding box.
-	//!
-	//! @param box		The other bounding box to contain.
-    void		Union( const BBox& box );
+    //! @brief  Enlarge the bounding box to contain the other bounding box.
+    //!
+    //! @param box      The other bounding box to contain.
+    void        Union( const BBox& box );
 
-	//! @brief	Length of the edge along a specific axis.
-	//!
-	//! @return			The length of the edge along specific edge.
-    float		Delta( unsigned k ) const;
+    //! @brief  Length of the edge along a specific axis.
+    //!
+    //! @return         The length of the edge along specific edge.
+    float       Delta( unsigned k ) const;
 
-	//! @brief	Reset the bounding box so that it is an invalid one.
-    void		InvalidBBox();
+    //! @brief  Reset the bounding box so that it is an invalid one.
+    void        InvalidBBox();
 
     //! @param  delta   The half delta to expend along each direction.
-	//! @brief	Expend the bounding box.
-	//!
-	//! @param delta	Half of the length to expend along every axis.
-    void		Expend( float delta );
+    //! @brief  Expend the bounding box.
+    //!
+    //! @param delta    Half of the length to expend along every axis.
+    void        Expend( float delta );
 
 public:
     // the minium and maxium point of the bounding box

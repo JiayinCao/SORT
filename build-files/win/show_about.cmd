@@ -24,7 +24,7 @@ echo:
 echo My name is Jiayin Cao. I'm currently working at Naughty Dog as a graphics engineer.
 echo Prior to joining Naughty Dog, I worked at Ubisoft, NVIDIA, AMD and Microsoft before.
 echo Following are my contacts, feel free to contact me for any reason,
-echo:	
+echo:   
 echo    * Linkedin,   https://www.linkedin.com/in/caojiayin/
 echo    * Twitter,    https://twitter.com/Jiayin_Cao
 echo    * Tech blog,  https://agraphicsguy.wordpress.com/

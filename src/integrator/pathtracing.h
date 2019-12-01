@@ -19,7 +19,7 @@
 
 #include "integrator.h"
 
-//! @brief	The core of path tracing algorithm, the most commonly used algorithm in SORT.
+//! @brief  The core of path tracing algorithm, the most commonly used algorithm in SORT.
 /**
  * A path tracing algorithm works by tracing rays recursively to converge to the correct approximation of rendering equation.
  * It doesn't solve all corner cases well, but it is a pretty solid algorithm.

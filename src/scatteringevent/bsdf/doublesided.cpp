@@ -34,7 +34,7 @@ Spectrum DoubleSided::sample_f(const Vector& wo, Vector& wi, const BsdfSample& b
     const auto back0 = CosTheta(wo) < 0.0f;
 
     Spectrum ret;
-	auto dummy_pdf = 0.0f;
+    auto dummy_pdf = 0.0f;
     if (!back0) ret = m_se0 ? m_se0->Sample_BSDF(wo, wi, bs, dummy_pdf) : 0.0f;
     if (back0){
         ret = m_se1 ? m_se1->Sample_BSDF(-wo, wi, bs, dummy_pdf) : 0.0f;

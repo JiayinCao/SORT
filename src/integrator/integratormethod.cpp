@@ -172,7 +172,7 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Interse
     const auto wo = -r.m_Dir;
     Vector wi;
     LightSample ls(true);
-	auto light_pdf = 0.0f;
+    auto light_pdf = 0.0f;
     const auto li = light->sample_l( inter , &ls , wi , 0 , &light_pdf , 0 , 0 , visibility );
     if( light_pdf > 0.0f && !li.IsBlack() ){
         Spectrum f = se.Evaluate_BSDF( wo , wi );

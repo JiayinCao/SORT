@@ -40,13 +40,13 @@ public:
     //! @param t            Type of this BRDF
     Lambert(const Spectrum& s, const Spectrum& weight, const Vector& n, bool doubleSided = false) :Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s) {}
 
-	//! Constructor taking spectrum information.
-	//!
-	//! @param s            Direction-Hemisphere reflection.
-	//! @param ew			Evaluation weight of this BRDF.
-	//! @param sw			Sampling weight of this BRDF.
-	//! @param t            Type of this BRDF
-	Lambert(const Spectrum& s, const Spectrum& ew, const float sw, const Vector& n, bool doubleSided = false) :Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s) {}
+    //! Constructor taking spectrum information.
+    //!
+    //! @param s            Direction-Hemisphere reflection.
+    //! @param ew           Evaluation weight of this BRDF.
+    //! @param sw           Sampling weight of this BRDF.
+    //! @param t            Type of this BRDF
+    Lambert(const Spectrum& s, const Spectrum& ew, const float sw, const Vector& n, bool doubleSided = false) :Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(s) {}
 
     //! Constructor from parameter set.
     //!

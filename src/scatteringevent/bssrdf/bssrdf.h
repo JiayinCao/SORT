@@ -46,13 +46,13 @@ struct BSSRDFIntersections{
     // following field is only used for spatial data structure to evaluate intersections
     float                   maxt = FLT_MAX;
 
-	//! @brief	Resoved the maximum depth of all intersections.
-	void	ResolveMaxDepth() {
-		maxt = 0.0f;
-		maxt = std::max(intersections[0]->intersection.t, intersections[1]->intersection.t);
-		maxt = std::max(maxt, intersections[2]->intersection.t);
-		maxt = std::max(maxt, intersections[3]->intersection.t);
-	}
+    //! @brief  Resoved the maximum depth of all intersections.
+    void    ResolveMaxDepth() {
+        maxt = 0.0f;
+        maxt = std::max(intersections[0]->intersection.t, intersections[1]->intersection.t);
+        maxt = std::max(maxt, intersections[2]->intersection.t);
+        maxt = std::max(maxt, intersections[3]->intersection.t);
+    }
 };
 
 //! @brief BSDF implementation.
@@ -90,7 +90,7 @@ public:
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  inter   Incident intersection sampled.
-    virtual void		Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const = 0;
+    virtual void        Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const = 0;
 };
 
 //! @brief  Separable BSSRDF implementation.
@@ -122,7 +122,7 @@ public:
     //! @param  wo      Extant direction.
     //! @param  po      Extant position.
     //! @param  inter   Intersection between the rays and the objects with same material.
-    void		Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
+    void        Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const override;
 
     //! @brief  PDF of sampling the reflectance profile.
     //!
@@ -161,7 +161,7 @@ protected:
 
     //! @brief  Sample a channel
     //!
-    //! @return			Randomly pick a channel in spectrum, in which the mean free path is not zero.
+    //! @return         Randomly pick a channel in spectrum, in which the mean free path is not zero.
     virtual int         Sample_Ch() const = 0;
 
     Vector nn;          /**< Normal at the point to be Evaluated. */

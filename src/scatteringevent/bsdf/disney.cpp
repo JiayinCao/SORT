@@ -100,8 +100,8 @@ DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R
 #endif
 
     // prevent the scatter distance to be zero, not a perfect solution, but it works.
-	// the divide four pi thing is just to get similar result with Cycles SSS implementation with same inputs.
-	const auto l = mfp * INV_FOUR_PI;
+    // the divide four pi thing is just to get similar result with Cycles SSS implementation with same inputs.
+    const auto l = mfp * INV_FOUR_PI;
     d = l.Clamp( 0.0001f , FLT_MAX ) / s;
 }
 
@@ -120,9 +120,9 @@ int DisneyBssrdf::Sample_Ch() const{
 
 Spectrum DisneyBssrdf::S( const Vector& wo , const Point& po , const Vector& wi , const Point& pi ) const{
     // This is clearly not disney BSSRDF, but it converges to lambert when mean free path is zero.
-	// Converging to lambert when mfp approaches to zero is a critically important feature in SORT renderer,
-	// this gives the flexibility of driving the parameter with a texture with black pixels and no noticeable
-	// gap will be since around the transition from SSS to lambert.
+    // Converging to lambert when mfp approaches to zero is a critically important feature in SORT renderer,
+    // this gives the flexibility of driving the parameter with a texture with black pixels and no noticeable
+    // gap will be since around the transition from SSS to lambert.
     return Sr( Distance( po , pi ) );
 }
 
@@ -330,7 +330,7 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
         // albedo doesn't matter here, we are only interested in light direction.
         if( UNLIKELY(hasSSS) ){
             // it is intentional to leave it empty
-			sAssertMsg( false , MATERIAL , "Incorrect sampling in Disney BRDF, something is wrong." );
+            sAssertMsg( false , MATERIAL , "Incorrect sampling in Disney BRDF, something is wrong." );
         }else{
             wi = CosSampleHemisphere(sort_canonical(), sort_canonical());
         }
@@ -343,7 +343,7 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
     if (pPdf) *pPdf = pdf(wo, wi);
 
     auto ret = f( wo , wi );
-	return ret;
+    return ret;
 }
 
 float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {

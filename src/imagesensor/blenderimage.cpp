@@ -59,8 +59,8 @@ void BlenderImage::FinishTile( int tile_x , int tile_y , const Render_Task& rt )
 
     m_sharedMemory.sharedmemory.bytes[tile_y * m_tilenum_x + tile_x] = 1;
 
-	std::lock_guard<std::mutex> lock(g_cntLock);
-	m_sharedMemory.sharedmemory.bytes[m_sharedMemory.sharedmemory.size - 2] = (int)((++m_finishedTileCnt) / (float)( m_tilenum_x * m_tilenum_y ) * 100.0f);
+    std::lock_guard<std::mutex> lock(g_cntLock);
+    m_sharedMemory.sharedmemory.bytes[m_sharedMemory.sharedmemory.size - 2] = (int)((++m_finishedTileCnt) / (float)( m_tilenum_x * m_tilenum_y ) * 100.0f);
 }
 
 void BlenderImage::PreProcess(){

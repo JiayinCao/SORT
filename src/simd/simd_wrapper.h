@@ -25,7 +25,7 @@
 #include "core/define.h"
 
 #if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
-	static_assert( false , "More than one SIMD version is defined before including the wrapper." );
+    static_assert( false , "More than one SIMD version is defined before including the wrapper." );
 #endif
 
 const static unsigned mask_true_i = 0xffffffff;
@@ -73,8 +73,8 @@ static_assert( sizeof( simd_data_sse ) == sizeof( __m128 ) , "Incorrect SSE data
 
 static const __m128 sse_zeros       = _mm_set_ps1( 0.0f );
 static const __m128 sse_infinites   = _mm_set_ps1( FLT_MAX );
-static const __m128 sse_neg_ones	= _mm_set_ps1( -1.0f );
-static const __m128 sse_ones		= _mm_set_ps1(1.0f);
+static const __m128 sse_neg_ones    = _mm_set_ps1( -1.0f );
+static const __m128 sse_ones        = _mm_set_ps1(1.0f);
 
 #define simd_data       simd_data_sse
 #define simd_ones       sse_ones
@@ -82,7 +82,7 @@ static const __m128 sse_ones		= _mm_set_ps1(1.0f);
 #define simd_neg_ones   sse_neg_ones
 #define simd_infinites  sse_infinites
 
-#define SIMD_CHANNEL	4
+#define SIMD_CHANNEL    4
 #define SIMD_ALIGNMENT  16
 
 static SORT_FORCEINLINE simd_data   simd_set_ps1( const float d ){
@@ -91,9 +91,9 @@ static SORT_FORCEINLINE simd_data   simd_set_ps1( const float d ){
 static SORT_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
     return _mm_set_ps( d[3] , d[2] , d[1] , d[0] );
 }
-static SORT_FORCEINLINE simd_data	simd_set_mask(const bool mask[]) {
-#define MASK_TO_INT(m)	(m?mask_true:0)
-	return _mm_set_ps(MASK_TO_INT(mask[3]), MASK_TO_INT(mask[2]), MASK_TO_INT(mask[1]), MASK_TO_INT(mask[0]));
+static SORT_FORCEINLINE simd_data   simd_set_mask(const bool mask[]) {
+#define MASK_TO_INT(m)  (m?mask_true:0)
+    return _mm_set_ps(MASK_TO_INT(mask[3]), MASK_TO_INT(mask[2]), MASK_TO_INT(mask[1]), MASK_TO_INT(mask[0]));
 #undef MASK_TO_INT
 }
 static SORT_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
@@ -158,7 +158,7 @@ static SORT_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const sim
 }
 static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
     const __m128 t_min = _mm_min_ps( get_sse_data(s) , _mm_shuffle_ps( get_sse_data(s) , get_sse_data(s) , _MM_SHUFFLE(2, 3, 0, 1) ) );
-	return _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
+    return _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
 }
 
 #endif // SIMD_SSE_IMPLEMENTATION
@@ -172,20 +172,20 @@ static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
 #define simd_data_avx   __m256
 #else
 struct simd_data_avx {
-	union {
-		__m256  avx_data;
-		float   float_data[8];
-	};
+    union {
+        __m256  avx_data;
+        float   float_data[8];
+    };
 
-	SORT_FORCEINLINE simd_data_avx() {}
-	SORT_FORCEINLINE simd_data_avx(const __m256& data) :avx_data(data) {}
+    SORT_FORCEINLINE simd_data_avx() {}
+    SORT_FORCEINLINE simd_data_avx(const __m256& data) :avx_data(data) {}
 
-	SORT_FORCEINLINE float  operator [](const int i) const {
-		return float_data[i];
-	}
-	SORT_FORCEINLINE float& operator [](const int i) {
-		return float_data[i];
-	}
+    SORT_FORCEINLINE float  operator [](const int i) const {
+        return float_data[i];
+    }
+    SORT_FORCEINLINE float& operator [](const int i) {
+        return float_data[i];
+    }
 };
 #endif
 
@@ -202,10 +202,10 @@ static_assert(sizeof(simd_data_avx) == sizeof(__m256), "Incorrect AVX data size.
 
 #ifdef SIMD_AVX_IMPLEMENTATION
 
-static const __m256 avx_zeros		= _mm256_set_ps(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-static const __m256 avx_infinites	= _mm256_set_ps(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX );
-static const __m256 avx_neg_ones	= _mm256_set_ps(-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f);
-static const __m256 avx_ones		= _mm256_set_ps(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
+static const __m256 avx_zeros       = _mm256_set_ps(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+static const __m256 avx_infinites   = _mm256_set_ps(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX );
+static const __m256 avx_neg_ones    = _mm256_set_ps(-1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, -1.0f);
+static const __m256 avx_ones        = _mm256_set_ps(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
 
 #define simd_data       simd_data_avx
 #define simd_ones       avx_ones
@@ -213,7 +213,7 @@ static const __m256 avx_ones		= _mm256_set_ps(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 #define simd_neg_ones   avx_neg_ones
 #define simd_infinites  avx_infinites
 
-#define SIMD_CHANNEL	8
+#define SIMD_CHANNEL    8
 #define SIMD_ALIGNMENT  32
 
 static SORT_FORCEINLINE simd_data   simd_set_ps1( const float f ){
@@ -222,9 +222,9 @@ static SORT_FORCEINLINE simd_data   simd_set_ps1( const float f ){
 static SORT_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
     return _mm256_set_ps( d[7] , d[6] , d[5] , d[4] , d[3] , d[2] , d[1] , d[0] );
 }
-static SORT_FORCEINLINE simd_data	simd_set_mask(const bool mask[]) {
-#define MASK_TO_INT(m)	(m?mask_true:0.0f)
-	return _mm256_set_ps( MASK_TO_INT( mask[7] ) , MASK_TO_INT( mask[6] ) , MASK_TO_INT( mask[5] ) , MASK_TO_INT( mask[4] ) , MASK_TO_INT( mask[3] ) , MASK_TO_INT( mask[2] ) , MASK_TO_INT( mask[1] ) , MASK_TO_INT( mask[0] ) );
+static SORT_FORCEINLINE simd_data   simd_set_mask(const bool mask[]) {
+#define MASK_TO_INT(m)  (m?mask_true:0.0f)
+    return _mm256_set_ps( MASK_TO_INT( mask[7] ) , MASK_TO_INT( mask[6] ) , MASK_TO_INT( mask[5] ) , MASK_TO_INT( mask[4] ) , MASK_TO_INT( mask[3] ) , MASK_TO_INT( mask[2] ) , MASK_TO_INT( mask[1] ) , MASK_TO_INT( mask[0] ) );
 #undef MASK_TO_INT
 }
 static SORT_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
@@ -289,15 +289,15 @@ static SORT_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const sim
 }
 
 static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
-	const static __m256i shuffle_mask0 = _mm256_set_epi32(1, 0, 3, 2, 5, 4, 7, 6);
-	const static __m256i shuffle_mask1 = _mm256_set_epi32(2, 3, 0, 1, 6, 7, 4, 5);
+    const static __m256i shuffle_mask0 = _mm256_set_epi32(1, 0, 3, 2, 5, 4, 7, 6);
+    const static __m256i shuffle_mask1 = _mm256_set_epi32(2, 3, 0, 1, 6, 7, 4, 5);
 
-	__m256 avx_data = get_avx_data(s);
-	__m256 shuffled = _mm256_permutevar_ps(avx_data, shuffle_mask1);
-	avx_data = _mm256_min_ps(shuffled, avx_data);
-	shuffled = _mm256_permutevar_ps(avx_data, shuffle_mask0);
-	simd_data_avx reduced_data = _mm256_min_ps(shuffled, avx_data);
-	return simd_set_ps1( reduced_data[0] < reduced_data[4] ? reduced_data[0] : reduced_data[4] );
+    __m256 avx_data = get_avx_data(s);
+    __m256 shuffled = _mm256_permutevar_ps(avx_data, shuffle_mask1);
+    avx_data = _mm256_min_ps(shuffled, avx_data);
+    shuffled = _mm256_permutevar_ps(avx_data, shuffle_mask0);
+    simd_data_avx reduced_data = _mm256_min_ps(shuffled, avx_data);
+    return simd_set_ps1( reduced_data[0] < reduced_data[4] ? reduced_data[0] : reduced_data[4] );
 }
 
 #endif
@@ -306,10 +306,10 @@ static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
 
 static SORT_FORCEINLINE int __bsf(int v) {
 #ifdef SORT_IN_WINDOWS
-	unsigned long r = 0;
-	_BitScanForward(&r, v);
-	return r;
+    unsigned long r = 0;
+    _BitScanForward(&r, v);
+    return r;
 #else
-	return __builtin_ctz(v);
+    return __builtin_ctz(v);
 #endif
 }

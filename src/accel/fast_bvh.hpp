@@ -44,12 +44,12 @@ SORT_STATS_COUNTER("Spatial-Structure(QBVH)", "Maximum Primitive in Leaf", sQbvh
 SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Count in Leaf", sQbvhPrimitiveCount , sQbvhLeafNodeCountCopy );
 SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-#define sFbvhNodeCount			sQbvhNodeCount
-#define sFbvhLeafNodeCount		sQbvhLeafNodeCount
-#define sFbvhDepth				sQbvhDepth
-#define sFbvhMaxPriCountInLeaf	sQbvhMaxPriCountInLeaf
-#define sFbvhPrimitiveCount		sQbvhPrimitiveCount
-#define sFbvhLeafNodeCountCopy	sQbvhLeafNodeCountCopy
+#define sFbvhNodeCount          sQbvhNodeCount
+#define sFbvhLeafNodeCount      sQbvhLeafNodeCount
+#define sFbvhDepth              sQbvhDepth
+#define sFbvhMaxPriCountInLeaf  sQbvhMaxPriCountInLeaf
+#define sFbvhPrimitiveCount     sQbvhPrimitiveCount
+#define sFbvhLeafNodeCountCopy  sQbvhLeafNodeCountCopy
 
 #endif
 
@@ -73,22 +73,22 @@ SORT_STATS_COUNTER("Spatial-Structure(OBVH)", "Maximum Primitive in Leaf", sObvh
 SORT_STATS_AVG_COUNT("Spatial-Structure(OBVH)", "Average Primitive Count in Leaf", sObvhPrimitiveCount , sObvhLeafNodeCountCopy );
 SORT_STATS_AVG_COUNT("Spatial-Structure(OBVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-#define sFbvhNodeCount			sObvhNodeCount
-#define sFbvhLeafNodeCount		sObvhLeafNodeCount
-#define sFbvhDepth				sObvhDepth
-#define sFbvhMaxPriCountInLeaf	sObvhMaxPriCountInLeaf
-#define sFbvhPrimitiveCount		sObvhPrimitiveCount
-#define sFbvhLeafNodeCountCopy	sObvhLeafNodeCountCopy
+#define sFbvhNodeCount          sObvhNodeCount
+#define sFbvhLeafNodeCount      sObvhLeafNodeCount
+#define sFbvhDepth              sObvhDepth
+#define sFbvhMaxPriCountInLeaf  sObvhMaxPriCountInLeaf
+#define sFbvhPrimitiveCount     sObvhPrimitiveCount
+#define sFbvhLeafNodeCountCopy  sObvhLeafNodeCountCopy
 
 #endif
 
 static SORT_FORCEINLINE BBox calcBoundingBox(const Fbvh_Node* const node , const Bvh_Primitive* const primitives ) {
-	BBox node_bbox;
-	if (!node)
-		return node_bbox;
-	for (auto i = node->pri_offset; node && i < node->pri_offset + node->pri_cnt; i++)
-		node_bbox.Union(primitives[i].GetBBox());
-	return node_bbox;
+    BBox node_bbox;
+    if (!node)
+        return node_bbox;
+    for (auto i = node->pri_offset; node && i < node->pri_offset + node->pri_cnt; i++)
+        node_bbox.Union(primitives[i].GetBBox());
+    return node_bbox;
 }
 
 void Fbvh::Build(const Scene& scene){
@@ -126,65 +126,65 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
         return;
     }
 
-	std::queue< std::pair<unsigned int, unsigned int> > to_split, done_splitting;
-	to_split.push( std::make_pair( start , end ) );
+    std::queue< std::pair<unsigned int, unsigned int> > to_split, done_splitting;
+    to_split.push( std::make_pair( start , end ) );
 
-	while( !to_split.empty() && to_split.size() + done_splitting.size() < (unsigned int)FBVH_CHILD_CNT ){
-		auto cur_split = to_split.front();
-		to_split.pop();
+    while( !to_split.empty() && to_split.size() + done_splitting.size() < (unsigned int)FBVH_CHILD_CNT ){
+        auto cur_split = to_split.front();
+        to_split.pop();
 
-		const auto start	= cur_split.first;
-		const auto end		= cur_split.second;
-		const auto prim_cnt = end - start;
+        const auto start    = cur_split.first;
+        const auto end      = cur_split.second;
+        const auto prim_cnt = end - start;
 
-		unsigned    split_axis;
-		float       split_pos;
-		const auto sah = pickBestSplit(split_axis, split_pos, m_bvhpri.get(), node_bbox, start, end);
-		if (sah >= prim_cnt || prim_cnt <= m_maxPriInLeaf )
-			done_splitting.push( std::make_pair( start , end ) );
-		else{
-			const auto compare = [split_pos, split_axis](const Bvh_Primitive& pri) {return pri.m_centroid[split_axis] < split_pos; };
-			const auto middle = std::partition(m_bvhpri.get() + start, m_bvhpri.get() + end, compare);
-			const auto mid = (unsigned)(middle - m_bvhpri.get());
+        unsigned    split_axis;
+        float       split_pos;
+        const auto sah = pickBestSplit(split_axis, split_pos, m_bvhpri.get(), node_bbox, start, end);
+        if (sah >= prim_cnt || prim_cnt <= m_maxPriInLeaf )
+            done_splitting.push( std::make_pair( start , end ) );
+        else{
+            const auto compare = [split_pos, split_axis](const Bvh_Primitive& pri) {return pri.m_centroid[split_axis] < split_pos; };
+            const auto middle = std::partition(m_bvhpri.get() + start, m_bvhpri.get() + end, compare);
+            const auto mid = (unsigned)(middle - m_bvhpri.get());
 
-			if (mid == start || mid == end){
-				done_splitting.push( std::make_pair( start , end ) );
-			}else{
-				to_split.push( std::make_pair( start , mid ) );
-				to_split.push( std::make_pair( mid , end ) );
-			}
-		}
-	}
+            if (mid == start || mid == end){
+                done_splitting.push( std::make_pair( start , end ) );
+            }else{
+                to_split.push( std::make_pair( start , mid ) );
+                to_split.push( std::make_pair( mid , end ) );
+            }
+        }
+    }
 
-	if( to_split.size() + done_splitting.size() == 1 ){
-		makeLeaf( node , start , end , depth );
-		return;
-	}else{
-		const auto populate_child = [&] ( Fbvh_Node* node , std::queue<std::pair<unsigned,unsigned>>& q ){
-			while (!q.empty()) {
-				const auto cur = q.front();
-				q.pop();
-				node->children[node->child_cnt++] = std::make_unique<Fbvh_Node>( cur.first , cur.second - cur.first );
-			}
-		};
+    if( to_split.size() + done_splitting.size() == 1 ){
+        makeLeaf( node , start , end , depth );
+        return;
+    }else{
+        const auto populate_child = [&] ( Fbvh_Node* node , std::queue<std::pair<unsigned,unsigned>>& q ){
+            while (!q.empty()) {
+                const auto cur = q.front();
+                q.pop();
+                node->children[node->child_cnt++] = std::make_unique<Fbvh_Node>( cur.first , cur.second - cur.first );
+            }
+        };
 
-		populate_child( node , to_split );
-		populate_child( node , done_splitting );
-	}
+        populate_child( node , to_split );
+        populate_child( node , done_splitting );
+    }
 
     // split children if needed.
     for( int j = 0 ; j < node->child_cnt ; ++j ){
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
-		const auto bbox = calcBoundingBox(node->children[j].get(), m_bvhpri.get());
-		splitNode(node->children[j].get(), bbox, depth + 1);
+        const auto bbox = calcBoundingBox(node->children[j].get(), m_bvhpri.get());
+        splitNode(node->children[j].get(), bbox, depth + 1);
 #else
         node->bbox[j] = calcBoundingBox( node->children[j].get() , m_bvhpri.get() );
-		splitNode( node->children[j].get() , node->bbox[j] , depth + 1 );
+        splitNode( node->children[j].get() , node->bbox[j] , depth + 1 );
 #endif
     }
 
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
-	node->bbox = calcBoundingBoxSIMD( node->children );
+    node->bbox = calcBoundingBoxSIMD( node->children );
 #endif
 
     SORT_STATS(sFbvhNodeCount+=node->child_cnt);
@@ -195,13 +195,13 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
     node->pri_offset = start;
     node->child_cnt = 0;
 
-	m_depth = fmax( m_depth , depth );
+    m_depth = fmax( m_depth , depth );
 
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
     Simd_Triangle   sind_tri;
     Simd_Line       simd_line;
-	std::vector<Simd_Triangle>	tri_list;
-	std::vector<Simd_Line>		line_list;
+    std::vector<Simd_Triangle>  tri_list;
+    std::vector<Simd_Line>      line_list;
     const auto _start = node->pri_offset;
     const auto _end = _start + node->pri_cnt;
     for(auto i = _start ; i < _end ; i++ ){
@@ -210,9 +210,9 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
         if( SHAPE_TRIANGLE == shape_type ){
             if( sind_tri.PushTriangle( primitive ) ){
                 if( sind_tri.PackData() ){
-					tri_list.push_back( sind_tri );
-					sind_tri.Reset();
-				}
+                    tri_list.push_back( sind_tri );
+                    sind_tri.Reset();
+                }
             }
         }else if( SHAPE_LINE == shape_type ){
             if( simd_line.PushLine( primitive ) ){
@@ -226,21 +226,21 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
             node->other_list.push_back( primitive );
         }
     }
-	if (sind_tri.PackData())
-		tri_list.push_back(sind_tri);
+    if (sind_tri.PackData())
+        tri_list.push_back(sind_tri);
     if (simd_line.PackData())
         line_list.push_back(simd_line);
-	
-	if( tri_list.size() ){
-		node->tri_list.allocate( (unsigned int)tri_list.size() );
-		for( auto i = 0u ; i < tri_list.size() ; ++i )
-			node->tri_list[i] = tri_list[i];
-	}
-	if( line_list.size() ){
-		node->line_list.allocate( (unsigned int)line_list.size() );
-		for( auto i = 0u ; i < line_list.size() ; ++i )
-			node->line_list[i] = line_list[i];
-	}
+    
+    if( tri_list.size() ){
+        node->tri_list.allocate( (unsigned int)tri_list.size() );
+        for( auto i = 0u ; i < tri_list.size() ; ++i )
+            node->tri_list[i] = tri_list[i];
+    }
+    if( line_list.size() ){
+        node->line_list.allocate( (unsigned int)line_list.size() );
+        for( auto i = 0u ; i < line_list.size() ; ++i )
+            node->line_list[i] = line_list[i];
+    }
 #endif
 
     SORT_STATS(++sFbvhLeafNodeCount);
@@ -250,60 +250,60 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 Simd_BBox Fbvh::calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) const {
-	Simd_BBox node_bbox;
+    Simd_BBox node_bbox;
 
-	float	min_x[SIMD_CHANNEL] , min_y[SIMD_CHANNEL] , min_z[SIMD_CHANNEL];
-	float	max_x[SIMD_CHANNEL] , max_y[SIMD_CHANNEL] , max_z[SIMD_CHANNEL];
-	bool	bb_valid[SIMD_CHANNEL] = { false };
-	for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
-		const auto bb = calcBoundingBox( children[i].get() , m_bvhpri.get() );
-		min_x[i] = bb.m_Min.x;
-		min_y[i] = bb.m_Min.y;
-		min_z[i] = bb.m_Min.z;
-		max_x[i] = bb.m_Max.x;
-		max_y[i] = bb.m_Max.y;
-		max_z[i] = bb.m_Max.z;
+    float   min_x[SIMD_CHANNEL] , min_y[SIMD_CHANNEL] , min_z[SIMD_CHANNEL];
+    float   max_x[SIMD_CHANNEL] , max_y[SIMD_CHANNEL] , max_z[SIMD_CHANNEL];
+    bool    bb_valid[SIMD_CHANNEL] = { false };
+    for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
+        const auto bb = calcBoundingBox( children[i].get() , m_bvhpri.get() );
+        min_x[i] = bb.m_Min.x;
+        min_y[i] = bb.m_Min.y;
+        min_z[i] = bb.m_Min.z;
+        max_x[i] = bb.m_Max.x;
+        max_y[i] = bb.m_Max.y;
+        max_z[i] = bb.m_Max.z;
 
-		bb_valid[i] = ( nullptr != children[i].get() );
-	}
+        bb_valid[i] = ( nullptr != children[i].get() );
+    }
 
-	node_bbox.m_min_x = simd_set_ps( min_x );
-	node_bbox.m_min_y = simd_set_ps( min_y );
-	node_bbox.m_min_z = simd_set_ps( min_z );
+    node_bbox.m_min_x = simd_set_ps( min_x );
+    node_bbox.m_min_y = simd_set_ps( min_y );
+    node_bbox.m_min_z = simd_set_ps( min_z );
     
-	node_bbox.m_max_x = simd_set_ps( max_x );
-	node_bbox.m_max_y = simd_set_ps( max_y );
-	node_bbox.m_max_z = simd_set_ps( max_z );
+    node_bbox.m_max_x = simd_set_ps( max_x );
+    node_bbox.m_max_y = simd_set_ps( max_y );
+    node_bbox.m_max_z = simd_set_ps( max_z );
 
-	node_bbox.m_mask = simd_set_mask( bb_valid );
+    node_bbox.m_mask = simd_set_mask( bb_valid );
 
-	return node_bbox;
+    return node_bbox;
 }
 #endif
 
 bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
-	// std::stack is by no means an option here due to its overhead under the hood.
-	static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
-	if (UNLIKELY(nullptr == bvh_stack))
-		bvh_stack = std::make_unique<std::pair<Fbvh_Node*, float>[]>(m_depth * FBVH_CHILD_CNT);
+    // std::stack is by no means an option here due to its overhead under the hood.
+    static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
+    if (UNLIKELY(nullptr == bvh_stack))
+        bvh_stack = std::make_unique<std::pair<Fbvh_Node*, float>[]>(m_depth * FBVH_CHILD_CNT);
 
 #ifdef QBVH_IMPLEMENTATION
-	SORT_PROFILE("Traverse Qbvh");
+    SORT_PROFILE("Traverse Qbvh");
 #endif
 #ifdef OBVH_IMPLEMENTATION
-	SORT_PROFILE("Traverse Obvh");
+    SORT_PROFILE("Traverse Obvh");
 #endif
 
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect != nullptr);
 
     // pre-calculate some data
-	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
+    RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
 #ifdef SIMD_SSE_IMPLEMENTATION
-	flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA );
+    flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA );
 #endif
 #ifdef SIMD_AVX_IMPLEMENTATION
-	flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA );
+    flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA );
 #endif
     ray.Prepare(flag);
 
@@ -311,9 +311,9 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     if (fmin < 0.0f)
         return false;
 
-	// stack index
-	auto si = 0;
-	bvh_stack[si++] = std::make_pair( m_root.get() , fmin );
+    // stack index
+    auto si = 0;
+    bvh_stack[si++] = std::make_pair( m_root.get() , fmin );
 
     while( si > 0 ){
         const auto top = bvh_stack[--si];
@@ -326,10 +326,10 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
-			const auto tri_cnt = node->tri_list.size();
+            const auto tri_cnt = node->tri_list.size();
             for( auto i = 0 ; i < tri_cnt ; ++i )
                 intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
-			const auto line_cnt = node->line_list.size();
+            const auto line_cnt = node->line_list.size();
             for( auto i = 0 ; i < line_cnt ; ++i )
                 intersectLine_SIMD( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
@@ -340,51 +340,51 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             continue;
         }
 
-		simd_data sse_f_min;
+        simd_data sse_f_min;
         auto m = IntersectBBox_SIMD( ray , node->bbox , sse_f_min );
-		if( 0 == m )
-			continue;
+        if( 0 == m )
+            continue;
 
-		const int k0 = __bsf( m );
-		const auto t0 = sse_f_min[k0];
-		m &= m - 1;
-		if( LIKELY( 0 == m ) ){
-			sAssert( t0 >= 0.0f , SPATIAL_ACCELERATOR );
-			bvh_stack[si++] = std::make_pair( node->children[k0].get() , t0 );
-		}else{
-			const int k1 = __bsf( m );
-			m &= m - 1;
+        const int k0 = __bsf( m );
+        const auto t0 = sse_f_min[k0];
+        m &= m - 1;
+        if( LIKELY( 0 == m ) ){
+            sAssert( t0 >= 0.0f , SPATIAL_ACCELERATOR );
+            bvh_stack[si++] = std::make_pair( node->children[k0].get() , t0 );
+        }else{
+            const int k1 = __bsf( m );
+            m &= m - 1;
 
-			if( LIKELY( 0 == m ) ){
-				const auto t1 = sse_f_min[k1];
-				sAssert( t1 >= 0.0f , SPATIAL_ACCELERATOR );
+            if( LIKELY( 0 == m ) ){
+                const auto t1 = sse_f_min[k1];
+                sAssert( t1 >= 0.0f , SPATIAL_ACCELERATOR );
 
-				if( t0 < t1 ){
-					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1 );
-					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0 );
-				}else{
-					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
-					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
-				}
-			}else{
-				for (auto i = 0; i < node->child_cnt; ++i) {
-					auto k = -1;
-					auto maxDist = 0.0f;
-					for (int j = 0; j < node->child_cnt; ++j) {
-						if (sse_f_min[j] > maxDist) {
-							maxDist = sse_f_min[j];
-							k = j;
-						}
-					}
+                if( t0 < t1 ){
+                    bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1 );
+                    bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0 );
+                }else{
+                    bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
+                    bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
+                }
+            }else{
+                for (auto i = 0; i < node->child_cnt; ++i) {
+                    auto k = -1;
+                    auto maxDist = 0.0f;
+                    for (int j = 0; j < node->child_cnt; ++j) {
+                        if (sse_f_min[j] > maxDist) {
+                            maxDist = sse_f_min[j];
+                            k = j;
+                        }
+                    }
 
-					if (k == -1)
-						break;
+                    if (k == -1)
+                        break;
 
-					sse_f_min[k] = -1.0f;
-					bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
-				}
-			}
-		}
+                    sse_f_min[k] = -1.0f;
+                    bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
+                }
+            }
+        }
 #else
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
@@ -392,7 +392,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             const auto _end = _start + node->pri_cnt;
 
             for(auto i = _start ; i < _end ; i++ )
-				m_bvhpri[i].primitive->GetIntersect( ray , intersect );
+                m_bvhpri[i].primitive->GetIntersect( ray , intersect );
             SORT_STATS(sIntersectionTest+=node->pri_cnt);
             continue;
         }
@@ -415,7 +415,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
                 break;
 
             f_min[k] = -1.0f;
-			bvh_stack[si++] = std::make_pair( node->children[k].get() , maxDist );
+            bvh_stack[si++] = std::make_pair( node->children[k].get() , maxDist );
         }
 #endif
     }
@@ -423,331 +423,331 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 }
 
 bool  Fbvh::IsOccluded(const Ray& ray) const{
-	// std::stack is by no means an option here due to its overhead under the hood.
-	using Fbvh_Node_Ptr = Fbvh_Node*;
-	static thread_local std::unique_ptr<Fbvh_Node_Ptr[]> bvh_stack = nullptr;
-	if (UNLIKELY(nullptr == bvh_stack))
-		bvh_stack = std::make_unique<Fbvh_Node_Ptr[]>(m_depth * FBVH_CHILD_CNT);
+    // std::stack is by no means an option here due to its overhead under the hood.
+    using Fbvh_Node_Ptr = Fbvh_Node*;
+    static thread_local std::unique_ptr<Fbvh_Node_Ptr[]> bvh_stack = nullptr;
+    if (UNLIKELY(nullptr == bvh_stack))
+        bvh_stack = std::make_unique<Fbvh_Node_Ptr[]>(m_depth * FBVH_CHILD_CNT);
 
 #ifdef QBVH_IMPLEMENTATION
-	SORT_PROFILE("Traverse Qbvh");
+    SORT_PROFILE("Traverse Qbvh");
 #endif
 #ifdef QBVH_IMPLEMENTATION
-	SORT_PROFILE("Traverse Obvh");
+    SORT_PROFILE("Traverse Obvh");
 #endif
 
-	SORT_STATS(++sRayCount);
-	SORT_STATS(++sShadowRayCount);
+    SORT_STATS(++sRayCount);
+    SORT_STATS(++sShadowRayCount);
 
-	// pre-calculate some data
-	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
+    // pre-calculate some data
+    RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
 #ifdef SIMD_SSE_IMPLEMENTATION
-	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
+    flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
 #endif
 #ifdef SIMD_AVX_IMPLEMENTATION
-	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
+    flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
 #endif
-	ray.Prepare(flag);
+    ray.Prepare(flag);
 
-	const auto fmin = Intersect(ray, m_bbox);
-	if (fmin < 0.0f)
-		return false;
+    const auto fmin = Intersect(ray, m_bbox);
+    if (fmin < 0.0f)
+        return false;
 
-	// stack index
-	auto si = 0;
-	bvh_stack[si++] = m_root.get();
+    // stack index
+    auto si = 0;
+    bvh_stack[si++] = m_root.get();
 
-	while (si > 0) {
-		const auto node = bvh_stack[--si];
+    while (si > 0) {
+        const auto node = bvh_stack[--si];
 
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
-		// check if it is a leaf node
-		if (0 == node->child_cnt) {
-			const auto tri_cnt = node->tri_list.size();
-			for (auto i = 0; i < tri_cnt; ++i) {
-				if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
-					SORT_STATS(sIntersectionTest += i * 4);
-					return true;
-				}
-			}
-			const auto line_list = node->line_list.size();
-			for (auto i = 0; i < line_list; ++i) {
-				if (intersectLineFast_SIMD(ray, node->line_list[i])) {
-					SORT_STATS(sIntersectionTest += (i + tri_cnt) * 4);
-					return true;
-				}
-			}
-			if (UNLIKELY(!node->other_list.empty())) {
-				for (auto i = 0; i < node->other_list.size(); ++i) {
-					if (node->other_list[i]->GetIntersect(ray, nullptr)) {
-						SORT_STATS(sIntersectionTest += (i + tri_cnt + line_list ) * 4);
-						return true;
-					}
-				}
-			}
-			SORT_STATS(sIntersectionTest += node->pri_cnt);
-			continue;
-		}
+        // check if it is a leaf node
+        if (0 == node->child_cnt) {
+            const auto tri_cnt = node->tri_list.size();
+            for (auto i = 0; i < tri_cnt; ++i) {
+                if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
+                    SORT_STATS(sIntersectionTest += i * 4);
+                    return true;
+                }
+            }
+            const auto line_list = node->line_list.size();
+            for (auto i = 0; i < line_list; ++i) {
+                if (intersectLineFast_SIMD(ray, node->line_list[i])) {
+                    SORT_STATS(sIntersectionTest += (i + tri_cnt) * 4);
+                    return true;
+                }
+            }
+            if (UNLIKELY(!node->other_list.empty())) {
+                for (auto i = 0; i < node->other_list.size(); ++i) {
+                    if (node->other_list[i]->GetIntersect(ray, nullptr)) {
+                        SORT_STATS(sIntersectionTest += (i + tri_cnt + line_list ) * 4);
+                        return true;
+                    }
+                }
+            }
+            SORT_STATS(sIntersectionTest += node->pri_cnt);
+            continue;
+        }
 
-		simd_data sse_f_min;
-		auto m = IntersectBBox_SIMD(ray, node->bbox, sse_f_min);
-		if (0 == m)
-			continue;
+        simd_data sse_f_min;
+        auto m = IntersectBBox_SIMD(ray, node->bbox, sse_f_min);
+        if (0 == m)
+            continue;
 
-		const int k0 = __bsf(m);
-		const auto t0 = sse_f_min[k0];
-		m &= m - 1;
-		if (LIKELY(0 == m)) {
-			sAssert(t0 >= 0.0f, SPATIAL_ACCELERATOR);
-			bvh_stack[si++] = node->children[k0].get();
-		}
-		else {
-			const int k1 = __bsf(m);
-			const auto t1 = sse_f_min[k0];
-			m &= m - 1;
+        const int k0 = __bsf(m);
+        const auto t0 = sse_f_min[k0];
+        m &= m - 1;
+        if (LIKELY(0 == m)) {
+            sAssert(t0 >= 0.0f, SPATIAL_ACCELERATOR);
+            bvh_stack[si++] = node->children[k0].get();
+        }
+        else {
+            const int k1 = __bsf(m);
+            const auto t1 = sse_f_min[k0];
+            m &= m - 1;
 
-			sAssert(t1 >= 0.0f, SPATIAL_ACCELERATOR);
+            sAssert(t1 >= 0.0f, SPATIAL_ACCELERATOR);
 
-			if (LIKELY(0 == m)) {
-				bvh_stack[si++] = node->children[k1].get();
-				bvh_stack[si++] = node->children[k0].get();
-			} else {
-				const int k2 = __bsf(m);
-				const auto t2 = sse_f_min[k2];
-				sAssert(t2 >= 0.0f, SPATIAL_ACCELERATOR);
+            if (LIKELY(0 == m)) {
+                bvh_stack[si++] = node->children[k1].get();
+                bvh_stack[si++] = node->children[k0].get();
+            } else {
+                const int k2 = __bsf(m);
+                const auto t2 = sse_f_min[k2];
+                sAssert(t2 >= 0.0f, SPATIAL_ACCELERATOR);
 
-				m &= m - 1;
+                m &= m - 1;
 
-				if( LIKELY(0==m) ){
-					bvh_stack[si++] = node->children[k2].get();
-					bvh_stack[si++] = node->children[k1].get();
-					bvh_stack[si++] = node->children[k0].get();
-				}else{
+                if( LIKELY(0==m) ){
+                    bvh_stack[si++] = node->children[k2].get();
+                    bvh_stack[si++] = node->children[k1].get();
+                    bvh_stack[si++] = node->children[k0].get();
+                }else{
 #if defined(SIMD_AVX_IMPLEMENTATION)
-					for (auto i = 0; i < node->child_cnt; ++i) {
-						auto k = -1;
-						auto maxDist = 0.0f;
-						for (int j = 0; j < node->child_cnt; ++j) {
-							if (sse_f_min[j] > maxDist) {
-								maxDist = sse_f_min[j];
-								k = j;
-							}
-						}
+                    for (auto i = 0; i < node->child_cnt; ++i) {
+                        auto k = -1;
+                        auto maxDist = 0.0f;
+                        for (int j = 0; j < node->child_cnt; ++j) {
+                            if (sse_f_min[j] > maxDist) {
+                                maxDist = sse_f_min[j];
+                                k = j;
+                            }
+                        }
 
-						if (k == -1)
-							break;
+                        if (k == -1)
+                            break;
 
-						sse_f_min[k] = -1.0f;
-						bvh_stack[si++] = node->children[k].get();
-					}
+                        sse_f_min[k] = -1.0f;
+                        bvh_stack[si++] = node->children[k].get();
+                    }
 #endif
 #if defined(SIMD_SSE_IMPLEMENTATION)
-					const int k3 = __bsf(m);
-					const auto t3 = sse_f_min[k3];
-					sAssert(t3 >= 0.0f, SPATIAL_ACCELERATOR);
+                    const int k3 = __bsf(m);
+                    const auto t3 = sse_f_min[k3];
+                    sAssert(t3 >= 0.0f, SPATIAL_ACCELERATOR);
 
-					bvh_stack[si++] = node->children[k3].get();
-					bvh_stack[si++] = node->children[k2].get();
-					bvh_stack[si++] = node->children[k1].get();
-					bvh_stack[si++] = node->children[k0].get();
+                    bvh_stack[si++] = node->children[k3].get();
+                    bvh_stack[si++] = node->children[k2].get();
+                    bvh_stack[si++] = node->children[k1].get();
+                    bvh_stack[si++] = node->children[k0].get();
 #endif
-				}
-			}
-		}
+                }
+            }
+        }
 #else
-		// check if it is a leaf node
-		if (0 == node->child_cnt) {
-			const auto _start = node->pri_offset;
-			const auto _end = _start + node->pri_cnt;
+        // check if it is a leaf node
+        if (0 == node->child_cnt) {
+            const auto _start = node->pri_offset;
+            const auto _end = _start + node->pri_cnt;
 
-			for (auto i = _start; i < _end; i++) {
-				if (m_bvhpri[i].primitive->GetIntersect(ray, nullptr)) {
-					SORT_STATS(sIntersectionTest += i - _start + 1);
-					return true;
-				}
-			}
-			SORT_STATS(sIntersectionTest += node->pri_cnt);
-			continue;
-		}
+            for (auto i = _start; i < _end; i++) {
+                if (m_bvhpri[i].primitive->GetIntersect(ray, nullptr)) {
+                    SORT_STATS(sIntersectionTest += i - _start + 1);
+                    return true;
+                }
+            }
+            SORT_STATS(sIntersectionTest += node->pri_cnt);
+            continue;
+        }
 
-		float f_min[FBVH_CHILD_CNT] = { FLT_MAX };
-		for (auto i = 0; i < node->child_cnt; ++i)
-			f_min[i] = Intersect(ray, node->bbox[i]);
+        float f_min[FBVH_CHILD_CNT] = { FLT_MAX };
+        for (auto i = 0; i < node->child_cnt; ++i)
+            f_min[i] = Intersect(ray, node->bbox[i]);
 
-		for (auto i = 0; i < node->child_cnt; ++i)
-			if( f_min[i] >= 0.0f )
-				bvh_stack[si++] = node->children[i].get();
+        for (auto i = 0; i < node->child_cnt; ++i)
+            if( f_min[i] >= 0.0f )
+                bvh_stack[si++] = node->children[i].get();
 #endif
-	}
-	return false;
+    }
+    return false;
 }
 
 void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
-	// std::stack is by no means an option here due to its overhead under the hood.
-	static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
-	if ( UNLIKELY( nullptr == bvh_stack ) )
-		bvh_stack = std::make_unique<std::pair<Fbvh_Node*, float>[]>(m_depth * FBVH_CHILD_CNT);
+    // std::stack is by no means an option here due to its overhead under the hood.
+    static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
+    if ( UNLIKELY( nullptr == bvh_stack ) )
+        bvh_stack = std::make_unique<std::pair<Fbvh_Node*, float>[]>(m_depth * FBVH_CHILD_CNT);
 
 #ifdef QBVH_IMPLEMENTATION
-	SORT_PROFILE("Traverse Qbvh");
+    SORT_PROFILE("Traverse Qbvh");
 #endif
 #ifdef QBVH_IMPLEMENTATION
-	SORT_PROFILE("Traverse Obvh");
+    SORT_PROFILE("Traverse Obvh");
 #endif
 
     SORT_STATS(++sRayCount);
 
-	// pre-calculate some data
-	RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
+    // pre-calculate some data
+    RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
 #ifdef SIMD_SSE_IMPLEMENTATION
-	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
+    flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
 #endif
 #ifdef SIMD_AVX_IMPLEMENTATION
-	flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
+    flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
 #endif
-	ray.Prepare(flag);
+    ray.Prepare(flag);
 
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;
 
-	const auto fmin = Intersect(ray, m_bbox);
-	if (fmin < 0.0f)
-		return;
+    const auto fmin = Intersect(ray, m_bbox);
+    if (fmin < 0.0f)
+        return;
 
-	// stack index
-	auto si = 0;
-	bvh_stack[si++] = std::make_pair(m_root.get(), fmin);
+    // stack index
+    auto si = 0;
+    bvh_stack[si++] = std::make_pair(m_root.get(), fmin);
 
-	while (si > 0) {
-		const auto top = bvh_stack[--si];
+    while (si > 0) {
+        const auto top = bvh_stack[--si];
 
-		const auto node = top.first;
-		const auto fmin = top.second;
-		if (intersect.maxt < fmin)
-			continue;
+        const auto node = top.first;
+        const auto fmin = top.second;
+        if (intersect.maxt < fmin)
+            continue;
 
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
-		if (0 == node->child_cnt) {
-			// Note, only triangle shape support SSS here. This is the only big difference between AVX and non-AVX version implementation.
-			// There are only two major primitives in SORT, line and triangle.
-			// Line is usually used for hair, which has its own hair shader.
-			// Triangle is the only major primitive that has SSS.
-			for ( auto i = 0u ; i < node->tri_list.size() ; ++i )
-				intersectTriangleMulti_SIMD(ray, node->tri_list[i] , matID, intersect);
-			SORT_STATS(sIntersectionTest += node->tri_list.size());
-			continue;
-		}
+        if (0 == node->child_cnt) {
+            // Note, only triangle shape support SSS here. This is the only big difference between AVX and non-AVX version implementation.
+            // There are only two major primitives in SORT, line and triangle.
+            // Line is usually used for hair, which has its own hair shader.
+            // Triangle is the only major primitive that has SSS.
+            for ( auto i = 0u ; i < node->tri_list.size() ; ++i )
+                intersectTriangleMulti_SIMD(ray, node->tri_list[i] , matID, intersect);
+            SORT_STATS(sIntersectionTest += node->tri_list.size());
+            continue;
+        }
 
-		simd_data sse_f_min;
-		auto m = IntersectBBox_SIMD(ray, node->bbox, sse_f_min);
-		if (0 == m)
-			continue;
+        simd_data sse_f_min;
+        auto m = IntersectBBox_SIMD(ray, node->bbox, sse_f_min);
+        if (0 == m)
+            continue;
 
-		const int k0 = __bsf(m);
-		const auto t0 = sse_f_min[k0];
-		m &= m - 1;
-		if (LIKELY(0 == m)) {
-			sAssert(t0 >= 0.0f, SPATIAL_ACCELERATOR);
-			bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
-		}
-		else {
-			const int k1 = __bsf(m);
-			m &= m - 1;
+        const int k0 = __bsf(m);
+        const auto t0 = sse_f_min[k0];
+        m &= m - 1;
+        if (LIKELY(0 == m)) {
+            sAssert(t0 >= 0.0f, SPATIAL_ACCELERATOR);
+            bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
+        }
+        else {
+            const int k1 = __bsf(m);
+            m &= m - 1;
 
-			if (LIKELY(0 == m)) {
-				const auto t1 = sse_f_min[k1];
-				sAssert(t1 >= 0.0f, SPATIAL_ACCELERATOR);
+            if (LIKELY(0 == m)) {
+                const auto t1 = sse_f_min[k1];
+                sAssert(t1 >= 0.0f, SPATIAL_ACCELERATOR);
 
-				if (t0 < t1) {
-					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
-					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
-				}
-				else {
-					bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
-					bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
-				}
-			}
-			else {
-				// fall back to the worst case
-				for (auto i = 0; i < node->child_cnt; ++i) {
-					auto k = -1;
-					auto maxDist = 0.0f;
-					for (int j = 0; j < node->child_cnt; ++j) {
-						if (sse_f_min[j] > maxDist) {
-							maxDist = sse_f_min[j];
-							k = j;
-						}
-					}
+                if (t0 < t1) {
+                    bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
+                    bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
+                }
+                else {
+                    bvh_stack[si++] = std::make_pair(node->children[k0].get(), t0);
+                    bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
+                }
+            }
+            else {
+                // fall back to the worst case
+                for (auto i = 0; i < node->child_cnt; ++i) {
+                    auto k = -1;
+                    auto maxDist = 0.0f;
+                    for (int j = 0; j < node->child_cnt; ++j) {
+                        if (sse_f_min[j] > maxDist) {
+                            maxDist = sse_f_min[j];
+                            k = j;
+                        }
+                    }
 
-					if (k == -1)
-						break;
+                    if (k == -1)
+                        break;
 
-					sse_f_min[k] = -1.0f;
-					bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
-				}
-			}
-		}
+                    sse_f_min[k] = -1.0f;
+                    bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
+                }
+            }
+        }
 #else
-		// check if it is a leaf node, to be optimized by SSE/AVX
-		if (0 == node->child_cnt) {
-			auto _start = node->pri_offset;
-			auto _pri = node->pri_cnt;
-			auto _end = _start + _pri;
+        // check if it is a leaf node, to be optimized by SSE/AVX
+        if (0 == node->child_cnt) {
+            auto _start = node->pri_offset;
+            auto _pri = node->pri_cnt;
+            auto _end = _start + _pri;
 
-			Intersection intersection;
-			for (auto i = _start; i < _end; i++) {
-				if (matID != m_bvhpri[i].primitive->GetMaterial()->GetID())
-					continue;
+            Intersection intersection;
+            for (auto i = _start; i < _end; i++) {
+                if (matID != m_bvhpri[i].primitive->GetMaterial()->GetID())
+                    continue;
 
-				SORT_STATS(++sIntersectionTest);
+                SORT_STATS(++sIntersectionTest);
 
-				intersection.Reset();
-				const auto intersected = m_bvhpri[i].primitive->GetIntersect(ray, &intersection);
-				if (intersected) {
-					if (intersect.cnt < TOTAL_SSS_INTERSECTION_CNT) {
-						intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
-						intersect.intersections[intersect.cnt++]->intersection = intersection;
-					}
-					else {
-						auto picked_i = -1;
-						auto t = 0.0f;
-						for (auto i = 0; i < TOTAL_SSS_INTERSECTION_CNT; ++i) {
-							if (t < intersect.intersections[i]->intersection.t) {
-								t = intersect.intersections[i]->intersection.t;
-								picked_i = i;
-							}
-						}
-						if (picked_i >= 0)
-							intersect.intersections[picked_i]->intersection = intersection;
+                intersection.Reset();
+                const auto intersected = m_bvhpri[i].primitive->GetIntersect(ray, &intersection);
+                if (intersected) {
+                    if (intersect.cnt < TOTAL_SSS_INTERSECTION_CNT) {
+                        intersect.intersections[intersect.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                        intersect.intersections[intersect.cnt++]->intersection = intersection;
+                    }
+                    else {
+                        auto picked_i = -1;
+                        auto t = 0.0f;
+                        for (auto i = 0; i < TOTAL_SSS_INTERSECTION_CNT; ++i) {
+                            if (t < intersect.intersections[i]->intersection.t) {
+                                t = intersect.intersections[i]->intersection.t;
+                                picked_i = i;
+                            }
+                        }
+                        if (picked_i >= 0)
+                            intersect.intersections[picked_i]->intersection = intersection;
 
-						intersect.ResolveMaxDepth();
-					}
-				}
-			}
+                        intersect.ResolveMaxDepth();
+                    }
+                }
+            }
 
-			continue;
-		}
+            continue;
+        }
 
-		float f_min[FBVH_CHILD_CNT] = { FLT_MAX };
-		for (int i = 0; i < node->child_cnt; ++i)
-			f_min[i] = Intersect(ray, node->bbox[i]);
+        float f_min[FBVH_CHILD_CNT] = { FLT_MAX };
+        for (int i = 0; i < node->child_cnt; ++i)
+            f_min[i] = Intersect(ray, node->bbox[i]);
 
-		for (int i = 0; i < node->child_cnt; ++i) {
-			int k = -1;
-			float maxDist = -1.0f;
-			for (int j = 0; j < node->child_cnt; ++j) {
-				if (f_min[j] > maxDist) {
-					maxDist = f_min[j];
-					k = j;
-				}
-			}
+        for (int i = 0; i < node->child_cnt; ++i) {
+            int k = -1;
+            float maxDist = -1.0f;
+            for (int j = 0; j < node->child_cnt; ++j) {
+                if (f_min[j] > maxDist) {
+                    maxDist = f_min[j];
+                    k = j;
+                }
+            }
 
-			if (k == -1)
-				break;
+            if (k == -1)
+                break;
 
-			f_min[k] = -1.0f;
-			bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
-		}
+            f_min[k] = -1.0f;
+            bvh_stack[si++] = std::make_pair(node->children[k].get(), maxDist);
+        }
 #endif
-	}
+    }
 }

@@ -95,28 +95,28 @@ struct Fast_Bvh_Node {
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
     using Simd_Triangle_Container   = Simd_Primitive_Container<Simd_Triangle>;
     using Simd_Line_Container       = Simd_Primitive_Container<Simd_Line>;
-	Simd_BBox						bbox;					    /**< Bounding boxes of its four children. */
-	Simd_Triangle_Container         tri_list;
-	Simd_Line_Container             line_list;
-	std::vector<const Primitive*>   other_list;
+    Simd_BBox                       bbox;                       /**< Bounding boxes of its four children. */
+    Simd_Triangle_Container         tri_list;
+    Simd_Line_Container             line_list;
+    std::vector<const Primitive*>   other_list;
 #else
-	BBox							bbox[FBVH_CHILD_CNT];	    /**< Bounding boxes of its children. */
+    BBox                            bbox[FBVH_CHILD_CNT];       /**< Bounding boxes of its children. */
 #endif
 
-	std::unique_ptr<Fast_Bvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
+    std::unique_ptr<Fast_Bvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
 
-	unsigned                        pri_cnt = 0;				/**< Number of primitives in the node. */
-	unsigned                        pri_offset = 0;				/**< Offset of primitives in the buffer. */
-	int                             child_cnt = 0;			    /**< 0 means it is a leaf node. */
+    unsigned                        pri_cnt = 0;                /**< Number of primitives in the node. */
+    unsigned                        pri_offset = 0;             /**< Offset of primitives in the buffer. */
+    int                             child_cnt = 0;              /**< 0 means it is a leaf node. */
 
-	//! @brief  Constructor.
-	//!
-	//! @param  offset      The offset of the first primitive in the whole buffer.
-	//! @param  cnt         Number of primitives in the node.
-	Fast_Bvh_Node(unsigned offset, unsigned cnt) : pri_cnt(cnt), pri_offset(offset) {}
+    //! @brief  Constructor.
+    //!
+    //! @param  offset      The offset of the first primitive in the whole buffer.
+    //! @param  cnt         Number of primitives in the node.
+    Fast_Bvh_Node(unsigned offset, unsigned cnt) : pri_cnt(cnt), pri_offset(offset) {}
 
-	//! @brief	Default constructor.
-	Fast_Bvh_Node() : pri_cnt(0), pri_offset(0), child_cnt(0) {}
+    //! @brief  Default constructor.
+    Fast_Bvh_Node() : pri_cnt(0), pri_offset(0), child_cnt(0) {}
 };
 #endif
 
@@ -156,15 +156,15 @@ public:
     //!                     it returns false.
     bool    GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
-	//! @brief This is a dedicated interface for detecting shadow rays.
-	//!
-	//! Instead of merging the interface with 'GetIntersect', this is a separate interface purely for occlusion detection.
-	//! There is a need for it so that we can achieve better performance. There will be less branch in this interfaces and
-	//! most importantly the traversed node doesn't need to be sorted.
-	//!
-	//! @param r			The ray to be tested.
-	//! @return				Whether the ray is occluded by anything.
-	bool	IsOccluded(const Ray& r) const override;
+    //! @brief This is a dedicated interface for detecting shadow rays.
+    //!
+    //! Instead of merging the interface with 'GetIntersect', this is a separate interface purely for occlusion detection.
+    //! There is a need for it so that we can achieve better performance. There will be less branch in this interfaces and
+    //! most importantly the traversed node doesn't need to be sorted.
+    //!
+    //! @param r            The ray to be tested.
+    //! @return             Whether the ray is occluded by anything.
+    bool    IsOccluded(const Ray& r) const override;
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
@@ -176,7 +176,7 @@ public:
     //! @param  r           The input ray to be tested.
     //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
-    void	GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
+    void    GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const override;
 
     //! @brief Build BVH structure in O(N*lg(N)).
     //!
@@ -204,8 +204,8 @@ private:
     /**< Maximum depth of node in BVH. */
     unsigned                            m_maxNodeDepth = 16;
 
-	/**< Depth of the QBVH/OBVH. */
-	unsigned							m_depth = 0;
+    /**< Depth of the QBVH/OBVH. */
+    unsigned                            m_depth = 0;
 
     //! @brief Split current QBVH/OBVH node.
     //!
@@ -219,15 +219,15 @@ private:
     //! @param node         The BVH node to be marked as leaf node.
     //! @param start        The start offset of primitives that the node holds.
     //! @param end          The end offset of primitives that the node holds.
-	//! @param depth		Depth of the current node.
+    //! @param depth        Depth of the current node.
     void    makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , unsigned depth );
 
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
-	//! @brief A helper function calculating bounding box of a node.
-	//!
-	//! @param children		The children nodes
-	//! @return             The 4/8 bounding box of the node, there could be degenerated ones if there is no four children.
-	Simd_BBox	calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) const;
+    //! @brief A helper function calculating bounding box of a node.
+    //!
+    //! @param children     The children nodes
+    //! @return             The 4/8 bounding box of the node, there could be degenerated ones if there is no four children.
+    Simd_BBox   calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) const;
 #endif
 
 #ifdef QBVH_IMPLEMENTATION

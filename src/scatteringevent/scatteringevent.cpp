@@ -22,7 +22,7 @@
 
 template< class T  >
 static SORT_FORCEINLINE const T* pickScattering( const T* const scattering[] , unsigned int cnt , float totalWeight , float& pdf ){
-	sAssert( totalWeight > 0.0f , MATERIAL );
+    sAssert( totalWeight > 0.0f , MATERIAL );
 
     const T* picked = nullptr;
     auto r = sort_canonical() * totalWeight;
@@ -92,15 +92,15 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
     if( pdf == 0.0f )
         return 0.0f;
     
-	// update the pdf
-	pdf *= bxdf_pdf;
+    // update the pdf
+    pdf *= bxdf_pdf;
 
     // setup pdf
     for( auto i = 0u; i < m_bxdfCnt ; ++i ){
         if( m_bxdfs[i] != bxdf ){
             ret += m_bxdfs[i]->F(wo,wi) * m_bxdfs[i]->GetEvalWeight();
-			pdf += m_bxdfs[i]->Pdf(wo,wi) * m_bxdfs[i]->GetSampleWeight();
-		}
+            pdf += m_bxdfs[i]->Pdf(wo,wi) * m_bxdfs[i]->GetSampleWeight();
+        }
     }
 
     // transform the direction back

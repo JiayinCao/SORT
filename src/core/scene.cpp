@@ -82,11 +82,11 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const{
 }
 
 bool Scene::IsOccluded(const Ray& r) const{
-	// brute force intersection test if there is no accelerator
-	if( UNLIKELY( g_accelerator == nullptr ) )
-		return bruteforceIntersect(r, nullptr);
+    // brute force intersection test if there is no accelerator
+    if( UNLIKELY( g_accelerator == nullptr ) )
+        return bruteforceIntersect(r, nullptr);
 
-	return g_accelerator->IsOccluded(r);
+    return g_accelerator->IsOccluded(r);
 }
 
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{

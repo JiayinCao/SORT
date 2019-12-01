@@ -22,13 +22,13 @@ static SORT_FORCEINLINE float sign( const float x ){
 }
 
 static SORT_FORCEINLINE int majorAxis(const Vector3f& v) {
-	if (abs(v[0]) > abs(v[1]) && abs(v[0]) > abs(v[2]))
-		return 0;
-	return abs(v[1]) > abs(v[2]) ? 1 : 2;
+    if (abs(v[0]) > abs(v[1]) && abs(v[0]) > abs(v[2]))
+        return 0;
+    return abs(v[1]) > abs(v[2]) ? 1 : 2;
 }
 
 static SORT_FORCEINLINE Vector3f permuteAxis(const Vector3f& v, int ax, int ay, int az) {
-	return Vector3f(v[ax], v[ay], v[az]);
+    return Vector3f(v[ax], v[ay], v[az]);
 }
 
 Ray::Ray(){
@@ -66,22 +66,22 @@ Ray::Ray( const Ray& r ){
 }
 
 void Ray::Prepare( const RAY_PREPARE_FLAG flag ) const{
-	m_local_y = majorAxis(m_Dir);
-	m_local_z = (m_local_y + 1) % 3;
-	m_local_x = (m_local_z + 1) % 3;
+    m_local_y = majorAxis(m_Dir);
+    m_local_z = (m_local_y + 1) % 3;
+    m_local_x = (m_local_z + 1) % 3;
 
-	const auto d = permuteAxis(m_Dir, m_local_x, m_local_y, m_local_z);
-	m_scale_x = -d.x / d.y;
-	m_scale_z = -d.z / d.y;
-	m_scale_y = 1.0f / d.y;
+    const auto d = permuteAxis(m_Dir, m_local_x, m_local_y, m_local_z);
+    m_scale_x = -d.x / d.y;
+    m_scale_z = -d.z / d.y;
+    m_scale_y = 1.0f / d.y;
 
 #ifdef SSE_ENABLED
-	if( flag & RESOLVE_SSE_DATA ){
+    if( flag & RESOLVE_SSE_DATA ){
         constexpr float delta = 0.00001f;
         const auto dir_x = fabs(m_Dir[0]) < delta ? sign(m_Dir[0]) * delta : m_Dir[0];
         const auto dir_y = fabs(m_Dir[1]) < delta ? sign(m_Dir[1]) * delta : m_Dir[1];
         const auto dir_z = fabs(m_Dir[2]) < delta ? sign(m_Dir[2]) * delta : m_Dir[2];
-        m_rcp_dir_x	= _mm_set_ps1( 1.0f/dir_x );
+        m_rcp_dir_x = _mm_set_ps1( 1.0f/dir_x );
         m_rcp_dir_y = _mm_set_ps1( 1.0f/dir_y );
         m_rcp_dir_z = _mm_set_ps1( 1.0f/dir_z );
         m_ori_dir_x = _mm_set_ps1( -m_Ori[0]/dir_x );
@@ -112,7 +112,7 @@ void Ray::Prepare( const RAY_PREPARE_FLAG flag ) const{
         const auto rcp_dir_x = 1.0f / dir_x;
         const auto rcp_dir_y = 1.0f / dir_y;
         const auto rcp_dir_z = 1.0f / dir_z;
-        m_rcp_dir_x_avx	= _mm256_set_ps( rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x );
+        m_rcp_dir_x_avx = _mm256_set_ps( rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x, rcp_dir_x );
         m_rcp_dir_y_avx = _mm256_set_ps( rcp_dir_y, rcp_dir_y, rcp_dir_y, rcp_dir_y, rcp_dir_y, rcp_dir_y, rcp_dir_y, rcp_dir_y );
         m_rcp_dir_z_avx = _mm256_set_ps( rcp_dir_z, rcp_dir_z, rcp_dir_z, rcp_dir_z, rcp_dir_z, rcp_dir_z, rcp_dir_z, rcp_dir_z );
         
