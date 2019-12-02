@@ -225,17 +225,17 @@ SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Tri
 
     // step 1 : pick the major axis to avoid dividing by zero in the sheering pass.
     //          by picking the major axis, we can also make sure we sheer as little as possible
-    simd_data p0_x = p0[ray.m_local_x];
-    simd_data p0_y = p0[ray.m_local_y];
-    simd_data p0_z = p0[ray.m_local_z];
+    simd_data& p0_x = p0[ray.m_local_x];
+    simd_data& p0_y = p0[ray.m_local_y];
+    simd_data& p0_z = p0[ray.m_local_z];
 
-    simd_data p1_x = p1[ray.m_local_x];
-    simd_data p1_y = p1[ray.m_local_y];
-    simd_data p1_z = p1[ray.m_local_z];
+    simd_data& p1_x = p1[ray.m_local_x];
+    simd_data& p1_y = p1[ray.m_local_y];
+    simd_data& p1_z = p1[ray.m_local_z];
 
-    simd_data p2_x = p2[ray.m_local_x];
-    simd_data p2_y = p2[ray.m_local_y];
-    simd_data p2_z = p2[ray.m_local_z];
+    simd_data& p2_x = p2[ray.m_local_x];
+    simd_data& p2_y = p2[ray.m_local_y];
+    simd_data& p2_z = p2[ray.m_local_z];
 
     // step 2 : sheer the vertices so that the ray direction points to ( 0 , 1 , 0 )
     p0_x = simd_mad_ps(p0_y, ray_scale_x(ray), p0_x);
