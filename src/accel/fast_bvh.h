@@ -56,8 +56,9 @@ struct Simd_Primitive_Container{
     SORT_FORCEINLINE void allocate( const unsigned int n ){
         cnt = n;
         if( cnt > 0 ){
+			constexpr auto mask = ~(uintptr_t)(alignment - 1);
             memory = std::make_unique<char[]>( sizeof(T) * n + alignment );
-            aligned_address = (T*)( (((uintptr_t)memory.get()) + alignment - 1 ) & ~(alignment-1) );
+            aligned_address = (T*)( (((uintptr_t)memory.get()) + alignment - 1 ) & mask);
         }
     }
 
