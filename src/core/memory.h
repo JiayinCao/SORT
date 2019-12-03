@@ -111,7 +111,8 @@ SORT_FORCEINLINE void* malloc_aligned( unsigned int size , unsigned int alignmen
 #ifdef SORT_IN_WINDOWS
     ret = _aligned_malloc( size , alignment );
 #else
-    posix_memalign( &ret , alignment , size );
+    if( 0 != posix_memalign( &ret , alignment , size ) )
+        return nullptr;
 #endif
 
     sAssert( ( ((uintptr_t)ret) & (alignment-1) ) == 0 , MEMORY );
