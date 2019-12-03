@@ -37,63 +37,6 @@ static_assert(false, "More than one SIMD version is defined before including fas
 #define FBVH_CHILD_CNT  8
 #endif
 
-//! @brief  A simple container that holds all primitives in a node.
-/**
- * This data structure will keep all data aligned so that SIMD instructions won't crash later.
- * A better and simpler solution would be using aligned_alloc, which requires either c11 or c++17.
- * C++17 is not an option because one of the C++ features used in a thirdparty library is not compatible
- * with C++17. SORT won't update to C++17 until the library is no longer needed.
- * C version aligned_alloc is not commonly available on all Mac OS platforms. Adding the limitation of
- * operating system platform just because of this function is by no means worth it since there could be
- * a fairly simple solution defined below.
- * 
- * This data structure can be removed after confirming malloc_align works on all platforms.
- */ 
-template<class T, unsigned long alignment = SIMD_ALIGNMENT>
-struct Simd_Primitive_Container{
-    //! @brief  Allocate 'n' primitives in the container.
-    //!
-    //! @param n    Number of primitives to allocate.
-    //! @return     Whether the allocation is sucessful.
-    SORT_FORCEINLINE void allocate( const unsigned int n ){
-        cnt = n;
-        if( cnt > 0 ){
-			constexpr auto mask = ~(uintptr_t)(alignment - 1);
-            memory = std::make_unique<char[]>( sizeof(T) * n + alignment );
-            aligned_address = (T*)( (((uintptr_t)memory.get()) + alignment - 1 ) & mask);
-        }
-    }
-
-    //! @brief  Get the 'i'th element.
-    //!
-    //! This function is frequently used in fast bvh algorithm. It is a razor thin layer that does no verification of input data.
-    //! It is totally up to the high level code to guarantee the correctness of the input. Failing to feed correct input may cause
-    //! potential crash.
-    //! 
-    //! @param i    Index of primitive to read.
-    //! @return     The element to read/write.
-    SORT_FORCEINLINE const T& operator[]( unsigned int i ) const{
-        sAssert( i < cnt , SPATIAL_ACCELERATOR );
-        return aligned_address[i];
-    }
-    SORT_FORCEINLINE T& operator[]( unsigned int i ){
-        sAssert( i < cnt , SPATIAL_ACCELERATOR );
-        return aligned_address[i];
-    }
-
-    //! @brief  Get the number of elements in this container.
-    //!
-    //! @return Get the number of primitives in this container.
-    SORT_FORCEINLINE unsigned int size() const{
-        return cnt;
-    }
-
-private:
-    std::unique_ptr<char[]> memory = nullptr; /**< The real memory allocated. */
-    T*          aligned_address = nullptr;    /**< Aligned address that has the list of the primitives. */
-    unsigned    cnt = 0;                      /**< Number of primitives in this container. */
-};
-
 struct Fast_Bvh_Node_Deallocator{
     void operator()(void* p){
         free_aligned(p);
@@ -105,11 +48,13 @@ using Fast_Bvh_Node_Ptr = std::unique_ptr<Fast_Bvh_Node,Fast_Bvh_Node_Deallocato
 
 struct Fast_Bvh_Node {
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
-    using Simd_Triangle_Container   = Simd_Primitive_Container<Simd_Triangle>;
-    using Simd_Line_Container       = Simd_Primitive_Container<Simd_Line>;
+    using Simd_Triangle_Container   = std::unique_ptr<Simd_Triangle[]>;
+    using Simd_Line_Container       = std::unique_ptr<Simd_Line[]>;
     Simd_BBox                       bbox;                       /**< Bounding boxes of its four children. */
     Simd_Triangle_Container         tri_list;
     Simd_Line_Container             line_list;
+    unsigned int                    tri_cnt = 0;
+    unsigned int                    line_cnt = 0;
     std::vector<const Primitive*>   other_list;
 #else
     BBox                            bbox[FBVH_CHILD_CNT];       /**< Bounding boxes of its children. */

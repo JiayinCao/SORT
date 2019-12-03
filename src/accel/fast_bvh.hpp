@@ -26,6 +26,12 @@ static SORT_FORCEINLINE Fast_Bvh_Node_Ptr makeFastBvhNode( unsigned int start , 
     return std::move(Fast_Bvh_Node_Ptr(node));
 }
 
+template<class T>
+static SORT_FORCEINLINE std::unique_ptr<T[]> makePrimitiveList( unsigned int cnt ){
+    auto* address = malloc_aligned( sizeof(T) * cnt , SIMD_ALIGNMENT );
+    return std::move(std::unique_ptr<T[]>((T*)address));
+}
+
 #if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
 static_assert(false, "More than one SIMD version is defined before including fast_bvh.hpp");
 #endif
@@ -238,12 +244,14 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
         line_list.push_back(simd_line);
     
     if( tri_list.size() ){
-        node->tri_list.allocate( (unsigned int)tri_list.size() );
+        node->tri_list = makePrimitiveList<Simd_Triangle>( (unsigned int)tri_list.size() );
+        node->tri_cnt = tri_list.size();
         for( auto i = 0u ; i < tri_list.size() ; ++i )
             node->tri_list[i] = tri_list[i];
     }
     if( line_list.size() ){
-        node->line_list.allocate( (unsigned int)line_list.size() );
+        node->line_list = makePrimitiveList<Simd_Line>( (unsigned int)line_list.size() );
+        node->line_cnt = line_list.size();
         for( auto i = 0u ; i < line_list.size() ; ++i )
             node->line_list[i] = line_list[i];
     }
@@ -332,10 +340,10 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
-            const auto tri_cnt = node->tri_list.size();
+            const auto tri_cnt = node->tri_cnt;
             for( auto i = 0u ; i < tri_cnt ; ++i )
                 intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
-            const auto line_cnt = node->line_list.size();
+            const auto line_cnt = node->line_cnt;
             for( auto i = 0u ; i < line_cnt ; ++i )
                 intersectLine_SIMD( ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
@@ -469,14 +477,14 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
         // check if it is a leaf node
         if (0 == node->child_cnt) {
-            const auto tri_cnt = node->tri_list.size();
+            const auto tri_cnt = node->tri_cnt;
             for (auto i = 0u; i < tri_cnt; ++i) {
                 if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
                     SORT_STATS(sIntersectionTest += i * 4);
                     return true;
                 }
             }
-            const auto line_list = node->line_list.size();
+            const auto line_list = node->line_cnt;
             for (auto i = 0u; i < line_list; ++i) {
                 if (intersectLineFast_SIMD(ray, node->line_list[i])) {
                     SORT_STATS(sIntersectionTest += (i + tri_cnt) * 4);
@@ -638,9 +646,9 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
             // There are only two major primitives in SORT, line and triangle.
             // Line is usually used for hair, which has its own hair shader.
             // Triangle is the only major primitive that has SSS.
-            for ( auto i = 0u ; i < node->tri_list.size() ; ++i )
+            for ( auto i = 0u ; i < node->tri_cnt ; ++i )
                 intersectTriangleMulti_SIMD(ray, node->tri_list[i] , matID, intersect);
-            SORT_STATS(sIntersectionTest += node->tri_list.size());
+            SORT_STATS(sIntersectionTest += node->tri_cnt);
             continue;
         }
 
