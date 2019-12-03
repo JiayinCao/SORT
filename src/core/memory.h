@@ -108,6 +108,9 @@ SORT_FORCEINLINE MemoryAllocator& GetStaticAllocator() {
 //! @return             The returned pointer pointing to allocated memory.
 SORT_FORCEINLINE void* malloc_aligned( unsigned int size , unsigned int alignment ){
     void* ret = nullptr;
+    if( 0 == size )
+        return ret;
+
 #ifdef SORT_IN_WINDOWS
     ret = _aligned_malloc( size , alignment );
 #else
@@ -124,5 +127,6 @@ SORT_FORCEINLINE void* malloc_aligned( unsigned int size , unsigned int alignmen
 //!
 //! @param  p           The address of memory allocated.
 SORT_FORCEINLINE void free_aligned( void* p ){
-    free(p);
+    if( p )
+        free(p);
 }
