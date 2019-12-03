@@ -214,24 +214,25 @@ static_assert( sizeof( Simd_Line ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Si
 
 //! @brief  Helper function that implements the core algorithm of ray line intersection.
 //!
-//! @param  ray     Ray to be tested against.
-//! @param  line4   The data structure holds four lines. Some of them may be invalid.
-//! @param  mask    The mask of valid results.
-//! @param  t4      Distane from the ray origin to the intersected point on the line.
-//! @param  inter_x Intersection in local line space.
-//! @param  inter_y Intersection in local line space.
-//! @param  inter_z Intersection in local line space.
-//! @return         Whether there is intersection between the ray and the four lines.
-SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Simd_Line& line4 , simd_data& mask , simd_data& t4 , simd_data& inter_x , simd_data& inter_y , simd_data& inter_z ){
+//! @param  ray         Ray to be tested against.
+//! @param  ray_simd    Resolved simd ray data.
+//! @param  line4       The data structure holds four lines. Some of them may be invalid.
+//! @param  mask        The mask of valid results.
+//! @param  t4          Distane from the ray origin to the intersected point on the line.
+//! @param  inter_x     Intersection in local line space.
+//! @param  inter_y     Intersection in local line space.
+//! @param  inter_z     Intersection in local line space.
+//! @return             Whether there is intersection between the ray and the four lines.
+SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Simd_Ray_Data& ray_simd, const Simd_Line& line4 , simd_data& mask , simd_data& t4 , simd_data& inter_x , simd_data& inter_y , simd_data& inter_z ){
     mask = line4.m_mask;
 
-    const simd_data _ray_ori_x = simd_add_ps( simd_mad_ps( line4.m_mat_02, ray_ori_z(ray), simd_mad_ps( line4.m_mat_01, ray_ori_y(ray), simd_mul_ps( line4.m_mat_00, ray_ori_x(ray)) ) ) , line4.m_mat_03 );
-    const simd_data _ray_ori_y = simd_add_ps( simd_mad_ps( line4.m_mat_12, ray_ori_z(ray), simd_mad_ps( line4.m_mat_11, ray_ori_y(ray), simd_mul_ps( line4.m_mat_10, ray_ori_x(ray)) ) ) , line4.m_mat_13 );
-    const simd_data _ray_ori_z = simd_add_ps( simd_mad_ps( line4.m_mat_22, ray_ori_z(ray), simd_mad_ps( line4.m_mat_21, ray_ori_y(ray), simd_mul_ps( line4.m_mat_20, ray_ori_x(ray)) ) ) , line4.m_mat_23 );
+    const simd_data _ray_ori_x = simd_add_ps( simd_mad_ps( line4.m_mat_02, ray_ori_z(ray_simd), simd_mad_ps( line4.m_mat_01, ray_ori_y(ray_simd), simd_mul_ps( line4.m_mat_00, ray_ori_x(ray_simd)) ) ) , line4.m_mat_03 );
+    const simd_data _ray_ori_y = simd_add_ps( simd_mad_ps( line4.m_mat_12, ray_ori_z(ray_simd), simd_mad_ps( line4.m_mat_11, ray_ori_y(ray_simd), simd_mul_ps( line4.m_mat_10, ray_ori_x(ray_simd)) ) ) , line4.m_mat_13 );
+    const simd_data _ray_ori_z = simd_add_ps( simd_mad_ps( line4.m_mat_22, ray_ori_z(ray_simd), simd_mad_ps( line4.m_mat_21, ray_ori_y(ray_simd), simd_mul_ps( line4.m_mat_20, ray_ori_x(ray_simd)) ) ) , line4.m_mat_23 );
     
-    const simd_data _ray_dir_x = simd_mad_ps( line4.m_mat_02, ray_dir_z(ray), simd_mad_ps( line4.m_mat_01, ray_dir_y(ray), simd_mul_ps( line4.m_mat_00, ray_dir_x(ray) )));
-    const simd_data _ray_dir_y = simd_mad_ps( line4.m_mat_12, ray_dir_z(ray), simd_mad_ps( line4.m_mat_11, ray_dir_y(ray), simd_mul_ps( line4.m_mat_10, ray_dir_x(ray) )));
-    const simd_data _ray_dir_z = simd_mad_ps( line4.m_mat_22, ray_dir_z(ray), simd_mad_ps( line4.m_mat_21, ray_dir_y(ray), simd_mul_ps( line4.m_mat_20, ray_dir_x(ray) )));
+    const simd_data _ray_dir_x = simd_mad_ps( line4.m_mat_02, ray_dir_z(ray_simd), simd_mad_ps( line4.m_mat_01, ray_dir_y(ray_simd), simd_mul_ps( line4.m_mat_00, ray_dir_x(ray_simd) )));
+    const simd_data _ray_dir_y = simd_mad_ps( line4.m_mat_12, ray_dir_z(ray_simd), simd_mad_ps( line4.m_mat_11, ray_dir_y(ray_simd), simd_mul_ps( line4.m_mat_10, ray_dir_x(ray_simd) )));
+    const simd_data _ray_dir_z = simd_mad_ps( line4.m_mat_22, ray_dir_z(ray_simd), simd_mad_ps( line4.m_mat_21, ray_dir_y(ray_simd), simd_mul_ps( line4.m_mat_20, ray_dir_x(ray_simd) )));
 
     const simd_data tmp =  simd_div_ps( simd_sub_ps( line4.m_w1 , line4.m_w0 ) , line4.m_length );
     const simd_data tmp0 = simd_mad_ps( _ray_ori_y, tmp, line4.m_w0 );
@@ -280,15 +281,16 @@ SORT_FORCEINLINE bool intersectLine4Inner( const Ray& ray , const Simd_Line& lin
 
 //! @brief  With the power of SSE, this utility function helps intersect a ray with four lines at the cost of one.
 //!
-//! @param  ray     Ray to be tested against.
-//! @param  line4   Data structure holds four lines.
-//! @param  ret     The result of intersection.
-//! @return         Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Line& line4 , Intersection* ret ){
+//! @param  ray         Ray to be tested against.
+//! @param  ray_simd    Resolved simd ray data.
+//! @param  line4       Data structure holds four lines.
+//! @param  ret         The result of intersection.
+//! @return             Whether there is any intersection that is valid.
+SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd, const Simd_Line& line4 , Intersection* ret ){
     sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
 
     simd_data  mask, t4 , inter_x , inter_y , inter_z ;
-    const auto intersected = intersectLine4Inner( ray , line4 , mask , t4 , inter_x , inter_y , inter_z );
+    const auto intersected = intersectLine4Inner( ray , ray_simd, line4 , mask , t4 , inter_x , inter_y , inter_z );
     if( !intersected )
         return false;
     
@@ -332,12 +334,13 @@ SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Line& line
 
 //! @brief  With the power of SSE, this utility function helps intersect a ray with four lines at the cost of one.
 //!
-//! @param  ray     Ray to be tested against.
-//! @param  line4   Data structure holds four lines.
-//! @return         Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectLineFast_SIMD( const Ray& ray , const Simd_Line& line4 ){
+//! @param  ray         Ray to be tested against.
+//! @param  ray_simd    Resolved simd ray data.
+//! @param  line4       Data structure holds four lines.
+//! @return             Whether there is any intersection that is valid.
+SORT_FORCEINLINE bool intersectLineFast_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd, const Simd_Line& line4 ){
     simd_data dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z;
-    return intersectLine4Inner( ray , line4 , dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z );
+    return intersectLine4Inner( ray , ray_simd , line4 , dummy_mask , dummy_t4 , dummy_inter_x , dummy_inter_y , dummy_inter_z );
 }
 
 #endif // SIMD_SSE_IMPLEMENTATION || SIMD_AVX_IMPLEMENTATION

@@ -56,22 +56,22 @@ public:
 
 static_assert( sizeof( Simd_BBox ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Simd_BBox." );
 
-SORT_FORCEINLINE int IntersectBBox_SIMD(const Ray& ray, const Simd_BBox& bb, simd_data& f_min ) {
+SORT_FORCEINLINE int IntersectBBox_SIMD(const Ray& ray, const Simd_Ray_Data& simd_ray , const Simd_BBox& bb, simd_data& f_min ) {
     f_min = simd_set_ps1( ray.m_fMin );
     simd_data f_max = simd_set_ps1( ray.m_fMax );
 
-    simd_data t1    = simd_add_ps( ray_ori_dir_x(ray) , simd_mul_ps( ray_rcp_dir_x(ray) , bb.m_max_x ) );
-    simd_data t2    = simd_add_ps( ray_ori_dir_x(ray) , simd_mul_ps( ray_rcp_dir_x(ray) , bb.m_min_x ) );
+    simd_data t1    = simd_add_ps( ray_ori_dir_x(simd_ray) , simd_mul_ps( ray_rcp_dir_x(simd_ray) , bb.m_max_x ) );
+    simd_data t2    = simd_add_ps( ray_ori_dir_x(simd_ray) , simd_mul_ps( ray_rcp_dir_x(simd_ray) , bb.m_min_x ) );
     f_min       = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
     f_max       = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-    t1          = simd_add_ps( ray_ori_dir_y(ray) , simd_mul_ps( ray_rcp_dir_y(ray) , bb.m_max_y ) );
-    t2          = simd_add_ps( ray_ori_dir_y(ray) , simd_mul_ps( ray_rcp_dir_y(ray) , bb.m_min_y ) );
+    t1          = simd_add_ps( ray_ori_dir_y(simd_ray) , simd_mul_ps( ray_rcp_dir_y(simd_ray) , bb.m_max_y ) );
+    t2          = simd_add_ps( ray_ori_dir_y(simd_ray) , simd_mul_ps( ray_rcp_dir_y(simd_ray) , bb.m_min_y ) );
     f_min       = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
     f_max       = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-    t1          = simd_add_ps( ray_ori_dir_z(ray) , simd_mul_ps( ray_rcp_dir_z(ray) , bb.m_max_z ) );
-    t2          = simd_add_ps( ray_ori_dir_z(ray) , simd_mul_ps( ray_rcp_dir_z(ray) , bb.m_min_z ) );
+    t1          = simd_add_ps( ray_ori_dir_z(simd_ray) , simd_mul_ps( ray_rcp_dir_z(simd_ray) , bb.m_max_z ) );
+    t2          = simd_add_ps( ray_ori_dir_z(simd_ray) , simd_mul_ps( ray_rcp_dir_z(simd_ray) , bb.m_min_z ) );
     f_min       = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
     f_max       = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 

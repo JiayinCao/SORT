@@ -311,15 +311,9 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     SORT_STATS(++sRayCount);
     SORT_STATS(sShadowRayCount += intersect != nullptr);
 
-    // pre-calculate some data
-    RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
-#ifdef SIMD_SSE_IMPLEMENTATION
-    flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA );
-#endif
-#ifdef SIMD_AVX_IMPLEMENTATION
-    flag = (RAY_PREPARE_FLAG)( flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA );
-#endif
-    ray.Prepare(flag);
+    ray.Prepare();
+    Simd_Ray_Data   simd_ray;
+    resolveRayData( ray , simd_ray );
 
     const auto fmin = Intersect(ray, m_bbox);
     if (fmin < 0.0f)
@@ -342,10 +336,10 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         if( 0 == node->child_cnt ){
             const auto tri_cnt = node->tri_cnt;
             for( auto i = 0u ; i < tri_cnt ; ++i )
-                intersectTriangle_SIMD( ray , node->tri_list[i] , intersect );
+                intersectTriangle_SIMD( ray , simd_ray , node->tri_list[i] , intersect );
             const auto line_cnt = node->line_cnt;
             for( auto i = 0u ; i < line_cnt ; ++i )
-                intersectLine_SIMD( ray , node->line_list[i] , intersect );
+                intersectLine_SIMD( ray , simd_ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
                 for( auto i = 0u ; i < node->other_list.size() ; ++i )
                     node->other_list[i]->GetIntersect( ray , intersect );
@@ -355,7 +349,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         }
 
         simd_data sse_f_min;
-        auto m = IntersectBBox_SIMD( ray , node->bbox , sse_f_min );
+        auto m = IntersectBBox_SIMD( ray , simd_ray , node->bbox , sse_f_min );
         if( 0 == m )
             continue;
 
@@ -453,15 +447,9 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
     SORT_STATS(++sRayCount);
     SORT_STATS(++sShadowRayCount);
 
-    // pre-calculate some data
-    RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
-#ifdef SIMD_SSE_IMPLEMENTATION
-    flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
-#endif
-#ifdef SIMD_AVX_IMPLEMENTATION
-    flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
-#endif
-    ray.Prepare(flag);
+    ray.Prepare();    
+    Simd_Ray_Data   simd_ray;
+    resolveRayData( ray , simd_ray );
 
     const auto fmin = Intersect(ray, m_bbox);
     if (fmin < 0.0f)
@@ -479,14 +467,14 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
         if (0 == node->child_cnt) {
             const auto tri_cnt = node->tri_cnt;
             for (auto i = 0u; i < tri_cnt; ++i) {
-                if (intersectTriangleFast_SIMD(ray, node->tri_list[i])) {
+                if (intersectTriangleFast_SIMD(ray, simd_ray , node->tri_list[i])) {
                     SORT_STATS(sIntersectionTest += i * 4);
                     return true;
                 }
             }
             const auto line_list = node->line_cnt;
             for (auto i = 0u; i < line_list; ++i) {
-                if (intersectLineFast_SIMD(ray, node->line_list[i])) {
+                if (intersectLineFast_SIMD(ray, simd_ray , node->line_list[i])) {
                     SORT_STATS(sIntersectionTest += (i + tri_cnt) * 4);
                     return true;
                 }
@@ -504,7 +492,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
         }
 
         simd_data sse_f_min;
-        auto m = IntersectBBox_SIMD(ray, node->bbox, sse_f_min);
+        auto m = IntersectBBox_SIMD(ray, simd_ray, node->bbox, sse_f_min);
         if (0 == m)
             continue;
 
@@ -611,15 +599,9 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 
     SORT_STATS(++sRayCount);
 
-    // pre-calculate some data
-    RAY_PREPARE_FLAG flag = RAY_PREPARE_FLAG::RESOLVE_NONE_DATA;
-#ifdef SIMD_SSE_IMPLEMENTATION
-    flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_SSE_DATA);
-#endif
-#ifdef SIMD_AVX_IMPLEMENTATION
-    flag = (RAY_PREPARE_FLAG)(flag | RAY_PREPARE_FLAG::RESOLVE_AVX_DATA);
-#endif
-    ray.Prepare(flag);
+    ray.Prepare();
+    Simd_Ray_Data   simd_ray;
+    resolveRayData( ray , simd_ray );
 
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;
@@ -647,13 +629,13 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
             // Line is usually used for hair, which has its own hair shader.
             // Triangle is the only major primitive that has SSS.
             for ( auto i = 0u ; i < node->tri_cnt ; ++i )
-                intersectTriangleMulti_SIMD(ray, node->tri_list[i] , matID, intersect);
+                intersectTriangleMulti_SIMD(ray, simd_ray, node->tri_list[i] , matID, intersect);
             SORT_STATS(sIntersectionTest += node->tri_cnt);
             continue;
         }
 
         simd_data sse_f_min;
-        auto m = IntersectBBox_SIMD(ray, node->bbox, sse_f_min);
+        auto m = IntersectBBox_SIMD(ray, simd_ray, node->bbox, sse_f_min);
         if (0 == m)
             continue;
 

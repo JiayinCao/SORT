@@ -21,10 +21,12 @@
 
 #ifdef SSE_ENABLED
 struct Line4;
+struct SSE_Ray_Data;
 #endif
 
 #ifdef AVX_ENABLED
 struct Line8;
+struct AVX_Ray_Data;
 #endif
 
 //! @brief  Line is a common type for hair or fur rendering.
@@ -164,11 +166,11 @@ private:
 
 #ifdef SSE_ENABLED
     friend struct Line4;
-    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Line4& line_simd , Intersection* ret );
+    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const SSE_Ray_Data& ray_simd , const Line4& line_simd , Intersection* ret );
 #endif
 
 #ifdef AVX_ENABLED
     friend struct Line8;
-    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Line8& line_simd , Intersection* ret );
+    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const AVX_Ray_Data& ray_simd , const Line8& line_simd , Intersection* ret );
 #endif
 };

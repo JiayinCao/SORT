@@ -25,106 +25,108 @@
     static_assert( false , "More than one SIMD version is defined before including simd_bbox." );
 #endif
 
-#ifdef SSE_ENABLED
+#if defined(SSE_ENABLED) || defined(AVX_ENABLED)
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 
 #ifdef SIMD_SSE_IMPLEMENTATION
-static SORT_FORCEINLINE simd_data_sse   ray_ori_dir_x( const Ray& ray ){
-    return ray.m_ori_dir_x;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_ori_dir_y( const Ray& ray ){
-    return ray.m_ori_dir_y;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_ori_dir_z( const Ray& ray ){
-    return ray.m_ori_dir_z;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_ori_x( const Ray& ray ){
-    return ray.m_ori_x;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_ori_y( const Ray& ray ){
-    return ray.m_ori_y;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_ori_z( const Ray& ray ){
-    return ray.m_ori_z;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_dir_x( const Ray& ray ){
-    return ray.m_dir_x;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_dir_y( const Ray& ray ){
-    return ray.m_dir_y;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_dir_z( const Ray& ray ){
-    return ray.m_dir_z;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_rcp_dir_x( const Ray& ray ){
-    return ray.m_rcp_dir_x;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_rcp_dir_y( const Ray& ray ){
-    return ray.m_rcp_dir_y;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_rcp_dir_z( const Ray& ray ){
-    return ray.m_rcp_dir_z;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_scale_x( const Ray& ray ){
-    return ray.m_sse_scale_x;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_scale_y( const Ray& ray ){
-    return ray.m_sse_scale_y;
-}
-static SORT_FORCEINLINE simd_data_sse   ray_scale_z( const Ray& ray ){
-    return ray.m_sse_scale_z;
-}
+    #define Simd_Ray_Data   SSE_Ray_Data
 #endif
-
-#endif // SSE_ENABLED
-
-#ifdef AVX_ENABLED
-
 #ifdef SIMD_AVX_IMPLEMENTATION
-static SORT_FORCEINLINE simd_data_avx   ray_ori_dir_x( const Ray& ray ){
-    return ray.m_ori_dir_x_avx;
+    #define Simd_Ray_Data   AVX_Ray_Data
+#endif
+
+static SORT_FORCEINLINE float sign( const float x ){
+    return x < 0.0f ? -1.0f : 1.0f;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_ori_dir_y( const Ray& ray ){
-    return ray.m_ori_dir_y_avx;
+
+struct alignas(SIMD_ALIGNMENT) Simd_Ray_Data{
+    simd_data  ori_dir_x;    /**< -Ori.x/Dir.x , this is used in ray AABB intersection. */
+	simd_data  ori_dir_y;    /**< -Ori.y/Dir.y , this is used in ray AABB intersection. */
+	simd_data  ori_dir_z;    /**< -Ori.z/Dir.z , this is used in ray AABB intersection. */
+	simd_data  rcp_dir_x;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
+	simd_data  rcp_dir_y;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
+	simd_data  rcp_dir_z;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
+	simd_data  ori_x;        /**< Ori.x , this is used in ray Triangle&Line intersection. */
+	simd_data  ori_y;        /**< Ori.y , this is used in ray Triangle&Line intersection. */
+	simd_data  ori_z;        /**< Ori.z , this is used in ray Triangle&Line intersection. */
+	simd_data  dir_x;        /**< Dir.x , this is used in ray Line intersection. */
+	simd_data  dir_y;        /**< Dir.x , this is used in ray Line intersection. */
+	simd_data  dir_z;        /**< Dir.x , this is used in ray Line intersection. */
+	simd_data  scale_x;      /**< Scaling along each axis in local coordinate. */
+	simd_data  scale_y;      /**< Scaling along each axis in local coordinate. */
+	simd_data  scale_z;      /**< Scaling along each axis in local coordinate. */
+};
+
+void resolveRayData( const Ray& ray , Simd_Ray_Data& simd_ray_data ){
+    constexpr float delta = 0.00001f;
+    const auto dir_x = fabs(ray.m_Dir[0]) < delta ? sign(ray.m_Dir[0]) * delta : ray.m_Dir[0];
+    const auto dir_y = fabs(ray.m_Dir[1]) < delta ? sign(ray.m_Dir[1]) * delta : ray.m_Dir[1];
+    const auto dir_z = fabs(ray.m_Dir[2]) < delta ? sign(ray.m_Dir[2]) * delta : ray.m_Dir[2];
+    simd_ray_data.rcp_dir_x = simd_set_ps1( 1.0f/dir_x );
+    simd_ray_data.rcp_dir_y = simd_set_ps1( 1.0f/dir_y );
+    simd_ray_data.rcp_dir_z = simd_set_ps1( 1.0f/dir_z );
+    simd_ray_data.ori_dir_x = simd_set_ps1( -ray.m_Ori[0]/dir_x );
+    simd_ray_data.ori_dir_y = simd_set_ps1( -ray.m_Ori[1]/dir_y ); 
+    simd_ray_data.ori_dir_z = simd_set_ps1( -ray.m_Ori[2]/dir_z ); 
+
+    simd_ray_data.ori_x = simd_set_ps1( ray.m_Ori.x );
+    simd_ray_data.ori_y = simd_set_ps1( ray.m_Ori.y );
+    simd_ray_data.ori_z = simd_set_ps1( ray.m_Ori.z );
+
+    simd_ray_data.dir_x = simd_set_ps1( ray.m_Dir.x );
+    simd_ray_data.dir_y = simd_set_ps1( ray.m_Dir.y );
+    simd_ray_data.dir_z = simd_set_ps1( ray.m_Dir.z );
+
+    simd_ray_data.scale_x = simd_set_ps1( ray.m_scale_x );
+    simd_ray_data.scale_y = simd_set_ps1( ray.m_scale_y );
+    simd_ray_data.scale_z = simd_set_ps1( ray.m_scale_z );
 }
-static SORT_FORCEINLINE simd_data_avx   ray_ori_dir_z( const Ray& ray ){
-    return ray.m_ori_dir_z_avx;
+
+static SORT_FORCEINLINE simd_data   ray_ori_dir_x( const Simd_Ray_Data& ray ){
+    return ray.ori_dir_x;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_ori_x( const Ray& ray ){
-    return ray.m_ori_x_avx;
+static SORT_FORCEINLINE simd_data   ray_ori_dir_y( const Simd_Ray_Data& ray ){
+    return ray.ori_dir_y;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_ori_y( const Ray& ray ){
-    return ray.m_ori_y_avx;
+static SORT_FORCEINLINE simd_data   ray_ori_dir_z( const Simd_Ray_Data& ray ){
+    return ray.ori_dir_z;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_ori_z( const Ray& ray ){
-    return ray.m_ori_z_avx;
+static SORT_FORCEINLINE simd_data   ray_ori_x( const Simd_Ray_Data& ray ){
+    return ray.ori_x;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_dir_x( const Ray& ray ){
-    return ray.m_dir_x_avx;
+static SORT_FORCEINLINE simd_data   ray_ori_y( const Simd_Ray_Data& ray ){
+    return ray.ori_y;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_dir_y( const Ray& ray ){
-    return ray.m_dir_y_avx;
+static SORT_FORCEINLINE simd_data   ray_ori_z( const Simd_Ray_Data& ray ){
+    return ray.ori_z;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_dir_z( const Ray& ray ){
-    return ray.m_dir_z_avx;
+static SORT_FORCEINLINE simd_data   ray_dir_x( const Simd_Ray_Data& ray ){
+    return ray.dir_x;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_rcp_dir_x( const Ray& ray ){
-    return ray.m_rcp_dir_x_avx;
+static SORT_FORCEINLINE simd_data   ray_dir_y( const Simd_Ray_Data& ray ){
+    return ray.dir_y;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_rcp_dir_y( const Ray& ray ){
-    return ray.m_rcp_dir_y_avx;
+static SORT_FORCEINLINE simd_data   ray_dir_z( const Simd_Ray_Data& ray ){
+    return ray.dir_z;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_rcp_dir_z( const Ray& ray ){
-    return ray.m_rcp_dir_z_avx;
+static SORT_FORCEINLINE simd_data   ray_rcp_dir_x( const Simd_Ray_Data& ray ){
+    return ray.rcp_dir_x;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_scale_x( const Ray& ray ){
-    return ray.m_scale_x_avx;
+static SORT_FORCEINLINE simd_data   ray_rcp_dir_y( const Simd_Ray_Data& ray ){
+    return ray.rcp_dir_y;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_scale_y( const Ray& ray ){
-    return ray.m_scale_y_avx;
+static SORT_FORCEINLINE simd_data   ray_rcp_dir_z( const Simd_Ray_Data& ray ){
+    return ray.rcp_dir_z;
 }
-static SORT_FORCEINLINE simd_data_avx   ray_scale_z( const Ray& ray ){
-    return ray.m_scale_z_avx;
+static SORT_FORCEINLINE simd_data   ray_scale_x( const Simd_Ray_Data& ray ){
+    return ray.scale_x;
+}
+static SORT_FORCEINLINE simd_data   ray_scale_y( const Simd_Ray_Data& ray ){
+    return ray.scale_y;
+}
+static SORT_FORCEINLINE simd_data   ray_scale_z( const Simd_Ray_Data& ray ){
+    return ray.scale_z;
 }
 #endif
 
-#endif // AVX_ENABLED
+#endif

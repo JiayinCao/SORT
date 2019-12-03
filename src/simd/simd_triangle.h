@@ -206,22 +206,22 @@ static_assert( sizeof( Simd_Triangle ) % SIMD_ALIGNMENT == 0 , "Incorrect size o
 //! @param  t_simd      Output, the distances from ray origin to triangles. It will be FLT_MAX if there is no intersection.
 //! @param  u_simd      Blending factor.
 //! @param  v_simd      Blending factor.
-SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Triangle& tri_simd, const bool quick_quit, const float maxt, simd_data& t_simd, simd_data& u_simd, simd_data& v_simd, simd_data& mask) {
+SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd, const Simd_Triangle& tri_simd, const bool quick_quit, const float maxt, simd_data& t_simd, simd_data& u_simd, simd_data& v_simd, simd_data& mask) {
     mask = tri_simd.m_mask;
 
     // step 0 : translate the vertices to ray coordinate system
     simd_data p0[3], p1[3], p2[3];
-    p0[0] = simd_sub_ps(tri_simd.m_p0_x, ray_ori_x(ray));
-    p0[1] = simd_sub_ps(tri_simd.m_p0_y, ray_ori_y(ray));
-    p0[2] = simd_sub_ps(tri_simd.m_p0_z, ray_ori_z(ray));
+    p0[0] = simd_sub_ps(tri_simd.m_p0_x, ray_ori_x(ray_simd));
+    p0[1] = simd_sub_ps(tri_simd.m_p0_y, ray_ori_y(ray_simd));
+    p0[2] = simd_sub_ps(tri_simd.m_p0_z, ray_ori_z(ray_simd));
 
-    p1[0] = simd_sub_ps(tri_simd.m_p1_x, ray_ori_x(ray));
-    p1[1] = simd_sub_ps(tri_simd.m_p1_y, ray_ori_y(ray));
-    p1[2] = simd_sub_ps(tri_simd.m_p1_z, ray_ori_z(ray));
+    p1[0] = simd_sub_ps(tri_simd.m_p1_x, ray_ori_x(ray_simd));
+    p1[1] = simd_sub_ps(tri_simd.m_p1_y, ray_ori_y(ray_simd));
+    p1[2] = simd_sub_ps(tri_simd.m_p1_z, ray_ori_z(ray_simd));
 
-    p2[0] = simd_sub_ps(tri_simd.m_p2_x, ray_ori_x(ray));
-    p2[1] = simd_sub_ps(tri_simd.m_p2_y, ray_ori_y(ray));
-    p2[2] = simd_sub_ps(tri_simd.m_p2_z, ray_ori_z(ray));
+    p2[0] = simd_sub_ps(tri_simd.m_p2_x, ray_ori_x(ray_simd));
+    p2[1] = simd_sub_ps(tri_simd.m_p2_y, ray_ori_y(ray_simd));
+    p2[2] = simd_sub_ps(tri_simd.m_p2_z, ray_ori_z(ray_simd));
 
     // step 1 : pick the major axis to avoid dividing by zero in the sheering pass.
     //          by picking the major axis, we can also make sure we sheer as little as possible
@@ -238,12 +238,12 @@ SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Tri
     simd_data& p2_z = p2[ray.m_local_z];
 
     // step 2 : sheer the vertices so that the ray direction points to ( 0 , 1 , 0 )
-    p0_x = simd_mad_ps(p0_y, ray_scale_x(ray), p0_x);
-    p0_z = simd_mad_ps(p0_y, ray_scale_z(ray), p0_z);
-    p1_x = simd_mad_ps(p1_y, ray_scale_x(ray), p1_x);
-    p1_z = simd_mad_ps(p1_y, ray_scale_z(ray), p1_z);
-    p2_x = simd_mad_ps(p2_y, ray_scale_x(ray), p2_x);
-    p2_z = simd_mad_ps(p2_y, ray_scale_z(ray), p2_z);
+    p0_x = simd_mad_ps(p0_y, ray_scale_x(ray_simd), p0_x);
+    p0_z = simd_mad_ps(p0_y, ray_scale_z(ray_simd), p0_z);
+    p1_x = simd_mad_ps(p1_y, ray_scale_x(ray_simd), p1_x);
+    p1_z = simd_mad_ps(p1_y, ray_scale_z(ray_simd), p1_z);
+    p2_x = simd_mad_ps(p2_y, ray_scale_x(ray_simd), p2_x);
+    p2_z = simd_mad_ps(p2_y, ray_scale_z(ray_simd), p2_z);
 
     // compute the edge functions
     const simd_data e0 = simd_sub_ps(simd_mul_ps(p1_x, p2_z), simd_mul_ps(p1_z, p2_x));
@@ -265,9 +265,9 @@ SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Tri
 
     const simd_data rcp_det = simd_rcp_ps(det);
 
-    p0_y = simd_mul_ps(p0_y, ray_scale_y(ray));
-    p1_y = simd_mul_ps(p1_y, ray_scale_y(ray));
-    p2_y = simd_mul_ps(p2_y, ray_scale_y(ray));
+    p0_y = simd_mul_ps(p0_y, ray_scale_y(ray_simd));
+    p1_y = simd_mul_ps(p1_y, ray_scale_y(ray_simd));
+    p2_y = simd_mul_ps(p2_y, ray_scale_y(ray_simd));
 
     t_simd = simd_mul_ps(e0, p0_y);
     t_simd = simd_mad_ps(e1, p1_y, t_simd);
@@ -341,16 +341,17 @@ SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri_simd, const Ray
 
 //! @brief  With the power of SSE, this utility function helps intersect a ray with four/eight triangles at the cost of one.
 //!
-//! @param  ray     Ray to be tested against.
+//! @param  ray         Ray to be tested against.
+//! @param  simd_ray    Resolved simd ray data.
 //! @param  tri_simd    Data structure holds four/eight triangles.
-//! @param  ret     The result of intersection. It can't be nullptr.
-//! @return         Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Triangle& tri_simd , Intersection* ret ){
+//! @param  ret         The result of intersection. It can't be nullptr.
+//! @return             Whether there is any intersection that is valid.
+SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd , const Simd_Triangle& tri_simd , Intersection* ret ){
     sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
 
     simd_data   u_simd, v_simd, t_simd, mask;
     const auto maxt = ret->t;
-    const auto intersected = intersectTriangleInner_SIMD(ray, tri_simd, false, maxt, t_simd, u_simd, v_simd, mask);
+    const auto intersected = intersectTriangleInner_SIMD(ray, ray_simd , tri_simd, false, maxt, t_simd, u_simd, v_simd, mask);
     if (!intersected)
         return false;
 
@@ -374,12 +375,13 @@ SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Triang
 //! This function stops as long as there is an intersection, it is for shadow ray occlusion detection.
 //!
 //! @param  ray         Ray to be tested against.
+//! @param  simd_ray    Resolved simd ray data.
 //! @param  tri_simd    Data structure holds four/eight triangles.
 //! @return             Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Triangle& tri_simd) {
+SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd , const Simd_Triangle& tri_simd) {
     // please optimize these value, compiler.
     simd_data   dummy_u, dummy_v, dummy_t, mask;
-    return intersectTriangleInner_SIMD(ray, tri_simd, true, FLT_MAX, dummy_t, dummy_u, dummy_v, mask);
+    return intersectTriangleInner_SIMD(ray, ray_simd, tri_simd, true, FLT_MAX, dummy_t, dummy_u, dummy_v, mask);
 }
 
 //! @brief  Unlike the above function, this helper function will populate all results in the BSSRDFIntersection data structure.
@@ -388,10 +390,10 @@ SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Tria
 //! @param  ray         Ray to be tested against.
 //! @param  tri_simd    Data structure holds four/eight triangles.
 //! @param  ret         The result of intersection.
-SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Triangle& tri_simd, const StringID matID , BSSRDFIntersections& intersections) {
+SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd, const Simd_Triangle& tri_simd, const StringID matID , BSSRDFIntersections& intersections) {
     simd_data   u_simd, v_simd, t_simd, mask;
     const auto maxt = intersections.maxt;
-    const auto intersected = intersectTriangleInner_SIMD(ray, tri_simd, false, maxt, t_simd, u_simd, v_simd, mask);
+    const auto intersected = intersectTriangleInner_SIMD(ray, ray_simd, tri_simd, false, maxt, t_simd, u_simd, v_simd, mask);
     if (!intersected)
         return;
 
