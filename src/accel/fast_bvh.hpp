@@ -245,13 +245,13 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
     
     if( tri_list.size() ){
         node->tri_list = makePrimitiveList<Simd_Triangle>( (unsigned int)tri_list.size() );
-        node->tri_cnt = tri_list.size();
+        node->tri_cnt = (unsigned int)tri_list.size();
         for( auto i = 0u ; i < tri_list.size() ; ++i )
             node->tri_list[i] = tri_list[i];
     }
     if( line_list.size() ){
         node->line_list = makePrimitiveList<Simd_Line>( (unsigned int)line_list.size() );
-        node->line_cnt = line_list.size();
+        node->line_cnt = (unsigned int)line_list.size();
         for( auto i = 0u ; i < line_list.size() ; ++i )
             node->line_list[i] = line_list[i];
     }

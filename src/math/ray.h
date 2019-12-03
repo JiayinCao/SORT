@@ -45,16 +45,16 @@ public:
     // constructor from a point and a direction
     // para 'ori'   :   original point of the ray
     // para 'dir'   :   direction of the ray , it's the programmer's responsibility to normalize it
-    // para 'depth' :   the depth of the curren ray , if not set , default value is 0
-    // para 'fmin'  :   the minium range of the ray . It could be set a very small value to avoid false self intersection
-    // para 'fmax'  :   the maxium range of the ray . A ray with 'fmax' not equal to 0 is actually a line segment, usually used for shadow ray.
+    // para 'depth' :   the depth of the current ray , if not set , default value is 0
+    // para 'fmin'  :   the minimum range of the ray . It could be set a very small value to avoid false self intersection
+    // para 'fmax'  :   the maximum range of the ray . A ray with 'fmax' not equal to 0 is actually a line segment, usually used for shadow ray.
     Ray( const Point& ori , const Vector& dir , unsigned depth = 0 , float fmin = 0.0f , float fmax = FLT_MAX );
     // copy constructor
     // para 'r' :   a ray to copy
     Ray( const Ray& r );
 
     // operator to get a point from the ray
-    // para 't' :   the distance from the retrive point if the direction of the ray is normalized.
+    // para 't' :   the distance from the retrieve point if the direction of the ray is normalized.
     // reslut   :   A point ( o + t * d )
     SORT_FORCEINLINE    Point operator ()( float t ) const{
         return m_Ori + t * m_Dir;
@@ -62,43 +62,6 @@ public:
 
     //! @brief  Pre-calculate some cached data for better performance. Only call this function after all ray data is prepared.
     void    Prepare( const RAY_PREPARE_FLAG flag = RESOLVE_NONE_DATA ) const;
-
-#ifdef AVX_ENABLED
-    mutable __m256  m_ori_dir_x_avx;    /**< -Ori.x/Dir.x , this is used in ray AABB intersection. */
-    mutable __m256  m_ori_dir_y_avx;    /**< -Ori.y/Dir.y , this is used in ray AABB intersection. */
-    mutable __m256  m_ori_dir_z_avx;    /**< -Ori.z/Dir.z , this is used in ray AABB intersection. */
-    mutable __m256  m_rcp_dir_x_avx;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
-    mutable __m256  m_rcp_dir_y_avx;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
-    mutable __m256  m_rcp_dir_z_avx;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
-    mutable __m256  m_ori_x_avx;        /**< Ori.x , this is used in ray Triangle&Line intersection. */
-    mutable __m256  m_ori_y_avx;        /**< Ori.y , this is used in ray Triangle&Line intersection. */
-    mutable __m256  m_ori_z_avx;        /**< Ori.z , this is used in ray Triangle&Line intersection. */
-    mutable __m256  m_dir_x_avx;        /**< Dir.x , this is used in ray Line intersection. */
-    mutable __m256  m_dir_y_avx;        /**< Dir.x , this is used in ray Line intersection. */
-    mutable __m256  m_dir_z_avx;        /**< Dir.x , this is used in ray Line intersection. */
-    mutable __m256  m_scale_x_avx;      /**< Scaling along each axis in local coordinate. */
-    mutable __m256  m_scale_y_avx;      /**< Scaling along each axis in local coordinate. */
-    mutable __m256  m_scale_z_avx;      /**< Scaling along each axis in local coordinate. */
-#endif
-
-// some data are pre-calculated so that it won't be redo later multiple times
-#ifdef SSE_ENABLED
-    mutable __m128  m_ori_dir_x;    /**< -Ori.x/Dir.x , this is used in ray AABB intersection. */
-    mutable __m128  m_ori_dir_y;    /**< -Ori.y/Dir.y , this is used in ray AABB intersection. */
-    mutable __m128  m_ori_dir_z;    /**< -Ori.z/Dir.z , this is used in ray AABB intersection. */
-    mutable __m128  m_rcp_dir_x;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
-    mutable __m128  m_rcp_dir_y;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
-    mutable __m128  m_rcp_dir_z;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
-    mutable __m128  m_ori_x;        /**< Ori.x , this is used in ray Triangle&Line intersection. */
-    mutable __m128  m_ori_y;        /**< Ori.y , this is used in ray Triangle&Line intersection. */
-    mutable __m128  m_ori_z;        /**< Ori.z , this is used in ray Triangle&Line intersection. */
-    mutable __m128  m_dir_x;        /**< Dir.x , this is used in ray Line intersection. */
-    mutable __m128  m_dir_y;        /**< Dir.x , this is used in ray Line intersection. */
-    mutable __m128  m_dir_z;        /**< Dir.x , this is used in ray Line intersection. */
-    mutable __m128  m_sse_scale_x;  /**< Scaling along each axis in local coordinate. */
-    mutable __m128  m_sse_scale_y;  /**< Scaling along each axis in local coordinate. */
-    mutable __m128  m_sse_scale_z;  /**< Scaling along each axis in local coordinate. */
-#endif
 
 // the original point and direction are also public
     // original point of the ray
@@ -119,6 +82,42 @@ public:
 
     // importance value of the ray
     Spectrum m_we;
+
+#ifdef SSE_ENABLED
+	mutable __m128  m_ori_dir_x;    /**< -Ori.x/Dir.x , this is used in ray AABB intersection. */
+	mutable __m128  m_ori_dir_y;    /**< -Ori.y/Dir.y , this is used in ray AABB intersection. */
+	mutable __m128  m_ori_dir_z;    /**< -Ori.z/Dir.z , this is used in ray AABB intersection. */
+	mutable __m128  m_rcp_dir_x;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
+	mutable __m128  m_rcp_dir_y;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
+	mutable __m128  m_rcp_dir_z;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
+	mutable __m128  m_ori_x;        /**< Ori.x , this is used in ray Triangle&Line intersection. */
+	mutable __m128  m_ori_y;        /**< Ori.y , this is used in ray Triangle&Line intersection. */
+	mutable __m128  m_ori_z;        /**< Ori.z , this is used in ray Triangle&Line intersection. */
+	mutable __m128  m_dir_x;        /**< Dir.x , this is used in ray Line intersection. */
+	mutable __m128  m_dir_y;        /**< Dir.x , this is used in ray Line intersection. */
+	mutable __m128  m_dir_z;        /**< Dir.x , this is used in ray Line intersection. */
+	mutable __m128  m_sse_scale_x;  /**< Scaling along each axis in local coordinate. */
+	mutable __m128  m_sse_scale_y;  /**< Scaling along each axis in local coordinate. */
+	mutable __m128  m_sse_scale_z;  /**< Scaling along each axis in local coordinate. */
+#endif
+
+#ifdef AVX_ENABLED
+	mutable __m256  m_ori_dir_x_avx;    /**< -Ori.x/Dir.x , this is used in ray AABB intersection. */
+	mutable __m256  m_ori_dir_y_avx;    /**< -Ori.y/Dir.y , this is used in ray AABB intersection. */
+	mutable __m256  m_ori_dir_z_avx;    /**< -Ori.z/Dir.z , this is used in ray AABB intersection. */
+	mutable __m256  m_rcp_dir_x_avx;    /**< 1.0/Dir.x , this is used in ray AABB intersection. */
+	mutable __m256  m_rcp_dir_y_avx;    /**< 1.0/Dir.y , this is used in ray AABB intersection. */
+	mutable __m256  m_rcp_dir_z_avx;    /**< 1.0/Dir.z , this is used in ray AABB intersection. */
+	mutable __m256  m_ori_x_avx;        /**< Ori.x , this is used in ray Triangle&Line intersection. */
+	mutable __m256  m_ori_y_avx;        /**< Ori.y , this is used in ray Triangle&Line intersection. */
+	mutable __m256  m_ori_z_avx;        /**< Ori.z , this is used in ray Triangle&Line intersection. */
+	mutable __m256  m_dir_x_avx;        /**< Dir.x , this is used in ray Line intersection. */
+	mutable __m256  m_dir_y_avx;        /**< Dir.x , this is used in ray Line intersection. */
+	mutable __m256  m_dir_z_avx;        /**< Dir.x , this is used in ray Line intersection. */
+	mutable __m256  m_scale_x_avx;      /**< Scaling along each axis in local coordinate. */
+	mutable __m256  m_scale_y_avx;      /**< Scaling along each axis in local coordinate. */
+	mutable __m256  m_scale_z_avx;      /**< Scaling along each axis in local coordinate. */
+#endif
 
     mutable int     m_local_x , m_local_y , m_local_z;  /**< Id used to identify axis in local coordinate. */
     mutable float   m_scale_x , m_scale_y , m_scale_z;  /**< Scaling along each axis in local coordinate. */
