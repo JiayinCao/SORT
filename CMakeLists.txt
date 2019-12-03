@@ -173,7 +173,7 @@ if(MSVC)
     # enable whole program optimization, which gains roughly 8% in term of performance
     if(ENABLE_LINKTIME_OPTIMIZATION)
         set_target_properties( SORT PROPERTIES COMPILE_FLAGS "/GL" )
-        set_target_properties( SORT PROPERTIES LINK_FLAGS_RELEASE "/LTCG")
+        #set_target_properties( SORT PROPERTIES LINK_FLAGS_RELEASE "/LTCG")
     endif()
 
     # enable fast math for better performance
