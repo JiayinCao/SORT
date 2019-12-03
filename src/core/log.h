@@ -52,6 +52,7 @@ enum class LOG_TYPE{
     LOG_STREAM,
     LOG_RESOURCE,
     LOG_TASK,
+    LOG_MEMORY,
 };
 
 //! @brief  LogDispatcher is an interface for dispatching log messages to different places.

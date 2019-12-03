@@ -56,7 +56,7 @@ public:
     template<class T>
     T*  Allocate(unsigned int cnt = 1u) {
         unsigned int size_to_allocate = (unsigned int)(sizeof(T) * cnt);
-        sAssert( size_to_allocate <= MEM_BLOCK_SIZE , GENERAL );
+        sAssert( size_to_allocate <= MEM_BLOCK_SIZE , MEMORY );
         MemoryBlock* currentBlock = m_availableBlocks.size() ? m_availableBlocks.front().get() : nullptr;
         if (nullptr == currentBlock || (currentBlock->m_start + size_to_allocate > MEM_BLOCK_SIZE)) {
             if (currentBlock) {
@@ -114,7 +114,7 @@ SORT_FORCEINLINE void* malloc_aligned( unsigned int size , unsigned int alignmen
     posix_memalign( &ret , alignment , size );
 #endif
 
-    sAssert( ( ((uintptr_t)ret) & (alignment-1) ) == 0 , "Incorrect memory allocation!" );
+    sAssert( ( ((uintptr_t)ret) & (alignment-1) ) == 0 , MEMORY );
     
     return ret;
 }
