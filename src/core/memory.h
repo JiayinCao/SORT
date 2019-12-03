@@ -100,3 +100,28 @@ SORT_FORCEINLINE MemoryAllocator& GetStaticAllocator() {
 #define SORT_MALLOC(T)              new (GetStaticAllocator().Allocate<T>()) T
 #define SORT_MALLOC_ARRAY(T,cnt)    new (GetStaticAllocator().Allocate<T>(cnt)) T
 #define SORT_CLEAR_MEMPOOL()        GetStaticAllocator().Reset()
+
+//! @brief  A helper utility function that allocate memory with alignment.
+//!
+//! @param size         The size of the memory to be allocated.
+//! @param alignment    The bytes to be aligned.
+//! @return             The returned pointer pointing to allocated memory.
+SORT_FORCEINLINE void* malloc_aligned( unsigned int size , unsigned int alignment ){
+    void* ret = nullptr;
+#ifdef SORT_IN_WINDOWS
+    ret = _aligned_malloc( size , alignment );
+#else
+    posix_memalign( &ret , alignment , size );
+#endif
+
+    sAssert( ( ((uintptr_t)ret) & (alignment-1) ) == 0 , "Incorrect memory allocation!" );
+    
+    return ret;
+}
+
+//! @brief  A helper function that frees the memory allocated with the interface defined above.
+//!
+//! @param  p           The address of memory allocated.
+SORT_FORCEINLINE void free_aligned( void* p ){
+    free(p);
+}

@@ -20,6 +20,12 @@
 #include "core/stats.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
 
+static SORT_FORCEINLINE Fast_Bvh_Node_Ptr makeFastBvhNode( unsigned int start , unsigned int end ){
+    auto* address = malloc_aligned( sizeof(Fast_Bvh_Node) , SIMD_ALIGNMENT );
+    auto* node = new (address) Fast_Bvh_Node( start , end );
+    return std::move(Fast_Bvh_Node_Ptr(node));
+}
+
 #if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
 static_assert(false, "More than one SIMD version is defined before including fast_bvh.hpp");
 #endif
@@ -105,7 +111,7 @@ void Fbvh::Build(const Scene& scene){
         m_bvhpri[i].SetPrimitive((*m_primitives)[i].get());
     
     // recursively split node
-    m_root = std::make_unique<Fbvh_Node>(0,(unsigned)m_primitives->size());
+    m_root = makeFastBvhNode( 0 , (unsigned)m_primitives->size() );
     splitNode( m_root.get() , m_bbox , 1u );
 
     // if the algorithm reaches here, it is a valid QBVH
@@ -164,7 +170,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
             while (!q.empty()) {
                 const auto cur = q.front();
                 q.pop();
-                node->children[node->child_cnt++] = std::make_unique<Fbvh_Node>( cur.first , cur.second - cur.first );
+                node->children[node->child_cnt++] = makeFastBvhNode( cur.first , cur.second - cur.first );
             }
         };
 
@@ -249,7 +255,7 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 }
 
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
-Simd_BBox Fbvh::calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) const {
+Simd_BBox Fbvh::calcBoundingBoxSIMD(const Fast_Bvh_Node_Ptr* children) const {
     Simd_BBox node_bbox;
 
     float   min_x[SIMD_CHANNEL] , min_y[SIMD_CHANNEL] , min_z[SIMD_CHANNEL];

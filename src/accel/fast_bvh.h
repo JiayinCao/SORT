@@ -46,6 +46,8 @@ static_assert(false, "More than one SIMD version is defined before including fas
  * C version aligned_alloc is not commonly available on all Mac OS platforms. Adding the limitation of
  * operating system platform just because of this function is by no means worth it since there could be
  * a fairly simple solution defined below.
+ * 
+ * This data structure can be removed after confirming malloc_align works on all platforms.
  */ 
 template<class T, unsigned long alignment = SIMD_ALIGNMENT>
 struct Simd_Primitive_Container{
@@ -92,6 +94,15 @@ private:
     unsigned    cnt = 0;                      /**< Number of primitives in this container. */
 };
 
+struct Fast_Bvh_Node_Deallocator{
+    void operator()(void* p){
+        free_aligned(p);
+    }
+};
+
+struct Fast_Bvh_Node;
+using Fast_Bvh_Node_Ptr = std::unique_ptr<Fast_Bvh_Node,Fast_Bvh_Node_Deallocator>;
+
 struct Fast_Bvh_Node {
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
     using Simd_Triangle_Container   = Simd_Primitive_Container<Simd_Triangle>;
@@ -104,7 +115,7 @@ struct Fast_Bvh_Node {
     BBox                            bbox[FBVH_CHILD_CNT];       /**< Bounding boxes of its children. */
 #endif
 
-    std::unique_ptr<Fast_Bvh_Node>  children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
+    Fast_Bvh_Node_Ptr               children[FBVH_CHILD_CNT];   /**< Children of its four nodes. */
 
     unsigned                        pri_cnt = 0;                /**< Number of primitives in the node. */
     unsigned                        pri_offset = 0;             /**< Offset of primitives in the buffer. */
@@ -117,8 +128,11 @@ struct Fast_Bvh_Node {
     Fast_Bvh_Node(unsigned offset, unsigned cnt) : pri_cnt(cnt), pri_offset(offset) {}
 
     //! @brief  Default constructor.
-    Fast_Bvh_Node() : pri_cnt(0), pri_offset(0), child_cnt(0) {}
+    Fast_Bvh_Node() : pri_cnt(0), pri_offset(0), child_cnt(0) {}  
 };
+
+static_assert( sizeof( Fast_Bvh_Node ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Fast_Bvh_Node." );
+
 #endif
 
 //! @brief Fast Bounding volume hierarchy.
@@ -198,7 +212,7 @@ private:
     std::unique_ptr<Bvh_Primitive[]>    m_bvhpri = nullptr;
 
     /**< Root node of the BVH. */
-    std::unique_ptr<Fbvh_Node>          m_root;
+    Fast_Bvh_Node_Ptr                   m_root;
 
     /**< Maximum primitives in a leaf node. During BVH construction, a node with less primitives will be marked as a leaf node. */
     unsigned                            m_maxPriInLeaf = 8;
@@ -228,7 +242,7 @@ private:
     //!
     //! @param children     The children nodes
     //! @return             The 4/8 bounding box of the node, there could be degenerated ones if there is no four children.
-    Simd_BBox   calcBoundingBoxSIMD(const std::unique_ptr<Fbvh_Node>* children) const;
+    Simd_BBox   calcBoundingBoxSIMD(const Fast_Bvh_Node_Ptr* children) const;
 #endif
 
 #ifdef QBVH_IMPLEMENTATION
