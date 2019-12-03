@@ -127,6 +127,11 @@ SORT_FORCEINLINE void* malloc_aligned( unsigned int size , unsigned int alignmen
 //!
 //! @param  p           The address of memory allocated.
 SORT_FORCEINLINE void free_aligned( void* p ){
-    if( p )
+    if( p ){
+#ifdef SORT_IN_WINDOWS
+        _aligned_free(p);
+#else
         free(p);
+#endif
+    }
 }
