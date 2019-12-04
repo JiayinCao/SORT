@@ -25,6 +25,7 @@
 
 #ifdef SSE_ENABLED
 #define SIMD_SSE_IMPLEMENTATION
+#define SIMD_BVH_IMPLEMENTATION
 #endif
 
 #include "simd/simd_ray_utils.h"
@@ -34,6 +35,7 @@
 #include "fast_bvh.h"
 
 #ifdef SSE_ENABLED
+#undef SIMD_BVH_IMPLEMENTATION
 #undef SIMD_SSE_IMPLEMENTATION
 #endif
 

@@ -21,7 +21,7 @@
 #include "scatteringevent/bssrdf/bssrdf.h"
 
 static SORT_FORCEINLINE Fast_Bvh_Node_Ptr makeFastBvhNode( unsigned int start , unsigned int end ){
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     auto* address = malloc_aligned( sizeof(Fast_Bvh_Node) , SIMD_ALIGNMENT );
     auto* node = new (address) Fast_Bvh_Node( start , end );
     return std::move(Fast_Bvh_Node_Ptr(node));
@@ -32,7 +32,7 @@ static SORT_FORCEINLINE Fast_Bvh_Node_Ptr makeFastBvhNode( unsigned int start , 
 
 template<class T>
 static SORT_FORCEINLINE std::unique_ptr<T[]> makePrimitiveList( unsigned int cnt ){
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     auto* address = malloc_aligned( sizeof(T) * cnt , SIMD_ALIGNMENT );
     return std::move(std::unique_ptr<T[]>((T*)address));
 #else
@@ -194,7 +194,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
 
     // split children if needed.
     for( int j = 0 ; j < node->child_cnt ; ++j ){
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
         const auto bbox = calcBoundingBox(node->children[j].get(), m_bvhpri.get());
         splitNode(node->children[j].get(), bbox, depth + 1);
 #else
@@ -203,7 +203,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
 #endif
     }
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     node->bbox = calcBoundingBoxSIMD( node->children );
 #endif
 
@@ -217,7 +217,7 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 
     m_depth = fmax( m_depth , depth );
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     Simd_Triangle   sind_tri;
     Simd_Line       simd_line;
     std::vector<Simd_Triangle>  tri_list;
@@ -270,7 +270,7 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
     SORT_STATS(sFbvhPrimitiveCount += (StatsInt)node->pri_cnt);
 }
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
 Simd_BBox Fbvh::calcBoundingBoxSIMD(const Fast_Bvh_Node_Ptr* children) const {
     Simd_BBox node_bbox;
 
@@ -321,7 +321,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 
     ray.Prepare();
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     Simd_Ray_Data   simd_ray;
     resolveRayData( ray , simd_ray );
 #endif
@@ -342,7 +342,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         if( intersect && intersect->t < fmin )
             continue;
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
             const auto tri_cnt = node->tri_cnt;
@@ -459,7 +459,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
     SORT_STATS(++sShadowRayCount);
 
     ray.Prepare();
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     Simd_Ray_Data   simd_ray;
     resolveRayData( ray , simd_ray );
 #endif
@@ -475,7 +475,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
     while (si > 0) {
         const auto node = bvh_stack[--si];
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
         // check if it is a leaf node
         if (0 == node->child_cnt) {
             const auto tri_cnt = node->tri_cnt;
@@ -613,7 +613,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
     SORT_STATS(++sRayCount);
 
     ray.Prepare();
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     Simd_Ray_Data   simd_ray;
     resolveRayData( ray , simd_ray );
 #endif
@@ -637,7 +637,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
         if (intersect.maxt < fmin)
             continue;
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
         if (0 == node->child_cnt) {
             // Note, only triangle shape support SSS here. This is the only big difference between AVX and non-AVX version implementation.
             // There are only two major primitives in SORT, line and triangle.

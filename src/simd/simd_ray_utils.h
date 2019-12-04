@@ -26,7 +26,7 @@
 #endif
 
 #if defined(SSE_ENABLED) || defined(AVX_ENABLED)
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
 
 #ifdef SIMD_SSE_IMPLEMENTATION
     #define Simd_Ray_Data   Ray4_Data

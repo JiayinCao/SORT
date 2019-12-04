@@ -23,11 +23,13 @@
 
 #ifdef AVX_ENABLED
 #define SIMD_AVX_IMPLEMENTATION
+#define SIMD_BVH_IMPLEMENTATION
 #endif
 
 #include "fast_bvh.hpp"
 
 #ifdef AVX_ENABLED
+#undef SIMD_BVH_IMPLEMENTATION
 #undef SIMD_AVX_IMPLEMENTATION
 #endif
 

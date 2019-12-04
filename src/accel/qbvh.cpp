@@ -23,11 +23,13 @@
 
 #ifdef SSE_ENABLED
 #define SIMD_SSE_IMPLEMENTATION
+#define SIMD_BVH_IMPLEMENTATION
 #endif
 
 #include "fast_bvh.hpp"
 
 #ifdef SSE_ENABLED
+#undef SIMD_BVH_IMPLEMENTATION
 #undef SIMD_SSE_IMPLEMENTATION
 #endif
 

@@ -22,7 +22,7 @@
 #include "shape/line.h"
 #include "core/primitive.h"
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
 
 #ifdef SIMD_SSE_IMPLEMENTATION
     #define Simd_Line   Line4

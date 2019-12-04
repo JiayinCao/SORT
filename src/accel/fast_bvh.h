@@ -37,7 +37,7 @@ static_assert(false, "More than one SIMD version is defined before including fas
 #define FBVH_CHILD_CNT  8
 #endif
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
 struct Fast_Bvh_Node_Deallocator{
     void operator()(void* p){
         free_aligned(p);
@@ -53,7 +53,7 @@ using Fast_Bvh_Node_Ptr = std::unique_ptr<Fast_Bvh_Node>;
 #endif
 
 struct Fast_Bvh_Node {
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     using Simd_Triangle_Container   = std::unique_ptr<Simd_Triangle[]>;
     using Simd_Line_Container       = std::unique_ptr<Simd_Line[]>;
     Simd_BBox                       bbox;                       /**< Bounding boxes of its four children. */
@@ -82,7 +82,7 @@ struct Fast_Bvh_Node {
     Fast_Bvh_Node() : pri_cnt(0), pri_offset(0), child_cnt(0) {}  
 };
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     static_assert( sizeof( Fast_Bvh_Node ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Fast_Bvh_Node." );
 #endif
 
@@ -190,7 +190,7 @@ private:
     //! @param depth        Depth of the current node.
     void    makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , unsigned depth );
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
     //! @brief A helper function calculating bounding box of a node.
     //!
     //! @param children     The children nodes

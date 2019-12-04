@@ -31,7 +31,7 @@
     static_assert( false , "More than one SIMD version is defined before including simd_triangle." );
 #endif
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
 
 #ifdef SIMD_SSE_IMPLEMENTATION
     #define Simd_Triangle       Triangle4

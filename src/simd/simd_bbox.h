@@ -24,7 +24,7 @@
     static_assert( false , "More than one SIMD version is defined before including simd_bbox." );
 #endif
 
-#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+#ifdef SIMD_BVH_IMPLEMENTATION
 
 #if defined(SIMD_AVX_IMPLEMENTATION)
     #define Simd_BBox   BBox8
