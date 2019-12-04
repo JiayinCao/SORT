@@ -37,8 +37,8 @@ const static float mask_true = *((float*)&( mask_true_i ));
 #ifndef SORT_IN_WINDOWS
 #define simd_data_sse   __m128
 #else
-// somehow this data structure can introduce huge performance problem in MacOS
-// since it is purely for [] operator, it is only used in Windows, where there is no
+// somehow this data structure can introduce huge performance problem on MacOS
+// since it is purely for [] operator, it is only used on Windows, where there is no
 // performance issue by using it.
 struct simd_data_sse{
     union{
