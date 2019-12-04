@@ -37,6 +37,7 @@ static_assert(false, "More than one SIMD version is defined before including fas
 #define FBVH_CHILD_CNT  8
 #endif
 
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 struct Fast_Bvh_Node_Deallocator{
     void operator()(void* p){
         free_aligned(p);
@@ -45,6 +46,11 @@ struct Fast_Bvh_Node_Deallocator{
 
 struct Fast_Bvh_Node;
 using Fast_Bvh_Node_Ptr = std::unique_ptr<Fast_Bvh_Node,Fast_Bvh_Node_Deallocator>;
+
+#else
+struct Fast_Bvh_Node;
+using Fast_Bvh_Node_Ptr = std::unique_ptr<Fast_Bvh_Node>;
+#endif
 
 struct Fast_Bvh_Node {
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)

@@ -21,15 +21,23 @@
 #include "scatteringevent/bssrdf/bssrdf.h"
 
 static SORT_FORCEINLINE Fast_Bvh_Node_Ptr makeFastBvhNode( unsigned int start , unsigned int end ){
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
     auto* address = malloc_aligned( sizeof(Fast_Bvh_Node) , SIMD_ALIGNMENT );
     auto* node = new (address) Fast_Bvh_Node( start , end );
     return std::move(Fast_Bvh_Node_Ptr(node));
+#else
+    return std::move( std::make_unique<Fast_Bvh_Node>( start , end ) );
+#endif
 }
 
 template<class T>
 static SORT_FORCEINLINE std::unique_ptr<T[]> makePrimitiveList( unsigned int cnt ){
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
     auto* address = malloc_aligned( sizeof(T) * cnt , SIMD_ALIGNMENT );
     return std::move(std::unique_ptr<T[]>((T*)address));
+#else
+    return std::move(std::unique_ptr<T[]>(cnt));
+#endif
 }
 
 #if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
@@ -312,8 +320,11 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     SORT_STATS(sShadowRayCount += intersect != nullptr);
 
     ray.Prepare();
+
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
     Simd_Ray_Data   simd_ray;
     resolveRayData( ray , simd_ray );
+#endif
 
     const auto fmin = Intersect(ray, m_bbox);
     if (fmin < 0.0f)
@@ -447,9 +458,11 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
     SORT_STATS(++sRayCount);
     SORT_STATS(++sShadowRayCount);
 
-    ray.Prepare();    
+    ray.Prepare();
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
     Simd_Ray_Data   simd_ray;
     resolveRayData( ray , simd_ray );
+#endif
 
     const auto fmin = Intersect(ray, m_bbox);
     if (fmin < 0.0f)
@@ -600,8 +613,10 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
     SORT_STATS(++sRayCount);
 
     ray.Prepare();
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
     Simd_Ray_Data   simd_ray;
     resolveRayData( ray , simd_ray );
+#endif
 
     intersect.cnt = 0;
     intersect.maxt = FLT_MAX;
