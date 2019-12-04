@@ -55,7 +55,6 @@ public:
     Phong(const Params& params, const Spectrum& weight, bool doubleSided = false)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.diffuse), S(params.specular), power(params.specularPower),
           diffRatio(intensityOSLVec3(params.diffuse)/(intensityOSLVec3(params.diffuse)+intensityOSLVec3(params.specular))) {
-        const auto combined = D + S;
         sAssert(combined.GetR() <= 1.0f, MATERIAL);
         sAssert(combined.GetG() <= 1.0f, MATERIAL);
         sAssert(combined.GetB() <= 1.0f, MATERIAL);

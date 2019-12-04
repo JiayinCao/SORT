@@ -510,26 +510,23 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
             continue;
 
         const int k0 = __bsf(m);
-        const auto t0 = sse_f_min[k0];
         m &= m - 1;
         if (LIKELY(0 == m)) {
-            sAssert(t0 >= 0.0f, SPATIAL_ACCELERATOR);
+            sAssert(sse_f_min[k0] >= 0.0f, SPATIAL_ACCELERATOR);
             bvh_stack[si++] = node->children[k0].get();
         }
         else {
             const int k1 = __bsf(m);
-            const auto t1 = sse_f_min[k0];
             m &= m - 1;
 
-            sAssert(t1 >= 0.0f, SPATIAL_ACCELERATOR);
+            sAssert(sse_f_min[k1] >= 0.0f, SPATIAL_ACCELERATOR);
 
             if (LIKELY(0 == m)) {
                 bvh_stack[si++] = node->children[k1].get();
                 bvh_stack[si++] = node->children[k0].get();
             } else {
                 const int k2 = __bsf(m);
-                const auto t2 = sse_f_min[k2];
-                sAssert(t2 >= 0.0f, SPATIAL_ACCELERATOR);
+                sAssert(sse_f_min[k2] >= 0.0f, SPATIAL_ACCELERATOR);
 
                 m &= m - 1;
 
@@ -558,8 +555,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 #endif
 #if defined(SIMD_SSE_IMPLEMENTATION)
                     const int k3 = __bsf(m);
-                    const auto t3 = sse_f_min[k3];
-                    sAssert(t3 >= 0.0f, SPATIAL_ACCELERATOR);
+                    sAssert(sse_f_min[k3] >= 0.0f, SPATIAL_ACCELERATOR);
 
                     bvh_stack[si++] = node->children[k3].get();
                     bvh_stack[si++] = node->children[k2].get();

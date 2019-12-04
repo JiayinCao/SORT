@@ -152,8 +152,8 @@ TEST(SIMD_TEST, simd_sqrt_ps) {
     const auto simd_data_sqrt = simd_sqrt_ps( simd_data );
 
     for( int i = 0 ; i < SIMD_CHANNEL ; ++i ){
-        const auto f0 = simd_data[i];
-        const auto f1 = data[i];
+        const auto f0 = simd_data_sqrt[i];
+        const auto f1 = sqrt(data[i]);
 
         const auto u0 = *((unsigned*)(&f0));
         const auto u1 = *((unsigned*)(&f1));

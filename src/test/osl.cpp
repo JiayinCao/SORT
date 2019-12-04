@@ -482,11 +482,10 @@ TEST(OSL, CheckingGlobalContext) {
     // Register closures
     RegisterClosures( shadingsys.get() );
 
-    const auto group_name = "default_shader_group";
     const auto shader_name = "default_shader";
     const auto shader_layer = "default_layer";
     const auto shadergroup = shadingsys->ShaderGroupBegin ("Closure_Test_ShaderGroup");
-    const auto ret = compile_buffer_test( shadingsys.get() , shader_source , shader_name );
+    compile_buffer_test( shadingsys.get() , shader_source , shader_name );
     shadingsys->Shader ("surface", shader_name, shader_layer);
     shadingsys->ShaderGroupEnd ();
 
