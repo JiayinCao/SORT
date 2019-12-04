@@ -27,10 +27,10 @@ To download the dependency files, simply run 'make update_dep' to retrieve it. H
 The last resort is to compile the library with [source code](https://github.com/yse/easy_profiler) by yourself. This is not suggested to compile the source code of easy_profiler due to potential changes in different version may cause unknown problems in SORT. The pre-compiled ones are more desired than compiling it by yourself.
 
 ## Windows
-It is necessary to install Visual Studio 2015 or above to compile SORT in Windows. And please also make sure that 'msbuild.exe' is in the system 'Path' folder so that the script can run it directly.
+It is necessary to install Visual Studio 2015 or above to compile SORT on Windows. And please also make sure that 'msbuild.exe' is in the system 'Path' folder so that the script can run it directly.
 
 ## Mac OS
-Please install XCode first before compiling in MacOS.
+Please install XCode first before compiling on MacOS.
 
 ## Ubuntu
 Unlike the other two platforms, for which SORT has packed all necessary libararies in the dependency, some of the depedent libraries is OS dependent. SORT doesn't pack those OS dependent libraries with it, it is programmer's responsibility to setup the correct environment before building it, meaning compiling SORT on Ubuntu requires some basic setup first. 
