@@ -76,7 +76,9 @@ struct Fast_Bvh_Node {
     Fast_Bvh_Node() : pri_cnt(0), pri_offset(0), child_cnt(0) {}  
 };
 
-static_assert( sizeof( Fast_Bvh_Node ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Fast_Bvh_Node." );
+#if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
+    static_assert( sizeof( Fast_Bvh_Node ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Fast_Bvh_Node." );
+#endif
 
 #endif
 

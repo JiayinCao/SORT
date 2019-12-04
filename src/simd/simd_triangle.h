@@ -43,8 +43,8 @@
 
 //! @brief  Simd_Triangle is more of a simplified resolved data structure holds only bare bone information of triangle.
 /**
- * Simd_Triangle is used in OBVH/QBVH to accelerate ray triangle intersection using AVX. Its sole purpose is to accelerate 
- * ray triangle intersection by using AVX. Meaning there is no need to provide sophisticated interface of the class.
+ * Simd_Triangle is used in OBVH/QBVH to accelerate ray triangle intersection using AVX/SSE. Its sole purpose is to accelerate 
+ * ray triangle intersection by using AVX/SSE. Meaning there is no need to provide sophisticated interface of the class.
  * And since it is quite performance sensitive code, everything is inlined and there is no polymorphisms to keep it
  * as simple as possible. However, since there will be extra data kept in the system, it will also insignificantly 
  * incur more cost in term of memory usage.
@@ -125,7 +125,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
 #endif
     }
 
-    //! @brief  Pack triangle information into SSE compatible data.
+    //! @brief  Pack triangle information into SSE/AVX compatible data.
     //!
     //! @return     Whether there is valid triangle inside.
     bool PackData(){
@@ -339,7 +339,7 @@ SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri_simd, const Ray
     intersection->primitive = tri_simd.m_ori_pri[id];
 }
 
-//! @brief  With the power of SSE, this utility function helps intersect a ray with four/eight triangles at the cost of one.
+//! @brief  With the power of SSE/AVX, this utility function helps intersect a ray with four/eight triangles at the cost of one.
 //!
 //! @param  ray         Ray to be tested against.
 //! @param  simd_ray    Resolved simd ray data.
@@ -370,7 +370,7 @@ SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Da
     return true;
 }
 
-//! @brief  With the power of SSE, this utility function helps intersect a ray with four triangles at the cost of one.
+//! @brief  With the power of SSE/AVX, this utility function helps intersect a ray with four triangles at the cost of one.
 //!
 //! This function stops as long as there is an intersection, it is for shadow ray occlusion detection.
 //!

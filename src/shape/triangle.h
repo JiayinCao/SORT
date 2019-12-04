@@ -25,7 +25,6 @@ struct  MeshFaceIndex;
 
 #ifdef SSE_ENABLED
     struct Triangle4;
-    struct SSE_Ray_Data;
 #ifdef SORT_IN_WINDOWS
     struct simd_data_sse;
 #endif
@@ -33,7 +32,6 @@ struct  MeshFaceIndex;
 
 #ifdef AVX_ENABLED
     struct Triangle8;
-    struct AVX_Ray_Data;
 #ifdef SORT_IN_WINDOWS
     struct simd_data_avx;
 #endif

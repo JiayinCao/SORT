@@ -62,18 +62,18 @@ SORT_FORCEINLINE int IntersectBBox_SIMD(const Ray& ray, const Simd_Ray_Data& sim
 
     simd_data t1    = simd_add_ps( ray_ori_dir_x(simd_ray) , simd_mul_ps( ray_rcp_dir_x(simd_ray) , bb.m_max_x ) );
     simd_data t2    = simd_add_ps( ray_ori_dir_x(simd_ray) , simd_mul_ps( ray_rcp_dir_x(simd_ray) , bb.m_min_x ) );
-    f_min       = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
-    f_max       = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
+    f_min           = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
+    f_max           = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-    t1          = simd_add_ps( ray_ori_dir_y(simd_ray) , simd_mul_ps( ray_rcp_dir_y(simd_ray) , bb.m_max_y ) );
-    t2          = simd_add_ps( ray_ori_dir_y(simd_ray) , simd_mul_ps( ray_rcp_dir_y(simd_ray) , bb.m_min_y ) );
-    f_min       = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
-    f_max       = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
+    t1              = simd_add_ps( ray_ori_dir_y(simd_ray) , simd_mul_ps( ray_rcp_dir_y(simd_ray) , bb.m_max_y ) );
+    t2              = simd_add_ps( ray_ori_dir_y(simd_ray) , simd_mul_ps( ray_rcp_dir_y(simd_ray) , bb.m_min_y ) );
+    f_min           = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
+    f_max           = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
-    t1          = simd_add_ps( ray_ori_dir_z(simd_ray) , simd_mul_ps( ray_rcp_dir_z(simd_ray) , bb.m_max_z ) );
-    t2          = simd_add_ps( ray_ori_dir_z(simd_ray) , simd_mul_ps( ray_rcp_dir_z(simd_ray) , bb.m_min_z ) );
-    f_min       = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
-    f_max       = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
+    t1              = simd_add_ps( ray_ori_dir_z(simd_ray) , simd_mul_ps( ray_rcp_dir_z(simd_ray) , bb.m_max_z ) );
+    t2              = simd_add_ps( ray_ori_dir_z(simd_ray) , simd_mul_ps( ray_rcp_dir_z(simd_ray) , bb.m_min_z ) );
+    f_min           = simd_max_ps( f_min , simd_min_ps( t1 , t2 ) );
+    f_max           = simd_min_ps( f_max , simd_max_ps( t1 , t2 ) );
 
     const simd_data mask = simd_and_ps( bb.m_mask , simd_cmple_ps( f_min , f_max ) );
     f_min = simd_pick_ps( mask , f_min , simd_neg_ones );

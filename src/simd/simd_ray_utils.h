@@ -29,10 +29,10 @@
 #if defined(SIMD_SSE_IMPLEMENTATION) || defined(SIMD_AVX_IMPLEMENTATION)
 
 #ifdef SIMD_SSE_IMPLEMENTATION
-    #define Simd_Ray_Data   SSE_Ray_Data
+    #define Simd_Ray_Data   Ray4_Data
 #endif
 #ifdef SIMD_AVX_IMPLEMENTATION
-    #define Simd_Ray_Data   AVX_Ray_Data
+    #define Simd_Ray_Data   Ray8_Data
 #endif
 
 static SORT_FORCEINLINE float sign( const float x ){
