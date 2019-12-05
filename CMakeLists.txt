@@ -190,6 +190,12 @@ if(MSVC)
 
     set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4305 /wd4800" )
+
+    if(ENABLE_AVX_OPTIMIZATION)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX" )
+    elseif(ENABLE_SSE_OPTIMIZATION)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE" )
+    endif()
 endif(MSVC)
 
 # Specific settings in Linux and Mac
