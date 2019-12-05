@@ -24,6 +24,28 @@
             }
         },
         {
+            "name": "Run Release with Debug Info",
+            "type": "cppdbg",
+            "request": "launch",
+            "preLaunchTask": "Build (Release with Debug Info)",
+            "program": "${workspaceFolder}/../bin/sort_rd",
+            "args": ["--input:${workspaceFolder}/../bin/scene.sort"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/../bin",
+            "environment": [],
+            "externalConsole": true,
+            "osx":{
+                "MIMode": "lldb"
+            },
+            "linux":{
+                "MIMode":"gdb"
+            },
+            "windows":{
+                "type": "cppvsdbg",
+                "program": "${workspaceFolder}/../bin/sort_rd.exe"
+            }
+        },
+        {
             "name": "Run Release",
             "type": "cppdbg",
             "request": "launch",
