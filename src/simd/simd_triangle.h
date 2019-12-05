@@ -132,15 +132,14 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
         if( !m_ori_pri[0] )
             return false;
 
-#ifdef SIMD_SSE_IMPLEMENTATION
-        float   mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f };
-#endif
-#ifdef SIMD_AVX_IMPLEMENTATION
-        float   mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f };
-#endif
-
+        bool	mask[SIMD_CHANNEL] = { false };
         float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL] , p2_x[SIMD_CHANNEL] , p2_y[SIMD_CHANNEL] , p2_z[SIMD_CHANNEL];
-        for( auto i = 0 ; i < SIMD_CHANNEL && m_ori_pri[i] ; ++i ){
+        for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
+			if (nullptr == m_ori_pri[i]) {
+				mask[i] = false;
+				continue;
+			}
+
             const auto triangle = m_ori_tri[i];
 
             const auto& mem = triangle->m_meshVisual->m_memory;
@@ -164,7 +163,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
             p2_y[i] = mv2.m_position.y;
             p2_z[i] = mv2.m_position.z;
 
-            mask[i] = 0.0f;
+            mask[i] = true;
         }
 
         m_p0_x = simd_set_ps( p0_x );
@@ -176,7 +175,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
         m_p2_x = simd_set_ps( p2_x );
         m_p2_y = simd_set_ps( p2_y );
         m_p2_z = simd_set_ps( p2_z );
-        m_mask = simd_cmpeq_ps( simd_zeros , simd_set_ps( mask ) );
+        m_mask = simd_set_mask( mask );
 
         return true;
     }

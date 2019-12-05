@@ -193,8 +193,6 @@ if(MSVC)
 
     if(ENABLE_AVX_OPTIMIZATION)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:AVX" )
-    elseif(ENABLE_SSE_OPTIMIZATION)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /arch:SSE" )
     endif()
 endif(MSVC)
 

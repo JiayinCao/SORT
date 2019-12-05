@@ -124,19 +124,18 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
         if( !m_ori_pri[0] )
             return false;
 
-#ifdef SIMD_SSE_IMPLEMENTATION
-        float   mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f };
-#endif
-#ifdef SIMD_AVX_IMPLEMENTATION
-        float   mask[SIMD_CHANNEL] = { 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f , 1.0f };
-#endif
-
+		bool	mask[SIMD_CHANNEL] = { false };
         float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL];
         float   w0[SIMD_CHANNEL] , w1[SIMD_CHANNEL] , length[SIMD_CHANNEL];
         float   mat_00[SIMD_CHANNEL] , mat_01[SIMD_CHANNEL] , mat_02[SIMD_CHANNEL] , mat_03[SIMD_CHANNEL];
         float   mat_10[SIMD_CHANNEL] , mat_11[SIMD_CHANNEL] , mat_12[SIMD_CHANNEL] , mat_13[SIMD_CHANNEL];
         float   mat_20[SIMD_CHANNEL] , mat_21[SIMD_CHANNEL] , mat_22[SIMD_CHANNEL] , mat_23[SIMD_CHANNEL];
-        for( auto i = 0 ; i < SIMD_CHANNEL && m_ori_pri[i] ; ++i ){
+        for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
+			if( nullptr == m_ori_pri[i] ){
+				mask[i] = false;
+				continue;
+			}
+
             const auto line = m_ori_line[i];
 
             p0_x[i] = line->m_p0.x;
@@ -165,7 +164,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
             mat_22[i] = line->m_world2Line.matrix.m[10];
             mat_23[i] = line->m_world2Line.matrix.m[11];
 
-            mask[i] = 0.0f;
+            mask[i] = true;
         }
 
         m_p0_x = simd_set_ps( p0_x );
@@ -191,7 +190,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
         m_mat_22 = simd_set_ps( mat_22 );
         m_mat_23 = simd_set_ps( mat_23 );
 
-        m_mask = simd_cmpeq_ps( simd_zeros , simd_set_ps( mask ) );
+        m_mask = simd_set_mask( mask );
 
         return true;
     }
