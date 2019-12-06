@@ -249,7 +249,7 @@ SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Ray
     const simd_data e1 = simd_sub_ps(simd_mul_ps(p2_x, p0_z), simd_mul_ps(p2_z, p0_x));
     const simd_data e2 = simd_sub_ps(simd_mul_ps(p0_x, p1_z), simd_mul_ps(p0_z, p1_x));
 
-    const simd_data zeros = simd_set_ps1( 0.0f );
+    const simd_data zeros = simd_zero();
     const simd_data c0 = simd_and_ps(simd_and_ps(simd_cmpge_ps(e0, zeros), simd_cmpge_ps(e1, zeros)), simd_cmpge_ps(e2, zeros));
     const simd_data c1 = simd_and_ps(simd_and_ps(simd_cmple_ps(e0, zeros), simd_cmple_ps(e1, zeros)), simd_cmple_ps(e2, zeros));
     mask = simd_or_ps( simd_and_ps(mask,c0) , simd_and_ps(mask,c1) );

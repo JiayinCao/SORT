@@ -85,6 +85,9 @@ static const __m128 sse_ones        = _mm_set_ps1(1.0f);
 #define SIMD_CHANNEL    4
 #define SIMD_ALIGNMENT  16
 
+static SORT_FORCEINLINE simd_data   simd_zero(){
+    return _mm_setzero_ps();
+}
 static SORT_FORCEINLINE simd_data   simd_set_ps1( const float d ){
     return _mm_set_ps1( d );
 }
@@ -216,6 +219,9 @@ static const __m256 avx_ones        = _mm256_set_ps(1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 #define SIMD_CHANNEL    8
 #define SIMD_ALIGNMENT  32
 
+static SORT_FORCEINLINE simd_data   simd_zero(){
+    return _mm256_setzero_ps();
+}
 static SORT_FORCEINLINE simd_data   simd_set_ps1( const float f ){
     return _mm256_set_ps(f,f,f,f,f,f,f,f);
 }
