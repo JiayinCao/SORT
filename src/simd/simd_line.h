@@ -242,21 +242,22 @@ SORT_FORCEINLINE bool intersectLine_Inner( const Ray& ray , const Simd_Ray_Data&
     const simd_data b = simd_sub_ps( simd_mad_ps( _ray_dir_x , _ray_ori_x , simd_mul_ps( _ray_dir_z , _ray_ori_z ) ) , simd_mul_ps( tmp0 , tmp1 ) );
     const simd_data c = simd_sub_ps( simd_add_ps( simd_sqr_ps( _ray_ori_x ) , simd_sqr_ps( _ray_ori_z ) ) , simd_sqr_ps( tmp0 ) );
 
+    const simd_data zeros = simd_zero();
     const simd_data discriminant = simd_sub_ps( simd_sqr_ps( b ) , simd_mul_ps( a , c ) );
-    mask = simd_and_ps( mask , simd_cmpgt_ps( discriminant , simd_zeros ) );
+    mask = simd_and_ps( mask , simd_cmpgt_ps( discriminant , zeros ) );
     auto cm = simd_movemask_ps(mask);
     if (0 == cm)
         return false;
     
     const simd_data sqrt_dist = simd_sqrt_ps( discriminant );
-    const simd_data t0 = simd_div_ps( simd_sub_ps( simd_sub_ps( simd_zeros , b ) , sqrt_dist ) , a );
+    const simd_data t0 = simd_div_ps( simd_sub_ps( simd_sub_ps( zeros , b ) , sqrt_dist ) , a );
     const simd_data inter_y0 = simd_mad_ps( _ray_dir_y, t0, _ray_ori_y );
-    const simd_data mask0 = simd_and_ps( simd_cmplt_ps( inter_y0 , line_simd.m_length ) , simd_cmpgt_ps( inter_y0 , simd_zeros ) );
+    const simd_data mask0 = simd_and_ps( simd_cmplt_ps( inter_y0 , line_simd.m_length ) , simd_cmpgt_ps( inter_y0 , zeros ) );
 
     const simd_data t1 = simd_div_ps( simd_sub_ps( sqrt_dist , b ) , a );
     const simd_data inter_y1 = simd_mad_ps( _ray_dir_y , t1 , _ray_ori_y );
     inter_y = simd_pick_ps( mask0 , inter_y0 , inter_y1 );
-    const simd_data mask1 = simd_and_ps( simd_cmplt_ps( inter_y , line_simd.m_length ) , simd_cmpgt_ps( inter_y , simd_zeros ) );
+    const simd_data mask1 = simd_and_ps( simd_cmplt_ps( inter_y , line_simd.m_length ) , simd_cmpgt_ps( inter_y , zeros ) );
     mask = simd_and_ps( mask , mask1 );
     cm = simd_movemask_ps(mask);
     if (0 == cm)

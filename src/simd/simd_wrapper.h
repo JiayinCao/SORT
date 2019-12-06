@@ -86,7 +86,12 @@ static const __m128 sse_ones        = _mm_set_ps1(1.0f);
 #define SIMD_ALIGNMENT  16
 
 static SORT_FORCEINLINE simd_data   simd_zero(){
-    return _mm_setzero_ps();
+    // this is slower on my 2017 iMac somehow.
+    // It could be a hardware issue, since MacOS is the major platform I used for development
+    // this is more of a workaround to make it faster.
+    // return _mm_setzero_ps();
+    
+    return _mm_set_ps1( 0.0f );
 }
 static SORT_FORCEINLINE simd_data   simd_set_ps1( const float d ){
     return _mm_set_ps1( d );
