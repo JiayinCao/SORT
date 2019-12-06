@@ -217,7 +217,7 @@ static_assert( sizeof( Simd_Line ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Si
 //! @param  ray_simd    Resolved simd ray data.
 //! @param  line_simd   The data structure holds four lines. Some of them may be invalid.
 //! @param  mask        The mask of valid results.
-//! @param  t_simd      Distane from the ray origin to the intersected point on the line.
+//! @param  t_simd      Distance from the ray origin to the intersected point on the line.
 //! @param  inter_x     Intersection in local line space.
 //! @param  inter_y     Intersection in local line space.
 //! @param  inter_z     Intersection in local line space.

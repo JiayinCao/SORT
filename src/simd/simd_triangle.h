@@ -205,7 +205,8 @@ static_assert( sizeof( Simd_Triangle ) % SIMD_ALIGNMENT == 0 , "Incorrect size o
 //! @param  t_simd      Output, the distances from ray origin to triangles. It will be FLT_MAX if there is no intersection.
 //! @param  u_simd      Blending factor.
 //! @param  v_simd      Blending factor.
-SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd, const Simd_Triangle& tri_simd, const bool quick_quit, const float maxt, simd_data& t_simd, simd_data& u_simd, simd_data& v_simd, simd_data& mask) {
+template< bool quick_quit >
+SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd, const Simd_Triangle& tri_simd, simd_data& t_simd, simd_data& u_simd, simd_data& v_simd, simd_data& mask) {
     mask = tri_simd.m_mask;
 
     // step 0 : translate the vertices to ray coordinate system
@@ -285,11 +286,6 @@ SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Ray
     if (quick_quit)
         return true;
 
-    mask = simd_and_ps(simd_and_ps(mask, simd_cmpgt_ps(t_simd, zeros)), simd_cmplt_ps(t_simd, simd_set_ps1(maxt)));
-    c = simd_movemask_ps(mask);
-    if (0 == c)
-        return false;
-
     // mask out the invalid values
     t_simd = simd_pick_ps( mask, t_simd, simd_infinites);
 
@@ -351,10 +347,14 @@ SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Da
     sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
 
     simd_data   u_simd, v_simd, t_simd, mask;
-    const auto maxt = ret->t;
-    const auto intersected = intersectTriangleInner_SIMD(ray, ray_simd , tri_simd, false, maxt, t_simd, u_simd, v_simd, mask);
+    const auto intersected = intersectTriangleInner_SIMD<false>(ray, ray_simd , tri_simd, t_simd, u_simd, v_simd, mask);
     if (!intersected)
         return false;
+
+	mask = simd_and_ps(mask, simd_cmplt_ps(t_simd, simd_set_ps1(ret->t)));
+	const auto c = simd_movemask_ps(mask);
+	if (0 == c)
+		return false;
 
     // find the closest result
     simd_data t0 = simd_minreduction_ps( t_simd );
@@ -382,7 +382,7 @@ SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Da
 SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd , const Simd_Triangle& tri_simd) {
     // please optimize these value, compiler.
     simd_data   dummy_u, dummy_v, dummy_t, mask;
-    return intersectTriangleInner_SIMD(ray, ray_simd, tri_simd, true, FLT_MAX, dummy_t, dummy_u, dummy_v, mask);
+    return intersectTriangleInner_SIMD<true>(ray, ray_simd, tri_simd, dummy_t, dummy_u, dummy_v, mask);
 }
 
 //! @brief  Unlike the above function, this helper function will populate all results in the BSSRDFIntersection data structure.
@@ -393,12 +393,15 @@ SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Ray_
 //! @param  ret         The result of intersection.
 SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd, const Simd_Triangle& tri_simd, const StringID matID , BSSRDFIntersections& intersections) {
     simd_data   u_simd, v_simd, t_simd, mask;
-    const auto maxt = intersections.maxt;
-    const auto intersected = intersectTriangleInner_SIMD(ray, ray_simd, tri_simd, false, maxt, t_simd, u_simd, v_simd, mask);
+    const auto intersected = intersectTriangleInner_SIMD<false>(ray, ray_simd, tri_simd, t_simd, u_simd, v_simd, mask);
     if (!intersected)
         return;
 
-    auto resolved_mask = simd_movemask_ps(mask);
+	mask = simd_and_ps(mask, simd_cmplt_ps(t_simd, simd_set_ps1(intersections.maxt)));
+	auto resolved_mask = simd_movemask_ps(mask);
+	if (0 == resolved_mask)
+		return;
+
     sAssert(resolved_mask > 0 && resolved_mask < pow(2,SIMD_CHANNEL), SPATIAL_ACCELERATOR);
 
     // A better approach would be to sort the intersection before populating it into the results to avoid some unnecessary setup.
