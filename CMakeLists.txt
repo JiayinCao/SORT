@@ -199,7 +199,7 @@ endif(MSVC)
 # Specific settings in Linux and Mac
 if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
     set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
-    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread")
+    set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread -O3")
 
     if(ENABLE_LINKTIME_OPTIMIZATION)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
