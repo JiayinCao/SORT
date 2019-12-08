@@ -193,7 +193,7 @@ void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned d
     }
 
     // split children if needed.
-    for( int j = 0 ; j < node->child_cnt ; ++j ){
+    for( auto j = 0u ; j < node->child_cnt ; ++j ){
 #ifdef SIMD_BVH_IMPLEMENTATION
         const auto bbox = calcBoundingBox(node->children[j].get(), m_bvhpri.get());
         splitNode(node->children[j].get(), bbox, depth + 1);
@@ -384,7 +384,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
                     bvh_stack[si++] = std::make_pair(node->children[k1].get(), t1);
                 }
             }else{
-                for (auto i = 0; i < node->child_cnt; ++i) {
+                for (auto i = 0u; i < node->child_cnt; ++i) {
                     auto k = -1;
                     auto maxDist = -1.0f;
                     for (auto j = 0u; j < node->child_cnt; ++j) {
@@ -532,10 +532,10 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
                     bvh_stack[si++] = node->children[k0].get();
                 }else{
 #if defined(SIMD_AVX_IMPLEMENTATION)
-                    for (auto i = 0; i < node->child_cnt; ++i) {
+                    for (auto i = 0u; i < node->child_cnt; ++i) {
                         auto k = -1;
                         auto maxDist = -1.0f;
-                        for (int j = 0; j < node->child_cnt; ++j) {
+                        for (auto j = 0u; j < node->child_cnt; ++j) {
                             if (sse_f_min[j] > maxDist) {
                                 maxDist = sse_f_min[j];
                                 k = j;
@@ -672,10 +672,10 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
             }
             else {
                 // fall back to the worst case
-                for (auto i = 0; i < node->child_cnt; ++i) {
+                for (auto i = 0u; i < node->child_cnt; ++i) {
                     auto k = -1;
                     auto maxDist = -1.0f;
-                    for (int j = 0; j < node->child_cnt; ++j) {
+                    for (auto j = 0u; j < node->child_cnt; ++j) {
                         if (sse_f_min[j] > maxDist) {
                             maxDist = sse_f_min[j];
                             k = j;

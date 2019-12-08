@@ -70,7 +70,7 @@ struct Fast_Bvh_Node {
 
     unsigned                        pri_cnt = 0;                /**< Number of primitives in the node. */
     unsigned                        pri_offset = 0;             /**< Offset of primitives in the buffer. */
-    int                             child_cnt = 0;              /**< 0 means it is a leaf node. */
+    unsigned                        child_cnt = 0;              /**< 0 means it is a leaf node. */
 
     //! @brief  Constructor.
     //!
