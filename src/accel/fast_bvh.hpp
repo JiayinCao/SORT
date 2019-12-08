@@ -420,7 +420,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 
         for( auto i = 0u ; i < node->child_cnt ; ++i ){
             auto k = -1;
-            auto maxDist = 0.0f;
+            auto maxDist = -1.0f;
             for( auto j = 0u ; j < node->child_cnt ; ++j ){
                 if( f_min[j] > maxDist ){
                     maxDist = f_min[j];
@@ -534,7 +534,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 #if defined(SIMD_AVX_IMPLEMENTATION)
                     for (auto i = 0; i < node->child_cnt; ++i) {
                         auto k = -1;
-                        auto maxDist = 0.0f;
+                        auto maxDist = -1.0f;
                         for (int j = 0; j < node->child_cnt; ++j) {
                             if (sse_f_min[j] > maxDist) {
                                 maxDist = sse_f_min[j];
@@ -674,7 +674,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
                 // fall back to the worst case
                 for (auto i = 0; i < node->child_cnt; ++i) {
                     auto k = -1;
-                    auto maxDist = 0.0f;
+                    auto maxDist = -1.0f;
                     for (int j = 0; j < node->child_cnt; ++j) {
                         if (sse_f_min[j] > maxDist) {
                             maxDist = sse_f_min[j];
