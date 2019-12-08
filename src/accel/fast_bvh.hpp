@@ -345,11 +345,9 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #ifdef SIMD_BVH_IMPLEMENTATION
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
-            const auto tri_cnt = node->tri_cnt;
-            for( auto i = 0u ; i < tri_cnt ; ++i )
+            for( auto i = 0u ; i < node->tri_cnt ; ++i )
                 intersectTriangle_SIMD( ray , simd_ray , node->tri_list[i] , intersect );
-            const auto line_cnt = node->line_cnt;
-            for( auto i = 0u ; i < line_cnt ; ++i )
+            for( auto i = 0u ; i < node->line_cnt ; ++i )
                 intersectLine_SIMD( ray , simd_ray , node->line_list[i] , intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
                 for( auto i = 0u ; i < node->other_list.size() ; ++i )
@@ -388,8 +386,8 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             }else{
                 for (auto i = 0; i < node->child_cnt; ++i) {
                     auto k = -1;
-                    auto maxDist = 0.0f;
-                    for (int j = 0; j < node->child_cnt; ++j) {
+                    auto maxDist = -1.0f;
+                    for (auto j = 0u; j < node->child_cnt; ++j) {
                         if (sse_f_min[j] > maxDist) {
                             maxDist = sse_f_min[j];
                             k = j;
@@ -417,13 +415,13 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         }
 
         float f_min[FBVH_CHILD_CNT] = { FLT_MAX };
-        for( int i = 0 ; i < node->child_cnt ; ++i )
+        for( auto i = 0u ; i < node->child_cnt ; ++i )
             f_min[i] = Intersect( ray , node->bbox[i] );
 
-        for( int i = 0 ; i < node->child_cnt ; ++i ){
-            int k = -1;
-            float maxDist = -1.0f;
-            for( int j = 0 ; j < node->child_cnt ; ++j ){
+        for( auto i = 0u ; i < node->child_cnt ; ++i ){
+            auto k = -1;
+            auto maxDist = 0.0f;
+            for( auto j = 0u ; j < node->child_cnt ; ++j ){
                 if( f_min[j] > maxDist ){
                     maxDist = f_min[j];
                     k = j;
@@ -478,24 +476,22 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 #ifdef SIMD_BVH_IMPLEMENTATION
         // check if it is a leaf node
         if (0 == node->child_cnt) {
-            const auto tri_cnt = node->tri_cnt;
-            for (auto i = 0u; i < tri_cnt; ++i) {
+            for (auto i = 0u; i < node->tri_cnt; ++i) {
                 if (intersectTriangleFast_SIMD(ray, simd_ray , node->tri_list[i])) {
                     SORT_STATS(sIntersectionTest += i * 4);
                     return true;
                 }
             }
-            const auto line_list = node->line_cnt;
-            for (auto i = 0u; i < line_list; ++i) {
+            for (auto i = 0u; i < node->line_cnt; ++i) {
                 if (intersectLineFast_SIMD(ray, simd_ray , node->line_list[i])) {
-                    SORT_STATS(sIntersectionTest += (i + tri_cnt) * 4);
+                    SORT_STATS(sIntersectionTest += (i + node->tri_cnt) * 4);
                     return true;
                 }
             }
             if (UNLIKELY(!node->other_list.empty())) {
                 for (auto i = 0u; i < node->other_list.size(); ++i) {
                     if (node->other_list[i]->GetIntersect(ray, nullptr)) {
-                        SORT_STATS(sIntersectionTest += (i + tri_cnt + line_list ) * 4);
+                        SORT_STATS(sIntersectionTest += i + ( node->tri_cnt + node->line_cnt ) * 4);
                         return true;
                     }
                 }
