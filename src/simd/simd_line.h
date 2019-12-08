@@ -22,6 +22,13 @@
 #include "shape/line.h"
 #include "core/primitive.h"
 
+// Reference implementation is disabled by default, it is only for debugging purposes.
+// #define SIMD_LINE_REFERENCE_IMPLEMENTATION
+
+#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+    static_assert( false , "More than one SIMD version is defined before including simd_line.h." );
+#endif
+
 #ifdef SIMD_BVH_IMPLEMENTATION
 
 #ifdef SIMD_SSE_IMPLEMENTATION
@@ -287,6 +294,7 @@ SORT_FORCEINLINE bool intersectLine_Inner( const Ray& ray , const Simd_Ray_Data&
 //! @param  ret         The result of intersection.
 //! @return             Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd, const Simd_Line& line_simd , Intersection* ret ){
+#ifndef SIMD_LINE_REFERENCE_IMPLEMENTATION
     sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
 
     simd_data  mask, t_simd , inter_x , inter_y , inter_z ;
@@ -330,6 +338,12 @@ SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Ray_Data& 
     ret->primitive = line_simd.m_ori_pri[res_i];
 
     return true;
+#else
+    bool ret_val = false;
+    for( auto i = 0u ; i < SIMD_CHANNEL && nullptr != line_simd.m_ori_pri[i] ; ++i )
+        ret_val |= line_simd.m_ori_pri[i]->GetIntersect( ray , ret );
+    return ret_val;
+#endif
 }
 
 //! @brief  With the power of SIMD, this utility function helps intersect a ray with four lines at the cost of one.
@@ -339,8 +353,15 @@ SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Ray_Data& 
 //! @param  line_simd   Data structure holds four lines.
 //! @return             Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectLineFast_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd, const Simd_Line& line_simd ){
+#ifndef SIMD_LINE_REFERENCE_IMPLEMENTATION
     simd_data dummy_mask , dummy_t , dummy_inter_x , dummy_inter_y , dummy_inter_z;
     return intersectLine_Inner( ray , ray_simd , line_simd , dummy_mask , dummy_t , dummy_inter_x , dummy_inter_y , dummy_inter_z );
+#else
+    bool ret = false;
+    for( auto i = 0u ; i < SIMD_CHANNEL && ( nullptr != line_simd.m_ori_pri[i] ) && !ret ; ++i )
+        ret |= line_simd.m_ori_pri[i]->GetIntersect( ray , nullptr );
+    return ret;
+#endif
 }
 
 #endif // SIMD_SSE_IMPLEMENTATION || SIMD_AVX_IMPLEMENTATION

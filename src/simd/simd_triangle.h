@@ -27,8 +27,11 @@
 #include "shape/triangle.h"
 #include "entity/visual.h"
 
+// Reference implementation is disabled by default, it is only for debugging purposes.
+// #define SIMD_TRI_REFERENCE_IMPLEMENTATION
+
 #if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
-    static_assert( false , "More than one SIMD version is defined before including simd_triangle." );
+    static_assert( false , "More than one SIMD version is defined before including simd_triangle.h." );
 #endif
 
 #ifdef SIMD_BVH_IMPLEMENTATION
@@ -344,6 +347,7 @@ SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri_simd, const Ray
 //! @param  ret         The result of intersection. It can't be nullptr.
 //! @return             Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd , const Simd_Triangle& tri_simd , Intersection* ret ){
+#ifndef SIMD_TRI_REFERENCE_IMPLEMENTATION
     sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
 
     simd_data   u_simd, v_simd, t_simd, mask;
@@ -369,6 +373,12 @@ SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Da
     setupIntersection(tri_simd, ray, t_simd, u_simd, v_simd, res_i, ret);
 
     return true;
+#else
+    bool ret_val = false;
+    for( auto i = 0u ; i < SIMD_CHANNEL && nullptr != tri_simd.m_ori_pri[i] ; ++i )
+        ret_val |= tri_simd.m_ori_pri[i]->GetIntersect( ray , ret );
+    return ret_val;
+#endif
 }
 
 //! @brief  With the power of SSE/AVX, this utility function helps intersect a ray with four triangles at the cost of one.
@@ -380,9 +390,16 @@ SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Da
 //! @param  tri_simd    Data structure holds four/eight triangles.
 //! @return             Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd , const Simd_Triangle& tri_simd) {
+#ifndef SIMD_TRI_REFERENCE_IMPLEMENTATION
     // please optimize these value, compiler.
     simd_data   dummy_u, dummy_v, dummy_t, mask;
     return intersectTriangleInner_SIMD<true>(ray, ray_simd, tri_simd, dummy_t, dummy_u, dummy_v, mask);
+#else
+    bool ret = false;
+    for( auto i = 0u ; i < SIMD_CHANNEL && ( nullptr != tri_simd.m_ori_pri[i] ) && !ret ; ++i )
+        ret |= tri_simd.m_ori_pri[i]->GetIntersect( ray , nullptr );
+    return ret;
+#endif
 }
 
 //! @brief  Unlike the above function, this helper function will populate all results in the BSSRDFIntersection data structure.
@@ -392,6 +409,7 @@ SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Ray_
 //! @param  tri_simd    Data structure holds four/eight triangles.
 //! @param  ret         The result of intersection.
 SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray_Data& ray_simd, const Simd_Triangle& tri_simd, const StringID matID , BSSRDFIntersections& intersections) {
+#ifndef SIMD_TRI_REFERENCE_IMPLEMENTATION
     simd_data   u_simd, v_simd, t_simd, mask;
     const auto intersected = intersectTriangleInner_SIMD<false>(ray, ray_simd, tri_simd, t_simd, u_simd, v_simd, mask);
     if (!intersected)
@@ -432,6 +450,37 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
             intersections.ResolveMaxDepth();
         }
     }
+#else
+    Intersection intersection;
+    for( auto i = 0u ; i < SIMD_CHANNEL && nullptr != tri_simd.m_ori_pri[i] ; ++i ){
+        const auto* primitive = tri_simd.m_ori_pri[i];
+        if (matID != primitive->GetMaterial()->GetID())
+            continue;
+
+        intersection.Reset();
+        const auto intersected = primitive->GetIntersect(ray, &intersection);
+        if (intersected) {
+            if (intersections.cnt < TOTAL_SSS_INTERSECTION_CNT) {
+                intersections.intersections[intersections.cnt] = SORT_MALLOC(BSSRDFIntersection)();
+                intersections.intersections[intersections.cnt++]->intersection = intersection;
+            }
+            else {
+                auto picked_i = -1;
+                auto t = 0.0f;
+                for (auto i = 0; i < TOTAL_SSS_INTERSECTION_CNT; ++i) {
+                    if (t < intersections.intersections[i]->intersection.t) {
+                        t = intersections.intersections[i]->intersection.t;
+                        picked_i = i;
+                    }
+                }
+                if (picked_i >= 0)
+                    intersections.intersections[picked_i]->intersection = intersection;
+
+                intersections.ResolveMaxDepth();
+            }
+        }
+    }
+#endif
 }
 
 #endif // SIMD_SSE_IMPLEMENTATION || SIMD_AVX_IMPLEMENTATION

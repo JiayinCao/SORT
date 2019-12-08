@@ -20,6 +20,9 @@
 #include "core/define.h"
 #include "math/bbox.h"
 
+// Reference implementation is disabled by default, it is only for debugging purposes.
+// #define SIMD_BBOX_REFERENCE_IMPLEMENTATION
+
 #if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
     static_assert( false , "More than one SIMD version is defined before including simd_bbox." );
 #endif
@@ -57,6 +60,7 @@ public:
 static_assert( sizeof( Simd_BBox ) % SIMD_ALIGNMENT == 0 , "Incorrect size of Simd_BBox." );
 
 SORT_FORCEINLINE int IntersectBBox_SIMD(const Ray& ray, const Simd_Ray_Data& simd_ray , const Simd_BBox& bb, simd_data& f_min ) {
+#ifndef SIMD_BBOX_REFERENCE_IMPLEMENTATION
     f_min = simd_set_ps1( ray.m_fMin );
     simd_data f_max = simd_set_ps1( ray.m_fMax );
 
@@ -79,5 +83,28 @@ SORT_FORCEINLINE int IntersectBBox_SIMD(const Ray& ray, const Simd_Ray_Data& sim
     f_min = simd_pick_ps( mask , f_min , simd_neg_ones );
 
     return simd_movemask_ps( mask );
+#else
+    int ret = 0;
+    for( auto i = 0u ; i < SIMD_CHANNEL ; ++i ){
+        if( bb.m_min_x[i] > bb.m_max_x[i] ){
+            f_min[i] = -1.0f;
+            continue;
+        }
+
+        BBox bbox;
+        bbox.m_Min[0] = bb.m_min_x[i];
+        bbox.m_Min[1] = bb.m_min_y[i];
+        bbox.m_Min[2] = bb.m_min_z[i];
+        bbox.m_Max[0] = bb.m_max_x[i];
+        bbox.m_Max[1] = bb.m_max_y[i];
+        bbox.m_Max[2] = bb.m_max_z[i];
+
+        f_min[i] = Intersect( ray , bbox );
+
+        if( f_min[i] >= 0.0f )
+            ret |= ( 1 << i );
+    }
+    return ret;
+#endif
 }
 #endif
