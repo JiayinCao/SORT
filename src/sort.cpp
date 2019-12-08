@@ -95,10 +95,7 @@ int RunSORT( int argc , char** argv ){
     }else{
         slog(INFO, GENERAL, "Number of CPU cores %d", std::thread::hardware_concurrency());
         #ifdef SORT_ENABLE_STATS_COLLECTION
-            if( g_profilingEnabled )
                 slog(INFO, GENERAL, "Stats collection is enabled.");
-            else
-                slog(INFO, GENERAL, "Stats collection is disabled.");
         #else
             slog(INFO, GENERAL, "Stats collection is disabled.");
         #endif
