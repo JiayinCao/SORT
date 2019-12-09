@@ -129,7 +129,7 @@ static SORT_FORCEINLINE simd_data   simd_mad_ps( const simd_data& a , const simd
     return _mm_add_ps( _mm_mul_ps( get_sse_data(a) , get_sse_data(b) ) , get_sse_data(c) );
 }
 static SORT_FORCEINLINE simd_data   simd_pick_ps( const simd_data& mask , const simd_data& a , const simd_data& b ){
-    return _mm_blendv_ps( get_sse_data(b) , get_sse_data(a) , mask );
+    return _mm_blendv_ps( get_sse_data(b) , get_sse_data(a) , get_sse_data(mask) );
 }
 static SORT_FORCEINLINE simd_data   simd_cmpeq_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_cmpeq_ps( get_sse_data(s0) , get_sse_data(s1) );
@@ -263,7 +263,7 @@ static SORT_FORCEINLINE simd_data   simd_mad_ps( const simd_data& a , const simd
     return _mm256_add_ps( _mm256_mul_ps( get_avx_data(a) , get_avx_data(b) ) , get_avx_data(c) );
 }
 static SORT_FORCEINLINE simd_data   simd_pick_ps( const simd_data& mask , const simd_data& a , const simd_data& b ){
-    return _mm256_blendv_ps( get_avx_data(b) , get_avx_data(a) , mask );
+    return _mm256_blendv_ps( get_avx_data(b) , get_avx_data(a) , get_avx_data(mask) );
 }
 static SORT_FORCEINLINE simd_data   simd_cmpeq_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_EQ_OQ );
