@@ -578,10 +578,10 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
         }
 
         float f_min[FBVH_CHILD_CNT] = { FLT_MAX };
-        for (auto i = 0; i < node->child_cnt; ++i)
+        for (auto i = 0u; i < node->child_cnt; ++i)
             f_min[i] = Intersect(ray, node->bbox[i]);
 
-        for (auto i = 0; i < node->child_cnt; ++i)
+        for (auto i = 0u; i < node->child_cnt; ++i)
             if( f_min[i] >= 0.0f )
                 bvh_stack[si++] = node->children[i].get();
 #endif
