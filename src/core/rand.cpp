@@ -46,8 +46,8 @@ static thread_local bool seed_setup = false;
 
 static thread_local std::default_random_engine  re;
 
-static thread_local std::uniform_real_distribution<unsigned>    dist_uint;
-static thread_local std::uniform_real_distribution<float>       dist_float( 0.0f , 1.0f );
+static thread_local std::uniform_int_distribution<unsigned>    dist_uint;
+static thread_local std::uniform_real_distribution<float>      dist_float( 0.0f , 1.0f );
 
 #endif
 
