@@ -205,7 +205,7 @@ if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
     endif()
 
-    if(ENABLE_AVX_OPTIMIZATION)
+    if(ENABLE_SSE_OPTIMIZATION)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
     endif()
 
