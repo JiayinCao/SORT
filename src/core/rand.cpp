@@ -17,7 +17,6 @@
 
 #include "rand.h"
 #include "core/define.h"
-#include "core/define.h"
 #include "core/thread.h"
 
 #if defined(SORT_IN_LINUX)
@@ -25,6 +24,12 @@
 #include <time.h>
 #endif
 
+#include <random>
+
+// this is to be totally removed after confirming it works on all platforms.
+//#define HIDE_OLD_RANDDOM_GENERATOR
+
+#ifndef HIDE_OLD_RANDDOM_GENERATOR
 // Random Number Method Definitions
 #define M 397
 #define MATRIX_A 0x9908b0dfUL   /* constant vector a */
@@ -37,11 +42,22 @@ static thread_local unsigned long mt[N]; /* the array for the state vector  */
 static thread_local int mti;
 static thread_local bool seed_setup = false;
 
+#else
+
+static thread_local std::default_random_engine  re;
+
+static thread_local std::uniform_real_distribution<unsigned>    dist_uint;
+static thread_local std::uniform_real_distribution<float>       dist_float( 0.0f , 1.0f );
+
+#endif
+
 // set the seed
 void sort_seed()
 {
-    unsigned seed = ( ThreadId() + 1 ) * (unsigned)time(0);
-    mt[0]= seed & 0xffffffffUL;
+    unsigned _seed = ( ThreadId() + 1 ) * (unsigned)time(0);
+
+#ifndef HIDE_OLD_RANDDOM_GENERATOR
+    mt[0]= _seed & 0xffffffffUL;
     for (mti=1; mti<N; mti++) {
         mt[mti] =
         (1812433253UL * (mt[mti-1] ^ (mt[mti-1] >> 30)) + mti);
@@ -54,11 +70,15 @@ void sort_seed()
     }
 
     seed_setup = true;
+#else
+    re.seed( _seed );
+#endif
 }
 
 // generate a unsigned integer
 unsigned sort_rand()
 {
+#ifndef HIDE_OLD_RANDDOM_GENERATOR
     unsigned long y;
     {
         static thread_local unsigned long mag01[2]={0x0UL, MATRIX_A};
@@ -96,10 +116,16 @@ unsigned sort_rand()
         y ^= (y >> 18);
     }
     return y;
+#else
+    return dist_uint(re);
+#endif
 }
 
 // generate a canonical random number
-float sort_canonical()
-{
+float sort_canonical(){
+#ifndef HIDE_OLD_RANDDOM_GENERATOR
     return (sort_rand() & 0xffffff) / float(1 << 24);
+#else
+    return dist_float(re);
+#endif
 }
