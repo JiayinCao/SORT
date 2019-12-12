@@ -27,7 +27,7 @@
 #include <random>
 
 // this is to be totally removed after confirming it works on all platforms.
-//#define HIDE_OLD_RANDDOM_GENERATOR
+#define HIDE_OLD_RANDDOM_GENERATOR
 
 #ifndef HIDE_OLD_RANDDOM_GENERATOR
 // Random Number Method Definitions
