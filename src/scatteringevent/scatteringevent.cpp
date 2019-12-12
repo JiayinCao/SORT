@@ -58,6 +58,17 @@ Vector ScatteringEvent::localToWorld( const Vector& v ) const{
 }
 
 float ScatteringEvent::SampleScatteringType( SE_Flag& flag ) const{
+    sAssert( m_bxdfTotalSampleWeight > 0.0f || m_bssrdfTotalSampleWeight > 0.0f , MATERIAL );
+
+    // handling common cases where there is either BSSRDF or BSDF.
+    if( m_bxdfTotalSampleWeight == 0.0f ){
+        flag = SE_EVALUATE_BSSRDF;
+        return 1.0f;
+    }else if( m_bssrdfTotalSampleWeight == 0.0f ){
+        flag = SE_EVALUATE_BXDF;
+        return 1.0f;
+    }
+
     const auto pdf_bxdf = m_bxdfTotalSampleWeight / ( m_bxdfTotalSampleWeight + m_bssrdfTotalSampleWeight );
     const auto r = sort_canonical();
     flag = ( r < pdf_bxdf ) ? SE_EVALUATE_BXDF : SE_EVALUATE_BSSRDF;
@@ -80,6 +91,7 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
 
     // randomly pick a bxdf
     float bxdf_pdf = 0.0f;
+    sAssert( m_bxdfTotalSampleWeight > 0.0f , MATERIAL );
     const Bxdf* bxdf = pickScattering<Bxdf>( m_bxdfs , m_bxdfCnt , m_bxdfTotalSampleWeight , bxdf_pdf );
 
     // transform the 'wo' from world space to shading coordinate
@@ -121,6 +133,7 @@ float ScatteringEvent::Pdf_BSDF( const Vector& wo , const Vector& wi ) const{
 
 void ScatteringEvent::Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const{
     // Randomly pick a bssrdf
+    sAssert( m_bssrdfTotalSampleWeight > 0.0f , MATERIAL );
     const Bssrdf* bssrdf = pickScattering<Bssrdf>( m_bssrdfs , m_bssrdfCnt , m_bssrdfTotalSampleWeight , pdf );
 
     // importance sampling the bssrdf
