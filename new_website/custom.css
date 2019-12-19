@@ -2,8 +2,8 @@
  * Globals
  */
 
-
 .reference-container {
-  max-width: 1024em;
+  max-width: 64em;
   text-align: justify;
+  padding-top: 90px;
 }
