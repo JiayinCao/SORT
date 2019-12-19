@@ -112,6 +112,30 @@
         </ul>
         <h3>Generated Binary</h3>
         <p>Only one executable file will be generated. It will be generated in a newly created folder ‘bin’ in the SORT root folder. For release version build, an executable named ‘sort_r’ will be generated. For debug version build, it is named ‘sort_d’.</p>
+
+        <hr width="50%" size="8" align="center">
+        <hr noshade>
+
+        <h2>Deploying SORT</h2>
+        <h5>Copying Blender Plugin</h5>
+        <p>There is a folder with the name ‘sortblend’ in SORT root folder, which has all blender plugin python source code in it. In order to add SORT in Blender as a new renderer, it is mandatory to copy the source code folder to the following folder,</p>
+        <ul>
+          <li><b>Windows</b><br>C:\Program Files\Blender\2.79\scripts\addons</li>
+          <li><b>Mac OS</b><br>~/Library/Application Support/Blender/2.79/script/addons/</li>
+          <li><b>Ubuntu</b><br>/home/$user/blender/2.79/scripts/addons/</li>
+        </ul>
+        <p>Depending the exact version of Blender, the above paths could be slightly different. However, the paths should be very similar with them.</p>
+
+        <h5>Activate SORT in Blender</h5>
+        <p>After compiling SORT with source code, there should be a binary folder with the name ‘bin’ in SORT root folder. Usually, the binary is named ‘sort_r’ for release version build and ‘sort_d’ for debugging version build. It is also fine to generate or copy the binary to any other desired folder with other binary file names.</p>
+        <p>Open the ‘Blender User Preferences’ in Blender by choosing ‘User Preferences’ in ‘File’ menu.</p>
+        <img src="./assets/building/active.png">
+        <p>Tick the checkbox before SORT and set the path of SORT binary to the folder that has SORT binary. There is another optional path to be set, it is supposed to be set to the binary path of PBRT so that it can export some scene to PBRT for a reference rendering result. The compilation of PBRT is out of scope of this wiki, please refer <a href="https://pbrt.org/">this page</a> for further detail. This path is totally optional, meaning SORT will work just fine without it being set to anything.</p>
+
+        <h5>Picking SORT as the Renderer</h5>
+        <p>After SORT is activated in Blender, the next step is to pick SORT as the renderer in Blender so that Blender will send jobs to SORT for rendering. </p>
+        <img src="./assets/building/pick_renderer.png">
+        <p>Simply by choosing SORT in engine will pick it as the main renderer. The rendering process is no difference from other engines.</p>
       </main>
     </div>
 
