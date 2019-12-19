@@ -14,6 +14,7 @@
 
     <!-- Custom styles for this template -->
     <link href="cover.css" rel="stylesheet">
+    <link href="custom.css" rel="stylesheet">
   </head>
 
   <body class="text-center">
@@ -50,18 +51,41 @@
       </div>
     </nav>
 
-    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+    <div class="reference-container d-flex h-100 p-3 mx-auto flex-column">
       <header class="masthead mb-auto">
         <div class="inner">
         </div>
       </header>
 
       <main role="main" class="inner cover">
-        <h1 class="cover-heading">Simple Open-source Ray Tracing</h1>
-        <p class="lead">SORT, short for Simple Open-source Ray Tracing, is my personal cross platform ray tracing renderer. It is a standalone ray tracing program, while works well in Blender as a renderer plugin. Simliar to other open source ray tracer, like PBRT, luxrenderer, SORT is also a physically based renderer. However, since it is a solo project that I worked on in my spare time, it is way simpler comparing with others. </p>
-        <p class="lead">
-          <a href="https://github.com/JiayinCao/SORT" class="btn btn-lg btn-secondary">View on Github</a>
-        </p>
+        <ul class="list-unstyled">
+            <li><b><font size="+2">Physically Based Shading</font></b>
+                <ul>
+                <li><a href="pbrt.org">Physically based rendering: From theory to implementation</a>, Matt Pharr, Wenzel Jakob, Greg Humphreys.</li>
+                <li><a href="https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf">Physically-based Shading at Disney</a>, Brent Burley. SIGGRAPH 2012.</li>
+                <li><a href="https://blog.selfshadow.com/publications/s2015-shading-course/burley/s2015_pbs_disney_bsdf_notes.pdf">Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering</a>, Brent Burley. SIGGRAPH 2015.</li>
+                <li><a href="https://schuttejoe.github.io/post/disneybsdf/">Rendering the Moana Island Scene Part 1: Implementing the Disney BSDF</a>, Schuttejoe.</li>
+                <li><a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.160.2363&rep=rep1&type=pdf">Arbitrarily Layered Micro-Facet Surfaces</a>, Andrea Weidlich, Alexander Wikie. GRAPHITE 2007.</li>
+                <li><a href="https://ivokabel.github.io/2018/05/15/rendering-layered-materials.html">Rendering Layered Materials</a>, Ivo Pavlik. EGSR 2008. </li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="list-unstyled">
+            <li><b><font size="+2">Spatial Data Structure</font></b>
+                <ul>
+                <li><a href="http://www.irisa.fr/prive/kadi/Sujets_CTR/kadi/Kadi_sujet2_article_Kdtree.pdf">On building fast kd-Trees for Ray Tracing, and on doing that in O(N log N)</a>, Ingo Wald, Vlastimil Havran. </li>
+                <li><a href="https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.inst.100/institut/Papers/QBVH.pdf">Shallow Bounding Volume Hierarchies for Fast SIMD Ray Tracing of Incoherent Rays</a>, H. Dammertz, J. Hanika, A. Keller. </li>
+                </ul>
+            </li>
+        </ul>
+        <ul class="list-unstyled">
+            <li><b><font size="+2">Subsurface Scattering</font></b>
+                <ul>
+                <li><a href="http://www.aconty.com/pdf/bssrdf.pdf">BSSRDF Importance Sampling</a>, Alan King, Christopher Kulla, Alejandro Conty, Marcos Fajardo. SIGGRAPH 2013.</li>
+                <li><a href="https://graphics.pixar.com/library/ApproxBSSRDF/paper.pdf">Approximate Reflectance Profiles for Efficient Subsurface Scattering</a>, Per H. Christensen, Brent Burley.</li>
+                </ul>
+            </li>
+        </ul>
       </main>
 
       <footer class="mastfoot mt-auto">
