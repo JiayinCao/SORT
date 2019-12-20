@@ -15,6 +15,18 @@
     <!-- Custom styles for this template -->
     <link href="cover.css" rel="stylesheet">
     <link href="custom.css" rel="stylesheet">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="./bootstrap/js/bootstrap.min.js"></script>
+    <script src="./bootstrap/lightbox/ekko-lightbox.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function ($) {
+        $(document).delegate('*[data-toggle="enlarge_image"]:not([data-gallery="navigateTo"])', 'click', function(event){
+          event.preventDefault();
+          return $(this).ekkoLightbox({});
+        });
+      });
+    </script>
   </head>
 
   <body class="text-center">
@@ -56,87 +68,85 @@
 
       <p>I am seeking cooperation with artists to put more art work on this page. Any good quality assets are very welcome.</p>
 
-      <!-- Grid row -->
-      <div class="gallery" id="gallery">
+        <div class="gallery" id="gallery">
 
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/curly hair.png" alt="Card image cap">
+            <a href="./assets/home/curly hair.png" data-toggle="enlarge_image" data-title="Cartoon Human" data-footer="Thanks to rico cilliers for his open source asset.">
+                <img src="./assets/home/curly hair.png" class="img-fluid" alt="Card image cap">
+            </a>
         </div>
-        <!-- Grid column -->
 
-        <!-- Grid column -->
-        <div class="mb-3 pics animation all 2">
-          <img class="img-fluid" src="./assets/gallery/car.png" alt="Card image cap">
-        </div>
-        <!-- Grid column -->
-
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/human.png" alt="Card image cap">
+            <a href="./assets/gallery/human.png" data-toggle="enlarge_image" data-title="Realistic Human" data-footer="Thanks to rico cilliers for his open source asset.">
+                <img src="./assets/gallery/human.png" class="img-fluid" alt="Card image cap">
+            </a>
         </div>
-        <!-- Grid column -->
 
-        <!-- Grid column -->
-        <div class="mb-3 pics animation all 2">
-          <img class="img-fluid" src="./assets/gallery/stormtrooper.png" alt="Card image cap">
-        </div>
-        <!-- Grid column -->
-
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/glass_monkey_head.png" alt="Card image cap">
-        </div>
-        <!-- Grid column -->
+            <a href="./assets/gallery/car.png" data-toggle="enlarge_image" data-title="Old School Car" data-footer="Thanks to Christophe Desse for this awesome asset.">
+                <img src="./assets/gallery/car.png" class="img-fluid" alt="Card image cap">
+            </a>
+        </div>        
 
-        <!-- Grid column -->
-        <div class="mb-3 pics animation all 2">
-          <img class="img-fluid" src="./assets/gallery/living room.png" alt="Card image cap">
-        </div>
-        <!-- Grid column -->
-
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/sponza.png" alt="Card image cap">
+            <a href="./assets/gallery/stormtrooper.png" data-toggle="enlarge_image" data-title="Stormtrooper" data-footer="Thanks to ScottGraham for the free downloadable asset. The above rendered image is not used for any commercial purposes.">
+                <img src="./assets/gallery/stormtrooper.png" class="img-fluid" alt="Card image cap">
+            </a>
         </div>
-        <!-- Grid column -->
 
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/sss_dragon.png" alt="Card image cap">
+            <a href="./assets/gallery/glass_monkey_head.png" data-toggle="enlarge_image" data-title="Glass Monkey Head">
+                <img src="./assets/gallery/glass_monkey_head.png" class="img-fluid" alt="Card image cap">
+            </a>
         </div>
-        <!-- Grid column -->
 
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/table.png" alt="Card image cap">
+            <a href="./assets/gallery/living room.png" data-toggle="enlarge_image" data-title="Living Room">
+                <img src="./assets/gallery/living room.png" class="img-fluid" alt="Card image cap">
+            </a>
         </div>
-        <!-- Grid column -->
 
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/santa_hat.png" alt="Card image cap">
+            <a href="./assets/gallery/sponza.png" data-toggle="enlarge_image" data-title="Sponza">
+                <img src="./assets/gallery/sponza.png" class="img-fluid" alt="Card image cap">
+            </a>
         </div>
-        <!-- Grid column -->
 
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/dof.png" alt="Card image cap">
+            <a href="./assets/gallery/sss_dragon.png" data-toggle="enlarge_image" data-title="Stanford Dragon with Subsurface Scattering">
+                <img src="./assets/gallery/sss_dragon.png" class="img-fluid" alt="Card image cap">
+            </a>
         </div>
-        <!-- Grid column -->
 
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/dinning room.png" alt="Card image cap">
+            <a href="./assets/gallery/table.png" data-toggle="enlarge_image" data-title="Table">
+                <img src="./assets/gallery/table.png" class="img-fluid" alt="Card image cap">
+            </a>
         </div>
-        <!-- Grid column -->
 
-        <!-- Grid column -->
         <div class="mb-3 pics animation all 1">
-          <img class="img-fluid" src="./assets/gallery/cups.png" alt="Card image cap">
+            <a href="./assets/gallery/santa_hat.png" data-toggle="enlarge_image" data-title="Santa Hat">
+                <img src="./assets/gallery/santa_hat.png" class="img-fluid" alt="Card image cap">
+            </a>
         </div>
-        <!-- Grid column -->
 
+        <div class="mb-3 pics animation all 1">
+            <a href="./assets/gallery/dof.png" data-toggle="enlarge_image" data-title="Depth of Field">
+                <img src="./assets/gallery/dof.png" class="img-fluid" alt="Card image cap">
+            </a>
+        </div>
+
+        <div class="mb-3 pics animation all 1">
+            <a href="./assets/gallery/dinning room.png" data-toggle="enlarge_image" data-title="Dinning Room">
+                <img src="./assets/gallery/dinning room.png" class="img-fluid" alt="Card image cap">
+            </a>
+        </div>
+
+        <div class="mb-3 pics animation all 1">
+            <a href="./assets/gallery/cups.png" data-toggle="enlarge_image" data-title="Glass Cups">
+                <img src="./assets/gallery/cups.png" class="img-fluid" alt="Card image cap">
+            </a>
+        </div>
       </div>
       <!-- Grid row -->
     </div>
