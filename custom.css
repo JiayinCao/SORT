@@ -56,25 +56,41 @@ a {
   font-weight:bold;
 }
 
+h1 {
+  word-break: break-all;
+}
+
 h2 {
   font-weight: bold;
+  word-break: break-all;
 }
 
 h3 {
   font-weight: bold;
+  word-break: break-all;
 }
 
 h4 {
   font-weight: bold;
+  word-break: break-all;
 }
 
 h5 {
   font-weight: bold;
+  word-break: break-all;
 }
 
 img {
     max-width: 100%;
     max-height: 100%;
+}
+
+p{
+  word-break: break-all;
+}
+
+li{
+  word-break: break-all;
 }
 
 .gallery {
