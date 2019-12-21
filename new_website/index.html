@@ -16,6 +16,7 @@
 
     <!-- Custom styles for this template -->
     <link href="cover.css" rel="stylesheet">
+    <link href="custom.css" rel="stylesheet">
   </head>
 
   <body class="text-center">
@@ -31,9 +32,6 @@
           <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
               <a class="nav-link" href="./index.html">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="./features.html">Features</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="./gallery.html">Gallery</a>
@@ -54,24 +52,48 @@
       </div>
     </nav>
 
-    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
-      <header class="masthead mb-auto">
-        <div class="inner">
+    <div class="content-container">
+        <div class="mb-3">
+          <img src="./assets/home/cover.jpeg" style="border:0px solid black">
         </div>
-      </header>
 
-      <main role="main" class="inner cover">
+        <hr width="50%" size="8" align="center">
+        <hr noshade>
+
+        <div class="mb-3">
         <h1 class="cover-heading">Simple Open-source Ray Tracing</h1>
-        <p class="lead">SORT, short for Simple Open-source Ray Tracing, is my personal cross platform ray tracing renderer. It is a standalone ray tracing program, while works well in Blender as a renderer plugin. Simliar to other open source ray tracer, like PBRT, luxrenderer, SORT is also a physically based renderer. However, since it is a solo project that I worked on in my spare time, it is way simpler comparing with others. </p>
+        
+        <br>
+        
         <p class="lead">
           <a href="https://github.com/JiayinCao/SORT" class="btn btn-lg btn-secondary">View on Github</a>
         </p>
-      </main>
 
-      <footer class="mastfoot mt-auto">
-        <div class="inner">
+        <br>
+
+        <p class="lead">SORT, short for Simple Open-source Ray Tracing, is my personal cross platform ray tracing renderer. It is a standalone ray tracing program, while works well in Blender as a renderer plugin. Simliar to other open source ray tracer, like PBRT, luxrenderer, SORT is also a physically based renderer. However, since it is a solo project that I worked on in my spare time, it is way simpler comparing with others. </p>
+
+        <br>
+
+        <p class="lead">Following features are implemented in SORT,</p>
+        <ul>
+          <li class="lead">Integrator. (Whitted ray tracing, direct lighting, path tracing, light tracing, bidirectional path tracing, instant radiosity, ambient occlusion).</li>
+          <li class="lead">Spatial acceleration structure. (OBVH, QBVH, BVH, KD-Tree, Uniform grid, OcTree)</li>
+          <li class="lead">BXDF. (Disney BRDF, Lambert, LambertTransmission, Oran Nayar, MicroFacet Reflection, Microfacet Transmission, MERL, Fourier, AshikhmanShirley, Modified Phong, Coat, Blend, Double-Sided, Distribution BRDF, DreamWorks Fabric BRDF).</li>
+          <li class="lead">Subsurface Scattering.</li>
+          <li class="lead">Fur, Hair.</li>
+          <li class="lead">Open Shading Language Support.</li>
+          <li class="lead">Depth of Field.</li>
+          <li class="lead">Multi-thread rendering, SIMD(SSE,AVX) Optimized.</li>
+          <li class="lead">Blender 2.8 Plugin.</li>
+          <li class="lead">Cross-platform (Windows, Ubuntu, MacOS).</li>
+        </ul>
         </div>
-      </footer>
+
+        <hr width="50%" size="8" align="center">
+        <hr noshade>
+
+        <p align="center">Copyright© 2011-2019 Jiayin Cao. All rights reserved.</p>
     </div>
   </body>
 </html>
