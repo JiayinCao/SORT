@@ -1,6 +1,4 @@
-<!doctype html>
 <html lang="en">
-
 <head>
   <title>SORT (Simple Open-source Ray Tracing)</title>
 
@@ -12,34 +10,26 @@
   <link href="cover.css" rel="stylesheet">
   <link href="custom.css" rel="stylesheet">
 
-  <link type="text/css" href="./fluidbox/css/fluidbox.min.css" media="all" rel="stylesheet" />
-
   <!-- Load jQuery -->
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 
   <!-- Bootstrap core CSS -->
   <link href="./bootstrap/css/bootstrap.min.css" media="all" rel="stylesheet" />
-
-  <!-- Load plugins -->
-  <script type="text/javascript" src="./fluidbox/js/jquery.fluidbox.min.js"></script>
-
-  <!-- Demo-specific jQuery -->
-  <script>
-    $(function () {
-      $('.mb-3 a[data-fluidbox]').fluidbox();
-    });
-  </script>
-
   <script src="./bootstrap/js/bootstrap.min.js"></script>
-  <script src="./bootstrap/lightbox/ekko-lightbox.min.js"></script>
-  <script type="text/javascript">
-    $(document).ready(function ($) {
-      $(document).delegate('*[data-toggle="lightbox"]:not([data-gallery="navigateTo"])', 'click', function(event){
-        event.preventDefault();
-        return $(this).ekkoLightbox({});
-      });
-    });
-  </script>
+
+  <!-- Lightbox -->
+  <link href="./lightbox/css/lightbox.css" rel="stylesheet" />
+  <script src="./lightbox/js/lightbox.js"></script>
+  
+  <script>
+    lightbox.option({
+      'resizeDuration'    : 50,
+      'imageFadeDuration' : 50,
+      'fadeDuration'      : 200,
+      'disableScrolling'  : true,
+      'albumLabel'        : ''
+    })
+</script>
 </head>
 
   <body class="text-center">
@@ -84,83 +74,80 @@
         <div class="gallery" id="gallery">
 
         <div class="mb-3">
-            <a href="./assets/gallery/curly hair.png" data-toggle="lightbox" data-title="Realistic Human" data-footer="Asset courtesy of &nbsp <a href='https://www.artstation.com/ricocilliers'>rico cilliers</a>">
-                <img src="./assets/gallery/thumb/curly hair.jpg">
+            <a href="./assets/gallery/curly hair.png" data-lightbox="image-1" data-title="Asset courtesy of <a href='https://www.artstation.com/ricocilliers'>rico cilliers</a>.">
+                <img src="./assets/gallery/thumb/curly hair.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/human.png" data-toggle="lightbox" data-title="Realistic Human" data-footer="Asset courtesy of &nbsp <a href='https://www.artstation.com/ricocilliers'>rico cilliers</a>">
-                <img src="./assets/gallery/thumb/human.jpg" class="img-fluid">
+            <a href="./assets/gallery/human.png" data-lightbox="image-1" data-title="Asset courtesy of <a href='https://www.artstation.com/ricocilliers'>rico cilliers</a>.">
+                <img src="./assets/gallery/thumb/human.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/car.png" data-toggle="lightbox" data-title="Old School Car" data-footer="Asset courtesy of &nbsp <a href='https://www.artstation.com/christophe-desse'> Christophe Desse</a>">
-                <img src="./assets/gallery/thumb/car.jpg" class="img-fluid">
+            <a href="./assets/gallery/car.png" data-lightbox="image-1" data-title="Asset courtesy of <a href='https://www.artstation.com/christophe-desse'> Christophe Desse</a>.">
+                <img src="./assets/gallery/thumb/car.jpg"/>
             </a>
         </div>        
 
         <div class="mb-3">
-            <a href="./assets/gallery/stormtrooper.png" data-fluidbox><img src="./assets/gallery/thumb/stormtrooper.jpg"/></a>
-            <!--
-            <a href="./assets/gallery/stormtrooper.png" data-toggle="lightbox" data-title="Stormtrooper" data-footer="Asset courtesy of &nbsp <a href='https://www.blendswap.com/blend/13953'> ScottGraham </a>. The above rendered image is not used for any commercial purposes.">
-                <img src="./assets/gallery/thumb/stormtrooper.jpg" class="img-fluid">
-            </a>
-            -->
-        </div>
-
-        <div class="mb-3">
-            <a href="./assets/gallery/glass_monkey_head.png" data-toggle="lightbox" data-title="Glass Monkey Head">
-                <img src="./assets/gallery/thumb/glass_monkey_head.jpg" class="img-fluid">
+            <a href="./assets/gallery/stormtrooper.png" data-lightbox="image-1" data-title="Asset courtesy of <a href='https://www.blendswap.com/blend/13953'> ScottGraham</a>. The above rendered image is not used for any commercial purposes.">
+                <img src="./assets/gallery/thumb/stormtrooper.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/living room.png" data-toggle="lightbox" data-title="Living Room">
-                <img src="./assets/gallery/thumb/living room.jpg" class="img-fluid">
+            <a href="./assets/gallery/glass_monkey_head.png" data-lightbox="image-1">
+                <img src="./assets/gallery/thumb/glass_monkey_head.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/sponza.png" data-toggle="lightbox" data-title="Sponza">
-                <img src="./assets/gallery/thumb/sponza.jpg" class="img-fluid">
+            <a href="./assets/gallery/living room.png" data-lightbox="image-1">
+                <img src="./assets/gallery/thumb/living room.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/sss_dragon.png" data-toggle="lightbox" data-title="Stanford Dragon with Subsurface Scattering">
-                <img src="./assets/gallery/thumb/sss_dragon.jpg" class="img-fluid">
+            <a href="./assets/gallery/sponza.png" data-lightbox="image-1">
+                <img src="./assets/gallery/thumb/sponza.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/table.png" data-toggle="lightbox" data-title="Table">
-                <img src="./assets/gallery/thumb/table.jpg" class="img-fluid">
+            <a href="./assets/gallery/sss_dragon.png" data-lightbox="image-1">
+                <img src="./assets/gallery/thumb/sss_dragon.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/santa_hat.png" data-toggle="lightbox" data-title="Santa Hat">
-                <img src="./assets/gallery/thumb/santa_hat.jpg" class="img-fluid">
+            <a href="./assets/gallery/table.png" data-lightbox="image-1">
+                <img src="./assets/gallery/thumb/table.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/dof.png" data-toggle="lightbox" data-title="Depth of Field">
-                <img src="./assets/gallery/thumb/dof.jpg" class="img-fluid">
+            <a href="./assets/gallery/santa_hat.png" data-lightbox="image-1">
+                <img src="./assets/gallery/thumb/santa_hat.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/dinning room.png" data-toggle="lightbox" data-title="Dinning Room">
-                <img src="./assets/gallery/thumb/dinning room.jpg" class="img-fluid">
+            <a href="./assets/gallery/dof.png" data-lightbox="image-1">
+                <img src="./assets/gallery/thumb/dof.jpg"/>
             </a>
         </div>
 
         <div class="mb-3">
-            <a href="./assets/gallery/cups.png" data-toggle="lightbox" data-title="Glass Cups">
-                <img src="./assets/gallery/thumb/cups.jpg" class="img-fluid">
+            <a href="./assets/gallery/dinning room.png" data-lightbox="image-1">
+                <img src="./assets/gallery/thumb/dinning room.jpg"/>
+            </a>
+        </div>
+
+        <div class="mb-3">
+            <a href="./assets/gallery/cups.png" data-lightbox="image-1">
+                <img src="./assets/gallery/thumb/cups.jpg"/>
             </a>
         </div>
       </div>
