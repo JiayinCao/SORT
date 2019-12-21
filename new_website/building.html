@@ -21,35 +21,37 @@
 
   <body class="text-center">
 
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-      <a class="navbar-brand">SORT</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+      <div class="container">
+        <a class="navbar-brand">SORT</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="./index.html">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./features.html">Features</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./gallery.html">Gallery</a>
-          </li>
-          <li class="nav-item active">
-            <a class="nav-link" href="./building.html">Building SORT</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="./references.html">References</a>
-          </li>
-        </ul>
-        <ul class="navbar-nav navbar-right">
-          <li class="nav-item">
-            <a class="nav-link" href="./aboutme.html">About Me</a>
-          </li>
-        </ul>
+        <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="./index.html">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="./features.html">Features</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="./gallery.html">Gallery</a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="./building.html">Building SORT</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="./references.html">References</a>
+            </li>
+          </ul>
+          <ul class="navbar-nav navbar-right">
+            <li class="nav-item">
+              <a class="nav-link" href="./aboutme.html">About Me</a>
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
 
@@ -78,7 +80,7 @@
         </ul>
         <h5>Download Dependencies before Compiling</h5>
         <p>SORT uses a third-party library that is not deployed with the source code together. In order to compile SORT successfully, it is mandatory to download the dependencies before compiling. Otherwise, it will have trouble locating the library, leading to the error in CMake generation.</p>
-        <p>To download the dependency files, simply run ‘make update_dep’ to retrieve it. However, if the script doesn’t work somehow, it is also fine to <a href="http://45.63.123.194/">download</a> the file directly. It is necessary to make sure the platform matches the target platform it runs on. The exact folder to put the dependencies should be ‘dependencies’ in the root folder. It should look like this SORT_Root/dependencies/easy_profiler/(bin/lib/include).</p>
+        <p>To download the dependency files, simply run ‘make update_dep’ to retrieve it. However, if the script doesn’t work somehow, it is also fine to <a href="http://45.63.123.194/">download</a> the file directly. It is necessary to make sure the platform matches the target platform it runs on. The exact folder to put the dependencies should be ‘dependencies’ in the root folder.
         <p>The last resort is to compile the library with <a href="https://github.com/yse/easy_profiler">source code</a> by yourself. This is not suggested to compile the source code of easy_profiler due to potential changes in different version may cause unknown problems in SORT. The pre-compiled ones are more desired than compiling it by yourself.</p>
         <h5>Windows</h5>
         <p>It is necessary to install Visual Studio 2015 or above to compile SORT on Windows. And please also make sure that ‘msbuild.exe’ is in the system ‘Path’ folder so that the script can run it directly.</p>
