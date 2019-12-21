@@ -6,6 +6,8 @@
   max-width: 64em;
   text-align: justify;
   padding-top: 90px;
+  padding-left: 32px;
+  padding-right: 32px;
   background-image: url("./assets/background.png");
   color: #bbbbbb;
 }
