@@ -92,22 +92,6 @@ void OptimizeShader(OSL::ShaderGroup* group) {
     g_shadingsys->optimize_group(group);
 }
 
-// To be deprecated
-void ExecuteShader( Bsdf* bsdf , Bssrdf*& bssrdf , const Intersection& intersection , OSL::ShaderGroup* shader , bool replaceBSSRDF ){
-    ShaderGlobals shaderglobals;
-    shaderglobals.P = Vec3( intersection.intersect.x , intersection.intersect.y , intersection.intersect.z );
-    shaderglobals.u = intersection.u;
-    shaderglobals.v = intersection.v;
-    shaderglobals.N = Vec3( intersection.normal.x , intersection.normal.y , intersection.normal.z );
-    shaderglobals.Ng = Vec3( intersection.gnormal.x , intersection.gnormal.y , intersection.gnormal.z );
-    shaderglobals.I = Vec3( intersection.view.x , intersection.view.y , intersection.view.z );
-    shaderglobals.dPdu = Vec3( 0.0f );
-    shaderglobals.dPdu = Vec3( 0.0f );
-    g_shadingsys->execute(g_contexts[ ThreadId() ], *shader, shaderglobals);
-
-    ProcessClosure( bsdf , bssrdf , intersection , shaderglobals.Ci , Color3( 1.0f ) , replaceBSSRDF );
-}
-
 void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
     const Intersection& intersection = se.GetIntersection();
 

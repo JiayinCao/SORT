@@ -23,7 +23,6 @@
 #include "spectrum/spectrum.h"
 #include "core/thread.h"
 #include "core/samplemethod.h"
-#include "scatteringevent/bsdf/bsdf.h"
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/bsdf/orennayar.h"
 #include "scatteringevent/bsdf/phong.h"

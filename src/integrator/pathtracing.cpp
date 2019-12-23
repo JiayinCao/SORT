@@ -17,7 +17,6 @@
 
 #include "pathtracing.h"
 #include "math/intersection.h"
-#include "scatteringevent/bsdf/bsdf.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
 #include "core/scene.h"
 #include "integratormethod.h"

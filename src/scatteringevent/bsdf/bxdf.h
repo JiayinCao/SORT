@@ -160,7 +160,7 @@ protected:
 
     //! @brief  This is a helpf function transforming vector from local coordinate to shading coordinate.
     //!
-    //! Bsdf is only responsible for transforming vector from world space to local coordinate without taking
+    //! Bxdf is only responsible for transforming vector from world space to local coordinate without taking
     //! normal map into consideration. Another transformation needs to be applied if there is normal map.
     //! Local coordinate is exactly the same with shading coordinate if there is no normal map.
     //! This is the function to perform the transformation if needed.

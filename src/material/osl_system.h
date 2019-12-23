@@ -56,10 +56,6 @@ bool BuildShader( const std::string& shader_source, const std::string& shader_na
 // Connect parameters between shaders
 bool ConnectShader( const std::string& source_shader , const std::string& source_param , const std::string& target_shader , const std::string& target_param );
 
-// To be deprecated
-// Execute a shader and populate the bsdf
-void ExecuteShader( class Bsdf* bsdf , class Bssrdf*& bssrdf , const class Intersection& intersection , OSL::ShaderGroup* shader , bool replaceBSSRDF );
-
 //! Execute a shader and populate the scattering event
 //!
 //! @param  shader      The osl shader to be evaluated.

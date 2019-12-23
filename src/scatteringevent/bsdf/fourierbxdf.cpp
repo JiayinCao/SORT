@@ -18,7 +18,6 @@
 #include <string.h>
 #include <fstream>
 #include "fourierbxdf.h"
-#include "bsdf.h"
 #include "core/memory.h"
 #include "core/samplemethod.h"
 #include "sampler/sample.h"

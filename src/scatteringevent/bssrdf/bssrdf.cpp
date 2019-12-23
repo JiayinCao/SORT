@@ -17,7 +17,6 @@
 
 #include "bssrdf.h"
 #include "math/intersection.h"
-#include "scatteringevent/bsdf/bsdf.h"
 #include "math/utils.h"
 #include "memory.h"
 #include "core/rand.h"

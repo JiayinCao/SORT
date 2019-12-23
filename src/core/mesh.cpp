@@ -21,7 +21,7 @@
 #include "material/matmanager.h"
 #include "entity/entity.h"
 #include "stream/stream.h"
-#include "scatteringevent/bsdf/bsdf.h"
+#include "scatteringevent/bsdf/bxdf_utils.h"
 
 void BufferMemory::ApplyTransform( const Transform& transform ){
     for (MeshVertex& mv : m_vertices) {

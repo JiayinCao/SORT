@@ -19,8 +19,6 @@
 
 #include <OSL/oslexec.h>
 
-class Bsdf;
-class Bssrdf;
 class Intersection;
 class ScatteringEvent;
 
@@ -51,9 +49,6 @@ enum BXDF_CLOSURE_TYPE {
 //!
 //! @param  shadingsys      Shading system of OSL.
 void RegisterClosures(OSL::ShadingSystem* shadingsys);
-
-// To be deprecated
-void ProcessClosure(Bsdf* bsdf, Bssrdf*& bssrdf, const Intersection& intersection, const OSL::ClosureColor* closure, const OSL::Color3& w , bool replaceBSSRDF );
 
 //! @brief  Process the closure tree result and populate the BSDF.
 //!

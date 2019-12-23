@@ -16,7 +16,6 @@
  */
 
 #include "sky.h"
-#include "scatteringevent/bsdf/bsdf.h"
 #include "math/ray.h"
 #include "core/samplemethod.h"
 #include "core/memory.h"

@@ -16,7 +16,7 @@
  */
 
 #include "orennayar.h"
-#include "bsdf.h"
+#include "scatteringevent/bsdf/bxdf_utils.h"
 
 OrenNayar::OrenNayar(const Spectrum& reflectance, float sigma, const Spectrum& weight, const Vector& n, bool doubleSided) :
     Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance){

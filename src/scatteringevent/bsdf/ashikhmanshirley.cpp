@@ -16,7 +16,6 @@
  */
 
 #include "ashikhmanshirley.h"
-#include "bsdf.h"
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 

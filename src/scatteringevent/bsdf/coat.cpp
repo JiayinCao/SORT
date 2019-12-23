@@ -16,7 +16,6 @@
  */
 
 #include "coat.h"
-#include "bsdf.h"
 #include "sampler/sample.h"
 
 // Because this BRDF doesn't take TIR ( Total inner reflection ) into account, there is a small biased compensation introduced

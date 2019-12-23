@@ -25,7 +25,6 @@
 #include "math/intersection.h"
 #include "scatteringevent/scatteringunit.h"
 
-class Bsdf;
 class Scene;
 
 // Up to 4 intersection supported.

@@ -18,8 +18,8 @@
 #pragma once
 
 #include "bxdf.h"
-#include "bsdf.h"
 #include "core/resource.h"
+#include "scatteringevent/bsdf/bxdf_utils.h"
 
 //! @brief Phong BRDF.
 /**

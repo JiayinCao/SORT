@@ -22,7 +22,6 @@
 #include "core/memory.h"
 #include "core/path.h"
 #include "math/vector3.h"
-#include "bsdf.h"
 #include "material/matmanager.h"
 
 // constant to be used in MERL

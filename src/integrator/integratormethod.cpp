@@ -19,7 +19,7 @@
 #include "math/ray.h"
 #include "math/intersection.h"
 #include "scatteringevent/scatteringevent.h"
-#include "scatteringevent/bsdf/bsdf.h"
+#include "scatteringevent/bsdf/bxdf_utils.h"
 #include "core/primitive.h"
 #include "material/material.h"
 #include "light/light.h"

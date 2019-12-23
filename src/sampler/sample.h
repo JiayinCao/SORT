@@ -52,9 +52,7 @@ public:
 };
 
 // Bsdf Sample
-class   BsdfSample
-{
-// public field
+class   BsdfSample{
 public:
     float   t;      // a canonical number to select bxdf from bsdf
     float   u , v;  // 2d sample data
@@ -62,15 +60,12 @@ public:
     float   preserved;  // a preserved data for memory alignment
 
     // default constructor
-    BsdfSample(bool auto_generate=false)
-    {
-        if( auto_generate )
-        {
+    BsdfSample(bool auto_generate=false){
+        if( auto_generate ){
             t = sort_canonical();
             u = sort_canonical();
             v = sort_canonical();
-        }else
-        {
+        }else{
             t = 0.0f;
             v = 0.0f;
             u = 0.0f;
@@ -79,8 +74,7 @@ public:
 };
 
 // light sample offset
-class SampleOffset
-{
+class SampleOffset{
 public:
     unsigned num;   // the number of sample
     unsigned offset;// the offset of the samples

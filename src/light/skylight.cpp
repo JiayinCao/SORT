@@ -17,7 +17,6 @@
 
 #include "skylight.h"
 #include "sampler/sample.h"
-#include "scatteringevent/bsdf/bsdf.h"
 #include "core/samplemethod.h"
 
 Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{

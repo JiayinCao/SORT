@@ -35,8 +35,7 @@ SORT_STATS_AVG_COUNT("Bi-directional Path Tracing", "Average Path Length Startin
 IMPLEMENT_RTTI( BidirPathTracing );
 
 // return the radiance of a specific direction
-Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const
-{
+Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const{
     SORT_STATS(++sPrimaryRayCount);
 
     // pick a light randomly
@@ -62,8 +61,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
     double vcm = MIS(light_pdfa / light_emission_pdf);
     Spectrum throughput = le * cosAtLight / (light_emission_pdf * pdf);
     float rr = 1.0f;
-    while ((int)light_path.size() < max_recursive_depth)
-    {
+    while ((int)light_path.size() < max_recursive_depth){
         SORT_STATS(++sTotalLengthPathFromLight);
 
         BDPT_Vertex vert;
@@ -130,19 +128,15 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
     vc = 0.0f;
     vcm = MIS(total_pixel / ray.m_fPdfW);
     rr = 1.0f;
-    while (light_path_len <= (int)max_recursive_depth)
-    {
+    while (light_path_len <= (int)max_recursive_depth){
         SORT_STATS(++sTotalLengthPathFromEye);
 
         BDPT_Vertex vert;
         vert.depth = light_path_len;
-        if (false == scene.GetIntersect(wi, &vert.inter))
-        {
+        if (!scene.GetIntersect(wi, &vert.inter)){
             // the following code needs to be modified
-            if (scene.GetSkyLight() == light)
-            {
-                if( vert.depth <= max_recursive_depth && vert.depth > 0 )
-                {
+            if (scene.GetSkyLight() == light){
+                if( vert.depth <= max_recursive_depth && vert.depth > 0 ){
                     float emissionPdf;
                     float directPdfA;
                     Spectrum _li = light->Le( vert.inter, -wi.m_Dir , &directPdfA , &emissionPdf ) * throughput / light->PickPDF();
@@ -165,10 +159,8 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
 
         //-----------------------------------------------------------------------------------------------------
         // Path evaluation: it hits a light source
-        if (vert.inter.primitive->GetLight() == light)
-        {
-            if( vert.depth > 0 && vert.depth <= max_recursive_depth )
-            {
+        if (vert.inter.primitive->GetLight() == light){
+            if( vert.depth > 0 && vert.depth <= max_recursive_depth ){
                 float emissionPdf;
                 float directPdfA;
                 Spectrum _li = vert.inter.Le(-wi.m_Dir , &directPdfA , &emissionPdf ) * throughput / pdf;
@@ -231,16 +223,13 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
     return li;
 }
 
-void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num )
-{
+void BidirPathTracing::RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ){
     Integrator::RequestSample( sampler, ps , ps_num );
-
     sample_per_pixel = ps_num;
 }
 
 // connect vertices
-Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 , const Light* light , const Scene& scene ) const
-{
+Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 , const Light* light , const Scene& scene ) const{
     if( p0.depth + p1.depth >= max_recursive_depth )
         return 0.0f;
 
@@ -280,8 +269,7 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
 }
 
 // connect light sample
-Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const Light* light , const Scene& scene ) const
-{
+Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const Light* light , const Scene& scene ) const{
     if( eye_vertex.depth >= max_recursive_depth )
         return 0.0f;
 

@@ -17,7 +17,6 @@
 
 #include <cmath>
 #include "microfacet.h"
-#include "bsdf.h"
 #include "sampler/sample.h"
 #include "math/utils.h"
 #include "core/memory.h"

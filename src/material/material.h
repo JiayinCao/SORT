@@ -22,8 +22,6 @@
 #include <OSL/oslexec.h>
 #include "stream/stream.h"
 
-class Bsdf;
-class Bssrdf;
 class Intersection;
 class ScatteringEvent;
 
@@ -39,15 +37,6 @@ class ScatteringEvent;
  */
 class Material : public SerializableObject{
 public:
-    //! @brief      Populate BSDF and BSSRDF if available.
-    //!
-    //! @param      intersect       The intersection information at the point to be shaded.
-    //! @param      bsdf            A BSDF holding BXDF information will be returned. The BSDF is allocated in the memory pool,
-    //!                             meaning this is no need to release the memory in BSDF.
-    //! @param      bssrdf          Bidirectional sub-surface scattering reflectance density function.
-    //! @param      replaceBSSRDF   Whether to replace BSSRDF with BRDF, it is not necessary to need it in the second bounce.
-    void    UpdateScattering(const Intersection& intersect, Bsdf*& bsdf , Bssrdf*& bssrdf, bool replaceBSSRDF = false ) const;
-
     //! @brief      Parse scattering event from the material shader.
     //!
     //! @param      se              Scattering event to be returned.

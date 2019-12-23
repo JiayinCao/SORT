@@ -17,7 +17,6 @@
 
 #include "lambert.h"
 #include "math/vector3.h"
-#include "bsdf.h"
 #include "core/samplemethod.h"
 #include "sampler/sample.h"
 

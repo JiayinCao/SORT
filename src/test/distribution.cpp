@@ -17,7 +17,6 @@
 
 #include "thirdparty/gtest/gtest.h"
 #include "unittest_common.h"
-#include "scatteringevent/bsdf/bsdf.h"
 #include "sampler/sample.h"
 #include "spectrum/spectrum.h"
 #include "scatteringevent/bsdf/microfacet.h"

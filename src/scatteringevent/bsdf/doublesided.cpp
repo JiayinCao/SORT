@@ -16,11 +16,10 @@
  */
 
 #include "doublesided.h"
-#include "bsdf.h"
 #include "sampler/sample.h"
+#include "scatteringevent/bsdf/bxdf_utils.h"
 
-Spectrum DoubleSided::f(const Vector& wo, const Vector& wi) const
-{
+Spectrum DoubleSided::f(const Vector& wo, const Vector& wi) const{
     const auto back0 = CosTheta(wo) < 0.0f;
     const auto back1 = CosTheta(wi) < 0.0f;
     if (back0 ^ back1) return 0.0f;

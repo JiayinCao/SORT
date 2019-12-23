@@ -21,9 +21,9 @@
 #include <OSL/oslexec.h>
 #include <OSL/oslclosure.h>
 #include "bxdf.h"
-#include "bsdf.h"
 #include "fresnel.h"
 #include "spectrum/spectrum.h"
+#include "scatteringevent/bsdf/bxdf_utils.h"
 
 //! @brief Normal distribution function.
 class MicroFacetDistribution{

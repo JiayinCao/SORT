@@ -17,12 +17,12 @@
 
 #pragma once
 
-#include "core/define.h"
-#include <algorithm>
-#include "scatteringevent/bsdf/bsdf.h"
-#include "texture/texture.h"
 #include <vector>
+#include <algorithm>
+#include "core/define.h"
+#include "texture/texture.h"
 #include "core/sassert.h"
+#include "scatteringevent/bsdf/bxdf_utils.h"
 
 /*
 description :
@@ -34,28 +34,24 @@ description :
 // para 'v' : a canonical random variable
 // para 'x' : x position on the unit disk
 // para 'y' : y position on the unit disk
-SORT_FORCEINLINE void UniformSampleDisk( float u , float v , float& x , float& y )
-{
+SORT_FORCEINLINE void UniformSampleDisk( float u , float v , float& x , float& y ){
     float r , theta;
     float su = 2.0f * u - 1.0f;
     float sv = 2.0f * v - 1.0f;
     float asu = fabs( su );
     float asv = fabs( sv );
 
-    if( asu < asv )
-    {
+    if( asu < asv ){
         r = asv;
         float factor = ( sv > 0.0f ) ? -1.0f : 1.0f;
         theta = factor * su / r + 4.0f + 2.0f * factor ;
-    }else if( asv < asu )
-    {
+    }else if( asv < asu ){
         r = asu;
         float factor = ( su > 0.0f ) ? 1.0f : -1.0f;
         theta = factor * sv / r - 2.0f * factor + 2.0f  ;
         if( theta < 0.0f )
             theta += 8.0f;
-    }else
-    {
+    }else{
         x = 0.0f;
         y = 0.0f;
         return;
@@ -70,8 +66,7 @@ SORT_FORCEINLINE void UniformSampleDisk( float u , float v , float& x , float& y
 // sampling a vector in a hemisphere using cosine pdf
 // para 'u' : a canonical random variable
 // para 'v' : a canonical random variable
-SORT_FORCEINLINE Vector CosSampleHemisphere( float u , float v )
-{
+SORT_FORCEINLINE Vector CosSampleHemisphere( float u , float v ){
     float x , z ;
     UniformSampleDisk( u , v , x , z );
     float y = sqrt( std::max( 0.0f , 1.0f - x * x - z * z ) );
@@ -79,16 +74,14 @@ SORT_FORCEINLINE Vector CosSampleHemisphere( float u , float v )
 }
 
 // cosine hemisphere pdf
-SORT_FORCEINLINE float CosHemispherePdf( const Vector& v )
-{
+SORT_FORCEINLINE float CosHemispherePdf( const Vector& v ){
     return AbsCosTheta(v) * INV_PI;
 }
 
 // sampling a cone uniformly
 // para 'u' : a canonical random variable
 // para 'v' : a canonical random variable
-SORT_FORCEINLINE Vector UniformSampleCone( float u , float v , float cos_max )
-{
+SORT_FORCEINLINE Vector UniformSampleCone( float u , float v , float cos_max ){
     sAssert( cos_max <= 1.0f && cos_max >= -1.0f , SAMPLING );
 
     float cos_theta = ( 1.0f - u ) + u * cos_max;
@@ -99,16 +92,14 @@ SORT_FORCEINLINE Vector UniformSampleCone( float u , float v , float cos_max )
 }
 
 // sampling a cone uniformly
-SORT_FORCEINLINE float UniformConePdf( float cos_max )
-{
+SORT_FORCEINLINE float UniformConePdf( float cos_max ){
     return 1.0f / ( TWO_PI * ( 1.0f - cos_max ) );
 }
 
 // sampling a vector in a hemisphere uniformly
 // para 'u' : a canonical random variable
 // para 'v' : a canonical random variable
-SORT_FORCEINLINE Vector UniformSampleHemisphere( float u , float v )
-{
+SORT_FORCEINLINE Vector UniformSampleHemisphere( float u , float v ){
     float theta = acos( u );
     float phi = TWO_PI * v;
 
@@ -116,30 +107,26 @@ SORT_FORCEINLINE Vector UniformSampleHemisphere( float u , float v )
 }
 
 // uniformly sample hemisphere pdf
-SORT_FORCEINLINE float UniformHemispherePdf()
-{
+SORT_FORCEINLINE float UniformHemispherePdf(){
     return INV_TWOPI;
 }
 
 // sampling a vector in sphere uniformly
 // para 'u' : a canonical random variable
 // para 'v' : a canonical random variable
-SORT_FORCEINLINE Vector UniformSampleSphere( float u , float v )
-{
+SORT_FORCEINLINE Vector UniformSampleSphere( float u , float v ){
     float theta = acos( 1 - 2.0f * u );
     float phi = TWO_PI * v;
     return SphericalVec( theta , phi );
 }
 
 // pdf of uniformly sampling a vector on sphere
-SORT_FORCEINLINE float UniformSpherePdf()
-{
+SORT_FORCEINLINE float UniformSpherePdf(){
     return INV_TWOPI * 0.5f;
 }
 
 // one dimensional distribution
-class Distribution1D
-{
+class Distribution1D{
 public:
     // constructor
     Distribution1D( const float* f , unsigned n ):
@@ -168,21 +155,18 @@ public:
     // para 'u' : a canonical random variable
     // para 'pdf' : probability density function value for the sample
     // result   : corresponding bucket straddle the u, -1 if there is no data in the distribution
-    int SampleDiscrete( float u , float* pdf ) const
-    {
+    int SampleDiscrete( float u , float* pdf ) const{
         sAssert( count != 0 && cdf != 0 , SAMPLING );
         sAssert( u <= 1.0f && u >= 0.0f , SAMPLING );
 
         float* target = std::lower_bound( cdf.get() , cdf.get() + count + 1 , u );
         unsigned offset = (u<=0.0f)? 0:(int)(target-cdf.get()-1);
         // special care needs to be payed to situation when u == 0.0f
-        if( offset == 0 )
-        {
+        if( offset == 0 ){
             while( offset < count && cdf[offset+1] == 0.0f )
                 offset++;
         }
-        if( offset == count )
-        {
+        if( offset == count ){
             if( pdf ) *pdf = 0.0f;
             return 0;
         }
@@ -194,8 +178,7 @@ public:
     // get a continuous sample
     // para 'u' : a canonical random variable
     // para 'pdf' : property density function value for the sample
-    float SampleContinuous( float u , float* pdf ) const
-    {
+    float SampleContinuous( float u , float* pdf ) const{
         sAssert( count != 0 && cdf != 0 , SAMPLING );
         sAssert( u <= 1.0f && u >= 0.0f , SAMPLING );
 
@@ -219,16 +202,17 @@ public:
     }
 
     // get the sum of the original data
-    float GetSum() const
-    { return sum; }
+    float GetSum() const{
+        return sum;
+    }
 
     // get the count
-    unsigned GetCount() const
-    { return count; }
+    unsigned GetCount() const{
+        return count;
+    }
 
     // get property of the unit
-    float GetProperty( unsigned i ) const
-    {
+    float GetProperty( unsigned i ) const{
         sAssert( i < count , GENERAL );
         return cdf[i+1]-cdf[i];
     }
@@ -240,14 +224,13 @@ private:
 };
 
 // two dimensional distribution
-class Distribution2D
-{
+class Distribution2D{
 public:
     // default constructor
-    Distribution2D( const float* data , unsigned nu , unsigned nv )
-    {_init( data , nu , nv );}
-    Distribution2D( const Texture* tex )
-    {
+    Distribution2D( const float* data , unsigned nu , unsigned nv ){
+        _init( data , nu , nv );
+    }
+    Distribution2D( const Texture* tex ){
         auto nu = tex->GetWidth();
         auto nv = tex->GetHeight();
         sAssert( nu != 0 && nv != 0 , GENERAL );
@@ -262,8 +245,7 @@ public:
     }
 
     // get a sample point
-    void SampleContinuous( float u , float v , float uv[2] , float* pdf )
-    {
+    void SampleContinuous( float u , float v , float uv[2] , float* pdf ){
         float pdf0 , pdf1;
         uv[1] = marginal->SampleContinuous( v , &pdf1 );
         int vi = (int)(uv[1] * m_nv);
@@ -275,8 +257,7 @@ public:
             *pdf = pdf0 * pdf1;
     }
     // get pdf
-    float Pdf( float u , float v ) const
-    {
+    float Pdf( float u , float v ) const{
         u = clamp( u , 0.0f , 1.0f );
         v = clamp( v , 0.0f , 1.0f );
 
@@ -296,8 +277,7 @@ private:
     unsigned m_nu , m_nv;
 
     // initialize data
-    void _init( const float* data , unsigned nu , unsigned nv )
-    {
+    void _init( const float* data , unsigned nu , unsigned nv ){
         for( unsigned i = 0 ; i < nv ; i++ )
             pConditions.push_back( std::make_unique<Distribution1D>( &data[i*nu] , nu ) );
         std::unique_ptr<float[]> m = std::make_unique<float[]>(nv);
