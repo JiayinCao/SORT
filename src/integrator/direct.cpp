@@ -19,7 +19,6 @@
 #include "integratormethod.h"
 #include "math/intersection.h"
 #include "core/scene.h"
-#include "scatteringevent/bsdf/bsdf.h"
 #include "light/light.h"
 #include "core/memory.h"
 #include "sampler/sampler.h"
@@ -27,12 +26,9 @@
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 
 SORT_STATS_COUNTER("Direct Illumination", "Primary Ray Count" , sPrimaryRayCount);
-
 IMPLEMENT_RTTI( DirectLight );
 
-// radiance along a specific ray direction
-Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const
-{
+Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const{
     SORT_STATS(++sPrimaryRayCount);
 
     if( r.m_Depth > max_recursive_depth )
@@ -50,7 +46,7 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& sc
     auto light_num = scene.LightNum();
     for( auto i = 0u ; i < light_num ; ++i ){
         const auto light = scene.GetLight(i);
-        li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true), BXDF_TYPE( BXDF_ALL ) );
+        li += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , true );
     }
 
     return li;

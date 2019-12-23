@@ -29,6 +29,8 @@ enum SE_Flag : unsigned int{
 
     SE_REPLACE_BSSRDF   = 0x04,                                         // Whether to replace BSSRDFD with lambert
     SE_SUB_EVENT        = 0x08,                                         // Whether this scattering event is a sub-event of others
+
+    SE_EVALUATE_ALL_NO_SSS  = ( SE_REPLACE_BSSRDF | SE_EVALUATE_ALL ),  // Replace SSS with lambert, this is used in several integrator that doesn't support SSS.
 };
 
 #define SE_MAX_BXDF_COUNT          16      // Maximum number of bxdf in a material is 16 by default
