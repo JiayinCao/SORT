@@ -20,7 +20,7 @@
 #include "math/intersection.h"
 #include "core/scene.h"
 #include "light/light.h"
-#include "scatteringevent/bsdf/bsdf.h"
+#include "scatteringevent/scatteringevent.h"
 
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 SORT_STATS_DEFINE_COUNTER(sVPLCount)
@@ -37,10 +37,8 @@ void InstantRadiosity::PreProcess( const Scene& scene )
 
     m_pVirtualLightSources = std::make_unique<std::list<VirtualLightSource>[]>(m_nLightPathSet);
 
-    for( int k = 0 ; k < m_nLightPathSet ; ++k )
-    {
-        for( int i = 0 ; i < m_nLightPaths ; ++i )
-        {
+    for( int k = 0 ; k < m_nLightPathSet ; ++k ){
+        for( int i = 0 ; i < m_nLightPaths ; ++i ){
             // pick a light first
             float light_pick_pdf;
             const Light* light = scene.SampleLight( sort_canonical() , &light_pick_pdf );
@@ -56,8 +54,7 @@ void InstantRadiosity::PreProcess( const Scene& scene )
 
             int current_depth = 0;
             Intersection intersect;
-            while( true )
-            {
+            while( true ){
                 if (false == scene.GetIntersect(ray, &intersect))
                     break;
 
@@ -70,10 +67,20 @@ void InstantRadiosity::PreProcess( const Scene& scene )
 
                 float bsdf_pdf;
                 Vector wo;
+                
+#if 1
+                // this code is to be deprecated, but somehow the below code introduce different results.
+                // need more investigation.
                 Bsdf*   bsdf = nullptr;
                 Bssrdf* bssrdf = nullptr;
                 intersect.primitive->GetMaterial()->UpdateScattering(intersect, bsdf, bssrdf);
-                Spectrum bsdf_value = bsdf->sample_f(ls.wi, wo, BsdfSample(true), &bsdf_pdf, BXDF_ALL);
+                Spectrum bsdf_value = bsdf->sample_f( ls.wi, wo, BsdfSample(true), &bsdf_pdf, BXDF_ALL);
+#else
+                // no support for SSS in this integrator.
+                ScatteringEvent se( intersect , SE_EVALUATE_ALL_NO_SSS );
+                intersect.primitive->GetMaterial()->UpdateScatteringEvent(se);
+                Spectrum bsdf_value = se.Sample_BSDF( ls.wi , wo, BsdfSample(true) , bsdf_pdf );
+#endif
 
                 if( bsdf_pdf == 0.0f )
                     break;
@@ -97,16 +104,13 @@ void InstantRadiosity::PreProcess( const Scene& scene )
 }
 
 // radiance along a specific ray direction
-Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps  , const Scene& scene ) const
-{
+Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps  , const Scene& scene ) const{
     SORT_STATS( ++sPrimaryRayCount );
-
     return _li( r , scene );
 }
 
 // private method of li
-Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreLe , float* first_intersect_dist ) const
-{
+Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreLe , float* first_intersect_dist ) const{
     // return if it is larger than the maximum depth
     if( r.m_Depth > max_recursive_depth )
         return 0.0f;
@@ -121,7 +125,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
     unsigned light_num = scene.LightNum();
     for( unsigned i = 0 ; i < light_num ; ++i ){
         const auto light = scene.GetLight(i);
-        radiance += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , BXDF_TYPE( BXDF_ALL ) );
+        radiance += EvaluateDirect( r , scene , light , ip , LightSample(true) , BsdfSample(true) , true );
     }
 
     if( first_intersect_dist )
@@ -131,37 +135,41 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
     const unsigned lps_id = std::min( m_nLightPathSet - 1 , (int)(sort_canonical() * m_nLightPathSet) );
     std::list<VirtualLightSource> vps = m_pVirtualLightSources[lps_id];
 
-    Bsdf*   bsdf = nullptr;
-    Bssrdf* bssrdf = nullptr;   // not implemented yet
-    ip.primitive->GetMaterial()->UpdateScattering(ip, bsdf, bssrdf);
+    //Bsdf*   bsdf = nullptr;
+    //Bssrdf* bssrdf = nullptr;   // not implemented yet
+    //ScatteringEvent se(ip);
+    //ip.primitive->GetMaterial()->UpdateScattering(ip, bsdf, bssrdf);
+
+    ScatteringEvent se( ip , SE_EVALUATE_ALL_NO_SSS );
+    ip.primitive->GetMaterial()->UpdateScatteringEvent(se);
 
     // evaluate indirect illumination
     Spectrum indirectIllum;
     std::list<VirtualLightSource>::const_iterator it = vps.begin();
-    while( it != vps.end() )
-    {
-        if( r.m_Depth + it->depth > max_recursive_depth )
-        {
+    while( it != vps.end() ){
+        if( r.m_Depth + it->depth > max_recursive_depth ){
             ++it;
             continue;
         }
 
-        Vector  delta = ip.intersect - it->intersect.intersect;
-        float   sqrLen = delta.SquaredLength();
-        float   len = sqrt( sqrLen );
-        Vector  n_delta = delta / len;
+        const auto  delta = ip.intersect - it->intersect.intersect;
+        const auto  sqrLen = delta.SquaredLength();
+        const auto  len = sqrt( sqrLen );
+        const auto  n_delta = delta / len;
 
-        Bsdf*   bsdf1 = nullptr;
-        Bssrdf* bssrdf1 = nullptr; // not implemented yet
-        it->intersect.primitive->GetMaterial()->UpdateScattering(it->intersect, bsdf1, bssrdf1);
+        //Bsdf*   bsdf1 = nullptr;
+        //Bssrdf* bssrdf1 = nullptr; // not implemented yet
+        //it->intersect.primitive->GetMaterial()->UpdateScattering(it->intersect, bsdf1, bssrdf1);
 
-        float       gterm = 1.0f / std::max( m_fMinSqrDist , sqrLen );
-        Spectrum    f0 = bsdf->f( -r.m_Dir , -n_delta );
-        Spectrum    f1 = bsdf1->f( n_delta , it->wi );
+        ScatteringEvent se1( it->intersect , SE_EVALUATE_ALL_NO_SSS );
+        it->intersect.primitive->GetMaterial()->UpdateScatteringEvent(se1);
+
+        const auto    gterm = 1.0f / std::max( m_fMinSqrDist , sqrLen );
+        const auto    f0 = se.Evaluate_BSDF( -r.m_Dir , -n_delta );
+        const auto    f1 = se1.Evaluate_BSDF( n_delta , it->wi );
 
         Spectrum    contr = gterm * f0 * f1 * it->power;
-        if( !contr.IsBlack() )
-        {
+        if( !contr.IsBlack() ){
             Visibility vis(scene);
             vis.ray = Ray( it->intersect.intersect , n_delta , 0 , 0.001f , len - 0.001f );
 
@@ -173,21 +181,19 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
     }
     radiance += indirectIllum / (float)m_nLightPaths;
 
-    if( m_fMinDist > 0.0f )
-    {
+    if( m_fMinDist > 0.0f ){
         Vector  wi;
         float   bsdf_pdf;
-        Spectrum f = bsdf->sample_f( -r.m_Dir , wi , BsdfSample( true ) , &bsdf_pdf );
+        //Spectrum f = bsdf->sample_f( -r.m_Dir , wi , BsdfSample( true ) , &bsdf_pdf );
+        const auto f = se.Sample_BSDF( -r.m_Dir , wi , BsdfSample( true ) , bsdf_pdf );
 
-        if( !f.IsBlack() && bsdf_pdf != 0.0f )
-        {
+        if( !f.IsBlack() && bsdf_pdf != 0.0f ){
             PixelSample ps;
             float gather_dist;
             Ray gather_ray( ip.intersect , wi , r.m_Depth + 1 , 0.001f , m_fMinDist - 0.001f );
             Spectrum li = _li( gather_ray , scene , true , &gather_dist );
 
-            if( !li.IsBlack() )
-            {
+            if( !li.IsBlack() ){
                 float dgterm = std::max( 0.0f , 1.0f - gather_dist * gather_dist / m_fMinSqrDist );
                 radiance += f * li * dgterm / bsdf_pdf;
             }

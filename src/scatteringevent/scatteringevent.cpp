@@ -85,6 +85,8 @@ Spectrum ScatteringEvent::Evaluate_BSDF( const Vector& wo , const Vector& wi ) c
 }
 
 Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf ) const{
+    pdf = 0.0f;
+
     Spectrum ret;
     if( m_bxdfCnt == 0 )
         return ret;

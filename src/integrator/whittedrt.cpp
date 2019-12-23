@@ -22,6 +22,7 @@
 #include "scatteringevent/bsdf/bsdf.h"
 #include "light/light.h"
 #include "core/log.h"
+#include "scatteringevent/scatteringevent.h"
 
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 
@@ -30,8 +31,7 @@ SORT_STATS_COUNTER("Whitted Ray Tracing", "Primary Ray Count" , sPrimaryRayCount
 IMPLEMENT_RTTI( WhittedRT );
 
 // radiance along a specific ray direction
-Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const
-{
+Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const{
     SORT_STATS(++sPrimaryRayCount);
 
     if( r.m_Depth > max_recursive_depth )
@@ -44,10 +44,9 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
 
     Spectrum t;
 
-    // get bsdf
-    Bsdf*   bsdf = nullptr;
-    Bssrdf* bssrdf = nullptr;   // not implemented yet
-    ip.primitive->GetMaterial()->UpdateScattering( ip , bsdf , bssrdf );
+    // no support for SSS in this integrator.
+    ScatteringEvent se( ip , SE_EVALUATE_ALL_NO_SSS );
+    ip.primitive->GetMaterial()->UpdateScatteringEvent(se);
 
     // lights
     Visibility visibility(scene);
@@ -63,7 +62,8 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
                 it++;
                 continue;
             }
-            Spectrum f = bsdf->f( -r.m_Dir , lightDir );
+            //Spectrum f = bsdf->f( -r.m_Dir , lightDir );
+            Spectrum f = se.Evaluate_BSDF( -r.m_Dir , lightDir );
             if( f.IsBlack() ){
                 it++;
                 continue;
