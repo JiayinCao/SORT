@@ -21,21 +21,21 @@
 #include "math/point.h"
 #include "math/vector3.h"
 #include "math/intersection.h"
+#include "scatteringevent/scatteringevent.h"
 
 class   Primitive;
-class   Bsdf;
 class   Light;
 
 struct BDPT_Vertex
 {
-    Point           p;                  // the position of the vertex
-    Vector          n;                  // the normal of the vertex
-    Vector          wi;                 // in direction
-    Vector          wo;                 // out direction
-    Bsdf*           bsdf = nullptr;     // bsdf from material
-    float           rr = 0.0f;          // russian roulette
-    Spectrum        throughput;         // through put
-    Intersection    inter;              // intersection
+    Point               p;                  // the position of the vertex
+    Vector              n;                  // the normal of the vertex
+    Vector              wi;                 // in direction
+    Vector              wo;                 // out direction
+    ScatteringEvent*    se = nullptr;       // scattering event
+    float               rr = 0.0f;          // russian roulette
+    Spectrum            throughput;         // through put
+    Intersection        inter;              // intersection
 
     // For further detail, please refer to the paper "Implementing Vertex Connection and Merging"
     // MIS factors
