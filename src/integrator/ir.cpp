@@ -68,19 +68,9 @@ void InstantRadiosity::PreProcess( const Scene& scene )
                 float bsdf_pdf;
                 Vector wo;
                 
-#if 1
-                // this code is to be deprecated, but somehow the below code introduce different results.
-                // need more investigation.
-                Bsdf*   bsdf = nullptr;
-                Bssrdf* bssrdf = nullptr;
-                intersect.primitive->GetMaterial()->UpdateScattering(intersect, bsdf, bssrdf);
-                Spectrum bsdf_value = bsdf->sample_f( ls.wi, wo, BsdfSample(true), &bsdf_pdf, BXDF_ALL);
-#else
-                // no support for SSS in this integrator.
                 ScatteringEvent se( intersect , SE_EVALUATE_ALL_NO_SSS );
                 intersect.primitive->GetMaterial()->UpdateScatteringEvent(se);
                 Spectrum bsdf_value = se.Sample_BSDF( ls.wi , wo, BsdfSample(true) , bsdf_pdf );
-#endif
 
                 if( bsdf_pdf == 0.0f )
                     break;
@@ -135,11 +125,6 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
     const unsigned lps_id = std::min( m_nLightPathSet - 1 , (int)(sort_canonical() * m_nLightPathSet) );
     std::list<VirtualLightSource> vps = m_pVirtualLightSources[lps_id];
 
-    //Bsdf*   bsdf = nullptr;
-    //Bssrdf* bssrdf = nullptr;   // not implemented yet
-    //ScatteringEvent se(ip);
-    //ip.primitive->GetMaterial()->UpdateScattering(ip, bsdf, bssrdf);
-
     ScatteringEvent se( ip , SE_EVALUATE_ALL_NO_SSS );
     ip.primitive->GetMaterial()->UpdateScatteringEvent(se);
 
@@ -156,10 +141,6 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
         const auto  sqrLen = delta.SquaredLength();
         const auto  len = sqrt( sqrLen );
         const auto  n_delta = delta / len;
-
-        //Bsdf*   bsdf1 = nullptr;
-        //Bssrdf* bssrdf1 = nullptr; // not implemented yet
-        //it->intersect.primitive->GetMaterial()->UpdateScattering(it->intersect, bsdf1, bssrdf1);
 
         ScatteringEvent se1( it->intersect , SE_EVALUATE_ALL_NO_SSS );
         it->intersect.primitive->GetMaterial()->UpdateScatteringEvent(se1);
@@ -184,7 +165,6 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
     if( m_fMinDist > 0.0f ){
         Vector  wi;
         float   bsdf_pdf;
-        //Spectrum f = bsdf->sample_f( -r.m_Dir , wi , BsdfSample( true ) , &bsdf_pdf );
         const auto f = se.Sample_BSDF( -r.m_Dir , wi , BsdfSample( true ) , bsdf_pdf );
 
         if( !f.IsBlack() && bsdf_pdf != 0.0f ){

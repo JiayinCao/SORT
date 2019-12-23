@@ -21,10 +21,7 @@
 #include "integrator.h"
 #include "math/intersection.h"
 
-class Bsdf;
-
-struct VirtualLightSource
-{
+struct VirtualLightSource{
     Intersection    intersect;
     Vector          wi;
     Spectrum        power;
