@@ -105,10 +105,14 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         float bsdf_pdf;
         const auto bsdf_value = vert.se->Sample_BSDF( vert.wi , vert.wo , BsdfSample(true) , bsdf_pdf );
         bsdf_pdf *= rr;
+
+        if( 0.0f == bsdf_pdf )
+            break;
+
         const float cosOut = AbsDot(vert.wo, vert.n);
         throughput *= bsdf_value / bsdf_pdf;
 
-        if (bsdf_pdf == 0 || throughput.IsBlack())
+        if (throughput.IsBlack())
             break;
 
         const auto rev_bsdf_pdfw = vert.se->Pdf_BSDF( vert.wo , vert.wi ) * rr;
@@ -206,11 +210,14 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         float bsdf_pdf;
         const auto bsdf_value = vert.se->Sample_BSDF( vert.wi , vert.wo , BsdfSample(true) , bsdf_pdf );
 
+        if( 0.0f == bsdf_pdf )
+            break;
+
         bsdf_pdf *= rr;
         const float cosOut = AbsDot(vert.wo, vert.n);
         throughput *= bsdf_value / bsdf_pdf;
 
-        if (bsdf_pdf == 0 || throughput.IsBlack())
+        if (throughput.IsBlack())
             break;
 
         const auto rev_bsdf_pdfw = vert.se->Pdf_BSDF( vert.wo , vert.wi ) * rr;
@@ -281,6 +288,10 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
     float emissionPdfW;
     float cosAtLight;
     Spectrum li = light->sample_l(eye_vertex.inter, &sample, wi, 0 , &directPdfW, &emissionPdfW , &cosAtLight , visibility);
+
+    if( 0.0f == directPdfW )
+        return 0.0f;
+    
     const float cosAtEyeVertex = AbsDot(eye_vertex.n, wi);
     li *= eye_vertex.throughput * eye_vertex.se->Evaluate_BSDF( eye_vertex.wi , wi ) / directPdfW;
 
