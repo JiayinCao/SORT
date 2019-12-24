@@ -86,9 +86,9 @@ bool FourierBxdfData::LoadResource( const std::string& filename ){
 // evaluate bxdf
 Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
 {
-    const auto muI = CosTheta( -wi );
-    const auto muO = CosTheta( wo );
-    const auto dPhi = CosDPhi( wo , -wi );
+    const auto muI = cosTheta( -wi );
+    const auto muO = cosTheta( wo );
+    const auto dPhi = cosDPhi( wo , -wi );
 
     int offsetI , offsetO;
     float weightsI[4] , weightsO[4];
@@ -118,7 +118,7 @@ Spectrum FourierBxdfData::f( const Vector& wo , const Vector& wi ) const
 
 Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pdf ) const
 {
-    auto muO = CosTheta(wo);
+    auto muO = cosTheta(wo);
     float pdfMu;
     auto muI = sampleCatmullRom2D(bsdfTable.nMu, bsdfTable.nMu, bsdfTable.mu.get(), bsdfTable.mu.get(), bsdfTable.a0.get(), bsdfTable.cdf.get(), muO, bs.u, nullptr, &pdfMu);
 
@@ -139,7 +139,7 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
     *pdf = std::max( 0.0f , pdfPhi * pdfMu );
 
     auto sin2ThetaI = std::max( 0.0f , 1.0f - muI * muI );
-    auto norm = sqrt( sin2ThetaI / SinTheta2(wo));
+    auto norm = sqrt( sin2ThetaI / sinTheta2(wo));
     if( IsInf(norm) ) norm = 0.0f;
     auto sinPhi = sin(phi) , cosPhi = cos(phi);
     wi = -Vector3f( norm * ( cosPhi * wo.x - sinPhi * wo.z ),
@@ -165,8 +165,8 @@ Spectrum FourierBxdfData::sample_f( const Vector& wo , Vector& wi , const BsdfSa
 
 float FourierBxdfData::pdf( const Vector& wo , const Vector& wi ) const
 {
-    auto muI = CosTheta(-wi) , muO = CosTheta(wo);
-    auto cosPhi = CosDPhi( -wi , wo );
+    auto muI = cosTheta(-wi) , muO = cosTheta(wo);
+    auto cosPhi = cosDPhi( -wi , wo );
 
     int offsetI , offsetO;
     float weightsI[4] , weightsO[4];

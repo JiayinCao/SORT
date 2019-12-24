@@ -48,18 +48,18 @@ Spectrum OrenNayar::f( const Vector& wo , const Vector& wi ) const
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    auto sintheta_i = SinTheta(wi);
-    auto sintheta_o = SinTheta(wo);
+    auto sintheta_i = sinTheta(wi);
+    auto sintheta_o = sinTheta(wo);
 
-    auto sinphii = SinPhi(wi);
-    auto cosphii = CosPhi(wi);
-    auto sinphio = SinPhi(wo);
-    auto cosphio = CosPhi(wo);
+    auto sinphii = sinPhi(wi);
+    auto cosphii = cosPhi(wi);
+    auto sinphio = sinPhi(wo);
+    auto cosphio = cosPhi(wo);
     auto dcos = cosphii * cosphio + sinphii * sinphio;
     if( dcos < 0.0f ) dcos = 0.0f;
 
-    auto abs_cos_theta_o = (float)AbsCosTheta(wo);
-    auto abs_cos_theta_i = (float)AbsCosTheta(wi);
+    auto abs_cos_theta_o = (float)absCosTheta(wo);
+    auto abs_cos_theta_i = (float)absCosTheta(wi);
 
     if( abs_cos_theta_i < 0.00001f && abs_cos_theta_o < 0.00001f )
         return 0.0f;
@@ -75,5 +75,5 @@ Spectrum OrenNayar::f( const Vector& wo , const Vector& wi ) const
         tanbeta = sintheta_i / abs_cos_theta_i;
     }
 
-    return R * INV_PI * ( A + B * dcos * sinalpha * tanbeta ) * AbsCosTheta(wi);
+    return R * INV_PI * ( A + B * dcos * sinalpha * tanbeta ) * absCosTheta(wi);
 }

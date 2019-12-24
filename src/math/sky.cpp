@@ -23,8 +23,8 @@
 // evaluate value from sky
 Spectrum Sky::Evaluate( const Vector& wi ) const
 {
-    float theta = SphericalTheta( wi );
-    float phi = SphericalPhi( wi );
+    float theta = sphericalTheta( wi );
+    float phi = sphericalPhi( wi );
 
     float v = theta * INV_PI;
     float u = phi * INV_TWOPI;
@@ -73,13 +73,13 @@ Vector Sky::sample_v( float u , float v , float* pdf , float* area_pdf ) const
     float theta = PI * ( 1.0f - uv[1] );
     float phi = TWO_PI * uv[0];
 
-    Vector wi = SphericalVec( theta , phi );
+    Vector wi = sphericalVec( theta , phi );
     if( pdf )
     {
         *pdf = apdf;
-        float sin_theta = SinTheta( wi );
+        float sin_theta = sinTheta( wi );
         if( sin_theta != 0.0f )
-            *pdf /= TWO_PI * PI * SinTheta( wi );
+            *pdf /= TWO_PI * PI * sinTheta( wi );
         else
             *pdf = 0.0f;
     }
@@ -90,11 +90,11 @@ Vector Sky::sample_v( float u , float v , float* pdf , float* area_pdf ) const
 // get the pdf
 float Sky::Pdf( const Vector& lwi ) const
 {
-    float sin_theta = SinTheta(lwi);
+    float sin_theta = sinTheta(lwi);
     if( sin_theta == 0.0f ) return 0.0f;
     float u , v;
-    float theta = SphericalTheta( lwi );
-    float phi = SphericalPhi( lwi );
+    float theta = sphericalTheta( lwi );
+    float phi = sphericalPhi( lwi );
     v = 1.0f - theta * INV_PI;
     u = phi * INV_TWOPI;
 

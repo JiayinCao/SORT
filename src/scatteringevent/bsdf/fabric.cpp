@@ -77,7 +77,7 @@ Spectrum Fabric::f( const Vector& wo , const Vector& wi ) const{
     const auto io = Io[i];
 
     const auto h = Normalize( wo + wi );
-    return baseColor * pow( 1.0f - fabs(h.x) , N ) * AbsCosTheta(wi) / io;
+    return baseColor * pow( 1.0f - fabs(h.x) , N ) * absCosTheta(wi) / io;
 }
 
 Spectrum Fabric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {

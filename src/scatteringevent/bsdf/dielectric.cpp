@@ -31,7 +31,7 @@ Spectrum Dielectric::f(const Vector& wo, const Vector& wi) const{
 }
 
 Spectrum Dielectric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
-    const auto fr = fresnel.Evaluate(CosTheta(wo)).GetIntensity();
+    const auto fr = fresnel.Evaluate(cosTheta(wo)).GetIntensity();
     const auto r = fr * R.GetIntensity();
     const auto t = ( 1.0f - fr ) * T.GetIntensity();
     const auto spec_Ratio = r / (r + t);
@@ -47,7 +47,7 @@ Spectrum Dielectric::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
 }
 
 float Dielectric::pdf(const Vector& wo, const Vector& wi) const {
-    const auto fr = fresnel.Evaluate(CosTheta(wo)).GetIntensity();
+    const auto fr = fresnel.Evaluate(cosTheta(wo)).GetIntensity();
     const auto r = fr * R.GetIntensity();
     const auto t = (1.0f - fr) * T.GetIntensity();
     const auto spec_Ratio = r / (r + t);

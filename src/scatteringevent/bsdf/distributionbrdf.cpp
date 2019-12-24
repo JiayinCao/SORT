@@ -27,8 +27,8 @@ Spectrum DistributionBRDF::f( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    const auto OoN = AbsCosTheta( wo );
-    const auto IoN = AbsCosTheta( wi );
+    const auto OoN = absCosTheta( wo );
+    const auto IoN = absCosTheta( wi );
     auto wh = Normalize( wo + wi );
     if( wh.Length() == 0.0f )
         wh = DIR_UP;
@@ -36,7 +36,7 @@ Spectrum DistributionBRDF::f( const Vector& wo , const Vector& wi ) const{
 
     // Crafting a Next-Gen Material Pipeline for The Order: 1886, Eq. 22
     const auto dterm = [&]( const Vector& wh ){
-        return ( 1.0f + A * exp( -1.0f / ( TanTheta2(wh) * alphaSqr ) ) / Pow<4>( SinTheta(wh) ) ) / ( PI * ( 1.0f + A * alphaSqr ) );
+        return ( 1.0f + A * exp( -1.0f / ( tanTheta2(wh) * alphaSqr ) ) / Pow<4>( sinTheta(wh) ) ) / ( PI * ( 1.0f + A * alphaSqr ) );
     };
 
     const auto F = SchlickFresnel( specular , IoH );
@@ -70,7 +70,7 @@ Spectrum DistributionBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSamp
         const auto sin_theta = sqrt( l );
         const auto cos_theta = sqrt( 1.0f - l );
         const auto phi = TWO_PI * sort_canonical();
-        const auto wh = SphericalVec( sin_theta , cos_theta , phi );
+        const auto wh = sphericalVec( sin_theta , cos_theta , phi );
         wi = reflect( wo , wh );
     }else{
         // Fall back to the default sampling method
@@ -99,7 +99,7 @@ float DistributionBRDF::pdf(const Vector& wo, const Vector& wi) const{
 
     // Pdf of wh w.r.t solid angle
     //   Pdf(wh) = ( 1.0f + A * exp( -1.0f / ( alpha^2 * tan_theta(wh)^2 ) ) / sin_theta(wh)^4 ) * cos_theta( wh ) / ( ( 1.0f + A * alpha^2 ) * PI )
-    const auto p = ( 1.0f + A * exp( -1.0f / ( TanTheta2( wh ) * alphaSqr ) / Pow<4>( SinTheta(wh) ) ) ) * CosTheta( wh ) / ( ( 1.0f + A * alphaSqr ) * PI );
+    const auto p = ( 1.0f + A * exp( -1.0f / ( tanTheta2( wh ) * alphaSqr ) / Pow<4>( sinTheta(wh) ) ) ) * cosTheta( wh ) / ( ( 1.0f + A * alphaSqr ) * PI );
     return slerp( Bxdf::pdf( wo , wi ) , p / ( 4.0f * OoH ) , specRatio );
 */
 }

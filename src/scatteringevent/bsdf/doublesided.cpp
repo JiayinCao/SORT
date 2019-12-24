@@ -20,8 +20,8 @@
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
 Spectrum DoubleSided::f(const Vector& wo, const Vector& wi) const{
-    const auto back0 = CosTheta(wo) < 0.0f;
-    const auto back1 = CosTheta(wi) < 0.0f;
+    const auto back0 = cosTheta(wo) < 0.0f;
+    const auto back1 = cosTheta(wi) < 0.0f;
     if (back0 ^ back1) return 0.0f;
 
     if (!back0) return m_se0 ? m_se0->Evaluate_BSDF(wo, wi) : 0.0f;
@@ -30,7 +30,7 @@ Spectrum DoubleSided::f(const Vector& wo, const Vector& wi) const{
 }
 
 Spectrum DoubleSided::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
-    const auto back0 = CosTheta(wo) < 0.0f;
+    const auto back0 = cosTheta(wo) < 0.0f;
 
     Spectrum ret;
     auto dummy_pdf = 0.0f;
@@ -44,8 +44,8 @@ Spectrum DoubleSided::sample_f(const Vector& wo, Vector& wi, const BsdfSample& b
 }
 
 float DoubleSided::pdf(const Vector& wo, const Vector& wi) const {
-    const auto back0 = CosTheta(wo) < 0.0f;
-    const auto back1 = CosTheta(wi) < 0.0f;
+    const auto back0 = cosTheta(wo) < 0.0f;
+    const auto back1 = cosTheta(wi) < 0.0f;
     if (back0 ^ back1) return 0.0f;
 
     if (!back0) return m_se0 ? m_se0->Pdf_BSDF(wo, wi) : 0.0f;

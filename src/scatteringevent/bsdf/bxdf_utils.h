@@ -21,73 +21,72 @@
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
 
-// BSDF Inline Functions
-SORT_FORCEINLINE float CosTheta(const Vector &w){
+SORT_FORCEINLINE float cosTheta(const Vector &w){
     return w.y;
 }
 
-SORT_FORCEINLINE float AbsCosTheta(const Vector &w){
+SORT_FORCEINLINE float absCosTheta(const Vector &w){
     return fabsf(w.y);
 }
 
-SORT_FORCEINLINE float SinTheta2(const Vector &w){
-    return std::max(0.f, 1.f - CosTheta(w)*CosTheta(w));
+SORT_FORCEINLINE float sinTheta2(const Vector &w){
+    return std::max(0.f, 1.f - cosTheta(w)*cosTheta(w));
 }
 
-SORT_FORCEINLINE float CosTheta2(const Vector &w){
-    return CosTheta(w) * CosTheta(w);
+SORT_FORCEINLINE float cosTheta2(const Vector &w){
+    return cosTheta(w) * cosTheta(w);
 }
 
-SORT_FORCEINLINE float TanTheta2(const Vector &w){
-    return 1.0f / CosTheta2(w) - 1.0f;
+SORT_FORCEINLINE float tanTheta2(const Vector &w){
+    return 1.0f / cosTheta2(w) - 1.0f;
 }
 
-SORT_FORCEINLINE float CosDPhi( const Vector& w0 , const Vector& w1 ){
+SORT_FORCEINLINE float cosDPhi( const Vector& w0 , const Vector& w1 ){
     return clamp( ( w0.x * w1.x + w0.z * w1.z ) / sqrt( (w0.x * w0.x + w0.z * w0.z)*(w1.x * w1.x + w1.z*w1.z) ) , -1.0f , 1.0f );
 }
-SORT_FORCEINLINE float SinTheta(const Vector &w){
-    return sqrtf(SinTheta2(w));
+SORT_FORCEINLINE float sinTheta(const Vector &w){
+    return sqrtf(sinTheta2(w));
 }
-SORT_FORCEINLINE float CosPhi(const Vector &w){
-    float sintheta = SinTheta(w);
+SORT_FORCEINLINE float cosPhi(const Vector &w){
+    float sintheta = sinTheta(w);
     if (sintheta == 0.f) return 1.f;
     return clamp(w.x / sintheta, -1.f, 1.f);
 }
 
-SORT_FORCEINLINE float SinPhi(const Vector &w) {
-    float sintheta = SinTheta(w);
+SORT_FORCEINLINE float sinPhi(const Vector &w) {
+    float sintheta = sinTheta(w);
     if (sintheta == 0.f) return 0.f;
     return clamp(w.z / sintheta, -1.f, 1.f);
 }
 
-SORT_FORCEINLINE float SinPhi2(const Vector &w) {
-    const float sinPhi = SinPhi(w);
-    return sinPhi * sinPhi;
+SORT_FORCEINLINE float sinPhi2(const Vector &w) {
+    const float sinphi = sinPhi(w);
+    return sinphi * sinphi;
 }
 
-SORT_FORCEINLINE float CosPhi2(const Vector &w) {
-    const float cosPhi = CosPhi(w);
-    return cosPhi * cosPhi;
+SORT_FORCEINLINE float cosPhi2(const Vector &w) {
+    const float cosphi = cosPhi(w);
+    return cosphi * cosphi;
 }
 
-SORT_FORCEINLINE float TanTheta( const Vector& w){
-    return SinTheta(w) / CosTheta(w);
+SORT_FORCEINLINE float tanTheta( const Vector& w){
+    return sinTheta(w) / cosTheta(w);
 }
 
-SORT_FORCEINLINE bool SameHemisphere(const Vector &w, const Vector &wp) {
+SORT_FORCEINLINE bool sameHemisphere(const Vector &w, const Vector &wp) {
     return w.y * wp.y > 0.f;
 }
 
-SORT_FORCEINLINE float SphericalTheta(const Vector &v) {
+SORT_FORCEINLINE float sphericalTheta(const Vector &v) {
     return acosf(clamp(v.y, -1.f, 1.f));
 }
 
-SORT_FORCEINLINE float SphericalPhi(const Vector &v) {
+SORT_FORCEINLINE float sphericalPhi(const Vector &v) {
     float p = atan2f(v.z, v.x);
     return (p < 0.f) ? p + 2.f*PI : p;
 }
 
-SORT_FORCEINLINE Vector SphericalVec( float theta , float phi ){
+SORT_FORCEINLINE Vector sphericalVec( float theta , float phi ){
     float x = sin( theta ) * cos( phi );
     float y = cos( theta );
     float z = sin( theta ) * sin( phi );
@@ -95,7 +94,7 @@ SORT_FORCEINLINE Vector SphericalVec( float theta , float phi ){
     return Vector( x , y , z );
 }
 
-SORT_FORCEINLINE Vector SphericalVec( float sintheta , float costheta , float phi ){
+SORT_FORCEINLINE Vector sphericalVec( float sintheta , float costheta , float phi ){
     float x = sintheta * cos( phi );
     float y = costheta;
     float z = sintheta * sin( phi );

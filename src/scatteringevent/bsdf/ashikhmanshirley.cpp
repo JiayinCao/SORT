@@ -23,10 +23,10 @@ Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    const auto cos_theta_o = AbsCosTheta(wo);
-    const auto cos_theta_i = AbsCosTheta(wi);
+    const auto cos_theta_o = absCosTheta(wo);
+    const auto cos_theta_i = absCosTheta(wi);
 
-    // Diffuse  : f_diffuse( wo , wi ) = 28.0f / ( 23.0f * PI ) * ( 1.0 - R ) * ( 1.0 - ( 1.0 - 0.5 * CosTheta(wo) ) ^ 5 ) * ( 1.0 - ( 1.0 - 0.5f * CosTheta(wi) ) ^ 5
+    // Diffuse  : f_diffuse( wo , wi ) = 28.0f / ( 23.0f * PI ) * ( 1.0 - R ) * ( 1.0 - ( 1.0 - 0.5 * cosTheta(wo) ) ^ 5 ) * ( 1.0 - ( 1.0 - 0.5f * cosTheta(wi) ) ^ 5
     // Specular : f_specular( wo , wi ) = D(h) * SchlickFresnel(S,Dot(wi,h)) / ( 4.0f * AbsDot( wi , h ) * max( AbsDot(wi,n) , AbsDot(wo,n) )
     const auto diffuse = 0.3875f * D * ( Spectrum( 1.0f ) - S ) * ( 1.0f - SchlickWeight( 0.5f * cos_theta_o ) ) * ( 1.0f - SchlickWeight( 0.5f * cos_theta_i ) );
 
@@ -37,7 +37,7 @@ Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const{
     const auto IoH = AbsDot( wi , h );
     const auto specular = ( distribution.D(h) * SchlickFresnel(S, IoH) ) / ( 4.0f * IoH * std::max( cos_theta_i , cos_theta_o ) ) ;
 
-    return ( diffuse + specular ) * AbsCosTheta(wi);
+    return ( diffuse + specular ) * absCosTheta(wi);
 }
 
 Spectrum AshikhmanShirley::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const{

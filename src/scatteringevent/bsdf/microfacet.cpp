@@ -51,9 +51,9 @@ float Blinn::D(const Vector& h) const {
     // Anisotropic model:   D(w_h) = sqrt( ( exponentU + 2 ) * ( exponentV + 2 ) ) * cos(\theta) ^ ( cos(\phi)^2 * alphaU + sin(\phi)^2 * alphaV ) / ( 2 * PI )
     // Isotropic model:     D(w_h) = ( exponent + 2 ) * cos(\theta) ^ alpha / ( 2 * PI )
 
-    const auto NoH = AbsCosTheta(h);
+    const auto NoH = absCosTheta(h);
     if (NoH <= 0.0f) return 0.0f;
-    const auto sin_phi_h_sq = SinPhi2(h);
+    const auto sin_phi_h_sq = sinPhi2(h);
     const auto cos_phi_h_sq = 1.0f - sin_phi_h_sq;
     return expUV * pow(NoH, cos_phi_h_sq * expU + sin_phi_h_sq * expV) * INV_TWOPI;
 }
@@ -78,13 +78,13 @@ Vector Blinn::sample_f( const BsdfSample& bs ) const {
     const auto cos_theta = std::pow(bs.u, 1.0f / (alpha + 2.0f));
     const auto sin_theta = sqrt( 1.0f - SQR( cos_theta ) ) ;
 
-    return SphericalVec(sin_theta, cos_theta, phi);
+    return sphericalVec(sin_theta, cos_theta, phi);
 }
 
 float Blinn::G1( const Vector& v ) const {
-    const auto absTan = fabs( TanTheta(v) );
+    const auto absTan = fabs( tanTheta(v) );
     if( IsInf( absTan ) ) return 0.0f;
-    const auto cos_phi_sq = CosPhi2(v);
+    const auto cos_phi_sq = cosPhi2(v);
     const auto a = 1.0f / ( sqrt( cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2 ) * absTan );
     if( a > 1.6f || IsInf( a ) ) return 1.0f;
     return ( 3.535f * a + 2.181f * a * a ) / ( 1.0f + 2.276f * a + 2.577f * a * a );
@@ -111,7 +111,7 @@ float Beckmann::D(const Vector& h) const {
     // Anisotropic Beckmann distribution formula, pbrt-v3 ( page 539 )
     // Anisotropic model:   D(w_h) = pow( e , -tan(\theta_h)^2 * ( (cos(\phi_h) / alphaU)^2 + (sin(\phi_h) / alphaV)^2 ) ) / ( PI * alphaU * alphaV * cos(\theta_h) ^ 4
     // Isotropic model:     D(w_h) = pow( e , -(tan(\theta_h)/alpha)^2 ) / ( PI * alpha^2 * cos(\theta_h)^4 )
-    const auto cos_theta_h_sq = CosTheta2(h);
+    const auto cos_theta_h_sq = cosTheta2(h);
     if( cos_theta_h_sq <= 0.0f ) return 0.f;
     return exp( ( SQR( h.x ) / alphaU2 + SQR( h.z ) / alphaV2 ) / (-cos_theta_h_sq) ) / ( PI * alphaUV * SQR( cos_theta_h_sq ) );
 }
@@ -136,13 +136,13 @@ Vector Beckmann::sample_f( const BsdfSample& bs ) const {
         theta = atan(sqrt(-logSample / ((1.0f - sin_phi_sq) / alphaU2 + sin_phi_sq / alphaV2)));
     }
 
-    return SphericalVec(theta, phi);
+    return sphericalVec(theta, phi);
 }
 
 float Beckmann::G1( const Vector& v ) const {
-    const auto absTan = fabs( TanTheta(v) );
+    const auto absTan = fabs( tanTheta(v) );
     if( IsInf( absTan ) ) return 0.0f;
-    const auto cos_phi_sq = CosPhi2(v);
+    const auto cos_phi_sq = cosPhi2(v);
     const auto a = 1.0f / ( sqrt( cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2 ) * absTan );
     if( a > 1.6f || IsInf( a ) ) return 1.0f;
     return ( 3.535f * a + 2.181f * a * a ) / ( 1.0f + 2.276f * a + 2.577f * a * a );
@@ -169,7 +169,7 @@ float GGX::D(const Vector& h) const {
     // Anisotropic GGX (Trowbridge-Reitz) distribution formula, pbrt-v3 ( page 539 )
     // Anisotropic model:   D(w_h) = 1.0f / ( PI * alphaU * alphaV * cos(\theta)^4 * ( 1 + tan(\thete)^2 * ( ( cos(\theta) / alphaU ) ^ 2 + ( sin(\theta) / alphaV ) ^ 2 ) ) ^ 2 )
     // Isotrocpic model:    D(w_h) = alpha ^ 2 / ( PI * ( 1 + ( alpha ^ 2 - 1 ) * cos(\theta) ^ 2 ) ^ 2
-    const auto cos_theta_h_sq = CosTheta2(h);
+    const auto cos_theta_h_sq = cosTheta2(h);
     if( cos_theta_h_sq <= 0.0f ) return 0.f;
     const auto beta = ( cos_theta_h_sq + ( SQR( h.x ) / alphaU2 + SQR( h.z ) / alphaV2));
     return 1.0f / ( PI * alphaUV * beta * beta );
@@ -194,13 +194,13 @@ Vector GGX::sample_f( const BsdfSample& bs ) const {
         float beta = 1.0f / ( cos_phi_sq / alphaU2 + sin_phi_sq / alphaV2 );
         theta = atan( sqrt( beta * bs.u / ( 1.0f - bs.u ) ) );
     }
-    return SphericalVec(theta, phi);
+    return sphericalVec(theta, phi);
 }
 
 float GGX::G1( const Vector& v ) const {
-    const auto tan_theta_sq = TanTheta2(v);
+    const auto tan_theta_sq = tanTheta2(v);
     if( IsInf( tan_theta_sq ) ) return 0.0f;
-    const auto cos_phi_sq = CosPhi2(v);
+    const auto cos_phi_sq = cosPhi2(v);
     const auto alpha2 = cos_phi_sq * alphaU2 + ( 1.0f - cos_phi_sq ) * alphaV2;
     return 2.0f / ( 1.0f + sqrt( 1.0f + alpha2 * tan_theta_sq ) );
 }
@@ -233,7 +233,7 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const {
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    const auto NoV = AbsCosTheta( wo );
+    const auto NoV = absCosTheta( wo );
     if (NoV == 0.f)
         return Spectrum(0.f);
 
@@ -276,11 +276,11 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const {
     if( SameHemiSphere(wi, wo) )
         return Spectrum(0.f);
 
-    const auto NoV = CosTheta( wo );
+    const auto NoV = cosTheta( wo );
     if (NoV == 0.f)
         return Spectrum(0.f);
 
-    const auto eta = CosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
+    const auto eta = cosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
 
     Vector3f wh = Normalize(wo + wi * eta);
     if( wh.y < 0.0f ) wh = -wh;
@@ -296,7 +296,7 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const {
 }
 
 Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const BsdfSample& bs , float* pPdf ) const {
-    if( CosTheta( wo ) == 0.0f )
+    if( cosTheta( wo ) == 0.0f )
         return 0.0f;
 
     // sampling the normal
@@ -312,10 +312,10 @@ Spectrum MicroFacetRefraction::sample_f( const Vector& wo , Vector& wi , const B
 }
 
 float MicroFacetRefraction::pdf( const Vector& wo , const Vector& wi ) const {
-    if( SameHemisphere( wo , wi ) )
+    if( sameHemisphere( wo , wi ) )
         return 0.0f;
 
-    const auto eta = CosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
+    const auto eta = cosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
     const auto wh = Normalize(wo + wi * eta);
 
     // Compute change of variables _dwh\_dwi_ for microfacet transmission

@@ -44,7 +44,7 @@ public:
     //! @brief PDF of sampling a specific normal direction
     //! @param wh   Normal direction to be sampled
     float Pdf( const Vector& wh ) const {
-        return D( wh ) * AbsCosTheta(wh);
+        return D( wh ) * absCosTheta(wh);
     }
 
 protected:

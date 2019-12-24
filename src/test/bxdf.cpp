@@ -40,8 +40,8 @@ void checkReciprocity(const Bxdf* bxdf) {
         const Vector wi = UniformSampleSphere(sort_canonical(), sort_canonical());
         const Vector wo = UniformSampleSphere(sort_canonical(), sort_canonical());
 
-        const auto f0 = bxdf->F(wo, wi) * AbsCosTheta(wo);
-        const auto f1 = bxdf->F(wi, wo) * AbsCosTheta(wi);
+        const auto f0 = bxdf->F(wo, wi) * absCosTheta(wo);
+        const auto f1 = bxdf->F(wi, wo) * absCosTheta(wi);
 
         std::lock_guard<spinlock_mutex> lock(mutex);
         ASSERT_NEAR(f0.GetR(), f1.GetR(), 0.001f);

@@ -24,12 +24,12 @@
 Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
-    return R * INV_PI * AbsCosTheta(wi);
+    return R * INV_PI * absCosTheta(wi);
 }
 
 // evaluate bxdf
 Spectrum LambertTransmission::f( const Vector& wo , const Vector& wi ) const{
-    return SameHemiSphere( wo , wi ) ? 0.0f : T * INV_PI * AbsCosTheta(wi);
+    return SameHemiSphere( wo , wi ) ? 0.0f : T * INV_PI * absCosTheta(wi);
 }
 
 // sample a direction randomly
@@ -43,5 +43,5 @@ Spectrum LambertTransmission::sample_f( const Vector& wo , Vector& wi , const Bs
 
 // get the pdf of the sampled direction
 float LambertTransmission::pdf( const Vector& wo , const Vector& wi ) const{
-    return SameHemisphere( wo , wi ) ? 0.0f : CosHemispherePdf( wi );
+    return sameHemisphere( wo , wi ) ? 0.0f : CosHemispherePdf( wi );
 }

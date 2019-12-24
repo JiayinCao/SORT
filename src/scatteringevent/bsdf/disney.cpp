@@ -55,7 +55,7 @@ float ClearcoatGGX::D(const Vector& h) const {
     // This function should return INV_PI when alphaU equals to 1.0, which is not possible given the implementation of disney BRDF in SORT.
     sAssert(alphaU != 1.0f, MATERIAL);
 
-    const auto cos = CosTheta(h);
+    const auto cos = cosTheta(h);
     return (alphaU2 - 1) / (PI * log(alphaU2) * (1 + (alphaU2 - 1) * SQR(cos)));
 }
 
@@ -64,13 +64,13 @@ Vector ClearcoatGGX::sample_f(const BsdfSample& bs) const {
     // theta = acos( sqrt( ( exp( 2 * ln(alpha) * v ) - 1 ) / ( alpha^2 - 1.0f ) ) )
     const auto phi = TWO_PI * bs.u;
     const auto theta = alphaU2 == 1.0f ? acos(sqrt(bs.v)) : acos(sqrt((exp(log(alphaU2) * bs.v) - 1.0f) / (alphaU2 - 1.0f)));
-    return SphericalVec(theta, phi);
+    return sphericalVec(theta, phi);
 }
 
 float ClearcoatGGX::G1(const Vector& v) const {
-    if (AbsCosTheta(v) == 1.0f)
+    if (absCosTheta(v) == 1.0f)
         return 0.0f;
-    const auto tan_theta_sq = TanTheta2(v);
+    const auto tan_theta_sq = tanTheta2(v);
     constexpr auto alpha = 0.25f;
     constexpr auto alpha2 = alpha * alpha;
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
@@ -169,8 +169,8 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const auto evaluate_reflection = PointingUp( wo ) && PointingUp( wi );
 
     if (diffuseWeight > 0.0f) {
-        const auto NoO = CosTheta(wo);
-        const auto NoI = CosTheta(wi);
+        const auto NoO = cosTheta(wo);
+        const auto NoI = cosTheta(wi);
         const auto Clampped_NoI = saturate(NoI);
         const auto FO = SchlickWeight(NoO);
         const auto FI = SchlickWeight(NoI);

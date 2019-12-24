@@ -75,7 +75,7 @@ SORT_FORCEINLINE Vector CosSampleHemisphere( float u , float v ){
 
 // cosine hemisphere pdf
 SORT_FORCEINLINE float CosHemispherePdf( const Vector& v ){
-    return AbsCosTheta(v) * INV_PI;
+    return absCosTheta(v) * INV_PI;
 }
 
 // sampling a cone uniformly
@@ -103,7 +103,7 @@ SORT_FORCEINLINE Vector UniformSampleHemisphere( float u , float v ){
     float theta = acos( u );
     float phi = TWO_PI * v;
 
-    return SphericalVec( theta , phi );
+    return sphericalVec( theta , phi );
 }
 
 // uniformly sample hemisphere pdf
@@ -117,7 +117,7 @@ SORT_FORCEINLINE float UniformHemispherePdf(){
 SORT_FORCEINLINE Vector UniformSampleSphere( float u , float v ){
     float theta = acos( 1 - 2.0f * u );
     float phi = TWO_PI * v;
-    return SphericalVec( theta , phi );
+    return sphericalVec( theta , phi );
 }
 
 // pdf of uniformly sampling a vector on sphere

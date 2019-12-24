@@ -40,10 +40,10 @@ Spectrum Coat::F( const Vector& wo , const Vector& wi ) const{
     const auto r_wi = refract(swi, DIR_UP, ior, 1.0f, tir_i);
     if (!tir_o && !tir_i) {
         // Bouguer-Lambert-Beer law
-        const auto attenuation = ( -thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
+        const auto attenuation = ( -thickness * sigma * (1.0f / absCosTheta(r_wo) + 1.0f / absCosTheta(r_wi))).Exp();
         // Fresnel attenuation between the boundary across layer0 and layer1
-        const auto T12 = (1.0f - fresnel.Evaluate(CosTheta(swo)));
-        const auto T21 = slerp( 1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
+        const auto T12 = (1.0f - fresnel.Evaluate(cosTheta(swo)));
+        const auto T21 = slerp( 1.0f - fresnel.Evaluate(cosTheta(swi)), 1.0f, TIR_COMPENSATION);
 
         ret += bottom->Evaluate_BSDF( -r_wo , -r_wi ) * attenuation * T12 * T21 / ( ior * ior );
     }
@@ -58,8 +58,8 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
     auto tir_o = false , tir_i = false;
     const auto r_wo = refract(swo, DIR_UP, ior, 1.0f, tir_o);
     Vector r_wi;
-    const auto attenuation = ( -thickness * sigma * 2.0f / AbsCosTheta(r_wo) ).Exp();
-    const auto I1 = fresnel.Evaluate(CosTheta(swo)).GetIntensity();
+    const auto attenuation = ( -thickness * sigma * 2.0f / absCosTheta(r_wo) ).Exp();
+    const auto I1 = fresnel.Evaluate(cosTheta(swo)).GetIntensity();
     const auto I2 = ( 1.0f - I1 ) * ( 1.0f - I1 ) * attenuation.GetIntensity() / ( ior * ior );
     const auto specProp = I1 / ( I1 + I2 );
 
@@ -73,10 +73,10 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
         auto r_wi = refract(swi, DIR_UP, ior, 1.0f, tir_i);
         if (!tir_o && !tir_i) {
             // Bouguer-Lambert-Beer law
-            const auto attenuation = (-thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
+            const auto attenuation = (-thickness * sigma * (1.0f / absCosTheta(r_wo) + 1.0f / absCosTheta(r_wi))).Exp();
             // Fresnel attenuation between the boundary across layer0 and layer1
-            const auto T12 = (1.0f - fresnel.Evaluate(CosTheta(swo)));
-            const auto T21 = slerp(1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
+            const auto T12 = (1.0f - fresnel.Evaluate(cosTheta(swo)));
+            const auto T21 = slerp(1.0f - fresnel.Evaluate(cosTheta(swi)), 1.0f, TIR_COMPENSATION);
 
             ret += bottom->Evaluate_BSDF(-r_wo, -r_wi) * attenuation * T12 * T21 / (ior * ior);
         }
@@ -102,10 +102,10 @@ Spectrum Coat::Sample_F( const Vector& wo , Vector& wi , const BsdfSample& bs , 
         }
 
         // Bouguer-Lambert-Beer law
-        const auto attenuation = (-thickness * sigma * (1.0f / AbsCosTheta(r_wo) + 1.0f / AbsCosTheta(r_wi))).Exp();
+        const auto attenuation = (-thickness * sigma * (1.0f / absCosTheta(r_wo) + 1.0f / absCosTheta(r_wi))).Exp();
         // Fresnel attenuation between the boundary across layer0 and layer1
-        const auto T12 = (1.0f - fresnel.Evaluate(CosTheta(swo)));
-        const auto T21 = slerp(1.0f - fresnel.Evaluate(CosTheta(swi)), 1.0f, TIR_COMPENSATION);
+        const auto T12 = (1.0f - fresnel.Evaluate(cosTheta(swo)));
+        const auto T21 = slerp(1.0f - fresnel.Evaluate(cosTheta(swi)), 1.0f, TIR_COMPENSATION);
 
         ret *= attenuation * T12 * T21 / (ior * ior);
 
@@ -131,8 +131,8 @@ float Coat::Pdf( const Vector& wo , const Vector& wi ) const{
     auto tir_o = false , tir_i = false;
     const auto r_wo = refract(swo, DIR_UP, ior, 1.0f, tir_o);
     const auto r_wi = refract(swi, DIR_UP, ior, 1.0f, tir_i);
-    const auto attenuation = ( -thickness * sigma * 2.0f / AbsCosTheta(r_wo) ).Exp();
-    const auto I1 = fresnel.Evaluate(CosTheta(swo)).GetIntensity();
+    const auto attenuation = ( -thickness * sigma * 2.0f / absCosTheta(r_wo) ).Exp();
+    const auto I1 = fresnel.Evaluate(cosTheta(swo)).GetIntensity();
     const auto I2 = ( 1.0f - I1 ) * ( 1.0f - I1 ) * attenuation.GetIntensity() / ( ior * ior );
     const auto specProp = I1 / ( I1 + I2 );
 

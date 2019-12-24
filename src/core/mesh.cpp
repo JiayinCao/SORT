@@ -67,8 +67,8 @@ void BufferMemory::GenUV(){
     for (MeshVertex& mv : m_vertices) {
         Vector diff = mv.m_position - center;
         diff.Normalize();
-        mv.m_texCoord.x = SphericalTheta(diff) * INV_PI;
-        mv.m_texCoord.y = SphericalPhi(diff) * INV_TWOPI;
+        mv.m_texCoord.x = sphericalTheta(diff) * INV_PI;
+        mv.m_texCoord.y = sphericalPhi(diff) * INV_TWOPI;
     }
 }
 

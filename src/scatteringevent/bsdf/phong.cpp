@@ -32,7 +32,7 @@ Spectrum Phong::f( const Vector& wo , const Vector& wi ) const{
         if (alpha > 0.0f)
             ret += S * (power + 2) * pow(alpha, power) * INV_TWOPI;
     }
-    return ret * AbsCosTheta(wi);
+    return ret * absCosTheta(wi);
 }
 
 Spectrum Phong::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, float* pPdf) const {
@@ -45,7 +45,7 @@ Spectrum Phong::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs, flo
         const auto cos_theta = pow(bs.v, 1.0f / (power + 2.0f));
         const auto sin_theta = sqrt(1.0f - cos_theta * cos_theta);
         const auto phi = TWO_PI * ( bs.u - diffRatio ) / (1.0f - diffRatio);
-        const auto dir = SphericalVec(sin_theta, cos_theta, phi);
+        const auto dir = sphericalVec(sin_theta, cos_theta, phi);
 
         const auto r = reflect(wo);
         Vector t0, t1;
