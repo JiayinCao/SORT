@@ -137,11 +137,11 @@ namespace {
             const auto weight = comp->w * w;
             const auto sample_weight = ( weight[0] + weight[1] + weight[2] ) / 3.0f;
             auto params = *comp->as<DisneyBRDF::Params>();
-            RGBSpectrum mfp = params.scatterDistance;
+            auto& mfp = params.scatterDistance;
 
             // Ignore SSS if necessary
             if ( SE_NONE != ( se.GetFlag() & SE_REPLACE_BSSRDF ) )
-                mfp = 0.0f;
+                mfp = OSL::Vec3(0.0f);
 
             RGBSpectrum sssBaseColor = params.baseColor;
 
@@ -176,7 +176,7 @@ namespace {
 #else
             constexpr auto bssrdf_pdf = 1.0f;
 #endif
-            if (!mfp.IsBlack()) {
+            if (!( 0.0f == mfp[0] && 0.0f == mfp[1] && 0.0f == mfp[2] )) {
                 const auto bxdf_sampling_weight = DisneyBRDF::Evaluate_PDF( params );
 
                 if( bxdf_sampling_weight > 0.0f )
