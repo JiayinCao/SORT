@@ -111,7 +111,7 @@ SORT_STATIC_FORCEINLINE const Point& operator -= ( Point& p , const Vector& v ){
 }
 
 SORT_STATIC_FORCEINLINE Point operator * ( float f , const Point& p ){
-    return p * f;
+    return Point( p.x * f , p.y * f , p.z * f );
 }
 
 SORT_STATIC_FORCEINLINE Point operator * ( const Point& p , float f ){

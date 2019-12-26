@@ -20,7 +20,6 @@
 #include <OSL/oslexec.h>
 #include <math.h>
 #include "math/utils.h"
-#include "vec_common.h"
 #include "core/sassert.h"
 
 //! @brief  Abstraction 3D vector class.
@@ -125,8 +124,6 @@ public:
     static const Vector3<T> UP;
 };
 
-VECTOR3_COMMON_DEFINE( Vector3<float> , float )
-
 typedef Vector3<float>      Vector;     // Vector is 3-float vector by default
 typedef Vector3<float>      Vector3f;
 typedef Vector3<int>        Vector3i;
@@ -181,4 +178,137 @@ SORT_FORCEINLINE void coordinateSystem( const Vector3<T>& v0 , Vector3<T>& v1 , 
         v1 = Vector( 0.0f , v0.z * invLen , -v0.y * invLen );
     }
     v2 = cross( v0 , v1 );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator+( const Vector3<T>& v0 , const Vector3<T>& v1 ){
+    return Vector3<T>( v0[0] + v1[0] , v0[1] + v1[1] , v0[2] + v1[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator-( const Vector3<T>& v0 , const Vector3<T>& v1 ){
+    return Vector3<T>( v0[0] - v1[0] , v0[1] - v1[1] , v0[2] - v1[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator*( const Vector3<T>& v0 , const Vector3<T>& v1 ){
+    return Vector3<T>( v0[0] * v1[0] , v0[1] * v1[1] , v0[2] * v1[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator/( const Vector3<T>& v0 , const Vector3<T>& v1 ){
+    return Vector3<T>( v0[0] / v1[0] , v0[1] / v1[1] , v0[2] / v1[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator+( const Vector3<T>& v , const T s ){
+    return Vector3<T>( v[0] + s , v[1] + s , v[2] + s );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator-( const Vector3<T>& v , const T s ){
+    return Vector3<T>( v[0] - s , v[1] - s , v[2] - s );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator*( const Vector3<T>& v , const T s ){
+    return Vector3<T>( v[0] * s , v[1] * s , v[2] * s );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator/( const Vector3<T>& v , const T s ){
+    return Vector3<T>( v[0] / s , v[1] / s , v[2] / s );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator+( const T s , const Vector3<T> v ){
+    return Vector3<T>( s + v[0] , s + v[1] , s + v[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator-( const T s , const Vector3<T>& v ){
+    return Vector3<T>( s - v[0] , s - v[1] , s - v[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator*( const T s , const Vector3<T>& v ){
+    return Vector3<T>( s * v[0] , s * v[1] , s * v[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector3<T> operator/( const T s , const Vector3<T>& v ){
+    return Vector3<T>( s / v[0] , s / v[1] , s / v[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T>& operator+= ( Vector3<T>& t, const Vector3<T>& v ){
+    t[0] += v[0]; t[1] += v[1]; t[2] += v[2];
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T>& operator-= ( Vector3<T>& t, const Vector3<T>& v ){
+    t[0] -= v[0]; t[1] -= v[1]; t[2] -= v[2];
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T>& operator*= ( Vector3<T>& t, const Vector3<T>& v ){
+    t[0] *= v[0]; t[1] *= v[1]; t[2] *= v[2];
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T>& operator/= ( Vector3<T>& t, const Vector3<T>& v ){
+    t[0] /= v[0]; t[1] /= v[1]; t[2] /= v[2];
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T>& operator+= ( Vector3<T>& t, const T s ){
+    t[0] += s; t[1] += s; t[2] += s;
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T>& operator-= ( Vector3<T>& t, const T s ){
+    t[0] -= s; t[1] -= s; t[2] -= s;
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T>& operator*= ( Vector3<T>& t, const T s ){
+    t[0] *= s; t[1] *= s; t[2] *= s;
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T>& operator/= ( Vector3<T>& t, const T s ){
+    t[0] /= s; t[1] /= s; t[2] /= s;
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T>& operator+ ( const Vector3<T>& v ){
+    return v;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector3<T> operator- ( const Vector3<T>& v ){
+    return Vector3<T>(-v[0],-v[1],-v[2]);
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE bool operator== ( const Vector3<T>& v0 , const Vector3<T>& v1 ){
+    return ( v0[0] == v1[0] ) && ( v0[1] == v1[1] ) && ( v0[2] == v1[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE bool operator!= ( const Vector3<T>& v0 , const Vector3<T>& v1 ){
+    return ( v0[0] != v1[0] ) || ( v0[1] != v1[1] ) || ( v0[2] != v1[2] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE bool isZero( const Vector3<T>& v ){
+    return ( v[0] == (T)0 ) && ( v[1] == (T)0 ) && ( v[2] == (T)0 );
 }

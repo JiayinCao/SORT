@@ -19,93 +19,90 @@
 
 #include <math.h>
 #include "core/define.h"
+#include "core/sassert.h"
 
+//! @brief  Abstraction 2D vector class.
 template< class T >
-class Vector2
-{
+class Vector2{
 public:
-    Vector2() : x(0),y(0){
-    }
-    Vector2( T _x , T _y ) : x(_x),y(_y){
-    }
-    Vector2( const Vector2<T>& c ) : x(c.x), y(c.y){
-    }
-    Vector2( const T* const d ) : x(d[0]),y(d[1]){
-    }
+    //! @brief  Default constructor reset all value to be zero.
+    Vector2() : x(0),y(0){}
 
-    Vector2<T>  operator+ ( const Vector2<T>& v) const {
-        return Vector2<T>( x + v.x , y + v.y );
-    }
-    const Vector2<T>&   operator+= ( const Vector2<T>& v) {
-        x += v.x; y += v.y;
-        return *this;
-    }
-    Vector2<T>  operator- ( const Vector2<T>& v) const {
-        return Vector2<T>( x - v.x , y - v.y );
-    }
-    const Vector2<T>&   operator-= ( const Vector2<T>& v ) {
-        x -= v.x; y -= v.y;
-        return *this;
-    }
-    Vector2<T>  operator* ( float s ) const {
-        return Vector2<T>( (T)(x * s) , (T)(y * s) );
-    }
-    const Vector2<T>&   operator*= ( float s ){
-        x *= s; y *= s;
-        return *this;
-    }
-    Vector2<T>  operator/ ( float div ) const {
-        if( div == 0.0f )
-            return *this;
-        div = 1.0f / div;
-        return (*this) * div;
-    }
-    const Vector2<T>&   operator/= ( float div ) {
-        if( div == 0.0f )
-            return *this;
-        div = 1.0f / div;
-        return *this *= div;
-    }
+    //! @brief  Constructor from two float values.
+    //!
+    //! @param  x   Value in x channel.
+    //! @param  y   Value in y channel.
+    Vector2( T x , T y ) : x(x),y(y){}
+
+    //! @brief  Constructor from one float value.
+    //!
+    //! @param  t   Value to be propergated to all channels.
+    Vector2( T t ) : Vector2(t,t){}
+
+    //! @brief  Copy constructor.
+    //!
+    //! @param  v   Value to copy from.
+    Vector2( const Vector2<T>& v ) : Vector2( v.x , v.y ) {}
+
+    //! @brief  Constructor from a point to two float value.
+    Vector2( const T* const d ) : x(d[0]),y(d[1]){}
+
+    //! @brief  = operator.
+    //!
+    //! @brief v    Value to copy from.
+    //! @return     Copied value.
     const Vector2<T>& operator = ( const Vector2<T>& v ){
         x = v.x; y = v.y;
         return *this;
     }
+
+    //! @brief  Access value in a specific channel.
+    //!
+    //! It is up to the higher level code to make sure id is with the valid range.
+    //!
+    //! @param id   Index of channel of interest.
+    //! @return     Value of interest.
     T operator[] ( unsigned id ) const{
+        sAssert( id >= 0 && id < 2 , GENERAL );
         return data[id];
-    }
-    T& operator[] ( unsigned id ){
-        return data[id];
-    }
-    Vector2<T> operator-() const{
-        return Vector2<T>( -x , -y );
-    }
-    bool operator== ( const Vector2<T>& v ) const{
-        return ( v.x == x ) && ( v.y == y ) ;
-    }
-    bool operator!= ( const Vector2<T>& v ) const{
-        return ( v.x != x ) || ( v.y != y ) ;
     }
 
-    float Length() const
-    {
+    //! @brief  Access value in a specific channel.
+    //!
+    //! It is up to the higher level code to make sure id is with the valid range.
+    //!
+    //! @param id   Index of channel of interest.
+    //! @return     Value of interest.
+    T& operator[] ( unsigned id ){
+        sAssert( id >= 0 && id < 2 , GENERAL );
+        return data[id];
+    }
+
+    //! @brief  Length of the vector.
+    //!
+    //! @return     The length of the vector.
+    float Length() const{
         return sqrt( SquaredLength() );
     }
-    float SquaredLength() const
-    {
-        return x * x + y * y ;
+
+    //! @brief  The squared length of the vector.
+    //!
+    //! @return     The squared length of the vector.
+    float SquaredLength() const{
+        return x * x + y * y;
     }
-    Vector2<T>& normalize()
-    {
+
+    //! @brief  Normalize the vector.
+    //!
+    //! @return     Normalized vector.
+    Vector2<T>& Normalize(){
         float len = Length();
         if( len != 0 )
             *this /= len;
         return *this;
     }
 
-public:
-    // the vector data
-    union
-    {
+    union{
         struct{
             T x , y;
         };
@@ -121,26 +118,150 @@ typedef Vector2<unsigned>   Vector2u;
 typedef Vector2<double>     Vector2d;
 
 template<class T>
-SORT_FORCEINLINE Vector2<T> operator *( float f , const Vector2<T>& v0 )
-{
-    return v0 * f;
-}
-
-template<class T>
-SORT_FORCEINLINE float dot( const Vector2<T>& v0 , const Vector2<T>& v1 )
-{
+SORT_FORCEINLINE float dot( const Vector2<T>& v0 , const Vector2<T>& v1 ){
     return v0.x * v1.x + v0.y * v1.y;
 }
 
 template<class T>
-SORT_FORCEINLINE float absDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
-{
+SORT_FORCEINLINE float absDot( const Vector2<T>& v0 , const Vector2<T>& v1 ){
     float r = dot( v0 , v1 );
     return ( r < 0.0f )? -r : r;
 }
 
 template<class T>
-SORT_FORCEINLINE float satDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
-{
+SORT_FORCEINLINE float satDot( const Vector2<T>& v0 , const Vector2<T>& v1 ){
     return clamp( dot( v0 , v1 ) , 0.0f , 1.0f );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator+( const Vector2<T>& v0 , const Vector2<T>& v1 ){
+    return Vector2<T>( v0[0] + v1[0] , v0[1] + v1[1] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator-( const Vector2<T>& v0 , const Vector2<T>& v1 ){
+    return Vector2<T>( v0[0] - v1[0] , v0[1] - v1[1] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator*( const Vector2<T>& v0 , const Vector2<T>& v1 ){
+    return Vector2<T>( v0[0] * v1[0] , v0[1] * v1[1] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator/( const Vector2<T>& v0 , const Vector2<T>& v1 ){
+    return Vector2<T>( v0[0] / v1[0] , v0[1] / v1[1] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator+( const Vector2<T>& v , const T s ){
+    return Vector2<T>( v[0] + s , v[1] + s );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator-( const Vector2<T>& v , const T s ){
+    return Vector2<T>( v[0] - s , v[1] - s );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator*( const Vector2<T>& v , const T s ){
+    return Vector2<T>( v[0] * s , v[1] * s );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator/( const Vector2<T>& v , const T s ){
+    return Vector2<T>( v[0] / s , v[1] / s );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator+( const T s , const Vector2<T> v ){
+    return Vector2<T>( s + v[0] , s + v[1] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator-( const T s , const Vector2<T>& v ){
+    return Vector2<T>( s - v[0] , s - v[1] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator*( const T s , const Vector2<T>& v ){
+    return Vector2<T>( s * v[0] , s * v[1] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE Vector2<T> operator/( const T s , const Vector2<T>& v ){
+    return Vector2<T>( s / v[0] , s / v[1] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T>& operator+= ( Vector2<T>& t, const Vector2<T>& v ){
+    t[0] += v[0]; t[1] += v[1];
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T>& operator-= ( Vector2<T>& t, const Vector2<T>& v ){
+    t[0] -= v[0]; t[1] -= v[1];
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T>& operator*= ( Vector2<T>& t, const Vector2<T>& v ){
+    t[0] *= v[0]; t[1] *= v[1];
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T>& operator/= ( Vector2<T>& t, const Vector2<T>& v ){
+    t[0] /= v[0]; t[1] /= v[1];
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T>& operator+= ( Vector2<T>& t, const T s ){
+    t[0] += s; t[1] += s;
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T>& operator-= ( Vector2<T>& t, const T s ){
+    t[0] -= s; t[1] -= s;
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T>& operator*= ( Vector2<T>& t, const T s ){
+    t[0] *= s; t[1] *= s;
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T>& operator/= ( Vector2<T>& t, const T s ){
+    t[0] /= s; t[1] /= s; 
+    return t;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T>& operator+ ( const Vector2<T>& v ){
+    return v;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE const Vector2<T> operator- ( const Vector2<T>& v ){
+    return Vector2<T>(-v[0],-v[1]);
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE bool operator== ( const Vector2<T>& v0 , const Vector2<T>& v1 ){
+    return ( v0[0] == v1[0] ) && ( v0[1] == v1[1] );
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE bool operator!= ( const Vector2<T>& v0 , const Vector2<T>& v1 ){
+    return ( v0[0] != v1[0] ) || ( v0[1] != v1[1] ) ;
+}
+
+template<class T>
+SORT_STATIC_FORCEINLINE bool isZero( const Vector2<T>& v ){
+    return ( v[0] == (T)0 ) && ( v[1] == (T)0 );
 }

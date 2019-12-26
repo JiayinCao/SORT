@@ -17,6 +17,5 @@
 
 #include "vector2.h"
 #include "vector3.h"
-#include "vector4.h"
 
 const Vector DIR_UP( 0.0f , 1.0f , 0.0f );

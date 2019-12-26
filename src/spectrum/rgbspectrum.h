@@ -21,7 +21,6 @@
 #include "core/define.h"
 #include "core/sassert.h"
 #include "math/utils.h"
-#include "math/vec_common.h"
 
 #define RGBSPECTRUM_SAMPLE      3
 
@@ -144,7 +143,101 @@ public:
     static const RGBSpectrum    m_White;
 };
 
-VECTOR3_COMMON_DEFINE( RGBSpectrum , float )
-
 #define WHITE_SPECTRUM      RGBSpectrum::m_White
 #define FULL_WEIGHT         WHITE_SPECTRUM
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator + ( const RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    return RGBSpectrum( c0.r + c1.r , c0.g + c1.g , c0.b + c1.b );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator - ( const RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    return RGBSpectrum( c0.r - c1.r , c0.g - c1.g , c0.b - c1.b );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator * ( const RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    return RGBSpectrum( c0.r * c1.r , c0.g * c1.g , c0.b * c1.b );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator / ( const RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    return RGBSpectrum( c0.r / c1.r , c0.g / c1.g , c0.b / c1.b );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator + ( const RGBSpectrum& c0 , const float f ){
+    return RGBSpectrum( c0.r + f , c0.g + f , c0.b + f );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator - ( const RGBSpectrum& c0 , const float f ){
+    return RGBSpectrum( c0.r - f , c0.g - f , c0.b - f );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator * ( const RGBSpectrum& c0 , const float f ){
+    return RGBSpectrum( c0.r * f , c0.g * f , c0.b * f );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator / ( const RGBSpectrum& c0 , const float f ){
+    return RGBSpectrum( c0.r / f , c0.g / f , c0.b / f );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator + ( const float f , const RGBSpectrum& c0 ){
+    return RGBSpectrum( f + c0.r , f + c0.g , f + c0.b );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator - ( const float f , const RGBSpectrum& c0 ){
+    return RGBSpectrum( f - c0.r , f - c0.g , f - c0.b );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator * ( const float f , const RGBSpectrum& c0 ){
+    return RGBSpectrum( f * c0.r , f * c0.g , f * c0.b );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator / ( const float f , const RGBSpectrum& c0 ){
+    return RGBSpectrum( f / c0.r , f / c0.g , f / c0.b );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator += ( RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    c0.r += c1.r; c0.g += c1.g; c0.b += c1.b;
+    return c0;
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator -= ( RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    c0.r -= c1.r; c0.g -= c1.g; c0.b -= c1.b;
+    return c0;
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator *= ( RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    c0.r *= c1.r; c0.g *= c1.g; c0.b *= c1.b;
+    return c0;
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator /= ( RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    c0.r /= c1.r; c0.g /= c1.g; c0.b /= c1.b;
+    return c0;
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator += ( RGBSpectrum& c0 , const float f ){
+    c0.r += f; c0.g += f; c0.b += f;
+    return c0;
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator -= ( RGBSpectrum& c0 , const float f ){
+    c0.r -= f; c0.g -= f; c0.b -= f;
+    return c0;
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator *= ( RGBSpectrum& c0 , const float f ){
+    c0.r *= f; c0.g *= f; c0.b *= f;
+    return c0;
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator /= ( RGBSpectrum& c0 , const float f ){
+    c0.r /= f; c0.g /= f; c0.b /= f;
+    return c0;
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator == ( const RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    return ( c0.r == c1.r ) && ( c0.g == c1.g ) && ( c0.b == c1.b );
+}
+
+SORT_STATIC_FORCEINLINE RGBSpectrum operator != ( const RGBSpectrum& c0 , const RGBSpectrum& c1 ){
+    return ( c0.r != c1.r ) || ( c0.g != c1.g ) || ( c0.b != c1.b );
+}
