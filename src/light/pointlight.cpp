@@ -22,12 +22,12 @@
 
 // sample ray from light
 Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
-    auto light_pos = Vector3f( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
+    const auto light_pos = Point( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 
     // Get light position
     const auto _dirToLight = light_pos - intersect.intersect;
 
-    // Normalize vec
+    // normalize vec
     const auto sqrLen = _dirToLight.SquaredLength();
     const auto len = sqrt(sqrLen);
     dirToLight = _dirToLight / len;
@@ -55,7 +55,7 @@ Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample
 
 // sample a ray from light
 Spectrum PointLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
-    auto light_pos = Vector3f( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
+    auto light_pos = Point( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 
     // sample a new ray
     r.m_fMin = 0.0f;

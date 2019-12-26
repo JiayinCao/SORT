@@ -20,7 +20,7 @@
 #include "core/stats.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
 
-static SORT_FORCEINLINE Fast_Bvh_Node_Ptr makeFastBvhNode( unsigned int start , unsigned int end ){
+SORT_STATIC_FORCEINLINE Fast_Bvh_Node_Ptr makeFastBvhNode( unsigned int start , unsigned int end ){
 #ifdef SIMD_BVH_IMPLEMENTATION
     auto* address = malloc_aligned( sizeof(Fast_Bvh_Node) , SIMD_ALIGNMENT );
     auto* node = new (address) Fast_Bvh_Node( start , end );
@@ -31,7 +31,7 @@ static SORT_FORCEINLINE Fast_Bvh_Node_Ptr makeFastBvhNode( unsigned int start , 
 }
 
 template<class T>
-static SORT_FORCEINLINE std::unique_ptr<T[]> makePrimitiveList( unsigned int cnt ){
+SORT_STATIC_FORCEINLINE std::unique_ptr<T[]> makePrimitiveList( unsigned int cnt ){
 #ifdef SIMD_BVH_IMPLEMENTATION
     auto* address = malloc_aligned( sizeof(T) * cnt , SIMD_ALIGNMENT );
     return std::move(std::unique_ptr<T[]>((T*)address));
@@ -102,7 +102,7 @@ SORT_STATS_AVG_COUNT("Spatial-Structure(OBVH)", "Average Primitive Tested per Ra
 
 #endif
 
-static SORT_FORCEINLINE BBox calcBoundingBox(const Fbvh_Node* const node , const Bvh_Primitive* const primitives ) {
+SORT_STATIC_FORCEINLINE BBox calcBoundingBox(const Fbvh_Node* const node , const Bvh_Primitive* const primitives ) {
     BBox node_bbox;
     if (!node)
         return node_bbox;

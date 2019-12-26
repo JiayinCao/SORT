@@ -319,14 +319,14 @@ SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Ray_Data& 
 
     if( inter_y[res_i] == line->m_length ){
         // A corner case where the tip of the line is being intersected.
-        ret->gnormal = Normalize( line->m_world2Line.GetInversed().TransformVector( Vector( 0.0f , 1.0f , 0.0f ) ) );
+        ret->gnormal = normalize( line->m_world2Line.GetInversed().TransformVector( Vector( 0.0f , 1.0f , 0.0f ) ) );
         ret->normal = ret->gnormal;
-        ret->tangent = Normalize( line->m_world2Line.GetInversed().TransformVector( Vector( 1.0f , 0.0f , 0.0f ) ) );
+        ret->tangent = normalize( line->m_world2Line.GetInversed().TransformVector( Vector( 1.0f , 0.0f , 0.0f ) ) );
     }else{
         // This may not be physically correct, but it should be fine for a pixel width line.
-        ret->gnormal = Normalize(line->m_world2Line.GetInversed().TransformVector( Vector( inter_x[res_i], 0.0f , inter_z[res_i] ) ) );
+        ret->gnormal = normalize(line->m_world2Line.GetInversed().TransformVector( Vector( inter_x[res_i], 0.0f , inter_z[res_i] ) ) );
         ret->normal = ret->gnormal;
-        ret->tangent = Normalize( line->m_gp1 - line->m_gp0 );
+        ret->tangent = normalize( line->m_gp1 - line->m_gp0 );
 
         ret->view = -ray.m_Dir;
     }

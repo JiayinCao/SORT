@@ -93,9 +93,6 @@ public:
     bool operator!= ( const Vector4<T>& v ) const{
         return ( v.x != x ) || ( v.y != y ) || ( v.z != z ) || ( v.w != w );
     }
-    bool IsZero() const{
-        return x == 0 && y == 0 && z == 0 && w == 0 ;
-    }
 
     float Length() const
     {
@@ -105,7 +102,7 @@ public:
     {
         return x * x + y * y + z * z + w * w;
     }
-    Vector4<T>& Normalize()
+    Vector4<T>& normalize()
     {
         float len = Length();
         if( len != 0 )
@@ -150,35 +147,30 @@ SORT_FORCEINLINE Vector4<T> operator *( float f , const Vector4<T>& v0 )
 }
 
 template<class T>
-SORT_FORCEINLINE float Dot( const Vector4<T>& v0 , const Vector4<T>& v1 )
+SORT_FORCEINLINE float dot( const Vector4<T>& v0 , const Vector4<T>& v1 )
 {
     return v0.x * v1.x + v0.y * v1.y + v0.z * v1.z + v0.w * v1.w;
 }
 
 template<class T>
-SORT_FORCEINLINE float AbsDot( const Vector4<T>& v0 , const Vector4<T>& v1 )
+SORT_FORCEINLINE float absDot( const Vector4<T>& v0 , const Vector4<T>& v1 )
 {
-    float r = Dot( v0 , v1 );
+    float r = dot( v0 , v1 );
     return ( r < 0.0f )? -r : r;
 }
 
 template<class T>
-SORT_FORCEINLINE float SatDot( const Vector4<T>& v0 , const Vector4<T>& v1 )
+SORT_FORCEINLINE float satDot( const Vector4<T>& v0 , const Vector4<T>& v1 )
 {
-    return clamp( Dot( v0 , v1 ) , 0.0f , 1.0f );
+    return clamp( dot( v0 , v1 ) , 0.0f , 1.0f );
 }
 
 // normalize a vector
 template<class T>
-SORT_FORCEINLINE Vector4<T> Normalize( const Vector4<T>& v )
+SORT_FORCEINLINE Vector4<T> normalize( const Vector4<T>& v )
 {
     float len = v.Length();
     if( len == 0.0f )
         return v;
     return v / len;
-}
-
-SORT_FORCEINLINE Vector4f FromSpectrum( const Spectrum& rgb )
-{
-    return Vector4f( rgb.GetR() , rgb.GetG() , rgb.GetB() , 0.0f );
 }

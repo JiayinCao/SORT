@@ -35,7 +35,7 @@
     #define Simd_Ray_Data   Ray8_Data
 #endif
 
-static SORT_FORCEINLINE float sign( const float x ){
+SORT_STATIC_FORCEINLINE float sign( const float x ){
     return x < 0.0f ? -1.0f : 1.0f;
 }
 
@@ -82,49 +82,49 @@ void resolveRayData( const Ray& ray , Simd_Ray_Data& simd_ray_data ){
     simd_ray_data.scale_z = simd_set_ps1( ray.m_scale_z );
 }
 
-static SORT_FORCEINLINE simd_data   ray_ori_dir_x( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_ori_dir_x( const Simd_Ray_Data& ray ){
     return ray.ori_dir_x;
 }
-static SORT_FORCEINLINE simd_data   ray_ori_dir_y( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_ori_dir_y( const Simd_Ray_Data& ray ){
     return ray.ori_dir_y;
 }
-static SORT_FORCEINLINE simd_data   ray_ori_dir_z( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_ori_dir_z( const Simd_Ray_Data& ray ){
     return ray.ori_dir_z;
 }
-static SORT_FORCEINLINE simd_data   ray_ori_x( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_ori_x( const Simd_Ray_Data& ray ){
     return ray.ori_x;
 }
-static SORT_FORCEINLINE simd_data   ray_ori_y( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_ori_y( const Simd_Ray_Data& ray ){
     return ray.ori_y;
 }
-static SORT_FORCEINLINE simd_data   ray_ori_z( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_ori_z( const Simd_Ray_Data& ray ){
     return ray.ori_z;
 }
-static SORT_FORCEINLINE simd_data   ray_dir_x( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_dir_x( const Simd_Ray_Data& ray ){
     return ray.dir_x;
 }
-static SORT_FORCEINLINE simd_data   ray_dir_y( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_dir_y( const Simd_Ray_Data& ray ){
     return ray.dir_y;
 }
-static SORT_FORCEINLINE simd_data   ray_dir_z( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_dir_z( const Simd_Ray_Data& ray ){
     return ray.dir_z;
 }
-static SORT_FORCEINLINE simd_data   ray_rcp_dir_x( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_rcp_dir_x( const Simd_Ray_Data& ray ){
     return ray.rcp_dir_x;
 }
-static SORT_FORCEINLINE simd_data   ray_rcp_dir_y( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_rcp_dir_y( const Simd_Ray_Data& ray ){
     return ray.rcp_dir_y;
 }
-static SORT_FORCEINLINE simd_data   ray_rcp_dir_z( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_rcp_dir_z( const Simd_Ray_Data& ray ){
     return ray.rcp_dir_z;
 }
-static SORT_FORCEINLINE simd_data   ray_scale_x( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_scale_x( const Simd_Ray_Data& ray ){
     return ray.scale_x;
 }
-static SORT_FORCEINLINE simd_data   ray_scale_y( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_scale_y( const Simd_Ray_Data& ray ){
     return ray.scale_y;
 }
-static SORT_FORCEINLINE simd_data   ray_scale_z( const Simd_Ray_Data& ray ){
+SORT_STATIC_FORCEINLINE simd_data   ray_scale_z( const Simd_Ray_Data& ray ){
     return ray.scale_z;
 }
 #endif

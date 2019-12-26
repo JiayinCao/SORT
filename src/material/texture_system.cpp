@@ -42,8 +42,8 @@ bool SORTTextureSystem::texture(TextureHandle *texture_handle, Perthread *thread
     float *dresultds , float *dresultdt ) {
     const auto* image_texture = (const ImageTexture*)texture_handle;
     RGBSpectrum color = image_texture->GetColorFromUV(s, t);
-    result[0] = color.GetR();
-    result[1] = color.GetG();
-    result[2] = color.GetB();
+    result[0] = color.r;
+    result[1] = color.g;
+    result[2] = color.b;
     return true;
 }

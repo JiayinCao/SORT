@@ -26,15 +26,14 @@ Point Disk::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Vect
     Point lp = m_transform.TransformPoint( Point( u * radius , 0.0f , v * radius ) );
     n = m_transform.TransformVector( Vector( 0 , 1.0f , 0 ) );
     Vector delta = lp - p;
-    wi = Normalize( delta );
+    wi = normalize( delta );
 
-    float dot = Dot( -wi , n );
-    if( pdf )
-    {
-        if( dot <= 0.0f )
+    float d = dot( -wi , n );
+    if( pdf ){
+        if( d <= 0.0f )
             *pdf = 0.0f;
         else
-            *pdf = delta.SquaredLength() / ( SurfaceArea() * dot );
+            *pdf = delta.SquaredLength() / ( SurfaceArea() * d );
     }
 
     return lp;

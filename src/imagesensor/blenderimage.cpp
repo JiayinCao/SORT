@@ -40,9 +40,9 @@ void BlenderImage::StorePixel( int x , int y , const Spectrum& color , const Ren
     int inner_offset = offset + 4 * (x - rt.GetTopLeft().x + (g_tileSize - 1 - (y - rt.GetTopLeft().y)) * tile_w);
 
     // copy data
-    data[ inner_offset ] = color.GetR();
-    data[ inner_offset + 1 ] = color.GetG();
-    data[ inner_offset + 2 ] = color.GetB();
+    data[ inner_offset ] = color.r;
+    data[ inner_offset + 1 ] = color.g;
+    data[ inner_offset + 2 ] = color.b;
     data[ inner_offset + 3 ] = 1.0f;
 
     // for final update
@@ -89,9 +89,9 @@ void BlenderImage::PostProcess(){
     for (auto i = 0; i < m_rendertarget.GetHeight(); ++i)
         for (auto j = 0; j < m_rendertarget.GetWidth(); ++j){
             const Spectrum& c = m_rendertarget.GetColor(j, m_rendertarget.GetHeight() - i - 1);
-            data[offset++] = c.GetR();
-            data[offset++] = c.GetG();
-            data[offset++] = c.GetB();
+            data[offset++] = c.r;
+            data[offset++] = c.g;
+            data[offset++] = c.b;
             data[offset++] = 1.0f;
         }
 

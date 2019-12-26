@@ -54,8 +54,8 @@ void OrthoCamera::SetCameraHeight( float h )
 void OrthoCamera::updateTransform()
 {
     Vector zaxis = ( m_target - m_eye ).Normalize();
-    Vector xaxis = Cross( m_up , zaxis ).Normalize();
-    Vector yaxis = Cross( zaxis , xaxis );
+    Vector xaxis = cross( m_up , zaxis ).Normalize();
+    Vector yaxis = cross( zaxis , xaxis );
 
     world2camera = Matrix(  xaxis.x , yaxis.x , zaxis.x , m_eye.x ,
                             xaxis.y , yaxis.y , zaxis.y , m_eye.y ,

@@ -69,7 +69,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
             break;
 
         const auto distSqr = vert.inter.t * vert.inter.t;
-        const auto cosIn = AbsDot( wi.m_Dir , vert.inter.normal );
+        const auto cosIn = absDot( wi.m_Dir , vert.inter.normal );
         if( light_path.size() > 0 || ( light_path.size() == 0 && !light->IsInfinite() ) )
             vcm *= MIS( distSqr );
         vcm /= MIS( cosIn );
@@ -109,7 +109,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         if( 0.0f == bsdf_pdf )
             break;
 
-        const auto cosOut = AbsDot(vert.wo, vert.n);
+        const auto cosOut = absDot(vert.wo, vert.n);
         throughput *= bsdf_value / bsdf_pdf;
 
         if (throughput.IsBlack())
@@ -156,7 +156,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         }
 
         const auto distSqr = vert.inter.t * vert.inter.t;
-        const auto cosIn = AbsDot( wi.m_Dir , vert.inter.normal );
+        const auto cosIn = absDot( wi.m_Dir , vert.inter.normal );
         vcm *= MIS( distSqr );
         vcm /= MIS( cosIn );
         vc /= MIS( cosIn );
@@ -214,7 +214,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
             break;
 
         bsdf_pdf *= rr;
-        const auto cosOut = AbsDot(vert.wo, vert.n);
+        const auto cosOut = absDot(vert.wo, vert.n);
         throughput *= bsdf_value / bsdf_pdf;
 
         if (throughput.IsBlack())
@@ -244,8 +244,8 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
     const auto invDistcSqr = 1.0f / delta.SquaredLength();
     const auto n_delta = delta * sqrt(invDistcSqr);
 
-    const auto cosAtP0 = AbsDot( p0.n , n_delta );
-    const auto cosAtP1 = AbsDot( p1.n , n_delta );
+    const auto cosAtP0 = absDot( p0.n , n_delta );
+    const auto cosAtP1 = absDot( p1.n , n_delta );
     const Spectrum g = p1.se->Evaluate_BSDF( p1.wi , n_delta ) * p0.se->Evaluate_BSDF( p0.wi , -n_delta ) * invDistcSqr;
     if( g.IsBlack() )
         return 0.0f;
@@ -292,7 +292,7 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
     if( 0.0f == directPdfW )
         return 0.0f;
     
-    const auto cosAtEyeVertex = AbsDot(eye_vertex.n, wi);
+    const auto cosAtEyeVertex = absDot(eye_vertex.n, wi);
     li *= eye_vertex.throughput * eye_vertex.se->Evaluate_BSDF( eye_vertex.wi , wi ) / directPdfW;
 
     if (li.IsBlack())
@@ -330,7 +330,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
     const auto invSqrLen = 1.0f / delta.SquaredLength();
     const auto n_delta = delta * sqrt(invSqrLen);
 
-    if( Dot( delta , camera->GetForward() ) <= 0.0f )
+    if( dot( delta , camera->GetForward() ) <= 0.0f )
         return;
 
     if (coord.x < 0.0f || coord.y < 0.0f ||
@@ -351,7 +351,7 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
     auto radiance = light_vertex.throughput * bsdf_value * we * gterm / (float)( sample_per_pixel * total_pixel * camera_pdfA );
 
     if( !light_tracing_only ){
-        const float lightvert_pdfA = camera_pdfW * AbsDot( light_vertex.n, n_delta ) * invSqrLen ;
+        const float lightvert_pdfA = camera_pdfW * absDot( light_vertex.n, n_delta ) * invSqrLen ;
         const float bsdf_rev_pdfw = light_vertex.se->Pdf_BSDF( -n_delta , light_vertex.wi ) * light_vertex.rr;
         const double mis0 = ( light_vertex.vcm + light_vertex.vc * MIS( bsdf_rev_pdfw ) ) * MIS( lightvert_pdfA / total_pixel );
         const float weight = (float)(1.0f / (1.0f + mis0));

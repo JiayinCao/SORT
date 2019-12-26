@@ -171,8 +171,8 @@ SORT_FORCEINLINE Transform RotateZ( float angle )
 
 SORT_FORCEINLINE Transform ViewLookat( const Point& eye , const Vector& dir , const Vector& up )
 {
-    const Vector right = Cross( up , dir );
-    const Vector adjusted_up = Cross( dir , right );
+    const Vector right = cross( up , dir );
+    const Vector adjusted_up = cross( dir , right );
 
     const float x = right.x * eye.x + right.y * eye.y + right.z * eye.z;
     const float y = adjusted_up.x * eye.x + adjusted_up.y * eye.y + adjusted_up.z * eye.z;

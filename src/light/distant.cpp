@@ -64,7 +64,7 @@ Spectrum DistantLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , 
     const float world_radius = delta.Length();
 
     Vector v0 , v1;
-    CoordinateSystem( r.m_Dir , v0 , v1 );
+    coordinateSystem( r.m_Dir , v0 , v1 );
     float u , v;
     UniformSampleDisk( ls.u , ls.v , u , v );
     const Point p = ( u * v0 + v * v1 ) * world_radius + center;

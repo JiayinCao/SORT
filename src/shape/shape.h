@@ -86,7 +86,7 @@ public:
             return 0.0f;
 
         const auto delta = p - inter.intersect;
-        const auto dot = SatDot( Normalize(delta) , inter.normal );
+        const auto dot = satDot( normalize(delta) , inter.normal );
         if( dot <= 0.0f )
             return 0.0f;
         return delta.SquaredLength() / ( SurfaceArea() * dot );

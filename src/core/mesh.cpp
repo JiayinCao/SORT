@@ -98,9 +98,9 @@ Vector BufferMemory::genTagentForTri( const MeshFaceIndex& mi ) const{
 
     const auto determinant = du1 * dv2 - dv1 * du2 ;
     if( determinant == 0.0f ){
-        const auto n = Normalize( Cross( p0 - p1 , p0 - p2 ) );
+        const auto n = normalize( cross( p0 - p1 , p0 - p2 ) );
         Vector t0 , t1;
-        CoordinateSystem( n , t0 , t1 );
+        coordinateSystem( n , t0 , t1 );
         return t0;
     }
     return ( dv2 * dp1 - dv1 * dp2 ) / determinant;

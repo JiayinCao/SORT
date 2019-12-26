@@ -18,7 +18,7 @@
 #include "triangle.h"
 #include "entity/visual.h"
 
-static SORT_FORCEINLINE Vector3f Permute( const Vector3f& v , int ax , int ay , int az ){
+SORT_STATIC_FORCEINLINE Vector3f Permute( const Vector3f& v , int ax , int ay , int az ){
     return Vector3f( v[ax] , v[ay] , v[az] );
 }
 
@@ -100,7 +100,7 @@ bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
     // store the intersection
     intersect->intersect = r(t);
 
-    intersect->gnormal = Normalize(Cross( ( op2 - op0 ) , ( op1 - op0 ) ));
+    intersect->gnormal = normalize(cross( ( op2 - op0 ) , ( op1 - op0 ) ));
     intersect->normal = ( w * mv0.m_normal + u * mv1.m_normal + v * mv2.m_normal).Normalize();
     intersect->tangent = ( w * mv0.m_tangent + u * mv1.m_tangent + v * mv2.m_tangent).Normalize();
     intersect->view = -r.m_Dir;
@@ -147,7 +147,7 @@ float Triangle::SurfaceArea() const{
 
     const auto e0 = p1 - p0 ;
     const auto e1 = p2 - p0 ;
-    const auto t = Cross( e0 , e1 );
+    const auto t = cross( e0 , e1 );
 
     return t.Length() * 0.5f;
 }
@@ -156,7 +156,7 @@ bool Triangle::GetIntersect(const BBox& box) const{
     // Project vertex along specific axis
     static const auto Project = [](const Point* points, int count , const Vector& axis, float& min, float& max){
         for( auto i = 0; i < count; ++i ){
-            auto val = Dot( axis , (Vector)points[i] );
+            auto val = dot( axis , (Vector)points[i] );
             if (val < min) min = val;
             if (val > max) max = val;
         }
@@ -192,9 +192,9 @@ bool Triangle::GetIntersect(const BBox& box) const{
 
     // Case 2 : try triangle plane , 1 test
     // get triangle normal
-    const auto triN = Cross( tri[1] - tri[0] , tri[2] - tri[0] );
+    const auto triN = cross( tri[1] - tri[0] , tri[2] - tri[0] );
     //triN = triN * ( 1.0f / triN.Length() );   // no need to normalize it at all
-    const auto triOffset = Dot( triN , (Vector)tri[0] );
+    const auto triOffset = dot( triN , (Vector)tri[0] );
     Point bbp[8] = { box.m_Min ,
         Point( box.m_Min.x , box.m_Min.y , box.m_Max.z ) ,
         Point( box.m_Min.x , box.m_Max.y , box.m_Min.z ),
@@ -213,7 +213,7 @@ bool Triangle::GetIntersect(const BBox& box) const{
         for( auto j = 0 ; j < 3 ; ++j ){
             triMin = boxMin = FLT_MAX;
             triMax = boxMax = -FLT_MAX;
-            const auto new_axis = Cross( triangleEdges[i] , boxN[j] );
+            const auto new_axis = cross( triangleEdges[i] , boxN[j] );
             Project( bbp , 8 , new_axis , boxMin , boxMax );
             Project( tri , 3 , new_axis , triMin , triMax );
 

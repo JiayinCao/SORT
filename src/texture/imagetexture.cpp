@@ -79,10 +79,12 @@ bool ImageTexture::LoadImageFromFile( const std::string& str ){
         for (auto i = 0; i < m_iTexHeight; ++i) {
             for (auto j = 0; j < m_iTexWidth; ++j) {
                 const auto k = i * m_iTexWidth + j;
-                const auto r = data[real_channel * k];
-                const auto g = data[real_channel * k + 1];
-                const auto b = data[real_channel * k + 2];
-                m_pMemory->m_ImgMem[i * m_iTexWidth + j].SetColor(r, g, b);
+
+                auto& color = m_pMemory->m_ImgMem[i * m_iTexWidth + j];
+
+                color.r = data[real_channel * k];
+                color.g = data[real_channel * k + 1];
+                color.b = data[real_channel * k + 2];
             }
         }
 

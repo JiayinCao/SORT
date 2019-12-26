@@ -238,8 +238,8 @@ Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const {
         return Spectrum(0.f);
 
     // evaluate fresnel term
-    const auto wh = Normalize(wi + wo);
-    const auto F = fresnel->Evaluate( Dot(wo,wh) );
+    const auto wh = normalize(wi + wo);
+    const auto F = fresnel->Evaluate( dot(wo,wh) );
     return R * distribution->D(wh) * F * distribution->G(wo,wi) / ( 4.0f * NoV );
 }
 
@@ -262,8 +262,8 @@ float MicroFacetReflection::pdf( const Vector& wo , const Vector& wi ) const {
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
-    const auto h = Normalize( wo + wi );
-    const auto EoH = AbsDot( wo , h );
+    const auto h = normalize( wo + wi );
+    const auto EoH = absDot( wo , h );
     return distribution->Pdf(h) / (4.0f * EoH);
 }
 
@@ -282,14 +282,14 @@ Spectrum MicroFacetRefraction::f( const Vector& wo , const Vector& wi ) const {
 
     const auto eta = cosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
 
-    Vector3f wh = Normalize(wo + wi * eta);
+    Vector3f wh = normalize(wo + wi * eta);
     if( wh.y < 0.0f ) wh = -wh;
 
-    const auto sVoH = Dot(wo, wh);
-    const auto sIoH = Dot(wi, wh);
+    const auto sVoH = dot(wo, wh);
+    const auto sIoH = dot(wi, wh);
 
     // Fresnel term
-    const auto F = fresnel.Evaluate( Dot( wh , wo ) );
+    const auto F = fresnel.Evaluate( dot( wh , wo ) );
     const auto sqrtDenom = sVoH + eta * sIoH;
     const auto t = eta / sqrtDenom;
     return (Spectrum(1.f) - F) * T * fabs(distribution->D(wh) * distribution->G(wo,wi) * t * t * sIoH * sVoH / NoV );
@@ -316,10 +316,10 @@ float MicroFacetRefraction::pdf( const Vector& wo , const Vector& wi ) const {
         return 0.0f;
 
     const auto eta = cosTheta(wo) > 0 ? (etaT / etaI) : (etaI / etaT);
-    const auto wh = Normalize(wo + wi * eta);
+    const auto wh = normalize(wo + wi * eta);
 
     // Compute change of variables _dwh\_dwi_ for microfacet transmission
-    const auto sqrtDenom = Dot(wo, wh) + eta * Dot(wi, wh);
-    const auto dwh_dwi = eta * eta * AbsDot(wi, wh) / (sqrtDenom * sqrtDenom);
+    const auto sqrtDenom = dot(wo, wh) + eta * dot(wi, wh);
+    const auto dwh_dwi = eta * eta * absDot(wi, wh) / (sqrtDenom * sqrtDenom);
     return distribution->Pdf(wh) * dwh_dwi;
 }

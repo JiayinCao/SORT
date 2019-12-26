@@ -20,18 +20,18 @@
 
 const RGBSpectrum RGBSpectrum::m_White(1.0f);
 
-unsigned int RGBSpectrum::GetColor() const{
-    unsigned int color = 0;
+// unsigned int RGBSpectrum::GetColor() const{
+//     unsigned int color = 0;
 
-    color |= ((unsigned char)(255.0f*saturate(data.r)))<<16;
-    color |= ((unsigned char)(255.0f*saturate(data.g)))<<8;
-    color |= ((unsigned char)(255.0f*saturate(data.b)))<<0;
+//     color |= ((unsigned char)(255.0f*saturate(r)))<<16;
+//     color |= ((unsigned char)(255.0f*saturate(g)))<<8;
+//     color |= ((unsigned char)(255.0f*saturate(b)))<<0;
 
-    return color;
-}
+//     return color;
+// }
 
-void RGBSpectrum::SetColor( unsigned int color ){
-    data.r = ((float)( ( color >> 16 ) & 255 )) / 255.0f;
-    data.g = ((float)( ( color >> 8 ) & 255 )) / 255.0f;
-    data.b = ((float)( ( color >> 0 ) & 255 )) / 255.0f;
-}
+// void RGBSpectrum::SetColor( unsigned int color ){
+//     r = ((float)( ( color >> 16 ) & 255 )) / 255.0f;
+//     g = ((float)( ( color >> 8 ) & 255 )) / 255.0f;
+//     b = ((float)( ( color >> 0 ) & 255 )) / 255.0f;
+// }

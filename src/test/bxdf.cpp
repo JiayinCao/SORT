@@ -44,9 +44,9 @@ void checkReciprocity(const Bxdf* bxdf) {
         const auto f1 = bxdf->F(wi, wo) * absCosTheta(wi);
 
         std::lock_guard<spinlock_mutex> lock(mutex);
-        ASSERT_NEAR(f0.GetR(), f1.GetR(), 0.001f);
-        ASSERT_NEAR(f0.GetG(), f1.GetG(), 0.001f);
-        ASSERT_NEAR(f0.GetB(), f1.GetB(), 0.001f);
+        ASSERT_NEAR(f0.r, f1.r, 0.001f);
+        ASSERT_NEAR(f0.g, f1.g, 0.001f);
+        ASSERT_NEAR(f0.b, f1.b, 0.001f);
     });
 }
 
@@ -58,9 +58,9 @@ void checkEnergyConservation(const Bxdf* bxdf) {
         Spectrum r = bxdf->Sample_F(DIR_UP, wi, BsdfSample(true), &pdf);
         return pdf > 0.0f ? r / pdf : 0.0f;
     } );
-    EXPECT_LE(total.GetR(), 1.03f);
-    EXPECT_LE(total.GetG(), 1.03f);
-    EXPECT_LE(total.GetB(), 1.03f);
+    EXPECT_LE(total.r, 1.03f);
+    EXPECT_LE(total.g, 1.03f);
+    EXPECT_LE(total.b, 1.03f);
 }
 
 // Check whether the pdf evaluated from sample_f matches the one from Pdf
@@ -85,9 +85,9 @@ void checkPdf( const Bxdf* bxdf ){
         EXPECT_LE( fabs( pdf / calculated_pdf - 1.0f ) , 0.01f );
         EXPECT_TRUE( !IsNan(pdf) );
         EXPECT_GE( pdf , 0.0f );
-        EXPECT_NEAR(f0.GetR(), f1.GetR(), 0.001f);
-        EXPECT_NEAR(f0.GetG(), f1.GetG(), 0.001f);
-        EXPECT_NEAR(f0.GetB(), f1.GetB(), 0.001f);
+        EXPECT_NEAR(f0.r, f1.r, 0.001f);
+        EXPECT_NEAR(f0.g, f1.g, 0.001f);
+        EXPECT_NEAR(f0.b, f1.b, 0.001f);
     });
 
     // Check whether pdf adds together is less to 1.0
@@ -277,8 +277,8 @@ TEST(BXDF, DISABLED_HairSamplingConsistance) {
         } );
         const auto ratio = uni.GetIntensity() / imp.GetIntensity();
         if( fabs( ratio - 1.0f ) > 0.05f ){
-            std::cout<<uni.GetR() << "\t"<<uni.GetG() << "\t"<< uni.GetB()<<std::endl;
-            std::cout<<imp.GetR() << "\t"<<imp.GetG() << "\t"<< imp.GetB()<<std::endl;
+            std::cout<<uni.r << "\t"<<uni.g << "\t"<< uni.b<<std::endl;
+            std::cout<<imp.r << "\t"<<imp.g << "\t"<< imp.b<<std::endl;
         }
         EXPECT_LE( fabs( ratio - 1.0f ) , 0.05f );
     };

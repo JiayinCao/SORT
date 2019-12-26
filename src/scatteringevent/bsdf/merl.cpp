@@ -92,7 +92,7 @@ Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
     }
     if (wh.x == 0.f && wh.y == 0.f && wh.z == 0.f)
         return Spectrum (0.f);
-    wh = Normalize(wh);
+    wh = normalize(wh);
 
     auto whTheta = sphericalTheta(wh);
     auto whCosPhi = cosPhi(wh), whSinPhi = sinPhi(wh);
@@ -100,7 +100,7 @@ Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
 
     Vector whx( whSinPhi , 0 , -whCosPhi );
     Vector why( whCosPhi * whCosTheta , -whSinTheta , whSinPhi * whCosTheta );
-    Vector wd(Dot(wi, whx), Dot(wi, wh), Dot(wi, why));
+    Vector wd(dot(wi, whx), dot(wi, wh), dot(wi, why));
 
     // Compute _index_ into measured BRDF tables
     auto wdTheta = sphericalTheta(wd), wdPhi = sphericalPhi(wd);

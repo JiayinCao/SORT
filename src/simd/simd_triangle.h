@@ -327,7 +327,7 @@ SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri_simd, const Ray
     intersection->intersect = ray(res_t);
     intersection->t = res_t;
 
-    intersection->gnormal = Normalize(Cross((mv2.m_position - mv0.m_position), (mv1.m_position - mv0.m_position)));
+    intersection->gnormal = normalize(cross((mv2.m_position - mv0.m_position), (mv1.m_position - mv0.m_position)));
     intersection->normal = (w * mv0.m_normal + u * mv1.m_normal + v * mv2.m_normal).Normalize();
     intersection->tangent = (w * mv0.m_tangent + u * mv1.m_tangent + v * mv2.m_tangent).Normalize();
     intersection->view = -ray.m_Dir;

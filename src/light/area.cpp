@@ -36,7 +36,7 @@ Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample*
         return 0.0f;
 
     if(cosAtLight)
-        *cosAtLight = Dot( -dirToLight , normal );
+        *cosAtLight = dot( -dirToLight , normal );
 
     if( distance )
         *distance = len;
@@ -61,7 +61,7 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
         *pdfA = 1.0f / m_shape->SurfaceArea();
 
     if( cosAtLight )
-        *cosAtLight = SatDot( r.m_Dir , n );
+        *cosAtLight = satDot( r.m_Dir , n );
 
     // to avoid self intersection
     r.m_fMin = 0.01f;
@@ -80,7 +80,7 @@ Spectrum AreaLight::Power() const{
 }
 
 Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const{
-    const float cos = SatDot( wo , intersect.normal );
+    const float cos = satDot( wo , intersect.normal );
     if( cos == 0.0f )
         return 0.0f;
 

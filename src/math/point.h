@@ -20,212 +20,128 @@
 #include "vector3.h"
 #include "core/sassert.h"
 
-/////////////////////////////////////////////////////////////////////
-// definition of point
-class Point
-{
-    //public method
+//! @brief  Data structure that represent a point in 3D space. 
+struct Point{
 public:
-    // default constructor
-    Point()
-    {
-        x = 0;
-        y = 0;
-        z = 0;
-    }
-    // constructor from three float data
-    // para 'x' :   x component of the point
-    // para 'y' :   y component of the point
-    // para 'z' :   z component of the point
-    Point( float _x , float _y , float _z )
-    {
-        x = _x;
-        y = _y;
-        z = _z;
-    }
-    // copy constructor
-    // para 'p' :   a point to copy
-    Point( const Point& p )
-    {
-        x = p.x;
-        y = p.y;
-        z = p.z;
-    }
-    // constructor from a vector
-    Point( const Vector& v )
-    {
-        x = v.x;
-        y = v.y;
-        z = v.z;
-    }
+    //! @brief  Default constructor that sets everything zero.
+    Point():x(0.0f),y(0.0f),z(0.0f){}
 
-    // some math operations
-    // para 'v' :   vector to add
-    // result   :   a point with the offset 'v' to the current point
-    Point operator + ( const Vector& v ) const
-    {
-        return Point( x + v.x , y + v.y , z + v.z );
-    }
-    // para 'p' :   point to merge
-    // result   :   a mixed point
-    Point operator + ( const Point& v ) const
-    {
-        return Point( x + v.x , y + v.y , z + v.z );
-    }
-    // para 'v' :   vector to add
-    // result   :   current point after the offset 'v' is applied
-    Point& operator += ( const Vector& v )
-    {
-        x += v.x;
-        y += v.y;
-        z += v.z;
+    //! @brief  Constructor from three float values
+    //!
+    //! @param x    Value in x channel.
+    //! @param y    Value in y channel.
+    //! @param z    Value in z channel.
+    Point( float x , float y , float z ):x(x),y(y),z(z){}
 
-        return *this;
-    }
-    // para 'v' :   vector to minus
-    // result   :   a point with the offset '-v' to the current point
-    Point operator - ( const Vector& v ) const
-    {
-        return Point( x - v.x , y - v.y , z - v.z );
-    }
+    //! @brief  Copy constructor
+    //!
+    //! @param  p   Point value to copy from.
+    Point( const Point& p ):Point(p.x,p.y,p.z){}
 
-    // para 'v' :   vector to minus
-    // result   :   current point after the offset '-v' is applied
-    Point& operator -= ( const Vector& v )
-    {
-        x -= v.x;
-        y -= v.y;
-        z -= v.z;
+    //! @brief  Constructor from a vector.
+    //!
+    //! @param  v   Vector value to copy from.
+    Point( const Vector& v ):Point(v.x,v.y,v.z){}
 
+    //! @brief  = operator
+    //!
+    //! @param  p   Value to copy from.
+    Point& operator = ( const Point& p ){
+        x = p.x; y = p.y; z = p.z;
         return *this;
     }
 
-    // para 'v' :   a point to calculate the offset
-    // result   :   the offset between them
-    Vector operator - ( const Point& p ) const
-    {
-        return Vector( x - p.x , y - p.y , z - p.z );
-    }
-
-    // para 'f' :   scaler
-    // result   :   a scaled point
-    Point operator * ( float f ) const
-    {
-        return Point( f * x , f * y , f * z );
-    }
-
-    // para 'f' :   scaler
-    // result   :   current point after scaling
-    Point& operator *= ( float f )
-    {
-        x *= f;
-        y *= f;
-        z *= f;
-
-        return *this;
-    }
-
-    // para 'f' :   divider
-    // result   :   a divided point
-    Point operator / ( float f ) const{
-        float t = 1.0f / f;
-        return (*this) * t;
-    }
-
-    // para 'f' :   divider
-    // result   :   current vector after dividing
-    Point& operator /= ( float f ){
-        float t = 1.0f / f;
-        x *= t;
-        y *= t;
-        z *= t;
-        return *this;
-    }
-
-    // para 'p' :   point to copy
-    Point& operator = ( const Point& p )
-    {
-        x = p.x;
-        y = p.y;
-        z = p.z;
-
-        return *this;
-    }
-
-
-    // [] operator
-    float operator [] ( unsigned id ) const
-    {
+    //! @brief  Get the data of specific channel.
+    //!
+    //! @param  id      Index of channel of interest.
+    //! @return         Value of channel of interest.
+    float operator [] ( unsigned id ) const{
         return data[id];
     }
 
-    // [] operator
-    float& operator[]( unsigned id )
-    {
+    //! @brief  Get the data of specific channel.
+    //!
+    //! @param  id      Index of channel of interest.
+    //! @return         Value of channel of interest.
+    float& operator[]( unsigned id ){
         return data[id];
     }
 
-    // == operator
-    // para 'p' :   a point to compare
-    // result   :   'true' if the 'v' is the same with current vector , 'false' else
-    bool operator == ( const Point& p ) const
-    {
-        if( p.x == x && p.y == y && p.z == z )
-            return true;
-        return false;
-    }
-
-    // != operator
-    // para 'p' :   a point to compare
-    // result   :   'true' if the 'v' is not the same with current vector , 'false' else
-    bool operator != ( const Point& p ) const
-    {
-        if( p.x == x && p.y == y && p.z == z )
-            return false;
-        return true;
-    }
-
-    operator Vector3f() const
-    {
+    //! @brief  Operator to convert a pointer to a vector.
+    operator Vector3f() const{
         return Vector3f( x , y , z );
     }
 
-    //public field
-public:
-    union
-    {
-        struct
-        {
+    union{
+        struct{
             float x , y , z;
         };
         float data[3];
     };
 };
 
-// some global math operations
-// para 'v' :   vector to add
-// result   :   a point with the offset 'v' to the current point
-SORT_FORCEINLINE Point operator + ( const Vector& v , const Point& p )
-{
+SORT_STATIC_FORCEINLINE Point operator + ( const Point& p , const Point& v ){
+    return Point( p.x + v.x , p.y + v.y , p.z + v.z );
+}
+
+SORT_STATIC_FORCEINLINE Point operator + ( const Point& p , const Vector& v ){
+    return Point( p.x + v.x , p.y + v.y , p.z + v.z );
+}
+
+SORT_STATIC_FORCEINLINE Point operator + ( const Vector& v , const Point& p ){
     return p + v;
 }
-// para 'f' :   scaler
-// result   :   a scaled point
-SORT_FORCEINLINE Point operator * ( float f , const Point& p )
-{
+
+SORT_STATIC_FORCEINLINE const Point& operator += ( Point& p , const Vector& v ){
+    p.x += v.x; p.y += v.y; p.z += v.z;
+    return p;
+}
+
+SORT_STATIC_FORCEINLINE Point operator - ( const Point& p , const Vector& v ){
+    return Point( p.x - v.x , p.y - v.y , p.z - v.z );
+}
+
+SORT_STATIC_FORCEINLINE Vector operator - ( const Point& p0 , const Point& p1 ){
+    return Vector( p0.x - p1.x , p0.y - p1.y , p0.z - p1.z );
+}
+
+SORT_STATIC_FORCEINLINE const Point& operator -= ( Point& p , const Vector& v ){
+    p.x -= v.x; p.y -= v.y; p.z -= v.z;
+    return p;
+}
+
+SORT_STATIC_FORCEINLINE Point operator * ( float f , const Point& p ){
     return p * f;
 }
-// para 'p0' :  a point
-// para 'p1' :  another point
-// result    :  the squared distance between the two points
-SORT_FORCEINLINE float SquaredDistance( const Point& p0 , const Point& p1 )
-{
-    return (p0-p1).SquaredLength();
+
+SORT_STATIC_FORCEINLINE Point operator * ( const Point& p , float f ){
+    return Point( f * p.x , f * p.y , f * p.z );
 }
-// para 'p0' :  a point
-// para 'p1' :  another point
-// result    :  the distance between the two points
-SORT_FORCEINLINE float Distance( const Point& p0 , const Point& p1 )
-{
+
+SORT_STATIC_FORCEINLINE Point& operator *= ( Point& p , float f ){
+    p.x *= f; p.y *= f; p.z *= f;
+    return p;
+}
+
+SORT_STATIC_FORCEINLINE Point operator / ( const Point& p , float f ){
+    const auto t = 1.0f / f;
+    return p * t;
+}
+
+SORT_STATIC_FORCEINLINE Point& operator /= ( Point& p , float f ){
+    const auto t = 1.0f / f;
+    p.x *= t; p.y *= t; p.z *= t;
+    return p;
+}
+
+SORT_STATIC_FORCEINLINE float distance( const Point& p0 , const Point& p1 ){
     return (p0-p1).Length();
+}
+
+SORT_STATIC_FORCEINLINE bool operator == ( const Point& p0 , const Point& p1 ){
+    return ( p0.x == p1.x ) && ( p0.y == p1.y ) && ( p0.z == p1.z );
+}
+
+SORT_STATIC_FORCEINLINE bool operator != ( const Point& p0 , const Point& p1 ){
+    return ( p0.x != p1.x ) || ( p0.y != p1.y ) || ( p0.z != p1.z );
 }

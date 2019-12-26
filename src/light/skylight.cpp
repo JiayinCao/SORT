@@ -78,7 +78,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
     float world_radius = delta.Length();
 
     Vector v1 , v2;
-    CoordinateSystem( -r.m_Dir , v1 , v2 );
+    coordinateSystem( -r.m_Dir , v1 , v2 );
     float d1 , d2;
     const float t0 = sort_canonical();
     const float t1 = sort_canonical();

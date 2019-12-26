@@ -53,6 +53,8 @@
     #define SORT_FORCEINLINE inline
 #endif
 
+#define SORT_STATIC_FORCEINLINE     static SORT_FORCEINLINE
+
 // This feature replaces SSS with small mean free path with Lambert, it greatly reduces noises in SSS implementation.
 // However, it does introduces more fireflies, which is not acceptable, for which reason it is disabled by default.
 // The firefly is caused by multiple path with more bounces so that it leads to very low pdf because of each bounce.

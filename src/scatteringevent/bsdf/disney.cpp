@@ -32,13 +32,13 @@ constexpr static float inv_eta = 1.0f / eta;   // hard coded reciprocal of IOR r
 
 // 8.0f bears no physical law, it is purely just to increase the probability to avoid fireflies.
 // Microfacet specular reflection is easily the source of fireflies, scaling the value up will efficiently avoid fireflies caused by it.
-static SORT_FORCEINLINE float specularPdfScale( const float roughness ){
+SORT_STATIC_FORCEINLINE float specularPdfScale( const float roughness ){
     constexpr static float specular_pdf_scale = 8.0f;
     return specular_pdf_scale * ( 1.0f - roughness );
 }
 
 //! Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering, section 3.1
-static SORT_FORCEINLINE float SchlickR0FromEta( float rROI ){
+SORT_STATIC_FORCEINLINE float SchlickR0FromEta( float rROI ){
     return SQR( ( rROI - 1.0f ) / ( rROI + 1.0f ) );
 }
 
@@ -123,7 +123,7 @@ Spectrum DisneyBssrdf::S( const Vector& wo , const Point& po , const Vector& wi 
     // Converging to lambert when mfp approaches to zero is a critically important feature in SORT renderer,
     // this gives the flexibility of driving the parameter with a texture with black pixels and no noticeable
     // gap will be since around the transition from SSS to lambert.
-    return Sr( Distance( po , pi ) );
+    return Sr( distance( po , pi ) );
 }
 
 Spectrum DisneyBssrdf::Sr( float r ) const{
@@ -157,8 +157,8 @@ Spectrum DisneyBRDF::f( const Vector& wo , const Vector& wi ) const {
     const auto aspect = sqrt(sqrt(1.0f - anisotropic * 0.9f));
     const auto diffuseWeight = (1.0f - metallic) * (1.0 - specTrans);
 
-    const auto wh = Normalize(wo + wi);
-    const auto HoO = Dot(wo, wh);
+    const auto wh = normalize(wo + wi);
+    const auto HoO = dot(wo, wh);
     const auto HoO2ByRoughness = SQR(HoO) * roughness;
 
     const auto luminance = basecolor.GetIntensity();
@@ -305,12 +305,12 @@ Spectrum DisneyBRDF::sample_f(const Vector& wo, Vector& wi, const BsdfSample& bs
         Vector wh;
         const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
         wh = cggx.sample_f(sample);
-        wi = 2 * Dot(wo, wh) * wh - wo;
+        wi = 2 * dot(wo, wh) * wh - wo;
     }else if (r <= sr_w) {
         BsdfSample sample(true);
         Vector wh;
         wh = ggx.sample_f(sample);
-        wi = 2 * Dot(wo, wh) * wh - wo;
+        wi = 2 * dot(wo, wh) * wh - wo;
     }else if (r <= st_w) {
         if (thinSurface) {
             // Scale roughness based on IOR (Burley 2015, Figure 15).
@@ -366,14 +366,14 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
         return 0.0f;
 
     auto total_pdf = 0.0f;
-    const auto wh = Normalize(wi + wo);
+    const auto wh = normalize(wi + wo);
     const GGX ggx(roughness / aspect, roughness * aspect);
     if (clearcoat_weight > 0.0f) {
         const ClearcoatGGX cggx(sqrt(slerp(0.1f, 0.001f, clearcoatGloss)));
-        total_pdf += clearcoat_weight * cggx.Pdf(wh) / (4.0f * AbsDot(wo, wh));
+        total_pdf += clearcoat_weight * cggx.Pdf(wh) / (4.0f * absDot(wo, wh));
     }
     if (specular_reflection_weight > 0.0f) {
-        total_pdf += specular_reflection_weight * ggx.Pdf(wh) / (4.0f * AbsDot(wo, wh));
+        total_pdf += specular_reflection_weight * ggx.Pdf(wh) / (4.0f * absDot(wo, wh));
     }
     if (specular_transmission_weight > 0.0f) {
         if (thinSurface) {

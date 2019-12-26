@@ -57,25 +57,25 @@ bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
 
         if( inter.y == m_length ){
             // A corner case where the tip of the line is being intersected.
-            intersect->gnormal = Normalize( m_world2Line.GetInversed().TransformVector( Vector( 0.0f , 1.0f , 0.0f ) ) );
+            intersect->gnormal = normalize( m_world2Line.GetInversed().TransformVector( Vector( 0.0f , 1.0f , 0.0f ) ) );
             intersect->normal = intersect->gnormal;
-            intersect->tangent = Normalize( m_world2Line.GetInversed().TransformVector( Vector( 1.0f , 0.0f , 0.0f ) ) );
+            intersect->tangent = normalize( m_world2Line.GetInversed().TransformVector( Vector( 1.0f , 0.0f , 0.0f ) ) );
         }else{
             // There could be better way to calculate the normal with smarter math.
             /*const auto w = lerp( m_w0 , m_w1 , inter.y / m_length );
             Point top( m_w1 * inter.x / w , m_length ,  m_w1 * inter.z / w );
-            const auto tangent = Normalize( top - inter );
+            const auto tangent = normalize( top - inter );
             intersect->tangent = m_world2Line.GetInversed()( tangent );
 
             const auto normal = Vector( inter.x , 0.0f , inter.z );
-            const auto biTangent = Cross( normal , tangent );
-            intersect->normal = Normalize( m_world2Line.GetInversed()( Cross( tangent , biTangent ) ) );
+            const auto biTangent = cross( normal , tangent );
+            intersect->normal = normalize( m_world2Line.GetInversed()( cross( tangent , biTangent ) ) );
             intersect->gnormal = intersect->normal;*/
 
             // This may not be physically correct, but it should be fine for a pixel width line.
-            intersect->gnormal = Normalize(m_world2Line.GetInversed().TransformVector( Vector( inter.x , 0.0f , inter.z ) ) );
+            intersect->gnormal = normalize(m_world2Line.GetInversed().TransformVector( Vector( inter.x , 0.0f , inter.z ) ) );
             intersect->normal = intersect->gnormal;
-            intersect->tangent = Normalize( m_gp1 - m_gp0 );
+            intersect->tangent = normalize( m_gp1 - m_gp0 );
 
             intersect->view = -r.m_Dir;
         }
@@ -111,9 +111,9 @@ void Line::SetTransform( const Transform& transform ){
     m_gp0 = transform.TransformPoint( m_p0 );
     m_gp1 = transform.TransformPoint( m_p1 );
 
-    auto y = Normalize( m_gp1 - m_gp0 );
+    auto y = normalize( m_gp1 - m_gp0 );
     Vector x , z;
-    CoordinateSystem( y , x , z );
+    coordinateSystem( y , x , z );
     Matrix world2line(  x.x, x.y, x.z, -( x.x * m_gp0.x + x.y * m_gp0.y + x.z * m_gp0.z ),
                         y.x, y.y, y.z, -( y.x * m_gp0.x + y.y * m_gp0.y + y.z * m_gp0.z ),
                         z.x, z.y, z.z, -( z.x * m_gp0.x + z.y * m_gp0.y + z.z * m_gp0.z ),

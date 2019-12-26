@@ -27,9 +27,9 @@ Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) : Sca
     }
 
     normal_map_applied = true;
-    nn = Normalize(n);
-    btn = Normalize(Cross( nn , Vector( 1.0f , 0.0f , 0.0f ) ));
-    tn = Normalize(Cross( btn , nn ));
+    nn = normalize(n);
+    btn = normalize(cross( nn , Vector( 1.0f , 0.0f , 0.0f ) ));
+    tn = normalize(cross( btn , nn ));
 
     gnormal = bsdfToBxdf( DIR_UP );
 }
@@ -42,9 +42,9 @@ Bxdf::Bxdf(const Spectrum& ew, const float sw , BXDF_TYPE type, Vector n , bool 
     }
 
     normal_map_applied = true;
-    nn = Normalize(n);
-    btn = Normalize(Cross( nn , Vector( 1.0f , 0.0f , 0.0f ) ));
-    tn = Normalize(Cross( btn , nn ));
+    nn = normalize(n);
+    btn = normalize(cross( nn , Vector( 1.0f , 0.0f , 0.0f ) ));
+    tn = normalize(cross( btn , nn ));
 
     gnormal = bsdfToBxdf( DIR_UP );
 }
@@ -63,5 +63,5 @@ float Bxdf::pdf( const Vector& wo , const Vector& wi ) const{
 }
 
 bool Bxdf::PointingUp( const Vector& v ) const {
-    return Dot( v , gnormal ) > 0.0f;
+    return dot( v , gnormal ) > 0.0f;
 }

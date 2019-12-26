@@ -25,9 +25,9 @@ Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
 
     const auto center = m_transform.TransformPoint( Point( 0.0f , 0.0f , 0.0f ) );
     const auto delta = center - p;
-    const auto dir = Normalize( delta );
+    const auto dir = normalize( delta );
     Vector wcx , wcy;
-    CoordinateSystem( dir , wcx , wcy );
+    coordinateSystem( dir , wcx , wcy );
 
     Matrix m(   wcx.x , dir.x , wcy.x , 0.0f ,
                 wcx.y , dir.y , wcy.y , 0.0f ,
@@ -45,7 +45,7 @@ Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
     Intersection intersection;
     const auto r = m_transform.invMatrix(Ray( p , wi ));
     if( !GetIntersect( r , &intersection ) )
-        intersection.intersect = r( Dot( delta , wi ) );
+        intersection.intersect = r( dot( delta , wi ) );
 
     return m_transform.TransformPoint(intersection.intersect);
 }
@@ -93,9 +93,9 @@ bool Sphere::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     const auto p = r(t);
     if( intersect ){
         intersect->t = t;
-        Vector n = Normalize(Vector( p.x , p.y , p.z ));
+        Vector n = normalize(Vector( p.x , p.y , p.z ));
         Vector v0 , v1;
-        CoordinateSystem( n , v0 , v1 );
+        coordinateSystem( n , v0 , v1 );
         intersect->intersect = m_transform.TransformPoint(p);
         intersect->normal = m_transform.TransformNormal(n);
         intersect->gnormal = intersect->normal;
@@ -113,7 +113,7 @@ void Sphere::Sample_l( const LightSample& ls , Ray& r , Vector& n , float* pdf )
     Vector normalized_dir = UniformSampleSphere( ls.u , ls.v );
     r.m_Ori = radius * normalized_dir;
     r.m_Dir = UniformSampleSphere( sort_canonical() , sort_canonical() );
-    if( Dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
+    if( dot( r.m_Dir , Vector( r.m_Ori.x , r.m_Ori.y , r.m_Ori.z ) ) < 0.0f )
         r.m_Dir = -r.m_Dir;
     n = m_transform.TransformNormal( Vector( normalized_dir.x , normalized_dir.y , normalized_dir.z ) );
 

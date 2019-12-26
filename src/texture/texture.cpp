@@ -36,9 +36,9 @@ bool Texture::Output( const std::string& name ){
             auto y = i / totalXRes;
             Spectrum c = GetColor(x, y);
 
-            data[3 * i] = c.GetR();
-            data[3 * i + 1] = c.GetG();
-            data[3 * i + 2] = c.GetB();
+            data[3 * i] = c.r;
+            data[3 * i + 1] = c.g;
+            data[3 * i + 2] = c.b;
         }
 
         int ret = SaveEXR(data.get(), GetWidth(), GetHeight(), 3, true, name.c_str());

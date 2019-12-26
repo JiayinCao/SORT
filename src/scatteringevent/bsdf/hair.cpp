@@ -21,7 +21,7 @@
 #include "fresnel.h"
 #include "math/utils.h"
 
-static SORT_FORCEINLINE void Ap( const float cosThetaO , const float eta , const float cosGammaO , const Spectrum& T , Spectrum ap[] ){
+SORT_STATIC_FORCEINLINE void Ap( const float cosThetaO , const float eta , const float cosGammaO , const Spectrum& T , Spectrum ap[] ){
     const auto cosTheta = cosThetaO * cosGammaO;
     const auto f = DielectricFresnel( cosTheta , 1.0f , eta );
 
@@ -32,7 +32,7 @@ static SORT_FORCEINLINE void Ap( const float cosThetaO , const float eta , const
     ap[PMAX] = ap[PMAX - 1] * f * T / ( 1.0f - T * f );
 }
 
-static SORT_FORCEINLINE float I0(const float x) {
+SORT_STATIC_FORCEINLINE float I0(const float x) {
     auto val = 0.0f;
     auto x2i = 1.0f;
     int64_t ifact = 1;
@@ -46,47 +46,47 @@ static SORT_FORCEINLINE float I0(const float x) {
     return val;
 }
 
-static SORT_FORCEINLINE float LogI0(float x) {
+SORT_STATIC_FORCEINLINE float LogI0(float x) {
     return (x > 12) ? x + 0.5f * (-log(TWO_PI) + log(1 / x) + 1 / (8 * x)) : log(I0(x));
 }
 
-static SORT_FORCEINLINE float Mp( const float cosThetaI , const float cosThetaO , const float sinThetaI , const float sinThetaO , const float v ){
+SORT_STATIC_FORCEINLINE float Mp( const float cosThetaI , const float cosThetaO , const float sinThetaI , const float sinThetaO , const float v ){
     const auto a = cosThetaI * cosThetaO / v;
     const auto b = sinThetaI * sinThetaO / v;
     return (v <= .1) ? (exp(LogI0(a) - b - 1 / v + 0.6931f + log(1 / (2 * v)))) : (exp(-b) * I0(a)) / (sinh(1 / v) * 2 * v);
 }
 
-static SORT_FORCEINLINE float Phi( const int p , const float gammaO , const float gammaT ){
+SORT_STATIC_FORCEINLINE float Phi( const int p , const float gammaO , const float gammaT ){
     return 2.0f * p * gammaT - 2.0f * gammaO + p * PI;
 }
 
-static SORT_FORCEINLINE float Logistic( float x , const float scale ){
+SORT_STATIC_FORCEINLINE float Logistic( float x , const float scale ){
     x = abs(x);
     return exp( -x / scale ) / ( scale * SQR( 1.0f + exp( -x / scale ) ) );
 }
 
-static SORT_FORCEINLINE float LogisticCDF( const float x , const float scale ){
+SORT_STATIC_FORCEINLINE float LogisticCDF( const float x , const float scale ){
     return 1.0f / ( 1.0f + exp( -x / scale ) );
 }
 
-static SORT_FORCEINLINE float TrimmedLogistic( const float x , const float scale , const float a , const float b ){
+SORT_STATIC_FORCEINLINE float TrimmedLogistic( const float x , const float scale , const float a , const float b ){
     return Logistic( x , scale ) / ( LogisticCDF( b , scale ) - LogisticCDF( a , scale ) );
 }
 
-static SORT_FORCEINLINE float SampleTrimmedLogistic(const float r, const float scale, const float a, const float b) {
+SORT_STATIC_FORCEINLINE float SampleTrimmedLogistic(const float r, const float scale, const float a, const float b) {
     const auto k = LogisticCDF(b, scale) - LogisticCDF(a, scale);
     const auto x = -scale * log(1 / (r * k + LogisticCDF(a, scale)) - 1);
     return clamp(x, a, b);
 }
 
-static SORT_FORCEINLINE float Np( const float phi , const int p , const float scale , const float gammaO , const float gammaT ){
+SORT_STATIC_FORCEINLINE float Np( const float phi , const int p , const float scale , const float gammaO , const float gammaT ){
     float dphi = phi - Phi( p , gammaO , gammaT );
     while( dphi > PI ) dphi -= TWO_PI;
     while( dphi < -PI ) dphi += TWO_PI;
     return TrimmedLogistic( dphi, scale, -PI, PI);
 }
 
-static SORT_FORCEINLINE void ComputeApPdf(const float cosThetaO , const float cosThetaT ,
+SORT_STATIC_FORCEINLINE void ComputeApPdf(const float cosThetaO , const float cosThetaT ,
                                 const float cosGammaO , const float cosGammaT ,
                                 const float eta , const Spectrum sigma, float pdf[] ){
     const auto T = sigma * ( -2.0f * cosGammaT / cosThetaT );

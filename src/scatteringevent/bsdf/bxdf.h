@@ -171,7 +171,7 @@ protected:
     //! @return     The corresponding vector in shading coordinate.
     SORT_FORCEINLINE Vector bsdfToBxdf( const Vector& v ) const{
         if( !normal_map_applied ) return v;
-        return Vector( Dot(v,tn) , Dot(v,nn) , Dot(v,btn) );
+        return Vector( dot(v,tn) , dot(v,nn) , dot(v,btn) );
     }
 
     //! @brief  Transform a vector from local coordinate to shading coordinate.

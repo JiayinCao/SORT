@@ -22,13 +22,13 @@
 
 // sample ray from light
 Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
-    const Vector light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
-    const Vector light_pos = Vector3f( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
+    const auto light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
+    const auto light_pos = Point( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 
     // direction to light
     const Vector _dirToLight = light_pos - intersect.intersect;
 
-    // Normalize vec
+    // normalize vec
     const float sqrLen = _dirToLight.SquaredLength();
     const float len = sqrt(sqrLen);
     dirToLight = _dirToLight / len;
@@ -51,7 +51,7 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
     const float delta = 0.01f;
     visibility.ray = Ray( light_pos , -dirToLight , 0 , delta , len - delta );
 
-    const float falloff = SatDot( dirToLight , -light_dir );
+    const float falloff = satDot( dirToLight , -light_dir );
     if( falloff <= cos_total_range )
         return 0.0f;
     if( falloff >= cos_falloff_start )
@@ -65,8 +65,8 @@ Spectrum SpotLight::sample_l( const Intersection& intersect , const LightSample*
 
 // sample a ray from light
 Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
-    const Vector light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
-    const Vector light_pos = Vector3f( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
+    const auto light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
+    const auto light_pos = Point( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 
     // udpate ray
     r.m_fMin = 0.0f;
@@ -89,7 +89,7 @@ Spectrum SpotLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
     if( cosAtLight )
         *cosAtLight = 1.0f;
 
-    const float falloff = SatDot( r.m_Dir , light_dir );
+    const float falloff = satDot( r.m_Dir , light_dir );
     if( falloff <= cos_total_range )
         return 0.0f;
     if( falloff >= cos_falloff_start )

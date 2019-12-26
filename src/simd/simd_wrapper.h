@@ -58,7 +58,7 @@ struct simd_data_sse{
 };
 #endif
 
-static SORT_FORCEINLINE __m128 get_sse_data( const simd_data_sse& d ){
+SORT_STATIC_FORCEINLINE __m128 get_sse_data( const simd_data_sse& d ){
 #ifdef SORT_IN_WINDOWS
     return d.sse_data;
 #else
@@ -85,7 +85,7 @@ static const __m128 sse_ones        = _mm_set_ps1(1.0f);
 #define SIMD_CHANNEL    4
 #define SIMD_ALIGNMENT  16
 
-static SORT_FORCEINLINE simd_data   simd_zero(){
+SORT_STATIC_FORCEINLINE simd_data   simd_zero(){
     // this is slower on my 2017 iMac somehow.
     // It could be a hardware issue, since MacOS is the major platform I used for development
     // this is more of a workaround to make it faster.
@@ -93,78 +93,78 @@ static SORT_FORCEINLINE simd_data   simd_zero(){
     
     return _mm_set_ps1( 0.0f );
 }
-static SORT_FORCEINLINE simd_data   simd_set_ps1( const float d ){
+SORT_STATIC_FORCEINLINE simd_data   simd_set_ps1( const float d ){
     return _mm_set_ps1( d );
 }
-static SORT_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
+SORT_STATIC_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
     return _mm_set_ps( d[3] , d[2] , d[1] , d[0] );
 }
-static SORT_FORCEINLINE simd_data   simd_set_mask(const bool mask[]) {
+SORT_STATIC_FORCEINLINE simd_data   simd_set_mask(const bool mask[]) {
 #define MASK_TO_INT(m)  (m?mask_true:0)
     return _mm_set_ps(MASK_TO_INT(mask[3]), MASK_TO_INT(mask[2]), MASK_TO_INT(mask[1]), MASK_TO_INT(mask[0]));
 #undef MASK_TO_INT
 }
-static SORT_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_add_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_sub_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_sub_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_sub_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_mul_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_mul_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_mul_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_div_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_div_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_div_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_sqr_ps( const simd_data& m ){
+SORT_STATIC_FORCEINLINE simd_data   simd_sqr_ps( const simd_data& m ){
     return _mm_mul_ps( get_sse_data(m) , get_sse_data(m) );
 }
-static SORT_FORCEINLINE simd_data   simd_sqrt_ps( const simd_data& m ){
+SORT_STATIC_FORCEINLINE simd_data   simd_sqrt_ps( const simd_data& m ){
     return _mm_sqrt_ps( get_sse_data(m) );
 }
-static SORT_FORCEINLINE simd_data   simd_rcp_ps( const simd_data& m ){
+SORT_STATIC_FORCEINLINE simd_data   simd_rcp_ps( const simd_data& m ){
     return _mm_div_ps( sse_ones , get_sse_data(m) );
 }
-static SORT_FORCEINLINE simd_data   simd_mad_ps( const simd_data& a , const simd_data& b , const simd_data& c ){
+SORT_STATIC_FORCEINLINE simd_data   simd_mad_ps( const simd_data& a , const simd_data& b , const simd_data& c ){
     return _mm_add_ps( _mm_mul_ps( get_sse_data(a) , get_sse_data(b) ) , get_sse_data(c) );
 }
-static SORT_FORCEINLINE simd_data   simd_pick_ps( const simd_data& mask , const simd_data& a , const simd_data& b ){
+SORT_STATIC_FORCEINLINE simd_data   simd_pick_ps( const simd_data& mask , const simd_data& a , const simd_data& b ){
     return _mm_blendv_ps( get_sse_data(b) , get_sse_data(a) , get_sse_data(mask) );
 }
-static SORT_FORCEINLINE simd_data   simd_cmpeq_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmpeq_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_cmpeq_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_cmpneq_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmpneq_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_cmpneq_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_cmple_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmple_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_cmple_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_cmplt_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmplt_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_cmplt_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_cmpge_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmpge_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_cmpge_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_cmpgt_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmpgt_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_cmpgt_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_and_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_and_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_and_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_or_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_or_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_or_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE int         simd_movemask_ps( const simd_data& mask ){
+SORT_STATIC_FORCEINLINE int         simd_movemask_ps( const simd_data& mask ){
     return _mm_movemask_ps( get_sse_data(mask) );
 }
-static SORT_FORCEINLINE simd_data   simd_min_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_min_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_min_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm_max_ps( get_sse_data(s0) , get_sse_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
+SORT_STATIC_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
     const __m128 t_min = _mm_min_ps( get_sse_data(s) , _mm_shuffle_ps( get_sse_data(s) , get_sse_data(s) , _MM_SHUFFLE(2, 3, 0, 1) ) );
     return _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
 }
@@ -197,7 +197,7 @@ struct simd_data_avx {
 };
 #endif
 
-static SORT_FORCEINLINE __m256 get_avx_data( const simd_data_avx& d ){
+SORT_STATIC_FORCEINLINE __m256 get_avx_data( const simd_data_avx& d ){
 #ifdef SORT_IN_WINDOWS
     return d.avx_data;
 #else
@@ -224,82 +224,82 @@ static const __m256 avx_ones        = _mm256_set_ps(1.0f, 1.0f, 1.0f, 1.0f, 1.0f
 #define SIMD_CHANNEL    8
 #define SIMD_ALIGNMENT  32
 
-static SORT_FORCEINLINE simd_data   simd_zero(){
+SORT_STATIC_FORCEINLINE simd_data   simd_zero(){
     return _mm256_setzero_ps();
 }
-static SORT_FORCEINLINE simd_data   simd_set_ps1( const float f ){
+SORT_STATIC_FORCEINLINE simd_data   simd_set_ps1( const float f ){
     return _mm256_set_ps(f,f,f,f,f,f,f,f);
 }
-static SORT_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
+SORT_STATIC_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
     return _mm256_set_ps( d[7] , d[6] , d[5] , d[4] , d[3] , d[2] , d[1] , d[0] );
 }
-static SORT_FORCEINLINE simd_data   simd_set_mask(const bool mask[]) {
+SORT_STATIC_FORCEINLINE simd_data   simd_set_mask(const bool mask[]) {
 #define MASK_TO_INT(m)  (m?mask_true:0.0f)
     return _mm256_set_ps( MASK_TO_INT( mask[7] ) , MASK_TO_INT( mask[6] ) , MASK_TO_INT( mask[5] ) , MASK_TO_INT( mask[4] ) , MASK_TO_INT( mask[3] ) , MASK_TO_INT( mask[2] ) , MASK_TO_INT( mask[1] ) , MASK_TO_INT( mask[0] ) );
 #undef MASK_TO_INT
 }
-static SORT_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_add_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_sub_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_sub_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_sub_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_mul_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_mul_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_mul_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_div_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_div_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_div_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_sqr_ps( const simd_data& m ){
+SORT_STATIC_FORCEINLINE simd_data   simd_sqr_ps( const simd_data& m ){
     return _mm256_mul_ps( get_avx_data(m) , get_avx_data(m) );
 }
-static SORT_FORCEINLINE simd_data   simd_sqrt_ps( const simd_data& m ){
+SORT_STATIC_FORCEINLINE simd_data   simd_sqrt_ps( const simd_data& m ){
     return _mm256_sqrt_ps( get_avx_data(m) );
 }
-static SORT_FORCEINLINE simd_data   simd_rcp_ps( const simd_data& m ){
+SORT_STATIC_FORCEINLINE simd_data   simd_rcp_ps( const simd_data& m ){
     return _mm256_div_ps( avx_ones , get_avx_data(m) );
 }
-static SORT_FORCEINLINE simd_data   simd_mad_ps( const simd_data& a , const simd_data& b , const simd_data& c ){
+SORT_STATIC_FORCEINLINE simd_data   simd_mad_ps( const simd_data& a , const simd_data& b , const simd_data& c ){
     return _mm256_add_ps( _mm256_mul_ps( get_avx_data(a) , get_avx_data(b) ) , get_avx_data(c) );
 }
-static SORT_FORCEINLINE simd_data   simd_pick_ps( const simd_data& mask , const simd_data& a , const simd_data& b ){
+SORT_STATIC_FORCEINLINE simd_data   simd_pick_ps( const simd_data& mask , const simd_data& a , const simd_data& b ){
     return _mm256_blendv_ps( get_avx_data(b) , get_avx_data(a) , get_avx_data(mask) );
 }
-static SORT_FORCEINLINE simd_data   simd_cmpeq_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmpeq_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_EQ_OQ );
 }
-static SORT_FORCEINLINE simd_data   simd_cmpneq_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmpneq_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_NEQ_OQ );
 }
-static SORT_FORCEINLINE simd_data   simd_cmple_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmple_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_LE_OQ );
 }
-static SORT_FORCEINLINE simd_data   simd_cmplt_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmplt_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_LT_OQ );
 }
-static SORT_FORCEINLINE simd_data   simd_cmpge_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmpge_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_GE_OQ );
 }
-static SORT_FORCEINLINE simd_data   simd_cmpgt_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_cmpgt_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_GT_OQ );
 }
-static SORT_FORCEINLINE simd_data   simd_and_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_and_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_and_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_or_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_or_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_or_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
-static SORT_FORCEINLINE int         simd_movemask_ps( const simd_data& mask ){
+SORT_STATIC_FORCEINLINE int         simd_movemask_ps( const simd_data& mask ){
     return _mm256_movemask_ps( get_avx_data(mask) );
 }
-static SORT_FORCEINLINE simd_data   simd_min_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_min_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_min_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
-static SORT_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const simd_data& s1 ){
+SORT_STATIC_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_max_ps( get_avx_data(s0) , get_avx_data(s1) );
 }
 
-static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
+SORT_STATIC_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
     const static __m256i shuffle_mask0 = _mm256_set_epi32(1, 0, 3, 2, 5, 4, 7, 6);
     const static __m256i shuffle_mask1 = _mm256_set_epi32(2, 3, 0, 1, 6, 7, 4, 5);
 
@@ -315,7 +315,7 @@ static SORT_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
 
 #endif
 
-static SORT_FORCEINLINE int __bsf(int v) {
+SORT_STATIC_FORCEINLINE int __bsf(int v) {
 #ifdef SORT_IN_WINDOWS
     unsigned long r = 0;
     _BitScanForward(&r, v);

@@ -81,14 +81,14 @@ Ray PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) 
 
         r.m_Ori.x = s * m_lensRadius;
         r.m_Ori.y = t * m_lensRadius;
-        r.m_Dir = Normalize( target - r.m_Ori );
+        r.m_Dir = normalize( target - r.m_Ori );
     }
 
     // transform the ray from camera space to world space
     r = m_worldToCamera.invMatrix( r );
 
     // calculate the pdf for camera ray
-    const float cosAtCamera = Dot( m_forward , r.m_Dir );
+    const float cosAtCamera = dot( m_forward , r.m_Dir );
     const float imagePointToCameraDist = m_imagePlaneDist / cosAtCamera;
     const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
 
@@ -147,7 +147,7 @@ Vector2i PerspectiveCamera::GetScreenCoord( const Intersection& inter, float* pd
     }
 
     // calculate the pdf for camera ray
-    cosAtCamera = Dot( m_forward , dir );
+    cosAtCamera = dot( m_forward , dir );
     const float imagePointToCameraDist = m_imagePlaneDist / cosAtCamera;
     const float imageToSolidAngleFactor = imagePointToCameraDist * imagePointToCameraDist / cosAtCamera;
 

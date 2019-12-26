@@ -29,10 +29,10 @@ Spectrum DistributionBRDF::f( const Vector& wo , const Vector& wi ) const{
 
     const auto OoN = absCosTheta( wo );
     const auto IoN = absCosTheta( wi );
-    auto wh = Normalize( wo + wi );
+    auto wh = normalize( wo + wi );
     if( wh.Length() == 0.0f )
         wh = DIR_UP;
-    const auto IoH = Dot( wi , wh );
+    const auto IoH = dot( wi , wh );
 
     // Crafting a Next-Gen Material Pipeline for The Order: 1886, Eq. 22
     const auto dterm = [&]( const Vector& wh ){
@@ -92,10 +92,10 @@ float DistributionBRDF::pdf(const Vector& wo, const Vector& wi) const{
     if (!doubleSided && !PointingUp(wo)) return 0.0f;
 
     const auto specRatio = specular * 0.8f;
-    auto wh = Normalize( wo + wi );
+    auto wh = normalize( wo + wi );
     if( wh.Length() == 0.0f )
         wh = DIR_UP;
-    const auto OoH = Dot( wo , wh );
+    const auto OoH = dot( wo , wh );
 
     // Pdf of wh w.r.t solid angle
     //   Pdf(wh) = ( 1.0f + A * exp( -1.0f / ( alpha^2 * tan_theta(wh)^2 ) ) / sin_theta(wh)^4 ) * cos_theta( wh ) / ( ( 1.0f + A * alpha^2 ) * PI )

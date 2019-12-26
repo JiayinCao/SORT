@@ -196,7 +196,7 @@ public:
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
     SORT_FORCEINLINE StreamBase&  operator << (const Spectrum& v) {
-        *this << v.GetR() << v.GetG() << v.GetB();
+        *this << v.r << v.g << v.b;
         return *this;
     }
 

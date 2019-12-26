@@ -102,7 +102,7 @@ SORT_FORCEINLINE Vector sphericalVec( float sintheta , float costheta , float ph
 }
 
 SORT_FORCEINLINE Vector reflect(const Vector& v, const Vector& n){
-    return (2.0f * Dot(v, n)) * n - v;
+    return (2.0f * dot(v, n)) * n - v;
 }
 
 // an optimized version only works in shading coordinate
@@ -118,7 +118,7 @@ SORT_FORCEINLINE Vector reflect(const Vector& v) {
 //! @return                     Refracted vector based on Snell's law.
 //! @Note                       Both vectors ( the first parameter and the returned value ) should be pointing outside the surface.
 SORT_FORCEINLINE Vector refract(const Vector& v, const Vector& n, float in_eta, float ext_eta, bool& inner_reflection){
-    const float coso = Dot(v, n);
+    const float coso = dot(v, n);
     const float eta = coso > 0 ? (ext_eta / in_eta) : (in_eta / ext_eta);
     const float t = 1.0f - eta * eta * std::max(0.0f, 1.0f - coso * coso);
 

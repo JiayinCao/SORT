@@ -85,9 +85,6 @@ public:
     bool operator!= ( const Vector2<T>& v ) const{
         return ( v.x != x ) || ( v.y != y ) ;
     }
-    bool IsZero() const{
-        return x == 0 && y == 0 ;
-    }
 
     float Length() const
     {
@@ -97,7 +94,7 @@ public:
     {
         return x * x + y * y ;
     }
-    Vector2<T>& Normalize()
+    Vector2<T>& normalize()
     {
         float len = Length();
         if( len != 0 )
@@ -130,20 +127,20 @@ SORT_FORCEINLINE Vector2<T> operator *( float f , const Vector2<T>& v0 )
 }
 
 template<class T>
-SORT_FORCEINLINE float Dot( const Vector2<T>& v0 , const Vector2<T>& v1 )
+SORT_FORCEINLINE float dot( const Vector2<T>& v0 , const Vector2<T>& v1 )
 {
     return v0.x * v1.x + v0.y * v1.y;
 }
 
 template<class T>
-SORT_FORCEINLINE float AbsDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
+SORT_FORCEINLINE float absDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
 {
-    float r = Dot( v0 , v1 );
+    float r = dot( v0 , v1 );
     return ( r < 0.0f )? -r : r;
 }
 
 template<class T>
-SORT_FORCEINLINE float SatDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
+SORT_FORCEINLINE float satDot( const Vector2<T>& v0 , const Vector2<T>& v1 )
 {
-    return clamp( Dot( v0 , v1 ) , 0.0f , 1.0f );
+    return clamp( dot( v0 , v1 ) , 0.0f , 1.0f );
 }

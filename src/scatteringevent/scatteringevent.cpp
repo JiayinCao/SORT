@@ -21,7 +21,7 @@
 #include "sampler/sample.h"
 
 template< class T  >
-static SORT_FORCEINLINE const T* pickScattering( const T* const scattering[] , unsigned int cnt , float totalWeight , float& pdf ){
+SORT_STATIC_FORCEINLINE const T* pickScattering( const T* const scattering[] , unsigned int cnt , float totalWeight , float& pdf ){
     sAssert( totalWeight > 0.0f , MATERIAL );
 
     const T* picked = nullptr;
@@ -40,14 +40,14 @@ static SORT_FORCEINLINE const T* pickScattering( const T* const scattering[] , u
 
 ScatteringEvent::ScatteringEvent( const Intersection& intersection , const SE_Flag flag )
 : m_flag(flag), m_intersection( intersection ){
-    m_n = Normalize(intersection.normal);
-    m_bt = Normalize(Cross( m_n , intersection.tangent ));
-    m_t = Normalize(Cross( m_bt , m_n ));
+    m_n = normalize(intersection.normal);
+    m_bt = normalize(cross( m_n , intersection.tangent ));
+    m_t = normalize(cross( m_bt , m_n ));
 }
 
 Vector ScatteringEvent::worldToLocal( const Vector& v , bool forceTransform ) const{
     if( ( m_flag & SE_SUB_EVENT ) && !forceTransform ) return v;
-    return Vector( Dot(v,m_t) , Dot(v,m_n) , Dot(v,m_bt) );
+    return Vector( dot(v,m_t) , dot(v,m_n) , dot(v,m_bt) );
 }
 
 Vector ScatteringEvent::localToWorld( const Vector& v ) const{

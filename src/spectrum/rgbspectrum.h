@@ -19,180 +19,132 @@
 
 #include <OSL/oslexec.h>
 #include "core/define.h"
+#include "core/sassert.h"
 #include "math/utils.h"
-#include "math/float3.h"
+#include "math/vec_common.h"
 
 #define RGBSPECTRUM_SAMPLE      3
 
-///////////////////////////////////////////////////////////////////
-// definition of rgb spectrum
+// @brief   Basic color representation based on RGB color.
+/**
+ * The color space is linear and sRGB. SORT doesn't support more advanced HDR color spaces, like
+ * Rec 2020. All colors are in sRGB space and linear in SORT.
+ */
 class   RGBSpectrum{
 public:
-    // default constructor
-    SORT_FORCEINLINE RGBSpectrum(){}
-    // constructor from three float
-    SORT_FORCEINLINE RGBSpectrum( float r , float g , float b ):data( r , g , b ) {}
-    // constructor from three unsigned char
-    SORT_FORCEINLINE RGBSpectrum( unsigned char r , unsigned char g , unsigned char b ):data( r / 255.0f , g / 255.0f , b / 255.0f ){}
-    // constructor from a OSL vector3
-    SORT_FORCEINLINE RGBSpectrum( const OSL::Vec3& v ):data( v.x , v.y , v.z ){}
-    // constructor from one float
-    SORT_FORCEINLINE RGBSpectrum( float g ):data(g){}
-    // constructor from and unsigned char
-    SORT_FORCEINLINE RGBSpectrum( unsigned char g ):data(g/255.0f){}
-    // constructor from float3
-    SORT_FORCEINLINE RGBSpectrum( const float3& color ):data(color){}
-    // destructor
-    SORT_FORCEINLINE ~RGBSpectrum() = default;
+    //! @brief  Default constructor.
+    SORT_FORCEINLINE RGBSpectrum():r(0.0f),g(0.0f),b(0.0f){}
 
-    // get the color
-    unsigned int GetColor() const;
-    // set the color
-    void SetColor( unsigned int color );
-    SORT_FORCEINLINE void SetColor( float r , float g , float b ){
-        data = float3( r , g , b );
-    }
+    //! @brief  Constructor from three float values.
+    //!
+    //! @param  r   Value in red channel.
+    //! @param  g   Value in green channel.
+    //! @param  b   Value in blue channel.
+    SORT_FORCEINLINE RGBSpectrum( float r , float g , float b ):r(r),g(g),b(b){}
 
-    SORT_FORCEINLINE RGBSpectrum operator + (const RGBSpectrum& c) const {
-        return data + c.data;
-    }
+    //! @brief  Constructor from a given OSL vec3 data type.
+    //!
+    //! @param  v   Data in OSL vec format.
+    SORT_FORCEINLINE RGBSpectrum( const OSL::Vec3& v ):RGBSpectrum( v.x , v.y , v.z ){}
 
-    SORT_FORCEINLINE RGBSpectrum operator - (const RGBSpectrum& c) const {
-        return data - c.data;
-    }
+    //! @brief  Constructor from a single value that propogates to all channels
+    //!
+    //! @param  g   Value to be propergated.
+    SORT_FORCEINLINE RGBSpectrum( float g ):RGBSpectrum(g,g,g){}
 
-    SORT_FORCEINLINE RGBSpectrum operator * (const RGBSpectrum& c) const {
-        return data * c.data;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum operator / (const RGBSpectrum& c) const {
-        return data / c.data;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum operator + (float t) const {
-        return data + t;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum operator - (float t) const {
-        return data - t;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum operator * (float t) const {
-        return data * t;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum operator / (float t) const {
-        return data / t;
-    }
-
-    SORT_FORCEINLINE float GetR() const {
-        return data.r;
-    }
-
-    SORT_FORCEINLINE float GetG() const {
-        return data.g;
-    }
-
-    SORT_FORCEINLINE float GetB() const {
-        return data.b;
-    }
-
+    //! @brief  Get the value of the maximum channel.
+    //!
+    //! @return     The value of the maximum channel.
     SORT_FORCEINLINE float GetMaxComponent() const {
-        return std::max(data.r, std::max(data.g, data.b));
+        return std::max(r, std::max(g, b));
     }
 
+    //! @brief  Clamping the color.
+    //!
+    //! @param  low     Minimum value of the range of clamping.
+    //! @param  high    Maximum value of the range of clamping.
+    //! @return         The clamped color.
     SORT_FORCEINLINE RGBSpectrum Clamp(float low, float high) const {
-        return RGBSpectrum(clamp(data, low, high));
+        return RGBSpectrum(clamp(r, low, high), clamp(g,low,high), clamp(b,low,high));
     }
 
-    SORT_FORCEINLINE RGBSpectrum& operator+= (const RGBSpectrum& c) {
-        return *this = *this + c; 
+    //! = operator
+    //!
+    //! @param  color   Source color to copy from.
+    //! @return         The copied color.
+    const RGBSpectrum& operator = ( const RGBSpectrum& color ){
+        x = color.x; y = color.y; z = color.z;
+        return *this;
     }
 
-    SORT_FORCEINLINE RGBSpectrum& operator-= (const RGBSpectrum& c) {
-        return *this = *this - c;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum& operator*= (const RGBSpectrum& c) {
-        return *this = *this * c;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum& operator/= (const RGBSpectrum& c) {
-        return *this = *this / c;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum& operator+=(float t) {
-        return *this = *this + t;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum& operator-=(float t) {
-        return *this = *this - t;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum& operator*=(float t) {
-        return *this = *this * t;
-    }
-
-    SORT_FORCEINLINE RGBSpectrum& operator/=(float t) {
-        return *this = *this / t;
-    }
-
+    //! @brief  Return value in specific channel.
+    //!
+    //! It is the upper level code's repsonsibility to make sure that i is within valid range.
+    //! Otherwise, it is very likely to crash the system.
+    //!
+    //! @param  i       Index of channel.
+    //! @return         Copy of the value of intersetd.
     SORT_FORCEINLINE float operator []( int i ) const {
+        sAssert( i >= 0 && i < 3 , GENERAL );
         return data[i]; 
     }
 
+    //! @brief  Return value in specific channel.
+    //!
+    //! It is the upper level code's repsonsibility to make sure that i is within valid range.
+    //! Otherwise, it is very likely to crash the system.
+    //!
+    //! @param  i       Index of channel.
+    //! @return         Reference of the value of interest.
     SORT_FORCEINLINE float& operator []( int i ) {
         return data[i];
     }
 
-    // whether the spectrum is black
+    //! @brief  Whether the color is totally black.
+    //!
+    //! @return     Whether the color is black.
     SORT_FORCEINLINE bool IsBlack() const{
-        return data.isZero();
+        return ( r == 0.0f ) && ( g == 0.0f ) && ( b == 0.0f );
     }
 
-    // get intensity
+    //! @brief  Get the intensity of the color.
+    //!
+    //! @return     Intensity of the color.
     SORT_FORCEINLINE float GetIntensity() const{
         static const float YWeight[3] = { 0.212671f, 0.715160f, 0.072169f };
-        return YWeight[0] * data.r + YWeight[1] * data.g + YWeight[2] * data.b;
+        return YWeight[0] * r + YWeight[1] * g + YWeight[2] * b;
     }
 
-    SORT_FORCEINLINE void ToLinear(){
-        data.r = GammaToLinear(data.r);
-        data.g = GammaToLinear(data.g);
-        data.b = GammaToLinear(data.b);
-    }
-    SORT_FORCEINLINE void ToGamma(){
-        data.r = LinearToGamma(data.r);
-        data.g = LinearToGamma(data.g);
-        data.b = LinearToGamma(data.b);
-    }
-
+    //! @brief  Return the x^e of each channel.
+    //!
+    //! @return     A color with each channel as exp of the original color.
     SORT_FORCEINLINE RGBSpectrum Exp() const {
-        return exp(data);
+        return RGBSpectrum( exp( r ) , exp( g ) , exp( b ) );
     }
 
+    //! @brief  Return the squared root of each channel.
+    //!
+    //! @return     A color with each channel as squared root of the original color.
     SORT_FORCEINLINE RGBSpectrum Sqrt() const {
-        return sqrt(data);
+        return RGBSpectrum( sqrt( r ) , sqrt( g ) , sqrt( b ) );
     }
 
-private:
-    float3  data;
+    union{
+        struct{
+            float x , y , z;
+        };
+        struct{
+            float r , g , b;
+        };
+        struct{
+            float data[3];
+        };
+    };
 
-    friend SORT_FORCEINLINE RGBSpectrum operator-( float t , const RGBSpectrum& s );
-
-public:
     static const RGBSpectrum    m_White;
 };
 
-SORT_FORCEINLINE  RGBSpectrum operator+( float t , const RGBSpectrum& s ){
-    return s + t;
-}
-SORT_FORCEINLINE  RGBSpectrum operator-( float t , const RGBSpectrum& s ){
-    return t - s.data;
-}
-SORT_FORCEINLINE  RGBSpectrum operator*( float t , const RGBSpectrum& s ){
-    return s * t;
-}
+VECTOR3_COMMON_DEFINE( RGBSpectrum , float )
 
 #define WHITE_SPECTRUM      RGBSpectrum::m_White
 #define FULL_WEIGHT         WHITE_SPECTRUM

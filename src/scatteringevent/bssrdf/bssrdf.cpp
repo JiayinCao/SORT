@@ -25,9 +25,9 @@
 
 SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const Spectrum& ew , const float sw )
     : Bssrdf( ew , sw ) , R(R) , intersection(intersection) , channels(0) {
-    nn = Normalize(intersection->normal);
-    btn = Normalize(Cross( nn , intersection->tangent ));
-    tn = Normalize(Cross( btn , nn ));
+    nn = normalize(intersection->normal);
+    btn = normalize(cross( nn , intersection->tangent ));
+    tn = normalize(cross( btn , nn ));
 }
 
 void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter ) const {
@@ -70,7 +70,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
         sAssert( inter.intersections[i] != nullptr , MATERIAL );
 
         auto pIntersection = inter.intersections[i];
-        const auto bssrdf = Sr( Distance( po , pIntersection->intersection.intersect ) );
+        const auto bssrdf = Sr( distance( po , pIntersection->intersection.intersect ) );
         const auto pdf = Pdf_Sp( po , pIntersection->intersection.intersect , pIntersection->intersection.gnormal );
         if( pdf > 0.0f && !bssrdf.IsBlack() )
             pIntersection->weight = bssrdf / pdf * GetEvalWeight();
@@ -79,8 +79,8 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
 
 float SeparableBssrdf::Pdf_Sp( const Point& po , const Point& pi , const Vector& n ) const {
     Vector d = po - pi;
-    Vector dLocal( Dot( btn , d ) , Dot( nn , d ) , Dot( tn , d ) );
-    Vector nLocal( Dot( btn , n ) , Dot( nn , n ) , Dot( tn , n ) );
+    Vector dLocal( dot( btn , d ) , dot( nn , d ) , dot( tn , d ) );
+    Vector nLocal( dot( btn , n ) , dot( nn , n ) , dot( tn , n ) );
 
     float rProj[3] = { sqrt( SQR( dLocal.y ) + SQR( dLocal.z ) ) ,
                        sqrt( SQR( dLocal.x ) + SQR( dLocal.z ) ) ,

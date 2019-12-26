@@ -76,7 +76,7 @@ Spectrum Fabric::f( const Vector& wo , const Vector& wi ) const{
     const auto i = (int)(( N / 30.0f ) * 255.0f);
     const auto io = Io[i];
 
-    const auto h = Normalize( wo + wi );
+    const auto h = normalize( wo + wi );
     return baseColor * pow( 1.0f - fabs(h.x) , N ) * absCosTheta(wi) / io;
 }
 
@@ -103,7 +103,7 @@ float Fabric::pdf(const Vector& wo, const Vector& wi) const {
 
     const auto N = ceil(1 + 29 * SQR(1 - roughness));
 
-    const auto wh = Normalize( wo + wi );
+    const auto wh = normalize( wo + wi );
     const auto pdf_h = ( N + 1 ) * pow( 1.0f - fabs(wh.x) , N ) * INV_TWOPI;
-    return pdf_h / ( 4.0f * Dot( wo , wh ) );
+    return pdf_h / ( 4.0f * dot( wo , wh ) );
 }

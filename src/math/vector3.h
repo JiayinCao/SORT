@@ -20,97 +20,97 @@
 #include <OSL/oslexec.h>
 #include <math.h>
 #include "math/utils.h"
+#include "vec_common.h"
+#include "core/sassert.h"
 
+//! @brief  Abstraction 3D vector class.
 template< class T >
-class Vector3
-{
+class Vector3{
 public:
+    //! @brief  Default constructor reset all value to be zero.
     Vector3() : x(0),y(0),z(0){}
-    Vector3( T _x , T _y , T _z ) : x(_x),y(_y),z(_z){}
-    Vector3( T t ) : x(t),y(t),z(t){}
-    Vector3( const Vector3<T>& c ) : x(c.x), y(c.y), z(c.z){}
+
+    //! @brief  Constructor from three float values.
+    //!
+    //! @param  x   Value in x channel.
+    //! @param  y   Value in y channel.
+    //! @param  z   Value in z channel.
+    Vector3( T x , T y , T z ) : x(x),y(y),z(z){}
+
+    //! @brief  Constructor from one float value.
+    //!
+    //! @param  t   Value to be propergated to all channels.
+    Vector3( T t ) : Vector3(t,t,t){}
+
+    //! @brief  Copy constructor.
+    //!
+    //! @param  v   Value to copy from.
+    Vector3( const Vector3<T>& v ) : Vector3( v.x , v.y , v.z ) {}
+
+    //! @brief  Constructor from a point to three float value.
     Vector3( const T* const d ) : x(d[0]),y(d[1]),z(d[2]){}
+
+    //! @brief  Constructor from OSL vector.
+    //!
+    //! @param  v   OSL type vector.
     Vector3( OSL::Vec3 v ) : x( v.x ) , y( v.y ) , z(v.z) {}
 
-    Vector3<T>  operator+ ( const Vector3<T>& v) const {
-        return Vector3<T>( x + v.x , y + v.y , z + v.z );
-    }
-    const Vector3<T>&   operator+= ( const Vector3<T>& v) {
-        x += v.x; y += v.y; z += v.z;
-        return *this;
-    }
-    Vector3<T>  operator- ( const Vector3<T>& v) const {
-        return Vector3<T>( x - v.x , y - v.y , z - v.z );
-    }
-    const Vector3<T>&   operator-= ( const Vector3<T>& v ) {
-        x -= v.x; y -= v.y; z -= v.z;
-        return *this;
-    }
-    Vector3<T>  operator* ( float s ) const {
-        return Vector3<T>( x * s , y * s , z * s );
-    }
-    const Vector3<T>&   operator*= ( float s ){
-        x *= s; y *= s; z *= s;
-        return *this;
-    }
-    Vector3<T>  operator* ( const Vector3<T>& v) const {
-        return Vector3<T>( x * v.x , y * v.y , z * v.z );
-    }
-    Vector3<T>  operator/ ( float div ) const {
-        if( div == 0.0f )
-            return *this;
-        div = 1.0f / div;
-        return (*this) * div;
-    }
-    const Vector3<T>&   operator/= ( float div ) {
-        if( div == 0.0f )
-            return *this;
-        div = 1.0f / div;
-        return *this *= div;
-    }
+    //! @brief  = operator.
+    //!
+    //! @brief v    Value to copy from.
+    //! @return     Copied value.
     const Vector3<T>& operator = ( const Vector3<T>& v ){
         x = v.x; y = v.y; z = v.z;
         return *this;
     }
+
+    //! @brief  Access value in a specific channel.
+    //!
+    //! It is up to the higher level code to make sure id is with the valid range.
+    //!
+    //! @param id   Index of channel of interest.
+    //! @return     Value of interest.
     T operator[] ( unsigned id ) const{
+        sAssert( id >= 0 && id < 3 , GENERAL );
         return data[id];
-    }
-    T& operator[] ( unsigned id ){
-        return data[id];
-    }
-    Vector3<T> operator-() const{
-        return Vector3<T>( -x , -y , -z );
-    }
-    bool operator== ( const Vector3<T>& v ) const{
-        return ( v.x == x ) && ( v.y == y ) && ( v.z == z );
-    }
-    bool operator!= ( const Vector3<T>& v ) const{
-        return ( v.x != x ) || ( v.y != y ) || ( v.z != z );
-    }
-    bool IsZero() const{
-        return x == 0 && y == 0 && z == 0;
     }
 
-    float Length() const
-    {
+    //! @brief  Access value in a specific channel.
+    //!
+    //! It is up to the higher level code to make sure id is with the valid range.
+    //!
+    //! @param id   Index of channel of interest.
+    //! @return     Value of interest.
+    T& operator[] ( unsigned id ){
+        sAssert( id >= 0 && id < 3 , GENERAL );
+        return data[id];
+    }
+
+    //! @brief  Length of the vector.
+    //!
+    //! @return     The length of the vector.
+    float Length() const{
         return sqrt( SquaredLength() );
     }
-    float SquaredLength() const
-    {
+
+    //! @brief  The squared length of the vector.
+    //!
+    //! @return     The squared length of the vector.
+    float SquaredLength() const{
         return x * x + y * y + z * z;
     }
-    Vector3<T>& Normalize()
-    {
+
+    //! @brief  Normalize the vector.
+    //!
+    //! @return     Normalized vector.
+    Vector3<T>& Normalize(){
         float len = Length();
         if( len != 0 )
             *this /= len;
         return *this;
     }
 
-public:
-    // the vector data
-    union
-    {
+    union{
         struct{
             T x , y , z;
         };
@@ -125,6 +125,8 @@ public:
     static const Vector3<T> UP;
 };
 
+VECTOR3_COMMON_DEFINE( Vector3<float> , float )
+
 typedef Vector3<float>      Vector;     // Vector is 3-float vector by default
 typedef Vector3<float>      Vector3f;
 typedef Vector3<int>        Vector3i;
@@ -133,81 +135,50 @@ typedef Vector3<double>     Vector3d;
 
 extern const Vector DIR_UP;
 
-// * operator
-// para 'f'  :  scaler
-// para 'v0' :  the vector to scale
-// result    :  a scaled vector
 template<class T>
-SORT_FORCEINLINE Vector3<T> operator *( float f , const Vector3<T>& v0 )
-{
-    return v0 * f;
-}
-// para 'v0' :  a vector
-// para 'v1' :  another vector
-// result    :  the dot product of the two vectors
-template<class T>
-SORT_FORCEINLINE float Dot( const Vector3<T>& v0 , const Vector3<T>& v1 )
-{
+SORT_FORCEINLINE float dot( const Vector3<T>& v0 , const Vector3<T>& v1 ){
     return v0.x * v1.x + v0.y * v1.y + v0.z * v1.z;
 }
-// para 'v0' :  a vector
-// para 'v1' :  another vector
-// result    :  the absolute value of the dot product
+
 template<class T>
-SORT_FORCEINLINE float AbsDot( const Vector3<T>& v0 , const Vector3<T>& v1 )
-{
-    float r = Dot( v0 , v1 );
+SORT_FORCEINLINE float absDot( const Vector3<T>& v0 , const Vector3<T>& v1 ){
+    float r = dot( v0 , v1 );
     return ( r < 0.0f )? -r : r;
 }
-// para 'v0' :  a vector
-// para 'v1' :  another vector
-// reulst    :  saturated dot product
+
 template<class T>
-SORT_FORCEINLINE float SatDot( const Vector3<T>& v0 , const Vector3<T>& v1 )
-{
-    return clamp( Dot( v0 , v1 ) , 0.0f , 1.0f );
+SORT_FORCEINLINE float satDot( const Vector3<T>& v0 , const Vector3<T>& v1 ){
+    return clamp( dot( v0 , v1 ) , 0.0f , 1.0f );
 }
-// para 'v0' :  a vector
-// para 'v1' :  another vector
-// result    :  the cross product of the two vectors
+
 template<class T>
-SORT_FORCEINLINE Vector Cross( const Vector3<T>& v0 , const Vector3<T>& v1 )
-{
+SORT_FORCEINLINE Vector cross( const Vector3<T>& v0 , const Vector3<T>& v1 ){
     return Vector ( v0.y * v1.z - v0.z * v1.y,
         v0.z * v1.x - v0.x * v1.z,
         v0.x * v1.y - v0.y * v1.x );
 }
-// para 'v0' :  a vector
-// para 'v1' :  another vector
-// result    :  'true' if the two vector is facing towards the same direction, 'false' else
+
 template<class T>
-SORT_FORCEINLINE bool FaceForward( const Vector3<T>& v0 , const Vector3<T>& v1 )
-{
-    return Dot( v0 , v1 ) >= 0.0f;
+SORT_FORCEINLINE bool faceForward( const Vector3<T>& v0 , const Vector3<T>& v1 ){
+    return dot( v0 , v1 ) >= 0.0f;
 }
 
-// normalize a vector
 template<class T>
-SORT_FORCEINLINE Vector Normalize( const Vector3<T>& v )
-{
+SORT_FORCEINLINE Vector normalize( const Vector3<T>& v ){
     float len = v.Length();
     if( len == 0.0f )
         return v;
     return v / len;
 }
 
-// generate a coorindate system
 template<class T>
-SORT_FORCEINLINE void CoordinateSystem( const Vector3<T>& v0 , Vector3<T>& v1 , Vector3<T>& v2 )
-{
-    if( fabs( v0.x ) > fabs( v0.y ) )
-    {
+SORT_FORCEINLINE void coordinateSystem( const Vector3<T>& v0 , Vector3<T>& v1 , Vector3<T>& v2 ){
+    if( fabs( v0.x ) > fabs( v0.y ) ){
         float invLen = 1.0f / sqrtf( v0.x * v0.x + v0.z * v0.z );
         v1 = Vector( -v0.z * invLen , 0.0f , v0.x * invLen );
-    }else
-    {
+    }else{
         float invLen = 1.0f / sqrtf( v0.y * v0.y + v0.z * v0.z );
         v1 = Vector( 0.0f , v0.z * invLen , -v0.y * invLen );
     }
-    v2 = Cross( v0 , v1 );
+    v2 = cross( v0 , v1 );
 }

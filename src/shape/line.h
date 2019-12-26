@@ -53,7 +53,7 @@ public:
         m_p0(p0), m_p1(p1), m_gp0(p0), m_gp1(p1), m_v0(v0), m_v1(v1), m_w0(w0), m_w1(w1), m_matId(matId) {
         sAssert( m_w0 >= 0.0f , GENERAL );
         sAssert( m_w1 >= 0.0f , GENERAL );
-        m_length = Distance( p0 , p1 );
+        m_length = distance( p0 , p1 );
     }
 
     //! @brief Sample a point on the surface of the shape given a shading point.

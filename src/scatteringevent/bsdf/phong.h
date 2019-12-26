@@ -56,9 +56,9 @@ public:
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.diffuse), S(params.specular), power(params.specularPower),
           diffRatio(intensityOSLVec3(params.diffuse)/(intensityOSLVec3(params.diffuse)+intensityOSLVec3(params.specular))) {
         const auto combined = D + S;
-        sAssert(combined.GetR() <= 1.0f, MATERIAL);
-        sAssert(combined.GetG() <= 1.0f, MATERIAL);
-        sAssert(combined.GetB() <= 1.0f, MATERIAL);
+        sAssert(combined.r <= 1.0f, MATERIAL);
+        sAssert(combined.g <= 1.0f, MATERIAL);
+        sAssert(combined.b <= 1.0f, MATERIAL);
     }
 
     //! Constructor
@@ -71,9 +71,9 @@ public:
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided) , D(diffuse), S(specular), power(specularPower),
           diffRatio(diffuse.GetIntensity()/(diffuse.GetIntensity()+specular.GetIntensity())) {
         const auto combined = D + S;
-        sAssert(combined.GetR() <= 1.0f, MATERIAL);
-        sAssert(combined.GetG() <= 1.0f, MATERIAL);
-        sAssert(combined.GetB() <= 1.0f, MATERIAL);
+        sAssert(combined.r <= 1.0f, MATERIAL);
+        sAssert(combined.g <= 1.0f, MATERIAL);
+        sAssert(combined.b <= 1.0f, MATERIAL);
     }
 
     //! Evaluate the BRDF
