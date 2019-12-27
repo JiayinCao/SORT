@@ -1,6 +1,12 @@
 # SORT
+<!--
+Hide them until I am sure Github Action is reliable.
 [![Build status](https://travis-ci.org/JiayinCao/SORT.svg?branch=master)](https://travis-ci.org/JiayinCao/SORT)
 [![Build status](https://ci.appveyor.com/api/projects/status/la6ixha9tqe52qyr?svg=true)](https://ci.appveyor.com/project/JiayinCao/sort)
+-->
+[![Action status](https://github.com/JiayinCao/SORT/workflows/Windows/badge.svg)](https://github.com/JiayinCao/SORT/actions?query=workflow%3AWindows)
+[![Action status](https://github.com/JiayinCao/SORT/workflows/MacOS/badge.svg)](https://github.com/JiayinCao/SORT/actions?query=workflow%3AMacOS)
+[![Action status](https://github.com/JiayinCao/SORT/workflows/Ubuntu/badge.svg)](https://github.com/JiayinCao/SORT/actions?query=workflow%3AUbuntu)
 [![License](https://img.shields.io/badge/License-GPL3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## Introduction
