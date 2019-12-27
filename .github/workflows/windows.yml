@@ -1,0 +1,27 @@
+name: Windows
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup MSBuild.exe
+      uses: warrenbuckley/Setup-MSBuild@v1
+    - name: Install Dependencies
+      run: make update_dep
+      shell: cmd
+    - name: Build Release Version
+      run: make release
+      shell: cmd
+    - name: Build Debug Version
+      run: make debug
+      shell: cmd
+    - name: Unit Test
+      run: |
+           cd bin
+           sort_r.exe --unittest
+      shell: cmd
