@@ -20,7 +20,7 @@ jobs:
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: ${{ steps.cache-dir.outputs.dir }}
+        path: $ENV{GITHUB_WORKSPACE}/dependencies
         key: ${{ runner.os }}-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
@@ -50,7 +50,7 @@ jobs:
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: ${{ steps.cache-dir.outputs.dir }}
+        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
         key: ${{ runner.os }}-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
@@ -82,7 +82,7 @@ jobs:
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: ${{ steps.cache-dir.outputs.dir }}
+        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
         key: ${{ runner.os }}-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
