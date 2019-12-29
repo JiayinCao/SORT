@@ -13,6 +13,7 @@ jobs:
     - name: Get Cache Directory
       id: cache-dir
       run: |
+          ::set-output name=dir::%CD%
           echo "::set-output name=dir::%CD%"
       shell: cmd
     - name: Load Dependencies from Cache
