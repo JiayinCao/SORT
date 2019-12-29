@@ -37,7 +37,7 @@ jobs:
     - name: Checking Out Source Code
       uses: actions/checkout@v1
     - name: Get Cache Directory
-      id: chach-dir
+      id: cache-dir
       run: |
           echo "::set-output name=dir::$(pwd)"
     - name: Load Dependencies from Cache
@@ -69,7 +69,7 @@ jobs:
            sudo apt-get update
            sudo apt-get install -y clang-6.0
     - name: Get Cache Directory
-      id: chach-dir
+      id: cache-dir
       run: |
            echo "::set-output name=dir::$(pwd)"
     - name: Load Dependencies from Cache
