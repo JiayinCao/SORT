@@ -10,11 +10,15 @@ jobs:
       uses: actions/checkout@v1
     - name: Setup MSBuild.exe
       uses: warrenbuckley/Setup-MSBuild@v1
+    - name: Get Cache Directory
+      id: cache-dir
+      run: |
+          echo "::set-output name=dir::$(CD)"
     - name: Load Dependencies from Cache
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: /dependencies
+        path: ${{ steps.cache-dir.outputs.dir }}
         key: ${{ runner.os }}-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
