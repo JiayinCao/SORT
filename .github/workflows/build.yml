@@ -9,9 +9,6 @@ jobs:
     - uses: actions/checkout@v1
     - name: Setup MSBuild.exe
       uses: warrenbuckley/Setup-MSBuild@v1
-    - name: Install Dependencies
-      run: make update_dep
-      shell: cmd
     - uses: actions/cache@v1
       id: cache-dep
       with:
