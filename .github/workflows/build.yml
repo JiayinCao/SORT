@@ -13,14 +13,13 @@ jobs:
     - name: Get Cache Directory
       id: cache-dir
       run: |
-          ::set-output name=dir::%CD%
-          echo "::set-output name=dir::%CD%"
+          message("::set-output name=dir::%CD%")
       shell: cmd
     - name: Load Dependencies from Cache
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: $ENV{GITHUB_WORKSPACE}/dependencies
+        path: ${{ steps.cache-dir.outputs.dir }}
         key: ${{ runner.os }}-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
@@ -50,7 +49,7 @@ jobs:
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
+        path: ${{ steps.cache-dir.outputs.dir }}
         key: ${{ runner.os }}-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
@@ -82,7 +81,7 @@ jobs:
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
+        path: ${{ steps.cache-dir.outputs.dir }}
         key: ${{ runner.os }}-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
