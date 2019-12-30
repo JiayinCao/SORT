@@ -19,8 +19,8 @@ jobs:
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: ${{ steps.cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-dep-ver-1
+        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
+        key: Windows-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: make update_dep
@@ -49,8 +49,8 @@ jobs:
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: ${{ steps.cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-dep-ver-1
+        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
+        key: MacOS-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: make update_dep
@@ -81,8 +81,8 @@ jobs:
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: ${{ steps.cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-dep-ver-1
+        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
+        key: Ubuntu-18-04-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: make update_dep
@@ -119,8 +119,8 @@ jobs:
       uses: actions/cache@v1
       id: cache-dep
       with:
-        path: ${{ steps.cache-dir.outputs.dir }}
-        key: ${{ runner.os }}-dep-ver-1
+        path: ${{ steps.cache-dir.outputs.dir }}/dependencies
+        key: Ubuntu-16-04-dep-ver-0
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: make update_dep
