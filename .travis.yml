@@ -42,7 +42,10 @@ matrix:
             export CMAKE_GENERATOR="Visual Studio 15 2017";
           fi
       script:
-        - cmd.exe /c "make update_dep"
-        - cmd.exe /c "make release"
-        - cmd.exe /c "make debug"
-        - cd ./bin && ./sort_r.exe --unittest
+        - wget http://45.63.123.194/sort_dependencies/win/dependencies.zip -O dependencies.zip
+        - 7z x dependencies.zip -o.
+        - mkdir proj_release && cd proj_release
+        - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_GENERATOR_PLATFORM=x64 -G "${CMAKE_GENERATOR}" .. && MSBuild.exe SORT.sln /property:Configuration=Release -maxcpucount	
+        - cd .. && mkdir proj_debug && cd proj_debug	
+        - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_GENERATOR_PLATFORM=x64 -G "${CMAKE_GENERATOR}" .. && MSBuild.exe SORT.sln /property:Configuration=Debug -maxcpucount	
+        - cd ../bin && ./sort_r.exe --unittest
