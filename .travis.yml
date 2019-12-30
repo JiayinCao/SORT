@@ -42,7 +42,7 @@ matrix:
             export CMAKE_GENERATOR="Visual Studio 15 2017";
           fi
       script:
-        - make update_dep
-        - make release
-        - make debug
+        - cmd.exe /c "make update_dep"
+        - cmd.exe /c "make release"
+        - cmd.exe /c "make debug"
         - cd ../bin && ./sort_r.exe --unittest
