@@ -150,10 +150,12 @@ endif(ENABLE_STATS)
 # Enable Profiling system in SORT.
 if(ENABLE_PROFILER)
     message( STATUS "SORT Profiling System Enabled." )
-    add_definitions(-DENABLE_PROFILER)
-if (!SORT_PLATFORM_LINUX) # it doesn't link well with OSL
-    add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-endif()
+    add_definitions(-DSORT_ENABLE_PROFILER)
+
+    if (!SORT_PLATFORM_LINUX) # it doesn't link well with OSL
+        add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+    endif()
+
 else()
     message( STATUS "SORT Profiling System Disabled." )
 endif(ENABLE_PROFILER)

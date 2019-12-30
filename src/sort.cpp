@@ -84,6 +84,11 @@ void SchedulTasks( Scene& scene , IStreamBase& stream ){
 int RunSORT( int argc , char** argv ){
     // Parse command line arguments.
     bool valid_args = GlobalConfiguration::GetSingleton().ParseCommandLine( argc , argv );
+
+    // Disable profiling if necessary
+    if( !g_profilingEnabled )
+        SORT_PROFILE_DISABLE;
+
     if (!valid_args) {
         slog(INFO, GENERAL, "There is not enough command line arguments.");
         slog(INFO, GENERAL, "  --input:<filename>   Specify the sort input file.");
@@ -95,16 +100,12 @@ int RunSORT( int argc , char** argv ){
     }else{
         slog(INFO, GENERAL, "Number of CPU cores %d", std::thread::hardware_concurrency());
         #ifdef SORT_ENABLE_STATS_COLLECTION
-                slog(INFO, GENERAL, "Stats collection is enabled.");
+            slog(INFO, GENERAL, "Stats collection is enabled.");
         #else
             slog(INFO, GENERAL, "Stats collection is disabled.");
         #endif
-            slog(INFO, GENERAL, "Profiling system is %s.", SORT_PROFILE_ISENABLED ? "enabled" : "disabled");
+        slog(INFO, GENERAL, "Profiling system is %s.", SORT_PROFILE_ISENABLED ? "enabled" : "disabled");
     }
-
-    // Disable profiling if necessary
-    if( !g_profilingEnabled )
-        SORT_PROFILE_DISABLE;
 
     // Run in unit test mode if required.
     if( g_unitTestMode ){
