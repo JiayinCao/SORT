@@ -5,11 +5,9 @@ matrix:
     - os: osx
       compiler: clang
       script:
-        - sudo /bin/sh ./build-files/mac/getdep.sh
-        - mkdir proj_release && cd proj_release
-        - cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
-        - cd .. && mkdir proj_debug && cd proj_debug
-        - cmake -DCMAKE_BUILD_TYPE=Debug DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
+        - make update_dep
+        - make release
+        - make debug
         - cd ../bin && ./sort_r --unittest
     - os: linux
       dist: xenial
@@ -33,11 +31,9 @@ matrix:
         - sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
         - sudo apt-get update
         - sudo apt-get install -y clang-6.0
-        - sudo /bin/sh ./build-files/ubuntu/getdep_xenial.sh
-        - mkdir proj_release && cd proj_release
-        - cmake -DCMAKE_BUILD_TYPE=Release DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
-        - cd .. && mkdir proj_debug && cd proj_debug
-        - cmake -DCMAKE_BUILD_TYPE=Debug DCMAKE_CXX_COMPILER=$CXX_COMPILER -DCMAKE_C_COMPILER=$C_COMPILER .. && make -j4
+        - make update_dep
+        - make release
+        - make debug
         - cd ../bin && ./sort_r --unittest
     - os: windows
       install:
@@ -46,10 +42,7 @@ matrix:
             export CMAKE_GENERATOR="Visual Studio 15 2017";
           fi
       script:
-        - wget http://45.63.123.194/sort_dependencies/win/dependencies.zip -O dependencies.zip
-        - 7z x dependencies.zip -o.
-        - mkdir proj_release && cd proj_release
-        - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_GENERATOR_PLATFORM=x64 -G "${CMAKE_GENERATOR}" .. && MSBuild.exe SORT.sln /property:Configuration=Release -maxcpucount
-        - cd .. && mkdir proj_debug && cd proj_debug
-        - cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_GENERATOR_PLATFORM=x64 -G "${CMAKE_GENERATOR}" .. && MSBuild.exe SORT.sln /property:Configuration=Debug -maxcpucount
+        - make update_dep
+        - make release
+        - make debug
         - cd ../bin && ./sort_r.exe --unittest
