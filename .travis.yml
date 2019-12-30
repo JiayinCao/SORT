@@ -8,7 +8,7 @@ matrix:
         - make update_dep
         - make release
         - make debug
-        - cd ../bin && ./sort_r --unittest
+        - cd ./bin && ./sort_r --unittest
     - os: linux
       dist: xenial
       compiler: gcc
@@ -34,7 +34,7 @@ matrix:
         - make update_dep
         - make release
         - make debug
-        - cd ../bin && ./sort_r --unittest
+        - cd ./bin && ./sort_r --unittest
     - os: windows
       install:
         - if [[ "${TRAVIS_OS_NAME}" == "windows" ]]; then
@@ -45,4 +45,4 @@ matrix:
         - cmd.exe /c "make update_dep"
         - cmd.exe /c "make release"
         - cmd.exe /c "make debug"
-        - cd ../bin && ./sort_r.exe --unittest
+        - cd ./bin && ./sort_r.exe --unittest
