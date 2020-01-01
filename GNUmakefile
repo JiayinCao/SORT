@@ -1,3 +1,20 @@
+#
+#    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
+#    platform physically based renderer.
+#
+#    Copyright (c) 2011-2020 by Jiayin Cao - All rights reserved.
+#
+#    SORT is a free software written for educational purpose. Anyone can distribute
+#    or modify it under the the terms of the GNU General Public License Version 3 as
+#    published by the Free Software Foundation. However, there is NO warranty that
+#    all components are functional in a perfect manner. Without even the implied
+#    warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+#    General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License along with
+#    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
+#
+
 define HELP_TEXT
 
 Available commands
@@ -27,7 +44,7 @@ Available commands
 Convenience targets
 
     * release
-        The relatively performant build version that provides reasonable 
+        The relatively performant build version that provides reasonable
         information, like statistics and log. However, there is no debug
         information.
     * debug
@@ -58,18 +75,18 @@ Following are dependencies used in SORT renderer
         also included in the thirdparty folder in SORT source code.
     * Tiny Exr
         Tiny Exr is a open source library for reading and writting exr files.
-        Like the other two libraries, the source code is also included in 
+        Like the other two libraries, the source code is also included in
         'thirdpard' folder.
 
 endef
 
 define ABOUT_TEXT
 
-SORT is short for Simple Open-source Ray Tracing. It is a stand along cross platform 
-physically based renderer. It is my personal side project that I have been working 
+SORT is short for Simple Open-source Ray Tracing. It is a stand along cross platform
+physically based renderer. It is my personal side project that I have been working
 on ever since 2011. Following are features supported in SORT renderer so far,
 
-    * Path Tracing, Bidirectional Path Tracing, Light Tracing, Instant Radiosity, 
+    * Path Tracing, Bidirectional Path Tracing, Light Tracing, Instant Radiosity,
       Ambient Occlusion, Whitted Ray Tracing.
     * KD-Tree, BVH, OcTree, Uniform Grid.
     * Point Light, Spot Light, Directional Light, Area Light, HDR Image Based Lighting.
@@ -90,7 +107,7 @@ Please visit the following website for more information,
 My name is Jiayin Cao. I'm currently working at Naughty Dog as a graphics engineer.
 Prior to joining Naughty Dog, I worked at Ubisoft, NVIDIA, AMD and Microsoft before.
 Following are my contacts, feel free to contact me for any reason,
-	
+
     * Linkedin,   https://www.linkedin.com/in/caojiayin/
     * Twitter,    https://twitter.com/Jiayin_Cao
     * Tech blog,  https://agraphicsguy.wordpress.com/
