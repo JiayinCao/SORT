@@ -1,7 +1,7 @@
 #    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
 #    platform physically based renderer.
 #
-#    Copyright (c) 2011-2019 by Jiayin Cao - All rights reserved.
+#    Copyright (c) 2011-2020 by Jiayin Cao - All rights reserved.
 #
 #    SORT is a free software written for educational purpose. Anyone can distribute
 #    or modify it under the the terms of the GNU General Public License Version 3 as
@@ -22,7 +22,7 @@ def registrar(register, unregister, name=None):
     if name is None or not [True for _, _, n in REGISTRARS if n == name]:
         REGISTRARS.append((register, unregister, name))
 
-# register a class in blender system, this function just 
+# register a class in blender system, this function just
 def register_class(cls):
     registrar(lambda: bpy.utils.register_class(cls), lambda: bpy.utils.unregister_class(cls), cls.__name__)
     return cls
@@ -56,7 +56,7 @@ def get_sort_compatible_panels():
 def register():
     for r, _, _ in REGISTRARS:
         r()
-    
+
     for t in get_sort_compatible_panels():
         t.COMPAT_ENGINES.add('SORT')
 

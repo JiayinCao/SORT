@@ -1,7 +1,7 @@
 #    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
 #    platform physically based renderer.
 #
-#    Copyright (c) 2011-2019 by Jiayin Cao - All rights reserved.
+#    Copyright (c) 2011-2020 by Jiayin Cao - All rights reserved.
 #
 #    SORT is a free software written for educational purpose. Anyone can distribute
 #    or modify it under the the terms of the GNU General Public License Version 3 as
@@ -132,7 +132,7 @@ class SORT_OT_node_socket_restore_shader_group_input(bpy.types.Operator):
 
         # create an input node and place it on the left of all nodes
         node_type = 'sort_shader_node_group_input' if material.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
-        node_input = tree.nodes.new(node_type)    
+        node_input = tree.nodes.new(node_type)
         node_input.location = loc
         node_input.selected = False
         node_input.tree = tree
@@ -243,7 +243,7 @@ class SORT_OT_node_socket_restore_input_node(bpy.types.Operator):
 
         # create an input node and place it on the left of all nodes
         node_type = 'sort_shader_node_group_input' if material.is_sort_node_group(tree) else 'SORTNodeExposedInputs'
-        node_input = tree.nodes.new(node_type)    
+        node_input = tree.nodes.new(node_type)
         node_input.location = loc
         node_input.selected = False
         node_input.tree = tree
@@ -284,7 +284,7 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
         if tree is None:
             self.layout.operator( 'sort.use_sort_node' , text='Use SORT Shader Node' )
             return
-        
+
         is_group_node = material.is_sort_node_group(tree)
         group_input_node = tree.nodes.get( "Shader Inputs" )
         if group_input_node is None:
@@ -292,7 +292,7 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
             display_text = 'Restore Group Input Node' if is_group_node else 'Add Shader Inputs'
             row.operator('sort.node_socket_restore_shader_group_input', text=display_text)
             return
-        
+
         for input in group_input_node.inputs:
             self.layout.prop( input , 'default_value' , text = input.name )
 

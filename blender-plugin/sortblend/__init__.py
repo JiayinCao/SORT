@@ -1,7 +1,7 @@
 #    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
 #    platform physically based renderer.
 #
-#    Copyright (c) 2011-2019 by Jiayin Cao - All rights reserved.
+#    Copyright (c) 2011-2020 by Jiayin Cao - All rights reserved.
 #
 #    SORT is a free software written for educational purpose. Anyone can distribute
 #    or modify it under the the terms of the GNU General Public License Version 3 as
@@ -44,7 +44,7 @@ class SORTAddonPreferences(bpy.types.AddonPreferences):
 def register():
     # register all classes in this plugin
     base.register()
-    
+
     # this is the place for initializing group node information saved last time
     bpy.app.handlers.load_post.append(material.node_groups_load_post)
 

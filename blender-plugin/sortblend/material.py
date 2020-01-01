@@ -1,7 +1,7 @@
 #    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
 #    platform physically based renderer.
 #
-#    Copyright (c) 2011-2019 by Jiayin Cao - All rights reserved.
+#    Copyright (c) 2011-2020 by Jiayin Cao - All rights reserved.
 #
 #    SORT is a free software written for educational purpose. Anyone can distribute
 #    or modify it under the the terms of the GNU General Public License Version 3 as
@@ -85,7 +85,7 @@ class SORTShaderNodeTree(bpy.types.NodeTree):
         tree = get_node_groups_by_id( self.sort_data.group_name_id )
         if tree is None:
             return
-            
+
         # get group input and output
         input_node = tree.nodes.get( 'Group Inputs' )
         output_node = tree.nodes.get( 'Group Outputs' )
@@ -95,7 +95,7 @@ class SORTShaderNodeTree(bpy.types.NodeTree):
             if input_node is None:
                 sockets = getattr(instance, 'inputs')
                 sockets.clear()
-            
+
             if output_node is None:
                 sockets = getattr(instance, 'outputs')
                 sockets.clear()
@@ -186,7 +186,7 @@ def getUniqueSocketName(socket_names, socket_name):
         for name in socket_names:
             if name == new_socket_name:
                 found_duplication = True
-        
+
         if found_duplication:
             new_socket_name = socket_name + str( i )
             i += 1
@@ -240,7 +240,7 @@ def get_other_socket(socket):
 
     for link in socket.links:
         other = link.from_socket if not socket.is_output else link.to_socket
-        
+
         # special handling for reroute node
         if other.node.bl_idname == 'NodeReroute':
             sockets = other.node.inputs if not socket.is_output else other.node.outputs
@@ -463,7 +463,7 @@ class SORTNodeSocket:
 
     def get_socket_data_type(self):
         return 'None'
-    
+
     def isDummySocket(self):
         return False
 
@@ -606,7 +606,7 @@ class SORTDummySocket(bpy.types.NodeSocket, SORTNodeSocket):
 
     def draw_color(self, context, node):
         return (0.6, 0.6, 0.6, 0.5)
-    
+
     def isDummySocket(self):
         return True
 
@@ -754,7 +754,7 @@ class SORT_Node_Group_Make_Operator(bpy.types.Operator):
                 tree.links.new(socket, node.inputs[index])
             for index, name, socket_index in output_relink:
                 tree.links.new(node.outputs[index], tree.nodes[name].inputs[socket_index])
-            
+
         tree = context.space_data.edit_tree
         for node in tree.nodes:
             if node.bl_idname == 'NodeReroute' or node.bl_idname == 'NodeFrame':
@@ -913,7 +913,7 @@ class SORTNodeOutput(SORTShadingNode):
     '''
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface' )
-    
+
 @base.register_class
 class SORTNodeExposedInputs(SORTShadingNode):
     bl_label = 'Shader Inputs'
@@ -922,7 +922,7 @@ class SORTNodeExposedInputs(SORTShadingNode):
 
     def init(self, context):
         self.outputs.new( 'sort_dummy_socket' , 'Input' )
-    
+
     # whether the node is a shader group input
     def isShaderGroupInputNode(self):
         return True
@@ -948,7 +948,7 @@ class SORTNodeExposedInputs(SORTShadingNode):
 
         new_socket_name = getUniqueSocketName( socket_names , to_socket.name )
         replace_socket(last_output, to_socket.bl_idname, new_name=new_socket_name)
-        
+
         # it also needs an input since it is a real node with shader
         input_socket = self.inputs.new( to_socket.bl_idname , new_socket_name )
         input_socket.enabled = False
@@ -964,10 +964,10 @@ class SORTNodeExposedInputs(SORTShadingNode):
         return 'i' + param.replace(' ', '')
     def getShaderOutputParameterName(self,param):
         return 'o' + param.replace(' ', '')
-    
+
     # this is just a proxy node
     def generate_osl_source(self):
-        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color', 
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color',
                                'SORTNodeSocketColor': 'color',
                                'SORTNodeSocketFloat': 'float',
                                'SORTNodeSocketFloatVector': 'vector',
@@ -997,7 +997,7 @@ class SORTNodeExposedInputs(SORTShadingNode):
             osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
         osl_shader += '}'
         return osl_shader
-    
+
     # this function helps serializing the material information
     def serialize_prop(self,fs):
         inputs = self.inputs
@@ -1021,12 +1021,12 @@ class SORTNodeSocketConnectorHelper:
             for socket in sockets:
                 socket_names.append( socket.name )
             return socket_names
-        
+
         def get_one_instance(tree):
             for instance in instances(tree):
                 return instance
             return None
-            
+
         kind = self.node_kind
         if not kind:
             return
@@ -1112,7 +1112,7 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
 
     # this is just a proxy node
     def generate_osl_source(self):
-        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color', 
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color',
                                'SORTNodeSocketColor': 'color',
                                'SORTNodeSocketFloat': 'float',
                                'SORTNodeSocketFloatVector': 'vector',
@@ -1199,10 +1199,10 @@ class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode)
         return 'i' + param.replace(' ', '')
     def getShaderOutputParameterName(self,param):
         return 'o' + param.replace(' ', '')
-    
+
     # this is just a proxy node
     def generate_osl_source(self):
-        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color', 
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color',
                                'SORTNodeSocketColor': 'color',
                                'SORTNodeSocketFloat': 'float',
                                'SORTNodeSocketFloatVector': 'vector',
@@ -1452,7 +1452,7 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        color BaseColor = @ ,
                        normal Normal = @ ,
                        output closure color Result = color(0) ){
-            Result = disney( Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness , 
+            Result = disney( Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness ,
                              SpecularTransmittance , ScatterDistance , Flatness , DiffuseTransmittance , IsThinSurface , BaseColor , Normal );
         }
     '''
@@ -2119,7 +2119,7 @@ class SORTNodeImage(SORTShadingNode):
                 item.image_name = new_image_name
             item.clear()
             thumb = item.load(img.name, bpy.path.abspath(img.filepath), 'IMAGE')
-            
+
             # somehow, it doesn't show the preview without this line
             thumb.image_size[0]
 
@@ -2338,7 +2338,7 @@ class SORTNodeInputFresnel(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketFloat' , 'F0' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Result' )
         self.inputs['F0'].default_value = 0.08
-        
+
     def serialize_prop(self, fs):
         fs.serialize( 1 )
         fs.serialize( self.inputs['F0'].export_osl_value() )
@@ -2391,7 +2391,7 @@ class SORTNodeMathOpUnary(SORTShadingNode):
         return self.osl_shader % ( dtype , dtype , self.op_type )
     def type_identifier(self):
         return self.bl_idname + self.data_type + self.op_type
-        
+
 @SORTShaderNodeTree.register_node('Math Ops')
 class SORTNodeMathOpBinary(SORTShadingNode):
     bl_label = 'Binary Operator'
@@ -2459,7 +2459,7 @@ class SORTNodeMathOpDotProduce(SORTShadingNode):
         fs.serialize( 2 )
         fs.serialize( self.inputs['Value0'].export_osl_value() )
         fs.serialize( self.inputs['Value1'].export_osl_value() )
-    
+
 @SORTShaderNodeTree.register_node('Math Ops')
 class SORTNodeMathOpLerp(SORTShadingNode):
     bl_label = 'Lerp'

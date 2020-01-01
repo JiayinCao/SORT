@@ -1,7 +1,7 @@
 #    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
 #    platform physically based renderer.
 #
-#    Copyright (c) 2011-2019 by Jiayin Cao - All rights reserved.
+#    Copyright (c) 2011-2020 by Jiayin Cao - All rights reserved.
 #
 #    SORT is a free software written for educational purpose. Anyone can distribute
 #    or modify it under the the terms of the GNU General Public License Version 3 as
@@ -39,7 +39,7 @@ class SORTHDRSky(bpy.types.PropertyGroup):
                 item.image_name = new_image_name
             item.clear()
             thumb = item.load(img.name, bpy.path.abspath(img.filepath), 'IMAGE')
-            
+
             # somehow, it doesn't show the preview without this line
             thumb.image_size[0]
 

@@ -1,7 +1,7 @@
 #    This file is a part of SORT(Simple Open Ray Tracing), an open-source cross
 #    platform physically based renderer.
 #
-#    Copyright (c) 2011-2019 by Jiayin Cao - All rights reserved.
+#    Copyright (c) 2011-2020 by Jiayin Cao - All rights reserved.
 #
 #    SORT is a free software written for educational purpose. Anyone can distribute
 #    or modify it under the the terms of the GNU General Public License Version 3 as
@@ -41,7 +41,7 @@ class SORT_Thread():
 
     def join(self):
         self.thread.join()
-    
+
     def stop(self):
         self.isTerminated = True
 
@@ -128,7 +128,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
     @classmethod
     def is_active(cls, context):
         return context.scene.render.engine == cls.bl_idname
-        
+
     # spawn new rendering thread
     def spawnnewthread(self):
         import mmap
