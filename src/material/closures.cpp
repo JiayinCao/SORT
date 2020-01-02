@@ -35,6 +35,7 @@
 #include "scatteringevent/bsdf/doublesided.h"
 #include "scatteringevent/bsdf/distributionbrdf.h"
 #include "scatteringevent/bsdf/fabric.h"
+#include "scatteringevent/bsdf/transparent.h"
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
 
@@ -634,6 +635,27 @@ namespace {
             }
         }
     };
+
+    struct Closure_Transparent : public Closure_Base {
+        static constexpr int    ClosureID = CLOSURE_TRANSPARENT;
+
+        static const char* GetName() {
+            return "transparent";
+        }
+
+        static void Register(ShadingSystem* shadingsys) {
+            BuiltinClosures closure = { GetName(), ClosureID,{
+                CLOSURE_COLOR_PARAM(Transparent::Params, attenuation),
+                CLOSURE_FINISH_PARAM(Transparent::Params)
+            } };
+            shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
+        }
+
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
+            const auto& params = *comp->as<Transparent::Params>();
+            se.AddBxdf(SORT_MALLOC(Transparent)(params, w * comp->w));
+        }
+    };
 }
 
 template< typename T >
@@ -666,6 +688,7 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys) {
     registerClosure<Closure_DistributionBRDF>(shadingsys);
     registerClosure<Closure_Fabric>(shadingsys);
     registerClosure<Closure_SSS>(shadingsys);
+    registerClosure<Closure_Transparent>(shadingsys);
 }
 
 void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se ){

@@ -500,6 +500,7 @@ closure color doubleSided( closure color bxdf0 , closure color bxdf1 ) BUILTIN;
 closure color distributionBRDF( color basecolor , float roughness , float specular , float specularTint , normal N ) BUILTIN;
 closure color fabric(color basecolor, float roughness, normal N) BUILTIN;
 closure color subsurfaceScattering(color basecolor, vector scatteringDistance, normal N) BUILTIN;
+closure color transparent(color basecolor) BUILTIN;
 
 #undef BUILTIN
 #undef BUILTIN_DERIV

@@ -1857,6 +1857,23 @@ class SORTNode_Material_SSS(SORTShadingNode):
         fs.serialize( self.inputs['Normal'].export_osl_value() )
 
 @SORTShaderNodeTree.register_node('Materials')
+class SORTNode_Material_Transparent(SORTShadingNode):
+    bl_label = 'Transparent'
+    bl_idname = 'SORTNode_Material_Transparent'
+    osl_shader = '''
+        shader MaterialTransparent(  color Attenuation = @ ,
+                                     output closure color Result = color(0) ){
+            Result = transparent( Attenuation );
+        }
+    '''
+    def init(self, context):
+        self.inputs.new( 'SORTNodeSocketColor' , 'Attenuation' )
+        self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 1 )
+        fs.serialize( self.inputs['Attenuation'].export_osl_value() )
+
+@SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Add(SORTShadingNode):
     bl_label = 'Add'
     bl_idname = 'SORTNode_Material_Add'
