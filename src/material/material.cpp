@@ -60,6 +60,7 @@ void Material::Serialize(IStreamBase& stream){
         if( shader_source.name.empty() ){
             if( shader_source.type != "verification_string" )
                 sAssertMsg( false , RESOURCE , "Serialization is broken." );
+            stream >> m_hasTransparentNode;
             break;
         }
 
@@ -96,4 +97,12 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
         ExecuteShader( m_shader.get() , se );
     else
         se.AddBxdf(SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
+}
+
+Spectrum Material::EvaluateTransparency( const Intersection& intersection ) const {
+    // this should happen most of the time.
+    if( !m_hasTransparentNode )
+        return WHITE_SPECTRUM;
+
+    return ::EvaluateTransparency( m_shader.get() , intersection );
 }

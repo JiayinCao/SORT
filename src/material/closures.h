@@ -18,8 +18,8 @@
 #pragma once
 
 #include <OSL/oslexec.h>
+#include "spectrum/spectrum.h"
 
-class Intersection;
 class ScatteringEvent;
 
 enum BXDF_CLOSURE_TYPE {
@@ -57,3 +57,10 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys);
 //! @param  w               The weight of this closure tree, this also counts the weight inderits from the higher level tree nodes.
 //! @param  se              The result scattering event.
 void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se );
+
+//! @brief  Evaluate occlusion in OSL shader.
+//!
+//! @param  closure         The closure tree in the osl shader.
+//! @param  w               The weight of this closure tree, this also counts the weight inderits from the higher level tree nodes.
+//! @return                 The occlusion of the intersection.
+Spectrum ProcessOcclusion(const OSL::ClosureColor* closure, const OSL::Color3& w );

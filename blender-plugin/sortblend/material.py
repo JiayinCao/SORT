@@ -652,6 +652,9 @@ class SORTShadingNode(bpy.types.Node):
     # get unique name
     def getUniqueName(self):
         return self.name + str( self.as_pointer() )
+    # whether the node is a transparent node
+    def isTransparentNode(self):
+        return False
 
 #------------------------------------------------------------------------------------#
 #                                Group Node Operators                                #
@@ -1872,6 +1875,8 @@ class SORTNode_Material_Transparent(SORTShadingNode):
     def serialize_prop(self, fs):
         fs.serialize( 1 )
         fs.serialize( self.inputs['Attenuation'].export_osl_value() )
+    def isTransparentNode(self):
+        return True
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Add(SORTShadingNode):

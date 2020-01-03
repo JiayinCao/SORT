@@ -109,6 +109,21 @@ void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
     ProcessClosure( shaderglobals.Ci , Color3( 1.0f ) , se );
 }
 
+Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const Intersection& intersection ){
+    ShaderGlobals shaderglobals;
+    shaderglobals.P = Vec3( intersection.intersect.x , intersection.intersect.y , intersection.intersect.z );
+    shaderglobals.u = intersection.u;
+    shaderglobals.v = intersection.v;
+    shaderglobals.N = Vec3( intersection.normal.x , intersection.normal.y , intersection.normal.z );
+    shaderglobals.Ng = Vec3( intersection.gnormal.x , intersection.gnormal.y , intersection.gnormal.z );
+    shaderglobals.I = Vec3( intersection.view.x , intersection.view.y , intersection.view.z );
+    shaderglobals.dPdu = Vec3( 0.0f );
+    shaderglobals.dPdu = Vec3( 0.0f );
+    g_shadingsys->execute(g_contexts[ ThreadId() ], *shader, shaderglobals);
+
+    return 1.0f - ProcessOcclusion( shaderglobals.Ci , Color3( 1.0f ) );
+}
+
 void ShadingContextWrapper::DestroyContext(OSL::ShadingSystem* shadingsys) {
     shadingsys->release_context(ctx);
     shadingsys->destroy_thread_info(thread_info);

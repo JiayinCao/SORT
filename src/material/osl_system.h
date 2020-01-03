@@ -23,6 +23,7 @@
 #include <string>
 #include "core/define.h"
 #include "math/vector3.h"
+#include "spectrum/spectrum.h"
 #include "closures.h"
 
 #if defined(SORT_IN_WINDOWS)
@@ -32,6 +33,7 @@
 #endif
 
 class ScatteringEvent;
+class Intersection;
 
 struct ShadingContextWrapper {
 public:
@@ -43,27 +45,33 @@ private:
     OSL::ShadingContext             *ctx = nullptr;
 };
 
-// begin building shader
+//! @brief  Begin building shader
 OSL::ShaderGroupRef BeginShaderGroup( const std::string& group_name );
 bool EndShaderGroup();
 
-// Optimize shader
+//! @brief  Optimize shader
 void OptimizeShader(OSL::ShaderGroup* group);
 
-// Build a shader from source code
+//! @brief  Build a shader from source code
 bool BuildShader( const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer , const std::string& shader_group_name = "" );
 
-// Connect parameters between shaders
+//! @brief  Connect parameters between shaders
 bool ConnectShader( const std::string& source_shader , const std::string& source_param , const std::string& target_shader , const std::string& target_param );
 
-//! Execute a shader and populate the scattering event
+//! @brief  Execute a shader and populate the scattering event
 //!
 //! @param  shader      The osl shader to be evaluated.
 //! @param  se          The resulting scattering event.
 void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
 
-// Create thread contexts
+//! @brief  Evaluate the transparency of the intersection.
+//!
+//! @param  shader          The osl shader to be evaluated.
+//! @param  intersection    The intersection of interest.
+Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const Intersection& intersection );
+
+//! @brief  Create thread contexts
 void CreateOSLThreadContexts();
 
-// Destroy thread contexts
+//! @brief  Destroy thread contexts
 void DestroyOSLThreadContexts();

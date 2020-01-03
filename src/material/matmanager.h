@@ -29,8 +29,7 @@
 /**
  * This could very likely be a temporary solution for now.
  */
-class   MatManager : public Singleton<MatManager>
-{
+class   MatManager : public Singleton<MatManager>{
 public:
     //! @brief  Find material by id.
     //!

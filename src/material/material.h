@@ -40,20 +40,26 @@ public:
     //! @brief      Parse scattering event from the material shader.
     //!
     //! @param      se              Scattering event to be returned.
-    void    UpdateScatteringEvent( ScatteringEvent& se ) const;
+    void        UpdateScatteringEvent( ScatteringEvent& se ) const;
+
+    //! @brief      Evaluate translucency.
+    //!
+    //! @param      intersection    The intersection.
+    //! @return                     The transparency at the intersection.
+    Spectrum    EvaluateTransparency( const Intersection& intersection ) const;
 
     //! @brief  Serialization interface. Loading data from stream.
     //!
     //! Serialize the material. Loading from an IStreamBase, which could be coming from file, memory or network.
     //!
     //! @param  stream      Input stream for data.
-    void    Serialize(IStreamBase& stream) override;
+    void        Serialize(IStreamBase& stream) override;
 
     //! @brief  Build shader in OSL.
     //!
     //! @param  shadingSys      Open-Shading-Language shading system.
     //! @return                 Whether the shader is created successfully.
-    bool    BuildMaterial();
+    bool        BuildMaterial();
 
     //! @brief  Get material ID.
     //!
@@ -87,4 +93,6 @@ private:
 
     /**< OSL device shader. */
     OSL::ShaderGroupRef             m_shader = nullptr;
+
+    bool                            m_hasTransparentNode = false;
 };

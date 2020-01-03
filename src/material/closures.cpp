@@ -55,6 +55,10 @@ namespace {
         Closure_Base() = default;
         virtual ~Closure_Base() = default;
         virtual void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se ) const = 0;
+
+        virtual Spectrum EvaluateOcclusion( const ClosureComponent* comp, const OSL::Color3& w ) const{
+            return WHITE_SPECTRUM;
+        }
     };
 
     static std::vector<std::unique_ptr<Closure_Base>>   g_closures(CLOSURE_CNT);
@@ -655,6 +659,10 @@ namespace {
             const auto& params = *comp->as<Transparent::Params>();
             se.AddBxdf(SORT_MALLOC(Transparent)(params, w * comp->w));
         }
+
+        Spectrum EvaluateOcclusion( const ClosureComponent* comp, const OSL::Color3& w ) const override{
+            return w;
+        }
     };
 }
 
@@ -713,4 +721,30 @@ void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , Sca
             g_closures[comp->id]->Process(comp, w * comp->w , se);
         }
     }
+}
+
+Spectrum ProcessOcclusion(const OSL::ClosureColor* closure, const OSL::Color3& w ){
+    if (!closure)
+        return 0.0f;
+
+    Spectrum occlusion = 0.0f;
+    switch (closure->id) {
+        case ClosureColor::MUL: {
+            Color3 cw = w * closure->as_mul()->weight;
+            occlusion += ProcessOcclusion(closure->as_mul()->closure, cw );
+            break;
+        }
+        case ClosureColor::ADD: {
+            occlusion += ProcessOcclusion(closure->as_add()->closureA, w );
+            occlusion += ProcessOcclusion(closure->as_add()->closureB, w );
+            break;
+        }
+        default: {
+            const ClosureComponent* comp = closure->as_comp();
+            sAssert(comp->id >= 0 && comp->id < CLOSURE_CNT, MATERIAL);
+            sAssert(g_closures[comp->id] != nullptr, MATERIAL);
+            occlusion += g_closures[comp->id]->EvaluateOcclusion(comp, w * comp->w);
+        }
+    }
+    return occlusion;
 }

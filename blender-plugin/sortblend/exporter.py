@@ -666,11 +666,17 @@ def export_materials(scene, fs):
         fs.serialize( compact_material_name )
         logD( 'Exporting material %s.' % compact_material_name )
 
+        # whether the material has transparent node
+        has_transparent_node = False
+
         # collect node count
-        mat_nodes = []          # resulting nodes
         mat_connections = []    # connections between nodes
         visited = set()         # prevent a node to be serialized twice
         def collect_node_count(mat_node, visited, parent_node_stack, leaving_group = False):
+            if mat_node.isTransparentNode() is True:
+                nonlocal has_transparent_node
+                has_transparent_node = True
+
             parent_node , accumulative_name = parent_node_stack.pop()
             parent_node_stack.append( ( parent_node , accumulative_name ) )
 
@@ -738,6 +744,7 @@ def export_materials(scene, fs):
 
         fs.serialize( '' )
         fs.serialize( 'verification_string' )
+        fs.serialize( bool(has_transparent_node) )
 
         # serialize this material
         fs.serialize( len( mat_connections ) )
