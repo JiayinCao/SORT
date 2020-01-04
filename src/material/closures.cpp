@@ -57,7 +57,7 @@ namespace {
         virtual void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se ) const = 0;
 
         virtual Spectrum EvaluateOcclusion( const ClosureComponent* comp, const OSL::Color3& w ) const{
-            return WHITE_SPECTRUM;
+            return w;
         }
     };
 
@@ -661,7 +661,7 @@ namespace {
         }
 
         Spectrum EvaluateOcclusion( const ClosureComponent* comp, const OSL::Color3& w ) const override{
-            return w;
+            return 0.0f;
         }
     };
 }
@@ -730,7 +730,7 @@ Spectrum ProcessOcclusion(const OSL::ClosureColor* closure, const OSL::Color3& w
     Spectrum occlusion = 0.0f;
     switch (closure->id) {
         case ClosureColor::MUL: {
-            Color3 cw = w * closure->as_mul()->weight;
+            const auto cw = w * closure->as_mul()->weight;
             occlusion += ProcessOcclusion(closure->as_mul()->closure, cw );
             break;
         }

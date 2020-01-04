@@ -74,6 +74,16 @@ public:
         return GetIntersect( r , nullptr );
     }
 
+    //! @brief  Evaluate attenuation along a ray segment.
+    //!
+    //! This function just returned the attenuation of the first intersection. It is not responsible for evaluating all attenuations
+    //! along the ray.
+    //!
+    //! @param r            The ray to be tested. Its origin will be updated upon intersection.
+    //! @param attenuation  The occlusion along the ray.
+    //! @return             Whether there is an intersection along the ray.
+    bool         GetAttenuation( Ray& r , Spectrum& attenuation ) const;
+
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
     //! This is a specific interface designed for SSS during disk ray casting. Without this interface, the algorithm has to use the

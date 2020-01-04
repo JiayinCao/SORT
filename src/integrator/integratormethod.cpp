@@ -40,13 +40,15 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
     const auto li = light->sample_l( ip , &ls , wi , 0 , &light_pdf , 0 , 0 , visibility );
     if( light_pdf > 0.0f && !li.IsBlack() ){
         Spectrum f = se.Evaluate_BSDF( wo , wi );
-        if( !f.IsBlack() && visibility.IsVisible() ){
+
+        const auto attenuation = visibility.GetAttenuation();
+        if( !f.IsBlack() && !attenuation.IsBlack() ){
             if( light->IsDelta() ){
-                radiance += li * f / light_pdf;
+                radiance += attenuation * li * f / light_pdf;
             }else{
                 bsdf_pdf = se.Pdf_BSDF( wo , wi );
                 const auto weight = MisFactor( light_pdf , bsdf_pdf );
-                radiance = li * f * weight / light_pdf;
+                radiance = attenuation * li * f * weight / light_pdf;
             }
         }
     }
@@ -70,8 +72,9 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
                 return radiance;
 
             visibility.ray = Ray( ip.intersect , wi , 0 , 0.001f , _ip.t - 0.001f );
-            if( !li.IsBlack() && visibility.IsVisible() )
-                radiance += li * f * weight / bsdf_pdf;
+            const auto attenuation = visibility.GetAttenuation();
+            if( !li.IsBlack() && !attenuation.IsBlack() )
+                radiance += attenuation * li * f * weight / bsdf_pdf;
         }
     }
 
@@ -95,8 +98,10 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Interse
     const auto li = light->sample_l( inter , &ls , wi , 0 , &light_pdf , 0 , 0 , visibility );
     if( light_pdf > 0.0f && !li.IsBlack() ){
         Spectrum f = se.Evaluate_BSDF( wo , wi );
-        if( !f.IsBlack() && visibility.IsVisible() ){
-            radiance += li * f / light_pdf / light_pick_pdf;
+
+        const auto attenuation = visibility.GetAttenuation();
+        if( !f.IsBlack() && !attenuation.IsBlack() ){
+            radiance += attenuation * li * f / light_pdf / light_pick_pdf;
         }
     }
     return radiance;

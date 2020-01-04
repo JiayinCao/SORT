@@ -121,7 +121,8 @@ Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const Intersection& in
     shaderglobals.dPdu = Vec3( 0.0f );
     g_shadingsys->execute(g_contexts[ ThreadId() ], *shader, shaderglobals);
 
-    return 1.0f - ProcessOcclusion( shaderglobals.Ci , Color3( 1.0f ) );
+    const auto occlusion = ProcessOcclusion( shaderglobals.Ci , Color3( 1.0f ) );
+    return Spectrum( 1.0f - occlusion ).Clamp( 0.0f , 1.0f );
 }
 
 void ShadingContextWrapper::DestroyContext(OSL::ShadingSystem* shadingsys) {

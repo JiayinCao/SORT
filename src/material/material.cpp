@@ -102,7 +102,7 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
 Spectrum Material::EvaluateTransparency( const Intersection& intersection ) const {
     // this should happen most of the time.
     if( !m_hasTransparentNode )
-        return WHITE_SPECTRUM;
+        return 0.0f;
 
     return ::EvaluateTransparency( m_shader.get() , intersection );
 }

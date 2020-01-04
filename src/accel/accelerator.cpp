@@ -36,3 +36,21 @@ void Accelerator::computeBBox(){
     m_bbox.m_Min -= delta;
     m_bbox.m_Max += delta;
 }
+
+bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
+    Intersection intersection;
+    if( !GetIntersect( r , &intersection ) )
+        return false;
+
+    sAssert( nullptr != intersection.primitive , SPATIAL_ACCELERATOR );
+
+    const Material* material = intersection.primitive->GetMaterial();
+
+    sAssert( nullptr != material , SPATIAL_ACCELERATOR );
+
+    r.m_Ori = intersection.intersect;
+
+    attenuation = material->EvaluateTransparency( intersection );
+
+    return true;
+}

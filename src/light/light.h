@@ -44,6 +44,15 @@ public:
         return !m_scene.IsOccluded( ray );
     }
 
+    //! @brief  Get occlusion along the ray.
+    //!
+    //! Get attenuation along the light.
+    //!
+    //! @return         The attenuation along the ray.
+    Spectrum    GetAttenuation() const {
+        return m_scene.GetAttenuation( ray );
+    }
+
     /**< The ray to be evaluated. */
     Ray ray;
 

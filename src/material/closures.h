@@ -60,6 +60,10 @@ void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , Sca
 
 //! @brief  Evaluate occlusion in OSL shader.
 //!
+//! NOTE, normally in real time rendering, occlusion, especially ambient occlusion, with the value of 0.0 means fully occluded.
+//! This function works exactly the opposite, the value returned is the spectrum dependent value of occlusion, meaning 0 is fully
+//! unoccluded.
+//!
 //! @param  closure         The closure tree in the osl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inderits from the higher level tree nodes.
 //! @return                 The occlusion of the intersection.

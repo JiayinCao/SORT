@@ -89,6 +89,24 @@ bool Scene::IsOccluded(const Ray& r) const{
     return g_accelerator->IsOccluded(r);
 }
 
+Spectrum Scene::GetAttenuation( const Ray& const_ray ) const{
+    auto ray = const_ray;
+
+    Spectrum attenuation( 1.0f );
+    while( !attenuation.IsBlack() ){
+        Spectrum att;
+        if( !g_accelerator->GetAttenuation(ray, att) )
+            break;
+
+        if( att.IsBlack() )
+            return 0.0f;
+
+        attenuation *= att;
+    }
+
+    return attenuation;
+}
+
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
     // no brute force support in BSSRDF
     if( g_accelerator != nullptr )

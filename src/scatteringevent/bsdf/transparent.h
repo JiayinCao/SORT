@@ -23,7 +23,7 @@
 //! @brief  Transparent BXDF
 /**
  * Transparent material is a very special material that pass through lights without any attenuation
- * if basecolor is (1,1,1). Essentially, this is a Dirac Delta function. Its existance is for masking 
+ * if attenuation is (1,1,1). Essentially, this is a Dirac Delta function. Its existance is for masking 
  * geometries and serving as proxy invisible geometries for volumes.
  */
 class Transparent : public Bxdf{
