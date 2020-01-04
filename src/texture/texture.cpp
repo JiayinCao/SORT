@@ -102,3 +102,15 @@ Spectrum Texture::GetColorFromUV( float u , float v ) const{
     return  GetColor(iu, iv) * (1.0f - _fu) * (1.0f - _fv) + GetColor(iu + 1, iv) * _fu * (1.0f - _fv) +
             GetColor(iu, iv + 1) * (1.0f - _fu) * _fv + GetColor(iu + 1, iv + 1) * _fu * _fv;
 }
+
+float Texture::GetAlphaFromtUV( float u , float v ) const{
+    const auto fu = u * m_iTexWidth - 0.5f;
+    const auto fv = v * m_iTexHeight - 0.5f;
+    const auto iu = (int)( fu );
+    const auto iv = (int)( fv );
+    const auto _fu = fu - floor(fu);
+    const auto _fv = fv - floor(fv);
+
+    return  GetAlpha(iu, iv) * (1.0f - _fu) * (1.0f - _fv) + GetAlpha(iu + 1, iv) * _fu * (1.0f - _fv) +
+            GetAlpha(iu, iv + 1) * (1.0f - _fu) * _fv + GetAlpha(iu + 1, iv + 1) * _fu * _fv;
+}

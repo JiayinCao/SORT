@@ -36,6 +36,8 @@ public:
     // result   :   spectrum value in the position
     Spectrum GetColor( int x , int y ) const override;
 
+    float GetAlpha( int x , int y ) const override;
+
     // whether the image is valid
     bool IsValid() override { return (bool)m_pMemory; }
 
@@ -45,7 +47,8 @@ public:
 private:
     class ImgMemory{
     public:
-        std::unique_ptr<Spectrum[]> m_ImgMem;
+        std::unique_ptr<Spectrum[]>     m_ImgMem = nullptr;   /**< RGB Channels. */
+        std::unique_ptr<float[]>        m_Alpha  = nullptr;   /**< Alpha Channel. */
     };
 
     // array saving the color of image

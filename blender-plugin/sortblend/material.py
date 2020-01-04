@@ -2075,11 +2075,12 @@ class SORTNodeImage(SORTShadingNode):
                                   vector UVCoordinate = @ ,
                                   float  UVTiling = @ ,
                                   output color Result = color( 0.0 , 0.0 , 0.0 ) ,
+                                  output float Alpha = 1.0 ,
                                   output float Red = 0.0 ,
                                   output float Green = 0.0 ,
                                   output float Blue = 0.0 ){
             vector scaledUV = UVCoordinate * UVTiling;
-            Result = texture( Filename , scaledUV[0] , scaledUV[1] );
+            Result = texture( Filename , scaledUV[0] , scaledUV[1] , "alpha" , Alpha);
             Red = Result[0];
             Green = Result[1];
             Blue = Result[2];
@@ -2090,11 +2091,12 @@ class SORTNodeImage(SORTShadingNode):
                                  vector UVCoordinate = @ ,
                                  float  UVTiling = @ ,
                                  output color Result = color( 0.0 , 0.0 , 0.0 ) ,
+                                 output float Alpha = 1.0 ,
                                  output float Red = 0.0 ,
                                  output float Green = 0.0 ,
                                  output float Blue = 0.0 ){
             vector scaledUV = UVCoordinate * UVTiling;
-            color gamma_color = texture( Filename , scaledUV[0] , scaledUV[1] );
+            color gamma_color = texture( Filename , scaledUV[0] , scaledUV[1] , "missingalpha" , 1.0 , "alpha" , Alpha );
             Result = pow( gamma_color , 2.2 );
             Red = Result[0];
             Green = Result[1];
@@ -2106,11 +2108,12 @@ class SORTNodeImage(SORTShadingNode):
                                  vector UVCoordinate = @ ,
                                  float  UVTiling = @ ,
                                  output color Result = color( 0.0 , 0.0 , 0.0 ) ,
+                                 output float Alpha = 1.0 ,
                                  output float Red = 0.0 ,
                                  output float Green = 0.0 ,
                                  output float Blue = 0.0 ){
             vector scaledUV = UVCoordinate * UVTiling;
-            color encoded_color = texture( Filename , scaledUV[0] , scaledUV[1] );
+            color encoded_color = texture( Filename , scaledUV[0] , scaledUV[1] , "missingalpha" , 1.0 , "alpha" , Alpha );
             Result = 2.0 * color( encoded_color[0] , encoded_color[2] , encoded_color[1] ) - 1.0;
             Red = Result[0];
             Green = Result[1];
@@ -2154,6 +2157,7 @@ class SORTNodeImage(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
         self.inputs.new( 'SORTNodeSocketAnyFloat' , 'UV Tiling' )
         self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
+        self.outputs.new( 'SORTNodeSocketFloat' , 'Alpha' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Red' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Green' )
         self.outputs.new( 'SORTNodeSocketFloat' , 'Blue' )

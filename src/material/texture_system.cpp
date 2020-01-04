@@ -16,6 +16,7 @@
  */
 
 #include "texture_system.h"
+#include "core/log.h"
 
 RendererServices::TextureHandle* SORTTextureSystem::get_texture_handle(OSL::ustring filename, Perthread *thread_info) {
     // Only process the texture if it has been seen before.
@@ -26,7 +27,8 @@ RendererServices::TextureHandle* SORTTextureSystem::get_texture_handle(OSL::ustr
 
         // load the texture from file
         ImageTexture*   sort_texture = m_TexturePool[std_filename].get();
-        sort_texture->LoadImageFromFile(std_filename);
+        if( !sort_texture->LoadImageFromFile(std_filename) )
+            slog( WARNING , MATERIAL , "Failed to load image %s." , filename.c_str() );
     }
 
     return (RendererServices::TextureHandle*)m_TexturePool[std_filename].get();
@@ -41,9 +43,15 @@ bool SORTTextureSystem::texture(TextureHandle *texture_handle, Perthread *thread
     float s, float t, float dsdx, float dtdx, float dsdy, float dtdy, int nchannels, float *result,
     float *dresultds , float *dresultdt ) {
     const auto* image_texture = (const ImageTexture*)texture_handle;
-    RGBSpectrum color = image_texture->GetColorFromUV(s, t);
+    const auto color = image_texture->GetColorFromUV(s, t);
     result[0] = color.r;
     result[1] = color.g;
     result[2] = color.b;
+
+    if( nchannels > 3 ){
+        const auto alpha = image_texture->GetAlphaFromtUV(s, t);
+        result[3] = alpha;
+    }
+
     return true;
 }

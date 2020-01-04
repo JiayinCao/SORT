@@ -52,8 +52,16 @@ public:
     // result   :   spectrum value in the position
     virtual Spectrum GetColor( int x , int y ) const = 0;
 
+    // get alpha, only certain image texture has alpha channel.
+    virtual float GetAlpha( int x , int y ) const {
+        return 1.0f;
+    }
+
     // get color from uv coordinate
     virtual Spectrum GetColorFromUV( float u , float v ) const;
+
+    // get alpha from uv
+    virtual float GetAlphaFromtUV( float u , float v ) const;
 
     // set texture coordinate filter mode
     void    SetTexCoordFilter( TEXCOORDFILTER mode );

@@ -473,7 +473,8 @@ def export_mesh(mesh, fs):
             primitive_cnt += 2
         else:
             # no other primitive supported in mesh
-            assert( False )
+            # assert( False )
+            log("Warning, there is unsupported geometry. The exported scene may be incomplete.")
 
     fs.serialize(SID('MeshVisual'))
     fs.serialize(bool(has_uv))

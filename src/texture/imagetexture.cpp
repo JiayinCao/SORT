@@ -40,6 +40,24 @@ Spectrum ImageTexture::GetColor( int x , int y ) const{
     return m_pMemory->m_ImgMem[ offset ];
 }
 
+float ImageTexture::GetAlpha( int x , int y ) const{
+    // if there is no image, just crash
+    sAssertMsg( m_pMemory != 0 , IMAGE , "Texture %s not loaded!" , m_Name.c_str() );
+
+    // in case of acquiring alpha value in a texture without this channel, 1.0 is returned by default.
+    if( nullptr == m_pMemory->m_Alpha )
+        return 1.0f;
+
+    // filter the texture coordinate
+    _texCoordFilter( x , y );
+
+    // get the offset
+    int offset = ( m_iTexHeight - 1 - y ) * m_iTexWidth + x;
+
+    // get the color
+    return m_pMemory->m_Alpha[ offset ];
+}
+
 // load image from file
 bool ImageTexture::LoadImageFromFile( const std::string& str ){
     static const std::regex exr_reg(".*\\.exr$", std::regex_constants::icase);
@@ -70,21 +88,36 @@ bool ImageTexture::LoadImageFromFile( const std::string& str ){
     stbi_ldr_to_hdr_gamma(1.0f);
     stbi_ldr_to_hdr_scale(1.0f);
 
-    auto channel = 0, desired_channel = 3;
-    float* data = stbi_loadf(m_Name.c_str(), &m_iTexWidth, &m_iTexHeight, &channel, desired_channel);
+    auto comp = 0;
+    float* data = stbi_loadf(m_Name.c_str(), &m_iTexWidth, &m_iTexHeight, &comp, STBI_rgb_alpha);
 
-    auto real_channel = std::min(desired_channel, channel);
-    if (data && real_channel) {
-        m_pMemory->m_ImgMem = std::make_unique<Spectrum[]>(m_iTexWidth*m_iTexHeight);
-        for (auto i = 0; i < m_iTexHeight; ++i) {
-            for (auto j = 0; j < m_iTexWidth; ++j) {
-                const auto k = i * m_iTexWidth + j;
+    if (data) {
+        if( comp == STBI_rgb || comp == STBI_rgb_alpha ){
+            m_pMemory->m_ImgMem = std::make_unique<Spectrum[]>(m_iTexWidth*m_iTexHeight);
+            for (auto i = 0; i < m_iTexHeight; ++i) {
+                for (auto j = 0; j < m_iTexWidth; ++j) {
+                    const auto k = i * m_iTexWidth + j;
 
-                auto& color = m_pMemory->m_ImgMem[i * m_iTexWidth + j];
+                    auto& color = m_pMemory->m_ImgMem[i * m_iTexWidth + j];
 
-                color.r = data[real_channel * k];
-                color.g = data[real_channel * k + 1];
-                color.b = data[real_channel * k + 2];
+                    color.r = data[4 * k];
+                    color.g = data[4 * k + 1];
+                    color.b = data[4 * k + 2];
+                }
+            }
+        }
+
+        // there is alpha channel in the texture.
+        if( comp == STBI_rgb_alpha ){
+            m_pMemory->m_Alpha = std::make_unique<float[]>(m_iTexWidth*m_iTexHeight);
+            for (auto i = 0; i < m_iTexHeight; ++i) {
+                for (auto j = 0; j < m_iTexWidth; ++j) {
+                    const auto k = i * m_iTexWidth + j;
+
+                    auto& alpha = m_pMemory->m_Alpha[i * m_iTexWidth + j];
+
+                    alpha = data[4 * k + 3];
+                }
             }
         }
 
