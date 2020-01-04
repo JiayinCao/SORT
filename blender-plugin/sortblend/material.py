@@ -2096,7 +2096,7 @@ class SORTNodeImage(SORTShadingNode):
                                  output float Green = 0.0 ,
                                  output float Blue = 0.0 ){
             vector scaledUV = UVCoordinate * UVTiling;
-            color gamma_color = texture( Filename , scaledUV[0] , scaledUV[1] , "missingalpha" , 1.0 , "alpha" , Alpha );
+            color gamma_color = texture( Filename , scaledUV[0] , scaledUV[1] , "alpha" , Alpha );
             Result = pow( gamma_color , 2.2 );
             Red = Result[0];
             Green = Result[1];
@@ -2113,7 +2113,7 @@ class SORTNodeImage(SORTShadingNode):
                                  output float Green = 0.0 ,
                                  output float Blue = 0.0 ){
             vector scaledUV = UVCoordinate * UVTiling;
-            color encoded_color = texture( Filename , scaledUV[0] , scaledUV[1] , "missingalpha" , 1.0 , "alpha" , Alpha );
+            color encoded_color = texture( Filename , scaledUV[0] , scaledUV[1] , "alpha" , Alpha );
             Result = 2.0 * color( encoded_color[0] , encoded_color[2] , encoded_color[1] ) - 1.0;
             Red = Result[0];
             Green = Result[1];
