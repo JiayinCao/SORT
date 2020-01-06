@@ -28,7 +28,7 @@
 // get color from image
 Spectrum ImageTexture::GetColor( int x , int y ) const{
     // if there is no image, just crash
-    sAssertMsg( m_pMemory != 0 && m_pMemory->m_ImgMem != 0 , IMAGE , "Texture %s not loaded!" , m_Name.c_str() );
+    sAssertMsg( m_pMemory != nullptr && m_pMemory->m_ImgMem != nullptr , IMAGE , "Texture %s not loaded!" , m_Name.c_str() );
 
     // filter the texture coordinate
     _texCoordFilter( x , y );
@@ -89,10 +89,10 @@ bool ImageTexture::LoadImageFromFile( const std::string& str ){
     stbi_ldr_to_hdr_scale(1.0f);
 
     auto comp = 0;
-    float* data = stbi_loadf(m_Name.c_str(), &m_iTexWidth, &m_iTexHeight, &comp, STBI_rgb_alpha);
+    const auto* data = stbi_loadf(m_Name.c_str(), &m_iTexWidth, &m_iTexHeight, &comp, STBI_rgb_alpha);
 
     if (data) {
-        if( comp == STBI_rgb || comp == STBI_rgb_alpha ){
+        if( m_iTexWidth > 0 && m_iTexHeight > 0 ){
             m_pMemory->m_ImgMem = std::make_unique<Spectrum[]>(m_iTexWidth*m_iTexHeight);
             for (auto i = 0; i < m_iTexHeight; ++i) {
                 for (auto j = 0; j < m_iTexWidth; ++j) {
