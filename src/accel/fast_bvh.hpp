@@ -439,6 +439,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
     return intersect && intersect->primitive;
 }
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
 bool  Fbvh::IsOccluded(const Ray& ray) const{
     // std::stack is by no means an option here due to its overhead under the hood.
     using Fbvh_Node_Ptr = Fbvh_Node*;
@@ -588,6 +589,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
     }
     return false;
 }
+#endif
 
 void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
     // std::stack is by no means an option here due to its overhead under the hood.

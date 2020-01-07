@@ -41,6 +41,17 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
     if( light_pdf > 0.0f && !li.IsBlack() ){
         Spectrum f = se.Evaluate_BSDF( wo , wi );
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
+        if( !f.IsBlack() && visibility.IsVisible() ){
+            if( light->IsDelta() ){
+                radiance += li * f / light_pdf;
+            }else{
+                bsdf_pdf = se.Pdf_BSDF( wo , wi );
+                const auto weight = MisFactor( light_pdf , bsdf_pdf );
+                radiance = li * f * weight / light_pdf;
+            }
+        }
+#else
         const auto attenuation = visibility.GetAttenuation();
         if( !f.IsBlack() && !attenuation.IsBlack() ){
             if( light->IsDelta() ){
@@ -51,6 +62,7 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
                 radiance = attenuation * li * f * weight / light_pdf;
             }
         }
+#endif
     }
 
     if( !light->IsDelta() ){
@@ -72,9 +84,14 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
                 return radiance;
 
             visibility.ray = Ray( ip.intersect , wi , 0 , 0.001f , _ip.t - 0.001f );
+#ifndef ENABLE_TRANSPARENT_SHADOW
+            if( !li.IsBlack() && visibility.IsVisible() )
+                radiance += li * f * weight / bsdf_pdf;
+#else
             const auto attenuation = visibility.GetAttenuation();
             if( !li.IsBlack() && !attenuation.IsBlack() )
                 radiance += attenuation * li * f * weight / bsdf_pdf;
+#endif
         }
     }
 
@@ -99,10 +116,15 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Interse
     if( light_pdf > 0.0f && !li.IsBlack() ){
         Spectrum f = se.Evaluate_BSDF( wo , wi );
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
+        if( !f.IsBlack() && visibility.IsVisible() )
+            radiance += li * f / light_pdf / light_pick_pdf;
+#else
         const auto attenuation = visibility.GetAttenuation();
         if( !f.IsBlack() && !attenuation.IsBlack() ){
             radiance += attenuation * li * f / light_pdf / light_pick_pdf;
         }
+#endif
     }
     return radiance;
 }

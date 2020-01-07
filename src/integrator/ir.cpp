@@ -154,8 +154,14 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
             Visibility vis(scene);
             vis.ray = Ray( it->intersect.intersect , n_delta , 0 , 0.001f , len - 0.001f );
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
             if( vis.IsVisible() )
                 indirectIllum += contr;
+#else
+            const auto attenuation = vis.GetAttenuation();
+            if( !attenuation.IsBlack() )
+                indirectIllum += contr * attenuation;
+#endif
         }
 
         ++it;

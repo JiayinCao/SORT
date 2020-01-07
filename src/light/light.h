@@ -34,6 +34,7 @@ public:
     //! @param  scene   The current rendering scene.
     Visibility( const Scene& scene ):m_scene(scene){}
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief  Whether there is a blocker.
     //!
     //! The ray may not shoot infinitely far. Sometimes we only need a ray to be shoot along
@@ -43,7 +44,7 @@ public:
     bool    IsVisible() const{
         return !m_scene.IsOccluded( ray );
     }
-
+#else
     //! @brief  Get occlusion along the ray.
     //!
     //! Get attenuation along the light.
@@ -52,6 +53,7 @@ public:
     Spectrum    GetAttenuation() const {
         return m_scene.GetAttenuation( ray );
     }
+#endif
 
     /**< The ray to be evaluated. */
     Ray ray;

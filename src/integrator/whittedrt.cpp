@@ -67,9 +67,15 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
                 it++;
                 continue;
             }
-            bool visible = visibility.IsVisible();
+#ifndef ENABLE_TRANSPARENT_SHADOW
+            const auto visible = visibility.IsVisible();
             if( visible )
                 t += (ld * f / pdf);
+#else
+            const auto attenuation = visibility.GetAttenuation();
+            if( !attenuation.IsBlack() )
+                t += (ld * f * attenuation / pdf );
+#endif
         }
         it++;
     }

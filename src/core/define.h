@@ -61,3 +61,14 @@
 // Blending a red diffuse and Cyan will also results in the same firefly problem. Further investigation needs to be
 // done before enabling this feature.
 // #define SSS_REPLACE_WITH_LAMBERT
+
+// By default, transparent shadow is enabled. Meaning transparent material node will cast transparent shadow.
+// This is not exactly physically based since the introduction of semi-transparent feature is not strictly physically
+// based from the very beginning. Disable transparent shadow means that transparent geometry will also cast shadow
+// even if it is fully transparent. I could have implemented extra optimization to avoid casting shadows for fully
+// transparent geometry at the cost of introducing more complex design. However, in order to keep it simple and
+// maintainable by myself, I would skip it.
+// Performance wise, this feature does introduce quite some extra cost since all interersection tests need to also
+// evalaute interestection results, like position, normal, uv, basically everything that is used in shader evaluation,
+// when transparent material is present.
+#define ENABLE_TRANSPARENT_SHADOW

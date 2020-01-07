@@ -124,6 +124,7 @@ public:
     //!                     it returns false.
     bool    GetIntersect( const Ray& r , Intersection* intersect ) const override;
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.
     //!
     //! Instead of merging the interface with 'GetIntersect', this is a separate interface purely for occlusion detection.
@@ -133,6 +134,7 @@ public:
     //! @param r            The ray to be tested.
     //! @return             Whether the ray is occluded by anything.
     bool    IsOccluded(const Ray& r) const override;
+#endif
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!

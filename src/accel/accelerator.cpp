@@ -37,6 +37,7 @@ void Accelerator::computeBBox(){
     m_bbox.m_Max += delta;
 }
 
+#ifdef ENABLE_TRANSPARENT_SHADOW
 bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
     Intersection intersection;
     if( !GetIntersect( r , &intersection ) )
@@ -54,3 +55,4 @@ bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
 
     return true;
 }
+#endif

@@ -99,10 +99,3 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
         se.AddBxdf(SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
 }
 
-Spectrum Material::EvaluateTransparency( const Intersection& intersection ) const {
-    // this should happen most of the time.
-    if( !m_hasTransparentNode )
-        return 0.0f;
-
-    return ::EvaluateTransparency( m_shader.get() , intersection );
-}

@@ -61,6 +61,7 @@ public:
     //!                     it returns false.
     virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.
     //!
     //! Instead of merging the interface with 'GetIntersect', this is a separate interface purely for occlusion detection.
@@ -73,7 +74,7 @@ public:
         // This default implementation will be removed once every spatial data structure has their own implementation.
         return GetIntersect( r , nullptr );
     }
-
+#else
     //! @brief  Evaluate attenuation along a ray segment.
     //!
     //! This function just returned the attenuation of the first intersection. It is not responsible for evaluating all attenuations
@@ -83,6 +84,7 @@ public:
     //! @param attenuation  The occlusion along the ray.
     //! @return             Whether there is an intersection along the ray.
     bool         GetAttenuation( Ray& r , Spectrum& attenuation ) const;
+#endif
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!

@@ -267,12 +267,16 @@ Spectrum BidirPathTracing::_ConnectVertices( const BDPT_Vertex& p0 , const BDPT_
     if( li.IsBlack() )
         return li;
 
-    Visibility visible( scene );
-    visible.ray = Ray( p1.p , n_delta  , 0 , 0.001f , delta.Length() - 0.001f );
-    if( visible.IsVisible() == false )
+    Visibility visibility( scene );
+    visibility.ray = Ray( p1.p , n_delta  , 0 , 0.001f , delta.Length() - 0.001f );
+#ifndef ENABLE_TRANSPARENT_SHADOW
+    if( visibility.IsVisible() == false )
         return 0.0f;
-
     return li;
+#else
+    const auto attenuation = visibility.GetAttenuation();
+    return attenuation.IsBlack() ? Spectrum( 0.0f ) : li * attenuation;
+#endif
 }
 
 // connect light sample
@@ -298,8 +302,14 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
     if (li.IsBlack())
         return 0.0f;
 
-    if (visibility.IsVisible() == false)
+#ifndef ENABLE_TRANSPARENT_SHADOW
+    if( visibility.IsVisible() == false )
         return 0.0f;
+#else
+    const auto attenuation = visibility.GetAttenuation();
+    if( attenuation.IsBlack() )
+        return 0.0f;
+#endif
 
     const auto eye_bsdf_pdfw = eye_vertex.se->Pdf_BSDF( eye_vertex.wi , wi ) * eye_vertex.rr;
     const auto eye_bsdf_rev_pdfw = eye_vertex.se->Pdf_BSDF( wi , eye_vertex.wi ) * eye_vertex.rr;
@@ -309,7 +319,11 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
 
     const auto weight = (float)(1.0f / (mis0 + mis1 + 1.0f));
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
     return li * weight;
+#else
+    return li * weight * attenuation;
+#endif
 }
 
 void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len , const Light* light , const Scene& scene ) const{
@@ -318,13 +332,13 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
 
     auto camera = scene.GetCamera();
 
-    Visibility visible( scene );
+    Visibility visibility( scene );
     float camera_pdfA;
     float camera_pdfW;
     float cosAtCamera;
     Spectrum we;
     Point eye_point;
-    const auto coord = camera->GetScreenCoord(light_vertex.inter, &camera_pdfW, &camera_pdfA , cosAtCamera , &we , &eye_point , &visible );
+    const auto coord = camera->GetScreenCoord(light_vertex.inter, &camera_pdfW, &camera_pdfA , cosAtCamera , &we , &eye_point , &visibility );
 
     const auto delta = light_vertex.inter.intersect - eye_point;
     const auto invSqrLen = 1.0f / delta.SquaredLength();
@@ -343,12 +357,22 @@ void BidirPathTracing::_ConnectCamera(const BDPT_Vertex& light_vertex, int len ,
     if( bsdf_value.IsBlack() )
         return;
 
-    if( visible.IsVisible() == false )
+#ifndef ENABLE_TRANSPARENT_SHADOW
+    if( visibility.IsVisible() == false )
         return;
+#else
+    const auto attenuation = visibility.GetAttenuation();
+    if( attenuation.IsBlack() )
+        return;
+#endif
 
     const auto total_pixel = (float)(g_resultResollutionWidth * g_resultResollutionHeight);
     const auto gterm = cosAtCamera * invSqrLen;    // the other cos in the g-term is hidden in the 'bsdf_value'.
     auto radiance = light_vertex.throughput * bsdf_value * we * gterm / (float)( sample_per_pixel * total_pixel * camera_pdfA );
+
+#ifdef ENABLE_TRANSPARENT_SHADOW
+    radiance *= attenuation;
+#endif
 
     if( !light_tracing_only ){
         const float lightvert_pdfA = camera_pdfW * absDot( light_vertex.n, n_delta ) * invSqrLen ;

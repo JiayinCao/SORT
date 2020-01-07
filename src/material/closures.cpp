@@ -56,7 +56,7 @@ namespace {
         virtual ~Closure_Base() = default;
         virtual void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se ) const = 0;
 
-        virtual Spectrum EvaluateOcclusion( const ClosureComponent* comp, const OSL::Color3& w ) const{
+        virtual Spectrum EvaluateOpacity( const ClosureComponent* comp, const OSL::Color3& w ) const{
             return w;
         }
     };
@@ -660,7 +660,7 @@ namespace {
             se.AddBxdf(SORT_MALLOC(Transparent)(params, w * comp->w));
         }
 
-        Spectrum EvaluateOcclusion( const ClosureComponent* comp, const OSL::Color3& w ) const override{
+        Spectrum EvaluateOpacity( const ClosureComponent* comp, const OSL::Color3& w ) const override{
             return 0.0f;
         }
     };
@@ -723,7 +723,7 @@ void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , Sca
     }
 }
 
-Spectrum ProcessOcclusion(const OSL::ClosureColor* closure, const OSL::Color3& w ){
+Spectrum ProcessOpacity(const OSL::ClosureColor* closure, const OSL::Color3& w ){
     if (!closure)
         return 0.0f;
 
@@ -731,19 +731,19 @@ Spectrum ProcessOcclusion(const OSL::ClosureColor* closure, const OSL::Color3& w
     switch (closure->id) {
         case ClosureColor::MUL: {
             const auto cw = w * closure->as_mul()->weight;
-            occlusion += ProcessOcclusion(closure->as_mul()->closure, cw );
+            occlusion += ProcessOpacity(closure->as_mul()->closure, cw );
             break;
         }
         case ClosureColor::ADD: {
-            occlusion += ProcessOcclusion(closure->as_add()->closureA, w );
-            occlusion += ProcessOcclusion(closure->as_add()->closureB, w );
+            occlusion += ProcessOpacity(closure->as_add()->closureA, w );
+            occlusion += ProcessOpacity(closure->as_add()->closureB, w );
             break;
         }
         default: {
             const ClosureComponent* comp = closure->as_comp();
             sAssert(comp->id >= 0 && comp->id < CLOSURE_CNT, MATERIAL);
             sAssert(g_closures[comp->id] != nullptr, MATERIAL);
-            occlusion += g_closures[comp->id]->EvaluateOcclusion(comp, w * comp->w);
+            occlusion += g_closures[comp->id]->EvaluateOpacity(comp, w * comp->w);
         }
     }
     return occlusion;

@@ -21,6 +21,7 @@
 #include <string>
 #include <OSL/oslexec.h>
 #include "stream/stream.h"
+#include "osl_system.h"
 
 class Intersection;
 class ScatteringEvent;
@@ -46,7 +47,12 @@ public:
     //!
     //! @param      intersection    The intersection.
     //! @return                     The transparency at the intersection.
-    Spectrum    EvaluateTransparency( const Intersection& intersection ) const;
+    SORT_FORCEINLINE Spectrum    EvaluateTransparency( const Intersection& intersection ) const{
+        // this should happen most of the time in the absence of transparent node.
+        if( !m_hasTransparentNode )
+            return 0.0f;
+        return ::EvaluateTransparency( m_shader.get() , intersection );
+    }
 
     //! @brief  Serialization interface. Loading data from stream.
     //!

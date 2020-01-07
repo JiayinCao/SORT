@@ -81,6 +81,7 @@ bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const{
     return g_accelerator->GetIntersect( r , intersect );
 }
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
 bool Scene::IsOccluded(const Ray& r) const{
     // brute force intersection test if there is no accelerator
     if( UNLIKELY( g_accelerator == nullptr ) )
@@ -88,7 +89,7 @@ bool Scene::IsOccluded(const Ray& r) const{
 
     return g_accelerator->IsOccluded(r);
 }
-
+#else
 Spectrum Scene::GetAttenuation( const Ray& const_ray ) const{
     auto ray = const_ray;
 
@@ -106,6 +107,7 @@ Spectrum Scene::GetAttenuation( const Ray& const_ray ) const{
 
     return attenuation;
 }
+#endif
 
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
     // no brute force support in BSSRDF

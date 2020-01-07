@@ -52,6 +52,7 @@ public:
     //! @return             Whether there is an intersection between the ray and the scene.
     bool    GetIntersect( const Ray& r , Intersection* intersect ) const;
 
+#ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief  This is a dedicated interface for detecting shadow rays.
     //!
     //! Instead of merging the interface with 'GetIntersect', this is a separate interface purely for occlusion detection.
@@ -61,7 +62,7 @@ public:
     //! @param r            The ray to be tested.
     //! @return             Whether the ray is occluded by anything.
     bool    IsOccluded(const Ray& r) const;
-
+#else
     //! @brief  Evaluate occlusion along a ray segment.
     //!
     //! This doesn't normaly happen in real life. But with the introduction of transaprent BSDF, it is innevitable to support
@@ -72,6 +73,7 @@ public:
     //! @param r            The ray to be tested.
     //! @return             The occlusion along the ray.
     Spectrum    GetAttenuation( const Ray& r ) const;
+#endif
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!

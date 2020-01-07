@@ -58,13 +58,9 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys);
 //! @param  se              The result scattering event.
 void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se );
 
-//! @brief  Evaluate occlusion in OSL shader.
-//!
-//! NOTE, normally in real time rendering, occlusion, especially ambient occlusion, with the value of 0.0 means fully occluded.
-//! This function works exactly the opposite, the value returned is the spectrum dependent value of occlusion, meaning 0 is fully
-//! unoccluded.
+//! @brief  Evaluate how opaque the surface is in the OSL shader.
 //!
 //! @param  closure         The closure tree in the osl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inderits from the higher level tree nodes.
-//! @return                 The occlusion of the intersection.
-Spectrum ProcessOcclusion(const OSL::ClosureColor* closure, const OSL::Color3& w );
+//! @return                 The opacity of the intersection.
+Spectrum ProcessOpacity(const OSL::ClosureColor* closure, const OSL::Color3& w );
