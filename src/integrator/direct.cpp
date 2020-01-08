@@ -37,7 +37,7 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& sc
     // get the intersection between the ray and the scene
     Intersection ip;
     // evaluate light directly
-    if( false == scene.GetIntersect( r , &ip ) )
+    if( false == scene.GetIntersect( r , ip ) )
         return scene.Le( r );
 
     auto li = ip.Le( -r.m_Dir );

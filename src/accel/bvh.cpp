@@ -118,10 +118,10 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned start , unsigned end ){
     SORT_STATS(sBvhPrimitiveCount += (StatsInt)node->pri_num);
 }
 
-bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect) const{
+bool Bvh::GetIntersect(const Ray& ray, Intersection& intersect) const{
     SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
-    SORT_STATS(sShadowRayCount += intersect != nullptr);
+    SORT_STATS(++sShadowRayCount);
 
     ray.Prepare();
 
@@ -129,10 +129,29 @@ bool Bvh::GetIntersect(const Ray& ray, Intersection* intersect) const{
     if (fmin < 0.0f)
         return false;
 
-    if (traverseNode(m_root.get(), ray, intersect, fmin))
-        return !intersect || intersect->primitive ;
+    if( traverseNode(m_root.get(), ray, &intersect, fmin) )
+        return nullptr != intersect.primitive;
     return false;
 }
+
+#ifndef ENABLE_TRANSPARENT_SHADOW
+bool Bvh::IsOccluded( const Ray& ray ) const{
+    SORT_PROFILE("Traverse Bvh");
+    SORT_STATS(++sRayCount);
+
+#ifdef ENABLE_TRANSPARENT_SHADOW
+    SORT_STATS(sShadowRayCount += intersect.query_shadow);
+#endif
+
+    ray.Prepare();
+
+    const auto fmin = Intersect(ray, m_bbox);
+    if (fmin < 0.0f)
+        return false;
+
+    return traverseNode(m_root.get(), ray, nullptr, fmin);
+}
+#endif
 
 bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const{
     if( fmin < 0.0f )

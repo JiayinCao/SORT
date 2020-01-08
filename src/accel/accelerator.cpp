@@ -40,7 +40,7 @@ void Accelerator::computeBBox(){
 #ifdef ENABLE_TRANSPARENT_SHADOW
 bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
     Intersection intersection;
-    if( !GetIntersect( r , &intersection ) )
+    if( !GetIntersect( r , intersection ) )
         return false;
 
     sAssert( nullptr != intersection.primitive , SPATIAL_ACCELERATOR );

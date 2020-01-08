@@ -70,23 +70,13 @@ bool Scene::LoadScene( IStreamBase& stream ){
     return true;
 }
 
-bool Scene::GetIntersect( const Ray& r , Intersection* intersect ) const{
-    if( intersect )
-        intersect->t = FLT_MAX;
-
-    // brute force intersection test if there is no accelerator
-    if( UNLIKELY( g_accelerator == nullptr ) )
-        return bruteforceIntersect( r , intersect );
-
+bool Scene::GetIntersect( const Ray& r , Intersection& intersect ) const{
+    intersect.t = FLT_MAX;
     return g_accelerator->GetIntersect( r , intersect );
 }
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
 bool Scene::IsOccluded(const Ray& r) const{
-    // brute force intersection test if there is no accelerator
-    if( UNLIKELY( g_accelerator == nullptr ) )
-        return bruteforceIntersect(r, nullptr);
-
     return g_accelerator->IsOccluded(r);
 }
 #else
@@ -113,20 +103,6 @@ void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const 
     // no brute force support in BSSRDF
     if( g_accelerator != nullptr )
         g_accelerator->GetIntersect( r , intersect , matID );
-}
-
-bool Scene::bruteforceIntersect( const Ray& r , Intersection* intersect ) const{
-    if( intersect ) intersect->t = FLT_MAX;
-    int n = (int)m_primitiveBuf.size();
-    for( int k = 0 ; k < n ; k++ ){
-        const auto found = m_primitiveBuf[k]->GetIntersect( r , intersect );
-        if( found && intersect == nullptr )
-            return true;
-    }
-
-    if( intersect == nullptr )
-        return false;
-    return intersect->t < r.m_fMax && ( intersect->primitive != 0 );
 }
 
 void Scene::_generatePriBuf(){

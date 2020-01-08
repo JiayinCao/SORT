@@ -303,7 +303,7 @@ Simd_BBox Fbvh::calcBoundingBoxSIMD(const Fast_Bvh_Node_Ptr* children) const {
 }
 #endif
 
-bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
+bool Fbvh::GetIntersect( const Ray& ray , Intersection& intersect ) const{
     // std::stack is by no means an option here due to its overhead under the hood.
     static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
     if (UNLIKELY(nullptr == bvh_stack))
@@ -317,7 +317,10 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 #endif
 
     SORT_STATS(++sRayCount);
-    SORT_STATS(sShadowRayCount += intersect != nullptr);
+
+#ifdef ENABLE_TRANSPARENT_SHADOW
+    SORT_STATS(sShadowRayCount += intersect.query_shadow);
+#endif
 
     ray.Prepare();
 
@@ -339,19 +342,19 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
 
         const auto node = top.first;
         const auto fmin = top.second;
-        if( intersect && intersect->t < fmin )
+        if( intersect.t < fmin )
             continue;
 
 #ifdef SIMD_BVH_IMPLEMENTATION
         // check if it is a leaf node
         if( 0 == node->child_cnt ){
             for( auto i = 0u ; i < node->tri_cnt ; ++i )
-                intersectTriangle_SIMD( ray , simd_ray , node->tri_list[i] , intersect );
+                intersectTriangle_SIMD( ray , simd_ray , node->tri_list[i] , &intersect );
             for( auto i = 0u ; i < node->line_cnt ; ++i )
-                intersectLine_SIMD( ray , simd_ray , node->line_list[i] , intersect );
+                intersectLine_SIMD( ray , simd_ray , node->line_list[i] , &intersect );
             if( UNLIKELY(!node->other_list.empty()) ){
                 for( auto i = 0u ; i < node->other_list.size() ; ++i )
-                    node->other_list[i]->GetIntersect( ray , intersect );
+                    node->other_list[i]->GetIntersect( ray , &intersect );
             }
             SORT_STATS(sIntersectionTest+=node->pri_cnt);
             continue;
@@ -409,7 +412,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
             const auto _end = _start + node->pri_cnt;
 
             for(auto i = _start ; i < _end ; i++ )
-                m_bvhpri[i].primitive->GetIntersect( ray , intersect );
+                m_bvhpri[i].primitive->GetIntersect( ray , &intersect );
             SORT_STATS(sIntersectionTest+=node->pri_cnt);
             continue;
         }
@@ -436,7 +439,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection* intersect ) const{
         }
 #endif
     }
-    return intersect && intersect->primitive;
+    return intersect.primitive;
 }
 
 #ifndef ENABLE_TRANSPARENT_SHADOW

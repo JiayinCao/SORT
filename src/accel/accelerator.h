@@ -47,10 +47,9 @@ public:
     //! @brief Get intersection between the ray and the primitive set using spatial data structure.
     //!
     //! It will return true if there is intersection between the ray and the primitive set.
-    //! In case of an existed intersection, if intersect is not empty, it will fill the
-    //! structure and return the nearest intersection.If intersect is empty, it will stop
-    //! as long as one intersection is found, it is not necessary to be the nearest one.
-    //! False will be returned if there is no intersection at all.
+    //! In case of an intersection, it will fill the structure and return the nearest intersection.
+    //! This intersection could possibly be a fully transparent intersection, it is up to the higher
+    //! level logic to handle (semi)transparency later.
     //!
     //! @param r            The input ray to be tested.
     //! @param intersect    The intersection result. If a nullptr pointer is provided, it
@@ -59,7 +58,7 @@ public:
     //!                     shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    virtual bool GetIntersect( const Ray& r , Intersection* intersect ) const = 0;
+    virtual bool GetIntersect( const Ray& r , Intersection& intersect ) const = 0;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.
@@ -70,10 +69,7 @@ public:
     //!
     //! @param r            The ray to be tested.
     //! @return             Whether the ray is occluded by anything.
-    virtual bool IsOccluded( const Ray& r ) const{
-        // This default implementation will be removed once every spatial data structure has their own implementation.
-        return GetIntersect( r , nullptr );
-    }
+    virtual bool IsOccluded( const Ray& r ) const = 0;
 #else
     //! @brief  Evaluate attenuation along a ray segment.
     //!

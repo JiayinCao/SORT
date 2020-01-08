@@ -31,6 +31,11 @@ public:
     // get the emissive
     Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;
 
+#ifdef ENABLE_TRANSPARENT_SHADOW
+    // whether the query is a shadow ray.
+    bool    query_shadow = false;
+#endif
+
     // the intersection point
     Point   intersect;
     // the shading normal

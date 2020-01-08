@@ -50,7 +50,7 @@ public:
     //! @param  r           The ray to be tested.
     //! @param  intersect   The result where the intersected information is to be returned.
     //! @return             Whether there is an intersection between the ray and the scene.
-    bool    GetIntersect( const Ray& r , Intersection* intersect ) const;
+    bool    GetIntersect( const Ray& r , Intersection& intersect ) const;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief  This is a dedicated interface for detecting shadow rays.
@@ -146,15 +146,6 @@ private:
 
     // bounding box for the scene
     mutable BBox    m_BBox;
-
-    //! @brief      Brute force solution to find intersection between a ray and the scene.
-    //!             This is generally an impractical solution to solve intersection test problem.
-    //!             It exists purely for reference purposes, any spatial data structure giving unbiased result is clearly wrong.
-    //!
-    //! @param  r               The ray to be tested against with.
-    //! @param  intersect       The result where the intersected information is to be returned.
-    //! @return                 Whether there is an intersection between the ray and the scene.
-    bool    bruteforceIntersect( const Ray& r , Intersection* intersect ) const;
 
     // generate primitive buffer
     void    _generatePriBuf();

@@ -145,10 +145,13 @@ void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container ){
         node->primitives.push_back( primitive );
 }
 
-bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
+bool OcTree::GetIntersect( const Ray& r , Intersection& intersect ) const{
     SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
-    SORT_STATS(sShadowRayCount += intersect == nullptr);
+
+#ifdef ENABLE_TRANSPARENT_SHADOW
+    SORT_STATS(sShadowRayCount += intersect.query_shadow);
+#endif
 
     r.Prepare();
 
@@ -157,13 +160,27 @@ bool OcTree::GetIntersect( const Ray& r , Intersection* intersect ) const{
     if( fmin < 0.0f )
         return false;
 
-    if( traverseOcTree( m_root.get() , r , intersect , fmin , fmax ) ){
-        if( !intersect )
-            return true;
-        return nullptr != intersect->primitive;
-    }
+    if( traverseOcTree( m_root.get() , r , &intersect , fmin , fmax ) )
+        return nullptr != intersect.primitive;
     return false;
 }
+
+#ifndef ENABLE_TRANSPARENT_SHADOW
+bool OcTree::IsOccluded( const Ray& r ) const{
+    SORT_PROFILE("Traverse OcTree");
+    SORT_STATS(++sRayCount);
+    SORT_STATS(++sShadowRayCount);
+
+    r.Prepare();
+
+    float fmax;
+    auto fmin = Intersect( r , m_bbox , &fmax );
+    if( fmin < 0.0f )
+        return false;
+
+    return traverseOcTree( m_root.get() , r , nullptr , fmin , fmax );
+}
+#endif
 
 bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const{
     constexpr auto   delta = 0.001f;

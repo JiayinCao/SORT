@@ -65,7 +65,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
         SORT_STATS(++sTotalLengthPathFromLight);
 
         BDPT_Vertex vert;
-        if (!scene.GetIntersect(wi, &vert.inter))
+        if (!scene.GetIntersect(wi, vert.inter))
             break;
 
         const auto distSqr = vert.inter.t * vert.inter.t;
@@ -137,7 +137,7 @@ Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Sc
 
         BDPT_Vertex vert;
         vert.depth = light_path_len;
-        if (!scene.GetIntersect(wi, &vert.inter)){
+        if (!scene.GetIntersect(wi, vert.inter)){
             // the following code needs to be modified
             if (scene.GetSkyLight() == light){
                 if( vert.depth <= max_recursive_depth && vert.depth > 0 ){

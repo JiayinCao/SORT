@@ -55,7 +55,7 @@ void InstantRadiosity::PreProcess( const Scene& scene )
             int current_depth = 0;
             Intersection intersect;
             while( true ){
-                if (false == scene.GetIntersect(ray, &intersect))
+                if (false == scene.GetIntersect(ray, intersect))
                     break;
 
                 VirtualLightSource ls;
@@ -107,7 +107,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
 
     // get intersection from camera ray
     Intersection ip;
-    if( false == scene.GetIntersect( r , &ip ) )
+    if( false == scene.GetIntersect( r , ip ) )
         return ignoreLe?0.0f:scene.Le( r );
 
     // evaluate light path less than two vertices

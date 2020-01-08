@@ -62,8 +62,7 @@ class SORTRenderData(bpy.types.PropertyGroup):
                           ("bvh", "BVH", "Binary Bounding Volume Hierarchy", 2),
                           ("KDTree", "SAH KDTree", "K-dimentional Tree", 3),
                           ("UniGrid", "Uniform Grid", "This is not quite practical in all cases.", 4),
-                          ("OcTree" , "OcTree" , "This is not quite practical in all cases." , 5),
-                          ("bruteforce", "No Accelerator", "Only use it in a scene with a handsful of primitives", 6) ]
+                          ("OcTree" , "OcTree" , "This is not quite practical in all cases." , 5)]
     accelerator_type_prop : bpy.props.EnumProperty(items=accelerator_types, name='Accelerator')
 
     # bvh properties

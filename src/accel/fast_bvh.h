@@ -110,19 +110,14 @@ public:
     //! @brief Get intersection between the ray and the primitive set using QBVH/OBVH.
     //!
     //! It will return true if there is intersection between the ray and the primitive set.
-    //! In case of an existed intersection, if intersect is not nullptr, it will fill the
-    //! structure and return the nearest intersection. If intersect is nullptr, it will stop
-    //! as long as one intersection is found, it is not necessary to be the nearest one.
-    //! False will be returned if there is no intersection at all.
+    //! In case of an intersection, it will fill the structure and return the nearest intersection.
+    //! This intersection could possibly be a fully transparent intersection, it is up to the higher
+    //! level logic to handle (semi)transparency later.
     //!
     //! @param r            The input ray to be tested.
-    //! @param intersect    The intersection result. If a nullptr pointer is provided, it
-    //!                     stops as long as it finds an intersection. It is faster than
-    //!                     the one with intersection information data and suitable for
-    //!                     shadow ray calculation.
-    //! @return             It will return true if there is an intersection, otherwise
-    //!                     it returns false.
-    bool    GetIntersect( const Ray& r , Intersection* intersect ) const override;
+    //! @param intersect    The intersection result.
+    //! @return             It will return true if there is an intersection, otherwise it returns false.
+    bool    GetIntersect( const Ray& r , Intersection& intersect ) const override;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.

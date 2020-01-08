@@ -56,7 +56,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
 
         // get the intersection between the ray and the scene if it's a light , accumulate the radiance and break
         Intersection inter;
-        if( !scene.GetIntersect( r , &inter ) ){
+        if( !scene.GetIntersect( r , inter ) ){
             if( 0 == local_bounce )
                 return !indirectOnly ? scene.Le( r ) : 0.0f;
             break;

@@ -41,11 +41,10 @@ public:
 
     //! @brief      Get intersection between the ray and the primitive set using KD-Tree.
     //!
-    //! It will return true if there is intersection between the ray and the primitive
-    //! set. In case of an existed intersection, if intersect is not empty, it will fill
-    //! the structure and return the nearest intersection.
-    //! If intersect is nullptr, it will stop as long as one intersection is found, it
-    //! is not necessary to be the nearest one.
+    //! It will return true if there is intersection between the ray and the primitive set.
+    //! In case of an intersection, it will fill the structure and return the nearest intersection.
+    //! This intersection could possibly be a fully transparent intersection, it is up to the higher
+    //! level logic to handle (semi)transparency later.
     //!
     //! @param r            The input ray to be tested.
     //! @param intersect    The intersection result. If a nullptr pointer is provided,
@@ -54,7 +53,19 @@ public:
     //!                     for shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    bool GetIntersect( const Ray& r , Intersection* intersect ) const override;
+    bool GetIntersect( const Ray& r , Intersection& intersect ) const override;
+
+#ifndef ENABLE_TRANSPARENT_SHADOW
+    //! @brief This is a dedicated interface for detecting shadow rays.
+    //!
+    //! Instead of merging the interface with 'GetIntersect', this is a separate interface purely for occlusion detection.
+    //! There is a need for it so that we can achieve better performance. There will be less branch in this interfaces and
+    //! most importantly the traversed node doesn't need to be sorted.
+    //!
+    //! @param r            The ray to be tested.
+    //! @return             Whether the ray is occluded by anything.
+    bool IsOccluded( const Ray& r ) const override;
+#endif
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
