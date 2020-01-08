@@ -74,7 +74,7 @@ void KDTree::Build( const Scene& scene ){
     m_root = std::make_unique<Kd_Node>(m_bbox);
 
     // build kd-tree
-    splitNode( m_root.get() , splits , count , 0 , tmp.get() );
+    splitNode( m_root.get() , splits , count , 1u , tmp.get() );
 
     SORT_STATS(++sKDTreeNodeCount);
 
@@ -82,9 +82,9 @@ void KDTree::Build( const Scene& scene ){
 }
 
 void KDTree::splitNode( Kd_Node* node , Splits& splits , unsigned prinum , unsigned depth , unsigned char* tmp ){
-    SORT_STATS(sKDTreeDepth = std::max(sKDTreeDepth, (StatsInt)depth+1));
+    SORT_STATS(sKDTreeDepth = std::max(sKDTreeDepth, (StatsInt)depth));
 
-    if( prinum < m_maxPriInLeaf || depth > m_maxDepth ){
+    if( prinum < m_maxPriInLeaf || depth >= m_maxDepth ){
         makeLeaf( node , splits , prinum );
         return;
     }

@@ -30,7 +30,6 @@ SORT_STATS_DEFINE_COUNTER(sBvhLeafNodeCount)
 SORT_STATS_DEFINE_COUNTER(sBVHDepth)
 SORT_STATS_DEFINE_COUNTER(sBvhMaxPriCountInLeaf)
 SORT_STATS_DEFINE_COUNTER(sBvhPrimitiveCount)
-SORT_STATS_DEFINE_COUNTER(sBvhLeafNodeCountCopy)
 
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Total Ray Count", sRayCount);
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Shadow Ray Count", sShadowRayCount);
@@ -39,7 +38,7 @@ SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Node Count", sBvhNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Leaf Node Count", sBvhLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "BVH Depth", sBVHDepth);
 SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sBvhMaxPriCountInLeaf);
-SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sBvhPrimitiveCount , sBvhLeafNodeCountCopy );
+SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sBvhPrimitiveCount , sBvhLeafNodeCount );
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
 void Bvh::Build(const Scene& scene){
@@ -52,7 +51,8 @@ void Bvh::Build(const Scene& scene){
     computeBBox();
 
     // generate BVH primitives
-    for (auto i = 0u; i < m_primitives->size(); ++i)
+    const auto primitive_cnt = m_primitives->size();
+    for (auto i = 0u; i < primitive_cnt; ++i)
         m_bvhpri[i].SetPrimitive((*m_primitives)[i].get());
 
     // recursively split node
@@ -62,11 +62,11 @@ void Bvh::Build(const Scene& scene){
     m_isValid = true;
 
     SORT_STATS(++sBvhNodeCount);
-    SORT_STATS(sBvhLeafNodeCountCopy = sBvhLeafNodeCount);
+    SORT_STATS(sBvhPrimitiveCount=primitive_cnt);
 }
 
 void Bvh::splitNode( Bvh_Node* node , unsigned start , unsigned end , unsigned depth ){
-    SORT_STATS(sBVHDepth = std::max( sBVHDepth , (StatsInt)depth + 1 ) );
+    SORT_STATS(sBVHDepth = std::max( sBVHDepth , (StatsInt)depth ) );
 
     // generate the bounding box for the node
     for( auto i = start ; i < end ; i++ )
@@ -115,7 +115,6 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned start , unsigned end ){
 
     SORT_STATS(++sBvhLeafNodeCount);
     SORT_STATS(sBvhMaxPriCountInLeaf = std::max( sBvhMaxPriCountInLeaf , (StatsInt)node->pri_num) );
-    SORT_STATS(sBvhPrimitiveCount += (StatsInt)node->pri_num);
 }
 
 bool Bvh::GetIntersect(const Ray& ray, Intersection& intersect) const{

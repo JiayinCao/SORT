@@ -28,7 +28,6 @@ SORT_STATS_DEFINE_COUNTER(sOcTreeLeafNodeCount)
 SORT_STATS_DEFINE_COUNTER(sOcTreeDepth)
 SORT_STATS_DEFINE_COUNTER(sOcTreeMaxPriCountInLeaf)
 SORT_STATS_DEFINE_COUNTER(sOcTreePrimitiveCount)
-SORT_STATS_DEFINE_COUNTER(sOcTreeLeafNodeCountCopy)
 
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Total Ray Count", sRayCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Shadow Ray Count", sShadowRayCount);
@@ -37,7 +36,7 @@ SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Node Count", sOcTreeNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Leaf Node Count", sOcTreeLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "OcTree Depth", sOcTreeDepth);
 SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOcTreeMaxPriCountInLeaf);
-SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCountCopy);
+SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCount);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
 void OcTree::Build( const Scene& scene ){
@@ -62,16 +61,15 @@ void OcTree::Build( const Scene& scene ){
     m_root->bb = m_bbox;
 
     // split OCTree node
-    splitNode( m_root.get() , container.get() , 0 );
+    splitNode( m_root.get() , container.get() , 1u );
 
     m_isValid = true;
 
     SORT_STATS(++sOcTreeNodeCount);
-    SORT_STATS(sOcTreeLeafNodeCountCopy = sOcTreeLeafNodeCount);
 }
 
 void OcTree::splitNode( OcTreeNode* node , NodePrimitiveContainer* container , unsigned depth ){
-    SORT_STATS( sOcTreeDepth = std::max( sOcTreeDepth , (StatsInt) depth + 1 ) );
+    SORT_STATS( sOcTreeDepth = std::max( sOcTreeDepth , (StatsInt) depth ) );
 
     // make a leaf if there are not enough points
     if( container->primitives.size() <= (int)m_maxPriInLeaf || depth >= m_maxDepthInOcTree ){

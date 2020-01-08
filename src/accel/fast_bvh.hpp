@@ -52,7 +52,6 @@ SORT_STATS_DEFINE_COUNTER(sQbvhLeafNodeCount)
 SORT_STATS_DEFINE_COUNTER(sQbvhDepth)
 SORT_STATS_DEFINE_COUNTER(sQbvhMaxPriCountInLeaf)
 SORT_STATS_DEFINE_COUNTER(sQbvhPrimitiveCount)
-SORT_STATS_DEFINE_COUNTER(sQbvhLeafNodeCountCopy)
 
 SORT_STATS_COUNTER("Spatial-Structure(QBVH)", "Total Ray Count", sRayCount);
 SORT_STATS_COUNTER("Spatial-Structure(QBVH)", "Shadow Ray Count", sShadowRayCount);
@@ -61,7 +60,7 @@ SORT_STATS_COUNTER("Spatial-Structure(QBVH)", "Node Count", sQbvhNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(QBVH)", "Leaf Node Count", sQbvhLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(QBVH)", "BVH Depth", sQbvhDepth);
 SORT_STATS_COUNTER("Spatial-Structure(QBVH)", "Maximum Primitive in Leaf", sQbvhMaxPriCountInLeaf);
-SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Count in Leaf", sQbvhPrimitiveCount , sQbvhLeafNodeCountCopy );
+SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Count in Leaf", sQbvhPrimitiveCount , sQbvhLeafNodeCount );
 SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
 #define sFbvhNodeCount          sQbvhNodeCount
@@ -69,7 +68,6 @@ SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Tested per Ra
 #define sFbvhDepth              sQbvhDepth
 #define sFbvhMaxPriCountInLeaf  sQbvhMaxPriCountInLeaf
 #define sFbvhPrimitiveCount     sQbvhPrimitiveCount
-#define sFbvhLeafNodeCountCopy  sQbvhLeafNodeCountCopy
 
 #endif
 
@@ -81,7 +79,6 @@ SORT_STATS_DEFINE_COUNTER(sObvhLeafNodeCount)
 SORT_STATS_DEFINE_COUNTER(sObvhDepth)
 SORT_STATS_DEFINE_COUNTER(sObvhMaxPriCountInLeaf)
 SORT_STATS_DEFINE_COUNTER(sObvhPrimitiveCount)
-SORT_STATS_DEFINE_COUNTER(sObvhLeafNodeCountCopy)
 
 SORT_STATS_COUNTER("Spatial-Structure(OBVH)", "Total Ray Count", sRayCount);
 SORT_STATS_COUNTER("Spatial-Structure(OBVH)", "Shadow Ray Count", sShadowRayCount);
@@ -90,7 +87,7 @@ SORT_STATS_COUNTER("Spatial-Structure(OBVH)", "Node Count", sObvhNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(OBVH)", "Leaf Node Count", sObvhLeafNodeCount);
 SORT_STATS_COUNTER("Spatial-Structure(OBVH)", "BVH Depth", sObvhDepth);
 SORT_STATS_COUNTER("Spatial-Structure(OBVH)", "Maximum Primitive in Leaf", sObvhMaxPriCountInLeaf);
-SORT_STATS_AVG_COUNT("Spatial-Structure(OBVH)", "Average Primitive Count in Leaf", sObvhPrimitiveCount , sObvhLeafNodeCountCopy );
+SORT_STATS_AVG_COUNT("Spatial-Structure(OBVH)", "Average Primitive Count in Leaf", sObvhPrimitiveCount , sObvhLeafNodeCount );
 SORT_STATS_AVG_COUNT("Spatial-Structure(OBVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
 #define sFbvhNodeCount          sObvhNodeCount
@@ -98,7 +95,6 @@ SORT_STATS_AVG_COUNT("Spatial-Structure(OBVH)", "Average Primitive Tested per Ra
 #define sFbvhDepth              sObvhDepth
 #define sFbvhMaxPriCountInLeaf  sObvhMaxPriCountInLeaf
 #define sFbvhPrimitiveCount     sObvhPrimitiveCount
-#define sFbvhLeafNodeCountCopy  sObvhLeafNodeCountCopy
 
 #endif
 
@@ -121,7 +117,8 @@ void Fbvh::Build(const Scene& scene){
     computeBBox();
 
     // generate BVH primitives
-    for (auto i = 0u; i < m_primitives->size(); ++i)
+    const auto primitive_cnt = m_primitives->size();
+    for (auto i = 0u; i < primitive_cnt; ++i)
         m_bvhpri[i].SetPrimitive((*m_primitives)[i].get());
     
     // recursively split node
@@ -132,11 +129,11 @@ void Fbvh::Build(const Scene& scene){
     m_isValid = true;
 
     SORT_STATS(++sFbvhNodeCount);
-    SORT_STATS(sFbvhLeafNodeCountCopy = sFbvhLeafNodeCount);
+    SORT_STATS(sFbvhPrimitiveCount += (StatsInt)primitive_cnt);
 }
 
 void Fbvh::splitNode( Fbvh_Node* const node , const BBox& node_bbox , unsigned depth ){
-    SORT_STATS(sFbvhDepth = std::max( sFbvhDepth , (StatsInt)depth + 1 ) );
+    SORT_STATS(sFbvhDepth = std::max( sFbvhDepth , (StatsInt)depth ) );
 
     const auto start    = node->pri_offset;
     const auto end      = start + node->pri_cnt;
@@ -267,7 +264,6 @@ void Fbvh::makeLeaf( Fbvh_Node* const node , unsigned start , unsigned end , uns
 
     SORT_STATS(++sFbvhLeafNodeCount);
     SORT_STATS(sFbvhMaxPriCountInLeaf = std::max( sFbvhMaxPriCountInLeaf , (StatsInt)node->pri_cnt) );
-    SORT_STATS(sFbvhPrimitiveCount += (StatsInt)node->pri_cnt);
 }
 
 #ifdef SIMD_BVH_IMPLEMENTATION
