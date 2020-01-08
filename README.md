@@ -22,6 +22,7 @@ Hide them until I am sure Github Action is reliable.
 [![Build status](https://ci.appveyor.com/api/projects/status/la6ixha9tqe52qyr?svg=true)](https://ci.appveyor.com/project/JiayinCao/sort)
 -->
 [![Action status](https://github.com/JiayinCao/SORT/workflows/Build%20SORT/badge.svg)](https://actions-badge.atrox.dev/Jiayincao/SORT/goto)
+[![Build status](https://travis-ci.org/JiayinCao/SORT.svg?branch=master)](https://travis-ci.org/JiayinCao/SORT)
 [![License](https://img.shields.io/badge/License-GPL3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 
