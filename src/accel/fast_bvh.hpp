@@ -363,8 +363,8 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection& intersect ) const{
                     if( !intersect.primitive->GetMaterial()->HasTransparency() ){
                         SORT_STATS(sIntersectionTest += ( i + 1 ) * 4);
 
-                        // setting primitive to be nullptr and return true at the same time is a special 'code' that the above level logic will take
-                        // advantage of.
+                        // setting primitive to be nullptr and return true at the same time is a special 'code' 
+                        // that the above level logic will take advantage of.
                         intersect.primitive = nullptr;
                         return true;
                     }
@@ -375,11 +375,12 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection& intersect ) const{
                 const auto blocked = intersectLine_SIMD( ray , simd_ray , node->line_list[i] , &intersect );
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
-                // No transpancy supported in this primitive type.
-                // This introduces some bias comparing with other spatial accelerators, but this is acceptable to me.
                 if( intersect.query_shadow && blocked ){
                     SORT_STATS(sIntersectionTest += (i + 1 + node->tri_cnt) * 4);
-                    intersect.primitive = nullptr;
+                    if( LIKELY(!intersect.primitive->GetMaterial()->HasTransparency()) ){
+                        SORT_STATS(sIntersectionTest += i + 1 + ( node->tri_cnt ) * 4);
+                        intersect.primitive = nullptr;
+                    }
                     return true;
                 }
 #endif
