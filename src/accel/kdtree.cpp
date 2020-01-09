@@ -278,8 +278,18 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
         for( auto primitive : node->primitivelist ){
             SORT_STATS(++sIntersectionTest);
             inter |= primitive->GetIntersect( ray , intersect );
-            if( nullptr == intersect && inter )
+            if( isShadowRay( intersect ) && inter ){
+#ifdef ENABLE_TRANSPARENT_SHADOW
+                sAssert( nullptr != intersect->primitive , SPATIAL_ACCELERATOR );
+                sAssert( nullptr != intersect->primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+                if( !intersect->primitive->GetMaterial()->HasTransparency() ){
+                    // setting primitive to be nullptr and return true at the same time is a special 'code' 
+                    // that the above level logic will take advantage of.
+                    intersect->primitive = nullptr;
+                }
+#endif
                 return true;
+            }
         }
         return inter && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
     }
@@ -297,7 +307,7 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* inte
     auto inter = false;
     if( t > fmin - delta ){
         inter = traverse( first , ray , intersect , fmin , std::min( fmax , t ) );
-        if( !intersect && inter )
+        if( isShadowRay(intersect) && inter )
             return true;
     }
     if( !inter && ( fmax + delta ) > t )

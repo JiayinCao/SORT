@@ -21,7 +21,10 @@
 #include "core/log.h"
 #include <assert.h>
 
-#ifdef SORT_DEBUG
+// uncomment this line to add assert in release build
+// #define FORCE_ASSERT
+
+#if defined(SORT_DEBUG) || defined(FORCE_ASSERT)
 
 #define sAssert(expr,type) \
     if( UNLIKELY(false == (bool)(expr)) ) {\

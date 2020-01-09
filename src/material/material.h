@@ -74,6 +74,13 @@ public:
         return m_matID;
     }
 
+    //! @brief  Whether the material has transparency
+    //!
+    //! @return Return true if there is transpancy in the material.
+    SORT_FORCEINLINE bool HasTransparency() const {
+        return m_hasTransparentNode;
+    }
+
 private:
     /**< Whether this is a valid material */
     bool                            m_valid = false;

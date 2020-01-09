@@ -40,10 +40,15 @@ void Accelerator::computeBBox(){
 #ifdef ENABLE_TRANSPARENT_SHADOW
 bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
     Intersection intersection;
+    intersection.query_shadow = true;
     if( !GetIntersect( r , intersection ) )
         return false;
 
-    sAssert( nullptr != intersection.primitive , SPATIAL_ACCELERATOR );
+    // primitive being null is a special coding meaning the ray is blocked by an opaque primitive.
+    if( nullptr == intersection.primitive ){
+        attenuation = 0.0f;
+        return true;
+    }
 
     const Material* material = intersection.primitive->GetMaterial();
 

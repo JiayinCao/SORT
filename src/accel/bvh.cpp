@@ -131,8 +131,13 @@ bool Bvh::GetIntersect(const Ray& ray, Intersection& intersect) const{
     if (fmin < 0.0f)
         return false;
 
-    if( traverseNode(m_root.get(), ray, &intersect, fmin) )
+    if( traverseNode(m_root.get(), ray, &intersect, fmin) ){
+#ifdef ENABLE_TRANSPARENT_SHADOW
+        return intersect.query_shadow || ( nullptr != intersect.primitive );
+#else
         return nullptr != intersect.primitive;
+#endif
+    }
     return false;
 }
 
@@ -168,8 +173,21 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         for(auto i = _start ; i < _end ; i++ ){
             SORT_STATS(++sIntersectionTest);
             found |= m_bvhpri[i].primitive->GetIntersect( ray , intersect );
-            if( intersect == nullptr && found )
+            
+            // a quick branching out if a shadow ray is hit by an opaque object
+            const auto is_shadow_ray_blocked = isShadowRay( intersect ) && found;
+            if( is_shadow_ray_blocked ){
+#ifdef ENABLE_TRANSPARENT_SHADOW
+                sAssert( nullptr != intersect->primitive , SPATIAL_ACCELERATOR );
+                sAssert( nullptr != intersect->primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+                if( !intersect->primitive->GetMaterial()->HasTransparency() ){
+                    // setting primitive to be nullptr and return true at the same time is a special 'code' 
+                    // that the above level logic will take advantage of.
+                    intersect->primitive = nullptr;
+                }
+#endif
                 return true;
+            }
         }
         return found;
     }
@@ -183,14 +201,15 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
     auto inter = false;
     if( fmin1 > fmin0 ){
         inter |= traverseNode( left , ray , intersect , fmin0 );
-        if( inter && intersect == nullptr ) return true;
+        if( inter && isShadowRay( intersect ) ) return true;
         inter |= traverseNode( right , ray , intersect , fmin1 );
     }else{
         inter |= traverseNode( right , ray , intersect , fmin1 );
-        if( inter && intersect == nullptr) return true;
+        if( inter && isShadowRay( intersect ) ) return true;
         inter |= traverseNode( left , ray , intersect , fmin0 );
     }
-    return intersect == nullptr ? inter : true;
+
+    return inter;
 }
 
 void Bvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{

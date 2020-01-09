@@ -156,18 +156,13 @@ const Light* Scene::SampleLight( float u , float* pdf ) const{
     return nullptr;
 }
 
-// get light sample property
-float Scene::LightProperbility( unsigned i ) const
-{
+float Scene::LightProperbility( unsigned i ) const{
     sAssert(m_lightsDis != nullptr , LIGHT );
     return m_lightsDis->GetProperty( i );
 }
 
-// Evaluate sky
-Spectrum Scene::Le( const Ray& ray ) const
-{
-    if( m_skyLight )
-    {
+Spectrum Scene::Le( const Ray& ray ) const{
+    if( m_skyLight ){
         Spectrum r;
         m_skyLight->Le( ray , 0 , r );
         return r;

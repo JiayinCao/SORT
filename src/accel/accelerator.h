@@ -30,6 +30,16 @@ class Ray;
 class Intersection;
 struct BSSRDFIntersections;
 
+#ifdef ENABLE_TRANSPARENT_SHADOW
+SORT_FORCEINLINE bool isShadowRay( const Intersection* intersection ){
+    return intersection->query_shadow;
+}
+#else
+SORT_FORCEINLINE bool isShadowRay( const Intersection* intersection ){
+    return nullptr == intersection;
+}
+#endif
+
 //! @brief Spatial acceleration structure interface.
 /**
  * Accelerator is an interface rather than a base class. There is no instance of it.
