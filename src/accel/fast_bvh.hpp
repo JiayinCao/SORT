@@ -478,20 +478,20 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
         if (0 == node->child_cnt) {
             for (auto i = 0u; i < node->tri_cnt; ++i) {
                 if (intersectTriangleFast_SIMD(ray, simd_ray , node->tri_list[i])) {
-                    SORT_STATS(sIntersectionTest += i * 4);
+                    SORT_STATS(sIntersectionTest += ( i + 1 ) * 4);
                     return true;
                 }
             }
             for (auto i = 0u; i < node->line_cnt; ++i) {
                 if (intersectLineFast_SIMD(ray, simd_ray , node->line_list[i])) {
-                    SORT_STATS(sIntersectionTest += (i + node->tri_cnt) * 4);
+                    SORT_STATS(sIntersectionTest += (i + 1 + node->tri_cnt) * 4);
                     return true;
                 }
             }
             if (UNLIKELY(!node->other_list.empty())) {
                 for (auto i = 0u; i < node->other_list.size(); ++i) {
                     if (node->other_list[i]->GetIntersect(ray, nullptr)) {
-                        SORT_STATS(sIntersectionTest += i + ( node->tri_cnt + node->line_cnt ) * 4);
+                        SORT_STATS(sIntersectionTest += i + 1 + ( node->tri_cnt + node->line_cnt ) * 4);
                         return true;
                     }
                 }

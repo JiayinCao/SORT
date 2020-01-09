@@ -120,7 +120,10 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned start , unsigned end ){
 bool Bvh::GetIntersect(const Ray& ray, Intersection& intersect) const{
     SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
-    SORT_STATS(++sShadowRayCount);
+    
+#ifdef ENABLE_TRANSPARENT_SHADOW
+    SORT_STATS(sShadowRayCount += intersect.query_shadow);
+#endif
 
     ray.Prepare();
 
@@ -137,10 +140,7 @@ bool Bvh::GetIntersect(const Ray& ray, Intersection& intersect) const{
 bool Bvh::IsOccluded( const Ray& ray ) const{
     SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
-
-#ifdef ENABLE_TRANSPARENT_SHADOW
-    SORT_STATS(sShadowRayCount += intersect.query_shadow);
-#endif
+    SORT_STATS(++sShadowRayCount);
 
     ray.Prepare();
 
@@ -160,9 +160,9 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* in
         return true;
 
     if( node->pri_num != 0 ){
-        auto _start = node->pri_offset;
-        auto _pri = node->pri_num;
-        auto _end = _start + _pri;
+        const auto _start = node->pri_offset;
+        const auto _pri = node->pri_num;
+        const auto _end = _start + _pri;
 
         auto found = false;
         for(auto i = _start ; i < _end ; i++ ){
