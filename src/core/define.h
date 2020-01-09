@@ -68,7 +68,7 @@
 // even if it is fully transparent. I could have implemented extra optimization to avoid casting shadows for fully
 // transparent geometry at the cost of introducing more complex design. However, in order to keep it simple and
 // maintainable by myself, I would skip it.
-// Performance wise, this feature does introduce quite some extra cost since all interersection tests need to also
-// evalaute interestection results, like position, normal, uv, basically everything that is used in shader evaluation,
+// Performance wise, this feature does introduce quite some extra cost since all intersection tests need to also
+// evaluate intersection results, like position, normal, uv, basically everything that is used in shader evaluation,
 // when transparent material is present.
 #define ENABLE_TRANSPARENT_SHADOW

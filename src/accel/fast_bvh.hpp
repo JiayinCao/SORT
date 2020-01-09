@@ -352,7 +352,7 @@ bool Fbvh::GetIntersect( const Ray& ray , Intersection& intersect ) const{
                 // There is still possibility for false positives to survive this branch since only the nearest among four/eight possible intersections
                 // will be tested here. If the nearest intersection happens to have transparency while not the others, it won't branch out, leading to
                 // some potential defficiency. However, testing every single intersection in all possible intersections among all SIMD channels also 
-                // comes at a cost and given the chance of mixing transparent primitve and non-transparent primitives in one BVH node is not fairly high, 
+                // comes at a cost and given the chance of mixing transparent primitive and non-transparent primitives in one BVH node is not fairly high, 
                 // it makes sense to just check the nearest one. It should work pretty well for fully opaque scene.
                 // With C++ 17 compile time if, this branch can totally be resolved during compilation, which may further reduce a bit of overhead, which
                 // might not be very obvious. there could be ways to achieve it in C++ 11. Since it won't boost the performance, I will keep it this way
