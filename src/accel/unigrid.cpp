@@ -264,8 +264,21 @@ bool UniGrid::traverse( const Ray& r , Intersection* intersect , unsigned voxelI
         SORT_STATS(++sIntersectionTest);
         // get intersection
         inter |= voxel->GetIntersect( r , intersect );
-        if( !intersect && inter )
+
+        // a quick branching out if a shadow ray is hit by an opaque object
+        const auto is_shadow_ray_blocked = isShadowRay( intersect ) && inter;
+        if( is_shadow_ray_blocked ){
+#ifdef ENABLE_TRANSPARENT_SHADOW
+            sAssert( nullptr != intersect->primitive , SPATIAL_ACCELERATOR );
+            sAssert( nullptr != intersect->primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+            if( !intersect->primitive->GetMaterial()->HasTransparency() ){
+                // setting primitive to be nullptr and return true at the same time is a special 'code' 
+                // that the above level logic will take advantage of.
+                intersect->primitive = nullptr;
+            }
+#endif
             return true;
+        }
     }
 
     return inter && ( intersect->t < nextT + 0.00001f );

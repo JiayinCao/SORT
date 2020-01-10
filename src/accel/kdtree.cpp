@@ -241,9 +241,7 @@ bool KDTree::GetIntersect( const Ray& r , Intersection& intersect ) const{
     if( fmin < 0.0f )
         return false;
 
-    if( traverse( m_root.get() , r , &intersect , fmin , fmax ) )
-        return intersect.primitive != 0;
-    return false;
+    return traverse( m_root.get() , r , &intersect , fmin , fmax );
 }
 
 #ifndef ENABLE_TRANSPARENT_SHADOW

@@ -158,9 +158,7 @@ bool OcTree::GetIntersect( const Ray& r , Intersection& intersect ) const{
     if( fmin < 0.0f )
         return false;
 
-    if( traverseOcTree( m_root.get() , r , &intersect , fmin , fmax ) )
-        return nullptr != intersect.primitive;
-    return false;
+    return traverseOcTree( m_root.get() , r , &intersect , fmin , fmax );
 }
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
@@ -195,8 +193,21 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersect
         for( auto primitive : node->primitives ){
             SORT_STATS(++sIntersectionTest);
             found |= primitive->GetIntersect( ray , intersect );
-            if( !intersect && found )
+
+            // a quick branching out if a shadow ray is hit by an opaque object
+            const auto is_shadow_ray_blocked = isShadowRay( intersect ) && found;
+            if( is_shadow_ray_blocked ){
+#ifdef ENABLE_TRANSPARENT_SHADOW
+                sAssert( nullptr != intersect->primitive , SPATIAL_ACCELERATOR );
+                sAssert( nullptr != intersect->primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+                if( !intersect->primitive->GetMaterial()->HasTransparency() ){
+                    // setting primitive to be nullptr and return true at the same time is a special 'code' 
+                    // that the above level logic will take advantage of.
+                    intersect->primitive = nullptr;
+                }
+#endif
                 return true;
+            }
         }
         return found && ( intersect->t < ( fmax + delta ) && intersect->t > ( fmin - delta ) );
     }
