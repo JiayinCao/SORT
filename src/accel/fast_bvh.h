@@ -113,6 +113,9 @@ public:
     //! In case of an intersection, it will fill the structure and return the nearest intersection.
     //! This intersection could possibly be a fully transparent intersection, it is up to the higher
     //! level logic to handle (semi)transparency later.
+    //! WARNING, it is quite possible to find an intersection that is fully transparent and still taking consideration of the light
+    //! coming from that point. This is not strictly correct, but I would choose to live with it because it is not worth the extra
+    //! performance overhead to fix the problem since it is very minor.
     //!
     //! @param r            The input ray to be tested.
     //! @param intersect    The intersection result.

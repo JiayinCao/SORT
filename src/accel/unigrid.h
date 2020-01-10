@@ -64,6 +64,9 @@ public:
     //! above one to acquire all intersections in a brute force way, which obviously introduces quite some duplicated work.
     //! The intersection returned doesn't guarrantee the order of the intersection of the results, but it does guarrantee to get the
     //! nearest N intersections.
+    //! WARNING, it is quite possible to find an intersection that is fully transparent and still taking consideration of the light
+    //! coming from that point. This is not strictly correct, but I would choose to live with it because it is not worth the extra
+    //! performance overhead to fix the problem since it is very minor.
     //!
     //! @param  r           The input ray to be tested.
     //! @param  intersect   The intersection result that holds all intersectionn.
