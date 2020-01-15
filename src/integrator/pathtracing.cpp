@@ -154,8 +154,9 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     const auto& intersection = pInter->intersection;
 
                     // Create a temporary lambert model to account the cos factor
-                    // Fresnel is totally ignored here due to two reasons, the lack of visual differences and most importantly,
-                    // there will be a discontinuity introduced when mean free path approaches zero.
+                    // Fresnel is totally ignored here due to two reasons, the lack of visual differences 
+                    // and more importantly, there will be a discontinuity introduced when mean free path 
+                    // approaches zero.
                     ScatteringEvent se(pInter->intersection, SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ));
                     se.AddBxdf( SORT_MALLOC(Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
 
