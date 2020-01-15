@@ -62,7 +62,7 @@ public:
     //! @brief  Constructor.
     //!
     //! @param  g   Asymmetry parameter in Henyey-Greenstein phase function.
-    HenyeyGreenstein( const float g ):g(g),sqrG(SQR(g)),twoG(2.0f*g){
+    HenyeyGreenstein( const float g ):g(clampG(g)),sqrG(SQR(clampG(g))),twoG(2.0f*clampG(g)){
     }
 
     //! @brief  Evaluation of the phase function.
@@ -84,7 +84,7 @@ public:
     //! @param wi       Incoming direction.
     //! @param pdf      Pdf of sampling the incoming direction.
     void    Sample( const Vector& wo , Vector& wi , float& pdf ) const override{
-        if( fabs(g) > 0.03f ){
+        if( fabs(g) > threshold ){
             // p(cos_theta) = ( 1 + g^2 - ( ( 1 - g^2 ) / ( 1 - g + 2 * g * t ) )^2 ) / ( 2 * g )
             const auto r = sort_canonical();
             const auto cos_theta = ( 1.0f + sqrG - SQR( ( 1.0f - sqrG ) / ( 1 - g + twoG * r ) ) ) / ( twoG );
@@ -116,9 +116,21 @@ private:
     const float sqrG;
     const float twoG;
 
+	// Henyey-Greenstein phase function with asymmetry parameter smaller than this value will be treated as totally isotropic.
+	static constexpr float threshold = 0.03f;
+
     SORT_FORCEINLINE float evaluate( const Vector& wo , const Vector& wi ) const{
+		if( fabs(g) < threshold )
+			return INV_FOUR_PI;
+
         const auto cos_theta = dot( wo , wi );
         const auto denom = 1.0f + sqrG - twoG * cos_theta;
         return INV_FOUR_PI * ( 1 - sqrG ) / ( denom * sqrt( denom ) );
     }
+
+	// It is necessary to avoid g equals to 1 or -1, which turns this phase function into a Dirac-Delta function, easily leading to some problems.
+	// Instead of adding more branches in the code above, a better approach is simply to clamp it to prevent it happening at the very beginning.
+	SORT_FORCEINLINE float clampG( const float g ){
+		return clamp( g , -0.995f , 0.995f );
+	}
 };

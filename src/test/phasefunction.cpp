@@ -20,13 +20,13 @@
 #include "unittest_common.h"
 
 // This should work. For some reason, it doesn't. I need to figure out what is wrong.
-TEST(PHASE_FUNCTION, DISABLED_HenyeyGreenstein_PDF_Sample_Accuracy) {
+TEST(PHASE_FUNCTION, HenyeyGreenstein_PDF_Sample_Accuracy) {
     const auto u = sort_canonical();
     const auto v = sort_canonical();
     const auto wo = UniformSampleSphere( u , v );
-
+	
     // Check whether the pdf actually matches the way rays are sampled
-    const auto total0 = ParrallReduction<double, 8, 8 * 1024 * 1024>( [&](){
+    const auto total0 = ParrallReduction<double, 8, 1024 * 1024>( [&](){
         Vector wi;
         float pdf = 0.0f;
         const HenyeyGreenstein hg( sort_canonical() );
@@ -41,15 +41,13 @@ TEST(PHASE_FUNCTION, DISABLED_HenyeyGreenstein_PDF_Sample_Accuracy) {
         float pdf = 0.0f;
         const HenyeyGreenstein hg( 0.0f );
         hg.Sample( wo , wi , pdf );
-        if( isnan( pdf ) )
-        std::cout<<"wrong"<<std::endl;
         return pdf != 0.0f ? 1.0f / pdf : 0.0f;
     } );
     EXPECT_NEAR( total1 , FOUR_PI , 0.03f );
 }
 
 // This should work. For some reason, it doesn't. I need to figure out what is wrong.
-TEST(PHASE_FUNCTION, DISABLED_HenyeyGreenstein_PDF_Sample) {
+TEST(PHASE_FUNCTION, HenyeyGreenstein_PDF_Sample) {
     const auto u = sort_canonical();
     const auto v = sort_canonical();
     const auto wo = UniformSampleSphere( u , v );
