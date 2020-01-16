@@ -49,7 +49,39 @@ public:
     virtual void    Sample( const Vector& wo , Vector& wi , float& pdf ) const = 0;
 };
 
-//! @brief  The Henyey-Greenstein phase function.
+//! @brief  Simplest phase function.
+/**
+ * Isotropic phase function scatter rays in all directions in a uniform manner.
+ * This is really just Henyey-Greenstein phase function with asymmetry parameter set to 0.0.
+ */ 
+class IsotropicPhaseFunction : public PhaseFunction{
+public:
+    //! @brief  Evaluation of the phase function.
+    //!
+    //! Just like BXDF definition, the directions passed in need to point from outside from
+    //! the same point of interest.
+    //!
+    //! @param  wo      Out-going direction.
+    //! @param  wi      Incoming direction.
+    //! @return         Evaluation of phase function.
+    float P( const Vector& wo , const Vector& wi ) const override{
+        return UniformSpherePdf();
+    }
+
+    //! @brief  Sample an incoming direction based on out-going direction.
+    //!
+    //! @param wo       Out-going direction.
+    //! @param wi       Incoming direction.
+    //! @param pdf      Pdf of sampling the incoming direction.
+    void    Sample( const Vector& wo , Vector& wi , float& pdf ) const override{
+        const auto u = sort_canonical();
+        const auto v = sort_canonical();
+        wi = UniformSampleSphere(u, v);
+        pdf = UniformSpherePdf();
+    }
+};
+
+//! @brief  The s phase function.
 /**
  * This phase function is a one dimensional function that only considers the angle formed by 
  * the out-going and incoming directions. It exists in isotropic medium.
@@ -79,15 +111,16 @@ public:
 
     //! @brief  Sample an incoming direction based on out-going direction.
     //!
-    //! This is a perfect probability density function that is 
+    //! This is a perfect probability density function that is propotional to the phase function itself.
+    //!
     //! @param wo       Out-going direction.
     //! @param wi       Incoming direction.
     //! @param pdf      Pdf of sampling the incoming direction.
     void    Sample( const Vector& wo , Vector& wi , float& pdf ) const override{
         if( fabs(g) > threshold ){
-            // p(cos_theta) = ( 1 + g^2 - ( ( 1 - g^2 ) / ( 1 - g + 2 * g * t ) )^2 ) / ( 2 * g )
+            // p(cos_theta) = ( 1 + g^2 - ( ( 1 - g^2 ) / ( 1 + g - 2 * g * t ) )^2 ) / ( 2 * g )
             const auto r = sort_canonical();
-            const auto cos_theta = ( 1.0f + sqrG - SQR( ( 1.0f - sqrG ) / ( 1 - g + twoG * r ) ) ) / ( twoG );
+            const auto cos_theta = ( 1.0f + sqrG - SQR( ( 1.0f - sqrG ) / ( 1 + g - twoG * r ) ) ) / ( -twoG );
             const auto sin_theta = ssqrt( 1.0f - SQR( cos_theta ) );
 
             const auto phi = TWO_PI * sort_canonical();
@@ -123,8 +156,12 @@ private:
 		if( fabs(g) < threshold )
 			return INV_FOUR_PI;
 
+        // Note, the original paper has a function with slightly different denominator.
+        // - Original ->    1 + g^2 - 2*g*cos(theta)
+        // - SORT     ->    1 + g^2 + 2*g*cos(theta)
+        // This is by no means a typo since the directions point outward from the same point, while it is different in the paper.
         const auto cos_theta = dot( wo , wi );
-        const auto denom = 1.0f + sqrG - twoG * cos_theta;
+        const auto denom = 1.0f + sqrG + twoG * cos_theta;
         return INV_FOUR_PI * ( 1 - sqrG ) / ( denom * sqrt( denom ) );
     }
 

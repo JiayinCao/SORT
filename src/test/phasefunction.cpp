@@ -21,20 +21,21 @@
 
 // This should work. For some reason, it doesn't. I need to figure out what is wrong.
 // This is probably because the quality of the random number generated is not good.
+// With the tolorance of 4%, there is still 0.2% failing rate, for which reason this unit test won't be activated.
 TEST(PHASE_FUNCTION, DISABLED_HenyeyGreenstein_PDF_Sample_Accuracy) {
     const auto u = sort_canonical();
     const auto v = sort_canonical();
     const auto wo = UniformSampleSphere( u , v );
 	
     // Check whether the pdf actually matches the way rays are sampled
-    const auto total0 = ParrallReduction<double, 8, 1024 * 1024>( [&](){
+    const auto total0 = ParrallReduction<double, 8, 8 * 1024 * 1024>( [&](){
         Vector wi;
         float pdf = 0.0f;
         const HenyeyGreenstein hg( sort_canonical() );
         hg.Sample( wo , wi , pdf );
         return pdf != 0.0f ? 1.0f / pdf : 0.0f;
     } );
-    EXPECT_NEAR( total0 , FOUR_PI , 0.03f );
+    EXPECT_NEAR( total0 , FOUR_PI , 0.04f );
 
     // corner cases when asymmetry parameter in HG phase function is zero
     const auto total1 = ParrallReduction<double, 8, 1024 * 1024>( [&](){
@@ -44,10 +45,9 @@ TEST(PHASE_FUNCTION, DISABLED_HenyeyGreenstein_PDF_Sample_Accuracy) {
         hg.Sample( wo , wi , pdf );
         return pdf != 0.0f ? 1.0f / pdf : 0.0f;
     } );
-    EXPECT_NEAR( total1 , FOUR_PI , 0.03f );
+    EXPECT_NEAR( total1 , FOUR_PI , 0.04f );
 }
 
-// This should work. For some reason, it doesn't. I need to figure out what is wrong.
 TEST(PHASE_FUNCTION, HenyeyGreenstein_PDF_Sample) {
     const auto u = sort_canonical();
     const auto v = sort_canonical();
