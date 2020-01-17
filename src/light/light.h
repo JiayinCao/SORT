@@ -22,7 +22,7 @@
 #include "core/scene.h"
 #include "math/vector3.h"
 
-class SurfaceInteraction;
+struct SurfaceInteraction;
 class LightSample;
 class Shape;
 

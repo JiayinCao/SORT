@@ -19,6 +19,9 @@
 
 #include "integrator.h"
 
+struct	SurfaceInteraction;
+class	Light;
+
 // evaluate direct lighting
 Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Scene& scene , const Light* light ,
                             const LightSample& ls ,const BsdfSample& bs );
@@ -27,5 +30,5 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
 Spectrum    SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene);
 
 // helper function to evaluate light contribution
-Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const class Light* light , const class SurfaceInteraction& ip ,
+Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const SurfaceInteraction& ip ,
                             const LightSample& ls , const BsdfSample& bs , bool replaceSSS = false );
