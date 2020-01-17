@@ -39,7 +39,7 @@ void Accelerator::computeBBox(){
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
 bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
-    Intersection intersection;
+    SurfaceInteraction intersection;
     intersection.query_shadow = true;
     if( !GetIntersect( r , intersection ) )
         return false;

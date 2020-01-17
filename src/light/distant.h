@@ -40,7 +40,7 @@ public:
     //! @param  cosAtLight      The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
     //! @param  visibility      The visibility data structured filled by the light source.
     //! @return                 The radiance goes from the light source to the intersected point.
-    Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const override;
+    Spectrum sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const override;
 
     //! @brief  Approximation of total power of the light.
     //!

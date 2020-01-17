@@ -42,7 +42,7 @@ Point Sphere::Sample_l( const LightSample& ls , const Point& p , Vector& wi , Ve
 
     if( pdf ) *pdf = UniformConePdf( cos_theta );
 
-    Intersection intersection;
+    SurfaceInteraction intersection;
     const auto r = m_transform.invMatrix(Ray( p , wi ));
     if( !GetIntersect( r , &intersection ) )
         intersection.intersect = r( dot( delta , wi ) );
@@ -61,7 +61,7 @@ float Sphere::SurfaceArea() const{
     return 4 * PI * radius * radius ;
 }
 
-bool Sphere::GetIntersect( const Ray& ray , Intersection* intersect ) const{
+bool Sphere::GetIntersect( const Ray& ray , SurfaceInteraction* intersect ) const{
     const auto r = m_transform.invMatrix( ray );
 
     const auto _b = 2.0f * ( r.m_Dir.x * r.m_Ori.x + r.m_Dir.y * r.m_Ori.y + r.m_Dir.z * r.m_Ori.z );

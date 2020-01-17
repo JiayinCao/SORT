@@ -16,14 +16,14 @@
  */
 
 #include "bssrdf.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "math/utils.h"
 #include "memory.h"
 #include "core/rand.h"
 #include "core/memory.h"
 #include "core/scene.h"
 
-SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const Spectrum& ew , const float sw )
+SeparableBssrdf::SeparableBssrdf( const Spectrum& R , const SurfaceInteraction* intersection , const Spectrum& ew , const float sw )
     : Bssrdf( ew , sw ) , R(R) , intersection(intersection) , channels(0) {
     nn = normalize(intersection->normal);
     btn = normalize(cross( nn , intersection->tangent ));

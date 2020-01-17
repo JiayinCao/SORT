@@ -19,7 +19,7 @@
 #include <math.h>
 #include "texture.h"
 #include "core/sassert.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "thirdparty/tiny_exr/tinyexr.h"
 #include "thirdparty/stb_image/stb_image.h"
 

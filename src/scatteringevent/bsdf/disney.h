@@ -214,7 +214,7 @@ public:
     //! @param  intersection    Intersection at the point of exit.
     //! @param  param           Parameter set from shader.
     //! @param  weight          Evaluation weight.
-    DisneyBssrdf( const Intersection* intersection , const Params& params , const Spectrum& weight );
+    DisneyBssrdf( const SurfaceInteraction* intersection , const Params& params , const Spectrum& weight );
 
     //! @brief  Constructor of DisneyBssrdf.
     //!
@@ -223,7 +223,7 @@ public:
     //! @param  mfp             Spectrum dependent mean free path.
     //! @param  ew              Evaluation weight.
     //! @param  sw              Sampling weight.
-    DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew );
+    DisneyBssrdf( const SurfaceInteraction* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew );
 
     //! @brief  Constructor of DisneyBssrdf.
     //!
@@ -232,7 +232,7 @@ public:
     //! @param  mfp             Spectrum dependent mean free path.
     //! @param  ew              Evaluation weight.
     //! @param  sw              Sampling weight.
-    DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew , const float sw);
+    DisneyBssrdf( const SurfaceInteraction* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew , const float sw);
 
     //! @brief  Evaluate the BSSRDF.
     //!

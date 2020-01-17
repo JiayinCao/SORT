@@ -22,7 +22,7 @@
 #include "math/transform.h"
 #include "math/bbox.h"
 #include "math/ray.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 
 class LightSample;
 
@@ -81,7 +81,7 @@ public:
     //! @param wi       Direction of the ray.
     //! @return         PDF w.r.t the solid angle of picking this sample point on the surface of the shape.
     virtual float   Pdf( const Point& p , const Vector& wi ) const{
-        Intersection inter;
+        SurfaceInteraction inter;
         if( !GetIntersect( Ray( p , wi ) , &inter ) )
             return 0.0f;
 
@@ -104,7 +104,7 @@ public:
     //! @param inter    The intersection data to be filled. If it is nullptr, there is no detailed information
     //!                 for the intersection.
     //! @return         Whether the ray intersects the shape.
-    virtual bool    GetIntersect( const Ray& ray , Intersection* inter = nullptr ) const = 0;
+    virtual bool    GetIntersect( const Ray& ray , SurfaceInteraction* inter = nullptr ) const = 0;
 
     //! @brief Intersection test between the shape and a bounding box.
     //!

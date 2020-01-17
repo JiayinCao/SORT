@@ -299,7 +299,7 @@ Simd_BBox Fbvh::calcBoundingBoxSIMD(const Fast_Bvh_Node_Ptr* children) const {
 }
 #endif
 
-bool Fbvh::GetIntersect( const Ray& ray , Intersection& intersect ) const{
+bool Fbvh::GetIntersect( const Ray& ray , SurfaceInteraction& intersect ) const{
     // std::stack is by no means an option here due to its overhead under the hood.
     static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
     if (UNLIKELY(nullptr == bvh_stack))
@@ -761,7 +761,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
             auto _pri = node->pri_cnt;
             auto _end = _start + _pri;
 
-            Intersection intersection;
+            SurfaceInteraction intersection;
             for (auto i = _start; i < _end; i++) {
                 if (matID != m_bvhpri[i].primitive->GetMaterial()->GetID())
                     continue;

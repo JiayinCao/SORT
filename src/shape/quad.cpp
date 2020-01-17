@@ -62,7 +62,7 @@ float Quad::SurfaceArea() const{
     return sizeX * sizeY;
 }
 
-bool Quad::GetIntersect( const Ray& r , Intersection* intersect ) const{
+bool Quad::GetIntersect( const Ray& r , SurfaceInteraction* intersect ) const{
     const auto ray = m_transform.invMatrix( r );
     if( ray.m_Dir.y == 0.0f )
         return false;

@@ -19,13 +19,13 @@
 
 #include <list>
 #include "integrator.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 
 struct VirtualLightSource{
-    Intersection    intersect;
-    Vector          wi;
-    Spectrum        power;
-    int             depth;
+    SurfaceInteraction  intersect;
+    Vector              wi;
+    Spectrum            power;
+    int                 depth;
 };
 
 /////////////////////////////////////////////////////////////////////////////

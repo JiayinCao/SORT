@@ -17,7 +17,7 @@
 
 #include "ir.h"
 #include "integratormethod.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "core/scene.h"
 #include "light/light.h"
 #include "scatteringevent/scatteringevent.h"
@@ -53,7 +53,7 @@ void InstantRadiosity::PreProcess( const Scene& scene )
             Spectrum throughput = le * cosAtLight / ( light_pick_pdf * light_emission_pdf );
 
             int current_depth = 0;
-            Intersection intersect;
+            SurfaceInteraction intersect;
             while( true ){
                 if (false == scene.GetIntersect(ray, intersect))
                     break;
@@ -106,7 +106,7 @@ Spectrum InstantRadiosity::_li( const Ray& r , const Scene& scene , bool ignoreL
         return 0.0f;
 
     // get intersection from camera ray
-    Intersection ip;
+    SurfaceInteraction ip;
     if( false == scene.GetIntersect( r , ip ) )
         return ignoreLe?0.0f:scene.Le( r );
 

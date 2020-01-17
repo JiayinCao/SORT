@@ -16,12 +16,12 @@
  */
 
 #include "pointlight.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "core/samplemethod.h"
 #include "sampler/sample.h"
 
 // sample ray from light
-Spectrum PointLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+Spectrum PointLight::sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
     const auto light_pos = Point( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 
     // Get light position

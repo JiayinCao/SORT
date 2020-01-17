@@ -22,7 +22,7 @@
 #include "math/vector3.h"
 #include "math/point.h"
 #include "scatteringevent/bsdf/bxdf.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "scatteringevent/scatteringunit.h"
 
 class Scene;
@@ -31,8 +31,8 @@ class Scene;
 #define     TOTAL_SSS_INTERSECTION_CNT      4
 
 struct BSSRDFIntersection{
-    Intersection    intersection;
-    Spectrum        weight;
+    SurfaceInteraction  intersection;
+    Spectrum            weight;
 };
 
 /**
@@ -109,7 +109,7 @@ public:
     //! @param  intersection    Intersection of bssrdf, usually exit point.
     //! @param  ew              Evaluation weight.
     //! @param  sw              Sample weight.
-    SeparableBssrdf( const Spectrum& R , const Intersection* intersection , const Spectrum& ew , const float sw );
+    SeparableBssrdf( const Spectrum& R , const SurfaceInteraction* intersection , const Spectrum& ew , const float sw );
 
     //! @brief  Importance sample the incident position.
     //!
@@ -170,5 +170,5 @@ protected:
     int    channels;    /**< Number of channels in spectrum in which mfp is not zero. */
     Spectrum    R;      /**< Reflectance of the BSSRDF. */
 
-    const Intersection*   intersection;   /**< Intersection that spawns the BSSRDF. */
+    const SurfaceInteraction*   intersection;   /**< Intersection that spawns the BSSRDF. */
 };

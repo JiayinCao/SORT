@@ -16,13 +16,13 @@
  */
 
 #include "distant.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "core/scene.h"
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 
 // sample a ray
-Spectrum DistantLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+Spectrum DistantLight::sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
     const Vector light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
 
     // distant light direction

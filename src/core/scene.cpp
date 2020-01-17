@@ -17,7 +17,7 @@
 
 #include <memory>
 #include "scene.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "accel/accelerator.h"
 #include "material/matmanager.h"
 #include "core/path.h"
@@ -70,7 +70,7 @@ bool Scene::LoadScene( IStreamBase& stream ){
     return true;
 }
 
-bool Scene::GetIntersect( const Ray& r , Intersection& intersect ) const{
+bool Scene::GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const{
     intersect.t = FLT_MAX;
     return g_accelerator->GetIntersect( r , intersect );
 }

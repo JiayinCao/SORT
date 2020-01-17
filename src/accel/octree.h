@@ -53,7 +53,7 @@ public:
     //!                     for shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    bool GetIntersect( const Ray& r , Intersection& intersect ) const override;
+    bool GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const override;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.
@@ -135,7 +135,7 @@ private:
     //! @param fmax         Current maximum value along the ray.
     //! @param matID        Material ID to avoid if it is not invalid.
     //! @return             Whether the ray intersects anything in the primitive set
-    bool traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect ,
+    bool traverseOcTree( const OcTreeNode* node , const Ray& ray , SurfaceInteraction* intersect ,
                          float fmin , float fmax ) const;
 
     //! @brief  Traverse OcTree recursively and return if there is intersection.

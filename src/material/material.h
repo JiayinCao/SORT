@@ -23,7 +23,7 @@
 #include "stream/stream.h"
 #include "osl_system.h"
 
-class Intersection;
+struct SurfaceInteraction;
 class ScatteringEvent;
 
 //! @brief  A thin layer of material definition.
@@ -47,7 +47,7 @@ public:
     //!
     //! @param      intersection    The intersection.
     //! @return                     The transparency at the intersection.
-    SORT_FORCEINLINE Spectrum    EvaluateTransparency( const Intersection& intersection ) const{
+    SORT_FORCEINLINE Spectrum    EvaluateTransparency( const SurfaceInteraction& intersection ) const{
         // this should happen most of the time in the absence of transparent node.
         if( !m_hasTransparentNode )
             return 0.0f;

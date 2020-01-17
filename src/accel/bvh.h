@@ -66,7 +66,7 @@ public:
     //!                     shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    bool    GetIntersect( const Ray& r , Intersection& intersect ) const override;
+    bool    GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const override;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.
@@ -147,7 +147,7 @@ private:
     //!                     the nearest one.
     //! @param fmin         The minimum range along the ray.
     //! @return             True if there is intersection, otherwise it will return false.
-    bool    traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const;
+    bool    traverseNode( const Bvh_Node* node , const Ray& ray , SurfaceInteraction* intersect , float fmin ) const;
 
     //! @brief A recursive helper function that traverse the BVH to find all intersections.
     //!

@@ -17,7 +17,7 @@
 
 #include "integratormethod.h"
 #include "math/ray.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
 #include "core/primitive.h"
@@ -82,7 +82,7 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
             }
 
             Spectrum li;
-            Intersection _ip;
+            SurfaceInteraction _ip;
             if( false == light->Le( Ray( ip.intersect , wi ) , &_ip , li ) )
                 return radiance;
 
@@ -104,7 +104,7 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
 }
 
 // This is only used by SSS for now, since it is a smooth BRDF, there is no need to do MIS.
-Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Intersection& inter, const Scene& scene) {
+Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene) {
     // Uniformly choose a light, this may not be the optimal solution in case of more lights, need more research in this topic later.
     float light_pick_pdf = 0.0f;
     const auto light = scene.SampleLight( sort_canonical() , &light_pick_pdf );
@@ -135,7 +135,7 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Interse
     return radiance;
 }
 
-Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const Intersection& ip ,
+Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const SurfaceInteraction& ip ,
                             const LightSample& ls ,const BsdfSample& bs , bool replaceSSS ){
     ScatteringEvent se( ip , replaceSSS ? SE_EVALUATE_ALL_NO_SSS : SE_EVALUATE_ALL );
     ip.primitive->GetMaterial()->UpdateScatteringEvent( se );

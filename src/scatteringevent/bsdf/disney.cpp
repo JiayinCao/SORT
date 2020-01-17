@@ -76,15 +76,15 @@ float ClearcoatGGX::G1(const Vector& v) const {
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
 }
 
-DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Params& params , const Spectrum& ew )
+DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Params& params , const Spectrum& ew )
 :DisneyBssrdf( intersection , params.baseColor , params.scatterDistance , ew , ew.GetIntensity() ){
 }
 
-DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew )
+DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew )
 :DisneyBssrdf( intersection , R , mfp , ew , ew.GetIntensity() ){
 }
 
-DisneyBssrdf::DisneyBssrdf( const Intersection* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew , const float sw )
+DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew , const float sw )
 :SeparableBssrdf( R , intersection , ew , sw ){
     // Approximate Reflectance Profiles for Efficient Subsurface Scattering, Eq 6
     const auto s = Spectrum(1.9f) - R + 3.5f * ( R - Spectrum( 0.8f ) ) * ( R - Spectrum( 0.8f ) );

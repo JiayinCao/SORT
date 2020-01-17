@@ -19,7 +19,7 @@
 #include <algorithm>
 #include "bvh.h"
 #include "math/ray.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 #include "core/memory.h"
 
@@ -117,7 +117,7 @@ void Bvh::makeLeaf( Bvh_Node* node , unsigned start , unsigned end ){
     SORT_STATS(sBvhMaxPriCountInLeaf = std::max( sBvhMaxPriCountInLeaf , (StatsInt)node->pri_num) );
 }
 
-bool Bvh::GetIntersect(const Ray& ray, Intersection& intersect) const{
+bool Bvh::GetIntersect(const Ray& ray, SurfaceInteraction& intersect) const{
     SORT_PROFILE("Traverse Bvh");
     SORT_STATS(++sRayCount);
     
@@ -157,7 +157,7 @@ bool Bvh::IsOccluded( const Ray& ray ) const{
 }
 #endif
 
-bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , Intersection* intersect , float fmin ) const{
+bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , SurfaceInteraction* intersect , float fmin ) const{
     if( fmin < 0.0f )
         return false;
 
@@ -238,7 +238,7 @@ void Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersecti
         auto _pri = node->pri_num;
         auto _end = _start + _pri;
 
-        Intersection intersection;
+        SurfaceInteraction intersection;
         for(auto i = _start ; i < _end ; i++ ){
             if( matID != m_bvhpri[i].primitive->GetMaterial()->GetID() )
                 continue;

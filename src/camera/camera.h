@@ -25,7 +25,7 @@
 
 class PixelSample;
 class Visibility;
-class Intersection;
+struct SurfaceInteraction;
 
 //! @brief Abstract camera
 /**
@@ -64,7 +64,7 @@ public:
     //! @param eyeP             The selected random viewing point in world space.
     //! @param visibility       The structure holding visibility information.
     //! @return                 The coordinate on the image sensor. Its values range from 0 to width/height - 1.
-    virtual Vector2i GetScreenCoord(const Intersection& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
+    virtual Vector2i GetScreenCoord(const SurfaceInteraction& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
                                     Point* eyeP , Visibility* visibility) const = 0;
 
 protected:

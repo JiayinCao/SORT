@@ -15,16 +15,14 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "intersection.h"
+#include "interaction.h"
 #include "light/light.h"
 #include "core/primitive.h"
 
-// get the emissive
-Spectrum Intersection::Le( const Vector& wo , float* directPdfA , float* emissionPdf ) const
-{
-    if( primitive == 0 ) return 0.0f;
-    auto light = primitive->GetLight();
-    if( light )
-        return light->Le( *this , wo , directPdfA , emissionPdf );
-    return 0.0f;
+Spectrum SurfaceInteraction::Le( const Vector& wo , float* directPdfA , float* emissionPdf ) const{
+    if( nullptr == primitive )
+        return 0.0f;
+
+    const auto light = primitive->GetLight();
+    return light ? light->Le( *this , wo , directPdfA , emissionPdf ) : Spectrum(0.0f);
 }

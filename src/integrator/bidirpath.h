@@ -20,7 +20,7 @@
 #include "integrator.h"
 #include "math/point.h"
 #include "math/vector3.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 
 class   Primitive;
@@ -35,7 +35,7 @@ struct BDPT_Vertex
     ScatteringEvent*    se = nullptr;       // scattering event
     float               rr = 0.0f;          // russian roulette
     Spectrum            throughput;         // through put
-    Intersection        inter;              // intersection
+    SurfaceInteraction  inter;              // intersection
 
     // For further detail, please refer to the paper "Implementing Vertex Connection and Merging"
     // MIS factors

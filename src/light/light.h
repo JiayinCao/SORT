@@ -22,7 +22,7 @@
 #include "core/scene.h"
 #include "math/vector3.h"
 
-class Intersection;
+class SurfaceInteraction;
 class LightSample;
 class Shape;
 
@@ -132,7 +132,7 @@ public:
     //! @param  cosAtLight      The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
     //! @param  visibility      The visibility data structured filled by the light source.
     //! @return                 The radiance goes from the light source to the intersected point.
-    virtual Spectrum sample_l(  const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance ,
+    virtual Spectrum sample_l(  const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance ,
                                 float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const = 0;
 
     //! @brief      Sample a point and light out-going direction.
@@ -171,7 +171,7 @@ public:
     //! @param  directPdfA      The pdf w.r.t area to pick the point, intersection between the direction and the light source.
     //! @param  emissionPdf     The pdf w.r.t solid angle to pick to sample such a position and direction goes to the intersection.
     //! @return                 The radiance goes from the light source to the intersection, black if there is no intersection.
-    virtual Spectrum Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const {
+    virtual Spectrum Le( const SurfaceInteraction& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const {
         return 0.0f;
     }
 
@@ -185,7 +185,7 @@ public:
     //! @param  intersect       The intersection between the ray and the light source.
     //! @param  radiance        The radiance goes from the light source to the ray origin.
     //! @return                 Whether there is an intersection between the ray and the light source.
-    virtual bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const {
+    virtual bool Le( const Ray& ray , SurfaceInteraction* intersect , Spectrum& radiance ) const {
         return false;
     }
 

@@ -88,7 +88,7 @@ public:
     //! @param inter    The intersection data to be filled. If it is nullptr, there is no detailed information
     //!                 for the intersection.
     //! @return         Whether the ray intersects the shape.
-    bool            GetIntersect( const Ray& ray , Intersection* inter = nullptr ) const override;
+    bool            GetIntersect( const Ray& ray , SurfaceInteraction* inter = nullptr ) const override;
 
     //! @brief Intersection test between the shape and a bounding box.
     //!
@@ -128,18 +128,18 @@ private:
 #ifdef SSE_ENABLED
     friend struct Triangle4;
     #ifdef SORT_IN_WINDOWS
-        friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const simd_data_sse& t4, const simd_data_sse& u4, const simd_data_sse& v4, const int id, Intersection* intersection);
+        friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const simd_data_sse& t4, const simd_data_sse& u4, const simd_data_sse& v4, const int id, SurfaceInteraction* intersection);
     #else
-        friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const __m128& t4, const __m128& u4, const __m128& v4, const int id, Intersection* intersection);
+        friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const __m128& t4, const __m128& u4, const __m128& v4, const int id, SurfaceInteraction* intersection);
     #endif
 #endif
 
 #ifdef AVX_ENABLED
     friend struct Triangle8;
     #ifdef SORT_IN_WINDOWS
-        friend SORT_FORCEINLINE void setupIntersection(const Triangle8& tri4, const Ray& ray, const simd_data_avx& t8, const simd_data_avx& u8, const simd_data_avx& v8, const int id, Intersection* intersection);
+        friend SORT_FORCEINLINE void setupIntersection(const Triangle8& tri4, const Ray& ray, const simd_data_avx& t8, const simd_data_avx& u8, const simd_data_avx& v8, const int id, SurfaceInteraction* intersection);
     #else
-        friend SORT_FORCEINLINE void setupIntersection(const Triangle8& tri8, const Ray& ray, const __m256& t8, const __m256& u8, const __m256& v8, const int id, Intersection* intersection);
+        friend SORT_FORCEINLINE void setupIntersection(const Triangle8& tri8, const Ray& ray, const __m256& t8, const __m256& u8, const __m256& v8, const int id, SurfaceInteraction* intersection);
     #endif
 #endif
 };

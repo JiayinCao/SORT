@@ -38,7 +38,7 @@ SORT_STATIC_FORCEINLINE const T* pickScattering( const T* const scattering[] , u
     return picked;
 }
 
-ScatteringEvent::ScatteringEvent( const Intersection& intersection , const SE_Flag flag )
+ScatteringEvent::ScatteringEvent( const SurfaceInteraction& intersection , const SE_Flag flag )
 : m_flag(flag), m_intersection( intersection ){
     m_n = normalize(intersection.normal);
     m_bt = normalize(cross( m_n , intersection.tangent ));

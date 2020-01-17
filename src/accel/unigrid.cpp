@@ -17,7 +17,7 @@
 
 #include "unigrid.h"
 #include "core/primitive.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "core/log.h"
 #include "core/sassert.h"
 #include "core/profile.h"
@@ -115,7 +115,7 @@ unsigned UniGrid::offset( unsigned x , unsigned y , unsigned z ) const{
     return z * m_voxelNum[1] * m_voxelNum[0] + y * m_voxelNum[0] + x;
 }
 
-bool UniGrid::GetIntersect( const Ray& r , Intersection& intersect ) const{
+bool UniGrid::GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const{
     SORT_PROFILE("Traverse Uniform Grid");
     SORT_STATS(++sRayCount);
 
@@ -256,7 +256,7 @@ bool UniGrid::IsOccluded( const Ray& r ) const{
 }
 #endif
 
-bool UniGrid::traverse( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const{
+bool UniGrid::traverse( const Ray& r , SurfaceInteraction* intersect , unsigned voxelId , float nextT ) const{
     sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "Invalid voxel id." );
 
     auto inter = false;
@@ -354,7 +354,7 @@ void UniGrid::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , cons
 void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsigned voxelId , float nextT , const StringID matID ) const{
     sAssertMsg( voxelId < m_voxelCount , SPATIAL_ACCELERATOR , "Invalid voxel id." );
 
-    Intersection intersection;
+    SurfaceInteraction intersection;
     for( auto primitive : m_voxels[voxelId] ){
         if( matID != primitive->GetMaterial()->GetID() )
             continue;

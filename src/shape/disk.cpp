@@ -56,7 +56,7 @@ float Disk::SurfaceArea() const{
     return PI * radius * radius;
 }
 
-bool Disk::GetIntersect( const Ray& r , Intersection* intersect ) const{
+bool Disk::GetIntersect( const Ray& r , SurfaceInteraction* intersect ) const{
     const auto ray = m_transform.invMatrix( r );
     if( ray.m_Dir.y == 0.0f )
         return false;

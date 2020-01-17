@@ -27,15 +27,15 @@
 #include "core/scene.h"
 
 class Ray;
-class Intersection;
+struct SurfaceInteraction;
 struct BSSRDFIntersections;
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
-SORT_FORCEINLINE bool isShadowRay( const Intersection* intersection ){
+SORT_FORCEINLINE bool isShadowRay( const SurfaceInteraction* intersection ){
     return intersection->query_shadow;
 }
 #else
-SORT_FORCEINLINE bool isShadowRay( const Intersection* intersection ){
+SORT_FORCEINLINE bool isShadowRay( const SurfaceInteraction* intersection ){
     return nullptr == intersection;
 }
 #endif
@@ -68,7 +68,7 @@ public:
     //!                     shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    virtual bool GetIntersect( const Ray& r , Intersection& intersect ) const = 0;
+    virtual bool GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const = 0;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.

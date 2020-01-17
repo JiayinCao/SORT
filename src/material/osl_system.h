@@ -33,7 +33,7 @@
 #endif
 
 class ScatteringEvent;
-class Intersection;
+struct SurfaceInteraction;
 
 struct ShadingContextWrapper {
 public:
@@ -68,7 +68,7 @@ void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
 //!
 //! @param  shader          The osl shader to be evaluated.
 //! @param  intersection    The intersection of interest.
-Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const Intersection& intersection );
+Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const SurfaceInteraction& intersection );
 
 //! @brief  Create thread contexts
 void CreateOSLThreadContexts();

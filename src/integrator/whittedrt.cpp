@@ -17,7 +17,7 @@
 
 #include "whittedrt.h"
 #include "integratormethod.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "core/scene.h"
 #include "light/light.h"
 #include "core/log.h"
@@ -37,7 +37,7 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
         return 0.0f;
 
     // get the intersection between the ray and the scene
-    Intersection ip;
+    SurfaceInteraction ip;
     if( false == scene.GetIntersect( r , ip ) )
         return scene.Le(r);
 

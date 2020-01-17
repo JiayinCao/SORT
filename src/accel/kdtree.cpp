@@ -18,7 +18,7 @@
 #include <algorithm>
 #include "kdtree.h"
 #include "core/primitive.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 #include "core/memory.h"
 
@@ -226,7 +226,7 @@ void KDTree::makeLeaf( Kd_Node* node , Splits& splits , unsigned prinum ){
     SORT_STATS(sKDTreeMaxPriCountInLeaf = std::max(sKDTreeMaxPriCountInLeaf, (StatsInt)prinum));
 }
 
-bool KDTree::GetIntersect( const Ray& r , Intersection& intersect ) const{
+bool KDTree::GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const{
     SORT_PROFILE("Traverse KD-Tree");
     SORT_STATS(++sRayCount);
 
@@ -261,7 +261,7 @@ bool KDTree::IsOccluded( const Ray& r ) const{
 }
 #endif
 
-bool KDTree::traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const{
+bool KDTree::traverse( const Kd_Node* node , const Ray& ray , SurfaceInteraction* intersect , float fmin , float fmax ) const{
     static const auto       mask = 0x00000003u;
     static const auto       delta = 0.001f;
 
@@ -342,7 +342,7 @@ void KDTree::traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersection
 
     // it's a leaf node
     if( (node->flag & mask) == 3 ){
-        Intersection intersection;
+        SurfaceInteraction intersection;
         
         for( auto primitive : node->primitivelist ){
             if( matID != primitive->GetMaterial()->GetID() )

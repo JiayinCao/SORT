@@ -41,7 +41,7 @@ public:
     //! @param  cosAtLight      The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
     //! @param  visibility      The visibility data structured filled by the light source.
     //! @return                 The radiance goes from the light source to the intersected point.
-    Spectrum sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const override;
+    Spectrum sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const override;
 
     //! @brief      Sample a point and light out-going direction.
     //!
@@ -65,7 +65,7 @@ public:
     //! @param  directPdfA      The pdf w.r.t area to pick the point, intersection between the direction and the light source.
     //! @param  emissionPdf     The pdf w.r.t solid angle to pick to sample such a position and direction goes to the intersection.
     //! @return                 The radiance goes from the light source to the intersection, black if there is no intersection.
-    Spectrum Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const override;
+    Spectrum Le( const SurfaceInteraction& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const override;
 
     //! @brief  Given a ray, sample the light source if there is any intersection between the ray and the light source.
     //!
@@ -77,7 +77,7 @@ public:
     //! @param  intersect       The intersection between the ray and the light source.
     //! @param  radiance        The radiance goes from the light source to the ray origin.
     //! @return                 Whether there is an intersection between the ray and the light source.
-    bool Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const override;
+    bool Le( const Ray& ray , SurfaceInteraction* intersect , Spectrum& radiance ) const override;
 
     //! @brief  Approximation of total power of the light.
     //!

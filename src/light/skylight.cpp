@@ -19,7 +19,7 @@
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 
-Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+Spectrum SkyLight::sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
     // sample a ray
     float _pdfw = 0.0f;
     const Vector localDir = sky.sample_v( ls->u , ls->v , &_pdfw , 0 );
@@ -50,7 +50,7 @@ Spectrum SkyLight::sample_l( const Intersection& intersect , const LightSample* 
     return sky.Evaluate( localDir ) * intensity;
 }
 
-Spectrum SkyLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const{
+Spectrum SkyLight::Le( const SurfaceInteraction& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const{
     const BBox& box = m_scene->GetBBox();
     const Vector delta = box.m_Max - box.m_Min;
 
@@ -104,7 +104,7 @@ Spectrum SkyLight::Power() const{
     return radius * radius * PI * sky.GetAverage() * intensity;
 }
 
-bool SkyLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const{
+bool SkyLight::Le( const Ray& ray , SurfaceInteraction* intersect , Spectrum& radiance ) const{
     if( intersect && intersect->t != FLT_MAX )
         return false;
 

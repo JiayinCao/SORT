@@ -61,7 +61,7 @@ public:
     //! @param inter    The intersection data to be filled. If it is nullptr, there is no detailed information
     //!                 for the intersection.
     //! @return         Whether the ray intersects the shape.
-    bool            GetIntersect( const Ray& ray , Intersection* inter = nullptr ) const override;
+    bool            GetIntersect( const Ray& ray , SurfaceInteraction* inter = nullptr ) const override;
 
     //! @brief  Get the pdf w.r.t solid angle of picking a point on the surface where the ray intersects.
     //!

@@ -19,7 +19,7 @@
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 
-Spectrum AreaLight::sample_l( const Intersection& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+Spectrum AreaLight::sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
     sAssert( ls != nullptr , LIGHT );
     sAssert( m_shape != nullptr , LIGHT );
 
@@ -79,7 +79,7 @@ Spectrum AreaLight::Power() const{
     return m_shape->SurfaceArea() * intensity.GetIntensity() * TWO_PI;
 }
 
-Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const{
+Spectrum AreaLight::Le( const SurfaceInteraction& intersect , const Vector& wo , float* directPdfA , float* emissionPdf ) const{
     const float cos = satDot( wo , intersect.normal );
     if( cos == 0.0f )
         return 0.0f;
@@ -93,7 +93,7 @@ Spectrum AreaLight::Le( const Intersection& intersect , const Vector& wo , float
     return intensity;
 }
 
-bool AreaLight::Le( const Ray& ray , Intersection* intersect , Spectrum& radiance ) const{
+bool AreaLight::Le( const Ray& ray , SurfaceInteraction* intersect , Spectrum& radiance ) const{
     sAssert( m_shape != nullptr , LIGHT );
 
     // get intersect

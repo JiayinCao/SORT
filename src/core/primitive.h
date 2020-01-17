@@ -19,7 +19,7 @@
 
 #include "math/bbox.h"
 #include "material/material.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "shape/shape.h"
 #include "material/matmanager.h"
 
@@ -48,7 +48,7 @@ public:
     //! @param  intersect   Intersected result. If nullptr is passed in, the algorithm could be a little more performant.
     //!                     The information of the intersection is also returned in world space.
     //! @return             Whether the ray intersects the primitive.
-    SORT_FORCEINLINE bool GetIntersect( const Ray& r , Intersection* intersect ) const{
+    SORT_FORCEINLINE bool GetIntersect( const Ray& r , SurfaceInteraction* intersect ) const{
         auto ret = m_shape->GetIntersect( r , intersect );
         if( ret && intersect ){
             intersect->primitive = this;

@@ -22,15 +22,13 @@
 #include "spectrum/spectrum.h"
 
 class Primitive;
+class PhaseFunction;
 
 /**
- * Intersection records all necessary data when a ray intersection a primitive.
+ * InteractionCommon keeps track of the common field shared by surface interfaction and
+ * medium interaction.
  */ 
-class   Intersection{
-public:
-    // get the emissive
-    Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;
-
+struct   InteractionCommon{
 #ifdef ENABLE_TRANSPARENT_SHADOW
     // whether the query is a shadow ray.
     bool    query_shadow = false;
@@ -38,18 +36,28 @@ public:
 
     // the intersection point
     Point   intersect;
+    // viewing direction in world space, this is usually Wo.
+    Vector  view;
+    // the delta distance from the original point
+    float   t = FLT_MAX;
+};
+
+//! @brief  Interaction at surface.
+/**
+ * Surface interaction keeps track of all useful data during ray and surface interaction.
+ */
+struct SurfaceInteraction : public InteractionCommon{
+    // get the emissive
+    Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;
+
     // the shading normal
     Vector  normal;
     // the geometry normal
     Vector  gnormal;
     // tangent vector
     Vector  tangent;
-    // viewing direction in world space, this is usually Wo.
-    Vector  view;
     // the uv coordinate
     float   u = 0.0f , v = 0.0f;
-    // the delta distance from the original point
-    float   t = FLT_MAX;
     // the intersected primitive
     const Primitive*  primitive = nullptr;
 
@@ -62,4 +70,12 @@ public:
         t = FLT_MAX;
         primitive = nullptr;
     }
+};
+
+//! @brief  Interaction in a medium.
+/**
+ * Interaction between a ray and a medium.
+ */
+struct MediumInteraction : public InteractionCommon{
+    PhaseFunction*  phaseFunction;
 };

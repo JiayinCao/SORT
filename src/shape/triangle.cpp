@@ -22,7 +22,7 @@ SORT_STATIC_FORCEINLINE Vector3f Permute( const Vector3f& v , int ax , int ay , 
     return Vector3f( v[ax] , v[ay] , v[az] );
 }
 
-bool Triangle::GetIntersect( const Ray& r , Intersection* intersect ) const{
+bool Triangle::GetIntersect( const Ray& r , SurfaceInteraction* intersect ) const{
     // get the memory
     // note : reference is not used here because it's not thread-safe
     auto& mem = m_meshVisual->m_memory;

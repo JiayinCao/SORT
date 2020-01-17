@@ -18,7 +18,7 @@
 #include "line.h"
 #include "math/utils.h"
 
-bool Line::GetIntersect( const Ray& r , Intersection* intersect ) const{
+bool Line::GetIntersect( const Ray& r , SurfaceInteraction* intersect ) const{
     // convert it to line space first
     const auto ray = m_world2Line( r );
 

@@ -16,7 +16,7 @@
  */
 
 #include "ao.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "core/scene.h"
 #include "light/light.h"
 #include "math/vector3.h"
@@ -38,7 +38,7 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps , const Scen
         return 0.0f;
 
     // get the intersection between the ray and the scene
-    Intersection ip;
+    SurfaceInteraction ip;
     if( false == scene.GetIntersect( r , ip ) )
         return 0.0f;
 
@@ -59,7 +59,7 @@ Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps , const Scen
     // the ray to be tested
     Ray ray( ip.intersect , wi , 0 , 0.001f , maxDistance );
 
-    Intersection aoip;
+    SurfaceInteraction aoip;
     if( !scene.GetIntersect( ray , aoip ) )
         return d * INV_PI / pdf;
     return 0.0f;

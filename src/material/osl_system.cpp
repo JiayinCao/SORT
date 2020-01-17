@@ -23,7 +23,7 @@
 #include "core/profile.h"
 #include "core/thread.h"
 #include "core/globalconfig.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 
 using namespace OSL;
@@ -93,7 +93,7 @@ void OptimizeShader(OSL::ShaderGroup* group) {
 }
 
 void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
-    const Intersection& intersection = se.GetIntersection();
+    const SurfaceInteraction& intersection = se.GetIntersection();
 
     ShaderGlobals shaderglobals;
     shaderglobals.P = Vec3( intersection.intersect.x , intersection.intersect.y , intersection.intersect.z );
@@ -109,7 +109,7 @@ void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
     ProcessClosure( shaderglobals.Ci , Color3( 1.0f ) , se );
 }
 
-Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const Intersection& intersection ){
+Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const SurfaceInteraction& intersection ){
     ShaderGlobals shaderglobals;
     shaderglobals.P = Vec3( intersection.intersect.x , intersection.intersect.y , intersection.intersect.z );
     shaderglobals.u = intersection.u;

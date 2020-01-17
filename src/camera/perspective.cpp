@@ -107,7 +107,7 @@ Ray PerspectiveCamera::GenerateRay( float x , float y , const PixelSample& ps ) 
 }
 
 // get camera coordinate according to a view direction in world space
-Vector2i PerspectiveCamera::GetScreenCoord( const Intersection& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
+Vector2i PerspectiveCamera::GetScreenCoord( const SurfaceInteraction& inter, float* pdfw, float* pdfa, float& cosAtCamera , Spectrum* we ,
                                             Point* eyeP , Visibility* visibility) const{
     const auto delta = 0.001f;
     Vector dir = inter.intersect - m_eye;

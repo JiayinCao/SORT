@@ -109,7 +109,7 @@ public:
     //! @param intersect    The intersection result.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    bool GetIntersect( const Ray& r , Intersection& intersect ) const override;
+    bool GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const override;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.
@@ -215,7 +215,7 @@ private:
     //! @param fmin         The minimum range along the ray.
     //! @param fmax         The maximum range along the ray.
     //! @return             True if there is intersection, otherwise it will return false.
-    bool traverse( const Kd_Node* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const;
+    bool traverse( const Kd_Node* node , const Ray& ray , SurfaceInteraction* intersect , float fmin , float fmax ) const;
 
     //! @brief  A recursive function that traverses the KD-Tree node.
     //!

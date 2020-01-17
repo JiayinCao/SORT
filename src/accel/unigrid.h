@@ -44,7 +44,7 @@ public:
     //!                     for shadow ray calculation.
     //! @return             It will return true if there is an intersection, otherwise
     //!                     it returns false.
-    bool GetIntersect( const Ray& r , Intersection& intersect ) const override;
+    bool GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const override;
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
     //! @brief This is a dedicated interface for detecting shadow rays.
@@ -121,7 +121,7 @@ private:
     //! @param nextT        The intersected position of the ray and the next to-be-traversed voxel along
     //!                     the ray.
     //! @return             It will return true if there is an intersection, otherwise it returns false.
-    bool traverse( const Ray& r , Intersection* intersect , unsigned voxelId , float nextT ) const;
+    bool traverse( const Ray& r , SurfaceInteraction* intersect , unsigned voxelId , float nextT ) const;
 
     //! @brief      Get the nearest intersection between a ray and the primitive set.
     //! @param r            The ray to be tested.

@@ -143,7 +143,7 @@ void OcTree::makeLeaf( OcTreeNode* node , NodePrimitiveContainer* container ){
         node->primitives.push_back( primitive );
 }
 
-bool OcTree::GetIntersect( const Ray& r , Intersection& intersect ) const{
+bool OcTree::GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const{
     SORT_PROFILE("Traverse OcTree");
     SORT_STATS(++sRayCount);
 
@@ -178,7 +178,7 @@ bool OcTree::IsOccluded( const Ray& r ) const{
 }
 #endif
 
-bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , Intersection* intersect , float fmin , float fmax ) const{
+bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , SurfaceInteraction* intersect , float fmin , float fmax ) const{
     constexpr auto   delta = 0.001f;
     auto found = false;
 
@@ -283,7 +283,7 @@ void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFInt
 
     // iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
     if( node->child[0] == nullptr ){
-        Intersection intersection;
+        SurfaceInteraction intersection;
         for( auto primitive : node->primitives ){
             if( matID != primitive->GetMaterial()->GetID() )
                 continue;

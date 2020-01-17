@@ -20,7 +20,7 @@
 #include "core/define.h"
 #include "core/memory.h"
 #include "math/ray.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "math/point.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
 #include "core/primitive.h"
@@ -307,7 +307,7 @@ SORT_FORCEINLINE bool intersectTriangleInner_SIMD(const Ray& ray, const Simd_Ray
 //! @param  v_simd        Blending factor.
 //! @param  id            Index of the intersection of our interest.
 //! @param  intersection  The pointer to the result to be filled. It can't be nullptr.
-SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri_simd, const Ray& ray, const simd_data& t_simd, const simd_data& u_simd, const simd_data& v_simd, const int id, Intersection* intersection) {
+SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri_simd, const Ray& ray, const simd_data& t_simd, const simd_data& u_simd, const simd_data& v_simd, const int id, SurfaceInteraction* intersection) {
     const auto* triangle = tri_simd.m_ori_tri[id];
 
     const auto u = u_simd[id];
@@ -346,7 +346,7 @@ SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri_simd, const Ray
 //! @param  tri_simd    Data structure holds four/eight triangles.
 //! @param  ret         The result of intersection. It can't be nullptr.
 //! @return             Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd , const Simd_Triangle& tri_simd , Intersection* ret ){
+SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd , const Simd_Triangle& tri_simd , SurfaceInteraction* ret ){
 #ifndef SIMD_TRI_REFERENCE_IMPLEMENTATION
     sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
 
@@ -451,7 +451,7 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
         }
     }
 #else
-    Intersection intersection;
+    SurfaceInteraction intersection;
     for( auto i = 0u ; i < SIMD_CHANNEL && nullptr != tri_simd.m_ori_pri[i] ; ++i ){
         const auto* primitive = tri_simd.m_ori_pri[i];
         if (matID != primitive->GetMaterial()->GetID())

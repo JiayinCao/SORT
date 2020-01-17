@@ -24,8 +24,8 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
                             const LightSample& ls ,const BsdfSample& bs );
 
 // uniformly evaluate direct illumination from one light
-Spectrum    SampleOneLight( const ScatteringEvent& se , const Ray& r, const Intersection& inter, const Scene& scene);
+Spectrum    SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene);
 
 // helper function to evaluate light contribution
-Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const class Light* light , const class Intersection& ip ,
+Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const class Light* light , const class SurfaceInteraction& ip ,
                             const LightSample& ls , const BsdfSample& bs , bool replaceSSS = false );

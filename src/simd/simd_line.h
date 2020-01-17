@@ -293,7 +293,7 @@ SORT_FORCEINLINE bool intersectLine_Inner( const Ray& ray , const Simd_Ray_Data&
 //! @param  line_simd   Data structure holds four lines.
 //! @param  ret         The result of intersection.
 //! @return             Whether there is any intersection that is valid.
-SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd, const Simd_Line& line_simd , Intersection* ret ){
+SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd, const Simd_Line& line_simd , SurfaceInteraction* ret ){
 #ifndef SIMD_LINE_REFERENCE_IMPLEMENTATION
     sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
 

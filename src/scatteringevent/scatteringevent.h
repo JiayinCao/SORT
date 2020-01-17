@@ -18,7 +18,7 @@
 #pragma once
 
 #include "core/define.h"
-#include "math/intersection.h"
+#include "math/interaction.h"
 #include "bssrdf/bssrdf.h"
 
 enum SE_Flag : unsigned int{
@@ -54,7 +54,7 @@ public:
     //!
     //! @param intersection         Intersection data of the point to be Evaluated.
     //! @param flag                 Scattering event flag.              
-    ScatteringEvent( const Intersection& intersection , const SE_Flag flag = SE_EVALUATE_ALL );
+    ScatteringEvent( const SurfaceInteraction& intersection , const SE_Flag flag = SE_EVALUATE_ALL );
 
     //! @brief  Add a new bxdf in the scattering event, there will be at most 16 bxdfs in it.
     //!
@@ -90,7 +90,7 @@ public:
 
     //! @brief Get intersection information of the point at which the bsdf is evaluated.
     //! @return The intersection information of the point at which the bsdf is evaluated.
-    SORT_FORCEINLINE const Intersection& GetIntersection() const {
+    SORT_FORCEINLINE const SurfaceInteraction& GetIntersection() const {
         return m_intersection;
     }
 
@@ -152,7 +152,7 @@ private:
     Vector              m_n;                /**< Normal at the point to be evaluated. */
     Vector              m_t;                /**< Bi-tangent at the point to be evaluated. */
     Vector              m_bt;               /**< Tangent at the point to be evaluated. */
-    const Intersection& m_intersection;     /**< Intersection at the point to be evaluated. */
+    const SurfaceInteraction& m_intersection;     /**< Intersection at the point to be evaluated. */
 
     //! @brief  Transform a vector from world coordinate to local shading coordinate.
     //!

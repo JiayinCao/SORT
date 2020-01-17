@@ -91,7 +91,7 @@ public:
     //! @param inter    The intersection data to be filled. If it is nullptr, there is no detailed information
     //!                 for the intersection.
     //! @return         Whether the ray intersects the shape.
-    bool            GetIntersect( const Ray& ray , Intersection* inter = nullptr ) const override;
+    bool            GetIntersect( const Ray& ray , SurfaceInteraction* inter = nullptr ) const override;
 
     //! @brief Intersection test between the shape and a bounding box.
     //!
@@ -166,11 +166,11 @@ private:
 
 #ifdef SSE_ENABLED
     friend struct Line4;
-    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Ray4_Data& ray_simd , const Line4& line_simd , Intersection* ret );
+    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Ray4_Data& ray_simd , const Line4& line_simd , SurfaceInteraction* ret );
 #endif
 
 #ifdef AVX_ENABLED
     friend struct Line8;
-    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Ray8_Data& ray_simd , const Line8& line_simd , Intersection* ret );
+    friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Ray8_Data& ray_simd , const Line8& line_simd , SurfaceInteraction* ret );
 #endif
 };
