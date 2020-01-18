@@ -77,5 +77,5 @@ struct SurfaceInteraction : public InteractionCommon{
  * Interaction between a ray and a medium.
  */
 struct MediumInteraction : public InteractionCommon{
-    PhaseFunction*  phaseFunction;
+    PhaseFunction*  phaseFunction;      /**< Phase function of the interfaction. */
 };
