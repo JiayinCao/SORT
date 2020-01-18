@@ -22,20 +22,11 @@
 
 //! @brief  HomogeneousMedium has equal scattering, absorption co-efficient everywhere.
 /**
- * Comparing with Heterogeneous medium, homogeneous medium is simpler and more performant.
- * There is close-form solution to some of the problems to be solved.
- * No emission supported for now.
+ * Unlike homogeneous medium, heterogeneous medium allows variation of scattering/absorption
+ * coefficient inside the medium, which leads to a lot more complex problems to be solved.
  */
-class HomogeneousMedium : public Medium{
+class HeterogenousMedium : public Medium{
 public:
-    //! @brief  Constructor.
-    //!
-    //! @param a            Absorption coefficient.
-    //! @param s            Scattering coefficient.
-    //! @param ph           Phase function.
-    HomogeneousMedium( const Spectrum& a , const Spectrum& s , const PhaseFunction* ph ):a(a),s(s),t(s+a),ph(ph){
-    }
-
     //! @brief  Evaluation of beam transmittance.
     //!
     //! Beam transmittance is how much percentage of radiance get attenuated during
@@ -53,10 +44,4 @@ public:
     //! @param mi           The interaction sampled.
     //! @return             The beam transmittance between the ray origin and the interaction.
     Spectrum Sample( const Ray& ray , MediumInteraction*& mi ) const override;
-
-private:
-    const Spectrum          a;
-    const Spectrum          s;
-    const Spectrum          t;
-    const PhaseFunction*    ph;
 };

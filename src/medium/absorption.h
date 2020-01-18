@@ -20,20 +20,17 @@
 #include "core/define.h"
 #include "medium.h"
 
-//! @brief  HomogeneousMedium has equal scattering, absorption co-efficient everywhere.
+//! @brief  Medium that only absorb lights without any scattering.
 /**
- * Comparing with Heterogeneous medium, homogeneous medium is simpler and more performant.
- * There is close-form solution to some of the problems to be solved.
- * No emission supported for now.
+ * This is not a physically based medium. There is only absorption considered, the scattering part is totally ignored.
+ * However, since it could be useful for rendering glass, it is still an available medium to the renderer.
  */
-class HomogeneousMedium : public Medium{
+class AbsorptionMedium : public Medium{
 public:
     //! @brief  Constructor.
     //!
     //! @param a            Absorption coefficient.
-    //! @param s            Scattering coefficient.
-    //! @param ph           Phase function.
-    HomogeneousMedium( const Spectrum& a , const Spectrum& s , const PhaseFunction* ph ):a(a),s(s),t(s+a),ph(ph){
+    AbsorptionMedium( const Spectrum& a , const PhaseFunction* ph ):a(a){
     }
 
     //! @brief  Evaluation of beam transmittance.
@@ -56,7 +53,4 @@ public:
 
 private:
     const Spectrum          a;
-    const Spectrum          s;
-    const Spectrum          t;
-    const PhaseFunction*    ph;
 };
