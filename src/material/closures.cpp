@@ -661,7 +661,8 @@ namespace {
         }
 
         Spectrum EvaluateOpacity( const ClosureComponent* comp, const OSL::Color3& w ) const override{
-            return 0.0f;
+            const auto& params = *comp->as<Transparent::Params>();
+            return 1.0f - Spectrum(params.attenuation);
         }
     };
 }

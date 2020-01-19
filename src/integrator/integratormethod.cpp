@@ -57,8 +57,7 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
 			if (!attenuation.IsBlack()) {
 				if (light->IsDelta()) {
 					radiance += attenuation * li * f / light_pdf;
-				}
-				else {
+				} else {
 					bsdf_pdf = se.Pdf_BSDF(wo, wi);
 					const auto weight = MisFactor(light_pdf, bsdf_pdf);
 					radiance = attenuation * li * f * weight / light_pdf;

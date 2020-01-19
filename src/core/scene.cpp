@@ -90,11 +90,11 @@ Spectrum Scene::GetAttenuation( const Ray& const_ray ) const{
             break;
 
         if( att.IsBlack() )
-            return 0.0f;
+            return att;
 
         attenuation *= att;
     }
-
+    
     return attenuation;
 }
 #endif

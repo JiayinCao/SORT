@@ -55,7 +55,8 @@ bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
     sAssert( nullptr != material , SPATIAL_ACCELERATOR );
 
     r.m_Ori = intersection.intersect;
-
+    r.m_fMax -= intersection.t;
+    
     attenuation = material->EvaluateTransparency( intersection );
 
     return true;

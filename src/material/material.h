@@ -81,6 +81,13 @@ public:
         return m_hasTransparentNode;
     }
 
+    //! @brief  Get the name of material
+    //!
+    //! @return Name of the material.
+    SORT_FORCEINLINE std::string GetName() const{
+        return m_name;
+    }
+
 private:
     /**< Whether this is a valid material */
     bool                            m_valid = false;
