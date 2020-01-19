@@ -60,7 +60,7 @@ void Render_Task::Execute(){
                 if( g_clammping > 0.0f )
                     li = li.Clamp( 0.0f , g_clammping );
                 
-                sAssert( IsValid() , GENERAL );
+                sAssert( li.IsValid() , GENERAL );
                 
                 if( li.IsValid() )
                     radiance += li;
