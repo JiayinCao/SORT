@@ -128,6 +128,17 @@ public:
         return RGBSpectrum( sqrt( r ) , sqrt( g ) , sqrt( b ) );
     }
 
+    //! @brief  Whether the color is valid.
+    //!
+    //! @return     Whether the color contains Nan or Inf
+    SORT_FORCEINLINE bool IsValid() const {
+        if( isnan( r ) || isnan( g ) || isnan( b ) )
+            return false;
+        if( isinf( r ) || isinf( g ) || isinf( b ) )
+            return false;
+        return true;
+    }
+
     union{
         struct{
             float x , y , z;
