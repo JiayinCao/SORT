@@ -49,6 +49,7 @@ void Render_Task::Execute(){
             // the radiance
             Spectrum radiance;
 
+            auto valid_pixel_cnt = g_samplePerPixel;
             for( unsigned k = 0 ; k < g_samplePerPixel; ++k ){
                 // clear managed memory after each pixel
                 SORT_CLEAR_MEMPOOL();
@@ -64,8 +65,12 @@ void Render_Task::Execute(){
                 
                 if( li.IsValid() )
                     radiance += li;
+                else
+                    --valid_pixel_cnt;
             }
-            radiance /= (float)g_samplePerPixel;
+
+            if( valid_pixel_cnt > 0 )
+                radiance /= (float)valid_pixel_cnt;
             
             // store the pixel
             g_imageSensor->StorePixel( j , i , radiance , *this );
