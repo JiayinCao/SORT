@@ -408,7 +408,7 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     return total_pdf / total_weight;
 }
 
-float DisneyBRDF::Evaluate_PDF( const Params& params ){
+float DisneyBRDF::Evaluate_Sampling_Weight( const Params& params ){
     const auto hasSSS = !isBlack(params.scatterDistance);
 
     // If there is no SSS, there will be 100% chance that a BXDF will be chosen.

@@ -155,7 +155,7 @@ public:
     //!
     //! @param  params      Parameters used to construct the class instance.
     //! @return             The properbility of sampling the bxdf, not the bssrdf.
-    static float Evaluate_PDF( const Params& params );
+    static float Evaluate_Sampling_Weight( const Params& params );
 
 private:
     const Spectrum  basecolor;          /**< The surface color, usually supplied by texture maps. */
