@@ -28,12 +28,15 @@ bool Material::BuildMaterial(){
     const auto message = "Build Material '" + m_name + "'";
     SORT_PROFILE(message);
 
+	m_valid = true;
+
     m_shader = BeginShaderGroup( m_name );
     for( const auto& shader : m_sources )
         BuildShader( shader.source , shader.name , shader.name , m_name );
     for( const auto& connection : m_connections )
-        ConnectShader( connection.source_shader , connection.source_property , connection.target_shader , connection.target_property );
-    m_valid = EndShaderGroup();
+        if( !ConnectShader( connection.source_shader , connection.source_property , connection.target_shader , connection.target_property ) )
+			m_valid = false;
+    m_valid &= EndShaderGroup();
 
     if (m_valid) {
         slog(INFO, MATERIAL, "Build shader %s successfully.", m_name.c_str());
@@ -42,7 +45,9 @@ bool Material::BuildMaterial(){
 
         // Optimize the shader
         OptimizeShader(m_shader.get());
-    }
+    }else{
+		slog(WARNING, MATERIAL, "Build shader %s unsuccessfully.", m_name.c_str());
+	}
     return m_valid;
 }
 
