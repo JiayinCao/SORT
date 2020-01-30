@@ -2491,7 +2491,7 @@ class SORTNodeMathOpDotProduce(SORTShadingNode):
     osl_shader = '''
         shader MathBinaryOp( vector Value0 = @ ,
                              vector Value1 = @ ,
-                             output vector Result = 0.0 ){
+                             output float Result = 0.0 ){
             Result = dot( Value0 , Value1 );
         }
     '''
