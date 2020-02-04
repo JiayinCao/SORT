@@ -420,6 +420,15 @@ def update_socket_name(self, context):
     if idx >= 0 and idx < len( node.outputs ):
         node.outputs[idx].name = self.sort_label
 
+def get_from_socket(socket):
+    if not socket.is_linked:
+        return None
+    other = socket.links[0].from_socket
+    if other.node.bl_idname == 'NodeReroute':
+        return get_from_socket(other.node.inputs[0])
+    else:
+        return other
+
 # Base class for sort socket
 class SORTNodeSocket:
     socket_color = (0.1, 0.1, 0.1, 0.75)
@@ -432,15 +441,6 @@ class SORTNodeSocket:
 
     # this is not an inherited function
     def draw_label(self, context, layout, node, text):
-        def get_from_socket(socket):
-            if not socket.is_linked:
-                return None
-            other = socket.links[0].from_socket
-            if other.node.bl_idname == 'NodeReroute':
-                return get_from_socket(other.node.inputs[0])
-            else:
-                return other
-
         source_socket = get_from_socket(self)
         has_error = False
         if source_socket is not None and source_socket.get_socket_data_type() != self.get_socket_data_type():
@@ -672,6 +672,9 @@ class SORTShadingNode(bpy.types.Node):
     # whether the node is a transparent node
     def isTransparentNode(self):
         return False
+    # whether the shader node needs to export its shader source
+    def needSerializingShader(self):
+        return True
 
 #------------------------------------------------------------------------------------#
 #                                Group Node Operators                                #
@@ -926,14 +929,22 @@ class SORT_Node_Group_Edit_Operator(bpy.types.Operator):
 class SORTNodeOutput(SORTShadingNode):
     bl_label = 'Shader Output'
     bl_idname = 'SORTNodeOutput'
-    osl_shader = '''
-        shader SORT_Shader( closure color Surface = color(0) ){
-            Ci = Surface;
-        }
-    '''
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface' )
         self.inputs.new( 'SORTNodeSocketVolume' , 'Volume' )
+
+    # whether the shader node needs to export its shader source
+    def needSerializingShader(self):
+        return False
+    # no unique name for output node
+    def getUniqueName(self):
+        return 'ShaderOutput_'
+    # whether there is connection in surface shader
+    def isSurfaceConnected(self):
+        return get_from_socket( self.inputs[0] ) is not None
+    # whether there is connection in volume shader
+    def isVolumeConnected(self):
+        return get_from_socket( self.inputs[1] ) is not None
 
 @base.register_class
 class SORTNodeExposedInputs(SORTShadingNode):
@@ -2615,16 +2626,22 @@ class SORTNodeAbsorption(SORTShadingNode):
     absorption_color : bpy.props.FloatVectorProperty( name='Color' , default=(1.0, 1.0, 1.0) , subtype='COLOR', soft_min = 0.0, soft_max = 1.0)
     absorption_coeffcient : bpy.props.FloatProperty( name='Absorption Density' , default=1.0 , min=0.0, max=float('inf') )
     osl_shader = '''
+        shader AbsoprtionMedium( output closure color Result = color(0) ){
+            Result = medium_absorption( %s , %s );
+        }
     '''
     def init(self, context):
         self.outputs.new( 'SORTNodeSocketVolume' , 'Result' )
     def serialize_prop(self, fs):
-        fs.serialize( 2 )
-        fs.serialize( self.inputs['Color'].export_osl_value() )
-        fs.serialize( self.inputs['Density'].export_osl_value() )
+        fs.serialize( 0 )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'absorption_color')
         layout.prop(self, 'absorption_coeffcient')
+    def generate_osl_source(self):
+        absorption_color = 'color( %f,%f,%f )'%(self.absorption_color[:])
+        absorption_coeffcient = self.absorption_coeffcient
+        ret = self.osl_shader % ( absorption_color , absorption_coeffcient )
+        return ret
 
 @SORTShaderNodeTree.register_node('Volume')
 class SORTNodeHomogeneous(SORTShadingNode):
@@ -2634,14 +2651,19 @@ class SORTNodeHomogeneous(SORTShadingNode):
     absorption_coeffcient : bpy.props.FloatProperty( name='Absorption Density' , default=0.5 , min=0.0, max=float('inf') )
     scattering_coeffcient : bpy.props.FloatProperty( name='Scattering Density' , default=0.5 , min=0.0, max=float('inf') )
     osl_shader = '''
+        shader HomogenenousMedium( output closure color Result = color(0) ){
+            Result = medium_homogeneous( %s , %s , %s );
+        }
     '''
     def init(self, context):
         self.outputs.new( 'SORTNodeSocketVolume' , 'Result' )
     def serialize_prop(self, fs):
-        fs.serialize( 2 )
-        fs.serialize( self.inputs['Color'].export_osl_value() )
-        fs.serialize( self.inputs['Density'].export_osl_value() )
+        fs.serialize( 0 )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'absorption_color')
         layout.prop(self, 'absorption_coeffcient')
         layout.prop(self, 'scattering_coeffcient')
+    def generate_osl_source(self):
+        absorption_color = 'color( %f,%f,%f )'%(self.absorption_color[:])
+        ret = self.osl_shader % ( absorption_color , self.absorption_coeffcient , self.scattering_coeffcient )
+        return ret

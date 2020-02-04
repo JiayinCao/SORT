@@ -660,6 +660,9 @@ def export_materials(scene, fs):
         output_node = find_output_node(material)
         if output_node is None:
             continue
+        
+        surface_shader_valid = output_node.isSurfaceConnected()
+        volume_shader_valid = output_node.isVolumeConnected()
 
         compact_material_name = name_compat(material.name)
         matname_to_id[compact_material_name] = i
@@ -717,6 +720,11 @@ def export_materials(scene, fs):
                 parent_node , _ = cloned_parent_node_stack.pop()
                 collect_node_count( parent_node , visited , cloned_parent_node_stack , True )
 
+            # skip nodes that don't require serliaizing shaders
+            # this is a corner case only true for output nodes, which has two separate shaders
+            if mat_node.needSerializingShader() is False:
+                return
+
             shader_name = ''
             shader_type = ''
             shader_node = None
@@ -745,6 +753,8 @@ def export_materials(scene, fs):
 
         fs.serialize( '' )
         fs.serialize( 'verification_string' )
+        fs.serialize( bool(surface_shader_valid) )
+        fs.serialize( bool(volume_shader_valid) )
         fs.serialize( bool(has_transparent_node) )
 
         # serialize this material
@@ -754,5 +764,5 @@ def export_materials(scene, fs):
             fs.serialize( connection[1] )
             fs.serialize( connection[2] )
             fs.serialize( connection[3] )
-
+        
     log( 'Exported %d materials in total.' %(len(materials)) )

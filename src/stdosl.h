@@ -502,6 +502,9 @@ closure color fabric(color basecolor, float roughness, normal N) BUILTIN;
 closure color subsurfaceScattering(color basecolor, vector scatteringDistance, normal N) BUILTIN;
 closure color transparent(color basecolor) BUILTIN;
 
+closure color medium_absorption(color basecolor, float absorption) BUILTIN;
+closure color medium_homogeneous(color basecolor, float absorption, float scattering) BUILTIN;
+
 #undef BUILTIN
 #undef BUILTIN_DERIV
 #undef PERCOMP1

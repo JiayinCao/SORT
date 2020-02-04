@@ -51,7 +51,7 @@ public:
         // this should happen most of the time in the absence of transparent node.
         if( !m_hasTransparentNode )
             return 0.0f;
-        return ::EvaluateTransparency( m_shader.get() , intersection );
+        return ::EvaluateTransparency(m_surface_shader.get() , intersection );
     }
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -64,8 +64,7 @@ public:
     //! @brief  Build shader in OSL.
     //!
     //! @param  shadingSys      Open-Shading-Language shading system.
-    //! @return                 Whether the shader is created successfully.
-    bool        BuildMaterial();
+    void        BuildMaterial();
 
     //! @brief  Get material ID.
     //!
@@ -90,7 +89,9 @@ public:
 
 private:
     /**< Whether this is a valid material */
-    bool                            m_valid = false;
+    bool                            m_surface_shader_valid = false;
+    bool                            m_volume_shader_valid = false;
+
     /**< Unique name of the material. */
     std::string                     m_name;
     /**< Material id. */
@@ -111,8 +112,9 @@ private:
     /**< Shader connections. */
     std::vector<ShaderConnection>   m_connections;
 
-    /**< OSL device shader. */
-    OSL::ShaderGroupRef             m_shader = nullptr;
+    /**< OSL device surface shader. */
+    OSL::ShaderGroupRef             m_surface_shader = nullptr;
+    OSL::ShaderGroupRef             m_volume_shader = nullptr;
 
     bool                            m_hasTransparentNode = false;
 };
