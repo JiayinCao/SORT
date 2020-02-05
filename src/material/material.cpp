@@ -29,67 +29,49 @@ void Material::BuildMaterial(){
     const auto message = "Build Material '" + m_name + "'";
     SORT_PROFILE(message);
 
-    static constexpr char* surface_shader_root = "shader SORT_Surface_Shader( closure color Surface = color(0) ){\nCi = Surface;\n}";
-    static constexpr char* surface_volume_root = "shader SORT_Volume_Shader( closure color Volume = color(0) ){\nCi = Volume;\n}";
+    static constexpr auto surface_shader_root = "shader SORT_Surface_Shader( closure color Surface = color(0) ){\nCi = Surface;\n}";
+    static constexpr auto surface_volume_root = "shader SORT_Volume_Shader( closure color Volume = color(0) ){\nCi = Volume;\n}";
 
-    const std::string output_node_name = "ShaderOutput_" + m_name;
+    const auto output_node_name = "ShaderOutput_" + m_name;
 
     auto tried_building_surface_shader = false;
     auto tried_building_volume_shader = false;
 
-    // Build surface shader
-    if (m_surface_shader_valid) {
-        m_surface_shader = BeginShaderGroup(m_name);
-
-        // build all shader nodes
-        for (const auto& shader : m_sources)
-            BuildShader(shader.source, shader.name, shader.name, m_name);
-
-        // root surface shader
-        BuildShader(surface_shader_root, output_node_name, output_node_name, m_name);
-
-        // connecting surface shader nodes
-        for (const auto& connection : m_connections)
-            if (!ConnectShader(connection.source_shader, connection.source_property, connection.target_shader, connection.target_property))
-                m_surface_shader_valid = false;
-
-        m_surface_shader_valid &= EndShaderGroup();
-
-        if (m_surface_shader_valid) {
-            const auto message = "Optimizing surface shader in material '" + m_name + "'";
-            SORT_PROFILE(message);
-            OptimizeShader(m_surface_shader.get());
-        }
-
-        tried_building_surface_shader = true;
-    }
-
-    if (m_volume_shader_valid) {
+    auto build_shader_type = [&](const OSL_ShaderData& shader_data , bool& shader_valid , bool& trying_building_shader_type , OSL::ShaderGroupRef& shader_ref ) {
         // Build surface shader
-        m_volume_shader = BeginShaderGroup(m_name);
+        if (shader_valid) {
+            shader_ref = BeginShaderGroup(m_name);
 
-        // build all shader nodes
-        for (const auto& shader : m_sources)
-            BuildShader(shader.source, shader.name, shader.name, m_name);
+            // build all shader nodes
+            for (const auto& shader : shader_data.m_sources)
+                BuildShader(shader.source, shader.name, shader.name, m_name);
 
-        // root volume shader
-        BuildShader(surface_volume_root, output_node_name, output_node_name, m_name);
+            // root surface shader
+            BuildShader(surface_shader_root, output_node_name, output_node_name, m_name);
 
-        // connecting surface shader nodes
-        for (const auto& connection : m_connections)
-            if (!ConnectShader(connection.source_shader, connection.source_property, connection.target_shader, connection.target_property))
-                m_volume_shader_valid = false;
+            // connecting surface shader nodes
+            for (const auto& connection : shader_data.m_connections) {
+                if (!ConnectShader(connection.source_shader, connection.source_property, connection.target_shader, connection.target_property))
+                    m_surface_shader_valid = false;
+            }
 
-        m_volume_shader_valid &= EndShaderGroup();
+            shader_valid &= EndShaderGroup();
 
-        if (m_volume_shader_valid) {
-            const auto message = "Optimizing volume shader in material '" + m_name + "'";
-            SORT_PROFILE(message);
-            OptimizeShader(m_volume_shader.get());
+            if (shader_valid) {
+                const auto message = "Optimizing surface shader in material '" + m_name + "'";
+                SORT_PROFILE(message);
+                OptimizeShader(shader_ref.get());
+            }
+
+            trying_building_shader_type = true;
         }
+    };
 
-        tried_building_volume_shader = true;
-    }
+    // build surface shader
+    build_shader_type(m_surface_shader_data, m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
+
+    // build volume shader
+    build_shader_type(m_volume_shader_data, m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
 
     auto build_shader_succesfully = true;
     if (tried_building_surface_shader && !m_surface_shader_valid ) {
@@ -101,12 +83,10 @@ void Material::BuildMaterial(){
         build_shader_succesfully = false;
     }
 
-    if (build_shader_succesfully) {
+    if (build_shader_succesfully)
         slog(INFO, MATERIAL, "Build material %s successfully.", m_name.c_str());
-        
-    }else{
+    else
 		slog(WARNING, MATERIAL, "Build material %s unsuccessfully.", m_name.c_str());
-	}
 }
 
 void Material::Serialize(IStreamBase& stream){
@@ -116,47 +96,56 @@ void Material::Serialize(IStreamBase& stream){
     const auto message = "Parsing Material '" + m_name + "'";
     SORT_PROFILE(message.c_str());
 
-    do{
-        ShaderSource shader_source;
-        stream >> shader_source.name >> shader_source.type;
+    auto parse_shader_type = [&](OSL_ShaderData& shader_data, bool& is_shader_valid) {
+        is_shader_valid = true;
 
-        //std::cout << shader_source.name << "\t" << shader_source.type << std::endl;
+        // parse surface shader
+        do {
+            ShaderSource shader_source;
+            stream >> shader_source.name >> shader_source.type;
 
-        if( shader_source.name.empty() ){
-            if( shader_source.type != "verification_string" )
-                sAssertMsg( false , RESOURCE , "Serialization is broken." );
-            stream >> m_surface_shader_valid;
-            stream >> m_volume_shader_valid;
-            stream >> m_hasTransparentNode;
-            break;
+            if (shader_source.name.empty()) {
+                if (shader_source.type == "invalid_shader")
+                    is_shader_valid = false;
+                else if (shader_source.type != "shader_done")
+                    sAssertMsg(false, RESOURCE, "Serialization is broken.");
+                break;
+            }
+
+            // it seems that shader name is a global unit, same shader name may conflict even if they are in different shader group
+            shader_source.name = shader_source.name;
+
+            std::vector<std::string> paramDefaultValues;
+            auto parameter_cnt = 0u;
+            stream >> parameter_cnt;
+            for (auto j = 0u; j < parameter_cnt; ++j) {
+                std::string defaultValue;
+                stream >> defaultValue;
+                paramDefaultValues.push_back(defaultValue);
+            }
+
+            // construct the shader source code
+            shader_source.source = MatManager::GetSingleton().ConstructShader(shader_source.name, shader_source.type, paramDefaultValues);
+
+            shader_data.m_sources.push_back(shader_source);
+        } while (true);
+
+        if (is_shader_valid) {
+            auto connection_cnt = 0u;
+            stream >> connection_cnt;
+            for (auto i = 0u; i < connection_cnt; ++i) {
+                ShaderConnection connection;
+                stream >> connection.source_shader >> connection.source_property;
+                stream >> connection.target_shader >> connection.target_property;
+                shader_data.m_connections.push_back(connection);
+            }
         }
+    };
 
-        // it seems that shader name is a global unit, same shader name may conflict even if they are in different shader group
-        shader_source.name = shader_source.name;
+    parse_shader_type(m_surface_shader_data, m_surface_shader_valid);
+    parse_shader_type(m_volume_shader_data, m_volume_shader_valid);
 
-        std::vector<std::string> paramDefaultValues;
-        auto parameter_cnt = 0u;
-        stream >> parameter_cnt;
-        for (auto j = 0u; j < parameter_cnt; ++j) {
-            std::string defaultValue;
-            stream >> defaultValue;
-            paramDefaultValues.push_back(defaultValue);
-        }
-
-        // construct the shader source code
-        shader_source.source = MatManager::GetSingleton().ConstructShader(shader_source.name, shader_source.type, paramDefaultValues);
-
-        m_sources.push_back( shader_source );
-    }while( true );
-
-    auto connection_cnt = 0u;
-    stream >> connection_cnt;
-    for (auto i = 0u; i < connection_cnt; ++i) {
-        ShaderConnection connection;
-        stream >> connection.source_shader >> connection.source_property;
-        stream >> connection.target_shader >> connection.target_property;
-        m_connections.push_back( connection );
-    }
+    stream >> m_hasTransparentNode;
 }
 
 void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {

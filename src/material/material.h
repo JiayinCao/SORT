@@ -107,10 +107,16 @@ private:
         std::string target_shader , target_property;
     };
 
-    /**< Shader source code. */
-    std::vector<ShaderSource>       m_sources;
-    /**< Shader connections. */
-    std::vector<ShaderConnection>   m_connections;
+    struct OSL_ShaderData {
+        /**< Shader source code. */
+        std::vector<ShaderSource>       m_sources;
+        /**< Shader connections. */
+        std::vector<ShaderConnection>   m_connections;
+    };
+
+    /**< OSL shader source data. */
+    OSL_ShaderData                  m_surface_shader_data;
+    OSL_ShaderData                  m_volume_shader_data;
 
     /**< OSL device surface shader. */
     OSL::ShaderGroupRef             m_surface_shader = nullptr;

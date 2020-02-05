@@ -939,12 +939,17 @@ class SORTNodeOutput(SORTShadingNode):
     # no unique name for output node
     def getUniqueName(self):
         return 'ShaderOutput_'
-    # whether there is connection in surface shader
-    def isSurfaceConnected(self):
-        return get_from_socket( self.inputs[0] ) is not None
+    # get the surface shader if connected
+    def getSurfaceShader(self):
+        from_socket = get_from_socket( self.inputs[0] )
+        return ( None , False ) if from_socket is None else ( from_socket.node , True )
     # whether there is connection in volume shader
-    def isVolumeConnected(self):
-        return get_from_socket( self.inputs[1] ) is not None
+    def getVolumeShader(self):
+        # this is a hacky line to make old assets compatible with the new shader output node layout
+        if len(self.inputs):
+            return ( None , False )
+        from_socket = get_from_socket( self.inputs[1] )
+        return ( None , False ) if from_socket is None else ( from_socket.node , True )
 
 @base.register_class
 class SORTNodeExposedInputs(SORTShadingNode):

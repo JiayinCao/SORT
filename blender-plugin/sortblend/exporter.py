@@ -550,7 +550,7 @@ def find_output_node(material):
     return None
 
 # get the from node of this socket if there is one recursively
-def get_from_socket(socket, parent_node_stack, visited):
+def get_from_socket(socket, visited):
     if not socket.is_linked:
         return None
 
@@ -560,7 +560,7 @@ def get_from_socket(socket, parent_node_stack, visited):
     if other.node in visited:
         return None
     if other.node.bl_idname == 'NodeReroute':
-        return get_from_socket(other.node.inputs[0], parent_node_stack, visited )
+        return get_from_socket(other.node.inputs[0], visited )
     return other
 
 # This function will iterate through all visited nodes in the scene and populate everything in a hash table
@@ -593,7 +593,7 @@ def collect_shader_resources(scene, fs):
                 serialize_prop( output_node , shaders , cloned_parent_node_stack )
             else:
                 for socket in mat_node.inputs:
-                    from_socket = get_from_socket( socket , parent_node_stack , dummy )
+                    from_socket = get_from_socket( socket , dummy )
                     if from_socket is not None:
                         serialize_prop( from_socket.node , shaders , parent_node_stack )
 
@@ -661,8 +661,8 @@ def export_materials(scene, fs):
         if output_node is None:
             continue
         
-        surface_shader_valid = output_node.isSurfaceConnected()
-        volume_shader_valid = output_node.isVolumeConnected()
+        surface_shader_node , surface_shader_valid = output_node.getSurfaceShader()
+        volume_shader_node , volume_shader_valid = output_node.getVolumeShader()
 
         compact_material_name = name_compat(material.name)
         matname_to_id[compact_material_name] = i
@@ -674,9 +674,7 @@ def export_materials(scene, fs):
         has_transparent_node = False
 
         # collect node count
-        mat_connections = []    # connections between nodes
-        visited = set()         # prevent a node to be serialized twice
-        def collect_node_count(mat_node, visited, parent_node_stack, leaving_group = False):
+        def collect_node_count(mat_node, visited, parent_node_stack, input_index = -1 , leaving_group = False):
             if mat_node.isTransparentNode() is True:
                 nonlocal has_transparent_node
                 has_transparent_node = True
@@ -691,8 +689,9 @@ def export_materials(scene, fs):
                 output_node = mat_node.getGroupTree().nodes.get("Group Outputs")
                 collect_node_count( output_node , visited , cloned_parent_node_stack )
             else:
-                for socket in mat_node.inputs:
-                    input_socket = get_from_socket( socket , parent_node_stack , visited )
+                inputs = mat_node.inputs if input_index < 0 else [mat_node.inputs[input_index]]
+                for socket in inputs:
+                    input_socket = get_from_socket( socket , visited )
                     if input_socket is None:
                         continue
                     input_node = input_socket.node
@@ -718,10 +717,9 @@ def export_materials(scene, fs):
 
             if mat_node.isGroupInputNode():
                 parent_node , _ = cloned_parent_node_stack.pop()
-                collect_node_count( parent_node , visited , cloned_parent_node_stack , True )
+                collect_node_count( parent_node , visited , cloned_parent_node_stack , -1 , True )
 
-            # skip nodes that don't require serliaizing shaders
-            # this is a corner case only true for output nodes, which has two separate shaders
+            # skip if this node doesn't need to be serialized
             if mat_node.needSerializingShader() is False:
                 return
 
@@ -747,22 +745,49 @@ def export_materials(scene, fs):
                 shader_node.serialize_prop( fs )
                 visited.add( shader_name )
 
-        # collect all material nodes
-        parent_node_stack = [ ( None , compact_material_name ) ]
-        collect_node_count(output_node, visited, parent_node_stack)
+        # serialize surface shader
+        if surface_shader_valid:
+            mat_connections = []    # connections between nodes
+            visited = set()         # prevent a node to be serialized twice
+            parent_node_stack = [ ( None , compact_material_name ) ]
+            collect_node_count(output_node, visited, parent_node_stack, 0)
+            
+            fs.serialize( '' )
+            fs.serialize( 'shader_done' )
 
-        fs.serialize( '' )
-        fs.serialize( 'verification_string' )
-        fs.serialize( bool(surface_shader_valid) )
-        fs.serialize( bool(volume_shader_valid) )
+            # serialize this material
+            fs.serialize( len( mat_connections ) )
+            for connection in mat_connections:
+                fs.serialize( connection[0] )
+                fs.serialize( connection[1] )
+                fs.serialize( connection[2] )
+                fs.serialize( connection[3] )
+        else:
+            fs.serialize( '' )
+            fs.serialize( 'invalid_shader' )
+
+        # serializing volume shader
+        if volume_shader_valid:
+            mat_connections = []    # connections between nodes
+            visited = set()         # prevent a node to be serialized twice
+            parent_node_stack = [ ( None , compact_material_name ) ]
+            collect_node_count(output_node, visited, parent_node_stack, 1)
+
+            fs.serialize( '' )
+            fs.serialize( 'shader_done' )
+
+            # serialize this material
+            fs.serialize( len( mat_connections ) )
+            for connection in mat_connections:
+                fs.serialize( connection[0] )
+                fs.serialize( connection[1] )
+                fs.serialize( connection[2] )
+                fs.serialize( connection[3] )
+        else:
+            fs.serialize( '' )
+            fs.serialize( 'invalid_shader' )
+        
+        # mark whether there is transparent support in the material, this is very important because it will affect performance eventually.
         fs.serialize( bool(has_transparent_node) )
 
-        # serialize this material
-        fs.serialize( len( mat_connections ) )
-        for connection in mat_connections:
-            fs.serialize( connection[0] )
-            fs.serialize( connection[1] )
-            fs.serialize( connection[2] )
-            fs.serialize( connection[3] )
-        
     log( 'Exported %d materials in total.' %(len(materials)) )
