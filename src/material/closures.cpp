@@ -767,7 +767,7 @@ void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& 
         }
         default: {
             const ClosureComponent* comp = closure->as_comp();
-            sAssert(comp->id >= 0 && comp->id < CLOSURE_CNT, MATERIAL);
+            sAssert(comp->id >= 0 && comp->id < SURFACE_CLOSURE_CNT, MATERIAL);
             sAssert(g_surface_closures[comp->id] != nullptr, MATERIAL);
             g_surface_closures[comp->id]->Process(comp, w * comp->w , se);
         }
@@ -792,7 +792,7 @@ Spectrum ProcessOpacity(const OSL::ClosureColor* closure, const OSL::Color3& w )
         }
         default: {
             const ClosureComponent* comp = closure->as_comp();
-            sAssert(comp->id >= 0 && comp->id < CLOSURE_CNT, MATERIAL);
+            sAssert(comp->id >= 0 && comp->id < SURFACE_CLOSURE_CNT, MATERIAL);
             sAssert(g_surface_closures[comp->id] != nullptr, MATERIAL);
             occlusion += g_surface_closures[comp->id]->EvaluateOpacity(comp, w * comp->w);
         }
