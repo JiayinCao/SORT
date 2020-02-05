@@ -106,7 +106,7 @@ void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
     shaderglobals.dPdu = Vec3( 0.0f );
     g_shadingsys->execute(g_contexts[ ThreadId() ], *shader, shaderglobals);
 
-    ProcessClosure( shaderglobals.Ci , Color3( 1.0f ) , se );
+    ProcessSurfaceClosure( shaderglobals.Ci , Color3( 1.0f ) , se );
 }
 
 Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const SurfaceInteraction& intersection ){

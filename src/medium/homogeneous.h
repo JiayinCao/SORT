@@ -28,12 +28,17 @@
  */
 class HomogeneousMedium : public Medium{
 public:
+    // Input parameters to construct the volume.
+    struct Params {
+        OSL::Vec3   baseColor;
+        OSL::Float  absorption;
+        OSL::Float  scattering;
+    };
+
     //! @brief  Constructor.
     //!
-    //! @param a            Absorption coefficient.
-    //! @param s            Scattering coefficient.
-    //! @param ph           Phase function.
-    HomogeneousMedium( const Spectrum& a , const Spectrum& s , const PhaseFunction* ph ):a(a),s(s),t(s+a),ph(ph){
+    //! @param param    Parameter to build the volume.
+    HomogeneousMedium(const HomogeneousMedium::Params& param):a(param.absorption),s(param.scattering),t(param.absorption+ param.scattering),ph(nullptr){
     }
 
     //! @brief  Evaluation of beam transmittance.

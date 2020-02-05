@@ -22,28 +22,35 @@
 
 class ScatteringEvent;
 
-enum BXDF_CLOSURE_TYPE {
-    CLOSURE_LAMBERT = 0,
-    CLOSURE_OREN_NAYAR,
-    CLOSURE_DISNEY,
-    CLOSURE_MICROFACET_REFLECTION,
-    CLOSURE_MICROFACET_REFRACTION,
-    CLOSURE_ASHIKHMANSHIRLEY,
-    CLOSURE_PHONG,
-    CLOSURE_LAMBERT_TRANSMITTANCE,
-    CLOSURE_MIRROR,
-    CLOSURE_DIELETRIC,
-    CLOSURE_MICROFACET_REFLECTION_DIELETRIC,
-    CLOSURE_HAIR,
-    CLOSURE_FOURIER_BDRF,
-    CLOSURE_MERL_BRDF,
-    CLOSURE_COAT,
-    CLOSURE_DOUBLESIDED,
-    CLOSURE_DISTRIBUTIONBRDF,
-    CLOSURE_FABRIC,
-    CLOSURE_SSS,
-    CLOSURE_TRANSPARENT,
-    CLOSURE_CNT,
+enum SURFACE_CLOSURE_TYPE {
+    SURFACE_CLOSURE_LAMBERT = 0,
+    SURFACE_CLOSURE_OREN_NAYAR,
+    SURFACE_CLOSURE_DISNEY,
+    SURFACE_CLOSURE_MICROFACET_REFLECTION,
+    SURFACE_CLOSURE_MICROFACET_REFRACTION,
+    SURFACE_CLOSURE_ASHIKHMANSHIRLEY,
+    SURFACE_CLOSURE_PHONG,
+    SURFACE_CLOSURE_LAMBERT_TRANSMITTANCE,
+    SURFACE_CLOSURE_MIRROR,
+    SURFACE_CLOSURE_DIELETRIC,
+    SURFACE_CLOSURE_MICROFACET_REFLECTION_DIELETRIC,
+    SURFACE_CLOSURE_HAIR,
+    SURFACE_CLOSURE_FOURIER_BDRF,
+    SURFACE_CLOSURE_MERL_BRDF,
+    SURFACE_CLOSURE_COAT,
+    SURFACE_CLOSURE_DOUBLESIDED,
+    SURFACE_CLOSURE_DISTRIBUTIONBRDF,
+    SURFACE_CLOSURE_FABRIC,
+    SURFACE_CLOSURE_SSS,
+    SURFACE_CLOSURE_TRANSPARENT,
+    SURFACE_CLOSURE_CNT,
+};
+
+enum VOLUME_CLOSURE_TYPE {
+    VOLUME_CLOSURE_ABSORPTION,
+    VOLUME_CLOSURE_HOMOGENEOUS,
+    VOLUME_CLOSURE_HETEROGENOUS,
+    VOLUME_CLOSURE_CNT,
 };
 
 //! @brief  Register all closures supported by SORT.
@@ -56,7 +63,7 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys);
 //! @param  closure         The closure tree in the osl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inderits from the higher level tree nodes.
 //! @param  se              The result scattering event.
-void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se );
+void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se );
 
 //! @brief  Evaluate how opaque the surface is in the OSL shader.
 //!

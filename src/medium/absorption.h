@@ -27,10 +27,16 @@
  */
 class AbsorptionMedium : public Medium{
 public:
+    // Input parameters to construct the volume.
+    struct Params {
+        OSL::Vec3   baseColor;
+        OSL::Float  absorption;
+    };
+
     //! @brief  Constructor.
     //!
-    //! @param a            Absorption coefficient.
-    AbsorptionMedium( const Spectrum& a , const PhaseFunction* ph ):a(a){
+    //! @param param        Parameter to build the volume.
+    AbsorptionMedium( const AbsorptionMedium::Params& param ):a(param.baseColor), absorption(param.absorption){
     }
 
     //! @brief  Evaluation of beam transmittance.
@@ -53,4 +59,5 @@ public:
 
 private:
     const Spectrum          a;
+    const float             absorption;
 };

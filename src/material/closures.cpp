@@ -38,6 +38,8 @@
 #include "scatteringevent/bsdf/transparent.h"
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
+#include "medium/absorption.h"
+#include "medium/homogeneous.h"
 
 using namespace OSL;
 
@@ -54,17 +56,25 @@ namespace {
 
         Closure_Base() = default;
         virtual ~Closure_Base() = default;
-        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se ) const = 0;
-
-        virtual Spectrum EvaluateOpacity( const ClosureComponent* comp, const OSL::Color3& w ) const{
-            return w;
-        }
     };
 
-    static std::vector<std::unique_ptr<Closure_Base>>   g_closures(CLOSURE_CNT);
+    struct Surface_Closure_Base : public Closure_Base {
+        virtual Spectrum EvaluateOpacity(const ClosureComponent* comp, const OSL::Color3& w) const {
+            return w;
+        }
 
-    struct Closure_Lambert : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_LAMBERT;
+        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const = 0;
+    };
+
+    struct Volume_Closure_Base : public Closure_Base {
+
+    };
+
+    static std::vector<std::unique_ptr<Surface_Closure_Base>>   g_surface_closures(SURFACE_CLOSURE_CNT);
+    static std::vector<std::unique_ptr<Volume_Closure_Base>>    g_volume_closures(VOLUME_CLOSURE_CNT);
+
+    struct Surface_Closure_Lambert : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_LAMBERT;
 
         static const char* GetName(){
             return "lambert";
@@ -85,8 +95,8 @@ namespace {
         }
     };
 
-    struct Closure_OrenNayar : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_OREN_NAYAR;
+    struct Surface_Closure_OrenNayar : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_OREN_NAYAR;
 
         static const char* GetName(){
             return "orenNayar";
@@ -108,8 +118,8 @@ namespace {
         }
     };
 
-    struct Closure_Disney : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_DISNEY;
+    struct Surface_Closure_Disney : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_DISNEY;
 
         static const char* GetName(){
             return "disney";
@@ -201,8 +211,8 @@ namespace {
         }
     };
 
-    struct Closure_MicrofacetReflection : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_MICROFACET_REFLECTION;
+    struct Surface_Closure_MicrofacetReflection : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFLECTION;
 
         static const char* GetName(){
             return "microfacetReflection";
@@ -228,8 +238,8 @@ namespace {
         }
     };
 
-    struct Closure_MicrofacetRefraction : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_MICROFACET_REFRACTION;
+    struct Surface_Closure_MicrofacetRefraction : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFRACTION;
 
         static const char* GetName(){
             return "microfacetRefraction";
@@ -255,8 +265,8 @@ namespace {
         }
     };
 
-    struct Closure_AshikhmanShirley : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_ASHIKHMANSHIRLEY;
+    struct Surface_Closure_AshikhmanShirley : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_ASHIKHMANSHIRLEY;
 
         static const char* GetName(){
             return "ashikhmanShirley";
@@ -280,8 +290,8 @@ namespace {
         }
     };
 
-    struct Closure_Phong : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_PHONG;
+    struct Surface_Closure_Phong : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_PHONG;
 
         static const char* GetName(){
             return "phong";
@@ -304,8 +314,8 @@ namespace {
         }
     };
 
-    struct Closure_LambertTransmission : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_LAMBERT_TRANSMITTANCE;
+    struct Surface_Closure_LambertTransmission : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_LAMBERT_TRANSMITTANCE;
 
         static const char* GetName(){
             return "lambertTransmission";
@@ -326,8 +336,8 @@ namespace {
         }
     };
 
-    struct Closure_Mirror : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_MIRROR;
+    struct Surface_Closure_Mirror : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_MIRROR;
 
         static const char* GetName(){
             return "mirror";
@@ -348,8 +358,8 @@ namespace {
         }
     };
 
-    struct Closure_Dielectric : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_DIELETRIC;
+    struct Surface_Closure_Dielectric : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_DIELETRIC;
 
         static const char* GetName(){
             return "dieletric";
@@ -373,8 +383,8 @@ namespace {
         }
     };
 
-    struct Closure_MicrofacetReflectionDielectric : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_MICROFACET_REFLECTION_DIELETRIC;
+    struct Surface_Closure_MicrofacetReflectionDielectric : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFLECTION_DIELETRIC;
 
         static const char* GetName(){
             return "microfacetReflectionDieletric";
@@ -400,8 +410,8 @@ namespace {
         }
     };
 
-    struct Closure_Hair : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_HAIR;
+    struct Surface_Closure_Hair : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_HAIR;
 
         static const char* GetName(){
             return "hair";
@@ -424,8 +434,8 @@ namespace {
         }
     };
 
-    struct Closure_FourierBRDF : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_FOURIER_BDRF;
+    struct Surface_Closure_FourierBRDF : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_FOURIER_BDRF;
 
         static const char* GetName(){
             return "fourierBRDF";
@@ -446,8 +456,8 @@ namespace {
         }
     };
 
-    struct Closure_MERL : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_MERL_BRDF;
+    struct Surface_Closure_MERL : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_MERL_BRDF;
 
         static const char* GetName(){
             return "merlBRDF";
@@ -468,8 +478,8 @@ namespace {
         }
     };
 
-    struct Closure_Coat : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_COAT;
+    struct Surface_Closure_Coat : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_COAT;
 
         static const char* GetName(){
             return "coat";
@@ -490,13 +500,13 @@ namespace {
         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
             const auto& params = *comp->as<Coat::Params>();
             ScatteringEvent* bottom = SORT_MALLOC(ScatteringEvent)(se.GetIntersection(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-            ProcessClosure(params.closure, Color3(1.0f), *bottom);
+            ProcessSurfaceClosure(params.closure, Color3(1.0f), *bottom);
             se.AddBxdf(SORT_MALLOC(Coat)(params, w, bottom));
         }
     };
 
-    struct Closure_DoubleSided : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_DOUBLESIDED;
+    struct Surface_Closure_DoubleSided : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_DOUBLESIDED;
 
         static const char* GetName(){
             return "doubleSided";
@@ -515,14 +525,14 @@ namespace {
             const auto& params = *comp->as<DoubleSided::Params>();
             ScatteringEvent* se0 = SORT_MALLOC(ScatteringEvent)(se.GetIntersection(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
             ScatteringEvent* se1 = SORT_MALLOC(ScatteringEvent)(se.GetIntersection(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-            ProcessClosure(params.bxdf0, Color3(1.0f), *se0);
-            ProcessClosure(params.bxdf1, Color3(1.0f), *se1);
+            ProcessSurfaceClosure(params.bxdf0, Color3(1.0f), *se0);
+            ProcessSurfaceClosure(params.bxdf1, Color3(1.0f), *se1);
             se.AddBxdf(SORT_MALLOC(DoubleSided)(se0, se1, w));
         }
     };
 
-    struct Closure_DistributionBRDF : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_DISTRIBUTIONBRDF;
+    struct Surface_Closure_DistributionBRDF : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_DISTRIBUTIONBRDF;
 
         static const char* GetName(){
             return "distributionBRDF";
@@ -546,8 +556,8 @@ namespace {
         }
     };
 
-    struct Closure_Fabric : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_FABRIC;
+    struct Surface_Closure_Fabric : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_FABRIC;
 
         static const char* GetName() {
             return "fabric";
@@ -569,8 +579,8 @@ namespace {
         }
     };
 
-    struct Closure_SSS : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_SSS;
+    struct Surface_Closure_SSS : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_SSS;
 
         static const char* GetName() {
             return "subsurfaceScattering";
@@ -640,8 +650,8 @@ namespace {
         }
     };
 
-    struct Closure_Transparent : public Closure_Base {
-        static constexpr int    ClosureID = CLOSURE_TRANSPARENT;
+    struct Surface_Closure_Transparent : public Surface_Closure_Base {
+        static constexpr int    ClosureID = SURFACE_CLOSURE_TRANSPARENT;
 
         static const char* GetName() {
             return "transparent";
@@ -665,61 +675,101 @@ namespace {
             return 1.0f - Spectrum(params.attenuation);
         }
     };
+
+    struct Volume_Closure_Absorption : public Volume_Closure_Base {
+        static constexpr int    ClosureID = VOLUME_CLOSURE_ABSORPTION;
+
+        static const char* GetName() {
+            return "medium_absorption";
+        }
+
+        static void Register(ShadingSystem* shadingsys) {
+            BuiltinClosures closure = { GetName(), ClosureID,{
+                CLOSURE_COLOR_PARAM(AbsorptionMedium::Params, baseColor),
+                CLOSURE_FLOAT_PARAM(AbsorptionMedium::Params, absorption),
+                CLOSURE_FINISH_PARAM(AbsorptionMedium::Params)
+            } };
+            shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
+        }
+    };
+
+    struct Volume_Closure_Homogeneous : public Volume_Closure_Base {
+        static constexpr int    ClosureID = VOLUME_CLOSURE_HOMOGENEOUS;
+
+        static const char* GetName() {
+            return "medium_homogeneous";
+        }
+
+        static void Register(ShadingSystem* shadingsys) {
+            BuiltinClosures closure = { GetName(), ClosureID,{
+                CLOSURE_COLOR_PARAM(HomogeneousMedium::Params, baseColor),
+                CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, absorption),
+                CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, scattering),
+                CLOSURE_FINISH_PARAM(HomogeneousMedium::Params)
+            } };
+            shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
+        }
+    };
 }
 
 template< typename T >
-void registerClosure(OSL::ShadingSystem* shadingsys) {
+static void registerSurfaceClosure(OSL::ShadingSystem* shadingsys) {
     T::Register(shadingsys);
+    g_surface_closures[T::ClosureID] = std::make_unique<T>();
+}
 
-    // Unit test will register a closure multiple times
-    // sAssertMsg(g_closures[T::ClosureID] == nullptr, MATERIAL, "Closure slot duplicated!");
-
-    g_closures[T::ClosureID] = std::make_unique<T>();
+template< typename T >
+static void registerVolumeClosure(OSL::ShadingSystem* shadingsys) {
+    T::Register(shadingsys);
+    g_volume_closures[T::ClosureID] = std::make_unique<T>();
 }
 
 void RegisterClosures(OSL::ShadingSystem* shadingsys) {
-    registerClosure<Closure_Lambert>(shadingsys);
-    registerClosure<Closure_OrenNayar>(shadingsys);
-    registerClosure<Closure_Disney>(shadingsys);
-    registerClosure<Closure_MicrofacetReflection>(shadingsys);
-    registerClosure<Closure_MicrofacetRefraction>(shadingsys);
-    registerClosure<Closure_AshikhmanShirley>(shadingsys);
-    registerClosure<Closure_Phong>(shadingsys);
-    registerClosure<Closure_LambertTransmission>(shadingsys);
-    registerClosure<Closure_Mirror>(shadingsys);
-    registerClosure<Closure_Dielectric>(shadingsys);
-    registerClosure<Closure_MicrofacetReflectionDielectric>(shadingsys);
-    registerClosure<Closure_Hair>(shadingsys);
-    registerClosure<Closure_MERL>(shadingsys);
-    registerClosure<Closure_Coat>(shadingsys);
-    registerClosure<Closure_DoubleSided>(shadingsys);
-    registerClosure<Closure_FourierBRDF>(shadingsys);
-    registerClosure<Closure_DistributionBRDF>(shadingsys);
-    registerClosure<Closure_Fabric>(shadingsys);
-    registerClosure<Closure_SSS>(shadingsys);
-    registerClosure<Closure_Transparent>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Lambert>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_OrenNayar>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Disney>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_MicrofacetRefraction>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_AshikhmanShirley>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Phong>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_LambertTransmission>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Mirror>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Dielectric>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_MicrofacetReflectionDielectric>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Hair>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_MERL>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Coat>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_DoubleSided>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_FourierBRDF>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_DistributionBRDF>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Fabric>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_SSS>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Transparent>(shadingsys);
+
+    registerVolumeClosure<Volume_Closure_Absorption>(shadingsys);
+    registerVolumeClosure<Volume_Closure_Homogeneous>(shadingsys);
 }
 
-void ProcessClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se ){
+void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se ){
     if (!closure)
         return;
 
     switch (closure->id) {
         case ClosureColor::MUL: {
             Color3 cw = w * closure->as_mul()->weight;
-            ProcessClosure(closure->as_mul()->closure, cw , se);
+            ProcessSurfaceClosure(closure->as_mul()->closure, cw , se);
             break;
         }
         case ClosureColor::ADD: {
-            ProcessClosure(closure->as_add()->closureA, w , se);
-            ProcessClosure(closure->as_add()->closureB, w , se);
+            ProcessSurfaceClosure(closure->as_add()->closureA, w , se);
+            ProcessSurfaceClosure(closure->as_add()->closureB, w , se);
             break;
         }
         default: {
             const ClosureComponent* comp = closure->as_comp();
             sAssert(comp->id >= 0 && comp->id < CLOSURE_CNT, MATERIAL);
-            sAssert(g_closures[comp->id] != nullptr, MATERIAL);
-            g_closures[comp->id]->Process(comp, w * comp->w , se);
+            sAssert(g_surface_closures[comp->id] != nullptr, MATERIAL);
+            g_surface_closures[comp->id]->Process(comp, w * comp->w , se);
         }
     }
 }
@@ -743,8 +793,8 @@ Spectrum ProcessOpacity(const OSL::ClosureColor* closure, const OSL::Color3& w )
         default: {
             const ClosureComponent* comp = closure->as_comp();
             sAssert(comp->id >= 0 && comp->id < CLOSURE_CNT, MATERIAL);
-            sAssert(g_closures[comp->id] != nullptr, MATERIAL);
-            occlusion += g_closures[comp->id]->EvaluateOpacity(comp, w * comp->w);
+            sAssert(g_surface_closures[comp->id] != nullptr, MATERIAL);
+            occlusion += g_surface_closures[comp->id]->EvaluateOpacity(comp, w * comp->w);
         }
     }
     return occlusion;
