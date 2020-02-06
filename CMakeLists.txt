@@ -177,7 +177,7 @@ if(MSVC)
         # the following line doesn't work somehow
         #set_target_properties( SORT PROPERTIES COMPILE_FLAGS_RELEASE "${COMPILE_FLAGS} /GL")
 
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /GL")
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /GL")
         set_target_properties( SORT PROPERTIES LINK_FLAGS_RELEASE "${LINK_FLAGS} /LTCG")
     endif()
 
