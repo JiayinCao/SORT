@@ -946,7 +946,7 @@ class SORTNodeOutput(SORTShadingNode):
     # whether there is connection in volume shader
     def getVolumeShader(self):
         # this is a hacky line to make old assets compatible with the new shader output node layout
-        if len(self.inputs):
+        if len(self.inputs) is 1:
             return ( None , False )
         from_socket = get_from_socket( self.inputs[1] )
         return ( None , False ) if from_socket is None else ( from_socket.node , True )
