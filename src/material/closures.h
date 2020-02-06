@@ -21,6 +21,7 @@
 #include "spectrum/spectrum.h"
 
 class ScatteringEvent;
+class MediumStack;
 
 enum SURFACE_CLOSURE_TYPE {
     SURFACE_CLOSURE_LAMBERT = 0,
@@ -64,6 +65,13 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys);
 //! @param  w               The weight of this closure tree, this also counts the weight inderits from the higher level tree nodes.
 //! @param  se              The result scattering event.
 void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se );
+
+//! @brief  Process the closure tree result and populate the MediumStack.
+//!
+//! @param  closure         The closure tree in the osl shader.
+//! @param  w               The weight of this closure tree, this also counts the weight inderits from the higher level tree nodes.
+//! @param  mediumStack     The medium stack container that holds the result.
+void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack);
 
 //! @brief  Evaluate how opaque the surface is in the OSL shader.
 //!

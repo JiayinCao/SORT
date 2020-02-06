@@ -30,7 +30,7 @@ SORT_FORCEINLINE float MisFactor( float f, float g ){
 
 Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Scene& scene , const Light* light ,
                             const LightSample& ls ,const BsdfSample& bs ){
-    const auto& ip = se.GetIntersection();
+    const auto& ip = se.GetInteraction();
     Spectrum radiance;
     Visibility visibility(scene);
     float light_pdf;

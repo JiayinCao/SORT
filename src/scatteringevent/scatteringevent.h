@@ -90,7 +90,7 @@ public:
 
     //! @brief Get intersection information of the point at which the bsdf is evaluated.
     //! @return The intersection information of the point at which the bsdf is evaluated.
-    SORT_FORCEINLINE const SurfaceInteraction& GetIntersection() const {
+    SORT_FORCEINLINE const SurfaceInteraction& GetInteraction() const {
         return m_intersection;
     }
 

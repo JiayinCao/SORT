@@ -45,6 +45,7 @@ enum class LOG_TYPE{
     LOG_INTEGRATOR,
     LOG_LIGHT,
     LOG_MATERIAL,
+    LOG_VOLUME,
     LOG_IMAGE,
     LOG_SAMPLING,
     LOG_CAMERA,

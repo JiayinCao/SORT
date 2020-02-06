@@ -38,6 +38,7 @@
 #include "scatteringevent/bsdf/transparent.h"
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
+#include "medium/medium.h"
 #include "medium/absorption.h"
 #include "medium/homogeneous.h"
 
@@ -67,7 +68,7 @@ namespace {
     };
 
     struct Volume_Closure_Base : public Closure_Base {
-
+        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& me) const = 0;
     };
 
     static std::vector<std::unique_ptr<Surface_Closure_Base>>   g_surface_closures(SURFACE_CLOSURE_CNT);
@@ -199,7 +200,7 @@ namespace {
 
                 const auto diffuseWeight = (Spectrum)( weight * (1.0f - params.metallic) * (1.0 - params.specTrans) );
                 if (!sssBaseColor.IsBlack() && bxdf_sampling_weight < 1.0f && !diffuseWeight.IsBlack() )
-                    se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight * bssrdf_pdf ) );
+                    se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight * bssrdf_pdf ) );
 
 #ifdef SSS_REPLACE_WITH_LAMBERT
                 if (addExtraLambert && !baseColor.IsBlack())
@@ -499,7 +500,7 @@ namespace {
 
         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
             const auto& params = *comp->as<Coat::Params>();
-            ScatteringEvent* bottom = SORT_MALLOC(ScatteringEvent)(se.GetIntersection(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+            ScatteringEvent* bottom = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
             ProcessSurfaceClosure(params.closure, Color3(1.0f), *bottom);
             se.AddBxdf(SORT_MALLOC(Coat)(params, w, bottom));
         }
@@ -523,8 +524,8 @@ namespace {
 
         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
             const auto& params = *comp->as<DoubleSided::Params>();
-            ScatteringEvent* se0 = SORT_MALLOC(ScatteringEvent)(se.GetIntersection(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-            ScatteringEvent* se1 = SORT_MALLOC(ScatteringEvent)(se.GetIntersection(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+            ScatteringEvent* se0 = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+            ScatteringEvent* se1 = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
             ProcessSurfaceClosure(params.bxdf0, Color3(1.0f), *se0);
             ProcessSurfaceClosure(params.bxdf1, Color3(1.0f), *se1);
             se.AddBxdf(SORT_MALLOC(DoubleSided)(se0, se1, w));
@@ -637,12 +638,12 @@ namespace {
                 
                 const auto bssrdf_pdf = bssrdf_channel_weight / total_channel_weight;
                 if (!mfp.IsBlack() && !sssBaseColor.IsBlack())
-                    se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), sssBaseColor, mfp, weight, pdf_weight * bssrdf_pdf ));
+                    se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, mfp, weight, pdf_weight * bssrdf_pdf ));
 
                 if (addExtraLambert && !baseColor.IsBlack())
                     se.AddBxdf(SORT_MALLOC(Lambert)(baseColor, weight, pdf_weight * ( 1.0f - bssrdf_pdf ), params.n));
 #else
-                se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetIntersection(), params.baseColor, params.scatterDistance, weight ));
+                se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), params.baseColor, params.scatterDistance, weight ));
 #endif
             }else{
                 se.AddBxdf(SORT_MALLOC(Lambert)(params.baseColor, weight , params.n));
@@ -691,6 +692,10 @@ namespace {
             } };
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
+
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& me) const override{
+
+        }
     };
 
     struct Volume_Closure_Homogeneous : public Volume_Closure_Base {
@@ -708,6 +713,10 @@ namespace {
                 CLOSURE_FINISH_PARAM(HomogeneousMedium::Params)
             } };
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
+        }
+
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& me) const override {
+
         }
     };
 }
@@ -770,6 +779,30 @@ void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& 
             sAssert(comp->id >= 0 && comp->id < SURFACE_CLOSURE_CNT, MATERIAL);
             sAssert(g_surface_closures[comp->id] != nullptr, MATERIAL);
             g_surface_closures[comp->id]->Process(comp, w * comp->w , se);
+        }
+    }
+}
+
+void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack) {
+    if (!closure)
+        return;
+
+    switch (closure->id) {
+        case ClosureColor::MUL: {
+            // no support for blending volume for now.
+            sAssert(false, VOLUME);
+            break;
+        }
+        case ClosureColor::ADD: {
+            // no support for blending volume for now.
+            sAssert(false, VOLUME);
+            break;
+        }
+        default: {
+            const ClosureComponent* comp = closure->as_comp();
+            sAssert(comp->id >= 0 && comp->id < VOLUME_CLOSURE_CNT, VOLUME);
+            sAssert(g_volume_closures[comp->id] != nullptr, VOLUME);
+            g_volume_closures[comp->id]->Process(comp, w * comp->w, mediumStack);
         }
     }
 }

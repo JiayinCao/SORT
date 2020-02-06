@@ -155,3 +155,7 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
         se.AddBxdf(SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
 }
 
+void Material::UpdateMediumStack(MediumStack& ms) const {
+    if (m_volume_shader_valid)
+        ExecuteShader(m_volume_shader.get(), ms);
+}

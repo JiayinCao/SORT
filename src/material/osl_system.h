@@ -34,6 +34,7 @@
 
 class ScatteringEvent;
 struct SurfaceInteraction;
+class MediumStack;
 
 struct ShadingContextWrapper {
 public:
@@ -63,6 +64,12 @@ bool ConnectShader( const std::string& source_shader , const std::string& source
 //! @param  shader      The osl shader to be evaluated.
 //! @param  se          The resulting scattering event.
 void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
+
+//! @brief  Execute a shader and populate the medium stack
+//!
+//! @param  shader      The osl shader to be evaluated.
+//! @param  ms          The medium stack to hold the results.
+void ExecuteShader(OSL::ShaderGroup* shader, MediumStack& se);
 
 //! @brief  Evaluate the transparency of the intersection.
 //!

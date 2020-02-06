@@ -25,6 +25,7 @@
 
 struct SurfaceInteraction;
 class ScatteringEvent;
+class MediumStack;
 
 //! @brief  A thin layer of material definition.
 /**
@@ -42,6 +43,11 @@ public:
     //!
     //! @param      se              Scattering event to be returned.
     void        UpdateScatteringEvent( ScatteringEvent& se ) const;
+
+    //! @brief      Parse volume from the material shader.
+    //!
+    //! @param      ms              Medium stack to be populdated.
+    void        UpdateMediumStack( MediumStack& ms ) const;
 
     //! @brief      Evaluate translucency.
     //!

@@ -43,3 +43,55 @@ public:
     //! @return             The beam transmittance between the ray origin and the interaction.
     virtual Spectrum Sample( const Ray& ray , MediumInteraction*& interaction ) const = 0;
 };
+
+// There is only support up to 8 medium overlap each other, exceeding this limit will cause problems in rendering.
+#define MEDIUM_MAX_CNT      8
+
+//! @brief  Data structure to hold all mediums.
+/**
+ * Technically, MediumStack is not a stack. It is more of a general data container holding all mediums.
+ * It is called 'stack' because it is a stack if every volume is fully contained in other volumes, which
+ * could likely to be true most of the time.
+ * This is the equivalent data structure of ScatteringEvent, except that this is for volumetric rendering.
+ * These two data structures don't share a common code infrastructure because the fundamental differences
+ * between them.
+ */
+class MediumStack {
+public:
+    //! @brief  Default constructor that does nothing.
+    //!
+    //! @param  mi      Medium interaction of interest.
+    MediumStack(const MediumInteraction& mi);
+
+    //! @brief  Destructor that does nothing. It is not responsible for deallocating all memory it holds.
+    ~MediumStack() = default;
+
+    //! @brief  Add a medium in the data structure.
+    //!
+    //! @param  medium      Medium to be added.
+    //! @return             Whether the medium is added in the stack.
+    bool    AddMedium(const Medium* medium);
+
+    //! @brief  Remove a medium from the data structure.
+    //!
+    //! @param  medium      Medium to remove.
+    //! @return             Whether the medium is removed. If the medium is not even in the container, it will return false.
+    bool    RemoveMedium(const Medium* medium);
+
+    //! @brief  Get the interaction where the medium is evaluated.
+    //!
+    //! @return             Medium interaction at where the mediums are evaluated.
+    const MediumInteraction& GetInteraction() const {
+        return m_mediumInteraction;
+    }
+
+private:
+    /**< Mediums it holds. */
+    const Medium*    m_mediums[MEDIUM_MAX_CNT] = { nullptr };
+
+    /**< Number of mediums in the stack currently. */
+    unsigned         m_mediumCnt = 0;
+
+    /**< Medium interfaction of interest. */
+    const MediumInteraction& m_mediumInteraction;
+};
