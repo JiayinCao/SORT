@@ -68,11 +68,27 @@ namespace {
     };
 
     struct Volume_Closure_Base : public Closure_Base {
-        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& me) const = 0;
+        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms) const = 0;
     };
 
     static std::vector<std::unique_ptr<Surface_Closure_Base>>   g_surface_closures(SURFACE_CLOSURE_CNT);
     static std::vector<std::unique_ptr<Volume_Closure_Base>>    g_volume_closures(VOLUME_CLOSURE_CNT);
+
+    inline static Surface_Closure_Base* getSurfaceClosureBase(unsigned int closure_id) {
+        sAssert(closure_id >= 0 && closure_id < SURFACE_CLOSURE_CNT, MATERIAL);
+        sAssert(g_surface_closures[closure_id] != nullptr, MATERIAL);
+
+        return g_surface_closures[closure_id].get();
+    }
+
+    inline static Volume_Closure_Base* getVolumeClosureBase(unsigned int closure_id) {
+        closure_id -= VOLUME_CLOSURE_BASE;
+
+        sAssert(closure_id >= 0 && closure_id < VOLUME_CLOSURE_CNT, VOLUME);
+        sAssert(g_volume_closures[closure_id] != nullptr, VOLUME);
+
+        return g_volume_closures[closure_id].get();
+    }
 
     struct Surface_Closure_Lambert : public Surface_Closure_Base {
         static constexpr int    ClosureID = SURFACE_CLOSURE_LAMBERT;
@@ -693,8 +709,9 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
-        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& me) const override{
-
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms) const override{
+            const auto& params = *comp->as<AbsorptionMedium::Params>();
+            ms.AddMedium(SORT_MALLOC(AbsorptionMedium)(params));
         }
     };
 
@@ -715,8 +732,9 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
-        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& me) const override {
-
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms) const override {
+            const auto& params = *comp->as<HomogeneousMedium::Params>();
+            ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params));
         }
     };
 }
@@ -730,7 +748,7 @@ static void registerSurfaceClosure(OSL::ShadingSystem* shadingsys) {
 template< typename T >
 static void registerVolumeClosure(OSL::ShadingSystem* shadingsys) {
     T::Register(shadingsys);
-    g_volume_closures[T::ClosureID] = std::make_unique<T>();
+    g_volume_closures[T::ClosureID - VOLUME_CLOSURE_BASE] = std::make_unique<T>();
 }
 
 void RegisterClosures(OSL::ShadingSystem* shadingsys) {
@@ -776,9 +794,7 @@ void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& 
         }
         default: {
             const ClosureComponent* comp = closure->as_comp();
-            sAssert(comp->id >= 0 && comp->id < SURFACE_CLOSURE_CNT, MATERIAL);
-            sAssert(g_surface_closures[comp->id] != nullptr, MATERIAL);
-            g_surface_closures[comp->id]->Process(comp, w * comp->w , se);
+            getSurfaceClosureBase(comp->id)->Process(comp, w * comp->w , se);
         }
     }
 }
@@ -800,9 +816,7 @@ void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w
         }
         default: {
             const ClosureComponent* comp = closure->as_comp();
-            sAssert(comp->id >= 0 && comp->id < VOLUME_CLOSURE_CNT, VOLUME);
-            sAssert(g_volume_closures[comp->id] != nullptr, VOLUME);
-            g_volume_closures[comp->id]->Process(comp, w * comp->w, mediumStack);
+            getVolumeClosureBase(comp->id)->Process(comp, w * comp->w, mediumStack);
         }
     }
 }
@@ -825,9 +839,7 @@ Spectrum ProcessOpacity(const OSL::ClosureColor* closure, const OSL::Color3& w )
         }
         default: {
             const ClosureComponent* comp = closure->as_comp();
-            sAssert(comp->id >= 0 && comp->id < SURFACE_CLOSURE_CNT, MATERIAL);
-            sAssert(g_surface_closures[comp->id] != nullptr, MATERIAL);
-            occlusion += g_surface_closures[comp->id]->EvaluateOpacity(comp, w * comp->w);
+            occlusion += getSurfaceClosureBase(comp->id)->EvaluateOpacity(comp, w * comp->w);
         }
     }
     return occlusion;
