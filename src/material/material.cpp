@@ -37,7 +37,7 @@ void Material::BuildMaterial(){
     auto tried_building_surface_shader = false;
     auto tried_building_volume_shader = false;
 
-    auto build_shader_type = [&](const OSL_ShaderData& shader_data , bool& shader_valid , bool& trying_building_shader_type , OSL::ShaderGroupRef& shader_ref ) {
+    auto build_shader_type = [&](const OSL_ShaderData& shader_data , const char* root_shader , const std::string prefix , bool& shader_valid , bool& trying_building_shader_type , OSL::ShaderGroupRef& shader_ref ) {
         // Build surface shader
         if (shader_valid) {
             shader_ref = BeginShaderGroup(m_name);
@@ -47,11 +47,12 @@ void Material::BuildMaterial(){
                 BuildShader(shader.source, shader.name, shader.name, m_name);
 
             // root surface shader
-            BuildShader(surface_shader_root, output_node_name, output_node_name, m_name);
+            BuildShader(root_shader, prefix + output_node_name, prefix + output_node_name, m_name);
 
             // connecting surface shader nodes
             for (const auto& connection : shader_data.m_connections) {
-                if (!ConnectShader(connection.source_shader, connection.source_property, connection.target_shader, connection.target_property))
+                const auto target_shader = connection.target_shader == output_node_name ? prefix + output_node_name : connection.target_shader;
+                if (!ConnectShader(connection.source_shader, connection.source_property, target_shader, connection.target_property))
                     m_surface_shader_valid = false;
             }
 
@@ -68,10 +69,10 @@ void Material::BuildMaterial(){
     };
 
     // build surface shader
-    build_shader_type(m_surface_shader_data, m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
+    build_shader_type(m_surface_shader_data, surface_shader_root, "Surface" , m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
 
     // build volume shader
-    build_shader_type(m_volume_shader_data, m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
+    build_shader_type(m_volume_shader_data, surface_volume_root, "Volume" , m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
 
     auto build_shader_succesfully = true;
     if (tried_building_surface_shader && !m_surface_shader_valid ) {

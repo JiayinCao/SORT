@@ -26,6 +26,7 @@ bool MediumStack::AddMedium(const Medium* medium) {
         return false;
 
     m_mediums[m_mediumCnt++] = medium;
+    return true;
 }
 
 bool MediumStack::RemoveMedium(const Medium* medium) {
