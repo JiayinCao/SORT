@@ -39,7 +39,7 @@ public:
     //! @param  mat     Material attached to the primitive.
     //! @param  shape   Shape of the material.
     //! @param  light   Light source attached to the material.
-    Primitive(MaterialBase* mat , Shape* shape , class Light* light = nullptr ):
+    Primitive(const MaterialBase* mat , Shape* shape , class Light* light = nullptr ):
         m_mat(mat), m_shape(shape), m_light(light){}
 
     //! @brief  Get the intersection between a ray and the primitive.
@@ -87,7 +87,7 @@ public:
     //! A default red material will be used for primitives with no materials or invalid materials.
     //!
     //! @return         Material attached to the primitives.
-    SORT_FORCEINLINE MaterialBase* GetMaterial() const{
+    SORT_FORCEINLINE const MaterialBase* GetMaterial() const{
         return m_mat == nullptr ? MatManager::GetSingleton().GetDefaultMat() : m_mat;
     }
 
@@ -115,7 +115,7 @@ public:
     }
 
 private:
-    MaterialBase*       m_mat;      /**< The material attached to the primitive. */
-    Shape*              m_shape;    /**< The shape of the primitive. */
-    class Light*        m_light;    /**< Light source attached to the primitive. */
+    const MaterialBase*     m_mat;      /**< The material attached to the primitive. */
+    Shape*                  m_shape;    /**< The shape of the primitive. */
+    class Light*            m_light;    /**< Light source attached to the primitive. */
 };

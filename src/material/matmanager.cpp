@@ -107,7 +107,7 @@ Resource* MatManager::GetResource(int index) {
     return m_resources[index].get();
 }
 
-MaterialBase* MatManager::CreateMaterialProxy(const MaterialBase& material) {
+const MaterialBase* MatManager::CreateMaterialProxy(const MaterialBase& material) {
     m_matPool.push_back(std::move(std::make_unique<MaterialProxy>(material)));
     return m_matPool.back().get();
 }

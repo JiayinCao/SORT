@@ -37,8 +37,8 @@ struct MeshVertex {
 
 //! @brief  MeshFaceIndex defines the indices of the three vertices and also the material index of the face.
 struct MeshFaceIndex {
-    int               m_id[3] = { -1 };   /**< Indices for one triangle. */
-    MaterialBase*     m_mat = nullptr;    /**< Materials attached to the triangle. */
+    int                     m_id[3] = { -1 };   /**< Indices for one triangle. */
+    const MaterialBase*     m_mat = nullptr;    /**< Materials attached to the triangle. */
 };
 
 //! @brief  A wrapper for mesh information.

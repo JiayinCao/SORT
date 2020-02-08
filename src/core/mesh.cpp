@@ -116,7 +116,7 @@ void MeshMemory::Serialize( IStreamBase& stream ){
         stream >> mv.m_position >> mv.m_normal >> mv.m_texCoord;
 
     // mapping from original material to material proxy
-    std::unordered_map<MaterialBase*, MaterialBase*> mapping;
+    std::unordered_map<const MaterialBase*, const MaterialBase*> mapping;
 
     stream >> ib_cnt;
     m_indices.resize(ib_cnt);

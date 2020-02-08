@@ -40,7 +40,7 @@ public:
     //! @param  matId   Id of the material. If this is an out-of-boundary id, default material
     //!                 will be returned.
     //! @return         Pointer for material returned.
-    MaterialBase* GetMaterial(int matId) const {
+    const MaterialBase* GetMaterial(int matId) const {
         if (matId < 0 || matId >= (int)m_matPool.size())
             return GetDefaultMat();
         return m_matPool[matId].get();
@@ -50,10 +50,10 @@ public:
     //!
     //! @param  material    The material to be proxied.
     //! @return             A material proxy that refers the to provided material.
-    MaterialBase* CreateMaterialProxy(const MaterialBase& material);
+    const MaterialBase* CreateMaterialProxy(const MaterialBase& material);
 
     // get default material
-    MaterialBase* GetDefaultMat() const{
+    const MaterialBase* GetDefaultMat() const{
         static Material defaultMat;
         return &defaultMat;
     }
