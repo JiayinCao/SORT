@@ -64,7 +64,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
     const auto source = po + r * ( vx * cos(phi) + vz * sin(phi) ) + l * vy * 0.5f;
     
     const Ray ray( source , -vy , 0 , 0.0001f , l );
-    scene.GetIntersect( ray , inter , intersection->primitive->GetMaterial()->GetID() );
+    scene.GetIntersect( ray , inter , intersection->primitive->GetMaterial()->GetUniqueID() );
 
     for( auto i = 0u ; i < inter.cnt ; ++i ){
         sAssert( inter.intersections[i] != nullptr , MATERIAL );

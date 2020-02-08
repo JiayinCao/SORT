@@ -63,11 +63,13 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
         // serialize shader
         mat->Serialize( stream );
 
-        // compile shader
-        mat->BuildMaterial();
+        if ( UNLIKELY(!noMaterialSupport) ) {
+            // compile shader
+            mat->BuildMaterial();
 
-        if( !noMaterialSupport )
-            m_matPool.push_back( std::move(mat) );
+            // push the compiled material in the pool
+            m_matPool.push_back(std::move(mat));
+        }
     }
 
     return material_cnt;
@@ -103,4 +105,9 @@ Resource* MatManager::GetResource(int index) {
     if (index < 0 || index >= m_resources.size())
         return nullptr;
     return m_resources[index].get();
+}
+
+MaterialBase* MatManager::CreateMaterialProxy(const MaterialBase& material) {
+    m_matPool.push_back(std::move(std::make_unique<MaterialProxy>(material)));
+    return m_matPool.back().get();
 }

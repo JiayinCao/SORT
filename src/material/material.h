@@ -27,6 +27,54 @@ struct SurfaceInteraction;
 class ScatteringEvent;
 class MediumStack;
 
+//! @brief  Base interface for material.
+/**
+ * MaterialBase is the basic interface for materials.
+ */
+class MaterialBase : public SerializableObject {
+public:
+    //! @brief      Parse scattering event from the material shader.
+    //!
+    //! @param      se              Scattering event to be returned.
+    virtual void       UpdateScatteringEvent(ScatteringEvent& se) const = 0;
+
+    //! @brief      Parse volume from the material shader.
+    //!
+    //! @param      ms              Medium stack to be populdated.
+    virtual void       UpdateMediumStack(MediumStack& ms) const = 0;
+
+    //! @brief      Evaluate translucency.
+    //!
+    //! @param      intersection    The intersection.
+    //! @return                     The transparency at the intersection.
+    virtual Spectrum   EvaluateTransparency(const SurfaceInteraction& intersection) const = 0;
+
+    //! @brief  Build shader in OSL.
+    //!
+    //! @param  shadingSys      Open-Shading-Language shading system.
+    virtual void       BuildMaterial() = 0;
+
+    //! @brief  Get material ID.
+    //!
+    //! @return     Material ID that uniquely identifies the material.
+    virtual StringID   GetUniqueID() const = 0;
+
+    //! @brief  Whether the material has transparency
+    //!
+    //! @return Return true if there is transpancy in the material.
+    virtual bool       HasTransparency() const = 0;
+
+    //! @brief  Whether the material has sss
+    //!
+    //! @return Return true if there is sss node in the material.
+    virtual bool       HasSSS() const = 0;
+
+    //! @brief  Whether the material is attached with a volume.
+    //!
+    //! @return Return true if the material is attached with a volume.
+    virtual bool HasVolumeAttached() const = 0;
+};
+
 //! @brief  A thin layer of material definition.
 /**
  * SORT supports node-graph based material system so that it could be flexible enough to support varies features.
@@ -37,23 +85,23 @@ class MediumStack;
  * Imageworks, following is the link to the github page to access its source code.
  * https://github.com/imageworks/OpenShadingLanguage
  */
-class Material : public SerializableObject{
+class Material : public MaterialBase {
 public:
     //! @brief      Parse scattering event from the material shader.
     //!
     //! @param      se              Scattering event to be returned.
-    void        UpdateScatteringEvent( ScatteringEvent& se ) const;
+    void        UpdateScatteringEvent( ScatteringEvent& se ) const override;
 
     //! @brief      Parse volume from the material shader.
     //!
     //! @param      ms              Medium stack to be populdated.
-    void        UpdateMediumStack( MediumStack& ms ) const;
+    void        UpdateMediumStack( MediumStack& ms ) const override;
 
     //! @brief      Evaluate translucency.
     //!
     //! @param      intersection    The intersection.
     //! @return                     The transparency at the intersection.
-    SORT_FORCEINLINE Spectrum    EvaluateTransparency( const SurfaceInteraction& intersection ) const{
+    Spectrum    EvaluateTransparency( const SurfaceInteraction& intersection ) const override{
         // this should happen most of the time in the absence of transparent node.
         if( !m_hasTransparentNode )
             return 0.0f;
@@ -70,27 +118,34 @@ public:
     //! @brief  Build shader in OSL.
     //!
     //! @param  shadingSys      Open-Shading-Language shading system.
-    void        BuildMaterial();
+    void        BuildMaterial() override;
 
     //! @brief  Get material ID.
     //!
     //! @return     Material ID that uniquely identifies the material.
-    SORT_FORCEINLINE StringID    GetID() const {
+    StringID    GetUniqueID() const override {
         return m_matID;
     }
 
     //! @brief  Whether the material has transparency
     //!
     //! @return Return true if there is transpancy in the material.
-    SORT_FORCEINLINE bool HasTransparency() const {
+    bool        HasTransparency() const override {
         return m_hasTransparentNode;
     }
-
-    //! @brief  Get the name of material
+    
+    //! @brief  Whether the material has sss
     //!
-    //! @return Name of the material.
-    SORT_FORCEINLINE std::string GetName() const{
-        return m_name;
+    //! @return Return true if there is sss node in the material.
+    bool        HasSSS() const override {
+        return m_hasSSSNode;
+    }
+
+    //! @brief  Whether the material is attached with a volume.
+    //!
+    //! @return Return true if the material is attached with a volume.
+    bool        HasVolumeAttached() const override {
+        return m_volume_shader_valid;
     }
 
 private:
@@ -129,4 +184,68 @@ private:
     OSL::ShaderGroupRef             m_volume_shader = nullptr;
 
     bool                            m_hasTransparentNode = false;
+    bool                            m_hasSSSNode = false;
+};
+
+//! @brief  MaterialProxy is nothing but a thin wrapper of another existed material.
+/**
+ * MaterialProxy only direct all method to its referred material. The existance of MaterialProxy
+ * is to differentiate same material used in different mesh, which is fairly important in SSS and volumetric rendering.
+ */
+class MaterialProxy : public MaterialBase {
+public:
+    //! @brief  Constructor of material proxy taking a reference of its referred material.
+    //!
+    //! @param  material    Material to be referred.
+    MaterialProxy(const MaterialBase& material) : m_material(material) {}
+
+    //! @brief      Parse scattering event from the material shader.
+    //!
+    //! @param      se              Scattering event to be returned.
+    void       UpdateScatteringEvent(ScatteringEvent& se) const override;
+
+    //! @brief      Parse volume from the material shader.
+    //!
+    //! @param      ms              Medium stack to be populdated.
+    void       UpdateMediumStack(MediumStack& ms) const override;
+
+    //! @brief  Just an empty interface, there is no serialization support for this type of material.
+    //!
+    //! @param  stream      Input stream for data.
+    void        Serialize(IStreamBase& stream) override {}
+
+    //! @brief      Evaluate translucency.
+    //!
+    //! @param      intersection    The intersection.
+    //! @return                     The transparency at the intersection.
+    Spectrum   EvaluateTransparency(const SurfaceInteraction& intersection) const override;
+
+    //! @brief  This should be an emtpy method that does nothing
+    //!
+    //! @param  shadingSys      Open-Shading-Language shading system.
+    void       BuildMaterial() override {}
+
+    //! @brief  Get material ID.
+    //!
+    //! @return     Material ID that uniquely identifies the material.
+    StringID   GetUniqueID() const override;
+
+    //! @brief  Whether the material has transparency
+    //!
+    //! @return Return true if there is transpancy in the material.
+    bool       HasTransparency() const override;
+
+    //! @brief  Whether the material has sss
+    //!
+    //! @return Return true if there is sss node in the material.
+    bool       HasSSS() const override;
+
+    //! @brief  Whether the material is attached with a volume.
+    //!
+    //! @return Return true if the material is attached with a volume.
+    bool       HasVolumeAttached() const override;
+
+private:
+    /**< Material to be referred. */
+    const MaterialBase& m_material;
 };

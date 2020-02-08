@@ -672,6 +672,9 @@ class SORTShadingNode(bpy.types.Node):
     # whether the node is a transparent node
     def isTransparentNode(self):
         return False
+    # whether the node is a sss node
+    def isSSSNode(self):
+        return False
     # whether the shader node needs to export its shader source
     def needSerializingShader(self):
         return True
@@ -1537,6 +1540,12 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         fs.serialize( self.inputs['Normal'].export_osl_value() )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'is_thin_surface', text='Is Thin Surface')
+    def isSSSNode(self):
+        metallic = self.inputs['Metallic'].default_value
+        if metallic == 1:
+            return False
+        sd = self.inputs['Scatter Distance'].default_value
+        return sd[0] > 0 or sd[1] > 0 or sd[2] > 0
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Hair(SORTShadingNode):
@@ -1892,6 +1901,8 @@ class SORTNode_Material_SSS(SORTShadingNode):
         fs.serialize( self.inputs['Base Color'].export_osl_value() )
         fs.serialize( self.inputs['Scatter Distance'].export_osl_value() )
         fs.serialize( self.inputs['Normal'].export_osl_value() )
+    def isSSSNode(self):
+        return True
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Transparent(SORTShadingNode):

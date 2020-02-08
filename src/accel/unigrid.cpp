@@ -356,7 +356,7 @@ void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsign
 
     SurfaceInteraction intersection;
     for( auto primitive : m_voxels[voxelId] ){
-        if( matID != primitive->GetMaterial()->GetID() )
+        if( matID != primitive->GetMaterial()->GetUniqueID() )
             continue;
 
         // make sure the primitive is not checked before

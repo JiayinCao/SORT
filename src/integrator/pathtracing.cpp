@@ -141,6 +141,11 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             r.m_Dir = wi;
             r.m_fMin = 0.0001f;
         }else{
+            // Strictly speaking, it should consider the possibility of crossing a volume when exit from the other point of the SSS object.
+            // This is not handled propery in SORT because it is considered ill-defined scene in this case.
+            // In a nutshell, content creator should avoid putting SSS object across volumes.
+            // It is totally possible to reconstruct the volume stack after exiting from the SSS surface, which will most likely incur more costs.
+
             BSSRDFIntersections bssrdf_inter;
             float               bssrdf_pdf = 0.0f;
             se.Sample_BSSRDF( scene, -r.m_Dir, se.GetInteraction().intersect, bssrdf_inter , bssrdf_pdf);
@@ -154,9 +159,9 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     const auto& intersection = pInter->intersection;
 
                     // Create a temporary lambert model to account the cos factor
-                    // Fresnel is totally ignored here due to two reasons, the lack of visual differences 
-                    // and more importantly, there will be a discontinuity introduced when mean free path 
-                    // approaches zero.
+                    // Fresnel is totally ignored here due to two reasons
+                    //  - the lack of visual differences 
+                    //  - more importantly, there will be a discontinuity introduced when mean free path approaches zero.
                     ScatteringEvent se(pInter->intersection, SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ));
                     se.AddBxdf( SORT_MALLOC(Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
 

@@ -240,7 +240,7 @@ void Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , BSSRDFIntersecti
 
         SurfaceInteraction intersection;
         for(auto i = _start ; i < _end ; i++ ){
-            if( matID != m_bvhpri[i].primitive->GetMaterial()->GetID() )
+            if( matID != m_bvhpri[i].primitive->GetMaterial()->GetUniqueID() )
                 continue;
             SORT_STATS(++sIntersectionTest);
         

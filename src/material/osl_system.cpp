@@ -117,7 +117,7 @@ void ExecuteShader(OSL::ShaderGroup* shader, MediumStack& ms) {
     memset(&shaderglobals, 0, sizeof(shaderglobals));
     shaderglobals.P = Vec3(intersection.intersect.x, intersection.intersect.y, intersection.intersect.z);
     shaderglobals.I = Vec3(intersection.view.x, intersection.view.y, intersection.view.z);
-    bool ret = g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
+    g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
     ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms);
 }

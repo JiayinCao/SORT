@@ -25,6 +25,8 @@
 #include "math/transform.h"
 #include "stream/stream.h"
 
+class MaterialBase;
+
 //! @brief  MeshVertex defines the basic information for a vertex in mesh.
 struct MeshVertex {
     Point       m_position;     /**< The position of the vertex in world space. */
@@ -35,8 +37,8 @@ struct MeshVertex {
 
 //! @brief  MeshFaceIndex defines the indices of the three vertices and also the material index of the face.
 struct MeshFaceIndex {
-    int                 m_id[3] = { -1 };   /**< Indices for one triangle. */
-    class Material*     m_mat = nullptr;    /**< Materials attached to the triangle. */
+    int               m_id[3] = { -1 };   /**< Indices for one triangle. */
+    MaterialBase*     m_mat = nullptr;    /**< Materials attached to the triangle. */
 };
 
 //! @brief  A wrapper for mesh information.
@@ -47,7 +49,7 @@ struct MeshFaceIndex {
 //! The old solution was to isolate the position, normal and texture coordinate buffers so that we can try
 //! saving minimal information without duplicating unnecessary data. However, the effort to generate such a
 //! layout of date requires quite some time in Blender, due to which reason, it was deprecated.
-class BufferMemory : public SerializableObject{
+class MeshMemory : public SerializableObject{
 public:
     std::vector<MeshVertex>     m_vertices;         /**< Vertex information including position, normal and etc.*/
     std::vector<MeshFaceIndex>  m_indices;          /**< Index information of the mesh, there is also material id in it. */

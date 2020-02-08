@@ -23,7 +23,7 @@
 #include "stream/stream.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
-void BufferMemory::ApplyTransform( const Transform& transform ){
+void MeshMemory::ApplyTransform( const Transform& transform ){
     for (MeshVertex& mv : m_vertices) {
         mv.m_position = transform.TransformPoint(mv.m_position);
         mv.m_normal = transform.TransformNormal((mv.m_normal).Normalize());
@@ -37,7 +37,7 @@ void BufferMemory::ApplyTransform( const Transform& transform ){
     }
 }
 
-void BufferMemory::GenSmoothTagent(){
+void MeshMemory::GenSmoothTagent(){
     // generate tangent for each triangle
     std::vector<std::vector<Vector>> tangent(m_vertices.size());
     for (auto mi : m_indices) {
@@ -55,7 +55,7 @@ void BufferMemory::GenSmoothTagent(){
     }
 }
 
-void BufferMemory::GenUV(){
+void MeshMemory::GenUV(){
     if (m_hasUV || m_vertices.empty())
         return;
 
@@ -72,7 +72,7 @@ void BufferMemory::GenUV(){
     }
 }
 
-Vector BufferMemory::genTagentForTri( const MeshFaceIndex& mi ) const{
+Vector MeshMemory::genTagentForTri( const MeshFaceIndex& mi ) const{
     const auto& _v0 = m_vertices[mi.m_id[0]];
     const auto& _v1 = m_vertices[mi.m_id[1]];
     const auto& _v2 = m_vertices[mi.m_id[2]];
@@ -106,14 +106,17 @@ Vector BufferMemory::genTagentForTri( const MeshFaceIndex& mi ) const{
     return ( dv2 * dp1 - dv1 * dp2 ) / determinant;
 }
 
-// serialization interface for BufferMemory
-void BufferMemory::Serialize( IStreamBase& stream ){
+// serialization interface for MeshMemory
+void MeshMemory::Serialize( IStreamBase& stream ){
     stream >> m_hasUV;
     unsigned int vb_cnt, ib_cnt;
     stream >> vb_cnt;
     m_vertices.resize(vb_cnt);
     for (MeshVertex& mv : m_vertices)
         stream >> mv.m_position >> mv.m_normal >> mv.m_texCoord;
+
+    // mapping from original material to material proxy
+    std::unordered_map<MaterialBase*, MaterialBase*> mapping;
 
     stream >> ib_cnt;
     m_indices.resize(ib_cnt);
@@ -122,5 +125,15 @@ void BufferMemory::Serialize( IStreamBase& stream ){
         int mat_id = -1;
         stream >> mat_id;
         mi.m_mat = MatManager::GetSingleton().GetMaterial(mat_id);
+
+        // If there is SSS in the material or volume is attached to the material, it is necessary to create a material proxy to
+        // prevent the same material used in multiple places being recognized as the same one.
+        if (mi.m_mat->HasSSS() || mi.m_mat->HasVolumeAttached()) {
+            // material proxy of this material is not created yet.
+            if (0 == mapping.count(mi.m_mat))
+                mapping[mi.m_mat] = MatManager::GetSingleton().CreateMaterialProxy(*mi.m_mat);
+            
+            mi.m_mat = mapping[mi.m_mat];
+        }
     }
 }

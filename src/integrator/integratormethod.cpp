@@ -72,13 +72,11 @@ Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Sce
         if( !f.IsBlack() && bsdf_pdf != 0.0f ){
             auto weight = 1.0f;
             // There is no delta BRDF in SORT.
-            if( true ){
-                float light_pdf;
-                light_pdf = light->Pdf( ip.intersect , wi );
-                if( light_pdf <= 0.0f )
-                    return radiance;
-                weight = MisFactor( bsdf_pdf , light_pdf );
-            }
+            float light_pdf;
+            light_pdf = light->Pdf( ip.intersect , wi );
+            if( light_pdf <= 0.0f )
+                return radiance;
+            weight = MisFactor( bsdf_pdf , light_pdf );
 
             Spectrum li;
             SurfaceInteraction _ip;

@@ -147,6 +147,7 @@ void Material::Serialize(IStreamBase& stream){
     parse_shader_type(m_volume_shader_data, m_volume_shader_valid);
 
     stream >> m_hasTransparentNode;
+    stream >> m_hasSSSNode;
 }
 
 void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
@@ -159,4 +160,34 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
 void Material::UpdateMediumStack(MediumStack& ms) const {
     if (m_volume_shader_valid)
         ExecuteShader(m_volume_shader.get(), ms);
+}
+
+void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se) const {
+    return m_material.UpdateScatteringEvent(se);
+}
+
+void MaterialProxy::UpdateMediumStack(MediumStack& ms) const {
+    return m_material.UpdateMediumStack(ms);
+}
+
+StringID  MaterialProxy::GetUniqueID() const {
+    // Hopefully there is no conflict with the hash key constructed by the name of the material.
+    const std::uintptr_t ret = (const std::uintptr_t)this;
+    return (StringID)(ret);
+}
+
+Spectrum MaterialProxy::EvaluateTransparency(const SurfaceInteraction& intersection) const {
+    return m_material.EvaluateTransparency(intersection);
+}
+
+bool MaterialProxy::HasTransparency() const {
+    return m_material.HasTransparency();
+}
+
+bool MaterialProxy::HasSSS() const {
+    return m_material.HasSSS();
+}
+
+bool MaterialProxy::HasVolumeAttached() const {
+    return m_material.HasVolumeAttached();
 }

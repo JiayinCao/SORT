@@ -25,6 +25,8 @@
 #include "material/material.h"
 #include "core/resource.h"
 
+class MaterialBase;
+
 //! @brief Material manager.
 /**
  * This could very likely be a temporary solution for now.
@@ -38,14 +40,20 @@ public:
     //! @param  matId   Id of the material. If this is an out-of-boundary id, default material
     //!                 will be returned.
     //! @return         Pointer for material returned.
-    class Material* GetMaterial(int matId) const {
+    MaterialBase* GetMaterial(int matId) const {
         if (matId < 0 || matId >= (int)m_matPool.size())
             return GetDefaultMat();
         return m_matPool[matId].get();
     }
 
+    //! @brief  Create a material proxy given a material.
+    //!
+    //! @param  material    The material to be proxied.
+    //! @return             A material proxy that refers the to provided material.
+    MaterialBase* CreateMaterialProxy(const MaterialBase& material);
+
     // get default material
-    class Material* GetDefaultMat() const{
+    MaterialBase* GetDefaultMat() const{
         static Material defaultMat;
         return &defaultMat;
     }
@@ -69,7 +77,7 @@ public:
     Resource*   GetResource(int index);
 
 private:
-    std::vector<std::unique_ptr<class Material>>     m_matPool;         /**< Material pool holding all materials. */
+    std::vector<std::unique_ptr<MaterialBase>>       m_matPool;         /**< Material pool holding all materials. */
     std::unordered_map<std::string, std::string>     m_shaderSources;   /**< OSL shader source code. */
 
     std::vector<std::unique_ptr<Resource>>           m_resources;       /**< Resources used during BXDF evaluation. */

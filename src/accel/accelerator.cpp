@@ -50,7 +50,7 @@ bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
         return true;
     }
 
-    const Material* material = intersection.primitive->GetMaterial();
+    const MaterialBase* material = intersection.primitive->GetMaterial();
 
     sAssert( nullptr != material , SPATIAL_ACCELERATOR );
 

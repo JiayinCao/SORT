@@ -429,7 +429,7 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
         resolved_mask = resolved_mask & (resolved_mask - 1);
 
         const auto primitive = tri_simd.m_ori_pri[res_i];
-        if (matID != primitive->GetMaterial()->GetID())
+        if (matID != primitive->GetMaterial()->GetUniqueID())
             continue;
 
         if (intersections.cnt < TOTAL_SSS_INTERSECTION_CNT) {

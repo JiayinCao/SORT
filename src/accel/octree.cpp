@@ -285,7 +285,7 @@ void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFInt
     if( node->child[0] == nullptr ){
         SurfaceInteraction intersection;
         for( auto primitive : node->primitives ){
-            if( matID != primitive->GetMaterial()->GetID() )
+            if( matID != primitive->GetMaterial()->GetUniqueID() )
                 continue;
             
             // make sure the primitive is not checked before

@@ -672,12 +672,16 @@ def export_materials(scene, fs):
 
         # whether the material has transparent node
         has_transparent_node = False
+        has_sss_node = False
 
         # collect node count
         def collect_node_count(mat_node, visited, parent_node_stack, input_index = -1 , leaving_group = False):
             if mat_node.isTransparentNode() is True:
                 nonlocal has_transparent_node
                 has_transparent_node = True
+            if mat_node.isSSSNode() is True:
+                nonlocal has_sss_node
+                has_sss_node = True
 
             parent_node , accumulative_name = parent_node_stack.pop()
             parent_node_stack.append( ( parent_node , accumulative_name ) )
@@ -789,5 +793,6 @@ def export_materials(scene, fs):
         
         # mark whether there is transparent support in the material, this is very important because it will affect performance eventually.
         fs.serialize( bool(has_transparent_node) )
+        fs.serialize( bool(has_sss_node) )
 
     log( 'Exported %d materials in total.' %(len(materials)) )

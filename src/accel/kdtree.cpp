@@ -345,7 +345,7 @@ void KDTree::traverse( const Kd_Node* node , const Ray& ray , BSSRDFIntersection
         SurfaceInteraction intersection;
         
         for( auto primitive : node->primitivelist ){
-            if( matID != primitive->GetMaterial()->GetID() )
+            if( matID != primitive->GetMaterial()->GetUniqueID() )
                 continue;
             
             // make sure the primitive is not checked before
