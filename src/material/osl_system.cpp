@@ -110,7 +110,7 @@ void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
     ProcessSurfaceClosure( shaderglobals.Ci , Color3( 1.0f ) , se );
 }
 
-void ExecuteShader(OSL::ShaderGroup* shader, MediumStack& ms) {
+void ExecuteShader(OSL::ShaderGroup* shader, MediumStack& ms, const MaterialBase* material ) {
     const MediumInteraction& intersection = ms.GetInteraction();
 
     ShaderGlobals shaderglobals;
@@ -119,7 +119,7 @@ void ExecuteShader(OSL::ShaderGroup* shader, MediumStack& ms) {
     shaderglobals.I = Vec3(intersection.view.x, intersection.view.y, intersection.view.z);
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
-    ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms);
+    ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms, material);
 }
 
 Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const SurfaceInteraction& intersection ){

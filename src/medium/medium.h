@@ -22,9 +22,16 @@
 #include "math/ray.h"
 #include "math/interaction.h"
 
+class MaterialBase;
+
 //! @brief  Medium is a data structure holding volumetric rendering data.
 class Medium{
 public:
+	//! @brief	Constructor taking the material that spawns the medium.
+	//!
+	//! @param	mat			Material that spawns the medium.
+	Medium( const MaterialBase* material ) : material( material ){}
+
     //! @brief  Evaluation of beam transmittance.
     //!
     //! Beam transmittance is how much percentage of radiance get attenuated during
@@ -36,12 +43,23 @@ public:
     //! @return             The attenuation of each spectrum channel.
     virtual Spectrum Tr( const Ray& ray ) const = 0;
 
-    //! @brief  Imporance sampling a point along the ray in the medium.
+    //! @brief  Importance sampling a point along the ray in the medium.
     //!
     //! @param ray          The ray we use to take sample.
     //! @param interaction  The interaction sampled.
     //! @return             The beam transmittance between the ray origin and the interaction.
     virtual Spectrum Sample( const Ray& ray , MediumInteraction*& interaction ) const = 0;
+
+	//! @brief	Get the material that spawns the medium.
+	//!
+	//! @return				The material that spawns the medium.
+	SORT_FORCEINLINE  const MaterialBase* GetMaterial() const {
+		return material;
+	}
+
+protected:
+	/**< Material that spawn the medium. */
+	const MaterialBase*	material;
 };
 
 // There is only support up to 8 medium overlap each other, exceeding this limit will cause problems in rendering.
@@ -92,6 +110,6 @@ private:
     /**< Number of mediums in the stack currently. */
     unsigned         m_mediumCnt = 0;
 
-    /**< Medium interfaction of interest. */
+    /**< Medium interaction of interest. */
     const MediumInteraction& m_mediumInteraction;
 };

@@ -142,7 +142,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             r.m_fMin = 0.0001f;
         }else{
             // Strictly speaking, it should consider the possibility of crossing a volume when exit from the other point of the SSS object.
-            // This is not handled propery in SORT because it is considered ill-defined scene in this case.
+            // This is not handled properly in SORT because it is considered ill-defined scene in this case.
             // In a nutshell, content creator should avoid putting SSS object across volumes.
             // It is totally possible to reconstruct the volume stack after exiting from the SSS surface, which will most likely incur more costs.
 

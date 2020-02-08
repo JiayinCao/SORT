@@ -41,6 +41,7 @@
 #include "medium/medium.h"
 #include "medium/absorption.h"
 #include "medium/homogeneous.h"
+#include "material/material.h"
 
 using namespace OSL;
 
@@ -68,7 +69,7 @@ namespace {
     };
 
     struct Volume_Closure_Base : public Closure_Base {
-        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms) const = 0;
+        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const MaterialBase* material) const = 0;
     };
 
     static std::vector<std::unique_ptr<Surface_Closure_Base>>   g_surface_closures(SURFACE_CLOSURE_CNT);
@@ -709,9 +710,9 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
-        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms) const override{
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const MaterialBase* material) const override{
             const auto& params = *comp->as<AbsorptionMedium::Params>();
-            ms.AddMedium(SORT_MALLOC(AbsorptionMedium)(params));
+            ms.AddMedium(SORT_MALLOC(AbsorptionMedium)(params, material));
         }
     };
 
@@ -732,9 +733,9 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
-        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms) const override {
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const MaterialBase* material ) const override {
             const auto& params = *comp->as<HomogeneousMedium::Params>();
-            ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params));
+            ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params, material));
         }
     };
 }
@@ -799,7 +800,7 @@ void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& 
     }
 }
 
-void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack) {
+void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const MaterialBase* material ) {
     if (!closure)
         return;
 
@@ -816,7 +817,7 @@ void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w
         }
         default: {
             const ClosureComponent* comp = closure->as_comp();
-            getVolumeClosureBase(comp->id)->Process(comp, w * comp->w, mediumStack);
+            getVolumeClosureBase(comp->id)->Process(comp, w * comp->w, mediumStack, material);
         }
     }
 }

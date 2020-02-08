@@ -69,7 +69,8 @@ void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
 //!
 //! @param  shader      The osl shader to be evaluated.
 //! @param  ms          The medium stack to hold the results.
-void ExecuteShader(OSL::ShaderGroup* shader, MediumStack& se);
+//! @param	material	The material that spawns the volume. If nullptr, it means it is a world volume.
+void ExecuteShader(OSL::ShaderGroup* shader, MediumStack& se, const MaterialBase* material = nullptr );
 
 //! @brief  Evaluate the transparency of the intersection.
 //!

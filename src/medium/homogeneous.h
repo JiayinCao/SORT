@@ -37,9 +37,9 @@ public:
 
     //! @brief  Constructor.
     //!
-    //! @param param    Parameter to build the volume.
-    HomogeneousMedium(const HomogeneousMedium::Params& param):a(param.absorption),s(param.scattering),t(param.absorption+ param.scattering),ph(nullptr){
-    }
+    //! @param param		Parameter to build the volume.
+	//! @param material		Material that spawns the medium.
+    HomogeneousMedium(const HomogeneousMedium::Params& param, const MaterialBase* material):Medium(material),a(param.absorption),s(param.scattering),t(param.absorption+ param.scattering),ph(nullptr){}
 
     //! @brief  Evaluation of beam transmittance.
     //!

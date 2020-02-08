@@ -16,6 +16,7 @@
  */
 
 #include "medium.h"
+#include "material/material.h"
 
 MediumStack::MediumStack(const MediumInteraction& mi) :m_mediumInteraction(mi) {
 }
@@ -34,11 +35,19 @@ bool MediumStack::RemoveMedium(const Medium* medium) {
     if (0 == m_mediumCnt)
         return false;
 
+	const auto material = medium->GetMaterial();
+	if( !material )
+		return false;
+
+	const auto medium_id = material->GetUniqueID();
+
     // find the medium to be removed. Unfortunately, due to the lack of detail in data, the medium to be removed could be any
     // medium in the data structure, it is necessary to iterate through everything to find it.
     const Medium* last_medium = m_mediums[m_mediumCnt - 1];
     for (int i = m_mediumCnt - 1; i >= 0; --i) {
-        if (m_mediums[i] == medium) {
+		const auto material_i	= m_mediums[i]->GetMaterial();
+		const auto medium_id_i	= material_i ? material_i->GetUniqueID() : INVALID_SID;
+        if (medium_id_i == medium_id) {
             m_mediums[i] = last_medium;
             --m_mediumCnt;
             return true;

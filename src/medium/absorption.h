@@ -36,8 +36,8 @@ public:
     //! @brief  Constructor.
     //!
     //! @param param        Parameter to build the volume.
-    AbsorptionMedium( const AbsorptionMedium::Params& param ):a(param.baseColor), absorption(param.absorption){
-    }
+	//! @param material		Material that spawns the medium.
+    AbsorptionMedium( const AbsorptionMedium::Params& param , const MaterialBase* material):Medium(material), a(param.baseColor), absorption(param.absorption){}
 
     //! @brief  Evaluation of beam transmittance.
     //!

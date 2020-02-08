@@ -159,7 +159,7 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
 
 void Material::UpdateMediumStack(MediumStack& ms) const {
     if (m_volume_shader_valid)
-        ExecuteShader(m_volume_shader.get(), ms);
+        ExecuteShader(m_volume_shader.get(), ms, this);
 }
 
 void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se) const {

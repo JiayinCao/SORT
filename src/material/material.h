@@ -40,7 +40,7 @@ public:
 
     //! @brief      Parse volume from the material shader.
     //!
-    //! @param      ms              Medium stack to be populdated.
+    //! @param      ms              Medium stack to be populated.
     virtual void       UpdateMediumStack(MediumStack& ms) const = 0;
 
     //! @brief      Evaluate translucency.
@@ -61,7 +61,7 @@ public:
 
     //! @brief  Whether the material has transparency
     //!
-    //! @return Return true if there is transpancy in the material.
+    //! @return Return true if there is transparency in the material.
     virtual bool       HasTransparency() const = 0;
 
     //! @brief  Whether the material has sss
@@ -94,7 +94,7 @@ public:
 
     //! @brief      Parse volume from the material shader.
     //!
-    //! @param      ms              Medium stack to be populdated.
+    //! @param      ms              Medium stack to be populated.
     void        UpdateMediumStack( MediumStack& ms ) const override;
 
     //! @brief      Evaluate translucency.
@@ -129,7 +129,7 @@ public:
 
     //! @brief  Whether the material has transparency
     //!
-    //! @return Return true if there is transpancy in the material.
+    //! @return Return true if there is transparency in the material.
     bool        HasTransparency() const override {
         return m_hasTransparentNode;
     }
@@ -189,8 +189,9 @@ private:
 
 //! @brief  MaterialProxy is nothing but a thin wrapper of another existed material.
 /**
- * MaterialProxy only direct all method to its referred material. The existance of MaterialProxy
- * is to differentiate same material used in different mesh, which is fairly important in SSS and volumetric rendering.
+ * MaterialProxy only directs all methods to its referred material. The existence of MaterialProxy
+ * is to differentiate the same material used in different meshes, which is fairly important in SSS 
+ * and volumetric rendering.
  */
 class MaterialProxy : public MaterialBase {
 public:
@@ -206,7 +207,7 @@ public:
 
     //! @brief      Parse volume from the material shader.
     //!
-    //! @param      ms              Medium stack to be populdated.
+    //! @param      ms              Medium stack to be populated.
     void       UpdateMediumStack(MediumStack& ms) const override;
 
     //! @brief  Just an empty interface, there is no serialization support for this type of material.
@@ -220,7 +221,7 @@ public:
     //! @return                     The transparency at the intersection.
     Spectrum   EvaluateTransparency(const SurfaceInteraction& intersection) const override;
 
-    //! @brief  This should be an emtpy method that does nothing
+    //! @brief  This should be an empty method that does nothing
     //!
     //! @param  shadingSys      Open-Shading-Language shading system.
     void       BuildMaterial() override {}
@@ -232,7 +233,7 @@ public:
 
     //! @brief  Whether the material has transparency
     //!
-    //! @return Return true if there is transpancy in the material.
+    //! @return Return true if there is transparency in the material.
     bool       HasTransparency() const override;
 
     //! @brief  Whether the material has sss
