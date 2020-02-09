@@ -19,18 +19,22 @@
 
 #include "integrator.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// definition of Ambient Occulusion
-class   AmbientOcclusion : public Integrator
-{
+//! @brief  This is the only integrator that doesn't take light into account.
+/**
+ * Unlike other integrator, AO integrator only evaluates ambient occlusion.
+ */
+class   AmbientOcclusion : public Integrator{
 public:
     DEFINE_RTTI( AmbientOcclusion , Integrator );
 
-    // return the radiance of a specific direction
-    // para 'scene' : scene containing geometry data
-    // para 'ray'   : ray with specific direction
-    // result       : radiance along the ray from the scene<F3>
-    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
+    //! @brief  Evaluate the radiance along a specific direction.
+    //!
+    //! @param  ray             The ray to be tested with.
+    //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
+    //! @param  scene           The scene to be evaluated.
+    //! @param  ms              AO evaluation doesn't take volume into account, this will be ignored.
+    //! @return                 The radiance along the opposite direction that the ray points to.
+    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const override;
 
     //! @brief      Serializing data from stream
     //!
@@ -41,6 +45,7 @@ public:
     }
 
 private:
+    /**< Maximal distance to consider in ao evaluation. */
     float   maxDistance = 10.0f;
 
     SORT_STATS_ENABLE( "Ambient Occlusion" )

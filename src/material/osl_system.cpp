@@ -93,7 +93,7 @@ void OptimizeShader(OSL::ShaderGroup* group) {
     g_shadingsys->optimize_group(group);
 }
 
-void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
+void ExecuteSurfaceShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
     const SurfaceInteraction& intersection = se.GetInteraction();
 
     ShaderGlobals shaderglobals;
@@ -110,13 +110,11 @@ void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
     ProcessSurfaceClosure( shaderglobals.Ci , Color3( 1.0f ) , se );
 }
 
-void ExecuteShader(OSL::ShaderGroup* shader, MediumStack& ms, const MaterialBase* material ) {
-    const MediumInteraction& intersection = ms.GetInteraction();
-
+void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& ms, const MaterialBase* material ) {
     ShaderGlobals shaderglobals;
     memset(&shaderglobals, 0, sizeof(shaderglobals));
-    shaderglobals.P = Vec3(intersection.intersect.x, intersection.intersect.y, intersection.intersect.z);
-    shaderglobals.I = Vec3(intersection.view.x, intersection.view.y, intersection.view.z);
+    shaderglobals.P = Vec3(mi.intersect.x, mi.intersect.y, mi.intersect.z);
+    shaderglobals.I = Vec3(mi.view.x, mi.view.y, mi.view.z);
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
     ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms, material);

@@ -30,7 +30,7 @@ SORT_STATS_COUNTER("Ambient Occlusion", "Primary Ray Count" , sPrimaryRayCount);
 IMPLEMENT_RTTI( AmbientOcclusion );
 
 // radiance along a specific ray direction
-Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const
+Spectrum AmbientOcclusion::Li( const Ray& r , const PixelSample& ps , const Scene& scene , MediumStack& mi ) const
 {
     SORT_STATS(++sPrimaryRayCount);
 

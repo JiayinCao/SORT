@@ -19,20 +19,23 @@
 
 #include "integrator.h"
 
-//////////////////////////////////////////////////////////////////////////////////////
-//  definition of direct light
-//  comparing with whitted ray tracing , direct light requires more samples per pixel
-//  and it supports soft shadow and area light.
-class   DirectLight : public Integrator
-{
+//! @brief  Only evaluate direct illumination.
+/**
+ * Comparing with whitted ray tracing , direct light requires more samples per pixel
+ * and it supports soft shadow and area light.
+ */
+class   DirectLight : public Integrator{
 public:
     DEFINE_RTTI( DirectLight , Integrator );
 
-    // return the radiance of a specific direction
-    // para 'scene' : scene containing geometry data
-    // para 'ray'   : ray with specific direction
-    // result       : radiance along the ray from the scene<F3>
-    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
+    //! @brief  Evaluate the radiance along a specific direction.
+    //!
+    //! @param  ray             The ray to be tested with.
+    //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
+    //! @param  scene           The scene to be evaluated.
+    //! @param  ms              DirectLight integrator is not medium aware, this will be ignored.
+    //! @return                 The radiance along the opposite direction that the ray points to.
+    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const override;
 
     //! @brief      Serializing data from stream
     //!

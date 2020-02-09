@@ -28,39 +28,36 @@ struct VirtualLightSource{
     int                 depth;
 };
 
-/////////////////////////////////////////////////////////////////////////////
-// definition of Instant Radiosity
-// note : Instant Radiosity is a subset of directional path tracing
-//        It has two seperate passes. First pass generates virtual light
-//        sources along the path tracing from light sources. Second pass
-//        will use those virtual light source to evaluate indirect
-//        illumination. Direct illumination is handled the same way in
-//        directlight integrator.
-class   InstantRadiosity : public Integrator
-{
+//! @brief  Instant radiosity integrator.
+/**
+ * Instant Radiosity is a subset of directional path tracing. It has two seperate passes.
+ * First pass generates virtual light sources along the path tracing from light sources.
+ * Second pass will use those virtual light source to evaluate indirect illuimination.
+ * Direct illumination is handled the same way in directlight integrator.
+ */
+class   InstantRadiosity : public Integrator{
 public:
     DEFINE_RTTI( InstantRadiosity , Integrator );
 
-    InstantRadiosity() {
-        m_nLightPaths = 64;
-        m_fMinDist = 1.0f;
-        m_fMinSqrDist = 1.0f;
-        m_nLightPathSet = 1;
-    }
+    //! @brief  Evaluate the radiance along a specific direction.
+    //!
+    //! @param  ray             The ray to be tested with.
+    //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
+    //! @param  scene           The scene to be evaluated.
+    //! @param  ms              This integrator is not medium aware, this will be ignored.
+    //! @return                 The radiance along the opposite direction that the ray points to.
+    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const override;
 
-    // return the radiance of a specific direction
-    // para 'scene' : scene containing geometry data
-    // para 'ray'   : ray with specific direction
-    // result       : radiance along the ray from the scene<F3>
-    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
-
-    // Preprocess: In preprocessing stage, numbers of virtual light sources
-    // are generated along the path tracing from light sources.
+    //! @brief  Preprocess before second phase happens.
+    //!
+    //! In preprocessing stage, numbers of virtual light sources are generated along the path tracing from light sources.
+    //!
+    //! @param  scene           The scene to be evaluated.
     void PreProcess( const Scene& scene ) override;
 
     //! @brief      Serializing data from stream
     //!
-    //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.
+    //! @param stream    Where the serialization data comes from. Depending on different situation, it could come from different places.
     void    Serialize( IStreamBase& stream ) override {
         Integrator::Serialize( stream );
         stream >> m_nLightPathSet;
@@ -69,20 +66,19 @@ public:
     }
 
 private:
-    // light path set
-    int     m_nLightPathSet;
+    /**< light path set */
+    int     m_nLightPathSet = 1;
 
-    // number of paths to follow when creating virtual light sources
-    int     m_nLightPaths;
+    /**< number of paths to follow when creating virtual light sources. */
+    int     m_nLightPaths   = 64;
 
-    // distant threshold
-    float   m_fMinDist;
-    float   m_fMinSqrDist;
+    /**< distant threshold. */
+    float   m_fMinDist      = 1.0f;
+    float   m_fMinSqrDist   = 1.0f;
 
-    // container for light sources
+    /**< container for light sources. */
     std::unique_ptr<std::list<VirtualLightSource>[]>    m_pVirtualLightSources;
 
-    // private method of li
     Spectrum _li( const Ray& ray , const Scene& scene , bool ignoreLe = false , float* first_intersect_dist = 0 ) const;
 
     SORT_STATS_ENABLE( "Instant Radiosity" )

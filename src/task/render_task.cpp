@@ -23,6 +23,7 @@
 #include "core/scene.h"
 #include "core/profile.h"
 #include "sampler/random.h"
+#include "medium/medium.h"
 
 Render_Task::Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
             const char* name , unsigned int priority , const Task::Task_Container& dependencies ) :
@@ -53,11 +54,12 @@ void Render_Task::Execute(){
             for( unsigned k = 0 ; k < g_samplePerPixel; ++k ){
                 // clear managed memory after each pixel
                 SORT_CLEAR_MEMPOOL();
-                
+
                 // generate rays
                 auto r = camera->GenerateRay( (float)j , (float)i , m_pixelSamples[k] );
                 // accumulate the radiance
-                auto li = g_integrator->Li( r , m_pixelSamples[k] , m_scene );
+                MediumStack ms;
+                auto li = g_integrator->Li( r , m_pixelSamples[k] , m_scene , ms );
                 if( g_clammping > 0.0f )
                     li = li.Clamp( 0.0f , g_clammping );
                 

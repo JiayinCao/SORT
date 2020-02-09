@@ -23,11 +23,9 @@
 #include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 
-class   Primitive;
 class   Light;
 
-struct BDPT_Vertex
-{
+struct BDPT_Vertex{
     Point               p;                  // the position of the vertex
     Vector              n;                  // the normal of the vertex
     Vector              wi;                 // in direction
@@ -46,32 +44,38 @@ struct BDPT_Vertex
     int         depth = 0;
 };
 
-struct Pending_Sample
-{
+struct Pending_Sample{
     Vector2i    coord;
     Spectrum    radiance;
 };
 
-///////////////////////////////////////////////////////////////////////////////////
-// definition of bidirectional path tracing
-// BDPT is not finished yet, there are bugs in the following code.
-// i'll try to finish it after i finish some more integrators.
-class BidirPathTracing : public Integrator
-{
+//! @brief  Bidirectional path tracing integrator.
+/**
+ * Different from path tracing algorithm, which could end up in having trouble finding paths with reasonable 
+ * contribution, bi-directional path tracing shoots rays from both sides, camera and lights, and then it connects
+ * all paths generated from both sides.
+ * The fact that bi-directional path tracing generates rays from light, allows it to evaluate Monte Carlo estimation
+ * way more efficient than a standard path tracing algorithm.
+ *
+ * However, due to my limited spare time, there is no SSS and volume support in it for now. This is also not very high
+ * priority in my to-do list for now.
+ */
+class BidirPathTracing : public Integrator{
 public:
     DEFINE_RTTI( BidirPathTracing , Integrator );
 
-    // return the radiance of a specific direction
-    // para 'scene' : scene containing geometry data
-    // para 'ray'   : ray with specific direction
-    // result       : radiance along the ray from the scene<F3>
-    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
+    //! @brief  Evaluate the radiance along a specific direction.
+    //!
+    //! @param  ray             The ray to be tested with.
+    //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
+    //! @param  scene           The scene to be evaluated.
+    //! @param  ms              Unfortunately, I don't have the time to support volumetric rendering in bi-direcitonal path tracing for now.
+    //! @return                 The radiance along the opposite direction that the ray points to.
+    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const override;
 
-    // request sample
+
+    //! @brief  The samples generated in this interface is not well used in this integrator for now.
     void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ) override;
-
-    // support pending write
-    bool SupportPendingWrite() override { return true; }
 
     //! @brief      Serializing data from stream
     //!
@@ -89,13 +93,13 @@ protected:
     Spectrum    _Gterm( const BDPT_Vertex& p0 , const BDPT_Vertex& p1 ) const;
 
     // connect light sample
-    Spectrum _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light , const Scene& scene ) const;
+    Spectrum    _ConnectLight(const BDPT_Vertex& eye_vertex, const Light* light , const Scene& scene ) const;
 
     // connect camera point
-    void _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light , const Scene& scene ) const;
+    void        _ConnectCamera(const BDPT_Vertex& light_vertex , int len , const Light* light , const Scene& scene ) const;
 
     // connect vertices
-    Spectrum _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light , const Scene& scene ) const;
+    Spectrum    _ConnectVertices( const BDPT_Vertex& light_vertex , const BDPT_Vertex& eye_vertex , const Light* light , const Scene& scene ) const;
 
 private:
     // use multiple importance sampling to sample direct illumination

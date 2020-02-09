@@ -33,9 +33,8 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , MediumInteraction*& mi ) co
     const auto d = fmin( -std::log( sort_canonical() ) / t[ch] , ray.m_fMax );
 
     const auto sample_medium = d < ray.m_fMax;
-    if( sample_medium ){
+    if( sample_medium )
         mi = SORT_MALLOC(MediumInteraction)();
-    }
 
     const auto e = t * (-fmin( d , FLT_MAX ));
     const auto tr = e.Exp();

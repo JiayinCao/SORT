@@ -19,6 +19,8 @@
 
 #include "integrator.h"
 
+class MediumStack;
+
 //! @brief  The core of path tracing algorithm, the most commonly used algorithm in SORT.
 /**
  * A path tracing algorithm works by tracing rays recursively to converge to the correct approximation of rendering equation.
@@ -33,8 +35,9 @@ public:
     //! @param  ray             The ray to be tested with.
     //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
     //! @param  scene           The scene to be evaluated.
+    //! @param  ms              The medium stack used to update during evaluation of radiance.
     //! @return                 The radiance along the opposite direction that the ray points to.
-    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const override;
+    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const override;
 
     //! @brief      Serializing data from stream
     //!

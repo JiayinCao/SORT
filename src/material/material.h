@@ -24,6 +24,7 @@
 #include "osl_system.h"
 
 struct SurfaceInteraction;
+struct MediumInteraction;
 class ScatteringEvent;
 class MediumStack;
 
@@ -40,8 +41,9 @@ public:
 
     //! @brief      Parse volume from the material shader.
     //!
+    //! @param      mi              Interaction with the medium.
     //! @param      ms              Medium stack to be populated.
-    virtual void       UpdateMediumStack(MediumStack& ms) const = 0;
+    virtual void       UpdateMediumStack( const MediumInteraction& mi , MediumStack& ms) const = 0;
 
     //! @brief      Evaluate translucency.
     //!
@@ -94,8 +96,9 @@ public:
 
     //! @brief      Parse volume from the material shader.
     //!
+    //! @param      mi              Interaction with the medium.
     //! @param      ms              Medium stack to be populated.
-    void        UpdateMediumStack( MediumStack& ms ) const override;
+    void        UpdateMediumStack(const MediumInteraction& mi, MediumStack& ms) const override;
 
     //! @brief      Evaluate translucency.
     //!
@@ -206,9 +209,9 @@ public:
     void       UpdateScatteringEvent(ScatteringEvent& se) const override;
 
     //! @brief      Parse volume from the material shader.
-    //!
+    //! @param      mi              Interaction with the medium.
     //! @param      ms              Medium stack to be populated.
-    void       UpdateMediumStack(MediumStack& ms) const override;
+    void       UpdateMediumStack(const MediumInteraction& mi, MediumStack& ms) const override;
 
     //! @brief  Just an empty interface, there is no serialization support for this type of material.
     //!

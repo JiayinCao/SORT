@@ -21,10 +21,10 @@
 
 Spectrum HeterogenousMedium::Tr( const Ray& ray ) const{
 	// to be implemented
-    return 0.0f;
+    return 1.0f;
 }
 
 Spectrum HeterogenousMedium::Sample( const Ray& ray , MediumInteraction*& mi ) const{
 	// to be implemented.
-    return 0.0f;
+    return 1.0f;
 }

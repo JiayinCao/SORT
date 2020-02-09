@@ -18,9 +18,6 @@
 #include "medium.h"
 #include "material/material.h"
 
-MediumStack::MediumStack(const MediumInteraction& mi) :m_mediumInteraction(mi) {
-}
-
 bool MediumStack::AddMedium(const Medium* medium) {
     // simply return false if there is no space, this should rarely happen unless there is more than 8 volumes overlap.
     if (m_mediumCnt >= MEDIUM_MAX_CNT)

@@ -28,7 +28,7 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 SORT_STATS_COUNTER("Direct Illumination", "Primary Ray Count" , sPrimaryRayCount);
 IMPLEMENT_RTTI( DirectLight );
 
-Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene ) const{
+Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene , MediumStack& mi) const{
     SORT_STATS(++sPrimaryRayCount);
 
     if( r.m_Depth > max_recursive_depth )

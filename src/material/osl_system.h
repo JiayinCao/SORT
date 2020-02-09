@@ -35,6 +35,7 @@
 class ScatteringEvent;
 struct SurfaceInteraction;
 class MediumStack;
+struct MediumInteraction;
 
 struct ShadingContextWrapper {
 public:
@@ -63,14 +64,15 @@ bool ConnectShader( const std::string& source_shader , const std::string& source
 //!
 //! @param  shader      The osl shader to be evaluated.
 //! @param  se          The resulting scattering event.
-void ExecuteShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
+void ExecuteSurfaceShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
 
 //! @brief  Execute a shader and populate the medium stack
 //!
 //! @param  shader      The osl shader to be evaluated.
+//! @param  mi          The interaction inside the medium.
 //! @param  ms          The medium stack to hold the results.
 //! @param	material	The material that spawns the volume. If nullptr, it means it is a world volume.
-void ExecuteShader(OSL::ShaderGroup* shader, MediumStack& se, const MaterialBase* material = nullptr );
+void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& se, const MaterialBase* material = nullptr );
 
 //! @brief  Evaluate the transparency of the intersection.
 //!

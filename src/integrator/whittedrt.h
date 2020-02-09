@@ -19,21 +19,25 @@
 
 #include "integrator.h"
 
-/////////////////////////////////////////////////////////////////////////////
-// definition of whittedrt
-// note : Whitted ray tracer only takes direct light into consideration,
-//        there are also specular reflection and refraction. While indirect
-//        light, like color bleeding , is not supported.
-class   WhittedRT : public Integrator
-{
+//! @brief  Whitted ray tracing is the simlest integration method in SORT.
+/**
+ * This is just a very barebone ray tracing that supports only delta light. Since there is no delta BRDF/BTDF 
+ * in SORT, there is no reflection/refraction supported in this integrator. Non-delta light will be ignored.
+ * Path with more than one bounces will be simply ignored. The result of whitted ray tracing is pretty much 
+ * the same with a barebone rasterizer renderer.
+ */
+class   WhittedRT : public Integrator{
 public:
     DEFINE_RTTI( WhittedRT , Integrator );
 
-    // return the radiance of a specific direction
-    // para 'scene' : scene containing geometry data
-    // para 'ray'   : ray with specific direction
-    // result       : radiance along the ray from the scene<F3>
-    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const;
+    //! @brief  Evaluate the radiance along a specific direction.
+    //!
+    //! @param  ray             The ray to be tested with.
+    //! @param  ps              There is no Monte-Carlo evaluation in this integrator, this will be ignored.
+    //! @param  scene           The scene to be evaluated.
+    //! @param  ms              This is not a medium aware integrator, this parameter will be ignored too.
+    //! @return                 The radiance along the opposite direction that the ray points to.
+    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const;
 
 private:
     SORT_STATS_ENABLE( "Whitted Ray Tracing" )

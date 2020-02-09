@@ -19,20 +19,28 @@
 
 #include "bidirpath.h"
 
-///////////////////////////////////////////////////////////////////////////////////
-// definition of bidirectional path tracing
-// BDPT is not finished yet, there are bugs in the following code.
-// i'll try to finish it after i finish some more integrators.
-class LightTracing : public BidirPathTracing
-{
+//! @brief  This integrator only traces rays from light sources instead of cameras.
+/**
+ * Light tracing is only part of bi-directional path tracing. There is no separate
+ * algorithm implemented in this integration, but only one parameter to drive the
+ * differences.
+ * The actual implementation is actually hidden in bidirectional path tracing integrator.
+ */
+class LightTracing : public BidirPathTracing{
 public:
     DEFINE_RTTI(LightTracing, Integrator );
 
+    //! @brief  Constructor simply setup light_tracing_only parameter.
     LightTracing(){
         light_tracing_only = true;
     }
 
-    // refresh tile in blender
-    // no need to refresh tiles
-    virtual bool NeedRefreshTile() const { return false; }
+    //! @brief  Whether to refreshtile in Blender user interface.
+    //!
+    //! Since there is no specific order of rendering, there is no way to support live refresh.
+    //!
+    //! @return     Whether there is tile refresh supported in Blender.
+    bool NeedRefreshTile() const override{
+        return false; 
+    }
 };

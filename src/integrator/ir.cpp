@@ -94,7 +94,7 @@ void InstantRadiosity::PreProcess( const Scene& scene )
 }
 
 // radiance along a specific ray direction
-Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps  , const Scene& scene ) const{
+Spectrum InstantRadiosity::Li( const Ray& r , const PixelSample& ps  , const Scene& scene, MediumStack& mi ) const{
     SORT_STATS( ++sPrimaryRayCount );
     return _li( r , scene );
 }

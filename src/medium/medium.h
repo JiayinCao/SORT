@@ -77,9 +77,7 @@ protected:
 class MediumStack {
 public:
     //! @brief  Default constructor that does nothing.
-    //!
-    //! @param  mi      Medium interaction of interest.
-    MediumStack(const MediumInteraction& mi);
+    MediumStack() = default;
 
     //! @brief  Destructor that does nothing. It is not responsible for deallocating all memory it holds.
     ~MediumStack() = default;
@@ -96,20 +94,10 @@ public:
     //! @return             Whether the medium is removed. If the medium is not even in the container, it will return false.
     bool    RemoveMedium(const Medium* medium);
 
-    //! @brief  Get the interaction where the medium is evaluated.
-    //!
-    //! @return             Medium interaction at where the mediums are evaluated.
-    const MediumInteraction& GetInteraction() const {
-        return m_mediumInteraction;
-    }
-
 private:
     /**< Mediums it holds. */
     const Medium*    m_mediums[MEDIUM_MAX_CNT] = { nullptr };
 
     /**< Number of mediums in the stack currently. */
     unsigned         m_mediumCnt = 0;
-
-    /**< Medium interaction of interest. */
-    const MediumInteraction& m_mediumInteraction;
 };

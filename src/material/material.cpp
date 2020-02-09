@@ -152,22 +152,22 @@ void Material::Serialize(IStreamBase& stream){
 
 void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
     if( !g_noMaterial && m_surface_shader_valid)
-        ExecuteShader(m_surface_shader.get() , se );
+        ExecuteSurfaceShader(m_surface_shader.get() , se );
     else
         se.AddBxdf(SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
 }
 
-void Material::UpdateMediumStack(MediumStack& ms) const {
+void Material::UpdateMediumStack( const MediumInteraction& mi , MediumStack& ms ) const {
     if (m_volume_shader_valid)
-        ExecuteShader(m_volume_shader.get(), ms, this);
+        ExecuteVolumeShader(m_volume_shader.get(), mi, ms, this);
 }
 
 void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se) const {
     return m_material.UpdateScatteringEvent(se);
 }
 
-void MaterialProxy::UpdateMediumStack(MediumStack& ms) const {
-    return m_material.UpdateMediumStack(ms);
+void MaterialProxy::UpdateMediumStack(const MediumInteraction& mi, MediumStack& ms) const {
+    return m_material.UpdateMediumStack(mi, ms);
 }
 
 StringID  MaterialProxy::GetUniqueID() const {

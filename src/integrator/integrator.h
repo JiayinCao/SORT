@@ -30,10 +30,14 @@
 
 class   Ray;
 
-////////////////////////////////////////////////////////////////////////////
-//  definition of integrator
-class   Integrator : public SerializableObject
-{
+//! @brief  Integrator is for esitimating radiance in rendering equation.
+/**
+ * This is the core of ray tracing rendering in SORT. There are different integrators supported in SORT.
+ * Path tracing is the most well supported algorithm implemented in SORT for now. Bi-directional path tracing
+ * is also well implemented with a few limitations like the lack of SSS and volumetric rendering.
+ * There are also other experimental integrators implemented only for learning purposes.
+ */
+class   Integrator : public SerializableObject{
 public:
     //! @brief  Empty virtual destructor.
     virtual ~Integrator(){}
@@ -46,58 +50,23 @@ public:
     //! @param  ray     The extent ray in rendering equation.
     //! @param  ps      The pixel samples. Currently not used.
     //! @param  scene   The rendering scene.
+    //! @param  ms      Medium stack, integrators that are not medium aware will simply ignore this parameter.
     //! @return         The spectrum of the radiance along the opposite direction of the ray.
-    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const = 0;
+    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const = 0;
 
-    // set sample per pixel
-    // para 'spp' : sample per pixel
-    void SetSamplePerPixel( unsigned spp ){ sample_per_pixel = spp; }
-
-    // generate samples
-    // para 'sampler' : the sampling method
-    // para 'samples' : the samples to be generated
-    // para 'ps'      : number of pixel sample to be generated
-    // para 'scene'   : the scene to be rendered
-    virtual void GenerateSample( const Sampler* sampler , PixelSample* samples , unsigned ps , const Scene& scene ) const{
-        auto data = std::make_unique<float[]>(2 * ps);
-        sampler->Generate2D( data.get() , ps , true );
-        for( unsigned i = 0 ; i < ps ; ++i )
-        {
-            samples[i].img_u = data[2*i];
-            samples[i].img_v = data[2*i+1];
-        }
-
-        auto shuffle = std::make_unique<unsigned[]>(ps);
-        for (unsigned i = 0; i < ps; i++)
-            shuffle[i] = i;
-        std::shuffle(shuffle.get(), shuffle.get() + ps, std::default_random_engine(sort_rand()));
-
-        sampler->Generate2D(data.get(), ps );
-        for( unsigned i = 0 ; i < ps ; ++i )
-        {
-            unsigned sid = 2* shuffle[i];
-            samples[i].dof_u = data[sid];
-            samples[i].dof_v = data[sid+1];
-        }
-    }
-
-    // request samples
-    virtual void RequestSample( Sampler* sampler , PixelSample* ps , unsigned ps_num ) {}
-
-    // pre-process before rendering
-    // by default , nothing is done in pre-process
-    // some integrator, such as Photon Mapping use pre-process step to
-    // generate some neccessary infomation by latter stage.
+    //! @brief Pre-process before rendering.
+    //!
+    //! By default , nothing is done in pre-process some integrator, such as Photon Mapping use pre-process step to
+    //! generate some neccessary infomation by latter stage.
     virtual void PreProcess(const Scene& scene) {}
 
-    // post process
+    //! @brief  Some integrator have a post process step.
     virtual void PostProcess() {}
 
-    // support pending write
-    virtual bool SupportPendingWrite() { return false; }
-
-    // refresh tile in blender
-    virtual bool NeedRefreshTile() const { return true; }
+    //! @brief  Though most integrators do support live update in Blender, some doesn't, like light tracing.
+    virtual bool NeedRefreshTile() const {
+        return true;
+    }
 
     //! @brief      Serializing data from stream
     //!
@@ -106,13 +75,35 @@ public:
         stream >> max_recursive_depth;
     }
 
+    //! @brief  This interface is not well supported in SORT for now.
+    virtual void GenerateSample(const Sampler* sampler, PixelSample* samples, unsigned ps, const Scene& scene) const {
+        auto data = std::make_unique<float[]>(2 * ps);
+        sampler->Generate2D(data.get(), ps, true);
+        for (unsigned i = 0; i < ps; ++i)
+        {
+            samples[i].img_u = data[2 * i];
+            samples[i].img_v = data[2 * i + 1];
+        }
+
+        auto shuffle = std::make_unique<unsigned[]>(ps);
+        for (unsigned i = 0; i < ps; i++)
+            shuffle[i] = i;
+        std::shuffle(shuffle.get(), shuffle.get() + ps, std::default_random_engine(sort_rand()));
+
+        sampler->Generate2D(data.get(), ps);
+        for (unsigned i = 0; i < ps; ++i)
+        {
+            unsigned sid = 2 * shuffle[i];
+            samples[i].dof_u = data[sid];
+            samples[i].dof_v = data[sid + 1];
+        }
+    }
+
+    //! @brief  This is not well supported in SORT for now.
+    virtual void RequestSample(Sampler* sampler, PixelSample* ps, unsigned ps_num) {}
+
 protected:
-    // maxium recursive depth
-    int             max_recursive_depth = 6;
-
-    // the pixel sample
-    PixelSample     pixel_sample;
-
-    // light sample per pixel sample per light
-    unsigned sample_per_pixel;
+    int           max_recursive_depth = 6;      /*< maxium recursive depth. */
+    PixelSample   pixel_sample;                 /*< the pixel sample. */
+    unsigned      sample_per_pixel;             /*< light sample per pixel sample per light. */
 };
