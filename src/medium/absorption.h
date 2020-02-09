@@ -45,17 +45,17 @@ public:
     //! traveling through the medium. It is a spectrum dependent attenuation.
     //!
     //! @param  ray         The ray, which it uses to evaluate beam transmittance.
-    //!                     It is very important to setup the max of the ray to be correct
-    //!                     that there is no occluder in between.
+    //! @param  max_t       The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
     //! @return             The attenuation of each spectrum channel.
-    Spectrum Tr( const Ray& ray ) const override;
+    Spectrum Tr( const Ray& ray , const float max_t ) const override;
 
     //! @brief  Importance sampling a point along the ray in the medium.
     //!
     //! @param ray          The ray we use to take sample.
+    //! @param max_t        The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
     //! @param mi           The interaction sampled.
     //! @return             The beam transmittance between the ray origin and the interaction.
-    Spectrum Sample( const Ray& ray , MediumInteraction*& mi ) const override;
+    Spectrum Sample( const Ray& ray, const float max_t, MediumInteraction*& mi ) const override;
 
 private:
     const Spectrum          a;

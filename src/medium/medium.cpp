@@ -17,6 +17,7 @@
 
 #include "medium.h"
 #include "material/material.h"
+#include "core/rand.h"
 
 bool MediumStack::AddMedium(const Medium* medium) {
     // simply return false if there is no space, this should rarely happen unless there is more than 8 volumes overlap.
@@ -46,4 +47,13 @@ bool MediumStack::RemoveMedium(const StringID medium_id) {
     }
 
     return false;
+}
+
+Spectrum MediumStack::Sample(const Ray& r, const float max_t , MediumInteraction*& mi) const {
+    if (0 == m_mediumCnt)
+        return 1.0f;
+
+    const auto k = clamp((int)(sort_canonical() * m_mediumCnt), 0, m_mediumCnt - 1);
+    const Medium* medium = m_mediums[k];
+    return medium->Sample(r, max_t, mi) * m_mediumCnt;
 }

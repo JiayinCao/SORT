@@ -39,17 +39,17 @@ public:
     //! traveling through the medium. It is a spectrum dependent attenuation.
     //!
     //! @param  ray         The ray, which it uses to evaluate beam transmittance.
-    //!                     It is very important to setup the max of the ray to be correct
-    //!                     that there is no occluder in between.
+    //! @param  max_t       The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
     //! @return             The attenuation of each spectrum channel.
-    virtual Spectrum Tr( const Ray& ray ) const = 0;
+    virtual Spectrum Tr(const Ray& ray, const float max_t) const = 0;
 
     //! @brief  Importance sampling a point along the ray in the medium.
     //!
     //! @param ray          The ray we use to take sample.
-    //! @param interaction  The interaction sampled.
+    //! @param  max_t       The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
+    //! @param mi           The interaction sampled.
     //! @return             The beam transmittance between the ray origin and the interaction.
-    virtual Spectrum Sample( const Ray& ray , MediumInteraction*& interaction ) const = 0;
+    virtual Spectrum Sample( const Ray& ray , const float max_t , MediumInteraction*& interaction ) const = 0;
 
 	//! @brief	Get the material that spawns the medium.
 	//!
@@ -95,7 +95,15 @@ public:
     //! @return             Whether the medium is removed. If the medium is not even in the container, it will return false.
     bool    RemoveMedium(const StringID medium_id);
 
-private:
+    //! @brief  Sample a point in the mediums.
+    //!
+    //! @param  r           The ray along which to take the sample.
+    //! @param  max_t       The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
+    //! @param  mi          The medium interaction taken as a sample, null if no sample is taken in the medium.
+    //! @return             Attenuation along the ray all the way to the sampled point.
+    Spectrum    Sample(const Ray& r, const float max_t, MediumInteraction*& mi ) const;
+
+public:
     /**< Mediums it holds. */
     const Medium*    m_mediums[MEDIUM_MAX_CNT] = { nullptr };
 

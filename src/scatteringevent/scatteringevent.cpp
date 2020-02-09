@@ -99,7 +99,7 @@ Spectrum ScatteringEvent::Evaluate_BSDF( const Vector& wo , const Vector& wi, SE
 
     // update interaction flag
     if (inter_flag)
-        *inter_flag = update_interaction_flag(cosTheta(wi), cosTheta(wo));
+        *inter_flag = update_interaction_flag(cosTheta(swi), cosTheta(swo));
 
     return r;
 }
@@ -139,7 +139,7 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
 
     // update interaction flag
     if (inter_flag)
-        *inter_flag = update_interaction_flag(cosTheta(wi), cosTheta(wo));
+        *inter_flag = update_interaction_flag(cosTheta(wi), cosTheta(swo));
 
     // transform the direction back
     wi = localToWorld( wi );

@@ -19,12 +19,12 @@
 #include "core/rand.h"
 #include "core/memory.h"
 
-Spectrum HeterogenousMedium::Tr( const Ray& ray ) const{
+Spectrum HeterogenousMedium::Tr( const Ray& ray , const float max_t ) const{
 	// to be implemented
     return 1.0f;
 }
 
-Spectrum HeterogenousMedium::Sample( const Ray& ray , MediumInteraction*& mi ) const{
+Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const{
 	// to be implemented.
     return 1.0f;
 }

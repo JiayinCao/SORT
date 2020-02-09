@@ -19,12 +19,12 @@
 #include "core/rand.h"
 #include "core/memory.h"
 
-Spectrum AbsorptionMedium::Tr( const Ray& ray ) const{
-    const auto e = a * (absorption * -fmin( ray.m_fMax , FLT_MAX ));
+Spectrum AbsorptionMedium::Tr( const Ray& ray , const float max_t ) const{
+    const auto e = a * (absorption * -fmin(max_t, FLT_MAX ));
     return e.Exp();
 }
 
 // Since there is no scattering, medium interaction is never sampled in this type of medium.
-Spectrum AbsorptionMedium::Sample( const Ray& ray , MediumInteraction*& mi ) const{
-    return Tr( ray );
+Spectrum AbsorptionMedium::Sample( const Ray& ray, const float max_t, MediumInteraction*& mi ) const{
+    return Tr( ray , max_t );
 }

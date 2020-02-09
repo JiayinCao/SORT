@@ -19,8 +19,8 @@
 #include "core/rand.h"
 #include "core/memory.h"
 
-Spectrum HomogeneousMedium::Tr( const Ray& ray ) const{
-    const auto e = t * (-fmin( ray.m_fMax , FLT_MAX ));
+Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
+    const auto e = t * (-fmin(max_t, FLT_MAX ));
     return e.Exp();
 }
 
@@ -28,11 +28,11 @@ Spectrum HomogeneousMedium::Tr( const Ray& ray ) const{
 // fully ready yet.
 //  - mediuminteraction is not correctly setup for now
 //  - there are several corner cases not well handled yet.
-Spectrum HomogeneousMedium::Sample( const Ray& ray , MediumInteraction*& mi ) const{
+Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const{
     const auto ch = clamp( (int)(sort_canonical() * RGBSPECTRUM_SAMPLE) , 0 , RGBSPECTRUM_SAMPLE - 1 );
     const auto d = fmin( -std::log( sort_canonical() ) / t[ch] , ray.m_fMax );
 
-    const auto sample_medium = d < ray.m_fMax;
+    const auto sample_medium = d < max_t;
     if( sample_medium )
         mi = SORT_MALLOC(MediumInteraction)();
 

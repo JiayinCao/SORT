@@ -63,6 +63,17 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             break;
         }
 
+        MediumInteraction* pMi = nullptr;
+        const auto medium_attenuation = ms.Sample(r, inter.t, pMi);
+
+        // update the through put based on the medium attenuation due to particle scattering and absorption.
+        throughput *= medium_attenuation;
+
+        if (pMi) {
+            // to be done shortly.
+            continue;
+        }
+
         if( local_bounce == 0 && !indirectOnly ) 
             L += inter.Le(-r.m_Dir);
         
