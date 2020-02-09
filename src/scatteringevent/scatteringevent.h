@@ -33,10 +33,17 @@ enum SE_Flag : unsigned int{
     SE_EVALUATE_ALL_NO_SSS  = ( SE_REPLACE_BSSRDF | SE_EVALUATE_ALL ),  // Replace SSS with lambert, this is used in several integrator that doesn't support SSS.
 };
 
+enum SE_Interaction : char {
+    SE_REFLECTION   = 0,
+    SE_LEAVING      = 1,
+    SE_ENTERING     = 2,
+};
+
 #define SE_MAX_BXDF_COUNT          16      // Maximum number of bxdf in a material is 16 by default
 #define SE_MAX_BSSRDF_COUNT        4       // Maximum number of bssrdf in a material is 4 by default 
 
 class Bxdf;
+class MediumStack;
 
 //! @brief  ScatteringEvent is a bsdf/bssrdf holder that could hold multiple of each.
 /**
@@ -103,41 +110,43 @@ public:
 
     //! @brief  Randomly pick between bxdf and bssrdf
     //!
-    //! @param  flag    Which catagory it picks, it could be SE_EVALUATE_BXDF/SE_EVALUATE_BSSRDF.
-    //! @return         The properbility of picking the bxdf/bssrdf.
+    //! @param  flag        Which catagory it picks, it could be SE_EVALUATE_BXDF/SE_EVALUATE_BSSRDF.
+    //! @return             The properbility of picking the bxdf/bssrdf.
     float       SampleScatteringType( SE_Flag& flag ) const;
 
     //! @brief Evaluate the value of BSDF based on the incident and outgoing directions.
     //!
-    //! @param wo   Exitant direction in shading coordinate.
-    //! @param wi   Incident direction in shading coordinate.
-    //! @return     The Evaluated value of the BSDF.
-    Spectrum    Evaluate_BSDF( const Vector& wo , const Vector& wi ) const;
+    //! @param wo           Exitant direction in shading coordinate.
+    //! @param wi           Incident direction in shading coordinate.
+    //! @param inter_flag   Interaction flag, this is for updating mediums.
+    //! @return             The Evaluated value of the BSDF.
+    Spectrum    Evaluate_BSDF( const Vector& wo , const Vector& wi, SE_Interaction* inter_flag = nullptr ) const;
 
     //! @brief Importance sampling for the bsdf.
     //!
-    //! @param wo   Exitant direction in shading coordinate.
-    //! @param wi   Incident direction in shading coordinate.
-    //! @param bs   Sample for bsdf that holds some random variables.
-    //! @param pdf  Probability density of the selected direction.
-    //! @return     The Evaluated BRDF value.
-    Spectrum    Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf ) const;
+    //! @param wo           Exitant direction in shading coordinate.
+    //! @param wi           Incident direction in shading coordinate.
+    //! @param bs           Sample for bsdf that holds some random variables.
+    //! @param pdf          Probability density of the selected direction.
+    //! @param inter_flag   Interaction flag, this is for updating mediums.
+    //! @return             The Evaluated BRDF value.
+    Spectrum    Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf , SE_Interaction* inter_flag = nullptr ) const;
 
     //! @brief Evaluate the pdf of an existance direction given the Incident direction.
     //!
-    //! @param wo   Exitant direction in shading coordinate.
-    //! @param wi   Incident direction in shading coordinate.
-    //! @param type The specific bxdf type it considers during evaluation.
-    //! @return     The probability of choosing the out-going direction based on the Incident direction.
+    //! @param wo           Exitant direction in shading coordinate.
+    //! @param wi           Incident direction in shading coordinate.
+    //! @param type         The specific bxdf type it considers during evaluation.
+    //! @return             The probability of choosing the out-going direction based on the Incident direction.
     float       Pdf_BSDF( const Vector& wo , const Vector& wi ) const;
 
     //! @brief  Importance sample the incident direction and position.
     //!
-    //! @param  scene   The scene where ray tracing happens.
-    //! @param  wo      Extant direction.
-    //! @param  po      Extant position.
-    //! @param  inter   Incident intersection sampled.
-    //! @param  pdf     The pdf of sampling this bssrdf among all bssrdfs.
+    //! @param  scene       The scene where ray tracing happens.
+    //! @param  wo          Extant direction.
+    //! @param  po          Extant position.
+    //! @param  inter       Incident intersection sampled.
+    //! @param  pdf         The pdf of sampling this bssrdf among all bssrdfs.
     void        Sample_BSSRDF( const Scene& scene , const Vector& wo , const Point& po , BSSRDFIntersections& inter , float& pdf ) const;
 
 private:

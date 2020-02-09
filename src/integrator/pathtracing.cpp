@@ -25,6 +25,7 @@
 #include "core/profile.h"
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/scatteringevent.h"
+#include "medium/medium.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalPathLength)
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
@@ -35,10 +36,10 @@ SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength 
 IMPLEMENT_RTTI( PathTracing );
 
 Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const{
-    return li( ray , ps , scene );
+    return li( ray , ps , scene , 0 , false , 0 , false , ms );
 }
 
-Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly , int bssrdfBounces , bool replaceSSS ) const{
+Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& scene , int bounces , bool indirectOnly , int bssrdfBounces , bool replaceSSS , MediumStack& ms ) const{
     SORT_PROFILE("Path tracing");
     SORT_STATS(++sPrimaryRayCount);
 
@@ -127,9 +128,20 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             Vector      wi;
             Spectrum f;
             BsdfSample  _bsdf_sample = BsdfSample(true);
-            f = se.Sample_BSDF( -r.m_Dir , wi , _bsdf_sample , path_pdf );
+            SE_Interaction interaction_flag;
+            f = se.Sample_BSDF( -r.m_Dir , wi , _bsdf_sample , path_pdf , &interaction_flag);
             if( ( f.IsBlack() || path_pdf == 0.0f ) )
                 break;
+
+            if (SE_Interaction::SE_ENTERING == interaction_flag) {
+                // adding the medium attached to the material to the medium stack
+
+                // to be done
+            } else if (SE_Interaction::SE_LEAVING == interaction_flag) {
+                // removing the medium attached to the material to the medium stack
+
+                // to be done
+            }
 
             // update path weight
             throughput *= f / path_pdf;
@@ -169,8 +181,10 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     float pdf = 0.0f;
                     Vector wi;
                     Spectrum f = se.Sample_BSDF( -r.m_Dir, wi, BsdfSample(true), pdf);
-                    if( !f.IsBlack() && pdf > 0.0f && !pInter->weight.IsBlack() )
-                        total_bssrdf += li( Ray( intersection.intersect , wi , 0 , 0.0001f ) , PixelSample() , scene , bounces + 1 , true , bssrdfBounces + 1 , true ) * f * pInter->weight / pdf;
+                    if (!f.IsBlack() && pdf > 0.0f && !pInter->weight.IsBlack()) {
+                        MediumStack ms_copy = ms;
+                        total_bssrdf += li(Ray(intersection.intersect, wi, 0, 0.0001f), PixelSample(), scene, bounces + 1, true, bssrdfBounces + 1, true, ms_copy) * f * pInter->weight / pdf;
+                    }
                 }
                 
                 L += total_bssrdf * throughput / bssrdf_pdf;

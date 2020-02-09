@@ -19,6 +19,21 @@
 #include "bsdf/bxdf.h"
 #include "bssrdf/bssrdf.h"
 #include "sampler/sample.h"
+#include "scatteringevent/bsdf/bxdf_utils.h"
+
+static SORT_FORCEINLINE SE_Interaction update_interaction_flag(const float cos_theta_wi, const float cos_theta_wo) {
+    if (cos_theta_wi > 0.0f && cos_theta_wo < 0.0f) {
+        // the ray is leaving the surface from back side to front, removing the medium if presented.
+        return SE_LEAVING;
+    }else if (cos_theta_wi < 0.0f && cos_theta_wo > 0.0f) {
+        // the ray is entering the surface from from to back, push the medium to medium stack if there is medium attached.
+        return SE_ENTERING;
+    }
+
+    // the ray is reflected, since there is no update happening in volume stack, whether it is reflected from inside or
+    // outside is not of our interest anymore.
+    return SE_REFLECTION;
+}
 
 template< class T  >
 SORT_STATIC_FORCEINLINE const T* pickScattering( const T* const scattering[] , unsigned int cnt , float totalWeight , float& pdf ){
@@ -75,16 +90,21 @@ float ScatteringEvent::SampleScatteringType( SE_Flag& flag ) const{
     return flag == SE_EVALUATE_BXDF ? pdf_bxdf : 1.0f - pdf_bxdf;
 }
 
-Spectrum ScatteringEvent::Evaluate_BSDF( const Vector& wo , const Vector& wi ) const{
+Spectrum ScatteringEvent::Evaluate_BSDF( const Vector& wo , const Vector& wi, SE_Interaction* inter_flag ) const{
     const auto swo = worldToLocal( wo );
     const auto swi = worldToLocal( wi );
     Spectrum r;
     for( auto i = 0u ; i < m_bxdfCnt ; ++i )
         r += m_bxdfs[i]->F( swo , swi ) * m_bxdfs[i]->GetEvalWeight();
+
+    // update interaction flag
+    if (inter_flag)
+        *inter_flag = update_interaction_flag(cosTheta(wi), cosTheta(wo));
+
     return r;
 }
 
-Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf ) const{
+Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf , SE_Interaction* inter_flag ) const{
     pdf = 0.0f;
 
     Spectrum ret;
@@ -116,6 +136,10 @@ Spectrum ScatteringEvent::Sample_BSDF( const Vector& wo , Vector& wi , const cla
             pdf += m_bxdfs[i]->Pdf(wo,wi) * m_bxdfs[i]->GetSampleWeight();
         }
     }
+
+    // update interaction flag
+    if (inter_flag)
+        *inter_flag = update_interaction_flag(cosTheta(wi), cosTheta(wo));
 
     // transform the direction back
     wi = localToWorld( wi );
