@@ -42,8 +42,9 @@ public:
     //! @brief      Parse volume from the material shader.
     //!
     //! @param      mi              Interaction with the medium.
+    //! @param      flag            A flag indicates whether to add or remove the medium.
     //! @param      ms              Medium stack to be populated.
-    virtual void       UpdateMediumStack( const MediumInteraction& mi , MediumStack& ms) const = 0;
+    virtual void       UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const = 0;
 
     //! @brief      Evaluate translucency.
     //!
@@ -97,8 +98,9 @@ public:
     //! @brief      Parse volume from the material shader.
     //!
     //! @param      mi              Interaction with the medium.
+    //! @param      flag            A flag indicates whether to add or remove the medium.
     //! @param      ms              Medium stack to be populated.
-    void        UpdateMediumStack(const MediumInteraction& mi, MediumStack& ms) const override;
+    void        UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const override;
 
     //! @brief      Evaluate translucency.
     //!
@@ -210,8 +212,9 @@ public:
 
     //! @brief      Parse volume from the material shader.
     //! @param      mi              Interaction with the medium.
+    //! @param      flag            A flag indicates whether to add or remove the medium.
     //! @param      ms              Medium stack to be populated.
-    void       UpdateMediumStack(const MediumInteraction& mi, MediumStack& ms) const override;
+    void       UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const override;
 
     //! @brief  Just an empty interface, there is no serialization support for this type of material.
     //!

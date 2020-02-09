@@ -21,6 +21,7 @@
 #include "spectrum/spectrum.h"
 #include "math/ray.h"
 #include "math/interaction.h"
+#include "core/strid.h"
 
 class MaterialBase;
 
@@ -90,9 +91,9 @@ public:
 
     //! @brief  Remove a medium from the data structure.
     //!
-    //! @param  medium      Medium to remove.
+    //! @param  medium_id   This is the unique id of the material that spawns the medium.
     //! @return             Whether the medium is removed. If the medium is not even in the container, it will return false.
-    bool    RemoveMedium(const Medium* medium);
+    bool    RemoveMedium(const StringID medium_id);
 
 private:
     /**< Mediums it holds. */

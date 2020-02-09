@@ -72,10 +72,13 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         // the lack of multiple bounces between different BSSRDF surfaces does introduce a bias.
         replaceSSS |= ( bssrdfBounces > m_maxBouncesInBSSRDFPath - 1 );
 
+        const MaterialBase* material = inter.primitive->GetMaterial();
+        sAssert(nullptr != material, INTEGRATOR);
+
         // Parse the material and populate the results into a scatteringEvent.
         SE_Flag seFlag = replaceSSS ? SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ) : SE_EVALUATE_ALL;
         ScatteringEvent se(inter, seFlag);
-        inter.primitive->GetMaterial()->UpdateScatteringEvent(se);
+        material->UpdateScatteringEvent(se);
 
         SE_Flag scattering_type_flag;
         auto pdf_scattering_type = se.SampleScatteringType(scattering_type_flag);
@@ -133,14 +136,11 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             if( ( f.IsBlack() || path_pdf == 0.0f ) )
                 break;
 
-            if (SE_Interaction::SE_ENTERING == interaction_flag) {
-                // adding the medium attached to the material to the medium stack
-
-                // to be done
-            } else if (SE_Interaction::SE_LEAVING == interaction_flag) {
-                // removing the medium attached to the material to the medium stack
-
-                // to be done
+            // as long as the ray is passing through the surface, it is necessary to update the medium stack.
+            if (SE_Interaction::SE_REFLECTION != interaction_flag) {
+                MediumInteraction mi;
+                mi.intersect = inter.intersect;
+                material->UpdateMediumStack(mi, interaction_flag, ms);
             }
 
             // update path weight

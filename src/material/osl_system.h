@@ -25,6 +25,7 @@
 #include "math/vector3.h"
 #include "spectrum/spectrum.h"
 #include "closures.h"
+#include "scatteringevent/scatteringevent.h"
 
 #if defined(SORT_IN_WINDOWS)
     #define STDOSL_PATH     "..\\src\\stdosl.h"
@@ -71,8 +72,9 @@ void ExecuteSurfaceShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
 //! @param  shader      The osl shader to be evaluated.
 //! @param  mi          The interaction inside the medium.
 //! @param  ms          The medium stack to hold the results.
+//! @param  flag        A flag indicates whether to add or remove the medium.
 //! @param	material	The material that spawns the volume. If nullptr, it means it is a world volume.
-void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& se, const MaterialBase* material = nullptr );
+void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& se, const SE_Interaction flag, const MaterialBase* material = nullptr);
 
 //! @brief  Evaluate the transparency of the intersection.
 //!

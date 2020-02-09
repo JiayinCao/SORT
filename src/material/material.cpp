@@ -157,17 +157,17 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
         se.AddBxdf(SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
 }
 
-void Material::UpdateMediumStack( const MediumInteraction& mi , MediumStack& ms ) const {
+void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interaction flag , MediumStack& ms ) const {
     if (m_volume_shader_valid)
-        ExecuteVolumeShader(m_volume_shader.get(), mi, ms, this);
+        ExecuteVolumeShader(m_volume_shader.get(), mi, ms, flag, this);
 }
 
 void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se) const {
     return m_material.UpdateScatteringEvent(se);
 }
 
-void MaterialProxy::UpdateMediumStack(const MediumInteraction& mi, MediumStack& ms) const {
-    return m_material.UpdateMediumStack(mi, ms);
+void MaterialProxy::UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const {
+    return m_material.UpdateMediumStack(mi, flag, ms);
 }
 
 StringID  MaterialProxy::GetUniqueID() const {

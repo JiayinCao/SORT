@@ -69,7 +69,7 @@ namespace {
     };
 
     struct Volume_Closure_Base : public Closure_Base {
-        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const MaterialBase* material) const = 0;
+        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material) const = 0;
     };
 
     static std::vector<std::unique_ptr<Surface_Closure_Base>>   g_surface_closures(SURFACE_CLOSURE_CNT);
@@ -710,9 +710,13 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
-        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const MaterialBase* material) const override{
-            const auto& params = *comp->as<AbsorptionMedium::Params>();
-            ms.AddMedium(SORT_MALLOC(AbsorptionMedium)(params, material));
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material) const override{
+            if (SE_ENTERING == flag) {
+                const auto& params = *comp->as<AbsorptionMedium::Params>();
+                ms.AddMedium(SORT_MALLOC(AbsorptionMedium)(params, material));
+            } else if( SE_LEAVING == flag ){
+                ms.RemoveMedium(material->GetUniqueID());
+            }
         }
     };
 
@@ -733,9 +737,14 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
-        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const MaterialBase* material ) const override {
-            const auto& params = *comp->as<HomogeneousMedium::Params>();
-            ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params, material));
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material ) const override {
+            if (SE_ENTERING == flag) {
+                const auto& params = *comp->as<HomogeneousMedium::Params>();
+                ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params, material));
+            }
+            else if (SE_LEAVING == flag) {
+                ms.RemoveMedium(material->GetUniqueID());
+            }
         }
     };
 }
@@ -800,7 +809,7 @@ void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& 
     }
 }
 
-void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const MaterialBase* material ) {
+void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material) {
     if (!closure)
         return;
 
@@ -817,7 +826,7 @@ void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w
         }
         default: {
             const ClosureComponent* comp = closure->as_comp();
-            getVolumeClosureBase(comp->id)->Process(comp, w * comp->w, mediumStack, material);
+            getVolumeClosureBase(comp->id)->Process(comp, w * comp->w, mediumStack, flag, material);
         }
     }
 }

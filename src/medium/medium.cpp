@@ -27,16 +27,10 @@ bool MediumStack::AddMedium(const Medium* medium) {
     return true;
 }
 
-bool MediumStack::RemoveMedium(const Medium* medium) {
+bool MediumStack::RemoveMedium(const StringID medium_id) {
     // if there is no medium in the container, simply return false
     if (0 == m_mediumCnt)
         return false;
-
-	const auto material = medium->GetMaterial();
-	if( !material )
-		return false;
-
-	const auto medium_id = material->GetUniqueID();
 
     // find the medium to be removed. Unfortunately, due to the lack of detail in data, the medium to be removed could be any
     // medium in the data structure, it is necessary to iterate through everything to find it.

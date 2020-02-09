@@ -19,6 +19,7 @@
 
 #include <OSL/oslexec.h>
 #include "spectrum/spectrum.h"
+#include "scatteringevent/scatteringevent.h"
 
 class ScatteringEvent;
 class MediumStack;
@@ -73,8 +74,9 @@ void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& 
 //! @param  closure         The closure tree in the osl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  mediumStack     The medium stack container that holds the result.
+//! @param  flag            A flag indicates whether to add or remove the medium.
 //! @param	material		The material that spawns the medium.
-void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const MaterialBase* material );
+void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material);
 
 //! @brief  Evaluate how opaque the surface is in the OSL shader.
 //!

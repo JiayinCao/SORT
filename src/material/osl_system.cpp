@@ -110,14 +110,14 @@ void ExecuteSurfaceShader( OSL::ShaderGroup* shader , ScatteringEvent& se ){
     ProcessSurfaceClosure( shaderglobals.Ci , Color3( 1.0f ) , se );
 }
 
-void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& ms, const MaterialBase* material ) {
+void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material ) {
     ShaderGlobals shaderglobals;
     memset(&shaderglobals, 0, sizeof(shaderglobals));
     shaderglobals.P = Vec3(mi.intersect.x, mi.intersect.y, mi.intersect.z);
     shaderglobals.I = Vec3(mi.view.x, mi.view.y, mi.view.z);
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
-    ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms, material);
+    ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms, flag, material);
 }
 
 Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const SurfaceInteraction& intersection ){
