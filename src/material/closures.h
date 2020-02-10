@@ -19,7 +19,7 @@
 
 #include <OSL/oslexec.h>
 #include "spectrum/spectrum.h"
-#include "scatteringevent/scatteringevent.h"
+#include "medium/medium.h"
 
 class ScatteringEvent;
 class MediumStack;

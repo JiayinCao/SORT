@@ -33,12 +33,6 @@ enum SE_Flag : unsigned int{
     SE_EVALUATE_ALL_NO_SSS  = ( SE_REPLACE_BSSRDF | SE_EVALUATE_ALL ),  // Replace SSS with lambert, this is used in several integrator that doesn't support SSS.
 };
 
-enum SE_Interaction : char {
-    SE_REFLECTION   = 0,
-    SE_LEAVING      = 1,
-    SE_ENTERING     = 2,
-};
-
 #define SE_MAX_BXDF_COUNT          16      // Maximum number of bxdf in a material is 16 by default
 #define SE_MAX_BSSRDF_COUNT        4       // Maximum number of bssrdf in a material is 4 by default 
 
@@ -120,7 +114,7 @@ public:
     //! @param wi           Incident direction in shading coordinate.
     //! @param inter_flag   Interaction flag, this is for updating mediums.
     //! @return             The Evaluated value of the BSDF.
-    Spectrum    Evaluate_BSDF( const Vector& wo , const Vector& wi, SE_Interaction* inter_flag = nullptr ) const;
+    Spectrum    Evaluate_BSDF( const Vector& wo , const Vector& wi ) const;
 
     //! @brief Importance sampling for the bsdf.
     //!
@@ -130,7 +124,7 @@ public:
     //! @param pdf          Probability density of the selected direction.
     //! @param inter_flag   Interaction flag, this is for updating mediums.
     //! @return             The Evaluated BRDF value.
-    Spectrum    Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf , SE_Interaction* inter_flag = nullptr ) const;
+    Spectrum    Sample_BSDF( const Vector& wo , Vector& wi , const class BsdfSample& bs , float& pdf ) const;
 
     //! @brief Evaluate the pdf of an existance direction given the Incident direction.
     //!

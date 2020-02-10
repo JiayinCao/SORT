@@ -25,6 +25,27 @@
 
 class MaterialBase;
 
+enum SE_Interaction : char {
+    SE_REFLECTION = 0,
+    SE_LEAVING = 1,
+    SE_ENTERING = 2,
+};
+
+SORT_FORCEINLINE SE_Interaction update_interaction_flag(const float cos_theta_wi, const float cos_theta_wo) {
+    if (cos_theta_wi > 0.0f && cos_theta_wo < 0.0f) {
+        // the ray is leaving the surface from back side to front, removing the medium if presented.
+        return SE_LEAVING;
+    }
+    else if (cos_theta_wi < 0.0f && cos_theta_wo > 0.0f) {
+        // the ray is entering the surface from from to back, push the medium to medium stack if there is medium attached.
+        return SE_ENTERING;
+    }
+
+    // the ray is reflected, since there is no update happening in volume stack, whether it is reflected from inside or
+    // outside is not of our interest anymore.
+    return SE_REFLECTION;
+}
+
 //! @brief  Medium is a data structure holding volumetric rendering data.
 class Medium{
 public:

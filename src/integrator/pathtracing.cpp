@@ -142,12 +142,12 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             Vector      wi;
             Spectrum f;
             BsdfSample  _bsdf_sample = BsdfSample(true);
-            SE_Interaction interaction_flag;
-            f = se.Sample_BSDF( -r.m_Dir , wi , _bsdf_sample , path_pdf , &interaction_flag);
+            f = se.Sample_BSDF( -r.m_Dir , wi , _bsdf_sample , path_pdf);
             if( ( f.IsBlack() || path_pdf == 0.0f ) )
                 break;
 
             // as long as the ray is passing through the surface, it is necessary to update the medium stack.
+            const auto interaction_flag = update_interaction_flag(dot(wi,inter.gnormal), dot(-r.m_Dir,inter.gnormal));
             if (SE_Interaction::SE_REFLECTION != interaction_flag) {
                 MediumInteraction mi;
                 mi.intersect = inter.intersect;
