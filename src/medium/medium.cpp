@@ -49,6 +49,15 @@ bool MediumStack::RemoveMedium(const StringID medium_id) {
     return false;
 }
 
+Spectrum MediumStack::Tr(const Ray& r, const float max_t) const {
+    if (0 == m_mediumCnt)
+        return 1.0f;
+
+    const auto k = clamp((int)(sort_canonical() * m_mediumCnt), 0, m_mediumCnt - 1);
+    const Medium* medium = m_mediums[k];
+    return medium->Tr(r, max_t) * m_mediumCnt;
+}
+
 Spectrum MediumStack::Sample(const Ray& r, const float max_t , MediumInteraction*& mi) const {
     if (0 == m_mediumCnt)
         return 1.0f;

@@ -25,6 +25,7 @@
 struct SurfaceInteraction;
 class LightSample;
 class Shape;
+class MediumStack;
 
 //! @brief  Visibility tells whether there is a primitive blocking the ray.
 class Visibility{
@@ -49,9 +50,11 @@ public:
     //!
     //! Get attenuation along the light.
     //!
+    //! @ms             Medium stack during shadow evaluation. Medium aware integrator needs 
+    //!                 to pass non-empty pointer.
     //! @return         The attenuation along the ray.
-    Spectrum    GetAttenuation() const {
-        return m_scene.GetAttenuation( ray );
+    Spectrum    GetAttenuation( MediumStack* ms = nullptr ) const {
+        return m_scene.GetAttenuation( ray , ms );
     }
 #endif
 

@@ -21,13 +21,14 @@
 
 struct	SurfaceInteraction;
 class	Light;
+class   MediumStack;
 
 // evaluate direct lighting
-Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Scene& scene , const Light* light ,
-                            const LightSample& ls ,const BsdfSample& bs );
+Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Scene& scene , const Light* light , const LightSample& ls ,const BsdfSample& bs , const MaterialBase* material , const MediumStack& ms );
+Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene& scene, const Light* light, const LightSample& ls, const BsdfSample& bs);
 
 // uniformly evaluate direct illumination from one light
-Spectrum    SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene);
+Spectrum    SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene, const MaterialBase* material, const MediumStack& ms);
 
 // helper function to evaluate light contribution
 Spectrum    EvaluateDirect( const Ray& r , const Scene& scene , const Light* light , const SurfaceInteraction& ip ,

@@ -88,8 +88,9 @@ public:
     //!
     //! @param r            The ray to be tested. Its origin will be updated upon intersection.
     //! @param attenuation  The occlusion along the ray.
+    //! @param ms           The medium stack used to evaluate shadow attenuation.
     //! @return             Whether there is an intersection along the ray.
-    bool         GetAttenuation( Ray& r , Spectrum& attenuation ) const;
+    bool         GetAttenuation( Ray& r , Spectrum& attenuation , MediumStack* ms = nullptr ) const;
 #endif
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.

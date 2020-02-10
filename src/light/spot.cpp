@@ -49,7 +49,7 @@ Spectrum SpotLight::sample_l( const SurfaceInteraction& intersect , const LightS
 
     // update visility
     const float delta = 0.01f;
-    visibility.ray = Ray( light_pos , -dirToLight , 0 , delta , len - delta );
+    visibility.ray = Ray( intersect.intersect , dirToLight , 0 , delta , len - delta );
 
     const float falloff = satDot( dirToLight , -light_dir );
     if( falloff <= cos_total_range )

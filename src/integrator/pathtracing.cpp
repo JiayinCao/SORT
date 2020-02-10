@@ -101,7 +101,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             const auto  bsdf_sample = BsdfSample(true);
             const auto  light = scene.SampleLight( light_sample.t , &light_pdf );
             if( light_pdf > 0.0f )
-                L += throughput * EvaluateDirect( se , r , scene, light , light_sample , bsdf_sample ) / light_pdf / pdf_scattering_type;
+                L += throughput * EvaluateDirect( se , r , scene, light , light_sample , bsdf_sample , material , ms ) / light_pdf / pdf_scattering_type;
         }else{
             BSSRDFIntersections bssrdf_inter;
             float               bssrdf_pdf = 0.0f;
@@ -122,7 +122,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
                     se.AddBxdf( SORT_MALLOC(Lambert)( WHITE_SPECTRUM , FULL_WEIGHT , DIR_UP ) );
 
                     // Accumulate the contribution from direct illumination
-                    total_bssrdf += SampleOneLight( se , r , intersection , scene ) * pInter->weight;
+                    total_bssrdf += SampleOneLight( se , r , intersection , scene , material , ms ) * pInter->weight;
                 }
                 
                 L += total_bssrdf * throughput / pdf_scattering_type / bssrdf_pdf;

@@ -38,11 +38,14 @@ void Accelerator::computeBBox(){
 }
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
-bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
+bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack* ms ) const {
     SurfaceInteraction intersection;
     intersection.query_shadow = true;
-    if( !GetIntersect( r , intersection ) )
+    if (!GetIntersect(ray, intersection)) {
+        if (ms)
+            attenuation *= ms->Tr(ray, ray.m_fMax);
         return false;
+    }
 
     // primitive being null is a special coding meaning the ray is blocked by an opaque primitive.
     if( nullptr == intersection.primitive ){
@@ -54,11 +57,27 @@ bool Accelerator::GetAttenuation( Ray& r , Spectrum& attenuation ) const {
 
     sAssert( nullptr != material , SPATIAL_ACCELERATOR );
 
-    r.m_Ori = intersection.intersect;
-    r.m_fMin = 0.001f;              // avoid self collision again.
-    r.m_fMax -= intersection.t;
-    
-    attenuation = material->EvaluateTransparency( intersection );
+    attenuation = 1.0f;
+
+    // consider beam transmittance during ray traversal if medium is presented.
+    if (ms) {
+        attenuation *= ms->Tr(ray, intersection.t);
+
+        const auto theta_wi = dot(ray.m_Dir, intersection.gnormal);
+        const auto theta_wo = -theta_wi;
+        const auto interaction_flag = update_interaction_flag(theta_wi, theta_wo);
+
+        // at this point, we know for sure the ray pass through the surface.
+        MediumInteraction mi;
+        mi.intersect = intersection.intersect;
+        material->UpdateMediumStack(mi, interaction_flag, *ms);
+    }
+
+    ray.m_Ori = intersection.intersect;
+    ray.m_fMin = 0.001f;              // avoid self collision again.
+    ray.m_fMax -= intersection.t;
+
+    attenuation *= material->EvaluateTransparency(intersection);
 
     return true;
 }

@@ -70,9 +70,10 @@ public:
     //! The returned value is the spectrum dependent percentage of un-occluded radiance. Put it in other words, 0 means fully
     //! occluded, 1.0 means fully un-occluded.
     //!
-    //! @param r            The ray to be tested.
+    //! @param  r           The ray to be tested.
+    //! @param  ms          The medium stack to be passed in. Medium aware integrator needs to pass non-empty pointer.
     //! @return             The occlusion along the ray.
-    Spectrum    GetAttenuation( const Ray& r ) const;
+    Spectrum    GetAttenuation( const Ray& r , MediumStack* ms = nullptr ) const;
 #endif
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.

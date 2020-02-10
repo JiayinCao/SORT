@@ -108,13 +108,20 @@ public:
     //!
     //! @param  medium      Medium to be added.
     //! @return             Whether the medium is added in the stack.
-    bool    AddMedium(const Medium* medium);
+    bool        AddMedium(const Medium* medium);
 
     //! @brief  Remove a medium from the data structure.
     //!
     //! @param  medium_id   This is the unique id of the material that spawns the medium.
     //! @return             Whether the medium is removed. If the medium is not even in the container, it will return false.
-    bool    RemoveMedium(const StringID medium_id);
+    bool        RemoveMedium(const StringID medium_id);
+
+    //! @brief  Evaluate beam transmittance.
+    //!
+    //! @param  r           The ray along which the bema transmittance will be evaluated.
+    //! @param  max_t       The maximum distance to be considered.
+    //! @return             The beam transmittance along the ray direction that taking all mediums in the stack into consideration.
+    Spectrum    Tr(const Ray& r, const float max_t) const;
 
     //! @brief  Sample a point in the mediums.
     //!

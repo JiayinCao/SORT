@@ -80,13 +80,13 @@ bool Scene::IsOccluded(const Ray& r) const{
     return g_accelerator->IsOccluded(r);
 }
 #else
-Spectrum Scene::GetAttenuation( const Ray& const_ray ) const{
+Spectrum Scene::GetAttenuation( const Ray& const_ray , MediumStack* ms ) const{
     auto ray = const_ray;
 
     Spectrum attenuation( 1.0f );
     while( !attenuation.IsBlack() ){
         Spectrum att;
-        if( !g_accelerator->GetAttenuation(ray, att) )
+        if( !g_accelerator->GetAttenuation(ray, att, ms) )
             break;
 
         if( att.IsBlack() )
