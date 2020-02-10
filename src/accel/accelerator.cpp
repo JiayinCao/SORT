@@ -53,14 +53,15 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack
         return true;
     }
 
+    // get the material of the intersected primitive
     const MaterialBase* material = intersection.primitive->GetMaterial();
-
     sAssert( nullptr != material , SPATIAL_ACCELERATOR );
 
-    attenuation = 1.0f;
+    // evaluate the transparency first in case it is fully opaque.
+    attenuation = material->EvaluateTransparency(intersection);
 
     // consider beam transmittance during ray traversal if medium is presented.
-    if (ms) {
+    if (ms && !attenuation.IsBlack() ) {
         attenuation *= ms->Tr(ray, intersection.t);
 
         const auto theta_wi = dot(ray.m_Dir, intersection.gnormal);
@@ -76,8 +77,6 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack
     ray.m_Ori = intersection.intersect;
     ray.m_fMin = 0.001f;              // avoid self collision again.
     ray.m_fMax -= intersection.t;
-
-    attenuation *= material->EvaluateTransparency(intersection);
 
     return true;
 }
