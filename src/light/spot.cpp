@@ -21,12 +21,12 @@
 #include "core/samplemethod.h"
 
 // sample ray from light
-Spectrum SpotLight::sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+Spectrum SpotLight::sample_l(const Point& ip, const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
     const auto light_dir = Vector3f( m_light2world.matrix.m[1] , m_light2world.matrix.m[5] , m_light2world.matrix.m[9] );
     const auto light_pos = Point( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 
     // direction to light
-    const Vector _dirToLight = light_pos - intersect.intersect;
+    const Vector _dirToLight = light_pos - ip;
 
     // normalize vec
     const float sqrLen = _dirToLight.SquaredLength();
@@ -49,7 +49,7 @@ Spectrum SpotLight::sample_l( const SurfaceInteraction& intersect , const LightS
 
     // update visility
     const float delta = 0.01f;
-    visibility.ray = Ray( intersect.intersect , dirToLight , 0 , delta , len - delta );
+    visibility.ray = Ray( ip , dirToLight , 0 , delta , len - delta );
 
     const float falloff = satDot( dirToLight , -light_dir );
     if( falloff <= cos_total_range )

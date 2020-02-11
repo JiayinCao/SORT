@@ -290,7 +290,7 @@ Spectrum BidirPathTracing::_ConnectLight(const BDPT_Vertex& eye_vertex , const L
     float directPdfW;
     float emissionPdfW;
     float cosAtLight;
-    auto  li = light->sample_l(eye_vertex.inter, &sample, wi, 0 , &directPdfW, &emissionPdfW , &cosAtLight , visibility);
+    auto  li = light->sample_l(eye_vertex.inter.intersect, &sample, wi, 0 , &directPdfW, &emissionPdfW , &cosAtLight , visibility);
 
     if( 0.0f == directPdfW )
         return 0.0f;

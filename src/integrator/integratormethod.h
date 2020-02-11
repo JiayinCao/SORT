@@ -24,8 +24,10 @@ class	Light;
 class   MediumStack;
 
 // evaluate direct lighting
-Spectrum    EvaluateDirect( const ScatteringEvent& se , const Ray& r , const Scene& scene , const Light* light , const LightSample& ls ,const BsdfSample& bs , const MaterialBase* material , const MediumStack& ms );
+Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene& scene, const Light* light, const LightSample& ls, const BsdfSample& bs, const MaterialBase* material, const MediumStack& ms);
 Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene& scene, const Light* light, const LightSample& ls, const BsdfSample& bs);
+
+Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vector& wo, const Scene& scene, const Light* light, MediumStack ms);
 
 // uniformly evaluate direct illumination from one light
 Spectrum    SampleOneLight( const ScatteringEvent& se , const Ray& r, const SurfaceInteraction& inter, const Scene& scene, const MaterialBase* material, const MediumStack& ms);

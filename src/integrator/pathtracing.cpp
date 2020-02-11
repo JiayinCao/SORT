@@ -26,6 +26,7 @@
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/scatteringevent.h"
 #include "medium/medium.h"
+#include "medium/phasefunction.h"
 
 SORT_STATS_DEFINE_COUNTER(sTotalPathLength)
 SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
@@ -70,7 +71,31 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         throughput *= medium_attenuation;
 
         if (pMi) {
-            // to be done shortly.
+            // temporary hard-coded phase function for now
+            IsotropicPhaseFunction hg;
+
+            Vector wi;
+            float pdf = 0.0f;
+            const auto pf = hg.Sample(-r.m_Dir, wi, pdf);
+
+            if ( UNLIKELY(pdf == 0.0f) )
+                break;
+
+            // evalute direct light illumination
+            float light_pdf = 0.0f;
+            const auto  light = scene.SampleLight(sort_canonical(), &light_pdf);
+            L += throughput * EvaluateDirect(pMi->intersect, &hg, -r.m_Dir, scene, light, ms) / light_pdf;
+
+            // update path weight
+            throughput *= pf / pdf;
+
+            if (0.0f == throughput.GetIntensity())
+                break;
+
+            r.m_Ori = pMi->intersect;
+            r.m_Dir = wi;
+            r.m_fMin = 0.0f;    // no need for bias anymore since there is no geometry
+
             continue;
         }
 

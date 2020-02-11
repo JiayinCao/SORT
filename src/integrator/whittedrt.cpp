@@ -55,7 +55,7 @@ Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scen
         if( (*it)->IsDelta() ){
             Vector  lightDir;
             float   pdf;
-            Spectrum ld = (*it)->sample_l( ip , &ps.light_sample[0] , lightDir , 0 , &pdf , 0 , 0 , visibility );
+            Spectrum ld = (*it)->sample_l( ip.intersect , &ps.light_sample[0] , lightDir , 0 , &pdf , 0 , 0 , visibility );
             if( ld.IsBlack() ){
                 it++;
                 continue;

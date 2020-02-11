@@ -19,7 +19,7 @@
 #include "sampler/sample.h"
 #include "core/samplemethod.h"
 
-Spectrum SkyLight::sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+Spectrum SkyLight::sample_l(const Point& ip, const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
     // sample a ray
     float _pdfw = 0.0f;
     const Vector localDir = sky.sample_v( ls->u , ls->v , &_pdfw , 0 );
@@ -45,7 +45,7 @@ Spectrum SkyLight::sample_l( const SurfaceInteraction& intersect , const LightSa
 
     // setup visibility tester
     const float delta = 0.01f;
-    visibility.ray = Ray( intersect.intersect , dirToLight , 0 , delta , FLT_MAX );
+    visibility.ray = Ray( ip , dirToLight , 0 , delta , FLT_MAX );
 
     return sky.Evaluate( localDir ) * intensity;
 }

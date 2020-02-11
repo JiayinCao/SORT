@@ -30,7 +30,7 @@ public:
     //! For some light sources, light point light, spot light and distant light, it is trival. However, it
     //! needs some decent algorithm to make it efficient for some other light sources like area light.
     //!
-    //! @param  intersect       The information of intersection.
+    //! @param  ip              The point where we are interested in shading at.
     //! @param  ls              The light sample information.
     //! @param  dirToLight      The resulting direction goes from the intersection to light source.
     //! @param  distance        The distance from the intersected point to the sampled point, which is the intersection
@@ -41,7 +41,7 @@ public:
     //! @param  cosAtLight      The cos of the angle between the light out-going direction, the opposite of 'dirToLight'.
     //! @param  visibility      The visibility data structured filled by the light source.
     //! @return                 The radiance goes from the light source to the intersected point.
-    Spectrum sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const override;
+    Spectrum sample_l(const Point& ip, const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const override;
 
     //! @brief      Sample a point and light out-going direction.
     //!

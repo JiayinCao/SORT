@@ -21,11 +21,11 @@
 #include "sampler/sample.h"
 
 // sample ray from light
-Spectrum PointLight::sample_l( const SurfaceInteraction& intersect , const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
+Spectrum PointLight::sample_l(const Point& ip, const LightSample* ls , Vector& dirToLight , float* distance , float* pdfw , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
     const auto light_pos = Point( m_light2world.matrix.m[3] , m_light2world.matrix.m[7] , m_light2world.matrix.m[11] );
 
     // Get light position
-    const auto _dirToLight = light_pos - intersect.intersect;
+    const auto _dirToLight = light_pos - ip;
 
     // normalize vec
     const auto sqrLen = _dirToLight.SquaredLength();
@@ -34,7 +34,7 @@ Spectrum PointLight::sample_l( const SurfaceInteraction& intersect , const Light
 
     // setup visibility ray
     const auto delta = 0.01f;
-    visibility.ray = Ray( intersect.intersect , dirToLight , 0 , 0.0f , len - delta );
+    visibility.ray = Ray( ip , dirToLight , 0 , 0.0f , len - delta );
 
     // direction pdf from 'intersect' to light source w.r.t solid angle
     if( pdfw )
