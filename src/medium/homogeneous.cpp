@@ -20,7 +20,7 @@
 #include "core/memory.h"
 
 Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
-    const auto e = t * (-fmin(max_t, FLT_MAX ));
+    const auto e = bc * t * (-fmin(max_t, FLT_MAX ));
     return e.Exp();
 }
 
@@ -33,10 +33,12 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
     const auto d = fmin( -std::log( sort_canonical() ) / t[ch] , ray.m_fMax );
 
     const auto sample_medium = d < max_t;
-    if( sample_medium )
+    if (sample_medium) {
         mi = SORT_MALLOC(MediumInteraction)();
+        mi->intersect = ray(d);
+    }
 
-    const auto e = t * (-fmin( d , FLT_MAX ));
+    const auto e = bc * t * (-fmin( d , FLT_MAX ));
     const auto tr = e.Exp();
 
     const auto density = sample_medium ? ( t * tr ) : tr;

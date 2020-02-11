@@ -39,7 +39,7 @@ public:
     //!
     //! @param param		Parameter to build the volume.
 	//! @param material		Material that spawns the medium.
-    HomogeneousMedium(const HomogeneousMedium::Params& param, const MaterialBase* material):Medium(material),a(param.absorption),s(param.scattering),t(param.absorption+ param.scattering),ph(nullptr){}
+    HomogeneousMedium(const HomogeneousMedium::Params& param, const MaterialBase* material):Medium(material),bc(param.baseColor),a(param.absorption),s(param.scattering),t(param.absorption+ param.scattering),ph(nullptr){}
 
     //! @brief  Evaluation of beam transmittance.
     //!
@@ -60,6 +60,7 @@ public:
     Spectrum Sample( const Ray& ray, const float max_t, MediumInteraction*& mi ) const override;
 
 private:
+    const Spectrum          bc;
     const Spectrum          a;
     const Spectrum          s;
     const Spectrum          t;
