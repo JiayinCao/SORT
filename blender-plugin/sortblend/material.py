@@ -2362,7 +2362,7 @@ class SORTNodeInputFloatVector(SORTShadingNode):
     bl_idname = 'SORTNodeInputFloatVector'
     bl_width_min = 256
     osl_shader = '''
-        shader ConstantFloat( vector Value = @ ,
+        shader ConstantFloatVector( vector Value = @ ,
                               output vector Result = 0.0 ){
             Result = Value;
         }
@@ -2643,21 +2643,18 @@ class SORTNodeAbsorption(SORTShadingNode):
     absorption_coeffcient : bpy.props.FloatProperty( name='Absorption Density' , default=1.0 , min=0.0, max=float('inf') )
     osl_shader = '''
         shader AbsoprtionMedium( output closure color Result = color(0) ){
-            Result = medium_absorption( %s , %s );
+            Result = medium_absorption( @ , @ );
         }
     '''
     def init(self, context):
         self.outputs.new( 'SORTNodeSocketVolume' , 'Result' )
     def serialize_prop(self, fs):
-        fs.serialize( 0 )
+        fs.serialize( 2 )
+        fs.serialize( 'color( %f,%f,%f )'%(self.absorption_color[:]) )
+        fs.serialize( '%f'%(self.absorption_coeffcient) )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'absorption_color')
         layout.prop(self, 'absorption_coeffcient')
-    def generate_osl_source(self):
-        absorption_color = 'color( %f,%f,%f )'%(self.absorption_color[:])
-        absorption_coeffcient = self.absorption_coeffcient
-        ret = self.osl_shader % ( absorption_color , absorption_coeffcient )
-        return ret
 
 @SORTShaderNodeTree.register_node('Volume')
 class SORTNodeHomogeneous(SORTShadingNode):
@@ -2668,18 +2665,17 @@ class SORTNodeHomogeneous(SORTShadingNode):
     scattering_coeffcient : bpy.props.FloatProperty( name='Scattering Density' , default=0.5 , min=0.0, max=float('inf') )
     osl_shader = '''
         shader HomogenenousMedium( output closure color Result = color(0) ){
-            Result = medium_homogeneous( %s , %s , %s );
+            Result = medium_homogeneous( @ , @ , @ );
         }
     '''
     def init(self, context):
         self.outputs.new( 'SORTNodeSocketVolume' , 'Result' )
     def serialize_prop(self, fs):
-        fs.serialize( 0 )
+        fs.serialize( 3 )
+        fs.serialize( 'color( %f,%f,%f )'%(self.absorption_color[:]) )
+        fs.serialize( '%f'%(self.absorption_coeffcient) )
+        fs.serialize( '%f'%(self.scattering_coeffcient) )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'absorption_color')
         layout.prop(self, 'absorption_coeffcient')
         layout.prop(self, 'scattering_coeffcient')
-    def generate_osl_source(self):
-        absorption_color = 'color( %f,%f,%f )'%(self.absorption_color[:])
-        ret = self.osl_shader % ( absorption_color , self.absorption_coeffcient , self.scattering_coeffcient )
-        return ret
