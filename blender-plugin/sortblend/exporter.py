@@ -192,9 +192,9 @@ def export_scene(depsgraph, fs):
     fs.serialize( vericiation_bits )
 
     # camera node
-    camera = next(cam for cam in scene.objects if cam.type == 'CAMERA' )
+    camera = scene.camera
     if camera is None:
-        print("Camera not found.")
+        print("There is no active camera.")
         return
 
     pos, target, up = lookat_camera(camera)
