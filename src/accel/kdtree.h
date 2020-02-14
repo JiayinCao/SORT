@@ -146,8 +146,8 @@ public:
     //! On building fast KD-Trees for Ray Tracing, and on doing that in O(N log N)</a>
     //! for further details.
     //!
-    //! @param scene    The rendering scene.
-    void    Build(const Scene& scene) override;
+    //! @param primitives       A vector holding all primitives.
+    void    Build(const std::vector<const Primitive*>& primitives) override;
 
     //! @brief      Serializing data from stream.
     //!

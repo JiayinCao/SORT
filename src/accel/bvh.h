@@ -101,8 +101,8 @@ public:
     //! <a href = "http://www.sci.utah.edu/~wald/Publications/2007/ParallelBVHBuild/fastbuild.pdf">
     //! On fast Construction of SAH - based Bounding Volume Hierarchies< / a> for further details.
     //!
-    //! @param scene    The rendering scene.
-    void    Build(const Scene& scene) override;
+    //! @param primitives       A vector holding all primitives.
+    void    Build(const std::vector<const Primitive*>& primitives) override;
 
     //! @brief      Serializing data from stream.
     //!

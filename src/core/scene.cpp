@@ -111,17 +111,8 @@ void Scene::_generatePriBuf(){
 }
 
 const BBox& Scene::GetBBox() const{
-    if( g_accelerator != nullptr && g_accelerator->GetIsValid() )
-        return g_accelerator->GetBBox();
-
-    // if there is no bounding box for the scene, generate one
-    for_each(m_primitives.begin() , m_primitives.end() ,
-        [&]( const Primitive* primitive ){
-            m_BBox.Union( primitive->GetBBox() );
-        }
-    );
-
-    return m_BBox;
+    sAssert(g_accelerator && g_accelerator->GetIsValid(), GENERAL);
+    return g_accelerator->GetBBox();
 }
 
 void Scene::_genLightDistribution(){

@@ -110,8 +110,8 @@ public:
 
     //! @brief Build the acceleration structure.
     //!
-    //! @param  scene       The rendering scene.
-    virtual void Build( const Scene& scene ) = 0;
+    //! @param primitives       A vector holding all primitives.
+    virtual void Build(const std::vector<const Primitive*>& primitives) = 0;
 
     //! @brief Get the bounding box of the primitive set.
     //!

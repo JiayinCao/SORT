@@ -107,10 +107,10 @@ SORT_STATIC_FORCEINLINE BBox calcBoundingBox(const Fbvh_Node* const node , const
     return node_bbox;
 }
 
-void Fbvh::Build(const Scene& scene){
+void Fbvh::Build(const std::vector<const Primitive*>& primitives){
     SORT_PROFILE("Build Fbvh");
 
-    m_primitives = scene.GetPrimitives();
+    m_primitives = &primitives;
     m_bvhpri = std::make_unique<Bvh_Primitive[]>(m_primitives->size());
 
     // build bounding box

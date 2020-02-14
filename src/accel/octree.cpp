@@ -39,10 +39,10 @@ SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOc
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCount);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void OcTree::Build( const Scene& scene ){
+void OcTree::Build(const std::vector<const Primitive*>& primitives){
     SORT_PROFILE("Build OcTree");
 
-    m_primitives = scene.GetPrimitives();
+    m_primitives = &primitives;
 
     // handling empty mesh case
     if( m_primitives->size() == 0 )

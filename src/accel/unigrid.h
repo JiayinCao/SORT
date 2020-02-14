@@ -75,8 +75,8 @@ public:
 
     //! Build uniform grid structure in O(N).
     //!
-    //! @param scene    The rendering scene.
-    void    Build(const Scene& scene) override;
+    //! @param primitives       A vector holding all primitives.
+    void    Build(const std::vector<const Primitive*>& primitives) override;
 
     //! @brief      Serializing data from stream
     //!

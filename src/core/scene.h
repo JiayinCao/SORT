@@ -111,15 +111,22 @@ public:
     unsigned LightNum() const{
         return (unsigned)m_lights.size();
     }
-    // get bounding box of the scene
+    
+    //! @brief  Get the bounding box of the whole scene.
+    //!
+    //! @return     The bounding box of the whole scene.
     const BBox& GetBBox() const;
-    // add primitives
+    
+    //! @brief  Add a primitive in the scene.
     void AddPrimitive( const Primitive* primitive) {
         m_primitives.push_back( std::move(primitive) );
     }
-    // get primtives
-    const std::vector<const Primitive*>*   GetPrimitives() const {
-        return &m_primitives;
+    
+    //! @brief  Get all of the primitives in the scene.
+    //!
+    //! @return     A vector that holds all primitives in the scene.
+    const std::vector<const Primitive*>&   GetPrimitives() const {
+        return m_primitives;
     }
 
     // Evaluate sky

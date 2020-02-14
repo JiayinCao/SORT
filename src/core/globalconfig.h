@@ -237,6 +237,7 @@ private:
     unsigned int                    m_threadCnt = 16;               /**< Number of worker thread ( including the main thread as a woker thread ). */
     unsigned int                    m_samplePerPixel = 4;           /**< Sample of per-pixel. Default value is 4 for fast iteration. */
     std::unique_ptr<Accelerator>    m_accelerator = nullptr;        /**< Spatial accelerator for accelerating primitive/ray intersection test. */
+    std::unique_ptr<Accelerator>    m_acceleratorVol = nullptr;     /**< Spatial accelerator for accelerating primitive/ray intersection test, this is only for primitives that has volumes attached to them. */
     std::unique_ptr<Integrator>     m_integrator = nullptr;         /**< Integrator used to evaluate rendering equation. */
     std::unique_ptr<ImageSensor>    m_imageSensor = nullptr;        /**< Image sensor to hold the result of ray tracing. */
 

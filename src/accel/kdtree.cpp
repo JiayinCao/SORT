@@ -40,10 +40,10 @@ SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sKD
 SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sKDTreePrimitiveCount , sKDTreeLeafNodeCount );
 SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void KDTree::Build( const Scene& scene ){
+void KDTree::Build( const std::vector<const Primitive*>& primitives ){
     SORT_PROFILE("Build KdTree");
 
-    m_primitives = scene.GetPrimitives();
+    m_primitives = &primitives;
 
     if( m_primitives->size() == 0 )
         return;

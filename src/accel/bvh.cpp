@@ -41,10 +41,10 @@ SORT_STATS_COUNTER("Spatial-Structure(BVH)", "Maximum Primitive in Leaf", sBvhMa
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Count in Leaf", sBvhPrimitiveCount , sBvhLeafNodeCount );
 SORT_STATS_AVG_COUNT("Spatial-Structure(BVH)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void Bvh::Build(const Scene& scene){
+void Bvh::Build(const std::vector<const Primitive*>& primitives){
     SORT_PROFILE("Build Bvh");
 
-    m_primitives = scene.GetPrimitives();
+    m_primitives = &primitives;
     m_bvhpri = std::make_unique<Bvh_Primitive[]>(m_primitives->size());
 
     // build bounding box

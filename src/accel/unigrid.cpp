@@ -40,10 +40,10 @@ SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGrid
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
 SORT_STATS_AVG_COUNT("Spatial-Structure(UniformGrid)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void UniGrid::Build( const Scene& scene ){
+void UniGrid::Build( const std::vector<const Primitive*>& primitives ){
     SORT_PROFILE("Build Uniform Grid");
 
-    m_primitives = scene.GetPrimitives();
+    m_primitives = &primitives;
 
     if( nullptr == m_primitives || m_primitives->empty() ){
         slog( WARNING , SPATIAL_ACCELERATOR , "There is no primitive in uniform grid." );
