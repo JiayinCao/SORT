@@ -140,11 +140,11 @@ void AreaLightEntity::Serialize(IStreamBase& stream) {
     }else{
         slog( WARNING , LIGHT , "Unrecognized area light type (%u)." , area_type.m_sid );
     }
+
+    m_primitive = std::make_unique<Primitive>(nullptr, m_light->m_shape.get(), m_light.get());
 }
 
 void AreaLightEntity::FillScene(class Scene& scene) {
     scene.AddLight(m_light.get());
-
-    auto primitive = std::make_unique<Primitive>(nullptr, m_light->m_shape.get() , m_light.get());
-    scene.AddPrimitive(std::move(primitive));
+    scene.AddPrimitive(m_primitive.get());
 }

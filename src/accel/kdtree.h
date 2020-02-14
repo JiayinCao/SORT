@@ -66,7 +66,7 @@ class KDTree : public Accelerator{
         /**< The index of the primitive that triggers the split plane in the primitive list.*/
         unsigned    id = 0;
         /**< The pointer pointing to the primitive that triggers the split plane.*/
-        Primitive*  primitive = nullptr;
+        const Primitive*  primitive = nullptr;
 
         //! @brief  Constructor of Split.
         //!
@@ -74,7 +74,7 @@ class KDTree : public Accelerator{
         //! @param t    Type of the split plane.
         //! @param pid  Index of the primitive that triggers the split plane.
         //! @param p    The pointer to the primitive that triggers the split plane.
-        Split(float po = 0.0f, Split_Type t = Split_Type::Split_None, unsigned pid = 0, Primitive* p = nullptr) :
+        Split(float po = 0.0f, Split_Type t = Split_Type::Split_None, unsigned pid = 0, const Primitive* p = nullptr) :
             pos(po), type(t), id(pid), primitive(p) {
         }
 

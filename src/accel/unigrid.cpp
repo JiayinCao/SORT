@@ -94,7 +94,7 @@ void UniGrid::Build( const Scene& scene ){
 
                     // only add the primitives if it is actually intersected
                     if( primitive->GetIntersect( bb ) )
-                        m_voxels[offset( k , j , i )].push_back(primitive.get());
+                        m_voxels[offset( k , j , i )].push_back(primitive);
                 }
     }
 

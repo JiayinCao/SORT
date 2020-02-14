@@ -96,7 +96,7 @@ private:
     /**< Inverse of extent of one voxel along each axis. */
     Vector                                      m_voxelInvExtent;
     /**< Vector holding all voxels. */
-    std::vector<std::vector<Primitive*>>        m_voxels;
+    std::vector<std::vector<const Primitive*>>  m_voxels;
 
     //! @brief      Locate the id of the voxel that the point belongs to along a specific axis.
     //!

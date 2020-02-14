@@ -54,7 +54,7 @@ void OcTree::Build( const Scene& scene ){
     // initialize a primitive container
     std::unique_ptr<NodePrimitiveContainer> container = std::make_unique<NodePrimitiveContainer>();
     for( auto& primitive : *m_primitives )
-        container->primitives.push_back( primitive.get() );
+        container->primitives.push_back( primitive );
 
     // create root node
     m_root = std::make_unique<OcTreeNode>();

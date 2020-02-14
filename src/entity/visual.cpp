@@ -18,8 +18,6 @@
 #include "visual.h"
 #include "material/matmanager.h"
 #include "core/scene.h"
-#include "shape/triangle.h"
-#include "core/primitive.h"
 
 IMPLEMENT_RTTI( MeshVisual );
 IMPLEMENT_RTTI( HairVisual );
@@ -27,7 +25,8 @@ IMPLEMENT_RTTI( HairVisual );
 void MeshVisual::FillScene( Scene& scene ){
     for (const auto& mi : m_memory->m_indices){
         m_triangles.push_back( std::make_unique<Triangle>( this , mi ) );
-        scene.AddPrimitive( std::make_unique<Primitive>( mi.m_mat , m_triangles.back().get() ) );
+        m_primitives.push_back(std::make_unique<Primitive>(mi.m_mat, m_triangles.back().get()));
+        scene.AddPrimitive(m_primitives.back().get());
     }
 }
 
@@ -45,7 +44,8 @@ void MeshVisual::ApplyTransform( const Transform& transform ){
 void HairVisual::FillScene( Scene& scene ){
     for( const auto& line : m_lines ){
         auto mat = MatManager::GetSingleton().GetMaterial(line->GetMaterialId());
-        scene.AddPrimitive( std::make_unique<Primitive>( mat , line.get() ) );
+        m_primitives.push_back(std::make_unique<Primitive>(mat, line.get()));
+        scene.AddPrimitive(m_primitives.back().get());
     }
 }
 

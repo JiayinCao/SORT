@@ -25,13 +25,13 @@ class Primitive;
 
 //! @brief Bounding volume hierarchy node primitives. It is used during BVH construction.
 struct Bvh_Primitive {
-    Primitive*  primitive;              /**< Primitive lists for this node. */
-    Point       m_centroid;             /**< Center point of the BVH node. */
+    const Primitive*    primitive;              /**< Primitive lists for this node. */
+    Point               m_centroid;             /**< Center point of the BVH node. */
 
     //! @brief Set primitive.
     //!
     //! @param p    Primitive list holding all primitives in the node.
-    void SetPrimitive(Primitive* p){
+    void SetPrimitive(const Primitive* p){
         primitive = p;
         m_centroid = (p->GetBBox().m_Max + p->GetBBox().m_Min) * 0.5f;
     }

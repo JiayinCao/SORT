@@ -121,6 +121,7 @@ public:
     void    FillScene(class Scene& scene) override;
 
 protected:
+    std::unique_ptr<Primitive>  m_primitive;                                /**< The primitive of the area light source. */
     std::unique_ptr<AreaLight>  m_light = std::make_unique<AreaLight>();    /**< Light in the entity. */
 };
 

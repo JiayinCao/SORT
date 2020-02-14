@@ -53,7 +53,7 @@ void Bvh::Build(const Scene& scene){
     // generate BVH primitives
     const auto primitive_cnt = m_primitives->size();
     for (auto i = 0u; i < primitive_cnt; ++i)
-        m_bvhpri[i].SetPrimitive((*m_primitives)[i].get());
+        m_bvhpri[i].SetPrimitive((*m_primitives)[i]);
 
     // recursively split node
     m_root = std::make_unique<Bvh_Node>();

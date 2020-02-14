@@ -21,6 +21,7 @@
 #include "core/mesh.h"
 #include "shape/triangle.h"
 #include "shape/line.h"
+#include "core/primitive.h"
 
 //! @brief Visual is the container for a specific type of shape that can be seen in SORT.
 /**
@@ -38,6 +39,10 @@ public:
     //!
     //! @param  transform   The transform of the visual to be applied.
     virtual void        ApplyTransform( const Transform& transform ) = 0;
+
+protected:
+    /*< Primitives that shape the visual. */
+    std::vector<std::unique_ptr<Primitive>>  m_primitives;
 };
 
 //! @brief Triangle Mesh Visual.

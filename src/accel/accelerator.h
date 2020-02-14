@@ -129,7 +129,7 @@ public:
 
 protected:
     /**< The vector holding all primitive pointers. */
-    const std::vector<std::unique_ptr<Primitive>>*    m_primitives = nullptr;
+    const std::vector<const Primitive*>*    m_primitives = nullptr;
     /**< The bounding box of all primitives. */
     BBox                                    m_bbox;
     /**< Whether the spatial structure is constructed before. */

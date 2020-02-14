@@ -64,7 +64,7 @@ bool Scene::LoadScene( IStreamBase& stream ){
     _generatePriBuf();
     _genLightDistribution();
 
-    SORT_STATS(sScenePrimitiveCount=(StatsInt)m_primitiveBuf.size());
+    SORT_STATS(sScenePrimitiveCount=(StatsInt)m_primitives.size());
     SORT_STATS(sSceneLightCount=(StatsInt)m_lights.size());
 
     return true;
@@ -115,8 +115,8 @@ const BBox& Scene::GetBBox() const{
         return g_accelerator->GetBBox();
 
     // if there is no bounding box for the scene, generate one
-    for_each( m_primitiveBuf.begin() , m_primitiveBuf.end() ,
-        [&]( const std::unique_ptr<Primitive>& primitive ){
+    for_each(m_primitives.begin() , m_primitives.end() ,
+        [&]( const Primitive* primitive ){
             m_BBox.Union( primitive->GetBBox() );
         }
     );

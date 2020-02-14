@@ -114,12 +114,12 @@ public:
     // get bounding box of the scene
     const BBox& GetBBox() const;
     // add primitives
-    void AddPrimitive( std::unique_ptr<Primitive> primitive) {
-        m_primitiveBuf.push_back( std::move(primitive) );
+    void AddPrimitive( const Primitive* primitive) {
+        m_primitives.push_back( std::move(primitive) );
     }
     // get primtives
-    const std::vector<std::unique_ptr<Primitive>>*   GetPrimitives() const {
-        return &m_primitiveBuf;
+    const std::vector<const Primitive*>*   GetPrimitives() const {
+        return &m_primitives;
     }
 
     // Evaluate sky
@@ -135,9 +135,11 @@ public:
     }
 
 private:
-    std::vector<std::unique_ptr<Entity>>        m_entities;     /**< Entities in the scene. */
-    std::vector<std::unique_ptr<Primitive>>     m_primitiveBuf; /**< Primitives in the scene. */
-    std::vector<Light*>                         m_lights;       /**< Lights in the scene. */
+    std::vector<std::unique_ptr<Entity>>        m_entities;             /**< Entities in the scene. */
+    std::vector<Light*>                         m_lights;               /**< Lights in the scene. */
+
+    std::vector<const Primitive*>               m_primitives;           /**< A list holding all primitives. */
+    std::vector<const Primitive*>               m_volPrimitives;        /**< A list holding all primitives that has volume attached to it. */
 
     Light*                  m_skyLight = nullptr;   /**< Sky light if available. */
     Camera*                 m_camera = nullptr;     /**< Camera of the scene. */
