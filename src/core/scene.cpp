@@ -99,6 +99,31 @@ Spectrum Scene::GetAttenuation( const Ray& const_ray , MediumStack* ms ) const{
 }
 #endif
 
+void Scene::RestoreMediumStack( const Point& p , MediumStack& ms ) const{
+	// check if there is volume in the scene, early return if there isn't.
+	if (!g_acceleratorVol->GetIsValid())
+		return;
+
+	Ray ray;
+	ray.m_Ori = p;
+	ray.m_Dir = Vector( 0.0f , 1.0f , 0.0f );		// shoot the ray through a random direction.
+
+	// Intersect the original ray with the volume bounding box.
+	const auto volumed_bbox = g_acceleratorVol->GetBBox();
+	float max_t, min_t;
+	min_t = Intersect(ray, volumed_bbox, &max_t);
+	max_t += 100.0f;	// just a random number to make sure the new ray's origin is outside the bounding box.
+
+	// The way medium stack is restored is by shooting a ray from outside the volume bounding box 
+	// to the origin of the provided ray.
+	Ray test_ray;
+	test_ray.m_Ori = ray(max_t);
+	test_ray.m_Dir = -ray.m_Dir;
+	test_ray.m_fMax = max_t;
+
+	while (g_accelerator->UpdateMediumStack(ray, ms)) {}
+}
+
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
     // no brute force support in BSSRDF
     if( g_accelerator != nullptr )

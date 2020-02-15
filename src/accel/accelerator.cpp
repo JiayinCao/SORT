@@ -81,3 +81,29 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack
     return true;
 }
 #endif
+
+bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms ) const{
+	SurfaceInteraction intersection;
+	intersection.query_shadow = false;
+	if (!GetIntersect(ray, intersection))
+		return false;
+
+	// get the material of the intersected primitive
+	const MaterialBase* material = intersection.primitive->GetMaterial();
+	sAssert(nullptr != material, SPATIAL_ACCELERATOR);
+
+	const auto theta_wi = dot(ray.m_Dir, intersection.gnormal);
+	const auto theta_wo = -theta_wi;
+	const auto interaction_flag = update_interaction_flag(theta_wi, theta_wo);
+
+	// at this point, we know for sure the ray pass through the surface.
+	MediumInteraction mi;
+	mi.intersect = intersection.intersect;
+	material->UpdateMediumStack(mi, interaction_flag, ms);
+
+	ray.m_Ori = intersection.intersect;
+	ray.m_fMin = 0.001f;              // avoid self collision again.
+	ray.m_fMax -= intersection.t;
+
+	return true;
+}

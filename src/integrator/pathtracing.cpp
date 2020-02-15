@@ -38,6 +38,8 @@ IMPLEMENT_RTTI( PathTracing );
 
 Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const{
 	MediumStack ms;
+	scene.RestoreMediumStack(ray.m_Ori, ms);
+
     return li( ray , ps , scene , 0 , false , 0 , false , ms );
 }
 
@@ -82,7 +84,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             if ( UNLIKELY(pdf == 0.0f) )
                 break;
 
-            // evalute direct light illumination
+            // evaluate direct light illumination
             float light_pdf = 0.0f;
             const auto  light = scene.SampleLight(sort_canonical(), &light_pdf);
             L += throughput * EvaluateDirect(pMi->intersect, &hg, -r.m_Dir, scene, light, ms) / light_pdf;

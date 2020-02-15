@@ -65,7 +65,7 @@ public:
 #else
     //! @brief  Evaluate occlusion along a ray segment.
     //!
-    //! This doesn't normaly happen in real life. But with the introduction of transaprent BSDF, it is innevitable to support
+    //! This doesn't normally happen in real life. But with the introduction of transparent BSDF, it is inevitable to support
     //! shadow attenuation forcing shadowing information transform from binary to a range.
     //! The returned value is the spectrum dependent percentage of un-occluded radiance. Put it in other words, 0 means fully
     //! occluded, 1.0 means fully un-occluded.
@@ -76,6 +76,12 @@ public:
     Spectrum    GetAttenuation( const Ray& r , MediumStack* ms = nullptr ) const;
 #endif
 
+	//! @brief	Restore the medium stack at a specific point.
+	//!
+	//! @param	p			The point where the evaluation is done.
+	//! @param	ms			The medium stack to be populated.
+	void		RestoreMediumStack( const Point& p , MediumStack& ms ) const ;
+
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
     //! This is a specific interface designed for SSS during disk ray casting. Without this interface, the algorithm has to use the
@@ -84,7 +90,7 @@ public:
     //! nearest N intersections.
     //!
     //! @param  r           The input ray to be tested.
-    //! @param  intersect   The intersection result that holds all intersectionn.
+    //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
     void    GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const;
 
@@ -120,6 +126,10 @@ public:
     //! @brief  Add a primitive in the scene.
     void AddPrimitive( const Primitive* primitive) {
         m_primitives.push_back( std::move(primitive) );
+
+		const auto material = primitive->GetMaterial();
+		if( material->HasVolumeAttached() )
+			m_volPrimitives.push_back( primitive );
     }
     
     //! @brief  Get all of the primitives in the scene.

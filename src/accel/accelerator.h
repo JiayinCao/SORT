@@ -93,6 +93,15 @@ public:
     bool         GetAttenuation( Ray& r , Spectrum& attenuation , MediumStack* ms = nullptr ) const;
 #endif
 
+	//! @brief	Update medium stack.
+	//!
+	//! The only difference between this function and 'GetAttenuation' is there is no need to evaluate attenuation.
+	//!
+	//! @param	ray			The ray to be tested.
+	//! @param	ms			The medium stack to be populated.
+	//! @return				Whether there is an intersection found.
+	bool		UpdateMediumStack( Ray& r , MediumStack& ms ) const;
+
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
     //! This is a specific interface designed for SSS during disk ray casting. Without this interface, the algorithm has to use the
