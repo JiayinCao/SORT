@@ -121,7 +121,7 @@ void Scene::RestoreMediumStack( const Point& p , MediumStack& ms ) const{
 	test_ray.m_Dir = -ray.m_Dir;
 	test_ray.m_fMax = max_t;
 
-	while (g_accelerator->UpdateMediumStack(ray, ms)) {}
+	while (g_accelerator->UpdateMediumStack(test_ray, ms)) {}
 }
 
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
