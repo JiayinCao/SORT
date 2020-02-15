@@ -43,10 +43,8 @@ void OcTree::Build(const std::vector<const Primitive*>& primitives){
     SORT_PROFILE("Build OcTree");
 
     m_primitives = &primitives;
-
-    // handling empty mesh case
-    if( m_primitives->size() == 0 )
-        return ;
+	if (m_primitives->empty())
+		return;
 
     // generate AABB
     computeBBox();
@@ -366,4 +364,12 @@ void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFInt
         if( _curt > fmax + delta || _curt < fmin - delta )
             break;
     }
+}
+
+std::unique_ptr<Accelerator> OcTree::Clone() const {
+	auto ret = std::make_unique<OcTree>();
+	ret->m_maxDepthInOcTree = m_maxDepthInOcTree;
+	ret->m_maxPriInLeaf = m_maxPriInLeaf;
+
+	return ret;
 }

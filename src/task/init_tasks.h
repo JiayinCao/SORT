@@ -55,3 +55,21 @@ private:
     /**< The scene description to be filled with during loading. */
     class Scene&      m_scene;
 };
+
+//! @brief  Spatial acceleration data structure construction pass, this is for primitives that has volumes attached.
+class SpatialAccelerationVolConstruction_Task : public Task {
+public:
+	//! @brief Constructor.
+	//!
+	//! @param  scene     Scene to be filled during loading.
+	SpatialAccelerationVolConstruction_Task(class Scene& scene, const char* name,
+		unsigned int priority, const Task::Task_Container& dependencies) :
+		Task(name, DEFAULT_TASK_PRIORITY, dependencies), m_scene(scene) {}
+
+	//! @brief  Load data from input file.
+	void        Execute() override;
+
+private:
+	/**< The scene description to be filled with during loading. */
+	class Scene&      m_scene;
+};

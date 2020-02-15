@@ -111,6 +111,9 @@ void Fbvh::Build(const std::vector<const Primitive*>& primitives){
     SORT_PROFILE("Build Fbvh");
 
     m_primitives = &primitives;
+	if( primitives.empty() )
+		return;
+
     m_bvhpri = std::make_unique<Bvh_Primitive[]>(m_primitives->size());
 
     // build bounding box
@@ -817,4 +820,12 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
         }
 #endif
     }
+}
+
+std::unique_ptr<Accelerator> Fbvh::Clone() const {
+	auto ret = std::make_unique<Fbvh>();
+	ret->m_maxNodeDepth = m_maxNodeDepth;
+	ret->m_maxPriInLeaf = m_maxPriInLeaf;
+
+	return ret;
 }

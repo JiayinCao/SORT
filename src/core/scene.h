@@ -129,6 +129,13 @@ public:
         return m_primitives;
     }
 
+	//! @brief  Get all of the primitives that has volume attached in the scene.
+	//!
+	//! @return     A vector that holds all primitives in the scene.
+	const std::vector<const Primitive*>&   GetPrimitivesVol() const {
+		return m_volPrimitives;
+	}
+
     // Evaluate sky
     Spectrum    Le( const Ray& ray ) const;
 

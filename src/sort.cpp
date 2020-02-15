@@ -37,9 +37,10 @@ SORT_STATS_COUNTER("Performance", "Worker thread number", sThreadCnt);
 void SchedulTasks( Scene& scene , IStreamBase& stream ){
     SORT_PROFILE("Schedule Tasks");
 
-    auto loading_task = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , scene, stream);
-    auto sac_task = SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structor Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
-    auto pre_render_task = SCHEDULE_TASK<PreRender_Task>( "Pre rendering pass" , DEFAULT_TASK_PRIORITY, {sac_task} , scene);
+    auto loading_task       = SCHEDULE_TASK<Loading_Task>( "Loading" , DEFAULT_TASK_PRIORITY, {} , scene, stream);
+    auto sac_task           = SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structure Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
+    auto savc_task          = SCHEDULE_TASK<SpatialAccelerationVolConstruction_Task>( "Spatial Data Structure (Volume) Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
+    auto pre_render_task    = SCHEDULE_TASK<PreRender_Task>( "Pre rendering pass" , DEFAULT_TASK_PRIORITY, {sac_task, savc_task} , scene);
 
     // Push render task into the queue
     const auto tilesize = (int)g_tileSize;

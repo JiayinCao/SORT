@@ -28,7 +28,7 @@
 #include "imagesensor/blenderimage.h"
 #include "imagesensor/rendertargetimage.h"
 
-//! @brief  This needs to be update every time the content of GlobalConfiguration chagnes.
+//! @brief  This needs to be update every time the content of GlobalConfiguration changes.
 constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
 
 //! @brief  GlobalConfiguration saves some global state.
@@ -68,10 +68,17 @@ public:
 
     //! @brief      Get the spatial accelerator structure.
     //!
-    //! @return     The spatial acceleration structure. Could be 'nullptr', meaning a bruteforce workaround will be used.
+    //! @return     The spatial acceleration structure.
     Accelerator*    GetAccelerator() {
         return m_accelerator.get();
     }
+
+	//! @brief      Get the spatial accelerator structure.
+	//!
+	//! @return     The spatial acceleration structure.
+	Accelerator*    GetAcceleratorVol() {
+		return m_acceleratorVol.get();
+	}
 
     //! @brief      Get the integrator of the renderer.
     //!
@@ -216,6 +223,8 @@ public:
         m_accelerator = MakeUniqueInstance<Accelerator>(accelType);
         if( m_accelerator )
             m_accelerator->Serialize( stream );
+		m_acceleratorVol = std::move(m_accelerator->Clone());
+
         stream >> integratorType;
         m_integrator = MakeUniqueInstance<Integrator>(integratorType);
         if( m_integrator != nullptr )
@@ -246,7 +255,7 @@ private:
     bool                            m_profilingEnalbed = false;     /**< Whether profiling is enabled in SORT. Since there is a big performance issue during rendering, it is turned off by default.*/
     bool                            m_noMaterialSupport = false;    /**< Disable material support in SORT. */
     std::string                     m_inputFile;                    /**< Full path of the input file. */
-    float                           m_clampping = 0.0f;             /**< Clampping value of evaluated radiance. */
+    float                           m_clampping = 0.0f;             /**< Clapping value of evaluated radiance. */
 
     //! @brief  Make constructor private
     GlobalConfiguration(){}
@@ -259,6 +268,7 @@ private:
 #define g_tileSize                  GlobalConfiguration::GetSingleton().GetTileSize()
 #define g_blenderMode               GlobalConfiguration::GetSingleton().GetBlenderMode()
 #define g_accelerator               GlobalConfiguration::GetSingleton().GetAccelerator()
+#define g_acceleratorVol            GlobalConfiguration::GetSingleton().GetAcceleratorVol()
 #define g_integrator                GlobalConfiguration::GetSingleton().GetIntegrator()
 #define g_threadCnt                 GlobalConfiguration::GetSingleton().GetThreadCnt()
 #define g_samplePerPixel            GlobalConfiguration::GetSingleton().GetSamplePerPixel()

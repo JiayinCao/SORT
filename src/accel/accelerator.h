@@ -104,7 +104,7 @@ public:
     //! performance overhead to fix the problem since it is very minor.
     //!
     //! @param  r           The input ray to be tested.
-    //! @param  intersect   The intersection result that holds all intersectionn.
+    //! @param  intersect   The intersection result that holds all intersection.
     //! @param  matID       We are only interested in intersection with the same material, whose material id should be set to matID.
     virtual void GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID = INVALID_SID ) const = 0;
 
@@ -126,6 +126,13 @@ public:
     SORT_FORCEINLINE bool GetIsValid() const {
         return m_isValid;
     }
+
+	//! @brief	Clone the accelerator.
+	//!
+	//! Only configuration will be cloned, not the data inside the accelerator, this is for primitives that has volumes attached.
+	//!
+	//! @return		Cloned accelerator.
+	virtual std::unique_ptr<Accelerator>	Clone() const = 0;
 
 protected:
     /**< The vector holding all primitive pointers. */

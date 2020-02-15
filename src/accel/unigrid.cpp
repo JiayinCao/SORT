@@ -44,11 +44,8 @@ void UniGrid::Build( const std::vector<const Primitive*>& primitives ){
     SORT_PROFILE("Build Uniform Grid");
 
     m_primitives = &primitives;
-
-    if( nullptr == m_primitives || m_primitives->empty() ){
-        slog( WARNING , SPATIAL_ACCELERATOR , "There is no primitive in uniform grid." );
-        return;
-    }
+	if (m_primitives->empty())
+		return;
 
     // find the bounding box first
     computeBBox();
@@ -396,4 +393,8 @@ void UniGrid::traverse( const Ray& ray , BSSRDFIntersections& intersect , unsign
             }
         }
     }
+}
+
+std::unique_ptr<Accelerator> UniGrid::Clone() const {
+	return std::make_unique<UniGrid>();
 }
