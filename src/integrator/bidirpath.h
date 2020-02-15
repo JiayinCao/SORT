@@ -69,9 +69,8 @@ public:
     //! @param  ray             The ray to be tested with.
     //! @param  ps              Pixel sample used to evaluate Monte Carlo method.
     //! @param  scene           The scene to be evaluated.
-    //! @param  ms              Unfortunately, I don't have the time to support volumetric rendering in bi-direcitonal path tracing for now.
     //! @return                 The radiance along the opposite direction that the ray points to.
-    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const override;
+    Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const override;
 
 
     //! @brief  The samples generated in this interface is not well used in this integrator for now.

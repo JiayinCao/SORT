@@ -36,7 +36,8 @@ SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength 
 
 IMPLEMENT_RTTI( PathTracing );
 
-Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const{
+Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const{
+	MediumStack ms;
     return li( ray , ps , scene , 0 , false , 0 , false , ms );
 }
 

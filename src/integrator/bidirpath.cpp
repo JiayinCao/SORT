@@ -34,7 +34,7 @@ SORT_STATS_AVG_COUNT("Bi-directional Path Tracing", "Average Path Length Startin
 
 IMPLEMENT_RTTI( BidirPathTracing );
 
-Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms ) const{
+Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const{
     SORT_STATS(++sPrimaryRayCount);
 
     // pick a light randomly

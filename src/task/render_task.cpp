@@ -58,8 +58,7 @@ void Render_Task::Execute(){
                 // generate rays
                 auto r = camera->GenerateRay( (float)j , (float)i , m_pixelSamples[k] );
                 // accumulate the radiance
-                MediumStack ms;
-                auto li = g_integrator->Li( r , m_pixelSamples[k] , m_scene , ms );
+                auto li = g_integrator->Li( r , m_pixelSamples[k] , m_scene );
                 if( g_clammping > 0.0f )
                     li = li.Clamp( 0.0f , g_clammping );
                 

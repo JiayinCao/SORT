@@ -28,7 +28,7 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 SORT_STATS_COUNTER("Direct Illumination", "Primary Ray Count" , sPrimaryRayCount);
 IMPLEMENT_RTTI( DirectLight );
 
-Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene , MediumStack& mi) const{
+Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& scene) const{
     SORT_STATS(++sPrimaryRayCount);
 
     if( r.m_Depth > max_recursive_depth )
@@ -42,7 +42,7 @@ Spectrum DirectLight::Li( const Ray& r , const PixelSample& ps , const Scene& sc
 
     auto li = ip.Le( -r.m_Dir );
 
-    // eavluate direct light
+    // evaluate direct light
     auto light_num = scene.LightNum();
     for( auto i = 0u ; i < light_num ; ++i ){
         const auto light = scene.GetLight(i);

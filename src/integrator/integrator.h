@@ -50,9 +50,8 @@ public:
     //! @param  ray     The extent ray in rendering equation.
     //! @param  ps      The pixel samples. Currently not used.
     //! @param  scene   The rendering scene.
-    //! @param  ms      Medium stack, integrators that are not medium aware will simply ignore this parameter.
     //! @return         The spectrum of the radiance along the opposite direction of the ray.
-    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene, MediumStack& ms) const = 0;
+    virtual Spectrum    Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const = 0;
 
     //! @brief Pre-process before rendering.
     //!

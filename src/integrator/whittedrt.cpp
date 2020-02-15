@@ -29,7 +29,7 @@ SORT_STATS_COUNTER("Whitted Ray Tracing", "Primary Ray Count" , sPrimaryRayCount
 
 IMPLEMENT_RTTI( WhittedRT );
 
-Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scene, MediumStack& ms) const{
+Spectrum WhittedRT::Li( const Ray& r , const PixelSample& ps , const Scene& scene) const{
     SORT_STATS(++sPrimaryRayCount);
 
     if( r.m_Depth > max_recursive_depth )
