@@ -40,7 +40,7 @@ SORT_STATS_COUNTER("Spatial-Structure(KDTree)", "Maximum Primitive in Leaf", sKD
 SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Count in Leaf", sKDTreePrimitiveCount , sKDTreeLeafNodeCount );
 SORT_STATS_AVG_COUNT("Spatial-Structure(KDTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void KDTree::Build( const std::vector<const Primitive*>& primitives ){
+void KDTree::Build( const std::vector<const Primitive*>& primitives, const BBox& bbox){
     SORT_PROFILE("Build KdTree");
 
     m_primitives = &primitives;
@@ -50,8 +50,7 @@ void KDTree::Build( const std::vector<const Primitive*>& primitives ){
     // pre-malloc node and leaf primitive list memory
     auto tmp = std::make_unique<unsigned char[]>(m_primitives->size());
 
-    // get the bounding box for the whole primitive list
-    computeBBox();
+    m_bbox = bbox;
 
     // create the split candidates
     auto count = (unsigned int)m_primitives->size();

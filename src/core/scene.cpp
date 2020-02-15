@@ -107,21 +107,7 @@ void Scene::RestoreMediumStack( const Point& p , MediumStack& ms ) const{
 	Ray ray;
 	ray.m_Ori = p;
 	ray.m_Dir = Vector( 0.0f , 1.0f , 0.0f );		// shoot the ray through a random direction.
-
-	// Intersect the original ray with the volume bounding box.
-	const auto volumed_bbox = g_acceleratorVol->GetBBox();
-	float max_t, min_t;
-	min_t = Intersect(ray, volumed_bbox, &max_t);
-	max_t += 100.0f;	// just a random number to make sure the new ray's origin is outside the bounding box.
-
-	// The way medium stack is restored is by shooting a ray from outside the volume bounding box 
-	// to the origin of the provided ray.
-	Ray test_ray;
-	test_ray.m_Ori = ray(max_t);
-	test_ray.m_Dir = -ray.m_Dir;
-	test_ray.m_fMax = max_t;
-
-	while (g_accelerator->UpdateMediumStack(test_ray, ms)) {}
+	while (g_accelerator->UpdateMediumStack(ray, ms, true)) {}
 }
 
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
@@ -133,11 +119,25 @@ void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const 
 void Scene::_generatePriBuf(){
     for( auto& entity : m_entities )
         entity->FillScene( *this );
-}
+    
+    auto generate_bbox = [](const std::vector<const Primitive*>& primitives) {
+        BBox bbox;
 
-const BBox& Scene::GetBBox() const{
-    sAssert(g_accelerator && g_accelerator->GetIsValid(), GENERAL);
-    return g_accelerator->GetBBox();
+        // update bounding box again
+        for (auto& primitive : primitives)
+            bbox.Union(primitive->GetBBox());
+
+        // enlarge the bounding box a little
+        static const auto threshold = 0.001f;
+        auto delta = (bbox.m_Max - bbox.m_Min) * threshold;
+        bbox.m_Min -= delta;
+        bbox.m_Max += delta;
+
+        return bbox;
+    };
+
+    m_bbox      = generate_bbox(m_primitives);
+    m_bboxVol   = generate_bbox(m_volPrimitives);
 }
 
 void Scene::_genLightDistribution(){

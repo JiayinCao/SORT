@@ -107,7 +107,7 @@ SORT_STATIC_FORCEINLINE BBox calcBoundingBox(const Fbvh_Node* const node , const
     return node_bbox;
 }
 
-void Fbvh::Build(const std::vector<const Primitive*>& primitives){
+void Fbvh::Build(const std::vector<const Primitive*>& primitives, const BBox& bbox){
     SORT_PROFILE("Build Fbvh");
 
     m_primitives = &primitives;
@@ -116,8 +116,7 @@ void Fbvh::Build(const std::vector<const Primitive*>& primitives){
 
     m_bvhpri = std::make_unique<Bvh_Primitive[]>(m_primitives->size());
 
-    // build bounding box
-    computeBBox();
+    m_bbox = bbox;
 
     // generate BVH primitives
     const auto primitive_cnt = m_primitives->size();

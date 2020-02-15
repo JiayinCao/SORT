@@ -22,21 +22,6 @@ SORT_STATS_DEFINE_COUNTER(sRayCount)
 SORT_STATS_DEFINE_COUNTER(sShadowRayCount)
 SORT_STATS_DEFINE_COUNTER(sIntersectionTest)
 
-void Accelerator::computeBBox(){
-    // reset bounding box
-    m_bbox.InvalidBBox();
-
-    // update bounding box again
-    for( auto& primitive : *m_primitives )
-        m_bbox.Union( primitive->GetBBox() );
-
-    // enlarge the bounding box a little
-    static const auto threshold = 0.001f;
-    auto delta = (m_bbox.m_Max - m_bbox.m_Min ) * threshold;
-    m_bbox.m_Min -= delta;
-    m_bbox.m_Max += delta;
-}
-
 #ifdef ENABLE_TRANSPARENT_SHADOW
 bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack* ms ) const {
     SurfaceInteraction intersection;
@@ -82,7 +67,7 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack
 }
 #endif
 
-bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms ) const{
+bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , const bool reversed ) const{
 	SurfaceInteraction intersection;
 	intersection.query_shadow = false;
 	if (!GetIntersect(ray, intersection))
@@ -92,9 +77,22 @@ bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms ) const{
 	const MaterialBase* material = intersection.primitive->GetMaterial();
 	sAssert(nullptr != material, SPATIAL_ACCELERATOR);
 
+#if 0
 	const auto theta_wi = dot(ray.m_Dir, intersection.gnormal);
 	const auto theta_wo = -theta_wi;
-	const auto interaction_flag = update_interaction_flag(theta_wi, theta_wo);
+	auto interaction_flag = update_interaction_flag(theta_wi, theta_wo);
+
+    if (reversed) {
+        if (SE_LEAVING == interaction_flag)
+            interaction_flag = SE_ENTERING;
+        else if (SE_ENTERING == interaction_flag)
+            interaction_flag = SE_LEAVING;
+    }
+#else
+    // The following logic is exactly the same with the above one.
+    const auto theta_wi = dot(ray.m_Dir, intersection.gnormal);
+    const auto interaction_flag = ((theta_wi > 0.0f) != (reversed)) ? SE_LEAVING : SE_ENTERING;
+#endif
 
 	// at this point, we know for sure the ray pass through the surface.
 	MediumInteraction mi;

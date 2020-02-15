@@ -39,15 +39,14 @@ SORT_STATS_COUNTER("Spatial-Structure(OcTree)", "Maximum Primitive in Leaf", sOc
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Count in Leaf", sOcTreePrimitiveCount , sOcTreeLeafNodeCount);
 SORT_STATS_AVG_COUNT("Spatial-Structure(OcTree)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void OcTree::Build(const std::vector<const Primitive*>& primitives){
+void OcTree::Build(const std::vector<const Primitive*>& primitives, const BBox& bbox){
     SORT_PROFILE("Build OcTree");
 
     m_primitives = &primitives;
 	if (m_primitives->empty())
 		return;
 
-    // generate AABB
-    computeBBox();
+    m_bbox = bbox;
 
     // initialize a primitive container
     std::unique_ptr<NodePrimitiveContainer> container = std::make_unique<NodePrimitiveContainer>();

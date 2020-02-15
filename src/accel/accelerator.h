@@ -99,8 +99,9 @@ public:
 	//!
 	//! @param	ray			The ray to be tested.
 	//! @param	ms			The medium stack to be populated.
+    //! @param  reversed    Reversing the order of updating medium stack.
 	//! @return				Whether there is an intersection found.
-	bool		UpdateMediumStack( Ray& r , MediumStack& ms ) const;
+	bool		UpdateMediumStack( Ray& r , MediumStack& ms , const bool reversed = false ) const;
 
     //! @brief Get multiple intersections between the ray and the primitive set using spatial data structure.
     //!
@@ -120,7 +121,8 @@ public:
     //! @brief Build the acceleration structure.
     //!
     //! @param primitives       A vector holding all primitives.
-    virtual void Build(const std::vector<const Primitive*>& primitives) = 0;
+    //! @param bbox             The bounding box of the scene.
+    virtual void Build(const std::vector<const Primitive*>& primitives, const BBox& bbox) = 0;
 
     //! @brief Get the bounding box of the primitive set.
     //!
@@ -150,7 +152,4 @@ protected:
     BBox                                    m_bbox;
     /**< Whether the spatial structure is constructed before. */
     bool                                    m_isValid = false;
-
-    //! @brief Generate the bounding box for the primitive set.
-    void computeBBox();
 };

@@ -149,7 +149,8 @@ public:
     //! @brief Build BVH structure in O(N*lg(N)).
     //!
     //! @param primitives       A vector holding all primitives.
-    void    Build(const std::vector<const Primitive*>& primitives) override;
+    //! @param bbox             The bounding box of the scene.
+    void    Build(const std::vector<const Primitive*>& primitives, const BBox& bbox) override;
 
     //! @brief      Serializing data from stream.
     //!

@@ -82,8 +82,9 @@ public:
     //! Build the OcTree in O(Nlg(N)) time.
     //!
     //! @param primitives       A vector holding all primitives.
-    void    Build(const std::vector<const Primitive*>& primitives) override;
-
+    //! @param bbox             The bounding box of the scene.
+    void    Build(const std::vector<const Primitive*>& primitives, const BBox& bbox) override;
+    
     //! @brief      Primitive information in OcTree node.
     struct NodePrimitiveContainer{
         /**< Primitive buffer used during OcTree construction.*/

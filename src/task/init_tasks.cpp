@@ -39,12 +39,12 @@ void SpatialAccelerationConstruction_Task::Execute(){
     SORT_STATS( TIMING_EVENT_STAT( "Spatial acceleration structure construction" , sPreprocessTimeMS ) );
 
 	sAssert( g_accelerator , SPATIAL_ACCELERATOR );
-	g_accelerator->Build(m_scene.GetPrimitives());
+	g_accelerator->Build(m_scene.GetPrimitives(), m_scene.GetBBox());
 }
 
 void SpatialAccelerationVolConstruction_Task::Execute() {
 	SORT_STATS(TIMING_EVENT_STAT("Spatial acceleration (Volume) structure construction", sPreprocessTimeMS));
 
 	sAssert(g_acceleratorVol, SPATIAL_ACCELERATOR );
-	g_acceleratorVol->Build(m_scene.GetPrimitivesVol());
+	g_acceleratorVol->Build(m_scene.GetPrimitivesVol(), m_scene.GetBBoxVol());
 }

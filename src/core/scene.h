@@ -121,7 +121,16 @@ public:
     //! @brief  Get the bounding box of the whole scene.
     //!
     //! @return     The bounding box of the whole scene.
-    const BBox& GetBBox() const;
+    const BBox& GetBBox() const {
+        return m_bbox;
+    }
+
+    //! @brief  Get the bounding box of the primitives that are attached with volumes.
+    //!
+    //! @return     The bounding box of the primitives that are attached with volumes.
+    const BBox& GetBBoxVol() const {
+        return m_bboxVol;
+    }
     
     //! @brief  Add a primitive in the scene.
     void AddPrimitive( const Primitive* primitive) {
@@ -172,7 +181,8 @@ private:
     std::unique_ptr<Distribution1D>             m_lightsDis = nullptr;
 
     // bounding box for the scene
-    mutable BBox    m_BBox;
+    BBox    m_bbox;
+    BBox    m_bboxVol;
 
     // generate primitive buffer
     void    _generatePriBuf();

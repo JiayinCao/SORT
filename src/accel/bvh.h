@@ -102,7 +102,8 @@ public:
     //! On fast Construction of SAH - based Bounding Volume Hierarchies< / a> for further details.
     //!
     //! @param primitives       A vector holding all primitives.
-    void    Build(const std::vector<const Primitive*>& primitives) override;
+    //! @param bbox             The bounding box of the scene.
+    void    Build(const std::vector<const Primitive*>& primitives, const BBox& bbox) override;
 
     //! @brief      Serializing data from stream.
     //!

@@ -40,15 +40,14 @@ SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Y", sUniformGrid
 SORT_STATS_COUNTER("Spatial-Structure(UniformGrid)", "Dimension Z", sUniformGridZ);
 SORT_STATS_AVG_COUNT("Spatial-Structure(UniformGrid)", "Average Primitive Tested per Ray", sIntersectionTest, sRayCount);
 
-void UniGrid::Build( const std::vector<const Primitive*>& primitives ){
+void UniGrid::Build( const std::vector<const Primitive*>& primitives , const BBox& bbox ){
     SORT_PROFILE("Build Uniform Grid");
 
     m_primitives = &primitives;
 	if (m_primitives->empty())
 		return;
 
-    // find the bounding box first
-    computeBBox();
+    m_bbox = bbox;
 
     // get the maximum extent id and distance
     auto id = m_bbox.MaxAxisId();
