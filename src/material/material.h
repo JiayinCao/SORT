@@ -108,9 +108,9 @@ public:
     //! @return                     The transparency at the intersection.
     Spectrum    EvaluateTransparency( const SurfaceInteraction& intersection ) const override{
         // this should happen most of the time in the absence of transparent node.
-        if( !m_hasTransparentNode )
+        if (!m_hasTransparentNode)
             return 0.0f;
-        return ::EvaluateTransparency(m_surface_shader.get() , intersection );
+        return m_special_transparent ? 1.0f : (::EvaluateTransparency(m_surface_shader.get(), intersection));
     }
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -157,6 +157,9 @@ private:
     /**< Whether this is a valid material */
     bool                            m_surface_shader_valid = false;
     bool                            m_volume_shader_valid = false;
+
+    /**< In the case where there is volume but no surface material, transparent will be automatically attached as surface material. */
+    bool                            m_special_transparent = false;
 
     /**< Unique name of the material. */
     std::string                     m_name;
@@ -219,7 +222,7 @@ public:
     //! @brief  Just an empty interface, there is no serialization support for this type of material.
     //!
     //! @param  stream      Input stream for data.
-    void        Serialize(IStreamBase& stream) override {}
+    void       Serialize(IStreamBase& stream) override {}
 
     //! @brief      Evaluate translucency.
     //!

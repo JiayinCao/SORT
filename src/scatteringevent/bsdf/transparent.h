@@ -33,7 +33,10 @@ public:
         OSL::Vec3 attenuation;
     };
 
-    //! Constructor from parameter set.
+    //! @brief      Default constructor
+    Transparent() : Bxdf(FULL_WEIGHT, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, true), A(WHITE_SPECTRUM) {}
+
+    //! @brief      Constructor from parameter set.
     //!
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.

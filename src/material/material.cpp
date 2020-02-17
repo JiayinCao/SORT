@@ -24,8 +24,9 @@
 #include "osl_system.h"
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bsdf/lambert.h"
+#include "scatteringevent/bsdf/transparent.h"
 
-void Material::BuildMaterial(){
+void Material::BuildMaterial() {
     const auto message = "Build Material '" + m_name + "'";
     SORT_PROFILE(message);
 
@@ -37,7 +38,7 @@ void Material::BuildMaterial(){
     auto tried_building_surface_shader = false;
     auto tried_building_volume_shader = false;
 
-    auto build_shader_type = [&](const OSL_ShaderData& shader_data , const char* root_shader , const std::string prefix , bool& shader_valid , bool& trying_building_shader_type , OSL::ShaderGroupRef& shader_ref ) {
+    auto build_shader_type = [&](const OSL_ShaderData& shader_data, const char* root_shader, const std::string prefix, bool& shader_valid, bool& trying_building_shader_type, OSL::ShaderGroupRef& shader_ref) {
         // Build surface shader
         if (shader_valid) {
             shader_ref = BeginShaderGroup(m_name);
@@ -69,10 +70,15 @@ void Material::BuildMaterial(){
     };
 
     // build surface shader
-    build_shader_type(m_surface_shader_data, surface_shader_root, "Surface" , m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
+    build_shader_type(m_surface_shader_data, surface_shader_root, "Surface", m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
 
     // build volume shader
-    build_shader_type(m_volume_shader_data, surface_volume_root, "Volume" , m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
+    build_shader_type(m_volume_shader_data, surface_volume_root, "Volume", m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
+
+    // if there is volume shader, but no surface shader, a special transparent material will be applied automatically
+    // this will make the shader authoring a lot easier.
+    if (!m_surface_shader_valid && m_volume_shader_valid && !tried_building_surface_shader)
+        m_special_transparent = true;
 
     auto build_shader_succesfully = true;
     if (tried_building_surface_shader && !m_surface_shader_valid ) {
@@ -88,6 +94,10 @@ void Material::BuildMaterial(){
         slog(INFO, MATERIAL, "Build material %s successfully.", m_name.c_str());
     else
 		slog(WARNING, MATERIAL, "Build material %s unsuccessfully.", m_name.c_str());
+
+    // fake transparent mode if necessary
+    if (m_special_transparent)
+        m_hasTransparentNode = true;
 }
 
 void Material::Serialize(IStreamBase& stream){
@@ -151,10 +161,16 @@ void Material::Serialize(IStreamBase& stream){
 }
 
 void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
-    if( !g_noMaterial && m_surface_shader_valid)
-        ExecuteSurfaceShader(m_surface_shader.get() , se );
-    else
+    // all lambert surfaces if the render is in no material mode.
+    if (UNLIKELY(g_noMaterial)) {
         se.AddBxdf(SORT_MALLOC(Lambert)(WHITE_SPECTRUM, FULL_WEIGHT, DIR_UP));
+        return;
+    }
+
+    if( m_surface_shader_valid )
+        ExecuteSurfaceShader(m_surface_shader.get() , se );
+    else if( m_special_transparent )
+        se.AddBxdf(SORT_MALLOC(Transparent)());
 }
 
 void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interaction flag , MediumStack& ms ) const {
