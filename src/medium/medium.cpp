@@ -24,6 +24,14 @@ bool MediumStack::AddMedium(const Medium* medium) {
     if (m_mediumCnt >= MEDIUM_MAX_CNT)
         return false;
 
+    // if there is existed medium in the stack, nothing needs to be done.
+    const auto material_src = medium->GetMaterial();
+    for (auto i = 0u; i < m_mediumCnt; ++i) {
+        const auto material_i = m_mediums[i]->GetMaterial();
+        if (material_i == material_src)
+            return false;
+    }
+
     m_mediums[m_mediumCnt++] = medium;
     return true;
 }
