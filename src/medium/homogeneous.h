@@ -33,13 +33,14 @@ public:
         OSL::Vec3   baseColor;
         OSL::Float  absorption;
         OSL::Float  scattering;
+        OSL::Float  anisotropy;
     };
 
     //! @brief  Constructor.
     //!
     //! @param param		Parameter to build the volume.
 	//! @param material		Material that spawns the medium.
-    HomogeneousMedium(const HomogeneousMedium::Params& param, const MaterialBase* material):Medium(material),bc(param.baseColor),a(param.absorption),s(param.scattering),t(param.absorption+ param.scattering),ph(nullptr){}
+    HomogeneousMedium(const HomogeneousMedium::Params& param, const MaterialBase* material):Medium(material),bc(param.baseColor),a(param.absorption),s(param.scattering),t(param.absorption+ param.scattering), anisotropy(param.anisotropy){}
 
     //! @brief  Evaluation of beam transmittance.
     //!
@@ -64,5 +65,5 @@ private:
     const Spectrum          a;
     const Spectrum          s;
     const Spectrum          t;
-    const PhaseFunction*    ph;
+    const float             anisotropy;
 };

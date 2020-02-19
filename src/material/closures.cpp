@@ -732,6 +732,7 @@ namespace {
                 CLOSURE_COLOR_PARAM(HomogeneousMedium::Params, baseColor),
                 CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, absorption),
                 CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, scattering),
+                CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, anisotropy),
                 CLOSURE_FINISH_PARAM(HomogeneousMedium::Params)
             } };
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);

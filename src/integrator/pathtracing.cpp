@@ -73,13 +73,10 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         // update the through put based on the medium attenuation due to particle scattering and absorption.
         throughput *= medium_attenuation;
 
-        if (pMi) {
-            // temporary hard-coded phase function for now
-            IsotropicPhaseFunction hg;
-
+        if (pMi && pMi->phaseFunction) {
             Vector wi;
             float pdf = 0.0f;
-            const auto pf = hg.Sample(-r.m_Dir, wi, pdf);
+            const auto pf = pMi->phaseFunction->Sample(-r.m_Dir, wi, pdf);
 
             if ( UNLIKELY(pdf == 0.0f) )
                 break;
@@ -87,7 +84,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             // evaluate direct light illumination
             float light_pdf = 0.0f;
             const auto  light = scene.SampleLight(sort_canonical(), &light_pdf);
-            L += throughput * EvaluateDirect(pMi->intersect, &hg, -r.m_Dir, scene, light, ms) / light_pdf;
+            L += throughput * EvaluateDirect(pMi->intersect, pMi->phaseFunction, -r.m_Dir, scene, light, ms) / light_pdf;
 
             // update path weight
             throughput *= pf / pdf;

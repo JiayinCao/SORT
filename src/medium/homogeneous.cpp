@@ -18,6 +18,7 @@
 #include "homogeneous.h"
 #include "core/rand.h"
 #include "core/memory.h"
+#include "phasefunction.h"
 
 Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
     const auto e = bc * t * (-fmin(max_t, FLT_MAX ));
@@ -36,6 +37,7 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
     if (sample_medium) {
         mi = SORT_MALLOC(MediumInteraction)();
         mi->intersect = ray(d);
+        mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(anisotropy);
     }
 
     const auto e = bc * t * (-fmin( d , FLT_MAX ));

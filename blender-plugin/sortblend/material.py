@@ -2663,19 +2663,22 @@ class SORTNodeHomogeneous(SORTShadingNode):
     absorption_color : bpy.props.FloatVectorProperty( name='Color' , default=(1.0, 1.0, 1.0) , subtype='COLOR', soft_min = 0.0, soft_max = 1.0)
     absorption_coeffcient : bpy.props.FloatProperty( name='Absorption Density' , default=0.5 , min=0.0, max=float('inf') )
     scattering_coeffcient : bpy.props.FloatProperty( name='Scattering Density' , default=0.5 , min=0.0, max=float('inf') )
+    anisotropy_coeffcient : bpy.props.FloatProperty( name='Anisotropy' , default=0.0 , min=-1.0, max=1.0 )
     osl_shader = '''
         shader HomogenenousMedium( output closure color Result = color(0) ){
-            Result = medium_homogeneous( @ , @ , @ );
+            Result = medium_homogeneous( @ , @ , @ , @ );
         }
     '''
     def init(self, context):
         self.outputs.new( 'SORTNodeSocketVolume' , 'Result' )
     def serialize_prop(self, fs):
-        fs.serialize( 3 )
+        fs.serialize( 4 )
         fs.serialize( 'color( %f,%f,%f )'%(self.absorption_color[:]) )
         fs.serialize( '%f'%(self.absorption_coeffcient) )
         fs.serialize( '%f'%(self.scattering_coeffcient) )
+        fs.serialize( '%f'%(self.anisotropy_coeffcient) )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'absorption_color')
         layout.prop(self, 'absorption_coeffcient')
         layout.prop(self, 'scattering_coeffcient')
+        layout.prop(self, 'anisotropy_coeffcient')

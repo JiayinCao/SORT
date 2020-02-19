@@ -503,7 +503,7 @@ closure color subsurfaceScattering(color basecolor, vector scatteringDistance, n
 closure color transparent(color basecolor) BUILTIN;
 
 closure color medium_absorption(color basecolor, float absorption) BUILTIN;
-closure color medium_homogeneous(color basecolor, float absorption, float scattering) BUILTIN;
+closure color medium_homogeneous(color basecolor, float absorption, float scattering, float anisotropy) BUILTIN;
 
 #undef BUILTIN
 #undef BUILTIN_DERIV
