@@ -55,13 +55,10 @@ Asset courtesy of [Morgan McGuire](https://casual-effects.com/data/).
 ![Image](http://sort-renderer.com/assets/gallery/human.png)
 ![Image](http://sort-renderer.com/assets/gallery/curly%20hair.png)
 Asset courtesy of [rico cilliers](https://www.artstation.com/ricocilliers).
-![Image](http://sort-renderer.com/assets/gallery/car.png)
-Asset courtesy of [Christophe Desse](https://www.artstation.com/christophe-desse).
 ![Image](http://sort-renderer.com/assets/gallery/stormtrooper.png)
 Asset courtesy of [ScottGraham](https://www.blendswap.com/blend/13953). The above rendered image is not used for any commercial purposes.
-![Image](http://sort-renderer.com/assets/gallery/sss_dragon.png)
 ![Image](http://sort-renderer.com/assets/gallery/dining%20room.png)
 Asset courtesy of [MaTTeSr](https://www.blendswap.com/blend/18762).
-![Image](http://sort-renderer.com/assets/gallery/living%20room.png)
 ![Image](http://sort-renderer.com/assets/gallery/kitchen.png)
 Asset courtesy of [Jay](https://www.blendswap.com/blend/5156)
+![Image](http://sort-renderer.com/assets/gallery/sss_dragon.png)
