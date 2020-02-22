@@ -41,6 +41,7 @@
 #include "medium/medium.h"
 #include "medium/absorption.h"
 #include "medium/homogeneous.h"
+#include "medium/heterogeneous.h"
 #include "material/material.h"
 
 using namespace OSL;
@@ -742,8 +743,35 @@ namespace {
             if (SE_ENTERING == flag) {
                 const auto& params = *comp->as<HomogeneousMedium::Params>();
                 ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params, material));
+            } else if (SE_LEAVING == flag) {
+                ms.RemoveMedium(material->GetUniqueID());
             }
-            else if (SE_LEAVING == flag) {
+        }
+    };
+
+    struct Volume_Closure_Heterogeneous : public Volume_Closure_Base {
+        static constexpr int    ClosureID = VOLUME_CLOSURE_HOMOGENEOUS;
+
+        static const char* GetName() {
+            return "medium_homogeneous";
+        }
+
+        static void Register(ShadingSystem* shadingsys) {
+            BuiltinClosures closure = { GetName(), ClosureID,{
+                CLOSURE_COLOR_PARAM(HeterogenousMedium::Params, baseColor),
+                CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, absorption),
+                CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, scattering),
+                CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, anisotropy),
+                CLOSURE_FINISH_PARAM(HeterogenousMedium::Params)
+            } };
+            shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
+        }
+
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material) const override {
+            if (SE_ENTERING == flag) {
+                const auto& params = *comp->as<HeterogenousMedium::Params>();
+                ms.AddMedium(SORT_MALLOC(HeterogenousMedium)(params, material));
+            } else if (SE_LEAVING == flag) {
                 ms.RemoveMedium(material->GetUniqueID());
             }
         }
@@ -786,6 +814,7 @@ void RegisterClosures(OSL::ShadingSystem* shadingsys) {
 
     registerVolumeClosure<Volume_Closure_Absorption>(shadingsys);
     registerVolumeClosure<Volume_Closure_Homogeneous>(shadingsys);
+    registerVolumeClosure<Volume_Closure_Heterogeneous>(shadingsys);
 }
 
 void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se ){
