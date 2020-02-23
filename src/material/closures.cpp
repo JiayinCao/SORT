@@ -750,10 +750,10 @@ namespace {
     };
 
     struct Volume_Closure_Heterogeneous : public Volume_Closure_Base {
-        static constexpr int    ClosureID = VOLUME_CLOSURE_HOMOGENEOUS;
+        static constexpr int    ClosureID = VOLUME_CLOSURE_HETEROGENOUS;
 
         static const char* GetName() {
-            return "medium_homogeneous";
+            return "medium_heterogeneous";
         }
 
         static void Register(ShadingSystem* shadingsys) {
