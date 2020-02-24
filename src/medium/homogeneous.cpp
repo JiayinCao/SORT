@@ -31,7 +31,7 @@ Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
 //  - there are several corner cases not well handled yet.
 Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const{
     const auto ch = clamp( (int)(sort_canonical() * RGBSPECTRUM_SAMPLE) , 0 , RGBSPECTRUM_SAMPLE - 1 );
-    const auto d = fmin( -std::log( sort_canonical() ) / t[ch] , ray.m_fMax );
+    const auto d = fmin( -std::log( sort_canonical() ) / t[ch] , max_t );
 
     const auto sample_medium = d < max_t;
     if (sample_medium) {
