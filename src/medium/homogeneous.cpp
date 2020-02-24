@@ -25,10 +25,6 @@ Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
     return e.Exp();
 }
 
-// this is by no-means a finished implementation, it is left this way because there are other code infrustruction not
-// fully ready yet.
-//  - mediuminteraction is not correctly setup for now
-//  - there are several corner cases not well handled yet.
 Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const{
     const auto ch = clamp( (int)(sort_canonical() * RGBSPECTRUM_SAMPLE) , 0 , RGBSPECTRUM_SAMPLE - 1 );
     const auto d = fmin( -std::log( sort_canonical() ) / t[ch] , max_t );
@@ -49,6 +45,10 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
     for( auto i = 0u ; i < RGBSPECTRUM_SAMPLE ; ++i )
         pdf += density[i];
     pdf /= RGBSPECTRUM_SAMPLE;
+
+    // This should rarely happen, though.
+    if (pdf == 0.0f)
+        return 0.0f;
 
     return sample_medium ? ( tr * s / pdf ) : ( tr / pdf );
 }
