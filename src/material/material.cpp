@@ -178,12 +178,21 @@ void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interac
         ExecuteVolumeShader(m_volume_shader.get(), mi, ms, flag, this);
 }
 
+void Material::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const {
+    if (m_volume_shader_valid)
+        EvaluateVolumeSample(m_volume_shader.get(), mi, ms);
+}
+
 void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se) const {
     return m_material.UpdateScatteringEvent(se);
 }
 
 void MaterialProxy::UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const {
     return m_material.UpdateMediumStack(mi, flag, ms);
+}
+
+void MaterialProxy::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const {
+    return m_material.EvaluateMediumSample(mi, ms);
 }
 
 StringID  MaterialProxy::GetUniqueID() const {

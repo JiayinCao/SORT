@@ -37,9 +37,9 @@ public:
 
     //! @brief  Constructor.
     //!
-    //! @param param		Parameter to build the volume.
     //! @param material		Material that spawns the medium.
-    HeterogenousMedium(const HeterogenousMedium::Params& param, const MaterialBase* material) :Medium(material), bc(param.baseColor), a(param.absorption), s(param.scattering), t(param.absorption + param.scattering), anisotropy(param.anisotropy) {}
+    HeterogenousMedium(const MaterialBase* material) :
+        Medium(WHITE_SPECTRUM, 0.0f, 0.0f, 0.0f, material) {}
 
     //! @brief  Evaluation of beam transmittance.
     //!
@@ -58,11 +58,4 @@ public:
     //! @param mi           The interaction sampled.
     //! @return             The beam transmittance between the ray origin and the interaction.
     Spectrum Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const override;
-
-private:
-    const Spectrum          bc;
-    const Spectrum          a;
-    const Spectrum          s;
-    const Spectrum          t;
-    const float             anisotropy;
 };

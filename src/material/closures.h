@@ -78,6 +78,15 @@ void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& 
 //! @param	material		The material that spawns the medium.
 void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material);
 
+//! @brief  Evaluate the properties of the volume at specific position in a volume.
+//!
+//! Neither of absorption volurm, nor the homogeneous volume need this function. This is purely for heteregenous medium.
+//!
+//! @param  closure         The closure tree in the osl shader.
+//! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
+//! @param  ms              The medium sample to be returned.
+void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumSample& mediumStack);
+
 //! @brief  Evaluate how opaque the surface is in the OSL shader.
 //!
 //! @param  closure         The closure tree in the osl shader.

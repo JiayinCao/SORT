@@ -74,7 +74,14 @@ void ExecuteSurfaceShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
 //! @param  ms          The medium stack to hold the results.
 //! @param  flag        A flag indicates whether to add or remove the medium.
 //! @param	material	The material that spawns the volume. If nullptr, it means it is a world volume.
-void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& se, const SE_Interaction flag, const MaterialBase* material = nullptr);
+void ExecuteVolumeShader( OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& se, const SE_Interaction flag, const MaterialBase* material = nullptr);
+
+//! @brief  Evaluate the properties at a specific position in the volume.
+//!
+//! @param  shader      The osl shader to be executed.
+//! @param  mi          The interaction inside the volume.
+//! @param  ms          The medium sample to be returned.
+void EvaluateVolumeSample( OSL::ShaderGroup* shader, const MediumInteraction& mi, MediumSample& ms);
 
 //! @brief  Evaluate the transparency of the intersection.
 //!

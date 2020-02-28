@@ -46,13 +46,31 @@ SORT_FORCEINLINE SE_Interaction update_interaction_flag(const float cos_theta_wi
     return SE_REFLECTION;
 }
 
+struct MediumSample {
+    Spectrum      basecolor;      /**< Base color of the medium. */
+    Spectrum      absorption;     /**< Absorption coefficient. */
+    Spectrum      scattering;     /**< Scattering coefficient. */
+    Spectrum      extinction;     /**< Absorption + scattering coefficient. */
+    float         anisotropy;     /**< Anisotropy of the phase function. */
+
+    MediumSample():anisotropy(0.0f){}
+
+    MediumSample(const Spectrum& baseColor, const float absorption, const float scattering, const float anisotropy) :
+        basecolor(baseColor), absorption(absorption), scattering(scattering), extinction(absorption + scattering), anisotropy(anisotropy) {}
+};
+
 //! @brief  Medium is a data structure holding volumetric rendering data.
 class Medium{
 public:
 	//! @brief	Constructor taking the material that spawns the medium.
 	//!
-	//! @param	mat			Material that spawns the medium.
-	Medium( const MaterialBase* material ) : material( material ){}
+    //! @param  baseColor   Base color of the volume.
+    //! @param  absorption  Absorption of the volume.
+    //! @param  scattering  Scattering of the volume.
+    //! @param  anisotropy  Anisotropy of the phase function.
+	//! @param	material	Material that spawns the medium.
+	Medium( const Spectrum& baseColor , const float absorption , const float scattering , const float anisotropy , const MaterialBase* material ) : 
+        m_material( material ) , m_globalMediumSample(baseColor, absorption, scattering, anisotropy) {}
 
     //! @brief  Evaluation of beam transmittance.
     //!
@@ -76,12 +94,15 @@ public:
 	//!
 	//! @return				The material that spawns the medium.
 	SORT_FORCEINLINE  const MaterialBase* GetMaterial() const {
-		return material;
+		return m_material;
 	}
 
 protected:
 	/**< Material that spawn the medium. */
-	const MaterialBase*	material;
+	const MaterialBase*	m_material;
+    
+    /**< A generic medium sample keeps consistant data for homogeneous volume and absorption volume. */
+    MediumSample        m_globalMediumSample;
 };
 
 // There is only support up to 8 medium overlap each other, exceeding this limit will cause problems in rendering.

@@ -20,7 +20,7 @@
 #include "core/memory.h"
 
 Spectrum AbsorptionMedium::Tr( const Ray& ray , const float max_t ) const{
-    const auto e = a * (absorption * -fmin(max_t, FLT_MAX ));
+    const auto e = m_globalMediumSample.basecolor * (m_globalMediumSample.absorption * -fmin(max_t, FLT_MAX ));
     return e.Exp();
 }
 

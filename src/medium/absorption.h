@@ -37,7 +37,8 @@ public:
     //!
     //! @param param        Parameter to build the volume.
 	//! @param material		Material that spawns the medium.
-    AbsorptionMedium( const AbsorptionMedium::Params& param , const MaterialBase* material):Medium(material), a(param.baseColor), absorption(param.absorption){}
+    AbsorptionMedium( const AbsorptionMedium::Params& param , const MaterialBase* material):
+        Medium( param.baseColor, param.absorption, 0.0f, 0.0f, material){}
 
     //! @brief  Evaluation of beam transmittance.
     //!
@@ -56,8 +57,4 @@ public:
     //! @param mi           The interaction sampled.
     //! @return             The beam transmittance between the ray origin and the interaction.
     Spectrum Sample( const Ray& ray, const float max_t, MediumInteraction*& mi ) const override;
-
-private:
-    const Spectrum          a;
-    const float             absorption;
 };

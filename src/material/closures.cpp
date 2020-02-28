@@ -71,6 +71,7 @@ namespace {
 
     struct Volume_Closure_Base : public Closure_Base {
         virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material) const = 0;
+        virtual void Evaluate(const ClosureComponent* comp, const OSL::Color3& w, MediumSample& ms) const {}
     };
 
     static std::vector<std::unique_ptr<Surface_Closure_Base>>   g_surface_closures(SURFACE_CLOSURE_CNT);
@@ -768,12 +769,19 @@ namespace {
         }
 
         void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material) const override {
-            if (SE_ENTERING == flag) {
-                const auto& params = *comp->as<HeterogenousMedium::Params>();
-                ms.AddMedium(SORT_MALLOC(HeterogenousMedium)(params, material));
-            } else if (SE_LEAVING == flag) {
+            if (SE_ENTERING == flag)
+                ms.AddMedium(SORT_MALLOC(HeterogenousMedium)(material));
+            else if (SE_LEAVING == flag)
                 ms.RemoveMedium(material->GetUniqueID());
-            }
+        }
+
+        void Evaluate(const ClosureComponent* comp, const OSL::Color3& w, MediumSample& ms) const {
+            const auto& params = *comp->as<HeterogenousMedium::Params>();
+            ms.absorption = params.absorption;
+            ms.scattering = params.scattering;
+            ms.extinction = ms.absorption + ms.scattering;
+            ms.anisotropy = params.anisotropy;
+            ms.basecolor = params.baseColor;
         }
     };
 }
@@ -844,19 +852,31 @@ void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w
         return;
 
     switch (closure->id) {
-        case ClosureColor::MUL: {
-            // no support for blending volume for now.
+        case ClosureColor::MUL:
+        case ClosureColor::ADD:
+            // no support for blending or addding volume for now.
             sAssert(false, VOLUME);
             break;
-        }
-        case ClosureColor::ADD: {
-            // no support for blending volume for now.
-            sAssert(false, VOLUME);
-            break;
-        }
         default: {
             const ClosureComponent* comp = closure->as_comp();
             getVolumeClosureBase(comp->id)->Process(comp, w * comp->w, mediumStack, flag, material);
+        }
+    }
+}
+
+void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumSample& ms){
+    if (!closure)
+        return;
+
+    switch (closure->id) {
+        case ClosureColor::MUL:
+        case ClosureColor::ADD:
+            // no support for blending or addding volume for now.
+            sAssert(false, VOLUME);
+            break;
+        default: {
+            const ClosureComponent* comp = closure->as_comp();
+            getVolumeClosureBase(comp->id)->Evaluate(comp, w * comp->w, ms);
         }
     }
 }

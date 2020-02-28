@@ -46,6 +46,14 @@ public:
     //! @param      ms              Medium stack to be populated.
     virtual void       UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const = 0;
 
+    //! @brief      Take sample in a medium at a specific position.
+    //!
+    //! This is specifically for sampling the heteregenous sampling. Neither of the other two types of volumes need take random samples.
+    //!
+    //! @param      mi              Interaction with the medium.
+    //! @param      ms              Medium sample taken.
+    virtual void       EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const = 0;
+
     //! @brief      Evaluate translucency.
     //!
     //! @param      intersection    The intersection.
@@ -101,6 +109,14 @@ public:
     //! @param      flag            A flag indicates whether to add or remove the medium.
     //! @param      ms              Medium stack to be populated.
     void        UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const override;
+
+    //! @brief      Take sample in a medium at a specific position.
+    //!
+    //! This is specifically for sampling the heteregenous sampling. Neither of the other two types of volumes need take random samples.
+    //!
+    //! @param      mi              Interaction with the medium.
+    //! @param      ms              Medium sample taken.
+    void        EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const override;
 
     //! @brief      Evaluate translucency.
     //!
@@ -218,6 +234,14 @@ public:
     //! @param      flag            A flag indicates whether to add or remove the medium.
     //! @param      ms              Medium stack to be populated.
     void       UpdateMediumStack(const MediumInteraction& mi, const SE_Interaction flag, MediumStack& ms) const override;
+
+    //! @brief      Take sample in a medium at a specific position.
+    //!
+    //! This is specifically for sampling the heteregenous sampling. Neither of the other two types of volumes need take random samples.
+    //!
+    //! @param      mi              Interaction with the medium.
+    //! @param      ms              Medium sample taken.
+    void        EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const override;
 
     //! @brief  Just an empty interface, there is no serialization support for this type of material.
     //!
