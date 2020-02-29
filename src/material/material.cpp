@@ -219,3 +219,11 @@ bool MaterialProxy::HasSSS() const {
 bool MaterialProxy::HasVolumeAttached() const {
     return m_material.HasVolumeAttached();
 }
+
+float MaterialProxy::GetVolumeStep() const {
+    return m_material.GetVolumeStep();
+}
+
+unsigned int MaterialProxy::GetVolumeStepCnt() const {
+    return m_material.GetVolumeStepCnt();
+}

@@ -83,7 +83,17 @@ public:
     //! @brief  Whether the material is attached with a volume.
     //!
     //! @return Return true if the material is attached with a volume.
-    virtual bool HasVolumeAttached() const = 0;
+    virtual bool        HasVolumeAttached() const = 0;
+
+    //! @brief  Get volume ray matching step size.
+    //!
+    //! @return Ray marching step size.
+    virtual float       GetVolumeStep() const = 0;
+
+    //! @brief  Get volume ray marching max step count.
+    //!
+    //! @return Maximum steps to march during ray marching.
+    virtual unsigned int GetVolumeStepCnt() const = 0;
 };
 
 //! @brief  A thin layer of material definition.
@@ -295,6 +305,16 @@ public:
     //!
     //! @return Return true if the material is attached with a volume.
     bool       HasVolumeAttached() const override;
+
+    //! @brief  Get volume ray matching step size.
+    //!
+    //! @return Ray marching step size.
+    float       GetVolumeStep() const override;
+
+    //! @brief  Get volume ray marching max step count.
+    //!
+    //! @return Maximum steps to march during ray marching.
+    unsigned int GetVolumeStepCnt() const override;
 
 private:
     /**< Material to be referred. */

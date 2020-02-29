@@ -53,6 +53,9 @@ public:
 
     //! @brief  Importance sampling a point along the ray in the medium.
     //!
+    //! This is no way to use Delta-Tracking algorithm due to the lack of context of maximum density because
+    //! density is a shader driven property, there is no way to explictly evaluate the maximum value.
+    //!
     //! @param ray          The ray we use to take sample.
     //! @param  max_t       The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
     //! @param mi           The interaction sampled.

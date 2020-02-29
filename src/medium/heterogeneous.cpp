@@ -18,6 +18,8 @@
 #include "heterogeneous.h"
 #include "core/rand.h"
 #include "core/memory.h"
+#include "material/material.h"
+#include "phasefunction.h"
 
 Spectrum HeterogenousMedium::Tr( const Ray& ray , const float max_t ) const{
 	// to be implemented
@@ -25,6 +27,73 @@ Spectrum HeterogenousMedium::Tr( const Ray& ray , const float max_t ) const{
 }
 
 Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const{
-	// to be implemented.
-    return 1.0f;
+    // Distance Sample, Jan Novak
+    // https://cs.dartmouth.edu/~wjarosz/publications/novak18monte-slides-3-distance-sampling.pdf
+
+    // get the step size and count
+    auto        step_size = m_material->GetVolumeStep();
+    const auto  step_cnt  = m_material->GetVolumeStepCnt();
+
+    // make sure step size is not unnecessarily larger.
+    if (step_size * step_cnt > max_t)
+        step_size = max_t / step_cnt;
+
+    // always start from 0.0 regardless the min_t value setup in ray
+    auto t = 0.0f;
+
+    // a random value
+    auto r = sort_canonical();
+
+    auto accum_transmittance = Spectrum(1.0f);
+
+    // ray marching
+    for (auto i = 0u; i < step_cnt; ++i) {
+        const auto dt = t + step_size <= max_t ? step_size : max_t - t;
+        const auto new_t = t + dt * sort_canonical();
+
+        // take a sample in the medium
+        MediumSample ms;
+        MediumInteraction tmp_mi;
+        tmp_mi.intersect = ray(new_t);
+        m_material->EvaluateMediumSample(tmp_mi, ms);
+
+        // beam transmittancy along the ray through the short distance
+        const auto extinction = ms.basecolor * ms.extinction;
+        const auto exponent = -dt * extinction;
+        const auto beam_transmitancy = exponent.Exp();
+
+        // maybe a better sampling algorithm for channel picking later
+        const auto ch = clamp((int)(sort_canonical() * RGBSPECTRUM_SAMPLE), 0, RGBSPECTRUM_SAMPLE - 1);
+
+        if (1.0f - r >= beam_transmitancy[ch]) {
+            // sample a medium and scatter the ray
+            const auto new_dt = -std::log(1.0f - r) / extinction[ch];
+
+            const auto new_exponent = -new_dt * extinction;
+            const auto new_beam_transmitancy = new_exponent.Exp();
+            const auto new_pdf = new_beam_transmitancy * extinction;
+
+            const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) * 0.33f;
+
+            const auto scattering = ms.scattering * ms.basecolor;
+
+            mi = SORT_MALLOC(MediumInteraction)();
+            mi->intersect = ray( t + new_dt );
+            mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(ms.anisotropy);
+
+            return accum_transmittance * new_beam_transmitancy * scattering / pdf;
+        } else {
+            const auto new_pdf = beam_transmitancy;
+            const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) * 0.33f;
+
+            accum_transmittance *= beam_transmitancy / pdf;
+
+            r = 1.0f - (1.0f - r) / beam_transmitancy[ch];
+        }
+
+        t += dt;
+    }
+
+    // sampling the surface behind the volume instead of the volume itself.
+    return accum_transmittance;
 }
