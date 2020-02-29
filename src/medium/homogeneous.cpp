@@ -26,10 +26,11 @@ Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
 }
 
 Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const{
-    // This algorithm here needs to be reviewed later.
-    // I haven't figure it out whether absorption and scattering is spectrum dependent yet.
+    const auto extinction = m_globalMediumSample.basecolor * m_globalMediumSample.extinction;
+    const auto scattering = m_globalMediumSample.basecolor * m_globalMediumSample.scattering;
+
     const auto ch = clamp( (int)(sort_canonical() * RGBSPECTRUM_SAMPLE) , 0 , RGBSPECTRUM_SAMPLE - 1 );
-    const auto d = fmin( -std::log( sort_canonical() ) / m_globalMediumSample.extinction[ch] , max_t );
+    const auto d = fmin( -std::log( sort_canonical() ) / extinction[ch] , max_t );
 
     const auto sample_medium = d < max_t;
     if (sample_medium) {
@@ -38,10 +39,10 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
         mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(m_globalMediumSample.anisotropy);
     }
 
-    const auto e = m_globalMediumSample.basecolor * m_globalMediumSample.extinction * (-fmin( d , FLT_MAX ));
+    const auto e = extinction * (-fmin( d , FLT_MAX ));
     const auto tr = e.Exp();
 
-    const auto density = sample_medium ? (m_globalMediumSample.extinction * tr ) : tr;
+    const auto density = sample_medium ? (extinction * tr) : tr;
 
     auto pdf = 0.0f;
     for( auto i = 0u ; i < RGBSPECTRUM_SAMPLE ; ++i )
@@ -49,8 +50,8 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
     pdf /= RGBSPECTRUM_SAMPLE;
 
     // This should rarely happen, though.
-    if (pdf == 0.0f)
+    if ( UNLIKELY(pdf == 0.0f) )
         return 0.0f;
 
-    return sample_medium ? ( tr * m_globalMediumSample.scattering / pdf ) : ( tr / pdf );
+    return sample_medium ? ( tr * scattering / pdf ) : ( tr / pdf );
 }

@@ -48,9 +48,9 @@ SORT_FORCEINLINE SE_Interaction update_interaction_flag(const float cos_theta_wi
 
 struct MediumSample {
     Spectrum      basecolor;      /**< Base color of the medium. */
-    Spectrum      absorption;     /**< Absorption coefficient. */
-    Spectrum      scattering;     /**< Scattering coefficient. */
-    Spectrum      extinction;     /**< Absorption + scattering coefficient. */
+    float         absorption;     /**< Absorption coefficient. */
+    float         scattering;     /**< Scattering coefficient. */
+    float         extinction;     /**< Absorption + scattering coefficient. */
     float         anisotropy;     /**< Anisotropy of the phase function. */
 
     MediumSample():anisotropy(0.0f){}
