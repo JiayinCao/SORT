@@ -297,6 +297,27 @@ class MATERIAL_PT_MaterialParameterPanel(SORTMaterialPanel, bpy.types.Panel):
             self.layout.prop( input , 'default_value' , text = input.name )
 
 @base.register_class
+class MATERIAL_PT_MaterialVolumePanel(SORTMaterialPanel, bpy.types.Panel):
+    bl_label = 'Volume'
+
+    @classmethod
+    def poll(self, context):
+        return context.material is not None and SORTMaterialPanel.poll(context)
+
+    def draw(self, context):
+        mat = context.material
+        if mat is None:
+            return
+
+        tree = mat.sort_material
+        if tree is None:
+            self.layout.operator( 'sort.use_sort_node' , text='Use SORT Shader Node' )
+            return
+
+        self.layout.prop( tree , 'volume_step' )
+        self.layout.prop( tree , 'volume_step_cnt' )
+
+@base.register_class
 class MATERIAL_PT_SORTInOutGroupEditor(SORTMaterialPanel, bpy.types.Panel):
     bl_label = "SORT In/Out Group Editor"
     bl_space_type = 'NODE_EDITOR'

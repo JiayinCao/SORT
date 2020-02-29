@@ -169,6 +169,20 @@ public:
         return m_volume_shader_valid;
     }
 
+    //! @brief  Get volume ray matching step size.
+    //!
+    //! @return Ray marching step size.
+    SORT_FORCEINLINE float GetVolumeStep() const {
+        return m_volumeStep;
+    }
+
+    //! @brief  Get volume ray marching max step count.
+    //!
+    //! @return Maximum steps to march during ray marching.
+    SORT_FORCEINLINE unsigned int GetVolumeStepCnt() const {
+        return m_volumeStepCnt;
+    }
+
 private:
     /**< Whether this is a valid material */
     bool                            m_surface_shader_valid = false;
@@ -209,6 +223,9 @@ private:
 
     bool                            m_hasTransparentNode = false;
     bool                            m_hasSSSNode = false;
+
+    float                           m_volumeStep = 0.1f;
+    unsigned int                    m_volumeStepCnt = 1024;
 };
 
 //! @brief  MaterialProxy is nothing but a thin wrapper of another existed material.

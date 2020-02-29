@@ -158,6 +158,9 @@ void Material::Serialize(IStreamBase& stream){
 
     stream >> m_hasTransparentNode;
     stream >> m_hasSSSNode;
+
+    stream >> m_volumeStep;
+    stream >> m_volumeStepCnt;
 }
 
 void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {

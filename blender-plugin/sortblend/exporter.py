@@ -795,4 +795,8 @@ def export_materials(scene, fs):
         fs.serialize( bool(has_transparent_node) )
         fs.serialize( bool(has_sss_node) )
 
+        # volume step size and step count
+        fs.serialize( material.sort_material.volume_step )
+        fs.serialize( material.sort_material.volume_step_cnt )
+
     log( 'Exported %d materials in total.' %(len(materials)) )

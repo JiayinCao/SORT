@@ -58,6 +58,8 @@ class SORTShaderNodeTree(bpy.types.NodeTree):
     @classmethod
     def register(cls):
         bpy.types.Material.sort_material = bpy.props.PointerProperty(type=bpy.types.NodeTree, name='SORT Material Settings')
+        bpy.types.NodeTree.volume_step = bpy.props.FloatProperty( name='Step' , default=0.1 , min=0.0, max=100.0 )
+        bpy.types.NodeTree.volume_step_cnt = bpy.props.IntProperty( name='Max Step Count' , default=1024 , min=0, max=8192 )
 
         # Register all nodes
         cats = []
