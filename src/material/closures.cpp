@@ -732,6 +732,7 @@ namespace {
         static void Register(ShadingSystem* shadingsys) {
             BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_COLOR_PARAM(HomogeneousMedium::Params, baseColor),
+                CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, emission),
                 CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, absorption),
                 CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, scattering),
                 CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, anisotropy),
@@ -760,6 +761,7 @@ namespace {
         static void Register(ShadingSystem* shadingsys) {
             BuiltinClosures closure = { GetName(), ClosureID,{
                 CLOSURE_COLOR_PARAM(HeterogenousMedium::Params, baseColor),
+                CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, emission),
                 CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, absorption),
                 CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, scattering),
                 CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, anisotropy),
@@ -781,6 +783,7 @@ namespace {
             ms.scattering = params.scattering;
             ms.extinction = ms.absorption + ms.scattering;
             ms.anisotropy = params.anisotropy;
+            ms.emission = params.emission;
             ms.basecolor = params.baseColor;
         }
     };

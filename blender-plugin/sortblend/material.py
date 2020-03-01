@@ -2663,24 +2663,27 @@ class SORTNodeHomogeneous(SORTShadingNode):
     bl_label = 'Homogeneous Medium'
     bl_idname = 'SORTNodeHomogeneous'
     absorption_color : bpy.props.FloatVectorProperty( name='Color' , default=(1.0, 1.0, 1.0) , subtype='COLOR', soft_min = 0.0, soft_max = 1.0)
-    absorption_coeffcient : bpy.props.FloatProperty( name='Absorption Density' , default=0.5 , min=0.0, max=float('inf') )
-    scattering_coeffcient : bpy.props.FloatProperty( name='Scattering Density' , default=0.5 , min=0.0, max=float('inf') )
+    absorption_coeffcient : bpy.props.FloatProperty( name='Absorption' , default=0.5 , min=0.0, max=float('inf') )
+    scattering_coeffcient : bpy.props.FloatProperty( name='Scattering' , default=0.5 , min=0.0, max=float('inf') )
+    emission_coefficient  : bpy.props.FloatProperty( name='Emission' , default=0.5 , min=0.0, max=float('inf') )
     anisotropy_coeffcient : bpy.props.FloatProperty( name='Anisotropy' , default=0.0 , min=-1.0, max=1.0 )
     osl_shader = '''
         shader HomogenenousMedium( output closure color Result = color(0) ){
-            Result = medium_homogeneous( @ , @ , @ , @ );
+            Result = medium_homogeneous( @ , @ , @ , @ , @ );
         }
     '''
     def init(self, context):
         self.outputs.new( 'SORTNodeSocketVolume' , 'Result' )
     def serialize_prop(self, fs):
-        fs.serialize( 4 )
+        fs.serialize( 5 )
         fs.serialize( 'color( %f,%f,%f )'%(self.absorption_color[:]) )
+        fs.serialize( '%f'%(self.emission_coefficient) )
         fs.serialize( '%f'%(self.absorption_coeffcient) )
         fs.serialize( '%f'%(self.scattering_coeffcient) )
         fs.serialize( '%f'%(self.anisotropy_coeffcient) )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'absorption_color')
+        layout.prop(self, 'emission_coefficient' )
         layout.prop(self, 'absorption_coeffcient')
         layout.prop(self, 'scattering_coeffcient')
         layout.prop(self, 'anisotropy_coeffcient')
@@ -2691,22 +2694,25 @@ class SORTNodeHeterogeneous(SORTShadingNode):
     bl_idname = 'SORTNodeHeterogeneous'
     osl_shader = '''
         shader HeterogeneousMedium( color Color = @ ,
+                                    float Emission = @ ,
                                     float Absorption = @ ,
                                     float Scattering = @ ,
                                     float Anisotropy = @ ,
                                     output closure color Result = color(0) ){
-            Result = medium_heterogeneous(Color, Absorption, Scattering, Anisotropy );
+            Result = medium_heterogeneous(Color, Emission, Absorption, Scattering, Anisotropy );
         }
     '''
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketColor' , 'Color' )
+        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Emission' )
         self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Absorption' )
         self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Scattering' )
         self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Anisotropy' )
         self.outputs.new( 'SORTNodeSocketVolume' , 'Result' )
     def serialize_prop(self, fs):
-        fs.serialize( 4 )
+        fs.serialize( 5 )
         fs.serialize( self.inputs['Color'].export_osl_value() )
+        fs.serialize( self.inputs['Emission'].export_osl_value() )
         fs.serialize( self.inputs['Absorption'].export_osl_value() )
         fs.serialize( self.inputs['Scattering'].export_osl_value() )
         fs.serialize( self.inputs['Anisotropy'].export_osl_value() )

@@ -47,16 +47,17 @@ SORT_FORCEINLINE SE_Interaction update_interaction_flag(const float cos_theta_wi
 }
 
 struct MediumSample {
-    Spectrum      basecolor;      /**< Base color of the medium. */
-    float         absorption;     /**< Absorption coefficient. */
-    float         scattering;     /**< Scattering coefficient. */
-    float         extinction;     /**< Absorption + scattering coefficient. */
-    float         anisotropy;     /**< Anisotropy of the phase function. */
+    Spectrum      basecolor;             /**< Base color of the medium. */
+    float         emission   = 0.0f;     /**< Emission coefficient. */
+    float         absorption = 0.0f;     /**< Absorption coefficient. */
+    float         scattering = 0.0f;     /**< Scattering coefficient. */
+    float         extinction = 0.0f;     /**< Absorption + scattering coefficient. */
+    float         anisotropy = 0.0f;     /**< Anisotropy of the phase function. */
 
     MediumSample():anisotropy(0.0f){}
 
-    MediumSample(const Spectrum& baseColor, const float absorption, const float scattering, const float anisotropy) :
-        basecolor(baseColor), absorption(absorption), scattering(scattering), extinction(absorption + scattering), anisotropy(anisotropy) {}
+    MediumSample(const Spectrum& baseColor, const float emission, const float absorption, const float scattering, const float anisotropy) :
+        basecolor(baseColor), emission(emission), absorption(absorption), scattering(scattering), extinction(absorption + scattering), anisotropy(anisotropy) {}
 };
 
 //! @brief  Medium is a data structure holding volumetric rendering data.
@@ -65,12 +66,13 @@ public:
 	//! @brief	Constructor taking the material that spawns the medium.
 	//!
     //! @param  baseColor   Base color of the volume.
+    //! @param  emission    Emission coefficient.
     //! @param  absorption  Absorption of the volume.
     //! @param  scattering  Scattering of the volume.
     //! @param  anisotropy  Anisotropy of the phase function.
 	//! @param	material	Material that spawns the medium.
-	Medium( const Spectrum& baseColor , const float absorption , const float scattering , const float anisotropy , const MaterialBase* material ) : 
-        m_material( material ) , m_globalMediumSample(baseColor, absorption, scattering, anisotropy) {}
+	Medium( const Spectrum& baseColor , const float emission, const float absorption , const float scattering , const float anisotropy , const MaterialBase* material ) : 
+        m_material( material ) , m_globalMediumSample(baseColor, emission, absorption, scattering, anisotropy) {}
 
     //! @brief  Evaluation of beam transmittance.
     //!

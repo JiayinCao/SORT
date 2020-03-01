@@ -30,6 +30,7 @@ public:
     // Input parameters to construct the volume.
     struct Params {
         OSL::Vec3   baseColor;
+        OSL::Float  emission;
         OSL::Float  absorption;
         OSL::Float  scattering;
         OSL::Float  anisotropy;
@@ -39,7 +40,7 @@ public:
     //!
     //! @param material		Material that spawns the medium.
     HeterogenousMedium(const MaterialBase* material) :
-        Medium(WHITE_SPECTRUM, 0.0f, 0.0f, 0.0f, material) {}
+        Medium(WHITE_SPECTRUM, 0.0f, 0.0f, 0.0f, 0.0f, material) {}
 
     //! @brief  Evaluation of beam transmittance.
     //!
