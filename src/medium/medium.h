@@ -89,8 +89,9 @@ public:
     //! @param ray          The ray we use to take sample.
     //! @param  max_t       The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
     //! @param mi           The interaction sampled.
+    //! @param emission     The emission contribution in RTE.
     //! @return             The beam transmittance between the ray origin and the interaction.
-    virtual Spectrum Sample( const Ray& ray , const float max_t , MediumInteraction*& interaction ) const = 0;
+    virtual Spectrum Sample( const Ray& ray , const float max_t , MediumInteraction*& interaction, Spectrum& emission) const = 0;
 
 	//! @brief	Get the material that spawns the medium.
 	//!
@@ -151,8 +152,9 @@ public:
     //! @param  r           The ray along which to take the sample.
     //! @param  max_t       The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
     //! @param  mi          The medium interaction taken as a sample, null if no sample is taken in the medium.
+    //! @param  emission    The emission contribution in RTE.
     //! @return             Attenuation along the ray all the way to the sampled point.
-    Spectrum    Sample(const Ray& r, const float max_t, MediumInteraction*& mi ) const;
+    Spectrum    Sample(const Ray& r, const float max_t, MediumInteraction*& mi, Spectrum& emission) const;
 
 public:
     /**< Mediums it holds. */

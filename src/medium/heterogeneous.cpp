@@ -51,7 +51,7 @@ Spectrum HeterogenousMedium::Tr( const Ray& ray , const float max_t ) const{
     return exponent.Exp();
 }
 
-Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const{
+Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi, Spectrum& emission) const{
     // Distance Sample, Jan Novak
     // https://cs.dartmouth.edu/~wjarosz/publications/novak18monte-slides-3-distance-sampling.pdf
 
@@ -102,7 +102,12 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
             mi->intersect = ray( t + new_dt );
             mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(ms.anisotropy);
 
-            return accum_transmittance * new_beam_transmitancy * scattering / pdf;
+            accum_transmittance *= new_beam_transmitancy;
+
+            // add emission
+            emission = ms.emission * ms.basecolor * ms.absorption * accum_transmittance;
+
+            return accum_transmittance * scattering / pdf;
         } else {
             const auto new_pdf = beam_transmitancy;
             const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) * 0.33f;

@@ -25,9 +25,10 @@ Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
     return e.Exp();
 }
 
-Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const{
+Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi , Spectrum& emission ) const{
     const auto extinction = m_globalMediumSample.basecolor * m_globalMediumSample.extinction;
     const auto scattering = m_globalMediumSample.basecolor * m_globalMediumSample.scattering;
+    const auto absorption = m_globalMediumSample.basecolor * m_globalMediumSample.absorption;
 
     const auto ch = clamp( (int)(sort_canonical() * RGBSPECTRUM_SAMPLE) , 0 , RGBSPECTRUM_SAMPLE - 1 );
     const auto d = fmin( -std::log( sort_canonical() ) / extinction[ch] , max_t );
@@ -52,6 +53,9 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
     // This should rarely happen, though.
     if ( UNLIKELY(pdf == 0.0f) )
         return 0.0f;
+
+    // add emission
+    emission = absorption * m_globalMediumSample.emission;
 
     return sample_medium ? ( tr * scattering / pdf ) : ( tr / pdf );
 }

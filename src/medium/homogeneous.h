@@ -59,6 +59,7 @@ public:
     //! @param ray          The ray we use to take sample.
     //! @param max_t        The maximum distance to be considered, usually this is the distance the ray travels before it hits a surface.
     //! @param mi           The interaction sampled.
+    //! @param emission     The emission contribution in RTE.
     //! @return             The beam transmittance between the ray origin and the interaction.
-    Spectrum Sample( const Ray& ray, const float max_t, MediumInteraction*& mi ) const override;
+    Spectrum Sample( const Ray& ray, const float max_t, MediumInteraction*& mi , Spectrum& emission ) const override;
 };
