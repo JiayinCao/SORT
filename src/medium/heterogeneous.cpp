@@ -22,8 +22,33 @@
 #include "phasefunction.h"
 
 Spectrum HeterogenousMedium::Tr( const Ray& ray , const float max_t ) const{
-	// to be implemented
-    return 1.0f;
+    // get the step size and count
+    auto        step_size = m_material->GetVolumeStep();
+    const auto  step_cnt = m_material->GetVolumeStepCnt();
+
+    auto t = 0.0f;
+    Spectrum exponent(0.0f);
+
+    // ray marching
+    for (auto i = 0u; i < step_cnt; ++i) {
+        const auto dt = t + step_size <= max_t ? step_size : max_t - t;
+        const auto new_t = t + dt * sort_canonical();
+
+        // take a sample in the medium
+        MediumSample ms;
+        MediumInteraction tmp_mi;
+        tmp_mi.intersect = ray(new_t);
+        m_material->EvaluateMediumSample(tmp_mi, ms);
+
+        exponent -= ms.basecolor * ms.extinction * dt;
+
+        t += dt;
+
+        if (t >= max_t)
+            break;
+    }
+
+    return exponent.Exp();
 }
 
 Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi ) const{
@@ -33,11 +58,7 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
     // get the step size and count
     auto        step_size = m_material->GetVolumeStep();
     const auto  step_cnt  = m_material->GetVolumeStepCnt();
-
-    // make sure step size is not unnecessarily larger.
-    if (step_size * step_cnt > max_t)
-        step_size = max_t / step_cnt;
-
+    
     // always start from 0.0 regardless the min_t value setup in ray
     auto t = 0.0f;
 
@@ -92,6 +113,9 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
         }
 
         t += dt;
+
+        if (t >= max_t)
+            break;
     }
 
     // sampling the surface behind the volume instead of the volume itself.
