@@ -182,14 +182,14 @@ public:
     //! @brief  Get volume ray matching step size.
     //!
     //! @return Ray marching step size.
-    SORT_FORCEINLINE float GetVolumeStep() const {
+    float       GetVolumeStep() const override {
         return m_volumeStep;
     }
 
     //! @brief  Get volume ray marching max step count.
     //!
     //! @return Maximum steps to march during ray marching.
-    SORT_FORCEINLINE unsigned int GetVolumeStepCnt() const {
+    unsigned int GetVolumeStepCnt() const override{
         return m_volumeStepCnt;
     }
 

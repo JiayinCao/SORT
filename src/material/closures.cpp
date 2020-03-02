@@ -777,7 +777,7 @@ namespace {
                 ms.RemoveMedium(material->GetUniqueID());
         }
 
-        void Evaluate(const ClosureComponent* comp, const OSL::Color3& w, MediumSample& ms) const {
+        void Evaluate(const ClosureComponent* comp, const OSL::Color3& w, MediumSample& ms) const override{
             const auto& params = *comp->as<HeterogenousMedium::Params>();
             ms.absorption = params.absorption;
             ms.scattering = params.scattering;
