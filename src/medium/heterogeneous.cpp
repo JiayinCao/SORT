@@ -78,7 +78,7 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
         tmp_mi.intersect = ray(new_t);
         m_material->EvaluateMediumSample(tmp_mi, ms);
 
-        // beam transmittancy along the ray through the short distance
+        // beam transmittance along the ray through the short distance
         const auto extinction = ms.basecolor * ms.extinction;
         const auto exponent = -dt * extinction;
         const auto beam_transmitancy = exponent.Exp();

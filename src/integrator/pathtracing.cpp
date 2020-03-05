@@ -71,7 +71,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
         MediumInteraction* pMi = nullptr;
         const auto medium_attenuation = ms.Sample(r, inter.t, pMi, emission);
 
-        L += emission;
+        L += emission * throughput;
 
         // update the through put based on the medium attenuation due to particle scattering and absorption.
         throughput *= medium_attenuation;
@@ -99,7 +99,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             r.m_Dir = wi;
             r.m_fMin = 0.0f;    // no need for bias anymore since there is no geometry
 
-            // apply russian roulette in volume scattering too
+            // apply Prussian Roulette in volume scattering too
             if (bounces > 3 && throughput.GetMaxComponent() < 0.1f) {
                 auto continueProperbility = std::max(0.05f, 1.0f - throughput.GetMaxComponent());
                 if (sort_canonical() < continueProperbility)
