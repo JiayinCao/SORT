@@ -94,7 +94,7 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
             const auto new_beam_transmitancy = new_exponent.Exp();
             const auto new_pdf = new_beam_transmitancy * extinction;
 
-            const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) * 0.33f;
+            const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) / 3.0f;
 
             mi = SORT_MALLOC(MediumInteraction)();
             mi->intersect = ray( t + new_dt );
@@ -108,7 +108,7 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
             return accum_transmittance * ms.scattering * ms.basecolor;
         } else {
             const auto new_pdf = beam_transmitancy;
-            const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) * 0.33f;
+            const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) / 3.0f;
 
             accum_transmittance *= beam_transmitancy / pdf;
 

@@ -55,7 +55,7 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
         return 0.0f;
 
     if (sample_medium)
-        emission = absorption * m_globalMediumSample.emission / pdf;
+        emission = absorption * m_globalMediumSample.emission * tr / pdf;
 
     return sample_medium ? ( tr * scattering / pdf ) : ( tr / pdf );
 }
