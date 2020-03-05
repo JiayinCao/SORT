@@ -114,7 +114,7 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
 
             accum_transmittance *= beam_transmitancy / pdf;
 
-            r = 1.0f - (1.0f - r) / beam_transmitancy[ch];
+            r = 1.0f - (1.0f - r) / pdf;
         }
 
         t += dt;
