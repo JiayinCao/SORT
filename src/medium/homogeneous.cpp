@@ -38,9 +38,6 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
         mi = SORT_MALLOC(MediumInteraction)();
         mi->intersect = ray(d);
         mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(m_globalMediumSample.anisotropy);
-
-        // add emission
-        emission = absorption * m_globalMediumSample.emission;
     }
 
     const auto e = extinction * (-fmin( d , FLT_MAX ));
@@ -56,6 +53,9 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
     // This should rarely happen, though.
     if ( UNLIKELY(pdf == 0.0f) )
         return 0.0f;
+
+    if (sample_medium)
+        emission = absorption * m_globalMediumSample.emission / pdf;
 
     return sample_medium ? ( tr * scattering / pdf ) : ( tr / pdf );
 }

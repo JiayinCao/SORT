@@ -96,18 +96,16 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
 
             const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) * 0.33f;
 
-            const auto scattering = ms.scattering * ms.basecolor;
-
             mi = SORT_MALLOC(MediumInteraction)();
             mi->intersect = ray( t + new_dt );
             mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(ms.anisotropy);
 
-            accum_transmittance *= new_beam_transmitancy;
+            accum_transmittance *= new_beam_transmitancy / pdf;
 
             // add emission
             emission = ms.emission * ms.basecolor * ms.absorption * accum_transmittance;
 
-            return accum_transmittance * scattering / pdf;
+            return accum_transmittance * ms.scattering * ms.basecolor;
         } else {
             const auto new_pdf = beam_transmitancy;
             const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) * 0.33f;
