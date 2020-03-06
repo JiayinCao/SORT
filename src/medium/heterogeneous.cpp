@@ -54,6 +54,9 @@ Spectrum HeterogenousMedium::Tr( const Ray& ray , const float max_t ) const{
 Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi, Spectrum& emission) const{
     // Distance Sample, Jan Novak
     // https://cs.dartmouth.edu/~wjarosz/publications/novak18monte-slides-3-distance-sampling.pdf
+    //
+    // The algorithm below is not fully mathematically correct when base color has different values in different channels.
+    // Since it works reasonable well, I'll leave it this way for now.
 
     // get the step size and count
     auto        step_size = m_material->GetVolumeStep();
@@ -102,8 +105,8 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
 
             accum_transmittance *= new_beam_transmitancy / pdf;
 
-            // add emission
-            emission = ms.emission * ms.basecolor * ms.absorption * accum_transmittance;
+            // This model is what is used in PBRT and different from 'Production Volume Rendering' by Disney.
+            emission = ms.emission * ms.basecolor * accum_transmittance;
 
             return accum_transmittance * ms.scattering * ms.basecolor;
         } else {
