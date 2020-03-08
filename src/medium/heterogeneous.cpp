@@ -21,7 +21,7 @@
 #include "material/material.h"
 #include "phasefunction.h"
 
-Spectrum HeterogenousMedium::Tr( const Ray& ray , const float max_t ) const{
+Spectrum HeterogenousMedium::Tr(const Ray& ray, const float max_t) const {
     // get the step size and count
     auto        step_size = m_material->GetVolumeStep();
     const auto  step_cnt = m_material->GetVolumeStepCnt();
@@ -51,24 +51,25 @@ Spectrum HeterogenousMedium::Tr( const Ray& ray , const float max_t ) const{
     return exponent.Exp();
 }
 
-Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , MediumInteraction*& mi, Spectrum& emission) const{
+Spectrum HeterogenousMedium::Sample(const Ray& ray, const float max_t, MediumInteraction*& mi, Spectrum& emission) const {
     // Distance Sample, Jan Novak
     // https://cs.dartmouth.edu/~wjarosz/publications/novak18monte-slides-3-distance-sampling.pdf
-    //
-    // The algorithm below is not fully mathematically correct when base color has different values in different channels.
-    // Since it works reasonable well, I'll leave it this way for now.
 
     // get the step size and count
     auto        step_size = m_material->GetVolumeStep();
-    const auto  step_cnt  = m_material->GetVolumeStepCnt();
-    
+    const auto  step_cnt = m_material->GetVolumeStepCnt();
+
     // always start from 0.0 regardless the min_t value setup in ray
     auto t = 0.0f;
 
     // a random value
     auto r = sort_canonical();
 
+    // accumulative transmittance
     auto accum_transmittance = Spectrum(1.0f);
+
+    // maybe a better sampling algorithm for channel picking later
+    const auto ch = clamp((int)(sort_canonical() * RGBSPECTRUM_SAMPLE), 0, RGBSPECTRUM_SAMPLE - 1);
 
     // ray marching
     for (auto i = 0u; i < step_cnt; ++i) {
@@ -86,36 +87,28 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
         const auto exponent = -dt * extinction;
         const auto beam_transmitancy = exponent.Exp();
 
-        // maybe a better sampling algorithm for channel picking later
-        const auto ch = clamp((int)(sort_canonical() * RGBSPECTRUM_SAMPLE), 0, RGBSPECTRUM_SAMPLE - 1);
-
         if (1.0f - r >= beam_transmitancy[ch]) {
             // sample a medium and scatter the ray
             const auto new_dt = -std::log(1.0f - r) / extinction[ch];
 
+            mi = SORT_MALLOC(MediumInteraction)();
+            mi->intersect = ray(t + new_dt);
+            mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(ms.anisotropy);
+            
             const auto new_exponent = -new_dt * extinction;
             const auto new_beam_transmitancy = new_exponent.Exp();
-            const auto new_pdf = new_beam_transmitancy * extinction;
-
+            accum_transmittance *= new_beam_transmitancy;
+            const auto new_pdf = accum_transmittance * extinction;
             const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) / 3.0f;
-
-            mi = SORT_MALLOC(MediumInteraction)();
-            mi->intersect = ray( t + new_dt );
-            mi->phaseFunction = SORT_MALLOC(HenyeyGreenstein)(ms.anisotropy);
-
-            accum_transmittance *= new_beam_transmitancy / pdf;
+            accum_transmittance /= pdf;
 
             // This model is what is used in PBRT and different from 'Production Volume Rendering' by Disney.
-            emission = ms.emission * ms.basecolor * accum_transmittance;
+            emission = ms.emission * ms.basecolor * ms.absorption * accum_transmittance;
 
             return accum_transmittance * ms.scattering * ms.basecolor;
         } else {
-            const auto new_pdf = beam_transmitancy;
-            const auto pdf = (new_pdf[0] + new_pdf[1] + new_pdf[2]) / 3.0f;
-
-            accum_transmittance *= beam_transmitancy / pdf;
-
-            r = 1.0f - (1.0f - r) / pdf;
+            accum_transmittance *= beam_transmitancy;
+            r = 1.0f - (1.0f - r) / beam_transmitancy[ch];
         }
 
         t += dt;
@@ -125,5 +118,6 @@ Spectrum HeterogenousMedium::Sample( const Ray& ray , const float max_t , Medium
     }
 
     // sampling the surface behind the volume instead of the volume itself.
-    return accum_transmittance;
+    const auto pdf = (accum_transmittance[0] + accum_transmittance[1] + accum_transmittance[2]) / 3.0f;
+    return accum_transmittance / pdf;
 }

@@ -56,7 +56,7 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
 
     // This model is what is used in PBRT and different from 'Production Volume Rendering' by Disney.
     if (sample_medium)
-        emission = m_globalMediumSample.basecolor * m_globalMediumSample.emission * tr / pdf;
+        emission = m_globalMediumSample.basecolor * m_globalMediumSample.emission * m_globalMediumSample.absorption * tr / pdf;
 
     return sample_medium ? ( tr * scattering / pdf ) : ( tr / pdf );
 }
