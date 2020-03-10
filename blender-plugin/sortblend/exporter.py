@@ -19,6 +19,7 @@ import mathutils
 import platform
 import tempfile
 import struct
+import numpy as np
 from time import time
 from math import degrees
 from .log import log, logD
@@ -223,12 +224,12 @@ def export_scene(depsgraph, fs):
     fs.serialize(fov_angle)
 
     all_lights = [ ob for ob in depsgraph_objects(depsgraph) if ob.type == 'LIGHT' ]
-    all_meshes = [ ob for ob in depsgraph_objects(depsgraph) if ob.type == 'MESH' ]
+    all_objs = [ ob for ob in depsgraph_objects(depsgraph) if ob.type == 'MESH' ]
 
     total_vert_cnt = 0
     total_prim_cnt = 0
     # export meshes
-    for obj in all_meshes:
+    for obj in all_objs:
         fs.serialize(SID('VisualEntity'))
         fs.serialize( matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
         fs.serialize( 1 )   # only one mesh for each mesh entity
@@ -246,15 +247,11 @@ def export_scene(depsgraph, fs):
         else:
             stat = export_mesh(obj.data, fs)
 
-        # check if there is smoke modifier
-        # disable for now since it is not functional yet
-        # export_smoke(obj, fs)
-
         total_vert_cnt += stat[0]
         total_prim_cnt += stat[1]
 
     # output hair/fur exporting
-    for obj in all_meshes:
+    for obj in all_objs:
         # output hair/fur information
         if len( obj.particle_systems ) > 0:
             fs.serialize(SID('VisualEntity'))
@@ -318,7 +315,12 @@ def export_scene(depsgraph, fs):
         fs.serialize(bpy.path.abspath( hdr_sky_image.filepath ))
 
     # to indicate the scene stream comes to an end
-    fs.serialize(SID('end of list'))
+    fs.serialize(SID('End of Entities'))
+
+    # output volume data
+    for vol in all_objs:
+        export_smoke(obj, fs)
+    fs.serialize(SID('End of Volumes'))
 
 # avoid having space in material name
 def name_compat(name):
@@ -492,18 +494,32 @@ def export_mesh(mesh, fs):
 def export_smoke(obj, fs):
     smoke_modifier = get_smoke_modifier(obj)
     if not smoke_modifier:
-        fs.serialize(0)
         return
     
     # making sure there is density data
     domain = smoke_modifier.domain_settings
-    
-    if len(domain.color_grid) == 0:
-        fs.serialize(0)
+    if len(domain.density_grid) == 0:
         return
 
-    fs.serialize(1)
-    print( 'smoke data for ' + obj.name )
+    # this is only because it is not fully functional yet.
+    return
+    
+    # serialize the name of the object
+    fs.serialize(SID(obj.name))
+
+    # dimension of the volume data
+    x, y, z = domain.domain_resolution
+    fs.serialize(x)
+    fs.serialize(y)
+    fs.serialize(z)
+
+    # the color itself
+    color_grid = np.fromiter(domain.color_grid, dtype=np.float32)
+    fs.serialize(color_grid)
+
+    # the density itself
+    density_grid = np.fromiter(domain.density_grid, dtype=np.float32)
+    fs.serialize(density_grid)
 
 # export hair information
 def export_hair(ps, obj, scene, fs):

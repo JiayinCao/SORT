@@ -2716,3 +2716,34 @@ class SORTNodeHeterogeneous(SORTShadingNode):
         fs.serialize( self.inputs['Absorption'].export_osl_value() )
         fs.serialize( self.inputs['Scattering'].export_osl_value() )
         fs.serialize( self.inputs['Anisotropy'].export_osl_value() )
+
+#------------------------------------------------------------------------------------#
+#                                 Volume Input Node                                  #
+#------------------------------------------------------------------------------------#
+@SORTShaderNodeTree.register_node('Volume Input')
+class SORTNodeVolumeColor(SORTShadingNode):
+    bl_label = 'Volume Color'
+    bl_idname = 'SORTNodeVolumeColor'
+    osl_shader = '''
+        shader VolumeDensity( output color Result = 0.0 ){
+            getattribute( "to_be_done" , Result );
+        }
+    '''
+    def init(self, context):
+        self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 0 )
+
+@SORTShaderNodeTree.register_node('Volume Input')
+class SORTNodeVolumeDensity(SORTShadingNode):
+    bl_label = 'Volume Density'
+    bl_idname = 'SORTNodeVolumeDensity'
+    osl_shader = '''
+        shader VolumeDensity( output float Result = 0.0 ){
+            getattribute( "to_be_done_density" , Result );
+        }
+    '''
+    def init(self, context):
+        self.outputs.new( 'SORTNodeSocketLargeFloat' , 'Result' )
+    def serialize_prop(self, fs):
+        fs.serialize( 0 )

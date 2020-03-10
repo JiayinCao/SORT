@@ -50,7 +50,7 @@ bool Scene::LoadScene( IStreamBase& stream ){
     while( true ){
         StringID class_id;
         stream >> class_id;
-        if( SID("end of list") == class_id )
+        if( SID("End of Entities") == class_id )
             break;
 
         auto entity = MakeUniqueInstance<Entity>( class_id );
@@ -58,6 +58,16 @@ bool Scene::LoadScene( IStreamBase& stream ){
 
         entity->Serialize(stream);
         m_entities.push_back(std::move(entity));
+    }
+
+    while (true) {
+        StringID volume_id;
+        stream >> volume_id;
+        if (SID("End of Volumes") == volume_id)
+            break;
+
+        // process volume data here, maybe add a volume data manager later.
+
     }
 
     // generate triangle buffer after parsing from stream
