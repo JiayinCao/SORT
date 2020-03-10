@@ -25,25 +25,20 @@ from .log import log, logD
 from .strid import SID
 from .stream import stream
 
-# List all objects in the scene
-def renderable_objects(scene):
-    def is_renderable(scene, ob):
-        # whether the object is hidden
-        def is_visible_layer(scene, ob):
-            for i in range(len(scene.view_layers)):
-                return True
-                if scene.view_layers[i] == True and ob.layers[i] == True:
-                    return True
-            return False
-        return (is_visible_layer(scene, ob) and not ob.hide_render)
-    return [ob for ob in scene.objects if is_renderable(scene, ob)]
+BLENDER_VERSION = f'{bpy.app.version[0]}.{bpy.app.version[1]}'
+
+def depsgraph_objects(depsgraph: bpy.types.Depsgraph):
+    """ Iterates evaluated objects in depsgraph with ITERATED_OBJECT_TYPES """
+    ITERATED_OBJECT_TYPES = ('MESH', 'LIGHT')
+    for obj in depsgraph.objects:
+        if obj.type in ITERATED_OBJECT_TYPES:
+            yield obj
 
 # Get the list of material for the whole scene, this function will only list materials that are currently
 # attached to an object in the scene. Non-used materials will not be needed to be exported to SORT.
-def list_materials( scene ):
+def list_materials( depsgraph ):
     exported_materials = []
-    all_nodes = renderable_objects(scene)
-    for ob in all_nodes:
+    for ob in depsgraph_objects(depsgraph):
         if ob.type == 'MESH':
             for material in ob.data.materials[:]:
                 # make sure it is a SORT material
@@ -145,7 +140,7 @@ def export_blender(depsgraph, force_debug=False):
     # export materials
     current_time = time()
     log("Exporting materials.")
-    collect_shader_resources(scene, fs)     # this is the place for material to signal heavy resources, like textures, measured BRDF, etc.
+    collect_shader_resources(depsgraph, scene, fs)     # this is the place for material to signal heavy resources, like textures, measured BRDF, etc.
     export_materials(scene, fs)             # this is the place for serializing OSL shader source code with proper default values.
     log("Exported materials %.2f(s)" % (time() - current_time))
 
@@ -172,6 +167,11 @@ def create_path(scene, force_debug):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
     return output_dir
+
+def get_smoke_modifier(obj: bpy.types.Object):
+    if BLENDER_VERSION >= '2.82':
+        return next((modifier for modifier in obj.modifiers if modifier.type == 'FLUID' and modifier.fluid_type == 'DOMAIN'), None)
+    return next((modifier for modifier in obj.modifiers if modifier.type == 'SMOKE' and modifier.smoke_type == 'DOMAIN'), None)
 
 # export scene
 def export_scene(depsgraph, fs):
@@ -222,9 +222,8 @@ def export_scene(depsgraph, fs):
     fs.serialize((aspect_ratio_x,aspect_ratio_y))
     fs.serialize(fov_angle)
 
-    all_renderable = renderable_objects(scene)
-    all_lights = [ ob for ob in all_renderable if ob.type == 'LIGHT' ]
-    all_meshes = [ ob for ob in all_renderable if ob.type == 'MESH' ]
+    all_lights = [ ob for ob in depsgraph_objects(depsgraph) if ob.type == 'LIGHT' ]
+    all_meshes = [ ob for ob in depsgraph_objects(depsgraph) if ob.type == 'MESH' ]
 
     total_vert_cnt = 0
     total_prim_cnt = 0
@@ -246,6 +245,10 @@ def export_scene(depsgraph, fs):
                 evaluted_obj.to_mesh_clear()
         else:
             stat = export_mesh(obj.data, fs)
+
+        # check if there is smoke modifier
+        # disable for now since it is not functional yet
+        # export_smoke(obj, fs)
 
         total_vert_cnt += stat[0]
         total_prim_cnt += stat[1]
@@ -485,6 +488,23 @@ def export_mesh(mesh, fs):
 
     return (vert_cnt, primitive_cnt)
 
+# export smoke information
+def export_smoke(obj, fs):
+    smoke_modifier = get_smoke_modifier(obj)
+    if not smoke_modifier:
+        fs.serialize(0)
+        return
+    
+    # making sure there is density data
+    domain = smoke_modifier.domain_settings
+    
+    if len(domain.color_grid) == 0:
+        fs.serialize(0)
+        return
+
+    fs.serialize(1)
+    print( 'smoke data for ' + obj.name )
+
 # export hair information
 def export_hair(ps, obj, scene, fs):
     LENFMT = struct.Struct('=i')
@@ -565,7 +585,7 @@ def get_from_socket(socket, visited):
 
 # This function will iterate through all visited nodes in the scene and populate everything in a hash table
 # Apart from collecting shaders, it will also collect all heavy data, like measured BRDF data, texture.
-def collect_shader_resources(scene, fs):
+def collect_shader_resources(depsgraph, scene, fs):
     # don't output any osl_shaders if using default materials
     if scene.sort_data.allUseDefaultMaterial is True:
         fs.serialize( 0 )
@@ -576,7 +596,7 @@ def collect_shader_resources(scene, fs):
     resources = []
 
     dummy = set()
-    for material in list_materials(scene):
+    for material in list_materials(depsgraph):
         # get output nodes
         output_node = find_output_node(material)
         if output_node is None:

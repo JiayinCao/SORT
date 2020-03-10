@@ -47,7 +47,17 @@ def get_sort_compatible_panels():
             'PARTICLE_PT_render',
             'PARTICLE_PT_rotation',
             'PARTICLE_PT_velocity',
-            'PARTICLE_PT_vertexgroups'
+            'PARTICLE_PT_vertexgroups',
+            'PHYSICS_PT_smoke',
+            'PHYSICS_PT_smoke_settings',
+            'PHYSICS_PT_smoke_settings_initial_velocity',
+            'PHYSICS_PT_smoke_settings_particle_size',
+            'PHYSICS_PT_smoke_behavior',
+            'PHYSICS_PT_smoke_behavior_dissolve',
+            'PHYSICS_PT_smoke_fire',
+            'PHYSICS_PT_smoke_cache',
+            'PHYSICS_PT_smoke_field_weights',
+            'PHYSICS_PT_add',
         }
         return hasattr(panel, 'COMPAT_ENGINES') and 'BLENDER_RENDER' in panel.COMPAT_ENGINES and panel.__name__ in compatible_panels
     return [panel for panel in bpy.types.Panel.__subclasses__() if is_panel_compatible(panel)]
