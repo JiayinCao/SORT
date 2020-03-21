@@ -88,7 +88,7 @@ public:
     //!
     //! @return         Material attached to the primitives.
     SORT_FORCEINLINE const MaterialBase* GetMaterial() const{
-        return m_mat == nullptr ? MatManager::GetSingleton().GetDefaultMat() : m_mat;
+        return IS_PTR_INVALID(m_mat) ? MatManager::GetSingleton().GetDefaultMat() : m_mat;
     }
 
     //! @brief  Get the light source of the primitive if there is one.

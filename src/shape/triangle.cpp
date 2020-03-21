@@ -88,7 +88,7 @@ bool Triangle::GetIntersect( const Ray& r , SurfaceInteraction* intersect ) cons
     const auto t = ( e0 * p0.y + e1 * p1.y + e2 * p2.y ) * invDet;
     if( t <= r.m_fMin || t >= r.m_fMax )
         return false;
-    if( intersect == nullptr )
+    if(IS_PTR_INVALID(intersect))
         return true;
     if( t > intersect->t || t <= 0.0f )
         return false;

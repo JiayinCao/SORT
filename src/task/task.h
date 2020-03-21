@@ -197,7 +197,7 @@ SORT_FORCEINLINE void    EXECUTING_TASKS(){
         auto task = Scheduler::GetSingleton().PickTask();
 
         // If there is no task to be picked, break out of the loop.
-        if( task == nullptr )
+        if(IS_PTR_INVALID(task))
             return;
 
         // Execute the task.

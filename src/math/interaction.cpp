@@ -20,7 +20,7 @@
 #include "core/primitive.h"
 
 Spectrum SurfaceInteraction::Le( const Vector& wo , float* directPdfA , float* emissionPdf ) const{
-    if( nullptr == primitive )
+    if(IS_PTR_INVALID(primitive))
         return 0.0f;
 
     const auto light = primitive->GetLight();

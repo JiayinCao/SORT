@@ -69,15 +69,15 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
     bool PushLine( const Primitive* primitive ){
 #ifdef SIMD_SSE_IMPLEMENTATION
         const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
-        if( m_ori_pri[0] == nullptr ){
+        if(IS_PTR_INVALID(m_ori_pri[0])){
             m_ori_pri[0] = primitive;
             m_ori_line[0] = line;
             return false;
-        }else if( m_ori_pri[1] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[1])){
             m_ori_pri[1] = primitive;
             m_ori_line[1] = line;
             return false;
-        }else if( m_ori_pri[2] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[2])){
             m_ori_pri[2] = primitive;
             m_ori_line[2] = line;
             return false;
@@ -89,31 +89,31 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
 
 #ifdef SIMD_AVX_IMPLEMENTATION
         const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
-        if( m_ori_pri[0] == nullptr ){
+        if(IS_PTR_INVALID(m_ori_pri[0])){
             m_ori_pri[0] = primitive;
             m_ori_line[0] = line;
             return false;
-        }else if( m_ori_pri[1] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[1])){
             m_ori_pri[1] = primitive;
             m_ori_line[1] = line;
             return false;
-        }else if( m_ori_pri[2] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[2])){
             m_ori_pri[2] = primitive;
             m_ori_line[2] = line;
             return false;
-        }else if( m_ori_pri[3] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[3])){
             m_ori_pri[3] = primitive;
             m_ori_line[3] = line;
             return false;
-        }else if( m_ori_pri[4] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[4])){
             m_ori_pri[4] = primitive;
             m_ori_line[4] = line;
             return false;
-        }else if( m_ori_pri[5] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[5])){
             m_ori_pri[5] = primitive;
             m_ori_line[5] = line;
             return false;
-        }else if( m_ori_pri[6] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[6])){
             m_ori_pri[6] = primitive;
             m_ori_line[6] = line;
             return false;
@@ -138,7 +138,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
         float   mat_10[SIMD_CHANNEL] , mat_11[SIMD_CHANNEL] , mat_12[SIMD_CHANNEL] , mat_13[SIMD_CHANNEL];
         float   mat_20[SIMD_CHANNEL] , mat_21[SIMD_CHANNEL] , mat_22[SIMD_CHANNEL] , mat_23[SIMD_CHANNEL];
         for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
-			if( nullptr == m_ori_pri[i] ){
+			if(IS_PTR_INVALID(m_ori_pri[i])){
 				mask[i] = false;
 				continue;
 			}
@@ -295,7 +295,7 @@ SORT_FORCEINLINE bool intersectLine_Inner( const Ray& ray , const Simd_Ray_Data&
 //! @return             Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd, const Simd_Line& line_simd , SurfaceInteraction* ret ){
 #ifndef SIMD_LINE_REFERENCE_IMPLEMENTATION
-    sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
+    sAssert(IS_PTR_VALID(ret), SPATIAL_ACCELERATOR );
 
     simd_data  mask, t_simd , inter_x , inter_y , inter_z ;
     const auto intersected = intersectLine_Inner( ray , ray_simd, line_simd , mask , t_simd , inter_x , inter_y , inter_z );
@@ -340,7 +340,7 @@ SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Simd_Ray_Data& 
     return true;
 #else
     bool ret_val = false;
-    for( auto i = 0u ; i < SIMD_CHANNEL && nullptr != line_simd.m_ori_pri[i] ; ++i )
+    for( auto i = 0u ; i < SIMD_CHANNEL && IS_PTR_VALID(line_simd.m_ori_pri[i]) ; ++i )
         ret_val |= line_simd.m_ori_pri[i]->GetIntersect( ray , ret );
     return ret_val;
 #endif
@@ -358,7 +358,7 @@ SORT_FORCEINLINE bool intersectLineFast_SIMD( const Ray& ray , const Simd_Ray_Da
     return intersectLine_Inner( ray , ray_simd , line_simd , dummy_mask , dummy_t , dummy_inter_x , dummy_inter_y , dummy_inter_z );
 #else
     bool ret = false;
-    for( auto i = 0u ; i < SIMD_CHANNEL && ( nullptr != line_simd.m_ori_pri[i] ) && !ret ; ++i )
+    for( auto i = 0u ; i < SIMD_CHANNEL && IS_PTR_VALID(line_simd.m_ori_pri[i]) && !ret ; ++i )
         ret |= line_simd.m_ori_pri[i]->GetIntersect( ray , nullptr );
     return ret;
 #endif

@@ -58,7 +58,7 @@ public:
         unsigned int size_to_allocate = (unsigned int)(sizeof(T) * cnt);
         sAssert( size_to_allocate <= MEM_BLOCK_SIZE , MEMORY );
         MemoryBlock* currentBlock = m_availableBlocks.size() ? m_availableBlocks.front().get() : nullptr;
-        if (nullptr == currentBlock || (currentBlock->m_start + size_to_allocate > MEM_BLOCK_SIZE)) {
+        if (IS_PTR_INVALID(currentBlock) || (currentBlock->m_start + size_to_allocate > MEM_BLOCK_SIZE)) {
             if (currentBlock) {
                 auto block = std::move(m_availableBlocks.front());
                 m_availableBlocks.pop_front();

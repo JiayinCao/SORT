@@ -33,8 +33,9 @@ Render_Task::Render_Task(const Vector2i& ori , const Vector2i& size , const Scen
 }
 
 void Render_Task::Execute(){
-    if(g_integrator == nullptr )
+    if(IS_PTR_INVALID(g_integrator))
         return;
+
     auto camera = m_scene.GetCamera();
 
     // request samples

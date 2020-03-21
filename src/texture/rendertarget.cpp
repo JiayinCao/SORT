@@ -21,7 +21,7 @@
 // set the color
 void RenderTarget::SetColor( int x , int y , const Spectrum& color ){
     // check if there is memory
-    sAssertMsg( m_pData != nullptr , IMAGE , "There is no data in render target , can't set color" );
+    sAssertMsg(IS_PTR_VALID(m_pData), IMAGE , "There is no data in render target , can't set color" );
 
     // use filter first
     _texCoordFilter( x , y );
@@ -34,7 +34,7 @@ void RenderTarget::SetColor( int x , int y , const Spectrum& color ){
 }
 
 Spectrum RenderTarget::GetColor( int x , int y ) const{
-    sAssertMsg( nullptr != m_pData , IMAGE , "No memory in the render target, can't get color." );
+    sAssertMsg(IS_PTR_VALID(m_pData) , IMAGE , "No memory in the render target, can't get color." );
 
     // filter the x y coordinate
     _texCoordFilter( x , y );

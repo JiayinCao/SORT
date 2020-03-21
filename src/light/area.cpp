@@ -20,8 +20,8 @@
 #include "core/samplemethod.h"
 
 Spectrum AreaLight::sample_l(const Point& ip, const LightSample* ls , Vector& dirToLight , float* distance , float* pdfW , float* emissionPdf , float* cosAtLight , Visibility& visibility ) const{
-    sAssert( ls != nullptr , LIGHT );
-    sAssert( m_shape != nullptr , LIGHT );
+    sAssert(IS_PTR_VALID(ls), LIGHT );
+    sAssert(IS_PTR_VALID(m_shape), LIGHT );
 
     // sample a point from light
     Vector normal;
@@ -53,7 +53,7 @@ Spectrum AreaLight::sample_l(const Point& ip, const LightSample* ls , Vector& di
 }
 
 Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , float* pdfA , float* cosAtLight ) const{
-    sAssert( m_shape != nullptr , LIGHT );
+    sAssert(IS_PTR_VALID(m_shape), LIGHT );
     Vector n;
     m_shape->Sample_l( ls , r , n , pdfW );
 
@@ -70,12 +70,12 @@ Spectrum AreaLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , flo
 }
 
 float AreaLight::Pdf( const Point& p , const Vector& wi ) const{
-    sAssert(m_shape != nullptr, LIGHT);
+    sAssert(IS_PTR_VALID(m_shape), LIGHT);
     return m_shape->Pdf( p , wi );
 }
 
 Spectrum AreaLight::Power() const{
-    sAssert( m_shape != nullptr, LIGHT );
+    sAssert(IS_PTR_VALID(m_shape), LIGHT );
     return m_shape->SurfaceArea() * intensity.GetIntensity() * TWO_PI;
 }
 
@@ -94,13 +94,13 @@ Spectrum AreaLight::Le( const SurfaceInteraction& intersect , const Vector& wo ,
 }
 
 bool AreaLight::Le( const Ray& ray , SurfaceInteraction* intersect , Spectrum& radiance ) const{
-    sAssert( m_shape != nullptr , LIGHT );
+    sAssert(IS_PTR_VALID(m_shape), LIGHT );
 
     // get intersect
     const auto result = m_shape->GetIntersect( ray , intersect );
 
     // transform the intersection result back to world coordinate
-    if( result && intersect != nullptr )
+    if( result && IS_PTR_VALID(intersect))
         radiance = Le( *intersect , -ray.m_Dir , 0 , 0 );
 
     return result;

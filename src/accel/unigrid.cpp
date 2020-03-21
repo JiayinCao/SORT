@@ -179,7 +179,7 @@ bool UniGrid::GetIntersect( const Ray& r , SurfaceInteraction& intersect ) const
         cur_t = next[nextAxis];
         next[nextAxis] += delta[nextAxis];
     }
-    return intersect.t < maxt && intersect.primitive != nullptr ;
+    return intersect.t < maxt && IS_PTR_VALID(intersect.primitive);
 }
 
 #ifndef ENABLE_TRANSPARENT_SHADOW
@@ -265,8 +265,8 @@ bool UniGrid::traverse( const Ray& r , SurfaceInteraction* intersect , unsigned 
         const auto is_shadow_ray_blocked = isShadowRay( intersect ) && inter;
         if( is_shadow_ray_blocked ){
 #ifdef ENABLE_TRANSPARENT_SHADOW
-            sAssert( nullptr != intersect->primitive , SPATIAL_ACCELERATOR );
-            sAssert( nullptr != intersect->primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+            sAssert(IS_PTR_VALID(intersect->primitive), SPATIAL_ACCELERATOR );
+            sAssert(IS_PTR_VALID(intersect->primitive->GetMaterial()), SPATIAL_ACCELERATOR );
             if( !intersect->primitive->GetMaterial()->HasTransparency() ){
                 // setting primitive to be nullptr and return true at the same time is a special 'code' 
                 // that the above level logic will take advantage of.

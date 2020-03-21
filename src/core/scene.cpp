@@ -122,7 +122,7 @@ void Scene::RestoreMediumStack( const Point& p , MediumStack& ms ) const{
 
 void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const StringID matID ) const{
     // no brute force support in BSSRDF
-    if( g_accelerator != nullptr )
+    if(IS_PTR_VALID(g_accelerator))
         g_accelerator->GetIntersect( r , intersect , matID );
 }
 
@@ -171,7 +171,7 @@ void Scene::_genLightDistribution(){
 
 const Light* Scene::SampleLight( float u , float* pdf ) const{
     sAssert( u >= 0.0f && u <= 1.0f , SAMPLING );
-    sAssertMsg(m_lightsDis != nullptr , SAMPLING , "No light in the scene." );
+    sAssertMsg(IS_PTR_VALID(m_lightsDis), SAMPLING , "No light in the scene." );
 
     float _pdf;
     int id = m_lightsDis->SampleDiscrete( u , &_pdf );
@@ -183,7 +183,7 @@ const Light* Scene::SampleLight( float u , float* pdf ) const{
 }
 
 float Scene::LightProperbility( unsigned i ) const{
-    sAssert(m_lightsDis != nullptr , LIGHT );
+    sAssert(IS_PTR_VALID(m_lightsDis), LIGHT );
     return m_lightsDis->GetProperty( i );
 }
 

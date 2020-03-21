@@ -186,7 +186,7 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , SurfaceIn
         return true;
 
     // Iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
-    if( node->child[0] == nullptr ){
+    if(IS_PTR_INVALID(node->child[0])){
         for( auto primitive : node->primitives ){
             SORT_STATS(++sIntersectionTest);
             found |= primitive->GetIntersect( ray , intersect );
@@ -195,8 +195,8 @@ bool OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , SurfaceIn
             const auto is_shadow_ray_blocked = isShadowRay( intersect ) && found;
             if( is_shadow_ray_blocked ){
 #ifdef ENABLE_TRANSPARENT_SHADOW
-                sAssert( nullptr != intersect->primitive , SPATIAL_ACCELERATOR );
-                sAssert( nullptr != intersect->primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+                sAssert(IS_PTR_VALID(intersect->primitive), SPATIAL_ACCELERATOR );
+                sAssert(IS_PTR_VALID(intersect->primitive->GetMaterial()), SPATIAL_ACCELERATOR );
                 if( !intersect->primitive->GetMaterial()->HasTransparency() ){
                     // setting primitive to be nullptr and return true at the same time is a special 'code' 
                     // that the above level logic will take advantage of.
@@ -279,7 +279,7 @@ void OcTree::traverseOcTree( const OcTreeNode* node , const Ray& ray , BSSRDFInt
         return;
 
     // iterate if there is primitives in the node. Since it is not allowed to store primitives in non-leaf node, there is no need to proceed.
-    if( node->child[0] == nullptr ){
+    if(IS_PTR_INVALID(node->child[0])){
         SurfaceInteraction intersection;
         for( auto primitive : node->primitives ){
             if( matID != primitive->GetMaterial()->GetUniqueID() )

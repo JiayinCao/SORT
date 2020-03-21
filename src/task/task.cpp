@@ -35,7 +35,7 @@ Scheduler::Task_Comp Scheduler::task_comp = []( const Task* t0 , const Task* t1 
 };
 
 Task* Scheduler::Schedule( std::unique_ptr<Task> task ){
-    if( task == nullptr )
+    if(IS_PTR_INVALID(task))
         return nullptr;
 
     std::lock_guard<std::mutex> lock(m_mutex);

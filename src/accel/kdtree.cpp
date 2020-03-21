@@ -276,8 +276,8 @@ bool KDTree::traverse( const Kd_Node* node , const Ray& ray , SurfaceInteraction
             inter |= primitive->GetIntersect( ray , intersect );
             if( isShadowRay( intersect ) && inter ){
 #ifdef ENABLE_TRANSPARENT_SHADOW
-                sAssert( nullptr != intersect->primitive , SPATIAL_ACCELERATOR );
-                sAssert( nullptr != intersect->primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+                sAssert(IS_PTR_VALID( intersect->primitive ), SPATIAL_ACCELERATOR );
+                sAssert(IS_PTR_VALID( intersect->primitive->GetMaterial() ), SPATIAL_ACCELERATOR );
                 if( !intersect->primitive->GetMaterial()->HasTransparency() ){
                     // setting primitive to be nullptr and return true at the same time is a special 'code' 
                     // that the above level logic will take advantage of.

@@ -39,7 +39,9 @@ public:
     float GetAlpha( int x , int y ) const override;
 
     // whether the image is valid
-    bool IsValid() override { return (bool)m_pMemory; }
+    bool IsValid() override { 
+        return IS_PTR_VALID(m_pMemory); 
+    }
 
     // get average color
     Spectrum GetAverage() const;

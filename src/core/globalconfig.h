@@ -227,7 +227,7 @@ public:
 
         stream >> integratorType;
         m_integrator = MakeUniqueInstance<Integrator>(integratorType);
-        if( m_integrator != nullptr )
+        if(IS_PTR_VALID(m_integrator))
             m_integrator->Serialize( stream );
 
         if( m_blenderMode )

@@ -67,7 +67,7 @@ void SeparableBssrdf::Sample_S( const Scene& scene , const Vector& wo , const Po
     scene.GetIntersect( ray , inter , intersection->primitive->GetMaterial()->GetUniqueID() );
 
     for( auto i = 0u ; i < inter.cnt ; ++i ){
-        sAssert( inter.intersections[i] != nullptr , MATERIAL );
+        sAssert(IS_PTR_VALID(inter.intersections[i]), MATERIAL );
 
         auto pIntersection = inter.intersections[i];
         const auto bssrdf = Sr( distance( po , pIntersection->intersection.intersect ) );

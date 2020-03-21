@@ -55,6 +55,9 @@
 
 #define SORT_STATIC_FORCEINLINE     static SORT_FORCEINLINE
 
+#define IS_PTR_INVALID(p)           (nullptr == p)
+#define IS_PTR_VALID(p)             (nullptr != p)
+
 // This feature replaces SSS with small mean free path with Lambert, it greatly reduces noises in SSS implementation.
 // However, it does introduces more fireflies, which is not acceptable, for which reason it is disabled by default.
 // The firefly is caused by multiple path with more bounces so that it leads to very low pdf because of each bounce.
@@ -64,7 +67,7 @@
 
 // By default, transparent shadow is enabled. Meaning transparent material node will cast transparent shadow.
 // This is not exactly physically based since the introduction of semi-transparent feature is not strictly physically
-// based from the very beginning. Disable transparent shadow means that transparent geometry will also cast shadow
+// based from the very beginning. Disabling transparent shadow means that transparent geometry will also cast shadow
 // even if it is fully transparent. I could have implemented extra optimization to avoid casting shadows for fully
 // transparent geometry at the cost of introducing more complex design. However, in order to keep it simple and
 // maintainable by myself, I would skip it.

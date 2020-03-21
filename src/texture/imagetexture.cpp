@@ -28,7 +28,7 @@
 // get color from image
 Spectrum ImageTexture::GetColor( int x , int y ) const{
     // if there is no image, just crash
-    sAssertMsg( m_pMemory != nullptr && m_pMemory->m_ImgMem != nullptr , IMAGE , "Texture %s not loaded!" , m_Name.c_str() );
+    sAssertMsg(IS_PTR_VALID(m_pMemory) && IS_PTR_VALID(m_pMemory->m_ImgMem) , IMAGE , "Texture %s not loaded!" , m_Name.c_str() );
 
     // filter the texture coordinate
     _texCoordFilter( x , y );
@@ -45,7 +45,7 @@ float ImageTexture::GetAlpha( int x , int y ) const{
     sAssertMsg( m_pMemory != 0 , IMAGE , "Texture %s not loaded!" , m_Name.c_str() );
 
     // in case of acquiring alpha value in a texture without this channel, 1.0 is returned by default.
-    if( nullptr == m_pMemory->m_Alpha )
+    if(IS_PTR_INVALID(m_pMemory->m_Alpha))
         return 1.0f;
 
     // filter the texture coordinate
@@ -137,7 +137,7 @@ Spectrum ImageTexture::GetAverage() const{
 // compute average radiance
 void ImageTexture::_average(){
     // if there is no image, just crash
-    if( m_pMemory == nullptr || m_pMemory->m_ImgMem == nullptr )
+    if(IS_PTR_INVALID(m_pMemory) || IS_PTR_INVALID(m_pMemory->m_ImgMem))
         return;
 
     Spectrum average;

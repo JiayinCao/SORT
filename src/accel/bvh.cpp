@@ -135,9 +135,9 @@ bool Bvh::GetIntersect(const Ray& ray, SurfaceInteraction& intersect) const{
 
     if( traverseNode(m_root.get(), ray, &intersect, fmin) ){
 #ifdef ENABLE_TRANSPARENT_SHADOW
-        return intersect.query_shadow || ( nullptr != intersect.primitive );
+        return intersect.query_shadow || (IS_PTR_VALID(intersect.primitive));
 #else
-        return nullptr != intersect.primitive;
+        return IS_PTR_VALID(intersect.primitive);
 #endif
     }
     return false;
@@ -180,8 +180,8 @@ bool Bvh::traverseNode( const Bvh_Node* node , const Ray& ray , SurfaceInteracti
             const auto is_shadow_ray_blocked = isShadowRay( intersect ) && found;
             if( is_shadow_ray_blocked ){
 #ifdef ENABLE_TRANSPARENT_SHADOW
-                sAssert( nullptr != intersect->primitive , SPATIAL_ACCELERATOR );
-                sAssert( nullptr != intersect->primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+                sAssert(IS_PTR_VALID(intersect->primitive), SPATIAL_ACCELERATOR);
+                sAssert(IS_PTR_VALID(intersect->primitive->GetMaterial()), SPATIAL_ACCELERATOR);
                 if( !intersect->primitive->GetMaterial()->HasTransparency() ){
                     // setting primitive to be nullptr and return true at the same time is a special 'code' 
                     // that the above level logic will take advantage of.

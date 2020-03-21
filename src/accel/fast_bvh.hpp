@@ -284,7 +284,7 @@ Simd_BBox Fbvh::calcBoundingBoxSIMD(const Fast_Bvh_Node_Ptr* children) const {
         max_y[i] = bb.m_Max.y;
         max_z[i] = bb.m_Max.z;
 
-        bb_valid[i] = ( nullptr != children[i].get() );
+        bb_valid[i] = (IS_PTR_VALID(children[i].get()));
     }
 
     node_bbox.m_min_x = simd_set_ps( min_x );
@@ -304,7 +304,7 @@ Simd_BBox Fbvh::calcBoundingBoxSIMD(const Fast_Bvh_Node_Ptr* children) const {
 bool Fbvh::GetIntersect( const Ray& ray , SurfaceInteraction& intersect ) const{
     // std::stack is by no means an option here due to its overhead under the hood.
     static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
-    if (UNLIKELY(nullptr == bvh_stack))
+    if (UNLIKELY(IS_PTR_INVALID(bvh_stack)))
         bvh_stack = std::make_unique<std::pair<Fbvh_Node*, float>[]>(m_depth * FBVH_CHILD_CNT);
 
 #ifdef QBVH_IMPLEMENTATION
@@ -360,8 +360,8 @@ bool Fbvh::GetIntersect( const Ray& ray , SurfaceInteraction& intersect ) const{
                 // might not be very obvious. there could be ways to achieve it in C++ 11. Since it won't boost the performance, I will keep it this way
                 // until I have C++ 17 updated.
                 if( intersect.query_shadow && blocked ){
-                    sAssert( nullptr != intersect.primitive , SPATIAL_ACCELERATOR );
-                    sAssert( nullptr != intersect.primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+                    sAssert(IS_PTR_VALID(intersect.primitive), SPATIAL_ACCELERATOR );
+                    sAssert(IS_PTR_VALID(intersect.primitive->GetMaterial()) , SPATIAL_ACCELERATOR );
                     if( !intersect.primitive->GetMaterial()->HasTransparency() ){
                         SORT_STATS(sIntersectionTest += ( i + 1 ) * 4);
 
@@ -393,8 +393,8 @@ bool Fbvh::GetIntersect( const Ray& ray , SurfaceInteraction& intersect ) const{
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
                     if( intersect.query_shadow && blocked ){
-                        sAssert( nullptr != intersect.primitive , SPATIAL_ACCELERATOR );
-                        sAssert( nullptr != intersect.primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+                        sAssert(IS_PTR_VALID(intersect.primitive), SPATIAL_ACCELERATOR );
+                        sAssert(IS_PTR_VALID(intersect.primitive->GetMaterial()), SPATIAL_ACCELERATOR );
                         if( !intersect.primitive->GetMaterial()->HasTransparency() ){
                             SORT_STATS(sIntersectionTest += i + 1 + ( node->tri_cnt + node->line_cnt ) * 4);
                             intersect.primitive = nullptr;
@@ -464,8 +464,8 @@ bool Fbvh::GetIntersect( const Ray& ray , SurfaceInteraction& intersect ) const{
 
 #ifdef ENABLE_TRANSPARENT_SHADOW
                 if( intersect.query_shadow && blocked ){
-                    sAssert( nullptr != intersect.primitive , SPATIAL_ACCELERATOR );
-                    sAssert( nullptr != intersect.primitive->GetMaterial() , SPATIAL_ACCELERATOR );
+                    sAssert(IS_PTR_VALID(intersect.primitive), SPATIAL_ACCELERATOR );
+                    sAssert(IS_PTR_VALID(intersect.primitive->GetMaterial()), SPATIAL_ACCELERATOR );
                     if( !intersect.primitive->GetMaterial()->HasTransparency() ){
                         SORT_STATS(sIntersectionTest += i - _start + 1);
                         intersect.primitive = nullptr;
@@ -508,7 +508,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
     // std::stack is by no means an option here due to its overhead under the hood.
     using Fbvh_Node_Ptr = Fbvh_Node*;
     static thread_local std::unique_ptr<Fbvh_Node_Ptr[]> bvh_stack = nullptr;
-    if (UNLIKELY(nullptr == bvh_stack))
+    if (UNLIKELY(IS_PTR_INVALID(bvh_stack)))
         bvh_stack = std::make_unique<Fbvh_Node_Ptr[]>(m_depth * FBVH_CHILD_CNT);
 
 #ifdef QBVH_IMPLEMENTATION
@@ -658,7 +658,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
 void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const StringID matID ) const{
     // std::stack is by no means an option here due to its overhead under the hood.
     static thread_local std::unique_ptr<std::pair<Fbvh_Node*, float>[]> bvh_stack = nullptr;
-    if ( UNLIKELY( nullptr == bvh_stack ) )
+    if ( UNLIKELY(IS_PTR_INVALID(bvh_stack) ) )
         bvh_stack = std::make_unique<std::pair<Fbvh_Node*, float>[]>(m_depth * FBVH_CHILD_CNT);
 
 #ifdef QBVH_IMPLEMENTATION

@@ -88,7 +88,7 @@ public:\
     }\
     void Merge( const StatsItemBase* item ) override{\
         auto p = (const NAME*)(item);\
-        sAssertMsg( p != nullptr , GENERAL , "Merging incorrect stats data." );\
+        sAssertMsg(IS_PTR_VALID(p), GENERAL , "Merging incorrect stats data." );\
         data += p->data;\
     }\
     std::unique_ptr<StatsItemBase> MakeItem() const override{\

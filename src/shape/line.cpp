@@ -47,7 +47,7 @@ bool Line::GetIntersect( const Ray& r , SurfaceInteraction* intersect ) const{
     if( t <= r.m_fMin || t >= r.m_fMax )
         return false;
 
-    if( intersect == nullptr )
+    if(IS_PTR_INVALID(intersect))
         return true;
     if( t >= intersect->t )
         return false;

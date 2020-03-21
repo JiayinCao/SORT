@@ -97,7 +97,7 @@ Spectrum SkyLight::sample_l( const LightSample& ls , Ray& r , float* pdfW , floa
 }
 
 Spectrum SkyLight::Power() const{
-    sAssert( m_scene != nullptr , LIGHT );
+    sAssert(IS_PTR_VALID(m_scene), LIGHT );
     const BBox box = m_scene->GetBBox();
     const float radius = (box.m_Max - box.m_Min).Length() * 0.5f;
 

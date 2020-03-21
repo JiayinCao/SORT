@@ -213,7 +213,7 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Surface
     // Uniformly choose a light, this may not be the optimal solution in case of more lights, need more research in this topic later.
     float light_pick_pdf = 0.0f;
     const auto light = scene.SampleLight( sort_canonical() , &light_pick_pdf );
-    if( nullptr == light )
+    if(IS_PTR_INVALID(light))
         return 0.0f;
 
     Spectrum radiance;

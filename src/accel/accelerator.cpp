@@ -33,14 +33,14 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack
     }
 
     // primitive being null is a special coding meaning the ray is blocked by an opaque primitive.
-    if( nullptr == intersection.primitive ){
+    if( IS_PTR_INVALID( intersection.primitive ) ){
         attenuation = 0.0f;
         return true;
     }
 
     // get the material of the intersected primitive
     const MaterialBase* material = intersection.primitive->GetMaterial();
-    sAssert( nullptr != material , SPATIAL_ACCELERATOR );
+    sAssert( IS_PTR_VALID( material ) , SPATIAL_ACCELERATOR );
 
     // evaluate the transparency first in case it is fully opaque.
     attenuation = material->EvaluateTransparency(intersection);
@@ -75,7 +75,7 @@ bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , const bool rev
 
 	// get the material of the intersected primitive
 	const MaterialBase* material = intersection.primitive->GetMaterial();
-	sAssert(nullptr != material, SPATIAL_ACCELERATOR);
+	sAssert( IS_PTR_VALID( material ) , SPATIAL_ACCELERATOR );
 
 #if 0
 	const auto theta_wi = dot(ray.m_Dir, intersection.gnormal);

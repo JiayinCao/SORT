@@ -117,13 +117,13 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             L += inter.Le(-r.m_Dir);
         
         // make sure there is intersected primitive
-        sAssert( nullptr != inter.primitive , INTEGRATOR );
+        sAssert(IS_PTR_VALID(inter.primitive), INTEGRATOR );
 
         // the lack of multiple bounces between different BSSRDF surfaces does introduce a bias.
         replaceSSS |= ( bssrdfBounces > m_maxBouncesInBSSRDFPath - 1 );
 
         const MaterialBase* material = inter.primitive->GetMaterial();
-        sAssert(nullptr != material, INTEGRATOR);
+        sAssert(IS_PTR_VALID(material), INTEGRATOR);
 
         // Parse the material and populate the results into a scatteringEvent.
         SE_Flag seFlag = replaceSSS ? SE_Flag( SE_EVALUATE_ALL | SE_REPLACE_BSSRDF ) : SE_EVALUATE_ALL;

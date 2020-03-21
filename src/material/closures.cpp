@@ -79,7 +79,7 @@ namespace {
 
     inline static Surface_Closure_Base* getSurfaceClosureBase(unsigned int closure_id) {
         sAssert(closure_id >= 0 && closure_id < SURFACE_CLOSURE_CNT, MATERIAL);
-        sAssert(g_surface_closures[closure_id] != nullptr, MATERIAL);
+        sAssert(IS_PTR_VALID(g_surface_closures[closure_id]), MATERIAL);
 
         return g_surface_closures[closure_id].get();
     }
@@ -88,7 +88,7 @@ namespace {
         closure_id -= VOLUME_CLOSURE_BASE;
 
         sAssert(closure_id >= 0 && closure_id < VOLUME_CLOSURE_CNT, VOLUME);
-        sAssert(g_volume_closures[closure_id] != nullptr, VOLUME);
+        sAssert(IS_PTR_VALID(g_volume_closures[closure_id]), VOLUME);
 
         return g_volume_closures[closure_id].get();
     }

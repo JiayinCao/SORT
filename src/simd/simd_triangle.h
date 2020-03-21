@@ -73,15 +73,15 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
     bool PushTriangle( const Primitive* primitive ){
 #ifdef SIMD_SSE_IMPLEMENTATION
         const Triangle* triangle = dynamic_cast<const Triangle*>(primitive->GetShape());
-        if( m_ori_pri[0] == nullptr ){
+        if(IS_PTR_INVALID(m_ori_pri[0])){
             m_ori_pri[0] = primitive;
             m_ori_tri[0] = triangle;
             return false;
-        }else if( m_ori_pri[1] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[1])){
             m_ori_pri[1] = primitive;
             m_ori_tri[1] = triangle;
             return false;
-        }else if( m_ori_pri[2] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[2])){
             m_ori_pri[2] = primitive;
             m_ori_tri[2] = triangle;
             return false;
@@ -93,31 +93,31 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
 
 #ifdef SIMD_AVX_IMPLEMENTATION
         const Triangle* triangle = dynamic_cast<const Triangle*>(primitive->GetShape());
-        if( m_ori_pri[0] == nullptr ){
+        if(IS_PTR_INVALID(m_ori_pri[0])){
             m_ori_pri[0] = primitive;
             m_ori_tri[0] = triangle;
             return false;
-        }else if( m_ori_pri[1] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[1])){
             m_ori_pri[1] = primitive;
             m_ori_tri[1] = triangle;
             return false;
-        }else if( m_ori_pri[2] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[2])){
             m_ori_pri[2] = primitive;
             m_ori_tri[2] = triangle;
             return false;
-        }else if( m_ori_pri[3] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[3])){
             m_ori_pri[3] = primitive;
             m_ori_tri[3] = triangle;
             return false;
-        }else if( m_ori_pri[4] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[4])){
             m_ori_pri[4] = primitive;
             m_ori_tri[4] = triangle;
             return false;
-        }else if( m_ori_pri[5] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[5])){
             m_ori_pri[5] = primitive;
             m_ori_tri[5] = triangle;
             return false;
-        }else if( m_ori_pri[6] == nullptr ){
+        }else if(IS_PTR_INVALID(m_ori_pri[6])){
             m_ori_pri[6] = primitive;
             m_ori_tri[6] = triangle;
             return false;
@@ -138,7 +138,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
         bool	mask[SIMD_CHANNEL] = { false };
         float   p0_x[SIMD_CHANNEL] , p0_y[SIMD_CHANNEL] , p0_z[SIMD_CHANNEL] , p1_x[SIMD_CHANNEL] , p1_y[SIMD_CHANNEL] , p1_z[SIMD_CHANNEL] , p2_x[SIMD_CHANNEL] , p2_y[SIMD_CHANNEL] , p2_z[SIMD_CHANNEL];
         for( auto i = 0 ; i < SIMD_CHANNEL ; ++i ){
-			if (nullptr == m_ori_pri[i]) {
+			if (IS_PTR_INVALID(m_ori_pri[i])) {
 				mask[i] = false;
 				continue;
 			}
@@ -348,7 +348,7 @@ SORT_FORCEINLINE void setupIntersection(const Simd_Triangle& tri_simd, const Ray
 //! @return             Whether there is any intersection that is valid.
 SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Data& ray_simd , const Simd_Triangle& tri_simd , SurfaceInteraction* ret ){
 #ifndef SIMD_TRI_REFERENCE_IMPLEMENTATION
-    sAssert( nullptr != ret , SPATIAL_ACCELERATOR );
+    sAssert(IS_PTR_VALID(ret), SPATIAL_ACCELERATOR );
 
     simd_data   u_simd, v_simd, t_simd, mask;
     const auto intersected = intersectTriangleInner_SIMD<false>(ray, ray_simd , tri_simd, t_simd, u_simd, v_simd, mask);
@@ -375,7 +375,7 @@ SORT_FORCEINLINE bool intersectTriangle_SIMD( const Ray& ray , const Simd_Ray_Da
     return true;
 #else
     bool ret_val = false;
-    for( auto i = 0u ; i < SIMD_CHANNEL && nullptr != tri_simd.m_ori_pri[i] ; ++i )
+    for( auto i = 0u ; i < SIMD_CHANNEL && IS_PTR_VALID(tri_simd.m_ori_pri[i]) ; ++i )
         ret_val |= tri_simd.m_ori_pri[i]->GetIntersect( ray , ret );
     return ret_val;
 #endif
@@ -396,7 +396,7 @@ SORT_FORCEINLINE bool intersectTriangleFast_SIMD(const Ray& ray, const Simd_Ray_
     return intersectTriangleInner_SIMD<true>(ray, ray_simd, tri_simd, dummy_t, dummy_u, dummy_v, mask);
 #else
     bool ret = false;
-    for( auto i = 0u ; i < SIMD_CHANNEL && ( nullptr != tri_simd.m_ori_pri[i] ) && !ret ; ++i )
+    for( auto i = 0u ; i < SIMD_CHANNEL && IS_PTR_VALID(tri_simd.m_ori_pri[i]) && !ret ; ++i )
         ret |= tri_simd.m_ori_pri[i]->GetIntersect( ray , nullptr );
     return ret;
 #endif
@@ -452,7 +452,7 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
     }
 #else
     SurfaceInteraction intersection;
-    for( auto i = 0u ; i < SIMD_CHANNEL && nullptr != tri_simd.m_ori_pri[i] ; ++i ){
+    for( auto i = 0u ; i < SIMD_CHANNEL && IS_PTR_VALID(tri_simd.m_ori_pri[i]) ; ++i ){
         const auto* primitive = tri_simd.m_ori_pri[i];
         if (matID != primitive->GetMaterial()->GetID())
             continue;

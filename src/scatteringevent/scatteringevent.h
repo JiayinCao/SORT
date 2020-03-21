@@ -67,7 +67,7 @@ public:
     //!
     //! @param  bxdf        The bxdf to be added.
     SORT_FORCEINLINE  void    AddBxdf( const Bxdf* bxdf ){
-        if( m_bxdfCnt == SE_MAX_BXDF_COUNT || bxdf == nullptr || bxdf->GetEvalWeight().IsBlack() ) 
+        if( m_bxdfCnt == SE_MAX_BXDF_COUNT || IS_PTR_INVALID(bxdf) || bxdf->GetEvalWeight().IsBlack() )
             return;
         m_bxdfs[m_bxdfCnt++] = bxdf;
         m_bxdfTotalSampleWeight += bxdf->GetSampleWeight();
@@ -83,7 +83,7 @@ public:
     //!
     //! @param  bssrdf      The bssrdf to be added.
     SORT_FORCEINLINE  void    AddBssrdf( const Bssrdf* bssrdf ){
-        if( m_bssrdfCnt == SE_MAX_BSSRDF_COUNT || bssrdf == nullptr || bssrdf->GetEvalWeight().IsBlack() ) 
+        if( m_bssrdfCnt == SE_MAX_BSSRDF_COUNT || IS_PTR_INVALID(bssrdf) || bssrdf->GetEvalWeight().IsBlack() )
             return;
         m_bssrdfs[m_bssrdfCnt++] = bssrdf;
         m_bssrdfTotalSampleWeight += bssrdf->GetSampleWeight();

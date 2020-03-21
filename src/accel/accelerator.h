@@ -36,7 +36,7 @@ SORT_FORCEINLINE bool isShadowRay( const SurfaceInteraction* intersection ){
 }
 #else
 SORT_FORCEINLINE bool isShadowRay( const SurfaceInteraction* intersection ){
-    return nullptr == intersection;
+    return IS_PTR_INVALID( intersection );
 }
 #endif
 
