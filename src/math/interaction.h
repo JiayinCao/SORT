@@ -23,6 +23,7 @@
 
 class Primitive;
 class PhaseFunction;
+class Mesh;
 
 /**
  * InteractionCommon keeps track of the common field shared by surface interfaction and
@@ -76,5 +77,6 @@ struct SurfaceInteraction : public InteractionCommon{
  * Interaction between a ray and a medium.
  */
 struct MediumInteraction : public InteractionCommon{
-    PhaseFunction*  phaseFunction;      /**< Phase function of the interfaction. */
+    const PhaseFunction*    phaseFunction = nullptr;      /**< Phase function of the interfaction. */
+    const Mesh*             mesh = nullptr;               /**< Mesh that wraps this volume. */
 };

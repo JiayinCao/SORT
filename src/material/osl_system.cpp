@@ -116,7 +116,7 @@ void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi, 
     shaderglobals.P = Vec3(mi.intersect.x, mi.intersect.y, mi.intersect.z);
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
-    ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms, flag, material);
+    ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms, flag, material, mi.mesh);
 }
 
 void EvaluateVolumeSample(OSL::ShaderGroup* shader, const MediumInteraction& mi, MediumSample& ms) {

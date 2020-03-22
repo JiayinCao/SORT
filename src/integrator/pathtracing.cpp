@@ -190,6 +190,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             if (SE_Interaction::SE_REFLECTION != interaction_flag) {
                 MediumInteraction mi;
                 mi.intersect = inter.intersect;
+                mi.mesh = inter.primitive->GetMesh();
                 material->UpdateMediumStack(mi, interaction_flag, ms);
             }
 

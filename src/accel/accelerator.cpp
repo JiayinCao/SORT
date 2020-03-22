@@ -56,6 +56,7 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack
         // at this point, we know for sure the ray pass through the surface.
         MediumInteraction mi;
         mi.intersect = intersection.intersect;
+        mi.mesh = intersection.primitive->GetMesh();
         material->UpdateMediumStack(mi, interaction_flag, *ms);
     }
 
@@ -76,6 +77,9 @@ bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , const bool rev
 
 	if (!GetIntersect(ray, intersection))
 		return false;
+
+    // make sure there is primitive intersected
+    sAssert(IS_PTR_VALID(intersection.primitive), SPATIAL_ACCELERATOR);
 
 	// get the material of the intersected primitive
 	const MaterialBase* material = intersection.primitive->GetMaterial();
@@ -101,6 +105,7 @@ bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , const bool rev
 	// at this point, we know for sure the ray pass through the surface.
 	MediumInteraction mi;
 	mi.intersect = intersection.intersect;
+    mi.mesh = intersection.primitive->GetMesh();
 	material->UpdateMediumStack(mi, interaction_flag, ms);
 
 	ray.m_Ori = intersection.intersect;

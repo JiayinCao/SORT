@@ -43,6 +43,7 @@
 #include "medium/homogeneous.h"
 #include "medium/heterogeneous.h"
 #include "material/material.h"
+#include "core/mesh.h"
 
 using namespace OSL;
 
@@ -70,7 +71,7 @@ namespace {
     };
 
     struct Volume_Closure_Base : public Closure_Base {
-        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material) const = 0;
+        virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const = 0;
         virtual void Evaluate(const ClosureComponent* comp, const OSL::Color3& w, MediumSample& ms) const {}
     };
 
@@ -712,7 +713,7 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
-        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material) const override{
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override{
             if (SE_ENTERING == flag) {
                 const auto& params = *comp->as<AbsorptionMedium::Params>();
                 ms.AddMedium(SORT_MALLOC(AbsorptionMedium)(params, material));
@@ -741,7 +742,7 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
-        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material ) const override {
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
             if (SE_ENTERING == flag) {
                 const auto& params = *comp->as<HomogeneousMedium::Params>();
                 ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params, material));
@@ -770,9 +771,9 @@ namespace {
             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
         }
 
-        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material) const override {
+        void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
             if (SE_ENTERING == flag)
-                ms.AddMedium(SORT_MALLOC(HeterogenousMedium)(material));
+                ms.AddMedium(SORT_MALLOC(HeterogenousMedium)(material, mesh));
             else if (SE_LEAVING == flag)
                 ms.RemoveMedium(material->GetUniqueID());
         }
@@ -850,7 +851,7 @@ void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& 
     }
 }
 
-void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material) {
+void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) {
     if (!closure)
         return;
 
@@ -862,7 +863,7 @@ void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w
             break;
         default: {
             const ClosureComponent* comp = closure->as_comp();
-            getVolumeClosureBase(comp->id)->Process(comp, w * comp->w, mediumStack, flag, material);
+            getVolumeClosureBase(comp->id)->Process(comp, w * comp->w, mediumStack, flag, material, mesh);
         }
     }
 }

@@ -39,8 +39,9 @@ public:
     //! @brief  Constructor.
     //!
     //! @param material		Material that spawns the medium.
-    HeterogenousMedium(const MaterialBase* material) :
-        Medium(WHITE_SPECTRUM, 0.0f, 0.0f, 0.0f, 0.0f, material) {}
+    //! @param mesh         Mesh that wraps the medium
+    HeterogenousMedium(const MaterialBase* material, const Mesh* mesh) :
+        Medium(WHITE_SPECTRUM, 0.0f, 0.0f, 0.0f, 0.0f, material), m_mesh(mesh){}
 
     //! @brief  Evaluation of beam transmittance.
     //!
@@ -63,4 +64,7 @@ public:
     //! @param emission     The emission contribution in RTE.
     //! @return             The beam transmittance between the ray origin and the interaction.
     Spectrum Sample(const Ray& ray, const float max_t, MediumInteraction*& mi, Spectrum& emission) const override;
+
+private:
+    const Mesh* m_mesh;
 };

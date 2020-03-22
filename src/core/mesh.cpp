@@ -127,6 +127,10 @@ void Mesh::Serialize( IStreamBase& stream ){
 
         // If there is SSS in the material or volume is attached to the material, it is necessary to create a material proxy to
         // prevent the same material used in multiple places being recognized as the same one.
+        //
+        // This doesn't handle the corner cases that the same material used in two separate parts in a same mesh, the two parts
+        // will still have SSS bleeding together. But it doesn't prevent a same material used by two meshes being bleeding from
+        // each other.
         if (mi.m_mat->HasSSS() || mi.m_mat->HasVolumeAttached()) {
             // material proxy of this material is not created yet.
             if (0 == mapping.count(mi.m_mat))

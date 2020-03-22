@@ -24,6 +24,7 @@
 class ScatteringEvent;
 class MediumStack;
 class MaterialBase;
+class Mesh;
 
 enum CLOSURE_TYPE {
     SURFACE_CLOSURE_LAMBERT = 0,
@@ -76,7 +77,8 @@ void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& 
 //! @param  mediumStack     The medium stack container that holds the result.
 //! @param  flag            A flag indicates whether to add or remove the medium.
 //! @param	material		The material that spawns the medium.
-void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material);
+//! @param  mesh            The mesh that wraps the volume.
+void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh);
 
 //! @brief  Evaluate the properties of the volume at specific position in a volume.
 //!

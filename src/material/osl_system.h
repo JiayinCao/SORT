@@ -37,6 +37,7 @@ class ScatteringEvent;
 struct SurfaceInteraction;
 class MediumStack;
 struct MediumInteraction;
+class Mesh;
 
 struct ShadingContextWrapper {
 public:
@@ -73,8 +74,8 @@ void ExecuteSurfaceShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
 //! @param  mi          The interaction inside the medium.
 //! @param  ms          The medium stack to hold the results.
 //! @param  flag        A flag indicates whether to add or remove the medium.
-//! @param	material	The material that spawns the volume. If nullptr, it means it is a world volume.
-void ExecuteVolumeShader( OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& se, const SE_Interaction flag, const MaterialBase* material = nullptr);
+//! @param  material    The material that spawns the medium.
+void ExecuteVolumeShader( OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& se, const SE_Interaction flag, const MaterialBase* material);
 
 //! @brief  Evaluate the properties at a specific position in the volume.
 //!

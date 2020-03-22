@@ -127,6 +127,7 @@ Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene&
         if (SE_Interaction::SE_REFLECTION != interaction_flag) {
             MediumInteraction mi;
             mi.intersect = se.GetInteraction().intersect;
+            mi.mesh = se.GetInteraction().primitive->GetMesh();
             material->UpdateMediumStack(mi, interaction_flag, ms_copy);
         }
 
@@ -174,6 +175,7 @@ Spectrum    EvaluateDirect(const ScatteringEvent& se, const Ray& r, const Scene&
             if (SE_Interaction::SE_REFLECTION != interaction_flag) {
                 MediumInteraction mi;
                 mi.intersect = se.GetInteraction().intersect;
+                mi.mesh = se.GetInteraction().primitive->GetMesh();
                 material->UpdateMediumStack(mi, interaction_flag, ms_copy);
             }
 
@@ -243,6 +245,7 @@ Spectrum SampleOneLight( const ScatteringEvent& se , const Ray& r, const Surface
         if (SE_Interaction::SE_REFLECTION != interaction_flag) {
             MediumInteraction mi;
             mi.intersect = se.GetInteraction().intersect;
+            mi.mesh = se.GetInteraction().primitive->GetMesh();
             material->UpdateMediumStack(mi, interaction_flag, ms_copy);
         }
 

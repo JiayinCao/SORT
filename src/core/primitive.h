@@ -24,6 +24,7 @@
 #include "material/matmanager.h"
 
 class Light;
+class Mesh;
 
 //! @brief  Primitive of SORT world.
 /**
@@ -36,11 +37,12 @@ class   Primitive{
 public:
     //! @brief Constructor of Primitive.
     //!
+    //! @param  mesh    The mesh that owns the primitive.
     //! @param  mat     Material attached to the primitive.
     //! @param  shape   Shape of the material.
     //! @param  light   Light source attached to the material.
-    Primitive(const MaterialBase* mat , Shape* shape , class Light* light = nullptr ):
-        m_mat(mat), m_shape(shape), m_light(light){}
+    Primitive(const Mesh* mesh, const MaterialBase* mat , const Shape* shape , class Light* light = nullptr ):
+        m_mesh(mesh), m_mat(mat), m_shape(shape), m_light(light){}
 
     //! @brief  Get the intersection between a ray and the primitive.
     //!
@@ -114,8 +116,19 @@ public:
         return m_shape;
     }
 
+    //! @brief  Get the mesh that owns the primitive.
+    //!
+    //! This is a very expensive member since most of the time it is not even used.
+    //! However, to keep things simple and managable, I'll leave it here for now.
+    //!
+    //! @return         The mesh that owns the primitive.
+    SORT_FORCEINLINE const Mesh*     GetMesh() const {
+        return m_mesh;
+    }
+
 private:
     const MaterialBase*     m_mat;      /**< The material attached to the primitive. */
-    Shape*                  m_shape;    /**< The shape of the primitive. */
+    const Shape*            m_shape;    /**< The shape of the primitive. */
     class Light*            m_light;    /**< Light source attached to the primitive. */
+    const Mesh*             m_mesh;     /**< The mesh that owns this primitive. */
 };
