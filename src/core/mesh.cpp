@@ -23,7 +23,7 @@
 #include "stream/stream.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
-void MeshMemory::ApplyTransform( const Transform& transform ){
+void Mesh::ApplyTransform( const Transform& transform ){
     for (MeshVertex& mv : m_vertices) {
         mv.m_position = transform.TransformPoint(mv.m_position);
         mv.m_normal = transform.TransformNormal((mv.m_normal).Normalize());
@@ -37,7 +37,7 @@ void MeshMemory::ApplyTransform( const Transform& transform ){
     }
 }
 
-void MeshMemory::GenSmoothTagent(){
+void Mesh::GenSmoothTagent(){
     // generate tangent for each triangle
     std::vector<std::vector<Vector>> tangent(m_vertices.size());
     for (auto mi : m_indices) {
@@ -55,7 +55,7 @@ void MeshMemory::GenSmoothTagent(){
     }
 }
 
-void MeshMemory::GenUV(){
+void Mesh::GenUV(){
     if (m_hasUV || m_vertices.empty())
         return;
 
@@ -72,7 +72,7 @@ void MeshMemory::GenUV(){
     }
 }
 
-Vector MeshMemory::genTagentForTri( const MeshFaceIndex& mi ) const{
+Vector Mesh::genTagentForTri( const MeshFaceIndex& mi ) const{
     const auto& _v0 = m_vertices[mi.m_id[0]];
     const auto& _v1 = m_vertices[mi.m_id[1]];
     const auto& _v2 = m_vertices[mi.m_id[2]];
@@ -106,8 +106,7 @@ Vector MeshMemory::genTagentForTri( const MeshFaceIndex& mi ) const{
     return ( dv2 * dp1 - dv1 * dp2 ) / determinant;
 }
 
-// serialization interface for MeshMemory
-void MeshMemory::Serialize( IStreamBase& stream ){
+void Mesh::Serialize( IStreamBase& stream ){
     stream >> m_hasUV;
     unsigned int vb_cnt, ib_cnt;
     stream >> vb_cnt;

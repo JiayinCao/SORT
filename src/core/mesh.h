@@ -49,7 +49,7 @@ struct MeshFaceIndex {
 //! The old solution was to isolate the position, normal and texture coordinate buffers so that we can try
 //! saving minimal information without duplicating unnecessary data. However, the effort to generate such a
 //! layout of date requires quite some time in Blender, due to which reason, it was deprecated.
-class MeshMemory : public SerializableObject{
+class Mesh : public SerializableObject{
 public:
     std::vector<MeshVertex>     m_vertices;         /**< Vertex information including position, normal and etc.*/
     std::vector<MeshFaceIndex>  m_indices;          /**< Index information of the mesh, there is also material id in it. */

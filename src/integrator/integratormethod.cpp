@@ -199,9 +199,15 @@ Spectrum    EvaluateDirect(const Point& ip, const PhaseFunction* ph, const Vecto
     if (light_pdf > 0.0f && !li.IsBlack() ) {
         const auto f = ph->P(wo, wi);
         if (f > 0.0f) {
+#ifdef ENABLE_TRANSPARENT_SHADOW
             const auto attenuation = visibility.GetAttenuation(&ms);
             if (!attenuation.IsBlack())
                 radiance = attenuation * li * f / light_pdf;
+#else
+            const auto occluded = visibility.IsVisible();
+            if (!occluded)
+                radiance = li * f / light_pdf;
+#endif
         }
     }
 

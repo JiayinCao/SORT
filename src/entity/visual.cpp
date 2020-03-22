@@ -32,7 +32,7 @@ void MeshVisual::FillScene( Scene& scene ){
 }
 
 void MeshVisual::Serialize( IStreamBase& stream ){
-    m_memory = std::make_unique<MeshMemory>();
+    m_memory = std::make_unique<Mesh>();
     m_memory->Serialize(stream);
 }
 

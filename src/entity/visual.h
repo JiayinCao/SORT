@@ -73,7 +73,7 @@ public:
 
 public:
     /**< Memory for the mesh. */
-    std::unique_ptr<MeshMemory>                 m_memory;
+    std::unique_ptr<Mesh>                 m_memory;
     /**< This is to make sure the memory of triangles will be properly cleared. */
     std::vector<std::unique_ptr<Triangle>>      m_triangles;
 };

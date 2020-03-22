@@ -69,7 +69,11 @@ bool Accelerator::GetAttenuation( Ray& ray , Spectrum& attenuation , MediumStack
 
 bool Accelerator::UpdateMediumStack( Ray& ray , MediumStack& ms , const bool reversed ) const{
 	SurfaceInteraction intersection;
+
+#ifdef ENABLE_TRANSPARENT_SHADOW
 	intersection.query_shadow = false;
+#endif
+
 	if (!GetIntersect(ray, intersection))
 		return false;
 

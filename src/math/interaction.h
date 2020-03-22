@@ -33,13 +33,8 @@ struct   InteractionCommon{
     // whether the query is a shadow ray.
     bool    query_shadow = false;
 #endif
-
     // the intersection point
     Point   intersect;
-    // viewing direction in world space, this is usually Wo.
-    Vector  view;
-    // the delta distance from the original point
-    float   t = FLT_MAX;
 };
 
 //! @brief  Interaction at surface.
@@ -50,6 +45,8 @@ struct SurfaceInteraction : public InteractionCommon{
     // get the emissive
     Spectrum Le( const Vector& wo , float* directPdfA = 0 , float* emissionPdf = 0 ) const;
 
+    // viewing direction in world space, this is usually Wo.
+    Vector  view;
     // the shading normal
     Vector  normal;
     // the geometry normal
@@ -58,6 +55,8 @@ struct SurfaceInteraction : public InteractionCommon{
     Vector  tangent;
     // the uv coordinate
     float   u = 0.0f , v = 0.0f;
+    // the delta distance from the original point
+    float   t = FLT_MAX;
     // the intersected primitive
     const Primitive*  primitive = nullptr;
 
