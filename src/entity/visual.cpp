@@ -15,6 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <numeric>
 #include "visual.h"
 #include "material/matmanager.h"
 #include "core/scene.h"
@@ -56,35 +57,48 @@ void HairVisual::Serialize( IStreamBase& stream ){
     stream >> width_tip >> width_bottom;
     auto mat_id = -1;
     stream >> mat_id;
-
+    
     for( auto i = 0u ; i < hair_cnt ; ++i ){
         auto hair_step = 0u;
         stream >> hair_step;
 
-        const auto width_delta = ( width_bottom - width_tip ) / (float)hair_step;
-        const auto v_delta = 1.0f / ( float ) hair_step;
-        Point prevP;
+        if (UNLIKELY(0u == hair_step))
+            continue;
 
-        auto width = width_bottom;
-        auto v = 0.0f;
-        for( auto j = 0u ; j <= hair_step ; ++j ){
+        // There is no guarrantee that the line segements will be the same length.
+        // It is necessary to evaluate the total length of the hair before pushing them into the list to get correct UV and width data.
+        std::vector<Point>  point_cache;
+        std::vector<float>  len_cache(hair_step);
+        for (auto j = 0u; j <= hair_step; ++j) {
             Point curP;
             stream >> curP;
+            point_cache.push_back(curP);
+        }
+        for (auto j = 0u; j < point_cache.size() - 1; ++j)
+            len_cache[j] += distance(point_cache[j], point_cache[j + 1]);
 
-            if( j > 0 ){
-                // Prevent float precision issue cauing negative width
-                const auto width_start = width * 0.5f;
-                const auto width_end = std::max( 0.0f , width - width_delta ) * 0.5f;
-                const auto v_start = v;
-                const auto v_end = std::min( 1.0f , v + v_delta );
+        // this means that the data is ill-defined, it shouldn't happen at all.
+        const auto total_length = std::accumulate(len_cache.begin(), len_cache.end(), 0.0f);
+        if (UNLIKELY(total_length <= 0.0f))
+            continue;
 
-                if( prevP != curP )
-                    m_lines.push_back(std::make_unique<Line>( prevP , curP , v_start , v_end , width_start, width_end , mat_id ) );
-                
-                width -= width_delta;
-                v += v_delta;
-            }
-            prevP = curP;
+        auto prev_v = 0.0f;
+        auto prev_w = width_bottom;
+        auto cur_len = 0.0f;
+        for (auto j = 1u; j <= hair_step; ++j) {
+            cur_len += len_cache[j-1];
+
+            const auto& prevP = point_cache[j - 1];
+            const auto& curP  = point_cache[j];
+
+            const auto t = cur_len / total_length;
+            const auto cur_w = slerp(width_bottom, width_tip, t);
+            const auto cur_v = slerp(0.0f, 1.0f, t);
+
+            m_lines.push_back(std::make_unique<Line>(prevP, curP, prev_v, cur_v, prev_w, cur_w, mat_id));
+
+            prev_w = cur_w;
+            prev_v = cur_v;
         }
     }
 }

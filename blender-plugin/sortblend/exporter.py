@@ -33,7 +33,7 @@ def depsgraph_objects(depsgraph: bpy.types.Depsgraph):
     ITERATED_OBJECT_TYPES = ('MESH', 'LIGHT')
     for obj in depsgraph.objects:
         if obj.type in ITERATED_OBJECT_TYPES:
-            yield obj
+            yield obj.evaluated_get(depsgraph)
 
 # Get the list of material for the whole scene, this function will only list materials that are currently
 # attached to an object in the scene. Non-used materials will not be needed to be exported to SORT.
@@ -120,7 +120,7 @@ def lookat_camera(camera):
     return (pos, target, up)
 
 # export blender information
-def export_blender(depsgraph, force_debug=False):
+def export_blender(depsgraph, force_debug=False, is_preview=False):
     scene = depsgraph.scene
 
     # create intermediate resource path
@@ -142,13 +142,13 @@ def export_blender(depsgraph, force_debug=False):
     current_time = time()
     log("Exporting materials.")
     collect_shader_resources(depsgraph, scene, fs)     # this is the place for material to signal heavy resources, like textures, measured BRDF, etc.
-    export_materials(scene, fs)             # this is the place for serializing OSL shader source code with proper default values.
+    export_materials(depsgraph, fs)             # this is the place for serializing OSL shader source code with proper default values.
     log("Exported materials %.2f(s)" % (time() - current_time))
 
     # export scene
     current_time = time()
     log("Exporting scene.")
-    export_scene(depsgraph, fs)
+    export_scene(depsgraph, is_preview, fs)
     log("Exported scene %.2f(s)" % (time() - current_time))
 
     # make sure the result of the file writting is flushed because it could be problematic on some machines
@@ -175,7 +175,7 @@ def get_smoke_modifier(obj: bpy.types.Object):
     return next((modifier for modifier in obj.modifiers if modifier.type == 'SMOKE' and modifier.smoke_type == 'DOMAIN'), None)
 
 # export scene
-def export_scene(depsgraph, fs):
+def export_scene(depsgraph, is_preview, fs):
     # helper function to convert a matrix to a tuple
     def matrix_to_tuple(matrix):
         return (matrix[0][0],matrix[0][1],matrix[0][2],matrix[0][3],matrix[1][0],matrix[1][1],matrix[1][2],matrix[1][3],
@@ -242,7 +242,6 @@ def export_scene(depsgraph, fs):
                 # instead of exporting the original mesh, export the temporary mesh.
                 stat = export_mesh(mesh, fs)
             finally:
-                # Unlike 2.7x, The result of 'to_mesh' is temporary and can not be used by objects from the main database
                 evaluted_obj.to_mesh_clear()
         else:
             stat = export_mesh(obj.data, fs)
@@ -252,18 +251,17 @@ def export_scene(depsgraph, fs):
 
     # output hair/fur exporting
     for obj in all_objs:
-        # output hair/fur information
-        if len( obj.particle_systems ) > 0:
-            fs.serialize(SID('VisualEntity'))
-            fs.serialize( matrix_to_tuple( MatrixBlenderToSort() @ obj.matrix_world ) )
-            fs.serialize( len( obj.particle_systems ) )
+        evaluted_obj = obj.evaluated_get(depsgraph)
 
-            eval_ob = depsgraph.objects.get(obj.name, None)
-            for ps in eval_ob.particle_systems:
-                stat = export_hair( ps , eval_ob , scene , fs )
+        # output hair/fur information
+        if len( evaluted_obj.particle_systems ) > 0:
+            fs.serialize( SID('VisualEntity') )
+            fs.serialize( matrix_to_tuple( MatrixBlenderToSort() @ evaluted_obj.matrix_world ) )
+            fs.serialize( len( evaluted_obj.particle_systems ) )
+            for ps in evaluted_obj.particle_systems:
+                stat = export_hair( ps , evaluted_obj , scene , is_preview, fs )
                 total_vert_cnt += stat[0]
                 total_prim_cnt += stat[1]
-            eval_ob.to_mesh_clear()
 
     log( "Total vertices: %d." % total_vert_cnt )
     log( "Total primitives: %d." % total_prim_cnt )
@@ -522,12 +520,12 @@ def export_smoke(obj, fs):
     fs.serialize(density_grid)
 
 # export hair information
-def export_hair(ps, obj, scene, fs):
+def export_hair(ps, obj, scene, is_preview, fs):
     LENFMT = struct.Struct('=i')
     POINTFMT = struct.Struct('=fff')
 
     vert_cnt = 0
-    hair_step = ps.settings.render_step
+    hair_step = ps.settings.display_step if is_preview else ps.settings.render_step
     width_tip = ps.settings.sort_data.fur_tip
     width_bottom = ps.settings.sort_data.fur_bottom
 
@@ -674,12 +672,13 @@ def collect_shader_resources(depsgraph, scene, fs):
 
 # Export OSL shader group
 matname_to_id = {}
-def export_materials(scene, fs):
+def export_materials(depsgraph, fs):
+    scene = depsgraph.scene
     if scene.sort_data.allUseDefaultMaterial is True:
         fs.serialize( int(0) )
         return None
 
-    materials = list_materials(scene)
+    materials = list_materials(depsgraph)
     material_count = 0
     for material in materials:
         # get output nodes
