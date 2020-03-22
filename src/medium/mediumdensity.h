@@ -17,18 +17,19 @@
 
 #pragma once
 
-#include <memory>
-#include "texturebase.h"
+#include "core/define.h"
+#include "texture/imagetexture3d.h"
 
-class   RenderTarget : public Texture2DBase{
+struct Point;
+
+//! @brief  Medium density data structure allows variation of density inside a medium volume.
+/**
+ * Medium density is essentially a 3D texture.
+ */
+class MediumDensity : public ImageTexture3D {
 public:
-    RenderTarget( int w , int h ) : Texture2DBase( w , h ){
-        m_pData = std::make_unique<Spectrum[]>( w * h );
-    }
-
-    void SetColor( int x , int y , const Spectrum& c );
-    Spectrum GetColor( int x , int y ) const;
-
-private:
-    std::unique_ptr<Spectrum[]> m_pData;
+    //! @brief  Take a sample in 3D texture.
+    //!
+    //! @param  pos     Position in world space.
+    Spectrum Sample( const Point& pos ) const;
 };

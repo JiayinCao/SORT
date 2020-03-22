@@ -20,13 +20,12 @@
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
 #include "math/transform.h"
-#include "texture/imagetexture.h"
+#include "texture/imagetexture2d.h"
 #include "core/samplemethod.h"
 
 ////////////////////////////////////////////////////////////////////////
 // definition of sky sphere
-class   Sky
-{
+class   Sky{
 public:
     // evaluate value from sky
     // para 'r' : the ray which misses all of the triangle in the scene
@@ -49,7 +48,7 @@ public:
     }
 
 private:
-    ImageTexture    m_sky;
+    ImageTexture2D    m_sky;
     std::unique_ptr<class Distribution2D>   distribution = nullptr;
 
     // generate 2d distribution

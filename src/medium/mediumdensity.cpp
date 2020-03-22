@@ -15,20 +15,11 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#pragma once
+#include "mediumdensity.h"
+#include "math/point.h"
 
-#include <memory>
-#include "texturebase.h"
-
-class   RenderTarget : public Texture2DBase{
-public:
-    RenderTarget( int w , int h ) : Texture2DBase( w , h ){
-        m_pData = std::make_unique<Spectrum[]>( w * h );
-    }
-
-    void SetColor( int x , int y , const Spectrum& c );
-    Spectrum GetColor( int x , int y ) const;
-
-private:
-    std::unique_ptr<Spectrum[]> m_pData;
-};
+Spectrum MediumDensity::Sample(const Point& pos) const {
+    // pos needs to be transformed from world space to local space before taking a sample.
+    // to be implemented
+    return 0.0f;
+}

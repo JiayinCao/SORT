@@ -19,7 +19,7 @@
 
 #include <OSL/oslexec.h>
 #include "core/sassert.h"
-#include "texture/imagetexture.h"
+#include "texture/imagetexture2d.h"
 
 // Since only one single file will include this header file, it is OK to use the namespace in a header file.
 using namespace OSL;
@@ -363,5 +363,5 @@ private:
     void operator delete(void* todel) { ::delete ((char*)todel); }
 
     // The texture pool
-    std::unordered_map<std::string, std::unique_ptr<ImageTexture>> m_TexturePool;
+    std::unordered_map<std::string, std::unique_ptr<ImageTexture2D>> m_TexturePool;
 };

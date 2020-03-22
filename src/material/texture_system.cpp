@@ -23,10 +23,10 @@ RendererServices::TextureHandle* SORTTextureSystem::get_texture_handle(OSL::ustr
     std::string std_filename(filename.c_str());
     if (m_TexturePool.count(std_filename) == 0) {
         // create a new texture and load it from file
-        m_TexturePool[std_filename] = std::make_unique<ImageTexture>();
+        m_TexturePool[std_filename] = std::make_unique<ImageTexture2D>();
 
         // load the texture from file
-        ImageTexture*   sort_texture = m_TexturePool[std_filename].get();
+        ImageTexture2D*   sort_texture = m_TexturePool[std_filename].get();
         if( !sort_texture->LoadImageFromFile(std_filename) )
             slog( WARNING , MATERIAL , "Failed to load image %s." , filename.c_str() );
     }
@@ -35,23 +35,21 @@ RendererServices::TextureHandle* SORTTextureSystem::get_texture_handle(OSL::ustr
 }
 
 bool SORTTextureSystem::good(TextureHandle* texture_handle) {
-    auto image_texture = (const ImageTexture*)texture_handle;
+    auto image_texture = reinterpret_cast<const ImageTexture2D*>(texture_handle);
     return IS_PTR_VALID(image_texture) && image_texture->IsValid();
 }
 
 bool SORTTextureSystem::texture(TextureHandle *texture_handle, Perthread *thread_info, TextureOpt &options,
     float s, float t, float dsdx, float dtdx, float dsdy, float dtdy, int nchannels, float *result,
     float *dresultds , float *dresultdt ) {
-    const auto* image_texture = (const ImageTexture*)texture_handle;
+    auto image_texture = reinterpret_cast<const ImageTexture2D*>(texture_handle);
     const auto color = image_texture->GetColorFromUV(s, t);
     result[0] = color.r;
     result[1] = color.g;
     result[2] = color.b;
 
-    if( nchannels > 3 ){
-        const auto alpha = image_texture->GetAlphaFromtUV(s, t);
-        result[3] = alpha;
-    }
+    if( nchannels > 3 )
+        result[3] = image_texture->GetAlphaFromtUV(s, t);
 
     return true;
 }

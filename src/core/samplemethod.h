@@ -20,7 +20,7 @@
 #include <vector>
 #include <algorithm>
 #include "core/define.h"
-#include "texture/texture.h"
+#include "texture/texturebase.h"
 #include "core/sassert.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
@@ -230,7 +230,7 @@ public:
     Distribution2D( const float* data , unsigned nu , unsigned nv ){
         _init( data , nu , nv );
     }
-    Distribution2D( const Texture* tex ){
+    Distribution2D( const Texture2DBase* tex ){
         auto nu = tex->GetWidth();
         auto nv = tex->GetHeight();
         sAssert( nu != 0 && nv != 0 , GENERAL );

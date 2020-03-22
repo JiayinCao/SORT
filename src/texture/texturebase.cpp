@@ -17,13 +17,13 @@
 
 #include <regex>
 #include <math.h>
-#include "texture.h"
+#include "texturebase.h"
 #include "core/sassert.h"
 #include "math/interaction.h"
 #include "thirdparty/tiny_exr/tinyexr.h"
 #include "thirdparty/stb_image/stb_image.h"
 
-bool Texture::Output( const std::string& name ){
+bool Texture2DBase::Output( const std::string& name ){
     std::regex exr_reg(".*\\.exr$", std::regex_constants::icase);
     if (std::regex_match(name, exr_reg)) {
         const auto totalXRes = GetWidth();
@@ -52,13 +52,8 @@ bool Texture::Output( const std::string& name ){
     return false;
 }
 
-void Texture::SetTexCoordFilter( TEXCOORDFILTER mode ){
-    m_TexCoordFilter = mode;
-}
-
-void Texture::_texCoordFilter( int& x , int& y ) const{
-    switch( m_TexCoordFilter )
-    {
+void Texture2DBase::texCoordFilter( int& x , int& y ) const{
+    switch( m_TexCoordFilter ){
     case TCF_WARP:
         if( x >= 0 )
             x = x % m_iTexWidth;
@@ -88,7 +83,7 @@ void Texture::_texCoordFilter( int& x , int& y ) const{
     }
 }
 
-Spectrum Texture::GetColorFromUV( float u , float v ) const{
+Spectrum Texture2DBase::GetColorFromUV( float u , float v ) const{
     // Before I have time to work on texturing system, using linear sampling by default.
     // This is by no means the most efficient way to implement bilinear sampling, but it works for now.
 
@@ -103,7 +98,7 @@ Spectrum Texture::GetColorFromUV( float u , float v ) const{
             GetColor(iu, iv + 1) * (1.0f - _fu) * _fv + GetColor(iu + 1, iv + 1) * _fu * _fv;
 }
 
-float Texture::GetAlphaFromtUV( float u , float v ) const{
+float Texture2DBase::GetAlphaFromtUV( float u , float v ) const{
     const auto fu = u * m_iTexWidth - 0.5f;
     const auto fv = v * m_iTexHeight - 0.5f;
     const auto iu = (int)( fu );

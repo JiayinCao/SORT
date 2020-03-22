@@ -24,7 +24,7 @@ void RenderTarget::SetColor( int x , int y , const Spectrum& color ){
     sAssertMsg(IS_PTR_VALID(m_pData), IMAGE , "There is no data in render target , can't set color" );
 
     // use filter first
-    _texCoordFilter( x , y );
+    texCoordFilter( x , y );
 
     // get the offset
     unsigned offset = y * m_iTexWidth + x;
@@ -37,7 +37,7 @@ Spectrum RenderTarget::GetColor( int x , int y ) const{
     sAssertMsg(IS_PTR_VALID(m_pData) , IMAGE , "No memory in the render target, can't get color." );
 
     // filter the x y coordinate
-    _texCoordFilter( x , y );
+    texCoordFilter( x , y );
 
     // get the offset
     int offset = y * m_iTexWidth + x;
