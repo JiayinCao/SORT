@@ -74,7 +74,7 @@ public:
         return m_iTexHeight;
     }
     // whether the texture is valid
-    virtual bool IsValid() {
+    virtual bool IsValid() const {
         return true;
     }
 

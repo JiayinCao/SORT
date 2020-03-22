@@ -39,7 +39,7 @@ public:
     float GetAlpha( int x , int y ) const override;
 
     // whether the image is valid
-    bool IsValid() override { 
+    bool IsValid() const override { 
         return IS_PTR_VALID(m_pMemory); 
     }
 

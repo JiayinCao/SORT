@@ -35,8 +35,8 @@ RendererServices::TextureHandle* SORTTextureSystem::get_texture_handle(OSL::ustr
 }
 
 bool SORTTextureSystem::good(TextureHandle* texture_handle) {
-    auto image_texture = (ImageTexture*)texture_handle;
-    return image_texture && image_texture->IsValid();
+    auto image_texture = (const ImageTexture*)texture_handle;
+    return IS_PTR_VALID(image_texture) && image_texture->IsValid();
 }
 
 bool SORTTextureSystem::texture(TextureHandle *texture_handle, Perthread *thread_info, TextureOpt &options,
