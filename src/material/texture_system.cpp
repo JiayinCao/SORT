@@ -17,25 +17,33 @@
 
 #include "texture_system.h"
 #include "core/log.h"
+#include "medium/mediumdensity.h"
+
+static const OSL::ustring s_volume_color("volume_color");
+static const OSL::ustring s_volume_density("volume_density");
 
 RendererServices::TextureHandle* SORTTextureSystem::get_texture_handle(OSL::ustring filename, Perthread *thread_info) {
+    // handle pre-defined 3d textures
+    if (s_volume_color == filename || s_volume_density == filename)
+        return nullptr;
+
     // Only process the texture if it has been seen before.
     std::string std_filename(filename.c_str());
-    if (m_TexturePool.count(std_filename) == 0) {
+    if (m_Texture2DPool.count(std_filename) == 0) {
         // create a new texture and load it from file
-        m_TexturePool[std_filename] = std::make_unique<ImageTexture2D>();
+        m_Texture2DPool[std_filename] = std::make_unique<ImageTexture2D>();
 
         // load the texture from file
-        ImageTexture2D*   sort_texture = m_TexturePool[std_filename].get();
+        ImageTexture2D*   sort_texture = m_Texture2DPool[std_filename].get();
         if( !sort_texture->LoadImageFromFile(std_filename) )
             slog( WARNING , MATERIAL , "Failed to load image %s." , filename.c_str() );
     }
 
-    return (RendererServices::TextureHandle*)m_TexturePool[std_filename].get();
+    return (RendererServices::TextureHandle*)m_Texture2DPool[std_filename].get();
 }
 
 bool SORTTextureSystem::good(TextureHandle* texture_handle) {
-    auto image_texture = reinterpret_cast<const ImageTexture2D*>(texture_handle);
+    auto image_texture = reinterpret_cast<const TextureBase*>(texture_handle);
     return IS_PTR_VALID(image_texture) && image_texture->IsValid();
 }
 
@@ -52,4 +60,30 @@ bool SORTTextureSystem::texture(TextureHandle *texture_handle, Perthread *thread
         result[3] = image_texture->GetAlphaFromtUV(s, t);
 
     return true;
+}
+
+bool SORTTextureSystem::texture3d(ustring filename, TextureOpt& options, const Imath::V3f& P, const Imath::V3f& dPdx,
+    const Imath::V3f& dPdy, const Imath::V3f& dPdz, int nchannels, float* result, float* dresultds , 
+    float* dresultdt , float* dresultdr ) {
+    const auto* thread_info = reinterpret_cast<const SORTTextureThreadInfo*>(get_perthread_info());
+
+    if (s_volume_color == filename) {
+        // to be done shortly
+    } else if (s_volume_density == filename) {
+        // to be done shortly
+    }
+
+    return false;
+}
+
+TextureSystem::Perthread* SORTTextureSystem::get_perthread_info(TextureSystem::Perthread* thread_info){
+    static thread_local SORTTextureThreadInfo s_thread_info;
+    return (TextureSystem::Perthread*)&s_thread_info;
+}
+
+TextureSystem::Perthread* SORTTextureSystem::create_thread_info() {
+    return nullptr;
+}
+
+void SORTTextureSystem::destroy_thread_info(TextureSystem::Perthread* threadinfo){
 }

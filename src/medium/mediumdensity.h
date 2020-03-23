@@ -32,4 +32,27 @@ public:
     //!
     //! @param  pos     Position in world space.
     Spectrum Sample( const Point& pos ) const;
+
+    //! @brief  Whether the 2d texture is valid or not.
+    //!
+    //! @return             True if the texture is valid.
+    bool IsValid() const override {
+        return true;
+    }
+};
+
+//! @brief  Medium color data structure allows variation of color inside a medium volume.
+class MediumColor : public ImageTexture3D {
+public:
+    //! @brief  Take a sample in 3D texture.
+    //!
+    //! @param  pos     Position in world space.
+    Spectrum Sample(const Point& pos) const;
+
+    //! @brief  Whether the 2d texture is valid or not.
+    //!
+    //! @return             True if the texture is valid.
+    bool IsValid() const override {
+        return true;
+    }
 };

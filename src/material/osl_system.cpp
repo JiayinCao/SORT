@@ -134,8 +134,11 @@ void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi, 
     shaderglobals.P = Vec3(mi.intersect.x, mi.intersect.y, mi.intersect.z);
 
     // objdata points to world to local volume transform
-    if (mi.mesh)
+    auto thread_info = reinterpret_cast<SORTTextureThreadInfo*>(g_textureSystem.get_perthread_info());
+    if (mi.mesh) {
         shaderglobals.objdata = (void*)mi.mesh->GetWorldToLocalVolume();
+        thread_info->mesh = mi.mesh;
+    }
 
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
@@ -148,8 +151,11 @@ void EvaluateVolumeSample(OSL::ShaderGroup* shader, const MediumInteraction& mi,
     shaderglobals.P = Vec3(mi.intersect.x, mi.intersect.y, mi.intersect.z);
 
     // objdata points to world to local volume transform
-    if (mi.mesh)
+    auto thread_info = reinterpret_cast<SORTTextureThreadInfo*>(g_textureSystem.get_perthread_info());
+    if (mi.mesh) {
         shaderglobals.objdata = (void*)mi.mesh->GetWorldToLocalVolume();
+        thread_info->mesh = mi.mesh;
+    }
 
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 

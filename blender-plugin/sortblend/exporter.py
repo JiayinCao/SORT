@@ -142,7 +142,7 @@ def export_blender(depsgraph, force_debug=False, is_preview=False):
     current_time = time()
     log("Exporting materials.")
     collect_shader_resources(depsgraph, scene, fs)     # this is the place for material to signal heavy resources, like textures, measured BRDF, etc.
-    export_materials(depsgraph, fs)             # this is the place for serializing OSL shader source code with proper default values.
+    export_materials(depsgraph, fs)                    # this is the place for serializing OSL shader source code with proper default values.
     log("Exported materials %.2f(s)" % (time() - current_time))
 
     # export scene

@@ -25,6 +25,9 @@
  */
 class ImageTexture3D : public Texture3DBase{
 public:
+    //! @brief  Default constructor.
+    ImageTexture3D() : Texture3DBase(0u, 0u, 0u) {}
+
     //! @brief  Constructor taking size data.
     //!
     //! @param  w       Width of the texture.

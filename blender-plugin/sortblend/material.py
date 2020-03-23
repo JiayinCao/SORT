@@ -2726,8 +2726,11 @@ class SORTNodeVolumeColor(SORTShadingNode):
     bl_idname = 'SORTNodeVolumeColor'
     osl_shader = '''
         shader VolumeDensity( output vector Result = 0.0 ){
-            point lp = transform("volume_local", P);
-            Result = lp;
+            // get the volume space coordinate to take samples
+            point volume_uvw = transform("volume_local", P);
+
+            // this is a very special 3d texture that is treated different in the renderer
+            Result = texture3d( "volume_color" , volume_uvw );
         }
     '''
     def init(self, context):
@@ -2741,7 +2744,11 @@ class SORTNodeVolumeDensity(SORTShadingNode):
     bl_idname = 'SORTNodeVolumeDensity'
     osl_shader = '''
         shader VolumeDensity( output float Result = 0.0 ){
-            // to be implemented shortly
+            // get the volume space coordinate to take samples
+            point volume_uvw = transform("volume_local", P);
+
+            // this is a very special 3d texture that is treated different in the renderer
+            Result = texture3d( "volume_density" , volume_uvw );
         }
     '''
     def init(self, context):

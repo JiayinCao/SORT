@@ -23,3 +23,9 @@ Spectrum MediumDensity::Sample(const Point& pos) const {
     // to be implemented
     return 0.0f;
 }
+
+Spectrum MediumColor::Sample(const Point& pos) const {
+    // pos needs to be transformed from world space to local space before taking a sample.
+    // to be implemented
+    return 0.0f;
+}

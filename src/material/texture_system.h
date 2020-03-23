@@ -20,10 +20,21 @@
 #include <OSL/oslexec.h>
 #include "core/sassert.h"
 #include "texture/imagetexture2d.h"
+#include "texture/imagetexture3d.h"
 
 // Since only one single file will include this header file, it is OK to use the namespace in a header file.
 using namespace OSL;
 using namespace OIIO;
+
+class Mesh;
+
+//! @brief  Texture System per-thread information.
+/**
+ * This is used to pass data from the host to texture access method.
+ */
+struct SORTTextureThreadInfo {
+    const Mesh* mesh = nullptr;
+};
 
 //! @brief  Texture system implementation in SORT.
 /**
@@ -58,6 +69,13 @@ public:
         float dsdy, float dtdy,
         int nchannels, float *result,
         float *dresultds = NULL, float *dresultdt = NULL) override;
+
+    bool texture3d(ustring filename, TextureOpt& options,
+        const Imath::V3f& P, const Imath::V3f& dPdx,
+        const Imath::V3f& dPdy, const Imath::V3f& dPdz,
+        int nchannels, float* result,
+        float* dresultds = NULL, float* dresultdt = NULL,
+        float* dresultdr = NULL) override;
 
     std::string resolve_filename(const std::string &filename) const override {
         return "";
@@ -118,16 +136,6 @@ public:
 
     // ---------------------------------------------------------------------------------------------------------
     // Unsupported interfaces in SORT
-    bool texture3d(ustring filename, TextureOpt &options,
-        const Imath::V3f &P, const Imath::V3f &dPdx,
-        const Imath::V3f &dPdy, const Imath::V3f &dPdz,
-        int nchannels, float *result,
-        float *dresultds = NULL, float *dresultdt = NULL,
-        float *dresultdr = NULL) override {
-        sAssertMsg(false, MATERIAL, "No support for sampling 3d texture for now.");
-        return false;
-    }
-
     bool texture3d(TextureHandle *texture_handle,
         Perthread *thread_info, TextureOpt &options,
         const Imath::V3f &P, const Imath::V3f &dPdx,
@@ -299,10 +307,9 @@ public:
         return false;
     }
 
-    // This is no per-thread information for current implementation of SORT texturing system.
-    Perthread* get_perthread_info(Perthread* thread_info = NULL) override { return nullptr; }
-    Perthread* create_thread_info() override { return nullptr; }
-    void destroy_thread_info(Perthread* threadinfo) override {}
+    Perthread* get_perthread_info(Perthread* thread_info = NULL) override;
+    Perthread* create_thread_info() override;
+    void destroy_thread_info(Perthread* threadinfo) override;
 
     bool texture(ustring filename, TextureOpt &options,
         float s, float t, float dsdx, float dtdx,
@@ -363,5 +370,5 @@ private:
     void operator delete(void* todel) { ::delete ((char*)todel); }
 
     // The texture pool
-    std::unordered_map<std::string, std::unique_ptr<ImageTexture2D>> m_TexturePool;
+    std::unordered_map<std::string, std::unique_ptr<ImageTexture2D>> m_Texture2DPool;
 };

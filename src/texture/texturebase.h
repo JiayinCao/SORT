@@ -32,6 +32,11 @@ class TextureBase {
 public:
     //! @brief  Virtual destructor.
     virtual ~TextureBase() = default;
+
+    //! @brief  Whether the texture is valid or not.
+    //!
+    //! @return             True if the texture is valid.
+    virtual bool IsValid() const = 0;
 };
 
 //! @brief  Base class of Texture2D.
@@ -100,8 +105,8 @@ public:
     //! @brief  Whether the 2d texture is valid or not.
     //!
     //! @return             True if the texture is valid.
-    virtual bool IsValid() const {
-        return true;
+    bool IsValid() const override{
+        return false;
     }
 
 protected:
@@ -150,6 +155,13 @@ public:
     //! @param w        W coordinate.
     virtual Spectrum Sample(float u, float v, float w) const = 0;
     
+    //! @brief  Whether the 2d texture is valid or not.
+    //!
+    //! @return             True if the texture is valid.
+    bool IsValid() const override {
+        return false;
+    }
+
 protected:
     /**< Size of the 3D texture. */
     unsigned m_width;
