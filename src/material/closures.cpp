@@ -780,11 +780,11 @@ namespace {
 
         void Evaluate(const ClosureComponent* comp, const OSL::Color3& w, MediumSample& ms) const override{
             const auto& params = *comp->as<HeterogenousMedium::Params>();
-            ms.absorption = params.absorption;
-            ms.scattering = params.scattering;
-            ms.extinction = ms.absorption + ms.scattering;
+            ms.absorption = fmax(0.0f, params.absorption);
+            ms.scattering = fmax(0.0f, params.scattering);
+            ms.extinction = fmax(0.0f, ms.absorption + ms.scattering);
             ms.anisotropy = params.anisotropy;
-            ms.emission = params.emission;
+            ms.emission = fmax(0.0f, params.emission);
             ms.basecolor = params.baseColor;
         }
     };

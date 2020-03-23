@@ -35,6 +35,19 @@ void Mesh::ApplyTransform( const Transform& transform ){
         //if(m_hasUV)
         //    mv.m_tangent = transform(mv.m_tangent).Normalize();
     }
+
+    m_world2Local = transform.invMatrix;
+}
+
+const float* Mesh::GetWorldToLocalVolume() const {
+    if (!m_w2lvCached) {
+        // Be very careful with the matrix multiplication used in SORT and OSL, they are different
+        // A transpose operation is necessary to achieve the correct result.
+        const Matrix mat = m_local2Volume * m_world2Local;
+        memcpy(m_world2LocalVolume, mat.Transpose().m, sizeof(float) * 16);
+        m_w2lvCached = true;
+    }
+    return m_world2LocalVolume;
 }
 
 void Mesh::GenSmoothTagent(){
@@ -139,4 +152,16 @@ void Mesh::Serialize( IStreamBase& stream ){
             mi.m_mat = mapping[mi.m_mat];
         }
     }
+
+    BBox bbox;
+    for (const auto& v : m_vertices)
+        bbox.Union(v.m_position);
+    const auto extent = bbox.m_Max - bbox.m_Min;
+    const auto ie_x = 1.0f / extent[0];
+    const auto ie_y = 1.0f / extent[1];
+    const auto ie_z = 1.0f / extent[2];
+    m_local2Volume = Matrix(ie_x, 0.0f, 0.0f, -bbox.m_Min[0] * ie_x,
+                            0.0f, ie_y, 0.0f, -bbox.m_Min[1] * ie_y,
+                            0.0f, 0.0f, ie_z, -bbox.m_Min[2] * ie_z,
+                            0.0f, 0.0f, 0.0f, 1.0f);
 }

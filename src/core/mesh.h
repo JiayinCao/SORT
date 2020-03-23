@@ -73,7 +73,28 @@ public:
     //!             it could come from different places.
     void    Serialize( IStreamBase& stream ) override;
 
+    //! @brief      Get world to volume local space transformation.
+    //!
+    //! Instead of baking data in a standard tranform or matrix data structure commonly used in SORT,
+    //! an array of 16 floats is used to save the raw data because the format is not aligned with what SORT uses
+    //! it seems that OSL multiply vector with matrix internally, while SORT does it the other way.
+    //! This data is not supposed to be used by any other code in SORT but passing through to OSL code.
+    //!
+    //! @return     Transform from world space to local volume space.
+    const float* GetWorldToLocalVolume() const;
+
 private:
     //! @brief      Generate tangent for the triangles.
     Vector  genTagentForTri( const MeshFaceIndex& ) const;
+
+    /**< Transformation from world space to local volume space. */
+    mutable float   m_world2LocalVolume[16] = { 0.0f };
+
+    /**< Tranform from object local space to volume texture space. */
+    Matrix          m_local2Volume;
+    /**< Tranfrom from world space to object space. */
+    Matrix          m_world2Local;
+
+    /**< Whether the world2localvolume matrix is cached or not. */
+    mutable bool    m_w2lvCached = false;
 };

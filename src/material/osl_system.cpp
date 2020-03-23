@@ -33,11 +33,29 @@ class SORTRenderServices : public OSL::RendererServices{
 public:
     SORTRenderServices( OIIO::TextureSystem* ts ) : OSL::RendererServices(ts){}
     int supports (OSL::string_view feature) const override { return 0; }
-    bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::TransformationPtr xform, float time)override{ return true; }
-    bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring from, float time)override{ return true; }
-    bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::TransformationPtr xform)override{ return true; }
-    bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring from)override{ return true; }
-    bool get_inverse_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring to, float time)override{ return true; }
+    bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::TransformationPtr xform, float time)override{ 
+        return false;
+    }
+    bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring from, float time)override{ 
+        return false; 
+    }
+    bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::TransformationPtr xform)override{ 
+        return false;
+    }
+    bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring from)override{ 
+        return false;
+    }
+    bool get_inverse_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring to, float time)override{ 
+        static OSL::ustring str_volume_object("volume_local");
+
+        // only process this type of matrix for now.
+        if (str_volume_object == to && sg->objdata) {
+            memcpy(result.x, sg->objdata, sizeof(float) * 16);
+            return true;
+        }
+
+        return false;
+    }
     bool get_array_attribute (OSL::ShaderGlobals *sg, bool derivatives, OSL::ustring object, OSL::TypeDesc type, OSL::ustring name, int index, void *val )override{ return true; }
     bool get_attribute (OSL::ShaderGlobals *sg, bool derivatives, OSL::ustring object, OSL::TypeDesc type, OSL::ustring name, void *val)override{ return true; }
     bool get_userdata (bool derivatives, OSL::ustring name, OSL::TypeDesc type, OSL::ShaderGlobals *sg, void *val)override{ return true;}
@@ -114,6 +132,11 @@ void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi, 
     ShaderGlobals shaderglobals;
     memset(&shaderglobals, 0, sizeof(shaderglobals));
     shaderglobals.P = Vec3(mi.intersect.x, mi.intersect.y, mi.intersect.z);
+
+    // objdata points to world to local volume transform
+    if (mi.mesh)
+        shaderglobals.objdata = (void*)mi.mesh->GetWorldToLocalVolume();
+
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
     ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms, flag, material, mi.mesh);
@@ -123,6 +146,11 @@ void EvaluateVolumeSample(OSL::ShaderGroup* shader, const MediumInteraction& mi,
     ShaderGlobals shaderglobals;
     memset(&shaderglobals, 0, sizeof(shaderglobals));
     shaderglobals.P = Vec3(mi.intersect.x, mi.intersect.y, mi.intersect.z);
+
+    // objdata points to world to local volume transform
+    if (mi.mesh)
+        shaderglobals.objdata = (void*)mi.mesh->GetWorldToLocalVolume();
+
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
     ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms);

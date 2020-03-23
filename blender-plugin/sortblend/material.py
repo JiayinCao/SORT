@@ -2725,8 +2725,9 @@ class SORTNodeVolumeColor(SORTShadingNode):
     bl_label = 'Volume Color'
     bl_idname = 'SORTNodeVolumeColor'
     osl_shader = '''
-        shader VolumeDensity( output color Result = 0.0 ){
-            getattribute( "to_be_done" , Result );
+        shader VolumeDensity( output vector Result = 0.0 ){
+            point lp = transform("volume_local", P);
+            Result = lp;
         }
     '''
     def init(self, context):
@@ -2740,7 +2741,7 @@ class SORTNodeVolumeDensity(SORTShadingNode):
     bl_idname = 'SORTNodeVolumeDensity'
     osl_shader = '''
         shader VolumeDensity( output float Result = 0.0 ){
-            getattribute( "to_be_done_density" , Result );
+            // to be implemented shortly
         }
     '''
     def init(self, context):
