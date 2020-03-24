@@ -24,6 +24,7 @@
 #include "math/vector3.h"
 #include "math/transform.h"
 #include "stream/stream.h"
+#include "medium/mediumdata.h"
 
 class MaterialBase;
 
@@ -104,4 +105,9 @@ private:
 
     /**< Whether the world2localvolume matrix is cached or not. */
     mutable bool    m_w2lvCached = false;
+
+    /**< The density of volume data insize this mesh. */
+    std::unique_ptr<MediumDensity>  m_volumeDensity;
+    /**< The color of the volume data inside this mesh. */
+    std::unique_ptr<MediumColor>    m_volumeColor;
 };

@@ -240,11 +240,11 @@ def export_scene(depsgraph, is_preview, fs):
                 evaluted_obj = obj.evaluated_get(depsgraph)
                 mesh = evaluted_obj.to_mesh()
                 # instead of exporting the original mesh, export the temporary mesh.
-                stat = export_mesh(mesh, fs)
+                stat = export_mesh(evaluted_obj, mesh, fs)
             finally:
                 evaluted_obj.to_mesh_clear()
         else:
-            stat = export_mesh(obj.data, fs)
+            stat = export_mesh(obj, obj.data, fs)
 
         total_vert_cnt += stat[0]
         total_prim_cnt += stat[1]
@@ -315,11 +315,6 @@ def export_scene(depsgraph, is_preview, fs):
     # to indicate the scene stream comes to an end
     fs.serialize(SID('End of Entities'))
 
-    # output volume data
-    for vol in all_objs:
-        export_smoke(obj, fs)
-    fs.serialize(SID('End of Volumes'))
-
 # avoid having space in material name
 def name_compat(name):
     if name is None:
@@ -385,8 +380,44 @@ def export_global_config(scene, fs, sort_resource_path):
         fs.serialize( sort_data.ir_light_path_num )
         fs.serialize( sort_data.ir_min_dist )
 
+# export smoke information
+def export_smoke(obj, fs):
+    smoke_modifier = get_smoke_modifier(obj)
+    if not smoke_modifier:
+        fs.serialize( SID('no_volume') )
+        return
+    
+    # making sure there is density data
+    domain = smoke_modifier.domain_settings
+    if len(domain.density_grid) == 0:
+        fs.serialize( SID('no_volume') )
+        return
+
+    # this is only because it is not fully functional yet.
+    fs.serialize( SID('has_volume') )
+    
+    # dimension of the volume data
+    x, y, z = domain.domain_resolution
+    fs.serialize(x)
+    fs.serialize(y)
+    fs.serialize(z)
+
+    # the color itself, don't export it for now
+    # color_grid = np.fromiter(domain.color_grid, dtype=np.float32)
+    # fs.serialize(color_grid)
+
+    FLTFMT = struct.Struct('=f')
+
+    # the density itself
+    density_data = bytearray()
+
+    density_grid = np.fromiter(domain.density_grid, dtype=np.float32)
+    for density in density_grid:
+        density_data += FLTFMT.pack(density)
+    fs.serialize(density_data)
+
 # export a mesh
-def export_mesh(mesh, fs):
+def export_mesh(obj, mesh, fs):
     LENFMT = struct.Struct('=i')
     FLTFMT = struct.Struct('=f')
     VERTFMT = struct.Struct('=ffffffff')
@@ -486,38 +517,12 @@ def export_mesh(mesh, fs):
     fs.serialize(LENFMT.pack(primitive_cnt))
     fs.serialize(wo3_tris)
 
+    # export smoke data if needed, this is for volumetric rendering
+    export_smoke(obj, fs)
+
+    fs.serialize(SID('end of mesh'))
+
     return (vert_cnt, primitive_cnt)
-
-# export smoke information
-def export_smoke(obj, fs):
-    smoke_modifier = get_smoke_modifier(obj)
-    if not smoke_modifier:
-        return
-    
-    # making sure there is density data
-    domain = smoke_modifier.domain_settings
-    if len(domain.density_grid) == 0:
-        return
-
-    # this is only because it is not fully functional yet.
-    return
-    
-    # serialize the name of the object
-    fs.serialize(SID(obj.name))
-
-    # dimension of the volume data
-    x, y, z = domain.domain_resolution
-    fs.serialize(x)
-    fs.serialize(y)
-    fs.serialize(z)
-
-    # the color itself
-    color_grid = np.fromiter(domain.color_grid, dtype=np.float32)
-    fs.serialize(color_grid)
-
-    # the density itself
-    density_grid = np.fromiter(domain.density_grid, dtype=np.float32)
-    fs.serialize(density_grid)
 
 # export hair information
 def export_hair(ps, obj, scene, is_preview, fs):

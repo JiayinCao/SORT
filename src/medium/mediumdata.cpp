@@ -15,17 +15,35 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include "mediumdensity.h"
+#include "mediumdata.h"
 #include "math/point.h"
+#include "stream/stream.h"
 
-Spectrum MediumDensity::Sample(const Point& pos) const {
+float MediumDensity::Sample(const Point& uvw) const {
+    return ImageTexture3D::Sample(uvw[0], uvw[1], uvw[2]);
+}
+
+void MediumDensity::Serialize(IStreamBase& stream) {
+    stream >> m_width >> m_height >> m_depth;
+
+    // make sure the dimension is valid.
+    if (m_width == 0 || m_height == 0 || m_depth == 0)
+        return;
+
+    const auto tex_cnt = m_width * m_height * m_depth;
+
+    m_memory = std::make_unique<ImgMemory<float>>();
+    m_memory->m_texel = std::make_unique<float[]>(tex_cnt);
+    stream.Load((char*)m_memory->m_texel.get(), sizeof(float) * tex_cnt);
+}
+
+Spectrum MediumColor::Sample(const Point& uvw) const {
     // pos needs to be transformed from world space to local space before taking a sample.
     // to be implemented
     return 0.0f;
 }
 
-Spectrum MediumColor::Sample(const Point& pos) const {
-    // pos needs to be transformed from world space to local space before taking a sample.
-    // to be implemented
-    return 0.0f;
+void MediumColor::Serialize(IStreamBase& stream) {
+    // do nothing for now
+    //stream >> m_width >> m_height >> m_depth;
 }

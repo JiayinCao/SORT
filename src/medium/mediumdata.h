@@ -21,38 +21,39 @@
 #include "texture/imagetexture3d.h"
 
 struct Point;
+class IStreamBase;
 
 //! @brief  Medium density data structure allows variation of density inside a medium volume.
 /**
  * Medium density is essentially a 3D texture.
  */
-class MediumDensity : public ImageTexture3D {
+class MediumDensity : public ImageTexture3D<float> {
 public:
     //! @brief  Take a sample in 3D texture.
     //!
-    //! @param  pos     Position in world space.
-    Spectrum Sample( const Point& pos ) const;
+    //! @param  uvw     Texture coordinate in volume space.
+    //! @return         The density at the position related to the object.
+    float   Sample( const Point& uvw) const;
 
-    //! @brief  Whether the 2d texture is valid or not.
+    //! @brief      Serializing data from stream.
     //!
-    //! @return             True if the texture is valid.
-    bool IsValid() const override {
-        return true;
-    }
+    //! @param  Stream  where the serialization data comes from. Depending on different situation,
+    //!                 it could come from different places.
+    void    Serialize(IStreamBase& stream);
 };
 
 //! @brief  Medium color data structure allows variation of color inside a medium volume.
-class MediumColor : public ImageTexture3D {
+class MediumColor : public ImageTexture3D<Spectrum> {
 public:
     //! @brief  Take a sample in 3D texture.
     //!
-    //! @param  pos     Position in world space.
-    Spectrum Sample(const Point& pos) const;
+    //! @param  uvw     Texture coordinate in volume space.
+    //! @return         The color at the position related to the object.
+    Spectrum Sample(const Point& uvw) const;
 
-    //! @brief  Whether the 2d texture is valid or not.
+    //! @brief      Serializing data from stream.
     //!
-    //! @return             True if the texture is valid.
-    bool IsValid() const override {
-        return true;
-    }
+    //! @param  Stream  where the serialization data comes from. Depending on different situation,
+    //!                 it could come from different places.
+    void    Serialize(IStreamBase& stream);
 };

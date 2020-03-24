@@ -60,19 +60,9 @@ bool Scene::LoadScene( IStreamBase& stream ){
         m_entities.push_back(std::move(entity));
     }
 
-    while (true) {
-        StringID volume_id;
-        stream >> volume_id;
-        if (SID("End of Volumes") == volume_id)
-            break;
-
-        // process volume data here, maybe add a volume data manager later.
-
-    }
-
     // generate triangle buffer after parsing from stream
-    _generatePriBuf();
-    _genLightDistribution();
+    generatePriBuf();
+    genLightDistribution();
 
     SORT_STATS(sScenePrimitiveCount=(StatsInt)m_primitives.size());
     SORT_STATS(sSceneLightCount=(StatsInt)m_lights.size());
@@ -126,7 +116,7 @@ void Scene::GetIntersect( const Ray& r , BSSRDFIntersections& intersect , const 
         g_accelerator->GetIntersect( r , intersect , matID );
 }
 
-void Scene::_generatePriBuf(){
+void Scene::generatePriBuf(){
     for( auto& entity : m_entities )
         entity->FillScene( *this );
     
@@ -150,7 +140,7 @@ void Scene::_generatePriBuf(){
     m_bboxVol   = generate_bbox(m_volPrimitives);
 }
 
-void Scene::_genLightDistribution(){
+void Scene::genLightDistribution(){
     unsigned count = (unsigned)m_lights.size();
     if( count == 0 )
         return ;

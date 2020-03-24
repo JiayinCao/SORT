@@ -185,10 +185,10 @@ private:
     BBox    m_bboxVol;
 
     // generate primitive buffer
-    void    _generatePriBuf();
+    void    generatePriBuf();
 
     // compute light cdf
-    void    _genLightDistribution();
+    void    genLightDistribution();
 
     friend class MeshVisual;
 };

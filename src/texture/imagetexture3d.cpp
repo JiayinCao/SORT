@@ -17,34 +17,20 @@
 
 #include "imagetexture3d.h"
 
-ImageTexture3D::ImageTexture3D(unsigned w, unsigned h, unsigned d, const float* data) {
-    if (w == 0 || h == 0 || d == 0)
-        return;
+template ImageTexture3D<float>;
+template ImageTexture3D<Spectrum>;
 
-    unsigned offset = 0;
-    m_memory->m_rgb = std::make_unique<Spectrum[]>(w * h * d);
-    for (auto i = 0u; i < d; ++i) {
-        for (auto j = 0u; j < h; ++j) {
-            for (auto k = 0u; k < w; ++k) {
-                m_memory->m_rgb[offset][0] = data[offset * 3];
-                m_memory->m_rgb[offset][1] = data[offset * 3 + 1];
-                m_memory->m_rgb[offset][2] = data[offset * 3 + 2];
-
-                ++offset;
-            }
-        }
-    }
-}
-
-Spectrum ImageTexture3D::Sample(int x, int y, int z) const {
+template<class T>
+T ImageTexture3D<T>::Sample(int x, int y, int z) const {
     if (x < 0 || x >= (int)m_width || y < 0 || y >= (int)m_height || z < 0 || z >= (int)m_depth)
         return 0.0f;
 
     const auto offset = z * m_width * m_height + y * m_width + x;
-    return m_memory->m_rgb[offset];
+    return m_memory->m_texel[offset];
 }
 
-Spectrum ImageTexture3D::Sample(float u, float v, float w) const{
+template<class T>
+T ImageTexture3D<T>::Sample(float u, float v, float w) const{
     // There should have been proper filtering algorithms
     // However, since this is mainly for medium density for now, there will be no filter supported.
     // If the uvw is out of range, just retuen 0.0.
@@ -55,5 +41,5 @@ Spectrum ImageTexture3D::Sample(float u, float v, float w) const{
     const auto y = (unsigned)(v * m_height);
     const auto z = (unsigned)(w * m_depth);
     const auto offset = z * m_width * m_height + y * m_width + x;
-    return m_memory->m_rgb[offset];
+    return m_memory->m_texel[offset];
 }

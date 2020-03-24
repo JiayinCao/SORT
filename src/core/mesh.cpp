@@ -108,7 +108,7 @@ Vector Mesh::genTagentForTri( const MeshFaceIndex& mi ) const{
     return ( dv2 * dp1 - dv1 * dp2 ) / determinant;
 }
 
-void Mesh::Serialize( IStreamBase& stream ){
+void Mesh::Serialize(IStreamBase& stream) {
     stream >> m_hasUV;
     unsigned int vb_cnt, ib_cnt;
     stream >> vb_cnt;
@@ -137,34 +137,56 @@ void Mesh::Serialize( IStreamBase& stream ){
             // material proxy of this material is not created yet.
             if (0 == mapping.count(mi.m_mat))
                 mapping[mi.m_mat] = MatManager::GetSingleton().CreateMaterialProxy(*mi.m_mat);
-            
+
             mi.m_mat = mapping[mi.m_mat];
         }
     }
 
-    BBox bbox;
-    for (const auto& v : m_vertices)
-        bbox.Union(v.m_position);
-    const auto extent = bbox.m_Max - bbox.m_Min;
-    const auto ie_x = 1.0f / extent[0];
-    const auto ie_y = 1.0f / extent[1];
-    const auto ie_z = 1.0f / extent[2];
-    m_local2Volume = Matrix(ie_x, 0.0f, 0.0f, -bbox.m_Min[0] * ie_x,
-                            0.0f, ie_y, 0.0f, -bbox.m_Min[1] * ie_y,
-                            0.0f, 0.0f, ie_z, -bbox.m_Min[2] * ie_z,
-                            0.0f, 0.0f, 0.0f, 1.0f);
+    static const StringID has_volume_sid("has_volume");
+    static const StringID no_volume_sid("no_volume");
+
+    // serialize volume data if needed
+    StringID volume_sid;
+    stream >> volume_sid;
+    if (volume_sid == has_volume_sid){
+        m_volumeDensity = std::make_unique<MediumDensity>();
+        m_volumeDensity->Serialize(stream);
+
+        m_volumeColor = std::make_unique<MediumColor>();
+        m_volumeColor->Serialize(stream);
+
+        // this doesn't need to be done if there is no volume data
+        BBox bbox;
+        for (const auto& v : m_vertices)
+            bbox.Union(v.m_position);
+        const auto extent = bbox.m_Max - bbox.m_Min;
+        const auto ie_x = 1.0f / extent[0];
+        const auto ie_y = 1.0f / extent[1];
+        const auto ie_z = 1.0f / extent[2];
+        m_local2Volume = Matrix(ie_x, 0.0f, 0.0f, -bbox.m_Min[0] * ie_x,
+            0.0f, ie_y, 0.0f, -bbox.m_Min[1] * ie_y,
+            0.0f, 0.0f, ie_z, -bbox.m_Min[2] * ie_z,
+            0.0f, 0.0f, 0.0f, 1.0f);
+    } else {
+        sAssert(volume_sid == no_volume_sid, VOLUME);
+    }
+
+    static const StringID end_of_mesh("end of mesh");
+    StringID eom_sid;
+    stream >> eom_sid;
+    sAssert(eom_sid == end_of_mesh, GENERAL);
 }
 
 float Mesh::SampleVolumeDensity(const Point& pos) const {
+    if (IS_PTR_INVALID(m_volumeDensity))
+        return 0.0f;
     const auto uvw = m_world2Volume.TransformPoint(pos);
-
-    // to be connected with the real density data
-    return uvw.x;
+    return m_volumeDensity->Sample(uvw);
 }
 
 Spectrum Mesh::SampleVolumeColor(const Point& pos) const {
+    if (IS_PTR_INVALID(m_volumeColor))
+        return 0.0f;
     const auto uvw = m_world2Volume.TransformPoint(pos);
-
-    // to be connected with the real color data
-    return Spectrum(uvw[0],uvw[1],uvw[2]);
+    return m_volumeColor->Sample(uvw);
 }

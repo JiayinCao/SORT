@@ -129,6 +129,7 @@ protected:
  * This data structure could be easily extended for other shading purposes in the future.
  * However, the only purpose of texture 3D is only for volume density for now.
  */
+template<class T>
 class Texture3DBase : public TextureBase {
 public:
     //! @brief  Default constructor for texture 3D.
@@ -146,20 +147,20 @@ public:
     //! @param  x       X coordinate position.
     //! @param  y       Y coordinate position.
     //! @param  z       Z coordinate position.
-    virtual Spectrum Sample(int x, int y, int z) const = 0;
+    virtual T Sample(int x, int y, int z) const = 0;
 
     //! @brief  Take a sample in 3D texture.
     //!
     //! @param u        U coordinate.
     //! @param v        V coordinate.
     //! @param w        W coordinate.
-    virtual Spectrum Sample(float u, float v, float w) const = 0;
+    virtual T Sample(float u, float v, float w) const = 0;
     
-    //! @brief  Whether the 2d texture is valid or not.
+    //! @brief  Whether the 3d texture is valid or not.
     //!
     //! @return             True if the texture is valid.
     bool IsValid() const override {
-        return false;
+        return m_width > 0 && m_height > 0 && m_depth > 0;
     }
 
 protected:

@@ -17,7 +17,6 @@
 
 #include "texture_system.h"
 #include "core/log.h"
-#include "medium/mediumdensity.h"
 #include "core/mesh.h"
 
 static const OSL::ustring s_volume_color("volume_color");
