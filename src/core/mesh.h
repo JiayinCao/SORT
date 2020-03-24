@@ -73,27 +73,34 @@ public:
     //!             it could come from different places.
     void    Serialize( IStreamBase& stream ) override;
 
-    //! @brief      Get world to volume local space transformation.
+    //! @brief      Sample volume density
     //!
-    //! Instead of baking data in a standard tranform or matrix data structure commonly used in SORT,
-    //! an array of 16 floats is used to save the raw data because the format is not aligned with what SORT uses
-    //! it seems that OSL multiply vector with matrix internally, while SORT does it the other way.
-    //! This data is not supposed to be used by any other code in SORT but passing through to OSL code.
+    //! For meshes that don't have volume inside, this function should not even be called.
+    //! However, if it is, which is totally possible depending on data setup, it returns 0.0f.
     //!
-    //! @return     Transform from world space to local volume space.
-    const float* GetWorldToLocalVolume() const;
+    //! @param  pos     Position in world space.
+    //! @return         The density of the volume.
+    float       SampleVolumeDensity(const Point& pos) const;
+
+    //! @brief      Sample volume color
+    //!
+    //! @param  pos     Position in world space.
+    //! @return         The color of the volume.
+    Spectrum    SampleVolumeColor(const Point& pos) const;
 
 private:
     //! @brief      Generate tangent for the triangles.
-    Vector  genTagentForTri( const MeshFaceIndex& ) const;
+    //!
+    //! @return     Generated tangent.
+    Vector      genTagentForTri( const MeshFaceIndex& ) const;
 
     /**< Transformation from world space to local volume space. */
     mutable float   m_world2LocalVolume[16] = { 0.0f };
 
     /**< Tranform from object local space to volume texture space. */
     Matrix          m_local2Volume;
-    /**< Tranfrom from world space to object space. */
-    Matrix          m_world2Local;
+    /**< Tranfrom from world space to volume texture space. */
+    Matrix          m_world2Volume;
 
     /**< Whether the world2localvolume matrix is cached or not. */
     mutable bool    m_w2lvCached = false;

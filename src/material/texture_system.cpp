@@ -18,6 +18,7 @@
 #include "texture_system.h"
 #include "core/log.h"
 #include "medium/mediumdensity.h"
+#include "core/mesh.h"
 
 static const OSL::ustring s_volume_color("volume_color");
 static const OSL::ustring s_volume_density("volume_density");
@@ -67,13 +68,31 @@ bool SORTTextureSystem::texture3d(ustring filename, TextureOpt& options, const I
     float* dresultdt , float* dresultdr ) {
     const auto* thread_info = reinterpret_cast<const SORTTextureThreadInfo*>(get_perthread_info());
 
-    if (s_volume_color == filename) {
-        // to be done shortly
-    } else if (s_volume_density == filename) {
-        // to be done shortly
+    // make sure there is valid mesh, otherwise, just return 0.0f.
+    const auto* mesh = thread_info->mesh;
+    if (IS_PTR_INVALID(mesh)) {
+        if (s_volume_color == filename) {
+            result[0] = result[1] = result[2] = 0.0f;
+            return true;
+        }
+        else if (s_volume_density == filename) {
+            result[0] = 0.0f;
+            return true;
+        }
     }
 
-    return false;
+    if (s_volume_color == filename) {
+        const auto color = mesh->SampleVolumeColor(Point(P));
+        result[0] = color[0];
+        result[1] = color[1];
+        result[2] = color[2];
+        return true;
+    } else if (s_volume_density == filename) {
+        result[0] = mesh->SampleVolumeDensity(Point(P));
+        return true;
+    }
+
+    return true;
 }
 
 TextureSystem::Perthread* SORTTextureSystem::get_perthread_info(TextureSystem::Perthread* thread_info){

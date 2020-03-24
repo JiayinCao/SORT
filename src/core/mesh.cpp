@@ -36,18 +36,7 @@ void Mesh::ApplyTransform( const Transform& transform ){
         //    mv.m_tangent = transform(mv.m_tangent).Normalize();
     }
 
-    m_world2Local = transform.invMatrix;
-}
-
-const float* Mesh::GetWorldToLocalVolume() const {
-    if (!m_w2lvCached) {
-        // Be very careful with the matrix multiplication used in SORT and OSL, they are different
-        // A transpose operation is necessary to achieve the correct result.
-        const Matrix mat = m_local2Volume * m_world2Local;
-        memcpy(m_world2LocalVolume, mat.Transpose().m, sizeof(float) * 16);
-        m_w2lvCached = true;
-    }
-    return m_world2LocalVolume;
+    m_world2Volume = m_local2Volume * transform.invMatrix;
 }
 
 void Mesh::GenSmoothTagent(){
@@ -164,4 +153,18 @@ void Mesh::Serialize( IStreamBase& stream ){
                             0.0f, ie_y, 0.0f, -bbox.m_Min[1] * ie_y,
                             0.0f, 0.0f, ie_z, -bbox.m_Min[2] * ie_z,
                             0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+float Mesh::SampleVolumeDensity(const Point& pos) const {
+    const auto uvw = m_world2Volume.TransformPoint(pos);
+
+    // to be connected with the real density data
+    return uvw.x;
+}
+
+Spectrum Mesh::SampleVolumeColor(const Point& pos) const {
+    const auto uvw = m_world2Volume.TransformPoint(pos);
+
+    // to be connected with the real color data
+    return Spectrum(uvw[0],uvw[1],uvw[2]);
 }

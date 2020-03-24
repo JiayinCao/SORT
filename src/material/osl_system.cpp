@@ -32,7 +32,9 @@ using namespace OSL;
 class SORTRenderServices : public OSL::RendererServices{
 public:
     SORTRenderServices( OIIO::TextureSystem* ts ) : OSL::RendererServices(ts){}
-    int supports (OSL::string_view feature) const override { return 0; }
+    int supports (OSL::string_view feature) const override { 
+        return 0; 
+    }
     bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::TransformationPtr xform, float time)override{ 
         return false;
     }
@@ -45,20 +47,18 @@ public:
     bool get_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring from)override{ 
         return false;
     }
-    bool get_inverse_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring to, float time)override{ 
-        static OSL::ustring str_volume_object("volume_local");
-
-        // only process this type of matrix for now.
-        if (str_volume_object == to && sg->objdata) {
-            memcpy(result.x, sg->objdata, sizeof(float) * 16);
-            return true;
-        }
-
+    bool get_inverse_matrix (OSL::ShaderGlobals *sg, OSL::Matrix44 &result, OSL::ustring to, float time)override{
         return false;
     }
-    bool get_array_attribute (OSL::ShaderGlobals *sg, bool derivatives, OSL::ustring object, OSL::TypeDesc type, OSL::ustring name, int index, void *val )override{ return true; }
-    bool get_attribute (OSL::ShaderGlobals *sg, bool derivatives, OSL::ustring object, OSL::TypeDesc type, OSL::ustring name, void *val)override{ return true; }
-    bool get_userdata (bool derivatives, OSL::ustring name, OSL::TypeDesc type, OSL::ShaderGlobals *sg, void *val)override{ return true;}
+    bool get_array_attribute (OSL::ShaderGlobals *sg, bool derivatives, OSL::ustring object, OSL::TypeDesc type, OSL::ustring name, int index, void *val )override{
+        return false;
+    }
+    bool get_attribute (OSL::ShaderGlobals *sg, bool derivatives, OSL::ustring object, OSL::TypeDesc type, OSL::ustring name, void *val)override{
+        return false;
+    }
+    bool get_userdata (bool derivatives, OSL::ustring name, OSL::TypeDesc type, OSL::ShaderGlobals *sg, void *val)override{
+        return false;
+    }
 };
 
 static std::unique_ptr<OSL::ShadingSystem>  g_shadingsys = nullptr;
@@ -135,10 +135,8 @@ void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi, 
 
     // objdata points to world to local volume transform
     auto thread_info = reinterpret_cast<SORTTextureThreadInfo*>(g_textureSystem.get_perthread_info());
-    if (mi.mesh) {
-        shaderglobals.objdata = (void*)mi.mesh->GetWorldToLocalVolume();
+    if (mi.mesh)
         thread_info->mesh = mi.mesh;
-    }
 
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
@@ -152,10 +150,8 @@ void EvaluateVolumeSample(OSL::ShaderGroup* shader, const MediumInteraction& mi,
 
     // objdata points to world to local volume transform
     auto thread_info = reinterpret_cast<SORTTextureThreadInfo*>(g_textureSystem.get_perthread_info());
-    if (mi.mesh) {
-        shaderglobals.objdata = (void*)mi.mesh->GetWorldToLocalVolume();
+    if (mi.mesh)
         thread_info->mesh = mi.mesh;
-    }
 
     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
 
