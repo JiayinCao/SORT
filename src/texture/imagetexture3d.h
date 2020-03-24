@@ -27,7 +27,7 @@ template<class T>
 class ImageTexture3D : public Texture3DBase<T>{
 public:
     //! @brief  Default constructor.
-    ImageTexture3D() : Texture3DBase(0u, 0u, 0u) {}
+    ImageTexture3D() : Texture3DBase<T>(0u, 0u, 0u) {}
 
     //! @brief  Take a sample in 3D texture given a position of texel.
     //!

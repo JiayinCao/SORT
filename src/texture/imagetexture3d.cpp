@@ -17,15 +17,15 @@
 
 #include "imagetexture3d.h"
 
-template ImageTexture3D<float>;
-template ImageTexture3D<Spectrum>;
+template class ImageTexture3D<float>;
+template class ImageTexture3D<Spectrum>;
 
 template<class T>
 T ImageTexture3D<T>::Sample(int x, int y, int z) const {
-    if (x < 0 || x >= (int)m_width || y < 0 || y >= (int)m_height || z < 0 || z >= (int)m_depth)
+    if (x < 0 || x >= (int)Texture3DBase<T>::m_width || y < 0 || y >= (int)Texture3DBase<T>::m_height || z < 0 || z >= (int)Texture3DBase<T>::m_depth)
         return 0.0f;
 
-    const auto offset = z * m_width * m_height + y * m_width + x;
+    const auto offset = z * Texture3DBase<T>::m_width * Texture3DBase<T>::m_height + y * Texture3DBase<T>::m_width + x;
     return m_memory->m_texel[offset];
 }
 
@@ -37,9 +37,9 @@ T ImageTexture3D<T>::Sample(float u, float v, float w) const{
     if (u < 0.0f || u >= 1.0f || v < 0.0f || v >= 1.0f || w < 0.0f || w >= 1.0f)
         return 0.0f;
 
-    const auto x = (unsigned)(u * m_width);
-    const auto y = (unsigned)(v * m_height);
-    const auto z = (unsigned)(w * m_depth);
-    const auto offset = z * m_width * m_height + y * m_width + x;
+    const auto x = (unsigned)(u * Texture3DBase<T>::m_width);
+    const auto y = (unsigned)(v * Texture3DBase<T>::m_height);
+    const auto z = (unsigned)(w * Texture3DBase<T>::m_depth);
+    const auto offset = z * Texture3DBase<T>::m_width * Texture3DBase<T>::m_height + y * Texture3DBase<T>::m_width + x;
     return m_memory->m_texel[offset];
 }
