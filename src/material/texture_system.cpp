@@ -91,7 +91,7 @@ bool SORTTextureSystem::texture3d(ustring filename, TextureOpt& options, const I
         return true;
     }
 
-    return true;
+    return false;
 }
 
 TextureSystem::Perthread* SORTTextureSystem::get_perthread_info(TextureSystem::Perthread* thread_info){
