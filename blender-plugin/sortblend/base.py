@@ -57,8 +57,13 @@ def get_sort_compatible_panels():
             'PHYSICS_PT_smoke_fire',
             'PHYSICS_PT_smoke_cache',
             'PHYSICS_PT_smoke_field_weights',
+            'PHYSICS_PT_smoke_highres',
             'PHYSICS_PT_add',
+            'PHYSICS_PT_field',
+            'PHYSICS_PT_field_settings',
+            'PHYSICS_PT_field_falloff',
         }
+
         return hasattr(panel, 'COMPAT_ENGINES') and 'BLENDER_RENDER' in panel.COMPAT_ENGINES and panel.__name__ in compatible_panels
     return [panel for panel in bpy.types.Panel.__subclasses__() if is_panel_compatible(panel)]
 
