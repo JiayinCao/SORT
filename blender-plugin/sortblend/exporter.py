@@ -237,12 +237,11 @@ def export_scene(depsgraph, is_preview, fs):
         # apply the modifier if there is one
         if obj.type != 'MESH' or obj.is_modified(scene, 'RENDER'):
             try:
-                evaluted_obj = obj.evaluated_get(depsgraph)
-                mesh = evaluted_obj.to_mesh()
-                # instead of exporting the original mesh, export the temporary mesh.
-                stat = export_mesh(evaluted_obj, mesh, fs)
+                evaluated_obj = obj.evaluated_get(depsgraph)
+                mesh = evaluated_obj.to_mesh()
+                stat = export_mesh(evaluated_obj, mesh, fs)
             finally:
-                evaluted_obj.to_mesh_clear()
+                evaluated_obj.to_mesh_clear()
         else:
             stat = export_mesh(obj, obj.data, fs)
 
@@ -393,7 +392,6 @@ def export_smoke(obj, fs):
         fs.serialize( SID('no_volume') )
         return
 
-    # this is only because it is not fully functional yet.
     fs.serialize( SID('has_volume') )
     
     # dimension of the volume data
@@ -410,10 +408,10 @@ def export_smoke(obj, fs):
 
     # the density itself
     density_data = bytearray()
-
     density_grid = np.fromiter(domain.density_grid, dtype=np.float32)
     for density in density_grid:
         density_data += FLTFMT.pack(density)
+
     fs.serialize(density_data)
 
 # export a mesh
@@ -550,28 +548,35 @@ def export_hair(ps, obj, scene, is_preview, fs):
     world2Local = obj.matrix_world.inverted()
     num_parents = len( ps.particles )
     num_children = len( ps.child_particles )
+
     hair_cnt = num_parents + num_children
     total_hair_segs = 0
 
+    real_hair_cnt = 0
     for pindex in range(hair_cnt):
         hair = []
         for step in range(0, steps + 1):
             co = ps.co_hair(obj, particle_no = pindex, step = step)
+
+            if co[0] == 0 and co[1] == 0 and co[2] == 0:
+                continue
+
             co = world2Local @ co
             hair.append( co )
             vert_cnt += 1
 
-        if len(hair) == 0:
+        if len(hair) <= 1:
             continue
 
-        assert len(hair) > 0
+        real_hair_cnt += 1
+
         verts += LENFMT.pack( len(hair) - 1 )
         for h in hair :
             verts += POINTFMT.pack( h[0] , h[1] , h[2] )
         total_hair_segs += len(hair) - 1
 
     fs.serialize( SID('HairVisual') )
-    fs.serialize( hair_cnt )
+    fs.serialize( real_hair_cnt )
     fs.serialize( width_tip )
     fs.serialize( width_bottom )
     fs.serialize( mat_index )
