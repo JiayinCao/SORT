@@ -22,7 +22,7 @@
 Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided) 
     : ScatteringUnit(w), m_type(type), gnormal( DIR_UP ), doubleSided(doubleSided){
     // Handle the special case where normal map is not applied, in which case, btn and tn will be invalid.
-    if( DIR_UP == gnormal ){
+    if( DIR_UP == n ){
         nn = n;
         return;
     }
@@ -38,7 +38,7 @@ Bxdf::Bxdf(const Spectrum& w, BXDF_TYPE type, Vector n , bool doubleSided)
 Bxdf::Bxdf(const Spectrum& ew, const float sw , BXDF_TYPE type, Vector n , bool doubleSided) 
     : ScatteringUnit(ew, sw), m_type(type), gnormal( DIR_UP ), doubleSided(doubleSided){
     // Handle the special case where normal map is not applied, in which case, btn and tn will be invalid.
-    if( DIR_UP == gnormal ){
+    if( DIR_UP == n ){
         nn = n;
         return;
     }
