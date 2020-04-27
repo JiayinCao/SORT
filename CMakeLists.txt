@@ -21,6 +21,11 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+# this will avoid generate ZERO_CHECK project
+# set(CMAKE_SUPPRESS_REGENERATION true)
+
 # define platform
 if (WIN32)
     set(SORT_PLATFORM_WIN true)
