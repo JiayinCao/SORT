@@ -454,7 +454,7 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
     SurfaceInteraction intersection;
     for( auto i = 0u ; i < SIMD_CHANNEL && IS_PTR_VALID(tri_simd.m_ori_pri[i]) ; ++i ){
         const auto* primitive = tri_simd.m_ori_pri[i];
-        if (matID != primitive->GetMaterial()->GetID())
+        if (matID != primitive->GetMaterial()->GetUniqueID())
             continue;
 
         intersection.Reset();

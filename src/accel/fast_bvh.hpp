@@ -765,7 +765,7 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
 
             SurfaceInteraction intersection;
             for (auto i = _start; i < _end; i++) {
-                if (matID != m_bvhpri[i].primitive->GetMaterial()->GetID())
+                if (matID != m_bvhpri[i].primitive->GetMaterial()->GetUniqueID())
                     continue;
 
                 SORT_STATS(++sIntersectionTest);
@@ -798,13 +798,13 @@ void Fbvh::GetIntersect( const Ray& ray , BSSRDFIntersections& intersect , const
         }
 
         float f_min[FBVH_CHILD_CNT] = { FLT_MAX };
-        for (int i = 0; i < node->child_cnt; ++i)
+        for (auto i = 0u; i < node->child_cnt; ++i)
             f_min[i] = Intersect(ray, node->bbox[i]);
 
-        for (int i = 0; i < node->child_cnt; ++i) {
+        for (auto i = 0u; i < node->child_cnt; ++i) {
             int k = -1;
             float maxDist = -1.0f;
-            for (int j = 0; j < node->child_cnt; ++j) {
+            for (auto j = 0u; j < node->child_cnt; ++j) {
                 if (f_min[j] > maxDist) {
                     maxDist = f_min[j];
                     k = j;
