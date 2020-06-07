@@ -23,8 +23,8 @@ apt-get install unzip
 wget http://45.63.123.194/sort_dependencies/linux/dependencies.zip
 unzip dependencies.zip
 rm dependencies.zip
-cd ..
-dir
+sh ./build-files/ubuntu/build_tsl.sh
+ls ./dependencies/ # just for debugging purpose
 ;;
 
 CYGWIN*|MINGW32*|MSYS*)

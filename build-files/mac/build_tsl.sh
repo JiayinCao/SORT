@@ -15,26 +15,23 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 #
 
-case "$(uname -s)" in
+# enter the directory of dependencies
+cd dependencies
 
-Darwin)
-rm -rf dependencies
-curl -o dependencies.zip http://45.63.123.194/sort_dependencies/mac/dependencies.zip
-unzip dependencies.zip
-rm -rf __MACOSX
-rm dependencies.zip
-sh ./build-files/mac/build_tsl.sh
-ls ./dependencies/ # just for debugging purpose
-;;
+# Tiny shading language is another personal project of mine, it is used as the shading language in SORT.
+git clone https://github.com/JiayinCao/Tiny-Shading-Language.git
 
-CYGWIN*|MINGW32*|MSYS*)
-echo 'MS Windows'
-;;
+# enter the directory
+cd Tiny-Shading-Language
 
-# Add here more strings to compare
-# See correspondence table at the bottom of this answer
+# trigger an installation of the library
+make update_dep
+make install
 
-*)
-echo 'other OS'
-;;
-esac
+# copy the library to the correct place
+cp -r ./tsl ../tsl
+
+# clean up
+cd ..
+rm -rf Tiny-Shading-Language
+cd ..
