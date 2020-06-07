@@ -29,9 +29,9 @@
 class Transparent : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3 attenuation;
-    };
+    // struct Params {
+    //     OSL::Vec3 attenuation;
+    // };
 
     //! @brief      Default constructor
     Transparent() : Bxdf(FULL_WEIGHT, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, true), A(WHITE_SPECTRUM) {}
@@ -40,7 +40,7 @@ public:
     //!
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
-    Transparent( const Params& param , const Spectrum& weight ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), DIR_UP, true),A(param.attenuation){}
+    // Transparent( const Params& param , const Spectrum& weight ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), DIR_UP, true),A(param.attenuation){}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

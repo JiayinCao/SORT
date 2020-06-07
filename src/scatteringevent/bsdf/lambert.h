@@ -28,10 +28,10 @@
 class Lambert : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3 baseColor;
-        OSL::Vec3 n;
-    };
+    // struct Params {
+    //     //OSL::Vec3 baseColor;
+    //     //OSL::Vec3 n;
+    // };
 
     //! Constructor taking spectrum information.
     //!
@@ -53,7 +53,7 @@ public:
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    Lambert( const Params& param , const Spectrum& weight , bool doubleSided = false):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.n, doubleSided),R(param.baseColor){}
+    // Lambert( const Params& param , const Spectrum& weight , bool doubleSided = false):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.n, doubleSided),R(param.baseColor){}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.
@@ -72,17 +72,17 @@ private:
 class LambertTransmission : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3 transmittance;
-        OSL::Vec3 n;
-    };
+    // struct Params {
+    //     OSL::Vec3 transmittance;
+    //     OSL::Vec3 n;
+    // };
 
     //! Constructor from parameter set.
     //!
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    LambertTransmission( const Params& param , const Spectrum& weight):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.n, true),T(param.transmittance){}
+    // LambertTransmission( const Params& param , const Spectrum& weight):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.n, true),T(param.transmittance){}
 
     //! Constructor taking spectrum information.
     //! @param s            Direction-Hemisphere refraction.

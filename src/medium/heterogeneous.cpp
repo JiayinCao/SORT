@@ -91,7 +91,7 @@ Spectrum HeterogenousMedium::Sample(const Ray& ray, const float max_t, MediumInt
 
         if (1.0f - r >= beam_transmitancy[ch]) {
             // sample a medium and scatter the ray
-            const auto new_dt = -std::log(1.0f - r) / extinction[ch];
+            const auto new_dt = -log(1.0f - r) / extinction[ch];
 
             mi = SORT_MALLOC(MediumInteraction)();
             mi->intersect = ray(t + new_dt);

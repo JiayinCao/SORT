@@ -27,11 +27,11 @@
 class Fabric : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3   baseColor;
-        float       roughness;
-        OSL::Vec3   n;
-    };
+    // struct Params {
+    //     OSL::Vec3   baseColor;
+    //     float       roughness;
+    //     OSL::Vec3   n;
+    // };
 
     //! Constructor taking spectrum information.
     //!
@@ -49,9 +49,9 @@ public:
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    Fabric( const Params& param , const Spectrum& weight , bool doubleSided = false)
-        : Fabric( param.baseColor , param.roughness , weight , param.n ) {
-    }
+    // Fabric( const Params& param , const Spectrum& weight , bool doubleSided = false)
+    //     : Fabric( param.baseColor , param.roughness , weight , param.n ) {
+    // }
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

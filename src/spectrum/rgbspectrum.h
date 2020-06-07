@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <OSL/oslexec.h>
+// #include <OSL/oslexec.h>
 #include "core/define.h"
 #include "core/sassert.h"
 #include "math/utils.h"
@@ -44,7 +44,7 @@ public:
     //! @brief  Constructor from a given OSL vec3 data type.
     //!
     //! @param  v   Data in OSL vec format.
-    SORT_FORCEINLINE RGBSpectrum( const OSL::Vec3& v ):RGBSpectrum( v.x , v.y , v.z ){}
+    // SORT_FORCEINLINE RGBSpectrum( const OSL::Vec3& v ):RGBSpectrum( v.x , v.y , v.z ){}
 
     //! @brief  Constructor from a single value that propogates to all channels
     //!

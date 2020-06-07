@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <OSL/oslexec.h>
+//#include <OSL/oslexec.h>
 #include "spectrum/spectrum.h"
 #include "medium/medium.h"
 
@@ -58,6 +58,8 @@ constexpr unsigned VOLUME_CLOSURE_CNT   = 3;
 constexpr unsigned VOLUME_CLOSURE_BASE  = SURFACE_CLOSURE_CNT;
 constexpr unsigned CLOSURE_CNT          = SURFACE_CLOSURE_CNT + VOLUME_CLOSURE_CNT;
 
+/*
+
 //! @brief  Register all closures supported by SORT.
 //!
 //! @param  shadingsys      Shading system of OSL.
@@ -95,3 +97,4 @@ void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @return                 The opacity of the intersection.
 Spectrum ProcessOpacity(const OSL::ClosureColor* closure, const OSL::Color3& w );
+*/

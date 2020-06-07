@@ -40,26 +40,26 @@
  */
 class Phong : public Bxdf{
 public:
-    struct Params{
-        OSL::Vec3     diffuse;
-        OSL::Vec3     specular;
-        float         specularPower;
-        OSL::Vec3     n;
-    };
+    // struct Params{
+    //     OSL::Vec3     diffuse;
+    //     OSL::Vec3     specular;
+    //     float         specularPower;
+    //     OSL::Vec3     n;
+    // };
 
     //! Constructor
     //!
     //! @param  params          Parameter set.
     //! @param  weight          BRDF weight.
     //! @param  doubleSided     Whether the BRDF is double-sided.
-    Phong(const Params& params, const Spectrum& weight, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.diffuse), S(params.specular), power(params.specularPower),
-          diffRatio(intensityOSLVec3(params.diffuse)/(intensityOSLVec3(params.diffuse)+intensityOSLVec3(params.specular))) {
-        const auto combined = D + S;
-        sAssert(combined.r <= 1.0f, MATERIAL);
-        sAssert(combined.g <= 1.0f, MATERIAL);
-        sAssert(combined.b <= 1.0f, MATERIAL);
-    }
+    // Phong(const Params& params, const Spectrum& weight, bool doubleSided = false)
+    //     : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.diffuse), S(params.specular), power(params.specularPower),
+    //       diffRatio(intensityOSLVec3(params.diffuse)/(intensityOSLVec3(params.diffuse)+intensityOSLVec3(params.specular))) {
+    //     const auto combined = D + S;
+    //     sAssert(combined.r <= 1.0f, MATERIAL);
+    //     sAssert(combined.g <= 1.0f, MATERIAL);
+    //     sAssert(combined.b <= 1.0f, MATERIAL);
+    // }
 
     //! Constructor
     //! @param diffuse          Direction-hemisphere reflection for diffuse.

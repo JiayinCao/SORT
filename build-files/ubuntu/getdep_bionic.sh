@@ -19,10 +19,7 @@ case "$(uname -s)" in
 
 Linux)
 rm -rf dependencies
-apt-get install unzip
-wget http://45.63.123.194/sort_dependencies/linux/dependencies_18_04.zip
-unzip dependencies_18_04.zip
-rm dependencies_18_04.zip
+mkdir dependencies
 sh ./build-files/ubuntu/build_tsl.sh
 ls ./dependencies/ # just for debugging purpose
 ;;

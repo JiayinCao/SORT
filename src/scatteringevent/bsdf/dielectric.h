@@ -17,9 +17,9 @@
 
 #pragma once
 
-#include <OSL/genclosure.h>
-#include <OSL/oslexec.h>
-#include <OSL/oslclosure.h>
+//#include <OSL/genclosure.h>
+//#include <OSL/oslexec.h>
+//#include <OSL/oslclosure.h>
 #include "microfacet.h"
 #include "spectrum/rgbspectrum.h"
 
@@ -36,19 +36,19 @@
 class Dielectric : public Bxdf {
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3       reflectance;
-        OSL::Vec3       transmittance;
-        float           roughnessU;
-        float           roughnessV;
-        OSL::Vec3       n;
-    };
+    // struct Params {
+    //     OSL::Vec3       reflectance;
+    //     OSL::Vec3       transmittance;
+    //     float           roughnessU;
+    //     float           roughnessV;
+    //     OSL::Vec3       n;
+    // };
 
     //! Constructor from parameter set.
     //!
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
-    Dielectric(const Params& params, const Spectrum& weight);
+    // Dielectric(const Params& params, const Spectrum& weight);
 
     //! Constructor
     //! @param reflectance      Direction hemisphere reflection.

@@ -67,16 +67,16 @@ class Merl : public Bxdf
 {
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        int     resIdx;
-        Vector  n;
-    };
+    // struct Params {
+    //     int     resIdx;
+    //     Vector  n;
+    // };
 
     //! Constructor taking spectrum information.
     //!
     //! @param params       Parameter set.
     //! @param weight       Weight of this BRDF
-    Merl(const Params& params, const Spectrum& weight, bool doubleSided = false);
+    // Merl(const Params& params, const Spectrum& weight, bool doubleSided = false);
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

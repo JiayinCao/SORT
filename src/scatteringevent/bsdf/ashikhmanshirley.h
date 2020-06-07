@@ -30,21 +30,21 @@
 class AshikhmanShirley : public Bxdf
 {
 public:
-    struct Params{
-        float           specular;
-        float           roughnessU;
-        float           roughnessV;
-        OSL::Vec3       baseColor;
-        OSL::Vec3       n;
-    };
+    // struct Params{
+    //     float           specular;
+    //     float           roughnessU;
+    //     float           roughnessV;
+    //     OSL::Vec3       baseColor;
+    //     OSL::Vec3       n;
+    // };
 
     //! Constructor.
     //!
     //! @param param            Parameter set.
     //! @param weight           Weight of the BXDF
     //! @param doubleSided      Whether the BRDF is two sided.
-    AshikhmanShirley(const Params& params, const Spectrum& weight, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.baseColor), S(params.specular), distribution(params.roughnessU, params.roughnessV) {}
+    // AshikhmanShirley(const Params& params, const Spectrum& weight, bool doubleSided = false)
+    //    : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.baseColor), S(params.specular), distribution(params.roughnessU, params.roughnessV) {}
 
     //! Constructor.
     //!

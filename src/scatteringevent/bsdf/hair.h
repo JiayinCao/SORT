@@ -32,18 +32,18 @@
 class Hair : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3   sigma;
-        float       longtitudinalRoughness;
-        float       azimuthalRoughness;
-        float       ior;
-    };
+    // struct Params {
+    //     OSL::Vec3   sigma;
+    //     float       longtitudinalRoughness;
+    //     float       azimuthalRoughness;
+    //     float       ior;
+    // };
 
     //! Constructor
     //!
     //! @param params       Parameter set.
     //! @param weight           Weight of the BXDF
-    Hair(const Params& params, const Spectrum& weight);
+    // Hair(const Params& params, const Spectrum& weight);
 
     //! Constructor
     //!

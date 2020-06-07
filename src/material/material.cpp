@@ -38,42 +38,42 @@ void Material::BuildMaterial() {
     auto tried_building_surface_shader = false;
     auto tried_building_volume_shader = false;
 
-    auto build_shader_type = [&](const OSL_ShaderData& shader_data, const char* root_shader, const std::string prefix, bool& shader_valid, bool& trying_building_shader_type, OSL::ShaderGroupRef& shader_ref) {
-        // Build surface shader
-        if (shader_valid) {
-            shader_ref = BeginShaderGroup(m_name);
+    // auto build_shader_type = [&](const OSL_ShaderData& shader_data, const char* root_shader, const std::string prefix, bool& shader_valid, bool& trying_building_shader_type, OSL::ShaderGroupRef& shader_ref) {
+    //     // Build surface shader
+    //     if (shader_valid) {
+    //         shader_ref = BeginShaderGroup(m_name);
 
-            // build all shader nodes
-            for (const auto& shader : shader_data.m_sources)
-                BuildShader(shader.source, shader.name, shader.name, m_name);
+    //         // build all shader nodes
+    //         for (const auto& shader : shader_data.m_sources)
+    //             BuildShader(shader.source, shader.name, shader.name, m_name);
 
-            // root surface shader
-            BuildShader(root_shader, prefix + output_node_name, prefix + output_node_name, m_name);
+    //         // root surface shader
+    //         BuildShader(root_shader, prefix + output_node_name, prefix + output_node_name, m_name);
 
-            // connecting surface shader nodes
-            for (const auto& connection : shader_data.m_connections) {
-                const auto target_shader = connection.target_shader == output_node_name ? prefix + output_node_name : connection.target_shader;
-                if (!ConnectShader(connection.source_shader, connection.source_property, target_shader, connection.target_property))
-                    m_surface_shader_valid = false;
-            }
+    //         // connecting surface shader nodes
+    //         for (const auto& connection : shader_data.m_connections) {
+    //             const auto target_shader = connection.target_shader == output_node_name ? prefix + output_node_name : connection.target_shader;
+    //             if (!ConnectShader(connection.source_shader, connection.source_property, target_shader, connection.target_property))
+    //                 m_surface_shader_valid = false;
+    //         }
 
-            shader_valid &= EndShaderGroup();
+    //         shader_valid &= EndShaderGroup();
 
-            if (shader_valid) {
-                const auto message = "Optimizing surface shader in material '" + m_name + "'";
-                SORT_PROFILE(message);
-                OptimizeShader(shader_ref.get());
-            }
+    //         if (shader_valid) {
+    //             const auto message = "Optimizing surface shader in material '" + m_name + "'";
+    //             SORT_PROFILE(message);
+    //             OptimizeShader(shader_ref.get());
+    //         }
 
-            trying_building_shader_type = true;
-        }
-    };
+    //         trying_building_shader_type = true;
+    //     }
+    // };
 
     // build surface shader
-    build_shader_type(m_surface_shader_data, surface_shader_root, "Surface", m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
+    // build_shader_type(m_surface_shader_data, surface_shader_root, "Surface", m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
 
-    // build volume shader
-    build_shader_type(m_volume_shader_data, surface_volume_root, "Volume", m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
+    // // build volume shader
+    // build_shader_type(m_volume_shader_data, surface_volume_root, "Volume", m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
 
     // if there is volume shader, but no surface shader, a special transparent material will be applied automatically
     // this will make the shader authoring a lot easier.
@@ -170,20 +170,20 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
         return;
     }
 
-    if( m_surface_shader_valid )
-        ExecuteSurfaceShader(m_surface_shader.get() , se );
-    else if( m_special_transparent )
-        se.AddBxdf(SORT_MALLOC(Transparent)());
+//    if( m_surface_shader_valid )
+//        ExecuteSurfaceShader(m_surface_shader.get() , se );
+//    else if( m_special_transparent )
+//        se.AddBxdf(SORT_MALLOC(Transparent)());
 }
 
 void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interaction flag , MediumStack& ms ) const {
-    if (m_volume_shader_valid)
-        ExecuteVolumeShader(m_volume_shader.get(), mi, ms, flag, this);
+//    if (m_volume_shader_valid)
+        //ExecuteVolumeShader(m_volume_shader.get(), mi, ms, flag, this);
 }
 
 void Material::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const {
-    if (m_volume_shader_valid)
-        EvaluateVolumeSample(m_volume_shader.get(), mi, ms);
+    // if (m_volume_shader_valid)
+    //     EvaluateVolumeSample(m_volume_shader.get(), mi, ms);
 }
 
 void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se) const {

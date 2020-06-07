@@ -19,7 +19,7 @@
 
 #include <vector>
 #include <string>
-#include <OSL/oslexec.h>
+//#include <OSL/oslexec.h>
 #include "stream/stream.h"
 #include "osl_system.h"
 
@@ -136,7 +136,9 @@ public:
         // this should happen most of the time in the absence of transparent node.
         if (!m_hasTransparentNode)
             return 0.0f;
-        return m_special_transparent ? 1.0f : (::EvaluateTransparency(m_surface_shader.get(), intersection));
+        
+        return 0.0f;
+        //return m_special_transparent ? 1.0f : (::EvaluateTransparency(m_surface_shader.get(), intersection));
     }
 
     //! @brief  Serialization interface. Loading data from stream.
@@ -228,8 +230,8 @@ private:
     OSL_ShaderData                  m_volume_shader_data;
 
     /**< OSL device surface shader. */
-    OSL::ShaderGroupRef             m_surface_shader = nullptr;
-    OSL::ShaderGroupRef             m_volume_shader = nullptr;
+    //OSL::ShaderGroupRef             m_surface_shader = nullptr;
+    //OSL::ShaderGroupRef             m_volume_shader = nullptr;
 
     bool                            m_hasTransparentNode = false;
     bool                            m_hasSSSNode = false;

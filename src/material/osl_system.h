@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <OSL/oslexec.h>
+//#include <OSL/oslexec.h>
 #include <string>
 #include "core/define.h"
 #include "math/vector3.h"
@@ -38,6 +38,8 @@ struct SurfaceInteraction;
 class MediumStack;
 struct MediumInteraction;
 class Mesh;
+
+/*
 
 struct ShadingContextWrapper {
 public:
@@ -95,3 +97,4 @@ void CreateOSLThreadContexts();
 
 //! @brief  Destroy thread contexts
 void DestroyOSLThreadContexts();
+*/

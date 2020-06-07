@@ -17,7 +17,7 @@
 
 #pragma once
 
-#include <OSL/oslexec.h>
+// #include <OSL/oslexec.h>
 #include <math.h>
 #include "math/utils.h"
 #include "core/sassert.h"
@@ -52,7 +52,7 @@ public:
     //! @brief  Constructor from OSL vector.
     //!
     //! @param  v   OSL type vector.
-    Vector3( OSL::Vec3 v ) : x( v.x ) , y( v.y ) , z(v.z) {}
+    // Vector3( OSL::Vec3 v ) : x( v.x ) , y( v.y ) , z(v.z) {}
 
     //! @brief  = operator.
     //!

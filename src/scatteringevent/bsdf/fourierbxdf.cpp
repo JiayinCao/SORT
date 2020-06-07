@@ -401,6 +401,6 @@ int FourierBxdfData::blendCoefficients( float* ak , int channel , int offsetI , 
     return nMax;
 }
 
-FourierBxdf::FourierBxdf(const Params& params, const Spectrum& weight)
-    : Bxdf(weight, BXDF_ALL, params.n, true), m_data(dynamic_cast<FourierBxdfData*>(MatManager::GetSingleton().GetResource(params.resIdx))) {
-}
+// FourierBxdf::FourierBxdf(const Params& params, const Spectrum& weight)
+//     : Bxdf(weight, BXDF_ALL, params.n, true), m_data(dynamic_cast<FourierBxdfData*>(MatManager::GetSingleton().GetResource(params.resIdx))) {
+// }

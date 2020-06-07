@@ -21,12 +21,21 @@
 #include "core/profile.h"
 #include "core/globalconfig.h"
 #include "core/log.h"
+#include "core/timer.h"
 #include "scatteringevent/bsdf/merl.h"
 #include "scatteringevent/bsdf/fourierbxdf.h"
+
+void ShaderCompiling_Task::Execute(){
+    TIMING_EVENT( "Compiling Shader" );
+    m_material->BuildMaterial();
+}
 
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     SORT_PROFILE("Parsing Materials");
+
+    const auto current_task = GetCurrentTask();
+    const auto dependencies = current_task->GetDependencies();
 
     auto shader_source_cnt = 0u;
     stream >> shader_source_cnt;
@@ -63,8 +72,9 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
         // serialize shader
         mat->Serialize( stream );
 
-        if ( UNLIKELY(!noMaterialSupport) ) {
-            // compile shader
+        if ( LIKELY(!noMaterialSupport) ) {
+            // schedule a separate task to async compile shaders
+            //SCHEDULE_TASK<ShaderCompiling_Task>( "Compiling Shader" , DEFAULT_TASK_PRIORITY, dependencies ,  mat.get() );
             mat->BuildMaterial();
 
             // push the compiled material in the pool

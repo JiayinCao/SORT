@@ -31,11 +31,11 @@ class OrenNayar : public Bxdf
 {
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3   baseColor;
-        float       sigma;
-        OSL::Vec3   n;
-    };
+    // struct Params {
+    //     OSL::Vec3   baseColor;
+    //     float       sigma;
+    //     OSL::Vec3   n;
+    // };
 
     //! Constructor
     //! @param reflectance  Direction-hemisphere reflection.
@@ -46,7 +46,7 @@ public:
     //! Constructor
     //! @param params       All parameters.
     //! @param weight       Weight of the BRDF
-    OrenNayar(const Params& params , const Spectrum& weight , bool doubleSided = false);
+    // OrenNayar(const Params& params , const Spectrum& weight , bool doubleSided = false);
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

@@ -28,13 +28,13 @@
 class HeterogenousMedium : public Medium{
 public:
     // Input parameters to construct the volume.
-    struct Params {
-        OSL::Vec3   baseColor;
-        OSL::Float  emission;
-        OSL::Float  absorption;
-        OSL::Float  scattering;
-        OSL::Float  anisotropy;
-    };
+    // struct Params {
+    //     OSL::Vec3   baseColor;
+    //     OSL::Float  emission;
+    //     OSL::Float  absorption;
+    //     OSL::Float  scattering;
+    //     OSL::Float  anisotropy;
+    // };
 
     //! @brief  Constructor.
     //!

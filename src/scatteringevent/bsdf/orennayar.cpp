@@ -28,16 +28,16 @@ OrenNayar::OrenNayar(const Spectrum& reflectance, float sigma, const Spectrum& w
     B = 0.45f * sigma2 / (sigma2 + 0.09f);
 }
 
-// constructor
-OrenNayar::OrenNayar( const Params& params , const Spectrum& weight , bool doubleSided) :
-    Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , params.n, doubleSided) , R(params.baseColor){
-    // roughness ranges from 0 to infinity
-    auto sigma = std::max( 0.0f , params.sigma );
+// // constructor
+// OrenNayar::OrenNayar( const Params& params , const Spectrum& weight , bool doubleSided) :
+//     Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , params.n, doubleSided) , R(params.baseColor){
+//     // roughness ranges from 0 to infinity
+//     auto sigma = std::max( 0.0f , params.sigma );
 
-    const auto sigma2 = sigma * sigma;
-    A = 1.0f - (sigma2 / ( 2.0f * (sigma2 +0.33f)));
-    B = 0.45f * sigma2 / (sigma2 + 0.09f );
-}
+//     const auto sigma2 = sigma * sigma;
+//     A = 1.0f - (sigma2 / ( 2.0f * (sigma2 +0.33f)));
+//     B = 0.45f * sigma2 / (sigma2 + 0.09f );
+// }
 
 // evaluate bxdf
 // para 'wo' : out going direction

@@ -38,45 +38,45 @@
 class DisneyBRDF : public Bxdf{
 public:
     // Input parameters to construct the disney BRDF.
-    struct Params {
-        float       metallic;
-        float       specular;
-        float       specularTint;
-        float       roughness;
-        float       anisotropic;
-        float       sheen;
-        float       sheenTint;
-        float       clearcoat;
-        float       clearcoatGloss;
-        float       specTrans;
-        OSL::Vec3   scatterDistance;
-        float       flatness;
-        float       diffTrans;
-        int         thinSurface;
-        OSL::Vec3   baseColor;
-        OSL::Vec3   n;
-    };
+    // struct Params {
+    //     float       metallic;
+    //     float       specular;
+    //     float       specularTint;
+    //     float       roughness;
+    //     float       anisotropic;
+    //     float       sheen;
+    //     float       sheenTint;
+    //     float       clearcoat;
+    //     float       clearcoatGloss;
+    //     float       specTrans;
+    //     OSL::Vec3   scatterDistance;
+    //     float       flatness;
+    //     float       diffTrans;
+    //     int         thinSurface;
+    //     OSL::Vec3   baseColor;
+    //     OSL::Vec3   n;
+    // };
 
     //! Constructor
     //!
     //! @param params           All parameters.
     //! @param ew               Evaluation weight of the BXDF.
     //! @param sw               Sampling weight of the BXDF.
-    DisneyBRDF( const Params& param , const Spectrum& ew , const float sw)
-        : Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
-        specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
-        clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
-          diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
+    // DisneyBRDF( const Params& param , const Spectrum& ew , const float sw)
+    //     : Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
+    //     specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
+    //     clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
+    //       diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
     
     //! Constructor
     //!
     //! @param params           All parameters.
     //! @param ew               Evaluation weight of the BXDF.
-    DisneyBRDF( const Params& param , const Spectrum& ew)
-        : Bxdf(ew, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
-        specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
-        clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
-          diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
+    // DisneyBRDF( const Params& param , const Spectrum& ew)
+    //     : Bxdf(ew, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
+    //     specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
+    //     clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
+    //       diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
 
     //! Constructor
     //! @param basecolor        The surface color, usually supplied by texture maps.
@@ -155,7 +155,7 @@ public:
     //!
     //! @param  params      Parameters used to construct the class instance.
     //! @return             The properbility of sampling the bxdf, not the bssrdf.
-    static float Evaluate_Sampling_Weight( const Params& params );
+    // static float Evaluate_Sampling_Weight( const Params& params );
 
 private:
     const Spectrum  basecolor;          /**< The surface color, usually supplied by texture maps. */
@@ -203,18 +203,18 @@ protected:
  */
 class DisneyBssrdf : public SeparableBssrdf {
 public:
-    struct Params{
-        OSL::Vec3     baseColor;
-        OSL::Vec3     scatterDistance;
-        OSL::Vec3     n;
-    };
+    // struct Params{
+    //     OSL::Vec3     baseColor;
+    //     OSL::Vec3     scatterDistance;
+    //     OSL::Vec3     n;
+    // };
 
     //! @brief  Constructor of DisneyBssrdf from shader input.
     //!
     //! @param  intersection    Intersection at the point of exit.
     //! @param  param           Parameter set from shader.
     //! @param  weight          Evaluation weight.
-    DisneyBssrdf( const SurfaceInteraction* intersection , const Params& params , const Spectrum& weight );
+    // DisneyBssrdf( const SurfaceInteraction* intersection , const Params& params , const Spectrum& weight );
 
     //! @brief  Constructor of DisneyBssrdf.
     //!

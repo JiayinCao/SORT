@@ -31,7 +31,7 @@ Spectrum HomogeneousMedium::Sample( const Ray& ray , const float max_t , MediumI
     const auto absorption = m_globalMediumSample.basecolor * m_globalMediumSample.absorption;
 
     const auto ch = clamp( (int)(sort_canonical() * RGBSPECTRUM_SAMPLE) , 0 , RGBSPECTRUM_SAMPLE - 1 );
-    const auto d = fmin( -std::log( sort_canonical() ) / extinction[ch] , max_t );
+    const auto d = fmin( -log( sort_canonical() ) / extinction[ch] , max_t );
 
     const auto sample_medium = d < max_t;
     if (sample_medium) {

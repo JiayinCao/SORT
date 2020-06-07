@@ -24,8 +24,28 @@
 #include "core/singleton.h"
 #include "material/material.h"
 #include "core/resource.h"
+#include "task/task.h"
 
-class MaterialBase;
+class Material;
+
+//! @brief  Compiling shader task.
+class   ShaderCompiling_Task : public Task{
+public:
+    //! @brief   Constrcutor.
+    //!
+    //! @param  name            Name of the task.
+    //! @param  priority        Priority of the task.
+    //! @param  dependencies    Dependencies of the task.
+    //! @param  material        The material to be compiled.
+    ShaderCompiling_Task( Material* material, const char* name, unsigned int priority, const Task::Task_Container& dependencies ) 
+                    : m_material( material ) , Task( name , priority , dependencies ) {}
+
+    //! @brief  Compile the shader.
+	void        Execute() override;
+
+private:
+    Material* m_material;
+};
 
 //! @brief Material manager.
 /**

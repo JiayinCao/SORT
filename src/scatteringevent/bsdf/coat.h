@@ -41,20 +41,20 @@
 class Coat : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::ClosureColor*      closure;
-        float                   roughness;
-        float                   ior;
-        RGBSpectrum             sigma;
-        Vector n;
-    };
+    // struct Params {
+    //     OSL::ClosureColor*      closure;
+    //     float                   roughness;
+    //     float                   ior;
+    //     RGBSpectrum             sigma;
+    //     Vector n;
+    // };
 
     //! Constructor.
     //!
     //! @param params           Parameter set.
     //! @param weight           Weight of the BXDF.
     //! @param bottom           Bottom layer scattering event.
-    Coat( const Params& params , const Spectrum& weight , const ScatteringEvent* bottom );
+    // Coat( const Params& params , const Spectrum& weight , const ScatteringEvent* bottom );
 
     //! Evaluate the BRDF.
     //!

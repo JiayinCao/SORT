@@ -28,10 +28,10 @@
  */
 class DoubleSided : public Bxdf{
 public:
-    struct Params{
-        OSL::ClosureColor*  bxdf0;
-        OSL::ClosureColor*  bxdf1;
-    };
+    // struct Params{
+    //     OSL::ClosureColor*  bxdf0;
+    //     OSL::ClosureColor*  bxdf1;
+    // };
 
     //! Constructor
     //! @param bxdf0        Bxdf0.

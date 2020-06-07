@@ -30,13 +30,13 @@
 class DistributionBRDF : public Bxdf{
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3   baseColor;
-        float       roughness;
-        float       specular;
-        float       specularTint;
-        Vector n;
-    };
+    // struct Params {
+    //     OSL::Vec3   baseColor;
+    //     float       roughness;
+    //     float       specular;
+    //     float       specularTint;
+    //     Vector n;
+    // };
 
     //! Constructor taking spectrum information.
     //!
@@ -56,9 +56,9 @@ public:
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    DistributionBRDF( const Params& param , const Spectrum& weight , bool doubleSided = false)
-        : DistributionBRDF( param.baseColor , param.roughness , param.specular , param.specularTint , weight , param.n ) {
-    }
+    // DistributionBRDF( const Params& param , const Spectrum& weight , bool doubleSided = false)
+    //     : DistributionBRDF( param.baseColor , param.roughness , param.specular , param.specularTint , weight , param.n ) {
+    // }
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

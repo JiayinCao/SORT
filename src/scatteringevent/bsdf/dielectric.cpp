@@ -20,11 +20,11 @@
 #include "microfacet.h"
 #include "core/memory.h"
 
-Dielectric::Dielectric(const Params& params, const Spectrum& weight):
-Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, true), R(params.reflectance), T(params.transmittance), fresnel(1.0f,1.5f),
-        mf_reflect(params.reflectance, &fresnel, SORT_MALLOC(GGX)(params.roughnessU, params.roughnessV), FULL_WEIGHT, params.n, true),
-        mf_refract(params.transmittance, SORT_MALLOC(GGX)(params.roughnessU, params.roughnessV), 1.0f, 1.5f, FULL_WEIGHT, params.n){
-}
+// Dielectric::Dielectric(const Params& params, const Spectrum& weight):
+// Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, true), R(params.reflectance), T(params.transmittance), fresnel(1.0f,1.5f),
+//         mf_reflect(params.reflectance, &fresnel, SORT_MALLOC(GGX)(params.roughnessU, params.roughnessV), FULL_WEIGHT, params.n, true),
+//         mf_refract(params.transmittance, SORT_MALLOC(GGX)(params.roughnessU, params.roughnessV), 1.0f, 1.5f, FULL_WEIGHT, params.n){
+// }
 
 Spectrum Dielectric::f(const Vector& wo, const Vector& wi) const{
     return mf_refract.f(wo, wi) + mf_reflect.f(wo, wi);

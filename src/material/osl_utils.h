@@ -19,14 +19,16 @@
 
 #pragma once
 
-#include <OSL/oslexec.h>
+//#include <OSL/oslexec.h>
 #include "core/define.h"
 
-SORT_FORCEINLINE bool isBlack( const OSL::Vec3& v ){
-    return ( v.x == 0.0f ) && ( v.y == 0.0f ) && ( v.z == 0.0f );
-}
+// SORT_FORCEINLINE bool isBlack( const OSL::Vec3& v ){
+//     return ( v.x == 0.0f ) && ( v.y == 0.0f ) && ( v.z == 0.0f );
+// }
 
+/*
 SORT_FORCEINLINE float intensityOSLVec3( const OSL::Vec3& v ){
     static const float YWeight[3] = { 0.212671f, 0.715160f, 0.072169f };
     return YWeight[0] * v.x + YWeight[1] * v.y + YWeight[2] * v.z;
 }
+*/

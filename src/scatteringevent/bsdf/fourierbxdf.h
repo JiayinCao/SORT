@@ -122,16 +122,16 @@ class FourierBxdf : public Bxdf
 {
 public:
     // Input parameters to construct the BRDF.
-    struct Params {
-        int     resIdx;
-        Vector  n;
-    };
+    // struct Params {
+    //     int     resIdx;
+    //     Vector  n;
+    // };
 
     //! Constructor taking spectrum information.
     //!
     //! @param params       Parameter set.
     //! @param weight       Weight of this BRDF
-    FourierBxdf(const Params& params, const Spectrum& weight);
+    // FourierBxdf(const Params& params, const Spectrum& weight);
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

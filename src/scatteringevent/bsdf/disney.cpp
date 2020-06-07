@@ -76,9 +76,9 @@ float ClearcoatGGX::G1(const Vector& v) const {
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
 }
 
-DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Params& params , const Spectrum& ew )
-:DisneyBssrdf( intersection , params.baseColor , params.scatterDistance , ew , ew.GetIntensity() ){
-}
+// DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Params& params , const Spectrum& ew )
+// :DisneyBssrdf( intersection , params.baseColor , params.scatterDistance , ew , ew.GetIntensity() ){
+// }
 
 DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew )
 :DisneyBssrdf( intersection , R , mfp , ew , ew.GetIntensity() ){
@@ -408,25 +408,25 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     return total_pdf / total_weight;
 }
 
-float DisneyBRDF::Evaluate_Sampling_Weight( const Params& params ){
-    const auto hasSSS = !isBlack(params.scatterDistance);
+// float DisneyBRDF::Evaluate_Sampling_Weight( const Params& params ){
+//     const auto hasSSS = !isBlack(params.scatterDistance);
 
-    // If there is no SSS, there will be 100% chance that a BXDF will be chosen.
-    if( !hasSSS )
-        return 1.0f;
+//     // If there is no SSS, there will be 100% chance that a BXDF will be chosen.
+//     if( !hasSSS )
+//         return 1.0f;
 
-    const auto luminance = intensityOSLVec3( params.baseColor );
-    const auto Ctint = luminance > 0.0f ? params.baseColor * (1.0f / luminance) : Spectrum(1.0f);
-    const auto min_specular_amount = SchlickR0FromEta(ior_ex / ior_in);
-    const auto Cspec0 = slerp(params.specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, params.specularTint), params.baseColor, params.metallic);
+//     const auto luminance = intensityOSLVec3( params.baseColor );
+//     const auto Ctint = luminance > 0.0f ? params.baseColor * (1.0f / luminance) : Spectrum(1.0f);
+//     const auto min_specular_amount = SchlickR0FromEta(ior_ex / ior_in);
+//     const auto Cspec0 = slerp(params.specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, params.specularTint), params.baseColor, params.metallic);
 
-    const auto clearcoat_weight = params.clearcoat * 0.04f;
-    const auto specular_reflection_weight = Cspec0.GetIntensity() * specularPdfScale( params.roughness );
-    const auto specular_transmission_weight = luminance * (1.0f - params.metallic) * params.specTrans;
-    const auto diffuse_reflection_weight = luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * (params.thinSurface ? (1.0f - params.diffTrans) : 1.0f);
-    const auto diffuse_transmission_weight = params.thinSurface ? luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * params.diffTrans : 0.0f;
+//     const auto clearcoat_weight = params.clearcoat * 0.04f;
+//     const auto specular_reflection_weight = Cspec0.GetIntensity() * specularPdfScale( params.roughness );
+//     const auto specular_transmission_weight = luminance * (1.0f - params.metallic) * params.specTrans;
+//     const auto diffuse_reflection_weight = luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * (params.thinSurface ? (1.0f - params.diffTrans) : 1.0f);
+//     const auto diffuse_transmission_weight = params.thinSurface ? luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * params.diffTrans : 0.0f;
     
-    const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
+//     const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
 
-    return 1.0f - diffuse_reflection_weight / total_weight;
-}
+//     return 1.0f - diffuse_reflection_weight / total_weight;
+// }

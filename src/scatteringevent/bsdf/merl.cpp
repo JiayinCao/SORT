@@ -124,7 +124,7 @@ Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
     return Spectrum( r , g , b );
 }
 
-Merl::Merl(const Params& params, const Spectrum& weight, bool doubleSided)
-    : Bxdf(weight, BXDF_ALL, params.n, doubleSided), m_data(dynamic_cast<MerlData*>(MatManager::GetSingleton().GetResource(params.resIdx)))
-{
-}
+// Merl::Merl(const Params& params, const Spectrum& weight, bool doubleSided)
+//     : Bxdf(weight, BXDF_ALL, params.n, doubleSided), m_data(dynamic_cast<MerlData*>(MatManager::GetSingleton().GetResource(params.resIdx)))
+// {
+// }

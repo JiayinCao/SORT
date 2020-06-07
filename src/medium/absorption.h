@@ -29,16 +29,16 @@ class AbsorptionMedium : public Medium{
 public:
     // Input parameters to construct the volume.
     struct Params {
-        OSL::Vec3   baseColor;
-        OSL::Float  absorption;
+        //OSL::Vec3   baseColor;
+        //OSL::Float  absorption;
     };
 
     //! @brief  Constructor.
     //!
     //! @param param        Parameter to build the volume.
 	//! @param material		Material that spawns the medium.
-    AbsorptionMedium( const AbsorptionMedium::Params& param , const MaterialBase* material):
-        Medium( param.baseColor, 0.0f, param.absorption, 0.0f, 0.0f, material){}
+    //AbsorptionMedium( const AbsorptionMedium::Params& param , const MaterialBase* material):
+    //    Medium( param.baseColor, 0.0f, param.absorption, 0.0f, 0.0f, material){}
 
     //! @brief  Evaluation of beam transmittance.
     //!
