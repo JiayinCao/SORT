@@ -50,10 +50,13 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: MacOS-dep-ver-3
+        key: MacOS-dep-ver-4
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
-      run: make update_dep
+      run: |
+           brew install flex
+           brew install bison
+           make update_dep
     - name: Build Release Version
       run: make release
     - name: Build Debug Version
@@ -82,10 +85,13 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-18-04-dep-ver-1
+        key: Ubuntu-18-04-dep-ver-2
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
-      run: make update_dep
+      run: |
+           sudo apt-get install flex
+           sudo apt-get install bison
+           make update_dep
     - name: Build Release Version
       run: make release
     - name: Build Debug Version
@@ -120,10 +126,13 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-16-04-dep-ver-1
+        key: Ubuntu-16-04-dep-ver-2
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
-      run: make update_dep
+      run: |
+           sudo apt-get install flex
+           sudo apt-get install bison
+           make update_dep
     - name: Build Release Version
       run: make release
     - name: Build Debug Version
