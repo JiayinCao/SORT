@@ -100,7 +100,7 @@ jobs:
     - name: Build Debug Version
       run: make debug
     - name: Unit Test
-      run: cd bin
+      run: cd bin;./sort_r unittest
   Ubuntu_16_04:
     runs-on: ubuntu-16.04
     steps:
@@ -141,4 +141,4 @@ jobs:
     - name: Build Debug Version
       run: make debug
     - name: Unit Test
-      run: cd bin
+      run: cd bin;./sort_r unittest
