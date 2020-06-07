@@ -56,6 +56,9 @@ jobs:
       run: |
            brew install flex
            brew install bison
+           echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
+           source ~/.bash_profile
+           bison -V
            make update_dep
     - name: Build Release Version
       run: make release
@@ -91,16 +94,13 @@ jobs:
       run: |
            sudo apt-get install flex
            sudo apt-get install bison
-           echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
-           source ~/.bash_profile
-           bison -V
            make update_dep
     - name: Build Release Version
       run: make release
     - name: Build Debug Version
       run: make debug
     - name: Unit Test
-      run: cd bin;./sort_r --unittest
+      run: cd bin
   Ubuntu_16_04:
     runs-on: ubuntu-16.04
     steps:
@@ -141,4 +141,4 @@ jobs:
     - name: Build Debug Version
       run: make debug
     - name: Unit Test
-      run: cd bin;./sort_r --unittest
+      run: cd bin
