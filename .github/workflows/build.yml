@@ -20,10 +20,12 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Windows-dep-ver-0
+        key: Windows-dep-ver-1
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: make update_dep
+           |
+           .\build-files\win\build_tsl.cmd
       shell: cmd
     - name: Build Release Version
       run: make release

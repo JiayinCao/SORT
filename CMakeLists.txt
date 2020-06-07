@@ -75,6 +75,15 @@ endif()
 
 project (SORT)
 
+# loading llvm library, this is mandatory for compiling tsl, make sure it looks for a local llvm library
+set(TSL_DIR ${SORT_SOURCE_DIR}/dependencies/tsl/)
+
+# find llvm librar${TSL_SOURCE_DIR}/thirdparty/gtesty
+find_package(TSL REQUIRED CONFIG)
+
+# output tsl library version
+message(STATUS "Tiny Shading Langauge version: ${TSL_VERSION}")
+
 # include other modules
 include("${CMAKE_CURRENT_LIST_DIR}/build-files/cmake/externalPackages.cmake")
 
@@ -83,6 +92,9 @@ if(ENABLE_PROFILER)
 endif(ENABLE_PROFILER)
 
 include_directories( "${SORT_SOURCE_DIR}/src" )
+include_directories( "${TSL_INCLUDE_DIR}" )
+
+link_directories( "${TSL_LIBRARY_DIR}" )
 
 macro(source_group_by_dir source_files)
     set(sgbd_cur_dir ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -129,6 +141,7 @@ add_executable(SORT ${all_files})
 
 target_link_libraries(SORT ${OPENIMAGEIO_LIBRARIES})
 target_link_libraries(SORT ${OSL_LIBRARIES})
+target_link_libraries(SORT ${TSL_LIBS})
 if(ENABLE_PROFILER)
     target_link_libraries(SORT easy_profiler)
 endif(ENABLE_PROFILER)
@@ -142,6 +155,9 @@ if (SORT_PLATFORM_WIN)
     ProcessorCount(N)
     SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} /MP${N}")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP${N}")
+
+    # make sure to copy the tsl dll to bin folder
+    tsl_runtime_copy( "${SORT_SOURCE_DIR}/bin" )
 endif (SORT_PLATFORM_WIN)
 
 # Enable SORT Stats system.
