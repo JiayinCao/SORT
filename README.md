@@ -16,15 +16,8 @@
 -->
 
 # SORT
-<!--
-Hide them until I am sure Github Action is reliable.
-[![Build status](https://travis-ci.org/JiayinCao/SORT.svg?branch=master)](https://travis-ci.org/JiayinCao/SORT)
-[![Build status](https://ci.appveyor.com/api/projects/status/la6ixha9tqe52qyr?svg=true)](https://ci.appveyor.com/project/JiayinCao/sort)
--->
 [![Action status](https://github.com/JiayinCao/SORT/workflows/Build%20SORT/badge.svg)](https://actions-badge.atrox.dev/Jiayincao/SORT/goto)
-[![Build status](https://travis-ci.org/JiayinCao/SORT.svg?branch=master)](https://travis-ci.org/JiayinCao/SORT)
 [![License](https://img.shields.io/badge/License-GPL3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
-
 
 ## Introduction
 SORT, short for Simple Open-source Ray Tracing, is my personal cross platform ray tracing renderer. It is a standalone ray tracing program, while works well in Blender as a renderer plugin. Simliar to other open source ray tracer, like PBRT, luxrenderer, SORT is also a physically based renderer. However, since it is a solo project that I worked on in my spare time, it is way simpler comparing with its peers.
