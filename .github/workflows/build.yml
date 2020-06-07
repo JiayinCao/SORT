@@ -91,6 +91,9 @@ jobs:
       run: |
            sudo apt-get install flex
            sudo apt-get install bison
+           echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
+           source ~/.bash_profile
+           bison -V
            make update_dep
     - name: Build Release Version
       run: make release
