@@ -39,7 +39,7 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specTrans)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, scatterDistance)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, flatness)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, diffTrans)
-//IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, int,   thinSurface)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, bool,  thinSurface)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, baseColor)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeDisney)
@@ -94,10 +94,6 @@ float ClearcoatGGX::G1(const Vector& v) const {
     constexpr auto alpha2 = alpha * alpha;
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
 }
-
-// DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Params& params , const Spectrum& ew )
-// :DisneyBssrdf( intersection , params.baseColor , params.scatterDistance , ew , ew.GetIntensity() ){
-// }
 
 DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew )
 :DisneyBssrdf( intersection , R , mfp , ew , ew.GetIntensity() ){

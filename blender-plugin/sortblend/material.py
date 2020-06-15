@@ -1510,7 +1510,7 @@ class SORTNode_Material_UE4Principle(SORTShadingNode):
 class SORTNode_Material_DisneyBRDF(SORTShadingNode):
     bl_label = 'Disney BRDF'
     bl_idname = 'SORTNode_Material_DisneyBRDF'
-    osl_shader = '''
+    tsl_shader_thin_surface = '''
         shader bxdf_disney( float Metallic ,
                        float Specular ,
                        float SpecularTint ,
@@ -1524,14 +1524,37 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        vector ScatterDistance ,
                        float Flatness ,
                        float DiffuseTransmittance ,
-                       /*int   IsThinSurface ,*/
+                       /*bool  IsThinSurface ,*/
                        color BaseColor ,
                        vector Normal ,
                        out closure Result ){
             Result = make_closure<disney>( Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness ,
-                             SpecularTransmittance , ScatterDistance , Flatness , DiffuseTransmittance ,/* IsThinSurface , */BaseColor , Normal );
+                             SpecularTransmittance , ScatterDistance , Flatness , DiffuseTransmittance , true , BaseColor , Normal );
         }
     '''
+    tsl_shader_non_thin_surface = '''
+        shader bxdf_disney( float Metallic ,
+                       float Specular ,
+                       float SpecularTint ,
+                       float Roughness ,
+                       float Anisotropic ,
+                       float Sheen ,
+                       float SheenTint ,
+                       float Clearcoat ,
+                       float ClearcoatGlossiness ,
+                       float SpecularTransmittance ,
+                       vector ScatterDistance ,
+                       float Flatness ,
+                       float DiffuseTransmittance ,
+                       /*bool  IsThinSurface ,*/
+                       color BaseColor ,
+                       vector Normal ,
+                       out closure Result ){
+            Result = make_closure<disney>( Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness ,
+                             SpecularTransmittance , ScatterDistance , Flatness , DiffuseTransmittance , false , BaseColor , Normal );
+        }
+    '''
+
     bl_width_min = 200
     is_thin_surface : bpy.props.BoolProperty(name='Is Thin Surface', default=False)
     def init(self, context):
@@ -1573,22 +1596,6 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs['Diffuse Transmittance'].serialize(fs)
         self.inputs['BaseColor'].serialize(fs)
         self.inputs['Normal'].serialize(fs)
-
-        #fs.serialize( self.inputs['Specular'].default_value )
-        #fs.serialize( self.inputs['Specular Tint'].export_osl_value() )
-        #fs.serialize( self.inputs['Roughness'].export_osl_value() )
-        #fs.serialize( self.inputs['Anisotropic'].export_osl_value() )
-        #fs.serialize( self.inputs['Sheen'].export_osl_value() )
-        #fs.serialize( self.inputs['Sheen Tint'].export_osl_value() )
-        #fs.serialize( self.inputs['Clearcoat'].export_osl_value() )
-        #fs.serialize( self.inputs['Clearcoat Glossiness'].export_osl_value() )
-        #fs.serialize( self.inputs['Specular Transmittance'].export_osl_value() )
-        #fs.serialize( self.inputs['Scatter Distance'].export_osl_value() )
-        #fs.serialize( self.inputs['Flatness'].export_osl_value() )
-        #fs.serialize( self.inputs['Diffuse Transmittance'].export_osl_value() )
-        #fs.serialize( '1' if self.is_thin_surface else '0' )
-        #fs.serialize( self.inputs['BaseColor'].export_osl_value() )
-        #fs.serialize( self.inputs['Normal'].export_osl_value() )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'is_thin_surface', text='Is Thin Surface')
     def isSSSNode(self):
@@ -1597,6 +1604,10 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
             return False
         sd = self.inputs['Scatter Distance'].default_value
         return sd[0] > 0 or sd[1] > 0 or sd[2] > 0
+    def generate_osl_source(self):
+        if self.is_thin_surface:
+            return self.tsl_shader_thin_surface
+        return self.tsl_shader_non_thin_surface
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Hair(SORTShadingNode):
