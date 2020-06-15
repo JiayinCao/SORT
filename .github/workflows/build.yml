@@ -20,7 +20,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Windows-dep-ver-10
+        key: Windows-dep-ver-11
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: make update_dep
@@ -50,7 +50,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: MacOS-dep-ver-10
+        key: MacOS-dep-ver-11
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -88,7 +88,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-18-04-dep-ver-10
+        key: Ubuntu-18-04-dep-ver-11
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -129,7 +129,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-16-04-dep-ver-10
+        key: Ubuntu-16-04-dep-ver-11
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |

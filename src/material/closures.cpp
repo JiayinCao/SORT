@@ -19,7 +19,6 @@
 #include "osl_utils.h"
 #include "core/memory.h"
 #include "scatteringevent/bsdf/lambert.h"
-#include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/bsdf/orennayar.h"
 #include "scatteringevent/bsdf/disney.h"
 #include "scatteringevent/bsdf/microfacet.h"

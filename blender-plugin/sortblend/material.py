@@ -1524,7 +1524,6 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        vector ScatterDistance ,
                        float Flatness ,
                        float DiffuseTransmittance ,
-                       /*bool  IsThinSurface ,*/
                        color BaseColor ,
                        vector Normal ,
                        out closure Result ){
@@ -1546,7 +1545,6 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
                        vector ScatterDistance ,
                        float Flatness ,
                        float DiffuseTransmittance ,
-                       /*bool  IsThinSurface ,*/
                        color BaseColor ,
                        vector Normal ,
                        out closure Result ){
@@ -2441,8 +2439,8 @@ class SORTNodeInputColor(SORTShadingNode):
     bl_label = 'Color'
     bl_idname = 'SORTNodeInputColor'
     osl_shader = '''
-        shader ConstantColor( color Color = @,
-                              output color Result = color(0)){
+        shader constant_color( color Color,
+                               out color Result ){
             Result = Color;
         }
     '''
@@ -2454,7 +2452,9 @@ class SORTNodeInputColor(SORTShadingNode):
         layout.prop(self, 'color', text='')
     def serialize_prop(self, fs):
         fs.serialize( 1 )
-        fs.serialize( 'color( %f,%f,%f )'%(self.color[:]) )
+        fs.serialize('Color')
+        fs.serialize(3)
+        fs.serialize(self.color[:])
 
 @SORTShaderNodeTree.register_node('Input')
 class SORTNodeInputFresnel(SORTShadingNode):
