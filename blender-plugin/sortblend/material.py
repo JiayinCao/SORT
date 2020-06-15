@@ -485,6 +485,8 @@ class SORTNodeSocketBxdf(bpy.types.NodeSocket, SORTNodeSocket):
         return 'color(0)'
     def get_socket_data_type(self):
         return 'bxdf'
+    def serialize(self,fs):
+        pass
 
 # Socket for volume
 @base.register_class
@@ -515,6 +517,10 @@ class SORTNodeSocketColor(bpy.types.NodeSocket, SORTNodeSocket):
         return 'color( %f, %f, %f )'%(self.default_value[:])
     def get_socket_data_type(self):
         return 'vector3'
+    def serialize(self,fs):
+        fs.serialize(self.name.replace(" " , ""))
+        fs.serialize(3)
+        fs.serialize(self.default_value[:])
 
 # Socket for Float
 @base.register_class
@@ -527,6 +533,10 @@ class SORTNodeSocketFloat(bpy.types.NodeSocket, SORTNodeSocket):
         return '%f'%(self.default_value)
     def get_socket_data_type(self):
         return 'float'
+    def serialize(self,fs):
+        fs.serialize(self.name.replace(" " , ""))
+        fs.serialize(1)
+        fs.serialize(self.default_value)
 
 # Socket for Float Vector
 @base.register_class
@@ -539,6 +549,10 @@ class SORTNodeSocketFloatVector(bpy.types.NodeSocket, SORTNodeSocket):
         return 'vector(%f,%f,%f)'%(self.default_value[:])
     def get_socket_data_type(self):
         return 'vector3'
+    def serialize(self,fs):
+        fs.serialize(self.name.replace(" " , ""))
+        fs.serialize(3)
+        fs.serialize(self.default_value[:])
 
 @base.register_class
 class SORTNodeSocketPositiveFloatVector(bpy.types.NodeSocket, SORTNodeSocket):
@@ -550,6 +564,10 @@ class SORTNodeSocketPositiveFloatVector(bpy.types.NodeSocket, SORTNodeSocket):
         return 'vector(%f,%f,%f)'%(self.default_value[:])
     def get_socket_data_type(self):
         return 'vector3'
+    def serialize(self,fs):
+        fs.serialize(self.name.replace(" " , ""))
+        fs.serialize(3)
+        fs.serialize(self.default_value[:])
 
 # Socket for Positive Float
 @base.register_class
@@ -562,6 +580,10 @@ class SORTNodeSocketLargeFloat(bpy.types.NodeSocket, SORTNodeSocket):
         return '%f'%(self.default_value)
     def get_socket_data_type(self):
         return 'float'
+    def serialize(self,fs):
+        fs.serialize(self.name.replace(" " , ""))
+        fs.serialize(1)
+        fs.serialize(self.default_value)
 
 # Socket for Any Float
 @base.register_class
@@ -574,6 +596,10 @@ class SORTNodeSocketAnyFloat(bpy.types.NodeSocket, SORTNodeSocket):
         return '%f'%(self.default_value)
     def get_socket_data_type(self):
         return 'float'
+    def serialize(self,fs):
+        fs.serialize(self.name.replace(" " , ""))
+        fs.serialize(1)
+        fs.serialize(self.default_value)
 
 # Socket for normal ( normal map )
 @base.register_class
@@ -594,6 +620,10 @@ class SORTNodeSocketNormal(bpy.types.NodeSocket, SORTNodeSocket):
         return 'normal( %f , %f , %f )' %(self.default_value[:])
     def get_socket_data_type(self):
         return 'vector3'
+    def serialize(self,fs):
+        fs.serialize(self.name.replace(" " , ""))
+        fs.serialize(3)
+        fs.serialize(self.default_value[:])
 
 # Socket for UV Mapping
 @base.register_class
@@ -614,6 +644,12 @@ class SORTNodeSocketUV(bpy.types.NodeSocket, SORTNodeSocket):
         return 'vector( u , v , 0.0 )'
     def get_socket_data_type(self):
         return 'vector3'
+    def serialize(self,fs):
+        fs.serialize(self.name.replace(" " , ""))
+        fs.serialize(3)
+        fs.serialize(u)
+        fs.serialize(v)
+        fa.serialize(0.0)
 
 @base.register_class
 class SORTDummySocket(bpy.types.NodeSocket, SORTNodeSocket):
@@ -1291,19 +1327,15 @@ class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode)
 class SORTNode_Material_Diffuse(SORTShadingNode):
     bl_label = 'Diffuse'
     bl_idname = 'SORTNode_Material_Diffuse'
-    osl_shader_diffuse = '''
-        shader bxdf_lambert( out closure Result ){
-            color diffuse;
-            diffuse.r = 1.0f;
-            diffuse.g = 0.3f;
-            diffuse.b = 0.4f;
-            Result = make_closure<lambert>( diffuse , global_value<normal> );
+    tsl_shader_diffuse = '''
+        shader bxdf_lambert(color Diffuse, vector Normal, out closure Result){
+            Result = make_closure<lambert>( Diffuse , Normal );
         }
     '''
-    osl_shader_orennayar = '''
+    tsl_shader_orennayar = '''
         shader bxdf_orennayar( float Roughness,
                                color Diffuse,
-                               normal Normal,
+                               vector Normal,
                                out closure Result ){
             Result = make_closure<oren_nayar>( Diffuse , Roughness , Normal );
         }
@@ -1325,17 +1357,17 @@ class SORTNode_Material_Diffuse(SORTShadingNode):
     def serialize_prop(self, fs):
         if self.brdf_type == 'OrenNayar':
             fs.serialize( 3 )
-            fs.serialize( self.inputs['Roughness'].export_osl_value() )
-            fs.serialize( self.inputs['Diffuse'].export_osl_value() )
-            fs.serialize( self.inputs['Normal'].export_osl_value() )
+            self.inputs['Roughness'].serialize(fs)
+            self.inputs['Diffuse'].serialize(fs)
+            self.inputs['Normal'].serialize(fs)
         else:
             fs.serialize( 2 )
-            fs.serialize( self.inputs['Diffuse'].export_osl_value() )
-            fs.serialize( self.inputs['Normal'].export_osl_value() )
+            self.inputs['Diffuse'].serialize(fs)
+            self.inputs['Normal'].serialize(fs)
     def generate_osl_source(self):
         if self.brdf_type == 'Lambert':
-            return self.osl_shader_diffuse
-        return self.osl_shader_orennayar
+            return self.tsl_shader_diffuse
+        return self.tsl_shader_orennayar
     def type_identifier(self):
         return self.bl_idname + self.brdf_type
 
@@ -1479,25 +1511,25 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
     bl_label = 'Disney BRDF'
     bl_idname = 'SORTNode_Material_DisneyBRDF'
     osl_shader = '''
-        shader Disney( float Metallic = @ ,
-                       float Specular = @ ,
-                       float SpecularTint = @ ,
-                       float Roughness = @ ,
-                       float Anisotropic = @ ,
-                       float Sheen = @ ,
-                       float SheenTint = @ ,
-                       float Clearcoat = @ ,
-                       float ClearcoatGlossiness = @ ,
-                       float SpecularTransmittance = @ ,
-                       vector ScatterDistance = @ ,
-                       float Flatness = @ ,
-                       float DiffuseTransmittance = @ ,
-                       int   IsThinSurface = @ ,
-                       color BaseColor = @ ,
-                       normal Normal = @ ,
-                       output closure color Result = color(0) ){
-            Result = disney( Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness ,
-                             SpecularTransmittance , ScatterDistance , Flatness , DiffuseTransmittance , IsThinSurface , BaseColor , Normal );
+        shader bxdf_disney( float Metallic ,
+                       float Specular ,
+                       float SpecularTint ,
+                       float Roughness ,
+                       float Anisotropic ,
+                       float Sheen ,
+                       float SheenTint ,
+                       float Clearcoat ,
+                       float ClearcoatGlossiness ,
+                       float SpecularTransmittance ,
+                       vector ScatterDistance ,
+                       float Flatness ,
+                       float DiffuseTransmittance ,
+                       /*int   IsThinSurface ,*/
+                       color BaseColor ,
+                       vector Normal ,
+                       out closure Result ){
+            Result = make_closure<disney>( Metallic , Specular , SpecularTint , Roughness , Anisotropic , Sheen , SheenTint , Clearcoat , ClearcoatGlossiness ,
+                             SpecularTransmittance , ScatterDistance , Flatness , DiffuseTransmittance ,/* IsThinSurface , */BaseColor , Normal );
         }
     '''
     bl_width_min = 200
@@ -1525,23 +1557,38 @@ class SORTNode_Material_DisneyBRDF(SORTShadingNode):
         self.inputs['Clearcoat Glossiness'].default_value = 1.0
         self.inputs['Sheen'].default_value = 1.0
     def serialize_prop(self, fs):
-        fs.serialize( 16 )
-        fs.serialize( self.inputs['Metallic'].export_osl_value() )
-        fs.serialize( self.inputs['Specular'].export_osl_value() )
-        fs.serialize( self.inputs['Specular Tint'].export_osl_value() )
-        fs.serialize( self.inputs['Roughness'].export_osl_value() )
-        fs.serialize( self.inputs['Anisotropic'].export_osl_value() )
-        fs.serialize( self.inputs['Sheen'].export_osl_value() )
-        fs.serialize( self.inputs['Sheen Tint'].export_osl_value() )
-        fs.serialize( self.inputs['Clearcoat'].export_osl_value() )
-        fs.serialize( self.inputs['Clearcoat Glossiness'].export_osl_value() )
-        fs.serialize( self.inputs['Specular Transmittance'].export_osl_value() )
-        fs.serialize( self.inputs['Scatter Distance'].export_osl_value() )
-        fs.serialize( self.inputs['Flatness'].export_osl_value() )
-        fs.serialize( self.inputs['Diffuse Transmittance'].export_osl_value() )
-        fs.serialize( '1' if self.is_thin_surface else '0' )
-        fs.serialize( self.inputs['BaseColor'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        fs.serialize( 15 )
+        self.inputs['Metallic'].serialize(fs)
+        self.inputs['Specular'].serialize(fs)
+        self.inputs['Specular Tint'].serialize(fs)
+        self.inputs['Roughness'].serialize(fs)
+        self.inputs['Anisotropic'].serialize(fs)
+        self.inputs['Sheen'].serialize(fs)
+        self.inputs['Sheen Tint'].serialize(fs)
+        self.inputs['Clearcoat'].serialize(fs)
+        self.inputs['Clearcoat Glossiness'].serialize(fs)
+        self.inputs['Specular Transmittance'].serialize(fs)
+        self.inputs['Scatter Distance'].serialize(fs)
+        self.inputs['Flatness'].serialize(fs)
+        self.inputs['Diffuse Transmittance'].serialize(fs)
+        self.inputs['BaseColor'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
+
+        #fs.serialize( self.inputs['Specular'].default_value )
+        #fs.serialize( self.inputs['Specular Tint'].export_osl_value() )
+        #fs.serialize( self.inputs['Roughness'].export_osl_value() )
+        #fs.serialize( self.inputs['Anisotropic'].export_osl_value() )
+        #fs.serialize( self.inputs['Sheen'].export_osl_value() )
+        #fs.serialize( self.inputs['Sheen Tint'].export_osl_value() )
+        #fs.serialize( self.inputs['Clearcoat'].export_osl_value() )
+        #fs.serialize( self.inputs['Clearcoat Glossiness'].export_osl_value() )
+        #fs.serialize( self.inputs['Specular Transmittance'].export_osl_value() )
+        #fs.serialize( self.inputs['Scatter Distance'].export_osl_value() )
+        #fs.serialize( self.inputs['Flatness'].export_osl_value() )
+        #fs.serialize( self.inputs['Diffuse Transmittance'].export_osl_value() )
+        #fs.serialize( '1' if self.is_thin_surface else '0' )
+        #fs.serialize( self.inputs['BaseColor'].export_osl_value() )
+        #fs.serialize( self.inputs['Normal'].export_osl_value() )
     def draw_buttons(self, context, layout):
         layout.prop(self, 'is_thin_surface', text='Is Thin Surface')
     def isSSSNode(self):

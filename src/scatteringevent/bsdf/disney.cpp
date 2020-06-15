@@ -25,6 +25,25 @@
 #include "math/exp.h"
 #include "material/osl_utils.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeDisney)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, metallic)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specular)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specularTint)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, roughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, anisotropic)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, sheen)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, sheenTint)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, clearcoat)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, clearcoatGloss)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specTrans)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, scatterDistance)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, flatness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, diffTrans)
+//IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, int,   thinSurface)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, baseColor)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeDisney)
+
 constexpr static float ior_in = 1.5f;          // hard coded index of refraction below the surface
 constexpr static float ior_ex = 1.0f;          // hard coded index of refraction above the surface
 constexpr static float eta = ior_ex / ior_in;  // hard coded index of refraction ratio

@@ -21,6 +21,25 @@
 #include "microfacet.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDisney)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, metallic)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specular)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specularTint)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, roughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, anisotropic)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, sheen)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, sheenTint)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, clearcoat)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, clearcoatGloss)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specTrans)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, scatterDistance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, flatness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, diffTrans)
+//DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, int,   thinSurface)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, baseColor)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeDisney)
+
 //! @brief Disney Principle BRDF.
 /**
  * Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering
@@ -37,36 +56,16 @@
  */
 class DisneyBRDF : public Bxdf{
 public:
-    // Input parameters to construct the disney BRDF.
-    // struct Params {
-    //     float       metallic;
-    //     float       specular;
-    //     float       specularTint;
-    //     float       roughness;
-    //     float       anisotropic;
-    //     float       sheen;
-    //     float       sheenTint;
-    //     float       clearcoat;
-    //     float       clearcoatGloss;
-    //     float       specTrans;
-    //     OSL::Vec3   scatterDistance;
-    //     float       flatness;
-    //     float       diffTrans;
-    //     int         thinSurface;
-    //     OSL::Vec3   baseColor;
-    //     OSL::Vec3   n;
-    // };
-
     //! Constructor
     //!
     //! @param params           All parameters.
     //! @param ew               Evaluation weight of the BXDF.
     //! @param sw               Sampling weight of the BXDF.
-    // DisneyBRDF( const Params& param , const Spectrum& ew , const float sw)
-    //     : Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.n, true), basecolor(param.baseColor), metallic(param.metallic),
-    //     specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
-    //     clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
-    //       diffTrans(param.diffTrans), thinSurface( param.thinSurface != 0 ) {}
+    DisneyBRDF( const ClosureTypeDisney& param , const Spectrum& ew , const float sw)
+         : Bxdf(ew, sw, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), param.normal, true), basecolor(param.baseColor), metallic(param.metallic),
+         specular(param.specular), specularTint(param.specularTint), roughness(param.roughness), anisotropic(param.anisotropic), sheen(param.sheen), sheenTint(param.sheenTint),
+         clearcoat(param.clearcoat), clearcoatGloss(param.clearcoatGloss), specTrans(param.specTrans), scatterDistance(param.scatterDistance), flatness(param.flatness),
+           diffTrans(param.diffTrans), thinSurface( false ) {}
     
     //! Constructor
     //!

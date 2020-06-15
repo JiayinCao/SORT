@@ -125,98 +125,79 @@ namespace {
          }
      };
 
-//     struct Surface_Closure_Disney : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_DISNEY;
+     struct Surface_Closure_Disney : public Surface_Closure_Base {
+         static constexpr int    ClosureID = SURFACE_CLOSURE_DISNEY;
 
-//         static const char* GetName(){
-//             return "disney";
-//         }
+         static const char* GetName(){
+             return "disney";
+         }
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, metallic),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specular),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specularTint),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, roughness),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, anisotropic),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, sheen),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, sheenTint),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoat),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, clearcoatGloss),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, specTrans),
-//                 CLOSURE_COLOR_PARAM(DisneyBRDF::Params, scatterDistance),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, flatness),
-//                 CLOSURE_FLOAT_PARAM(DisneyBRDF::Params, diffTrans),
-//                 CLOSURE_INT_PARAM(DisneyBRDF::Params, thinSurface),
-//                 CLOSURE_COLOR_PARAM(DisneyBRDF::Params, baseColor),
-//                 CLOSURE_VECTOR_PARAM(DisneyBRDF::Params, n),
-//                 CLOSURE_FINISH_PARAM(DisneyBRDF::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+         static void Register(ShadingSystem* shadingsys) {
+             ClosureTypeDisney::RegisterClosure(GetName(), *shadingsys);
+         }
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto weight = comp->w * w;
-//             const auto sample_weight = ( weight[0] + weight[1] + weight[2] ) / 3.0f;
-//             auto params = *comp->as<DisneyBRDF::Params>();
-//             auto& mfp = params.scatterDistance;
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto weight = w;
+             const auto sample_weight = ( weight.x + weight.y + weight.z ) / 3.0f;
+             auto& params = *(ClosureTypeDisney*)param;
+             auto& mfp = params.scatterDistance;
 
-//             // Ignore SSS if necessary
-//             if ( SE_NONE != ( se.GetFlag() & SE_REPLACE_BSSRDF ) )
-//                 mfp = OSL::Vec3(0.0f);
+             // Ignore SSS if necessary
+             if (SE_NONE != (se.GetFlag() & SE_REPLACE_BSSRDF))
+                 mfp = Tsl_Namespace::make_float3(0.0f, 0.0f, 0.0f);
 
-//             RGBSpectrum sssBaseColor = params.baseColor;
+             RGBSpectrum sssBaseColor = params.baseColor;
 
-// #ifdef SSS_REPLACE_WITH_LAMBERT
-//             constexpr float delta = 0.0001f;
-//             auto bssrdf_channel_weight = 0.0f;
-//             auto total_channel_weight = 0.0f;
-//             auto addExtraLambert = false;
-//             auto baseColor = params.baseColor;
-//             for (int i = 0; i < SPECTRUM_SAMPLE; ++i) {
-//                 total_channel_weight += params.baseColor[i];
+ #ifdef SSS_REPLACE_WITH_LAMBERT
+             constexpr float delta = 0.0001f;
+             auto bssrdf_channel_weight = 0.0f;
+             auto total_channel_weight = 0.0f;
+             auto addExtraLambert = false;
+             auto baseColor = params.baseColor;
+             for (int i = 0; i < SPECTRUM_SAMPLE; ++i) {
+                 total_channel_weight += params.baseColor[i];
 
-//                 // If the reflectance is zero or the mean free path is too small, switch back to lambert.
-//                 if (params.baseColor[i] == 0.0f) {
-//                     mfp[i] = 0.0f;
-//                     continue;
-//                 }
+                 // If the reflectance is zero or the mean free path is too small, switch back to lambert.
+                 if (params.baseColor[i] == 0.0f) {
+                     mfp[i] = 0.0f;
+                     continue;
+                 }
 
-//                 // if the mean free distance is too small, replace it with lambert.
-//                 if (mfp[i] < delta) {
-//                     mfp[i] = 0.0f;
-//                     sssBaseColor[i] = 0.0f;
-//                     addExtraLambert = true;
-//                 }
-//                 else {
-//                     baseColor[i] = 0.0f;
-//                     bssrdf_channel_weight += sssBaseColor[i];
-//                 }
-//             }
+                 // if the mean free distance is too small, replace it with lambert.
+                 if (mfp[i] < delta) {
+                     mfp[i] = 0.0f;
+                     sssBaseColor[i] = 0.0f;
+                     addExtraLambert = true;
+                 }
+                 else {
+                     baseColor[i] = 0.0f;
+                     bssrdf_channel_weight += sssBaseColor[i];
+                 }
+             }
 
-//             const auto bssrdf_pdf = bssrdf_channel_weight / total_channel_weight;
-// #else
-//             constexpr auto bssrdf_pdf = 1.0f;
-// #endif
-//             if (!( 0.0f == mfp[0] && 0.0f == mfp[1] && 0.0f == mfp[2] )) {
-//                 const auto bxdf_sampling_weight = 0.0f; // DisneyBRDF::Evaluate_Sampling_Weight( params );
+             const auto bssrdf_pdf = bssrdf_channel_weight / total_channel_weight;
+ #else
+             constexpr auto bssrdf_pdf = 1.0f;
+ #endif
+             if (!( 0.0f == mfp.x && 0.0f == mfp.y && 0.0f == mfp.z )) {
+                 const auto bxdf_sampling_weight = 0.0f; // DisneyBRDF::Evaluate_Sampling_Weight( params );
 
-//                 if( bxdf_sampling_weight > 0.0f )
-//                     se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight, bxdf_sampling_weight * sample_weight));
+                 if( bxdf_sampling_weight > 0.0f )
+                     se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight, bxdf_sampling_weight * sample_weight));
 
-//                 const auto diffuseWeight = (Spectrum)( weight * (1.0f - params.metallic) * (1.0 - params.specTrans) );
-//                 if (!sssBaseColor.IsBlack() && bxdf_sampling_weight < 1.0f && !diffuseWeight.IsBlack() )
-//                     se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight * bssrdf_pdf ) );
+                 const auto diffuseWeight = (Spectrum)( weight * (1.0f - params.metallic) * (1.0 - params.specTrans) );
+                 if (!sssBaseColor.IsBlack() && bxdf_sampling_weight < 1.0f && !diffuseWeight.IsBlack() )
+                     se.AddBssrdf( SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), sssBaseColor, params.scatterDistance, diffuseWeight , ( 1.0f - bxdf_sampling_weight ) * sample_weight * bssrdf_pdf ) );
 
-// #ifdef SSS_REPLACE_WITH_LAMBERT
-//                 if (addExtraLambert && !baseColor.IsBlack())
-//                     se.AddBxdf(SORT_MALLOC(Lambert)(baseColor, diffuseWeight, ( 1.0f - bxdf_sampling_weight ) * sample_weight * ( 1.0f - bssrdf_pdf ) , params.n));
-// #endif
-//             }else{
-//                 se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight));
-//             }
-//         }
-//     };
+ #ifdef SSS_REPLACE_WITH_LAMBERT
+                 if (addExtraLambert && !baseColor.IsBlack())
+                     se.AddBxdf(SORT_MALLOC(Lambert)(baseColor, diffuseWeight, ( 1.0f - bxdf_sampling_weight ) * sample_weight * ( 1.0f - bssrdf_pdf ) , params.n));
+ #endif
+             }else{
+                 se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight, sample_weight));
+             }
+         }
+     };
 
 //     struct Surface_Closure_MicrofacetReflection : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFLECTION;
@@ -791,8 +772,8 @@ namespace {
 void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys) {
     registerSurfaceClosure<Surface_Closure_Lambert>(shadingsys);
     registerSurfaceClosure<Surface_Closure_OrenNayar>(shadingsys);
-    /*registerSurfaceClosure<Surface_Closure_Disney>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Disney>(shadingsys);
+    /*registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MicrofacetRefraction>(shadingsys);
     registerSurfaceClosure<Surface_Closure_AshikhmanShirley>(shadingsys);
     registerSurfaceClosure<Surface_Closure_Phong>(shadingsys);
