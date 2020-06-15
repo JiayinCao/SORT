@@ -91,6 +91,10 @@ void Material::BuildMaterial() {
              arg.m_is_output = true;
              shader_group->expose_shader_argument(root_shader_name, "out_surface", arg);
 
+             // update default values
+             for (const auto& dv : m_paramDefaultValues)
+                 shader_group->init_shader_input(dv.shader_unit_name, dv.shader_unit_param_name, dv.default_value);
+             
              // end building the shader group
              auto ret = EndShaderGroup(shader_group);
              if (!ret)
@@ -160,20 +164,33 @@ void Material::Serialize(IStreamBase& stream){
                 break;
             }
 
-            // it seems that shader name is a global unit, same shader name may conflict even if they are in different shader group
-            shader_source.name = shader_source.name;
-
-            std::vector<std::string> paramDefaultValues;
             auto parameter_cnt = 0u;
             stream >> parameter_cnt;
             for (auto j = 0u; j < parameter_cnt; ++j) {
-                std::string defaultValue;
-                stream >> defaultValue;
-                paramDefaultValues.push_back(defaultValue);
-            }
+                ShaderParamDefaultValue default_value;
+                default_value.shader_unit_name = shader_source.name;
+                stream >> default_value.shader_unit_param_name;
+                int channel_num = 0;
+                stream >> channel_num;
+                // currently only float and float3 are supported for now
+                if (channel_num == 1) {
+                    default_value.default_value.m_type = ShaderArgumentTypeEnum::TSL_TYPE_FLOAT;
+                    float x;
+                    stream >> x;
+                    default_value.default_value.m_val.m_float = x;
+                }
+                else if (channel_num == 3) {
+                    default_value.default_value.m_type = ShaderArgumentTypeEnum::TSL_TYPE_FLOAT3;
+                    float x, y, z;
+                    stream >> x >> y >> z;
+                    default_value.default_value.m_val.m_float3 = Tsl_Namespace::make_float3(x, y, z);
+                }
 
+                m_paramDefaultValues.push_back(default_value);
+            }
+            
             // construct the shader source code
-            shader_source.source = MatManager::GetSingleton().ConstructShader(shader_source.name, shader_source.type, paramDefaultValues);
+            shader_source.source = MatManager::GetSingleton().LoadShaderSourceCode(shader_source.name, shader_source.type);
 
             shader_data.m_sources.push_back(shader_source);
         } while (true);

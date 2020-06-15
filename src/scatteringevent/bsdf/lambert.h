@@ -32,12 +32,6 @@ DECLARE_CLOSURE_TYPE_END(ClosureTypeLambert)
  */
 class Lambert : public Bxdf{
 public:
-    // Input parameters to construct the BRDF.
-    // struct Params {
-    //     //OSL::Vec3 baseColor;
-    //     //OSL::Vec3 n;
-    // };
-
     Lambert( const ClosureTypeLambert& params, const Spectrum& weight, bool doubleSided = false) :Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided), R(params.base_color) {}
 
     //! Constructor taking spectrum information.

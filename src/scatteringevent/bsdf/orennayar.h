@@ -19,6 +19,12 @@
 
 #include "bxdf.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeOrenNayar)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float,  roughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeOrenNayar)
+
 //! @brief OrenNayar BRDF.
 /**
  * 'Generalization of Lambert's Reflectance Model'
@@ -30,12 +36,8 @@
 class OrenNayar : public Bxdf
 {
 public:
-    // Input parameters to construct the BRDF.
-    // struct Params {
-    //     OSL::Vec3   baseColor;
-    //     float       sigma;
-    //     OSL::Vec3   n;
-    // };
+    //! @brief  Constructor
+    OrenNayar(const ClosureTypeOrenNayar& params, const Spectrum& weight, bool doubleSided = false);
 
     //! Constructor
     //! @param reflectance  Direction-hemisphere reflection.

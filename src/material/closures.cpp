@@ -45,10 +45,8 @@
 
 using namespace Tsl_Namespace;
 
-// // These data structure is not supposed to be seen by other parts of the renderer
+// These data structure is not supposed to be seen by other parts of the renderer
 namespace {
-     constexpr int MAXPARAMS = 32;
-
      struct Closure_Base {
          struct BuiltinClosures {
              const char* name;
@@ -64,8 +62,6 @@ namespace {
          virtual Spectrum EvaluateOpacity(const ClosureComponent* comp, const OSL::Color3& w) const {
              return w;
          }
-
-         virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const = 0;
          */
 
          virtual void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const = 0;
@@ -107,33 +103,27 @@ namespace {
          }
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
-             ClosureTypeLambert* lambert_param = (ClosureTypeLambert*)param;
-             se.AddBxdf(SORT_MALLOC(Lambert)(*lambert_param, w));
+             ClosureTypeLambert* bxdf_param = (ClosureTypeLambert*)param;
+             se.AddBxdf(SORT_MALLOC(Lambert)(*bxdf_param, w));
          }
      };
 
-//     struct Surface_Closure_OrenNayar : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_OREN_NAYAR;
+     struct Surface_Closure_OrenNayar : public Surface_Closure_Base {
+         static constexpr int    ClosureID = SURFACE_CLOSURE_OREN_NAYAR;
 
-//         static const char* GetName(){
-//             return "orenNayar";
-//         }
+         static const char* GetName(){
+             return "oren_nayar";
+         }
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID, {
-//                 CLOSURE_COLOR_PARAM(OrenNayar::Params, baseColor),
-//                 CLOSURE_FLOAT_PARAM(OrenNayar::Params, sigma),
-//                 CLOSURE_VECTOR_PARAM(OrenNayar::Params, n),
-//                 CLOSURE_FINISH_PARAM(OrenNayar::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+         static void Register(ShadingSystem* shadingsys) {
+             ClosureTypeOrenNayar::RegisterClosure(GetName(), *shadingsys);
+         }
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<OrenNayar::Params>();
-//             se.AddBxdf(SORT_MALLOC(OrenNayar)(params, w * comp->w));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             ClosureTypeOrenNayar* bxdf_param = (ClosureTypeOrenNayar*)param;
+             se.AddBxdf(SORT_MALLOC(OrenNayar)(*bxdf_param, w));
+         }
+     };
 
 //     struct Surface_Closure_Disney : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_DISNEY;
@@ -800,8 +790,8 @@ namespace {
 
 void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys) {
     registerSurfaceClosure<Surface_Closure_Lambert>(shadingsys);
-    /*registerSurfaceClosure<Surface_Closure_OrenNayar>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_Disney>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_OrenNayar>(shadingsys);
+    /*registerSurfaceClosure<Surface_Closure_Disney>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MicrofacetRefraction>(shadingsys);
     registerSurfaceClosure<Surface_Closure_AshikhmanShirley>(shadingsys);

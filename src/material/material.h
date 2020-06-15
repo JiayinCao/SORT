@@ -217,6 +217,11 @@ private:
         std::string source_shader , source_property;
         std::string target_shader , target_property;
     };
+    struct ShaderParamDefaultValue {
+        std::string shader_unit_name;
+        std::string shader_unit_param_name;
+        Tsl_Namespace::ShaderUnitInputDefaultValue default_value;
+    };
 
     struct TSL_ShaderData {
         /**< Shader source code. */
@@ -231,6 +236,9 @@ private:
 
     /**< Shader unit instance. */
     std::unique_ptr<Tsl_Namespace::ShaderInstance>  m_surface_shader = nullptr;
+
+    /**< Shader unit default values. */
+    std::vector<ShaderParamDefaultValue>        m_paramDefaultValues;
 
     /**< OSL device surface shader. */
     //OSL::ShaderGroupRef             m_surface_shader = nullptr;

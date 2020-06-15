@@ -82,13 +82,12 @@ public:
     // result           : the number of materials in the file
     unsigned    ParseMatFile( class IStreamBase& stream );
 
-    //! @brief  Construct shader source code given a list of parameters in string format.
+    //! @brief  Load the shader source code given a specific shader type
     //!
     //! @param  shaderName  The name of the shader to be constructed.
     //! @param  shaderType  The type of shader to be constructed.
-    //! @param  paramValue  The default value of the parameters in string format to be set.
     //! @return             The constructed shader source code.
-    std::string ConstructShader(const std::string& shaderName, const std::string& shaderType, const std::vector<std::string>& paramValue);
+    std::string LoadShaderSourceCode(const std::string& shaderName, const std::string& shaderType);
 
     //! @brief  Get resource data based on index.
     //!
