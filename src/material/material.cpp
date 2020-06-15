@@ -67,7 +67,7 @@ void Material::BuildMaterial() {
                  return;
 
              // begin compiling shader group
-             auto shader_group = BeginShaderGroup("first shader");
+             auto shader_group = BeginShaderGroup(m_name);
              if (!shader_group)
                  return;
 
