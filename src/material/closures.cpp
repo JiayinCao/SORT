@@ -180,7 +180,7 @@ namespace {
              constexpr auto bssrdf_pdf = 1.0f;
  #endif
              if (!( 0.0f == mfp.x && 0.0f == mfp.y && 0.0f == mfp.z )) {
-                 const auto bxdf_sampling_weight = 0.0f; // DisneyBRDF::Evaluate_Sampling_Weight( params );
+                 const auto bxdf_sampling_weight = DisneyBRDF::Evaluate_Sampling_Weight( params );
 
                  if( bxdf_sampling_weight > 0.0f )
                      se.AddBxdf(SORT_MALLOC(DisneyBRDF)(params, weight, bxdf_sampling_weight * sample_weight));
