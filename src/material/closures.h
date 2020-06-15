@@ -17,7 +17,9 @@
 
 #pragma once
 
-//#include <OSL/oslexec.h>
+#include <tslversion.h>
+#include <shading_system.h>
+#include <shader_arg_types.h>
 #include "spectrum/spectrum.h"
 #include "medium/medium.h"
 
@@ -58,20 +60,19 @@ constexpr unsigned VOLUME_CLOSURE_CNT   = 3;
 constexpr unsigned VOLUME_CLOSURE_BASE  = SURFACE_CLOSURE_CNT;
 constexpr unsigned CLOSURE_CNT          = SURFACE_CLOSURE_CNT + VOLUME_CLOSURE_CNT;
 
-/*
-
 //! @brief  Register all closures supported by SORT.
 //!
 //! @param  shadingsys      Shading system of OSL.
-void RegisterClosures(OSL::ShadingSystem* shadingsys);
+void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys);
 
 //! @brief  Process the closure tree result and populate the BSDF.
 //!
 //! @param  closure         The closure tree in the osl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  se              The result scattering event.
-void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se );
+void ProcessSurfaceClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, ScatteringEvent& se);
 
+/*
 //! @brief  Process the closure tree result and populate the MediumStack.
 //!
 //! @param  closure         The closure tree in the osl shader.

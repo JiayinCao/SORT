@@ -17,6 +17,10 @@
 
 #pragma once
 
+#include <tslversion.h>
+#include <shading_system.h>
+#include <closure.h>
+#include <shader_arg_types.h>
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
 #include "scatteringevent/scatteringunit.h"
@@ -209,3 +213,6 @@ protected:
     mutable Vector      gnormal;            /**< Geometry normal. */
     const bool  doubleSided = false;        /**< Whether the bxdf is double sided. */
 };
+
+// this is temporary
+using namespace Tsl_Namespace;

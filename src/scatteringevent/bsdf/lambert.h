@@ -19,6 +19,11 @@
 
 #include "bxdf.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeLambert)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeLambert)
+
 //! @brief Lambert brdf.
 /**
  * Lambert is the simplest BRDF that exists in any renderers.
@@ -32,6 +37,8 @@ public:
     //     //OSL::Vec3 baseColor;
     //     //OSL::Vec3 n;
     // };
+
+    Lambert( const ClosureTypeLambert& params, const Spectrum& weight, bool doubleSided = false) :Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided), R(params.base_color) {}
 
     //! Constructor taking spectrum information.
     //!

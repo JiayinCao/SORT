@@ -21,7 +21,7 @@
 #include <string>
 //#include <OSL/oslexec.h>
 #include "stream/stream.h"
-#include "osl_system.h"
+#include "tsl_system.h"
 
 struct SurfaceInteraction;
 struct MediumInteraction;
@@ -218,7 +218,7 @@ private:
         std::string target_shader , target_property;
     };
 
-    struct OSL_ShaderData {
+    struct TSL_ShaderData {
         /**< Shader source code. */
         std::vector<ShaderSource>       m_sources;
         /**< Shader connections. */
@@ -226,8 +226,11 @@ private:
     };
 
     /**< OSL shader source data. */
-    OSL_ShaderData                  m_surface_shader_data;
-    OSL_ShaderData                  m_volume_shader_data;
+    TSL_ShaderData                  m_surface_shader_data;
+    TSL_ShaderData                  m_volume_shader_data;
+
+    /**< Shader unit instance. */
+    std::unique_ptr<Tsl_Namespace::ShaderInstance>  m_surface_shader = nullptr;
 
     /**< OSL device surface shader. */
     //OSL::ShaderGroupRef             m_surface_shader = nullptr;

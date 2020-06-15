@@ -1292,18 +1292,20 @@ class SORTNode_Material_Diffuse(SORTShadingNode):
     bl_label = 'Diffuse'
     bl_idname = 'SORTNode_Material_Diffuse'
     osl_shader_diffuse = '''
-        shader Lambert( color Diffuse = @ ,
-                        normal Normal = @ ,
-                        output closure color Result = color(0) ){
-            Result = lambert( Diffuse , Normal );
+        shader bxdf_lambert( out closure Result ){
+            color diffuse;
+            diffuse.r = 1.0f;
+            diffuse.g = 0.3f;
+            diffuse.b = 0.4f;
+            Result = make_closure<lambert>( diffuse , global_value<normal> );
         }
     '''
     osl_shader_orennayar = '''
-        shader OrenNayar( float Roughness = @,
-                          color Diffuse = @ ,
-                          normal Normal = @ ,
-                          output closure color Result = color(0) ){
-            Result = orenNayar( Diffuse , Roughness , Normal );
+        shader bxdf_orennayar( float Roughness,
+                               color Diffuse,
+                               normal Normal,
+                               out closure Result ){
+            Result = make_closure<oren_nayar>( Diffuse , Roughness , Normal );
         }
     '''
     def update_brdf(self,context):

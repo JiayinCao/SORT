@@ -23,7 +23,7 @@
 #include "sampler/random.h"
 #include "core/timer.h"
 #include "stream/fstream.h"
-#include "material/osl_system.h"
+#include "material/tsl_system.h"
 
 SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
 SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
@@ -120,7 +120,7 @@ int RunSORT( int argc , char** argv ){
     IFileStream stream( g_inputFilePath );
     GlobalConfiguration::GetSingleton().Serialize(stream);
 
-    // CreateOSLThreadContexts();
+    CreateTSLThreadContexts();
 
     Scene scene;
     // Schedule all tasks.
@@ -147,7 +147,7 @@ int RunSORT( int argc , char** argv ){
     // Post process for image sensor
     g_imageSensor->PostProcess();
 
-    // DestroyOSLThreadContexts();
+    DestroyTSLThreadContexts();
 
     return 0;
 }

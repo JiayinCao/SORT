@@ -16,12 +16,12 @@
  */
 
 #include <string.h>
+#include <shading_context.h>
 #include "material.h"
 #include "matmanager.h"
 #include "core/log.h"
 #include "core/globalconfig.h"
 #include "core/strid.h"
-#include "osl_system.h"
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/bsdf/transparent.h"
@@ -30,47 +30,84 @@ void Material::BuildMaterial() {
     const auto message = "Build Material '" + m_name + "'";
     SORT_PROFILE(message);
 
-    static constexpr auto surface_shader_root = "shader SORT_Surface_Shader( closure color Surface = color(0) ){\nCi = Surface;\n}";
-    static constexpr auto surface_volume_root = "shader SORT_Volume_Shader( closure color Volume = color(0) ){\nCi = Volume;\n}";
+    static constexpr auto surface_shader_root = R"(
+            shader SORT_Surface_Shader( in closure Surface, out closure out_surface ){
+                out_surface = Surface;
+            }
+    )";
+    // static constexpr auto surface_volume_root = "shader SORT_Volume_Shader( out closure Volume = color(0) ){\nCi = Volume;\n}";
 
     const auto output_node_name = "ShaderOutput_" + m_name;
 
     auto tried_building_surface_shader = false;
     auto tried_building_volume_shader = false;
 
-    // auto build_shader_type = [&](const OSL_ShaderData& shader_data, const char* root_shader, const std::string prefix, bool& shader_valid, bool& trying_building_shader_type, OSL::ShaderGroupRef& shader_ref) {
-    //     // Build surface shader
-    //     if (shader_valid) {
-    //         shader_ref = BeginShaderGroup(m_name);
+     auto build_shader_type = [&](const TSL_ShaderData& shader_data, const char* root_shader, const std::string prefix, bool& shader_valid, bool& trying_building_shader_type, std::unique_ptr<Tsl_Namespace::ShaderInstance>& shader_instance) {
+         // Build surface shader
+         if (shader_valid) {
+             shader_valid = false;
+             trying_building_shader_type = true;
 
-    //         // build all shader nodes
-    //         for (const auto& shader : shader_data.m_sources)
-    //             BuildShader(shader.source, shader.name, shader.name, m_name);
+             // build all shader nodes
+             std::unordered_map<std::string, Tsl_Namespace::ShaderUnitTemplate*> shader_units;
+             for (const auto& shader : shader_data.m_sources) {
+                 auto su = BuildShader(shader.name, shader.source);
+                 if (su)
+                     shader_units[shader.name] = su;
+                 else
+                     return;
+             }
 
-    //         // root surface shader
-    //         BuildShader(root_shader, prefix + output_node_name, prefix + output_node_name, m_name);
+             // build the root shader
+             const auto root_shader_name = prefix + output_node_name;
+             auto su_root = BuildShader(root_shader_name, root_shader);
+             if (su_root)
+                 shader_units[root_shader_name] = su_root;
+             else 
+                 return;
 
-    //         // connecting surface shader nodes
-    //         for (const auto& connection : shader_data.m_connections) {
-    //             const auto target_shader = connection.target_shader == output_node_name ? prefix + output_node_name : connection.target_shader;
-    //             if (!ConnectShader(connection.source_shader, connection.source_property, target_shader, connection.target_property))
-    //                 m_surface_shader_valid = false;
-    //         }
+             // begin compiling shader group
+             auto shader_group = BeginShaderGroup("first shader");
+             if (!shader_group)
+                 return;
 
-    //         shader_valid &= EndShaderGroup();
+             for (auto su : shader_units) {
+                 const auto is_root = su.first == root_shader_name;
+                 const auto ret = shader_group->add_shader_unit(su.first, su.second, is_root);
+                 if (!ret)
+                     return;
+             }
 
-    //         if (shader_valid) {
-    //             const auto message = "Optimizing surface shader in material '" + m_name + "'";
-    //             SORT_PROFILE(message);
-    //             OptimizeShader(shader_ref.get());
-    //         }
+             // connect the shader units
+             for (auto connection : shader_data.m_connections) {
+                 const auto target_shader = connection.target_shader == output_node_name ? prefix + output_node_name : connection.target_shader;
+                 shader_group->connect_shader_units(connection.source_shader, connection.source_property, target_shader, connection.target_property);
+             }
 
-    //         trying_building_shader_type = true;
-    //     }
-    // };
+             // expose the shader interface
+             ArgDescriptor arg;
+             arg.m_name = "out_bxdf";
+             arg.m_type = TSL_TYPE_CLOSURE;
+             arg.m_is_output = true;
+             shader_group->expose_shader_argument(root_shader_name, "out_surface", arg);
+
+             // end building the shader group
+             auto ret = EndShaderGroup(shader_group);
+             if (!ret)
+                 return;
+
+             shader_instance = shader_group->make_shader_instance();
+             // ret = shading_context->resolve_shader_instance(shader_instance.get());
+             ret = ResolveShaderInstance(shader_instance.get());
+             if (!ret)
+                 return;
+
+             shader_valid = true;
+         }
+     };
 
     // build surface shader
-    // build_shader_type(m_surface_shader_data, surface_shader_root, "Surface", m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
+    build_shader_type(m_surface_shader_data, surface_shader_root, "Surface", m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
 
     // // build volume shader
     // build_shader_type(m_volume_shader_data, surface_volume_root, "Volume", m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
@@ -107,7 +144,7 @@ void Material::Serialize(IStreamBase& stream){
     const auto message = "Parsing Material '" + m_name + "'";
     SORT_PROFILE(message.c_str());
 
-    auto parse_shader_type = [&](OSL_ShaderData& shader_data, bool& is_shader_valid) {
+    auto parse_shader_type = [&](TSL_ShaderData& shader_data, bool& is_shader_valid) {
         is_shader_valid = true;
 
         // parse surface shader
@@ -170,8 +207,8 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
         return;
     }
 
-//    if( m_surface_shader_valid )
-//        ExecuteSurfaceShader(m_surface_shader.get() , se );
+    if( m_surface_shader_valid )
+        ExecuteSurfaceShader(m_surface_shader.get() , se );
 //    else if( m_special_transparent )
 //        se.AddBxdf(SORT_MALLOC(Transparent)());
 }

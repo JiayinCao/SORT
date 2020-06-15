@@ -17,7 +17,8 @@
 
 #pragma once
 
-// #include <OSL/oslexec.h>
+#include <string>
+#include <shader_arg_types.h>
 #include <math.h>
 #include "math/utils.h"
 #include "core/sassert.h"
@@ -28,6 +29,9 @@ class Vector3{
 public:
     //! @brief  Default constructor reset all value to be zero.
     Vector3() : x(0),y(0),z(0){}
+
+    //! @brief  Conversion from tsl float3
+    Vector3(const Tsl_Namespace::float3& f3) : r(f3.x), g(f3.y), b(f3.z) {}
 
     //! @brief  Constructor from three float values.
     //!

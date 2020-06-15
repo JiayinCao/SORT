@@ -15,8 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-//#include <OSL/oslclosure.h>
-//#include <OSL/genclosure.h>
 #include "closures.h"
 #include "osl_utils.h"
 #include "core/memory.h"
@@ -45,45 +43,48 @@
 #include "material/material.h"
 #include "core/mesh.h"
 
-// using namespace OSL;
+using namespace Tsl_Namespace;
 
 // // These data structure is not supposed to be seen by other parts of the renderer
-// namespace {
-//     constexpr int MAXPARAMS = 32;
+namespace {
+     constexpr int MAXPARAMS = 32;
 
-//     struct Closure_Base {
-//         struct BuiltinClosures {
-//             const char* name;
-//             int id;
-//             ClosureParam params[MAXPARAMS];
-//         };
+     struct Closure_Base {
+         struct BuiltinClosures {
+             const char* name;
+             int id;
+         };
 
-//         Closure_Base() = default;
-//         virtual ~Closure_Base() = default;
-//     };
+         Closure_Base() = default;
+         virtual ~Closure_Base() = default;
+     };
 
-//     struct Surface_Closure_Base : public Closure_Base {
-//         virtual Spectrum EvaluateOpacity(const ClosureComponent* comp, const OSL::Color3& w) const {
-//             return w;
-//         }
+     struct Surface_Closure_Base : public Closure_Base {
+         /*
+         virtual Spectrum EvaluateOpacity(const ClosureComponent* comp, const OSL::Color3& w) const {
+             return w;
+         }
 
-//         virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const = 0;
-//     };
+         virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const = 0;
+         */
+
+         virtual void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const = 0;
+     };
 
 //     struct Volume_Closure_Base : public Closure_Base {
 //         virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const = 0;
 //         virtual void Evaluate(const ClosureComponent* comp, const OSL::Color3& w, MediumSample& ms) const {}
 //     };
 
-//     static std::vector<std::unique_ptr<Surface_Closure_Base>>   g_surface_closures(SURFACE_CLOSURE_CNT);
+     static std::vector<std::unique_ptr<Surface_Closure_Base>>   g_surface_closures(SURFACE_CLOSURE_CNT);
 //     static std::vector<std::unique_ptr<Volume_Closure_Base>>    g_volume_closures(VOLUME_CLOSURE_CNT);
 
-//     inline static Surface_Closure_Base* getSurfaceClosureBase(unsigned int closure_id) {
-//         sAssert(closure_id >= 0 && closure_id < SURFACE_CLOSURE_CNT, MATERIAL);
-//         sAssert(IS_PTR_VALID(g_surface_closures[closure_id]), MATERIAL);
+     inline static Surface_Closure_Base* getSurfaceClosureBase(unsigned int closure_id) {
+         sAssert(closure_id >= 0 && closure_id < SURFACE_CLOSURE_CNT, MATERIAL);
+         sAssert(IS_PTR_VALID(g_surface_closures[closure_id]), MATERIAL);
 
-//         return g_surface_closures[closure_id].get();
-//     }
+         return g_surface_closures[closure_id].get();
+     }
 
 //     inline static Volume_Closure_Base* getVolumeClosureBase(unsigned int closure_id) {
 //         closure_id -= VOLUME_CLOSURE_BASE;
@@ -94,27 +95,22 @@
 //         return g_volume_closures[closure_id].get();
 //     }
 
-//     struct Surface_Closure_Lambert : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_LAMBERT;
+     struct Surface_Closure_Lambert : public Surface_Closure_Base {
+         static constexpr int    ClosureID = SURFACE_CLOSURE_LAMBERT;
 
-//         static const char* GetName(){
-//             return "lambert";
-//         }
+         static const char* GetName(){
+             return "lambert";
+         }
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID, {
-//                 CLOSURE_COLOR_PARAM(Lambert::Params, baseColor),
-//                 CLOSURE_VECTOR_PARAM(Lambert::Params, n),
-//                 CLOSURE_FINISH_PARAM(Lambert::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+         static void Register(ShadingSystem* shadingsys) {
+             ClosureTypeLambert::RegisterClosure(GetName(), *shadingsys);
+         }
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w , ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<Lambert::Params>();
-//             se.AddBxdf(SORT_MALLOC(Lambert)(params, w * comp->w));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             ClosureTypeLambert* lambert_param = (ClosureTypeLambert*)param;
+             se.AddBxdf(SORT_MALLOC(Lambert)(*lambert_param, w));
+         }
+     };
 
 //     struct Surface_Closure_OrenNayar : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_OREN_NAYAR;
@@ -788,13 +784,13 @@
 //             ms.basecolor = params.baseColor;
 //         }
 //     };
-// }
+}
 
-// template< typename T >
-// static void registerSurfaceClosure(OSL::ShadingSystem* shadingsys) {
-//     T::Register(shadingsys);
-//     g_surface_closures[T::ClosureID] = std::make_unique<T>();
-// }
+ template< typename T >
+ static void registerSurfaceClosure(Tsl_Namespace::ShadingSystem* shadingsys) {
+     T::Register(shadingsys);
+     g_surface_closures[T::ClosureID] = std::make_unique<T>();
+ }
 
 // template< typename T >
 // static void registerVolumeClosure(OSL::ShadingSystem* shadingsys) {
@@ -802,54 +798,70 @@
 //     g_volume_closures[T::ClosureID - VOLUME_CLOSURE_BASE] = std::make_unique<T>();
 // }
 
-// void RegisterClosures(OSL::ShadingSystem* shadingsys) {
-//     registerSurfaceClosure<Surface_Closure_Lambert>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_OrenNayar>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_Disney>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_MicrofacetRefraction>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_AshikhmanShirley>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_Phong>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_LambertTransmission>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_Mirror>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_Dielectric>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_MicrofacetReflectionDielectric>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_Hair>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_MERL>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_Coat>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_DoubleSided>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_FourierBRDF>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_DistributionBRDF>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_Fabric>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_SSS>(shadingsys);
-//     registerSurfaceClosure<Surface_Closure_Transparent>(shadingsys);
+void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys) {
+    registerSurfaceClosure<Surface_Closure_Lambert>(shadingsys);
+    /*registerSurfaceClosure<Surface_Closure_OrenNayar>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Disney>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_MicrofacetRefraction>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_AshikhmanShirley>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Phong>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_LambertTransmission>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Mirror>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Dielectric>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_MicrofacetReflectionDielectric>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Hair>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_MERL>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Coat>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_DoubleSided>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_FourierBRDF>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_DistributionBRDF>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Fabric>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_SSS>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Transparent>(shadingsys);
 
-//     registerVolumeClosure<Volume_Closure_Absorption>(shadingsys);
-//     registerVolumeClosure<Volume_Closure_Homogeneous>(shadingsys);
-//     registerVolumeClosure<Volume_Closure_Heterogeneous>(shadingsys);
-// }
+    registerVolumeClosure<Volume_Closure_Absorption>(shadingsys);
+    registerVolumeClosure<Volume_Closure_Homogeneous>(shadingsys);
+    registerVolumeClosure<Volume_Closure_Heterogeneous>(shadingsys);*/
+}
 
-// void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se ){
-//     if (!closure)
-//         return;
+void ProcessSurfaceClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, ScatteringEvent& se) {
+    if (!closure)
+        return;
 
-//     switch (closure->id) {
-//         case ClosureColor::MUL: {
-//             Color3 cw = w * closure->as_mul()->weight;
-//             ProcessSurfaceClosure(closure->as_mul()->closure, cw , se);
-//             break;
-//         }
-//         case ClosureColor::ADD: {
-//             ProcessSurfaceClosure(closure->as_add()->closureA, w , se);
-//             ProcessSurfaceClosure(closure->as_add()->closureB, w , se);
-//             break;
-//         }
-//         default: {
-//             const ClosureComponent* comp = closure->as_comp();
-//             getSurfaceClosureBase(comp->id)->Process(comp, w * comp->w , se);
-//         }
-//     }
-// }
+    switch (closure->m_id) {
+        case Tsl_Namespace::CLOSURE_ADD:
+            break;
+        case Tsl_Namespace::CLOSURE_MUL:
+            break;
+        default:
+            auto closure_base = getSurfaceClosureBase(closure->m_id - Tsl_Namespace::INVALID_CLOSURE_ID - 1);
+            closure_base->Process(closure->m_params, w, se);
+            break;
+    }
+}
+
+ //void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se ){
+ //    if (!closure)
+ //        return;
+
+ //    switch (closure->id) {
+ //        case ClosureColor::MUL: {
+ //            Color3 cw = w * closure->as_mul()->weight;
+ //            ProcessSurfaceClosure(closure->as_mul()->closure, cw , se);
+ //            break;
+ //        }
+ //        case ClosureColor::ADD: {
+ //            ProcessSurfaceClosure(closure->as_add()->closureA, w , se);
+ //            ProcessSurfaceClosure(closure->as_add()->closureB, w , se);
+ //            break;
+ //        }
+ //        default: {
+ //            const ClosureComponent* comp = closure->as_comp();
+ //            getSurfaceClosureBase(comp->id)->Process(comp, w * comp->w , se);
+ //        }
+ //    }
+ //}
 
 // void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) {
 //     if (!closure)

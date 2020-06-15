@@ -17,7 +17,8 @@
 
 #pragma once
 
-// #include <OSL/oslexec.h>
+#include <string>
+#include <shader_arg_types.h>
 #include "core/define.h"
 #include "core/sassert.h"
 #include "math/utils.h"
@@ -33,6 +34,9 @@ class   RGBSpectrum{
 public:
     //! @brief  Default constructor.
     SORT_FORCEINLINE RGBSpectrum():r(0.0f),g(0.0f),b(0.0f){}
+
+    //! @brief  Conversion from tsl float3
+    SORT_FORCEINLINE RGBSpectrum(const Tsl_Namespace::float3& f3) : r(f3.x), g(f3.y), b(f3.z) {}
 
     //! @brief  Constructor from three float values.
     //!
