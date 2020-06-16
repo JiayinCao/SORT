@@ -17,13 +17,15 @@
 
 #pragma once
 
-//#include <OSL/genclosure.h>
-//#include <OSL/oslexec.h>
-//#include <OSL/oslclosure.h>
 #include "bxdf.h"
 #include "fresnel.h"
 #include "spectrum/spectrum.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMirror)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMirror, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMirror, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeMirror)
 
 //! @brief Normal distribution function.
 class MicroFacetDistribution{
@@ -155,30 +157,12 @@ protected:
 //! @brief Microfacet Reflection BRDF.
 class MicroFacetReflection : public Microfacet{
 public:
-    // struct Params{
-    //     OSL::ustring    dist;
-    //     OSL::Vec3       eta;
-    //     OSL::Vec3       absorption;
-    //     float           roughnessU;
-    //     float           roughnessV;
-    //     OSL::Vec3       baseColor;
-    //     OSL::Vec3       n;
-    // };
-
-    // struct ParamsDieletric{
-    //     OSL::ustring    dist;
-    //     float           iorI;
-    //     float           iorT;
-    //     float           roughnessU;
-    //     float           roughnessV;
-    //     OSL::Vec3       baseColor;
-    //     OSL::Vec3       n;
-    // };
-
-    // struct MirrorParams{
-    //     OSL::Vec3       baseColor;
-    //     OSL::Vec3       n;
-    // };
+    //! @brief Constructor for constructing a mirror bxdf.
+    //!
+    //! @param  params          Parameter set.
+    //! @param  weight          Weight of this bxdf.
+    //! @param  doubleSided     Whether the material is double sided
+    MicroFacetReflection(const ClosureTypeMirror& params, const Spectrum& weight, bool doubleSided = false);
 
     //! @brief Constructor from parameter set
     //!

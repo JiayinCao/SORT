@@ -22,6 +22,11 @@
 #include "core/memory.h"
 #include "scatteringevent/bsdf/fresnel.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeMirror)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMirror, float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMirror, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeMirror)
+
 Blinn::Blinn( float roughnessU , float roughnessV ) {
     // UE4 style way to convert roughness to alpha used here because it still keeps sharp reflection with low value of roughness
     // http://graphicrants.blogspot.com/2013/08/specular-brdf-reference.html
@@ -225,9 +230,9 @@ Microfacet::Microfacet(const std::string& distType, float ru , float rv , const 
 // R(params.baseColor), fresnel(SORT_MALLOC( FresnelDielectric )(params.iorI, params.iorT)){
 // }
 
-// MicroFacetReflection::MicroFacetReflection(const MirrorParams &params, const Spectrum& weight ):
-// Microfacet( "GGX" , 0.0f , 0.0f , weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, false) , R(params.baseColor), fresnel(SORT_MALLOC(FresnelNo)()){
-// }
+MicroFacetReflection::MicroFacetReflection(const ClosureTypeMirror& params, const Spectrum& weight, bool doubleSided ):
+    Microfacet("GGX", 0.0f, 0.0f, weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false), R(params.base_color), fresnel(SORT_MALLOC(FresnelNo)()) {
+}
 
 Spectrum MicroFacetReflection::f( const Vector& wo , const Vector& wi ) const {
     if (!SameHemiSphere(wo, wi)) return 0.0f;

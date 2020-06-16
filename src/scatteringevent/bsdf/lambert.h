@@ -66,24 +66,23 @@ private:
     const Spectrum R;         /**< Direction-Hemisphere reflection or total reflection. */
 };
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeLambertTransmission)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, transmittance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeLambertTransmission)
+
 //! @brief Lambert transmittance brdf.
 /**
  * LambertTransmittance is the transmittance version of lambert model
  */
 class LambertTransmission : public Bxdf{
 public:
-    // Input parameters to construct the BRDF.
-    // struct Params {
-    //     OSL::Vec3 transmittance;
-    //     OSL::Vec3 n;
-    // };
-
     //! Constructor from parameter set.
     //!
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    // LambertTransmission( const Params& param , const Spectrum& weight):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.n, true),T(param.transmittance){}
+    LambertTransmission( const ClosureTypeLambertTransmission& param , const Spectrum& weight):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), param.normal, true),T(param.transmittance){}
 
     //! Constructor taking spectrum information.
     //! @param s            Direction-Hemisphere refraction.

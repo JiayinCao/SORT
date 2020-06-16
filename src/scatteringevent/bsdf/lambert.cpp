@@ -25,6 +25,11 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeLambert, float3, base_color)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeLambert, float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeLambert)
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeLambertTransmission)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, transmittance)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeLambertTransmission)
+
 // evaluate bxdf
 Spectrum Lambert::f( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
