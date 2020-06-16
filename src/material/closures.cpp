@@ -93,14 +93,14 @@ namespace {
 //     }
 
      struct Surface_Closure_Lambert : public Surface_Closure_Base {
-         static ClosureID    ClosureID;
+         static ClosureID    closure_id;
 
          static const char* GetName(){
              return "lambert";
          }
 
          static void Register(ShadingSystem* shadingsys) {
-             ClosureID = ClosureTypeLambert::RegisterClosure(GetName(), *shadingsys);
+             closure_id = ClosureTypeLambert::RegisterClosure(GetName(), *shadingsys);
          }
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
@@ -108,17 +108,17 @@ namespace {
              se.AddBxdf(SORT_MALLOC(Lambert)(*bxdf_param, w));
          }
      };
-     ClosureID Surface_Closure_Lambert::ClosureID = INVALID_CLOSURE_ID;
+     ClosureID Surface_Closure_Lambert::closure_id = INVALID_CLOSURE_ID;
 
      struct Surface_Closure_OrenNayar : public Surface_Closure_Base {
-         static ClosureID    ClosureID;
+         static ClosureID    closure_id;
 
          static const char* GetName(){
              return "oren_nayar";
          }
 
          static void Register(ShadingSystem* shadingsys) {
-             ClosureID = ClosureTypeOrenNayar::RegisterClosure(GetName(), *shadingsys);
+             closure_id = ClosureTypeOrenNayar::RegisterClosure(GetName(), *shadingsys);
          }
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
@@ -126,17 +126,17 @@ namespace {
              se.AddBxdf(SORT_MALLOC(OrenNayar)(*bxdf_param, w));
          }
      };
-     ClosureID Surface_Closure_OrenNayar::ClosureID = INVALID_CLOSURE_ID;
+     ClosureID Surface_Closure_OrenNayar::closure_id = INVALID_CLOSURE_ID;
 
      struct Surface_Closure_Disney : public Surface_Closure_Base {
-         static ClosureID    ClosureID;
+         static ClosureID    closure_id;
 
          static const char* GetName(){
              return "disney";
          }
 
          static void Register(ShadingSystem* shadingsys) {
-             ClosureID = ClosureTypeDisney::RegisterClosure(GetName(), *shadingsys);
+             closure_id = ClosureTypeDisney::RegisterClosure(GetName(), *shadingsys);
          }
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
@@ -201,7 +201,7 @@ namespace {
              }
          }
      };
-     ClosureID Surface_Closure_Disney::ClosureID = INVALID_CLOSURE_ID;
+     ClosureID Surface_Closure_Disney::closure_id = INVALID_CLOSURE_ID;
 
 //     struct Surface_Closure_MicrofacetReflection : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFLECTION;
@@ -307,14 +307,14 @@ namespace {
 //     };
 
      struct Surface_Closure_LambertTransmission : public Surface_Closure_Base {
-         static ClosureID    ClosureID;
+         static ClosureID    closure_id;
 
          static const char* GetName(){
              return "lambert_transmission";
          }
 
          static void Register(ShadingSystem* shadingsys) {
-             ClosureID = ClosureTypeLambertTransmission::RegisterClosure(GetName(), *shadingsys);
+             closure_id = ClosureTypeLambertTransmission::RegisterClosure(GetName(), *shadingsys);
          }
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
@@ -322,17 +322,17 @@ namespace {
              se.AddBxdf(SORT_MALLOC(LambertTransmission)(*bxdf_param, w));
          }
      };
-     ClosureID Surface_Closure_LambertTransmission::ClosureID = INVALID_CLOSURE_ID;
+     ClosureID Surface_Closure_LambertTransmission::closure_id = INVALID_CLOSURE_ID;
 
      struct Surface_Closure_Mirror : public Surface_Closure_Base {
-         static ClosureID    ClosureID;
+         static ClosureID    closure_id;
 
          static const char* GetName(){
              return "mirror";
          }
 
          static void Register(ShadingSystem* shadingsys) {
-             ClosureID = ClosureTypeMirror::RegisterClosure(GetName(), *shadingsys);
+             closure_id = ClosureTypeMirror::RegisterClosure(GetName(), *shadingsys);
          }
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
@@ -340,17 +340,17 @@ namespace {
              se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(*bxdf_param, w));
          }
      };
-     ClosureID Surface_Closure_Mirror::ClosureID = INVALID_CLOSURE_ID;
+     ClosureID Surface_Closure_Mirror::closure_id = INVALID_CLOSURE_ID;
 
      struct Surface_Closure_Dielectric : public Surface_Closure_Base {
-         static ClosureID    ClosureID;
+         static ClosureID    closure_id;
 
          static const char* GetName(){
              return "dieletric";
          }
 
          static void Register(ShadingSystem* shadingsys) {
-             ClosureID = ClosureTypeDielectric::RegisterClosure(GetName(), *shadingsys);
+             closure_id = ClosureTypeDielectric::RegisterClosure(GetName(), *shadingsys);
          }
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
@@ -358,7 +358,7 @@ namespace {
              se.AddBxdf(SORT_MALLOC(Dielectric)(*bxdf_param, w));
          }
      };
-     ClosureID Surface_Closure_Dielectric::ClosureID = INVALID_CLOSURE_ID;
+     ClosureID Surface_Closure_Dielectric::closure_id = INVALID_CLOSURE_ID;
 
 //     struct Surface_Closure_MicrofacetReflectionDielectric : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFLECTION_DIELETRIC;
@@ -749,7 +749,7 @@ namespace {
  template< typename T >
  static void registerSurfaceClosure(Tsl_Namespace::ShadingSystem* shadingsys) {
      T::Register(shadingsys);
-     g_surface_closures[T::ClosureID] = std::make_unique<T>();
+     g_surface_closures[T::closure_id] = std::make_unique<T>();
  }
 
 // template< typename T >
