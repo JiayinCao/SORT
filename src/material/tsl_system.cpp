@@ -41,13 +41,7 @@ class SORT_Shader_MemoryAllocator : public Tsl_Namespace::MemoryAllocator {
 
 // Tsl shading system
 static SORT_Shader_MemoryAllocator     g_shader_memory_allocator;
-static std::unique_ptr<ShadingSystem>  g_shadingsys = nullptr;
 static std::vector<ShadingContext*>    g_contexts;
-// static std::vector<ShadingContextWrapper>   g_shadingContexts;
-
-std::unique_ptr<ShadingSystem>  MakeShadingSystem() {
-     return std::move(std::make_unique<ShadingSystem>());
-}
 
 ShaderUnitTemplate*     BuildShader(const std::string& shader_name, const std::string& shader_source) {
     return g_contexts[ThreadId()]->compile_shader_unit_template(shader_name, shader_source.c_str());
@@ -136,22 +130,20 @@ void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEve
 // }
 
 void CreateTSLThreadContexts(){
-    // make global tsl shading system
-    g_shadingsys = MakeShadingSystem();
-
+    auto& shading_system = ShadingSystem::get_instance();
     // shader memory allocator
-    g_shadingsys->register_memory_allocator(&g_shader_memory_allocator);
+    shading_system.register_memory_allocator(&g_shader_memory_allocator);
 
     // register all closures
-    RegisterClosures(g_shadingsys.get());
+    RegisterClosures(&shading_system);
 
     // register tsl global, this may need to be per-shader data later for more flexibility
-    TslGlobal::RegisterGlobal(*g_shadingsys);
+    TslGlobal::RegisterGlobal(shading_system);
 
     // allocate shading context for each thread
     g_contexts.resize( g_threadCnt );
     for (auto i = 0u; i < g_threadCnt; ++i)
-        g_contexts[i] = g_shadingsys->make_shading_context();
+        g_contexts[i] = shading_system.make_shading_context();
 }
 
  void DestroyTSLThreadContexts(){

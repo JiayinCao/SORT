@@ -26,6 +26,8 @@
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/bsdf/transparent.h"
 
+using namespace Tsl_Namespace;
+
 void Material::BuildMaterial() {
     const auto message = "Build Material '" + m_name + "'";
     SORT_PROFILE(message);
@@ -49,7 +51,7 @@ void Material::BuildMaterial() {
              trying_building_shader_type = true;
 
              // build all shader nodes
-             std::unordered_map<std::string, Tsl_Namespace::ShaderUnitTemplate*> shader_units;
+             std::unordered_map<std::string, ShaderUnitTemplate*> shader_units;
              for (const auto& shader : shader_data.m_sources) {
                  auto su = BuildShader(shader.name, shader.source);
                  if (su)
@@ -97,13 +99,13 @@ void Material::BuildMaterial() {
              
              // end building the shader group
              auto ret = EndShaderGroup(shader_group);
-             if (!ret)
+             if (TSL_Resolving_Succeed != ret)
                  return;
 
              shader_instance = shader_group->make_shader_instance();
              // ret = shading_context->resolve_shader_instance(shader_instance.get());
              ret = ResolveShaderInstance(shader_instance.get());
-             if (!ret)
+             if (TSL_Resolving_Succeed != ret)
                  return;
 
              shader_valid = true;

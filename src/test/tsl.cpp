@@ -23,7 +23,7 @@ using namespace Tsl_Namespace;
 
 TEST(ShaderGroup, ShaderGroupWithoutClosure) {
     // global tsl shading system
-    ShadingSystem shading_system;
+    auto& shading_system = ShadingSystem::get_instance();
 
     // make a shading context for shader compiling, since there is only one thread involved in this unit test, it is good enough.
     auto shading_context = shading_system.make_shading_context();
@@ -71,12 +71,12 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
     shader_group->expose_shader_argument("bxdf_shader", "in_bxdf", arg);
 
     // resolve the shader group
-    ret = shading_context->end_shader_group_template(shader_group);
-    EXPECT_EQ(true, ret);
+    auto status = shading_context->end_shader_group_template(shader_group);
+    EXPECT_EQ(TSL_Resolving_Status::TSL_Resolving_Succeed, status);
 
     auto shader_instance = shader_group->make_shader_instance();
-    ret = shading_context->resolve_shader_instance(shader_instance.get());
-    EXPECT_EQ(true, ret);
+    status = shading_context->resolve_shader_instance(shader_instance.get());
+    EXPECT_EQ(TSL_Resolving_Status::TSL_Resolving_Succeed, status);
 
     // get the function pointer
     auto raw_function = (void(*)(float*, float))shader_instance->get_function();
