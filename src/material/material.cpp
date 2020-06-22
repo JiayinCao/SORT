@@ -50,14 +50,21 @@ void Material::BuildMaterial() {
              shader_valid = false;
              trying_building_shader_type = true;
 
-             // build all shader nodes
+             // It is necessary to avoid shader code generation of the same shader template to avoid duplicated symbol in TSL.
+             // Maybe I can offer a better interface in TSL later to resolve this.
              std::unordered_map<std::string, ShaderUnitTemplate*> shader_units;
+             std::unordered_map<std::string, ShaderUnitTemplate*> shader_type_mapping;
              for (const auto& shader : shader_data.m_sources) {
-                 auto su = BuildShader(shader.name, shader.source);
-                 if (su)
-                     shader_units[shader.name] = su;
-                 else
-                     return;
+                 if (shader_type_mapping.count(shader.type)) {
+                     shader_units[shader.name] = shader_type_mapping[shader.type];
+                 }else {
+                     auto su = BuildShader(shader.name, shader.source);
+                     if (su) {
+                         shader_units[shader.name] = su;
+                         shader_type_mapping[shader.type] = su;
+                     }else
+                         return;
+                 }
              }
 
              // build the root shader
