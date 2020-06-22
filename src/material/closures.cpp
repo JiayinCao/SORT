@@ -79,7 +79,9 @@ IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
         SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionDielectric)\
         SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionGGX)\
         SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBlinn)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBeckmann)
+        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBeckmann)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Hair)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Coat)
 
 // These data structure is not supposed to be seen by other parts of the renderer
 namespace {
@@ -340,29 +342,14 @@ namespace {
          }
      };
 
-//     struct Surface_Closure_Hair : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_HAIR;
+     struct Surface_Closure_Hair : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeHair, "hair")
 
-//         static const char* GetName(){
-//             return "hair";
-//         }
-
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_COLOR_PARAM(Hair::Params, sigma),
-//                 CLOSURE_FLOAT_PARAM(Hair::Params, longtitudinalRoughness),
-//                 CLOSURE_FLOAT_PARAM(Hair::Params, azimuthalRoughness),
-//                 CLOSURE_FLOAT_PARAM(Hair::Params, ior),
-//                 CLOSURE_FINISH_PARAM(Hair::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
-
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<Hair::Params>();
-//             se.AddBxdf(SORT_MALLOC(Hair)(params, w * comp->w));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeHair*)param;
+             se.AddBxdf(SORT_MALLOC(Hair)(params, w));
+         }
+     };
 
 //     struct Surface_Closure_FourierBRDF : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_FOURIER_BDRF;
@@ -408,32 +395,16 @@ namespace {
 //         }
 //     };
 
-//     struct Surface_Closure_Coat : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_COAT;
+     struct Surface_Closure_Coat : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeCoat, "coat")
 
-//         static const char* GetName(){
-//             return "coat";
-//         }
-
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_CLOSURE_PARAM(Coat::Params, closure),
-//                 CLOSURE_FLOAT_PARAM(Coat::Params, roughness),
-//                 CLOSURE_FLOAT_PARAM(Coat::Params, ior),
-//                 CLOSURE_COLOR_PARAM(Coat::Params, sigma),
-//                 CLOSURE_VECTOR_PARAM(Coat::Params, n),
-//                 CLOSURE_FINISH_PARAM(Coat::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
-
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<Coat::Params>();
-//             ScatteringEvent* bottom = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-//             ProcessSurfaceClosure(params.closure, Color3(1.0f), *bottom);
-//             se.AddBxdf(SORT_MALLOC(Coat)(params, w, bottom));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeCoat*)param;
+             ScatteringEvent* bottom = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+             ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure, make_float3(1.0f, 1.0f, 1.0f), *bottom);
+             se.AddBxdf(SORT_MALLOC(Coat)(params, w, bottom));
+         }
+     };
 
      struct Surface_Closure_DoubleSided : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeDoubleSided, "double_sided")
@@ -656,9 +627,7 @@ void RegisterClosures() {
 #undef SURFACE_CLOSURE_ACTION
 
     /*
-    registerSurfaceClosure<Surface_Closure_Hair>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MERL>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_Coat>(shadingsys);
     registerSurfaceClosure<Surface_Closure_FourierBRDF>(shadingsys);
     
     registerVolumeClosure<Volume_Closure_Absorption>(shadingsys);

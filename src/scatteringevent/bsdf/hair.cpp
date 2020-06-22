@@ -21,6 +21,13 @@
 #include "fresnel.h"
 #include "math/utils.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeHair)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, float3, sigma)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, float, longtitudinalRoughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, float, azimuthalRoughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, float, ior)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeHair)
+
 SORT_STATIC_FORCEINLINE void Ap( const float cosThetaO , const float eta , const float cosGammaO , const Spectrum& T , Spectrum ap[] ){
     const auto cosTheta = cosThetaO * cosGammaO;
     const auto f = DielectricFresnel( cosTheta , 1.0f , eta );
@@ -103,30 +110,7 @@ SORT_STATIC_FORCEINLINE void ComputeApPdf(const float cosThetaO , const float co
         pdf[i] = ap[i].GetIntensity() / sumY;
 }
 
-// Hair::Hair(const Params& params, const Spectrum& weight): Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector(0.0f,1.0f,0.0f), true) ,
-//         m_sigma(params.sigma), m_lRoughness( std::max( 0.01f , params.longtitudinalRoughness) ), m_aRoughness( std::max( 0.01f , params.azimuthalRoughness ) ), m_eta(params.ior){
-//     m_v[0] = SQR(0.726f * m_lRoughness + 0.812f * SQR(m_lRoughness) + 3.7f * Pow<20>(m_lRoughness));
-//     m_v[1] = 0.25f * m_v[0];
-//     m_v[2] = 4 * m_v[0];
-//     for (int p = 3; p <= PMAX; ++p)
-//         m_v[p] = m_v[2];
-
-// #ifndef DISABLE_ANGLE_TILT
-//     // Hard coded tilt angle, 2 degrees by default.
-//     constexpr auto alpha = 2.0f / 180.0f;
-//     m_sin2kAlpha[0] = sin( alpha );
-//     m_cos2kAlpha[0] = ssqrt( 1.0f - SQR( m_sin2kAlpha[0] ) );
-//     for( auto i = 1 ; i < PMAX ; ++i ){
-//         m_sin2kAlpha[i] = 2 * m_cos2kAlpha[i-1] * m_sin2kAlpha[i-1];
-//         m_cos2kAlpha[i] = SQR( m_cos2kAlpha[i-1] ) - SQR( m_sin2kAlpha[i-1] );
-//     }
-// #endif
-
-//     constexpr auto SqrtPiOver8 = 0.626657069f; //sqrt( PI / 8.0f );
-//     m_scale = SqrtPiOver8 * (0.265f * m_aRoughness + 1.194f * SQR(m_aRoughness) + 5.372f * Pow<22>(m_aRoughness));
-
-//     m_etaSqr = SQR( m_eta );
-// }
+Hair::Hair(const ClosureTypeHair& params, const Spectrum& weight): Hair(params.sigma, params.longtitudinalRoughness, params.azimuthalRoughness, params.ior, weight, true ){}
 
 Hair::Hair(const Spectrum& absorption, const float lRoughness, const float aRoughness, const float ior, const Spectrum& weight, bool doubleSided)
         : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), Vector(0.0f,1.0f,0.0f), doubleSided) ,

@@ -1622,19 +1622,26 @@ class SORTNode_Material_Hair(SORTShadingNode):
     # A Practical and Controllable Hair and Fur Model for Production Path Tracing
     # https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
     osl_shader = '''
+        // functions defined by c library
+        float powf( float base , float exp );
+        float logf( float x );
+
         float helper( float x , float inv ){
-            float y = log(x) * inv;
+            float y = logf(x) * inv;
             return y * y;
         }
-        shader Hair( color HairColor = @ ,
-                     float LongtitudinalRoughness = @ ,
-                     float AzimuthalRoughness = @ ,
-                     float IndexofRefraction = @ ,
-                     output closure color Result = color(0) ){
-            float inv = 1.0 / ( 5.969 - 0.215 * AzimuthalRoughness + 2.532 * pow(AzimuthalRoughness,2.0) - 10.73 * pow(AzimuthalRoughness,3.0) +
-                        5.574 * pow(AzimuthalRoughness,4.0) + 0.245 * pow(AzimuthalRoughness, 5.0) );
-            color sigma = color( helper(HairColor[0],inv) , helper(HairColor[1],inv) , helper(HairColor[2],inv) );
-            Result = hair( sigma , LongtitudinalRoughness , AzimuthalRoughness , IndexofRefraction );
+        shader Hair( color HairColor ,
+                     float LongtitudinalRoughness ,
+                     float AzimuthalRoughness ,
+                     float IndexofRefraction ,
+                     out closure Result ){
+            float inv = 1.0 / ( 5.969 - 0.215 * AzimuthalRoughness + 2.532 * powf(AzimuthalRoughness,2.0) - 10.73 * powf(AzimuthalRoughness,3.0) +
+                        5.574 * powf(AzimuthalRoughness,4.0) + 0.245 * powf(AzimuthalRoughness, 5.0) );
+            color sigma;
+            sigma.r = helper(HairColor[0],inv);
+            sigma.g = helper(HairColor[1],inv);
+            sigma.b = helper(HairColor[2],inv);
+            Result = make_closure<hair>( sigma , LongtitudinalRoughness , AzimuthalRoughness , IndexofRefraction );
         }
     '''
     def init(self, context):
@@ -1648,10 +1655,10 @@ class SORTNode_Material_Hair(SORTShadingNode):
         self.inputs['Index of Refraction'].default_value = 1.55
     def serialize_prop(self, fs):
         fs.serialize( 4 )
-        fs.serialize( self.inputs['HairColor'].export_osl_value() )
-        fs.serialize( self.inputs['Longtitudinal Roughness'].export_osl_value() )
-        fs.serialize( self.inputs['Azimuthal Roughness'].export_osl_value() )
-        fs.serialize( self.inputs['Index of Refraction'].export_osl_value() )
+        self.inputs['HairColor'].serialize(fs)
+        self.inputs['Longtitudinal Roughness'].serialize(fs)
+        self.inputs['Azimuthal Roughness'].serialize(fs)
+        self.inputs['Index of Refraction'].serialize(fs)
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Coat(SORTShadingNode):
@@ -1660,36 +1667,42 @@ class SORTNode_Material_Coat(SORTShadingNode):
     # A Practical and Controllable Hair and Fur Model for Production Path Tracing
     # https://disney-animation.s3.amazonaws.com/uploads/production/publication_asset/147/asset/siggraph2015Fur.pdf
     osl_shader = '''
+        // functions defined by c library
+        float powf( float base , float exp );
+        float logf( float x );
+
         float helper( float x , float inv ){
-            float y = log(x) * inv;
+            float y = logf(x) * inv;
             return y * y;
         }
-        shader Coat( float     IndexofRefraction = @ ,
-                     float     Roughness = @ ,
-                     color     ColorTint = @ ,
-                     closure color Surface = @ ,
-                     normal Normal = @ ,
-                     output closure color Result = color(0) ){
-            float inv = 1.0 / ( 5.969 - 0.215 * Roughness + 2.532 * pow(Roughness,2.0) - 10.73 * pow(Roughness,3.0) + 5.574 * pow(Roughness,4.0) + 0.245 * pow(Roughness, 5.0) );
-            color sigma = color( helper(ColorTint[0],inv) , helper(ColorTint[1],inv) , helper(ColorTint[2],inv) );
-            Result = coat( Surface , Roughness , IndexofRefraction , sigma , Normal );
+        shader bxdf_coat(   float     IndexofRefraction ,
+                            float     Roughness ,
+                            color     ColorTint ,
+                            closure   Surface ,
+                            vector    Normal ,
+                            out closure Result ){
+            float inv = 1.0 / ( 5.969 - 0.215 * Roughness + 2.532 * powf(Roughness,2.0) - 10.73 * powf(Roughness,3.0) + 5.574 * powf(Roughness,4.0) + 0.245 * powf(Roughness, 5.0) );
+            color sigma;
+            sigma.r = helper(ColorTint.r,inv);
+            sigma.g = helper(ColorTint.g,inv);
+            sigma.b = helper(ColorTint.b,inv);
+            Result = make_closure<coat>( Surface , Roughness , IndexofRefraction , sigma , Normal );
         }
     '''
     def init(self, context):
-        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Index of Refration' )
+        self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Index of Refraction' )
         self.inputs.new( 'SORTNodeSocketLargeFloat' , 'Roughness' )
         self.inputs.new( 'SORTNodeSocketColor' , 'ColorTint' )
         self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
-        self.inputs['Index of Refration'].default_value = 1.55
+        self.inputs['Index of Refraction'].default_value = 1.55
     def serialize_prop(self, fs):
-        fs.serialize( 5 )
-        fs.serialize( self.inputs['Index of Refration'].export_osl_value() )
-        fs.serialize( self.inputs['Roughness'].export_osl_value() )
-        fs.serialize( self.inputs['ColorTint'].export_osl_value() )
-        fs.serialize( self.inputs['Surface'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        fs.serialize( 4 )
+        self.inputs['Index of Refraction'].serialize(fs)
+        self.inputs['Roughness'].serialize(fs)
+        self.inputs['ColorTint'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Measured(SORTShadingNode):

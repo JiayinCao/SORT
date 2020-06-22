@@ -22,6 +22,14 @@
 #include "microfacet.h"
 #include "scatteringevent/scatteringevent.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeCoat)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, void*, closure)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, roughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, ior)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float3, sigma)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeCoat)
+
 //! @brief Coat BRDF.
 /**
  * 'Arbitrarily Layered Micro-Facet Surfaces'
@@ -40,21 +48,12 @@
  */
 class Coat : public Bxdf{
 public:
-    // Input parameters to construct the BRDF.
-    // struct Params {
-    //     OSL::ClosureColor*      closure;
-    //     float                   roughness;
-    //     float                   ior;
-    //     RGBSpectrum             sigma;
-    //     Vector n;
-    // };
-
     //! Constructor.
     //!
     //! @param params           Parameter set.
     //! @param weight           Weight of the BXDF.
     //! @param bottom           Bottom layer scattering event.
-    // Coat( const Params& params , const Spectrum& weight , const ScatteringEvent* bottom );
+    Coat( const ClosureTypeCoat& params , const Spectrum& weight , const ScatteringEvent* bottom );
 
     //! Evaluate the BRDF.
     //!
