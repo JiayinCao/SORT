@@ -29,9 +29,7 @@ class MaterialBase;
 class Mesh;
 
 //! @brief  Register all closures supported by SORT.
-//!
-//! @param  shadingsys      Shading system of OSL.
-void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys);
+void RegisterClosures();
 
 //! @brief  Process the closure tree result and populate the BSDF.
 //!

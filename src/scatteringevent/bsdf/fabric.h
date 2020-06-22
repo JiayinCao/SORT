@@ -19,6 +19,12 @@
 
 #include "bxdf.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeFabric)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeFabric, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeFabric, float, roughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeFabric, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeFabric)
+
 //! @brief Fabric BRDF from DreamWorks
 /**
  * Physically Based Shading at DreamWorks Animation
@@ -26,13 +32,6 @@
  */
 class Fabric : public Bxdf{
 public:
-    // Input parameters to construct the BRDF.
-    // struct Params {
-    //     OSL::Vec3   baseColor;
-    //     float       roughness;
-    //     OSL::Vec3   n;
-    // };
-
     //! Constructor taking spectrum information.
     //!
     //! @param bc           Base color.
@@ -49,9 +48,9 @@ public:
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    // Fabric( const Params& param , const Spectrum& weight , bool doubleSided = false)
-    //     : Fabric( param.baseColor , param.roughness , weight , param.n ) {
-    // }
+    Fabric( const ClosureTypeFabric& param , const Spectrum& weight , bool doubleSided = false)
+        : Fabric( param.base_color , param.roughness , weight , param.normal ) {
+    }
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

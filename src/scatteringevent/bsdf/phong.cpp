@@ -20,6 +20,13 @@
 #include "core/samplemethod.h"
 #include "math/matrix.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypePhong)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, diffuse)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, specular)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, float, specular_power)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypePhong)
+
 Spectrum Phong::f( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;
     if (!doubleSided && !PointingUp(wo)) return 0.0f;

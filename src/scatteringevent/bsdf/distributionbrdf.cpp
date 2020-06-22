@@ -20,6 +20,14 @@
 #include "scatteringevent/bsdf/fresnel.h"
 #include "sampler/sample.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeDistributionBRDF)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, roughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, specular)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, specular_tint)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeDistributionBRDF)
+
 // The scaling factor used in the original paper.
 constexpr static float A = 4.0f;
 

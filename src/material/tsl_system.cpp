@@ -137,7 +137,7 @@ void CreateTSLThreadContexts(){
     shading_system.register_shadingsystem_interface(std::make_unique<TSL_ShadingSystemInterface>());
 
     // register all closures
-    RegisterClosures(&shading_system);
+    RegisterClosures();
 
     // register tsl global, this may need to be per-shader data later for more flexibility
     TslGlobal::RegisterGlobal(shading_system);

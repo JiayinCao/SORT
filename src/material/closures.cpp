@@ -16,7 +16,7 @@
  */
 
 #include "closures.h"
-#include "osl_utils.h"
+#include "tsl_utils.h"
 #include "core/memory.h"
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/bsdf/orennayar.h"
@@ -44,20 +44,26 @@
 
 using namespace Tsl_Namespace;
 
-SORT_FORCEINLINE bool is_tsl_color_black(float3 color) {
-    return color.x == 0.0f && color.y == 0.0f && color.y == 0.0f;
-}
-
-// it is always assumed the value is valid
-SORT_FORCEINLINE float& tsl_color_channel(float3 color, int i) {
-    return (i == 0) ? color.x : ((i == 1) ? color.y : color.z);
-}
-
 #define DEFINE_CLOSURETYPE(T,name)  static ClosureID closure_id; \
                                     static const char* GetName(){ return name; } \
-                                    static void Register(ShadingSystem* shadingsys) { closure_id = T::RegisterClosure(GetName(), *shadingsys); }
+                                    static void Register() { closure_id = T::RegisterClosure(GetName(), ShadingSystem::get_instance()); }
                                     
 #define DEFINE_CLOSUREID(T)         ClosureID T::closure_id = INVALID_CLOSURE_ID
+
+#define ALL_SURFACE_CLOSURE_ACTION \
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Lambert)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_OrenNayar)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Disney)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_LambertTransmission)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Mirror)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Dielectric)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_AshikhmanShirley)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_SSS)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_DoubleSided)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Transparent)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Phong)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_DistributionBRDF)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Fabric)
 
 // These data structure is not supposed to be seen by other parts of the renderer
 namespace {
@@ -123,7 +129,6 @@ namespace {
              se.AddBxdf(SORT_MALLOC(Lambert)(*bxdf_param, w));
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_Lambert);
 
      struct Surface_Closure_OrenNayar : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeOrenNayar, "oren_nayar")
@@ -133,7 +138,6 @@ namespace {
              se.AddBxdf(SORT_MALLOC(OrenNayar)(*bxdf_param, w));
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_OrenNayar);
 
      struct Surface_Closure_Disney : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeDisney, "disney")
@@ -203,7 +207,6 @@ namespace {
              }
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_Disney);
 
 //     struct Surface_Closure_MicrofacetReflection : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFLECTION;
@@ -267,31 +270,15 @@ namespace {
              se.AddBxdf(SORT_MALLOC(AshikhmanShirley)(params, w));
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_AshikhmanShirley);
 
-//     struct Surface_Closure_Phong : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_PHONG;
+     struct Surface_Closure_Phong : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypePhong, "phong")
 
-//         static const char* GetName(){
-//             return "phong";
-//         }
-
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_COLOR_PARAM(Phong::Params, diffuse),
-//                 CLOSURE_COLOR_PARAM(Phong::Params, specular),
-//                 CLOSURE_FLOAT_PARAM(Phong::Params, specularPower),
-//                 CLOSURE_VECTOR_PARAM(Phong::Params, n),
-//                 CLOSURE_FINISH_PARAM(Phong::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
-
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<Phong::Params>();
-//             se.AddBxdf(SORT_MALLOC(Phong)(params, w * comp->w));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(ClosureTypePhong*)param;
+             se.AddBxdf(SORT_MALLOC(Phong)(params, w));
+         }
+     };
 
      struct Surface_Closure_LambertTransmission : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeLambertTransmission, "lambert_transmission")
@@ -301,7 +288,6 @@ namespace {
              se.AddBxdf(SORT_MALLOC(LambertTransmission)(*bxdf_param, w));
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_LambertTransmission);
 
      struct Surface_Closure_Mirror : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeMirror, "mirror")
@@ -311,7 +297,6 @@ namespace {
              se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(*bxdf_param, w));
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_Mirror);
 
      struct Surface_Closure_Dielectric : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeDielectric, "dieletric")
@@ -321,7 +306,6 @@ namespace {
              se.AddBxdf(SORT_MALLOC(Dielectric)(*bxdf_param, w));
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_Dielectric);
 
 //     struct Surface_Closure_MicrofacetReflectionDielectric : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFLECTION_DIELETRIC;
@@ -457,55 +441,24 @@ namespace {
              se.AddBxdf(SORT_MALLOC(DoubleSided)(se0, se1, w));
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_DoubleSided);
 
-//     struct Surface_Closure_DistributionBRDF : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_DISTRIBUTIONBRDF;
+     struct Surface_Closure_DistributionBRDF : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeDistributionBRDF, "distribution_brdf")
 
-//         static const char* GetName(){
-//             return "distributionBRDF";
-//         }
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeDistributionBRDF*)param;
+             se.AddBxdf(SORT_MALLOC(DistributionBRDF)(params, w));
+         }
+     };
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID, {
-//                 CLOSURE_COLOR_PARAM(DistributionBRDF::Params, baseColor),
-//                 CLOSURE_FLOAT_PARAM(DistributionBRDF::Params, roughness),
-//                 CLOSURE_FLOAT_PARAM(DistributionBRDF::Params, specular),
-//                 CLOSURE_FLOAT_PARAM(DistributionBRDF::Params, specularTint),
-//                 CLOSURE_VECTOR_PARAM(DistributionBRDF::Params, n),
-//                 CLOSURE_FINISH_PARAM(DistributionBRDF::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+     struct Surface_Closure_Fabric : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeFabric, "fabric")
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<DistributionBRDF::Params>();
-//             se.AddBxdf(SORT_MALLOC(DistributionBRDF)(params, w * comp->w));
-//         }
-//     };
-
-//     struct Surface_Closure_Fabric : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_FABRIC;
-
-//         static const char* GetName() {
-//             return "fabric";
-//         }
-
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_COLOR_PARAM(Fabric::Params, baseColor),
-//                 CLOSURE_FLOAT_PARAM(Fabric::Params, roughness),
-//                 CLOSURE_VECTOR_PARAM(Fabric::Params, n),
-//                 CLOSURE_FINISH_PARAM(Fabric::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
-
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<Fabric::Params>();
-//             se.AddBxdf(SORT_MALLOC(Fabric)(params, w * comp->w));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeFabric*)param;
+             se.AddBxdf(SORT_MALLOC(Fabric)(params, w));
+         }
+     };
 
      struct Surface_Closure_SSS : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeSSS, "subsurface_scattering")
@@ -566,7 +519,6 @@ namespace {
              }
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_SSS);
 
      struct Surface_Closure_Transparent : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeTransparent, "transparent")
@@ -582,7 +534,6 @@ namespace {
              return 1.0f - Spectrum(params.attenuation);
          }
      };
-     DEFINE_CLOSUREID(Surface_Closure_Transparent);
 
 //     struct Volume_Closure_Absorption : public Volume_Closure_Base {
 //         static constexpr int    ClosureID = VOLUME_CLOSURE_ABSORPTION;
@@ -675,11 +626,15 @@ namespace {
 //             ms.basecolor = params.baseColor;
 //         }
 //     };
+
+#define SURFACE_CLOSURE_ACTION(T) DEFINE_CLOSUREID(T);
+     ALL_SURFACE_CLOSURE_ACTION
+#undef SURFACE_CLOSURE_ACTION
 }
 
  template< typename T >
- static void registerSurfaceClosure(Tsl_Namespace::ShadingSystem* shadingsys) {
-     T::Register(shadingsys);
+ static void registerSurfaceClosure() {
+     T::Register();
      g_surface_closures[T::closure_id] = std::make_unique<T>();
  }
 
@@ -689,29 +644,19 @@ namespace {
 //     g_volume_closures[T::ClosureID - VOLUME_CLOSURE_BASE] = std::make_unique<T>();
 // }
 
-void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys) {
-    registerSurfaceClosure<Surface_Closure_Lambert>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_OrenNayar>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_Disney>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_LambertTransmission>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_Mirror>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_Dielectric>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_AshikhmanShirley>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_SSS>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_DoubleSided>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_Transparent>(shadingsys);
+void RegisterClosures() {
+#define SURFACE_CLOSURE_ACTION(T) registerSurfaceClosure<T>();
+    ALL_SURFACE_CLOSURE_ACTION
+#undef SURFACE_CLOSURE_ACTION
 
     /*registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MicrofacetRefraction>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_Phong>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MicrofacetReflectionDielectric>(shadingsys);
     registerSurfaceClosure<Surface_Closure_Hair>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MERL>(shadingsys);
     registerSurfaceClosure<Surface_Closure_Coat>(shadingsys);
     registerSurfaceClosure<Surface_Closure_FourierBRDF>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_DistributionBRDF>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_Fabric>(shadingsys);
-
+    
     registerVolumeClosure<Volume_Closure_Absorption>(shadingsys);
     registerVolumeClosure<Volume_Closure_Homogeneous>(shadingsys);
     registerVolumeClosure<Volume_Closure_Heterogeneous>(shadingsys);*/

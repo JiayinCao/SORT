@@ -1853,13 +1853,23 @@ class SORTNode_Material_ModifiedPhong(SORTShadingNode):
     bl_label = 'Modified Phong'
     bl_idname = 'SORTNode_Material_ModifiedPhong'
     osl_shader = '''
-        shader Phong( float SpecularPower = @ ,
-                      float DiffuseRatio = @ ,
-                      color Specular = @ ,
-                      color Diffuse = @ ,
-                      normal Normal = @ ,
-                      output closure color Result = color(0) ){
-            Result = phong( Diffuse * DiffuseRatio , ( 1.0 - DiffuseRatio ) * Specular , SpecularPower , Normal );
+        shader bxdf_modified_phong( float SpecularPower ,
+                                    float DiffuseRatio ,
+                                    color Specular ,
+                                    color Diffuse ,
+                                    vector Normal ,
+                                    out closure Result ){
+            // Ideally, TSL should support float * float3, however this is a workaround for now since it is now supported.
+            // I need to get this supported eventually
+            color resolved_diffuse;
+            resolved_diffuse.r = Diffuse.r * DiffuseRatio;
+            resolved_diffuse.g = Diffuse.g * DiffuseRatio;
+            resolved_diffuse.b = Diffuse.b * DiffuseRatio;
+            color resolved_specular;
+            resolved_specular.r = ( 1.0f - DiffuseRatio ) * Specular.r;
+            resolved_specular.g = ( 1.0f - DiffuseRatio ) * Specular.g;
+            resolved_specular.b = ( 1.0f - DiffuseRatio ) * Specular.b;
+            Result = make_closure<phong>( resolved_diffuse , resolved_specular , SpecularPower , Normal );
         }
     '''
     def init(self, context):
@@ -1873,32 +1883,32 @@ class SORTNode_Material_ModifiedPhong(SORTShadingNode):
         self.inputs['Diffuse Ratio'].default_value = 0.2
     def serialize_prop(self, fs):
         fs.serialize( 5 )
-        fs.serialize( self.inputs['Specular Power'].export_osl_value() )
-        fs.serialize( self.inputs['Diffuse Ratio'].export_osl_value() )
-        fs.serialize( self.inputs['Diffuse'].export_osl_value() )
-        fs.serialize( self.inputs['Specular'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        self.inputs['Specular Power'].serialize(fs)
+        self.inputs['Diffuse Ratio'].serialize(fs)
+        self.inputs['Diffuse'].serialize(fs)
+        self.inputs['Specular'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Cloth(SORTShadingNode):
     bl_label = 'Cloth'
     bl_idname = 'SORTNode_Material_Cloth'
-    osl_shader_dbrdf = '''
-        shader DistributionBRDF(  color BaseColor = @ ,
-                                  float Roughness = @ ,
-                                  float Specular = @ ,
-                                  float SpecularTint = @ ,
-                                  normal Normal = @ ,
-                                  output closure color Result = color(0) ){
-            Result = distributionBRDF( BaseColor , Roughness , Specular , SpecularTint , Normal );
+    tsl_shader_dbrdf = '''
+        shader DistributionBRDF(  color BaseColor ,
+                                  float Roughness ,
+                                  float Specular ,
+                                  float SpecularTint ,
+                                  vector Normal ,
+                                  out closure Result ){
+            Result = make_closure<distribution_brdf>( BaseColor , Roughness , Specular , SpecularTint , Normal );
         }
     '''
-    osl_shader_dwa_fabric = '''
-        shader DWA_Fabric( color BaseColor = @ ,
-                           float Roughness = @ ,
-                           normal Normal = @ ,
-                           output closure color Result = color(0) ){
-            Result = fabric( BaseColor , Roughness , Normal );
+    tsl_shader_dwa_fabric = '''
+        shader DWA_Fabric( color BaseColor ,
+                           float Roughness ,
+                           vector Normal ,
+                           out closure Result ){
+            Result = make_closure<fabric>( BaseColor , Roughness , Normal );
         }
     '''
     def update_brdf(self,context):
@@ -1911,8 +1921,8 @@ class SORTNode_Material_Cloth(SORTShadingNode):
     brdf_type : bpy.props.EnumProperty(name='Type', items=[('TheOrder_Fabric','TheOrder_Fabric','',1),('DreamWorks_Fabric','DreamWorks_Fabric','',2)], default='TheOrder_Fabric', update=update_brdf)
     def generate_osl_source(self):
         if self.brdf_type == 'TheOrder_Fabric':
-            return self.osl_shader_dbrdf
-        return self.osl_shader_dwa_fabric
+            return self.tsl_shader_dbrdf
+        return self.tsl_shader_dwa_fabric
     def type_identifier(self):
         return self.bl_idname + self.brdf_type
     def init(self, context):
@@ -1927,12 +1937,12 @@ class SORTNode_Material_Cloth(SORTShadingNode):
             fs.serialize( 5 )
         else:
             fs.serialize( 3 )
-        fs.serialize( self.inputs['BaseColor'].export_osl_value() )
-        fs.serialize( self.inputs['Roughness'].export_osl_value() )
+        self.inputs['BaseColor'].serialize(fs)
+        self.inputs['Roughness'].serialize(fs)
         if self.brdf_type == 'TheOrder_Fabric':
-            fs.serialize( self.inputs['Specular'].export_osl_value() )
-            fs.serialize( self.inputs['SpecularTint'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+            self.inputs['Specular'].serialize(fs)
+            self.inputs['SpecularTint'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
     def draw_buttons(self, context, layout):
         layout.prop(self, 'brdf_type', text='BRDF Type', expand=True)
 

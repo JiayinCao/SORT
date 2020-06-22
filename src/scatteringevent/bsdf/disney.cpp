@@ -23,7 +23,7 @@
 #include "microfacet.h"
 #include "core/memory.h"
 #include "math/exp.h"
-#include "material/osl_utils.h"
+#include "material/tsl_utils.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeDisney)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, metallic)
