@@ -54,7 +54,7 @@ SORT_FORCEINLINE float& tsl_color_channel(float3 color, int i) {
 }
 
 #define DEFINE_CLOSURETYPE(T,name)  static ClosureID closure_id; \
-                                    static const char* GetName(){ return ##name; } \
+                                    static const char* GetName(){ return name; } \
                                     static void Register(ShadingSystem* shadingsys) { closure_id = T::RegisterClosure(GetName(), *shadingsys); }
                                     
 #define DEFINE_CLOSUREID(T)         ClosureID T::closure_id = INVALID_CLOSURE_ID
