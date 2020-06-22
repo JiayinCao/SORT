@@ -116,15 +116,7 @@ namespace {
 //     }
 
      struct Surface_Closure_Lambert : public Surface_Closure_Base {
-         static ClosureID    closure_id;
-
-         static const char* GetName(){
-             return "lambert";
-         }
-
-         static void Register(ShadingSystem* shadingsys) {
-             closure_id = ClosureTypeLambert::RegisterClosure(GetName(), *shadingsys);
-         }
+         DEFINE_CLOSURETYPE(ClosureTypeLambert, "lambert")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              ClosureTypeLambert* bxdf_param = (ClosureTypeLambert*)param;
@@ -134,15 +126,7 @@ namespace {
      DEFINE_CLOSUREID(Surface_Closure_Lambert);
 
      struct Surface_Closure_OrenNayar : public Surface_Closure_Base {
-         static ClosureID    closure_id;
-
-         static const char* GetName(){
-             return "oren_nayar";
-         }
-
-         static void Register(ShadingSystem* shadingsys) {
-             closure_id = ClosureTypeOrenNayar::RegisterClosure(GetName(), *shadingsys);
-         }
+         DEFINE_CLOSURETYPE(ClosureTypeOrenNayar, "oren_nayar")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              ClosureTypeOrenNayar* bxdf_param = (ClosureTypeOrenNayar*)param;
@@ -152,15 +136,7 @@ namespace {
      DEFINE_CLOSUREID(Surface_Closure_OrenNayar);
 
      struct Surface_Closure_Disney : public Surface_Closure_Base {
-         static ClosureID    closure_id;
-
-         static const char* GetName(){
-             return "disney";
-         }
-
-         static void Register(ShadingSystem* shadingsys) {
-             closure_id = ClosureTypeDisney::RegisterClosure(GetName(), *shadingsys);
-         }
+         DEFINE_CLOSURETYPE(ClosureTypeDisney, "disney")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto weight = w;
@@ -284,15 +260,7 @@ namespace {
 //     };
 
      struct Surface_Closure_AshikhmanShirley : public Surface_Closure_Base {
-         static ClosureID closure_id;
-
-         static const char* GetName(){
-             return "ashikhman_shirley";
-         }
-
-         static void Register(ShadingSystem* shadingsys) {
-             closure_id = ClosureTypeAshikhmanShirley::RegisterClosure(GetName(), *shadingsys);
-         }
+         DEFINE_CLOSURETYPE(ClosureTypeAshikhmanShirley, "ashikhman_shirley")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(ClosureTypeAshikhmanShirley*)param;
@@ -326,15 +294,7 @@ namespace {
 //     };
 
      struct Surface_Closure_LambertTransmission : public Surface_Closure_Base {
-         static ClosureID    closure_id;
-
-         static const char* GetName(){
-             return "lambert_transmission";
-         }
-
-         static void Register(ShadingSystem* shadingsys) {
-             closure_id = ClosureTypeLambertTransmission::RegisterClosure(GetName(), *shadingsys);
-         }
+         DEFINE_CLOSURETYPE(ClosureTypeLambertTransmission, "lambert_transmission")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              ClosureTypeLambertTransmission* bxdf_param = (ClosureTypeLambertTransmission*)param;
@@ -344,15 +304,7 @@ namespace {
      DEFINE_CLOSUREID(Surface_Closure_LambertTransmission);
 
      struct Surface_Closure_Mirror : public Surface_Closure_Base {
-         static ClosureID    closure_id;
-
-         static const char* GetName(){
-             return "mirror";
-         }
-
-         static void Register(ShadingSystem* shadingsys) {
-             closure_id = ClosureTypeMirror::RegisterClosure(GetName(), *shadingsys);
-         }
+         DEFINE_CLOSURETYPE(ClosureTypeMirror, "mirror")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              ClosureTypeMirror* bxdf_param = (ClosureTypeMirror*)param;
@@ -362,15 +314,7 @@ namespace {
      DEFINE_CLOSUREID(Surface_Closure_Mirror);
 
      struct Surface_Closure_Dielectric : public Surface_Closure_Base {
-         static ClosureID    closure_id;
-
-         static const char* GetName(){
-             return "dieletric";
-         }
-
-         static void Register(ShadingSystem* shadingsys) {
-             closure_id = ClosureTypeDielectric::RegisterClosure(GetName(), *shadingsys);
-         }
+         DEFINE_CLOSURETYPE(ClosureTypeDielectric, "dieletric")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              ClosureTypeDielectric* bxdf_param = (ClosureTypeDielectric*)param;
@@ -502,15 +446,7 @@ namespace {
 //     };
 
      struct Surface_Closure_DoubleSided : public Surface_Closure_Base {
-         static ClosureID closure_id;
-
-         static const char* GetName(){
-             return "double_sided";
-         }
-
-         static void Register(ShadingSystem* shadingsys) {
-             closure_id = ClosureTypeDoubleSided::RegisterClosure(GetName(), *shadingsys);
-         }
+         DEFINE_CLOSURETYPE(ClosureTypeDoubleSided, "double_sided")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
              const auto& params = *(const ClosureTypeDoubleSided*)param;
@@ -572,15 +508,7 @@ namespace {
 //     };
 
      struct Surface_Closure_SSS : public Surface_Closure_Base {
-         static ClosureID closure_id;
-
-         static const char* GetName() {
-             return "subsurface_scattering";
-         }
-
-         static void Register(ShadingSystem* shadingsys) {
-             closure_id = ClosureTypeSSS::RegisterClosure(GetName(), *shadingsys);
-         }
+         DEFINE_CLOSURETYPE(ClosureTypeSSS, "subsurface_scattering")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
              const auto& params = *(ClosureTypeSSS*)param;
