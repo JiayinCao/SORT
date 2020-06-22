@@ -53,7 +53,7 @@ SORT_FORCEINLINE float& tsl_color_channel(float3 color, int i) {
     return (i == 0) ? color.x : ((i == 1) ? color.y : color.z);
 }
 
-#define DEFINE_CLOSUREID(T)  ClosureID T::closure_id = INVALID_CLOSURE_ID;
+#define DEFINE_CLOSUREID(T)  ClosureID T::closure_id = INVALID_CLOSURE_ID
 
 // These data structure is not supposed to be seen by other parts of the renderer
 namespace {
@@ -489,31 +489,27 @@ namespace {
 //         }
 //     };
 
-//     struct Surface_Closure_DoubleSided : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_DOUBLESIDED;
+     struct Surface_Closure_DoubleSided : public Surface_Closure_Base {
+         static ClosureID closure_id;
 
-//         static const char* GetName(){
-//             return "doubleSided";
-//         }
+         static const char* GetName(){
+             return "double_sided";
+         }
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_CLOSURE_PARAM(DoubleSided::Params, bxdf0),
-//                 CLOSURE_CLOSURE_PARAM(DoubleSided::Params, bxdf1),
-//                 CLOSURE_FINISH_PARAM(DoubleSided::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+         static void Register(ShadingSystem* shadingsys) {
+             closure_id = ClosureTypeDoubleSided::RegisterClosure(GetName(), *shadingsys);
+         }
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<DoubleSided::Params>();
-//             ScatteringEvent* se0 = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-//             ScatteringEvent* se1 = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
-//             ProcessSurfaceClosure(params.bxdf0, Color3(1.0f), *se0);
-//             ProcessSurfaceClosure(params.bxdf1, Color3(1.0f), *se1);
-//             se.AddBxdf(SORT_MALLOC(DoubleSided)(se0, se1, w));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
+             const auto& params = *(const ClosureTypeDoubleSided*)param;
+             ScatteringEvent* se0 = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+             ScatteringEvent* se1 = SORT_MALLOC(ScatteringEvent)(se.GetInteraction(), SE_Flag( SE_EVALUATE_ALL | SE_SUB_EVENT | SE_REPLACE_BSSRDF ) );
+             ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure0, make_float3(1.0f, 1.0f, 1.0f), *se0);
+             ProcessSurfaceClosure((const ClosureTreeNodeBase*)params.closure1, make_float3(1.0f, 1.0f, 1.0f), *se1);
+             se.AddBxdf(SORT_MALLOC(DoubleSided)(se0, se1, w));
+         }
+     };
+     DEFINE_CLOSUREID(Surface_Closure_DoubleSided);
 
 //     struct Surface_Closure_DistributionBRDF : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_DISTRIBUTIONBRDF;
@@ -772,6 +768,7 @@ void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys) {
     registerSurfaceClosure<Surface_Closure_Dielectric>(shadingsys);
     registerSurfaceClosure<Surface_Closure_AshikhmanShirley>(shadingsys);
     registerSurfaceClosure<Surface_Closure_SSS>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_DoubleSided>(shadingsys);
     /*registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MicrofacetRefraction>(shadingsys);
     registerSurfaceClosure<Surface_Closure_Phong>(shadingsys);
@@ -779,7 +776,6 @@ void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys) {
     registerSurfaceClosure<Surface_Closure_Hair>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MERL>(shadingsys);
     registerSurfaceClosure<Surface_Closure_Coat>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_DoubleSided>(shadingsys);
     registerSurfaceClosure<Surface_Closure_FourierBRDF>(shadingsys);
     registerSurfaceClosure<Surface_Closure_DistributionBRDF>(shadingsys);
     registerSurfaceClosure<Surface_Closure_Fabric>(shadingsys);
@@ -790,14 +786,24 @@ void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys) {
     registerVolumeClosure<Volume_Closure_Heterogeneous>(shadingsys);*/
 }
 
-void ProcessSurfaceClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, ScatteringEvent& se) {
+void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, ScatteringEvent& se) {
     if (!closure)
         return;
 
     switch (closure->m_id) {
         case Tsl_Namespace::CLOSURE_ADD:
+            {
+                const ClosureTreeNodeAdd* closure_add = (const ClosureTreeNodeAdd*)closure;
+                ProcessSurfaceClosure(closure_add->m_closure0, w, se);
+                ProcessSurfaceClosure(closure_add->m_closure1, w, se);
+            }
             break;
         case Tsl_Namespace::CLOSURE_MUL:
+            {
+                const ClosureTreeNodeMul* closure_mul = (const ClosureTreeNodeMul*)closure;
+                const float3 weight = make_float3(w.x * closure_mul->m_weight, w.y * closure_mul->m_weight, w.z * closure_mul->m_weight);
+                ProcessSurfaceClosure(closure_mul->m_closure, weight, se);
+            }
             break;
         default:
             auto closure_base = getSurfaceClosureBase(closure->m_id);
