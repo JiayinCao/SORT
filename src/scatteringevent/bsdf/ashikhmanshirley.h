@@ -20,6 +20,14 @@
 #include "bxdf.h"
 #include "microfacet.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeAshikhmanShirley)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float,  specular)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float,  roughnessU)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float,  roughnessV)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeAshikhmanShirley)
+
 //! @brief AshikhmanShirley brdf.
 /**
  * An Anisotropic Phong BRDF Model
@@ -27,24 +35,15 @@
  * This BRDF model has two layer, specular and diffuse.
  * Unlike the modern PBR model ( microfacet + diffuse ), this model also counts fresnel effect when blending the two layer
  */
-class AshikhmanShirley : public Bxdf
-{
+class AshikhmanShirley : public Bxdf{
 public:
-    // struct Params{
-    //     float           specular;
-    //     float           roughnessU;
-    //     float           roughnessV;
-    //     OSL::Vec3       baseColor;
-    //     OSL::Vec3       n;
-    // };
-
     //! Constructor.
     //!
     //! @param param            Parameter set.
     //! @param weight           Weight of the BXDF
     //! @param doubleSided      Whether the BRDF is two sided.
-    // AshikhmanShirley(const Params& params, const Spectrum& weight, bool doubleSided = false)
-    //    : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.baseColor), S(params.specular), distribution(params.roughnessU, params.roughnessV) {}
+    AshikhmanShirley(const ClosureTypeAshikhmanShirley& params, const Spectrum& weight, bool doubleSided = false)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided) , D(params.base_color), S(params.specular), distribution(params.roughnessU, params.roughnessV) {}
 
     //! Constructor.
     //!

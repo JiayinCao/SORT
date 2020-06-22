@@ -44,6 +44,12 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, baseColor)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeDisney)
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeSSS)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, scatter_distance)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeSSS)
+
 constexpr static float ior_in = 1.5f;          // hard coded index of refraction below the surface
 constexpr static float ior_ex = 1.0f;          // hard coded index of refraction above the surface
 constexpr static float eta = ior_ex / ior_in;  // hard coded index of refraction ratio
@@ -93,6 +99,10 @@ float ClearcoatGGX::G1(const Vector& v) const {
     constexpr auto alpha = 0.25f;
     constexpr auto alpha2 = alpha * alpha;
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
+}
+
+DisneyBssrdf::DisneyBssrdf(const SurfaceInteraction* intersection, const ClosureTypeSSS& params, const Spectrum& weight)
+    :DisneyBssrdf(intersection, params.base_color, params.scatter_distance, weight) {
 }
 
 DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew )

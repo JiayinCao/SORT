@@ -1475,14 +1475,14 @@ class SORTNode_Material_UE4Principle(SORTShadingNode):
     bl_label = 'UE4 Principle'
     bl_idname = 'SORTNode_Material_UE4Principle'
     osl_shader = '''
-        shader Principle( float RoughnessU = @ ,
-                          float RoughnessV = @ ,
-                          float Metallic = @ ,
-                          float Specular = @ ,
-                          color BaseColor = @ ,
-                          normal Normal = @ ,
-                          output closure color Result = color(0) ){
-            // UE4 PBS model, this may very likely not very updated.
+        shader Principle( float RoughnessU ,
+                          float RoughnessV ,
+                          float Metallic ,
+                          float Specular ,
+                          color BaseColor ,
+                          vector Normal ,
+                          out closure Result ){
+            // UE4 PBS model, this is obviously very wrong since I have no time digging into UE4 for now.
             Result = lambert( BaseColor , Normal ) * ( 1 - Metallic ) * 0.92 + microfacetReflection( "GGX", color( 0.37 ), color( 2.82 ), RoughnessU, RoughnessV, BaseColor , Normal ) * ( Metallic * 0.92 + 0.08 * Specular );
         }
     '''
@@ -1821,13 +1821,13 @@ class SORTNode_Material_AshikhmanShirley(SORTShadingNode):
     bl_label = 'AshikhmanShirley'
     bl_idname = 'SORTNode_Material_AshikhmanShirley'
     osl_shader = '''
-        shader AshikhmanShirley( float Specular = @ ,
-                                 float RoughnessU = @ ,
-                                 float RoughnessV = @ ,
-                                 color Diffuse = @ ,
-                                 normal Normal = @ ,
-                                 output closure color Result = color(0) ){
-            Result = ashikhmanShirley( Specular , RoughnessU , RoughnessV , Diffuse , Normal );
+        shader bxdf_ashikhmanshirley( float Specular ,
+                                      float RoughnessU ,
+                                      float RoughnessV ,
+                                      color Diffuse ,
+                                      vector Normal ,
+                                      out closure Result ){
+            Result = make_closure<ashikhman_shirley>(Specular, RoughnessU, RoughnessV, Diffuse, Normal);
         }
     '''
     def init(self, context):
@@ -1842,11 +1842,11 @@ class SORTNode_Material_AshikhmanShirley(SORTShadingNode):
         self.inputs['Specular'].default_value = 0.5
     def serialize_prop(self, fs):
         fs.serialize( 5 )
-        fs.serialize( self.inputs['Specular'].export_osl_value() )
-        fs.serialize( self.inputs['RoughnessU'].export_osl_value() )
-        fs.serialize( self.inputs['RoughnessV'].export_osl_value() )
-        fs.serialize( self.inputs['Diffuse'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        self.inputs['Specular'].serialize(fs)
+        self.inputs['RoughnessU'].serialize(fs)
+        self.inputs['RoughnessV'].serialize(fs)
+        self.inputs['Diffuse'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_ModifiedPhong(SORTShadingNode):
@@ -1942,11 +1942,11 @@ class SORTNode_Material_SSS(SORTShadingNode):
     bl_idname = 'SORTNode_Material_SSS'
     bl_width_min = 300
     osl_shader = '''
-        shader MaterialSSS(  color BaseColor = @ ,
-                             color ScatterDistance = @ ,
-                             vector Normal = @ ,
-                             output closure color Result = color(0) ){
-            Result = subsurfaceScattering( BaseColor , ScatterDistance , Normal );
+        shader MaterialSSS(  color BaseColor ,
+                             color ScatterDistance ,
+                             vector Normal ,
+                             out closure Result ){
+            Result = make_closure<subsurface_scattering>( BaseColor , ScatterDistance , Normal );
         }
     '''
     def init(self, context):
@@ -1958,9 +1958,9 @@ class SORTNode_Material_SSS(SORTShadingNode):
         self.inputs['Scatter Distance'].default_value = ( 1.0 , 0.2 , 0.1 )
     def serialize_prop(self, fs):
         fs.serialize( 3 )
-        fs.serialize( self.inputs['Base Color'].export_osl_value() )
-        fs.serialize( self.inputs['Scatter Distance'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        self.inputs['Base Color'].serialize(fs)
+        self.inputs['Scatter Distance'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
     def isSSSNode(self):
         return True
 

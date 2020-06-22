@@ -40,6 +40,12 @@ DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, baseColor)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeDisney)
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeSSS)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, scatter_distance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeSSS)
+
 //! @brief Disney Principle BRDF.
 /**
  * Extending the Disney BRDF to a BSDF with Integrated Subsurface Scattering
@@ -202,18 +208,12 @@ protected:
  */
 class DisneyBssrdf : public SeparableBssrdf {
 public:
-    // struct Params{
-    //     OSL::Vec3     baseColor;
-    //     OSL::Vec3     scatterDistance;
-    //     OSL::Vec3     n;
-    // };
-
     //! @brief  Constructor of DisneyBssrdf from shader input.
     //!
     //! @param  intersection    Intersection at the point of exit.
     //! @param  param           Parameter set from shader.
     //! @param  weight          Evaluation weight.
-    // DisneyBssrdf( const SurfaceInteraction* intersection , const Params& params , const Spectrum& weight );
+    DisneyBssrdf( const SurfaceInteraction* intersection , const ClosureTypeSSS& params , const Spectrum& weight );
 
     //! @brief  Constructor of DisneyBssrdf.
     //!

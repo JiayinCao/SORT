@@ -26,6 +26,7 @@
 #include "math/interaction.h"
 #include "scatteringevent/scatteringevent.h"
 #include "medium/medium.h"
+#include "core/log.h"
 
 using namespace Tsl_Namespace;
 
@@ -33,14 +34,18 @@ IMPLEMENT_TSLGLOBAL_BEGIN()
 IMPLEMENT_TSLGLOBAL_VAR(float3, normal)
 IMPLEMENT_TSLGLOBAL_END()
 
-class SORT_Shader_MemoryAllocator : public Tsl_Namespace::MemoryAllocator {
+class TSL_ShadingSystemInterface : public ShadingSystemInterface {
+public:
     void* allocate(unsigned int size) const override {
         return SORT_MALLOC_ARRAY(char, size);
+    }
+
+    void catch_debug(const DEBUG_LEVEL level, const char* error) const override {
+        slog(WARNING, GENERAL, error);
     }
 };
 
 // Tsl shading system
-static SORT_Shader_MemoryAllocator     g_shader_memory_allocator;
 static std::vector<ShadingContext*>    g_contexts;
 
 ShaderUnitTemplate*     BuildShader(const std::string& shader_name, const std::string& shader_source) {
@@ -131,8 +136,7 @@ void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEve
 
 void CreateTSLThreadContexts(){
     auto& shading_system = ShadingSystem::get_instance();
-    // shader memory allocator
-    shading_system.register_memory_allocator(&g_shader_memory_allocator);
+    shading_system.register_shadingsystem_interface(std::make_unique<TSL_ShadingSystemInterface>());
 
     // register all closures
     RegisterClosures(&shading_system);
