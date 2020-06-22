@@ -1416,15 +1416,23 @@ class SORTNode_Material_Plastic(SORTShadingNode):
     bl_label = 'Plastic'
     bl_idname = 'SORTNode_Material_Plastic'
     osl_shader = '''
-        shader Plastic( color Diffuse ,
-                        color Specular ,
-                        float Roughness ,
-                        vector Normal ,
-                        out closure Result ){
-            if( Diffuse.r != 0.0f || Diffuse.g != 0.0f || Diffuse.b != 0.0f )
-                Result += make_closure<lambert>( Diffuse , N );
-            if( Specular.r != 0.0f || Specular.b != 0.0f || Specular.b != 0.0f )
-                Result += microfacetReflectionDieletric( "GGX", 1.0, 1.5, Roughness, Roughness, Specular , Normal );
+        shader bxdf_plastic( color Diffuse ,
+                             color Specular ,
+                             float Roughness ,
+                             vector Normal ,
+                             out closure Result ){
+            // Ideally, if closure supports += operator, this shader could have been much simplified.
+            bool has_diffuse = Diffuse.r != 0.0f || Diffuse.g != 0.0f || Diffuse.b != 0.0f;
+            bool has_specular = Specular.r != 0.0f || Specular.b != 0.0f || Specular.b != 0.0f;
+
+            if( has_diffuse && has_specular )
+                Result = make_closure<lambert>( Diffuse , Normal ) + make_closure<microfacet_dielectric>( 1.0f, 1.5f, Roughness, Roughness, Specular , Normal );
+            else if( has_diffuse )
+                Result = make_closure<lambert>( Diffuse , Normal );
+            else if( has_specular )
+                Result = make_closure<microfacet_dielectric>( 1.0f, 1.5f, Roughness, Roughness, Specular , Normal );
+            else
+                Result = make_closure<empty_closure>(0.0f);
         }
     '''
     def init(self, context):
@@ -1436,10 +1444,10 @@ class SORTNode_Material_Plastic(SORTShadingNode):
         self.inputs['Roughness'].default_value = 0.2
     def serialize_prop(self, fs):
         fs.serialize( 4 )
-        fs.serialize( self.inputs['Diffuse'].export_osl_value() )
-        fs.serialize( self.inputs['Specular'].export_osl_value() )
-        fs.serialize( self.inputs['Roughness'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        self.inputs['Diffuse'].serialize(fs)
+        self.inputs['Specular'].serialize(fs)
+        self.inputs['Roughness'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_Glass(SORTShadingNode):
@@ -1739,16 +1747,37 @@ class SORTNode_Material_MicrofacetReflection(SORTShadingNode):
     bl_label = 'MicrofacetRelection'
     bl_idname = 'SORTNode_Material_MicrofacetReflection'
     bl_width_min = 256
-    osl_shader = '''
-        shader MicrofacetRelection(  string MicroFacetDistribution = @ ,
-                                     vector InteriorIOR = @ ,
-                                     vector AbsorptionCoefficient = @ ,
-                                     float  RoughnessU = @ ,
-                                     float  RoughnessV = @ ,
-                                     color  BaseColor = @ ,
-                                     normal Normal = @ ,
-                                     output closure color Result = color(0) ){
-            Result = microfacetReflection( MicroFacetDistribution , InteriorIOR , AbsorptionCoefficient , RoughnessU , RoughnessV , BaseColor , Normal );
+    tsl_shader_ggx = '''
+        shader bxdf_microfacet_reflection_ggx(  vector InteriorIOR ,
+                                                vector AbsorptionCoefficient ,
+                                                float  RoughnessU ,
+                                                float  RoughnessV ,
+                                                color  BaseColor ,
+                                                vector Normal ,
+                                                out closure Result ){
+            Result = make_closure<microfacet_reflection_ggx>( InteriorIOR , AbsorptionCoefficient , RoughnessU , RoughnessV , BaseColor , Normal );
+        }
+    '''
+    tsl_shader_blinn = '''
+        shader bxdf_microfacet_reflection_ggx(  vector InteriorIOR ,
+                                                vector AbsorptionCoefficient ,
+                                                float  RoughnessU ,
+                                                float  RoughnessV ,
+                                                color  BaseColor ,
+                                                vector Normal ,
+                                                out closure Result ){
+            Result = make_closure<microfacet_reflection_blinn>( InteriorIOR , AbsorptionCoefficient , RoughnessU , RoughnessV , BaseColor , Normal );
+        }
+    '''
+    tsl_shader_beckmann = '''
+        shader bxdf_microfacet_reflection_ggx(  vector InteriorIOR ,
+                                                vector AbsorptionCoefficient ,
+                                                float  RoughnessU ,
+                                                float  RoughnessV ,
+                                                color  BaseColor ,
+                                                vector Normal ,
+                                                out closure Result ){
+            Result = make_closure<microfacet_reflection_beckmann>( InteriorIOR , AbsorptionCoefficient , RoughnessU , RoughnessV , BaseColor , Normal );
         }
     '''
     distribution : bpy.props.EnumProperty(name='MicroFacetDistribution',default='GGX',items=[('GGX','GGX','',1),('Blinn','Blinn','',2),('Beckmann','Beckmann','',3)])
@@ -1765,30 +1794,60 @@ class SORTNode_Material_MicrofacetReflection(SORTShadingNode):
         layout.prop(self, 'interior_ior', text='Interior IOR')
         layout.prop(self, 'absopt_co', text='Absorption Coefficient')
     def serialize_prop(self, fs):
-        fs.serialize( 7 )
-        fs.serialize( '\"%s\"'%(self.distribution))
-        fs.serialize( 'vector( %f,%f,%f )'%(self.interior_ior[:]))
-        fs.serialize( 'vector( %f,%f,%f )'%(self.absopt_co[:]))
-        fs.serialize( self.inputs['RoughnessU'].export_osl_value() )
-        fs.serialize( self.inputs['RoughnessV'].export_osl_value() )
-        fs.serialize( self.inputs['BaseColor'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        fs.serialize( 6 )
+        fs.serialize('InteriorIOR')
+        fs.serialize(3)
+        fs.serialize(self.interior_ior[:])
+        fs.serialize('AbsorptionCoefficient')
+        fs.serialize(3)
+        fs.serialize(self.absopt_co[:])
+        self.inputs['RoughnessU'].serialize(fs)
+        self.inputs['RoughnessV'].serialize(fs)
+        self.inputs['BaseColor'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
+    def generate_osl_source(self):
+        if self.distribution == 'GGX':
+            return self.tsl_shader_ggx
+        if self.distribution == 'Blinn':
+            return self.tsl_shader_blinn
+        return self.tsl_shader_beckmann
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_MicrofacetRefraction(SORTShadingNode):
     bl_label = 'MicrofacetRefraction'
     bl_idname = 'SORTNode_Material_MicrofacetRefraction'
     bl_width_min = 256
-    osl_shader = '''
-        shader MicrofacetRefraction( string MicroFacetDistribution = @ ,
-                                     float  InteriorIOR = @ ,
-                                     float  ExteriorIOR = @ ,
-                                     float  RoughnessU = @ ,
-                                     float  RoughnessV = @ ,
-                                     color  BaseColor = @ ,
-                                     normal Normal = @ ,
-                                     output closure color Result = color(0) ){
-            Result = microfacetRefraction( MicroFacetDistribution , InteriorIOR , ExteriorIOR , RoughnessU , RoughnessV , BaseColor , Normal );
+    tsl_shader_ggx = '''
+        shader bxdf_microfacetRefraction_ggx(   float  InteriorIOR ,
+                                                float  ExteriorIOR ,
+                                                float  RoughnessU ,
+                                                float  RoughnessV ,
+                                                color  BaseColor ,
+                                                vector Normal ,
+                                                out closure Result ){
+            Result = make_closure<microfacet_refraction_ggx>( InteriorIOR , ExteriorIOR , RoughnessU , RoughnessV , BaseColor , Normal );
+        }
+    '''
+    tsl_shader_blinn = '''
+        shader bxdf_microfacetRefraction_blinn( float  InteriorIOR ,
+                                                float  ExteriorIOR ,
+                                                float  RoughnessU ,
+                                                float  RoughnessV ,
+                                                color  BaseColor ,
+                                                vector Normal ,
+                                                out closure Result ){
+            Result = make_closure<microfacet_refraction_blinn>( InteriorIOR , ExteriorIOR , RoughnessU , RoughnessV , BaseColor , Normal );
+        }
+    '''
+    tsl_shader_beckmann = '''
+        shader bxdf_microfacetRefraction_beckmann(  float  InteriorIOR ,
+                                                    float  ExteriorIOR ,
+                                                    float  RoughnessU ,
+                                                    float  RoughnessV ,
+                                                    color  BaseColor ,
+                                                    vector Normal ,
+                                                    out closure Result ){
+            Result = make_closure<microfacet_refraction_beckmann>( InteriorIOR , ExteriorIOR , RoughnessU , RoughnessV , BaseColor , Normal );
         }
     '''
     distribution : bpy.props.EnumProperty(name='MicroFacetDistribution',default='GGX',items=[('GGX','GGX','',1),('Blinn','Blinn','',2),('Beckmann','Beckmann','',3)])
@@ -1807,14 +1866,25 @@ class SORTNode_Material_MicrofacetRefraction(SORTShadingNode):
         layout.prop(self, 'interior_ior', text='Interior IOR')
         layout.prop(self, 'exterior_ior', text='Exterior IOR')
     def serialize_prop(self, fs):
-        fs.serialize( 7 )
-        fs.serialize( '\"%s\"'%(self.distribution))
-        fs.serialize( '%f'%(self.interior_ior))
-        fs.serialize( '%f'%(self.exterior_ior))
-        fs.serialize( self.inputs['RoughnessU'].export_osl_value() )
-        fs.serialize( self.inputs['RoughnessV'].export_osl_value() )
-        fs.serialize( self.inputs['BaseColor'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        fs.serialize(6)
+        fs.serialize('InteriorIOR')
+        fs.serialize(1)
+        fs.serialize(self.interior_ior)
+        fs.serialize('ExteriorIOR')
+        fs.serialize(1)
+        fs.serialize(self.exterior_ior)
+
+        self.inputs['RoughnessU'].serialize(fs)
+        self.inputs['RoughnessV'].serialize(fs)
+        self.inputs['BaseColor'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
+
+    def generate_osl_source(self):
+        if self.distribution == 'GGX':
+            return self.tsl_shader_ggx
+        if self.distribution == 'Blinn':
+            return self.tsl_shader_blinn
+        return self.tsl_shader_beckmann
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_AshikhmanShirley(SORTShadingNode):

@@ -44,6 +44,14 @@
 
 using namespace Tsl_Namespace;
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeEmpty)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeEmpty, float, dummy)    // this is purely because tsl doesn't support empty closure structure
+DECLARE_CLOSURE_TYPE_END(ClosureTypeEmpty)
+
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeEmpty)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeEmpty, float, dummy)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
+
 #define DEFINE_CLOSURETYPE(T,name)  static ClosureID closure_id; \
                                     static const char* GetName(){ return name; } \
                                     static void Register() { closure_id = T::RegisterClosure(GetName(), ShadingSystem::get_instance()); }
@@ -51,6 +59,7 @@ using namespace Tsl_Namespace;
 #define DEFINE_CLOSUREID(T)         ClosureID T::closure_id = INVALID_CLOSURE_ID
 
 #define ALL_SURFACE_CLOSURE_ACTION \
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Empty)\
         SURFACE_CLOSURE_ACTION(Surface_Closure_Lambert)\
         SURFACE_CLOSURE_ACTION(Surface_Closure_OrenNayar)\
         SURFACE_CLOSURE_ACTION(Surface_Closure_Disney)\
@@ -63,7 +72,14 @@ using namespace Tsl_Namespace;
         SURFACE_CLOSURE_ACTION(Surface_Closure_Transparent)\
         SURFACE_CLOSURE_ACTION(Surface_Closure_Phong)\
         SURFACE_CLOSURE_ACTION(Surface_Closure_DistributionBRDF)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Fabric)
+        SURFACE_CLOSURE_ACTION(Surface_Closure_Fabric)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionGGX)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionBlinn)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionBeckmann)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionDielectric)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionGGX)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBlinn)\
+        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBeckmann)
 
 // These data structure is not supposed to be seen by other parts of the renderer
 namespace {
@@ -120,6 +136,14 @@ namespace {
 
 //         return g_volume_closures[closure_id].get();
 //     }
+
+     struct Surface_Closure_Empty: public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeEmpty, "empty_closure")
+
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             // nothing inside the closure needs to be processed.
+         }
+     };
 
      struct Surface_Closure_Lambert : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeLambert, "lambert")
@@ -208,59 +232,59 @@ namespace {
          }
      };
 
-//     struct Surface_Closure_MicrofacetReflection : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFLECTION;
+     struct Surface_Closure_MicrofacetReflectionGGX : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionGGX, "microfacet_reflection_ggx")
 
-//         static const char* GetName(){
-//             return "microfacetReflection";
-//         }
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeMicrofacetReflectionGGX*)param;
+             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
+         }
+     };
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_STRING_PARAM(MicroFacetReflection::Params, dist),
-//                 CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, eta),
-//                 CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, absorption),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetReflection::Params, roughnessU),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetReflection::Params, roughnessV),
-//                 CLOSURE_COLOR_PARAM(MicroFacetReflection::Params, baseColor),
-//                 CLOSURE_VECTOR_PARAM(MicroFacetReflection::Params, n),
-//                 CLOSURE_FINISH_PARAM(MicroFacetReflection::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+     struct Surface_Closure_MicrofacetReflectionBlinn: public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBlinn, "microfacet_reflection_blinn")
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<MicroFacetReflection::Params>();
-//             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w * comp->w));
-//         }
-//     };
+        void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeMicrofacetReflectionBlinn*)param;
+             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
+         }
+     };
 
-//     struct Surface_Closure_MicrofacetRefraction : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFRACTION;
+     struct Surface_Closure_MicrofacetReflectionBeckmann : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann, "microfacet_reflection_beckmann")
 
-//         static const char* GetName(){
-//             return "microfacetRefraction";
-//         }
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeMicrofacetReflectionBeckmann*)param;
+             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
+         }
+     };
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_STRING_PARAM(MicroFacetRefraction::Params, dist),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, etaI),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, etaT),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, roughnessU),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetRefraction::Params, roughnessV),
-//                 CLOSURE_COLOR_PARAM(MicroFacetRefraction::Params, transmittance),
-//                 CLOSURE_VECTOR_PARAM(MicroFacetRefraction::Params, n),
-//                 CLOSURE_FINISH_PARAM(MicroFacetRefraction::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+     struct Surface_Closure_MicrofacetRefractionGGX : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann, "microfacet_refraction_ggx")
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<MicroFacetRefraction::Params>();
-//             se.AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, w * comp->w));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeMicrofacetRefractionGGX*)param;
+             se.AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, w));
+         }
+     };
+
+     struct Surface_Closure_MicrofacetRefractionBlinn : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann, "microfacet_refraction_blinn")
+
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeMicrofacetRefractionBlinn*)param;
+             se.AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, w));
+         }
+     };
+
+     struct Surface_Closure_MicrofacetRefractionBeckmann : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann, "microfacet_refraction_beckmann")
+
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeMicrofacetRefractionBeckmann*)param;
+             se.AddBxdf(SORT_MALLOC(MicroFacetRefraction)(params, w));
+         }
+     };
 
      struct Surface_Closure_AshikhmanShirley : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeAshikhmanShirley, "ashikhman_shirley")
@@ -284,8 +308,8 @@ namespace {
          DEFINE_CLOSURETYPE(ClosureTypeLambertTransmission, "lambert_transmission")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
-             ClosureTypeLambertTransmission* bxdf_param = (ClosureTypeLambertTransmission*)param;
-             se.AddBxdf(SORT_MALLOC(LambertTransmission)(*bxdf_param, w));
+             const auto& params = *(const ClosureTypeLambertTransmission*)param;
+             se.AddBxdf(SORT_MALLOC(LambertTransmission)(params, w));
          }
      };
 
@@ -293,8 +317,8 @@ namespace {
          DEFINE_CLOSURETYPE(ClosureTypeMirror, "mirror")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
-             ClosureTypeMirror* bxdf_param = (ClosureTypeMirror*)param;
-             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(*bxdf_param, w));
+             const auto& params = *(ClosureTypeMirror*)param;
+             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
          }
      };
 
@@ -302,37 +326,19 @@ namespace {
          DEFINE_CLOSURETYPE(ClosureTypeDielectric, "dieletric")
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
-             ClosureTypeDielectric* bxdf_param = (ClosureTypeDielectric*)param;
-             se.AddBxdf(SORT_MALLOC(Dielectric)(*bxdf_param, w));
+             const auto& params = *(ClosureTypeDielectric*)param;
+             se.AddBxdf(SORT_MALLOC(Dielectric)(params, w));
          }
      };
 
-//     struct Surface_Closure_MicrofacetReflectionDielectric : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_MICROFACET_REFLECTION_DIELETRIC;
+     struct Surface_Closure_MicrofacetReflectionDielectric : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionDielectric, "microfacet_dielectric")
 
-//         static const char* GetName(){
-//             return "microfacetReflectionDieletric";
-//         }
-
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_STRING_PARAM(MicroFacetReflection::ParamsDieletric, dist),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, iorI),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, iorT),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, roughnessU),
-//                 CLOSURE_FLOAT_PARAM(MicroFacetReflection::ParamsDieletric, roughnessV),
-//                 CLOSURE_COLOR_PARAM(MicroFacetReflection::ParamsDieletric, baseColor),
-//                 CLOSURE_VECTOR_PARAM(MicroFacetReflection::ParamsDieletric, n),
-//                 CLOSURE_FINISH_PARAM(MicroFacetReflection::ParamsDieletric)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
-
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<MicroFacetReflection::ParamsDieletric>();
-//             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w * comp->w));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
+             const auto& params = *(ClosureTypeMicrofacetReflectionDielectric*)param;
+             se.AddBxdf(SORT_MALLOC(MicroFacetReflection)(params, w));
+         }
+     };
 
 //     struct Surface_Closure_Hair : public Surface_Closure_Base {
 //         static constexpr int    ClosureID = SURFACE_CLOSURE_HAIR;
@@ -649,9 +655,7 @@ void RegisterClosures() {
     ALL_SURFACE_CLOSURE_ACTION
 #undef SURFACE_CLOSURE_ACTION
 
-    /*registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_MicrofacetRefraction>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_MicrofacetReflectionDielectric>(shadingsys);
+    /*
     registerSurfaceClosure<Surface_Closure_Hair>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MERL>(shadingsys);
     registerSurfaceClosure<Surface_Closure_Coat>(shadingsys);
@@ -729,24 +733,24 @@ void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, 
      Spectrum occlusion = 0.0f;
 
      switch (closure->m_id) {
-     case Tsl_Namespace::CLOSURE_ADD:
-     {
-         const ClosureTreeNodeAdd* closure_add = (const ClosureTreeNodeAdd*)closure;
-         occlusion += Spectrum(ProcessOpacity(closure_add->m_closure0, w));
-         occlusion += Spectrum(ProcessOpacity(closure_add->m_closure1, w));
-     }
-     break;
-     case Tsl_Namespace::CLOSURE_MUL:
-     {
-         const ClosureTreeNodeMul* closure_mul = (const ClosureTreeNodeMul*)closure;
-         const float3 weight = make_float3(w.x * closure_mul->m_weight, w.y * closure_mul->m_weight, w.z * closure_mul->m_weight);
-         occlusion += Spectrum(ProcessOpacity(closure_mul->m_closure, weight));
-     }
-     break;
-     default:
-         auto closure_base = getSurfaceClosureBase(closure->m_id);
-         occlusion += Spectrum(closure_base->EvaluateOpacity(closure->m_params, w));
-         break;
+         case Tsl_Namespace::CLOSURE_ADD:
+             {
+                 const ClosureTreeNodeAdd* closure_add = (const ClosureTreeNodeAdd*)closure;
+                 occlusion += Spectrum(ProcessOpacity(closure_add->m_closure0, w));
+                 occlusion += Spectrum(ProcessOpacity(closure_add->m_closure1, w));
+             }
+             break;
+         case Tsl_Namespace::CLOSURE_MUL:
+             {
+                 const ClosureTreeNodeMul* closure_mul = (const ClosureTreeNodeMul*)closure;
+                 const float3 weight = make_float3(w.x * closure_mul->m_weight, w.y * closure_mul->m_weight, w.z * closure_mul->m_weight);
+                 occlusion += Spectrum(ProcessOpacity(closure_mul->m_closure, weight));
+             }
+             break;
+         default:
+             auto closure_base = getSurfaceClosureBase(closure->m_id);
+             occlusion += Spectrum(closure_base->EvaluateOpacity(closure->m_params, w));
+             break;
      }
 
      return occlusion;

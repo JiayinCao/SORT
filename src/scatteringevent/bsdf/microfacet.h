@@ -27,6 +27,69 @@ DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMirror, float3, base_color)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMirror, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeMirror)
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionGGX)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float3, eta)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float3, absorption)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float,  roughness_u)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float,  roughness_v)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetReflectionGGX)
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionBlinn)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float3, eta)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float3, absorption)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float, roughness_u)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float, roughness_v)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetReflectionBlinn)
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionBeckmann)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float3, eta)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float3, absorption)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float, roughness_u)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float, roughness_v)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetReflectionBeckmann)
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionDielectric)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float, iorI)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float, iorT)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float, roughness_u)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float, roughness_v)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetReflectionDielectric)
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetRefractionGGX)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float, etaI)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float, etaT)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float, roughness_u)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float, roughness_v)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float3, transmittance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetRefractionGGX)
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetRefractionBlinn)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float, etaI)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float, etaT)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float, roughness_u)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float, roughness_v)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float3, transmittance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetRefractionBlinn)
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetRefractionBeckmann)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, float, etaI)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, float, etaT)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, float, roughness_u)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, float, roughness_v)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, float3, transmittance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetRefractionBeckmann)
+
 //! @brief Normal distribution function.
 class MicroFacetDistribution{
 public:
@@ -132,6 +195,12 @@ protected:
     float G1( const Vector& v ) const override;
 };
 
+enum MF_Dist_Type {
+    MF_DIST_GGX = 0,
+    MF_DIST_BLINN,
+    MF_DIST_BECKMANN,
+};
+
 //! @brief Interface for Microfacet bxdf.
 class Microfacet : public Bxdf{
 public:
@@ -142,7 +211,7 @@ public:
     //! @param rv           Roughness along V axis.
     //! @param w            Weight of the bxdf
     //! @param t            Type of the bxdf
-    Microfacet(const std::string& distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided );
+    Microfacet(const MF_Dist_Type distType, float ru , float rv , const Spectrum& w, const BXDF_TYPE t , const Vector& n , bool doubleSided );
 
     //! @brief Constructor
     //! @param d        Normal distribution term
@@ -169,14 +238,28 @@ public:
     //! @param  params          Parameter set.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    // MicroFacetReflection(const Params &params, const Spectrum& weight , bool doubleSided = false );
+    MicroFacetReflection(const ClosureTypeMicrofacetReflectionGGX &params, const Spectrum& weight , bool doubleSided = false );
 
     //! @brief Constructor from parameter set
     //!
     //! @param  params          Parameter set.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    // MicroFacetReflection(const ParamsDieletric &params, const Spectrum& weight , bool doubleSided = false );
+    MicroFacetReflection(const ClosureTypeMicrofacetReflectionBlinn& params, const Spectrum& weight, bool doubleSided = false);
+
+    //! @brief Constructor from parameter set
+    //!
+    //! @param  params          Parameter set.
+    //! @param  weight          Weight of this BRDF.
+    //! @param  doubleSided     Whether the BRDF is double sided.
+    MicroFacetReflection(const ClosureTypeMicrofacetReflectionBeckmann& params, const Spectrum& weight, bool doubleSided = false);
+
+    //! @brief Constructor from parameter set
+    //!
+    //! @param  params          Parameter set.
+    //! @param  weight          Weight of this BRDF.
+    //! @param  doubleSided     Whether the BRDF is double sided.
+    MicroFacetReflection(const ClosureTypeMicrofacetReflectionDielectric& params, const Spectrum& weight, bool doubleSided = false);
 
     // //! @brief Constructor a mirror
     // //!
@@ -224,15 +307,13 @@ private:
  */
 class MicroFacetRefraction : public Microfacet{
 public:
-    // struct Params{
-    //     OSL::ustring    dist;
-    //     float           etaI;
-    //     float           etaT;
-    //     float           roughnessU;
-    //     float           roughnessV;
-    //     OSL::Vec3       transmittance;
-    //     OSL::Vec3       n;
-    // };
+    //! @brief Constructor from parameter set
+    //!
+    //! @param  params          Parameter set.
+    //! @param  f               Fresnel term.
+    //! @param  weight          Weight of this BRDF.
+    //! @param  doubleSided     Whether the BRDF is double sided.
+    MicroFacetRefraction(const ClosureTypeMicrofacetRefractionGGX&params,  const Spectrum& weight);
 
     //! @brief Constructor from parameter set
     //!
@@ -240,7 +321,15 @@ public:
     //! @param  f               Fresnel term.
     //! @param  weight          Weight of this BRDF.
     //! @param  doubleSided     Whether the BRDF is double sided.
-    // MicroFacetRefraction(const Params &params,  const Spectrum& weight);
+    MicroFacetRefraction(const ClosureTypeMicrofacetRefractionBlinn& params, const Spectrum& weight);
+
+    //! @brief Constructor from parameter set
+    //!
+    //! @param  params          Parameter set.
+    //! @param  f               Fresnel term.
+    //! @param  weight          Weight of this BRDF.
+    //! @param  doubleSided     Whether the BRDF is double sided.
+    MicroFacetRefraction(const ClosureTypeMicrofacetRefractionBeckmann& params, const Spectrum& weight);
 
     //! @brief Constructor
     //! @param transmittance    Direction hemisphere transmittance.
