@@ -137,8 +137,7 @@ public:
         if (!m_hasTransparentNode)
             return 0.0f;
         
-        return 0.0f;
-        //return m_special_transparent ? 1.0f : (::EvaluateTransparency(m_surface_shader.get(), intersection));
+        return m_special_transparent ? 1.0f : (::EvaluateTransparency(m_surface_shader.get(), intersection));
     }
 
     //! @brief  Serialization interface. Loading data from stream.

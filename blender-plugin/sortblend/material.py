@@ -1969,9 +1969,9 @@ class SORTNode_Material_Transparent(SORTShadingNode):
     bl_label = 'Transparent'
     bl_idname = 'SORTNode_Material_Transparent'
     osl_shader = '''
-        shader MaterialTransparent(  color Attenuation = @ ,
-                                     output closure color Result = color(0) ){
-            Result = transparent( Attenuation );
+        shader bxdf_transparent(  color Attenuation ,
+                                  out closure Result ){
+            Result = make_closure<transparent>( Attenuation );
         }
     '''
     def init(self, context):
@@ -1979,7 +1979,7 @@ class SORTNode_Material_Transparent(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
     def serialize_prop(self, fs):
         fs.serialize( 1 )
-        fs.serialize( self.inputs['Attenuation'].export_osl_value() )
+        self.inputs['Attenuation'].serialize(fs)
     def isTransparentNode(self):
         return True
 

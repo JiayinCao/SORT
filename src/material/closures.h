@@ -59,11 +59,11 @@ void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  ms              The medium sample to be returned.
 void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumSample& mediumStack);
+*/
 
-//! @brief  Evaluate how opaque the surface is in the OSL shader.
+//! @brief  Evaluate how opaque the surface is in the TSL shader.
 //!
-//! @param  closure         The closure tree in the osl shader.
+//! @param  closure         The closure tree in the tsl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @return                 The opacity of the intersection.
-Spectrum ProcessOpacity(const OSL::ClosureColor* closure, const OSL::Color3& w );
-*/
+Spectrum ProcessOpacity(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w);

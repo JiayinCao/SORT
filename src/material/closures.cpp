@@ -53,7 +53,11 @@ SORT_FORCEINLINE float& tsl_color_channel(float3 color, int i) {
     return (i == 0) ? color.x : ((i == 1) ? color.y : color.z);
 }
 
-#define DEFINE_CLOSUREID(T)  ClosureID T::closure_id = INVALID_CLOSURE_ID
+#define DEFINE_CLOSURETYPE(T,name)  static ClosureID closure_id; \
+                                    static const char* GetName(){ return ##name; } \
+                                    static void Register(ShadingSystem* shadingsys) { closure_id = T::RegisterClosure(GetName(), *shadingsys); }
+                                    
+#define DEFINE_CLOSUREID(T)         ClosureID T::closure_id = INVALID_CLOSURE_ID
 
 // These data structure is not supposed to be seen by other parts of the renderer
 namespace {
@@ -70,13 +74,21 @@ namespace {
      };
 
      struct Surface_Closure_Base : public Closure_Base {
-         /*
-         virtual Spectrum EvaluateOpacity(const ClosureComponent* comp, const OSL::Color3& w) const {
+         //! @brief     This is the interface for creating the processing the closure and fill the scattering event.
+         //!
+         //! @param param       Closure parameter.
+         //! @param w           Weight of the current closure.
+         //! @param se          This is the output of the function, the scattering event.
+         virtual void Process(const ClosureParamPtr param, const float3& w, ScatteringEvent& se) const = 0;
+
+         //! @brief     Evaluate the opacity of the closure.
+         //!
+         //! @param param       Closure parameter.
+         //! @param w           Weight of the current closure.
+         //! @return            The opacity of the closure.
+         virtual Spectrum EvaluateOpacity(const ClosureParamPtr comp, const float3& w) const {
              return w;
          }
-         */
-
-         virtual void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const = 0;
      };
 
 //     struct Volume_Closure_Base : public Closure_Base {
@@ -628,31 +640,21 @@ namespace {
      };
      DEFINE_CLOSUREID(Surface_Closure_SSS);
 
-//     struct Surface_Closure_Transparent : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_TRANSPARENT;
+     struct Surface_Closure_Transparent : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeTransparent, "transparent")
 
-//         static const char* GetName() {
-//             return "transparent";
-//         }
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeTransparent*)param;
+             se.AddBxdf(SORT_MALLOC(Transparent)(params, w));
+         }
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_COLOR_PARAM(Transparent::Params, attenuation),
-//                 CLOSURE_FINISH_PARAM(Transparent::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
-
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<Transparent::Params>();
-//             se.AddBxdf(SORT_MALLOC(Transparent)(params, w * comp->w));
-//         }
-
-//         Spectrum EvaluateOpacity( const ClosureComponent* comp, const OSL::Color3& w ) const override{
-//             const auto& params = *comp->as<Transparent::Params>();
-//             return 1.0f - Spectrum(params.attenuation);
-//         }
-//     };
+         Spectrum EvaluateOpacity(const ClosureParamPtr param, const float3& w) const override{
+             // do I need to take the weight into account?
+             const auto& params = *(const ClosureTypeTransparent*)param;
+             return 1.0f - Spectrum(params.attenuation);
+         }
+     };
+     DEFINE_CLOSUREID(Surface_Closure_Transparent);
 
 //     struct Volume_Closure_Absorption : public Volume_Closure_Base {
 //         static constexpr int    ClosureID = VOLUME_CLOSURE_ABSORPTION;
@@ -769,6 +771,8 @@ void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys) {
     registerSurfaceClosure<Surface_Closure_AshikhmanShirley>(shadingsys);
     registerSurfaceClosure<Surface_Closure_SSS>(shadingsys);
     registerSurfaceClosure<Surface_Closure_DoubleSided>(shadingsys);
+    registerSurfaceClosure<Surface_Closure_Transparent>(shadingsys);
+
     /*registerSurfaceClosure<Surface_Closure_MicrofacetReflection>(shadingsys);
     registerSurfaceClosure<Surface_Closure_MicrofacetRefraction>(shadingsys);
     registerSurfaceClosure<Surface_Closure_Phong>(shadingsys);
@@ -779,7 +783,6 @@ void RegisterClosures(Tsl_Namespace::ShadingSystem* shadingsys) {
     registerSurfaceClosure<Surface_Closure_FourierBRDF>(shadingsys);
     registerSurfaceClosure<Surface_Closure_DistributionBRDF>(shadingsys);
     registerSurfaceClosure<Surface_Closure_Fabric>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_Transparent>(shadingsys);
 
     registerVolumeClosure<Volume_Closure_Absorption>(shadingsys);
     registerVolumeClosure<Volume_Closure_Homogeneous>(shadingsys);
@@ -811,28 +814,6 @@ void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, 
             break;
     }
 }
-
- //void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se ){
- //    if (!closure)
- //        return;
-
- //    switch (closure->id) {
- //        case ClosureColor::MUL: {
- //            Color3 cw = w * closure->as_mul()->weight;
- //            ProcessSurfaceClosure(closure->as_mul()->closure, cw , se);
- //            break;
- //        }
- //        case ClosureColor::ADD: {
- //            ProcessSurfaceClosure(closure->as_add()->closureA, w , se);
- //            ProcessSurfaceClosure(closure->as_add()->closureB, w , se);
- //            break;
- //        }
- //        default: {
- //            const ClosureComponent* comp = closure->as_comp();
- //            getSurfaceClosureBase(comp->id)->Process(comp, w * comp->w , se);
- //        }
- //    }
- //}
 
 // void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) {
 //     if (!closure)
@@ -868,26 +849,32 @@ void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, 
 //     }
 // }
 
-// Spectrum ProcessOpacity(const OSL::ClosureColor* closure, const OSL::Color3& w ){
-//     if (!closure)
-//         return 0.0f;
+ Spectrum ProcessOpacity(const ClosureTreeNodeBase* closure, const float3& w ){
+     if (!closure)
+         return 0.0f;
 
-//     Spectrum occlusion = 0.0f;
-//     switch (closure->id) {
-//         case ClosureColor::MUL: {
-//             const auto cw = w * closure->as_mul()->weight;
-//             occlusion += ProcessOpacity(closure->as_mul()->closure, cw );
-//             break;
-//         }
-//         case ClosureColor::ADD: {
-//             occlusion += ProcessOpacity(closure->as_add()->closureA, w );
-//             occlusion += ProcessOpacity(closure->as_add()->closureB, w );
-//             break;
-//         }
-//         default: {
-//             const ClosureComponent* comp = closure->as_comp();
-//             occlusion += getSurfaceClosureBase(comp->id)->EvaluateOpacity(comp, w * comp->w);
-//         }
-//     }
-//     return occlusion;
-// }
+     Spectrum occlusion = 0.0f;
+
+     switch (closure->m_id) {
+     case Tsl_Namespace::CLOSURE_ADD:
+     {
+         const ClosureTreeNodeAdd* closure_add = (const ClosureTreeNodeAdd*)closure;
+         occlusion += Spectrum(ProcessOpacity(closure_add->m_closure0, w));
+         occlusion += Spectrum(ProcessOpacity(closure_add->m_closure1, w));
+     }
+     break;
+     case Tsl_Namespace::CLOSURE_MUL:
+     {
+         const ClosureTreeNodeMul* closure_mul = (const ClosureTreeNodeMul*)closure;
+         const float3 weight = make_float3(w.x * closure_mul->m_weight, w.y * closure_mul->m_weight, w.z * closure_mul->m_weight);
+         occlusion += Spectrum(ProcessOpacity(closure_mul->m_closure, weight));
+     }
+     break;
+     default:
+         auto closure_base = getSurfaceClosureBase(closure->m_id);
+         occlusion += Spectrum(closure_base->EvaluateOpacity(closure->m_params, w));
+         break;
+     }
+
+     return occlusion;
+ }

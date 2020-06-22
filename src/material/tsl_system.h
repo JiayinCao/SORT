@@ -55,28 +55,6 @@ bool ResolveShaderInstance(ShaderInstance* si);
 void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent& se);
 
 /*
-struct ShadingContextWrapper {
-public:
-    OSL::ShadingContext* GetShadingContext(OSL::ShadingSystem* shadingsys);
-    void DestroyContext(OSL::ShadingSystem* shadingsys);
-
-private:
-    OSL::PerThreadInfo              *thread_info = nullptr;
-    OSL::ShadingContext             *ctx = nullptr;
-};
-
-//! @brief  Optimize shader
-void OptimizeShader(OSL::ShaderGroup* group);
-
-//! @brief  Build a shader from source code
-bool BuildShader( const std::string& shader_source, const std::string& shader_name, const std::string& shader_layer , const std::string& shader_group_name = "" );
-
-//! @brief  Execute a shader and populate the scattering event
-//!
-//! @param  shader      The osl shader to be evaluated.
-//! @param  se          The resulting scattering event.
-void ExecuteSurfaceShader( OSL::ShaderGroup* shader , ScatteringEvent& se );
-
 //! @brief  Execute a shader and populate the medium stack
 //!
 //! @param  shader      The osl shader to be evaluated.
@@ -92,13 +70,14 @@ void ExecuteVolumeShader( OSL::ShaderGroup* shader, const MediumInteraction& mi 
 //! @param  mi          The interaction inside the volume.
 //! @param  ms          The medium sample to be returned.
 void EvaluateVolumeSample( OSL::ShaderGroup* shader, const MediumInteraction& mi, MediumSample& ms);
+*/
 
 //! @brief  Evaluate the transparency of the intersection.
 //!
-//! @param  shader          The osl shader to be evaluated.
+//! @param  shader          The tsl shader to be evaluated.
 //! @param  intersection    The intersection of interest.
-Spectrum EvaluateTransparency( OSL::ShaderGroup* shader , const SurfaceInteraction& intersection );
-*/
+Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader, const SurfaceInteraction& intersection);
+
 //! @brief  Create thread contexts
 void CreateTSLThreadContexts();
 
