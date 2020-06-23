@@ -19,10 +19,15 @@
 
 #include "bxdf.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeLambert)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeLambert, "lambert")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, float3, base_color)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeLambert)
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeLambertTransmission, "lambert_transmission")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, transmittance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeLambertTransmission)
 
 //! @brief Lambert brdf.
 /**
@@ -65,11 +70,6 @@ public:
 private:
     const Spectrum R;         /**< Direction-Hemisphere reflection or total reflection. */
 };
-
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeLambertTransmission)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, transmittance)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, normal)
-DECLARE_CLOSURE_TYPE_END(ClosureTypeLambertTransmission)
 
 //! @brief Lambert transmittance brdf.
 /**

@@ -20,7 +20,7 @@
 #include "microfacet.h"
 #include "spectrum/rgbspectrum.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDielectric)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDielectric, "dieletric")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, reflectance)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, transmittance)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float,  roughness_u)

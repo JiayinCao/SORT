@@ -20,7 +20,7 @@
 #include "bxdf.h"
 #include "core/sassert.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeHair)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeHair, "hair")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float3, sigma)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float, longtitudinalRoughness)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float, azimuthalRoughness)

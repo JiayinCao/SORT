@@ -19,7 +19,7 @@
 
 #include "bxdf.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDistributionBRDF)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDistributionBRDF, "distribution_brdf")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float3, base_color)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, roughness)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, specular)

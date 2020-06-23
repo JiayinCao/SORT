@@ -22,7 +22,7 @@
 #include "microfacet.h"
 #include "scatteringevent/scatteringevent.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeCoat)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeCoat, "coat")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, void*, closure)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, roughness)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, ior)

@@ -20,7 +20,7 @@
 #include "bxdf.h"
 #include "microfacet.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeAshikhmanShirley)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeAshikhmanShirley, "ashikhman_shirley")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float,  specular)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float,  roughnessU)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float,  roughnessV)

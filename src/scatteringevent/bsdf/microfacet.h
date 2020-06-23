@@ -22,12 +22,12 @@
 #include "spectrum/spectrum.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMirror)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMirror, "mirror")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMirror, float3, base_color)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMirror, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeMirror)
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionGGX)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionGGX, "microfacet_reflection_ggx")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float3, eta)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float3, absorption)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float,  roughness_u)
@@ -36,7 +36,7 @@ DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float3, base_color)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionGGX, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetReflectionGGX)
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionBlinn)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionBlinn, "microfacet_reflection_blinn")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float3, eta)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float3, absorption)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float, roughness_u)
@@ -45,7 +45,7 @@ DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float3, base_colo
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBlinn, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetReflectionBlinn)
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionBeckmann)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionBeckmann, "microfacet_reflection_beckmann")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float3, eta)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float3, absorption)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float, roughness_u)
@@ -54,7 +54,7 @@ DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float3, base_c
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionBeckmann, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetReflectionBeckmann)
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionDielectric)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetReflectionDielectric, "microfacet_dielectric")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float, iorI)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float, iorT)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float, roughness_u)
@@ -63,7 +63,7 @@ DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float3, base
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetReflectionDielectric, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetReflectionDielectric)
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetRefractionGGX)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetRefractionGGX, "microfacet_refraction_ggx")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float, etaI)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float, etaT)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float, roughness_u)
@@ -72,7 +72,7 @@ DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float3, transmittan
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionGGX, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetRefractionGGX)
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetRefractionBlinn)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetRefractionBlinn, "microfacet_refraction_blinn")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float, etaI)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float, etaT)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float, roughness_u)
@@ -81,7 +81,7 @@ DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float3, transmitt
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBlinn, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeMicrofacetRefractionBlinn)
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetRefractionBeckmann)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMicrofacetRefractionBeckmann, "microfacet_refraction_beckmann")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, float, etaI)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, float, etaT)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMicrofacetRefractionBeckmann, float, roughness_u)

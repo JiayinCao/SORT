@@ -20,7 +20,7 @@
 #include "bxdf.h"
 #include "math/vector3.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeTransparent)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeTransparent, "transparent")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeTransparent, float3, attenuation)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeTransparent)
 

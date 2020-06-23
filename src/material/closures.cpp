@@ -44,7 +44,7 @@
 
 using namespace Tsl_Namespace;
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeEmpty)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeEmpty, "empty_closure")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeEmpty, float, dummy)    // this is purely because tsl doesn't support empty closure structure
 DECLARE_CLOSURE_TYPE_END(ClosureTypeEmpty)
 
@@ -52,9 +52,8 @@ IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeEmpty)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeEmpty, float, dummy)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
 
-#define DEFINE_CLOSURETYPE(T,name)  static ClosureID closure_id; \
-                                    static const char* GetName(){ return name; } \
-                                    static void Register() { closure_id = T::RegisterClosure(GetName(), ShadingSystem::get_instance()); }
+#define DEFINE_CLOSURETYPE(T)       static ClosureID closure_id; \
+                                    static void Register() { closure_id = T::RegisterClosure(ShadingSystem::get_instance()); }
                                     
 #define DEFINE_CLOSUREID(T)         ClosureID T::closure_id = INVALID_CLOSURE_ID
 
@@ -140,7 +139,7 @@ namespace {
 //     }
 
      struct Surface_Closure_Empty: public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeEmpty, "empty_closure")
+         DEFINE_CLOSURETYPE(ClosureTypeEmpty)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              // nothing inside the closure needs to be processed.
@@ -148,7 +147,7 @@ namespace {
      };
 
      struct Surface_Closure_Lambert : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeLambert, "lambert")
+         DEFINE_CLOSURETYPE(ClosureTypeLambert)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              ClosureTypeLambert* bxdf_param = (ClosureTypeLambert*)param;
@@ -157,7 +156,7 @@ namespace {
      };
 
      struct Surface_Closure_OrenNayar : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeOrenNayar, "oren_nayar")
+         DEFINE_CLOSURETYPE(ClosureTypeOrenNayar)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              ClosureTypeOrenNayar* bxdf_param = (ClosureTypeOrenNayar*)param;
@@ -166,7 +165,7 @@ namespace {
      };
 
      struct Surface_Closure_Disney : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeDisney, "disney")
+         DEFINE_CLOSURETYPE(ClosureTypeDisney)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto weight = w;
@@ -235,7 +234,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetReflectionGGX : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionGGX, "microfacet_reflection_ggx")
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionGGX)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeMicrofacetReflectionGGX*)param;
@@ -244,7 +243,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetReflectionBlinn: public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBlinn, "microfacet_reflection_blinn")
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBlinn)
 
         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeMicrofacetReflectionBlinn*)param;
@@ -253,7 +252,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetReflectionBeckmann : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann, "microfacet_reflection_beckmann")
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeMicrofacetReflectionBeckmann*)param;
@@ -262,7 +261,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetRefractionGGX : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann, "microfacet_refraction_ggx")
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionGGX*)param;
@@ -271,7 +270,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetRefractionBlinn : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann, "microfacet_refraction_blinn")
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionBlinn*)param;
@@ -280,7 +279,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetRefractionBeckmann : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann, "microfacet_refraction_beckmann")
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionBeckmann*)param;
@@ -289,7 +288,7 @@ namespace {
      };
 
      struct Surface_Closure_AshikhmanShirley : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeAshikhmanShirley, "ashikhman_shirley")
+         DEFINE_CLOSURETYPE(ClosureTypeAshikhmanShirley)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(ClosureTypeAshikhmanShirley*)param;
@@ -298,7 +297,7 @@ namespace {
      };
 
      struct Surface_Closure_Phong : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypePhong, "phong")
+         DEFINE_CLOSURETYPE(ClosureTypePhong)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(ClosureTypePhong*)param;
@@ -307,7 +306,7 @@ namespace {
      };
 
      struct Surface_Closure_LambertTransmission : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeLambertTransmission, "lambert_transmission")
+         DEFINE_CLOSURETYPE(ClosureTypeLambertTransmission)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeLambertTransmission*)param;
@@ -316,7 +315,7 @@ namespace {
      };
 
      struct Surface_Closure_Mirror : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMirror, "mirror")
+         DEFINE_CLOSURETYPE(ClosureTypeMirror)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(ClosureTypeMirror*)param;
@@ -325,7 +324,7 @@ namespace {
      };
 
      struct Surface_Closure_Dielectric : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeDielectric, "dieletric")
+         DEFINE_CLOSURETYPE(ClosureTypeDielectric)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(ClosureTypeDielectric*)param;
@@ -334,7 +333,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetReflectionDielectric : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionDielectric, "microfacet_dielectric")
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionDielectric)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
              const auto& params = *(ClosureTypeMicrofacetReflectionDielectric*)param;
@@ -343,7 +342,7 @@ namespace {
      };
 
      struct Surface_Closure_Hair : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeHair, "hair")
+         DEFINE_CLOSURETYPE(ClosureTypeHair)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeHair*)param;
@@ -396,7 +395,7 @@ namespace {
 //     };
 
      struct Surface_Closure_Coat : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeCoat, "coat")
+         DEFINE_CLOSURETYPE(ClosureTypeCoat)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeCoat*)param;
@@ -407,7 +406,7 @@ namespace {
      };
 
      struct Surface_Closure_DoubleSided : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeDoubleSided, "double_sided")
+         DEFINE_CLOSURETYPE(ClosureTypeDoubleSided)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
              const auto& params = *(const ClosureTypeDoubleSided*)param;
@@ -420,7 +419,7 @@ namespace {
      };
 
      struct Surface_Closure_DistributionBRDF : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeDistributionBRDF, "distribution_brdf")
+         DEFINE_CLOSURETYPE(ClosureTypeDistributionBRDF)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeDistributionBRDF*)param;
@@ -429,7 +428,7 @@ namespace {
      };
 
      struct Surface_Closure_Fabric : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeFabric, "fabric")
+         DEFINE_CLOSURETYPE(ClosureTypeFabric)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeFabric*)param;
@@ -438,7 +437,7 @@ namespace {
      };
 
      struct Surface_Closure_SSS : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeSSS, "subsurface_scattering")
+         DEFINE_CLOSURETYPE(ClosureTypeSSS)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3 & w, ScatteringEvent & se) const override {
              const auto& params = *(ClosureTypeSSS*)param;
@@ -498,7 +497,7 @@ namespace {
      };
 
      struct Surface_Closure_Transparent : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeTransparent, "transparent")
+         DEFINE_CLOSURETYPE(ClosureTypeTransparent)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeTransparent*)param;

@@ -21,7 +21,7 @@
 #include "microfacet.h"
 #include "scatteringevent/bssrdf/bssrdf.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDisney)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDisney, "disney")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, metallic)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specular)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specularTint)
@@ -40,7 +40,7 @@ DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, baseColor)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeDisney)
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeSSS)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeSSS, "subsurface_scattering")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, base_color)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, scatter_distance)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, normal)

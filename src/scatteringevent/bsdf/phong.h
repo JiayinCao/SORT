@@ -21,7 +21,7 @@
 #include "core/sassert.h"
 #include "material/tsl_utils.h"
 
-DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypePhong)
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypePhong, "phong")
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, diffuse)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, specular)
 DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float, specular_power)
