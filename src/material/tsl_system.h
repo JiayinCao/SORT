@@ -54,7 +54,6 @@ bool ResolveShaderInstance(ShaderInstance* si);
 //! @brief  Execute Jited shader code.
 void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent& se);
 
-/*
 //! @brief  Execute a shader and populate the medium stack
 //!
 //! @param  shader      The osl shader to be evaluated.
@@ -62,8 +61,9 @@ void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent
 //! @param  ms          The medium stack to hold the results.
 //! @param  flag        A flag indicates whether to add or remove the medium.
 //! @param  material    The material that spawns the medium.
-void ExecuteVolumeShader( OSL::ShaderGroup* shader, const MediumInteraction& mi , MediumStack& se, const SE_Interaction flag, const MaterialBase* material);
+void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi , MediumStack& se, const SE_Interaction flag, const MaterialBase* material);
 
+/*
 //! @brief  Evaluate the properties at a specific position in the volume.
 //!
 //! @param  shader      The osl shader to be executed.

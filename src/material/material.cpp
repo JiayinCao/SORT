@@ -33,11 +33,15 @@ void Material::BuildMaterial() {
     SORT_PROFILE(message);
 
     static constexpr auto surface_shader_root = R"(
-            shader SORT_Surface_Shader( in closure Surface, out closure out_surface ){
-                out_surface = Surface;
+            shader SORT_Surface_Shader( in closure Surface, out closure result ){
+                result = Surface;
             }
     )";
-    // static constexpr auto surface_volume_root = "shader SORT_Volume_Shader( out closure Volume = color(0) ){\nCi = Volume;\n}";
+    static constexpr auto surface_volume_root = R"(
+            shader SORT_Volume_Shader( in closure Volume, out closure result ){
+                result = Volume;
+            }
+    )";
 
     const auto output_node_name = "ShaderOutput_" + m_name;
 
@@ -98,7 +102,7 @@ void Material::BuildMaterial() {
              arg.m_name = "out_bxdf";
              arg.m_type = TSL_TYPE_CLOSURE;
              arg.m_is_output = true;
-             shader_group->expose_shader_argument(root_shader_name, "out_surface", arg);
+             shader_group->expose_shader_argument(root_shader_name, "result", arg);
 
              // update default values
              for (const auto& dv : m_paramDefaultValues)
@@ -122,8 +126,8 @@ void Material::BuildMaterial() {
     // build surface shader
     build_shader_type(m_surface_shader_data, surface_shader_root, "Surface", m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
 
-    // // build volume shader
-    // build_shader_type(m_volume_shader_data, surface_volume_root, "Volume", m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
+    // build volume shader
+    build_shader_type(m_volume_shader_data, surface_volume_root, "Volume", m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
 
     // if there is volume shader, but no surface shader, a special transparent material will be applied automatically
     // this will make the shader authoring a lot easier.
@@ -235,13 +239,13 @@ void Material::UpdateScatteringEvent( ScatteringEvent& se ) const {
 
     if( m_surface_shader_valid )
         ExecuteSurfaceShader(m_surface_shader.get() , se );
-//    else if( m_special_transparent )
-//        se.AddBxdf(SORT_MALLOC(Transparent)());
+    else if( m_special_transparent )
+        se.AddBxdf(SORT_MALLOC(Transparent)());
 }
 
 void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interaction flag , MediumStack& ms ) const {
-//    if (m_volume_shader_valid)
-        //ExecuteVolumeShader(m_volume_shader.get(), mi, ms, flag, this);
+    if (m_volume_shader_valid)
+        ExecuteVolumeShader(m_volume_shader.get(), mi, ms, flag, this);
 }
 
 void Material::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const {

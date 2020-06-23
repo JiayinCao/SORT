@@ -19,6 +19,11 @@
 #include "core/rand.h"
 #include "core/memory.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeAbsorption)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, float, absorption)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeAbsorption)
+
 Spectrum AbsorptionMedium::Tr( const Ray& ray , const float max_t ) const{
     const auto e = m_globalMediumSample.basecolor * (m_globalMediumSample.absorption * -fmin(max_t, FLT_MAX ));
     return e.Exp();

@@ -57,45 +57,43 @@ IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
                                     
 #define DEFINE_CLOSUREID(T)         ClosureID T::closure_id = INVALID_CLOSURE_ID
 
-#define ALL_SURFACE_CLOSURE_ACTION \
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Empty)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Lambert)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_OrenNayar)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Disney)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_LambertTransmission)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Mirror)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Dielectric)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_AshikhmanShirley)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_SSS)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_DoubleSided)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Transparent)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Phong)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_DistributionBRDF)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Fabric)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionGGX)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionBlinn)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionBeckmann)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionDielectric)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionGGX)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBlinn)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBeckmann)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Hair)\
-        SURFACE_CLOSURE_ACTION(Surface_Closure_Coat)
+#define ALL_CLOSURES_ACTION \
+        CLOSURE_ACTION(Surface_Closure_Empty)\
+        CLOSURE_ACTION(Surface_Closure_Lambert)\
+        CLOSURE_ACTION(Surface_Closure_OrenNayar)\
+        CLOSURE_ACTION(Surface_Closure_Disney)\
+        CLOSURE_ACTION(Surface_Closure_LambertTransmission)\
+        CLOSURE_ACTION(Surface_Closure_Mirror)\
+        CLOSURE_ACTION(Surface_Closure_Dielectric)\
+        CLOSURE_ACTION(Surface_Closure_AshikhmanShirley)\
+        CLOSURE_ACTION(Surface_Closure_SSS)\
+        CLOSURE_ACTION(Surface_Closure_DoubleSided)\
+        CLOSURE_ACTION(Surface_Closure_Transparent)\
+        CLOSURE_ACTION(Surface_Closure_Phong)\
+        CLOSURE_ACTION(Surface_Closure_DistributionBRDF)\
+        CLOSURE_ACTION(Surface_Closure_Fabric)\
+        CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionGGX)\
+        CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionBlinn)\
+        CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionBeckmann)\
+        CLOSURE_ACTION(Surface_Closure_MicrofacetReflectionDielectric)\
+        CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionGGX)\
+        CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBlinn)\
+        CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBeckmann)\
+        CLOSURE_ACTION(Surface_Closure_Hair)\
+        CLOSURE_ACTION(Surface_Closure_Coat)\
+        CLOSURE_ACTION(Volume_Closure_Absorption)\
+        CLOSURE_ACTION(Volume_Closure_Homogeneous)
 
 // These data structure is not supposed to be seen by other parts of the renderer
 namespace {
      constexpr unsigned int MAX_CLOSURE_CNT = 128;
 
+     //! @brief     Base interface of closure types.
      struct Closure_Base {
-         struct BuiltinClosures {
-             const char* name;
-             int id;
-         };
-
-         Closure_Base() = default;
          virtual ~Closure_Base() = default;
      };
-
+     
+     //! @brief     Closure types for surfaces, this counts brdf, btdf and also sss surfaces.
      struct Surface_Closure_Base : public Closure_Base {
          //! @brief     This is the interface for creating the processing the closure and fill the scattering event.
          //!
@@ -114,29 +112,43 @@ namespace {
          }
      };
 
-//     struct Volume_Closure_Base : public Closure_Base {
-//         virtual void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const = 0;
-//         virtual void Evaluate(const ClosureComponent* comp, const OSL::Color3& w, MediumSample& ms) const {}
-//     };
+     //! @brief     Volume closures
+     struct Volume_Closure_Base : public Closure_Base {
+         //! @brief     This is the interface for filling the volume closures in a medium stack.
+         //!
+         //! @param param       Parameters for constructing the closure.
+         //! @param w           Weight of the closure.
+         //! @param ms          Medium stack, this keeps the resulf of the processing.
+         //! @param flag        Some useful properties used during processing.
+         //! @param material    The material that holds the volume.
+         //! @param mesh        The mesh holds the volume.
+         virtual void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const = 0;
 
-     static std::vector<std::unique_ptr<Surface_Closure_Base>>   g_surface_closures(MAX_CLOSURE_CNT);
-//     static std::vector<std::unique_ptr<Volume_Closure_Base>>    g_volume_closures(VOLUME_CLOSURE_CNT);
+         //! @brief     This the interface for evaluating volume density inside a volume.
+         //!
+         //! Apart from heterogenous volume, no other closure needs this interface.
+         //!
+         //! @param param       Parameters for constructing the closure.
+         //! @param w           Weight of the closure.
+         //! @param ms          Medium stack, this keeps the resulf of the processing.
+         virtual void Evaluate(const ClosureParamPtr param, const float3& w, MediumSample& ms) const {}
+     };
+
+     static std::vector<std::unique_ptr<Closure_Base>>   g_closures(MAX_CLOSURE_CNT);
 
      inline static Surface_Closure_Base* getSurfaceClosureBase(unsigned int closure_id) {
          sAssert(closure_id >= 0 && closure_id < MAX_CLOSURE_CNT, MATERIAL);
-         sAssert(IS_PTR_VALID(g_surface_closures[closure_id]), MATERIAL);
+         sAssert(IS_PTR_VALID(g_closures[closure_id]), MATERIAL);
 
-         return g_surface_closures[closure_id].get();
+         return (Surface_Closure_Base*)g_closures[closure_id].get();
      }
 
-//     inline static Volume_Closure_Base* getVolumeClosureBase(unsigned int closure_id) {
-//         closure_id -= VOLUME_CLOSURE_BASE;
+     inline static Volume_Closure_Base* getVolumeClosureBase(unsigned int closure_id) {
+         sAssert(closure_id >= 0 && closure_id < MAX_CLOSURE_CNT, MATERIAL);
+         sAssert(IS_PTR_VALID(g_closures[closure_id]), MATERIAL);
 
-//         sAssert(closure_id >= 0 && closure_id < VOLUME_CLOSURE_CNT, VOLUME);
-//         sAssert(IS_PTR_VALID(g_volume_closures[closure_id]), VOLUME);
-
-//         return g_volume_closures[closure_id].get();
-//     }
+         return (Volume_Closure_Base*)g_closures[closure_id].get();
+     }
 
      struct Surface_Closure_Empty: public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeEmpty)
@@ -511,60 +523,31 @@ namespace {
          }
      };
 
-//     struct Volume_Closure_Absorption : public Volume_Closure_Base {
-//         static constexpr int    ClosureID = VOLUME_CLOSURE_ABSORPTION;
+     struct Volume_Closure_Absorption : public Volume_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeAbsorption)
 
-//         static const char* GetName() {
-//             return "medium_absorption";
-//         }
+         void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
+             if (SE_ENTERING == flag) {
+                 const auto& params = *(const ClosureTypeAbsorption*)param;
+                 ms.AddMedium(SORT_MALLOC(AbsorptionMedium)(params, material));
+             } else if (SE_LEAVING == flag) {
+                 ms.RemoveMedium(material->GetUniqueID());
+             }
+         }
+     };
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_COLOR_PARAM(AbsorptionMedium::Params, baseColor),
-//                 CLOSURE_FLOAT_PARAM(AbsorptionMedium::Params, absorption),
-//                 CLOSURE_FINISH_PARAM(AbsorptionMedium::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+     struct Volume_Closure_Homogeneous : public Volume_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeHomogeneous)
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override{
-//             if (SE_ENTERING == flag) {
-//                 const auto& params = *comp->as<AbsorptionMedium::Params>();
-//                 ms.AddMedium(SORT_MALLOC(AbsorptionMedium)(params, material));
-//             } else if( SE_LEAVING == flag ){
-//                 ms.RemoveMedium(material->GetUniqueID());
-//             }
-//         }
-//     };
-
-//     struct Volume_Closure_Homogeneous : public Volume_Closure_Base {
-//         static constexpr int    ClosureID = VOLUME_CLOSURE_HOMOGENEOUS;
-
-//         static const char* GetName() {
-//             return "medium_homogeneous";
-//         }
-
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_COLOR_PARAM(HomogeneousMedium::Params, baseColor),
-//                 CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, emission),
-//                 CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, absorption),
-//                 CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, scattering),
-//                 CLOSURE_FLOAT_PARAM(HomogeneousMedium::Params, anisotropy),
-//                 CLOSURE_FINISH_PARAM(HomogeneousMedium::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
-
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
-//             if (SE_ENTERING == flag) {
-//                 const auto& params = *comp->as<HomogeneousMedium::Params>();
-//                 ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params, material));
-//             } else if (SE_LEAVING == flag) {
-//                 ms.RemoveMedium(material->GetUniqueID());
-//             }
-//         }
-//     };
+         void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
+             if (SE_ENTERING == flag) {
+                 const auto& params = *(const ClosureTypeHomogeneous*)param;
+                 ms.AddMedium(SORT_MALLOC(HomogeneousMedium)(params, material));
+             } else if (SE_LEAVING == flag) {
+                 ms.RemoveMedium(material->GetUniqueID());
+             }
+         }
+     };
 
 //     struct Volume_Closure_Heterogeneous : public Volume_Closure_Base {
 //         static constexpr int    ClosureID = VOLUME_CLOSURE_HETEROGENOUS;
@@ -603,34 +586,26 @@ namespace {
 //         }
 //     };
 
-#define SURFACE_CLOSURE_ACTION(T) DEFINE_CLOSUREID(T);
-     ALL_SURFACE_CLOSURE_ACTION
-#undef SURFACE_CLOSURE_ACTION
+#define CLOSURE_ACTION(T) DEFINE_CLOSUREID(T);
+     ALL_CLOSURES_ACTION
+#undef CLOSURE_ACTION
 }
 
- template< typename T >
- static void registerSurfaceClosure() {
-     T::Register();
-     g_surface_closures[T::closure_id] = std::make_unique<T>();
- }
-
-// template< typename T >
-// static void registerVolumeClosure(OSL::ShadingSystem* shadingsys) {
-//     T::Register(shadingsys);
-//     g_volume_closures[T::ClosureID - VOLUME_CLOSURE_BASE] = std::make_unique<T>();
-// }
+template< typename T >
+static void register_closure() {
+    T::Register();
+    g_closures[T::closure_id] = std::make_unique<T>();
+}
 
 void RegisterClosures() {
-#define SURFACE_CLOSURE_ACTION(T) registerSurfaceClosure<T>();
-    ALL_SURFACE_CLOSURE_ACTION
-#undef SURFACE_CLOSURE_ACTION
+#define CLOSURE_ACTION(T) register_closure<T>();
+    ALL_CLOSURES_ACTION
+#undef CLOSURE_ACTION
 
     /*
     registerSurfaceClosure<Surface_Closure_MERL>(shadingsys);
     registerSurfaceClosure<Surface_Closure_FourierBRDF>(shadingsys);
     
-    registerVolumeClosure<Volume_Closure_Absorption>(shadingsys);
-    registerVolumeClosure<Volume_Closure_Homogeneous>(shadingsys);
     registerVolumeClosure<Volume_Closure_Heterogeneous>(shadingsys);*/
 }
 
@@ -660,22 +635,22 @@ void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, 
     }
 }
 
-// void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) {
-//     if (!closure)
-//         return;
+void ProcessVolumeClosure(const ClosureTreeNodeBase* closure, const float3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) {
+    if (!closure)
+        return;
 
-//     switch (closure->id) {
-//         case ClosureColor::MUL:
-//         case ClosureColor::ADD:
-//             // no support for blending or addding volume for now.
-//             sAssert(false, VOLUME);
-//             break;
-//         default: {
-//             const ClosureComponent* comp = closure->as_comp();
-//             getVolumeClosureBase(comp->id)->Process(comp, w * comp->w, mediumStack, flag, material, mesh);
-//         }
-//     }
-// }
+    switch (closure->m_id) {
+        case Tsl_Namespace::CLOSURE_ADD:
+        case Tsl_Namespace::CLOSURE_MUL:
+            // no support for blending or addding volume for now.
+            sAssert(false, VOLUME);
+            break;
+        default: {
+            auto volume_closure = getVolumeClosureBase(closure->m_id);
+            volume_closure->Process(closure->m_params, w, mediumStack, flag, material, mesh);
+        }
+    }
+}
 
 // void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumSample& ms){
 //     if (!closure)

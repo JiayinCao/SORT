@@ -78,20 +78,23 @@ void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEve
     ProcessSurfaceClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f) , se );
 }
 
-// void ExecuteVolumeShader(OSL::ShaderGroup* shader, const MediumInteraction& mi, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material ) {
-//     ShaderGlobals shaderglobals;
-//     memset(&shaderglobals, 0, sizeof(shaderglobals));
-//     shaderglobals.P = Vec3(mi.intersect.x, mi.intersect.y, mi.intersect.z);
+void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material ) {
+    //const SurfaceInteraction& intersection = se.GetInteraction();
+    TslGlobal global;
+    //global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
 
-//     // objdata points to world to local volume transform
-//     auto thread_info = reinterpret_cast<SORTTextureThreadInfo*>(g_textureSystem.get_perthread_info());
-//     if (mi.mesh)
-//         thread_info->mesh = mi.mesh;
+     // objdata points to world to local volume transform
+    // auto thread_info = reinterpret_cast<SORTTextureThreadInfo*>(g_textureSystem.get_perthread_info());
+    // if (mi.mesh)
+    //     thread_info->mesh = mi.mesh;
 
-//     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
+    // shader execution
+    ClosureTreeNodeBase* closure = nullptr;
+    auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+    raw_function(&closure, &global);
 
-//     ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms, flag, material, mi.mesh);
-// }
+    ProcessVolumeClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms, flag, material, mi.mesh);
+}
 
 // void EvaluateVolumeSample(OSL::ShaderGroup* shader, const MediumInteraction& mi, MediumSample& ms) {
 //     ShaderGlobals shaderglobals;

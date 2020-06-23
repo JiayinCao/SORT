@@ -20,6 +20,11 @@
 #include "core/define.h"
 #include "medium.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeAbsorption, "volume_absorption")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, float, absorption)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeAbsorption)
+
 //! @brief  Medium that only absorb lights without any scattering.
 /**
  * This is not a physically based medium. There is only absorption considered, the scattering part is totally ignored.
@@ -27,18 +32,12 @@
  */
 class AbsorptionMedium : public Medium{
 public:
-    // Input parameters to construct the volume.
-    struct Params {
-        //OSL::Vec3   baseColor;
-        //OSL::Float  absorption;
-    };
-
     //! @brief  Constructor.
     //!
     //! @param param        Parameter to build the volume.
 	//! @param material		Material that spawns the medium.
-    //AbsorptionMedium( const AbsorptionMedium::Params& param , const MaterialBase* material):
-    //    Medium( param.baseColor, 0.0f, param.absorption, 0.0f, 0.0f, material){}
+    AbsorptionMedium( const ClosureTypeAbsorption& param , const MaterialBase* material):
+        Medium( param.base_color, 0.0f, param.absorption, 0.0f, 0.0f, material){}
 
     //! @brief  Evaluation of beam transmittance.
     //!

@@ -20,6 +20,14 @@
 #include "core/memory.h"
 #include "phasefunction.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeHomogeneous)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float, emission)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float, absorption)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float, scattering)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float, anisotropy)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeHomogeneous)
+
 Spectrum HomogeneousMedium::Tr( const Ray& ray , const float max_t ) const{
     const auto e = m_globalMediumSample.basecolor * m_globalMediumSample.extinction * (-fmin(max_t, FLT_MAX ));
     return e.Exp();

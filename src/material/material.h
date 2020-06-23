@@ -235,13 +235,10 @@ private:
 
     /**< Shader unit instance. */
     std::unique_ptr<Tsl_Namespace::ShaderInstance>  m_surface_shader = nullptr;
+    std::unique_ptr<Tsl_Namespace::ShaderInstance>  m_volume_shader = nullptr;
 
     /**< Shader unit default values. */
     std::vector<ShaderParamDefaultValue>        m_paramDefaultValues;
-
-    /**< OSL device surface shader. */
-    //OSL::ShaderGroupRef             m_surface_shader = nullptr;
-    //OSL::ShaderGroupRef             m_volume_shader = nullptr;
 
     bool                            m_hasTransparentNode = false;
     bool                            m_hasSSSNode = false;
