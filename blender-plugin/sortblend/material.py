@@ -1491,7 +1491,11 @@ class SORTNode_Material_UE4Principle(SORTShadingNode):
                           vector Normal ,
                           out closure Result ){
             // UE4 PBS model, this is obviously very wrong since I have no time digging into UE4 for now.
-            Result = lambert( BaseColor , Normal ) * ( 1 - Metallic ) * 0.92 + microfacetReflection( "GGX", color( 0.37 ), color( 2.82 ), RoughnessU, RoughnessV, BaseColor , Normal ) * ( Metallic * 0.92 + 0.08 * Specular );
+            color ior, absorb;
+            ior.r = ior.g = ior.b = 0.37f;
+            absorb.r = absorb.g = absorb.b = 2.82f;
+            Result = make_closure<lambert>( BaseColor , Normal ) * ( 1.0f - Metallic ) * 0.92f + 
+                     make_closure<microfacet_reflection_ggx>( ior, absorb, RoughnessU, RoughnessV, BaseColor , Normal ) * ( Metallic * 0.92 + 0.08 * Specular );
         }
     '''
     def init(self, context):
@@ -1507,12 +1511,12 @@ class SORTNode_Material_UE4Principle(SORTShadingNode):
         self.inputs['RoughnessV'].default_value = 0.2
     def serialize_prop(self, fs):
         fs.serialize( 6 )
-        fs.serialize( self.inputs['RoughnessU'].export_osl_value() )
-        fs.serialize( self.inputs['RoughnessV'].export_osl_value() )
-        fs.serialize( self.inputs['Metallic'].export_osl_value() )
-        fs.serialize( self.inputs['Specular'].export_osl_value() )
-        fs.serialize( self.inputs['BaseColor'].export_osl_value() )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
+        self.inputs['RoughnessU'].serialize(fs)
+        self.inputs['RoughnessV'].serialize(fs)
+        self.inputs['Metallic'].serialize(fs)
+        self.inputs['Specular'].serialize(fs)
+        self.inputs['BaseColor'].serialize(fs)
+        self.inputs['Normal'].serialize(fs)
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_DisneyBRDF(SORTShadingNode):
