@@ -39,8 +39,8 @@ DECLARE_TSLGLOBAL_BEGIN()
 DECLARE_TSLGLOBAL_VAR(float3, normal)
 DECLARE_TSLGLOBAL_END()
 
-//! @brief  Build a shader from source code
-Tsl_Namespace::ShaderUnitTemplate* BuildShader(const std::string& shader_name, const std::string& shader_source);
+//! @brief  Get Shading context.
+Tsl_Namespace::ShadingContext* GetShadingContext();
 
 //! @brief  Begin building the shader group
 ShaderGroupTemplate* BeginShaderGroup(const std::string& group_name);

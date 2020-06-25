@@ -91,15 +91,15 @@ public:
 
     //! @brief  Get resource data based on index.
     //!
-    //! @param  index       Index of the resource.
+    //! @param  name        Name of the resource.
     //! @return             The pointer of the resource. 'nullptr' will be returned if the index is out of range.
-    Resource*   GetResource(int index);
+    const Resource*   GetResource(const std::string& name) const;
 
 private:
     std::vector<std::unique_ptr<MaterialBase>>       m_matPool;         /**< Material pool holding all materials. */
-    std::unordered_map<std::string, std::string>     m_shaderSources;   /**< OSL shader source code. */
+    std::unordered_map<std::string, std::string>     m_shaderSources;   /**< TSL shader source code. */
 
-    std::vector<std::unique_ptr<Resource>>           m_resources;       /**< Resources used during BXDF evaluation. */
+    std::unordered_map<std::string, std::unique_ptr<Resource>> m_resources;       /**< Resources used during BXDF evaluation. */
 
     friend class Singleton<MatManager>;
 };

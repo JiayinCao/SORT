@@ -29,30 +29,36 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
     auto shading_context = shading_system.make_shading_context();
 
     // the root shader node, this usually matches to the output node in material system
-    const auto root_shader_unit = shading_context->compile_shader_unit_template("root_shader", R"(
+    auto root_shader_template = shading_context->begin_shader_unit_template("root_shader");
+    const auto root_shader_compiling = shading_context->compile_shader_unit_template(root_shader_template, R"(
         shader output_node( float in_bxdf , out float out_bxdf ){
             out_bxdf = in_bxdf * 1231.0f;
         }
     )");
-    EXPECT_NE(nullptr, root_shader_unit);
+    shading_context->end_shader_unit_template(root_shader_template);
+    EXPECT_NE(nullptr, root_shader_template);
+    EXPECT_EQ(true, root_shader_compiling);
 
     // a bxdf node
-    const auto bxdf_shader_unit = shading_context->compile_shader_unit_template("bxdf_shader", R"(
+    auto bxdf_shader_template = shading_context->begin_shader_unit_template("bxdf_shader");
+    const auto bxdf_shader_compiling = shading_context->compile_shader_unit_template(bxdf_shader_template, R"(
         shader lambert_node( float in_bxdf , out float out_bxdf , out float dummy ){
             out_bxdf = in_bxdf;
             // dummy = 1.0f;
         }
     )");
-    EXPECT_NE(nullptr, bxdf_shader_unit);
+    shading_context->end_shader_unit_template(bxdf_shader_template);
+    EXPECT_NE(nullptr, bxdf_shader_template);
+    EXPECT_EQ(true, bxdf_shader_compiling);
 
     // make a shader group
     auto shader_group = shading_context->begin_shader_group_template("first shader");
     EXPECT_NE(nullptr, shader_group);
 
     // add the two shader units in this group
-    auto ret = shader_group->add_shader_unit("root_shader", root_shader_unit, true);
+    auto ret = shader_group->add_shader_unit("root_shader", root_shader_template, true);
     EXPECT_EQ(true, ret);
-    ret = shader_group->add_shader_unit("bxdf_shader", bxdf_shader_unit);
+    ret = shader_group->add_shader_unit("bxdf_shader", bxdf_shader_template);
     EXPECT_EQ(true, ret);
 
     // setup connections between shader units

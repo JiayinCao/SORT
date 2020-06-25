@@ -82,7 +82,9 @@ IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
         CLOSURE_ACTION(Surface_Closure_Hair)\
         CLOSURE_ACTION(Surface_Closure_Coat)\
         CLOSURE_ACTION(Volume_Closure_Absorption)\
-        CLOSURE_ACTION(Volume_Closure_Homogeneous)
+        CLOSURE_ACTION(Volume_Closure_Homogeneous)\
+        CLOSURE_ACTION(Surface_Closure_FourierBRDF)\
+        CLOSURE_ACTION(Surface_Closure_MERL)
 
 // These data structure is not supposed to be seen by other parts of the renderer
 namespace {
@@ -362,49 +364,23 @@ namespace {
          }
      };
 
-//     struct Surface_Closure_FourierBRDF : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_FOURIER_BDRF;
+     struct Surface_Closure_FourierBRDF : public Surface_Closure_Base {
+        DEFINE_CLOSURETYPE(ClosureTypeFourier)
 
-//         static const char* GetName(){
-//             return "fourierBRDF";
-//         }
+        void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeFourier*)param;
+             se.AddBxdf(SORT_MALLOC(FourierBxdf)(params, w));
+         }
+     };
 
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_INT_PARAM(FourierBxdf::Params, resIdx),
-//                 CLOSURE_VECTOR_PARAM(FourierBxdf::Params, n),
-//                 CLOSURE_FINISH_PARAM(FourierBxdf::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+     struct Surface_Closure_MERL : public Surface_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeMERL)
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<FourierBxdf::Params>();
-//             se.AddBxdf(SORT_MALLOC(FourierBxdf)(params, w * comp->w));
-//         }
-//     };
-
-//     struct Surface_Closure_MERL : public Surface_Closure_Base {
-//         static constexpr int    ClosureID = SURFACE_CLOSURE_MERL_BRDF;
-
-//         static const char* GetName(){
-//             return "merlBRDF";
-//         }
-
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_INT_PARAM(Merl::Params, resIdx),
-//                 CLOSURE_VECTOR_PARAM(Merl::Params, n),
-//                 CLOSURE_FINISH_PARAM(Merl::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
-
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, ScatteringEvent& se) const override {
-//             const auto& params = *comp->as<Merl::Params>();
-//             se.AddBxdf(SORT_MALLOC(Merl)(params, w * comp->w));
-//         }
-//     };
+         void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
+             const auto& params = *(const ClosureTypeMERL*)param;
+             se.AddBxdf(SORT_MALLOC(Merl)(params, w));
+         }
+     };
 
      struct Surface_Closure_Coat : public Surface_Closure_Base {
          DEFINE_CLOSURETYPE(ClosureTypeCoat)
@@ -550,23 +526,7 @@ namespace {
      };
 
 //     struct Volume_Closure_Heterogeneous : public Volume_Closure_Base {
-//         static constexpr int    ClosureID = VOLUME_CLOSURE_HETEROGENOUS;
-
-//         static const char* GetName() {
-//             return "medium_heterogeneous";
-//         }
-
-//         static void Register(ShadingSystem* shadingsys) {
-//             BuiltinClosures closure = { GetName(), ClosureID,{
-//                 CLOSURE_COLOR_PARAM(HeterogenousMedium::Params, baseColor),
-//                 CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, emission),
-//                 CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, absorption),
-//                 CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, scattering),
-//                 CLOSURE_FLOAT_PARAM(HeterogenousMedium::Params, anisotropy),
-//                 CLOSURE_FINISH_PARAM(HeterogenousMedium::Params)
-//             } };
-//             shadingsys->register_closure(closure.name, closure.id, closure.params, nullptr, nullptr);
-//         }
+//         DEFINE_CLOSURETYPE(ClosureTypeHomogeneous)
 
 //         void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
 //             if (SE_ENTERING == flag)
@@ -602,11 +562,7 @@ void RegisterClosures() {
     ALL_CLOSURES_ACTION
 #undef CLOSURE_ACTION
 
-    /*
-    registerSurfaceClosure<Surface_Closure_MERL>(shadingsys);
-    registerSurfaceClosure<Surface_Closure_FourierBRDF>(shadingsys);
-    
-    registerVolumeClosure<Volume_Closure_Heterogeneous>(shadingsys);*/
+    // registerVolumeClosure<Volume_Closure_Heterogeneous>(shadingsys);
 }
 
 void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, ScatteringEvent& se) {

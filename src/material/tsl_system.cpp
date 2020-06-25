@@ -27,6 +27,7 @@
 #include "scatteringevent/scatteringevent.h"
 #include "medium/medium.h"
 #include "core/log.h"
+#include "material.h"
 
 using namespace Tsl_Namespace;
 
@@ -48,9 +49,9 @@ public:
 // Tsl shading system
 static std::vector<ShadingContext*>    g_contexts;
 
-ShaderUnitTemplate*     BuildShader(const std::string& shader_name, const std::string& shader_source) {
-    return g_contexts[ThreadId()]->compile_shader_unit_template(shader_name, shader_source.c_str());
-};
+Tsl_Namespace::ShadingContext* GetShadingContext() {
+    return g_contexts[ThreadId()];
+}
 
 ShaderGroupTemplate*    BeginShaderGroup(const std::string& group_name) {
     return g_contexts[ThreadId()]->begin_shader_group_template(group_name);
@@ -124,16 +125,6 @@ Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader , const Surf
     const auto opacity = ProcessOpacity(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f));
     return Spectrum(1.0f - opacity).Clamp(0.0f, 1.0f);
 }
-
-// void ShadingContextWrapper::DestroyContext(OSL::ShadingSystem* shadingsys) {
-//     shadingsys->release_context(ctx);
-//     shadingsys->destroy_thread_info(thread_info);
-// }
-
-// OSL::ShadingContext* ShadingContextWrapper::GetShadingContext(OSL::ShadingSystem* shadingsys){
-//     thread_info = shadingsys->create_thread_info();
-//     return ctx = shadingsys->get_context(thread_info);
-// }
 
 void CreateTSLThreadContexts(){
     auto& shading_system = ShadingSystem::get_instance();

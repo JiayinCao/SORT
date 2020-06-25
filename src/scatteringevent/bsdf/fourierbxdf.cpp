@@ -23,6 +23,11 @@
 #include "sampler/sample.h"
 #include "material/matmanager.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeFourier)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFourier, void*, measured_data)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFourier, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeFourier)
+
 bool FourierBxdfData::LoadResource( const std::string& filename ){
     std::ifstream file( filename.c_str(), std::ios::binary);
     if( !file.is_open() )
@@ -401,6 +406,6 @@ int FourierBxdfData::blendCoefficients( float* ak , int channel , int offsetI , 
     return nMax;
 }
 
-// FourierBxdf::FourierBxdf(const Params& params, const Spectrum& weight)
-//     : Bxdf(weight, BXDF_ALL, params.n, true), m_data(dynamic_cast<FourierBxdfData*>(MatManager::GetSingleton().GetResource(params.resIdx))) {
-// }
+FourierBxdf::FourierBxdf(const ClosureTypeFourier& params, const Spectrum& weight)
+    : Bxdf(weight, BXDF_ALL, params.normal, true), m_data((const FourierBxdfData*)(params.measured_data)) {
+}

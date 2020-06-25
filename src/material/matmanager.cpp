@@ -50,17 +50,18 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     auto resource_cnt = 0u;
     stream >> resource_cnt;
     for (auto i = 0u; i < resource_cnt; ++i) {
-        std::string resource_file, resource_type;
+        std::string resource_file;
+        StringID resource_type;
         stream >> resource_file >> resource_type;
 
-        if (resource_type == "MerlBRDFMeasuredData")
-            m_resources.push_back(std::make_unique<MerlData>());
-        else if (resource_type == "FourierBRDFMeasuredData")
-            m_resources.push_back(std::make_unique<FourierBxdfData>());
+        if (resource_type == SID("MerlBRDFMeasuredData"))
+            m_resources[resource_file] = std::make_unique<MerlData>();
+        else if (resource_type == SID("FourierBRDFMeasuredData"))
+            m_resources[resource_file] = std::make_unique<FourierBxdfData>();
         else
-            sAssertMsg(false, MATERIAL, "Resource type %s not supported!" , resource_type.c_str());
+            sAssertMsg(false, MATERIAL, "Resource type not supported!");
 
-        m_resources.back()->LoadResource(resource_file);
+        m_resources[resource_file]->LoadResource(resource_file);
     }
 
     const bool noMaterialSupport = g_noMaterial;
@@ -99,10 +100,11 @@ std::string MatManager::LoadShaderSourceCode(const std::string& shaderName, cons
     return shader_template;
 }
 
-Resource* MatManager::GetResource(int index) {
-    if (index < 0 || index >= m_resources.size())
+const Resource* MatManager::GetResource(const std::string& name) const {
+    auto it = m_resources.find(name);
+    if (it == m_resources.end())
         return nullptr;
-    return m_resources[index].get();
+    return it->second.get();
 }
 
 const MaterialBase* MatManager::CreateMaterialProxy(const MaterialBase& material) {

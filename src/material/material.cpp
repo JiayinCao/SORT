@@ -48,6 +48,29 @@ void Material::BuildMaterial() {
     auto tried_building_surface_shader = false;
     auto tried_building_volume_shader = false;
 
+    auto build_shader = [&](const std::string& name, const std::string& source, const std::vector<ShaderResourceBinding>& shader_resources) {
+        auto context = GetShadingContext();
+
+        // begin the shader unit template
+        auto shader_unit_template = context->begin_shader_unit_template(name);
+
+        // bind shader resources
+        for (auto sr : shader_resources) {
+            auto resource = MatManager::GetSingleton().GetResource(sr.shader_resource_name);
+            shader_unit_template->register_shader_resource(sr.resource_handle_name, (const ShaderResourceHandle*)resource);
+        }
+
+        // compile the shader
+        const auto ret = context->compile_shader_unit_template(shader_unit_template, source.c_str());
+        if (!ret)
+            return (ShaderUnitTemplate*)nullptr;
+
+        // indicate the shader unit is done
+        context->end_shader_unit_template(shader_unit_template);
+
+        return shader_unit_template;
+    };
+
      auto build_shader_type = [&](const TSL_ShaderData& shader_data, const char* root_shader, const std::string prefix, bool& shader_valid, bool& trying_building_shader_type, std::unique_ptr<Tsl_Namespace::ShaderInstance>& shader_instance) {
          // Build surface shader
          if (shader_valid) {
@@ -62,7 +85,7 @@ void Material::BuildMaterial() {
                  if (shader_type_mapping.count(shader.type)) {
                      shader_units[shader.name] = shader_type_mapping[shader.type];
                  }else {
-                     auto su = BuildShader(shader.name, shader.source);
+                     auto su = build_shader(shader.name, shader.source, shader.m_shader_resources_binding);
                      if (su) {
                          shader_units[shader.name] = su;
                          shader_type_mapping[shader.type] = su;
@@ -73,7 +96,7 @@ void Material::BuildMaterial() {
 
              // build the root shader
              const auto root_shader_name = prefix + output_node_name;
-             auto su_root = BuildShader(root_shader_name, root_shader);
+             auto su_root = build_shader(root_shader_name, root_shader, {});
              if (su_root)
                  shader_units[root_shader_name] = su_root;
              else 
@@ -175,6 +198,14 @@ void Material::Serialize(IStreamBase& stream){
                 else if (shader_source.type != "shader_done")
                     sAssertMsg(false, RESOURCE, "Serialization is broken.");
                 break;
+            }
+
+            auto shader_resource_cnt = 0u;
+            stream >> shader_resource_cnt;
+            for (auto j = 0u; j < shader_resource_cnt; ++j) {
+                ShaderResourceBinding srb;
+                stream >> srb.resource_handle_name >> srb.shader_resource_name;
+                shader_source.m_shader_resources_binding.push_back(srb);
             }
 
             auto parameter_cnt = 0u;
