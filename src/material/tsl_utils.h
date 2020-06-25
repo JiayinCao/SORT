@@ -23,12 +23,12 @@
 #include "shader_arg_types.h"
 #include "core/define.h"
 
-SORT_FORCEINLINE bool is_tsl_color_black(Tsl_Namespace::float3 color) {
+SORT_FORCEINLINE bool is_tsl_color_black(const Tsl_Namespace::float3& color) {
     return color.x == 0.0f && color.y == 0.0f && color.y == 0.0f;
 }
 
 // it is always assumed the value is valid
-SORT_FORCEINLINE float& tsl_color_channel(Tsl_Namespace::float3 color, int i) {
+SORT_FORCEINLINE float& tsl_color_channel(Tsl_Namespace::float3& color, int i) {
     return (i == 0) ? color.x : ((i == 1) ? color.y : color.z);
 }
 
