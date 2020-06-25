@@ -791,6 +791,7 @@ def export_materials(depsgraph, fs):
             if shader_name not in visited and shader_name != '':
                 fs.serialize( shader_name )
                 fs.serialize( shader_type )
+                shader_node.serialize_shader_resource( fs )
                 shader_node.serialize_prop( fs )
                 visited.add( shader_name )
 

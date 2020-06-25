@@ -18,6 +18,7 @@ import random
 import nodeitems_utils
 from . import base, renderer
 import bpy.utils.previews
+from .strid import SID
 
 SORT_NODE_GROUP_PREFIX = 'SORTGroupName_'
 
@@ -716,6 +717,9 @@ class SORTShadingNode(bpy.types.Node):
     # whether the shader node needs to export its shader source
     def needSerializingShader(self):
         return True
+    # serialize shader resource data
+    def serialize_shader_resource(self, fs):
+        fs.serialize(0)
 
 #------------------------------------------------------------------------------------#
 #                                Group Node Operators                                #
@@ -1712,21 +1716,20 @@ class SORTNode_Material_Coat(SORTShadingNode):
 class SORTNode_Material_Measured(SORTShadingNode):
     bl_label = 'Measured BRDF'
     bl_idname = 'SORTNode_Material_Measured'
-    osl_shader_merl = '''
-        shader merlBRDF( string Filename = @,
-                         normal Normal = @ ,
-                         output closure color Result = color(0) ){
-            Result = merlBRDF( @ , Normal );
+    tsl_shader_merl = '''
+        shader_resource measured_data;
+        shader bxdf_merl( vector Normal ,
+                          out closure Result ){
+            Result = make_closure<merl>( measured_data , Normal );
         }
     '''
-    osl_shader_fourier = '''
-        shader FourierBRDF( string Filename = @,
-                            normal Normal = @ ,
-                            output closure color Result = color(0) ){
-            Result = fourierBRDF( @ , Normal );
+    tsl_shader_fourier = '''
+        shader_resource measured_data;
+        shader bxdf_fourier( vector Normal ,
+                             out closure Result ){
+            Result = make_closure<fourier>( measured_data , Normal );
         }
     '''
-    osl_shader = osl_shader_fourier
     brdf_type : bpy.props.EnumProperty(name='Type', items=[('FourierBRDF','FourierBRDF','',1),('MERL','MERL','',2)], default='FourierBRDF')
     file_path : bpy.props.StringProperty( name='FilePath' , subtype='FILE_PATH' )
     ResourceIndex : bpy.props.IntProperty( name='ResourceId' )
@@ -1738,9 +1741,7 @@ class SORTNode_Material_Measured(SORTShadingNode):
         layout.prop(self, 'brdf_type', text='BRDF Type', expand=True)
         layout.prop(self, 'file_path', text='File Path')
     def generate_osl_source(self):
-        if self.brdf_type == 'FourierBRDF':
-            return self.osl_shader_fourier
-        return self.osl_shader_merl
+        return self.tsl_shader_fourier if self.brdf_type == 'FourierBRDF' else self.tsl_shader_merl
     def populateResources( self , resources ):
         found = False
         for resource in resources:
@@ -1749,15 +1750,17 @@ class SORTNode_Material_Measured(SORTShadingNode):
         if not found:
             self.ResourceIndex = len(resources)
             if self.brdf_type == 'FourierBRDF':
-                resources.append( ( self.file_path , 'FourierBRDFMeasuredData' ) )
+                resources.append( ( self.file_path , SID('FourierBRDFMeasuredData') ) )
             else:
-                resources.append( ( self.file_path , 'MerlBRDFMeasuredData' ) )
+                resources.append( ( self.file_path , SID('MerlBRDFMeasuredData') ) )
         pass
     def serialize_prop(self, fs):
-        fs.serialize( 3 )
-        fs.serialize( '\"%s\"'%self.file_path )
-        fs.serialize( self.inputs['Normal'].export_osl_value() )
-        fs.serialize( '%i'%self.ResourceIndex )
+        fs.serialize( 1 )
+        self.inputs['Normal'].serialize(fs)
+    def serialize_shader_resource(self, fs):
+        fs.serialize(1)
+        fs.serialize('measured_data')
+        fs.serialize(self.file_path)
 
 @SORTShaderNodeTree.register_node('Materials')
 class SORTNode_Material_MicrofacetReflection(SORTShadingNode):
@@ -2855,7 +2858,7 @@ class SORTNodeHomogeneous(SORTShadingNode):
         fs.serialize('anisotropy_coeffcient')
         fs.serialize(1)
         fs.serialize(self.anisotropy_coeffcient)
-        
+
     def draw_buttons(self, context, layout):
         layout.prop(self, 'absorption_color')
         layout.prop(self, 'emission_coefficient' )
