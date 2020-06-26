@@ -81,10 +81,11 @@ IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
         CLOSURE_ACTION(Surface_Closure_MicrofacetRefractionBeckmann)\
         CLOSURE_ACTION(Surface_Closure_Hair)\
         CLOSURE_ACTION(Surface_Closure_Coat)\
+        CLOSURE_ACTION(Surface_Closure_FourierBRDF)\
+        CLOSURE_ACTION(Surface_Closure_MERL)\
         CLOSURE_ACTION(Volume_Closure_Absorption)\
         CLOSURE_ACTION(Volume_Closure_Homogeneous)\
-        CLOSURE_ACTION(Surface_Closure_FourierBRDF)\
-        CLOSURE_ACTION(Surface_Closure_MERL)
+        CLOSURE_ACTION(Volume_Closure_Heterogeneous)
 
 // These data structure is not supposed to be seen by other parts of the renderer
 namespace {
@@ -525,44 +526,36 @@ namespace {
          }
      };
 
-//     struct Volume_Closure_Heterogeneous : public Volume_Closure_Base {
-//         DEFINE_CLOSURETYPE(ClosureTypeHomogeneous)
+     struct Volume_Closure_Heterogeneous : public Volume_Closure_Base {
+         DEFINE_CLOSURETYPE(ClosureTypeHeterogenous)
 
-//         void Process(const ClosureComponent* comp, const OSL::Color3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
-//             if (SE_ENTERING == flag)
-//                 ms.AddMedium(SORT_MALLOC(HeterogenousMedium)(material, mesh));
-//             else if (SE_LEAVING == flag)
-//                 ms.RemoveMedium(material->GetUniqueID());
-//         }
+         void Process(const ClosureParamPtr param, const float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh) const override {
+             if (SE_ENTERING == flag)
+                 ms.AddMedium(SORT_MALLOC(HeterogenousMedium)(material, mesh));
+             else if (SE_LEAVING == flag)
+                 ms.RemoveMedium(material->GetUniqueID());
+         }
 
-//         void Evaluate(const ClosureComponent* comp, const OSL::Color3& w, MediumSample& ms) const override{
-//             const auto& params = *comp->as<HeterogenousMedium::Params>();
-//             ms.absorption = fmax(0.0f, params.absorption);
-//             ms.scattering = fmax(0.0f, params.scattering);
-//             ms.extinction = fmax(0.0f, ms.absorption + ms.scattering);
-//             ms.anisotropy = params.anisotropy;
-//             ms.emission = fmax(0.0f, params.emission);
-//             ms.basecolor = params.baseColor;
-//         }
-//     };
+         void Evaluate(const ClosureParamPtr param, const float3& w, MediumSample& ms) const override {
+             const auto& params = *(const ClosureTypeHeterogenous*)param;
+             ms.absorption = fmax(0.0f, params.absorption);
+             ms.scattering = fmax(0.0f, params.scattering);
+             ms.extinction = fmax(0.0f, ms.absorption + ms.scattering);
+             ms.anisotropy = params.anisotropy;
+             ms.emission = fmax(0.0f, params.emission);
+             ms.basecolor = params.base_color;
+         }
+     };
 
 #define CLOSURE_ACTION(T) DEFINE_CLOSUREID(T);
      ALL_CLOSURES_ACTION
 #undef CLOSURE_ACTION
 }
 
-template< typename T >
-static void register_closure() {
-    T::Register();
-    g_closures[T::closure_id] = std::make_unique<T>();
-}
-
 void RegisterClosures() {
-#define CLOSURE_ACTION(T) register_closure<T>();
+#define CLOSURE_ACTION(T) T::Register(); g_closures[T::closure_id] = std::make_unique<T>();
     ALL_CLOSURES_ACTION
 #undef CLOSURE_ACTION
-
-    // registerVolumeClosure<Volume_Closure_Heterogeneous>(shadingsys);
 }
 
 void ProcessSurfaceClosure(const ClosureTreeNodeBase* closure, const float3& w, ScatteringEvent& se) {
@@ -608,22 +601,22 @@ void ProcessVolumeClosure(const ClosureTreeNodeBase* closure, const float3& w, M
     }
 }
 
-// void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumSample& ms){
-//     if (!closure)
-//         return;
+void EvaluateVolumeSample(const ClosureTreeNodeBase* closure, const float3& w, MediumSample& ms){
+    if (!closure)
+        return;
 
-//     switch (closure->id) {
-//         case ClosureColor::MUL:
-//         case ClosureColor::ADD:
-//             // no support for blending or addding volume for now.
-//             sAssert(false, VOLUME);
-//             break;
-//         default: {
-//             const ClosureComponent* comp = closure->as_comp();
-//             getVolumeClosureBase(comp->id)->Evaluate(comp, w * comp->w, ms);
-//         }
-//     }
-// }
+    switch (closure->m_id) {
+        case Tsl_Namespace::CLOSURE_ADD:
+        case Tsl_Namespace::CLOSURE_MUL:
+            // no support for blending or addding volume for now.
+            sAssert(false, VOLUME);
+            break;
+        default: {
+            auto volume_closure = getVolumeClosureBase(closure->m_id);
+            volume_closure->Evaluate(closure->m_params, w, ms);
+        }
+    }
+}
 
  Spectrum ProcessOpacity(const ClosureTreeNodeBase* closure, const float3& w ){
      if (!closure)

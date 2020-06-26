@@ -97,20 +97,15 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
     ProcessVolumeClosure(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms, flag, material, mi.mesh);
 }
 
-// void EvaluateVolumeSample(OSL::ShaderGroup* shader, const MediumInteraction& mi, MediumSample& ms) {
-//     ShaderGlobals shaderglobals;
-//     memset(&shaderglobals, 0, sizeof(shaderglobals));
-//     shaderglobals.P = Vec3(mi.intersect.x, mi.intersect.y, mi.intersect.z);
+void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumSample& ms) {
+    TslGlobal global;
 
-//     // objdata points to world to local volume transform
-//     auto thread_info = reinterpret_cast<SORTTextureThreadInfo*>(g_textureSystem.get_perthread_info());
-//     if (mi.mesh)
-//         thread_info->mesh = mi.mesh;
+    ClosureTreeNodeBase* closure = nullptr;
+    auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();
+    raw_function(&closure, &global);
 
-//     g_shadingsys->execute(g_contexts[ThreadId()], *shader, shaderglobals);
-
-//     ProcessVolumeClosure(shaderglobals.Ci, Color3(1.0f), ms);
-// }
+    EvaluateVolumeSample(closure, Tsl_Namespace::make_float3(1.0f, 1.0f, 1.0f), ms);
+}
 
 Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader , const SurfaceInteraction& intersection ){
     TslGlobal global;

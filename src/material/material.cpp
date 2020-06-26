@@ -280,8 +280,8 @@ void Material::UpdateMediumStack( const MediumInteraction& mi , const SE_Interac
 }
 
 void Material::EvaluateMediumSample(const MediumInteraction& mi, MediumSample& ms) const {
-    // if (m_volume_shader_valid)
-    //     EvaluateVolumeSample(m_volume_shader.get(), mi, ms);
+    if (m_volume_shader_valid)
+        EvaluateVolumeSample(m_volume_shader.get(), mi, ms);
 }
 
 void MaterialProxy::UpdateScatteringEvent(ScatteringEvent& se) const {

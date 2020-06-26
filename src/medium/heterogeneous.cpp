@@ -21,6 +21,14 @@
 #include "material/material.h"
 #include "phasefunction.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeHeterogenous)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, emission)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, absorption)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, scattering)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, anisotropy)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeHeterogenous)
+
 Spectrum HeterogenousMedium::Tr(const Ray& ray, const float max_t) const {
     // get the step size and count
     auto        step_size = m_material->GetVolumeStep();

@@ -20,6 +20,14 @@
 #include "core/define.h"
 #include "medium.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeHeterogenous, "medium_heterogeneous")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, emission)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, absorption)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, scattering)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, anisotropy)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeHeterogenous)
+
 //! @brief  HomogeneousMedium has equal scattering, absorption co-efficient everywhere.
 /**
  * Unlike homogeneous medium, heterogeneous medium allows variation of scattering/absorption
@@ -27,14 +35,12 @@
  */
 class HeterogenousMedium : public Medium{
 public:
-    // Input parameters to construct the volume.
-    // struct Params {
-    //     OSL::Vec3   baseColor;
-    //     OSL::Float  emission;
-    //     OSL::Float  absorption;
-    //     OSL::Float  scattering;
-    //     OSL::Float  anisotropy;
-    // };
+    //! @brief  Constructor.
+    //!
+    //! @param param		Parameter to build the volume.
+    //! @param material		Material that spawns the medium.
+    HeterogenousMedium(const ClosureTypeHeterogenous& param, const MaterialBase* material) :
+        Medium(param.base_color, param.emission, param.absorption, param.scattering, param.anisotropy, material) {}
 
     //! @brief  Constructor.
     //!

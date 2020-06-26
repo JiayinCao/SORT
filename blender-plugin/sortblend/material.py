@@ -2871,13 +2871,13 @@ class SORTNodeHeterogeneous(SORTShadingNode):
     bl_label = 'Heterogeneous Medium'
     bl_idname = 'SORTNodeHeterogeneous'
     osl_shader = '''
-        shader HeterogeneousMedium( color Color = @ ,
-                                    float Emission = @ ,
-                                    float Absorption = @ ,
-                                    float Scattering = @ ,
-                                    float Anisotropy = @ ,
-                                    output closure color Result = color(0) ){
-            Result = medium_heterogeneous(Color, Emission, Absorption, Scattering, Anisotropy );
+        shader HeterogeneousMedium( color Color ,
+                                    float Emission ,
+                                    float Absorption ,
+                                    float Scattering ,
+                                    float Anisotropy ,
+                                    out closure Result ){
+            Result = make_closure<medium_heterogeneous>(Color, Emission, Absorption, Scattering, Anisotropy );
         }
     '''
     def init(self, context):
@@ -2889,12 +2889,12 @@ class SORTNodeHeterogeneous(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketVolume' , 'Result' )
     def serialize_prop(self, fs):
         fs.serialize( 5 )
-        fs.serialize( self.inputs['Color'].export_osl_value() )
-        fs.serialize( self.inputs['Emission'].export_osl_value() )
-        fs.serialize( self.inputs['Absorption'].export_osl_value() )
-        fs.serialize( self.inputs['Scattering'].export_osl_value() )
-        fs.serialize( self.inputs['Anisotropy'].export_osl_value() )
-
+        self.inputs['Color'].serialize(fs)
+        self.inputs['Emission'].serialize(fs)
+        self.inputs['Absorption'].serialize(fs)
+        self.inputs['Scattering'].serialize(fs)
+        self.inputs['Anisotropy'].serialize(fs)
+        
 #------------------------------------------------------------------------------------#
 #                                 Volume Input Node                                  #
 #------------------------------------------------------------------------------------#
