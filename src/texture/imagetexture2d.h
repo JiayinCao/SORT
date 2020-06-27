@@ -18,6 +18,7 @@
 #pragma once
 
 #include <memory>
+#include "core/resource.h"
 #include "texturebase.h"
 
 //! @brief  Image texture.
@@ -25,13 +26,13 @@
  * Image texture is the most commonly used texture. It is just a two dimensional set of pixels.
  * There is no mip-map solution for now.
  */
-class ImageTexture2D : public Texture2DBase{
+class ImageTexture2D : public Texture2DBase, public Resource{
 public:
-    //! @brief  Load an image from file.
+    //! @brief  Load the resource from file.
     //!
-    //! @param  filename    The name of the file to be loaded.
-    //! @return             Whether the file is loaded correctly.
-    bool LoadImageFromFile( const std::string& filename );
+    //! @param  filename        Name of the external file holding the data.
+    //! @return                 Whether the file has been loaded successfully.
+    bool LoadResource(const std::string& filename) override;
 
     //! @brief  Get the color at a specific position.
     //!
@@ -52,6 +53,11 @@ public:
     //! @return             True if the texture is valid.
     bool IsValid() const override { 
         return IS_PTR_VALID(m_memory); 
+    }
+
+    //! @brief  Whether this resource is a texture.
+    bool IsTexture() const override{
+        return true;
     }
 
     //! @brief  Get the average color of the texture.

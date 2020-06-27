@@ -141,7 +141,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             const auto  light = scene.SampleLight( light_sample.t , &light_pdf );
             if( light_pdf > 0.0f )
                 L += throughput * EvaluateDirect( se , r , scene, light , light_sample , bsdf_sample , material , ms ) / light_pdf / pdf_scattering_type;
-        }else{
+        }else if(scattering_type_flag & SE_EVALUATE_BSSRDF) {
             BSSRDFIntersections bssrdf_inter;
             float               bssrdf_pdf = 0.0f;
             se.Sample_BSSRDF( scene, -r.m_Dir, se.GetInteraction().intersect, bssrdf_inter , bssrdf_pdf);

@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <list>
 #include <vector>
 #include <string>
 #include "stream/stream.h"

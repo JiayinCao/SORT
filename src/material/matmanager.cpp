@@ -24,6 +24,7 @@
 #include "core/timer.h"
 #include "scatteringevent/bsdf/merl.h"
 #include "scatteringevent/bsdf/fourierbxdf.h"
+#include "texture/imagetexture2d.h"
 
 void ShaderCompiling_Task::Execute(){
     TIMING_EVENT( "Compiling Shader" );
@@ -54,14 +55,26 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
         StringID resource_type;
         stream >> resource_file >> resource_type;
 
-        if (resource_type == SID("MerlBRDFMeasuredData"))
-            m_resources[resource_file] = std::make_unique<MerlData>();
-        else if (resource_type == SID("FourierBRDFMeasuredData"))
-            m_resources[resource_file] = std::make_unique<FourierBxdfData>();
-        else
-            sAssertMsg(false, MATERIAL, "Resource type not supported!");
+        Resource* ptr_resource = nullptr;
 
-        m_resources[resource_file]->LoadResource(resource_file);
+        if (resource_type == SID("MerlBRDFMeasuredData")) {
+            m_resources[resource_file] = std::make_unique<MerlData>();
+            ptr_resource = m_resources[resource_file].get();
+        }
+        else if (resource_type == SID("FourierBRDFMeasuredData")) {
+            m_resources[resource_file] = std::make_unique<FourierBxdfData>();
+            ptr_resource = m_resources[resource_file].get();
+        }
+        else if (resource_type == SID("Texture2D")) {
+            m_resources[resource_file] = std::make_unique<ImageTexture2D>();
+            ptr_resource = m_resources[resource_file].get();
+        }
+        
+        if (!ptr_resource) {
+            sAssertMsg(false, MATERIAL, "Resource type not supported!");
+        } else {
+            ptr_resource->LoadResource(resource_file);
+        }
     }
 
     const bool noMaterialSupport = g_noMaterial;

@@ -2207,7 +2207,7 @@ class SORTNodeGrid(SORTShadingNode):
     bl_idname = 'SORTNodeGrid'
     osl_shader = '''
         float floorf(float x);
-        
+
         shader Grid( color Color1 ,
                      color Color2 ,
                      float Threshold ,
@@ -2282,54 +2282,77 @@ class SORTNodeImage(SORTShadingNode):
              ('CLAMP_ONE', "Clamp to White", "Clamp to White outside 0-1"),)
     wrap_type : bpy.props.EnumProperty(name='Wrap Type', items=wrap_items, default='REPEAT')
     image_preview : bpy.props.BoolProperty(name='Preview Image', default=True)
-    osl_shader_linear = '''
-        shader ImageShaderLinear( string Filename = @ ,
-                                  vector UVCoordinate = @ ,
-                                  float  UVTiling = @ ,
-                                  output color Result = color( 0.0 , 0.0 , 0.0 ) ,
-                                  output float Alpha = 1.0 ,
-                                  output float Red = 0.0 ,
-                                  output float Green = 0.0 ,
-                                  output float Blue = 0.0 ){
-            vector scaledUV = UVCoordinate * UVTiling;
-            Result = texture( Filename , scaledUV[0] , scaledUV[1] , "alpha" , Alpha);
+    tsl_shader_linear = '''
+        texture2d g_texture;
+        shader ImageShaderLinear( vector UVCoordinate ,
+                                  float  UVTiling ,
+                                  out color Result ,
+                                  out float Alpha ,
+                                  out float Red ,
+                                  out float Green ,
+                                  out float Blue ){
+            // this will be revived once TSL supports proper multiplication later.
+            // vector scaledUV = UVCoordinate * UVTiling;
+            vector scaledUV;
+            scaledUV.x = UVCoordinate.x * UVTiling;
+            scaledUV.y = UVCoordinate.y * UVTiling;
+            scaledUV.z = UVCoordinate.z * UVTiling;
+
+            Result = texture2d_sample<g_texture>( scaledUV[0] , scaledUV[1] );
             Red = Result[0];
             Green = Result[1];
             Blue = Result[2];
         }
     '''
-    osl_shader_gamma = '''
-        shader ImageShaderGamma( string Filename = @ ,
-                                 vector UVCoordinate = @ ,
-                                 float  UVTiling = @ ,
-                                 output color Result = color( 0.0 , 0.0 , 0.0 ) ,
-                                 output float Alpha = 1.0 ,
-                                 output float Red = 0.0 ,
-                                 output float Green = 0.0 ,
-                                 output float Blue = 0.0 ){
-            vector scaledUV = UVCoordinate * UVTiling;
-            color gamma_color = texture( Filename , scaledUV[0] , scaledUV[1] , "alpha" , Alpha );
-            Result = pow( gamma_color , 2.2 );
+    tsl_shader_gamma = '''
+        float powf( float base , float exp );
+
+        texture2d g_texture;
+        shader ImageShaderGamma( vector UVCoordinate ,
+                                 float  UVTiling ,
+                                 out color Result ,
+                                 out float Alpha ,
+                                 out float Red ,
+                                 out float Green ,
+                                 out float Blue ){
+            // this will be revived once TSL supports proper multiplication later.
+            // vector scaledUV = UVCoordinate * UVTiling;
+            vector scaledUV;
+            scaledUV.x = UVCoordinate.x * UVTiling;
+            scaledUV.y = UVCoordinate.y * UVTiling;
+            scaledUV.z = UVCoordinate.z * UVTiling;
+
+            Result = texture2d_sample<g_texture>( scaledUV[0] , scaledUV[1] );
+            Result = powf( gamma_color , 2.2 );
             Red = Result[0];
             Green = Result[1];
             Blue = Result[2];
         }
     '''
-    osl_shader_normal = '''
-        shader ImageShaderNormal( string Filename = @ ,
-                                 vector UVCoordinate = @ ,
-                                 float  UVTiling = @ ,
-                                 output color Result = color( 0.0 , 0.0 , 0.0 ) ,
-                                 output float Alpha = 1.0 ,
-                                 output float Red = 0.0 ,
-                                 output float Green = 0.0 ,
-                                 output float Blue = 0.0 ){
-            vector scaledUV = UVCoordinate * UVTiling;
-            color encoded_color = texture( Filename , scaledUV[0] , scaledUV[1] , "alpha" , Alpha );
-            Result = 2.0 * color( encoded_color[0] , encoded_color[2] , encoded_color[1] ) - 1.0;
-            Red = Result[0];
-            Green = Result[1];
-            Blue = Result[2];
+    tsl_shader_normal = '''
+        texture2d g_texture;
+        shader ImageShaderNormal(vector UVCoordinate ,
+                                 float  UVTiling ,
+                                 out color Result ,
+                                 out float Alpha ,
+                                 out float Red ,
+                                 out float Green ,
+                                 out float Blue ){
+            // this will be revived once TSL supports proper multiplication later.
+            // vector scaledUV = UVCoordinate * UVTiling;
+            vector scaledUV;
+            scaledUV.x = UVCoordinate.x * UVTiling;
+            scaledUV.y = UVCoordinate.y * UVTiling;
+            scaledUV.z = UVCoordinate.z * UVTiling;
+            
+            vector encoded_normal = texture2d_sample<g_texture>( scaledUV.x , scaledUV.y );
+            Result.x = 2.0f * encoded_normal.x - 1.0f;
+            Result.y = 2.0f * encoded_normal.z - 1.0f;
+            Result.z = 2.0f * encoded_normal.y - 1.0f;
+
+            Red = Result.x;
+            Green = Result.y;
+            Blue = Result.z;
         }
     '''
     def toggle_result_channel(self,context):
@@ -2386,18 +2409,31 @@ class SORTNodeImage(SORTShadingNode):
         layout.prop(self, 'color_space_type', expand=True)
         layout.prop(self, 'wrap_type')
     def serialize_prop(self, fs):
-        fs.serialize( 3 )
-        fs.serialize( '\"%s\"'%(bpy.path.abspath(self.image.filepath)) )
-        fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
-        fs.serialize( self.inputs['UV Tiling'].export_osl_value() )
+        fs.serialize( 2 )
+        self.inputs['UV Coordinate'].serialize(fs)
+        self.inputs['UV Tiling'].serialize(fs)
     def generate_osl_source(self):
         if self.color_space_type == 'sRGB':
-            return self.osl_shader_gamma
+            return self.tsl_shader_gamma
         elif self.color_space_type == 'Normal':
-            return self.osl_shader_normal
-        return self.osl_shader_linear
+            return self.tsl_shader_normal
+        return self.tsl_shader_linear
     def type_identifier(self):
         return self.bl_idname + self.color_space_type
+    def populateResources( self , resources ):
+        found = False
+        for resource in resources:
+            if resource[1] == self.image.filepath:
+                found = True
+        if not found:
+            self.ResourceIndex = len(resources)
+            resources.append( ( self.image.filepath , SID('Texture2D') ) )
+        pass
+    # serialize shader resource data
+    def serialize_shader_resource(self, fs):
+        fs.serialize(1)
+        fs.serialize('g_texture')
+        fs.serialize(self.image.filepath)
 
 #------------------------------------------------------------------------------------#
 #                                 Convertor Nodes                                    #

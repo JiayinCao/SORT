@@ -59,7 +59,10 @@ Vector ScatteringEvent::localToWorld( const Vector& v ) const{
 }
 
 float ScatteringEvent::SampleScatteringType( SE_Flag& flag ) const{
-    sAssert( m_bxdfTotalSampleWeight > 0.0f || m_bssrdfTotalSampleWeight > 0.0f , MATERIAL );
+    if (UNLIKELY(m_bxdfTotalSampleWeight == 0.0f && m_bssrdfTotalSampleWeight == 0.0f)) {
+        flag = SE_Flag::SE_NONE;
+        return 0.0f;
+    }
 
     // handling common cases where there is either BSSRDF or BSDF.
     if( m_bxdfTotalSampleWeight == 0.0f ){

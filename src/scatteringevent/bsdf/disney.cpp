@@ -453,6 +453,8 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
      const auto diffuse_transmission_weight = params.thinSurface ? luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * params.diffTrans : 0.0f;
     
      const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
+     if (total_weight == 0.0f)
+         return 0.0f;
 
      return 1.0f - diffuse_reflection_weight / total_weight;
  }

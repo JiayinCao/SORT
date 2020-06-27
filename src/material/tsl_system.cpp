@@ -27,6 +27,7 @@
 #include "medium/medium.h"
 #include "core/log.h"
 #include "material.h"
+#include "texture/imagetexture2d.h"
 
 using namespace Tsl_Namespace;
 
@@ -36,12 +37,20 @@ IMPLEMENT_TSLGLOBAL_END()
 
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
 public:
-    void* allocate(unsigned int size) const override {
+    void*   allocate(unsigned int size) const override {
         return SORT_MALLOC_ARRAY(char, size);
     }
 
-    void catch_debug(const DEBUG_LEVEL level, const char* error) const override {
+    void    catch_debug(const DEBUG_LEVEL level, const char* error) const override {
         slog(WARNING, GENERAL, error);
+    }
+
+    void    sample_2d(const void* texture, float u, float v, float3& color, float& alpha) const override {
+        auto resource = (const Resource*)texture;
+        auto sort_texture = dynamic_cast<const ImageTexture2D*>(resource);
+        auto ret = sort_texture->GetColorFromUV(u, v);
+        color = make_float3(ret.x, ret.y, ret.z);
+        alpha = sort_texture->GetAlphaFromtUV(u, v);
     }
 };
 

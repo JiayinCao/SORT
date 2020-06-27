@@ -25,6 +25,7 @@
 #include "scatteringevent/scatteringevent.h"
 #include "scatteringevent/bsdf/lambert.h"
 #include "scatteringevent/bsdf/transparent.h"
+#include "texture/imagetexture2d.h"
 
 using namespace Tsl_Namespace;
 
@@ -57,7 +58,11 @@ void Material::BuildMaterial() {
         // bind shader resources
         for (auto sr : shader_resources) {
             auto resource = MatManager::GetSingleton().GetResource(sr.shader_resource_name);
-            shader_unit_template->register_shader_resource(sr.resource_handle_name, (const ShaderResourceHandle*)resource);
+
+            if(resource->IsTexture())
+                shader_unit_template->register_texture(sr.resource_handle_name, (const void*)resource);
+            else
+                shader_unit_template->register_shader_resource(sr.resource_handle_name, (const ShaderResourceHandle*)resource);
         }
 
         // compile the shader
