@@ -19,7 +19,6 @@
 #include <vector>
 #include <shading_context.h>
 #include "tsl_system.h"
-#include "texture_system.h"
 #include "core/profile.h"
 #include "core/thread.h"
 #include "core/globalconfig.h"

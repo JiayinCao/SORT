@@ -33,14 +33,14 @@ void RegisterClosures();
 
 //! @brief  Process the closure tree result and populate the BSDF.
 //!
-//! @param  closure         The closure tree in the osl shader.
+//! @param  closure         The closure tree in the tsl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  se              The result scattering event.
 void ProcessSurfaceClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, ScatteringEvent& se);
 
 //! @brief  Process the closure tree result and populate the MediumStack.
 //!
-//! @param  closure         The closure tree in the osl shader.
+//! @param  closure         The closure tree in the tsl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  mediumStack     The medium stack container that holds the result.
 //! @param  flag            A flag indicates whether to add or remove the medium.
@@ -52,7 +52,7 @@ void ProcessVolumeClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, con
 //!
 //! Neither of absorption volurm, nor the homogeneous volume need this function. This is purely for heteregenous medium.
 //!
-//! @param  closure         The closure tree in the osl shader.
+//! @param  closure         The closure tree in the tsl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  ms              The medium sample to be returned.
 void EvaluateVolumeSample(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, MediumSample& ms);

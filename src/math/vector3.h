@@ -53,11 +53,6 @@ public:
     //! @brief  Constructor from a point to three float value.
     Vector3( const T* const d ) : x(d[0]),y(d[1]),z(d[2]){}
 
-    //! @brief  Constructor from OSL vector.
-    //!
-    //! @param  v   OSL type vector.
-    // Vector3( OSL::Vec3 v ) : x( v.x ) , y( v.y ) , z(v.z) {}
-
     //! @brief  = operator.
     //!
     //! @brief v    Value to copy from.

@@ -19,7 +19,6 @@
 
 #include <vector>
 #include <string>
-//#include <OSL/oslexec.h>
 #include "stream/stream.h"
 #include "tsl_system.h"
 
@@ -60,7 +59,7 @@ public:
     //! @return                     The transparency at the intersection.
     virtual Spectrum   EvaluateTransparency(const SurfaceInteraction& intersection) const = 0;
 
-    //! @brief  Build shader in OSL.
+    //! @brief  Build shader in tsl.
     //!
     //! @param  shadingSys      Open-Shading-Language shading system.
     virtual void       BuildMaterial() = 0;
@@ -147,7 +146,7 @@ public:
     //! @param  stream      Input stream for data.
     void        Serialize(IStreamBase& stream) override;
 
-    //! @brief  Build shader in OSL.
+    //! @brief  Build shader in tsl.
     //!
     //! @param  shadingSys      Open-Shading-Language shading system.
     void        BuildMaterial() override;
@@ -237,7 +236,7 @@ private:
         std::vector<ShaderConnection>       m_connections;
     };
 
-    /**< OSL shader source data. */
+    /**< tsl shader source data. */
     TSL_ShaderData                  m_surface_shader_data;
     TSL_ShaderData                  m_volume_shader_data;
 

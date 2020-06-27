@@ -45,11 +45,6 @@ public:
     //! @param  b   Value in blue channel.
     SORT_FORCEINLINE RGBSpectrum( float r , float g , float b ):r(r),g(g),b(b){}
 
-    //! @brief  Constructor from a given OSL vec3 data type.
-    //!
-    //! @param  v   Data in OSL vec format.
-    // SORT_FORCEINLINE RGBSpectrum( const OSL::Vec3& v ):RGBSpectrum( v.x , v.y , v.z ){}
-
     //! @brief  Constructor from a single value that propogates to all channels
     //!
     //! @param  g   Value to be propergated.

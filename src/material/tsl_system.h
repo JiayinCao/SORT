@@ -15,7 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// This file wraps most of OSL related interface
+// This file wraps most of TSL related interface
 
 #pragma once
 
@@ -56,7 +56,7 @@ void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent
 
 //! @brief  Execute a shader and populate the medium stack
 //!
-//! @param  shader      The osl shader to be evaluated.
+//! @param  shader      The tsl shader to be evaluated.
 //! @param  mi          The interaction inside the medium.
 //! @param  ms          The medium stack to hold the results.
 //! @param  flag        A flag indicates whether to add or remove the medium.
@@ -65,7 +65,7 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
 
 //! @brief  Evaluate the properties at a specific position in the volume.
 //!
-//! @param  shader      The osl shader to be executed.
+//! @param  shader      The tsl shader to be executed.
 //! @param  mi          The interaction inside the volume.
 //! @param  ms          The medium sample to be returned.
 void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumSample& ms);

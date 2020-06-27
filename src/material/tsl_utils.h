@@ -15,7 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// This file wraps most of OSL related interface
+// This file wraps most of TSL related interface
 
 #pragma once
 
