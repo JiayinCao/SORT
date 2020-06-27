@@ -36,7 +36,7 @@ struct MediumInteraction;
 class Mesh;
 
 DECLARE_TSLGLOBAL_BEGIN()
-DECLARE_TSLGLOBAL_VAR(float3, normal)
+DECLARE_TSLGLOBAL_VAR(float3, uvw)
 DECLARE_TSLGLOBAL_END()
 
 //! @brief  Get Shading context.

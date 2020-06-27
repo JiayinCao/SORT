@@ -229,6 +229,13 @@ void Material::Serialize(IStreamBase& stream){
                     stream >> x >> y >> z;
                     default_value.default_value.m_val.m_float3 = Tsl_Namespace::make_float3(x, y, z);
                 }
+                else if (channel_num == 4) { // this is fairly ugly, but it works, I will find time to refactor it later.
+                    default_value.default_value.m_type = ShaderArgumentTypeEnum::TSL_TYPE_GLOBAL;
+                    m_string_container.push_back(std::string());
+                    stream >> m_string_container.back();
+
+                    default_value.default_value.m_val.m_global_var_name = m_string_container.back().c_str();
+                }
 
                 m_paramDefaultValues.push_back(default_value);
             }

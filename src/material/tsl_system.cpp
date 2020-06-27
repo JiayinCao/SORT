@@ -31,7 +31,7 @@
 using namespace Tsl_Namespace;
 
 IMPLEMENT_TSLGLOBAL_BEGIN()
-IMPLEMENT_TSLGLOBAL_VAR(float3, normal)
+IMPLEMENT_TSLGLOBAL_VAR(float3, uvw)
 IMPLEMENT_TSLGLOBAL_END()
 
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
@@ -67,7 +67,7 @@ bool ResolveShaderInstance(ShaderInstance* si) {
 void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEvent& se ){
     const SurfaceInteraction& intersection = se.GetInteraction();
     TslGlobal global;
-    global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
+    global.uvw = make_float3(intersection.u, intersection.v, 0.0f);
 
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
@@ -82,11 +82,6 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
     //const SurfaceInteraction& intersection = se.GetInteraction();
     TslGlobal global;
     //global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
-
-     // objdata points to world to local volume transform
-    // auto thread_info = reinterpret_cast<SORTTextureThreadInfo*>(g_textureSystem.get_perthread_info());
-    // if (mi.mesh)
-    //     thread_info->mesh = mi.mesh;
 
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
@@ -108,7 +103,7 @@ void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInt
 
 Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader , const SurfaceInteraction& intersection ){
     TslGlobal global;
-    global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
+    global.uvw = make_float3(intersection.u, intersection.v, 0.0f);
 
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;

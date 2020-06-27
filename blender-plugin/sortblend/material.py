@@ -647,10 +647,8 @@ class SORTNodeSocketUV(bpy.types.NodeSocket, SORTNodeSocket):
         return 'vector3'
     def serialize(self,fs):
         fs.serialize(self.name.replace(" " , ""))
-        fs.serialize(3)
-        fs.serialize(u)
-        fs.serialize(v)
-        fa.serialize(0.0)
+        fs.serialize(4) # this is just a magic number to indicate system value type, will refactor later
+        fs.serialize('uvw')
 
 @base.register_class
 class SORTDummySocket(bpy.types.NodeSocket, SORTNodeSocket):
@@ -2148,18 +2146,25 @@ class SORTNodeCheckerBoard(SORTShadingNode):
     bl_label = 'CheckerBoard'
     bl_idname = 'SORTNodeCheckerBoard'
     osl_shader = '''
-        shader CheckerBoard( color Color1 = @ ,
-                             color Color2 = @ ,
-                             vector UVCoordinate = @ ,
-                             float  UVTiling = @ ,
-                             output color Result = color( 0.0 , 0.0 , 0.0 ) ,
-                             output float Red = 0.0 ,
-                             output float Green = 0.0 ,
-                             output float Blue = 0.0 ){
-            vector scaledUV = UVCoordinate * UVTiling;
-            float fu = scaledUV[0] - floor( scaledUV[0] );
-            float fv = scaledUV[1] - floor( scaledUV[1] );
-            if( ( fu > 0.5 && fv > 0.5 ) || ( fu < 0.5 && fv < 0.5 ) )
+        float floorf(float x);
+
+        shader CheckerBoard( color Color1 ,
+                             color Color2 ,
+                             vector UVCoordinate ,
+                             float  UVTiling ,
+                             out color Result ,
+                             out float Red ,
+                             out float Green ,
+                             out float Blue ){
+            // this will be revived once TSL supports proper multiplication later.
+            // vector scaledUV = UVCoordinate * UVTiling;
+            vector scaledUV;
+            scaledUV.x = UVCoordinate.x * UVTiling;
+            scaledUV.y = UVCoordinate.y * UVTiling;
+            scaledUV.z = UVCoordinate.z * UVTiling;
+            float fu = scaledUV.x - floorf( scaledUV.x );
+            float fv = scaledUV.y - floorf( scaledUV.y );
+            if( ( fu > 0.5f && fv > 0.5f ) || ( fu < 0.5f && fv < 0.5f ) )
                 Result = Color1;
             else
                 Result = Color2;
@@ -2189,10 +2194,10 @@ class SORTNodeCheckerBoard(SORTShadingNode):
         self.inputs['UV Tiling'].default_value = 1.0
     def serialize_prop(self, fs):
         fs.serialize( 4 )
-        fs.serialize( self.inputs['Color1'].export_osl_value() )
-        fs.serialize( self.inputs['Color2'].export_osl_value() )
-        fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
-        fs.serialize( self.inputs['UV Tiling'].export_osl_value() )
+        self.inputs['Color1'].serialize(fs)
+        self.inputs['Color2'].serialize(fs)
+        self.inputs['UV Coordinate'].serialize(fs)
+        self.inputs['UV Tiling'].serialize(fs)
     def draw_buttons(self, context, layout):
         layout.prop(self, "show_separate_channels")
 
@@ -2201,26 +2206,34 @@ class SORTNodeGrid(SORTShadingNode):
     bl_label = 'Grid'
     bl_idname = 'SORTNodeGrid'
     osl_shader = '''
-        shader Grid( color Color1 = @ ,
-                     color Color2 = @ ,
-                     float Treshold = @ ,
-                     vector UVCoordinate = @ ,
-                     float  UVTiling = @ ,
-                     output color Result = color( 0.0 , 0.0 , 0.0 ) ,
-                     output float Red = 0.0 ,
-                     output float Green = 0.0 ,
-                     output float Blue = 0.0 ){
-            vector scaledUV = UVCoordinate * UVTiling;
-            float fu = scaledUV[0] - floor( scaledUV[0] ) - 0.5;
-            float fv = scaledUV[1] - floor( scaledUV[1] ) - 0.5;
-            float half_threshold = ( 1.0 - Treshold ) * 0.5;
+        float floorf(float x);
+        
+        shader Grid( color Color1 ,
+                     color Color2 ,
+                     float Threshold ,
+                     vector UVCoordinate ,
+                     float  UVTiling ,
+                     out color Result ,
+                     out float Red ,
+                     out float Green ,
+                     out float Blue ){
+            // this will be revived once TSL supports proper multiplication later.
+            // vector scaledUV = UVCoordinate * UVTiling;
+            vector scaledUV;
+            scaledUV.x = UVCoordinate.x * UVTiling;
+            scaledUV.y = UVCoordinate.y * UVTiling;
+            scaledUV.z = UVCoordinate.z * UVTiling;
+
+            float fu = scaledUV.x - floorf( scaledUV.x ) - 0.5f;
+            float fv = scaledUV.y - floorf( scaledUV.y ) - 0.5f;
+            float half_threshold = ( 1.0 - Threshold ) * 0.5f;
             if( fu <= half_threshold && fu >= -half_threshold && fv <= half_threshold && fv >= -half_threshold )
                 Result = Color1;
             else
                 Result = Color2;
-            Red = Result[0];
-            Green = Result[1];
-            Blue = Result[2];
+            Red = Result.r;
+            Green = Result.g;
+            Blue = Result.b;
         }
     '''
     def toggle_result_channel(self,context):
@@ -2231,7 +2244,7 @@ class SORTNodeGrid(SORTShadingNode):
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketColor' , 'Color1' )
         self.inputs.new( 'SORTNodeSocketColor' , 'Color2' )
-        self.inputs.new( 'SORTNodeSocketFloat' , 'Treshold' )
+        self.inputs.new( 'SORTNodeSocketFloat' , 'Threshold' )
         self.inputs.new( 'SORTNodeSocketUV' , 'UV Coordinate' )
         self.inputs.new( 'SORTNodeSocketAnyFloat' , 'UV Tiling' )
         self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
@@ -2241,16 +2254,16 @@ class SORTNodeGrid(SORTShadingNode):
         self.outputs['Red'].enabled = self.show_separate_channels
         self.outputs['Blue'].enabled = self.show_separate_channels
         self.outputs['Green'].enabled = self.show_separate_channels
-        self.inputs['Treshold'].default_value = 0.1
+        self.inputs['Threshold'].default_value = 0.1
         self.inputs['Color1'].default_value = ( 0.2 , 0.2 , 0.2 )
         self.inputs['UV Tiling'].default_value = 1.0
     def serialize_prop(self, fs):
         fs.serialize( 5 )
-        fs.serialize( self.inputs['Color1'].export_osl_value() )
-        fs.serialize( self.inputs['Color2'].export_osl_value() )
-        fs.serialize( self.inputs['Treshold'].export_osl_value() )
-        fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
-        fs.serialize( self.inputs['UV Tiling'].export_osl_value() )
+        self.inputs['Color1'].serialize(fs)
+        self.inputs['Color2'].serialize(fs)
+        self.inputs['Threshold'].serialize(fs)
+        self.inputs['UV Coordinate'].serialize(fs)
+        self.inputs['UV Tiling'].serialize(fs)
     def draw_buttons(self, context, layout):
         layout.prop(self, "show_separate_channels")
 
@@ -2395,13 +2408,15 @@ class SORTNodeRemappingUV(SORTShadingNode):
     bl_idname = 'SORTNodeRemappingUV'
     output_type = 'SORTNodeSocketFloat'
     osl_shader = '''
-        shader RemappingUV( vector UVCoordinate = @,
-                        float  TilingU = @ ,
-                        float  TilingV = @ ,
-                        float  OffsetU = @ ,
-                        float  OffsetV = @ ,
-                        output vector Result = vector( 0.0 ) ){
-            Result = vector( UVCoordinate[0] * TilingV + OffsetU , UVCoordinate[1] * TilingU + OffsetV , 0.0 );
+        shader RemappingUV( vector UVCoordinate,
+                            float  TilingU ,
+                            float  TilingV ,
+                            float  OffsetU ,
+                            float  OffsetV ,
+                            out vector Result ){
+            Result.x = UVCoordinate.x * TilingU + OffsetU;
+            Result.y = UVCoordinate.y * TilingV + OffsetV;
+            Result.z = 0.0f;
         }
     '''
     def init(self, context):
@@ -2415,11 +2430,11 @@ class SORTNodeRemappingUV(SORTShadingNode):
         self.inputs['TilingV'].default_value = 1.0
     def serialize_prop(self, fs):
         fs.serialize( 5 )
-        fs.serialize( self.inputs['UV Coordinate'].export_osl_value() )
-        fs.serialize( self.inputs['TilingU'].export_osl_value() )
-        fs.serialize( self.inputs['TilingV'].export_osl_value() )
-        fs.serialize( self.inputs['OffsetU'].export_osl_value() )
-        fs.serialize( self.inputs['OffsetV'].export_osl_value() )
+        self.inputs['UV Coordinate'].serialize(fs)
+        self.inputs['TilingU'].serialize(fs)
+        self.inputs['TilingV'].serialize(fs)
+        self.inputs['OffsetU'].serialize(fs)
+        self.inputs['OffsetV'].serialize(fs)
 
 @SORTShaderNodeTree.register_node('Convertor')
 class SORTNodeExtract(SORTShadingNode):
@@ -2894,7 +2909,7 @@ class SORTNodeHeterogeneous(SORTShadingNode):
         self.inputs['Absorption'].serialize(fs)
         self.inputs['Scattering'].serialize(fs)
         self.inputs['Anisotropy'].serialize(fs)
-        
+
 #------------------------------------------------------------------------------------#
 #                                 Volume Input Node                                  #
 #------------------------------------------------------------------------------------#
