@@ -2324,7 +2324,7 @@ class SORTNodeImage(SORTShadingNode):
             
             vector encoded_normal = 2.0f * texture2d_sample<g_texture>( scaledUV.x , scaledUV.y );
             Result = 2.0f * vector( encoded_normal.x , encoded_normal.z , encoded_normal.y ) - 1.0f;
-            
+
             Red = Result.x;
             Green = Result.y;
             Blue = Result.z;
@@ -2695,15 +2695,15 @@ class SORTNodeMathOpBinary(SORTShadingNode):
         return self.bl_idname + self.data_type + self.op_type
 
 @SORTShaderNodeTree.register_node('Math Ops')
-class SORTNodeMathOpDotProduce(SORTShadingNode):
+class SORTNodeMathOpDotProduct(SORTShadingNode):
     bl_label = 'Dot Product'
-    bl_idname = 'SORTNodeMathOpDotProduce'
+    bl_idname = 'SORTNodeMathOpDotProduct'
     bl_width_min = 240
     osl_shader = '''
-        shader MathBinaryOp( vector Value0 = @ ,
-                             vector Value1 = @ ,
-                             output float Result = 0.0 ){
-            Result = dot( Value0 , Value1 );
+        shader dot_product( vector Value0 ,
+                             vector Value1 ,
+                             out float Result ){
+            Result = Value0.x * Value1.x + Value0.y * Value1.y + Value0.z * Value1.z;
         }
     '''
     def init(self, context):
@@ -2712,9 +2712,9 @@ class SORTNodeMathOpDotProduce(SORTShadingNode):
         self.outputs.new( 'SORTNodeSocketAnyFloat' , 'Result' )
     def serialize_prop(self, fs):
         fs.serialize( 2 )
-        fs.serialize( self.inputs['Value0'].export_osl_value() )
-        fs.serialize( self.inputs['Value1'].export_osl_value() )
-
+        self.inputs['Value0'].serialize(fs)
+        self.inputs['Value1'].serialize(fs)
+        
 @SORTShaderNodeTree.register_node('Math Ops')
 class SORTNodeMathOpLerp(SORTShadingNode):
     bl_label = 'Lerp'
