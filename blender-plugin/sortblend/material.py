@@ -1644,9 +1644,9 @@ class SORTNode_Material_Hair(SORTShadingNode):
             float inv = 1.0 / ( 5.969 - 0.215 * AzimuthalRoughness + 2.532 * powf(AzimuthalRoughness,2.0) - 10.73 * powf(AzimuthalRoughness,3.0) +
                         5.574 * powf(AzimuthalRoughness,4.0) + 0.245 * powf(AzimuthalRoughness, 5.0) );
             color sigma;
-            sigma.r = helper(HairColor[0],inv);
-            sigma.g = helper(HairColor[1],inv);
-            sigma.b = helper(HairColor[2],inv);
+            sigma.r = helper(HairColor.x,inv);
+            sigma.g = helper(HairColor.g,inv);
+            sigma.b = helper(HairColor.b,inv);
             Result = make_closure<hair>( sigma , LongtitudinalRoughness , AzimuthalRoughness , IndexofRefraction );
         }
     '''
@@ -2156,12 +2156,7 @@ class SORTNodeCheckerBoard(SORTShadingNode):
                              out float Red ,
                              out float Green ,
                              out float Blue ){
-            // this will be revived once TSL supports proper multiplication later.
-            // vector scaledUV = UVCoordinate * UVTiling;
-            vector scaledUV;
-            scaledUV.x = UVCoordinate.x * UVTiling;
-            scaledUV.y = UVCoordinate.y * UVTiling;
-            scaledUV.z = UVCoordinate.z * UVTiling;
+            vector scaledUV = UVCoordinate * UVTiling;
             float fu = scaledUV.x - floorf( scaledUV.x );
             float fv = scaledUV.y - floorf( scaledUV.y );
             if( ( fu > 0.5f && fv > 0.5f ) || ( fu < 0.5f && fv < 0.5f ) )
@@ -2217,12 +2212,7 @@ class SORTNodeGrid(SORTShadingNode):
                      out float Red ,
                      out float Green ,
                      out float Blue ){
-            // this will be revived once TSL supports proper multiplication later.
-            // vector scaledUV = UVCoordinate * UVTiling;
-            vector scaledUV;
-            scaledUV.x = UVCoordinate.x * UVTiling;
-            scaledUV.y = UVCoordinate.y * UVTiling;
-            scaledUV.z = UVCoordinate.z * UVTiling;
+            vector scaledUV = UVCoordinate * UVTiling;
 
             float fu = scaledUV.x - floorf( scaledUV.x ) - 0.5f;
             float fv = scaledUV.y - floorf( scaledUV.y ) - 0.5f;
@@ -2291,12 +2281,7 @@ class SORTNodeImage(SORTShadingNode):
                                   out float Red ,
                                   out float Green ,
                                   out float Blue ){
-            // this will be revived once TSL supports proper multiplication later.
-            // vector scaledUV = UVCoordinate * UVTiling;
-            vector scaledUV;
-            scaledUV.x = UVCoordinate.x * UVTiling;
-            scaledUV.y = UVCoordinate.y * UVTiling;
-            scaledUV.z = UVCoordinate.z * UVTiling;
+            vector scaledUV = UVCoordinate * UVTiling;
 
             Result = texture2d_sample<g_texture>( scaledUV[0] , scaledUV[1] );
             Red = Result.x;
@@ -2315,15 +2300,12 @@ class SORTNodeImage(SORTShadingNode):
                                  out float Red ,
                                  out float Green ,
                                  out float Blue ){
-            // this will be revived once TSL supports proper multiplication later.
-            // vector scaledUV = UVCoordinate * UVTiling;
-            vector scaledUV;
-            scaledUV.x = UVCoordinate.x * UVTiling;
-            scaledUV.y = UVCoordinate.y * UVTiling;
-            scaledUV.z = UVCoordinate.z * UVTiling;
+            vector scaledUV = UVCoordinate * UVTiling;
 
-            Result = texture2d_sample<g_texture>( scaledUV[0] , scaledUV[1] );
-            Result = powf( gamma_color , 2.2 );
+            vector gamma_color = texture2d_sample<g_texture>( scaledUV[0] , scaledUV[1] );
+            Result.x = powf( gamma_color.x , 2.2f );
+            Result.y = powf( gamma_color.y , 2.2f );
+            Result.z = powf( gamma_color.z , 2.2f );
             Red = Result.x;
             Green = Result.y;
             Blue = Result.z;
@@ -2338,18 +2320,11 @@ class SORTNodeImage(SORTShadingNode):
                                  out float Red ,
                                  out float Green ,
                                  out float Blue ){
-            // this will be revived once TSL supports proper multiplication later.
-            // vector scaledUV = UVCoordinate * UVTiling;
-            vector scaledUV;
-            scaledUV.x = UVCoordinate.x * UVTiling;
-            scaledUV.y = UVCoordinate.y * UVTiling;
-            scaledUV.z = UVCoordinate.z * UVTiling;
+            vector scaledUV = UVCoordinate * UVTiling;
             
-            vector encoded_normal = texture2d_sample<g_texture>( scaledUV.x , scaledUV.y );
-            Result.x = 2.0f * encoded_normal.x - 1.0f;
-            Result.y = 2.0f * encoded_normal.z - 1.0f;
-            Result.z = 2.0f * encoded_normal.y - 1.0f;
-
+            vector encoded_normal = 2.0f * texture2d_sample<g_texture>( scaledUV.x , scaledUV.y );
+            Result = 2.0f * vector( encoded_normal.x , encoded_normal.z , encoded_normal.y ) - 1.0f;
+            
             Red = Result.x;
             Green = Result.y;
             Blue = Result.z;
@@ -2745,11 +2720,19 @@ class SORTNodeMathOpLerp(SORTShadingNode):
     bl_label = 'Lerp'
     bl_idname = 'SORTNodeMathOpLerp'
     bl_width_min = 240
-    osl_shader = '''
-        shader MathBinaryOp( %s Value0 = @ ,
-                             %s Value1 = @ ,
-                             float Factor = @ ,
-                             output %s Result = 0.0 ){
+    tsl_shader_float = '''
+        shader lerp_float( float Value0 ,
+                           float Value1 ,
+                           float Factor ,
+                           out float Result ){
+            Result = Value0 * ( 1.0 - Factor ) + Value1 * Factor;
+        }
+    '''
+    tsl_shader_float3 = '''
+        shader lerp_float3( vector Value0 ,
+                            vector Value1 ,
+                            float  Factor ,
+                            out vector Result ){
             Result = Value0 * ( 1.0 - Factor ) + Value1 * Factor;
         }
     '''
@@ -2778,16 +2761,11 @@ class SORTNodeMathOpLerp(SORTShadingNode):
         layout.prop(self, 'data_type', text='Type', expand=True)
     def serialize_prop(self, fs):
         fs.serialize( 3 )
-        fs.serialize( self.inputs['Value0'].export_osl_value() )
-        fs.serialize( self.inputs['Value1'].export_osl_value() )
-        fs.serialize( self.inputs['Factor'].export_osl_value() )
+        self.inputs['Value0'].serialize(fs)
+        self.inputs['Value1'].serialize(fs)
+        self.inputs['Factor'].serialize(fs)
     def generate_osl_source(self):
-        dtype = 'float'
-        if self.data_type == 'SORTNodeSocketColor':
-            dtype = 'color'
-        elif self.data_type == 'SORTNodeSocketFloatVector':
-            dtype = 'vector'
-        return self.osl_shader % ( dtype , dtype , dtype )
+        return self.tsl_shader_float if self.data_type == 'SORTNodeSocketAnyFloat' else self.tsl_shader_float3;
     def type_identifier(self):
         return self.bl_idname + self.data_type
 
