@@ -2606,10 +2606,32 @@ class SORTNodeMathOpUnary(SORTShadingNode):
     bl_label = 'Unary Operator'
     bl_idname = 'SORTNodeMathOpUnary'
     bl_width_min = 240
-    osl_shader = '''
-        shader MathUnaryOp( %s Value = @ ,
-                            output %s Result = 0.0 ){
+    tsl_shader_float = '''
+        float %s(float x);
+        shader unary_op_float(  float Value ,
+                                out float Result){
             Result = %s(Value);
+        }
+    '''
+    tsl_shader_float3 = '''
+        float %s(float x);
+        shader unary_op_float3( vector Value ,
+                                out vector Result){
+            Result.x = %s(Value.x);
+            Result.y = %s(Value.y);
+            Result.z = %s(Value.z);
+        }
+    '''
+    tsl_shader_float_negate = '''
+        shader unary_op_float_negate( float Value ,
+                                      out float Result){
+            Result = -Value;
+        }
+    '''
+    tsl_shader_float3_negate = '''
+        shader unary_op_float3_negate( vector Value ,
+                                       out vector Result){
+            Result = -Value;
         }
     '''
     def change_type(self,context):
@@ -2624,9 +2646,9 @@ class SORTNodeMathOpUnary(SORTShadingNode):
         else:
             self.inputs['Value'].default_value = 1.0
     op_type : bpy.props.EnumProperty(name='Type',default='-',items=[
-        ('-','Negation','',1), ('1.0-','One Minus','',2), ('sin','Sin','',3), ('cos','Cos','',4), ('tan','Tan','',5), ('asin','Asin','',6), ('acos','Acos','',7), ('atan','Atan','',8),
-        ('exp','Exp','',9), ('exp2','Exp2','',10), ('log','Log','',11), ('log2','Log2','',12), ('log10','Log10','',13), ('sqrt','Sqrt','',14), ('inversesqrt','Inverse Sqrt','',15),
-        ('fabs','Abs','', 16), ('sign','Sign','',17), ('floor','Floor','',18), ('ceil','Ceil','',19), ('round','Round','',20), ('trunc','Trunc','',21) ])
+        ('-','Negation','',1), ('1.0f-','One Minus','',2), ('sinf','Sin','',3), ('cosf','Cos','',4), ('tanf','Tan','',5), ('asinf','Asin','',6), ('acosf','Acos','',7), ('atanf','Atan','',8),
+        ('expf','Exp','',9), ('exp2f','Exp2','',10), ('logf','Log','',11), ('log2f','Log2','',12), ('log10f','Log10','',13), ('sqrtf','Sqrt','',14),
+        ('fabsf','Abs','', 15), ('floorf','Floor','',16), ('ceilf','Ceil','',17), ('roundf','Round','',18), ('truncf','Trunc','',19) ])
     data_type : bpy.props.EnumProperty(name='Type',default='SORTNodeSocketAnyFloat',items=[('SORTNodeSocketAnyFloat','Float','',1),('SORTNodeSocketColor','Color','',2),('SORTNodeSocketFloatVector','Vector','',3)],update=change_type)
     def init(self, context):
         self.inputs.new( 'SORTNodeSocketAnyFloat' , 'Value' )
@@ -2636,14 +2658,17 @@ class SORTNodeMathOpUnary(SORTShadingNode):
         layout.prop(self, 'data_type', text='Type', expand=True)
     def serialize_prop(self, fs):
         fs.serialize( 1 )
-        fs.serialize( self.inputs['Value'].export_osl_value() )
+        self.inputs['Value'].serialize(fs)
     def generate_osl_source(self):
         dtype = 'float'
         if self.data_type == 'SORTNodeSocketColor':
             dtype = 'color'
         elif self.data_type == 'SORTNodeSocketFloatVector':
             dtype = 'vector'
-        return self.osl_shader % ( dtype , dtype , self.op_type )
+
+        if dtype == 'float':
+            return self.tsl_shader_float % ( self.op_type, self.op_type ) if self.op_type != '-' else self.tsl_shader_float_negate
+        return self.tsl_shader_float3 % ( self.op_type, self.op_type ) if self.op_type != '-' else self.tsl_shader_float3_negate
     def type_identifier(self):
         return self.bl_idname + self.data_type + self.op_type
 
@@ -2652,10 +2677,10 @@ class SORTNodeMathOpBinary(SORTShadingNode):
     bl_label = 'Binary Operator'
     bl_idname = 'SORTNodeMathOpBinary'
     bl_width_min = 240
-    osl_shader = '''
-        shader MathBinaryOp( %s Value0 = @ ,
-                             %s Value1 = @ ,
-                             output %s Result = 0.0 ){
+    tsl_shader = '''
+        shader MathBinaryOp( %s Value0 ,
+                             %s Value1 ,
+                             out %s Result ){
             Result = Value0 %s Value1;
         }
     '''
@@ -2682,15 +2707,15 @@ class SORTNodeMathOpBinary(SORTShadingNode):
         layout.prop(self, 'data_type', text='Type', expand=True)
     def serialize_prop(self, fs):
         fs.serialize( 2 )
-        fs.serialize( self.inputs['Value0'].export_osl_value() )
-        fs.serialize( self.inputs['Value1'].export_osl_value() )
+        self.inputs['Value0'].serialize(fs)
+        self.inputs['Value1'].serialize(fs)
     def generate_osl_source(self):
         dtype = 'float'
         if self.data_type == 'SORTNodeSocketColor':
             dtype = 'color'
         elif self.data_type == 'SORTNodeSocketFloatVector':
             dtype = 'vector'
-        return self.osl_shader % ( dtype , dtype , dtype , self.op_type )
+        return self.tsl_shader % ( dtype , dtype , dtype , self.op_type )
     def type_identifier(self):
         return self.bl_idname + self.data_type + self.op_type
 
@@ -2714,7 +2739,7 @@ class SORTNodeMathOpDotProduct(SORTShadingNode):
         fs.serialize( 2 )
         self.inputs['Value0'].serialize(fs)
         self.inputs['Value1'].serialize(fs)
-        
+
 @SORTShaderNodeTree.register_node('Math Ops')
 class SORTNodeMathOpLerp(SORTShadingNode):
     bl_label = 'Lerp'
