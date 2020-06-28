@@ -1041,52 +1041,48 @@ class SORTNodeExposedInputs(SORTShadingNode):
 
     # get shader parameter name
     def getShaderInputParameterName(self,param):
-        return 'i' + param.replace(' ', '')
+        return param.replace(' ', '')
     def getShaderOutputParameterName(self,param):
         return 'o' + param.replace(' ', '')
 
     # this is just a proxy node
     def generate_osl_source(self):
-        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color',
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure',
                                'SORTNodeSocketColor': 'color',
                                'SORTNodeSocketFloat': 'float',
                                'SORTNodeSocketFloatVector': 'vector',
                                'SORTNodeSocketLargeFloat': 'float',
                                'SORTNodeSocketAnyFloat': 'float',
-                               'SORTNodeSocketNormal': 'normal',
+                               'SORTNodeSocketNormal': 'vector',
                                'SORTNodeSocketUV': 'vector'}
 
         inputs = self.inputs
 
-        osl_shader = 'shader PassThrough_GroupInput('
+        tsl_shader = 'shader PassThrough_GroupInput('
         for i in range( 0 , len(inputs) ):
             input = inputs[i]
             input_type = socket_type_mapping[input.bl_idname]
-            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = @, \n'
+            tsl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ', \n'
         for i in range( 0 , len(inputs) ):
             output = inputs[i]
             output_type = socket_type_mapping[output.bl_idname]
-            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = @'
+            tsl_shader += 'out ' + output_type + ' ' + self.getShaderOutputParameterName(output.name)
             if i < len(inputs) - 1 :
-                osl_shader += ',\n'
+                tsl_shader += ',\n'
             else:
-                osl_shader += '){\n'
+                tsl_shader += '){\n'
 
         for i in range( 0 , len(inputs) ):
             var_name = inputs[i].name
-            osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
-        osl_shader += '}'
-        return osl_shader
+            tsl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
+        tsl_shader += '}'
+        return tsl_shader
 
     # this function helps serializing the material information
     def serialize_prop(self,fs):
-        inputs = self.inputs
-        fs.serialize(len(inputs)*2)
-        for input in inputs:
-            fs.serialize( input.export_osl_value() )
-        # this time it is for output default values, this is useless, but needed by OSL compiler
-        for input in inputs:
-            fs.serialize( input.export_osl_value() )
+        fs.serialize(len(self.inputs))
+        for input in self.inputs:
+            input.serialize(fs)
 
 #------------------------------------------------------------------------------------#
 #                                  Shader Group Nodes                                #
@@ -2398,17 +2394,17 @@ class SORTNodeImage(SORTShadingNode):
     def populateResources( self , resources ):
         found = False
         for resource in resources:
-            if resource[1] == self.image.filepath:
+            if resource[1] == bpy.path.abspath(self.image.filepath):
                 found = True
         if not found:
             self.ResourceIndex = len(resources)
-            resources.append( ( self.image.filepath , SID('Texture2D') ) )
+            resources.append( ( bpy.path.abspath(self.image.filepath) , SID('Texture2D') ) )
         pass
     # serialize shader resource data
     def serialize_shader_resource(self, fs):
         fs.serialize(1)
         fs.serialize('g_texture')
-        fs.serialize(self.image.filepath)
+        fs.serialize(bpy.path.abspath(self.image.filepath))
 
 #------------------------------------------------------------------------------------#
 #                                 Convertor Nodes                                    #
