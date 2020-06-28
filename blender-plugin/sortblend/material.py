@@ -2299,9 +2299,9 @@ class SORTNodeImage(SORTShadingNode):
             scaledUV.z = UVCoordinate.z * UVTiling;
 
             Result = texture2d_sample<g_texture>( scaledUV[0] , scaledUV[1] );
-            Red = Result[0];
-            Green = Result[1];
-            Blue = Result[2];
+            Red = Result.x;
+            Green = Result.y;
+            Blue = Result.z;
         }
     '''
     tsl_shader_gamma = '''
@@ -2324,9 +2324,9 @@ class SORTNodeImage(SORTShadingNode):
 
             Result = texture2d_sample<g_texture>( scaledUV[0] , scaledUV[1] );
             Result = powf( gamma_color , 2.2 );
-            Red = Result[0];
-            Green = Result[1];
-            Blue = Result[2];
+            Red = Result.x;
+            Green = Result.y;
+            Blue = Result.z;
         }
     '''
     tsl_shader_normal = '''
@@ -2796,12 +2796,30 @@ class SORTNodeMathOpClamp(SORTShadingNode):
     bl_label = 'Clamp'
     bl_idname = 'SORTNodeMathOpClamp'
     bl_width_min = 240
-    osl_shader = '''
-        shader MathBinaryOp( %s MinValue = @ ,
-                             %s MaxValue = @ ,
-                             %s Value = @ ,
-                             output %s Result = 0.0 ){
-            Result = min( MaxValue , max( MinValue , Value ) );
+    tsl_shader_float = '''
+        shader math_clamp_float( float MinValue ,
+                                 float MaxValue ,
+                                 float Value ,
+                                 out float Result ){
+            Value = ( Value < MinValue ) ? MinValue : Value;
+            Value = ( Value < MaxValue ) ? Value : MaxValue;
+            Result = Value;
+        }
+    '''
+    tsl_shader_vector = '''
+        float clamp( float Value , float MinValue , float MaxValue ){
+            Value = ( Value < MinValue ) ? MinValue : Value;
+            Value = ( Value < MaxValue ) ? Value : MaxValue;
+            return Value;
+        }
+
+        shader math_clamp_vector( vector MinValue ,
+                                  vector MaxValue ,
+                                  vector Value ,
+                                  out vector Result ){
+            Result.x = clamp( Value.x , MinValue.x , MaxValue.x );
+            Result.y = clamp( Value.y , MinValue.y , MaxValue.y );
+            Result.z = clamp( Value.z , MinValue.z , MaxValue.z );
         }
     '''
     def change_type(self,context):
@@ -2828,16 +2846,11 @@ class SORTNodeMathOpClamp(SORTShadingNode):
         layout.prop(self, 'data_type', text='Type', expand=True)
     def serialize_prop(self, fs):
         fs.serialize( 3 )
-        fs.serialize( self.inputs['Min Value'].export_osl_value() )
-        fs.serialize( self.inputs['Max Value'].export_osl_value() )
-        fs.serialize( self.inputs['Value'].export_osl_value() )
+        self.inputs['Min Value'].serialize(fs);
+        self.inputs['Max Value'].serialize(fs);
+        self.inputs['Value'].serialize(fs);
     def generate_osl_source(self):
-        dtype = 'float'
-        if self.data_type == 'SORTNodeSocketColor':
-            dtype = 'color'
-        elif self.data_type == 'SORTNodeSocketFloatVector':
-            dtype = 'vector'
-        return self.osl_shader % ( dtype , dtype , dtype , dtype )
+        return self.tsl_shader_float if self.data_type == 'SORTNodeSocketAnyFloat' else self.tsl_shader_vector
     def type_identifier(self):
         return self.bl_idname + self.data_type
 
