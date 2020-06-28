@@ -2503,11 +2503,16 @@ class SORTNodeInputIntersection(SORTShadingNode):
     bl_idname = 'SORTNodeInputIntersection'
     bl_width_min = 160
     osl_shader = '''
-        shader InputShader( output vector WorldPosition = P ,
-                            output vector WorldViewDirection = I ,
-                            output vector WorldShadingNormal = N ,
-                            output vector WorldGeometryNormal = Ng ,
-                            output vector UVCoordinate = vector( u , v , 0.0 ) ){
+        shader InputShader( out vector WorldPosition ,
+                            out vector WorldViewDirection ,
+                            out vector WorldShadingNormal ,
+                            out vector WorldGeometryNormal ,
+                            out vector UVCoordinate ){
+            WorldPosition = global_value<position>;
+            WorldViewDirection = global_value<I>;
+            WorldShadingNormal = global_value<normal>;
+            WorldGeometryNormal = global_value<gnormal>;
+            UVCoordinate = global_value<uvw>;
         }
     '''
     def init(self, context):
@@ -2579,10 +2584,16 @@ class SORTNodeInputFresnel(SORTShadingNode):
     bl_label = 'Fresnel'
     bl_idname = 'SORTNodeInputFresnel'
     osl_shader = '''
-        shader SchlickFresnel( float F0 = @,
-                               output float Result = 0.0 ){
-            float cos_theta = dot( N , I );
-            Result = F0 + pow( 1.0 - cos_theta , 5.0 ) * ( 1.0 - F0 );
+        float powf( float base , float exp );
+
+        float inner_dot( vector a, vector b ){
+            return a.x * b.x + a.y * b.y + a.z * b.z;
+        }
+
+        shader SchlickFresnel( float F0,
+                               out float Result ){
+            float cos_theta = inner_dot( global_value<normal> , global_value<I> );
+            Result = F0 + powf( 1.0 - cos_theta , 5.0f ) * ( 1.0 - F0 );
         }
     '''
     def init(self, context):
@@ -2592,7 +2603,7 @@ class SORTNodeInputFresnel(SORTShadingNode):
 
     def serialize_prop(self, fs):
         fs.serialize( 1 )
-        fs.serialize( self.inputs['F0'].export_osl_value() )
+        self.inputs['F0'].serialize(fs)
 
 #------------------------------------------------------------------------------------#
 #                                 Math Op Nodes                                      #

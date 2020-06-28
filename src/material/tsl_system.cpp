@@ -32,7 +32,11 @@
 using namespace Tsl_Namespace;
 
 IMPLEMENT_TSLGLOBAL_BEGIN()
-IMPLEMENT_TSLGLOBAL_VAR(float3, uvw)
+IMPLEMENT_TSLGLOBAL_VAR(float3, uvw)     // UV coordinate, W is preserved for now.
+IMPLEMENT_TSLGLOBAL_VAR(float3, position)     // this is world space position
+IMPLEMENT_TSLGLOBAL_VAR(float3, normal)       // this is world space normal
+IMPLEMENT_TSLGLOBAL_VAR(float3, gnormal)      // this is world space geometric normal
+IMPLEMENT_TSLGLOBAL_VAR(float3, I)            // this is world space input direction
 IMPLEMENT_TSLGLOBAL_END()
 
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
@@ -77,6 +81,8 @@ void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEve
     const SurfaceInteraction& intersection = se.GetInteraction();
     TslGlobal global;
     global.uvw = make_float3(intersection.u, intersection.v, 0.0f);
+    global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
+    global.I = make_float3(intersection.view.x, intersection.view.y, intersection.view.z);
 
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
@@ -113,6 +119,10 @@ void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInt
 Spectrum EvaluateTransparency(Tsl_Namespace::ShaderInstance* shader , const SurfaceInteraction& intersection ){
     TslGlobal global;
     global.uvw = make_float3(intersection.u, intersection.v, 0.0f);
+    global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
+    global.I = make_float3(intersection.view.x, intersection.view.y, intersection.view.z);
+    global.gnormal = make_float3(intersection.gnormal.x, intersection.gnormal.y, intersection.gnormal.z);
+    global.position = make_float3(intersection.intersect.x, intersection.intersect.y, intersection.intersect.z);
 
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
