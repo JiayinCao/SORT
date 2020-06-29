@@ -91,4 +91,12 @@ if "%BUILD_DEBUG%" == "1" (
 	cd ..
 )
 
+if "%REGISTER_SYS_ENV%" == "1" (
+	echo Register environment variables
+	echo Setting system environment 'SORT_ROOT_DIR' to %cd%
+	setx SORT_ROOT_DIR %cd% /M
+	echo Setting system environment 'SORT_BIN_DIR' to %cd%/bin
+	setx SORT_BIN_DIR %cd%/bin /M
+)
+
 :EOF

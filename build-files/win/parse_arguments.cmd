@@ -47,6 +47,9 @@ if NOT "%1" == "" (
     ) else if "%1" == "relwithdebinfo" (
         set BUILD_RELWITHDEBINFO=1
         goto EOF
+    ) else if "%1" == "register" (
+        set REGISTER_SYS_ENV=1
+        goto EOF
     ) else (
         echo Unrecognized Command
         goto EOF
