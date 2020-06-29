@@ -2318,7 +2318,7 @@ class SORTNodeImage(SORTShadingNode):
                                  out float Blue ){
             vector scaledUV = UVCoordinate * UVTiling;
             
-            vector encoded_normal = 2.0f * texture2d_sample<g_texture>( scaledUV.x , scaledUV.y );
+            vector encoded_normal = texture2d_sample<g_texture>( scaledUV.x , scaledUV.y );
             Result = 2.0f * vector( encoded_normal.x , encoded_normal.z , encoded_normal.y ) - 1.0f;
 
             Red = Result.x;
@@ -2390,7 +2390,7 @@ class SORTNodeImage(SORTShadingNode):
             return self.tsl_shader_normal
         return self.tsl_shader_linear
     def type_identifier(self):
-        return self.bl_idname + self.color_space_type
+        return self.bl_idname + self.color_space_type + bpy.path.abspath(self.image.filepath)
     def populateResources( self , resources ):
         found = False
         for resource in resources:
@@ -2629,16 +2629,16 @@ class SORTNodeMathOpUnary(SORTShadingNode):
             Result.z = %s(Value.z);
         }
     '''
-    tsl_shader_float_negate = '''
-        shader unary_op_float_negate( float Value ,
+    tsl_shader_float_simple = '''
+        shader unary_op_float_simple( float Value ,
                                       out float Result){
-            Result = -Value;
+            Result = %s Value;
         }
     '''
-    tsl_shader_float3_negate = '''
-        shader unary_op_float3_negate( vector Value ,
+    tsl_shader_float3_simple = '''
+        shader unary_op_float3_simple( vector Value ,
                                        out vector Result){
-            Result = -Value;
+            Result = %s Value;
         }
     '''
     def change_type(self,context):
@@ -2653,7 +2653,7 @@ class SORTNodeMathOpUnary(SORTShadingNode):
         else:
             self.inputs['Value'].default_value = 1.0
     op_type : bpy.props.EnumProperty(name='Type',default='-',items=[
-        ('-','Negation','',1), ('1.0f-','One Minus','',2), ('sinf','Sin','',3), ('cosf','Cos','',4), ('tanf','Tan','',5), ('asinf','Asin','',6), ('acosf','Acos','',7), ('atanf','Atan','',8),
+        ('-','Negation','',1), ('1.0f - ','One Minus','',2), ('sinf','Sin','',3), ('cosf','Cos','',4), ('tanf','Tan','',5), ('asinf','Asin','',6), ('acosf','Acos','',7), ('atanf','Atan','',8),
         ('expf','Exp','',9), ('exp2f','Exp2','',10), ('logf','Log','',11), ('log2f','Log2','',12), ('log10f','Log10','',13), ('sqrtf','Sqrt','',14),
         ('fabsf','Abs','', 15), ('floorf','Floor','',16), ('ceilf','Ceil','',17), ('roundf','Round','',18), ('truncf','Trunc','',19) ])
     data_type : bpy.props.EnumProperty(name='Type',default='SORTNodeSocketAnyFloat',items=[('SORTNodeSocketAnyFloat','Float','',1),('SORTNodeSocketColor','Color','',2),('SORTNodeSocketFloatVector','Vector','',3)],update=change_type)
@@ -2674,8 +2674,8 @@ class SORTNodeMathOpUnary(SORTShadingNode):
             dtype = 'vector'
 
         if dtype == 'float':
-            return self.tsl_shader_float % ( self.op_type, self.op_type ) if self.op_type != '-' else self.tsl_shader_float_negate
-        return self.tsl_shader_float3 % ( self.op_type, self.op_type ) if self.op_type != '-' else self.tsl_shader_float3_negate
+            return self.tsl_shader_float % ( self.op_type, self.op_type ) if self.op_type != '-' and self.op_type != '1.0f - ' else self.tsl_shader_float_simple % ( self.op_type )
+        return self.tsl_shader_float3 % ( self.op_type, self.op_type ) if self.op_type != '-' and self.op_type != '1.0f - ' else self.tsl_shader_float3_simple % ( self.op_type )
     def type_identifier(self):
         return self.bl_idname + self.data_type + self.op_type
 
