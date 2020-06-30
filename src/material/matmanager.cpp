@@ -26,6 +26,13 @@
 #include "scatteringevent/bsdf/fourierbxdf.h"
 #include "texture/imagetexture2d.h"
 
+namespace {
+    struct ShaderResourceBinding {
+        std::string resource_handle_name;
+        std::string shader_resource_name;
+    };
+}
+
 void ShaderCompiling_Task::Execute(){
     TIMING_EVENT( "Compiling Shader" );
     m_material->BuildMaterial();
@@ -78,25 +85,83 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     }
 
     const bool noMaterialSupport = g_noMaterial;
-    unsigned int material_cnt = 0;
-    stream >> material_cnt;
-    for( unsigned int i = 0 ; i < material_cnt ; ++i ){
-        auto mat = std::make_unique<Material>();
 
-        // serialize shader
-        mat->Serialize( stream );
+    StringID material_type;
+    while (true) {
+        stream >> material_type;
 
-        if ( LIKELY(!noMaterialSupport) ) {
-            // schedule a separate task to async compile shaders
-            //SCHEDULE_TASK<ShaderCompiling_Task>( "Compiling Shader" , DEFAULT_TASK_PRIORITY, dependencies ,  mat.get() );
-            mat->BuildMaterial();
+        if (material_type == SID("End of Material"))
+            break;
+        else if (material_type == SID("ShaderUnitTemplate")) {
+            // shader type, maybe I should use string id here.
+            std::string shader_node_type;
+            stream >> shader_node_type;
 
-            // push the compiled material in the pool
-            m_matPool.push_back(std::move(mat));
+            // stream the shader source code
+            std::string source_code;
+            stream >> source_code;
+
+            /**< Shader reousrce binding. */
+            std::vector<ShaderResourceBinding>  m_shader_resources_binding;
+
+            unsigned int shader_resources = 0;
+            stream >> shader_resources;
+            for (auto i = 0u; i < shader_resources; ++i) {
+                ShaderResourceBinding srb;
+                stream >> srb.resource_handle_name >> srb.shader_resource_name;
+                m_shader_resources_binding.push_back(srb);
+            }
+
+            // compile the shader unit template
+            auto shading_context = GetShadingContext();
+
+            // allocate the shader unit template
+            const auto shader_unit_template = shading_context->begin_shader_unit_template(shader_node_type);
+
+            // bind shader resources
+            for (auto sr : m_shader_resources_binding) {
+                auto resource = MatManager::GetSingleton().GetResource(sr.shader_resource_name);
+
+                if (resource->IsTexture())
+                    shader_unit_template->register_texture(sr.resource_handle_name, (const void*)resource);
+                else
+                    shader_unit_template->register_shader_resource(sr.resource_handle_name, (const ShaderResourceHandle*)resource);
+            }
+
+            // compile the shader unit
+            const auto ret = shading_context->compile_shader_unit_template(shader_unit_template, source_code.c_str());
+
+            // indicate the end of shader unit compilation
+            shading_context->end_shader_unit_template(shader_unit_template);
+
+            // push it if it compiles the shader successful
+            if( ret )
+                m_shader_units[shader_node_type] = shader_unit_template;
+        }
+        else if (material_type == SID("ShaderGroupTemplate")) {
+            // this is to be handled later.
+        }
+        else if (material_type == SID("Material")) {
+            // allocate a new material
+            auto mat = std::make_unique<Material>();
+
+            // serialize the material
+            mat->Serialize(stream);
+
+            if (LIKELY(!noMaterialSupport)) {
+                // build the material
+                mat->BuildMaterial();
+
+                // push the compiled material in the pool
+                m_matPool.push_back(std::move(mat));
+            }
+        }
+        else {
+            sAssertMsg(false, MATERIAL, "Serialization is broken.");
         }
     }
 
-    return material_cnt;
+    return (unsigned int)m_matPool.size();
 }
 
 std::string MatManager::LoadShaderSourceCode(const std::string& shaderName, const std::string& shaderType){
@@ -123,4 +188,11 @@ const Resource* MatManager::GetResource(const std::string& name) const {
 const MaterialBase* MatManager::CreateMaterialProxy(const MaterialBase& material) {
     m_matPool.push_back(std::move(std::make_unique<MaterialProxy>(material)));
     return m_matPool.back().get();
+}
+
+ShaderUnitTemplate* MatManager::GetShaderUnitTemplate(const std::string& name_id) const {
+    auto it = m_shader_units.find(name_id);
+    if (it == m_shader_units.end())
+        return nullptr;
+    return it->second;
 }

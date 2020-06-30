@@ -680,9 +680,8 @@ def collect_shader_resources(depsgraph, scene, fs):
         fs.serialize( resource[0] ) # type
         fs.serialize( resource[1] ) # external file name
 
-# Export OSL shader group
-matname_to_id = {}
-def export_materials(depsgraph, fs):
+# this will be deprecated eventually, it is left here for reference purposes
+def old_export_materials(depsgraph, fs):
     scene = depsgraph.scene
     if scene.sort_data.allUseDefaultMaterial is True:
         fs.serialize( int(0) )
@@ -846,3 +845,145 @@ def export_materials(depsgraph, fs):
         fs.serialize( material.sort_material.volume_step_cnt )
 
     log( 'Exported %d materials in total.' %(len(materials)) )
+
+matname_to_id = {}
+def export_materials(depsgraph, fs):
+    # if we are in no-material mode, just skip outputting all materials
+    if depsgraph.scene.sort_data.allUseDefaultMaterial is True:
+        fs.serialize( SID('End of Material') )
+        return None
+
+    # this is used to keep track of all visited nodes to avoid duplicated nodes exported.
+    visited_shader_unit_types = set()
+
+    # loop through all materials and output them if valid
+    i = 0
+    materials = list_materials(depsgraph)
+    for material in materials:
+        # indicating material exporting
+        logD( 'Exporting material %s.' %(material.name) )
+
+        # get output nodes
+        output_node = find_output_node(material)
+        if output_node is None:
+            logD( 'Material %s doesn\'t have any output node, it is invalid and will be ignored.' %(material.name) )
+            continue
+        
+        # update the material mapping
+        compact_material_name = name_compat(material.name)
+        matname_to_id[compact_material_name] = i
+        i += 1
+
+        # whether the material has transparent node
+        has_transparent_node = False
+        # whether there is sss in the material
+        has_sss_node = False
+
+        # basically, this is a topological sort to serialize all nodes.
+        # each node type will get exported exactly once to avoid duplicated shader unit compliation.
+        def collect_shader_unit(shader_node, visited_instance, visited_types, shader_node_connections, node_type_mapping, input_index = -1):
+            # no need to process a node multiple times
+            if shader_node in visited_node_instances:
+                return
+
+            # add the current node to visited cache to avoid it being visited again
+            visited_node_instances.add(shader_node)
+
+            # update transparent and sss flag
+            if shader_node.isTransparentNode() is True:
+                nonlocal has_transparent_node
+                has_transparent_node = True
+            if shader_node.isSSSNode() is True:
+                nonlocal has_sss_node
+                has_sss_node = True
+
+            # this identifies the unique name of the shader
+            current_shader_node_name = shader_node.getUniqueName()
+
+            # this is to make sure each output has an unique name
+            if shader_node.needSerializingShader() is False:
+                current_shader_node_name = current_shader_node_name + compact_material_name
+
+            # the type of the node
+            shader_node_type = shader_node.type_identifier()
+
+            # mapping from node name to node type
+            node_type_mapping[shader_node] = shader_node_type
+
+            # grab all source shader nodes
+            inputs = shader_node.inputs if input_index < 0 else [shader_node.inputs[input_index]]
+            for socket in inputs:
+                input_socket = get_from_socket( socket , set() )  # this is a temporary solution
+                if input_socket is None:
+                    continue
+                source_node = input_socket.node
+
+                source_param = source_node.getShaderOutputParameterName(input_socket.name)
+                target_param = shader_node.getShaderInputParameterName(socket.name)
+
+                source_shader_node_name = source_node.getUniqueName()
+
+                # add the shader unit connection
+                shader_node_connections.append( ( source_shader_node_name , source_param , current_shader_node_name, target_param ) )
+
+                # recursively collect shader unit
+                collect_shader_unit(source_node, visited_node_instances, visited_types, shader_node_connections, node_type_mapping)
+
+            # no need to serialize the same node multiple times
+            if shader_node_type in visited_types:
+                return
+            visited_types.add(shader_node_type)
+
+            # export the shader node
+            if shader_node.isGroupNode():
+                fs.serialize(SID("ShaderGroupTemplate"))
+                fs.serialize(SID(shader_node_type))
+
+                # this will be handled later
+            else:
+                fs.serialize(SID('ShaderUnitTemplate'))
+                fs.serialize(shader_node_type)
+                fs.serialize(shader_node.generate_osl_source())
+                shader_node.serialize_shader_resource(fs)
+                print(shader_node.type_identifier())
+                print(shader_node.generate_osl_source())
+
+        # this is the shader node connections
+        shader_node_connections = []
+
+        # this hash table keeps track of all visited shader node instance
+        visited_node_instances = set()
+
+        # node type mapping, this maps from node name to node type
+        shader_node_type = {}
+
+        # iterate through the shader node
+        collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, shader_node_connections, shader_node_type)
+
+        # serialize this material, it is a real material
+        fs.serialize(SID('Material'))
+        fs.serialize(compact_material_name)
+        fs.serialize(len(shader_node_type))
+        for shader_node, shader_type in shader_node_type.items():
+            #fs.serialize(shader_node)
+            fs.serialize(shader_node.getUniqueName())
+            fs.serialize(shader_type)
+            shader_node.serialize_prop(fs)
+        fs.serialize(len(shader_node_connections))
+        print(shader_node_connections)
+        for connection in shader_node_connections:
+            fs.serialize( connection[0] )
+            fs.serialize( connection[1] )
+            fs.serialize( connection[2] )
+            fs.serialize( connection[3] )
+
+        # mark whether there is transparent support in the material, this is very important because it will affect performance eventually.
+        fs.serialize( bool(has_transparent_node) )
+        fs.serialize( bool(has_sss_node) )
+
+        # volume step size and step count
+        fs.serialize( material.sort_material.volume_step )
+        fs.serialize( material.sort_material.volume_step_cnt )
+
+    # indicate the end of material parsing
+    fs.serialize(SID('End of Material'))

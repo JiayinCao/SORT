@@ -216,18 +216,10 @@ private:
         std::string shader_unit_param_name;
         Tsl_Namespace::ShaderUnitInputDefaultValue default_value;
     };
-    struct ShaderResourceBinding {
-        std::string resource_handle_name;
-        std::string shader_resource_name;
-    };
 
     struct ShaderSource{
         std::string name;
         std::string type;
-        std::string source;
-
-        /**< Shader reousrce binding. */
-        std::vector<ShaderResourceBinding>  m_shader_resources_binding;
     };
 
     struct TSL_ShaderData {

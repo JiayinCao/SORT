@@ -95,11 +95,19 @@ public:
     //! @return             The pointer of the resource. 'nullptr' will be returned if the index is out of range.
     const Resource*   GetResource(const std::string& name) const;
 
+    //! @brief  Retrieve shader units through shader unit template type.
+    //!
+    //! @param  name_id     The name of the template.
+    //! @return             The shader unit template returned, nullptr if it doesn't exist.
+    ShaderUnitTemplate* GetShaderUnitTemplate(const std::string& name) const;
+
 private:
     std::vector<std::unique_ptr<MaterialBase>>       m_matPool;         /**< Material pool holding all materials. */
     std::unordered_map<std::string, std::string>     m_shaderSources;   /**< TSL shader source code. */
 
-    std::unordered_map<std::string, std::unique_ptr<Resource>> m_resources;       /**< Resources used during BXDF evaluation. */
+    std::unordered_map<std::string, std::unique_ptr<Resource>>  m_resources;       /**< Resources used during BXDF evaluation. */
+
+    std::unordered_map<std::string, ShaderUnitTemplate*>     m_shader_units;
 
     friend class Singleton<MatManager>;
 };
