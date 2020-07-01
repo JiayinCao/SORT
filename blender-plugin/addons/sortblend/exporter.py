@@ -700,7 +700,8 @@ def export_materials(depsgraph, fs):
                 return
 
             # add the current node to visited cache to avoid it being visited again
-            visited_node_instances.add(shader_node)
+            if shader_node.isMaterialOutputNode() is False:
+                visited_node_instances.add(shader_node)
 
             # update transparent and sss flag
             if shader_node.isTransparentNode() is True:
@@ -713,8 +714,8 @@ def export_materials(depsgraph, fs):
             # this identifies the unique name of the shader
             current_shader_node_name = shader_node.getUniqueName()
 
-            # this is to make sure each output has an unique name
-            if shader_node.needSerializingShader() is False:
+            # output node is a bit special that it can be revisited
+            if shader_node.isMaterialOutputNode():
                 current_shader_node_name = current_shader_node_name + compact_material_name
 
             # the type of the node
@@ -724,7 +725,15 @@ def export_materials(depsgraph, fs):
             node_type_mapping[shader_node] = shader_node_type
 
             # grab all source shader nodes
-            inputs = shader_node.inputs if input_index < 0 else [shader_node.inputs[input_index]]
+            inputs = shader_node.inputs 
+            if input_index >= 0:
+                # out of index, simply return, this is because some old assets doesn't have the volume channel
+                # a bit tolerance will allow me to still use the render with old assets
+                if input_index >= len(shader_node.inputs):
+                    return
+                else:
+                    inputs = [shader_node.inputs[input_index]]
+
             for socket in inputs:
                 input_socket = get_from_socket( socket )  # this is a temporary solution
                 if input_socket is None:
@@ -795,34 +804,56 @@ def export_materials(depsgraph, fs):
                 shader_node.serialize_shader_resource(fs)
 
         # this is the shader node connections
-        shader_node_connections = []
+        surface_shader_node_connections = []
+        volume_shader_node_connections = []
 
         # this hash table keeps track of all visited shader node instance
         visited_node_instances = set()
 
         # node type mapping, this maps from node name to node type
-        shader_node_type = {}
+        surface_shader_node_type = {}
+        volume_shader_node_type = {}
 
         # iterate the material for surface shader
-        collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, shader_node_connections, shader_node_type, 0)
+        collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, surface_shader_node_connections, surface_shader_node_type, 0)
+        # iterate the material for volume shader
+        collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, volume_shader_node_connections, volume_shader_node_type, 1)
 
         # serialize this material, it is a real material
         fs.serialize(SID('Material'))
         fs.serialize(compact_material_name)
-        fs.serialize(len(shader_node_type))
-        for shader_node, shader_type in shader_node_type.items():
-            fs.serialize(shader_node.getUniqueName())
-            fs.serialize(shader_type)
-            shader_node.serialize_prop(fs)
-        fs.serialize(len(shader_node_connections))
-        for connection in shader_node_connections:
-            fs.serialize( connection[0] )
-            fs.serialize( connection[1] )
-            fs.serialize( connection[2] )
-            fs.serialize( connection[3] )
 
-        # iterate the material for volume shader
-        # collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, shader_node_connections, shader_node_type, 1)
+        if len(surface_shader_node_type) > 1:
+            fs.serialize(SID('Surface Shader'))
+            fs.serialize(len(surface_shader_node_type))
+            for shader_node, shader_type in surface_shader_node_type.items():
+                fs.serialize(shader_node.getUniqueName())
+                fs.serialize(shader_type)
+                shader_node.serialize_prop(fs)
+            fs.serialize(len(surface_shader_node_connections))
+            for connection in surface_shader_node_connections:
+                fs.serialize( connection[0] )
+                fs.serialize( connection[1] )
+                fs.serialize( connection[2] )
+                fs.serialize( connection[3] )
+        else:
+            fs.serialize( SID('Invalid Surface Shader') )
+
+        if len(volume_shader_node_type) > 1 :
+            fs.serialize(SID('Volume Shader'))
+            fs.serialize(len(volume_shader_node_type))
+            for shader_node, shader_type in volume_shader_node_type.items():
+                fs.serialize(shader_node.getUniqueName())
+                fs.serialize(shader_type)
+                shader_node.serialize_prop(fs)
+            fs.serialize(len(volume_shader_node_connections))
+            for connection in volume_shader_node_connections:
+                fs.serialize( connection[0] )
+                fs.serialize( connection[1] )
+                fs.serialize( connection[2] )
+                fs.serialize( connection[3] )
+        else:
+            fs.serialize( SID('Invalid Volume Shader') )
 
         # mark whether there is transparent support in the material, this is very important because it will affect performance eventually.
         fs.serialize( bool(has_transparent_node) )

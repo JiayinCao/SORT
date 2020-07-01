@@ -276,7 +276,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetRefractionGGX : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann)
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetRefractionGGX)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionGGX*)param;
@@ -285,7 +285,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetRefractionBlinn : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann)
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetRefractionBlinn)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionBlinn*)param;
@@ -294,7 +294,7 @@ namespace {
      };
 
      struct Surface_Closure_MicrofacetRefractionBeckmann : public Surface_Closure_Base {
-         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetReflectionBeckmann)
+         DEFINE_CLOSURETYPE(ClosureTypeMicrofacetRefractionBeckmann)
 
          void Process(const Tsl_Namespace::ClosureParamPtr param, const Tsl_Namespace::float3& w, ScatteringEvent& se) const override {
              const auto& params = *(const ClosureTypeMicrofacetRefractionBeckmann*)param;

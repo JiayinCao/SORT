@@ -77,7 +77,7 @@ void Material::BuildMaterial() {
             }
     
             // begin compiling shader group
-            auto shader_group = BeginShaderGroup(m_name);
+            auto shader_group = BeginShaderGroup(prefix + m_name);
             if (!shader_group)
                 return;
     
@@ -214,11 +214,16 @@ void Material::Serialize(IStreamBase& stream){
         }
     };
 
-    parse_shader_type(m_surface_shader_data, m_surface_shader_valid);
+    StringID surface_shader_tag;
+    stream >> surface_shader_tag;
+    if(surface_shader_tag == "Surface Shader"_sid)
+        parse_shader_type(m_surface_shader_data, m_surface_shader_valid);
 
     // temporary for now
-    // parse_shader_type(m_volume_shader_data, m_volume_shader_valid);
-    m_volume_shader_valid = false;
+    StringID volume_shader_tag;
+    stream >> volume_shader_tag;
+    if(volume_shader_tag == "Volume Shader"_sid)
+        parse_shader_type(m_volume_shader_data, m_volume_shader_valid);
 
     stream >> m_hasTransparentNode;
     stream >> m_hasSSSNode;

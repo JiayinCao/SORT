@@ -713,9 +713,9 @@ class SORTShadingNode(bpy.types.Node):
     # whether the node is a sss node
     def isSSSNode(self):
         return False
-    # whether the shader node needs to export its shader source
-    def needSerializingShader(self):
-        return True
+    # whether it is the output node
+    def isMaterialOutputNode(self):
+        return False
     # serialize shader resource data
     def serialize_shader_resource(self, fs):
         fs.serialize(0)
@@ -977,9 +977,6 @@ class SORTNodeOutput(SORTShadingNode):
         self.inputs.new( 'SORTNodeSocketBxdf' , 'Surface' )
         self.inputs.new( 'SORTNodeSocketVolume' , 'Volume' )
 
-    # whether the shader node needs to export its shader source
-    def needSerializingShader(self):
-        return False
     # no unique name for output node
     def getUniqueName(self):
         return 'ShaderOutput_'
@@ -994,6 +991,9 @@ class SORTNodeOutput(SORTShadingNode):
             return ( None , False )
         from_socket = get_from_socket( self.inputs[1] )
         return ( None , False ) if from_socket is None else ( from_socket.node , True )
+    # whether it is the output node
+    def isMaterialOutputNode(self):
+        return True
 
 @base.register_class
 class SORTNodeExposedInputs(SORTShadingNode):
