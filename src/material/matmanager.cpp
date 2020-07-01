@@ -55,16 +55,6 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     const auto current_task = GetCurrentTask();
     const auto dependencies = current_task->GetDependencies();
 
-    auto shader_source_cnt = 0u;
-    stream >> shader_source_cnt;
-    for (auto i = 0u; i < shader_source_cnt; ++i) {
-        std::string shader_name;
-        std::string shader_source;
-        stream >> shader_name;
-        stream >> shader_source;
-        m_shaderSources[shader_name] = shader_source;
-    }
-
     auto resource_cnt = 0u;
     stream >> resource_cnt;
     for (auto i = 0u; i < resource_cnt; ++i) {
@@ -302,20 +292,6 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     }
 
     return (unsigned int)m_matPool.size();
-}
-
-std::string MatManager::LoadShaderSourceCode(const std::string& shaderName, const std::string& shaderType){
-    std::string shader;
-
-    // If there is no such a shader type, just return an empty string.
-    if (m_shaderSources.count(shaderType) == 0) {
-        slog(WARNING, MATERIAL, "Can't find TSL shader type %s.", shaderType.c_str());
-        slog(WARNING, MATERIAL, "Failed to build shader %s.", shaderName.c_str());
-        return shader;
-    }
-
-    const auto& shader_template = m_shaderSources[shaderType];
-    return shader_template;
 }
 
 const Resource* MatManager::GetResource(const std::string& name) const {

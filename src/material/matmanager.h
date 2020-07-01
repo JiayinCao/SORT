@@ -82,13 +82,6 @@ public:
     // result           : the number of materials in the file
     unsigned    ParseMatFile( class IStreamBase& stream );
 
-    //! @brief  Load the shader source code given a specific shader type
-    //!
-    //! @param  shaderName  The name of the shader to be constructed.
-    //! @param  shaderType  The type of shader to be constructed.
-    //! @return             The constructed shader source code.
-    std::string LoadShaderSourceCode(const std::string& shaderName, const std::string& shaderType);
-
     //! @brief  Get resource data based on index.
     //!
     //! @param  name        Name of the resource.
@@ -103,7 +96,6 @@ public:
 
 private:
     std::vector<std::unique_ptr<MaterialBase>>       m_matPool;         /**< Material pool holding all materials. */
-    std::unordered_map<std::string, std::string>     m_shaderSources;   /**< TSL shader source code. */
 
     std::unordered_map<std::string, std::unique_ptr<Resource>>  m_resources;       /**< Resources used during BXDF evaluation. */
 

@@ -1181,17 +1181,6 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
             output_socket = self.outputs.new(socket_bl_idname, socket_name)
             output_socket.sort_label = output_socket.name
 
-    # get shader parameter name
-    def getShaderInputParameterName(self,param):
-        return param.replace(' ', '')
-    def getShaderOutputParameterName(self,param):
-        return param.replace(' ', '')
-
-    # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
-    def type_identifier(self):
-        ng = get_node_groups_by_id(self.bl_idname)
-        return self.bl_idname + ng.name
-
     # this function helps serializing the material information
     def serialize_prop(self,fs):
         inputs = self.inputs
@@ -1199,9 +1188,14 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
         for input in inputs:
             input.serialize(fs)
 
-    # get unique name, group node doesn't need to have instance even if it has, but the shaders are exactly the same
+    # this name uniquelly identifies a shader group instance used in a material.
     def getUniqueName(self):
         return self.bl_idname + str( self.as_pointer() )
+    
+    # each type of shader group has exactly the same id identifier
+    def type_identifier(self):
+        ng = get_node_groups_by_id(self.bl_idname)
+        return self.bl_idname + ng.name
 
 @base.register_class
 class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
@@ -1296,8 +1290,6 @@ class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
     def isGroupInputNode(self):
         return True
     # get shader parameter name
-    def getShaderInputParameterName(self,param):
-        return param.replace(' ', '')
     def getShaderOutputParameterName(self,param):
         return 'o' + param.replace(' ', '')
 
@@ -1322,8 +1314,6 @@ class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode)
     # get shader parameter name
     def getShaderInputParameterName(self,param):
         return 'i' + param.replace(' ', '')
-    def getShaderOutputParameterName(self,param):
-        return param.replace(' ', '')
 
     # shader group node needs to inform SORT which parameter to expose
     def serialize_exposed_args(self,fs):
