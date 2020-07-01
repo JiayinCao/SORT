@@ -204,15 +204,13 @@ void Material::Serialize(IStreamBase& stream){
             shader_data.m_sources.push_back(shader_source);
         }
 
-        if (is_shader_valid) {
-            auto connection_cnt = 0u;
-            stream >> connection_cnt;
-            for (auto i = 0u; i < connection_cnt; ++i) {
-                ShaderConnection connection;
-                stream >> connection.source_shader >> connection.source_property;
-                stream >> connection.target_shader >> connection.target_property;
-                shader_data.m_connections.push_back(connection);
-            }
+        auto connection_cnt = 0u;
+        stream >> connection_cnt;
+        for (auto i = 0u; i < connection_cnt; ++i) {
+            ShaderConnection connection;
+            stream >> connection.source_shader >> connection.source_property;
+            stream >> connection.target_shader >> connection.target_property;
+            shader_data.m_connections.push_back(connection);
         }
     };
 

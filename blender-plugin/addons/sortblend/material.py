@@ -646,7 +646,8 @@ class SORTNodeSocketUV(bpy.types.NodeSocket, SORTNodeSocket):
     def get_socket_data_type(self):
         return 'vector3'
     def serialize(self,fs):
-        fs.serialize(self.name.replace(" " , ""))
+        compact_name = self.name.replace(" " , "")
+        fs.serialize(compact_name)
         fs.serialize(4) # this is just a magic number to indicate system value type, will refactor later
         fs.serialize('uvw')
 
@@ -1160,7 +1161,7 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
     def draw_buttons(self, context, layout):
         ng = get_node_groups_by_id(self.bl_idname)
         assert( ng is not None )
-
+        
         row = layout.row()
         row.prop(ng, 'name', text='')
         row.operator('sort.node_group_edit', text='', icon= 'GROUP')
@@ -1182,52 +1183,21 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
 
     # get shader parameter name
     def getShaderInputParameterName(self,param):
-        return 'i' + param.replace(' ', '')
+        return param.replace(' ', '')
     def getShaderOutputParameterName(self,param):
-        return 'o' + param.replace(' ', '')
+        return param.replace(' ', '')
 
-    # this is just a proxy node
-    def generate_osl_source(self):
-        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color',
-                               'SORTNodeSocketColor': 'color',
-                               'SORTNodeSocketFloat': 'float',
-                               'SORTNodeSocketFloatVector': 'vector',
-                               'SORTNodeSocketLargeFloat': 'float',
-                               'SORTNodeSocketAnyFloat': 'float',
-                               'SORTNodeSocketNormal': 'normal',
-                               'SORTNodeSocketUV': 'vector'}
-
-        inputs = self.inputs
-
-        osl_shader = 'shader PassThrough_GroupInput('
-        for i in range( 0 , len(inputs) ):
-            input = inputs[i]
-            input_type = socket_type_mapping[input.bl_idname]
-            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = @, \n'
-        for i in range( 0 , len(inputs) ):
-            output = inputs[i]
-            output_type = socket_type_mapping[output.bl_idname]
-            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = @'
-            if i < len(inputs) - 1 :
-                osl_shader += ',\n'
-            else:
-                osl_shader += '){\n'
-
-        for i in range( 0 , len(inputs) ):
-            var_name = inputs[i].name
-            osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
-        osl_shader += '}'
-        return osl_shader
+    # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
+    def type_identifier(self):
+        ng = get_node_groups_by_id(self.bl_idname)
+        return self.bl_idname + ng.name
 
     # this function helps serializing the material information
     def serialize_prop(self,fs):
         inputs = self.inputs
-        fs.serialize(len(inputs)*2)
+        fs.serialize(len(inputs))
         for input in inputs:
-            fs.serialize( input.export_osl_value() )
-        # this time it is for output default values, this is useless, but needed by OSL compiler
-        for input in inputs:
-            fs.serialize( input.export_osl_value() )
+            input.serialize(fs)
 
     # get unique name, group node doesn't need to have instance even if it has, but the shaders are exactly the same
     def getUniqueName(self):
@@ -1246,12 +1216,88 @@ class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
         self.outputs.new('sort_dummy_socket', '')
         self.node_kind = 'outputs'
 
+    # shader group node needs to inform SORT which parameter to expose
+    def serialize_exposed_args(self,fs):
+        # serialize the name first
+        name = self.getUniqueName()
+        fs.serialize(name)
+
+        # this may be a temporary solution for now
+        socket_type_mapping = {'SORTNodeSocketBxdf': SID('closure'),
+                               'SORTNodeSocketColor': SID('vector'),
+                               'SORTNodeSocketFloat': SID('float'),
+                               'SORTNodeSocketFloatVector': SID('vector'),
+                               'SORTNodeSocketLargeFloat': SID('float'),
+                               'SORTNodeSocketAnyFloat': SID('float'),
+                               'SORTNodeSocketNormal': SID('vector'),
+                               'SORTNodeSocketUV': SID('vector')}
+
+        # expose all paremters, of course
+        fs.serialize(len(self.outputs) - 1)
+        for output in self.outputs:
+            # dummy socket means nothing
+            if output.isDummySocket():
+                continue
+
+            fs.serialize(self.getShaderInputParameterName(output.name))
+            fs.serialize(socket_type_mapping[output.bl_idname])
+
+    # this is just a proxy node
+    def generate_osl_source(self):
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color',
+                               'SORTNodeSocketColor': 'vector',
+                               'SORTNodeSocketFloat': 'float',
+                               'SORTNodeSocketFloatVector': 'vector',
+                               'SORTNodeSocketLargeFloat': 'float',
+                               'SORTNodeSocketAnyFloat': 'float',
+                               'SORTNodeSocketNormal': 'vector',
+                               'SORTNodeSocketUV': 'vector'}
+
+        outputs = self.outputs
+
+        first_arg = True
+
+        osl_shader = 'shader PassThrough_GroupInput('
+        for output in outputs:
+            if output.isDummySocket():
+                continue
+                
+            if first_arg is False:
+                osl_shader += ',\n'
+            first_arg = False
+
+            input_type = socket_type_mapping[output.bl_idname]
+            osl_shader += input_type + ' ' + self.getShaderInputParameterName(output.name)
+
+        for output in outputs:
+            if output.isDummySocket():
+                osl_shader += '){\n'
+                continue
+                
+            if first_arg is False:
+                osl_shader += ',\n'
+            first_arg = False
+
+            output_type = socket_type_mapping[output.bl_idname]
+            osl_shader += 'out ' + output_type + ' ' + self.getShaderOutputParameterName(output.name)
+            
+        for output in outputs:
+            if output.isDummySocket():
+                continue
+            var_name = output.name
+            osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
+        osl_shader += '}'
+        return osl_shader
+
+    # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
+    def type_identifier(self):
+        return self.bl_idname + str( self.as_pointer() )
     # whether the node is a group input
     def isGroupInputNode(self):
         return True
     # get shader parameter name
     def getShaderInputParameterName(self,param):
-        return 'i' + param.replace(' ', '')
+        return param.replace(' ', '')
     def getShaderOutputParameterName(self,param):
         return 'o' + param.replace(' ', '')
 
@@ -1270,50 +1316,85 @@ class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode)
     # whether the node is a group output
     def isGroupOutputNode(self):
         return True
+    # unique name to identify the node type, because some node can output mutitple shaders, need to output all if necessary
+    def type_identifier(self):
+        return self.bl_idname + str( self.as_pointer() )
     # get shader parameter name
     def getShaderInputParameterName(self,param):
         return 'i' + param.replace(' ', '')
     def getShaderOutputParameterName(self,param):
-        return 'o' + param.replace(' ', '')
+        return param.replace(' ', '')
+
+    # shader group node needs to inform SORT which parameter to expose
+    def serialize_exposed_args(self,fs):
+        # serialize the name first
+        name = self.getUniqueName()
+        fs.serialize(name)
+
+        # this may be a temporary solution for now
+        socket_type_mapping = {'SORTNodeSocketBxdf': SID('closure'),
+                               'SORTNodeSocketColor': SID('vector'),
+                               'SORTNodeSocketFloat': SID('float'),
+                               'SORTNodeSocketFloatVector': SID('vector'),
+                               'SORTNodeSocketLargeFloat': SID('float'),
+                               'SORTNodeSocketAnyFloat': SID('float'),
+                               'SORTNodeSocketNormal': SID('vector'),
+                               'SORTNodeSocketUV': SID('vector')}
+
+        # expose all paremters, of course
+        fs.serialize(len(self.inputs) - 1)
+        for input in self.inputs:
+            # dummy socket means nothing
+            if input.isDummySocket():
+                continue
+
+            fs.serialize(fs.serialize(self.getShaderOutputParameterName(input.name)))
+            fs.serialize(socket_type_mapping[input.bl_idname])
 
     # this is just a proxy node
     def generate_osl_source(self):
-        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color',
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure',
                                'SORTNodeSocketColor': 'color',
                                'SORTNodeSocketFloat': 'float',
                                'SORTNodeSocketFloatVector': 'vector',
                                'SORTNodeSocketLargeFloat': 'float',
                                'SORTNodeSocketAnyFloat': 'float',
-                               'SORTNodeSocketNormal': 'normal',
+                               'SORTNodeSocketNormal': 'vector',
                                'SORTNodeSocketUV': 'vector'}
 
         inputs = self.inputs
 
-        last_input_id = -1
-        osl_shader = 'shader PassThrough_GroupInput('
-        for i in range( 0 , len(inputs) ):
-            input = inputs[i]
+        first_arg = True
+
+        osl_shader = 'shader PassThrough_GroupOutput('
+        for input in inputs:
             if input.isDummySocket():
                 continue
-            input_type = socket_type_mapping[input.bl_idname]
-            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name) + ' = ' + input.export_osl_value() + ', \n'
-
-            last_input_id = i
-        for i in range( 0 , len(inputs) ):
-            output = inputs[i]
-            if output.isDummySocket():
-                continue
-            output_type = socket_type_mapping[output.bl_idname]
-            osl_shader += 'output ' + output_type + ' ' + self.getShaderOutputParameterName(output.name) + ' = ' + output.export_osl_value() + ', \n'
-            if i != last_input_id:
+            
+            if first_arg is False:
                 osl_shader += ',\n'
-            else:
-                osl_shader += '){\n'
+            first_arg = False
 
-        for i in range( 0 , len(inputs) ):
-            if inputs[i].isDummySocket():
+            input_type = socket_type_mapping[input.bl_idname]
+            osl_shader += input_type + ' ' + self.getShaderInputParameterName(input.name)
+
+        for input in inputs:
+            if input.isDummySocket():
+                osl_shader += '){\n'
                 continue
-            var_name = inputs[i].name
+                
+            if first_arg is False:
+                osl_shader += ',\n'
+            first_arg = False
+
+            input_type = socket_type_mapping[input.bl_idname]
+            osl_shader += 'out ' + input_type + ' ' + self.getShaderOutputParameterName(input.name)
+            
+
+        for input in inputs:
+            if input.isDummySocket():
+                continue
+            var_name = input.name
             osl_shader += self.getShaderOutputParameterName(var_name) + ' = ' + self.getShaderInputParameterName(var_name) + ';\n'
         osl_shader += '}'
         return osl_shader
@@ -1394,19 +1475,19 @@ class SORTNode_Material_Mirror(SORTShadingNode):
     bl_label = 'Mirror'
     bl_idname = 'SORTNode_Material_Mirror'
     osl_shader = '''
-        shader Mirror( color BaseColor ,
+        shader Mirror( color Color ,
                        vector Normal ,
                        out closure Result ){
-            Result = make_closure<mirror>( BaseColor , Normal );
+            Result = make_closure<mirror>( Color , Normal );
         }
     '''
     def init(self, context):
-        self.inputs.new( 'SORTNodeSocketColor' , 'BaseColor' )
+        self.inputs.new( 'SORTNodeSocketColor' , 'Color' )
         self.inputs.new( 'SORTNodeSocketNormal' , 'Normal' )
         self.outputs.new( 'SORTNodeSocketBxdf' , 'Result' )
     def serialize_prop(self, fs):
         fs.serialize( 2 )
-        self.inputs['BaseColor'].serialize(fs)
+        self.inputs['Color'].serialize(fs)
         self.inputs['Normal'].serialize(fs)
 
 @SORTShaderNodeTree.register_node('Materials')

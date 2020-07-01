@@ -936,17 +936,62 @@ def export_materials(depsgraph, fs):
 
             # export the shader node
             if shader_node.isGroupNode():
-                fs.serialize(SID("ShaderGroupTemplate"))
-                fs.serialize(SID(shader_node_type))
+                # shader group should have a new set of connections
+                shader_group_connections = []
+                # shader group should also has its own node mapping
+                shader_group_node_mapping = {}
+                # start from a new visited cache
+                shader_group_node_visited = set()   
+                
+                # sub tree for the group nodes
+                sub_tree = shader_node.getGroupTree()
 
-                # this will be handled later
+                # recursively parse the node first
+                output_node = sub_tree.nodes.get("Group Outputs")
+                collect_shader_unit(output_node, shader_group_node_visited, visited_types, shader_group_connections, shader_group_node_mapping)
+
+                # start serialization
+                fs.serialize(SID("ShaderGroupTemplate"))
+                fs.serialize(shader_node_type)
+
+                #print(shader_group_node_visited)
+                #print(shader_group_node_mapping)
+                #print(shader_group_connections)
+
+                fs.serialize(len(shader_group_node_mapping))
+                for shader_node, shader_type in shader_group_node_mapping.items():
+                    fs.serialize(shader_node.getUniqueName())
+                    fs.serialize(shader_type)
+                    shader_node.serialize_prop(fs)
+                fs.serialize(len(shader_group_connections))
+                for connection in shader_group_connections:
+                    fs.serialize( connection[0] )
+                    fs.serialize( connection[1] )
+                    fs.serialize( connection[2] )
+                    fs.serialize( connection[3] )
+                
+                #print( "---------------------Shader Group-------------------------")
+                #print(shader_group_node_mapping)
+                #print(shader_group_connections)
+
+                # indicate the exposed arguments
+                output_node.serialize_exposed_args(fs)
+
+                # if there is input node, exposed the inputs
+                input_node = sub_tree.nodes.get("Group Inputs")
+                if input_node is not None:
+                    input_node.serialize_exposed_args(fs)
+                else:
+                    fs.serialize( "" )
             else:
                 fs.serialize(SID('ShaderUnitTemplate'))
                 fs.serialize(shader_node_type)
                 fs.serialize(shader_node.generate_osl_source())
                 shader_node.serialize_shader_resource(fs)
-                print(shader_node.type_identifier())
-                print(shader_node.generate_osl_source())
+
+                #print( "---------------------Shader Unit-------------------------")
+                #print(shader_node_type)
+                #print(shader_node.generate_osl_source())
 
         # this is the shader node connections
         shader_node_connections = []
@@ -957,25 +1002,30 @@ def export_materials(depsgraph, fs):
         # node type mapping, this maps from node name to node type
         shader_node_type = {}
 
-        # iterate through the shader node
-        collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, shader_node_connections, shader_node_type)
+        # iterate the material for surface shader
+        collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, shader_node_connections, shader_node_type, 0)
 
         # serialize this material, it is a real material
         fs.serialize(SID('Material'))
         fs.serialize(compact_material_name)
         fs.serialize(len(shader_node_type))
         for shader_node, shader_type in shader_node_type.items():
-            #fs.serialize(shader_node)
             fs.serialize(shader_node.getUniqueName())
             fs.serialize(shader_type)
             shader_node.serialize_prop(fs)
         fs.serialize(len(shader_node_connections))
-        print(shader_node_connections)
         for connection in shader_node_connections:
             fs.serialize( connection[0] )
             fs.serialize( connection[1] )
             fs.serialize( connection[2] )
             fs.serialize( connection[3] )
+
+        # iterate the material for volume shader
+        # collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, shader_node_connections, shader_node_type, 1)
+
+        #print( "---------------------Material-------------------------")
+        #print(shader_node_type)
+        #print(shader_node_connections)
 
         # mark whether there is transparent support in the material, this is very important because it will affect performance eventually.
         fs.serialize( bool(has_transparent_node) )

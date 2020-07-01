@@ -50,10 +50,10 @@ Tsl_Namespace::ShadingContext* GetShadingContext();
 ShaderGroupTemplate* BeginShaderGroup(const std::string& group_name);
 
 //! @brief  End bulding the shader group
-bool EndShaderGroup(ShaderGroupTemplate* sg);
+TSL_Resolving_Status EndShaderGroup(ShaderGroupTemplate* sg);
 
 //! @brief  Resolve shader instance.
-bool ResolveShaderInstance(ShaderInstance* si);
+TSL_Resolving_Status ResolveShaderInstance(ShaderInstance* si);
 
 //! @brief  Execute Jited shader code.
 void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent& se);

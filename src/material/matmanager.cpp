@@ -38,6 +38,16 @@ void ShaderCompiling_Task::Execute(){
     m_material->BuildMaterial();
 }
 
+ShaderArgumentTypeEnum shader_arg_type_from_sid(const StringID id) {
+    if (id == "closure"_sid)
+        return TSL_TYPE_CLOSURE;
+    else if (id == "vector"_sid)
+        return TSL_TYPE_FLOAT3;
+    else if (id == "float"_sid)
+        return TSL_TYPE_FLOAT;
+    return TSL_TYPE_INVALID;
+}
+
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     SORT_PROFILE("Parsing Materials");
@@ -139,7 +149,137 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
                 m_shader_units[shader_node_type] = shader_unit_template;
         }
         else if (material_type == SID("ShaderGroupTemplate")) {
-            // this is to be handled later.
+            // The following logic is very similar with 
+            std::string shader_template_type;
+            stream >> shader_template_type;
+
+            unsigned shader_unit_cnt = 0;
+            stream >> shader_unit_cnt;
+
+            TSL_ShaderData shader_data;
+
+            for (auto i = 0u; i < shader_unit_cnt; ++i) {
+                // parse surface shader
+                ShaderSource shader_source;
+                stream >> shader_source.name >> shader_source.type;
+
+                auto parameter_cnt = 0u;
+                stream >> parameter_cnt;
+                for (auto j = 0u; j < parameter_cnt; ++j) {
+                    ShaderParamDefaultValue default_value;
+                    default_value.shader_unit_name = shader_source.name;
+                    stream >> default_value.shader_unit_param_name;
+                    int channel_num = 0;
+                    stream >> channel_num;
+                    // currently only float and float3 are supported for now
+                    if (channel_num == 1) {
+                        default_value.default_value.m_type = ShaderArgumentTypeEnum::TSL_TYPE_FLOAT;
+                        float x;
+                        stream >> x;
+                        default_value.default_value.m_val.m_float = x;
+                    }
+                    else if (channel_num == 3) {
+                        default_value.default_value.m_type = ShaderArgumentTypeEnum::TSL_TYPE_FLOAT3;
+                        float x, y, z;
+                        stream >> x >> y >> z;
+                        default_value.default_value.m_val.m_float3 = Tsl_Namespace::make_float3(x, y, z);
+                    }
+                    else if (channel_num == 4) { // this is fairly ugly, but it works, I will find time to refactor it later.
+                        default_value.default_value.m_type = ShaderArgumentTypeEnum::TSL_TYPE_GLOBAL;
+                        m_string_container.push_back(std::string());
+                        stream >> m_string_container.back();
+
+                        default_value.default_value.m_val.m_global_var_name = m_string_container.back().c_str();
+                    }
+
+                    m_paramDefaultValues.push_back(default_value);
+                }
+
+                shader_data.m_sources.push_back(shader_source);
+            }
+
+            auto connection_cnt = 0u;
+            stream >> connection_cnt;
+            for (auto i = 0u; i < connection_cnt; ++i) {
+                ShaderConnection connection;
+                stream >> connection.source_shader >> connection.source_property;
+                stream >> connection.target_shader >> connection.target_property;
+                shader_data.m_connections.push_back(connection);
+            }
+
+            // compiling the shader group template
+            std::unordered_map<std::string, ShaderUnitTemplate*> shader_units;
+            for (const auto& shader : shader_data.m_sources)
+                shader_units[shader.name] = MatManager::GetSingleton().GetShaderUnitTemplate(shader.type);
+
+            // begin compiling shader group
+            auto shader_group = BeginShaderGroup(shader_template_type);
+            if (!shader_group)
+                continue;
+
+            // expose arguments in output node
+            std::string root_shader_name;
+            stream >> root_shader_name;
+            unsigned int exposed_out_arg_cnt = 0;
+            stream >> exposed_out_arg_cnt;
+            for (auto i = 0u; i < exposed_out_arg_cnt; ++i) {
+                std::string arg_name;
+                stream >> arg_name;
+
+                StringID data_type;
+                stream >> data_type;
+
+                // expose the shader interface
+                ArgDescriptor arg;
+                arg.m_name = arg_name;
+                arg.m_type = shader_arg_type_from_sid(data_type);
+                arg.m_is_output = true;
+                shader_group->expose_shader_argument(root_shader_name, arg_name, arg);
+            }
+
+            std::string shader_group_input_name;
+            stream >> shader_group_input_name;
+
+            if (!shader_group_input_name.empty()) {
+                unsigned int exposed_in_arg_cnt = 0;
+                stream >> exposed_in_arg_cnt;
+                for (auto i = 0u; i < exposed_in_arg_cnt; ++i) {
+                    std::string arg_name;
+                    stream >> arg_name;
+
+                    StringID data_type;
+                    stream >> data_type;
+
+                    // expose the shader interface
+                    ArgDescriptor arg;
+                    arg.m_name = arg_name;
+                    arg.m_type = shader_arg_type_from_sid(data_type);
+                    arg.m_is_output = false;
+                    shader_group->expose_shader_argument(shader_group_input_name, arg_name, arg);
+                }
+            }
+
+            for (auto su : shader_units) {
+                const auto is_root = (su.first == root_shader_name);
+                const auto ret = shader_group->add_shader_unit(su.first, su.second, is_root);
+                if (!ret)
+                    continue;
+            }
+
+            // connect the shader units
+            for (auto connection : shader_data.m_connections)
+                shader_group->connect_shader_units(connection.source_shader, connection.source_property, connection.target_shader, connection.target_property);
+
+            // update default values
+            for (const auto& dv : m_paramDefaultValues)
+                shader_group->init_shader_input(dv.shader_unit_name, dv.shader_unit_param_name, dv.default_value);
+
+            // end building the shader group
+            auto ret = EndShaderGroup(shader_group);
+
+            // push it if it compiles the shader successful
+            if (TSL_Resolving_Succeed == ret)
+                m_shader_units[shader_template_type] = shader_group;
         }
         else if (material_type == SID("Material")) {
             // allocate a new material

@@ -28,6 +28,29 @@ struct MediumInteraction;
 class ScatteringEvent;
 class MediumStack;
 
+struct ShaderConnection {
+    std::string source_shader, source_property;
+    std::string target_shader, target_property;
+};
+
+struct ShaderParamDefaultValue {
+    std::string shader_unit_name;
+    std::string shader_unit_param_name;
+    Tsl_Namespace::ShaderUnitInputDefaultValue default_value;
+};
+
+struct ShaderSource {
+    std::string name;
+    std::string type;
+};
+
+struct TSL_ShaderData {
+    /**< Shader source code. */
+    std::vector<ShaderSource>           m_sources;
+    /**< Shader connections. */
+    std::vector<ShaderConnection>       m_connections;
+};
+
 //! @brief  Base interface for material.
 /**
  * MaterialBase is the basic interface for materials.
@@ -206,28 +229,6 @@ private:
     std::string                     m_name;
     /**< Material id. */
     StringID                        m_matID = INVALID_SID;
-
-    struct ShaderConnection {
-        std::string source_shader, source_property;
-        std::string target_shader, target_property;
-    };
-    struct ShaderParamDefaultValue {
-        std::string shader_unit_name;
-        std::string shader_unit_param_name;
-        Tsl_Namespace::ShaderUnitInputDefaultValue default_value;
-    };
-
-    struct ShaderSource{
-        std::string name;
-        std::string type;
-    };
-
-    struct TSL_ShaderData {
-        /**< Shader source code. */
-        std::vector<ShaderSource>           m_sources;
-        /**< Shader connections. */
-        std::vector<ShaderConnection>       m_connections;
-    };
 
     /**< tsl shader source data. */
     TSL_ShaderData                  m_surface_shader_data;

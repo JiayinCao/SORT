@@ -69,11 +69,11 @@ ShaderGroupTemplate*    BeginShaderGroup(const std::string& group_name) {
     return g_contexts[ThreadId()]->begin_shader_group_template(group_name);
 }
 
-bool EndShaderGroup(ShaderGroupTemplate* sg) {
+TSL_Resolving_Status EndShaderGroup(ShaderGroupTemplate* sg) {
     return g_contexts[ThreadId()]->end_shader_group_template(sg);
 }
 
-bool ResolveShaderInstance(ShaderInstance* si) {
+TSL_Resolving_Status ResolveShaderInstance(ShaderInstance* si) {
     return g_contexts[ThreadId()]->resolve_shader_instance(si);
 }
 
