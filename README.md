@@ -1,5 +1,8 @@
 # SORT
+<!--- 
 [![Build status](https://travis-ci.org/JerryCao1985/SORT.svg?branch=master)](https://travis-ci.org/JerryCao1985/SORT)
+--->
+
 [![Build status](https://ci.appveyor.com/api/projects/status/6kiio0dak0wc3ics?svg=true)](https://ci.appveyor.com/project/JerryCao1985/sort)
 
 ## Introduction
