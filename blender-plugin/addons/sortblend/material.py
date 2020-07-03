@@ -2350,10 +2350,12 @@ class SORTNodeImage(SORTShadingNode):
                                   out float Blue ){
             vector scaledUV = UVCoordinate * UVTiling;
 
-            Result = texture2d_sample<g_texture>( scaledUV[0] , scaledUV[1] );
+            Result = texture2d_sample<g_texture>( scaledUV.x , scaledUV.y );
             Red = Result.x;
             Green = Result.y;
             Blue = Result.z;
+
+            Alpha = texture2d_sample_alpha<g_texture>( scaledUV.x , scaledUV.y );
         }
     '''
     tsl_shader_gamma = '''
@@ -2369,13 +2371,15 @@ class SORTNodeImage(SORTShadingNode):
                                  out float Blue ){
             vector scaledUV = UVCoordinate * UVTiling;
 
-            vector gamma_color = texture2d_sample<g_texture>( scaledUV[0] , scaledUV[1] );
+            vector gamma_color = texture2d_sample<g_texture>( scaledUV.x , scaledUV.y );
             Result.x = powf( gamma_color.x , 2.2f );
             Result.y = powf( gamma_color.y , 2.2f );
             Result.z = powf( gamma_color.z , 2.2f );
             Red = Result.x;
             Green = Result.y;
             Blue = Result.z;
+
+            Alpha = texture2d_sample_alpha<g_texture>( scaledUV.x , scaledUV.y );
         }
     '''
     tsl_shader_normal = '''
@@ -2383,7 +2387,6 @@ class SORTNodeImage(SORTShadingNode):
         shader ImageShaderNormal(vector UVCoordinate ,
                                  float  UVTiling ,
                                  out color Result ,
-                                 out float Alpha ,
                                  out float Red ,
                                  out float Green ,
                                  out float Blue ){

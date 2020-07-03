@@ -49,11 +49,16 @@ public:
         slog(WARNING, GENERAL, error);
     }
 
-    void    sample_2d(const void* texture, float u, float v, float3& color, float& alpha) const override {
+    void    sample_2d(const void* texture, float u, float v, float3& color) const override {
         auto resource = (const Resource*)texture;
         auto sort_texture = dynamic_cast<const ImageTexture2D*>(resource);
         auto ret = sort_texture->GetColorFromUV(u, v);
         color = make_float3(ret.x, ret.y, ret.z);
+    }
+
+    void    sample_alpha_2d(const void* texture, float u, float v, float& alpha) const override {
+        auto resource = (const Resource*)texture;
+        auto sort_texture = dynamic_cast<const ImageTexture2D*>(resource);
         alpha = sort_texture->GetAlphaFromtUV(u, v);
     }
 };
