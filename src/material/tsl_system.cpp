@@ -37,6 +37,7 @@ IMPLEMENT_TSLGLOBAL_VAR(float3, position)     // this is world space position
 IMPLEMENT_TSLGLOBAL_VAR(float3, normal)       // this is world space normal
 IMPLEMENT_TSLGLOBAL_VAR(float3, gnormal)      // this is world space geometric normal
 IMPLEMENT_TSLGLOBAL_VAR(float3, I)            // this is world space input direction
+IMPLEMENT_TSLGLOBAL_VAR(float, density)       // volume density
 IMPLEMENT_TSLGLOBAL_END()
 
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
@@ -113,6 +114,7 @@ void ExecuteVolumeShader(Tsl_Namespace::ShaderInstance* shader, const MediumInte
 
 void EvaluateVolumeSample(Tsl_Namespace::ShaderInstance* shader, const MediumInteraction& mi, MediumSample& ms) {
     TslGlobal global;
+    global.density = mi.mesh->SampleVolumeDensity(mi.intersect);
 
     ClosureTreeNodeBase* closure = nullptr;
     auto raw_function = (void(*)(ClosureTreeNodeBase**, TslGlobal*))shader->get_function();

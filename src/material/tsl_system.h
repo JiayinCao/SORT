@@ -41,6 +41,7 @@ DECLARE_TSLGLOBAL_VAR(float3, position)     // this is world space position
 DECLARE_TSLGLOBAL_VAR(float3, normal)       // this is world space normal
 DECLARE_TSLGLOBAL_VAR(float3, gnormal)      // this is world space geometric normal
 DECLARE_TSLGLOBAL_VAR(float3, I)            // this is world space input direction
+DECLARE_TSLGLOBAL_VAR(float, density)       // volume density
 DECLARE_TSLGLOBAL_END()
 
 //! @brief  Get Shading context.

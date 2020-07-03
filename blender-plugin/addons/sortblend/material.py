@@ -3051,14 +3051,19 @@ class SORTNodeVolumeColor(SORTShadingNode):
     bl_label = 'Volume Color'
     bl_idname = 'SORTNodeVolumeColor'
     osl_shader = '''
-        shader VolumeDensity( output vector Result = 0.0 ){
-            // this is a very special 3d texture that is treated different in the renderer
-            Result = texture3d( "volume_color" , P );
+        /*
+        This node is not even supported for now, I don't have a plan to support it in the near future though.
+        texture3d g_density
+        shader VolumeDensity( out float Result = 0.0 ){
+            vector uvw = global_value<local_position>;
+            Result = texture2d_sample<g_density>( uvw.x, uvw.y, uvw.z );
         }
+        */
     '''
     def init(self, context):
         self.outputs.new( 'SORTNodeSocketColor' , 'Result' )
     def serialize_prop(self, fs):
+        # this needs to be changed
         fs.serialize( 0 )
 
 @SORTShaderNodeTree.register_node('Volume Input')
@@ -3066,12 +3071,12 @@ class SORTNodeVolumeDensity(SORTShadingNode):
     bl_label = 'Volume Density'
     bl_idname = 'SORTNodeVolumeDensity'
     osl_shader = '''
-        shader VolumeDensity( output float Result = 0.0 ){
-            // this is a very special 3d texture that is treated different in the renderer
-            Result = texture3d( "volume_density" , P );
+        shader VolumeDensity( out float Result ){
+            Result = global_value<density>;
         }
     '''
     def init(self, context):
         self.outputs.new( 'SORTNodeSocketLargeFloat' , 'Result' )
     def serialize_prop(self, fs):
+        # this needs to be changed
         fs.serialize( 0 )
