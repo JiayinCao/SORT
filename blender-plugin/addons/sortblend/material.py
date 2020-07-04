@@ -1560,9 +1560,8 @@ class SORTNode_Material_UE4Principle(SORTShadingNode):
                           vector Normal ,
                           out closure Result ){
             // UE4 PBS model, this is obviously very wrong since I have no time digging into UE4 for now.
-            color ior, absorb;
-            ior.r = ior.g = ior.b = 0.37f;
-            absorb.r = absorb.g = absorb.b = 2.82f;
+            color ior = color( 0.37f, 0.37f, 0.37f );
+            color absorb = color( 2.82f, 2.82f, 2.82f );
             Result = make_closure<lambert>( BaseColor , Normal ) * ( 1.0f - Metallic ) * 0.92f + 
                      make_closure<microfacet_reflection_ggx>( ior, absorb, RoughnessU, RoughnessV, BaseColor , Normal ) * ( Metallic * 0.92 + 0.08 * Specular );
         }
@@ -2014,16 +2013,8 @@ class SORTNode_Material_ModifiedPhong(SORTShadingNode):
                                     color Diffuse ,
                                     vector Normal ,
                                     out closure Result ){
-            // Ideally, TSL should support float * float3, however this is a workaround for now since it is now supported.
-            // I need to get this supported eventually
-            color resolved_diffuse;
-            resolved_diffuse.r = Diffuse.r * DiffuseRatio;
-            resolved_diffuse.g = Diffuse.g * DiffuseRatio;
-            resolved_diffuse.b = Diffuse.b * DiffuseRatio;
-            color resolved_specular;
-            resolved_specular.r = ( 1.0f - DiffuseRatio ) * Specular.r;
-            resolved_specular.g = ( 1.0f - DiffuseRatio ) * Specular.g;
-            resolved_specular.b = ( 1.0f - DiffuseRatio ) * Specular.b;
+            color resolved_diffuse = Diffuse * DiffuseRatio;
+            color resolved_specular = ( 1.0f - DiffuseRatio ) * Specular;
             Result = make_closure<phong>( resolved_diffuse , resolved_specular , SpecularPower , Normal );
         }
     '''
