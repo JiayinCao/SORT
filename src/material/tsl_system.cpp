@@ -65,13 +65,13 @@ public:
 };
 
 // Tsl shading system
-static std::vector<ShadingContext*>    g_contexts;
+static std::vector<std::shared_ptr<ShadingContext>>    g_contexts;
 
 Tsl_Namespace::ShadingContext* GetShadingContext() {
-    return g_contexts[ThreadId()];
+    return g_contexts[ThreadId()].get();
 }
 
-ShaderGroupTemplate*    BeginShaderGroup(const std::string& group_name) {
+std::shared_ptr<ShaderGroupTemplate> BeginShaderGroup(const std::string& group_name) {
     return g_contexts[ThreadId()]->begin_shader_group_template(group_name);
 }
 

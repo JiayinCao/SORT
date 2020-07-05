@@ -49,13 +49,12 @@ void Material::BuildMaterial() {
     auto tried_building_surface_shader = false;
     auto tried_building_volume_shader = false;
 
-    auto build_shader_type = [&](const TSL_ShaderData& shader_data, const char* root_shader, const std::string prefix, bool& shader_valid, bool& trying_building_shader_type, std::unique_ptr<Tsl_Namespace::ShaderInstance>& shader_instance) {
+    auto build_shader_type = [&](const TSL_ShaderData& shader_data, const char* root_shader, const std::string prefix, bool& shader_valid, bool& trying_building_shader_type, ShaderUnitContainer& shader_units, std::shared_ptr<Tsl_Namespace::ShaderInstance>& shader_instance) {
         // Build surface shader
         if (shader_valid) {
             shader_valid = false;
             trying_building_shader_type = true;
     
-            std::unordered_map<std::string, ShaderUnitTemplate*> shader_units;
             for (const auto& shader : shader_data.m_sources)
                 shader_units[shader.name] = MatManager::GetSingleton().GetShaderUnitTemplate(shader.type);
     
@@ -64,12 +63,12 @@ void Material::BuildMaterial() {
             const auto root_shader_name = prefix + output_node_name;
             if(auto shader_unit_template = context->begin_shader_unit_template(root_shader_name)){
                 // compile the root shader
-                const auto ret = context->compile_shader_unit_template(shader_unit_template, root_shader);
+                const auto ret = context->compile_shader_unit_template(shader_unit_template.get(), root_shader);
                 if (!ret)
                     return;
 
                 // indicate the shader unit is done
-                context->end_shader_unit_template(shader_unit_template);
+                context->end_shader_unit_template(shader_unit_template.get());
 
                 shader_units[root_shader_name] = shader_unit_template;
             } else {
@@ -106,7 +105,7 @@ void Material::BuildMaterial() {
                 shader_group->init_shader_input(dv.shader_unit_name, dv.shader_unit_param_name, dv.default_value);
             
             // end building the shader group
-            auto ret = EndShaderGroup(shader_group);
+            auto ret = EndShaderGroup(shader_group.get());
             if (TSL_Resolving_Succeed != ret)
                 return;
     
@@ -121,10 +120,10 @@ void Material::BuildMaterial() {
     };
 
     // build surface shader
-    build_shader_type(m_surface_shader_data, surface_shader_root, "Surface", m_surface_shader_valid, tried_building_surface_shader, m_surface_shader);
+    build_shader_type(m_surface_shader_data, surface_shader_root, "Surface", m_surface_shader_valid, tried_building_surface_shader, m_surface_shader_units, m_surface_shader);
 
     // build volume shader
-    build_shader_type(m_volume_shader_data, surface_volume_root, "Volume", m_volume_shader_valid, tried_building_volume_shader, m_volume_shader);
+    build_shader_type(m_volume_shader_data, surface_volume_root, "Volume", m_volume_shader_valid, tried_building_volume_shader, m_volume_shader_units, m_volume_shader);
 
     // if there is volume shader, but no surface shader, a special transparent material will be applied automatically
     // this will make the shader authoring a lot easier.

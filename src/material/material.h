@@ -235,8 +235,13 @@ private:
     TSL_ShaderData                  m_volume_shader_data;
 
     /**< Shader unit instance. */
-    std::unique_ptr<Tsl_Namespace::ShaderInstance>  m_surface_shader = nullptr;
-    std::unique_ptr<Tsl_Namespace::ShaderInstance>  m_volume_shader = nullptr;
+    std::shared_ptr<Tsl_Namespace::ShaderInstance>  m_surface_shader = nullptr;
+    std::shared_ptr<Tsl_Namespace::ShaderInstance>  m_volume_shader = nullptr;
+
+    /**< TSL data structures. */
+    using ShaderUnitContainer = std::unordered_map<std::string, std::shared_ptr<Tsl_Namespace::ShaderUnitTemplate>>;
+    ShaderUnitContainer m_surface_shader_units;
+    ShaderUnitContainer m_volume_shader_units;
 
     /**< Shader unit default values. */
     std::vector<ShaderParamDefaultValue>        m_paramDefaultValues;

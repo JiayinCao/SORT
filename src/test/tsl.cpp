@@ -30,24 +30,24 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
 
     // the root shader node, this usually matches to the output node in material system
     auto root_shader_template = shading_context->begin_shader_unit_template("root_shader");
-    const auto root_shader_compiling = shading_context->compile_shader_unit_template(root_shader_template, R"(
+    const auto root_shader_compiling = shading_context->compile_shader_unit_template(root_shader_template.get(), R"(
         shader output_node( float in_bxdf , out float out_bxdf ){
             out_bxdf = in_bxdf * 1231.0f;
         }
     )");
-    shading_context->end_shader_unit_template(root_shader_template);
+    shading_context->end_shader_unit_template(root_shader_template.get());
     EXPECT_NE(nullptr, root_shader_template);
     EXPECT_EQ(true, root_shader_compiling);
 
     // a bxdf node
     auto bxdf_shader_template = shading_context->begin_shader_unit_template("bxdf_shader");
-    const auto bxdf_shader_compiling = shading_context->compile_shader_unit_template(bxdf_shader_template, R"(
+    const auto bxdf_shader_compiling = shading_context->compile_shader_unit_template(bxdf_shader_template.get(), R"(
         shader lambert_node( float in_bxdf , out float out_bxdf , out float dummy ){
             out_bxdf = in_bxdf;
             // dummy = 1.0f;
         }
     )");
-    shading_context->end_shader_unit_template(bxdf_shader_template);
+    shading_context->end_shader_unit_template(bxdf_shader_template.get());
     EXPECT_NE(nullptr, bxdf_shader_template);
     EXPECT_EQ(true, bxdf_shader_compiling);
 
@@ -77,7 +77,7 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
     shader_group->expose_shader_argument("bxdf_shader", "in_bxdf", arg);
 
     // resolve the shader group
-    auto status = shading_context->end_shader_group_template(shader_group);
+    auto status = shading_context->end_shader_group_template(shader_group.get());
     EXPECT_EQ(TSL_Resolving_Status::TSL_Resolving_Succeed, status);
 
     auto shader_instance = shader_group->make_shader_instance();

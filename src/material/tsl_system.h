@@ -48,7 +48,7 @@ DECLARE_TSLGLOBAL_END()
 Tsl_Namespace::ShadingContext* GetShadingContext();
 
 //! @brief  Begin building the shader group
-ShaderGroupTemplate* BeginShaderGroup(const std::string& group_name);
+std::shared_ptr<ShaderGroupTemplate> BeginShaderGroup(const std::string& group_name);
 
 //! @brief  End bulding the shader group
 TSL_Resolving_Status EndShaderGroup(ShaderGroupTemplate* sg);

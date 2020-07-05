@@ -92,14 +92,14 @@ public:
     //!
     //! @param  name_id     The name of the template.
     //! @return             The shader unit template returned, nullptr if it doesn't exist.
-    ShaderUnitTemplate* GetShaderUnitTemplate(const std::string& name) const;
+    std::shared_ptr<ShaderUnitTemplate> GetShaderUnitTemplate(const std::string& name) const;
 
 private:
     std::vector<std::unique_ptr<MaterialBase>>       m_matPool;         /**< Material pool holding all materials. */
 
     std::unordered_map<std::string, std::unique_ptr<Resource>>  m_resources;       /**< Resources used during BXDF evaluation. */
 
-    std::unordered_map<std::string, ShaderUnitTemplate*>     m_shader_units;
+    std::unordered_map<std::string, std::shared_ptr<ShaderUnitTemplate>>     m_shader_units;
 
     /**< Shader unit default values. */
     std::vector<ShaderParamDefaultValue>        m_paramDefaultValues;

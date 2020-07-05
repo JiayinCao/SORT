@@ -129,10 +129,10 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             }
 
             // compile the shader unit
-            const auto ret = shading_context->compile_shader_unit_template(shader_unit_template, source_code.c_str());
+            const auto ret = shading_context->compile_shader_unit_template(shader_unit_template.get(), source_code.c_str());
 
             // indicate the end of shader unit compilation
-            shading_context->end_shader_unit_template(shader_unit_template);
+            shading_context->end_shader_unit_template(shader_unit_template.get());
 
             // push it if it compiles the shader successful
             if( ret )
@@ -198,7 +198,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             }
 
             // compiling the shader group template
-            std::unordered_map<std::string, ShaderUnitTemplate*> shader_units;
+            std::unordered_map<std::string, std::shared_ptr<Tsl_Namespace::ShaderUnitTemplate>> shader_units;
             for (const auto& shader : shader_data.m_sources)
                 shader_units[shader.name] = MatManager::GetSingleton().GetShaderUnitTemplate(shader.type);
 
@@ -265,7 +265,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
                 shader_group->init_shader_input(dv.shader_unit_name, dv.shader_unit_param_name, dv.default_value);
 
             // end building the shader group
-            auto ret = EndShaderGroup(shader_group);
+            auto ret = EndShaderGroup(shader_group.get());
 
             // push it if it compiles the shader successful
             if (TSL_Resolving_Succeed == ret)
@@ -306,7 +306,7 @@ const MaterialBase* MatManager::CreateMaterialProxy(const MaterialBase& material
     return m_matPool.back().get();
 }
 
-ShaderUnitTemplate* MatManager::GetShaderUnitTemplate(const std::string& name_id) const {
+std::shared_ptr<ShaderUnitTemplate> MatManager::GetShaderUnitTemplate(const std::string& name_id) const {
     auto it = m_shader_units.find(name_id);
     if (it == m_shader_units.end())
         return nullptr;
