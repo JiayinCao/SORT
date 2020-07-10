@@ -39,7 +39,7 @@ static const double MERL_GREEN_SCALE = 0.000766666666666667;
 static const double MERL_BLUE_SCALE = 0.0011066666666666667;
 
 // Load data from file
-bool MerlData::LoadResource( const std::string& filename )
+bool MerlData::LoadResource( const std::string filename )
 {
     // get full path
     auto str = ( filename );

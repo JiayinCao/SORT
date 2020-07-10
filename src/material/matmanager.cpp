@@ -15,6 +15,17 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+// This is a temporary quick solution to enable multi-thread texture loading
+// It is by no means a very good idea to parallel a bunch of IO bound threads.
+// However, my newly planned job system is far from being ready yet, I'll live with it for now.
+// This async loading eventually will be less useful since I'm planning to implement a texture cache
+// system in the future to do lazy texture loading in the future.
+#define ASYNC_TEXTURE_LOADING
+
+#ifdef ASYNC_TEXTURE_LOADING
+#include <future>
+#endif
+
 #include "matmanager.h"
 #include "material/material.h"
 #include "stream/stream.h"
@@ -48,6 +59,12 @@ ShaderArgumentTypeEnum shader_arg_type_from_sid(const StringID id) {
     return TSL_TYPE_INVALID;
 }
 
+#ifdef ASYNC_TEXTURE_LOADING
+static bool async_load_resource(Resource* resource, std::string filename) {
+    return resource->LoadResource(filename);
+}
+#endif
+
 // parse material file and add the materials into the manager
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     SORT_PROFILE("Parsing Materials");
@@ -57,6 +74,11 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
 
     auto resource_cnt = 0u;
     stream >> resource_cnt;
+
+#ifdef ASYNC_TEXTURE_LOADING
+    std::vector<std::future<bool>>      m_async_resource_reading(resource_cnt);
+#endif
+
     for (auto i = 0u; i < resource_cnt; ++i) {
         std::string resource_file;
         StringID resource_type;
@@ -64,23 +86,30 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
 
         Resource* ptr_resource = nullptr;
 
-        if (resource_type == SID("MerlBRDFMeasuredData")) {
-            m_resources[resource_file] = std::make_unique<MerlData>();
-            ptr_resource = m_resources[resource_file].get();
-        }
-        else if (resource_type == SID("FourierBRDFMeasuredData")) {
-            m_resources[resource_file] = std::make_unique<FourierBxdfData>();
-            ptr_resource = m_resources[resource_file].get();
-        }
-        else if (resource_type == SID("Texture2D")) {
-            m_resources[resource_file] = std::make_unique<ImageTexture2D>();
-            ptr_resource = m_resources[resource_file].get();
-        }
-        
-        if (!ptr_resource) {
-            sAssertMsg(false, MATERIAL, "Resource type not supported!");
-        } else {
-            ptr_resource->LoadResource(resource_file);
+        if (0 == m_resources.count(resource_file)) {
+            if (resource_type == SID("MerlBRDFMeasuredData")) {
+                m_resources[resource_file] = std::make_unique<MerlData>();
+                ptr_resource = m_resources[resource_file].get();
+            }
+            else if (resource_type == SID("FourierBRDFMeasuredData")) {
+                m_resources[resource_file] = std::make_unique<FourierBxdfData>();
+                ptr_resource = m_resources[resource_file].get();
+            }
+            else if (resource_type == SID("Texture2D")) {
+                m_resources[resource_file] = std::make_unique<ImageTexture2D>();
+                ptr_resource = m_resources[resource_file].get();
+            }
+
+            if (!ptr_resource) {
+                sAssertMsg(false, MATERIAL, "Resource type not supported!");
+            }
+            else {
+#ifdef ASYNC_TEXTURE_LOADING
+                m_async_resource_reading[i] = std::async(std::launch::async, async_load_resource, ptr_resource, resource_file);
+#else
+                ptr_resource->LoadResource(resource_file);
+#endif
+            }
         }
     }
 
@@ -290,6 +319,10 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             sAssertMsg(false, MATERIAL, "Serialization is broken.");
         }
     }
+
+#ifdef ASYNC_TEXTURE_LOADING
+    std::for_each(m_async_resource_reading.begin(), m_async_resource_reading.end(), [](std::future<bool>& promise) { promise.wait(); });
+#endif
 
     return (unsigned int)m_matPool.size();
 }

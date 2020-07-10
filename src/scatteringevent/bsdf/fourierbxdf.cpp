@@ -28,7 +28,7 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFourier, void*, measured_data)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFourier, float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeFourier)
 
-bool FourierBxdfData::LoadResource( const std::string& filename ){
+bool FourierBxdfData::LoadResource( const std::string filename ){
     std::ifstream file( filename.c_str(), std::ios::binary);
     if( !file.is_open() )
         return false;

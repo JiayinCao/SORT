@@ -32,7 +32,7 @@ public:
     //!
     //! @param  filename        Name of the external file holding the data.
     //! @return                 Whether the file has been loaded successfully.
-    bool LoadResource(const std::string& filename) override;
+    bool LoadResource(const std::string filename) override;
 
     //! @brief  Get the color at a specific position.
     //!

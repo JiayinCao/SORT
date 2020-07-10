@@ -58,7 +58,7 @@ float ImageTexture2D::GetAlpha( int x , int y ) const{
 }
 
 // load image from file
-bool ImageTexture2D::LoadResource( const std::string& str ){
+bool ImageTexture2D::LoadResource( const std::string str ){
     static const std::regex exr_reg(".*\\.exr$", std::regex_constants::icase);
 
     m_memory = std::make_unique<ImgMemory>();

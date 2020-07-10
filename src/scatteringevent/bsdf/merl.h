@@ -47,7 +47,7 @@ public:
 
     //! Load brdf data from MERL file.
     //! @param filename Name of the MERL file.
-    bool    LoadResource(const std::string& filename) override;
+    bool    LoadResource(const std::string filename) override;
 
     //! Whether there is valid data loaded.
     //! @return True if data is valid, otherwise it will return false.

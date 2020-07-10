@@ -68,7 +68,7 @@ public:
     //!
     //! @param filename     Name of Fourier Bxdf file.
     //! @return             Whether the resource is loaded
-    bool    LoadResource(const std::string& filename) override;
+    bool    LoadResource(const std::string filename) override;
 
 private:
     // Bxdf Table
