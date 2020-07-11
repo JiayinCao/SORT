@@ -2,6 +2,8 @@ name: Build SORT
 
 on: [push, pull_request]
 
+tsl_sdk_cache_id: 22
+
 jobs:
   Windows:
     runs-on: windows-latest
@@ -20,7 +22,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Windows-dep-ver-21
+        key: Windows-dep-ver-${{ github.event.inputs.tsl_sdk_cache_id }}
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: make update_dep
@@ -50,7 +52,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: MacOS-dep-ver-21
+        key: MacOS-dep-ver-${{ github.event.inputs.tsl_sdk_cache_id }}
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -88,7 +90,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-18-04-dep-ver-21
+        key: Ubuntu-18-04-dep-ver-${{ github.event.inputs.tsl_sdk_cache_id }}
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -129,7 +131,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-16-04-dep-ver-21
+        key: Ubuntu-16-04-dep-ver-${{ github.event.inputs.tsl_sdk_cache_id }}
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |

@@ -19,6 +19,7 @@
 #include <vector>
 #include <shading_context.h>
 #include "tsl_system.h"
+#include "shading_callback.h"
 #include "core/profile.h"
 #include "core/thread.h"
 #include "core/globalconfig.h"
@@ -32,7 +33,7 @@
 using namespace Tsl_Namespace;
 
 IMPLEMENT_TSLGLOBAL_BEGIN()
-IMPLEMENT_TSLGLOBAL_VAR(float3, uvw)     // UV coordinate, W is preserved for now.
+IMPLEMENT_TSLGLOBAL_VAR(float3, uvw)          // UV coordinate, W is preserved for now.
 IMPLEMENT_TSLGLOBAL_VAR(float3, position)     // this is world space position
 IMPLEMENT_TSLGLOBAL_VAR(float3, normal)       // this is world space normal
 IMPLEMENT_TSLGLOBAL_VAR(float3, gnormal)      // this is world space geometric normal
@@ -46,7 +47,7 @@ public:
         return SORT_MALLOC_ARRAY(char, size);
     }
 
-    void    catch_debug(const DEBUG_LEVEL level, const char* error) const override {
+    void    catch_debug(const TSL_DEBUG_LEVEL level, const char* error) const override {
         slog(WARNING, GENERAL, error);
     }
 
