@@ -76,7 +76,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     stream >> resource_cnt;
 
 #ifdef ASYNC_TEXTURE_LOADING
-    std::vector<std::future<bool>>      m_async_resource_reading(resource_cnt);
+    std::vector<std::future<bool>>      async_resource_reading;
 #endif
 
     for (auto i = 0u; i < resource_cnt; ++i) {
@@ -105,7 +105,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             }
             else {
 #ifdef ASYNC_TEXTURE_LOADING
-                m_async_resource_reading[i] = std::async(std::launch::async, async_load_resource, ptr_resource, resource_file);
+                async_resource_reading.push_back(std::async(std::launch::async, async_load_resource, ptr_resource, resource_file));
 #else
                 ptr_resource->LoadResource(resource_file);
 #endif
@@ -321,7 +321,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     }
 
 #ifdef ASYNC_TEXTURE_LOADING
-    std::for_each(m_async_resource_reading.begin(), m_async_resource_reading.end(), [](std::future<bool>& promise) { promise.wait(); });
+    std::for_each(async_resource_reading.begin(), async_resource_reading.end(), [](std::future<bool>& promise) { promise.wait(); });
 #endif
 
     return (unsigned int)m_matPool.size();
