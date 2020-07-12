@@ -16,7 +16,7 @@
  */
 
 #include <string.h>
-#include <shading_context.h>
+#include <tsl_system.h>
 #include "material.h"
 #include "matmanager.h"
 #include "core/log.h"
@@ -106,13 +106,13 @@ void Material::BuildMaterial() {
             
             // end building the shader group
             auto ret = EndShaderGroup(shader_group.get());
-            if (TSL_Resolving_Succeed != ret)
+            if (TSL_Resolving_Status::TSL_Resolving_Succeed != ret)
                 return;
     
             shader_instance = shader_group->make_shader_instance();
             // ret = shading_context->resolve_shader_instance(shader_instance.get());
             ret = ResolveShaderInstance(shader_instance.get());
-            if (TSL_Resolving_Succeed != ret)
+            if (TSL_Resolving_Status::TSL_Resolving_Succeed != ret)
                 return;
     
             shader_valid = true;

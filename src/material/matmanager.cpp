@@ -293,7 +293,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             auto ret = EndShaderGroup(shader_group.get());
 
             // push it if it compiles the shader successful
-            if (TSL_Resolving_Succeed == ret)
+            if (TSL_Resolving_Status::TSL_Resolving_Succeed == ret)
                 m_shader_units[shader_template_type] = shader_group;
         }
         else if (material_type == SID("Material")) {

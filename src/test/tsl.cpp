@@ -15,8 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-#include <shading_system.h>
-#include <shading_context.h>
+#include <tsl_system.h>
 #include "thirdparty/gtest/gtest.h"
 
 using namespace Tsl_Namespace;
