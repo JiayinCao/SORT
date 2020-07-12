@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include "tsl_version.h"
-#include "shader_arg_types.h"
+#include <tsl_version.h>
+#include <tsl_args.h>
 #include "core/define.h"
 
 SORT_FORCEINLINE bool is_tsl_color_black(const Tsl_Namespace::float3& color) {

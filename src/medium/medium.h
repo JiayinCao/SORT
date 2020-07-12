@@ -18,8 +18,7 @@
 #pragma once
 
 #include <tsl_system.h>
-#include <closure.h>
-#include <shader_arg_types.h>
+#include <tsl_args.h>
 #include "core/define.h"
 #include "spectrum/spectrum.h"
 #include "math/ray.h"

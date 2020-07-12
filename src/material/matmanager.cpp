@@ -51,12 +51,12 @@ void ShaderCompiling_Task::Execute(){
 
 ShaderArgumentTypeEnum shader_arg_type_from_sid(const StringID id) {
     if (id == "closure"_sid)
-        return TSL_TYPE_CLOSURE;
+        return ShaderArgumentTypeEnum::TSL_TYPE_CLOSURE;
     else if (id == "vector"_sid)
-        return TSL_TYPE_FLOAT3;
+        return ShaderArgumentTypeEnum::TSL_TYPE_FLOAT3;
     else if (id == "float"_sid)
-        return TSL_TYPE_FLOAT;
-    return TSL_TYPE_INVALID;
+        return ShaderArgumentTypeEnum::TSL_TYPE_FLOAT;
+    return ShaderArgumentTypeEnum::TSL_TYPE_INVALID;
 }
 
 #ifdef ASYNC_TEXTURE_LOADING
@@ -245,7 +245,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
                 stream >> data_type;
 
                 // expose the shader interface
-                ArgDescriptor arg;
+                ExposedArgDescriptor arg;
                 arg.m_name = arg_name;
                 arg.m_type = shader_arg_type_from_sid(data_type);
                 arg.m_is_output = true;
@@ -266,7 +266,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
                     stream >> data_type;
 
                     // expose the shader interface
-                    ArgDescriptor arg;
+                    ExposedArgDescriptor arg;
                     arg.m_name = arg_name;
                     arg.m_type = shader_arg_type_from_sid(data_type);
                     arg.m_is_output = false;

@@ -94,9 +94,9 @@ void Material::BuildMaterial() {
             }
     
             // expose the shader interface
-            ArgDescriptor arg;
+            ExposedArgDescriptor arg;
             arg.m_name = "out_bxdf";
-            arg.m_type = TSL_TYPE_CLOSURE;
+            arg.m_type = ShaderArgumentTypeEnum::TSL_TYPE_CLOSURE;
             arg.m_is_output = true;
             shader_group->expose_shader_argument(root_shader_name, "result", arg);
     

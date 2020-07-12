@@ -53,7 +53,7 @@ IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeEmpty, float, dummy)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
 
 #define DEFINE_CLOSURETYPE(T)       static ClosureID closure_id; \
-                                    static void Register() { closure_id = T::RegisterClosure(ShadingSystem::get_instance()); }
+                                    static void Register() { closure_id = T::RegisterClosure(); }
                                     
 #define DEFINE_CLOSUREID(T)         ClosureID T::closure_id = INVALID_CLOSURE_ID
 

@@ -18,7 +18,7 @@
 #pragma once
 
 #include <string>
-#include <shader_arg_types.h>
+#include <tsl_args.h>
 #include "core/define.h"
 #include "core/sassert.h"
 #include "math/utils.h"

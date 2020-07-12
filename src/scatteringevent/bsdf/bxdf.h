@@ -18,8 +18,7 @@
 #pragma once
 
 #include <tsl_system.h>
-#include <closure.h>
-#include <shader_arg_types.h>
+#include <tsl_args.h>
 #include "spectrum/spectrum.h"
 #include "math/vector3.h"
 #include "scatteringevent/scatteringunit.h"
