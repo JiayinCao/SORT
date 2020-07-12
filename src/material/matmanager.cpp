@@ -146,6 +146,9 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
 
             // allocate the shader unit template
             const auto shader_unit_template = shading_context->begin_shader_unit_template(shader_node_type);
+            
+            // register tsl global
+            TslGlobal::shader_unit_register(shader_unit_template.get());
 
             // bind shader resources
             for (auto sr : m_shader_resources_binding) {
@@ -231,6 +234,9 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             auto shader_group = BeginShaderGroup(shader_template_type);
             if (!shader_group)
                 continue;
+
+            // register tsl global
+            TslGlobal::shader_unit_register(shader_group.get());
 
             // expose arguments in output node
             std::string root_shader_name;

@@ -34,7 +34,15 @@ class MediumStack;
 struct MediumInteraction;
 class Mesh;
 
-DECLARE_TSLGLOBAL_BEGIN()
+// In an ideal world, I should have used different memory layout for different type of shaders.
+// The following fields are obviously not valid in certain cases, like there is no normal in 
+// a volume shader since there is no intersection, the same goes true the other way.
+//
+// TSL already supports per-shader tsl global. However, SORT decides to use consitent tsl global
+// because it supports groupping nodes in Blender. With nodes with different tsl global memory 
+// layout grouped together, it will result in compilation error.
+// This is the main reason I didn't choose to use the feature.
+DECLARE_TSLGLOBAL_BEGIN(TslGlobal)
 DECLARE_TSLGLOBAL_VAR(float3, uvw)
 DECLARE_TSLGLOBAL_VAR(float3, position)     // this is world space position
 DECLARE_TSLGLOBAL_VAR(float3, normal)       // this is world space normal

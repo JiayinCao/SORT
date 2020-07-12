@@ -30,7 +30,7 @@
 
 using namespace Tsl_Namespace;
 
-IMPLEMENT_TSLGLOBAL_BEGIN()
+IMPLEMENT_TSLGLOBAL_BEGIN(TslGlobal)
 IMPLEMENT_TSLGLOBAL_VAR(float3, uvw)          // UV coordinate, W is preserved for now.
 IMPLEMENT_TSLGLOBAL_VAR(float3, position)     // this is world space position
 IMPLEMENT_TSLGLOBAL_VAR(float3, normal)       // this is world space normal
@@ -146,9 +146,6 @@ void CreateTSLThreadContexts(){
 
     // register all closures
     RegisterClosures();
-
-    // register tsl global, this may need to be per-shader data later for more flexibility
-    TslGlobal::RegisterGlobal(shading_system);
 
     // allocate shading context for each thread
     g_contexts.resize( g_threadCnt );

@@ -62,6 +62,9 @@ void Material::BuildMaterial() {
             auto context = GetShadingContext();
             const auto root_shader_name = prefix + output_node_name;
             if(auto shader_unit_template = context->begin_shader_unit_template(root_shader_name)){
+                // register tsl global
+                TslGlobal::shader_unit_register(shader_unit_template.get());
+
                 // compile the root shader
                 const auto ret = context->compile_shader_unit_template(shader_unit_template.get(), root_shader);
                 if (!ret)
@@ -79,7 +82,10 @@ void Material::BuildMaterial() {
             auto shader_group = BeginShaderGroup(prefix + m_name);
             if (!shader_group)
                 return;
-    
+            
+            // register tsl global
+            TslGlobal::shader_unit_register(shader_group.get());
+
             for (auto su : shader_units) {
                 const auto is_root = su.first == root_shader_name;
                 const auto ret = shader_group->add_shader_unit(su.first, su.second, is_root);
