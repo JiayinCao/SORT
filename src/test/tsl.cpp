@@ -64,14 +64,14 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
     shader_group->connect_shader_units("bxdf_shader", "out_bxdf", "root_shader", "in_bxdf");
 
     // expose the shader interface
-    ArgDescriptor arg;
+    ExposedArgDescriptor arg;
     arg.m_name = "out_bxdf";
-    arg.m_type = TSL_TYPE_FLOAT;
+    arg.m_type = ShaderArgumentTypeEnum::TSL_TYPE_FLOAT;
     arg.m_is_output = true;
     shader_group->expose_shader_argument("root_shader", "out_bxdf", arg);
 
     arg.m_name = "in_bxdf";
-    arg.m_type = TSL_TYPE_FLOAT;
+    arg.m_type = ShaderArgumentTypeEnum::TSL_TYPE_FLOAT;
     arg.m_is_output = false;
     shader_group->expose_shader_argument("bxdf_shader", "in_bxdf", arg);
 
