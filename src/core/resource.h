@@ -34,9 +34,4 @@ public:
     //! @param  filename        Name of the external file holding the data.
     //! @return                 Whether the file has been loaded successfully.
     virtual bool LoadResource(const std::string filename) = 0;
-
-    //! @brief  Whether this resource is a texture.
-    virtual bool IsTexture() const {
-        return false;
-    }
 };

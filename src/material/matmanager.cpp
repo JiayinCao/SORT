@@ -150,11 +150,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             // bind shader resources
             for (auto sr : m_shader_resources_binding) {
                 auto resource = MatManager::GetSingleton().GetResource(sr.shader_resource_name);
-
-                if (resource->IsTexture())
-                    shader_unit_template->register_texture(sr.resource_handle_name, (const void*)resource);
-                else
-                    shader_unit_template->register_shader_resource(sr.resource_handle_name, (const ShaderResourceHandle*)resource);
+                shader_unit_template->register_shader_resource(sr.resource_handle_name, (const ShaderResourceHandle*)resource);
             }
 
             // compile the shader unit

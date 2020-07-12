@@ -17,8 +17,7 @@
 
 #pragma once
 
-#include <tslversion.h>
-#include <shading_system.h>
+#include <tsl_system.h>
 #include <closure.h>
 #include <shader_arg_types.h>
 #include "core/define.h"

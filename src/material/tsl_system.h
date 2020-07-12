@@ -19,9 +19,8 @@
 
 #pragma once
 
-#include <tslversion.h>
-#include <shading_system.h>
-#include <shading_context.h>
+#include <tsl_version.h>
+#include <tsl_system.h>
 #include <string>
 #include "core/define.h"
 #include "math/vector3.h"

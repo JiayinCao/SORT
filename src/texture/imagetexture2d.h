@@ -55,11 +55,6 @@ public:
         return IS_PTR_VALID(m_memory); 
     }
 
-    //! @brief  Whether this resource is a texture.
-    bool IsTexture() const override{
-        return true;
-    }
-
     //! @brief  Get the average color of the texture.
     //!
     //! @return             The average color of the texture.

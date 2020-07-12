@@ -17,8 +17,7 @@
 
 #pragma once
 
-#include <tslversion.h>
-#include <shading_system.h>
+#include <tsl_system.h>
 #include <shader_arg_types.h>
 #include "spectrum/spectrum.h"
 #include "medium/medium.h"
