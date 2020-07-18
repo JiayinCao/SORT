@@ -104,8 +104,5 @@ private:
     /**< Shader unit default values. */
     std::vector<ShaderParamDefaultValue>        m_paramDefaultValues;
 
-    /**< string container. */
-    std::list<std::string>                      m_string_container;
-
     friend class Singleton<MatManager>;
 };
