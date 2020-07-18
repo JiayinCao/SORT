@@ -52,10 +52,8 @@ IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeEmpty)
 IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeEmpty, float, dummy)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
 
-#define DEFINE_CLOSURETYPE(T)       static ClosureID closure_id; \
+#define DEFINE_CLOSURETYPE(T)       inline static ClosureID closure_id = INVALID_CLOSURE_ID; \
                                     static void Register() { closure_id = T::RegisterClosure(); }
-                                    
-#define DEFINE_CLOSUREID(T)         ClosureID T::closure_id = INVALID_CLOSURE_ID
 
 #define ALL_CLOSURES_ACTION \
         CLOSURE_ACTION(Surface_Closure_Empty)\
@@ -546,10 +544,6 @@ namespace {
              ms.basecolor = params.base_color;
          }
      };
-
-#define CLOSURE_ACTION(T) DEFINE_CLOSUREID(T);
-     ALL_CLOSURES_ACTION
-#undef CLOSURE_ACTION
 }
 
 void RegisterClosures() {

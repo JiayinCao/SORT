@@ -93,7 +93,6 @@ std::unique_ptr<T> MakeUniqueInstance( const StringID sid ) {
     return std::unique_ptr<T>(Factory<T>::GetSingleton().CreateUniqueType(sid));
 }
 
-#define IMPLEMENT_RTTI( T )      static T::T##FactoryMethod g_factoryMethod##T;
 #define DEFINE_RTTI( T , B )     class T##FactoryMethod : public FactoryMethod<B>\
 {public: \
     T##FactoryMethod(){\
@@ -107,4 +106,5 @@ std::unique_ptr<T> MakeUniqueInstance( const StringID sid ) {
     }\
     std::shared_ptr<B> CreateSharedInstance() const { return std::make_shared<T>(); }\
     std::unique_ptr<B> CreateUniqueInstance() const { return std::make_unique<T>(); }\
-};
+};\
+inline static T::T##FactoryMethod g_factoryMethod##T;

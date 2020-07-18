@@ -21,8 +21,6 @@
 #include "scatteringevent/scatteringevent.h"
 #include "core/memory.h"
 
-IMPLEMENT_RTTI(OcTree);
-
 SORT_STATS_DEFINE_COUNTER(sOcTreeNodeCount)
 SORT_STATS_DEFINE_COUNTER(sOcTreeLeafNodeCount)
 SORT_STATS_DEFINE_COUNTER(sOcTreeDepth)

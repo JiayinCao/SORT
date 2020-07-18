@@ -28,8 +28,6 @@ SORT_STATS_DEFINE_COUNTER(sVPLCount)
 SORT_STATS_COUNTER("Instant Radiosity", "Primary Ray Count" , sPrimaryRayCount);
 SORT_STATS_COUNTER("Instant Radiosity", "Virtual Point Lights Count" , sVPLCount);
 
-IMPLEMENT_RTTI( InstantRadiosity );
-
 // Preprocess
 void InstantRadiosity::PreProcess( const Scene& scene )
 {

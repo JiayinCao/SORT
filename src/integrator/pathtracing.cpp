@@ -34,8 +34,6 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 SORT_STATS_COUNTER("Path Tracing", "Primary Ray Count" , sPrimaryRayCount);
 SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength , sPrimaryRayCount);    // This also counts the case where ray hits sky
 
-IMPLEMENT_RTTI( PathTracing );
-
 Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const{
 	MediumStack ms;
 	scene.RestoreMediumStack(ray.m_Ori, ms);

@@ -45,7 +45,6 @@ static_assert(false, "More than one SIMD version is defined before including fas
 #endif
 
 #ifdef QBVH_IMPLEMENTATION
-IMPLEMENT_RTTI(Qbvh);
 
 SORT_STATS_DEFINE_COUNTER(sQbvhNodeCount)
 SORT_STATS_DEFINE_COUNTER(sQbvhLeafNodeCount)
@@ -72,7 +71,6 @@ SORT_STATS_AVG_COUNT("Spatial-Structure(QBVH)", "Average Primitive Tested per Ra
 #endif
 
 #ifdef OBVH_IMPEMENTATION
-IMPLEMENT_RTTI(Obvh);
 
 SORT_STATS_DEFINE_COUNTER(sObvhNodeCount)
 SORT_STATS_DEFINE_COUNTER(sObvhLeafNodeCount)

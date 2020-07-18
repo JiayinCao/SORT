@@ -18,8 +18,6 @@
 #include "camera_entity.h"
 #include "core/scene.h"
 
-IMPLEMENT_RTTI(PerspectiveCameraEntity);
-
 void PerspectiveCameraEntity::Serialize(IStreamBase& stream) {
     stream >> m_camera->m_eye;
     stream >> m_camera->m_up;
