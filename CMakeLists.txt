@@ -17,7 +17,7 @@
 
 cmake_minimum_required (VERSION 3.1)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -144,6 +144,9 @@ if(ENABLE_PROFILER)
     target_link_libraries(SORT easy_profiler)
 endif(ENABLE_PROFILER)
 
+# g-test needs the macro to avoid a compiling error in C++ 17
+set( CMAKE_CXX_FLAGS "${GTEST_HAS_TR1_TUPLE} -DGTEST_HAS_TR1_TUPLE=0" )
+
 # Enable multi-thread compiling on Windows.
 if (SORT_PLATFORM_WIN)
     file(GLOB easy_profiler_bin "${SORT_SOURCE_DIR}/dependencies/easy_profiler/bin/*.dll")
@@ -207,7 +210,7 @@ if(MSVC)
 
     # this enables debuging in Visual Studio, otherwise it will crash
     # somehow CMAKE_MSVC_RUNTIME_LIBRARY doesn't work
-    set_target_properties( SORT PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGS} /MD" )
+    set_target_properties( SORT PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGS} /MD /EHsc" )
 
     set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4305 /wd4800" )

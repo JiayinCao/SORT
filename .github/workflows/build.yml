@@ -20,7 +20,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Windows-dep-ver-27
+        key: Windows-dep-ver-28
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: make update_dep
@@ -50,7 +50,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: MacOS-dep-ver-27
+        key: MacOS-dep-ver-28
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -88,7 +88,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-18-04-dep-ver-27
+        key: Ubuntu-18-04-dep-ver-28
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |
@@ -108,18 +108,14 @@ jobs:
       uses: actions/checkout@v1
     - name: Configure Environment
       run: |
-           sudo apt-get install libopenexr-dev
-           sudo apt-get install libboost-all-dev
-           wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-           sudo apt-add-repository "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-6.0 main"
-           sudo apt-get update
-           sudo apt-get install -y clang-6.0
            sudo apt-get install -y software-properties-common
            sudo add-apt-repository ppa:ubuntu-toolchain-r/test
            sudo apt update
            sudo apt install g++-7 -y
            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
            sudo update-alternatives --config gcc
+           gcc --version
+           g++ --version
     - name: Get Cache Directory
       id: cache-dir
       run: |
@@ -129,7 +125,7 @@ jobs:
       id: cache-dep
       with:
         path: ${{ steps.cache-dir.outputs.dir }}/dependencies
-        key: Ubuntu-16-04-dep-ver-27
+        key: Ubuntu-16-04-dep-ver-28
     - name: Install Dependencies
       if: steps.cache-dep.outputs.cache-hit != 'true'
       run: |

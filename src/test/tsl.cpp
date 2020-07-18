@@ -35,7 +35,7 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
         }
     )");
     shading_context->end_shader_unit_template(root_shader_template.get());
-    EXPECT_NE(nullptr, root_shader_template);
+    EXPECT_NE((void*)nullptr, (void*)root_shader_template.get());
     EXPECT_EQ(true, root_shader_compiling);
 
     // a bxdf node
@@ -47,12 +47,12 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
         }
     )");
     shading_context->end_shader_unit_template(bxdf_shader_template.get());
-    EXPECT_NE(nullptr, bxdf_shader_template);
+    EXPECT_NE((void*)nullptr, (void*)bxdf_shader_template.get());
     EXPECT_EQ(true, bxdf_shader_compiling);
 
     // make a shader group
     auto shader_group = shading_context->begin_shader_group_template("first shader");
-    EXPECT_NE(nullptr, shader_group);
+    EXPECT_NE((void*)nullptr, (void*)shader_group.get());
 
     // add the two shader units in this group
     auto ret = shader_group->add_shader_unit("root_shader", root_shader_template, true);
@@ -85,7 +85,7 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
 
     // get the function pointer
     auto raw_function = (void(*)(float*, float))shader_instance->get_function();
-    EXPECT_NE(nullptr, raw_function);
+    EXPECT_NE((void*)nullptr, (void*)raw_function);
 
     // execute the shader
     float closure, in_bxdf = 0.5f;
