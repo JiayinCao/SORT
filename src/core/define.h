@@ -85,4 +85,15 @@
 // shader group. However, in an ideal world, even shader unit should be compiled in a multi-thread environment to fully
 // utilize the power of TSL's multi-thread compilation, this does require a more robust job system, which SORT currently
 // doesn't have.
-#define ENABLE_MULTI_THREAD_SHADER_COMPILATION
+// This will be disabled since the efficiency of the current task system will be the main performance bottleneck,
+// leading to worse performance with multi-thread shader compilation enabled.
+// #define ENABLE_MULTI_THREAD_SHADER_COMPILATION
+
+// This macro offers a cheap way to mult-thread shader compilation without the task system. However, there is no sign
+// indicating there is significant gain in performance. Probably because the overhead of thread switching, allocating
+// new thread context and also the mutex inside TSL lib.
+// However, I would still like to keep this macro alive since it doesn't hurt things. The main purpose is to make sure
+// TSL's multi-thread compilation works as expected.
+// Eventually this will be replaced with a proper job system. However, given that I have very limited time and there is
+// so much things to do, this may be lower priority before I get a chance to work on it.
+#define ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP

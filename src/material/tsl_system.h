@@ -52,16 +52,7 @@ DECLARE_TSLGLOBAL_VAR(float, density)       // volume density
 DECLARE_TSLGLOBAL_END()
 
 //! @brief  Get Shading context.
-Tsl_Namespace::ShadingContext* GetShadingContext();
-
-//! @brief  Begin building the shader group
-std::shared_ptr<ShaderGroupTemplate> BeginShaderGroup(const std::string& group_name);
-
-//! @brief  End bulding the shader group
-TSL_Resolving_Status EndShaderGroup(ShaderGroupTemplate* sg);
-
-//! @brief  Resolve shader instance.
-TSL_Resolving_Status ResolveShaderInstance(ShaderInstance* si);
+std::shared_ptr<Tsl_Namespace::ShadingContext> GetShadingContext();
 
 //! @brief  Execute Jited shader code.
 void ExecuteSurfaceShader(Tsl_Namespace::ShaderInstance* shader, ScatteringEvent& se);

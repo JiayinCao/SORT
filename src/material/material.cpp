@@ -86,7 +86,7 @@ void Material::BuildMaterial() {
             }
     
             // begin compiling shader group
-            auto shader_group = BeginShaderGroup(prefix + m_name);
+            auto shader_group = context->begin_shader_group_template(prefix + m_name);
             if (!shader_group)
                 return;
             
@@ -114,12 +114,12 @@ void Material::BuildMaterial() {
                 shader_group->init_shader_input(dv.shader_unit_name, dv.shader_unit_param_name, dv.default_value);
             
             // end building the shader group
-            auto ret = EndShaderGroup(shader_group.get());
+            auto ret = context->end_shader_group_template(shader_group.get());
             if (TSL_Resolving_Status::TSL_Resolving_Succeed != ret)
                 return;
     
             shader_instance = shader_group->make_shader_instance();
-            ret = ResolveShaderInstance(shader_instance.get());
+            ret = context->resolve_shader_instance(shader_instance.get());
             if (TSL_Resolving_Status::TSL_Resolving_Succeed != ret)
                 return;
     

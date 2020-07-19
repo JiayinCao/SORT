@@ -69,14 +69,15 @@ namespace {
     };
 }
 
-void ShaderCompiling_Task::Execute(){
-    TIMING_EVENT( "Compiling Shader" );
-    m_material->BuildMaterial();
-}
-
 #ifdef ASYNC_TEXTURE_LOADING
 static bool async_load_resource(Resource* resource, std::string filename) {
     return resource->LoadResource(filename);
+}
+#endif
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
+static void async_build_material(MaterialBase* material) {
+    material->BuildMaterial();
 }
 #endif
 
@@ -92,6 +93,10 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
 
 #ifdef ASYNC_TEXTURE_LOADING
     std::vector<std::future<bool>>      async_resource_reading;
+#endif
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
+    std::vector<std::future<void>>      async_material_building;
 #endif
 
     for (auto i = 0u; i < resource_cnt; ++i) {
@@ -241,8 +246,10 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             for (const auto& shader : shader_data.m_sources)
                 shader_units[shader.name] = MatManager::GetSingleton().GetShaderUnitTemplate(shader.type);
 
+            auto context = GetShadingContext();
+
             // begin compiling shader group
-            auto shader_group = BeginShaderGroup(shader_template_type);
+            auto shader_group = context->begin_shader_group_template(shader_template_type);
             if (!shader_group)
                 continue;
 
@@ -293,7 +300,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
                 shader_group->init_shader_input(dv.shader_unit_name, dv.shader_unit_param_name, dv.default_value);
 
             // end building the shader group
-            auto ret = EndShaderGroup(shader_group.get());
+            auto ret = context->end_shader_group_template(shader_group.get());
 
             // push it if it compiles the shader successful
             if (TSL_Resolving_Status::TSL_Resolving_Succeed == ret)
@@ -307,8 +314,10 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             mat->Serialize(stream);
 
             if (LIKELY(!noMaterialSupport)) {
-                
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+         
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
+                async_material_building.push_back(std::async(std::launch::async, async_build_material, mat.get()));
+#elif defined(ENABLE_MULTI_THREAD_SHADER_COMPILATION)
                 // build the material asynchronously
                 SCHEDULE_TASK<CompileMaterial_Task>("Compiling Material", DEFAULT_TASK_PRIORITY, {}, mat.get());
 #else
@@ -327,6 +336,10 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
 
 #ifdef ASYNC_TEXTURE_LOADING
     std::for_each(async_resource_reading.begin(), async_resource_reading.end(), [](std::future<bool>& promise) { promise.wait(); });
+#endif
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
+    std::for_each(async_material_building.begin(), async_material_building.end(), [](std::future<void>& promise) { promise.wait(); });
 #endif
 
 #ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION

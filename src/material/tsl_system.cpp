@@ -66,20 +66,13 @@ public:
 // Tsl shading system
 static std::vector<std::shared_ptr<ShadingContext>>    g_contexts;
 
-Tsl_Namespace::ShadingContext* GetShadingContext() {
-    return g_contexts[ThreadId()].get();
-}
-
-std::shared_ptr<ShaderGroupTemplate> BeginShaderGroup(const std::string& group_name) {
-    return g_contexts[ThreadId()]->begin_shader_group_template(group_name);
-}
-
-TSL_Resolving_Status EndShaderGroup(ShaderGroupTemplate* sg) {
-    return g_contexts[ThreadId()]->end_shader_group_template(sg);
-}
-
-TSL_Resolving_Status ResolveShaderInstance(ShaderInstance* si) {
-    return g_contexts[ThreadId()]->resolve_shader_instance(si);
+std::shared_ptr<Tsl_Namespace::ShadingContext> GetShadingContext() {
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
+    // this is by no means a good approach, but I'll live with it before I have a proper job system.
+    return ShadingSystem::get_instance().make_shading_context();
+#else
+    return g_contexts[ThreadId()];
+#endif
 }
 
 void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEvent& se ){
