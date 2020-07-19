@@ -1216,16 +1216,6 @@ class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
         name = self.getUniqueName()
         fs.serialize(name)
 
-        # this may be a temporary solution for now
-        socket_type_mapping = {'SORTNodeSocketBxdf': SID('closure'),
-                               'SORTNodeSocketColor': SID('vector'),
-                               'SORTNodeSocketFloat': SID('float'),
-                               'SORTNodeSocketFloatVector': SID('vector'),
-                               'SORTNodeSocketLargeFloat': SID('float'),
-                               'SORTNodeSocketAnyFloat': SID('float'),
-                               'SORTNodeSocketNormal': SID('vector'),
-                               'SORTNodeSocketUV': SID('vector')}
-
         # expose all paremters, of course
         fs.serialize(len(self.outputs) - 1)
         for output in self.outputs:
@@ -1234,7 +1224,6 @@ class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
                 continue
 
             fs.serialize(self.getShaderInputParameterName(output.name))
-            fs.serialize(socket_type_mapping[output.bl_idname])
 
     # this is just a proxy node
     def generate_osl_source(self):
@@ -1321,16 +1310,6 @@ class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode)
         name = self.getUniqueName()
         fs.serialize(name)
 
-        # this may be a temporary solution for now
-        socket_type_mapping = {'SORTNodeSocketBxdf': SID('closure'),
-                               'SORTNodeSocketColor': SID('vector'),
-                               'SORTNodeSocketFloat': SID('float'),
-                               'SORTNodeSocketFloatVector': SID('vector'),
-                               'SORTNodeSocketLargeFloat': SID('float'),
-                               'SORTNodeSocketAnyFloat': SID('float'),
-                               'SORTNodeSocketNormal': SID('vector'),
-                               'SORTNodeSocketUV': SID('vector')}
-
         # expose all paremters, of course
         fs.serialize(len(self.inputs) - 1)
         for input in self.inputs:
@@ -1339,7 +1318,6 @@ class SORTShaderGroupOutputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode)
                 continue
 
             fs.serialize(fs.serialize(self.getShaderOutputParameterName(input.name)))
-            fs.serialize(socket_type_mapping[input.bl_idname])
 
     # this is just a proxy node
     def generate_osl_source(self):

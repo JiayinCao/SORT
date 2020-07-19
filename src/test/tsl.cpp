@@ -64,16 +64,8 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
     shader_group->connect_shader_units("bxdf_shader", "out_bxdf", "root_shader", "in_bxdf");
 
     // expose the shader interface
-    ExposedArgDescriptor arg;
-    arg.m_name = "out_bxdf";
-    arg.m_type = ShaderArgumentTypeEnum::TSL_TYPE_FLOAT;
-    arg.m_is_output = true;
-    shader_group->expose_shader_argument("root_shader", "out_bxdf", arg);
-
-    arg.m_name = "in_bxdf";
-    arg.m_type = ShaderArgumentTypeEnum::TSL_TYPE_FLOAT;
-    arg.m_is_output = false;
-    shader_group->expose_shader_argument("bxdf_shader", "in_bxdf", arg);
+    shader_group->expose_shader_argument("root_shader", "out_bxdf");
+    shader_group->expose_shader_argument("bxdf_shader", "in_bxdf", false);
 
     // resolve the shader group
     auto status = shading_context->end_shader_group_template(shader_group.get());

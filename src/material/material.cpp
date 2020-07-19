@@ -100,11 +100,7 @@ void Material::BuildMaterial() {
             }
     
             // expose the shader interface
-            ExposedArgDescriptor arg;
-            arg.m_name = "out_bxdf";
-            arg.m_type = ShaderArgumentTypeEnum::TSL_TYPE_CLOSURE;
-            arg.m_is_output = true;
-            shader_group->expose_shader_argument(root_shader_name, "result", arg);
+            shader_group->expose_shader_argument(root_shader_name, "result", true, "out_bxdf");
     
             // update default values
             for (const auto& dv : m_paramDefaultValues)
@@ -116,7 +112,6 @@ void Material::BuildMaterial() {
                 return;
     
             shader_instance = shader_group->make_shader_instance();
-            // ret = shading_context->resolve_shader_instance(shader_instance.get());
             ret = ResolveShaderInstance(shader_instance.get());
             if (TSL_Resolving_Status::TSL_Resolving_Succeed != ret)
                 return;

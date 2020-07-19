@@ -49,16 +49,6 @@ void ShaderCompiling_Task::Execute(){
     m_material->BuildMaterial();
 }
 
-ShaderArgumentTypeEnum shader_arg_type_from_sid(const StringID id) {
-    if (id == "closure"_sid)
-        return ShaderArgumentTypeEnum::TSL_TYPE_CLOSURE;
-    else if (id == "vector"_sid)
-        return ShaderArgumentTypeEnum::TSL_TYPE_FLOAT3;
-    else if (id == "float"_sid)
-        return ShaderArgumentTypeEnum::TSL_TYPE_FLOAT;
-    return ShaderArgumentTypeEnum::TSL_TYPE_INVALID;
-}
-
 #ifdef ASYNC_TEXTURE_LOADING
 static bool async_load_resource(Resource* resource, std::string filename) {
     return resource->LoadResource(filename);
@@ -243,15 +233,8 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
                 std::string arg_name;
                 stream >> arg_name;
 
-                StringID data_type;
-                stream >> data_type;
-
                 // expose the shader interface
-                ExposedArgDescriptor arg;
-                arg.m_name = arg_name;
-                arg.m_type = shader_arg_type_from_sid(data_type);
-                arg.m_is_output = true;
-                shader_group->expose_shader_argument(root_shader_name, arg_name, arg);
+                shader_group->expose_shader_argument(root_shader_name, arg_name);
             }
 
             std::string shader_group_input_name;
@@ -264,15 +247,8 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
                     std::string arg_name;
                     stream >> arg_name;
 
-                    StringID data_type;
-                    stream >> data_type;
-
                     // expose the shader interface
-                    ExposedArgDescriptor arg;
-                    arg.m_name = arg_name;
-                    arg.m_type = shader_arg_type_from_sid(data_type);
-                    arg.m_is_output = false;
-                    shader_group->expose_shader_argument(shader_group_input_name, arg_name, arg);
+                    shader_group->expose_shader_argument(shader_group_input_name, arg_name, false);
                 }
             }
 
