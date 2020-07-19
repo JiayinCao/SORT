@@ -1184,7 +1184,12 @@ class SORTGroupNode(SORTShadingNode,bpy.types.PropertyGroup):
     # this function helps serializing the material information
     def serialize_prop(self,fs):
         inputs = self.inputs
-        fs.serialize(len(inputs))
+        input_to_be_seriliazed = 0
+        for input in inputs:
+            if type(input) != SORTNodeSocketBxdf:
+                input_to_be_seriliazed = input_to_be_seriliazed + 1
+
+        fs.serialize(input_to_be_seriliazed)
         for input in inputs:
             input.serialize(fs)
 
@@ -1227,7 +1232,7 @@ class SORTShaderGroupInputsNode(SORTNodeSocketConnectorHelper, SORTShadingNode):
 
     # this is just a proxy node
     def generate_osl_source(self):
-        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure color',
+        socket_type_mapping = {'SORTNodeSocketBxdf': 'closure',
                                'SORTNodeSocketColor': 'vector',
                                'SORTNodeSocketFloat': 'float',
                                'SORTNodeSocketFloatVector': 'vector',

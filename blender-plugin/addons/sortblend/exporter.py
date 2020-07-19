@@ -210,8 +210,6 @@ def export_scene(depsgraph, is_preview, fs):
     aspect_ratio_x = scene.render.pixel_aspect_x
     aspect_ratio_y = scene.render.pixel_aspect_y
     fov_angle = bpy.data.cameras[0].angle
-    camera_shift_x = bpy.data.cameras[0].shift_x
-    camera_shift_y = bpy.data.cameras[0].shift_y
 
     fs.serialize(SID('PerspectiveCameraEntity'))
     fs.serialize(vec3_to_tuple(pos))
@@ -771,6 +769,11 @@ def export_materials(depsgraph, fs):
                 # recursively parse the node first
                 output_node = sub_tree.nodes.get("Group Outputs")
                 collect_shader_unit(output_node, shader_group_node_visited, visited_types, shader_group_connections, shader_group_node_mapping)
+
+                # it is important to visit the input node even if it is not connected since this needs to be connected with exposed arguments.
+                # lacking this node will result in tsl compilation error
+                input_node = sub_tree.nodes.get("Group Inputs")
+                collect_shader_unit(input_node, shader_group_node_visited, visited_types, shader_group_connections, shader_group_node_mapping)
 
                 # start serialization
                 fs.serialize(SID("ShaderGroupTemplate"))
