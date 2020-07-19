@@ -15,21 +15,6 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
-// This is a temporary quick solution to enable multi-thread texture loading
-// It is by no means a very good idea to parallel a bunch of IO bound threads.
-// However, my newly planned job system is far from being ready yet, I'll live with it for now.
-// This async loading eventually will be less useful since I'm planning to implement a texture cache
-// system in the future to do lazy texture loading in the future.
-#define ASYNC_TEXTURE_LOADING
-
-#ifdef ASYNC_TEXTURE_LOADING
-#include <future>
-#endif
-
-#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-#include "task/task.h"
-#endif
-
 #include "matmanager.h"
 #include "material/material.h"
 #include "stream/stream.h"
@@ -40,6 +25,14 @@
 #include "scatteringevent/bsdf/merl.h"
 #include "scatteringevent/bsdf/fourierbxdf.h"
 #include "texture/imagetexture2d.h"
+
+#ifdef ENABLE_ASYNC_TEXTURE_LOADING
+#include <future>
+#endif
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+#include "task/task.h"
+#endif
 
 #ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
 //! @brief  A task for compiling materials in a seperate thread
@@ -69,7 +62,7 @@ namespace {
     };
 }
 
-#ifdef ASYNC_TEXTURE_LOADING
+#ifdef ENABLE_ASYNC_TEXTURE_LOADING
 static bool async_load_resource(Resource* resource, std::string filename) {
     return resource->LoadResource(filename);
 }
@@ -91,7 +84,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     auto resource_cnt = 0u;
     stream >> resource_cnt;
 
-#ifdef ASYNC_TEXTURE_LOADING
+#ifdef ENABLE_ASYNC_TEXTURE_LOADING
     std::vector<std::future<bool>>      async_resource_reading;
 #endif
 
@@ -124,7 +117,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
                 sAssertMsg(false, MATERIAL, "Resource type not supported!");
             }
             else {
-#ifdef ASYNC_TEXTURE_LOADING
+#ifdef ENABLE_ASYNC_TEXTURE_LOADING
                 async_resource_reading.push_back(std::async(std::launch::async, async_load_resource, ptr_resource, resource_file));
 #else
                 ptr_resource->LoadResource(resource_file);
@@ -334,7 +327,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
         }
     }
 
-#ifdef ASYNC_TEXTURE_LOADING
+#ifdef ENABLE_ASYNC_TEXTURE_LOADING
     std::for_each(async_resource_reading.begin(), async_resource_reading.end(), [](std::future<bool>& promise) { promise.wait(); });
 #endif
 
