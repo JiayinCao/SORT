@@ -24,6 +24,9 @@
 #include "core/profile.h"
 #include "sampler/random.h"
 #include "medium/medium.h"
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+#include "material/matmanager.h"
+#endif
 
 Render_Task::Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
             const char* name , unsigned int priority , const Task::Task_Container& dependencies ) :
@@ -87,5 +90,11 @@ void Render_Task::Execute(){
 }
 
 void PreRender_Task::Execute(){
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+    // this is only a temporary solution before I have job system that is more robust and flexible to support spawning jobs inside other jobs.
+    // wait for all materials to be built before moving forward
+    MatManager::GetSingleton().WaitForMaterialBuilding();
+#endif
+
     g_integrator->PreProcess(m_scene);
 }

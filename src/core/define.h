@@ -75,3 +75,14 @@
 // evaluate intersection results, like position, normal, uv, basically everything that is used in shader evaluation,
 // when transparent material is present.
 #define ENABLE_TRANSPARENT_SHADOW
+
+// Multi-thread shader compilation.
+// This is not a functional feature since there could be some data race problem in the TSL library. By default, this
+// is disabled.
+// Also, before I have a refactored job system with more flexible design so that I can spawn jobs inside a job, multi-
+// thread shader compilation is not a done feature. The current solution is just the first iteration that only
+// bulids material shader group in seperate thread since I know for a fact there is no dependencies between material
+// shader group. However, in an ideal world, even shader unit should be compiled in a multi-thread environment to fully
+// utilize the power of TSL's multi-thread compilation, this does require a more robust job system, which SORT currently
+// doesn't have.
+// #define ENABLE_MULTI_THREAD_SHADER_COMPILATION

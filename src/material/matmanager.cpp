@@ -26,6 +26,10 @@
 #include <future>
 #endif
 
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+#include "task/task.h"
+#endif
+
 #include "matmanager.h"
 #include "material/material.h"
 #include "stream/stream.h"
@@ -36,6 +40,27 @@
 #include "scatteringevent/bsdf/merl.h"
 #include "scatteringevent/bsdf/fourierbxdf.h"
 #include "texture/imagetexture2d.h"
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+//! @brief  A task for compiling materials in a seperate thread
+class CompileMaterial_Task : public Task {
+public:
+    //! @brief Constructor
+    //!
+    //! @param priority     New priority of the task.
+    CompileMaterial_Task(Material* material, const char* name, unsigned int priority,
+        const Task::Task_Container& dependencies) :
+        Task(name, priority, dependencies), material(material) {}
+
+    //! @brief  Execute the task
+    void        Execute() override {
+        material->BuildMaterial();
+    }
+
+private:
+    Material* material;
+};
+#endif
 
 namespace {
     struct ShaderResourceBinding {
@@ -282,8 +307,14 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             mat->Serialize(stream);
 
             if (LIKELY(!noMaterialSupport)) {
+                
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+                // build the material asynchronously
+                SCHEDULE_TASK<CompileMaterial_Task>("Compiling Material", DEFAULT_TASK_PRIORITY, {}, mat.get());
+#else
                 // build the material
                 mat->BuildMaterial();
+#endif
 
                 // push the compiled material in the pool
                 m_matPool.push_back(std::move(mat));
@@ -319,3 +350,13 @@ std::shared_ptr<ShaderUnitTemplate> MatManager::GetShaderUnitTemplate(const std:
         return nullptr;
     return it->second;
 }
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+void MatManager::WaitForMaterialBuilding() const {
+    std::for_each(m_matPool.begin(), m_matPool.end(), [](const std::unique_ptr<MaterialBase>& mat) {
+        while (!mat->IsMaterialBuilt()) {
+            _mm_pause();
+        }
+    });
+}
+#endif

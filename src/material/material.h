@@ -24,6 +24,10 @@
 #include "stream/stream.h"
 #include "tsl_system.h"
 
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+#include <atomic>
+#endif
+
 struct SurfaceInteraction;
 struct MediumInteraction;
 class ScatteringEvent;
@@ -96,28 +100,39 @@ public:
 
     //! @brief  Whether the material has transparency
     //!
-    //! @return Return true if there is transparency in the material.
+    //! @return     Return true if there is transparency in the material.
     virtual bool       HasTransparency() const = 0;
 
     //! @brief  Whether the material has sss
     //!
-    //! @return Return true if there is sss node in the material.
+    //! @return     Return true if there is sss node in the material.
     virtual bool       HasSSS() const = 0;
 
     //! @brief  Whether the material is attached with a volume.
     //!
-    //! @return Return true if the material is attached with a volume.
+    //! @return     Return true if the material is attached with a volume.
     virtual bool        HasVolumeAttached() const = 0;
 
     //! @brief  Get volume ray matching step size.
     //!
-    //! @return Ray marching step size.
+    //! @return     Ray marching step size.
     virtual float       GetVolumeStep() const = 0;
 
     //! @brief  Get volume ray marching max step count.
     //!
-    //! @return Maximum steps to march during ray marching.
+    //! @return     Maximum steps to march during ray marching.
     virtual unsigned int GetVolumeStepCnt() const = 0;
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+    //! @brief  Whether the material has been built.
+    //!
+    //! @return     True if the material has been built, even if it fails.
+    bool IsMaterialBuilt() const;
+
+protected:
+    /**< Whether the material has been built, even if it fails building, it is still considered built. */
+    std::atomic<bool>   m_is_built = false;
+#endif
 };
 
 //! @brief  A thin layer of material definition.

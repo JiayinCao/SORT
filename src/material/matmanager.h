@@ -94,6 +94,11 @@ public:
     //! @return             The shader unit template returned, nullptr if it doesn't exist.
     std::shared_ptr<ShaderUnitTemplate> GetShaderUnitTemplate(const std::string& name) const;
 
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+    //! @brief  Wait for all materials to be built before moving forward
+    void WaitForMaterialBuilding() const;
+#endif
+
 private:
     std::vector<std::unique_ptr<MaterialBase>>       m_matPool;         /**< Material pool holding all materials. */
 
