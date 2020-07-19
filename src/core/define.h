@@ -85,4 +85,4 @@
 // shader group. However, in an ideal world, even shader unit should be compiled in a multi-thread environment to fully
 // utilize the power of TSL's multi-thread compilation, this does require a more robust job system, which SORT currently
 // doesn't have.
-// #define ENABLE_MULTI_THREAD_SHADER_COMPILATION
+#define ENABLE_MULTI_THREAD_SHADER_COMPILATION

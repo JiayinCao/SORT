@@ -329,6 +329,12 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     std::for_each(async_resource_reading.begin(), async_resource_reading.end(), [](std::future<bool>& promise) { promise.wait(); });
 #endif
 
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+    // this is only a temporary solution before I have job system that is more robust and flexible to support spawning jobs inside other jobs.
+    // wait for all materials to be built before moving forward
+    MatManager::GetSingleton().WaitForMaterialBuilding();
+#endif
+
     return (unsigned int)m_matPool.size();
 }
 
