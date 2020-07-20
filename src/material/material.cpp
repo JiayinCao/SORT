@@ -73,7 +73,7 @@ void Material::BuildMaterial() {
                 TslGlobal::shader_unit_register(shader_unit_template.get());
 
                 // compile the root shader
-                const auto ret = context->compile_shader_unit_template(shader_unit_template.get(), root_shader);
+                const auto ret = shader_unit_template->compile_shader_source(root_shader);
                 if (!ret)
                     return;
 
@@ -119,7 +119,7 @@ void Material::BuildMaterial() {
                 return;
     
             shader_instance = shader_group->make_shader_instance();
-            ret = context->resolve_shader_instance(shader_instance.get());
+            ret = shader_instance->resolve_shader_instance();
             if (TSL_Resolving_Status::TSL_Resolving_Succeed != ret)
                 return;
     

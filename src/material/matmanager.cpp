@@ -170,7 +170,7 @@ unsigned MatManager::ParseMatFile( IStreamBase& stream ){
             }
 
             // compile the shader unit
-            const auto ret = shading_context->compile_shader_unit_template(shader_unit_template.get(), source_code.c_str());
+            const auto ret = shader_unit_template->compile_shader_source(source_code.c_str());
 
             // indicate the end of shader unit compilation
             shading_context->end_shader_unit_template(shader_unit_template.get());

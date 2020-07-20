@@ -29,7 +29,7 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
 
     // the root shader node, this usually matches to the output node in material system
     auto root_shader_template = shading_context->begin_shader_unit_template("root_shader");
-    const auto root_shader_compiling = shading_context->compile_shader_unit_template(root_shader_template.get(), R"(
+    const auto root_shader_compiling = root_shader_template->compile_shader_source(R"(
         shader output_node( float in_bxdf , out float out_bxdf ){
             out_bxdf = in_bxdf * 1231.0f;
         }
@@ -40,7 +40,7 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
 
     // a bxdf node
     auto bxdf_shader_template = shading_context->begin_shader_unit_template("bxdf_shader");
-    const auto bxdf_shader_compiling = shading_context->compile_shader_unit_template(bxdf_shader_template.get(), R"(
+    const auto bxdf_shader_compiling = bxdf_shader_template->compile_shader_source(R"(
         shader lambert_node( float in_bxdf , out float out_bxdf , out float dummy ){
             out_bxdf = in_bxdf;
             // dummy = 1.0f;
@@ -72,7 +72,7 @@ TEST(ShaderGroup, ShaderGroupWithoutClosure) {
     EXPECT_EQ(TSL_Resolving_Status::TSL_Resolving_Succeed, status);
 
     auto shader_instance = shader_group->make_shader_instance();
-    status = shading_context->resolve_shader_instance(shader_instance.get());
+    status = shader_instance->resolve_shader_instance();
     EXPECT_EQ(TSL_Resolving_Status::TSL_Resolving_Succeed, status);
 
     // get the function pointer
