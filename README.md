@@ -33,7 +33,7 @@ Here are the features implemented so far:
   - Subsurface Scattering
   - Fur, Hair
   - Volumetric Rendering
-  - Support Open Shading Language
+  - [Tiny Shading Language](https://github.com/JiayinCao/Tiny-Shading-Language)
   - Depth of Field
   - Multi-thread rendering, SIMD(SSE,AVX) optimized
   - Blender 2.8 plugin
