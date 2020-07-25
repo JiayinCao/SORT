@@ -34,8 +34,6 @@ SORT_STATS_DECLARE_COUNTER(sPrimaryRayCount)
 SORT_STATS_COUNTER("Path Tracing", "Primary Ray Count" , sPrimaryRayCount);
 SORT_STATS_AVG_COUNT("Path Tracing", "Average Length of Path", sTotalPathLength , sPrimaryRayCount);    // This also counts the case where ray hits sky
 
-IMPLEMENT_RTTI( PathTracing );
-
 Spectrum PathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene) const{
 	MediumStack ms;
 	scene.RestoreMediumStack(ray.m_Ori, ms);
@@ -141,7 +139,7 @@ Spectrum PathTracing::li( const Ray& ray , const PixelSample& ps , const Scene& 
             const auto  light = scene.SampleLight( light_sample.t , &light_pdf );
             if( light_pdf > 0.0f )
                 L += throughput * EvaluateDirect( se , r , scene, light , light_sample , bsdf_sample , material , ms ) / light_pdf / pdf_scattering_type;
-        }else{
+        }else if(scattering_type_flag & SE_EVALUATE_BSSRDF) {
             BSSRDFIntersections bssrdf_inter;
             float               bssrdf_pdf = 0.0f;
             se.Sample_BSSRDF( scene, -r.m_Dir, se.GetInteraction().intersect, bssrdf_inter , bssrdf_pdf);

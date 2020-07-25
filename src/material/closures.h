@@ -17,7 +17,8 @@
 
 #pragma once
 
-#include <OSL/oslexec.h>
+#include <tsl_system.h>
+#include <tsl_args.h>
 #include "spectrum/spectrum.h"
 #include "medium/medium.h"
 
@@ -26,72 +27,38 @@ class MediumStack;
 class MaterialBase;
 class Mesh;
 
-enum CLOSURE_TYPE {
-    SURFACE_CLOSURE_LAMBERT = 0,
-    SURFACE_CLOSURE_OREN_NAYAR,
-    SURFACE_CLOSURE_DISNEY,
-    SURFACE_CLOSURE_MICROFACET_REFLECTION,
-    SURFACE_CLOSURE_MICROFACET_REFRACTION,
-    SURFACE_CLOSURE_ASHIKHMANSHIRLEY,
-    SURFACE_CLOSURE_PHONG,
-    SURFACE_CLOSURE_LAMBERT_TRANSMITTANCE,
-    SURFACE_CLOSURE_MIRROR,
-    SURFACE_CLOSURE_DIELETRIC,
-    SURFACE_CLOSURE_MICROFACET_REFLECTION_DIELETRIC,
-    SURFACE_CLOSURE_HAIR,
-    SURFACE_CLOSURE_FOURIER_BDRF,
-    SURFACE_CLOSURE_MERL_BRDF,
-    SURFACE_CLOSURE_COAT,
-    SURFACE_CLOSURE_DOUBLESIDED,
-    SURFACE_CLOSURE_DISTRIBUTIONBRDF,
-    SURFACE_CLOSURE_FABRIC,
-    SURFACE_CLOSURE_SSS,
-    SURFACE_CLOSURE_TRANSPARENT,
-
-    VOLUME_CLOSURE_ABSORPTION,
-    VOLUME_CLOSURE_HOMOGENEOUS,
-    VOLUME_CLOSURE_HETEROGENOUS,
-};
-
-constexpr unsigned SURFACE_CLOSURE_CNT  = 20;
-constexpr unsigned VOLUME_CLOSURE_CNT   = 3;
-constexpr unsigned VOLUME_CLOSURE_BASE  = SURFACE_CLOSURE_CNT;
-constexpr unsigned CLOSURE_CNT          = SURFACE_CLOSURE_CNT + VOLUME_CLOSURE_CNT;
-
 //! @brief  Register all closures supported by SORT.
-//!
-//! @param  shadingsys      Shading system of OSL.
-void RegisterClosures(OSL::ShadingSystem* shadingsys);
+void RegisterClosures();
 
 //! @brief  Process the closure tree result and populate the BSDF.
 //!
-//! @param  closure         The closure tree in the osl shader.
+//! @param  closure         The closure tree in the tsl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  se              The result scattering event.
-void ProcessSurfaceClosure(const OSL::ClosureColor* closure, const OSL::Color3& w , ScatteringEvent& se );
+void ProcessSurfaceClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, ScatteringEvent& se);
 
 //! @brief  Process the closure tree result and populate the MediumStack.
 //!
-//! @param  closure         The closure tree in the osl shader.
+//! @param  closure         The closure tree in the tsl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  mediumStack     The medium stack container that holds the result.
 //! @param  flag            A flag indicates whether to add or remove the medium.
 //! @param	material		The material that spawns the medium.
 //! @param  mesh            The mesh that wraps the volume.
-void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumStack& mediumStack, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh);
+void ProcessVolumeClosure(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, MediumStack& ms, const SE_Interaction flag, const MaterialBase* material, const Mesh* mesh);
 
 //! @brief  Evaluate the properties of the volume at specific position in a volume.
 //!
 //! Neither of absorption volurm, nor the homogeneous volume need this function. This is purely for heteregenous medium.
 //!
-//! @param  closure         The closure tree in the osl shader.
+//! @param  closure         The closure tree in the tsl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @param  ms              The medium sample to be returned.
-void ProcessVolumeClosure(const OSL::ClosureColor* closure, const OSL::Color3& w, MediumSample& mediumStack);
+void EvaluateVolumeSample(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w, MediumSample& ms);
 
-//! @brief  Evaluate how opaque the surface is in the OSL shader.
+//! @brief  Evaluate how opaque the surface is in the TSL shader.
 //!
-//! @param  closure         The closure tree in the osl shader.
+//! @param  closure         The closure tree in the tsl shader.
 //! @param  w               The weight of this closure tree, this also counts the weight inherits from the higher level tree nodes.
 //! @return                 The opacity of the intersection.
-Spectrum ProcessOpacity(const OSL::ClosureColor* closure, const OSL::Color3& w );
+Spectrum ProcessOpacity(const Tsl_Namespace::ClosureTreeNodeBase* closure, const Tsl_Namespace::float3& w);

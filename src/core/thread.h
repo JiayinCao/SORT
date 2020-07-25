@@ -17,9 +17,10 @@
 
 #pragma once
 
-#include "core/define.h"
+#include <emmintrin.h>
 #include <thread>
 #include <atomic>
+#include "core/define.h"
 
 // get the thread id
 int ThreadId();
@@ -48,9 +49,18 @@ private:
 class spinlock_mutex{
 public:
     void lock() {
-        while (locked.test_and_set(std::memory_order_acquire)) { ; }
+        // std::memory_order_acquire is neccessary here to prevent the out-of-order execution optimization.
+        // It makes sure all memory load will happen after the lock is acquired.
+        while (locked.test_and_set(std::memory_order_acquire)) { 
+            // In a very contended multi-threading environment, full busy loop may not be the most efficient thing to do since
+            // they consume CPU cycles all the time. This instruction could allow delaying CPU instructions for a few cycles in
+            // some cases to allow other threads to take ownership of hardware resources.
+            // https://software.intel.com/en-us/comment/1134767
+            _mm_pause(); 
+        }
     }
     void unlock() {
+        // std::memory_order_release will make sure all memory writting operations will be finished by the time this is done.
         locked.clear(std::memory_order_release);
     }
 

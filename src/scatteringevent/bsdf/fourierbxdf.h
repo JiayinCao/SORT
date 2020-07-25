@@ -21,6 +21,11 @@
 #include "core/resource.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeFourier, "fourier")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeFourier, void*, measured_data)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeFourier, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeFourier)
+
 //! @brief FourierBxdfData.
 /**
  * Same with MERL brdf, FourierBxdf is also a measured bxdf.
@@ -63,7 +68,7 @@ public:
     //!
     //! @param filename     Name of Fourier Bxdf file.
     //! @return             Whether the resource is loaded
-    bool    LoadResource(const std::string& filename) override;
+    bool    LoadResource(const std::string filename) override;
 
 private:
     // Bxdf Table
@@ -121,17 +126,11 @@ private:
 class FourierBxdf : public Bxdf
 {
 public:
-    // Input parameters to construct the BRDF.
-    struct Params {
-        int     resIdx;
-        Vector  n;
-    };
-
     //! Constructor taking spectrum information.
     //!
     //! @param params       Parameter set.
     //! @param weight       Weight of this BRDF
-    FourierBxdf(const Params& params, const Spectrum& weight);
+    FourierBxdf(const ClosureTypeFourier& params, const Spectrum& weight);
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

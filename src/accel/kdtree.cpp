@@ -22,8 +22,6 @@
 #include "scatteringevent/scatteringevent.h"
 #include "core/memory.h"
 
-IMPLEMENT_RTTI(KDTree);
-
 SORT_STATS_DEFINE_COUNTER(sKDTreeNodeCount)
 SORT_STATS_DEFINE_COUNTER(sKDTreeLeafNodeCount)
 SORT_STATS_DEFINE_COUNTER(sKDTreeDepth)

@@ -15,26 +15,23 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 #
 
-case "$(uname -s)" in
+# enter the directory of dependencies
+cd dependencies
 
-Linux)
-rm -rf dependencies
-apt-get install unzip
-wget http://45.63.123.194/sort_dependencies/linux/dependencies_18_04.zip
-unzip dependencies_18_04.zip
-rm dependencies_18_04.zip
+# Tiny shading language is another personal project of mine, it is used as the shading language in SORT.
+git clone https://github.com/JiayinCao/Tiny-Shading-Language.git
+
+# enter the directory
+cd Tiny-Shading-Language
+
+# trigger an installation of the library
+make update_dep
+make install
+
+# copy the library to the correct place
+cp -r ./tsl ../tsl
+
+# clean up
 cd ..
-dir
-;;
-
-CYGWIN*|MINGW32*|MSYS*)
-echo 'MS Windows'
-;;
-
-# Add here more strings to compare
-# See correspondence table at the bottom of this answer
-
-*)
-echo 'other OS'
-;;
-esac
+rm -rf Tiny-Shading-Language
+cd ..

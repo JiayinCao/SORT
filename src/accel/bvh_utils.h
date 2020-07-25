@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <string.h>
 #include "core/define.h"
 #include "math/point.h"
 #include "math/bbox.h"

@@ -23,7 +23,32 @@
 #include "microfacet.h"
 #include "core/memory.h"
 #include "math/exp.h"
-#include "material/osl_utils.h"
+#include "material/tsl_utils.h"
+
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeDisney)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, metallic)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specular)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specularTint)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, roughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, anisotropic)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, sheen)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, sheenTint)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, clearcoat)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, clearcoatGloss)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, specTrans)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, scatterDistance)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, flatness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float, diffTrans)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, bool,  thinSurface)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, baseColor)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDisney, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeDisney)
+
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeSSS)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, scatter_distance)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeSSS, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeSSS)
 
 constexpr static float ior_in = 1.5f;          // hard coded index of refraction below the surface
 constexpr static float ior_ex = 1.0f;          // hard coded index of refraction above the surface
@@ -76,8 +101,8 @@ float ClearcoatGGX::G1(const Vector& v) const {
     return 1.0f / (1.0f + sqrt(1.0f + alpha2 * tan_theta_sq));
 }
 
-DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Params& params , const Spectrum& ew )
-:DisneyBssrdf( intersection , params.baseColor , params.scatterDistance , ew , ew.GetIntensity() ){
+DisneyBssrdf::DisneyBssrdf(const SurfaceInteraction* intersection, const ClosureTypeSSS& params, const Spectrum& weight)
+    :DisneyBssrdf(intersection, params.base_color, params.scatter_distance, weight) {
 }
 
 DisneyBssrdf::DisneyBssrdf( const SurfaceInteraction* intersection , const Spectrum& R , const Spectrum& mfp , const Spectrum& ew )
@@ -408,25 +433,28 @@ float DisneyBRDF::pdf( const Vector& wo , const Vector& wi ) const {
     return total_pdf / total_weight;
 }
 
-float DisneyBRDF::Evaluate_Sampling_Weight( const Params& params ){
-    const auto hasSSS = !isBlack(params.scatterDistance);
+ float DisneyBRDF::Evaluate_Sampling_Weight( const ClosureTypeDisney& params ){
+     const auto hasSSS = !(params.scatterDistance.x == 0.0f && params.scatterDistance.y == 0.0f && params.scatterDistance.z == 0.0f);
 
-    // If there is no SSS, there will be 100% chance that a BXDF will be chosen.
-    if( !hasSSS )
-        return 1.0f;
+     // If there is no SSS, there will be 100% chance that a BXDF will be chosen.
+     if( !hasSSS )
+         return 1.0f;
 
-    const auto luminance = intensityOSLVec3( params.baseColor );
-    const auto Ctint = luminance > 0.0f ? params.baseColor * (1.0f / luminance) : Spectrum(1.0f);
-    const auto min_specular_amount = SchlickR0FromEta(ior_ex / ior_in);
-    const auto Cspec0 = slerp(params.specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, params.specularTint), params.baseColor, params.metallic);
+     static const float YWeight[3] = { 0.212671f, 0.715160f, 0.072169f };
+     const auto luminance = YWeight[0] * params.baseColor.x + YWeight[1] * params.baseColor.y + YWeight[2] * params.baseColor.z;
+     const auto Ctint = luminance > 0.0f ? params.baseColor * (1.0f / luminance) : Spectrum(1.0f);
+     const auto min_specular_amount = SchlickR0FromEta(ior_ex / ior_in);
+     const auto Cspec0 = slerp(params.specular * min_specular_amount * slerp(Spectrum(1.0f), Ctint, params.specularTint), params.baseColor, params.metallic);
 
-    const auto clearcoat_weight = params.clearcoat * 0.04f;
-    const auto specular_reflection_weight = Cspec0.GetIntensity() * specularPdfScale( params.roughness );
-    const auto specular_transmission_weight = luminance * (1.0f - params.metallic) * params.specTrans;
-    const auto diffuse_reflection_weight = luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * (params.thinSurface ? (1.0f - params.diffTrans) : 1.0f);
-    const auto diffuse_transmission_weight = params.thinSurface ? luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * params.diffTrans : 0.0f;
+     const auto clearcoat_weight = params.clearcoat * 0.04f;
+     const auto specular_reflection_weight = Cspec0.GetIntensity() * specularPdfScale( params.roughness );
+     const auto specular_transmission_weight = luminance * (1.0f - params.metallic) * params.specTrans;
+     const auto diffuse_reflection_weight = luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * (params.thinSurface ? (1.0f - params.diffTrans) : 1.0f);
+     const auto diffuse_transmission_weight = params.thinSurface ? luminance * (1.0f - params.metallic) * (1.0f - params.specTrans) * params.diffTrans : 0.0f;
     
-    const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
+     const auto total_weight = clearcoat_weight + specular_reflection_weight + specular_transmission_weight + diffuse_reflection_weight + diffuse_transmission_weight;
+     if (total_weight == 0.0f)
+         return 0.0f;
 
-    return 1.0f - diffuse_reflection_weight / total_weight;
-}
+     return 1.0f - diffuse_reflection_weight / total_weight;
+ }

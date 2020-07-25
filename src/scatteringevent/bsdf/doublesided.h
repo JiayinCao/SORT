@@ -21,6 +21,11 @@
 #include "core/sassert.h"
 #include "scatteringevent/scatteringevent.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDoubleSided, "double_sided")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, void*, closure0)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, void*, closure1)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeDoubleSided)
+
 //! @brief DoubleSided BRDF.
 /**
  * This is a BXDF wrapper shows double sided BRDF.
@@ -28,11 +33,6 @@
  */
 class DoubleSided : public Bxdf{
 public:
-    struct Params{
-        OSL::ClosureColor*  bxdf0;
-        OSL::ClosureColor*  bxdf1;
-    };
-
     //! Constructor
     //! @param bxdf0        Bxdf0.
     //! @param bxdf1        Bxdf1.

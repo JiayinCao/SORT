@@ -17,11 +17,16 @@
 
 #pragma once
 
-#include <OSL/genclosure.h>
-#include <OSL/oslexec.h>
-#include <OSL/oslclosure.h>
 #include "microfacet.h"
 #include "spectrum/rgbspectrum.h"
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDielectric, "dieletric")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, reflectance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, transmittance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float,  roughness_u)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float,  roughness_v)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeDielectric)
 
  //! @brief Coat BRDF.
  /**
@@ -35,20 +40,11 @@
   */
 class Dielectric : public Bxdf {
 public:
-    // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3       reflectance;
-        OSL::Vec3       transmittance;
-        float           roughnessU;
-        float           roughnessV;
-        OSL::Vec3       n;
-    };
-
     //! Constructor from parameter set.
     //!
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
-    Dielectric(const Params& params, const Spectrum& weight);
+    Dielectric(const ClosureTypeDielectric& params, const Spectrum& weight);
 
     //! Constructor
     //! @param reflectance      Direction hemisphere reflection.

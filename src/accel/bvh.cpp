@@ -23,8 +23,6 @@
 #include "scatteringevent/scatteringevent.h"
 #include "core/memory.h"
 
-IMPLEMENT_RTTI(Bvh);
-
 SORT_STATS_DEFINE_COUNTER(sBvhNodeCount)
 SORT_STATS_DEFINE_COUNTER(sBvhLeafNodeCount)
 SORT_STATS_DEFINE_COUNTER(sBVHDepth)

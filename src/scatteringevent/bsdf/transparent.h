@@ -20,6 +20,10 @@
 #include "bxdf.h"
 #include "math/vector3.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeTransparent, "transparent")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeTransparent, float3, attenuation)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeTransparent)
+
 //! @brief  Transparent BXDF
 /**
  * Transparent material is a very special material that pass through lights without any attenuation
@@ -28,19 +32,19 @@
  */
 class Transparent : public Bxdf{
 public:
-    // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3 attenuation;
-    };
-
     //! @brief      Default constructor
     Transparent() : Bxdf(FULL_WEIGHT, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, true), A(WHITE_SPECTRUM) {}
+
+    //! @brief      Constructor taken attenuation.
+    //!
+    //! @param      Parameter set.
+    Transparent(const ClosureTypeTransparent& param, const Spectrum& weight) : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), DIR_UP, true), A(param.attenuation) {}
 
     //! @brief      Constructor from parameter set.
     //!
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
-    Transparent( const Params& param , const Spectrum& weight ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), DIR_UP, true),A(param.attenuation){}
+    // Transparent( const Params& param , const Spectrum& weight ):Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE|BXDF_REFLECTION), DIR_UP, true),A(param.attenuation){}
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

@@ -21,6 +21,11 @@
 #include "core/resource.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMERL, "merl")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMERL, void*, merl_data)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMERL, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeMERL)
+
 //! @brief Phong BRDF.
 /**
  * MERL BRDF Database - Mitsubishi Electric Research Laboratories
@@ -42,7 +47,7 @@ public:
 
     //! Load brdf data from MERL file.
     //! @param filename Name of the MERL file.
-    bool    LoadResource(const std::string& filename) override;
+    bool    LoadResource(const std::string filename) override;
 
     //! Whether there is valid data loaded.
     //! @return True if data is valid, otherwise it will return false.
@@ -66,17 +71,11 @@ private:
 class Merl : public Bxdf
 {
 public:
-    // Input parameters to construct the BRDF.
-    struct Params {
-        int     resIdx;
-        Vector  n;
-    };
-
     //! Constructor taking spectrum information.
     //!
     //! @param params       Parameter set.
     //! @param weight       Weight of this BRDF
-    Merl(const Params& params, const Spectrum& weight, bool doubleSided = false);
+    Merl(const ClosureTypeMERL& params, const Spectrum& weight, bool doubleSided = false);
 
     //! Evaluate the BRDF
     //! @param wo   Exitant direction in shading coordinate.

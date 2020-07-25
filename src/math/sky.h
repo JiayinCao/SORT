@@ -43,7 +43,7 @@ public:
 
     // load image file
     void Load(const std::string& str) {
-        m_sky.LoadImageFromFile(str);
+        m_sky.LoadResource(str);
         _generateDistribution2D();
     }
 

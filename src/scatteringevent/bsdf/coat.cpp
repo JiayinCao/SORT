@@ -18,14 +18,21 @@
 #include "coat.h"
 #include "sampler/sample.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeCoat)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, void*, closure)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, roughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, ior)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, float3, sigma)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeCoat)
+
 // Because this BRDF doesn't take TIR ( Total inner reflection ) into account, there is a small biased compensation introduced
 // when evaluating the attenuation upward. The exact number is not mentioned in the original paper, 0.2 is used as default here.
 #define TIR_COMPENSATION    0.2f
 
-Coat::Coat( const Params& params , const Spectrum& weight, const ScatteringEvent* bottom )
-: Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, false), thickness(1.0f), ior(params.ior), sigma(params.sigma), ggx(params.roughness, params.roughness),
-fresnel(1.0f,params.ior), coat_weight( 1.0f ), coat(coat_weight, &fresnel , &ggx , coat_weight , params.n ), bottom( bottom ){
-}
+Coat::Coat( const ClosureTypeCoat& params , const Spectrum& weight, const ScatteringEvent* bottom )
+ : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, false), thickness(1.0f), ior(params.ior), sigma(params.sigma), ggx(params.roughness, params.roughness),
+   fresnel(1.0f,params.ior), coat_weight( 1.0f ), coat(coat_weight, &fresnel , &ggx , coat_weight , params.normal ), bottom( bottom ){}
 
 Spectrum Coat::F( const Vector& wo , const Vector& wi ) const{
     if (!SameHemiSphere(wo, wi)) return 0.0f;

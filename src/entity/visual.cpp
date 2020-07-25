@@ -20,9 +20,6 @@
 #include "material/matmanager.h"
 #include "core/scene.h"
 
-IMPLEMENT_RTTI( MeshVisual );
-IMPLEMENT_RTTI( HairVisual );
-
 void MeshVisual::FillScene( Scene& scene ){
     for (const auto& mi : m_memory->m_indices){
         m_triangles.push_back( std::make_unique<Triangle>( this , mi ) );

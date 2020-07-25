@@ -17,16 +17,44 @@
 
 #pragma once
 
+#include <unordered_map>
+#include <list>
 #include <vector>
 #include <string>
-#include <OSL/oslexec.h>
 #include "stream/stream.h"
-#include "osl_system.h"
+#include "tsl_system.h"
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+#include <atomic>
+#endif
 
 struct SurfaceInteraction;
 struct MediumInteraction;
 class ScatteringEvent;
 class MediumStack;
+
+struct ShaderConnection {
+    std::string source_shader, source_property;
+    std::string target_shader, target_property;
+};
+
+struct ShaderParamDefaultValue {
+    std::string shader_unit_name;
+    std::string shader_unit_param_name;
+    Tsl_Namespace::ShaderUnitInputDefaultValue default_value;
+};
+
+struct ShaderSource {
+    std::string name;
+    std::string type;
+};
+
+struct TSL_ShaderData {
+    /**< Shader source code. */
+    std::vector<ShaderSource>           m_sources;
+    /**< Shader connections. */
+    std::vector<ShaderConnection>       m_connections;
+};
 
 //! @brief  Base interface for material.
 /**
@@ -60,7 +88,7 @@ public:
     //! @return                     The transparency at the intersection.
     virtual Spectrum   EvaluateTransparency(const SurfaceInteraction& intersection) const = 0;
 
-    //! @brief  Build shader in OSL.
+    //! @brief  Build shader in tsl.
     //!
     //! @param  shadingSys      Open-Shading-Language shading system.
     virtual void       BuildMaterial() = 0;
@@ -72,28 +100,39 @@ public:
 
     //! @brief  Whether the material has transparency
     //!
-    //! @return Return true if there is transparency in the material.
+    //! @return     Return true if there is transparency in the material.
     virtual bool       HasTransparency() const = 0;
 
     //! @brief  Whether the material has sss
     //!
-    //! @return Return true if there is sss node in the material.
+    //! @return     Return true if there is sss node in the material.
     virtual bool       HasSSS() const = 0;
 
     //! @brief  Whether the material is attached with a volume.
     //!
-    //! @return Return true if the material is attached with a volume.
+    //! @return     Return true if the material is attached with a volume.
     virtual bool        HasVolumeAttached() const = 0;
 
     //! @brief  Get volume ray matching step size.
     //!
-    //! @return Ray marching step size.
+    //! @return     Ray marching step size.
     virtual float       GetVolumeStep() const = 0;
 
     //! @brief  Get volume ray marching max step count.
     //!
-    //! @return Maximum steps to march during ray marching.
+    //! @return     Maximum steps to march during ray marching.
     virtual unsigned int GetVolumeStepCnt() const = 0;
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+    //! @brief  Whether the material has been built.
+    //!
+    //! @return     True if the material has been built, even if it fails.
+    bool IsMaterialBuilt() const;
+
+protected:
+    /**< Whether the material has been built, even if it fails building, it is still considered built. */
+    std::atomic<bool>   m_is_built = false;
+#endif
 };
 
 //! @brief  A thin layer of material definition.
@@ -136,6 +175,7 @@ public:
         // this should happen most of the time in the absence of transparent node.
         if (!m_hasTransparentNode)
             return 0.0f;
+        
         return m_special_transparent ? 1.0f : (::EvaluateTransparency(m_surface_shader.get(), intersection));
     }
 
@@ -146,7 +186,7 @@ public:
     //! @param  stream      Input stream for data.
     void        Serialize(IStreamBase& stream) override;
 
-    //! @brief  Build shader in OSL.
+    //! @brief  Build shader in tsl.
     //!
     //! @param  shadingSys      Open-Shading-Language shading system.
     void        BuildMaterial() override;
@@ -206,30 +246,21 @@ private:
     /**< Material id. */
     StringID                        m_matID = INVALID_SID;
 
-    struct ShaderSource{
-        std::string name;
-        std::string type;
-        std::string source;
-    };
-    struct ShaderConnection{
-        std::string source_shader , source_property;
-        std::string target_shader , target_property;
-    };
+    /**< tsl shader source data. */
+    TSL_ShaderData                  m_surface_shader_data;
+    TSL_ShaderData                  m_volume_shader_data;
 
-    struct OSL_ShaderData {
-        /**< Shader source code. */
-        std::vector<ShaderSource>       m_sources;
-        /**< Shader connections. */
-        std::vector<ShaderConnection>   m_connections;
-    };
+    /**< Shader unit instance. */
+    std::shared_ptr<Tsl_Namespace::ShaderInstance>  m_surface_shader = nullptr;
+    std::shared_ptr<Tsl_Namespace::ShaderInstance>  m_volume_shader = nullptr;
 
-    /**< OSL shader source data. */
-    OSL_ShaderData                  m_surface_shader_data;
-    OSL_ShaderData                  m_volume_shader_data;
+    /**< TSL data structures. */
+    using ShaderUnitContainer = std::unordered_map<std::string, std::shared_ptr<Tsl_Namespace::ShaderUnitTemplate>>;
+    ShaderUnitContainer m_surface_shader_units;
+    ShaderUnitContainer m_volume_shader_units;
 
-    /**< OSL device surface shader. */
-    OSL::ShaderGroupRef             m_surface_shader = nullptr;
-    OSL::ShaderGroupRef             m_volume_shader = nullptr;
+    /**< Shader unit default values. */
+    std::vector<ShaderParamDefaultValue>        m_paramDefaultValues;
 
     bool                            m_hasTransparentNode = false;
     bool                            m_hasSSSNode = false;

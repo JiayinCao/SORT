@@ -19,6 +19,12 @@
 #include "core/samplemethod.h"
 #include "core/rand.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeFabric)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFabric, float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFabric, float, roughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFabric, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeFabric)
+
 // This array is a pre-integrated array for BRDF normalization using Monte Carlo estimation.
 constexpr float Io[] = {3.98501,3.84697,3.6726,3.55824,3.37832,3.28126,3.16199,3.04171,2.95213,2.82915,
                         2.7315,2.6731,2.58954,2.49541,2.4235,2.33565,2.30792,2.2241,2.20148,2.11513,

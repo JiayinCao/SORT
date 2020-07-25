@@ -115,6 +115,13 @@ public:
         return m_dependencies;
     }
 
+    //! @brief  Get tasks this task depends on.
+    //!
+    //! @return Tasks this task depends on.
+    SORT_FORCEINLINE const Task_Container& GetDependencies() const {
+        return m_dependencies;
+    }
+
 private:
     Task_Container              m_dependencies;     /**< Tasks this task depends on. */
     DependentTask_Container     m_dependents;       /**< Tasks depending on this task. */
@@ -191,16 +198,7 @@ SORT_FORCEINLINE Task*  SCHEDULE_TASK( const char* name , unsigned int priority 
 }
 
 //! @brief      Executing tasks. It will exit if there is no other tasks.
-SORT_FORCEINLINE void    EXECUTING_TASKS(){
-    while( true ){
-        // Pick a task that is available.
-        auto task = Scheduler::GetSingleton().PickTask();
+void        EXECUTING_TASKS();
 
-        // If there is no task to be picked, break out of the loop.
-        if(IS_PTR_INVALID(task))
-            return;
-
-        // Execute the task.
-        task->ExecuteTask();
-    }
-}
+//! @brief      Get the current ongoing task.
+const Task* GetCurrentTask();

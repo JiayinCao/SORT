@@ -19,6 +19,14 @@
 
 #include "bxdf.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDistributionBRDF, "distribution_brdf")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, roughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, specular)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, specular_tint)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeDistributionBRDF)
+
 //! @brief Disbribution based brdf.
 /**
  * Distribution-based BRDFs
@@ -29,15 +37,6 @@
  */
 class DistributionBRDF : public Bxdf{
 public:
-    // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3   baseColor;
-        float       roughness;
-        float       specular;
-        float       specularTint;
-        Vector n;
-    };
-
     //! Constructor taking spectrum information.
     //!
     //! @param s            Direction-Hemisphere reflection.
@@ -56,8 +55,8 @@ public:
     //! @param param        All parameters.
     //! @param weight       Weight of this BRDF.
     //! @param doubleSided  Whether the material is double-sided.
-    DistributionBRDF( const Params& param , const Spectrum& weight , bool doubleSided = false)
-        : DistributionBRDF( param.baseColor , param.roughness , param.specular , param.specularTint , weight , param.n ) {
+    DistributionBRDF( const ClosureTypeDistributionBRDF& param , const Spectrum& weight , bool doubleSided = false)
+        : DistributionBRDF( param.base_color, param.roughness , param.specular , param.specular_tint , weight , param.normal ) {
     }
 
     //! Evaluate the BRDF

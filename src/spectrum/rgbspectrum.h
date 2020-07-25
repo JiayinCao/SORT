@@ -17,7 +17,8 @@
 
 #pragma once
 
-#include <OSL/oslexec.h>
+#include <string>
+#include <tsl_args.h>
 #include "core/define.h"
 #include "core/sassert.h"
 #include "math/utils.h"
@@ -34,17 +35,15 @@ public:
     //! @brief  Default constructor.
     SORT_FORCEINLINE RGBSpectrum():r(0.0f),g(0.0f),b(0.0f){}
 
+    //! @brief  Conversion from tsl float3
+    SORT_FORCEINLINE RGBSpectrum(const Tsl_Namespace::float3& f3) : r(f3.x), g(f3.y), b(f3.z) {}
+
     //! @brief  Constructor from three float values.
     //!
     //! @param  r   Value in red channel.
     //! @param  g   Value in green channel.
     //! @param  b   Value in blue channel.
     SORT_FORCEINLINE RGBSpectrum( float r , float g , float b ):r(r),g(g),b(b){}
-
-    //! @brief  Constructor from a given OSL vec3 data type.
-    //!
-    //! @param  v   Data in OSL vec format.
-    SORT_FORCEINLINE RGBSpectrum( const OSL::Vec3& v ):RGBSpectrum( v.x , v.y , v.z ){}
 
     //! @brief  Constructor from a single value that propogates to all channels
     //!

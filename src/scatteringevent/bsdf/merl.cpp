@@ -24,6 +24,11 @@
 #include "math/vector3.h"
 #include "material/matmanager.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeMERL)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMERL, void*, merl_data)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMERL, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeMERL)
+
 // constant to be used in MERL
 static const unsigned MERL_SAMPLING_RES_THETA_H = 90;
 static const unsigned MERL_SAMPLING_RES_THETA_D = 90;
@@ -34,7 +39,7 @@ static const double MERL_GREEN_SCALE = 0.000766666666666667;
 static const double MERL_BLUE_SCALE = 0.0011066666666666667;
 
 // Load data from file
-bool MerlData::LoadResource( const std::string& filename )
+bool MerlData::LoadResource( const std::string filename )
 {
     // get full path
     auto str = ( filename );
@@ -124,7 +129,7 @@ Spectrum MerlData::f( const Vector& Wo , const Vector& Wi ) const
     return Spectrum( r , g , b );
 }
 
-Merl::Merl(const Params& params, const Spectrum& weight, bool doubleSided)
-    : Bxdf(weight, BXDF_ALL, params.n, doubleSided), m_data(dynamic_cast<MerlData*>(MatManager::GetSingleton().GetResource(params.resIdx)))
-{
-}
+ Merl::Merl(const ClosureTypeMERL& params, const Spectrum& weight, bool doubleSided)
+     : Bxdf(weight, BXDF_ALL, params.normal, doubleSided), m_data((MerlData*)params.merl_data)
+ {
+ }

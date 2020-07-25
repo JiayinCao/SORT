@@ -19,11 +19,30 @@
 #include "core/sassert.h"
 #include "core/profile.h"
 
+thread_local static const Task* g_currentTask = nullptr;
+
+class UpdateCurrentTaskWrapper{
+public:
+    //! Update current task
+    UpdateCurrentTaskWrapper( const Task* task ){
+        g_currentTask = task;
+    }
+
+    //! There is no current on-going task any more.
+    ~UpdateCurrentTaskWrapper(){
+        g_currentTask = nullptr;
+    }
+};
+
 void Task::ExecuteTask(){
     SORT_PROFILE(m_name);
 
-    // Execute the task.
-    Execute();
+    {
+        UpdateCurrentTaskWrapper uctw( this );
+
+        // Execute the task.
+        Execute();
+    }
 
     // Upon termination of a task, release its dependents' dependencies on this task.
     Scheduler::GetSingleton().TaskFinished( this );
@@ -94,4 +113,22 @@ void Scheduler::TaskFinished( const Task* task ){
     }
 
     m_tasks.erase(task->GetTaskID());
+}
+
+void    EXECUTING_TASKS(){
+    while( true ){
+        // Pick a task that is available.
+        auto task = Scheduler::GetSingleton().PickTask();
+
+        // If there is no task to be picked, break out of the loop.
+        if(IS_PTR_INVALID(task))
+            return;
+
+        // Execute the task.
+        task->ExecuteTask();
+    }
+}
+
+const Task* GetCurrentTask(){
+    return g_currentTask;
 }

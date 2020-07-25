@@ -210,8 +210,6 @@ def export_scene(depsgraph, is_preview, fs):
     aspect_ratio_x = scene.render.pixel_aspect_x
     aspect_ratio_y = scene.render.pixel_aspect_y
     fov_angle = bpy.data.cameras[0].angle
-    camera_shift_x = bpy.data.cameras[0].shift_x
-    camera_shift_y = bpy.data.cameras[0].shift_y
 
     fs.serialize(SID('PerspectiveCameraEntity'))
     fs.serialize(vec3_to_tuple(pos))
@@ -594,17 +592,15 @@ def find_output_node(material):
     return None
 
 # get the from node of this socket if there is one recursively
-def get_from_socket(socket, visited):
+def get_from_socket(socket):
     if not socket.is_linked:
         return None
 
     # there should be exactly one link attached to an input socket, this is guaranteed by Blender
     assert( len( socket.links ) == 1 )
     other = socket.links[0].from_socket
-    if other.node in visited:
-        return None
     if other.node.bl_idname == 'NodeReroute':
-        return get_from_socket(other.node.inputs[0], visited )
+        return get_from_socket(other.node.inputs[0])
     return other
 
 # This function will iterate through all visited nodes in the scene and populate everything in a hash table
@@ -616,226 +612,252 @@ def collect_shader_resources(depsgraph, scene, fs):
         fs.serialize( 0 )
         return None
 
-    osl_shaders = {}
     resources = []
-
-    dummy = set()
+    visited = set()
     for material in list_materials(depsgraph):
         # get output nodes
         output_node = find_output_node(material)
         if output_node is None:
             continue
 
-        def serialize_prop(mat_node , shaders , parent_node_stack , leaving_group = False ):
+        def collect_resources(mat_node, visited, resources):
             if mat_node is None:
                 return
+            
+            # no need to iterate a node twice
+            if mat_node in visited:
+                return
+            visited.add(mat_node)
+            
+            # iterate through all source shader nodes.
+            for socket in mat_node.inputs:
+                input_socket = get_from_socket(socket)  # this is a temporary solution
+                if input_socket is None:
+                    continue
+                collect_resources(input_socket.node, visited, resources)
+            
+            # if it is a shader group node, recursively iterate its nodes
+            if mat_node.isGroupNode():
+                # sub tree for the group nodes
+                sub_tree = mat_node.getGroupTree()
 
-            cloned_parent_node_stack = parent_node_stack.copy()
-            if mat_node.isGroupNode() and leaving_group is False:
-                cloned_parent_node_stack.append( mat_node )
-                output_node = mat_node.getGroupTree().nodes.get("Group Outputs")
-                serialize_prop( output_node , shaders , cloned_parent_node_stack )
+                # recursively parse the node first
+                output_node = sub_tree.nodes.get("Group Outputs")
+
+                # recursively collect more nodes
+                collect_resources(output_node, visited, resources)
             else:
-                for socket in mat_node.inputs:
-                    from_socket = get_from_socket( socket , dummy )
-                    if from_socket is not None:
-                        serialize_prop( from_socket.node , shaders , parent_node_stack )
+                # otherwise simply populate the resources in this node
+                mat_node.populateResources(resources)
 
-            if mat_node.isGroupInputNode():
-                parent_node = cloned_parent_node_stack.pop()
-                serialize_prop( parent_node , shaders , cloned_parent_node_stack , True )
+        collect_resources(output_node, visited, resources)
 
-            # populate the resources first
-            mat_node.populateResources( resources )
-
-            # populate the shader source code if it is not exported before
-            if mat_node.isGroupInputNode():
-                # may there is a real stack instead of list?
-                parent_node = parent_node_stack.pop()
-                parent_node_stack.append( parent_node )
-
-                shader_type = parent_node.type_identifier() + '_GI'
-                if shader_type not in shaders:
-                    shaders[shader_type] = parent_node.generate_osl_source()
-            elif mat_node.isGroupNode() is False:
-                shader_type = mat_node.type_identifier()
-                if mat_node.isGroupOutputNode():
-                    parent_node = parent_node_stack.pop()
-                    parent_node_stack.append( parent_node )
-                    shader_type =  parent_node.type_identifier() + '_GO'
-                if shader_type not in shaders:
-                    shaders[shader_type] = mat_node.generate_osl_source()
-
-        parent_node_stack = [None]
-        serialize_prop(output_node, osl_shaders, parent_node_stack, False)
-
-    fs.serialize( len( osl_shaders ) )
-    for key , value in osl_shaders.items():
-        fs.serialize( key )
-        fs.serialize( value )
-        logD( 'Exporting node source code for node %s. Source code: %s' %(key , value) )
-    del osl_shaders
     fs.serialize( len( resources ) )
     for resource in resources:
         fs.serialize( resource[0] ) # type
         fs.serialize( resource[1] ) # external file name
 
-# Export OSL shader group
 matname_to_id = {}
 def export_materials(depsgraph, fs):
-    scene = depsgraph.scene
-    if scene.sort_data.allUseDefaultMaterial is True:
-        fs.serialize( int(0) )
+    # if we are in no-material mode, just skip outputting all materials
+    if depsgraph.scene.sort_data.allUseDefaultMaterial is True:
+        fs.serialize( SID('End of Material') )
         return None
 
-    materials = list_materials(depsgraph)
-    material_count = 0
-    for material in materials:
-        # get output nodes
-        output_node = find_output_node(material)
-        if output_node is None:
-            continue
-        material_count += 1
+    # this is used to keep track of all visited nodes to avoid duplicated nodes exported.
+    visited_shader_unit_types = set()
 
-    global matname_to_id
+    # loop through all materials and output them if valid
     i = 0
-    fs.serialize( int(material_count) )
+    materials = list_materials(depsgraph)
     for material in materials:
+        # indicating material exporting
+        logD( 'Exporting material %s.' %(material.name) )
+
         # get output nodes
         output_node = find_output_node(material)
         if output_node is None:
+            logD( 'Material %s doesn\'t have any output node, it is invalid and will be ignored.' %(material.name) )
             continue
         
-        surface_shader_node , surface_shader_valid = output_node.getSurfaceShader()
-        volume_shader_node , volume_shader_valid = output_node.getVolumeShader()
-
+        # update the material mapping
         compact_material_name = name_compat(material.name)
         matname_to_id[compact_material_name] = i
         i += 1
-        fs.serialize( compact_material_name )
-        logD( 'Exporting material %s.' % compact_material_name )
 
         # whether the material has transparent node
         has_transparent_node = False
+        # whether there is sss in the material
         has_sss_node = False
 
-        # collect node count
-        def collect_node_count(mat_node, visited, parent_node_stack, input_index = -1 , leaving_group = False):
-            if mat_node.isTransparentNode() is True:
+        # basically, this is a topological sort to serialize all nodes.
+        # each node type will get exported exactly once to avoid duplicated shader unit compliation.
+        def collect_shader_unit(shader_node, visited_instance, visited_types, shader_node_connections, node_type_mapping, input_index = -1):
+            # no need to process a node multiple times
+            if shader_node in visited_node_instances:
+                return
+
+            # add the current node to visited cache to avoid it being visited again
+            if shader_node.isMaterialOutputNode() is False:
+                visited_node_instances.add(shader_node)
+
+            # update transparent and sss flag
+            if shader_node.isTransparentNode() is True:
                 nonlocal has_transparent_node
                 has_transparent_node = True
-            if mat_node.isSSSNode() is True:
+            if shader_node.isSSSNode() is True:
                 nonlocal has_sss_node
                 has_sss_node = True
 
-            parent_node , accumulative_name = parent_node_stack.pop()
-            parent_node_stack.append( ( parent_node , accumulative_name ) )
+            # this identifies the unique name of the shader
+            current_shader_node_name = shader_node.getUniqueName()
 
-            cloned_parent_node_stack = parent_node_stack.copy()
+            # output node is a bit special that it can be revisited
+            if shader_node.isMaterialOutputNode():
+                current_shader_node_name = current_shader_node_name + compact_material_name
 
-            if mat_node.isGroupNode() and leaving_group is False:
-                cloned_parent_node_stack.append( ( mat_node , accumulative_name + mat_node.name ) )
-                output_node = mat_node.getGroupTree().nodes.get("Group Outputs")
-                collect_node_count( output_node , visited , cloned_parent_node_stack )
-            else:
-                inputs = mat_node.inputs if input_index < 0 else [mat_node.inputs[input_index]]
-                for socket in inputs:
-                    input_socket = get_from_socket( socket , visited )
-                    if input_socket is None:
-                        continue
-                    input_node = input_socket.node
+            # the type of the node
+            shader_node_type = shader_node.type_identifier()
 
-                    source_param = input_node.getShaderOutputParameterName(input_socket.name)
-                    target_param = mat_node.getShaderInputParameterName(socket.name)
+            # mapping from node name to node type
+            node_type_mapping[shader_node] = shader_node_type
 
-                    input_shader_name = input_node.getUniqueName() + accumulative_name
-                    if input_node.isGroupInputNode():
-                        input_shader_name = parent_node.getUniqueName() + '_GI' + accumulative_name
-                    elif input_node.isGroupNode():
-                        input_shader_name = input_node.getUniqueName() + '_GO' + accumulative_name + input_node.name
+            # grab all source shader nodes
+            inputs = shader_node.inputs 
+            if input_index >= 0:
+                # out of index, simply return, this is because some old assets doesn't have the volume channel
+                # a bit tolerance will allow me to still use the render with old assets
+                if input_index >= len(shader_node.inputs):
+                    return
+                else:
+                    inputs = [shader_node.inputs[input_index]]
 
-                    output_shader_name = mat_node.getUniqueName() + accumulative_name
-                    if mat_node.isGroupNode():
-                        output_shader_name = mat_node.getUniqueName() + '_GI' + accumulative_name + mat_node.name
-                    elif mat_node.isGroupOutputNode():
-                        output_shader_name = parent_node.getUniqueName() + '_GO' + accumulative_name
+            for socket in inputs:
+                input_socket = get_from_socket( socket )  # this is a temporary solution
+                if input_socket is None:
+                    continue
+                source_node = input_socket.node
 
-                    mat_connections.append( ( input_shader_name , source_param , output_shader_name, target_param ) )
+                source_param = source_node.getShaderOutputParameterName(input_socket.name)
+                target_param = shader_node.getShaderInputParameterName(socket.name)
 
-                    collect_node_count(input_node, visited, cloned_parent_node_stack)
+                source_shader_node_name = source_node.getUniqueName()
 
-            if mat_node.isGroupInputNode():
-                parent_node , _ = cloned_parent_node_stack.pop()
-                collect_node_count( parent_node , visited , cloned_parent_node_stack , -1 , True )
+                # add the shader unit connection
+                shader_node_connections.append( ( source_shader_node_name , source_param , current_shader_node_name, target_param ) )
 
-            # skip if this node doesn't need to be serialized
-            if mat_node.needSerializingShader() is False:
+                # recursively collect shader unit
+                collect_shader_unit(source_node, visited_node_instances, visited_types, shader_node_connections, node_type_mapping)
+
+            # no need to serialize the same node multiple times
+            if shader_node_type in visited_types:
                 return
+            visited_types.add(shader_node_type)
 
-            shader_name = ''
-            shader_type = ''
-            shader_node = None
-            if mat_node.isGroupInputNode():
-                shader_name = parent_node.getUniqueName() + '_GI' + accumulative_name
-                shader_type = parent_node.type_identifier() + '_GI'
-                shader_node = parent_node
-            elif mat_node.isGroupOutputNode():
-                shader_name = parent_node.getUniqueName() + '_GO' + accumulative_name
-                shader_type = parent_node.type_identifier() + '_GO'
-                shader_node = parent_node
-            elif mat_node.isGroupNode() is False:
-                shader_name = mat_node.getUniqueName() + accumulative_name
-                shader_type = mat_node.type_identifier()
-                shader_node = mat_node
+            # export the shader node
+            if shader_node.isGroupNode():
+                # shader group should have a new set of connections
+                shader_group_connections = []
+                # shader group should also has its own node mapping
+                shader_group_node_mapping = {}
+                # start from a new visited cache
+                shader_group_node_visited = set()   
+                
+                # sub tree for the group nodes
+                sub_tree = shader_node.getGroupTree()
 
-            if shader_name not in visited and shader_name != '':
-                fs.serialize( shader_name )
-                fs.serialize( shader_type )
-                shader_node.serialize_prop( fs )
-                visited.add( shader_name )
+                # recursively parse the node first
+                output_node = sub_tree.nodes.get("Group Outputs")
+                collect_shader_unit(output_node, shader_group_node_visited, visited_types, shader_group_connections, shader_group_node_mapping)
 
-        # serialize surface shader
-        if surface_shader_valid:
-            mat_connections = []    # connections between nodes
-            visited = set()         # prevent a node to be serialized twice
-            parent_node_stack = [ ( None , compact_material_name ) ]
-            collect_node_count(output_node, visited, parent_node_stack, 0)
-            
-            fs.serialize( '' )
-            fs.serialize( 'shader_done' )
+                # it is important to visit the input node even if it is not connected since this needs to be connected with exposed arguments.
+                # lacking this node will result in tsl compilation error
+                input_node = sub_tree.nodes.get("Group Inputs")
+                collect_shader_unit(input_node, shader_group_node_visited, visited_types, shader_group_connections, shader_group_node_mapping)
 
-            # serialize this material
-            fs.serialize( len( mat_connections ) )
-            for connection in mat_connections:
+                # start serialization
+                fs.serialize(SID("ShaderGroupTemplate"))
+                fs.serialize(shader_node_type)
+
+                fs.serialize(len(shader_group_node_mapping))
+                for shader_node, shader_type in shader_group_node_mapping.items():
+                    fs.serialize(shader_node.getUniqueName())
+                    fs.serialize(shader_type)
+                    shader_node.serialize_prop(fs)
+                fs.serialize(len(shader_group_connections))
+                for connection in shader_group_connections:
+                    fs.serialize( connection[0] )
+                    fs.serialize( connection[1] )
+                    fs.serialize( connection[2] )
+                    fs.serialize( connection[3] )
+                
+                # indicate the exposed arguments
+                output_node.serialize_exposed_args(fs)
+
+                # if there is input node, exposed the inputs
+                input_node = sub_tree.nodes.get("Group Inputs")
+                if input_node is not None:
+                    input_node.serialize_exposed_args(fs)
+                else:
+                    fs.serialize( "" )
+            else:
+                fs.serialize(SID('ShaderUnitTemplate'))
+                fs.serialize(shader_node_type)
+                fs.serialize(shader_node.generate_osl_source())
+                shader_node.serialize_shader_resource(fs)
+
+        # this is the shader node connections
+        surface_shader_node_connections = []
+        volume_shader_node_connections = []
+
+        # this hash table keeps track of all visited shader node instance
+        visited_node_instances = set()
+
+        # node type mapping, this maps from node name to node type
+        surface_shader_node_type = {}
+        volume_shader_node_type = {}
+
+        # iterate the material for surface shader
+        collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, surface_shader_node_connections, surface_shader_node_type, 0)
+        # iterate the material for volume shader
+        collect_shader_unit(output_node, visited_node_instances, visited_shader_unit_types, volume_shader_node_connections, volume_shader_node_type, 1)
+
+        # serialize this material, it is a real material
+        fs.serialize(SID('Material'))
+        fs.serialize(compact_material_name)
+
+        if len(surface_shader_node_type) > 1:
+            fs.serialize(SID('Surface Shader'))
+            fs.serialize(len(surface_shader_node_type))
+            for shader_node, shader_type in surface_shader_node_type.items():
+                fs.serialize(shader_node.getUniqueName())
+                fs.serialize(shader_type)
+                shader_node.serialize_prop(fs)
+            fs.serialize(len(surface_shader_node_connections))
+            for connection in surface_shader_node_connections:
                 fs.serialize( connection[0] )
                 fs.serialize( connection[1] )
                 fs.serialize( connection[2] )
                 fs.serialize( connection[3] )
         else:
-            fs.serialize( '' )
-            fs.serialize( 'invalid_shader' )
+            fs.serialize( SID('Invalid Surface Shader') )
 
-        # serializing volume shader
-        if volume_shader_valid:
-            mat_connections = []    # connections between nodes
-            visited = set()         # prevent a node to be serialized twice
-            parent_node_stack = [ ( None , compact_material_name ) ]
-            collect_node_count(output_node, visited, parent_node_stack, 1)
-
-            fs.serialize( '' )
-            fs.serialize( 'shader_done' )
-
-            # serialize this material
-            fs.serialize( len( mat_connections ) )
-            for connection in mat_connections:
+        if len(volume_shader_node_type) > 1 :
+            fs.serialize(SID('Volume Shader'))
+            fs.serialize(len(volume_shader_node_type))
+            for shader_node, shader_type in volume_shader_node_type.items():
+                fs.serialize(shader_node.getUniqueName())
+                fs.serialize(shader_type)
+                shader_node.serialize_prop(fs)
+            fs.serialize(len(volume_shader_node_connections))
+            for connection in volume_shader_node_connections:
                 fs.serialize( connection[0] )
                 fs.serialize( connection[1] )
                 fs.serialize( connection[2] )
                 fs.serialize( connection[3] )
         else:
-            fs.serialize( '' )
-            fs.serialize( 'invalid_shader' )
-        
+            fs.serialize( SID('Invalid Volume Shader') )
+
         # mark whether there is transparent support in the material, this is very important because it will affect performance eventually.
         fs.serialize( bool(has_transparent_node) )
         fs.serialize( bool(has_sss_node) )
@@ -844,4 +866,5 @@ def export_materials(depsgraph, fs):
         fs.serialize( material.sort_material.volume_step )
         fs.serialize( material.sort_material.volume_step_cnt )
 
-    log( 'Exported %d materials in total.' %(len(materials)) )
+    # indicate the end of material parsing
+    fs.serialize(SID('End of Material'))

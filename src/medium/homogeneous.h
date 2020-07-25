@@ -20,6 +20,14 @@
 #include "core/define.h"
 #include "medium.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeHomogeneous, "medium_homogeneous")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float, emission)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float, absorption)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float, scattering)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHomogeneous, float, anisotropy)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeHomogeneous)
+
 //! @brief  HomogeneousMedium has equal scattering, absorption co-efficient everywhere.
 /**
  * Comparing with Heterogeneous medium, homogeneous medium is simpler and more performant.
@@ -28,21 +36,12 @@
  */
 class HomogeneousMedium : public Medium{
 public:
-    // Input parameters to construct the volume.
-    struct Params {
-        OSL::Vec3   baseColor;
-        OSL::Float  emission;
-        OSL::Float  absorption;
-        OSL::Float  scattering;
-        OSL::Float  anisotropy;
-    };
-
     //! @brief  Constructor.
     //!
     //! @param param		Parameter to build the volume.
 	//! @param material		Material that spawns the medium.
-    HomogeneousMedium(const HomogeneousMedium::Params& param, const MaterialBase* material):
-        Medium(param.baseColor, param.emission, param.absorption, param.scattering, param.anisotropy, material){}
+    HomogeneousMedium(const ClosureTypeHomogeneous& param, const MaterialBase* material):
+        Medium(param.base_color, param.emission, param.absorption, param.scattering, param.anisotropy, material){}
 
     //! @brief  Evaluation of beam transmittance.
     //!

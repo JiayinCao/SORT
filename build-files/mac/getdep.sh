@@ -19,11 +19,9 @@ case "$(uname -s)" in
 
 Darwin)
 rm -rf dependencies
-curl -o dependencies.zip http://45.63.123.194/sort_dependencies/mac/dependencies.zip
-unzip dependencies.zip
-rm -rf __MACOSX
-rm dependencies.zip
-cd ..
+mkdir dependencies
+sh ./build-files/mac/build_tsl.sh
+ls ./dependencies/ # just for debugging purpose
 ;;
 
 CYGWIN*|MINGW32*|MSYS*)

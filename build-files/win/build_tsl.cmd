@@ -15,15 +15,23 @@
 ::    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 ::
 
-rem reset all variables so they do not get accidentally get carried over from previous builds
-set SHOW_HELP=
-set SHOW_ABOUT=
-set SHOW_DEP_INFO=
-set GIT_UPDATE=
-set UPDATE_DEP=
-set CLEAN_DEP=
-set CLEAN=
-set BUILD_RELEASE=
-set BUILD_DEBUG=
-set BUILD_RELWITHDEBINFO=
-set REGISTER_SYS_ENV=
+:: enter the directory of dependencies
+call cd dependencies
+
+:: Tiny shading language is another personal project of mine, it is used as the shading language in SORT.
+call git clone https://github.com/JiayinCao/Tiny-Shading-Language.git
+
+:: enter the directory
+call cd Tiny-Shading-Language
+
+:: trigger an installation of the library
+call make update_dep
+call make install
+
+:: copy the library to the correct place
+call xcopy .\tsl ..\tsl /E /C /I
+
+:: clean up
+call cd ..
+call rm -rf Tiny-Shading-Language
+call cd ..

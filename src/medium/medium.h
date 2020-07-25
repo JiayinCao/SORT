@@ -17,11 +17,15 @@
 
 #pragma once
 
+#include <tsl_system.h>
+#include <tsl_args.h>
 #include "core/define.h"
 #include "spectrum/spectrum.h"
 #include "math/ray.h"
 #include "math/interaction.h"
 #include "core/strid.h"
+
+using namespace Tsl_Namespace;
 
 class MaterialBase;
 

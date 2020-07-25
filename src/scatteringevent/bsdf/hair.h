@@ -20,6 +20,13 @@
 #include "bxdf.h"
 #include "core/sassert.h"
 
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeHair, "hair")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float3, sigma)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float, longtitudinalRoughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float, azimuthalRoughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float, ior)
+DECLARE_CLOSURE_TYPE_END(ClosureTypeHair)
+
 // Somehow tilting angle will cause problem in unit test
 #define DISABLE_ANGLE_TILT
 #define PMAX                    3
@@ -31,19 +38,11 @@
  */
 class Hair : public Bxdf{
 public:
-    // Input parameters to construct the BRDF.
-    struct Params {
-        OSL::Vec3   sigma;
-        float       longtitudinalRoughness;
-        float       azimuthalRoughness;
-        float       ior;
-    };
-
     //! Constructor
     //!
     //! @param params       Parameter set.
     //! @param weight           Weight of the BXDF
-    Hair(const Params& params, const Spectrum& weight);
+    Hair(const ClosureTypeHair& params, const Spectrum& weight);
 
     //! Constructor
     //!

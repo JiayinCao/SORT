@@ -24,8 +24,7 @@
 #include "core/singleton.h"
 #include "material/material.h"
 #include "core/resource.h"
-
-class MaterialBase;
+#include "task/task.h"
 
 //! @brief Material manager.
 /**
@@ -62,25 +61,32 @@ public:
     // result           : the number of materials in the file
     unsigned    ParseMatFile( class IStreamBase& stream );
 
-    //! @brief  Construct shader source code given a list of parameters in string format.
-    //!
-    //! @param  shaderName  The name of the shader to be constructed.
-    //! @param  shaderType  The type of shader to be constructed.
-    //! @param  paramValue  The default value of the parameters in string format to be set.
-    //! @return             The constructed shader source code.
-    std::string ConstructShader(const std::string& shaderName, const std::string& shaderType, const std::vector<std::string>& paramValue);
-
     //! @brief  Get resource data based on index.
     //!
-    //! @param  index       Index of the resource.
+    //! @param  name        Name of the resource.
     //! @return             The pointer of the resource. 'nullptr' will be returned if the index is out of range.
-    Resource*   GetResource(int index);
+    const Resource*   GetResource(const std::string& name) const;
+
+    //! @brief  Retrieve shader units through shader unit template type.
+    //!
+    //! @param  name_id     The name of the template.
+    //! @return             The shader unit template returned, nullptr if it doesn't exist.
+    std::shared_ptr<ShaderUnitTemplate> GetShaderUnitTemplate(const std::string& name) const;
+
+#ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
+    //! @brief  Wait for all materials to be built before moving forward
+    void WaitForMaterialBuilding() const;
+#endif
 
 private:
     std::vector<std::unique_ptr<MaterialBase>>       m_matPool;         /**< Material pool holding all materials. */
-    std::unordered_map<std::string, std::string>     m_shaderSources;   /**< OSL shader source code. */
 
-    std::vector<std::unique_ptr<Resource>>           m_resources;       /**< Resources used during BXDF evaluation. */
+    std::unordered_map<std::string, std::unique_ptr<Resource>>  m_resources;       /**< Resources used during BXDF evaluation. */
+
+    std::unordered_map<std::string, std::shared_ptr<ShaderUnitTemplate>>     m_shader_units;
+
+    /**< Shader unit default values. */
+    std::vector<ShaderParamDefaultValue>        m_paramDefaultValues;
 
     friend class Singleton<MatManager>;
 };

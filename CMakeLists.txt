@@ -17,7 +17,7 @@
 
 cmake_minimum_required (VERSION 3.1)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -51,8 +51,8 @@ SET( ENABLE_PROFILER               "NO"   CACHE BOOL "Enable SORT profiling syst
 SET( ENABLE_STATS                  "YES"  CACHE BOOL "Enable SORT stats system. It is enabled by default." )
 SET( ENABLE_FASTMATH               "NO"   CACHE BOOL "Enable fast math. It may have potential risk in errors due to lower precision. Performance gain is quite limited and unstable, for which reason it is disabled by default." )
 SET( ENABLE_LINKTIME_OPTIMIZATION  "YES"  CACHE BOOL "Link time optimization is enabled by default since it does show some performance gain sometimes." )
-SET( ENABLE_SSE_OPTIMIZATION       "YES"  CACHE BOOL "Enable SSE optimization, this could boost the performance of ray tracing." )
-SET( ENABLE_AVX_OPTIMIZATION       "YES"  CACHE BOOL "Enable AVX optimization, this could boost the performance of ray tracing even more." )
+SET( ENABLE_SSE_OPTIMIZATION       "NO"  CACHE BOOL "Enable SSE optimization, this could boost the performance of ray tracing." )
+SET( ENABLE_AVX_OPTIMIZATION       "NO"  CACHE BOOL "Enable AVX optimization, this could boost the performance of ray tracing even more." )
 
 # For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
 if(ENABLE_PROFILER)
@@ -75,14 +75,26 @@ endif()
 
 project (SORT)
 
+# loading llvm library, this is mandatory for compiling tsl, make sure it looks for a local llvm library
+set(TSL_DIR ${SORT_SOURCE_DIR}/dependencies/tsl/)
+
+# find llvm librar${TSL_SOURCE_DIR}/thirdparty/gtesty
+find_package(TSL REQUIRED CONFIG)
+
+# output tsl library version
+message(STATUS "Tiny Shading Langauge version: ${TSL_VERSION}")
+
 # include other modules
-include("${CMAKE_CURRENT_LIST_DIR}/build-files/cmake/externalPackages.cmake")
+# include("${CMAKE_CURRENT_LIST_DIR}/build-files/cmake/externalPackages.cmake")
 
 if(ENABLE_PROFILER)
 	find_package(easy_profiler REQUIRED)
 endif(ENABLE_PROFILER)
 
 include_directories( "${SORT_SOURCE_DIR}/src" )
+include_directories( "${TSL_INCLUDE_DIR}" )
+
+link_directories( "${TSL_LIBRARY_DIR}" )
 
 macro(source_group_by_dir source_files)
     set(sgbd_cur_dir ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -127,11 +139,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${SORT_SOURCE_DIR}/bin")
 
 add_executable(SORT ${all_files})
 
-target_link_libraries(SORT ${OPENIMAGEIO_LIBRARIES})
-target_link_libraries(SORT ${OSL_LIBRARIES})
+target_link_libraries(SORT ${TSL_LIBS})
 if(ENABLE_PROFILER)
     target_link_libraries(SORT easy_profiler)
 endif(ENABLE_PROFILER)
+
+# g-test needs the macro to avoid a compiling error in C++ 17
+set( CMAKE_CXX_FLAGS "${GTEST_HAS_TR1_TUPLE} -DGTEST_HAS_TR1_TUPLE=0" )
 
 # Enable multi-thread compiling on Windows.
 if (SORT_PLATFORM_WIN)
@@ -142,6 +156,9 @@ if (SORT_PLATFORM_WIN)
     ProcessorCount(N)
     SET(CMAKE_C_FLAGS   "${CMAKE_C_FLAGS} /MP${N}")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP${N}")
+
+    # make sure to copy the tsl dll to bin folder
+    tsl_runtime_copy( "${SORT_SOURCE_DIR}/bin" )
 endif (SORT_PLATFORM_WIN)
 
 # Enable SORT Stats system.
@@ -193,7 +210,7 @@ if(MSVC)
 
     # this enables debuging in Visual Studio, otherwise it will crash
     # somehow CMAKE_MSVC_RUNTIME_LIBRARY doesn't work
-    set_target_properties( SORT PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGS} /MD" )
+    set_target_properties( SORT PROPERTIES COMPILE_FLAGS "${COMPILE_FLAGS} /MD /EHsc" )
 
     set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS /W0)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4244 /wd4305 /wd4800" )

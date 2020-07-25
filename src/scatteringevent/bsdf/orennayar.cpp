@@ -18,6 +18,23 @@
 #include "orennayar.h"
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
+IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeOrenNayar)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float, roughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeOrenNayar)
+
+OrenNayar::OrenNayar(const ClosureTypeOrenNayar& params, const Spectrum& weight, bool doubleSided ):
+    Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided), R(params.base_color) {
+    // roughness ranges from 0 to infinity
+    auto sigma = params.roughness;
+    sigma = std::max(0.0f, sigma);
+
+    const auto sigma2 = sigma * sigma;
+    A = 1.0f - (sigma2 / (2.0f * (sigma2 + 0.33f)));
+    B = 0.45f * sigma2 / (sigma2 + 0.09f);
+}
+
 OrenNayar::OrenNayar(const Spectrum& reflectance, float sigma, const Spectrum& weight, const Vector& n, bool doubleSided) :
     Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), n, doubleSided), R(reflectance){
     // roughness ranges from 0 to infinity
@@ -28,16 +45,16 @@ OrenNayar::OrenNayar(const Spectrum& reflectance, float sigma, const Spectrum& w
     B = 0.45f * sigma2 / (sigma2 + 0.09f);
 }
 
-// constructor
-OrenNayar::OrenNayar( const Params& params , const Spectrum& weight , bool doubleSided) :
-    Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , params.n, doubleSided) , R(params.baseColor){
-    // roughness ranges from 0 to infinity
-    auto sigma = std::max( 0.0f , params.sigma );
+// // constructor
+// OrenNayar::OrenNayar( const Params& params , const Spectrum& weight , bool doubleSided) :
+//     Bxdf( weight , (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION) , params.n, doubleSided) , R(params.baseColor){
+//     // roughness ranges from 0 to infinity
+//     auto sigma = std::max( 0.0f , params.sigma );
 
-    const auto sigma2 = sigma * sigma;
-    A = 1.0f - (sigma2 / ( 2.0f * (sigma2 +0.33f)));
-    B = 0.45f * sigma2 / (sigma2 + 0.09f );
-}
+//     const auto sigma2 = sigma * sigma;
+//     A = 1.0f - (sigma2 / ( 2.0f * (sigma2 +0.33f)));
+//     B = 0.45f * sigma2 / (sigma2 + 0.09f );
+// }
 
 // evaluate bxdf
 // para 'wo' : out going direction

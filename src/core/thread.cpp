@@ -31,8 +31,6 @@ int ThreadId(){
     return g_ThreadId;
 }
 
-spinlock_mutex g_mutex;
-
 void WorkerThread::BeginThread(){
     m_thread = std::thread([&]() {
         g_ThreadId = m_tid;

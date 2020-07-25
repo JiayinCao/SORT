@@ -19,7 +19,14 @@
 
 #include "bxdf.h"
 #include "core/sassert.h"
-#include "material/osl_utils.h"
+#include "material/tsl_utils.h"
+
+DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypePhong, "phong")
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, diffuse)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, specular)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float, specular_power)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, normal)
+DECLARE_CLOSURE_TYPE_END(ClosureTypePhong)
 
 //! @brief Phong BRDF.
 /**
@@ -40,21 +47,14 @@
  */
 class Phong : public Bxdf{
 public:
-    struct Params{
-        OSL::Vec3     diffuse;
-        OSL::Vec3     specular;
-        float         specularPower;
-        OSL::Vec3     n;
-    };
-
     //! Constructor
     //!
     //! @param  params          Parameter set.
     //! @param  weight          BRDF weight.
     //! @param  doubleSided     Whether the BRDF is double-sided.
-    Phong(const Params& params, const Spectrum& weight, bool doubleSided = false)
-        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.n, doubleSided) , D(params.diffuse), S(params.specular), power(params.specularPower),
-          diffRatio(intensityOSLVec3(params.diffuse)/(intensityOSLVec3(params.diffuse)+intensityOSLVec3(params.specular))) {
+    Phong(const ClosureTypePhong& params, const Spectrum& weight, bool doubleSided = false)
+        : Bxdf(weight, (BXDF_TYPE)(BXDF_DIFFUSE | BXDF_REFLECTION), params.normal, doubleSided) , D(params.diffuse), S(params.specular), power(params.specular_power),
+          diffRatio(intensity_tsl_float3(params.diffuse)/(intensity_tsl_float3(params.diffuse)+ intensity_tsl_float3(params.specular))) {
         const auto combined = D + S;
         sAssert(combined.r <= 1.0f, MATERIAL);
         sAssert(combined.g <= 1.0f, MATERIAL);

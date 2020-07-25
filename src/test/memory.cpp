@@ -30,7 +30,7 @@ TEST(Memory, AlignedAllocation) {
             auto* ret = malloc_aligned( 1024 , alignment );
 
             // the memory should be aligned
-            EXPECT_EQ( ((uintptr_t)ret) % alignment , 0 );
+            EXPECT_EQ( ((uintptr_t)ret) % alignment , (uintptr_t)0 );
 
             // free the memory
             free_aligned( ret );
@@ -43,7 +43,7 @@ TEST(Memory, AlignedAllocation_ZeroInput) {
     auto* ret = malloc_aligned( 0 , 32 );
 
     // there should be no memory allocated.
-    EXPECT_EQ( ret , nullptr );
+    EXPECT_EQ( (void*)ret , (void*)nullptr );
 
     // this line should do nothing.
     free_aligned( ret );

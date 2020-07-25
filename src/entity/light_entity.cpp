@@ -21,12 +21,6 @@
 #include "shape/disk.h"
 #include "core/primitive.h"
 
-IMPLEMENT_RTTI(PointLightEntity);
-IMPLEMENT_RTTI(DirLightEntity);
-IMPLEMENT_RTTI(SpotLightEntity);
-IMPLEMENT_RTTI(SkyLightEntity);
-IMPLEMENT_RTTI(AreaLightEntity);
-
 void PointLightEntity::Serialize( IStreamBase& stream ){
     stream >> m_light->m_light2world;
     auto energy = 0.0f;

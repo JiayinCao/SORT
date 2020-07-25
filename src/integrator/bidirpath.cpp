@@ -32,8 +32,6 @@ SORT_STATS_COUNTER("Bi-directional Path Tracing", "Primary Ray Count" , sPrimary
 SORT_STATS_AVG_COUNT("Bi-directional Path Tracing", "Average Path Length Starting from Eye", sTotalLengthPathFromEye , sPrimaryRayCount);            // This also counts the case where ray hits sky
 SORT_STATS_AVG_COUNT("Bi-directional Path Tracing", "Average Path Length Starting from Lights", sTotalLengthPathFromLight , sPrimaryRayCount);       // This also counts the case where ray hits sky
 
-IMPLEMENT_RTTI( BidirPathTracing );
-
 Spectrum BidirPathTracing::Li( const Ray& ray , const PixelSample& ps , const Scene& scene ) const{
     SORT_STATS(++sPrimaryRayCount);
 

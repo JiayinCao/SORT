@@ -132,16 +132,7 @@ endif
 
 # Ubuntu
 ifeq ($(OS), linux)
-	# Different Ubuntu have different version of libraries, we need to tell which version it is.
-	# I have only built dependencies for Ubuntu Xenial and Bionic. In order to build other versions,
-	# it is necessary to build the library first.
-	OS_VERS:=$(shell lsb_release -a 2>/dev/null | grep Description | awk '{ print $$2 "-" $$3 }')
-	ifeq ($(findstring Ubuntu-16,$(OS_VERS)),Ubuntu-16)
-		UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_xenial.sh
-	endif
-	ifeq ($(findstring Ubuntu-18,$(OS_VERS)),Ubuntu-18)
-		UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_bionic.sh
-	endif
+    UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_ubuntu.sh
 endif
 
 BUILD_RELEASE_COMMAND        = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Release ..;make -j 4;cd ..;

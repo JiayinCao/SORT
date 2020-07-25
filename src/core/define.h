@@ -75,3 +75,30 @@
 // evaluate intersection results, like position, normal, uv, basically everything that is used in shader evaluation,
 // when transparent material is present.
 #define ENABLE_TRANSPARENT_SHADOW
+
+// Multi-thread shader compilation.
+// This is not a functional feature since there could be some data race problem in the TSL library. By default, this
+// is disabled.
+// Also, before I have a refactored job system with more flexible design so that I can spawn jobs inside a job, multi-
+// thread shader compilation is not a done feature. The current solution is just the first iteration that only
+// bulids material shader group in seperate thread since I know for a fact there is no dependencies between material
+// shader group. However, in an ideal world, even shader unit should be compiled in a multi-thread environment to fully
+// utilize the power of TSL's multi-thread compilation, this does require a more robust job system, which SORT currently
+// doesn't have.
+// This will be disabled since the efficiency of the current task system will be the main performance bottleneck,
+// leading to worse performance with multi-thread shader compilation enabled.
+// #define ENABLE_MULTI_THREAD_SHADER_COMPILATION
+
+// This macro offers a cheap way to mult-thread shader compilation without the task system. However, there is no sign
+// indicating there is significant gain in performance. Probably because the overhead of thread switching, allocating
+// new thread context and also the mutex inside TSL lib.
+// Eventually this will be replaced with a proper job system. However, given that I have very limited time and there is
+// so much things to do, this may be lower priority before I get a chance to work on it.
+// This is disabled since it is significantly slower on my 2015 Macbook.
+// #define ENABLE_MULTI_THREAD_SHADER_COMPILATION_CHEAP
+
+// This is a temporary quick solution to enable multi-thread texture loading. It is by no means a very good idea to 
+// parallel a bunch of IO bound threads. However, my newly planned job system is far from being ready yet, I'll live 
+// with it for now. This async loading eventually will be less useful since I'm planning to implement a texture cache
+// system in the future to do lazy texture loading in the future.
+#define ENABLE_ASYNC_TEXTURE_LOADING
