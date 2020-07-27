@@ -18,7 +18,7 @@
 #include "transparent.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeTransparent)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeTransparent, float3, attenuation)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeTransparent, Tsl_float3, attenuation)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeTransparent)
 
 Spectrum Transparent::f( const Vector& wo , const Vector& wi ) const{

@@ -22,10 +22,10 @@
 #include "math/utils.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeHair)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, float3, sigma)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, float, longtitudinalRoughness)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, float, azimuthalRoughness)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, float, ior)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, Tsl_float3, sigma)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, Tsl_float, longtitudinalRoughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, Tsl_float, azimuthalRoughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHair, Tsl_float, ior)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeHair)
 
 SORT_STATIC_FORCEINLINE void Ap( const float cosThetaO , const float eta , const float cosGammaO , const Spectrum& T , Spectrum ap[] ){

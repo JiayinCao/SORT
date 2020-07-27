@@ -27,7 +27,7 @@
 #include "scatteringevent/bsdf/transparent.h"
 #include "texture/imagetexture2d.h"
 
-using namespace Tsl_Namespace;
+USE_TSL_NAMESPACE
 
 #ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
 bool MaterialBase::IsMaterialBuilt() const{

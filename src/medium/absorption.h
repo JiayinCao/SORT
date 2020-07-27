@@ -21,8 +21,8 @@
 #include "medium.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeAbsorption, "volume_absorption")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, float3, base_color)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, float, absorption)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, Tsl_float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAbsorption, Tsl_float, absorption)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeAbsorption)
 
 //! @brief  Medium that only absorb lights without any scattering.

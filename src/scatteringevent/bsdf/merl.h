@@ -22,8 +22,8 @@
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeMERL, "merl")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMERL, void*, merl_data)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMERL, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMERL, Tsl_resource, merl_data)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeMERL, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeMERL)
 
 //! @brief Phong BRDF.

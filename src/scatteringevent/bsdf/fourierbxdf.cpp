@@ -24,8 +24,8 @@
 #include "material/matmanager.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeFourier)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFourier, void*, measured_data)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFourier, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFourier, Tsl_resource, measured_data)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFourier, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeFourier)
 
 bool FourierBxdfData::LoadResource( const std::string filename ){

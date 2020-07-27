@@ -25,8 +25,6 @@
 #include "math/interaction.h"
 #include "core/strid.h"
 
-using namespace Tsl_Namespace;
-
 class MaterialBase;
 
 enum SE_Interaction : char {

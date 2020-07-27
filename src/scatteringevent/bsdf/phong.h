@@ -22,10 +22,10 @@
 #include "material/tsl_utils.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypePhong, "phong")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, diffuse)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, specular)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float, specular_power)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, Tsl_float3, diffuse)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, Tsl_float3, specular)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, Tsl_float, specular_power)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypePhong, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypePhong)
 
 //! @brief Phong BRDF.

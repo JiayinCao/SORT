@@ -21,11 +21,11 @@
 #include "core/memory.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeDielectric)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, reflectance)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, transmittance)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float, roughness_u)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float, roughness_v)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float3, reflectance)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float3, transmittance)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float, roughness_u)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float, roughness_v)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeDielectric)
 
  Dielectric::Dielectric(const ClosureTypeDielectric& params, const Spectrum& weight):

@@ -25,8 +25,8 @@
 #include "material/matmanager.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeMERL)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMERL, void*, merl_data)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMERL, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMERL, Tsl_resource, merl_data)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeMERL, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeMERL)
 
 // constant to be used in MERL

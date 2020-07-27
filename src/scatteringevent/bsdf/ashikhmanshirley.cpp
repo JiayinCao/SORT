@@ -20,11 +20,11 @@
 #include "core/samplemethod.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeAshikhmanShirley)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float, specular)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float, roughnessU)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float, roughnessV)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float3, base_color)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float, specular)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float, roughnessU)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float, roughnessV)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeAshikhmanShirley)
 
 Spectrum AshikhmanShirley::f( const Vector& wo , const Vector& wi ) const{

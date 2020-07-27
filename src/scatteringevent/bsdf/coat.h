@@ -23,11 +23,11 @@
 #include "scatteringevent/scatteringevent.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeCoat, "coat")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, void*, closure)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, roughness)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, ior)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float3, sigma)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_closure, closure)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_float, roughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_float, ior)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_float3, sigma)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeCoat)
 
 //! @brief Coat BRDF.

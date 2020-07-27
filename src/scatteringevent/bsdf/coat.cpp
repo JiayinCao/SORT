@@ -19,11 +19,11 @@
 #include "sampler/sample.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeCoat)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, void*, closure)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, roughness)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, float, ior)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, float3, sigma)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_closure, closure)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_float, roughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_float, ior)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_float3, sigma)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeCoat, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeCoat)
 
 // Because this BRDF doesn't take TIR ( Total inner reflection ) into account, there is a small biased compensation introduced

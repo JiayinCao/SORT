@@ -21,11 +21,11 @@
 #include "microfacet.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeAshikhmanShirley, "ashikhman_shirley")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float,  specular)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float,  roughnessU)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float,  roughnessV)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float3, base_color)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float,  specular)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float,  roughnessU)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float,  roughnessV)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeAshikhmanShirley, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeAshikhmanShirley)
 
 //! @brief AshikhmanShirley brdf.

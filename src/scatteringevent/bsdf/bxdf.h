@@ -211,6 +211,3 @@ protected:
     mutable Vector      gnormal;            /**< Geometry normal. */
     const bool  doubleSided = false;        /**< Whether the bxdf is double sided. */
 };
-
-// this is temporary
-using namespace Tsl_Namespace;

@@ -20,9 +20,9 @@
 #include "core/rand.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeFabric)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFabric, float3, base_color)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFabric, float, roughness)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFabric, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFabric, Tsl_float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFabric, Tsl_float, roughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeFabric, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeFabric)
 
 // This array is a pre-integrated array for BRDF normalization using Monte Carlo estimation.

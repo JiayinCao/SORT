@@ -22,8 +22,8 @@
 #include "scatteringevent/scatteringevent.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDoubleSided, "double_sided")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, void*, closure0)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, void*, closure1)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, Tsl_closure, closure0)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, Tsl_closure, closure1)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeDoubleSided)
 
 //! @brief DoubleSided BRDF.

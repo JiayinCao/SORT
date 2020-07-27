@@ -21,7 +21,7 @@
 #include "math/vector3.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeTransparent, "transparent")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeTransparent, float3, attenuation)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeTransparent, Tsl_float3, attenuation)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeTransparent)
 
 //! @brief  Transparent BXDF

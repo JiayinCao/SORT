@@ -20,11 +20,11 @@
 #include "bxdf.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDistributionBRDF, "distribution_brdf")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float3, base_color)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, roughness)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, specular)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float, specular_tint)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, Tsl_float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, Tsl_float, roughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, Tsl_float, specular)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, Tsl_float, specular_tint)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDistributionBRDF, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeDistributionBRDF)
 
 //! @brief Disbribution based brdf.

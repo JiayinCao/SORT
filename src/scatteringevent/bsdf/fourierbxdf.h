@@ -22,8 +22,8 @@
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeFourier, "fourier")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeFourier, void*, measured_data)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeFourier, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeFourier, Tsl_resource, measured_data)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeFourier, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeFourier)
 
 //! @brief FourierBxdfData.

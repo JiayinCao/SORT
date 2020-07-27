@@ -43,12 +43,12 @@ class Mesh;
 // layout grouped together, it will result in compilation error.
 // This is the main reason I didn't choose to use the feature.
 DECLARE_TSLGLOBAL_BEGIN(TslGlobal)
-DECLARE_TSLGLOBAL_VAR(float3, uvw)
-DECLARE_TSLGLOBAL_VAR(float3, position)     // this is world space position
-DECLARE_TSLGLOBAL_VAR(float3, normal)       // this is world space normal
-DECLARE_TSLGLOBAL_VAR(float3, gnormal)      // this is world space geometric normal
-DECLARE_TSLGLOBAL_VAR(float3, I)            // this is world space input direction
-DECLARE_TSLGLOBAL_VAR(float, density)       // volume density
+DECLARE_TSLGLOBAL_VAR(Tsl_float3, uvw)
+DECLARE_TSLGLOBAL_VAR(Tsl_float3, position)     // this is world space position
+DECLARE_TSLGLOBAL_VAR(Tsl_float3, normal)       // this is world space normal
+DECLARE_TSLGLOBAL_VAR(Tsl_float3, gnormal)      // this is world space geometric normal
+DECLARE_TSLGLOBAL_VAR(Tsl_float3, I)            // this is world space input direction
+DECLARE_TSLGLOBAL_VAR(Tsl_float, density)       // volume density
 DECLARE_TSLGLOBAL_END()
 
 //! @brief  Get Shading context.

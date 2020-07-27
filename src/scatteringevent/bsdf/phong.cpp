@@ -21,10 +21,10 @@
 #include "math/matrix.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypePhong)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, diffuse)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, specular)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, float, specular_power)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, Tsl_float3, diffuse)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, Tsl_float3, specular)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, Tsl_float, specular_power)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypePhong, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypePhong)
 
 Spectrum Phong::f( const Vector& wo , const Vector& wi ) const{

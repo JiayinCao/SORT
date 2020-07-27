@@ -42,14 +42,14 @@
 #include "material/material.h"
 #include "core/mesh.h"
 
-using namespace Tsl_Namespace;
+USE_TSL_NAMESPACE
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeEmpty, "empty_closure")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeEmpty, float, dummy)    // this is purely because tsl doesn't support empty closure structure
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeEmpty, Tsl_float, dummy)    // this is purely because tsl doesn't support empty closure structure
 DECLARE_CLOSURE_TYPE_END(ClosureTypeEmpty)
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeEmpty)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeEmpty, float, dummy)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeEmpty, Tsl_float, dummy)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeEmpty)
 
 #define DEFINE_CLOSURETYPE(T)       inline static ClosureID closure_id = INVALID_CLOSURE_ID; \

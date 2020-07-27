@@ -21,11 +21,11 @@
 #include "medium.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeHeterogenous, "medium_heterogeneous")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float3, base_color)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, emission)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, absorption)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, scattering)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, anisotropy)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, emission)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, absorption)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, scattering)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, anisotropy)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeHeterogenous)
 
 //! @brief  HomogeneousMedium has equal scattering, absorption co-efficient everywhere.

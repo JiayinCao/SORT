@@ -20,9 +20,9 @@
 #include "bxdf.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeOrenNayar, "oren_nayar")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float3, base_color)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float,  roughness)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, Tsl_float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, Tsl_float,  roughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeOrenNayar)
 
 //! @brief OrenNayar BRDF.

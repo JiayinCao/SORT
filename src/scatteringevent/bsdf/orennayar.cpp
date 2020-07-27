@@ -19,9 +19,9 @@
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeOrenNayar)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float3, base_color)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float, roughness)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, float3, normal)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, Tsl_float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, Tsl_float, roughness)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeOrenNayar, Tsl_float3, normal)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeOrenNayar)
 
 OrenNayar::OrenNayar(const ClosureTypeOrenNayar& params, const Spectrum& weight, bool doubleSided ):

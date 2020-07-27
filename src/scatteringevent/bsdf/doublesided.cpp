@@ -20,8 +20,8 @@
 #include "scatteringevent/bsdf/bxdf_utils.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeDoubleSided)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, void*, closure0)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, void*, closure1)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, Tsl_closure, closure0)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeDoubleSided, Tsl_closure, closure1)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeDoubleSided)
 
 Spectrum DoubleSided::f(const Vector& wo, const Vector& wi) const{

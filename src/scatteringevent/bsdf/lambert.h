@@ -20,13 +20,13 @@
 #include "bxdf.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeLambert, "lambert")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, float3, base_color)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, Tsl_float3, base_color)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambert, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeLambert)
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeLambertTransmission, "lambert_transmission")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, transmittance)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, Tsl_float3, transmittance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeLambertTransmission, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeLambertTransmission)
 
 //! @brief Lambert brdf.

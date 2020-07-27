@@ -18,7 +18,7 @@
 #include <tsl_system.h>
 #include "thirdparty/gtest/gtest.h"
 
-using namespace Tsl_Namespace;
+USE_TSL_NAMESPACE
 
 TEST(ShaderGroup, ShaderGroupWithoutClosure) {
     // global tsl shading system

@@ -22,11 +22,11 @@
 #include "phasefunction.h"
 
 IMPLEMENT_CLOSURE_TYPE_BEGIN(ClosureTypeHeterogenous)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float3, base_color)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, emission)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, absorption)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, scattering)
-IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, float, anisotropy)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float3, base_color)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, emission)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, absorption)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, scattering)
+IMPLEMENT_CLOSURE_TYPE_VAR(ClosureTypeHeterogenous, Tsl_float, anisotropy)
 IMPLEMENT_CLOSURE_TYPE_END(ClosureTypeHeterogenous)
 
 Spectrum HeterogenousMedium::Tr(const Ray& ray, const float max_t) const {

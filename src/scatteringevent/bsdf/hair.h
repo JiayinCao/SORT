@@ -21,10 +21,10 @@
 #include "core/sassert.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeHair, "hair")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float3, sigma)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float, longtitudinalRoughness)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float, azimuthalRoughness)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, float, ior)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, Tsl_float3, sigma)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, Tsl_float, longtitudinalRoughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, Tsl_float, azimuthalRoughness)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeHair, Tsl_float, ior)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeHair)
 
 // Somehow tilting angle will cause problem in unit test

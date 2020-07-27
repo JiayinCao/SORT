@@ -21,11 +21,11 @@
 #include "spectrum/rgbspectrum.h"
 
 DECLARE_CLOSURE_TYPE_BEGIN(ClosureTypeDielectric, "dieletric")
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, reflectance)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, transmittance)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float,  roughness_u)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float,  roughness_v)
-DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, float3, normal)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float3, reflectance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float3, transmittance)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float,  roughness_u)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float,  roughness_v)
+DECLARE_CLOSURE_TYPE_VAR(ClosureTypeDielectric, Tsl_float3, normal)
 DECLARE_CLOSURE_TYPE_END(ClosureTypeDielectric)
 
  //! @brief Coat BRDF.

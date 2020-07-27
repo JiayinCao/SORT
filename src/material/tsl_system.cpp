@@ -28,15 +28,15 @@
 #include "material.h"
 #include "texture/imagetexture2d.h"
 
-using namespace Tsl_Namespace;
+USE_TSL_NAMESPACE
 
 IMPLEMENT_TSLGLOBAL_BEGIN(TslGlobal)
-IMPLEMENT_TSLGLOBAL_VAR(float3, uvw)          // UV coordinate, W is preserved for now.
-IMPLEMENT_TSLGLOBAL_VAR(float3, position)     // this is world space position
-IMPLEMENT_TSLGLOBAL_VAR(float3, normal)       // this is world space normal
-IMPLEMENT_TSLGLOBAL_VAR(float3, gnormal)      // this is world space geometric normal
-IMPLEMENT_TSLGLOBAL_VAR(float3, I)            // this is world space input direction
-IMPLEMENT_TSLGLOBAL_VAR(float, density)       // volume density
+IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, uvw)          // UV coordinate, W is preserved for now.
+IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, position)     // this is world space position
+IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, normal)       // this is world space normal
+IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, gnormal)      // this is world space geometric normal
+IMPLEMENT_TSLGLOBAL_VAR(Tsl_float3, I)            // this is world space input direction
+IMPLEMENT_TSLGLOBAL_VAR(Tsl_float, density)       // volume density
 IMPLEMENT_TSLGLOBAL_END()
 
 class TSL_ShadingSystemInterface : public ShadingSystemInterface {
