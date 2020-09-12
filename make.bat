@@ -72,6 +72,12 @@ if "%BUILD_RELEASE%" == "1" (
 	cd proj_release
 	cmake -A x64 ..
 	msbuild /p:Configuration=Release SORT.sln
+
+	:: catch msbuild error
+	if ERRORLEVEL 1 ( 
+		goto BUILD_ERR
+	)
+
 	cd ..
 )
 
@@ -80,6 +86,12 @@ if "%BUILD_RELWITHDEBINFO%" == "1" (
 	cd proj_relwithdebinfo
 	cmake -A x64 ..
 	msbuild /p:Configuration=RelWithDebInfo SORT.sln
+
+	:: catch msbuild error
+	if ERRORLEVEL 1 ( 
+		goto BUILD_ERR
+	)
+
 	cd ..
 )
 
@@ -88,6 +100,12 @@ if "%BUILD_DEBUG%" == "1" (
 	cd proj_debug
 	cmake -A x64 ..
 	msbuild /p:Configuration=Debug SORT.sln
+
+	:: catch msbuild error
+	if ERRORLEVEL 1 ( 
+		goto BUILD_ERR
+	)
+
 	cd ..
 )
 
@@ -100,3 +118,6 @@ if "%REGISTER_SYS_ENV%" == "1" (
 )
 
 :EOF
+exit /b 0
+:BUILD_ERR
+exit /b 1

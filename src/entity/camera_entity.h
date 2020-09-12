@@ -45,7 +45,7 @@ public:
     //! Setup camera for the scene.
     //!
     //! @param  scene       The scene to be filled.
-    void   FillScene(class Scene& scene) override;
+    void    FillScene(class Scene& scene) override;
 
 private:
     std::unique_ptr<PerspectiveCamera>  m_camera = std::make_unique<PerspectiveCamera>();   /**< Perspective camera. */
