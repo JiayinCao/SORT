@@ -46,7 +46,8 @@ public:
     }
 
     void    catch_debug(const TSL_DEBUG_LEVEL level, const char* error) const override {
-        slog(WARNING, GENERAL, error);
+        int dummy; // this is to prevent warnings on linux and macos
+        slog(WARNING, GENERAL, error, dummy);
     }
 
     void    sample_2d(const void* texture, float u, float v, float3& color) const override {
