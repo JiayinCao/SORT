@@ -75,7 +75,7 @@ bool ImageTexture2D::LoadResource( const std::string str ){
             for (auto i = 0; i < total; i++)
                 m_memory->m_rgb[i] = Spectrum(out[4 * i], out[4 * i + 1], out[4 * i + 2]);
 
-            delete[] out;
+            free(out);
 
             average();
             return true;
@@ -120,7 +120,7 @@ bool ImageTexture2D::LoadResource( const std::string str ){
             }
         }
 
-        delete[] data;
+        stbi_image_free((void*)data);
 
         average();
         return true;
