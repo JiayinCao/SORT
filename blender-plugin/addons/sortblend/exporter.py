@@ -78,22 +78,67 @@ def get_intermediate_dir(force_debug=False):
         return return_path + '/'
     return return_path + '/'
 
-# Blender and SORT doesn't share exactly the same coordinate system, the following functions are to be applied whenever
-# a matrix is used in other system.
+# Coordinate transformation
+# Basically, the coordinate system of Blender and SORT is very different.
+# In Blender, the coordinate system is as below and this is a right handed system
+#
+#        Z
+#        ^   Y
+#        |  /
+#        | /
+#        |/
+#        ---------> X
+#
+# In SORT, the coordinate system is as below and this is a left handed system
+#
+#
+#        Y
+#        ^   Z
+#        |  /
+#        | /
+#        |/
+#        ----------> X
+#
+
+# There are few ways to convert data from SORT coordinate system to Blender's
+# The following method adopts this way
+#    - Flip the z axis first to make sure it is a right handed system as Blender's
+#    - Swap Y and the new flipped Z channel. So the new Y channel will be the -Z in the flipped coordinate,
+#      the new Z channel will be the flipped Y channel.
+#
+# So the final matrix is
+#           | 1.0  0.0  0.0  0.0 |
+#  M_flip = | 0.0  1.0  0.0  0.0 |
+#           | 0.0  0.0 -1.0  0.0 |
+#           | 0.0  0.0  0.0  1.0 |
+#
+#           | 1.0  0.0  0.0  0.0 |
+#  M_swap = | 0.0  0.0 -1.0  0.0 |
+#           | 0.0  1.0  0.0  0.0 |
+#           | 0.0  0.0  0.0  1.0 |
+#                         
+#                         | 1.0  0.0  0.0  0.0 |
+#  M = M_swap * M_flip =  | 0.0  0.0  1.0  0.0 |
+#                         | 0.0  1.0  0.0  0.0 |
+#                         | 0.0  0.0  0.0  1.0 |
+
 def MatrixSortToBlender():
-    from bpy_extras.io_utils import axis_conversion
-    global_matrix = axis_conversion(to_forward='-Z',to_up='Y').to_4x4()
-    global_matrix[2][0] *= -1.0
-    global_matrix[2][1] *= -1.0
-    global_matrix[2][2] *= -1.0
+    global_matrix = mathutils.Matrix()
+    global_matrix[1][1] = 0.0
+    global_matrix[2][2] = 0.0
+    global_matrix[2][1] = 1.0
+    global_matrix[1][2] = 1.0
     return global_matrix
 
+# Similarly, in order to convert data from Blender coordinate to SORT coodinate.
+# Instead of deriving it like above, a simple way to do this is simply to take the inverse of the above matrix,
+# which is exactly the same with the matrix itself.
 def MatrixBlenderToSort():
-    from bpy_extras.io_utils import axis_conversion
-    global_matrix = axis_conversion(to_forward='-Z',to_up='Y').to_4x4()
-    global_matrix[2][0] *= -1.0
-    global_matrix[2][1] *= -1.0
-    global_matrix[2][2] *= -1.0
+    global_matrix = mathutils.Matrix()
+    global_matrix[1][1] = 0.0
+    global_matrix[2][2] = 0.0
+    global_matrix[2][1] = 1.0
+    global_matrix[1][2] = 1.0
     return global_matrix
 
 # get camera data
@@ -266,6 +311,8 @@ def export_scene(depsgraph, is_preview, fs):
     mapping = {'SUN': 'DirLightEntity', 'POINT': 'PointLightEntity', 'SPOT': 'SpotLightEntity', 'AREA': 'AreaLightEntity' }
     for ob in all_lights:
         lamp = ob.data
+
+        # This matrix will be used to transform data in SORT coodinate. So it needs to start from SORT coodinate system instead of Blender's.
         # light faces forward Y+ in SORT, while it faces Z- in Blender, needs to flip the direction
         flip_mat = mathutils.Matrix([[ 1.0 , 0.0 , 0.0 , 0.0 ] , [ 0.0 , -1.0 , 0.0 , 0.0 ] , [ 0.0 , 0.0 , 1.0 , 0.0 ] , [ 0.0 , 0.0 , 0.0 , 1.0 ]])
         world_matrix = MatrixBlenderToSort() @ ob.matrix_world @ MatrixSortToBlender() @ flip_mat
@@ -304,7 +351,8 @@ def export_scene(depsgraph, is_preview, fs):
     hdr_sky_image = scene.sort_hdr_sky.hdr_image
     if hdr_sky_image is not None:
         fs.serialize(SID('SkyLightEntity'))
-        fs.serialize(matrix_to_tuple(MatrixBlenderToSort() @ MatrixSortToBlender()))
+        global_matrix = mathutils.Matrix()
+        fs.serialize(matrix_to_tuple(global_matrix))
         fs.serialize(( 1.0 , 1.0 , 1.0 ))   # light tint color
         fs.serialize( 1.0 )                 # sky light scaling, not supported since it is not pbs.
         fs.serialize(bpy.path.abspath( hdr_sky_image.filepath ))
