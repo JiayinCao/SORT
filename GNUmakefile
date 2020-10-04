@@ -138,12 +138,15 @@ ifeq ("$(wildcard $(SORT_DEP_DIR))","")
 endif
 
 release: .FORCE
+	$(UPDATE_DEP_COMMAND)
 	$(BUILD_RELEASE_COMMAND)
 
 debug: .FORCE
+	$(UPDATE_DEP_COMMAND)
 	$(BUILD_DEBUG_COMMAND)
 
 relwithdebinfo: .FORCE
+	$(UPDATE_DEP_COMMAND)
 	$(BUILD_RELWITHDEBINFO_COMMAND)
 
 update: .FORCE
@@ -156,9 +159,9 @@ update_dep: .FORCE
 	$(UPDATE_DEP_COMMAND)
 
 force_update_dep: .FORCE
-    @echo 'Syncing dependencies'
-    @echo $(OS_NAME)
-    $(FORCE_UPDATE_DEP_COMMAND)
+	@echo 'Syncing dependencies'
+	@echo $(OS_NAME)
+	$(FORCE_UPDATE_DEP_COMMAND)
 
 clean: .FORCE
 	@echo 'Cleaning all generated files'
