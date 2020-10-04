@@ -15,106 +15,6 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 #
 
-define HELP_TEXT
-
-Available commands
-
-    * release
-        Build release version.
-    * debug
-        Build debug version.
-    * relwithdebinfo
-        Build release version with debug information.
-    * update
-        Sync the latest code from Github
-    * update_dep
-        Update dependency files.
-    * clean
-    	Clean up all generated file, including the binaries.
-    	But dependency will still exist.
-    * clean_dep
-    	Clean the dependency.
-    * help
-        Print this help message.
-    * about
-        Introduction about SORT and myself.
-    * dep_info
-        Introduction about the third party libraries used in SORT.
-
-Convenience targets
-
-    * release
-        The relatively performant build version that provides reasonable
-        information, like statistics and log. However, there is no debug
-        information.
-    * debug
-        Standard debugging version that has everything, which is only for
-        debugging purposes.
-    * relwithdebinfo
-        Release version with debug information.
-
-endef
-
-define DEP_TEXT
-
-Following are dependencies used in SORT renderer
-
-    * Open Shading Language
-        OSL is what SORT is currently using as shading language. With the
-        support of OSL, SORT can compile shaders during runtime to allow
-        artist more flexible support in shader assets.
-    * Easy Profiler
-        Easy profiler is currently used as main profiling tool. It is more
-        of a higher level profiling tool for tasks, instead of low level
-        profiling tool.
-    * stb_image
-        Stb_image is used to read textures from file system. It is already
-        included in the source code in the thirdparty folder.
-    * Google Test Framework
-        SORT uses Google test as its framework for unit testing. This is
-        also included in the thirdparty folder in SORT source code.
-    * Tiny Exr
-        Tiny Exr is a open source library for reading and writting exr files.
-        Like the other two libraries, the source code is also included in
-        'thirdpard' folder.
-
-endef
-
-define ABOUT_TEXT
-
-SORT is short for Simple Open-source Ray Tracing. It is a stand along cross platform
-physically based renderer. It is my personal side project that I have been working
-on ever since 2011. Following are features supported in SORT renderer so far,
-
-    * Path Tracing, Bidirectional Path Tracing, Light Tracing, Instant Radiosity,
-      Ambient Occlusion, Whitted Ray Tracing.
-    * KD-Tree, BVH, OcTree, Uniform Grid.
-    * Point Light, Spot Light, Directional Light, Area Light, HDR Image Based Lighting.
-    * Disney BRDF (2015), Lambert, LambertTransmission, Oran Nayar, Microfacet Reflection,
-      Microfacet Tranmission, MERL Measured BRDF, Fourier BRDF, AshikhmanShirley BRDF,
-      Phong, Coat, Blend, Double-Sided, Ditribution BRDF, DreamWorks' Fabric BRDF.
-    * Sursurface Scattering.
-    * Hair, Fur.
-    * Open Shading Language.
-    * Depth of Field.
-    * Multi-threaded Rendering.
-    * Blender 2.8.
-
-Please visit the following website for more information,
-
-    * http://sort-renderer.com/
-
-My name is Jiayin Cao. I'm currently working at Naughty Dog as a graphics engineer.
-Prior to joining Naughty Dog, I worked at Ubisoft, NVIDIA, AMD and Microsoft before.
-Following are my contacts, feel free to contact me for any reason,
-
-    * Linkedin,   https://www.linkedin.com/in/caojiayin/
-    * Twitter,    https://twitter.com/Jiayin_Cao
-    * Tech blog,  https://agraphicsguy.wordpress.com/
-    * Email,      caojiayin1985@icloud.com
-
-endef
-
 # SORT root directory
 SORT_DIR       := $(shell pwd -P)
 # SORT dependency folder
@@ -173,14 +73,15 @@ clean_dep: .FORCE
 
 export HELP_TEXT
 help: .FORCE
-	@echo "$$HELP_TEXT"
+	python3 ./scripts/show_help.py
 
 export ABOUT_TEXT
 about: .FORCE
-	@echo "$$ABOUT_TEXT"
+	python3 ./scripts/show_about.py
 
 export DEP_TEXT
 dep_info: .FORCE
 	@echo "$$DEP_TEXT"
+	python3 ./scripts/show_dep_info.py
 
 .FORCE:

@@ -18,25 +18,82 @@
 @echo off
 set SORT_DIR=%~dp0
 
-rem reset all variables first
-call "%SORT_DIR%\build-files\win\reset_variables.cmd"
+rem reset all variables so they do not get accidentally get carried over from previous builds
+set SHOW_HELP=
+set SHOW_ABOUT=
+set SHOW_DEP_INFO=
+set GIT_UPDATE=
+set UPDATE_DEP=
+set CLEAN_DEP=
+set CLEAN=
+set BUILD_RELEASE=
+set BUILD_DEBUG=
+set BUILD_RELWITHDEBINFO=
+set REGISTER_SYS_ENV=
+set FORCE_UPDATE_DEP=
 
 rem parse arguments
-call "%SORT_DIR%\build-files\win\parse_arguments.cmd" %*
-if errorlevel 1 goto EOF
+:argv_loop
+if NOT "%1" == "" (
+    if "%1" == "help" (
+        set SHOW_HELP=1
+        goto EOF
+    ) else if "%1" == "about" (
+        set SHOW_ABOUT=1
+        goto EOF
+    ) else if "%1" == "dep_info" (
+        set SHOW_DEP_INFO=1
+        goto EOF
+    ) else if "%1" == "update" (
+        set GIT_UPDATE=1
+        goto EOF
+    ) else if "%1" == "update_dep" (
+        set UPDATE_DEP=1
+        goto EOF
+    ) else if "%1" == "clean_dep" (
+        set CLEAN_DEP=1
+        goto EOF
+    ) else if "%1" == "clean" (
+        set CLEAN=1
+        goto EOF
+    ) else if "%1" == "release" (
+        set BUILD_RELEASE=1
+        goto EOF
+    ) else if "%1" == "debug" (
+        set BUILD_DEBUG=1
+        goto EOF
+    ) else if "%1" == "relwithdebinfo" (
+        set BUILD_RELWITHDEBINFO=1
+        goto EOF
+    ) else if "%1" == "register" (
+        set REGISTER_SYS_ENV=1
+        goto EOF
+    ) else if "%1" == "force_update_dep" (
+        set FORCE_UPDATE_DEP=1
+        goto EOF
+    ) else (
+        echo Unrecognized Command
+        goto EOF
+    )
+)else if "%1" == "" (
+    set BUILD_RELEASE=1
+    goto EOF
+)
+
+:EOF
 
 if "%SHOW_HELP%" == "1" (
-	call "%SORT_DIR%\build-files\win\show_help.cmd"
+    py .\scripts\show_help.py
 	goto EOF
 )
 
 if "%SHOW_ABOUT%" == "1" (
-	call "%SORT_DIR%\build-files\win\show_about.cmd"
+    py .\scripts\show_about.py
 	goto EOF
 )
 
 if "%SHOW_DEP_INFO%" == "1" (
-	call "%SORT_DIR%\build-files\win\show_dep_info.cmd"
+    py .\scripts\show_dep_info.py
 	goto EOF
 )
 
