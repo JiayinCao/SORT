@@ -52,7 +52,7 @@ force_update_dep: .FORCE
 
 clean: .FORCE
 	@echo 'Cleaning all generated files'
-	@cd $(SORT_DIR); rm -rf bin ; rm -rf proj_release ; rm -rf proj_debug ; rm -rf proj_relwithdebinfo ; rm -rf _out ; rm -rf generted_src ;
+	@cd $(SORT_DIR); rm -rf bin ; rm -rf proj_release ; rm -rf proj_debug ; rm -rf proj_relwithdebinfo ; rm -rf _out ; rm -rf generated_src ;
 
 clean_dep: .FORCE
 	@echo 'Cleaning all dependency files'
