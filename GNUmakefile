@@ -23,8 +23,8 @@ SORT_DEP_DIR   := $(SORT_DIR)/dependencies
 OS             := $(shell uname -s | tr A-Z a-z)
 
 # unified command by using python script
-UPDATE_DEP_COMMAND           = python3 ./scripts/get_dep.py
-FORCE_UPDATE_DEP_COMMAND     = python3 ./scripts/get_dep.py TRUE
+UPDATE_DEP_COMMAND           = @python3 ./scripts/get_dep.py
+FORCE_UPDATE_DEP_COMMAND     = @python3 ./scripts/get_dep.py TRUE
 
 BUILD_RELEASE_COMMAND        = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Release ..;make -j 4;cd ..;
 BUILD_DEBUG_COMMAND          = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_debug; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4;cd ..;
@@ -73,15 +73,15 @@ clean_dep: .FORCE
 
 export HELP_TEXT
 help: .FORCE
-	python3 ./scripts/show_help.py
+	@python3 ./scripts/show_help.py
 
 export ABOUT_TEXT
 about: .FORCE
-	python3 ./scripts/show_about.py
+	@python3 ./scripts/show_about.py
 
 export DEP_TEXT
 dep_info: .FORCE
 	@echo "$$DEP_TEXT"
-	python3 ./scripts/show_dep_info.py
+	@python3 ./scripts/show_dep_info.py
 
 .FORCE:
