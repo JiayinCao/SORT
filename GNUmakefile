@@ -17,8 +17,6 @@
 
 # SORT root directory
 SORT_DIR       := $(shell pwd -P)
-# Operating system name, it could be Darwin or Linux
-OS             := $(shell uname -s | tr A-Z a-z)
 
 # unified command by using python script
 UPDATE_DEP_COMMAND           = @python3 ./scripts/get_dep.py
@@ -42,25 +40,23 @@ relwithdebinfo: .FORCE
 
 update: .FORCE
 	@echo 'Syncing source code from Github'
-	git pull
+	@git pull
 
 update_dep: .FORCE
 	@echo 'Syncing dependencies'
-	@echo $(OS_NAME)
 	$(UPDATE_DEP_COMMAND)
 
 force_update_dep: .FORCE
 	@echo 'Syncing dependencies'
-	@echo $(OS_NAME)
 	$(FORCE_UPDATE_DEP_COMMAND)
 
 clean: .FORCE
 	@echo 'Cleaning all generated files'
-	cd $(SORT_DIR); rm -rf bin ; rm -rf proj_release ; rm -rf proj_debug ; rm -rf proj_relwithdebinfo ; rm -rf _out ;
+	@cd $(SORT_DIR); rm -rf bin ; rm -rf proj_release ; rm -rf proj_debug ; rm -rf proj_relwithdebinfo ; rm -rf _out ;
 
 clean_dep: .FORCE
 	@echo 'Cleaning all dependency files'
-	cd $(SORT_DIR); rm -rf dependencies
+	@cd $(SORT_DIR); rm -rf dependencies
 
 help: .FORCE
 	@python3 ./scripts/show_help.py
