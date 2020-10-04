@@ -122,18 +122,9 @@ SORT_DEP_DIR   := $(SORT_DIR)/dependencies
 # Operating system name, it could be Darwin or Linux
 OS             := $(shell uname -s | tr A-Z a-z)
 
-# Update dependency command
-UPDATE_DEP_COMMAND = @echo "Unfortunately, the dependencies in this OS has not been prebuilt. You can choose to build them by yourself or find a platform with existed pre-built dependencies."
-
-# Mac OS
-ifeq ($(OS), darwin)
-	UPDATE_DEP_COMMAND = sh ./build-files/mac/getdep.sh
-endif
-
-# Ubuntu
-ifeq ($(OS), linux)
-    UPDATE_DEP_COMMAND = sh ./build-files/ubuntu/getdep_ubuntu.sh
-endif
+# unified command by using python script
+UPDATE_DEP_COMMAND           = python3 ./scripts/get_dep.py
+FORCE_UPDATE_DEP_COMMAND     = python3 ./scripts/get_dep.py TRUE
 
 BUILD_RELEASE_COMMAND        = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Release ..;make -j 4;cd ..;
 BUILD_DEBUG_COMMAND          = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_debug; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4;cd ..;
@@ -163,6 +154,11 @@ update_dep: .FORCE
 	@echo 'Syncing dependencies'
 	@echo $(OS_NAME)
 	$(UPDATE_DEP_COMMAND)
+
+force_update_dep: .FORCE
+    @echo 'Syncing dependencies'
+    @echo $(OS_NAME)
+    $(FORCE_UPDATE_DEP_COMMAND)
 
 clean: .FORCE
 	@echo 'Cleaning all generated files'

@@ -48,7 +48,13 @@ if "%GIT_UPDATE%" == "1" (
 
 if "%UPDATE_DEP%" == "1" (
 	echo Syncing dependencies
-	powershell .\build-files\win\getdep.ps1
+	py .\scripts\get_dep.py
+	goto EOF
+)
+
+if "%FORCE_UPDATE_DEP%" == "1" (
+	echo Syncing dependencies
+	py .\scripts\get_dep.py TRUE
 	goto EOF
 )
 

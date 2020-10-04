@@ -50,6 +50,9 @@ if NOT "%1" == "" (
     ) else if "%1" == "register" (
         set REGISTER_SYS_ENV=1
         goto EOF
+    ) else if "%1" == "force_update_dep" (
+        set FORCE_UPDATE_DEP=1
+        goto EOF
     ) else (
         echo Unrecognized Command
         goto EOF
