@@ -16,7 +16,6 @@
 #
 
 import os
-import shutil
 
 # the current directory is the sort root
 sort_dir = os.getcwd()
