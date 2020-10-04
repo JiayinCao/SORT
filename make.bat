@@ -131,6 +131,7 @@ if "%CLEAN%" == "1" (
 	powershell Remove-Item -path ./_out -recurse -ErrorAction Ignore
 	powershell Remove-Item -path ./proj_release -recurse -ErrorAction Ignore
 	powershell Remove-Item -path ./proj_debug -recurse -ErrorAction Ignore
+	powershell Remove-Item -path ./generated_src -recurse -ErrorAction Ignore
 	goto EOF
 )
 
