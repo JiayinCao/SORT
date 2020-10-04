@@ -62,17 +62,17 @@ clean_dep: .FORCE
 	@echo 'Cleaning all dependency files'
 	cd $(SORT_DIR); rm -rf dependencies
 
-export HELP_TEXT
 help: .FORCE
 	@python3 ./scripts/show_help.py
 
-export ABOUT_TEXT
 about: .FORCE
 	@python3 ./scripts/show_about.py
 
-export DEP_TEXT
 dep_info: .FORCE
-	@echo "$$DEP_TEXT"
 	@python3 ./scripts/show_dep_info.py
+
+generate_src: .FORCE
+    @echo 'Generating source code'
+    @python3 ./scripts/generate_src.py
 
 .FORCE:

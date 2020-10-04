@@ -221,3 +221,4 @@ _out/
 proj_release/
 proj_debug/
 proj_relwithdebinfo/
+generated_src/

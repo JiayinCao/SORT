@@ -31,6 +31,7 @@ set BUILD_DEBUG=
 set BUILD_RELWITHDEBINFO=
 set REGISTER_SYS_ENV=
 set FORCE_UPDATE_DEP=
+set GENERATE_SRC=
 
 rem parse arguments
 :argv_loop
@@ -70,6 +71,9 @@ if NOT "%1" == "" (
         goto EOF
     ) else if "%1" == "force_update_dep" (
         set FORCE_UPDATE_DEP=1
+        goto EOF
+    ) else if "%1" == "generate_src" (
+        set GENERATE_SRC=1
         goto EOF
     ) else (
         echo Unrecognized Command
@@ -178,6 +182,11 @@ if "%REGISTER_SYS_ENV%" == "1" (
 	setx SORT_ROOT_DIR %cd%/ /M
 	echo Setting system environment 'SORT_BIN_DIR' to %cd%/bin
 	setx SORT_BIN_DIR %cd%/bin/ /M
+)
+
+if "%GENERATE_SRC%" == "1" (
+    echo Generating source code
+    py .\scripts\generate_src.py
 )
 
 :EOF
