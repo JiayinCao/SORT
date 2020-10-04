@@ -50,6 +50,15 @@ sort_dir = os.getcwd()
 
 # set the current directory as the generated source directory
 sort_generated_src_dir = sort_dir + '/generated_src'
+
+# check if the folder already exists, if it does, remove it
+if os.path.isdir(sort_generated_src_dir):
+    shutil.rmtree(sort_generated_src_dir)
+
+# generate a new directory
+os.makedirs(sort_generated_src_dir)
+
+# use the new directory as working directory for this script
 os.chdir(sort_generated_src_dir)
 
 # generate fabric lut

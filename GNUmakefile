@@ -72,7 +72,7 @@ dep_info: .FORCE
 	@python3 ./scripts/show_dep_info.py
 
 generate_src: .FORCE
-    @echo 'Generating source code'
-    @python3 ./scripts/generate_src.py
+	@echo 'Generating source code'
+	@python3 ./scripts/generate_src.py
 
 .FORCE:
