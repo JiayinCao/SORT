@@ -17,8 +17,6 @@
 
 # SORT root directory
 SORT_DIR       := $(shell pwd -P)
-# SORT dependency folder
-SORT_DEP_DIR   := $(SORT_DIR)/dependencies
 # Operating system name, it could be Darwin or Linux
 OS             := $(shell uname -s | tr A-Z a-z)
 
@@ -29,13 +27,6 @@ FORCE_UPDATE_DEP_COMMAND     = @python3 ./scripts/get_dep.py TRUE
 BUILD_RELEASE_COMMAND        = @echo "building release version.";cd $(SORT_DIR); mkdir proj_release; cd proj_release; cmake -DCMAKE_BUILD_TYPE=Release ..;make -j 4;cd ..;
 BUILD_DEBUG_COMMAND          = @echo "building debug version.";cd $(SORT_DIR); mkdir proj_debug; cd proj_debug; cmake -DCMAKE_BUILD_TYPE=Debug ..;make -j 4;cd ..;
 BUILD_RELWITHDEBINFO_COMMAND = @echo "building release version with debug information.";cd $(SORT_DIR); mkdir proj_relwithdebinfo; cd proj_relwithdebinfo; cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..;make -j 4;cd ..;
-
-# Check if the depedency files are already downloaded.
-ifeq ("$(wildcard $(SORT_DEP_DIR))","")
-    BUILD_RELEASE_COMMAND        = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
-    BUILD_DEBUG_COMMAND          = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
-    BUILD_RELWITHDEBINFO_COMMAND = @echo "Please check out the dependency files before building. Run 'make update_dep' first."
-endif
 
 release: .FORCE
 	$(UPDATE_DEP_COMMAND)
