@@ -16,6 +16,7 @@
 #
 
 import os
+import shutil
 from file_generator import fabric_brdf_lut
 
 # as usual, license header goes first
