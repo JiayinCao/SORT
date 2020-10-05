@@ -17,6 +17,7 @@
 
 import os
 import shutil
+import glob
 from file_generator import fabric_brdf_lut
 
 # as usual, license header goes first
@@ -54,10 +55,12 @@ sort_generated_src_dir = sort_dir + '/generated_src'
 
 # check if the folder already exists, if it does, remove it
 if os.path.isdir(sort_generated_src_dir):
-    shutil.rmtree(sort_generated_src_dir)
-
-# generate a new directory
-os.makedirs(sort_generated_src_dir)
+	files = glob.glob(sort_generated_src_dir + '/*')
+	for f in files:
+		os.remove(f)
+else:
+	# generate a new directory
+	os.makedirs(sort_generated_src_dir)
 
 # use the new directory as working directory for this script
 os.chdir(sort_generated_src_dir)
