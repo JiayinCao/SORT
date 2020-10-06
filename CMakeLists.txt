@@ -125,6 +125,10 @@ include_directories( "${generated_src_dir}" )
 set(all_files ${project_headers} ${project_cpps} ${project_cs} ${project_ccs})
 source_group_by_dir(all_files)
 
+# tsl include folder
+file(GLOB_RECURSE tsl_headers ${TSL_INCLUDE_DIR}/*.h)
+source_group("thirdparty\\tsl" FILES ${tsl_headers})
+
 file(GLOB_RECURSE thirdparty_headers src/thirdparty/*.h)
 file(GLOB_RECURSE thirdparty_cpps src/thirdparty/*.cpp)
 file(GLOB_RECURSE thirdparty_cs src/thirdparty/*.c)
@@ -145,7 +149,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG "${SORT_SOURCE_DIR}/bin")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${SORT_SOURCE_DIR}/bin")
 
 # add the executable
-add_executable(SORT ${all_files} ${generated_src})
+add_executable(SORT ${all_files} ${generated_src} ${tsl_headers})
 
 # rules to generate source code
 add_custom_command( OUTPUT ${generated_src}
