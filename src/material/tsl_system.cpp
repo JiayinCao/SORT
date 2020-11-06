@@ -82,6 +82,7 @@ void ExecuteSurfaceShader( Tsl_Namespace::ShaderInstance* shader , ScatteringEve
     global.uvw = make_float3(intersection.u, intersection.v, 0.0f);
     global.normal = make_float3(intersection.normal.x, intersection.normal.y, intersection.normal.z);
     global.I = make_float3(intersection.view.x, intersection.view.y, intersection.view.z);
+    global.position = make_float3(intersection.intersect.x, intersection.intersect.y, intersection.intersect.z);
 
     // shader execution
     ClosureTreeNodeBase* closure = nullptr;
