@@ -475,7 +475,10 @@ namespace {
                  if (addExtraLambert && !is_tsl_color_black(baseColor))
                      se.AddBxdf(SORT_MALLOC(Lambert)(baseColor, weight, pdf_weight * ( 1.0f - bssrdf_pdf ), params.normal));
  #else
-                 se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), params, weight ));
+                 if(is_tsl_color_black(params.scatter_distance))
+                    se.AddBxdf(SORT_MALLOC(Lambert)(params.base_color, weight, params.normal));
+                 else
+                    se.AddBssrdf(SORT_MALLOC(DisneyBssrdf)(&se.GetInteraction(), params, weight ));
  #endif
              }else{
                  se.AddBxdf(SORT_MALLOC(Lambert)(params.base_color, weight , params.normal));
