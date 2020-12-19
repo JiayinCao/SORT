@@ -96,20 +96,6 @@ include_directories( "${TSL_INCLUDE_DIR}" )
 
 link_directories( "${TSL_LIBRARY_DIR}" )
 
-macro(source_group_by_dir source_files)
-    set(sgbd_cur_dir ${CMAKE_CURRENT_SOURCE_DIR}/src)
-    foreach(sgbd_file ${${source_files}})
-        string(REGEX REPLACE ${sgbd_cur_dir}/\(.*\) \\1 sgbd_fpath ${sgbd_file})
-        string(REGEX REPLACE "\(.*\)/.*" \\1 sgbd_group_name ${sgbd_fpath})
-        string(COMPARE EQUAL ${sgbd_fpath} ${sgbd_group_name} sgbd_nogroup)
-        string(REPLACE "/" "\\" sgbd_group_name ${sgbd_group_name})
-        if(sgbd_nogroup)
-            set(sgbd_group_name "\\")
-        endif(sgbd_nogroup)
-        source_group(${sgbd_group_name} FILES ${sgbd_file})
-    endforeach(sgbd_file)
-endmacro(source_group_by_dir)
-
 file(GLOB_RECURSE project_headers src/*.h src/*.hpp)
 file(GLOB_RECURSE project_cpps src/*.cpp)
 file(GLOB_RECURSE project_cs src/*.c)
@@ -123,7 +109,7 @@ set(generated_src ${generated_src_dir}/fabric_lut.h)
 include_directories( "${generated_src_dir}" )
 
 set(all_files ${project_headers} ${project_cpps} ${project_cs} ${project_ccs})
-source_group_by_dir(all_files)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src FILES ${all_files})
 
 # tsl include folder
 file(GLOB_RECURSE tsl_headers ${TSL_INCLUDE_DIR}/*.h)
