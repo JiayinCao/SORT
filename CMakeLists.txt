@@ -15,7 +15,7 @@
 #    this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
 #
 
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.8)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
