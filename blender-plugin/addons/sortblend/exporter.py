@@ -52,9 +52,11 @@ def list_materials( depsgraph ):
 
 def get_sort_dir():
     preferences = bpy.context.preferences.addons['sortblend'].preferences
-    return_path = preferences.install_path
+    return_path = os.environ.get('SORT_BIN_DIR')
     if platform.system() == 'Windows':
         return return_path
+    
+    return_path = os.path.expanduser(return_path)
     return return_path
 
 def get_sort_bin_path():
@@ -76,6 +78,8 @@ def get_intermediate_dir(force_debug=False):
     if platform.system() == 'Windows':
         return_path = return_path.replace( '\\' , '/' )
         return return_path + '/'
+    if return_path[-1] == '/':
+        return return_path
     return return_path + '/'
 
 # Coordinate transformation

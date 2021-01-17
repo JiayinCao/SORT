@@ -53,6 +53,13 @@
     #define SORT_FORCEINLINE inline
 #endif
 
+// x86/x64 detection
+#if defined(__x86_64__) || defined(_M_X64)
+    #define SORT_X64_TARGET
+#elif defined(__i386) || defined(_M_IX86)
+    #define SORT_X64_TARGET
+#endif
+
 #define SORT_STATIC_FORCEINLINE     static SORT_FORCEINLINE
 
 #define IS_PTR_INVALID(p)           (nullptr == p)

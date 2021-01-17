@@ -17,7 +17,10 @@
 
 #pragma once
 
+#if (defined(STBI__X86_TARGET) || defined(STBI__X64_TARGET))
 #include <emmintrin.h>
+#endif
+
 #include <thread>
 #include <atomic>
 #include "core/define.h"
@@ -56,7 +59,9 @@ public:
             // they consume CPU cycles all the time. This instruction could allow delaying CPU instructions for a few cycles in
             // some cases to allow other threads to take ownership of hardware resources.
             // https://software.intel.com/en-us/comment/1134767
+            #if (defined(STBI__X86_TARGET) || defined(STBI__X64_TARGET))
             _mm_pause(); 
+            #endif
         }
     }
     void unlock() {
