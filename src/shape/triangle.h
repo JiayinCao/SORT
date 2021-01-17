@@ -108,17 +108,20 @@ public:
         return SHAPE_TRIANGLE;
     }
 
-private:
+// This is very weird, somehow friend struct doesn't work on Linux and Mac since this change below
+// https://github.com/JiayinCao/SORT/commit/9e22f5bc62bfe5a3bdf29cc0cf1ffcb06ac96cd3
+// This is low priority since I only have limited time to support Neon, I'll leave it this way for now.
+public:
     const MeshVisual*        m_meshVisual = nullptr;     /**< Visual holding the vertex buffer. */
     const MeshFaceIndex&     m_index;                    /**< Index buffer points to the index of this triangle. */
 
 #ifdef SIMD_4WAY_ENABLED
-    friend struct Triangle4;
+    struct Triangle4;
     friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const simd_data_sse& t4, const simd_data_sse& u4, const simd_data_sse& v4, const int id, SurfaceInteraction* intersection);
 #endif
 
 #ifdef SIMD_8WAY_ENABLED
-    friend struct Triangle8;
+    struct Triangle8;
     friend SORT_FORCEINLINE void setupIntersection(const Triangle8& tri4, const Ray& ray, const simd_data_avx& t8, const simd_data_avx& u8, const simd_data_avx& v8, const int id, SurfaceInteraction* intersection);
 #endif
 };
