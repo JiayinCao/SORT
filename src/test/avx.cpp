@@ -17,6 +17,8 @@
 
 #include "core/define.h"
 
+#ifdef SORT_X64_TARGET
+
 #ifdef SIMD_8WAY_ENABLED
 #define SIMD_8WAY_IMPLEMENTATION
 #endif
@@ -25,4 +27,6 @@
 
 #ifdef SIMD_8WAY_ENABLED
 #undef SIMD_8WAY_IMPLEMENTATION
+#endif
+
 #endif

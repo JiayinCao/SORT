@@ -20,14 +20,22 @@
 #include "thirdparty/gtest/gtest.h"
 #include "simd/simd_wrapper.h"
 
-#ifdef SORT_X64_TARGET
-
 #ifdef SIMD_8WAY_IMPLEMENTATION
-    #define SIMD_TEST       SIMD_AVX
+    #ifdef SORT_X64_TARGET
+        #define SIMD_TEST       SIMD_AVX
+    #else
+        #error "Undefined SIMD"
+    #endif
 #endif
 
 #ifdef SIMD_4WAY_IMPLEMENTATION
-    #define SIMD_TEST       SIMD_SSE
+    #ifdef SORT_X64_TARGET
+        #define SIMD_TEST       SIMD_SSE
+    #elif defined(SORT_ARM64_TARGET)
+        #define SIMD_TEST       SIMD_NEON
+    #else
+        #error "Undefined SIMD"
+    #endif
 #endif
 
 #if defined( SIMD_4WAY_IMPLEMENTATION ) || defined( SIMD_8WAY_IMPLEMENTATION )
@@ -52,7 +60,7 @@ TEST(SIMD_TEST, simd_set_ps) {
         EXPECT_EQ( simd_data[i] , data[i] );
 }
 
-TEST(SIMD_TEST, simd_set_mask) {
+TEST(SIMD_TEST, current /*simd_set_mask*/) {
     bool data[SIMD_CHANNEL];
     for( auto i = 0 ; i < SIMD_CHANNEL ; ++i )
         data[i] = ( i % 2 ) ? true : false;
@@ -499,5 +507,3 @@ TEST(SIMD_TEST, simd_minreduction_ps) {
 }
 
 #endif
-
-#endif // SORT_X64_TARGET

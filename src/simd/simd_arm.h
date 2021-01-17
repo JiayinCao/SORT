@@ -102,7 +102,7 @@ SORT_STATIC_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_set_mask(const bool mask[]) {
 #define MASK_TO_INT(m)  (m?mask_true:0)
-    //return _mm_set_ps(MASK_TO_INT(mask[3]), MASK_TO_INT(mask[2]), MASK_TO_INT(mask[1]), MASK_TO_INT(mask[0]));
+    return {MASK_TO_INT(mask[3]), MASK_TO_INT(mask[2]), MASK_TO_INT(mask[1]), MASK_TO_INT(mask[0])};
 #undef MASK_TO_INT
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){

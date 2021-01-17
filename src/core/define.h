@@ -58,6 +58,10 @@
     #define SORT_X64_TARGET
 #elif defined(__i386) || defined(_M_IX86)
     #define SORT_X64_TARGET
+#elif defined(__aarch64__)
+    #define SORT_ARM64_TARGET
+#elif
+    #error "Undefined target."
 #endif
 
 #define SORT_STATIC_FORCEINLINE     static SORT_FORCEINLINE

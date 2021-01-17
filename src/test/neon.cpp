@@ -17,7 +17,7 @@
 
 #include "core/define.h"
 
-#ifdef SORT_X64_TARGET
+#ifdef SORT_ARM64_TARGET
 
 #ifdef SIMD_4WAY_ENABLED
 #define SIMD_4WAY_IMPLEMENTATION
