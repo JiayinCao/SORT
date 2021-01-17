@@ -21,10 +21,6 @@
 #include "math/point.h"
 #include "ray.h"
 
-#ifdef SSE_ENABLED
-    #include <nmmintrin.h>
-#endif
-
 //! @brief  Axis Aligned Bounding Box.
 class BBox{
 public:

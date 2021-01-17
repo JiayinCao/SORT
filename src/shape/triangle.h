@@ -19,6 +19,7 @@
 
 #include "core/define.h"
 #include "shape.h"
+#include "simd/simd_wrapper.h"
 
 class   MeshVisual;
 struct  MeshFaceIndex;
