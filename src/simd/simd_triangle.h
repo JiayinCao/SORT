@@ -30,17 +30,17 @@
 // Reference implementation is disabled by default, it is only for debugging purposes.
 // #define SIMD_TRI_REFERENCE_IMPLEMENTATION
 
-#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_4WAY_IMPLEMENTATION) && defined(SIMD_8WAY_IMPLEMENTATION)
     static_assert( false , "More than one SIMD version is defined before including simd_triangle.h." );
 #endif
 
 #ifdef SIMD_BVH_IMPLEMENTATION
 
-#ifdef SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_IMPLEMENTATION
     #define Simd_Triangle       Triangle4
 #endif
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
     #define Simd_Triangle       Triangle8
 #endif
 
@@ -62,7 +62,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
     const Triangle*  m_ori_tri[SIMD_CHANNEL] = { nullptr };
     const Primitive* m_ori_pri[SIMD_CHANNEL] = { nullptr };
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
     char padding[16];
 #endif
 
@@ -71,7 +71,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
     //! @param  pri     The original primitive.
     //! @return         Whether the data structure is full.
     bool PushTriangle( const Primitive* primitive ){
-#ifdef SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_IMPLEMENTATION
         const Triangle* triangle = dynamic_cast<const Triangle*>(primitive->GetShape());
         if(IS_PTR_INVALID(m_ori_pri[0])){
             m_ori_pri[0] = primitive;
@@ -91,7 +91,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
         return true;
 #endif
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
         const Triangle* triangle = dynamic_cast<const Triangle*>(primitive->GetShape());
         if(IS_PTR_INVALID(m_ori_pri[0])){
             m_ori_pri[0] = primitive;
@@ -185,12 +185,12 @@ struct alignas(SIMD_ALIGNMENT) Simd_Triangle{
 
     //! @brief  Reset the data for reuse
     void Reset(){
-#ifdef SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_IMPLEMENTATION
         m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = nullptr;
         m_ori_tri[0] = m_ori_tri[1] = m_ori_tri[2] = m_ori_tri[3] = nullptr;
 #endif
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
         m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = m_ori_pri[4] = m_ori_pri[5] = m_ori_pri[6] = m_ori_pri[7] = nullptr;
         m_ori_tri[0] = m_ori_tri[1] = m_ori_tri[2] = m_ori_tri[3] = m_ori_tri[4] = m_ori_tri[5] = m_ori_tri[6] = m_ori_tri[7] = nullptr;
 #endif
@@ -483,4 +483,4 @@ SORT_FORCEINLINE void intersectTriangleMulti_SIMD(const Ray& ray, const Simd_Ray
 #endif
 }
 
-#endif // SIMD_SSE_IMPLEMENTATION || SIMD_AVX_IMPLEMENTATION
+#endif // SIMD_4WAY_IMPLEMENTATION || SIMD_8WAY_IMPLEMENTATION

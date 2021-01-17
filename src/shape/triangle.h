@@ -24,20 +24,6 @@
 class   MeshVisual;
 struct  MeshFaceIndex;
 
-#ifdef SSE_ENABLED
-    struct Triangle4;
-#ifdef SORT_IN_WINDOWS
-    struct simd_data_sse;
-#endif
-#endif
-
-#ifdef AVX_ENABLED
-    struct Triangle8;
-#ifdef SORT_IN_WINDOWS
-    struct simd_data_avx;
-#endif
-#endif
-
 //! @brief Triangle class defines the basic behavior of triangle.
 /**
  * Triangle is the most common shape that is used in a ray tracer.
@@ -126,21 +112,13 @@ private:
     const MeshVisual*        m_meshVisual = nullptr;     /**< Visual holding the vertex buffer. */
     const MeshFaceIndex&     m_index;                    /**< Index buffer points to the index of this triangle. */
 
-#ifdef SSE_ENABLED
+#ifdef SIMD_4WAY_ENABLED
     friend struct Triangle4;
-    #ifdef SORT_IN_WINDOWS
-        friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const simd_data_sse& t4, const simd_data_sse& u4, const simd_data_sse& v4, const int id, SurfaceInteraction* intersection);
-    #else
-        friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const __m128& t4, const __m128& u4, const __m128& v4, const int id, SurfaceInteraction* intersection);
-    #endif
+    friend SORT_FORCEINLINE void setupIntersection(const Triangle4& tri4, const Ray& ray, const simd_data_sse& t4, const simd_data_sse& u4, const simd_data_sse& v4, const int id, SurfaceInteraction* intersection);
 #endif
 
-#ifdef AVX_ENABLED
+#ifdef SIMD_8WAY_ENABLED
     friend struct Triangle8;
-    #ifdef SORT_IN_WINDOWS
-        friend SORT_FORCEINLINE void setupIntersection(const Triangle8& tri4, const Ray& ray, const simd_data_avx& t8, const simd_data_avx& u8, const simd_data_avx& v8, const int id, SurfaceInteraction* intersection);
-    #else
-        friend SORT_FORCEINLINE void setupIntersection(const Triangle8& tri8, const Ray& ray, const __m256& t8, const __m256& u8, const __m256& v8, const int id, SurfaceInteraction* intersection);
-    #endif
+    friend SORT_FORCEINLINE void setupIntersection(const Triangle8& tri4, const Ray& ray, const simd_data_avx& t8, const simd_data_avx& u8, const simd_data_avx& v8, const int id, SurfaceInteraction* intersection);
 #endif
 };

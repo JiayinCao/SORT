@@ -40,7 +40,7 @@ SORT_STATIC_FORCEINLINE std::unique_ptr<T[]> makePrimitiveList( unsigned int cnt
 #endif
 }
 
-#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_4WAY_IMPLEMENTATION) && defined(SIMD_8WAY_IMPLEMENTATION)
 static_assert(false, "More than one SIMD version is defined before including fast_bvh.hpp");
 #endif
 
@@ -594,7 +594,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
                     bvh_stack[si++] = node->children[k1].get();
                     bvh_stack[si++] = node->children[k0].get();
                 }else{
-#if defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_8WAY_IMPLEMENTATION)
                     for (auto i = 0u; i < node->child_cnt; ++i) {
                         auto k = -1;
                         auto maxDist = -1.0f;
@@ -612,7 +612,7 @@ bool  Fbvh::IsOccluded(const Ray& ray) const{
                         bvh_stack[si++] = node->children[k].get();
                     }
 #endif
-#if defined(SIMD_SSE_IMPLEMENTATION)
+#if defined(SIMD_4WAY_IMPLEMENTATION)
                     const int k3 = __bsf(m);
                     sAssert(sse_f_min[k3] >= 0.0f, SPATIAL_ACCELERATOR);
 

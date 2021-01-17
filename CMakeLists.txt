@@ -51,8 +51,8 @@ SET( ENABLE_PROFILER               "NO"   CACHE BOOL "Enable SORT profiling syst
 SET( ENABLE_STATS                  "YES"  CACHE BOOL "Enable SORT stats system. It is enabled by default." )
 SET( ENABLE_FASTMATH               "NO"   CACHE BOOL "Enable fast math. It may have potential risk in errors due to lower precision. Performance gain is quite limited and unstable, for which reason it is disabled by default." )
 SET( ENABLE_LINKTIME_OPTIMIZATION  "YES"  CACHE BOOL "Link time optimization is enabled by default since it does show some performance gain sometimes." )
-SET( ENABLE_SSE_OPTIMIZATION       "ON"  CACHE BOOL "Enable SSE optimization, this could boost the performance of ray tracing." )
-SET( ENABLE_AVX_OPTIMIZATION       "NO"  CACHE BOOL "Enable AVX optimization, this could boost the performance of ray tracing even more." )
+SET( ENABLE_SIMD_4WAY_OPTIMIZATION "YES"  CACHE BOOL "Enable SSE/Neon optimization, this could boost the performance of ray tracing." )
+SET( ENABLE_SIMD_8WAY_OPTIMIZATION "NO"   CACHE BOOL "Enable AVX optimization, this could boost the performance of ray tracing even more." )
 
 # For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
 if(ENABLE_PROFILER)
@@ -121,12 +121,12 @@ file(GLOB_RECURSE thirdparty_cs src/thirdparty/*.c)
 file(GLOB_RECURSE thirdparty_ccs src/thirdparty/*.cc)
 set(thirdparty_files ${thirdparty_headers} ${thirdparty_cpps} ${thirdparty_cs} ${thirdparty_ccs})
 
-if(ENABLE_SSE_OPTIMIZATION)
-    add_definitions( -DSSE_ENABLED )
+if(ENABLE_SIMD_4WAY_OPTIMIZATION)
+    add_definitions( -DSIMD_4WAY_ENABLED )
 endif()
 
-if(ENABLE_AVX_OPTIMIZATION)
-    add_definitions( -DAVX_ENABLED )
+if(ENABLE_SIMD_8WAY_OPTIMIZATION)
+    add_definitions( -DSIMD_8WAY_ENABLED )
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${SORT_SOURCE_DIR}/bin")
@@ -233,11 +233,11 @@ if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
     endif()
 
-    if(ENABLE_SSE_OPTIMIZATION)
+    if(ENABLE_SIMD_4WAY_OPTIMIZATION)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
     endif()
 
-    if(ENABLE_AVX_OPTIMIZATION)
+    if(ENABLE_SIMD_8WAY_OPTIMIZATION)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mavx")
     endif()
 

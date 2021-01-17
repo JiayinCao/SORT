@@ -17,12 +17,12 @@
 
 #include "core/define.h"
 
-#ifdef AVX_ENABLED
-#define SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_ENABLED
+#define SIMD_8WAY_IMPLEMENTATION
 #endif
 
 #include "simd.hpp"
 
-#ifdef AVX_ENABLED
-#undef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_ENABLED
+#undef SIMD_8WAY_IMPLEMENTATION
 #endif

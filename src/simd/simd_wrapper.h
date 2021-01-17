@@ -17,11 +17,13 @@
 
 #pragma once
 
+#include "core/define.h"
+
 #ifdef SORT_X64_TARGET
     #include "simd_intel.h"
 #else
-    #ifdef SIMD_AVX_IMPLEMENTATION
-        #undef SIMD_AVX_IMPLEMENTATION
+    #ifdef SIMD_8WAY_IMPLEMENTATION
+        #undef SIMD_8WAY_IMPLEMENTATION
     #endif
 
     #include "simd_arm.h"

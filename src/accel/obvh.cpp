@@ -21,16 +21,16 @@
 #define Fbvh        Obvh
 #define Fbvh_Node   Obvh_Node
 
-#ifdef AVX_ENABLED
-#define SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_ENABLED
+#define SIMD_8WAY_IMPLEMENTATION
 #define SIMD_BVH_IMPLEMENTATION
 #endif
 
 #include "fast_bvh.hpp"
 
-#ifdef AVX_ENABLED
+#ifdef SIMD_8WAY_ENABLED
 #undef SIMD_BVH_IMPLEMENTATION
-#undef SIMD_AVX_IMPLEMENTATION
+#undef SIMD_8WAY_IMPLEMENTATION
 #endif
 
 #undef  Fbvh

@@ -23,8 +23,8 @@
 #define Fbvh        Qbvh
 #define Fbvh_Node   Qbvh_Node
 
-#ifdef SSE_ENABLED
-#define SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_ENABLED
+#define SIMD_4WAY_IMPLEMENTATION
 #define SIMD_BVH_IMPLEMENTATION
 #endif
 
@@ -34,9 +34,9 @@
 #include "simd/sse_line.h"
 #include "fast_bvh.h"
 
-#ifdef SSE_ENABLED
+#ifdef SIMD_4WAY_ENABLED
 #undef SIMD_BVH_IMPLEMENTATION
-#undef SIMD_SSE_IMPLEMENTATION
+#undef SIMD_4WAY_IMPLEMENTATION
 #endif
 
 #undef QBVH_IMPLEMENTATION

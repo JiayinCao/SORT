@@ -25,17 +25,17 @@
 // Reference implementation is disabled by default, it is only for debugging purposes.
 // #define SIMD_LINE_REFERENCE_IMPLEMENTATION
 
-#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_4WAY_IMPLEMENTATION) && defined(SIMD_8WAY_IMPLEMENTATION)
     static_assert( false , "More than one SIMD version is defined before including simd_line.h." );
 #endif
 
 #ifdef SIMD_BVH_IMPLEMENTATION
 
-#ifdef SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_IMPLEMENTATION
     #define Simd_Line   Line4
 #endif
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
     #define Simd_Line   Line8
 #endif
 
@@ -58,7 +58,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
     const Line*         m_ori_line[SIMD_CHANNEL] = { nullptr };
     const Primitive*    m_ori_pri[SIMD_CHANNEL] = { nullptr };
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
     char                padding[16];
 #endif
 
@@ -67,7 +67,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
     //! @param  pri     The original primitive.
     //! @return         Whether the data structure is full.
     bool PushLine( const Primitive* primitive ){
-#ifdef SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_IMPLEMENTATION
         const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
         if(IS_PTR_INVALID(m_ori_pri[0])){
             m_ori_pri[0] = primitive;
@@ -87,7 +87,7 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
         return true;
 #endif
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
         const Line* line = dynamic_cast<const Line*>(primitive->GetShape());
         if(IS_PTR_INVALID(m_ori_pri[0])){
             m_ori_pri[0] = primitive;
@@ -204,12 +204,12 @@ struct alignas(SIMD_ALIGNMENT) Simd_Line{
 
     //! @brief  Reset the data for reuse
     void Reset(){
-#ifdef SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_IMPLEMENTATION
         m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = nullptr;
         m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = nullptr;
 #endif
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
         m_ori_pri[0] = m_ori_pri[1] = m_ori_pri[2] = m_ori_pri[3] = m_ori_pri[4] = m_ori_pri[5] = m_ori_pri[6] = m_ori_pri[7] = nullptr;
         m_ori_line[0] = m_ori_line[1] = m_ori_line[2] = m_ori_line[3] = m_ori_line[4] = m_ori_line[5] = m_ori_line[6] = m_ori_line[7] = nullptr;
 #endif
@@ -364,4 +364,4 @@ SORT_FORCEINLINE bool intersectLineFast_SIMD( const Ray& ray , const Simd_Ray_Da
 #endif
 }
 
-#endif // SIMD_SSE_IMPLEMENTATION || SIMD_AVX_IMPLEMENTATION
+#endif // SIMD_4WAY_IMPLEMENTATION || SIMD_8WAY_IMPLEMENTATION

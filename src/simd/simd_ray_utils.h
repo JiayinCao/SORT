@@ -21,17 +21,17 @@
 #include "simd_wrapper.h"
 #include "math/ray.h"
 
-#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_4WAY_IMPLEMENTATION) && defined(SIMD_8WAY_IMPLEMENTATION)
     static_assert( false , "More than one SIMD version is defined before including simd_bbox." );
 #endif
 
-#if defined(SSE_ENABLED) || defined(AVX_ENABLED)
+#if defined(SIMD_4WAY_ENABLED) || defined(SIMD_8WAY_ENABLED)
 #ifdef SIMD_BVH_IMPLEMENTATION
 
-#ifdef SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_IMPLEMENTATION
     #define Simd_Ray_Data   Ray4_Data
 #endif
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
     #define Simd_Ray_Data   Ray8_Data
 #endif
 

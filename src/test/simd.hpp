@@ -16,18 +16,21 @@
  */
 
 #include <math.h>
+#include "core/define.h"
 #include "thirdparty/gtest/gtest.h"
 #include "simd/simd_wrapper.h"
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SORT_X64_TARGET
+
+#ifdef SIMD_8WAY_IMPLEMENTATION
     #define SIMD_TEST       SIMD_AVX
 #endif
 
-#ifdef SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_IMPLEMENTATION
     #define SIMD_TEST       SIMD_SSE
 #endif
 
-#if defined( SIMD_AVX_IMPLEMENTATION ) || defined( SIMD_SSE_IMPLEMENTATION )
+#if defined( SIMD_4WAY_IMPLEMENTATION ) || defined( SIMD_8WAY_IMPLEMENTATION )
 
 static constexpr float nan_unsigned = 0xffc00000;
 static constexpr float nan_float = *((float*)(&nan_unsigned));
@@ -496,3 +499,5 @@ TEST(SIMD_TEST, simd_minreduction_ps) {
 }
 
 #endif
+
+#endif // SORT_X64_TARGET

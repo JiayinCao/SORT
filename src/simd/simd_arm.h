@@ -24,14 +24,14 @@
 #include <float.h>
 #include "core/define.h"
 
-#if defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_8WAY_IMPLEMENTATION)
     static_assert( false , "No 8 lane width simd available on Arm." );
 #endif
 
 const static unsigned mask_true_i = 0xffffffff;
 const static float mask_true = *((float*)&( mask_true_i ));
 
-#ifdef SSE_ENABLED
+#ifdef SIMD_4WAY_ENABLED
 #include<arm_neon.h>
 
 #define __m128 float32x4_t
@@ -71,7 +71,7 @@ SORT_STATIC_FORCEINLINE float32x4_t get_sse_data( const simd_data_sse& d ){
 // zero tolerance in any extra size in this structure.
 static_assert( sizeof( simd_data_sse ) == sizeof( float32x4_t ) , "Incorrect SSE data size." );
 
-#ifdef  SIMD_SSE_IMPLEMENTATION
+#ifdef  SIMD_4WAY_IMPLEMENTATION
 
 static const float32x4_t sse_zeros       = { 0.0f, 0.0f, 0.0f, 0.0f };
 static const float32x4_t sse_infinites   = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
@@ -170,8 +170,8 @@ SORT_STATIC_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
   //  return _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
 }
 
-#endif // SIMD_SSE_IMPLEMENTATION
-#endif // SSE_ENABLED
+#endif // SIMD_4WAY_IMPLEMENTATION
+#endif // SIMD_4WAY_ENABLED
 
 SORT_STATIC_FORCEINLINE int __bsf(int v) {
 #ifdef SORT_IN_WINDOWS

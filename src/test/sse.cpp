@@ -17,12 +17,12 @@
 
 #include "core/define.h"
 
-#ifdef SSE_ENABLED
-#define SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_ENABLED
+#define SIMD_4WAY_IMPLEMENTATION
 #endif
 
 #include "simd.hpp"
 
-#ifdef SSE_ENABLED
-#undef SIMD_SSE_IMPLEMENTATION
+#ifdef SIMD_4WAY_ENABLED
+#undef SIMD_4WAY_IMPLEMENTATION
 #endif

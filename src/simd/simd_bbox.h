@@ -23,17 +23,17 @@
 // Reference implementation is disabled by default, it is only for debugging purposes.
 // #define SIMD_BBOX_REFERENCE_IMPLEMENTATION
 
-#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_4WAY_IMPLEMENTATION) && defined(SIMD_8WAY_IMPLEMENTATION)
     static_assert( false , "More than one SIMD version is defined before including simd_bbox." );
 #endif
 
 #ifdef SIMD_BVH_IMPLEMENTATION
 
-#if defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_8WAY_IMPLEMENTATION)
     #define Simd_BBox   BBox8
 #endif
 
-#if defined(SIMD_SSE_IMPLEMENTATION)
+#if defined(SIMD_4WAY_IMPLEMENTATION)
     #define Simd_BBox   BBox4
 #endif
 

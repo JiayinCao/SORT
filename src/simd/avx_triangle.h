@@ -19,7 +19,7 @@
 
 #include "core/define.h"
 
-#ifdef AVX_ENABLED
+#ifdef SIMD_8WAY_ENABLED
 #include "simd_wrapper.h"
 #include "simd_triangle.h"
 #endif

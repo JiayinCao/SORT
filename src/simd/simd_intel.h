@@ -24,14 +24,14 @@
 #include <float.h>
 #include "core/define.h"
 
-#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_4WAY_IMPLEMENTATION) && defined(SIMD_8WAY_IMPLEMENTATION)
     static_assert( false , "More than one SIMD version is defined before including the wrapper." );
 #endif
 
 const static unsigned mask_true_i = 0xffffffff;
 const static float mask_true = *((float*)&( mask_true_i ));
 
-#ifdef SSE_ENABLED
+#ifdef SIMD_4WAY_ENABLED
 #include <nmmintrin.h>
 
 #ifndef SORT_IN_WINDOWS
@@ -69,7 +69,7 @@ SORT_STATIC_FORCEINLINE __m128 get_sse_data( const simd_data_sse& d ){
 // zero tolerance in any extra size in this structure.
 static_assert( sizeof( simd_data_sse ) == sizeof( __m128 ) , "Incorrect SSE data size." );
 
-#ifdef  SIMD_SSE_IMPLEMENTATION
+#ifdef  SIMD_4WAY_IMPLEMENTATION
 
 static const __m128 sse_zeros       = _mm_set_ps1( 0.0f );
 static const __m128 sse_infinites   = _mm_set_ps1( FLT_MAX );
@@ -169,10 +169,10 @@ SORT_STATIC_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
     return _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
 }
 
-#endif // SIMD_SSE_IMPLEMENTATION
-#endif // SSE_ENABLED
+#endif // SIMD_4WAY_IMPLEMENTATION
+#endif // SIMD_4WAY_ENABLED
 
-#ifdef  AVX_ENABLED
+#ifdef  SIMD_8WAY_ENABLED
 
 #include <immintrin.h>
 
@@ -208,7 +208,7 @@ SORT_STATIC_FORCEINLINE __m256 get_avx_data( const simd_data_avx& d ){
 // zero tolerance in any extra size in this structure.
 static_assert(sizeof(simd_data_avx) == sizeof(__m256), "Incorrect AVX data size.");
 
-#ifdef SIMD_AVX_IMPLEMENTATION
+#ifdef SIMD_8WAY_IMPLEMENTATION
 
 static const __m256 avx_zeros       = _mm256_set_ps(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 static const __m256 avx_infinites   = _mm256_set_ps(FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX );
@@ -283,7 +283,6 @@ SORT_STATIC_FORCEINLINE simd_data   simd_cmpge_ps( const simd_data& s0 , const s
 SORT_STATIC_FORCEINLINE simd_data   simd_cmpgt_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_cmp_ps( get_avx_data(s0) , get_avx_data(s1) , _CMP_GT_OQ );
 }
-lafdsfda
 SORT_STATIC_FORCEINLINE simd_data   simd_and_ps( const simd_data& s0 , const simd_data& s1 ){
     return _mm256_and_ps( get_avx_data(s0) , get_avx_data(s1) );
 }

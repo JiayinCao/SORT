@@ -19,12 +19,12 @@
 
 #include "shape.h"
 
-#ifdef SSE_ENABLED
+#ifdef SIMD_4WAY_ENABLED
 struct Line4;
 struct Ray4_Data;
 #endif
 
-#ifdef AVX_ENABLED
+#ifdef SIMD_8WAY_ENABLED
 struct Line8;
 struct Ray8_Data;
 #endif
@@ -164,12 +164,12 @@ private:
      * there is no scaling in the matrix. */
     Transform       m_world2Line;
 
-#ifdef SSE_ENABLED
+#ifdef SIMD_4WAY_ENABLED
     friend struct Line4;
     friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Ray4_Data& ray_simd , const Line4& line_simd , SurfaceInteraction* ret );
 #endif
 
-#ifdef AVX_ENABLED
+#ifdef SIMD_8WAY_ENABLED
     friend struct Line8;
     friend SORT_FORCEINLINE bool intersectLine_SIMD( const Ray& ray , const Ray8_Data& ray_simd , const Line8& line_simd , SurfaceInteraction* ret );
 #endif

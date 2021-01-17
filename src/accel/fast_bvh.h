@@ -21,7 +21,7 @@
 #include "bvh_utils.h"
 #include "core/primitive.h"
 
-#if defined(SIMD_SSE_IMPLEMENTATION) && defined(SIMD_AVX_IMPLEMENTATION)
+#if defined(SIMD_4WAY_IMPLEMENTATION) && defined(SIMD_8WAY_IMPLEMENTATION)
 static_assert(false, "More than one SIMD version is defined before including fast_bvh.h");
 #endif
 
