@@ -60,7 +60,7 @@ TEST(SIMD_TEST, simd_set_ps) {
         EXPECT_EQ( simd_data[i] , data[i] );
 }
 
-TEST(SIMD_TEST, current /*simd_set_mask*/) {
+TEST(SIMD_TEST, simd_set_mask) {
     bool data[SIMD_CHANNEL];
     for( auto i = 0 ; i < SIMD_CHANNEL ; ++i )
         data[i] = ( i % 2 ) ? true : false;

@@ -34,55 +34,55 @@ const static float mask_true = *((float*)&( mask_true_i ));
 #ifdef SIMD_4WAY_ENABLED
 #include<arm_neon.h>
 
-#define __m128 float32x4_t
-
 #ifndef SORT_IN_WINDOWS
-#define simd_data_sse   float32x4_t
-#else
-// somehow this data structure can introduce huge performance problem on MacOS
-// since it is purely for [] operator, it is only used on Windows, where there is no
-// performance issue by using it.
-struct simd_data_sse{
+struct simd_data_neon
+{
     union{
-        float32x4_t     sse_data;
-        float           float_data[4];
+        float32x4_t   neon_data_f4;
+        uint32x4_t    neon_data_u4;
+        float         neon_data_raw_f4[4];
     };
 
-    SORT_FORCEINLINE simd_data_sse(){}
-    SORT_FORCEINLINE simd_data_sse( const float32x4_t& data ):sse_data(data){}
-    
+    SORT_FORCEINLINE simd_data_neon(const float32x4_t& data) : neon_data_f4(data){}
+    SORT_FORCEINLINE simd_data_neon(const uint32x4_t& data) : neon_data_u4(data){}
+    SORT_FORCEINLINE simd_data_neon() {}
     SORT_FORCEINLINE float  operator []( const int i ) const{
-        return float_data[i];
+        return neon_data_f4[i];
     }
-    SORT_FORCEINLINE float& operator []( const int i ){
-        return float_data[i];
+
+    SORT_FORCEINLINE float&  operator []( const int i ){
+        return neon_data_raw_f4[i];
     }
 };
+#define simd_data_sse   simd_data_neon  // to be removed
+#else
+#error "Not implemented yet."
 #endif
 
-SORT_STATIC_FORCEINLINE float32x4_t get_sse_data( const simd_data_sse& d ){
+SORT_STATIC_FORCEINLINE float32x4_t get_neon_data( const simd_data_neon& d ){
 #ifdef SORT_IN_WINDOWS
-    return d.sse_data;
+    #error "Not implemented yet."
 #else
-    return d;
+    return d.neon_data_f4;
 #endif
 }
 
 // zero tolerance in any extra size in this structure.
-static_assert( sizeof( simd_data_sse ) == sizeof( float32x4_t ) , "Incorrect SSE data size." );
+static_assert( sizeof( simd_data_neon ) == sizeof( float32x4_t ) , "Incorrect Neon data size." );
 
 #ifdef  SIMD_4WAY_IMPLEMENTATION
 
-static const float32x4_t sse_zeros       = { 0.0f, 0.0f, 0.0f, 0.0f };
-static const float32x4_t sse_infinites   = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
-static const float32x4_t sse_neg_ones    = { -1.0f, -1.0f, -1.0f, -1.0f };
-static const float32x4_t sse_ones        = { 1.0f, 1.0f, 1.0f, 1.0f };
+static const float32x4_t neon_zeros       = { 0.0f, 0.0f, 0.0f, 0.0f };
+static const float32x4_t neon_infinites   = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
+static const float32x4_t neon_neg_ones    = { -1.0f, -1.0f, -1.0f, -1.0f };
+static const float32x4_t neon_ones        = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-#define simd_data       simd_data_sse
-#define simd_ones       sse_ones
-#define simd_zeros      sse_zeros
-#define simd_neg_ones   sse_neg_ones
-#define simd_infinites  sse_infinites
+
+#define simd_data       simd_data_neon
+#define simd_ones       neon_ones
+#define simd_zeros      neon_zeros
+#define simd_neg_ones   neon_neg_ones
+#define simd_infinites  neon_infinites
 
 #define SIMD_CHANNEL    4
 #define SIMD_ALIGNMENT  16
@@ -92,82 +92,96 @@ SORT_STATIC_FORCEINLINE simd_data   simd_zero(){
     // It could be a hardware issue, since MacOS is the major platform I used for development
     // this is more of a workaround to make it faster.
     // return _mm_setzero_ps();
-    return { 0.0f, 0.0f, 0.0f, 0.0f };
+    return (float32x4_t){ 0.0f, 0.0f, 0.0f, 0.0f };
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_set_ps1( const float d ){
-    return { d , d , d , d };
+    return (float32x4_t){ d , d , d , d };
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_set_ps( const float d[] ){
     return vld1q_f32( d );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_set_mask(const bool mask[]) {
 #define MASK_TO_INT(m)  (m?mask_true:0)
-    return {MASK_TO_INT(mask[3]), MASK_TO_INT(mask[2]), MASK_TO_INT(mask[1]), MASK_TO_INT(mask[0])};
+    return (float32x4_t){MASK_TO_INT(mask[0]), MASK_TO_INT(mask[1]), MASK_TO_INT(mask[2]), MASK_TO_INT(mask[3])};
 #undef MASK_TO_INT
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_add_ps( const simd_data& s0 , const simd_data& s1 ){
- //   return _mm_add_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vaddq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_sub_ps( const simd_data& s0 , const simd_data& s1 ){
-  //  return _mm_sub_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vsubq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_mul_ps( const simd_data& s0 , const simd_data& s1 ){
-  //  return _mm_mul_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vmulq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_div_ps( const simd_data& s0 , const simd_data& s1 ){
-  //  return _mm_div_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vdivq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_sqr_ps( const simd_data& m ){
-  //  return _mm_mul_ps( get_sse_data(m) , get_sse_data(m) );
+    return simd_mul_ps( get_neon_data(m) , get_neon_data(m) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_sqrt_ps( const simd_data& m ){
-  //  return _mm_sqrt_ps( get_sse_data(m) );
+    return vsqrtq_f32( get_neon_data(m) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_rcp_ps( const simd_data& m ){
-  //  return _mm_div_ps( sse_ones , get_sse_data(m) );
+    return vdivq_f32( neon_ones , get_neon_data(m) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_mad_ps( const simd_data& a , const simd_data& b , const simd_data& c ){
-  //  return _mm_add_ps( _mm_mul_ps( get_sse_data(a) , get_sse_data(b) ) , get_sse_data(c) );
+    return simd_add_ps( simd_mul_ps( get_neon_data(a) , get_neon_data(b) ) , get_neon_data(c) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_pick_ps( const simd_data& mask , const simd_data& a , const simd_data& b ){
-  //  return _mm_blendv_ps( get_sse_data(b) , get_sse_data(a) , get_sse_data(mask) );
+    return vbslq_f32(mask.neon_data_u4, get_neon_data(a), get_neon_data(b));
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_cmpeq_ps( const simd_data& s0 , const simd_data& s1 ){
-   // return _mm_cmpeq_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vceqq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_cmpneq_ps( const simd_data& s0 , const simd_data& s1 ){
-   // return _mm_cmpneq_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vmvnq_u32(simd_cmpeq_ps( get_neon_data(s0) , get_neon_data(s1) ).neon_data_u4);
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_cmple_ps( const simd_data& s0 , const simd_data& s1 ){
-  //  return _mm_cmple_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vcleq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_cmplt_ps( const simd_data& s0 , const simd_data& s1 ){
-   // return _mm_cmplt_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vcltq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_cmpge_ps( const simd_data& s0 , const simd_data& s1 ){
-  //  return _mm_cmpge_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vcgeq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_cmpgt_ps( const simd_data& s0 , const simd_data& s1 ){
-  //  return _mm_cmpgt_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vcgtq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_and_ps( const simd_data& s0 , const simd_data& s1 ){
-//    return _mm_and_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vandq_u32( s0.neon_data_u4 , s1.neon_data_u4 );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_or_ps( const simd_data& s0 , const simd_data& s1 ){
- //   return _mm_or_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vorrq_u32( s0.neon_data_u4 , s1.neon_data_u4 );
 }
 SORT_STATIC_FORCEINLINE int         simd_movemask_ps( const simd_data& mask ){
-  //  return _mm_movemask_ps( get_sse_data(mask) );
+    const uint32x4_t conditions = mask.neon_data_u4;
+    
+    // reference implementation for now
+    // I need to figure out a better way later.
+    int ret = 0;
+    if( mask.neon_data_u4[0] & 0x80000000 )
+      ret |= 1;
+    if( mask.neon_data_u4[1] & 0x80000000 )
+      ret |= 2;
+    if( mask.neon_data_u4[2] & 0x80000000 )
+      ret |= 4;
+    if( mask.neon_data_u4[3] & 0x80000000 )
+      ret |= 8;
+    return ret;
 }
+
 SORT_STATIC_FORCEINLINE simd_data   simd_min_ps( const simd_data& s0 , const simd_data& s1 ){
- //   return _mm_min_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vminq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const simd_data& s1 ){
-//    return _mm_max_ps( get_sse_data(s0) , get_sse_data(s1) );
+    return vmaxq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
-  //  const __m128 t_min = _mm_min_ps( get_sse_data(s) , _mm_shuffle_ps( get_sse_data(s) , get_sse_data(s) , _MM_SHUFFLE(2, 3, 0, 1) ) );
-  //  return _mm_min_ps( t_min , _mm_shuffle_ps(t_min, t_min, _MM_SHUFFLE(1, 0, 3, 2) ) );
+    // there must be a better way!
+    return simd_set_ps1( fmin( fmin( s[0], s[1] ) , fmin( s[2], s[3]) ) );
 }
 
 #endif // SIMD_4WAY_IMPLEMENTATION
