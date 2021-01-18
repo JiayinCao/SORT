@@ -17,10 +17,6 @@
 
 #pragma once
 
-// WARNING, following instructions will results in different results in SIMD and non-SIMD version.
-//  - 0.0f / 0.0f    ( SIMD, Nan 0x7fc00000 ) ( Non-SIMD, Nan 0xffc00000 )
-//  - Nan != Nan     ( SIMD, 0xffffffff )     ( Non-SIMD, false )
-
 #include <float.h>
 #include "core/define.h"
 
@@ -76,7 +72,6 @@ static const float32x4_t neon_zeros       = { 0.0f, 0.0f, 0.0f, 0.0f };
 static const float32x4_t neon_infinites   = { FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX };
 static const float32x4_t neon_neg_ones    = { -1.0f, -1.0f, -1.0f, -1.0f };
 static const float32x4_t neon_ones        = { 1.0f, 1.0f, 1.0f, 1.0f };
-
 
 #define simd_data       simd_data_neon
 #define simd_ones       neon_ones
@@ -157,22 +152,22 @@ SORT_STATIC_FORCEINLINE simd_data   simd_or_ps( const simd_data& s0 , const simd
     return vorrq_u32( s0.neon_data_u4 , s1.neon_data_u4 );
 }
 SORT_STATIC_FORCEINLINE int         simd_movemask_ps( const simd_data& mask ){
-    const uint32x4_t conditions = mask.neon_data_u4;
-    
-    // reference implementation for now
-    // I need to figure out a better way later.
-    int ret = 0;
-    if( mask.neon_data_u4[0] & 0x80000000 )
-      ret |= 1;
-    if( mask.neon_data_u4[1] & 0x80000000 )
-      ret |= 2;
-    if( mask.neon_data_u4[2] & 0x80000000 )
-      ret |= 4;
-    if( mask.neon_data_u4[3] & 0x80000000 )
-      ret |= 8;
-    return ret;
-}
+    static const uint32x4_t bit_mask      = (uint32x4_t){0x80000000, 0x80000000, 0x80000000, 0x80000000};
+    static const uint32x4_t bit_zeros     = (uint32x4_t){0x0, 0x0, 0x0, 0x0};
+    static const uint32x4_t bit_ones      = (uint32x4_t){0x01, 0x01, 0x01, 0x01};
+    static const uint32x4_t bit_all_masks = (uint32x4_t){0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+    static const uint32x4_t bit_mask1     = (uint32x4_t) {0x1, 0x2, 0x4, 0x8};
 
+    const uint32x4_t m0   = vandq_u32(mask.neon_data_u4, bit_mask);
+    const uint32x4_t m1   = vqsubq_s32(m0, bit_ones);
+    const uint32x4_t m2   = vbslq_u32(m1, bit_zeros, bit_all_masks);
+    const uint32x4_t mmA  = vandq_u32(m2, bit_mask1); // [0 1 2 3]
+    const uint32x4_t mmB  = vextq_u32(mmA, mmA, 2);   // [2 3 0 1]
+    const uint32x4_t mmC  = vorrq_u32(mmA, mmB);      // [0+2 1+3 0+2 1+3]
+    const uint32x4_t mmD  = vextq_u32(mmC, mmC, 3);   // [1+3 0+2 1+3 0+2]
+    const uint32x4_t mmE  = vorrq_u32(mmC, mmD);      // [0+1+2+3 ...]
+    return vgetq_lane_u32(mmE, 0);
+}
 SORT_STATIC_FORCEINLINE simd_data   simd_min_ps( const simd_data& s0 , const simd_data& s1 ){
     return vminq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
@@ -180,8 +175,11 @@ SORT_STATIC_FORCEINLINE simd_data   simd_max_ps( const simd_data& s0 , const sim
     return vmaxq_f32( get_neon_data(s0) , get_neon_data(s1) );
 }
 SORT_STATIC_FORCEINLINE simd_data   simd_minreduction_ps( const simd_data& s ){
-    // there must be a better way!
-    return simd_set_ps1( fmin( fmin( s[0], s[1] ) , fmin( s[2], s[3]) ) );
+    const auto d = get_neon_data(s);
+    const auto d0 = vextq_f32(d, d, 2);     // [2 3 0 1]
+    const auto d1 = vminq_f32(d0, d);       // [02, 13, 02, 13]
+    const auto d2 = vextq_f32(d1, d1, 1);   // [13, 02, 13, 02]
+    return vminq_f32(d2, d1);
 }
 
 #endif // SIMD_4WAY_IMPLEMENTATION
