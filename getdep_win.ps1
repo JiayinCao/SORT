@@ -1,4 +1,4 @@
 md dependencies
-wget http://45.63.123.194/sort_dependencies/win/dependencies.zip -OutFile dependencies.zip
+wget https://raw.githubusercontent.com/JiayinCao/SORT/dependencies/OSL_Integration_Last/win/dependencies.zip -OutFile dependencies.zip
 Expand-Archive .\dependencies.zip -DestinationPath .\
 rm .\dependencies.zip
