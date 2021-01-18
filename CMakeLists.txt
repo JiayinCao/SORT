@@ -55,7 +55,16 @@ SET( ENABLE_SIMD_4WAY_OPTIMIZATION "YES"  CACHE BOOL "Enable SSE/Neon optimizati
 SET( ENABLE_SIMD_8WAY_OPTIMIZATION "NO"   CACHE BOOL "Enable AVX optimization, this could boost the performance of ray tracing even more." )
 
 # detect apple silicon
-set(APPLE_SILICON ${CMAKE_HOST_SYSTEM_PROCESSOR} == "arm64")
+set(APPLE_SILICON false)
+if(SORT_PLATFORM_MAC)
+    if("${CMAKE_HOST_SYSTEM_PROCESSOR}" EQUAL "arm64")
+        set(APPLE_SILICON true)
+    endif()
+endif(SORT_PLATFORM_MAC)
+
+if(APPLE_SILICON)
+    message("Building on Apple Siligon")
+endif(APPLE_SILICON)
 
 # For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
 if(ENABLE_PROFILER)
@@ -236,7 +245,7 @@ if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
     endif()
 
-    if(ENABLE_SIMD_4WAY_OPTIMIZATION AND !APPLE_SILICON)
+    if(ENABLE_SIMD_4WAY_OPTIMIZATION AND NOT APPLE_SILICON)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
     endif()
 
