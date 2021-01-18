@@ -237,8 +237,7 @@ if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
     endif()
 
     if(ENABLE_SIMD_4WAY_OPTIMIZATION AND !APPLE_SILICON)
-        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
-        message("aa")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
     endif()
 
     if(ENABLE_SIMD_8WAY_OPTIMIZATION)
