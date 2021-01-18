@@ -16,6 +16,6 @@
 #>
 
 powershell Remove-Item -path ./dependencies -recurse -ErrorAction Ignore
-wget http://45.63.123.194/sort_dependencies/win/dependencies.zip -OutFile dependencies.zip
+wget https://github.com/JiayinCao/SORT/raw/dependencies/OSL_Integration_Last/win/dependencies.zip -OutFile dependencies.zip
 Expand-Archive .\dependencies.zip -DestinationPath .\
 rm .\dependencies.zip

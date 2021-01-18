@@ -19,7 +19,7 @@ case "$(uname -s)" in
 
 Darwin)
 rm -rf dependencies
-curl -o dependencies.zip http://45.63.123.194/sort_dependencies/mac/dependencies.zip
+curl -o dependencies.zip https://github.com/JiayinCao/SORT/raw/dependencies/OSL_Integration_Last/mac/dependencies.zip
 unzip dependencies.zip
 rm -rf __MACOSX
 rm dependencies.zip

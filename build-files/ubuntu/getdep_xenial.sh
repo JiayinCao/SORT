@@ -20,7 +20,7 @@ case "$(uname -s)" in
 Linux)
 rm -rf dependencies
 apt-get install unzip
-wget http://45.63.123.194/sort_dependencies/linux/dependencies.zip
+wget https://github.com/JiayinCao/SORT/raw/dependencies/OSL_Integration_Last/linux/dependencies.zip
 unzip dependencies.zip
 rm dependencies.zip
 cd ..
