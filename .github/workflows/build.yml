@@ -9,7 +9,7 @@ jobs:
     - name: Checking Out Source Code
       uses: actions/checkout@v1
     - name: Setup MSBuild.exe
-      uses: warrenbuckley/Setup-MSBuild@v1
+      uses: microsoft/setup-msbuild@v1.0.2
     - name: Get Cache Directory
       id: cache-dir
       run: |
