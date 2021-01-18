@@ -54,6 +54,9 @@ SET( ENABLE_LINKTIME_OPTIMIZATION  "YES"  CACHE BOOL "Link time optimization is 
 SET( ENABLE_SIMD_4WAY_OPTIMIZATION "YES"  CACHE BOOL "Enable SSE/Neon optimization, this could boost the performance of ray tracing." )
 SET( ENABLE_SIMD_8WAY_OPTIMIZATION "NO"   CACHE BOOL "Enable AVX optimization, this could boost the performance of ray tracing even more." )
 
+# detect apple silicon
+set(APPLE_SILICON ${CMAKE_HOST_SYSTEM_PROCESSOR} == "arm64")
+
 # For Easy_Profiler to locate its library, but this doesn't need to show up as UI an option
 if(ENABLE_PROFILER)
     set( easy_profiler_DIR "./dependencies/easy_profiler/lib/cmake/easy_profiler" )
@@ -233,8 +236,9 @@ if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
     endif()
 
-    if(ENABLE_SIMD_4WAY_OPTIMIZATION)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
+    if(ENABLE_SIMD_4WAY_OPTIMIZATION AND !APPLE_SILICON)
+        #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse4.1")
+        message("aa")
     endif()
 
     if(ENABLE_SIMD_8WAY_OPTIMIZATION)
