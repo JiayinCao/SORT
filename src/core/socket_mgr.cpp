@@ -68,6 +68,8 @@ socket_t SocketManager::AddSocket(const SOCKET_TYPE type, const std::string ip, 
         return sock;
     }
 
+    slog(INFO, SOCKET, "Connected to socket:\t%s:%s", ip.c_str(), port.c_str());
+
     m_sockets.insert(sock);
     
     return sock;

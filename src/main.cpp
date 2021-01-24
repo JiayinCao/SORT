@@ -56,6 +56,11 @@ int main(int argc, char* argv[])
     }
     slog(INFO, GENERAL, "Log file: \"%s\"", GetFilePathInExeFolder("log.txt").c_str());
 
+    // This, unfortunately, is a fairly ugly hack to 'make sure' all socket packages are received.
+    // I need to investigate how TEV doesn't require this
+    if(g_blenderMode)
+        Sleep(1000);
+
     SocketManager::GetSingleton().Shutdown();
 
     return ret;

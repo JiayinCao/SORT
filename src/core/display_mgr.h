@@ -48,6 +48,11 @@ struct DisplayImageInfo : public DisplayItemBase {
     void Process(std::unique_ptr<OSocketStream>& stream) override;
 };
 
+//! @brief  Indicate that we are done
+struct TerminateIndicator : public DisplayItemBase {
+    void Process(std::unique_ptr<OSocketStream>& stream) override;
+};
+
 //! @brief  Display is responsible for displaying intermediate result of the ray traced images.
 /*
  * Dynamic displaying intermediate buffer should work in either Blender or Tev(https://github.com/Tom94/tev).

@@ -23,6 +23,8 @@ import shutil
 import platform
 import threading
 import time
+import socket
+from .log import log, logD
 from . import base
 from . import exporter
 
@@ -31,14 +33,48 @@ class SORT_Thread():
     shared_memory = None
     float_shared_memory = None
 
+    sock = None
+    host_name = socket.gethostname()
+    ip_addr = socket.gethostbyname(host_name)
+    port    = 2006 # just a random port
+
     def __init__(self, engine):
         self.isTerminated = False
         self.render_engine = engine
         self.thread = threading.Thread(name="Rendering Thread", target=self.update)
 
-    def start(self):
-        self.thread.start()
+    def listen_socket(self):
+        ip_addr = self.ip_addr
+        port = self.port
 
+        log("Your Computer Name is:\t\t" + self.host_name)
+        log("Listening address and port:\t {ip}:{p}".format(ip=ip_addr, p=port))
+
+        # create the socket
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # non blocking socket
+        self.sock.setblocking(False)
+
+        # bind the socket
+        #self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.sock.bind((ip_addr, port))
+
+        # listen for socket connection
+        self.sock.settimeout(20)
+        self.sock.listen()
+
+        sort_addr = None
+        try:
+            self.connection, sort_addr = self.sock.accept()
+        except socket.timeout:
+            log("Timeout exceeded")
+            return
+
+        log('SORT is connected!')
+
+        self.thread.start()
+        
     def join(self):
         self.thread.join()
 
@@ -56,64 +92,55 @@ class SORT_Thread():
         self.float_shared_memory = struct.pack('%sf'%(self.render_engine.image_size_in_bytes), *sm[self.render_engine.image_header_size:self.render_engine.image_size_in_bytes + self.render_engine.image_header_size] )
 
     def update(self, final_update=False):
-        # total pixel count
-        mod = self.render_engine.image_tile_size - ( self.render_engine.image_size_h % self.render_engine.image_tile_size )
-        if mod is self.render_engine.image_tile_size:
-            mod = 0
+        while True:
+            try:
+                header_bytes = self.connection.recv(4)
+                if header_bytes == b'':
+                    print('[header_bytes] socket error.')
+                
+                pkg_length = int.from_bytes(header_bytes, "little")
 
-        while self.isTerminated is False:
-            # pick active tiles to update
-            active_tiles , all_done = self.picknewtiles()
+                # we are done if the length is zero, this will be the last socket package sent from SORT
+                if pkg_length == 0:
+                    break
+                
+                header = self.connection.recv(16)
+                if header == b'':
+                    print('[header] socket error.')
 
-            for i in active_tiles:
-                tile_x = i % self.render_engine.image_tile_count_x
-                tile_y = int(i / self.render_engine.image_tile_count_x)
+                # update a proportion of the image
+                tile_width  = int.from_bytes(header[0:3], "little")
+                tile_height = int.from_bytes(header[4:7], "little")
+                offset_x    = int.from_bytes(header[8:11], "little")
+                offset_y    = int.from_bytes(header[12:15], "little")
 
-                tile_x_offset = tile_x * self.render_engine.image_tile_size
-                tile_y_offset = tile_y * self.render_engine.image_tile_size
+                # receive the pixel data
+                pixels = self.connection.recv(pkg_length - 16)
 
-                tile_size_x = min( self.render_engine.image_tile_size , self.render_engine.image_size_w - tile_x_offset )
-                tile_size_y = self.render_engine.image_tile_size
-
-                # y offset
-                offset_y = max( mod - tile_y_offset , 0 )
-
-                # load shared memory
-                self.shared_memory.seek( self.render_engine.image_header_size + i * self.render_engine.image_tile_size_in_bytes + offset_y * tile_size_x * 16)
-                byptes = self.shared_memory.read(self.render_engine.image_tile_size_in_bytes - offset_y * tile_size_x * 16)
+                if pixels == b'':
+                    print('[pixel data] socket error.')
 
                 # convert binary to two dimensional array
-                tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
-                tile_rect = tile_data.reshape( ( ( self.render_engine.image_tile_pixel_count - offset_y * tile_size_x ) , 4 ) )
+                tile_data = numpy.fromstring(pixels, dtype=numpy.float32)
+                tile_rect = tile_data.reshape( ( ( tile_width * tile_height ) , 4 ) )
 
                 # begin result
-                result = self.render_engine.begin_result(tile_x_offset, max(tile_y_offset - mod,0), tile_size_x, tile_size_y - offset_y)
+                result = self.render_engine.begin_result(offset_x, self.render_engine.image_size_h - offset_y - 1 - tile_height, tile_width, tile_height)
 
                 # update image memmory
-                result.layers[0].passes[0].rect = tile_rect
+                if result is not None:
+                    result.layers[0].passes[0].rect = tile_rect
 
-                # refresh the update
-                self.render_engine.end_result(result)
+                    # refresh the update
+                    self.render_engine.end_result(result)
 
-                # update header info to make sure it is not processed again
-                self.shared_memory[i] = self.shared_memory[i] + 1
-
-            if all_done is True:
+            except socket.error as e:
+                print('socket error\t ')
+                print(e)
                 break
-
-        # close the shared memory if it is the last update
-        #if final_update:
-        #    self.shared_memory.close()
-
-    def picknewtiles(self):
-        active_tiles = []
-        all_done = True
-        for i in range( self.render_engine.image_header_size ):
-            if self.shared_memory[i] is 1:
-                active_tiles.append(i)
-            elif self.shared_memory[i] is 0:
-                all_done = False
-        return ( active_tiles , all_done )
+        
+        # we are done with rendering, no need for the socket anymore
+        self.sock.close()
 
 @base.register_class
 class SORTRenderEngine(bpy.types.RenderEngine):
@@ -154,7 +181,6 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             self.sharedmemory = mmap.mmap(0, self.sm_size , sm_full_path)
 
         self.sort_thread.setsharedmemory(self.sharedmemory)
-        self.sort_thread.start()
 
     def __init__(self):
         self.sort_available = True
@@ -217,7 +243,8 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         binary_path = exporter.get_sort_bin_path()
         intermediate_dir = exporter.get_intermediate_dir()
         # execute binary
-        self.cmd_argument = [binary_path];
+        self.cmd_argument = [binary_path]
+        self.cmd_argument.append( "--displayserver:" + self.sort_thread.ip_addr + ":" + str(self.sort_thread.port))
         self.cmd_argument.append( intermediate_dir + 'scene.sort')
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 
@@ -265,12 +292,16 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         # execute binary
         self.cmd_argument = [binary_path];
         self.cmd_argument.append( '--input:' + intermediate_dir + 'scene.sort')
+        self.cmd_argument.append( "--displayserver:" + self.sort_thread.ip_addr + ":" + str(self.sort_thread.port))
         self.cmd_argument.append( '--blendermode' )
         if scene.sort_data.profilingEnabled is True:
             self.cmd_argument.append( '--profiling:on' )
         if scene.sort_data.allUseDefaultMaterial is True:
             self.cmd_argument.append( '--noMaterial' )
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
+
+        # start listening the socket
+        self.sort_thread.listen_socket()
 
         # wait for the process to finish
         while subprocess.Popen.poll(process) is None:
@@ -289,7 +320,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
 
         # if final update is necessary
         final_update = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size + 1]
-        if final_update:
+        if final_update and False:
             # begin result
             result = self.begin_result(0, 0, bpy.data.scenes[0].render.resolution_x, bpy.data.scenes[0].render.resolution_y)
 

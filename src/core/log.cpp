@@ -105,7 +105,8 @@ const std::string typeToString( LOG_TYPE type ){
     ( LOG_TYPE::LOG_SHAPE == type ) ? "[Shape]" :
     ( LOG_TYPE::LOG_STREAM == type ) ? "[Stream]" :
     ( LOG_TYPE::LOG_RESOURCE == type ) ? "[Resource]" :
-    ( LOG_TYPE::LOG_TASK == type ) ? "[Task]" : "[Unknown]";
+    ( LOG_TYPE::LOG_TASK == type ) ? "[Task]" : 
+    ( LOG_TYPE::LOG_SOCKET == type ) ? "[Socket]" : "[Unknown]";
 }
 
 const std::string lineInfoString( const char* file , int line , LOG_LEVEL level ){

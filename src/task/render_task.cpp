@@ -58,24 +58,54 @@ void Render_Task::Execute(){
         indicate_tile->w = m_size.x;
         indicate_tile->h = m_size.y;
         indicate_tile->title = g_imageTitle;
-        for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
-            const auto indication_intensity = 0.3f;
 
-            indicate_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
-            auto data = indicate_tile->m_data[i].get();
-            memset(data, 0, sizeof(float) * total_pixel);
+        const auto indication_intensity = 0.3f;
+        if (g_blenderMode) {
+            indicate_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
+            auto data = indicate_tile->m_data[0].get();
+            memset(data, 0, sizeof(float) * total_pixel * 4);
 
             for (auto i = 0u; i < indicate_tile->w; ++i) {
                 if ((i >> 2) % 2 == 0)
                     continue;
-                data[i] = indication_intensity;
-                data[total_pixel - 1 - i] = indication_intensity;
+
+                for (auto c = 0; c < 3; ++c) {
+                    data[4 * i + c] = indication_intensity;
+                    data[4 * (total_pixel - 1 - i) + c] = indication_intensity;
+                }
+                data[4 * i + 3] = 1.0f;
+                data[4 * (total_pixel - 1 - i) + 3] = 1.0f;
             }
             for (auto i = 0u; i < indicate_tile->h; ++i) {
                 if ((i >> 2) % 2 == 0)
                     continue;
-                data[i * indicate_tile->w] = indication_intensity;
-                data[i * indicate_tile->w + indicate_tile->w - 1] = indication_intensity;
+
+                for (auto c = 0; c < 3; ++c) {
+                    data[4 * (i * indicate_tile->w) + c] = indication_intensity;
+                    data[4 * (i * indicate_tile->w + indicate_tile->w - 1) + c] = indication_intensity;
+                }
+                data[4 * (i * indicate_tile->w) + 3] = 1.0f;
+                data[4 * (i * indicate_tile->w + indicate_tile->w - 1) + 3] = 1.0f;
+            }
+        }
+        else {
+            for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
+                indicate_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
+                auto data = indicate_tile->m_data[i].get();
+                memset(data, 0, sizeof(float) * total_pixel);
+
+                for (auto i = 0u; i < indicate_tile->w; ++i) {
+                    if ((i >> 2) % 2 == 0)
+                        continue;
+                    data[i] = indication_intensity;
+                    data[total_pixel - 1 - i] = indication_intensity;
+                }
+                for (auto i = 0u; i < indicate_tile->h; ++i) {
+                    if ((i >> 2) % 2 == 0)
+                        continue;
+                    data[i * indicate_tile->w] = indication_intensity;
+                    data[i * indicate_tile->w + indicate_tile->w - 1] = indication_intensity;
+                }
             }
         }
 
@@ -88,10 +118,12 @@ void Render_Task::Execute(){
         display_tile->w = m_size.x;
         display_tile->h = m_size.y;
         display_tile->title = g_imageTitle;
-        for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
-            display_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
-            auto data = display_tile->m_data[i].get();
-            memset(data, 0, sizeof(float) * total_pixel);
+
+        if (g_blenderMode) {
+            display_tile->m_data[0] = std::make_unique<float[]>(total_pixel * 4);
+        } else {
+            for (auto i = 0u; i < 3; ++i)
+                display_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
         }
     }
 
@@ -134,10 +166,18 @@ void Render_Task::Execute(){
             if (display_server_connected) {
                 auto local_i = i - m_coord.y;
                 auto local_j = j - m_coord.x;
-                auto local_index = local_j + local_i * m_size.x;
-
-                for(auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i)
-                    display_tile->m_data[i][local_index] = radiance[i];
+                
+                if (g_blenderMode) {
+                    auto local_index = local_j + (m_size.y - 1 - local_i) * m_size.x;
+                    display_tile->m_data[0][4 * local_index] = radiance[0];
+                    display_tile->m_data[0][4 * local_index + 1] = radiance[1];
+                    display_tile->m_data[0][4 * local_index + 2] = radiance[2];
+                    display_tile->m_data[0][4 * local_index + 3] = 1.0f;
+                } else {
+                    auto local_index = local_j + local_i * m_size.x;
+                    for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i)
+                        display_tile->m_data[i][local_index] = radiance[i];
+                }
             }
         }
     }

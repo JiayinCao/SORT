@@ -18,6 +18,7 @@
 #include "display_mgr.h"
 #include "core/globalconfig.h"
 #include "core/socket_mgr.h"
+#include "core/sassert.h"
 
 #ifdef SORT_IN_WINDOWS
 #else
@@ -78,15 +79,59 @@ void DisplayManager::QueueDisplayItem(std::shared_ptr<DisplayItemBase> item) {
 void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     OSocketStream& stream = *ptr_stream;
 
-    for (auto i = 0u; i < nChannels; ++i) {
-        stream << int(0);            // reserved for length
-        stream << char(UpdateImage); // indicate to update some of the images
-        stream << char(0);           // indicate to grab the current image
-        stream << title;             // indicate the title of the image
-        stream << channelNames[i];   // the channel name
+    if (g_blenderMode){
+        // [0] Length of the package, it doesn't count itself
+        // [1] Width of the tile
+        // [2] Height of the tile
+        // [3] x position of the tile
+        // [4] y position of the tile
+        // [....] the pixel data
+        const int pixel_memory_size = w * h * sizeof(float) * 4;
+        const int total_size = pixel_memory_size + sizeof(int) * 4;
+        stream << int(total_size);
+        stream << w << h << x << y;
+        stream.Write((char*)m_data->get(), pixel_memory_size);
+        stream.Flush();
+    } else {
+        // This is for TEV
+        // https://github.com/Tom94/tev
+        for (auto i = 0u; i < nChannels; ++i) {
+            stream << int(0);            // reserved for length
+            stream << char(UpdateImage); // indicate to update some of the images
+            stream << char(0);           // indicate to grab the current image
+            stream << title;             // indicate the title of the image
+            stream << channelNames[i];   // the channel name
 
-        stream << x << y << w << h;
-        stream.Write((char*)m_data[i].get(), w * h * sizeof(float));
+            stream << x << y << w << h;
+            stream.Write((char*)m_data[i].get(), w * h * sizeof(float));
+
+            // set the length data
+            const auto pos = stream.GetPos();
+            stream.Seek(0);
+            stream << int(pos);
+            stream.Seek(pos);
+
+            // distribute data to all display servers
+            stream.Flush();
+        }
+    }
+}
+
+void DisplayImageInfo::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
+    // Blender doesn't care about creating a new image, only TEV does.
+    if (!g_blenderMode) {
+        OSocketStream& stream = *ptr_stream;
+
+        const int image_width = g_resultResollutionWidth;
+        const int image_height = g_resultResollutionHeight;
+        stream << int(0);            // reserved for length
+        stream << char(CreateImage); // indicate to update some of the images
+        stream << char(1);           // indicate to grab the current image
+        stream << title;             // indicate the title of the image
+        stream << image_width << image_height;
+        stream << int(nChannels);
+        for (auto i = 0; i < nChannels; ++i)
+            stream << channelNames[i];   // the channel name
 
         // set the length data
         const auto pos = stream.GetPos();
@@ -94,31 +139,17 @@ void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
         stream << int(pos);
         stream.Seek(pos);
 
-        // distribute data to all display servers
+        // flush the data
         stream.Flush();
     }
 }
 
-void DisplayImageInfo::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
-    OSocketStream& stream = *ptr_stream;
-
-    const int image_width = g_resultResollutionWidth;
-    const int image_height = g_resultResollutionHeight;
-    stream << int(0);            // reserved for length
-    stream << char(CreateImage); // indicate to update some of the images
-    stream << char(1);           // indicate to grab the current image
-    stream << title;             // indicate the title of the image
-    stream << image_width << image_height;
-    stream << int(nChannels);
-    for (auto i = 0; i < nChannels; ++i)
-        stream << channelNames[i];   // the channel name
-
-    // set the length data
-    const auto pos = stream.GetPos();
-    stream.Seek(0);
-    stream << int(pos);
-    stream.Seek(pos);
-
-    // flush the data
-    stream.Flush();
+void TerminateIndicator::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
+    // Tev won't response this well
+    if (g_blenderMode) {
+        // Blender doesn't care about creating a new image, only TEV does.
+        OSocketStream& stream = *ptr_stream;
+        stream << int(0);   // 0 as length indicating that we are done, no more package will be received.
+        stream.Flush();
+    }
 }

@@ -17,6 +17,7 @@
 
 #include <atomic>
 #include "display_task.h"
+#include "core/globalconfig.h"
 #include "core/display_mgr.h"
 
 extern std::atomic<int> g_render_task_cnt;
@@ -28,6 +29,12 @@ void Display_Task::Execute() {
     while (g_render_task_cnt > 0) {
         DisplayManager::GetSingleton().ProcessDisplayQueue();
         std::this_thread::yield();
+    }
+
+    // terminator is only needed in blender mode
+    if (g_blenderMode) {
+        std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>();
+        DisplayManager::GetSingleton().QueueDisplayItem(terminator);
     }
 
     // make sure flush all display items before quiting
