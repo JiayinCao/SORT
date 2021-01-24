@@ -30,13 +30,11 @@ from . import exporter
 
 class SORT_Thread():
     render_engine = None
-    shared_memory = None
-    float_shared_memory = None
 
     sock = None
     host_name = socket.gethostname()
     ip_addr = socket.gethostbyname(host_name)
-    port    = 2006 # just a random port
+    port    = 2007 # just a random port
 
     def __init__(self, engine):
         self.isTerminated = False
@@ -83,13 +81,6 @@ class SORT_Thread():
 
     def isAlive(self):
         return self.thread.isAlive()
-
-    def setsharedmemory(self,sm):
-        # setup shared memory
-        self.shared_memory = sm
-
-        # pack image content as float
-        self.float_shared_memory = struct.pack('%sf'%(self.render_engine.image_size_in_bytes), *sm[self.render_engine.image_header_size:self.render_engine.image_size_in_bytes + self.render_engine.image_header_size] )
 
     def update(self, final_update=False):
         while True:
@@ -156,38 +147,11 @@ class SORTRenderEngine(bpy.types.RenderEngine):
     def is_active(cls, context):
         return context.scene.render.engine == cls.bl_idname
 
-    # spawn new rendering thread
-    def spawnnewthread(self):
-        import mmap
-
-        # setup shared memory size
-        self.sm_size = self.image_size_in_bytes * 2 + self.image_header_size + 2
-
-        intermediate_dir = exporter.get_intermediate_dir()
-        sm_full_path = intermediate_dir + "sharedmem.bin"
-        # on mac os
-        if platform.system() == "Darwin" or platform.system() == "Linux":
-            # open a new file
-            self.file = open( sm_full_path , "wb" , self.sm_size)
-            self.file.write( bytes( "\0" * self.sm_size , "utf-8" ) )
-            self.file.close()
-
-            # open it in append mode
-            self.file = open( sm_full_path , "a+b" , self.sm_size)
-
-            # allocate shared memory first
-            self.sharedmemory = mmap.mmap(self.file.fileno(), self.sm_size)
-        elif platform.system() == "Windows":
-            self.sharedmemory = mmap.mmap(0, self.sm_size , sm_full_path)
-
-        self.sort_thread.setsharedmemory(self.sharedmemory)
-
     def __init__(self):
         self.sort_available = True
         self.cmd_argument = []
         self.render_pass = None
         self.sort_thread = SORT_Thread(self)
-        self.sharedmemory = None
 
         self.image_tile_size = 64
         self.image_size_w = int(bpy.data.scenes[0].render.resolution_x * bpy.data.scenes[0].render.resolution_percentage / 100)
@@ -235,9 +199,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
     # preview render
     def render_preview(self, depsgraph):
         scene = depsgraph.scene
-        #spawn new thread
-        self.spawnnewthread()
-
+        
         # start rendering process first
         binary_dir = exporter.get_sort_dir()
         binary_path = exporter.get_sort_bin_path()
@@ -252,8 +214,6 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         while subprocess.Popen.poll(process) is None:
             if self.test_break():
                 break
-            progress = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size]
-            self.update_progress(progress/100)
 
         # terminate the process by force
         if subprocess.Popen.poll(process) is None:
@@ -274,17 +234,11 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             # refresh the update
             self.end_result(result)
 
-            # close shared memory connection
-            self.sharedmemory.close()
-
         # clear immediate directory
         shutil.rmtree(intermediate_dir)
 
     # scene render
     def render_scene(self, scene):
-        #spawn new thread
-        self.spawnnewthread()
-
         # start rendering process first
         binary_dir = exporter.get_sort_dir()
         binary_path = exporter.get_sort_bin_path()
@@ -307,8 +261,6 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         while subprocess.Popen.poll(process) is None:
             if self.test_break():
                 break
-            progress = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size]
-            self.update_progress(progress/100)
 
         # terminate the process by force
         if subprocess.Popen.poll(process) is None:
@@ -317,27 +269,6 @@ class SORTRenderEngine(bpy.types.RenderEngine):
         # wait for the thread to finish
         self.sort_thread.stop()
         self.sort_thread.join()
-
-        # if final update is necessary
-        final_update = self.sharedmemory[self.image_size_in_bytes * 2 + self.image_header_size + 1]
-        if final_update and False:
-            # begin result
-            result = self.begin_result(0, 0, bpy.data.scenes[0].render.resolution_x, bpy.data.scenes[0].render.resolution_y)
-
-            self.sharedmemory.seek( self.image_header_size + self.image_size_in_bytes)
-            byptes = self.sharedmemory.read(self.image_pixel_count * 16)
-
-            tile_data = numpy.fromstring(byptes, dtype=numpy.float32)
-            tile_rect = tile_data.reshape( self.image_pixel_count , 4 )
-
-            # update image memory
-            result.layers[0].passes[0].rect = tile_rect
-
-            # refresh the update
-            self.end_result(result)
-
-        # close shared memory connection
-        self.sharedmemory.close()
 
         # clear immediate directory
         shutil.rmtree(intermediate_dir)

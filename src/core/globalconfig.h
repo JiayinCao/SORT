@@ -25,7 +25,6 @@
 #include "accel/accelerator.h"
 #include "integrator/integrator.h"
 #include "core/rtti.h"
-#include "imagesensor/blenderimage.h"
 #include "imagesensor/rendertargetimage.h"
 #include "core/display_mgr.h"
 #include "core/log.h"
@@ -247,10 +246,7 @@ public:
         if(IS_PTR_VALID(m_integrator))
             m_integrator->Serialize( stream );
 
-        if( m_blenderMode )
-            m_imageSensor = std::make_unique<BlenderImage>( m_resWidth , m_resHeight );
-        else
-            m_imageSensor = std::make_unique<RenderTargetImage>( m_resWidth , m_resHeight );
+        m_imageSensor = std::make_unique<RenderTargetImage>( m_resWidth , m_resHeight );
         m_imageSensor->PreProcess();
 
         std::string s = logTimeString();
