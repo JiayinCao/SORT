@@ -59,7 +59,11 @@ int main(int argc, char* argv[])
     // This, unfortunately, is a fairly ugly hack to 'make sure' all socket packages are received.
     // I need to investigate how TEV doesn't require this
     if(g_blenderMode)
+    #ifdef SORT_IN_WINDOWS
         Sleep(1000);
+    #else
+        sleep(1000);
+    #endif
 
     SocketManager::GetSingleton().Shutdown();
 
