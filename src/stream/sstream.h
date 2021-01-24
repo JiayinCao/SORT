@@ -17,8 +17,18 @@
 
 #pragma once
 
+#ifdef SORT_IN_WINDOWS
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <winsock2.h>
+#undef NOMINMAX
+#endif
+
 #include "stream.h"
 #include "core/define.h"
+#include "core/socket_mgr.h"
+#include "stream/mstream.h"
 
 //! @brief Streaming from socket through network.
 /**
@@ -54,6 +64,14 @@ public:
     StreamBase& operator >> (unsigned int& v) override {
         return *this;
     }
+    
+    //! @brief Streaming out an 8 bit integer number.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator >> (char& v) override {
+        return *this;
+    }
 
     //! @brief Streaming in a string from socket.
     //!
@@ -87,61 +105,24 @@ public:
 /**
  * OSocketStream only works for streaming data to socket. Any attempt to read data
  * from socket will result in immediate crash.
+ * By default, writting data to the stream won't trigger a flush. It has to be explictly called.
  */
-class OSocketStream : public OStreamBase{
+class OSocketStream : public OMemoryStream {
 public:
     //! @brief  Constructor.
-    OSocketStream(){
+    OSocketStream(socket_t socket):m_socket(socket){}
+
+    //! @brief Flush current written result.
+    void Flush() override{
+        // send the data out
+        const auto size = GetDataSize();
+        if (size > 0) {
+            const auto data = GetData();
+            send(m_socket, data, size, 0);
+            Clear();
+        }
     }
 
-    //! @brief Streaming in a float number from socket.
-    //!
-    //! @param v    Value to be saved.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator << (const float v) override {
-        return *this;
-    }
-
-    //! @brief Streaming in an integer number from socket.
-    //!
-    //! @param v    Value to be saved.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator << (const int v) override {
-        return *this;
-    }
-
-    //! @brief Streaming in an unsigned integer number from socket.
-    //!
-    //! @param v    Value to be saved.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator << (const unsigned int v) override {
-        return *this;
-    }
-
-    //! @brief Streaming in a string from socket.
-    //!
-    //! Unlike stand stream, space doesn't count to separate strings. For example, streaming "hello world" in will
-    //! result in one single string instead of two.
-    //!
-    //! @param v    Value to be saved.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator << (const std::string& v) override {
-        return *this;
-    }
-
-    //! @brief Streaming in a boolean value from socket.
-    //!
-    //! @param v    Value to be saved.
-    //! @return     Reference of the stream itself.
-    StreamBase& operator << (const bool v) override {
-        return *this;
-    }
-
-    //! @brief Writing data to stream.
-    //!
-    //! @param  data    Data to be written.
-    //! @param  size    Size of the data to be filled in bytes.
-    StreamBase& Write( char* data , int size ) override {
-        return *this;
-    }
+private:
+    socket_t m_socket;
 };

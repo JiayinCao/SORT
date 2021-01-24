@@ -27,6 +27,8 @@
 #include "core/rtti.h"
 #include "imagesensor/blenderimage.h"
 #include "imagesensor/rendertargetimage.h"
+#include "core/display_mgr.h"
+#include "core/log.h"
 
 //! @brief  This needs to be update every time the content of GlobalConfiguration changes.
 constexpr unsigned int GLOBAL_CONFIGURATION_VERSION = 0;
@@ -153,6 +155,13 @@ public:
         return m_clampping;
     }
 
+    //! @brief      Get title of the image.
+    //!
+    //! This is pretty much only for tev.
+    const std::string& GetTitle() const {
+        return m_title;
+    }
+
     //! @brief      Parse command line.
     //!
     //! This is not a perfect way to parse command line arguments. If there is a space in the path,
@@ -196,6 +205,14 @@ public:
                 m_profilingEnalbed = value_str == "on";
             }else if (key_str == "nomaterial" ){
                 m_noMaterialSupport = true;
+            }else if (key_str == "displayserver") {
+                int split = value_str.find_last_of(':');
+                if (split < 0)
+                    continue;
+
+                const auto ip = value_str.substr(0, split);
+                const auto port = value_str.substr(split + 1);
+                DisplayManager::GetSingleton().AddDisplayServer(ip, port);
             }
         }
 
@@ -235,11 +252,15 @@ public:
         else
             m_imageSensor = std::make_unique<RenderTargetImage>( m_resWidth , m_resHeight );
         m_imageSensor->PreProcess();
+
+        std::string s = logTimeString();
+        m_title = m_outputFile + s;
     };
 
 private:
     std::string                     m_resourcePath = "";            /**< Full path of the resource files. */
     std::string                     m_outputFile;                   /**< Name of the output file. */
+    std::string                     m_title;                        /**< Title of the file. */
     unsigned int                    m_tileSize = 64;                /**< Size of tile for tasks to render each time. */
     unsigned int                    m_resWidth = 1024;              /**< Width of the result resolution. */
     unsigned int                    m_resHeight = 1024;             /**< Height of the result resolution. */
@@ -283,3 +304,4 @@ private:
 #define g_profilingEnabled          GlobalConfiguration::GetSingleton().GetIsProfilingEnabled()
 #define g_noMaterial                GlobalConfiguration::GetSingleton().GetNoMaterial()
 #define g_clammping                 GlobalConfiguration::GetSingleton().GetClampping()
+#define g_imageTitle                GlobalConfiguration::GetSingleton().GetTitle();

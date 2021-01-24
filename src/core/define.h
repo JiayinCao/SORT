@@ -40,6 +40,7 @@
 #ifdef SORT_IN_WINDOWS
     #define UNLIKELY(EXP)       (EXP)
     #define LIKELY(EXP)         (EXP)
+    #define _WINSOCKAPI_
 #else
     #define UNLIKELY(EXP)       __builtin_expect((EXP),0)
     #define LIKELY(EXP)         __builtin_expect((EXP),1)

@@ -25,29 +25,29 @@
  * IMemoryStream only works for streaming data from memory. Any attempt to write data
  * to memory will result in immediate crash.
  */
-class IMemoryStream : public OStreamBase{
+class OMemoryStream : public OStreamBase {
 public:
     //! @brief  Constructor.
     //!
     //! @param  initSize    Initial size of the stream.
-    IMemoryStream( unsigned int initSize = 1024u ){
-        if( initSize == 0u )
+    OMemoryStream(unsigned initSize = 1024u) {
+        if (initSize == 0u)
             return;
-        Resize( initSize );
+        Resize(initSize);
     }
 
     //! @brief  Resize the stream.
     //!
     //! @param  size    The new size to be resized.
-    SORT_FORCEINLINE void    Resize( unsigned int size ){
-        size = std::max( 1024u , size );
-        auto new_data = std::make_unique<char[]>( size );
-        if( m_capacity )
-            memcpy( new_data.get() , m_data.get() , m_capacity );
+    SORT_FORCEINLINE void    Resize(unsigned int size) {
+        size = std::max(1024u, size);
+        auto new_data = std::make_unique<char[]>(size);
+        if (m_capacity)
+            memcpy(new_data.get(), m_data.get(), m_capacity);
         if (size > m_capacity)
             memset((char*)new_data.get() + m_capacity, 0, size - m_capacity);
         m_capacity = size;
-        m_data = std::move( new_data );
+        m_data = std::move(new_data);
     }
 
     //! @brief Streaming in a float number from memory.
@@ -55,12 +55,13 @@ public:
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
     StreamBase& operator << (const float v) override {
-        if( m_pos + sizeof( v ) > m_capacity ){
-            Resize( 2 * m_capacity );
+        if (m_pos + sizeof(v) > m_capacity) {
+            Resize(2 * m_capacity);
             return *this << v;
-        }else{
-            memcpy( m_data.get() + m_pos , &v , sizeof( v ) );
-            m_pos += sizeof( v );
+        }
+        else {
+            memcpy(m_data.get() + m_pos, &v, sizeof(v));
+            m_pos += sizeof(v);
         }
         return *this;
     }
@@ -70,12 +71,29 @@ public:
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
     StreamBase& operator << (const int v) override {
-        if( m_pos + sizeof( v ) > m_capacity ){
-            Resize( 2 * m_capacity );
+        if (m_pos + sizeof(v) > m_capacity) {
+            Resize(2 * m_capacity);
             return *this << v;
-        }else{
-            memcpy( m_data.get() + m_pos , &v , sizeof( v ) );
-            m_pos += sizeof( v );
+        }
+        else {
+            memcpy(m_data.get() + m_pos, &v, sizeof(v));
+            m_pos += sizeof(v);
+        }
+        return *this;
+    }
+
+    //! @brief Streaming in an 8 bit integer number.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator << (const char v) override {
+        if (m_pos + sizeof(v) > m_capacity) {
+            Resize(2 * m_capacity);
+            return *this << v;
+        }
+        else {
+            memcpy(m_data.get() + m_pos, &v, sizeof(v));
+            m_pos += sizeof(v);
         }
         return *this;
     }
@@ -85,12 +103,13 @@ public:
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
     StreamBase& operator << (const unsigned int v) override {
-        if( m_pos + sizeof( v ) > m_capacity ){
-            Resize( 2 * m_capacity );
+        if (m_pos + sizeof(v) > m_capacity) {
+            Resize(2 * m_capacity);
             return *this << v;
-        }else{
-            memcpy( m_data.get() + m_pos , &v , sizeof( v ) );
-            m_pos += sizeof( v );
+        }
+        else {
+            memcpy(m_data.get() + m_pos, &v, sizeof(v));
+            m_pos += sizeof(v);
         }
         return *this;
     }
@@ -103,13 +122,13 @@ public:
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
     StreamBase& operator << (const std::string& v) override {
-        if( ( v.size() + 1 ) + m_pos > m_capacity ){
-            Resize( 2 * m_capacity );
+        if ((v.size() + 1) + m_pos > m_capacity) {
+            Resize(2 * m_capacity);
             return *this << v;
         }
 
-        if( !v.empty() ){
-            memcpy( m_data.get() + m_pos , v.c_str() , sizeof(char) * v.size() );
+        if (!v.empty()) {
+            memcpy(m_data.get() + m_pos, v.c_str(), sizeof(char) * v.size());
             m_pos += (unsigned int)v.size();
         }
         m_data[m_pos++] = 0;
@@ -121,12 +140,13 @@ public:
     //! @param v    Value to be saved.
     //! @return     Reference of the stream itself.
     StreamBase& operator << (const bool v) override {
-        if( m_pos + sizeof( v ) > m_capacity ){
-            Resize( 2 * m_capacity );
+        if (m_pos + sizeof(v) > m_capacity) {
+            Resize(2 * m_capacity);
             return *this << v;
-        }else{
-            memcpy( m_data.get() + m_pos , &v , sizeof( v ) );
-            m_pos += sizeof( v );
+        }
+        else {
+            memcpy(m_data.get() + m_pos, &v, sizeof(v));
+            m_pos += sizeof(v);
         }
         return *this;
     }
@@ -142,15 +162,36 @@ public:
     //!
     //! @param  data    Data to be filled.
     //! @param  size    Size of the data to be filled in bytes.
-    StreamBase& Write( char* data , int size ) override {
-        if( m_pos + size > m_capacity ){
-            Resize( 2 * m_capacity );
-            return Write( data , size );
-        }else{
-            memcpy( data , m_data.get() + m_pos , size );
+    StreamBase& Write(char* data, int size) override {
+        if (m_pos + size > m_capacity) {
+            Resize(2 * m_capacity);
+            return Write(data, size);
+        }
+        else {
+            memcpy(m_data.get() + m_pos, data, size);
             m_pos += size;
         }
         return *this;
+    }
+
+    //! @brief  Get raw data;
+    const char* GetData() const {
+        return m_data.get();
+    }
+
+    //! @brief  Clear the data
+    void Clear() {
+        m_pos = 0;
+    }
+
+    //! @brief Get current position. Ideally, IStreamBase might need to have this interface too. But it is not currently needed.
+    unsigned    GetPos() override {
+        return m_pos;
+    }
+
+    //! @brief Seek to a specific position
+    void        Seek(unsigned int p) override {
+        m_pos = p;
     }
 
 private:
@@ -169,16 +210,14 @@ private:
  * OMemoryStream only works for streaming data to memory. Any attempt to read data
  * from memory will result in immediate crash.
  */
-class OMemoryStream : public IStreamBase{
+class IMemoryStream : public IStreamBase{
 public:
     //! @brief  Constructor.
     //!
     //! @param  istream      The IMemoryStream as input.
-    OMemoryStream( const IMemoryStream& istream ){
-        if( istream.m_pos == 0u )
-            return;
-        Resize( istream.m_pos );
-        memcpy( m_data.get() , istream.m_data.get() , istream.m_pos );
+    IMemoryStream(const char* data, unsigned int initSize){
+        Resize(initSize);
+        memcpy(m_data.get(), data, initSize);
     }
 
     //! @brief  Resize the stream.
@@ -219,6 +258,20 @@ public:
         else{
             memcpy( &v , m_data.get() + m_pos , sizeof( v ) );
             m_pos += sizeof( v );
+        }
+        return *this;
+    }
+
+    //! @brief Streaming out an 8 bit integer number.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator >> (char& v) override {
+        if (m_pos + sizeof(v) > m_capacity)
+            v = 0;
+        else {
+            memcpy(&v, m_data.get() + m_pos, sizeof(v));
+            m_pos += sizeof(v);
         }
         return *this;
     }

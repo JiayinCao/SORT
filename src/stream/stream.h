@@ -63,6 +63,18 @@ public:
     //! @return     Reference of the stream itself.
     virtual StreamBase& operator >> (int& v) = 0;
 
+    //! @brief Streaming in an 8 bit integer number.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    virtual StreamBase& operator << (const char v) = 0;
+
+    //! @brief Streaming out an 8 bit integer number.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    virtual StreamBase& operator >> (char& v) = 0;
+
     //! @brief Streaming in an unsigned integer number.
     //!
     //! @param v    Value to be saved.
@@ -259,6 +271,12 @@ public:
     //! @return     Reference of the stream itself.
     StreamBase& operator << (const int v) override final { sAssertMsg(false, STREAM, "Streaming in data by using OStreamBase!"); return *this; }
 
+    //! @brief Streaming in an 8 bit integer number.
+    //!
+    //! @param v    Value to be saved.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator << (const char v) final { sAssertMsg(false, STREAM, "Streaming in data by using OStreamBase!"); return *this; }
+
     //! @brief Disable streaming in an unsigned integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be saved.
@@ -306,6 +324,12 @@ public:
     //! @return     Reference of the stream itself.
     StreamBase& operator >> (int& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStreamBase!"); return *this; }
 
+    //! @brief Streaming out an 8 bit integer number.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator >> (char& v) override final { sAssertMsg(false, STREAM, "Streaming out data by using IStreamBase!"); return *this; }
+
     //! @brief Disable streaming out an unsigned integer number. Attempting to do it will result in crash!
     //!
     //! @param v    Value to be loaded.
@@ -335,6 +359,12 @@ public:
 
     //! @brief Flush current written result.
     virtual void Flush() {}
+
+    //! @brief Get current position. Ideally, IStreamBase might need to have this interface too. But it is not currently needed.
+    virtual unsigned    GetPos() = 0;
+
+    //! @brief Seek to a specific position
+    virtual void        Seek(unsigned int) = 0;
 };
 
 //! @brief  Interface for serializable objects.

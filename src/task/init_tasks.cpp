@@ -21,6 +21,7 @@
 #include "material/matmanager.h"
 #include "core/globalconfig.h"
 #include "core/scene.h"
+#include "core/display_mgr.h"
 
 SORT_STATS_DEFINE_COUNTER(sPreprocessTimeMS)
 SORT_STATS_TIME("Performance", "Pre-processing Time", sPreprocessTimeMS);
@@ -33,6 +34,15 @@ void Loading_Task::Execute(){
 
     // Serialize the scene entities
     m_scene.LoadScene(m_stream);
+
+    // display the image first
+    if (DisplayManager::GetSingleton().IsDisplayServerConnected()) {
+        std::shared_ptr<DisplayImageInfo> image_info = std::make_shared<DisplayImageInfo>();
+        image_info->title = g_imageTitle;
+        image_info->w = g_resultResollutionWidth;
+        image_info->h = g_resultResollutionHeight;
+        DisplayManager::GetSingleton().QueueDisplayItem(image_info);
+    }
 }
 
 void SpatialAccelerationConstruction_Task::Execute(){

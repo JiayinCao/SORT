@@ -28,6 +28,7 @@
 
 // Default task priority is 100000.
 #define DEFAULT_TASK_PRIORITY       100000
+#define LOW_TASK_PRIORITY           100
 
 using TaskID = unsigned int;
 

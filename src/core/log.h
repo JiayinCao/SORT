@@ -54,6 +54,7 @@ enum class LOG_TYPE{
     LOG_RESOURCE,
     LOG_TASK,
     LOG_MEMORY,
+    LOG_SOCKET,
 };
 
 //! @brief  LogDispatcher is an interface for dispatching log messages to different places.
@@ -142,3 +143,6 @@ void sortLog( LOG_LEVEL level , LOG_TYPE type , const std::string& str , const c
 //!
 //! @param  logDispatcher   Dispatcher to add in the log system.
 void addLogDispatcher( std::unique_ptr<LogDispatcher> logDispatcher );
+
+//! @brief  Utility function to get current time.
+std::string logTimeString();

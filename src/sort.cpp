@@ -24,6 +24,7 @@
 #include "core/timer.h"
 #include "stream/fstream.h"
 #include "material/tsl_system.h"
+#include "task/display_task.h"
 
 SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
 SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)
@@ -41,6 +42,10 @@ void SchedulTasks( Scene& scene , IStreamBase& stream ){
     auto sac_task           = SCHEDULE_TASK<SpatialAccelerationConstruction_Task>( "Spatial Data Structure Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
     auto savc_task          = SCHEDULE_TASK<SpatialAccelerationVolConstruction_Task>( "Spatial Data Structure (Volume) Construction" , DEFAULT_TASK_PRIORITY, {loading_task} , scene);
     auto pre_render_task    = SCHEDULE_TASK<PreRender_Task>( "Pre rendering pass" , DEFAULT_TASK_PRIORITY, {sac_task, savc_task} , scene);
+
+    // Only schedule this task if there is display server connected
+    if(DisplayManager::GetSingleton().IsDisplayServerConnected())
+        auto update_task    = SCHEDULE_TASK<Display_Task>("Display", DEFAULT_TASK_PRIORITY, { loading_task });
 
     // Push render task into the queue
     const auto tilesize = (int)g_tileSize;

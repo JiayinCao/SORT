@@ -88,6 +88,15 @@ public:
         return *this;
     }
 
+    //! @brief Streaming out an 8 bit integer number.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator >> (char& v) override {
+        m_file.read(reinterpret_cast<char*>(&v), sizeof(int));
+        return *this;
+    }
+
     //! @brief Streaming in an unsigned integer number to file.
     //!
     //! @param v            Value to be loaded.
@@ -206,6 +215,15 @@ public:
         return *this;
     }
 
+    //! @brief Streaming out an 8 bit integer number.
+    //!
+    //! @param v    Value to be loaded.
+    //! @return     Reference of the stream itself.
+    StreamBase& operator << (char v) override {
+        m_file.write(reinterpret_cast<const char*>(&v), sizeof(int));
+        return *this;
+    }
+
     //! @brief Streaming out an unsigned integer number from file.
     //!
     //! @param v            Value to be saved.
@@ -251,6 +269,16 @@ public:
     //! @brief Flush current written result.
     void Flush() override{
         m_file.flush();
+    }
+
+    //! @brief Get current position. Ideally, IStreamBase might need to have this interface too. But it is not currently needed.
+    unsigned    GetPos() override {
+        return m_file.tellp();
+    }
+
+    //! @brief Seek to a specific position
+    void        Seek(unsigned int p) override {
+        m_file.seekp(p);
     }
 
 private:

@@ -51,7 +51,7 @@ void LogDispatcher::Dispatch( LOG_LEVEL level , LOG_TYPE type , const char* str 
     output(level,header,info);
 }
 
-const std::string logTimeString(){
+std::string logTimeString(){
     if( !g_logTime )
         return "";
 

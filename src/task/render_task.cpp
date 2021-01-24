@@ -24,12 +24,17 @@
 #include "core/profile.h"
 #include "sampler/random.h"
 #include "medium/medium.h"
+#include "core/display_mgr.h"
+
+std::atomic<int> g_render_task_cnt = 0;
 
 Render_Task::Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
             const char* name , unsigned int priority , const Task::Task_Container& dependencies ) :
             Task( name , priority , dependencies ), m_coord(ori), m_size(size), m_scene(scene){
     m_sampler = std::make_unique<RandomSampler>();
     m_pixelSamples = std::make_unique<PixelSample[]>(g_samplePerPixel);
+
+    ++g_render_task_cnt;
 }
 
 void Render_Task::Execute(){
@@ -41,8 +46,56 @@ void Render_Task::Execute(){
     // request samples
     g_integrator->RequestSample( m_sampler.get() , m_pixelSamples.get() , g_samplePerPixel);
 
-    Vector2i rb = m_coord + m_size;
+    const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
 
+    const auto total_pixel = m_size.x * m_size.y;
+    std::shared_ptr<DisplayTile> display_tile;
+    if (display_server_connected) {
+        std::shared_ptr<DisplayTile> indicate_tile;
+        indicate_tile = std::make_shared<DisplayTile>();
+        indicate_tile->x = m_coord.x;
+        indicate_tile->y = m_coord.y;
+        indicate_tile->w = m_size.x;
+        indicate_tile->h = m_size.y;
+        indicate_tile->title = g_imageTitle;
+        for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
+            const auto indication_intensity = 0.3f;
+
+            indicate_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
+            auto data = indicate_tile->m_data[i].get();
+            memset(data, 0, sizeof(float) * total_pixel);
+
+            for (auto i = 0u; i < indicate_tile->w; ++i) {
+                if ((i >> 2) % 2 == 0)
+                    continue;
+                data[i] = indication_intensity;
+                data[total_pixel - 1 - i] = indication_intensity;
+            }
+            for (auto i = 0u; i < indicate_tile->h; ++i) {
+                if ((i >> 2) % 2 == 0)
+                    continue;
+                data[i * indicate_tile->w] = indication_intensity;
+                data[i * indicate_tile->w + indicate_tile->w - 1] = indication_intensity;
+            }
+        }
+
+        // indicate that we are rendering this tile
+        DisplayManager::GetSingleton().QueueDisplayItem(indicate_tile);
+
+        display_tile = std::make_shared<DisplayTile>();
+        display_tile->x = m_coord.x;
+        display_tile->y = m_coord.y;
+        display_tile->w = m_size.x;
+        display_tile->h = m_size.y;
+        display_tile->title = g_imageTitle;
+        for (auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i) {
+            display_tile->m_data[i] = std::make_unique<float[]>(total_pixel);
+            auto data = display_tile->m_data[i].get();
+            memset(data, 0, sizeof(float) * total_pixel);
+        }
+    }
+
+    Vector2i rb = m_coord + m_size;
     for( int i = m_coord.y ; i < rb.y ; i++ ){
         for( int j = m_coord.x ; j < rb.x ; j++ ){
             // generate samples to be used later
@@ -76,14 +129,32 @@ void Render_Task::Execute(){
             
             // store the pixel
             g_imageSensor->StorePixel( j , i , radiance , *this );
+
+            // update the value if display server is connected
+            if (display_server_connected) {
+                auto local_i = i - m_coord.y;
+                auto local_j = j - m_coord.x;
+                auto local_index = local_j + local_i * m_size.x;
+
+                for(auto i = 0u; i < RGBSPECTRUM_SAMPLE; ++i)
+                    display_tile->m_data[i][local_index] = radiance[i];
+            }
         }
     }
 
+    // update display server if needed
+    if (display_server_connected)
+        DisplayManager::GetSingleton().QueueDisplayItem(display_tile);
+
+    // this needs to go away eventaully.
     if( g_integrator->NeedRefreshTile() ){
         auto x_off = m_coord.x / g_tileSize;
         auto y_off = (g_resultResollutionHeight - 1 - m_coord.y ) / g_tileSize ;
         g_imageSensor->FinishTile( x_off, y_off, *this );
     }
+
+    // we are done rendering this task
+    --g_render_task_cnt;
 }
 
 void PreRender_Task::Execute(){

@@ -175,6 +175,9 @@ if (SORT_PLATFORM_WIN)
 
     # make sure to copy the tsl dll to bin folder
     tsl_runtime_copy( "${SORT_SOURCE_DIR}/bin" )
+
+    # link socket libraries
+    target_link_libraries(SORT "wsock32.lib;ws2_32.lib")
 endif (SORT_PLATFORM_WIN)
 
 # Enable SORT Stats system.
