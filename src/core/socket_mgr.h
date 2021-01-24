@@ -28,20 +28,22 @@
 #include <Ws2tcpip.h>
 #include <winsock2.h>
 #undef NOMINMAX
+using socket_t = SOCKET;
 #else
 #define INVALID_SOCKET (-1)
+using socket_t = int;
+#include <arpa/inet.h>
+#include <errno.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <signal.h>
+#include <sys/socket.h>
 #endif
 
 enum SOCKET_TYPE {
     SERVER,
     CLIENT
 };
-
-#ifdef SORT_IN_WINDOWS
-using socket_t = SOCKET;
-#else
-using socket_t = SOCKET;
-#endif
 
 //! @brief  A manager keep track of all sockets in the program.
 class SocketManager : public Singleton<SocketManager> {
