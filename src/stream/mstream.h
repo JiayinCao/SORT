@@ -201,8 +201,6 @@ private:
     unsigned int                m_capacity = 0;
     /**< Current position of streaming. */
     unsigned int                m_pos = 0;
-
-    friend class OMemoryStream;
 };
 
 //! @brief Streaming to memory.
