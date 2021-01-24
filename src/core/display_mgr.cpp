@@ -80,7 +80,7 @@ void DisplayTile::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
 
     for (auto i = 0u; i < nChannels; ++i) {
         stream << int(0);            // reserved for length
-        stream << UpdateImage;       // indicate to update some of the images
+        stream << char(UpdateImage); // indicate to update some of the images
         stream << char(0);           // indicate to grab the current image
         stream << title;             // indicate the title of the image
         stream << channelNames[i];   // the channel name
@@ -105,7 +105,7 @@ void DisplayImageInfo::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
     const int image_width = g_resultResollutionWidth;
     const int image_height = g_resultResollutionHeight;
     stream << int(0);            // reserved for length
-    stream << CreateImage;       // indicate to update some of the images
+    stream << char(CreateImage); // indicate to update some of the images
     stream << char(1);           // indicate to grab the current image
     stream << title;             // indicate the title of the image
     stream << image_width << image_height;
