@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <cstring>
 #include "stream.h"
 #include "core/define.h"
 

@@ -15,6 +15,7 @@
     this program. If not, see <http://www.gnu.org/licenses/gpl-3.0.html>.
  */
 
+#include <cstring>
 #include "socket_mgr.h"
 #include "core/log.h"
 
@@ -37,7 +38,7 @@ void    SocketManager::Initialize() {
 void    SocketManager::Shutdown() {
 #ifdef SORT_IN_WINDOWS
     WSACleanup();
-#endif;
+#endif
 
     m_initialized = false;
 }
