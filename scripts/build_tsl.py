@@ -31,7 +31,7 @@ os.system('git clone https://github.com/JiayinCao/Tiny-Shading-Language.git ' + 
 
 # build tsl from source code
 os.chdir(tsl_dir)
-os.system('make install')
+os.system('make install INSTALL_PATH="../tsl"')
 os.chdir(sort_dir)
 
 # remove the tsl source dir
