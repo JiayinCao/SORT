@@ -21,13 +21,24 @@
 #include "core/define.h"
 #include "core/singleton.h"
 
+#ifdef SORT_IN_WINDOWS
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Ws2tcpip.h>
+#include <winsock2.h>
+#undef NOMINMAX
+#else
+#define INVALID_SOCKET (-1)
+#endif
+
 enum SOCKET_TYPE {
     SERVER,
     CLIENT
 };
 
 #ifdef SORT_IN_WINDOWS
-using socket_t = int;
+using socket_t = SOCKET;
 #else
 using socket_t = SOCKET;
 #endif

@@ -18,17 +18,6 @@
 #include "socket_mgr.h"
 #include "core/log.h"
 
-#ifdef SORT_IN_WINDOWS
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <Ws2tcpip.h>
-#include <winsock2.h>
-#undef NOMINMAX
-#else
-#define INVALID_SOCKET (-1)
-#endif
-
 void    SocketManager::Initialize() {
 #ifdef SORT_IN_WINDOWS
     WSADATA wsaData;
