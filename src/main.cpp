@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
     #ifdef SORT_IN_WINDOWS
         Sleep(1000);
     #else
-        sleep(1000);
+        sleep(1);
     #endif
 
     SocketManager::GetSingleton().Shutdown();
