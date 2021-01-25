@@ -81,6 +81,7 @@ def dipslay_update(sock, render_engine):
     
     connection.close()
 
+
 @base.register_class
 class SORTRenderEngine(bpy.types.RenderEngine):
     # These three members are used by blender to set up the
@@ -89,15 +90,12 @@ class SORTRenderEngine(bpy.types.RenderEngine):
     bl_label = 'SORT'
     bl_use_preview = False  # disable material preview until it works
 
-    sock        = None
-    host_name   = socket.gethostname()
-    ip_addr     = socket.gethostbyname(host_name)
+    # Socket to listen so that SORT can talk to Blender
+    ip_addr     = '127.0.0.1'
     port        = 2009 # just a random port
 
+    sock        = None
     display_thread = None
-
-    render_lock = threading.Lock()
-
     terminating_display_thread = False
 
     @classmethod
@@ -106,19 +104,9 @@ class SORTRenderEngine(bpy.types.RenderEngine):
 
     def __init__(self):
         self.sort_available = True
-        self.cmd_argument = []
-        self.render_pass = None
         
-        self.image_tile_size = 64
         self.image_size_w = int(bpy.data.scenes[0].render.resolution_x * bpy.data.scenes[0].render.resolution_percentage / 100)
         self.image_size_h = int(bpy.data.scenes[0].render.resolution_y * bpy.data.scenes[0].render.resolution_percentage / 100)
-        self.image_pixel_count = self.image_size_w * self.image_size_h
-        self.image_tile_count_x = math.ceil( self.image_size_w / self.image_tile_size )
-        self.image_tile_count_y = math.ceil( self.image_size_h / self.image_tile_size )
-        self.image_header_size = self.image_tile_count_x * self.image_tile_count_y
-        self.image_tile_pixel_count = self.image_tile_size * self.image_tile_size
-        self.image_tile_size_in_bytes = self.image_tile_pixel_count * 16
-        self.image_size_in_bytes = self.image_tile_count_x * self.image_tile_count_y * self.image_tile_size_in_bytes
 
         # create the socket
         if self.sock is None:
@@ -135,7 +123,6 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             self.sock.settimeout(5)
             self.sock.listen()
 
-            log("Your Computer Name is:\t\t" + self.host_name)
             log("Listening address and port:\t {ip}:{p}".format(ip=self.ip_addr, p=self.port))
 
     # update frame
@@ -160,33 +147,26 @@ class SORTRenderEngine(bpy.types.RenderEngine):
 
     # render
     def render(self, depsgraph):
-        scene = depsgraph.scene
         if not self.sort_available:
             return
 
-        with SORTRenderEngine.render_lock:
-            if scene.name == 'preview':
-                # this is where we handle preview, but it is not implemented
-                pass
-            else:
-                self.render_scene(scene)
+        scene = depsgraph.scene
 
-    # scene render
-    def render_scene(self, scene):
         # start rendering process first
         binary_dir = exporter.get_sort_dir()
         binary_path = exporter.get_sort_bin_path()
         intermediate_dir = exporter.get_intermediate_dir()
+
         # execute binary
-        self.cmd_argument = [binary_path];
-        self.cmd_argument.append( '--input:' + intermediate_dir + 'scene.sort')
-        self.cmd_argument.append( "--displayserver:" + self.ip_addr + ":" + str(self.port))
-        self.cmd_argument.append( '--blendermode' )
+        cmd_argument = [binary_path];
+        cmd_argument.append( '--input:' + intermediate_dir + 'scene.sort')
+        cmd_argument.append( "--displayserver:" + self.ip_addr + ":" + str(self.port))
+        cmd_argument.append( '--blendermode' )
         if scene.sort_data.profilingEnabled is True:
-            self.cmd_argument.append( '--profiling:on' )
+            cmd_argument.append( '--profiling:on' )
         if scene.sort_data.allUseDefaultMaterial is True:
-            self.cmd_argument.append( '--noMaterial' )
-        process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
+            cmd_argument.append( '--noMaterial' )
+        process = subprocess.Popen(cmd_argument,cwd=binary_dir)
 
         # start a background pool thread
         self.display_thread = threading.Thread(target=dipslay_update, args=(self.sock, self))
