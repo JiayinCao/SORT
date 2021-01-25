@@ -661,7 +661,6 @@ def collect_shader_resources(depsgraph, scene, fs):
     # don't output any osl_shaders if using default materials
     if scene.sort_data.allUseDefaultMaterial is True:
         fs.serialize( 0 )
-        fs.serialize( 0 )
         return None
 
     resources = []
