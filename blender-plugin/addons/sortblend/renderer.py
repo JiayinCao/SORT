@@ -17,12 +17,9 @@ import bpy
 import os
 import subprocess
 import math
-import struct
 import numpy
 import shutil
-import platform
 import threading
-import time
 import socket
 from .log import log, logD
 from . import base
@@ -81,7 +78,8 @@ def dipslay_update(sock, render_engine):
             print('socket error\t ')
             print(e)
             break
-
+    
+    connection.close()
 
 @base.register_class
 class SORTRenderEngine(bpy.types.RenderEngine):
