@@ -112,6 +112,15 @@ public:
     //! @brief  Constructor.
     OSocketStream(socket_t socket):m_socket(socket){}
 
+    //! @brief  Destructor
+    ~OSocketStream() {
+#ifdef SORT_IN_WINDOWS
+        closesocket(m_socket);
+#else
+        close(m_socket);
+#endif
+    }
+
     //! @brief Flush current written result.
     void Flush() override{
         // send the data out
