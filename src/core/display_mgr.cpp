@@ -153,3 +153,77 @@ void TerminateIndicator::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
         stream.Flush();
     }
 }
+
+void FullTargetUpdate::Process(std::unique_ptr<OSocketStream>& ptr_stream) {
+    // This is slow, but so far it is only used in light tracing algorithm, an algorithm that I rarely used.
+    // So I don't care about its performance.
+    // For bidirecitonal path tracing, by the time it is needed, it is already finished, so it is not a performance issue.
+    // WARNING, this thread might result in some unknown results because of unguarded data racing. However, it is not a big
+    // deal to reveal slightly inconsistent data as long as the final result is fine.
+
+    OSocketStream& stream = *ptr_stream;
+
+    auto w = g_imageSensor->GetWidth();
+    auto h = g_imageSensor->GetHeight();
+
+    if (g_blenderMode) {
+        // [0] Length of the package, it doesn't count itself
+        // [1] Width of the tile
+        // [2] Height of the tile
+        // [3] x position of the tile
+        // [4] y position of the tile
+        // [....] the pixel data
+        const int pixel_memory_size = w * h * sizeof(float) * 4;
+        const int total_size = pixel_memory_size + sizeof(int) * 4;
+        stream << int(total_size);
+        stream << w << h << int(0) << int(0);
+
+        std::unique_ptr<float[]> data = std::make_unique<float[]>(w * h * 4);
+        for (auto i = 0; i < h; ++i) {
+            for (auto j = 0; j < w; ++j) {
+                const auto index = 4 * ((h - i - 1) * w + j);
+                const auto src_index = i * w + j;
+                data[index]     = g_imageSensor->m_rendertarget.m_pData[src_index][0];
+                data[index+1]   = g_imageSensor->m_rendertarget.m_pData[src_index][1];
+                data[index+2]   = g_imageSensor->m_rendertarget.m_pData[src_index][2];
+                data[index+3]   = 1.0f;
+            }
+        }
+        stream.Write((char*)data.get(), pixel_memory_size);
+        stream.Flush();
+    }
+    else {
+        std::unique_ptr<float[]> data;
+        data = std::make_unique<float[]>(w * h);
+
+        // This is for TEV
+        // https://github.com/Tom94/tev
+        for (auto c = 0u; c < nChannels; ++c) {
+            stream << int(0);            // reserved for length
+            stream << char(UpdateImage); // indicate to update some of the images
+            stream << char(0);           // indicate to grab the current image
+            stream << title;             // indicate the title of the image
+            stream << channelNames[c];   // the channel name
+
+            stream << int(0) << int(0) << w << h;
+
+            for (auto i = 0; i < h; ++i) {
+                for (auto j = 0; j < w; ++j) {
+                    const auto index = i * w + j;
+                    data[index] = g_imageSensor->m_rendertarget.m_pData[index][c];
+                }
+            }
+
+            stream.Write((char*)data.get(), w * h * sizeof(float));
+           
+            // set the length data
+            const auto pos = stream.GetPos();
+            stream.Seek(0);
+            stream << int(pos);
+            stream.Seek(pos);
+
+            // distribute data to all display servers
+            stream.Flush();
+        }
+    }
+}

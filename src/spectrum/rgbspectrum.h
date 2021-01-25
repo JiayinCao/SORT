@@ -153,6 +153,8 @@ public:
     static const RGBSpectrum    m_White;
 };
 
+static_assert(sizeof(RGBSpectrum) == sizeof(float) * 3);
+
 #define WHITE_SPECTRUM      RGBSpectrum::m_White
 #define FULL_WEIGHT         WHITE_SPECTRUM
 

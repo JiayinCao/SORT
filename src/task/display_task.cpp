@@ -19,6 +19,7 @@
 #include "display_task.h"
 #include "core/globalconfig.h"
 #include "core/display_mgr.h"
+#include "core/timer.h"
 
 extern std::atomic<int> g_render_task_cnt;
 
@@ -26,17 +27,20 @@ Display_Task::Display_Task(const char* name, unsigned int priority, const Task::
 }
 
 void Display_Task::Execute() {
+    static Timer timer;
+
     while (g_render_task_cnt > 0) {
+        if (UNLIKELY(g_integrator->NeedFullTargetRealtimeUpdate())) {
+            // only update it every 1 second
+            if (timer.GetElapsedTime() > 1000) {
+                std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
+                di->title = g_imageTitle;
+                DisplayManager::GetSingleton().QueueDisplayItem(di);
+                timer.Reset();
+            }
+        }
+
         DisplayManager::GetSingleton().ProcessDisplayQueue();
         std::this_thread::yield();
     }
-
-    // terminator is only needed in blender mode
-    if (g_blenderMode) {
-        std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>();
-        DisplayManager::GetSingleton().QueueDisplayItem(terminator);
-    }
-
-    // make sure flush all display items before quiting
-    DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
 }

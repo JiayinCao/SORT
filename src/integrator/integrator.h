@@ -67,6 +67,16 @@ public:
         return true;
     }
 
+    //! @brief  Whether the integrater need final update, light tracing and bdpt will need it
+    virtual bool NeedFinalUpdate() const {
+        return false;
+    }
+
+    //! @brief  Need full target real time update.
+    virtual bool NeedFullTargetRealtimeUpdate() const {
+        return false;
+    }
+
     //! @brief      Serializing data from stream
     //!
     //! @param      Stream where the serialization data comes from. Depending on different situation, it could come from different places.

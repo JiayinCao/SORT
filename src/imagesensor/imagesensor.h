@@ -34,9 +34,6 @@ public:
     // pre process
     virtual void PreProcess() {}
 
-    // finish image tile
-    virtual void FinishTile( int tile_x , int tile_y , const Render_Task& rt ){}
-
     // store pixel information
     virtual void StorePixel( int x , int y , const Spectrum& color , const Render_Task& rt ) = 0;
 
@@ -69,4 +66,6 @@ protected:
 
     // the render target
     RenderTarget m_rendertarget;
+
+    friend class FullTargetUpdate;
 };

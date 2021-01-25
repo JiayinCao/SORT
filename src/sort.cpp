@@ -152,6 +152,22 @@ int RunSORT( int argc , char** argv ){
     // Post process for image sensor
     g_imageSensor->PostProcess();
 
+    // terminator is only needed in blender mode
+    if (g_blenderMode) {
+        std::shared_ptr<TerminateIndicator> terminator = std::make_shared<TerminateIndicator>();
+        DisplayManager::GetSingleton().QueueDisplayItem(terminator);
+    }
+
+    // some integrator might need a final refresh
+    if (UNLIKELY(g_integrator->NeedFinalUpdate())) {
+        std::shared_ptr<FullTargetUpdate> di = std::make_shared<FullTargetUpdate>();
+        di->title = g_imageTitle;
+        DisplayManager::GetSingleton().QueueDisplayItem(di);
+    }
+
+    // make sure flush all display items before quiting
+    DisplayManager::GetSingleton().ProcessDisplayQueue(-1);
+
     DestroyTSLThreadContexts();
 
     return 0;

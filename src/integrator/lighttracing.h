@@ -43,4 +43,9 @@ public:
     bool NeedRefreshTile() const override{
         return false; 
     }
+
+    //! @brief  Need full target real time update.
+    bool NeedFullTargetRealtimeUpdate() const override{
+        return true;
+    }
 };

@@ -84,6 +84,11 @@ public:
         stream >> m_bMIS;
     }
 
+    //! @brief  Whether the integrater need final update, light tracing and bdpt will need it
+    bool NeedFinalUpdate() const override{
+        return true;
+    }
+
 protected:
     bool    light_tracing_only = false;     // only do light tracing
     int     sample_per_pixel = 1;           // light sample per pixel

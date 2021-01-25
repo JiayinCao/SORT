@@ -47,10 +47,11 @@ void Render_Task::Execute(){
     g_integrator->RequestSample( m_sampler.get() , m_pixelSamples.get() , g_samplePerPixel);
 
     const bool display_server_connected = DisplayManager::GetSingleton().IsDisplayServerConnected();
+    const bool need_refresh_tile = g_integrator->NeedRefreshTile();
 
     const auto total_pixel = m_size.x * m_size.y;
     std::shared_ptr<DisplayTile> display_tile;
-    if (display_server_connected) {
+    if (display_server_connected && need_refresh_tile) {
         std::shared_ptr<DisplayTile> indicate_tile;
         indicate_tile = std::make_shared<DisplayTile>();
         indicate_tile->x = m_coord.x;
@@ -163,7 +164,7 @@ void Render_Task::Execute(){
             g_imageSensor->StorePixel( j , i , radiance , *this );
 
             // update the value if display server is connected
-            if (display_server_connected) {
+            if (display_server_connected && need_refresh_tile) {
                 auto local_i = i - m_coord.y;
                 auto local_j = j - m_coord.x;
                 
@@ -185,13 +186,6 @@ void Render_Task::Execute(){
     // update display server if needed
     if (display_server_connected)
         DisplayManager::GetSingleton().QueueDisplayItem(display_tile);
-
-    // this needs to go away eventaully.
-    if( g_integrator->NeedRefreshTile() ){
-        auto x_off = m_coord.x / g_tileSize;
-        auto y_off = (g_resultResollutionHeight - 1 - m_coord.y ) / g_tileSize ;
-        g_imageSensor->FinishTile( x_off, y_off, *this );
-    }
 
     // we are done rendering this task
     --g_render_task_cnt;
