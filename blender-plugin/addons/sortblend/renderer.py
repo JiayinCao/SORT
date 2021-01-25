@@ -137,10 +137,6 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             log("Your Computer Name is:\t\t" + self.host_name)
             log("Listening address and port:\t {ip}:{p}".format(ip=self.ip_addr, p=self.port))
 
-        # start a background pool thread
-        self.display_thread = threading.Thread(target=dipslay_update, args=(self.sock, self))
-        self.display_thread.start()
-
     # update frame
     def update(self, data, depsgraph):
         # check if the path for SORT is set correctly
@@ -191,6 +187,10 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             self.cmd_argument.append( '--noMaterial' )
         process = subprocess.Popen(self.cmd_argument,cwd=binary_dir)
 
+        # start a background pool thread
+        self.display_thread = threading.Thread(target=dipslay_update, args=(self.sock, self))
+        self.display_thread.start()
+        
         # wait for the process to finish
         while subprocess.Popen.poll(process) is None:
             if self.test_break():
