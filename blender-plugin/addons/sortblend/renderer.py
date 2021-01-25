@@ -19,15 +19,29 @@ import subprocess
 import math
 import numpy
 import shutil
+import time
 import threading
 import socket
+import platform
 from .log import log, logD
 from . import base
 from . import exporter
 
 # this thread runs forever
 def dipslay_update(sock, render_engine):
-    connection, _ = sock.accept()
+    # we only wait for 5 seconds before bail
+    time_out = 5.0
+    time_start = time.time()
+    while True:
+        try:
+            connection, _ = sock.accept()
+            break
+        except:
+            time_stop = time.time()
+            if time_stop - time_start > time_out:
+                log('Can not accept connection!')
+                return
+            pass
 
     while render_engine.terminating_display_thread is False:
         try:
@@ -116,8 +130,21 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             self.sock.setblocking(False)
 
             # bind the socket
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.sock.bind((self.ip_addr, self.port))
+            value = socket.SO_EXCLUSIVEADDRUSE if platform.system() == 'Windows' else socket.SO_REUSEADDR
+            self.sock.setsockopt(socket.SOL_SOCKET, value, 1)
+
+            time_out = 5.0
+            time_start = time.time()
+            while True:
+                try:
+                    self.sock.bind((self.ip_addr, self.port))
+                    break
+                except:
+                    time_stop = time.time()
+                    if time_stop - time_start > time_out:
+                        log('Can not bind the socket!')
+                        return
+                    pass
 
             # listen for socket connection
             self.sock.settimeout(5)
