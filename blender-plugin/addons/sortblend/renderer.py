@@ -216,4 +216,7 @@ class SORTRenderEngine(bpy.types.RenderEngine):
             subprocess.Popen.terminate(process)
 
         # clear immediate directory
-        shutil.rmtree(intermediate_dir)
+        try:
+            shutil.rmtree(intermediate_dir)
+        except:
+            print('Failed to delete the temp folder')
