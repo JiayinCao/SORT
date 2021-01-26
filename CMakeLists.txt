@@ -244,7 +244,9 @@ if( SORT_PLATFORM_MAC OR SORT_PLATFORM_LINUX )
     set_source_files_properties(${thirdparty_files} PROPERTIES COMPILE_FLAGS -w)
     set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -pthread -O3")
 
-    if(ENABLE_LINKTIME_OPTIMIZATION)
+    # link time optimization will result in bad any_cast in TSL on Ubuntu, :(
+    # I would choose to disable it for the clean interface in TSL.
+    if(ENABLE_LINKTIME_OPTIMIZATION AND NOT SORT_PLATFORM_LINUX)
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
     endif()
 
