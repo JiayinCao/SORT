@@ -52,7 +52,7 @@ def list_materials( depsgraph ):
 
 def get_sort_dir():
     preferences = bpy.context.preferences.addons['sortblend'].preferences
-    return_path = os.environ.get('SORT_BIN_DIR')
+    return_path = preferences.install_path
     if platform.system() == 'Windows':
         return return_path
     

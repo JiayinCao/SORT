@@ -38,8 +38,10 @@ from .ui import ui_material
 @base.register_class
 class SORTAddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __package__
+    install_path : bpy.props.StringProperty( name="Path to SORT binary", description='Path to SORT binary', subtype='DIR_PATH')
+
     def draw(self, context):
-        pass
+        self.layout.prop(self, "install_path")
 
 def register():
     # register all classes in this plugin
