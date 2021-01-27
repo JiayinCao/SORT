@@ -49,7 +49,7 @@ Spectrum SpotLight::sample_l(const Point& ip, const LightSample* ls , Vector& di
 
     // update visility
     const float delta = 0.01f;
-    visibility.ray = Ray( ip , dirToLight , 0 , delta , len - delta );
+    visibility.ray = Ray( ip , dirToLight , 0 , delta , len );
 
     const float falloff = satDot( dirToLight , -light_dir );
     if( falloff <= cos_total_range )

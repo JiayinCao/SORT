@@ -34,7 +34,7 @@ Spectrum PointLight::sample_l(const Point& ip, const LightSample* ls , Vector& d
 
     // setup visibility ray
     const auto delta = 0.01f;
-    visibility.ray = Ray( ip , dirToLight , 0 , 0.0f , len - delta );
+    visibility.ray = Ray( ip , dirToLight , 0 , delta , len );
 
     // direction pdf from 'intersect' to light source w.r.t solid angle
     if( pdfw )
