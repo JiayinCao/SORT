@@ -42,15 +42,23 @@ void DisplayManager::AddDisplayServer(const std::string host, const std::string&
     if (m_stream)
         return;
 
-    auto socket = SocketManager::GetSingleton().AddSocket(SOCKET_TYPE::CLIENT, host, port);
-    m_stream = std::make_unique<OSocketStream>(socket);
+    m_socket = SocketManager::GetSingleton().AddSocket(SOCKET_TYPE::CLIENT, host, port);
+    m_stream = std::make_unique<OSocketStream>(m_socket);
 }
 
 bool DisplayManager::IsDisplayServerConnected() const {
-    return m_stream != nullptr;
+    return m_stream != nullptr && m_connected;
+}
+
+void DisplayManager::ResolveDisplayServerConnection(){
+    m_connected = SocketManager::GetSingleton().ResolveSocket(m_socket);
 }
 
 void DisplayManager::ProcessDisplayQueue(int cnt) {
+    // bail if connection is not established.
+    if(!m_connected)
+        return;
+
     // we only process 4 display tiles everytime this thread gains control
     while (cnt-- != 0) {
         std::shared_ptr<DisplayItemBase> item;

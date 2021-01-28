@@ -17,7 +17,8 @@
 
 #pragma once
 
-#include <unordered_set>
+#include <unordered_map>
+#include <future>
 #include "core/define.h"
 #include "core/singleton.h"
 
@@ -61,9 +62,15 @@ public:
     //! @param port         The port the server is listening.
     socket_t AddSocket(const SOCKET_TYPE type, const std::string host, const std::string& port);
 
+    //! @brief  Resolve result of the socket connection
+    //!
+    //! @param sock         The socket to resolve
+    //! @return             Whether the connetion is established
+    bool ResolveSocket(const socket_t sock);
+
 private:
     /**< This data structure keeps track of all sockets. */
-    std::unordered_set<socket_t> m_sockets;
+    std::unordered_map<socket_t, std::shared_future<int>> m_sockets;
 
     /**< Whether the manager is initialized */
     bool m_initialized;

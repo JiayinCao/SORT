@@ -63,14 +63,27 @@ socket_t SocketManager::AddSocket(const SOCKET_TYPE type, const std::string ip, 
         return sock;
     }
 
-    if (auto err = connect(sock, (struct sockaddr*) & serv_addr, sizeof(serv_addr)) < 0){
-        slog(WARNING, SOCKET, "Connection failed.");
-        return sock;
-    }
-
-    slog(INFO, SOCKET, "Connected to socket:\t%s:%s", ip.c_str(), port.c_str());
-
-    m_sockets.insert(sock);
+    std::shared_future<int> future_ret = std::async(std::launch::async, connect, sock, (struct sockaddr*) & serv_addr, sizeof(serv_addr));
+    m_sockets[sock] = future_ret;
     
     return sock;
+}
+
+// collect listening result
+bool SocketManager::ResolveSocket(const socket_t sock){
+    // socket doesn't even exist
+    if(m_sockets.count(sock) == 0)
+        return false;
+
+    // we wait for another three seconds before giving up.
+    std::shared_future<int> future_ret = m_sockets[sock];
+    if( std::future_status::ready == future_ret.wait_for(std::chrono::seconds(3)) ){
+        if( future_ret.get() >= 0 ){
+            slog(INFO, SOCKET, "Connection is established.");
+            return true;
+        }
+    }
+    
+    slog(WARNING, SOCKET, "Failed to connect to server.");
+    return false;
 }

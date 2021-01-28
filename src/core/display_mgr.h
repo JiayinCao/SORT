@@ -80,6 +80,9 @@ public:
     //! @brief  Whether there is any display server connected
     bool IsDisplayServerConnected() const;
 
+    //! @brief  Resolve connection
+    void ResolveDisplayServerConnection();
+
     //! @brief  Refresh the tile in display servers
     //!
     //! @param item         A display item to process
@@ -98,4 +101,9 @@ private:
     std::queue<std::shared_ptr<DisplayItemBase>>    m_queue;
     /**< A spin lock to protect the queue from being accessed in multiple threads. */
     spinlock_mutex                                  m_lock;
+
+    /**< Whether the server is connected. */
+    bool                                            m_connected = true;
+    /**< The socket of the server. */
+    socket_t                                        m_socket;
 };
