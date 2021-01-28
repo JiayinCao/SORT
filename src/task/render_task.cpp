@@ -184,7 +184,7 @@ void Render_Task::Execute(){
     }
 
     // update display server if needed
-    if (display_server_connected)
+    if (display_server_connected && need_refresh_tile)
         DisplayManager::GetSingleton().QueueDisplayItem(display_tile);
 
     // we are done rendering this task

@@ -53,7 +53,6 @@ socket_t SocketManager::AddSocket(const SOCKET_TYPE type, const std::string ip, 
         return sock;
     }
 
-    sockaddr_in serv_addr;
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(atoi(port.c_str()));

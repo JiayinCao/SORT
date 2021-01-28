@@ -36,6 +36,7 @@ void Loading_Task::Execute(){
     m_scene.LoadScene(m_stream);
 
     // display the image first
+    DisplayManager::GetSingleton().ResolveDisplayServerConnection();
     if (DisplayManager::GetSingleton().IsDisplayServerConnected()) {
         std::shared_ptr<DisplayImageInfo> image_info = std::make_shared<DisplayImageInfo>();
         image_info->title = g_imageTitle;

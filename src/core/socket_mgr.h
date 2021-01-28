@@ -74,4 +74,7 @@ private:
 
     /**< Whether the manager is initialized */
     bool m_initialized;
+
+    /**< Socket connection description. */
+    sockaddr_in serv_addr;
 };
