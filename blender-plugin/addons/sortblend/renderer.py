@@ -79,7 +79,7 @@ def dipslay_update(sock, render_engine):
             tile_rect = tile_data.reshape( ( ( tile_width * tile_height ) , 4 ) )
 
             # begin result
-            result = render_engine.begin_result(offset_x, render_engine.image_size_h - offset_y - 1 - tile_height, tile_width, tile_height)
+            result = render_engine.begin_result(offset_x, render_engine.image_size_h - offset_y - tile_height, tile_width, tile_height)
 
             # update image memmory
             if result is not None:
