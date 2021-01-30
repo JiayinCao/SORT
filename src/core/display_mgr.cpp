@@ -47,16 +47,16 @@ void DisplayManager::AddDisplayServer(const std::string host, const std::string&
 }
 
 bool DisplayManager::IsDisplayServerConnected() const {
-    return m_stream != nullptr && m_connected;
+    return m_stream != nullptr && ( CONNECTION_FAILED != m_status );
 }
 
 void DisplayManager::ResolveDisplayServerConnection(){
-    m_connected = SocketManager::GetSingleton().ResolveSocket(m_socket);
+    m_status = SocketManager::GetSingleton().ResolveSocket(m_socket) ? CONNECTION_SUCCEED : CONNECTION_FAILED;
 }
 
 void DisplayManager::ProcessDisplayQueue(int cnt) {
     // bail if connection is not established.
-    if(!m_connected)
+    if(m_status != CONNECTION_SUCCEED)
         return;
 
     // we only process 4 display tiles everytime this thread gains control

@@ -58,6 +58,12 @@ struct FullTargetUpdate : public DisplayItemBase {
     void Process(std::unique_ptr<OSocketStream>& stream) override;
 };
 
+enum SocketStatus {
+    UNINITIALIZE = 0,
+    CONNECTION_FAILED,
+    CONNECTION_SUCCEED
+};
+
 //! @brief  Display is responsible for displaying intermediate result of the ray traced images.
 /*
  * Dynamic displaying intermediate buffer should work in either Blender or Tev(https://github.com/Tom94/tev).
@@ -103,7 +109,7 @@ private:
     spinlock_mutex                                  m_lock;
 
     /**< Whether the server is connected. */
-    bool                                            m_connected = true;
+    SocketStatus                                    m_status = SocketStatus::UNINITIALIZE;
     /**< The socket of the server. */
     socket_t                                        m_socket;
 };
