@@ -27,6 +27,10 @@ bool create_fiber(const FiberInitDesc& desc, Fiber& fiber) {
 
     return fiber.m_fiber != nullptr;
 #else
+    fiber.m_fiber.uc_stack.ss_sp = malloc(desc.m_stack_size);
+    fiber.m_fiber.uc_stack.ss_size = desc.m_stack_size;
+    fiber.m_fiber.uc_link = 0;
+    //makecontext(&fiber.m_fiber, desc.m_fiber_func, 1, desc.m_fiber_arg); 
     return true;
 #endif
 }
@@ -56,10 +60,10 @@ void thread_from_fiber() {
 }
 
 bool delete_fiber(Fiber& fiber) {
+#ifdef SORT_IN_WINDOWS
     if (!fiber.m_fiber)
         return false;
 
-#ifdef SORT_IN_WINDOWS
     DeleteFiber(fiber.m_fiber);
     fiber.m_fiber = nullptr;
     return true;

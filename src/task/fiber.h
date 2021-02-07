@@ -24,12 +24,16 @@
 
 using Native_Fiber_Handle = void*;
 using Native_Fiber_FuncPtr = LPFIBER_START_ROUTINE;
-#else
-// this is clearly not right, but this is to be implemented later.
-using Native_Fiber_Handle = void*;
-#endif
-
+using Native_Fiber_Arg = void*;
 #define INVALID_FIBER   nullptr
+#else
+#include <sys/ucontext.h>
+
+using Native_Fiber_Handle = ucontext_t;
+using Native_Fiber_Arg = int;
+using Native_Fiber_FuncPtr = void (*)(Native_Fiber_Arg);
+#define INVALID_FIBER   ucontext_t()
+#endif
 
 struct FiberInitDesc {
     unsigned int            m_stack_size = 0;
