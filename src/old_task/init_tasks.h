@@ -20,13 +20,13 @@
 #include "task.h"
 
 //! @brief  Loading_Task is responsible for loading data to initialize the system.
-class Loading_Task : public Task{
+class Loading_Task : public old_task::Task{
 public:
     //! @brief Constructor.
     //!
     //! @param  scene     Scene to be filled during loading.
     Loading_Task( class Scene& scene , class IStreamBase& stream , const char* name , unsigned int priority ,
-                  const Task::Task_Container& dependencies ) :
+                  const old_task::Task::Task_Container& dependencies ) :
         Task( name , DEFAULT_TASK_PRIORITY , dependencies ) , m_scene(scene) , m_stream(stream) {}
 
     //! @brief  Load data from input file.
@@ -39,13 +39,13 @@ private:
 };
 
 //! @brief  Spatial acceleration data structure construction pass.
-class SpatialAccelerationConstruction_Task : public Task{
+class SpatialAccelerationConstruction_Task : public old_task::Task{
 public:
     //! @brief Constructor.
     //!
     //! @param  scene     Scene to be filled during loading.
     SpatialAccelerationConstruction_Task( class Scene& scene, const char* name ,
-                 unsigned int priority , const Task::Task_Container& dependencies ) :
+                 unsigned int priority , const old_task::Task::Task_Container& dependencies ) :
         Task( name , DEFAULT_TASK_PRIORITY, dependencies  ) , m_scene(scene) {}
 
     //! @brief  Load data from input file.
@@ -57,13 +57,13 @@ private:
 };
 
 //! @brief  Spatial acceleration data structure construction pass, this is for primitives that has volumes attached.
-class SpatialAccelerationVolConstruction_Task : public Task {
+class SpatialAccelerationVolConstruction_Task : public old_task::Task {
 public:
 	//! @brief Constructor.
 	//!
 	//! @param  scene     Scene to be filled during loading.
 	SpatialAccelerationVolConstruction_Task(class Scene& scene, const char* name,
-		unsigned int priority, const Task::Task_Container& dependencies) :
+		unsigned int priority, const old_task::Task::Task_Container& dependencies) :
 		Task(name, DEFAULT_TASK_PRIORITY, dependencies), m_scene(scene) {}
 
 	//! @brief  Load data from input file.

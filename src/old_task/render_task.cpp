@@ -29,7 +29,7 @@
 std::atomic<int> g_render_task_cnt = 0;
 
 Render_Task::Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
-            const char* name , unsigned int priority , const Task::Task_Container& dependencies ) :
+            const char* name , unsigned int priority , const old_task::Task::Task_Container& dependencies ) :
             Task( name , priority , dependencies ), m_coord(ori), m_size(size), m_scene(scene){
     m_sampler = std::make_unique<RandomSampler>();
     m_pixelSamples = std::make_unique<PixelSample[]>(g_samplePerPixel);

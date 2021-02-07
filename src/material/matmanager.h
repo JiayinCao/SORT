@@ -24,7 +24,7 @@
 #include "core/singleton.h"
 #include "material/material.h"
 #include "core/resource.h"
-#include "task/task.h"
+#include "old_task/task.h"
 
 //! @brief Material manager.
 /**

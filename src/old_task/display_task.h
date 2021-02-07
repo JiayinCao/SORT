@@ -23,12 +23,12 @@
 /**
  * Ideally, this should be a low priority background task. But I don't have it supported yet.
  */
-class Display_Task : public Task{
+class Display_Task : public old_task::Task{
 public:
     //! @brief Constructor
     //!
     //! @param priority     New priority of the task.
-    Display_Task(const char* name , unsigned int priority , const Task::Task_Container& dependencies);
+    Display_Task(const char* name , unsigned int priority , const old_task::Task::Task_Container& dependencies);
 
     //! @brief  Execute the task
     void        Execute() override;

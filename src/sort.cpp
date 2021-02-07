@@ -18,13 +18,15 @@
 #include "sort.h"
 #include "core/globalconfig.h"
 #include "thirdparty/gtest/gtest.h"
-#include "task/init_tasks.h"
+#include "old_task/init_tasks.h"
 #include "core/scene.h"
 #include "sampler/random.h"
 #include "core/timer.h"
 #include "stream/fstream.h"
 #include "material/tsl_system.h"
-#include "task/display_task.h"
+#include "old_task/display_task.h"
+
+using namespace old_task;
 
 SORT_STATS_DEFINE_COUNTER(sRenderingTimeMS)
 SORT_STATS_DEFINE_COUNTER(sSamplePerPixel)

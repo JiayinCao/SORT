@@ -31,12 +31,12 @@
 #endif
 
 #ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
-#include "task/task.h"
+#include "old_task/task.h"
 #endif
 
 #ifdef ENABLE_MULTI_THREAD_SHADER_COMPILATION
 //! @brief  A task for compiling materials in a seperate thread
-class CompileMaterial_Task : public Task {
+class CompileMaterial_Task : public old_task::Task {
 public:
     //! @brief Constructor
     //!
@@ -78,7 +78,7 @@ static void async_build_material(MaterialBase* material) {
 unsigned MatManager::ParseMatFile( IStreamBase& stream ){
     SORT_PROFILE("Parsing Materials");
 
-    const auto current_task = GetCurrentTask();
+    const auto current_task = old_task::GetCurrentTask();
     const auto dependencies = current_task->GetDependencies();
 
     auto resource_cnt = 0u;

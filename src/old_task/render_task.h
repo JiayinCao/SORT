@@ -27,13 +27,13 @@
 //! Each render task is usually responsible for a tile of image to be rendered in
 //! most cases. In other cases, like light tracing, there is no difference between
 //! different render_task.
-class Render_Task : public Task{
+class Render_Task : public old_task::Task{
 public:
     //! @brief Constructor
     //!
     //! @param priority     New priority of the task.
     Render_Task(const Vector2i& ori , const Vector2i& size , const Scene& scene ,
-                const char* name , unsigned int priority , const Task::Task_Container& dependencies );
+                const char* name , unsigned int priority , const old_task::Task::Task_Container& dependencies );
 
     //! @brief  Execute the task
     void        Execute() override;
@@ -64,13 +64,13 @@ private:
 //!
 //! One example of such a case is to shoot virtual point light before evaluating rendering equation
 //! in a second stage in an instance radiosity algorithm.
-class PreRender_Task : public Task {
+class PreRender_Task : public old_task::Task {
 public:
     //! @brief Constructor
     //!
     //! @param priority     New priority of the task.
     PreRender_Task( const Scene& scene , const char* name , unsigned int priority ,
-                    const Task::Task_Container& dependencies ) :
+                    const old_task::Task::Task_Container& dependencies ) :
                     Task( name , priority , dependencies ), m_scene(scene){}
 
     //! @brief  Execute the task

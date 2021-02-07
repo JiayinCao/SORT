@@ -22,7 +22,7 @@
 #include "core/memory.h"
 #include "core/stats.h"
 #include "core/profile.h"
-#include "task/task.h"
+#include "old_task/task.h"
 #include "core/profile.h"
 #include "core/define.h"
 
@@ -41,6 +41,6 @@ void WorkerThread::BeginThread(){
 void WorkerThread::RunThread(){
     static thread_local std::string thread_name = "Thread " + std::to_string( ThreadId() );
     SORT_PROFILE(thread_name.c_str())
-    EXECUTING_TASKS();
+    old_task::EXECUTING_TASKS();
     SortStatsFlushData();
 }

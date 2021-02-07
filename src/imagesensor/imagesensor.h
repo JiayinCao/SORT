@@ -19,7 +19,7 @@
 
 #include "spectrum/spectrum.h"
 #include "texture/rendertarget.h"
-#include "task/render_task.h"
+#include "old_task/render_task.h"
 #include "core/thread.h"
 #include <mutex>
 
